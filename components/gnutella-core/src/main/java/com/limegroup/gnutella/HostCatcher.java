@@ -336,13 +336,18 @@ public class HostCatcher {
         if (permanentHostsSet.contains(e))
             //TODO: we could adjust the key
             return false;
-
-        if (permanentHosts.insert(e)!=e) {
-            //Was actually added.
+        
+        Object removed=permanentHosts.insert(e);
+        if (removed!=e) {
+            //Was actually added...
             permanentHostsSet.add(e);
+            if (removed!=null)
+                //...and something else was removed.
+                permanentHostsSet.remove(removed);
             return true;
         } else {
-            //Uptime not good enough to add.
+            //Uptime not good enough to add.  (Note that this is 
+            //really just an optimization of the above case.)
             return false;
         }
     }
@@ -541,6 +546,13 @@ public class HostCatcher {
                 return;
             }
         }
+
+        //If this couldn't be found, we can fake up some information.  This is
+        //a hack, but it's necessary in case the endpoint was purged from the
+        //cache in between fetching and adding.  Unfortunately we've lost uptime
+        //and history information.
+        ExtendedEndpoint ee=new ExtendedEndpoint(host, port);
+        doneWithEndpoint(ee, success);
     }
 
     /**

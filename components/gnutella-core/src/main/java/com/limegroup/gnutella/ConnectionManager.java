@@ -780,7 +780,9 @@ public class ConnectionManager {
         //force the call here.  It's ok if doneWithEndpoint is called twice,
         //since it coalesces multiple connect/failure data.  This whole method
         //is somewhat expensive: O(N*K*lg K) or (N*K^2) time for N connections
-        //and a permanent list of K connections.
+        //and a permanent list of K connections.  Also, if the endpoint for
+        //a connection has been purged from the cache, uptime and other history
+        //information is lost.
         for (Iterator iter=getConnections().iterator(); iter.hasNext(); ) {
             ManagedConnection mc=(ManagedConnection)iter.next();
             if (mc.isOutgoing())

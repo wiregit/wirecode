@@ -286,19 +286,28 @@ public class HostCatcherTest extends TestCase {
         }
     }
 
-    /** Tests that only the best hosts are remembered. (This method is slow;
-     *  you may comment it out if performance is an issue.) */
+    /** Tests that only the best hosts are remembered.  */
     public void testBestPermanent() {  
         HostCatcher.DEBUG=false;  //Too darn slow
         try {
-            //1. Write
-            final int N=HostCatcher.PERMANENT_SIZE+20;
-            for (int i=1; i<=N; i++) {
+            //1. Fill up host catcher with PERMANENT_SIZE+1 mid-level pongs
+            //(various uptimes).
+            final int N=HostCatcher.PERMANENT_SIZE;
+            for (int i=0; i<=N; i++) {
                 hc.add(new PingReply(GUID.makeGuid(), (byte)7, i,
                            new byte[] {(byte)18, (byte)239, (byte)0, (byte)142},
-                           0l, 0l, false, i),
+                           0l, 0l, false, i+10),
                        null);
             }
+            //Now add bad pong--which isn't really added
+            hc.add(new PingReply(GUID.makeGuid(), (byte)7, N+1,
+                           new byte[] {(byte)18, (byte)239, (byte)0, (byte)142},
+                           0l, 0l, false, 0),
+                       null);
+            //Now re-add port 0 (which was kicked out earlier).  Note that this
+            //would fail if line 346 of HostCatcher were not executed.
+            hc.doneWithEndpoint("18.239.0.142", 0, true);
+
             File tmp=File.createTempFile("hc_test", ".net" );
             hc.write(tmp.getAbsolutePath());            
 
@@ -308,12 +317,14 @@ public class HostCatcherTest extends TestCase {
             HostCatcher.DEBUG=false;  //Too darn slow
             hc.read(tmp.getAbsolutePath());
             assertTrue(hc.getNumUltrapeerHosts()==0);
-            for (int i=N; i>N-HostCatcher.PERMANENT_SIZE; i--) {
-                assertTrue(hc.getNumHosts()>0);
+            assertEquals(new Endpoint("18.239.0.142", 0),
+                         hc.getAnEndpoint());
+            for (int i=N; i>1; i--) {
+                assertTrue("No more hosts after "+i, hc.getNumHosts()>0);
                 assertEquals(new Endpoint("18.239.0.142", i),
                              hc.getAnEndpoint());
-
             }
+            assertEquals(0, hc.getNumHosts());
 
             //Cleanup.
             tmp.delete();
