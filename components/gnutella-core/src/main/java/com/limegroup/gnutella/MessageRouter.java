@@ -109,6 +109,12 @@ public abstract class MessageRouter {
 		DynamicQuerier.instance();
 	
 	/**
+	 * Handle to the <tt>ActivityCallback</tt> for sending data to the 
+	 * display.
+	 */
+	private ActivityCallback _callback;
+	
+	/**
 	 * Constant for whether or not to record stats.
 	 */
 	private final boolean RECORD_STATS = !CommonUtils.isJava118();
@@ -135,6 +141,7 @@ public abstract class MessageRouter {
      */
     public void initialize() {
         _manager = RouterService.getConnectionManager();
+		_callback = RouterService.getCallback();
     }
 
     public String getPingRouteTableDump() {
@@ -152,6 +159,9 @@ public abstract class MessageRouter {
     /**
      * A callback for ConnectionManager to clear a ManagedConnection from
      * the routing tables when the connection is closed.
+	 *
+	 * TODO: we don't currently remove UDPReplyHandlers -- allowing the route
+	 * tables to grow without bound!!
      */
     public void removeConnection(ManagedConnection connection) {
         _pingRouteTable.removeReplyHandler(connection);
@@ -326,10 +336,9 @@ public abstract class MessageRouter {
      * if the request has already been seen.  If not, calls handlePingRequest.
      */
     final void handlePingRequestPossibleDuplicate(
-        PingRequest pingRequest, ReplyHandler handler) {
-        if(_pingRouteTable.tryToRouteReply(pingRequest.getGUID(),
-										   handler))
-            handlePingRequest(pingRequest, handler);
+        PingRequest request, ReplyHandler handler) {
+		if(_pingRouteTable.tryToRouteReply(request.getGUID(), handler) != null)
+            handlePingRequest(request, handler);
     }
 
     /**
@@ -338,9 +347,9 @@ public abstract class MessageRouter {
      * if the request has already been seen.  If not, calls handlePingRequest.
      */
     final void handleUDPPingRequestPossibleDuplicate(													 
-        PingRequest pingRequest, ReplyHandler handler, DatagramPacket datagram) {
-        if(_pingRouteTable.tryToRouteReply(pingRequest.getGUID(), handler))
-            handleUDPPingRequest(pingRequest, handler, datagram);
+        PingRequest request, ReplyHandler handler, DatagramPacket datagram) {
+		if(_pingRouteTable.tryToRouteReply(request.getGUID(), handler) != null)
+            handleUDPPingRequest(request, handler, datagram);
     }
 
     /**
@@ -350,8 +359,11 @@ public abstract class MessageRouter {
      */
     final void handleQueryRequestPossibleDuplicate(
         QueryRequest request, ManagedConnection receivingConnection) {
-        if(_queryRouteTable.tryToRouteReply(request.getGUID(),
-                                            receivingConnection)) {
+		RouteTable.RouteTableEntry entry = 
+			_queryRouteTable.tryToRouteReply(request.getGUID(), 
+											 receivingConnection);
+		if(entry != null) {
+			//if(_queryRouteTable.tryToRouteReply(request.getGUID(), receivingConnection)) {
 			//Hack! If this is the indexing query from a Clip2 reflector, mark the
 			//connection as unkillable so the ConnectionWatchdog will not police it
 			//any more.
@@ -360,7 +372,7 @@ public abstract class MessageRouter {
                 && (request.getQuery().equals(FileManager.INDEXING_QUERY))) {
 				receivingConnection.setKillable(false);
 			}
-            handleQueryRequest(request, receivingConnection);
+            handleQueryRequest(request, receivingConnection, entry);
 		} else {
 			if(RECORD_STATS)
 				ReceivedMessageStatHandler.TCP_DUPLICATE_QUERIES.addMessage(request);
@@ -368,22 +380,27 @@ public abstract class MessageRouter {
     }
 	
 	/**
-	 * Special handler for UDP queries.
+	 * Special handler for UDP queries.  Checks the routing table to see if
+	 * the request has already been seen, handling it if not.
 	 *
 	 * @param query the UDP <tt>QueryRequest</tt> 
 	 * @param handler the <tt>ReplyHandler</tt> that will handle the reply
 	 */
 	final void handleUDPQueryRequestPossibleDuplicate(QueryRequest request,
 													  ReplyHandler handler)  {
-        if(_queryRouteTable.tryToRouteReply(request.getGUID(), handler)) {
-            handleQueryRequest(request, handler);
+		RouteTable.RouteTableEntry entry = 
+			_queryRouteTable.tryToRouteReply(request.getGUID(), 
+											 handler);
+		if(entry != null) {
+			//if(_queryRouteTable.tryToRouteReply(request.getGUID(), handler) {
+            handleQueryRequest(request, handler, entry);
 		} else {
 			if(RECORD_STATS)
 				ReceivedMessageStatHandler.UDP_DUPLICATE_QUERIES.addMessage(request);
 		}
 	}
 
-    
+
     /**
      * The default handler for PingRequests received in
      * ManagedConnection.loopForMessages().  This implementation updates stats,
@@ -516,7 +533,14 @@ public abstract class MessageRouter {
      *      handling framework and just customize responses.
      */
     protected void handleQueryRequest(QueryRequest request,
-									  ReplyHandler handler) {
+									  ReplyHandler handler, 
+									  RouteTable.RouteTableEntry entry) {
+        // Apply the personal filter to decide whether the callback
+        // should be informed of the query
+        if (!handler.isPersonalSpam(request)) {
+            _callback.handleQueryString(request.getQuery());
+        }
+
 		// if it's a request from a leaf and we GUESS, send it out via GUESS --
 		// otherwise, broadcast it if it still has TTL
 		//if(handler.isSupernodeClientConnection() && 
@@ -524,7 +548,9 @@ public abstract class MessageRouter {
 		//unicastQueryRequest(request, handler);
         //else if(request.getTTL() > 0) {
 
-		if(request.getTTL() > 0) {
+		if(handler.isSupernodeClientConnection()) {
+			sendDynamicQuery(QueryHandler.createHandler(request), handler, entry);
+		} else if(request.getTTL() > 0) {
 			// send the request to intra-Ultrapeer connections -- this does
 			// not send the request to leaves
 			broadcastQueryRequest(request, handler);
@@ -533,6 +559,7 @@ public abstract class MessageRouter {
 		// always forward any queries to leaves -- this only does
 		// anything when this node's an Ultrapeer
 		forwardQueryRequestToLeaves(request, handler);
+
         // if I'm not firewalled and the source isn't firewalled THEN reply....
         if (request.isFirewalledSource() &&
             !RouterService.acceptedIncomingConnection())
@@ -564,9 +591,12 @@ public abstract class MessageRouter {
      * Broadcasts the ping request to all initialized connections,
      * setting up the proper reply routing.
      */
-    public void broadcastPingRequest(PingRequest pingRequest) {
-        _pingRouteTable.routeReply(pingRequest.getGUID(), FOR_ME_REPLY_HANDLER);
-        broadcastPingRequest(pingRequest, null, _manager);
+    public void broadcastPingRequest(PingRequest ping) {
+		if(ping == null) {
+			throw new NullPointerException("null ping");
+		}
+        _pingRouteTable.routeReply(ping.getGUID(), FOR_ME_REPLY_HANDLER);
+        broadcastPingRequest(ping, null, _manager);
     }
 
     /**
@@ -574,13 +604,42 @@ public abstract class MessageRouter {
      * setting up the proper reply routing.
      */
     public void broadcastQueryRequest(QueryRequest request) {
+		if(request == null) {
+			throw new NullPointerException("null query request");
+		}		
         _queryRouteTable.routeReply(request.getGUID(), FOR_ME_REPLY_HANDLER);
         //if (RouterService.isGUESSCapable()) {
 		//unicastQueryRequest(request, null);
 		//} else {
-		broadcastQueryRequest(request, null);
+		broadcastQueryRequest(request, FOR_ME_REPLY_HANDLER);
 		//}
     }
+
+	/**
+	 * Generates a new dynamic query.  This method is used to send a new 
+	 * dynamic query from this host (the user initiated this query directly,
+	 * so it's replies are intended for this node.
+	 *
+	 * @param qh the <tt>QueryHandler</tt> instance that generates
+	 *  queries for this dynamic query
+	 * @throws <tt>NullPointerException</tt> if the <tt>QueryHandler</tt> 
+	 *  argument is <tt>null</tt>
+	 */
+	public void sendDynamicQuery(QueryHandler qh) {
+		if(qh == null) {
+			throw new NullPointerException("null QueryHandler");
+		}
+		// get the RouteTableEntry so we can track the number of results
+		ResultCounter counter = 
+			_queryRouteTable.routeReply(qh.getGUID(), 
+										FOR_ME_REPLY_HANDLER);
+		if(RouterService.isSupernode()) {
+			// create a query to send to leaves
+			forwardQueryRequestToLeaves(qh.createQuery((byte)1), 
+										FOR_ME_REPLY_HANDLER);
+		}
+		sendDynamicQuery(qh, FOR_ME_REPLY_HANDLER, counter);
+	}
 
 	/**
 	 * Initiates a dynamic query.  Only Ultrapeer should call this method,
@@ -588,33 +647,23 @@ public abstract class MessageRouter {
 	 * dynamically adjust the TTL based on the number of results received, 
 	 * the number of remaining connections, etc.
 	 *
-	 * @param factory the <tt>QueryHandler</tt> instance that generates
+	 * @param qh the <tt>QueryHandler</tt> instance that generates
 	 *  queries for this dynamic query
 	 * @throws <tt>NullPointerException</tt> if the <tt>RouteTableEntry</tt>
-	 *  for the guid cannot be found -- this should never happen
+	 *  for the guid cannot be found -- this should never happen, or if any
+	 *  of the arguments is <tt>null</tt>
 	 */
-	public void sendDynamicQuery(QueryHandler qh) {
+	public void sendDynamicQuery(QueryHandler qh, ReplyHandler handler,
+								 ResultCounter counter) {
 		if(qh == null) {
 			throw new NullPointerException("null QueryHandler");
-		}
-		byte[] guid = qh.getGUID().bytes();
-
-		// get the RouteTableEntry so we can track the number of results
-		RouteTable.RouteTableEntry rte = 
-			_queryRouteTable.routeReply(guid, FOR_ME_REPLY_HANDLER);
-
-		if(rte == null) {
-			// this should never, ever, happen
-			throw new NullPointerException("null route table entry");
+		} else if(handler == null) {
+			throw new NullPointerException("null ReplyHandler");
+		} else if(counter == null) {
+			throw new NullPointerException("null ResultCounter");
 		}
 
-		qh.setRouteTableEntry(rte);
-
-		if(RouterService.isSupernode()) {
-			// create a query to send to leaves
-			forwardQueryRequestToLeaves(qh.createQuery((byte)1), null);
-		}
-
+		qh.setResultCounter(counter);
 		DYNAMIC_QUERIER.addQuery(qh);
 	}
 
@@ -711,16 +760,16 @@ public abstract class MessageRouter {
 		// Note the use of initializedConnections only.
 		// Note that we have zero allocations here.
 		
-		//Broadcast the query to other connected nodes (supernodes or older
-		//nodes), but DON'T forward any queries not originating from me (i.e.,
-		//handler!=null) along leaf to ultrapeer connections.
+		//Broadcast the query to other connected nodes (ultrapeers or older
+		//nodes), but DON'T forward any queries not originating from me 
+		//along leaf to ultrapeer connections.
 		List list=_manager.getInitializedConnections2();
 		for(int i=0; i<list.size(); i++){
-			ManagedConnection c = (ManagedConnection)list.get(i);
-			if (   handler==null   //came from me
-				   || (c!=handler
-					   && !c.isClientSupernodeConnection())) {
-				sendQueryRequest(queryRequest, c, handler);
+			ManagedConnection mc = (ManagedConnection)list.get(i);
+			if (handler == FOR_ME_REPLY_HANDLER   //came from me
+				|| (mc != handler
+					&& !mc.isClientSupernodeConnection())) {
+				sendQueryRequest(queryRequest, mc, handler);
 			}
 		}
 	}
@@ -740,14 +789,13 @@ public abstract class MessageRouter {
 								 ReplyHandler handler) {
         //send the query over this connection only if any of the following
         //is true:
-        //1. The query originated from our node (receiving connection 
-        //is null)
+        //1. The query originated from our node 
         //2. The connection under  consideration is an unauthenticated 
         //connection (normal gnutella connection)
         //3. It is an authenticated connection, and the connection on 
         //which we received query and this connection, are both 
         //authenticated to a common domain
-        if((handler == null ||
+        if((handler == FOR_ME_REPLY_HANDLER ||
             containsDefaultUnauthenticatedDomainOnly(sendConnection.getDomains())
             || Utilities.hasIntersection(handler.getDomains(), 
 										 sendConnection.getDomains()))) {
