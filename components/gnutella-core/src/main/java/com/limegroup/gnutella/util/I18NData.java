@@ -5,47 +5,20 @@ import com.limegroup.gnutella.ErrorService;
 import java.io.*;
 import java.util.*;
 
-public class I18NData {
+final class I18NData {
 
     /* these can be switched out for optimized strucs */
-    Trie convert, kc;
+    private Trie convert, kc;
     /* the excluded chars */
-    java.util.BitSet ex;
+    private java.util.BitSet ex;
 
-    public I18NData() {
-        init();
+    private final static I18NData _instance = new I18NData();
+
+    public static I18NData instance() {
+        return _instance;
     }
 
-    /*
-     * decompose the char. 
-     * @param c char to decompose
-     * @return decomposed String
-     */
-    public String getDK(char c) {
-        if(ex.get(c)) //if excluded return blank
-            return "";
-        else {
-            String s = (String)convert.get(String.valueOf(c)); 
-            //TODO: switch up the data struts so we can access using ints/chars
-            return s == null ? String.valueOf(c) : s;
-        }
-    }
-    
-    /*
-     * look up for composition. returns null if not found.
-     * @param c char to decompose
-     * @return decomposed String
-     */
-    public String getKC(String s) {
-        return (String)kc.get(s);
-    }
-
-    /*
-     * Builds the trie, bitset used by the conversions.  The data is read
-     * in from files created by the UDataFileCreator.
-     * The files are in i18n.jar
-     */
-    private void init() {
+    private I18NData() {
         convert = new Trie(false);
         kc = new Trie(false);
         try {
@@ -80,8 +53,31 @@ public class I18NData {
         //TODO: what should happen if the data was not loaded?
         //TODO: keep a flag and if this failed do not convert?
     }
+
+    /*
+     * decompose the char. 
+     * @param c char to decompose
+     * @return decomposed String
+     */
+    String getDK(char c) {
+        if(ex.get(c)) //if excluded return blank
+            return "";
+        else {
+            String s = (String)convert.get(String.valueOf(c)); 
+            //TODO: switch up the data struts so we can access using ints/chars
+            return s == null ? String.valueOf(c) : s;
+        }
+    }
     
-    
+    /*
+     * look up for composition. returns null if not found.
+     * @param c char to decompose
+     * @return decomposed String
+     */
+    String getKC(String s) {
+        return (String)kc.get(s);
+    }
+
     /*
      * converts the hex representation of a String to a String
      * ie. 0020 -> " "

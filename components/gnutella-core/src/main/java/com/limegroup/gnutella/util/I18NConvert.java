@@ -6,23 +6,18 @@ package com.limegroup.gnutella.util;
 public class I18NConvert {
 
     /* data class to use for the raw look up of conversions */
-    I18NData _data;
+    private final I18NData _data;
     
     /* instance */
-    private static I18NConvert _instance = new I18NConvert();
+    private final static I18NConvert _instance = new I18NConvert();
     
     private I18NConvert() {
-        initialize();
+        _data = I18NData.instance();
     }
 
     /* accesor */
     public static I18NConvert instance() {
         return _instance;
-    }
-
-    /* load in the data class */
-    private void initialize() {
-        _data = new I18NData();
     }
 
     /*
