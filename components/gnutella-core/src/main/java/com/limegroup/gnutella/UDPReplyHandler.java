@@ -112,6 +112,17 @@ public final class UDPReplyHandler implements ReplyHandler {
 	}
 
 	/**
+	 * Implements <tt>ReplyHandler</tt>.  This always returns <tt>false</tt>
+	 * for UDP reply handlers, as leaves are always connected via TCP.
+	 *
+	 * @return <tt>false</tt>, as all leaves are connected via TCP, so
+	 *  directly connected leaves will not have <tt>UDPReplyHandler</tt>s
+	 */
+	public boolean isSupernodeClientConnection() {
+		return false;
+	}
+
+	/**
 	 * Overrides toString to print out more detailed information about
 	 * this <tt>UDPReplyHandler</tt>
 	 */
