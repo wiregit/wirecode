@@ -59,7 +59,7 @@ public final class SupernodeAssigner implements Runnable {
 	 * Constant for the number of milliseconds between the timer's calls
 	 * to its <tt>ActionListener</tt>s.
 	 */
-	private final int TIMER_DELAY = 2000;
+	private final int TIMER_DELAY = 1000;
 
 	/**
 	 * Constant for the number of seconds between the timer's calls
