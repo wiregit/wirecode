@@ -258,6 +258,6 @@ public class DefaultBootstrapServers {
         "http://www.waddell.ch/cache/",
         //"http://user1.7host.com/gcache/lynn.asp",
         "http://www.php50.com/gwebcache/index.php",
-        "http://www.rodage.net/gnetcache/index.php"
+        "http://www.rodage.net/gnetcache/gcache.php"
     };
 }
