@@ -690,16 +690,12 @@ public class RouterService
      * @param autoDL flag that indicates whether the auto downloader should take
      * care of downloading files....
      */
-    public void query(byte[] guid, String query, int minSpeed, MediaType type,
-                      boolean autoDL) {
+    public void query(byte[] guid, String query, int minSpeed, MediaType type) {
         QueryRequest qr=new QueryRequest(guid,
                                          SettingsManager.instance().getTTL(),
                                          minSpeed, query);
         verifier.record(qr, type);
         router.broadcastQueryRequest(qr);
-
-        if (autoDL)
-            downloader.registerAutomaticDownload(guid, query, null, type);
     }
 
     /**
@@ -710,15 +706,13 @@ public class RouterService
      * @see query(byte[], String, int, MediaType)
      */
     public void query(byte[] guid, String query, String richQuery, 
-                        int minSpeed, MediaType type, boolean autoDL) {
+                        int minSpeed, MediaType type) {
         QueryRequest qr=new QueryRequest(guid,
                                          SettingsManager.instance().getTTL(),
                                          minSpeed, query, richQuery);
         verifier.record(qr, type);
         router.broadcastQueryRequest(qr);
 
-        if (autoDL)
-            downloader.registerAutomaticDownload(guid, query, richQuery, type);
         /* 
          * We don't really use this. for now
          //Rich query?
@@ -749,7 +743,7 @@ public class RouterService
      * @see query(byte[], String, int, MediaType)
      */
     public void query(byte[] guid, String query, int minSpeed) {
-        query(guid, query, minSpeed, null, false);
+        query(guid, query, minSpeed, null);
     }
 
     /** 
@@ -966,6 +960,25 @@ public class RouterService
   			   java.io.FileNotFoundException {
 		return downloader.getFiles(files, overwrite);
 	}
+
+    /**
+     * Starts a "requery download".
+     * A "requery download" should be started when the user has not received any
+     * results for her query, and wants LimeWire to spawn a specialized
+     * Downloader that requeries the network until a 'appropriate' file is
+     * found.
+     * 
+     * @param query The original query string.
+     * @param richQuery The original richQuery string.
+     * @param guid The guid associated with this query request.
+     * @param type The mediatype associated with this search.
+     */
+    public Downloader requeryDownload(String query, String richQuery,
+                                      byte[] guid, MediaType type) {
+        return downloader.startRequeryDownload(query, richQuery,
+                                               guid, type);
+    }
+
 
     /** 
       * Notifies the backend that the BLACKLISTED_IP property has changed,

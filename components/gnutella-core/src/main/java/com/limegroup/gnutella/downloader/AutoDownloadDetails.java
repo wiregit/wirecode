@@ -58,7 +58,7 @@ public class AutoDownloadDetails {
     
     
     // don't auto dl any more than this number of files....
-    public static final int MAX_DOWNLOADS = 5;
+    public static final int MAX_DOWNLOADS = 1;
     
     // keeps track of committed downloads....
     private int committedDLs = 0;

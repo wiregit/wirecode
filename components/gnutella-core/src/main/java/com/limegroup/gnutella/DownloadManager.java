@@ -52,11 +52,6 @@ public class DownloadManager implements BandwidthTracker {
     private List /* of ManagedDownloader */ waiting=new LinkedList();
 
 
-    /** This is a Map from Query GUIDs to the details of the search, which is
-     *  encapsulated by a AutoDownloadDetail structure.
-     */
-    private Map queryDetails = new Hashtable();
-
     /** The amount of time between requeries: 
      *  45 minutes
      */
@@ -263,6 +258,38 @@ public class DownloadManager implements BandwidthTracker {
     }   
     
     /**
+     * Starts a "requery download".
+     * A "requery download" should be started when the user has not received any
+     * results for her query, and wants LimeWire to spawn a specialized
+     * Downloader that requeries the network until a 'appropriate' file is
+     * found.
+     * 
+     * @param query The original query string.
+     * @param richQuery The original richQuery string.
+     * @param guid The guid associated with this query request.
+     * @param type The mediatype associated with this search.
+     */
+    public synchronized Downloader startRequeryDownload(String query,
+                                                        String richQuery,
+                                                        byte[] guid,
+                                                        MediaType type) {
+        AutoDownloadDetails add = new AutoDownloadDetails(query,
+                                                          richQuery,
+                                                          guid,
+                                                          type);
+        Downloader downloader = new RequeryDownloader(this,
+                                                      fileManager,
+                                                      incompleteFileManager,
+                                                      add);
+        waiting.add(downloader);
+        callback.addDownload(downloader);
+        //Save this' state to disk for crash recovery.
+        writeSnapshot();
+        return downloader;        
+    }
+
+
+    /**
      * Returns the name of any of the files in 'files' conflict with any of the
      * downloads in this except for dloader, which may be null.  Returns null if
      * there are no conflicts.  This is used before starting and resuming
@@ -292,18 +319,6 @@ public class DownloadManager implements BandwidthTracker {
     }
 
 
-    public void registerAutomaticDownload(byte[] guid, String query,
-                                          String richQuery, MediaType type) {
-        
-        GUID key = new GUID(guid);
-        // in the off case that a key (GUID) inserted is already in the HT, then
-        // just ignore.  this shouldn't happen every since the guid space is so
-        // big and we'd assume no client will be up that long....
-        queryDetails.put(key, 
-                         new AutoDownloadDetails(query, richQuery, guid, type));
-    }
-
-
     /* Adds the file named in qr to an existing downloader if appropriate.
      */
     public void handleQueryReply(QueryReply qr) {
@@ -323,9 +338,6 @@ public class DownloadManager implements BandwidthTracker {
         }
         
         handleManagedDownloaderAdditions(rfds);
-
-        handlePotentialAutoDownload(new GUID(qr.getGUID()),
-                                    rfds);
     }
 
 
@@ -362,46 +374,6 @@ public class DownloadManager implements BandwidthTracker {
             }
     }
 
-
-
-    private void handlePotentialAutoDownload(GUID qrGUID, 
-                                             RemoteFileDesc[] rfds) {
-        if (queryDetails.containsKey(qrGUID)) {
-            // get the appropriate details....
-            AutoDownloadDetails add = 
-            (AutoDownloadDetails) queryDetails.get(qrGUID);
-
-            // are there any files you should get?
-            RemoteFileDesc[] toGet = new RemoteFileDesc[1];
-            for (int i = 0; i < rfds.length; i++) 
-                if (add.addDownload(rfds[i])) {
-                    toGet[0] = rfds[i];
-                    try {
-                        getFiles(toGet, false);
-                        add.commitDownload(toGet[0]);
-                    }
-                    catch (AlreadyDownloadingException ade) {
-                        // not too much of a surprise, defn. possible...
-                        debug(ade);
-                        add.removeDownload(toGet[0]);
-                    }
-                    catch (FileExistsException fee) {
-                        // yeah, don't dl a file if the user has it already...
-                        debug(fee);
-                        add.removeDownload(toGet[0]);
-                    }
-                    catch (java.io.FileNotFoundException fnfe) {
-                        // i guess the RFD expired....
-                        debug(fnfe);
-                        add.removeDownload(toGet[0]);
-                    }
-                }
-                        
-            // if you've got enough files, don't consider this guy in the future
-            if (add.expired())
-                queryDetails.remove(qrGUID);
-        }
-    }
 
 
     /**
@@ -627,18 +599,33 @@ public class DownloadManager implements BandwidthTracker {
             allowed = false;
 
         if (allowed) {
-            // convert....
-            String[] names = new String[rfds.length];
-            for (int i = 0; i < rfds.length; i++)
-                names[i] = rfds[i].getFileName();
-
-            // construct QRs
-            String[] qStrings= extractQueryStrings(names);
-            QueryRequest[] qReqs = constructQueryRequests(qStrings);
-            
-            // send away....
-            for (int i = 0; i < qReqs.length; i++)
-                router.broadcastQueryRequest(qReqs[i]);            
+            if (rfds.length > 0) { // requery based on filename...
+                // convert....
+                String[] names = new String[rfds.length];
+                for (int i = 0; i < rfds.length; i++)
+                    names[i] = rfds[i].getFileName();
+                
+                // construct QRs
+                String[] qStrings= extractQueryStrings(names);
+                QueryRequest[] qReqs = constructQueryRequests(qStrings);
+                
+                // send away....
+                for (int i = 0; i < qReqs.length; i++)
+                    router.broadcastQueryRequest(qReqs[i]);            
+            }
+            else if ((rfds.length == 0) && 
+                     (requerier instanceof RequeryDownloader)) {
+                // downloader without any files, get the query from the
+                // RequeryDownloader...
+                RequeryDownloader dlder = (RequeryDownloader) requerier;
+                QueryRequest qr = 
+                new QueryRequest(SettingsManager.instance().getTTL(),
+                                 0, dlder.getQuery(), true);
+                router.broadcastQueryRequest(qr);
+            }
+            else
+                Assert.that(false, 
+                            "Downloader has no files and is not a Requerier.");
         }
         debug("DM.sendQuery(): returning.");
     }
