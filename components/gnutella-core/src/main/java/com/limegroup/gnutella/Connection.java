@@ -1310,6 +1310,24 @@ public class Connection {
     /** @return -1 if the message isn't supported, else the version number 
      *  supported.
      */
+    public int remoteHostSupportsUDPRedirect() {
+        if (_messagesSupported != null)
+            return _messagesSupported.supportsUDPConnectBackRedirect();
+        return -1;
+    }
+    
+    /** @return -1 if the message isn't supported, else the version number 
+     *  supported.
+     */
+    public int remoteHostSupportsTCPRedirect() {
+        if (_messagesSupported != null)
+            return _messagesSupported.supportsTCPConnectBackRedirect();
+        return -1;
+    }
+    
+    /** @return -1 if the message isn't supported, else the version number 
+     *  supported.
+     */
     public int remoteHostSupportsHopsFlow() {
         if (_messagesSupported != null)
             return _messagesSupported.supportsHopsFlow();

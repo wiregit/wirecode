@@ -941,8 +941,37 @@ public abstract class MessageRouter {
      */
     protected void handleUDPConnectBackRequest(UDPConnectBackVendorMessage udp,
                                                Connection source) {
-        GUID guidToUse = udp.getConnectBackGUID();
-        int portToContact = udp.getConnectBackPort();
+        // two options here:
+        // 1) if we are connected to an Ultrapeer that supports UDPCBRedirect
+        //    messages, just transplant the info from this CB into a Redirect
+        //    message and forward it to that Ultrapeer.
+        // 2) if we can't a find a UP that supports redirect, then just do the
+        //    old procedure (do the connect back yourself).  We will deprecate
+        //    this as the user base upgrades....
+
+        // 1)
+        final GUID guidToUse = udp.getConnectBackGUID();
+        final int portToContact = udp.getConnectBackPort();
+        Connection redirect = _manager.getUDPRedirectUltrapeer();
+        if (redirect != null) {
+            InetAddress sourceAddr = source.getInetAddress();
+            try {
+                // make a new redirect message
+                UDPConnectBackRedirect redir = new
+                    UDPConnectBackRedirect(guidToUse, sourceAddr, portToContact);
+                // redirect it
+                redirect.send(redir);
+            }
+            catch (IOException ioe) {
+                // connection went bye-bye?
+            }
+            catch (BadPacketException bpe) {
+                ErrorService.error(bpe);
+            }
+            return;
+        }
+
+        // 2)
         InetAddress addrToContact = null;
         try {
             addrToContact = source.getInetAddress();
@@ -1015,7 +1044,37 @@ public abstract class MessageRouter {
      */
     protected void handleTCPConnectBackRequest(TCPConnectBackVendorMessage tcp,
                                                Connection source) {
+
+        // two options here:
+        // 1) if we are connected to an Ultrapeer that supports TCPCBRedirect
+        //    messages, just transplant the info from this CB into a Redirect
+        //    message and forward it to that Ultrapeer.
+        // 2) if we can't a find a UP that supports redirect, then just do the
+        //    old procedure (do the connect back yourself).  We will deprecate
+        //    this as the user base upgrades....
+
+        // 1)
         final int portToContact = tcp.getConnectBackPort();
+        Connection redirect = _manager.getTCPRedirectUltrapeer();
+        if (redirect != null) {
+            InetAddress sourceAddr = source.getInetAddress();
+            try {
+                // make a new redirect message
+                TCPConnectBackRedirect redir = new
+                    TCPConnectBackRedirect(sourceAddr, portToContact);
+                // redirect it
+                redirect.send(redir);
+            }
+            catch (IOException ioe) {
+                // connection went bye-bye?
+            }
+            catch (BadPacketException bpe) {
+                ErrorService.error(bpe);
+            }
+            return;
+        }
+
+        // 2)
         final String addrToContact;
         try {
             addrToContact = source.getInetAddress().getHostAddress();

@@ -856,6 +856,40 @@ public class ConnectionManager {
     }
 
     /**
+     * Accessor for the <tt>Connection</tt> that supports TCPRedirect.  If
+     * there are none available, this will return an empty null.
+     *
+     * @return A <tt>Connection<tt> that supports TCPRedirect or null.
+     * 
+     */
+    public Connection getTCPRedirectUltrapeer() {
+        Iterator ultrapeers = getInitializedConnections().iterator();
+        while (ultrapeers.hasNext()) {
+            ManagedConnection currMC = (ManagedConnection) ultrapeers.next();
+            if (currMC.remoteHostSupportsTCPRedirect() >= 0)
+                return currMC;
+        }
+        return null;
+    }
+
+    /**
+     * Accessor for the <tt>Connection</tt> that supports UDPRedirect.  If
+     * there are none available, this will return an empty null.
+     *
+     * @return A <tt>Connection<tt> that supports UDPRedirect or null.
+     * 
+     */
+    public Connection getUDPRedirectUltrapeer() {
+        Iterator ultrapeers = getInitializedConnections().iterator();
+        while (ultrapeers.hasNext()) {
+            ManagedConnection currMC = (ManagedConnection) ultrapeers.next();
+            if (currMC.remoteHostSupportsUDPRedirect() >= 0)
+                return currMC;
+        }
+        return null;
+    }
+
+    /**
      * Sends a QueryStatusResponse message to as many Ultrapeers as possible.
      *
      * @param 
