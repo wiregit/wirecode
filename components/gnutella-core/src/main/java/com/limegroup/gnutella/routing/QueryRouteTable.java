@@ -74,19 +74,26 @@ public class QueryRouteTable {
         }
         return true;
     }
-
-
+    
     /**
      * For all keywords k in filename, adds <k, 0> to this.
      */
     public void add(String filename) {
+        add(filename, 0);
+    }
+
+    /**
+     * For all keywords k in filename, adds <k, ttl> to this.
+     * This method is public mainly for testing reasons.
+     */
+    public void add(String filename, int ttl) {
         String[] keywords=HashFunction.keywords(filename);
         for (int i=0; i<keywords.length; i++) {
             //See contains(..) for a discussion on TTLs and decrementing.
-            for (int ttl=0; ttl<tables.length; ttl++) {
+            for (int t=ttl; t<tables.length; t++) {
                 String keyword=keywords[i];
                 int hash=HashFunction.hash(keyword, tableLength);
-                tables[ttl].set(hash);
+                tables[t].set(hash);
             }
         }
     }
@@ -117,8 +124,8 @@ public class QueryRouteTable {
             handleTableMessage((SetDenseTableMessage)m);
             return;
         default:
-            Assert.that(false,
-               "addAll not implemented for variant "+m.getVariant());
+            //Ignore.
+            return;
         }
     }
 
@@ -189,7 +196,7 @@ public class QueryRouteTable {
             for (int i=0; i<tableLength; i++) {
                 if (tables[ttl].get(i)) {
                     if (ttl==0 || !tables[ttl-1].get(i))
-                        buf.append("unhash("+i+")/"+ttl+", ");
+                        buf.append(i+"/"+ttl+", ");
                 }
             }
         }
@@ -214,10 +221,7 @@ public class QueryRouteTable {
 
         //2. TTL tests. (update)
         int size=100;
-        //    clear
-        ResetTableMessage reset=new ResetTableMessage((byte)1, (byte)5, size);
-        qrt.update(reset);
-        Assert.that(! qrt.contains(qrA));
+        qrt=new QueryRouteTable((byte)5, size);
         //    add one entry
         BitSet dummy=new BitSet(size);
         dummy.set(HashFunction.hash("good", size));
