@@ -4,6 +4,7 @@ import com.limegroup.gnutella.altlocs.AlternateLocation;
 import com.limegroup.gnutella.altlocs.AlternateLocationCollection;
 import com.limegroup.gnutella.filters.IPFilter;
 import com.limegroup.gnutella.messages.GGEP;
+import com.limegroup.gnutella.messages.HUGEExtension;
 import com.limegroup.gnutella.messages.BadGGEPBlockException;
 import com.limegroup.gnutella.messages.BadGGEPPropertyException;
 import com.limegroup.gnutella.search.HostData;
@@ -366,77 +367,25 @@ public class Response {
         } else {
 			// now handle between-the-nulls
 			// \u001c is the HUGE v0.93 GEM delimiter
-			StringTokenizer stok = new StringTokenizer(betweenNulls, EXT_STRING); 
-			Set urns = null;
-			GGEPContainer ggep = null;
-			long createTime;
+            HUGEExtension huge = new HUGEExtension(rawMeta);
+
+			Set urns = huge.getURNS();
+
 			String metaString = null;
-			while(stok.hasMoreTokens()) {
-				final String ext = stok.nextToken();
-				
-				// First see if this extension is URNs.
-				if(URN.isUrn(ext)) {
-					// it's a HUGE v0.93 URN name for the same files
-					try {
-						URN urn = URN.createSHA1Urn(ext);
-						if (urns == null) urns = new HashSet(1);
-						urns.add(urn);
-						continue;
-					} catch(IOException e) {
-					    // invalid URN. try something else.
-					}
-				}
-				
-				
-				// Then see if this extension is GGEP.
-				byte[] extBytes = ext.getBytes();
-				if( extBytes != null && extBytes.length > 1 && 
-				    extBytes[0] == GGEP.GGEP_PREFIX_MAGIC_NUMBER ) {
-				        boolean readMore = false;
-				        // GGEP can contain 0x1c in its information,
-				        // so it is documented that a GGEP block must be
-				        // the last block.
-				        // So, gather the rest of the tokens and make them
-				        // into one huge token.
-				        if( stok.hasMoreTokens() ) {
-				            readMore = true;
-				            StringBuffer sb = new StringBuffer(ext);
-				            while(stok.hasMoreTokens()) {
-				                sb.append(EXT_STRING);
-				                sb.append(stok.nextToken());
-                            }
-				            extBytes = sb.toString().getBytes();
-                        }
-				        GGEP[] ggepBlocks = null;
-				        try {
-				            // See if there are any per-file GGEP blocks
-				            if(!readMore)
-				                ggepBlocks = GGEP.read(extBytes, 0);
-                            else {
-                                //If we used up the rest of our tokens,
-                                //see where we ended reading the GGEPs
-                                //and put tokens back if needed.
-                                int[] end = new int[1];
-                                ggepBlocks = GGEP.read(extBytes, 0, end);
-                                //Recreate stok if necessary.
-                                if(end[0] != extBytes.length)
-                                    stok = recreateTokenizer(extBytes, end[0]);
-                            }
-                            GGEPContainer innerGGEP = GGEPUtil.getGGEP(ggepBlocks);
-                            if(ggep == null)
-                                ggep = innerGGEP;
-                            else
-                                ggep = GGEPContainer.merge(ggep, innerGGEP);
-				            continue;
-				        } catch(BadGGEPBlockException be) {
-				            //invalid GGEP. try something else.
-				        }
-				}
-				
-				// If it wasn't any of the above, make XML out of it.
-                metaString = createXmlString(name, ext);
-                
-			}			
+            Set metaSet = huge.getXMLBlocks();
+            if (metaSet != null)
+                metaString = (String) metaSet.iterator().next();
+
+			GGEPContainer ggep = null;
+            Set ggepSet = huge.getGGEPBlocks();
+            if (ggepSet != null) {
+                GGEP[] ggeps = new GGEP[ggepSet.size()];
+                Iterator iter = ggepSet.iterator();
+                for (int i = 0; i < ggeps.length; i++)
+                    ggeps[i] = (GGEP) iter.next();
+                ggep = GGEPUtil.getGGEP(ggeps);
+            }
+
 			return new Response(index, size, name, metaString, 
 			                    urns, null, ggep, rawMeta);
         }
