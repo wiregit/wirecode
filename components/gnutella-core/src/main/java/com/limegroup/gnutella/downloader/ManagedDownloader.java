@@ -1289,7 +1289,25 @@ public class ManagedDownloader implements Downloader, Serializable {
             return true;
         }
     }
+    
+    /**
+     * Returns the incompleteFile or the completeFile, if the is complete.
+     */
+    public File getFile() {
+        if(incompleteFile == null)
+            return null;
+            
+        if(state == COMPLETE)
+            return completeFile;
+        else
+            return incompleteFile;
+    }
 
+    /**
+     * Returns the first fragment of the incomplete file,
+     * copied to a new file, or the completeFile if the download
+     * is complete, or the corruptFile if the download is corrupted.
+     */
     public File getDownloadFragment() {
         //We haven't started yet.
         if (incompleteFile==null)
