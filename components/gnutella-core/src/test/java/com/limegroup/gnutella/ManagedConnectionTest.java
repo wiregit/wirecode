@@ -148,7 +148,7 @@ public class ManagedConnectionTest extends BaseTestCase {
 
     public void testHorizonStatistics() {
         HorizonCounter hc = HorizonCounter.instance();
-        ManagedConnection mc= new ManagedConnection("", 0);
+        ManagedConnection mc= new ManagedConnection("", 1);
         //For testing.  You may need to ensure that HORIZON_UPDATE_TIME is
         //non-final to compile.
         hc.HORIZON_UPDATE_TIME=1*200;   
