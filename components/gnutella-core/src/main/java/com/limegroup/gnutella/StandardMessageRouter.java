@@ -2,7 +2,7 @@ package com.limegroup.gnutella;
 
 import java.io.IOException;
 
-public final class StandardMessageRouter
+public class StandardMessageRouter
     extends MessageRouter
 {
     private ActivityCallback _callback;
