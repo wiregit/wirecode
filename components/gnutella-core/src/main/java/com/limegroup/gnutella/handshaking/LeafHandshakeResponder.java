@@ -71,7 +71,7 @@ public final class LeafHandshakeResponder
 
         if (RouterService.isShieldedLeaf()) {
             //a) If we're already a leaf, reject
-            return HandshakeResponse.createRejectIncomingResponse(ret);
+            return HandshakeResponse.createLeafRejectIncomingResponse(ret);
         } 
 
 		//deflate if we can ...
