@@ -51,9 +51,10 @@ public abstract class MessageRouter
      */
     private RouteTable _pingRouteTable = new RouteTable(2048);
     /**
-     * Maps QueryRequest GUIDs to QueryReplyHandlers
+     * Maps QueryRequest GUIDs to QueryReplyHandlers.  Allows for 4 minutes
+     * of query traffic at 100 queries/sec.
      */
-    private RouteTable _queryRouteTable = new RouteTable(2048);
+    private RouteTable _queryRouteTable = new RouteTable(24000);
     /**
      * Maps QueryReply client GUIDs to PushRequestHandlers
      * Because client GUID's can be re-mapped to different connections, we
