@@ -8,6 +8,7 @@ import java.util.Properties;
 import java.util.StringTokenizer;
 
 import com.limegroup.gnutella.messages.*;
+import com.limegroup.gnutella.connection.*;
 import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.security.Authenticator;
 import com.limegroup.gnutella.handshaking.*;
@@ -192,6 +193,12 @@ public class ConnectionManager {
 	private volatile int _demotionLimit = 0;
 
     /**
+     * <tt>List</tt> of listeners that should be notified each time this node
+     * either attains or loses its Ultrapeer status.
+     */
+    private static final List ULTRAPEER_LISTENERS = new LinkedList();
+
+    /**
      * Constructs a ConnectionManager.  Must call initialize before using.
      * @param authenticator Authenticator instance for authenticating users
      */
@@ -236,8 +243,7 @@ public class ConnectionManager {
      * Create a new connection, allowing it to initialize and loop for messages
      * on a new thread.
      */
-    public void createConnectionAsynchronously(
-            String hostname, int portnum) {
+    public void createConnectionAsynchronously(String hostname, int portnum) {
 
 		Runnable outgoingRunner = 
 			new OutgoingConnector(new ManagedConnection(hostname, portnum),
@@ -290,6 +296,19 @@ public class ConnectionManager {
                 lostShieldedClientSupernodeConnection();
          }
      }
+
+    /**
+     * Adds the specified <tt>UltrapeerListener</tt> instance to the list
+     * of <tt>UltrapeerListener</tt>s that should be notified each time
+     * this node becomes an Ultrapeer or loses its Ultrapeer status.
+     *
+     * @param ul the <tt>UltrapeerListener</tt> instance to add
+     */
+    public void addUltrapeerListener(UltrapeerListener ul) {
+        synchronized(ULTRAPEER_LISTENERS) {
+            ULTRAPEER_LISTENERS.add(ul);
+        }
+    }
 
     /** 
      * Used by killExcess.  Sorts by outgoing/incoming, then by number of
@@ -922,6 +941,16 @@ public class ConnectionManager {
                     =new ArrayList(_initializedClientConnections);
                 newConnections.add(c);
                 _initializedClientConnections=newConnections;
+                if(_initializedClientConnections.size() == 1) {
+                    synchronized(ULTRAPEER_LISTENERS) {
+                        Iterator iter = ULTRAPEER_LISTENERS.iterator();
+                        while(iter.hasNext()) {
+                            UltrapeerListener ul = 
+                                (UltrapeerListener)iter.next();
+                            ul.ultrapeerActive();
+                        }
+                    }
+                }
             }
             c.postInit();
             return true;
@@ -929,6 +958,7 @@ public class ConnectionManager {
         return false;
         
     }
+
 
     /**
      * Disconnects from the network.  Closes all connections and sets
@@ -1033,6 +1063,16 @@ public class ConnectionManager {
                 newConnections.addAll(_initializedClientConnections);
                 newConnections.remove(c);
                 _initializedClientConnections=newConnections;
+                if(_initializedClientConnections.size() == 0) {
+                    synchronized(ULTRAPEER_LISTENERS) {
+                        Iterator iter = ULTRAPEER_LISTENERS.iterator();
+                        while(iter.hasNext()) {
+                            UltrapeerListener ul = 
+                                (UltrapeerListener)iter.next();
+                            ul.ultrapeerInactive();
+                        }
+                    }
+                }
             }
         }        
         
