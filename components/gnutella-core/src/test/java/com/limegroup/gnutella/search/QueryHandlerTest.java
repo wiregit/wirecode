@@ -76,7 +76,7 @@ public final class QueryHandlerTest extends BaseTestCase {
 
         // make sure we add the connection to the queries handlers
         // if it doesn't support probe queries and the TTL is 1
-        params[1] = LeafConnection.createLeafConnection();
+        params[1] = LeafConnection.createLeafConnection(false);
         m.invoke(null, params);
         hostsQueried = 
             (List)PrivilegedAccessor.getValue(qh, "QUERIED_CONNECTIONS");
