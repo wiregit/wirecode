@@ -13,46 +13,6 @@ import java.net.*;
  * This class tests the methods of the <tt>AlternateLocation</tt> class.
  */
 public final class AlternateLocationTest extends TestCase {
-	private static final String[] validTimestampedLocs = {
-		"http://Y.Y.Y.Y:6352/get/2/"+
-		                     "lime%20capital%20management%2001.mpg "+
-		                     "2002-04-09T20:32:33Z",
-		"http://Y.Y.Y.Y:6352/get/2/"+
-		               "lime%20capital%20management%2002.mpg "+
-		               "2002-04-09T20:32:33Z",
-		"http://Y.Z.Y.Y:6352/get/2/"+
-		               "lime%20capital%20management%2001.mpg "+
-		               "2002-04-09T20:32:33Z",
-		"http://Y.W.Y.Y:6352/get/2/"+
-		               "lime%20capital%20management%2001.mpg "+
-		               "2002-04-09T20:32:33Z",
-		"http://Y.T.Y.Y:6352/get/2/"+
-		               "lime%20capital%20management%2001.mpg "+
-		               "2002-04-09T20:32:33Z",
-		"http: //Y.R.Y.Y:6352/get/2/"+
-		               "lime%20capital%20management%2001.mpg "+
-		               "2002-04-09T20:32:33Z"
-	};
-
-	private static final String[] validNonTimestampedLocs = {
-		HTTPHeaderName.ALT_LOCATION.httpStringValue()+
-		    ": http://Y.Y.Y.Y:6352/get/2/"+
-		    "lime%20capital%20management%2001.mpg",
-		HTTPHeaderName.ALT_LOCATION.httpStringValue()+
-		    ": http://Y.X.Y.Y:6352/get/2/"+
-		    "lime%20capital%20management%2001.mpg",
-		HTTPHeaderName.ALT_LOCATION.httpStringValue()+
-		    ": http://Y.R.Y.Y:6352/get/2/"+
-		    "lime%20capital%20management%2001.mpg",
-		"http://Y.Y.Y.Y:6352/get/2/"+
-		    "lime%20capital%20management%2001.mpg",
-		"http: //Y.Y.Y.Y:6352/get/2/"+
-		    "lime%20capital%20management%2001.mpg",
-		"http://Y.S.Y.Y:6352/get/2/"+
-		    "lime%20capital%20management%2001.mpg",
-		"http://Y.Z.Y.Y:6352/get/2/"+
-		    "lime%20capital%20management%2001.mpg"
-	};
 
 
 	private static final String[] equalLocs = {
@@ -62,33 +22,7 @@ public final class AlternateLocationTest extends TestCase {
 		"http://Y.Y.Y.Y:6352/get/2/"+
 		    "lime%20capital%20management%2001.mpg"
 	};
-	
-	
-	private static final String [] validURNS = {
-		"urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB",
-		"urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB",
-		"urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB",
-		"urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB",
-		"urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB",
-		"UrN:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB",
-		"urn:sHa1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB",
-		"urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB",
-		"urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB",
-	};
-
-	private static final String [] validURLS = {
-		"www.limewire.org",
-		"www.limewire.org",
-		"www.limewire.org",
-		"www.limewire.org",
-		"www.limewire.org",
-		"www.limewire.org",
-		"www.limewire.org",
-		"www.limewire.org",
-		"www.limewire.org",
-		"www.limewire.org",
-		"www.limewire.org"
-	};
+	  
 
 	public AlternateLocationTest(String name) {
 		super(name);
@@ -107,20 +41,21 @@ public final class AlternateLocationTest extends TestCase {
 	 */
 	public void testUrlUrnConstructor() {
 		try {
-			for(int i=0; i<validURNS.length; i++) {
-				URN urn = new URN(validURNS[i]);
-				URL url1 = new URL("http", validURLS[i], 6346, 
-								   URNFactory.createHttpUrnServiceRequest(urn));
-				URL url2 = new URL("http", validURLS[i], "/test.htm");
+			for(int i=0; i<HugeTestUtils.URNS.length; i++) {
+				URN urn = URNFactory.createUrn(HugeTestUtils.VALID_URN_STRINGS[i]);
+				URL url1 = new URL("http", HugeTestUtils.URL_STRINGS[i], 6346, 
+								   URNFactory.createHttpUrnServiceRequest(HugeTestUtils.URNS[i]));
+				URL url2 = new URL("http", HugeTestUtils.URL_STRINGS[i], "/test.htm");
 				AlternateLocation al1 = new AlternateLocation(url1);
 				AlternateLocation al2 = new AlternateLocation(url2);
+				Date date = new Date();
 				AlternateLocation al3 = 
-				    new AlternateLocation("http://"+validURLS[i] + ":6346"+
+				    new AlternateLocation("http://"+HugeTestUtils.URL_STRINGS[i] + ":6346"+
 										  URNFactory.createHttpUrnServiceRequest(urn)+
-										  " "+AlternateLocation.convertDateToString(new Date()));
+										  " "+AlternateLocation.convertDateToString(date));
 				AlternateLocation al4 = 
-				    new AlternateLocation("http://"+validURLS[i] + "/test.htm"+
-										  " "+AlternateLocation.convertDateToString(new Date()));
+				    new AlternateLocation("http://"+HugeTestUtils.URL_STRINGS[i] + "/test.htm"+
+										  " "+AlternateLocation.convertDateToString(date));
 			}
 		} catch(IOException e) {
 			// this also catches MalformedURLException
@@ -135,9 +70,9 @@ public final class AlternateLocationTest extends TestCase {
 	 */
 	public void testStringConstructorForTimestampedLocs() {
 		try {
-			for(int i=0; i<validTimestampedLocs.length; i++) {
-				AlternateLocation al = new AlternateLocation(validTimestampedLocs[i]);
-				if(!AlternateLocation.isTimestamped(validTimestampedLocs[i])) {
+			for(int i=0; i<HugeTestUtils.VALID_TIMESTAMPED_LOCS.length; i++) {
+				AlternateLocation al = new AlternateLocation(HugeTestUtils.VALID_TIMESTAMPED_LOCS[i]);
+				if(!AlternateLocation.isTimestamped(HugeTestUtils.VALID_TIMESTAMPED_LOCS[i])) {
 					assertTrue("test failed -- alternate location string not "+
 							   "considered stamped", false);
 				}
@@ -158,13 +93,30 @@ public final class AlternateLocationTest extends TestCase {
 	 */
 	public void testStringConstructorForNotTimestampedLocs() {
 		try {
-			for(int i=0; i<validNonTimestampedLocs.length; i++) {
-				AlternateLocation al = new AlternateLocation(validNonTimestampedLocs[i]);
+			for(int i=0; i<HugeTestUtils.VALID_NONTIMESTAMPED_LOCS.length; i++) {
+				AlternateLocation al = 
+				    new AlternateLocation(HugeTestUtils.VALID_NONTIMESTAMPED_LOCS[i]);
 			}
 		} catch(IOException e) {
 			assertTrue("test failed with exception: "+e, false); 
 			e.printStackTrace();
 		}		
+	}
+
+	/**
+	 * Tests invalid alternate location strings to make sure they fail.
+	 */
+	public void testStringConstructorForInvalidLocs() {
+		try {
+			for(int i=0; i<HugeTestUtils.INVALID_LOCS.length; i++) {
+				AlternateLocation al = 
+				    new AlternateLocation(HugeTestUtils.INVALID_LOCS[i]);
+				assertTrue("alternate location string should not have been accepted",
+						   false);
+			}
+		} catch(IOException e) {
+			// the exception is excpected in this case
+		}
 	}
 
 	/**
@@ -197,10 +149,12 @@ public final class AlternateLocationTest extends TestCase {
 		}
 		TreeMap timeStampedAltLocs0 = new TreeMap();
 		TreeMap testMap = new TreeMap();
-		for(int i=0; i<validTimestampedLocs.length; i++) {
+		for(int i=0; i<HugeTestUtils.VALID_TIMESTAMPED_LOCS.length; i++) {
 			try {
-				AlternateLocation al0 = new AlternateLocation(validTimestampedLocs[i]);
-				AlternateLocation al1 = new AlternateLocation(validTimestampedLocs[i]);
+				AlternateLocation al0 = 
+				    new AlternateLocation(HugeTestUtils.VALID_TIMESTAMPED_LOCS[i]);
+				AlternateLocation al1 = 
+				    new AlternateLocation(HugeTestUtils.VALID_TIMESTAMPED_LOCS[i]);
 				timeStampedAltLocs0.put(al0, al0);
 				testMap.put(al1, al1);
 				//timeStampedAltLocs0.add(al);
