@@ -584,6 +584,15 @@ public final class UDPService implements Runnable {
 	}
 
 	/**
+	 * Sets whether or not this node is capable of receiving SOLICITED
+     * UDP packets.  This is useful for testing UDPConnections.
+	 *
+	 */	
+	public void setReceiveSolicited(boolean value) {
+		_acceptedSolicitedIncoming = value;
+	}
+
+	/**
 	 * Returns whether or not the UDP socket is listening for incoming
 	 * messsages.
 	 *
