@@ -398,10 +398,10 @@ public class ManagedConnection extends Connection
     public boolean shouldForwardQuery(QueryRequest query) {
         // special what is queries have version numbers attached to them - make
         // sure that the remote host can answer the query....
-        if (query.getWhatIsVersionNumber() > 0) {
+        if (query.getCapabilitySelector() > 0) {
             if (isSupernodeClientConnection())
                 return (remoteHostWhatIsVersion() >= 
-                        query.getWhatIsVersionNumber());
+                        query.getCapabilitySelector());
             else if (isSupernodeSupernodeConnection())
                 return (remoteHostWhatIsVersion() >=  
                         CapabilitiesVM.WHAT_IS_BASE_VERSION);

@@ -1600,7 +1600,7 @@ public abstract class MessageRouter {
 
         // special what is queries have version numbers attached to them - make
         // sure that the remote host can answer the query....
-        if ((query.getWhatIsVersionNumber() > 0) &&
+        if ((query.getCapabilitySelector() > 0) &&
             (ultrapeer.remoteHostWhatIsVersion() <
              CapabilitiesVM.WHAT_IS_BASE_VERSION)) return;
 
@@ -1702,7 +1702,7 @@ public abstract class MessageRouter {
         
         // special what is queries have version numbers attached to them - make
         // sure that the remote host can answer the query....
-        if ((query.getWhatIsVersionNumber() > 0) &&
+        if ((query.getCapabilitySelector() > 0) &&
             (mc.remoteHostWhatIsVersion() < CapabilitiesVM.WHAT_IS_BASE_VERSION)
             ) return false;
         mc.originateQuery(query);

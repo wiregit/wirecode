@@ -160,8 +160,8 @@ public class StandardMessageRouter extends MessageRouter {
 
         // This is a special What is Query - we can only answer queries which
         // have version numbers at or below our supported version
-        if ((queryRequest.getWhatIsVersionNumber() > 0) &&
-            (queryRequest.getWhatIsVersionNumber() > 
+        if ((queryRequest.getCapabilitySelector() > 0) &&
+            (queryRequest.getCapabilitySelector() > 
              CapabilitiesVM.WHAT_IS_CAPABILITY_VERSION)) return false;
                                                 
         // Only send results if we're not busy.  Note that this ignores

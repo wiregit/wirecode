@@ -257,7 +257,8 @@ public final class ServerSideWhatIsRoutingTest extends BaseTestCase {
         QueryRequest whatIsNewQuery = 
             new QueryRequest(GUID.makeGuid(), (byte)2, 
                              QueryRequest.WHAT_IS_NEW_QUERY_STRING, "", null, 
-                             null, null, false, Message.N_UNKNOWN, false, true);
+                             null, null, false, Message.N_UNKNOWN, false, 
+                             QueryRequest.WHAT_IS_NEW_GGEP_VALUE);
         ULTRAPEER_1.send(whatIsNewQuery);
         ULTRAPEER_1.flush();
 
@@ -281,7 +282,8 @@ public final class ServerSideWhatIsRoutingTest extends BaseTestCase {
         QueryRequest whatIsNewQuery = 
             new QueryRequest(GUID.makeGuid(), (byte)2, 
                              QueryRequest.WHAT_IS_NEW_QUERY_STRING, "", null, 
-                             null, null, false, Message.N_UNKNOWN, false, true);
+                             null, null, false, Message.N_UNKNOWN, false, 
+                             QueryRequest.WHAT_IS_NEW_GGEP_VALUE);
         ULTRAPEER_1.send(whatIsNewQuery);
         ULTRAPEER_1.flush();
 
@@ -299,7 +301,8 @@ public final class ServerSideWhatIsRoutingTest extends BaseTestCase {
         whatIsNewQuery = 
             new QueryRequest(GUID.makeGuid(), (byte)1, 
                              QueryRequest.WHAT_IS_NEW_QUERY_STRING, "", null, 
-                             null, null, false, Message.N_UNKNOWN, false, true);
+                             null, null, false, Message.N_UNKNOWN, false,
+                             QueryRequest.WHAT_IS_NEW_GGEP_VALUE);
         ULTRAPEER_2.send(whatIsNewQuery);
         ULTRAPEER_2.flush();
 
@@ -324,7 +327,8 @@ public final class ServerSideWhatIsRoutingTest extends BaseTestCase {
         QueryRequest whatIsNewQuery = 
             new QueryRequest(GUID.makeGuid(), (byte)2, 
                              QueryRequest.WHAT_IS_NEW_QUERY_STRING, "", null, 
-                             null, null, false, Message.N_UNKNOWN, false, true);
+                             null, null, false, Message.N_UNKNOWN, false,
+                             QueryRequest.WHAT_IS_NEW_GGEP_VALUE);
         ULTRAPEER_2.send(whatIsNewQuery);
         ULTRAPEER_2.flush();
 
@@ -349,7 +353,8 @@ public final class ServerSideWhatIsRoutingTest extends BaseTestCase {
         QueryRequest whatIsNewQuery = 
             new QueryRequest(GUID.makeGuid(), (byte)2, 
                              QueryRequest.WHAT_IS_NEW_QUERY_STRING, "", null, 
-                             null, null, false, Message.N_UNKNOWN, false, true);
+                             null, null, false, Message.N_UNKNOWN, false,
+                             QueryRequest.WHAT_IS_NEW_GGEP_VALUE);
         ULTRAPEER_2.send(whatIsNewQuery);
         ULTRAPEER_2.flush();
 
@@ -374,7 +379,8 @@ public final class ServerSideWhatIsRoutingTest extends BaseTestCase {
         QueryRequest whatIsNewQuery = 
             new QueryRequest(GUID.makeGuid(), (byte)2, 
                              QueryRequest.WHAT_IS_NEW_QUERY_STRING, "", null, 
-                             null, null, false, Message.N_UNKNOWN, false, true);
+                             null, null, false, Message.N_UNKNOWN, false,
+                             QueryRequest.WHAT_IS_NEW_GGEP_VALUE);
         LEAF.send(whatIsNewQuery);
         LEAF.flush();
 
@@ -405,7 +411,8 @@ public final class ServerSideWhatIsRoutingTest extends BaseTestCase {
         QueryRequest whatIsNewQuery = 
             new QueryRequest(GUID.makeGuid(), (byte)3, 
                              QueryRequest.WHAT_IS_NEW_QUERY_STRING, "", null, 
-                             null, null, false, Message.N_UNKNOWN, false, true);
+                             null, null, false, Message.N_UNKNOWN, false,
+                             QueryRequest.WHAT_IS_NEW_GGEP_VALUE);
         ULTRAPEER_2.send(whatIsNewQuery);
         ULTRAPEER_2.flush();
 
@@ -440,7 +447,8 @@ public final class ServerSideWhatIsRoutingTest extends BaseTestCase {
         QueryRequest whatIsNewQuery = 
             new QueryRequest(GUID.makeGuid(), (byte)2, 
                              QueryRequest.WHAT_IS_NEW_QUERY_STRING, "", null, 
-                             null, null, false, Message.N_UNKNOWN, false, true);
+                             null, null, false, Message.N_UNKNOWN, false,
+                             QueryRequest.WHAT_IS_NEW_GGEP_VALUE);
         ULTRAPEER_2.send(whatIsNewQuery);
         ULTRAPEER_2.flush();
 

@@ -286,7 +286,8 @@ public class ServerSideWhatIsNewTest
         QueryRequest whatIsNewQuery = 
             new QueryRequest(GUID.makeGuid(), (byte)2, 
                              QueryRequest.WHAT_IS_NEW_QUERY_STRING, "", null, 
-                             null, null, false, Message.N_UNKNOWN, false, true);
+                             null, null, false, Message.N_UNKNOWN, false,
+                             QueryRequest.WHAT_IS_NEW_GGEP_VALUE);
         whatIsNewQuery.hop();
         testUP.send(whatIsNewQuery);
         testUP.flush();
@@ -379,7 +380,8 @@ public class ServerSideWhatIsNewTest
         QueryRequest whatIsNewQuery = 
             new QueryRequest(GUID.makeGuid(), (byte)2, 
                              QueryRequest.WHAT_IS_NEW_QUERY_STRING, "", null, 
-                             null, null, false, Message.N_UNKNOWN, false, true);
+                             null, null, false, Message.N_UNKNOWN, false, 
+                             QueryRequest.WHAT_IS_NEW_GGEP_VALUE);
         testUP.send(whatIsNewQuery);
         testUP.flush();
 
@@ -436,7 +438,8 @@ public class ServerSideWhatIsNewTest
         QueryRequest whatIsNewQuery = 
             new QueryRequest(GUID.makeGuid(), (byte)2, 
                              QueryRequest.WHAT_IS_NEW_QUERY_STRING, "", null, 
-                             null, null, false, Message.N_UNKNOWN, false, true);
+                             null, null, false, Message.N_UNKNOWN, false, 
+                             QueryRequest.WHAT_IS_NEW_GGEP_VALUE);
         testUP.send(whatIsNewQuery);
         testUP.flush();
 
@@ -495,7 +498,8 @@ public class ServerSideWhatIsNewTest
         QueryRequest whatIsNewQuery = 
             new QueryRequest(GUID.makeGuid(), (byte)2, 
                              QueryRequest.WHAT_IS_NEW_QUERY_STRING, "", null, 
-                             null, null, false, Message.N_UNKNOWN, false, true);
+                             null, null, false, Message.N_UNKNOWN, false, 
+                             QueryRequest.WHAT_IS_NEW_GGEP_VALUE);
         testUP.send(whatIsNewQuery);
         testUP.flush();
 
