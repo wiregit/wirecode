@@ -5,6 +5,7 @@ import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.routing.PatchTableMessage;
 import com.limegroup.gnutella.routing.QueryRouteTable;
 import com.limegroup.gnutella.routing.ResetTableMessage;
+import com.limegroup.gnutella.Connection;
 
 /**
  * This class handles access to query routing tables for a given connection.
@@ -15,6 +16,17 @@ import com.limegroup.gnutella.routing.ResetTableMessage;
  */
 public final class QRPHandler {
 
+    /** 
+     * The time to wait between route table updates for leaves, 
+     * in milliseconds. 
+     */
+    private long LEAF_QUERY_ROUTE_UPDATE_TIME = 1000*60*5; //5 minutes
+
+    /** 
+     * The time to wait between route table updates for Ultrapeers, 
+     * in milliseconds. 
+     */
+    private long ULTRAPEER_QUERY_ROUTE_UPDATE_TIME = 1000*60; //1 minute
 
     /**
      * Variable for the <tt>QueryRouteTable</tt> received for this 
@@ -22,20 +34,35 @@ public final class QRPHandler {
      */
     private QueryRouteTable _lastQRPTableReceived;
     
+    /** 
+     * The next time I should send a query route table to this connection.
+     */
+    private long _nextQRPForwardTime;
+    
+    /**
+     * Constant for the <tt>Connection</tt> that uses this handler.
+     */
+    private final Connection CONNECTION;
+    
     /**
      * Factory constructor for creating new <tt>QRPHandler</tt> instances.
      * 
+     * @param conn the <tt>Connection</tt> that uses this QRP handler
      * @return a new <tt>QRPHandler</tt> instance
      */
-    public static QRPHandler createHandler() {
-        return new QRPHandler();    
+    public static QRPHandler createHandler(Connection conn) {
+        return new QRPHandler(conn);    
     }
     
     /**
      * Creates a new <tt>QRPHandler</tt> instance to handle all query routing
      * management.
+     * 
+     * @param conn the <tt>Connection</tt> that uses this QRP handler
      */
-    private QRPHandler() {}
+    private QRPHandler(Connection conn) {
+        CONNECTION = conn;
+    }
         
     /**
      * Resets the query route table for this connection.  The new table
@@ -117,5 +144,28 @@ public final class QRPHandler {
             0 : _lastQRPTableReceived.getPercentFull();
     }
 
+    /** Returns the system time that we should next forward a query route table
+     *  along this connection.  Only valid if isClientSupernodeConnection() is
+     *  true. */
+    public long getNextQRPForwardTime() {
+        return _nextQRPForwardTime;
+    }
+
+    /**
+     * Increments the next time we should forward query route tables for
+     * this connection.  This depends on whether or not this is a connection
+     * to a leaf or to an Ultrapeer.
+     *
+     * @param curTime the current time in milliseconds, used to calculate 
+     *  the next update time
+     */
+    public void incrementNextQRPForwardTime(long curTime) {
+        if(CONNECTION.isLeafConnection()) {
+            _nextQRPForwardTime = curTime + LEAF_QUERY_ROUTE_UPDATE_TIME;
+        } else {
+            // otherwise, it's an Ultrapeer
+            _nextQRPForwardTime = curTime + ULTRAPEER_QUERY_ROUTE_UPDATE_TIME;
+        }
+    }
 }
 
