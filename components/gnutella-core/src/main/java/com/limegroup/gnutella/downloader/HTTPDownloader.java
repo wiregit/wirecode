@@ -109,7 +109,7 @@ public class HTTPDownloader implements BandwidthTracker {
      * 
      * @param socket the socket to download from.  The "GIV..." line must
      *  have been read from socket.  HTTP headers may not have been read or 
-     *  buffered.
+     *  buffered -- this can be <tt>null</tt>
      * @param rfd complete information for the file to download, including
      *  host address and port
      * @param incompleteFile the temp file to use while downloading, which need
@@ -119,9 +119,6 @@ public class HTTPDownloader implements BandwidthTracker {
      */
 	public HTTPDownloader(Socket socket, RemoteFileDesc rfd, 
       File incompleteFile, AlternateLocationCollection alts) {
-        if(socket == null) {
-            throw new NullPointerException("null socket");
-        }
         if(rfd == null) {
             throw new NullPointerException("null rfd");
         }
