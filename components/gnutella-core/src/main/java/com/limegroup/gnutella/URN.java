@@ -51,9 +51,6 @@ public final class URN {
 	 */
 	public URN(File file) {
         try {
-            // update modTime
-            long modTime = file.lastModified();
-            
             FileInputStream fis = new FileInputStream(file);   
             // we can only calculate SHA1 for now
             MessageDigest md = MessageDigest.getInstance("SHA");
@@ -109,8 +106,11 @@ public final class URN {
 	 * @param urn the URN to compare against
 	 * @return <tt>true</tt> if the URNs are equal, <tt>false</tt> otherwise
 	 */
-	public boolean equals(URN urn) {
-		return urn.getURNString().equals(_urnString);
+	public boolean equals(Object urn) {
+		if(!(urn instanceof URN)){
+			return false;
+		}
+		return ((URN)urn).getURNString().equals(_urnString);
 	}
 
 	/**
