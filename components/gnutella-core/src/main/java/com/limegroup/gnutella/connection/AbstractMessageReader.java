@@ -1,28 +1,18 @@
 package com.limegroup.gnutella.connection;
 
-import java.io.IOException;
-import java.io.InputStream;
 
+import com.limegroup.gnutella.Assert;
 import com.limegroup.gnutella.messages.*;
 import com.limegroup.gnutella.messages.vendor.*;
 import com.limegroup.gnutella.routing.*;
+import com.limegroup.gnutella.statistics.ReceivedErrorStat;
+import com.limegroup.gnutella.util.CommonUtils;
 
 /**
- * @author Administrator
- *
- * To change the template for this generated type comment go to
- * Window&gt;Preferences&gt;Java&gt;Code Generation&gt;Code and Comments
+ * Abstract class that supplies a general method for creating messages that
+ * is used by both the blocking and non-blocking implementations.
  */
 public abstract class AbstractMessageReader implements MessageReader {
-
-    protected static final byte F_PING                  = (byte)0x0;
-    protected static final byte F_PING_REPLY            = (byte)0x1;
-    protected static final byte F_PUSH                  = (byte)0x40;
-    protected static final byte F_QUERY                 = (byte)0x80;
-    protected static final byte F_QUERY_REPLY           = (byte)0x81;
-    protected static final byte F_ROUTE_TABLE_UPDATE    = (byte)0x30;
-    protected static final byte F_VENDOR_MESSAGE        = (byte)0x31;
-    protected static final byte F_VENDOR_MESSAGE_STABLE = (byte)0x32;
     
     /**
      * Constant for the length of Gnutella headers.
@@ -54,13 +44,62 @@ public abstract class AbstractMessageReader implements MessageReader {
      */
     protected static final int LENGTH_OFFSET = 19;
     
-    /* (non-Javadoc)
-     * @see com.limegroup.gnutella.connection.MessageReader#createMessageFromTCP(java.io.InputStream)
+    /**
+     * Constant for whether or not to record stats.
      */
-    public abstract Message createMessageFromTCP(InputStream is)
-        throws BadPacketException, IOException;
+    protected static final boolean RECORD_STATS = !CommonUtils.isJava118();
+
+    protected static final void checkFields(byte ttl, byte hops, byte softMax,
+        byte func) throws BadPacketException {
+        //4. Check values.   These are based on the recommendations from the
+        //   GnutellaDev page.  This also catches those TTLs and hops whose
+        //   high bit is set to 0.
+        if (hops<0) {
+            if( RECORD_STATS )
+                ReceivedErrorStat.INVALID_HOPS.incrementStat();
+            throw new BadPacketException("Negative (or very large) hops");
+        } else if (ttl<0) {
+            if( RECORD_STATS )
+                ReceivedErrorStat.INVALID_TTL.incrementStat();
+            throw new BadPacketException("Negative (or very large) TTL");
+        } else if ((hops >= softMax) && 
+                 (func != Message.F_QUERY_REPLY) &&
+                 (func != Message.F_PING_REPLY)) {
+            if( RECORD_STATS )
+                ReceivedErrorStat.HOPS_EXCEED_SOFT_MAX.incrementStat();
+            throw BadPacketException.HOPS_EXCEED_SOFT_MAX;
+        } else if (ttl+hops > (byte)14) {
+            if( RECORD_STATS )
+                ReceivedErrorStat.HOPS_AND_TTL_OVER_HARD_MAX.incrementStat();
+            throw new BadPacketException("TTL+hops over hard max - maybe spam");
+        } else if ((ttl+hops > softMax) && 
+                 (func != Message.F_QUERY_REPLY) &&
+                 (func != Message.F_PING_REPLY)) {
+            ttl = (byte)(softMax - hops);  //overzealous client;
+                                         //readjust accordingly
+            Assert.that(ttl>=0);     //should hold since hops<=softMax ==>
+                                     //new ttl>=0
+        }
+    }
     
-    protected Message createMessage(byte[] guid, byte func, byte ttl, 
+    /**
+     * Generalized method for creating messages.
+     * 
+     * @param guid the message GUID
+     * @param func the message op code - specifies whether it's a query, a hit
+     *  a ping, a pong, etc
+     * @param ttl the time to live for the message
+     * @param hops the number of hops the message has travelled
+     * @param length the length of the message payload
+     * @param payload the payload itself
+     * @param flag for the transport layer used, such as TCP, UPD, or multicast,
+     *  even though technically multicast is still UDP
+     * 
+     * @return the new <tt>Message</tt>
+     * 
+     * @throws BadPacketException if the message was invalid for any reason
+     */
+    protected static Message createMessage(byte[] guid, byte func, byte ttl, 
         byte hops, int length, byte[] payload, int network) 
         throws BadPacketException  {
         switch (func) {
@@ -68,44 +107,44 @@ public abstract class AbstractMessageReader implements MessageReader {
             //constructors; Message shouldn't know anything about the various
             //messages except for their function codes.  I've started this
            //refactoring with PushRequest and PingReply.
-           case F_PING:
+           case Message.F_PING:
               if (length>0) { //Big ping
                  return new PingRequest(guid,ttl,hops,payload);
               }
               return new PingRequest(guid,ttl,hops);
 
-           case F_PING_REPLY:
+           case Message.F_PING_REPLY:
                return PingReply.createFromNetwork(guid, ttl, hops, payload);
-           case F_QUERY:
+           case Message.F_QUERY:
                if (length<3) break;
                return QueryRequest.createNetworkQuery(
                    guid, ttl, hops, payload, network);
-           case F_QUERY_REPLY:
+           case Message.F_QUERY_REPLY:
                if (length<26) break;
                return new QueryReply(guid,ttl,hops,payload);
-           case F_PUSH:
+           case Message.F_PUSH:
                return new PushRequest(guid,ttl,hops,payload, network);
-           case F_ROUTE_TABLE_UPDATE:
+           case Message.F_ROUTE_TABLE_UPDATE:
                //The exact subclass of RouteTableMessage returned depends on
                //the variant stored within the payload.  So leave it to the
                //static read(..) method of RouteTableMessage to actually call
                //the right constructor.
                return RouteTableMessage.read(guid, ttl, hops, payload);
-           case F_VENDOR_MESSAGE:
+           case Message.F_VENDOR_MESSAGE:
                if ((ttl != 1) || (hops != 0))
                    throw new BadPacketException("VM with bad ttl/hops: " +
                                                 ttl + "/" + hops);
                return VendorMessage.deriveVendorMessage(guid, ttl, hops, 
                                                         payload);
-           case F_VENDOR_MESSAGE_STABLE:
+           case Message.F_VENDOR_MESSAGE_STABLE:
                if ((ttl != 1) || (hops != 0))
                    throw new BadPacketException("VM with bad ttl/hops: " +
                                                 ttl + "/" + hops);
                return VendorMessage.deriveVendorMessage(guid, ttl, hops, 
                                                         payload);
-       }
+        }
               
-         throw new BadPacketException("Unrecognized function code: "+func);
+        throw new BadPacketException("Unrecognized function code: "+func);
     }
 
 }
