@@ -265,18 +265,21 @@ public final class HandshakeResponse {
      * Constructs the response from the other host during connection
      * handshaking.
      *
+     * @param line the status line received from the connecting host
+     * @param headers the headers received from the other host
      * @return a new <tt>HandshakeResponse</tt> instance with the headers
      *  sent by the other host
+     * @throws <tt>IOException</tt> if the status line could not be parsed
      */
     public static HandshakeResponse 
         createResponse(String line, Properties headers) throws IOException {
-        int code;
-        String message;
-        try {
-            code = extractCode(line);
-            message = extractMessage(line);
-        } catch(Exception e) {
-            throw new IOException("could not parse connect string: "+line);
+        int code = extractCode(line);
+        if(code == -1) {
+            throw new IOException("could not parse status code: "+line);
+        }
+        String message = extractMessage(line);
+        if(message == null) {
+            throw new IOException("could not parse status message: "+line);
         }
         return new HandshakeResponse(code, message, headers);        
     }
@@ -376,12 +379,18 @@ public final class HandshakeResponse {
      * such as "200" in a "200 OK" message.
      *
      * @param line the full connection string, such as "200 OK."
-     * @return the status code for the connection string
+     * @return the status code for the connection string, or -1 if the code
+     *  could not be parsed
      */
     private static int extractCode(String line) {
         //get the status code and message out of the status line
         int statusMessageIndex = line.indexOf(" ");
-        return Integer.parseInt(line.substring(0, statusMessageIndex).trim());
+        if(statusMessageIndex == -1) return -1;
+        try {
+            return Integer.parseInt(line.substring(0, statusMessageIndex).trim());
+        } catch(NumberFormatException e) {
+            return -1;
+        }
     }
 
     /**
@@ -394,6 +403,7 @@ public final class HandshakeResponse {
     private static String extractMessage(String line) {
         //get the status code and message out of the status line
         int statusMessageIndex = line.indexOf(" ");
+        if(statusMessageIndex == -1) return null;
         return line.substring(statusMessageIndex).trim();
     }
 
