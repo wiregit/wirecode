@@ -114,14 +114,16 @@ public class MetaFileManager extends FileManager {
         Assert.that(fd == removed, "did not remove valid fd.");
         _needRebuild = true;
         fd = addFileIfShared(f, xmlDocs);
-        //re-populate the ctCache
-        // *----
-        synchronized (ctCache) {
-            ctCache.removeTime(fd.getSHA1Urn()); //addFile() put lastModified
-            ctCache.addTime(fd.getSHA1Urn(), cTime.longValue());
-            ctCache.commitTime(fd.getSHA1Urn());
+        if (fd != null) { // file was not re-shared? weird but possible
+            //re-populate the ctCache
+            // *----
+            synchronized (ctCache) {
+                ctCache.removeTime(fd.getSHA1Urn()); //addFile() put lastModified
+                ctCache.addTime(fd.getSHA1Urn(), cTime.longValue());
+                ctCache.commitTime(fd.getSHA1Urn());
+            }
+            // ----*
         }
-        // ----*
         return fd;
     }        
     
