@@ -55,7 +55,7 @@ public final class BIOHeaderWriter implements HeaderWriter {
      * @throws IOException if there's an IO error writing the header to 
      *  the socket 
      */
-    public void writeHeader(String header) throws IOException {
+    public boolean writeHeader(String header) throws IOException {
         if(header == null || header.equals("")) {
             throw new IllegalArgumentException("null or empty string: "+header);
         }
@@ -67,7 +67,8 @@ public final class BIOHeaderWriter implements HeaderWriter {
                 bytes.length);
         }        
         OUTPUT_STREAM.write(bytes);
-        OUTPUT_STREAM.flush();                
+        OUTPUT_STREAM.flush();
+        return true;              
     }
 
     /**
@@ -77,11 +78,20 @@ public final class BIOHeaderWriter implements HeaderWriter {
      * @throws IOException if there's an IO error writing to the socket 
      *  to close the header
      */
-    public void closeHeaderWriting() throws IOException {
+    public boolean closeHeaderWriting() throws IOException {
         if(!CommonUtils.isJava118()) {
             BandwidthStat.GNUTELLA_HEADER_UPSTREAM_BANDWIDTH.addData(CRLF.length);
         }        
         OUTPUT_STREAM.write(CRLF);
-        OUTPUT_STREAM.flush();                        
+        OUTPUT_STREAM.flush(); 
+        return true;                      
+    }
+
+    /* (non-Javadoc)
+     * @see com.limegroup.gnutella.connection.HeaderWriter#hasBufferedData()
+     */
+    public boolean hasBufferedData() {
+        // TODO Auto-generated method stub
+        return false;
     }
 }
