@@ -236,6 +236,13 @@ public final class ThemeSettings extends LimeProps {
     }
     
     /**
+     * Determines if the theme is the pinstripes theme.
+     */
+    public static boolean isPinstripesTheme() {
+        return THEME_FILE.getValue().equals(PINSTRIPES_OSX_THEME_FILE);
+    }
+    
+    /**
      * Determines if the current theme is the native OSX theme.
      */
     public static boolean isNativeOSXTheme() {
