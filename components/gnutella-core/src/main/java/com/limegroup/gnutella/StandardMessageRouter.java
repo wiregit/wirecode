@@ -339,18 +339,14 @@ public class StandardMessageRouter extends MessageRouter {
                     else //there is no XML
                         xmlCompressed = new byte[0];
                     
-                    try {
-                        // create the new queryReply
-                        queryReply = new QueryReply(guid, ttl, port, ip, speed, 
-                                                    currResps, _clientGUID, 
-                                                    xmlCompressed, notIncoming, 
-                                                    busy, uploaded, 
-                                                    measuredSpeed, supportsChat,
-                                                    isFromMcast);
-                        queryReplies.add(queryReply);
-                    }
-                    catch (IllegalArgumentException ignored) {
-                    }
+                    // create the new queryReply
+                    queryReply = new QueryReply(guid, ttl, port, ip, speed, 
+                                                currResps, _clientGUID, 
+                                                xmlCompressed, notIncoming, 
+                                                busy, uploaded, 
+                                                measuredSpeed, supportsChat,
+                                                isFromMcast);
+                    queryReplies.add(queryReply);
                 }
             }
 
@@ -360,20 +356,16 @@ public class StandardMessageRouter extends MessageRouter {
             byte[] xmlCompressed = null;
             if (xmlCollectionString!=null && !xmlCollectionString.equals(""))
                 xmlCompressed = 
-                LimeXMLUtils.compress(xmlBytes);
+                    LimeXMLUtils.compress(xmlBytes);
             else //there is no XML
                 xmlCompressed = new byte[0];
             
-            try {
-                // create the new queryReply
-                queryReply = new QueryReply(guid, ttl, port, ip, speed, res, 
-                                            _clientGUID, xmlCompressed,
-                                            notIncoming, busy, uploaded, 
-                                            measuredSpeed,supportsChat, isFromMcast);
-                queryReplies.add(queryReply);
-            }
-            catch (IllegalArgumentException ignored) {
-            }
+            // create the new queryReply
+            queryReply = new QueryReply(guid, ttl, port, ip, speed, res, 
+                                        _clientGUID, xmlCompressed,
+                                        notIncoming, busy, uploaded, 
+                                        measuredSpeed,supportsChat, isFromMcast);
+            queryReplies.add(queryReply);
         }
 
         return queryReplies;
