@@ -11,6 +11,11 @@ import java.io.*;
 public final class URNFactory {
 
 	/**
+	 * Ensure that this class can never be constructed.
+	 */
+	private URNFactory() {}
+
+	/**
 	 * Creates a new <tt>URN</tt> instance with a SHA1 hash.
 	 *
 	 * @param file the <tt>File</tt> instance to use to create a 
@@ -268,95 +273,6 @@ public final class URNFactory {
 			return false;
 		}
 		return true;
-	}
-
-	// unit test for the validating of GET requests
-	public static void main(String[] args) {
-		String [] validURNS = {
-		    "GET /uri-res/N2R?urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB HTTP/1.0",
-		    "GET /URI-RES/N2R?urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB HTTP/1.0",
-		    "GET /uri-res/n2R?urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB HTTP/1.0",
-		    "GET /uri-res/N2r?urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB HTTP/1.0",
-		    "GET /uri-res/n2r?urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB HTTP/1.0",
-		    "GET /uri-res/N2R?UrN:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB HTTP/1.0",
-		    "GET /uri-res/N2R?urn:sHa1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB HTTP/1.0",
-		    "GET /uri-res/N2R?urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB HTTP/1.1",
-		    "GET /uri-res/N2R?urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB HtTP/1.0",
-		    "GET /uri-res/N2R?urn:bitprint:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB."+
-			"PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB1234567 HTTP/1.0",
-		    "GET /uri-res/N2R?urn:bitprint:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB."+
-			"PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB1234567 HTTP/1.1"
-		};
-
-		String [] invalidURNS = {
-		    "GET /uri-res/N2R?urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB HTTP/1.2",
-		    "GET /urires/N2R?urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB HTTP/1.1",
-		    "/uri-res/N2R?urn:sha1:PLSTHIPQGSSZTS5FJcdirnZWUGYQYPFB HTTP/1.0",
-		    "GET /uri-res/N2R?urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB HTTP/1.2",
-		    "GET /uri-res/N2Rurn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB HTTP/1.0",
-		    "GET /uri-res/N2R?urn:sh1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB HTTP/1.1",
-		    "GET/uri-res/N2R?urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB HTTP/1.0",
-		    "GET /uri-res/N2R?urn:bitprint::PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB."+
-			"PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB1234567 HTTP/1.0",
-		    "GET /uri-res/N2R?urn:sha1::PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB."+
-			"PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB1234567 HTTP/1.0",
-		    "GET /uri-res/N2R?urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPF HTTP/1.0",
-		    "GET /uri-res/N2R?ur:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB HTTP/1.0",
-		    "GET /uri-res/N2R? urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB HTTP/1.0",
-		    "GET /uri-res/N2R?  urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB HTTP/1.0",
-		    "GET /uri-res/N2R?                                                    "+
-			"urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB HTTP/1.0",
-		    "GET /uri-res/N2R?urn:sha1: PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB HTTP/1.0",
-		    "GET /uri-res/ N2R?urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB HTTP/1.0",
-		    "GET /uri-res/N2?urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB HTTP/1.0",
-		    "GET /uri-res/N2Rurn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB HTTP/1.0",
-		    "GET /uri-res/N2R?urnsha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB HTTP/1.0",
-		    "GET /uri-res/N2R?urn:sa1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB HTTP/1.0",
-		    "GET /uri-res/N2R?urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB HTTP/1.0 ",
-		    " GET /uri-res/N2R?urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB HTTP/1.0 ",
-			" ",
-			"GET",
-		    "GET /uri-res/N2R?urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFBC HTTP/1.0",
-		};
-		//UploadManager um = new UploadManager();
-		boolean encounteredFailure = false;
-		System.out.println("TESTING THAT VALID URN GET REQUESTS PASS..."); 
-		for(int i=0; i<validURNS.length; i++) {
-			if(URNFactory.isValidUrnGetRequest(validURNS[i]) != true) {
-				if(!encounteredFailure) {
-					System.out.println(  ); 
-					System.out.println("VALID URN TEST FAILED");
-				}
-				encounteredFailure = true;
-				System.out.println(); 
-				System.out.println("FAILED ON URN: ");
-				System.out.println(validURNS[i]); 
-			}
-		}
-		if(!encounteredFailure) {
-			System.out.println("TEST PASSED"); 
-		}
-		System.out.println(); 
-		System.out.println("TESTING THAT INVALID URN GET REQUESTS FAIL..."); 
-		for(int i=0; i<invalidURNS.length; i++) {
-			if(URNFactory.isValidUrnGetRequest(invalidURNS[i]) == true) {
-				if(!encounteredFailure) {
-					System.out.println("INVALID URN TEST FAILED");
-				}
-				encounteredFailure = true;
-				System.out.println(); 
-				System.out.println("FAILED ON URN "+i+":");
-				System.out.println(invalidURNS[i]); 
-			}			
-		}
-		if(!encounteredFailure) {
-			System.out.println("TEST PASSED"); 
-		}
-		System.out.println(); 
-		if(!encounteredFailure) {
-			System.out.println("ALL TESTS PASSED"); 
-		}
-	}
-	
+	}	
 }
 
