@@ -303,14 +303,15 @@ public class ManagedDownloader implements Downloader, Serializable {
             dloaderThread.interrupt();
     }
 
-    public synchronized void resume() {
+    public synchronized boolean resume() throws AlreadyDownloadingException {
         //It's not strictly necessary to check all these states, but it can't
         //hurt.
         if (! (state==WAITING_FOR_RETRY || state==GAVE_UP))
-            return;
+            return false;
         //Sometimes a resume can cause a conflict.  So we check.
-        if (this.manager.conflicts(allFiles, this)!=null)
-            return;      //TODO: we should really convey this in the GUI.
+        String conflict=this.manager.conflicts(allFiles, this);
+        if (conflict!=null)
+            throw new AlreadyDownloadingException(conflict);
 
         if (stopped) {
             //This stopped because all hosts were tried.  (Note that this
@@ -323,6 +324,7 @@ public class ManagedDownloader implements Downloader, Serializable {
             if (dloaderThread!=null)
                 dloaderThread.interrupt();
         }
+        return true;
     }
 
     /** Actually does the download. */
