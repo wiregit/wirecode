@@ -811,9 +811,9 @@ public class Connection implements IpPort {
      */
     private void sendHeaders(Properties props) throws IOException {
         if(props != null) {
-            Enumeration enum=props.propertyNames();
-            while (enum.hasMoreElements()) {
-                String key=(String)enum.nextElement();
+            Enumeration names=props.propertyNames();
+            while (names.hasMoreElements()) {
+                String key=(String)names.nextElement();
                 String value=props.getProperty(key);
                 // Overwrite any domainname with true IP address
                 if ( HeaderNames.REMOTE_IP.equals(key) )
