@@ -258,7 +258,7 @@ public final class QueryHandler {
                 sendProbeQuery(this, 
                                _connectionManager.getInitializedConnections2()); 
             if(_probeCompleted) {
-                _nextQueryTime = System.currentTimeMillis() + 6000;
+                _nextQueryTime = System.currentTimeMillis() + 7000;
             } else {
                 // allow time for connections to become established
                 _nextQueryTime = System.currentTimeMillis() + 2000;
@@ -269,7 +269,7 @@ public final class QueryHandler {
         
         _theoreticalHostsQueried += 
             sendQuery(this, _connectionManager.getInitializedConnections2()); 
-        _nextQueryTime = System.currentTimeMillis() + 1500;
+        _nextQueryTime = System.currentTimeMillis() + 2000;
     }
 
     /**
