@@ -346,14 +346,6 @@ public class FileManager {
             addDirectory((File)iter.next(), directory);
     }
 
-	/**
-	 * Same as addFileIfShared(new File(path)). This method is obsolescent * and
-	 * exists only for backwards compatibility.  
-     */
-    public synchronized boolean addFileIfShared(String path) {
-		return addFileIfShared(new File(path));
-    }
-
     /**
      * @modifies this
      * @effects adds the given file to this, if it exists in a shared 
