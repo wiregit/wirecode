@@ -212,7 +212,9 @@ public class Main implements ActivityCallback {
 
 	public void acceptChat(Chatter chat) {}
 
-	public void recieveMessage(String msg) {}
+	public void removeChat(Chatter chat) {}
+
+	public void recieveMessage(Chatter chat) {}
 	
 }
 

@@ -204,11 +204,13 @@ public class StandardMessageRouter
 			// see if we have ever accepted an incoming connection
 			boolean incoming = _acceptor.acceptedIncoming();
 
+			boolean chat = SettingsManager.instance().getChatEnabled();
+
             // create the new queryReply
             queryReply = new QueryReply(guid, ttl, port, ip,
                                         speed, res, clientGUID, 
 										!incoming, busy, uploaded, measuredSpeed,
-                                        true);  //supports chat
+                                        chat);  //supports chat
 
             // try to send the new queryReply
             try {
