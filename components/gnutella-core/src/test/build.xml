@@ -70,6 +70,9 @@
 
   <!-- tests all classes -->
   <target name="test all" depends="build tests">
+    <antcall target="test class">
+      <param name="class" value="UltrapeerRoutingTest"/>
+    </antcall>
     <junit printsummary="withOutAndErr" 
            haltonfailure="yes"
 	       showoutput="true"
