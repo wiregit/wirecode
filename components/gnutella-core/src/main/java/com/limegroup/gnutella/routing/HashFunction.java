@@ -16,8 +16,8 @@ import com.sun.java.util.collections.*;
  * for details of multiplication-based algorithms.
  */
 public class HashFunction {
-    private static final double A=(Math.sqrt(5.0)-1.0)/2.0;
-    private static final long TWO_31=0x80000000l;
+    //private static final double A=(Math.sqrt(5.0)-1.0)/2.0;
+    //private static final long TWO_31=0x80000000l;
     //private static final int A_INT=(int)(A*TWO_31); //=1327217884
     private static final int A_INT=0x4F1BBCDC;
         
