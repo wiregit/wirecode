@@ -279,6 +279,29 @@ public class DownloadManager implements BandwidthTracker {
                 throw new AlreadyDownloadingException(md.getFileName());
         }
 
+        //Check if file exists.  TODO3: ideally we'd pass ALL conflicting files
+        //to the GUI, so they know what they're overwriting.
+        //if (! overwrite) {
+        //    try {
+        //        File downloadDir=SettingsManager.instance().getSaveDirectory();
+        //        File completeFile=new File(
+        //            downloadDir, 
+        //            incompleteFileManager.getCompletedName(incompleteFile));
+        //        if (completeFile.exists())
+        //            throw new FileExistsException(filename);
+        //    } catch (IllegalArgumentException e) {
+        //        throw new CantResumeException(incompleteFile.getName());
+        //    }
+        //}
+
+        //Purge entries from incompleteFileManager that have no corresponding
+        //file on disk.  This protects against stupid users who delete their
+        //temporary files while LimeWire is running, either through the command
+        //prompt or the library.  Note that you could optimize this by just
+        //purging files corresponding to the current download, but it's not
+        //worth it.
+        incompleteFileManager.purge(false);
+
         //Instantiate downloader, validating incompleteFile first.
         ResumeDownloader downloader=null;
         try {
@@ -331,6 +354,14 @@ public class DownloadManager implements BandwidthTracker {
                                                           type);
         if (requeryConflicts(add))
             throw new AlreadyDownloadingException(query);
+
+        //Purge entries from incompleteFileManager that have no corresponding
+        //file on disk.  This protects against stupid users who delete their
+        //temporary files while LimeWire is running, either through the command
+        //prompt or the library.  Note that you could optimize this by just
+        //purging files corresponding to the current download, but it's not
+        //worth it.
+        incompleteFileManager.purge(false);
 
         Downloader downloader = new RequeryDownloader(this,
                                                       fileManager,
