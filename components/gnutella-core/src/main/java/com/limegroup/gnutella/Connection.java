@@ -2,6 +2,7 @@ package com.limegroup.gnutella;
 
 import java.net.*;
 import java.io.*;
+import java.util.*;
 
 
 /**
@@ -48,10 +49,13 @@ import java.io.*;
 public class Connection implements Runnable { 
     /** These are only needed for the run method.
      *  INVARIANT: (manager==null)==(routeTable==null)==(pushRouteTable==null) 
+     *             routeTable==manager.routeTable //i.e., it's shared
+     *             pushRouteTable==manager.routeTable //i.e., it's shared
      */
-    protected ConnectionManager manager=null; //may be null
-    protected RouteTable routeTable=null;     //may be null
-    protected RouteTable pushRouteTable=null; 
+    protected ConnectionManager manager=null;
+    protected RouteTable routeTable=null;    
+    protected RouteTable pushRouteTable=null;
+    protected SpamFilter spamFilter=SpamFilter.newInstance();
 
     /** The underlying socket.  sock, in, and out are null iff this is in
      *  the unconnected state.
@@ -210,7 +214,6 @@ public class Connection implements Runnable {
 	    if (manager!=null)
 		manager.total++;
 	}
-	//	System.out.println("Wrote "+m.toString()+"\n   to "+sock.toString());
     }
 
     /** 
@@ -229,6 +232,7 @@ public class Connection implements Runnable {
 		Message m=Message.read(in);
 		if (m==null) 
 		    continue;
+  		//System.out.println("Read "+m.toString());
 		received++;  //keep statistics.
 		if (manager!=null)
 		    manager.total++;
@@ -321,7 +325,7 @@ public class Connection implements Runnable {
 		if(m instanceof PingRequest){
 		    Connection inConnection = routeTable.get(m.getGUID()); 
 		    //connection has never been encountered before...
-		    if (inConnection==null){
+		    if (inConnection==null && spamFilter.allow(m)){
 			//reduce TTL, increment hops. If old val of TTL was 0 drop message
 			if (manager.stats==true)
 			    manager.PReqCount++;//keep track of statistics if stats is turned on.
@@ -357,7 +361,7 @@ public class Connection implements Runnable {
 		    // System.out.println("Sumeet: Getting ping reply");
 		    Connection outConnection = routeTable.get(m.getGUID());
 		    manager.catcher.spy(m);//update hostcatcher (even if this isn't for me)
-		    if(outConnection!=null){ //we have a place to route it
+		    if(outConnection!=null && spamFilter.allow(m)){ //we have a place to route it
 			if (manager.stats==true)
 			    manager.PRepCount++; //keep stats if stats is turned on
 			//HACK: is the reply for me?
@@ -382,7 +386,7 @@ public class Connection implements Runnable {
 		}
 		else if (m instanceof QueryRequest){
 		    Connection inConnection = routeTable.get(m.getGUID());
-		    if (inConnection==null){
+		    if (inConnection==null && spamFilter.allow(m)){
 
 			// Feed to the UI Monitor
 			ActivityCallback ui=manager.getCallback();
@@ -428,7 +432,7 @@ public class Connection implements Runnable {
 		}
 		else if (m instanceof QueryReply){
 		    Connection outConnection = routeTable.get(m.getGUID());
-		    if(outConnection!=null){ //we have a place to route it
+		    if(outConnection!=null && spamFilter.allow(m)){ //we have a place to route it
 			if (manager.stats==true)
 			    manager.QRepCount++;
 			//System.out.println("Sumeet:found connection");
@@ -456,7 +460,7 @@ public class Connection implements Runnable {
 		    PushRequest req = (PushRequest)m;
 		    String DestinationId = new String(req.getClientGUID());
 		    Connection nextHost = pushRouteTable.get(req.getClientGUID());
-		    if (nextHost!=null){//we have a place to route this message
+		    if (nextHost!=null && spamFilter.allow(m)){//we have a place to route this message
 			m.hop(); // Ok to send even if ttl =0 since the message has a specific place to go
 			nextHost.send(m); //send the message to appropriate host
 		    }
