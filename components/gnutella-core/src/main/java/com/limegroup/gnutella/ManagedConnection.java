@@ -218,6 +218,9 @@ public class ManagedConnection
     /** True iff this should not be policed by the ConnectionWatchdog, e.g.,
      *  because this is a connection to a Clip2 reflector. */
     private boolean _isKillable=true;
+    
+    //if I am a supernode shielding the given connection
+    private Boolean _isSupernodeClientConnection=null;
 
     /** Same as ManagedConnection(host, port, router, manager, false); */
     ManagedConnection(String host,
@@ -916,6 +919,17 @@ public class ManagedConnection
      *  if I wrote "Supernode: true" and this connection wrote "Supernode:
      *  false, and <b>both support query routing</b>. */
     public boolean isSupernodeClientConnection() {
+        if(_isSupernodeClientConnection != null) {
+            _isSupernodeClientConnection = 
+                new Boolean(isSupernodeClientConnection2());
+        }
+        return _isSupernodeClientConnection.booleanValue();
+    }
+    
+    /** Returns true iff I am a supernode shielding the given connection, i.e.,
+     *  if I wrote "Supernode: true" and this connection wrote "Supernode:
+     *  false, and <b>both support query routing</b>. */
+    private boolean isSupernodeClientConnection2() {
         //Is remote host a supernode...
         if (! isClientConnection())
             return false;
