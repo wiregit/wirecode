@@ -10,6 +10,8 @@ import com.limegroup.gnutella.messages.*;
  */
 public class OnDemandUnicaster {
 
+    private static final int CLEAR_TIME = 5 * 60 * 1000; // 5 minutes
+
     /** GUESSEndpoints => QueryKey.
      */
     private static final Map _queryKeys;
@@ -19,14 +21,18 @@ public class OnDemandUnicaster {
     private static final UDPService _udp;
     
     /** Short term store for queries waiting for query keys.
+     *  GUESSEndpoints => URNs
      */
-    private static final Map _bufferedQueries;
+    private static final Map _bufferedURNs;
 
     static {
+        // static initializers are only called once, right?
         _queryKeys = new Hashtable(); // need sychronization
-        _bufferedQueries = new Hashtable(); // synchronization handy
+        _bufferedURNs = new Hashtable(); // synchronization handy
         _udp = UDPService.instance();
-    }        
+        // schedule a runner to clear various data structures
+        RouterService.schedule(new Expirer(), CLEAR_TIME, CLEAR_TIME);
+     }        
 
     /** Feed me QueryKey pongs so I can query people....
      *  pre: pr.getQueryKey() != null
@@ -64,7 +70,7 @@ public class OnDemandUnicaster {
         // if a buffered query exists, send it...
         // -----
         SendLaterBundle bundle = 
-            (SendLaterBundle) _bufferedQueries.remove(endpoint);
+            (SendLaterBundle) _bufferedURNs.remove(endpoint);
         if (bundle != null) {
             QueryRequest query = 
                 QueryRequest.createQueryKeyQuery(bundle._queryURN, qk);
@@ -120,11 +126,11 @@ public class OnDemandUnicaster {
         else {
             // don't want to get a query key before buffering the query - this
             // still may happen but it seems HIGHLY unlikely
-            synchronized (_bufferedQueries) {
+            synchronized (_bufferedURNs) {
                 GUESSEndpoint endpoint = new GUESSEndpoint(ep.getAddress(),
                                                            ep.getPort());
                 SendLaterBundle bundle = new SendLaterBundle(queryURN);
-                _bufferedQueries.put(endpoint, bundle);
+                _bufferedURNs.put(endpoint, bundle);
             }
         }
         // ------
@@ -148,5 +154,53 @@ public class OnDemandUnicaster {
                     MAX_LIFETIME);
         }
     }
+
+    /** This is run to clear various data structures used.
+     *  Made package access for easy test access.
+     */
+    private static class Expirer implements Runnable {
+
+        // 24 hours
+        private static final int QUERY_KEY_CLEAR_TIME = 24 * 60 * 60 * 1000;
+
+        private long _lastQueryKeyClearTime;
+
+        public Expirer() {
+            _lastQueryKeyClearTime = System.currentTimeMillis();
+        }
+
+        public void run() {
+            try {
+                // Clear the QueryKeys is needed
+                // ------
+                if ((System.currentTimeMillis() - _lastQueryKeyClearTime) >
+                    QUERY_KEY_CLEAR_TIME) {
+                    _lastQueryKeyClearTime = System.currentTimeMillis();
+                    // we just indiscriminately clear all the query keys - we
+                    // could just expire 'old' ones, but the benefit is marginal
+                    _queryKeys.clear();
+                }
+                // ------
+
+                // Get rid of all the buffered URNs that should be expired
+                // ------
+                synchronized (_bufferedURNs) {
+                    Iterator iter = _bufferedURNs.entrySet().iterator();
+                    while (iter.hasNext()) {
+                        Map.Entry entry = (Map.Entry) iter.next();
+                        SendLaterBundle bundle = 
+                            (SendLaterBundle) entry.getValue();
+                        if (bundle.shouldExpire())
+                            iter.remove();
+                    }
+                }
+                // ------
+            } 
+            catch(Throwable t) {
+                ErrorService.error(t);
+            }
+        }
+    }
+
 
 }
