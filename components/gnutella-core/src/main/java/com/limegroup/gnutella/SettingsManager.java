@@ -81,6 +81,8 @@ public class SettingsManager implements SettingsInterface
     private static String   connectOkString_;
 	private static int      basicQueryInfo_;
 	private static int      advancedQueryInfo_;
+    private static int      freeLoaderFiles_;
+    private static int      freeLoaderAllowed_;
 
     /** Set up a local variable for the properties */
     private static Properties props_;
@@ -375,10 +377,18 @@ public class SettingsManager implements SettingsInterface
 					setForcedIPAddress(p);
 				}
                 else if(key.equals(SettingsInterface.FORCED_PORT)){
-					setForcedPort(Integer.parseInt(p));
+                    setForcedPort(Integer.parseInt(p));
+				}
+                else if(key.equals(SettingsInterface.FREELOADER_FILES)) {
+                    setFreeloaderFiles(Integer.parseInt(p));
+				}
+                else if(key.equals(SettingsInterface.FREELOADER_ALLOWED)) {
+                    setFreeloaderAllowed(Integer.parseInt(p));
 				}
             }
-            catch(ClassCastException cce){}
+            catch(NumberFormatException nfe){ /* continue */ }
+            catch(IllegalArgumentException iae){ /* continue */ }
+            catch(ClassCastException cce){ /* continue */ }
         }
 
         //Special case: the legality of KEEP_ALIVE and MAX_INCOMING_CONNECTIONS
@@ -446,7 +456,9 @@ public class SettingsManager implements SettingsInterface
 		setForceIPAddress(DEFAULT_FORCE_IP_ADDRESS);
 		setForcedIPAddress(DEFAULT_FORCED_IP_ADDRESS);
 		setForcedPort(DEFAULT_FORCED_PORT);
-
+        setFreeloaderFiles(DEFAULT_FREELOADER_FILES);
+        setFreeloaderAllowed(DEFAULT_FREELOADER_ALLOWED);
+        
 		write_ = true;
         writeProperties();
     }
@@ -608,6 +620,14 @@ public class SettingsManager implements SettingsInterface
 	public boolean getCheckAgain() {
 		return checkAgain_;
 	}
+    public int getFreeloaderFiles() {
+        return freeLoaderFiles_;
+    }
+    public int getFreeloaderAllowed() {
+        return freeLoaderAllowed_;
+    }
+
+    
 
     /******************************************************
      **************  END OF ACCESSOR METHODS **************
@@ -1281,6 +1301,40 @@ public class SettingsManager implements SettingsInterface
             writeProperties();
         }
     }
+    
+    /** 
+     * Sets the probability (expressed as a percentage) that an incoming
+     * freeloader will be accepted.   For example, if allowed==50, an incoming
+     * connection has a 50-50 chance being accepted.  If allowed==100, all
+     * incoming connections are accepted.  Throws IllegalArgumentException if
+     * allowed<0 or allowed>100. 
+     */
+    public void setFreeloaderAllowed(int allowed)
+        throws IllegalArgumentException
+    {
+        if (allowed>100 || allowed<0)
+            throw new IllegalArgumentException();
+        this.freeLoaderAllowed_=allowed;
+        String s = Integer.toString(allowed);
+        props_.put(SettingsInterface.FREELOADER_ALLOWED, s);
+        writeProperties();
+    }
+
+    /** 
+     * Sets minimum the number of files a host must share to not be considered a
+     * freeloader.  For example, if files==0, no host is considered a
+     * freeloader.  Throws IllegalArgumentException if files<0.  
+     */
+    public void setFreeloaderFiles(int files) 
+        throws IllegalArgumentException
+    {
+        if (files<0)
+            throw new IllegalArgumentException();
+        this.freeLoaderFiles_=files;
+        String s = Integer.toString(files);
+        props_.put(SettingsInterface.FREELOADER_FILES, s);
+        writeProperties();
+    }
 
 	/**
 	 * private methods to handle versioning 
@@ -1302,7 +1356,6 @@ public class SettingsManager implements SettingsInterface
 		props_.put(SettingsInterface.CHECK_AGAIN, c);
         writeProperties();
 	}
-
 
     /**
      *  Sets the pathname String for the file that
