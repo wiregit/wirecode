@@ -33,12 +33,18 @@ public class HTTPDownloader {
 	private String _filename; 
 	private byte[] _guid;
 
-	private int _amountRead;
-	private int _fileSize;
+    /** The amount we've downloaded. */
+	private volatile int _amountRead;
+    /** The amount we'll have downloaded if the download completes properly. 
+     *  Note that the amount still left to download is 
+     *  _amountToRead - _amountToRead. */
+	private volatile int _amountToRead;
+    /** The index to start reading from the server and start writing to the
+     *  file. */
 	private int _initialReadingPoint;
 
 	private ByteReader _byteReader;
-	private FileOutputStream _fos;
+	private RandomAccessFile _fos;
 	private Socket _socket;  //initialized in HTTPDownloader(Socket) or connect
     private File _incompleteFile;
 
@@ -53,14 +59,18 @@ public class HTTPDownloader {
      *
      * @param rfd complete information for the file to download, including
      *  host address and port
-     * @param incompleteFile the temp file to use while downloading.  No other 
-     *  thread or process should be using this file, at least when doDownload
-     *  is called 
+     * @param incompleteFile the temp file to use while downloading, which need
+     *  not exist.
+     * @param start the place to start reading from the network and writing to 
+     *  the file
+     * @param stop the last byte to read+1
      */
 	public HTTPDownloader(RemoteFileDesc rfd,
-                          File incompleteFile) {
+                          File incompleteFile,
+                          int start,
+                          int bytes) {
         //Dirty secret: this is implemented with the push constructor!
-        this(null, rfd, incompleteFile);
+        this(null, rfd, incompleteFile, start, bytes);
         _isPush=false;
 	}	
 
@@ -73,32 +83,31 @@ public class HTTPDownloader {
      *  buffered.
      * @param rfd complete information for the file to download, including
      *  host address and port
-     * @param incompleteFile the temp file to use while downloading.  No other 
-     *  thread or process should be using this file, at least when doDownload
-     *  is called 
+     * @param incompleteFile the temp file to use while downloading, which need
+     *  not exist.
+     * @param start the place to start reading from network and writing to
+     *  the file
+     * @param stop the last byte to read+1
      */
 	public HTTPDownloader(Socket socket,
                           RemoteFileDesc rfd,
-                          File incompleteFile) {
+                          File incompleteFile,
+                          int start,
+                          int bytes) {
         _isPush=true;
         _socket=socket;
         _incompleteFile=incompleteFile;
 		_filename = rfd.getFileName();
 		_index = rfd.getIndex();
 		_guid = rfd.getClientGUID();
-		_fileSize = rfd.getSize();
+		_amountToRead = rfd.getSize();
 		_port = rfd.getPort();
 		_host = rfd.getHost();
 		_chatEnabled = rfd.chatEnabled();
-
-        //If the incomplete file exists, set up a resume just past the end.
-        //Otherwise, begin from the start.
+        
 		_amountRead = 0;
-		_initialReadingPoint = 0;
-        if (_incompleteFile.exists()) {
-            _initialReadingPoint = (int)incompleteFile.length();
-            _amountRead = _initialReadingPoint;
-        }
+        _amountToRead = bytes;
+		_initialReadingPoint = start;
     }
 
     /** 
@@ -141,7 +150,8 @@ public class HTTPDownloader {
         }
         _byteReader = new ByteReader(istream);
 
-        //Write GET request and headers
+        //Write GET request and headers.  TODO: we COULD specify the end of the
+        //range (i.e., start+bytes).  But why bother?
         OutputStream os = _socket.getOutputStream();
         OutputStreamWriter osw = new OutputStreamWriter(os);
         BufferedWriter out=new BufferedWriter(osw);
@@ -179,13 +189,18 @@ public class HTTPDownloader {
         } catch (IOException e) { }
 	}
 
-	/* Public Accessor Methods */
-
+    public int getInitialReadingPoint() {return _initialReadingPoint;}
 	public int getAmountRead() {return _amountRead;}
-	public int getFileSize() {return _fileSize;}
-	public int getInitialRead() {return _initialReadingPoint;}
+	public int getAmountToRead() {return _amountToRead;}
+    /** 
+     * Forces this to not write past the given byte of the file, if it has not
+     * already done so.  Typically this is called to reduce the download window;
+     * doing otherwise will typically result in incomplete downloads.
+     * 
+     * @param stop a byte index into the file, using 0 to N-1 notation.  
+     */
+    public void stopAt(int stop) {_amountToRead=(stop-_initialReadingPoint);}
     public InetAddress getInetAddress() {return _socket.getInetAddress();}
-
 	public boolean chatEnabled() {
 		return _chatEnabled;
 	}
@@ -201,7 +216,7 @@ public class HTTPDownloader {
 
 
     /*
-     * Reads the headers from this, setting _initialReadingPoint and _fileSize.
+     * Reads the headers from this, setting _initialReadingPoint and _amountToRead.
      * Throws any of the exceptions listed in connect().  
      */
 	private void readHeader() throws IOException {
@@ -273,9 +288,12 @@ public class HTTPDownloader {
 		// if we've gotten this far, then we can assume that we should
 		// be alright to prodeed.
 
-		// str = _byteReader.readLine();
+
 	
 		while (true) {
+            /*
+            //TODO: we currently ignore the Content-length and 
+            //content-range headers.  Maybe we shouldn't.
 			if (str.toUpperCase().indexOf("CONTENT-LENGTH:") != -1)  {
 
                 String sub;
@@ -294,7 +312,7 @@ public class HTTPDownloader {
 					throw new ProblemReadingHeaderException();
                 }
 
-				_fileSize = tempSize;
+				_amountToRead = tempSize;
 				
             }  // end of content length if
 			
@@ -353,10 +371,11 @@ public class HTTPDownloader {
 
 				_initialReadingPoint = numBeforeDash;
 				// _amountRead = numBeforeSlash;
-				_fileSize = numAfterSlash;
+				_amountToRead = numAfterSlash;
 
             } // end of content range if
-
+            */
+            
 			str = _byteReader.readLine();
 			
             //EOF?
@@ -366,10 +385,9 @@ public class HTTPDownloader {
     }
 
     /*
-     * Downloads the content from the server, writes it to a temporary
-     * file, and copies the temporary file to the library.  Blocking.
-     * This MUST be initialized via connect() beforehand, and doDownload
-     * MUST NOT have already been called.
+     * Downloads the content from the server and writes it to a temporary
+     * file.  Blocking.  This MUST be initialized via connect() beforehand, and
+     * doDownload MUST NOT have already been called.
      *  
      * @exception FileIncompleteException transfer interrupted, either
      *  locally or remotely.  TODO: is this ALWAYS thrown during 
@@ -377,51 +395,23 @@ public class HTTPDownloader {
      * @exception FileCantBeMovedException file downloaded but  couldn't be
      *  moved to library
      * @exception IOException file couldn't be downloaded for some other
-     *  reason
+     *  reason 
      */
 	public void doDownload() throws IOException {
-        //1. For security, check that download location is OK.
-        //   This is to prevent against any files with '.' or '/' or '\'.
-		SettingsManager settings = SettingsManager.instance();		
-		File download_dir = settings.getSaveDirectory();
-
-		File complete_file = new File(download_dir, _filename);
-		
-		//File shared = new File(download_dir);
-		String shared_path = download_dir.getCanonicalPath();
-		
-		File parent_of_shared = new File(complete_file.getParent());
-		String path_to_parent = parent_of_shared.getCanonicalPath();
-		
-		if (!path_to_parent.equals(shared_path)) {
-			// need to add an error message here
-			throw new InvalidPathException();  
-		}
-
-	  
-        //2. Do actual download, appending to incomplete file if necessary.
-		String path_to_incomplete = _incompleteFile.getCanonicalPath();
-		boolean append = false;
-
-		if (_initialReadingPoint > 0)
-			append = true;
-
-		_fos = new FileOutputStream(path_to_incomplete, append);
+		_fos = new RandomAccessFile(_incompleteFile, "rw");
+        _fos.seek(_initialReadingPoint);
 
 		int c = -1;
 		
 		byte[] buf = new byte[1024];
 
 		while (true) {
-			
-  			if (_amountRead == _fileSize) 
+			//It's possible that we've read more than requested because of a
+			//call to setAmountToRead from another thread.  This used to be an
+			//error resulting in FileTooLargeException. TODO: what should we do
+            //here now?
+  			if (_amountRead >= _amountToRead) 
 				break;
-						
-  			// just a safety check.  hopefully this wouldn't
-  			// happen, but if it does, need a way to exit 
-  			// gracefully...
-  			if (_amountRead > _fileSize) 
-				throw new FileTooLargeException();
 			
 			c = _byteReader.read(buf);
 
@@ -438,22 +428,9 @@ public class HTTPDownloader {
 		_fos.close();
 
 
-		//3. If not interrupted, move from temporary directory to final directory.
-		if ( _amountRead == _fileSize ) {
-			//Delete target.  If target doesn't exist, this will fail silently.
-			//Otherwise, it's always safe to do this since we prompted the user
-			//in SearchView/DownloadManager.
-			complete_file.delete();
-            //Try moving file.  If we couldn't move the file, i.e., because
-            //someone is previewing it or it's on a different volume, try copy
-            //instead.  If that failed, notify user.
-            if (!_incompleteFile.renameTo(complete_file))
-                if (! CommonUtils.copy(_incompleteFile, complete_file))
-                    throw new FileCantBeMovedException();
-            //Add file to library.
-			FileManager.instance().addFileIfShared(complete_file);
-		} else 
-			throw new FileIncompleteException();
+		if ( _amountRead != _amountToRead ) {
+            throw new FileIncompleteException();
+        }
 	}
 
 
