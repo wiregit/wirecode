@@ -60,8 +60,7 @@ public class ManagedDownloader implements Downloader, Serializable {
       capacity of the fastest uploader.
 
       The ideal way of identifying duplicate copies of a file is to use hashes
-      via the HUGE proposal.  Until that is more widely adopted, LimeWire
-      considers two files with the same name and file size to be duplicates.
+      via the HUGE proposal.
 
       When discussing swarmed downloads, it's useful to divide parts of a file
       into three categories: black, grey, and white. Black regions have already
@@ -121,7 +120,13 @@ public class ManagedDownloader implements Downloader, Serializable {
                                       |
                            HTTPDownloader.connectHTTP
 
-      tryAllDownloads waits for retries.
+      DownloadManager notifies a ManagedDownloader when it should start
+      tryAllDownloads.  An inactive download (waiting for a busy host,
+      waiting for a user to requery, waiting for GUESS responses, etc..)
+      is essentially a state-machine, pumped forward by DownloadManager.
+      The 'master thread' of a ManagedDownloader is recreated every time
+      DownloadManager moves the download from inactive to active.
+      
       The core downloading loop is done by tryAllDownloads3.
       connectAndDownload (which is started asynchronously in tryAllDownloads3),
       does the three step ennumerated above.
