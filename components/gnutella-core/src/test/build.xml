@@ -39,7 +39,6 @@
   <property name="MESSAGES" value="${GNUTELLA}.messages" />
   <property name="MP3" value="${GNUTELLA}.mp3" />
   <property name="ROUTING" value="${GNUTELLA}.routing" />
-  <property name="UPDATE" value="${GNUTELLA}.update" />
   <property name="UPLOADER" value="${GNUTELLA}.uploader" />
   <property name="UTIL" value="${GNUTELLA}.util" />
   <property name="XML" value="${GNUTELLA}.xml" />
@@ -432,7 +431,6 @@
     <antcall target="messages"/>
     <antcall target="mp3"/>
     <antcall target="routing"/>
-    <antcall target="update"/>
     <antcall target="uploader"/>
     <antcall target="util"/>
     <antcall target="xml"/>
