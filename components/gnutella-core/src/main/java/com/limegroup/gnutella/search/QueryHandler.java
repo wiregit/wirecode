@@ -29,6 +29,12 @@ public final class QueryHandler {
 	 */
 	public static final int ULTRAPEER_RESULTS = 150;
 
+    /**
+     * Ultrapeers seem to get less results - lets give them a little boost.
+     */
+    public static final double UP_RESULT_BUMP = 1.15;
+
+
 	/**
 	 * The number of results to try to get if the query came from an old
 	 * leaf -- they are connected to 2 other Ultrapeers that may or may
@@ -219,6 +225,24 @@ public final class QueryHandler {
 											 ReplyHandler handler,
                                              ResultCounter counter) {	
 		return new QueryHandler(query, ULTRAPEER_RESULTS, handler, counter);
+	}
+
+	/**
+	 * Factory constructor for generating a new <tt>QueryHandler</tt> 
+	 * for the given <tt>QueryRequest</tt>.  Used by supernodes to run
+     * their own queries (ties up to ForMeReplyHandler.instance()).
+	 *
+	 * @param guid the <tt>QueryRequest</tt> instance containing data
+	 *  for this set of queries
+     * @param counter the <tt>ResultCounter</tt> that keeps track of how
+     *  many results have been returned for this query
+	 * @return the <tt>QueryHandler</tt> instance for this query
+	 */
+	public static QueryHandler createHandlerForMe(QueryRequest query, 
+                                                  ResultCounter counter) {	
+        // because UPs seem to get less results, give them more than usual
+		return new QueryHandler(query, (int)(ULTRAPEER_RESULTS * UP_RESULT_BUMP),
+                                ForMeReplyHandler.instance(), counter);
 	}
 
 	/**

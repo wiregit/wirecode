@@ -1336,9 +1336,8 @@ public abstract class MessageRouter {
 			_queryRouteTable.routeReply(query.getGUID(), 
 										FOR_ME_REPLY_HANDLER);
 		if(RouterService.isSupernode()) {
-			sendDynamicQuery(QueryHandler.createHandler(query, 
-														FOR_ME_REPLY_HANDLER,
-                                                        counter), 
+			sendDynamicQuery(QueryHandler.createHandlerForMe(query, 
+                                                             counter), 
 							 FOR_ME_REPLY_HANDLER);
 		} else {
             originateLeafQuery(query);
