@@ -995,6 +995,34 @@ public class QueryRequest extends Message implements Serializable{
                         int network, boolean canReceiveOutOfBandReplies,
                         int capabilitySelector, boolean doNotProxy,
                         int metaFlagMask) {
+        this(guid, ttl, 0, query, richQuery, requestedUrnTypes, queryUrns,
+             queryKey, isFirewalled, network, canReceiveOutOfBandReplies,
+             capabilitySelector, doNotProxy, metaFlagMask);
+    }
+
+    /**
+     * Builds a new query from scratch but you can flag it as a Requery, if 
+     * needed.  If you need to make a query that accepts out-of-band results, 
+     * be sure to set the guid correctly (see GUID.makeAddressEncodedGUI) and 
+     * set canReceiveOutOfBandReplies .
+     *
+     * @requires 0<=minSpeed<2^16 (i.e., can fit in 2 unsigned bytes)
+     * @param requestedUrnTypes <tt>Set</tt> of <tt>UrnType</tt> instances
+     *  requested for this query, which may be empty or null if no types were
+     *  requested
+	 * @param queryUrns <tt>Set</tt> of <tt>URN</tt> instances requested for 
+     *  this query, which may be empty or null if no URNs were requested
+	 * @throws <tt>IllegalArgumentException</tt> if the query string, the xml
+	 *  query string, and the urns are all empty, or if the capability selector
+     *  is bad
+     */
+    public QueryRequest(byte[] guid, byte ttl, int minSpeed,
+                        String query, String richQuery, 
+                        Set requestedUrnTypes, Set queryUrns,
+                        QueryKey queryKey, boolean isFirewalled, 
+                        int network, boolean canReceiveOutOfBandReplies,
+                        int capabilitySelector, boolean doNotProxy,
+                        int metaFlagMask) {
         // don't worry about getting the length right at first
         super(guid, Message.F_QUERY, ttl, /* hops */ (byte)0, /* length */ 0, 
               network);
@@ -1014,27 +1042,30 @@ public class QueryRequest extends Message implements Serializable{
         if (metaFlagMask > 0)
             _metaMask = new Integer(metaFlagMask);
 
-		// the new Min Speed format - looks reversed but
-		// it isn't because of ByteOrder.short2leb
-		int minSpeed = SPECIAL_MINSPEED_MASK; 
-		// set the firewall bit if i'm firewalled
-		if (isFirewalled && !isMulticast())
-			minSpeed |= SPECIAL_FIREWALL_MASK;
-        // if i'm firewalled and can do solicited, mark the query for fw
-		// transfer capability.
-        if (isFirewalled && UDPService.instance().canReceiveSolicited())
-            minSpeed |= SPECIAL_FWTRANS_MASK;
-        // THE DEAL:
-        // if we can NOT receive out of band replies, we want in-band XML - so
-		// set the correct bit.
-        // if we can receive out of band replies, we do not want in-band XML -
-		// we'll hope the out-of-band reply guys will provide us all necessary
-		// XML.
-
-        if (!canReceiveOutOfBandReplies) 
-            minSpeed |= SPECIAL_XML_MASK;
-        else // bit 10 flags out-of-band support
-            minSpeed |= SPECIAL_OUTOFBAND_MASK;
+        // only set the minspeed if none was input...x
+        if (minSpeed == 0) {
+            // the new Min Speed format - looks reversed but
+            // it isn't because of ByteOrder.short2leb
+            minSpeed = SPECIAL_MINSPEED_MASK; 
+            // set the firewall bit if i'm firewalled
+            if (isFirewalled && !isMulticast())
+                minSpeed |= SPECIAL_FIREWALL_MASK;
+            // if i'm firewalled and can do solicited, mark the query for fw
+            // transfer capability.
+            if (isFirewalled && UDPService.instance().canReceiveSolicited())
+                minSpeed |= SPECIAL_FWTRANS_MASK;
+            // THE DEAL:
+            // if we can NOT receive out of band replies, we want in-band XML -
+            // so set the correct bit.
+            // if we can receive out of band replies, we do not want in-band XML
+            // we'll hope the out-of-band reply guys will provide us all
+            // necessary XML.
+            
+            if (!canReceiveOutOfBandReplies) 
+                minSpeed |= SPECIAL_XML_MASK;
+            else // bit 10 flags out-of-band support
+                minSpeed |= SPECIAL_OUTOFBAND_MASK;
+        }
 
         MIN_SPEED = minSpeed;
 		if(query == null) {

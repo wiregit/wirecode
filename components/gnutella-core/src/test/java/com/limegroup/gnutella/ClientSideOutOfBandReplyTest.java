@@ -141,33 +141,11 @@ public class ClientSideOutOfBandReplyTest extends ClientSideTestCase {
             UDP_ACCESS.send(pack);
         }
 
-        // you also have to set up TCP incoming....
-        {
-            Socket sock = null;
-            OutputStream os = null;
-            try {
-                sock = Sockets.connect(InetAddress.getLocalHost().getHostAddress(), 
-                                       SERVER_PORT, 12);
-                os = sock.getOutputStream();
-                os.write("\n\n".getBytes());
-            } catch (IOException ignored) {
-            } catch (SecurityException ignored) {
-            } catch (Throwable t) {
-                ErrorService.error(t);
-            } finally {
-                if(sock != null)
-                    try { sock.close(); } catch(IOException ignored) {}
-                if(os != null)
-                    try { os.close(); } catch(IOException ignored) {}
-            }
-        }        
-
         // ----------------------------------------
 
         Thread.sleep(250);
         // we should now be guess capable and tcp incoming capable....
         assertTrue(RouterService.isGUESSCapable());
-        assertTrue(RouterService.acceptedIncomingConnection());
         
         keepAllAlive(testUP);
         // clear up any messages before we begin the test.
@@ -405,6 +383,59 @@ public class ClientSideOutOfBandReplyTest extends ClientSideTestCase {
 
     }
 
+    public void testFirewalledReplyLogic() throws Exception {
+
+        { // this should not go through because of firewall/firewall
+            drain(testUP[0]);
+
+            QueryRequest query = 
+                new QueryRequest(GUID.makeGuid(), (byte)2, 
+                                 0 | QueryRequest.SPECIAL_MINSPEED_MASK |
+                                 QueryRequest.SPECIAL_FIREWALL_MASK,
+                                 "berkeley", "", null, 
+                                 null, null, false, Message.N_UNKNOWN, false, 
+                                 0, false, 0);
+
+            testUP[0].send(query);testUP[0].flush();
+            QueryReply reply = getFirstQueryReply(testUP[0]);
+            assertNull(reply);
+        }
+
+        { // this should go through because of firewall transfer/solicited
+            drain(testUP[0]);
+
+            QueryRequest query = 
+                new QueryRequest(GUID.makeGuid(), (byte)2, 
+                                 0 | QueryRequest.SPECIAL_MINSPEED_MASK |
+                                 QueryRequest.SPECIAL_FIREWALL_MASK |
+                                 QueryRequest.SPECIAL_FWTRANS_MASK,
+                                 "susheel", "", null, 
+                                 null, null, false, Message.N_UNKNOWN, false, 
+                                 0, false, 0);
+
+            testUP[0].send(query);testUP[0].flush();
+            QueryReply reply = getFirstQueryReply(testUP[0]);
+            assertNotNull(reply);
+        }
+
+        { // this should go through because the source isn't firewalled
+            drain(testUP[1]);
+
+            QueryRequest query = 
+                new QueryRequest(GUID.makeGuid(), (byte)2, 
+                                 0 | QueryRequest.SPECIAL_MINSPEED_MASK |
+                                 QueryRequest.SPECIAL_XML_MASK,
+                                 "susheel", "", null, 
+                                 null, null, false, Message.N_UNKNOWN, false, 
+                                 0, false, 0);
+
+            testUP[1].send(query);testUP[1].flush();
+            QueryReply reply = getFirstQueryReply(testUP[1]);
+            assertNotNull(reply);
+        }
+
+    }
+    
     
     //////////////////////////////////////////////////////////////////
 
