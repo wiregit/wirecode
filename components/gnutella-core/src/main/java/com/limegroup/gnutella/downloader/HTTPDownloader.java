@@ -165,6 +165,12 @@ public class HTTPDownloader implements BandwidthTracker {
 	 * LOCKING: this
 	 */
 	private boolean _victim;
+    
+    /**
+     * Whether this downloader managed to connect through HTTP.
+     * LOCKING: this
+     */
+    private boolean _didConnect;
 	
 	/**
 	 * The content-length of the output, useful only for when we
@@ -503,6 +509,7 @@ public class HTTPDownloader implements BandwidthTracker {
             _initialWritingPoint = start;
             _bodyConsumed = false;
             _contentLength = 0;
+            _didConnect = false;
         }
 		
 		// features to be sent with the X-Features header
@@ -685,6 +692,13 @@ public class HTTPDownloader implements BandwidthTracker {
 
         //Read response.
         readHeaders();
+        
+        // if we got here, we connected fine
+        if (LOG.isDebugEnabled())
+            LOG.debug(this+" completed connectHTTP");
+        synchronized(this) {
+            _didConnect=true;
+        }
 	}
 	
 	/**
@@ -1243,6 +1257,9 @@ public class HTTPDownloader implements BandwidthTracker {
         int numBeforeSlash;
         int numAfterSlash;
 
+        if (LOG.isDebugEnabled())
+            LOG.debug("reading content range: "+str);
+        
         //Try to parse all three numbers from header for verification.
         //Special case "*" before or after slash.
         try {
@@ -1702,9 +1719,8 @@ public class HTTPDownloader implements BandwidthTracker {
 	public synchronized int getTotalAmountRead() {return _totalAmountRead + _amountRead;}
 	public synchronized int getAmountToRead() {return _amountToRead;}
 	public boolean isActive() { return _isActive; }
-	public synchronized boolean isVictim() {
-	    return _victim;
-	}
+	public synchronized boolean isVictim() {return _victim;}
+    public synchronized boolean didConnect() {return _didConnect;}
 
     /** 
      * Forces this to not write past the given byte of the file, if it has not

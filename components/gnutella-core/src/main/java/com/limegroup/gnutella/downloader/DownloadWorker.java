@@ -377,10 +377,16 @@ public class DownloadWorker implements Runnable {
      */
     private void releaseRanges() {
         int high, low;
+        
         synchronized(_downloader) {
             // do not release ranges for downloaders that we have stolen from
             // since they are still marked as leased
             if (_downloader.isVictim())
+                return;
+            
+            // if this was a stealer which couldn't connect, do not unlease his
+            // ranges either
+            if (!_downloader.didConnect())
                 return;
             
             low=_downloader.getInitialReadingPoint()+_downloader.getAmountRead();
@@ -391,7 +397,7 @@ public class DownloadWorker implements Runnable {
         if( (high-low)>0) {//dloader failed to download a part assigned to it?
             
             if (LOG.isDebugEnabled())
-                LOG.debug("releasing ranges "+new Interval(low,high), new Exception());
+                LOG.debug("releasing ranges "+new Interval(low,high));
             
             synchronized(_stealLock) {
                 _commonOutFile.releaseBlock(new Interval(low,high));
@@ -1148,10 +1154,10 @@ public class DownloadWorker implements Runnable {
         
         
         return biggest.getAmountRead() < biggest.getAmountToRead() && 
-                bandwidthStealer > bandwidthVictim ||
+                (bandwidthStealer > bandwidthVictim ||
                     (bandwidthVictim != -1 &&
                             bandwidthVictim < MIN_ACCEPTABLE_SPEED && 
-                            bandwidthStealer == -1);
+                            bandwidthStealer == -1));
     }
     
     ////// various handlers for failure states of the assign process /////
