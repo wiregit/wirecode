@@ -35,7 +35,7 @@ public final class CompositeQueue {
 	 *  slightly larger than the standard to accomodate higher priority 
 	 *  messages, such as queries and query hits. 
 	 */
-    private static final int BIG_QUEUE_SIZE = 100;
+    public static final int BIG_QUEUE_SIZE = 100;
 
 	/** 
      * The size of the queue per priority. Larger values tolerate larger bursts
@@ -43,7 +43,7 @@ public final class CompositeQueue {
 	 *  smaller so that we don't waste too much memory on lower
 	 *  priority messages. 
 	 */
-    private static final int QUEUE_SIZE = 1;
+    public static final int QUEUE_SIZE = 1;
     
     /** 
      * The max time to keep reply messages and pushes in the queues, in
@@ -60,7 +60,7 @@ public final class CompositeQueue {
     /** 
      * The number of different priority levels. 
      */
-    private static final int PRIORITIES = 7;
+    static final int PRIORITIES = 7;
     
     /** 
      * Names for each priority. "Other" includes QRP messages and is NOT
@@ -190,6 +190,57 @@ public final class CompositeQueue {
         repOk();
     }
 
+    /**
+     * Retrieves the next message in the queue.
+     * 
+     * @return the next message in the queue, or <tt>null</tt> if there are
+     */
+    public Message removeNext() {
+        // if there are no buffered messages, return null immediately
+        if(size() == 0) {
+            return null;
+        }
+        int start = _priority;
+        
+        do {
+            MessageQueue queue = _queues[_priority];
+            while(true) {
+                Message msg = null;
+                synchronized (QUEUE_LOCK) {
+                    msg = queue.removeNext();
+                    int dropped = queue.resetDropped();
+                    CONNECTION.stats().addSentDropped(dropped);
+                    _size -= (msg==null?0:1) + dropped;  //maintain invariant
+                    
+                    if(msg != null) {
+                        return msg;
+                    } else {
+                        // tricky part -- either we've come to the end of the 
+                        // queue's currect cycle, or we've emptied the queue.  
+                        // Reset the cycle to ensure that this queue can still
+                        // be read from in the future
+                        queue.resetCycle();
+                        
+                        // do this inside the lock so that _priority 
+                        // cannot be corrupted by another thread
+                        _priority = (_priority+1)%PRIORITIES;
+                        if(_size == 0) {
+                            // optimization -- return null if there are no 
+                            // more messages left
+                            return null;
+                        }
+                        break; 
+                    }
+                }     
+            }
+            
+            // TODO: still a threading issue with _priority -- an add can
+            // change it here
+        } while(_priority != start);
+        
+        // if we get here, there are no messages to send, so return null
+        return null;
+    }
      
     /** 
      * Removes and returns the next message to send from this.  Returns null if
@@ -199,7 +250,7 @@ public final class CompositeQueue {
      * note that size()>0 does not imply that removeBest()!=null.
      * 
      * @return the next message, or <tt>null</tt> if none
-     * @see com.limegroup.gnutella.connection.MessageQueue#resetDropped()
+     * @see com.limegroup.gnutella.connection.MessageQueue#resetCycle()
      * TODO:: make syncrhonization more fine-grained
      */
     public void write() throws IOException {    
