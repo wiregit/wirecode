@@ -246,27 +246,20 @@ public class ManagedDownloader implements Downloader, Serializable {
     }
 
 
-    private final long ONE_MEG_BYTES = 1000000;
-    private final long SIXTY_KB      = 60000;
+    private final long SIXTY_KB = 60000;
     private final boolean sizeClose(long one, long two) {
         boolean retVal = false;
-
-		float floatSizeOne = (float)one;
-		float floatSizeTwo  = (float)two;
-		// if the sizes match exactly and the file size is over
-		// about a meg, we are good to go....
-		if((floatSizeOne == floatSizeTwo) &&
-		   (floatSizeOne > ONE_MEG_BYTES)) 
+		// if the sizes match exactly, we are good to go....
+		if (one == two)
             retVal = true;
         else {
             //Similar file size (within 60k)?  This value was determined 
             //empirically to optimize grouping aggressiveness with minimal 
             //performance cost.
-            float sizeDiff=Math.abs(floatSizeOne - floatSizeTwo);
+            long sizeDiff = Math.abs(one - two);
             if (sizeDiff <= SIXTY_KB) 
                 retVal = true;
         }
-
         return retVal;
     }
 
