@@ -52,7 +52,8 @@ public class HostCatcher implements HostListener {
 
     /** The number of milliseconds to wait after trying gnutella.net entries
      *  before resorting to GWebCache HOSTFILE requests. */
-    public static final int GWEBCACHE_DELAY=6000;  //6 seconds    
+    public static int GWEBCACHE_DELAY=20000;  //20 seconds    
+    // TODO: Is this okay?
     
     /**
      * Size of the queue for hosts returned from the GWebCaches.
@@ -640,8 +641,18 @@ public class HostCatcher implements HostListener {
                 long now=System.currentTimeMillis();
                 //Be patient; maybe some gnutella.net entries will work.
                 if (now < nextAllowedFetchTime) {
+
+                    //  Determine if a reschedule will occur
+                    boolean rescheduled =
+                      (nextAllowedFetchTime==Long.MAX_VALUE);
+
                     nextAllowedFetchTime=Math.min(
                         nextAllowedFetchTime, now+GWEBCACHE_DELAY);
+
+                    // Exponential backoff
+                    if ( rescheduled ) 
+                        GWEBCACHE_DELAY *= 5;
+                    
                     if(LOG.isDebugEnabled())
                         LOG.debug("delaying fetch time till " + 
                                   nextAllowedFetchTime);
@@ -666,7 +677,7 @@ public class HostCatcher implements HostListener {
             } catch (NoSuchElementException e) { }
             
             //No luck?  Wait and try again.
-            wait();  //throws InterruptedException          
+            wait(GWEBCACHE_DELAY/5);  //throws InterruptedException          
         } 
     }
   
@@ -732,6 +743,14 @@ public class HostCatcher implements HostListener {
         // we want to fill any remaining leaf slots if we can.
         else if(!FREE_ULTRAPEER_SLOTS_SET.isEmpty()) {
             Iterator iter = FREE_ULTRAPEER_SLOTS_SET.iterator();
+            ExtendedEndpoint ee = (ExtendedEndpoint)iter.next();
+            iter.remove();
+            return ee;
+        } 
+        // Otherwise, might as well use the leaf slots hosts up as well
+        // since we added them to the size and they can give us other info
+        else if(!FREE_LEAF_SLOTS_SET.isEmpty()) {
+            Iterator iter = FREE_LEAF_SLOTS_SET.iterator();
             ExtendedEndpoint ee = (ExtendedEndpoint)iter.next();
             iter.remove();
             return ee;
@@ -906,7 +925,8 @@ public class HostCatcher implements HostListener {
         
         PROBATION_HOSTS.clear();
         EXPIRED_HOSTS.clear();
-        _hitCaches = false;
+        // TODO: Is this okay?
+        //_hitCaches = false;
         _failures = 0;
         
         // Read the hosts file again.  This will also notify any waiting 
