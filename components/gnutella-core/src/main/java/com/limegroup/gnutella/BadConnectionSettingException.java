@@ -11,6 +11,8 @@ package com.limegroup.gnutella;
 public class BadConnectionSettingException extends RuntimeException {
     public final static int NEGATIVE_VALUE=0x1;
     public final static int TOO_HIGH_FOR_SPEED=0x2;
+    public final static int TOO_HIGH_FOR_LEAF=0x3;
+    public final static int TOO_LOW_FOR_ULTRAPEER=0x4;
     
     /** INVARIANT: One of the static fields defined above. */
     private int reason;
