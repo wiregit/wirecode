@@ -6,6 +6,8 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.UnknownHostException;
+import java.util.List;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
@@ -13,41 +15,39 @@ import java.util.Iterator;
 import java.util.Set;
 import java.util.StringTokenizer;
 
-import org.xml.sax.SAXException;
-
 import com.limegroup.gnutella.altlocs.AlternateLocationCollection;
 import com.limegroup.gnutella.altlocs.DirectAltLoc;
 import com.limegroup.gnutella.filters.IPFilter;
+import com.limegroup.gnutella.metadata.AudioMetaData;
 import com.limegroup.gnutella.messages.BadGGEPPropertyException;
 import com.limegroup.gnutella.messages.GGEP;
 import com.limegroup.gnutella.messages.HUGEExtension;
 import com.limegroup.gnutella.search.HostData;
+import com.limegroup.gnutella.util.NameValue;
 import com.limegroup.gnutella.util.DataUtils;
 import com.limegroup.gnutella.util.NetworkUtils;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
-import com.limegroup.gnutella.xml.SchemaNotFoundException;
+
+import org.apache.commons.logging.LogFactory;
+import org.apache.commons.logging.Log;
 
 
 /**
  * A single result from a query reply message.  (In hindsight, "Result" would
  * have been a better name.)  Besides basic file information, responses can
- * include metadata, which is actually stored query reply's QHD.  Metadata comes
- * in two formats: raw strings or parsed LimeXMLDocument.<p>
+ * include metadata.
  *
  * Response was originally intended to be immutable, but it currently includes
  * mutator methods for metadata; these will be removed in the future.  
  */
 public class Response {
     
+    private static final Log LOG = LogFactory.getLog(Response.class);
+    
     /**
      * The magic byte to use as extension seperators.
      */
     private static final byte EXT_SEPERATOR = 0x1c;
-    
-    /**
-     * The magic byte, as a string, to use as extension seperators.
-     */
-    private static final String EXT_STRING = "\u001c";
     
     /**
      * The maximum number of alternate locations to include in responses
@@ -69,27 +69,6 @@ public class Response {
      *  include the double null terminator.
      */
     private final String name;
-    /**
-     * Metadata can be stored in one of two forms: raw strings (read from the
-     * network) or LimeXMLDocument (prepared by FileManager).  Storing the
-     * latter makes calculating aggregate strings in the QHD more efficient.
-     * Response provides methods to access both formats, lazily converting
-     * between the two and caching the results as needed.     
-     *
-     * INVARIANT: metadata!=null ==> metaBytes==metadata.getBytes()
-     * INVARIANT: metadata!=null && document!=null ==> metadata and document
-     *  are equivalent but in different formats 
-     */
-    
-	/** Raw unparsed XML metadata. */
-	private String metadata;
-
-    /** The bytes of the metadata instance variable, used for
-     * internationalization purposes.  (Remember that
-     * metadata.length()!=metaBytes.length.)  This is guaranteed to not be
-	 * null
-	 */
-    private byte[] metaBytes;
 
     /** The document representing the XML in this response. */
     private LimeXMLDocument document;
@@ -118,49 +97,6 @@ public class Response {
      */
     private final GGEPContainer ggepData;
 
-	
-	/**
-	 * Static constant for the beginning of the xml audios schema so
-	 * that we don't have to generate new strings each time.
-	 */
- 	private static final String AUDIOS_NAMESPACE =
-		"<audios xsi:noNamespaceSchemaLocation="+
-		"\"http://www.limewire.com/schemas/audio.xsd\">";
-
-	/**
-	 * Constant for the XML audio title key.
-	 */
-	private static final String AUDIO_TITLE =
-		"<audio title=\"";
-	
-	/**
-	 * Constant for the XML audio bitrate key.
-	 */
-	private static final String AUDIO_BITRATE = 
-		"bitrate=\"";
-
-	/**
-	 * Constant for the XML audio seconds key.
-	 */
-	private static final String AUDIO_SECONDS =
-		"seconds=\"";
-
-	/**
-	 * Constant for the string that ends the audios xml.
-	 */
-	private static final String AUDIOS_CLOSE =
-		"</audio></audios>";				
-
-	/**
-	 * Constant for a quote followed by a space, used in XML.
-	 */
-	private static final String QUOTE_SPACE ="\" ";
-
-	/**
-	 * Constant for a quote followed by the XML close tag.
-	 */
-	private static final String CLOSE_TAG = "\">";
-
 	/**
 	 * Constant for the KBPS string to avoid constructing it too many
 	 * times.
@@ -178,7 +114,7 @@ public class Response {
      *  0 <= index, size < 2^32
      */
     public Response(long index, long size, String name) {
-		this(index, size, name, "", null, null, null, null);
+		this(index, size, name, null, null, null, null);
     }
 
 
@@ -188,18 +124,8 @@ public class Response {
      * @param doc the metadata to include
      */
     public Response(long index, long size, String name, LimeXMLDocument doc) {
-        this(index, size, name, extractMetadata(doc), null, doc, null, null);
+        this(index, size, name, null, doc, null, null);
     }
-
-
-    /**
-     * Creates a new response with raw unparsed metadata.  Typically this
-     * is used when reading replies from the network.
-     * @param metadata a string of metadata, typically XML
-     */
-    public Response(long index, long size, String name, String metadata) {
-		this(index, size, name, metadata, null, null, null, null);
-	}
 
 	/**
 	 * Constructs a new <tt>Response</tt> instance from the data in the
@@ -210,7 +136,7 @@ public class Response {
 	 */
 	public Response(FileDesc fd) {
 		this(fd.getIndex(), fd.getSize(), fd.getName(), 
-			 "", fd.getUrns(), null, 
+			 fd.getUrns(), null, 
 			 new GGEPContainer(
 			    getAsEndpoints(fd.getAlternateLocationCollection()),
 			    CreationTimeCache.instance().getCreationTimeAsLong(fd.getSHA1Urn())),
@@ -229,7 +155,6 @@ public class Response {
 	 * @param index the index of the file referenced in the response
 	 * @param size the size of the file (in bytes)
 	 * @param name the name of the file
-	 * @param metadata the string of metadata associated with the file
 	 * @param urns the <tt>Set</tt> of <tt>URN</tt> instances associated
 	 *  with the file
 	 * @param doc the <tt>LimeXMLDocument</tt> instance associated with
@@ -239,7 +164,7 @@ public class Response {
 	 * @param extensions The raw unparsed extension bytes.
      */
     private Response(long index, long size, String name,
-					 String metadata, Set urns, LimeXMLDocument doc, 
+					 Set urns, LimeXMLDocument doc, 
 					 GGEPContainer ggepData, byte[] extensions) {
         if( (index & 0xFFFFFFFF00000000L)!=0 )
             throw new IllegalArgumentException("invalid index: " + index);
@@ -256,16 +181,13 @@ public class Response {
 			this.name = name;
 
         byte[] temp = null;
-        
         try {
             temp = this.name.getBytes("UTF-8");
-        }
-        catch(UnsupportedEncodingException namex) {
+        } catch(UnsupportedEncodingException namex) {
             //b/c this should never happen, we will show and error
             //if it ever does for some reason.
             ErrorService.error(namex);
         }
-        
         this.nameBytes = temp;
 
 		if (urns == null)
@@ -283,27 +205,6 @@ public class Response {
 		else 
 		    this.extBytes = createExtBytes(this.urns, this.ggepData);
 
-		if(((metadata == null) || (metadata.equals(""))) && (doc != null)) {
-			// this is guaranteed to be non-null, although it could be the
-			// empty string
-			this.metadata = extractMetadata(doc);
-		} else if(metadata == null) {
-			this.metadata = "";
-		} else {
-			this.metadata = metadata.trim();
-		}
-        Assert.that(this.metadata!=null, "Null metadata");
-        try { //It's possible to get metadata between the null from others
-            this.metaBytes = this.metadata.getBytes("UTF-8");
-        } catch(UnsupportedEncodingException ueex) {
-            //b/c this should never happen, we will show and error
-            //if it ever does for some reason.
-            ErrorService.error(ueex);
-        }
-		
-		// we don't generate this from the metadata string in the case where the
-		// LimeXMLDocument is null and the metadata string is not because the
-		// construction of LimeXMLDocuments is expensive -- just let it be null
 		this.document = doc;
     }
   
@@ -372,15 +273,15 @@ public class Response {
 
 			Set urns = huge.getURNS();
 
-			String metaString = "";
+			LimeXMLDocument doc = null;
             Iterator iter = huge.getMiscBlocks().iterator();
-            while (iter.hasNext() && metaString.equals(""))
-                metaString = createXmlString(name, (String)iter.next());
+            while (iter.hasNext() && doc == null)
+                doc = createXmlDocument(name, (String)iter.next());
 
 			GGEPContainer ggep = GGEPUtil.getGGEP(huge.getGGEP());
 
-			return new Response(index, size, name, metaString, 
-			                    urns, null, ggep, rawMeta);
+			return new Response(index, size, name, 
+			                    urns, doc, ggep, rawMeta);
         }
     }
     
@@ -393,13 +294,13 @@ public class Response {
 	 * @return the xml formatted string, or the empty string if the
 	 *  xml could not be parsed
 	 */
-	private static String createXmlString(String name, String ext) {
+	private static LimeXMLDocument createXmlDocument(String name, String ext) {
 		StringTokenizer tok = new StringTokenizer(ext);
-		if(tok.countTokens() < 2) {
-			// if there aren't the expected number of tokens, simply
-			// return the empty string
-			return "";
-		}
+		// if there aren't the expected number of tokens, simply
+		// return the empty string
+		if(tok.countTokens() < 2)
+			return null;
+		
 		String first  = tok.nextToken();
 		String second = tok.nextToken();
 		if (first != null)
@@ -437,22 +338,24 @@ public class Response {
 			else//not gnotella, after all...some other format we do not know
 				gnotella=false;
 		}
-		if(bearShare1 || bearShare2 || gnotella) {//some metadata we understand
-			StringBuffer sb = new StringBuffer();
-			sb.append(AUDIOS_NAMESPACE);
-			sb.append(AUDIO_TITLE);
-			sb.append(name);
-			sb.append(QUOTE_SPACE);
-			sb.append(AUDIO_BITRATE);
-			sb.append(bitrate);
-			sb.append(QUOTE_SPACE);
-			sb.append(AUDIO_SECONDS);
-			sb.append(length);
-			sb.append(CLOSE_TAG);
-			sb.append(AUDIOS_CLOSE);
-			return sb.toString();
+		
+		// make sure these are valid numbers.
+		try {
+		    Integer.parseInt(bitrate);
+		    Integer.parseInt(length);
+		} catch(NumberFormatException nfe) {
+		    return null;
 		}
-		return "";
+		
+		if(bearShare1 || bearShare2 || gnotella) {//some metadata we understand
+		    List values = new ArrayList(3);
+		    values.add(new NameValue("audios__audio__title__", name));
+		    values.add(new NameValue("audios__audio__bitrate__", bitrate));
+		    values.add(new NameValue("audios__audio__seconds__", length));
+		    return new LimeXMLDocument(values, AudioMetaData.schemaURI);
+		}
+		
+		return null;
 	}
 
 	/**
@@ -535,50 +438,7 @@ public class Response {
             }
             return endpoints == null ? Collections.EMPTY_SET : endpoints;
         }
-        
-    }           
-
-	/**
-	 * Utility method for extracting the metadata string from the given
-	 * <tt>LimeXMLDocument</tt> instance.
-	 *
-	 * @param doc the <tt>LimeXMLDocument</tt> instance that contains the
-	 *  desired metadata
-	 * @return the metadata string for the <tt>LimeXMLDocument</tt>, or the
-	 *  empty string if the data could not be extracted for any reason
-	 */
-	private static String extractMetadata(LimeXMLDocument doc) {
-		if(doc == null) {
-			return "";
-		}
-		try {
-			return doc.getXMLString();
-		} catch (SchemaNotFoundException e) {
-		}
-		return "";
-	}
-
-    /**
-     * Write the response data to the given byte array, as if inside a 
-	 * <tt>QueryReply</tt>.
-     */
-    public int writeToArray(byte[] array, int i) {
-        ByteOrder.int2leb((int)index,array,i);
-        ByteOrder.int2leb((int)size,array,i+4);
-        i+=8;            
-        System.arraycopy(nameBytes, 0, array, i, nameBytes.length);
-        i+=nameBytes.length;
-        //Write first null terminator.
-        array[i++]=(byte)0;
-        // write HUGE v0.93 General Extension Mechanism extensions
-        // (currently just URNs)
-		System.arraycopy(extBytes, 0, array, i, extBytes.length);
-		i+=extBytes.length;
-        //add the second null terminator
-        array[i++]=(byte)0;
-        return i;
-    }
-    
+    }    
 
     /**
      * Like writeToArray(), but writes to an OutputStream.
@@ -599,25 +459,11 @@ public class Response {
     }
 
     /**
-     * Sets this' metadata.  Added to faciliatate setting audio metadata for
-     * responses generated from ordinary searches.  Typically this should only
-     * be called if no metadata was passed to this' constructor.
+     * Sets this' metadata.
      * @param meta the parsed XML metadata 
      */	
     public void setDocument(LimeXMLDocument doc) {
         document = doc;
-
-		// this is guaranteed to be non-null, although it could be the empty
-		// string
-		metadata = extractMetadata(document);
-        try {
-            metaBytes = metadata.getBytes("UTF-8");
-        }
-        catch(UnsupportedEncodingException uee) {
-            //b/c this should never happen, we will show and error
-            //if it ever does for some reason.
-            ErrorService.error(uee);
-        }
 	}
 	
     
@@ -655,55 +501,6 @@ public class Response {
         return size;
     }
 
-    /**
-     * Returns the size of the name in bytes (not the whole response)
-     * In the constructor we create the nameBytes array once which is 
-     * the representation of the name in bytes. 
-     *<p> storing the nameBytes is an optimization beacuse we do not want 
-     * to call getBytes() on the name string every time we need the byte
-     * representation or the number of bytes in the name.
-     */
-    public int getNameBytesSize() {
-        return nameBytes.length;
-    }
-
-	/**
-	 * Accessor fot the length of the array of bytes that stores the meta-
-	 * data.
-	 * 
-	 * @return the length of the array of bytes that stores the meta-data
-	 */
-    public int getMetaBytesSize() {
-        return metaBytes.length;
-    }
-
-	/**
-	 * Returns a copy of the array of bytes for the file name for this 
-	 * <tt>Response</tt> instance.
-	 *
-	 * @return a copy of the array of bytes for the file name for this 
-	 * <tt>Response</tt> instance
-	 */
-    public byte[] getNameBytes() {
-		// make a defensive copy to preserve invariants
-		byte[] copy = new byte[nameBytes.length];
-		System.arraycopy(nameBytes, 0, copy, 0, nameBytes.length);
-        return copy;
-    }
-
-	/**
-	 * Returns a copy of the array of bytes for the meta-data for this
-	 * <tt>Response</tt> instance.
-	 *
-	 * @return a copy of the array of bytes for the meta-data
-	 */
-    public byte[] getMetaBytes() {
-		// make a defensive copy to preserve invariants
-		byte[] copy = new byte[metaBytes.length];
-		System.arraycopy(metaBytes, 0, copy, 0, metaBytes.length);
-        return copy;
-    }
-
 	/**
 	 * Returns the name of the file for this response.  This is guaranteed
 	 * to be non-null, but it could be the empty string.
@@ -714,33 +511,11 @@ public class Response {
         return name;
     }
 
-	/**
-	 * Returns the string of meta-data for this <tt>Response</tt> instance.
-	 *
-	 * @return the string of meta-data for this <tt>Response</tt> instance,
-	 *  which is guaranteed to be non-null, but which can be the empty string
-	 */
-	public String getMetadata() {
-		return metadata;
-	}
-
     /**
-     * Returns this' metadata as a parsed XML document
-     * @return the metadata, or null if none exists or the metadata
-     *  couldn't be parsed
+     * Returns this' metadata.
      */
     public LimeXMLDocument getDocument() {
-		if (document != null) 
-			return document;
-		else if (metadata != null && !metadata.equals("")) {
-			try {
-			    document = new LimeXMLDocument(metadata);
-			    return document;
-			} catch (SAXException e) {
-			} catch (SchemaNotFoundException e) {
-			} catch (IOException e) { }
-		}
-		return null;//both document and metadata are null
+        return document;
     }
 
 	/**
@@ -827,9 +602,6 @@ public class Response {
 		return getIndex() == r.getIndex() &&
                getSize() == r.getSize() &&
 			   getName().equals(r.getName()) &&
-               Arrays.equals(getNameBytes(), r.getNameBytes()) &&
-               getMetadata().equals(r.getMetadata()) &&
-               Arrays.equals(getMetaBytes(), r.getMetaBytes()) &&
                ((getDocument() == null) ? (r.getDocument() == null) :
                getDocument().equals(r.getDocument())) &&
                getUrns().equals(r.getUrns());
@@ -849,7 +621,6 @@ public class Response {
 		return ("index:        "+index+"\r\n"+
 				"size:         "+size+"\r\n"+
 				"name:         "+name+"\r\n"+
-				"metadata:     "+metadata+"\r\n"+
 				"xml document: "+document+"\r\n"+
 				"urns:         "+urns);
 	}

@@ -1442,13 +1442,8 @@ public class QueryRequest extends Message implements Serializable{
     private String getRichQueryString() {
         if( XML_DOC == null )
             return null;
-        else {
-            try {
-                return XML_DOC.getXMLString();
-            } catch(SchemaNotFoundException snfe) {
-                return null;
-            }
-        }
+        else
+            return XML_DOC.getXMLString();
     }       
  
 	/**

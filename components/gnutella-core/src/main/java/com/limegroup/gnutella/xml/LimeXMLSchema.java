@@ -32,8 +32,7 @@ import org.xml.sax.SAXException;
  * of schema
  * @author asingla
  */
-public class LimeXMLSchema 
-{
+public class LimeXMLSchema {
     /**
      * List<String> of fields (in canonicalized form to preserve the structural
      * information)
@@ -50,6 +49,12 @@ public class LimeXMLSchema
      */
     private final String _description;
     
+    /**
+     * The outer-XML name for this schema.
+     * IE: 'things', for the 'thing' schema.
+     */
+    private final String _rootXMLName;
+    
 
     /** 
      * Creates new LimeXMLSchema 
@@ -57,8 +62,7 @@ public class LimeXMLSchema
      * @exception IOException If the specified schemaFile doesnt exist, or isnt
      * a valid schema file
      */
-    public LimeXMLSchema(File schemaFile) throws IOException
-    {
+    public LimeXMLSchema(File schemaFile) throws IOException {
         this(LimeXMLUtils.getInputSource(schemaFile));
     }
     
@@ -69,13 +73,13 @@ public class LimeXMLSchema
      * @exception IOException If the specified schemaFile doesnt exist, or isnt
      * a valid schema file
      */
-    public LimeXMLSchema(InputSource inputSource) throws IOException 
-    {
+    public LimeXMLSchema(InputSource inputSource) throws IOException {
         //initialize schema
         Document document = getDocument(inputSource);
         _canonicalizedFields =
             (new LimeXMLSchemaFieldExtractor()).getFields(document);
         _schemaURI = retrieveSchemaURI(document);
+        _rootXMLName = getRootXMLName(document);
         _description = getDisplayString(_schemaURI);
     }
     
@@ -85,8 +89,7 @@ public class LimeXMLSchema
      * to be parsed
      */
     private Document getDocument(InputSource schemaInputSource)
-        throws IOException
-    {
+        throws IOException {
         //get an instance of DocumentBuilderFactory
         DocumentBuilderFactory documentBuilderFactory =
             DocumentBuilderFactory.newInstance();
@@ -96,13 +99,10 @@ public class LimeXMLSchema
             
         //get the document builder from factory    
         DocumentBuilder documentBuilder=null;
-        try
-        {
+        try {
             documentBuilder = documentBuilderFactory.newDocumentBuilder();
-        }
-        catch(ParserConfigurationException e)
-        {
-            throw new IOException("" + e);
+        } catch(ParserConfigurationException e) {
+            throw new IOException(e.getMessage());
         }
         // Set an entity resolver to resolve the schema
         documentBuilder.setEntityResolver(new Resolver(schemaInputSource));
@@ -112,7 +112,7 @@ public class LimeXMLSchema
         try {
             document = documentBuilder.parse(schemaInputSource);
         } catch(SAXException e) {
-            throw new IOException("" + e);
+            throw new IOException(e.getMessage());
         }
 
         return document;
@@ -125,8 +125,7 @@ public class LimeXMLSchema
      * @return The schema URI
      * @requires The document be a parsed form of valid xml schema
      */
-    private static String retrieveSchemaURI(Document document)
-    {
+    private static String retrieveSchemaURI(Document document) {
         //get the root element which should be "xsd:schema" element (provided
         //document represents valid schema)
         Element root = document.getDocumentElement();
@@ -135,16 +134,33 @@ public class LimeXMLSchema
         //get the targetNameSpaceAttribute
         Node targetNameSpaceAttribute = nnm.getNamedItem("targetNamespace");
 
-        if(targetNameSpaceAttribute != null)
-        {
+        if(targetNameSpaceAttribute != null) {
             //return the specified target name space as schema URI
             return targetNameSpaceAttribute.getNodeValue();
-        }
-        else
-        {
+        } else {
             //return an empty string otherwise
             return "";
         }
+    }
+    
+    /**
+     * Retrieves the name of the root tag name for XML generated
+     * with this schema.
+     */
+    private static String getRootXMLName(Document document) {
+        Element root = document.getDocumentElement();
+        // Get the children elements.
+        NodeList children = root.getElementsByTagName("element");
+        if(children.getLength() == 0)
+            return "";
+        
+        Node element = children.item(0);
+        NamedNodeMap map = element.getAttributes();
+        Node name = map.getNamedItem("name");
+        if(name != null)
+            return name.getNodeValue();
+        else
+            return "";
     }
     
     /**
@@ -178,11 +194,23 @@ public class LimeXMLSchema
      * Returns the unique identifier which identifies this particular schema
      * @return the unique identifier which identifies this particular schema
      */
-    public String getSchemaURI()
-    {
+    public String getSchemaURI() {
         return _schemaURI;
     }
     
+    /**
+     * Retrieves the name to use when constructing XML docs under this schema.
+     */
+    public String getRootXMLName() {
+        return _rootXMLName;
+    }
+    
+    /**
+     * Retrieves the name to use for inner elements when constructing docs under this schema.
+     */
+    public String getInnerXMLName() {
+        return _description;
+    }
     /**
      * Returns all the fields(placeholders) in this schema.
      * The field names are canonicalized as mentioned below:
@@ -349,5 +377,17 @@ public class LimeXMLSchema
         else
             schemaStr= schemaURI.substring(start+1,end);
         return schemaStr;
+    }
+    
+    public boolean equals(Object o) {
+        if( o == this )
+            return true;
+        if( o == null )
+            return false;
+        return _schemaURI.equals(((LimeXMLSchema)o)._schemaURI);
+    }
+    
+    public int hashCode() {
+        return _schemaURI.hashCode();
     }
 }

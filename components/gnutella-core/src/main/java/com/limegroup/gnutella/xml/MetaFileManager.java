@@ -44,7 +44,7 @@ public class MetaFileManager extends FileManager {
         if (shouldIncludeXMLInResponse(request)) {
             LimeXMLDocument doc = request.getRichQuery();
             if( doc != null ) {
-                Response[] metas = RichQueryHandler.instance().query(doc);
+                Response[] metas = query(doc);
                 if (metas != null) // valid query & responses.
                     result = union(result, metas, doc);
             }
@@ -199,14 +199,8 @@ public class MetaFileManager extends FileManager {
         retList.remove(audioDoc);
         
         //now add the non-id3 tags from audioDoc to id3doc
-        List audioList = null;
-        List id3List = null;
-        try {
-            audioList = audioDoc.getOrderedNameValueList();
-            id3List = id3Doc.getOrderedNameValueList();
-        } catch (SchemaNotFoundException snfx) {
-            ErrorService.error(snfx);
-        }
+        List audioList = audioDoc.getOrderedNameValueList();
+        List id3List = id3Doc.getOrderedNameValueList();
         for(int i = 0; i < audioList.size(); i++) {
             NameValue nameVal = (NameValue)audioList.get(i);
             if(AudioMetaData.isNonLimeAudioField(nameVal.getName()))
@@ -447,47 +441,67 @@ public class MetaFileManager extends FileManager {
                 words.add(schemas[i]);        
         return words;
     }
-
-    /**
-     * Used only for showing the current XML data in the system. This method
-     * is used only for the purpose of testing. It is not used for anything 
-     * else.
+    
+   /**
+     * Returns an array of Responses that correspond to documents
+     * that have a match given query document.
      */
-     /*
-    private void showXMLData(){
-        //get all the schemas
-        LimeXMLSchemaRepository rep = LimeXMLSchemaRepository.instance();
-        String[] schemas = rep.getAvailableSchemaURIs();
-        SchemaReplyCollectionMapper mapper = 
-                SchemaReplyCollectionMapper.instance();
-        int len = schemas.length;
-        LimeXMLReplyCollection collection;
-        for(int i=0; i<len; i++){
-            System.out.println("Schema : " + schemas[i]);
-            System.out.println("-----------------------");
-            collection = mapper.getReplyCollection(schemas[i]);
-            if (collection == null || collection.getCount()<1){
-                System.out.println("No docs corresponding to this schema ");
-                continue;
-            }
-            List replies = collection.getCollectionList();
-            int size = replies.size();
-            for(int j=0; j< size; j++){
-                System.out.println("Doc number "+j);
-                System.out.println("-----------------------");
-                LimeXMLDocument doc = (LimeXMLDocument)replies.get(j);
-                List elements = doc.getNameValueList();
-                int t = elements.size();
-                for(int k=0; k<t; k++){
-                    NameValue nameValue = (NameValue)elements.get(k);
-                    System.out.println("Name " + nameValue.getName());
-                    System.out.println("Value " + nameValue.getValue());
-                
+    private Response[] query(LimeXMLDocument queryDoc) {
+        String schema = queryDoc.getSchemaURI();
+        SchemaReplyCollectionMapper mapper = SchemaReplyCollectionMapper.instance();
+        LimeXMLReplyCollection replyCol = mapper.getReplyCollection(schema);
+        if(replyCol == null)//no matching reply collection for schema
+            return null;
+
+        List matchingReplies = replyCol.getMatchingReplies(queryDoc);
+        //matchingReplies = a List of LimeXMLDocuments that match the query
+        int s = matchingReplies.size();
+        if( s == 0 ) // no matching replies.
+            return null; 
+        
+        Response[] retResponses = new Response[s];
+        int z = 0;
+        for(Iterator i = matchingReplies.iterator(); i.hasNext(); ) {
+            LimeXMLDocument currDoc = (LimeXMLDocument)i.next();
+            File file = currDoc.getIdentifier();//returns null if none
+            Response res = null;
+            if (file == null) { //pure metadata (no file)
+                res = new Response(LimeXMLProperties.DEFAULT_NONFILE_INDEX, 0, " ");
+            } else { //meta-data about a specific file
+                FileDesc fd = RouterService.getFileManager().getFileDescForFile(file);
+                if( fd == null) {
+                    // if fd is null, MetaFileManager is out of synch with
+                    // FileManager -- this is bad.
+                    continue;
+                } else { //we found a file with the right name
+					res = new Response(fd);
+					fd.incrementHitCount();
+                    RouterService.getCallback().handleSharedFileUpdate(fd.getFile());
                 }
             }
+            
+            // Note that if any response was invalid,
+            // the array will be too small, and we'll
+            // have to resize it.
+            res.setDocument(currDoc);
+            retResponses[z] = res;
+            z++;
         }
-    } */
+        
+        if( z == 0 )
+            return null; // no responses
 
+        // need to ensure that no nulls are returned in my response[]
+        // z is a count of responses constructed, see just above...
+        // s == retResponses.length        
+        if (z < s) {
+            Response[] temp = new Response[z];
+            System.arraycopy(retResponses, 0, temp, 0, z);
+            retResponses = temp;
+        }
+
+        return retResponses;
+    }
 }
 
         

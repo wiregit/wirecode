@@ -299,6 +299,7 @@ public class FileDesc implements AlternateLocationCollector {
 	    List newDocs = new ArrayList(_limeXMLDocs.size() + 1);
 	    newDocs.addAll(_limeXMLDocs);
 	    newDocs.add(doc);
+	    doc.setIdentifier(FILE);
 	    _limeXMLDocs = newDocs;
     }
     
@@ -315,6 +316,7 @@ public class FileDesc implements AlternateLocationCollector {
         Object removed = newDocs.remove(index);
         Assert.that(removed == oldDoc, "wrong doc removed!");
         newDocs.add(newDoc);
+        newDoc.setIdentifier(FILE);
         _limeXMLDocs = newDocs;
         return true;
     }
