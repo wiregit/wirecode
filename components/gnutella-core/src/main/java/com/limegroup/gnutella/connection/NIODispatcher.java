@@ -6,14 +6,14 @@ import java.nio.channels.ClosedChannelException;
 import java.nio.channels.SelectableChannel;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
+import java.nio.channels.SocketChannel;
 
 import com.limegroup.gnutella.ErrorService;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.statistics.MessageReadErrorStat;
-import com.limegroup.gnutella.statistics.ReceivedMessageStatHandler;
-import com.limegroup.gnutella.util.CommonUtils;
+import com.limegroup.gnutella.util.NetworkUtils;
 import com.sun.java.util.collections.Collections;
 import com.sun.java.util.collections.Iterator;
 import com.sun.java.util.collections.LinkedList;
@@ -43,6 +43,13 @@ public final class NIODispatcher implements Runnable {
 	 */
 	private final List READERS = 
 		Collections.synchronizedList(new LinkedList());
+    
+    /**
+     * Synchronized <tt>List</tt> of outgoing connections that need their 
+     * connections to be completed.
+     */    
+    private final List CONNECTORS =
+        Collections.synchronizedList(new LinkedList());
 	
 	/**
 	 * Synchronized <tt>List</tt> of new writers that need to be registered for
@@ -126,6 +133,15 @@ public final class NIODispatcher implements Runnable {
         // new Channel for write events
 		SELECTOR.wakeup();
 	}
+    
+    public void addConnector(Connection conn)  {
+        if(conn == null)  {
+            throw new NullPointerException("adding null connection");
+        }
+        CONNECTORS.add(conn);
+        
+        SELECTOR.wakeup();
+    }
 
     /* (non-Javadoc)
      * @see java.lang.Runnable#run()
@@ -145,9 +161,8 @@ public final class NIODispatcher implements Runnable {
 	 * @throws IOException if the <tt>Selector</tt> is not opened successfully
 	 */
     private void loopForMessages() throws IOException {
+        int n = -1;
 		while(true) {
-            
-			int n = -1;
             
             try {
                 n = SELECTOR.select();
@@ -159,22 +174,99 @@ public final class NIODispatcher implements Runnable {
                 // just continue
                 continue;
             }
+            
+            // register any new connectors...
+            registerConnectors();
 			
 			// register any new readers...
 			registerReaders();
+            
+            // register any new writers...
+            registerWriters();
+            
 			if(n == 0) {
 				continue;
 			}
             
-            // and read from any existing readers
-			handleReaders();
+            java.util.Iterator iter = SELECTOR.selectedKeys().iterator();
+            while(iter.hasNext())  {
+                SelectionKey key = (SelectionKey)iter.next();
+                
+                // remove the current entry 
+                iter.remove();
+                if(key.isAcceptable())  {
+                    // we don't handle this yet
+                }
+                if(key.isReadable())  {
+                    handleReader(key);
+                }
+                
+                if(key.isWritable())  {
+                    handleWriter(key);
+                }
+                
+                if(key.isConnectable())  {
+                    handleConnector(key);
+                }
+            }
             
-            // register any new writers...
-			registerWriters();
+            // and read from any existing readers
+			//handleReaders();
             
             // and write to any existing writers
-			handleWriters();
+			//handleWriters();
 		}
+    }
+    
+    /**
+     * Registers any new connections for connect events.  This is relevant
+     * only for new outgoing sockets that finish the TCP connect process
+     * without blocking.
+     */
+    private void registerConnectors()  {
+        synchronized(CONNECTORS)  {
+            if(CONNECTORS.isEmpty()) return;
+            for(Iterator iter = CONNECTORS.iterator(); iter.hasNext();) {
+                Connection conn = (Connection)iter.next();
+                try {
+                    conn.getSocket().
+                        getChannel().register(SELECTOR, 
+                            SelectionKey.OP_CONNECT, conn);
+                } catch (ClosedChannelException e) {
+                    continue;
+                }
+            }
+            CONNECTORS.clear();
+        }
+    }
+    
+    private void handleConnector(SelectionKey key)  {
+        SocketChannel sc = (SocketChannel)key.channel();
+        
+        // if the connection does not need completing, return
+        if(!sc.isConnectionPending()) return;        
+        // Attempt to complete the connection sequence
+        try {
+            if(sc.finishConnect()) {
+                key.cancel();
+                
+                // now that we're fully connected, finish the connection 
+                // handshaking
+                Connection conn = (Connection)key.attachment();
+                System.out.println("NIODispatcher::about to handshake");
+                addReader(conn);
+                //conn.handshake();
+            }
+        } catch (IOException e) {
+            // TODO: we need to notify ConnectionManager to remove this from
+            // its connecting list
+            NetworkUtils.close(sc.socket());
+            try {                        
+                sc.close();
+            } catch(IOException ioe) {
+                // nothing to do
+            }
+        }
     }
     
     /**
@@ -257,6 +349,38 @@ public final class NIODispatcher implements Runnable {
 			}
 		}
 	}
+    
+    private void handleReader(SelectionKey key)  {
+        // ignore invalid keys
+        if(!key.isValid()) return;
+        Connection conn = (Connection)key.attachment();
+        if(conn.handshaker().handshakeComplete())  {
+            try {
+                MessageReader reader = conn.reader();
+                Message msg = reader.createMessageFromTCP(key);
+                    
+                if(msg == null) {
+                    // the message was not read completely -- we'll get
+                    // another read event on the channel and keep reading
+                    return;
+                }
+    
+                reader.routeMessage(msg);
+            } catch (BadPacketException e) {
+                MessageReadErrorStat.BAD_PACKET_EXCEPTIONS.incrementStat();
+            } catch (IOException e) {
+                // remove the connection if we got an IOException
+                RouterService.removeConnection(conn);
+                MessageReadErrorStat.IO_EXCEPTIONS.incrementStat();
+            }
+        } else  {
+            try {
+                conn.handshaker().read();
+            } catch (IOException e) {
+                // TODO: remove from initializing connections in ConnectionManager
+            }
+        }
+    }
 	
 	/**
 	 * Writes any new data to the network.  Writers are only registered for
@@ -285,6 +409,22 @@ public final class NIODispatcher implements Runnable {
 			}
 		}			
 	}
+    
+    private void handleWriter(SelectionKey key)  {
+        if(!key.isValid()) return;
+
+        Connection conn = (Connection)key.attachment();
+        try {
+            if(conn.write()) {
+                // if the message was successfully written, switch it 
+                // back to only being registered for read events
+                register(conn, SelectionKey.OP_READ);
+                conn.setWriteRegistered(false);
+            } 
+        } catch (IOException e) {
+            RouterService.removeConnection(conn);
+        }  
+    }
     
     /**
      * Helper method that registers the given <tt>Connection</tt> for future 
