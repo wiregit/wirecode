@@ -186,13 +186,18 @@ public class HTTPDownloader implements Runnable {
 
 	_state = CONNECTED;
 	
-	//Note that the following code is similar to initTwo except that it does
-	//not use the built in Java URL/URLConnection classes (since we've already
+	//Note that the following code is similar to initTwo except 
+	//that it does not use the built in Java URL/URLConnection 
+	//classes (since we've already
 	//established the connection).  Ideally we should have special methods
 	//to handle the HTTP formatting, but this is kind of a hack.
 	try {
-	    BufferedWriter out=new BufferedWriter(
-				 new OutputStreamWriter(_socket.getOutputStream()));
+
+	    OutputStream os = _socket.getOutputStream();
+	    OutputStreamWriter osw = new OutputStreamWriter(os);
+	    BufferedWriter out=new BufferedWriter(osw);
+	    
+	    // new OutputStreamWriter(_socket.getOutputStream()));
 	    out.write("GET /get/"+_index+"/"+_filename+" HTTP/1.0\r\n");
 	    out.write("User-Agent: Gnutella\r\n");
 	    out.write("\r\n");
@@ -233,35 +238,9 @@ public class HTTPDownloader implements Runnable {
 	_state = CONNECTED;
 
     }
-    
-    public void run() {
-
-	_callback.addDownload(this);
-	
-	if (_mode == 1)
-	    initOne();
-	else if (_mode == 2)
-	    initTwo();
-	else if (_mode == 3) {
-	    initThree();
-	}
-	else 
-	    return;
-
-	 if (_state == CONNECTED) {
-	    doDownload();
-	    _callback.removeDownload(this);
-	 }
-    }
-    
-    public void resume() {
-	
-	_mode = 3;
-	
-    }
-
+  
     public void initThree() {
-
+	
 	SettingsManager set = SettingsManager.instance();
 	_downloadDir = set.getSaveDirectory();
 	String pathname = _downloadDir + _filename;
@@ -293,6 +272,32 @@ public class HTTPDownloader implements Runnable {
 	_resume = true;
 
     }
+   
+    public void run() {
+	
+	_callback.addDownload(this);
+	
+	if (_mode == 1)
+	    initOne();
+	else if (_mode == 2)
+	    initTwo();
+	else if (_mode == 3) {
+	    initThree();
+	}
+	else 
+	    return;
+
+	 if (_state == CONNECTED) {
+	    doDownload();
+	    _callback.removeDownload(this);
+	 }
+    }
+ 
+    public void resume() {
+	_mode = 3;
+    }
+
+  
 
     /** 
      * @requires this is an outgoing (normal) HTTPDownloader
@@ -566,8 +571,8 @@ class PushRequestedFile {
 	PushRequestedFile prf=(PushRequestedFile)o;
 	return Arrays.equals(clientGUID, prf.clientGUID)	    
 	    && filename.equals(prf.filename)
-	    //Because of the following line, hosts that used faked IP addresses
-	    //will not be able to connect to you.
+	    //Because of the following line, hosts that used faked 
+	    //IP addresses will not be able to connect to you.
   	    && Arrays.equals(ip, prf.ip)
 	    && index==prf.index;
     }
