@@ -377,9 +377,8 @@ public class ManagedDownloader implements Downloader, Serializable {
         //otherwise).  So instead we target the two cases we're interested:
         //waiting for downloaders to complete (by waiting on this) or waiting
         //for retry (by sleeping).
-        if (state==Downloader.WAITING_FOR_RETRY)
-            dloaderManagerThread.interrupt();   //see tryAllDownloads    
-        else if (state==Downloader.WAITING_FOR_RESULTS)
+        if ((state==Downloader.WAITING_FOR_RETRY) ||
+            (state==Downloader.WAITING_FOR_RESULTS))
             reqLock.release();
         else
             this.notify();                      //see tryAllDownloads3
@@ -540,14 +539,10 @@ public class ManagedDownloader implements Downloader, Serializable {
 
         // the number of requeries i've done...
         int numRequeries = 0;
-        // switch that determines whether or not we should wait for a busy host
-        boolean shouldWaitForRetry = false;
-        // time i last woke up....
-        long lastWakeUpTime = 0;
-        // now....
-        long nowTime = 0;
-        // time to wait before next requery....
-        long waitTime = 0;
+        // the next time to requery....
+        long nextRequeryTime = 0;
+        // the current time...
+        long currTime = 0;
 
         synchronized (this) {
             buckets=new RemoteFileDescGrouper(allFiles, incompleteFileManager);
@@ -599,17 +594,33 @@ public class ManagedDownloader implements Downloader, Serializable {
                 }
                 manager.yieldSlot(this);
 
-                // General flow of control of this subsection of code:
-                // * If I have a retry and i should try it, go head and wait for
-                // it, but wake up early if new results come in..
-                // * If I have a retry by i shouldn't wait OR if i don't have a
-                // retry, then see if you should send a requery out, send the
-                // requery out if necessary, and if you don't have a retry sleep
-                // or if you do then set shouldWaitForRetry to true so you can
-                // try it next iteration....
-                if (waitForRetry &&
-                    (shouldWaitForRetry)) {
-                    shouldWaitForRetry = false;
+                // should i send a requery?
+                currTime = System.currentTimeMillis();
+                if ((currTime >= nextRequeryTime) &&
+                    (numRequeries++ < REQUERY_ATTEMPTS)) {
+                    // yeah, it is about time and i've not sent too many...
+                    manager.sendQuery(allFiles);
+                    // set time for next requery...
+                    nextRequeryTime = currTime + 
+                    (getMinutesToWaitForRequery(numRequeries)*60*1000);
+                }
+
+
+                // FLOW:
+                // 1.  If there is a retry to try (at least 1), then sleep for
+                // the time you should sleep to wait for busy hosts.  Also do
+                // some counting to let the GUI know how many guys you are
+                // waiting on.  Be sure to use the RequestLock, so then you can
+                // be waken up early to service a new QR
+                // 2. If there is no retry, then we have the following options:
+                //    A.  If you were stopped, stop.
+                //    B.  If you are waiting for results, set up the GUI
+                //        correctly.  Note that the condition to enter this
+                //        branch will be violated when the last requery wait
+                //        time is reached but we've incremented past the number
+                //        of requeries allowed.
+                //    C.  Else, give up.
+                if (waitForRetry && !stopped) {
                     synchronized (this) {
                         retriesWaiting=0;
                         for (Iterator iter=buckets.buckets(); iter.hasNext(); ) {
@@ -628,37 +639,11 @@ public class ManagedDownloader implements Downloader, Serializable {
                         manager.remove(this, false);
                         return;
                     }
-                    else if (numRequeries < REQUERY_ATTEMPTS) {
-                        // see how long i've been sleeping....
-                        lastWakeUpTime = nowTime;
-                        nowTime = Calendar.getInstance().getTime().getTime();
-                        long timeSlept = nowTime - lastWakeUpTime;
-
-                        if (timeSlept < waitTime) {
-                            // have not transpired waitTime, so sleep more...
-                            waitTime -= timeSlept;
-                        }
-                        else {
-                            numRequeries++;
-                            manager.sendQuery(allFiles);
-
-                            waitTime = getMinutesToWaitForRequery(numRequeries);
-                            waitTime *= (60 * 1000);                        
-                        }
-
-                        // take the current time....
-                        nowTime = Calendar.getInstance().getTime().getTime();
-
-                        if (!waitForRetry) {
-                            // no busy hosts to try....
-                            // i may have sent a query, either way prepare to 
-                            // sleep
-                            setState(WAITING_FOR_RESULTS, (long) waitTime);
-                            // sleep....
-                            reqLock.lock((long) waitTime);
-                        }
-                        else // sleep, but wait for retries during sleep...
-                            shouldWaitForRetry = true;
+                    else if (numRequeries <= REQUERY_ATTEMPTS) {
+                        currTime = System.currentTimeMillis();
+                        final long waitTime = nextRequeryTime - currTime;
+                        setState(WAITING_FOR_RESULTS, waitTime);
+                        reqLock.lock(waitTime);
                     }
                     else {
                         setState(GAVE_UP);
@@ -1317,7 +1302,7 @@ public class ManagedDownloader implements Downloader, Serializable {
     private int getMinutesToWaitForRequery(int numCalls) {
         switch (numCalls) {
         case 1:
-            return 1;
+            return 2;
         case 2:
             return 15;
         case 3:
