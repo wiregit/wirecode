@@ -84,6 +84,10 @@ public abstract class MessageRouter {
      */
     private static final long CLEAR_TIME = 30 * 1000; // 30 seconds
 
+    /** Time between sending HopsFlow messages.
+     */
+    private static final long HOPS_FLOW_INTERVAL = 30 * 1000; // 30 seconds
+
     /** The maximum number of UDP replies to buffer up.  Non-final for 
      *  testing.
      */
@@ -216,6 +220,9 @@ public abstract class MessageRouter {
         // schedule a runner to clear guys we've connected back to
         RouterService.schedule(new ConnectBackExpirer(), 10 * CLEAR_TIME, 
                                10 * CLEAR_TIME);
+        // schedule a runner to send hops-flow messages
+        RouterService.schedule(new HopsFlowManager(), HOPS_FLOW_INTERVAL*10, 
+                               HOPS_FLOW_INTERVAL);
     }
 
     /** Call this to inform us that a query has been killed by a user or
@@ -2590,5 +2597,54 @@ public abstract class MessageRouter {
         }
     }
 
+    static class HopsFlowManager implements Runnable {
+        /* in case we don't want any queries any more */
+        private static final byte BUSY_HOPS_FLOW = 0;
 
+	/* in case we want to reenable queries */
+	private static final byte FREE_HOPS_FLOW = 5;
+
+        /* small optimization:
+           send only HopsFlowVendorMessages if the busy state changed */
+        private static boolean _oldBusyState = false;
+           
+        public void run() {
+            // only leafs should use HopsFlow
+            if (RouterService.isSupernode())
+                return;
+            // busy hosts don't want to receive any queries, if this node is not
+            // busy, we need to reset the HopsFlow value
+            boolean isBusy = RouterService.getUploadManager().isQueueFull();
+            
+            // state changed? don't bother the ultrapeer with information
+            // that it already knows. we need to inform new ultrapeers, though.
+            if (isBusy == _oldBusyState) {
+                List connections = _manager.getInitializedConnections();
+                for (int i = 0; i < connections.size(); i++) {
+                    ManagedConnection c =
+                        (ManagedConnection)connections.get(i);
+                    // Yes, we may tell a new ultrapeer twice, but
+                    // without a buffer of some kind, we might forget
+                    // some ultrapeers. The clean solution would be
+                    // to remember the hops-flow value in the connection.
+                    if (c != null 
+                        && c.getConnectionTime() + 1.25 * HOPS_FLOW_INTERVAL 
+                            > System.currentTimeMillis()
+                        && c.isClientSupernodeConnection() )
+                        c.send(new HopsFlowVendorMessage(
+                            isBusy ? BUSY_HOPS_FLOW : FREE_HOPS_FLOW));
+                }
+            } else { 
+                _oldBusyState = isBusy;
+                List connections = _manager.getInitializedConnections();
+                for (int i = 0; i < connections.size(); i++) {
+                    ManagedConnection c = (ManagedConnection)connections.get(i);
+                    if (c != null && c.isClientSupernodeConnection())
+                        c.send(new HopsFlowVendorMessage(
+                            isBusy ? BUSY_HOPS_FLOW : FREE_HOPS_FLOW));
+                }
+            }
+        }
+    }
+    
 }
