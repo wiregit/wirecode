@@ -258,7 +258,7 @@ public class UDPConnectionProcessor {
 
 		// If UDP is not running or not workable, barf
 		if ( !_udpService.isListening() || 
-			 !_udpService.canReceiveSolicited() ) { 
+			 !_udpService.canDoFWT() ) { 
 			throw CANT_RECEIVE_UDP;
 		}
 

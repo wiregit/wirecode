@@ -49,7 +49,6 @@ public class PingRequest extends Message {
     public PingRequest(byte ttl) {
         super((byte)0x0, ttl, (byte)0);
         addLocale();
-        addIPRequest();
     }
     
     /**
@@ -175,11 +174,12 @@ public class PingRequest extends Message {
      * marks this ping request as requesting a pong carrying ip:port
      * info
      */
-    private void addIPRequest() {
+    public void addIPRequest() {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         try {
-            //first put in the exsisting payload
-            baos.write(payload);
+            //first put in the exsisting payload, if any
+            if (payload!=null)
+                baos.write(payload);
             
             GGEP ggep = new GGEP(false);
             ggep.put(GGEP.GGEP_HEADER_IPPORT);

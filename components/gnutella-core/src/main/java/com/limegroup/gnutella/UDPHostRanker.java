@@ -77,6 +77,8 @@ public class UDPHostRanker {
             waits++;
         }
         final PingRequest ping = new PingRequest((byte)1);
+        // request an ip test
+        ping.addIPRequest();
         final GUID pingGUID = new GUID(ping.getGUID());
         
         if (listener != null)
