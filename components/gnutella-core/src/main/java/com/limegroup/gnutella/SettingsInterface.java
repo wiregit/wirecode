@@ -53,6 +53,7 @@ public interface SettingsInterface
     public int        getMaxUploads();
     public boolean    getClearCompletedUpload();
     public boolean    getClearCompletedDownload();
+	public int        getUploadThrottle();
     /** special method for getting the number of files scanned */
     public int        getFilesScanned();
     public int        getSearchAnimationTime();
@@ -178,6 +179,7 @@ public interface SettingsInterface
     public void setClearCompletedUpload(boolean b);
     public void setClearCompletedDownload(boolean b);
     public void setSearchAnimationTime(int seconds);
+	public void setUploadThrottle(int throttle);
 
     /** Sets the handshake string for initializing outgoing connections,
      *  without trailing newlines. */
@@ -261,6 +263,7 @@ public interface SettingsInterface
     public static final int     DEFAULT_SEARCH_ANIMATION_TIME = 45;
     public static final String  DEFAULT_CONNECT_STRING    = "GNUTELLA CONNECT/0.4";
     public static final String  DEFAULT_CONNECT_OK_STRING = "GNUTELLA OK";
+    public static final int     DEFAULT_UPLOAD_THROTTLE = 100;
 
     // The property key name constants 
     public static final String TTL            = "TTL";
@@ -294,6 +297,7 @@ public interface SettingsInterface
     public static final String MAX_UPLOADS     ="MAX_UPLOADS";
     public static final String CLEAR_UPLOAD   = "CLEAR_UPLOAD";
     public static final String CLEAR_DOWNLOAD = "CLEAR_DOWNLOAD";
+    public static final String UPLOAD_THROTTLE = "UPLOAD_THROTTLE";	
     public static final String SEARCH_ANIMATION_TIME = "SEARCH_ANIMATION_TIME";
     public static final String SAVE_DEFAULT   = "SAVE_DEFAULT";
 

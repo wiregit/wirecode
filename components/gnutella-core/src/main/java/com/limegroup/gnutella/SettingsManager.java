@@ -58,6 +58,7 @@ public class SettingsManager implements SettingsInterface
     private static int      maxSimDownload_;
     private static int      maxUploads_;
     private static int      searchAnimationTime_;
+	private static int      uploadThrottle_;
     private static String   saveDefault_;
 
     /** connectString_ is something like "GNUTELLA CONNECT..."
@@ -241,6 +242,14 @@ public class SettingsManager implements SettingsInterface
 						return;
 					try { setClearCompletedUpload(bs); }
 					catch (IllegalArgumentException ie){}
+				}
+				else if(key.equals(SettingsInterface.UPLOAD_THROTTLE)) {
+					try {
+						i = Integer.parseInt(p);
+						try{setUploadThrottle(i);}
+						catch(IllegalArgumentException iae){}
+					}
+					catch(NumberFormatException nfe){}
 				}
 				else if(key.equals(SettingsInterface.TIMEOUT)) {
 					try {
@@ -479,6 +488,7 @@ public class SettingsManager implements SettingsInterface
 		setClearCompletedDownload(SettingsInterface.DEFAULT_CLEAR_DOWNLOAD);
 		setMaxSimDownload(SettingsInterface.DEFAULT_MAX_SIM_DOWNLOAD);
 		setMaxUploads(SettingsInterface.DEFAULT_MAX_UPLOADS);
+		setUploadThrottle(SettingsInterface.DEFAULT_UPLOAD_THROTTLE);
 		setSearchAnimationTime(SettingsInterface.DEFAULT_SEARCH_ANIMATION_TIME);
 		setConnectString(SettingsInterface.DEFAULT_CONNECT_STRING);
 		setConnectOkString(SettingsInterface.DEFAULT_CONNECT_OK_STRING);
@@ -584,6 +594,7 @@ public class SettingsManager implements SettingsInterface
     public boolean getClearCompletedUpload(){return clearCompletedUpload_;} 
     public boolean getClearCompletedDownload(){return clearCompletedDownload_;} 
     public int getSearchAnimationTime(){ return searchAnimationTime_; }
+	public int getUploadThrottle(){ return uploadThrottle_; }
 
     public String getConnectString(){ return connectString_; }
     /** Returns the first word of the connect string.   
@@ -966,6 +977,62 @@ public class SettingsManager implements SettingsInterface
 		props_.put(SettingsInterface.CONNECT_OK_STRING, ok);
     }
 
+    public synchronized void setParallelSearchMax(int max) {
+		if(max<1)
+			throw new IllegalArgumentException();
+		else {
+			parallelSearchMax_ = max;
+			String s = String.valueOf(max);
+			props_.put(SettingsInterface.PARALLEL_SEARCH, s);
+		}
+    }
+
+    public void setMaxSimDownload(int max) {
+		if(false)
+			throw new IllegalArgumentException();
+		else {
+			maxSimDownload_ = max;
+			String s = String.valueOf(max);
+			props_.put(SettingsInterface.MAX_SIM_DOWNLOAD, s);
+		}
+    }
+
+    public void setMaxUploads(int max) {
+		if(false)
+			throw new IllegalArgumentException();
+		else {
+			maxUploads_ = max;
+			String s = String.valueOf(max);
+			props_.put(SettingsInterface.MAX_UPLOADS, s);
+		}
+    }
+    
+    public void setClearCompletedUpload(boolean b) {
+		if(false)
+			throw new IllegalArgumentException();
+		else {
+			clearCompletedUpload_ = b;
+			String s = String.valueOf(b);
+			props_.put(SettingsInterface.CLEAR_UPLOAD, s);
+		}
+    }
+    
+    public void setClearCompletedDownload(boolean b) {
+		if(false)
+			throw new IllegalArgumentException();
+		else {
+			clearCompletedDownload_ = b;
+			String s = String.valueOf(b);
+			props_.put(SettingsInterface.CLEAR_DOWNLOAD, s);
+		}
+    }
+
+	public void setUploadThrottle(int throttle) {
+		uploadThrottle_ = throttle;
+		String s = String.valueOf(throttle);
+		props_.put(SettingsInterface.UPLOAD_THROTTLE, s);
+	}
+
 	/******************************************************
      *********  END OF CONFIGURATION SETTINGS *************
 	 ******************************************************/
@@ -1071,16 +1138,6 @@ public class SettingsManager implements SettingsInterface
 		}
     }
 	
-    public synchronized void setParallelSearchMax(int max) {
-		if(max<1)
-			throw new IllegalArgumentException();
-		else {
-			parallelSearchMax_ = max;
-			String s = String.valueOf(max);
-			props_.put(SettingsInterface.PARALLEL_SEARCH, s);
-			writeProperties();	
-		}
-    }
 	
     public synchronized void setSearchAnimationTime(int seconds) {
 		if(seconds < 0)
@@ -1092,51 +1149,7 @@ public class SettingsManager implements SettingsInterface
 			writeProperties();
 		}
     }
-    
-    public synchronized void setMaxSimDownload(int max) {
-		if(false)
-			throw new IllegalArgumentException();
-		else {
-			maxSimDownload_ = max;
-			String s = String.valueOf(max);
-			props_.put(SettingsInterface.MAX_SIM_DOWNLOAD, s);
-			writeProperties();	
-		}
-    }
-
-    public synchronized void setMaxUploads(int max) {
-		if(false)
-			throw new IllegalArgumentException();
-		else {
-			maxUploads_ = max;
-			String s = String.valueOf(max);
-			props_.put(SettingsInterface.MAX_UPLOADS, s);
-			writeProperties();	
-		}
-    }
-    
-    public synchronized void setClearCompletedUpload(boolean b) {
-		if(false)
-			throw new IllegalArgumentException();
-		else {
-			clearCompletedUpload_ = b;
-			String s = String.valueOf(b);
-			props_.put(SettingsInterface.CLEAR_UPLOAD, s);
-			writeProperties();	
-		}
-    }
-    
-    public synchronized void setClearCompletedDownload(boolean b) {
-		if(false)
-			throw new IllegalArgumentException();
-		else {
-			clearCompletedDownload_ = b;
-			String s = String.valueOf(b);
-			props_.put(SettingsInterface.CLEAR_DOWNLOAD, s);
-			writeProperties();	
-		}
-    }
-    
+        
 
     /**
      *  Sets the pathname String for the file that 
