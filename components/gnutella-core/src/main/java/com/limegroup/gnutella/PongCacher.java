@@ -102,12 +102,7 @@ public final class PongCacher {
         if(!RouterService.isSupernode()) return;
 
         // Make sure we don't cache pongs that aren't from Ultrapeers.
-        if(!pr.isUltrapeer()) return;
-        
-        // If the host returning the pong does not have free connection slots,
-        // ignore it.
-        if(!pr.hasFreeSlots()) return;
-        
+        if(!pr.isUltrapeer()) return;      
         
         // if the hops are too high, ignore it
         if(pr.getHops() >= NUM_HOPS) return;
