@@ -56,7 +56,7 @@ public class DataWindow
 	public DataRecord addData(UDPConnectionMessage msg) {
 		if (LOG.isDebugEnabled())
 			LOG.debug("adding message seq "+msg.getSequenceNumber()+ " window start "+windowStart);
-		
+		LOG.info("map size is "+window.size());
 		DataRecord d = new DataRecord(msg.getSequenceNumber(),msg);
 		window.put(d.pkey, d);
 
@@ -488,12 +488,12 @@ public class DataWindow
  */
 class DataRecord {
 	final Long 				pkey;     // sequence number as a Long
-	final UDPConnectionMessage msg;      // the actual data message
-    int                  sends;    // count of the sends
-	boolean 		        written;  // whether the data was written
-	int   		        acks;     // count of the number of acks
-    long                 sentTime; // when it was sent
-    long                 ackTime;  // when it was acked
+	final UDPConnectionMessage              msg;      // the actual data message
+        int                                     sends;    // count of the sends
+	boolean 		                written;  // whether the data was written
+	int   		                        acks;     // count of the number of acks
+        long                                    sentTime; // when it was sent
+        long                                    ackTime;  // when it was acked
     
     DataRecord(long pnum, UDPConnectionMessage msg) {
     	pkey = new Long(pnum);
