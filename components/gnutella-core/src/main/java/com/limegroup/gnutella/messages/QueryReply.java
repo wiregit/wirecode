@@ -985,10 +985,9 @@ public class QueryReply extends Message implements Serializable{
 		if( isMCastReply ) {
 		    iFirewalled = false;
 		    heFirewalled = NO;
-		}
-		else if ((new Endpoint(this.getIP(), this.getPort())).isPrivateAddress())
+		} else if(NetworkUtils.isPrivateAddress(this.getIPBytes())) {
 			heFirewalled = YES;
-		else {
+		} else {
 			try {
 				heFirewalled=this.getNeedsPush()? YES : NO;
 			} catch (BadPacketException e) {
