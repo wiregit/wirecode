@@ -402,12 +402,27 @@ public class ExternalControl {
 			} else if ( keystr.startsWith("as") ) {
 				curOptions.addAS(cmdstr);
 			}
-			options.put(iIndex, curOptions);
+			
+		
+			// make sure the magnet has something besides a hash
+			boolean hashOnly = false;
+			if (!curOptions.getXT().isEmpty()) {
+			    hashOnly = 
+			        curOptions.getKT()==null &&
+			        curOptions.getDN()==null &&
+			        curOptions.getAS().isEmpty() &&
+			        curOptions.getXS().isEmpty();
+			    
+			}
+			
+			if (!hashOnly)
+			    options.put(iIndex, curOptions);
 		}
 		
 		ret = new MagnetOptions[options.size()];
 		ret = (MagnetOptions[]) options.values().toArray(ret);
 
+		
 		return ret;
 	}
 

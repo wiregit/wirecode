@@ -709,6 +709,13 @@ public abstract class MessageRouter {
      */
     final void handleQueryRequestPossibleDuplicate(
         QueryRequest request, ManagedConnection receivingConnection) {
+        
+        // Drop all hash-only queries coming through tcp.  This will lose some
+        // potential search results of ultrapeers who have a matching sha1, but
+        // this does not affect LimeWires.
+        
+        if (request.isHashOnlyQuery())
+            return; //TODO: stats
 
         // With the new handling of probe queries (TTL 1, Hops 0), we have a few
         // new options:
