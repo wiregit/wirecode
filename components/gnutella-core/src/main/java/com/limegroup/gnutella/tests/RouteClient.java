@@ -49,7 +49,7 @@ public class RouteClient {
 
     private static void syntaxError() {
 	System.err.println("Syntax: java com.limegroup.gnutella.tests.RouteClient "
-			   +"<host> <port> [- nopings]");
+			   +"<host> <port> [- nocheck]");
 	System.exit(1);
     }
 
@@ -59,7 +59,7 @@ public class RouteClient {
 	    int port=Integer.parseInt(args[1]);
 	    RouteClient rc=new RouteClient();
 	    if (args.length==3) {
-		if (! args[2].equals("-nopings"))
+		if (! args[2].equals("-nocheck"))
 		    syntaxError();
 		rc.doTest(host, port, true);
 	    } else {
@@ -79,7 +79,7 @@ public class RouteClient {
 	}
     }
 
-    public void doTest(String host, int port, boolean nopings) 
+    public void doTest(String host, int port, boolean nocheck) 
 	throws IOException, BadPacketException {
 	//1. Create outgoing connection.
 	System.out.print("Connecting to router...");
@@ -99,39 +99,39 @@ public class RouteClient {
 	}
 
 
-	//3. Now read replies as fast as possible (without checking what
-	//   they are) and measure the message bandwidth.
-	if (nopings) {
+	//3. Now read replies as fast as possible and measure the message bandwidth.
+    //   a) Measure in kbytes/sec without verifying messages.
+	if (nocheck) {
 	    System.out.println("done.\nReading replies quickly.  "
 			       +"Press Ctrl-C to end.");
 	    while (true) {
-		Date startTime=new Date();
-		for (int i=0; i<MEASURE; i++) {
-		    //23 is size of header. cf below
-		    //c.receiveRaw(23+RouteServer.REPLY_PAYLOAD_SIZE);
-		    c.receive();
-		}
-		Date endTime=new Date();
-		float milliseconds=(float)(endTime.getTime()-startTime.getTime());
-		report(MEASURE, milliseconds);
+            final int CHUNK=100;
+            Date startTime=new Date();
+            for (int i=0; i<MEASURE; i++) {
+                c.receiveRaw(CHUNK);
+            }
+            Date endTime=new Date();
+            float milliseconds=(float)(endTime.getTime()-startTime.getTime());
+            //MEASURE*CHUNK bytes were read.  Note that bytes/msec=kbyte/sec
+            float bandwidth=((float)MEASURE*CHUNK)/milliseconds;
+            System.out.println("Reply bandwidth: "+bandwidth+" kb/sec");
 	    }	
-	} else {
+	}
+    //   b) Measure in messages/sec and verify message.
+    else {
 	    System.out.println("done.\nReading replies carefully.  "
 			       +"Press Ctrl-C to end.");
 	    while (true) {
-		Date startTime=new Date();
-		for (int i=0; i<MEASURE; i++) {
-		    c.receive();  //cf above
-		}
-		Date endTime=new Date();
-		float milliseconds=(float)(endTime.getTime()-startTime.getTime());
-		report(MEASURE, milliseconds);
+            Date startTime=new Date();
+            for (int i=0; i<MEASURE; i++) {
+                c.receive();  //cf above
+            }
+            Date endTime=new Date();
+            float milliseconds=(float)(endTime.getTime()-startTime.getTime());
+            float bandwidth=(float)MEASURE/milliseconds*1000.f;
+            System.out.println("Reply bandwidth: "+bandwidth+" replies/sec");
 	    }	
 	}
     }
-
-    protected void report(int messages, float milliseconds) {
-	float bandwidth=(float)messages/milliseconds*1000.f;
-	System.out.println("Reply bandwidth: "+bandwidth+" replies/sec");
-    }
 }
+
