@@ -979,13 +979,8 @@ public class ManagedConnection
     /** Returns true iff this connection is a temporary connection as per
      the headers. */
     public boolean isTempConnection() {
-        //get the X-Temp-Connection from either the headers received or written.
-        //Preference is given to the received headers
+        //get the X-Temp-Connection from either the headers received
         String value=getProperty(ConnectionHandshakeHeaders.X_TEMP_CONNECTION);
-        if (value==null)
-            value = getPropertyWritten(
-                ConnectionHandshakeHeaders.X_TEMP_CONNECTION);
-        
         //if X-Temp-Connection header is not received, return false, else
         //return the value received
         if(value == null)
