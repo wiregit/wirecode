@@ -32,6 +32,7 @@ public class UploadTest extends com.limegroup.gnutella.util.BaseTestCase {
     private static final int index=0;
     /** Our listening port for pushes. */
     private static final int callbackPort = 6671;
+    private UploadManager upMan;
 
     private static final RouterService ROUTER_SERVICE =
         new RouterService(new ActivityCallbackStub());
@@ -84,6 +85,8 @@ public class UploadTest extends com.limegroup.gnutella.util.BaseTestCase {
 	    
         assertEquals("ports should be equal",
                      PORT, SettingsManager.instance().getPort());
+                     
+        upMan = RouterService.getUploadManager();
 
 
         try {Thread.sleep(300); } catch (InterruptedException e) { }
@@ -95,7 +98,12 @@ public class UploadTest extends com.limegroup.gnutella.util.BaseTestCase {
 		//	+"Finally, the file must contain all lower-case characters in\n" 
 		//	+"the alphabet, exactly like the following:\n\n"
 		//	+"abcdefghijklmnopqrstuvwxyz");
-		//System.out.println(); 
+		//System.out.println();
+		
+		assertEquals("unexpected uploads in progress",
+		    0, upMan.uploadsInProgress() );
+        assertEquals("unexpected queued uploads",
+            0, upMan.getNumQueuedUploads() );
 	}
 
     //public void testAll() {
@@ -719,6 +727,10 @@ public class UploadTest extends com.limegroup.gnutella.util.BaseTestCase {
             int c = in.read();
             buf.append((char)c);
         }
+        // close all the appropriate streams & sockets.
+        in.close();
+        out.close();
+        s.close();
         return ret && buf.toString().equals(expResp);
     }
 
@@ -794,6 +806,11 @@ public class UploadTest extends com.limegroup.gnutella.util.BaseTestCase {
             int c1 = in.read();
             buf.append((char)c1);
         }
+        // close all the appropriate streams & sockets.
+        in.close();
+        out.close();
+        s.close();
+        ss.close();
         return ret && buf.toString().equals(expResp);
     }
 
