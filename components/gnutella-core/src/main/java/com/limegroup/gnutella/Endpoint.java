@@ -115,6 +115,10 @@ public class Endpoint implements Cloneable, Serializable, Comparable{
     public String getHostname(){
 	return hostname;
     }
+    
+    public void setHostname(String hostname){
+	this.hostname = hostname;
+    }
 
     public int getPort(){
 	return port;
