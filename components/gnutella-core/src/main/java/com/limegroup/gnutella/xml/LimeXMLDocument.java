@@ -77,6 +77,7 @@ public class LimeXMLDocument{
     }
 
     private void grabDocInfo(Document doc) throws SchemaNotFoundException{
+        fieldToValue = new HashMap();
         Element docElement = doc.getDocumentElement();
         List attributes=LimeXMLUtils.getAttributes(docElement.getAttributes());
         int size = attributes.size();
@@ -90,6 +91,12 @@ public class LimeXMLDocument{
                 identifier = att.getNodeValue();
             else if (lowerAttName.indexOf("action") >= 0)
                 action = att.getNodeValue();
+            else{//these are attributes that have a value
+                String canonicalizedAttName= docElement.getTagName()+
+                XMLStringUtils.DELIMITER+att.getNodeName()+
+                XMLStringUtils.DELIMITER;                
+                fieldToValue.put(canonicalizedAttName,att.getNodeValue());
+            }
         }
         if(schemaUri == null)//we cannot have a doc with out a schema
             throw new SchemaNotFoundException();
@@ -100,7 +107,6 @@ public class LimeXMLDocument{
     }
 
     private void createMap(Document doc) {
-        fieldToValue = new HashMap();
         Element docElement = doc.getDocumentElement();
         doAllChildren(docElement,"");
     }

@@ -49,7 +49,7 @@ public class Response {
                 "Response constructor: index too big!");
         Assert.that((size &  0xFFFFFFFF00000000l)==0,
                 "Response constructor: size too big!");
-        metadata = metadata.trim();
+        metadata = metadata.trim();      
         this.index=index;
         this.size=size;
         this.name=name;
@@ -97,6 +97,14 @@ public class Response {
 		return metadata;
 	}
 
+    /**
+     * returns true if metadata is not XML, but ToadNode's response
+     */
+    public boolean hasToadNodeData(){
+        if(metadata.indexOf("<")>-1 && metadata.indexOf(">") > -1)
+            return false;
+        return true;//no angular brackets. This is a TOADNODE response
+    }
 
     public boolean equals(Object o) {
         if (! (o instanceof Response))

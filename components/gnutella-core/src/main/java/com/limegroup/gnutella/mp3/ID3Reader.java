@@ -81,28 +81,37 @@ public final class ID3Reader {
         if(solo){
             str = str+ "<audio noNamespaceSchemaLocation=\""+this.schemaURI;
             String filename = file.getCanonicalPath();
-            str = str+"\""+" identifier=\""+filename+"\">";
+            //str = str+"\""+" identifier=\""+filename+"\">";
+            str = str+"\""+" identifier=\""+filename+"\"";
         }
         //end of head
         if(!title.equals(""))
-            str=str+"<title>"+title+"</title>";
+            //str=str+"<title>"+title+"</title>";
+            str=str+" title=\""+title+"\"";
         if(!artist.equals(""))
-            str = str+"<artist>"+artist+"</artist>";
+            //str = str+"<artist>"+artist+"</artist>";
+            str = str+" artist=\""+artist+"\"";
         if(!album.equals(""))
-            str = str+"<album>"+album+"</album>";
+            //str = str+"<album>"+album+"</album>";
+            str = str+" album=\""+album+"\"";
         if(track>0)
-            str = str+"<track>"+track+"</track>";
+            //str = str+"<track>"+track+"</track>";
+            str = str+" track=\""+track+"\"";
         String genre = getGenreString(gen);
         if(!genre.equals(""))
-            str = str+"<genre>"+genre+"</genre>";
+            //str = str+"<genre>"+genre+"</genre>";
+            str = str+" genre=\""+genre+"\"";
         if(!year.equals(""))
-            str = str+"<year>"+year+"</year>";
+            //str = str+"<year>"+year+"</year>";
+            str = str+"< year=\""+year+"\"";
         if(!comment.equals(""))
-            str = str+"<comments>"+comment+"</comments>";
+            //str = str+"<comments>"+comment+"</comments>";
+            str = str+" comments=\""+comment+"\"";
         if(bitrate > 0)
-            str = str+"<bitrate>"+bitrate+"</bitrate>";
+            str = str+" bitrate=\""+bitrate+"\"";
         if(solo)
-            str = str+"</audio>";
+            //str = str+"</audio>";
+            str = str+"/>";
 
         randomAccessFile.close();
 
