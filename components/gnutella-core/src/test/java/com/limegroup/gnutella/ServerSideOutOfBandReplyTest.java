@@ -70,7 +70,7 @@ public final class ServerSideOutOfBandReplyTest extends BaseTestCase {
     /**
      * Ultrapeer 1 UDP connection.
      */
-    private static DatagramSocket ULTRAPEER_1_UDP;
+    private static DatagramSocket UDP_ACCESS;
 
     /**
 	 * Second Ultrapeer connection
@@ -108,7 +108,7 @@ public final class ServerSideOutOfBandReplyTest extends BaseTestCase {
 						   new EmptyResponder()
 						   );
 
-        ULTRAPEER_1_UDP = new DatagramSocket();
+        UDP_ACCESS = new DatagramSocket();
 
         ULTRAPEER_2 = 
 			new Connection("localhost", PORT,
@@ -127,9 +127,12 @@ public final class ServerSideOutOfBandReplyTest extends BaseTestCase {
         //pongs for testing.  TODO: it would be nice to have a way to prevent
         //BootstrapServerManager from adding defaults and connecting.
         settings.setBannedIps(new String[] {"*.*.*.*"});
-        settings.setAllowedIps(new String[] {"127.*.*.*", "18.239.0.*"});
+        settings.setAllowedIps(new String[] {"127.*.*.*"});
         settings.setPort(PORT);
-        settings.setDirectories(new File[0]);
+        settings.setExtensions("txt;");
+        File shareDir[] = {new File("com/limegroup/gnutella")};
+        assertTrue(shareDir[0].isDirectory());
+        settings.setDirectories(shareDir);
 		ConnectionSettings.CONNECT_ON_STARTUP.setValue(false);
 		UltrapeerSettings.EVER_ULTRAPEER_CAPABLE.setValue(true);
 		UltrapeerSettings.DISABLE_ULTRAPEER_MODE.setValue(false);
@@ -376,6 +379,45 @@ public final class ServerSideOutOfBandReplyTest extends BaseTestCase {
         // ultrapeers should get the QR
         assertTrue(getFirstQueryRequest(ULTRAPEER_1) != null);
         assertTrue(getFirstQueryRequest(ULTRAPEER_2) != null);
+
+        // LEAF should get the reply
+        assertTrue(getFirstQueryReply(LEAF) != null);
     }
+
+    // a node should NOT send a reply out of band via UDP if it is not
+    // far away (low hop)
+    public void testLowHopOutOfBandRequest() throws Exception {
+        drainAll();
+
+        QueryRequest query = 
+            QueryRequest.createOutOfBandQuery("susheel",
+                                              UDP_ACCESS.getLocalAddress().getAddress(),
+                                              UDP_ACCESS.getLocalPort());
+        ULTRAPEER_2.send(query);
+        ULTRAPEER_2.flush();
+
+        // ULTRAPEER_2 should get a reply via TCP
+        assertTrue(getFirstQueryReply(ULTRAPEER_2) != null);
+    }
+
+    // tests basic out of band functionality
+    // this tests no UDP support - it should just send a UDP reply
+    public void testOutOfBandRequest() throws Exception {
+        drainAll();
+    }
+
+    // tests basic out of band functionality
+    // this tests solicited UDP support - it should participate in ACK exchange
+    public void testOutOfBandRequestWithSolicitedSupport() throws Exception {
+        drainAll();
+    }
+
+    // tests that MessageRouter expires GUIDBundles/Replies in a timely fashion
+    // this test requires solicited support
+    public void testExpirer() throws Exception {
+        drainAll();
+    }
+
+    
 
 }
