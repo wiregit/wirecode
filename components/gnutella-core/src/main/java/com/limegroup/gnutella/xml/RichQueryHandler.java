@@ -5,9 +5,12 @@ import com.limegroup.gnutella.FileManager;
 import com.limegroup.gnutella.FileDesc;
 import com.limegroup.gnutella.ErrorService;
 import com.limegroup.gnutella.RouterService;
+import com.limegroup.gnutella.URN;
 import org.xml.sax.SAXException;
 import java.io.IOException;
+import java.io.File;
 import com.sun.java.util.collections.List;
+import com.sun.java.util.collections.Iterator;
 
 
 /**
@@ -74,7 +77,6 @@ public class RichQueryHandler{
         long size=-1;
         String name="";
         int z =0;
-        boolean valid = true;
         debug("RQH.query(): # of resps = " + s);
         boolean busy = 
             RouterService.getUploadManager().isBusy() &&
@@ -90,12 +92,15 @@ public class RichQueryHandler{
                 name = " "; //leave blank
                 res = new Response(index, size, name);
             } else { //meta-data about a specific file
-                fd = fManager.file2index(subjectFile);
+                URN hash = currDoc.getXMLUrn();
+                if( hash == null ) 
+                    continue;
+                fd = fManager.getMatchingFileDesc(hash, new File(subjectFile));
                 if( fd == null || 
-                   (busy && fd.getNumberOfAlternateLocations() < 10) ) {
+                   (busy && fd.getNumberOfAlternateLocations() >= 10) ) {
                     // if fd is null, MetaFileManager is out of synch with
                     // FileManager -- this is bad.
-                    valid = false;
+                    continue;
                 } else { //we found a file with the right name
 					index = fd.getIndex();
                     //need not send whole path; just name + index					
@@ -104,32 +109,27 @@ public class RichQueryHandler{
 					res = new Response(fd);
                 }
             }
-            if (valid) {
-                // Note that if any response was invalid,
-                // the array will be too small, and we'll
-                // have to resize it.
-                res.setDocument(currDoc);
-                retResponses[z] = res;
-                z++;
-            }
-            valid = true;
+            
+            // Note that if any response was invalid,
+            // the array will be too small, and we'll
+            // have to resize it.
+            res.setDocument(currDoc);
+            retResponses[z] = res;
+            z++;
         }
 
         // need to ensure that no nulls are returned in my response[]
         // z is a count of responses constructed, see just above...
-        // s == retResponses.length
-        if (z < s){
-            Response[] temp = new Response[z];  
-            for (int i = 0, j = 0; i < s; i++) // at most s responses
-                if (retResponses[i] != null)
-                    temp[j++] = retResponses[i];
+        // s == retResponses.length        
+        if (z < s) {
+            Response[] temp = new Response[z];
+            System.arraycopy(retResponses, 0, temp, 0, z);
             retResponses = temp;
         }
 
         debug("RQH: num Response = " + retResponses.length);
         return retResponses;
     }
-
 
     private final boolean debugOn = false;
     private void debug(String out) {
