@@ -109,7 +109,8 @@ public class FixedSizeSortedSet {
             Assert.that(false,
                 "removed from map: " + b1 + ", from set: " + b2 +
                 "\nmap: " + _map +
-                "\nset: " + _sortedSet);
+                "\nset: " + _sortedSet +
+                "\nkey removed: " + o + ", value removed: " + obj);
         }
         return b1;
     }
