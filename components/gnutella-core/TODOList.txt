@@ -56,8 +56,10 @@ wholeheartheadly while testing.
 
 --------------------------------------------------------------------------------
 Date Posted: 10/01/02
-Date Resolved: 
+Date Resolved: 10/02/03
 
 Send UDP PingReplies to any initialized Ultrapeer TCP connections.
+
+Notes: This feature has not been tested as much as I'd like.
 
 ********************************************************************************
