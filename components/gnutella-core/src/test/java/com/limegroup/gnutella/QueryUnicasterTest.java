@@ -24,7 +24,8 @@ public class QueryUnicasterTest extends TestCase {
     }
 
     static {
-        Backend.instance();
+		Backend.createBackend(40*1000);
+        //Backend.instance();
     }
 
 
