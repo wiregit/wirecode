@@ -333,8 +333,9 @@ public class ConnectionManager {
             if(fetcher.isInterrupted())
                 // Externally generated interrupt.
                 // The interrupting thread has recorded the
-                // death of the fetcher, so just return.
-                return;
+                // death of the fetcher, so throw IOException.
+                // (This prevents fetcher from continuing!)
+                throw new IOException();
 
             _initializingFetchedConnections.add(c);
             _fetchers.remove(fetcher);
