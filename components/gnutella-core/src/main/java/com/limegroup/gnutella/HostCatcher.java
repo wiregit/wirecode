@@ -474,16 +474,20 @@ public class HostCatcher {
      * the modifications will not be observed.
      */
     public synchronized Iterator getHosts() {
-        return queue.iterator();
+        //Clone the queue before iterating.
+        return (new BucketQueue(queue)).iterator();
     }
 
     /**
      * @requires n>0
      * @effects returns an iterator that yields up the best n endpoints of this.
-     *  It's not guaranteed that these are reachable.
+     *  It's not guaranteed that these are reachable. This can be modified while
+     *  iterating through the result, but the modifications will not be
+     *  observed.  
      */
     public synchronized Iterator getBestHosts(int n) {
-        return queue.iterator(n);
+        //Clone the queue before iterating.
+        return (new BucketQueue(queue)).iterator(n);
     }
 
     /**
