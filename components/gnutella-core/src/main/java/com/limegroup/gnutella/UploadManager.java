@@ -217,8 +217,10 @@ public final class UploadManager implements BandwidthTracker {
                 
                 if(iStream == null)
                     iStream = new BufferedInputStream(socket.getInputStream());
-
+                
+                LOG.trace("parsing http line.");
                 HttpRequestLine line = parseHttpRequest(socket, iStream);
+                LOG.trace("line = " + line);
 
                 if(LOG.isDebugEnabled())
                     LOG.debug(uploader + " successfully parsed request");
@@ -1442,6 +1444,11 @@ public final class UploadManager implements BandwidthTracker {
          * Guaranteed to be non null.
          */
         final Map _params;
+
+        public String toString() {
+            return "Index = " + _index + ", FileName = " + _fileName +
+            ", is HTTP1.1? " + _http11 + ", Parameters = " + _params;
+        }
         
 		/**
 		 * Constructs a new <tt>RequestLine</tt> instance with no parameters.
