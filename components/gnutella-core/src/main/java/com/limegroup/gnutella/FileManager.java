@@ -600,6 +600,7 @@ public class FileManager {
     ///////////////////////////////////// Testing //////////////////////////////
 
     /** Checks this' rep. invariants.  VERY expensive. */
+    /*
     protected synchronized void repOk() {
         //Verify index.  Get the set of indices in the _index....
         IntSet indices=new IntSet();
@@ -667,6 +668,7 @@ public class FileManager {
         Assert.that(_size==sizeFilesCount,
                     _size+" should be "+sizeFilesCount);
     }
+    */
 
     /** Unit test.  REQUIRES JAVA2 FOR createTempFile */
     /*
