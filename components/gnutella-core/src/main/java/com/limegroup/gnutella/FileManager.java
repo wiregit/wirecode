@@ -642,9 +642,8 @@ public class FileManager {
             if (_callback!=null)
                 _callback.addSharedFile(fileDesc, parent);
 		
-            String path = file.getAbsolutePath();
             //Index the filename.  For each keyword...
-            String[] keywords=StringUtils.split(path, DELIMETERS);
+            String[] keywords=StringUtils.split(fileDesc.getPath(), DELIMETERS);
             for (int i=0; i<keywords.length; i++) {
                 String keyword=keywords[i];
                 //Ensure there _index has a set of indices associated with
@@ -932,19 +931,25 @@ public class FileManager {
         Response[] response = new Response[matches.size()];
         int j=0;
         for (IntSet.IntSetIterator iter=matches.iterator(); 
-                 iter.hasNext(); 
-                 j++) {            
+             iter.hasNext(); 
+             j++) {            
             int i=iter.next();
             FileDesc desc = (FileDesc)_files.get(i);
-            desc.incrementHitCount();
-            if ( _callback != null )
-                _callback.handleSharedFileUpdate(desc.getFile());
-            response[j] = new Response(desc);
+            if(desc != null) {
+                desc.incrementHitCount();
+                if ( _callback != null )
+                    _callback.handleSharedFileUpdate(desc.getFile());
+                response[j] = new Response(desc);
+            } else {
+                Assert.that(false, 
+                            "unexpected null in FileManager for query:\n"+
+                            request);
+            }
         }
         return response;
     }
 
-    public FileDesc file2index(String fullName) {  
+    public synchronized FileDesc file2index(String fullName) {  
         // TODO1: precompute and store in table.
         for (int i=0; i<_files.size(); i++) {
             FileDesc fd=(FileDesc)_files.get(i);
@@ -1025,7 +1030,7 @@ public class FileManager {
     /**
      * Find all files with matching full URNs
      */
-    private IntSet urnSearch(Iterator urnsIter,IntSet priors) {
+    private synchronized IntSet urnSearch(Iterator urnsIter,IntSet priors) {
         IntSet ret = priors;
         while(urnsIter.hasNext()) {
             URN urn = (URN)urnsIter.next();
