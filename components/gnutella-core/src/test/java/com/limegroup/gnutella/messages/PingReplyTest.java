@@ -75,7 +75,7 @@ public class PingReplyTest extends TestCase {
     }
       
     public void testPowerOf2() {
-       assertTrue(! PingReply.isPowerOf2(-1));
+        assertTrue(! PingReply.isPowerOf2(-1));
         assertTrue(! PingReply.isPowerOf2(0));
         assertTrue(PingReply.isPowerOf2(1));
         assertTrue(PingReply.isPowerOf2(2));
@@ -145,6 +145,40 @@ public class PingReplyTest extends TestCase {
         assertTrue("Big part of pong lost", out.equals("AB"));
         //come this far means its OK
     }
+
+
+    public void testBasicGGEP() {
+        // create a pong
+        PingReply pr=new PingReply(new byte[16], (byte)3, 6349, new byte[4],
+                                   0l, 0l);        
+        ByteArrayOutputStream baos=new ByteArrayOutputStream();
+        try {
+            pr.write(baos);
+        } catch (IOException e) {
+            assertTrue("Couldn't write stream.", false);
+        }
+        byte[] bytes=baos.toByteArray(); 
+
+        //Decode and check contents.
+        try {
+            Message m=Message.read(new ByteArrayInputStream(bytes));
+            PingReply pong=(PingReply)m;
+            assertTrue(m instanceof PingReply);
+            assertTrue(pong.getPort()==6349);
+            assertTrue(pong.hasGGEPExtension());
+            assertTrue(pong.supportsUnicast()==false);
+            assertTrue(pong.getVendor().equals("LIME"));
+            assertTrue("Major Version = " + pong.getVendorMajorVersion(), 
+                       pong.getVendorMajorVersion()==2);
+            assertTrue("Minor Version = " + pong.getVendorMinorVersion(), 
+                       pong.getVendorMinorVersion()==7);
+        } catch (BadPacketException e) {
+            fail("Couldn't extract uptime");
+        } catch (IOException e) {
+            fail("IO problem");
+        }
+    }
+
 
     /** Test the raw bytes of an encoded GGEP'ed pong.  Then checks that
      *  these can be decoded.  Note that this will need to be changed if
