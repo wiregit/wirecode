@@ -11,6 +11,15 @@ import com.limegroup.gnutella.ErrorService;
  */
 public class UDPConnectionProcessor {
 
+    /** Define the chunk size used for data bytes */
+    public static final int   DATA_CHUNK_SIZE         = 512;
+
+    /** Record the desired connection timeout on the connection */
+    private int               connectTimeOut          = MAX_CONNECT_WAIT_TIME;
+
+    /** Record the desired read timeout on the connection */
+    private int               readTimeOut             = 0;
+
 	/** Predefine a common exception if the user can't receive UDP */
 	private static final IOException CANT_RECEIVE_UDP = 
 	  new IOException("Can't receive UDP");
@@ -287,7 +296,7 @@ public class UDPConnectionProcessor {
             // the other side of the connection.
 			while ( isConnecting() ) { 
 
-                if ( waitTime > MAX_CONNECT_WAIT_TIME )
+                if ( waitTime > connectTimeOut )
                     throw CONNECTION_TIMEOUT;
 
 				// Send a SYN packet with our connectionID 
