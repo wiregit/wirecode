@@ -59,9 +59,6 @@ public class UDPPushTest extends BaseTestCase {
 		
 		udpsocket = new DatagramSocket(20000);
 		udpsocket.setSoTimeout(1000);
-		System.out.println(udpsocket.getReceiveBufferSize());
-		udpsocket.setReceiveBufferSize(256*1024);
-		System.out.println(udpsocket.getReceiveBufferSize());
 				
 		ActivityCallback ac = new ActivityCallbackStub();
 		RouterService rs = new RouterService(ac);
@@ -286,9 +283,7 @@ public class UDPPushTest extends BaseTestCase {
 	static void sendGiv(final Socket sock,final String str) {
 		Thread t = new Thread() {
 			public void run()  {
-				try {System.out.println(sock.getReceiveBufferSize());
-				sock.setSendBufferSize(128*1024);
-				System.out.println(sock.getReceiveBufferSize());
+				try {
 					sock.getOutputStream().write(str.getBytes());
 				}catch(IOException e) {
 					fail(e);
