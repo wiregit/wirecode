@@ -255,7 +255,7 @@ public final class HandshakeResponse {
         	isVersionOrHigher(headers, HeaderNames.CRAWLER, 0.1F);
         IS_LIMEWIRE =
             extractStringHeaderValue(headers, HeaderNames.USER_AGENT).
-                toLowerCase().startsWith('limewire');
+                toLowerCase().startsWith("limewire");
         IS_OLD_LIMEWIRE = IS_LIMEWIRE && 
         oldVersion(extractStringHeaderValue(headers, HeaderNames.USER_AGENT));
     }
