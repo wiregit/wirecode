@@ -89,9 +89,10 @@ public class ManagedConnection
      * These are the horizon statistics kept whenever a PingReply is received
      * on this connection.
      */
-    private long _totalHorizonFileSize;
-    private long _numHorizonFiles;
-    private long _numHorizonHosts;
+    private volatile boolean _horizonEnabled=true;
+    private volatile long _totalHorizonFileSize;
+    private volatile long _numHorizonFiles;
+    private volatile long _numHorizonHosts;
 
     /**
      * Creates an outgoing connection.
@@ -535,11 +536,28 @@ public class ManagedConnection
         _numHorizonFiles = 0;
     }
 
+    /** 
+     * @modifies this
+     * @effects enables or disables updateHorizon. Typically this method
+     *  is used to temporarily disable horizon statistics before sending a 
+     *  ping with a small TTL to make sure a connection is up.
+     */
+    public void setHorizonEnabled(boolean enable) {
+        _horizonEnabled=enable;
+    }
+
     /**
      * This method is called when a reply is received by this connection for a
-     * PingRequest that originated here.
+     * PingRequest that originated from LimeWire.
+     * 
+     * @modifies this 
+     * @effects adds the statistics from pingReply to this' horizon statistics,
+     *  unless horizon statistics have been disabled via setHorizonEnabled(false).
      */
     public void updateHorizonStats(PingReply pingReply) {
+        if (! _horizonEnabled)
+            return;
+
         _totalHorizonFileSize += pingReply.getKbytes();
         _numHorizonFiles += pingReply.getFiles();
         _numHorizonHosts++;
