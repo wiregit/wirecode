@@ -153,6 +153,11 @@ public class UDPConnectionProcessor {
     /** The last time that a message was received from the other host */
 	private long              _lastReceivedTime;
 
+    /** The number of resends to take into account when scheduling ack wait */
+    private int               _ackResendCount;
+
+    /** Skip a Data Write if this flag is true */
+    private boolean           _skipADataWrite;
 
     /**
      *  Try to kickoff a reliable udp connection. This method blocks until it 
@@ -174,6 +179,8 @@ public class UDPConnectionProcessor {
         _waitingForDataSpace     = false;
         _waitingForDataAvailable = false;
         _wakeupWriteEvent        = false;
+        _skipADataWrite          = false;
+        _ackResendCount          = 0;
 
 		_udpService        = UDPService.instance();
 
@@ -601,6 +608,13 @@ log("------scheduleAckIfNeeded");
 			if (rto == 0) 
 				rto = (int) DEFAULT_RTO_WAIT_TIME;
             long waitTime    = drec.sentTime + ((long)rto);
+
+            // If there was a resend then base the wait off of current time
+            if ( _ackResendCount > 0 ) {
+                waitTime    = _lastSendTime + ((long)rto);
+               _ackResendCount = 0;
+            }
+
 log("------scheduled");
             scheduleAckTimeoutEvent(waitTime);
         } else {
@@ -633,6 +647,7 @@ log2("Soft resend data:"+ start+ " rto:"+rto+
 
             DataRecord drec;
             int        blockNum;
+            int        numResent = 0;
 
             // Resend up to 2
             for (int i = 0; i < 2; i++) {
@@ -662,8 +677,14 @@ log2("Soft resending message:"+drec.msg.getSequenceNumber());
                     currTime      = _lastSendTime;
                     drec.sentTime = currTime;
                     drec.sends++;
+                    numResent++;
                 }
             }
+            
+            // Delay subsequent resends of data based on number resent
+            _ackResendCount = numResent;
+            if ( numResent > 0 )
+                _skipADataWrite          = true;
         } 
         scheduleAckIfNeeded();
     }
@@ -836,6 +857,12 @@ log2("Received duplicate block num: "+ dmsg.getSequenceNumber());
 	        scheduleWriteDataEvent(WRITE_STARTUP_WAIT_TIME);
 			return;
 		}
+
+        // If someone wanted us to wait a bit then don't send data now
+        if ( _skipADataWrite ) {
+            _skipADataWrite = false;
+            return;
+        }
 
 		// Reset special flags for long wait times
 		_waitingForDataAvailable = false;
