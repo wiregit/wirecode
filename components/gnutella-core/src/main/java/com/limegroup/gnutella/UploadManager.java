@@ -318,9 +318,8 @@ public class UploadManager implements BandwidthTracker {
     /** Increments the count of uploads in progress for host.
      *  If uploader has exceeded its limits, places it in LIMIT_REACHED state.
      *  Notifies callback of this.
-     *      @requires this' monitor is held
      *      @modifies _uploadsInProgress, uploader, _callback */
-	private void insertAndTest(Uploader uploader, String host) {
+	private synchronized void insertAndTest(Uploader uploader, String host) {
 		// add to the Map
 		insertIntoMapAndList(uploader, host);
 
