@@ -33,6 +33,38 @@ public final class QueryHandlerTest extends BaseTestCase {
     }
 
     /**
+     * Tests the method for calculating the next TTL.
+     */
+    public void testCalculateNewTTL() throws Exception {
+        Class[] params = new Class[]{Integer.TYPE, Integer.TYPE, Byte.TYPE};
+		Method m = 
+            PrivilegedAccessor.getMethod(QueryHandler.class, 
+                                         "calculateNewTTL",
+                                         params);        
+        byte ttl = getTTL(m, 2000, 15, (byte)5);
+        assertEquals("unexpected ttl", 4, ttl);
+
+        ttl = getTTL(m, 200, 15, (byte)5);
+        assertEquals("unexpected ttl", 3, ttl);
+
+
+        ttl = getTTL(m, 200000, 15, (byte)4);
+        assertEquals("unexpected ttl", 4, ttl);
+    }
+
+    /**
+     * Convenience method for getting the TTL from QueryHandler/
+     */
+    private byte getTTL(Method m, int hosts, int degree, byte maxTTL) 
+        throws Exception {
+        byte ttl = 
+            ((Byte)m.invoke(null, new Object[] {
+                new Integer(hosts), new Integer(degree), 
+                new Byte(maxTTL)})).byteValue();
+        return ttl;
+    }
+
+    /**
      * Tests the public sendQuery method to make sure it's working as
      * expected.
      */
@@ -168,7 +200,7 @@ public final class QueryHandlerTest extends BaseTestCase {
             PrivilegedAccessor.getMethod(QueryHandler.class, 
                                          "calculateNewHosts",
                                          new Class[]{Connection.class, 
-                                                     Integer.TYPE});
+                                                     Byte.TYPE});
         
         // test for a degree 19, ttl 4 network
         ManagedConnection mc = new TestConnection(19);
@@ -176,7 +208,7 @@ public final class QueryHandlerTest extends BaseTestCase {
         for(int i=0; i<19; i++) {
             horizon += 
                 ((Integer)m.invoke(null, 
-                                  new Object[]{mc, new Integer(4)})).intValue();
+                                  new Object[]{mc, new Byte((byte)4)})).intValue();
         }                
         assertEquals("incorrect horizon", 117325, horizon);
 
@@ -186,7 +218,7 @@ public final class QueryHandlerTest extends BaseTestCase {
         for(int i=0; i<30; i++) {
             horizon += 
                 ((Integer)m.invoke(null, 
-                                   new Object[]{mc, new Integer(3)})).intValue();
+                                   new Object[]{mc, new Byte((byte)3)})).intValue();
         }                
         assertEquals("incorrect horizon", 26130, horizon);
     }
