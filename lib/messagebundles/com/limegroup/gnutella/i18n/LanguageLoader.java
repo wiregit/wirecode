@@ -63,7 +63,7 @@ class LanguageLoader {
                        in.reset();
                 } catch (java.io.IOException ioe) {
                 }
-                loadFile(langs, in, linkFileName, skipUTF8LeadingBOM);
+                loadFile(langs, in, linkFileName, files[i], skipUTF8LeadingBOM);
             } catch (FileNotFoundException fnfe) {
                 // oh well.
             }
@@ -170,7 +170,8 @@ class LanguageLoader {
     /**
      * Loads a single file into the languages map.
      */
-    private LanguageInfo loadFile(Map langs, InputStream in, String filename, boolean isUTF8) {
+    private LanguageInfo loadFile(Map langs, InputStream in, String filename, 
+                                  String baseFileName, boolean isUTF8) {
         try {
             in = new BufferedInputStream(in);
             final Properties props = new Properties();
@@ -218,7 +219,7 @@ class LanguageLoader {
             LanguageInfo li = new LanguageInfo(lc, cc, vc, sc,
                                                ln, cn, vn, sn,
                                                dn, rtl, filename, props,
-                                               isUTF8);
+                                               baseFileName);
             langs.put(li.getCode(), li);
             return li;
         } catch (IOException e) {

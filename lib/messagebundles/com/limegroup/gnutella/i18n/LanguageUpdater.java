@@ -53,22 +53,69 @@ class LanguageUpdater {
         File temp;
         FileOutputStream fos;
         try {
-            temp = File.createTempFile("TEMP", "LIME", lib);
+            temp = File.createTempFile("TEMP", info.getCode(), lib);
             fos = new FileOutputStream(temp);
             writeInitialComments(fos, f, info);
             writeBody(fos, info);
             fos.close();
-            if(isDifferent(f, temp))
+            if(isDifferent(f, temp)) {
                 System.out.println("...changes.");
-            else
+                f.delete();
+                temp.renameTo(f);
+                if(info.isUTF8())
+                    native2ascii(info);
+            } else {
                 System.out.println("...no changes!");
-            f.delete();
-            temp.renameTo(f);
+                temp.delete();
+            }
         } catch(IOException ioe) {
             System.out.println("...error! (" + ioe.getMessage() + ")");
         }
     }
     
+    /**
+     * Home-made native2ascii.
+     */
+    private void native2ascii(LanguageInfo info) {
+        if(!info.isUTF8())
+            throw new IllegalArgumentException("requires utf8 language.");
+
+        InputStream in = null;
+        OutputStream out = null;
+        
+        System.out.print("\tConverting to ASCII... ");
+        
+        try  {
+            in = new BufferedInputStream(new FileInputStream(info.getFileName()));
+            in.mark(3);
+            if (in.read() != 0xEF || in.read() != 0xBB || in.read() != 0xBF)
+                in.reset(); 
+            BufferedReader reader = new BufferedReader(new InputStreamReader(in, "UTF8"));
+            
+            out = new BufferedOutputStream(new FileOutputStream(info.getAlternateFileName()));
+            BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(out, "ISO-8859-1"));
+            
+            String read;
+            while( (read = reader.readLine()) != null) {
+                writer.write(ascii(read));
+                writer.write("\n");
+            }
+            writer.flush();
+            out.flush();
+            System.out.println("... done!");
+        } catch(IOException ignored) {
+            System.out.println("... error! (" + ignored.getMessage() + ")");
+        } finally {
+            if(in != null)
+                try { in.close(); } catch(IOException ignored) {}
+            if(out != null)
+                try { out.close(); } catch(IOException ignored) {}
+        }
+    }   
+
+    /**
+     * Determines if there is any difference between file a & file b.
+     */
     private boolean isDifferent(File a, File b) {
         InputStream ia = null, ib = null;
         try {
@@ -141,7 +188,9 @@ class LanguageUpdater {
         InputStream in = null;
         
         try {
-            in = new FileInputStream(file);
+            // use BufferedInputStream (even though we use BufferedReader)
+            // to make sure that mark is supported.
+            in = new BufferedInputStream(new FileInputStream(file));
             BufferedReader reader;
             String charset = "ISO-8859-1";
             
@@ -223,7 +272,22 @@ class LanguageUpdater {
     }
     
     /**
-     * Returns the unicode representation of 'p'.
+     * Converts the input string to ascii, using \\u escapes.
+     */
+    private String ascii(String s) {
+        StringBuffer sb = new StringBuffer(s.length() * 5);
+        for(int i = 0; i < s.length(); i++) {
+            int p = s.codePointAt(i);
+            if(p < 0x0020 || p > 0x007e)
+                sb.append(unicode(p));
+            else
+                sb.appendCodePoint(p);
+        }
+        return sb.toString();
+    }
+    
+    /**
+     * Returns the unicode representation of the codepoint.
      */
     private String unicode(int codepoint) {
         StringBuffer sb = new StringBuffer(6);
