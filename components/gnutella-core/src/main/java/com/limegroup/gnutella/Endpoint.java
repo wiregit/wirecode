@@ -206,27 +206,16 @@ com.sun.java.util.collections.Comparable
                 files = kbytes = 0;
                 return;
             }
-            if(files > 10000)  //>10000 files
+            else if(files > 5000)  //> 5000 files
             {
                 files = kbytes = 0;
                 return;
             }
-
-            if(kbytes/files < 35000)  //ie avg file size less than 35MB
+            else if (kbytes/files > 250000) //> 250MB/file
             {
                 files = kbytes = 0;
                 return;
-            }
-            else if(kbytes/files < 150000 && files < 10) //ie avg file size less
-            {                               //than 150MB, and num-files < 10
-                //might be some video files
-                //but with more number of files
-                //maintaining such a ratio may not
-                //be possible
-                files = kbytes = 0;
-                return;
-            }
-
+            }   
         }
         catch(ArithmeticException ae)
         {
