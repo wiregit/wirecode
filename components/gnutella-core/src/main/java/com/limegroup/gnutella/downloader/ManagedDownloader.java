@@ -642,7 +642,11 @@ public class ManagedDownloader implements Downloader, Serializable {
         // Notify the manager that this download is done.
         manager.remove(this, complete);
 
-        LOG.trace("MD<" + getFileName() + "> completed download, state: " + getState() + ", numQueries: " + numQueries + ", lastQuerySent: " + lastQuerySent);
+        if(LOG.isTraceEnabled())
+            LOG.trace("MD completing <" + getFileName() + 
+                      "> completed download, state: " +
+                      getState() + ", numQueries: " + numQueries +
+                      ", lastQuerySent: " + lastQuerySent);
 
         // if this is all completed, nothing else to do.
         if(complete)
@@ -676,7 +680,10 @@ public class ManagedDownloader implements Downloader, Serializable {
         else
             setState(WAITING_FOR_USER);
         
-        LOG.trace("!!MD<" + getFileName() + "> completed download, state: " + getState() + ", numQueries: " + numQueries);        
+        if(LOG.isTraceEnabled())
+            LOG.trace("MD completed <" + getFileName() +
+                      "> completed download, state: " + 
+                      getState() + ", numQueries: " + numQueries);
     }
     
     /**
@@ -706,7 +713,10 @@ public class ManagedDownloader implements Downloader, Serializable {
      * Handles state changes when inactive.
      */
     public void handleInactivity() {
-        LOG.trace("handling inactivity. state: " + getState() + ", hasnew: " + hasNewSources() + ", left: " + getRemainingStateTime());
+        if(LOG.isTraceEnabled())
+            LOG.trace("handling inactivity. state: " + 
+                      getState() + ", hasnew: " + hasNewSources() + 
+                      ", left: " + getRemainingStateTime());
         
         switch(getState()) {
         case WAITING_FOR_RETRY:
@@ -744,8 +754,6 @@ public class ManagedDownloader implements Downloader, Serializable {
      * Tries iterative GUESSing of sources.
      */
     private boolean tryGUESSing() {
-        LOG.trace("origGUID: " + originalQueryGUID + ", tried: " + triedLocatingSources + ", sha1: " + sha1);
-        
         if(originalQueryGUID == null || triedLocatingSources || sha1 == null)
             return false;
             
@@ -753,8 +761,6 @@ public class ManagedDownloader implements Downloader, Serializable {
         Set guessLocs = mr.getGuessLocs(this.originalQueryGUID);
         if(guessLocs == null || guessLocs.isEmpty())
             return false;
-            
-        LOG.trace("guessLocs: " + guessLocs);
 
         setState(ITERATIVE_GUESSING, 5000);
         triedLocatingSources = true;
@@ -765,7 +771,6 @@ public class ManagedDownloader implements Downloader, Serializable {
             // send a guess query
             GUESSEndpoint ep = (GUESSEndpoint) i.next();
             OnDemandUnicaster.query(ep, sha1);
-            LOG.trace("sent to: " + ep);
             // TODO: see if/how we can wait 750 seconds PER send again.
             // if we got a result, no need to continue GUESSing.
             if(receivedNewSources)
@@ -1438,18 +1443,14 @@ public class ManagedDownloader implements Downloader, Serializable {
     /**
      * Requests this download to resume.
      *
-     * If the download is not in WAITING_FOR_RETRY, GAVE_UP,
-     * ABORTED, or WAITING_FOR_USER state then this does nothing.
-     * Otherwise, it will notify DownloadManager that we want to
-     * resume, and leave the actual resuming decision up to the manager.
+     * If the download is not inactive, this does nothing.
+     * If the downloader was waiting for the user, a requery is sent.
      */
     public boolean resume() {
         synchronized(this) {
             //Ignore request if already in the download cycle.
             if (!isInactive())
                 return false;
-                
-            LOG.trace("RESUMING, state: " + getState());
     
             // if we were waiting for the user to start us, then try to send the
             // requery.
@@ -1612,9 +1613,6 @@ public class ManagedDownloader implements Downloader, Serializable {
 		// TODO: Note that on a private network, these conditions might
 		//       be too strict.
 		
-		LOG.debug("nmessages: " + RouterService.countConnectionsWithNMessages(MIN_CONNECTION_MESSAGES) + 
-		          ", active: " + RouterService.getActiveConnectionMessages());
-
 		// Wait till your connections are stable enough to get the minimum 
 		// number of messages
 		return RouterService.countConnectionsWithNMessages(MIN_CONNECTION_MESSAGES) 

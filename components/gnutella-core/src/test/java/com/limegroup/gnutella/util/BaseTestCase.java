@@ -83,7 +83,7 @@ public class BaseTestCase extends AssertComparisons implements ErrorCallback {
         String method = System.getProperty("junit.test.method");
         if(method != null) {
             method = method.trim();
-            if(!"".equals(method) && !"${methods}".equals(method)) {
+            if(!"".equals(method) && !"${method}".equals(method)) {
                 StringTokenizer st = new StringTokenizer(method, ",");
                 List l = new LinkedList();
                 while(st.hasMoreTokens())
