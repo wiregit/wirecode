@@ -383,7 +383,8 @@ public final class SettingsManager {
      * Default file extensions.
      */
     private final String  DEFAULT_EXTENSIONS =
-		"html;htm;xml;txt;pdf;ps;rtf;doc;tex;mp3;wav;au;aif;aiff;ra;ram;wma;"+
+		"asx;html;htm;xml;txt;pdf;ps;rtf;doc;tex;mp3;wav;wax;au;aif;aiff;"+
+		"ra;ram;wma;wm;wmv;mp2v;mlv;mpa;mpv2;mid;midi;rmi;aifc;snd"+
 		"mpg;mpeg;asf;qt;mov;avi;mpe;swf;dcr;gif;jpg;jpeg;jpe;png;tif;tiff;"+
 		"exe;zip;gz;gzip;hqx;tar;tgz;z;rmj;lqt;rar;ace;sit;smi;img;ogg;rm;"+
 		"bin;dmg;jve;nsv;med;mod;7z;iso";
