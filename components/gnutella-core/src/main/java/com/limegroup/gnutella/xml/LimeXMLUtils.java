@@ -262,23 +262,6 @@ public class LimeXMLUtils
         return byteArray.toByteArray();
     }
     
-    /**
-     * It converts the passed aggregate XML Document (where root node 
-     * has multiple children of same type, to represent multiple results)
-     * to individual documents (in each of which the root node 
-     * will have only one child). So, in a way, the aggreate document 
-     * containing multiple results will get converted to multiple individual
-     * result documents
-     * @param aggregateXMLDocument The Aggregate XML document that needs to 
-     * be broken inti simpler documents
-     * @return Array of individual documents after breaking the aggregate
-     * document
-     */
-    public static LimeXMLDocument[] convertAggregateToParts(
-        LimeXMLDocument aggregateXMLDocument)
-    {
-        return null;
-    }
     
     /**
      * Compares the queryDoc with the replyDoc and finds out if the
