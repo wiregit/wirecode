@@ -63,6 +63,19 @@ public class UpdateMessageVerifier {
             throw new IllegalStateException();
         return xmlMessage;
     }
+    
+    /**
+     * package access writes data to signed_updateFile
+     */ 
+    void commitVersionFile() throws IOException {
+        File f = new File("lib\\signed_update_file.xml");
+        File nf = new File("lib\\signed_update_file.new");
+        RandomAccessFile raf = new RandomAccessFile(nf,"rw");
+        raf.write(data);
+        boolean deleted = nf.renameTo(f);
+        if(!deleted)
+            throw new IOException();
+    }
 
     public static void main(String[] args) {
         try {

@@ -5,6 +5,7 @@ import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.util.*;
 import com.limegroup.gnutella.http.*;
 import java.net.*;
+import java.util.*;
 import java.io.*;
 
 /**
@@ -96,8 +97,9 @@ public class UpdateManager {
                     return;
                 if(isGreaterVersion(newVersion)) {
                     synchronized(UpdateManager.this) {
-                        //TODO1:write data to disk
-                        //TODO1:update value of latestVersion
+                        verifier.commitVersionFile();//could throw an exception
+                        //update the value of latestVersion
+                        latestVersion = newVersion;//we have the file committed
                     }
                 }
                 } catch(Exception e ) {
@@ -109,12 +111,29 @@ public class UpdateManager {
         checker.start();      
     }
 
+    /**
+     * compares this.latestVersion with version. and returns true if version 
+     * is a newer version. 
+     */
     private boolean isGreaterVersion(String version) {
-        //TODO1: figure out which is bigger and return true if
-        //v1 is bigger than v2
-        if(version==null)
+        if(version==null) //no version? latestVersion is newer
             return false;
-        return true;
-        
+        int l1, l2 = -1;
+        int v1, v2 = -1;
+        try {
+            StringTokenizer tokenizer = new StringTokenizer(latestVersion,".");
+            l1 = (new Integer(tokenizer.nextToken())).intValue();
+            l2 = (new Integer(tokenizer.nextToken())).intValue();
+            tokenizer = new StringTokenizer(version,".");
+            v1 = (new Integer(tokenizer.nextToken())).intValue();
+            v2 = (new Integer(tokenizer.nextToken())).intValue();
+        } catch (Exception e) {//numberFormat or NoSuchElementException
+            return false;
+        }
+        if(v1>l1)
+            return true;
+        else if(v1==l1 && v2>l2)
+            return true;        
+        return false;
     }
 }
