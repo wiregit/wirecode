@@ -329,7 +329,8 @@ public class VersionUpdate
 			return;
 		}
 		if(laxFile.exists()) {
-			String newClasspaths = "lax.class.path=";;
+			String newClasspaths = "lax.class.path=";
+			StringBuffer sb = new StringBuffer(newClasspaths);
 			try {
 				FileReader fr = new FileReader(laxFile);
 				FileWriter fw = null;
@@ -341,22 +342,24 @@ public class VersionUpdate
 				}
 				BufferedReader br = new BufferedReader(fr);
 				BufferedWriter bw = new BufferedWriter(fw);
+				StringTokenizer st;
+				String pathSeparator = System.getProperty("path.separator");
 				String line = br.readLine();
+				String curTok = "";
 				while(line != null) {
 					if(line.startsWith(newClasspaths)) {
 						line = line.substring(15);
-						StringBuffer sb = new StringBuffer(newClasspaths);
-						StringTokenizer st = new StringTokenizer(line, ";");
-						String curTok = st.nextToken()+";";
+						st = new StringTokenizer(line, pathSeparator);
+						curTok = st.nextToken()+pathSeparator;
 						while(st.hasMoreTokens()) {							
 							if(curTok.startsWith("LimeWire")) {
-								if(!curTok.endsWith("update.jar;")) {
+								if(!curTok.endsWith("update.jar"+pathSeparator)) {
 									_settings.setOldJARName(curTok);
-									curTok = newFileName+";";
+									curTok = newFileName+pathSeparator;
 								}
 							}
 							sb.append(curTok);
-							curTok = st.nextToken()+";";
+							curTok = st.nextToken()+pathSeparator;
 						}
 						line = sb.toString();
 					}
