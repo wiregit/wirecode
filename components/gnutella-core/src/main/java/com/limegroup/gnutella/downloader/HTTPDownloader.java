@@ -42,6 +42,11 @@ public class HTTPDownloader implements BandwidthTracker {
 	private String _filename; 
 	private byte[] _guid;
 
+    /**
+     * The total amount we've downloaded, including all previous 
+     * HTTP connections
+     */
+    private volatile int _totalAmountRead;
     /** The amount we've downloaded. */
 	private volatile int _amountRead;
     /** The amount we'll have downloaded if the download completes properly. 
@@ -131,6 +136,7 @@ public class HTTPDownloader implements BandwidthTracker {
             AlternateLocationCollection.createCollection(alts.getSHA1Urn()));
 
 		_amountRead = 0;
+		_totalAmountRead = 0;
     }
 
     /**
@@ -197,6 +203,7 @@ public class HTTPDownloader implements BandwidthTracker {
                NotSharingException, QueuedException {
 
         _amountToRead = stop-start;
+        _totalAmountRead += _amountRead;
         _amountRead = 0;
 		_initialReadingPoint = start;
         //Write GET request and headers.  We request HTTP/1.1 since we need
@@ -618,6 +625,7 @@ public class HTTPDownloader implements BandwidthTracker {
 
     public int getInitialReadingPoint() {return _initialReadingPoint;}
 	public int getAmountRead() {return _amountRead;}
+	public int getTotalAmountRead() {return _totalAmountRead + _amountRead;}
 	public int getAmountToRead() {return _amountToRead;}
 
     /** 
@@ -647,7 +655,7 @@ public class HTTPDownloader implements BandwidthTracker {
 
     /////////////////////Bandwidth tracker interface methods//////////////
     public void measureBandwidth() {
-        bandwidthTracker.measureBandwidth(getAmountRead());
+        bandwidthTracker.measureBandwidth(getTotalAmountRead());
     }
 
     public float getMeasuredBandwidth() throws InsufficientDataException {
