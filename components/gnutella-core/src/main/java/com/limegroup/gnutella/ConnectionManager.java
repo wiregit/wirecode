@@ -58,9 +58,26 @@ import org.apache.commons.logging.Log;
 public class ConnectionManager {
     
     /**
+     * Timestamp for the last time the user selected to disconnect.
+     */
+    private volatile long _disconnectTime = 0;
+
+    /**
+     * Timestamp for the time we began automatically connecting.  We stop 
+     * trying to automatically connect if the user has disconnected since that
+     * time.
+     */
+    private volatile long _automaticConnectTime = 0;
+
+    /**
+     * Flag for whether or not the auto-connection process is in effect.
+     */
+    private volatile boolean _automaticallyConnecting;
+
+    /**
      * Flag for whether or not the user has an internet connection.
      */
-    private boolean _noInternetConnection;
+    private volatile boolean _noInternetConnection;
     
     /**
      * Timestamp of our last successful connection.
@@ -1081,6 +1098,7 @@ public class ConnectionManager {
      * the number of connections to zero.
      */
     public synchronized void disconnect() {
+        _disconnectTime = System.currentTimeMillis();
         //1. Prevent any new threads from starting.  Note that this does not
         //   affect the permanent settings.  We have to use setKeepAliveNow
         //   to ignore the fact that we have a client-ultrapeer connection.
@@ -1104,11 +1122,17 @@ public class ConnectionManager {
      */
     public synchronized void connect() {
         
+        // Reset the disconnect time to be a long time ago.
+        _disconnectTime = 0;
+        
+        // Ignore this call if we're already connected.
+        if(isConnected()) {
+            return;
+        }
         _connectionAttempts = 0;
         _noInternetConnection = false;
         _lastConnectionCheck = 0;
         _lastSuccessfulConnect = 0;
-        //_lastConnectionCheck = Long.MIN_VALUE;
 
         //Tell the HostCatcher to retrieve more bootstrap servers
         //if necessary. (Only fetch if we haven't received a reply
@@ -1815,8 +1839,55 @@ public class ConnectionManager {
      */
     public void noInternetConnection() {
         
-        // Notify the user that they have no internet connection.
-        MessageService.showError("NO_INTERNET", QuestionsHandler.NO_INTERNET);
+        if(_automaticallyConnecting) {
+            // Notify the HostCatcher that it should keep any hosts it has 
+            // already used instead of discarding them only if we're down to
+            // a small number of hosts to try. 
+            // The HostCatcher can be null in testing.
+            if(_catcher != null && (_catcher.getNumHosts() < 50)) {
+                _catcher.recoverHosts();
+            }      
+            
+            // We've already notified the user about their connection and we're
+            // alread retrying, so just return.    
+            return;  
+        }
+        
+        // If the user has used the computer in the last 30 seconds, notify 
+        // them to reconnect.  Otherwise, there may have been a temporary 
+        // hiccup in the network connection, and we'll keep automatically 
+        // trying to recover the connection.
+        if(SystemUtils.getIdleTime() < 30*1000 && 
+           SystemUtils.supportsIdleTime()) {
+            // Notify the user that they have no internet connection.
+            MessageService.showError("NO_INTERNET", 
+                QuestionsHandler.NO_INTERNET);
+        } else {
+            // Notify the user that they have no internet connection and that
+            // we will automatically retry
+            MessageService.showError("NO_INTERNET_RETRYING",
+                QuestionsHandler.NO_INTERNET);
+            
+            // Try to reconnect in 2 minutes, and then every 30 minutes after
+            // that.
+            RouterService.schedule(new Runnable() {
+                public void run() {
+                    // If the last time the user disconnected is more recent
+                    // than when we started automatically connecting, just 
+                    // return without trying to connect.  Note that the 
+                    // disconnect time is reset if the user selects to connect.
+                    if(_automaticConnectTime < _disconnectTime) {
+                        return;
+                    }
+                    ConnectionManager cm = RouterService.getConnectionManager();
+                    if(!cm.isConnected()) {
+                        cm.connect();
+                    }
+                }
+            }, 10*1000, 60*1000);   
+            _automaticConnectTime = System.currentTimeMillis();
+            _automaticallyConnecting = true;         
+        }
         
         _noInternetConnection = true;
         
