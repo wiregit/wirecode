@@ -48,15 +48,21 @@ public class MDFiveCalculator {
 				break;
 			}
 			// byte b = = fis.read();
-			
-			value += read;
+			if (read > 0)
+				value += read;
 			
 		}
+
+		// print(value);
 
 		// right now this is just returning the summation 
 		// of the first SIZE_TO_READ (1024) bytes.
 		return value;
 
+	}
+
+	public void print(int i) {
+		System.out.println("The value is: " + i);
 	}
 
 }

@@ -28,7 +28,15 @@ public class SmartDownloader extends HTTPDownloader {
 		super();
 		_state = NOT_CONNECTED;  // not connected from the super class
 		_remoteFiles = files;
+		_router = router;
 		_callback = callback;
+		_acceptor = acceptor;
+		_filename = files[0].getFileName();
+		_amountRead = 0;
+		// _sizeOfFile = -1; // 
+		_sizeOfFile = files[0].getSize();
+		_downloadDir = "";
+		_stateString = "";
 	}
 
 	public void run() {
@@ -62,7 +70,8 @@ public class SmartDownloader extends HTTPDownloader {
 			/* see if we can connect to it */
 			  if ( tryHost(file.getIndex(), file.getFileName(),
 						   file.getHost(), file.getPort() ) ){
-				  break;
+				  _state = COMPLETE;
+				  return;
 			  } 
 
 			index++;
@@ -79,7 +88,7 @@ public class SmartDownloader extends HTTPDownloader {
 			
 		// try to connect...
 		String furl = "/get/" + String.valueOf(index) + "/" + filename;
-		String protocal = "HTTP";
+		String protocal = "http";
 		URLConnection conn;
 		try {
 			URL url = new URL(protocal, host, port, furl);
@@ -107,6 +116,7 @@ public class SmartDownloader extends HTTPDownloader {
 
 		// if there is a problem, return false
         if ( _state == ERROR ) {
+			
 			_state = NOT_CONNECTED;
             return false;
 		}
@@ -174,7 +184,7 @@ public class SmartDownloader extends HTTPDownloader {
 		int c = -1;
 		
         byte[] buf = new byte[1024];
-		
+
         while (true) {
 
 			if (_amountRead == _sizeOfFile) {
@@ -206,6 +216,7 @@ public class SmartDownloader extends HTTPDownloader {
                 fos.write(buf, 0, c);
             }
             catch (Exception e) {
+				e.printStackTrace();
                 _state = ERROR;
                 break;
             }
@@ -225,7 +236,7 @@ public class SmartDownloader extends HTTPDownloader {
 
         //Move from temporary directory to final directory.
         if ( _amountRead == _sizeOfFile ) {
-            String pname = downloadDir + filename;
+            String pname = downloadDir + _filename;
             File target=new File(pname);
             //If target doesn't exist, this will fail silently.  Otherwise,
             //it's always safe to do this since we prompted the user above.
@@ -233,14 +244,15 @@ public class SmartDownloader extends HTTPDownloader {
             boolean ok=myFile.renameTo(target);
             if (! ok) {
                 //renameTo is not guaranteed to work, esp. when the
-                //file is being moved across file systems.  
+                //file is being moved across file systems. 
                 _state = NOT_CONNECTED;
                 _stateString = "Couldn't Move to Library";
                 return false;
             }
+
             _state = COMPLETE;
             FileManager.getFileManager().addFileIfShared(pname);
-			return true;
+
         }
 
         else
@@ -250,9 +262,18 @@ public class SmartDownloader extends HTTPDownloader {
 			return false;
         }
 
-
+		return true;
 		// return false;
 	}
 	
 
 }
+
+
+
+
+
+
+
+
+

@@ -433,8 +433,17 @@ public class RouterService
      */
     public HTTPDownloader initDownload(String ip, int port, int index,
           String fname, byte[] bguid, int size) {
-        return new HTTPDownloader("http", ip, port, index, fname, router,
-                                  acceptor, callback, bguid, size);
+     //     return new HTTPDownloader("http", ip, port, index, fname, router,
+//                                    acceptor, callback, bguid, size);
+
+
+		RemoteFileDesc f = new RemoteFileDesc(ip, port, index, fname, size, bguid, 1);
+
+		RemoteFileDesc files[] = new RemoteFileDesc[1];
+		files[0] = f;
+
+
+		return new SmartDownloader(router, files, acceptor, callback);
 
     }
 

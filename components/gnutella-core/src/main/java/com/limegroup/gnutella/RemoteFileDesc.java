@@ -16,6 +16,7 @@ public class RemoteFileDesc {
 	private int _index;
 	private byte[] _clientGUID;
 	private int _priority;
+	private int _size;
 
 	/** 
 	 * @param host the host's ip
@@ -26,12 +27,13 @@ public class RemoteFileDesc {
 	 * @param priority this is still a little up in the air
 	 */
 	public RemoteFileDesc(String host, int port, int index, String filename,
-						  byte[] clientGUID, int priority) {
+						  int size, byte[] clientGUID, int priority) {
 		
 		_host = host;
 		_port = port;
 		_index = index;
 		_filename = filename;
+		_size = size;
 		_clientGUID = clientGUID;
 		_priority = priority;
 	}
@@ -40,6 +42,7 @@ public class RemoteFileDesc {
 	public String getHost() {return _host;}
 	public int getPort() {return _port;}
 	public int getIndex() {return _index;}
+	public int getSize() {return _size;}
 	public String getFileName() {return _filename;}
 	public byte[] getClientGUID() {return _clientGUID;}
 	public int getPriority() {return _priority;}
@@ -47,6 +50,7 @@ public class RemoteFileDesc {
 	public void setHost(String h) {_host = h;}
 	public void setPost(int p) {_port = p;}
 	public void setIndex(int i) {_index = i;}
+	public void setSize(int s) {_size = s;}
 	public void setFileName(String name) {_filename = name;}
 	public void setClientGUID(byte[] b) {_clientGUID = b;}
 	public void setPriority(int p) {_priority = p;}
