@@ -107,8 +107,8 @@ public class PromotionRequestVendorMessage extends VendorMessage {
 	 * @param candidate the candidate for promotion
 	 * @param distance how long has the message travelled.
 	 */
-	public PromotionRequestVendorMessage(QueryReply.IPPortCombo requestor,
-							QueryReply.IPPortCombo candidate,
+	public PromotionRequestVendorMessage(QueryReply.IPPortCombo candidate,
+							QueryReply.IPPortCombo requestor,
 							int distance){
 		super(F_LIME_VENDOR_ID, F_PROMOTION_REQUEST,VERSION,derivePayload(requestor,candidate,distance));
 		_requestor = requestor;

@@ -150,7 +150,7 @@ public class RadialCrawler implements AsyncCrawler, BlacklistCrawler {
 				GUID key = new GUID(GUID.makeGuid());
 				
 				//the message to send (we do not request any leafs)
-				GiveUPVendorMessage gupvm = new GiveUPVendorMessage(key,_degree,0);
+				GiveUPVendorMessage gupvm = new GiveUPVendorMessage(key,_degree,0,GiveUPVendorMessage.PLAIN);
 				
 				//register a new listener with ttl one less than ours
 				RouterService.getMessageRouter().registerMessageListener(key,
@@ -242,7 +242,7 @@ public class RadialCrawler implements AsyncCrawler, BlacklistCrawler {
 			
 			//create a new vendor message
 			GUID key = new GUID(GUID.makeGuid());
-			GiveUPVendorMessage gupvm = new GiveUPVendorMessage(key,_degree,0);
+			GiveUPVendorMessage gupvm = new GiveUPVendorMessage(key,_degree,0,GiveUPVendorMessage.PLAIN);
 			
 			//register on both lists
 			_registeredGuids.add(key);

@@ -20,6 +20,12 @@ public class UPListVendorMessage extends VendorMessage {
 	
 	List _ultrapeers, _leaves;
 	
+	final boolean _connectionTime, _localeInfo;
+	
+	/**
+	 * the format of the response.
+	 */
+	private final byte _format;
 	
 
 	
@@ -29,9 +35,15 @@ public class UPListVendorMessage extends VendorMessage {
 	public UPListVendorMessage(GiveUPVendorMessage request){
 		super(F_LIME_VENDOR_ID,F_ULTRAPEER_LIST, VERSION, derivePayload(request));
 		setGUID(new GUID(request.getGUID()));
+		_format = (byte)(request.getFormat() & GiveUPVendorMessage.FEATURE_MASK);
+		_localeInfo = request.asks4LocaleInfo();
+		_connectionTime = request.asks4ConnectionTime();
 	}
 	
 	private static byte [] derivePayload(GiveUPVendorMessage request) {
+		
+		//local copy of the requested format
+		byte format = (byte)(request.getFormat() & GiveUPVendorMessage.FEATURE_MASK);
 		
 		//get a list of all ultrapeers and leafs we have connections to
 		List endpointsUP = new LinkedList();
@@ -44,7 +56,7 @@ public class UPListVendorMessage extends VendorMessage {
 		while(iter.hasNext()) {
 			Connection c = (Connection)iter.next();
 			if (c.isGoodUltrapeer()) 
-				endpointsUP.add( new Endpoint(c.getAddress(), c.getPort()));
+				endpointsUP.add(c);
 		}
 		
 		iter = RouterService.getConnectionManager()
@@ -54,8 +66,14 @@ public class UPListVendorMessage extends VendorMessage {
 		while(iter.hasNext()) {
 			Connection c = (Connection)iter.next();
 			//if (c.isGoodLeaf()) //uncomment if you decide you want only good leafs 
-				endpointsLeaf.add( new Endpoint(c.getAddress(), c.getPort()));
+				endpointsLeaf.add(c);
 		}
+		
+		//TODO:when the locale pref stuff gets merged, sort the results by locale pref
+		//and do not randomize
+		//the ping does not carry info about which locale to preference to, so we'll just
+		//preference any locale.  In reality we will probably have only connections only to 
+		//this host's pref'd locale so they will end up in the pong.
 		
 		//then see how many of each kind the client requested, if necessary trim
 		if (request.getNumberUP() != request.ALL && 
@@ -75,28 +93,52 @@ public class UPListVendorMessage extends VendorMessage {
 		
 		
 		//serialize the Endpoints to a byte []
-		byte [] result = new byte[(endpointsUP.size()+endpointsLeaf.size())*6+2];
+		int bytesPerResult = 6;
+		if (request.asks4ConnectionTime())
+			bytesPerResult+=2;
+		if (request.asks4LocaleInfo())
+			bytesPerResult+=2;
+		byte [] result = new byte[(endpointsUP.size()+endpointsLeaf.size())*
+								  bytesPerResult+3];
 		
+		//write out metainfo
 		result[0] = (byte)endpointsUP.size();
 		result[1] = (byte)endpointsLeaf.size();
+		result[2] = format;
 		
 		//cat the two lists
 		endpointsUP.addAll(endpointsLeaf);
 		
-		int index = 2;
+		//cache the call to currentTimeMillis() cause its not always cheap
+		long now = System.currentTimeMillis();
+		
+		int index = 3;
 		iter = endpointsUP.iterator();
 		while(iter.hasNext()) {
 			//pack each entry into a 6 byte array and add it to the result.
-			Endpoint e = (Endpoint)iter.next();
+			Connection c = (Connection)iter.next();
 			System.arraycopy(
-					packIPAddress(e.getInetAddress(),e.getPort()),
+					packIPAddress(c.getInetAddress(),c.getPort()),
 					0,
 					result,
 					index,
 					6);
 			index+=6;
+			//add connection time if asked for
+			//represent it as a short with the # of minutes
+			if (request.asks4ConnectionTime()) {
+				long uptime = now - c.getConnectionTime();
+				short packed = (short) ( uptime / (60*1000));
+				ByteOrder.short2leb(packed, result, index);
+				index+=2;
+			}
+				
+			if (request.asks4LocaleInfo()){
+				//TODO: when locale pref gets merged put the 2-byte language code here
+			}
+			
 		}
-		//TODO: add check for outofbounds
+		
 		return result;
 	}
 	
@@ -126,20 +168,37 @@ public class UPListVendorMessage extends VendorMessage {
 			throws BadPacketException {
 		super(guid, ttl, hops, F_LIME_VENDOR_ID, F_ULTRAPEER_LIST, version, payload);
 		
+		
 		_ultrapeers = new LinkedList();
 		_leaves = new LinkedList();
 		
-		// check if the payload is legal length
+		
 		int numberUP = payload[0];
 		int numberLeaves = payload[1];
-		if (payload.length!= (numberUP+numberLeaves)*6+2) //evil evil
+		//we mask the received results with our capabilities mask because
+		//we should not be receiving more features than we asked for, even
+		//if the other side supports them.
+		_format = (byte) (payload[2] & GiveUPVendorMessage.FEATURE_MASK);
+		
+		_connectionTime = ((_format & GiveUPVendorMessage.CONNECTION_TIME)
+			== (int)GiveUPVendorMessage.CONNECTION_TIME);
+		_localeInfo = (_format & GiveUPVendorMessage.LOCALE_INFO)
+			== (int)GiveUPVendorMessage.LOCALE_INFO;
+		
+		int bytesPerResult = 6;
+		
+		if (_connectionTime)
+			bytesPerResult+=2;
+		if (_localeInfo)
+			bytesPerResult+=2;
+		
+		//check if the payload is legal length
+		if (payload.length!= (numberUP+numberLeaves)*bytesPerResult+3) //evil evil
 			throw new BadPacketException("size is "+payload.length+ 
-					" but the # of UPs is " + numberUP +
-					" and the # of leaves is " + numberLeaves +
-					" , so the size should have been "+ (numberUP+numberLeaves)*6+2);
+					" but should have been "+ (numberUP+numberLeaves)*bytesPerResult+2);
 		
 		//parse the up ip addresses
-		for (int i = 2;i<numberUP*6;i+=6) {
+		for (int i = 3;i<numberUP*bytesPerResult;i+=bytesPerResult) {
 			
 			byte [] current = new byte[6];
 			System.arraycopy(payload,i,current,0,6);
@@ -151,12 +210,27 @@ public class UPListVendorMessage extends VendorMessage {
 				throw new BadPacketException("parsing of ip:port failed. "+
 						" dump of current byte block: "+current);
 			
-			_ultrapeers.add(new Endpoint(combo.getInetAddress().getAddress(),
-								combo.getPort()));
+			//store the result in an ExtendedEndpoint
+			ExtendedEndpoint result; 
+			
+			if(_connectionTime)  //FIXME: when the changes to EE get merged, add a setter rather than doing this 
+				result= new ExtendedEndpoint(combo.getAddress(),
+								combo.getPort(),
+								ByteOrder.leb2short(payload,i+6));
+			else 
+				result= new ExtendedEndpoint(combo.getAddress(),
+						combo.getPort());
+			
+			if (_localeInfo) {
+				//add the locale info to the extendedEndpoint
+			}
+			 _ultrapeers.add(result);
+			
+			
 		}
 		
 		//parse the leaf ip addresses
-		for (int i = numberUP*6+2;i<payload.length;i+=6) {
+		for (int i = numberUP*bytesPerResult+3;i<payload.length;i+=bytesPerResult) {
 			byte [] current = new byte[6];
 			System.arraycopy(payload,i,current,0,6);
 			
@@ -167,11 +241,23 @@ public class UPListVendorMessage extends VendorMessage {
 				throw new BadPacketException("parsing of ip:port failed. "+
 						" dump of current byte block: "+current);
 			
-			_leaves.add(new Endpoint(combo.getInetAddress().getAddress(),
-								combo.getPort()));
+			ExtendedEndpoint result; 
+			
+			if(_connectionTime) 
+				result= new ExtendedEndpoint(combo.getAddress(),
+								combo.getPort(),
+								ByteOrder.leb2short(payload,i+6));
+			else 
+				result= new ExtendedEndpoint(combo.getAddress(),
+						combo.getPort());
+			
+			if (_localeInfo) {
+				//add the locale info to the extendedEndpoint
+			}
+			 _leaves.add(result);
 		}
 		
-		//leave the check whether we got as many UPs as requested elsewhere.
+		//do the check whether we got as many UPs as requested elsewhere.
 	}
 	/**
 	 * @return Returns the List of Ultrapeers contained in the message.
@@ -185,5 +271,17 @@ public class UPListVendorMessage extends VendorMessage {
 	 */
 	public List getLeaves() {
 		return _leaves;
+	}
+	/**
+	 * @return whether the set of results contains connection uptime
+	 */
+	public boolean hasConnectionTime() {
+		return _connectionTime;
+	}
+	/**
+	 * @return whether the set of results contains locale information
+	 */
+	public boolean hasLocaleInfo() {
+		return _localeInfo;
 	}
 }
