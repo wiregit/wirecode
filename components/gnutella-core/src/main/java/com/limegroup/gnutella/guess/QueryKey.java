@@ -53,10 +53,8 @@ public class QueryKey {
      */
     public void prepareForNetwork() {
         // the encrypted bytes CANNOT have any 0x1c's in it!!  replace them....
-        for (int i = 0; i < _queryKey.length; i++) {
+        for (int i = 0; i < _queryKey.length; i++) 
             if (_queryKey[i] == (byte) 0x1c) _queryKey[i] = (byte) 0xFA;
-            else if (_queryKey[i] == (byte) 0) _queryKey[i] = (byte) 0xAF;
-        }
     }
 
 
