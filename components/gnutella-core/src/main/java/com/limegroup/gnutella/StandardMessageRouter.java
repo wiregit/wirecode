@@ -36,11 +36,11 @@ public class StandardMessageRouter
     protected void respondToPingRequest(PingRequest pingRequest,
                                         Acceptor acceptor)
     {
-        //only return our own address if we still have any available incoming
-        //slots or 
+        //Only return a pong if we still have incoming connection slots or the
+        //ping is from a crawler, either directly or indirectly.
         int hops = (int)pingRequest.getHops();
         int ttl = (int)pingRequest.getTTL();
-        if ( (!_manager.hasAvailableIncoming()) && ((hops+ttl > 2)) )
+        if ( (!_manager.hasAvailableIncoming()) && (hops+ttl > 2) )
             return;
 
         int num_files = FileManager.instance().getNumFiles();
