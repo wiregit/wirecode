@@ -859,7 +859,6 @@ public class ManagedDownloader implements Downloader, Serializable {
         }
         if (status!=COMPLETE)
             return status;
-        //System.out.println("Sumeet: status "+status);
         //3. Move to library.  
         //System.out.println("MANAGER: completed");
         //Delete target.  If target doesn't exist, this will fail silently.
@@ -889,6 +888,7 @@ public class ManagedDownloader implements Downloader, Serializable {
         if (fileExists(completeFile))
             fileManager.removeFileIfShared(completeFile);
         fileManager.addFileIfShared(completeFile, getXMLDocuments());  
+        //System.out.println("About to return complete from TAD2");
         return COMPLETE;
     }   
 
@@ -953,14 +953,17 @@ public class ManagedDownloader implements Downloader, Serializable {
     private int tryAllDownloads3() throws InterruptedException {
         //The parts of the file we still need to download.
         //INVARIANT: all intervals are disjoint and non-empty
-        needed=new ArrayList(); {
-            RemoteFileDesc rfd=(RemoteFileDesc)files.get(0);
-            File incompleteFile=incompleteFileManager.getFile(rfd);
-            synchronized (incompleteFileManager) {
-                Iterator iter=incompleteFileManager.
-                getFreeBlocks(incompleteFile, rfd.getSize());
-                while (iter.hasNext()) 
-                    needed.add((Interval)iter.next());
+        synchronized(this) {
+            needed=new ArrayList(); 
+            {//all variables in this block have limited scope
+                RemoteFileDesc rfd=(RemoteFileDesc)files.get(0);
+                File incompleteFile=incompleteFileManager.getFile(rfd);
+                synchronized (incompleteFileManager) {
+                    Iterator iter=incompleteFileManager.
+                    getFreeBlocks(incompleteFile, rfd.getSize());
+                    while (iter.hasNext())
+                        needed.add((Interval)iter.next());
+                }
             }
         }
 
@@ -973,6 +976,7 @@ public class ManagedDownloader implements Downloader, Serializable {
                 if (stopped) {
                     throw new InterruptedException();
                 } else if (dloaders.size()==0 && needed.size()==0) {
+                    //System.out.println("Download over returning from TAD3");
                     //Finished.
                     return COMPLETE;
                 } else if (dloaders.size()==0 
@@ -997,7 +1001,6 @@ public class ManagedDownloader implements Downloader, Serializable {
                     public void run() {
                         try {
                             connectAndDownload(rfd);
-                            //System.out.println("Sumeet: end of run");
                         } catch (Exception e) {
                             //This is a "firewall" for reporting unhandled
                             //errors.  We don't really try to recover at this
@@ -1010,7 +1013,6 @@ public class ManagedDownloader implements Downloader, Serializable {
                 connectCreator.start();
             }//end of for 
             //wait for a notification before we continue.
-            //System.out.println("Sumeet: waiting");
             synchronized(this) {
                 try {
                     this.wait(4000);//if no workers notify in 4 secs, iterate
@@ -1018,14 +1020,23 @@ public class ManagedDownloader implements Downloader, Serializable {
                     //ee.printStackTrace();
                 }
             }
-            //System.out.println("Sumeet: finished waiting");
         }//end of while
     }
     
+    /**
+     * Top level method of the thread. Calls three methods 
+     * a. Establish a TCP Connection.
+     * b. Assign this thread a part of the file, and do HTTP handshaking
+     * c. get the file.
+     * Each of these steps can run into errors, which have to be dealt with
+     * differently.
+     */
     private void connectAndDownload(RemoteFileDesc rfd) {
         //this make throw an exception if we were not able to establish a 
         //direct connection and push was unsuccessful too
         HTTPDownloader dloader = null;
+        //Step 1. establish a TCP Connection, either by opening a socket,
+        //OR by sending a push request.
         try {
             dloader = establishConnection(rfd);
             //find out the start and stop areas for this thread
@@ -1034,6 +1045,9 @@ public class ManagedDownloader implements Downloader, Serializable {
             //could not be established, so we are throwing away the rfd
             return;
         }
+        //Step 2. OK. Wr have established TCP Connection. This downloader
+        //should choose a part of the file to download and send the appropriate
+        //HTTP hearders
         try {
             assignAndRequest(dloader);      
         } catch(TryAgainLaterException tale) {
@@ -1047,16 +1061,19 @@ public class ManagedDownloader implements Downloader, Serializable {
             files.add(rfd);//we can try this rfd again later
             return;
         } catch (NoSuchElementException nsex) {
-            //System.out.println("Sumeet: files size "+files.size());
-            ;//ignored...we have already handled it all
+            return;//ignored...we have already handled it all
         } catch (Exception e) {
             debug ("connectAndDownload : other exception thrown");
             //IOException, FileNotFound, NotSharing
-            //InterruptedException, NoSuchElementException 
             //Don't care about this rfd...lose it.
             updateNeeded(dloader);
             return;
         }
+        
+        //Step 3. OK, we have successfully connected, start saving the file
+        //to disk
+        doDownload(dloader);
+        
     }
     
     private synchronized void updateNeeded(HTTPDownloader dloader) {
@@ -1099,27 +1116,22 @@ public class ManagedDownloader implements Downloader, Serializable {
      * @exception InterruptedException this thread was interrupted while
      *  waiting to send/receive HTTP headers.
      */
-    private void assignAndRequest(HTTPDownloader dloader) throws 
+    private synchronized void assignAndRequest(HTTPDownloader dloader) throws 
     InterruptedException, IOException, TryAgainLaterException, 
-    FileNotFoundException, NotSharingException , NoSuchElementException {
-        
-        synchronized(this) {
-            if (needed.size()>0)
-                assignWhite(dloader); //any exceptions passed up call chain
-            else
-                assignGrey(dloader); //any exceptions are passed up call chain
-            
-            //System.out.println("MANAGER: downloading from "
-            // +dloader.getInitialReadingPoint()+" to "+
-            //+(dloader.getInitialReadingPoint()+dloader.getAmountToRead()));
-            setState(DOWNLOADING);
-            if (stopped)
-                throw new InterruptedException();
-            dloaders.add(dloader);
-			chatList.addHost(dloader);
-        }
-         
-        tryOneDownload(dloader);
+    FileNotFoundException, NotSharingException , NoSuchElementException {    
+        if (needed.size()>0)
+            assignWhite(dloader); //any exceptions passed up call chain
+        else
+            assignGrey(dloader); //any exceptions are passed up call chain
+        //did not throw exception? OK. we are downloading
+        setState(DOWNLOADING);
+        if (stopped)
+            throw new InterruptedException();
+        dloaders.add(dloader);
+        chatList.addHost(dloader);
+        //System.out.println("MANAGER: downloading from "
+        // +dloader.getInitialReadingPoint()+" to "+
+        //+(dloader.getInitialReadingPoint()+dloader.getAmountToRead()));
     }
 
     /**
@@ -1136,7 +1148,7 @@ public class ManagedDownloader implements Downloader, Serializable {
         //this line can throw a bunch of exceptions.
         dloader.connectHTTP(interval.low, interval.high);
         dloader.stopAt(interval.high);
-        debug("MANAGER: assigning white "+interval+" to "+dloader);
+        debug("WORKER: picking white "+interval+" to "+dloader);
     }
 
     /**
@@ -1175,13 +1187,11 @@ public class ManagedDownloader implements Downloader, Serializable {
         //variable.
         int amountRead=biggest.getAmountRead();
         int left=biggest.getAmountToRead()-amountRead;
-        //System.out.println("Sumeet left, downloader "+left+", "+dloader);
         if (left < MIN_SPLIT_SIZE) { 
             float bandwidth = -1;//initialize
             try {
                 bandwidth = biggest.getMeasuredBandwidth();
             } catch (InsufficientDataException ide) {
-                //System.out.println("Sumeet: insufficientdataException ");
                 files.add(dloader.getRemoteFileDesc());//RFD may still be used
                 throw new NoSuchElementException();
             }
@@ -1194,7 +1204,7 @@ public class ManagedDownloader implements Downloader, Serializable {
                 //this line could throw a bunch of exceptions
                 dloader.connectHTTP(getOverlapOffset(start), stop);
                 dloader.stopAt(stop);
-                debug("MANAGER: assigning stolen grey "
+                debug("WORKER: picking stolen grey "
                       +start+"-"+stop+" from "+biggest+" to "+dloader);
                 biggest.stopAt(start);
                 biggest.stop();
@@ -1318,7 +1328,7 @@ public class ManagedDownloader implements Downloader, Serializable {
      * which MUST be initialized (i.e., downloader.connectTCP() and
      * connectHTTP() have been called) 
      */
-    private void tryOneDownload(HTTPDownloader downloader) {
+    private void doDownload(HTTPDownloader downloader) {
         boolean problem = false;
         try {
             downloader.doDownload(true);
