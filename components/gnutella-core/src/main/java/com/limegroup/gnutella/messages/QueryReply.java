@@ -5,6 +5,7 @@ import com.limegroup.gnutella.search.HostData;
 import com.limegroup.gnutella.udpconnect.UDPConnection;
 import com.limegroup.gnutella.util.*;
 import com.limegroup.gnutella.statistics.*;
+import com.limegroup.gnutella.settings.*;
 import java.io.*;
 import java.net.*;
 import java.util.Locale;
@@ -1119,12 +1120,18 @@ public class QueryReply extends Message implements Serializable{
         if ((this.getPushProxies() != null) && 
             (this.getPushProxies().size() > 1))
             hasPushProxies = true;
-            
+        
+	boolean testingFwt = SearchSettings.FWT_ONLY.getValue();    
+
         if (getSupportsFWTransfer() && 
             UDPService.instance().canReceiveSolicited()) {
             iFirewalled = false;
             heFirewalled = NO;
-        }
+	    if (testingFwt)
+		return 3;
+        } 
+	else if (testingFwt)
+		return -1; 
 
         /* In the old days, busy hosts were considered bad.  Now they're ok (but
          * not great) because of alternate locations.  WARNING: before changing

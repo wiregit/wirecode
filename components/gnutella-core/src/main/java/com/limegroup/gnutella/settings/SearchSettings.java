@@ -76,4 +76,11 @@ public final class SearchSettings extends LimeProps {
 	 */    
     public static final IntSetting PARALLEL_SEARCH =
         FACTORY.createIntSetting("PARALLEL_SEARCH", 5);
+
+    /**
+     * whether we want the gui to show only results that would
+     * require firewall-to-firewall transfer.  For testing purposes only
+     */
+    public static final BooleanSetting FWT_ONLY = 
+	FACTORY.createBooleanSetting("FWT_TEST",false);
 }
