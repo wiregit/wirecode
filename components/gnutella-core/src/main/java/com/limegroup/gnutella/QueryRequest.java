@@ -41,7 +41,16 @@ public class QueryRequest extends Message {
     }
     
     public String getQuery() {
-	return new String(payload,2,payload.length-3);
+	int n=payload.length;
+	//Some clients (like Gnotella) DOUBLE null-terminate strings.
+	//When you make a Java string with 0 in it, it is NOT ignored.
+	//The solution is simple: just shave off the extra null terminator.
+	if (super.getLength()>3 && payload[n-2]==(byte)0)
+	    return new String(payload,2,payload.length-4);
+	//Normal case: single null-terminated.
+	//This also handles the special case of an empty search string.
+	else
+	    return new String(payload,2,payload.length-3);
     }
 
     /** 
@@ -75,5 +84,26 @@ public class QueryRequest extends Message {
 //  	qr=new QueryRequest((byte)3,(byte)1,"ZZZ");
 //  	Assert.that(qr.getMinSpeed()==(byte)1);
 //  	Assert.that(qr.getQuery().equals("ZZZ"));
+
+//  	//String is single null-terminated.
+//  	byte[] payload=new byte[2+2];
+//  	payload[2]=(byte)65;
+//  	qr=new QueryRequest(new byte[16], (byte)0, (byte)0, payload);
+//  	Assert.that(qr.getLength()==4);
+//  	String s=qr.getQuery();
+//  	Assert.that(s.equals("A"), s);
+
+//  	//String is double null-terminated.
+//  	payload=new byte[2+3];
+//  	payload[2]=(byte)65;
+//  	qr=new QueryRequest(new byte[16], (byte)0, (byte)0, payload);
+//  	s=qr.getQuery();
+//  	Assert.that(s.equals("A"), s);
+
+//  	//String is empty.
+//  	payload=new byte[2+1];
+//  	qr=new QueryRequest(new byte[16], (byte)0, (byte)0, payload);
+//  	s=qr.getQuery();
+//  	Assert.that(s.equals(""), s);
 //      }
 }
