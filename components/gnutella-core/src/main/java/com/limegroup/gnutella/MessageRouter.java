@@ -54,18 +54,28 @@ public abstract class MessageRouter
      */
     private volatile int _numMessages;
     /**
-     * The number of PingRequests we actually respond to after filtering.
-     * Note that excludes PingRequests we generate.
-     */
-    private volatile int _numPingRequests;
-    /**
      * The number of PingReplies we actually process after filtering, either by
      * routing to another connection or updating our horizon statistics.
      * Note that excludes PingReplies we generate.  That number is basically
-     * _numPingRequests (the number of PingRequests for which we generate a
+     * _numRecvdPingRequests (the number of PingRequests for which we generate a
      * PingReply)
      */
     private volatile int _numPingReplies;
+    /**
+     * The number of PingRequests that we received and processed.  This is not
+     * the total number of Ping Requests received, as ping requests that are 
+     * handshakes (i.e., ttl of 1), crawler ping requests, and ping requests from
+     * old clients (within a certain time frame) are received, but are not 
+     * counted as processed ping requests, even though crawler ping request are
+     * processed, but are handled in a different manner.
+     */
+    private volatile int _numProcessedPingRequests;
+    /**
+     * The number of PingRequests that we broadcast to all the neighbors.  This
+     * count is only incremented when the pong cache is expired, and we need to
+     * refill it by broadcasting a ping to all the neighbors.
+     */
+    private volatile int _numBroadcastPingRequests;
     /**
      * The number of QueryRequests we actually respond to after filtering.
      * Note that excludes QueryRequests we generate.
@@ -227,15 +237,16 @@ public abstract class MessageRouter
             return;
         }
 
-        _numPingRequests++;
+        _numProcessedPingRequests++;
 
         //if PingReplyCache expired, refresh cache.
         if (_pongCache.expired())
-            refreshPingReplyCache();
+            refreshPingReplyCache(receivingConnection);
 
-        //set necessary info in pingInfo
+        //set necessary info in pingInfo.  Since hop() has been called on
+        //the message, we need to set the needed to the original TTL.
         pingInfo.setLastGUID(pingRequest.getGUID());
-        pingInfo.setNeededPingReplies((int)pingRequest.getTTL());
+        pingInfo.setNeededPingReplies(((int)pingRequest.getTTL()+1));
         
         respondToPingRequest(pingRequest, _acceptor, receivingConnection);
 
@@ -274,7 +285,8 @@ public abstract class MessageRouter
         //MAX_PONGS_TO_RETURN.  It avoids the possibility of a race condition
         //where the cache has to be expired while we were still not done sending
         //MAX_PONGS_TO_RETURN pongs to the ping request (because we kept getting
-        //the same random i (hops to use) in the cache
+        //the same random i (hops to use) in the cache or most of the pongs in 
+        //the cache are all from the receiving connection.
         long totalWaitTime = System.currentTimeMillis() + 
             MAX_WAIT_TIME_GETTING_PING_REPLIES;
 
@@ -286,29 +298,15 @@ public abstract class MessageRouter
             {
                 PingReply pingReply = 
                     getAPingReply(receivingConnection, pingInfo, i+1);
-                //if we already have sent this ping, keep trying until we get
-                //one we haven't sent yet.  However, count ensures that if 
-                //we get the same one three times, then it's highly likely that
-                //there are no more Ping Replies (for that hops) left in the 
-                //cache that we haven't already sent out.
-                int count = 0; 
-                while ((pongs.contains(pingReply)) && (count < 3))
-                {
-                    pingReply = getAPingReply(receivingConnection, pingInfo, 
-                        i+1);
-                    count++;
-                }
-                //if null retrieved from the PingReplyCache, just continue. 
-                if (pingReply == null)
+                //if null retrieved from the PingReplyCache or the ping reply
+                //already sent, just continue. 
+                if ( (pingReply == null) || (pongs.contains(pingReply)) )
                     continue;
 
-                if (count < 3)
-                {
-                    pongs.add(pingReply);
-                    receivingConnection.send(pingReply);
-                    neededPongs[i]--;
-                    sentCount++;
-                }
+                pongs.add(pingReply);
+                receivingConnection.send(pingReply);
+                neededPongs[i]--;
+                sentCount++;
             }
         }
 
@@ -381,15 +379,20 @@ public abstract class MessageRouter
      * Sends out the Ping Replies of all the neighbors that we are connected to.
      * (i.e., Ping Replies that we received that are 1 hop away from us.  Since
      *  a crawler might send back a dummy PingReply when we send a PingRequest 
-     * to it, we have to make sure, we don't send back the dummy PingReply
+     * to it, we have to make sure, we don't send back the dummy PingReply.  
+     * Also, send back our own address to the crawler
      *
      * @requires - sending the pings to a crawler connection (i.e., a Gnutella
      *             crawler connected to us and wants pongs of all of our 
      *             neighbors.
      */
-    public void sendCrawlerPingReplies(byte[] guid,
+    public void sendCrawlerPingReplies(PingRequest pingRequest,
                                        ManagedConnection connection)
     {
+        //send our own address back first.
+        respondToPingRequest(pingRequest, _acceptor, connection);
+        
+        byte[] guid = pingRequest.getGUID();
         for (Iterator iter = _pongCache.iterator(1); iter.hasNext(); )
         {
             PingReplyCacheEntry entry = (PingReplyCacheEntry)iter.next();
@@ -410,13 +413,13 @@ public abstract class MessageRouter
      * reserve cache (in HostCatcher), clearing the caching, and then 
      * broadcasting a ping to all the new clients.
      */
-    private void refreshPingReplyCache()
+    private void refreshPingReplyCache(ManagedConnection receivingConnection)
     {
         _catcher.copyCacheContents(); //copy PingReplyCache into reserve cache.
         
         _pongCache.clear();
 
-        broadcastPingRequest();
+        broadcastPingRequest(receivingConnection);
     }
 
     /**
@@ -497,7 +500,7 @@ public abstract class MessageRouter
      * Note: This method should only be called when refreshing the PingReply 
      * Cache.
      */
-    protected void broadcastPingRequest()
+    protected void broadcastPingRequest(ManagedConnection receivingConnection)
     {
         // Note the use of initializedConnections only.
         // Note that we have zero allocations here.
@@ -505,9 +508,16 @@ public abstract class MessageRouter
         for(int i=0; i<list.size(); i++)
         {
             ManagedConnection conn = (ManagedConnection)list.get(i);
-            if(!conn.isOldClient()) //send only to "newer" clients.
-                conn.send(new PingRequest((byte)this.MAX_TTL_FOR_CACHE_REFRESH));
+            //don't send ping to connection whose ping caused the pong cache 
+            //refresh.
+            if (conn != receivingConnection) 
+            {
+                if(!conn.isOldClient()) //send only to "newer" clients.
+                    conn.send(
+                        new PingRequest((byte)this.MAX_TTL_FOR_CACHE_REFRESH));
+            }
         }
+        _numBroadcastPingRequests++;
     }
 
     /**
@@ -579,13 +589,19 @@ public abstract class MessageRouter
             receivingConnection.countDroppedMessage();
             return;
         }
-
-        //add to cache
-        _pongCache.addPingReply(pingReply, receivingConnection);
-
-        _numPingReplies++;
-        //send pong to other connections
-        sendPongToOtherConnections(pingReply, receivingConnection);        
+        
+        //add to cache and send pong to other connections, if it was 
+        //successfully added to the cache.
+        if (_pongCache.addPingReply(pingReply, receivingConnection))
+        {
+            _numPingReplies++;
+            //send pong to other connections
+            sendPongToOtherConnections(pingReply, receivingConnection);
+        }
+        else
+        {
+            receivingConnection.countDroppedMessage();
+        }
     }
 
     /**
@@ -618,7 +634,7 @@ public abstract class MessageRouter
                 //than maybe a handshake ping), so just continue.
                 if (pingInfo == null)
                     continue;
-                
+
                 int[] neededPongs = pingInfo.getNeededPingReplies();
                 if (neededPongs[hops-1] > 0)
                 {
@@ -812,13 +828,19 @@ public abstract class MessageRouter
     }
 
     /**
-     * @return the number of PingRequests we actually respond to after
-     * filtering.
-     * Note that excludes PingRequests we generate.
+     * @return the number of Ping Requests broadcasted to all the neighbors.
      */
-    public int getNumPingRequests()
+    public int getNumBroadcastPingRequests()
     {
-        return _numPingRequests;
+        return _numBroadcastPingRequests;
+    }
+
+    /**
+     * @return the number of processed Ping Requests.
+     */
+    public int getNumProcessedPingRequests()
+    {
+        return _numProcessedPingRequests;
     }
 
     /**
@@ -826,7 +848,7 @@ public abstract class MessageRouter
      * either by routing to another connection or updating our horizon
      * statistics.
      * Note that excludes PingReplies we generate.  That number is basically
-     * _numPingRequests (the number of PingRequests for which we generate a
+     * _numRecvdPingRequests (the number of PingRequests for which we generate a
      * PingReply)
      */
     public int getNumPingReplies()

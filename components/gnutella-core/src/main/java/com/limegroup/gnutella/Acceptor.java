@@ -19,7 +19,7 @@ public class Acceptor extends Thread {
      * when done.
      */
     private volatile ServerSocket _socket=null;
-    private int _port=0;
+    private static int _port=0;
     private Object _socketLock=new Object();
 
     /**
@@ -53,6 +53,8 @@ public class Acceptor extends Thread {
 
 	private boolean _acceptedIncoming = false;
 
+    private static final byte[] LOCALHOST={(byte)127, (byte)0, (byte)0,
+                                           (byte)1};
 
 	/**
      * @modifes this
@@ -386,7 +388,28 @@ public class Acceptor extends Thread {
         throw new IOException();
     }
 
+    /**
+     * If host is not a valid host address, returns false.
+     * Otherwise, returns true if connecting to host:port would connect to
+     * the manager's listening port.
+     */
+    public static boolean isMe(String host, int port) {
+        //Don't allow connections to yourself.  We have to special
+        //case connections to "localhost" or "127.0.0.1" since
+        //they are aliases this machine.
+        byte[] cIP;
+        try {
+            cIP=InetAddress.getByName(host).getAddress();
+        } catch (IOException e) {
+            return false;
+        }
 
-
+        if (Arrays.equals(cIP, LOCALHOST)) {
+            return port == _port;
+        } else {
+            return (Arrays.equals(cIP, _address) &&
+                    (port==_port));
+        }
+    }
 
 }

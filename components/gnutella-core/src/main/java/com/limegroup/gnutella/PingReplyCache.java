@@ -36,13 +36,25 @@ public class PingReplyCache
 
     /** Cache expire time is 3 seconds */
     private static final long CACHE_EXPIRE_TIME = 3000;
-
+    
     /** next time cache expires again. */
     private long expireTime;
 
     private ArrayList[] pingReplies;
 
     private Random random; //used for returning random PingReplies from cache.
+
+    //when an initial connection to a pong cache server other than "router.
+    //limewire.com" is made, it will return pongs all with the same TTL.  Hence,
+    //the cache will only store replies for one hop and all the connection
+    //fetchers will have to get all the hosts in the cache from the same hop, 
+    //rather than randomly.
+    private boolean allRepliesOneHop;
+    
+    //if all the replies are only for one hop (currently), then the cache needs
+    //to hold that hop, so connection fetchers can get all the replies (for 
+    //that hop
+    private int currentHop;
 
     //singleton
     private static PingReplyCache instance = null;
@@ -61,6 +73,8 @@ public class PingReplyCache
 
         random = new Random();
         expireTime = System.currentTimeMillis() + CACHE_EXPIRE_TIME;
+        allRepliesOneHop = true;
+        currentHop = -1; //when size = 0
     }
 
     /**
@@ -74,6 +88,8 @@ public class PingReplyCache
         {
             pingReplies[i] = new ArrayList(otherCache.pingReplies[i]);
         }
+        allRepliesOneHop = false;
+        currentHop = MessageRouter.MAX_TTL_FOR_CACHE_REFRESH + 1;
     }
 
     /**
@@ -90,22 +106,40 @@ public class PingReplyCache
 
     /** 
      * adds a Pong to the cache, based on its hops.  If the PingReply is from an
-     * older client, then don't add it to the cache.
+     * older client, then don't add it to the cache.  Note: hop() has already
+     * been called on this ping reply before we add it to the cache.  Returns
+     * true if the pong was successfully added to the cache, false otherwise.
      *
      * requires: PingReply is from a newer client (Gnutella protocol version
      *           0.6 or higher).
      */
-    public synchronized void addPingReply(PingReply pr, 
+    public synchronized boolean addPingReply(PingReply pr, 
         ManagedConnection connection) 
     {
         if (GUID.getProtocolVersion(pr.getGUID()) < GUID.GNUTELLA_VERSION_06)
-            return;
+            return false;
 
         int hops = (int)pr.getHops();
-        if (hops > pingReplies.length)
-            return; //if greater than Max Hops allowed, do nothing.
+        if (hops > (pingReplies.length-1))
+            return false; //if greater than Max Hops allowed, do nothing.
 
-        pingReplies[hops-1].add(new PingReplyCacheEntry(pr,connection));
+        if (currentHop == -1) //empty cache
+        {
+            currentHop = hops;
+        }
+        else if (currentHop != hops) //ping reply with different hops
+        {
+            currentHop = MessageRouter.MAX_TTL_FOR_CACHE_REFRESH+1;
+            allRepliesOneHop = false;
+        }
+
+        //only add to cache, if the cache already doesn't contain that PingReply
+        //(determined by IP, port, hops, and different managed connections).
+        PingReplyCacheEntry newEntry = new PingReplyCacheEntry(pr, connection);
+        if (!(pingReplies[hops].contains(newEntry)))
+            pingReplies[hops].add(newEntry);
+
+        return true;
     }
 
     /**
@@ -118,6 +152,8 @@ public class PingReplyCache
                 pingReplies[i].clear();
 
         expireTime = System.currentTimeMillis() + CACHE_EXPIRE_TIME;
+        allRepliesOneHop = true;
+        currentHop = -1; //when size = 0
     }
 
     /**
@@ -141,6 +177,24 @@ public class PingReplyCache
         ArrayList arrayOfPongs = pingReplies[hops-1];
         int index = random.nextInt(arrayOfPongs.size());
         return (PingReplyCacheEntry)arrayOfPongs.get(index);
+    }
+
+    /**
+     * returns whether all the replies currently in the cache are all for the
+     * same hop.
+     */
+    public boolean areAllRepliesForOneHop()
+    {
+        return allRepliesOneHop;
+    }
+
+    /**
+     * if all the replies are currently for the same hop, then return that
+     * hop.  Returns -1, if the cache is currently empty.  
+     */
+    public int getCurrentHop()
+    {
+        return currentHop;
     }
 
     /**
@@ -254,7 +308,7 @@ public class PingReplyCache
             if (hopsIndex >= MessageRouter.MAX_TTL_FOR_CACHE_REFRESH)
                 return false;
    
-            if (origHopsIndex > 0) //returning entries for only one hops.
+            if (origHopsIndex >= 0) //returning entries for only one hops.
             {
                 if (hopsIndex > origHopsIndex) 
                     return false;
@@ -324,6 +378,43 @@ class PingReplyCacheEntry
     public String toString()
     {
         return pingReply.toString();
+    }
+
+    /**
+     * Determines if two pong cache entries are equal by looking at IP and port.
+     * This is used to ascertain that the same IP and address is added 
+     * continously in the cache (from the same connection, that is).
+     */
+    public boolean equals(Object o)
+    {
+        if (! (o instanceof PingReplyCacheEntry))
+            return false;
+
+        PingReplyCacheEntry entry = (PingReplyCacheEntry)o;
+        //first, check if connections are the same, if not then, then the entries
+        //are not the same.
+        //NOTE: Connection class does not contain an "equals" method since 
+        //different classes might interpret two connections being "equal" with
+        //different comparators.
+        ManagedConnection otherConnection = entry.getManagedConnection();
+        if (!connectionsEqual(otherConnection))
+            return false;
+
+        PingReply otherReply = entry.pingReply;
+        return pingReply.equals(otherReply);
+    }
+
+    /**
+     * Determines whether another managed connections is equivalent to the one
+     * in this class by looking at the orig host and orig port.
+     */
+    private boolean connectionsEqual(ManagedConnection c)
+    {
+        String otherHost = c.getOrigHost();
+        int otherPort = c.getOrigPort();
+
+        return ( (connection.getOrigHost().equals(otherHost)) &&
+                 (connection.getOrigPort() == otherPort) );
     }
 }
 

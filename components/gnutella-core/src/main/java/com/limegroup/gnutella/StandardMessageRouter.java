@@ -32,14 +32,21 @@ public class StandardMessageRouter
     /**
      * Responds to the PingRequest by getting information from the FileManager
      * and the Acceptor.  However, it only sends a Ping Reply back if we
-     * are not firewalled and can currently accept incoming connections.
+     * can currently accept incoming connections or the hops + ttl <= 2 (to allow
+     * for crawler pings) or if not firewalled (with respect to the connection).
      */
     protected void respondToPingRequest(PingRequest pingRequest,
                                         Acceptor acceptor,
                                         ManagedConnection connection)
     {
-        //check for preconditions: not firewalled and can accept incoming
-        if (!_acceptor.acceptedIncoming() || !_manager.haveAvailableIncoming())
+        //check if connection is "firewalled" with respect to the remote host.
+        if (connection.isFirewalled())
+            return;
+
+        //check if can accept incoming and hops + ttl > 2
+        int ttl = (int)pingRequest.getTTL();
+        int hops = (int)pingRequest.getHops();
+        if (!_manager.hasAvailableIncoming() && ((hops+ttl) > 2)) 
             return;
 
         int num_files = FileManager.instance().getNumFiles();
@@ -59,7 +66,7 @@ public class StandardMessageRouter
     {
         super.handlePingReply(pingReply, receivingConnection);
     }
-    
+
     /**
      * Handles the PingReply by updating horizon stats.
      */

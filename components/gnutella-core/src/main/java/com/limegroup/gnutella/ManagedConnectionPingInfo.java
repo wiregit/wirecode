@@ -82,8 +82,11 @@ public class ManagedConnectionPingInfo {
         //first, reset needed array
         resetNeeded();
 
+        if (ttl > _neededPongs.length)
+            ttl = _neededPongs.length;
+
         for (int i = 0; i < ttl; i++) 
-            _neededPongs[i] = MessageRouter.MAX_PONGS_TO_RETURN / (i+1);
+            _neededPongs[i] = MessageRouter.MAX_PONGS_TO_RETURN / ttl;
 
         _lastTTL = ttl;
     }

@@ -213,7 +213,7 @@ public class ConnectionManager {
 			}
          }
      }
-
+//don't broadcast pin
     /**
      * @modifies this, route table
      * @effects closes c and removes it from this' connection list and
@@ -269,9 +269,17 @@ public class ConnectionManager {
     }
 
     /**
+     * @return the number of initialized connections, which is less than or 
+     * equal to the number of connections.
+     */
+    public int getNumInitializedConnections() {
+        return _initializedConnections.size();
+    }
+
+    /**
      * @return true if incoming connection slots are still available.
      */
-    public boolean haveAvailableIncoming() {
+    public boolean hasAvailableIncoming() {
         return (_incomingConnections < _keepAlive);
     }
 
@@ -370,8 +378,9 @@ public class ConnectionManager {
      */
     private void sendInitialPingRequest(ManagedConnection connection) {
         PingRequest pr;
-        //based on the invariant: numConnections + numFetchers >= _keepAlive
-        if ( (getNumConnections() + _fetchers.size() >= _keepAlive) &&
+        //based on the invariant: numInitializedConnections + numFetchers >= 
+        //_keepAlive
+        if ( (getNumInitializedConnections() + _fetchers.size() >= _keepAlive) &&
              (_catcher.reserveCacheSufficient()))
             pr = new PingRequest((byte)1);
         else
@@ -759,8 +768,11 @@ public class ConnectionManager {
 
             do {
                 try {
-                    hops = random.nextInt
-                        (MessageRouter.MAX_TTL_FOR_CACHE_REFRESH);
+                    if (pongCache.areAllRepliesForOneHop()) 
+                        hops = pongCache.getCurrentHop();
+                    else
+                        hops = random.nextInt
+                            (MessageRouter.MAX_TTL_FOR_CACHE_REFRESH);
                     entry = pongCache.getEntry(hops+1);
                     //if nothing in the cache, then try from the reserve cache
                     if (entry == null) {
@@ -777,7 +789,9 @@ public class ConnectionManager {
                     _fetchers.remove(this);
                     return;
                 }               
-            } while ((endpoint == null) || (isConnected(endpoint)));
+            } while ((endpoint == null) || (isConnected(endpoint)) || 
+                     (Acceptor.isMe(endpoint.getHostname(), 
+                      endpoint.getPort())) );
 
             Assert.that(endpoint != null);
 

@@ -114,6 +114,20 @@ public class PingReply extends Message implements Serializable{
         return ByteOrder.ubytes2long(ByteOrder.leb2int(payload,10));
     }
 
+    /**
+     * Determines whether two PingReplies are equivalent by looking at the 
+     * host, port, and hops away.
+     */
+     public boolean equals(Object o) {
+         if (! (o instanceof PingReply))
+             return false;
+
+         PingReply other = (PingReply)o;
+         return ( (this.getIP().equals(other.getIP())) &&
+             (this.getPort() == other.getPort()) && 
+             (this.getHops() == other.getHops()) );
+    }
+
 //      /** Unit test */
 //      public static void main(String args[]) {
 //      long u4=0x00000000FFFFFFFFl;

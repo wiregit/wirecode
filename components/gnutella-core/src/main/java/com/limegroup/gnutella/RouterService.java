@@ -91,6 +91,44 @@ public class RouterService
             System.out.println(iter.next().toString());
     }
 
+    public String[] getConnectionsInfo() {
+        Iterator iter=manager.getConnections().iterator();
+        Vector buf = new Vector();
+        while (iter.hasNext())
+            buf.add(iter.next().toString());
+        String[] connections = new String[buf.size()];
+        for (int i = 0; i < connections.length; i++) {
+            connections[i] = (String)buf.elementAt(i);
+        }
+        return connections;    
+    }
+
+    /**
+     * Removes the ManagedConnection to host:port from the list of 
+     * connections.  This method is used so that the external world
+     * cannot access the list of managed connections (in connection manager),
+     * but can at least disconnect from a particular connection to a host:port.
+     * This method is used mostly for command-line clients.  Returns true if 
+     * host:port was succesfully removed.
+     *
+     * @requires - for incoming connections, port is known, i.e., connections
+     *             have to be seen by caller (controller) to get the proper port
+     *             of an incoming connections.
+     */
+    public boolean removeAConnection(String host, int port) {
+        Iterator iter=manager.getConnections().iterator();
+        while (iter.hasNext()) {
+            ManagedConnection c = (ManagedConnection)iter.next();
+            if ( (c.getOrigHost().equals(host)) && 
+                 (c.getOrigPort() == port) ) {
+                removeConnection(c);
+                return true;
+            }
+        }
+        
+        return false;
+    }
+
     private static final byte[] LOCALHOST={(byte)127, (byte)0, (byte)0,
                                            (byte)1};
 
@@ -416,6 +454,20 @@ public class RouterService
      */
     public int getTotalRouteErrors() {
         return( router.getNumRouteErrors() );
+    }
+
+    /**
+     * Return the total number of broadcasted ping requests
+     */
+    public int getTotalBroadcastPingRequests() {
+        return ( router.getNumBroadcastPingRequests() );
+    }
+
+    /**
+     * Return the total number of processed ping requests
+     */
+    public int getTotalProcessedPingRequests() {
+        return ( router.getNumProcessedPingRequests() );
     }
 
     /**

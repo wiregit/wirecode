@@ -97,6 +97,15 @@ public class Connection {
     private volatile boolean _closed=false;
 
     /**
+     * indicates whether the connection is to a "firewalled" host with respect
+     * to the other host.  Hence, if two hosts are under the same firewall, then
+     * a connection between them is not a "firewalled" connection, but a 
+     * connection from either one of them to another host outside the firewall
+     * is a "firewalled" connection.
+     */
+    private boolean _firewalled = false;
+
+    /**
      * Creates an outgoing connection with the specified listener.
      * initalize() must be called before anything else.
      */
@@ -171,6 +180,10 @@ public class Connection {
             _socket.close();
             throw e;
         }
+        
+        //determine if this a "firewalled" connection with respect to the host
+        //on the other side.  (see _firewalled)
+        checkForFirewall();
     }
 
     /**
@@ -217,6 +230,56 @@ public class Connection {
     public boolean isOutgoing() {
         return _outgoing;
     }
+
+    /**
+     * Returns whether or not the connection is a "firewalled" connection with
+     * respect to the other host.  (See _firewalled).
+     */
+    public boolean isFirewalled() {
+        return _firewalled;
+    }
+
+    /**
+     * Checks to see if this connection is "firewalled", where a connection
+     * is firewalled with respect to the remote host.  There are 3 different
+     * scenarios for firewalled.
+     *
+     * 1) If local address is a public address, then it is not a "firewalled" 
+     *    connection, since we can return our address in pongs and receive
+     *    download requests.
+     *
+     * 2) If local address is private and remote address is public, then it is a 
+     *    firewalled connection, since remote host cannot connect to us.
+     * 
+     * 3) If both local and remote addresses are private, then check if both
+     *    address are in the same subnet. 
+     */
+    private void checkForFirewall() {
+        byte[] myAddress = getLocalAddress().getAddress();
+        int myPort = getLocalPort();
+        Endpoint me = new Endpoint(myAddress, myPort);
+        if (!me.isPrivateAddress()) //local host is public address
+            return;
+       
+        byte[] remoteAddress = getInetAddress().getAddress();
+        int otherPort = getPort();
+        Endpoint other = new Endpoint(remoteAddress, otherPort);
+        
+        //local address is private and remote address is public, so this is
+        //a "firewalled" connection.
+        if (!other.isPrivateAddress()) { 
+            _firewalled = true;
+            return;
+        }
+        else { //both address private
+            //if not same subnet, then this is a "firewalled" connection.
+            if (!me.isSameSubnet(other)) {
+                _firewalled = true;
+                return;
+            }
+        }
+    }
+
 
     /** A tiny allocation optimization; see Message.read(InputStream,byte[]). */
     private byte[] HEADER_BUF=new byte[23];

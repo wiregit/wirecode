@@ -142,6 +142,8 @@ public class ManagedConnection
         _manager = manager;
         _isRouter = isRouter;
 
+        
+
         new OutputRunner(); // Start the thread to empty the output queue
     }
 
@@ -393,7 +395,7 @@ public class ManagedConnection
 
             //if crawler ping, send back pongs of neighbors.
             if ((m instanceof PingRequest) && (isCrawlerPing(m))) {
-                _router.sendCrawlerPingReplies(m.getGUID(),this);
+                _router.sendCrawlerPingReplies((PingRequest)m, this);
                 continue;
             }
 

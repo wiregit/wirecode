@@ -167,7 +167,8 @@ public class HostCatcher {
             else
                 e.setWeight(NORMAL_PRIORITY);
 
-            if ((! reserveCacheSet.contains(e)) && (! isMe(host, port))) {
+            if ((! reserveCacheSet.contains(e)) && 
+                (! Acceptor.isMe(host, port))) {
                 //add e to the head.  Order matters!
                 Object removed=reserveCacheQueue.insert(e);
                 //Shouldn't happen...
@@ -243,7 +244,7 @@ public class HostCatcher {
                     pr.getFiles(), pr.getKbytes());
 
         //Skip if this would connect us to our listening port.
-        if (isMe(e.getHostname(), e.getPort()))
+        if (Acceptor.isMe(e.getHostname(), e.getPort()))
             return;
 
         //Skip if this is the router.
@@ -409,7 +410,6 @@ public class HostCatcher {
                         manager.createRouterConnection(e.getHostname(),
                                                        e.getPort());
                     } catch (IOException exc) {
-                        System.out.println("Caught exception");
                         continue;
                     }
 
@@ -564,31 +564,6 @@ public class HostCatcher {
         synchronized(needRouterConnectionLock) {
             needRouterConnection = true;
             needRouterConnectionLock.notify();
-        }
-    }
-
-    /**
-     * If host is not a valid host address, returns false.
-     * Otherwise, returns true if connecting to host:port would connect to
-     *  the manager's listening port.
-     */
-    private boolean isMe(String host, int port) {
-        //Don't allow connections to yourself.  We have to special
-        //case connections to "localhost" or "127.0.0.1" since
-        //they are aliases this machine.
-        byte[] cIP;
-        try {
-            cIP=InetAddress.getByName(host).getAddress();
-        } catch (IOException e) {
-            return false;
-        }
-
-        if (Arrays.equals(cIP, LOCALHOST)) {
-            return port == acceptor.getPort();
-        } else {
-            byte[] managerIP = acceptor.getAddress();
-            return (Arrays.equals(cIP, managerIP) &&
-                    (port==acceptor.getPort()));
         }
     }
 
