@@ -1,3 +1,5 @@
+
+
 package com.limegroup.gnutella;
 
 import java.io.*;
@@ -109,6 +111,9 @@ public class FileManager {
         }
     }
 
+	/**
+	 * Creates a new <tt>FileManager</tt> instance.
+	 */
     public FileManager() {
         // We'll initialize all the instance variables so that the FileManager
         // is ready once the constructor completes, even though the
