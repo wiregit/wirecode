@@ -940,6 +940,7 @@ public class Connection {
         // See the notes in Connection.close above the calls
         // to end() on the Inflater/Deflater and close()
         // on the Input/OutputStreams for the details.
+        Message msg = null;
         try {
             if(isReadDeflated()) {
                 pCompressed = _inflater.getTotalIn();
@@ -947,7 +948,7 @@ public class Connection {
             }
             
             // DO THE ACTUAL READ
-            Message m = Message.read(_in, HEADER_BUF, _softMax);
+            msg = Message.read(_in, HEADER_BUF, _softMax);
             
             // _bytesReceived must be set differently
             // when compressed because the inflater will
@@ -963,13 +964,13 @@ public class Connection {
                     CompressionStat.GNUTELLA_COMPRESSED_DOWNSTREAM.addData(
                         (int)(_inflater.getTotalIn() - pCompressed));
                 }            
-            } else if(m != null) {
-                _bytesReceived += m.getTotalLength();
+            } else if(msg != null) {
+                _bytesReceived += msg.getTotalLength();
             }
         } catch(NullPointerException npe) {
             throw CONNECTION_CLOSED;
         }
-        return m;
+        return msg;
     }
 
     /**
