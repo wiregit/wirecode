@@ -267,7 +267,5 @@ public class Main implements ActivityCallback, ErrorCallback {
     }
 
     public void indicateNewVersion() {}
-
-    public void showError(String message, String messageKey) {}
 }
 

@@ -9,6 +9,9 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.text.ParseException;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 
 /**
  * The host catcher.  This peeks at pong messages coming on the
@@ -39,6 +42,12 @@ import java.text.ParseException;
  * use those anymore.
  */
 public class HostCatcher {    
+    
+    /**
+     * Log for logging this class.
+     */
+    private static final Log LOG = LogFactory.getLog(HostCatcher.class);
+        
     //These constants are package-access for testing.  
     //That's ok as they're final.
 
@@ -138,11 +147,7 @@ public class HostCatcher {
      */
     public void initialize() {
         //Read gnutella.net
-        try {
-			read(HOST_FILE);
-        } catch (FileNotFoundException e) {
-        } catch (IOException e) {
-        }
+        readHostsFile();
         
         //Register to send updates every hour (starting in one hour) if we're a
         //supernode and have accepted incoming connections.  I think we should
@@ -445,6 +450,7 @@ public class HostCatcher {
      */
     public synchronized Endpoint getAnEndpoint() throws InterruptedException {
         while (true)  {
+            
             //If we've completely run out of hosts, asynchronously contact a
             //GWebCache server to get more addresses.  Note, however, that this
             //will not do anything if we're currently connecting to a GWebCache.
@@ -502,13 +508,15 @@ public class HostCatcher {
             //Should never happen, but I don't want to update public
             //interface of this to operate on ExtendedEndpoint.
             return;
+        
         ExtendedEndpoint ee=(ExtendedEndpoint)e;
 
         removePermanent(ee);
-        if (success)
+        if (success) {
             ee.recordConnectionSuccess();
-        else
+        } else {
             ee.recordConnectionFailure();
+        }
         addPermanent(ee);
     }
 
@@ -525,6 +533,7 @@ public class HostCatcher {
             //pop e from queue and remove from set.
             ExtendedEndpoint e=(ExtendedEndpoint)ENDPOINT_QUEUE.extractMax();
             boolean ok=ENDPOINT_SET.remove(e);
+            
             //check that e actually was in set.
             Assert.that(ok, "Rep. invariant for HostCatcher broken.");
             return e;
@@ -662,6 +671,32 @@ public class HostCatcher {
                             +permanentHostsSet+" in "+permanentHosts);
             }
         }
+    }
+    
+    /**
+     * Reads the gnutella.net file.
+     */
+    private void readHostsFile() {
+        // Just gnutella.net
+        try {
+            read(HOST_FILE);
+        } catch (FileNotFoundException e) {
+            if(LOG.isErrorEnabled()) {
+                LOG.error(HOST_FILE);
+            }
+        } catch (IOException e) {
+            if(LOG.isErrorEnabled()) {
+                LOG.error(HOST_FILE);
+            }
+        }    
+    }
+
+    /**
+     * Recovers any hosts that we have put in the set of hosts "pending" 
+     * removal from our hosts list.
+     */
+    public void recoverHosts() {
+        readHostsFile();
     }
 
     //Unit test: tests/com/.../gnutella/HostCatcherTest.java   

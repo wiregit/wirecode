@@ -144,22 +144,22 @@ public class ExternalControl {
             if ( !( urls.size() > 0  || 
                     urn != null || 
                     (curOpt.kt != null && !"".equals(curOpt.kt)) ) ) {
-                RouterService.getCallback().showError(
-                  curOpt.toString(),"ERROR_BAD_MAGNET_LINK");
+                MessageService.showError(
+                    curOpt.toString(),"ERROR_BAD_MAGNET_LINK");
                 return;
             }
             
             try {
                 RouterService.download
-                (urn,curOpt.kt,curOpt.dn,defaultURLs,false);//!overwrite
+                    (urn,curOpt.kt,curOpt.dn,defaultURLs,false);//!overwrite
             } catch ( AlreadyDownloadingException a ) {  
-                RouterService.getCallback().showError(
-                                a.getFilename(),"ERROR_ALREADY_DOWNLOADING");
+                MessageService.showError(
+                    a.getFilename(),"ERROR_ALREADY_DOWNLOADING");
 			} catch ( IllegalArgumentException il ) { 
 			    ErrorService.error(il);
 			} catch (FileExistsException fex) {
-                RouterService.getCallback().showError(
-                                   fex.getFileName(), "ERROR_ALREADY_EXISTS");
+                MessageService.showError(
+                    fex.getFileName(), "ERROR_ALREADY_EXISTS");
             }
 		}
 	}

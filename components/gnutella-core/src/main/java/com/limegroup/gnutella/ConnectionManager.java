@@ -13,6 +13,7 @@ import com.limegroup.gnutella.util.*;
 import com.limegroup.gnutella.security.Authenticator;
 import com.limegroup.gnutella.handshaking.*;
 import com.limegroup.gnutella.settings.*;
+import com.limegroup.gnutella.connection.ConnectionChecker;
 import com.limegroup.gnutella.filters.IPFilter;
 
 import org.apache.commons.logging.LogFactory;
@@ -56,6 +57,29 @@ import org.apache.commons.logging.Log;
  */
 public class ConnectionManager {
     
+    /**
+     * Flag for whether or not the user has an internet connection.
+     */
+    private boolean _noInternetConnection;
+    
+    /**
+     * Timestamp of our last successful connection.
+     */
+    private volatile long _lastSuccessfulConnect = 0;
+    
+    /**
+     * Timestamp of the last time we checked to verify that the user has a live
+     * Internet connection.
+     */
+    private volatile long _lastConnectionCheck = 0;
+   
+
+    /**
+     * Counter for the number of connection attempts we've made.
+     */
+    private volatile static int _connectionAttempts;
+    
+
     private static final Log LOG = LogFactory.getLog(ConnectionManager.class);
 
 	/**
@@ -1079,6 +1103,12 @@ public class ConnectionManager {
      * (keep-alive) is non-zero and recontacts the pong server as needed.  
      */
     public synchronized void connect() {
+        
+        _connectionAttempts = 0;
+        _noInternetConnection = false;
+        _lastConnectionCheck = 0;
+        _lastSuccessfulConnect = 0;
+        //_lastConnectionCheck = Long.MIN_VALUE;
 
         //Tell the HostCatcher to retrieve more bootstrap servers
         //if necessary. (Only fetch if we haven't received a reply
@@ -1334,6 +1364,7 @@ public class ConnectionManager {
         RouterService.getCallback().connectionInitializing(mc);
 
         try {
+            _connectionAttempts++;
             mc.initialize();
         } catch(IOException e) {
             synchronized(ConnectionManager.this) {
@@ -1707,34 +1738,55 @@ public class ConnectionManager {
 
         // Try a single connection
         public void run() {
-            // Wait for an endpoint.
-            Endpoint endpoint = null;
-            do {
-                try {
-                    endpoint = _catcher.getAnEndpoint();
-                } catch (InterruptedException exc2) {
-                    // Externally generated interrupt.
-                    // The interrupting thread has recorded the
-                    // death of the fetcher, so just return.
+            try {
+                // If the user has no Internet connection, simply return.
+                if(_noInternetConnection) {
                     return;
                 }
-            } while ( !IPFilter.instance().allow(endpoint.getHostname()) || 
-                      isConnectedTo(endpoint) );                      
+                // Wait for an endpoint.
+                Endpoint endpoint = null;
+                do {
+                    try {
+                        endpoint = _catcher.getAnEndpoint();
+                    } catch (InterruptedException exc2) {
+                        // Externally generated interrupt.
+                        // The interrupting thread has recorded the
+                        // death of the fetcher, so just return.
+                        return;
+                    }
+                } while ( !IPFilter.instance().allow(endpoint.getHostname()) || 
+                          isConnectedTo(endpoint) );                      
+    
+                Assert.that(endpoint != null);
+    
+                ManagedConnection connection = new ManagedConnection(
+                    endpoint.getHostname(), endpoint.getPort());
 
-            Assert.that(endpoint != null);
-
-            ManagedConnection connection = new ManagedConnection(
-                endpoint.getHostname(), endpoint.getPort());
-
-            try {
+                // If we've been trying to connect for awhile and have not 
+                // already checked our connection, check to make sure the
+                // user's internet connection is live.
+                long curTime = System.currentTimeMillis();
+                if(_connectionAttempts > 40 && 
+                   ((curTime - _lastSuccessfulConnect)>2000) &&
+                   ((curTime - _lastConnectionCheck)>60000)) {
+                    _connectionAttempts = 0;
+                    _lastConnectionCheck = curTime;
+                    if(LOG.isDebugEnabled()) {
+                        LOG.debug("checking for live connection");
+                    }
+                    ConnectionChecker.checkForLiveConnection();
+                }
+                
                 //Try to connect, recording success or failure so HostCatcher
                 //can update connection history.  Note that we declare 
                 //success if we were able to establish the TCP connection
                 //but couldn't handshake (NoGnutellaOkException).
                 try {
                     initializeFetchedConnection(connection, this);
+                    _lastSuccessfulConnect = System.currentTimeMillis();
                     _catcher.doneWithConnect(endpoint, true);
                 } catch (NoGnutellaOkException e) {
+                    _lastSuccessfulConnect = System.currentTimeMillis();
                     _catcher.doneWithConnect(endpoint, true);
                     throw e;                    
                 } catch (IOException e) {
@@ -1748,10 +1800,34 @@ public class ConnectionManager {
                 //Internal error!
                 ErrorService.error(e);
             }
-            finally{
-                if (connection.isClientSupernodeConnection())
-                    lostShieldedClientSupernodeConnection();
-            }
+        }
+        
+        public String toString() {
+            return "ConnectionFetcher";
         }
 	}
+
+    /**
+     * This method notifies the connection manager that the user does not have
+     * a live connection to the Internet to the best of our determination.
+     * In this case, we notify the user with a message and maintain any 
+     * Gnutella hosts we have already tried instead of discarding them.
+     */
+    public void noInternetConnection() {
+        
+        // Notify the user that they have no internet connection.
+        MessageService.showError("NO_INTERNET");
+        
+        _noInternetConnection = true;
+        
+        // Kill all of the ConnectionFetchers.
+        disconnect();
+        
+        // Notify the HostCatcher that it should keep any hosts it has already
+        // used instead of discarding them.  
+        // The HostCatcher can be null in testing.
+        if(_catcher != null) {
+            _catcher.recoverHosts();
+        }
+    }
 }
