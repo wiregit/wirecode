@@ -633,9 +633,10 @@ public class FileManager {
      * This method is thread-safe.  It acquires locks on a per-file basis.
      * If the _loadThread is interrupted while adding the contents of the
      * directory, it returns immediately.     
-     * @param List a list of KeyValue objects, the key being the directory
-     *        the files are in, and the value being an array of the shareable
-     *        files.
+     *
+     * @param toShare a list of KeyValue objects, the key being the directory
+     *  the files are in, and the value being an array of the shareable
+     *  files.
      */
      private void updateSharedFiles(List toShare) {
         for(Iterator i = toShare.iterator();
