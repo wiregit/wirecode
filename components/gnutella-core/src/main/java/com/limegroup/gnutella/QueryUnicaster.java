@@ -177,6 +177,13 @@ public final class QueryUnicaster {
         catch (BadPacketException ignored) {}
     }
 
+	/** Adds the specified <tt>InetAddress</tt> and port to the list
+	 *  of endpoints to query.
+	 */
+	public void addUnicastEndpoint(InetAddress address, int port) {
+		
+	}
+
     /** Feed me QRs so I can keep track of stuff.
      */
     public void handleQueryReply(QueryReply qr) {
