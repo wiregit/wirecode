@@ -148,9 +148,12 @@ public class BlockingServer {
         
         private void write() throws IOException, InterruptedException {
             OutputStream os = CLIENT.getOutputStream();
-            while(_writesToPerform > 0) {
-                os.write(WRITE_BYTES);
-                os.flush();
+            
+            synchronized(QUEUE_LOCK) {
+                while(_writesToPerform > 0) {
+                    os.write(WRITE_BYTES);
+                    os.flush();
+                }
             }
         }
     }
