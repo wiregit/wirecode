@@ -99,6 +99,9 @@ public class Acceptor extends Thread {
         //TODO3: if FORCE_LOCAL_IP is true, then use that value instead.
         //       (Alternative implementation: just set this._address accordingly
         //        during initialization.)
+
+		if(SettingsManager.instance().getForceIPAddress())
+			return SettingsManager.instance().getForcedIPAddress();
         return _address;
     }
 
@@ -108,6 +111,8 @@ public class Acceptor extends Thread {
      * @return the listening port
      */
     public int getPort() {
+		if(SettingsManager.instance().getForceIPAddress())
+			return SettingsManager.instance().getForcedPort();
         return _port;
     }
 
