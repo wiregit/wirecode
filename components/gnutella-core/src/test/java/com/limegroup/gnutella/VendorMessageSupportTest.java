@@ -9,7 +9,6 @@ import com.limegroup.gnutella.routing.*;
 import com.limegroup.gnutella.messages.*;
 import com.limegroup.gnutella.settings.*;
 import com.limegroup.gnutella.messages.vendor.*;
-import com.limegroup.gnutella.stubs.*;
 import com.limegroup.gnutella.util.*;
 
 
@@ -44,6 +43,14 @@ public class VendorMessageSupportTest extends BaseTestCase {
     private static boolean _testHopsFlow = true;
     private static boolean _testTCPCB = true;
     private static boolean _testUDPCB = true;
+    
+    public static void globalSetUp() throws Exception {
+        
+        // make sure RouterService has a message router -- we'll get null
+        // pointers otherwise when handling vendor messages
+        MessageRouter mr = new StandardMessageRouter();
+        PrivilegedAccessor.setValue(RouterService.class, "router", mr);
+    }
 
     public void setUp() throws Exception {
         debug("Expecting to test Gnutella host on " +
@@ -73,6 +80,9 @@ public class VendorMessageSupportTest extends BaseTestCase {
                               new LeafHeaders(""),
                               new EmptyResponder());
         _leaf1.initialize();
+        
+        // need to initialize the message writer
+        _leaf1.buildAndStartQueues();
         for (Iterator iter=qrt.encode(null).iterator(); iter.hasNext(); )
             _leaf1.sendMessage((RouteTableMessage)iter.next());
         _leaf1.flushMessage();
@@ -84,6 +94,9 @@ public class VendorMessageSupportTest extends BaseTestCase {
                               new LeafHeaders(""),
                               new EmptyResponder());
         _leaf2.initialize();
+        
+        // need to initialize the message writer
+        _leaf2.buildAndStartQueues();
         for (Iterator iter=qrt.encode(null).iterator(); iter.hasNext(); )
             _leaf2.sendMessage((RouteTableMessage)iter.next());
         _leaf2.flushMessage();
@@ -108,16 +121,21 @@ public class VendorMessageSupportTest extends BaseTestCase {
 
     private void testConnection(Connection c) throws Exception {
         boolean receivedDesiredMessage = false;
+        boolean receivedPushProxyAcknowledgement = false;
         while (true) {
             try {
-                Message m = (Message) c.receive(TIMEOUT);
+                Message m = c.receive(TIMEOUT);
                 if (m instanceof VendorMessage) {
                     if (m instanceof MessagesSupportedVendorMessage) {
                         c.handleVendorMessage((VendorMessage) m);
                         receivedDesiredMessage = true;
                     }
+                    else if( m instanceof PushProxyAcknowledgement) {
+                        c.handleVendorMessage((VendorMessage) m);
+                        receivedPushProxyAcknowledgement = true;
+                    }
                     else
-                        fail("Unexpected VendorMessage of class" + m.getClass());
+                        fail("Unexpected VendorMessage of class: " + m.getClass());
                 }
             }
             catch (InterruptedIOException iioe) {
@@ -127,6 +145,8 @@ public class VendorMessageSupportTest extends BaseTestCase {
         }
         if (!receivedDesiredMessage)
             fail("No MessagesSupportedMessage recieved");
+        if (!receivedPushProxyAcknowledgement)
+            fail("no push proxy ack!");
         if (c.supportsVendorMessage("BEAR".getBytes(), 4) < 1) {
             _testHopsFlow = false;
         }
