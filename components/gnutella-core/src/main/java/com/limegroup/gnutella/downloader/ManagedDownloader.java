@@ -119,7 +119,6 @@ public class ManagedDownloader implements Downloader, Serializable {
     /** See note on serialization at top of file */
     private void writeObject(ObjectOutputStream stream)
             throws IOException {
-        //TODO: serialize to disk
         stream.writeObject(allFiles);
         stream.writeObject(incompleteFileManager);
     }
@@ -168,7 +167,7 @@ public class ManagedDownloader implements Downloader, Serializable {
     public boolean conflicts(RemoteFileDesc other) {
         synchronized (this) {
             File otherFile=incompleteFileManager.getFile(other);
-            //TODO: this is stricter than necessary.  What if a location has
+            //TODO3: this is stricter than necessary.  What if a location has
             //been removed?  Tricky without global variables.  At the least we
             //should return false if in COULDNT_DOWNLOAD state.
             for (int i=0; i<allFiles.length; i++) {
@@ -484,13 +483,13 @@ public class ManagedDownloader implements Downloader, Serializable {
 
 
     /** Like tryDownloads2, but does not deal with the library and hence
-     *  cannot return COULDNT_MOVE_TO_LIBRARY. */
+     *  cannot return COULDNT_MOVE_TO_LIBRARY.  Also requires that
+     *  files.size()>0. */
     private int tryAllDownloads3(final List /* of RemoteFileDesc */ files) 
             throws InterruptedException {
         //The parts of the file we still need to download.
         //INVARIANT: all intervals are disjoint and non-empty
         List /* of Interval */ needed=new ArrayList(); {
-            //TODO: this assumes files.size()>0
             RemoteFileDesc rfd=(RemoteFileDesc)files.get(0);
             File incompleteFile=incompleteFileManager.getFile(rfd);
             Iterator iter=incompleteFileManager.
@@ -607,8 +606,8 @@ public class ManagedDownloader implements Downloader, Serializable {
         HTTPDownloader dloader;
         if (needed.size()>0) {
             //Assign "white" (unclaimed) interval to new downloader.
-            //TODO: choose biggest, earliest, etc.
-            //TODO: assign to existing downloader if possible, without
+            //TODO2: choose biggest, earliest, etc.
+            //TODO2: assign to existing downloader if possible, without
             //      increasing parallelism
             Interval interval=(Interval)needed.remove(0);
             try {
@@ -628,9 +627,9 @@ public class ManagedDownloader implements Downloader, Serializable {
         else {
             //Split largest "gray" interval, i.e., steal part of another
             //downloader's region for a new downloader.  
-            //TODO: split interval into P-|dloaders|, etc., not just half
-            //TODO: account for speed
-            //TODO: there is a minor race condition where biggest and 
+            //TODO3: split interval into P-|dloaders|, etc., not just half
+            //TODO3: account for speed
+            //TODO3: there is a minor race condition where biggest and 
             //      dloader could write to the same region of the file
             //      I think it's ok, though it could result in >100% in the GUI
             HTTPDownloader biggest=null;
@@ -786,7 +785,7 @@ public class ManagedDownloader implements Downloader, Serializable {
             //System.out.println("    WORKER: terminating from "+downloader
             //                   +" at "+stop);
             //In order to reuse this location again, we need to know the
-            //RemoteFileDesc.  TODO: use measured speed.
+            //RemoteFileDesc.  TODO2: use measured speed if possible.
             RemoteFileDesc rfd=downloader.getRemoteFileDesc();
             synchronized (this) {
                 dloaders.remove(downloader);
@@ -966,16 +965,6 @@ public class ManagedDownloader implements Downloader, Serializable {
         return (int)Math.max(remaining, 0)/1000;
     }
     
-
-	public synchronized boolean chatEnabled() {
-        //TODO: re-enable by OR'ing all connections.
-        return false;
-//  		if (dloader == null)
-//  			return false;
-//  		else 
-//  			return dloader.chatEnabled();
-	}
-
     public synchronized String getFileName() {        
         //If we're not actually downloading, we just pick some random value.
         if (dloaders.size()==0)
