@@ -62,7 +62,8 @@ public class UltrapeerRoutingTest extends TestCase {
         settings.setForceSupernodeMode(true);
         settings.setMaxShieldedClientConnections(10);
         settings.setKeepAlive(6);
-        RouterService rs=new RouterService(new ActivityCallbackStub());
+        settings.setLocalIsPrivate(false);
+        RouterService rs=new RouterService(new ActivityCallbackStub());	  
         assertTrue("Bad port: "+settings.getPort(), settings.getPort()==PORT);
         rs.start();
         rs.clearHostCatcher();
