@@ -1113,7 +1113,66 @@ public class ManagedDownloader implements Downloader, Serializable {
     public float getMeasuredBandwidth() {
         return bandwidthTracker.getMeasuredBandwidth();
     }
-    
+  
+	
+	/*
+	  // Adam's unit test on the bucket() method.
+	public static void main(String args[]) {
+        IncompleteFileManager ifm=new IncompleteFileManager();
+        RemoteFileDesc rf1=new RemoteFileDesc(
+            "1.2.3.4", 6346, 0, "some file.txt", 3000000, 
+            new byte[16], SpeedConstants.T1_SPEED_INT, false, 0);
+        RemoteFileDesc rf2=new RemoteFileDesc(
+            "1.2.3.5", 6346, 0, "some file.txt", 3000000, 
+            new byte[16], SpeedConstants.T1_SPEED_INT, false, 0);
+        RemoteFileDesc rf3=new RemoteFileDesc(
+            "1.2.3.6", 6346, 0, "some file.txt", 3000000, 
+            new byte[16], SpeedConstants.MODEM_SPEED_INT, false, 0);
+
+
+        RemoteFileDesc rf4=new RemoteFileDesc(
+            "1.2.3.7", 6346, 0, "some file.txt", 3100000, 
+            new byte[16], SpeedConstants.T3_SPEED_INT, false, 0);
+        RemoteFileDesc rf5=new RemoteFileDesc(
+            "1.2.3.8", 6346, 0, "some file.txt", 3100000, 
+            new byte[16], SpeedConstants.T3_SPEED_INT, false, 0);
+        RemoteFileDesc rf6=new RemoteFileDesc(
+            "1.2.3.9", 6346, 0, "some file.txt", 3100000, 
+            new byte[16], SpeedConstants.T3_SPEED_INT, false, 0);
+        RemoteFileDesc rf7=new RemoteFileDesc(
+            "1.2.3.10", 6346, 0, "some file.txt", 3100000, 
+            new byte[16], SpeedConstants.T3_SPEED_INT, false, 0);
+        RemoteFileDesc rf8=new RemoteFileDesc(
+            "1.2.3.11", 6346, 0, "some file.txt", 3100000, 
+            new byte[16], SpeedConstants.T3_SPEED_INT, false, 0);
+        RemoteFileDesc rf9=new RemoteFileDesc(
+            "1.2.3.12", 6346, 0, "some file.txt", 3100000, 
+            new byte[16], SpeedConstants.T3_SPEED_INT, false, 0);
+        RemoteFileDesc rf10=new RemoteFileDesc(
+            "1.2.3.13", 6346, 0, "some file.txt", 3100000, 
+            new byte[16], SpeedConstants.T3_SPEED_INT, false, 0);
+        RemoteFileDesc rf11=new RemoteFileDesc(
+            "1.2.3.14", 6346, 0, "some file.txt", 3100000, 
+            new byte[16], SpeedConstants.T1_SPEED_INT, false, 0);
+        RemoteFileDesc rf12=new RemoteFileDesc(
+		    "1.2.3.15", 6346, 0, "some file.txt", 3100000, 
+		    new byte[16], SpeedConstants.T1_SPEED_INT, false, 0);
+        RemoteFileDesc rf13=new RemoteFileDesc(
+		    "1.2.3.16", 6346, 0, "some file.txt", 3100000, 
+		    new byte[16], SpeedConstants.MODEM_SPEED_INT, false, 0);
+
+
+        //Simple case
+        //RemoteFileDesc[] allFiles={rf1, rf2, rf3, rf4, rf5, rf6, rf7, rf8, rf9};
+        RemoteFileDesc[] allFiles={rf13, rf12, rf11, rf10, rf9, rf8, rf7, rf6, rf5, rf4, rf3, rf2, rf1};
+        List[] files=bucket(allFiles, ifm);
+		//List list = files[0];
+		RemoteFileDesc rfd=(RemoteFileDesc)files[0].get(0);
+		System.out.println(rfd.getSize());
+	}	
+	*/
+	
+
     /*
     public static void main(String args[]) {
         //Test bucketing.  Note that the 1-star result is ignored.
