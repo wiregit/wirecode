@@ -29,7 +29,7 @@ public final class SearchResultHandler {
      * The maximum number of results to send in a QueryStatusResponse -
      * basically sent to say 'shut off query'.
 	 */
-    private static final int MAX_RESULTS = 65535;
+    public static final int MAX_RESULTS = 65535;
 
     /** 
 	 * The maximum number of replies to display per SECOND.  Must be greater
@@ -326,13 +326,21 @@ public final class SearchResultHandler {
 
             // inform proxying Ultrapeers....
             if (RouterService.isShieldedLeaf()) {
-                if (gc.getNumResults() > gc.getNextReportNum()) {
+                if (!gc.isFinished() && 
+                    (gc.getNumResults() > gc.getNextReportNum())) {
                     debug("SRH.accountAndUpdateDynamicQueriers(): telling UPs.");
                     gc.tallyReport();
+                    if (gc.getNumResults() > QueryHandler.ULTRAPEER_RESULTS)
+                        gc.markAsFinished();
+                    // if you think you are done, then undeniably shut off the
+                    // query.
+                    final int numResultsToReport = (gc.isFinished() ?
+                                                    MAX_RESULTS :
+                                                    gc.getNumResults()/4);
                     try {
                         QueryStatusResponse stat = 
                             new QueryStatusResponse(gc.getGUID(), 
-                                                    gc.getNumResults()/4);
+                                                    numResultsToReport);
                         RouterService.getConnectionManager().updateQueryStatus(stat);
                     }
                     catch (BadPacketException terrible) {
@@ -392,6 +400,7 @@ public final class SearchResultHandler {
         private final GUID _guid;
         private int _numResults;
         private int _nextReportNum = REPORT_INTERVAL;
+        private boolean markAsFinished = false;
 
         public GuidCount(byte[] guid) {
             _guid = new GUID(guid);
@@ -401,12 +410,14 @@ public final class SearchResultHandler {
         public GUID getGUID() { return _guid; }
         public int getNumResults() { return _numResults; }
         public int getNextReportNum() { return _nextReportNum; }
+        public boolean isFinished() { return markAsFinished; }
         public void tallyReport() { 
             _nextReportNum = _numResults + REPORT_INTERVAL; 
         }
 
         public void increment(int incr) { _numResults += incr; }
-        
+        public void markAsFinished() { markAsFinished = true; }
+
         public String toString() {
             return "" + _guid + ":" + _numResults + ":" + _nextReportNum;
         }

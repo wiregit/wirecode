@@ -39,6 +39,7 @@ public class ClientSideLeafGuidanceTest
     private static MyActivityCallback callback;
 
     private final int REPORT_INTERVAL = SearchResultHandler.REPORT_INTERVAL;
+    private final int MAX_RESULTS = SearchResultHandler.MAX_RESULTS;
 
     public ClientSideLeafGuidanceTest(String name) {
         super(name);
@@ -251,11 +252,13 @@ public class ClientSideLeafGuidanceTest
         // now send back results and make sure that we get a QueryStatus
         // from the leaf
         Message m = null;
-        assertGreaterThan(REPORT_INTERVAL, 2*testUPs.length);
+        assertGreaterThan(REPORT_INTERVAL, 4*testUPs.length);
         for (int i = 0; i < testUPs.length; i++) {
-            Response[] res = new Response[2];
+            Response[] res = new Response[4];
             res[0] = new Response(10, 10, "susheel"+i);
             res[1] = new Response(10, 10, "susheel smells good"+i);
+            res[2] = new Response(10, 10, "anita is sweet"+i);
+            res[3] = new Response(10, 10, "anita is prety"+i);
             m = new QueryReply(queryGuid.bytes(), (byte) 1, 6355, myIP(), 0, res,
                                GUID.makeGuid(), new byte[0], false, false, true,
                                true, false, false, null);
@@ -269,7 +272,7 @@ public class ClientSideLeafGuidanceTest
             QueryStatusResponse stat = getFirstQueryStatus(testUPs[i]);
             assertNotNull(stat);
             assertEquals(new GUID(stat.getGUID()), queryGuid);
-            assertEquals(1, stat.getNumResults());
+            assertEquals(4, stat.getNumResults());
         }
 
         // shut off the query....
@@ -304,7 +307,9 @@ public class ClientSideLeafGuidanceTest
         // from the leaf
         Message m = null;
         for (int i = 0; i < testUPs.length; i++) {
-            Response[] res = new Response[REPORT_INTERVAL*4];
+            // since i know REPORT_INTERVAL is 15, i'm sending 45, then 90, then
+            // 135, then 180 - after 180 leaf guidance should shut off....
+            Response[] res = new Response[REPORT_INTERVAL*3];
             for (int j = 0; j < res.length; j++)
                 res[j] = new Response(10, 10, "susheel good"+i+j);
 
@@ -317,13 +322,53 @@ public class ClientSideLeafGuidanceTest
         }
         
         // all UPs should get a QueryStatusResponse
+        boolean maxResultsEncountered = false;
         for (int i = 0; i < testUPs.length; i++) {
             for (int j = 0; j < testUPs.length; j++) {
                 QueryStatusResponse stat = getFirstQueryStatus(testUPs[j]);
                 assertNotNull(stat);
                 assertEquals(new GUID(stat.getGUID()), queryGuid);
-                assertEquals(5*(i+1), stat.getNumResults());
+                // depending on how far along the query is we could have a
+                // number or 65535 - the number 11 depends on settings such as
+                // REPORT_INTERVAL
+                assertTrue((stat.getNumResults() == 11*(i+1)) ||
+                           (stat.getNumResults() == MAX_RESULTS));
+                if (stat.getNumResults() == MAX_RESULTS) {
+                    assertTrue(i == testUPs.length-1);
+                    maxResultsEncountered = true;
+                }
             }
+        }
+        assertTrue(maxResultsEncountered);
+
+        // now, even though we send more responses, we shoudl NOT get any more
+        // leaf guidance...
+        Response[] res = new Response[REPORT_INTERVAL*4];
+        for (int j = 0; j < res.length; j++)
+            res[j] = new Response(10, 10, "anita is pretty"+j);
+        m = new QueryReply(queryGuid.bytes(), (byte) 1, 6355, myIP(), 0, res,
+                           GUID.makeGuid(), new byte[0], false, false, true,
+                           true, false, false, null);
+        
+        testUPs[0].send(m);
+        testUPs[0].flush();
+
+        // no UPs should get a QueryStatusResponse
+        for (int i = 0; i < testUPs.length; i++) {
+            final int index = i;
+            Thread newThread = new Thread() {
+                    public void run() {
+                        try {
+                            QueryStatusResponse stat = 
+                                getFirstQueryStatus(testUPs[index]);
+                            assertNull(stat);
+                        }
+                        catch (Exception e) {
+                            assertNull(e);
+                        }
+                    }
+                };
+            newThread.start();
         }
     }
 
@@ -403,7 +448,8 @@ public class ClientSideLeafGuidanceTest
             QueryStatusResponse stat = getFirstQueryStatus(testUPs[i]);
             assertNotNull(stat);
             assertEquals(new GUID(stat.getGUID()), queryGuid);
-            assertEquals(5+((REPORT_INTERVAL+1)/4), stat.getNumResults());
+            assertEquals(REPORT_INTERVAL+((REPORT_INTERVAL+1)/4), 
+                         stat.getNumResults());
         }
 
         // shut off the query....
