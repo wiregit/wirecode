@@ -1,0 +1,22 @@
+﻿################################################################################
+# Messages Bundle for LimeWire 2.8.5
+# Specialization for: Hindi - India (standard Devanagari script)
+# Dummy resources bundle for missing translation.
+################################################################################
+LOCALE_LANGUAGE_CODE=hi
+LOCALE_LANGUAGE_NAME=हिन्दी
+LOCALE_COUNTRY_CODE=
+LOCALE_COUNTRY_NAME=इंडिया
+LOCALE_VARIANT_CODE=
+LOCALE_VARIANT_NAME=Devanagari
+
+################################################################################
+# Key/value pair for whether or not bold characters should be used for this
+# locale. Must be "true" or "false" (true only for complex scripts).
+################################################################################
+DISABLE_BOLD_CHARACTERS=true
+
+################################################################################
+# All other translated resources are missing. Look at the default English file.
+################################################################################
+

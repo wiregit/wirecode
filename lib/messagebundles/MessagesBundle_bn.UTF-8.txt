@@ -1,0 +1,21 @@
+﻿################################################################################
+# Messages Bundle for LimeWire 2.8.5
+# Specialization for: Bengali - Bengla Desh & India
+# Dummy resources bundle for missing translation.
+################################################################################
+LOCALE_LANGUAGE_CODE=bn
+LOCALE_LANGUAGE_NAME=Bengla
+LOCALE_COUNTRY_CODE=
+LOCALE_COUNTRY_NAME=Bengla Desh, India
+LOCALE_VARIANT_CODE=
+LOCALE_VARIANT_NAME=International
+
+################################################################################
+# Key/value pair for whether or not bold characters should be used for this
+# locale. Must be "true" or "false" (true only for complex scripts).
+################################################################################
+DISABLE_BOLD_CHARACTERS=true
+
+################################################################################
+# All other translated resources are missing. Look at the default English file.
+################################################################################
