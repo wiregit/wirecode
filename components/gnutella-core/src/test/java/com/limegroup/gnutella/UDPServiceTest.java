@@ -48,9 +48,11 @@ public class UDPServiceTest extends TestCase {
 	 * Tests sending query requests to the UDP port.
 	 */
 	public void testQueryRequests() {
-		//System.out.println("TESTING UDP QUERY REQUESTS"); 
 		FileManager fm = ROUTER_SERVICE.getFileManager();
 		File[] sharedDirs = SettingsManager.instance().getDirectories();
+		for(int i=0; i<sharedDirs.length; i++) {
+			System.out.println("shared dir: "+sharedDirs[i]); 
+		}
 		FileDesc[] fds = fm.getSharedFileDescriptors(sharedDirs[0]);
 
 
