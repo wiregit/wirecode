@@ -1092,7 +1092,7 @@ public final class SettingsManager {
                     setLastShutdownTime(Long.parseLong(p));
                 }
                 else if(key.equals(FRACTIONAL_UPTIME)) {
-                    setFractionalUptime(Float.parseFloat(p));
+                    setFractionalUptime(Float.valueOf(p).floatValue());
                 }
                 else if(key.equals(SERVANT_TYPE)) {
 					setServantType(p);
@@ -3387,7 +3387,7 @@ public final class SettingsManager {
 	 *  specified key
 	 */
 	private float getFloatValue(final String KEY) {
-		return Float.parseFloat(PROPS.getProperty(KEY));
+		return Float.valueOf(PROPS.getProperty(KEY)).floatValue();
 	}
 
     /**
