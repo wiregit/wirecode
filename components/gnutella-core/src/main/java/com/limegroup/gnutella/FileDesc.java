@@ -119,7 +119,7 @@ public final class FileDesc implements AlternateLocationCollector {
         _path = FILE.getAbsolutePath(); //TODO: right method?
         _size = (int)FILE.length();
         _modTime = FILE.lastModified();
-        URNS = urns;
+        URNS = Collections.unmodifiableSet(urns);
         _hits = 0; // Starts off with 0 hits
     }		
 
