@@ -195,7 +195,9 @@ public class LimeXMLDocument{
      */
 
     public String getXMLString() {        
-        return XMLString;
+        //return XMLString;
+        String ret = constructXML(getNameValueList(),schemaUri);
+        return ret;
     }            
 
     //Unit Tester    
