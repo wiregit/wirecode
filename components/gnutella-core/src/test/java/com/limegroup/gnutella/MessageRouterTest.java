@@ -9,6 +9,7 @@ import com.limegroup.gnutella.routing.QueryRouteTable;
 import com.limegroup.gnutella.settings.UltrapeerSettings;
 import com.limegroup.gnutella.stubs.FileManagerStub;
 import com.limegroup.gnutella.util.BaseTestCase;
+import com.limegroup.gnutella.util.LeafConnection;
 import com.limegroup.gnutella.util.NewConnection;
 import com.limegroup.gnutella.util.OldConnection;
 import com.limegroup.gnutella.util.PrivilegedAccessor;
@@ -67,6 +68,7 @@ public final class MessageRouterTest extends BaseTestCase {
     public void testForwardQueryRequestToLeaves() throws Exception  {
         TestConnectionManager tcm = 
             TestConnectionManager.createManagerWithVariedLeaves();
+        PrivilegedAccessor.setValue(RouterService.class, "manager", tcm);
         PrivilegedAccessor.setValue(ROUTER, "_manager", tcm);
         Class[] paramTypes = new Class[] {
             QueryRequest.class,
@@ -79,14 +81,29 @@ public final class MessageRouterTest extends BaseTestCase {
                 paramTypes);
         
         QueryRequest qr = 
-            QueryRequest.createQuery(TestConnectionManager.ALT_LEAF_KEYWORD);
+            QueryRequest.createQuery(LeafConnection.ALT_LEAF_KEYWORD);
         ReplyHandler rh = new ManagedConnection("localhost", 6346);
         Object[] params = new Object[]  {qr, rh};
         m.invoke(ROUTER, params);
-        int numQueries = tcm.getNumUltrapeerQueries();
+        int numQueries = tcm.getNumLeafQueries();
         assertEquals("unexpected number of queries received by leaves", 
             UltrapeerSettings.MAX_LEAVES.getValue()/2, numQueries);
+
+        tcm = TestConnectionManager.createManager();
+        PrivilegedAccessor.setValue(RouterService.class, "manager", tcm);
+        PrivilegedAccessor.setValue(ROUTER, "_manager", tcm);
+
+        m = PrivilegedAccessor.getMethod(ROUTER, 
+                    "forwardQueryRequestToLeaves",
+                    paramTypes);
+        qr = QueryRequest.createQuery(LeafConnection.LEAF_KEYWORD);
+        params[0] = qr;
+        m.invoke(ROUTER, params);
+        numQueries = tcm.getNumLeafQueries();
+        assertEquals("unexpected number of queries received by leaves", 
+            UltrapeerSettings.MAX_LEAVES.getValue()/4, numQueries); 
     }
+
     
     /**
      * Tests the method for creating <tt>QueryReply</tt> instances from
