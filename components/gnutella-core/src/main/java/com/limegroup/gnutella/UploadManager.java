@@ -861,14 +861,9 @@ public final class UploadManager implements BandwidthTracker {
 	 *  <tt>false</tt> otherwise
 	 */
 	private boolean isMalformedURNGet(final String requestLine) {
-	    int ignoreSlashIndex = requestLine.indexOf("/");
-		int slash1Index = requestLine.indexOf("/", ignoreSlashIndex+1);
-		int slash2Index = requestLine.indexOf("/", slash1Index+1);
-		if((slash1Index==-1) || (slash2Index==-1)) {
-			return false;
-		}
-		String idString = requestLine.substring(slash1Index+1, slash2Index);
-		return idString.equalsIgnoreCase("uri-res");
+	    if ( requestLine.charAt(0) == '/' )
+	        return isURNGet(requestLine.substring(1));
+        return false;	        
 	}	
 
 	/**
@@ -969,8 +964,7 @@ public final class UploadManager implements BandwidthTracker {
 	 */
 	private HttpRequestLine parseMalformedURNGet(final String requestLine) 
 		throws IOException {
-		final String realRequest = requestLine.substring(1);
-		return parseURNGet(realRequest);
+		return parseURNGet(requestLine.substring(1));
 	}
 	
 
