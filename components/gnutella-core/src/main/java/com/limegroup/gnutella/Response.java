@@ -5,6 +5,7 @@ import com.limegroup.gnutella.altlocs.AlternateLocationCollection;
 import com.limegroup.gnutella.messages.GGEP;
 import com.limegroup.gnutella.messages.BadGGEPBlockException;
 import com.limegroup.gnutella.messages.BadGGEPPropertyException;
+import com.limegroup.gnutella.search.HostData;
 import com.limegroup.gnutella.util.NetworkUtils;
 import com.limegroup.gnutella.util.DataUtils;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
@@ -797,6 +798,35 @@ public class Response {
     
     byte[] getExtBytes() {
         return extBytes;
+    }
+    
+    /**
+     * Returns this Response as a RemoteFileDesc array.
+     * Uses information from HostData and LimeXMLDocument if needed
+     */
+    public RemoteFileDesc toRemoteFileDesc(HostData data, LimeXMLDocument doc){
+        // try to create the document from QHD if we weren't given one.
+        if( doc == null )
+            doc = getDocument();
+        return new RemoteFileDesc(
+             data.getIP(),
+             data.getPort(),
+             getIndex(),
+             getName(),
+             (int)getSize(),
+             data.getClientGUID(),
+             data.getSpeed(),
+             data.isChatEnabled(),
+             data.getQuality(),
+             data.isBrowseHostEnabled(),
+             doc,
+             getUrns(),
+             data.isReplyToMulticastQuery(),
+             data.isFirewalled(), 
+             data.getVendorCode(),
+             System.currentTimeMillis(),
+             data.getPushProxies()
+            );
     }
 
 	/**
