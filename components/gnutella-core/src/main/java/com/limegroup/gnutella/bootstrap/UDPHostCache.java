@@ -260,7 +260,7 @@ public class UDPHostCache {
      */
     private void createAndAdd(String host, int port) {
         try {
-            ExtendendEndpoint ep = new ExtendedEndpoint(host, port).setUDPHostCache(true);
+            ExtendedEndpoint ep = new ExtendedEndpoint(host, port).setUDPHostCache(true);
             add(ep);
         } catch(IllegalArgumentException ignored) {}
     }
