@@ -63,7 +63,8 @@ public class MessageTest extends TestCase {
         Message m  = null;
         try {
             m = Message.read(bais,b);
-        } catch(BadPacketException boe) {
+            assertTrue(false);//if things go well, we should throw bpe
+        } catch(BadPacketException bpe) {
         } catch(Exception e) {
             assertTrue("Messasge.read failed",false);
         } 
