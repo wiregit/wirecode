@@ -9,7 +9,7 @@ import com.limegroup.gnutella.http.*;
 import com.limegroup.gnutella.util.Sockets;
 import java.io.*;
 import java.net.*;
-import com.limegroup.gnutella.util.CommonUtils;
+import com.limegroup.gnutella.util.*;
 import java.util.StringTokenizer;
 import com.sun.java.util.collections.*;
 
@@ -481,10 +481,8 @@ public class HTTPDownloader implements BandwidthTracker {
 	public void stop() {        
         if (_byteReader != null)
             _byteReader.close();
-        try {
-            if (_socket != null)
-                _socket.close();
-        } catch (IOException e) { }
+        if (_socket != null)
+            Sockets.close(_socket);
 	}
 
     /**

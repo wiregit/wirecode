@@ -7,8 +7,7 @@ import java.util.StringTokenizer;
 import com.sun.java.util.collections.*;
 import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.http.*;
-import com.limegroup.gnutella.util.StringUtils;
-import com.limegroup.gnutella.util.URLDecoder;
+import com.limegroup.gnutella.util.*;
 
 /**
  * There are two constructors that are necessary.  The 
@@ -289,10 +288,8 @@ public class HTTPUploader implements Uploader {
 			if (_fis != null)
 				_fis.close();
 		} catch (IOException e) {}
-		try {
-			if (_socket != null) 
-				_socket.close();
-		} catch (IOException e) {}
+        if (_socket != null) 
+            Sockets.close(_socket);
 	}
     
 	/**

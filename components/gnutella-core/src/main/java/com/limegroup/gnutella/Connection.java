@@ -58,8 +58,8 @@ public class Connection {
 
     /**
      * Trigger an opening connection to close after it opens.  This
-     * flag is set in shutdown() and then checked in initialize()
-     * to insure the _socket.close() happens if shutdown is called
+     * flag is set in close() and then checked in initialize()
+     * to insure that _socket.close() happens if close() is called
      * asynchronously before initialize() completes.  Note that the 
      * connection may have been remotely closed even if _closed==true.  
      * Protected (instead of private) for testing purposes only.
@@ -275,7 +275,7 @@ public class Connection {
 
         // Check to see if close() was called while the socket was initializing
         if (_closed) {
-            _socket.close();
+            close();
             throw new IOException();
         }
 
@@ -312,10 +312,10 @@ public class Connection {
             else
                 initializeIncoming();
         } catch (NoGnutellaOkException e) {
-            _socket.close();
+            close();
             throw e;
         } catch (IOException e) {
-            _socket.close();
+            close();
             throw new BadHandshakeException(e);
         }
     }
@@ -920,17 +920,8 @@ public class Connection {
         // Setting this flag insures that the socket is closed if this
         // method is called asynchronously before the socket is initialized.
         _closed = true;
-        if(_socket != null) {
-            //There is a bug in Java 1.4 where s.close() does not work if the
-            //socket s was created from a SocketChannel and s.setSoTimeout() was
-            //ever called.  The work around is to shutdown the input and output
-            //streams independently.
-            try { _socket.shutdownInput(); } catch(IOException e) {}
-            try { _socket.shutdownOutput(); } catch(IOException e) {}
-            //However, we still need to call _socket.close to ensure it's
-            //cancelled from selector.
-            try { _socket.close(); } catch(IOException e) { }
-        }
+        if(_socket != null)
+            Sockets.close(_socket);
     }
 
     public String toString() {

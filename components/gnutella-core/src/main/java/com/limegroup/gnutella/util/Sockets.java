@@ -118,6 +118,23 @@ public class Sockets {
 //              return new Socket(host, port);
 //          }
     }
+
+    /**
+     * Closes the socket s.  To work around bugs in Java 1.4, always use this
+     * method instead of calling s.close() directly.  Catches and silently
+     * ignores any IO errors.
+     */
+    public static void close(Socket s) {
+        //There is a bug in Java 1.4 where s.close() does not work if the
+        //socket s was created from a SocketChannel and s.setSoTimeout() was
+        //ever called.  The work around is to shutdown the input and output
+        //streams independently.
+        try { s.shutdownInput(); } catch(IOException e) {}
+        try { s.shutdownOutput(); } catch(IOException e) {}
+        //However, we still need to call _socket.close to ensure it's
+        //cancelled from any selectors.
+        try { s.close(); } catch(IOException e) { }
+    }
 }
 
 
