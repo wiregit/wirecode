@@ -324,7 +324,11 @@ public class Backend extends com.limegroup.gnutella.util.BaseTestCase {
             try {
                 if (shutdownSocket != null) shutdownSocket.close();
             } catch (IOException ex2) {}
-            postTearDown();
+            try {
+                postTearDown();
+            } finally {
+                deleteFiles(_baseDir, true); // get rid of tmp dirs.
+            }
         }
         
 	}

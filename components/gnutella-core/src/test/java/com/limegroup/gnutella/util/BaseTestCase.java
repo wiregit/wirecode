@@ -91,6 +91,8 @@ public class BaseTestCase extends TestCase implements ErrorCallback {
      * Recursively delete a directory.
      */
     protected static void cleanFiles(File dir, boolean deleteDirs) {
+        if ( dir == null ) return;
+        
         File[] files = dir.listFiles();
         for(int i=0; i< files.length; i++) {
             if ( files[i].isDirectory() ) {
@@ -216,8 +218,7 @@ public class BaseTestCase extends TestCase implements ErrorCallback {
      * Used to remove directories and possibly other things.
      */
     public void postTearDown() {
-        if ( _baseDir != null )
-            cleanFiles(_baseDir, false);
+        cleanFiles(_baseDir, false);
     }
     
     /**
