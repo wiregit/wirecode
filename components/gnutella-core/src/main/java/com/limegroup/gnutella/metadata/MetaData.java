@@ -2,7 +2,7 @@
 package com.limegroup.gnutella.metadata;
 
 import com.limegroup.gnutella.xml.LimeXMLUtils;
-import com.sun.java.util.collections.List;
+import com.sun.java.util.collections.*;
 import java.io.*;
 
 /**
@@ -11,6 +11,7 @@ import java.io.*;
  */
 
 public abstract class MetaData {
+	
 	
 	protected MetaData(){} // use the factory instead of instantiating
 	
@@ -34,4 +35,8 @@ public abstract class MetaData {
 	 * @throws IOException parsing failed
 	 */
     protected abstract void parseFile(File f) throws IOException;
+    
+
+
+    
 }

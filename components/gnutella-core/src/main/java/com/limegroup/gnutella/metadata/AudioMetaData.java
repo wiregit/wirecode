@@ -6,7 +6,7 @@
  */
 package com.limegroup.gnutella.metadata;
 
-import com.limegroup.gnutella.util.NameValue;
+import com.limegroup.gnutella.util.*;
 import com.limegroup.gnutella.xml.*;
 import com.sun.java.util.collections.*;
 
@@ -30,8 +30,8 @@ public abstract class AudioMetaData extends MetaData {
     private short disk=-1;
     private short totalDisks=-1;
     
-    public static final String ISO_LATIN_1 = "8859_1";
-    public static final String UNICODE = "Unicode";
+    protected static final String CHARSET = CommonUtils.getCharset();
+    protected static final String UNICODE = "Unicode";
     
     public static String schemaURI = 
         "http://www.limewire.com/schemas/audio.xsd";

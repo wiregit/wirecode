@@ -102,8 +102,9 @@ public final class Launcher {
 		else if(CommonUtils.isMacClassic() || CommonUtils.isMacOSX()) {
 			openURLMac(url);
 		}
-		else if(CommonUtils.isUnix()) {
-			launchFileUnix(url);
+		else {
+		    // Other OS
+			launchFileOther(url);
 		}
 		return -1;
 	}
@@ -191,8 +192,9 @@ public final class Launcher {
 			else if(CommonUtils.isMacOSX()) {
 				launchFileMacOSX(path);
 			}
-			else if(CommonUtils.isUnix()) {
-				launchFileUnix(path);
+			else {
+			    // Other OS, use helper apps
+				launchFileOther(path);
 			}
 		}
 		else {
@@ -303,14 +305,14 @@ public final class Launcher {
     
     
 	/**
-	 * Attempts to launch the given file on Unix.
+	 * Attempts to launch the given file.
 	 * NOTE: WE COULD DO THIS ONE BETTER!!
 	 *
 	 * @throws IOException  if the call to Runtime.exec throws an IOException
 	 *                      or if the Process created by the Runtime.exec call
 	 *                      throws an InterruptedException
 	 */
-	private static void launchFileUnix(String path) throws IOException {
+	private static void launchFileOther(String path) throws IOException {
 	    String handler;
 	    if (MediaType.getAudioMediaType().matches(path)) {
 	    	handler = URLHandlerSettings.AUDIO_PLAYER.getValue();
@@ -344,12 +346,3 @@ public final class Launcher {
         }
     }
 }
-
-
-
-
-
-
-
-
-

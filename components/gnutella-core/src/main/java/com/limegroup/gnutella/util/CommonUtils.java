@@ -185,6 +185,10 @@ public final class CommonUtils {
      */
     static File SETTINGS_DIRECTORY = null;
 
+    /**
+     * the preferred charsets for systems that do not use unicode
+     */
+    private static final Properties CHARSETS = new Properties();
 
 	/**
 	 * Make sure the constructor can never be called.
@@ -241,6 +245,10 @@ public final class CommonUtils {
                            substring(0, LIMEWIRE_VERSION.length()-4)+" (Pro)");
             _isPro = true;
 		}
+		
+		CHARSETS.setProperty("RU","Cp1251");
+		CHARSETS.setProperty("BG","Cp1251");
+		//add other language codes -> charset mappings here
 	}
 
     /** Gets the major version of GUESS supported.
@@ -1111,7 +1119,7 @@ public final class CommonUtils {
         for (int i = 0; i < ILLEGAL_CHARS_ANY_OS.length; i++) 
             name = name.replace(ILLEGAL_CHARS_ANY_OS[i], '_');
 		
-        if ( _isWindows ) {
+        if ( _isWindows || _isOS2 ) {
             for (int i = 0; i < ILLEGAL_CHARS_WINDOWS.length; i++) 
                 name = name.replace(ILLEGAL_CHARS_WINDOWS[i], '_');
         } else if ( _isLinux || _isSolaris ) {
@@ -1133,6 +1141,18 @@ public final class CommonUtils {
      */
     public static boolean recordStats() {
         return !CommonUtils.isJava118();
+    }
+    
+    /**
+     * @return the charset used by the language the user has selected.
+     */
+    public static String getCharset() {
+    	 String userLanguage =
+            System.getProperty("user.language").toUpperCase();
+             
+    	return CHARSETS.getProperty(userLanguage,
+    			System.getProperty("file.encoding"));
+
     }
     
     /*

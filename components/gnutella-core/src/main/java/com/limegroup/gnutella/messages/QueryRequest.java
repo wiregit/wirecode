@@ -957,6 +957,8 @@ public class QueryRequest extends Message implements Serializable{
                 metaFlag |= LIN_PROG_MASK;
             else if (CommonUtils.isWindows())
                 metaFlag |= WIN_PROG_MASK;
+            else // Other OS, search any type of programs
+                metaFlag |= (LIN_PROG_MASK|WIN_PROG_MASK);
         }
         return metaFlag;
     }

@@ -116,7 +116,7 @@ public class MP3MetaData extends AudioMetaData {
      */
     private String getString(byte[] buffer, int length) {
         try {
-            return new String(buffer, 0, getTrimmedLength(buffer, length), ISO_LATIN_1);
+            return new String(buffer, 0, getTrimmedLength(buffer, length), CHARSET);
         } catch (UnsupportedEncodingException err) {
             // should never happen
             return null;
@@ -157,7 +157,7 @@ public class MP3MetaData extends AudioMetaData {
 
             if (contentBytes.length > 0) {
                 try {
-                    String enc = (frame.isISOLatin1()) ? ISO_LATIN_1 : UNICODE;
+                    String enc = (frame.isISOLatin1()) ? CHARSET : UNICODE;
                     frameContent = new String(contentBytes, enc).trim();
                 } catch (UnsupportedEncodingException err) {
                     // should never happen
