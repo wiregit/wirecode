@@ -14,7 +14,7 @@ classes = Main.class ConnectionManager.class RouteTable.class \
 	RouterService.class ResponseVerifier.class \
 	MediaType.class \
 	FileManager.class RejectConnection.class \
-	ConnectionWatchdog.class
+	ConnectionWatchdog.class Acceptor.class
 
 subpackages = util gui filters networkdiscoverer
 

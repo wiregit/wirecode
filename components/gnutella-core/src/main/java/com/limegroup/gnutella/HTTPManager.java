@@ -25,7 +25,7 @@ public class HTTPManager {
     /**
      * @requires If isPush, "GIV " was just read from s.
      *           Otherwise, "GET " was just read from s.
-     * @effects  Transfers the file over s in the background.
+     * @effects  Transfers the file over s <i>in the foreground</i>.
      *           Throws IOException if the handshake failed.
      */
     public HTTPManager(Socket s, ConnectionManager m, boolean isPush)
@@ -80,9 +80,8 @@ public class HTTPManager {
                 HTTPUploader uploader;
                 uploader = new HTTPUploader(s, _filename, _index, _manager,
                                             _uploadBegin, _uploadEnd);
-                Thread t = new Thread(uploader);
-                t.setDaemon(true);
-                t.start();
+                Thread.currentThread().setName("HTTPUploader (normal)");
+                uploader.run(); //Ok, since we've already spawned a thread.
             }
 
             else /* isPush */ {
@@ -112,9 +111,8 @@ public class HTTPManager {
                 HTTPDownloader downloader;
                 downloader = new HTTPDownloader(s, _filename, _index, guid,
                                 _manager);
-                Thread t = new Thread(downloader);
-                t.setDaemon(true);
-                t.start();
+                Thread.currentThread().setName("HTTPDownload (push)");
+                downloader.run(); //Ok, since we've already spawned a thread.
             }
         } catch (IndexOutOfBoundsException e) {
             throw new IOException();
