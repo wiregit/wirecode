@@ -150,6 +150,7 @@ public class ClientSideBrowseHostTest extends ClientSideTestCase {
 
 
     public void testPushProxyRequest() throws Exception {
+    	Thread.sleep(6000);
         callback = (MyActivityCallback) getCallback();
         drain(testUP[0]);
         // some setup
@@ -196,6 +197,8 @@ public class ClientSideBrowseHostTest extends ClientSideTestCase {
                                 proxies);
 
         // wait for the incoming PushProxy request
+        // increase the timeout since we send udp pushes first
+        ss.setSoTimeout(6000);
         Socket httpSock = ss.accept();
         assertNotNull(httpSock);
         
