@@ -20,6 +20,9 @@ import com.limegroup.gnutella.gml.GMLReplyCollection;
 import com.limegroup.gnutella.gml.GMLReplyRepository;
 import com.limegroup.gnutella.gml.GMLTemplateRepository;
 import com.limegroup.gnutella.gml.TemplateNotFoundException;
+import java.security.DigestInputStream;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import org.xml.sax.InputSource;
 
 public class FileManager{
@@ -111,7 +114,7 @@ public class FileManager{
         // Get the canoncial path, using the absolute path as a backup.
         try {
             return file.getCanonicalPath();
-        } catch(IOException e) {
+        } catch(IOException e2) {
             return file.getAbsolutePath();
         }
     }

@@ -483,7 +483,7 @@ public class SettingsManager implements SettingsInterface
         setSaveDirectory(home_);
         setSaveDefault(home_);
         setGMLTemplateDirectory(home_);
-        setGMLReplyFile(home_ + "\\replies.gmlr");
+        setGMLReplyFile(home_ + "\\" + DEFAULT_GML_REPLY_FILE);
         setUseQuickConnect(DEFAULT_USE_QUICK_CONNECT);
         setQuickConnectHosts(DEFAULT_QUICK_CONNECT_HOSTS);
         setParallelSearchMax(DEFAULT_PARALLEL_SEARCH);

@@ -47,6 +47,8 @@ public interface SettingsInterface
     public static final int     DEFAULT_MAX_INCOMING_CONNECTION=4;
     /** Default directories for file searching */
     public static final String  DEFAULT_SAVE_DIRECTORY = "";
+    /** Default file for the GML Reply Repository*/
+    public static final String  DEFAULT_GML_REPLY_FILE = "tags.gmlr";
     /** Default directories for file searching */
     public static final String  DEFAULT_DIRECTORIES    = "";
     /** Default file extensions */
