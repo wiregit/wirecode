@@ -302,11 +302,17 @@ public class LimeXMLUtils
         for(int j=0; j< size; j++){
             String currFieldName = (String)fieldNames.get(j);
             String queryValue = queryDoc.getValue(currFieldName);
+            if(queryValue==null) {
+                try {
+                    Assert.that(false,"Bad query. String = "+
+                                queryDoc.getXMLString());
+                } catch(SchemaNotFoundException snfx) {
+                    Assert.that(false, "SchemaNotFound? That's impossible!");
+                }
+            }
             String replyDocValue = replyDoc.getValue(currFieldName);
             if((replyDocValue == null) || replyDocValue.equals(""))
-            {
                 nullCount++;
-            }
             else {
                 try {  
                     // if this is a parse-able numeric value, doing a prefix
