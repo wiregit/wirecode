@@ -1,8 +1,9 @@
 package com.limegroup.gnutella.html;
 
 import com.limegroup.gnutella.*;
-import com.limegroup.gnutella.util.NetworkUtils;
+import com.limegroup.gnutella.util.*;
 import java.io.File;
+import java.net.URLEncoder;
 
 /**
  * Creates a HTML listing of shared files and/or magnet links.
@@ -45,8 +46,9 @@ public class FileListHTMLPage {
         for (int i = 0; i < sharedFiles.length; i++) {
             File currFile = sharedFiles[i].getFile();
             sb.append(beginURL + sharedFiles[i].getIndex() + "/" + 
-                      currFile.getName() + ">" + currFile.getName() +
-                      "</a><br>");
+                      StringUtils.replace(URLEncoder.encode(currFile.getName()),
+                                          "+", "%20") + ">" + 
+                      currFile.getName() + "</a><br>");
         }
 
         // cap off the page
