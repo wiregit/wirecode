@@ -440,4 +440,21 @@ public final class SettingsFactory {
         
         return result;
 	}
+    
+    /**
+     * Creates a new <tt>FontNameSetting</tt> instance with the specified
+     * key and default value.
+     *
+     * @param key the key for the setting
+	 * @param defaultValue the default value for the setting
+	 */
+    public synchronized FontNameSetting createFontNameSetting(String key, 
+                                                           String defaultValue){
+ 		FontNameSetting result = 
+            new FontNameSetting(DEFAULT_PROPS, PROPS, key, defaultValue);
+        settings.add(result);
+        result.reload();
+        return result;
+ 	}
+
 }

@@ -74,8 +74,8 @@ public final class ThemeFileHandler {
 	/**
 	 * Setting for the control text font name.
 	 */
-	public static final StringSetting CONTROL_TEXT_FONT_NAME =
-		FACTORY.createStringSetting("CONTROL_TEXT_FONT_NAME", "dialog");
+	public static final FontNameSetting CONTROL_TEXT_FONT_NAME =
+		FACTORY.createFontNameSetting("CONTROL_TEXT_FONT_NAME", "dialog");
 
 	/**
 	 * Setting for the control text font style.
@@ -92,8 +92,8 @@ public final class ThemeFileHandler {
 	/**
 	 * Setting for the system text font name.
 	 */
-	public static final StringSetting SYSTEM_TEXT_FONT_NAME =
-		FACTORY.createStringSetting("SYSTEM_TEXT_FONT_NAME", "dialog");
+	public static final FontNameSetting SYSTEM_TEXT_FONT_NAME =
+		FACTORY.createFontNameSetting("SYSTEM_TEXT_FONT_NAME", "dialog");
 
 	/**
 	 * Setting for the system text font style.
@@ -110,8 +110,8 @@ public final class ThemeFileHandler {
 	/**
 	 * Setting for the user text font name.
 	 */
-	public static final StringSetting USER_TEXT_FONT_NAME =
-		FACTORY.createStringSetting("USER_TEXT_FONT_NAME", "dialog");
+	public static final FontNameSetting USER_TEXT_FONT_NAME =
+		FACTORY.createFontNameSetting("USER_TEXT_FONT_NAME", "dialog");
 
 	/**
 	 * Setting for the user text font style.
@@ -128,8 +128,8 @@ public final class ThemeFileHandler {
 	/**
 	 * Setting for the menu text font name.
 	 */
-	public static final StringSetting MENU_TEXT_FONT_NAME =
-		FACTORY.createStringSetting("MENU_TEXT_FONT_NAME", "dialog");
+	public static final FontNameSetting MENU_TEXT_FONT_NAME =
+		FACTORY.createFontNameSetting("MENU_TEXT_FONT_NAME", "dialog");
 
 	/**
 	 * Setting for the menu text font style.
@@ -146,8 +146,8 @@ public final class ThemeFileHandler {
 	/**
 	 * Setting for the window title font name.
 	 */
-	public static final StringSetting WINDOW_TITLE_FONT_NAME =
-		FACTORY.createStringSetting("WINDOW_TITLE_FONT_NAME", "dialog");
+	public static final FontNameSetting WINDOW_TITLE_FONT_NAME =
+		FACTORY.createFontNameSetting("WINDOW_TITLE_FONT_NAME", "dialog");
 
 	/**
 	 * Setting for the window title font style.
@@ -164,8 +164,8 @@ public final class ThemeFileHandler {
 	/**
 	 * Setting for the sub text font name.
 	 */
-	public static final StringSetting SUB_TEXT_FONT_NAME =
-		FACTORY.createStringSetting("SUB_TEXT_FONT_NAME", "dialog");
+	public static final FontNameSetting SUB_TEXT_FONT_NAME =
+		FACTORY.createFontNameSetting("SUB_TEXT_FONT_NAME", "dialog");
 
 	/**
 	 * Setting for the sub text font style.
