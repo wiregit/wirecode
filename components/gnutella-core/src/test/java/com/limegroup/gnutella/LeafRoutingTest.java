@@ -96,7 +96,7 @@ public class LeafRoutingTest extends BaseTestCase {
      ////////////////////////// Initialization ////////////////////////
 
      private static void connect(RouterService rs) 
-     throws IOException, BadPacketException {
+         throws Exception {
          debug("-Establish connections");
 
          ultrapeer1 = connect(rs, 6350, true);
@@ -105,8 +105,8 @@ public class LeafRoutingTest extends BaseTestCase {
          old2 = connect(rs, 6353, true);
      }
      
-     private static Connection connect(RouterService rs, int port, boolean ultrapeer) 
-     throws IOException, BadPacketException {
+    private static Connection connect(RouterService rs, int port, boolean ultrapeer) 
+        throws Exception {
          ServerSocket ss=new ServerSocket(port);
          rs.connectToHostAsynchronously("127.0.0.1", port);
          Socket socket = ss.accept();
@@ -155,7 +155,7 @@ public class LeafRoutingTest extends BaseTestCase {
      }
 
 	private static void replyToPing(Connection c, boolean ultrapeer) 
-      throws IOException, BadPacketException {
+        throws Exception {
         // respond to a ping iff one is given.
         Message m = null;
         byte[] guid;
@@ -169,11 +169,12 @@ public class LeafRoutingTest extends BaseTestCase {
             guid = new GUID().bytes();
         }
         
-         PingReply reply = 
-             PingReply.createExternal(guid, (byte)7,
-                                       c.getLocalPort(), 
-                                       ultrapeer ? ultrapeerIP : oldIP,
-                                       ultrapeer);
+        Socket socket = (Socket)PrivilegedAccessor.getValue(c, "_socket");
+        PingReply reply = 
+            PingReply.createExternal(guid, (byte)7,
+                                     socket.getLocalPort(), 
+                                     ultrapeer ? ultrapeerIP : oldIP,
+                                     ultrapeer);
          reply.hop();
          c.send(reply);
          c.flush();

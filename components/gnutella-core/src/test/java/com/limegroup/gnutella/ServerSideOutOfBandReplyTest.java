@@ -904,10 +904,14 @@ public final class ServerSideOutOfBandReplyTest extends BaseTestCase {
         assertNull(getFirstQueryRequest(ULTRAPEER_1));
         assertNull(getFirstQueryRequest(ULTRAPEER_2));
         
+        
+        Socket socket = 
+            (Socket)PrivilegedAccessor.getValue(LEAF, "_socket");
         // try a good query
-        query = QueryRequest.createOutOfBandQuery("berkeley", 
-                                                  LEAF.getLocalAddress().getAddress(),
-                                                  6346);
+        query = 
+            QueryRequest.createOutOfBandQuery("berkeley", 
+                                              socket.getLocalAddress().getAddress(),
+                                              6346);
         LEAF.send(query);
         LEAF.flush();
 
