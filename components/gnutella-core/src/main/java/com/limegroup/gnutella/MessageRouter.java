@@ -943,6 +943,14 @@ public abstract class MessageRouter {
             if ((numResults<0) || (numResults>QueryHandler.ULTRAPEER_RESULTS)) {
                 if (RECORD_STATS)
                     OutOfBandThroughputStat.RESPONSES_BYPASSED.addData(reply.getNumResults());
+
+                DownloadManager dManager = RouterService.getDownloadManager();
+                // only store result if it is being shown to the user or if a
+                // file with the same guid is being downloaded
+                if (!_callback.queryIsAlive(qGUID) && 
+                    !dManager.guidForQueryIsDownloading(qGUID))
+                    return;
+
                 GUESSEndpoint ep = new GUESSEndpoint(datagram.getAddress(),
                                                      datagram.getPort());
                 synchronized (_bypassedResults) {

@@ -299,6 +299,8 @@ public class ClientSideOOBRequeryTest
 
         byte[] guid = rs.newQueryGUID();
         rs.query(guid, "whatever");
+        // i need to pretend that the UI is showing the user the query still
+        callback.setGUID(new GUID(guid));
         
         QueryRequest qr = 
             (QueryRequest) getFirstInstanceOfMessageType(testUPs[0],
@@ -359,7 +361,148 @@ public class ClientSideOOBRequeryTest
             Set endpoints = (Set) _bypassedResults.get(new GUID(qr.getGUID()));
             assertNull(endpoints);
         }
+        callback.clearGUID();
     }
+
+
+    public void testDSDeletionUponSuccessfulDownload() throws Exception {
+
+        keepAllAlive(testUPs);
+        // clear up any messages before we begin the test.
+        drainAll();
+
+        // luckily there is hacky little way to go through the download paces -
+        // download from yourself :) .
+
+        Message m = null;
+
+        byte[] guid = rs.newQueryGUID();
+        rs.query(guid, "berkeley");
+        callback.setGUID(new GUID(guid));
+        
+        QueryRequest qr = 
+            (QueryRequest) getFirstInstanceOfMessageType(testUPs[0],
+                                                         QueryRequest.class);
+        assertNotNull(qr);
+        assertTrue(qr.desiresOutOfBandReplies());
+
+        // just return ONE real result and the rest junk
+        Response resp = null;
+        QueryReply reply = null;
+        {
+            // get a correct response object
+            QueryRequest qrTemp = QueryRequest.createQuery("berkeley");
+            testUPs[0].send(qrTemp);
+            testUPs[0].flush();
+
+            reply = (QueryReply) getFirstInstanceOfMessageType(testUPs[0],
+                                                               QueryReply.class);
+            assertNotNull(reply);
+            resp = (Response) (reply.getResultsAsList()).get(0);
+
+        }
+        assertNotNull(reply);
+        assertNotNull(resp);
+        Response[] res = new Response[] { resp };
+
+        // this isn't really needed but just for completeness send it back to 
+        // the test Leaf
+        m = new QueryReply(guid, (byte) 1, PORT, myIP(), 0, res,
+                           GUID.makeGuid(), new byte[0], false, false, true,
+                           true, false, false, null);
+        testUPs[0].send(m);
+        testUPs[0].flush();
+
+        // send back a lot of results via TCP so you konw the UDP one will be
+        // bypassed
+        for (int i = 0; i < testUPs.length; i++) {
+            res = new Response[75];
+            for (int j = 0; j < res.length; j++)
+                res[j] = new Response(10+j+i, 10+j+i, "berkeley "+ j + i);
+            m = new QueryReply(guid, (byte) 1, testUPs[0].getListeningPort(), 
+                               myIP(), 0, res,
+                               GUID.makeGuid(), new byte[0], false, false, true,
+                               true, false, false, null);
+            testUPs[i].send(m);
+            testUPs[i].flush();
+        }
+
+        // allow for processing
+        Thread.sleep(3000);
+
+        {
+            // now we should make sure MessageRouter has not bypassed anything
+            // yet
+            Map _bypassedResults = 
+                (Map) PrivilegedAccessor.getValue(rs.getMessageRouter(),
+                                                  "_bypassedResults");
+            assertNotNull(_bypassedResults);
+            assertEquals(0, _bypassedResults.size());
+            Set endpoints = (Set) _bypassedResults.get(new GUID(qr.getGUID()));
+            assertNull(endpoints);
+        }
+        
+        // send back a UDP response and make sure it was saved in bypassed...
+        {
+            ReplyNumberVendorMessage vm = 
+                new ReplyNumberVendorMessage(new GUID(guid), 1);
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            vm.write(baos);
+            DatagramPacket pack = new DatagramPacket(baos.toByteArray(), 
+                                                     baos.toByteArray().length,
+                                                     testUPs[0].getInetAddress(),
+                                                     PORT);
+            UDP_ACCESS[0].send(pack);
+        }
+
+        // allow for processing
+        Thread.sleep(500);
+
+        {
+            // all the UDP ReplyNumberVMs should have been bypassed
+            Map _bypassedResults = 
+                (Map) PrivilegedAccessor.getValue(rs.getMessageRouter(),
+                                                  "_bypassedResults");
+            assertNotNull(_bypassedResults);
+            assertEquals(1, _bypassedResults.size());
+            Set endpoints = (Set) _bypassedResults.get(new GUID(guid));
+            assertNotNull(endpoints);
+            assertEquals(1, endpoints.size());
+        }
+        
+        // now do the download, wait for it to finish, and then bypassed results
+        // should be empty again
+        RemoteFileDesc rfd = resp.toRemoteFileDesc(reply.getHostData());
+        
+        assertFalse("file should not be saved yet", 
+            new File( _savedDir, "berkeley.txt").exists());
+        assertTrue("file should be shared",
+            new File(_sharedDir, "berkeley.txt").exists());
+        
+        rs.download(new RemoteFileDesc[] { rfd }, false, new GUID(guid));
+        callback.clearGUID();
+        
+        // sleep to make sure the download starts 
+        Thread.sleep(5000);
+        
+        assertTrue("file should saved", 
+            new File( _savedDir, "berkeley.txt").exists());
+        assertTrue("file should be shared",
+            new File(_sharedDir, "berkeley.txt").exists());
+
+        {
+            // now we should make sure MessageRouter clears the map
+            Map _bypassedResults = 
+                (Map) PrivilegedAccessor.getValue(rs.getMessageRouter(),
+                                                  "_bypassedResults");
+            assertNotNull(_bypassedResults);
+            assertEquals(0, _bypassedResults.size());
+            Set endpoints = (Set) _bypassedResults.get(new GUID(qr.getGUID()));
+            assertNull(endpoints);
+        }
+
+    }
+
 
     //////////////////////////////////////////////////////////////////
 
@@ -397,15 +540,15 @@ public class ClientSideOOBRequeryTest
     }
 
     public static class MyActivityCallback extends ActivityCallbackStub {
-        private RemoteFileDesc rfd = null;
-        public RemoteFileDesc getRFD() {
-            return rfd;
-        }
+        public GUID aliveGUID = null;
 
-        public void handleQueryResult(RemoteFileDesc rfd,
-                                      HostData data,
-                                      Set locs) {
-            this.rfd = rfd;
+        public void setGUID(GUID guid) { aliveGUID = guid; }
+        public void clearGUID() { aliveGUID = null; }
+
+        public boolean queryIsAlive(GUID guid) {
+            if (aliveGUID != null)
+                return (aliveGUID.equals(guid));
+            return false;
         }
     }
 
