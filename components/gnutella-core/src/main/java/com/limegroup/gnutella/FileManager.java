@@ -1036,7 +1036,6 @@ public abstract class FileManager {
         //Take care of case, etc.
         try {
             f=getCanonicalFile(f);
-            System.out.println("f: " + f);
         } catch (IOException e) {
             e.printStackTrace();
             repOk();
