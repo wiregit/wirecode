@@ -1232,7 +1232,9 @@ public abstract class MessageRouter {
      */
     protected void handlePushProxyRequest(PushProxyRequest ppReq,
                                           ManagedConnection source) {
-        if (source.isSupernodeClientConnection()) {
+        if (source.isSupernodeClientConnection() &&
+            NetworkUtils.isValidAddress(RouterService.getAddress()) &&
+            NetworkUtils.isValidPort(RouterService.getPort())) {
             String stringAddr = 
                 NetworkUtils.ip2string(RouterService.getAddress());
             InetAddress addr = null;
