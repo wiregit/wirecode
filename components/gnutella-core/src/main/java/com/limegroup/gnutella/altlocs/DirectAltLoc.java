@@ -6,6 +6,7 @@ import java.net.InetAddress;
 import java.net.URL;
 import java.net.UnknownHostException;
 
+
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.util.IpPort;
 import com.limegroup.gnutella.Endpoint;
@@ -45,11 +46,13 @@ public class DirectAltLoc extends AlternateLocation {
         if(NetworkUtils.isPrivateAddress(url.getHost()))
             throw new IOException("invalid address: " + url.getHost());
             
-	    try {
-	    	_node = new QueryReply.IPPortCombo(url.getHost(),url.getPort());
-	    }catch(UnknownHostException bad) {
-	    	throw new IOException("invalid direct loc");
-	    }
+        try {
+            _node = new QueryReply.IPPortCombo(url.getHost(),url.getPort());
+        }catch(UnknownHostException bad) {
+            throw new IOException(bad.getMessage());
+        }
+
+	    
 
         _count = 1;
         _demoted = false;
@@ -133,8 +136,8 @@ public class DirectAltLoc extends AlternateLocation {
 		DirectAltLoc other = (DirectAltLoc)o;
 		
 
-		return (_node.equals(other._node) &&
-                SHA1_URN.equals(other.SHA1_URN));
+		return (_node.getInetAddress().equals(other._node.getInetAddress()) &&
+		        _node.getPort() == other._node.getPort());
 		
 	}
 

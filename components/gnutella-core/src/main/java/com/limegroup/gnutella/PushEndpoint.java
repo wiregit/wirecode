@@ -410,12 +410,12 @@ public class PushEndpoint implements HTTPHeaderValue{
 			PushProxyInterface cur = (PushProxyInterface)iter.next();
 			
 			httpString = httpString + 
-			NetworkUtils.ip2string(cur.getPushProxyAddress().getAddress());
+				NetworkUtils.ip2string(cur.getPushProxyAddress().getAddress());
 			httpString = httpString +":"+cur.getPushProxyPort()+";";
 		}
 		
 		//trim the ; at the end
-		if (getProxies().size() > 0)
+		if (httpString.endsWith(";"))
 			httpString = httpString.substring(0,httpString.length()-1);
 		
 		return httpString;

@@ -63,6 +63,11 @@ public final class AlternateLocationCollection
 	 *  <tt>AlternateLocation</tt>s from the HTTP string, or <tt>null</tt>
 	 *  if no valid locations could be found
 	 * @throws <tt>NullPointerException</tt> if <tt>value</tt> is <tt>null</tt>
+	 * 
+	 * Note: this method requires the full altloc syntax (including the SHA1 in it)
+	 * In other words, you cannot use the httpStringValue() output as an input to 
+	 * this method if you want to recreate the collection.  It seems to be used only
+	 * in downloader.HeadRequester 
 	 */
 	public static AlternateLocationCollection 
 		createCollectionFromHttpValue(final String value) {
