@@ -208,7 +208,7 @@ public class Connection {
     
     /**
      * Indicates whether the connection is to a supernode
-     * @return true, if the connection is to a shielded client, false
+     * @return true, if the connection is to a supernode, false
      * otherwise
      */
     public boolean isSupernodeConnection(){
@@ -554,6 +554,14 @@ public class Connection {
     /** Returns the port set at construction */
     public int getOrigPort() {
         return _port;
+    }
+    
+    /** 
+     * Sets the port where the conected node listens at, not the one
+     * got from socket
+     */
+    void setOrigPort(int port){
+        this._port = port;
     }
 
     /**
