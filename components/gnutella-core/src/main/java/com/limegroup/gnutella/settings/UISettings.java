@@ -11,6 +11,6 @@ public final class UISettings extends LimeProps {
      * Setting for autocompletion
      */
     public static final BooleanSetting AUTOCOMPLETE_ENABLED =
-		FACTORY.createBooleanSetting("AUTOCOMPLETE_ENABLED", false);
+		FACTORY.createBooleanSetting("AUTOCOMPLETE_ENABLED", true);
 
 }
