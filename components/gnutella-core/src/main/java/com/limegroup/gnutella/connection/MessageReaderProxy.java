@@ -1,7 +1,6 @@
 package com.limegroup.gnutella.connection;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InterruptedIOException;
 import java.nio.channels.SelectionKey;
 
@@ -25,13 +24,6 @@ public class MessageReaderProxy implements MessageReader {
         } else {
             DELEGATE = BIOMessageReader.createReader(conn);
         }
-    }
-    /* (non-Javadoc)
-     * @see com.limegroup.gnutella.connection.MessageReader#createMessageFromTCP(java.io.InputStream)
-     */
-    public Message createMessageFromTCP(InputStream is) 
-        throws BadPacketException, IOException {
-        return DELEGATE.createMessageFromTCP(is);
     }
 
     /* (non-Javadoc)
