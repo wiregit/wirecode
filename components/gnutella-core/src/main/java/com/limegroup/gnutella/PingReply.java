@@ -141,7 +141,8 @@ public class PingReply extends Message implements Serializable {
             GGEP ggep=new GGEP(true);
             ggep.put(GGEP.GGEP_HEADER_DAILY_AVERAGE_UPTIME, dailyUptime);
             if (udpSupported)
-                ggep.put(GGEP.GGEP_HEADER_UNICAST_SUPPORT);
+                // the version number is .01 (.01 * 10 == 1).
+                ggep.put(GGEP.GGEP_HEADER_UNICAST_SUPPORT, 1);
             ByteArrayOutputStream baos=new ByteArrayOutputStream();
             ggep.write(baos);
             return baos.toByteArray();
