@@ -58,8 +58,8 @@ public final class MessageWriterProxy implements MessageWriter {
     /* (non-Javadoc)
      * @see com.limegroup.gnutella.connection.MessageWriter#close()
      */
-    public void close() {
-        DELEGATE.close();
+    public void setClosed(boolean closed) {
+        DELEGATE.setClosed(closed);
     }
 
     /* (non-Javadoc)

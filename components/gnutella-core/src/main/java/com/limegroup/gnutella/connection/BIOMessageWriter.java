@@ -274,20 +274,18 @@ public final class BIOMessageWriter implements MessageWriter, Runnable {
     /**
      * Closes the writer.
      */
-    public void close() {
-        synchronized(QUEUE_LOCK) {
-            QUEUE_LOCK.notify();
+    public void setClosed(boolean closed) {
+        if(closed) {
+            synchronized(QUEUE_LOCK) {
+                QUEUE_LOCK.notify();
+            }
+        } else {
+            Thread blockingWriter = new Thread(this, "blocking message writer");
+            blockingWriter.setDaemon(true);
+            blockingWriter.start();             
         }
     }
     
-    /**
-     * Used in tests to restart processing messages from the queue.
-     */
-    public void start() {
-        Thread blockingWriter = new Thread(this, "blocking message writer");
-        blockingWriter.setDaemon(true);
-        blockingWriter.start(); 
-    }
     
     /**
      * Accessor for the queue lock, used in testing.

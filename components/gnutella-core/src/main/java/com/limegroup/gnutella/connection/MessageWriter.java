@@ -56,10 +56,6 @@ public interface MessageWriter {
      */
     boolean hasPendingMessage();
 
-    /**
-     * Closes this writer -- called when the socket is closed.
-     */
-    void close();
 
     /**
      * Sets whether or not this writer is registered with any relevant write
@@ -68,4 +64,13 @@ public interface MessageWriter {
      * @param b registration status
      */
     void setRegistered(boolean b);
+
+    /**
+     * This method is only used for testing.  This sets the closed status of
+     * the writer, specifying whether or not it should write messages to the
+     * network.
+     * 
+     * @param closed the closed status of the connection
+     */
+    void setClosed(boolean closed);
 }
