@@ -31,13 +31,13 @@ public final class ThemeSettings extends AbstractSettings {
 	 * The default name of the theme file for all operating systems other than
 	 * OS X.
 	 */
-	private static final String DEFAULT_THEME_NAME = 
+	public static final String DEFAULT_THEME_NAME = 
 		"default_theme."+EXTENSION;
 
 	/**
 	 * The default name of the theme file name for OS X.
 	 */
-	private static final String DEFAULT_OSX_THEME_NAME = 
+	public static final String DEFAULT_OSX_THEME_NAME = 
 		"default_osx_theme."+EXTENSION;
 
 	
@@ -112,6 +112,17 @@ public final class ThemeSettings extends AbstractSettings {
 		}
 	}
 	
+	/**
+	 * Determines whether or not the current theme file is the default theme 
+	 * file.
+	 *
+	 * @return <tt>true</tt> if the current theme file is the default,
+	 *  otherwise <tt>false</tt>
+	 */
+	public static boolean isDefaultTheme() {
+		return THEME_FILE.getValue().equals(THEME_DEFAULT.getValue());
+	}
+
 	/**
 	 * Setting for the default theme file to use for LimeWire display.
 	 */
