@@ -129,6 +129,14 @@ public abstract class MessageRouter {
 	 */
 	private final QRPPropagator QRP_PROPAGATOR = new QRPPropagator();
 
+
+    /**
+     * Variable for the most recent <tt>QueryRouteTable</tt> created
+     * for this node.  If this node is an Ultrapeer, the routing
+     * table will include the tables from its leaves.
+     */
+    private QueryRouteTable _lastQueryRouteTable;
+
     /**
      * Creates a MessageRouter.  Must call initialize before using.
      */
@@ -1676,21 +1684,31 @@ public abstract class MessageRouter {
 
 			c.incrementNextQRPForwardTime(time);
 				
-			//Create table to send on this connection...
+			// Create a new query route table if we need to
 			if (table == null) {
-				table=createRouteTable();
-			}                    
+				table = createRouteTable();
+                _lastQueryRouteTable = table;
+			} 
 
 			//..and send each piece.
 			//TODO2: use incremental and interleaved update
 			for (Iterator iter=table.encode(c.getQueryRouteTableSent()); 
                  iter.hasNext();) {  
-				RouteTableMessage m=(RouteTableMessage)iter.next();
-				c.send(m);
+				c.send((RouteTableMessage)iter.next());
 			}
             c.setQueryRouteTableSent(table);
-			//qi.lastSent=table;
 		}
+    }
+
+    /**
+     * Accessor for the most recently calculated <tt>QueryRouteTable</tt>
+     * for this node.  If this node is an Ultrapeer, the table will include
+     * all data for leaf nodes in addition to data for this node's files.
+     *
+     * @return the <tt>QueryRouteTable</tt> for this node
+     */
+    public QueryRouteTable getQueryRouteTable() {
+        return _lastQueryRouteTable;
     }
 
     /**
