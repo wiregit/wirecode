@@ -3,6 +3,7 @@ package com.limegroup.gnutella.downloader;
 import java.io.*;
 import com.limegroup.gnutella.*;
 import com.sun.java.util.collections.*;
+import com.limegroup.gnutella.util.FileComparator;
 
 /** 
  * A repository of temporary filenames.  Gives out file names for temporary
@@ -29,11 +30,9 @@ public class IncompleteFileManager implements Serializable {
      * INVARIANT: all blocks disjoint, no two intervals can be coalesced into
      * one interval.  Note that blocks are no sorted; there are typically few
      * blocks so performance isn't an issue.
-     *
-     * TODO: use TreeMap instead.  Requires a TreeComparator for Java 1.1.8.
-     * TODO: purge entries on shutdown
      */
-    private Map /* File -> List<Interval> */ blocks=new HashMap();  
+    private Map /* File -> List<Interval> */ blocks=
+        new TreeMap(new FileComparator());  
 
 
     ///////////////////////////////////////////////////////////////////////////
@@ -112,7 +111,7 @@ public class IncompleteFileManager implements Serializable {
      *  I.high-1 of incompleteFile have been written.  
      */
     public synchronized Iterator getBlocks(File incompleteFile) {
-        //TODO: return unmodifiable
+        //TODO3: return unmodifiable
         List intervals=(List)blocks.get(incompleteFile);
         if (intervals==null)
             return (new LinkedList()).iterator();
