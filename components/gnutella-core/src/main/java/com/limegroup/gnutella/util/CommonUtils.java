@@ -336,8 +336,8 @@ public final class CommonUtils {
 	 *  does not exist
      */
     public static File getUserSettingsDir() {
-		if(this.isWindows()) {
-			return this.getCurrentDirectory();
+		if(isWindows()) {
+			return getCurrentDirectory();
 		}
         final File HOME_DIR = new File(getUserHomeDir(), ".limewire");
         if(!HOME_DIR.isDirectory()) {
