@@ -280,6 +280,10 @@ public final class SettingsManager {
 	private final String DEFAULT_LANGUAGE             = "en";
 	private final String DEFAULT_COUNTRY              = "US";
 	
+    private final boolean DEFAULT_MONITOR_VIEW_ENABLED = true;
+    private final boolean DEFAULT_CONNECTION_VIEW_ENABLED = false;
+    private final boolean DEFAULT_LIBRARY_VIEW_ENABLED = true;
+
 	/**
 	 * Constant default value for whether or not an incoming connection
 	 * has ever been established.
@@ -431,6 +435,21 @@ public final class SettingsManager {
 	private final String PLAYER_ENABLED = "PLAYER_ENABLED";
 
 	/**
+	 * Constant key for whether or not the Monitor Tab is enabled.
+	 */
+	private final String MONITOR_VIEW_ENABLED = "MONITOR_VIEW_ENABLED";
+
+	/**
+	 * Constant key for whether or not the Connection Tab is enabled.
+	 */
+	private final String CONNECTION_VIEW_ENABLED = "CONNECTION_VIEW_ENABLED";
+
+	/**
+	 * Constant key for whether or not the Library Tab is enabled.
+	 */
+	private final String LIBRARY_VIEW_ENABLED = "LIBRARY_VIEW_ENABLED";
+
+	/**
 	 * Constant key for the language we're currently using.
 	 */
 	private final String LANGUAGE = "LANGUAGE";
@@ -553,6 +572,10 @@ public final class SettingsManager {
 
 	private volatile boolean  _chatEnabled;          
 	private volatile boolean  _playerEnabled;          
+
+    private volatile boolean  _monitorViewEnabled;
+    private volatile boolean  _connectionViewEnabled;
+    private volatile boolean  _libraryViewEnabled;
 
     /** connectString_ is something like "GNUTELLA CONNECT..."
      *  connectStringOk_ is something like "GNUTELLA OK..."
@@ -788,6 +811,36 @@ public final class SettingsManager {
                     else
                         break;
                     setPlayerEnabled(bs);
+				}
+				else if(key.equals(MONITOR_VIEW_ENABLED)) {
+					boolean bs;
+                    if (p.equals("true"))
+                        bs=true;
+                    else if (p.equals("false"))
+                        bs=false;
+                    else
+                        break;
+                    setMonitorViewEnabled(bs);
+				}
+				else if(key.equals(CONNECTION_VIEW_ENABLED)) {
+					boolean bs;
+                    if (p.equals("true"))
+                        bs=true;
+                    else if (p.equals("false"))
+                        bs=false;
+                    else
+                        break;
+                    setConnectionViewEnabled(bs);
+				}
+				else if(key.equals(LIBRARY_VIEW_ENABLED)) {
+					boolean bs;
+                    if (p.equals("true"))
+                        bs=true;
+                    else if (p.equals("false"))
+                        bs=false;
+                    else
+                        break;
+                    setLibraryViewEnabled(bs);
 				}
                 else if(key.equals(CLIENT_ID)) {
                     setClientID(p);
@@ -1142,6 +1195,11 @@ public final class SettingsManager {
 		setChatEnabled(DEFAULT_CHAT_ENABLED);
 		setPlayerEnabled(DEFAULT_PLAYER_ENABLED);
 
+        //defaults for tabs...
+        setMonitorViewEnabled(DEFAULT_MONITOR_VIEW_ENABLED);
+        setConnectionViewEnabled(DEFAULT_CONNECTION_VIEW_ENABLED);
+        setLibraryViewEnabled(DEFAULT_LIBRARY_VIEW_ENABLED);
+
 		setLanguage(DEFAULT_LANGUAGE);
 		setCountry(DEFAULT_COUNTRY);
 		setMinimumSearchQuality(DEFAULT_MINIMUM_SEARCH_QUALITY);
@@ -1247,6 +1305,22 @@ public final class SettingsManager {
             return false;
         return _playerEnabled;
     }
+
+	/** Returns true if the Monitor Tab should be enabled */
+	public boolean getMonitorViewEnabled() {
+        return _monitorViewEnabled;
+    }
+
+	/** Returns true if the Connection Tab should be enabled */
+	public boolean getConnectionViewEnabled() {
+        return _connectionViewEnabled;
+    }
+
+	/** Returns true if the Connection Tab should be enabled */
+	public boolean getLibraryViewEnabled() {
+        return _libraryViewEnabled;
+    }
+
 
     /** 
 	 * Returns a new <tt>File</tt> instance that denotes the abstract
@@ -2464,6 +2538,39 @@ public final class SettingsManager {
 		_playerEnabled = playerEnabled;
 		String s = String.valueOf(playerEnabled);
 		PROPS.put(PLAYER_ENABLED, s);
+	}
+
+	/**
+	 * Sets whether or not Monitor Tab should be enabled.
+	 *
+	 * @param monitorEnabled specified whether or not Monitor Tab is enabled.
+	 */
+	public void setMonitorViewEnabled(boolean monitorEnabled) {
+		_monitorViewEnabled = monitorEnabled;
+		String s = String.valueOf(monitorEnabled);
+		PROPS.put(MONITOR_VIEW_ENABLED, s);
+	}
+
+	/**
+	 * Sets whether or not Connection Tab should be enabled.
+	 *
+	 * @param connectionEnabled specified whether or not Monitor Tab is enabled.
+	 */
+	public void setConnectionViewEnabled(boolean connectionEnabled) {
+		_connectionViewEnabled = connectionEnabled;
+		String s = String.valueOf(connectionEnabled);
+		PROPS.put(CONNECTION_VIEW_ENABLED, s);
+	}
+
+	/**
+	 * Sets whether or not Library Tab should be enabled.
+	 *
+	 * @param libraryEnabled specified whether or not Library Tab is enabled.
+	 */
+	public void setLibraryViewEnabled(boolean libraryEnabled) {
+		_libraryViewEnabled = libraryEnabled;
+		String s = String.valueOf(libraryEnabled);
+		PROPS.put(LIBRARY_VIEW_ENABLED, s);
 	}
 
 	/**
