@@ -10,6 +10,7 @@ import com.limegroup.gnutella.routing.*;
 import com.limegroup.gnutella.security.*;
 import com.limegroup.gnutella.stubs.*;
 import com.limegroup.gnutella.util.*;
+import com.limegroup.gnutella.downloader.*;
 import com.bitzi.util.*;
 
 import junit.framework.*;
@@ -67,6 +68,10 @@ public class ServerSideWhatIsNewTest
 		ConnectionSettings.NUM_CONNECTIONS.setValue(0);
 		ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
 		SharingSettings.EXTENSIONS_TO_SHARE.setValue("txt;");
+        try {
+        SharingSettings.setDirectories( new File[] { _sharedDir, _savedDir } );
+        }
+        catch (IOException bad) { assertTrue(false); }
         // get the resource file for com/limegroup/gnutella
         berkeley = 
             CommonUtils.getResourceFile("com/limegroup/gnutella/berkeley.txt");
@@ -594,6 +599,48 @@ public class ServerSideWhatIsNewTest
         }
     }
     
+
+    // download a file and make sure the creation time given back is stored...
+    public void testDownloadCapturesCreationTime() throws Exception {
+        FileManager fm = rs.getFileManager();
+        CreationTimeCache ctCache = CreationTimeCache.instance();
+        
+        final int UPLOADER_PORT = 10000;
+        byte[] guid = GUID.makeGuid();
+        TestUploader uploader = new TestUploader("whatever.txt", UPLOADER_PORT);
+        Long cTime = new Long(2);
+        uploader.setCreationTime(cTime);
+        RemoteFileDesc rfd = new RemoteFileDesc("127.0.0.1", UPLOADER_PORT, 1, 
+                                                "whatever.txt", 10, 
+                                                guid, 1, false, 3,
+                                                false, null, null, false,
+                                                false, "LIME", 0, new HashSet());
+        Downloader downloader = 
+            rs.download(new RemoteFileDesc[] { rfd }, false, new GUID(guid));
+        
+        Thread.sleep(3000);
+        assertEquals("State = " + downloader.getState(),
+                     Downloader.COMPLETE, downloader.getState());
+        
+        assertEquals("num shared files? " + rs.getNumSharedFiles(), 2,
+                     rs.getNumSharedFiles());
+
+        {
+            Map urnToLong = 
+                (Map)PrivilegedAccessor.getValue(ctCache, "URN_TO_TIME_MAP");
+            assertEquals(""+urnToLong, 2, urnToLong.size());
+        }
+        {
+            Map longToUrns =
+                (Map)PrivilegedAccessor.getValue(ctCache, "TIME_TO_URNSET_MAP");
+            assertEquals(""+longToUrns, 2, longToUrns.size());
+        }
+
+        File newFile = new File(_savedDir, "whatever.txt");
+        assertTrue(newFile.exists());
+        URN newFileURN = fm.getURNForFile(newFile);
+        assertEquals(cTime, ctCache.getCreationTime(newFileURN));
+    }
         
 
     private static void shutdown() throws IOException {

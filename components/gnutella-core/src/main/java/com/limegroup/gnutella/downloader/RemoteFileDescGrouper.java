@@ -251,7 +251,7 @@ class RemoteFileDescGrouper implements Serializable {
         while (iter.hasNext()) {
             RemoteFileDesc currRFD = (RemoteFileDesc) iter.next();
             if ((currRFD.getCreationTime() > 0) &&
-                (currRFD.getCreationTime() < retVal))
+                ((retVal == -1) || (currRFD.getCreationTime() < retVal)))
                 retVal = currRFD.getCreationTime();
         }
         return retVal;
