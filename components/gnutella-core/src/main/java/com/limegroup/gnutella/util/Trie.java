@@ -120,7 +120,6 @@ public class Trie {
         //i is a parallel index into a
         int i=startOffset;
         for (int j=0; j<b.length(); j++) {
-            Assert.that(i==(j+startOffset), "Bad value for i");  //TODO: remove
             if ( i>=stopOffset )
                 return j;
             if (canonicalCase(a.charAt(i))!=b.charAt(j))
@@ -477,6 +476,7 @@ public class Trie {
 //      }
 
     /** Unit test. */
+    /*
     public static void main(String args[]) {
         TrieNode.unitTest();
         Trie t=new Trie(false);
@@ -607,6 +607,7 @@ public class Trie {
         Assert.that(t.get("an")==null);
         Assert.that(t.get("ant")==antVal);
     }
+    */
 }
 
 
@@ -785,6 +786,7 @@ final class TrieNode {
             return val.toString();
     }
 
+    /*
     static void unitTest() {
         TrieNode node=new TrieNode();
         TrieNode childA=new TrieNode();
@@ -873,6 +875,7 @@ final class TrieNode {
         Assert.that(node.get('b')==null);
         Assert.that(node.get('c')==null);
     }
+    */
 }
 
 /**

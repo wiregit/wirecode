@@ -350,6 +350,7 @@ public class IntSet {
     }
 
     /** Unit test. */
+    /*
     public static void main(String args[]) {
         //Test search(..) by manually modifying the rep.  It's important to test
         //even and odd length lists here.
@@ -524,6 +525,7 @@ public class IntSet {
         Assert.that(s1.contains(1)==true);
         Assert.that(s1.contains(2)==false);  
     }
+    */
 }
 
 /** Checks invariants. */
