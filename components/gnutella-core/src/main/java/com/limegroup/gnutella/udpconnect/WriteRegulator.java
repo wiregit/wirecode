@@ -11,6 +11,12 @@ public class WriteRegulator {
     private static final Log LOG =
       LogFactory.getLog(WriteRegulator.class);
 
+    /** Don't adjust the skipping of sleeps until the window has initialized */
+    private static final int MIN_START_WINDOW = 40;
+
+    /** When the window space hits this size, it is low */
+    private static final int LOW_WINDOW_SPACE = 6;
+
     private DataWindow _sendWindow;
     private int        _skipCount  = 0;
     private int        _skipLimit  = 2;
@@ -52,13 +58,14 @@ public class WriteRegulator {
         //------------- Sleep ------------------------
 
         // Sleep a fraction of rtt for specified window increment
-        int usedSpots  = _sendWindow.getUsedSpots(); 
-        int windowSize = _sendWindow.getWindowSize(); 
-        int rtt;
-        int realRTT    = _sendWindow.averageRoundTripTime();
-        int lowRTT     = _sendWindow.lowRoundTripTime();
-        int smoothRTT  = _sendWindow.smoothRoundTripTime();
-        int sentWait   = _sendWindow.calculateWaitTime( currTime, 3);
+        int  usedSpots   = _sendWindow.getUsedSpots(); 
+        int  windowSize  = _sendWindow.getWindowSize(); 
+        long windowStart = _sendWindow.getWindowStart(); 
+        int  rtt;
+        int  realRTT     = _sendWindow.averageRoundTripTime();
+        int  lowRTT      = _sendWindow.lowRoundTripTime();
+        int  smoothRTT   = _sendWindow.smoothRoundTripTime();
+        int  sentWait    = _sendWindow.calculateWaitTime( currTime, 3);
         //rtt = sentWait + lowRTT;
         rtt = sentWait + 1;
         if  (rtt == 0) 
@@ -70,9 +77,10 @@ public class WriteRegulator {
         //
         int sleepTime  = ((usedSpots+1) * baseWait);
 
-        if ( receiverWindowSpace <= 6 ) {
+        if ( receiverWindowSpace <= LOW_WINDOW_SPACE ) {
             sleepTime += 1;
-            sleepTime = 7 * (7 - receiverWindowSpace) * sleepTime / 5;  
+            sleepTime = 7 * (LOW_WINDOW_SPACE + 1 - receiverWindowSpace) *
+              sleepTime / 5;  
         }
 
         // Ensure the sleep time is fairly distributed
@@ -116,7 +124,7 @@ public class WriteRegulator {
             maxRTT      = ((_sendWindow.lowRoundTripTime()*15) / 5);
         }
         int windowDelay = 
-          (((baseWait * _sendWindow.getWindowSize()) / _skipLimit) * 2) / 4;
+          (((baseWait * windowSize) / _skipLimit) * 2) / 4;
 
         // If our RTT time is going up, figure out what to do
         if ( rtt != 0 && baseWait != 0 && 
@@ -124,7 +132,7 @@ public class WriteRegulator {
             if(LOG.isDebugEnabled())  
                 LOG.debug(
                   " -- MAX EXCEED "+
-                  " RTT sL:"+_skipLimit + " w:"+ _sendWindow.getWindowStart()+
+                  " RTT sL:"+_skipLimit + " w:"+ windowStart+
                   " Rrtt:"+realRTT+ " base :"+baseWait+" uS:"+usedSpots+
                   " lRTT:"+_sendWindow.lowRoundTripTime()+
                   " sWait:"+sentWait+
@@ -166,7 +174,8 @@ public class WriteRegulator {
         if ( !_limitHit ) {
             // Bump up the skipLimit occasionally to see if we can handle it
             if (_skipLimit < 50 &&
-                _sendWindow.getWindowStart()%_sendWindow.getWindowSize() == 0) {
+                windowStart%windowSize == 0  &&
+                windowStart > MIN_START_WINDOW) {
                 _skipLimit++;
             if(LOG.isDebugEnabled())  
                 LOG.debug(" -- UPP sL:"+_skipLimit);
@@ -181,11 +190,14 @@ public class WriteRegulator {
             }
         }
 
+        // Readjust the sleepTime to zero if the connection can handle it
+        if ( _skipCount != 0 && 
+             rtt < maxRTT && 
+             receiverWindowSpace > LOW_WINDOW_SPACE )  {
+            sleepTime = 0;
+        }
+
         return (long) sleepTime;
         //------------- Sleep ------------------------
     }
-
-	private static void log(String str) {
-		System.err.println(str);
-	}
 }

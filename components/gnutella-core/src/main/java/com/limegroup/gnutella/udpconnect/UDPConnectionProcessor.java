@@ -1144,13 +1144,8 @@ public class UDPConnectionProcessor {
             long waitTime = _writeRegulator.getSleepTime(currTime, 
               _receiverWindowSpace);
 
+            // If we are getting too close to the end of window, make a note
             if ( _receiverWindowSpace <= SMALL_SEND_WINDOW ) { 
-
-                //waitTime += 1;
-
-                // If send window getting small
-                // then wait longer
-                //waitTime *= SMALL_WINDOW_MULTIPLE;
 
                 // Scale back on the writing speed if you are hitting limits
                 _writeRegulator.hitZeroWindow();
