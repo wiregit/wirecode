@@ -198,36 +198,31 @@ public abstract class MessageRouter
 	 * @param receivingConnection the <tt>ManagedConnection</tt> over which
 	 *  the message was received
      */
-    public void handleMessage(Message m, ManagedConnection receivingConnection)
+    public void handleMessage(Message msg, ManagedConnection receivingConnection)
     {
         // Increment hops and decrease TTL.
-        m.hop();
+        msg.hop();
 	   
-        if(m instanceof PingRequest) {
+        if(msg instanceof PingRequest) {
 			STATS.addTCPPingRequest();
-            handlePingRequestPossibleDuplicate((PingRequest)m, 
+            handlePingRequestPossibleDuplicate((PingRequest)msg, 
 											   receivingConnection);
-		}
-        else if (m instanceof PingReply) {
+		} else if (msg instanceof PingReply) {
 			STATS.addTCPPingReply();
-            handlePingReply((PingReply)m, receivingConnection);
-		}
-        else if (m instanceof QueryRequest) {
+            handlePingReply((PingReply)msg, receivingConnection);
+		} else if (msg instanceof QueryRequest) {
 			STATS.addTCPQueryRequest();
             handleQueryRequestPossibleDuplicate(
-                (QueryRequest)m, receivingConnection);
-		}
-        else if (m instanceof QueryReply) {
+                (QueryRequest)msg, receivingConnection);
+		} else if (msg instanceof QueryReply) {
 			STATS.addTCPQueryReply();
-            handleQueryReply((QueryReply)m, receivingConnection);
-		}
-        else if (m instanceof PushRequest) {
+            handleQueryReply((QueryReply)msg, receivingConnection);
+		} else if (msg instanceof PushRequest) {
 			STATS.addTCPPushRequest();
-            handlePushRequest((PushRequest)m, receivingConnection);
-		}
-        else if (m instanceof RouteTableMessage) {
+            handlePushRequest((PushRequest)msg, receivingConnection);
+		} else if (msg instanceof RouteTableMessage) {
 			STATS.addTCPRouteTableMessage();
-            handleRouteTableMessage((RouteTableMessage)m,
+            handleRouteTableMessage((RouteTableMessage)msg,
                                     receivingConnection);
 		}
 
@@ -268,7 +263,8 @@ public abstract class MessageRouter
 			handleUDPPingRequestPossibleDuplicate((PingRequest)msg, handler);
 		} else if(msg instanceof PingReply) {
 			STATS.addUDPPingReply();
-			addGUESSUltrapeer(datagram);
+			UNICASTER.addUnicastEndpoint(datagram.getAddress(),
+										 datagram.getPort());		
 			handlePingReply((PingReply)msg, handler);
 		} else if(msg instanceof PushRequest) {
 			STATS.addUDPPushRequest();
@@ -276,19 +272,6 @@ public abstract class MessageRouter
 		}
     }
 
-	/**
-	 * Adds the GUESS Ultrapeer that sent the specified datagram to
-	 * the list of GUESS Ultrapeers to query.
-	 *
-	 * @param datagram the <tt>DatagramPacket</tt> instance sent by
-	 *  the GUESS Ultrapeer
-	 */
-	private void addGUESSUltrapeer(DatagramPacket datagram) {
-        ExtendedEndpoint host = 
-		    new ExtendedEndpoint(datagram.getAddress().getHostAddress(), 
-								 datagram.getPort(), 0, true);
-		UNICASTER.addUnicastEndpoint(host);		
-	}   
 	
     /**
      * The handler for PingRequests received in
@@ -418,21 +401,22 @@ public abstract class MessageRouter
      *   3. Implement respondToQueryRequest.  This allows you to use the default
      *      handling framework and just customize responses.
      */
-    protected void handleQueryRequest(QueryRequest queryRequest,
+    protected void handleQueryRequest(QueryRequest request,
 									  ReplyHandler handler)
     {
         _numQueryRequests++;
 
-		// in the case of UDP queries, the following check should
-		// never evaluate to true (we've already incremented the ttl)
-        if(queryRequest.getTTL() > 0) {
-            broadcastQueryRequest(queryRequest, handler, _manager);
-		} 
+		if(!handler.isSupernodeClientConnection() && 
+		   request.getTTL() > 0) {
+			broadcastQueryRequest(request, handler);
+		} else {
+			unicastQueryRequest(request);
+		}
 			
 		// always forward any queries to leaves -- this only does
-		// anything when this node's an UltraPeer
-		forwardQueryRequestToLeaves(queryRequest, handler, _manager);
-        respondToQueryRequest(queryRequest, _clientGUID);
+		// anything when this node's an Ultrapeer
+		forwardQueryRequestToLeaves(request, handler, _manager);
+        respondToQueryRequest(request, _clientGUID);
     }
 
     /**
@@ -474,11 +458,11 @@ public abstract class MessageRouter
     public void broadcastQueryRequest(QueryRequest queryRequest)
     {
         _queryRouteTable.routeReply(queryRequest.getGUID(), _forMeReplyHandler);
-        boolean shouldUnicastRequest = _manager.isSupernode() && UNICAST_MODE;
-        if (shouldUnicastRequest) 
+        //boolean shouldUnicastRequest = _manager.isSupernode() && UNICAST_MODE;
+        if (UNICAST_MODE && RouterService.isGUESSCapable()) 
             unicastQueryRequest(queryRequest);
         else
-            broadcastQueryRequest(queryRequest, null, _manager);
+            broadcastQueryRequest(queryRequest, null);
     }
 
     /**
@@ -571,43 +555,38 @@ public abstract class MessageRouter
      * requests originating here).
      */
     protected void broadcastQueryRequest(QueryRequest queryRequest,
-										 ReplyHandler receivingConnection,
-										 ConnectionManager manager)
+										 ReplyHandler handler)
     {
-        if (UNICAST_MODE && _manager.isSupernode()) 
-            unicastQueryRequest(queryRequest);
-        else {
-            // Note the use of initializedConnections only.
-            // Note that we have zero allocations here.
-            
-            //Broadcast the query to other connected nodes (supernodes or older
-            //nodes), but DON'T forward any queries not originating from me (i.e.,
-            //receivingConnection!=null) along leaf to ultrapeer connections.
-            List list=_manager.getInitializedConnections2();
-            for(int i=0; i<list.size(); i++){
-                ManagedConnection c = (ManagedConnection)list.get(i);
-                if (   receivingConnection==null   //came from me
-                       || (c!=receivingConnection
-                           && !c.isClientSupernodeConnection())) {
-                    sendQueryRequest(queryRequest, c, receivingConnection);
-                }
-            }
-        }
+		// Note the use of initializedConnections only.
+		// Note that we have zero allocations here.
+		
+		//Broadcast the query to other connected nodes (supernodes or older
+		//nodes), but DON'T forward any queries not originating from me (i.e.,
+		//handler!=null) along leaf to ultrapeer connections.
+		List list=_manager.getInitializedConnections2();
+		for(int i=0; i<list.size(); i++){
+			ManagedConnection c = (ManagedConnection)list.get(i);
+			if (   handler==null   //came from me
+				   || (c!=handler
+					   && !c.isClientSupernodeConnection())) {
+				sendQueryRequest(queryRequest, c, handler);
+			}
+		}
 	}
 
     
     /**
-     * Sends the passed query request, received on receivingConnection, 
-     * to the passed sendConnection, only if the receivingConnection and
+     * Sends the passed query request, received on handler, 
+     * to the passed sendConnection, only if the handler and
      * the sendConnection are authenticated to a common domain
      * @param queryRequest Query Request to send
      * @param sendConnection The connection on which to send out the query
-     * @param receivingConnection The connection on which we originally
+     * @param handler The connection on which we originally
      * received the query
      */
     protected void sendQueryRequest(QueryRequest queryRequest, 
 									ManagedConnection sendConnection, 
-									ReplyHandler receivingConnection)
+									ReplyHandler handler)
     {
         //send the query over this connection only if any of the following
         //is true:
@@ -618,11 +597,11 @@ public abstract class MessageRouter
         //3. It is an authenticated connection, and the connection on 
         //which we received query and this connection, are both 
         //authenticated to a common domain
-        if((receivingConnection == null)
+        if((handler == null)
             || containsDefaultUnauthenticatedDomainOnly(
                 sendConnection.getDomains())
             || Utilities.hasIntersection(
-            receivingConnection.getDomains(), sendConnection.getDomains()))
+            handler.getDomains(), sendConnection.getDomains()))
             sendConnection.send(queryRequest);
     }
     
@@ -687,11 +666,11 @@ public abstract class MessageRouter
      * if you do.
      */
     protected void handlePingReply(PingReply pingReply,
-                                   ReplyHandler receivingConnection)
+                                   ReplyHandler handler)
     {
         //update hostcatcher (even if the reply isn't for me)
         boolean newAddress = 
-		    RouterService.getHostCatcher().add(pingReply, receivingConnection);
+		    RouterService.getHostCatcher().add(pingReply, handler);
 
         //First route to originator in usual manner.
         ReplyHandler replyHandler =
@@ -701,12 +680,12 @@ public abstract class MessageRouter
         {
             _numPingReplies++;
             replyHandler.handlePingReply(pingReply,
-                                         receivingConnection);
+                                         handler);
         }
         else
         {
             _numRouteErrors++;
-            receivingConnection.countDroppedMessage();
+            handler.countDroppedMessage();
         }
 
         //Then, if a marked pong from a supernode that we've never seen before,
@@ -720,7 +699,7 @@ public abstract class MessageRouter
             for (int i=0; i<list.size(); i++) 
             {
                 ManagedConnection c = (ManagedConnection)list.get(i);
-                if (c!=receivingConnection && c!=replyHandler)
+                if (c!=handler && c!=replyHandler)
                     c.send(pingReply);        
             }
         }
@@ -737,7 +716,7 @@ public abstract class MessageRouter
      * if you do.
      */
     public void handleQueryReply(QueryReply queryReply,
-                                 ReplyHandler receivingConnection)
+                                 ReplyHandler handler)
     {
         //For flow control reasons, we keep track of the bytes routed for this
         //GUID.  Replies with less volume have higher priorities (i.e., lower
@@ -754,7 +733,7 @@ public abstract class MessageRouter
             // here like a QueryReplyReply
             // Note the use of getClientGUID() here, not getGUID()
             _pushRouteTable.routeReply(queryReply.getClientGUID(),
-                                       receivingConnection);
+                                       handler);
             //Simple flow control: don't route this message along other
             //connections if we've already routed too many replies for this
             //GUID.  Note that replies destined for me all always delivered to
@@ -762,13 +741,13 @@ public abstract class MessageRouter
             if (rrp.getBytesRouted()<MAX_REPLY_ROUTE_BYTES ||
 				rrp.getReplyHandler()==_forMeReplyHandler) {
                 rrp.getReplyHandler().handleQueryReply(queryReply,
-                                                       receivingConnection);
+                                                       handler);
             }
         }
         else
         {
             _numRouteErrors++;
-            receivingConnection.countDroppedMessage();
+            handler.countDroppedMessage();
         }
     }
 
@@ -783,7 +762,7 @@ public abstract class MessageRouter
      * super.handlePushRequest if you do.
      */
     public void handlePushRequest(PushRequest pushRequest,
-                                  ReplyHandler receivingConnection)
+                                  ReplyHandler handler)
     {
         // Note the use of getClientGUID() here, not getGUID()
         ReplyHandler replyHandler =
@@ -792,12 +771,12 @@ public abstract class MessageRouter
         if(replyHandler != null)
         {
             _numPingReplies++;
-            replyHandler.handlePushRequest(pushRequest, receivingConnection);
+            replyHandler.handlePushRequest(pushRequest, handler);
         }
         else
         {
             _numRouteErrors++;
-            receivingConnection.countDroppedMessage();
+            handler.countDroppedMessage();
         }
     }
 
