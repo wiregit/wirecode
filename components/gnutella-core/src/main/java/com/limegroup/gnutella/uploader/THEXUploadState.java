@@ -6,6 +6,7 @@ import java.io.OutputStream;
 import com.limegroup.gnutella.FileDesc;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.http.ConstantHTTPHeaderValue;
+import com.limegroup.gnutella.http.HTTPHeaderValueCollection;
 import com.limegroup.gnutella.http.HTTPConstants;
 import com.limegroup.gnutella.http.HTTPHeaderName;
 import com.limegroup.gnutella.http.HTTPMessage;
@@ -54,9 +55,7 @@ public class THEXUploadState implements HTTPMessage {
      *             if there was a problem writing to the <tt>OutputStream</tt>.
      */
     public void writeMessageHeaders(OutputStream os) throws IOException {
-        String str;
-        //if not queued, this should never be the state
-        str = "HTTP/1.1 200 OK\r\n";
+        String str = "HTTP/1.1 200 OK\r\n";
         os.write(str.getBytes());
         HTTPUtils.writeHeader(
             HTTPHeaderName.SERVER,
@@ -75,35 +74,22 @@ public class THEXUploadState implements HTTPMessage {
 
         if (UPLOADER.isFirstReply()) {
             // write x-features header once because the downloader is
-            // supposed
-            // to cache that information anyway
+            // supposed to cache that information anyway
             Set features = new HashSet();
-            features.add(
-                HTTPConstants.BROWSE_PROTOCOL
-                    + "/"
-                    + HTTPConstants.BROWSE_VERSION);
+            features.add(ConstantHTTPHeaderValue.BROWSE_FEATURE);
             if (ChatSettings.CHAT_ENABLED.getValue())
-                features.add(
-                    HTTPConstants.CHAT_PROTOCOL
-                        + "/"
-                        + HTTPConstants.CHAT_VERSION);
+                features.add(ConstantHTTPHeaderValue.CHAT_FEATURE);
             // Write X-Features header.
             if (features.size() > 0) {
-                os.write("X-Features: ".getBytes());
-                for (Iterator iter = features.iterator(); iter.hasNext();) {
-                    String feature = (String) iter.next();
-                    os.write(feature.getBytes());
-                    if (iter.hasNext())
-                        os.write(", ".getBytes());
-                }
-                os.write("\r\n".getBytes());
+                HTTPUtils.writeHeader(HTTPHeaderName.X_FEATURES,
+                        new HTTPHeaderValueCollection(features),
+                                      os);
             }
             // write X-Thex-URI header
             if (FILE_DESC.getHashTree() != null)
-                HTTPUtils.writeHeader(
-                    HTTPHeaderName.X_THEX_URI,
-                    FILE_DESC.getHashTree(),
-                    os);
+                HTTPUtils.writeHeader(HTTPHeaderName.X_THEX_URI,
+                                      FILE_DESC.getHashTree(),
+                                      os);
         }
         str = "\r\n";
         os.write(str.getBytes());
