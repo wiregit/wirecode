@@ -75,9 +75,9 @@ public class UploadManager {
                 
 
 	public void acceptUpload(Socket socket) {
-		System.out.println(">>>>>>>>>>>>>>>>>>>>>>>");
-		System.out.println(">> acceptUpload called!");
-		System.out.println(">>>>>>>>>>>>>>>>>>>>>>>");
+	    // System.out.println(">>>>>>>>>>>>>>>>>>>>>>>");
+	    // System.out.println(">> acceptUpload called!");
+	    // System.out.println(">>>>>>>>>>>>>>>>>>>>>>>");
 		HTTPUploader uploader;
 		GETLine line;
 		try {
@@ -114,9 +114,9 @@ public class UploadManager {
 	public void acceptPushUpload(String file, String host, int port, 
 								 int index, String guid) { 
 
-		System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>>");
-		System.out.println(">> acceptPushUpload called!");
-		System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>>");
+	    // System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>>");
+	    // System.out.println(">> acceptPushUpload called!");
+	    // System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>>");
 		Uploader uploader;
 		uploader = new HTTPUploader(file, host, port, index, guid);
 		// check to see if the file is in the attempted pushes
@@ -147,7 +147,7 @@ public class UploadManager {
 			// attempt to connect via push
 			uploader.connect();
 		} catch (AssertFailure a) {
-			System.out.println("Assert Failure");
+		    // System.out.println("Assert Failure");
 			// if it fails, insert it into the push failed list
 			uploader.setState(Uploader.PUSH_FAILED);
 			insertFailedPush(host);
@@ -210,7 +210,7 @@ public class UploadManager {
 			Integer value = (Integer)_uploadsInProgress.get(host);
 			int current = value.intValue();
 			int max = SettingsManager.instance().getUploadsPerPerson();
-			if (current >= max)
+			if (current > max)
 				throw new ExceededPerHostLimitException();
 		}
 	}
@@ -219,7 +219,7 @@ public class UploadManager {
 		throws ExceededTotalUploadLimitException {
 		int max = SettingsManager.instance().getMaxUploads();
 		int current = _uploadsInProgress.size();
-		if (current >= max)
+		if (current > max)
 			throw new ExceededTotalUploadLimitException();
 	}
 
@@ -255,7 +255,7 @@ public class UploadManager {
 
 	private GETLine parseGET(Socket socket) throws IOException {
 
-		System.out.println("GETLINE PARSEGET");
+	    // System.out.println("GETLINE PARSEGET");
   		// Set the timeout so that we don't do block reading.
   		socket.setSoTimeout(SettingsManager.instance().getTimeout());
   		// open the stream from the socket for reading
@@ -282,8 +282,8 @@ public class UploadManager {
 		
 
 
-		System.out.println("  >> THe file " + file);
-		System.out.println("  >>THe index " + index);
+		// System.out.println("  >> THe file " + file);
+		// System.out.println("  >>THe index " + index);
 
   		return new GETLine(index, file);
   	}
