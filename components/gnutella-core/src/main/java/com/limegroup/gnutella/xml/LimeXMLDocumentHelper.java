@@ -22,11 +22,10 @@ public final class LimeXMLDocumentHelper{
     /**
      * TO be used when a Query Reply comes with a chunk of meta-data
      * we want to get LimeXMLDocuments out of it
-     *<p>
-     * returns null if the XML string does now parse.
      */
     public static List getDocuments(String aggregrateXMLStr, 
-                                                 int totalResponseCount){
+                                    int totalResponseCount)
+        throws IllegalArgumentException {
         if(aggregrateXMLStr==null || aggregrateXMLStr.equals(""))
             return DataUtils.EMPTY_LIST;
 
@@ -77,7 +76,9 @@ public final class LimeXMLDocumentHelper{
                 }
                 catch (SchemaNotFoundException snfx) {
                     continue;//ignoring these exceptions has the same effect
-                } 
+                }
+                if (currIndex >= docs.length)
+                    throw new IllegalArgumentException("Bad Index");
                 docs[currIndex]=currDoc;
             }
             retList.add( docs);
