@@ -29,6 +29,6 @@ public final class UltrapeerSettings extends AbstractSettings {
 	 * Setting for the maximum leaf connections.
 	 */
 	public static final IntSetting MAX_LEAVES =
-		CFG_FACTORY.createIntSetting("MAX_LEAVES", 40);
+		CFG_FACTORY.createIntSetting("MAX_LEAVES", 30);
 }
 
