@@ -430,6 +430,7 @@ public class MetaFileManager extends FileManager {
             if(collection==null)//not loaded? skip it and keep goin'
                 continue;
             words.addAll(collection.getKeyWords());
+            words.addAll(collection.getKeyWordsIndivisible());
         }
         return words;
     }

@@ -25,6 +25,7 @@ import org.xml.sax.SAXException;
 import com.limegroup.gnutella.metadata.MP3MetaData;
 import com.limegroup.gnutella.util.Comparators;
 import com.limegroup.gnutella.util.NameValue;
+import com.limegroup.gnutella.licenses.CCConstants;
 
 
 /**
@@ -79,6 +80,10 @@ public class LimeXMLDocument implements Serializable {
      * upon construction, they can be cached upon retrieval.
      */
     private transient List CACHED_KEYWORDS = null;
+
+    /** Cached boolean - true if this doc has CC audio license.
+     */
+    private boolean hasCCLicense = false;
 
     public void setIdentifier(String id) {
         identifier = id;
@@ -324,10 +329,20 @@ public class LimeXMLDocument implements Serializable {
             return CACHED_KEYWORDS;
 
         List retList = new ArrayList();
-        Iterator iter = fieldToValue.values().iterator();
+        Iterator iter = fieldToValue.keySet().iterator();
+        final boolean isAudioSchemaURI = isAudioSchemaURI();
         while(iter.hasNext()){
             boolean number = true;//reset
-            String val = (String)iter.next();
+            String currKey = (String) iter.next();
+            String val = (String) fieldToValue.get(currKey);
+            // unfortunately, parsing of CC stuff requires special casing
+            if (isAudioSchemaURI && 
+                currKey.equals(CCConstants.AUDIO_LICENSE_NAME)) {
+                if ((val != null) && 
+                    (val.startsWith(CCConstants.CC_URI_PREFIX)))
+                    hasCCLicense = true;
+                continue; // don't want to add this as an divisible keyword
+            }
             try{
                 new Double(val); // will trigger NFE.
             }catch(NumberFormatException e){
@@ -337,6 +352,15 @@ public class LimeXMLDocument implements Serializable {
                 retList.add(val);
         }
         CACHED_KEYWORDS = retList;
+        return retList;
+    }
+
+    /** if there is a CC License associated with this file, adds it....
+     */
+    public List getKeyWordsIndivisible() {
+        List retList = new ArrayList();
+        if (hasCCLicense)
+            retList.add(CCConstants.CC_URI_PREFIX);
         return retList;
     }
 
@@ -566,6 +590,12 @@ public class LimeXMLDocument implements Serializable {
         String middle = " identifier=\""+identifier+"\"";
         ret = first+middle+last;
         return ret;
+    }
+
+    /** Currently only useful internally.  Feel free to 'public'ize.
+     */
+    private boolean isAudioSchemaURI() {
+        return schemaUri.equals("http://www.limewire.com/schemas/audio.xsd");
     }
 
 
