@@ -209,12 +209,13 @@ public class DataWindow
      *  the RTO, it looks like a message was lost.
      */
     public boolean acksAppearToBeMissing(long time, int multiple) {
+		int irto = (int)rto;
 		// Check for first record being old
 		DataRecord drec = getBlock(windowStart);
-		if ( rto > 0 &&
+		if ( irto > 0 &&
 			 drec != null   &&
 			 drec.acks < 1  &&
-		     drec.sentTime + (multiple * rto) < time ) {
+		     drec.sentTime + (multiple * irto) < time ) {
 			return true;
 		}
 
