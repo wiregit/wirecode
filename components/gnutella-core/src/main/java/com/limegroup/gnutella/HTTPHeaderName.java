@@ -42,6 +42,30 @@ public class HTTPHeaderName {
 		new HTTPHeaderName("X-Gnutella-Content-URN");
 
 	/**
+	 * Header for specifying the byte range of the content.
+	 */
+	public static final HTTPHeaderName CONTENT_RANGE =
+		new HTTPHeaderName("Content-Range");
+
+	/**
+	 * Header for specifying the type of content.
+	 */
+	public static final HTTPHeaderName CONTENT_TYPE =
+		new HTTPHeaderName("Content-Type");
+
+	/**
+	 * Header for specifying the length of the content, in bytes.
+	 */
+	public static final HTTPHeaderName CONTENT_LENGTH =
+		new HTTPHeaderName("Content-Length");
+
+	/**
+	 * Response header for specifying the server name and version.
+	 */
+	public static final HTTPHeaderName SERVER =
+		new HTTPHeaderName("Server");
+
+	/**
 	 * Returns whether or not the start of the passed in string matches the 
 	 * string representation of this HTTP header, ignoring case.
 	 *
