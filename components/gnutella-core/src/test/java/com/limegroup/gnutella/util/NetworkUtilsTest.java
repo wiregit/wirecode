@@ -58,6 +58,30 @@ public class NetworkUtilsTest extends com.limegroup.gnutella.util.BaseTestCase {
     }  
 
     /**
+     * Tests the method for checking whether or not an IP address is
+     * "close" to this address.
+     */
+    public void testIsCloseIP() throws Exception {
+        byte[] addr0 = new byte[4];
+        byte[] addr1 = new byte[4];
+
+        addr0[0] = (byte)3;
+        addr1[0] = (byte)3;
+        addr0[1] = (byte)2;
+        addr1[1] = (byte)2;
+        assertTrue("should be considered close", 
+                   NetworkUtils.isCloseIP(addr0, addr1));
+
+        addr0[1] = (byte)4;
+        assertTrue("should be considered close", 
+                   NetworkUtils.isCloseIP(addr0, addr1));
+
+        addr0[0] = (byte)0;
+        assertTrue("should not be considered close", 
+                   !NetworkUtils.isCloseIP(addr0, addr1));
+    }
+
+    /**
      * Tests the method for checking if something's from a private
      * network with a string argument.
      */
