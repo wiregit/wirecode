@@ -6,6 +6,7 @@ import com.limegroup.gnutella.updates.*;
 import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.NetworkUtils;
 import com.limegroup.gnutella.settings.ConnectionSettings;
+import com.limegroup.gnutella.settings.ApplicationSettings;
 
 /**
  * This class contains the headers that all LimeWires pass in connection
@@ -57,6 +58,8 @@ public abstract class DefaultHeaders extends Properties {
 
         props.put(HeaderNames.X_MAX_TTL, "3");
         props.put(HeaderNames.X_DYNAMIC_QUERY, "0.1");
+        props.put(HeaderNames.X_LOCALE_PREF, 
+                  ApplicationSettings.LANGUAGE.getValue());
         
         if ( ConnectionSettings.ACCEPT_DEFLATE.getValue() )
             props.put(HeaderNames.ACCEPT_ENCODING, HeaderNames.DEFLATE_VALUE);
