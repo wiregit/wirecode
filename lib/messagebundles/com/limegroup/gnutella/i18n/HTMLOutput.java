@@ -362,12 +362,8 @@ class HTMLOutput {
 "     <br />\n" +
 "     <b><big>General Considerations for Translators</big></b><br />\n" +
 "     <br />\n" +
-"     During the translation process, you may <a\n" +
-"     href=\"http://www.limewire.org/mailinglist.shtml\">subscribe to the translate mailing list</a>\n" +
-"     where you may benefit from other translators' questions and knowledge.<br />\n" + 
-"     <br />\n" + 
 "     Do not start with the existing message bundle installed with your current\n" +
-"     version of LimeWire.&nbsp; Make sure you<b>work on the latest version of a message bundle</b>.&nbsp; \n" +
+"     version of LimeWire.&nbsp; Make sure you <b>work on the latest version of a message bundle</b>.&nbsp; \n" +
 "     You can get the latest bundle by clicking on a language in the list on the right side of this page.<br />\n" +
 "     <br />\n" +
 "     When translating, adopt the common terminology used in your localized\n" +
@@ -383,28 +379,28 @@ class HTMLOutput {
 "     Avoid translating word for word and do not use blindly automatic translators.&nbsp; \n" +
 "     Be imaginative but make a clear and concise translation.&nbsp; For button\n" +
 "     labels and column names, do not translate them with long sentences, as they\n" +
-"     need to be short.&nbsp; Suppress some articles, or use abbreviations if necessary.&nbsp; \n" +
-"     If there are problems translating some difficult terms, write to the translate\n" +
-"     list (in English or French) for assistance.<br />\n" +
+"     need to be short.&nbsp; Suppress some articles, or use abbreviations if necessary.<br />\n" +
 "     <br />\n" +
+"     During the translation process, you may <a\n" +
+"     href=\"http://www.limewire.org/mailinglist.shtml\">subscribe to the translate mailing list</a>\n" +
+"     where you may benefit from other translators' questions and knowledge as well as receive assistance in English or French.<br />\n" + 
+"     <br />\n" + 
 "     <b><big>How to Submit Corrections or Enhancements for Your Language</big></b><br />\n" +
 "     <br />\n" +
 "     Users that do not have the correct tools to edit a message bundle can send us\n" +
-"     an email in English or in French that explains their needs.&nbsp; \n" +
-"     For any discussion with the contributing translators you may write to\n" +
-      HTML_TRANSLATE_EMAIL_ADDRESS + ".<br />\n" +
+"     an email in English or in French that explains their needs.<br />\n" +
 "     <br />\n" +
-"     <b>If your corrections are significant</b>, you may send us your complete\n" +
+"     If your corrections are significant, you may send us your complete\n" +
 "     message bundle.&nbsp; Please be sure to include all resource strings defined in the\n" +
 "     latest version of the existing message bundle before sending us your\n" +
 "     revision.<br />\n" +
 "     <br />\n" +
-"     <b>For simple few corrections or additions</b>, just send the corrected lines\n" +
+"     For simple few corrections or additions, just send the corrected lines\n" +
 "     in the content body of an email (making sure to select the correct character encoding\n" +
 "     in your email tool before sending it so that non-ASCII characters are not lost or\n" +
 "     replaced), with your comments.<br />\n" +
 "     <br />\n" +
-"     <i>We will review submitted translations and integrate\n" +
+"     <i>We will review submitted translations and integrate all\n" +
 "     valuable contributions as quickly as possible.</i><br />\n" +
 "     <br />\n" +
 "     <b><big>How to Test a New Translation</big></b><br />\n" +
