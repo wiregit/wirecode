@@ -32,18 +32,9 @@ public class MetaFileManager extends FileManager {
         return result;
     }
         
-    /**This method now breaks the contract of the super class. The super class
-     * claims that this method is non-blocking. Because the the loadThread 
-     * would asynchronously do the loading.
-     * <p>
-     * But now, only the regular file stuff is passed off to the over-riden
-     * method in the super class. 
-     * <p>
-     * The meta-information loading is done within this method. That makes
-     * this method a blocking method. This is a quick fix for now. because we
-     * are interested in loading the meta-database only one time  at startup
-     * so the fact thats it is blocking is not so bad. 
-     * <p>
+    /**This method overrides FileManager.loadSettingsBlocking(), though
+     * it calls the super method to load up the shared file DB.  Then, it
+     * processes these files and annotates them automatically as apropos.
      * TODO2: Eventually we will think that its too much of a burden
      * to have this thread be blocking in which case we will have to 
      * have the load thread also handle the reloading of the meta-data.
@@ -51,8 +42,11 @@ public class MetaFileManager extends FileManager {
      * want to update the file information?? It depends on how we want to 
      * handle the meta-data and its relation to the file system
      */
-    public void loadSettings(boolean notifyOnClear){
-        super.loadSettings(notifyOnClear);//it has its own synchronization
+    protected void loadSettingsBlocking(boolean notifyOnClear){
+        // let FileManager do its work....
+        super.loadSettingsBlocking(notifyOnClear);
+        if (Thread.currentThread().isInterrupted())
+            return;
         synchronized(metaLocker){
             if (!initialized){//do this only on startup
                 SchemaReplyCollectionMapper mapper = 
@@ -60,12 +54,18 @@ public class MetaFileManager extends FileManager {
                 //created maper schemaURI --> ReplyCollection
                 LimeXMLSchemaRepository schemaRepository = 
                       LimeXMLSchemaRepository.instance();                
+
+                if (Thread.currentThread().isInterrupted())
+                    return;
+
                 //now the schemaRepository contains all the schemas.
                 String[] schemas = schemaRepository.getAvailableSchemaURIs();
                 //we have a list of schemas
                 int len = schemas.length;
                 LimeXMLReplyCollection collection;  
-                for(int i=0;i<len;i++){
+                for(int i=0;
+                    (i<len) && !Thread.currentThread().isInterrupted();
+                    i++){
                     //One ReplyCollection per schema
                     String s = LimeXMLSchema.getDisplayString(schemas[i]);
                     if (s.equalsIgnoreCase("audio")){
@@ -80,8 +80,10 @@ public class MetaFileManager extends FileManager {
                     if(collection.getDone())//if we have some valid data
                         mapper.add(schemas[i],collection);
                 }
-            }//end of if, now we are initialized
-            initialized = true;
+            }//end of if, we may be initialized, may have been interrupted 
+            // fell through...
+            if (!Thread.currentThread().isInterrupted())
+                initialized = true;
             //System.out.println("Sumeet: Printing current xml data");
             //showXMLData();
         }//end of synchronized block
