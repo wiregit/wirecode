@@ -28,4 +28,10 @@ public interface IpPort {
      * @return the address of this host as a string
      */
     String getAddress();
+    
+    /**
+     * @param other an IpPort to be compared to the current one
+     * @return whether other contains the same ip and port as this.
+     */
+    public boolean isSame(IpPort other);
 }

@@ -1115,5 +1115,13 @@ public class PingReply extends Message implements Serializable, IpPort {
         return FREE_LOCALE_SLOTS;
     }
 
+    
+    public boolean isSame(IpPort other) {
+    	if (other == null)
+    		return false;
+    	
+    	return getInetAddress().equals(other.getInetAddress())
+			&& getPort() == other.getPort();
+    }
     //Unit test: tests/com/limegroup/gnutella/messages/PingReplyTest
 }

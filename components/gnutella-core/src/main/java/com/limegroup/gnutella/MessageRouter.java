@@ -400,6 +400,18 @@ public abstract class MessageRouter {
             handleStatisticsMessage(
                             (StatisticVendorMessage)msg, receivingConnection);
         }
+        else if (msg instanceof BestCandidatesVendorMessage) {
+        	if(RECORD_STATS) 
+                ;//TODO: add the statistics recording code
+        	receivingConnection.handleVendorMessage(
+        			(VendorMessage)msg);
+        }
+        else if (msg instanceof FeaturesVendorMessage) {
+        	if(RECORD_STATS) 
+                ;//TODO: add the statistics recording code
+        	receivingConnection.handleVendorMessage(
+        			(VendorMessage)msg);
+        }
         //This may trigger propogation of query route tables.  We do this AFTER
         //any handshake pings.  Otherwise we'll think all clients are old
         //clients.

@@ -447,5 +447,13 @@ com.sun.java.util.collections.Comparable
         else
             return a[0]==b[0] && a[1]==b[1] && a[2]==b[2];
     }
+    
+    //Implements IpPort interface
+    public boolean isSame(IpPort o) {
+    	if (o==null)
+    		return false;
+    	return getInetAddress().equals(o.getInetAddress()) &&
+			getPort() == o.getPort();
+    }
 }
 

@@ -148,6 +148,7 @@ public class UDPHostRankerTest extends ClientSideTestCase {
             catch (Exception noway) {}
             return null;
         }
+        public boolean isSame(IpPort other) {return false;} //stub
     }
 
     public static Integer numUPs() {

@@ -9,6 +9,9 @@ import junit.framework.Test;
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.Message;
+import com.limegroup.gnutella.upelection.RemoteCandidate;
+import com.limegroup.gnutella.util.*;
+import com.limegroup.gnutella.*;
 
 public class VendorMessageTest extends com.limegroup.gnutella.util.BaseTestCase {
     public VendorMessageTest(String name) {
@@ -665,6 +668,65 @@ public class VendorMessageTest extends com.limegroup.gnutella.util.BaseTestCase 
         }
     }
 
+    public void testBestCandidatesVendorMessage() throws Exception {
+    	RemoteCandidate [] test = new RemoteCandidate[2];
+    	test[0] = new RemoteCandidate("1.2.3.4",15,(short)20);
+    	test[1] = new RemoteCandidate("1.2.3.5",15,(short)20);
+    	BestCandidatesVendorMessage req = new BestCandidatesVendorMessage(test);
+    	
+    	//pack the candidates into a byte, see if the result is the same
+    	byte [] testbyte = new byte [16];
+    	System.arraycopy(test[0].toBytes(),0,testbyte,0,8);
+    	System.arraycopy(test[1].toBytes(),0,testbyte,8,8);
+    	
+    	assertEquals(new String(testbyte), new String(req.getPayload()));
+    	
+    	RemoteCandidate []test2 = new RemoteCandidate[2];
+    	test2[0] = new  RemoteCandidate("1.2.3.4",15,(short)500);
+    	test2[1] = new  RemoteCandidate("1.2.3.5",15,(short)600);
+    	
+    	BestCandidatesVendorMessage req2 = new BestCandidatesVendorMessage(test2);
+    	
+    	assertTrue(req.isSame(req2));
+    	assertFalse(req.isSame(null));
+    	
+    	
+    	test2[1]=null;
+    	req2 = new BestCandidatesVendorMessage(test2);
+    	assertFalse(req.isSame(req2));
+    	test[1]=null;
+    	req = new BestCandidatesVendorMessage(test2);
+    	assertTrue(req.isSame(req2));
+    	test2[1]= new RemoteCandidate("1.2.3.4",16,(short)20);
+    	req2 = new BestCandidatesVendorMessage(test2);
+    	assertFalse(req.isSame(req2));
+    	
+    	ByteArrayOutputStream baos = new ByteArrayOutputStream();
+    	req.write(baos);
+    	ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
+    	req2 = (BestCandidatesVendorMessage)Message.read(bais);
+    	assertTrue(req.isSame(req2));
+    	
+    	testWrite(req);
+    	testRead(req);
+    }
+    
+    public void testFeaturesVM() throws Exception {
+    	FeaturesVendorMessage fvm = new FeaturesVendorMessage();
+    	testWrite(fvm);
+    	testRead(fvm);
+    	
+    	ByteArrayOutputStream baos = new ByteArrayOutputStream();
+    	fvm.write(baos);
+    	ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
+    	fvm = (FeaturesVendorMessage)Message.read(bais);
+    	
+    	assertEquals(CommonUtils.getJavaVersion(),fvm.getJVM());
+    	assertEquals(CommonUtils.getOS().toLowerCase(),fvm.getOS());
+    	assertEquals(RouterService.getFileManager().getNumFiles(),fvm.getFileShared());
+    	assertTrue(RouterService.getConnectionManager().getMeasuredUpstreamBandwidth() 
+    			== fvm.getBandidth());
+    }
 
     private static class VM extends VendorMessage {
         public VM(byte[] guid, byte ttl, byte hops, byte[] vendorID, 

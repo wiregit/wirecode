@@ -117,6 +117,11 @@ public final class MessagesSupportedVendorMessage extends VendorMessage {
         								F_ULTRAPEER_LIST,
 										UDPCrawlerPong.VERSION);
         hashSet.add(smp);
+        //Best Candidates support
+        smp = new SupportedMessageBlock(F_LIME_VENDOR_ID,
+        								F_BEST_CANDIDATES,
+										BestCandidatesVendorMessage.VERSION);
+        hashSet.add(smp);
     }
 
 
@@ -219,6 +224,14 @@ public final class MessagesSupportedVendorMessage extends VendorMessage {
      */
     public int supportsUDPCrawling() {
     	return supportsMessage(F_LIME_VENDOR_ID, F_ULTRAPEER_LIST);
+    }
+    
+    /**
+     * @return -1 if the remote host does not support best candidates,
+     * else it returns the version.
+     */
+    public int supportsBestCandidates() {
+    	return supportsMessage(F_LIME_VENDOR_ID, F_BEST_CANDIDATES);
     }
 
     // override super
