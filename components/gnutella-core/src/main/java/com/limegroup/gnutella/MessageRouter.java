@@ -867,7 +867,7 @@ public abstract class MessageRouter {
 		}
 
 		// are we sending it to the last hop??
-		boolean lastHop = query.getTTL()==1;
+		boolean lastHop = query.getTTL()==0;
 		for(int i=0; i<limit; i++){
 			ManagedConnection mc = (ManagedConnection)list.get(i);
 			if (handler == FOR_ME_REPLY_HANDLER || 
