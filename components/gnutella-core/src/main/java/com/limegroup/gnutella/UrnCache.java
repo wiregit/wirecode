@@ -128,6 +128,10 @@ public final class UrnCache {
             return new HashMap();
         } catch(ClassCastException e) {
             return new HashMap();
+        } catch(IndexOutOfBoundsException ioobe) {
+            return new HashMap();
+        } catch(SecurityException se) {
+            return new HashMap();
         } finally {
             if(ois != null) {
                 try {
