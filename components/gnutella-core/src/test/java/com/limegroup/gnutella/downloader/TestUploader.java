@@ -247,7 +247,7 @@ public class TestUploader {
 			if(HTTPHeaderName.ALT_LOCATION.matchesStartOfString(line)) {
 				readAlternateLocations(line, incomingAltLocs);
             }        
-			if(HTTPHeaderName.CONTENT_URN.matchesStartOfString(line)) {
+			if(HTTPHeaderName.GNUTELLA_CONTENT_URN.matchesStartOfString(line)) {
 				sha1 = readContentUrn(line);
 			}
             
