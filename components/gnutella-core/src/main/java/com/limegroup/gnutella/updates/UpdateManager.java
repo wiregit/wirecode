@@ -70,15 +70,13 @@ public class UpdateManager {
     }
 
     public void checkAndUpdate(Connection connection) {
+        String nv=connection.getProperty(ConnectionHandshakeHeaders.X_VERSION);
+        System.out.println("Sumeet:myVersion:"+latestVersion+" theirs: "+nv);
+        if(!isGreaterVersion(nv))
+            return;        
         final Connection c = connection;
         Thread checker = new Thread() {
             public void run() {
-                String newVersion = 
-                c.getProperty(ConnectionHandshakeHeaders.X_VERSION);
-                System.out.println("Sumeet:myVersion:"+
-                                   latestVersion+" theirs: "+newVersion);
-                if(!isGreaterVersion(newVersion))
-                     return;
                 System.out.println("Sumeet...getting file.");
                 final String UPDATE = "/update.xml";
                 String ip = c.getOrigHost();
@@ -118,7 +116,7 @@ public class UpdateManager {
                 System.out.println("Sumeet: new version: "+parser.getVersion());
                 //we checked for new version while handshaking, but we should
                 //check again with the authenticated xml data.
-                newVersion = parser.getVersion();
+                String newVersion = parser.getVersion();
                 if(newVersion==null)
                     return;
                 if(isGreaterVersion(newVersion)) {
