@@ -34,11 +34,11 @@ public class HTTPUtil {
 
 	    buf.add(s.substring(i,j));
 
-	    for (i=j+1; j<n ; ) {       /* Ignore white space after s[j]*/
-		if (s.charAt(i)!=' ')
-		    break;
-		i++;
-	    }			
+	    for (i=j+1; j<n-1 ; ) {       /* Ignore white space after s[j]*/
+  		if (s.charAt(i)!=' ')
+  		    break;
+  		i++;
+  	    }			
 
 	}
 
