@@ -14,8 +14,6 @@ import com.limegroup.gnutella.statistics.DownloadStat;
 import java.io.*;
 import java.net.*;
 
-import java.util.Date;
-import java.util.Calendar;
 import java.util.StringTokenizer;
 
 import com.sun.java.util.collections.*;
@@ -542,7 +540,7 @@ public class ManagedDownloader implements Downloader, Serializable {
         // IncompleteFileDesc.
         URN hash = incompleteFileManager.getCompletedHash(incompleteFile);
         if( hash != null ) {
-            long size = incompleteFileManager.getCompletedSize(incompleteFile);
+            long size = IncompleteFileManager.getCompletedSize(incompleteFile);
             // Create our AlternateLocationCollection if we haven't already.
             if( totalAlternateLocations == null )
                 totalAlternateLocations =
@@ -1613,7 +1611,7 @@ public class ManagedDownloader implements Downloader, Serializable {
                     } else if (dloaders.size()==0 && needed.isEmpty()) {
                         // Verify the commonOutFile is all done.
                         int doneSize =
-                            (int)incompleteFileManager.getCompletedSize(
+                            (int)IncompleteFileManager.getCompletedSize(
                                 incompleteFile);
                         Assert.that(
                             !commonOutFile.getFreeBlocks(doneSize).hasNext(),
