@@ -912,7 +912,7 @@ public class ManagedConnection
                         
                         //also store the authentication information in a 
                         //cookie, for next-time use
-                        COOKIES.putCookie(user.getUsername(), user);
+                        COOKIES.putCookie(_host, user);
                     }
                 }
                 
