@@ -206,7 +206,7 @@ public class HTTPDownloader {
         int code=parseHTTPCode(str);		
 
 		//Accept any 2xx's, but reject other codes.
-		if ( (code < 200) || (code > 300) ) {
+		if ( (code < 200) || (code >= 300) ) {
 			if (code == 404)
 				throw new 
 				    com.limegroup.gnutella.downloader.FileNotFoundException();
@@ -459,7 +459,7 @@ public class HTTPDownloader {
 
 	////////////////////////////// Unit Test ////////////////////////////////////
 
-	
+
 //  	private HTTPDownloader(String str) {
 //  		ByteArrayInputStream stream = new ByteArrayInputStream(str.getBytes());
 //  		_byteReader = new ByteReader(stream);
@@ -503,9 +503,27 @@ public class HTTPDownloader {
 //  			Assert.that(false);
 //  		}
 		
+		
+//  		str = "HTTP 301 Moved Permanently\r\n";
+//  		down = new HTTPDownloader(str);
+//  		try {
+//  			down.readHeaders();
+//  			down.stop();
+//  			Assert.that(false);
+//  		} catch (IOException e) {
+//  		}
+
+//          str = "HTTP 300 Multiple Choices\r\n";
+//  		down = new HTTPDownloader(str);
+//  		try {
+//  			down.readHeaders();
+//  			down.stop();
+//  			Assert.that(false);
+//  		} catch (IOException e) {
+//  		}
+
 //  		str = "HTTP 404 File Not Found \r\n";
 //  		down = new HTTPDownloader(str);
-
 //  		try {
 //  			down.readHeaders();
 //  			down.stop();
