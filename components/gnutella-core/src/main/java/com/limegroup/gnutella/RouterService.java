@@ -279,10 +279,10 @@ public class RouterService
      * Create a download request
      */
     public void tryDownload(String ip, int port, int index, String fname) {
-	String file = "/get/" + String.valueOf(index) + "/" + fname;
+	//String file = "/get/" + String.valueOf(index) + "/" + fname;
 
         HTTPDownloader down = new
-            HTTPDownloader("http", ip, port, file, manager );
+            HTTPDownloader("http", ip, port, index, fname, manager );
 	Thread t = new Thread(down);
 	t.setDaemon(true);
 	t.start();

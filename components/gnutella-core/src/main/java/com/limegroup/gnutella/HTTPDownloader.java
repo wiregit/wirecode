@@ -47,7 +47,7 @@ public class HTTPDownloader implements Runnable {
       
     /* The client side get */
     public HTTPDownloader(String protocal, String host, 
-			  int port, String file, ConnectionManager m ) {
+			  int port, int index, String file, ConnectionManager m ) {
 			
 	_filename = file;
 	_amountRead = 0;
@@ -58,8 +58,11 @@ public class HTTPDownloader implements Runnable {
 
 	URLConnection conn;
 
+    String furl = "/get/" + String.valueOf(index) + "/" + file;
+
 	try {
-	    URL url = new URL(protocal, host, port, file);
+	    URL url = new URL(protocal, host, port, furl);
+System.out.println("URL :"+url+":");
 	    conn = url.openConnection();
 	}
 	catch (java.net.MalformedURLException e) {
@@ -134,6 +137,7 @@ public class HTTPDownloader implements Runnable {
 	catch (Exception e) {
 	    
 	    _callback.error("Unable to write to file");
+System.out.println("E :"+e+":");
 	}
 
     }
@@ -147,13 +151,15 @@ public class HTTPDownloader implements Runnable {
 	    while (true) {
 		
 		str = _in.readLine();
+System.out.println("DH :"+str+":");
 		
 		if (str.indexOf("Content-length:") != -1) {
 
 		    String sub = str.substring(16);
 		    sub.trim();
 		    _sizeOfFile = java.lang.Integer.parseInt(sub);
-		    _in.readLine();
+		    str = _in.readLine();
+System.out.println("DH2 :"+str+":");
 		    break;
 		    
 		}
