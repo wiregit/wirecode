@@ -1847,8 +1847,10 @@ public class ManagedDownloader implements Downloader, Serializable {
         // first check if it conflicts with the saved dir....
         if (fileExists(completeFile))
             fileManager.removeFileIfShared(completeFile);
+        long cTime = buckets.getCreationTimeForBucket(bucketNumber);
         FileDesc fileDesc = 
-		    fileManager.addFileIfShared(completeFile, getXMLDocuments());  
+            fileManager.addFileIfShared(completeFile, getXMLDocuments(), 
+                                        cTime);  
 
 		// Add the alternate locations to the newly saved local file
 		if(validAlts != null && 
