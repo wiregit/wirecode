@@ -262,12 +262,28 @@ public class Connection implements Runnable {
 			    System.out.println("the port " + port);
 
 			    byte[] ip=sock.getLocalAddress().getAddress(); //little endian
-			    System.out.println("the ip " + ip);
+			    System.out.println("the ip ");
+			    for(int i = 0; i < ip.length; i++) {
+  				System.out.print(ip[i]);
+  			    }
+
+			    System.out.println("");
+
 			    // long speed = ((QueryRequest)m).getMinSpeed();
 			    long speed = 0;
 			    System.out.println("the speed " + speed);
 			    byte[] clientGUID = manager.ClientId.getBytes();
-			    System.out.println("the client GUID " + clientGUID);
+
+			    System.out.println("the client GUID ");
+
+			    for(int i = 0; i < clientGUID.length; i++) {
+  				System.out.print(clientGUID[i]);
+  			    }
+			    
+			    System.out.println("");
+
+			    // byte[] clientGUID = m.ClientId.getBytes();
+
 			    // byte[] clientGUID = null;
 			    QueryReply qreply = new QueryReply(guid, ttl, port, ip, 
 					   speed, responses, clientGUID);
