@@ -98,7 +98,7 @@ public class VersionUpdate
                 if (str != null) {
                     latest = str;
                 }
-            } catch (Exception e) {
+            } catch (IOException ioe) {
                 br.close();
                 return;
             }			
