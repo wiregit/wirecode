@@ -106,7 +106,7 @@ public class QueryRouteTable {
      */
     private void initialize(int size) {
         this.bitTableLength = size;
-        this.bitTable = new BitSet(bitTableLength);
+        this.bitTable = new BitSet();
         this.sequenceNumber = -1;
         this.sequenceSize = -1;
         this.nextPatch = 0;                
