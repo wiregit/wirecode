@@ -240,9 +240,12 @@ public class NormalUploadState implements UploadState {
         // 
         // Earlier version of LimeWire mistakenly sent "bytes=" instead of
         // "bytes ".  Thankfully most clients understand both.
+        //
+        // _uploadEnd is an EXCLUSIVE index internally, but HTTP uses
+        // an INCLUSIVE index.
 		if (_uploadBegin != 0) {
 			str = "Content-range: bytes " + _uploadBegin  +
-			"-" + ( _fileSize - 1 )+ "/" + _fileSize + "\r\n";
+			"-" + ( _uploadEnd - 1 )+ "/" + _fileSize + "\r\n";
 			_ostream.write(str.getBytes());
 		}
 		 str = "\r\n";

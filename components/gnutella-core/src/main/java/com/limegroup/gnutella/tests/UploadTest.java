@@ -75,12 +75,14 @@ public class UploadTest {
                  passed);
 
 
-            passed=download(file, "Range: bytes=2-5","cdef");
+            passed=download(file, "Range: bytes=2-5","cdef",
+                            "Content-range: bytes 2-5/26");
             test("Middle range, inclusive",passed);
 
         
             passed=download(file, "Range:bytes 2-",
-                            "cdefghijklmnopqrstuvwxyz");
+                            "cdefghijklmnopqrstuvwxyz",
+                            "Content-length:24");
             test("No space after \":\".  (Legal HTTP.)",passed);
 
             passed=download(file, "Range: bytes=-5","vwxyz");
@@ -189,8 +191,13 @@ public class UploadTest {
         return ret;
     }
 
+    private static boolean download(String file,String header,String expResp) 
+            throws IOException {
+        return download(file, header, expResp, null);
+    }
 
-    private static boolean download(String file,String header,String expResp)
+    private static boolean download(String file,String header,
+                                    String expResp, String expHeader)
         throws IOException {
         //Unfortunately we can't use URLConnection because we need to test
         //malformed and slightly malformed headers
@@ -202,7 +209,7 @@ public class UploadTest {
         BufferedWriter out = new BufferedWriter(new OutputStreamWriter(
             s.getOutputStream()));
 
-        String ret=downloadInternal(file, header, out, in);
+        String ret=downloadInternal(file, header, out, in, expHeader);
         in.close();
         out.close();
         s.close();
@@ -313,11 +320,26 @@ public class UploadTest {
     /** 
      * Sends a get request to out, reads the response from in, and returns the
      * content.  Doesn't close in or out.
+     * @param requiredHeader a header to look for, or null if we don't care
      */
     private static String downloadInternal(String file,
                                            String header,
                                            BufferedWriter out,
                                            BufferedReader in) 
+    throws IOException {
+        return downloadInternal(file, header, out, in, null);
+    }
+
+    /** 
+     * Sends a get request to out, reads the response from in, and returns the
+     * content.  Doesn't close in or out.
+     * @param requiredHeader a header to look for, or null if we don't care
+     */
+    private static String downloadInternal(String file,
+                                           String header,
+                                           BufferedWriter out,
+                                           BufferedReader in,
+                                           String requiredHeader) 
             throws IOException {
         //1. Send request
         out.write("GET /get/"+index+"/"+file+" HTTP/1.0\r\n");
@@ -327,7 +349,19 @@ public class UploadTest {
         out.flush();
 
         //2. Read (and ignore!) response code and headers.  TODO: verify.
-        while (!in.readLine().equals("")) { }
+        boolean foundHeader=false;
+        while (true) { 
+            String line = in.readLine();
+            if(line.equals(""))
+                break;
+            if(requiredHeader!=null)
+               if (canonicalizeHeader(line).
+                       equals(canonicalizeHeader(requiredHeader)))
+                   foundHeader = true;
+        }
+        if (requiredHeader!=null)
+            //TODO: convey this to the caller gently so it can print "FAILED"
+            Assert.that(foundHeader, "Didn't find header");
         
         //3. Read content.  Obviously this is designed for small files.
         StringBuffer buf=new StringBuffer();
@@ -341,6 +375,18 @@ public class UploadTest {
         return buf.toString();
     }
     
+    /** Removes all spaces and lower cases all characters. */
+    private static String canonicalizeHeader(String line) {
+        //Although we really should not replace 'bytes 2' with 'bytes2'
+        //this method does...but who cares?
+        StringBuffer buf=new StringBuffer();
+        for (int i=0; i<line.length(); i++) {
+            if (line.charAt(i)!=' ')
+                buf.append(Character.toLowerCase(line.charAt(i)));
+        }
+        return buf.toString();
+    }
+
     /** 
      * Sends a get request to out, reads the response from in, and returns the
      * content.  Doesn't close in or out.
