@@ -57,10 +57,12 @@ public abstract class AbstractMessageReader implements MessageReader {
      * @param softMax the soft max TTL for the message
      * @param func the function code of the message
      * 
+     * @return the new TTL, possibly adjusted from the original value according
+     *  to the soft max TTL
      * @throws BadPacketException if any of the fields are not within expected
      *  ranges
      */
-    protected static final void checkFields(byte ttl, byte hops, byte softMax,
+    protected static final byte checkFields(byte ttl, byte hops, byte softMax,
         byte func) throws BadPacketException {
         //4. Check values.   These are based on the recommendations from the
         //   GnutellaDev page.  This also catches those TTLs and hops whose
@@ -73,7 +75,7 @@ public abstract class AbstractMessageReader implements MessageReader {
             if( RECORD_STATS )
                 ReceivedErrorStat.INVALID_TTL.incrementStat();
             throw new BadPacketException("Negative (or very large) TTL");
-        } else if ((hops >= softMax) && 
+        } else if ((hops > softMax) && 
                  (func != Message.F_QUERY_REPLY) &&
                  (func != Message.F_PING_REPLY)) {
             if( RECORD_STATS )
@@ -91,6 +93,8 @@ public abstract class AbstractMessageReader implements MessageReader {
             Assert.that(ttl>=0);     //should hold since hops<=softMax ==>
                                      //new ttl>=0
         }
+        
+        return ttl;
     }
     
     /**
