@@ -78,7 +78,7 @@ public final class CompositeQueue {
      * The producer's queues, one priority per mesage type. 
      *  INVARIANT: QUEUES.length==PRIORITIES 
      */
-    private MessageQueue[] _queues;
+    private volatile MessageQueue[] _queues;
     
     /** 
      * The priority of the last message added to _outputQueue. This is an
@@ -192,6 +192,7 @@ public final class CompositeQueue {
      * Retrieves the next message in the queue.
      * 
      * @return the next message in the queue, or <tt>null</tt> if there are
+     *  no messages left
      */
     public Message removeNext() {
         // if there are no buffered messages, return null immediately
