@@ -78,8 +78,13 @@ public final class NIODispatcher implements Runnable {
 	 * 
 	 * @param conn the <tt>Connection</tt> instance that will be reading data 
      * from the network
+     * @throws NullPointerException if the <tt>conn</tt> argument is 
+     *  <tt>null</tt>
 	 */
     public void addReader(Connection conn) {
+        if(conn == null) {
+            throw new NullPointerException("adding null connection");
+        }
 		READERS.add(conn);
 		_selector.wakeup();
 	}
@@ -94,8 +99,13 @@ public final class NIODispatcher implements Runnable {
 	 * 
 	 * @param conn the <tt>Connection</tt> instance containing a message that 
      *  was not fully written
+     * @throws NullPointerException if the <tt>conn</tt> argument is 
+     *  <tt>null</tt>
 	 */
 	public void addWriter(Connection conn) {
+        if(conn == null) {
+            throw new NullPointerException("adding null connection");
+        }
 		WRITERS.add(conn);
 		
 		// we have not added this writer to the selector yet, as this call is 
@@ -191,7 +201,7 @@ public final class NIODispatcher implements Runnable {
 			if(WRITERS.isEmpty()) return;
 			for(Iterator iter = WRITERS.iterator(); iter.hasNext();) {
 				Connection conn = (Connection)iter.next();
-				registerWriter(conn);
+                register(conn, SelectionKey.OP_WRITE | SelectionKey.OP_READ);
 			}
 			WRITERS.clear();
 		}
@@ -259,9 +269,10 @@ public final class NIODispatcher implements Runnable {
 			if(!key.isValid()) continue;
 			if(key.isWritable()) {
 				Connection conn = (Connection)key.attachment();
-				if(!conn.write()) {
-					// register the writer again if not all of the data was sent
-					registerWriter(conn);
+				if(conn.write()) {
+                    // if the message was successfully written, switch it back 
+                    // to only being registered for read events
+                    register(conn, SelectionKey.OP_READ);
 				}
 			}
 		}			
@@ -274,7 +285,7 @@ public final class NIODispatcher implements Runnable {
      * @param conn the <tt>Connection</tt> whose channel should be registered
      *  for write events
      */
-    private void registerWriter(Connection conn) {
+    private void register(Connection conn, int ops) {
 		SelectableChannel channel = conn.getChannel();
 
 		// try to make sure the channel's open instead of just
@@ -282,9 +293,7 @@ public final class NIODispatcher implements Runnable {
 		// more efficient and cleaner
 		if(channel.isOpen()) {
 			try {
-                channel.register(_selector, 
-                    SelectionKey.OP_WRITE | SelectionKey.OP_READ, 
-                	conn);
+                channel.register(_selector, ops, conn);
             } catch (ClosedChannelException e) {
                 // no problem -- just don't register it
             }
