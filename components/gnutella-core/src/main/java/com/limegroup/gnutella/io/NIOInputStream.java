@@ -49,7 +49,7 @@ class NIOInputStream implements WriteHandler {
         sink = pipe.sink();
         sink.configureBlocking(false);
         pipe.source().configureBlocking(true);
-        source = Channels.newInputStream(pipe.source());
+        source = new TimedInputStream(pipe.source(), handler);
         
         buffer = ByteBuffer.allocate(8192); // TODO: use a ByteBufferPool
         

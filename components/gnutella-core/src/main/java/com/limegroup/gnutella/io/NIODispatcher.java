@@ -232,7 +232,7 @@ class NIODispatcher implements Runnable {
             LOG.debug("Selecting");
             try {
                 // see register(...) for why this has a timeout
-                n = selector.select(50);
+                selector.select(50);
             } catch (NullPointerException err) {
                 LOG.warn("npe", err);
                 continue;
@@ -245,7 +245,7 @@ class NIODispatcher implements Runnable {
             
             Collection keys = selector.selectedKeys();
             if(LOG.isDebugEnabled())
-                LOG.debug("Selected (" + n + ") keys.");
+                LOG.debug("Selected (" + keys.size() + ") keys.");
             
             for(Iterator it = keys.iterator(); it.hasNext(); ) {
                 SelectionKey sk = (SelectionKey)it.next();
