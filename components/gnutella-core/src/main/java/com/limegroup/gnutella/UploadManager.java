@@ -1,6 +1,7 @@
 package com.limegroup.gnutella;
 
 import com.limegroup.gnutella.uploader.*;
+import com.limegroup.gnutella.util.Buffer;
 import java.net.*;
 import java.io.*;
 import com.sun.java.util.collections.*;
@@ -14,6 +15,12 @@ import java.util.Date;
 //2345678|012345678|012345678|012345678|012345678|012345678|012345678|012345678|
 
 public class UploadManager {
+	/** The callback for notifying the GUI of major changes. */
+    private ActivityCallback _callback;
+    /** The message router to use for pushes. */
+    private MessageRouter _router;
+    /** Used for get addresses in pushes. */
+    private Acceptor _acceptor;
 
 	/**
 	 * LOCKING: obtain this' monitor before modifying any 
@@ -46,7 +53,6 @@ public class UploadManager {
 	 */
 	private static Map /* String -> Integer */ _uploadsInProgress =
 		new HashMap();
-
     /**
      * The number of uploads that are actually transferring data.
      *
@@ -55,14 +61,29 @@ public class UploadManager {
      */
     private volatile int _activeUploads= 0;
 
-	/** The callback for notifying the GUI of major changes. */
-    private ActivityCallback _callback;
-    /** The message router to use for pushes. */
-    private MessageRouter _router;
-    /** Used for get addresses in pushes. */
-    private Acceptor _acceptor;
 	/** set to true when an upload has been succesfully completed. */
 	private volatile boolean _hadSuccesfulUpload=false;
+
+
+    /** The number of uploads considered when calculating capacity, if possible.
+     *  BearShare uses 10.  Settings it too low causes you to be fooled be a
+     *  streak of slow downloaders.  Setting it too high causes you to be fooled
+     *  by a number of quick downloads before your slots become filled.  */
+    private static final int MAX_SPEED_SAMPLE_SIZE=5;
+    /** The min number of uploads considered to give out your speed.  Same 
+     *  criteria needed as for MAX_SPEED_SAMPLE_SIZE. */
+    private static final int MIN_SPEED_SAMPLE_SIZE=5;
+    /** The minimum number of bytes transferred by an uploadeder to count. */
+    private static final int MIN_SAMPLE_BYTES=200000;  //200KB
+    /** The average speed in kiloBITs/second of the last few uploads. */
+    private Buffer /* of Integer */ speeds=new Buffer(MAX_SPEED_SAMPLE_SIZE);
+    /** The highestSpeed of the last few downloads, or -1 if not enough
+     *  downloads have been down for an accurate sample.
+     *  INVARIANT: highestSpeed>=0 ==> highestSpeed==max({i | i in speeds}) 
+     *  INVARIANT: speeds.size()<MIN_SPEED_SAMPLE_SIZE <==> highestSpeed==-1
+     */
+    private volatile int highestSpeed=-1;
+
 
    //////////////////////// Main Public Interface /////////////////////////
 
@@ -187,7 +208,8 @@ public class UploadManager {
 		return _hadSuccesfulUpload;
 	} 
 
-	//////////////////////// Private Interface /////////////////////////
+
+	/////////////////// Private Interface for Testing Limits /////////////////
 
     /** Increments the count of uploads in progress for host.
      *  If uploader has exceeded its limits, places it in LIMIT_REACHED state.
@@ -321,7 +343,7 @@ public class UploadManager {
 	}
 
 
-	////////////////// Handle Bandwith Allocation //////////////////
+	////////////////// Bandwith Allocation and Measurement///////////////
 
 	/**
 	 * calculates the appropriate burst size for the allocating
@@ -335,8 +357,6 @@ public class UploadManager {
 		float burstSize = totalBandwith/uploadsInProgress();
 		return (int)burstSize;
 	}
-
-	////////////////// Private Bandwith Calculation //////////////////
 	
 	/**
 	 * @return the total bandwith available for uploads
@@ -361,14 +381,42 @@ public class UploadManager {
 		return totalBandwith;
 	}
 
-	/**
-	 * @return a percentage of bandwith available.
-	 */
-	private float getBandwithPercentage() {
-		return 0;
-	}
 
+    /** Returns the estimated upload speed in <b>KILOBITS/s</b> [sic] of the
+     *  next transfer, assuming the client (i.e., downloader) has infinite
+     *  bandwidth.  Returns -1 if not enough data is available for an 
+     *  accurate estimate. */
+    public int measuredUploadSpeed() {
+        //Note that no lock is needed.
+        return highestSpeed;
+    }
 
+    /**
+     * Notes that some uploader has uploaded the given number of BYTES in the
+     * given number of milliseconds.  If bytes is too small, the data may be
+     * ignored.  
+     *     @requires this' lock held 
+     *     @modifies this.speed, this.speeds
+     */
+    private void reportUploadSpeed(long milliseconds, long bytes) {
+        //This is critical for ignoring 404's messages, etc.
+        if (bytes<MIN_SAMPLE_BYTES)
+            return;
+
+        //Calculate the bandwidth in kiloBITS/s.  We just assume that 1 kilobyte
+        //is 1000 (not 1024) bytes for simplicity.
+        int bandwidth=8*(int)((float)bytes/(float)milliseconds);
+        speeds.add(new Integer(bandwidth));
+
+        //Update maximum speed if possible.  This should be atomic.  TODO: can
+        //the compiler replace the temporary variable max with highestSpeed?
+        if (speeds.size()>=MIN_SPEED_SAMPLE_SIZE) {
+            int max=0;
+            for (int i=0; i<speeds.size(); i++) 
+                max=Math.max(max, ((Integer)speeds.get(i)).intValue());
+            this.highestSpeed=max;
+        }
+    }
 
 	//////////////////////// Handle Parsing /////////////////////////
 
@@ -432,6 +480,7 @@ public class UploadManager {
             _index = index;
 		}
 		public void run() {
+            long startTime=-1;
 			try {
 				// connect is always safe to call.  it should be
 				// if it is a non-push upload, then connect should
@@ -443,6 +492,7 @@ public class UploadManager {
                     // start doesn't throw an exception.  rather, it
                     // handles it internally.  is this the correct
                     // way to handle it?
+                    startTime=System.currentTimeMillis();
                     _up.start();
 					// check the state of the upload once the
 					// start method has finished.  if it is complete...
@@ -457,7 +507,14 @@ public class UploadManager {
 				synchronized(UploadManager.this) { insertFailedPush(_host, _index); }
 				return;
 			} finally {			    
+                long finishTime=System.currentTimeMillis();
 				synchronized(UploadManager.this) {
+                    //Report how quickly we uploaded the data, regardless of
+                    //whether the transfer was interrupted, unless we couldn't
+                    //connect.  The client will ignore small amounts of data.
+                    if (startTime>0)
+                        reportUploadSpeed(finishTime-startTime,
+                                          _up.amountUploaded());
 					removeFromMap(_host);
 					removeAttemptedPush(_host, _index);
 					_callback.removeUpload(_up);		
@@ -497,15 +554,30 @@ public class UploadManager {
 		
 	}
 
+    /** Partial unit test. */
+    /*
+    public static void main(String args[]) {
+        UploadManager upman=new UploadManager();
+        upman.reportUploadSpeed(100000, 1000000);  //10 kB/s
+        Assert.that(upman.measuredUploadSpeed()==-1);
+        upman.reportUploadSpeed(100000, 2000000);  //20 kB/s
+        Assert.that(upman.measuredUploadSpeed()==-1);
+        upman.reportUploadSpeed(100000, 3000000);  //30 kB/s
+        Assert.that(upman.measuredUploadSpeed()==-1);
+        upman.reportUploadSpeed(100000, 4000000);  //40 kB/s
+        Assert.that(upman.measuredUploadSpeed()==-1);
+        upman.reportUploadSpeed(100000, 5000000);  //50 kB/s == 400 kb/sec
+        Assert.that(upman.measuredUploadSpeed()==400);
+        upman.reportUploadSpeed(100000, 6000000);  //60 kB/s == 480 kb/sec
+        Assert.that(upman.measuredUploadSpeed()==480);
+        upman.reportUploadSpeed(1, 1000);          //too little data to count
+        Assert.that(upman.measuredUploadSpeed()==480);
+        upman.reportUploadSpeed(100000, 1000000);  //10 kB/s = 80 kb/s
+        upman.reportUploadSpeed(100000, 1000000);  
+        upman.reportUploadSpeed(100000, 1000000);  
+        upman.reportUploadSpeed(100000, 1000000);  
+        upman.reportUploadSpeed(100000, 1000000);  
+        Assert.that(upman.measuredUploadSpeed()==80);
+    }
+    */
 }
-
-
-
-
-
-
-
-
-
-
-
