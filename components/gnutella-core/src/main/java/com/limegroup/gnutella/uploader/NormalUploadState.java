@@ -188,7 +188,10 @@ public class NormalUploadState implements UploadState {
 		// an optional field in the regular case, we don't need
 		// to send it.
 		if (_uploadBegin != 0) {
-			str = "Content-range: bytes=" + _uploadBegin  +
+			// versions 1.7b and before mistakenly sent
+			// "Content-range: bytes=".  the '=' is changed
+			// top a ' '.
+			str = "Content-range: bytes " + _uploadBegin  +
 			"-" + ( _fileSize - 1 )+ "/" + _fileSize + "\r\n";
 			_ostream.write(str.getBytes());
 		}
