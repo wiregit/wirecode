@@ -165,7 +165,7 @@ public interface SettingsInterface
     /** Default name for the network discovery properties */
     public static final String  DEFAULT_ND_PROPS_NAME  = "nd.props";
     /** Default value for the keep alive */    
-    public static final int     DEFAULT_KEEP_ALIVE     = 0;
+    public static final int     DEFAULT_KEEP_ALIVE     = 4;
     /** Default port*/
     public static final int     DEFAULT_PORT           = 6346;
     /** Default network connection speed */
