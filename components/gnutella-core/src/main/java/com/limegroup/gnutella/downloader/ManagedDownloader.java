@@ -941,7 +941,14 @@ public class ManagedDownloader implements Downloader, Serializable {
         synchronized (this) {
             for (Iterator iter=files.iterator(); iter.hasNext(); ) {
                 tempRFD = (RemoteFileDesc)iter.next();
+
+				// Don't add a location to the alternate location list 
+				// if the RFD doesn't have a SHA1
+				if ( tempRFD.getSHA1Urn() == null)
+				    continue;
+
 				// This really should be a method on RemoteFileDesc
+				// Construct a workable URL out of RFD 
 				rfdStr = "http://"+tempRFD.getHost()+":"+
 				  tempRFD.getPort()+"/get/"+String.valueOf(tempRFD.getIndex())+
 				  "/"+tempRFD.getFileName();
