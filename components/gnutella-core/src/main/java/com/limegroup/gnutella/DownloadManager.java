@@ -1019,7 +1019,7 @@ public class DownloadManager implements BandwidthTracker {
                 // appropriate control index
                 (shouldDoFWTransfer ? ("&file=" + PushRequest.FW_TRANS_INDEX) :
                  "");
-            final String nodeString = "X-Node:";
+            final String nodeString = "X-Node";
             byte[] nodeAddrToSend = shouldDoFWTransfer ?
                                     RouterService.getExternalAddress() : addr;
             final String nodeValue = NetworkUtils.ip2string(nodeAddrToSend) + 
