@@ -278,15 +278,15 @@ public class ConnectionManager {
     }
     
     /**
-     * Tells whether this node has a connection to
-     * a supernode, being itself a client node. This flag has importance
-     * for client nodes only
-     * @return True, if the clientnode has connection to supernode,
-     * false otherwise
+     * Returns true if this is a leaf node with a connection to a supernode.  It
+     * is not required that the supernode support query routing, though that is
+     * generally the case.  
      */
     public synchronized boolean hasClientSupernodeConnection() {
-        //TODO2: this can be optimized to avoid allocations
-        List connections=getInitializedConnections();
+        //TODO3: it may be possible to remove the synchronized statement here,
+        //depending on whether Java ALWAYS stores the value of
+        //_incomingConnections in a register before proceeding.
+        List connections=_initializedConnections;
         if (connections.size()!=1)
             return false;
         else {
