@@ -5,6 +5,7 @@ import com.limegroup.gnutella.util.*;
 import com.limegroup.gnutella.xml.*;
 import com.sun.java.util.collections.*;
 import java.util.Date;
+import java.util.Calendar;
 import java.io.*;
 import java.net.*;
 
@@ -544,6 +545,12 @@ public class ManagedDownloader implements Downloader, Serializable {
         int numRequeries = 0;
         // per query, the number of waits i've allowed...
         int numRetries = 0;
+        // time i last woke up....
+        long lastWakeUpTime = 0;
+        // now....
+        long nowTime = 0;
+        // time to wait before next requery....
+        long waitTime = 0;
 
         synchronized (this) {
             buckets=new RemoteFileDescGrouper(allFiles, incompleteFileManager);
@@ -614,15 +621,34 @@ public class ManagedDownloader implements Downloader, Serializable {
                         manager.remove(this, false);
                         return;
                     }
-                    else if (numRequeries++ < REQUERY_ATTEMPTS) {
-                        manager.sendQuery(allFiles);
-                        // reset numRetries for next iteration...
-                        numRetries = 0;
+                    else if (numRequeries < REQUERY_ATTEMPTS) {
+                        // see how long i've been sleeping....
+                        lastWakeUpTime = nowTime;
+                        nowTime = Calendar.getInstance().getTime().getTime();
+                        long timeSlept = nowTime - lastWakeUpTime;
 
-                        int waitTime = getMinutesToWaitForRequery(numRequeries);
-                        waitTime *= (60 * 1000);                        
+                        if (timeSlept < waitTime) {
+                            // ok, sleep more....
+                            waitTime -= timeSlept;
+                            setState(WAITING_FOR_RESULTS, waitTime);
+                        }
+                        else {
+                            numRequeries++;
+                            manager.sendQuery(allFiles);
+                            
+                            waitTime = getMinutesToWaitForRequery(numRequeries);
+                            waitTime *= (60 * 1000);                        
+
+                            // reset numRetries for next batch of results for
+                            // next query
+                            numRetries = 0;                        
+                        }
+
+                        // i may have sent a query, either way prepare to sleep
                         setState(WAITING_FOR_RESULTS, (long) waitTime);
-                        
+                        // take the current time....
+                        nowTime = Calendar.getInstance().getTime().getTime();
+                        // sleep....
                         reqLock.lock((long) waitTime);
                     }
                     else {
