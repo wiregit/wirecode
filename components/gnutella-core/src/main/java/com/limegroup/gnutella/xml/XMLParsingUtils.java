@@ -160,7 +160,7 @@ public class XMLParsingUtils {
                 for(int i = 0; i < attributesLength; i++) {
                     attributeMap.put(_result.canonicalKeyPrefix + 
                                      attributes.getLocalName(i) + "__",
-                                     attributes.getValue(i));
+                                     attributes.getValue(i).trim());
                 }
                 _result.add(attributeMap);
             } else {
