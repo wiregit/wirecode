@@ -992,7 +992,7 @@ log2("Received duplicate block num: "+ dmsg.getSequenceNumber());
 
         public void handleEvent() {
             long time = System.currentTimeMillis();
-//log2("keepalive: "+ time);
+log2("keepalive: "+ time);
 
 			// Make sure that some messages are received within timeframe
 			if ( isConnected() && 
@@ -1007,7 +1007,7 @@ log2("Received duplicate block num: "+ dmsg.getSequenceNumber());
             // If reevaluation of the time still requires a keepalive then send
             if ( time+1 >= (_lastSendTime + KEEPALIVE_WAIT_TIME) ) {
                 if ( isConnected() ) {
-//log("sendKeepAlive");
+log("sendKeepAlive");
                     sendKeepAlive();
                 } else {
                     return;
@@ -1017,7 +1017,7 @@ log2("Received duplicate block num: "+ dmsg.getSequenceNumber());
             // Reschedule keepalive timer
             _eventTime = _lastSendTime + KEEPALIVE_WAIT_TIME;
             _scheduler.scheduleEvent(this);
-//log2("end keepalive: "+ System.currentTimeMillis());
+log2("end keepalive: "+ System.currentTimeMillis());
         }
     }
     /** 
@@ -1029,7 +1029,7 @@ log2("Received duplicate block num: "+ dmsg.getSequenceNumber());
         }
 
         public void handleEvent() {
-//log2("data timeout :"+ System.currentTimeMillis());
+log2("data timeout :"+ System.currentTimeMillis());
             long time = System.currentTimeMillis();
 
 			// Make sure that some messages are received within timeframe
@@ -1045,7 +1045,7 @@ log2("Received duplicate block num: "+ dmsg.getSequenceNumber());
             if ( isConnected() ) {
                 writeData();
             }
-//log2("end data timeout: "+ System.currentTimeMillis());
+log2("end data timeout: "+ System.currentTimeMillis());
         }
     }
 
@@ -1059,11 +1059,11 @@ log2("Received duplicate block num: "+ dmsg.getSequenceNumber());
         }
 
         public void handleEvent() {
-//log2("ack timeout: "+ System.currentTimeMillis());
+log2("ack timeout: "+ System.currentTimeMillis());
             if ( isConnected() ) {
                 validateAckedData();
             }
-//log2("end ack timeout: "+ System.currentTimeMillis());
+log2("end ack timeout: "+ System.currentTimeMillis());
         }
     }
 
@@ -1077,13 +1077,13 @@ log2("Received duplicate block num: "+ dmsg.getSequenceNumber());
         }
 
         public void handleEvent() {
-//log2("write wakeup timeout: "+ System.currentTimeMillis());
+log2("write wakeup timeout: "+ System.currentTimeMillis());
             if ( isConnected() ) {
                 writeDataActivation();
             }
             _eventTime = Long.MAX_VALUE;
             _scheduler.scheduleEvent(this);
-//log2("write wakeup timeout: "+ System.currentTimeMillis());
+log2("write wakeup timeout: "+ System.currentTimeMillis());
         }
     }
     //

@@ -134,7 +134,9 @@ public class PingReply extends Message implements Serializable, IpPort {
                       (Statistics.instance().calculateDailyUptime(),
                        RouterService.isSupernode(),
                        UDPService.instance().isGUESSCapable(),
-                       ApplicationSettings.LANGUAGE.getValue(),
+                       (ApplicationSettings.LANGUAGE.getValue().equals("") ?
+                        ApplicationSettings.DEFAULT_LOCALE.getValue() :
+                        ApplicationSettings.LANGUAGE.getValue()),
                        RouterService.getConnectionManager()
                        .getNumLimeWireLocalePrefSlots()));
     }
