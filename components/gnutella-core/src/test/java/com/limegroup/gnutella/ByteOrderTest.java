@@ -117,7 +117,7 @@ public class ByteOrderTest extends BaseTestCase {
         assertEquals(0x80000000, ByteOrder.long2int(-0xABFFFFFFFFl)); //Integer.MIN_VALUE
     }
 
-    public static void testInt2MinLeb() {
+    public void testInt2MinLeb() {
         try {
             ByteOrder.int2minLeb(-1);
             fail("exception should have been thrown");
@@ -131,4 +131,15 @@ public class ByteOrderTest extends BaseTestCase {
         assertTrue(Arrays.equals(ByteOrder.int2minLeb(731328764), 
             new byte[] {(byte)0xFC, (byte)0x30, (byte)0x97, (byte)0x2B}));
     }
+    
+    public void testLeb2Int() {
+          assertEquals(0, ByteOrder.leb2int(new byte[] {(byte)0}, 0, 1));
+          assertEquals(1, ByteOrder.leb2int(new byte[] {(byte)1}, 0, 1));
+          assertEquals(7, ByteOrder.leb2int(new byte[] {(byte)7}, 0, 1));
+          assertEquals(0x11c7f,
+            ByteOrder.leb2int(new byte[] {(byte)0x7f, (byte)0x1c, (byte)0x1}, 0, 3));
+          assertEquals(0x1c,
+            ByteOrder.leb2int(new byte[] {(byte)0x7f, (byte)0x1c, (byte)0x1}, 1, 1));
+          //TODO: expand tests to cover exceptional cases and negative values
+   }    
 }        
