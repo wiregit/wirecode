@@ -760,6 +760,28 @@ public final class CommonUtils {
         }
         return a.length()-b.length();
     }
+    
+    
+    /**
+     * Gets a resource file using the CommonUtils class loader,
+     * or the system class loader if CommonUtils isn't loaded.
+     */
+    public static File getResourceFile(String location) {
+        ClassLoader cl = CommonUtils.class.getClassLoader();
+        if(cl == null)
+            cl = ClassLoader.getSystemClassLoader();
+            
+        URL resource = cl.getResource(location);
+        
+        if( resource == null ) {
+            // note: this will probably not work,
+            // but it will ultimately trigger a better exception
+            // than returning null.
+            return new File(location);
+        }
+        
+        return new File(resource.getFile());
+    }
 
 	/**
 	 * Copies the specified resource file into the current directory from
