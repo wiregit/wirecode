@@ -1264,8 +1264,11 @@ public class ConnectionManager {
             colonIndex++;
             if(colonIndex > remoteAddress.length()) return;
             try {
-                connection.setOrigPort(
-                    Integer.parseInt(remoteAddress.substring(colonIndex).trim()));
+                int port =
+                    Integer.parseInt(remoteAddress.substring(colonIndex).trim());
+                if(NetworkUtils.isValidPort(port)) {
+                    connection.setOrigPort(port);
+                }
             } catch(NumberFormatException e){
                 // should nothappen though if the other client is well-coded
             } 
