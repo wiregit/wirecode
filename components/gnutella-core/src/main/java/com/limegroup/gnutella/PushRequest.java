@@ -104,6 +104,11 @@ public class PushRequest extends Message implements Serializable {
         }
     }
 
+	// inherit doc comment
+	public void recordDrop() {
+		DroppedSentMessageStatHandler.TCP_PUSH_REQUESTS.addMessage(this);
+	}
+
     public String toString() {
         return "PushRequest("+super.toString()+")";
     }

@@ -429,4 +429,9 @@ public abstract class Message
              +", ttl="+ttl
              +", priority="+getPriority()+"}";
     }
+
+	/**
+	 * Records the dropping of this message in statistics.
+	 */
+	public abstract void recordDrop();
 }

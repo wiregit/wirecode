@@ -394,6 +394,11 @@ public class PingReply extends Message implements Serializable {
             return (x&(x - 1)) == 0;
     }
 
+	// inherit doc comment
+	public void recordDrop() {
+		DroppedSentMessageStatHandler.TCP_PING_REPLIES.addMessage(this);
+	}
+
     /** Marks the given kbytes field */
     private static long mark(long kbytes) {
         int x=ByteOrder.long2int(kbytes);

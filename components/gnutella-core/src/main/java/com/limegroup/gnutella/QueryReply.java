@@ -361,6 +361,7 @@ public class QueryReply extends Message implements Serializable{
         return retInt;
     }
 
+	// inherit doc comment
     public void writePayload(OutputStream out) throws IOException {
         out.write(payload);
         SentMessageStatHandler.TCP_QUERY_REPLIES.addMessage(this);
@@ -942,6 +943,10 @@ public class QueryReply extends Message implements Serializable{
         return quality==0 || quality==2;
 	}
 
+	// inherit doc comment
+	public void recordDrop() {
+		DroppedSentMessageStatHandler.TCP_QUERY_REPLIES.addMessage(this);
+	}
 
     public final static boolean debugOn = false;
     public static void debug(String out) {

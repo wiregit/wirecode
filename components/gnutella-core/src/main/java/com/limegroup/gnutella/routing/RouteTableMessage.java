@@ -114,6 +114,11 @@ public abstract class RouteTableMessage extends Message {
         return this;
     }
 
+	// inherit doc comment
+	public void recordDrop() {
+		DroppedSentMessageStatHandler.TCP_ROUTE_TABLE_MESSAGES.addMessage(this);	   
+	}
+
     /** Unit test */
     public static void main(String[] args) {                  
         //Read bytes with bad variant

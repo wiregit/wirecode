@@ -78,6 +78,11 @@ public class PingRequest extends Message {
                                    this.getHops());
     }
 
+	// inherit doc comment
+	public void recordDrop() {
+		DroppedSentMessageStatHandler.TCP_PING_REQUESTS.addMessage(this);
+	}
+
     public String toString() {
         return "PingRequest("+super.toString()+")";
     }
