@@ -118,8 +118,7 @@ public final class ChatManager {
 	/** blocks incoming connections from a particular ip address  */
 	public void blockHost(String host) {
 		String[] bannedIPs = FilterSettings.BLACK_LISTED_IP_ADDRESSES.getValue();
-        
-		Arrays.sort(bannedIPs);		
+		Arrays.sort(bannedIPs, Comparators.stringComparator());
 		synchronized (this) {
 			if ( Arrays.binarySearch(bannedIPs, host, 
 									 Comparators.stringComparator()) < 0 ) {
