@@ -29,6 +29,8 @@ public class GGEP extends Object {
     public static final String GGEP_HEADER_VENDOR_INFO = "VC";
     /** The extension header (key) for Ultrapeer support. */
     public static final String GGEP_HEADER_UP_SUPPORT = "UP";
+    /** The extension header (key) for QueryKey support. */
+    public static final String GGEP_HEADER_QUERY_KEY_SUPPORT = "QK";
     /** The maximum size of a extension header (key). */
     public static final int MAX_KEY_SIZE_IN_BYTES = 15;
 

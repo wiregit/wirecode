@@ -1,8 +1,9 @@
 package com.limegroup.gnutella;
 
+import com.limegroup.gnutella.messages.*;
+import com.limegroup.gnutella.guess.*;
 import com.limegroup.gnutella.statistics.*;
 import java.io.*;
-import com.limegroup.gnutella.messages.*;
 import com.limegroup.gnutella.util.*;
 import com.sun.java.util.collections.*;
 
@@ -93,6 +94,31 @@ public class PingReply extends Message implements Serializable {
     }
 
     /**
+     * Use this constructor to make a PingReply with a QueryKey.  
+     *
+     * @param guid the sixteen byte message GUID
+     * @param ttl the message TTL to use
+     * @param port my listening port.  MUST fit in two signed bytes,
+     *  i.e., 0 < port < 2^16.
+     * @param ip my listening IP address.  MUST be in dotted-quad big-endian,
+     *  format e.g. {18, 239, 0, 144}.
+     * @param files the number of files I'm sharing.  Must fit in 4 unsigned
+     *  bytes, i.e., 0 < files < 2^32.
+     * @param kbytes the total size of all files I'm sharing, in kilobytes.
+     *  Must fit in 4 unsigned bytes, i.e., 0 < files < 2^32.
+     * @param isUltrapeer true if this should be a marked ultrapeer pong,
+     *  which sets kbytes to the nearest power of 2 not less than 8.
+     * @param queryKey the QueryKey you want the receiving host to use for UDP
+     *  query credentials.
+     */
+    public PingReply(byte[] guid, byte ttl, int port, byte[] ip, 
+                     long files, long kbytes, boolean isUltrapeer,
+                     QueryKey queryKey) {
+        this(guid, ttl, port, ip, files, kbytes, isUltrapeer,
+             qkGGEP(queryKey));
+    }
+
+    /**
      * Wrap a PingReply around stuff snatched from the network.
      * <p>
      * Initially this method required that payload.lenghth == 14. But now we
@@ -106,9 +132,8 @@ public class PingReply extends Message implements Serializable {
         if (payload.length<STANDARD_PAYLOAD_SIZE)
             throw new BadPacketException();
         this.payload=payload;
-		if(!MessageUtils.isValidPort(getPort())) {
+ 		if(!MessageUtils.isValidPort(getPort()))
 			throw new BadPacketException("invalid port");
-		}
     }
      
     /** Internal constructor used to bind the encoded GGEP payload, avoiding the
@@ -169,6 +194,29 @@ public class PingReply extends Message implements Serializable {
         } catch (IOException e) {
             //See above.
             Assert.that(false, "Couldn't encode uptime or udp");
+            return null;
+        }
+    }
+
+
+    /** Returns the GGEP payload bytes to encode the given QueryKey */
+    private static byte[] qkGGEP(QueryKey queryKey) {
+        try {
+            GGEP ggep=new GGEP(true);
+
+            // get qk bytes....
+            ByteArrayOutputStream baos=new ByteArrayOutputStream();
+            queryKey.write(baos);
+            // populate GGEP....
+            ggep.put(GGEP.GGEP_HEADER_QUERY_KEY_SUPPORT, baos.toByteArray());
+
+            // actually write the badboy
+            baos=new ByteArrayOutputStream();
+            ggep.write(baos);
+            return baos.toByteArray();
+        } catch (IOException e) {
+            //See above.
+            Assert.that(false, "Couldn't encode QueryKey" + queryKey);
             return null;
         }
     }
@@ -341,12 +389,37 @@ public class PingReply extends Message implements Serializable {
     }
 
 
+    /** Returns the QueryKey (if any) associated with this pong.  May be null!
+     *  @exception BadPacketException if the version is not known or corrupt.
+     */
+    public synchronized QueryKey getQueryKey() throws BadPacketException {
+        parseGGEP();
+        if (ggep==null)
+            throw new BadPacketException("Missing GGEP block");
+        try {
+            if (ggep.hasKey(GGEP.GGEP_HEADER_QUERY_KEY_SUPPORT)) {
+                byte[] bytes = 
+                    ggep.getBytes(GGEP.GGEP_HEADER_QUERY_KEY_SUPPORT);
+                return QueryKey.getQueryKey(bytes, false);
+            }
+        }
+        catch (IllegalArgumentException malformedQueryKey) {
+            throw new BadPacketException("Malformed Query Key");
+        }
+        catch (BadGGEPPropertyException corrupt) {
+            throw new BadPacketException("Corrupt GGEP block");
+        }
+        return null;
+    }
+
+
 
     public synchronized boolean hasGGEPExtension() {
         parseGGEP();
         return ggep!=null;
     }
     
+    // TODO : change this to look for multiple GGEP block in the payload....
     /** Ensure GGEP data parsed...if possible. */
     private synchronized void parseGGEP() {
         //Return if we've already parsed the data or this is a plain pong

@@ -5,6 +5,7 @@ import com.limegroup.gnutella.security.User;
 import com.limegroup.gnutella.routing.*;
 import com.limegroup.gnutella.guess.*;
 import com.limegroup.gnutella.statistics.*;
+import com.limegroup.gnutella.messages.*;
 
 import com.sun.java.util.collections.*;
 import java.io.IOException;
@@ -26,6 +27,27 @@ public abstract class MessageRouter {
      *         response.
      */
     protected byte[] _clientGUID;
+
+    /**
+     * The SecretKey used for QueryKey generation.
+     */
+    protected QueryKey.SecretKey _secretKey;
+    /**
+     * The LAST SecretKey used for QueryKey generation.  Used to honor older
+     * (but not too old) requests.
+     */
+    protected QueryKey.SecretKey _lastSecretKey;
+
+    /**
+     * The SecretPad used for QueryKey generation.
+     */
+    protected QueryKey.SecretPad _secretPad;
+    /**
+     * The LAST SecretPad used for QueryKey generation.  Used to honor older
+     * (but not too old) requests.
+     */
+    protected QueryKey.SecretPad _lastSecretPad;
+
 
 	/**
 	 * Reference to the <tt>ReplyHandler</tt> for messages intended for 
@@ -95,6 +117,8 @@ public abstract class MessageRouter {
             //This should never happen! But if it does, we can recover.
             _clientGUID = Message.makeGuid();
         }
+        _secretKey = QueryKey.generateSecretKey();
+        _secretPad = QueryKey.generateSecretPad();
     }
 
     /**
@@ -190,14 +214,18 @@ public abstract class MessageRouter {
 		UDPReplyHandler handler = new UDPReplyHandler(address, port);
 		
         if (msg instanceof QueryRequest) {
-			sendAcknowledgement(datagram, msg.getGUID());
-			if(RECORD_STATS)
-				ReceivedMessageStatHandler.UDP_QUERY_REQUESTS.addMessage(msg);
-			// a TTL above zero may indicate a malicious client, as UDP
-			// messages queries should not be sent with TTL above 1.
-			//if(msg.getTTL() > 0) return;
-            handleUDPQueryRequestPossibleDuplicate((QueryRequest)msg, 
-												   handler);
+            //TODO: compare QueryKey with old generation params.  if it matches
+            //send a new one generated with current params 
+            if (hasValidQueryKey(address, port, (QueryRequest) msg)) {
+                sendAcknowledgement(datagram, msg.getGUID());
+                // a TTL above zero may indicate a malicious client, as UDP
+                // messages queries should not be sent with TTL above 1.
+                //if(msg.getTTL() > 0) return;
+                handleUDPQueryRequestPossibleDuplicate((QueryRequest)msg, 
+                                                       handler);
+            }
+            if(RECORD_STATS)
+                ReceivedMessageStatHandler.UDP_QUERY_REQUESTS.addMessage(msg);
 		} else if (msg instanceof QueryReply) {			
 			if(RECORD_STATS)
 				ReceivedMessageStatHandler.UDP_QUERY_REPLIES.addMessage(msg);
@@ -216,6 +244,19 @@ public abstract class MessageRouter {
 				ReceivedMessageStatHandler.UDP_PUSH_REQUESTS.addMessage(msg);
 			handlePushRequest((PushRequest)msg, handler);
 		}
+    }
+
+    /**
+     * Returns true if the Query has a valid QueryKey.  false if it isn't
+     * present or valid.
+     */
+    protected boolean hasValidQueryKey(InetAddress ip, int port, 
+                                       QueryRequest qr) {
+        if (qr.getQueryKey() == null)
+            return false;
+        QueryKey computedQK = QueryKey.getQueryKey(ip, port, _secretKey,
+                                                   _secretPad);
+        return qr.getQueryKey().equals(computedQK);
     }
 
 	/**
@@ -377,12 +418,56 @@ public abstract class MessageRouter {
     protected void handleUDPPingRequest(PingRequest pingRequest,
 										ReplyHandler handler, 
 										DatagramPacket datagram) {
-        respondToUDPPingRequest(pingRequest, datagram);
+        if (pingRequest.isQueryKeyRequest())
+            sendQueryKeyPong(pingRequest, datagram);
+        else
+            respondToUDPPingRequest(pingRequest, datagram);
     }
     
 
+    /**
+     * Generates a QueryKey for the source (described by datagram) and sends the
+     * QueryKey to it via a QueryKey pong....
+     */
+    protected void sendQueryKeyPong(PingRequest pr, DatagramPacket datagram) {
+
+        boolean isSupernode = RouterService.isSupernode();
+        if (isSupernode) { // only UPs should be doling out QKs....
+            // generate a QueryKey (quite quick - current impl. (DES) is super
+            // fast!
+            InetAddress address = datagram.getAddress();
+            int port = datagram.getPort();
+            QueryKey qkToDeliver = QueryKey.getQueryKey(address, port, 
+                                                        _secretKey, _secretPad);
+
+            // respond with Pong with QK, as GUESS requires....
+            int num_files = RouterService.getNumSharedFiles();
+            int kilobytes = RouterService.getSharedFileSize()/1024;
+            
+            PingReply pRep = new PingReply(pr.getGUID(), (byte) 1, 
+                                           RouterService.getPort(),
+                                           RouterService.getAddress(),
+                                           num_files, kilobytes, isSupernode, 
+                                           qkToDeliver);
+            UDPService.instance().send(pRep, datagram.getAddress(),
+                                       datagram.getPort());
+            if (RECORD_STATS)
+                SentMessageStatHandler.UDP_PING_REPLIES.addMessage(pRep);
+        }
+    }
+
+
     protected void handleUDPPingReply(PingReply reply, ReplyHandler handler,
                                       InetAddress address, int port) {
+        try {
+            if (reply.getQueryKey() != null) {
+                // this is a PingReply in reply to my QueryKey Request - 
+                //consume the Pong and return, don't process as usual....
+                UNICASTER.handleQueryKeyPong(reply);
+                return;
+            }
+        }
+        catch (BadPacketException ignored) {}
 
         // also add the sender of the pong if different from the host
         // described in the reply...
@@ -896,7 +981,7 @@ public abstract class MessageRouter {
         else
             throw new IOException();
     }
-     
+
     /**
      * Handles a query route table update message that originated from
      * receivingConnection.
@@ -994,7 +1079,6 @@ public abstract class MessageRouter {
         addQueryRoutingEntries(ret);
         return ret;
     }
-
 
     /**
      * Converts the passed responses to QueryReplies. Each QueryReply can

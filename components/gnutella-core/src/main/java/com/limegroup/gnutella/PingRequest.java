@@ -1,5 +1,6 @@
 package com.limegroup.gnutella;
 
+import com.limegroup.gnutella.messages.*;
 import com.limegroup.gnutella.util.*;
 import com.limegroup.gnutella.statistics.*;
 import java.io.*;
@@ -59,6 +60,27 @@ public class PingRequest extends Message {
         super((byte)0x0, ttl, (byte)length);
     }
 
+    /**
+     * Creates a QueryKey Request ping with a new GUID and TTL of 1
+     */
+    public PingRequest() {
+        this((byte)1);
+
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        try {
+            // write the GGEP block as the payload
+            GGEP ggepBlock = new GGEP(false);
+            ggepBlock.put(GGEP.GGEP_HEADER_QUERY_KEY_SUPPORT);
+            ggepBlock.write(baos);
+            baos.write(0);
+        }
+        catch (IOException why) {
+            why.printStackTrace();
+        }
+        
+		payload=baos.toByteArray();
+		updateLength(payload.length); 
+    }
 
     /////////////////////////////methods///////////////////////////
 
@@ -67,9 +89,8 @@ public class PingRequest extends Message {
             out.write(payload);
         }
         // the ping is still written even if there's no payload
-        if(RECORD_STATS) {
+        if (RECORD_STATS) 
             SentMessageStatHandler.TCP_PING_REQUESTS.addMessage(this);
-        }
         //Do nothing...there is no payload!
     }
 
@@ -80,6 +101,29 @@ public class PingRequest extends Message {
             return new PingRequest(this.getGUID(), 
                                    this.getTTL(), 
                                    this.getHops());
+    }
+
+    public boolean isQueryKeyRequest() {
+        if (!(getTTL() == 0) || !(getHops() == 1))
+            return false;
+        if (payload == null)
+            return false;
+        return parseGGEP(payload);
+    }
+
+
+    // handles parsing of all GGEP blocks.  may need to change return sig
+    // if new things are needed....
+    // TODO: technically there may be multiple GGEP blocks here - we tried to
+    // get all but encountered a infinite loop so just try to get one for now.
+    private final boolean parseGGEP(byte[] ggepBytes) {
+        try {
+            GGEP ggepBlock = new GGEP(ggepBytes, 0, null);
+            if (ggepBlock.hasKey(GGEP.GGEP_HEADER_QUERY_KEY_SUPPORT)) 
+                return true;
+        }        
+        catch (BadGGEPBlockException ignored) {}
+        return false;
     }
 
 	// inherit doc comment
