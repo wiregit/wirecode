@@ -428,8 +428,11 @@ public class HTTPDownloader implements Runnable {
 
 	if ((myFile.exists()) && (!_resume)) {
 	    // ask the user if the file should be overwritten
-	    _state = ERROR;
-	    return;
+	    if ( ! _callback.overwriteFile(_filename) )
+	    { 
+	        _state = ERROR;
+	        return;
+	    }
 	}
 		
 	try {
