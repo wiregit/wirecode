@@ -81,37 +81,77 @@ public class ExternalControl {
 			return;
 
 		// Kick off appropriate downloaders
+        // 
+        MagnetOptions curOpt;
+        boolean xtSHA1 = false;
+        boolean xsSHA1 = false;
+        boolean asSHA1 = false;
 		for ( int i = 0; i < options.length; i++ ) {
+            curOpt = options[i];
+
+            // Find SHA1 URN
 			URN urn = null;
-			if ( options[i].xt != null && options[i].xt.length() > 0 ) {
+			if ( curOpt.xt != null && curOpt.xt.length() > 0 ) {
 				try {
-			        urn = URN.createSHA1Urn(options[i].xt);
-				} catch (IOException e) { /* Not a SHA1 */ }
+			        urn = URN.createSHA1Urn(curOpt.xt);
+                    xtSHA1 = true;
+				} catch (IOException e) { 
+                    /* xt Not a SHA1 - try xs */ 
+                    if ( curOpt.xs != null && curOpt.xs.length() > 0 ) {
+                        try {
+                            urn = URN.createSHA1Urn(curOpt.xs);
+                            xsSHA1 = true;
+                        } catch (IOException e2) { 
+                            /* xs Not a SHA1 */ 
+                            if ( curOpt.as != null && 
+                                 curOpt.as.length() > 0 ) {
+                                try {
+                                    urn = URN.createSHA1Urn(curOpt.as);
+                                    asSHA1 = true;
+                                } catch (IOException e3) { /* as Not a SHA1 */ }
+                            }
+                        }
+                    }
+                }
 			}
 
-			// Collect up exact locations and additional locations
+			// Collect up http locations
 			String defaultURLs[] = null;
 			ArrayList urls = new ArrayList();
-			if (options[i].xs != null && options[i].xs.startsWith(HTTP)) 
-				urls.add(options[i].xs);
-			if (options[i].as != null && options[i].as.startsWith(HTTP)) 
-				urls.add(options[i].as);
+            if (!xtSHA1 && curOpt.xt != null && 
+                curOpt.xt.startsWith(HTTP)) 
+                urls.add(curOpt.xt);
+			if (!xsSHA1 && curOpt.xs != null && 
+                curOpt.xs.startsWith(HTTP)) 
+				urls.add(curOpt.xs);
+			if (!asSHA1 && curOpt.as != null && 
+                curOpt.as.startsWith(HTTP)) 
+				urls.add(curOpt.as);
 			if (urls.size() > 0) {
 				defaultURLs = new String[urls.size()];
 		        defaultURLs = (String[]) urls.toArray(defaultURLs);
 			}
             //System.out.println("download parms:");
             //System.out.println("urn:"+urn);
-            //System.out.println("kt:"+options[i].kt);
-            //System.out.println("dn:"+options[i].dn);
-            //System.out.println("xs:"+options[i].xs);
-            //System.out.println("as:"+options[i].as);
+            //System.out.println("kt:"+curOpt.kt);
+            //System.out.println("dn:"+curOpt.dn);
+            //System.out.println("xt:"+curOpt.xt);
+            //System.out.println("xs:"+curOpt.xs);
+            //System.out.println("as:"+curOpt.as);
+
+            // Validate that we have something to go with from magnet
+            // If not, report an error.
+            if ( !( urls.size() > 0  || 
+                    urn != null || 
+                    (curOpt.kt != null && !"".equals(curOpt.kt)) ) ) {
+                RouterService.getCallback().showError(
+                  curOpt.toString(),"ERROR_BAD_MAGNET_LINK");
+                return;
+            }
             
-            // TODO:  Need to juggle xt, xs and as if SHA1s and URLs are
-            // being used loosely.
             try {
                 RouterService.download
-                (urn,options[i].kt,options[i].dn,defaultURLs,false);//!overwrite
+                (urn,curOpt.kt,curOpt.dn,defaultURLs,false);//!overwrite
             } catch ( AlreadyDownloadingException a ) {  
                 RouterService.getCallback().showError(
                                 a.getFilename(),"ERROR_ALREADY_DOWNLOADING");

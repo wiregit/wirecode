@@ -223,6 +223,10 @@ public class MagnetDownloader extends ManagedDownloader implements Serializable 
             return QueryRequest.createQuery(_textQuery);
         else if (_filename != null)
             return QueryRequest.createQuery(_filename);
+        else if (_urn != null)
+            return QueryRequest.createQuery(_urn);
+        else if (_defaultURLs != null && _defaultURLs.length > 0)
+            throw new CantResumeException("exact source");
         else return super.newRequery(numRequeries);
 
         /* //TODO: if we ever add back URN query support

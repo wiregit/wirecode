@@ -352,12 +352,13 @@ public class DownloadManager implements BandwidthTracker {
             String filename, String [] defaultURL, boolean overwrite) 
             throws IllegalArgumentException, AlreadyDownloadingException,
                                                        FileExistsException {
-        if (textQuery==null && urn==null && filename==null)
+        if (textQuery==null && urn==null && filename==null && 
+            (defaultURL == null || defaultURL.length == 0) )
             throw new IllegalArgumentException("Need something for requeries");
         
         //if we have a valid filename to check against, and we are not supposed
         //to overwrite, thrown an exception if the file already exists
-        if(!overwrite && (filename!=null || !filename.equals(""))) {
+        if(!overwrite && (filename!=null && !filename.equals(""))) {
             File downloadDir = SharingSettings.getSaveDirectory();
             File completeFile = new File(downloadDir,filename);
             if(completeFile.exists()) 
