@@ -75,11 +75,10 @@ public class UploadTest extends TestCase {
 		
 		ActivityCallback callback = new ActivityCallbackStub();
 		FileManager fm = new MetaFileManager();
-		fm.initialize(callback);		
+		fm.initialize();		
 		MessageRouter mr = new StandardMessageRouter(callback, fm);
-		RouterService router = new RouterService(callback, mr, fm, 
-												 new ServerAuthenticator());
-		router.initialize();
+		RouterService router = new RouterService(callback);
+		router.start();
         assertEquals(port, SettingsManager.instance().getPort());
 
         //System.out.println(
