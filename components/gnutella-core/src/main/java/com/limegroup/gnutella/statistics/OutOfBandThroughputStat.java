@@ -22,12 +22,14 @@ public class OutOfBandThroughputStat extends BasicStatistic {
     public static final int PROXY_SUCCESS_RATE = 80;
     public static final int TERRIBLE_SUCCESS_RATE = 40;
 
+    private static Runnable adjuster = null;
 	/**
 	 * Constructs a new <tt>MessageStat</tt> instance. 
 	 */
 	private OutOfBandThroughputStat() {
         final int thirtyMins = 30 * 60 * 1000;
-        Runnable adjuster = new Runnable() {
+        if (adjuster==null) {
+        	adjuster = new Runnable() {
                 public void run() {
                 	if (LOG.isDebugEnabled())
                 		LOG.debug("current success rate "+ getSuccessRate()+
@@ -40,7 +42,8 @@ public class OutOfBandThroughputStat extends BasicStatistic {
                     }
                 }
             };
-        RouterService.schedule(adjuster, thirtyMins, thirtyMins);
+            RouterService.schedule(adjuster, thirtyMins, thirtyMins);
+        }
     }
 
 
