@@ -22,6 +22,11 @@ public interface AlternateLocationCollector {
 	 *  add this alternate location to the collection 
 	 */
 	public int addAll(AlternateLocationCollection alc);
+	
+	/**
+	 * Removes the specified location from this collection.
+	 */
+	public boolean remove(AlternateLocation al);
 
 	/**
 	 * Returns whether or not this <tt>AlternateLocationCollector</tt> has
