@@ -63,9 +63,6 @@ public class VersionUpdate
 				_settings.setDeleteOldJAR(false);
 				_settings.setOldJARName("");
 			}
-			else {
-				Utilities.showMessage("could not delete jar");
-			}
 		}
 		boolean checkAgain;		
 		checkAgain = _settings.getCheckAgain();
