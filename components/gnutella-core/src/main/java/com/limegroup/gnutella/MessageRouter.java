@@ -27,6 +27,27 @@ public abstract class MessageRouter {
      */
     protected byte[] _clientGUID;
 
+    /**
+     * The SecretKey used for QueryKey generation.
+     */
+    protected QueryKey.SecretKey _secretKey;
+    /**
+     * The LAST SecretKey used for QueryKey generation.  Used to honor older
+     * (but not too old) requests.
+     */
+    protected QueryKey.SecretKey _lastSecretKey;
+
+    /**
+     * The SecretPad used for QueryKey generation.
+     */
+    protected QueryKey.SecretPad _secretPad;
+    /**
+     * The LAST SecretPad used for QueryKey generation.  Used to honor older
+     * (but not too old) requests.
+     */
+    protected QueryKey.SecretPad _lastSecretPad;
+
+
 	/**
 	 * Reference to the <tt>ReplyHandler</tt> for messages intended for 
 	 * this node.
@@ -95,6 +116,8 @@ public abstract class MessageRouter {
             //This should never happen! But if it does, we can recover.
             _clientGUID = Message.makeGuid();
         }
+        _secretKey = QueryKey.generateSecretKey();
+        _secretPad = QueryKey.generateSecretPad();
     }
 
     /**
@@ -190,14 +213,18 @@ public abstract class MessageRouter {
 		UDPReplyHandler handler = new UDPReplyHandler(address, port);
 		
         if (msg instanceof QueryRequest) {
-			sendAcknowledgement(datagram, msg.getGUID());
-			if(RECORD_STATS)
-				ReceivedMessageStatHandler.UDP_QUERY_REQUESTS.addMessage(msg);
-			// a TTL above zero may indicate a malicious client, as UDP
-			// messages queries should not be sent with TTL above 1.
-			//if(msg.getTTL() > 0) return;
-            handleUDPQueryRequestPossibleDuplicate((QueryRequest)msg, 
-												   handler);
+            //TODO: compare QueryKey with old generation params.  if it matches
+            //send a new one generated with current params 
+            if (hasValidQueryKey(address, port, (QueryRequest) msg)) {
+                sendAcknowledgement(datagram, msg.getGUID());
+                // a TTL above zero may indicate a malicious client, as UDP
+                // messages queries should not be sent with TTL above 1.
+                //if(msg.getTTL() > 0) return;
+                handleUDPQueryRequestPossibleDuplicate((QueryRequest)msg, 
+                                                       handler);
+            }
+            if(RECORD_STATS)
+                ReceivedMessageStatHandler.UDP_QUERY_REQUESTS.addMessage(msg);
 		} else if (msg instanceof QueryReply) {			
 			if(RECORD_STATS)
 				ReceivedMessageStatHandler.UDP_QUERY_REPLIES.addMessage(msg);
@@ -216,6 +243,19 @@ public abstract class MessageRouter {
 				ReceivedMessageStatHandler.UDP_PUSH_REQUESTS.addMessage(msg);
 			handlePushRequest((PushRequest)msg, handler);
 		}
+    }
+
+    /**
+     * Returns true if the Query has a valid QueryKey.  false if it isn't
+     * present or valid.
+     */
+    protected boolean hasValidQueryKey(InetAddress ip, int port, 
+                                       QueryRequest qr) {
+        if (qr.getQueryKey() == null)
+            return false;
+        QueryKey computedQK = QueryKey.getQueryKey(ip, port, _secretKey,
+                                                   _secretPad);
+        return qr.getQueryKey().equals(computedQK);
     }
 
 	/**
