@@ -117,10 +117,27 @@ public final class MessagesSupportedVMP extends VendorMessagePayload {
         return supportsMessage(F_GTKG_VENDOR_ID, F_UDP_CONNECT_BACK);
     }
 
+    // override super
+    public boolean equals(Object other) {
+        // basically two of these messages are the same if the support the same
+        // messages
+        if (other instanceof MessagesSupportedVMP) {
+            MessagesSupportedVMP vmp = (MessagesSupportedVMP) other;
+            return (_messagesSupported.equals(vmp._messagesSupported));
+        }
+        return false;
+    }
+    
+    
+    // override super
+    public int hashCode() {
+        return _messagesSupported.hashCode();
+    }
+    
 
     /** Container for vector elements.
      */  
-    private static class SupportedMessageBlock {
+    static class SupportedMessageBlock {
         byte[] _vendorID = null;
         int _selector = 0;
         int _version = 0;
@@ -141,7 +158,7 @@ public final class MessagesSupportedVMP extends VendorMessagePayload {
             _vendorID = new byte[4];
             encodedBlock.read(_vendorID, 0, _vendorID.length);
 
-            _selector = ByteOrder.ubytes2int(ByteOrder.leb2short(encodedBlock));
+            _selector =ByteOrder.ubytes2int(ByteOrder.leb2short(encodedBlock));
             _version = ByteOrder.ubytes2int(ByteOrder.leb2short(encodedBlock));
         }
 
@@ -167,6 +184,26 @@ public final class MessagesSupportedVMP extends VendorMessagePayload {
                 return _version;
             else 
                 return -1;
+        }
+
+        public boolean equals(Object other) {
+            if (other instanceof SupportedMessageBlock) {
+                SupportedMessageBlock vmp = (SupportedMessageBlock) other;
+                return ((_selector == vmp._selector) &&
+                        (_version == vmp._version) &&
+                        (Arrays.equals(_vendorID, vmp._vendorID))
+                        );
+            }
+            return false;
+        }
+        
+        public int hashCode() {
+            int hashCode = 0;
+            hashCode += 37*_version;
+            hashCode += 37*_selector;
+            for (int i = 0; i < _vendorID.length; i++)
+                hashCode += (int) 37*_vendorID[i];
+            return hashCode;
         }
     }
 
