@@ -378,6 +378,8 @@ public class HTTPDownloader implements BandwidthTracker {
         int maxPollTime = -1;
         //        boolean done = false;
         String str = _byteReader.readLine();
+        if(str==null)
+            throw new IOException();
         while(!str.equals("")) {//still need info & headers exist
             StringTokenizer tokenizer = new StringTokenizer(str," ,:=");
             if(!tokenizer.hasMoreTokens()) { //no tokens on new line??
