@@ -463,6 +463,69 @@ public final class ServerSidePushProxyTest extends BaseTestCase {
         
     }
     
+
+    public void testBadPushProxyRequest() throws Exception {
+        Message m = null;
+        String result = null;
+
+        Socket s = new Socket("localhost", PORT);
+        BufferedReader in = 
+            new BufferedReader(new InputStreamReader(s.getInputStream()));
+        BufferedWriter out = 
+            new BufferedWriter(new OutputStreamWriter(s.getOutputStream()));
+
+        // first test a GET with a unrecognized guid
+        out.write("GET /gnutella/pushproxy?ServerID=");
+        out.write((new GUID(GUID.makeGuid())).toHexString());
+        out.write(" HTTP/1.1\r\n");
+        out.write("X-Node:127.0.0.1:6346\r\n");
+        out.write("\r\n");
+        out.flush();
+
+        // check opcode - less important, but might as well
+        result = in.readLine();
+        assertTrue(result, (result.indexOf("410") > -1));
+        // clear out other responses
+        while (in.readLine() != null) ;
+
+        // leaf should NOT get PushRequest
+        try {
+            do {
+                m = LEAF.receive(TIMEOUT);
+                assertTrue(!(m instanceof PushRequest));
+            } while (true) ;
+        }
+        catch (InterruptedIOException expected) {}
+
+        // now test a HEAD with a bad IP
+        s = new Socket("localhost", PORT);
+        in = new BufferedReader(new InputStreamReader(s.getInputStream()));
+        out = new BufferedWriter(new OutputStreamWriter(s.getOutputStream()));
+
+        out.write("HEAD /gnutella/pushproxy?ServerID=");
+        out.write((new GUID(clientGUID)).toHexString());
+        out.write(" HTTP/1.1\r\n");
+        out.write("X-Node:www.crapalapadapa.com:6346\r\n");
+        out.write("\r\n");
+        out.flush();
+
+        // check opcode - less important, but might as well
+        result = in.readLine();
+        assertTrue(result, (result.indexOf("400") > -1));
+        // clear out other responses
+        while (in.readLine() != null) ;
+
+        // leaf should NOT get PushRequest
+        try {
+            do {
+                m = LEAF.receive(TIMEOUT);
+                assertTrue(!(m instanceof PushRequest));
+            } while (true) ;
+        }
+        catch (InterruptedIOException expected) {}
+
+
+    }
     
 
 }
