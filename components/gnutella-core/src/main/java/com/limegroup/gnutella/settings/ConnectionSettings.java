@@ -166,7 +166,8 @@ public final class ConnectionSettings extends LimeProps {
      * Forces IP address to the given address.
      */
     public static final StringSetting FORCED_IP_ADDRESS_STRING =
-        FACTORY.createStringSetting("FORCED_IP_ADDRESS_STRING", "0.0.0.0");
+        (StringSetting)FACTORY.createStringSetting("FORCED_IP_ADDRESS_STRING", "0.0.0.0").
+        setPrivate(true);
     
     /**
      * The port to use when forcing the ip address.

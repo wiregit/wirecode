@@ -21,13 +21,14 @@ public final class FileSetting extends Setting {
 	 */
 	FileSetting(Properties defaultProps, Properties props, String key, 
                                                          File defaultFile) {
-		super(defaultProps, props, key, defaultFile.getAbsolutePath(), null); 
+		this(defaultProps, props, key, defaultFile, null); 
 	}
 
 
 	FileSetting(Properties defaultProps, Properties props, String key, 
                 File defaultFile, String simppKey) {
 		super(defaultProps, props, key, defaultFile.getAbsolutePath(), simppKey);
+		setPrivate(true);
 	}
 
         

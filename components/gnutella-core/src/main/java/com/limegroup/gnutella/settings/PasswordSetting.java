@@ -7,7 +7,7 @@ import java.util.Properties;
  */
 public final class PasswordSetting extends Setting {
 
-    String value;
+    private String value;
 
     /**
      * Creates a new <tt>PasswordSetting</tt> instance with the specified key
@@ -18,12 +18,13 @@ public final class PasswordSetting extends Setting {
      */
     PasswordSetting(Properties defaultProps, Properties props, String key,
             String defaultStr) {
-        super(defaultProps, props, key, defaultStr, null);
+        this(defaultProps, props, key, defaultStr, null);
     }
 
     PasswordSetting(Properties defaultProps, Properties props, String key,
             String defaultStr, String simppKey) {
         super(defaultProps, props, key, defaultStr, simppKey);
+        setPrivate(true);
     }
 
     /**

@@ -13,7 +13,7 @@ public class DaapSettings extends LimeProps {
      * Whether or not DAAP should be enabled
      */
     public static BooleanSetting DAAP_ENABLED =
-	FACTORY.createBooleanSetting("DAAP_ENABLED", true);
+	    FACTORY.createBooleanSetting("DAAP_ENABLED", true);
 	
     
     /**
@@ -27,7 +27,9 @@ public class DaapSettings extends LimeProps {
      * The name of the Library.
      */
     public static StringSetting DAAP_LIBRARY_NAME =
-	FACTORY.createStringSetting("DAAP_LIBRARY_NAME", "Shared LimeWire Tunes");
+	    (StringSetting)FACTORY.createStringSetting("DAAP_LIBRARY_NAME",
+	            System.getProperty("user.name", "Unknown") + "'s LimeWire Tunes").
+	    setPrivate(true);
 	
     /**
      * The maximum number of simultaneous connections. Note: There
@@ -41,7 +43,7 @@ public class DaapSettings extends LimeProps {
      * The port where the DaapServer is running
      */
     public static IntSetting DAAP_PORT =
-	FACTORY.createIntSetting("DAAP_PORT", 5214);
+	    FACTORY.createIntSetting("DAAP_PORT", 5214);
 	
     /**
      * The fully qualified service type name <code>_daap._tcp.local.</code>.
@@ -58,7 +60,9 @@ public class DaapSettings extends LimeProps {
      * DAAP_TYPE_NAME.getValue()</code>
      */
 	public static StringSetting DAAP_SERVICE_NAME =
-		FACTORY.createStringSetting("DAAP_SERVICE_NAME", "Shared LimeWire Tunes");
+		(StringSetting)FACTORY.createStringSetting("DAAP_SERVICE_NAME",
+		    System.getProperty("user.name", "Unknown") + "'s LimeWire Tunes").
+		setPrivate(true);
 	
     /**
      * This isn't important
@@ -76,13 +80,13 @@ public class DaapSettings extends LimeProps {
      * Whether or not password protection is enabled
      */
     public static BooleanSetting DAAP_REQUIRES_PASSWORD =
-	FACTORY.createBooleanSetting("DAAP_REQUIRES_PASSWORD", false);
+	    FACTORY.createBooleanSetting("DAAP_REQUIRES_PASSWORD", false);
     
     /**
      * The password in clear text. A security hazard?
      */
     public static PasswordSetting DAAP_PASSWORD =
-	FACTORY.createPasswordSetting("DAAP_PASSWORD", "");
+	    FACTORY.createPasswordSetting("DAAP_PASSWORD", "");
     
     /**
      * Use either BIO or NIO (default) for DAAP

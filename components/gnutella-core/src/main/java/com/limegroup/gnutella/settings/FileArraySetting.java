@@ -22,12 +22,13 @@ public class FileArraySetting extends Setting {
 	 */
 	FileArraySetting(Properties defaultProps, Properties props, String key, 
                                                          File[] defaultValue) {
-		super(defaultProps, props, key, decode(defaultValue), null);
+		this(defaultProps, props, key, defaultValue, null);
 	}
         
 	FileArraySetting(Properties defaultProps, Properties props, String key, 
                      File[] defaultValue, String simppKey) {
 		super(defaultProps, props, key, decode(defaultValue), simppKey);
+		setPrivate(true);
     }
 
 

@@ -35,6 +35,12 @@ public abstract class Setting {
 	 * Value for whether or not this setting should always save.
 	 */
 	private boolean _alwaysSave = false;
+	
+	/**
+	 * Setting for whether or not this setting is private and should
+	 * not be reported in bug reports.
+	 */
+	private boolean _isPrivate = false;
 
 
     /**
@@ -106,6 +112,21 @@ public abstract class Setting {
     public Setting setAlwaysSave(boolean save) {
         _alwaysSave = save;
         return this;
+    }
+    
+    /**
+     * Sets whether or not this setting should be reported in bug reports.
+     */
+    public Setting setPrivate(boolean priv) {
+        _isPrivate = priv;
+        return this;
+    }
+    
+    /**
+     * Determines whether or not a setting is private.
+     */
+    public boolean isPrivate() {
+        return _isPrivate;
     }
 	
     /**
