@@ -29,7 +29,7 @@ public class QueuedUploadState implements HTTPMessage {
         Assert.that(position!=-1);
         str = "HTTP/1.1 503 Service Unavailable\r\n";
         ostream.write(str.getBytes());
-        str = "X-Queue: position="+position+
+        str = "X-Queue: position="+(position+1)+
         ", pollMin="+(UploadManager.MIN_POLL_TIME/1000)+/*mS to S*/
         ", pollMax="+(UploadManager.MAX_POLL_TIME/1000)+/*mS to S*/"\r\n";
         ostream.write(str.getBytes());

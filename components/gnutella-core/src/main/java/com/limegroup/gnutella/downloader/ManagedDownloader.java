@@ -422,6 +422,7 @@ public class ManagedDownloader implements Downloader, Serializable {
 		this.fileManager=fileManager;
         this.callback=callback;
         dloaders=new LinkedList();
+        threads=new ArrayList();
 		chatList=new DownloadChatList();
         browseList=new DownloadBrowseHostList();
         stealLock = new Object();
@@ -1159,7 +1160,6 @@ public class ManagedDownloader implements Downloader, Serializable {
         //INVARIANT: all intervals are disjoint and non-empty
         synchronized(this) {
             needed=new ArrayList(); 
-            threads=new ArrayList();
             {//all variables in this block have limited scope
                 RemoteFileDesc rfd=(RemoteFileDesc)files.get(0);
                 File incompleteFile=incompleteFileManager.getFile(rfd);
