@@ -12,6 +12,8 @@ import junit.framework.*;
  */
 public class XMLDocSerializerTest extends TestCase {
 
+    final String fileLocation = "com/limegroup/gnutella/xml/";
+
     public XMLDocSerializerTest(String name) {
         super(name);
     }
@@ -42,14 +44,14 @@ public class XMLDocSerializerTest extends TestCase {
     /* Test the first version of LimeXMLDocument, versions 2.4.4 and preceding.
      */
     public void test244Pre() {
-        basicTest(new File("audio244Pre.sxml"));
+        basicTest(new File(fileLocation + "audio244Pre.sxml"));
     }
 
     /* This method should be changed as new versions are added.  And the current
      * version should be added as a new test.
      */
     public void testCurrent() {
-        basicTest(new File("audio.sxml"));
+        basicTest(new File(fileLocation + "audio.sxml"));
     }
 
 

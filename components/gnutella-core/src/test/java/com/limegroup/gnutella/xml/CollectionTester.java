@@ -11,11 +11,12 @@ import junit.framework.*;
 public class CollectionTester extends TestCase {
 
     final Set files = new HashSet();
-    final File mason = new File("nullfile.null");
-    final File vader = new File("vader.mp3");
-    final File swing = new File("swing.mp3");
-    final String schemaURI =  "http://www.limewire.com/schemas/audio.xsd";
-    final String schemaURIVideo =  "http://www.limewire.com/schemas/video.xsd";
+    final String fileLocation = "com/limegroup/gnutella/xml/";
+    final File mason = new File(fileLocation + "nullfile.null");
+    final File vader = new File(fileLocation + "vader.mp3");
+    final File swing = new File(fileLocation + "swing.mp3");
+    final String schemaURI = "http://www.limewire.com/schemas/audio.xsd";
+    final String schemaURIVideo = "http://www.limewire.com/schemas/video.xsd";
     final MetaFileManager mfm = new MFMStub();
     final boolean audio = true;
 
@@ -251,10 +252,8 @@ public class CollectionTester extends TestCase {
                            keywords.contains("susheel")  &&
                            keywords.contains("daswani") )
                           );
-
         
-
-        clearDirectory();
+        restoreDirectory();
     }
 
 
@@ -270,12 +269,22 @@ public class CollectionTester extends TestCase {
 
 
     private void populateDirectory() {
-        File audioFile = new File("audio.collection");
-        File videoFile = new File("video.collection");
+        File audioFile = new File(fileLocation + "audio.collection");
+        File videoFile = new File(fileLocation + "video.collection");
         File newAudio  = new File("lib/xml/data/audio.sxml");
         File newVideo  = new File("lib/xml/data/video.sxml");
         audioFile.renameTo(newAudio);
         videoFile.renameTo(newVideo);
+    }
+
+
+    private void restoreDirectory() {
+        File audioFile = new File(fileLocation + "audio.collection");
+        File videoFile = new File(fileLocation + "video.collection");
+        File newAudio  = new File("lib/xml/data/audio.sxml");
+        File newVideo  = new File("lib/xml/data/video.sxml");
+        newAudio.renameTo(audioFile);
+        newVideo.renameTo(videoFile);
     }
 
 
