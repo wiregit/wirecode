@@ -5,6 +5,7 @@ import com.limegroup.gnutella.util.*;
 import java.util.zip.*;
 import java.util.*;
 import java.io.*;
+import java.awt.*;
 
 /**
  * Class for handling all LimeWire settings that are stored to disk.  To
@@ -40,6 +41,11 @@ public final class SettingsFactory {
 		reload(settingsFile);
 	}
 
+	/**
+	 * Factory method for creating a <tt>SettingsFactory</tt> instance for the
+	 * specified properties file and with the specified default <tt>Properties</tt>
+	 * instance.
+	 */
 	static SettingsFactory createFromFile(File file, Properties defaultProps) {
 		return new SettingsFactory(file, defaultProps, new Properties(defaultProps));
 	}
@@ -128,5 +134,16 @@ public final class SettingsFactory {
 		if(!parent.isDirectory()) parent.mkdirs();
 
 		return new FileSetting(DEFAULT_PROPS, PROPS, key, defaultValue);
+	}
+
+	/**
+	 * Creates a new <tt>ColorSetting</tt> instance with the specified
+	 * key and default value.
+	 *
+	 * @param key the key for the setting
+	 * @param defaultValue the default value for the setting
+	 */
+	public ColorSetting createColorSetting(String key, Color defaultValue) {
+		return new ColorSetting(DEFAULT_PROPS, PROPS, key, defaultValue);
 	}
 }
