@@ -1013,8 +1013,8 @@ public class ConnectionManager {
      * Updates the addresses in the hostCache by parsing the passed string
      * @param hostAddresses The string representing the addressess to be 
      * added. It should be in the form:
-     * <p> IP Address:Port [; IPAddress:Port]* 
-     * <p> e.g. 123.4.5.67:6346; 234.5.6.78:6347 
+     * <p> IP Address:Port [,IPAddress:Port]* 
+     * <p> e.g. 123.4.5.67:6346,234.5.6.78:6347 
      * @param connection The connection on which we received the addresses
      */
     private void updateHostCache(Properties headers, ManagedConnection
@@ -1025,7 +1025,8 @@ public class ConnectionManager {
          if(hostAddresses != null)
          {
             //tokenize to retrieve individual addresses
-            StringTokenizer st = new StringTokenizer(hostAddresses,";");
+            StringTokenizer st = new StringTokenizer(hostAddresses,
+                Constants.HTTP_ENTRY_SEPARATOR);
             //iterate over the tokens
             while(st.hasMoreTokens()){
                 //get an address
@@ -1043,7 +1044,8 @@ public class ConnectionManager {
          if(hostAddresses != null)
          {
             //tokenize to retrieve individual addresses
-            StringTokenizer st = new StringTokenizer(hostAddresses,";");
+            StringTokenizer st = new StringTokenizer(hostAddresses,
+                Constants.HTTP_ENTRY_SEPARATOR);
             //iterate over the tokens
             while(st.hasMoreTokens()){
                 //get an address

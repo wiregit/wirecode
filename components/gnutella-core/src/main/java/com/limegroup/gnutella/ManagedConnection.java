@@ -803,8 +803,8 @@ public class ManagedConnection
      * be connected thru gnutella. Also includes the addresses of the
      * supernodes it is connected to
      * <p> Host address string returned is in the form:
-     * <p> IP Address:Port [; IPAddress:Port]* 
-     * <p> e.g. 123.4.5.67:6346; 234.5.6.78:6347
+     * <p> IP Address:Port [,IPAddress:Port]* 
+     * <p> e.g. 123.4.5.67:6346,234.5.6.78:6347
      */
     private static void addHostAddresses(Properties properties, 
         ConnectionManager manager){
@@ -816,8 +816,8 @@ public class ManagedConnection
             Endpoint endpoint =(Endpoint)iter.next();
             //if the first endpoint that we are adding
             if(!isFirstHost){
-                //append semicolon to separate the entries
-                hostString.append(";");
+                //append separator to separate the entries
+                hostString.append(Constants.HTTP_ENTRY_SEPARATOR);
             }else{
                 //unset the flag
                 isFirstHost = false;
@@ -847,8 +847,8 @@ public class ManagedConnection
             Endpoint endpoint =(Endpoint)iter.next();
             //if the first endpoint that we are adding
             if(!isFirstHost){
-                //append semicolon to separate the entries
-                hostString.append(";");
+                //append separator to separate the entries
+                hostString.append(Constants.HTTP_ENTRY_SEPARATOR);
             }else{
                 //unset the flag
                 isFirstHost = false;
