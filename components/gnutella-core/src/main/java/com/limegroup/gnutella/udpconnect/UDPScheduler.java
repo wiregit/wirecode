@@ -35,6 +35,8 @@ public class UDPScheduler extends ManagedThread {
 
     private boolean             _started;
 
+    private Thread              _myThread;
+
 	/** Keep track of a singleton instance */
     private static UDPScheduler _instance    = null;
 
@@ -88,14 +90,33 @@ public class UDPScheduler extends ManagedThread {
     /**
      *  Notify the scheduler that a connection has a new scheduled event
      */
-	public synchronized void scheduleEvent(UDPTimerEvent evt) {
-		if ( evt.getEventTime() < _scheduledEvent.getEventTime() ) {
-			_scheduledEvent      = evt;
-			if (_waiting) {
-				interrupt();
-			}
-		}
+	public void scheduleEvent(UDPTimerEvent evt) {
+        // This is a shortcut test for a fix of synchronization here.
+        EThread ethread = new EThread(evt);
+        ethread.start();
 	}
+
+    /**
+     *  Shortcut test for a second thread to deal with the new schedule handoff
+     */
+    class EThread extends Thread {
+        UDPTimerEvent evt;
+
+        public EThread(UDPTimerEvent evt) {
+            this.evt = evt;
+        }
+        
+        public void run() {
+            synchronized(UDPScheduler.this) {
+                if ( evt.getEventTime() < _scheduledEvent.getEventTime() ) {
+                    _scheduledEvent      = evt;
+                    if (_waiting) {
+                        _myThread.interrupt();
+                    }
+                }
+            }
+        }
+    }
 
     /**
 	 *  Wait for scheduled events on UDPTimerEvent, 
@@ -103,6 +124,8 @@ public class UDPScheduler extends ManagedThread {
      */
  	public void managedRun() {
 		long  waitTime;
+
+        _myThread = Thread.currentThread();
 	
         // Specify that an interrupt is okay
 		_waiting = true;
