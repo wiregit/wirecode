@@ -495,16 +495,22 @@ public class RemoteFileDesc implements Serializable {
 		if(o == this) return true;
         if (! (o instanceof RemoteFileDesc))
             return false;
-        RemoteFileDesc other=(RemoteFileDesc)o;        
-        return nullEquals(_host, other._host) &&
-               _port == other._port &&
-               nullEquals(_filename, other._filename) &&
-               _index == other._index &&
-               byteArrayEquals(_clientGUID, other._clientGUID) &&
-               _speed == other._speed &&
-               _size == other._size &&
-               nullEquals(getXMLDoc(), other.getXMLDoc()) &&
-               nullEquals(_urns, other._urns);
+        RemoteFileDesc other=(RemoteFileDesc)o;
+        if (! (nullEquals(_host, _other._host) && (_port==other._port)) )
+            return false;
+
+        if( (NetworkUtils.isPrivateAddress(_host) ||
+             NetworkUtils.isPrivateAddress(other._host)) && 
+            !byteArrayEquals(_clientGUID, other._clientGUID) )
+            return false;
+
+        if (_size != other._size)
+            return false;
+
+        if (_urns.isEmpty() && other._urns.isEmpty())
+            return nullEquals(_filename, other._filename);
+        else
+            nullEquals(_urns, other._urns);
     }
     
     private boolean nullEquals(Object one, Object two) {
