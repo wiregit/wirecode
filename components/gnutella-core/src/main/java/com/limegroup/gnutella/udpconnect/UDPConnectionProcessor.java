@@ -93,7 +93,7 @@ public class UDPConnectionProcessor {
     private static final long MAX_MESSAGE_WAIT_TIME   = 20 * 1000;
 
     /** Define the minimum wait time between ack timeout events */
-    private static final long MIN_ACK_WAIT_TIME       = 2;
+    private static final long MIN_ACK_WAIT_TIME       = 5;
 
     /** Define the size of a small send window for increasing wait time */
     private static final long SMALL_SEND_WINDOW       = 4;
@@ -687,8 +687,8 @@ log2("send :"+msg+" ip:"+_ip+" p:"+_port+" t:"+_lastReceivedTime);
             int        blockNum;
             int        numResent = 0;
 
-            // Resend up to 2
-            for (int i = 0; i < 2; i++) {
+            // Resend up to 1
+            for (int i = 0; i < 1; i++) {
 
                 //blockNum = (start + i) % DataWindow.MAX_SEQUENCE_NUMBER;
 
