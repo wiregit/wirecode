@@ -212,6 +212,13 @@ class RemoteFileDescGrouper implements Serializable {
         return false;
     }
 
+    synchronized URN getURNForBucket(int n) {
+        if (n <0 || n>=buckets.size())
+            throw new IllegalArgumentException();
+        return sha1s[n];
+    }
+
+
     /**
      * True if the URNS are equals.
      * @param urn1 a SHA1 URN, or null

@@ -216,6 +216,14 @@ public class ManagedDownloader implements Downloader, Serializable {
      *  them from allFiles to support resumes.)
      */
     RemoteFileDescGrouper buckets;
+    
+    /**
+     * The index of the bucket we are trying to download from. We use it
+     * to find the hash of the bucket we are downloading from - so that 
+     * we can verify that we downloaded the correct file, once the download is
+     * complete
+     */
+    private int bucketNumber;
 
     /** If started, the thread trying to coordinate all downloads.  
      *  Otherwise null. */
@@ -760,8 +768,10 @@ public class ManagedDownloader implements Downloader, Serializable {
                 setState(QUEUED);
                 manager.waitForSlot(this);
                 boolean waitForRetry=false;
+                bucketNumber = 0;//reset
                 try {
-                    for (Iterator iter=buckets.buckets(); iter.hasNext(); ) {
+                    for (Iterator iter=buckets.buckets(); iter.hasNext(); 
+                                                              bucketNumber++) {
                         //when are are done tyring with a bucket cleanup
                         cleanup();
                         files =(List)iter.next();
@@ -988,8 +998,34 @@ public class ManagedDownloader implements Downloader, Serializable {
             throw new InterruptedException();
         if (status!=COMPLETE)
             return status;
-
-        //3. Move to library.  
+        
+        //3. Find out the hash of the file and verify that its the same
+        // as the hash of the bucket it was downloaded from.
+        //If the hash is different, we should ask the user about corruption
+        //if the user has not been asked before.               
+        URN bucketHash = buckets.getURNForBucket(bucketNumber);
+        URN fileHash=null;
+        try {
+            fileHash = URN.createSHA1Urn(incompleteFile);
+        } catch(IOException ignored) {}
+        if(bucketHash!=null) { //if bucketHash==null, we cannot check
+            //if fileHash == null, it will be a mismatch
+            synchronized(corruptStateLock) {
+                if(!fileHash.equals(bucketHash))
+                    promptAboutCorruptDownload();
+                try {
+                    while(corruptState==CORRUPT_WAITING_STATE)
+                        corruptStateLock.wait();
+                } catch(InterruptedException ignored2) {
+                    //interrupted while waiting for user. do nothing.
+                }
+            }
+            if (corruptState==CORRUPT_STOP_STATE) {
+                cleanupCorrupt(incompleteFile, completeFile.getName());
+                return CORRUPT_FILE;
+            } 
+        }
+        //4. Move to library.  
         //System.out.println("MANAGER: completed");
         //Delete target.  If target doesn't exist, this will fail silently.
         completeFile.delete();

@@ -42,4 +42,5 @@ public class ActivityCallbackStub implements ActivityCallback {
         dloader.discardCorruptDownload(delCorrupt);
     }    
     public void browseHostFailed(GUID guid) {};
+    public void setAnnotateEnabled(boolean enabled) {};
 }
