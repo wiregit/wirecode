@@ -2618,8 +2618,11 @@ public abstract class MessageRouter {
             
             // state changed? don't bother the ultrapeer with information
             // that it already knows. we need to inform new ultrapeers, though.
+            final List connections = _manager.getInitializedConnections();
+            final HopsFlowVendorMessage hops = 
+                new HopsFlowVendorMessage(isBusy ? BUSY_HOPS_FLOW :
+                                          FREE_HOPS_FLOW);
             if (isBusy == _oldBusyState) {
-                List connections = _manager.getInitializedConnections();
                 for (int i = 0; i < connections.size(); i++) {
                     ManagedConnection c =
                         (ManagedConnection)connections.get(i);
@@ -2631,17 +2634,14 @@ public abstract class MessageRouter {
                         && c.getConnectionTime() + 1.25 * HOPS_FLOW_INTERVAL 
                             > System.currentTimeMillis()
                         && c.isClientSupernodeConnection() )
-                        c.send(new HopsFlowVendorMessage(
-                            isBusy ? BUSY_HOPS_FLOW : FREE_HOPS_FLOW));
+                        c.send(hops);
                 }
             } else { 
                 _oldBusyState = isBusy;
-                List connections = _manager.getInitializedConnections();
                 for (int i = 0; i < connections.size(); i++) {
                     ManagedConnection c = (ManagedConnection)connections.get(i);
                     if (c != null && c.isClientSupernodeConnection())
-                        c.send(new HopsFlowVendorMessage(
-                            isBusy ? BUSY_HOPS_FLOW : FREE_HOPS_FLOW));
+                        c.send(hops);
                 }
             }
         }
