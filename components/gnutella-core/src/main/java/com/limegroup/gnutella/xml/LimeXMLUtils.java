@@ -200,4 +200,47 @@ public class LimeXMLUtils
                 xml.length(), "xml result", xml);
     }
     
+    /**
+     * Reads all the bytes from the passed input stream till end of stream
+     * reached.
+     * @param in The input stream to read from
+     * @return array of bytes read
+     * @exception IOException If any I/O exception occurs while reading data
+     */
+    public static byte[] readFully(InputStream in) throws IOException
+    {
+        //create a new byte array stream to store the read data
+        ByteArrayOutputStream byteArray = new ByteArrayOutputStream();
+        
+        //read the bytes till EOF
+        byte[] buffer = new byte[1024];
+        int bytesRead;
+        while((bytesRead = in.read(buffer)) != -1)
+        {
+            //append the bytes read to the byteArray buffer
+            byteArray.write(buffer,0,bytesRead);
+        }
+        
+        //return the bytes read
+        return byteArray.toByteArray();
+    }
+    
+    /**
+     * It converts the passed aggregate XML Document (where root node 
+     * has multiple children of same type, to represent multiple results)
+     * to individual documents (in each of which the root node 
+     * will have only one child). So, in a way, the aggreate document 
+     * containing multiple results will get converted to multiple individual
+     * result documents
+     * @param aggregateXMLDocument The Aggregate XML document that needs to 
+     * be broken inti simpler documents
+     * @return Array of individual documents after breaking the aggregate
+     * document
+     */
+    public static LimeXMLDocument[] convertAggregateToParts(
+        LimeXMLDocument aggregateXMLDocument)
+    {
+        return null;
+    }
+    
 }
