@@ -5,6 +5,8 @@ import com.sun.java.util.collections.*;
 import java.io.*;
 import java.net.*;
 import java.util.StringTokenizer;
+import com.limegroup.gnutella.util.URLDecoder;
+
 
 /** 
  * The list of all downloads in progress.  DownloadManager has a fixed number of
@@ -401,7 +403,7 @@ public class DownloadManager implements BandwidthTracker {
             if (wordSet.contains(currToken))
                 continue;
             try {
-                Double.parseDouble(currToken);
+                Double d = new Double(currToken);
                 continue;
             }
             catch (NumberFormatException ignored) {}

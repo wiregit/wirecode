@@ -6,6 +6,7 @@ import java.net.*;
 import java.io.*;
 import com.sun.java.util.collections.*;
 import java.util.Date;
+import com.limegroup.gnutella.util.URLDecoder;
 
 /**
  * The list of all the uploads in progress.

@@ -12,6 +12,7 @@ import java.util.Date;
 import com.sun.java.util.collections.*;
 import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.util.StringUtils;
+import com.limegroup.gnutella.util.URLDecoder;
 
 
 public class HTTPUploader implements Uploader {
