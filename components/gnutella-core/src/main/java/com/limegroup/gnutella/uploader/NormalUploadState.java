@@ -1,6 +1,7 @@
 package com.limegroup.gnutella.uploader;
 
 import com.limegroup.gnutella.*;
+import com.limegroup.gnutella.altlocs.*;
 import com.limegroup.gnutella.settings.*;
 import com.limegroup.gnutella.http.*;
 import com.sun.java.util.collections.*;
@@ -111,12 +112,13 @@ public final class NormalUploadState implements HTTPMessage {
 				URN urn = FILE_DESC.getSHA1Urn();
 				if(urn != null) {
 					HTTPUtils.writeHeader(HTTPHeaderName.GNUTELLA_CONTENT_URN, 
-										  urn,
-										  ostream);
+										                          urn, ostream);
 				}
-				if(FILE_DESC.hasAlternateLocations()) {
+                AlternateLocationCollection coll = 
+                                     _uploader.getAlternateLocationCollection();
+				if(coll.getAltLocsSize()>0) {
 					HTTPUtils.writeHeader(HTTPHeaderName.ALT_LOCATION,
-						   _uploader.getAlternateLocationCollection(), ostream);
+                                                                 coll,ostream);
 				}
                 if (FILE_DESC instanceof IncompleteFileDesc) {
                     HTTPUtils.writeHeader(HTTPHeaderName.AVAILABLE_RANGES,

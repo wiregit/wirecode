@@ -1,6 +1,7 @@
 package com.limegroup.gnutella.uploader;
 
 import com.limegroup.gnutella.*;
+import com.limegroup.gnutella.altlocs.*;
 import com.limegroup.gnutella.http.*;
 import com.limegroup.gnutella.util.*;
 import java.io.*;
@@ -37,10 +38,12 @@ public class QueuedUploadState implements HTTPMessage {
                 HTTPUtils.writeHeader(HTTPHeaderName.GNUTELLA_CONTENT_URN,
                                       FILE_DESC.getSHA1Urn(),
                                       ostream);
-                if(FILE_DESC.hasAlternateLocations()) {
-                    HTTPUtils.writeHeader(HTTPHeaderName.ALT_LOCATION,
-                        _uploader.getAlternateLocationCollection(), ostream);
-                }
+                AlternateLocationCollection coll = 
+                                _uploader.getAlternateLocationCollection();
+				if(coll.getAltLocsSize() > 0) {
+					HTTPUtils.writeHeader(HTTPHeaderName.ALT_LOCATION,
+                                                                 coll,ostream);
+				}
                 if (FILE_DESC instanceof IncompleteFileDesc) {
                     HTTPUtils.writeHeader(HTTPHeaderName.AVAILABLE_RANGES,
                                           ((IncompleteFileDesc)FILE_DESC),

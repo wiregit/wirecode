@@ -1,6 +1,7 @@
 package com.limegroup.gnutella.uploader;
 
 import com.limegroup.gnutella.*;
+import com.limegroup.gnutella.altlocs.*;
 import com.limegroup.gnutella.http.*;
 import java.io.*;
 import com.limegroup.gnutella.util.CommonUtils;
@@ -18,7 +19,7 @@ public class UnavailableRangeUploadState implements HTTPMessage {
 	 */
 	private final FileDesc FILE_DESC;
 
-    private final HTTPUploader _uploader;
+    private final HTTPUploader UPLOADER;
 
 	/**
 	 * The error message to send in the message body.
@@ -33,8 +34,8 @@ public class UnavailableRangeUploadState implements HTTPMessage {
 	 * @param fd the <tt>FileDesc</tt> for the upload
 	 */
 	public UnavailableRangeUploadState(HTTPUploader uploader) {
-        _uploader = uploader;
-		FILE_DESC = _uploader.getFileDesc();
+        UPLOADER = uploader;
+		FILE_DESC = UPLOADER.getFileDesc();
 	}
 
 	public void writeMessageHeaders(OutputStream ostream) throws IOException {
@@ -54,9 +55,11 @@ public class UnavailableRangeUploadState implements HTTPMessage {
 				HTTPUtils.writeHeader(HTTPHeaderName.GNUTELLA_CONTENT_URN,
 									  sha1,
 									  ostream);
-				if(FILE_DESC.hasAlternateLocations()) {
+                AlternateLocationCollection coll = 
+                                     UPLOADER.getAlternateLocationCollection();
+				if(coll.getAltLocsSize()>0) {
 					HTTPUtils.writeHeader(HTTPHeaderName.ALT_LOCATION,
-						  _uploader.getAlternateLocationCollection(), ostream);
+                                                                 coll,ostream);
 				}
 			}
             if (FILE_DESC instanceof IncompleteFileDesc) {

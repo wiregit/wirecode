@@ -1,6 +1,7 @@
 package com.limegroup.gnutella.uploader;
 
 import com.limegroup.gnutella.*;
+import com.limegroup.gnutella.altlocs.*;
 import com.limegroup.gnutella.http.*;
 import java.io.*;
 import com.limegroup.gnutella.util.CommonUtils;
@@ -54,9 +55,11 @@ public class LimitReachedUploadState implements HTTPMessage {
 				HTTPUtils.writeHeader(HTTPHeaderName.GNUTELLA_CONTENT_URN,
 									  sha1,
 									  ostream);
-				if(FILE_DESC.hasAlternateLocations()) {
+                AlternateLocationCollection coll = 
+                                    UPLOADER.getAlternateLocationCollection();
+				if(coll.getAltLocsSize()>0) {
 					HTTPUtils.writeHeader(HTTPHeaderName.ALT_LOCATION,
-						   UPLOADER.getAlternateLocationCollection(),ostream);
+                                                                 coll,ostream);
 				}
                 if (FILE_DESC instanceof IncompleteFileDesc) {
                     HTTPUtils.writeHeader(HTTPHeaderName.AVAILABLE_RANGES,
