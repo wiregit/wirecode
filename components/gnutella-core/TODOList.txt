@@ -27,7 +27,7 @@ accepted.
 
 --------------------------------------------------------------------------------
 Date Posted: 9/30/02
-Date Resolved: 
+Date Resolved: 9/30/02 (recheck if spec changes)
 
 Does PingReply have a accurate GGEP extension for GUESS?  Does it conform
 to the latest version of the GUESS spec?
