@@ -397,6 +397,10 @@ public abstract class MessageRouter {
         //any handshake pings.  Otherwise we'll think all clients are old
         //clients.
 		//forwardQueryRouteTables();
+        notifyMessageListener(msg);
+    }
+
+    private final void notifyMessageListener(Message msg) {
         MessageListener ml = 
             (MessageListener) _messageListeners.get(new GUID(msg.getGUID()));
         if (ml != null) ml.processMessage(msg);
@@ -488,9 +492,7 @@ public abstract class MessageRouter {
                 ;
             handleStatisticsMessage((StatisticVendorMessage)msg, handler);
         }
-        MessageListener ml = 
-            (MessageListener) _messageListeners.get(new GUID(msg.getGUID()));
-        if (ml != null) ml.processMessage(msg);
+        notifyMessageListener(msg);
     }
     
     /**
@@ -553,9 +555,7 @@ public abstract class MessageRouter {
 				ReceivedMessageStatHandler.MULTICAST_PUSH_REQUESTS.addMessage(msg);
 			handlePushRequest((PushRequest)msg, handler);
 		}
-        MessageListener ml = 
-            (MessageListener) _messageListeners.get(new GUID(msg.getGUID()));
-        if (ml != null) ml.processMessage(msg);
+        notifyMessageListener(msg);
     }
 
 
