@@ -2,9 +2,9 @@ package com.limegroup.gnutella.updates;
 
 import com.limegroup.gnutella.handshaking.*;
 import com.limegroup.gnutella.*;
-import com.limegroup.gnutella.gui.*;
 import com.limegroup.gnutella.util.*;
 import com.limegroup.gnutella.http.*;
+import org.xml.sax.*;
 import java.net.*;
 import java.util.*;
 import java.io.*;
@@ -38,9 +38,9 @@ public class UpdateManager {
             UpdateFileParser parser = new UpdateFileParser(xml);
             latestVersion = parser.getVersion();
             message = parser.getMessage();
-        } catch(Exception e) {//TODO2: Deal w/ each exception separately
+        } catch(Exception e) {//SAXException or IOException, we react similarly
             latestVersion = CommonUtils.getLimeWireVersion();
-        }
+        } 
     }
     
     public static synchronized UpdateManager instance() {
@@ -65,8 +65,7 @@ public class UpdateManager {
         if(isGreaterVersion(myVersion))
             return;
         //OK. myVersion < latestVersion
-        String guiMessage = GUIMediator.getStringResource("UPDATE_MESSAGE")+
-        latestVersion+". "+message;
+        String guiMessage = latestVersion+". "+message;
         gui.notifyUserAboutUpdate(guiMessage, CommonUtils.isPro());
     }
 
@@ -80,56 +79,61 @@ public class UpdateManager {
             public void run() {
                 System.out.println("Sumeet...getting file.");
                 final String UPDATE = "/update.xml";
+                //if we get host or port incorrectly, we will not be able to 
+                //establish a connection and just return, its fail safe. 
                 String ip = c.getOrigHost();
                 int port = c.getOrigPort();
                 byte[] data = null;
-                //TODO1: if the ip and port are invalid, we should return
                 try {
-                URL url = new URL("HTTP",ip,port,UPDATE);
-                HttpURLConnection connection=(HttpURLConnection)
+                    URL url = new URL("HTTP",ip,port,UPDATE);
+                    HttpURLConnection connection=(HttpURLConnection)
                                                       url.openConnection();
-                connection.setUseCaches(false);
-                connection.setRequestProperty("User-Agent",
-                                              CommonUtils.getHttpServer());
-                connection.setRequestProperty(  /*no persistence*/
+                    connection.setUseCaches(false);
+                    connection.setRequestProperty("User-Agent",
+                                                  CommonUtils.getHttpServer());
+                    connection.setRequestProperty(  /*no persistence*/
                     HTTPHeaderName.CONNECTION.httpStringValue(), "close");
-                connection.setRequestProperty("accept","text/html");//??
-                
-                InputStream in = connection.getInputStream();
-                int len = connection.getContentLength();
-                data = new byte[len];
-                for(int i=0; i<len; i++) {
-                    //TODO2: more efficient if I read a chunk at a time
-                    int a = in.read();
-                    if(a==-1)
-                         break;
-                    data[i] = (byte)a;
-                }
-                UpdateMessageVerifier verifier=new UpdateMessageVerifier(data);
-                boolean verified = verifier.verifySource();
-                if(!verified) {
-                    System.out.println("Sumeet: verification failed");
-                    return;
-                }
-                System.out.println("Sumeet: verified file contents");
-                String xml = new String(verifier.getMessageBytes(),"UTF-8");
-                UpdateFileParser parser = new UpdateFileParser(xml);
-                System.out.println("Sumeet: new version: "+parser.getVersion());
-                //we checked for new version while handshaking, but we should
-                //check again with the authenticated xml data.
-                String newVersion = parser.getVersion();
-                if(newVersion==null)
-                    return;
-                if(isGreaterVersion(newVersion)) {
-                    synchronized(UpdateManager.this) {
-                        commitVersionFile(data);//could throw an exception
-                        //update the value of latestVersion
-                        latestVersion = newVersion;//we have the file committed
+                    connection.setRequestProperty("accept","text/html");//??
+                    
+                    InputStream in = connection.getInputStream();
+                    int len = connection.getContentLength();
+                    data = new byte[len];
+                    for(int i=0; i<len; i++) {
+                        //TODO2: more efficient if I read a chunk at a time
+                        int a = in.read();
+                        if(a==-1)
+                        break;
+                        data[i] = (byte)a;
                     }
-                }
+                    UpdateMessageVerifier verifier=new 
+                                                   UpdateMessageVerifier(data);
+                    boolean verified = verifier.verifySource();
+                    if(!verified) {
+                        System.out.println("Sumeet: verification failed");
+                        return;
+                    }
+                    System.out.println("Sumeet: verified file contents");
+                    String xml = new String(verifier.getMessageBytes(),"UTF-8");
+                    UpdateFileParser parser = new UpdateFileParser(xml);
+                    System.out.println("Sumeet: new version: "
+                                                         +parser.getVersion());
+                    //we checked for new version while handshaking, but we
+                    //should check again with the authenticated xml data.
+                    String newVersion = parser.getVersion();
+                    if(newVersion==null)
+                        return;
+                    if(isGreaterVersion(newVersion)) {
+                        synchronized(UpdateManager.this) {
+                            commitVersionFile(data);//could throw an exception
+                            //committed file, update the value of latestVersion
+                            latestVersion = newVersion;
+                        }
+                    }
                 } catch(Exception e ) {
-                    //any errors? We can't continue...forget it.
-                    return;
+                    //MalformedURLException - while creating URL
+                    //IOException - reading from socket, writing to disk etc.
+                    //SAXException - parsing the xml
+                    return; //any errors? We can't continue...forget it.
                 }
             }//end of run
         };

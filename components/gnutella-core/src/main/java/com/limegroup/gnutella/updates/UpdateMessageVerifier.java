@@ -22,20 +22,34 @@ public class UpdateMessageVerifier {
     }
     
     
-    public boolean verifySource() throws Exception {
+    public boolean verifySource() {        
         //read the input stream and parse it into signature and xmlMessage
         parse();        
         //get the public key
         PublicKey pubKey = null;
-        FileInputStream fis = new FileInputStream("lib\\public.key");
-        ObjectInputStream ois = new ObjectInputStream(fis);
-        pubKey = (PublicKey)ois.readObject();        
-        //initialize the verifier
-        Signature verifier = Signature.getInstance("DSA");
-        verifier.initVerify(pubKey);//initialize the signaure
-        verifier.update(xmlMessage,0,xmlMessage.length);
-        //verify
-        return verifier.verify(signature);
+        try {
+            FileInputStream fis = new FileInputStream("lib\\public.key");
+            ObjectInputStream ois = new ObjectInputStream(fis);
+            pubKey = (PublicKey)ois.readObject();
+        } catch (ClassNotFoundException cnfx) {
+            return false;
+        } catch (IOException iox) { //could not read public key?
+            return false;
+        }
+        try {
+            //initialize the verifier
+            Signature verifier = Signature.getInstance("DSA");
+            verifier.initVerify(pubKey);//initialize the signaure
+            verifier.update(xmlMessage,0,xmlMessage.length);
+            //verify
+            return verifier.verify(signature);
+        } catch (NoSuchAlgorithmException nsax) {
+            return false;
+        } catch (InvalidKeyException ikx) {
+            return false;
+        } catch (SignatureException sx) {
+            return false;
+        }
     }
 
     private void parse() {
