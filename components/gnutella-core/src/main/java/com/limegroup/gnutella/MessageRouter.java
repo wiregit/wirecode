@@ -436,11 +436,12 @@ public abstract class MessageRouter
      * if you do.
      */
     protected void handlePingReply(PingReply pingReply,
-                                ManagedConnection receivingConnection)
+                                   ManagedConnection receivingConnection)
     {
         //update hostcatcher (even if the reply isn't for me)
-        _catcher.spy(pingReply, receivingConnection);
+        boolean newAddress=_catcher.add(pingReply, receivingConnection);
 
+        //First route to originator in usual manner.
         ReplyHandler replyHandler =
             _pingRouteTable.getReplyHandler(pingReply.getGUID());
 
@@ -454,6 +455,22 @@ public abstract class MessageRouter
         {
             _numRouteErrors++;
             receivingConnection.countDroppedMessage();
+        }
+
+        //Then, if a marked pong from a supernode that we've never seen before,
+        //send to all leaf connections except replyHandler (which may be null),
+        //irregardless of GUID.  The leafs will add the address then drop the
+        //pong as they have no routing entry.  Note that if supernodes are very
+        //prevalent, this may consume too much bandwidth.
+        if (newAddress && pingReply.isMarked()) 
+        {
+            List list=_manager.getInitializedClientConnections2();
+            for (int i=0; i<list.size(); i++) 
+            {
+                ManagedConnection c = (ManagedConnection)list.get(i);
+                if (c!=receivingConnection && c!=replyHandler)
+                    c.send(pingReply);        
+            }
         }
     }
 
