@@ -110,10 +110,14 @@ public class GUESSServerSideTest extends com.limegroup.gnutella.util.BaseTestCas
         // first try a bad QueryKey....
         byte[] fakeQueryKey = new byte[8];
         (new Random()).nextBytes(fakeQueryKey);
-        QueryRequest crapQuery = 
-            new QueryRequest(GUID.makeGuid(), (byte) 1, 0, "susheel", null, 
-                             false, null, null, 
-                             QueryKey.getQueryKey(fakeQueryKey, true), false);
+
+		QueryRequest crapQuery = 
+			QueryRequest.createQueryKeyQuery("susheel", 
+											 QueryKey.getQueryKey(fakeQueryKey, true));
+        //QueryRequest crapQuery = 
+		//  new QueryRequest(GUID.makeGuid(), (byte) 1, 0, "susheel", null, 
+		//                   false, null, null, 
+		//                   QueryKey.getQueryKey(fakeQueryKey, true), false);
         send(crapQuery, address, Backend.PORT);
         try {
             receive();
@@ -124,10 +128,16 @@ public class GUESSServerSideTest extends com.limegroup.gnutella.util.BaseTestCas
         }
 
         // now try a legit one....
-        byte[] guid = GUID.makeGuid();
-        QueryRequest goodQuery = 
-            new QueryRequest(guid, (byte) 1, 0, "susheel", null, 
-                             false, null, null, qkToUse, false);
+        //byte[] guid = GUID.makeGuid();
+        //QueryRequest goodQuery = 
+		//  new QueryRequest(guid, (byte) 1, 0, "susheel", null, 
+		//                   false, null, null, qkToUse, false);
+
+        // now try a legit one....
+		QueryRequest goodQuery =
+			QueryRequest.createQueryKeyQuery("susheel", qkToUse);
+
+		byte[] guid = goodQuery.getGUID();
         send(goodQuery, address, Backend.PORT);
         //try {
             pRep = (PingReply) receive();
