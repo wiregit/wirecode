@@ -3,8 +3,9 @@ package com.limegroup.gnutella.uploader;
 import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.altlocs.*;
 import com.limegroup.gnutella.http.*;
-import java.io.*;
 import com.limegroup.gnutella.util.CommonUtils;
+import java.io.*;
+import com.sun.java.util.collections.Set;
 
 
 /**
@@ -55,11 +56,11 @@ public class UnavailableRangeUploadState implements HTTPMessage {
 				HTTPUtils.writeHeader(HTTPHeaderName.GNUTELLA_CONTENT_URN,
 									  sha1,
 									  ostream);
-                AlternateLocationCollection coll = 
-                                     UPLOADER.getAlternateLocationCollection();
-				if(coll.getAltLocsSize()>0) {
+                Set alts = UPLOADER.getNextSetOfAltsToSend();
+				if(alts.size() > 0) {
 					HTTPUtils.writeHeader(HTTPHeaderName.ALT_LOCATION,
-                                                                 coll,ostream);
+                                          new HTTPHeaderValueCollection(alts),
+                                          ostream);
 				}
 			}
             if (FILE_DESC instanceof IncompleteFileDesc) {

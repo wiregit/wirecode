@@ -114,11 +114,11 @@ public final class NormalUploadState implements HTTPMessage {
 					HTTPUtils.writeHeader(HTTPHeaderName.GNUTELLA_CONTENT_URN, 
 										                          urn, ostream);
 				}
-                AlternateLocationCollection coll = 
-                                     _uploader.getAlternateLocationCollection();
-				if(coll.getAltLocsSize()>0) {
+                Set alts = _uploader.getNextSetOfAltsToSend();
+				if(alts.size() > 0) {
 					HTTPUtils.writeHeader(HTTPHeaderName.ALT_LOCATION,
-                                                                 coll,ostream);
+                                          new HTTPHeaderValueCollection(alts),
+                                          ostream);
 				}
                 if (FILE_DESC instanceof IncompleteFileDesc) {
                     HTTPUtils.writeHeader(HTTPHeaderName.AVAILABLE_RANGES,

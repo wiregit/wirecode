@@ -5,29 +5,30 @@ import com.limegroup.gnutella.altlocs.*;
 import com.limegroup.gnutella.http.*;
 import com.limegroup.gnutella.util.*;
 import java.io.*;
+import com.sun.java.util.collections.Set;
 
 
 public class QueuedUploadState implements HTTPMessage {
 
-    private FileDesc FILE_DESC;
-    private HTTPUploader _uploader;
-    private int position;
+    private final FileDesc FILE_DESC;
+    private final HTTPUploader UPLOADER;
+    private final int POSITION;
 
     public QueuedUploadState(int pos, HTTPUploader uploader) {
-        this.position = pos;
-        this._uploader = uploader;
+        this.POSITION = pos;
+        this.UPLOADER = uploader;
         this.FILE_DESC= uploader.getFileDesc();
     }
 
     public void writeMessageHeaders(OutputStream ostream) throws IOException {
         String str;
         //if not queued, this should never be the state
-        Assert.that(position!=-1);
+        Assert.that(POSITION!=-1);
         str = "HTTP/1.1 503 Service Unavailable\r\n";
         ostream.write(str.getBytes());
         HTTPUtils.writeHeader(HTTPHeaderName.SERVER,
 							  ConstantHTTPHeaderValue.SERVER_VALUE,ostream);
-        str = "X-Queue: position="+(position+1)+
+        str = "X-Queue: position="+(POSITION+1)+
         ", pollMin="+(UploadManager.MIN_POLL_TIME/1000)+/*mS to S*/
         ", pollMax="+(UploadManager.MAX_POLL_TIME/1000)+/*mS to S*/"\r\n";
         ostream.write(str.getBytes());
@@ -38,11 +39,11 @@ public class QueuedUploadState implements HTTPMessage {
                 HTTPUtils.writeHeader(HTTPHeaderName.GNUTELLA_CONTENT_URN,
                                       FILE_DESC.getSHA1Urn(),
                                       ostream);
-                AlternateLocationCollection coll = 
-                                _uploader.getAlternateLocationCollection();
-				if(coll.getAltLocsSize() > 0) {
+                Set alts = UPLOADER.getNextSetOfAltsToSend();
+				if(alts.size() > 0) {
 					HTTPUtils.writeHeader(HTTPHeaderName.ALT_LOCATION,
-                                                                 coll,ostream);
+                                          new HTTPHeaderValueCollection(alts),
+                                          ostream);
 				}
                 if (FILE_DESC instanceof IncompleteFileDesc) {
                     HTTPUtils.writeHeader(HTTPHeaderName.AVAILABLE_RANGES,

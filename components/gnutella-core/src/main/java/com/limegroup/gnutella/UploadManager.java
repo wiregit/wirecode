@@ -501,8 +501,6 @@ public final class UploadManager implements BandwidthTracker {
                 uploader.setState(Uploader.FILE_NOT_FOUND);
                 return;
             }
-            
-            uploader.initializeAltLocs();
 
             assertAsConnecting( uploader.getState() );
         }
