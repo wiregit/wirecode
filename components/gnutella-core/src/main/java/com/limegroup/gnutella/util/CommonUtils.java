@@ -1111,7 +1111,7 @@ public final class CommonUtils {
         for (int i = 0; i < ILLEGAL_CHARS_ANY_OS.length; i++) 
             name = name.replace(ILLEGAL_CHARS_ANY_OS[i], '_');
 		
-        if ( _isWindows ) {
+        if ( _isWindows || _isOS2 ) {
             for (int i = 0; i < ILLEGAL_CHARS_WINDOWS.length; i++) 
                 name = name.replace(ILLEGAL_CHARS_WINDOWS[i], '_');
         } else if ( _isLinux || _isSolaris ) {

@@ -1,7 +1,6 @@
 package com.limegroup.gnutella.udpconnect;
 
 import java.io.*;
-import java.net.*;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -63,7 +62,7 @@ public class UDPBufferedInputStream extends InputStream {
 
                     // Wait for some data to become available
                 	if (timedOut) {
-                		SocketTimeoutException e = new SocketTimeoutException();
+                		InterruptedIOException e = new InterruptedIOException();
                 		LOG.debug("",e);
                 		throw e;
                 	}
@@ -124,7 +123,7 @@ public class UDPBufferedInputStream extends InputStream {
 
                     // Wait for some data to become available
                 	if (timedOut) {
-                		SocketTimeoutException e = new SocketTimeoutException();
+                		InterruptedIOException e = new InterruptedIOException();
                 		LOG.debug("",e);
                 		throw e;
                 	}
@@ -177,7 +176,7 @@ public class UDPBufferedInputStream extends InputStream {
 
                     // Wait for some data to become available
                 	if (timedOut) {
-                		SocketTimeoutException e = new SocketTimeoutException();
+                		InterruptedIOException e = new InterruptedIOException();
                 		LOG.debug("",e);
                 		throw e;
                 	}
