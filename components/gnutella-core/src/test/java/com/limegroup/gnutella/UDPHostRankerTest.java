@@ -50,16 +50,7 @@ public class UDPHostRankerTest extends ClientSideTestCase {
 
         final MLImpl ml = new MLImpl();
 
-        Thread newThread = new Thread() {
-                public void run() {
-                    try {
-                        Thread.sleep(100);
-                    }
-                    catch (InterruptedException no) {}
-                    UDPHostRanker.rank(list, ml);
-                }
-            };
-        newThread.start();
+        UDPHostRanker.rank(list, ml, null);
 
         for (int i = 0; i < udps.length; i++) {
             DatagramPacket pack = new DatagramPacket(new byte[1000], 1000);
