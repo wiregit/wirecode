@@ -228,6 +228,9 @@ MENU_VIEW_THEMES_REFRESH_ACCESSIBLE=ディスク上のテーマを最ロード�
 MENU_VIEW_THEMES_USE_DEFAULT=デフォルトテーマを適用
 MENU_VIEW_THEMES_USE_DEFAULT_MNEMONIC=D
 MENU_VIEW_THEMES_USE_DEFAULT_ACCESSIBLE=ユーザーデフォルトを適用
+MENU_VIEW_LANGS_TITLE=言語選択
+MENU_VIEW_LANGS_TITLE_MNEMONIC=H
+MENU_VIEW_LANGS_RESTART_REQUIRED=選択された言語を使用するには, ライムワイヤーを再起動させてください
 
 MENU_RESOURCES_TITLE=リソース (R)
 MENU_RESOURCES_TITLE_MNEMONIC=R
@@ -546,6 +549,7 @@ CV_TABLE_STRING_KBPSEC=KB/秒
 ################################################################################
 # Key/value pairs for a strings in the library window
 ################################################################################
+LIBRARY_TABLE_ICON=アイコン
 LIBRARY_TABLE_NAME=ファイル名
 LIBRARY_TABLE_TITLE=題名
 LIBRARY_TABLE_ARTIST=アーティスト
@@ -601,6 +605,7 @@ SETUP_WAIT_TITLE=ハードディスクを検索中
 SETUP_WAIT_LABEL=LimeWire がハードディスクを検索中です. お待ち下さい...
 SETUP_CONFIRM_TITLE=検索確定
 SETUP_CONFIRM_LABEL=共有候補のフォルダが以下の様に発見されました. このうちの一つを共有したいなら, チェックボックスを有効にして下さい. 選択したフォルダの下位フォルダも同様に共有されます.
+SETUP_CONFIRM_LABEL_NO_DIRECTORIES=共有可能なファイルが見つかりませんでした. ライムワイヤーの設定を続けるには, "次へ"をクリックしてください。
 SETUP_FINISH_TITLE=設定終了
 SETUP_FINISH_LABEL=LimeWire の設定は無事に完了しました. "終了" ボタンを押して LimeWire をお使い下さい.
 
