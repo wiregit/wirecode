@@ -619,7 +619,10 @@ public class ManagedDownloader implements Downloader, Serializable {
     }
 
     public boolean conflicts(URN urn) {
+        Assert.that(urn!=null, "attempting to check conflicts with null urn");
         File otherFile = incompleteFileManager.getFileForUrn(urn);
+        if(otherFile==null)
+            return false;
         return conflicts(otherFile);
     }
 
