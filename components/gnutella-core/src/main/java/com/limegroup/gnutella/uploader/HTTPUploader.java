@@ -44,8 +44,8 @@ public class HTTPUploader implements Runnable {
     private static volatile int uploadCount=0;
     private static Object uploadCountLock=new Object();
     private boolean       uploadCountIncremented = false;
-	private boolean       limitExceeded  = false;
-	private boolean       _isPushAttempt = false;
+    private boolean       limitExceeded  = false;
+    private boolean       _isPushAttempt = false;
 
 
     //////////// Initialized in Constructors ///////////
@@ -55,7 +55,7 @@ public class HTTPUploader implements Runnable {
     public static final int COMPLETE = 3;
     /** One of NOT_CONNECTED, CONNECTED, ERROR, COMPLETE */
     private int    _state;
-	private String _stateString=null;
+    private String _stateString=null;
     /** True if the connection is server-side,
      *  false if client-side (actively establishes connection). */
     private boolean _isServer;
@@ -125,7 +125,7 @@ public class HTTPUploader implements Runnable {
         _state = CONNECTED;
         _isServer = true;
         _callback = callback;
-        _fmanager = FileManager.getFileManager();
+        _fmanager = FileManager.instance();
         _host = s.getInetAddress().getHostAddress();
         _port = s.getPort();
         _index = index;
@@ -167,7 +167,7 @@ public class HTTPUploader implements Runnable {
         _state = NOT_CONNECTED;
         _isServer = false;
         _callback = callback;
-        _fmanager = FileManager.getFileManager();
+        _fmanager = FileManager.instance();
         _host = host;
         _port = port;
         _index = index;
@@ -176,7 +176,7 @@ public class HTTPUploader implements Runnable {
         _amountRead = 0;
         _priorAmountRead = 0;
         _clientGUID=guidString;
-		_isPushAttempt = true;
+        _isPushAttempt = true;
 
         synchronized (failedPushes) {
             //First remove all files that were pushed more than a few
@@ -204,7 +204,7 @@ public class HTTPUploader implements Runnable {
                 }
             }
         }
-		// Check for and add attempted push for this file
+        // Check for and add attempted push for this file
         synchronized (attemptingPushes) {
             //Now see if we are attempting to pus this now
             Iterator iter=attemptingPushes.iterator();
@@ -216,9 +216,9 @@ public class HTTPUploader implements Runnable {
                     break;
                 }
             }
-			if ( _state != ERROR ) {
+            if ( _state != ERROR ) {
                 attemptingPushes.add(thisFile);
-			}
+            }
         }
     }
 
@@ -285,13 +285,13 @@ public class HTTPUploader implements Runnable {
             if (index!=_index)
             throw new IOException();
 
-			//2. Check for upload overload
-			if ( limitExceeded = testAndIncrementUploadCount() )
-			{ 
-				//send 503 Limit Exceeded Headers
-				doLimitReachedAfterConnect();
-				throw new IOException();
-			}
+            //2. Check for upload overload
+            if ( limitExceeded = testAndIncrementUploadCount() )
+            {
+                //send 503 Limit Exceeded Headers
+                doLimitReachedAfterConnect();
+                throw new IOException();
+            }
 
         } catch (IndexOutOfBoundsException e) {
             throw new IOException();
@@ -377,7 +377,7 @@ public class HTTPUploader implements Runnable {
         try {
             String str = "HTTP 200 OK \r\n";
 
-			String version = SettingsManager.instance().getCurrentVersion();
+            String version = SettingsManager.instance().getCurrentVersion();
 
             _ostream.write(str.getBytes());
             str = "Server: LimeWire " + version + " \r\n";
@@ -388,14 +388,14 @@ public class HTTPUploader implements Runnable {
             str = "Content-length:"+ (_sizeOfFile - _uploadBegin) + "\r\n";
             _ostream.write(str.getBytes());
 
-			// Version 0.5 of limewire misinterpreted Content-range
-			// to be 1 - n instead of 0 - (n-1), but because this is
-			// an optional field in the regular case, we don't need
-			// to send it.
-			if (_uploadBegin != 0) {
-				str = "Content-range: bytes=" + _uploadBegin  +
-				"-" + ( _sizeOfFile - 1 )+ "/" + _sizeOfFile + "\r\n";
-			}
+            // Version 0.5 of limewire misinterpreted Content-range
+            // to be 1 - n instead of 0 - (n-1), but because this is
+            // an optional field in the regular case, we don't need
+            // to send it.
+            if (_uploadBegin != 0) {
+                str = "Content-range: bytes=" + _uploadBegin  +
+                "-" + ( _sizeOfFile - 1 )+ "/" + _sizeOfFile + "\r\n";
+            }
 
             _ostream.write(str.getBytes());
 
@@ -428,12 +428,12 @@ public class HTTPUploader implements Runnable {
                 try {
                     connect();
                 } catch (IOException e) {
-					// If the connect failed due to max uploads
-					// record this and don't add to the failedPushes
-					if ( limitExceeded ) {
-						_stateString = "Try Again Later";
+                    // If the connect failed due to max uploads
+                    // record this and don't add to the failedPushes
+                    if ( limitExceeded ) {
+                        _stateString = "Try Again Later";
                         throw e;
-					}
+                    }
 
                     //If we couldn't connect, make sure we don't try to push
                     //this file again in the future.
@@ -446,35 +446,35 @@ public class HTTPUploader implements Runnable {
             }
 
             //2. Check for upload room for non-pushes
-			if ( ! uploadCountIncremented ) // Pushes have already been handled
-			{
-			    if ( testAndIncrementUploadCount() )
-				{
-				    doLimitReached(_socket);//send 503 Limit Exceeded Headers
-            		throw new IOException();
-				}
-			}
+            if ( ! uploadCountIncremented ) // Pushes have already been handled
+            {
+                if ( testAndIncrementUploadCount() )
+                {
+                    doLimitReached(_socket);//send 503 Limit Exceeded Headers
+                    throw new IOException();
+                }
+            }
 
             //3. Actually do the transfer.
-			if ( uploadCountIncremented )
-			{
-				doUpload();             //sends headers via writeHeader
-            	_state = COMPLETE;
-			}
+            if ( uploadCountIncremented )
+            {
+                doUpload();             //sends headers via writeHeader
+                _state = COMPLETE;
+            }
         } catch (IOException e) {
             _state = ERROR;
         } finally {
-			if ( uploadCountIncremented )
+            if ( uploadCountIncremented )
                 synchronized(uploadCountLock) { uploadCount--; }
-			if ( _isPushAttempt )
-			    cleanupAttemptedPush();
+            if ( _isPushAttempt )
+                cleanupAttemptedPush();
             shutdown();
             _callback.removeUpload(this);
         }
     }
 
-	private void cleanupAttemptedPush()
-	{
+    private void cleanupAttemptedPush()
+    {
         Iterator iter;
         synchronized (attemptingPushes) {
             //Now see if we are attempting to push this now
@@ -488,7 +488,7 @@ public class HTTPUploader implements Runnable {
                 }
             }
         }
-	}
+    }
 
     public void doUpload() throws IOException {
         writeHeader();
@@ -589,38 +589,38 @@ public class HTTPUploader implements Runnable {
         _state = COMPLETE;
     }
 
-	/**
-	 *   Get an unsynchronized version of the total upload count.
-	 */ 
-	public static int getUploadCount()
-	{
-		return uploadCount;
-	}
+    /**
+     *   Get an unsynchronized version of the total upload count.
+     */
+    public static int getUploadCount()
+    {
+        return uploadCount;
+    }
 
-	/**
-	 *  Increment the uploadCount if the limit has not been exceeded.
-	 *  Record whether this is an active upload.
-	 *  Return true if the limit has been exceeded.  
-	 */
+    /**
+     *  Increment the uploadCount if the limit has not been exceeded.
+     *  Record whether this is an active upload.
+     *  Return true if the limit has been exceeded.
+     */
     public boolean testAndIncrementUploadCount()
-	{
-		boolean limitExceeded;
-		synchronized(uploadCountLock) 
-		{
-			if ( getUploadCount() >=
-				 SettingsManager.instance().getMaxUploads() )
-			{
-				limitExceeded = true;
-			}
-			else 
-			{
-				uploadCount++; 
-				uploadCountIncremented = true;
-				limitExceeded = false;
-			}
-		}
-		return(limitExceeded);
-	}
+    {
+        boolean limitExceeded;
+        synchronized(uploadCountLock)
+        {
+            if ( getUploadCount() >=
+                 SettingsManager.instance().getMaxUploads() )
+            {
+                limitExceeded = true;
+            }
+            else
+            {
+                uploadCount++;
+                uploadCountIncremented = true;
+                limitExceeded = false;
+            }
+        }
+        return(limitExceeded);
+    }
 
     private String getMimeType() {         /* eventually this method should */
         String mimetype;                /* determine the mime type of a file */
@@ -679,7 +679,7 @@ public class HTTPUploader implements Runnable {
      *   Handle too many upload requests after push has connected
      */
     public void doLimitReachedAfterConnect() {
-        
+
         /* Sends a 503 Service Unavailable message */
         try {
             /* is this the right format? */
@@ -729,7 +729,7 @@ public class HTTPUploader implements Runnable {
     /*
     public static void main(String args[]) {
         ConnectionManager manager=new ConnectionManager(6344);
-        FileManager.getFileManager().addDirectories(".");
+        FileManager.instance().addDirectories(".");
         manager.setActivityCallback(new Main());
         HTTPUploader uploader;
 

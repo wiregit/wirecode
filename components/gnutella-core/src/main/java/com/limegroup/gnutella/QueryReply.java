@@ -61,16 +61,12 @@ public class QueryReply extends Message implements Serializable{
             ByteOrder.int2leb((int)r.getSize(),payload,i+4);
             i+=8;
             String name=r.getName();
-            //This getBytes method is deprecated because it does
-            //not properly convert Unicode (it throws away the high
-            //byte.  But this is not a problem since most Gnutella
-            //clients probably do not understand Unicode!
-            name.getBytes(0, name.length(), payload, i);
-            i+=name.length();
+            byte[] nameBytes = r.getName().getBytes();
+            System.arraycopy(nameBytes, 0, payload, i, nameBytes.length);
+            i+=nameBytes.length;
             //Write double null terminator.
-            payload[i]=(byte)0;
-            payload[i+1]=(byte)0;
-            i+=2;
+            payload[i++]=(byte)0;
+            payload[i++]=(byte)0;
         }
 
         //Write footer at payload[i...i+16-1]
@@ -78,8 +74,8 @@ public class QueryReply extends Message implements Serializable{
             payload[i+j]=clientGUID[j];
         }
     }
-    
-    /** 
+
+    /**
     * Creates a new query reply from the passed query Reply. The new one is
     * same as the passed one, but with different specified GUID
     * @param guid The new GUID for the reply
@@ -87,14 +83,14 @@ public class QueryReply extends Message implements Serializable{
     * new constructed query reply
     * Note: The payload is not really copied, but the reference in the newly
     * constructed query reply, points to the one in the passed reply.
-    * but since the payload is not meant to be 
+    * but since the payload is not meant to be
     * mutated, it shouldnt make difference if different query replies
     * maintain reference to same payload
     */
     public QueryReply(byte[] guid, QueryReply reply){
         //call the super constructor with new GUID
-        super(guid, Message.F_QUERY_REPLY, reply.getTTL(), reply.getHops(), 
-                                                            reply.getLength()); 
+        super(guid, Message.F_QUERY_REPLY, reply.getTTL(), reply.getHops(),
+                                                            reply.getLength());
         //set the payload field
         this.payload = reply.payload;
     }

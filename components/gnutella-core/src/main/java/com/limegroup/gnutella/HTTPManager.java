@@ -33,7 +33,7 @@ public class HTTPManager {
         _socket = s;
 
         String command=null;
-        FileManager fm = FileManager.getFileManager();
+        FileManager fm = FileManager.instance();
 
         try {
             //We set the timeout now so we don't block reading

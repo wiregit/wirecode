@@ -137,7 +137,7 @@ public class HTTPDownloader implements Runnable {
     _index = down.getIndex();
     _port = down.getPort();
     _guid = down.getGUID();
-	_sizeOfFile = down.getContentLength();
+    _sizeOfFile = down.getContentLength();
 
     }
 
@@ -171,8 +171,8 @@ public class HTTPDownloader implements Runnable {
                           ActivityCallback callback) {
         _state = NOT_CONNECTED;
         _filename = file;
-		_amountRead = 0;
-		 //_amountRead = 1;
+        _amountRead = 0;
+         //_amountRead = 1;
         _sizeOfFile = -1;
         _router = router;
         _acceptor = acceptor;
@@ -247,7 +247,7 @@ public class HTTPDownloader implements Runnable {
         }
         catch (IOException e) {
 
-			//  There appears to be a delay in going to Push here so preset it
+            //  There appears to be a delay in going to Push here so preset it
             _state    = REQUESTING;
 
             // Handle immediate error cases
@@ -278,75 +278,75 @@ public class HTTPDownloader implements Runnable {
     }
 
     public void initThree() {
-		
-		// Reset any error message
+
+        // Reset any error message
         _stateString = null;
 
-		// First, get the incomplete directory where the 
-		// file will be temperarily downloaded.
-		SettingsManager sm = SettingsManager.instance();
-		String incompleteDir;
-		incompleteDir = sm.getIncompleteDirectory();
-		// check to see if we actually get a directory
-		if (incompleteDir == "") {
-			// the incomplete directory is null
-			// so i don't think we should be downloading
-			_state = ERROR;
-			return;
-		}
-		
-		// now, check to see if a file of that name alread
-		// exists in the temporary directory.
-		String incompletePath;
-		incompletePath = incompleteDir + _filename;
-		File incompleteFile = new File(incompletePath);
-		// incompleteFile represents the file as it would
-		// be named in the temporary incomplete directory.
-
-		int start = 0;
-		_resume = false;
-		// if there is a file, set the initial amount
-		// read at the size of that file, otherwise leave
-		// it at zero.
-		if (incompleteFile.exists()) {
-			// dont alert an error if the file doesn't 
-			// exist, just assume a starting range of 0;
-			start = (int)incompleteFile.length();
-			_resume = true;
-		}
-		// convert the int start to String equivalent
-		String startRange = java.lang.String.valueOf(start);
-
-		// Now, try to establish a socket connection
-		URLConnection conn;
-		String furl = "/get/" + String.valueOf(_index) + "/" + _filename;
-				
-		try {
-			URL url = new URL(_protocol, _host, _port, furl);
-			conn = url.openConnection();
-			conn.setRequestProperty("Range", "bytes="+ startRange + "-");
-            conn.connect();
-		} catch (Exception e) {
-			// for some reason the connection could not
-			// be established;
-			_stateString = "Resumed Connection Failed";
-            _state = ERROR;		_resume = true;
-            return;
-		}
-		// try to get the input stream from the connection
-		try {
-            _istream = conn.getInputStream();
-            _br = new ByteReader(_istream);
-		}
-		catch (Exception e) {
-			// for some reason the inputstream could
-			// not be opened.
-			_stateString = "Resumed Connection Failed";
+        // First, get the incomplete directory where the
+        // file will be temperarily downloaded.
+        SettingsManager sm = SettingsManager.instance();
+        String incompleteDir;
+        incompleteDir = sm.getIncompleteDirectory();
+        // check to see if we actually get a directory
+        if (incompleteDir == "") {
+            // the incomplete directory is null
+            // so i don't think we should be downloading
             _state = ERROR;
             return;
-		}
+        }
 
-		_state = CONNECTED;
+        // now, check to see if a file of that name alread
+        // exists in the temporary directory.
+        String incompletePath;
+        incompletePath = incompleteDir + _filename;
+        File incompleteFile = new File(incompletePath);
+        // incompleteFile represents the file as it would
+        // be named in the temporary incomplete directory.
+
+        int start = 0;
+        _resume = false;
+        // if there is a file, set the initial amount
+        // read at the size of that file, otherwise leave
+        // it at zero.
+        if (incompleteFile.exists()) {
+            // dont alert an error if the file doesn't
+            // exist, just assume a starting range of 0;
+            start = (int)incompleteFile.length();
+            _resume = true;
+        }
+        // convert the int start to String equivalent
+        String startRange = java.lang.String.valueOf(start);
+
+        // Now, try to establish a socket connection
+        URLConnection conn;
+        String furl = "/get/" + String.valueOf(_index) + "/" + _filename;
+
+        try {
+            URL url = new URL(_protocol, _host, _port, furl);
+            conn = url.openConnection();
+            conn.setRequestProperty("Range", "bytes="+ startRange + "-");
+            conn.connect();
+        } catch (Exception e) {
+            // for some reason the connection could not
+            // be established;
+            _stateString = "Resumed Connection Failed";
+            _state = ERROR;     _resume = true;
+            return;
+        }
+        // try to get the input stream from the connection
+        try {
+            _istream = conn.getInputStream();
+            _br = new ByteReader(_istream);
+        }
+        catch (Exception e) {
+            // for some reason the inputstream could
+            // not be opened.
+            _stateString = "Resumed Connection Failed";
+            _state = ERROR;
+            return;
+        }
+
+        _state = CONNECTED;
 
 
     }
@@ -372,12 +372,12 @@ public class HTTPDownloader implements Runnable {
 
         if (_state == CONNECTED) {
             doDownload();
-			// check to see if there is an error condition 
-			// after attempting the download
-			if (_state == ERROR) {
-				// if there is, close the streams
-				errorClose();
-			}
+            // check to see if there is an error condition
+            // after attempting the download
+            if (_state == ERROR) {
+                // if there is, close the streams
+                errorClose();
+            }
             _callback.removeDownload(this);
         } else if (_state == ERROR) {
             _callback.removeDownload(this);
@@ -461,7 +461,7 @@ public class HTTPDownloader implements Runnable {
         readHeader();
         if ( _state == ERROR ) {
             return;
-		}
+        }
 
         SettingsManager set = SettingsManager.instance();
 
@@ -476,9 +476,9 @@ public class HTTPDownloader implements Runnable {
         String path = myTest.getAbsolutePath();
 
         // This is necessary, and a little tricky. I
-		//  check to see if the canonical path of the
-		//  parent of the requested file is equivalent
-		//  to the canonical path of the shared directory. */
+        //  check to see if the canonical path of the
+        //  parent of the requested file is equivalent
+        //  to the canonical path of the shared directory. */
 
         File f;
         String p;
@@ -499,9 +499,9 @@ public class HTTPDownloader implements Runnable {
         }
 
 
-		
-		if ( ( myFile.exists() && !_resume  ) 
-			|| (myTest.exists()) ) {
+
+        if ( ( myFile.exists() && !_resume  )
+            || (myTest.exists()) ) {
             // ask the user if the file should be overwritten
             if ( ! _callback.overwriteFile(_filename) ) {
                 _stateString = "File Already Exists";
@@ -528,15 +528,15 @@ public class HTTPDownloader implements Runnable {
 
         while (true) {
 
-			if (_amountRead == _sizeOfFile) {
+            if (_amountRead == _sizeOfFile) {
                 _state = COMPLETE;
                 break;
             }
 
-			// just a safety check.  hopefully this wouldn't
-			// happen, but if it does, need a way to exit 
-			// gracefully...
-			if (_amountRead > _sizeOfFile) {
+            // just a safety check.  hopefully this wouldn't
+            // happen, but if it does, need a way to exit
+            // gracefully...
+            if (_amountRead > _sizeOfFile) {
                 _state = ERROR;
                 break;
             }
@@ -584,13 +584,13 @@ public class HTTPDownloader implements Runnable {
             boolean ok=myFile.renameTo(target);
             if (! ok) {
                 //renameTo is not guaranteed to work, esp. when the
-                //file is being moved across file systems.  
+                //file is being moved across file systems.
                 _state = ERROR;
                 _stateString = "Couldn't Move to Library";
                 return;
             }
             _state = COMPLETE;
-            FileManager.getFileManager().addFileIfShared(pname);
+            FileManager.instance().addFileIfShared(pname);
         }
 
         else
@@ -601,21 +601,21 @@ public class HTTPDownloader implements Runnable {
     }
 
 
-	// this method handles cexpplicitly closing the streams 
-	// if an error condition was somehow reached.
-	private void errorClose() {
-		try {
+    // this method handles cexpplicitly closing the streams
+    // if an error condition was somehow reached.
+    private void errorClose() {
+        try {
 
-			if (_br != null) // i dont think this should ever happen
-				_br.close();
-			
-			if (_fos != null)
-				_fos.close();
+            if (_br != null) // i dont think this should ever happen
+                _br.close();
 
-		} catch(IOException e) {
-			return;
-		}
-	}
+            if (_fos != null)
+                _fos.close();
+
+        } catch(IOException e) {
+            return;
+        }
+    }
 
 
     public void readHeader() {
@@ -644,16 +644,16 @@ public class HTTPDownloader implements Runnable {
             if ( lineNumber == 0 )
             {
                 // Handle a 503 error from Gnotella/Gnutella
-                if ( str.equals("3") || 
+                if ( str.equals("3") ||
                      str.startsWith("3 Upload limit reached") )
                 {
-                	_stateString = TryAgainLater;
+                    _stateString = TryAgainLater;
                     _state = ERROR;
                     return;
                 }
 
                 // Handle a 404 error from Gnotella/Gnutella
-                if ( str.equals("4") || 
+                if ( str.equals("4") ||
                      str.startsWith("4 File Not Found") )
                 {
                     _stateString = "File Not Found";
@@ -685,32 +685,32 @@ public class HTTPDownloader implements Runnable {
 
             if (str.toUpperCase().indexOf("CONTENT-RANGE:") != -1) {
 
-				String sub;
-				String sub_two;
-				int dash;
-				int slash;
-				int resumeInit;
+                String sub;
+                String sub_two;
+                int dash;
+                int slash;
+                int resumeInit;
 
-				String beforeSlash;
-				int numBeforeSlash;
+                String beforeSlash;
+                int numBeforeSlash;
 
                 try {
-					str = str.substring(21);
-					dash=str.indexOf('-');
-					slash = str.indexOf('/');
-					sub_two = str.substring(slash+1);
+                    str = str.substring(21);
+                    dash=str.indexOf('-');
+                    slash = str.indexOf('/');
+                    sub_two = str.substring(slash+1);
                     sub=str.substring(0, dash);
-					sub = sub.trim();
-					sub_two = sub_two.trim();
+                    sub = sub.trim();
+                    sub_two = sub_two.trim();
 
-					beforeSlash = str.substring(dash+1, slash);
+                    beforeSlash = str.substring(dash+1, slash);
 
                 } catch (IndexOutOfBoundsException e) {
                     // _state = ERROR;
-					return;
+                    return;
                 }
-				try {
-					tempSize = java.lang.Integer.parseInt(sub_two);
+                try {
+                    tempSize = java.lang.Integer.parseInt(sub_two);
                     resumeInit = java.lang.Integer.parseInt(sub);
                     numBeforeSlash = java.lang.Integer.parseInt(beforeSlash);
                 }
@@ -720,34 +720,34 @@ public class HTTPDownloader implements Runnable {
                 }
 
 
-				// In order to be backwards compatible with
-				// LimeWire 0.5, which sent broken headers like:
-				// Content-range: bytes=1-67818707/67818707
-				//
-				// If the number preceding the '/' is equal 
-				// to the number after the '/', then we want
-				// to decrement the first number and the number
-				// before the '/'.
-				if (numBeforeSlash == tempSize) {
-					resumeInit--;
-					numBeforeSlash--;
-				}
-				
+                // In order to be backwards compatible with
+                // LimeWire 0.5, which sent broken headers like:
+                // Content-range: bytes=1-67818707/67818707
+                //
+                // If the number preceding the '/' is equal
+                // to the number after the '/', then we want
+                // to decrement the first number and the number
+                // before the '/'.
+                if (numBeforeSlash == tempSize) {
+                    resumeInit--;
+                    numBeforeSlash--;
+                }
 
-				_amountRead = resumeInit;
+
+                _amountRead = resumeInit;
 
                 _resume = true;
-				foundLength = true;
+                foundLength = true;
             }
         }
 
         if (foundLength) {
             if ( tempSize != -1 ) {
-				_sizeOfFile = tempSize;
+                _sizeOfFile = tempSize;
 
-			}
-        } 
-		else {
+            }
+        }
+        else {
             _state = ERROR;
         }
     }

@@ -52,17 +52,15 @@ public interface SettingsInterface
     public int        getMaxUploads();
     public boolean    getClearCompletedUpload();
     public boolean    getClearCompletedDownload();
-    /** special method for getting the number of files scanned */
-    public int        getFilesScanned();
-    public int        getSearchAnimationTime();		
-	
+    public int        getSearchAnimationTime();
+
     public String     getConnectString();
     public String     getConnectOkString();
 
    /** The current version of LimeWire.  This is read-only. */
-	public String getCurrentVersion();
-	public String getLastVersionChecked();
-	public boolean getCheckAgain();
+    public String getCurrentVersion();
+    public String getLastVersionChecked();
+    public boolean getCheckAgain();
 
     public int getFreeloaderFiles();
     public int getFreeloaderAllowed();
@@ -188,17 +186,13 @@ public interface SettingsInterface
     /** Sets the handshake string for initializing outgoing connections,
      *  without trailing newlines. */
     public void setConnectOkString(String ok);
-	
-	public void setLastVersionChecked(String last);
-	public void setCheckAgain(boolean check);
+
+    public void setLastVersionChecked(String last);
+    public void setCheckAgain(boolean check);
 
     public void setFreeloaderFiles(int files);
     public void setFreeloaderAllowed(int probability);
 
-    /** specialized method for writing the
-     *  properties file for the network discoverer
-     */
-    public void writeNDProps();
     public void setWrite(boolean b);
 
     /** Default setting for the time to live */
@@ -240,7 +234,7 @@ public interface SettingsInterface
     "html;htm;xml;txt;pdf;ps;rtf;doc;tex;mp3;wav;au;aif;aiff;ra;ram;"+
     "mpg;mpeg;asf;qt;mov;avi;mpe;swf;dcr;gif;jpg;jpeg;jpe;png;tif;tiff;"+
     "exe;zip;gz;gzip;hqx;tar;tgz;z";
-	
+
 
     /** default banned ip addresses */
     public static final String[] DEFAULT_BANNED_IPS     = {};
@@ -269,14 +263,14 @@ public interface SettingsInterface
     public static final String  DEFAULT_CONNECT_STRING    = "GNUTELLA CONNECT/0.4";
     public static final String  DEFAULT_CONNECT_OK_STRING = "GNUTELLA OK";
     public static final int     DEFAULT_BASIC_INFO_FOR_QUERY = 1000;
-    public static final int     DEFAULT_ADVANCED_INFO_FOR_QUERY = 50;	
+    public static final int     DEFAULT_ADVANCED_INFO_FOR_QUERY = 50;
 
     public static final String  DEFAULT_LAST_VERSION_CHECKED = "0.6d";
     public static final boolean DEFAULT_CHECK_AGAIN = true;
-	public static final boolean DEFAULT_FORCE_IP_ADDRESS = false;
-	public static final byte[]  DEFAULT_FORCED_IP_ADDRESS = {};
-	public static final String  DEFAULT_FORCED_IP_ADDRESS_STRING = "";
-	public static final int     DEFAULT_FORCED_PORT = 6346;
+    public static final boolean DEFAULT_FORCE_IP_ADDRESS = false;
+    public static final byte[]  DEFAULT_FORCED_IP_ADDRESS = {};
+    public static final String  DEFAULT_FORCED_IP_ADDRESS_STRING = "";
+    public static final int     DEFAULT_FORCED_PORT = 6346;
     public static final int     DEFAULT_FREELOADER_FILES = 1;
     public static final int     DEFAULT_FREELOADER_ALLOWED = 100;
 
@@ -318,15 +312,15 @@ public interface SettingsInterface
 
     public static final String CONNECT_STRING = "CONNECT_STRING";
     public static final String CONNECT_OK_STRING = "CONNECT_OK_STRING";
-	public static final String LAST_VERSION_CHECKED = "LAST_VERSION_CHECKED";
+    public static final String LAST_VERSION_CHECKED = "LAST_VERSION_CHECKED";
     public static final String CHECK_AGAIN = "CHECK_AGAIN";
-	public static final String BASIC_QUERY_INFO = "BASIC_QUERY_INFO";
-	public static final String ADVANCED_QUERY_INFO = "ADVANCED_QUERY_INFO";
-	public static final String FORCE_IP_ADDRESS = "FORCE_IP_ADDRESS";
-	public static final String FORCED_IP_ADDRESS = "FORCED_IP_ADDRESS";
-	public static final String FORCED_IP_ADDRESS_STRING 
-		= "FORCED_IP_ADDRESS_STRING";
-	public static final String FORCED_PORT = "FORCED_PORT";
+    public static final String BASIC_QUERY_INFO = "BASIC_QUERY_INFO";
+    public static final String ADVANCED_QUERY_INFO = "ADVANCED_QUERY_INFO";
+    public static final String FORCE_IP_ADDRESS = "FORCE_IP_ADDRESS";
+    public static final String FORCED_IP_ADDRESS = "FORCED_IP_ADDRESS";
+    public static final String FORCED_IP_ADDRESS_STRING
+        = "FORCED_IP_ADDRESS_STRING";
+    public static final String FORCED_PORT = "FORCED_PORT";
     public static final String FREELOADER_FILES = "FREELOADER_FILES";
     public static final String FREELOADER_ALLOWED = "FREELOADER_ALLOWED";
 

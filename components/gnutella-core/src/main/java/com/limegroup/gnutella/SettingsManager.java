@@ -21,16 +21,16 @@ import java.util.StringTokenizer;
 
 public class SettingsManager implements SettingsInterface
 {
-	private static boolean forceIPAddress_;
-	private static byte[]  forcedIPAddress_;
-	private static String  forcedIPAddressString_;
-	private static int forcedPort_;
+    private static boolean forceIPAddress_;
+    private static byte[]  forcedIPAddress_;
+    private static String  forcedIPAddressString_;
+    private static int forcedPort_;
 
-	/** lastVersionChecked is the most recent version number checked.  Also,
-	 * there is a boolean for don't check again. */
+    /** lastVersionChecked is the most recent version number checked.  Also,
+     * there is a boolean for don't check again. */
     private static final String CURRENT_VERSION=DEFAULT_LAST_VERSION_CHECKED;
-	private String lastVersionChecked_;
-	private boolean checkAgain_;
+    private String lastVersionChecked_;
+    private boolean checkAgain_;
 
     boolean write_ = false;
     /** Variables for the various settings */
@@ -66,7 +66,7 @@ public class SettingsManager implements SettingsInterface
     private static boolean  clearCompletedUpload_;
     private static boolean  clearCompletedDownload_;
     private static int      maxSimDownload_;
-    private static int      maxUploads_;	
+    private static int      maxUploads_;
 
     private static int      searchAnimationTime_;
     private static String   saveDefault_;
@@ -81,8 +81,8 @@ public class SettingsManager implements SettingsInterface
     private static String   connectStringFirstWord_;
     private static String   connectStringRemainder_;
     private static String   connectOkString_;
-	private static int      basicQueryInfo_;
-	private static int      advancedQueryInfo_;
+    private static int      basicQueryInfo_;
+    private static int      advancedQueryInfo_;
     private static int      freeLoaderFiles_;
     private static int      freeLoaderAllowed_;
 
@@ -105,15 +105,6 @@ public class SettingsManager implements SettingsInterface
     private String ndFileName_;
     private String saveShareDir_;
 
-
-	/* this blank method simply ensures that the 
-	 * instance_ field will be initialized as
-	 * early as possible in the class loading.
-	 *
-	 * @see The Java Language Specification page 223
-	 */
-	public static void init() {
-	}
 
     /**
      * This method provides the only access
@@ -184,25 +175,25 @@ public class SettingsManager implements SettingsInterface
                 key = (String)enum.nextElement();
                 p = tempProps.getProperty(key);
                 if(key.equals(TTL)) {
-					setTTL(Byte.parseByte(p));
+                    setTTL(Byte.parseByte(p));
                 }
                 else if(key.equals(SOFT_MAX_TTL)) {
-					setSoftMaxTTL(Byte.parseByte(p));
-				}
+                    setSoftMaxTTL(Byte.parseByte(p));
+                }
                 else if(key.equals(MAX_TTL)) {
-					setMaxTTL(Byte.parseByte(p));
+                    setMaxTTL(Byte.parseByte(p));
                 }
                 else if(key.equals(MAX_LENGTH)) {
-					setMaxLength(Integer.parseInt(p));
+                    setMaxLength(Integer.parseInt(p));
                 }
                 else if(key.equals(PARALLEL_SEARCH)) {
-					setParallelSearchMax(Integer.parseInt(p)); 
+                    setParallelSearchMax(Integer.parseInt(p));
                 }
-                else if(key.equals(MAX_SIM_DOWNLOAD)) {					
-					setMaxSimDownload(Integer.parseInt(p)); 
+                else if(key.equals(MAX_SIM_DOWNLOAD)) {
+                    setMaxSimDownload(Integer.parseInt(p));
                 }
                 else if(key.equals(MAX_UPLOADS)) {
-					setMaxUploads(Integer.parseInt(p)); 
+                    setMaxUploads(Integer.parseInt(p));
                 }
                 else if(key.equals(CLEAR_DOWNLOAD)) {
                     boolean bs;
@@ -212,7 +203,7 @@ public class SettingsManager implements SettingsInterface
                         bs=false;
                     else
                         return;
-                    setClearCompletedDownload(bs); 
+                    setClearCompletedDownload(bs);
                 }
                 else if(key.equals(CLEAR_UPLOAD)) {
                     boolean bs;
@@ -222,26 +213,26 @@ public class SettingsManager implements SettingsInterface
                         bs=false;
                     else
                         return;
-                    setClearCompletedUpload(bs); 
+                    setClearCompletedUpload(bs);
                 }
                 else if(key.equals(TIMEOUT)) {
-					setTimeout(Integer.parseInt(p));
+                    setTimeout(Integer.parseInt(p));
                 }
                 else if(key.equals(KEEP_ALIVE)) {
-					//Verified for real later.  See note below.
-					setKeepAlive(Integer.parseInt(p));
+                    //Verified for real later.  See note below.
+                    setKeepAlive(Integer.parseInt(p));
                 }
                 else if(key.equals(PORT)) {
-					setPort(Integer.parseInt(p));
+                    setPort(Integer.parseInt(p));
                 }
                 else if(key.equals(SPEED)) {
-					setConnectionSpeed(Integer.parseInt(p));
+                    setConnectionSpeed(Integer.parseInt(p));
                 }
                 else if(key.equals(UPLOAD_SPEED)) {
-					setUploadSpeed(Integer.parseInt(p));
+                    setUploadSpeed(Integer.parseInt(p));
                 }
                 else if(key.equals(SEARCH_LIMIT)) {
-					setSearchLimit(Byte.parseByte(p));
+                    setSearchLimit(Byte.parseByte(p));
                 }
 
                 else if(key.equals(CLIENT_ID)) {
@@ -249,8 +240,8 @@ public class SettingsManager implements SettingsInterface
                 }
 
                 else if(key.equals(MAX_INCOMING_CONNECTIONS)) {
-					//Verified for real later.  See note below.
-					setMaxIncomingConnections(Integer.parseInt(p));
+                    //Verified for real later.  See note below.
+                    setMaxIncomingConnections(Integer.parseInt(p));
                 }
 
                 else if(key.equals(SAVE_DIRECTORY)) {
@@ -264,10 +255,10 @@ public class SettingsManager implements SettingsInterface
                 else if(key.equals(EXTENSIONS)) {
                     setExtensions(p);
                 }
-				else if(key.equals(LAST_VERSION_CHECKED)) {
+                else if(key.equals(LAST_VERSION_CHECKED)) {
                     setLastVersionChecked(p);
                 }
-				else if(key.equals(CHECK_AGAIN)) {
+                else if(key.equals(CHECK_AGAIN)) {
                     boolean bs;
                     if (p.equals("true"))
                         bs=true;
@@ -275,7 +266,7 @@ public class SettingsManager implements SettingsInterface
                         bs=false;
                     else
                         return;
-                    setCheckAgain(bs); 
+                    setCheckAgain(bs);
                 }
 
                 else if(key.equals(INCOMPLETE_DIR)) {
@@ -352,7 +343,7 @@ public class SettingsManager implements SettingsInterface
 
                 else if(key.equals(QUICK_CONNECT_HOSTS)) {
                     setQuickConnectHosts(decode(p));
-				}
+                }
 
                 else if(key.equals(USE_QUICK_CONNECT)) {
                     boolean bs;
@@ -365,7 +356,7 @@ public class SettingsManager implements SettingsInterface
                     setUseQuickConnect(bs);
                 }
                 else if(key.equals(SEARCH_ANIMATION_TIME)) {
-					setSearchAnimationTime(Integer.parseInt(p));
+                    setSearchAnimationTime(Integer.parseInt(p));
                 }
                 else if(key.equals(SAVE_DEFAULT)){
                     setSaveDefault(p);
@@ -384,8 +375,8 @@ public class SettingsManager implements SettingsInterface
                 else if(key.equals(ADVANCED_QUERY_INFO)){
                     setAdvancedInfoForQuery(Integer.parseInt(p));
                 }
-                else if(key.equals(FORCE_IP_ADDRESS)){  
-					boolean bs;
+                else if(key.equals(FORCE_IP_ADDRESS)){
+                    boolean bs;
                     if (p.equals("true"))
                         bs=true;
                     else if (p.equals("false"))
@@ -393,43 +384,42 @@ public class SettingsManager implements SettingsInterface
                     else
                         return;
                     setForceIPAddress(bs);
-				}
+                }
                 else if(key.equals(FORCED_IP_ADDRESS)){
-					setForcedIPAddress(p.getBytes());
-				}
+                    setForcedIPAddress(p.getBytes());
+                }
                 else if(key.equals(FORCED_IP_ADDRESS_STRING)){
-					setForcedIPAddressString(p);
-				}
+                    setForcedIPAddressString(p);
+                }
                 else if(key.equals(FORCED_PORT)){
                     setForcedPort(Integer.parseInt(p));
-				}
+                }
                 else if(key.equals(FREELOADER_FILES)) {
                     setFreeloaderFiles(Integer.parseInt(p));
-				}
+                }
                 else if(key.equals(FREELOADER_ALLOWED)) {
                     setFreeloaderAllowed(Integer.parseInt(p));
-				}
+                }
             }
             catch(NumberFormatException nfe){ /* continue */ }
             catch(IllegalArgumentException iae){ /* continue */ }
             catch(ClassCastException cce){ /* continue */ }
         }
-          
+
         //Special case: if this is a modem, ensure that KEEP_ALIVE and
         //MAX_INCOMING_CONNECTIONS are sufficiently low.
         if ( getConnectionSpeed()<=56 ) { //modem
             setKeepAlive(Math.min(2, getKeepAlive()));
             setMaxIncomingConnections(0);
-        }  
-		
+        }
+
         write_ = true;
-		resetFileManager();
         writeProperties();
     }
 
     /* Load in the default values.  Any properties
-	 * written to the real properties file will overwrite 
-	 * these. */
+     * written to the real properties file will overwrite
+     * these. */
     private void loadDefaults()
     {
         setMaxTTL(DEFAULT_MAX_TTL);
@@ -461,7 +451,6 @@ public class SettingsManager implements SettingsInterface
         setFilterHtml(SettingsInterface.DEFAULT_FILTER_HTML);
         setFilterGreedyQueries(DEFAULT_FILTER_GREEDY_QUERIES);
         setFilterBearShareQueries(SettingsInterface.DEFAULT_FILTER_BEARSHARE_QUERIES);
-        setExtensions(SettingsInterface.DEFAULT_EXTENSIONS);
         setDirectories(home_);
         setSaveDirectory(home_);
         setSaveDefault(home_);
@@ -478,20 +467,20 @@ public class SettingsManager implements SettingsInterface
         setConnectString(DEFAULT_CONNECT_STRING);
         setConnectOkString(DEFAULT_CONNECT_OK_STRING);
 
-		// RJS - setting the default values... 
-		setLastVersionChecked(DEFAULT_LAST_VERSION_CHECKED);
-		setCheckAgain(DEFAULT_CHECK_AGAIN);
-		setBasicInfoForQuery(DEFAULT_BASIC_INFO_FOR_QUERY);
-		setAdvancedInfoForQuery(DEFAULT_ADVANCED_INFO_FOR_QUERY);
-		setForceIPAddress(DEFAULT_FORCE_IP_ADDRESS);
-		setForcedIPAddress(DEFAULT_FORCED_IP_ADDRESS);
-		setForcedIPAddressString
-		(DEFAULT_FORCED_IP_ADDRESS_STRING);
-		setForcedPort(DEFAULT_FORCED_PORT);
+        // RJS - setting the default values...
+        setLastVersionChecked(DEFAULT_LAST_VERSION_CHECKED);
+        setCheckAgain(DEFAULT_CHECK_AGAIN);
+        setBasicInfoForQuery(DEFAULT_BASIC_INFO_FOR_QUERY);
+        setAdvancedInfoForQuery(DEFAULT_ADVANCED_INFO_FOR_QUERY);
+        setForceIPAddress(DEFAULT_FORCE_IP_ADDRESS);
+        setForcedIPAddress(DEFAULT_FORCED_IP_ADDRESS);
+        setForcedIPAddressString
+        (DEFAULT_FORCED_IP_ADDRESS_STRING);
+        setForcedPort(DEFAULT_FORCED_PORT);
         setFreeloaderFiles(DEFAULT_FREELOADER_FILES);
         setFreeloaderAllowed(DEFAULT_FREELOADER_ALLOWED);
-        
-		write_ = true;
+
+        write_ = true;
         writeProperties();
     }
 
@@ -575,11 +564,11 @@ public class SettingsManager implements SettingsInterface
 
     /** returns the directories to search */
     public String getDirectories(){return directories_;}
-	
-	public String[] getDirectoriesAsArray() {
-		directories_.trim();
-		return HTTPUtil.stringSplit(directories_, ';');
-	}
+
+    public String[] getDirectoriesAsArray() {
+        directories_.trim();
+        return HTTPUtil.stringSplit(directories_, ';');
+    }
 
     /** returns the string of file extensions*/
     public String getExtensions(){return extensions_;}
@@ -612,11 +601,6 @@ public class SettingsManager implements SettingsInterface
     public String getConnectOkString(){ return connectOkString_; }
 
 
-    /** specialized method for getting the number
-     *  of files scanned */
-    public int getFilesScanned()
-    {return FileManager.getFileManager().getNumFiles();}
-
     // SPECIALIZED METHODS FOR NETWORK DISCOVERY
     /** returns the Network Discovery specialized properties file */
     public Properties getNDProps(){return ndProps_;}
@@ -624,46 +608,46 @@ public class SettingsManager implements SettingsInterface
     /** returns the path of the properties and host list files */
     public String getPath() {return home_;}
 
-	public int getBasicInfoSizeForQuery() {return basicQueryInfo_;}
+    public int getBasicInfoSizeForQuery() {return basicQueryInfo_;}
 
-	public int getAdvancedInfoSizeForQuery() {return advancedQueryInfo_;}
-	
-	public boolean getForceIPAddress() {
-		return forceIPAddress_;
-	}
+    public int getAdvancedInfoSizeForQuery() {return advancedQueryInfo_;}
 
-	public byte[] getForcedIPAddress() {
-		return forcedIPAddress_;
-	}
+    public boolean getForceIPAddress() {
+        return forceIPAddress_;
+    }
 
-	public String getForcedIPAddressString() {
-		return forcedIPAddressString_;
-	}
+    public byte[] getForcedIPAddress() {
+        return forcedIPAddress_;
+    }
 
-	public int getForcedPort() {
-		return forcedPort_;
-	}
+    public String getForcedIPAddressString() {
+        return forcedIPAddressString_;
+    }
 
-	/**
-	 * private methods to handle versioning 
-	 * control information
-	 */
-	public String getCurrentVersion() {
+    public int getForcedPort() {
+        return forcedPort_;
+    }
+
+    /**
+     * private methods to handle versioning
+     * control information
+     */
+    public String getCurrentVersion() {
         //This is intentionally hard-coded in.
-		return CURRENT_VERSION;
-	}
-	public String getLastVersionChecked() {
-		return lastVersionChecked_;
-	}
-	public boolean getCheckAgain() {
-		return checkAgain_;
-	}
+        return CURRENT_VERSION;
+    }
+    public String getLastVersionChecked() {
+        return lastVersionChecked_;
+    }
+    public boolean getCheckAgain() {
+        return checkAgain_;
+    }
     public int getFreeloaderFiles() {
         return freeLoaderFiles_;
     }
     public int getFreeloaderAllowed() {
         return freeLoaderAllowed_;
-    }  
+    }
 
     /******************************************************
      **************  END OF ACCESSOR METHODS **************
@@ -720,7 +704,7 @@ public class SettingsManager implements SettingsInterface
      *
      * If checkLimit is true, BadConnectionSettingException is thrown if
      * keepAlive is too large for the current connection speed.  The suggestions
-     * are not necessarily guaranteed to be valid however.  
+     * are not necessarily guaranteed to be valid however.
      */
     public synchronized void setKeepAlive(int keepAlive,
                                           boolean checkLimit)
@@ -731,7 +715,7 @@ public class SettingsManager implements SettingsInterface
             //Too high for this connection speed?  Decrease it.
             if (keepAlive > max) {
                 throw new BadConnectionSettingException(
-				    BadConnectionSettingException.TOO_HIGH_FOR_SPEED,
+                    BadConnectionSettingException.TOO_HIGH_FOR_SPEED,
                     max, maxConnections());
             }
         }
@@ -753,7 +737,7 @@ public class SettingsManager implements SettingsInterface
     private int maxConnections() {
         int speed=getConnectionSpeed();
         //I'm copying these numbers out of GUIStyles.  I don't want this to
-        //depend on GUI code, though. 
+        //depend on GUI code, though.
         if (speed<=56)    //modems
             return 3;
         else if (speed<=350)  //cable
@@ -792,7 +776,7 @@ public class SettingsManager implements SettingsInterface
 
     /**
      * Sets the max number of incoming connections without checking the maximum
-     * value. Throws IllegalArgumentException if maxConn is negative.  
+     * value. Throws IllegalArgumentException if maxConn is negative.
      */
     public synchronized void setMaxIncomingConnections(int maxConn)
         throws IllegalArgumentException {
@@ -865,10 +849,10 @@ public class SettingsManager implements SettingsInterface
         }
     }
 
-	/** sets the default save directory for when the user 
-	 *  presses the "use default" button in the config 
-	 *  window.  this method should only get called at
-	 *  install time, and is therefore not synchronized */
+    /** sets the default save directory for when the user
+     *  presses the "use default" button in the config
+     *  window.  this method should only get called at
+     *  install time, and is therefore not synchronized */
     public void setSaveDefault(String dir) {
         if(!dir.endsWith(File.separator))
             dir += File.separator;
@@ -883,17 +867,17 @@ public class SettingsManager implements SettingsInterface
         }
     }
 
-	public void setBasicInfoForQuery(int basicInfo) {
-		basicQueryInfo_ = basicInfo;
-		String s = Integer.toString(basicInfo);
-		props_.put(BASIC_QUERY_INFO, s);
-	}
-	
-	public void setAdvancedInfoForQuery(int advancedInfo) {
-		advancedQueryInfo_ = advancedInfo;
-		String s = Integer.toString(advancedInfo);
-		props_.put(ADVANCED_QUERY_INFO, s);
-	}
+    public void setBasicInfoForQuery(int basicInfo) {
+        basicQueryInfo_ = basicInfo;
+        String s = Integer.toString(basicInfo);
+        props_.put(BASIC_QUERY_INFO, s);
+    }
+
+    public void setAdvancedInfoForQuery(int advancedInfo) {
+        advancedQueryInfo_ = advancedInfo;
+        String s = Integer.toString(advancedInfo);
+        props_.put(ADVANCED_QUERY_INFO, s);
+    }
 
     /******************************************************
      *********  START OF CONFIGURATION SETTINGS ***********
@@ -914,105 +898,98 @@ public class SettingsManager implements SettingsInterface
     }
 
     /* set the directories to search.  this is synchronized
-	 *  because some gui elements may want to make this call
-	 *  in separate threads (they probably should, since this
-	 *  method could take awhile). this method will also filter
-	 *  out any duplicate or invalid directories in the string. 
-	 *  note, however, that it does not currently filter out
-	 *  listing subdirectories that have parent directories
-	 *  also in the string.  this should change at some point.*/
+     *  because some gui elements may want to make this call
+     *  in separate threads. this method will also filter
+     *  out any duplicate or invalid directories in the string.
+     *  note, however, that it does not currently filter out
+     *  listing subdirectories that have parent directories
+     *  also in the string.  this should change at some point.*/
     public synchronized void setDirectories(String dir) {
-		boolean dirsModified = false;
-		directories_ = dir;
-		String[] dirs = getDirectoriesAsArray();
-		int i = 0;
-		while(i < dirs.length) {
-			if(dirs[i] != null) {
-				File f = new File(dirs[i]);
-				if(f.isDirectory()) {
-					int count = 0;
-					int z = 0;
-					String str = "";
-					try {str = f.getCanonicalPath();}
-					catch(IOException ioe) {break;}
-					while(z < dirs.length) {
-						if(dirs[z] != null) { 
-							File file = new File(dirs[z]);
-							String name = "";
-							try {name = file.getCanonicalPath();}
-							catch(IOException ioe) {break;}
-							if(str.equals(name)) { 
-								count++;			
-								if(count > 1) {
-									dirs[z] = null;
-									dirsModified = true;
-								}
-							}
-						}
-						z++;
-					}					
-				}
-				else {
-					dirs[i] = null;
-					dirsModified = true;
-				}
-			}
-			i++;
-		}
-		if(dirsModified) {
-			i = 0;
-			StringBuffer sb = new StringBuffer();
-			while(i < dirs.length) {
-				if(dirs[i] != null) {
-					sb.append(dirs[i]);
-					sb.append(';');
-				}
-				i++;
-			}
-			directories_ = sb.toString();
-		}
-		resetFileManager();
+        boolean dirsModified = false;
+        directories_ = dir;
+        String[] dirs = getDirectoriesAsArray();
+        int i = 0;
+        while(i < dirs.length) {
+            if(dirs[i] != null) {
+                File f = new File(dirs[i]);
+                if(f.isDirectory()) {
+                    int count = 0;
+                    int z = 0;
+                    String str = "";
+                    try {str = f.getCanonicalPath();}
+                    catch(IOException ioe) {break;}
+                    while(z < dirs.length) {
+                        if(dirs[z] != null) {
+                            File file = new File(dirs[z]);
+                            String name = "";
+                            try {name = file.getCanonicalPath();}
+                            catch(IOException ioe) {break;}
+                            if(str.equals(name)) {
+                                count++;
+                                if(count > 1) {
+                                    dirs[z] = null;
+                                    dirsModified = true;
+                                }
+                            }
+                        }
+                        z++;
+                    }
+                }
+                else {
+                    dirs[i] = null;
+                    dirsModified = true;
+                }
+            }
+            i++;
+        }
+        if(dirsModified) {
+            i = 0;
+            StringBuffer sb = new StringBuffer();
+            while(i < dirs.length) {
+                if(dirs[i] != null) {
+                    sb.append(dirs[i]);
+                    sb.append(';');
+                }
+                i++;
+            }
+            directories_ = sb.toString();
+        }
         props_.put(DIRECTORIES, directories_);
     }
 
-	/* adds one directory to the directory string (if
-	 * it is a directory and is not already listed. */
-	public synchronized boolean addDirectory(String dir) {
-		File f = new File(dir);
-		if(f.isDirectory()) {
-			String[] dirs = getDirectoriesAsArray();			
-			String newPath = "";
-			try {newPath = f.getCanonicalPath();}
-			catch(IOException ioe) {return false;}
-			// check for directory
-			int i = 0;
-			while(i < dirs.length) {			
-				File file = new File(dirs[i]);
-				String name = "";
-				try {name = file.getCanonicalPath();}
-				catch(IOException ioe) {break;}
-				if(name.equals(newPath)) {
-					return false;
-				}
-				i++;
-			}
-			if(!directories_.endsWith(";")) 
-				directories_ += ";";				
-			directories_ += newPath;
-			directories_ += ";";
-			resetFileManager();
-			props_.put(DIRECTORIES, directories_);
-			return true;
-		}
-		return false;
-	}
+    /* adds one directory to the directory string (if
+     * it is a directory and is not already listed. */
+    public synchronized boolean addDirectory(String dir) {
+        File f = new File(dir);
+        if(f.isDirectory()) {
+            String[] dirs = getDirectoriesAsArray();
+            String newPath = "";
+            try {newPath = f.getCanonicalPath();}
+            catch(IOException ioe) {return false;}
+            // check for directory
+            int i = 0;
+            while(i < dirs.length) {
+                File file = new File(dirs[i]);
+                String name = "";
+                try {name = file.getCanonicalPath();}
+                catch(IOException ioe) {break;}
+                if(name.equals(newPath)) {
+                    return false;
+                }
+                i++;
+            }
+            if(!directories_.endsWith(";"))
+                directories_ += ";";
+            directories_ += newPath;
+            directories_ += ";";
+            props_.put(DIRECTORIES, directories_);
+            return true;
+        }
+        return false;
+    }
 
     /** set the extensions to search for */
     public void setExtensions(String ext) {
-        FileManager.getFileManager().setExtensions(ext);
-		if(getDirectories() != null) {
-			resetFileManager();
-		}
         extensions_ = ext;
         props_.put(EXTENSIONS, ext);
     }
@@ -1177,39 +1154,39 @@ public class SettingsManager implements SettingsInterface
             props_.put(CLEAR_DOWNLOAD, s);
         }
     }
-	
-	public void setForceIPAddress(boolean force) {
-		String c;
-		if (force == true)
-			c = "true";
-		else 
-			c = "false";
-		forceIPAddress_ = force;
-		props_.put(FORCE_IP_ADDRESS, c);
-	}
 
-	public void setForcedIPAddress(byte[] address) {
-		forcedIPAddress_ = address;
-		props_.put(FORCED_IP_ADDRESS, new String(address));		
-	}
+    public void setForceIPAddress(boolean force) {
+        String c;
+        if (force == true)
+            c = "true";
+        else
+            c = "false";
+        forceIPAddress_ = force;
+        props_.put(FORCE_IP_ADDRESS, c);
+    }
 
-	public void setForcedIPAddressString(String address) {
-		forcedIPAddressString_ = address;
-		props_.put(FORCED_IP_ADDRESS_STRING, address);		
-	}
+    public void setForcedIPAddress(byte[] address) {
+        forcedIPAddress_ = address;
+        props_.put(FORCED_IP_ADDRESS, new String(address));
+    }
 
-	public void setForcedPort(int port) {
+    public void setForcedIPAddressString(String address) {
+        forcedIPAddressString_ = address;
+        props_.put(FORCED_IP_ADDRESS_STRING, address);
+    }
+
+    public void setForcedPort(int port) {
         // if the entered port is outside accepted
         // port numbers, throw the exception
         if(port > 65536 || port < 1)
             throw new IllegalArgumentException();
-		else {
-			forcedPort_ = port;
-			String s = Integer.toString(forcedPort_);
-			props_.put(FORCED_PORT, s);
-		}
-	}
-	
+        else {
+            forcedPort_ = port;
+            String s = Integer.toString(forcedPort_);
+            props_.put(FORCED_PORT, s);
+        }
+    }
+
 
     /******************************************************
      *********  END OF CONFIGURATION SETTINGS *************
@@ -1336,13 +1313,13 @@ public class SettingsManager implements SettingsInterface
             writeProperties();
         }
     }
-    
-    /** 
+
+    /**
      * Sets the probability (expressed as a percentage) that an incoming
      * freeloader will be accepted.   For example, if allowed==50, an incoming
      * connection has a 50-50 chance being accepted.  If allowed==100, all
      * incoming connections are accepted.  Throws IllegalArgumentException if
-     * allowed<0 or allowed>100. 
+     * allowed<0 or allowed>100.
      */
     public void setFreeloaderAllowed(int allowed)
         throws IllegalArgumentException
@@ -1355,12 +1332,12 @@ public class SettingsManager implements SettingsInterface
         writeProperties();
     }
 
-    /** 
+    /**
      * Sets minimum the number of files a host must share to not be considered a
      * freeloader.  For example, if files==0, no host is considered a
-     * freeloader.  Throws IllegalArgumentException if files<0.  
+     * freeloader.  Throws IllegalArgumentException if files<0.
      */
-    public void setFreeloaderFiles(int files) 
+    public void setFreeloaderFiles(int files)
         throws IllegalArgumentException
     {
         if (files<0)
@@ -1371,26 +1348,26 @@ public class SettingsManager implements SettingsInterface
         writeProperties();
     }
 
-	/**
-	 * private methods to handle versioning 
-	 * control information
-	 */
-	public void setLastVersionChecked(String last) {
-		lastVersionChecked_ = last;
-		props_.put(LAST_VERSION_CHECKED, last);
-		writeProperties();
-	}
-	
-	public void setCheckAgain(boolean check) {
-		checkAgain_ = check;
-		String c;
-		if (check == true)
-			c = "true";
-		else 
-			c = "false";
-		props_.put(CHECK_AGAIN, c);
+    /**
+     * private methods to handle versioning
+     * control information
+     */
+    public void setLastVersionChecked(String last) {
+        lastVersionChecked_ = last;
+        props_.put(LAST_VERSION_CHECKED, last);
         writeProperties();
-	}
+    }
+
+    public void setCheckAgain(boolean check) {
+        checkAgain_ = check;
+        String c;
+        if (check == true)
+            c = "true";
+        else
+            c = "false";
+        props_.put(CHECK_AGAIN, c);
+        writeProperties();
+    }
 
     /**
      *  Sets the pathname String for the file that
@@ -1419,40 +1396,6 @@ public class SettingsManager implements SettingsInterface
      ***************  END OF MUTATOR METHODS **************
      ******************************************************/
 
-
-    /** writes out the Network Discovery specialized
-     *  properties file
-     */
-    public synchronized void writeNDProps() {
-        FileOutputStream ostream = null;
-        try {
-            ostream = new FileOutputStream(ndFileName_);
-            props_.save(ostream, "Properties file for Network Discovery");
-            ostream.close();
-        }
-        catch (Exception e){}
-        finally {
-            try {
-                ostream.close();
-            }
-            catch(IOException io) {}
-        }
-    }
-
-	// resets the file manager values in a new thread,
-	// as it could take a long time. 
-	private synchronized void resetFileManager() {
-		if(write_) {
-			Thread fileManagerThread = new Thread() {
-				public void run() {
-                    //Note that this 
-					FileManager.getFileManager().setDirectories(directories_);  
-				}
-			};
-			fileManagerThread.setDaemon(true);
-			fileManagerThread.start();
-		}
-	}
 
     /** writes out the properties file to with the specified
      *  name in the user's home directory
@@ -1535,17 +1478,17 @@ public class SettingsManager implements SettingsInterface
     //      Assert.that(manager.getConnectStringRemainder().equals(""));
     //      }
 
-	// test for setDirectories method
-//  	public static void main(String args[]) {
-//  		System.out.println("directories_: "+ directories_);
-//  		SettingsManager settings = SettingsManager.instance();
-//  		System.out.println("directories_: "+ directories_);
-//  		settings.setDirectories("c:\\p;c:\\p;c:\\pC:\\My Music;C:\\Program Files;"+
-//  								"C:\\Program Files\\LimeWire;"+
-//  								"C:\\Program Files\\LimeWire;C:\\Program Files;C:\\My Music;"+
-//  								"c:\\My Music;c:\\Program Files\\Direct;"+
-//  								"C:\\Program Files\\direct\\;C:\\ProgramFiles");
-//  		System.out.println("directories_: "+ directories_);
-//  	}
+    // test for setDirectories method
+//      public static void main(String args[]) {
+//          System.out.println("directories_: "+ directories_);
+//          SettingsManager settings = SettingsManager.instance();
+//          System.out.println("directories_: "+ directories_);
+//          settings.setDirectories("c:\\p;c:\\p;c:\\pC:\\My Music;C:\\Program Files;"+
+//                                  "C:\\Program Files\\LimeWire;"+
+//                                  "C:\\Program Files\\LimeWire;C:\\Program Files;C:\\My Music;"+
+//                                  "c:\\My Music;c:\\Program Files\\Direct;"+
+//                                  "C:\\Program Files\\direct\\;C:\\ProgramFiles");
+//          System.out.println("directories_: "+ directories_);
+//      }
 
 }

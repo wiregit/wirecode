@@ -225,7 +225,7 @@ public abstract class MessageRouter
             receivingConnection.setKillable(false);
         }
 
-        
+
         if(queryRequest.getTTL() > 0)
             broadcastQueryRequest(queryRequest, receivingConnection,
                                   _manager);
@@ -292,7 +292,7 @@ public abstract class MessageRouter
         // Note the use of initializedConnections only.
         // Note that we have zero allocations here.
         List list=manager.getInitializedConnections2();
-        for(int i=0; i<list.size(); i++) 
+        for(int i=0; i<list.size(); i++)
         {
             ManagedConnection c = (ManagedConnection)list.get(i);
             if(c != receivingConnection)
@@ -317,7 +317,7 @@ public abstract class MessageRouter
         // Note the use of initializedConnections only.
         // Note that we have zero allocations here.
         List list=manager.getInitializedConnections2();
-        for(int i=0; i<list.size(); i++) 
+        for(int i=0; i<list.size(); i++)
         {
             ManagedConnection c = (ManagedConnection)list.get(i);
             if(c != receivingConnection)
@@ -506,18 +506,18 @@ public abstract class MessageRouter
     /**
      * Allow the controlled creation of a GroupPingRequest
      */
-	public GroupPingRequest createGroupPingRequest(String group)
-	{ 
-        FileManager fm = FileManager.getFileManager();
+    public GroupPingRequest createGroupPingRequest(String group)
+    {
+        FileManager fm = FileManager.instance();
         int num_files = fm.getNumFiles();
         int kilobytes = fm.getSize()/1024;
 
-        GroupPingRequest pingRequest = 
-		  new GroupPingRequest(SettingsManager.instance().getTTL(),
+        GroupPingRequest pingRequest =
+          new GroupPingRequest(SettingsManager.instance().getTTL(),
             _acceptor.getPort(), _acceptor.getAddress(),
             num_files, kilobytes, group);
-		return( pingRequest );
-	}
+        return( pingRequest );
+    }
 
 
     /**
@@ -698,7 +698,7 @@ public abstract class MessageRouter
             handlePushRequestForMe(pushRequest, receivingConnection);
         }
 
-        public boolean isOpen() 
+        public boolean isOpen()
         {
             //I'm always ready to handle replies.
             return true;

@@ -36,9 +36,8 @@ public class StandardMessageRouter
     protected void respondToPingRequest(PingRequest pingRequest,
                                         Acceptor acceptor)
     {
-        FileManager fm = FileManager.getFileManager();
-        int num_files = fm.getNumFiles();
-        int kilobytes = fm.getSize()/1024;
+        int num_files = FileManager.instance().getNumFiles();
+        int kilobytes = FileManager.instance().getSize()/1024;
 
         PingReply pingReply = new PingReply(pingRequest.getGUID(),
                                             (byte)(pingRequest.getHops()+1),
@@ -63,7 +62,7 @@ public class StandardMessageRouter
     {
         receivingConnection.updateHorizonStats(pingReply);
 
-        SettingsManager settings=SettingsManager.instance(); 
+        SettingsManager settings=SettingsManager.instance();
         //Kill incoming connections that don't share.  Note that we randomly
         //allow some freeloaders.  (Hopefully they'll get some stuff and then
         //share!)  Note that we only consider killing them on the first ping.
@@ -74,7 +73,7 @@ public class StandardMessageRouter
                && (receivingConnection.isKillable())
                && (pingReply.getFiles()<settings.getFreeloaderFiles())
                && ((int)(Math.random()*100.f) >
-                       settings.getFreeloaderAllowed())) { 
+                       settings.getFreeloaderAllowed())) {
             _manager.remove(receivingConnection);
         }
     }
@@ -87,7 +86,7 @@ public class StandardMessageRouter
 //                                           byte[] clientGUID)
 //      {
 //          // Run the local query
-//          Response[] responses = FileManager.getFileManager().query(queryRequest);
+//          Response[] responses = FileManager.instance().query(queryRequest);
 //          // If we have responses, send back a QueryReply
 //          if (responses!=null && (responses.length>0))
 //          {
@@ -112,91 +111,91 @@ public class StandardMessageRouter
 //              catch(IOException e) {}
 //          }
 //      }
-	protected void respondToQueryRequest(QueryRequest queryRequest,
-										 Acceptor acceptor, 
-										 byte[] clientGUID)
-	{
+    protected void respondToQueryRequest(QueryRequest queryRequest,
+                                         Acceptor acceptor,
+                                         byte[] clientGUID)
+    {
 
-		// Run the local query
-		FileManager fm = FileManager.getFileManager();
-		Response[] responses = fm.query(queryRequest);
-		
-		// if either there are no responses or, the 
-		// response array came back null for some reason, 
-		// exit this method
-		if ( (responses == null) || ((responses.length < 1)) )
-			return;
-		
-		// get the appropriate queryReply information
-		byte[] guid = queryRequest.getGUID();
-		byte ttl = (byte)(queryRequest.getHops() + 1);
-		int port = acceptor.getPort();
-		byte[] ip = acceptor.getAddress();
-		long speed = SettingsManager.instance().getConnectionSpeed();
-		
-		int numResponses = responses.length;
-		int index = 0;
+        // Run the local query
+        FileManager fm = FileManager.instance();
+        Response[] responses = fm.query(queryRequest);
 
-		int numHops = queryRequest.getHops();
+        // if either there are no responses or, the
+        // response array came back null for some reason,
+        // exit this method
+        if ( (responses == null) || ((responses.length < 1)) )
+            return;
 
-		QueryReply queryReply;
+        // get the appropriate queryReply information
+        byte[] guid = queryRequest.getGUID();
+        byte ttl = (byte)(queryRequest.getHops() + 1);
+        int port = acceptor.getPort();
+        byte[] ip = acceptor.getAddress();
+        long speed = SettingsManager.instance().getConnectionSpeed();
 
-		// modified by rsoule, 11/16/00
+        int numResponses = responses.length;
+        int index = 0;
 
-		while (numResponses > 0)
-		{
-			int arraySize;			
-			// if there are more than 255 responses,
-			// create an array of 255 to send in the queryReply
-			// otherwise, create an array of whatever size is left.
-			if (numResponses < 255) {
-				// break;
-				arraySize = numResponses;
-			}
-			else 
-				arraySize = 255;
+        int numHops = queryRequest.getHops();
 
-			Response[] res;
-			// a special case.  in the common case where there
-			// are less than 256 responses being sent, there
-			// is no need to copy one array into another.
-			if ( (index == 0) && (arraySize < 255) )
-			{
-				res = responses;
-			}
-			else 
-			{
-				res = new Response[arraySize];				
-				// copy the reponses into bite-size chunks
-				for(int i =0; i < arraySize; i++) {
-					res[i] = responses[index];
-					index++;
-				}
-			}
+        QueryReply queryReply;
 
-			// decrement the number of responses we have left
-			numResponses-= arraySize;
+        // modified by rsoule, 11/16/00
 
-			// create the new queryReply
-			queryReply = new QueryReply(guid, ttl, port, ip, 
-										speed, res, clientGUID);
-			
-			// try to send the new queryReply
-			try {
-				sendQueryReply(queryReply);
-			} catch (IOException e) {
-				// if there is an error, do nothing..
-			}
+        while (numResponses > 0)
+        {
+            int arraySize;
+            // if there are more than 255 responses,
+            // create an array of 255 to send in the queryReply
+            // otherwise, create an array of whatever size is left.
+            if (numResponses < 255) {
+                // break;
+                arraySize = numResponses;
+            }
+            else
+                arraySize = 255;
 
-			// we only want to send multiple queryReplies 
-			// if the number of hops is small.
-			if (numHops > 2) {
-  				break;
-  			}
-			
-		}
-		
-	}
+            Response[] res;
+            // a special case.  in the common case where there
+            // are less than 256 responses being sent, there
+            // is no need to copy one array into another.
+            if ( (index == 0) && (arraySize < 255) )
+            {
+                res = responses;
+            }
+            else
+            {
+                res = new Response[arraySize];
+                // copy the reponses into bite-size chunks
+                for(int i =0; i < arraySize; i++) {
+                    res[i] = responses[index];
+                    index++;
+                }
+            }
+
+            // decrement the number of responses we have left
+            numResponses-= arraySize;
+
+            // create the new queryReply
+            queryReply = new QueryReply(guid, ttl, port, ip,
+                                        speed, res, clientGUID);
+
+            // try to send the new queryReply
+            try {
+                sendQueryReply(queryReply);
+            } catch (IOException e) {
+                // if there is an error, do nothing..
+            }
+
+            // we only want to send multiple queryReplies
+            // if the number of hops is small.
+            if (numHops > 2) {
+                break;
+            }
+
+        }
+
+    }
 
 
     /**
@@ -243,7 +242,7 @@ public class StandardMessageRouter
         FileDesc desc;
         try
         {
-            desc = FileManager.getFileManager().get(index);
+            desc = FileManager.instance().get(index);
         }
         catch (IndexOutOfBoundsException e)
         {

@@ -115,15 +115,15 @@ public class RouterService
     }
 
 
-	/**
-	 * Attempts to connect to the given group.  Removes your current 
+    /**
+     * Attempts to connect to the given group.  Removes your current
      * connections and blocks until the group server has been contacted.
      * If the group server is not reachable, restores connection settings
      * and silently fails.
-	 */
-	public void connectToGroup(String group) {
-		groupConnect(group);
-	}
+     */
+    public void connectToGroup(String group) {
+        groupConnect(group);
+    }
 
 //------------------------------------------------------------------------
     /**
@@ -131,18 +131,18 @@ public class RouterService
      * Blocks until connection established but send a GroupPingRequest
      */
     private ManagedConnection groupConnectToHostBlocking(
-	  String hostname, int portnum, String group)
+      String hostname, int portnum, String group)
             throws IOException {
 
         SettingsManager settings=SettingsManager.instance();
         group += ":"+settings.getConnectionSpeed();
 
-        GroupPingRequest pingRequest = 
-		  router.createGroupPingRequest(group);
+        GroupPingRequest pingRequest =
+          router.createGroupPingRequest(group);
 
-        return manager.createGroupConnectionBlocking(hostname, portnum, 
-		  pingRequest);
-	}
+        return manager.createGroupConnectionBlocking(hostname, portnum,
+          pingRequest);
+    }
 
     /**
      * Connects to router and sends a GroupPingRequest.
@@ -151,9 +151,9 @@ public class RouterService
     private void groupConnect(String group) {
         SettingsManager settings=SettingsManager.instance();
 
-		// Store the quick connect value.
-		boolean useQuickConnect = settings.getUseQuickConnect(); 
-		settings.setUseQuickConnect(false);
+        // Store the quick connect value.
+        boolean useQuickConnect = settings.getUseQuickConnect();
+        settings.setUseQuickConnect(false);
 
         // Ensure the keep alive is at least 1.
         if (settings.getKeepAlive()<1)
@@ -162,43 +162,43 @@ public class RouterService
 
         // Build an endpoint of the group server
         String host= "router.limewire.com:6349";
-		Endpoint e;
-		try {
-			e=new Endpoint(host);
-		} catch (IllegalArgumentException exc) {
-			return;
-		}
+        Endpoint e;
+        try {
+            e=new Endpoint(host);
+        } catch (IllegalArgumentException exc) {
+            return;
+        }
 
-		// Disconnect from current connections.
-		disconnect();
+        // Disconnect from current connections.
+        disconnect();
 
-        // Clear host catcher.  
+        // Clear host catcher.
         catcher.silentClear();
 
-		// Kickoff the Group Connect fetch of PingReplies
-		try {
-			groupConnectToHostBlocking(e.getHostname(), e.getPort(), group);
-		} catch (IOException exc) {
-			settings.setUseQuickConnect(useQuickConnect);
-			return;
-		}
+        // Kickoff the Group Connect fetch of PingReplies
+        try {
+            groupConnectToHostBlocking(e.getHostname(), e.getPort(), group);
+        } catch (IOException exc) {
+            settings.setUseQuickConnect(useQuickConnect);
+            return;
+        }
 
-		// Reset the KeepAlive to greater than 1
+        // Reset the KeepAlive to greater than 1
         //oldKeepAlive;
 
         //Ensure settings are positive
         int outgoing=settings.getKeepAlive();
         if (outgoing<1) {
             outgoing = settings.DEFAULT_KEEP_ALIVE;
-            settings.setKeepAlive(outgoing);                    
+            settings.setKeepAlive(outgoing);
         }
         int incoming=settings.getMaxIncomingConnections();
         if (incoming<1 && outgoing!=0) {
             incoming = outgoing/2;
             settings.setMaxIncomingConnections(incoming);
-        }    
+        }
         setKeepAlive(oldKeepAlive);
-		settings.setUseQuickConnect(useQuickConnect);
+        settings.setUseQuickConnect(useQuickConnect);
     }
 //------------------------------------------------------------------------
 
@@ -234,15 +234,15 @@ public class RouterService
         int outgoing=settings.getKeepAlive();
         if (outgoing<1) {
             outgoing = settings.DEFAULT_KEEP_ALIVE;
-            settings.setKeepAlive(outgoing);                    
+            settings.setKeepAlive(outgoing);
         }
         int incoming=settings.getMaxIncomingConnections();
         if (incoming<1 && outgoing!=0) {
             incoming = outgoing/2;
             settings.setMaxIncomingConnections(incoming);
-        }        
+        }
         //Special action needed if KEEP_ALIVE changed.
-        setKeepAlive(outgoing);    
+        setKeepAlive(outgoing);
 
         //See note above.
         if (useHack) {
@@ -609,6 +609,6 @@ public class RouterService
      * Return how many files are being shared
      */
     public int getNumSharedFiles( ) {
-        return( FileManager.getFileManager().getNumFiles() );
+        return( FileManager.instance().getNumFiles() );
     }
 }
