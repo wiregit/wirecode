@@ -17,6 +17,7 @@ public class AllTests {
         suite.addTest(FileManagerTest.suite());
         suite.addTest(ManagedConnectionTest.suite());
         suite.addTest(GUIDTest.suite());
+        suite.addTest(MessageTest.suite());
         suite.addTest(StatisticsTest.suite());
         suite.addTest(XMLDocSerializerTest.suite());
         suite.addTest(CollectionTester.suite());
