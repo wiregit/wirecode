@@ -357,7 +357,7 @@ public class LimeXMLReplyCollection{
             fieldNames.add(fieldName);
         }
         //compare these fields with the current reply document
-        List currDocNameValues = replyDoc.getNameValueList();
+        //List currDocNameValues = replyDoc.getNameValueList();
         int matchCount=0;//number of matches
         int nullCount=0;//num of fields which are in query but null in ReplyDoc
         for(int j=0; j< size; j++){
@@ -366,7 +366,7 @@ public class LimeXMLReplyCollection{
             String replyDocValue = replyDoc.getValue(currFieldName);
             if(replyDocValue == null)
                 nullCount++;
-            else if(replyDocValue.equals(queryValue))
+            else if(replyDocValue.equalsIgnoreCase(queryValue))
                 matchCount++;
         }
         //The metric of a correct match is that whatever fields are specified
@@ -374,8 +374,19 @@ public class LimeXMLReplyCollection{
         //unless the reply has a null for that feild, in which case we are OK 
         // with letting it slide. But if there is even one mismatch
         // we are going to return false.
-        if( ( (nullCount+matchCount)/size ) < 1)
-            return false;
-        return true;
+        //We make an exception for queries of size i field. Here 
+        // there must be a 100% match
+        if(size > 1){
+            if( ( (nullCount+matchCount)/size ) < 1)
+                return false;
+            return true;
+        }
+        else if (size == 1){
+            if(matchCount/size <1)
+                return false;
+            return true;
+        }
+        //this should never happen - size >0
+        return false;
     }
 }
