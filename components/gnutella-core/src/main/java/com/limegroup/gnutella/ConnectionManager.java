@@ -2149,6 +2149,9 @@ public class ConnectionManager {
     	
     	//first, see if we are already connected to that host
     	//and if so, close the connection since morphing is not yet implemented
+    	
+    	//note: its ok to iterate over _initializedConnections because even though the ref
+    	//can change, the iterator will still point to the old, immutable list.
     	for (Iterator iter = _initializedConnections.iterator();iter.hasNext();) {
     		ManagedConnection c = (ManagedConnection) iter.next();
     		if (c.isSame(target))
@@ -2191,7 +2194,15 @@ public class ConnectionManager {
 		recoverHosts();
 		setKeepAlive(ConnectionSettings.NUM_CONNECTIONS.getValue());
 		
-		_disconnectTime=0; 
+		//the candidate code uses this variable to decide whether the node is connected
+		//or not.
+		//note: there are rumors floating around that some jvm's haven't been too 
+		//ardent in implementing volatility properly.  Also, all other references to this
+		//variable are synchronized...
+		synchronized(this) {
+			_disconnectTime=0;
+		}
+		
 		
     }
 
