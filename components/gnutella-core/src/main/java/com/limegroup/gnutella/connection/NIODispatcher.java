@@ -10,6 +10,9 @@ import java.nio.channels.SocketChannel;
 
 import com.limegroup.gnutella.ErrorService;
 import com.limegroup.gnutella.RouterService;
+import com.limegroup.gnutella.messages.BadPacketException;
+import com.limegroup.gnutella.messages.Message;
+import com.limegroup.gnutella.statistics.MessageReadErrorStat;
 import com.limegroup.gnutella.util.NetworkUtils;
 import com.sun.java.util.collections.Collections;
 import com.sun.java.util.collections.Iterator;
@@ -351,7 +354,25 @@ public final class NIODispatcher implements Runnable {
         if(!key.isValid()) return;
         Connection conn = (Connection)key.attachment();
         if(conn.handshaker().readComplete())  {
-            conn.reader().handleMessage(key);
+            try {
+                MessageReader reader = conn.reader();
+                Message msg = reader.createMessageFromTCP(key);
+                    
+                if(msg == null) {
+                    // the message was not read completely -- we'll get
+                    // another read event on the channel and keep reading
+                    return;
+                }
+    
+                reader.routeMessage(msg);
+            } catch (BadPacketException e) {
+                MessageReadErrorStat.BAD_PACKET_EXCEPTIONS.incrementStat();
+            } catch (IOException e) {
+                key.cancel();
+                // remove the connection if we got an IOException
+                RouterService.removeConnection((Connection)key.attachment());
+                MessageReadErrorStat.IO_EXCEPTIONS.incrementStat();
+            }
         } else  {
             try {
                 conn.handshaker().read();
