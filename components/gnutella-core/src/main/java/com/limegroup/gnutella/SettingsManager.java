@@ -307,7 +307,7 @@ public final class SettingsManager {
 	 * The default minimum number of stars for search results, on a scale
 	 * of 0 to 3 inclusive.
 	 */
-	private final int DEFAULT_MINIMUM_SEARCH_QUALITY  = 2;
+	private final int DEFAULT_MINIMUM_SEARCH_QUALITY  = 0;
 
 	/**
 	 * Value for the default minimum speed to allow in search results.
@@ -544,7 +544,7 @@ public final class SettingsManager {
 	 * Constant key for the minimum quality to allow in search results.
 	 */
 	private final String MINIMUM_SEARCH_QUALITY =
-		"MINIMUM_SEARCH_QAULITY";
+		"MINIMUM_SEARCH_QUALITY";
 
 	/**
 	 * Constant key for the minimum speed to allow in search results.
