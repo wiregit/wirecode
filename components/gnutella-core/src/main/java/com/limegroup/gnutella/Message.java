@@ -20,7 +20,7 @@ public abstract class Message implements Serializable{
     public static final byte F_PUSH=(byte)0x40;
     public static final byte F_QUERY=(byte)0x80;
     public static final byte F_QUERY_REPLY=(byte)0x81;
-    public static final byte F_ROUTE_TABLE_UPDATE=(byte)0x20;
+    public static final byte F_ROUTE_TABLE_UPDATE=(byte)0x30;
 
     /** Same as GUID.makeGUID.  This exists for backwards compatibility. */
     static byte[] makeGuid() {
