@@ -2129,6 +2129,10 @@ public class Connection implements IpPort, Candidate {
 		return res;
 	}
 	
+	/**
+	 * @return the uptime of this connection in minutes.  Minute is defined
+	 * in Constants.MINUTE in case you need to change it for tests.
+	 */
 	public short getUptime() {
 		return (short) ((System.currentTimeMillis() - getConnectionTime()) / 
 			(Constants.MINUTE));
@@ -2140,6 +2144,17 @@ public class Connection implements IpPort, Candidate {
 		if (! (o instanceof IpPort))
 			return false;
 		
+		//first try a cast to connection
+		if (o instanceof Connection) {
+			Connection other = (Connection)o;
+			
+			if (isInitialized() != other.isInitialized())
+				return false;
+			
+			// with Connection objects use the string address.
+			return getAddress().equals(other.getAddress());
+			
+		}
 		
 		IpPort other = (IpPort)o;
 		return other.getInetAddress().equals(getInetAddress()) &&
