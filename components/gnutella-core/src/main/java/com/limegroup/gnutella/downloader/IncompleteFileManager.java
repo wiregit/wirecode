@@ -461,12 +461,12 @@ public class IncompleteFileManager implements Serializable {
      */
     private synchronized void registerIncompleteFile(File incompleteFile) {
         // Only register if it has a SHA1 -- otherwise we can't share.
-        Set hashes = getAllCompletedHashes(incompleteFile);
-        if( hashes.size() == 0 ) return;
+        Set completeHashes = getAllCompletedHashes(incompleteFile);
+        if( completeHashes.size() == 0 ) return;
         
         RouterService.getFileManager().addIncompleteFile(
             incompleteFile,
-            hashes,
+            completeHashes,
             getCompletedName(incompleteFile),
             (int)getCompletedSize(incompleteFile),
             getEntry(incompleteFile)
