@@ -367,7 +367,10 @@ public final class QueryUnicaster {
 			_queryHosts.notify();
 			if(UDPService.instance().isListening() &&
 			   !RouterService.isGUESSCapable() &&
-			   _testUDPPingsSent < 10) {
+			   (_testUDPPingsSent < 10) &&
+               !(ConnectionSettings.LOCAL_IS_PRIVATE.getValue() && 
+                 NetworkUtils.isCloseIP(RouterService.getAddress(),
+                                        endpoint.getAddress().getAddress())) ) {
 				PingRequest pr = 
                 new PingRequest(UDPService.instance().getSolicitedGUID().bytes(),
                                 (byte)1, (byte)0);
