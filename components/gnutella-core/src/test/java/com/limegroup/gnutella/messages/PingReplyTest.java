@@ -61,7 +61,8 @@ public class PingReplyTest extends com.limegroup.gnutella.util.BaseTestCase {
         // subtract the number of connections we have from the desired number
         assertEquals("unexpected number ultrapeer slots", 
             ConnectionSettings.NUM_CONNECTIONS.getValue() -
-            ConnectionManager.RESERVED_NON_LIMEWIRE_PEERS, 
+            ConnectionManager.RESERVED_NON_LIMEWIRE_PEERS -
+            ConnectionSettings.NUM_LOCALE_PREF.getValue(), 
             pr.getNumUltrapeerSlots());
         
         // Switch ConnectionManager to report different values for free leaf
