@@ -18,6 +18,8 @@ import com.limegroup.gnutella.util.StringUtils;
  */
 //2345678|012345678|012345678|012345678|012345678|012345678|012345678|012345678|
 public class SettingsManager implements SettingsInterface {
+
+	private final String CURRENT_DIRECTORY = System.getProperty("user.dir");
  
 	/** Variables for the various settings */
     private volatile boolean  _forceIPAddress;
@@ -118,10 +120,9 @@ public class SettingsManager implements SettingsInterface {
     private SettingsManager() {
         _props      = new Properties();
         _ndProps    = new Properties();
-        _curDir     = System.getProperty("user.dir");
 		
-        _fileName   = _curDir + File.separator;
-        _ndFileName = _curDir + File.separator;
+        _fileName   = CURRENT_DIRECTORY + File.separator;
+        _ndFileName = CURRENT_DIRECTORY + File.separator;
         _fileName   += PROPS_NAME;
         _ndFileName += ND_PROPS_NAME;
         FileInputStream fis;
@@ -570,7 +571,7 @@ public class SettingsManager implements SettingsInterface {
      * pathname of the file listing the hosts 
 	 */
     public String getHostList() {
-		File hostListFile = new File(_curDir, HOST_LIST_NAME);		
+		File hostListFile = new File(CURRENT_DIRECTORY, HOST_LIST_NAME);		
 		return hostListFile.getAbsolutePath();
 	}
 
@@ -600,6 +601,7 @@ public class SettingsManager implements SettingsInterface {
 
     /** returns the directory to save to */
     public String getSaveDirectory() {
+		
         File file = new File(_saveDirectory);
         if(!file.isDirectory()) file.mkdirs();
 		return _saveDirectory;
@@ -610,17 +612,13 @@ public class SettingsManager implements SettingsInterface {
 	 * directory dynamically based on the save directory.
 	 */
     public String getIncompleteDirectory() {
-		// if the incomplete directory has already been set, simply
-		// return it.
-		if(_incompleteDirectory != null) return _incompleteDirectory;
-
 		String saveDir = getSaveDirectory();
 		File saveFileDir = new File(saveDir);
 		String parentDir = saveFileDir.getParent();
 		
 		// if getParent returns null, simply use the current directory
 		// as the parent.
-		if(parentDir == null) parentDir = _curDir;
+		if(parentDir == null) parentDir = CURRENT_DIRECTORY;
 		File incFile = new File(parentDir, "Incomplete");
 		incFile.mkdirs();
 		_incompleteDirectory = incFile.getAbsolutePath();		
@@ -631,7 +629,10 @@ public class SettingsManager implements SettingsInterface {
 	 * returns the default save directory path. 
 	 */	
     public String getSaveDefault() {		
-		return _curDir + File.separator + SAVE_DIRECTORY_NAME;
+		String defaultPath = CURRENT_DIRECTORY;		
+		if(!defaultPath.endsWith(File.separator))
+			defaultPath += File.separator;
+		return defaultPath + SAVE_DIRECTORY_NAME;
     }
 
     /** returns the directories to search */
@@ -709,7 +710,7 @@ public class SettingsManager implements SettingsInterface {
     public Properties getNDProps(){return _ndProps;}
 
     /** returns the path of the properties and host list files */
-    public String getPath() {return _curDir + File.separator;}
+    public String getPath() {return CURRENT_DIRECTORY + File.separator;}
 
     public int getBasicInfoSizeForQuery() {return _basicQueryInfo;}
 
