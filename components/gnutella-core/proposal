@@ -5,7 +5,9 @@ Replies through the HTTP protocol used for Uploads and Downloads.
 
 Here are the details about the proposed standard:
 
-* 'Browse Host' capable clients notify others of this feature via
+1) Advertising Browse Host through GGEP
+
+'Browse Host' capable clients notify others of this feature via
 GGEP. THe new extension ID for Browse Host is 'BHOST' (subject to
 approval) and 'Browse Host' capable clients should add a
 corresponding extension header to all Query Replies. There is no
@@ -17,7 +19,11 @@ For now, simply having a GGEP ext. ID (and no data) is sufficient
 because different 'Browse Host' implementations are resolved via the
 'Accept' HTTP header flag (see below for more detail).
 
-* A Browse Host request will be satisfied through an HTTP GET request.
+2) The HTTP-based Browse Host Protocol
+
+A) The Protocol
+
+A Browse Host request will be satisfied through an HTTP GET request.
 The request will list media types that are acceptable as a return
 value (via the 'Accept' request header field, RFC 1945, pg. 59).
 The request lists these media types with a empty-string valued GET.
@@ -69,6 +75,32 @@ browsed.
 
 Other media types will be followed by different responses, as
 necessary.
+
+A server may compress the results of a Browse Host query.  First,
+the server should confirm that the client accepts the compressed
+encoding, ie "deflate".  This can be communicated by the client
+through use of the HTTP 'Accept-Encoding' header and by the
+server's use of the HTTP 'Content-Encoding' header.  For example:
+
+Client (LimeWire)
+-------------------------
+GET / HTTP/1.1
+Host: w.x.y.z
+User-Agent: Limewire x.y.z Pro
+Accept: text/html, application/x-gnutella-queryreplies
+Accept-Encoding: deflate
+Content-Length: 0
+Connection: close
+
+Server (New BearShare)
+-------------------------
+HTTP/1.1 200 OK
+User-Agent: BearShare/x.y
+Content-Type: text/html; charset=iso-8859-1
+Content-Encoding: deflate
+
+B) Error Cases
+
 If a servent cannot respond to any of the requested media types, an
 HTTP error message is returned.
 For example:
@@ -86,14 +118,17 @@ Content-Type: text/html
 Old BearShare's only support text/html and LimeWire does not, so a 406
 is returned (This is a example only) .
 
+C) Servent Specific Behavior
+
 A servent may impose whatever limitations on responding to Browse
 Host requests that they see fit, such as Upload Slot and Bandwidth
 Usage limitations. It is recommended that Upload Slot limitations
-are not
-enforced for the majority of clients though (A client sharing a large
-number of files may want to limit 'Browse Host' requests).
+are not enforced for the majority of clients though (A client sharing 
+a large number of files may want to limit 'Browse Host' requests).
 
-* Pushes are also supported. A Push is routed in the normal fashion
+3) Browse Host through Pushes
+
+Pushes are also supported. A Push is routed in the normal fashion
 (a la Push Requests). The Push Request can technically have any
 index.
 The GIV message (sent from the server to the client requesting a
@@ -123,6 +158,8 @@ HTTP/1.1 200 OK
 User-Agent: BearShare/x.y
 Content-Type: text/html; charset=iso-8859-1
 
+
+4) Protocol Advantages
 
 This scheme has the following advantages:
 1) It works seamlessly with all existing BearShares. This flexibility
