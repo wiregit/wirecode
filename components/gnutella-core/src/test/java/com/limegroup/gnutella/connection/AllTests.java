@@ -11,6 +11,7 @@ public class AllTests {
         TestSuite suite=new TestSuite("All connection tests");
         suite.addTest(ConnectionHandshakeTest.suite());
         suite.addTest(ConnectionTest.suite());
+        suite.addTest(ConnectionDriverTest.suite());
         return suite;
     }
 
