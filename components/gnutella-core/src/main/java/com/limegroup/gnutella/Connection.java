@@ -56,11 +56,11 @@ import java.util.Enumeration;
  * filters are configured by the properties in the SettingsManager, but
  * you can change them with setPersonalFilter and setRouteFilter.<p>
  *
- * Connections support the 0.4 and 1.0 handshakses.  Connections try to connect
+ * Connections support the 0.4 and 0.6 handshakes.  Connections try to connect
  * at the highest protocol level possible, but they also try to avoid
  * incompatibility.  The only time there is a tension is when attempting to
- * establish outgoing 1.0 connections; you don't know whether they'll accept
- * your headers.  Gnutella 1.0 connections have a list of properties read and
+ * establish outgoing 0.6 connections; you don't know whether they'll accept
+ * your headers.  Gnutella 0.6 connections have a list of properties read and
  * written during the handshake sequence.  Typical property/value pairs might be
  * "Query-Routing: 0.3" or "Pong-Caching: 0.1".  
  */
@@ -115,9 +115,9 @@ public class Connection {
     private boolean _negotiate=false;
     public static final String GNUTELLA_CONNECT_04="GNUTELLA CONNECT/0.4";
     public static final String GNUTELLA_OK_04="GNUTELLA OK";
-    public static final String GNUTELLA_CONNECT_10="GNUTELLA CONNECT/1.0";
-    public static final String GNUTELLA_OK_10="GNUTELLA/1.0 200 OK";
-    /** End of line for Gnutella 1.0 */
+    public static final String GNUTELLA_CONNECT_06="GNUTELLA CONNECT/0.6";
+    public static final String GNUTELLA_OK_06="GNUTELLA/0.6 200 OK";
+    /** End of line for Gnutella 0.6 */
     public static final String CRLF="\r\n";
     /** End of line for Gnutella 0.4 */
     public static final String LF="\n";
@@ -133,7 +133,7 @@ public class Connection {
 
 
     /**
-     * Creates an outgoing Gnutella 1.0 connection 
+     * Creates an outgoing Gnutella 0.6 connection 
      * initialize() must be called before anything else.
      * 
      * @param properties the properties to send upon connection
@@ -185,13 +185,13 @@ public class Connection {
      */
     public void initialize() throws IOException {
         try {
-            initialize2();
+            initializeWithoutRetry();
         } catch (BadHandshakeException e) {
-            //If an outgoing attempt at Gnutella 1.0 failed, and the user
+            //If an outgoing attempt at Gnutella 0.6 failed, and the user
             //has requested we try lower protocol versions, try again.
             if (_negotiate && isOutgoing() && _propertiesWritten!=null) {
                 _propertiesWritten=null;
-                initialize2();
+                initializeWithoutRetry();
             } else {
                 throw e;
             }
@@ -203,7 +203,7 @@ public class Connection {
     /*
      * Exactly like initialize, but without the re-connection.
      */
-    private void initialize2() throws IOException {
+    private void initializeWithoutRetry() throws IOException {
         SettingsManager settingsManager = SettingsManager.instance();
         String expectString;
 
@@ -239,52 +239,76 @@ public class Connection {
         try {
             //In all the line reading code below, we are somewhat lax in
             //distinguishing between '\r' and '\n'.  Who cares?
-            if(isOutgoing()) {
-                //On outgoing connections, ALWAYS try Gnutella 1.0 if requested
-                //by the user.  If the other end doesn't understand it--too bad!
-                //It might be nice to provide an option for automatic reconnect
-                //at lower protocol version.
-                if (_propertiesWritten==null)
-                    sendString(GNUTELLA_CONNECT_04+LF+LF);
-                else {
-                    sendString(GNUTELLA_CONNECT_10+CRLF);
-                    sendHeaders();                
-                }
-                //We require that the response be at the same protocol level as
-                //we sent out.  This is necessary because BearShare will accept
-                //"GNUTELLA CONNECT/1.0" and respond with "GNUTELLA OK", only to
-                //be confused by the headers later.
-                String line=readLine();
-                if (_propertiesWritten==null && line.equals(GNUTELLA_OK_04))
-                    readLine();
-                else if (_propertiesWritten!=null && line.equals(GNUTELLA_OK_10))
-                    readHeaders();
-                else
-                    throw new IOException("Bad connect string");                
-            } else {
-                //Remember that "GNUTELLA " has already been read by Acceptor.
-                //Hence we are looking for "CONNECT/0.4" or "CONNECT/1.0".  As a
-                //dirty hack, we use String.endsWith.  This means we will
-                //accidentally allow crazy things like "0.4".  Oh well!
-                String line=readLine();  
-                if (GNUTELLA_CONNECT_04.endsWith(line)) {
-                    readLine();
-                    sendString(GNUTELLA_OK_04+LF+LF);
-                    //If the user requested properties, we can't send them.
-                    _propertiesWritten=null;
-                } else if (GNUTELLA_CONNECT_10.endsWith(line)) {
-                    readHeaders();
-                    sendString(GNUTELLA_OK_10+CRLF);
-                    if (_propertiesWritten==null)
-                        _propertiesWritten=new Properties();
-                    sendHeaders();
-                } else {
-                    throw new IOException("Unexpected connect string");
-                }
-            }
+            if(isOutgoing())
+                initializeOutgoing();
+            else
+                initializeIncoming();
         } catch(IOException e) {
             _socket.close();
             throw new BadHandshakeException();
+        }
+    }
+
+    /** Sends and receives handshake strings for outgoing connections,
+     *  throwing IOException if any problems. */
+    private void initializeOutgoing() throws IOException {
+        //On outgoing connections, ALWAYS try Gnutella 0.6 if requested by the
+        //user.  If the other end doesn't understand it--too bad!  There is an
+        //option at higher levels to retry.
+        if (_propertiesWritten==null) {
+            sendString(GNUTELLA_CONNECT_04+LF+LF);
+            if (! readLine().equals(GNUTELLA_OK_04))
+                throw new IOException("Bad connect string"); 
+            if (! readLine().equals(""))  //Get second \n
+                throw new IOException("Bad connect string"); 
+        }
+        else {
+            //1. Send "GNUTELLA CONNECT" and headers
+            sendString(GNUTELLA_CONNECT_06+CRLF);
+            sendHeaders();                
+            //2. Read "GNUTELLA CONNECT" and headers.  We require that the
+            //response be at the same protocol level as we sent out.  This is
+            //necessary because BearShare will accept "GNUTELLA CONNECT/0.6" and
+            //respond with "GNUTELLA OK", only to be confused by the headers
+            //later.
+            if (! readLine().equals(GNUTELLA_OK_06))
+                throw new IOException("Bad connect string");
+            readHeaders();
+            //3. Send "GNUTELLA/200 OK" with no headers.
+            sendString(GNUTELLA_OK_06+CRLF+CRLF);
+        }
+    }
+
+    /** Sends and receives handshake strings for incoming connections,
+     *  throwing IOException if any problems. */
+    private void initializeIncoming() throws IOException {
+        //Dispatch based on first line read.  Remember that "GNUTELLA " has
+        //already been read by Acceptor.  Hence we are looking for "CONNECT/0.4"
+        //or "CONNECT/0.6".  As a dirty hack, we use String.endsWith.  This
+        //means we will accidentally allow crazy things like "0.4".  Oh well!
+        String line=readLine();  
+        if (GNUTELLA_CONNECT_04.endsWith(line)) {
+            //a) Old style
+            if (! readLine().equals(""))  //Get second \n
+                throw new IOException("Bad connect string"); 
+            sendString(GNUTELLA_OK_04+LF+LF);
+            //If the user requested properties, we can't send them.
+            _propertiesWritten=null;
+        } else if (GNUTELLA_CONNECT_06.endsWith(line)) {
+            //b) New style
+            //1. Read GNUTELLA CONNECT
+            readHeaders();
+            //2. Send GNUTELLA/200 OK
+            sendString(GNUTELLA_OK_06+CRLF);
+            if (_propertiesWritten==null)
+                _propertiesWritten=new Properties();
+            sendHeaders();
+            //3. Read GNUTELLA/200 OK, and any private vendor headers.
+            if (! readLine().equals(GNUTELLA_OK_06))
+                throw new IOException("Bad connect string");
+            readHeaders();
+        } else {
+            throw new IOException("Unexpected connect string");
         }
     }
 
@@ -307,12 +331,14 @@ public class Connection {
 
 
     /**
-     * Allocates _propertiesRead and reads the properties from the network into
-     * _propertiesRead, throwing IOException if there are any problems.
+     * reads the properties from the network into _propertiesRead, throwing
+     * IOException if there are any problems.  Allocates _propertiesRead if
+     * null.
      *     @modifies network 
      */
     private void readHeaders() throws IOException {
-        _propertiesRead=new Properties();
+        if (_propertiesRead==null)
+            _propertiesRead=new Properties();
         //TODO: limit number of headers read
         while (true) {
             //This doesn't distinguish between \r and \n.  That's fine.
@@ -345,7 +371,7 @@ public class Connection {
      * Reads and returns one line from the network.  A line is defined as a
      * maximal sequence of characters without '\n', with '\r''s removed.  If the
      * characters cannot be read within TIMEOUT milliseconds (as defined by the
-     * property manager), throws IOException.
+     * property manager), throws IOException.  This includes EOF.
      *
      * @requires _socket is properly set up
      * @modifies network
@@ -545,28 +571,28 @@ public class Connection {
 //          Assert.that(p.out.getProperty("Query-Routing")==null);
 //          disconnect(p);
 
-//          //2. 1.0 => 1.0
+//          //2. 0.6 => 0.6
 //          p=connect(props, props);
 //          Assert.that(p!=null);
 //          Assert.that(p.in.getProperty("Query-Routing").equals("0.3"));
 //          Assert.that(p.out.getProperty("Query-Routing").equals("0.3"));
 //          disconnect(p);
 
-//          //3. 0.4 => 1.0 (Incoming doesn't send properties)
+//          //3. 0.4 => 0.6 (Incoming doesn't send properties)
 //          p=connect(props, null);
 //          Assert.that(p!=null);
 //          Assert.that(p.in.getProperty("Query-Routing")==null);
 //          Assert.that(p.out.getProperty("Query-Routing")==null);
 //          disconnect(p);
 
-//          //4. 1.0 => 0.4 (If the receiving connection were Gnutella 0.4, this
-//          //wouldn't work.  But the new guy will automatically upgrade to 1.0.)
+//          //4. 0.6 => 0.4 (If the receiving connection were Gnutella 0.4, this
+//          //wouldn't work.  But the new guy will automatically upgrade to 0.6.)
 //          p=connect(null, props);
 //          Assert.that(p!=null);
-//          Assert.that(p.in.getProperty("Query-Routing").equals("0.3"));
+//          Assert.that(p.in.getProperty("Query-Routing")==null);
 //          Assert.that(p.out.getProperty("Query-Routing")==null);
 //          disconnect(p);
-//     }   
+//      }   
 
 //      private static class ConnectionPair {
 //          Connection in;
@@ -578,7 +604,7 @@ public class Connection {
 //          ConnectionPair ret=new ConnectionPair();
 //          MiniAcceptor acceptor=new MiniAcceptor(inProperties);
 //          try {
-//              ret.out=new Connection("localhost", 6346, outProperties);
+//              ret.out=new Connection("localhost", 6346, outProperties, true);
 //              ret.out.initialize();
 //          } catch (IOException e) { }
 //          ret.in=acceptor.accept();
