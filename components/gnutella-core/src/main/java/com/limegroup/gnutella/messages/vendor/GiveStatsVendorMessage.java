@@ -21,12 +21,14 @@ public class GiveStatsVendorMessage extends VendorMessage {
     
     public static final byte GNUTELLA_OUTGOING_TRAFFIC = (byte)2;
 
-    public static final byte DOWNLOAD_TRAFFIC_STATS = (byte)3;
+    public static final byte HTTP_DOWNLOAD_TRAFFIC_STATS = (byte)3;
     
-    public static final byte UPLOAD_TRAFFIC_STATS = (byte)4;   
+    public static final byte HTTP_UPLOAD_TRAFFIC_STATS = (byte)4;   
 
     public static final byte PER_CONNECTION_STATS = (byte)1;
     public static final byte ALL_CONNECTIONS_STATS = (byte)2;
+    public static final byte LEAF_CONNECTIONS_STATS = (byte)1;
+    public static final byte UP_CONNECTIONS_STATS = (byte)2;
 
 
     private int _network;
