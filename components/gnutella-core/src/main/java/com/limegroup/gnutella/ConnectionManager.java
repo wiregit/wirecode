@@ -283,10 +283,6 @@ public class ConnectionManager implements Runnable {
 	Assert.that(!connections.contains(c));
 	
 	connections.add(c);
-	//Don't record incoming connections, since the foreign host's
-	//port is ephemeral.
-	if (c.isOutgoing())
-	    catcher.addGood(c);
 
 	// Tell the listener that this connection is okay.
 	if ( callback != null )
