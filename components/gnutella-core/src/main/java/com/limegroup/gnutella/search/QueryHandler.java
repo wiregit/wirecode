@@ -27,21 +27,21 @@ public final class QueryHandler {
 	 * The number of results to try to get if we're an Ultrapeer originating
 	 * the query.
 	 */
-	private static final int ULTRAPEER_RESULTS = 100;
+	private static final int ULTRAPEER_RESULTS = 150;
 
 	/**
 	 * The number of results to try to get if the query came from an old
 	 * leaf -- they are connected to 2 other Ultrapeers that may or may
 	 * not use this algorithm.
 	 */
-	private static final int OLD_LEAF_RESULTS = 30;
+	private static final int OLD_LEAF_RESULTS = 40;
 
 	/**
 	 * The number of results to try to get for new leaves -- they only 
 	 * maintain 2 connections and don't generate as much overall traffic,
 	 * so give them a little more.
 	 */
-	private static final int NEW_LEAF_RESULTS = 50;
+	private static final int NEW_LEAF_RESULTS = 75;
 
 	/**
 	 * The number of results to try to get for queries by hash -- really
@@ -303,11 +303,6 @@ public final class QueryHandler {
                                this);
             long timeToWait = pq.getTimeToWait();            
             _theoreticalHostsQueried += pq.sendProbe();
-            if(QUERY.getHops() == 0) {
-                System.out.println("QueryHandler::sendQuery:"+
-                                   "_theoreticalHostsQueried: "+
-                                   QUERY.getQuery()+" "+_theoreticalHostsQueried); 
-            }
             _nextQueryTime = 
                 System.currentTimeMillis() + timeToWait;
             _probeQuerySent = true;
@@ -340,7 +335,6 @@ public final class QueryHandler {
      *  query iteration
      */
     private int sendQuery(List list) {
-
         // weed out any stale data from the lists of queried connections --
         // remove any elements that are not in our more up-to-date list
         // of connections.
@@ -381,15 +375,11 @@ public final class QueryHandler {
         if(remainingConnections == 0) return 0;
 
         // pretend we have fewer connections than we do in case we
-        // lost some
+        // lose some
         if(remainingConnections > 4) remainingConnections -= 4;
 
         boolean probeConnection = false;
         if(mc == null) {
-            if(QUERY.getHops() == 0) {
-                System.out.println("QueryHandler::sendQuery::"+
-                                   QUERY.getQuery()+"using probe"); 
-            }
             // if we have no connections to query, simply return for now
             if(QUERIED_PROBE_CONNECTIONS.isEmpty()) return 0;
             
@@ -398,10 +388,6 @@ public final class QueryHandler {
             // not have any of the same entries, as this connection
             // will be added to QUERIED_CONNECTIONS
             mc = (ManagedConnection)QUERIED_PROBE_CONNECTIONS.remove(0);
-            if(QUERY.getHops() == 0) {
-                System.out.println("QueryHandler::sendQuery::"+
-                                   QUERY.getQuery()+"got probe"); 
-            }
             probeConnection = true;
         }
                            
@@ -410,38 +396,16 @@ public final class QueryHandler {
         double resultsPerHost = 
             (double)results/(double)_theoreticalHostsQueried;
 			
-        int resultsNeeded = RESULTS - results;
-        if(QUERY.getHops() == 0) {
-            System.out.println("QueryHandler::sendQuery::"+
-                               "results needed: "+
-                               QUERY.getQuery()+" "+
-                               resultsNeeded); 
-        }
-        
+        int resultsNeeded = RESULTS - results;        
         int hostsToQuery = 40000;
         if(resultsPerHost != 0) {
             hostsToQuery = (int)((double)resultsNeeded/resultsPerHost);
         }
-        
-        if(QUERY.getHops() == 0) {
-            System.out.println("QueryHandler::sendQuery::"+
-                               "hosts to query: "+
-                               QUERY.getQuery()+" "+
-                               hostsToQuery+" remaining connections: "+
-                               remainingConnections+" "+
-                               "probes: "+QUERIED_PROBE_CONNECTIONS.size()); 
-        }
-        
+                
         
         int hostsToQueryPerConnection = 
             hostsToQuery/remainingConnections;			
         
-        if(QUERY.getHops() == 0) {
-            System.out.println("QueryHandler::sendQuery::"+
-                               "hosts to query per connection: "+
-                               QUERY.getQuery()+" "+
-                               hostsToQueryPerConnection); 
-        }
         byte maxTTL = mc.headers().getMaxTTL();
         
         ttl = calculateNewTTL(hostsToQueryPerConnection, 
@@ -449,8 +413,12 @@ public final class QueryHandler {
                               mc.headers().getMaxTTL());
                
 
-        // if we're sending the query down a probe connection, send it at
-        // ttl=2, as we've already sent it at TTL=1
+        // If we're sending the query down a probe connection and we've
+        // already used that connection, or that connection doesn't have
+        // a hit for the query, send it at TTL=2.  In these cases, 
+        // sending the query at TTL=1 is pointless because we've either
+        // already sent this query, or the Ultrapeer doesn't have a 
+        // match anyway
         if(ttl == 1 && 
            ((mc.isUltrapeerQueryRoutingConnection() &&
             !mc.hitsQueryRouteTable(QUERY)) || probeConnection)) {
@@ -509,6 +477,7 @@ public final class QueryHandler {
 	 *  each remaining connections, to the best of our knowledge
      * @param degree the out-degree of the next connection
      * @param maxTTL the maximum TTL the connection will allow
+     * @return the TTL to use for the next connection
 	 */
 	private static byte 
         calculateNewTTL(int hostsToQueryPerConnection, int degree, byte maxTTL) {
@@ -521,6 +490,7 @@ public final class QueryHandler {
             // quickly
             int hosts = (int)(16.0*calculateNewHosts(degree, i));            
             if(hosts >= hostsToQueryPerConnection) {
+                if(i > maxTTL) return maxTTL;
                 return i;
             }
         }
@@ -568,11 +538,6 @@ public final class QueryHandler {
 		if(_queryStartTime == 0) return false;
 
 		if(RESULT_COUNTER.getNumResults() >= RESULTS) {
-            if(QUERY.getHops() == 0) {
-                System.out.println(QUERY.getQuery()+
-                                   " received enough results: "+
-                                   RESULT_COUNTER.getNumResults()); 
-            }
             return true;
         }
 	 
@@ -582,11 +547,6 @@ public final class QueryHandler {
         // because, while connection have a specfic degree, the degree of 
         // the connections on subsequent hops cannot be determined
 		if(_theoreticalHostsQueried > 110000) {
-            if(QUERY.getHops() == 0) {
-                System.out.println(QUERY.getQuery()+
-                                   " max horizon reached: "+
-                                   _theoreticalHostsQueried); 
-            }
             return true;
         }
 
@@ -594,11 +554,6 @@ public final class QueryHandler {
 		// maximum
 		int queryLength = (int)(System.currentTimeMillis() - _queryStartTime);
 		if(queryLength > 200*1000) {
-            if(QUERY.getHops() == 0) {
-                System.out.println(QUERY.getQuery()+
-                                   " length timed out: "+
-                                   queryLength); 
-            }
             return true;
         }
 
@@ -621,3 +576,6 @@ public final class QueryHandler {
 		return "QueryHandler: QUERY: "+QUERY;
 	}
 }
+
+
+
