@@ -32,15 +32,26 @@ public class HTTPDownloader implements Runnable {
     private BufferedInputStream _bis;
     private FileOutputStream _fos;
 
+
+    String _protocol;
+    String _host;
+    int _port;
+    int _index;
+    byte[] _guid;    
+
     private ByteReader _br;
 
     private boolean _okay;
+
+    private int _mode;
 
 
     /* The server side put */
     public HTTPDownloader(Socket s, String file, ConnectionManager m) {
 	
 	_okay = false;
+
+	_mode = 1;
 
 	_filename = file;
 	_amountRead = 0;
@@ -49,10 +60,12 @@ public class HTTPDownloader implements Runnable {
 	_manager = m;
 	_callback = _manager.getCallback();
 	_downloadDir = "";
+    }
 
+    public void initOne() {
 
 	try {
-	    _istream = s.getInputStream();
+	    _istream = _socket.getInputStream();
 	    // _bis = new BufferedInputStream(_istream);
 	    // InputStreamReader isr = new InputStreamReader(_istream);
 	    // _in = new BufferedReader(isr, 1);
@@ -71,6 +84,10 @@ public class HTTPDownloader implements Runnable {
 	
     }
       
+
+  
+
+
     /* The client side get */
     public HTTPDownloader(String protocol, String host, 
 			  int port, int index, String file, 
@@ -78,6 +95,9 @@ public class HTTPDownloader implements Runnable {
 			
 	System.out.println("entered cons.");
 	_okay = false;
+
+	_mode = 2;
+
 	_filename = file;
 	_amountRead = 0;
 	_sizeOfFile = -1;
@@ -86,25 +106,35 @@ public class HTTPDownloader implements Runnable {
 	_callback = _manager.getCallback();
 	_downloadDir = "";
 
+	_protocol = protocol;
+	_host = host;
+	_index = index;
+	_port = port;
+	_guid = guid;
+
+    }
+
+    public void initTwo() {
+
 	URLConnection conn;
 
-	String furl = "/get/" + String.valueOf(index) + "/" + file;
+	String furl = "/get/" + String.valueOf(_index) + "/" + _filename;
 
 	try {
 	    // System.out.println("b4 url open");
-	    URL url = new URL(protocol, host, port, furl);
+	    URL url = new URL(_protocol, _host, _port, furl);
 	    // System.out.println("mid url open");
 	    conn = url.openConnection();
 	    // System.out.println("after url open");
 
 	}
 	catch (java.net.MalformedURLException e) {
-	    sendPushRequest(host, index, port, guid);
+	    sendPushRequest(_host, _index, _port, _guid);
 	    // _callback.error(ActivityCallback.ERROR_5);
 	    return;
 	}
 	catch (IOException e) {
-	    sendPushRequest(host, index, port, guid);
+	    sendPushRequest(_host, _index, _port, _guid);
 	    // _callback.error(ActivityCallback.ERROR_6);
 
 	    return;
@@ -130,7 +160,7 @@ public class HTTPDownloader implements Runnable {
 	}
   	catch (IOException e) {
   	//      e.printStackTrace();
-  	    sendPushRequest(host, index, port, guid);
+  	    sendPushRequest(_host, _index, _port, _guid);
   	    return;
 
   	}
@@ -205,6 +235,14 @@ public class HTTPDownloader implements Runnable {
     }
 
     public void run() {
+
+	if (_mode == 1)
+	    initOne();
+	else if (_mode ==2)
+	    initTwo();
+	else
+	    return;
+
 	 if (_okay) {
 	     // System.out.println("Download is Okay");
 	    _callback.addDownload(this);
@@ -285,8 +323,8 @@ public class HTTPDownloader implements Runnable {
 	    _amountRead+=c;
 	    // _amountRead++;
 	    
-	//      System.out.println("The amount read: " + _amountRead);
-//  	    System.out.println("The size of the file: " + _sizeOfFile);	    
+	    System.out.println("The amount read: " + _amountRead);
+  	    System.out.println("The size of the file: " + _sizeOfFile);	    
 //  	    double percent = _amountRead / _sizeOfFile;
 //  	    System.out.println("The percent read: " + percent);
 //  	    System.out.println("");
