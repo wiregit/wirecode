@@ -11,8 +11,10 @@ import com.limegroup.gnutella.util.BucketQueue;
 import com.limegroup.gnutella.util.MessageTestUtils;
 import com.limegroup.gnutella.util.PrivilegedAccessor;
 import com.limegroup.gnutella.util.UltrapeerConnectionManager;
+import com.limegroup.gnutella.settings.ApplicationSettings;
 import com.sun.java.util.collections.Iterator;
 import com.sun.java.util.collections.List;
+import com.sun.java.util.collections.Map;
 
 /**
  * Tests the <tt>PongCacher</tt> class that maintains a cache of the best most
@@ -37,11 +39,10 @@ public final class PongCacherTest extends BaseTestCase {
     }
 
     public void setUp() throws Exception {
-        BucketQueue bq = 
-            (BucketQueue)PrivilegedAccessor.getValue(PC, "PONGS");
-        if(bq != null) {
-            bq.clear();
-        }
+        Map m = 
+            (Map)PrivilegedAccessor.getValue(PC, "PONGS");
+        if(m != null)
+            m.clear();
     }
 
     public static void globalSetUp() throws Exception {
@@ -62,14 +63,16 @@ public final class PongCacherTest extends BaseTestCase {
         PongCacher.instance().addPong(pr);
         
         // Make sure we get the pong successfully.
-        List pongs = PongCacher.instance().getBestPongs();
+        List pongs = PongCacher.instance()
+            .getBestPongs(ApplicationSettings.LANGUAGE.getValue());
         assertEquals("should be 1 pong",1,pongs.size());
         Iterator iter = pongs.iterator();
         PingReply retrievedPong = (PingReply)iter.next();
         assertEquals("unexpected pong", pr, retrievedPong);
 
         // Make sure we still get the pong successfully on a second pass.
-        pongs = PongCacher.instance().getBestPongs();
+        pongs = PongCacher.instance()
+            .getBestPongs(ApplicationSettings.LANGUAGE.getValue());
         assertEquals("should be 1 pong",1,pongs.size());
         iter = pongs.iterator();
         retrievedPong = (PingReply)iter.next();
@@ -78,7 +81,8 @@ public final class PongCacherTest extends BaseTestCase {
         // Finally, make sure the pong expires on a sleep -- add a bit to the
         // sleep to avoid thread scheduling craziness.
         Thread.sleep(PongCacher.EXPIRE_TIME+800);
-        pongs = PongCacher.instance().getBestPongs();
+        pongs = PongCacher.instance()
+            .getBestPongs(ApplicationSettings.LANGUAGE.getValue());
         assertEquals("list should be empty", 0, pongs.size());
         
     }
@@ -91,12 +95,12 @@ public final class PongCacherTest extends BaseTestCase {
             new UltrapeerConnectionManager(new ServerAuthenticator());
         PrivilegedAccessor.setValue(RouterService.class, "manager", cm);    
         
-        List pongs = PC.getBestPongs();
+        List pongs = PC.getBestPongs(ApplicationSettings.LANGUAGE.getValue());
 
         PingReply pong = PingReply.create(new GUID().bytes(), (byte)5);
         PC.addPong(pong);        
 
-        pongs = PC.getBestPongs();
+        pongs = PC.getBestPongs(ApplicationSettings.LANGUAGE.getValue());
         assertEquals("unexpected number of cached pongs", 
                      1, pongs.size());        
 
@@ -104,7 +108,7 @@ public final class PongCacherTest extends BaseTestCase {
         PC.addPong(pong);        
 
 
-        pongs = PC.getBestPongs();
+        pongs = PC.getBestPongs(ApplicationSettings.LANGUAGE.getValue());
         assertEquals("unexpected number of cached pongs", 
                      1, pongs.size());  
 
@@ -115,7 +119,7 @@ public final class PongCacherTest extends BaseTestCase {
             PC.addPong(curPong);
         }
 
-        pongs = PC.getBestPongs();
+        pongs = PC.getBestPongs(ApplicationSettings.LANGUAGE.getValue());
 
         assertEquals("unexpected number of cached pongs", 
                      PongCacher.NUM_PONGS_PER_HOP, pongs.size());
@@ -128,7 +132,7 @@ public final class PongCacherTest extends BaseTestCase {
         PC.addPong(highHopPong);
 
         //Thread.sleep(PongCacher.REFRESH_INTERVAL+200);
-        pongs = PC.getBestPongs();
+        pongs = PC.getBestPongs(ApplicationSettings.LANGUAGE.getValue());
         assertEquals("unexpected number of cached pongs", 
                      PongCacher.NUM_PONGS_PER_HOP+1, pongs.size());
 
@@ -146,7 +150,7 @@ public final class PongCacherTest extends BaseTestCase {
         PC.addPong(highHopPong2);
 
         //Thread.sleep(PongCacher.REFRESH_INTERVAL+200);
-        pongs = PC.getBestPongs();
+        pongs = PC.getBestPongs(ApplicationSettings.LANGUAGE.getValue());
         assertEquals("unexpected number of cached pongs", 
                      PongCacher.NUM_PONGS_PER_HOP+2, pongs.size());   
 
@@ -167,9 +171,11 @@ public final class PongCacherTest extends BaseTestCase {
         PingReply pong = PingReply.create(new GUID().bytes(), (byte)5);
         PC.addPong(pong);
 
+        Map m = 
+            (Map)PrivilegedAccessor.getValue(PongCacher.class,
+                                             "PONGS");
         BucketQueue bq = 
-            (BucketQueue)PrivilegedAccessor.getValue(PongCacher.class, 
-                                                     "PONGS");
+            (BucketQueue)m.get(pong.getClientLocale());
         assertEquals("unexpected bucket queue size", 1, bq.size());
 
         pong = PingReply.create(new GUID().bytes(), (byte)5);

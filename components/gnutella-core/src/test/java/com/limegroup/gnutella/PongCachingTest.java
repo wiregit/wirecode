@@ -16,6 +16,7 @@ import com.limegroup.gnutella.settings.FilterSettings;
 import com.limegroup.gnutella.settings.PingPongSettings;
 import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.settings.UltrapeerSettings;
+import com.limegroup.gnutella.settings.ApplicationSettings;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.util.BaseTestCase;
 import com.limegroup.gnutella.util.EmptyResponder;
@@ -230,7 +231,8 @@ public final class PongCachingTest extends BaseTestCase {
             PongCacher.instance().addPong(curPong);            
         }
         
-        List pongs = PongCacher.instance().getBestPongs();
+        List pongs = PongCacher.instance()
+            .getBestPongs(ApplicationSettings.LANGUAGE.getValue());
         assertEquals( PongCacher.NUM_HOPS, pongs.size() );
 
         Message m = new PingRequest((byte)7);
