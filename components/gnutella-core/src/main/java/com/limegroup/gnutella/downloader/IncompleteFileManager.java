@@ -110,10 +110,8 @@ public class IncompleteFileManager implements Serializable {
         //Remove any hashes for which the file doesn't exist.  Only do this once
         //per session--that's critical to resume-by-hash.
         if (initialPurge) {
-            for (Iterator iter=hashes.entrySet().iterator(); iter.hasNext(); ) {
-                Map.Entry entry=(Map.Entry)iter.next();
-                URN urn=(URN)entry.getKey();
-                File file=(File)entry.getValue();
+            for (Iterator iter=hashes.values().iterator(); iter.hasNext(); ) {
+                File file=(File)iter.next();
                 if (!file.exists()) {
                     iter.remove();
                     ret=true;
