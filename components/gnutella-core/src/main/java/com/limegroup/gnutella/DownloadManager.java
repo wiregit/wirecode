@@ -132,9 +132,9 @@ public class DownloadManager implements BandwidthTracker {
         try {
             for (Iterator iter=buf.iterator(); iter.hasNext(); ) {
                 ManagedDownloader downloader=(ManagedDownloader)iter.next();
-                waiting.add(downloader);             //1
-                downloader.initialize(this);         //2
-                callback.addDownload(downloader);    //3
+                waiting.add(downloader);                       //1
+                downloader.initialize(this, this.fileManager); //2
+                callback.addDownload(downloader);              //3
             }
             return true;
         } catch (ClassCastException e) {
