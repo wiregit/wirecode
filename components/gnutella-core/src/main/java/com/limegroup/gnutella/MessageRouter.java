@@ -1188,9 +1188,9 @@ public abstract class MessageRouter {
      * ManagedConnection.loopForMessages().  This implementation
      * uses the ping route table to route a ping reply.  If an appropriate route
      * doesn't exist, records the error statistics.  On sucessful routing,
-     * the PingReply count is incremented.
+     * the PingReply count is incremented.<p>
      *
-     * In all cases, the ping reply is recorded into the host catcher.
+     * In all cases, the ping reply is recorded into the host catcher.<p>
      *
      * Override as desired, but you probably want to call super.handlePingReply
      * if you do.
@@ -1238,7 +1238,7 @@ public abstract class MessageRouter {
      * ManagedConnection.loopForMessages().  This implementation
      * uses the query route table to route a query reply.  If an appropriate
      * route doesn't exist, records the error statistics.  On sucessful routing,
-     * the QueryReply count is incremented.
+     * the QueryReply count is incremented.<p>
      *
      * Override as desired, but you probably want to call super.handleQueryReply
      * if you do.
