@@ -41,6 +41,7 @@
 	<pathelement location="${mac}" />
 	<pathelement location="${quicktime}"/>
 	<pathelement location="${skins}"/>
+	<pathelement location="lib/junit.jar"/>
   </path>
 
   <!-- Initialization stuff -->
