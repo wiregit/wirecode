@@ -518,4 +518,9 @@ public class IncompleteFileManager implements Serializable {
         buf.append("}");
         return buf.toString();
     }
+
+    public synchronized String dumpHashes () {
+        return hashes.toString();
+    }
+    
 }

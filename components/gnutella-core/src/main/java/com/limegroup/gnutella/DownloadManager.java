@@ -1009,7 +1009,22 @@ public class DownloadManager implements BandwidthTracker {
 	public synchronized float getAverageBandwidth() {
         return averageBandwidth;
 	}		
-    
+
+    public synchronized String dumpDownloaders() {
+        String ret = "\nactive downloaders: ";
+        Iterator iter = active.iterator();
+        while(iter.hasNext()) {
+            ret += ((ManagedDownloader)iter.next()) + "|";
+        }
+        iter = waiting.iterator();
+        ret += "\nwaiting downloaders: ";
+        while(iter.hasNext()) {
+            ret += ((ManagedDownloader)iter.next()) + "|";
+        }
+        return ret;
+    }
+
+
     private final boolean debugOn = false;
     private final void debug(String out) {
         if (debugOn)

@@ -1080,7 +1080,9 @@ public class ManagedDownloader implements Downloader, Serializable {
      * The IncompleteFileDesc is also notified of new locations for this
      * file.
      */
-    private synchronized void informMesh(RemoteFileDesc rfd, boolean good) {
+    private void informMesh(RemoteFileDesc rfd, boolean good) {
+        //TODO2: unsplit the lock when we don't need the debugging info
+        synchronized(this) {
         if(!rfd.isAltLocCapable())
             return;
             
@@ -1121,7 +1123,7 @@ public class ManagedDownloader implements Downloader, Serializable {
             else
                 httpDloader.addFailedAltLoc(loc);
         }
-        
+        }
         FileDesc fd = fileManager.getFileDescForFile(incompleteFile);
         IncompleteFileDesc ifd = null;
         if( fd != null && fd instanceof IncompleteFileDesc) {
@@ -1129,16 +1131,18 @@ public class ManagedDownloader implements Downloader, Serializable {
             if(!bucketHash.equals(ifd.getSHA1Urn())) {
                 // Assert that the SHA1 of the IFD and the bucketHash match.
                 Assert.silent(false, "wrong IFD.\n" +
-                                "ours  :   " + incompleteFile +
-                              "\ntheirs: " + ifd.getFile() +
-                              "\nour hash    : " + bucketHash +
-                              "\ntheir hashes: " +
-                                DataUtils.listSet(ifd.getUrns()));
+                           "ours  :   " + incompleteFile +
+                           "\ntheirs: " + ifd.getFile() +
+                           "\nour hash    : " + bucketHash +
+                           "\ntheir hashes: " +
+                           DataUtils.listSet(ifd.getUrns())+
+                          "\nifm.hashes : "+incompleteFileManager.dumpHashes()+
+                          "\ndownloaders : "+manager.dumpDownloaders());
                 fileManager.removeFileIfShared(incompleteFile);
                 ifd = null; // do not use, it's bad.
             }
         }
-        
+        synchronized(this) {
         if(good) {
             //check if validAlts contains loc to avoid duplicate stats, and
             //spurious count increments in the local
@@ -1157,6 +1161,7 @@ public class ManagedDownloader implements Downloader, Serializable {
             if( ifd != null )
                 ifd.remove(forFD);
             invalidAlts.put(rfd, rfd);
+        }
         }
     }
 
@@ -3377,7 +3382,14 @@ public class ManagedDownloader implements Downloader, Serializable {
         }
 
     }
-
+ 
+    public synchronized String toString() {
+        return "MD.NumBuckets: "+buckets.numBuckets()+
+        "MD.currentBucketNo.: "+bucketNumber+
+        "MD.currentHash: "+buckets.getURNForBucket(bucketNumber)+
+        "MD.incompleteFile: "+incompleteFile;
+    }
+   
     private final boolean debugOn = false;
     private final boolean log = false;
     PrintWriter writer = null;

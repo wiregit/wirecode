@@ -256,6 +256,10 @@ class RemoteFileDescGrouper implements Serializable {
         return new BucketIterator();
     }
 
+    synchronized int numBuckets() {
+        return buckets.size();
+    }
+
     private class BucketIterator implements Iterator {
         /** The NEXT bucket to yield.  Implementation note: this iterator can
          *  reflect mutations to this because elements are only added to
