@@ -90,7 +90,7 @@ public class HashFunction {
         int xor=0;  //the running total
         int j=0;    //the byte position in xor.  INVARIANT: j==8*((i-start)%4)
         for (int i=start; i<end; i++) {
-            // TODO: internationalization be damned? Not a problem here:
+            // internationalization be damned? Not a problem here:
             // we just hash the lower 8 bits of the lowercase UTF-16 code-units
             // representing characters, ignoring only the high 8 bits that
             // indicate a Unicode page, and it is not very widely distributed
@@ -132,7 +132,7 @@ public class HashFunction {
         //TODO2: perhaps we should do an English-specific version that accounts
         //for plurals, common keywords, etc.  But that's only necessary for 
         //our own files, since the assumption is that queries have already been
-        //canonicalized. //yn:
+        //canonicalized. 
         return StringUtils.split(
             // TODO: a better canonicalForm(query) function here that
             // also removes accents by converting first to NFKD and keeping
