@@ -53,6 +53,10 @@ public interface SettingsInterface
     public int        getSearchAnimationTime();
     public String     getConnectString();
     public String     getConnectOkString();
+    public String     getInstallDir();
+
+    /** writes out the properties to disk */
+    public void writeProperties();
 
     /** returns the Properties file for Network Discovery */
     public Properties getNDProps();
@@ -159,6 +163,9 @@ public interface SettingsInterface
      *  without trailing newlines. */
     public void setConnectOkString(String ok);
 
+    public void setInstallDir(String dir) 
+	throws IllegalArgumentException;
+
     /** specialized method for writing the 
      *  properties file for the network discoverer
      */
@@ -260,16 +267,10 @@ public interface SettingsInterface
     public static final String CLEAR_DOWNLOAD = "CLEAR_DOWNLOAD";
     public static final String SEARCH_ANIMATION_TIME = "SEARCH_ANIMATION_TIME";
     public static final String SAVE_DEFAULT   = "SAVE_DEFAULT";
+    public static final String INSTALL_DIR    = "INSTALL_DIRECTORY";
 
     public static final String CONNECT_STRING = "CONNECT_STRING";
-    public static final String CONNECT_OK_STRING = "CONNECT_OK_STRING";
-    
-    public static final String HEADER = "Properties file for the LimeWire"+
-	" gnutella client.\nYou can modify any of the default"+
-	" properties here if\nyou wish, but if your modifications"+
-	" do not fit the\nrange of expected values for specific"+
-	" properties, those\nproperties will revert to their default"+
-	" values.\n\n";
+    public static final String CONNECT_OK_STRING = "CONNECT_OK_STRING";    
 }
 
 
