@@ -2,6 +2,7 @@ package com.limegroup.gnutella.downloader;
 
 import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.util.CommonUtils;
+import com.limegroup.gnutella.util.PrivilegedAccessor;
 import com.sun.java.util.collections.*;
 import junit.framework.*;
 import java.io.*;
@@ -46,28 +47,43 @@ public class IncompleteFileManagerTest extends com.limegroup.gnutella.util.BaseT
 
     /////////////////////////////////////////////////////////////
 
-	public void testLegacy() {
-        //Tests blocks access.  Requires access to private data.
-        IncompleteFileManager.unitTest();
+	public void testLegacy() throws Throwable {
+        File file=new File(getSaveDirectory(), "test.txt");
+        IncompleteFileManager ifm=new IncompleteFileManager();
+        Iterator iter=null;
+        VerifyingFile vf = new VerifyingFile(true);
+        //0 blocks
+        assertNull(ifm.getEntry(file));
+        assertEquals(0, ifm.getBlockSize(file));
+        //1 block
+        vf.addInterval(new Interval(0,10));
+        ifm.addEntry(file,vf);
+        assertEquals(11, ifm.getBlockSize(file));//full inclusive now
+        iter=ifm.getEntry(file).getBlocks();
+        assertEquals(new Interval(0, 10), iter.next());
+        assertTrue(! iter.hasNext());
+        
+        SettingsManager.instance().setIncompletePurgeTime(26);
+        File young=new FakeTimedFile(25);
+        File old=new FakeTimedFile(27);
+        assertTrue(!isOld(young));
+        assertTrue(isOld(old));
     }
 
-    /*
-    public void testTempName() {
-        //Requires change of access to tempName
+    public void testTempName() throws Throwable {
         assertEquals("T-748-abc def",
-                     IncompleteFileManager.tempName("abc def", 748, 0));
+                     tempName("abc def", 748, 0));
         assertEquals("T-748-abc def (2)",
-                     IncompleteFileManager.tempName("abc def", 748, 2));
+                     tempName("abc def", 748, 2));
         assertEquals("T-748-abc.txt",
-                     IncompleteFileManager.tempName("abc.txt", 748, 1));
+                     tempName("abc.txt", 748, 1));
         assertEquals("T-748-abc (2).txt",
-                     IncompleteFileManager.tempName("abc.txt", 748, 2));
+                     tempName("abc.txt", 748, 2));
         assertEquals("T-748-.txt",
-                     IncompleteFileManager.tempName(".txt", 748, 1));
+                     tempName(".txt", 748, 1));
         assertEquals("T-748- (2).txt",
-                     IncompleteFileManager.tempName(".txt", 748, 2));
+                     tempName(".txt", 748, 2));
     }
-    */
     
 
     /** Different name or size ==> different temp file */
@@ -77,7 +93,7 @@ public class IncompleteFileManagerTest extends com.limegroup.gnutella.util.BaseT
         assertTrue(! IncompleteFileManager.same(rfd1, rfd2));
         File tmp1=ifm.getFile(rfd1);
         File tmp2=ifm.getFile(rfd2);
-        assertTrue(! tmp2.equals(tmp1));
+        assertNotEquals(tmp2, tmp1);
     }
 
     /** 
@@ -105,7 +121,7 @@ public class IncompleteFileManagerTest extends com.limegroup.gnutella.util.BaseT
         assertTrue(! IncompleteFileManager.same(rfd1, rfd2));
         File tmp1=ifm.getFile(rfd1);
         File tmp2=ifm.getFile(rfd2);
-        assertTrue(! tmp2.equals(tmp1));
+        assertNotEquals(tmp2, tmp1);
     }
 
     /** Risky resumes are allowed: no hashes */
@@ -130,7 +146,7 @@ public class IncompleteFileManagerTest extends com.limegroup.gnutella.util.BaseT
 
         //After deleting entry there should be no more blocks...
         ifm.removeEntry(tmp1);      
-        assertEquals(null, ifm.getEntry(tmp1));
+        assertNull(ifm.getEntry(tmp1));
 
         //...and same temp file should be used for different hash. [sic]
         rfd2=newRFD("some file name", 1839, 
@@ -142,7 +158,7 @@ public class IncompleteFileManagerTest extends com.limegroup.gnutella.util.BaseT
 
     public void testCompletedHash_NotFound() {
         File tmp2=new File("T-1839-some file name");
-        assertEquals(null, ifm.getCompletedHash(tmp2));
+        assertNull(ifm.getCompletedHash(tmp2));
     }
 
     public void testCompletedHash_Found() {
@@ -235,9 +251,9 @@ public class IncompleteFileManagerTest extends com.limegroup.gnutella.util.BaseT
         //After purging, only hashes associated with files that exists remain.
         ifm.purge(true);
         File file1c=ifm.getFile(rfd1b);
-        assertTrue(!file1b.equals(file1c));
+        assertNotEquals(file1b, file1c);
         File file2c=ifm.getFile(rfd2b);
-        assertTrue(file2b.equals(file2c));
+        assertEquals(file2b ,file2c);
         file2.delete();
     }
 
@@ -346,4 +362,43 @@ public class IncompleteFileManagerTest extends com.limegroup.gnutella.util.BaseT
 
         return ifm;
     }
+    
+	private static String tempName(String s, int one, int two) throws Throwable {
+	    try {
+            return (String)PrivilegedAccessor.invokeMethod(
+                IncompleteFileManager.class, "tempName", 
+                new Object[] {s, new Integer(one), new Integer(two)},
+                new Class[] {String.class, Integer.TYPE, Integer.TYPE});
+        } catch(Exception e) {
+            if ( e.getCause() != null ) 
+                throw e.getCause();
+            else throw e;
+        }
+    }
+    
+	private static boolean isOld(File f) throws Throwable {
+	    try {
+            return ((Boolean)PrivilegedAccessor.invokeMethod(
+                IncompleteFileManager.class, "isOld", 
+                new Object[] {f},
+                new Class[] {File.class} )).booleanValue();
+        } catch(Exception e) {
+            if ( e.getCause() != null ) 
+                throw e.getCause();
+            else throw e;
+        }
+    }    
+    
+    static class FakeTimedFile extends File {
+        private long days;
+        FakeTimedFile(int days) {
+            super("whatever.txt");
+            this.days=days;
+        }
+
+        public long lastModified() {
+            //30 days ago
+            return System.currentTimeMillis()-days*24l*60l*60l*1000l;
+        }
+    }       
 }

@@ -25,6 +25,8 @@ import java.util.Arrays;
  * @author Charlie Hubbard (chubbard@iss.net)
  * @author Prashant Dhokte (pdhokte@iss.net)
  * @author Christopher Rohrs (added setValue)
+ * @author Sam Berlin (added support for static fields/methods,
+ *                     native parameters in methods, and invokeConstructor)
  */
 public class PrivilegedAccessor {
 
@@ -107,8 +109,30 @@ public class PrivilegedAccessor {
                     classTypes[i] = args[i].getClass();
             }
         }
-        return getMethod(instance,methodName,classTypes).invoke(instance,args);
+        return invokeMethod(instance, methodName, args, classTypes);
     }
+    
+    /**
+     * Calls a method on the given object instance with the given arguments
+     * and types.
+     * Necessary for using native-type parameters and when the arguments
+     * are subclassed objects.
+     *
+     * @param instance the object instance
+     * @param methodName the name of the method to invoke
+     * @param args an array of objects to pass as arguments
+     * @param classTypes an array of the types of the arguments.
+     * @see PrivilegedAccessor#invokeMethod(Object,String,Object)
+     */
+    public static Object invokeMethod(Object instance, 
+                                      String methodName, 
+                                      Object[] args,
+                                      Class[] classTypes ) 
+        throws NoSuchMethodException,
+               IllegalAccessException, 
+               InvocationTargetException  {
+        return getMethod(instance,methodName,classTypes).invoke(instance,args);
+    }    
 
     /**
      *
@@ -121,9 +145,9 @@ public class PrivilegedAccessor {
                                    throws NoSuchMethodException {
         Method accessMethod;
         if ( instance instanceof Class )
-            accessMethod = getMethod((Class)instance, methodName, classTypes);
+            accessMethod = getMethodImpl((Class)instance, methodName, classTypes);
         else
-            accessMethod = getMethod(instance.getClass(), methodName, classTypes);
+            accessMethod = getMethodImpl(instance.getClass(), methodName, classTypes);
         accessMethod.setAccessible(true);
         return accessMethod;
     }
@@ -170,7 +194,7 @@ public class PrivilegedAccessor {
      * Return the named method with a method signature matching classTypes
      * from the given class.
      */
-    private static Method getMethod(Class thisClass, 
+    private static Method getMethodImpl(Class thisClass, 
                                     String methodName, 
                                     Class[] classTypes) 
                                     throws NoSuchMethodException {
@@ -180,7 +204,7 @@ public class PrivilegedAccessor {
             return thisClass.getDeclaredMethod( methodName, classTypes );
         }
         catch(NoSuchMethodException e) {
-            return getMethod(thisClass.getSuperclass(), methodName, classTypes);
+            return getMethodImpl(thisClass.getSuperclass(), methodName, classTypes);
         }
     }
     
