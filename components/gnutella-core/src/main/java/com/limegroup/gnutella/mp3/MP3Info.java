@@ -109,6 +109,14 @@ public final class MP3Info {
         return _isVariableBitRate;
     }
 
+    /** uses a simple, not very accurate, formula to get length in seconds.
+     *  a sample return value is 94.  the formula is:
+     *  (FileSize / (BitRate / 8))
+     */
+    public long getLengthInSeconds() {
+        return getFileSize() / ((getBitRate()*1000) / 8);
+    }
+
 
     /** @return The Constant Bit Rate or Variable Bit Rate, depending on 
      *  type of file.
