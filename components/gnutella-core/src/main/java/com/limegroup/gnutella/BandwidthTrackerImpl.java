@@ -5,17 +5,24 @@ import com.limegroup.gnutella.util.*;
 import com.sun.java.util.collections.*;
 
 /**
- * A helper class for implementing the BandwidthTracker interface.
- * Despite the name, this does NOT implement the BandwidthTracker
- * interface itself.
+ * A helper class for implementing the BandwidthTracker interface.  For
+ * backwards compatibility, this implements the Serializable interface and marks
+ * some fields transient.  However, LimeWire currently only reads but not writes
+ * BandwidthTrackerImpl.
  */
-public class BandwidthTrackerImpl {
-    //Keep 10 clicks worth of data 
-    Buffer snapShots = new Buffer(10);
+public class BandwidthTrackerImpl implements Serializable {
+    static final long serialVersionUID = 7694080781117787305L;
+
+    /** Keep 10 clicks worth of data, which we can then average to get a more
+     *  accurate moving time average.
+     *  INVARIANT: snapShots[0]==measuredBandwidth.floatValue() */
+    transient Buffer /* of Float */ snapShots = new Buffer(10);
     
     long lastTime;
     int lastAmountRead;
 
+    /** The most recent measured bandwidth.  DO NOT DELETE THIS; it exists
+     *  for backwards serialization reasons. */
     float measuredBandwidth;
 
     /** 
@@ -59,5 +66,5 @@ public class BandwidthTrackerImpl {
             total+= ((Float)iter.next()).floatValue();
         }
         return total/size;
-    }
+    }    
 }
