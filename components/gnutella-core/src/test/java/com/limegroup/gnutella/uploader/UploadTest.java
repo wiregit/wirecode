@@ -68,6 +68,7 @@ import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.stubs.ConnectionManagerStub;
 import com.limegroup.gnutella.util.BaseTestCase;
 import com.limegroup.gnutella.util.CommonUtils;
+import com.limegroup.gnutella.util.IntervalSet;
 import com.limegroup.gnutella.util.PrivilegedAccessor;
 
 /**
@@ -469,7 +470,8 @@ public class UploadTest extends BaseTestCase {
         boolean passed = false;
         // add the range.
         Interval iv = new Interval(2, 6);
-        vf.addInterval(iv);
+        IntervalSet vb = (IntervalSet) PrivilegedAccessor.getValue(vf,"verifiedBlocks");
+        vb.add(iv);
         passed = download1(incompleteHash, "Range: bytes 2-5", "cdef", true);
         assertTrue("incomplete range did not work", passed);
         
@@ -1322,21 +1324,22 @@ public class UploadTest extends BaseTestCase {
     public void testIncompleteFileWithRanges() throws Exception {
         // add a range to the incomplete file.
         Interval iv = new Interval(50, 102500);
-        vf.addInterval(iv);
+        IntervalSet vb = (IntervalSet) PrivilegedAccessor.getValue(vf,"verifiedBlocks");
+        vb.add(iv);
         tFailureHeaderRequired(
             "/uri-res/N2R?" + incompleteHash, null, true, true,
                 "X-Available-Ranges: bytes 50-102499");
                 
         // add another range and make sure we display it.
         iv = new Interval(150050, 252450);
-        vf.addInterval(iv);
+        vb.add(iv);
         tFailureHeaderRequired(
             "/uri-res/N2R?" + incompleteHash, null, true, true,
                 "X-Available-Ranges: bytes 50-102499, 150050-252449");
         
         // add an interval too small to report and make sure we don't report        
         iv = new Interval(102505, 150000);
-        vf.addInterval(iv);
+        vb.add(iv);
         tFailureHeaderRequired(
             "/uri-res/N2R?" + incompleteHash, null, true, true,
                 "X-Available-Ranges: bytes 50-102499, 150050-252449");
@@ -1344,9 +1347,9 @@ public class UploadTest extends BaseTestCase {
         // add the glue between the other intervals and make sure we condense
         // the ranges into a single larger range.
         iv = new Interval(102500, 102505);
-        vf.addInterval(iv);
+        vb.add(iv);
         iv = new Interval(150000, 150050);
-        vf.addInterval(iv);
+        vb.add(iv);
         tFailureHeaderRequired(
             "/uri-res/N2R?" + incompleteHash, null, true, true,
                 "X-Available-Ranges: bytes 50-252449");
