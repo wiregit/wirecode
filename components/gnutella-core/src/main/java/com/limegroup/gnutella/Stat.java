@@ -33,7 +33,7 @@ public class Stat implements Runnable{
 	while(true){
 	    try{
 		Thread.sleep(108000000); //sleep for 30 minutes
-		System.out.println("Sumeet: thread waking up");
+		//System.out.println("Sumeet: thread waking up");
 	    }
 	    catch (Exception e){
 		System.out.println("Error in statistical thread");
@@ -42,7 +42,7 @@ public class Stat implements Runnable{
 	    Date d = cal.getTime();
 	    
 	    try{
-		System.out.println("Writing to file");
+		//System.out.println("Sumeet : Writing to file");
 		pr.println(d);//write the time
 		pr.println("Total messages seen : " + man.total);
 		pr.println("Ping requests : " + man.PReqCount + " (" + ((man.PReqCount*100)/man.total) +"%)" );
