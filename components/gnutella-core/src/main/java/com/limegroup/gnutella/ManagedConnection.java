@@ -291,8 +291,15 @@ public class ManagedConnection
         //the headers according to whether we're supernode capable.
         super(host, port, 
 			  (manager.isSupernode() ? 
-			   (Properties)(new SupernodeProperties(host)) : 
-			   (Properties)(new ClientProperties(host))),
+			   (Properties)(new SupernodeProperties(host,
+                                                    RouterService.shouldSendTCPConnectBack(),
+                                                    RouterService.shouldSendUDPConnectBack(),
+                                                    RouterService.getUDPConnectBackGUID())) : 
+			   (Properties)(new ClientProperties(host,
+                                                 RouterService.shouldSendTCPConnectBack(),
+                                                 RouterService.shouldSendUDPConnectBack(),
+                                                 RouterService.getUDPConnectBackGUID()))
+               ),
 			  (manager.isSupernode() ?
 			   (HandshakeResponder)new SupernodeHandshakeResponder(manager, host) :
 			   (HandshakeResponder)new ClientHandshakeResponder(manager, host)),

@@ -51,6 +51,9 @@ public class SupernodeHandshakeResponder
             //also add some host addresses in the response
             addHostAddresses(ret, _manager);
 
+            // if any ConnectBack Request exist, fulfill them....
+            connectBack(outgoing, response.getHeaders());
+
             //Decide whether to allow or reject.  Somewhat complicated because
             //of ultarpeer guidance.
             if (reject(outgoing, response.getHeaders())) {
@@ -121,6 +124,13 @@ public class SupernodeHandshakeResponder
 
         //Reject if not allowed now and guidance not possible.
         return ! (allowedNow || (isUltrapeer && allowedAsLeaf));
-    }    
+    }
+
+    /**
+     * If any ConnectBack requests are needed, fulfill them....
+     */
+    private void connectBack(boolean outgoing, Properties headers) {
+    }
+
 }
 

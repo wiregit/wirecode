@@ -1164,4 +1164,21 @@ public final class RouterService {
 	public static boolean isGUESSCapable() {
 		return udpService.isGUESSCapable();
 	}
+
+    public static int _numUDPConnectBackAttempts = 0;
+    public static int _numTCPConnectBackAttempts = 0;
+
+    public static boolean shouldSendTCPConnectBack() {
+        return (!acceptedIncomingConnection() && 
+                _numTCPConnectBackAttempts++ < 10);
+    }
+
+    public static boolean shouldSendUDPConnectBack() {
+        return (!isGUESSCapable() && 
+                _numUDPConnectBackAttempts++ < 10);
+    }
+
+    public static byte[] getUDPConnectBackGUID() {
+        return udpService.getUDPConnectBackGUID().bytes();
+    }
 }
