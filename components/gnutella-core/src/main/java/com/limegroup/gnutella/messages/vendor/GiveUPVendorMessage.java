@@ -4,6 +4,8 @@ package com.limegroup.gnutella.messages.vendor;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.GUID;
 
+import com.limegroup.gnutella.*;
+
 /**
  * a request for a given ultrapeer's ultrapeer connections.
  * Useful for crawling.
@@ -52,7 +54,13 @@ public class GiveUPVendorMessage extends VendorMessage {
 	}
 	
 	private static byte [] derivePayload(int numberUP, int numberLeaves) {
-		//we don't expect to have more than 255 UP connections soon
+		//we don't expect to have more than 255 connections soon
+
+		if (numberUP > 127)
+			numberUP=127;
+		if (numberLeaves > 127)
+			numberLeaves=127;
+		
 		byte [] payload = new byte[2];
 		payload[0] = (byte)numberUP;
 		payload[1] = (byte)numberLeaves;
@@ -76,6 +84,7 @@ public class GiveUPVendorMessage extends VendorMessage {
 		
 		_numberUP = payload[0];
 		_numberLeaves = payload[1];
+		
 		if (_numberUP < ALL || _numberLeaves < ALL) //corrupted packet
 			throw new BadPacketException();
 		

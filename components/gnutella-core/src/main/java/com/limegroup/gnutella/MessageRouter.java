@@ -2623,7 +2623,7 @@ public abstract class MessageRouter {
     	 * elects the best ultrapeer candidate amongst our leaf connections
     	 */
     	private Candidate electBest() {
-    		TreeSet possibleCandidates = new TreeSet(Candidate.priorityComparator());
+    		Candidate best = null;
     		
     		for (Iterator iter = _manager.getInitializedClientConnections().iterator();
     			iter.hasNext();){
@@ -2634,16 +2634,15 @@ public abstract class MessageRouter {
 						current.isGUESSCapable()) //unsolicited udp
     				//add more criteria here
     				try {
-    					possibleCandidates.add(new Candidate(current));
+    					Candidate currentCandidate = new Candidate(current);
+    					if (currentCandidate.compareTo(best) > 0)
+    						best = currentCandidate;
     				}catch (UnknownHostException ignored) {
     					//if the leaf doesn't have valid address it should be rightfully ignored.
     				}
     		}
     		
-    		if (possibleCandidates.size()==0) 
-    			return null;
-    		
-    		return (Candidate) possibleCandidates.last();
+    		return best;
     	}
     }
 

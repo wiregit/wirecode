@@ -59,11 +59,19 @@ public class UPListVendorMessage extends VendorMessage {
 		
 		//then see how many of each kind the client requested, if necessary trim
 		if (request.getNumberUP() != request.ALL && 
-				request.getNumberUP() < endpointsUP.size())
-			endpointsUP = endpointsUP.subList(0,request.getNumberUP());
+				request.getNumberUP() < endpointsUP.size()) {
+			//randomized trim
+			int index = (int) Math.floor(Math.random()*
+					(endpointsUP.size()-request.getNumberUP()));
+			endpointsUP = endpointsUP.subList(index,request.getNumberUP());
+		}
 		if (request.getNumberLeaves() != request.ALL && 
-				request.getNumberLeaves() < endpointsLeaf.size())
-			endpointsLeaf = endpointsLeaf.subList(0,request.getNumberLeaves());
+				request.getNumberLeaves() < endpointsLeaf.size()) {
+			//randomized trim
+			int index = (int) Math.floor(Math.random()*
+					(endpointsLeaf.size()-request.getNumberLeaves()));
+			endpointsLeaf = endpointsLeaf.subList(index,request.getNumberLeaves());
+		}
 		
 		
 		//serialize the Endpoints to a byte []

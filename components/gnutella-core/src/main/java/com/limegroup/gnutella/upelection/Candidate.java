@@ -11,6 +11,8 @@ import java.text.ParseException;
 
 import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.messages.*;
+import com.limegroup.gnutella.util.*;
+
 import com.sun.java.util.collections.Comparable;
 import com.sun.java.util.collections.Iterator;
 import com.sun.java.util.collections.Comparator;
@@ -55,18 +57,27 @@ public class Candidate implements Comparable{
 		_address = new QueryReply.IPPortCombo(c.getAddress(),c.getPort());
 	}
 	
-	public Candidate(byte [] data) throws BadPacketException {
-		if (data.length!=8)
+	public Candidate(byte []data, int offset) throws BadPacketException{
+		if ((data.length-offset) < 8)
 			throw new BadPacketException("invalid size candidate");
 		
-		byte [] ip_port = new byte[6];
-		System.arraycopy(data,0,ip_port,0,6);
-		
-		_address = QueryReply.IPPortCombo.getCombo(ip_port);
-		_uptime  =(short) ByteOrder.ubytes2int(ByteOrder.leb2short(data, 6));
+		 String host = NetworkUtils.ip2string(data, offset);
+		 int port = ByteOrder.ubytes2int(ByteOrder.leb2short(data, offset+4));
+		 try {
+		 	_address = new QueryReply.IPPortCombo(host,port);
+		 }catch(UnknownHostException uhx) {
+		 	//the advertiser shouldn't have sent such candidate.  Consider the entire packet bad.
+		 	throw new BadPacketException("invalid candidate advertised");
+		 }
+		 
+		_uptime  =(short) ByteOrder.ubytes2int(ByteOrder.leb2short(data, offset+6));
 	}
 	
-	public byte [] toByte() {
+	public Candidate(byte [] data) throws BadPacketException {
+		this(data,0);
+	}
+	
+	public byte [] toBytes() {
 		byte [] ipport = _address.toBytes();
 		byte [] ret = new byte[8];
 		
@@ -76,6 +87,8 @@ public class Candidate implements Comparable{
 	}
 	
 	public int compareTo(Object o) {
+		if (o==null)
+			return 1;
 		Candidate other = (Candidate)o;
 		return _uptime-other._uptime;
 	}

@@ -40,12 +40,12 @@ public class BestCandidatesVendorMessage extends VendorMessage {
 		
 		if (bestCandidates[1]!=null) { 
 			networkData = new byte [16];
-			System.arraycopy(bestCandidates[1].toByte(),0,networkData,8,8);
+			System.arraycopy(bestCandidates[1].toBytes(),0,networkData,8,8);
 		}
 		else 
 			networkData = new byte[8];
 
-		System.arraycopy(bestCandidates[0].toByte(),0,networkData,0,8); 
+		System.arraycopy(bestCandidates[0].toBytes(),0,networkData,0,8); 
 		
 		return networkData;
 	}
@@ -76,15 +76,11 @@ public class BestCandidatesVendorMessage extends VendorMessage {
 		_bestCandidates = new Candidate[2];
 		
 		//we have at least one candidate
-		byte [] one = new byte[8];
-		System.arraycopy(payload,0,one,0,8);
-		_bestCandidates[0] = new Candidate(one);
+		_bestCandidates[0] = new Candidate(payload,0);
 		
 		//if the size of the payload is 16 we have two candidates
-		if (payload.length==16) {
-			System.arraycopy(payload,8,one,0,8);
-			_bestCandidates[1]= new Candidate(one);
-		}
+		if (payload.length==16) 
+			_bestCandidates[1]= new Candidate(payload,8);
 		else //otherwise the other peer advertised just a single candidate
 			_bestCandidates[1]=null;
 		
