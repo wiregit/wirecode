@@ -234,9 +234,6 @@ public final class SearchResultHandler {
                 }    
             }
             
-            //Sumeet:TODO1: figure out how the xml is being parsed
-            //and choose the xml-document we want - see if we can optimize
-            //the above block.
             RemoteFileDesc rfd = null;
             LimeXMLDocument doc = docs==null||docs.size()==0?null
                                                  :(LimeXMLDocument)docs.get(0);

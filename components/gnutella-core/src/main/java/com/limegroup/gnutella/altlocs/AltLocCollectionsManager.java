@@ -75,8 +75,6 @@ public class AltLocCollectionsManager {
         _validAltLocs.clear();
         _failedAltLocs.clear();
     }
-
-        //Sumeet:TODO1: add a diffAlternateLocationCollection method??
     
 }
 

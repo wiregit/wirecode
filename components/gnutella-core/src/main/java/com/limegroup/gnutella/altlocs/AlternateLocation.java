@@ -263,8 +263,7 @@ public final class AlternateLocation implements
 								  true, 3, false, null, urnSet, false,
                                   false, //assume altLoc is not firewalled
                                   "ALT",//Never displayed, and we don't know
-                                  System.currentTimeMillis(),//Sumeet:TODO2:??
-                                  null);
+                                  System.currentTimeMillis(), null);
 	}
 
     /**

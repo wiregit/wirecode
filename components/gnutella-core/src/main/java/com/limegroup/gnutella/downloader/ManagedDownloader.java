@@ -1351,8 +1351,6 @@ public class ManagedDownloader implements Downloader, Serializable {
         // If no alternate location collection existed already, or one existed
         // but this is the first new RFD, and current SHA1 is different than it,
         // create a new collection.
-        //Sumeet:TODO1: Check if this needs to be synchronized on 
-        //totalAlternateLocations
         if( sha1!=null && 
             (validAlts == null || !validAlts.getSHA1Urn().equals(sha1)) )
             validAlts  = AlternateLocationCollection.create(sha1);
