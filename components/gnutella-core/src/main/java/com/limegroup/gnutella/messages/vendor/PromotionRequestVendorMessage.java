@@ -100,6 +100,23 @@ public class PromotionRequestVendorMessage extends VendorMessage {
 		_distance = original.getDistance()+1;
 	}
 	
+	/**
+	 * constructor which creates a vendor message with the specified attributes.
+	 * It does not check for valididty because its meant only for testing.
+	 * @param requestor the requestor of the promotion
+	 * @param candidate the candidate for promotion
+	 * @param distance how long has the message travelled.
+	 */
+	public PromotionRequestVendorMessage(QueryReply.IPPortCombo requestor,
+							QueryReply.IPPortCombo candidate,
+							int distance){
+		super(F_LIME_VENDOR_ID, F_PROMOTION_REQUEST,VERSION,derivePayload(requestor,candidate,distance));
+		_requestor = requestor;
+		_candidate= candidate;
+		_distance = distance;
+	}
+	
+	
 	protected static byte [] derivePayload(Candidate candidate) {
 		byte [] payload = new byte[13];
 		
@@ -131,6 +148,18 @@ public class PromotionRequestVendorMessage extends VendorMessage {
 		
 		return ret;
 	}
+	
+	protected static byte[] derivePayload(QueryReply.IPPortCombo requestor,
+								QueryReply.IPPortCombo candidate,
+								int distance) {
+		byte []res = new byte[13];
+		
+		//put in the values blindly - so never use this other than for testing.
+		res[0] = (byte)distance;
+		System.arraycopy(candidate.toBytes(),0,res,1,6);
+		System.arraycopy(requestor.toBytes(),0,res,7,6);
+		return res;
+	}
 	/**
 	 * @return Returns the _candidate.
 	 */
@@ -149,4 +178,5 @@ public class PromotionRequestVendorMessage extends VendorMessage {
 	public QueryReply.IPPortCombo getRequestor() {
 		return _requestor;
 	}
+
 }

@@ -2761,6 +2761,7 @@ public abstract class MessageRouter {
     
     private void initiatePromotion() {
     	//TODO:implement ;-)
+    	throw new RuntimeException("method not implemented, this thrown for test purposes only");
     }
     
     /**
