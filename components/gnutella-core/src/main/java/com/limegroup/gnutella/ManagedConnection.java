@@ -317,15 +317,12 @@ public class ManagedConnection extends Connection
      * even if we are leaf.  Useful for promoting to ultrapeer.
      * @param host the host to connect to
      * @param port the port the host is listening on
-     * @param forcedUP whether to forcefully make this connection an UP2UP
      * @return the new connection object.
      */
-    public static ManagedConnection forceConnection (String host, int port, boolean forcedUP) {
-    	if (forcedUP)
-    		return new ManagedConnection(host, port, 
-    				new UltrapeerHeaders(host), new UltrapeerHandshakeResponder(host));
-    	else
-    		return new ManagedConnection(host,port);
+    public static ManagedConnection forceUP2UPConnection (String host, int port) {
+    	return new ManagedConnection(host, port, 
+    		new UltrapeerHeaders(host), new UltrapeerHandshakeResponder(host));
+    	
     }
 
 	/**
