@@ -794,8 +794,7 @@ public class ManagedConnection extends Connection
         //This is an important optimization to prevent calling
         //RouteTable.removeReplyHandler when the connection is closed.
         //Unfortunately it still can be triggered by the
-        //OutputRunnerThread. TODO: can we avoid creating the OutputRunner
-        //thread in this case?
+        //OutputRunnerThread.
 
         //send the pongs for the Ultrapeer & 0.4 connections
         List /*<ManagedConnection>*/ nonLeafConnections 
