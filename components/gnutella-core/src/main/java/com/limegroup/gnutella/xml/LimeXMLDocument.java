@@ -240,7 +240,7 @@ public class LimeXMLDocument implements Serializable {
             boolean number = true;//reset
             String val = (String)iter.next();
             try{
-                double d = (new Double(val)).doubleValue();
+                new Double(val); // will trigger NFE.
             }catch(NumberFormatException e){
                 number = false;
             }
