@@ -167,7 +167,7 @@ public final class HandshakeResponse {
      HandshakeResponse(int code, String message, Properties headers) { 
          STATUS_CODE = code;
          STATUS_MESSAGE = message;
-         HEADERS = Collections.unmodifiableMap(headers);
+         HEADERS = headers;//Collections.unmodifiableMap(headers);
          DEGREE = extractIntHeaderValue(HEADERS, HeaderNames.X_DEGREE, 6);         
          HIGH_DEGREE = getNumIntraUltrapeerConnections() >= 15;
          ULTRAPEER_QRP = 
