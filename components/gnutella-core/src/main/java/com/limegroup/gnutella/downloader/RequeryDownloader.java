@@ -75,7 +75,6 @@ public class RequeryDownloader extends ManagedDownloader
                getMediaType().toString().equals(add.getMediaType().toString()));
     }
 
-
     /* We need special handling of the initial failed state so this overrides
      * the super class when necessary.
      */
@@ -90,6 +89,15 @@ public class RequeryDownloader extends ManagedDownloader
         return super.getFailedState(deserialized, timeSpentWaiting);
     }
 
+    protected int getQueryCount(boolean deserializedFromDisk) {
+        // RequeryDownloaders started from scratch have already had a search
+        // done for them.
+        if (deserializedFromDisk)
+            return 0;
+        else
+            return 1;
+    }
+
     /** Overrides ManagedDownloader to use the original search keywords. */
     protected QueryRequest newRequery(int numRequeries) 
 		throws CantResumeException {
@@ -98,7 +106,7 @@ public class RequeryDownloader extends ManagedDownloader
         if (_hasFile)
             return super.newRequery(numRequeries);
         //Otherwise just spit out the original search keywords.
-		return QueryRequest.createRequery(getQuery());
+		return QueryRequest.createQuery(getQuery());
     }
 
     /**

@@ -213,21 +213,8 @@ public class MagnetDownloader extends ManagedDownloader implements Serializable 
     ////////////////////////////// Requery Logic ///////////////////////////
 
     /** 
-     * Overrides ManagedDownloader to ensure that the first requery happens as
-     * soon as necessary.  This will happen, for example, if there was no
-     * initial location.  
-     */
-    protected long nextRequeryTime(int requeries) {
-        if (requeries==0)
-            return System.currentTimeMillis();   //now!
-        else
-            return super.nextRequeryTime(requeries);        
-    }
-
-    /** 
      * Overrides ManagedDownloader to use the query words and hash (if any)
-     * specified by the MAGNET URI.  The initial requery is unmarked, bypassing
-     * global rate limiting.
+     * specified by the MAGNET URI.
      */
     protected QueryRequest newRequery(int numRequeries) {        
         Set queryUrns=null;
@@ -253,6 +240,9 @@ public class MagnetDownloader extends ManagedDownloader implements Serializable 
 			else
                 return QueryRequest.createQuery(_urn, _filename);
         }
+        
+		if (_urn != null) 
+            return QueryRequest.createQuery(_urn, _textQuery);
 		return QueryRequest.createQuery(_textQuery);
     }
 

@@ -353,7 +353,8 @@ public class ManagedDownloader implements Downloader, Serializable {
     /** If in CORRUPT_FILE state, the name of the saved corrupt file or null if
      *  no corrupt file. */
     private volatile File corruptFile;
-    /** Lock used to communicate between addDownload and tryAllDownloads.
+    /** Lock used to communicate between addDownload and tryAllDownloads, and
+     *  pauseForRequery and resume
      */
     private RequeryLock reqLock = new RequeryLock();
 
@@ -598,6 +599,10 @@ public class ManagedDownloader implements Downloader, Serializable {
      * query also includes all hashes for all RemoteFileDesc's, i.e., the UNION
      * of all hashes.
      *
+     * Since there are not more AUTOMATIC requeries, subclasses are advised to
+     * stop using createRequery(...).  All attempts to 'requery' the network is
+     * spawned by the user, so use createQuery(...) .
+     *
      * @param numRequeries the number of requeries that have already happened
      * @exception CantResumeException if this doesn't know what to search for 
 	 * @return a new <tt>QueryRequest</tt> for making the requery
@@ -608,11 +613,56 @@ public class ManagedDownloader implements Downloader, Serializable {
             throw new CantResumeException("");  //      maybe another exception?
 
 		if(allFiles[0].getSHA1Urn() == null) {
-			return QueryRequest.createRequery(extractQueryString());
+			return QueryRequest.createQuery(extractQueryString());
 		}
-		return QueryRequest.createRequery(allFiles[0].getSHA1Urn());
+		return QueryRequest.createQuery(allFiles[0].getSHA1Urn(),
+                                        extractQueryString());
     }
 
+    /** We need to offer this to subclasses to override because they might
+     *  have specific behavior when deserialized from disk.  for example,
+     *  RequeryDowloader should return a count of 0 upon deserialization, but 1
+     *  if started from scratch.
+     */
+    protected int getQueryCount(boolean deserializedFromDisk) {
+        // MDs, whether started from scratch or from disk, always
+        // start with 0 query attempts.  subclasses should override as
+        // necessary
+        return 0; 
+    }
+
+
+    /**
+     * This dictates whether this downloader should wait for user input before
+     * spawning a Requery.  Subclasses should override with desired behavior as
+     * necessary.
+     * @return true if we the pause was broken because of new results.  false
+     * if the user woke us up.
+     * @param numRequeries The number of requeries sent so far.
+     * @param deserializedFromDisk If the downloader was deserialized from a 
+     * snapshot.  May be useful for subclasses.
+     */
+    protected boolean pauseForRequery(int numRequeries, 
+                                      boolean deserializedFromDisk) 
+        throws InterruptedException {
+        // MD's never want to requery without user input.
+        boolean retVal = false;
+        synchronized (reqLock) {
+            setState(WAITING_FOR_USER);
+            try {
+                retVal = reqLock.lock(0);  // wait indefinitely
+            }
+            catch (InterruptedException stopException) {
+                // must have been killed!!
+                if (!stopped)
+                    stopException.printStackTrace();
+                else
+                    throw stopException;
+            }
+            // state will be set by tryAllDownloads()
+        }
+        return retVal;
+    }
 
     /** Returns the URNs for requery, i.e., the union of all requeries 
      *  (within reason).
@@ -863,8 +913,8 @@ public class ManagedDownloader implements Downloader, Serializable {
         if ( added ) {
             if ((state==Downloader.WAITING_FOR_RETRY) ||
                 (state==Downloader.WAITING_FOR_RESULTS) || 
-                (state==Downloader.GAVE_UP))
-                reqLock.release();
+                (state==Downloader.WAITING_FOR_USER))
+                reqLock.releaseDueToNewResults();
             else
                 this.notify();                      //see tryAllDownloads3
         }
@@ -938,7 +988,7 @@ public class ManagedDownloader implements Downloader, Serializable {
         //Ignore request if already in the download cycle.
         synchronized (this) {
             if (! (state==WAITING_FOR_RETRY || state==GAVE_UP || 
-                   state==ABORTED || state==WAITING_FOR_RESULTS))
+                   state==ABORTED || state==WAITING_FOR_USER))
                 return false;
         }
 
@@ -971,7 +1021,7 @@ public class ManagedDownloader implements Downloader, Serializable {
                     // right thing' but will cause a memory leak due to threads
                     // not being cleaned up.  Alternatively, we could have
                     // called stop() and then initialize.
-                    reqLock.release();
+                    reqLock.releaseDueToNewResults();
                 } else
                     //This stopped because all hosts were tried.  (Note that this
                     //couldn't have been user aborted.)  Therefore no threads are
@@ -982,10 +1032,8 @@ public class ManagedDownloader implements Downloader, Serializable {
                 //Interrupt any waits.
                 if (dloaderManagerThread!=null)
                     dloaderManagerThread.interrupt();
-            } else if (state==WAITING_FOR_RESULTS) {
-                // wake up the requerier...
-                reqLock.release();
-            }
+            } else if (state==WAITING_FOR_USER) 
+                reqLock.releaseDueToRequery();
             return true;
         }
     }
@@ -1087,17 +1135,17 @@ public class ManagedDownloader implements Downloader, Serializable {
      * @param deserialized True if this downloader was deserialized from disk,
      * false if it was newly constructed.
      */
-    protected void tryAllDownloads(boolean deserialized) {     
-        // the number of requeries i've done...
-        int numRequeries = 0;
+    protected void tryAllDownloads(final boolean deserializedFromDisk) {     
+        // the number of queries i've done for this downloader - this is
+        // influenced by the type of downloader i am and if i was started from
+        // disk or from scratch
+        int numQueries = getQueryCount(deserializedFromDisk);
+        // set this up in case you need to wait for results.  we'll always wait
+        // TIME_BETWEEN_REQUERIES long after a query
+        long timeQuerySent = System.currentTimeMillis();
         // the amount of time i've spent waiting for results or any other
         // special state as dictated by subclasses (getFailedState)
         long timeSpentWaiting = 0;
-        // the time to next requery.  We don't want to send the first requery
-        // until a few minutes after the initial download attempt--after all,
-        // the user just started a query.  Hence initialize nextRequeryTime to
-        // System.currentTimeMillis() plus a few minutes.
-        long nextRequeryTime = nextRequeryTime(numRequeries);
 
         synchronized (this) {
             buckets=new RemoteFileDescGrouper(allFiles,incompleteFileManager);
@@ -1107,7 +1155,7 @@ public class ManagedDownloader implements Downloader, Serializable {
             // correctly, as the RFDs built from alternate locations are not
             // added to allFiles, so the RFDGrouper won't add them into
             // buckets.
-            if(deserialized) {
+            if(deserializedFromDisk) {
                 initializeAlternateLocations();
             }
         }
@@ -1172,21 +1220,6 @@ public class ManagedDownloader implements Downloader, Serializable {
                     return;
                 }
 
-                // should i send a requery?
-                final long currTime = System.currentTimeMillis();
-                if ((currTime >= nextRequeryTime) &&
-                    (numRequeries < REQUERY_ATTEMPTS)) {
-					waitForStableConnections();
-                    // yeah, it is about time and i've not sent too many...
-                    try {
-                        if (manager.sendQuery(this, newRequery(numRequeries)))
-                            numRequeries++;
-                    } catch (CantResumeException ignore) { }
-                    // set time for next requery...
-                    nextRequeryTime = nextRequeryTime(numRequeries);
-                }
-
-
                 // FLOW:
                 // 1.  If there is a retry to try (at least 1), then sleep for
                 // the time you should sleep to wait for busy hosts.  Also do
@@ -1195,11 +1228,14 @@ public class ManagedDownloader implements Downloader, Serializable {
                 // be waken up early to service a new QR
                 // 2. If there is no retry, then we have the following options:
                 //    A.  If you are waiting for results, set up the GUI
-                //        correctly.  Note that the condition to enter this
-                //        branch will be violated when the last requery wait
-                //        time is reached but we've incremented past the number
-                //        of requeries allowed.
-                //    B.  Else, give up.
+                //        correctly.  You know if you are waiting if
+                //        numQueries is positive and we still have to wait.
+                //    B.  Else, stall the download and see if the user ever
+                //        wants to relaunch the query.  Note that the stalled
+                //        download could be resumed because relevant results
+                //        came in (they were later than TIME_BETWEEN_REQUERIES)
+
+                // 1.
                 if (waitForRetry) {
                     synchronized (this) {
                         retriesWaiting=0;
@@ -1214,26 +1250,56 @@ public class ManagedDownloader implements Downloader, Serializable {
                     // wait for a retry, but if you get a new result in earlier
                     // feel free to wake up early and try it....
                     reqLock.lock(time); 
-                } else {
-                    if (numRequeries <= REQUERY_ATTEMPTS) {
-                        final long waitTime = 
-                        nextRequeryTime - System.currentTimeMillis();
-                        if (waitTime > 0) {
-                            setState(WAITING_FOR_RESULTS, waitTime);
-                            reqLock.lock(waitTime);
+                } 
+                // 2.
+                else {
+                    boolean areThereNewResults = false;
+                    final long timeToWait = TIME_BETWEEN_REQUERIES - 
+                        (System.currentTimeMillis() - timeQuerySent);
+                    // 2A) we've sent a requery and never received results, 
+                    // so wait for results...
+                    if ((numQueries > 0) && (timeToWait > 0)) {
+                        setState(WAITING_FOR_RESULTS, timeToWait);
+                        try {
+                            areThereNewResults = 
+                                reqLock.lock(timeToWait);
                         }
+                        catch (InterruptedException timeOut) {
+                            if (stopped)
+                                throw timeOut; // get out of here...
+                        }
+                    }
+
+                    // 2B) should we wait for the user to respawn a query?
+                    if (!areThereNewResults) {
+                        // pauseForRequery delegates to subclasses when
+                        // necessary, it returns if it was woken up due to new
+                        // results.  so if new results, go up top and try and
+                        // get them, else the user woke us up so send another
+                        // query
+                        if (pauseForRequery(numQueries, deserializedFromDisk)) 
+                            continue;
+                        waitForStableConnections();
+                        // yeah, it is about time and i've not sent too many...
+                        try {
+                            if (manager.sendQuery(this, 
+                                                  newRequery(numQueries)))
+                                numQueries++;
+                            // reset wait time for results
+                            timeQuerySent = System.currentTimeMillis();
+                        } catch (CantResumeException ignore) { }
                     }
                     else {
                         // first delegate to subclass - see if we should set
                         // the state and or wait for a certain amount of time
-                        long[] instructions = getFailedState(deserialized, 
-                                                            timeSpentWaiting);
+                        long[] instructions = getFailedState(deserializedFromDisk, 
+                                                             timeSpentWaiting);
                         // if the subclass has told me to do some special waiting
                         if (instructions[1] > 0) {
                             setState((int) instructions[0], instructions[1]);
                             reqLock.lock(instructions[1]);
                             timeSpentWaiting += 
-                                System.currentTimeMillis() - currTime;
+                                System.currentTimeMillis();
                         }
                         else {
                             // now just give up and hope for matching results
@@ -1242,6 +1308,7 @@ public class ManagedDownloader implements Downloader, Serializable {
                             reqLock.lock(0);
                         }
                     }
+
                 }
             } catch (InterruptedException e) {
                 if (stopped) {
@@ -1263,7 +1330,7 @@ public class ManagedDownloader implements Downloader, Serializable {
      *  Try to wait for good, stable, connections with some amount of reach
 	 *  or message flow.
      */
-    private static void waitForStableConnections() 
+    private void waitForStableConnections() 
       throws InterruptedException {
 
 		if ( NO_DELAY )  return;  // For Testing without network connection
@@ -1278,19 +1345,11 @@ public class ManagedDownloader implements Downloader, Serializable {
 			  < MIN_NUM_CONNECTIONS) &&
 		  (RouterService.getActiveConnectionMessages() < MIN_TOTAL_MESSAGES) 
         ) {
+            setState(WAITING_FOR_CONNECTIONS);
 			Thread.sleep(CONNECTION_DELAY); 
 		}
     }
 
-
-    /** Returns the next system time that we can requery.  Subclasses may
-     *  override to customize this behavior.  Note that this is still 
-     *  subject to global requery limits in DownloadManager.
-     *  @param requeries the number of requeries that have happened so far
-     *  @return an absolute system time of the next allowed requery */
-    protected long nextRequeryTime(int requeries) {
-        return System.currentTimeMillis()+TIME_BETWEEN_REQUERIES;
-    }
 
     /** Returns the amount of time to wait in milliseconds before retrying,
      *  based on tries.  This is also the time to wait for * incoming pushes to
@@ -3025,18 +3084,37 @@ public class ManagedDownloader implements Downloader, Serializable {
      *  wait() for up to waitTime.  it may be woken up earlier if it gets
      *  a requery result. moreover, it won't wait if it has a result already...
      *  -- The addDownload method, upon getting a result that matches, will
-     *  wake up the tryAllDownloads thread with a release().  
+     *  wake up the tryAllDownloads thread with a release...().  
      *  WARNING:  THIS IS VERY SPECIFIC SYNCHRONIZATION.  IT WAS NOT MEANT TO 
      *  WORK WITH MORE THAN ONE PRODUCER OR ONE CONSUMER.
      */
     private class RequeryLock extends Object {
         private boolean shouldWait = true;
-        public synchronized void release() {
+        // returned from lock to signify the reason for exit
+        private boolean newResults = false;
+
+        public synchronized void releaseDueToNewResults() {
             shouldWait = false;
+            newResults = true;
             this.notifyAll();
         }
 
-        public synchronized void lock(long waitTime) 
+        public synchronized void releaseDueToRequery() {
+            // we want shouldWait to stay what it is - we don't want to 'queue'
+            // (queue size = 1) user requests 
+            this.notifyAll();
+        }
+
+        private synchronized boolean getAndClearNewResult() {
+            boolean retVal = newResults;
+            newResults = false;
+            return retVal;
+        }
+
+        /** @exception InterruptedException you timed out - defn. didn't get 
+         *  any results in the meantime.
+         */
+        public synchronized boolean lock(long waitTime) 
             throws InterruptedException {
             try {
                 // max waitTime i'll wait, best case i'll get
@@ -3050,6 +3128,7 @@ public class ManagedDownloader implements Downloader, Serializable {
                 throw ie;
             }
             shouldWait = true;
+            return getAndClearNewResult();
         }
 
     }

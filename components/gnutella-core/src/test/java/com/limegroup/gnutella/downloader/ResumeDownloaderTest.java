@@ -126,8 +126,9 @@ public class ResumeDownloaderTest extends com.limegroup.gnutella.util.BaseTestCa
                 1, qr.getQueryUrns().size());
             assertEquals("unexpected hash",
                 hash, qr.getQueryUrns().iterator().next());
-            assertEquals("hash query shouldn't have filename",
-                "\\", qr.getQuery());
+            // filenames were put in hash queries since everyone drops //
+            assertEquals("hash query should have filename",
+                name, qr.getQuery());
         } else {
             assertEquals("unexpected amount of urns",
                 0, qr.getQueryUrns().size());
