@@ -927,78 +927,19 @@ public class RouterService
      * @param port The port at which to browse
      * @param guid The guid to be used for the query replies received 
      * while browsing host
+     * @param serventID The guid of the client to browse from.  Only non-null if
+     * this is supposed to be push browse....
      * @exception IOException in case any I/O error occurs while 
      * connecting/reading/writing from the host
 	 */
 	public void doBrowseHost(String host, int port, 
                              GUID guid, GUID serventID) 
         throws IOException {
-        if (serventID != null) {
-            PushRequest pr = new PushRequest(GUID.makeGuid(),
-                                             SettingsManager.instance().getTTL(),
-                                             serventID.bytes(), 
-                                             1,
-                                             acceptor.getAddress(),
-                                             acceptor.getPort());
-            //router.sendPushRequest(pr);
-        }
-        else
-            handleNormalBrowseHost(host, port, guid);
+        BrowseHostHandler handler = new BrowseHostHandler(callback, router,
+                                                          acceptor, guid,
+                                                          serventID);
+        handler.browseHost(host, port);
 	}
-
-    // handles the execution of a normal (non-push) browse host
-    private void handleNormalBrowseHost(String host, int port, GUID guid) 
-        throws IOException {
-        URLConnection conn 
-        = (new URL("http://"+host+":"+port)).openConnection();
-        conn.setRequestProperty("Accept", 
-                                Constants.QUERYREPLY_MIME_TYPE);
-        conn.setRequestProperty("User-Agent", CommonUtils.getVendor());
-        conn.setRequestProperty("Content-Length", "0");
-        conn.setRequestProperty("Connection", "close");
-        InputStream in = conn.getInputStream();
-        
-        if (conn instanceof HttpURLConnection) {
-            HttpURLConnection httpConn = (HttpURLConnection) conn;
-            int respCode = httpConn.getResponseCode();
-            // didn't get a OK message!!
-            if (respCode != HttpURLConnection.HTTP_OK)
-                throw new IOException();
-        }
-        
-        final String cType = conn.getContentType();
-        if (!cType.equalsIgnoreCase(Constants.QUERYREPLY_MIME_TYPE))
-            // weird, returned a type we didn't understand...
-            throw new IOException(); 
-        
-        final String cEnc  = conn.getContentEncoding();
-        if ((cEnc != null) && cEnc.equals("deflate"))
-            // need to uncompress, not currently supported...
-            throw new IOException();
-        
-        Message m = null;
-        while(true) {
-            try {
-                m = null;
-                m = Message.read(in);
-            }
-            catch (BadPacketException bpe) {
-            }
-            catch (IOException bpe) {
-                // thrown when stream is closed
-            }
-            if(m == null) 
-                //we are finished reading the stream
-                return;
-            else {
-                if(m instanceof QueryReply) {
-                    QueryReply queryReply = (QueryReply)m;
-                    m.setGUID(guid);
-                    callback.handleQueryReply(queryReply);
-                }
-            }
-        }
-    }
 
     /**
      * Tells whether the node is a supernode or not

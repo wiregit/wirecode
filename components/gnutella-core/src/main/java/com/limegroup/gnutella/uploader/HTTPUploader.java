@@ -552,7 +552,7 @@ public class HTTPUploader implements Uploader {
     }
 
 
-    private final boolean debugOn = false;
+    private final boolean debugOn = true;
     private void debug(String out) {
         if (debugOn)
             System.out.println(out);

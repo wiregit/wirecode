@@ -35,6 +35,7 @@ public class BrowseHostUploadState implements UploadState
      */
     public void doUpload(HTTPUploader uploader) throws IOException
     {
+        debug("BHUS.doUpload(): entered.");
         //GUARD CLAUSE
         // we can only handle query replies, so reply back with a 406 if they
         // don't accept them...
@@ -45,6 +46,7 @@ public class BrowseHostUploadState implements UploadState
             str = "HTTP/1.1 406 Not Acceptable\r\n";
             _ostream.write(str.getBytes());
             _ostream.flush();
+            debug("BHUS.doUpload(): client does not accept QRs.");
             return;
         }        
 
@@ -92,6 +94,7 @@ public class BrowseHostUploadState implements UploadState
         
         _uploader.setAmountUploaded(outBytes.size());
         _uploader.setState(_uploader.COMPLETE);
+        debug("BHUS.doUpload(): returning.");
     }
     
     /**
@@ -104,5 +107,16 @@ public class BrowseHostUploadState implements UploadState
     {
         return true;
     }
+
+    private final static boolean debugOn = true;
+    private final void debug(String out) {
+        if (debugOn)
+            System.out.println(out);
+    }
+    private final void debug(Exception out) {
+        if (debugOn)
+            out.printStackTrace();
+    }
+
     
 }
