@@ -12,11 +12,6 @@ import java.io.*;
  * and replies (pong, search results).  Only the TTL and hops field of
  * a message can be changed.
  */
-
-//TODO2: I feel like this is a terrible way of doing things.  It's much easier
-//in C because you just declare a struct and fill in the bytes. Perhaps this 
-//can be optimized by keeping the raw bytes around when calling read.
-
 public abstract class Message {       
     //Functional IDs defined by Gnutella protocol.
     protected static final byte F_PING=(byte)0x0;
@@ -89,18 +84,26 @@ public abstract class Message {
      *    <li>No data is available: returns null
      *    <li>A bad packet is read: BadPacketException.  The client should be
      *      able to recover from this.
-     *    <li>A major problem occurs: IOException.  The client is not expected 
-     *      to recover from this.
+     *    <li>A major problem occurs: IOException.  This includes reading packets
+     *      that are ridiculously long and half-completed messages. The client 
+     *      is not expected to recover from this.
      *    </ul>        
      */
     public static Message read(InputStream in) 
 	throws BadPacketException, IOException {	
-	//1. Read header bytes from network
-	//TODO3: it's probably possible to optimize this by buffering	
-	//TODO1: add timeouts
+	//1. Read header bytes from network.  If we timeout before any
+	//   data has been read, return null instead of throwing an
+	//   exception.
 	byte[] buf=new byte[23]; //23=size of header (in bytes)
 	for (int i=0; i<23; ) {
-	    int got=in.read(buf, i, 23-i);
+	    int got;
+	    try {
+		got=in.read(buf, i, 23-i);
+	    } catch (InterruptedIOException e) {
+		//have we read any of the message yet?
+		if (i==0) return null;
+		else throw e;		
+	    }
 	    if (got==-1) throw new IOException("Connection closed.");
 	    i+=got;
 	}
