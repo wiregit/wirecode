@@ -27,7 +27,12 @@ public class HTTPDownloaderTest extends com.limegroup.gnutella.util.BaseTestCase
                                             false, 2, false, null,
                                             null, false, false, "LIME",
                                             0, null, -1);
-        HTTPDownloader dl = new HTTPDownloader(rfd, new File("sam"));
+        File f = new File("sam");
+        VerifyingFile vf = new VerifyingFile(length);
+        vf.open(f);
+        HTTPDownloader dl = new HTTPDownloader(rfd, vf);
+        
+        PrivilegedAccessor.setValue(dl, "_amountToRead", new Integer(rfd.getSize()));
         
         
         assertEquals(new Interval(1, 9), 

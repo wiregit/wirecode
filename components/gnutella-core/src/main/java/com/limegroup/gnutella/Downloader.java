@@ -22,7 +22,7 @@ public interface Downloader extends BandwidthTracker {
      *  in the GAVE_UP state.
      */
     public static final int GAVE_UP                 = 6;
-    public static final int COULDNT_MOVE_TO_LIBRARY = 7;
+    public static final int DISK_PROBLEM 			= 7;
     public static final int WAITING_FOR_RESULTS     = 8;
     public static final int CORRUPT_FILE            = 9;
     public static final int REMOTE_QUEUED           = 10;
@@ -125,12 +125,6 @@ public interface Downloader extends BandwidthTracker {
     public int getAmountRead();
     
     /**
-     * Returns the last address that this tried to connect to, or null if it
-     * hasn't tried any.  Useful primarily for CONNECTING.  
-     */
-    public String getAddress();
-    
-    /**
      * Returns the locations from which this is currently downloading, as an
      * iterator of Endpoint.  If this is swarming, may return multiple
      * addresses.  Result meaningful only in the DOWNLOADING state.
@@ -214,6 +208,21 @@ public interface Downloader extends BandwidthTracker {
      * Determines if the download is completed.
      */
     public boolean isCompleted();
+	
+	/**
+	 * @return the amount of data that has been verified
+	 */
+	public int getAmountVerified();
+	
+	/**
+	 * @return the chunk size for the given download
+	 */
+	public int getChunkSize();
+	
+	/**
+	 * @return the amount of data lost due to corruption
+	 */
+	public int getAmountLost();
 
 
 }

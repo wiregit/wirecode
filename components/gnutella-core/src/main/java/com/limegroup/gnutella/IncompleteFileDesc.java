@@ -1,11 +1,13 @@
 package com.limegroup.gnutella;
 
+import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.BufferedInputStream;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
 
 import com.limegroup.gnutella.altlocs.AlternateLocation;
@@ -86,11 +88,7 @@ public class IncompleteFileDesc extends FileDesc implements HTTPHeaderValue {
         // have entered the download mesh in the first place!!!
         if (getFile().length() == 0)
             throw new FileNotFoundException("nothing downloaded");
-        
-        // If the underlying data is corrupt, do not output anything.
-        if (_verifyingFile.isCorrupted())
-            throw new FileNotFoundException("data is corrupt");
-        
+                
         return new BufferedInputStream(new FileInputStream(getFile()));
     }
     
@@ -101,7 +99,7 @@ public class IncompleteFileDesc extends FileDesc implements HTTPHeaderValue {
     public boolean add(AlternateLocation al) {
         boolean ret = super.add(al);
         if (ret) {
-            ManagedDownloader md = _verifyingFile.getManagedDownloader();
+            ManagedDownloader md = getMyDownloader();
             if( md != null )
                 md.addDownload(al.createRemoteFileDesc((int)getSize()),false);
         }
@@ -131,7 +129,7 @@ public class IncompleteFileDesc extends FileDesc implements HTTPHeaderValue {
      * ManagedDownloader of new locations for this.
      */
 	public int addAll(AlternateLocationCollection alc) {
-	    ManagedDownloader md = _verifyingFile.getManagedDownloader();
+	    ManagedDownloader md = getMyDownloader();
 	    
         // if no downloader, just add the collection.
 	    if( md == null )
@@ -152,11 +150,16 @@ public class IncompleteFileDesc extends FileDesc implements HTTPHeaderValue {
         return added;
 	}
 	
+    private ManagedDownloader getMyDownloader() {
+        return RouterService.getDownloadManager().getDownloaderForURN(getSHA1Urn());
+    }
+    
 	/**
 	 * Returns whether or not we are actively downloading this file.
 	 */
 	public boolean isActivelyDownloading() {
-	    ManagedDownloader md = _verifyingFile.getManagedDownloader();
+        
+        ManagedDownloader md = getMyDownloader();
 	    
 	    if(md == null)
 	        return false;
@@ -166,7 +169,7 @@ public class IncompleteFileDesc extends FileDesc implements HTTPHeaderValue {
         case Downloader.WAITING_FOR_RETRY:
         case Downloader.ABORTED:
         case Downloader.GAVE_UP:
-        case Downloader.COULDNT_MOVE_TO_LIBRARY:
+        case Downloader.DISK_PROBLEM:
         case Downloader.CORRUPT_FILE:
         case Downloader.REMOTE_QUEUED:
         case Downloader.WAITING_FOR_USER:
@@ -188,7 +191,7 @@ public class IncompleteFileDesc extends FileDesc implements HTTPHeaderValue {
         // to the verifying file do not cause concurrent mod
         // exceptions.
         synchronized(_verifyingFile) {
-            for (Iterator iter = _verifyingFile.getBlocks(); iter.hasNext(); ) {
+            for (Iterator iter = _verifyingFile.getVerifiedBlocks(); iter.hasNext(); ) {
                 Interval interval = (Interval) iter.next();
     	        // don't offer ranges that are smaller than MIN_CHUNK_SIZE
     	        // ( we add one because HTTP values are exclusive )
@@ -197,7 +200,7 @@ public class IncompleteFileDesc extends FileDesc implements HTTPHeaderValue {
     
                 added = true;
                 // ( we subtract one because HTTP values are exclusive )
-                ret.append(" " + interval.low + "-" + (interval.high -1) + ",");
+                ret.append(" ").append(interval.low).append("-").append(interval.high -1).append(",");
             }
         }
         // truncate off the last ',' if atleast one was added.
@@ -219,7 +222,7 @@ public class IncompleteFileDesc extends FileDesc implements HTTPHeaderValue {
         // to the verifying file do not cause concurrent mod
         // exceptions.
         synchronized(_verifyingFile) {
-            for (Iterator iter = _verifyingFile.getBlocks(); iter.hasNext(); ) {
+            for (Iterator iter = _verifyingFile.getVerifiedBlocks(); iter.hasNext(); ) {
                 Interval interval = (Interval) iter.next();
                 if (low >= interval.low && high <= interval.high)
                     return true;
@@ -235,7 +238,7 @@ public class IncompleteFileDesc extends FileDesc implements HTTPHeaderValue {
      */
      public Interval getAvailableSubRange(int low, int high) {
         synchronized(_verifyingFile) {
-            for (Iterator iter = _verifyingFile.getBlocks(); iter.hasNext(); ) {
+            for (Iterator iter = _verifyingFile.getVerifiedBlocks(); iter.hasNext(); ) {
                 Interval interval = (Interval) iter.next();
                 if ((interval.low <= high && low <= interval.high))
                 	// overlap found 

@@ -6,6 +6,7 @@ import java.io.OutputStream;
 import java.io.Serializable;
 import java.security.MessageDigest;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
@@ -32,7 +33,7 @@ import com.limegroup.gnutella.security.TigerTree;
  * 
  * @author Gregorio Roper
  */
-public final class HashTree implements HTTPHeaderValue, Serializable {
+public class HashTree implements HTTPHeaderValue, Serializable {
     
     private static final long serialVersionUID = -5752974896215224469L;    
 
@@ -75,12 +76,25 @@ public final class HashTree implements HTTPHeaderValue, Serializable {
      * The tree writer.
      */
     private transient HashTreeHandler _treeWriter;
+    
+    /**
+     * The size of each node
+     */
+    private transient int _nodeSize;
 
-    /*
+    /**
      * Constructs a new HashTree out of the given nodes, root, sha1
      * and filesize.
      */
     private HashTree(List allNodes, String sha1, long fileSize) {
+        this(allNodes,sha1,fileSize,calculateNodeSize(fileSize,allNodes.size()-1));
+    }
+    
+    /**
+     * Constructs a new HashTree out of the given nodes, root, sha1
+     * filesize and chunk size.
+     */
+    private HashTree(List allNodes, String sha1, long fileSize, int nodeSize) {
         THEX_URI = HTTPConstants.URI_RES_N2X + sha1;
         NODES = (List)allNodes.get(allNodes.size()-1);
         FILE_SIZE = fileSize;
@@ -88,8 +102,9 @@ public final class HashTree implements HTTPHeaderValue, Serializable {
         DEPTH = allNodes.size()-1;
         Assert.that(log2Ceil(NODES.size()) == DEPTH);
         HashTreeNodeManager.instance().register(this, allNodes);
+        _nodeSize = nodeSize;
     }
-
+    
     /**
      * Creates a new HashTree for the given FileDesc.
      */
@@ -110,14 +125,16 @@ public final class HashTree implements HTTPHeaderValue, Serializable {
     }
     
     /**
-     * Creates a new HashTree for the given file size, input stream and SHA1.
-     *
-     * Exists as a hook for tests, to create a HashTree from a File
-     * when no FileDesc exists.
+     *  Calculates a the node size based on the file size and the target depth.
+     *  
+     *   A tree of depth n has 2^(n-1) leaf nodes, so ideally the file will be
+     *   split in that many chunks.  However, since chunks have to be powers of 2,
+     *   we make the size of each chunk the closest power of 2 that is bigger than
+     *   the ideal size.
+     *   
+     *   This ensures the resulting tree will have between 2^(n-2) and 2^(n-1) nodes.
      */
-    private static HashTree createHashTree(long fileSize, InputStream is,
-                                           URN sha1) throws IOException {
-        int depth = calculateDepth(fileSize);
+    public static int calculateNodeSize(long fileSize, int depth) {
         
         // don't create more than this many nodes
         int maxNodes = 1 << depth;        
@@ -139,20 +156,33 @@ public final class HashTree implements HTTPHeaderValue, Serializable {
 
         // this is just to make sure we have the right nodeSize for our depth
         // of choice
-        Assert.that((long)nodeSize * maxNodes >= fileSize,
+        Assert.that(nodeSize * (long)maxNodes >= fileSize,
                     "nodeSize: " + nodeSize + 
                     ", fileSize: " + fileSize + 
                     ", maxNode: " + maxNodes);
-        Assert.that((long)nodeSize * maxNodes <= ((long)fileSize * 2),
+        Assert.that(nodeSize * (long)maxNodes <= fileSize * 2,
                     "nodeSize: " + nodeSize + 
                     ", fileSize: " + fileSize + 
                     ", maxNode: " + maxNodes);
-
+ 
+        return nodeSize;
+    }
+    
+    /**
+     * Creates a new HashTree for the given file size, input stream and SHA1.
+     *
+     * Exists as a hook for tests, to create a HashTree from a File
+     * when no FileDesc exists.
+     */
+    private static HashTree createHashTree(long fileSize, InputStream is,
+                                           URN sha1) throws IOException {
         // do the actual hashing
+        int nodeSize = calculateNodeSize(fileSize,calculateDepth(fileSize));
         List nodes = createTTNodes(nodeSize, fileSize, is);
+        
         // calculate the intermediary nodes to get the root hash & others.
         List allNodes = createAllParentNodes(nodes);
-        return new HashTree(allNodes, sha1.toString(), fileSize);
+        return new HashTree(allNodes, sha1.toString(), fileSize, nodeSize);
     }
 
     /**
@@ -182,50 +212,26 @@ public final class HashTree implements HTTPHeaderValue, Serializable {
         return new HashTree(HashTreeHandler.read(is, fileSize, root32),
                             sha1, fileSize);
     }
-
+    
     /**
-     * This method returns the ranges of a file that do no match the expected
-     * TigerTree hashes
-     * 
-     * @param is
-     *            an <tt>InputStream</tt>
-     * @return List of <tt>Interval</tt>
-     * @throws IOException
-     *             if there was a problem reading the file
+     * Checks whether the specific area of the file matches the hash tree. 
      */
-    public List getCorruptRanges(InputStream is) throws IOException {
-        LOG.trace("getting corrupt ranges ");
-
-        List ret = new ArrayList();
-        // calculate the node size using FILE_SIZE and DEPTH.
-        // nodeSize = 2^(log2Ceil(FILE_SIZE) - DEPTH);
-        int n = log2Ceil((int) FILE_SIZE) - DEPTH;
-        // 2^n
-        int nodeSize = 1 << n;
-        List fileHashes = createTTNodes(nodeSize, FILE_SIZE, is);
-        int minSize = Math.min(fileHashes.size(), NODES.size());
-        for (int i = 0; i < minSize; i++) {
-            byte[] aHash = (byte[]) fileHashes.get(i);
-            byte[] bHash = (byte[]) NODES.get(i);
-            for (int j = 0; j < aHash.length; j++) {
-                if (aHash[j] != bHash[j]) {
-                    Interval in =
-                        new Interval(
-                            i * nodeSize,
-                            (int) Math.min(
-                                (i + 1) * nodeSize - 1,
-                                FILE_SIZE - 1));
-                    ret.add(in);
-                    if (LOG.isDebugEnabled())
-                        LOG.debug(
-                            Base32.encode(ROOT_HASH)
-                                + " -> found corrupted range: "
-                                + in);
-                    break;
-                } 
-            }
-        }
-        return ret;
+    public boolean isCorrupt(Interval in, byte [] data) {
+        // if the interval is not a fixed chunk, we cannot verify it.
+        // (actually we can but its more complicated) 
+        if (in.low % _nodeSize == 0 && 
+                in.high - in.low +1 <= _nodeSize &&
+                (in.high == in.low+_nodeSize-1 || in.high == FILE_SIZE -1)) {
+            TigerTree digest = new TigerTree();
+            digest.update(data);
+            byte [] hash = digest.digest();
+            byte [] treeHash = (byte [])NODES.get(in.low / _nodeSize);
+            boolean ok = Arrays.equals(treeHash, hash);
+            if (LOG.isDebugEnabled())
+                LOG.debug("interval "+in+" verified "+ok);
+            return !ok;
+        } 
+        return true;
     }
 
     /**
@@ -248,7 +254,8 @@ public final class HashTree implements HTTPHeaderValue, Serializable {
      * @return true if the DEPTH is ideal enough according to our own standards
      */
     public boolean isDepthGoodEnough() {
-        return DEPTH >= calculateDepth(FILE_SIZE);
+        // for some ranges newDepth actually returns smaller values than oldDepth
+        return DEPTH >= calculateDepth(FILE_SIZE) - 1;
     }
     
     /**
@@ -311,6 +318,14 @@ public final class HashTree implements HTTPHeaderValue, Serializable {
         return NODES;
     }
     
+    public synchronized int getNodeSize() {
+        if (_nodeSize == 0) {
+            // we were deserialized
+            _nodeSize = calculateNodeSize(FILE_SIZE,DEPTH);
+        }
+        return _nodeSize;
+    }
+    
     /**
      * @return The number of nodes in the full tree.
      */
@@ -327,6 +342,7 @@ public final class HashTree implements HTTPHeaderValue, Serializable {
         }
         return count;
     }
+    
     
     /**
      * @return all nodes.
@@ -363,28 +379,32 @@ public final class HashTree implements HTTPHeaderValue, Serializable {
      * @param size
      *            the fileSize
      * @return int the ideal generation depth for the fileSize
-     */
+     */    
     public static int calculateDepth(long size) {
-        if (size < 256 * KB)
+        if (size < 256 * KB) // 256KB chunk, 0b tree
             return 0;
-        else if (size < 512 * KB)
+        else if (size < 512 * KB) // 256KB chunk, 24B tree
             return 1;
-        else if (size < MB)
+        else if (size < MB)  // 256KB chunk, 72B tree
             return 2;
-        else if (size < 2 * MB)
+        else if (size < 2 * MB) // 256KB chunk, 168B tree
             return 3;
-        else if (size < 5 * MB)
+        else if (size < 4 * MB) // 256KB chunk, 360B tree
             return 4;
-        else if (size < 10 * MB)
+        else if (size < 8 * MB) // 256KB chunk, 744B tree
             return 5;
-        else if (size < 20 * MB)
+        else if (size < 16 * MB) // 256KB chunk, 1512B tree
             return 6;
-        else if (size < 50 * MB)
+        else if (size < 32 * MB) // 256KB chunk, 3048B tree
             return 7;
-        else if (size < 100 * MB)
+        else if (size < 64 * MB) // 256KB chunk, 6120B tree
             return 8;
-        else
+        else if (size < 256 * MB) // 512KB chunk, 12264B tree
             return 9;
+        else if (size < 1024 * MB) // 1MB chunk, 24552B tree 
+            return 10;
+        else
+            return 11; // 2MB chunks, 49128B tree
     }
     
     /**

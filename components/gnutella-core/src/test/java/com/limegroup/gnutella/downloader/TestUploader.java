@@ -9,6 +9,7 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.EventListener;
 import java.util.Iterator;
 import java.util.StringTokenizer;
 
@@ -31,6 +32,17 @@ import com.limegroup.gnutella.util.BandwidthThrottle;
 import com.limegroup.gnutella.util.IntPair;
 import com.limegroup.gnutella.util.PrivilegedAccessor;
 import com.limegroup.gnutella.util.RoundRobinQueue;
+
+/**
+ * Callback for whenever this uploader starts or finishes to serve
+ * an http11 request.
+ */
+interface HTTP11Listener {
+	public void thexRequestStarted();
+    public void thexRequestHandled();
+	public void requestStarted(TestUploader uploader);
+	public void requestHandled();
+}
 
 public class TestUploader extends AssertComparisons {    
     
@@ -89,6 +101,7 @@ public class TestUploader extends AssertComparisons {
 
     boolean killedByDownloader = false;
     
+    int start,stop;
     /**
      * The offset for the low chunk.
      */
@@ -153,6 +166,11 @@ public class TestUploader extends AssertComparisons {
      * Use this to throttle sending our data
      */
     private BandwidthThrottle throttle;
+    
+    /**
+     * a callback to notify every time we start an http11 request
+     */
+    HTTP11Listener _httpListener;
 
     /**
      * The sum of the number of bytes we need to upload across all requests.  If
@@ -251,6 +269,7 @@ public class TestUploader extends AssertComparisons {
     }
 
     public void stopThread() {
+        LOG.debug("stopping thread");
         try {
             if ( server != null )
                 server.close();
@@ -292,10 +311,15 @@ public class TestUploader extends AssertComparisons {
         sendContentLength = true;
         queueOnThex = false;
         useBadThexResponseHeader = false;
+        _httpListener = null;
     }
 
-    public int amountUploaded() {
+    public int fullRequestsUploaded() {
         return totalUploaded;
+    }
+    
+    public int getAmountUploaded() {
+        return totalUploaded+amountThisRequest;
     }
     
     /** Sets the upload throttle rate 
@@ -395,6 +419,10 @@ public class TestUploader extends AssertComparisons {
      */
     public void setHTTP11(boolean yes) {
         respondWithHTTP11 = yes;
+    }
+    
+    public void setHTTPListener(HTTP11Listener listener) {
+    	_httpListener = listener;
     }
     
     /**
@@ -547,6 +575,7 @@ public class TestUploader extends AssertComparisons {
     
     
     private void handleRequest(Socket socket) throws IOException {
+    	
         //Find the region of the file to upload.  If a Range request is present,
         //use that.  Otherwise, send the whole file.  Skip all other headers.
         //TODO2: Later we should also check the validity of the requests
@@ -558,8 +587,8 @@ public class TestUploader extends AssertComparisons {
             throttle = new BandwidthThrottle(rate*1024);
         else
             throttle = new BandwidthThrottle(Float.MAX_VALUE);
-        int start = 0;
-        int stop = TestFile.length();
+        start = 0;
+        stop = TestFile.length();
         boolean firstLine=true;
         AlternateLocationCollection badLocs = null;
         AlternateLocationCollection goodLocs = null;
@@ -644,6 +673,8 @@ public class TestUploader extends AssertComparisons {
         }
         
         if(thexReq && sendThexTree && !queue) {
+        	if (_httpListener != null)
+        		_httpListener.thexRequestStarted();
             LOG.debug("sending thex tree.");
             sendThexTree = false;
             sendThexTree(output);
@@ -651,7 +682,16 @@ public class TestUploader extends AssertComparisons {
             LOG.debug("done sending thex tree.");
         } else {    
             //Send the data.
+        	if (_httpListener != null)
+        		_httpListener.requestStarted(this);
             send(output, start, stop);
+        }
+        
+        if (_httpListener != null) {
+            if (thexReq)
+                _httpListener.thexRequestHandled();
+            else
+                _httpListener.requestHandled();
         }
     }
     
@@ -675,6 +715,7 @@ public class TestUploader extends AssertComparisons {
 
     private void send(OutputStream out, int start, int stop) 
         throws IOException {
+        LOG.debug("starting to send data "+start+"-"+stop);
         totalAmountToUpload += stop - start;
         //Write header, stolen from NormalUploadState.writeHeader()
         long t0 = System.currentTimeMillis();
@@ -766,7 +807,7 @@ public class TestUploader extends AssertComparisons {
                                   TestFile.tree(),
                                   out);
         }
-        if(interestedInFalts)
+        if(interestedInFalts) {
             if (!isFirewalled) 
                 HTTPUtils.writeFeatures(out);
             else {
@@ -784,6 +825,7 @@ public class TestUploader extends AssertComparisons {
                     ErrorService.error(bad);
                 }
             }
+        }
         
 
         if (isFirewalled && _proxiesString!=null) {
@@ -800,12 +842,13 @@ public class TestUploader extends AssertComparisons {
             return;
         }
 
-        //Write data.
+        amountThisRequest = 0;
         for (int i=start; i<stop; ) {
             //1 second write cycle
-            if (stopAfter > -1 && totalUploaded == stopAfter) {
+            if (stopAfter > -1 && totalUploaded + amountThisRequest == stopAfter) {
                 stopped=true;
                 out.flush();
+                totalUploaded+=amountThisRequest;
                 LOG.debug(name+" stopped at "+totalUploaded);
                 throw new IOException();
             }
@@ -817,10 +860,13 @@ public class TestUploader extends AssertComparisons {
             else
                 out.write(TestFile.getByte(i));
             
-            totalUploaded++;
+            amountThisRequest++;
             i++;
+            
         }
         out.flush();
+        // only if the flush didn't throw do we add to totalUploaded
+        totalUploaded+=amountThisRequest;
     }
 
     /**
@@ -986,6 +1032,8 @@ public class TestUploader extends AssertComparisons {
 	}
 	
 	private static final RoundRobinQueue rr = new RoundRobinQueue();
+
+    private int amountThisRequest;
 	private class SocketHandler implements Runnable {
 	    private final Socket mySocket;
 	    public SocketHandler(Socket s) {

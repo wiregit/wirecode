@@ -15,7 +15,10 @@ import org.apache.commons.httpclient.methods.HeadMethod;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.limegroup.gnutella.ActivityCallback;
 import com.limegroup.gnutella.Assert;
+import com.limegroup.gnutella.DownloadManager;
+import com.limegroup.gnutella.FileManager;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.ResponseVerifier;
 import com.limegroup.gnutella.SpeedConstants;
@@ -102,10 +105,16 @@ public class MagnetDownloader extends ManagedDownloader implements Serializable 
         this._defaultURLs=defaultURLs;
     }
     
+    public void initialize(DownloadManager manager, FileManager fileManager, 
+            ActivityCallback callback) {
+        downloadSHA1 = _urn;
+        super.initialize(manager,fileManager,callback);
+    }
+    
     /**
      * Overrides ManagedDownloader to ensure that the default location is tried.
      */
-    protected void tryAllDownloads() {     
+    protected void performDownload() {     
 
 		for (int i = 0; _defaultURLs != null && i < _defaultURLs.length; i++) {
 			//Send HEAD request to default location (if present)to get its size.
@@ -127,7 +136,7 @@ public class MagnetDownloader extends ManagedDownloader implements Serializable 
 		}
 
         //Start the downloads for real.
-        super.tryAllDownloads();
+        super.performDownload();
     }
 
 

@@ -13,6 +13,7 @@ import java.net.InetAddress;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -304,6 +305,21 @@ public class DownloadManager implements BandwidthTracker {
    
     public synchronized int getNumWaitingDownloads() {
         return waiting.size();
+    }
+    
+    public ManagedDownloader getDownloaderForURN(URN sha1) {
+        List l;
+        synchronized(this) {
+            l = new ArrayList(active);
+            l.addAll(waiting);
+        }
+        
+        for (Iterator iter = l.iterator(); iter.hasNext();) {
+            ManagedDownloader current = (ManagedDownloader) iter.next();
+            if (current.getSHA1Urn().equals(sha1))
+                return current;
+        }
+        return null;
     }
 
     public synchronized boolean isGuidForQueryDownloading(GUID guid) {
