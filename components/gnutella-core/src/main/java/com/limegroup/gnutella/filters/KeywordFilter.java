@@ -34,6 +34,31 @@ public class KeywordFilter extends SpamFilter {
         disallow("porn");
         disallow("xxx");
         disallow("fuck");
+        disallow("blowjob");
+        disallow("cunt");
+        disallow("titty");
+        disallow("tittie");
+        disallow("twat");
+        disallow("incest");
+        disallow("facial");
+        disallow("cock");
+        disallow("pussy");
+        disallow("jenna");
+        disallow("anal");
+        disallow("anul");
+        disallow("centerfold");
+        disallow("whore");
+        disallow("penis");
+        disallow("vagina");
+        disallow("suck");
+        disallow("porn");
+        disallow("blow");
+        disallow("asshole");
+        disallow("bondage");
+        disallow("cum");
+        disallow("playboy");
+        disallow("nipple");
+        disallow("masturbat");
     }
 
     /**
