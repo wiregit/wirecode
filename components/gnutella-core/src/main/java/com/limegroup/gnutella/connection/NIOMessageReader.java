@@ -7,11 +7,13 @@ import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.SocketChannel;
 
-import com.limegroup.gnutella.Assert;
+import com.limegroup.gnutella.*;
+import com.limegroup.gnutella.util.*;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.settings.MessageSettings;
-import com.limegroup.gnutella.statistics.MessageReadErrorStat;
+import com.limegroup.gnutella.statistics.*;
+
 
 /**
  * Reads Gnutella messages from a SocketChannel, instantiating subclasses of
@@ -33,26 +35,28 @@ public class NIOMessageReader extends AbstractMessageReader {
     /**
      * Constant for the <tt>ByteBuffer</tt> for reading payloads.
      */
-     private final ByteBuffer PAYLOAD = 
+    private final ByteBuffer PAYLOAD = 
         ByteBuffer.allocate(MessageSettings.MAX_LENGTH.getValue());
-    
-    
 
     
     /**
      * Factory method for creating new <tt>MessageReader</tt>
      * instances for each connection.
      * 
+     * @param conn the <tt>Connection</tt> this reader reads for
      * @return a new <tt>MessageReader</tt> instance
      */
-    public static NIOMessageReader createReader() {
-        return new NIOMessageReader();
+    public static NIOMessageReader createReader(Connection conn) {
+        return new NIOMessageReader(conn);
     }
     
 	/**
 	 * Ensure that this class cannot be constructed by another class.
+     *
+     * @param conn the <tt>Connection</tt> this reader reads for
 	 */
-	protected NIOMessageReader() {
+	protected NIOMessageReader(Connection conn) {
+        super(conn);
         HEADER.order(java.nio.ByteOrder.LITTLE_ENDIAN);
     }
 		
@@ -275,3 +279,4 @@ public class NIOMessageReader extends AbstractMessageReader {
         return null;
     }
 }
+
