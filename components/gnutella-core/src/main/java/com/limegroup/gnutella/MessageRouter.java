@@ -642,7 +642,7 @@ public abstract class MessageRouter {
         for(int i=0; i<list.size(); i++) {
             ManagedConnection c = (ManagedConnection)list.get(i);
             if (   receivingConnection==null   //came from me
-                || (c!=receivingConnection
+				   || (c!=receivingConnection
                      && !c.isClientSupernodeConnection())) {
                 c.send(request);
             }
@@ -873,7 +873,8 @@ public abstract class MessageRouter {
         //numbers).
         RouteTable.ReplyRoutePair rrp =
             _queryRouteTable.getReplyHandler(queryReply.getGUID(),
-                                             queryReply.getTotalLength());
+                                             queryReply.getTotalLength(),
+											 queryReply.getResultCount());
 
         if(rrp != null) {
             queryReply.setPriority(rrp.getBytesRouted());
@@ -995,7 +996,8 @@ public abstract class MessageRouter {
         //numbers).
         RouteTable.ReplyRoutePair rrp =
             _queryRouteTable.getReplyHandler(queryReply.getGUID(),
-                                             queryReply.getTotalLength());
+                                             queryReply.getTotalLength(),
+											 queryReply.getResultCount());
 
         if(rrp != null) {
             queryReply.setPriority(rrp.getBytesRouted());
