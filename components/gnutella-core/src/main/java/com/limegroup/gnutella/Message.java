@@ -224,7 +224,9 @@ public abstract class Message implements Serializable{
      * delimiter if necessary, reporting whether next call should add
      * delimiter. ext may be null or zero-length, in which case this is noop
      */
-    protected boolean writeGemExtension(OutputStream os, boolean addPrefixDelimiter, String ext) throws IOException {
+    protected boolean writeGemExtension(OutputStream os, 
+										boolean addPrefixDelimiter, 
+										String ext) throws IOException {
         if (ext == null || (ext.length()==0)) {
             return addPrefixDelimiter;
         }
@@ -240,12 +242,15 @@ public abstract class Message implements Serializable{
      * adding delimiters as necessary. exts may be null or empty, in
      *  which case this is noop
      */
-    protected boolean writeGemExtensions(OutputStream os, boolean addPrefixDelimiter, Iterator iter) throws IOException {
+    protected boolean writeGemExtensions(OutputStream os, 
+										 boolean addPrefixDelimiter, 
+										 Iterator iter) throws IOException {
         if (iter == null) {
             return addPrefixDelimiter;
         }
         while(iter.hasNext()) {
-            addPrefixDelimiter = writeGemExtension(os, addPrefixDelimiter, (String)(iter.next()));
+            addPrefixDelimiter = writeGemExtension(os, addPrefixDelimiter, 
+												   (String)(iter.next()));
         }
         return addPrefixDelimiter; // will be true is anything at all was written 
     }
