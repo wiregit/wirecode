@@ -47,6 +47,17 @@ public final class NetworkUtils {
         return isValidAddress(addr.getAddress());
     }       
 	
+    /**
+     * Returns whether or not the specified host is a valid address.
+     */
+    public static boolean isValidAddress(String host) {
+        try {
+            return isValidAddress(InetAddress.getByName(host));
+        } catch(UnknownHostException uhe) {
+            return false;
+        }
+    }
+    
 	/**
 	 * Returns whether or not the supplied address is a local address.
 	 */
