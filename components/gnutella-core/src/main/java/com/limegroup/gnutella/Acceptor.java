@@ -532,7 +532,7 @@ public class Acceptor implements Runnable {
                         try {
                             client=_socket.accept();
                         } catch (IOException e) {
-                            LOG.error("IOX while accepting", e);
+                            LOG.warn("IOX while accepting", e);
                             continue;
                         }
                     } else {
@@ -720,7 +720,7 @@ public class Acceptor implements Runnable {
                     IOUtils.close(_socket);
                 }
             } catch (IOException e) {
-                LOG.error("IOX while dispatching", e);
+                LOG.warn("IOX while dispatching", e);
                 IOUtils.close(_socket);
             } catch(Throwable e) {
 				ErrorService.error(e);
