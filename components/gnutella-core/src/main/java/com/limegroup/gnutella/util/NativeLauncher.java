@@ -12,7 +12,8 @@
 
 
 public class NativeLauncher {
-	static {
+
+	public NativeLauncher() {
 		// load the native libary only if we're on Windows
 		String os = System.getProperty("os.name");
 		if(os.indexOf("Windows") != -1) {
@@ -22,12 +23,22 @@ public class NativeLauncher {
 		}
 	}
 
+//  	static {
+//  		// load the native libary only if we're on Windows
+//  		String os = System.getProperty("os.name");
+//  		if(os.indexOf("Windows") != -1) {
+//  			try {
+//  				System.loadLibrary("NativeLauncher");
+//  			} catch(UnsatisfiedLinkError ule) {}
+//  		}
+//  	}
+
 	/**
 	 * launches the file with it's associated application on Windows. 
 	 * @requires that we are running on Windows and that the String 
 	 *  specify a valid file pathname or a valid URL.
 	 */
-	public static int launchFileWindows(String name) {
+	public int launchFileWindows(String name) {
 		int launchCode = -1;
 		try {
 			launchCode = nativeLaunchFileWindows(name);

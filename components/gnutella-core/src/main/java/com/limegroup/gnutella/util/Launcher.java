@@ -1,7 +1,6 @@
 package com.limegroup.gnutella.util;
 
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -87,13 +86,39 @@ public class Launcher {
 	 */
 	private static String _errorMessage;
 
+	private static final String NATIVE_LAUNCHER_NAME = "NativeLauncher.dll";
+
 
 	/** 
 	 * initialization block that determines the operating 
 	 * system and loads the necessary runtime data. 
 	 */
-	static {		
-		if(CommonUtils.isMacClassic()) {
+	public static void initialize() {
+		if(CommonUtils.isWindows()) {
+			String libraryPath = CommonUtils.getCurrentDirectory();
+			libraryPath += File.separator;
+			libraryPath += NATIVE_LAUNCHER_NAME;
+			File nativeLauncherLibrary = new File(libraryPath);
+			
+			// return if the dll is already there
+			if(nativeLauncherLibrary.exists()) return;
+
+			InputStream is = ClassLoader.getSystemResourceAsStream(NATIVE_LAUNCHER_NAME);
+			try {
+				FileOutputStream fos = new FileOutputStream(libraryPath);
+				int c;
+
+				while ((c = is.read()) != -1)
+					fos.write(c);
+				
+				is.close();
+				fos.close();
+			} catch(FileNotFoundException fnfe) {
+			} catch(IOException ioe) {
+			}
+		}
+
+		else if(CommonUtils.isMacClassic()) {
 			_macLoadedWithoutErrors = loadMacClasses();		
 		}
 	}
@@ -140,7 +165,8 @@ public class Launcher {
 	 * @requires that we are running on Windows
 	 */
 	private static int launchFileWindows(String path) {
-		return NativeLauncher.launchFileWindows(path);
+		NativeLauncher nl = new NativeLauncher();
+		return nl.launchFileWindows(path);
 	}
 
 	/** 
