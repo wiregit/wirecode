@@ -19,7 +19,7 @@ public class SimpleFileManager extends FileManager {
         ;
     }
     
-    public int addFileIfShared(File f, List docs) {
+    public FileDesc addFileIfShared(File f, List docs) {
         return addFileIfShared(f);
     }
 }

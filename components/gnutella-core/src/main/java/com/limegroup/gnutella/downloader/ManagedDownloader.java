@@ -1513,12 +1513,11 @@ public class ManagedDownloader implements Downloader, Serializable {
         // first check if it conflicts with the saved dir....
         if (fileExists(completeFile))
             fileManager.removeFileIfShared(completeFile);
-        int fileAddedAt = 
+        FileDesc fileDesc = 
 		    fileManager.addFileIfShared(completeFile, getXMLDocuments());  
 
 		// Add the alternate locations to the newly saved local file
-		if(totalAlternateLocations != null && fileAddedAt != -1) {
-			FileDesc fileDesc = fileManager.get(fileAddedAt);
+		if(totalAlternateLocations != null && fileDesc != null) {
 			// making this call now is necessary to avoid writing the 
 			// same alternate locations back to the requester as they sent 
 			// in their original headers
