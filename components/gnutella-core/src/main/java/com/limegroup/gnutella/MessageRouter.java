@@ -172,6 +172,12 @@ public abstract class MessageRouter {
     private static final long TIMED_GUID_LIFETIME = 25 * 1000; 
 
     /**
+     * Keeps track of Listeners of GUIDs.
+     * GUID -> MessageListener
+     */
+    private final Map _messageListeners = new Hashtable();
+
+    /**
      * Creates a MessageRouter.  Must call initialize before using.
      */
     protected MessageRouter() {
@@ -390,7 +396,10 @@ public abstract class MessageRouter {
         //This may trigger propogation of query route tables.  We do this AFTER
         //any handshake pings.  Otherwise we'll think all clients are old
         //clients.
-		//forwardQueryRouteTables();      
+		//forwardQueryRouteTables();
+        MessageListener ml = 
+            (MessageListener) _messageListeners.get(new GUID(msg.getGUID()));
+        if (ml != null) ml.processMessage(msg);
     }
 
 	/**
@@ -2492,6 +2501,21 @@ public abstract class MessageRouter {
 			}
 		}
 	}
+
+    
+    /** Add a message listener if you want to be notified.  Please unregister
+     *  yourself ASAP.
+     */
+    public void registerMessageListener(GUID guid, MessageListener ml) {
+        _messageListeners.put(guid, ml);
+    }
+    
+    /** Unregister a message listener for a certain guid.
+     */
+    public void unregisterMessageListener(GUID guid) {
+        _messageListeners.remove(guid);
+    }
+
 
     private static class QueryResponseBundle {
         public final QueryRequest _query;
