@@ -496,24 +496,6 @@ public class ManagedConnectionTest extends TestCase {
         Assert.that(mc.getTotalFileSize()==0);                
     }
     
-    public void testIsRouter() {
-        Assert.that(! ManagedConnection.isRouter("127.0.0.1"));
-        Assert.that(! ManagedConnection.isRouter("18.239.0.1"));
-        Assert.that(ManagedConnection.isRouter("64.61.25.171"));
-        Assert.that(ManagedConnection.isRouter("64.61.25.139"));
-        Assert.that(ManagedConnection.isRouter("64.61.25.143"));
-        Assert.that(! ManagedConnection.isRouter("64.61.25.138"));
-        Assert.that(! ManagedConnection.isRouter("64.61.25.170"));
-        Assert.that(! ManagedConnection.isRouter("www.limewire.com"));
-        Assert.that(! ManagedConnection.isRouter("public.bearshare.net"));
-        Assert.that(ManagedConnection.isRouter("router.limewire.com"));
-        Assert.that(ManagedConnection.isRouter("router4.limewire.com"));
-        Assert.that(ManagedConnection.isRouter("router2.limewire.com"));
-        Assert.that(ManagedConnection.translateHost("router.limewire.com").
-            equals("router4.limewire.com"));
-        Assert.that(ManagedConnection.translateHost("router4.limewire.com").
-            equals("router4.limewire.com"));
-     }
 
     public void testForwardsGGEP() {
         int TIMEOUT=1000;
