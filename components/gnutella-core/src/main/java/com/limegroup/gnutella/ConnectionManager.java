@@ -688,10 +688,6 @@ public class ConnectionManager {
         return clone;
     }
 
-	public Set getUltraPeersSupportingUdp() {
-		return _catcher.getUltraPeersSupportingUdp();
-	}
-
     /**
      * Returns the endpoints of the best known ultrapeers.  This include
      * both ultrapeers we are connected to and marked ultrapeer pongs.
