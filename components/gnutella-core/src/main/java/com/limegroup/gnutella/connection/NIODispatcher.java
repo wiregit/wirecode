@@ -239,7 +239,7 @@ public final class NIODispatcher implements Runnable {
                     MessageReadErrorStat.BAD_PACKET_EXCEPTIONS.incrementStat();
 				} catch (IOException e) {
                     // remove the connection if we got an IOException
-                    RouterService.getConnectionManager().remove(mc);
+                    RouterService.removeConnection(mc);
                     MessageReadErrorStat.IO_EXCEPTIONS.incrementStat();
 				}
 			}
