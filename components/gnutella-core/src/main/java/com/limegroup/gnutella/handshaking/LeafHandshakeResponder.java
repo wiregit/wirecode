@@ -41,7 +41,7 @@ public final class LeafHandshakeResponder
         respondToOutgoing(HandshakeResponse response) {
         // let the Ultrapeer know of any high-hops Ultrapeers
         // we're aware of
-        return HandshakeResponse.createAcceptResponse(new Properties());
+        return HandshakeResponse.createAcceptOutgoingResponse(new Properties());
     }
 
     
@@ -57,10 +57,10 @@ public final class LeafHandshakeResponder
         
         if (RouterService.isLeaf()) {
             //b) Incoming, with ultrapeer connection: reject (redirect)
-            return HandshakeResponse.createRejectResponse(props);
+            return HandshakeResponse.createRejectIncomingResponse(props);
         } else {
             //c) Incoming, no ultrapeer: accept...until I find one
-            return HandshakeResponse.createAcceptResponse(props);
+            return HandshakeResponse.createAcceptIncomingResponse(props);
         }
     }
 }
