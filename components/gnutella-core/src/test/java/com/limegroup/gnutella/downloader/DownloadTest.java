@@ -90,7 +90,7 @@ public class DownloadTest extends com.limegroup.gnutella.util.BaseTestCase {
     }
 
     public static Test suite() { 
-        return buildTestSuite(DownloadTest.class,"testAlternateLocationsAreRemoved");
+        return buildTestSuite(DownloadTest.class);//,"testPartialSourceNotAddedWithCorruption");
     }
 
     public static void main(String[] args) {
@@ -710,11 +710,14 @@ public class DownloadTest extends com.limegroup.gnutella.util.BaseTestCase {
         //Check to check the alternate locations
         AlternateLocationCollection alt1 = uploader1.getAlternateLocations();
         AlternateLocation agood = AlternateLocation.create(rfd1);
-                
-        assertTrue("uploader didn't receive alt", alt1.hasAlternateLocations());
-        assertEquals("downloader passed bad locs",1, alt1.getAltLocsSize());
-        assertTrue("uploader got wrong loc", alt1.contains(agood));
 
+        assertEquals("uploader got bad alt locs",0,alt1.getAltLocsSize());
+        AlternateLocationCollection coll = (AlternateLocationCollection)
+        PrivilegedAccessor.getValue(DOWNLOADER,"validAlts");
+        assertTrue(coll.contains(agood));
+        assertFalse(coll.contains(HugeTestUtils.EQUAL_SHA1_LOCATIONS[0]));
+        assertFalse(coll.contains(HugeTestUtils.EQUAL_SHA1_LOCATIONS[1]));
+        assertFalse(coll.contains(HugeTestUtils.EQUAL_SHA1_LOCATIONS[2]));
     }
 
     public void testStealerInterruptedWithAlternate() throws Exception {
@@ -882,15 +885,6 @@ public class DownloadTest extends com.limegroup.gnutella.util.BaseTestCase {
         assertTrue( !u1Alt.contains(al) );
         assertTrue( !u2Alt.contains(al) );
         
-        //check that u1 is demoted in u2's Collection
-        //Sumeet:TODO: add this test back
-        FixedSizeSortedSet set = 
-        (FixedSizeSortedSet)PrivilegedAccessor.getValue(u2Alt,"LOCATIONS");
-        AlternateLocation loc = (AlternateLocation)set.first();
-        Boolean demoted = 
-        (Boolean)PrivilegedAccessor.invokeMethod(loc,"getDemoted",null);
-        assertTrue("failed uploader not demoted ",demoted.booleanValue());
-
         //Note: The amount downloaded from each uploader will not 
         //be equal, because the uploaders are started at different times.
 
