@@ -1457,6 +1457,12 @@ public class Connection implements IpPort {
             return _capabilities.supportsWhatIsNew();
         return false;
     }
+    
+    public int remoteHostSupportsBestCandidates(){
+    	if (_capabilities !=null)
+    		return _messagesSupported.supportsBestCandidatesVM();
+    	return -1;
+    }
 
     /**
      * Returns whether or not this connection represents a local address.

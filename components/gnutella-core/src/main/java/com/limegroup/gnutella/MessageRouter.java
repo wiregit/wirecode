@@ -2611,18 +2611,11 @@ public abstract class MessageRouter {
     				BestCandidates.getCandidates());
     		
     		//broadcast!
-    		//note: I didn't find a method which simply takes a Message and broadcasts it 
-    		//to all ultrapeer connections.  All existing methods take specific kinds of messages
-    		//as arguments, which makes extending the functionality somewhat tedious
-    		
     		for (Iterator iter = _manager.getInitializedConnections().iterator();iter.hasNext();) {
     			ManagedConnection current = (ManagedConnection)iter.next();
     			if (current.isGoodUltrapeer() &&
-    					current.isLimeWire()) 
-						//add more criteria if necessary
+    					current.remoteHostSupportsBestCandidates() >= 1);
     				current.send(bcvm);
-    		
-    		
     		}
     	}
     	
@@ -2640,7 +2633,11 @@ public abstract class MessageRouter {
 						current.isLimeWire() &&
 						current.isGUESSCapable()) //unsolicited udp
     				//add more criteria here
-    				possibleCandidates.add(new Candidate(current));
+    				try {
+    					possibleCandidates.add(new Candidate(current));
+    				}catch (UnknownHostException ignored) {
+    					//if the leaf doesn't have valid address it should be rightfully ignored.
+    				}
     		}
     		
     		if (possibleCandidates.size()==0) 
