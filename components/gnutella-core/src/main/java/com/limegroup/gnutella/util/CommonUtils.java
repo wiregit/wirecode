@@ -824,11 +824,14 @@ public final class CommonUtils {
      * or the system class loader if CommonUtils isn't loaded.
      */
     public static File getResourceFile(String location) {
-        ClassLoader cl = CommonUtils.class.getClassLoader();
-        if(cl == null)
-            cl = ClassLoader.getSystemClassLoader();
-            
-        URL resource = cl.getResource(location);
+        ClassLoader cl = CommonUtils.class.getClassLoader();            
+        URL resource = null;
+
+        if(cl == null) {
+            resource = ClassLoader.getSystemResource(location);
+        } else {
+            resource = cl.getResource(location);
+        }
         
         if( resource == null ) {
             // note: this will probably not work,
