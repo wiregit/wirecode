@@ -21,14 +21,14 @@ import java.util.Properties;
 public class Library {
 
     private HashMap _files;
-    private Library _lib;
+    private static Library _lib;
 
-    public Library() {
+    private Library() {
 	_files = new HashMap();
     }
 
     /* for singleton */
-    public Library instance() {
+    public static Library instance() {
 	if (_lib == null)
 	    return new Library();
 	else return _lib;
