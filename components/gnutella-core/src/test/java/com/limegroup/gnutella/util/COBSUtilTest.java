@@ -3,6 +3,7 @@ package com.limegroup.gnutella.util;
 import junit.framework.*;
 import com.sun.java.util.collections.*;
 import com.limegroup.gnutella.ByteOrder;
+import java.io.IOException;
 
 /**
  * Tests COBSUtil
@@ -17,13 +18,13 @@ public class COBSUtilTest extends com.limegroup.gnutella.util.BaseTestCase {
     }  
 
 
-    public void testEncodeAndDecode() throws java.io.IOException {
+    public void testEncodeAndDecode() throws IOException {
         for (int num = 1; num < 260; num++) 
             encodeAndDecode(num);
     }
     
 
-    private void encodeAndDecode(int num) throws java.io.IOException {
+    private void encodeAndDecode(int num) throws IOException {
         // test all 0s...
         debug("COBSUtilTest.encode(): num = " +
               num);
@@ -129,7 +130,7 @@ public class COBSUtilTest extends com.limegroup.gnutella.util.BaseTestCase {
     }
 
 
-    public void testSymmetry() throws java.io.IOException {
+    public void testSymmetry() throws IOException {
         // a quick test for symmetry - but symmetry was actually tested above,
         // so no need for much testing...
         byte[] bytes = (new String("Sush Is Cool!")).getBytes();
@@ -139,6 +140,45 @@ public class COBSUtilTest extends com.limegroup.gnutella.util.BaseTestCase {
         assertTrue(Arrays.equals(bytes, afterTrimmed));
     }
 
+
+    public void testBadCOBSBlock() throws Exception {
+        byte[] badBlock = new byte[10];
+        badBlock[0] = (byte) 11;
+        for (int i = 1; i < badBlock.length; i++)
+            badBlock[i] = (byte)1;
+        try {
+            byte[] badDecode = COBSUtil.cobsDecode(badBlock);
+            assertTrue(false);
+        }
+        catch (IOException expected) {}
+
+        badBlock = new byte[10];
+        badBlock[0] = (byte) 10;
+        for (int i = 1; i < badBlock.length; i++)
+            badBlock[i] = (byte)1;
+        try {
+            // should pass this time
+            // badBlock is actually good ;)
+            byte[] badDecode = COBSUtil.cobsDecode(badBlock);
+        }
+        catch (IOException unexpected) {
+            assertTrue(false);
+        }
+
+        badBlock = new byte[4];
+        badBlock[0] = (byte) 2;
+        badBlock[1] = (byte) 1;
+        badBlock[2] = (byte) 1;
+        badBlock[3] = (byte) 2;
+        try {
+            byte[] badDecode = COBSUtil.cobsDecode(badBlock);
+            assertTrue(false);
+        }
+        catch (IOException expected) {
+        }
+
+    }
+    
 
     public static void main(String argv[]) {
         junit.textui.TestRunner.run(suite());
