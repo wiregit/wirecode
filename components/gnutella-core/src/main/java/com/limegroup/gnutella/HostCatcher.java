@@ -169,17 +169,25 @@ public class HostCatcher {
         //Skip if this would connect us to our listening port.
         if (isMe(e.getHostname(), e.getPort()))
             return;
-
+ 
+        boolean isPrivate=e.isPrivateAddress();
         boolean notifyGUI=false;
         synchronized(this) {
             if (! (set.contains(e))) {
                 //We don't already have e, so add to both set and queue.
                 //Current policy: add e to the END of queue, so newer points are
-                //used before older.  Adding e may eject an older point from
-                //queue, so we have to cleanup the set to maintain
+                //used before older.  Exception: if e is a private address, add
+                //it to beginning.  This means that the host catcher will still
+                //work on private networks, although we will normally ignore
+                //private addresses. In either case, adding e may eject an older
+                //point from queue, so we have to cleanup the set to maintain
                 //rep. invariant.
                 set.add(e);
-                Object ejected=queue.addLast(e);  
+                Object ejected;
+                if (! isPrivate) //normal case
+                    ejected=queue.addLast(e);  
+                else             //private network OR junk point
+                    ejected=queue.addFirst(e);  
                 if (ejected!=null)
                     set.remove(ejected);
                 
