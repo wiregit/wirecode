@@ -133,17 +133,19 @@ public class ManagedDownloader implements Downloader, Serializable {
     private static final int PUSH_INVALIDATE_TIME=5*60;  //5 minutes
     /** The smallest interval that can be split for parallel download */
     private static final int MIN_SPLIT_SIZE=100000;      //100 KB        
+    /** The lowest (cumulative) bandwith we will accept without stealing the
+     * entire grey area from a downloader for a new one */
+    private static final float MIN_ACCEPTABLE_SPEED = 0.1f;
+    /** The number of bytes to overlap when swarming and resuming, used to help
+     *  verify that different sources are serving the same content. */
+    private static final int OVERLAP_BYTES=500;
 
-    /** The number of times to requery the network.
-     */
+    /** The number of times to requery the network. */
     private static final int REQUERY_ATTEMPTS = 60;
-
-    /** the size of the approx matcher 2d buffer...
-     */
+    /** The size of the approx matcher 2d buffer... */
     private static final int MATCHER_BUF_SIZE = 120;
-    /** this is used for matching of filenames.  kind of big so we only want
-     *  one.
-     */
+    /** This is used for matching of filenames.  kind of big so we only want
+     *  one. */
     private static ApproximateMatcher matcher = 
         new ApproximateMatcher(MATCHER_BUF_SIZE);
     
@@ -169,6 +171,9 @@ public class ManagedDownloader implements Downloader, Serializable {
     private List /* of HTTPDownloader */ dloaders;
     /** True iff this has been forcibly stopped. */
     private boolean stopped;
+    /** True iff a corrupt byte has been detected and this has been stopped by
+     *  the thread detecting the problem.  INVARIANT: corrupted=>stopped.  */
+    private boolean corrupted;
     
     /** The lock for pushes (see below).  Used intead of THIS to prevent missing
      *  notify's.  See readObject for note on serialization.  LOCKING: use
@@ -183,9 +188,6 @@ public class ManagedDownloader implements Downloader, Serializable {
     /** The socket for the pending push download.  Used to communicate between
      *  the Acceptor thread and the manager thread. */
     private Socket pushSocket;
-
-    /** For implementing the BandwidthTracker interface. */
-    private BandwidthTrackerImpl bandwidthTracker=new BandwidthTrackerImpl();
 
     ///////////////////////// Variables for GUI Display  /////////////////
     /** The current state.  One of Downloader.CONNECTING, Downloader.ERROR,
@@ -207,6 +209,12 @@ public class ManagedDownloader implements Downloader, Serializable {
     /** The name of the last location we tried to connect to. (We may be
      *  downloading from multiple other locations. */
     private String currentLocation;
+    /** If in CORRUPT_FILE state, the number of bytes downloaded.  Note that
+     *  this is less than corruptFile.length() if there are holes. */
+    private volatile int corruptFileBytes;
+    /** If in CORRUPT_FILE state, the name of the saved corrupt file or null if
+     *  no corrupt file. */
+    private volatile File corruptFile;
     /** Lock used to communicate between addDownload and tryAllDownloads.
      */
     private RequeryLock reqLock = new RequeryLock();
@@ -236,7 +244,13 @@ public class ManagedDownloader implements Downloader, Serializable {
         initialize(manager, fileManager);
     }
 
-    /** See note on serialization at top of file */
+    /** 
+     * See note on serialization at top of file 
+     * <p>
+     * Note that we are serializing a new BandwidthImpl to the stream. 
+     * This is for compatibility reasons, so the new version of the code 
+     * will run with an older download.dat file.     
+     */
     private synchronized void writeObject(ObjectOutputStream stream)
             throws IOException {
         stream.writeObject(allFiles);
@@ -245,16 +259,20 @@ public class ManagedDownloader implements Downloader, Serializable {
         synchronized (incompleteFileManager) {
             stream.writeObject(incompleteFileManager);
         }
-		stream.writeObject(bandwidthTracker);
+		stream.writeObject(new BandwidthTrackerImpl());
     }
 
     /** See note on serialization at top of file.  You must call initialize on
-     *  this!  */
+     *  this!  
+     * Also see note in writeObjects about why we are not using 
+     * BandwidthTrackerImpl after reading from the stream
+     */
     private void readObject(ObjectInputStream stream)
             throws IOException, ClassNotFoundException {        
         allFiles=(RemoteFileDesc[])stream.readObject();
         incompleteFileManager=(IncompleteFileManager)stream.readObject();
-		bandwidthTracker=(BandwidthTrackerImpl)stream.readObject();
+		//BandwidthTrackerImpl which we are going to throw away
+        stream.readObject();
 
         //The following is needed to prevent NullPointerException when reading
         //serialized object from disk.  This can't be done in the constructor or
@@ -278,6 +296,7 @@ public class ManagedDownloader implements Downloader, Serializable {
         dloaders=new LinkedList();
 		chatList=new DownloadChatList();
         stopped=false;
+        corrupted=false;   //if resuming, cleanupCorrupt() already called
         setState(QUEUED);
             
         this.dloaderManagerThread=new Thread() {
@@ -540,13 +559,17 @@ public class ManagedDownloader implements Downloader, Serializable {
         //We haven't started yet.
         if (currentFileName==null)
             return null;
-
-        //a) If the file is being downloaded, create *copy* of first
+        
+        //a) Special case for saved corrupt fragments.  We don't worry about
+        //removing holes.
+        if (state==CORRUPT_FILE) 
+            return corruptFile; //may be null
+        //b) If the file is being downloaded, create *copy* of first
         //block of incomplete file.  The copy is needed because some
         //programs, notably Windows Media Player, attempt to grab
         //exclusive file locks.  If the download hasn't started, the
         //incomplete file may not even exist--not a problem.
-        if (state!=COMPLETE) {
+        else if (state!=COMPLETE) {
             File incomplete=incompleteFileManager.
                                getFile(currentFileName, currentFileSize); 
             File file=new File(incomplete.getParent(),
@@ -655,6 +678,10 @@ public class ManagedDownloader implements Downloader, Serializable {
                         setState(COULDNT_MOVE_TO_LIBRARY);
                         manager.remove(this, false);
                         return;
+                    } else if (status==CORRUPT_FILE) {
+                        setState(CORRUPT_FILE);
+                        manager.remove(this, false);
+                        return;
                     } else if (status==WAITING_FOR_RETRY) {
                         waitForRetry=true;
                     } else {
@@ -758,6 +785,8 @@ public class ManagedDownloader implements Downloader, Serializable {
      *  "identical" instances of RemoteFileDesc.  Unreachable locations
      *  are removed from files.
      * @return COMPLETE if a file was successfully downloaded
+     *         CORRUPT_FILE a bytes mismatched when checking overlapping
+     *             regions of resume or swarm, and all downloader were aborted
      *         COULDNT_MOVE_TO_LIBRARY the download completed but the
      *             temporary file couldn't be moved to the library
      *         WAITING_FOR_RETRY if no file was downloaded, but it makes sense 
@@ -800,7 +829,18 @@ public class ManagedDownloader implements Downloader, Serializable {
         }           
 
         //2. Do the download
-        int status=tryAllDownloads3(files);
+        int status;
+        try {
+            status=tryAllDownloads3(files);
+        } catch (InterruptedException e) {
+            //Convert InterruptedException&corrupted to "return CORRUPT_FILE".
+            if (corrupted) {
+                cleanupCorrupt(incompleteFile, completeFile.getName());
+                return CORRUPT_FILE;
+            } else {
+                throw e;
+            }
+        }
         if (status!=COMPLETE)
             return status;
                 
@@ -851,10 +891,49 @@ public class ManagedDownloader implements Downloader, Serializable {
         return retVal;
     }
 
+    /** Removes all entries for incompleteFile from incompleteFileManager 
+     *  and attempts to rename incompleteFile to "CORRUPT-i-...".  Deletes
+     *  incompleteFile if rename fails. */
+    private void cleanupCorrupt(File incompleteFile, String name) {
+        corruptFileBytes=getAmountRead();        
+        incompleteFileManager.removeBlocks(incompleteFile);
 
-    /** Like tryDownloads2, but does not deal with the library and hence
-     *  cannot return COULDNT_MOVE_TO_LIBRARY.  Also requires that
-     *  files.size()>0. */
+        //Try to rename the incomplete file to a new corrupt file in the same
+        //directory (INCOMPLETE_DIRECTORY).
+        boolean renamed = false;
+        for (int i=0; i<10 && !renamed; i++) {
+            corruptFile=new File(incompleteFile.getParent(),
+                                 "CORRUPT-"+i+"-"+name);
+            if (corruptFile.exists())
+                continue;
+            renamed=incompleteFile.renameTo(corruptFile);
+        }
+
+        //Could not rename after ten attempts?  Delete.
+        if(!renamed) {
+            incompleteFile.delete();
+            this.corruptFile=null;
+        }
+    }
+
+
+    /** 
+     * Like tryDownloads2, but does not deal with the library, cleaning
+     * up corrupt files, etc.
+     *
+     * @param files a list of files to pick from, all of which MUST be
+     *  "identical" instances of RemoteFileDesc.  Unreachable locations
+     *  are removed from files.
+     * @return COMPLETE if a file was successfully downloaded
+     *         WAITING_FOR_RETRY if no file was downloaded, but it makes sense 
+     *             to try again later because some hosts reported busy.
+     *             The caller should usually wait before retrying.
+     *         GAVE_UP the download attempt failed, and there are 
+     *             no more locations to try.
+     * @exception InterruptedException if the user stop()'ed this download
+     *  or a corrupt byte was detected.  (Calls to resume() do not result
+     *  in InterruptedException.)
+     */
     private int tryAllDownloads3(final List /* of RemoteFileDesc */ files) 
             throws InterruptedException {
         //The parts of the file we still need to download.
@@ -878,7 +957,9 @@ public class ManagedDownloader implements Downloader, Serializable {
         //While there is still an unfinished region of the file...
         while (true) {
             synchronized (this) {
-                if (dloaders.size()==0 && needed.size()==0) {
+                if (stopped) {
+                    throw new InterruptedException();
+                } else if (dloaders.size()==0 && needed.size()==0) {
                     //Finished.
                     return COMPLETE;
                 } else if (dloaders.size()==0 
@@ -900,8 +981,8 @@ public class ManagedDownloader implements Downloader, Serializable {
                 if (! allowAnotherDownload())
                     break;
                 try {
-                    startBestDownload(files, needed,
-                                      busy, terminated);
+                    startBestDownload(files, needed, busy, terminated);
+                                                 //throws InterruptedException
                 } catch (NoSuchElementException e) {
                     break;
                 }
@@ -916,7 +997,7 @@ public class ManagedDownloader implements Downloader, Serializable {
                 //addDownload.
                 if (dloaders.size()>0) {
                     try {
-                        this.wait();
+                        this.wait(2000);
                     } catch (InterruptedException e) {
                         if (stopped) throw e;
                     }
@@ -978,61 +1059,11 @@ public class ManagedDownloader implements Downloader, Serializable {
         //downloader requests until the end of the file (second arg to
         //findConnectable) though it secretly plans on terminating sooner
         //(stopAt(..)).
-        HTTPDownloader dloader;
-        if (needed.size()>0) {
-            //Assign "white" (unclaimed) interval to new downloader.
-            //TODO2: choose biggest, earliest, etc.
-            //TODO2: assign to existing downloader if possible, without
-            //      increasing parallelism
-            Interval interval=(Interval)needed.remove(0);
-            try {
-                dloader=findConnectable(files, 
-                                        interval.low, interval.high,
-                                        busy);
-            } catch (NoSuchElementException e) {
-                //Need to re-add the interval.  If there is an existing
-                //downloader, it will be reassigned to this later.
-                needed.add(interval);
-                throw e;
-            }
-            dloader.stopAt(interval.high);
-            //System.out.println("MANAGER: assigning white "
-            //                   +interval+" to "+dloader);
-        }
-        else {
-            //Split largest "gray" interval, i.e., steal part of another
-            //downloader's region for a new downloader.  
-            //TODO3: split interval into P-|dloaders|, etc., not just half
-            //TODO3: account for speed
-            //TODO3: there is a minor race condition where biggest and 
-            //      dloader could write to the same region of the file
-            //      I think it's ok, though it could result in >100% in the GUI
-            HTTPDownloader biggest=null;
-            synchronized (this) {
-                for (Iterator iter=dloaders.iterator(); iter.hasNext();) {
-                    HTTPDownloader h=(HTTPDownloader)iter.next();
-                    if (biggest==null 
-                           || h.getAmountToRead()>biggest.getAmountToRead())
-                        biggest=h;
-                }                
-            }
-            if (biggest==null)
-                throw new NoSuchElementException();
-            //Note that getAmountToRead() and getInitialReadingPoint() are
-            //constant.  getAmountRead() is not, so we "capture" it into a
-            //variable.
-            int amountRead=biggest.getAmountRead();
-            int left=biggest.getAmountToRead()-amountRead;;
-            if (left < MIN_SPLIT_SIZE)
-                throw new NoSuchElementException();
-            int start=biggest.getInitialReadingPoint()+amountRead+left/2;
-            int stop=biggest.getInitialReadingPoint()+biggest.getAmountToRead();
-            dloader=findConnectable(files, start, stop, busy);
-            dloader.stopAt(stop);
-            biggest.stopAt(start);
-            //System.out.println("MANAGER: assigning grey "+start
-            //                    +"-"+stop+" to "+dloader);
-        }
+        HTTPDownloader dloader = null;//intialize
+        if (needed.size()>0)
+            dloader = assignWhite(files,needed,busy);
+        else
+            dloader = assignGrey(files, busy);
                 
         //2) Asynchronously do download
         //System.out.println("MANAGER: downloading from "
@@ -1061,6 +1092,114 @@ public class ManagedDownloader implements Downloader, Serializable {
             };
         worker.setDaemon(true);
         worker.start();
+    }
+
+    /**
+     * Assigns a white part of the file to a HTTPDownloader and returns it
+     * This method has side effects
+     */
+    private HTTPDownloader assignWhite( List/*of RemoteFileDesc*/  files,
+                             List/*of interval*/  needed,
+                             List /*of RemoteFileDesc*/ busy) 
+                                          throws InterruptedException {
+        //Assign "white" (unclaimed) interval to new downloader.
+        //TODO2: choose biggest, earliest, etc.
+        //TODO2: assign to existing downloader if possible, without
+        //      increasing parallelism
+        HTTPDownloader dloader;
+        Interval interval=(Interval)needed.remove(0);
+        try {                
+            dloader=findConnectable(files, 
+                                    getOverlapOffset(interval.low), 
+                                    interval.high,
+                                    busy);
+        } catch (NoSuchElementException e) {
+            //Need to re-add the interval.  If there is an existing
+            //downloader, it will be reassigned to this later.
+            needed.add(interval);
+            throw e;
+        }
+        dloader.stopAt(interval.high);
+        debug("MANAGER: assigning white "+interval+" to "+dloader);
+        return dloader;
+    }
+
+    /**
+     * Steals a grey area from the biggesr HHTPDownloader and gives it to
+     * the HTTPDownloader this method will return. 
+     * <p> 
+     * If there is less than MIN_SPLIT_SIZE left, we will assign the entire
+     * area to a new HTTPDownloader, if the current downloader is going too
+     * slow.
+     */
+    private HTTPDownloader assignGrey( List/*of RemoteFileDesc*/  files,
+                                       List /*of RemoteFileDesc*/ busy) 
+                                          throws InterruptedException {
+        //Split largest "gray" interval, i.e., steal part of another
+        //downloader's region for a new downloader.  
+        //TODO3: split interval into P-|dloaders|, etc., not just half
+        //TODO3: account for speed
+        //TODO3: there is a minor race condition where biggest and 
+        //      dloader could write to the same region of the file
+        //      I think it's ok, though it could result in >100% in the GUI
+        HTTPDownloader dloader;
+        HTTPDownloader biggest=null;
+        synchronized (this) {
+            for (Iterator iter=dloaders.iterator(); iter.hasNext();) {
+                HTTPDownloader h=(HTTPDownloader)iter.next();
+                if (biggest==null 
+                    || h.getAmountToRead()>biggest.getAmountToRead())
+                    biggest=h;
+            }                
+        }
+        if (biggest==null)
+            throw new NoSuchElementException();
+        //Note that getAmountToRead() and getInitialReadingPoint() are
+        //constant.  getAmountRead() is not, so we "capture" it into a
+        //variable.
+        int amountRead=biggest.getAmountRead();
+        int left=biggest.getAmountToRead()-amountRead;
+        if (left < MIN_SPLIT_SIZE) { 
+            float bandwidth = -1;//initialize
+            try {
+                bandwidth = biggest.getMeasuredBandwidth();
+            } catch (InsufficientDataException ide) {
+                throw new NoSuchElementException();
+            }
+            if(bandwidth < MIN_ACCEPTABLE_SPEED) {
+                //replace (bad boy) biggest if possible
+                int start=
+                biggest.getInitialReadingPoint()+amountRead;
+                int stop=
+                biggest.getInitialReadingPoint()+biggest.getAmountToRead();
+                dloader=
+                findConnectable(files, getOverlapOffset(start), stop, busy);
+                dloader.stopAt(stop);
+                debug("MANAGER: assigning stolen grey "
+                      +start+"-"+stop+" from "+biggest+" to "+dloader);
+                biggest.stopAt(start);
+                biggest.stop();
+            }
+            else//less than MIN_SPLIT_SIZE...but we are doing fine...
+                throw new NoSuchElementException();
+        }
+        else { //There is a big enough chunk to split...split it
+            int start=
+            biggest.getInitialReadingPoint()+amountRead+left/2;
+            int stop=
+            biggest.getInitialReadingPoint()+biggest.getAmountToRead();
+            dloader=
+            findConnectable(files, getOverlapOffset(start), stop, busy);
+            dloader.stopAt(stop);
+            biggest.stopAt(start);
+            debug("MANAGER: assigning split grey "
+                  +start+"-"+stop+" from "+biggest+" to "+dloader);
+        }
+        return dloader;
+    }
+
+    private int getOverlapOffset(int i) {
+        return Math.max(0, i-OVERLAP_BYTES);
     }
 
     /** 
@@ -1105,6 +1244,8 @@ public class ManagedDownloader implements Downloader, Serializable {
                     setState(CONNECTING, 
                         needsPush ? PUSH_CONNECT_TIME : NORMAL_CONNECT_TIME);
             }
+            debug("MANAGER: attempting connect to "
+                  +rfd.getHost()+":"+rfd.getPort());
             if (needsPush) {
                 //System.out.println("MANAGER: trying push to "+rfd);
                 //Send push message, wait for response with timeout.
@@ -1171,14 +1312,16 @@ public class ManagedDownloader implements Downloader, Serializable {
                                 List /* of RemoteFileDesc */ files,
                                 List /* of HTTPDownloader */ terminated) {
         try {
-            downloader.doDownload();
+            downloader.doDownload(true);
         } catch (IOException e) {
 			chatList.removeHost(downloader);
+        } catch (OverlapMismatchException e) {
+            corrupted=true;
+            stop();
         } finally {
-            //int stop=downloader.getInitialReadingPoint()
-            //            +downloader.getAmountRead();
-            //System.out.println("    WORKER: terminating from "+downloader
-            //                   +" at "+stop);
+            int stop=downloader.getInitialReadingPoint()
+                        +downloader.getAmountRead();
+            debug("    WORKER: terminating from "+downloader+" at "+stop);
             //In order to reuse this location again, we need to know the
             //RemoteFileDesc.  TODO2: use measured speed if possible.
             RemoteFileDesc rfd=downloader.getRemoteFileDesc();
@@ -1242,7 +1385,6 @@ public class ManagedDownloader implements Downloader, Serializable {
         else
             return false;
     }
-
 
     /**
      * Returns the union of all XML metadata documents from all hosts.
@@ -1367,18 +1509,13 @@ public class ManagedDownloader implements Downloader, Serializable {
     }
 
     public synchronized int getAmountRead() {
-        //If we're not actually downloading, we just pick some random value.
-        //TODO: this can also mean we've FINISHED the download.  Luckily it
-        //doesn't really matter.
-        if (dloaders.size()==0)
-            return 0;
-        else {
-            //Add all blocks from HTTPDownloaders to IncompleteFileManager.
+        if (state!=CORRUPT_FILE) {
             updateIncompleteFileManager();
-            RemoteFileDesc rfd=((HTTPDownloader)dloaders.get(0))
-                                    .getRemoteFileDesc();
-            File incompleteFile=incompleteFileManager.getFile(rfd);
+            File incompleteFile=incompleteFileManager.getFile(
+                currentFileName, currentFileSize);
             return incompleteFileManager.getBlockSize(incompleteFile);
+        } else {
+            return corruptFileBytes;
         }
     }
      
@@ -1414,12 +1551,28 @@ public class ManagedDownloader implements Downloader, Serializable {
         return retriesWaiting;
     }
 
-    public void measureBandwidth() {
-        bandwidthTracker.measureBandwidth(getAmountRead());
+    public synchronized void measureBandwidth() {
+        Iterator iter = dloaders.iterator();
+        while(iter.hasNext()) {
+            BandwidthTracker dloader = (BandwidthTracker)iter.next();
+            dloader.measureBandwidth();
+        }
     }
     
-    public float getMeasuredBandwidth() {
-        return bandwidthTracker.getMeasuredBandwidth();
+    public synchronized float getMeasuredBandwidth() {
+        float retVal = 0f;
+        Iterator iter = dloaders.iterator();
+        while(iter.hasNext()) {
+            BandwidthTracker dloader = (BandwidthTracker)iter.next();
+            float curr = 0;
+            try {
+                curr = dloader.getMeasuredBandwidth();
+            } catch (InsufficientDataException ide) {
+                curr = 0;
+            }
+            retVal += curr;
+        }
+        return retVal;
     }
 
     /**

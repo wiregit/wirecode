@@ -27,7 +27,7 @@ import java.util.StringTokenizer;
  * dl.doDownload();
  * </pre>
  */
-public class HTTPDownloader {
+public class HTTPDownloader implements BandwidthTracker {
     /** The length of the buffer used in downloading. */
     public static final int BUF_LENGTH=1024;
 
@@ -48,7 +48,6 @@ public class HTTPDownloader {
 	private int _initialReadingPoint;
 
 	private ByteReader _byteReader;
-	private RandomAccessFile _fos;
 	private Socket _socket;  //initialized in HTTPDownloader(Socket) or connect
     private File _incompleteFile;
 
@@ -56,6 +55,9 @@ public class HTTPDownloader {
 	private String _host;
 	
 	private boolean _chatEnabled = false; // for now
+
+    /** For implementing the BandwidthTracker interface. */
+    private BandwidthTrackerImpl bandwidthTracker=new BandwidthTrackerImpl();
 
     /**
      * Creates an uninitialized client-side normal download.  Call connect() on
@@ -355,50 +357,74 @@ public class HTTPDownloader {
     /*
      * Downloads the content from the server and writes it to a temporary
      * file.  Blocking.  This MUST be initialized via connect() beforehand, and
-     * doDownload MUST NOT have already been called.
+     * doDownload MUST NOT have already been called.  If checkOverlap, the
+     * incomplete file is compared with the data being downloaded; if there is
+     * a mismatch, OverlapMismatchException is thrown immediately.
      *  
-     * @exception FileIncompleteException transfer interrupted, either
-     *  locally or remotely.  TODO: is this ALWAYS thrown during 
-     *  interruption?
-     * @exception FileCantBeMovedException file downloaded but  couldn't be
-     *  moved to library
-     * @exception IOException file couldn't be downloaded for some other
-     *  reason 
+     * @param checkOverlap check the existing contents of the incomplete file 
+     *  before writing to it.
+     * @exception OverlapMismatchException part of the incomplete file on
+     *  disk didn't match data read from network.
+     * @exception IOException download was interrupted, typically (but not
+     *  always) because the other end closed the connection.
      */
-	public void doDownload() throws IOException {
-		_fos = new RandomAccessFile(_incompleteFile, "rw");
-        _fos.seek(_initialReadingPoint);
+	public void doDownload(boolean checkOverlap) 
+            throws IOException, OverlapMismatchException {
+        RandomAccessFile fos = new RandomAccessFile(_incompleteFile, "rw");
+        try {            
+            fos.seek(_initialReadingPoint);
+            int c = -1;
+            byte[] buf = new byte[BUF_LENGTH];
+            byte[] fileBuf = new byte[BUF_LENGTH];
+            
+            while (true) {
+                //1. Read from network.  It's possible that we've read more than
+                //requested because of a call to setAmountToRead from another
+                //thread.  This used to be an error resulting in
+                //FileTooLargeException. TODO: what should we do here now?
+                if (_amountRead >= _amountToRead) 
+                    break;
+                
+                int left=_amountToRead - _amountRead;
+                c = _byteReader.read(buf, 0, Math.min(BUF_LENGTH, left));
+                
+                if (c == -1) 
+                    break;
+                            
+                //2. Check that data read matches any non-zero bytes already on
+                //disk, i.e., from previous downloads.  Assumption: "holes" in
+                //file are zeroed.  Be careful not read beyond end of file,
+                //which is easy in the case of resuming.  Also note that
+                //amountToCheck can be negative; the file length isn't extended
+                //until the first write after a seek.
+                long currPos = fos.getFilePointer();
+                int amountToCheck=(int)Math.min(c,fos.length()-currPos);
+                if(checkOverlap && amountToCheck>0) {                    
+                    fos.readFully(fileBuf,0,amountToCheck);
+                    for(int i=0;i<amountToCheck;i++) {
+                        if (fileBuf[i]!=0 &&  buf[i]!=fileBuf[i]) 
+                            throw new OverlapMismatchException();
+                    }
+                    //get the fp back where it was before we checked
+                    fos.seek(currPos);
+                }
+            
+                //3. Write to disk.
+                fos.write(buf, 0, c);			
+                _amountRead+=c;
+            }  // end of while loop
 
-		int c = -1;
-		
-		byte[] buf = new byte[BUF_LENGTH];
 
-		while (true) {
-			//It's possible that we've read more than requested because of a
-			//call to setAmountToRead from another thread.  This used to be an
-			//error resulting in FileTooLargeException. TODO: what should we do
-            //here now?
-  			if (_amountRead >= _amountToRead) 
-				break;
-			
-            int left=_amountToRead - _amountRead;
-			c = _byteReader.read(buf, 0, Math.min(BUF_LENGTH, left));
-
-			if (c == -1) 
-				break;
-			
-			_fos.write(buf, 0, c);
-			
-			_amountRead+=c;
-
-		}  // end of while loop
-
-		_byteReader.close();
-		_fos.close();
-
-
-		if ( _amountRead != _amountToRead ) {
-            throw new FileIncompleteException();
+            if ( _amountRead != _amountToRead ) {
+                //TODO: what if corruptBytes>0?
+                throw new FileIncompleteException();  
+            }
+        } finally {
+            _byteReader.close();
+            try {
+                fos.getFD().sync();
+            } catch (SyncFailedException ignored) { }
+            fos.close();
         }
 	}
 
@@ -410,10 +436,6 @@ public class HTTPDownloader {
 	public void stop() {        
         if (_byteReader != null)
             _byteReader.close();
-        try {
-            if (_fos != null)
-                _fos.close();
-        } catch (IOException e) { }
         try {
             if (_socket != null)
                 _socket.close();
@@ -455,9 +477,26 @@ public class HTTPDownloader {
     public RemoteFileDesc getRemoteFileDesc() {return _rfd;}
     /** Returns true iff this is a push download. */
     public boolean isPush() {return _isPush;}
-	
 
-	////////////////////////////// Unit Test ////////////////////////////////////
+
+    /////////////////////Bandwidth tracker interface methods//////////////
+    public void measureBandwidth() {
+        bandwidthTracker.measureBandwidth(getAmountRead());
+    }
+
+    public float getMeasuredBandwidth() throws InsufficientDataException {
+        try {
+            return bandwidthTracker.getMeasuredBandwidth();
+        } catch(InsufficientDataException ide) {
+            throw ide;
+        }
+    }
+	
+	////////////////////////////// Unit Test ////////////////////////////////
+
+    public String toString() {
+        return "<"+_host+":"+_port+", "+getFileName()+">";
+    }
 
 
 //  	private HTTPDownloader(String str) {

@@ -58,7 +58,7 @@ public final class SupernodeAssigner {
 	 * Constant for the number of milliseconds between the timer's calls
 	 * to its <tt>Runnable</tt>s.
 	 */
-	private final int TIMER_DELAY = 1000;
+	public static final int TIMER_DELAY = 1000;
 
 	/**
 	 * Constant for the number of seconds between the timer's calls
@@ -183,11 +183,23 @@ public final class SupernodeAssigner {
         _uploadTracker.measureBandwidth();
         _downloadTracker.measureBandwidth();
         _manager.measureBandwidth();
+        float bandwidth = 0;
+        try {
+            bandwidth = _uploadTracker.getMeasuredBandwidth();
+        }catch(InsufficientDataException ide) {
+            bandwidth = 0;
+        }
 		int newUpstreamBytesPerSec = 
-            (int)_uploadTracker.getMeasuredBandwidth()
+            (int)bandwidth
            +(int)_manager.getMeasuredUpstreamBandwidth();
+        bandwidth = 0;
+        try {
+            bandwidth = _downloadTracker.getMeasuredBandwidth();
+        } catch (InsufficientDataException ide) {
+            bandwidth = 0;
+        }
 		int newDownstreamBytesPerSec = 
-            (int)_downloadTracker.getMeasuredBandwidth()
+            (int)bandwidth
            +(int)_manager.getMeasuredDownstreamBandwidth();
 		if(newUpstreamBytesPerSec > _maxUpstreamBytesPerSec) {
 			_maxUpstreamBytesPerSec = newUpstreamBytesPerSec;

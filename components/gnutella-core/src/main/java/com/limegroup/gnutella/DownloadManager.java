@@ -694,7 +694,13 @@ public class DownloadManager implements BandwidthTracker {
         float sum=0;
         for (Iterator iter = active.iterator(); iter.hasNext(); ) {
 			BandwidthTracker bt = (BandwidthTracker)iter.next();
-			sum+=bt.getMeasuredBandwidth();
+            float curr = 0;
+            try{
+                curr = bt.getMeasuredBandwidth();
+            } catch(InsufficientDataException ide) {
+                curr = 0;//insufficient data? assume 0
+            }
+			sum+=curr;
 		}
         return sum;
 	}

@@ -26,7 +26,7 @@ public class TestFile {
     }
 
     public static int length() {
-        //return 1000000; //1MB;
-        return 100000;    //100 KB;
+        return 1000000; //1MB;
+        //return 100000;    //100 KB;
     }
 }

@@ -962,7 +962,13 @@ public class ManagedConnection
      * @see BandwidthTracker#measureBandwidth 
      */
     public float getMeasuredUpstreamBandwidth() {
-        return _upBandwidthTracker.getMeasuredBandwidth();
+        float retValue = 0; //initialize to default
+        try {
+            retValue = _upBandwidthTracker.getMeasuredBandwidth();
+        } catch(InsufficientDataException ide) {
+            return 0;
+        }
+        return retValue;
     }
 
     /**
@@ -971,7 +977,13 @@ public class ManagedConnection
      * @see BandwidthTracker#measureBandwidth 
      */
     public float getMeasuredDownstreamBandwidth() {
-        return _downBandwidthTracker.getMeasuredBandwidth();
+        float retValue = 0;
+        try {
+            retValue = _downBandwidthTracker.getMeasuredBandwidth();
+        } catch (InsufficientDataException ide) {
+            return 0;
+        }
+        return retValue;
     }
 
     /** 

@@ -18,6 +18,6 @@ public interface BandwidthTracker {
      * Returns the throughput of this in kilobytes/sec (KB/s) between the last
      * two calls to measureBandwidth, or 0.0 if unknown.  
      */
-    public float getMeasuredBandwidth();        
+    public float getMeasuredBandwidth() throws InsufficientDataException;
 }
 

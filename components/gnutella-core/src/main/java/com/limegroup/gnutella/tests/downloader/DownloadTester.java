@@ -3,9 +3,14 @@ package com.limegroup.gnutella.tests.downloader;
 import java.io.*;
 import java.util.*;
 import com.limegroup.gnutella.*;
+import com.limegroup.gnutella.util.*;
 import com.limegroup.gnutella.tests.*;
 import com.limegroup.gnutella.downloader.*;
 import com.limegroup.gnutella.tests.stubs.*;
+import com.limegroup.gnutella.gui.*;
+import com.limegroup.gnutella.gui.search.*;
+import javax.swing.JOptionPane;
+
 
 public class DownloadTester {
     static File directory=new File(".");
@@ -14,7 +19,7 @@ public class DownloadTester {
     static TestUploader uploader1=new TestUploader("6346", 6346);
     static TestUploader uploader2=new TestUploader("6347", 6347);
     static TestUploader uploader3=new TestUploader("6348", 6348);
-    static DownloadManager dm;
+    static final DownloadManager dm = new DownloadManager();
 
     public static void main(String[] args) {
         try {
@@ -23,15 +28,30 @@ public class DownloadTester {
             file=new File("DownloadTester2834343.out");
             file.delete();
             SettingsManager.instance().setSaveDirectory(directory);
+            SettingsManager.instance().setConnectionSpeed(1000);
         } catch (IOException e) {
             System.err.println("Couldn't create temp file.");
             System.exit(1);
         }
-        dm=new DownloadManager();
         RouterService rs=new RouterService(null, null, null, null);
         dm.initialize(new ActivityCallbackStub(), new MessageRouterStub(), 
                       null, new FileManagerStub(), rs);
-     
+
+        SimpleTimer timer = new SimpleTimer(true);
+        Runnable click = new Runnable() {
+                public void run() {
+                    dm.measureBandwidth();
+                }
+            };
+        timer.schedule(click,0,SupernodeAssigner.TIMER_DELAY);
+
+//         testOverlapCheckSpeed(5);
+//         cleanup();
+//         testOverlapCheckSpeed(25);
+//         cleanup();
+//         testOverlapCheckSpeed(125);
+//         cleanup();
+
         testSimpleDownload();
         cleanup();
         testSimpleSwarm();
@@ -44,10 +64,58 @@ public class DownloadTester {
         cleanup();
         testAddDownload();
         cleanup();
+        testStallingUploaderReplaced();
+        cleanup();
+        
+        testOverlapCheckGrey();
+        cleanup();
+        testOverlapCheckWhite();
+        cleanup();
     }
 
 
     ////////////////////////// Test Cases //////////////////////////
+
+    private static void testOverlapCheckSpeed(int rate) {
+        RemoteFileDesc rfd=newRFD(6346, 100);
+        System.out.println("-Measuring time for download at rate "+rate+"...");
+        uploader1.setRate(rate);
+        long start1=System.currentTimeMillis();
+        try {
+            HTTPDownloader downloader=new HTTPDownloader(
+                rfd, file, 0, TestFile.length());
+            downloader.connect();
+            downloader.doDownload(true);        
+        } catch (IOException e) {
+            Assert.that(false, "Unexpected exception: "+e);
+        } catch (OverlapMismatchException e) {
+            Assert.that(false, "Unexpected mismatch");
+        }
+        long elapsed1=System.currentTimeMillis()-start1;
+        
+//         try{
+//             RandomAccessFile raf = new RandomAccessFile(file,"rw");
+//             raf.seek(300);
+//             raf.write(65);
+//         } catch (IOException io) {
+//             Assert.that(false, "Error programing a spook");
+//         }
+        
+        long start2=System.currentTimeMillis();
+        try {
+            HTTPDownloader downloader=new HTTPDownloader(
+                rfd, file, 0, TestFile.length());
+            downloader.connect();
+            downloader.doDownload(false);        
+        } catch (IOException e) {
+            Assert.that(false, "Unexpected exception: "+e);
+        } catch (OverlapMismatchException e) {
+            Assert.that(false, "Unexpected mismatch");
+        }
+        long elapsed2=System.currentTimeMillis()-start2;
+        System.out.println("  No check="+elapsed2+", check="+elapsed1);
+    }
+
 
     private static void testSimpleDownload() {
         System.out.print("-Testing non-swarmed download...");
@@ -59,7 +127,7 @@ public class DownloadTester {
     private static void testSimpleSwarm() {
         System.out.print("-Testing swarming from two sources...");
         //Throttle rate at 10KB/s to give opportunities for swarming.
-        final int RATE=10;
+        final int RATE=500;
         //The first uploader got a range of 0-100%.  After the download receives
         //50%, it will close the socket.  But the uploader will send some data
         //between the time it sent byte 50% and the time it receives the FIN
@@ -89,7 +157,7 @@ public class DownloadTester {
 
     private static void testUnbalancedSwarm() {
         System.out.print("-Testing swarming from two unbalanced sources...");
-        final int RATE=10;
+        final int RATE=500;
         final int FUDGE_FACTOR=RATE*1024;  
         uploader1.setRate(RATE);
         uploader2.setRate(RATE/10);
@@ -117,7 +185,7 @@ public class DownloadTester {
 
     private static void testSwarmWithInterrupt() {
         System.out.print("-Testing swarming from two sources (one broken)...");
-        final int RATE=10;
+        final int RATE=500;
         final int STOP_AFTER = TestFile.length()/4;       
         final int FUDGE_FACTOR=RATE*1024;  
         uploader1.setRate(RATE);
@@ -138,15 +206,17 @@ public class DownloadTester {
 
         //Note: The amount downloaded from each uploader will not 
         //be equal, because the uploaders are stated at different times.
-        check(u1<TestFile.length()-STOP_AFTER+FUDGE_FACTOR, "u1 did all the work");
+        check(u1<TestFile.length()-STOP_AFTER+FUDGE_FACTOR, 
+              "u1 did all the work");
         check(u2==STOP_AFTER, "u2 did all the work");
     }
 
 
     private static void testStealerInterrupted() {
         System.out.print("-Testing unequal swarming with stealer dying...");
-        final int RATE=10;
-        final int STOP_AFTER = 5*TestFile.length()/8;//second half of file + 1/8 of the file
+        final int RATE=500;
+        //second half of file + 1/8 of the file
+        final int STOP_AFTER = 5*TestFile.length()/8;
         final int FUDGE_FACTOR=RATE*1024;  
         uploader1.setRate(RATE/10);
         uploader2.setRate(RATE);
@@ -166,7 +236,8 @@ public class DownloadTester {
 
         //Note: The amount downloaded from each uploader will not 
         //be equal, because the uploaders are stated at different times.
-        check(u1<TestFile.length()-STOP_AFTER+2*FUDGE_FACTOR, "u1 did all the work");
+        check(u1<TestFile.length()-STOP_AFTER+2*FUDGE_FACTOR,
+              "u1 did all the work");
         check(u2==STOP_AFTER, "u2 did all the work");
     }
 
@@ -174,8 +245,8 @@ public class DownloadTester {
 
     private static void testAddDownload() {
         System.out.print("-Testing addDownload (increases swarming)...");
-        final int RATE=10;
-        final int FUDGE_FACTOR=15000;  
+        final int RATE=500;
+        final int FUDGE_FACTOR=RATE*1024;  
         uploader1.setRate(RATE);
         uploader2.setRate(RATE);
         RemoteFileDesc rfd1=newRFD(6346, 100);
@@ -185,7 +256,6 @@ public class DownloadTester {
         try {
             //Start one location, wait a bit, then add another.
             download=dm.getFiles(new RemoteFileDesc[] {rfd1}, false);
-            try { Thread.sleep(10); } catch (InterruptedException e) { }
             ((ManagedDownloader)download).addDownload(rfd2);
         } catch (FileExistsException e) {
             check(false, "FAILED: already exists");
@@ -203,8 +273,8 @@ public class DownloadTester {
         else
             check(false, "FAILED: complete corrupt");
 
-        //Make sure there weren't too many overlapping regions. Each upload should
-        //do roughly half the work.
+        //Make sure there weren't too many overlapping regions. Each upload
+        //should do roughly half the work.
         int u1 = uploader1.amountUploaded();
         int u2 = uploader2.amountUploaded();
         //Note: The amount downloaded from each uploader will not 
@@ -213,11 +283,125 @@ public class DownloadTester {
         System.out.println("\tu2: "+u2);
         System.out.println("\tTotal: "+(u1+u2));
 
-        check(u1<TestFile.length()/2+FUDGE_FACTOR, "u1 did all the work");
-        check(u2<TestFile.length()/2+FUDGE_FACTOR, "u2 did all the work");
+        check(u1<(TestFile.length()/2+(FUDGE_FACTOR)), "u1 did all the work");
+        check(u2<(TestFile.length()/2+(FUDGE_FACTOR)), "u2 did all the work");
+    }
+
+    private static void testStallingUploaderReplaced() {
+        System.out.print
+        ("-Testing download completion with stalling downloader...");
+        //Throttle rate at 500KB/s to give opportunities for swarming.
+        final int RATE=500;
+        uploader1.setRate(0);//stalling uploader
+        uploader2.setRate(RATE);
+        RemoteFileDesc rfd1=newRFD(6346, 100);
+        RemoteFileDesc rfd2=newRFD(6347, 100);
+        RemoteFileDesc[] rfds = {rfd1,rfd2};
+
+        testGeneric(rfds);
+
+
+        //Make sure there weren't too many overlapping regions.
+        int u1 = uploader1.amountUploaded();
+        int u2 = uploader2.amountUploaded();
+        System.out.println("\tu1: "+u1);
+        System.out.println("\tu2: "+u2);
+        System.out.println("\tTotal: "+(u1+u2));
+
+        //Note: The amount downloaded from each uploader will not 
+
+        System.out.println("passed");//file downloaded? passed
+    }
+
+    private static void testOverlapCheckGrey() {
+        System.out.print("-Testing overlap checking from Grey area...");
+        final int RATE=500;
+        uploader1.setRate(RATE);
+        uploader2.setRate(RATE/100);
+        uploader2.setCorruption(true);
+        RemoteFileDesc rfd1=newRFD(6346, 100);
+        RemoteFileDesc rfd2=newRFD(6347, 100);
+        
+        Downloader download=null;
+        try {
+            //Start one location, wait a bit, then add another.
+            download=dm.getFiles(new RemoteFileDesc[] {rfd1,rfd2}, false);
+        } catch (FileExistsException e) {
+            check(false, "FAILED: already exists");
+            return;
+        } catch (AlreadyDownloadingException e) {
+            check(false, "FAILED: already downloading");
+            return;
+        } catch (java.io.FileNotFoundException e) {
+            check(false, "FAILED: file not found (huh?)");
+            return;
+        }
+        waitForCorrupt(download);
+        check(download.getAmountRead()<2*TestFile.length()/3, 
+              "Didn't interrupt soon enough: "+download.getAmountRead());
+        System.out.println("passed");//got here? Test passed
+        //TODO: check IncompleteFileManager, disk
     }
 
 
+    private static void testOverlapCheckWhite() {
+        System.out.print("-Testing overlap checking from White area...");
+        final int RATE=500;
+        uploader1.setCorruption(true);
+        uploader1.stopAfter(TestFile.length()/8);//blinding fast
+        uploader2.setRate(RATE);
+        RemoteFileDesc rfd1=newRFD(6346, 100);
+        RemoteFileDesc rfd2=newRFD(6347, 100);
+        
+        Downloader download=null;
+        try {
+            //Start one location, wait a bit, then add another.
+            download=dm.getFiles(new RemoteFileDesc[] {rfd1,rfd2}, false);
+        } catch (FileExistsException e) {
+            check(false, "FAILED: already exists");
+            return;
+        } catch (AlreadyDownloadingException e) {
+            check(false, "FAILED: already downloading");
+            return;
+        } catch (java.io.FileNotFoundException e) {
+            check(false, "FAILED: file not found (huh?)");
+            return;
+        }
+        waitForCorrupt(download);
+        System.out.println("passed");//got here? Test passed
+    }
+
+//     private static void testGUI() {
+//         final int RATE=500;
+//         uploader1.setCorruption(true);
+//         uploader1.setRate(RATE);
+//         uploader2.setRate(RATE);
+
+//         //Bring up application.  Make sure disconnected.
+//         System.out.println("Bringing up GUI...");
+//         com.limegroup.gnutella.gui.Main.main(new String[0]);
+//         RouterService router=GUIMediator.instance().getRouter();
+//         router.disconnect();
+        
+//         //Do dummy search
+//         byte[] guid=GUIMediator.instance().triggerSearch(file.getName());
+//         Assert.that(guid!=null, "Search didn't happen");
+
+//         //Add normal dummy result
+//         ActivityCallback callback=router.getActivityCallback();        
+//         byte[] localhost={(byte)127, (byte)0, (byte)0, (byte)1};
+//         Response[] responses=new Response[1];
+//         responses[0]=new Response(0l, file.length(), file.getName());
+//         QueryReply qr=new QueryReply(guid, (byte)5, 6346,
+//                                      localhost, Integer.MAX_VALUE,
+//                                      responses, new byte[16]);
+//         responses=new Response[1];
+//         responses[0]=new Response(0l, file.length(), file.getName());
+//         qr=new QueryReply(guid, (byte)5, 6347,
+//                           localhost, Integer.MAX_VALUE,
+//                           responses, new byte[16]);
+//         callback.handleQueryReply(qr);
+//     }
 
     ////////////////////////// Helping Code ///////////////////////////
     
@@ -262,12 +446,24 @@ public class DownloadTester {
         }
     }
 
+
+    private static void waitForCorrupt(Downloader d) {
+        //Current implementation: polling (ugh)
+        while (d.getState()!=Downloader.CORRUPT_FILE) {
+            try {
+                Thread.sleep(100);
+            } catch (InterruptedException e) { }
+            dm.writeSnapshot();  //Try to mess up downloaders
+        }
+    }
+
     /** Returns true if the complete file exists and is complete */
     private static boolean isComplete() {
         if (file.length()!=TestFile.length())
             return false;
+        FileInputStream stream=null;
         try {
-            FileInputStream stream = new FileInputStream(file);
+            stream = new FileInputStream(file);
             for (int i=0 ; ; i++) {
                 int c=stream.read();
                 if (c==-1)//eof
@@ -277,6 +473,13 @@ public class DownloadTester {
             }
         } catch (IOException ioe) {
             return false;
+        } finally {
+            if (stream!=null) {
+                try {
+                    stream.close();
+                } catch (IOException ignored) {
+                }
+            }
         }
         return true;
     }
@@ -289,7 +492,9 @@ public class DownloadTester {
 
     /** Cleans up the complete file */
     private static void cleanup() {
-        file.delete();
+        boolean deleted=file.delete();
+        if (!deleted)
+            System.err.println("WARNING: couldn't delete "+file);
         uploader1.reset();
         uploader2.reset();
         uploader3.reset();
