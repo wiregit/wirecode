@@ -42,9 +42,9 @@ class LimeXMLSchemaFieldExtractor
 {
     
     /**
-     * The map from names to corresponding FieldTypeSet
+     * The map from names to corresponding FieldInfoList
      */
-    private Map _nameFieldTypeSetMap = null;
+    private Map _nameFieldInfoListMap = new HashMap();
     
     /**
      * A dummy name to be used when there's no name for a field
@@ -71,7 +71,7 @@ class LimeXMLSchemaFieldExtractor
      * The field names that are referenced/used from some other field
      * (ie which can not be root element)
      */
-    private Set _referencedNames = null;
+    private Set _referencedNames = new HashSet();
     
     //initialize the static variables
     static
@@ -123,23 +123,24 @@ class LimeXMLSchemaFieldExtractor
     {
         try
         {
-            //reInitialize fields(internal datastructures)
-            reInitializeMemberFields();
-            
-            //traverse the document
+            //traverse the document and gather information
             Element root = document.getDocumentElement();
             traverse(root);
             
             //now get the root element below <xsd:schema>
             String rootElementName = getRootElementName();
             
+            //create a list to store the field names
             List fieldNames = new LinkedList(); 
+            
+            //fill the list with field names
             fillWithFieldNames(fieldNames, 
-                (FieldTypeSet)_nameFieldTypeSetMap.get(rootElementName),
+                (FieldInfoList)_nameFieldInfoListMap.get(rootElementName),
                 rootElementName);
             
             System.out.println("fields: " + fieldNames);
             
+            //return the list of field names
             return fieldNames;
         }
         catch(NullPointerException npe)
@@ -148,58 +149,78 @@ class LimeXMLSchemaFieldExtractor
         }
     }
     
-    private void reInitializeMemberFields()
-    {
-        _nameFieldTypeSetMap = new HashMap();
-        _uniqueCount = 1;
-        _lastUniqueComplexTypeName = "";
-        _referencedNames = new HashSet(); 
-    }
     
+    /**
+     * Fills the passed list of fieldnames with fields from
+     * the passed fieldInfoList.
+     * @param prefix The prefix to be prepended to the new fields
+     * being added
+     */
     private void  fillWithFieldNames(List fieldNames,
-        FieldTypeSet fieldTypeSet,
+        FieldInfoList fieldInfoList,
         final String prefix)
     {
-        
-        //get the iterator over the elements in the fieldtypeSet
-        Iterator iterator = fieldTypeSet.iterator();
-
+        //get the iterator over the elements in the fieldInfoList
+        Iterator iterator = fieldInfoList.iterator();
+        //iterate
         while(iterator.hasNext())
         {
-            FieldTypePair fieldTypePair = (FieldTypePair)iterator.next();
+            //get the next FieldInfoPair
+            FieldInfoPair fieldInfoPair = (FieldInfoPair)iterator.next();
+            
             //get the field type set corresponding to this field pair's type
-            FieldTypeSet newFieldTypeSet 
-                = (FieldTypeSet)_nameFieldTypeSetMap.get(
-                fieldTypePair.getType());
-            String field = fieldTypePair.getField();
-            if(newFieldTypeSet == null)
+            FieldInfoList newFieldInfoList 
+                = (FieldInfoList)_nameFieldInfoListMap.get(
+                fieldInfoPair.getFieldInfo().getType());
+            
+            //get the field
+            String field = fieldInfoPair.getField();
+            
+            //if datatype is not defined elsewhere in the schema (may be
+            //because it is a primitive type or so)
+            if(newFieldInfoList == null)
             {
+                //if not a dummy field
                 if(!isDummy(field))
                 {
+                    //add to fieldNames with prefix
                     fieldNames.add(prefix 
                         + XMLStringUtils.DELIMITER + field);
                 }
                 else
                 {
+                    //else just add the prefix (without field, as the 
+                    //field is a dummy)
                     fieldNames.add(prefix);
                 }
             }
             else
             {
+                //else (i.e. when the datatype is further defined)
+                
+                //if not a dummy field
                 if(!isDummy(field))
                 {
-                    fillWithFieldNames(fieldNames,newFieldTypeSet,
+                    //recursively call the method with the new values
+                    //change the prefix to account for the field
+                    fillWithFieldNames(fieldNames,newFieldInfoList,
                         prefix + XMLStringUtils.DELIMITER
                         + field);
                 }
                 else
                 {
-                    fillWithFieldNames(fieldNames,newFieldTypeSet,prefix);
+                    //recursively call the method with the new values
+                    //prefix is not changed (since the field is dummy)
+                    fillWithFieldNames(fieldNames,newFieldInfoList,prefix);
                 }
             }
         }
     }
     
+    /**
+     * Tests if the passed field is a dummy field
+     * @return true, if dummy, false otherwise
+     */
     private boolean isDummy(String field)
     {
         if(field.trim().equals(DUMMY))
@@ -214,9 +235,9 @@ class LimeXMLSchemaFieldExtractor
      */
     private String getRootElementName()
     {
-        //get the set of keys in _nameFieldTypeSetMap
+        //get the set of keys in _nameFieldInfoListMap
         //one of this is the root element
-        Set possibleRoots = ((HashMap)((HashMap)_nameFieldTypeSetMap).clone()).keySet();
+        Set possibleRoots = ((HashMap)((HashMap)_nameFieldInfoListMap).clone()).keySet();
         
         //Iterate over set of _referencedNames
         //and remove those from possibleRoots
@@ -235,7 +256,7 @@ class LimeXMLSchemaFieldExtractor
 
     /**
      * Traverses the given node as well as its children and fills in the
-     * datastructures (_nameFieldTypeSetMap, _referencedNames etc) using
+     * datastructures (_nameFieldInfoListMap, _referencedNames etc) using
      * the information gathered
      * @param n The node which has to be traveresed (along with its children)
      * @modifies this
@@ -248,6 +269,7 @@ class LimeXMLSchemaFieldExtractor
         //if element
         if(isElementTag(name))
         {
+            //process the element tag and gather specific information
            processElementTag(n);
            
            //get and process children
@@ -255,30 +277,26 @@ class LimeXMLSchemaFieldExtractor
             int numChildren = children.getLength();
             for(int i=0;i<numChildren; i++)
             {
+                //traverse the child
                 Node child = children.item(i);
                 traverse(child);
             }
         }
         else if(isComplexTypeTag(name))
         {
+            //if its a complex type tag, process differently.
             processComplexTypeTag(n);
         }
         else
         {
-             //get and process children
-            NodeList children = n.getChildNodes();
-            int numChildren = children.getLength();
-            for(int i=0;i<numChildren; i++)
-            {
-                Node child = children.item(i);
-                traverse(child);
-            }
+            //traverse children
+            traverseChildren(n);
         }
     }
     
     
     /**
-     * Processes the 'complexType' tag
+     * Processes the 'complexType' tag (gets the structure of a complex type)
      * @param n The node having 'complexType' tag 
      */
     private void processComplexTypeTag(Node n)
@@ -293,8 +311,8 @@ class LimeXMLSchemaFieldExtractor
             name = nameAttribute.getNodeValue();   
         }
         
-        //get new fieldtype set
-        FieldTypeSet fieldTypeSet = new FieldTypeSet();
+        //get new field info list
+        FieldInfoList fieldInfoList = new FieldInfoList();
         
         //get and process children
         NodeList children = n.getChildNodes();
@@ -302,11 +320,11 @@ class LimeXMLSchemaFieldExtractor
         for(int i=0;i<numChildren; i++)
         {
             Node child = children.item(i);
-            processChildOfComplexType(child,fieldTypeSet);
+            processChildOfComplexType(child,fieldInfoList);
         }
         
-        //add mapping to _nameFieldTypeSetMap
-        _nameFieldTypeSetMap.put(name, fieldTypeSet);     
+        //add mapping to _nameFieldInfoListMap
+        _nameFieldInfoListMap.put(name, fieldInfoList);     
         
         //also add to the _referencedNames
         _referencedNames.add(name);
@@ -315,12 +333,12 @@ class LimeXMLSchemaFieldExtractor
     /**
      * Processes the child of a 'complexType' element
      * @param n The child to be processed
-     * @param fieldTypeSet The set to which information related to the child
+     * @param fieldInfoList The list to which information related to the child
      * is to be put
-     * @modifies fieldTypeSet
+     * @modifies fieldInfoList
      */
     private void processChildOfComplexType(Node n, 
-        FieldTypeSet fieldTypeSet)
+        FieldInfoList fieldInfoList)
     {
             //get the name of the node
             String nodeName = n.getNodeName();
@@ -328,11 +346,11 @@ class LimeXMLSchemaFieldExtractor
             //if element
             if(isElementTag(nodeName))
             {
-                processChildElementTag(n,fieldTypeSet);
+                processChildElementTag(n,fieldInfoList);
             }
             else if(isAttributeTag(nodeName))
             {
-                processChildAttributeTag(n,fieldTypeSet);
+                processChildAttributeTag(n,fieldInfoList);
             }
             else
             {
@@ -342,19 +360,19 @@ class LimeXMLSchemaFieldExtractor
                 for(int i=0;i<numChildren; i++)
                 {
                     Node child = children.item(i);
-                    processChildOfComplexType(child,fieldTypeSet);
+                    processChildOfComplexType(child,fieldInfoList);
                 }
             }
     }
     
     /**
      * Processes the child that has the "element' tag
-     * @param n The node whose child needs to be processed
-     * @param fieldTypeSet The set to which information related to the child
+     * @param n child node to be processed
+     * @param fieldInfoList The set to which information related to the child
      * is to be put
-     * @modifies fieldTypeSet
+     * @modifies fieldInfoList
      */
-    private void processChildElementTag(Node n, FieldTypeSet fieldTypeSet)
+    private void processChildElementTag(Node n, FieldInfoList fieldInfoList)
     {
          //get attributes
         NamedNodeMap  attributes = n.getAttributes();
@@ -369,15 +387,15 @@ class LimeXMLSchemaFieldExtractor
             if(refAttribute == null)
             {
                 //return, cant do anything
-                //anu check if something else can be done
                 return;
             }
 
             //get the ref name
             String refName = refAttribute.getNodeValue();
             
-            //add mapping to fieldTypeSet
-            fieldTypeSet.add(new FieldTypePair(refName, refName));
+            //add mapping to fieldInfoList
+            fieldInfoList.add(new FieldInfoPair(refName, 
+                new FieldInfo(refName)));
             
             //also add the refName to set of _referencedNames
             _referencedNames.add(refName);
@@ -404,8 +422,9 @@ class LimeXMLSchemaFieldExtractor
                 traverseChildren(n);
             }
 
-           //add mapping to fieldTypeMap
-           fieldTypeSet.add(new FieldTypePair(name, removeNameSpace(typeName)));   
+            //add mapping to fieldInfoList
+            fieldInfoList.add(new FieldInfoPair(name, 
+                new FieldInfo(removeNameSpace(typeName))));   
         }
 
     }
@@ -436,11 +455,11 @@ class LimeXMLSchemaFieldExtractor
     /**
      * Processes the attribute child element
      * @param n The node whose child needs to be processed
-     * @param fieldTypeSet The set to which information related to the child
+     * @param fieldInfoList The set to which information related to the child
      * is to be put
-     * @modifies fieldTypeSet
+     * @modifies fieldInfoList
      */
-    private void processChildAttributeTag(Node n, FieldTypeSet fieldTypeSet)
+    private void processChildAttributeTag(Node n, FieldInfoList fieldInfoList)
     {
         //get attributes
         NamedNodeMap attributes = n.getAttributes();
@@ -460,10 +479,14 @@ class LimeXMLSchemaFieldExtractor
         String name = nameAttribute.getNodeValue() + XMLStringUtils.DELIMITER;
         String typeName = typeAttribute.getNodeValue();
        
-        //add mapping to fieldTypeMap
-        fieldTypeSet.addFirst(new FieldTypePair(name, removeNameSpace(typeName)));   
+        //add mapping to fieldInfoList
+        fieldInfoList.addFirst(new FieldInfoPair(name, 
+            new FieldInfo(removeNameSpace(typeName))));   
     }
     
+    /**
+     * traverses the children of the passed node
+     */
     private void traverseChildren(Node n)
     {
         //get and process children
@@ -471,18 +494,33 @@ class LimeXMLSchemaFieldExtractor
         int numChildren = children.getLength();
         for(int i=0;i<numChildren; i++)
         {
+            //traverse the child
             Node child = children.item(i);
             traverse(child);
         }
     }
     
+    /** 
+     * Tests if the given tag denotes a complex type
+     * @return true, if is a complex type tag, false otherwise
+     */
     private boolean isComplexTypeTag(String tag)
     {
-        if(tag.trim().equals("complexType") || tag.trim().equals("xsd:complexType"))
+        if(tag.trim().equals("complexType") 
+            || tag.trim().equals("xsd:complexType"))
+        {
             return true;
-        return false;
+        }
+        else
+        {
+            return false;
+        }
     }
     
+    /** 
+     * Tests if the given tag denotes a attribute
+     * @return true, if is an attribute tag, false otherwise
+     */
     private boolean isAttributeTag(String tag)
     {
         if(tag.trim().equals("attribute") || tag.trim().equals("xsd:attribute"))
@@ -491,6 +529,12 @@ class LimeXMLSchemaFieldExtractor
     }
     
     
+     /**
+     * Gathers information from the element tag and updates the element
+      * name & type information in _nameFieldInfoListMap
+     * @param n The element node that needs to be processed
+     * @modifies this
+     */
     private void processElementTag(Node n)
     {
         //get attributes
@@ -498,54 +542,34 @@ class LimeXMLSchemaFieldExtractor
         
         //get name attribute
         Node nameAttribute = attributes.getNamedItem("name");
+        
+        //return if doesnt have name attribute
         if(nameAttribute == null)
-        {
-//            //TODO anu
-//            //check if we need to do this
-//            processElementTagWithoutNameAttribute(n, attributes);
-//            return;
-        }
+            return;
+        
+        //get the name of the element
         String name = nameAttribute.getNodeValue();
         
         //get type attribute
         Node typeAttribute = attributes.getNamedItem("type");
         String typeName;
+        //if type is specified in the element tag
         if(typeAttribute != null)
         {
+            //get the type name
             typeName = typeAttribute.getNodeValue();
         }
         else
         {
+            //else assign a new unique name for this type
             typeName = getUniqueComplexTypeName();
             //also store it in _lastUniqueComplexTypeName for future use
             _lastUniqueComplexTypeName = typeName;
         }
         
-       //add mapping to _nameFieldTypeSetMap
-       addToFieldTypeSetMap(name, typeName); 
+       //add mapping to _nameFieldInfoListMap
+       addToFieldInfoListMap(name, typeName); 
     }
-    
-//    private static void processElementTagWithoutNameAttribute(Node n, 
-//            NamedNodeMap attributes)
-//    {
-//        //get "ref" attribute
-//        Node refAttribute = attributes.getNamedItem("ref");
-//        
-//        if(refAttribute == null)
-//        {
-//            //return, cant do anything
-//            //anu check if something else can be done
-//            return;
-//        }
-//        
-//        //get the ref name
-//        String refName = refAttribute.getNodeValue();
-//        
-//        //TODO anu think
-////        //add mapping to _nameFieldTypeSetMap
-////        addToFieldTypeSetMap(name, typeName, typeName); 
-//    }
-    
     
     /**
      * @modifies _uniqueCount
@@ -556,20 +580,26 @@ class LimeXMLSchemaFieldExtractor
     }
     
     
-    private void addToFieldTypeSetMap(String name, String typeName)
+    /**
+     * Adds the mapping for the passed field to a new FieldInfoList,
+     * containing a FieldInfo element initialized with the passed
+     * typeName
+     */
+    private void addToFieldInfoListMap(String field, String typeName)
     {
-        //get new fieldtype set
-        FieldTypeSet fieldTypeSet = new FieldTypeSet();
-        fieldTypeSet.add(new FieldTypePair(DUMMY, removeNameSpace(typeName)));
+        //get new fieldinfo list
+        FieldInfoList fieldInfoList = new FieldInfoList();
+        fieldInfoList.add(new FieldInfoPair(DUMMY, new FieldInfo(
+            removeNameSpace(typeName))));
         
-        //add mapping to _nameFieldTypeSetMap
-        _nameFieldTypeSetMap.put(name, fieldTypeSet);
+        //add mapping to _nameFieldInfoListMap
+        _nameFieldInfoListMap.put(field, fieldInfoList);
         
         //add type name to the referenced names set
         _referencedNames.add(removeNameSpace(typeName));
     }
     
-    private boolean isElementTag(String tag)
+    private static boolean isElementTag(String tag)
     {
         if(tag.trim().equals("element") || tag.trim().equals("xsd:element"))
             return true;
@@ -578,31 +608,30 @@ class LimeXMLSchemaFieldExtractor
     
     
 /**
- * A Set <FieldTypePair> of fields and corresponding types
- * Note: The implementation now uses List (instead of Set)
+ * A List (of FieldInfoPair) of fields and information corresponding to those
  */   
-private static class FieldTypeSet
+private static class FieldInfoList
 {
-    private LinkedList /* of FieldTypePair */ _elements = new LinkedList();
+    private LinkedList /* of FieldInfoPair */ _elements = new LinkedList();
    
     /**
-     * Adds the given fieldType pair to the list of elements
-     * @param fieldTypePair the field-type pair to be added
+     * Adds the given FieldInfo pair to the list of elements
+     * @param fieldInfoPair the field-FieldInfo pair to be added
      */
-    public void add(FieldTypePair fieldTypePair)
+    public void add(FieldInfoPair fieldInfoPair)
     {
         //add to the _elements
-        _elements.add(fieldTypePair);
+        _elements.add(fieldInfoPair);
     }
 
     /**
-     * Adds the given fieldType pair in front of other elements in the list
-     * @param fieldTypePair the field-type pair to be added
+     * Adds the given fieldInfo pair in front of other elements in the list
+     * @param fieldInfoPair the field-info pair to be added
      */
-    public void addFirst(FieldTypePair fieldTypePair)
+    public void addFirst(FieldInfoPair fieldInfoPair)
     {
         //add to the _elements
-        _elements.addFirst(fieldTypePair);
+        _elements.addFirst(fieldInfoPair);
     }
     
     /**
@@ -623,15 +652,11 @@ private static class FieldTypeSet
     
 }
 
-//private static class Type
-//{
-//    Type _type = null;
-//}
 
 /**
- * Stores the field and corresponding type
+ * Stores the field and corresponding field information
  */
-private static class FieldTypePair
+private static class FieldInfoPair
 {
     /**
      * Name of the field
@@ -639,16 +664,17 @@ private static class FieldTypePair
     private String _field;
     
     /**
-     * Reference to the type of the field (Is null, if the type is a basic
-     * predefined type (like integer, float etc).
+     * Information pertaining to this field
      */
-//    private Type _type;
-      private String _type;
+    private FieldInfo _fieldInfo;
     
-    public FieldTypePair(String field, String type)
+    /**
+     * creates a new FieldInfoPair using the passed values
+     */
+    public FieldInfoPair(String field, FieldInfo fieldInfo)
     {
         this._field = field;
-        this._type = type;
+        this._fieldInfo = fieldInfo;
     }
     
     public String getField()
@@ -656,15 +682,42 @@ private static class FieldTypePair
         return _field;
     }
     
+    public FieldInfo getFieldInfo()
+    {
+        return _fieldInfo;
+    }
+    
+    public String toString()
+    {
+        return "[" + _field + ":" + _fieldInfo + "]";
+    }
+}
+ 
+/**
+ * Stores information pertaining to fields (elements) in xml documents
+ */
+private static class FieldInfo
+{
+    /**
+     * Type of the field (eg Integer, String, complex etc)
+     */
+    private String _type;
+    
+    /**
+     * Creates a new instance of FieldInfo and initializes internal fields
+     * with the passed values
+     * @param type The tye of the field (eg Integer, String, complex etc)
+     */
+    public FieldInfo(String type)
+    {
+        this._type = type;
+    }   
+    
     public String getType()
     {
         return _type;
     }
     
-    public String toString()
-    {
-        return "[" + _field + ":" + _type + "]";
-    }
-}
-    
-}
+}//end of class FieldInfo
+
+}//end of class LimeXMLSchemaFieldExtractor
