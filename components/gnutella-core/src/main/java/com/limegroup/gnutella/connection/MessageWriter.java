@@ -10,7 +10,8 @@ import java.io.*;
 /**
  * Writes Gnutella messages to SocketChannel.  Used by Connnection to send
  * messages in a non-blocking manner (which requires state).  Queues at most
- * one message at a time.  Not thread-safe.
+ * one message at a time.  Thread-safe; in a true single-thread core, this
+ * would not be necessary.
  */
 public class MessageWriter {
     /** Where to get data */
@@ -27,7 +28,7 @@ public class MessageWriter {
      * Returns true if this has any queued data, i.e., if we're in the process
      * of sending a message.  
      */
-    public boolean hasQueued() {
+    public synchronized boolean hasQueued() {
         return message!=null;
     }
 
@@ -41,7 +42,7 @@ public class MessageWriter {
      *  If true, the caller must subsequently call write() 
      * @exception IOException the underlying socket was closed
      */
-    public boolean write(Message m) throws IOException {
+    public synchronized boolean write(Message m) throws IOException {
         if (hasQueued())
             return true;
         
@@ -68,7 +69,7 @@ public class MessageWriter {
      *  If true, the caller must subsequently call write() again
      * @exception IOException the underlying socket was closed
      */
-    public boolean write() throws IOException {
+    public synchronized boolean write() throws IOException {
         if (! hasQueued())
             return false;
 

@@ -78,14 +78,12 @@ public class ManagedConnection
 
     /**
      * The number of messages sent.  This includes messages that are eventually
-     * dropped.  This stat is synchronized by _outputQueueLock;
+     * dropped.  This stat is synchronized by this.
      */
     private int _numMessagesSent;
     /**
      * The number of messages received.  This includes messages that are
-     * eventually dropped.  This stat is not synchronized because receiving
-     * is not thread-safe; callers are expected to make sure only one thread
-     * at a time is calling receive on a given connection.
+     * eventually dropped.  This stat is synchronized by this.
      */
     private int _numMessagesReceived;
     /**
@@ -298,9 +296,11 @@ public class ManagedConnection
             super(delegate);
         }
         public void read(Connection c, Message m) { 
-            _bytesReceived+=m.getTotalLength();
-            _numMessagesReceived++;
-            _router.countMessage();  //TODO: shouldn't this go in handleMessage?
+            synchronized (this) {
+                _bytesReceived+=m.getTotalLength();
+                _numMessagesReceived++;
+                _router.countMessage();  //TODO: move to handleMessage
+            }
             delegate.read(c, m);
         }
     }
@@ -316,20 +316,22 @@ public class ManagedConnection
         if (! supportsGGEP())
             m=m.stripExtendedPayload();
 
-        _router.countMessage();   //why count messages snet?
-        _numMessagesSent++;
-        _queue.add(m);
-        _numSentMessagesDropped+=_queue.resetDropped();
-        //Attempt to write queued data, not necessarily m.  This calls
-        //super.write(m'), which may call listener.needsWrite().
-        return this.write();   
+        synchronized (this) {
+            _router.countMessage();   //why count messages snet?
+            _numMessagesSent++;
+            _queue.add(m);
+            _numSentMessagesDropped+=_queue.resetDropped();
+            //Attempt to write queued data, not necessarily m.  This calls
+            //super.write(m'), which may call listener.needsWrite().
+            return this.write();   
+        }
     }
 
     /**
      * Like Connection.write(), but may write more than one message.
      * May also call listener.needsWrite.
      */
-    public boolean write() {
+    public synchronized boolean write() {
         //Terminate when either
         //a) super cannot send any more data because its send
         //   buffer is full OR

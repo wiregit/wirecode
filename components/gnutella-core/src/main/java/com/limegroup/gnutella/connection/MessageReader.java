@@ -11,7 +11,8 @@ import java.io.*;
  * Reads Gnutella messages from a SocketChannel, instantiating subclasses of
  * Message as appropriate by opcode.  Used by Connnection to read messages in a
  * non-blocking manner (which requires state).  Contains code formerly in
- * Message.read(InputStream).  Not thread-safe.  
+ * Message.read(InputStream).  Thread-safe; in a true single-thread core, this
+ * would not be necessary.
  */
 public class MessageReader {
     final int READING_HEADER_STATE=0;
@@ -42,7 +43,7 @@ public class MessageReader {
      * @exception BadPacketException got a bad packet but recovered
      * @exception IOException connection closed or unrecoverable error
      */
-    public Message read() throws BadPacketException, IOException {
+    public synchronized Message read() throws BadPacketException, IOException {
         if (state==READING_HEADER_STATE) {
             readHeader();
         } 
