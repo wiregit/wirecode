@@ -84,13 +84,17 @@ public class IncompleteFileManager implements Serializable {
 
     /** 
      * Deletes incomplete files more than INCOMPLETE_PURGE_TIME days old from
-     * disk.  Then removes any entries from this for which there is no file on
-     * disk.  
-     * @return true iff any entries were purged
+     * disk.  Then removes entries in this for which there is no file on disk.
+     * 
+     * @param initialPurge true iff this was just read from disk, i.e., if this
+     *  is being called from readSnapshot() instead of getFiles().  Hashes will
+     *  only be purged if initialPurge==true.
+     * @return true iff any entries were purged 
      */
-    public synchronized boolean purge() {
-        //TODO: purge hashes...at least some of the time
+    public synchronized boolean purge(boolean initialPurge) {
         boolean ret=false;
+        //Remove any files that are old.  
+        //Remove any blocks for which the file doesn't exist.
         for (Iterator iter=blocks.keySet().iterator(); iter.hasNext(); ) {
             File file=(File)iter.next();
             if (!file.exists() || isOld(file)) {
@@ -98,6 +102,20 @@ public class IncompleteFileManager implements Serializable {
                 file.delete();  //always safe to call; return value ignored
                 iter.remove();
             }                
+        }
+
+        //Remove any hashes for which the file doesn't exist.  Only do this once
+        //per session--that's critical to resume-by-hash.
+        if (initialPurge) {
+            for (Iterator iter=hashes.entrySet().iterator(); iter.hasNext(); ) {
+                Map.Entry entry=(Map.Entry)iter.next();
+                URN urn=(URN)entry.getKey();
+                File file=(File)entry.getValue();
+                if (!file.exists()) {
+                    iter.remove();
+                    ret=true;
+                }
+            }
         }
         return ret;
     }

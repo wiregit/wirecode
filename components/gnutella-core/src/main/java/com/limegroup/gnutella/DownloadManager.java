@@ -171,7 +171,7 @@ public class DownloadManager implements BandwidthTracker {
         //before starting downloads in the rare case that a downloader uses one
         //of these incomplete files.  Then commit changes to disk.  (This last
         //step isn't really needed.)
-        if (incompleteFileManager.purge())
+        if (incompleteFileManager.purge(true))
             writeSnapshot();
 
         //Initialize and start downloaders.  Must catch ClassCastException since
@@ -246,7 +246,7 @@ public class DownloadManager implements BandwidthTracker {
         //prompt or the library.  Note that you could optimize this by just
         //purging files corresponding to the current download, but it's not
         //worth it.
-        incompleteFileManager.purge();
+        incompleteFileManager.purge(false);
 
         //Start download asynchronously.  This automatically moves downloader to
         //active if it can.

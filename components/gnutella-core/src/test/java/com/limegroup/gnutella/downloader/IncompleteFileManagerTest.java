@@ -176,6 +176,49 @@ public class IncompleteFileManagerTest extends TestCase {
         } catch (IllegalArgumentException pass) { }
     }
 
+    /** Tests that hash information is purged when calling purge(true). */
+    public void testPurgeHash_Yes() {
+        //These files have the same hash, but no blocks have been written.
+        RemoteFileDesc rfd1=newRFD("file name.txt", 1839, 
+                                   "urn:sha1:GLSTHIPQGSSZTS5FJUPAKPZWUGYQYPFB");
+        RemoteFileDesc rfd1b=newRFD("other file.txt", 1839, 
+                                   "urn:sha1:GLSTHIPQGSSZTS5FJUPAKPZWUGYQYPFB");
+        File file1=ifm.getFile(rfd1);
+        File file1b=ifm.getFile(rfd1b);
+        assertEquals(file1, file1b);
+
+        //These files have the same hash, but blocks have been written to disk.
+        RemoteFileDesc rfd2=newRFD("another name.txt", 1839, 
+                                   "urn:sha1:LSTHIPQGSSZGTS5FJUPAKPZWUGYQYPFB");
+        RemoteFileDesc rfd2b=newRFD("yet another file.txt", 1839, 
+                                   "urn:sha1:LSTHIPQGSSZGTS5FJUPAKPZWUGYQYPFB");
+        File file2=ifm.getFile(rfd2);
+        File file2b=ifm.getFile(rfd2b);
+        assertEquals(file2, file2b);
+        file2.createNewFile();
+
+        //After purging, only hashes associated with files that exists remain.
+        ifm.purge(true);
+        File file1c=ifm.getFile(rfd1b);
+        assertTrue(!file1b.equals(file1c));
+        File file2c=ifm.getFile(rfd2b);
+        assertTrue(file2b.equals(file2c));
+    }
+
+    /** Tests that hash information is not purged when calling purge(false). */
+    public void testPurgeHash_No() {
+        RemoteFileDesc rfd1=newRFD("file name.txt", 1839, 
+                                   "urn:sha1:GLSTHIPQGSSZTS5FJUPAKPZWUGYQYPFB");
+        RemoteFileDesc rfd2=newRFD("other file.txt", 1839, 
+                                   "urn:sha1:GLSTHIPQGSSZTS5FJUPAKPZWUGYQYPFB");
+        File file1=ifm.getFile(rfd1);
+        File file2=ifm.getFile(rfd2);
+        assertEquals(file1, file2);
+        ifm.purge(false);             //Does nothing
+        File file2b=ifm.getFile(rfd2);
+        assertEquals(file2, file2b);
+    }
+
     /** Serializes, then deserializes. */
     public void testSerialize() {
         File tmp=null;
@@ -203,8 +246,7 @@ public class IncompleteFileManagerTest extends TestCase {
             IncompleteFileManager ifm2=(IncompleteFileManager)in.readObject();
             in.close();
             
-            //Make sure it's the same--this includes the hash.
-            //TODO: check hash purging as well.
+            //Make sure it's the same.
             VerifyingFile vf2=(VerifyingFile)ifm2.getEntry(
                                                  new File("T-1839-file name.txt"));
             assertTrue(vf2!=null);
