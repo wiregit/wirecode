@@ -160,16 +160,46 @@ public class QueryRouteTable {
      * </pre> 
      */
     public Iterator /* of RouteTableMessage */ encode(RouteTableMessage prev) {
-        //TODO1: this is a hopelessly inefficient encoding.  Optimize.
-        //TODO: should this be responsible for sending RESET?
-        List buf=new ArrayList(tables.length);
-        buf.add(new ResetTableMessage((byte)1,
+        //TODO1: this is not an optimal encoding.  Optimize.
+
+        List messages=new ArrayList(tables.length);
+        messages.add(new ResetTableMessage((byte)1,
                                       (byte)0, tableLength));
-        for (int i=0; i<tables.length; i++) {
-            buf.add(new SetDenseTableMessage((byte)1, (byte)i, 
-                                             tables[i], 0, tableLength-1));
-        }
-        return buf.iterator();
+        
+//          //Dense encoding
+//          for (int i=0; i<tables.length; i++) {
+//              buf.add(new SetDenseTableMessage((byte)1, (byte)i, 
+//                                               tables[i], 0, tableLength-1));
+//          }
+
+        //"Differential" sparse encoding
+        for (int ttl=0; ttl<tables.length; ttl++) {
+            //Find indices that need adding for this TTL.
+            List /* of Integer */ blocks=new ArrayList();
+            for (int i=0; i<tableLength; i++) {
+                if (tables[ttl].get(i)) {
+                    if (ttl==0 || !tables[ttl-1].get(i))
+                        blocks.add(new Integer(i));
+                }
+            }
+
+            //Add ADD_SPARSE_BLOCK_VARIANT messages, if desired
+            if (blocks.size()==0)
+                continue;
+            int[] blocksA=new int[blocks.size()];
+            int blockSize=4;
+            for (int i=0; i<blockA.length; i++) {
+                int block=((Integer)blocks.get(i)).intValue();
+                blocksA[i]=block;
+            }
+            messages.add(new SparseTableMessage((byte)1,   //TTL
+                                                (byte)ttl, //Table TTL
+                                                true,
+                                                blocksA,
+                                                blockSize));
+        }                                            
+
+        return messages.iterator();
     }
 
     /** True if o is a QueryRouteTable with the same entries of this. */
