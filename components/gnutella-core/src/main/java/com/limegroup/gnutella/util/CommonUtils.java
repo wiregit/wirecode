@@ -15,7 +15,7 @@ import java.io.*;
 public class CommonUtils {
 
 	// constant for the current version of LimeWire
-	private static final String LIMEWIRE_VERSION = "1.5";
+	private static final String LIMEWIRE_VERSION = "1.4";
 	
 	// variable for the system properties
 	private static Properties _props;
@@ -41,12 +41,9 @@ public class CommonUtils {
 	private CommonUtils() {}
 
 	/**
-	 * initialize the settings statically. this gives a little
-	 * more control over when the class is initialized over
-	 * a simple static initializer.
+	 * initialize the settings statically. 
 	 */
-	public static void initialize() {
-
+	static {
 		// get the system properties object
 		_props = System.getProperties();
 
