@@ -1,5 +1,6 @@
 package com.limegroup.gnutella;
 
+import com.limegroup.gnutella.settings.*;
 import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.handshaking.*;
 import com.limegroup.gnutella.routing.*;
@@ -46,11 +47,16 @@ public class LeafRoutingTest extends TestCase {
         SettingsManager settings=SettingsManager.instance();
         settings.setPort(PORT);
         settings.setDirectories(new File[0]);
-        settings.setConnectOnStartup(false);
-        settings.setEverSupernodeCapable(false);
-        settings.setDisableSupernodeMode(true);
-        settings.setForceSupernodeMode(false);
-        settings.setKeepAlive(0);
+		ConnectionSettings.CONNECT_ON_STARTUP.setValue(false);
+		UltrapeerSettings.EVER_ULTRAPEER_CAPABLE.setValue(false);
+		UltrapeerSettings.DISABLE_ULTRAPEER_MODE.setValue(true);
+		UltrapeerSettings.FORCE_ULTRAPEER_MODE.setValue(false);
+		ConnectionSettings.KEEP_ALIVE.setValue(0);
+        //settings.setConnectOnStartup(false);
+        //settings.setEverSupernodeCapable(false);
+        //settings.setDisableSupernodeMode(true);
+        //settings.setForceSupernodeMode(false);
+        //settings.setKeepAlive(0);
         ActivityCallback callback=new ActivityCallbackStub();
         FileManager files=new FileManagerStub();
         MessageRouter router=new MessageRouterStub();
@@ -208,8 +214,7 @@ public class LeafRoutingTest extends TestCase {
         //System.out.println("-Test X-Try/X-Try-Ultrapeer headers");
         Connection c=new Connection("127.0.0.1", PORT,
                                     new Properties(),
-                                    new OldResponder(),
-                                    false);
+                                    new OldResponder());
         try {
             c.initialize();
             assertTrue("Handshake succeeded!", false);

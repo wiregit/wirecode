@@ -1,6 +1,7 @@
 package com.limegroup.gnutella;
 
 import com.limegroup.gnutella.*;
+import com.limegroup.gnutella.settings.*;
 import com.limegroup.gnutella.stubs.*;
 import com.limegroup.gnutella.handshaking.*;
 import com.limegroup.gnutella.security.*;
@@ -45,13 +46,19 @@ public class UltrapeerRoutingTest extends TestCase {
         settings.setAllowedIps(new String[] {"127.*.*.*", "18.239.0.*"});
         settings.setPort(PORT);
         settings.setDirectories(new File[0]);
-        settings.setConnectOnStartup(false);
-        settings.setEverSupernodeCapable(true);
-        settings.setDisableSupernodeMode(false);
-        settings.setForceSupernodeMode(true);
-        settings.setMaxShieldedClientConnections(10);
-        settings.setKeepAlive(6);
-        settings.setLocalIsPrivate(false);
+		ConnectionSettings.CONNECT_ON_STARTUP.setValue(false);
+		UltrapeerSettings.EVER_ULTRAPEER_CAPABLE.setValue(true);
+		UltrapeerSettings.DISABLE_ULTRAPEER_MODE.setValue(false);
+		UltrapeerSettings.FORCE_ULTRAPEER_MODE.setValue(true);
+		UltrapeerSettings.MAX_LEAVES.setValue(10);
+		ConnectionSettings.KEEP_ALIVE.setValue(6);
+		ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
+        //settings.setEverSupernodeCapable(true);
+        //settings.setDisableSupernodeMode(false);
+        //settings.setForceSupernodeMode(true);
+        //settings.setMaxShieldedClientConnections(10);
+        //settings.setKeepAlive(6);
+        //settings.setLocalIsPrivate(false);
         ActivityCallback callback=new ActivityCallbackStub();
         FileManager files=new FileManagerStub();
         MessageRouter router=new MessageRouterStub();
@@ -96,16 +103,16 @@ public class UltrapeerRoutingTest extends TestCase {
 
         //2. unrouted ultrapeer connection
         ultrapeer=new Connection("localhost", PORT, 
-                                            new UltrapeerProperties(),
-                                            new EmptyResponder(),
-                                            false);
+								 new UltrapeerProperties(),
+								 new EmptyResponder());
+		//false);
         ultrapeer.initialize();
         
         //3. routed leaf, with route table for "test"
         leaf=new Connection("localhost", PORT, 
-                                       new LeafProperties(),
-                                       new EmptyResponder(),
-                                       false);
+							new LeafProperties(),
+							new EmptyResponder());
+		//false);
         leaf.initialize();
         QueryRouteTable qrt=new QueryRouteTable();
         qrt.add("test");
