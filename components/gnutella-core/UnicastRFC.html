@@ -1,7 +1,7 @@
 Content-Type: text/html
 
 <html><head><title>Gnutella Developer Forum: Gnutella UDP Extension for Scalable Searches (GUESS) v0.1</title>
-<meta http-equiv="Expires" content="Mon, 16 Sep 2002 15:19:46 +0000">
+<meta http-equiv="Expires" content="Tue, 17 Sep 2002 13:37:23 +0000">
 <STYLE type='text/css'>
     .title { color: #990000; font-size: 22px; line-height: 22px; font-weight: bold; text-align: right;
              font-family: helvetica, arial, sans-serif }
@@ -56,12 +56,14 @@ Content-Type: text/html
 	    "GUESS" is a technique for performing iterative unicast 
 		searches of Ultrapeers on the Gnutella network, or "Ultrapeer 
 		crawling."  Shifting from the current broadcast search model 
-		to this system can dramatically reduce the 
-		overall network bandwidth, CPU, and memory required to support 
-		the Gnutella search architecture while providing comparable 
-		search results to the old broadcast model.  For rare files, the 
-		unicast search model may even provide better results than 
-		broadcast.
+		to this system will reduce the number of messages passing through
+		Ultrapeers by several orders of magnitude.  This substantially
+		reduces the bandwidth, memory, and CPU costs of remaining an 
+		Ultrapeer, making it more likely users will keep their
+		nodes running instead of turning them off to free 
+		resources.  At the same time, GUESS provides adequate search 
+		results for popular content while providing better search 
+		results for rare files.
 	  
 </p><a name="toc"><br><hr size="1" shade="0"></a>
 <table border="0" cellpadding="0" cellspacing="2" width="30" height="15" align="right"><tr><td bgcolor="#990000" align="center" width="30" height="15"><a href="#toc" CLASS="link2"><font face="monaco, MS Sans Serif" color="#ffffff" size="1"><b>&nbsp;TOC&nbsp;</b></font></a><br></td></tr></table>
@@ -109,14 +111,14 @@ Fragmentation<br></b>
 Congestion<br></b>
 <b><a href="#backwards">6.</a>&nbsp;
 Backwards Compatibility<br></b>
-<b><a href="#security">7.</a>&nbsp;
-Security Considerations<br></b>
-<b><a href="#anchor3">7.1</a>&nbsp;
-Distributed Denial of Service (DDoS) Attack<br></b>
-<b><a href="#ggep">8.</a>&nbsp;
+<b><a href="#ggep">7.</a>&nbsp;
 GGEP Extensions<br></b>
-<b><a href="#ggep_pongs">8.1</a>&nbsp;
+<b><a href="#ggep_pongs">7.1</a>&nbsp;
 Advertise GUESS Support in Pongs<br></b>
+<b><a href="#security">8.</a>&nbsp;
+Security Considerations<br></b>
+<b><a href="#anchor3">8.1</a>&nbsp;
+Distributed Denial of Service (DDoS) Attack<br></b>
 <b><a href="#features">9.</a>&nbsp;
 Additional Features<br></b>
 <b><a href="#cycles">9.1</a>&nbsp;
@@ -205,7 +207,7 @@ Acknowledgements<br></b>
 		  It does this by:
 
 	        
-<blockquote class="text">
+<ol class="text">
 <li>
 			    Sending queries with high TTLs (typically 7), making the 
 		        number of nodes searched unpredictable and dependent upon the 
@@ -217,10 +219,10 @@ Acknowledgements<br></b>
 				regardless of variable conditions.
 			  
 </li>
-</blockquote><p>
+</ol><p>
 
 	      As a result, searches for common keywords in highly 
-		  connected areas of the network have disproportionate impacts 
+		  connected areas of the network have a disproportionate impact
 		  on network load, while searches for less common keywords in
 		  less connected areas are not able to reach enough nodes to
 		  obtain a satisfactory number of query hits.
@@ -250,9 +252,9 @@ Acknowledgements<br></b>
 
 		  With this system, users frequently get more results than they need 
 		  for popular content while they have a difficult time finding files
-		  that are not as widely distributed.  In either case, queries and query 
-		  hits follow the same model where they are allowed to run wild,
-		  devouring network resources as they go.
+		  that are not as widely distributed.  The current system provides
+		  no mechanism for dynamically adjusting the search depending on
+		  these factors -- the central issue GUESS addresses.
 	      
 </p>
 <a name="rfc.section.1.4"></a><h4><a name="anchor2">1.4</a>&nbsp;Switch to Iterative Unicast, or 'Ultrapeer Crawling'</h4>
@@ -282,10 +284,11 @@ Acknowledgements<br></b>
 <p>
 	    In several ways, this scheme is simple and easy to 
 		implement.  It requires the node initiating the query to
-		quickly send TTL=1 queries to GUESS Ultrapeers.  The node initiating
-		the query can be either a leaf or an Ultrapeer.  Only Ultrapeers
-		are REQUIRED to support GUESS queries, however, allowing leaves
-		to use Ultrapeers as search proxies.  
+		quickly send TTL=1 queries iteratively to GUESS Ultrapeers.  The 
+		node initiating the query can be either a leaf or an 
+		Ultrapeer.  Only Ultrapeers are REQUIRED to support sending 
+		and receiving GUESS queries, however, allowing leaves to use 
+		Ultrapeers as search proxies.  
 
 		<br>
 <br>
@@ -353,7 +356,8 @@ Acknowledgements<br></b>
 		iteration.  This allows the query to stop quickly if it receives
 		enough results from just the first few Ultrapeers searched.  In 
 		this scheme, the interval could eventually reach some absolute 
-		minimum interval and stay there.
+		minimum interval and stay there.  In any case, the interval 
+		MUST never fall below the absolute minimum required by GUESS.
 
 		<br>
 <br>
@@ -411,10 +415,10 @@ Acknowledgements<br></b>
 <li>
 			  Clients MUST NOT query the same Ultrapeer more 
 			  than once.  In particular, a node MUST NOT send a 
-			  second query to an Ultrapeer if it does not receive responses 
-			  to the first query (it MUST NOT consider that the datagram 
-			  was lost and re-query as a result).  If the datagram was,
-			  in fact, lost, this likely indicates high overall packet 
+			  second query to an Ultrapeer if it does not receive hits or
+			  an ack for the first query (it MUST NOT consider that the 
+			  datagram was lost and re-query as a result).  If the datagram 
+			  was, in fact, lost, this may indicate high overall packet 
 			  loss rates around that node, and resending the query would 
 			  aggravate the congestion.
 			
@@ -439,7 +443,8 @@ Acknowledgements<br></b>
 <p>
 	    The changes on the server side are less significant.  There are 
 		no changes for leaves, as leaves do not act as 
-		servers.  Ultrapeers MUST, however, open a port for incoming 
+		servers, although leaves MAY choose to accept incoming UDP
+		messages.  Ultrapeers MUST, however, open a port for incoming 
 		UDP traffic, and they MUST use the same 
 		port that they are using for incoming Gnutella messages 
 		over TCP.  The details of this are discussed in 
@@ -453,8 +458,8 @@ Acknowledgements<br></b>
 		  
 <ol class="text">
 <li>
-			  Serves as an acknowledgement, or an "ack," letting the
-			  client know the server is still up  and is available for 
+			  It acknowledges, or "acks" the query, letting the
+			  client know the server is still up and is available for 
 			  future queries.  While not receiving a pong does
 		      not necessarily indicate to the client that the server is no 
 			  longer available, as the packet may have been lost, receiving 
@@ -468,7 +473,11 @@ Acknowledgements<br></b>
 			  pong MUST be a pong for another GUESS Ultrapeer, if available, 
 			  and not a pong for the Ultrapeer receiving the query.  If 
 			  the server has no other GUESS Ultrapeer pongs, then the pong 
-			  MUST be for the server itself.  
+			  MUST be for the server itself.  Otherwise, the host listed
+			  in the pong MAY be a GUESS Ultrapeer the server is directly
+			  connected to over an intra-Ultrapeer connection via TCP, as
+			  the server knows for certain such an Ultrapeer neighbor is
+			  currently on the network.
 			
 </li>
 </ol><p>  
@@ -489,9 +498,9 @@ Acknowledgements<br></b>
 		control over the query and would eliminate benefits such as
 		no longer needing to concern ourselves 
 		with <a href="#cycles">cycles</a>.  The current practice
-		of not forwarding TTL=1 queries to leaves also fails to take
-		advantage of the powerful Ultrapeer infrastructure that 
-		can be used more effectively. 
+		of not forwarding TTL=1 queries to leaves also fails to fully 
+		harness the powerful Ultrapeer infrastructure that 
+		can be used more effectively at the last hop.
 		
 </p>
 <a name="discovery"><br><hr size="1" shade="0"></a>
@@ -504,13 +513,11 @@ Acknowledgements<br></b>
 		  In fact, Ultrapeer discovery may be one
 		  of the most challenging components of this proposal, as
 		  Ultrapeers do not simply have to discover other Ultrapeers -- 
-		  they have to discover LOTS of them.  Leaves also may prefer
-		  to connect to Ultrapeers supporting GUESS, requiring a
-		  new connections header.  This section discusses the various 
-		  techniques for discovering GUESS Ultrapeers.  These techniques
-		  can be used together to discover enough GUESS Ultrapeers to
-		  support searches while not flooding the network with
-		  ping and pong traffic.
+		  they have to discover LOTS of them.  This section discusses the 
+		  various techniques for discovering GUESS Ultrapeers.  These 
+		  techniques can be used together to discover enough GUESS 
+		  Ultrapeers to support searches while not flooding the network 
+		  with ping and pong traffic.
 
 		  
 <a name="rfc.section.3.1"></a><h4><a name="broadcast_ping">3.1</a>&nbsp;Traditional Broadcast Pings</h4>
@@ -587,9 +594,13 @@ Acknowledgements<br></b>
 <p>
 	    Developers MAY also choose to implement GUESS queries controlled
 		by leaves.  Leaf-controlled queries offload messaging traffic from
-		Ultrapeers.  Leaves need enough pongs to
-		run queries on their own, increasing the ping and pong traffic at
-		Ultrapeers.  Ultrapeers will no longer have to pass the more 
+		Ultrapeers.  They also allow leaves to take advantage of the 
+		GUESS architecture without connecting a GUESS Ultrapeer, allowing
+		older clients to become GUESS leaves.  Shifting the control of
+		queries to leaves does not uniformally reduce traffic at the
+		Ultrapeers.  In particular, Leaves need enough pongs to
+		run queries on their own, increasing Ultrapeer ping and pong 
+		traffic.  Ultrapeers will no longer have to pass the more 
 		expensive queries and query hits on behalf of leaves running their
 		own queries, however, decreasing overall Ultrapeer load.
 
@@ -609,17 +620,28 @@ Acknowledgements<br></b>
 		<br>
 <br>
 
-		To determing whether or not it can accept incoming UDP packets,
+		To determine whether or not it can accept incoming UDP packets,
 		a leaf SHOULD send a UDP ping to a GUESS Ultrapeer as soon
-		as it establishes a connection.  The pinged Ultrapeer can be 
-		any GUESS Ultrapeer -- it does not have to be connected 
+		as it joins the network.  The pinged Ultrapeer can be 
+		any GUESS Ultrapeer -- it does not have to be connected via TCP
 		to the leaf.  This allows leaves to connect to non-GUESS
 		Ultrapeers but still run GUESS queries.  If no pongs are
 		received in response to the ping, the leaf can be reasonably 
 		sure it cannot accept incoming UDP packets, and it should send 
 		all queries through its Ultrapeer.  The leaf also MAY send UDP
-		pings to multiple GUESS Ultrapeers to ensure that it cannot
+		pings to multiple GUESS Ultrapeers to make sure that it cannot
 		accept incoming UDP packets.
+
+		<br>
+<br>
+
+		Once a leaf has received an incoming UDP packet, it can run
+		GUESS queries on its own.  The algorithm for this is identical 
+		to the algorithm discussed in 
+		the <a href="#algorithm">section</a> on client 
+		searching. If leaves are unable to accept incoming UDP
+		packets, they MUST send all queries to their Ultrapeer,
+		using the Ultrapeer as a proxy.
 	  
 </p>
 <a name="udp"><br><hr size="1" shade="0"></a>
@@ -651,13 +673,13 @@ Acknowledgements<br></b>
 		  very quickly, making performance a concern while 
 		  reliability is not a requirement.  In fact, 
 		  with the high transience of Gnutella nodes, reliability cannot
-		  be expected and is undesirable.  Clients wishing to implement 
-		  this change MUST do so over UDP, as a TCP implementation would 
-		  incur excessive overhead for other nodes, and would be 
-		  impossible without a new, transient connection.  If a TCP
-		  connection already exists, Ultrapeers MUST send messages
-		  just as if the connection were over UDP, using TTL=1
-		  in particular.
+		  be expected and is an impediment to search performance.  Clients 
+		  wishing to implement this change MUST do so over UDP, as a TCP 
+		  implementation would incur excessive overhead for other 
+		  nodes, and would be impossible without a new, transient 
+		  connection.  If a TCP connection already exists, Ultrapeers 
+		  MUST send messages just as if the connection were over UDP, 
+		  using TTL=1.
 	    
 </p>
 <a name="rfc.section.5.1"></a><h4><a name="port">5.1</a>&nbsp;Open a UDP Port</h4>
@@ -722,11 +744,11 @@ Acknowledgements<br></b>
 			routers.<a href="#RFC1191" title="Mogul, J. and S. Deering, Path MTU discovery, November 1990.">[8]</a>  This is because 
 			1,500 bytes is the MTU for Ethernet links, which most
 			TCP/IP stacks take into account.  Clients should stay
-			significantly under this limit if possible.  IP headers
-			are at least 20 bytes, and UDP headers are 8 bytes.  
-			In addition, however, there are many other protocols, 
-			such as PPP, that can add bytes of their own.  As a 
-			result, developers should stay significantly under 
+			significantly under this limit if possible.  Moreover,
+			IP headers are at least 20 bytes, and UDP headers are 
+			8 bytes.  In addition, there are many other 
+			protocols, such as PPP, that can add bytes of their 
+			own.  As a result, developers should stay significantly under 
 			the 1,500 byte limit for Gnutella message data.  A limit 
 			of 1K should suffice in all cases, with a hard upper limit 
 			of 1,400 bytes.
@@ -735,7 +757,7 @@ Acknowledgements<br></b>
 <br>
 	
 			It will often not be possible to keep query hits under
-			the 1,472 byte limit.  To address this problem, 
+			this limit.  To address this problem, 
 			it is RECOMMENDED that developers break up large 
 			query hits into multiple smaller 
 			query hits.  This will increase the bandwidth required 
@@ -776,38 +798,21 @@ Acknowledgements<br></b>
 		  the current network quite easily.  Leaves not supporting
 		  GUESS can still connect to GUESS Ultrapeers.  Similarly, 
 		  leaves supporting GUESS can connect to non-GUESS 
-		  Ultrapeers.  During initial rollout, hosts MAY choose to 
-		  implement a hubrid query scheme until enough nodes on the
+		  Ultrapeers.  In a first implementation, hosts MAY choose to 
+		  implement a hybrid query scheme until enough nodes on the
 		  network support GUESS.  For example, a node could combine 
 		  a conservative GUESS-style query with a traditional broadcast
-		  query sent with TTL=4.  This SHOULD be seen as only a
+		  query sent with TTL=4.  This MUST be only a
 		  temporary solution, however, as GUESS improvements will
 		  only be fully seen if traditional broadcasts are 
 		  abandoned in favor of GUESS.
 		
 </p>
-<a name="security"><br><hr size="1" shade="0"></a>
-<table border="0" cellpadding="0" cellspacing="2" width="30" height="15" align="right"><tr><td bgcolor="#990000" align="center" width="30" height="15"><a href="#toc" CLASS="link2"><font face="monaco, MS Sans Serif" color="#ffffff" size="1"><b>&nbsp;TOC&nbsp;</b></font></a><br></td></tr></table>
-<a name="rfc.section.7"></a><h3>7.&nbsp;Security Considerations</h3>
-
-<a name="rfc.section.7.1"></a><h4><a name="anchor3">7.1</a>&nbsp;Distributed Denial of Service (DDoS) Attack</h4>
-
-<p>
-			In the past, a principal objection to using UDP has been
-			that it allows anyone to easily execute a DDoS attack
-			on any target machine.  This concern has been based on the
-			assumption that queries would require an extension listing
-			the IP address and UDP port to reply to, however.  In this
-			proposal, this extension is not required, as responses are
-			always sent directly back to the node that sent them, 
-			rendering such an attack impossible.
-	      
-</p>
 <a name="ggep"><br><hr size="1" shade="0"></a>
 <table border="0" cellpadding="0" cellspacing="2" width="30" height="15" align="right"><tr><td bgcolor="#990000" align="center" width="30" height="15"><a href="#toc" CLASS="link2"><font face="monaco, MS Sans Serif" color="#ffffff" size="1"><b>&nbsp;TOC&nbsp;</b></font></a><br></td></tr></table>
-<a name="rfc.section.8"></a><h3>8.&nbsp;GGEP Extensions</h3>
+<a name="rfc.section.7"></a><h3>7.&nbsp;GGEP Extensions</h3>
 
-<a name="rfc.section.8.1"></a><h4><a name="ggep_pongs">8.1</a>&nbsp;Advertise GUESS Support in Pongs</h4>
+<a name="rfc.section.7.1"></a><h4><a name="ggep_pongs">7.1</a>&nbsp;Advertise GUESS Support in Pongs</h4>
 
 <p>
 		    Ultrapeers that support GUESS MUST advertise that fact 
@@ -829,6 +834,23 @@ Acknowledgements<br></b>
 			do for the life of the protocol.
 		  
 </p>
+<a name="security"><br><hr size="1" shade="0"></a>
+<table border="0" cellpadding="0" cellspacing="2" width="30" height="15" align="right"><tr><td bgcolor="#990000" align="center" width="30" height="15"><a href="#toc" CLASS="link2"><font face="monaco, MS Sans Serif" color="#ffffff" size="1"><b>&nbsp;TOC&nbsp;</b></font></a><br></td></tr></table>
+<a name="rfc.section.8"></a><h3>8.&nbsp;Security Considerations</h3>
+
+<a name="rfc.section.8.1"></a><h4><a name="anchor3">8.1</a>&nbsp;Distributed Denial of Service (DDoS) Attack</h4>
+
+<p>
+			In the past, a principal objection to using UDP has been
+			that it allows anyone to easily execute a DDoS attack
+			on any target machine.  This concern has been based on the
+			assumption that queries would require an extension listing
+			the IP address and UDP port to reply to, however.  In this
+			proposal, this extension is not required, as responses are
+			always sent directly back to the node that sent them, 
+			rendering such an attack impossible.
+	      
+</p>
 <a name="features"><br><hr size="1" shade="0"></a>
 <table border="0" cellpadding="0" cellspacing="2" width="30" height="15" align="right"><tr><td bgcolor="#990000" align="center" width="30" height="15"><a href="#toc" CLASS="link2"><font face="monaco, MS Sans Serif" color="#ffffff" size="1"><b>&nbsp;TOC&nbsp;</b></font></a><br></td></tr></table>
 <a name="rfc.section.9"></a><h3>9.&nbsp;Additional Features</h3>
@@ -839,12 +861,13 @@ Acknowledgements<br></b>
 	      Adoption of this proposal has several additional benefits.  For 
 		  example, concern for cycles in intra-Ultrapeer connections is 
 		  eliminated.  In the current network, cycles can be a serious 
-		  problem in the worst case.  As a general, the number of cycles 
-		  increases as the connectivity of the network graph increases.
-		  This is highly problematic because there are significant benefits
-		  to having a more highly connected graph.  These cycles result in 
-		  nodes receiving many duplicate messages, wasting bandwidth, CPU, and 
-		  memory.(See <a href="#refs.RandomWalk" title="Lv, Q., Cao, P., Cohen, E., Li, K. and S. Shenker, Search and Replication in Unstructured Peer-to-Peer Networks, June 2002.">[1]</a> and <a href="#refs.tutorial" title="Berk and Cybenko, File Sharing Protocols: A Tutorial on Gnutella, March 2001.">[11]</a>)  This 
+		  problem in the worst case.  As a general rule, the number of 
+		  cycles increases as the connectivity of the network graph 
+		  increases.  This is problematic because there are significant 
+		  benefits to having a more highly connected graph.  These cycles 
+		  result in nodes receiving many duplicate messages, wasting 
+		  bandwidth, CPU, and 
+		  memory.(See <a href="#refs.RandomWalk" title="Lv, Q., Cao, P., Cohen, E., Li, K. and S. Shenker, Search and Replication in Unstructured Peer-to-Peer Networks, June 2002.">[1]</a> and <a href="#refs.tutorial" title="Berk and Cybenko, File Sharing Protocols: A Tutorial on Gnutella, March 2001.">[11]</a>)  GUESS
 		  eliminates these duplicates except in the case where leaves 
 		  are connected to multiple Ultrapeers, and two or more of 
 		  their Ultrapeers are sent the same query.
@@ -860,14 +883,15 @@ Acknowledgements<br></b>
 		  to download from each other, as in the "Download Proxy"
 		  proposal.<a href="#refs.download_proxy" title="Thomas, J., Download Proxy v0.1, January 2002.">[10]</a>  In the current
 		  network, push requests frequently fail, primarily because
-		  the node serving the file may be 7 Gnutella hops away from 
+		  the node serving a file may be 7 Gnutella hops away from 
 		  the node requesting a file, and the request has to travel through
 		  all intervening nodes.  As a result, if any node along that
-		  path leaves the network, the push will not go through.
-		  With the adoption of this proposal, success rates for 
+		  path leaves the network or is otherwise unable to pass the
+		  push request, the push will not reach the intended
+		  node.  With the adoption of this proposal, success rates for 
 		  push request should increase dramatically, as the node 
-		  serving the file will only be from 1 to 3 hops away (this 
-		  depends on whether the searching and replying nodes
+		  serving the file will only be from 1 to 3 hops away 
+		  (depending on whether the searching and replying nodes
 		  are leaves or Ultrapeers). 
 		
 </p>
@@ -877,7 +901,7 @@ Acknowledgements<br></b>
 		  Another benefit of this scheme is that the user manually "stopping"
 		  a query can, in fact, stop that query from being sent to more
 		  hosts, saving network resources.  This does not apply, of course,
-		  in the case where an Ultrapeer proxies a query on a leave's
+		  in the case where an Ultrapeer proxies a query on a leaf's
 		  behalf.
 		
 </p>
