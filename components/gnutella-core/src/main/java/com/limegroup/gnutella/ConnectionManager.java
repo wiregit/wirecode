@@ -81,7 +81,7 @@ public class ConnectionManager {
         ConnectionSettings.NUM_CONNECTIONS.getValue();
 
     /** Ideal number of connections for a leaf.  */
-    public static final int PREFERRED_CONNECTIONS_FOR_LEAF = 2;
+    public static final int PREFERRED_CONNECTIONS_FOR_LEAF = 3;
 
 	//public static final int HIGH_DEGREE_CONNECTIONS_FOR_LEAF = 2;
 
