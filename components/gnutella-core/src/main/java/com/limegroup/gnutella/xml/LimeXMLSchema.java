@@ -68,6 +68,7 @@ public class LimeXMLSchema
      * to be parsed
      */
     private void initializeSchema(InputSource schemaInputSource)
+        throws IOException
     {
         //get an instance of DocumentBuilderFactory
         DocumentBuilderFactory documentBuilderFactory =
@@ -84,8 +85,8 @@ public class LimeXMLSchema
         }
         catch(ParserConfigurationException e)
         {
-            e.printStackTrace();
-            return;
+            //e.printStackTrace();
+            throw new IOException("" + e);
         }
         // Set an entity resolver to resolve the schema
         documentBuilder.setEntityResolver(new Resolver(schemaInputSource));
@@ -98,8 +99,8 @@ public class LimeXMLSchema
         }
         catch(Exception e)
         {
-            e.printStackTrace();
-            return;
+            //e.printStackTrace();
+            throw new IOException("" + e);
         }
         
         //print some of the elements
@@ -131,7 +132,7 @@ public class LimeXMLSchema
         //get attributes
         NamedNodeMap  nnm = root.getAttributes();
         //get the targetNameSpaceAttribute
-        Node targetNameSpaceAttribute = nnm.getNamedItem("targetNameSpace");
+        Node targetNameSpaceAttribute = nnm.getNamedItem("targetNamespace");
 
         if(targetNameSpaceAttribute != null)
         {
