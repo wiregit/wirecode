@@ -3,6 +3,7 @@ package com.limegroup.gnutella;
 import com.limegroup.gnutella.util.Utilities;
 import com.limegroup.gnutella.security.User;
 import com.limegroup.gnutella.routing.*;
+import com.limegroup.gnutella.guess.*;
 import com.limegroup.gnutella.statistics.*;
 
 import com.sun.java.util.collections.*;
@@ -16,8 +17,7 @@ import java.net.*;
  * as they pass through.  To do so, it aggregates a ConnectionManager that
  * maintains a list of connections.
  */
-public abstract class MessageRouter
-{
+public abstract class MessageRouter {
 
     protected ConnectionManager _manager;
 
@@ -184,8 +184,7 @@ public abstract class MessageRouter
 	 * @param datagram the <tt>DatagramPacket</tt> containing the IP and 
 	 *  port of the client node
      */	
-	public void handleUDPMessage(Message msg, DatagramPacket datagram)
-    {
+	public void handleUDPMessage(Message msg, DatagramPacket datagram) {
         // Increment hops and decrement TTL.
         msg.hop();
 
@@ -194,6 +193,7 @@ public abstract class MessageRouter
 		UDPReplyHandler handler = new UDPReplyHandler(address, port);
 		
         if (msg instanceof QueryRequest) {
+			sendAcknowledgement(datagram, msg.getGUID());
 			ReceivedMessageStatHandler.UDP_QUERY_REQUESTS.addMessage(msg);
 			// a TTL above zero may indicate a malicious client, as UDP
 			// messages queries should not be sent with TTL above 1.
@@ -214,6 +214,56 @@ public abstract class MessageRouter
 			handlePushRequest((PushRequest)msg, handler);
 		}
     }
+
+	/**
+	 * Sends an ack back to the GUESS client node.  
+	 */
+	private void sendAcknowledgement(DatagramPacket datagram, byte[] guid) {
+		ConnectionManager manager = RouterService.getConnectionManager();
+		Endpoint host = manager.getConnectedGUESSUltrapeer();
+		PingReply reply;
+		if(host != null) {
+			try {
+				reply = new PingReply(guid, (byte)1,
+									  host.getPort(),
+									  host.getHostBytes(),
+									  (long)0, (long)0, true);
+			} catch(UnknownHostException e) {
+				reply = createPingReply(guid);
+			}
+		} else {
+			reply = createPingReply(guid);
+		}
+
+		UDPService.instance().send(reply, datagram.getAddress(), 
+								   datagram.getPort());
+		SentMessageStatHandler.UDP_PING_REPLIES.addMessage(reply);
+	}
+
+	/**
+	 * Creates a new <tt>PingReply</tt> from the set of cached
+	 * GUESS endpoints, or a <tt>PingReply</tt> for localhost
+	 * if no GUESS endpoints are available.
+	 */
+	private PingReply createPingReply(byte[] guid) {
+		GUESSEndpoint endpoint = UNICASTER.getUnicastEndpoint();
+		if(endpoint == null) {
+			return new PingReply(guid, (byte)1,
+								 RouterService.getPort(),
+								 RouterService.getAddress(),
+								 RouterService.getNumSharedFiles(),
+								 RouterService.getSharedFileSize()/1024,
+								 RouterService.isSupernode(),
+								 Statistics.instance().calculateDailyUptime());		
+		} else {
+			return new PingReply(guid, (byte)1,
+								 endpoint.getPort(),
+								 endpoint.getAddress().getAddress(),
+								 0, 0, true, 0);
+		}
+	}
+
+
 
 	
     /**

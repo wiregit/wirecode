@@ -180,8 +180,8 @@ public final class UDPService implements Runnable {
                     InputStream in = new ByteArrayInputStream(data);
                     Message message = Message.read(in);		
                     if(message == null) continue;
-                    if (message instanceof QueryRequest)
-                        sendAcknowledgement(datagram, message.getGUID());
+                    //if (message instanceof QueryRequest)
+					//sendAcknowledgement(datagram, message.getGUID());
                     router.handleUDPMessage(message, datagram);				
                 }
                 catch (IOException e) {
@@ -195,53 +195,6 @@ public final class UDPService implements Runnable {
         } catch(Throwable t) {
             RouterService.error(t);
         }
-	}
-
-	/**
-	 * Sends an ack back to the GUESS client node.  
-	 */
-	private void sendAcknowledgement(DatagramPacket datagram, byte[] guid) {
-		ConnectionManager manager = RouterService.getConnectionManager();
-		Endpoint host = manager.getConnectedGUESSUltrapeer();
-		PingReply reply;
-		if(host != null) {
-			try {
-				reply = new PingReply(guid, (byte)1,
-									  host.getPort(),
-									  host.getHostBytes(),
-									  (long)0, (long)0, true);
-			} catch(UnknownHostException e) {
-				reply = createPingReply(guid);
-			}
-		} else {
-			reply = createPingReply(guid);
-		}
-
-		send(reply, datagram.getAddress(), datagram.getPort());
-		SentMessageStatHandler.UDP_PING_REPLIES.addMessage(reply);
-	}
-
-	/**
-	 * Creates a new <tt>PingReply</tt> from the set of cached
-	 * GUESS endpoints, or a <tt>PingReply</tt> for localhost
-	 * if no GUESS endpoints are available.
-	 */
-	private PingReply createPingReply(byte[] guid) {
-		GUESSEndpoint endpoint = UNICASTER.getUnicastEndpoint();
-		if(endpoint == null) {
-			return new PingReply(guid, (byte)1,
-								 RouterService.getPort(),
-								 RouterService.getAddress(),
-								 RouterService.getNumSharedFiles(),
-								 RouterService.getSharedFileSize()/1024,
-								 RouterService.isSupernode(),
-								 Statistics.instance().calculateDailyUptime());		
-		} else {
-			return new PingReply(guid, (byte)1,
-								 endpoint.getPort(),
-								 endpoint.getAddress().getAddress(),
-								 0, 0, true, 0);
-		}
 	}
 
 	/**
