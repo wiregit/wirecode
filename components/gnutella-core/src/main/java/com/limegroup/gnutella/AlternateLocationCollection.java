@@ -306,7 +306,12 @@ public final class AlternateLocationCollection
 	 * @return a randomized <tt>Collection</tt> of <tt>AlternateLocation</tt>s
 	 */
 	public Collection values() {
-		List list = new ArrayList(LOCATIONS);
+		List list = null;
+		synchronized(LOCATIONS) {
+			// Note that new ArrayList(List) internally iterates over List
+			// so you need to synchronize this call.
+		    list = new ArrayList(LOCATIONS);
+		}
 		Collections.shuffle(list);
 		return list;
 	}
