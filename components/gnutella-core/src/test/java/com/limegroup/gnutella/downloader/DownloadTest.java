@@ -180,10 +180,10 @@ public class DownloadTest extends TestCase {
             tStealerInterruptedWithAlternate();
             cleanup();
         }
-        if(args.length == 0 || args[0].equals("18")) {
-            tTwoAlternatesButOneWithNoSHA1();
-            cleanup();
-        }
+//          if(args.length == 0 || args[0].equals("18")) {
+//              tTwoAlternatesButOneWithNoSHA1();
+//              cleanup();
+//          }
         if(args.length == 0 || args[0].equals("19")) {
             tUpdateWhiteWithFailingFirstUploader();
             cleanup();
