@@ -68,6 +68,72 @@ public class FileViewRequestTest extends ClientSideTestCase {
         assertEquals(bytes, output.getBytes());
     }
 
+    public void testPartialFileViewRequest1() throws Exception {
+        
+        URL url = new URL("http", "localhost", SERVER_PORT,
+                          UploadManager.FV_REQ_BEGIN + "/" +
+                          UploadManager.FV_PASS + "/0");
+        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+        InputStream is = conn.getInputStream();
+        FileDesc[] fds = {RouterService.getFileManager().get(0)};
+        final String output = 
+            FileListHTMLPage.instance().getSharedFilePage(fds);
+        assertEquals(output.length(), conn.getContentLength());
+        byte[] bytes = new byte[output.length()];
+        is.read(bytes);
+        assertEquals(bytes, output.getBytes());
+    }
+
+    public void testPartialFileViewRequest2() throws Exception {
+        
+        URL url = new URL("http", "localhost", SERVER_PORT,
+                          UploadManager.FV_REQ_BEGIN + "/" +
+                          UploadManager.FV_PASS + "/0&1&Junk&MoreJunk");
+        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+        InputStream is = conn.getInputStream();
+        FileDesc[] fds = {RouterService.getFileManager().get(0),
+                          RouterService.getFileManager().get(1)};
+        final String output = 
+            FileListHTMLPage.instance().getSharedFilePage(fds);
+        assertEquals(output.length(), conn.getContentLength());
+        byte[] bytes = new byte[output.length()];
+        is.read(bytes);
+        assertEquals(bytes, output.getBytes());
+    }
+
+    public void testPartialFileViewRequest3() throws Exception {
+        
+        URL url = new URL("http", "localhost", SERVER_PORT,
+                          UploadManager.FV_REQ_BEGIN + "/" +
+                          UploadManager.FV_PASS + "/0&1&Junk&MoreJunk&1");
+        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+        InputStream is = conn.getInputStream();
+        FileDesc[] fds = {RouterService.getFileManager().get(0),
+                          RouterService.getFileManager().get(1),
+                          RouterService.getFileManager().get(1)};
+        final String output = 
+            FileListHTMLPage.instance().getSharedFilePage(fds);
+        assertEquals(output.length(), conn.getContentLength());
+        byte[] bytes = new byte[output.length()];
+        is.read(bytes);
+        assertEquals(bytes, output.getBytes());
+    }
+
+    public void testBadPartialFileViewRequest() throws Exception {
+        
+        URL url = new URL("http", "localhost", SERVER_PORT,
+                          UploadManager.FV_REQ_BEGIN + "/" +
+                          UploadManager.FV_PASS + "&Junk&MoreJunk&Crap");
+        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+        InputStream is = conn.getInputStream();
+        final String output = 
+            new String(FileViewUploadState.MALFORMED_REQUEST_REPLY);
+        assertEquals(output.length(), conn.getContentLength());
+        byte[] bytes = new byte[output.length()];
+        is.read(bytes);
+        assertEquals(bytes, output.getBytes());
+    }
+
     public void testDownloadFileRequest() throws Exception {
         FileDesc fd = RouterService.getFileManager().get(0);
         assertNotNull(fd);
