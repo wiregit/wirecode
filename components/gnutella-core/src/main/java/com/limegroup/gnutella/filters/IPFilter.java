@@ -3,6 +3,7 @@ package com.limegroup.gnutella.filters;
 import com.sun.java.util.collections.*;
 import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.messages.*;
+import com.limegroup.gnutella.util.NetworkUtils;
 
 /**
  * Blocks messages and hosts based on IP address.  Formerly know as
@@ -44,7 +45,7 @@ public final class IPFilter extends SpamFilter {
     /** 
      * Checks if a given host is banned.  This method will be
      * called when accepting an incomming or outgoing connection. 
-     * @return true iff host is a banned address
+     * @return false iff host is a banned address, true otherwise.
      */
     public boolean allow(String host) {
         IP ip;
@@ -57,8 +58,9 @@ public final class IPFilter extends SpamFilter {
     }
 
     /** 
-     * Returns true if m is a ping or query reply message with a banned
+     * Returns false if m is a ping or query reply message with a banned
      * address.
+     * @return false iff host is a banned address, true otherwise.     
      */
     public boolean allow(Message m){
         String ip;
@@ -71,17 +73,12 @@ public final class IPFilter extends SpamFilter {
             ip = qr.getIP();
         } else if (m instanceof PushRequest) {
             PushRequest push=(PushRequest)m;
-            ip = ip2string(push.getIP());
+            ip = NetworkUtils.ip2string(push.getIP());
         }
         else // we dont want to block other kinds of messages
             return true;
         // now check the ip
         return allow(ip); 
-    }
-
-    private static String ip2string(byte[] ip) {
-        //Hack.  Ideally we'd call NetworkUtils.ip2string.
-        return (new Endpoint(ip, 0)).getHostname();
     }
 }
 
