@@ -13,6 +13,9 @@ import com.limegroup.gnutella.util.URLDecoder;
 import com.limegroup.gnutella.util.IOUtils;
 import java.util.StringTokenizer;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 /**
  * This class parses HTTP requests and delegates to <tt>HTTPUploader</tt>
  * to handle individual uploads.
@@ -66,6 +69,9 @@ import java.util.StringTokenizer;
  * @see com.limegroup.gnutella.uploader.HTTPUploader
  */
 public final class UploadManager implements BandwidthTracker {
+    
+    private static final Log LOG = LogFactory.getLog(UploadManager.class);
+    
 
     /** An enumeration of return values for queue checking. */
     private final int BYPASS_QUEUE = -1;
@@ -179,7 +185,8 @@ public final class UploadManager implements BandwidthTracker {
 	 */
     public void acceptUpload(final HTTPRequestMethod method,
                              Socket socket, boolean forceAllow) {
-        debug(" accepting upload");
+        
+        LOG.trace("accepting upload");
         HTTPUploader uploader = null;
         long startTime = -1;
 		try {
@@ -199,7 +206,8 @@ public final class UploadManager implements BandwidthTracker {
 
                 HttpRequestLine line = parseHttpRequest(socket, iStream);
 
-                debug(uploader + " successfully parsed request");
+                if(LOG.isDebugEnabled())
+                    LOG.debug(uploader + " successfully parsed request");
                 
                 String fileName = line._fileName;
                 
@@ -215,7 +223,8 @@ public final class UploadManager implements BandwidthTracker {
                 // If we're starting a new uploader, clean the old one up
                 // and then create a new one.
                 if(startedNewFile) {
-                    debug(uploader + " starting new file");
+                    if(LOG.isDebugEnabled())
+                        LOG.debug(uploader + " starting new file");
                     if (uploader != null) {
                         // Because queueing is per-socket (and not per file),
                         // we do not want to reset the queue status if they're
@@ -242,7 +251,8 @@ public final class UploadManager implements BandwidthTracker {
                 // Otherwise (we're continuing an uploader),
                 // reinitialize the existing HTTPUploader.
                 else {
-                    debug(uploader + " continuing old file");
+                    if(LOG.isDebugEnabled())
+                        LOG.debug(uploader + " continuing old file");
                     uploader.reinitialize(currentMethod, line.getParameters());
                 }
                 
@@ -260,7 +270,8 @@ public final class UploadManager implements BandwidthTracker {
                     uploader.setState(Uploader.MALFORMED_REQUEST);
                 }
                 
-                debug(uploader+" HTTPUploader created and read all headers");
+                if(LOG.isDebugEnabled())
+                    LOG.debug(uploader+" HTTPUploader created and read all headers");
 
                 // If we have not accepted this file already, then
                 // find out whether or not we should.
@@ -293,7 +304,8 @@ public final class UploadManager implements BandwidthTracker {
                 //read the first word of the next request and proceed only if
                 //"GET" or "HEAD" request.  Versions of LimeWire before 2.7
                 //forgot to switch the request method.
-                debug(uploader+" waiting for next request with socket ");
+                if(LOG.isDebugEnabled())
+                    LOG.debug(uploader+" waiting for next request with socket ");
                 int oldTimeout = socket.getSoTimeout();
                 if(queued!=QUEUED)
                     socket.setSoTimeout(SharingSettings.PERSISTENT_HTTP_CONNECTION_TIMEOUT.getValue());
@@ -302,7 +314,8 @@ public final class UploadManager implements BandwidthTracker {
                 //as we will handle only the next "HEAD" or "GET" request
                 String word = IOUtils.readWord(
                     iStream, 4);
-                debug(uploader+" next request arrived ");
+                if(LOG.isDebugEnabled())
+                    LOG.debug(uploader+" next request arrived ");
                 socket.setSoTimeout(oldTimeout);
                 if (word.equals("GET")) {
                     currentMethod=HTTPRequestMethod.GET;
@@ -320,7 +333,8 @@ public final class UploadManager implements BandwidthTracker {
                 }
             }//end of while
         } catch(IOException ioe) {//including InterruptedIOException
-            debug(uploader + " IOE thrown, closing socket");
+            if(LOG.isDebugEnabled())
+                LOG.debug(uploader + " IOE thrown, closing socket", ioe);
         } finally {
             // The states SHOULD be INTERRUPTED or COMPLETED
             // here.  However, it is possible that an IOException
@@ -362,7 +376,8 @@ public final class UploadManager implements BandwidthTracker {
                 cleanupFinishedUploader(uploader, startTime);
             }
             
-            debug(uploader + " closing socket");
+            if(LOG.isDebugEnabled())
+                LOG.debug(uploader + " closing socket");
             //close the socket
             close(socket);
         }
@@ -405,7 +420,8 @@ public final class UploadManager implements BandwidthTracker {
      * (4 & 5 are only done if 'shouldShowInGUI' is true)
      */
     private void cleanupFinishedUploader(HTTPUploader uploader, long startTime) {
-        debug(uploader + " cleaning up finished.");
+        if(LOG.isTraceEnabled())
+            LOG.trace(uploader + " cleaning up finished.");
         
         int state = uploader.getState();
         int lastState = uploader.getLastTransferState();        
@@ -483,13 +499,15 @@ public final class UploadManager implements BandwidthTracker {
             } 
             // If the index was invalid or the file was unshared, FNF.
             if(fd == null) {
-                debug(uploader + " fd is null");
+                if(LOG.isDebugEnabled())
+                    LOG.debug(uploader + " fd is null");
                 uploader.setState(Uploader.FILE_NOT_FOUND);
                 return;
             }
             // If the name they want isn't the name we have, FNF.
             if(!uploader.getFileName().equals(fd.getName())) {
-                debug(uploader + " wrong file name");
+                if(LOG.isDebugEnabled())
+                    LOG.debug(uploader + " wrong file name");
                 uploader.setState(Uploader.FILE_NOT_FOUND);
                 return;
             }
@@ -497,7 +515,8 @@ public final class UploadManager implements BandwidthTracker {
             try {
                 uploader.setFileDesc(fd);
             } catch(IOException ioe) {
-                debug(uploader + " could not create file stream");
+                if(LOG.isDebugEnabled())
+                    LOG.debug(uploader + " could not create file stream");
                 uploader.setState(Uploader.FILE_NOT_FOUND);
                 return;
             }
@@ -517,7 +536,8 @@ public final class UploadManager implements BandwidthTracker {
             // If it's the wrong URN, File Not Found it.
             URN urn = uploader.getRequestedURN();
     		if(fd != null && urn != null && !fd.containsUrn(urn)) {
-    		    debug(uploader + " wrong content urn");
+    		    if(LOG.isDebugEnabled())
+    		        LOG.debug(uploader + " wrong content urn");
                 uploader.setState(Uploader.FILE_NOT_FOUND);
                 return;
             }
@@ -558,7 +578,8 @@ public final class UploadManager implements BandwidthTracker {
     private int processNewRequest(HTTPUploader uploader, 
                                   Socket socket,
                                   boolean forceAllow) throws IOException {
-        debug(uploader + " processing new request.");
+        if(LOG.isTraceEnabled())
+            LOG.trace(uploader + " processing new request.");
         
         int queued = -1;
         
@@ -667,7 +688,8 @@ public final class UploadManager implements BandwidthTracker {
                 break;
         }
         
-        debug(uploader + " doing single upload");
+        if(LOG.isTraceEnabled())
+            LOG.trace(uploader + " doing single upload");
         
         boolean closeConnection = false;
         
@@ -823,35 +845,42 @@ public final class UploadManager implements BandwidthTracker {
         Assert.that(uploader.getMethod()==HTTPRequestMethod.GET);
 
         if(posInQueue == -1) {//this uploader is not in the queue already
-            debug(uploader+"Uploader not in que(capacity:"+maxQueueSize+")");
+            if(LOG.isDebugEnabled())
+                LOG.debug(uploader+"Uploader not in que(capacity:"+maxQueueSize+")");
             if(limitReached || wontAccept) { 
-                debug(uploader+" limited? "+limitReached+" wontAccept? "
+                if(LOG.isDebugEnabled())
+                    LOG.debug(uploader+" limited? "+limitReached+" wontAccept? "
                       +wontAccept);
                 return REJECTED; //we rejected this uploader
             }
             addToQueue(socket);
             posInQueue = size;//the index of the uploader in the queue
             ret = QUEUED;//we have queued it now
-            debug(uploader+" new uploader added to queue");
+            if(LOG.isDebugEnabled())
+                LOG.debug(uploader+" new uploader added to queue");
         }
         else {//we are alreacy in queue, update it
             KeyValue kv = (KeyValue)_queuedUploads.get(posInQueue);
             Long prev=(Long)kv.getValue();
             if(prev.longValue()+MIN_POLL_TIME > System.currentTimeMillis()) {
                 _queuedUploads.remove(posInQueue);
-                debug(uploader+" queued uploader flooding-throwing exception");
+                if(LOG.isDebugEnabled())
+                    LOG.debug(uploader+" queued uploader flooding-throwing exception");
                 throw new IOException();
             }
             kv.setValue(new Long(System.currentTimeMillis()));
-            debug(uploader+" updated queued uploader");
+            if(LOG.isDebugEnabled())
+                LOG.debug(uploader+" updated queued uploader");
             ret = QUEUED;//queued
         }
-        debug(uploader+" checking if given uploader is can be accomodated ");
+        if(LOG.isDebugEnabled())
+            LOG.debug(uploader+" checking if given uploader is can be accomodated ");
         // If we have atleast one slot available, see if the position
         // in the queue is small enough to be accepted.
         if(!this.isBusy() && hasFreeSlot(posInQueue + uploadsInProgress())) {
             ret = ACCEPTED;
-            debug(uploader+" accepting upload");
+            if(LOG.isDebugEnabled())
+                LOG.debug(uploader+" accepting upload");
             //remove this uploader from queue
             _queuedUploads.remove(posInQueue);
         }
@@ -1449,33 +1478,7 @@ public final class UploadManager implements BandwidthTracker {
 	 */
 	public synchronized float getAverageBandwidth() {
         return averageBandwidth;
-	}	
-    
-    private static final boolean debugOn = false;
-    private static final boolean log = false;
-    private static PrintWriter writer = null;
-    private static final void debug(String out) {
-        if (debugOn) {
-            if(log) {
-                if(writer== null) {
-                    try {
-                        writer=new 
-                        PrintWriter(new FileOutputStream("UploadLog.log",true));
-                    }catch (IOException ioe) {
-                        System.out.println("could not create log file");
-                    }
-                }
-                writer.println(out);
-                writer.flush();
-            }
-            else
-                System.out.println(out);
-        }
-    }
-    private static final void debug(Exception e) {
-        if (debugOn)
-            e.printStackTrace();
-    }
+	}
 
     static void tBandwidthTracker(UploadManager upman) {
         upman.reportUploadSpeed(100000, 1000000);  //10 kB/s
