@@ -117,7 +117,10 @@ public final class RouteTable {
 												   ReplyHandler replyHandler) {
         repOk();
         purge();
-        Assert.that(replyHandler != null);
+		if(replyHandler == null) {
+			throw new NullPointerException("null reply handler");
+		}
+
         if (! replyHandler.isOpen())
             return null;
 
@@ -202,7 +205,8 @@ public final class RouteTable {
      *  count by replyBytes.
      */
     public synchronized ReplyRoutePair getReplyHandler(byte[] guid, 
-                                                       int replyBytes) {
+                                                       int replyBytes,
+													   short numReplies) {
         //no purge
         repOk();
 
@@ -223,7 +227,7 @@ public final class RouteTable {
         ReplyRoutePair ret=new ReplyRoutePair(handler, entry.bytesRouted);
 
         entry.bytesRouted += replyBytes;
-        entry.repliesRouted++;
+        entry.repliesRouted += numReplies;
         return ret;
     }
 
