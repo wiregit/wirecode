@@ -121,11 +121,10 @@ public class ManagedConnectionTest extends BaseTestCase {
 
         assertTrue("connection is open", out.isOpen());
         assertTrue("connection should support GGEP", out.supportsGGEP());
-		// receive initial ping
-        //drain(out);
+		// receive initial pings
 		out.receive();
 		out.receive();
-		//out.receive();`
+        out.receive();
 
         //assertTrue("connection should support GGEP", out.supportsGGEP());
 		out.send(new PingRequest((byte)3));
