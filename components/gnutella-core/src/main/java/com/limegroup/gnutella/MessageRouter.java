@@ -928,19 +928,12 @@ public abstract class MessageRouter {
         //along leaf to ultrapeer connections.
         List list = manager.getInitializedConnections2();
         int size = list.size();
-        boolean randomlyForward = false;
-        if(size > 3) randomlyForward = true;
         for(int i=0; i<size; i++) {
             ManagedConnection c = (ManagedConnection)list.get(i);
-            if (   receivingConnection==FOR_ME_REPLY_HANDLER
-				   || (c!=receivingConnection
-                     && !c.isClientSupernodeConnection())) {
-
-                if(randomlyForward && (Math.random() < 0.95)) {
-                    continue;
-                } else {
-                    c.send(request);
-                }
+            if (receivingConnection == FOR_ME_REPLY_HANDLER || 
+                (c!=receivingConnection && 
+                 !c.isClientSupernodeConnection())) {
+                c.send(request);
             }
         }
     }
