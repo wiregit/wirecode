@@ -52,8 +52,21 @@ public class LimeXMLProperties
      */
     private static final String XML_SCHEMA_DIR_DEF = "etc" + File.separator + 
                                                 "schemas" + File.separator;
+                                                
+    /**
+     * The property that denotes the file that stores the 
+     * Schema Transformation DataMap
+     */
+    private static final String SCHEMA_TRANSFORMATION_DATA_MAP_FILE
+        = "SCHEMA_TRANSFORMATION_DATA_MAP_FILE";
 
-
+     /**
+     * The name of the file that stores the 
+     * Schema Transformation DataMap
+     */
+    private static final String SCHEMA_TRANSFORMATION_DATA_MAP_FILE_DEF 
+        = "etc" + File.separator + "STDataMap.dat";
+    
     /**
      * Constructor: Initializes various default values, and loads the settings
      * from the properties file.
@@ -116,6 +129,18 @@ public class LimeXMLProperties
     }
         
     /**
+     * Returns the name of the file that stores the SchemaTransformationDataMap
+     */
+    public String getSchemaTransformationDataMapFile()
+    {
+        String schemaTransformationDataMapFile = _properties.getProperty(
+            SCHEMA_TRANSFORMATION_DATA_MAP_FILE, 
+            SCHEMA_TRANSFORMATION_DATA_MAP_FILE_DEF);
+
+        return getPath() + schemaTransformationDataMapFile;                   
+    }
+    
+    /**
      * Returns the files pertaining to the XML Schemas used for 
      * querying/responding
      */
@@ -131,7 +156,7 @@ public class LimeXMLProperties
     {
         //a hack. I guess, adam will provide some way so that installation
         //directory can be accesed in some other way than user.dir
-        return "E:\\work";
+        return "E:\\work\\";
     }
     
 }//end of class

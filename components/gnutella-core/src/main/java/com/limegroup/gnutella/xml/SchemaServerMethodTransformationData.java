@@ -6,6 +6,7 @@
 
 package com.limegroup.gnutella.xml;
 import java.util.*;
+import java.io.*;
 
 /**
  * Stores the information required to transform a xml documents confirming
@@ -14,8 +15,11 @@ import java.util.*;
  * @author  asingla
  * @version
  */
-public class SchemaServerMethodTransformationData 
+public class SchemaServerMethodTransformationData implements Serializable
 {
+    //serial version ID
+    static final long serialVersionUID = -7898848299483184137L;
+    
     //constants defining the methods to communicate with server
     public static final String HTTP_POST   = "HTTP_POST";
     public static final String HTTP_GET    = "HTTP_GET";
