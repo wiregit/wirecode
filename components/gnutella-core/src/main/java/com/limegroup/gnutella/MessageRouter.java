@@ -21,7 +21,6 @@ public abstract class MessageRouter
     public static final boolean UNICAST_MODE = true;
 
     protected ConnectionManager _manager;
-    protected Acceptor _acceptor;
 
     /**
      * @return the GUID we attach to QueryReplies to allow PushRequests in
@@ -148,7 +147,6 @@ public abstract class MessageRouter
      */
     public void initialize()
     {
-        _acceptor = RouterService.getAcceptor();
         _manager = RouterService.getConnectionManager();
 		_forMeReplyHandler = new ForMeReplyHandler();
     }
@@ -334,7 +332,7 @@ public abstract class MessageRouter
             broadcastPingRequest(pingRequest, receivingConnection,
                                  _manager);
 
-        respondToPingRequest(pingRequest, _acceptor);
+        respondToPingRequest(pingRequest);
     }
 
 
@@ -357,7 +355,7 @@ public abstract class MessageRouter
 										ReplyHandler handler)
     {
         _numPingRequests++;
-        respondToUDPPingRequest(pingRequest, _acceptor);
+        respondToUDPPingRequest(pingRequest);
     }
     
     
@@ -390,7 +388,7 @@ public abstract class MessageRouter
 		// always forward any queries to leaves -- this only does
 		// anything when this node's an UltraPeer
 		forwardQueryRequestToLeaves(queryRequest, handler, _manager);
-        respondToQueryRequest(queryRequest, _acceptor, _clientGUID);
+        respondToQueryRequest(queryRequest, _clientGUID);
     }
 
     /**
@@ -620,8 +618,7 @@ public abstract class MessageRouter
      * sendPingReply(PingReply).
      * This method is called from the default handlePingRequest.
      */
-    protected abstract void respondToPingRequest(PingRequest request,
-                                                 Acceptor acceptor);
+    protected abstract void respondToPingRequest(PingRequest request);
 
 	/**
 	 * Responds to a ping received over UDP -- implementations
@@ -633,8 +630,7 @@ public abstract class MessageRouter
 	 * @param handler the <tt>ReplyHandler</tt> that will handle 
 	 *  sending the replies
 	 */
-    protected abstract void respondToUDPPingRequest(PingRequest request,
-													Acceptor acceptor);
+    protected abstract void respondToUDPPingRequest(PingRequest request);
 
 
     /**
@@ -644,7 +640,6 @@ public abstract class MessageRouter
      * This method is called from the default handleQueryRequest.
      */
     protected abstract void respondToQueryRequest(QueryRequest queryRequest,
-                                                  Acceptor acceptor,
                                                   byte[] clientGUID);
     /**
      * The default handler for PingRequests received in
@@ -1034,7 +1029,7 @@ public abstract class MessageRouter
             boolean uploaded = um.hadSuccesfulUpload();
 
 			// see if we have ever accepted an incoming connection
-			boolean incoming = _acceptor.acceptedIncoming();
+			boolean incoming = RouterService.acceptedIncomingConnection();
 
 			boolean chat = SettingsManager.instance().getChatEnabled();
 
