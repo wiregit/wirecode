@@ -771,15 +771,13 @@ public final class RouterService {
 			urnTypes.add(UrnType.ANY_TYPE);
 			Set urns = new HashSet();
 			QueryRequest qr = 
-				new QueryRequest(guid, (byte)6, minSpeed, 
+				new QueryRequest(guid, 
+								 SettingsManager.instance().getTTL(), 
+								 minSpeed, 
 								 query, richQuery, false, urnTypes, urns,
 								 !acceptedIncomingConnection());
 			verifier.record(qr, type);
-			if(!isSupernode()) {
-				router.broadcastQueryRequest(qr);
-			} else {
-				router.sendDynamicQuery(QueryHandler.createHandler(qr));
-			}
+			router.sendDynamicQuery(qr);
 		} catch(Throwable t) {
 			ErrorService.error(t);
 		}
