@@ -225,7 +225,7 @@ public class UDPHeadPong extends VendorMessage {
 			return baos.toByteArray();
 		}
 		
-		//if we can't receive unsolicited udp...
+		//if we can't receive unsolicited tcp...
 		if (!RouterService.acceptedIncomingConnection())
 			retCode = FIREWALLED;
 		
