@@ -67,7 +67,7 @@
   
   <target name="with.clover" depends="prepare">
      <clover-setup initString="${cloverdir}/limeCloverCoverage.db">
-       <fileset dir="${coredir}" defaultexcludes="yes"/> 
+       <fileset dir="${coredir}" defaultexcludes="yes"/>
      </clover-setup>
   </target>
   
@@ -83,11 +83,10 @@
     <delete dir="${cloverdir}"/>
   </target>
   
-  <target name="clover.all">
-    <antcall target="with.clover"/>
-    <antcall target="test all"/>
-    <antcall target="clover.html"/>
-  </target>
+  <target name="clover.all" depends="clean, with.clover">
+    <antcall target="test all" inheritRefs="true"/>
+    <antcall target="clover.html" inheritRefs="true"/>
+  </target>        
 
   <!-- Initialization stuff -->
   <target name="init" >
@@ -137,7 +136,7 @@
  <!-- To run, type 'ant "test all"' (without the single quotes). -->
  <!-- Formats the XML output to html. -->
  <target name="test all">
-    <antcall target="batchunit">
+    <antcall target="batchunit" inheritRefs="true">
         <param name="unit" value="**/*Test.class"/>
         <param name="haltonfailure" value="no"/>
         <param name="haltonerror" value="no"/>
@@ -151,7 +150,7 @@
   <!-- To run, type 'ant -D"package=<mypackage>" "test package"' (without the single quotes). -->
   <!-- Formats the XML output to html. -->
  <target name="test package" if="package">
-    <antcall target="batchunit">
+    <antcall target="batchunit" inheritRefs="true">
         <param name="unit" value="com/limegroup/gnutella/${package}/*Test.class"/>
         <param name="haltonfailure" value="no"/>
         <param name="haltonerror" value="no"/>
@@ -167,7 +166,7 @@
  <!-- To test, say, DownloadTest, you would type: -->
  <!-- ant -D"class=downloader/DownloadTest" test -->
  <target name="test" if="class">
-    <antcall target="batchunit">
+    <antcall target="batchunit" inheritRefs="true">
         <param name="unit" value="com/limegroup/gnutella/${class}.class"/>
         <param name="haltonfailure" value="yes"/>
         <param name="haltonerror" value="yes"/>
@@ -183,7 +182,7 @@
  <!-- To test, say, DownloadTest, you would type: -->
  <!-- ant -D"class=downloader/DownloadTest" test -->
  <target name="testnofail" if="class">
-    <antcall target="batchunit">
+    <antcall target="batchunit" inheritRefs="true">
         <param name="unit" value="com/limegroup/gnutella/${class}.class"/>
         <param name="haltonfailure" value="no"/>
         <param name="haltonerror" value="no"/>
