@@ -395,7 +395,10 @@ public final class QueryHandler {
     }
 
     /**
-     * Runs the query over the given list of connections.  This is static
+     * Sends a query to one of the specified <tt>List</tt> of connections.  
+     * This is the heart of the dynamic query.  We dynamically calculate the
+     * appropriate TTL to use based on our current estimate of how widely the
+     * file is distributed, how many connections we have, etc.  This is static
      * to decouple the algorithm from the specific <tt>QueryHandler</tt>
      * instance, making testing significantly easier.
      *
@@ -406,31 +409,31 @@ public final class QueryHandler {
      * @return the number of new hosts theoretically reached by this
      *  query iteration
      */
-    private int sendQuery(List list) {
+    private int sendQuery(List ultrapeers) {
         // weed out any stale data from the lists of queried connections --
         // remove any elements that are not in our more up-to-date list
         // of connections.
-        QUERIED_CONNECTIONS.retainAll(list);
-        QUERIED_PROBE_CONNECTIONS.retainAll(list);
+        QUERIED_CONNECTIONS.retainAll(ultrapeers);
+        QUERIED_PROBE_CONNECTIONS.retainAll(ultrapeers);
 
 
         // now, remove any connections we've used from our current list
         // of connections to try
-        list.removeAll(QUERIED_CONNECTIONS);
-        list.removeAll(QUERIED_PROBE_CONNECTIONS);
+        ultrapeers.removeAll(QUERIED_CONNECTIONS);
+        ultrapeers.removeAll(QUERIED_PROBE_CONNECTIONS);
         
         
-		int length = list.size();
+		int length = ultrapeers.size();
         byte ttl = 0;
         ManagedConnection mc = null;
 
         // add randomization to who we send our queries to
-        Collections.shuffle(list);
+        Collections.shuffle(ultrapeers);
 
         // weed out all connections that aren't yet stable
         for(int i=0; i<length; i++) {
 			ManagedConnection curConnection = 
-                (ManagedConnection)list.get(i);			
+                (ManagedConnection)ultrapeers.get(i);			
 
 			// if the connection hasn't been up for long, don't use it,
             // as the replies will never make it back to us if the
