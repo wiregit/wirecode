@@ -34,15 +34,18 @@ public final class AlternateLocation {
 	
 
 	/**
-	 * Constructs a new <tt>AlternateLocation</tt> instance 
-	 * based on the specified string argument.  
+	 * Constructs a new <tt>AlternateLocation</tt> instance based on the
+	 * specified string argument.  
 	 *
-	 * @param LOCATION a string containing a single alternate 
-	 *  location, including a full URL for a file and an
-	 *  optional date
+	 * @param LOCATION a string containing a single alternate location,
+	 *  including a full URL for a file and an optional date
+	 * @throws <tt>IOException</tt> if there is any problem constructing
+	 *  the new instance from the specified string
+	 * @throws <tt>MalformedURLException</tt> if the enclosed URL is not
+	 *  formatted correctly
 	 */
 	public AlternateLocation(final String LOCATION) throws IOException {
-		URL = AlternateLocation.extractHttpUrl(LOCATION);
+		URL = AlternateLocation.createUrl(LOCATION);
 		OUTPUT_DATE_TIME = AlternateLocation.extractDateTimeString(LOCATION);
 		DATE = AlternateLocation.createDateInstance(OUTPUT_DATE_TIME);
 	}
@@ -110,11 +113,9 @@ public final class AlternateLocation {
 			throw new IOException("INVALID DATE/TIME STRING");
 		}
 		String YYYYMMDD = DATE_TIME_STRING.substring(0, dateTimeSepIndex);
-		System.out.println("YYYYMMDD: "+YYYYMMDD); 
 		String hhmmss = 
 		    DATE_TIME_STRING.substring(dateTimeSepIndex+1, 
 									   DATE_TIME_STRING.length()-1);
-		System.out.println("hhmmss: "+hhmmss);
 		StringTokenizer stdate = new StringTokenizer(YYYYMMDD, "-");
 		if(stdate.countTokens() != 3) {
 			throw new IOException("INVALID DATE FORMAT");
@@ -146,7 +147,20 @@ public final class AlternateLocation {
 		return cal.getTime();
 	}
 
-	private static URL extractHttpUrl(final String LOCATION_HEADER) 
+	/**
+	 * Creates a new <tt>URL</tt> instance based on the URL specified in
+	 * the alternate location header.
+	 * 
+	 * @param LOCATION_HEADER the alternate location header from an HTTP
+	 *  header
+	 * @return a new <tt>URL</tt> instance for the URL in the alternate
+	 *  location header
+	 * @throws <tt>IOException</tt> if the url could not be extracted from
+	 *  the header in the expected format
+	 * @throws <tt>MalformedURLException</tt> if the enclosed URL is not
+	 *  formatted correctly
+	 */
+	private static URL createUrl(final String LOCATION_HEADER) 
 		throws IOException {
 		int urlIndex  = LOCATION_HEADER.indexOf(" ");
 		int dateIndex = LOCATION_HEADER.lastIndexOf(" ");
@@ -156,7 +170,6 @@ public final class AlternateLocation {
 			throw new IOException("ERROR EXTRACTING URL STRING");
 		}
 		String urlString = LOCATION_HEADER.substring(urlIndex+1, dateIndex);
-		System.out.println("urlString:"+urlString); 
 		return new URL(urlString);
 	}
 
