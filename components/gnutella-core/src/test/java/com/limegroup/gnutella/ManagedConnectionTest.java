@@ -10,10 +10,15 @@ import com.limegroup.gnutella.routing.*;
 import com.limegroup.gnutella.messages.*;
 import com.limegroup.gnutella.stubs.*;
 import com.limegroup.gnutella.settings.*;
+import com.limegroup.gnutella.util.*;
 import com.sun.java.util.collections.*;
 
 public class ManagedConnectionTest extends TestCase {  
     public static final int PORT=6666;
+
+
+    private static final RouterService ROUTER_SERVICE =
+        new RouterService(new ActivityCallbackStub());
 
     public ManagedConnectionTest(String name) {
         super(name);
@@ -22,34 +27,70 @@ public class ManagedConnectionTest extends TestCase {
     public static Test suite() {
         return new TestSuite(ManagedConnectionTest.class);
     }    
-   
-    /*
-    public static Test suite() {
-        //return new TestSuite(ManagedConnectionTest.class);
-        TestSuite ret=new TestSuite("Simplified ManagedConnection tests");
-        ret.addTest(new ManagedConnectionTest("testBuffering"));
-        ret.addTest(new ManagedConnectionTest("testClose"));
-        ret.addTest(new ManagedConnectionTest("testHorizonStatistics"));
-        ret.addTest(new ManagedConnectionTest("testIsRouter"));
-        ret.addTest(new ManagedConnectionTest("testForwardsGGEP"));
-        ret.addTest(new ManagedConnectionTest("testStripsGGEP"));
-        ret.addTest(new ManagedConnectionTest("testForwardsGroupPing"));
-        return ret;
+
+	public static void main(String[] args) {
+		junit.textui.TestRunner.run(suite());
+	}
+
+    static {
+		AbstractSettings.revertToDefault();
+        SettingsManager.instance().setPort(6444);
+		ConnectionSettings.KEEP_ALIVE.setValue(1);
+		ConnectionSettings.CONNECT_ON_STARTUP.setValue(false);
+		ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
+        ConnectionSettings.EVER_ACCEPTED_INCOMING.setValue(true);
+		ConnectionSettings.USE_GWEBCACHE.setValue(false);
+        UltrapeerSettings.FORCE_ULTRAPEER_MODE.setValue(true);
+        UltrapeerSettings.EVER_ULTRAPEER_CAPABLE.setValue(true);
     }
-    */
+
 
     public void setUp() {
-        //Restore all the defaults.  Apparently testForwardsGGEP fails if this
-        //is in ultrapeer mode and the KEEP_ALIVE is 1.  It seems that WE (the
-        //client) send a "503 Service Unavailable" at line 77 of
-        //SupernodeHandshakeResponder.
-        SettingsManager.instance().loadDefaults();
-        ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
+        if(ROUTER_SERVICE.isStarted()) return;
+
+        ROUTER_SERVICE.start();
+		ROUTER_SERVICE.connect();
+        RouterService.clearHostCatcher();
+    }
+
+	public void tearDown() {
+		
+	}
+
+	public void testServerRunning() {
+		try {
+			ManagedConnection mc = 
+				new ManagedConnection("localhost", Backend.DEFAULT_PORT);
+			mc.initialize();		
+		} catch(IOException e) {
+			e.printStackTrace();
+			failWithServerMessage();
+		}
+	}
+
+    private void failWithServerMessage() {
+        fail("You must run this test with servers running --\n"+
+             "use the test6300 ant target to run LimeWire servers "+
+             "on ports 6300 and 6300.\n\n"+
+             "Type ant -D\"class=ConnectionManagerTest\" test6300\n\n");        
     }
  
     private static void sleep(long msecs) {
         try { Thread.sleep(msecs); } catch (InterruptedException ignored) { }
     }
+
+
+	/**
+	 * Tests the method for checking whether or not the connection is a high-
+	 * degree connection that maintains high numbers of intra-Ultrapeer 
+	 * connections.
+	 */
+	public void testIsHighDegreeConnection() throws IOException {
+		ManagedConnection mc = new ManagedConnection("localhost", 6300);
+		mc.initialize();
+		assertTrue("connection should be high degree", 
+				   mc.isHighDegreeConnection());
+	}
 
     public void testHorizonStatistics() {
         ManagedConnection mc=newConnection();
@@ -106,9 +147,9 @@ public class ManagedConnectionTest extends TestCase {
         catch (InterruptedException e) { }       
 
         mc.refreshHorizonStats();
-        Assert.that(mc.getNumFiles()==0);
-        Assert.that(mc.getNumHosts()==0);
-        Assert.that(mc.getTotalFileSize()==0);                
+        assertEquals("unexpected number of files", 0,mc.getNumFiles());
+        assertEquals("unexpected number of hosts", 0,mc.getNumHosts());
+        assertEquals("unexpected total file size", 0,mc.getTotalFileSize());                
     }
     
 	/*
@@ -132,59 +173,86 @@ public class ManagedConnectionTest extends TestCase {
      }
 	*/
 
+	/**
+	 * Test to make sure that GGEP extensions are correctly returned in pongs.
+	 */
     public void testForwardsGGEP() {
-        int TIMEOUT=1000;
-        MiniAcceptor acceptor=new MiniAcceptor(new GGEPResponder(), PORT);
-        ManagedConnection out=new ManagedConnection("localhost", PORT,
-													new MessageRouterStub(),
-													new ConnectionManagerStub());
+        ManagedConnection out = newConnection("localhost", Backend.DEFAULT_PORT);
         try {
             out.initialize();
-            Connection in=acceptor.accept();
-            assertTrue(out.supportsGGEP());
 
-            out.send(new PingReply(new byte[16], (byte)3, 6349, new byte[4],
-                                   13l, 14l, false, 4321, false));
-            PingReply reply=(PingReply)in.receive(TIMEOUT);
-            assertEquals(reply.getPort(), 6349);
-            try {
-                assertEquals("incorrect daily uptime!",reply.getDailyUptime(), 4321);
-            } catch (BadPacketException e) {
-                fail("Couldn't extract uptime: "+e);
-            }
-            in.close();
-            out.close();
+			// receive initial ping
+			out.receive();
+			out.receive();
+			out.receive();
+
+            assertTrue("connection should support GGEP", out.supportsGGEP());
+			out.send(new PingRequest((byte)2));
+			
+			Message m = out.receive();
+			System.out.println(m); 
+			assertTrue("should be a pong", m instanceof PingReply);
+			PingReply pr = (PingReply)m;
+
+			assertTrue("should not support unicast", !pr.supportsUnicast());
+
+			assertTrue("incorrect daily uptime!", pr.getDailyUptime() > 0);
+			assertTrue("unexpected vendor", pr.getVendor().equals("LIME"));
+			assertTrue("pong should have GGEP", pr.hasGGEPExtension());
+			out.close();
         } catch (IOException e) {
             e.printStackTrace();
             fail("Mysterious IO problem: "+e);
         } catch (BadPacketException e) {
-            fail("Bad packet: "+e);
+			e.printStackTrace();
+			fail("Bad packet: "+e);
         }
     }
 	
 	
+	/**
+	 * Tests to make sure that LimeWire correctly strips any GGEP extensions
+	 * in pongs if it thinks the connection on the other end does not 
+	 * support GGEP.
+	 */
 	public void testStripsGGEP() {
-        int TIMEOUT=1000;
-        MiniAcceptor acceptor=new MiniAcceptor(new EmptyResponder(), PORT);
         ManagedConnection out = 
-			new ManagedConnection("localhost", PORT,
-								  new MessageRouterStub(),
-								  new ConnectionManagerStub());
+			ManagedConnection.createTestConnection("localhost", 
+												   Backend.DEFAULT_PORT,
+												   new NoGGEPProperties(),
+												   new EmptyResponder());
         try {
-            out.initialize();
-            Connection in = acceptor.accept();
-            assertTrue("Connection should not support GGEP", !out.supportsGGEP());
+			out.initialize();
 
-            out.send(new PingReply(new byte[16], (byte)3, 6349, new byte[4],
-                                   13l, 14l, false, 4321, false));
-            PingReply reply=(PingReply)in.receive(TIMEOUT);
-            assertEquals(14, reply.getLength());
-            assertEquals(reply.getPort(), 6349);
+			// receive initial ping
+			out.receive();
+			out.receive()
+;			out.receive();
+
+            //Connection in = acceptor.accept();
+			//assertNotNull("connection should not be null", in);
+            assertTrue("Connection should support GGEP", out.supportsGGEP());
+			out.send(new PingRequest((byte)2));
+			
+			Message m = out.receive();
+			assertTrue("should be a pong", m instanceof PingReply);
+			PingReply pr = (PingReply)m;
             try {
-                reply.getDailyUptime();
+                pr.getDailyUptime();
                 fail("Payload wasn't stripped");
-            } catch (BadPacketException e) { }
-            in.close();
+            } catch (BadPacketException e) { }			
+
+            try {
+                pr.getDailyUptime();
+                fail("GGEP payload wasn't stripped");
+            } catch (BadPacketException e) { }			
+            try {
+                pr.supportsUnicast();
+                fail("GGEP payload wasn't stripped");
+            } catch (BadPacketException e) { }			
+
+			assertTrue("pong should not have GGEP", !pr.hasGGEPExtension());
+
             out.close();
         } catch (IOException e) {
 			e.printStackTrace();
@@ -195,69 +263,108 @@ public class ManagedConnectionTest extends TestCase {
         }
     }
     
-
-    public void testClose() {
+	/**
+	 * Tests to make sure that connections are closed correctly from the
+	 * client side.
+	 */
+    public void testClientSideClose() {
         try {
             ManagedConnection out=null;
             Connection in=null;
-            com.limegroup.gnutella.MiniAcceptor acceptor=null;                
+            //com.limegroup.gnutella.MiniAcceptor acceptor=null;                
             //When receive() or sendQueued() gets IOException, it calls
             //ConnectionManager.remove().  This in turn calls
             //ManagedConnection.close().  Our stub does this.
             ConnectionManager manager=new ConnectionManagerStub(true);
 
             //1. Locally closed
-            acceptor=new com.limegroup.gnutella.MiniAcceptor(null, PORT);
-            out=newConnection("localhost", PORT, manager);
+            //acceptor=new com.limegroup.gnutella.MiniAcceptor(null, PORT);
+			out = new ManagedConnection("localhost", Backend.DEFAULT_PORT);
+            //out=newConnection("localhost", PORT, manager);
             out.initialize();            
-            in=acceptor.accept(); 
+
+            //in=acceptor.accept(); 
 			assertTrue("connection should be open", out.isOpen());
 			assertTrue("runner should not be dead", !out.runnerDied());
             out.close();
             sleep(100);
             assertTrue("connection should not be open", !out.isOpen());
-            assertTrue("", out.runnerDied());
-            try { Thread.sleep(1000); } catch (InterruptedException e) { }
-            in.close(); //needed to ensure connect below works
+            assertTrue("runner should have died", out.runnerDied());
 
-            //2. Remote close: discovered on read
-            acceptor = new com.limegroup.gnutella.MiniAcceptor(null, PORT);
-            out = newConnection("localhost", PORT, manager);
-            out.initialize();            
-            in=acceptor.accept(); 
+            try { Thread.sleep(1000); } catch (InterruptedException e) { }
+            //in.close(); //needed to ensure connect below works
+		} catch (IOException e) {
+            e.printStackTrace();
+            fail("Unexpected IO problem");
+        }
+	}
+
+	/**
+	 * Tests to make sure that connections are closed correctly from the
+	 * server side.
+	 */
+    public void testServerSideClose() {
+		try {
+			MiniAcceptor acceptor = new MiniAcceptor(PORT);
+			
+			//2. Remote close: discovered on read
+			ManagedConnection out = new ManagedConnection("localhost", PORT);
+			//out = newConnection("localhost", PORT, manager);
+			out.initialize();            
+            Connection in = acceptor.accept(); 
             assertTrue("connection should be open", out.isOpen());
             assertTrue("runner should not be dead", !out.runnerDied());
+
+
             in.close();
             try {
-                out.receive();
-                Assert.that(false);
+				out.receive();
+				fail("should not have received message");
             } catch (BadPacketException e) {
-                Assert.that(false);
+				e.printStackTrace();
+				fail("should not have received bad packet");
             } catch (IOException e) { }            
+
             sleep(100);
             assertTrue("connection should not be open", !out.isOpen());
-            assertTrue("runner should not be dead", out.runnerDied());
+            assertTrue("runner should be dead", out.runnerDied());
 
             //3. Remote close: discovered on write.  Because of TCP's half-close
             //semantics, we need TWO writes to discover this.  (See unit tests
             //for Connection.)
-            acceptor=new com.limegroup.gnutella.MiniAcceptor(null, PORT);
-            out=newConnection("localhost", PORT, manager);
+            acceptor = new com.limegroup.gnutella.MiniAcceptor(PORT);
+            out = new ManagedConnection("localhost", PORT);
             out.initialize();            
-            in=acceptor.accept(); 
+            in = acceptor.accept(); 
             assertTrue("connection should be open", out.isOpen());
             assertTrue("runner should not be dead", !out.runnerDied());
             in.close();
             out.send(new PingRequest((byte)3));
             out.send(new PingRequest((byte)3));
             sleep(100);
-            assertTrue(! out.isOpen());
-            assertTrue(out.runnerDied());
+
+            assertTrue("connection should not be open", !out.isOpen());
+            assertTrue("runner should be dead", out.runnerDied());
 			sleep(2000);
 
         } catch (IOException e) {
-            fail("Unexpected IO problem");
             e.printStackTrace();
+            fail("Unexpected IO problem");
+        }
+    }
+
+    /** Tries to receive any outstanding messages on c 
+     *  @return true if this got a message */
+    private static boolean drain(Connection c) throws IOException {
+        boolean ret=false;
+        while (true) {
+            try {
+                Message m = c.receive(500);
+                ret=true;
+            } catch (InterruptedIOException e) {
+                return ret;
+            } catch (BadPacketException e) {
+            }
         }
     }
 
@@ -278,19 +385,39 @@ public class ManagedConnectionTest extends TestCase {
         }
     }
 
+	private static class NoGGEPProperties extends SupernodeProperties {
+		public NoGGEPProperties() {
+			super("localhost");
+			remove(ConnectionHandshakeHeaders.GGEP);
+		}
+	}
+
     private static ManagedConnection newConnection() {
         return newConnection("", 0);
     }
 
     private static ManagedConnection newConnection(String host, int port) {
-        return new ManagedConnection(host, port, new MessageRouterStub(),
-                                     new ConnectionManagerStub());
+        ManagedConnection mc = new ManagedConnection(host, port);
+		setStubs(mc, new ConnectionManagerStub());
+		return mc;
     }
 
     private static ManagedConnection newConnection(String host, int port,
                                                    ConnectionManager cm) {
-        return new ManagedConnection(host, port, new MessageRouterStub(), cm);
+        ManagedConnection mc = new ManagedConnection(host, port);
+		setStubs(mc, cm);
+		return mc;
     }
+
+	private static void setStubs(ManagedConnection mc, ConnectionManager cm) {
+        try {
+            PrivilegedAccessor.setValue(mc, "_router", new MessageRouterStub());
+            PrivilegedAccessor.setValue(mc, "_manager", cm);
+        } catch(Exception e) {
+            e.printStackTrace();
+            fail("could not initialize test");
+        }		
+	}
 
     public static void main(String argv[]) {
         junit.textui.TestRunner.run(suite());
