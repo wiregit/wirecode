@@ -76,10 +76,10 @@ public class InstantMessenger implements Chatter {
 		// header, and reading until a blank line
 		while (true) {
 			String str = _reader.readLine();
-			if  (str.equals("")) 
-				break;
 			if (str == null) 
 				return;
+			if (str.equals("")) 
+				break;
 		}
 		// finally, we send 
         _out.write("CHAT/0.1 200 OK\r\n");
@@ -167,10 +167,10 @@ public class InstantMessenger implements Chatter {
 		// the blank line.
 		while (true) {
 			String str = _reader.readLine();
-			if  (str.equals("")) 
-				break;
 			if (str == null) 
 				return;
+			if (str.equals("")) 
+				break;
 		}
 		// then we want to send 'CHAT/0.1 200 OK'
 		_out.write("CHAT/0.1 200 OK\r\n");
