@@ -104,6 +104,24 @@ public class RemoteFileDesc implements Serializable {
 		return _urns;
 	}
 
+	/**
+	 * Accessor for the SHA1 URN for this <tt>RemoteFileDesc</tt>.
+	 *
+	 * @return the SHA1 <tt>URN</tt> for this <tt>RemoteFileDesc</tt>, or 
+	 *  <tt>null</tt> if there is none
+	 */
+	public final URN getSHA1Urn() {
+		Iterator iter = _urns.iterator(); 
+		while(iter.hasNext()) {
+			URN urn = (URN)iter.next();
+			if(urn.isSHA1()) {
+				return urn;
+			}
+		}
+
+		return null;
+	}
+
 	public final boolean isPrivate() {
 		if (_host == null) return true;
 		Endpoint e = new Endpoint(_host, _port);
