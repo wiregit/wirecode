@@ -160,6 +160,11 @@ public final class UploadManager implements BandwidthTracker {
      */
     public static final int PUSH_PROXY_FILE_INDEX = -5;
     
+    /**
+     * Whether or not to record stats.
+     */
+    public static final boolean RECORD_STATS = !CommonUtils.isJava118();
+    
                 
 	/**
 	 * Accepts a new upload, creating a new <tt>HTTPUploader</tt>
@@ -304,13 +309,16 @@ public final class UploadManager implements BandwidthTracker {
                 socket.setSoTimeout(oldTimeout);
                 if (word.equals("GET")) {
                     currentMethod=HTTPRequestMethod.GET;
-                    UploadStat.SUBSEQUENT_GET.incrementStat();
+                    if( RECORD_STATS )
+                        UploadStat.SUBSEQUENT_GET.incrementStat();
                 } else if (word.equals("HEAD")) {
                     currentMethod=HTTPRequestMethod.HEAD;
-                    UploadStat.SUBSEQUENT_HEAD.incrementStat();
+                    if( RECORD_STATS )
+                        UploadStat.SUBSEQUENT_HEAD.incrementStat();
                 } else {
                     //Unknown request type
-                    UploadStat.SUBSEQUENT_UNKNOWN.incrementStat();
+                    if( RECORD_STATS )
+                        UploadStat.SUBSEQUENT_UNKNOWN.incrementStat();
                     return;
                 }
             }//end of while
@@ -390,6 +398,7 @@ public final class UploadManager implements BandwidthTracker {
         debug(uploader + " cleaning up finished.");
         
         int state = uploader.getState();
+        int lastState = uploader.getLastTransferState();        
         assertAsFinished(state);
                      
         long finishTime = System.currentTimeMillis();
@@ -404,18 +413,24 @@ public final class UploadManager implements BandwidthTracker {
         
         uploader.closeFileStreams();
         
-        switch(state) {
-            case Uploader.COMPLETE:
-                UploadStat.COMPLETED.incrementStat();
-                break;
-            case Uploader.INTERRUPTED:
-                UploadStat.INTERRUPTED.incrementStat();
-                break;
+        if( RECORD_STATS ) {
+            switch(state) {
+                case Uploader.COMPLETE:
+                    UploadStat.COMPLETED.incrementStat();
+                    if( lastState == Uploader.UPLOADING )
+                        UploadStat.COMPLETED_FILE.incrementStat();
+                    break;
+                case Uploader.INTERRUPTED:
+                    UploadStat.INTERRUPTED.incrementStat();
+                    break;
+            }
         }
         
         if ( shouldShowInGUI(uploader) ) {
             FileDesc fd = uploader.getFileDesc();
-            if( fd != null && state == Uploader.COMPLETE ) {
+            if( fd != null && 
+              state == Uploader.COMPLETE &&
+              lastState == Uploader.UPLOADING ) {
                 fd.incrementCompletedUploads();
                 RouterService.getCallback().handleSharedFileUpdate(
                     fd.getFile());
@@ -588,7 +603,8 @@ public final class UploadManager implements BandwidthTracker {
         
         // We want to increment attempted only for uploads that may
         // have a chance of failing.
-        UploadStat.ATTEMPTED.incrementStat();
+        if( RECORD_STATS )
+            UploadStat.ATTEMPTED.incrementStat();
         
         //We are going to notify the gui about the new upload, and let
         //it decide what to do with it - will act depending on it's
@@ -611,23 +627,29 @@ public final class UploadManager implements BandwidthTracker {
         
         switch(uploader.getState()) {
             case Uploader.UNAVAILABLE_RANGE:
-                UploadStat.UNAVAILABLE_RANGE.incrementStat();
+                if( RECORD_STATS )
+                    UploadStat.UNAVAILABLE_RANGE.incrementStat();
                 break;
             case Uploader.FILE_NOT_FOUND:
-                UploadStat.FILE_NOT_FOUND.incrementStat();
+                if( RECORD_STATS )
+                    UploadStat.FILE_NOT_FOUND.incrementStat();
                 break;
             case Uploader.FREELOADER:
-                UploadStat.FREELOADER.incrementStat();
+                if( RECORD_STATS )
+                    UploadStat.FREELOADER.incrementStat();
                 break;
             case Uploader.LIMIT_REACHED:
-                UploadStat.LIMIT_REACHED.incrementStat();
+                if( RECORD_STATS )
+                    UploadStat.LIMIT_REACHED.incrementStat();
                 break;
             case Uploader.QUEUED:
-                UploadStat.QUEUED.incrementStat();
+                if( RECORD_STATS )
+                    UploadStat.QUEUED.incrementStat();
                 break;
             case Uploader.CONNECTING:
                 uploader.setState(Uploader.UPLOADING);
-                UploadStat.UPLOADING.incrementStat();
+                if( RECORD_STATS )
+                    UploadStat.UPLOADING.incrementStat();
                 break;
             case Uploader.COMPLETE:
             case Uploader.INTERRUPTED:
@@ -1020,7 +1042,8 @@ public final class UploadManager implements BandwidthTracker {
             // index.  it is up to HttpUploader to interpret
             // this index correctly and send the appropriate
             // info.
-            UploadStat.MALFORMED_REQUEST.incrementStat();
+            if( RECORD_STATS )
+                UploadStat.MALFORMED_REQUEST.incrementStat();
             if( str == null ) 
                 return new HttpRequestLine(MALFORMED_REQUEST_INDEX,
                     "Malformed Request", false);
@@ -1114,11 +1137,13 @@ public final class UploadManager implements BandwidthTracker {
                 //special case for browse host request
                 index = BROWSE_HOST_FILE_INDEX;
                 fileName = "Browse-Host Request";
-                UploadStat.BROWSE_HOST.incrementStat();
+                if( RECORD_STATS )
+                    UploadStat.BROWSE_HOST.incrementStat();
             } else if (fileInfoPart.equals("/update.xml")) {
                 index = UPDATE_FILE_INDEX;
                 fileName = "Update-File Request";
-                UploadStat.UPDATE_FILE.incrementStat();
+                if( RECORD_STATS )
+                    UploadStat.UPDATE_FILE.incrementStat();
             } else if (fileInfoPart.startsWith("/gnutella/pushproxy")) {
                 index = PUSH_PROXY_FILE_INDEX;
                 // set the filename as the servent ID
@@ -1129,7 +1154,8 @@ public final class UploadManager implements BandwidthTracker {
                 stLocal.nextToken();
                 // had better be the client GUID
                 fileName = stLocal.nextToken();
-                UploadStat.PUSH_PROXY.incrementStat();
+                if( RECORD_STATS )
+                    UploadStat.PUSH_PROXY.incrementStat();
             } else {
                 //NORMAL CASE
                 // parse this for the appropriate information
@@ -1150,7 +1176,8 @@ public final class UploadManager implements BandwidthTracker {
 				} catch(IllegalArgumentException e) {
 					fileName = requestLine.substring( (d+1), f);
 				}
-                UploadStat.TRADITIONAL_GET.incrementStat();				
+                if( RECORD_STATS )
+                    UploadStat.TRADITIONAL_GET.incrementStat();				
             }
             //check if the protocol is HTTP1.1. Note that this is not a very 
             //strict check.
@@ -1182,13 +1209,15 @@ public final class UploadManager implements BandwidthTracker {
 		URN urn = URN.createSHA1UrnFromHttpRequest(requestLine);
 		FileDesc desc = RouterService.getFileManager().getFileDescForUrn(urn);
 		if(desc == null) {
-		    UploadStat.UNKNOWN_URN_GET.incrementStat();
+            if( RECORD_STATS )
+		        UploadStat.UNKNOWN_URN_GET.incrementStat();
             return new HttpRequestLine(BAD_URN_QUERY_INDEX,
                   "Invalid URN query", isHTTP11Request(requestLine));
 		}		
 		int fileIndex = desc.getIndex();
 		String fileName = desc.getName();
-		UploadStat.URN_GET.incrementStat();
+        if( RECORD_STATS )
+		    UploadStat.URN_GET.incrementStat();
 		return new HttpRequestLine(desc.getIndex(), desc.getName(), 
 								   isHTTP11Request(requestLine));
 	}
