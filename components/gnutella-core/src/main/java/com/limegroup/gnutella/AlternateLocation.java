@@ -605,7 +605,8 @@ public final class AlternateLocation
 	/**
 	 * Creates a new <tt>RemoteFileDesc</tt> from this AlternateLocation
      *
-	 * @return new <tt>RemoteFileDesc</tt> based off of this.
+	 * @return new <tt>RemoteFileDesc</tt> based off of this, or 
+	 *  <tt>null</tt> if the <tt>RemoteFileDesc</tt> could not be created
 	 */
 	public RemoteFileDesc createRemoteFileDesc(int size, Set urns) {
 		RemoteFileDesc ret = null;
