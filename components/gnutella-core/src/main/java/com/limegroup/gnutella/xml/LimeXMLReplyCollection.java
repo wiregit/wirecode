@@ -29,7 +29,7 @@ public class LimeXMLReplyCollection{
      * A map of URN -> LimeXMLDocument for each shared file that contains XML.
      * Each ReplyCollection is written out to one physical file on shutdown.
      */
-    private HashMap /* URN -> LimeXMLDocument */ mainMap;
+    private final HashMap /* URN -> LimeXMLDocument */ mainMap;
     
     /**
      * Whether or not this LimeXMLReplyCollection is for audio files.
@@ -71,6 +71,7 @@ public class LimeXMLReplyCollection{
               audio);
 
         // construct a backing store object (for serialization)
+        mainMap = new HashMap();
         MapSerializer ms = initializeMapSerializer(URI);
         Map hashToXML;
 
@@ -243,7 +244,6 @@ public class LimeXMLReplyCollection{
         // invalid if directory.
         if( dataFile.isDirectory() )
             return null;
-        mainMap = new HashMap();
         try {
             return new MapSerializer(dataFile);
         } catch(IOException e) {
