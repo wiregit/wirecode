@@ -277,10 +277,19 @@ public class ConnectionManager {
     }
 
     /**
-     * @return the number of connections
+     * @return the number of connections, which is greater than or equal
+     *  to the number of initialized connections.
      */
     public int getNumConnections() {
         return _connections.size();
+    }
+
+    /**
+     * @return the number of initialized connections, which is less than or equals
+     *  to the number of connections.
+     */
+    public int getNumInitializedConnections() {
+        return _initializedConnections.size();
     }
 
     /**
@@ -391,7 +400,7 @@ public class ConnectionManager {
         //send a handshake ping, since we're always adjusting the connection 
         //fetchers to have the difference between keep alive and num of
         //connections.
-        if (getNumConnections() >= _keepAlive)
+        if (getNumInitializedConnections() >= _keepAlive)
             pr = new PingRequest((byte)1);
         else
             pr = new PingRequest(SettingsManager.instance().getTTL());
