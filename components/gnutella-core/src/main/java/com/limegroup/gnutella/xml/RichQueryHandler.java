@@ -45,19 +45,7 @@ public class RichQueryHandler{
      * This method is synchronized. Because if two threads from different
      * connections make two different queries. Then all bad things can happen.
      */
-    public synchronized Response[] query(String XMLQuery,FileManager fManager){
-        if (XMLQuery.equals(""))
-            return null;
-        LimeXMLDocument queryDoc = null;
-        try{// if we catch an exception here the query is malformed.
-            queryDoc=new LimeXMLDocument(XMLQuery);
-        }catch (SAXException e){
-            return null; //Return null
-        }catch (IOException ee){
-            return null;
-        }catch(SchemaNotFoundException eee){
-            return null;
-        }
+    public synchronized Response[] query(LimeXMLDocument queryDoc) {
         String schema = queryDoc.getSchemaURI();
         SchemaReplyCollectionMapper mapper = 
                             SchemaReplyCollectionMapper.instance();
@@ -89,7 +77,8 @@ public class RichQueryHandler{
                 name = " "; //leave blank
                 res = new Response(index, size, name);
             } else { //meta-data about a specific file
-                fd = fManager.getFileDescForFile(new File(subjectFile));
+                fd = RouterService.getFileManager().getFileDescForFile(
+                    new File(subjectFile));
                 if( fd == null || 
                    (busy && fd.getNumberOfAlternateLocations() >= 10) ) {
                     // if fd is null, MetaFileManager is out of synch with

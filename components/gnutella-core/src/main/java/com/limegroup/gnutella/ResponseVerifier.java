@@ -17,7 +17,7 @@ public class ResponseVerifier {
         /** The original query. */
         String query;
         /** The rich query. */
-        String richQuery;
+        LimeXMLDocument richQuery;
         /** The keywords of the original query, lowercased. */
         String[] queryWords;
         /** The type of the original query. */
@@ -27,7 +27,7 @@ public class ResponseVerifier {
             this(query, null, type);
         }
 
-        RequestData(String query, String richQuery, MediaType type) {
+        RequestData(String query, LimeXMLDocument richQuery, MediaType type) {
             this.query=query;
             this.richQuery=richQuery;
             this.queryWords=getSearchTerms(query, richQuery);
@@ -35,7 +35,7 @@ public class ResponseVerifier {
         }
 
         public boolean xmlQuery() {
-            return ((richQuery != null) && (!richQuery.equals("")));
+            return richQuery != null;
         }
 
     }
@@ -77,7 +77,7 @@ public class ResponseVerifier {
      * @return the percentage of query keywords (0-100) matching
      */
     public static int score(String query, 
-                            String richQuery, 
+                            LimeXMLDocument richQuery, 
                             RemoteFileDesc response) {
         return score(getSearchTerms(query, richQuery), response.getFileName());
     }
@@ -136,44 +136,41 @@ public class ResponseVerifier {
         return mapper.toString();
     }
 
+
+    /** Returns all search terms as one long string.  This includes xml and
+     *  the standard search terms.  the terms are all in lowercase....
+     */
+    private static String getSearchTerms(Response resp) {
+        StringBuffer retSB = new StringBuffer();
+        String[] terms = getSearchTerms(resp.getName(), resp.getDocument());
+        for (int i = 0; i < terms.length; i++)
+            retSB.append(terms[i] + " ");
+        return retSB.toString().trim();
+    }
+
     private static String[] getSearchTerms(String query,
-                                           String richQuery) {
-        String[] retTerms = null;
+                                           LimeXMLDocument richQuery) {
+        String[] terms = null;
         // combine xml and standard keywords
         // ---------------------------------------
         HashSet qWords=new HashSet();
-        retTerms=StringUtils.split(query.toLowerCase(),
-                                          DELIMITERS);
+        terms = StringUtils.split(query.toLowerCase(), DELIMITERS);
         // add the standard query words..
-        for (int i = 0; i < retTerms.length; i++)
-            qWords.add(retTerms[i]);
+        for (int i = 0; i < terms.length; i++)
+            qWords.add(terms[i]);
+
         List xmlWords=null;
-        try {
-            if ((richQuery != null) && (!richQuery.equals(""))) 
-                xmlWords = (new LimeXMLDocument(richQuery)).getKeyWords();
-            if (xmlWords != null) {
-                final int size = xmlWords.size();
-                // add a lowercase version of the xml words...
-                for (int i = 0; i < size; i++) {
-                    String currWord = (String) xmlWords.remove(0);
-                    qWords.add(currWord.toLowerCase());
-                }
+        if (richQuery != null) {
+            xmlWords = richQuery.getKeyWords();
+            final int size = xmlWords.size();
+            // add a lowercase version of the xml words...
+            for (int i = 0; i < size; i++) {
+                String currWord = (String) xmlWords.remove(0);
+                qWords.add(currWord.toLowerCase());
             }
-            retTerms = new String[qWords.size()];
-            Iterator setWords = qWords.iterator();
-            int index = 0;
-            while (setWords.hasNext())
-                retTerms[index++] = (String) setWords.next();
         }
-        catch (SAXException eSAX) {
-        }                
-        catch (SchemaNotFoundException eSchema) {
-        }                
-        catch (IOException eIO) {
-        }                
-        // ---------------------------------------
         
-        return retTerms;
+        return (String[])qWords.toArray(new String[qWords.size()]);
     }
 }
 

@@ -3,6 +3,7 @@ package com.limegroup.gnutella.filters;
 import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.messages.*;
 import com.limegroup.gnutella.util.Buffer;
+import com.limegroup.gnutella.xml.LimeXMLDocument;
 import com.sun.java.util.collections.*;
 
 /**
@@ -194,11 +195,11 @@ final class GUIDPair {
 final class QueryPair {
     String query;
     int hops;
-    String xml;
+    LimeXMLDocument xml;
     Set URNs;
     int cachedHash = 0;
     
-    QueryPair(String query, int hops, String xml, Set URNs) {
+    QueryPair(String query, int hops, LimeXMLDocument xml, Set URNs) {
         this.query=query;
         this.hops=hops;
         this.xml = xml;
@@ -230,14 +231,15 @@ final class QueryPair {
         return (this.hops==other.hops) && 
                this.URNs.equals(other.URNs) &&
                this.query.equals(other.query) &&
-               this.xml.equals(other.xml);
+               xml == null ? other.xml == null : xml.equals(other.xml);
     }                
 
     public int hashCode() {
         if ( cachedHash == 0 ) {
             cachedHash = 17;
     		cachedHash = (37*cachedHash) + query.hashCode();
-    		cachedHash = (37*cachedHash) + xml.hashCode();
+    		if( xml != null )
+    		    cachedHash = (37*cachedHash) + xml.hashCode();
     		cachedHash = (37*cachedHash) + URNs.hashCode();
     		cachedHash = (37*cachedHash) + hops;
         }    		

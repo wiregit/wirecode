@@ -8,7 +8,6 @@ import com.limegroup.gnutella.xml.*;
 import com.sun.java.util.collections.*;
 import java.util.zip.*;
 import java.io.*;
-import org.xml.sax.*;
 
 //Please note that &#60; and &#62; are the HTML escapes for '<' and '>'.
 
@@ -135,9 +134,9 @@ public class QueryRouteTable {
         //   table.  Note that this is done with zero allocations!  Also note
         //   that HashFunction.hash() takes cares of the capitalization.
         String query = qr.getQuery();
-        String richQuery = qr.getRichQuery();
+        LimeXMLDocument richQuery = qr.getRichQuery();
 		if(query.length() == 0 && 
-		   richQuery.length() == 0 && 
+		   richQuery == null && 
 		   !qr.hasQueryUrns()) {
 			return false;
 		}
@@ -172,32 +171,19 @@ public class QueryRouteTable {
         
         //2. Now we extract meta information in the query.  If there isn't any,
         //   declare success now.  Otherwise ensure that the URI is in the 
-        //   table.  TODO: avoid allocations.
-        //TODO2: avoid parsing if possible
-        //String richQuery = qr.getRichQuery();
-        if (richQuery.equals(""))
-            //Normal case for matching query with no metadata.
+        //   table.
+        if (richQuery == null) //Normal case for matching query with no metadata.
             return true;
-        LimeXMLDocument doc = null;
-        try {
-            doc = new LimeXMLDocument(richQuery);
-            String docSchemaURI = doc.getSchemaURI();
-            int hash = HashFunction.hash(docSchemaURI, bits);
-            if (!contains(hash))//don't know the URI? can't answer query
-                return false;
-        } catch(IOException e) {
-            return true; // leaf can answer based on normal query
-        } catch(SAXException e) {
-            return true; // leaf can answer based on normal query
-        } catch(SchemaNotFoundException e) {
-            return true; // leaf can answer based on normal query
-        }
+        String docSchemaURI = richQuery.getSchemaURI();
+        int hash = HashFunction.hash(docSchemaURI, bits);
+        if (!contains(hash))//don't know the URI? can't answer query
+            return false;
             
         //3. Finally check that "enough" of the metainformation keywords are in
         //   the table: 2/3 or 3, whichever is more.
         int wordCount=0;
         int matchCount=0;
-        Iterator iter=doc.getKeyWords().iterator();
+        Iterator iter=richQuery.getKeyWords().iterator();
         while(iter.hasNext()) {
             //getKeyWords only returns all the fields, so we still need to split
             //the words.  The code is copied from part (1) above.  It could be
@@ -215,8 +201,8 @@ public class QueryRouteTable {
                 int k=HashFunction.keywordEnd(words, j);
                 
                 //...and look up its hash.
-                int hash=HashFunction.hash(words, j, k, bits);
-                if (contains(hash))
+                int wordHash = HashFunction.hash(words, j, k, bits);
+                if (contains(wordHash))
                     matchCount++;
                 wordCount++;
                 i=k+1;

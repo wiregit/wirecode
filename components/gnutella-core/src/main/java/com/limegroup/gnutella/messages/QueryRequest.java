@@ -5,9 +5,12 @@ import com.limegroup.gnutella.settings.*;
 import com.limegroup.gnutella.statistics.*;
 import com.limegroup.gnutella.util.*;
 import com.limegroup.gnutella.guess.*;
+import com.limegroup.gnutella.xml.LimeXMLDocument;
+import com.limegroup.gnutella.xml.SchemaNotFoundException;
 import java.io.*;
 import com.sun.java.util.collections.*;
 import java.util.StringTokenizer;
+import org.xml.sax.SAXException;
 
 /**
  * This class creates Gnutella query messages, either from scratch, or
@@ -49,11 +52,11 @@ public class QueryRequest extends Message implements Serializable{
      * The query string.
      */
     private final String QUERY;
-
-	/** 
-     * The XML query string. 
+    
+    /**
+     * The LimeXMLDocument of the rich query.
      */
-    private final String XML_QUERY;
+    private final LimeXMLDocument XML_DOC;
 
     // HUGE v0.93 fields
     /** 
@@ -412,7 +415,7 @@ public class QueryRequest extends Message implements Serializable{
 	 */
 	public static QueryRequest createQuery(QueryRequest qr, byte ttl) {
 		return new QueryRequest(qr.getGUID(), ttl, qr.getQuery(),
-								qr.getRichQuery(), 
+								qr.getRichQueryString(), 
 								qr.getRequestedUrnTypes(),
 								qr.getQueryUrns(), qr.getQueryKey(),
 								qr.isFirewalledSource(),
@@ -471,7 +474,7 @@ public class QueryRequest extends Message implements Serializable{
 		}
         QueryRequest mQr =
             new QueryRequest(qr.getGUID(), (byte)1, qr.getQuery(),
-								qr.getRichQuery(), 
+								qr.getRichQueryString(), 
 								qr.getRequestedUrnTypes(),
 								qr.getQueryUrns(), qr.getQueryKey(),
 								false, Message.N_MULTICAST, false);
@@ -491,7 +494,7 @@ public class QueryRequest extends Message implements Serializable{
 	public static QueryRequest 
 		createQueryKeyQuery(QueryRequest qr, QueryKey key) {
         return new QueryRequest(qr.getGUID(), qr.getTTL(), 
-                                qr.getQuery(), qr.getRichQuery(), 
+                                qr.getQuery(), qr.getRichQueryString(), 
                                 qr.getRequestedUrnTypes(), qr.getQueryUrns(),
                                 key, qr.isFirewalledSource(), Message.N_UNKNOWN,
                                 false);
@@ -651,10 +654,17 @@ public class QueryRequest extends Message implements Serializable{
 		} else {
 			this.QUERY = query;
 		}
-		if(richQuery == null) {
-			this.XML_QUERY = "";
-		} else{
-			this.XML_QUERY = richQuery;
+		if(richQuery == null || richQuery.equals("") ) {
+			this.XML_DOC = null;
+		} else {
+		    LimeXMLDocument doc = null;
+		    try {
+		        doc = new LimeXMLDocument(richQuery);
+            } catch(SAXException ignored) {
+            } catch(SchemaNotFoundException ignored) {
+            } catch(IOException ignored) {
+            }
+            this.XML_DOC = doc;
 		}
 		Set tempRequestedUrnTypes = null;
 		Set tempQueryUrns = null;
@@ -688,8 +698,8 @@ public class QueryRequest extends Message implements Serializable{
             boolean addDelimiterBefore = false;
 			
             byte[] richQueryBytes = null;
-            if(XML_QUERY != null) {
-                richQueryBytes = XML_QUERY.getBytes("UTF-8");
+            if(XML_DOC != null) {
+                richQueryBytes = richQuery.getBytes("UTF-8");
 			}
             
 			// add the rich query
@@ -838,7 +848,14 @@ public class QueryRequest extends Message implements Serializable{
             ErrorService.error(ioe);
         }
 		QUERY = tempQuery;
-		XML_QUERY = tempRichQuery;
+	    LimeXMLDocument tempDoc = null;
+	    try {
+	        tempDoc = new LimeXMLDocument(tempRichQuery);
+        } catch(SAXException ignored) {
+        } catch(SchemaNotFoundException ignored) {
+        } catch(IOException ignored) {
+        }
+        this.XML_DOC = tempDoc;
 		MIN_SPEED = tempMinSpeed;
 		if(tempQueryUrns == null) {
 			QUERY_URNS = EMPTY_SET; 
@@ -855,7 +872,7 @@ public class QueryRequest extends Message implements Serializable{
 		}	
         QUERY_KEY = tempQueryKey;
 		if(QUERY.length() == 0 &&
-		   XML_QUERY.length() == 0 &&
+		   tempRichQuery.length() == 0 &&
 		   QUERY_URNS.size() == 0) {
 		    if( RECORD_STATS )
 		        ReceivedErrorStat.QUERY_EMPTY.incrementStat();
@@ -872,7 +889,7 @@ public class QueryRequest extends Message implements Serializable{
             throw BadPacketException.QUERY_TOO_BIG;
         }        
 
-        if(XML_QUERY.length() > MAX_XML_QUERY_LENGTH) {
+        if(tempRichQuery.length() > MAX_XML_QUERY_LENGTH) {
             if( RECORD_STATS )
                 ReceivedErrorStat.QUERY_XML_TOO_LARGE.incrementStat();
             throw BadPacketException.XML_QUERY_TOO_BIG;
@@ -936,13 +953,28 @@ public class QueryRequest extends Message implements Serializable{
     }
     
 	/**
-	 * Returns the rich query string.
+	 * Returns the rich query LimeXMLDocument.
 	 *
-	 * @return the rich query string
+	 * @return the rich query LimeXMLDocument
 	 */
-    public String getRichQuery() {
-        return XML_QUERY;
+    public LimeXMLDocument getRichQuery() {
+        return XML_DOC;
     }
+    
+    /**
+     * Helper method used internally for getting the rich query string.
+     */
+    private String getRichQueryString() {
+        if( XML_DOC == null )
+            return null;
+        else {
+            try {
+                return XML_DOC.getXMLString();
+            } catch(SchemaNotFoundException snfe) {
+                return null;
+            }
+        }
+    }       
  
 	/**
 	 * Returns the <tt>Set</tt> of URN types requested for this query.
@@ -1072,7 +1104,8 @@ public class QueryRequest extends Message implements Serializable{
 		if(_hashCode == 0) {
 			int result = 17;
 			result = (37*result) + QUERY.hashCode();
-			result = (37*result) + XML_QUERY.hashCode();
+			if( XML_DOC != null )
+			    result = (37*result) + XML_DOC.hashCode();
 			result = (37*result) + REQUESTED_URN_TYPES.hashCode();
 			result = (37*result) + QUERY_URNS.hashCode();
 			if(QUERY_KEY != null) {
@@ -1091,7 +1124,8 @@ public class QueryRequest extends Message implements Serializable{
 		QueryRequest qr = (QueryRequest)o;
 		return (MIN_SPEED == qr.MIN_SPEED &&
 				QUERY.equals(qr.QUERY) &&
-				XML_QUERY.equals(qr.XML_QUERY) &&
+				(XML_DOC == null ? qr.XML_DOC == null : 
+				    XML_DOC.equals(qr.XML_DOC)) &&
 				REQUESTED_URN_TYPES.equals(qr.REQUESTED_URN_TYPES) &&
 				QUERY_URNS.equals(qr.QUERY_URNS) &&
 				Arrays.equals(getGUID(), qr.getGUID()) &&
@@ -1103,7 +1137,7 @@ public class QueryRequest extends Message implements Serializable{
  		return "<query: \""+getQuery()+"\", "+
             "ttl: "+getTTL()+", "+
             "hops: "+getHops()+", "+            
-            "meta: \""+getRichQuery()+"\", "+
+            "meta: \""+getRichQueryString()+"\", "+
             "types: "+getRequestedUrnTypes().size()+","+
             "urns: "+getQueryUrns().size()+">";
     }

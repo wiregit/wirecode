@@ -2,9 +2,12 @@ package com.limegroup.gnutella.downloader;
 
 import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.util.*;
+import com.limegroup.gnutella.xml.LimeXMLDocument;
+import com.limegroup.gnutella.xml.SchemaNotFoundException;
 import com.sun.java.util.collections.*;
 import java.util.StringTokenizer;
 import java.io.*;
+import org.xml.sax.SAXException;
 
 /** 
  * Encapsulates important details about a auto download.  Serializable for 
@@ -17,6 +20,11 @@ public class AutoDownloadDetails implements Serializable {
     private String query = null;
     // the rich query associated with this search
     private String richQuery = null;
+    // the LimeXMLDocument of this rich query ... 
+    // initialized when needed.
+    private transient LimeXMLDocument xmlDoc = null;
+    // flag of whether or not we've tried to create the doc.
+    private transient boolean xmlCreated = false;
     // the 'filter' associated with this search
     private MediaType type = null;
     // the GUID associated with this search
@@ -118,8 +126,20 @@ public class AutoDownloadDetails implements Serializable {
                       inputFileName + " isn't the right type.");
             }
 
+            // create our xml doc if we need to...
+            if( !xmlCreated ) {
+                xmlCreated = true;
+                if( richQuery != null && !richQuery.equals("") ) {
+                    try {
+                        xmlDoc = new LimeXMLDocument(richQuery);
+                    } catch(SchemaNotFoundException ignored) {
+                    } catch(SAXException ignored) {
+                    } catch(IOException ignored) {
+                    }
+                }
+            }
             // make sure the score for this file isn't too low....
-            int score = ResponseVerifier.score(query,richQuery,toAdd);
+            int score = ResponseVerifier.score(query, xmlDoc, toAdd);
             if (score < LOW_SCORE) {
                 retVal = false;
                 debug("ADD.addDownload(): file " +

@@ -601,7 +601,8 @@ public class Response {
 			return document;
 		else if (metadata != null) {
 			try {
-				return new LimeXMLDocument(metadata);
+			    document = new LimeXMLDocument(metadata);
+			    return document;
 			} catch (SAXException e) {
 			} catch (SchemaNotFoundException e) {
 			} catch (IOException e) { }

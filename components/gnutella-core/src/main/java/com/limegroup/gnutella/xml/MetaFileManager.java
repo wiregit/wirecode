@@ -25,10 +25,12 @@ public class MetaFileManager extends FileManager {
         Response[] result = super.query(request);
 
         if (shouldIncludeXMLInResponse(request)) {
-            String rich = request.getRichQuery();
-            Response[] metas = RichQueryHandler.instance().query(rich,this);
-            if (metas != null) // valid query & responses.
-                result = union(result, metas);
+            LimeXMLDocument doc = request.getRichQuery();
+            if( doc != null ) {
+                Response[] metas = RichQueryHandler.instance().query(doc);
+                if (metas != null) // valid query & responses.
+                    result = union(result, metas);
+            }
         }
         
         return result;

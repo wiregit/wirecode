@@ -48,6 +48,12 @@ public class LimeXMLDocument implements Serializable {
      */
     private String identifier;
     private String action="";
+    
+    /**
+     * Cached list of keywords.  Because keywords are only filled up
+     * upon construction, they can be cached upon retrieval.
+     */
+    private transient List CACHED_KEYWORDS = null;
 
     public void setIdentifier(String id) {
         identifier = id;
@@ -235,7 +241,10 @@ public class LimeXMLDocument implements Serializable {
      * QRP code may want to split this into the QRP keywords
      * "Some", "comment", and "blah".
      */
-    public List getKeyWords(){
+    public List getKeyWords() {
+        if( CACHED_KEYWORDS != null )
+            return CACHED_KEYWORDS;
+
         List retList = new ArrayList();
         Iterator iter = fieldToValue.values().iterator();
         while(iter.hasNext()){
@@ -249,6 +258,7 @@ public class LimeXMLDocument implements Serializable {
             if(!number && (val != null) && (!val.equals("")))
                 retList.add(val);
         }
+        CACHED_KEYWORDS = retList;
         return retList;
     }
 
