@@ -293,18 +293,7 @@ public class QueryRequest extends Message implements Serializable{
 		if(query.length() == 0) {
 			throw new IllegalArgumentException("empty query");
 		}
-        byte[] guid = newQueryGUID(false);
-        if ((new GUID(guid)).addressesMatch(RouterService.getAddress(), 
-                                            RouterService.getPort()))
-            // if the guid is encoded with my address, mark it as needing out
-            // of band support.  note that there is a VERY small chance that
-            // the guid will be address encoded but not meant for out of band
-            // delivery of results.  bad things may happen in this case but 
-            // it seems tremendously unlikely, even over the course of a 
-            // VERY long lived client
-            return QueryRequest.createOutOfBandQuery(guid, query);
-        else
-            return new QueryRequest(guid, query);
+		return new QueryRequest(newQueryGUID(false), query);
 	}
 
 
@@ -1026,11 +1015,9 @@ public class QueryRequest extends Message implements Serializable{
     /**
      * Returns a new GUID appropriate for query requests.  If isRequery,
      * the GUID query is marked.
-     * When creating normal queries, use the RouterService method to incorporate
-     * OOB capability.
      */
     public static byte[] newQueryGUID(boolean isRequery) {
-        return isRequery ? GUID.makeGuidRequery() : RouterService.newQueryGUID();
+        return isRequery ? GUID.makeGuidRequery() : GUID.makeGuid();
 	}
 
     protected void writePayload(OutputStream out) throws IOException {
