@@ -4,9 +4,11 @@ import junit.framework.*;
 import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.messages.*;
 import com.limegroup.gnutella.stubs.*;
+import com.limegroup.gnutella.util.*;
 import com.limegroup.gnutella.settings.*;
 import com.sun.java.util.collections.*;
 import java.io.*;
+import java.lang.reflect.*;
 
 public class ManagedDownloaderTest extends com.limegroup.gnutella.util.BaseTestCase {
     final static int PORT=6666;
@@ -27,8 +29,84 @@ public class ManagedDownloaderTest extends com.limegroup.gnutella.util.BaseTestC
         ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
     }
 
-    public void testLegacy() {
-        //ManagedDownloader.unitTest();
+    public void testLegacy() throws Exception {
+        //Test removeBest
+        Set urns1 = new TreeSet();
+        Set urns2 = new TreeSet();
+        try {
+            urns1.add(URN.createSHA1Urn(
+                         "urn:sha1:GLSTHIPQGSSZTS5FJUPAKPZWUGYQYPFB"));
+            urns2.add(URN.createSHA1Urn(
+                         "urn:sha1:GLSTHIPQGSSZTS5FJUPAKPZWUGYQYPFB"));
+        } catch (IOException e) { 
+			fail(e);
+        }
+
+        RemoteFileDesc rf1=new RemoteFileDesc("1.2.3.4", 6346, 0, 
+                                              "some file.txt", 1010, 
+                                              new byte[16], 
+                                              SpeedConstants.T1_SPEED_INT, 
+                                              false, 3, false, null, null);
+        RemoteFileDesc rf4=new RemoteFileDesc("1.2.3.6", 6346, 0, 
+                                              "some file.txt", 1010, 
+                                              new byte[16], 
+                                              SpeedConstants.T3_SPEED_INT, 
+                                              false, 0, false, null, null);
+        RemoteFileDesc rf5=new RemoteFileDesc("1.2.3.6", 6346, 0, 
+                                              "some file.txt", 1010, 
+                                              new byte[16], 
+                                              SpeedConstants.T3_SPEED_INT+1, 
+                                              false, 0, false, null, null);
+        RemoteFileDesc rf6=new RemoteFileDesc("1.2.3.7", 6346, 0,
+                                              "some file.txt", 1010,
+                                              new byte[16],
+                                              SpeedConstants.MODEM_SPEED_INT,
+                                              false, 0, false, null, urns1);
+        RemoteFileDesc rf7=new RemoteFileDesc("1.2.3.7", 6346, 0,
+                                              "some file.txt", 1010,
+                                              new byte[16],
+                                              SpeedConstants.MODEM_SPEED_INT+1,
+                                              false, 0, false, null, urns2);
+
+        List list = new LinkedList();
+        list.add(rf4);
+        list.add(rf6);
+        list.add(rf1);
+        list.add(rf5);
+        list.add(rf7);
+		RemoteFileDesc testRFD = null;
+		
+		Class[] args = new Class[1];
+		args[0] = List.class;
+		Method m = PrivilegedAccessor.getMethod(ManagedDownloader.class, "removeBest",
+												new Class[]{List.class});
+
+		m.setAccessible(true);
+		testRFD = (RemoteFileDesc)m.invoke(null, new Object[]{list});
+		assertEquals("rfds should be equal", testRFD, rf7);
+
+		testRFD = (RemoteFileDesc)m.invoke(null, new Object[]{list});
+		assertEquals("rfds should be equal", testRFD, rf6);
+
+		testRFD = (RemoteFileDesc)m.invoke(null, new Object[]{list});
+		assertEquals("rfds should be equal", testRFD, rf1);
+
+		assertEquals("unexpected size", 2, list.size());
+
+		assertTrue("should contain rfd", list.contains(rf4));
+		assertTrue("should contain rfd", list.contains(rf5));
+
+		testRFD = (RemoteFileDesc)m.invoke(null, new Object[]{list});
+		assertEquals("rfds should be equal", testRFD, rf5);
+
+		assertEquals("unexpected size", 1, list.size());
+
+		assertTrue("should contain rfd", list.contains(rf4));
+
+		testRFD = (RemoteFileDesc)m.invoke(null, new Object[]{list});
+		assertEquals("rfds should be equal", testRFD, rf4);
+
+		assertEquals("unexpected size", 0, list.size());
     }
 
     public void testNewRequery() throws Exception {
