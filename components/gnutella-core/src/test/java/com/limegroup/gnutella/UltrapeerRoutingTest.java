@@ -297,7 +297,7 @@ public class UltrapeerRoutingTest extends TestCase {
               
         Message m=ultrapeer.receive(TIMEOUT);
         assertTrue(m instanceof QueryRequest);
-        assertTrue(((QueryRequest)m).getQuery().equals("test"));
+        assertEquals("test", ((QueryRequest)m).getQuery());
         assertTrue(m.getHops()==(byte)1); 
         assertTrue(m.getTTL()==(byte)6);
 
@@ -498,8 +498,9 @@ public class UltrapeerRoutingTest extends TestCase {
         drain(leaf);
 
         byte[] guid=GUID.makeGuid();
+        byte[] ip={(byte)18, (byte)239, (byte)0, (byte)143};
         Message m=new PingReply(guid, 
-                                (byte)7, 6399, new byte[4], 
+                                (byte)7, 6399, ip, 
                                 0, 0, true);                                
         ultrapeer.send(m);
         ultrapeer.flush();
