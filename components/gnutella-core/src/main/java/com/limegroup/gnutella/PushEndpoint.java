@@ -226,7 +226,9 @@ public class PushEndpoint implements HTTPHeaderValue{
 			throw new IllegalArgumentException ("target array too small");
 		
 		//store the number of proxies
-		where[offset] = (byte)(Math.min(4,proxies.size()) | getFeatures());
+		where[offset] = (byte)(Math.min(4,proxies.size()) 
+		        | getFeatures() 
+		        | supportsFWTVersion() << 3);
 		
 		//store the guid
 		System.arraycopy(_clientGUID,0,where,offset+1,16);

@@ -36,6 +36,7 @@ public class PushEndpointTest extends BaseTestCase {
     public void testConstructors() throws Exception {
     	GUID guid1 = new GUID(GUID.makeGuid());
     	GUID guid2 = new GUID(GUID.makeGuid());
+    	GUID guid3 = new GUID(GUID.makeGuid());
     	
     	PushProxyInterface ppi1 = new QueryReply.PushProxyContainer("1.2.3.4",1234);
     	PushProxyInterface ppi2 = new QueryReply.PushProxyContainer("1.2.3.5",1235);
@@ -48,33 +49,28 @@ public class PushEndpointTest extends BaseTestCase {
     	set2.add(ppi2);
     	
     	PushEndpoint empty = new PushEndpoint(guid1.bytes());
-    	updateProxies(empty);
-    	
+    	empty.updateProxies(true);
     	assertEquals(guid1,new GUID(empty.getClientGUID()));
     	assertEquals(PushEndpoint.HEADER_SIZE,PushEndpoint.getSizeBytes(empty.getProxies()));
     	assertEquals(0,empty.getProxies().size());
     	
     	PushEndpoint one = new PushEndpoint(guid2.bytes(),set1);
-    	updateProxies(one);
     	assertEquals(PushEndpoint.HEADER_SIZE+PushEndpoint.PROXY_SIZE,
     			PushEndpoint.getSizeBytes(one.getProxies()));
     	assertEquals(1,one.getProxies().size());
     	assertEquals(0,one.supportsFWTVersion());
     	
     	PushEndpoint two = new PushEndpoint(guid2.bytes(),set2);
-    	updateProxies(two);
+    	two.updateProxies(true);
     	assertEquals(PushEndpoint.HEADER_SIZE+2*PushEndpoint.PROXY_SIZE,
     			PushEndpoint.getSizeBytes(two.getProxies()));
     	assertEquals(2,two.getProxies().size());
     	assertEquals(0,two.supportsFWTVersion());
     	
     	//test features
-    	PushEndpoint three = new PushEndpoint(guid2.bytes(),set2,0x0,1);
+    	PushEndpoint three = new PushEndpoint(guid3.bytes(),set2,0x0,1);
+    	three.updateProxies(true);
     	assertGreaterThan(0,three.supportsFWTVersion());
-    	
-    	//the equals method ignores the features since all we care about 
-    	//is the ip address when putting in maps and sets.
-    	assertEquals(two,three);
     }
     
     
@@ -97,7 +93,7 @@ public class PushEndpointTest extends BaseTestCase {
     	set6.add(ppi5);set6.add(ppi6);
     	
     	PushEndpoint one = new PushEndpoint(guid1.bytes(),set1);
-    	updateProxies(one);
+    	one.updateProxies(true);
     	
     	assertEquals(0,one.supportsFWTVersion());
     	byte [] network = one.toBytes();
@@ -113,7 +109,7 @@ public class PushEndpointTest extends BaseTestCase {
     	
     	PushEndpoint six = new PushEndpoint(guid2.bytes(),set6,
     			0,2);
-    	updateProxies(six);
+    	six.updateProxies(true);
     	assertEquals(2,six.supportsFWTVersion());
     	network = six.toBytes();
     	assertEquals(PushEndpoint.getSizeBytes(six.getProxies()),network.length);
@@ -151,7 +147,7 @@ public class PushEndpointTest extends BaseTestCase {
     	set6.add(ppi5);set6.add(ppi6);
     	
     	PushEndpoint one = new PushEndpoint(guid1.bytes(),set1);
-    	updateProxies(one);
+    	one.updateProxies(true);
     	
     	String httpString = one.httpStringValue();
     	
@@ -166,7 +162,7 @@ public class PushEndpointTest extends BaseTestCase {
     	
     	//now test a bigger endpoint
        	PushEndpoint six = new PushEndpoint(guid2.bytes(),set6,0,2);
-       	updateProxies(six);
+       	six.updateProxies(true);
     	httpString = six.httpStringValue();
     	
     	m.clear();
@@ -205,10 +201,4 @@ public class PushEndpointTest extends BaseTestCase {
     	
     }
     
-    private void updateProxies(PushEndpoint pe) throws Exception{
-        PrivilegedAccessor.invokeAllStaticMethods(
-                PushEndpoint.class,"updateProxies",
-                new Object[]{pe,new Boolean(true)},
-                new Class[]{PushEndpoint.class,boolean.class});
-    }
 }
