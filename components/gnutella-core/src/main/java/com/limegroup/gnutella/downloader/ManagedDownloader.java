@@ -1590,10 +1590,14 @@ public class ManagedDownloader implements Downloader, Serializable {
             //Now, connected is either 0 or 2
             Assert.that(connected==0 || connected==2 || connected==3,
                         "invalid return from assignAndRequest "+connected);
-            if(connected==0)
+            if(connected==0) { // File Not Found, Try Again Later, etc...
+                dloader.stop(); // close the connection for now.
                 return true;
-            else if(connected==3)
+            }
+            else if(connected==3) { // Nothing more to download
+                dloader.stop(); // close the connection since we're finished.
                 return false;
+            }
             
             //Step 3. OK, we have successfully connected, start saving the file
             //to disk
@@ -2432,7 +2436,7 @@ public class ManagedDownloader implements Downloader, Serializable {
     }
 
     private final boolean debugOn = false;
-    private final boolean log = false;    
+    private final boolean log = false;
     PrintWriter writer = null;
     private final void debug(String out) {
         if (debugOn) {
