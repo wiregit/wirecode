@@ -112,10 +112,6 @@ public class UploadManager {
 		Thread upThread = new Thread(runner);
 		upThread.setDaemon(true);
 		upThread.start();
-
-		// remove from the map
-		removeFromMap(host);
-
 	}
 
 	public synchronized void acceptPushUpload(String file, 
@@ -309,7 +305,7 @@ public class UploadManager {
 			int index = java.lang.Integer.parseInt(str_index);
 			// get the filename, which should be right after
 			// the "/", and before the next " ".
-			int f = str.indexOf( " ", d );
+			int f = str.indexOf( " HTTP/", d );
 			String file = str.substring( (d+1), f);
 			return new GETLine(index, file);
 		} catch (NumberFormatException e) {

@@ -172,7 +172,6 @@ public class HTTPUploader implements Uploader {
 		} catch (FreeloaderUploadingException e) { 
 			setState(FREELOADER);
 		} catch (IOException e) {
-			e.printStackTrace();
 			setState(INTERRUPTED);
 		}
 		stop();

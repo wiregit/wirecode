@@ -62,7 +62,11 @@ public class NormalUploadState implements UploadState {
 				c = _fis.read(buf);
                 if (c == -1)
                     break;
-				_ostream.write(buf, 0, c);
+				try {
+					_ostream.write(buf, 0, c);
+				} catch (java.net.SocketException e) {
+					throw new IOException();
+				}
                 _amountRead += c;
 				_uploader.setAmountUploaded(_amountRead);
             }
@@ -104,7 +108,11 @@ public class NormalUploadState implements UploadState {
 					c = _fis.read(buf);
                     if (c == -1)
                         break outerLoop;  //get out of BOTH loops
-					_ostream.write(buf, 0, c);
+					try {
+						_ostream.write(buf, 0, c);
+					} catch (java.net.SocketException e) {
+						throw new IOException();
+					}
                     _amountRead += c;
 					_uploader.setAmountUploaded(_amountRead);
                     burstSent += c;
@@ -152,8 +160,11 @@ public class NormalUploadState implements UploadState {
             _filename = name;
         } else {
 			/* matches the name */
-           if ( !name.equals(_filename) )  
-               throw new IOException();
+			if ( !name.equals(_filename) ) {
+				System.out.println("_filename '" + _filename + "'");
+				System.out.println("name '" + name + "'");
+				throw new IOException();
+			}
         }
 
 		// set the file size
