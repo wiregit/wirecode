@@ -7,17 +7,37 @@ import java.io.*;
 
 /**
  * A handy class for creating incoming connections for in-process tests.  
+ * Typical use: 
+ *
+ * <pre>
+ * MiniAcceptor acceptor=new MiniAcceptor(inProperties, 6346);
+ * Connection out=new Connection("localhost", 6346);
+ * out.initialize();
+ * Connection in=acceptor.accept();
+ *
+ * out.send(..);
+ * in.receive();
+ * in.send(..);
+ * out.receive(..);
+ * </pre>
  */
 public class MiniAcceptor implements Runnable {
     Object lock=new Object();
     Connection c=null;
     boolean done=false;
+    int port;
 
     HandshakeResponder properties;
         
-    /** Starts the listen socket without blocking. */
+    /** Starts the listen socket on port 6346 without blocking. */
     public MiniAcceptor(HandshakeResponder properties) {
+        this(properties, 6346);
+    }
+
+    /** Starts the listen socket without blocking. */
+    public MiniAcceptor(HandshakeResponder properties, int port) {
         this.properties=properties;
+        this.port=port;
         Thread runner=new Thread(this);
         runner.start();
         Thread.yield();  //hack to make sure runner creates socket
@@ -41,7 +61,7 @@ public class MiniAcceptor implements Runnable {
     /** Don't call.  For internal use only. */
     public void run() {
         try {
-            ServerSocket ss=new ServerSocket(6346);
+            ServerSocket ss=new ServerSocket(port);
             Socket s=ss.accept();
             //Technically "GNUTELLA " should be read from s.  Turns out that
             //out implementation doesn't care;
@@ -54,6 +74,7 @@ public class MiniAcceptor implements Runnable {
                 lock.notify();
             } 
         } catch (IOException e) {
+            e.printStackTrace();
             synchronized (lock) {
                 done=true;
                 lock.notify();
