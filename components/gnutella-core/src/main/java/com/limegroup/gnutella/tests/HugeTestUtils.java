@@ -28,6 +28,9 @@ final class HugeTestUtils {
 		"urn:sha1: PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB",
 		"urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWU GYQYPFB",
 		"urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWU GYQYPFB ",
+		null,
+		"",
+		"test"
 	};
 
 	/**
