@@ -6,6 +6,7 @@ import com.limegroup.gnutella.settings.*;
 import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.search.*;
 import com.limegroup.gnutella.handshaking.*;
+import com.limegroup.gnutella.guess.*;
 import com.limegroup.gnutella.routing.*;
 import com.limegroup.gnutella.security.*;
 import com.limegroup.gnutella.stubs.*;
@@ -188,7 +189,7 @@ public class ClientSideOOBRequeryTest
             assertTrue("should be open", testUPs[i].isOpen());
             assertTrue("should be up -> leaf",
                 testUPs[i].isSupernodeClientConnection());
-            drain(testUPs[i], 500);
+            drain(testUPs[i], 100);
             // OOB client side needs server side leaf guidance
             testUPs[i].send(MessagesSupportedVendorMessage.instance());
             testUPs[i].flush();
@@ -208,7 +209,7 @@ public class ClientSideOOBRequeryTest
             testUPs[0].flush();
 
             // wait for the ping request from the test UP
-            UDP_ACCESS[0].setSoTimeout(2000);
+            UDP_ACCESS[0].setSoTimeout(10000);
             pack = new DatagramPacket(new byte[1000], 1000);
             try {
                 UDP_ACCESS[0].receive(pack);
@@ -326,7 +327,7 @@ public class ClientSideOOBRequeryTest
         }
         
         // wait for processing
-        Thread.sleep(500);
+        Thread.sleep(2000);
 
         for (int i = 0; i < UDP_ACCESS.length; i++) {
             ReplyNumberVendorMessage vm = 
@@ -340,7 +341,7 @@ public class ClientSideOOBRequeryTest
         }
 
         // wait for processing
-        Thread.sleep(500);
+        Thread.sleep(1000);
 
         {
             // all the UDP ReplyNumberVMs should have been bypassed
@@ -947,6 +948,184 @@ public class ClientSideOOBRequeryTest
     }
 
 
+    public void testDownloadFinishes() throws Exception {
+
+        keepAllAlive(testUPs);
+        // clear up any messages before we begin the test.
+        drainAll();
+
+        DatagramPacket pack = null;
+
+        Message m = null;
+
+        byte[] guid = rs.newQueryGUID();
+        rs.query(guid, "whatever");
+        // i need to pretend that the UI is showing the user the query still
+        callback.setGUID(new GUID(guid));
+        
+        QueryRequest qr = 
+            (QueryRequest) getFirstInstanceOfMessageType(testUPs[0],
+                                                         QueryRequest.class);
+        assertNotNull(qr);
+        assertTrue(qr.desiresOutOfBandReplies());
+
+        // ok, the leaf is sending OOB queries - good stuff, now we should send
+        // a lot of results back and make sure it buffers the bypassed OOB ones
+        for (int i = 0; i < testUPs.length; i++) {
+            Response[] res = new Response[200];
+            for (int j = 0; j < res.length; j++)
+                res[j] = new Response(10+j+i, 10+j+i, "whatever "+ j + i);
+            m = new QueryReply(qr.getGUID(), (byte) 1, 6355, myIP(), 0, res,
+                               GUID.makeGuid(), new byte[0], false, false, true,
+                               true, false, false, null);
+            testUPs[i].send(m);
+            testUPs[i].flush();
+        }
+
+        // create a test uploader and send back that response
+        final int UPLOADER_PORT = 10000;
+        TestUploader uploader = new TestUploader("whatever", UPLOADER_PORT);
+        uploader.setBusy(true);
+        URN urn =
+        URN.createSHA1Urn("urn:sha1:GLIQY64M7FSXBSQEZY37FIM5QQSA2OUJ");
+        Set urns = new HashSet();
+        urns.add(urn);
+        RemoteFileDesc rfd = new RemoteFileDesc("127.0.0.1", UPLOADER_PORT, 1, 
+                                                "whatever", 10, GUID.makeGuid(),
+                                                1, false, 3, false, null, 
+                                                urns, false, false, 
+                                                "LIME", 0, new HashSet());
+
+        // wait for processing
+        Thread.sleep(1500);
+
+        // just do it for 1 UDP guy
+        {
+            ReplyNumberVendorMessage vm = 
+                new ReplyNumberVendorMessage(new GUID(qr.getGUID()), 1);
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            vm.write(baos);
+            pack = new DatagramPacket(baos.toByteArray(), 
+                                      baos.toByteArray().length,
+                                      testUPs[0].getInetAddress(), PORT);
+            UDP_ACCESS[0].send(pack);
+        }
+
+        // wait for processing
+        Thread.sleep(500);
+
+        {
+            // all the UDP ReplyNumberVMs should have been bypassed
+            Map _bypassedResults = 
+                (Map) PrivilegedAccessor.getValue(rs.getMessageRouter(),
+                                                  "_bypassedResults");
+            assertNotNull(_bypassedResults);
+            assertEquals(1, _bypassedResults.size());
+            Set endpoints = (Set) _bypassedResults.get(new GUID(qr.getGUID()));
+            assertNotNull(endpoints);
+            assertEquals(1, endpoints.size());
+        }
+        
+        long currTime = System.currentTimeMillis();
+        Downloader downloader = 
+            rs.download(new RemoteFileDesc[] { rfd }, false, new GUID(guid));
+        
+        Thread.sleep(100);
+        assertEquals(Downloader.ITERATIVE_GUESSING, downloader.getState());
+
+        // we should get a query key request
+        {
+            boolean gotPing = false;
+            while (!gotPing) {
+                try {
+                    byte[] datagramBytes = new byte[1000];
+                    pack = new DatagramPacket(datagramBytes, 1000);
+                    UDP_ACCESS[0].setSoTimeout(10000); // may need to wait
+                    UDP_ACCESS[0].receive(pack);
+                    InputStream in = new ByteArrayInputStream(pack.getData());
+                    m = Message.read(in);
+                    m.hop();
+                    if (m instanceof PingRequest)
+                        gotPing = ((PingRequest) m).isQueryKeyRequest();
+                }
+                catch (InterruptedIOException iioe) {
+                    assertTrue(false);
+                }
+            }
+        }
+
+        // send back a query key
+        {
+            QueryKey qk = QueryKey.getQueryKey(InetAddress.getLocalHost(),
+                                               PORT);
+            byte[] ip = new byte[] {(byte)127, (byte) 0, (byte) 0, (byte) 1};
+            PingReply pr = 
+                PingReply.createQueryKeyReply(GUID.makeGuid(), (byte) 1,
+                                              UDP_ACCESS[0].getLocalPort(),
+                                              ip, 10, 10, false, qk);
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            pr.write(baos);
+            pack = new DatagramPacket(baos.toByteArray(), 
+                                      baos.toByteArray().length,
+                                      testUPs[0].getInetAddress(),
+                                      PORT);
+            UDP_ACCESS[0].send(pack);
+        }
+
+        Thread.sleep(500);
+
+        // ensure that it gets into the OnDemandUnicaster
+        {
+            // now we should make sure MessageRouter clears the map
+            Map _queryKeys = 
+            (Map) PrivilegedAccessor.getValue(OnDemandUnicaster.class,
+                                              "_queryKeys");
+            assertNotNull(_queryKeys);
+            assertEquals(1, _queryKeys.size());
+        }
+
+        { // confirm a URN query
+            boolean gotQuery = false;
+            while (!gotQuery) {
+                try {
+                    byte[] datagramBytes = new byte[1000];
+                    pack = new DatagramPacket(datagramBytes, 1000);
+                    UDP_ACCESS[0].setSoTimeout(10000); // may need to wait
+                    UDP_ACCESS[0].receive(pack);
+                    InputStream in = new ByteArrayInputStream(pack.getData());
+                    m = Message.read(in);
+                    m.hop();
+                    if (m instanceof QueryRequest) 
+                        gotQuery = ((QueryRequest) m).hasQueryUrns();
+                }
+                catch (InterruptedIOException iioe) {
+                    assertTrue(false);
+                }
+            }
+        }
+
+        Thread.sleep(1000 - (System.currentTimeMillis() - currTime));
+
+        assertEquals(Downloader.WAITING_FOR_RETRY, downloader.getState());
+
+        callback.clearGUID();
+        downloader.stop();
+
+        Thread.sleep(1000);
+
+        {
+            // now we should make sure MessageRouter clears the map
+            Map _bypassedResults = 
+                (Map) PrivilegedAccessor.getValue(rs.getMessageRouter(),
+                                                  "_bypassedResults");
+            assertNotNull(_bypassedResults);
+            assertEquals(0, _bypassedResults.size());
+            Set endpoints = (Set) _bypassedResults.get(new GUID(qr.getGUID()));
+            assertNull(endpoints);
+        }
+    }
+
+
     //////////////////////////////////////////////////////////////////
 
     private void drainAll() throws Exception {
@@ -997,4 +1176,3 @@ public class ClientSideOOBRequeryTest
 
 
 }
-
