@@ -69,20 +69,6 @@ public class RouterService
     }
 
     /**
-     * Dump the query routing tables
-     */
-    public void dumpRouteTable() {
-        System.out.println(router.getQueryRouteTableDump());
-    }
-
-    /**
-     * Dump the push routing table
-     */
-    public void dumpPushRouteTable() {
-        System.out.println(router.getPushRouteTableDump());
-    }
-
-    /**
      * Dump the list of connections
      */
     public void dumpConnections() {

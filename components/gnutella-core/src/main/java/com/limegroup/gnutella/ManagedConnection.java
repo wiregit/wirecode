@@ -4,6 +4,7 @@ import java.io.*;
 import java.net.*;
 import com.limegroup.gnutella.util.Buffer;
 import com.sun.java.util.collections.*;
+import com.limegroup.gnutella.routing.RouteTableMessage;
 
 /**
  * A Connection that is managed.  Includes a loopForMessages method that runs
@@ -407,19 +408,10 @@ public class ManagedConnection
                 //Gnutella protocol version in GUID).
                 if (!_receivedFirstPing) 
                     checkForOlderClient(m); 
-                if (!isHandshake(m)) //if handshake, just continue;
-                    _router.handlePingRequest((PingRequest)m, this);
+                //if (!isHandshake(m)) //if handshake, just continue;  TODO: why?
+                //    _router.handlePingRequest((PingRequest)m, this);
             }
-            else if (m instanceof PingReply) {
-                _router.handlePingReply((PingReply)m, this);
-            }
-            else if (m instanceof QueryRequest)
-                _router.handleQueryRequestPossibleDuplicate(
-                    (QueryRequest)m, this);
-            else if (m instanceof QueryReply)
-                _router.handleQueryReply((QueryReply)m, this);
-            else if (m instanceof PushRequest)
-                _router.handlePushRequest((PushRequest)m, this);
+            _router.handleMessage(m, this);
         }
     }
 
