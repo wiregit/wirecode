@@ -584,8 +584,6 @@ public class HTTPDownloader implements Runnable {
         String str = " ";
 
         boolean foundLength = false;
-        boolean foundRangeInitial = false;
-        boolean foundRangeFinal = false;
         int     tempSize = -1;
         int     lineNumber = -1;
 

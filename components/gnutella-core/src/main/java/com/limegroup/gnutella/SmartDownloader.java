@@ -98,6 +98,8 @@ public class SmartDownloader extends HTTPDownloader {
 				// there was an error, then the download failed.
 				// increase the index, and try the next file
 				counter++;
+				_amountRead = 0;
+				_sizeOfFile = -1;
 			}
 
 		}
