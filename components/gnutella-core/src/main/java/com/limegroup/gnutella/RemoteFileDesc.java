@@ -68,6 +68,10 @@ public class RemoteFileDesc implements Serializable {
      *  worst and 3 is the best.  (This is the same system as in the
      *  GUI but on a 0 to N-1 scale.)
      * @param xmlDocs the array of XML documents pertaining to this file
+	 * @param browseHost specifies whether or not the remote host supports
+	 *  browse host
+	 * @param xmlDoc the <tt>LimeXMLDocument</tt> for the response
+	 * @param urns the <tt>Set</tt> of <tt>URN</tt>s for the file
 	 */
 	public RemoteFileDesc(String host, int port, long index, String filename,
 						  int size, byte[] clientGUID, int speed, 
@@ -112,15 +116,57 @@ public class RemoteFileDesc implements Serializable {
 		}
     }
     
-
-	// Accessor Methods 
+	/**
+	 * Accessor for the host ip with this file, which can be <tt>null</tt>.
+	 *
+	 * @return the host ip with this file, which can be <tt>null</tt>
+	 */
 	public final String getHost() {return _host;}
+
+	/**
+	 * Accessor for the port of the host with this file.
+	 *
+	 * @return the file name for the port of the host
+	 */
 	public final int getPort() {return _port;}
+
+	/**
+	 * Accessor for the index this file, which can be <tt>null</tt>.
+	 *
+	 * @return the file name for this file, which can be <tt>null</tt>
+	 */
 	public final long getIndex() {return _index;}
+
+	/**
+	 * Accessor for the size in bytes of this file.
+	 *
+	 * @return the size in bytes of this file
+	 */
 	public final int getSize() {return _size;}
+
+	/**
+	 * Accessor for the file name for this file, which can be <tt>null</tt>.
+	 *
+	 * @return the file name for this file, which can be <tt>null</tt>
+	 */
 	public final String getFileName() {return _filename;}
+
+	/**
+	 * Accessor for the client guid for this file, which can be <tt>null</tt>.
+	 *
+	 * @return the client guid for this file, which can be <tt>null</tt>
+	 */
 	public final byte[] getClientGUID() {return _clientGUID;}
+
+	/**
+	 * Accessor for the speed of the host with this file, which can be 
+	 * <tt>null</tt>.
+	 *
+	 * @return the speed of the host with this file, which can be 
+	 *  <tt>null</tt>
+	 */
 	public final int getSpeed() {return _speed;}	
+
 	public final boolean chatEnabled() {return _chatEnabled;}
 	public final boolean browseHostEnabled() {return _browseHostEnabled;}
 
