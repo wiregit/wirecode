@@ -14,6 +14,10 @@ public class UrnType implements Serializable {
 	private static final long serialVersionUID = -8211681448456483713L;
 
 	/**
+	 * Cached constant for a colon string.
+	 */
+	private static final String COLON = ":";
+	/**
 	 * Identifier string for the SHA1 type.
 	 */
 	public static final String SHA1_STRING = "sha1";
@@ -27,7 +31,7 @@ public class UrnType implements Serializable {
 	public static final String URN_NAMESPACE_ID = "urn:";
 
 	/**
-	 * Constant string for the URN type.
+	 * Constant string for the URN type. INVARIANT: this cannot be null
 	 */
 	private transient String _urnType;
 
@@ -37,8 +41,13 @@ public class UrnType implements Serializable {
 	 * from outside the class.  This assigns the _urnType string.
 	 * 
 	 * @param typeString the string representation of the URN type
+	 * @throws <tt>NullPointerException</tt> if the <tt>typeString</tt>
+	 *  argument is <tt>null</tt>
 	 */
 	private UrnType(String typeString) {
+		if(typeString == null) {
+			throw new NullPointerException("UrnTypes cannot except null strings");
+		}
 		_urnType = typeString;
 	}
 
@@ -53,22 +62,45 @@ public class UrnType implements Serializable {
 	}
 
 	/**
-	 * The <tt>UrnType</tt> for SHA1 hashes.
-	 */
-	public static final UrnType SHA1 = new UrnType(SHA1_STRING);
-
-	/**
-	 * The <tt>UrnType</tt> for specifying any URN type.
-	 */
-	public static final UrnType ANY_TYPE = new UrnType("");
-
-	/**
 	 * Returns the string representation of this URN type.
 	 *
 	 * @return the string representation of this URN type
 	 */
 	public String toString() {
-		return URN_NAMESPACE_ID+_urnType+":";
+		return URN_NAMESPACE_ID+_urnType+COLON;
+	}
+
+	/**
+	 * It is necessary for this class to override equals because the 
+	 * readResolve method was not added to the serialization API until 
+	 * Java 1.2, which means that we cannot use it to ensure that the
+	 * <tt>UrnType</tt> enum constants are actually the same instances upon
+	 * deserialization.  Therefore, we must rely on Object.equals instead
+	 * of upon "==".  
+	 *
+	 * @param o the <tt>Object</tt> to compare for equality
+	 * @return <tt>true</tt> if these represent the same UrnType, <tt>false</tt>
+	 *  otherwise
+	 * @see java.lang.Object#equals(Object)
+	 */
+	public boolean equals(Object o) {
+		if(o == this) return true;
+		if(!(o instanceof UrnType)) return false;
+		UrnType type = (UrnType)o;
+		return _urnType.equals(type._urnType);
+	}
+
+	/**
+	 * Overridden to meet the contract of Object.hashCode.
+	 *
+	 * @return the unique hashcode for this <tt>UrnType</tt>, in accordance with
+	 *  Object.equals
+	 * @see java.lang.Object#hashCode
+	 */
+	public int hashCode() {
+		int result = 17;
+		result = 37*result + _urnType.hashCode();
+		return result;
 	}
 
 	/**
@@ -98,6 +130,10 @@ public class UrnType implements Serializable {
 	 * Factory method for obtaining <tt>UrnType</tt> instances from strings.
 	 *
 	 * @param type the string representation of the urn type
+	 * @return the <tt>UrnType</tt> instance corresponding with the specified
+	 *  string
+	 * @throws <tt>IllegalArgumentException</tt> if the <tt>type</tt>
+	 *  argument does not correspond with any known type
 	 */
 	public static UrnType createUrnType(String type) {
 		String lowerCaseType = type.toLowerCase();
@@ -105,7 +141,7 @@ public class UrnType implements Serializable {
 			return SHA1;
 		} else if(lowerCaseType.equals(SHA1.toString())) { 
 			return SHA1;
-		}else {
+		} else {
 			throw new IllegalArgumentException("unknown type: "+type);
 		}
 	}
@@ -119,7 +155,7 @@ public class UrnType implements Serializable {
 	 *  otherwise
 	 */
 	public static boolean isSupportedUrnType(final String urnString) {
-		int colonIndex = urnString.indexOf(":");
+		int colonIndex = urnString.indexOf(COLON);
 		if(colonIndex == -1) {
 			return false;
 		}	   
@@ -128,7 +164,7 @@ public class UrnType implements Serializable {
 			return true;
 		}
 		typeString = typeString.substring(colonIndex+1);
-		if(typeString.equals(SHA1_STRING + ":")) {
+		if(typeString.equals(SHA1_STRING + COLON)) {
 			return true;
 		}
 		return false;		
@@ -149,4 +185,16 @@ public class UrnType implements Serializable {
 		}
 		return false;
 	}
+
+	// the enum constants
+
+	/**
+	 * The <tt>UrnType</tt> for SHA1 hashes.
+	 */
+	public static final UrnType SHA1 = new UrnType(SHA1_STRING);
+
+	/**
+	 * The <tt>UrnType</tt> for specifying any URN type.
+	 */
+	public static final UrnType ANY_TYPE = new UrnType("");
 }
