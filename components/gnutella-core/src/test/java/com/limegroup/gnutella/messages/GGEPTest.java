@@ -122,16 +122,20 @@ public class GGEPTest extends TestCase {
         for (int i = 0; i < GGEP.MAX_VALUE_SIZE_IN_BYTES; i++)
             bigBoy.append("1");
         
+        String[] keys = {"Susheel", "is", "an", "Idiot!!"};
+
         try {
             GGEP temp = new GGEP(true);
-            temp.put("Susheel", bigBoy.toString());
-            temp.put("is", bigBoy.toString());
-            temp.put("an", bigBoy.toString());
-            temp.put("Idiot!!", bigBoy.toString());
+            for (int i = 0; i < keys.length; i++)
+                temp.put(keys[i], bigBoy.toString());
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             temp.write(baos);
             byte[] ggepBytes = baos.toByteArray();
             GGEP reconstruct = new GGEP(ggepBytes, 0, null);
+            for (int i = 0; i < keys.length; i++) {
+                String currValue = reconstruct.getString(keys[i]);
+                assertTrue(currValue.equals(bigBoy.toString()));
+            }
         } 
         catch (IllegalArgumentException fail1) { 
             fail("IllegalArgumentException!");
@@ -141,6 +145,9 @@ public class GGEPTest extends TestCase {
         }
         catch (BadGGEPBlockException fail2) {
             fail("BadPacketException not expected!!");
+        }
+        catch (BadGGEPPropertyException fail2) {
+            fail("BadGGEPPropertyException not expected!!");
         }
     }
 
