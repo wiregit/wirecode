@@ -293,6 +293,23 @@ public final class HashTree implements HTTPHeaderValue, Serializable {
     }
     
     /**
+     * @return The number of nodes in the full tree.
+     */
+    public int getNodeCount() {
+        // This works by calculating how many nodes
+        // will be in the tree based on the number of nodes
+        // at the last depth.  The previous depth is always
+        // going to have ceil(current/2) nodes.
+        double last = NODES.size();
+        int count = (int)last;
+        for(int i = DEPTH-1; i >= 0; i--) {
+            last = Math.ceil(last / 2);
+            count += (int)last;
+        }
+        return count;
+    }
+    
+    /**
      * @return all nodes.
      */
     public List getAllNodes() {

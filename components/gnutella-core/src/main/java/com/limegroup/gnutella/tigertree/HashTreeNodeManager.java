@@ -22,6 +22,11 @@ class HashTreeNodeManager {
      * The maximum amount of nodes to store in memory.
      *
      * This will use up MAX_NODES * 24 + overhead bytes of memory.
+     *
+     * This number MUST be greater than the maximum possible number
+     * of nodes for the largest depth this stores.  Currently
+     * we store up to depth 6, which has a maximum node count of 127
+     * nodes.
      */
     private static final int MAX_NODES = 500;    
     
@@ -52,9 +57,11 @@ class HashTreeNodeManager {
             List outer = new ArrayList(1);
             outer.add(tree.getNodes());
             return outer;
-        case 1: case 2:
+        case 1: case 2: case 7: case 8: case 9:
             // trees of depth 1 & 2 are really easy to calculate, so
-            // always do those on the fly.        
+            // always do those on the fly.
+            // trees of depth 7, 8 & 9 take up too much memory to store,
+            // so don't store them.
             return HashTree.createAllParentNodes(tree.getNodes());
         default:
             // other trees need to battle it out for storage.

@@ -168,15 +168,16 @@ class HashTreeHandler {
         private final HashTree TREE;
         
         /**
-         * The cached length, calculated the first time requested.
+         * The length of the tree.
          */
-        private int _length = -1;
+        private final int LENGTH;
         
         TreeRecord(HashTree tree, UUID uri) {
             super(DIMERecord.TYPE_ABSOLUTE_URI, null,
                   getBytes("uuid:" + uri),
                   TREE_TYPE_BYTES, null);
             TREE = tree;
+            LENGTH = TREE.getNodeCount() * HASH_SIZE;
         }
 
         /**
@@ -195,13 +196,7 @@ class HashTreeHandler {
          * Determines the length of the data.
          */
         public int getDataLength() {
-            if(_length == -1) {
-                int size = 0;
-                for(Iterator i = TREE.getAllNodes().iterator(); i.hasNext(); )
-                    size += ((List)i.next()).size();
-                _length = size * HASH_SIZE;
-            }
-            return _length;
+            return LENGTH;
         }
     }
     

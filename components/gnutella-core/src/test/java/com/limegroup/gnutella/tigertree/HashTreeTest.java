@@ -98,6 +98,7 @@ public class HashTreeTest extends BaseTestCase {
         assertEquals(3, three.size());
         assertEquals(6, four.size());
         assertEquals(11, five.size());
+        assertEquals(1+2+3+6+11, hashTree.getNodeCount());
     }
     
     public void testWriteToStream() throws Throwable {
