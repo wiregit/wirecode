@@ -1,7 +1,7 @@
 package com.limegroup.gnutella.util;
 
 import com.limegroup.gnutella.Assert;
-import java.util.*;
+import com.sun.java.util.collections.*;
 
 /** 
  * A very simple fixed-size double-ended queue, i.e., a circular buffer.

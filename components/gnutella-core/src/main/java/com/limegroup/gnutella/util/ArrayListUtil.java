@@ -1,6 +1,6 @@
 package com.limegroup.gnutella.util;
 
-import java.util.*;
+import com.sun.java.util.collections.ArrayList;
 
 /** 
  * Coomon Array manipulation routines
