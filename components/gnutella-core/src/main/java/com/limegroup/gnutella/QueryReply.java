@@ -73,7 +73,7 @@ public class QueryReply extends Message implements Serializable{
     /** The mask for extracting the busy flag from the QHD common area. */
     private static final byte SPEED_MASK=(byte)0x10;
     /** The mask for extracting the GGEP flag from the QHD common area. */
-    private static final byte GGEP_MASK=(byte)0x40;
+    private static final byte GGEP_MASK=(byte)0x20;
 
     /** The mask for extracting the chat flag from the QHD private area. */
     private static final byte CHAT_MASK=(byte)0x01;
@@ -234,7 +234,7 @@ public class QueryReply extends Message implements Serializable{
                 | BUSY_MASK 
                 | UPLOADED_MASK 
                 | SPEED_MASK
-                | (supportsBH ? GGEP_MASK : (ggepLen > 0 ? GGEP_MASK : 0)) );
+                | GGEP_MASK);
             payload[i++]=(byte)(PUSH_MASK
                 | (isBusy ? BUSY_MASK : 0) 
                 | (finishedUpload ? UPLOADED_MASK : 0)
