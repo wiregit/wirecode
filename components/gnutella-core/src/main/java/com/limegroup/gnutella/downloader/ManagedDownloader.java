@@ -1861,7 +1861,8 @@ public class ManagedDownloader implements Downloader, Serializable {
      */
     private synchronized int getNumAllowedDownloads() {
         //TODO1: this should really be done dynamically by observing capacity
-        //and load, but that's hard to do.
+        //and load, but that's hard to do.  It should also avoid swarming from
+        //locations without hashes if throughput is good enough.
         int downloads=dloaders.size();
         int capacity=SettingsManager.instance().getConnectionSpeed();
         if (capacity<=SpeedConstants.MODEM_SPEED_INT)
@@ -1873,7 +1874,7 @@ public class ManagedDownloader implements Downloader, Serializable {
         else 
             //Wow you are fast, try 8
             return Math.max(8-downloads,0);
-  }
+    }
 
     /** 
      * Removes and returns the RemoteFileDesc with the highest quality in
@@ -1893,15 +1894,25 @@ public class ManagedDownloader implements Downloader, Serializable {
         //The best rfd found so far
         RemoteFileDesc ret=(RemoteFileDesc)iter.next();
         
-        //Find max of each (remaining) ret...
+        //Find max of each (remaining) element, storing in max.  
+        //  Primary key: whether the file has a hash (avoid corruptions)
+        //  Secondary key: the quality of the results (avoid dud locations)
+        //  Ternary key: the speed of the result (avoid slow downloads)
         while (iter.hasNext()) {
             RemoteFileDesc rfd=(RemoteFileDesc)iter.next();
-            if (rfd.getQuality() > ret.getQuality())
+            //rfd.hash > ret.hash?
+            if (rfd.getSHA1Urn()!=null && ret.getSHA1Urn()==null)
                 ret=rfd;
-            else if (rfd.getQuality() == ret.getQuality()) {
-                if (rfd.getSpeed() > ret.getSpeed())
+            else if ((rfd.getSHA1Urn()==null) == (ret.getSHA1Urn()==null)) {
+                //rfd.quality > ret.quality?
+                if (rfd.getQuality() > ret.getQuality())
                     ret=rfd;
-            }            
+                else if (rfd.getQuality() == ret.getQuality()) {
+                    //rfd.speed > ret.speed?
+                    if (rfd.getSpeed() > ret.getSpeed())
+                        ret=rfd;
+                }            
+            }
         }
             
         filesLeft.remove(ret);
@@ -2232,8 +2243,19 @@ public class ManagedDownloader implements Downloader, Serializable {
      */
     static void unitTest() {
         //Test removeBest
+        Set urns1=new TreeSet();
+        Set urns2=new TreeSet();
+        try {
+            urns1.add(URN.createSHA1Urn(
+                         "urn:sha1:GLSTHIPQGSSZTS5FJUPAKPZWUGYQYPFB"));
+            urns2.add(URN.createSHA1Urn(
+                         "urn:sha1:GLSTHIPQGSSZTS5FJUPAKPZWUGYQYPFB"));
+        } catch (IOException e) { 
+            Assert.that(false, "Couldn't make urn");
+        }
+
         RemoteFileDesc rf1=new RemoteFileDesc("1.2.3.4", 6346, 0, 
-                                              "some file.txt", 1000, 
+                                              "some file.txt", 1010, 
                                               new byte[16], 
                                               SpeedConstants.T1_SPEED_INT, 
                                               false, 3, false, null, null);
@@ -2247,17 +2269,31 @@ public class ManagedDownloader implements Downloader, Serializable {
                                               new byte[16], 
                                               SpeedConstants.T3_SPEED_INT+1, 
                                               false, 0, false, null, null);
+        RemoteFileDesc rf6=new RemoteFileDesc("1.2.3.7", 6346, 0,
+                                              "some file.txt", 1010,
+                                              new byte[16],
+                                              SpeedConstants.MODEM_SPEED_INT,
+                                              false, 0, false, null, urns1);
+        RemoteFileDesc rf7=new RemoteFileDesc("1.2.3.7", 6346, 0,
+                                              "some file.txt", 1010,
+                                              new byte[16],
+                                              SpeedConstants.MODEM_SPEED_INT+1,
+                                              false, 0, false, null, urns2);
 
         List list=new LinkedList();
         list.add(rf4);
+        list.add(rf6);
         list.add(rf1);
         list.add(rf5);
+        list.add(rf7);
         ManagedDownloader stub=new ManagedDownloader();
+        Assert.that(stub.removeBest(list)==rf7);  //hashes over all
+        Assert.that(stub.removeBest(list)==rf6);  
         Assert.that(stub.removeBest(list)==rf1);  //quality over speed
         Assert.that(list.size()==2);
         Assert.that(list.contains(rf4));
         Assert.that(list.contains(rf5));
-        Assert.that(stub.removeBest(list)==rf5);  
+        Assert.that(stub.removeBest(list)==rf5);  //speed is least important
         Assert.that(list.size()==1);
         Assert.that(list.contains(rf4));
         Assert.that(stub.removeBest(list)==rf4);  
