@@ -104,6 +104,8 @@ public class ConnectionManager {
      */
     private volatile boolean _supernodeModeTransit 
         = SettingsManager.instance().getForcedSupernodeMode();
+    private volatile boolean _shieldedClientSupernodeConnection;
+    private volatile boolean _hasSupernodeOrClientnodeStatusForced = false;
 
     /**
      * Constructs a ConnectionManager.  Must call initialize before using.
@@ -320,14 +322,46 @@ public class ConnectionManager {
     }    
     
     /**
-     * Sets the maximum number of incoming connections.  This does not
-     * affect the MAX_INCOMING_CONNECTIONS property.  It is useful to be
-     * able to vary this without permanently setting the property.
+     * Tells whether this node has a connection to
+     * a supernode, being itself a client node. This flag has importance
+     * for client nodes only
+     * @return True, if the clientnode has connection to supernode,
+     * false otherwise
      */
-    //public void setMaxIncomingConnections(int max) {
-	//_maxIncomingConnections = max;
-    //}
-
+    public boolean hasShieldedClientSupernodeConnection() {
+        return _shieldedClientSupernodeConnection;
+    }
+    
+    /**
+     * Tells whether the node's status has been forced,
+     * in which case SupernodeAssigner Thread wont try
+     * to change the status
+     */
+    public boolean hasSupernodeOrClientnodeStatusForced()
+    {
+        return _hasSupernodeOrClientnodeStatusForced;
+    }
+    
+    /**
+     * Sets the flag indicating whether this node has a connection to
+     * a supernode, being itself a client node. This flag has importance
+     * for client nodes only
+     * @param flag the flag value to be set
+     */
+    public void setShieldedClientSupernodeConnection(boolean flag) {
+        _shieldedClientSupernodeConnection = flag;
+    }
+    
+    /**
+     * Sets the node's status flag. If the flag is true, it indicates that
+     * the  SupernodeAssigner Thread wont try
+     * to change the status
+     */
+    public void setSupernodeOrClientnodeStatusForced(boolean flag)
+    {
+        _hasSupernodeOrClientnodeStatusForced = flag;
+    }
+    
     /**
      * @return true if there is a connection to the given host.
      */
@@ -902,7 +936,7 @@ public class ConnectionManager {
      */
     private synchronized void lostShieldedClientSupernodeConnection()
     {
-        SettingsManager.instance().setSupernodeOrClientnodeStatusForced(false);
+        setSupernodeOrClientnodeStatusForced(false);
         if(_connections.size() == 0)
         {
             //set the _hasShieldedClientSupernodeConnection flag to false
@@ -994,9 +1028,6 @@ public class ConnectionManager {
         String remoteAddress){
         //if we are in the state asked for, return
         if(isSupernode() == supernodeNeeded)
-            return;
-        //Also return, if we have a forced state
-        if(SettingsManager.instance().hasSupernodeOrClientnodeStatusForced())
             return;
         
         //if is a supernode, and have client connections, dont change mode

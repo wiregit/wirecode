@@ -520,10 +520,6 @@ public final class SettingsManager {
     private volatile int _minShieldedClientConnections;
     /** This is the forced supernode mode */
     private volatile boolean _supernodeModeForced;
-    /** This is the transitional supernode mode, set automatically during
-     * the execution of program */
-    private volatile boolean _shieldedClientSupernodeConnection;
-    private volatile boolean _hasSupernodeOrClientnodeStatusForced = false;
 
     /** 
 	 * Constant member variable for the main <tt>Properties</tt> instance.
@@ -1775,27 +1771,6 @@ public final class SettingsManager {
         return _supernodeModeForced;
     }
 
-    /**
-     * Tells whether this node has a connection to
-     * a supernode, being itself a client node. This flag has importance
-     * for client nodes only
-     * @return True, if the clientnode has connection to supernode,
-     * false otherwise
-     */
-    public boolean hasShieldedClientSupernodeConnection() {
-        return _shieldedClientSupernodeConnection;
-    }
-    
-    /**
-     * Tells whether the node's status has been forced,
-     * in which case SupernodeAssigner Thread wont try
-     * to change the status
-     */
-    public boolean hasSupernodeOrClientnodeStatusForced()
-    {
-        return _hasSupernodeOrClientnodeStatusForced;
-    }
-
 	/**
 	 * Returns whether or not we should connect to the Gnutella network
 	 * on startup.
@@ -2895,26 +2870,6 @@ public final class SettingsManager {
             (new Boolean(supernodeMode)).toString());
     }
     
-    /**
-     * Sets the flag indicating whether this node has a connection to
-     * a supernode, being itself a client node. This flag has importance
-     * for client nodes only
-     * @param flag the flag value to be set
-     */
-    public void setShieldedClientSupernodeConnection(boolean flag) {
-        _shieldedClientSupernodeConnection = flag;
-    }
-    
-    /**
-     * Sets the node's status flag. If the flag is true, it indicates that
-     * the  SupernodeAssigner Thread wont try
-     * to change the status
-     */
-    public void setSupernodeOrClientnodeStatusForced(boolean flag)
-    {
-        _hasSupernodeOrClientnodeStatusForced = flag;
-    }
-
 	/**
 	 * Sets whether or not to connect to the Gnutella network when the
 	 * application starts up.
