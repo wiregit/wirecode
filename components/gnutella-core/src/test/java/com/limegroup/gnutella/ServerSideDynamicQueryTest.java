@@ -302,6 +302,155 @@ public final class ServerSideDynamicQueryTest extends BaseTestCase {
         reqRecvd = (QueryRequest) ULTRAPEER_1.receive(TIMEOUT);
         assertTrue(reqRecvd.getQuery().equals("berkeley"));
         assertTrue(Arrays.equals(request.getGUID(), reqRecvd.getGUID()));
+        assertEquals(reqRecvd.getHops(), (byte) 1);
     }
+
+
+    public void testDuplicateProbes() throws Exception {
+        drainAll();
+
+        QueryRequest request = QueryRequest.createQuery("berkeley");
+        request.setTTL((byte)1);
+
+        ULTRAPEER_2.send(request);
+        ULTRAPEER_2.flush();
+
+        QueryRequest reqRecvd = (QueryRequest) LEAF.receive(TIMEOUT);
+        assertTrue(reqRecvd.getQuery().equals("berkeley"));
+        assertTrue(Arrays.equals(request.getGUID(), reqRecvd.getGUID()));
+
+        // should NOT be forwarded to other Ultrapeer
+        try {
+            ULTRAPEER_1.receive(TIMEOUT);
+            assertTrue(false);
+        }
+        catch (InterruptedIOException expected) {}
+
+        Thread.sleep(2*1000);
+
+        // test that the duplicate probe doesn't go anywhere it isn't supposed
+        ULTRAPEER_2.send(request);
+        ULTRAPEER_2.flush();
+
+        // should NOT be forwarded to leaf again....
+        try {
+            reqRecvd = (QueryRequest) LEAF.receive(TIMEOUT);
+        }
+        catch (InterruptedIOException expected) {}
+
+        // should NOT be forwarded to other Ultrapeer....
+        try {
+            ULTRAPEER_1.receive(TIMEOUT);
+            assertTrue(false);
+        }
+        catch (InterruptedIOException expected) {}
+
+    }
+    
+    // makes sure a probe can't be extended twice....
+    public void testProbeIsLimited() throws Exception {
+        drainAll();
+
+        QueryRequest request = QueryRequest.createQuery("berkeley");
+        request.setTTL((byte)1);
+
+        ULTRAPEER_2.send(request);
+        ULTRAPEER_2.flush();
+
+        QueryRequest reqRecvd = (QueryRequest) LEAF.receive(TIMEOUT);
+        assertTrue(reqRecvd.getQuery().equals("berkeley"));
+        assertTrue(Arrays.equals(request.getGUID(), reqRecvd.getGUID()));
+
+        // should NOT be forwarded to other Ultrapeer
+        try {
+            ULTRAPEER_1.receive(TIMEOUT);
+            assertTrue(false);
+        }
+        catch (InterruptedIOException expected) {}
+
+        Thread.sleep(2*1000);
+
+        // extend the probe....
+        request.setTTL((byte)3);
+        ULTRAPEER_2.send(request);
+        ULTRAPEER_2.flush();
+
+        try {
+            LEAF.receive(TIMEOUT);
+            assertTrue(false);
+        }
+        catch (InterruptedIOException expected) {}
+
+        reqRecvd = (QueryRequest) ULTRAPEER_1.receive(TIMEOUT);
+        assertTrue(reqRecvd.getQuery().equals("berkeley"));
+        assertTrue(Arrays.equals(request.getGUID(), reqRecvd.getGUID()));
+        assertEquals(reqRecvd.getHops(), (byte) 1);
+
+        Thread.sleep(2*1000);
+
+        // extend it again but make sure it doesn't get through...
+        request.setTTL((byte)4);
+        ULTRAPEER_2.send(request);
+        ULTRAPEER_2.flush();
+
+        // should NOT be forwarded to leaf again....
+        try {
+            reqRecvd = (QueryRequest) LEAF.receive(TIMEOUT);
+        }
+        catch (InterruptedIOException expected) {}
+
+        // should NOT be forwarded to other Ultrapeer....
+        try {
+            ULTRAPEER_1.receive(TIMEOUT);
+            assertTrue(false);
+        }
+        catch (InterruptedIOException expected) {}
+
+    }
+
+    // tries to extend queries with original TTL > 1, should fail...
+    public void testProbeIsTTL1Only() throws Exception {
+        for (int i = 2; i < 5; i++) {
+            drainAll();
+
+            QueryRequest request = QueryRequest.createQuery("berkeley");
+            request.setTTL((byte)i);
+
+            ULTRAPEER_2.send(request);
+            ULTRAPEER_2.flush();
+
+            QueryRequest reqRecvd = (QueryRequest) LEAF.receive(TIMEOUT);
+            assertTrue(reqRecvd.getQuery().equals("berkeley"));
+            assertTrue(Arrays.equals(request.getGUID(), reqRecvd.getGUID()));
+
+            // should be forwarded to other Ultrapeer
+            reqRecvd = (QueryRequest) ULTRAPEER_1.receive(TIMEOUT);
+            assertTrue(reqRecvd.getQuery().equals("berkeley"));
+            assertTrue(Arrays.equals(request.getGUID(), reqRecvd.getGUID()));
+            assertEquals(reqRecvd.getHops(), (byte) 1);
+            
+            Thread.sleep(2*1000);
+            
+            // extend the probe....
+            request.setTTL((byte)(i+1));
+            ULTRAPEER_2.send(request);
+            ULTRAPEER_2.flush();
+
+            // should be counted as a duplicate and not forwarded anywhere...
+            try {
+                LEAF.receive(TIMEOUT);
+                assertTrue(false);
+            }
+            catch (InterruptedIOException expected) {}
+
+            try {
+                ULTRAPEER_1.receive(TIMEOUT);
+                assertTrue(false);
+            }
+            catch (InterruptedIOException expected) {}
+        }
+    }
+
+    
 
 }
