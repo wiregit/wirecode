@@ -77,8 +77,7 @@ public class SimppSettingsManager {
      * this.simppProps
      */
     public void activateSimppSettings() {
-        if(LOG.isDebugEnabled())
-            LOG.debug("activating new settings");
+        LOG.debug("activating new settings");
         if(!_isDefault) //we are already activated...
             return;
         synchronized(_simppProps) {
@@ -160,8 +159,7 @@ public class SimppSettingsManager {
      * @param rawSetting has the form SETTING_NAME{setting_key} = setting_value
      */
     private Setting loadSetting(String rawSetting) {
-        if(LOG.isDebugEnabled())
-            LOG.debug("loadSetting called");
+        LOG.debug("loadSetting called");
         String fullname = getSettingsClass(rawSetting);
         if(fullname == null) //simpp messasge badly formatted
             return null;
