@@ -209,10 +209,10 @@ public class ManagedConnectionBufferTest extends BaseTestCase {
         elapsed=System.currentTimeMillis()-start;
         assertEquals("unexpected number of sent messages", 1, 
             out.stats().getNumMessagesSent());
-        assertEquals( "unexpected number of uncompressed bytes received", 
+        assertEquals("unexpected number of uncompressed bytes received", 
             pr.getTotalLength(), in.stats().getUncompressedBytesReceived() );
-        assertEquals( pr.getTotalLength(), 
-            out.stats().getUncompressedBytesSent() );
+        assertEquals("unexpected number of uncompressed bytes sent",
+            pr.getTotalLength(), out.stats().getUncompressedBytesSent() );
         assertLessThan("Unreasonably long send time", 500, elapsed);
         assertEquals("hopped something other than 0", 0, pr.getHops());
         assertEquals("unexpected ttl", 3, pr.getTTL());
