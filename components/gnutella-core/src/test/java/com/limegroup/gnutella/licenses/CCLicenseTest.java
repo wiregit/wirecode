@@ -10,7 +10,7 @@ import com.limegroup.gnutella.util.*;
 
 import org.apache.commons.httpclient.*;
 
-public final class CCVerifierTest extends BaseTestCase {
+public final class CCLicenseTest extends BaseTestCase {
     
     private static final String RDF_GOOD = 
 "<rdf:RDF xmlns=\"http://web.resource.org/cc/\"" +
@@ -46,12 +46,12 @@ public final class CCVerifierTest extends BaseTestCase {
         LICENSE_URI = uri;
     }
 
-	public CCVerifierTest(String name) {
+	public CCLicenseTest(String name) {
 		super(name);
 	}
 
 	public static Test suite() {
-		return buildTestSuite(CCVerifierTest.class);
+		return buildTestSuite(CCLicenseTest.class);
 	}
 
 	/**
@@ -63,33 +63,34 @@ public final class CCVerifierTest extends BaseTestCase {
 	
 	public void testParsingRDF() throws Exception {
 
-	    Verifier vf = new TestVerifier(RDF_GOOD);
+	    License l = new TestLicense(RDF_GOOD);
 	    Callback c = new Callback();
 	    assertFalse(c.completed);
-	    assertFalse(vf.isVerified());
-	    assertFalse(vf.isVerifying());
-	    assertFalse(vf.isVerificationDone());
-	    vf.verify(c);
+	    assertFalse(l.isVerified());
+	    assertFalse(l.isVerifying());
+	    l.verify(c);
 	    Thread.sleep(500);
-	    assertTrue(vf.isVerified());
-	    assertTrue(vf.isVerificationDone());
+	    assertTrue(l.isVerified());
+	    assertTrue(l.isValid(null));
+	    assertTrue(l.isValid(URN.createSHA1Urn("urn:sha1:MSMBC5VEUDLTC26UT5W7GZBAKZHCY2MD")));
+	    assertTrue(l.isValid(URN.createSHA1Urn("urn:sha1:SAMBC5VEUDLTC26UT5W7GZBAKZHCY2MD")));	    
 	    assertTrue(c.completed);
 	    
     }
     
-    private static class Callback implements VerificationCallback {
+    private static class Callback implements VerificationListener {
         boolean completed = false;
         
-        public void verificationCompleted(Verifier verifier) {
+        public void licenseVerified(License license) {
             completed = true;
         }
     }
     
     
-    private static class TestVerifier extends CCVerifier {
+    private static class TestLicense extends CCLicense {
         private final String page;
         
-        TestVerifier(String page) {
+        TestLicense(String page) {
             super("license text", LICENSE_URI);
             this.page = page;
         }
