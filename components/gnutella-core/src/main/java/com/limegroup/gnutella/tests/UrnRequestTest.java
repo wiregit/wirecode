@@ -84,8 +84,6 @@ public final class UrnRequestTest extends TestCase {
 			FileDesc fd = _fileManager.get(i);
 			Response testResponse = new Response(fd);
 			URN urn = fd.getSHA1Urn();
-			assertEquals("File indexes should match", i, 
-						 _fileManager.getFileIndexForUrn(urn));
 			assertEquals("FileDescs should match", fd, 
 						 _fileManager.getFileDescForUrn(urn));
 			

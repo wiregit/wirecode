@@ -66,7 +66,8 @@ public final class UrnCacheTest extends TestCase {
 		File[] files = createFiles();
 		FileDesc[] fileDescs = new FileDesc[files.length];
 		for(int i=0; i<files.length; i++) {
-			fileDescs[i] = new FileDesc(files[i], i);
+			Set urns = FileDesc.calculateAndCacheURN(files[i]);
+			fileDescs[i] = new FileDesc(files[i], urns, i);
 		}				
 		return fileDescs;
 	}

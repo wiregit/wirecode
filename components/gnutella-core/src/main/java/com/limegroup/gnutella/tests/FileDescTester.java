@@ -72,7 +72,8 @@ public final class FileDescTester extends TestCase {
 		_fileArray = parDir.listFiles();
 		_fileDescArray = new FileDesc[_fileArray.length];
 		for(int i=0; i<_fileArray.length; i++) {
-			_fileDescArray[i] = new FileDesc(_fileArray[i], i);
+			Set urns = FileDesc.calculateAndCacheURN(_fileArray[i]);
+			_fileDescArray[i] = new FileDesc(_fileArray[i], urns, i);
 		}
 	}
 
@@ -83,7 +84,8 @@ public final class FileDescTester extends TestCase {
 		File file = new File("FileDescTester.java");
 
 		try {
-			FileDesc fd = new FileDesc(null, 0);
+			Set urns = FileDesc.calculateAndCacheURN(file);
+			FileDesc fd = new FileDesc(null, urns, 0);
 			assertTrue("null values should not be permitted for FileDesc "+
 					   "constructor", false);
 		} catch(NullPointerException e) {

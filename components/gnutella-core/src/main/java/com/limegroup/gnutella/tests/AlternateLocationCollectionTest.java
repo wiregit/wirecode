@@ -107,7 +107,9 @@ public final class AlternateLocationCollectionTest extends TestCase {
 		_fileArray = parDir.listFiles();
 		_fileDescArray = new FileDesc[_fileArray.length];
 		for(int i=0; i<_fileArray.length; i++) {
-			_fileDescArray[i] = new FileDesc(_fileArray[i], i);
+			_fileDescArray[i] = new FileDesc(_fileArray[i], 
+											 FileDesc.calculateAndCacheURN(_fileArray[i]),
+											 i);
 		}
 
 		_alCollection = new AlternateLocationCollection();
