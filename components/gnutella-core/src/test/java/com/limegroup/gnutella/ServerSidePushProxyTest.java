@@ -402,6 +402,7 @@ public final class ServerSidePushProxyTest extends BaseTestCase {
     
     public void testGETWithServerId() throws Exception {
         tRequest("GET", // request method.
+                 "/gnutella/push-proxy", // the request
                  "ServerID", // initial param
                  Base32.encode(clientGUID), // initial value
                  "127.0.0.1", // ip
@@ -411,64 +412,78 @@ public final class ServerSidePushProxyTest extends BaseTestCase {
     }
     
     public void testHEADWithServerId() throws Exception {
-        tRequest("HEAD", "Serverid", Base32.encode(clientGUID),
-                        "10.238.1.87", 6350, null, 202);
+        tRequest("HEAD", "/gnutella/push-proxy", "Serverid", 
+                Base32.encode(clientGUID), "10.238.1.87", 6350, null, 202);
     }
     
     public void testInvalidGUIDWithServerId() throws Exception {
-        tRequest("GET", "serverid", Base32.encode(GUID.makeGuid()),
-                 "127.0.0.1", 6346, null, 410);
+        tRequest("GET", "/gnutella/push-proxy", "serverid",
+                Base32.encode(GUID.makeGuid()), "127.0.0.1", 6346, null, 410);
     }
     
     public void testInvalidGUIDWithGuid()  throws Exception {
-        tRequest("GET", "guid", new GUID().toHexString(),
-                "127.0.0.1", 6346, null, 410);
+        tRequest("GET", "/gnutella/push-proxy", "guid", 
+                new GUID().toHexString(), "127.0.0.1", 6346, null, 410);
     }
     
     public void testInvalidIP() throws Exception {
-        tRequest("GET", "serverid", Base32.encode(clientGUID),
-                "www.crapalapadapa.com", 6346, null, 400);
+        tRequest("GET", "/gnutella/push-proxy", "serverid",
+                Base32.encode(clientGUID), "www.crapalapadapa.com",
+                6346, null, 400);
     }
     
     public void testServerIdWithBase16Fails() throws Exception {
-        tRequest("GET", "serverid", leafGUID.toHexString(),
-                "127.0.0.1", 6346, null, 400);
+        tRequest("GET", "/gnutella/push-proxy", "serverid",
+                 leafGUID.toHexString(), "127.0.0.1", 6346, null, 400);
     }
     
     public void testGuidIsBase16() throws Exception {
-        tRequest("GET", "guid", leafGUID.toHexString(),
-                "127.0.0.1", 6346, null, 202);
+        tRequest("GET", "/gnutella/push-proxy", "guid",
+                leafGUID.toHexString(), "127.0.0.1", 6346, null, 202);
     }
     
     public void testGuidWithBase32Fails() throws Exception {
-        tRequest("GET", "guid", Base32.encode(clientGUID),
-                "127.0.0.1", 6346, null, 400);
+        tRequest("GET", "/gnutella/push-proxy", "guid",
+                Base32.encode(clientGUID), "127.0.0.1", 6346, null, 400);
     }
     
+    public void testGuidWithGnet() throws Exception {
+        tRequest("GET", "/gnet/push-proxy", "guid",
+                Base32.encode(clientGUID), "127.0.0.1", 6346, null, 400);
+    }
+        
     public void testFileChangesIndex() throws Exception {
         Map m = new HashMap();
         m.put("file", new Integer(34));
-        tRequest("GET", "guid", leafGUID.toHexString(),
-                "127.0.0.1", 6346, m, 202);
+        tRequest("GET", "/gnutella/push-proxy", "guid",
+                leafGUID.toHexString(), "127.0.0.1", 6346, m, 202);
+    }
+    
+    public void testFileWithGnet() throws Exception {
+        Map m = new HashMap();
+        m.put("file", new Integer(34));
+        tRequest("GET", "/gnet/push-proxy", "guid",
+                leafGUID.toHexString(), "127.0.0.1", 6346, m, 202);
     }
     
     public void testCannotHaveServeridAndGuid() throws Exception {
         Map m = new HashMap();
         m.put("serverid", Base32.encode(clientGUID));
-        tRequest("GET", "guid", leafGUID.toHexString(),
-                "127.0.0.1", 6346, m, 400);
+        tRequest("GET", "/gnutella/push-proxy", "guid",
+                leafGUID.toHexString(), "127.0.0.1", 6346, m, 400);
     }
     
     public void testMultipleFileFails() throws Exception {
         Map m = new HashMap();
         m.put("FILE", new Integer(1));
         m.put("file", new Integer(2));
-        tRequest("GET", "guid", leafGUID.toHexString(),
-                "127.0.0.1", 6346, m, 400);
+        tRequest("GET", "/gnutella/push-proxy", "guid",
+                leafGUID.toHexString(), "127.0.0.1", 6346, m, 400);
     }
     
-    private void tRequest(String reqMethod, String initKey, String guid,
-                                 String ip, int port, Map params, int opcode)
+    private void tRequest(String reqMethod, String reqKey, String initKey,
+                          String guid, String ip, int port, Map params,
+                          int opcode)
      throws Exception {
         Socket s = new Socket("localhost", PORT);
         BufferedReader in = 
@@ -479,7 +494,7 @@ public final class ServerSidePushProxyTest extends BaseTestCase {
         String result = null;
         Message m = null;
 
-        out.write(reqMethod + " /gnutella/push-proxy?");
+        out.write(reqMethod + " " + reqKey + "?");
         out.write(initKey + "=" + guid);
         if( params != null ) {
             for(Iterator i = params.entrySet().iterator(); i.hasNext(); ) {
