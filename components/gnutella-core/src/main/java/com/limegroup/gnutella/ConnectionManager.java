@@ -23,7 +23,7 @@ import java.util.*;
 public class ConnectionManager implements Runnable {
     private int port;
     public RouteTable routeTable=new RouteTable(2048); //tweak as needed
-    public PushRouteTable pushRouteTable = new PushRouteTable(2048);//same as Route Table could be lower
+    public RouteTable pushRouteTable = new RouteTable(2048);//same as Route Table could be lower
     private List /* of Connection */ connections=Collections.synchronizedList(
 						      new ArrayList());
     public HostCatcher catcher=new HostCatcher(this,Const.HOSTLIST);
@@ -184,6 +184,7 @@ public class ConnectionManager implements Runnable {
 	int i=connections.indexOf(c);
 	if (i != -1) {
 	    routeTable.remove(c);
+	    pushRouteTable.remove(c);
 	    connections.remove(i);
 	    if (keepAlive!=0) {
 		//Asynchronously fetch a connection to replace c
