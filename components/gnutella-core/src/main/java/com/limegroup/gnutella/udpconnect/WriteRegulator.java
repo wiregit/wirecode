@@ -77,6 +77,7 @@ public class WriteRegulator {
 
         int   rto        = _sendWindow.getRTO();
         float rttvar     = _sendWindow.getRTTVar();
+        float srtt       = _sendWindow.getSRTT();
 log(
 "sleepTime:"+sleepTime+
 " uS:"+usedSpots+
@@ -85,6 +86,7 @@ log(
 " rtt:"+rtt+
 " RTO:"+rto+
 " RTTVar:"+rttvar+
+" srtt:"+srtt+
 " sL:"+_skipLimit);
 
         if ( _skipLimit < 1 )

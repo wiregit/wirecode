@@ -226,6 +226,13 @@ public class DataWindow
     }
 
     /** 
+     *  Return the srtt estimate
+     */
+    public float getSRTT() {
+        return srtt;
+    }
+
+    /** 
      *  Return the current measure of average round trip time.
      */
     public int averageRoundTripTime() {
