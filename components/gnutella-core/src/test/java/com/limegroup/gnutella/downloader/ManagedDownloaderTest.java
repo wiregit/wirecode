@@ -28,6 +28,7 @@ import com.limegroup.gnutella.PushEndpoint;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.SpeedConstants;
+import com.limegroup.gnutella.UDPService;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.altlocs.AlternateLocation;
 import com.limegroup.gnutella.altlocs.AlternateLocationCollection;
@@ -307,8 +308,8 @@ public class ManagedDownloaderTest extends com.limegroup.gnutella.util.BaseTestC
                    qr.getQuery().equals("daswani susheel neil") ||
                    qr.getQuery().equals("susheel neil daswani") ||
                    qr.getQuery().equals("susheel daswani neil"));
-        // minspeed mask | firewalled | xml | firewall transfer = 226
-        assertEquals(226, qr.getMinSpeed());
+        // minspeed mask | firewalled | xml = 224
+        assertEquals(224, qr.getMinSpeed());
         // the guid should be a lime guid but not a lime requery guid
         assertTrue((GUID.isLimeGUID(qr.getGUID())) && 
                    !(GUID.isLimeRequeryGUID(qr.getGUID())));
@@ -316,6 +317,13 @@ public class ManagedDownloaderTest extends com.limegroup.gnutella.util.BaseTestC
                    (qr.getRichQuery().equals("")));
         Set urns=qr.getQueryUrns();
         assertEquals(0, urns.size());
+        
+        UDPService.instance().setReceiveSolicited(true);
+        qr=downloader.newRequery2();
+        // minspeed mask | firewalled | xml | firewall transfer = 226
+        assertEquals(226, qr.getMinSpeed());
+            
+        
     }
 
     /** Catches a bug with earlier keyword intersection code. */
