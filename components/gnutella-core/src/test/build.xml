@@ -473,7 +473,7 @@
  <!-- Runs a specific class without building the HTML - passed by 'class' -->
  <target name="test class internal" if="class" depends="prepare, build">
     <junit printsummary="withOutAndErr" 
-	       haltonfailure="yes"
+	       haltonfailure="no"
 	       showoutput="true"
 		   fork="on"
     >
