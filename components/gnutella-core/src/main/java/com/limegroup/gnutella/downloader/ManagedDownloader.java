@@ -2277,6 +2277,9 @@ public class ManagedDownloader implements Downloader, Serializable {
      * currently this method returns false iff NSEEx is  thrown. 
      */
     private boolean connectAndDownload(RemoteFileDesc rfd) {
+        if(LOG.isTraceEnabled())
+            LOG.trace("connectAndDownload for: " + rfd);
+        
         //this make throw an exception if we were not able to establish a 
         //direct connection and push was unsuccessful too
         HTTPDownloader dloader = null;
@@ -2552,7 +2555,9 @@ public class ManagedDownloader implements Downloader, Serializable {
      * to connect. Remember this rfd by putting it back into files and return
      * null 
      */
-    private HTTPDownloader establishConnection(RemoteFileDesc rfd) {        
+    private HTTPDownloader establishConnection(RemoteFileDesc rfd) {
+        if(LOG.isTraceEnabled())
+            LOG.trace("establishConnection(" + rfd + ")");
         
         if (rfd == null) //bad rfd, discard it and return null
             return null; // throw new NoSuchElementException();
@@ -2731,6 +2736,9 @@ public class ManagedDownloader implements Downloader, Serializable {
     private ConnectionStatus assignAndRequest(HTTPDownloader dloader,
                                               boolean http11) {
         RemoteFileDesc rfd = dloader.getRemoteFileDesc();
+        if(LOG.isTraceEnabled())
+            LOG.trace("assignAndRequest for: " + rfd);
+        
         try {
             if (commonOutFile.hasFreeBlocksToAssign()) {
                 assignWhite(dloader,http11);

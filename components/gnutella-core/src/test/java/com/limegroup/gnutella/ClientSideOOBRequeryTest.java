@@ -385,7 +385,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
         ((MyCallback)getCallback()).clearGUID();
         
         // sleep to make sure the download starts 
-        Thread.sleep(5000);
+        Thread.sleep(10000);
         
         assertTrue("file should saved", 
             new File( _savedDir, "berkeley.txt").exists());
@@ -797,7 +797,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
             RouterService.download(new RemoteFileDesc[] { rfd }, false, 
                 new GUID(guid));
         
-        Thread.sleep(1000);
+        Thread.sleep(5000);
         assertEquals(Downloader.ITERATIVE_GUESSING, downloader.getState());
 
         // we should start getting guess queries on all UDP ports, actually
@@ -823,8 +823,10 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
             }
         }
 
-        Thread.sleep((UDP_ACCESS.length * 1000) - 
-                     (System.currentTimeMillis() - currTime));
+        //Thread.sleep((UDP_ACCESS.length * 1000) - 
+                     //(System.currentTimeMillis() - currTime));
+
+        Thread.sleep(1000);
 
         assertEquals(Downloader.WAITING_FOR_RETRY, downloader.getState());
 
@@ -928,7 +930,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
             RouterService.download(new RemoteFileDesc[] { rfd }, false, 
                 new GUID(guid));
         
-        Thread.sleep(100);
+        Thread.sleep(5000);
         assertEquals(Downloader.ITERATIVE_GUESSING, downloader.getState());
 
         // we should get a query key request

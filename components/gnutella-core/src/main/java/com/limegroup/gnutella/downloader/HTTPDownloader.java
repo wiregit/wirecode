@@ -463,6 +463,7 @@ public class HTTPDownloader implements BandwidthTracker {
 	 * if necessary.
 	 */
     public void consumeBodyIfNecessary() {
+        LOG.trace("enter consumeBodyIfNecessary");
         try {
             if(!_bodyConsumed)
                 consumeBody(_contentLength);
@@ -597,6 +598,9 @@ public class HTTPDownloader implements BandwidthTracker {
      */
     private ConnectionStatus consumeBody(int contentLength)
       throws IOException {
+        if(LOG.isTraceEnabled())
+            LOG.trace("enter consumeBody(" + contentLength + ")");
+
         if(contentLength < 0)
             throw new IOException("unknown content-length, can't consume");
 
@@ -1265,6 +1269,7 @@ public class HTTPDownloader implements BandwidthTracker {
                 throw new FileIncompleteException();  
             }
         } finally {
+            _bodyConsumed = true;
             _isActive = false;
             if(!isHTTP11())
                 _byteReader.close();
