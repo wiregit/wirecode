@@ -1435,7 +1435,7 @@ public class ConnectionManager {
         //connections.  Sometimes ManagedConnections are handled by headers
         //directly.
         if (!c.isOutgoing() && !allowConnection(c)) {
-            c.loopToReject(_catcher);   
+            c.loopToReject();   
             //No need to remove, since it hasn't been added to any lists.
             throw new IOException("No space for connection");
         }
