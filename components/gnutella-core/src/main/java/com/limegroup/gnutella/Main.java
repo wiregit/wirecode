@@ -187,4 +187,14 @@ public class Main implements ActivityCallback {
 	    ret[i]=(String)buf.get(i);
 	return ret;
     }
+
+
+    /*******************************/
+    
+    public void removeDownload() {}
+
+    public void addUpload() {}
+
+    public void removeUpload() {}
+
 }
