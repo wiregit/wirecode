@@ -278,8 +278,16 @@ public class ManagedConnection extends Connection
     
     /**
      * Holds the mappings of GUIDs that are being proxied.
+     * We want to construct this lazily....
+     * GUID.TimedGUID -> GUID
+     * OOB Proxy GUID - > Original GUID
      */
-    private List _guidPairs = Collections.synchronizedList(new LinkedList());
+    private Map _guidMap = null;
+
+    /**
+     * The max lifetime of the GUID.
+     */
+    private static final long TIMED_GUID_LIFETIME = 10 * 60 * 1000;
 
     /**
      * Whether or not horizon counting is enabled from this connection.
@@ -980,7 +988,8 @@ public class ManagedConnection extends Connection
             if (isSupernodeClientConnection && 
                 (m instanceof QueryRequest)) m = tryToProxy((QueryRequest) m);
             if (isSupernodeClientConnection &&
-                (m instanceof QueryStatusResponse)) ; // clean up tables
+                (m instanceof QueryStatusResponse)) 
+                m = morphToStopQuery((QueryStatusResponse) m);
             //call MessageRouter to handle and process the message
             router.handleMessage(m, this);            
         }
@@ -1003,8 +1012,7 @@ public class ManagedConnection extends Connection
         // 2) set up mappings between the old guid and the new guid.
         // after that, everything is set.  all you need to do is map the guids
         // of the replies back to the original guid.  also, see if a you get a
-        // QueryStatus message that shuts off the query so you can clean up
-        // your tables.
+        // QueryStatusResponse message and morph it...
         // THIS IS SOME MAJOR HOKERY-POKERY!!!
         
         // 1) mutate the GUID of the query
@@ -1017,12 +1025,47 @@ public class ManagedConnection extends Connection
         query = QueryRequest.createProxyQuery(query, oobGUID);
 
         // 2) set up mappings between the guids
-        // put the original guid as the first, the oob guid as the second
-        GUIDPair pair = new GUIDPair(new GUID(origGUID), new GUID(oobGUID));
-        _guidPairs.add(pair);
+        if (_guidMap == null)
+            _guidMap = new Hashtable();
+        GUID.TimedGUID tGuid = new GUID.TimedGUID(new GUID(oobGUID),
+                                                  TIMED_GUID_LIFETIME);
+        _guidMap.put(tGuid, new GUID(origGUID));
 
         return query;
     }
+
+    private QueryStatusResponse morphToStopQuery(QueryStatusResponse resp) {
+        // if the _guidMap is null, we aren't proxying anything....
+        if (_guidMap == null) return resp;
+
+        // if we are proxying this query, we should modify the GUID so as
+        // to shut off the correct query
+        final GUID origGUID = resp.getQueryGUID();
+        GUID oobGUID = null;
+        synchronized (_guidMap) {
+            Iterator entrySetIter = _guidMap.entrySet().iterator();
+            while (entrySetIter.hasNext()) {
+                Map.Entry entry = (Map.Entry) entrySetIter.next();
+                if (origGUID.equals(entry.getValue())) {
+                    oobGUID = ((GUID.TimedGUID)entry.getKey()).getGUID();
+                    break;
+                }
+            }
+        }
+
+        // if we had a match, then just construct a new one....
+        if (oobGUID != null) {
+            try {
+                return new QueryStatusResponse(oobGUID, resp.getNumResults());
+            }
+            catch (BadPacketException bpe) {
+                ErrorService.error(bpe);
+                return resp;
+            }
+        }
+        else return resp;
+    }
+    
 
     /**
      * Utility method for checking whether or not this message is considered
@@ -1154,6 +1197,17 @@ public class ManagedConnection extends Connection
      */
     public void handleQueryReply(QueryReply queryReply,
                                  ReplyHandler receivingConnection) {
+        if (_guidMap != null) {
+        // ---------------------
+        // If we are proxying for a query, map back the guid of the reply
+        GUID.TimedGUID tGuid = new GUID.TimedGUID(new GUID(queryReply.getGUID()), 
+                                                  TIMED_GUID_LIFETIME);
+        GUID origGUID = (GUID) _guidMap.get(tGuid);
+        if (origGUID != null) queryReply = new QueryReply(origGUID.bytes(),
+                                                          queryReply);
+        // ---------------------
+        }
+        
         send(queryReply);
     }
 
@@ -1522,16 +1576,5 @@ public class ManagedConnection extends Connection
 	public Object getQRPLock() {
 		return QRP_LOCK;
 	}
-
-    
-    /** A simple container that associates two guids. */
-    public class GUIDPair {
-        public final GUID _one;
-        public final GUID _two;
-        public GUIDPair(GUID one, GUID two) {
-            _one = one;
-            _two = two;
-        }
-    }
 
 }

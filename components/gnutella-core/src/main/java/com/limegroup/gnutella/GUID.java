@@ -451,6 +451,7 @@ public class GUID implements  com.sun.java.util.collections.Comparable {
     public static class TimedGUID {
         private final long MAX_LIFE;
         private final GUID _guid;
+        public GUID getGUID() { return _guid; }
         private final long _creationTime;
 
         /**
