@@ -32,5 +32,5 @@ LAYOUT_RIGHT_TO_LEFT=false
 HAS_TIPS_OF_THE_DAY=false
 
 ################################################################################
-# Keys/value pairs for general strings that can be used in any components
+# All other translated resources are missing. Look at the default English file.
 ################################################################################
