@@ -319,7 +319,7 @@ public final class AlternateLocationCollection
     		AlternateLocation current = (AlternateLocation)iter.next();
     		byte [] addr = current.getHost().getInetAddress().getAddress();
     		System.arraycopy(addr,0,ret,index,4);
-    		ByteOrder.short2beb((short)
+    		ByteOrder.short2leb((short)
     				current.getHost().getPort(),ret,index+4 );
     		index+=6;
     	}

@@ -9,7 +9,7 @@ import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.settings.UploadSettings;
 import com.limegroup.gnutella.util.*;
 
-import java.util.*;
+import com.sun.java.util.collections.*;
 
 /**
  * a response to an UDPHeadPing.  It is a trimmed down version of the standard HEAD response,

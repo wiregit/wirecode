@@ -7,7 +7,7 @@ import com.limegroup.gnutella.filters.IPList;
 import com.limegroup.gnutella.messages.*;
 import java.io.*;
 import java.net.*;
-import java.util.*;
+import com.sun.java.util.collections.*;
 
 import com.sun.java.util.collections.Arrays;
 
@@ -285,10 +285,11 @@ public final class NetworkUtils {
      * @return a collection of <tt>IpPort</tt> objects.
      */
     public static Collection unpackIps(byte [] data) {
-    	List ret = new Vector();
+    	int size = data.length/6;
+    	List ret = new Vector(size);
     	byte [] current = new byte[6];
     	
-    	int size = data.length/6;
+    	
     	for (int i=0;i<size;i++) {
     		System.arraycopy(data,i*6,current,0,6);
     		try {

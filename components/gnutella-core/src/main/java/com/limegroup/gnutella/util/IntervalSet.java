@@ -300,8 +300,8 @@ public class IntervalSet {
     	int pos = 0;
     	for (Iterator iter = intervals.iterator();iter.hasNext();) {
     		Interval current = (Interval) iter.next();
-    		System.arraycopy(current.toBytes(),0,ret,pos,4);
-    		pos+=4;
+    		System.arraycopy(current.toBytes(),0,ret,pos,8);
+    		pos+=8;
     	}
     	return ret;
     }
