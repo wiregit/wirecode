@@ -754,7 +754,8 @@ public class SettingsManager implements SettingsInterface {
     }
 
     public boolean getCheckAgain() {
-        return Boolean.getBoolean(props_.getProperty(CHECK_AGAIN));
+		Boolean b = new Boolean(props_.getProperty(CHECK_AGAIN));
+        return b.booleanValue();
     }
 
     public int getFreeloaderFiles() {
@@ -1652,12 +1653,8 @@ public class SettingsManager implements SettingsInterface {
 	 * sets the boolean for whether or not we should check again for an update.
 	 */
     public void setCheckAgain(boolean check) {
-        String c;
-        if (check == true)
-            c = "true";
-        else
-            c = "false";
-        props_.put(CHECK_AGAIN, c);
+		Boolean b = new Boolean(check);
+        props_.put(CHECK_AGAIN, b.toString());
     }
 
     /**
