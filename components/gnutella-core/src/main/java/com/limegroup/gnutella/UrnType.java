@@ -54,12 +54,6 @@ public class UrnType implements Serializable {
 	}
 
 	/**
-	 * Cached constant for a colon string.
-	 */
-	private static final String COLON = ":";
-
-
-	/**
 	 * Constant for the leading URN string identifier, as specified in
 	 * RFC 2141.  This is equal to "urn:", although note that this
 	 * should be used in a case-insensitive manner in compliance with
