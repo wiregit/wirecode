@@ -170,4 +170,10 @@ public class ApplicationSettings extends LimeProps {
     public static final BooleanSetting CHECK_AGAIN = 
         FACTORY.createBooleanSetting("CHECK_AGAIN", true);
         
+    /**
+     * Whether or not tips should be displayed on startup.
+     */
+    public static final BooleanSetting SHOW_TOTD =
+        FACTORY.createBooleanSetting("SHOW_TOTD", true);
+        
 }
