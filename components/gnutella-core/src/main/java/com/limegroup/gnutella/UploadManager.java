@@ -105,7 +105,13 @@ public class UploadManager {
 		}
 		// 3) start the upload
 		_callback.addUpload(uploader);
-		uploader.start();
+
+		UploadRunner runner = new UploadRunner(uploader);
+		Thread upThread = new Thread(runner);
+		upThread.setDaemon(true);
+		// uploader.start();
+		upThread.start();
+
 		// remove from the map
 		removeFromMap(host);
 
@@ -168,7 +174,11 @@ public class UploadManager {
 //  		}
 
 		_callback.addUpload(uploader);		
-		uploader.start();
+		UploadRunner runner = new UploadRunner(uploader);
+		Thread upThread = new Thread(runner);
+		upThread.setDaemon(true);
+		// uploader.start();
+		upThread.start();
 
 		// remove it from the uploads in progress
 		removeFromMap(host);
@@ -300,6 +310,21 @@ public class UploadManager {
   		}
 
   	}
+
+    /*
+     * handles the threading 
+     */
+    private class UploadRunner implements Runnable {
+	private Uploader _up;
+	public UploadRunner(Uploader up) {
+	    _up = up;
+	}
+	public void run() {
+	    _up.start();
+	}
+
+    }
+
 
 }
 
