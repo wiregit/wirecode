@@ -173,10 +173,9 @@ public final class URN implements HTTPHeaderValue {
 	}
 
 	/**
-	 * Returns a <tt>String</tt> containing the URN for the get request.  For
-	 * a typical SHA1 request, this will return a 41 character URN, including
-	 * the 32 character hash value.  For a full description of what qualifies
-	 * as a valid URN, see RFC2141 ( http://www.ietf.org ).<p>
+	 * Returns whether or not the specified string represents a valid 
+	 * URN.  For a full description of what qualifies as a valid URN, 
+	 * see RFC2141 ( http://www.ietf.org ).<p>
 	 *
 	 * The broad requirements of the URN are that it meet the following 
 	 * syntax: <p>
@@ -187,9 +186,8 @@ public final class URN implements HTTPHeaderValue {
 	 * Namespace Identifier and "<NSS>" is the Namespace Specific String.
 	 *
 	 * @param urnString the <tt>String</tt> instance containing the get request
-	 * @return a <tt>String</tt> containing the URN for the get request
-	 * @throws <tt>IOException</tt> if there is an error parsing out the URN
-	 *  from the line
+	 * @return <tt>true</tt> if the specified string represents a valid urn,
+	 *         <tt>false</tt> otherwise
 	 */
 	private static boolean isValidUrn(final String urnString) {
 		int colon1Index = urnString.indexOf(":");
