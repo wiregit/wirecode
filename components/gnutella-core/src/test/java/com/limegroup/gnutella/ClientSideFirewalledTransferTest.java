@@ -138,6 +138,8 @@ public class ClientSideFirewalledTransferTest extends ClientSideTestCase {
 
         // confirm it has proxy info
         QueryReply reply = (QueryReply) m;
+        assertEquals("127.0.0.1", reply.getIP());
+        assertTrue(reply.getSupportsFWTransfer());
         assertNotNull(reply.getPushProxies());
 
         // check out PushProxy info
