@@ -583,7 +583,6 @@ public class UploadManager implements BandwidthTracker {
 		// Set the timeout so that we don't do block reading.
 		socket.setSoTimeout(SettingsManager.instance().getTimeout());
 		// open the stream from the socket for reading
-		//InputStream istream = socket.getInputStream();
 		ByteReader br = new ByteReader(socket.getInputStream());
 		
 		// read the first line. if null, throw an exception
@@ -603,6 +602,13 @@ public class UploadManager implements BandwidthTracker {
 		return this.parseURNGet(str);
   	}
 
+	/**
+	 * Returns whether or not the HTTP get request is a traditional 
+	 * Gnutella-style HTTP get.
+	 *
+	 * @return <tt>true</tt> if it is a traditional Gnutella HTTP get,
+	 *  <tt>false</tt> otherwise
+	 */
 	private boolean isTraditionalGet(final String GET_LINE) {
 		return (GET_LINE.indexOf("/get/") != -1);
 	}
@@ -626,6 +632,16 @@ public class UploadManager implements BandwidthTracker {
 		return idString.equalsIgnoreCase("uri-res");
 	}
 
+	/**
+	 * Performs the parsing for a traditional HTTP Gnutella get request,
+	 * returning a new <tt>GETLine</tt> instance with the data for the
+	 * request.
+	 *
+	 * @param GET_LINE the HTTP get request string
+	 * @return a new <tt>GETLine</tt> instance for the request
+	 * @throws <tt>IOException</tt> if there is an error parsing the
+	 *  request
+	 */
 	private static GETLine parseTraditionalGet(final String GET_LINE) 
 		throws IOException {
 		try {
