@@ -31,9 +31,12 @@ public class SimppManager {
 
     private String _propsStream;
 
+    private final ProcessingQueue _processingQueue;
+
     private SimppManager() {
         boolean problem = false;
         RandomAccessFile raf = null;
+        _processingQueue = new ProcessingQueue("Simpp Handling Queue");
         try {
             File file = 
                 new File(CommonUtils.getUserSettingsDir(), "simpp.xml");
@@ -109,8 +112,8 @@ public class SimppManager {
         if(simppPayload == null)
             return;
         final int myVersion = _latestVersion;
-        Thread simppHandler = new ManagedThread("SimppFileHandler") {
-            public void managedRun() {
+        Runnable simppHandler = new Runnable() {
+            public void run() {
                 SimppDataVerifier verifier=new SimppDataVerifier(simppPayload);
                 boolean verified = false;
                 try {
@@ -146,7 +149,6 @@ public class SimppManager {
                 RouterService.getConnectionManager().sendUpdatedCapabilities();
             }
         };
-        simppHandler.setDaemon(true);
-        simppHandler.start();
+        _processingQueue.add(simppHandler);
     }
 }
