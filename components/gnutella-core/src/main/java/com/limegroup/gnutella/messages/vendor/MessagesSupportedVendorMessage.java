@@ -112,6 +112,11 @@ public final class MessagesSupportedVendorMessage extends VendorMessage {
                                         F_UDP_CONNECT_BACK_REDIR,
                                         UDPConnectBackRedirect.VERSION);
         hashSet.add(smp);
+        // Best Candidates Support
+        smp = new SupportedMessageBlock(F_LIME_VENDOR_ID,
+        								F_BEST_CANDIDATE,
+										BestCandidatesVendorMessage.VERSION);
+        hashSet.add(smp);
     }
 
 
@@ -200,6 +205,9 @@ public final class MessagesSupportedVendorMessage extends VendorMessage {
         return supportsMessage(F_LIME_VENDOR_ID, F_GIVE_STATS);
     }
     
+    public int supportsBestCandidatesVM() {
+    	return supportsMessage(F_LIME_VENDOR_ID,F_BEST_CANDIDATE);
+    }
     /**
      * @return -1 if the message isn't supported, else it returns the version 
      * of the message supported.

@@ -81,7 +81,6 @@ public class UltrapeerHandshakeResponder
 	 * @param response the headers read from the connection
 	 */
 	private HandshakeResponse respondToIncoming(HandshakeResponse response) {
- 		
 		// if this is a connections from the crawler, return the special crawler 
         // response
 		if(response.isCrawler()) {
@@ -125,7 +124,6 @@ public class UltrapeerHandshakeResponder
     private boolean reject(HandshakeResponse response, Properties ret) { 
         // See if this connection can be allowed as a leaf.
         boolean allowedAsLeaf = _manager.allowConnectionAsLeaf(response);
-        
         // If the user wasn't an ultrapeer, accept or reject
         // based on whether or not it was allowed.
         // This is because leaf connections cannot upgrade to ultrapeers,

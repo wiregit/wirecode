@@ -395,7 +395,7 @@ public class Connection implements IpPort {
      */
     public void initialize(int timeout) 
 		throws IOException, NoGnutellaOkException, BadHandshakeException {
-
+    	
         if(isOutgoing())
             _socket=Sockets.connect(_host, _port, timeout);
 
@@ -438,10 +438,14 @@ public class Connection implements IpPort {
         try {
             //In all the line reading code below, we are somewhat lax in
             //distinguishing between '\r' and '\n'.  Who cares?
-            if(isOutgoing())
+            if(isOutgoing()) {
+                
                 initializeOutgoing();
-            else
+            }
+            else {
+                
                 initializeIncoming();
+            }
 
             _headers = HandshakeResponse.createResponse(HEADERS_READ);
             _headersWritten = HandshakeResponse.createResponse(HEADERS_WRITTEN);
@@ -536,6 +540,7 @@ public class Connection implements IpPort {
      * @exception IOException any other error.  
      */
     private void concludeOutgoingHandshake() throws IOException {
+    	
         //This step may involve handshaking multiple times so as
         //to support challenge/response kind of behaviour
         for(int i=0; i < MAX_HANDSHAKE_ATTEMPTS; i++) {
@@ -550,7 +555,6 @@ public class Connection implements IpPort {
                 throw new IOException("Bad connect string");
             }
 				
-
 			//3. Read the Gnutella headers. 
 			readHeaders();
 
@@ -602,7 +606,7 @@ public class Connection implements IpPort {
 			Assert.that(RESPONSE_HEADERS != null, "null RESPONSE_HEADERS");
             HandshakeResponse ourResponse = 
 				RESPONSE_HEADERS.respond(theirResponse, true);
-
+            
             Assert.that(ourResponse != null, "null ourResponse");
             writeLine(GNUTELLA_06 + " " + ourResponse.getStatusLine() + CRLF);
             sendHeaders(ourResponse.props());
@@ -702,7 +706,6 @@ public class Connection implements IpPort {
 			//loop.
 			HandshakeResponse ourResponse = 
 				RESPONSE_HEADERS.respond(_headers, false);
-
             writeLine(GNUTELLA_06 + " " + ourResponse.getStatusLine() + CRLF);
             sendHeaders(ourResponse.props());                   
             //Our response should be either OK or UNAUTHORIZED for the handshake
@@ -1463,6 +1466,12 @@ public class Connection implements IpPort {
         if (_capabilities != null)
             return _capabilities.supportsWhatIsNew();
         return false;
+    }
+    
+    public int remoteHostSupportsBestCandidates(){
+    	if (_capabilities !=null)
+    		return _messagesSupported.supportsBestCandidatesVM();
+    	return -1;
     }
 
     /**

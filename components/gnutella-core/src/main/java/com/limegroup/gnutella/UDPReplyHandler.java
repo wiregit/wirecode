@@ -243,7 +243,7 @@ public final class UDPReplyHandler implements ReplyHandler {
      * sends a Vendor Message to the host/port in this reply handler by UDP
      * datagram.
      */
-    public void handleStatisticVM(StatisticVendorMessage m) throws IOException {
+    public void handleStatisticVM(StatisticVendorMessage m) {
         UDPService.instance().send(m, IP, PORT);
     }
     
@@ -280,5 +280,25 @@ public final class UDPReplyHandler implements ReplyHandler {
 		return ("UDPReplyHandler:\r\n"+
 				IP.toString()+"\r\n"+
 				PORT+"\r\n");
+	}
+
+	/* (non-Javadoc)
+	 * @see com.limegroup.gnutella.ReplyHandler#handleUPListVM(com.limegroup.gnutella.messages.vendor.UPListVendorMessage)
+	 */
+	public void handleUPListVM(UPListVendorMessage m) {
+		UDPService.instance().send(m, IP, PORT);
+	}
+	/* (non-Javadoc)
+	 * @see com.limegroup.gnutella.ReplyHandler#isUDPCapable()
+	 */
+	public boolean isUDPCapable() {
+		// Auto-generated method stub
+		return false;
+	}
+	/* (non-Javadoc)
+	 * @see com.limegroup.gnutella.ReplyHandler#setUDPCapable(boolean)
+	 */
+	public void setUDPCapable(boolean status) {
+		//  Auto-generated method stub
 	}
 }

@@ -10,6 +10,7 @@ import com.limegroup.gnutella.messages.*;
 import com.limegroup.gnutella.messages.vendor.*;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.*;
+import com.limegroup.gnutella.upelection.*;
 import com.sun.java.util.collections.*;
 import java.util.StringTokenizer;
 import java.io.*;
@@ -176,7 +177,12 @@ public abstract class MessageRouter {
      * GUID -> MessageListener
      */
     private final Map _messageListeners = new Hashtable();
-
+    
+    /**
+     * ref to the promotion manager.
+     */
+    private PromotionManager _promotionManager;
+    
     /**
      * Creates a MessageRouter.  Must call initialize before using.
      */
@@ -201,6 +207,7 @@ public abstract class MessageRouter {
         _manager = RouterService.getConnectionManager();
 		_callback = RouterService.getCallback();
 		_fileManager = RouterService.getFileManager();
+		_promotionManager = RouterService.getPromotionManager();
 		DYNAMIC_QUERIER.start();
 	    QRP_PROPAGATOR.start();
 
@@ -209,6 +216,10 @@ public abstract class MessageRouter {
         // schedule a runner to clear guys we've connected back to
         RouterService.schedule(new ConnectBackExpirer(), 10 * CLEAR_TIME, 
                                10 * CLEAR_TIME);
+        
+        RouterService.schedule(new CandidateAdvertiser(), 
+        			PromotionManager.CANDIDATE_PROPAGATION_DELAY,	
+					PromotionManager.CANDIDATE_PROPAGATION_INTERVAL);
     }
 
     /** Call this to inform us that a query has been killed by a user or
@@ -393,6 +404,16 @@ public abstract class MessageRouter {
             handleStatisticsMessage(
                             (StatisticVendorMessage)msg, receivingConnection);
         }
+        else if (msg instanceof BestCandidatesVendorMessage) {
+        	//TODO: add statistics recording code
+        	handleBestCandidatesMessage(
+        					(BestCandidatesVendorMessage)msg, receivingConnection);
+        }
+        else if (msg instanceof PromotionRequestVendorMessage) {
+        	//TODO: add statistics recording code
+        	handlePromotionRequestVM(
+        					(PromotionRequestVendorMessage)msg,receivingConnection);
+        }
         //This may trigger propogation of query route tables.  We do this AFTER
         //any handshake pings.  Otherwise we'll think all clients are old
         //clients.
@@ -491,6 +512,22 @@ public abstract class MessageRouter {
             if(RECORD_STATS)
                 ;
             handleStatisticsMessage((StatisticVendorMessage)msg, handler);
+        } 
+        else if(msg instanceof GiveUPVendorMessage) {
+        	if(RECORD_STATS)
+        		;
+        	handleGiveUPVendorMessage((GiveUPVendorMessage)msg, handler);
+        }
+        else if(msg instanceof UPListVendorMessage) {
+        	if(RECORD_STATS)
+        		;
+        	//handleUPListVendorMessage((UPListVendorMessage)msg, handler);
+        }
+        else if (msg instanceof PromotionACKVendorMessage) {
+        	if(RECORD_STATS)
+        		;
+        	handlePromotionACKVendorMessage(
+        			(PromotionACKVendorMessage)msg,handler,datagram);
         }
         notifyMessageListener(msg);
     }
@@ -883,8 +920,11 @@ public abstract class MessageRouter {
                     // whatever...
                     ; 
                 else return;
+                
             }
-
+            //mark the other node as OOB capable
+            handler.setUDPCapable(request.desiresOutOfBandReplies());
+            
             // don't send it to leaves here -- the dynamic querier will 
             // handle that
             locallyEvaluate = false;
@@ -2540,8 +2580,7 @@ public abstract class MessageRouter {
             }
         }
     }
-
-
+    
     /** This is run to clear out the registry of connect back attempts...
      *  Made package access for easy test access.
      */
@@ -2555,6 +2594,181 @@ public abstract class MessageRouter {
                 ErrorService.error(t);
             }
         }
+    }
+    
+    /**
+     * processes and updates the list of the best candidates based on a received message
+     * @param msg
+     * @param advertiser
+     */
+    private void handleBestCandidatesMessage(BestCandidatesVendorMessage msg, ReplyHandler advertiser) {
+    	
+    	//make sure the advertiser is directly connected to us ultrapeer 
+    	//AND that we are an ultrapeer.
+    	if (!advertiser.isGoodUltrapeer() || !RouterService.isSupernode())
+    		return;
+    	
+    	//make sure they aren't advertising too soon.
+    	if (!_promotionManager.getCandidateAdvertisers().add(advertiser.getInetAddress()))
+    		return;
+    	
+    	//then add a ref of the advertiser to each candidate he sent
+    	Candidate [] candidates = msg.getBestCandidates();
+    	
+    	for (int i = 0;i<candidates.length;i++) 
+    		if (candidates[i]!=null)
+    			candidates[i].setAdvertiser(advertiser);
+    		
+    	//then update our lists
+    	BestCandidates.update(candidates);
+    }
+    
+    /**
+     * responds to a request for the list of ultrapeers or leaves.  It is sent right back to the
+     * requestor on the UDP receiver thread.
+     * @param msg the request message
+     * @param handler the UDPHandler to send it to.
+     */
+    private void handleGiveUPVendorMessage(GiveUPVendorMessage msg, ReplyHandler handler){
+    	
+    	//make sure the same person doesn't request too often
+    	//note: this should only happen on the UDP receiver thread, that's why
+    	//I'm not locking it.
+    	if (!_promotionManager.getUDPListRequestors().add(handler.getInetAddress())) 
+    		return; //this also takes care of multiple instances running on the same ip address.
+    	UPListVendorMessage newMsg = new UPListVendorMessage(msg);
+    	handler.handleUPListVM(newMsg);
+    }
+    
+    /**
+     * handles a PromotionRequest received from the network.
+     * 
+     * There are two possible scenarios:
+     * A. We are the target leaf - initiate the promotion process
+     * B. We are a forwarding UP - check for validity and forward
+     *  
+     * @param msg the received message
+     * @param handler the connection we received the message on.
+     */
+    public void handlePromotionRequestVM(PromotionRequestVendorMessage msg, ReplyHandler handler) {
+    	//first make sure the other side is an ultrapeer, since only UPs should send these messages
+    	if (!handler.isGoodUltrapeer()) {
+    		return;
+    	}
+    	//then check the distance field, and if it is 0 verify the sender
+    	if (msg.getDistance() == 0 &&
+    			! msg.getRequestor().getInetAddress().equals(handler.getInetAddress())) {
+    		return;
+    	}
+				
+    	
+    	//if we are a leaf and we are the target, start the promotion process.
+    	if(!RouterService.isSupernode()) {
+    		//make sure the promotion request was intended for us
+    		if (Arrays.equals(msg.getCandidate().getInetAddress().getAddress(),
+    				RouterService.getExternalAddress()) ||
+					handler.getInetAddress().isLoopbackAddress()) 
+    			//for testing purposes allows requests from localhost
+    			_promotionManager.initiatePromotion(msg);
+    		return; 
+    	}
+    	
+    	//*********************
+    	//we are an ultrapeer that needs to forward this query.
+    	//*********************
+    	
+    	//first make sure the request hasn't been travelling for too long.
+    	if (msg.getDistance() > 2) {
+    		return;
+    	}
+    	//then see if the specified candidate is still on our lists
+    	//it should be either in the ttl 0 or ttl 1 slot.
+    	//also, if it is in the ttl 1 slot is should not have traveled more than 1 hop.
+    	Candidate [] ourCandidates = BestCandidates.getCandidates();
+    	InetAddress candidateAddress = msg.getCandidate().getInetAddress();
+    	
+    	if ((ourCandidates[0].getInetAddress().equals(candidateAddress) && 
+    			msg.getDistance()<2) ||
+			(ourCandidates[1].getInetAddress().equals(candidateAddress) &&
+    			msg.getDistance()<1))
+    		forwardPromotionRequest(new PromotionRequestVendorMessage(msg));
+    	
+    }
+    
+    
+    
+    /**
+     * forwards a promotion request to a candidate.  This method will route
+     * the Promotion Request VM to the appropriate destination.
+     * If the route to the target is no longer open, the message is dropped.
+     *  
+     * @param msg the PromotionRequestVendorMEssage to forward
+     */
+    public void forwardPromotionRequest(PromotionRequestVendorMessage msg) {
+    	//get the address of the candidate
+    	InetAddress address = msg.getCandidate().getInetAddress();
+    	
+    	
+    	//see if the target is at ttl 0 from us
+    	//if so, send the message to the leaf directly.
+    	if (BestCandidates.getCandidates()[0].getInetAddress().equals(address)) {
+    		//see if such leaf is still connected.
+    		Connection leaf=null;
+    		Iterator iter = RouterService.getConnectionManager().
+				getInitializedClientConnections().iterator();
+    		
+    		while(iter.hasNext()) {
+    			Connection handler = (Connection)iter.next();
+    			if (handler.getInetAddress().equals(address)) {
+    				leaf = handler;
+    				break;
+    			}
+    		}
+    		
+    		//if we have found the leaf, forward the new request to it.
+    		if (leaf !=null)
+    			try {
+    				leaf.send(msg);
+    			}catch(IOException ohWell) {
+    				//sending failed.  not much we can do.
+    			}
+    		
+    		return;
+    	}
+    	
+    	//the target is ttl 1 from us.  Forward the query to its advertiser.
+    	Connection up = null;
+    	Iterator iter = RouterService.getConnectionManager().getInitializedConnections().iterator();
+    	while (iter.hasNext()) {
+    		Connection current = (Connection)iter.next();
+    		if (current.getInetAddress().equals(
+    				BestCandidates.getCandidates()[1].getAdvertiser().getInetAddress())) {
+    			up = current;
+    			break;
+    		}
+    	}
+    	
+    	//forward the message to the ultrapeer.
+    	if (up!=null)
+    		try {
+				up.send(msg);
+			}catch(IOException ohWell) {
+				//sending failed.  not much we can do.
+			}
+		
+    }
+    
+    /**
+     * handles an ACK for a promotion request message.
+     * delegates the call to promotion manager.
+     * 
+     */
+    private void handlePromotionACKVendorMessage(PromotionACKVendorMessage message, 
+    			ReplyHandler handler, DatagramPacket datagram) {
+    	
+    	_promotionManager.handleACK(message,
+    			new Endpoint(datagram.getAddress().getHostAddress(),datagram.getPort()));
+    	
     }
 
 

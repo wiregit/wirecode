@@ -688,6 +688,7 @@ public class ConnectionManager {
      * @return true if a connection of the given type is allowed
      */
     public boolean allowConnection(HandshakeResponse hr, boolean leaf) {
+
 		// preferencing may not be active for testing purposes --
 		// just return if it's not
 		if(!ConnectionSettings.PREFERENCING_ACTIVE.getValue()) return true;
@@ -728,7 +729,6 @@ public class ConnectionManager {
                 return false;
             }
 		} else if (hr.isLeaf() || leaf) {
-            
             if(!allowUltrapeer2LeafConnection(hr)) {
                 return false;
             }
@@ -770,11 +770,13 @@ public class ConnectionManager {
                   RESERVED_GOOD_LEAF_CONNECTIONS);
                             
         } else if (hr.isUltrapeer()) {
+        	
             // Note that this code is NEVER CALLED when we are a leaf.
             // As a leaf, we will allow however many ultrapeers we happen
             // to connect to.
             // Thus, we only worry about the case we're connecting to
             // another ultrapeer (internally or externally generated)
+
             int peers = getNumInitializedConnections();
             int nonLimeWirePeers = _nonLimeWirePeers;
             int locale_num = 0;
@@ -854,7 +856,8 @@ public class ConnectionManager {
      */
     private static boolean allowUltrapeer2LeafConnection(HandshakeResponse hr) {
         String userAgent = hr.getUserAgent();
-        if(userAgent == null) return false;
+        if(userAgent == null) 
+        return false;
         if(userAgent.startsWith("Morpheus")) return false;
         return true;        
     }
@@ -1562,6 +1565,65 @@ public class ConnectionManager {
         
         completeConnectionInitialization(mc, true);
     }
+    
+    /**
+     * tries to become an ulrapeer by first disconnecting all existing leaf connections
+     * and then adding the guaranteed up2up connection.  Used for promotion.
+     * @param host the host to connect to that we are sure has a slot waiting for us
+     * @param port the port that host is listening to
+     */
+    public void becomeAnUPWithBackupConn(String host, int port) throws IOException {
+   
+    	//first, see if we are already connected to that host
+    	//and if so, close the connection since morphing is not yet implemented
+    	if (isConnectedTo(host))
+    		for (Iterator iter = _initializedConnections.iterator();iter.hasNext();) {
+    			ManagedConnection c = (ManagedConnection) iter.next();
+    			if (c.getAddress().equals(host))
+    				remove(c);
+    		}
+    	
+    	//also close some connections until we have a free slot
+    	while (PREFERRED_CONNECTIONS_FOR_LEAF - getNumInitializedConnections() < 1)
+    		remove ((ManagedConnection) _initializedConnections.get(0));
+    	
+    	
+    	//this connection must not fail.  If it does, the process will be aborted. 
+		final ManagedConnection UPconn = ManagedConnection.forceUP2UPConnection(host,port);
+		UPconn.initialize();
+		processConnectionHeaders(UPconn);
+		
+		//if we got here, the connection is initialized
+		//shut down the other connections
+		disconnect(); 
+		
+		//now add our backup connection to the lists.
+		//this duplicates some code from initializeExternallyGeneratedConnection
+		RouterService.getCallback().connectionInitializing(UPconn);
+		synchronized(this) {
+			connectionInitializing(UPconn);
+			completeConnectionInitialization(UPconn,false);
+		}
+		//start the connection
+		Thread connectionRunner = new ManagedThread(
+				new OutgoingConnector(UPconn,false));
+		connectionRunner.start();
+		
+		//sleep some time to get the connection initialized, etc.
+		try {
+			Thread.sleep(1000);
+		}catch(InterruptedException iex){}
+
+		//become an UP! :)
+		UltrapeerSettings.EVER_ULTRAPEER_CAPABLE.setValue(true);
+		isSupernode();
+		
+		//connect using the classic method.  This should be removed
+		//when the crawler is implemented
+		recoverHosts();
+		setKeepAlive(ConnectionSettings.NUM_CONNECTIONS.getValue());
+		
+    }
 
     /** 
      * Indicates that we are a client node, and have received ultrapeer
@@ -1765,6 +1827,24 @@ public class ConnectionManager {
         //works for Gnutella 0.4 connections, as well as some odd cases for 0.6
         //connections.  Sometimes ManagedConnections are handled by headers
         //directly.
+        //
+        //however, always accept the connection if it comes from the
+        //leaf that we are trying to promote.
+        
+        boolean fromCandidate = false;
+        if (c.isSupernodeSupernodeConnection() && !c.isOutgoing()) 
+        	//evaluate the big conditional only for incoming UP connections
+        	//because it involves locking stuff.
+        	fromCandidate =RouterService.getPromotionManager().
+					isPromoting(c.getAddress(),c.getPort());
+        
+        if (fromCandidate) {
+        	//free up an UP slot
+        	while (!hasFreeUltrapeerSlots())
+        		remove ( (ManagedConnection)
+        				_initializedConnections.get(0));
+        } 
+        else
         if (!c.isOutgoing() && !allowConnection(c)) {
             c.loopToReject();
             //No need to remove, since it hasn't been added to any lists.

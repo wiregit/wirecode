@@ -2,6 +2,7 @@ package com.limegroup.gnutella;
 
 import java.io.*;
 import java.net.*;
+
 import com.limegroup.gnutella.search.SearchResultHandler;
 import com.limegroup.gnutella.messages.*;
 import com.limegroup.gnutella.settings.*;
@@ -293,6 +294,13 @@ public class ManagedConnection extends Connection
      * Whether or not horizon counting is enabled from this connection.
      */
     private boolean _horizonEnabled = true;
+    
+    /**
+     * Whether this connection can receive unsolicited UDP.
+     * Ultrapeers always can, leafs can if they send queries that desire
+     * out of band results.
+     */
+    private boolean _UDPCapable = false;
 
     /**
      * Creates a new outgoing connection to the specified host on the
@@ -309,6 +317,19 @@ public class ManagedConnection extends Connection
 			 (RouterService.isSupernode() ?
 			  (HandshakeResponder)new UltrapeerHandshakeResponder(host) :
 			  (HandshakeResponder)new LeafHandshakeResponder(host)));
+    }
+    
+    /**
+     * factory method which allows the creation of Ultrapeer2Ultrapeer connection
+     * even if we are leaf.  Useful for promoting to ultrapeer.
+     * @param host the host to connect to
+     * @param port the port the host is listening on
+     * @return the new connection object.
+     */
+    public static ManagedConnection forceUP2UPConnection (String host, int port) {
+    	return new ManagedConnection(host, port, 
+    		new UltrapeerHeaders(host), new ForcedUltrapeerHandshakeResponder(host));
+    	
     }
 
 	/**
@@ -1520,6 +1541,22 @@ public class ManagedConnection extends Connection
     }
     
 
+    /**
+     * @return whether the peer on the other side of this connection
+     * can receive unsolicited UDP.  Ultrapeers always can.
+     */
+    public boolean isUDPCapable() {
+    	return isSupernodeConnection() ? true : _UDPCapable;
+    }
+    
+    /**
+     * marks this connection as capable of receiving unsolicited UDP
+     */
+    public void setUDPCapable(boolean status) {
+    	_UDPCapable=status;  
+    }
+    
+
     /** 
      * Tests representation invariants.  For performance reasons, this is
      * private and final.  Make protected if ManagedConnection is subclassed.
@@ -1621,5 +1658,14 @@ public class ManagedConnection extends Connection
             }
         }
     }
+
+
+
+	/** 
+	 * this should not arrive through TCP.
+	 */
+	public void handleUPListVM(UPListVendorMessage m) {
+		
+	}
 
 }

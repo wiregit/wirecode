@@ -279,9 +279,32 @@ public final class ForMeReplyHandler implements ReplyHandler {
         return true;
     }
 
+
     public String getLocalePref() {
         return ApplicationSettings.LANGUAGE.getValue();
     }
+
+
+
+	/* (non-Javadoc)
+	 * @see com.limegroup.gnutella.ReplyHandler#handleUPListVM(com.limegroup.gnutella.messages.vendor.UPListVendorMessage)
+	 */
+	public void handleUPListVM(UPListVendorMessage m) {
+		// Auto-generated method stub
+		
+	}
+	/* (non-Javadoc)
+	 * @see com.limegroup.gnutella.ReplyHandler#isUDPCapable()
+	 */
+	public boolean isUDPCapable() {
+		return RouterService.isGUESSCapable();
+	}
+	/* (non-Javadoc)
+	 * @see com.limegroup.gnutella.ReplyHandler#setUDPCapable(boolean)
+	 */
+	public void setUDPCapable(boolean status) {
+		//stub
+	}
 
 }
 

@@ -162,7 +162,21 @@ public interface ReplyHandler {
      * Handles StatisticVendorMessage using this ReplyHandler
      */ 
     public void handleStatisticVM(StatisticVendorMessage m) throws IOException;
-
+    
+    /**
+     * Handles the UDP analog of "Crawler:" header
+     */
+    public void handleUPListVM(UPListVendorMessage m);
+    
+    /**
+     * Whether it supports unsolicited UDP
+     */
+    public boolean isUDPCapable();
+    
+    /**
+     * Sets whether the handler can receive unsolicited UDP
+     */
+    public void setUDPCapable(boolean status);
 }
 
 
