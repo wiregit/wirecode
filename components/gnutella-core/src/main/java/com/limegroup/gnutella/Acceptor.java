@@ -32,6 +32,9 @@ public class Acceptor extends Thread {
     private MessageRouter _router;
     private ActivityCallback _callback;
 
+	private boolean _acceptedIncoming = false;
+
+
 	//  Statically initialize address which should be replaced by a true socket
 	//
     static {
@@ -183,6 +186,19 @@ public class Acceptor extends Thread {
         }
     }
 
+
+	/**
+	 * This method lets you know if this class has accepted
+	 * an incoming connection at any point during the session.
+	 * The boolean variable _acceptedIncoming is set to false
+	 * by default, and true as soon as a connection is established.
+	 */
+
+	public boolean acceptedIncoming() {
+		return _acceptedIncoming;
+	}
+
+
     /** @modifies this, network, SettingsManager
      *  @effects accepts new incoming connections on a designated port
      *   and services incoming requests.  If the port was changed
@@ -250,6 +266,9 @@ public class Acceptor extends Thread {
                     client.close();
                     continue;
                 }
+
+				// we have accepted an incoming socket.
+				_acceptedIncoming = true;
 
                 //Dispatch asynchronously.
                 new ConnectionDispatchRunner(client);
