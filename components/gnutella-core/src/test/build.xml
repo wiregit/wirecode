@@ -69,7 +69,7 @@
 
   <!-- tests all classes -->
   <target name="test all" depends="build tests">
-    <junit printsummary="withOutAndErr" haltonfailure="yes">
+    <junit printsummary="withOutAndErr" haltonfailure="yes" fork="yes">
 	  <formatter type="plain" useFile="false"/>
 	  <test name="com.limegroup.gnutella.AllTests" />
 	  <classpath>
@@ -82,7 +82,7 @@
 
   <!-- tests individual class -->
   <target name="test class" if="class" depends="build tests">
-    <junit printsummary="withOutAndErr" haltonfailure="yes">
+    <junit printsummary="withOutAndErr" haltonfailure="yes" fork="yes">
 	  <formatter type="plain" useFile="false"/>
 	  <test name="com.limegroup.gnutella.${class}" />
 	  <classpath>
