@@ -226,12 +226,20 @@ class RemoteFileDescGrouper implements Serializable {
     /**
      * Accessor for the <tt>List</tt> of all URNs for this grouper.
      * 
-     * @return a new, unmodifiable <tt>List</tt> of URNs for this grouper
+     * @return a new, unmodifiable <tt>List</tt> of URNs for this grouper. The
+     *  returned <tt>List</tt> can contain <tt>null</tt> elements
      */
     synchronized List getURNs() {
         return Collections.unmodifiableList(Arrays.asList(sha1s));
     }
 
+    /**
+     * Accessor for the <tt>URN</tt> for the specified bucket index.
+     * 
+     * @param n the index of the of the desired bucket
+     * @return the <tt>URN</tt> for the specified bucket index, which can be
+     *  <tt>null</tt>
+     */
     synchronized URN getURNForBucket(int n) {
         if (n <0 || n>=buckets.size())
             throw new IllegalArgumentException("index: " + n + 
@@ -243,7 +251,7 @@ class RemoteFileDescGrouper implements Serializable {
      */
     synchronized URN getBestURN() {
         int index = 0;
-        final int numBuckets = numBuckets();
+        final int numBuckets = buckets.size();
         for (int i = 0, maxNum = 0; i < numBuckets; i++) {
             List currBucket = (List)buckets.get(i);
             if (currBucket.size() > maxNum) {
@@ -278,10 +286,6 @@ class RemoteFileDescGrouper implements Serializable {
      */
     Iterator /* of List of RemoteFileDesc */ buckets() {
         return new BucketIterator();
-    }
-
-    synchronized int numBuckets() {
-        return buckets.size();
     }
 
     private class BucketIterator implements Iterator {
