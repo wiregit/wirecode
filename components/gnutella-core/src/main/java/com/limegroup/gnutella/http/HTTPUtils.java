@@ -281,10 +281,7 @@ public final class HTTPUtils {
         if (ChatSettings.CHAT_ENABLED.getValue())
             features.add(ConstantHTTPHeaderValue.CHAT_FEATURE);
         
-        //TODO: after fw2fw transfer gets ipmlemented, add appropriate
-        //header here.
-        if (RouterService.acceptedIncomingConnection())
-        	features.add(ConstantHTTPHeaderValue.PUSH_LOCS_FEATURE);
+       	features.add(ConstantHTTPHeaderValue.PUSH_LOCS_FEATURE);
         
         return features;
     }        
