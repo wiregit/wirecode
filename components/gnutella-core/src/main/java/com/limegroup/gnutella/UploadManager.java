@@ -395,19 +395,20 @@ public class UploadManager {
 		}
 		public void run() {
 			try {
-				// is connect always safe to call?  it should be
+				// connect is always safe to call.  it should be
 				// if it is a non-push upload, then connect should
 				// just return.  if there is an error, it should
 				// be because the connection failed.
 				_up.connect();
-				// start doesn't throw an exception.  rather, it
-				synchronized(UploadManager.this) {
-				    _activeUploads++;
-				}
-				
-				// handles it internally.  is this the correct
-				// way to handle it?
-				_up.start();
+                try {
+                    synchronized(UploadManager.this) { _activeUploads++; }
+                    // start doesn't throw an exception.  rather, it
+                    // handles it internally.  is this the correct
+                    // way to handle it?
+                    _up.start();
+                }  finally {
+                    synchronized(UploadManager.this) { _activeUploads--; }
+                }
 			} catch (IOException e) {
 				// if it fails, insert it into the push failed list
 				// _up.setState(Uploader.PUSH_FAILED);
@@ -416,7 +417,6 @@ public class UploadManager {
 				return;
 			} finally {			    
 				synchronized(UploadManager.this) {
-				    _activeUploads--;
 					removeFromMap(_host);
 					removeAttemptedPush(_host);
 				}
