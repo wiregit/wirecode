@@ -5,7 +5,7 @@ import com.limegroup.gnutella.xml.*;
 import com.limegroup.gnutella.handshaking.*;
 import com.limegroup.gnutella.security.*;
 import com.limegroup.gnutella.routing.*;
-import com.limegroup.gnutella.tests.stubs.*;
+import com.limegroup.gnutella.stubs.*;
 import com.limegroup.gnutella.gui.*;
 
 import java.util.Properties;
@@ -134,7 +134,8 @@ public class AcceptLimitTest {
             System.out.println("-Testing that 5th fetched non-LW is REJECTED");
             Connection c5a=testOneFetch(
                 rs, router, LOCALHOST, 6351, new EmptyResponder(), 503);
-            Assert.that(cm.getNumConnections()==4);
+            try { Thread.sleep(100); } catch (InterruptedException e) { }
+            Assert.that(cm.getNumConnections()==4);   //FAIL
 
             System.out.println("-Testing that 5th fetched LW is allowed");
             Connection c5b=testOneFetch(
@@ -324,6 +325,9 @@ public class AcceptLimitTest {
         Thread.yield();
         rs.connectToHostAsynchronously("localhost", 6341);
         Connection in=acceptor.accept();
+        try { Thread.sleep(100); } catch (InterruptedException e) { } //wait for init
+        Assert.that(in.getProperty("X-Ultrapeer").toLowerCase().equals("true"));
+        Assert.that(in.getPropertyWritten("X-Ultrapeer").toLowerCase().equals("false"));
         Assert.that(in!=null);
         Assert.that(rs.isSupernode());
         Assert.that(rs.getNumConnections()==1);
