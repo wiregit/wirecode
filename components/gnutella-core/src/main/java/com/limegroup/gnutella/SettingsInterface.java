@@ -250,9 +250,10 @@ public interface SettingsInterface
     public static final boolean DEFAULT_USE_QUICK_CONNECT = true;
     /** List of hosts to try on quick connect */
     public static final String[] DEFAULT_QUICK_CONNECT_HOSTS 
-	= {"gnutellahosts.com:6346", "gnet.ath.cx:6346",
-	   "gnet1.ath.cx:6346","gnet2.ath.cx:6346","gnet3.ath.cx:6346",
-	   "gnet4.ath.cx:6346"};
+	= {"router.limewire.com:6346", 
+	   "64.61.25.139:6346",
+	   "gnutellahosts.com:6346", 
+	};
     public static final int     DEFAULT_PARALLEL_SEARCH  = 5;
     public static final int     DEFAULT_MAX_SIM_DOWNLOAD = 4;
     public static final int     DEFAULT_MAX_UPLOADS      = 2;

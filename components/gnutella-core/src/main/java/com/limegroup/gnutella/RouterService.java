@@ -131,10 +131,13 @@ public class RouterService
      */
     public void quickConnect() {
         SettingsManager settings=SettingsManager.instance();
-        //Ensure the keep alive is at least 1.
+
+        // Ensure the keep alive is at least 1.
+		// Note:  Keep this in sync with connect code in StatusLine
         if (settings.getKeepAlive()<1)
             settings.setKeepAlive(SettingsInterface.DEFAULT_KEEP_ALIVE);
         adjustKeepAlive(settings.getKeepAlive());
+
         //Clear host catcher.  Note that if we already have outgoing
         //connections the host catcher will fill up after clearing it.
         //This means we won't really be trying those hosts.
