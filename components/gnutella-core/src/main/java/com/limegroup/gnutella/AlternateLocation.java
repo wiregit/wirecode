@@ -429,12 +429,8 @@ public final class AlternateLocation
 	private static URL createUrl(final String locationHeader) 
 		throws IOException {
 		String test = locationHeader.toLowerCase();
-		String urlString;	
 
-		if(HTTPHeaderName.ALT_LOCATION.matchesStartOfString(test)) {
-			String altLocValue = HTTPUtils.extractHeaderValue(locationHeader);
-			return new URL(AlternateLocation.removeTimestamp(altLocValue));
-		} else if(test.startsWith("http")) {
+		if(test.startsWith("http")) {
 			return new URL(AlternateLocation.removeTimestamp(locationHeader));
 
 		} else {
