@@ -276,6 +276,69 @@ public class ClientSidePushProxyTest
         // wait for the incoming HTTP request
         Socket httpSock = ss.accept();
         assertNotNull(httpSock);
+
+        // start reading and confirming the HTTP request
+        String currLine = null;
+        BufferedReader reader = 
+            new BufferedReader(new
+                               InputStreamReader(httpSock.getInputStream()));
+
+        // confirm a GET/HEAD pushproxy request
+        currLine = reader.readLine();
+        assertTrue(currLine.startsWith("GET /gnutella/pushproxy") ||
+                   currLine.startsWith("HEAD /gnutella/pushproxy"));
+        
+        // make sure it sends the correct client GUID
+        int beginIndex = currLine.indexOf("ID=") + 3;
+        String guidString = currLine.substring(beginIndex, beginIndex+32);
+        GUID guidFromBackend = new GUID(clientGUID);
+        GUID guidFromNetwork = new GUID(GUID.fromHexString(guidString));
+        assertEquals(guidFromNetwork, guidFromBackend);
+
+        // make sure the node sends the correct X-Node
+        currLine = reader.readLine();
+        assertTrue(currLine.startsWith("X-Node:"));
+        StringTokenizer st = new StringTokenizer(currLine, ":");
+        assertEquals(st.nextToken(), "X-Node");
+        InetAddress addr = InetAddress.getByName(st.nextToken().trim());
+        Arrays.equals(addr.getAddress(), rs.getAddress());
+        assertEquals(Integer.parseInt(st.nextToken()), PORT);
+
+        // send back a 202 and make sure no PushRequest is sent via the normal
+        // way
+        BufferedWriter writer = 
+            new BufferedWriter(new
+                               OutputStreamWriter(httpSock.getOutputStream()));
+        
+        writer.write("HTTP/1.1 202 gobbledygook");
+        writer.flush();
+        httpSock.close();
+
+        try {
+            do {
+                m = testUP.receive(TIMEOUT);
+                assertTrue(!(m instanceof PushRequest));
+            } while (true) ;
+        }
+        catch (InterruptedIOException expected) {}
+
+        // now make a connection to the leaf to confirm that it will send a
+        // correct download request
+        Socket push = new Socket(InetAddress.getLocalHost(), PORT);
+        writer = 
+            new BufferedWriter(new
+                               OutputStreamWriter(push.getOutputStream()));
+        writer.write("GIV 0:" + new GUID(clientGUID).toHexString() + "/\r\n");
+        writer.write("\r\n");
+        writer.flush();
+    
+        reader = 
+            new BufferedReader(new
+                               InputStreamReader(push.getInputStream()));
+        currLine = reader.readLine();
+        assertEquals("GET /get/10/boalt.org HTTP/1.1", currLine);
+
+        // awesome - everything checks out!
     }
 
 
