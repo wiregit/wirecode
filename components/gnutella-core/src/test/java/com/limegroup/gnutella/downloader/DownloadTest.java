@@ -53,7 +53,7 @@ public class DownloadTest extends com.limegroup.gnutella.util.BaseTestCase {
     private static File dataDir = 
         CommonUtils.getResourceFile(filePath);
     private static File saveDir = 
-        CommonUtils.getResourceFile(filePath + "saved");
+        (CommonUtils.getResourceFile(filePath + "saved")).getAbsoluteFile();
     
     // a random name for the saved file
     private static final String savedFileName = "DownloadTester2834343.out";
@@ -139,7 +139,7 @@ public class DownloadTest extends com.limegroup.gnutella.util.BaseTestCase {
         uploader2.stopThread();
         uploader3.stopThread();
         uploader4.stopThread();
-        
+
         deleteAllFiles();
     }
     
@@ -490,31 +490,43 @@ public class DownloadTest extends com.limegroup.gnutella.util.BaseTestCase {
         debug("passed"+"\n");//got here? Test passed
     }
 
-
-    //Sumeet:TODO: change this test to make sure head is issued for smaller
-    //files.
-//      public void testSimpleAlternateLocations() throws Exception {  
-//          debug("-Testing AlternateLocation write...");
+    public void testDownloaderAddsSmallFilesWithHead() throws Exception {  
+        debug("-Testing AlternateLocation write...");
+        Object[] params = new Object[2];
+        params[0] = saveDir;
+        params[1] = new File(".");
+        //add current dir as a save directory so MD sends head request
+        PrivilegedAccessor.invokeMethod
+        (RouterService.getFileManager(),"updateDirectories",params);
+        //make the .out extension shared so FM thinks its shared
+        FileManager man = RouterService.getFileManager();
+        Set exts = (Set) PrivilegedAccessor.getValue(man,"_extensions");
+        exts.add("out");
         
-//          RemoteFileDesc rfd1=newRFDWithURN(PORT_1,100,TestFile.hash().toString());
-//          RemoteFileDesc[] rfds = {rfd1};
+        RemoteFileDesc rfd1=
+                           newRFDWithURN(PORT_1,100,TestFile.hash().toString());
+        RemoteFileDesc[] rfds = {rfd1};
 
-//          tGeneric(rfds);
+        tGeneric(rfds);
 
-//          //Prepare to check the alternate locations
-//          AlternateLocationCollection alt1 = uploader1.getAlternateLocations();
-//          AlternateLocation dAlt = AlternateLocation.create(rfd1.getUrl());
+        //Prepare to check the alternate locations
+        AlternateLocationCollection alt1 = uploader1.getAlternateLocations();
+        AlternateLocation dAlt = AlternateLocation.create(rfd1.getUrl());
            
-//          URN sha1 = rfd1.getSHA1Urn();
-//          URN uSHA1 = uploader1.getReportedSHA1();
+        URN sha1 = rfd1.getSHA1Urn();
+        URN uSHA1 = uploader1.getReportedSHA1();
         
-//          assertTrue("uploader didn't recieve alt", alt1.hasAlternateLocations());
-//          assertTrue("downloader didn't add itself to mesh", alt1.contains(dAlt));
-//          assertEquals("wrong number of locs ",1, alt1.getAltLocsSize());
-//          assertNotNull("rfd1 sha1", sha1);
-//          assertNotNull("uploader1 sha1", uSHA1);
-//          assertEquals("SHA1 test failed", sha1, uSHA1);
-//      }
+        assertTrue("uploader didn't recieve alt", alt1.hasAlternateLocations());
+        assertTrue("downloader didn't add itself to mesh", alt1.contains(dAlt));
+        //in the head requester case the uploader will be sent all the locations
+        //including itself. The download has no way of knowing it is sending the
+        //uploader the same uploaders location
+        assertEquals("wrong number of locs ",2, alt1.getAltLocsSize());
+        assertNotNull("rfd1 sha1", sha1);
+        assertNotNull("uploader1 sha1", uSHA1);
+        assertEquals("SHA1 test failed", sha1, uSHA1);
+        exts.remove("out");
+    }
 
     public void testTwoAlternateLocations() throws Exception {  
         debug("-Testing Two AlternateLocations...");
@@ -837,7 +849,7 @@ public class DownloadTest extends com.limegroup.gnutella.util.BaseTestCase {
         
         // change the minimum required bytes so it'll be added.
         PrivilegedAccessor.setValue(HTTPDownloader.class,
-            "MIN_PARTIAL_FILE_BYTES", new Integer(TestFile.length()/2) );
+            "MIN_PARTIAL_FILE_BYTES", new Integer((TestFile.length()/3)*2) );
         PrivilegedAccessor.setValue(RouterService.getAcceptor(),
             "_acceptedIncoming", Boolean.TRUE );
             

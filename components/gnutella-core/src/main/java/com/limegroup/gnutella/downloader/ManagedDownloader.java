@@ -910,6 +910,9 @@ public class ManagedDownloader implements Downloader, Serializable {
         }
         for(Iterator iter=dloaders.iterator(); iter.hasNext();) {
             HTTPDownloader httpDloader = (HTTPDownloader)iter.next();
+            RemoteFileDesc r = httpDloader.getRemoteFileDesc();
+            if(r.getHost()==rfd.getHost() && r.getPort()==rfd.getPort()) 
+                continue;//no need to tell uploader about itself
             if(good)
                 httpDloader.addSuccessfulAltLoc(loc);
             else
@@ -1467,15 +1470,19 @@ public class ManagedDownloader implements Downloader, Serializable {
                 synchronized(this) {
                     set = new HashSet(files);
                 }
-//  				HeadRequester requester = 
-//  			        new HeadRequester(set, fileHash, fileDesc, 
-//                                        fileDesc.getAlternateLocationCollection());
-//  				Thread headThread = new Thread(requester, "HEAD Request Thread");
-//  				headThread.setDaemon(true);
-//  				headThread.start();
-			}
-		}
-		
+                if(fileDesc.getSize() < HTTPDownloader.MIN_PARTIAL_FILE_BYTES) {
+                    //for small files which never add themselves to the mesh
+                    //while downloading, we need to send head requests, so we
+                    //get added to the mesh
+                    HeadRequester requester = new HeadRequester(set, fileHash, 
+                           fileDesc, fileDesc.getAlternateLocationCollection());
+                    Thread headThread = 
+                                   new Thread(requester, "HEAD Request Thread");
+                    headThread.setDaemon(true);
+                    headThread.start();
+                }
+            }
+        }
         return COMPLETE;
     }   
 
@@ -2470,9 +2477,14 @@ public class ManagedDownloader implements Downloader, Serializable {
                 if(!problem && !http11)
                     files.add(rfd);
                 if(!problem && rfd.isAltLocCapable()) {
+                    //Sumeet:TODO:Until IncompleteFileDesc and ManagedDownloader
+                    //do not share a common AlternateLocation, they should get
+                    //separate copies of AlternateLocations
                     AlternateLocation loc=null;
+                    AlternateLocation loc2=null;
                     try {
                         loc = AlternateLocation.create(rfd);
+                        loc2 = AlternateLocation.create(rfd);
                     } catch (Exception e) {}
                     if(loc!=null) {
                         informMesh(rfd,true);
@@ -2485,7 +2497,7 @@ public class ManagedDownloader implements Downloader, Serializable {
                         }
                         //Sumeet:TODO1:IncompleteFileDesc and this should share
                         //a AlternateLocationCollection
-                        addAlternateLocation(loc);
+                        addAlternateLocation(loc2);
                     }
                 }
             }
@@ -2939,8 +2951,8 @@ public class ManagedDownloader implements Downloader, Serializable {
 
     }
 
-    private final boolean debugOn = true;
-    private final boolean log = true;
+    private final boolean debugOn = false;
+    private final boolean log = false;
     PrintWriter writer = null;
     private final void debug(String out) {
         if (debugOn) {
