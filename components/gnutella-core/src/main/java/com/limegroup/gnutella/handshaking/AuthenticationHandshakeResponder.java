@@ -36,12 +36,12 @@ public abstract class AuthenticationHandshakeResponder
      * An instance of connection manager (to reference other stuff
      * held by connection manager)
      */
-    private ConnectionManager _manager;
+    private final ConnectionManager _manager;
     
     /**
      * The host to which are opening connection
      */
-    private String _host = null;
+    private final String _host;
     
     /**
      * Flag indicating whether we have used the cookie for authentication
@@ -70,7 +70,8 @@ public abstract class AuthenticationHandshakeResponder
         this._host = host;
     }
     
-    public HandshakeResponse respond(HandshakeResponse response, boolean outgoing) throws IOException
+    public HandshakeResponse respond(HandshakeResponse response, boolean outgoing) 
+        throws IOException
     {
         //save the first request
         if(_beforeAuthenticationRequest == null)
@@ -254,80 +255,7 @@ public abstract class AuthenticationHandshakeResponder
         //return the user information
         return user;
     }
-    
-    /**
-     * Adds string representing addresses of other hosts that may
-     * be connected thru gnutella, 
-     * (to corresponding header keys) in the passed properties. 
-     * Also includes the addresses of the
-     * supernodes it is connected to
-     * @param properties The properties instance to which to add host addresses
-     * @param manager Reference to the connection manager from whom 
-     * to retrieve the addressses
-     * <p> Host address string added (to corresponding header keys)
-     * is in the form:
-     * <p> IP Address:Port [,IPAddress:Port]* 
-     * <p> e.g. 123.4.5.67:6346,234.5.6.78:6347
-     */
-    protected void addHostAddresses(Properties properties, 
-        ConnectionManager manager){
-        StringBuffer hostString = new StringBuffer();
-        boolean isFirstHost = true;
-        //get the connected supernodes and pass them
-        for(Iterator iter = 
-				RouterService.getHostCatcher().getNormalHosts(10);
-			iter.hasNext();) {
-            //get the next endpoint
-            Endpoint endpoint =(Endpoint)iter.next();
-            //if the first endpoint that we are adding
-            if(!isFirstHost){
-                //append separator to separate the entries
-                hostString.append(Constants.ENTRY_SEPARATOR);
-            }else{
-                //unset the flag
-                isFirstHost = false;
-            }
-            //append the host information
-            hostString.append(endpoint.getHostname());
-            hostString.append(":");
-            hostString.append(endpoint.getPort());
-        }
-        //set the property
-        properties.put(ConnectionHandshakeHeaders.X_TRY, 
-            hostString.toString());
-
-        //Also add neighbouring supernodes
-        Set connectedSupernodeEndpoints 
-            = manager.getSupernodeEndpoints();
-        //if nothing to add, return
-        if(connectedSupernodeEndpoints.size() < 0)
-            return;
         
-        //else add the supernodes
-        hostString = new StringBuffer();
-        isFirstHost = true;
-        for(Iterator iter = connectedSupernodeEndpoints.iterator();
-            iter.hasNext();){
-            //get the next endpoint
-            Endpoint endpoint =(Endpoint)iter.next();
-            //if the first endpoint that we are adding
-            if(!isFirstHost){
-                //append separator to separate the entries
-                hostString.append(Constants.ENTRY_SEPARATOR);
-            }else{
-                //unset the flag
-                isFirstHost = false;
-            }
-            //append the host information
-            hostString.append(endpoint.getHostname());
-            hostString.append(":");
-            hostString.append(endpoint.getPort());
-        }
-        //set the property
-        properties.put(ConnectionHandshakeHeaders.X_TRY_SUPERNODES
-            , hostString.toString());
-    }
-    
     /**
      * Returns the corresponding handshake to be sent
      * to the remote host when
