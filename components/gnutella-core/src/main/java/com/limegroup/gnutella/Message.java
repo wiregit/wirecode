@@ -20,12 +20,9 @@ public abstract class Message implements Serializable{
     protected static final byte F_QUERY=(byte)0x80;
     protected static final byte F_QUERY_REPLY=(byte)0x81;
 
-    //Temporary code for managing GUIDs
-    private static Random rand=new Random();
+    /** Same as GUID.makeGUID.  This exists for backwards compatibility. */
     static byte[] makeGuid() {
-        byte[] ret=new byte[16];
-        rand.nextBytes(ret); //TODO1: not guaranteed unique
-        return ret;
+        return GUID.makeGuid();
     }
 
     ////////////////////////// Instance Data //////////////////////
