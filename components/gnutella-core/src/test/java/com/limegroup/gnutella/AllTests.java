@@ -21,6 +21,7 @@ public class AllTests {
         suite.addTest(StatisticsTest.suite());
         suite.addTest(XMLDocSerializerTest.suite());
         suite.addTest(CollectionTester.suite());
+        suite.addTest(UploadManagerTest.suite());
         suite.addTest(com.limegroup.gnutella.downloader.AllTests.suite());
         return suite;
     }

@@ -1,4 +1,4 @@
-package com.limegroup.gnutella.tests.util;
+package com.limegroup.gnutella.util;
 
 import java.io.*;
 import java.net.*;
