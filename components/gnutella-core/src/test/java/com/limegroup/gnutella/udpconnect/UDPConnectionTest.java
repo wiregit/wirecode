@@ -56,7 +56,7 @@ public final class UDPConnectionTest extends BaseTestCase {
         ConnectionSettings.FORCED_IP_ADDRESS_STRING.setValue("127.0.0.1");
     }
 
-    public static void globaltearDown() throws Exception {
+    public static void globalTearDown() throws Exception {
         // Cleanup the UDPServiceStub usage
         UDPConnectionProcessor.setUDPServiceForTesting(null);
     }
@@ -89,18 +89,17 @@ public final class UDPConnectionTest extends BaseTestCase {
 
         // Start the second connection in another thread
         // and run it to completion.
-        class SubTest extends Thread {
+        class Inner extends ManagedThread {
             boolean sSuccess = false;
 
-            public void run() {
+            public void managedRun()  {
+                yield();
                 try {
-                    yield();
                     UDPConnection uconn2 = 
                       new UDPConnection("127.0.0.1",6348);
-                    sSuccess = UTest.echoServer(uconn2, NUM_BYTES);
-                    
-                } catch(Throwable e) {
-                    sSuccess = false;
+                    sSuccess = UStandalone.echoServer(uconn2, NUM_BYTES);
+                } catch(IOException ioe) {
+                    throw new RuntimeException(ioe);
                 }
             }
 
@@ -108,7 +107,7 @@ public final class UDPConnectionTest extends BaseTestCase {
                 return sSuccess;
             }
         }
-        SubTest t = new SubTest();
+        Inner t = new Inner();
         t.setDaemon(true);
         t.start();
 
@@ -116,7 +115,7 @@ public final class UDPConnectionTest extends BaseTestCase {
         UDPConnection uconn1 = new UDPConnection("127.0.0.1",6346);
 
         // Run the first connection
-        boolean cSuccess = UTest.echoClient(uconn1, NUM_BYTES);
+        boolean cSuccess = UStandalone.echoClient(uconn1, NUM_BYTES);
 
         // Wait for the second to finish
         t.join();
@@ -136,18 +135,17 @@ public final class UDPConnectionTest extends BaseTestCase {
 
         // Start the second connection in another thread
         // and run it to completion.
-        class SubTest extends Thread {
+        class Inner extends ManagedThread {
             boolean sSuccess = false;
 
-            public void run() {
+            public void managedRun() {
+                yield();
                 try {
-                    yield();
                     UDPConnection uconn2 = 
                       new UDPConnection("127.0.0.1",6348);
-                    sSuccess = UTest.echoServerBlock(uconn2, NUM_BLOCKS);
-                    
-                } catch(Throwable e) {
-                    sSuccess = false;
+                    sSuccess = UStandalone.echoServerBlock(uconn2, NUM_BLOCKS);
+                } catch(IOException ioe) {
+                    throw new RuntimeException(ioe);
                 }
             }
 
@@ -155,7 +153,7 @@ public final class UDPConnectionTest extends BaseTestCase {
                 return sSuccess;
             }
         }
-        SubTest t = new SubTest();
+        Inner t = new Inner();
         t.setDaemon(true);
         t.start();
 
@@ -163,7 +161,7 @@ public final class UDPConnectionTest extends BaseTestCase {
         UDPConnection uconn1 = new UDPConnection("127.0.0.1",6346);
 
         // Run the first connection
-        boolean cSuccess = UTest.echoClientBlock(uconn1, NUM_BLOCKS);
+        boolean cSuccess = UStandalone.echoClientBlock(uconn1, NUM_BLOCKS);
 
         // Wait for the second to finish
         t.join();
@@ -183,18 +181,17 @@ public final class UDPConnectionTest extends BaseTestCase {
 
         // Start the second connection in another thread
         // and run it to completion.
-        class SubTest extends Thread {
+        class Inner extends ManagedThread {
             boolean sSuccess = false;
 
-            public void run() {
+            public void managedRun() {
+                yield();
                 try {
-                    yield();
                     UDPConnection uconn2 = 
                       new UDPConnection("127.0.0.1",6348);
-                    sSuccess = UTest.unidirectionalServer(uconn2, NUM_BYTES);
-                    
-                } catch(Throwable e) {
-                    sSuccess = false;
+                    sSuccess = UStandalone.unidirectionalServer(uconn2, NUM_BYTES);
+                } catch(IOException ioe) {
+                    throw new RuntimeException(ioe);
                 }
             }
 
@@ -202,7 +199,7 @@ public final class UDPConnectionTest extends BaseTestCase {
                 return sSuccess;
             }
         }
-        SubTest t = new SubTest();
+        Inner t = new Inner();
         t.setDaemon(true);
         t.start();
 
@@ -210,7 +207,7 @@ public final class UDPConnectionTest extends BaseTestCase {
         UDPConnection uconn1 = new UDPConnection("127.0.0.1",6346);
 
         // Run the first connection
-        boolean cSuccess = UTest.unidirectionalClient(uconn1, NUM_BYTES);
+        boolean cSuccess = UStandalone.unidirectionalClient(uconn1, NUM_BYTES);
 
         // Wait for the second to finish
         t.join();
@@ -423,21 +420,22 @@ public final class UDPConnectionTest extends BaseTestCase {
 
 
         // Close the writer while the reader is blocked
-        class SubTest extends Thread {
+        class Inner extends ManagedThread {
 
-            public void run() {
+            public void managedRun() {
                 try {
                     // Let reader lock up on block read
                     Thread.sleep(500);
-
+    
                     // Close writer
                     uconn1.close(); 
-                    
-                } catch(Throwable e) {
+                        
+                } catch(IOException e) {
+                } catch(InterruptedException ie) {
                 }
             }
         }
-        SubTest st = new SubTest();
+        Inner st = new Inner();
         st.setDaemon(true);
         st.start();
 
@@ -486,18 +484,17 @@ public final class UDPConnectionTest extends BaseTestCase {
 
         // Start the second connection in another thread
         // and run it to completion.
-        class SubTest extends Thread {
+        class Inner extends ManagedThread {
             boolean sSuccess = false;
 
-            public void run() {
+            public void managedRun() {
+                yield();
                 try {
-                    yield();
                     UDPConnection uconn2 = 
                       new UDPConnection("127.0.0.1",6348);
-                    sSuccess = UTest.echoServer(uconn2, NUM_BYTES);
-                    
-                } catch(Throwable e) {
-                    sSuccess = false;
+                    sSuccess = UStandalone.echoServer(uconn2, NUM_BYTES);
+                } catch(IOException ioe) {
+                    throw new RuntimeException(ioe);
                 }
             }
 
@@ -505,7 +502,7 @@ public final class UDPConnectionTest extends BaseTestCase {
                 return sSuccess;
             }
         }
-        SubTest t = new SubTest();
+        Inner t = new Inner();
         t.setDaemon(true);
         t.start();
 
@@ -513,7 +510,7 @@ public final class UDPConnectionTest extends BaseTestCase {
         UDPConnection uconn1 = new UDPConnection("127.0.0.1",6346);
 
         // Run the first connection
-        boolean cSuccess = UTest.echoClient(uconn1, NUM_BYTES);
+        boolean cSuccess = UStandalone.echoClient(uconn1, NUM_BYTES);
 
         // Wait for the second to finish
         t.join();
@@ -547,18 +544,17 @@ public final class UDPConnectionTest extends BaseTestCase {
 
         // Start the second connection in another thread
         // and run it to completion.
-        class SubTest extends Thread {
+        class Inner extends ManagedThread {
             boolean sSuccess = false;
 
-            public void run() {
+            public void managedRun() {
+                yield();
                 try {
-                    yield();
                     UDPConnection uconn2 = 
                       new UDPConnection("127.0.0.1",6348);
-                    sSuccess = UTest.echoServer(uconn2, NUM_BYTES);
-                    
-                } catch(Throwable e) {
-                    sSuccess = false;
+                    sSuccess = UStandalone.echoServer(uconn2, NUM_BYTES);
+                } catch(IOException ioe) {
+                    throw new RuntimeException(ioe);
                 }
             }
 
@@ -566,7 +562,7 @@ public final class UDPConnectionTest extends BaseTestCase {
                 return sSuccess;
             }
         }
-        SubTest t = new SubTest();
+        Inner t = new Inner();
         t.setDaemon(true);
         t.start();
 
@@ -574,7 +570,7 @@ public final class UDPConnectionTest extends BaseTestCase {
         UDPConnection uconn1 = new UDPConnection("127.0.0.1",6346);
 
         // Run the first connection
-        boolean cSuccess = UTest.echoClient(uconn1, NUM_BYTES);
+        boolean cSuccess = UStandalone.echoClient(uconn1, NUM_BYTES);
 
         // Wait for the second to finish
         t.join();
@@ -607,18 +603,17 @@ public final class UDPConnectionTest extends BaseTestCase {
 
         // Start the second connection in another thread
         // and run it to completion.
-        class SubTest extends Thread {
+        class Inner extends ManagedThread {
             boolean sSuccess = false;
 
-            public void run() {
+            public void managedRun() {
+                yield();
                 try {
-                    yield();
                     UDPConnection uconn2 = 
                       new UDPConnection("127.0.0.1",6348);
-                    sSuccess = UTest.echoServer(uconn2, NUM_BYTES);
-                    
-                } catch(Throwable e) {
-                    sSuccess = false;
+                    sSuccess = UStandalone.echoServer(uconn2, NUM_BYTES);
+                } catch(IOException ioe) {
+                    throw new RuntimeException(ioe);
                 }
             }
 
@@ -626,7 +621,7 @@ public final class UDPConnectionTest extends BaseTestCase {
                 return sSuccess;
             }
         }
-        SubTest t = new SubTest();
+        Inner t = new Inner();
         t.setDaemon(true);
         t.start();
 
@@ -634,7 +629,7 @@ public final class UDPConnectionTest extends BaseTestCase {
         UDPConnection uconn1 = new UDPConnection("127.0.0.1",6346);
 
         // Run the first connection
-        boolean cSuccess = UTest.echoClient(uconn1, NUM_BYTES);
+        boolean cSuccess = UStandalone.echoClient(uconn1, NUM_BYTES);
 
         // Wait for the second to finish
         t.join();

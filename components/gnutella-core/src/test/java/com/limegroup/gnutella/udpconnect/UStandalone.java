@@ -7,17 +7,18 @@ import com.limegroup.gnutella.chat.*;
 import com.limegroup.gnutella.security.User;
 import com.limegroup.gnutella.search.*;
 import com.limegroup.gnutella.*;
+import com.limegroup.gnutella.util.ManagedThread;
 
 /**
  * A standalone program for testing UDPConnections across machines.
  */
-public class UTest implements ActivityCallback, ErrorCallback {
+public class UStandalone implements ActivityCallback, ErrorCallback {
 	
 	/** Control some logging of state */
 	private static boolean activeLogging = false;
 
     public static void main(String args[]) {
-		ActivityCallback callback = new UTest();
+		ActivityCallback callback = new UStandalone();
 		RouterService service = new RouterService(callback);
 		service.start();    
 		activeLogging = true;
@@ -127,7 +128,7 @@ public class UTest implements ActivityCallback, ErrorCallback {
 		return readSuccess;
 	}
 
-	static class ClientReader extends Thread {
+	static class ClientReader extends ManagedThread {
 		InputStream istream;
 		int         numBytes;
 
@@ -136,7 +137,7 @@ public class UTest implements ActivityCallback, ErrorCallback {
 			this.numBytes = numBytes;
 		}
 
-		public void run() {
+		public void managedRun() {
 			int rval;
 			log2("Begin read");
 
@@ -154,7 +155,7 @@ public class UTest implements ActivityCallback, ErrorCallback {
 				}
 				readSuccess = true;
 			} catch (IOException e) {
-				e.printStackTrace();
+				throw new RuntimeException(e);
 			}
 			log2("Done read");
 		}
@@ -168,22 +169,18 @@ public class UTest implements ActivityCallback, ErrorCallback {
 		boolean success = false;
 
 		int rval;
-		try {
-			for (int i = 0; i < numBytes; i++) {
-				rval = istream.read();
-				if ( rval != (i % 256) ) {
-					log2("Error on read expected: "+i
-					  +" received: "+rval);
-					return false;
-				} 
-				if ( (i % 1000) == 0 ) 
-					log2("Echo status: "+i);
-				ostream.write(rval);
-			}
-			success = true;
-		} catch (IOException e) {
-			e.printStackTrace();
+		for (int i = 0; i < numBytes; i++) {
+			rval = istream.read();
+			if ( rval != (i % 256) ) {
+				log2("Error on read expected: "+i
+				  +" received: "+rval);
+				return false;
+			} 
+			if ( (i % 1000) == 0 ) 
+				log2("Echo status: "+i);
+			ostream.write(rval);
 		}
+		success = true;
 		log("Done echo");
 		try { Thread.sleep(1*1000); } catch (InterruptedException ie){}
         tlogend("Done echoServer test");
@@ -217,7 +214,7 @@ public class UTest implements ActivityCallback, ErrorCallback {
 		return readSuccess;
 	}
 
-	static class ClientBlockReader extends Thread {
+	static class ClientBlockReader extends ManagedThread {
 		InputStream istream;
 		int         numBlocks;
 
@@ -226,7 +223,7 @@ public class UTest implements ActivityCallback, ErrorCallback {
 			this.numBlocks = numBlocks;
 		}
 
-		public void run() {
+		public void managedRun() {
 			int rval;
 			log2("Begin read");
 
@@ -258,7 +255,7 @@ public class UTest implements ActivityCallback, ErrorCallback {
 				}
 				readSuccess = true;
 			} catch (IOException e) {
-				e.printStackTrace();
+				throw new RuntimeException(e);
 			}
 			log2("Done read");
 		}
@@ -275,30 +272,26 @@ public class UTest implements ActivityCallback, ErrorCallback {
 
         int btest;
 		int len = 0;
-		try {
-			for (int i = 0; i < 512 * numBlocks; i += len) {
-				len = istream.read(bdata);
+		for (int i = 0; i < 512 * numBlocks; i += len) {
+			len = istream.read(bdata);
 
-                if ( len != 512 ) 
-                    log2("Abnormal data size: "+len+" loc: "+i);
+            if ( len != 512 ) 
+                log2("Abnormal data size: "+len+" loc: "+i);
 
-				for (int j = 0; j < len; j++) {
-                    btest = bdata[j] & 0xff;
-					if ( btest != ((i+j) % 256) ) {
-						log2("Error on echo expected: "+(i+j)
-						  +" received: "+bdata[j]);
-						return false;
-					} 
-					if ( ((i+j) % 1024) == 0 ) 
-						log2("Echo status: "+i+
-                          " time:"+System.currentTimeMillis());
-				}
-                ostream.write(bdata, 0, len);
+			for (int j = 0; j < len; j++) {
+                btest = bdata[j] & 0xff;
+				if ( btest != ((i+j) % 256) ) {
+					log2("Error on echo expected: "+(i+j)
+					  +" received: "+bdata[j]);
+					return false;
+				} 
+				if ( ((i+j) % 1024) == 0 ) 
+					log2("Echo status: "+i+
+                      " time:"+System.currentTimeMillis());
 			}
-			success = true;
-		} catch (IOException e) {
-			e.printStackTrace();
+            ostream.write(bdata, 0, len);
 		}
+		success = true;
 		log("Done echoBlock");
 		try { Thread.sleep(1*1000); } catch (InterruptedException ie){}
         tlogend("Done echoServerBlock test");
@@ -332,22 +325,18 @@ public class UTest implements ActivityCallback, ErrorCallback {
 		boolean success = false;
         int rval;
         int i = 0;
-        try {
-            for (i = 0; i < numBytes; i++) {
-                rval = istream.read();
-                if ( rval != (i % 256) ) {
-                    log2("Error on read expected: "+i
-                      +" received: "+rval);
-                    break;
-                } else {
-                    if ( (i % 1000) == 0 ) 
-                        log2("Read Properly received: "+i);
-                }
+        for (i = 0; i < numBytes; i++) {
+            rval = istream.read();
+            if ( rval != (i % 256) ) {
+                log2("Error on read expected: "+i
+                  +" received: "+rval);
+                break;
+            } else {
+                if ( (i % 1000) == 0 ) 
+                    log2("Read Properly received: "+i);
             }
-			success = true;
-        } catch (IOException e) {
-            e.printStackTrace();
         }
+		success = true;
         log2("Read reached: "+i);
         
         try { Thread.sleep(1*1000); } catch (InterruptedException ie){}
@@ -388,7 +377,7 @@ public class UTest implements ActivityCallback, ErrorCallback {
 		if ( waits >= 10 ) {
 			log2("UDP didn't make it up ...");
 			log2("Bubye ...");
-			System.exit(1);
+			throw new RuntimeException("no UDP");
 		}
 	}
 
