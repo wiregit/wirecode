@@ -92,6 +92,11 @@ public final class QueryHandler {
 	 */
 	private long _queryStartTime = 0;
 
+    /**
+     * The current time, taken each time the query is initiated again.
+     */
+    private long _curTime = 0;
+
 	/**
 	 * <tt>ReplyHandler</tt> for replies received for this query.
 	 */
@@ -228,11 +233,11 @@ public final class QueryHandler {
 		}
 		if(hasEnoughResults()) return;
 
-		long sysTime = System.currentTimeMillis();
-		if(sysTime < _nextQueryTime) return;
+		_curTime = System.currentTimeMillis();
+		if(_curTime < _nextQueryTime) return;
 
 		if(_queryStartTime == 0) {
-			_queryStartTime = sysTime;
+			_queryStartTime = _curTime;
             _theoreticalHostsQueried += 
                 sendProbeQuery(this, 
                                _connectionManager.getInitializedConnections2()); 
@@ -263,7 +268,12 @@ public final class QueryHandler {
         int newHosts = 0;
         for(int i=0; i<length; i++) {
 			ManagedConnection mc = (ManagedConnection)list.get(i);			
-			
+
+			// if the connection hasn't been up for long, don't use it,
+            // as the replies will never make it back to us if the
+            // connection is dropped, wasting bandwidth
+            if(!mc.isStable(handler._curTime)) continue;
+                
 			// if we've already queried this host, go to the next one
 			if(handler.QUERIED_HANDLERS.contains(mc)) continue;
 			
@@ -349,7 +359,7 @@ public final class QueryHandler {
 	 */
 	private static byte 
         calculateNewTTL(int hostsToQueryPerConnection, int degree, byte maxTTL) {
-
+        
         // not the most efficient algorithm -- should use Math.log, but
         // that's ok
         for(byte i=1; i<6; i++) {
