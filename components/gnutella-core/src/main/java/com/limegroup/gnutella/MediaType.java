@@ -378,7 +378,7 @@ public class MediaType implements Serializable {
         if (query.desiresDocuments())
             retAggr.addFilter(TYPE_DOCUMENTS);
         if (query.desiresAudio())
-            retAggr.addFilter(TYPE_ANY);
+            retAggr.addFilter(TYPE_AUDIO);
         if (query.desiresVideo())
             retAggr.addFilter(TYPE_VIDEO);
         if (query.desiresImages())
