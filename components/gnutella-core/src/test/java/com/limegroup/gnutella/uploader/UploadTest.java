@@ -27,7 +27,8 @@ public class UploadTest extends com.limegroup.gnutella.util.BaseTestCase {
     /** The file contents. */
 	private static final String alphabet="abcdefghijklmnopqrstuvwxyz";
     /** The hash of the file contents. */
-    private static final String hash="urn:sha1:GLIQY64M7FSXBSQEZY37FIM5QQSA2OUJ";
+    private static final String hash=   "urn:sha1:GLIQY64M7FSXBSQEZY37FIM5QQSA2OUJ";
+    private static final String badHash="urn:sha1:GLIQY64M7FSXBSQEZY37FIM5QQSA2SAM";
     private static final int index=0;
     /** Our listening port for pushes. */
     private static final int callbackPort = 6671;
@@ -302,6 +303,36 @@ public class UploadTest extends com.limegroup.gnutella.util.BaseTestCase {
     public void testHTTP11DownloadPersistentURI() throws Exception {
         tPersistentURIRequests();
     }
+    
+/////////////////Miscellaneous tests for acceptable failure behaviour//////////
+    public void testHTTP11WrongURI() throws Exception {
+        tFailureHeaderRequired(
+            "/uri-res/N2R?" + badHash, true, "HTTP/1.1 404 Not Found");
+    }
+    
+    public void testHTTP10WrongURI() throws Exception {
+        // note that the header will be returned with 1.1
+        // even though we sent with 1.0
+        tFailureHeaderRequired(
+            "/uri-res/N2R?" + badHash, false, "HTTP/1.1 404 Not Found");
+    }
+    
+    public void testHTTP11MalformedURI() throws Exception {
+        tFailureHeaderRequired(
+            "/uri-res/N2R?" + "no more school", true,
+            "HTTP/1.1 400 Malformed Request");
+    }
+    
+    public void testHTTP10MalformedURI() throws Exception {
+        tFailureHeaderRequired(
+            "/uri-res/N2R?" + "no more school", false,
+            "HTTP/1.1 400 Malformed Request");
+    }
+    
+	public void testHTTP11MalformedGet() throws Exception {
+        tFailureHeaderRequired(
+            "/get/some/dr/pepper", true, "HTTP/1.1 400 Malformed Request");
+    }
 
     /** 
      * Downloads file (stored in slot index) from address:port, returning the
@@ -497,7 +528,76 @@ public class UploadTest extends com.limegroup.gnutella.util.BaseTestCase {
     throws IOException {
         return downloadInternal(file, header, out, in, null);
     }
+    
+    /**
+     * Sends a get request to out, reads the response from in, and returns the
+     * content.  Doesn't close in or out.     
+     * @param requestMethod the method to request ('GET', 'HEAD')
+     * @param file the actual request (/get/ ...)
+     * @param header the header to send, possibly null
+     * @param out the writer
+     * @param in the reader
+     * @param requiredHeader the header we want to receive
+     *      if null, then no header is expected.
+     * @param http11 whether or not to write http 1.1 or 1.0
+     * @return the contents of what we read
+     */
+     private static String downloadInternal(String requestMethod,
+                                            String file,
+                                            String header,
+                                            BufferedWriter out,
+                                            BufferedReader in,
+                                            String requiredHeader,
+                                            boolean http11)
+      throws IOException {
+        // send request
+        out.write( requestMethod + " " + file + " " + 
+            (http11 ? "HTTP/1.1" : "HTTP/1.0") + "\r\n");
+        if (header != null)
+            out.write(header + "\r\n");
+        if(http11)
+            out.write("Connection: Keep-Alive\r\n");            
+        out.write("\r\n");
+        out.flush();
 
+        //2. Read response code and headers, remember the content-length.
+        boolean foundHeader = false;
+        String expectedHeader = null;
+        int length = -1;
+        
+        if( requiredHeader != null )
+            expectedHeader = canonicalizeHeader(requiredHeader);
+            
+        while (true) { 
+            String line = in.readLine();
+            if (line == null || line.equals(""))
+                break;
+            if (requiredHeader != null) {
+                if (canonicalizeHeader(line).equals(expectedHeader)) {
+                    foundHeader = true;
+                }
+            }
+            if( line.startsWith("Content-Length: ") )
+                length = Integer.valueOf(line.substring(15).trim()).intValue();            
+        }
+
+        //2A. If a header was required, make sure it was there.
+        if (requiredHeader != null) {
+			assertTrue("Didn't find header: " + requiredHeader, foundHeader);
+		}
+        
+        //3. Read content.  Obviously this is designed for small files.
+        StringBuffer buf = new StringBuffer();
+        for(int i = 0; i < length; i++) {
+            int c = in.read();
+            if (c < 0)
+                break;
+            buf.append((char)c);
+        }
+        
+        return buf.toString();
+    }
+    
     /** 
      * Sends a get request to out, reads the response from in, and returns the
      * content.  Doesn't close in or out.
@@ -509,40 +609,10 @@ public class UploadTest extends com.limegroup.gnutella.util.BaseTestCase {
                                            BufferedReader in,
                                            String requiredHeader) 
             throws IOException {
-        //1. Send request
-        out.write("GET /get/"+index+"/"+file+" HTTP/1.0\r\n");
-        if (header!=null)
-            out.write(header+"\r\n");
-        out.write("\r\n");
-        out.flush();
-
-        //2. Read (and ignore!) response code and headers.  TODO: verify.
-        boolean foundHeader=false;
-        while (true) { 
-            String line = in.readLine();
-            if(line.equals(""))
-                break;
-            if(requiredHeader!=null)
-               if (canonicalizeHeader(line).
-                       equals(canonicalizeHeader(requiredHeader)))
-                   foundHeader = true;
-        }
-        if (requiredHeader!=null) {
-            //TODO: convey this to the caller gently so it can print "FAILED"
-			assertTrue("Didn't find header", foundHeader);
-		}
-        
-        //3. Read content.  Obviously this is designed for small files.
-        StringBuffer buf=new StringBuffer();
-        while (true) {
-            int c=in.read();
-            if (c<0)
-                break;
-            buf.append((char)c);
-        }
- 
-        return buf.toString();
-    }
+        return downloadInternal("GET", "/get/" + index + "/" + file, header,
+                                    out, in, requiredHeader, false);
+	}
+    
     
     /** Removes all spaces and lower cases all characters. */
     private static String canonicalizeHeader(String line) {
@@ -770,6 +840,39 @@ public class UploadTest extends com.limegroup.gnutella.util.BaseTestCase {
             assertEquals(alphabet,
                          downloadInternal1("GET", "/uri-res/N2R?"+hash,
                                            null, out, in, alphabet.length()));
+        } finally {
+            if (s!=null)
+                try { s.close(); } catch (IOException ignore) { }
+        }
+    }
+
+    /**
+     * Tests various cases for failed downloads, ensuring
+     * that the correct header is sent back.
+     */
+    public void tFailureHeaderRequired(String file, 
+                                boolean http11,
+                                String requiredHeader) throws Exception {
+        Socket s = null;
+        try {
+            //1. Establish connection.
+            s = new Socket("localhost", PORT);
+            BufferedReader in = new BufferedReader(new InputStreamReader(
+                                                          s.getInputStream()));
+            BufferedWriter out = new BufferedWriter(new OutputStreamWriter(
+                                                          s.getOutputStream()));
+            //2. Send GET request in URI form
+            downloadInternal("GET", file, null, out, in, 
+                             requiredHeader, http11);
+            
+            //3. If we're testing HTTP1.1 then send another request
+            //   to make sure that failures keep the connection alive
+            //   if requested.
+            if( http11 ) {
+                downloadInternal("GET", file, null, out, in,
+                                 requiredHeader, http11);
+            }                
+            
         } finally {
             if (s!=null)
                 try { s.close(); } catch (IOException ignore) { }
