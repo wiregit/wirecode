@@ -361,6 +361,8 @@ public class ExternalControl {
 		Integer         iIndex;
 		int             periodLoc;
 		MagnetOptions   curOptions;
+		
+		boolean hashOnly=true;
 
 		// Process each key=value pair
      	while (st.hasMoreTokens()) {
@@ -405,9 +407,9 @@ public class ExternalControl {
 			
 		
 			// make sure the magnet has something besides a hash
-			boolean hashOnly = false;
+			boolean currentHashOnly=false;
 			if (!curOptions.getXT().isEmpty()) {
-			    hashOnly = 
+			    currentHashOnly = 
 			        curOptions.getKT()==null &&
 			        curOptions.getDN()==null &&
 			        curOptions.getAS().isEmpty() &&
@@ -415,12 +417,14 @@ public class ExternalControl {
 			    
 			}
 			
-			if (!hashOnly)
-			    options.put(iIndex, curOptions);
+			if (!currentHashOnly)
+			    hashOnly=false;
+			
+			options.put(iIndex,curOptions);
 		}
 		
-     	if (options.isEmpty())
-     	    return null;
+     	if (hashOnly)
+     	    MessageService.showMessage("DOWNLOAD_HASH_ONLY_MAGNET");
      	
 		ret = new MagnetOptions[options.size()];
 		ret = (MagnetOptions[]) options.values().toArray(ret);

@@ -132,7 +132,7 @@ public class QueryRequest extends Message implements Serializable{
      * The Query Key associated with this query -- can be null.
      */
     private final QueryKey QUERY_KEY;
-    
+
     /**
      * The flag in the 'M' GGEP extension - if non-null, the query is requesting
      * only certain types.
@@ -1360,8 +1360,7 @@ public class QueryRequest extends Message implements Serializable{
 		else {
 			REQUESTED_URN_TYPES =
 			    Collections.unmodifiableSet(tempRequestedUrnTypes);
-		}
-		
+		}	
         QUERY_KEY = tempQueryKey;
 		if(QUERY.length() == 0 &&
 		   tempRichQuery.length() == 0 &&
@@ -1573,7 +1572,7 @@ public class QueryRequest extends Message implements Serializable{
     public boolean isFeatureQuery() {
         return _featureSelector > 0;
     }
-    
+
     /**
      * Returns 0 if this is not a "feature" query, else it returns the selector
      * of the feature query, e.g. What Is New returns 1.
