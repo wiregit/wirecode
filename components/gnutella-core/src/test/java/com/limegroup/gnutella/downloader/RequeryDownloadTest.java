@@ -61,7 +61,6 @@ public class RequeryDownloadTest
     }
 
     public void setUp() throws Exception {
-        try {
         ManagedDownloader.NO_DELAY = true;
 		ConnectionSettings.NUM_CONNECTIONS.setValue(0);
 		ConnectionSettings.CONNECT_ON_STARTUP.setValue(false);
@@ -87,10 +86,6 @@ public class RequeryDownloadTest
         _uploader.setRate(Integer.MAX_VALUE);
         
         new File( getSaveDirectory(), _filename).delete();
-        } catch(Exception e) {
-            e.printStackTrace();
-            throw e;
-        }
     }    
 
     /** Creates a downloads.dat file named SNAPSHOT with a faked up
