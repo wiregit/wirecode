@@ -1,18 +1,21 @@
 /**
- * auth: afisk
- * file: NativeLauncher.java
- * desc: Wrapper for calls to native code that launches
- *       files in their associated applications.
+ * Wrapper for calls to native code that launches files in their 
+ * associated applications.
+ *
+ * @author Adam Fisk
  */
 //2345678|012345678|012345678|012345678|012345678|012345678|012345678|012345678|
 
-package com.limegroup.gnutella.util;
+//package com.limegroup.gnutella.util;
+
+//import com.limegroup.gnutella.util.CommonUtils;
 
 
 public class NativeLauncher {
 	static {
 		// load the native libary only if we're on Windows
-		if(CommonUtils.isWindows()) {
+		String os = System.getProperty("os.name");
+		if(os.indexOf("Windows") != -1) {
 			try {
 				System.loadLibrary("NativeLauncher");
 			} catch(UnsatisfiedLinkError ule) {}
