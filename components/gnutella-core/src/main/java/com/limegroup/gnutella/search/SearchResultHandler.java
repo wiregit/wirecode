@@ -120,8 +120,12 @@ public final class SearchResultHandler {
      * @param guid the guid of the query that has been removed.
      */ 
     public void removeQuery(GUID guid) {
-        if (removeQueryInternal(guid) != null) {
-            // shut off the query at the UPs....
+        GuidCount gc = removeQueryInternal(guid);
+        if ((gc != null) && (!gc.isFinished())) {
+            // shut off the query at the UPs - it wasn't finished so it hasn't
+            // been shut off - at worst we may shut it off twice, but that is
+            // a timing issue that has a small probability of happening, no big
+            // deal if it does....
             try {
                 QueryStatusResponse stat = new QueryStatusResponse(guid, 
                                                                    MAX_RESULTS);
