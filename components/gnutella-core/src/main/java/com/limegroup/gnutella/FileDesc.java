@@ -44,13 +44,13 @@ public final class FileDesc {
 	/**
 	 * Constant <tt>Collection</tt> of <tt>URN</tt> instances for the file.
 	 */
-    private final Collection /* of URNS */ URNS; 
+    private final Set /* of URNS */ URNS; 
 
 	/**
 	 * <tt>Map</tt> of <tt>AlternateLocation</tt> instances, keyed by
 	 * <tt>AlternateLocation</tt>s.
 	 */
-	private Map/*AlternateLocation->AlternateLocation*/
+	private Map /*AlternateLocation->AlternateLocation*/
 		_alternateLocations;
 
 	/**
@@ -59,7 +59,7 @@ public final class FileDesc {
 	 * any temporary locations that should not be reported in HTTP
 	 * headers, at least for now.
 	 */
-	private Map/*AlternateLocation->AlternateLocation*/
+	private Map /*AlternateLocation->AlternateLocation*/
 		_temporaryAlternateLocations;
 
 	/**
@@ -90,6 +90,18 @@ public final class FileDesc {
 		//this.calculateUrns();
 		//}
     }
+
+	public int getIndex() {
+		return _index;
+	}
+
+	public long getSize() {
+		return _size;
+	}
+
+	public String getName() {
+		return _name;
+	}
 
 	/**
 	 * Adds the specified <tt>AlternateLocation</tt> instance to the list
@@ -212,13 +224,14 @@ public final class FileDesc {
 	 * @return a new <tt>Response</tt> instance for this <tt>FileDesc</tt>
 	 *  and the given <tt>QueryRequest</tt>
 	 */
-    public Response responseFor(QueryRequest qr) {
-        Response response = new Response(_index,_size,_name);        
-        /** Popular approach: return all URNs **/
-        Iterator allUrns = URNS.iterator();
-        while(allUrns.hasNext()) {
-            response.addUrn(((URN)allUrns.next()));
-        }
+	
+//      public Response responseFor(QueryRequest qr) {
+//          Response response = new Response(_index,_size,_name);        
+//          /** Popular approach: return all URNs **/
+//          Iterator allUrns = URNS.iterator();
+//          while(allUrns.hasNext()) {
+//              response.addUrn(((URN)allUrns.next()));
+//          }
         
         /** 
          * Technically proper approach (by HUGE v.0.93): 
@@ -237,9 +250,9 @@ public final class FileDesc {
             }
         }
         /**/
-        return response;
+//          return response;
         
-    }
+//      }
     
     //
     //
@@ -248,16 +261,11 @@ public final class FileDesc {
     
     /**
      * would calling the calculation method add useful URNs?
-     */
-    public boolean shouldCalculateUrns() {
-        Iterator iter = URNS.iterator();
-        while(iter.hasNext()) {
-            if(((URN)iter.next()).isSHA1()) {
-                return false; // we already have all the values we can calculate
-            }
-        }
-        return true; // we could calculate a SHA1
-    }
+     */	
+    public synchronized boolean hasSHA1Urn() {
+		return (getSHA1Urn() != null);
+	}
+	
     
     /**
      * Adds any URNs that can be locally calculated; may take a while to 
@@ -271,7 +279,7 @@ public final class FileDesc {
 		_modTime = FILE.lastModified();
 		URN urn =  null;
 		try {
-			urn = URNFactory.createSHA1URN(FILE);
+			urn = URNFactory.createSHA1Urn(FILE);
 		} catch(IOException e) {
 			return;
 		}		
@@ -279,14 +287,14 @@ public final class FileDesc {
 	}
     
     /**
-     * Verify that given <tt>URN</tt> instance is a URN for this
-	 * <tt>FileDesc</tt>.
+     * Determine whether or not the given <tt>URN</tt> instance is 
+	 * contained in this <tt>FileDesc</tt>.
 	 *
 	 * @param urn the <tt>URN</tt> instance to check for
 	 * @return <tt>true</tt> if the <tt>URN</tt> is a valid <tt>URN</tt>
 	 *  for this file, <tt>false</tt> otherwise
      */
-    public boolean satisfiesUrn(URN urn) {
+    public synchronized boolean containsUrn(URN urn) {
         // first check if modified since last hashing
         if (FILE.lastModified()!=_modTime) {
             // recently modified; throw out SHA1 values
@@ -335,13 +343,13 @@ public final class FileDesc {
 	}
 
 	/**
-	 * Returns a new <tt>Collection</tt> instance containing the <tt>URN</tt>s
+	 * Returns a new <tt>Set</tt> instance containing the <tt>URN</tt>s
 	 * for the this <tt>FileDesc</tt>.
 	 *
-	 * @return a new <tt>Collection</tt> of <tt>URN</tt>s for this 
+	 * @return a new <tt>Set</tt> of <tt>URN</tt>s for this 
 	 *  <tt>FileDesc</tt>
 	 */
-	public Collection getUrns() {
+	public Set getUrns() {
 		return new HashSet(URNS);
 	}
 
