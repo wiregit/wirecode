@@ -100,6 +100,8 @@ public final class ChatManager {
 			_chatsInProgress.add(im);
 			im.start();
 		} catch (IOException e) {
+            // TODO: shouldn't we do some cleanup here?  Remove the session
+            // from _chatsInProgress??
 		} 
 		return im;
 	}
@@ -134,7 +136,8 @@ public final class ChatManager {
 		List bannedList = Arrays.asList(bannedIPs);
 		synchronized (this) {
 			if (bannedList.remove(host) )
-                FilterSettings.BLACK_LISTED_IP_ADDRESSES.setValue((String[])bannedList.toArray());
+                FilterSettings.BLACK_LISTED_IP_ADDRESSES.
+                    setValue((String[])bannedList.toArray());
 		}
 	}
 }
