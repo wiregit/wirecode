@@ -769,8 +769,16 @@ public abstract class MessageRouter {
 		//Broadcast the query to other connected nodes (ultrapeers or older
 		//nodes), but DON'T forward any queries not originating from me 
 		//along leaf to ultrapeer connections.
+	 
 		List list=_manager.getInitializedConnections2();
-		for(int i=0; i<list.size(); i++){
+		int limit;
+		int connections = handler.getNumIntraUltrapeerConnections();		
+		if(connections == 30) {
+			limit = list.size();
+		} else {
+			limit = Math.min(5, list.size());
+		}
+		for(int i=0; i<limit; i++){
 			ManagedConnection mc = (ManagedConnection)list.get(i);
 			if (handler == FOR_ME_REPLY_HANDLER   //came from me
 				|| (mc != handler
