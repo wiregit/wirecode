@@ -49,7 +49,7 @@ public class Cookies implements Serializable
         catch(Exception e)
         {
             //if not able to read from file, create a new instance
-            e.printStackTrace();
+//            e.printStackTrace();
             _hostUserInfoMap = new HashMap(); 
         }
     }
@@ -132,6 +132,12 @@ public class Cookies implements Serializable
     public String toString()
     {
         return _hostUserInfoMap.toString();
+    }
+    
+    //Unit Test
+    public static void main(String[] args)
+    {
+        System.out.println(Cookies.instance().toString());
     }
     
 }
