@@ -39,6 +39,7 @@ public class LimeXMLReplyCollection{
      */
     public LimeXMLReplyCollection(String URI, Map fileToHash,FileManager fm ){
         audio = true;
+        this.schemaURI = URI;
         this.metaFileManager = (MetaFileManager)fm;
         MapSerializer ms = initialize(URI);//contains strings now 
         Map hashToXMLStr;
@@ -117,6 +118,7 @@ public class LimeXMLReplyCollection{
      */
     public LimeXMLReplyCollection(Map fileToHash, String URI, FileManager fm) {
         audio = false;
+        this.schemaURI = URI;
         this.metaFileManager = (MetaFileManager)fm;
         MapSerializer ms = initialize(URI);
         Map hashToXMLStr;
@@ -213,6 +215,7 @@ public class LimeXMLReplyCollection{
         return(a+mp3Str+b);
     }
 
+    
     public String getSchemaURI(){
         return schemaURI;
     }
@@ -313,12 +316,6 @@ public class LimeXMLReplyCollection{
         synchronized(mainMapLock){
             val = mainMap.remove(hash);
             found = val==null?false:true;
-            if(mainMap.size() == 0){//if there are no more replies.
-                removeFromRepository();//remove this collection from map
-                //Note: this follows the convention of the MetaFileManager
-                //of not adding a ReplyCollection to the map if there are
-                //no docs in it.
-            }
         }
         boolean written = false;
         if(found){
@@ -333,11 +330,6 @@ public class LimeXMLReplyCollection{
         else if(found && written)
             return true;
         return false;
-    }
-        
-    private void removeFromRepository(){
-        SchemaReplyCollectionMapper map=SchemaReplyCollectionMapper.instance();
-        map.removeReplyCollection(this.schemaURI);
     }
     
     /**

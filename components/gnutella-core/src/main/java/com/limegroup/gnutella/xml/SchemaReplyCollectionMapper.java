@@ -61,7 +61,7 @@ public class SchemaReplyCollectionMapper{
         return replyCollection;
     }
 
-    protected void removeReplyCollection(String schemaURI){
+    private void removeReplyCollection(String schemaURI){
         synchronized(mapper){
             mapper.remove(schemaURI);
         }
