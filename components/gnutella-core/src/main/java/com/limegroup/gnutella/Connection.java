@@ -3,83 +3,43 @@ package com.limegroup.gnutella;
 import java.io.*;
 import java.net.*;
 import com.sun.java.util.collections.*;
+import java.util.Properties;
+import java.util.Enumeration;
 
 /**
- * A Gnutella connection. A connection is either INCOMING or OUTGOING.
+ * A Gnutella messaging connection.  Provides handshaking functionality and
+ * routines for reading and writing of Gnutella messages.  A connection is
+ * either incoming (created from a Socket) or outgoing (created from an
+ * address).  This class does not provide sophisticated buffering or routing
+ * logic; use ManagedConnection for that. <p>
  *
- * This class provides the core logic for handling the Gnutella
- * protocol.  This includes sending replies to requests but not
- * details of routing.  The Message class (and subclasses)
- * actually does the tedious reading/writing of bytes from socket.<p>
+ * You will note that the constructors don't actually involve the network and
+ * hence never throw exceptions or block. <b>To actual initialize a connection,
+ * you must call initialize().</b> While this is somwhat awkward, it is
+ * intentional.  It makes it easier, for example, for the GUI to show
+ * uninitialized connections.<p>
  *
- * The class can be used in a number of ways.  The typical use, to
- * handle a normal Gnutella connection, involves creating a
- * ConnectionManager.<p>
+ * Connection supports the 0.4 and 0.6 handshakes.  Gnutella 0.6 connections
+ * have a list of properties read and written during the handshake sequence.
+ * Typical property/value pairs might be "Query-Routing: 0.3" or "User-Agent:
+ * LimeWire".  Incoming connections always connect at the protocol level
+ * specified by the remote host.  Outgoing connections can be made at the 0.4
+ * level, the 0.6 level, or the best level possible.  Realize that the latter is
+ * implemented by reconnecting the socket.<p>
  *
- * <pre>
- *   //1. Setup manager and connection.
- *   ConnectionManager cm=new ConnectionManager(...);
- *   cm.createConnectionAsynchronously(host, port);
- * </pre>
- *
- * or, if you need to use the Connection immediately:
- *
- * <pre>
- *   //1. Setup manager and connection.
- *   ConnectionManager cm=new ConnectionManager(...);
- *   Connection c = cm.createConnectionBlocking(host, port);
- *   c.send(whatever);
- * </pre>
- *
- * The third use is for "do it yourselfers".  This is useful for
- * Gnutella spiders. This goes something like this:<p>
- *
- * <pre>
- *   Connection c = new Connection(host, port);
- *   c.initialize();
- *   c.send(whatever);
- * </pre>
- *
- * You will note that the constructors don't actually connect
- * this.  For that you must call initialize().  While this is awkward,
- * it is intentional, as it makes dealing with connection failures easier
- * The constuctor doesn't throw an exception, and the constructor does not
- * run for an unreasonable amount of time (i.e., the constructor does not
- * use the network).  Often, the connection is initialized on a new
- * thread for this reason. <p>
- *
- * All connections have two underlying spam filters: a personal filter
- * (controls what I see) and a route filter (also controls what I pass
- * along to others).  See SpamFilter for a description.  These
- * filters are configured by the properties in the SettingsManager, but
- * you can change them with setPersonalFilter and setRouteFilter.
+ * All connections have two underlying spam filters: a personal filter (controls
+ * what I see) and a route filter (also controls what I pass along to others).
+ * See SpamFilter for a description.  These filters are configured by the
+ * properties in the SettingsManager, but you can change them with
+ * setPersonalFilter and setRouteFilter.<p> 
  */
 public class Connection {
-    /** The underlying socket, its address, and input and output
-     *  streams.  sock, in, and out are null iff this is in the
-     *  unconnected state.  For thread synchronization reasons, it is
-     *  important that this only be modified by the send(m) and
-     *  receive() methods.
-     *
-     *  This implementation has two goals:
-     *    1) a slow connection cannot prevent other connections from making
-     *       progress.  Packets must be dropped.
-     *    2) packets should be sent in large batches to the OS, but the
-     *       batches should not be so long as to cause undue latency.
-     *
-     *  Towards this end, we queue sent messages on the front of
-     *  outputQueue.  Whenever outputQueue contains at least
-     *  BATCH_SIZE messages or QUEUE_TIME milliseconds has passed, the
-     *  messages on outputQueue are written to out.  Out is then
-     *  flushed exactly once. outputQueue is fixed size, so if the
-     *  output thread can't keep up with the producer, packets will be
-     *  (intentionally) droppped.  LOCKING: obtain outputQueueLock
-     *  lock before modifying or replacing outputQueue.
-     *
-     *  One problem with this scheme is that IOExceptions from sending
-     *  data happen asynchronously.  When this happens, _connectionClosed
-     *  is set to true.  Then the next time send is called, an IOException
-     *  is thrown.  */
+    /** 
+     * The underlying socket, its address, and input and output streams.  sock,
+     * in, and out are null iff this is in the unconnected state.  For thread
+     * synchronization reasons, it is important that this only be modified by
+     * the send(m) and receive() methods.
+     */
     private String _host;
     private int _port;
     private Socket _socket;
@@ -92,32 +52,99 @@ public class Connection {
      * flag is set in shutdown() and then checked in initialize()
      * to insure the _socket.close() happens if shutdown is called
      * asynchronously before initialize() completes.  Note that the 
-     * connection may have been remotely closed even if _closed==true.
-     */
+     * connection may have been remotely closed even if _closed==true.  */
     private volatile boolean _closed=false;
 
+    /** The properties read from the connection, or null if Gnutella 0.4.  */
+    private Properties _propertiesRead;
+    /** For outgoing Gnutella 0.6 connections, the properties written
+     *  after "GNUTELLA CONNECT".  Null otherwise. */
+    private Properties _propertiesWrittenP;
+    /** For outgoing Gnutella 0.6 connections, a function calculating the
+     *  properties written after the server's "GNUTELLA OK".  For incoming
+     *  Gnutella 0.6 connections, the properties written after the client's
+     *  "GNUTELLA CONNECT".  Null otherwise. */
+    private HandshakeResponder _propertiesWrittenR;
+    /** True iff this should try to reconnect at a lower protocol level on
+     *  outgoing connections. */
+    private boolean _negotiate=false;
+    public static final String GNUTELLA_CONNECT_04="GNUTELLA CONNECT/0.4";
+    public static final String GNUTELLA_OK_04="GNUTELLA OK";
+    public static final String GNUTELLA_CONNECT_06="GNUTELLA CONNECT/0.6";
+    public static final String GNUTELLA_OK_06="GNUTELLA/0.6 200 OK";
+    public static final String CONNECT="CONNECT/";
+    /** End of line for Gnutella 0.6 */
+    public static final String CRLF="\r\n";
+    /** End of line for Gnutella 0.4 */
+    public static final String LF="\n";
+    
+
     /**
-     * Creates an outgoing connection with the specified listener.
-     * initalize() must be called before anything else.
+     * Creates an uninitialized outgoing Gnutella 0.4 connection.
+     *
+     * @param host the name of the host to connect to
+     * @param port the port of the remote host 
      */
     public Connection(String host, int port) {
+        this(host, port, null, null, false);
+    }
+
+
+    /**
+     * Creates an uninitialized outgoing Gnutella 0.6 connection with the
+     * desired outgoing properties, possibly reverting to Gnutella 0.4 if
+     * needed.
+     * 
+     * @param host the name of the host to connect to
+     * @param port the port of the remote host
+     * @param properties1 the headers to be sent after "GNUTELLA CONNECT"
+     * @param properties2 a function returning the headers to be sent
+     *  after the server's "GNUTELLA OK".  Typically this returns only
+     *  vendor-specific properties.
+     * @param negotiate if true and if the first connection attempt fails, try
+     *  to reconnect at the Gnutella 0.4 level with no headers 
+     */
+    public Connection(String host, int port,
+                      Properties properties1,
+                      HandshakeResponder properties2,
+                      boolean negotiate) {
         _host = host;
         _port = port;
         _outgoing = true;
+        _negotiate = negotiate;
+        _propertiesWrittenP=properties1;
+        _propertiesWrittenR=properties2;
+    }
+    
+    /**
+     * Creates an uninitialized incoming Gnutella 0.6/0.4 connection with no
+     * extra properties.  Connects at the same protocol level as the remote
+     * host.
+     *
+     * @param socket the socket accepted by a ServerSocket.  The word
+     *  "GNUTELLA " and nothing else must have been read from the socket.
+     */
+    public Connection(Socket socket) {
+        this(socket, null);
     }
 
     /**
-     * Creates an incoming connection.
-     * initalize() must be called before anything else.
-     *
-     * @requires the word "GNUTELLA " and nothing else has just been read
-     *  from socket
+     * Creates an uninitialized incoming 0.6/0.4 Gnutella connection.  Connects
+     * at the same protocol level as the incoming connection.  Hence 
+     * properties are only written if the remote client supports 0.6.
+     * 
+     * @param socket the socket accepted by a ServerSocket.  The word
+     *  "GNUTELLA " and nothing else must have been read from the socket.
+     * @param properties a function returning the headers to be sent in response
+     *  to the client's "GNUTELLA CONNECT".  If the client connected at the 0.4
+     *  level, this method is never called.  
      */
-    public Connection(Socket socket) {
+    public Connection(Socket socket, HandshakeResponder properties) {
         _host = socket.getInetAddress().toString();
         _port = socket.getPort();
         _socket = socket;
         _outgoing = false;
+        _propertiesWrittenR=properties;
     }
 
     /**
@@ -126,6 +153,30 @@ public class Connection {
      * in the first line of the override.
      */
     public void initialize() throws IOException {
+        try {
+            initializeWithoutRetry();
+        } catch (BadHandshakeException e) {
+            //If an outgoing attempt at Gnutella 0.6 failed, and the user
+            //has requested we try lower protocol versions, try again.
+            if (_negotiate 
+                    && isOutgoing() 
+                    && _propertiesWrittenP!=null
+                    && _propertiesWrittenR!=null) {
+                _propertiesWrittenP=null;
+                _propertiesWrittenR=null;
+                initializeWithoutRetry();
+            } else {
+                throw e;
+            }
+        }
+    }
+
+    private static class BadHandshakeException extends IOException { }
+
+    /*
+     * Exactly like initialize, but without the re-connection.
+     */
+    private void initializeWithoutRetry() throws IOException {
         SettingsManager settingsManager = SettingsManager.instance();
         String expectString;
 
@@ -159,57 +210,176 @@ public class Connection {
         }
 
         try {
-            if(isOutgoing()) {
-                sendString(settingsManager.getConnectString()+"\n\n");
-                expectString(settingsManager.getConnectOkString()+"\n\n");
-            } else {
-                expectString(
-                    settingsManager.getConnectStringRemainder()+"\n\n");
-                sendString(settingsManager.getConnectOkString()+"\n\n");
-            }
+            //In all the line reading code below, we are somewhat lax in
+            //distinguishing between '\r' and '\n'.  Who cares?
+            if(isOutgoing())
+                initializeOutgoing();
+            else
+                initializeIncoming();
         } catch(IOException e) {
             _socket.close();
-            throw e;
+            throw new BadHandshakeException();
+        }
+    }
+
+    /** Sends and receives handshake strings for outgoing connections,
+     *  throwing IOException if any problems. */
+    private void initializeOutgoing() throws IOException {
+        //On outgoing connections, ALWAYS try Gnutella 0.6 if requested by the
+        //user.  If the other end doesn't understand it--too bad!  There is an
+        //option at higher levels to retry.
+        if (_propertiesWrittenP==null || _propertiesWrittenR==null) {
+            sendString(GNUTELLA_CONNECT_04+LF+LF);
+            if (! readLine().equals(GNUTELLA_OK_04))
+                throw new IOException("Bad connect string"); 
+            if (! readLine().equals(""))  //Get second \n
+                throw new IOException("Bad connect string"); 
+        }
+        else {
+            //1. Send "GNUTELLA CONNECT" and headers
+            sendString(GNUTELLA_CONNECT_06+CRLF);
+            sendHeaders(_propertiesWrittenP);                
+            //2. Read "GNUTELLA CONNECT" and headers.  We require that the
+            //response be at the same protocol level as we sent out.  This is
+            //necessary because BearShare will accept "GNUTELLA CONNECT/0.6" and
+            //respond with "GNUTELLA OK", only to be confused by the headers
+            //later.
+            if (! readLine().equals(GNUTELLA_OK_06))
+                throw new IOException("Bad connect string");
+            _propertiesRead=new Properties();
+            readHeaders();
+            //3. Send "GNUTELLA/200 OK" with no headers.
+            sendString(GNUTELLA_OK_06+CRLF);
+            sendHeaders(_propertiesWrittenR.respond(_propertiesRead));
+        }
+    }
+
+    /** Sends and receives handshake strings for incoming connections,
+     *  throwing IOException if any problems. */
+    private void initializeIncoming() throws IOException {
+        //Dispatch based on first line read.  Remember that "GNUTELLA " has
+        //already been read by Acceptor.  Hence we are looking for "CONNECT/0.4"
+        //or "CONNECT/0.6".  As a dirty hack, we use String.endsWith.  This
+        //means we will accidentally allow crazy things like "0.4".  Oh well!
+        String line=readLine();  
+        if (GNUTELLA_CONNECT_04.endsWith(line)) {
+            //a) Old style
+            if (! readLine().equals(""))  //Get second \n
+                throw new IOException("Bad connect string"); 
+            sendString(GNUTELLA_OK_04+LF+LF);
+            //If the user requested properties, we can't send them.
+            _propertiesWrittenP=null;
+            _propertiesWrittenR=null;
+        } else if (notLessThan06(line)) {
+            //b) New style
+            _propertiesRead=new Properties();
+            //1. Read GNUTELLA CONNECT
+            readHeaders();
+            //2. Send GNUTELLA/200 OK
+            sendString(GNUTELLA_OK_06+CRLF);
+            if (_propertiesWrittenR==null)
+                sendString(CRLF);  //no headers specified ==> blank line
+            else
+                sendHeaders(_propertiesWrittenR.respond(_propertiesRead));
+            //3. Read GNUTELLA/200 OK, and any private vendor headers.
+            if (! readLine().equals(GNUTELLA_OK_06))
+                throw new IOException("Bad connect string");
+            readHeaders();
+        } else {
+            throw new IOException("Unexpected connect string");
+        }
+    }
+
+    /** Returns true iff line ends with "CONNECT/N", where N
+     *  is a number greater than or equal "0.6". */
+    private static boolean notLessThan06(String line) {
+        int i=line.indexOf(CONNECT);
+        if (i<0)
+            return false;
+        try {
+            float f=Float.parseFloat(line.substring(i+CONNECT.length()));
+            return f>=0.6f;
+        } catch (NumberFormatException e) {
+            return false;
         }
     }
 
     /**
-     * Called only from initialize()
-     * @requires _socket, _out are properly set up
+     * Writes the properties in props to network, including the blank line at
+     * the end.  Throws IOException if there are any problems.
+     *    @modifies network 
      */
+    private void sendHeaders(Properties props) throws IOException {
+        Enumeration enum=props.propertyNames();
+        while (enum.hasMoreElements()) {
+            String key=(String)enum.nextElement();
+            String value=props.getProperty(key);
+            if (value==null)
+                value="";
+            sendString(key+": "+value+CRLF);            
+        }
+        sendString(CRLF);
+    }
+
+
+    /**
+     * Reads the properties from the network into _propertiesRead, throwing
+     * IOException if there are any problems. 
+     *     @modifies network 
+     */
+    private void readHeaders() throws IOException {
+        //TODO: limit number of headers read
+        while (true) {
+            //This doesn't distinguish between \r and \n.  That's fine.
+            String line=readLine();
+            if (line==null)
+                throw new IOException();   //unexpected EOF
+            if (line.equals(""))
+                return;                    //blank line ==> done
+            int i=line.indexOf(':');
+            if (i<0)
+                continue;                  //ignore lines without ':'
+            String key=line.substring(0, i);
+            String value=line.substring(i+1).trim();
+            _propertiesRead.setProperty(key, value);
+        }
+    }
+
+    /**
+     * Writes s to out, with no trailing linefeeds.  Called only from
+     * initialize().  
+     *    @requires _socket, _out are properly set up */
     private void sendString(String s) throws IOException {
+        //TODO: character encodings?
         byte[] bytes=s.getBytes();
         _out.write(bytes);
         _out.flush();
     }
 
     /**
-     * Called only from the constructors
+     * Reads and returns one line from the network.  A line is defined as a
+     * maximal sequence of characters without '\n', with '\r''s removed.  If the
+     * characters cannot be read within TIMEOUT milliseconds (as defined by the
+     * property manager), throws IOException.  This includes EOF.
      *
      * @requires _socket is properly set up
      * @modifies network
-     * @effects attempts to read s.size() characters from the network/
-     *  If they do not match s, throws IOException.  If the characters
-     *  cannot be read within TIMEOUT milliseconds (as defined by the
-     *  property manager), throws IOException.
      */
-    private void expectString(String s) throws IOException {
+    private String readLine() throws IOException {
         int oldTimeout=_socket.getSoTimeout();
         try {
             _socket.setSoTimeout(SettingsManager.instance().getTimeout());
-            byte[] bytes=s.getBytes();
-            for (int i=0; i<bytes.length; i++) {
-                int got=_in.read();
-                if (got==-1)
-                    throw new IOException();
-                if (bytes[i]!=(byte)got)
-                    throw new IOException();
-            }
+            String line=(new ByteReader(_in)).readLine();
+            if (line==null)
+                throw new IOException();
+            return line;
         } finally {
             //Restore socket timeout.
             _socket.setSoTimeout(oldTimeout);
         }
     }
+
+    /////////////////////////////////////////////////////////////////////////
 
     /**
      * Used to determine whether the connection is incoming or outgoing.
@@ -340,6 +510,18 @@ public class Connection {
     }
 
     /**
+     * Returns the value of the given incoming connection property, or null if
+     * no such property.  For example, getProperty("Query-Routing") tells
+     * whether the remote host supports query routing.  
+     */
+    public String getProperty(String name) {
+        if (_propertiesRead==null)
+            return null;
+        else
+            return _propertiesRead.getProperty(name);
+    }
+
+    /**
      * @return true until close() is called on this Connection
      */
     public boolean isOpen() {
@@ -360,55 +542,153 @@ public class Connection {
         }
     }
 
-    public String toString()
-    {
+    public String toString() {
         return "host=" + _host  + " port=" + _port; 
     }
     
-    ///** Unit test */
-    /*
-    public static void main(String args[]) {
-        //1. Test replacement policies.
-        Message qr=new QueryRequest((byte)5, 0, "test");
-        Message qr2=new QueryRequest((byte)5, 0, "test2");
-        Message preq=new PingRequest((byte)5); preq.hop(); //from other
-        Message preq2=new PingRequest((byte)5);            //from me
-        Message prep=new PingReply(new byte[16], (byte)5, 6346,
-                                   new byte[4], 0, 0);
+    
+    /////////////////////////// Unit Tests  ///////////////////////////////////
+    
+//      /** Unit test */
+//      public static void main(String args[]) {
+//          Assert.that(! notLessThan06("CONNECT"));
+//          Assert.that(! notLessThan06("CONNECT/0.4"));
+//          Assert.that(! notLessThan06("CONNECT/0.599"));
+//          Assert.that(! notLessThan06("CONNECT/XP"));
+//          Assert.that(notLessThan06("CONNECT/0.6"));
+//          Assert.that(notLessThan06("CONNECT/0.7"));
+//          Assert.that(notLessThan06("GNUTELLA CONNECT/1.0"));
 
-        Connection c=new Connection("localhost", 6346);
-        try {
-            //   a') Regression test
-            c.send(qr);
-            c.send(qr2);
-            Assert.that(c._outputQueue.get(0)==qr2);
-            Assert.that(c._outputQueue.get(1)==qr);
+//          final Properties props=new Properties();
+//          props.setProperty("Query-Routing", "0.3");        
+//          HandshakeResponder standardResponder=new HandshakeResponder() {
+//              public Properties respond(Properties props) {
+//                  return props;
+//              }
+//          };        
+//          HandshakeResponder secretResponder=new HandshakeResponder() {
+//              public Properties respond(Properties props) {
+//                  Properties ret=new Properties();
+//                  ret.setProperty("Secret", "abcdefg");
+//                  return ret;
+//              }
+//          };
+//          ConnectionPair p=null;
 
-            for (int i=0; i<QUEUE_SIZE-2; i++) {
-                Assert.that(! c._outputQueue.isFull());
-                c.send(qr);
-            }
-            Assert.that(c._outputQueue.isFull());
+//          //1. 0.4 => 0.4
+//          p=connect(null, null, null);
+//          Assert.that(p!=null);
+//          Assert.that(p.in.getProperty("Query-Routing")==null);
+//          Assert.that(p.out.getProperty("Query-Routing")==null);
+//          disconnect(p);
 
-            //   a) No pings or pongs.  Boot oldest.
-            c.send(preq2);
-            Assert.that(c._outputQueue.isFull());
-            Assert.that(c._outputQueue.get(0)==preq2);
+//          //2. 0.6 => 0.6
+//          p=connect(standardResponder, props, secretResponder);
+//          Assert.that(p!=null);
+//          Assert.that(p.in.getProperty("Query-Routing").equals("0.3"));
+//          Assert.that(p.out.getProperty("Query-Routing").equals("0.3"));
+//          Assert.that(p.out.getProperty("Secret")==null);
+//          Assert.that(p.in.getProperty("Secret").equals("abcdefg"));
+//          disconnect(p);
 
-            //   b) Old ping request in last position
-            c._outputQueue.set(QUEUE_SIZE-1, preq);
-            c.send(preq2);
-            Assert.that(c._outputQueue.get(QUEUE_SIZE-1)==preq2);
+//          //3. 0.4 => 0.6 (Incoming doesn't send properties)
+//          p=connect(standardResponder, null, null);
+//          Assert.that(p!=null);
+//          Assert.that(p.in.getProperty("Query-Routing")==null);
+//          Assert.that(p.out.getProperty("Query-Routing")==null);
+//          disconnect(p);
 
-            //   c) Old ping reply in second to last position.
-            c._outputQueue.set(QUEUE_SIZE-2, prep);
-            c.send(qr);
-            Assert.that(c._outputQueue.get(QUEUE_SIZE-1)==preq2);
-            Assert.that(c._outputQueue.get(QUEUE_SIZE-2)==qr);
-        } catch (IOException e) {
-            e.printStackTrace();
-            Assert.that(false, "IOException");
-        }
-    }
-    */
+//          //4. 0.6 => 0.4 (If the receiving connection were Gnutella 0.4, this
+//          //wouldn't work.  But the new guy will automatically upgrade to 0.6.)
+//          p=connect(null, props, standardResponder);
+//          Assert.that(p!=null);
+//          //Assert.that(p.in.getProperty("Query-Routing")==null);
+//          Assert.that(p.out.getProperty("Query-Routing")==null);
+//          disconnect(p);
+//      }   
+
+//      private static class ConnectionPair {
+//          Connection in;
+//          Connection out;
+//      }
+
+//      private static ConnectionPair connect(HandshakeResponder inProperties,
+//                                            Properties outProperties1,
+//                                            HandshakeResponder outProperties2) {
+//          ConnectionPair ret=new ConnectionPair();
+//          MiniAcceptor acceptor=new MiniAcceptor(inProperties);
+//          try {
+//              ret.out=new Connection("localhost", 6346,
+//                                     outProperties1, outProperties2,
+//                                     true);
+//              ret.out.initialize();
+//          } catch (IOException e) { }
+//          ret.in=acceptor.accept();
+//          if (ret.in==null || ret.out==null)
+//              return null;
+//          else
+//              return ret;
+//      }
+
+//      private static void disconnect(ConnectionPair cp) {
+//          if (cp.in!=null)
+//              cp.in.close();
+//          if (cp.out!=null)
+//              cp.out.close();
+//      }
+    
+
+//      private static class MiniAcceptor implements Runnable {
+//          Object lock=new Object();
+//          Connection c=null;
+//          boolean done=false;
+
+//          HandshakeResponder properties;
+        
+//          /** Starts the listen socket without blocking. */
+//          public MiniAcceptor(HandshakeResponder properties) {
+//              this.properties=properties;
+//              Thread runner=new Thread(this);
+//              runner.start();
+//              Thread.yield();  //hack to make sure runner creates socket
+//          }
+
+//          /** Blocks until a connection is available, and returns it. 
+//           *  Returns null if something went awry. */
+//          public Connection accept() {
+//              synchronized (lock) {
+//                  while (! done) {
+//                      try {
+//                          lock.wait();
+//                      } catch (InterruptedException e) {
+//                          return null;
+//                      }
+//                  }
+//                  return c;
+//              }
+//          }
+        
+//          /** Don't call.  For internal use only. */
+//          public void run() {
+//              try {
+//                  ServerSocket ss=new ServerSocket(6346);
+//                  Socket s=ss.accept();
+//                  //Technically "GNUTELLA " should be read from s.  Turns out that
+//                  //out implementation doesn't care;
+//                  Connection c=new Connection(s, properties);
+//                  c.initialize();
+//                  ss.close();
+//                  synchronized (lock) {
+//                      this.c=c;
+//                      done=true;
+//                      lock.notify();
+//                  } 
+//              } catch (IOException e) {
+//                  synchronized (lock) {
+//                      done=true;
+//                      lock.notify();
+//                  } 
+//              }
+//          }
+//      }
 }
