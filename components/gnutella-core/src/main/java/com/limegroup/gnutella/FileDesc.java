@@ -68,7 +68,7 @@ public class FileDesc implements AlternateLocationCollector {
 	/**
 	 * The collection of alternate locations for the file.
 	 */
-	private AlternateLocationCollection _altLocs;
+	private AlternateLocationCollection ALT_LOCS;
 	
 	/**
 	 * The number of hits this file has recieved.
@@ -130,6 +130,7 @@ public class FileDesc implements AlternateLocationCollector {
 		if(SHA1_URN == null) {
 			throw new IllegalArgumentException("no SHA1 URN");
 		}
+        ALT_LOCS = AlternateLocationCollection.createCollection(SHA1_URN);
         _hits = 0; // Starts off with 0 hits
     }		
 
@@ -271,7 +272,7 @@ public class FileDesc implements AlternateLocationCollector {
 	 *  if it is not initialized
 	 */
 	public AlternateLocationCollection getAlternateLocationCollection() {
-		return _altLocs;
+		return ALT_LOCS;
 	}
 
 	/** 
@@ -293,39 +294,38 @@ public class FileDesc implements AlternateLocationCollector {
 			throw new IllegalArgumentException("URN does not match");
 		}
 		URL url = al.getUrl();
-		createAlternateLocations();
-		_altLocs.addAlternateLocation(al);
+		ALT_LOCS.addAlternateLocation(al);
 	}
 
-	// implements AlternateLocationCollector interface
+	/**
+     * Implements the <tt>AlternateLocationCollector</tt> interface.
+     * Adds the specified <tt>AlternateLocationCollection</tt> to this 
+     * collection.
+     *
+     * @param alc the <tt>AlternateLocationCollection</tt> to add
+     * @throws <tt>NullPointerException</tt> if <tt>alc</tt> is 
+     *  <tt>null</tt>
+     * @throws <tt>IllegalArgumentException</tt> if the SHA1 of the
+     *  collection to add does not match the collection of <tt>this</tt>
+     */
 	public void addAlternateLocationCollection(AlternateLocationCollection alc) {
         if(alc == null) {
             throw new NullPointerException("cannot accept null alt loc coll");
         }
-		createAlternateLocations();
-		_altLocs.addAlternateLocationCollection(alc);
+		if(!alc.getSHA1Urn().equals(SHA1_URN)) {
+			throw new IllegalArgumentException("SHA1 does not match");
+		}
+		ALT_LOCS.addAlternateLocationCollection(alc);
 	}
 
 	// implements AlternateLocationCollector interface
 	public boolean hasAlternateLocations() {
-		if(_altLocs == null) return false;
-		return _altLocs.hasAlternateLocations();
+		return ALT_LOCS.hasAlternateLocations();
 	}
 	
 	// implements AlternateLocationCollector interface
 	public int numberOfAlternateLocations() {
-	    // save memory by not creating the object if it isn't storing anything
-	    if(_altLocs == null) return 0;
-	    return _altLocs.numberOfAlternateLocations();
-	}
-
-	/**
-	 * Constructs the alternate location collection instance if it's null.
-	 */
-	private void createAlternateLocations() {
-		if(_altLocs == null) 
-			_altLocs = 
-				AlternateLocationCollection.createCollection(SHA1_URN);
+	    return ALT_LOCS.numberOfAlternateLocations();
 	}
 	
     
@@ -443,7 +443,7 @@ public class FileDesc implements AlternateLocationCollector {
 				"modTime:  "+_modTime+"\r\n"+
 				"File:     "+FILE+"\r\n"+
 				"urns:     "+URNS+"\r\n"+
-				"alt locs: "+_altLocs+"\r\n");
+				"alt locs: "+ALT_LOCS+"\r\n");
 	}
 }
 
