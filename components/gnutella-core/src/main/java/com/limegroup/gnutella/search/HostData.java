@@ -2,6 +2,8 @@ package com.limegroup.gnutella.search;
 
 import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.messages.*;
+import com.limegroup.gnutella.util.*;
+import java.net.*;
 
 /**
  * This class contains data about a host that has returned a query hit,
@@ -75,6 +77,7 @@ public final class HostData {
      * Constant for the Vendor code of the reply.
      */
     private final String VENDOR_CODE;
+    
 
 	/**
 	 * Constructs a new <tt>HostData</tt> instance from a 
@@ -94,14 +97,19 @@ public final class HostData {
 		boolean browseHostEnabled = false;
 		boolean chatEnabled       = false;
 		boolean measuredSpeed     = false;
-		boolean multicast     = false;
+		boolean multicast         = false;
         String  vendor = "";
 
 		try {
-			firewalled = reply.getNeedsPush();
+			firewalled = reply.getNeedsPush() || 
+                NetworkUtils.isPrivateAddress(IP);
 		} catch(BadPacketException e) {
 			firewalled = true;
-		}
+		} catch(UnknownHostException e) {
+            firewalled = true;
+            // TODO: we want to handle this!! requires more changes
+            // though
+        }
 		try {
 			browseHostEnabled = reply.getSupportsBrowseHost();
 		} catch (BadPacketException e){ 
