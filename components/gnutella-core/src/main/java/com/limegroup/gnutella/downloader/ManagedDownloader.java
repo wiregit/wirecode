@@ -1238,8 +1238,8 @@ public class ManagedDownloader implements Downloader, Serializable {
             }
         }
 
-        if(good) {
-            synchronized(altLock) {
+        synchronized(altLock) {
+            if(good) {
                 //check if validAlts contains loc to avoid duplicate stats, and
                 //spurious count increments in the local
                 //AlternateLocationCollections
@@ -1249,7 +1249,8 @@ public class ManagedDownloader implements Downloader, Serializable {
                     validAlts.add(loc);
                     if( ifd != null )
                         ifd.addVerified(forFD);
-                }  else {
+                }
+            }  else {
                     if( RECORD_STATS && rfd.isFromAlternateLocation() )
                         DownloadStat.ALTERNATE_NOT_ADDED.incrementStat();
                     validAlts.remove(loc);
@@ -1257,9 +1258,8 @@ public class ManagedDownloader implements Downloader, Serializable {
                         ifd.remove(forFD);
                     invalidAlts.add(rfd.getRemoteHostData());
                     recentInvalidAlts.add(loc);
-                }
             }
-        }
+        } 
     }
 
     public boolean resume() throws AlreadyDownloadingException {
@@ -2628,13 +2628,15 @@ public class ManagedDownloader implements Downloader, Serializable {
         // must notify that we cannot connect directly.
         informMesh(rfd, false);
 
-        try {
-            ret = connectWithPush(rfd, incFile);
-            return ret;
-        } catch(IOException e) {
-            // even the push failed :(
+        if (!rfd.isFromAlternateLocation()) {
+            try {
+                 ret = connectWithPush(rfd, incFile);
+                 return ret;
+            } catch(IOException e) {
+                // even the push failed :(
+            }
         }
-
+        
         // if we're here, everything failed.
         return null;
     }
