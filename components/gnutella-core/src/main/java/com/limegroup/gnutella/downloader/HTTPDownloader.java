@@ -277,7 +277,7 @@ public class HTTPDownloader implements BandwidthTracker {
             //If platform supports it, set SO_KEEPALIVE option.  This helps
             //detect a crashed uploader.
             Sockets.setKeepAlive(_socket, true);
-            _input = new BufferedInputStream(_socket.getInputStream());
+            _input = _socket.getInputStream();
             _output = new BufferedOutputStream(_socket.getOutputStream());
             
         } catch (IOException e) {
