@@ -46,27 +46,32 @@ public class ManagedDownloaderTest extends com.limegroup.gnutella.util.BaseTestC
                                               "some file.txt", 1010, 
                                               new byte[16], 
                                               SpeedConstants.T1_SPEED_INT, 
-                                              false, 3, false, null, null);
+                                              false, 3, false, null, null,
+                                              false, false,"",0,null);
         RemoteFileDesc rf4=new RemoteFileDesc("1.2.3.6", 6346, 0, 
                                               "some file.txt", 1010, 
                                               new byte[16], 
                                               SpeedConstants.T3_SPEED_INT, 
-                                              false, 0, false, null, null);
+                                              false, 0, false, null, null,
+                                              false, false,"",0,null);
         RemoteFileDesc rf5=new RemoteFileDesc("1.2.3.6", 6346, 0, 
                                               "some file.txt", 1010, 
                                               new byte[16], 
                                               SpeedConstants.T3_SPEED_INT+1, 
-                                              false, 0, false, null, null);
+                                              false, 0, false, null, null,
+                                              false, false,"",0,null);
         RemoteFileDesc rf6=new RemoteFileDesc("1.2.3.7", 6346, 0,
                                               "some file.txt", 1010,
                                               new byte[16],
                                               SpeedConstants.MODEM_SPEED_INT,
-                                              false, 0, false, null, urns1);
+                                              false, 0, false, null, urns1,
+                                              false, false,"",0,null);
         RemoteFileDesc rf7=new RemoteFileDesc("1.2.3.7", 6346, 0,
                                               "some file.txt", 1010,
                                               new byte[16],
                                               SpeedConstants.MODEM_SPEED_INT+1,
-                                              false, 0, false, null, urns2);
+                                              false, 0, false, null, urns2,
+                                              false, false,"",0,null);
 
         List list = new LinkedList();
         list.add(rf4);
@@ -289,7 +294,8 @@ public class ManagedDownloaderTest extends com.limegroup.gnutella.util.BaseTestC
         }        
         return new RemoteFileDesc("127.0.0.1", PORT, 13l,
                                   name, 1024,
-                                  new byte[16], 56, false, 4, true, null, urns);
+                                  new byte[16], 56, false, 4, true, null, urns,
+                                  false, false,"",0,null);
     }
 
     /** Provides access to protected methods. */

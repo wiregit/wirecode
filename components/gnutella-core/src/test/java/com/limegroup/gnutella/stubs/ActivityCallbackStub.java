@@ -22,8 +22,7 @@ public class ActivityCallbackStub implements ActivityCallback {
     public void knownHost(Endpoint e) { }
     //public void handleQueryReply( QueryReply qr ) { }
 
-	public void handleQueryResult(HostData data, Response response, 
-								  List docs) {}
+	public void handleQueryResult(RemoteFileDesc rfd, byte[] clientGUID) {}
     public void handleQueryString( String query ) { }    
     public void addDownload(Downloader d) { }    
     public void removeDownload(Downloader d) { }    

@@ -24,7 +24,8 @@ public class AutoDownloaderDetailsTest extends com.limegroup.gnutella.util.BaseT
         for (int i = 0; i < rfds.length; i++)
             rfds[i] = new RemoteFileDesc("0.0.0.0", 6346, i, files[i],
                                          i, GUID.makeGuid(),
-                                         3, false, 3, false,null, null);
+                                         3, false, 3, false,null, null,
+                                         false, false,"",0,null);
 
         //Test serialization by writing to disk and rereading.  All the methods
         //should still work afterwards.

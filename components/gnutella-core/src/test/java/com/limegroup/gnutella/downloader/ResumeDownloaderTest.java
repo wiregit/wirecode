@@ -54,7 +54,8 @@ public class ResumeDownloaderTest extends com.limegroup.gnutella.util.BaseTestCa
             urns.add(hash);
         return new RemoteFileDesc("1.2.3.4", 6346, 13l,
                                   name, size,
-                                  new byte[16], 56, false, 4, true, null, urns);
+                                  new byte[16], 56, false, 4, true, null, urns,
+                                  false, false,"",0,null);
     }
 
     ////////////////////////////////////////////////////////////////////////////

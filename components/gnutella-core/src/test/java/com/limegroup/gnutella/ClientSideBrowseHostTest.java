@@ -543,7 +543,7 @@ public class ClientSideBrowseHostTest
                                      (int) response.getSize(), 
                                      data.getClientGUID(),
                                      0, data.isChatEnabled(), 3, false,
-                                     null, null, false, 
+                                     null, null, false, false,"",0,
                                      data.getPushProxies());
         }
     }

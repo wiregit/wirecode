@@ -114,8 +114,9 @@ public class RequeryDownloadTest
        urns.add(_hash);
        RemoteFileDesc rfd = new RemoteFileDesc("1.2.3.4", 6346, 13l,
                                                _filename, TestFile.length(),
-                                               new byte[16], 56, false, 4, true, 
-                                               null, urns);
+                                               new byte[16], 56, false, 4, 
+                                               true, null, urns,  false, 
+                                               false,"",0,null);
 
        //Create incompleteFile, write a few bytes
        _incompleteFile=ifm.getFile(rfd);

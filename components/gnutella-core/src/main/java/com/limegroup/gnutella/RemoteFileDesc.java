@@ -63,14 +63,6 @@ public class RemoteFileDesc implements Serializable {
 	private static final Set EMPTY_SET = 
 		Collections.unmodifiableSet(new HashSet());
 	
-    public RemoteFileDesc(String host, int port, long index, String filename,
-						  int size, byte[] clientGUID, int speed, 
-						  boolean chat, int quality, boolean browseHost, 
-						  LimeXMLDocument xmlDoc, Set urns) {
-        this(host, port, index, filename, size, clientGUID, speed,
-             chat, quality, browseHost, xmlDoc, urns, false,false,"",0l, null);
-    }
-	
 	/** 
      * Constructs a new RemoteFileDesc with metadata.
      *
