@@ -365,7 +365,11 @@ public final class CommonUtils {
 		    } catch(FileNotFoundException e) {
 		        // this will just continue to return the default
 		        // directory for all oses
-		    }
+		    } catch(NoSuchMethodError e) {
+				// we're running on the old version of Java on OS X,
+				// so just return the current directory
+				settingsDir = CommonUtils.getCurrentDirectory();
+			}
 		} else {
             settingsDir = new File(CommonUtils.getUserHomeDir(), 
 							       ".limewire");
