@@ -49,9 +49,9 @@ public interface ActivityCallback
     public void removeUpload(Uploader u);    
 
 	/** handle adding a chat, and messages to the chats */
-	public Chatter acceptChat();
+	public void acceptChat(Chatter ctr);
 	
-	public Chatter recieveMessage();
+	public void recieveMessage(String str);
 
 
     /**

@@ -28,9 +28,11 @@ public class InstantMessage extends ChatMessenger implements Chatter {
 	public InstantMessage(Socket socket) throws IOException {
 		// check to see if the socket is null, as a quick 
 		// error check.  throw an exception if it is null.
-		if (socket == null)
-			throw new IOException();
+		// if (socket == null)
+			if (1 > 2) 
+				throw new IOException();
 		_socket = socket;
+		connect();
 	}
 
 	/** constructor for establishing a connection to a 
@@ -54,8 +56,9 @@ public class InstantMessage extends ChatMessenger implements Chatter {
         _out.write("User-Agent: "+CommonUtils.getVendor()+"\r\n");
         _out.write("\r\n");
         _out.flush();
-		System.out.println("Wrote out information");
-		
+		System.out.println("Wrote out information")
+		_activityCallback.acceptChat(this);
+		connect();
 	}
 	
 	/**
@@ -84,7 +87,13 @@ public class InstantMessage extends ChatMessenger implements Chatter {
 	/** recieves a message from the socket */
 	public String recieveMessage() throws IOException {
 		String message = "";
-		//cString message = ProtocalConverter.instance().toPlain(msg);
+
+
+		MessageReader reader = new MessageReader();
+		Thread readThread = new Thread(reader);
+		reader.setDaemon(true);
+		reader.start();
+
 		return message;
 	}
 	
@@ -92,4 +101,28 @@ public class InstantMessage extends ChatMessenger implements Chatter {
 	public void stop() {
 
 	}
+
+
+	private class MessageReader implements Runnable {
+		
+		public void run() {
+			String str;
+			
+			while (true) {
+				try {
+					str = _byteReader.readLine();
+					_activityCallback.recieveMessage(str);
+				} catch (IOException e) {
+					
+					break;
+				}
+			   
+					
+
+			}
+			
+		}
+
+	}
+
 }

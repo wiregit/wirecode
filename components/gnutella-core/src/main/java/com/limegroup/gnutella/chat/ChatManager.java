@@ -44,15 +44,19 @@ public class ChatManager {
 	 * chat connection, like an Instant Message
 	 */
 	public void acceptIM(Socket socket) {
+		InstantMessage im;
 		try {
-			InstantMessage im = new InstantMessage(socket);
+			im = new InstantMessage(socket);
 			// need to add to the list:
 			// _chatsInProgress.add(im);
+			im.recieveMessage();
 		} catch (IOException e) {
+			System.out.println("error in acceptIM");
 			// unable to recieve connection.
 		}
 		System.out.println("Accepted the socket");
-
+		
+		
 	}
 
 	/**
