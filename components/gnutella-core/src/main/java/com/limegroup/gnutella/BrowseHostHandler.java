@@ -11,9 +11,10 @@ import com.limegroup.gnutella.settings.*;
 import org.apache.commons.logging.LogFactory;
 import org.apache.commons.logging.Log;
 
-/** Handles all stuff necessary for browsing of networks hosts. 
-    Has a instance component, one per browse host, and a static Map of instances
-    that is used to coordinate between replies to PushRequests.
+/**
+ * Handles all stuff necessary for browsing of networks hosts. 
+ * Has a instance component, one per browse host, and a static Map of instances
+ * that is used to coordinate between replies to PushRequests.
  */
 public class BrowseHostHandler {
     
@@ -302,7 +303,7 @@ public class BrowseHostHandler {
                     reply.setBrowseHostReply(true);
                     reply.setGUID(_guid);
 					
-					RouterService.getSearchResultHandler().handleQueryReply(reply);
+					ForMeReplyHandler.instance().handleQueryReply(reply, null);
                 }
             }
         }

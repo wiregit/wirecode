@@ -63,7 +63,7 @@ public final class ForMeReplyHandler implements ReplyHandler {
 	}
 	
 	public void handleQueryReply(QueryReply reply, ReplyHandler handler) {
-		if(handler.isPersonalSpam(reply)) return;
+		if(handler != null && handler.isPersonalSpam(reply)) return;
 		
 		// Drop if it's a reply to mcast and conditions aren't met ...
 		try {
