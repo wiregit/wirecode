@@ -18,7 +18,7 @@ public class FileManagerBenchmark {
         //Set up FileManager with no files.
         SettingsManager settings=SettingsManager.instance();
         settings.setExtensions(SettingsInterface.DEFAULT_EXTENSIONS);
-        settings.setDirectories("");
+        settings.setDirectories(DIRECTORY);
         FileManager fm=FileManager.instance();
         if (! (new File(DIRECTORY).exists())) {
             System.out.println("Directory doesn't exist");
@@ -26,12 +26,12 @@ public class FileManagerBenchmark {
         }
         
         //Time directory scan.
-        System.out.println("Adding files...");
-        long startTime=System.currentTimeMillis();
-        fm.addDirectory(DIRECTORY);
-        long stopTime=System.currentTimeMillis();
-        long elapsed=stopTime-startTime;
-        System.out.println("Added "+fm.getNumFiles()+" in "+elapsed+" msecs\n");
+        System.out.println("Adding files.  Waiting 60 seconds for load...");
+        fm.loadSettings();
+        try {
+            Thread.sleep(60000);
+        } catch (InterruptedException e) { }
+        System.out.println("Added "+fm.getNumFiles()+"\n");
 
 
         //Time query.
@@ -40,16 +40,16 @@ public class FileManagerBenchmark {
             QueryRequest qr=new QueryRequest((byte)5, 0, query);
             System.out.println("Querying files for \""+query+"\"...");
 
-            startTime=System.currentTimeMillis();
+            long startTime=System.currentTimeMillis();
             long hits=0;
             for (int tries=0; tries<QUERY_TRIES; tries++) {            
                 Response[] responses=fm.query(qr);
                 if (responses!=null)
                     hits+=responses.length;
             }
-            stopTime=System.currentTimeMillis();
+            long stopTime=System.currentTimeMillis();
 
-            elapsed=stopTime-startTime;
+            long elapsed=stopTime-startTime;
             System.out.println("Delivered "+hits+" query results in "+elapsed+" msecs\n"); 
         }
     }
