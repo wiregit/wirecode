@@ -710,6 +710,15 @@ public final class RouterService {
         query(guid, query, minSpeed, null);
     }
 
+
+    /** Will make all attempts to stop a query from executing.  Really only 
+     *  applicable to GUESS queries...
+     *  @param guid The GUID of the query you want to get rid of....
+     */
+    public static void stopQuery(GUID guid) {
+        QueryUnicaster.instance().purgeQuery(guid);
+    }
+
     /** 
      * Returns the percentage of keywords in the query with the given guid that
      * match the given response.  Returns 100 if guid is not recognized.
