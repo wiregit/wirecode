@@ -73,7 +73,7 @@ import org.apache.commons.logging.LogFactory;
 public final class UploadManager implements BandwidthTracker {
     
     private static final Log LOG = LogFactory.getLog(UploadManager.class);
-    public static final String FV_PASS = 
+    public static final String FV_PASS =
         new String(""+(new Random()).nextInt(999999));
 
     /** An enumeration of return values for queue checking. */
@@ -432,9 +432,13 @@ public final class UploadManager implements BandwidthTracker {
      *
      * All requests that are not the 'connecting' state should bypass
      * the queue, because they have already been queued once.
+     *
+     * Don't let FILE_VIEW requests bypass the queue, we want to make sure
+     * those guys don't hammer.
      */
     private boolean shouldBypassQueue(Uploader uploader) {
-        return uploader.getState() != Uploader.CONNECTING ||
+        return (uploader.getState() != Uploader.CONNECTING &&
+                uploader.getState() != Uploader.FILE_VIEW) ||
                uploader.getMethod() == HTTPRequestMethod.HEAD;
     }
     
@@ -640,12 +644,9 @@ public final class UploadManager implements BandwidthTracker {
                 queued = ACCEPTED;
             // Otherwise, determine whether or not to queue, accept
             // or reject the uploader.
-            else {
+            else
                 // note that checkAndQueue can throw an IOException
                 queued = checkAndQueue(uploader, socket);
-                Assert.that(queued != -1);
-            
-            }
         } else {
             queued = BYPASS_QUEUE;
         }
@@ -880,9 +881,10 @@ public final class UploadManager implements BandwidthTracker {
      *  
      * @return ACCEPTED if the download may proceed, QUEUED if this is in the
      *  upload queue, REJECTED if this is flat-out disallowed (and hence not
-     *  queued) and BANNED if the downloader is hammering us.  If REJECTED, 
+     *  queued) and BANNED if the downloader is hammering us, and BYPASS_QUEUE
+     *  if this is a File-View request that isn't hammering us. If REJECTED, 
      *  <tt>uploader</tt>'s state will be set to LIMIT_REACHED. If BANNED,
-     *  the <tt>Uploader</tt>'s state will be set to BANNED_GREEDY 
+     *  the <tt>Uploader</tt>'s state will be set to BANNED_GREEDY.
      * @exception IOException the request came sooner than allowed by upload
      *  queueing rules.  (Throwing IOException forces the connection to be
      *  closed by the calling code.)  */
@@ -893,14 +895,18 @@ public final class UploadManager implements BandwidthTracker {
 	    	rqc = new RequestCache();
 	    // make sure we don't forget this RequestCache too soon!
 		REQUESTS.put(uploader.getHost(), rqc);
-	    	
-        boolean isGreedy = rqc.isGreedy(uploader.getFileDesc().getSHA1Urn());
+
+        rqc.countRequest();
         if (rqc.isHammering()) {
             if(LOG.isWarnEnabled())
                 LOG.warn(uploader + " banned.");
         	return BANNED;
         }
 
+        // if this is a file view request and it is not hammering it is cool
+        if (uploader.getState() == Uploader.FILE_VIEW) return BYPASS_QUEUE;
+
+        boolean isGreedy = rqc.isGreedy(uploader.getFileDesc().getSHA1Urn());
         int size = _queuedUploads.size();
         int posInQueue = positionInQueue(socket);//-1 if not in queue
         int maxQueueSize = UploadSettings.UPLOAD_QUEUE_SIZE.getValue();
@@ -1660,7 +1666,6 @@ public final class UploadManager implements BandwidthTracker {
          * as a request.
          */
     	boolean isGreedy(URN sha1) {
-    		countRequest();
     		return REQUESTS.contains(sha1);
     	}
     	
@@ -1686,7 +1691,7 @@ public final class UploadManager implements BandwidthTracker {
     	/**
     	 * Adds a new request.
     	 */
-    	private void countRequest() {
+    	void countRequest() {
     		_numRequests++;
     		_lastRequest = System.currentTimeMillis();
     	}
