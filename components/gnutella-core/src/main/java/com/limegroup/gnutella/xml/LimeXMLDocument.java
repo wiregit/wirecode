@@ -26,6 +26,9 @@ public class LimeXMLDocument{
      * meta-data corresponds to. It can be null if the data is pure meta-data
      */
     protected String identifier;
+    public void setIdentifier(String id) {
+        identifier = id;
+    }
     protected String action="";
 
     //constructor
@@ -122,8 +125,14 @@ public class LimeXMLDocument{
             String lowerAttName = attName.toLowerCase();
             if (lowerAttName.indexOf("schemalocation") >= 0)
                 schemaUri = att.getNodeValue();
-            else if (lowerAttName.indexOf("identifier") >= 0)
+            else if (lowerAttName.indexOf("identifier") >= 0) {
                 identifier = att.getNodeValue();
+                //This indentifier corresponds to the ED of the response in
+                //the system. Remove this attribute from the node. We are not 
+                //interested in it anymore
+                Element e = (Element)docElement;
+                e.removeAttribute(attName);
+            }
             else if (lowerAttName.indexOf("action") >= 0)
                 action = att.getNodeValue();
             else if(lowerAttName.indexOf("index") >= 0){
