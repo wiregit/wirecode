@@ -172,7 +172,7 @@ public final class ID3Reader {
         if(track > 0)
             nameValList.add(new NameValue(TRACK_KEY, ""+track));
         if(!info[6].equals("") )
-            nameValList.add(new NameValue(GENRE_KEY, genre));
+            nameValList.add(new NameValue(GENRE_KEY, info[6]));
         if(bitrate > 0)
             nameValList.add(new NameValue(BITRATE_KEY, ""+bitrate));
         if(seconds > 0) 
