@@ -416,15 +416,28 @@ public class HostCatcher {
             }
         }
 
-        synchronized (this) {
-            while (true) {                                
-                try {
-                    return getAnEndpointInternal();
-                } catch (NoSuchElementException e) { 
-                    wait(); //throws InterruptedException
-                }
-            }
-        }
+        Endpoint endpoint = null; 
+        synchronized (this) { 
+			while (true)  {
+				try { 
+					endpoint = getAnEndpointInternal(); 
+					break; 
+				} catch (NoSuchElementException e) {
+					wait(); //throws InterruptedException 
+				} 
+			} 
+        } 
+        return endpoint;
+
+//        synchronized (this) {
+//            while (true) {                                
+//                try {
+//                    return getAnEndpointInternal();
+//                } catch (NoSuchElementException e) { 
+//                    wait(); //throws InterruptedException
+//                }
+//            }
+//        }
     }
 
     /**
