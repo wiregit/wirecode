@@ -228,7 +228,8 @@ public class HostCatcher {
         //Convert to endpoint
         ExtendedEndpoint e;
         try {
-            e=new ExtendedEndpoint(pr.getIP(), pr.getPort(), pr.getDailyUptime());
+            e=new ExtendedEndpoint(pr.getIP(), pr.getPort(), 
+                                   pr.getDailyUptime(), pr.supportsUnicast());
         } catch (BadPacketException bpe) {
             e=new ExtendedEndpoint(pr.getIP(), pr.getPort());
         }
