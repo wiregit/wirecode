@@ -6,8 +6,8 @@ import com.limegroup.gnutella.Assert;
 /** Various static routines for manipulating strings.*/
 public class StringUtils {
     
-    /** Returns true if input contains the simple wildcard string. 
-     *  Examples:
+    /** Returns true if input contains the given pattern, which may contain the
+     *  wildcard character '*'.  TODO: need more formal definition.  Examples:
      *
      *  <pre>
      *  StringUtils.contains("", "") ==> true
@@ -17,12 +17,11 @@ public class StringUtils {
      *  StringUtils.contains("abcd", "a*d") ==> true
      *  StringUtils.contains("abcd", "*a**d*") ==> true
      *  StringUtils.contains("abcd", "d*a") ==> false
-     *  </pre>
-     */
-    public static boolean contains(String input, String wildcard) {
+     *  </pre> */
+    public static boolean contains(String input, String pattern) {
         //TODO2: more efficient algorithms are possible that use fewer
         //allocations, e.g. a modified version of the Rabin-Karp algorithm.
-        String words[]=split(wildcard, '*');
+        String words[]=split(pattern, '*');
         int fromIndex=0;
         for (int i=0; i<words.length; i++) {
             String word=words[i];
@@ -51,6 +50,12 @@ public class StringUtils {
         return HTTPUtil.stringSplit(s, delimeter);
     }
 
+    /** Exactly like split(String,char), except ANY of the delimeters in
+     *  "delimeters" can be used to split s. */
+    public static String[] split(String s, String delimeters) {
+        return HTTPUtil.split(s, delimeters);
+    }
+
     /*
     public static void main(String args[]) {
         Assert.that(StringUtils.contains("", "") == true);
@@ -63,6 +68,8 @@ public class StringUtils {
         Assert.that(StringUtils.contains("abcd", "*.*") == false);
         Assert.that(StringUtils.contains("abc.d", "*.*") == true);
         Assert.that(StringUtils.contains("abc.", "*.*") == true);
+        
+        //Unit tests for split in HTTPUtil.
     }
     */   
 }
