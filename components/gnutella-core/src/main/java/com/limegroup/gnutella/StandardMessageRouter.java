@@ -20,6 +20,7 @@ import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.messages.vendor.ReplyNumberVendorMessage;
 import com.limegroup.gnutella.settings.ChatSettings;
+import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.statistics.ReceivedMessageStat;
 import com.limegroup.gnutella.statistics.RoutedQueryStat;
 import com.limegroup.gnutella.util.DataUtils;
@@ -130,7 +131,9 @@ public class StandardMessageRouter extends MessageRouter {
         Collection hosts = Collections.EMPTY_LIST;
         if(data != null) {
             boolean isUltrapeer = data.length >= 1 && (data[0] & 0x1) == 0x1;
-            hosts = RouterService.getPreferencedHosts(isUltrapeer, request.getLocale());
+            hosts = RouterService.getPreferencedHosts(isUltrapeer, 
+			request.getLocale(),
+			ConnectionSettings.NUM_RETURN_PONGS.getValue());
         }        
         
         
