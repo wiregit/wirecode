@@ -61,14 +61,13 @@ public class CommonUtilsTest extends com.limegroup.gnutella.util.BaseTestCase {
 	public void testCommonUtilsCopyResourceFile() throws Exception {
 		File newResourceFile = new File(getSaveDirectory(), "copyTest");
 		newResourceFile.deleteOnExit();
-		String fileName = "com/sun/java/util/collections/Comparable.class";
-		File collectionsFile = CommonUtils.getResourceFile("collections.jar");
-		if(!collectionsFile.isFile()) {
-			fail("collections.jar not located");
-		}
-		JarFile collections = new JarFile(collectionsFile);
-		JarEntry entry = collections.getJarEntry(fileName);
-		long entrySize = entry.getCompressedSize();
+		String fileName = "org/apache/commons/logging/Log.class";
+		File jarFile = CommonUtils.getResourceFile("commons-logging.jar");
+		if(!jarFile.isFile())
+			fail("jar not located");
+		JarFile jar = new JarFile(jarFile);
+		JarEntry entry = jar.getJarEntry(fileName);
+		long entrySize = entry.getSize();
 		CommonUtils.copyResourceFile(fileName, newResourceFile, false);
 		assertEquals("size of file in jar should equal size on disk", 
 					 entrySize, newResourceFile.length());
