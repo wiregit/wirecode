@@ -109,6 +109,8 @@ public class MetaFileManager extends FileManager {
             FileDesc f = get((int)responses[i].getIndex());
             File file = new File(f._path);
             String hash=readFromMap(file,true);
+            if(hash==null)//not an mp3 file
+                hash = readFromMap(file, false);
             LimeXMLDocument doc = coll.getDocForHash(hash);
             if(doc==null)
                 continue;
