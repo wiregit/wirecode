@@ -426,7 +426,15 @@ public class LimeXMLProperties
     {
         //a hack. I guess, adam will provide some way so that installation
         //directory can be accesed in some other way than user.dir
-        return SettingsManager.instance().getPath();
+        String limeHome = System.getProperty("LIME_HOME"); 
+        if(limeHome == null || limeHome.trim().equals(""))
+        {
+            return SettingsManager.instance().getPath();
+        }
+        else
+        {
+            return limeHome;
+        }
 //        return "e:/work/";
     }    
     
