@@ -266,7 +266,6 @@ public class ID3Editor{
                 else
                     trackByte = Byte.parseByte(track_);
             }catch(NumberFormatException nfe){
-                //nfe.printStackTrace();
                 return LimeXMLReplyCollection.FAILED_TRACK;
             }
                     

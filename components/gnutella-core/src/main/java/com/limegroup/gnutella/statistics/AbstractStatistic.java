@@ -5,6 +5,7 @@ import com.sun.java.util.collections.*;
 import java.io.*;
 import java.lang.reflect.*;
 import java.util.StringTokenizer;
+import com.limegroup.gnutella.ErrorService;
 
 /**
  * This class provides a default implementation of the <tt>Statistic</tt>
@@ -129,8 +130,7 @@ public abstract class AbstractStatistic implements Statistic {
 					_writer.write(",");
 					_writer.flush();
 				} catch(IOException e) {
-					e.printStackTrace();
-					// not much to do
+				    ErrorService.error(e);
 				}
 			}
 		}
@@ -176,7 +176,7 @@ public abstract class AbstractStatistic implements Statistic {
 					_writer = new FileWriter(_fileName, false);
 					
 				} catch(IOException e) {
-					e.printStackTrace();
+				    ErrorService.error(e);
 				}
 			}
 		} else if(_numWriters != 0) {

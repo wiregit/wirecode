@@ -55,8 +55,6 @@ public final class TCPConnectBackVendorMessage extends VendorMessage {
             return baos.toByteArray();
         }
         catch (IOException ioe) {
-            // this should never happen!!!
-            ioe.printStackTrace();
             throw new BadPacketException("Couldn't write to a ByteStream!!!");
         }
     }

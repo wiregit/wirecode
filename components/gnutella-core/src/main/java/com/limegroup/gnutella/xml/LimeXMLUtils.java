@@ -17,6 +17,7 @@ import org.xml.sax.SAXException;
 import javax.xml.parsers.ParserConfigurationException;
 import com.limegroup.gnutella.Response;
 import com.limegroup.gnutella.util.NameValue;
+import com.limegroup.gnutella.ErrorService;
 
 import org.xml.sax.InputSource;
 
@@ -411,9 +412,7 @@ public class LimeXMLUtils
 //                System.out.println("response = " + responseString);
             }
             catch (SchemaNotFoundException snfe) {
-                System.out.println("LimeXMLUtils.getResponseArray():" +
-                                   " could not get response XML String!");
-                snfe.printStackTrace();
+                ErrorService.error(snfe);
             }
 
             //make response out of the string

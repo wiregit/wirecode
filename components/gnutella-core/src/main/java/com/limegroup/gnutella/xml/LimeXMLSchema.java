@@ -85,7 +85,6 @@ public class LimeXMLSchema
         }
         catch(ParserConfigurationException e)
         {
-            //e.printStackTrace();
             throw new IOException("" + e);
         }
         // Set an entity resolver to resolve the schema

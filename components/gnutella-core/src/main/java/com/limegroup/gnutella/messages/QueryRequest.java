@@ -727,7 +727,7 @@ public class QueryRequest extends Message implements Serializable{
 
             baos.write(0);                             // final null
 		} catch (IOException e) {
-			e.printStackTrace();
+		    ErrorService.error(e);
 		}
 
 		PAYLOAD = baos.toByteArray();
@@ -835,7 +835,7 @@ public class QueryRequest extends Message implements Serializable{
                 }
             }
         } catch (IOException ioe) {
-			ioe.printStackTrace();
+            ErrorService.error(ioe);
         }
 		QUERY = tempQuery;
 		XML_QUERY = tempRichQuery;

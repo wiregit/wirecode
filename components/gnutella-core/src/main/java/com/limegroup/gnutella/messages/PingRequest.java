@@ -1,6 +1,7 @@
 package com.limegroup.gnutella.messages;
 
 import com.limegroup.gnutella.statistics.*;
+import com.limegroup.gnutella.ErrorService;
 import java.io.*;
 
 /**
@@ -73,7 +74,7 @@ public class PingRequest extends Message {
             baos.write(0);
         }
         catch (IOException why) {
-            why.printStackTrace();
+            ErrorService.error(why);
         }
         
 		payload=baos.toByteArray();

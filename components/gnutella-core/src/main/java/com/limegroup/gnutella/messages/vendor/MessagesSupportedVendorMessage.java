@@ -5,6 +5,7 @@ import com.limegroup.gnutella.ByteOrder;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.statistics.*;
 import com.sun.java.util.collections.*;
+import com.limegroup.gnutella.ErrorService;
 
 /** The message that lets other know what messages you support.  Everytime you
  *  add a subclass of VendorMessage you should modify this class (assuming your
@@ -63,7 +64,6 @@ public final class MessagesSupportedVendorMessage extends VendorMessage {
             return baos.toByteArray();
         }
         catch (IOException ioe) {
-            ioe.printStackTrace();
             throw new BadPacketException("Couldn't write to a ByteStream!!!");
         }
 
@@ -210,7 +210,7 @@ public final class MessagesSupportedVendorMessage extends VendorMessage {
                 ByteOrder.short2leb((short)_version, baos);
             }
             catch (IOException ioe) {
-                ioe.printStackTrace();
+                ErrorService.error(ioe);
             }
             return baos.toByteArray();
         }

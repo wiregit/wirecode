@@ -379,7 +379,7 @@ public class QueryReply extends Message implements Serializable{
             updateLength(payload.length);
         }
         catch (IOException reallyBad) {
-            reallyBad.printStackTrace();
+            ErrorService.error(reallyBad);
         }
 
 		setAddress();
@@ -1210,8 +1210,7 @@ public class QueryReply extends Message implements Serializable{
                     catch (UnknownHostException bad) {
                     }
                     catch (IOException terrible) {
-                        // TODO: something else we can do here??
-                        terrible.printStackTrace();
+                        ErrorService.error(terrible);
                     }
                 }
 
@@ -1226,8 +1225,7 @@ public class QueryReply extends Message implements Serializable{
                     retGGEPBlock = baos.toByteArray();
                 }
                 catch (IOException terrible) {
-                    // TODO: something else we can do here??
-                    terrible.printStackTrace();
+                    ErrorService.error(terrible);
                 }
 
             }
@@ -1291,7 +1289,7 @@ public class QueryReply extends Message implements Serializable{
                             ggeps[i].getBytes(GGEP.GGEP_HEADER_PUSH_PROXY);
                     }
                     catch (BadGGEPPropertyException bad) {
-                        bad.printStackTrace();  // unexpected
+                        ErrorService.error(bad);
                         continue;
                     }
 

@@ -10,7 +10,7 @@ import com.limegroup.gnutella.downloader.*;
 import com.limegroup.gnutella.stubs.*;
 import com.limegroup.gnutella.gui.*;
 import com.limegroup.gnutella.settings.*;
-import com.limegroup.gnutella.gui.search.*;
+//import com.limegroup.gnutella.gui.search.*;
 import javax.swing.JOptionPane;
 import junit.framework.*;
 

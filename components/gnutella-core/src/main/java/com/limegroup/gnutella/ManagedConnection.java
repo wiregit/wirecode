@@ -1097,7 +1097,7 @@ public class ManagedConnection extends Connection
                     send(req);
                 }
                 catch (BadPacketException never) {
-                    never.printStackTrace();
+                    ErrorService.error(never);
                 }
             }
 
@@ -1121,7 +1121,7 @@ public class ManagedConnection extends Connection
                     _numUDPConnectBackRequests++;
                 }
                 catch (BadPacketException ignored) {
-                    ignored.printStackTrace(); // should NEVER happen!!
+                    ErrorService.error(ignored);
                 }
             }
             if (!RouterService.acceptedIncomingConnection() &&
@@ -1134,7 +1134,7 @@ public class ManagedConnection extends Connection
                     _numTCPConnectBackRequests++;
                 }
                 catch (BadPacketException ignored) {
-                    ignored.printStackTrace(); // should NEVER happen!!
+                    ErrorService.error(ignored);
                 }
             }
         }

@@ -60,7 +60,6 @@ public class LimeXMLSchemaRepository
                 catch(IOException ioe)
                 {
                     //no problem
-                    //ioe.printStackTrace();
                 }//end of try
             }//end of for
         }//end of if

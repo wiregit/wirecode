@@ -238,7 +238,6 @@ public class StandardMessageRouter extends MessageRouter {
                 catch (BadPacketException bpe) {
                     // should NEVER happen
                     ErrorService.error(bpe);
-                    bpe.printStackTrace();
                 }
             }
             // else i couldn't buffer the responses due to busy-ness, oh, scrap

@@ -62,7 +62,6 @@ public class UserManager
         catch(Exception e)
         {
             //if not able to read from file, create a new instance
-            //e.printStackTrace();
             _userMap = new HashMap(); 
         }
     }

@@ -334,7 +334,8 @@ public class Connection {
         catch (IOException ioe) {
         }
         catch (BadPacketException bpe) {
-            bpe.printStackTrace();  // we don't really expect this....
+            // should never happen.
+            ErrorService.error(bpe);
         }
     }
 

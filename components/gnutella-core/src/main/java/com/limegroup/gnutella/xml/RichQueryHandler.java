@@ -3,6 +3,7 @@ package com.limegroup.gnutella.xml;
 import com.limegroup.gnutella.Response;
 import com.limegroup.gnutella.FileManager;
 import com.limegroup.gnutella.FileDesc;
+import com.limegroup.gnutella.ErrorService;
 import org.xml.sax.SAXException;
 import java.io.IOException;
 import com.sun.java.util.collections.List;
@@ -112,7 +113,7 @@ public class RichQueryHandler{
                     debug("RQH: xml = " + currDoc.getXMLString());
                 }
                 catch (Exception e) {
-                    e.printStackTrace();
+                    ErrorService.error(e);
                 }
             }
             valid = true;

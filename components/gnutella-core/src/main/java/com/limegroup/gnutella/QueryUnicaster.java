@@ -175,7 +175,6 @@ public final class QueryUnicaster {
                 try {
                     queryLoop();
                 } catch(Throwable t) {
-					t.printStackTrace();
                     ErrorService.error(t);
                 }
 			}

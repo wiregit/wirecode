@@ -126,7 +126,6 @@ public class InstantMessenger implements Chatter {
 			_out.write(message+"\n");
 			_out.flush();
 		} catch (IOException e) {
-			// e.printStackTrace();
 		} catch (NullPointerException e) {
 
 		}
