@@ -340,6 +340,9 @@ public class RouterService
         try {
             catcher.write(SettingsManager.instance().getHostList());
         } catch (IOException e) {}
+		finally {
+			SettingsManager.instance().writeProperties();
+		}
     }
 
     /**
