@@ -438,6 +438,8 @@ public class LimeXMLProperties
         }
         else
         {
+            if(!limeHome.endsWith(File.separator))
+                limeHome = limeHome + File.separator;
             return limeHome + "lib" + File.separator;
         }
 //        return "e:/work/lib/";
