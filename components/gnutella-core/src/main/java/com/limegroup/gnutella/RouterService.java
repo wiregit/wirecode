@@ -275,11 +275,11 @@ public class RouterService {
             downloader.postGuiInit();
             LOG.trace("STOP DownloadManager.postGuiInit");
             
-            LOG.trace("START UpdateManager.instance");
-            callback.componentLoading("UPDATE_MANAGER");
-            UpdateManager.instance();//initialize
-            LOG.trace("STOP UpdateManager.instance");
-            
+//            LOG.trace("START UpdateManager.instance");
+//            callback.componentLoading("UPDATE_MANAGER");
+//            UpdateManager.instance();//initialize
+//            LOG.trace("STOP UpdateManager.instance");
+
             LOG.trace("START QueryUnicaster");
             callback.componentLoading("QUERY_UNICASTER");
     		QueryUnicaster.instance().start();

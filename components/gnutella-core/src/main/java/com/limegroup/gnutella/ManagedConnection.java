@@ -356,8 +356,8 @@ public class ManagedConnection extends Connection
         //Establish the socket (if needed), handshake.
 		super.initialize(CONNECT_TIMEOUT);
 
-        UpdateManager updater = UpdateManager.instance();
-        updater.checkAndUpdate(this);
+//        UpdateManager updater = UpdateManager.instance();
+//        updater.checkAndUpdate(this);
     }
 
 
