@@ -175,12 +175,21 @@ public final class UploadManager implements BandwidthTracker {
                 // If we're starting a new uploader, clean the old one up
                 // and then create a new one.
                 if(startedNewFile) {
-                    // reset the queued status, so pipelined
-                    // requests go through the queue again.
-                    if(queued!=QUEUED)
-                        queued = -1;
                     debug(uploader + " starting new file");
                     if (uploader != null) {
+                        // Because queueing is per-socket (and not per file),
+                        // we do not want to reset the queue status if they're
+                        // requesting a new file.
+                        if(queued != QUEUED)
+                            queued = -1;
+                        // However, we DO want to make sure that the old file
+                        // is interpreted as interrupted.  Otherwise,
+                        // the GUI would show two lines with the the same slot
+                        // until the newer line finished, at which point
+                        // the first one would display as a -1 queue position.
+                        else
+                            uploader.setState(Uploader.INTERRUPTED);
+
                         cleanupFinishedUploader(uploader, startTime);
                     }
                     uploader = new HTTPUploader(currentMethod,
