@@ -1422,7 +1422,7 @@ public class HTTPDownloader implements BandwidthTracker {
             	// replace the FWT version in the rfd with the one reported
             	// by the header if they don't match
             	if (_rfd.getPushAddr().supportsFWTVersion()!=FWTVersion)
-            	    _rfd = new RemoteFileDesc(_rfd,
+            	    _rfd.setPushAddress(
             	        new PushEndpoint(_rfd.getClientGUID(),
             	                _rfd.getPushProxies(),
             	                _rfd.getPushAddr().getFeatures(),

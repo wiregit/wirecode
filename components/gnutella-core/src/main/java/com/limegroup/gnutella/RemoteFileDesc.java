@@ -412,6 +412,17 @@ public class RemoteFileDesc implements Serializable {
     }
     
     /**
+     * updates the push address of the rfd to a new one.
+     * This should be done only to update the set of push proxies,
+     * features or FWT capability.
+     */
+    public void setPushAddress(PushEndpoint pe) {
+        if (!Arrays.equals(pe.getClientGUID(),this._clientGUID))
+                throw new IllegalArgumentException("different clientGUID");
+        this._pushAddr=pe;
+    }
+    
+    /**
      * Returns the current failed count.
      */
     public int getFailedCount() {
