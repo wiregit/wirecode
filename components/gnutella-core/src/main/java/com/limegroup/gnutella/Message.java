@@ -109,7 +109,7 @@ public abstract class Message
      *    </ul>
      */
     public static Message read(InputStream in)
-            throws BadPacketException, IOException {
+		throws BadPacketException, IOException {
         return Message.read(in, new byte[23]);
     }
 
@@ -121,7 +121,7 @@ public abstract class Message
      *  but the contents are not guaranteed to contain any useful data.  
      */
     static Message read(InputStream in, byte[] buf)
-            throws BadPacketException, IOException {
+		throws BadPacketException, IOException {
         //1. Read header bytes from network.  If we timeout before any
         //   data has been read, return null instead of throwing an
         //   exception.
