@@ -7,7 +7,7 @@
 package com.limegroup.gnutella.xml;
 import java.util.*;
 import java.io.*;
-import java.limegroup.gnutella.xml.basic.*;
+import com.limegroup.gnutella.xml.basic.*;
 
 /**
  * Stores a XML schema, and provides access to various components
@@ -16,9 +16,6 @@ import java.limegroup.gnutella.xml.basic.*;
  * @version
  */
 public class LimeXMLSchema extends LimeXMLDocument{
-    
-    Vector 
-    
 
     /** 
      * Creates new LimeXMLSchema 
