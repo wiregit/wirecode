@@ -111,6 +111,7 @@ public final class UDPConnectionTest extends BaseTestCase {
             }
         }
         Inner t = new Inner();
+        t.setName("EchoServer");
         t.setDaemon(true);
         t.start();
 

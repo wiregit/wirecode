@@ -3,6 +3,9 @@ package com.limegroup.gnutella.udpconnect;
 import java.util.ArrayList;
 import java.util.Iterator;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import com.limegroup.gnutella.util.ManagedThread;
 
 /** 
@@ -13,6 +16,9 @@ import com.limegroup.gnutella.util.ManagedThread;
  *  objects that extend UDPTimerEvent with a handleEvent method defined.
  */
 public class UDPScheduler extends ManagedThread {
+    
+    private static final Log LOG =
+        LogFactory.getLog(UDPScheduler.class);
 
     /** This is the default event when nothing is scheduled */
 	public static final  UDPTimerEvent NO_EVENT  = new NoEvent(Long.MAX_VALUE);
@@ -60,6 +66,7 @@ public class UDPScheduler extends ManagedThread {
      */
     private UDPScheduler() {
         super(NAME_OF_THREAD);
+        
 		_connectionEvents    = new ArrayList();
 		_scheduledEvent      = NO_EVENT;
         _started             = false;
@@ -85,11 +92,12 @@ public class UDPScheduler extends ManagedThread {
 	 * starts both threads if they haven't been started yet.
 	 */
 	private final void startThreads() {
-		
-		if ( !_started ) {
-			setDaemon(true);
-			start();
-            _started = true;
+		synchronized(this) {
+		    if ( !_started ) {
+		        _started = true;
+		        setDaemon(true);
+		        start();
+		    }
 		}
 		
 		synchronized(_updateThreadLock) {

@@ -7,6 +7,9 @@ import java.io.OutputStream;
 import java.net.InetAddress;
 import java.util.Set;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import com.limegroup.gnutella.ActivityCallback;
 import com.limegroup.gnutella.Connection;
 import com.limegroup.gnutella.Downloader;
@@ -30,18 +33,18 @@ import com.limegroup.gnutella.util.ManagedThread;
  */
 public class UStandalone implements ActivityCallback, ErrorCallback {
 	
-	/** Control some logging of state */
-	private static boolean activeLogging = false;
+    private static final Log LOG =
+        LogFactory.getLog(UStandalone.class);
+
 
     public static void main(String args[]) {
 		ActivityCallback callback = new UStandalone();
 		RouterService service = new RouterService(callback);
 		service.start();    
-		activeLogging = true;
 
-		log("Starting up ...");
+		LOG.debug("Starting up ...");
 		waitOnUDP();
-		log("UDPServices up ...");
+		LOG.debug("UDPServices up ...");
         UDPService.instance().setReceiveSolicited(true);
         try { Thread.sleep(1000); } catch (InterruptedException ie){}
 
@@ -94,25 +97,17 @@ public class UStandalone implements ActivityCallback, ErrorCallback {
     }
 
     private static void log2(String str) {
-		if (activeLogging)
-        	System.out.println(str);
+        	LOG.debug(str);
     }
 
     private static long startTime;
     private static long endTime;
     private static void tlogstart(String str) {
-		if (activeLogging) {
-        	startTime = System.currentTimeMillis();
-        	System.out.println(str +" "+ startTime);
-		}
+        LOG.debug("start" + str);
     }
 
     private static void tlogend(String str) {
-		if (activeLogging) {
-        	endTime = System.currentTimeMillis();
-        	System.out.println(str +" "+ endTime);
-        	System.out.println("Total: "+(endTime -startTime)/1000 +" seconds");
-		}
+        LOG.debug("end "+str);
     }
 
 	/** The amount of data to transfer */
@@ -149,6 +144,7 @@ public class UStandalone implements ActivityCallback, ErrorCallback {
 		int         numBytes;
 
 		public ClientReader(InputStream istream, int numBytes) {
+		    super ("ClientReader");
 			this.istream = istream;
 			this.numBytes = numBytes;
 		}
