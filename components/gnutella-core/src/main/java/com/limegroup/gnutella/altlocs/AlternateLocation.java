@@ -16,6 +16,9 @@ import com.sun.java.util.collections.Comparable;
  * specified in HUGE v0.93.  This also provides utility methods for such 
  * operations as comparing alternate locations based on the date they were 
  * stored.
+ * 
+ * Firewalled hosts can also be alternate locations, although the format is
+ * slightly different.
  */
 public final class AlternateLocation implements HTTPHeaderValue, Comparable {
     
@@ -39,6 +42,11 @@ public final class AlternateLocation implements HTTPHeaderValue, Comparable {
 	 * Constant for the string to display as the httpStringValue.
 	 */
 	private final String DISPLAY_STRING;
+	
+	/**
+	 * the host we would send push to.  Null if not firewalled.
+	 */
+	private final PushEndpoint _pushAddress;
 
 	/**
 	 * Cached hash code that is lazily initialized.
@@ -178,9 +186,13 @@ public final class AlternateLocation implements HTTPHeaderValue, Comparable {
 		    throw new NullPointerException("cannot accept null URN");
 		int port = rfd.getPort();
 
-		URL url = new URL("http", rfd.getHost(), port,						  
+		if (!rfd.isPushCapable()) {
+			URL url = new URL("http", rfd.getHost(), port,						  
 						  HTTPConstants.URI_RES_N2R + urn.httpStringValue());
-		return new AlternateLocation(url, urn);
+			return new AlternateLocation(url, urn);
+		}else {
+			return new AlternateLocation(rfd.getPushAddr(),urn);
+		}
 	}
 
 	/**
@@ -236,26 +248,34 @@ public final class AlternateLocation implements HTTPHeaderValue, Comparable {
 		    DISPLAY_STRING = ip + ":" + URL.getPort();
         _count = 1;
         _demoted = false;
+        _pushAddress=null;
+	}
+	
+	/**
+	 * creates a new AlternateLocation for a firewalled host.
+	 * @param address
+	 * @param sha1
+	 * @throws IOException
+	 */
+	private AlternateLocation(final PushEndpoint address, final URN sha1) 
+		throws IOException {
+		
+		if(sha1 == null)
+            throw new IOException("null sha1");
+		if (address == null)
+			throw new IOException("null address");
+		if (address.getProxies().isEmpty())
+			throw new IOException("no proxies for altloc");
+		
+		this.SHA1_URN  = sha1;
+		_pushAddress = address;
+		
+		DISPLAY_STRING= ""; //eventually this will be a proper X-Alt header
+		URL= null;
 	}
 
     //////////////////////////////accessors////////////////////////////
 
-	/**
-	 * Returns an instance of the <tt>URL</tt> instance for this alternate
-	 * location.  
-     * <p>
-	 * @return a <tt>URL</tt> instance corresponding to the URL for this
-	 * alternate location, or <tt>null</tt> if an instance could not be created
-	 */
-	public URL getUrl() {
-		try {
-			return new URL(this.URL.getProtocol(), this.URL.getHost(), 
-						   this.URL.getPort(),this.URL.getFile());
-		} catch(MalformedURLException e) {
-			// this should never happen in practice, but retun null nevertheless
-			return null;
-		}
-	}
 	
 	/**
 	 * Returns the host/port of this alternate location as an endpoint.

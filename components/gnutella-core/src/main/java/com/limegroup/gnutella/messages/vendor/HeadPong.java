@@ -292,6 +292,10 @@ public class HeadPong extends VendorMessage {
 			
 		}
 		
+		//TODO: add the firewalled altlocs first, since only a non-firewalled
+		//host would ask for them
+		
+		
 		//if we have any altlocs and enough room in the packet, add them.
 		AlternateLocationCollection altlocs = desc.getAlternateLocationCollection();
 		

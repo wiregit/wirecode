@@ -616,16 +616,42 @@ public class RemoteFileDesc implements Serializable {
     }
 
     /**
-     * @return true if I am not (firewalled, multicast host, have private IP)
-     *         and i do have a valid port & address.
+     * @return true if I am not a multicast host and have a hash.
+     * also, if I am firewalled I must have at least one push proxy,
+     * otherwise my port and address need to be valid.
      */
     public final boolean isAltLocCapable() {
-        return getSHA1Urn() != null &&
-               !_replyToMulticast &&
-               !_firewalled &&
-               NetworkUtils.isValidPort(_port) &&
-               !NetworkUtils.isPrivateAddress(_host) &&
-               NetworkUtils.isValidAddress(_host);
+        boolean ret = getSHA1Urn() != null &&
+               !_replyToMulticast;
+        
+        if (_firewalled)
+        	ret = ret && 
+				_pushAddr!=null &&
+				_pushAddr.getProxies().size() > 0;
+		else
+             ret= ret &&  
+			    NetworkUtils.isValidPort(_port) &&
+                !NetworkUtils.isPrivateAddress(_host) &&
+                NetworkUtils.isValidAddress(_host);
+        
+        return ret;
+    }
+    
+    /**
+     * 
+     * @return whether a push can/should be sent tho this rfd.
+     */
+    public boolean isPushCapable() {
+    	return _firewalled && _pushAddr!=null &&
+			_pushAddr.getProxies().size()>0;
+    }
+    
+    /**
+     * 
+     * @return the push address.
+     */
+    public PushEndpoint getPushAddr() {
+    	return _pushAddr;
     }
 
 	/**

@@ -34,6 +34,14 @@ public final class AlternateLocationCollection
      */
  
 	private final FixedSizeSortedSet LOCATIONS=new FixedSizeSortedSet(MAX_SIZE);
+	
+	/**
+	 * this is a set of alternate locations that require push requests to be sent.
+	 * LOCKING: same as for LOCATIONS
+	 * INVARIANT: this is always a subset of LOCATIONS.  can be empty.
+	 */
+	private final FixedSizeSortedSet PUSH_LOCATIONS = new FixedSizeSortedSet(MAX_SIZE);
+	
         
     /**
      * SHA1 <tt>URN</tt> for this collection.
@@ -309,7 +317,7 @@ public final class AlternateLocationCollection
     
     /**
      * 
-     * @return the alternate locations packed as ip:port pairs.
+     * @return the non-firewalled alternate locations packed as ip:port pairs.
      */
     public byte [] toBytes() {
     	return toBytes(MAX_SIZE);
@@ -318,12 +326,12 @@ public final class AlternateLocationCollection
     /**
      * 
      * @param number number of altlocs to return. 
-     * @return the alternate locations packed as ip:port pairs.
+     * @return the non-firewlled alternate locations packed as ip:port pairs.
      */
     public byte [] toBytes(int number) {
-    	
-    	if (number > LOCATIONS.size())
-    		number = LOCATIONS.size();
+    	int size = LOCATIONS.size() - PUSH_LOCATIONS.size();
+    	if (number > size)
+    		number = size;
     	
     	if (number <=0)
     		return null;
@@ -336,6 +344,8 @@ public final class AlternateLocationCollection
 	}
     	for(Iterator iter = clone.iterator();iter.hasNext() && number >0;) {
     		AlternateLocation current = (AlternateLocation)iter.next();
+    		if (PUSH_LOCATIONS.contains(current))
+    			continue;
     		byte [] addr = current.getHost().getInetAddress().getAddress();
     		System.arraycopy(addr,0,ret,index,4);
     		ByteOrder.short2leb((short)
