@@ -14,15 +14,25 @@ public class ManagedConnectionTest extends TestCase {
     public ManagedConnectionTest(String name) {
         super(name);
     }
-
+    
+    public static Test suite() {
+        return new TestSuite(ManagedConnectionTest.class);
+    }    
+   
+    /*
     public static Test suite() {
         //return new TestSuite(ManagedConnectionTest.class);
         TestSuite ret=new TestSuite("Simplified ManagedConnection tests");
+        ret.addTest(new ManagedConnectionTest("testBuffering"));
+        ret.addTest(new ManagedConnectionTest("testClose"));
+        ret.addTest(new ManagedConnectionTest("testHorizonStatistics"));
+        ret.addTest(new ManagedConnectionTest("testIsRouter"));
         ret.addTest(new ManagedConnectionTest("testForwardsGGEP"));
         ret.addTest(new ManagedConnectionTest("testStripsGGEP"));
         ret.addTest(new ManagedConnectionTest("testForwardsGroupPing"));
         return ret;
     }
+    */
 
     public void setUp() {
         //Restore all the defaults.  Apparently testForwardsGGEP fails if this
@@ -45,7 +55,7 @@ public class ManagedConnectionTest extends TestCase {
             com.limegroup.gnutella.tests.MiniAcceptor acceptor=
                 new com.limegroup.gnutella.tests.MiniAcceptor(null);
             ManagedConnection.QUEUE_TIME=1000;
-            ManagedConnection out=new ManagedConnection("localhost", 6346);
+            ManagedConnection out=newConnection("localhost", 6346);
             out.initialize();
             Connection in=acceptor.accept();      
             testSendFlush(out, in);
@@ -368,12 +378,11 @@ public class ManagedConnectionTest extends TestCase {
             //When receive() or sendQueued() gets IOException, it calls
             //ConnectionManager.remove().  This in turn calls
             //ManagedConnection.close().  Our stub does this.
-            ConnectionManager manager=
-                new com.limegroup.gnutella.tests.stubs.ConnectionManagerStub();
+            ConnectionManager manager=new ConnectionManagerStub(true);
 
             //1. Locally closed
             acceptor=new com.limegroup.gnutella.tests.MiniAcceptor(null);
-            out=new ManagedConnection("localhost", 6346);
+            out=newConnection("localhost", 6346, manager);
             out.initialize();            
             in=acceptor.accept(); 
             Assert.that(out.isOpen());
@@ -387,7 +396,7 @@ public class ManagedConnectionTest extends TestCase {
 
             //2. Remote close: discovered on read
             acceptor=new com.limegroup.gnutella.tests.MiniAcceptor(null);
-            out=new ManagedConnection("localhost", 6346, manager);
+            out=newConnection("localhost", 6346, manager);
             out.initialize();            
             in=acceptor.accept(); 
             Assert.that(out.isOpen());
@@ -407,7 +416,7 @@ public class ManagedConnectionTest extends TestCase {
             //semantics, we need TWO writes to discover this.  (See unit tests
             //for Connection.)
             acceptor=new com.limegroup.gnutella.tests.MiniAcceptor(null);
-            out=new ManagedConnection("localhost", 6346, manager);
+            out=newConnection("localhost", 6346, manager);
             out.initialize();            
             in=acceptor.accept(); 
             Assert.that(out.isOpen());
@@ -428,7 +437,7 @@ public class ManagedConnectionTest extends TestCase {
  
 
     public void testHorizonStatistics() {
-        ManagedConnection mc=new ManagedConnection();
+        ManagedConnection mc=newConnection();
         //For testing.  You may need to ensure that HORIZON_UPDATE_TIME is
         //non-final to compile.
         mc.HORIZON_UPDATE_TIME=1*200;   
@@ -612,6 +621,20 @@ public class ManagedConnectionTest extends TestCase {
             Properties props=new Properties();
             return new HandshakeResponse(props);
         }
+    }
+
+    private static ManagedConnection newConnection() {
+        return newConnection("", 0);
+    }
+
+    private static ManagedConnection newConnection(String host, int port) {
+        return new ManagedConnection(host, port, new MessageRouterStub(),
+                                     new ConnectionManagerStub());
+    }
+
+    private static ManagedConnection newConnection(String host, int port,
+                                                   ConnectionManager cm) {
+        return new ManagedConnection(host, port, new MessageRouterStub(), cm);
     }
 
     public static void main(String argv[]) {

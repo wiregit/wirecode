@@ -9,7 +9,6 @@ import java.util.Properties;
 import com.limegroup.gnutella.routing.*;
 import com.limegroup.gnutella.handshaking.*;
 import com.limegroup.gnutella.connection.*;
-import com.limegroup.gnutella.tests.stubs.*;
 
 /**
  * A Connection managed by a ConnectionManager.  Includes a loopForMessages
@@ -1363,23 +1362,6 @@ public class ManagedConnection
     /***************************************************************************
      * UNIT TESTS: tests/com/limegroup/gnutella/ManagedConnectionTest
      **************************************************************************/
-
-    /** STUB FOR TESTING PURPOSES ONLY! */
-    ManagedConnection() {
-        super("", 0);
-    }
-
-    /** STUB FOR TESTING PURPOSES ONLY! */
-    ManagedConnection(String address, int port, ConnectionManager manager) {
-        super(address, port);
-        this._router=new com.limegroup.gnutella.tests.MessageRouterStub();
-        this._manager=manager;
-    }
-
-    /** STUB FOR TESTING PURPOSES ONLY! */
-    ManagedConnection(String address, int port) {
-        this(address, port, null);
-    }
 
     /** FOR TESTING PURPOSES ONLY! */
     void stopOutputRunner() {
