@@ -29,16 +29,21 @@ public class GiveStatsVendorMessage extends VendorMessage {
     public static final byte ALL_CONNECTIONS_STATS = (byte)2;
 
 
+    private int _network;
+
     /**
      * A vendor message read off the network. Package access
      */
     GiveStatsVendorMessage(byte[] guid, byte ttl, byte hops, int version,
-                           byte[] payload) throws BadPacketException {
+                       byte[] payload, int network) throws BadPacketException {
         super(guid, ttl, hops, F_LIME_VENDOR_ID, F_GIVE_STATS, version,
               payload);
         if(version == 1 && getPayload().length != 2)
             throw new BadPacketException("UNSUPPORTED PAYLOAD LENGTH: "+
                                          payload.length);
+
+        _network = network;
+
         //TODO1: OK. Find out what kind of stat is requested and return it
         //with the StatisticVendorMessage.
         //Note the response StatisticVendor message must go out in UDP, or
@@ -47,13 +52,19 @@ public class GiveStatsVendorMessage extends VendorMessage {
     }
     
     /**
-     * @param opCode the byte the receiver of the vendor message looks at to
-     * decide what stats have been requested.
+     * @param statsControl the byte the receiver will look at to decide the
+     * ganularity of the desired stats (this connection, all connections, UPs
+     * only, leaves only etc.) 
+     * @param statType the byte the receiver of this message will look at to
+     * decide what kind of statistics are desired -- upload, download, gnutella
+     * etc.
+     * @param network to decide whether this message should go out via TCP, UDP,
+     * multicast, etc.
      */
-    public GiveStatsVendorMessage(byte statsControl, byte statType) 
+    public GiveStatsVendorMessage(byte statsControl, byte statType, int network)
                                               throws BadPacketException {
             super(F_LIME_VENDOR_ID, F_GIVE_STATS, VERSION, 
-                                        derivePayload(statsControl, statType));
+                                 derivePayload(statsControl, statType),network);
     }
     
     private static byte[] derivePayload(byte control, byte type) {
@@ -69,11 +80,10 @@ public class GiveStatsVendorMessage extends VendorMessage {
     protected void writePayload(OutputStream out) throws IOException {
         super.writePayload(out);
         if(RECORD_STATS) {
-            ;//TODO replace this with TCP/UDP stats
-//              if(tcp)
-//                  SentMessageStatHandler.TCP_GIVE_STATS.addMessage(this);
-//              else //UDP
-//                  SentMessageStatHandler.UDP_GIVE_STATS.addMessage(this);
+            if(_network == Message.N_TCP)
+                SentMessageStatHandler.TCP_GIVE_STATS.addMessage(this);
+            else if(_network == Message.N_UDP)
+                SentMessageStatHandler.UDP_GIVE_STATS.addMessage(this);
         }
     }
     

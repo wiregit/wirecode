@@ -368,7 +368,11 @@ public abstract class MessageRouter {
                 ;
             handleQueryStatus((QueryStatusResponse) msg, receivingConnection);
         }
-
+        else if (msg instanceof GiveStatsVendorMessage) {
+            if(RECORD_STATS)
+                ; //TODO: add the statistics recording code
+            //TODO: Add the code to handle this message
+        }
         //This may trigger propogation of query route tables.  We do this AFTER
         //any handshake pings.  Otherwise we'll think all clients are old
         //clients.

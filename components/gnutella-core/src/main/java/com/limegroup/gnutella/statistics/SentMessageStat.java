@@ -120,7 +120,17 @@ public class SentMessageStat extends AdvancedStatistic {
 	 */
 	public static final Statistic TCP_PING_REPLIES = 
 	    new TCPSentMessageStat();
-	    
+	
+    /**
+     * <tt>Statistic</tt> for "Give Stat" messages sent over TCP
+     */ 
+    public static final Statistic TCP_GIVE_STATS = new TCPSentMessageStat();
+
+    /**
+     * <tt>Statistic</tt> for "Give Stat" messages sent over UDP
+     */ 
+    public static final Statistic UDP_GIVE_STATS = new UDPSentMessageStat();
+    
 	/**
 	 * <tt>Statistic</tt> for Gnutella pongs sent over MULTICAST.
 	 */

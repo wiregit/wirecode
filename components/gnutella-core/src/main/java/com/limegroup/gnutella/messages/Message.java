@@ -100,7 +100,11 @@ public abstract class Message
      *  The GUID is set appropriately, and the number of hops is set to 0.
      */
     protected Message(byte func, byte ttl, int length) {
-        this(makeGuid(), func, ttl, (byte)0, length, N_UNKNOWN);
+        this(func, ttl, length, N_UNKNOWN);
+    }
+
+    protected Message(byte func, byte ttl, int length, int network) {
+        this(makeGuid(), func, ttl, (byte)0, length, network);
     }
 
     /**

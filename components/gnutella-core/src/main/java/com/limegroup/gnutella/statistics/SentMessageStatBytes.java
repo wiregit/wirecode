@@ -251,6 +251,17 @@ public class SentMessageStatBytes extends AdvancedKilobytesStatistic {
 	public static final Statistic TCP_HOPS_FLOW = 
 	    new TCPSentMessageStatBytes();
 
+    /**
+     * <tt>Statistic</tt> for "Give Stat" messages sent over TCP
+     */ 
+    public static final Statistic TCP_GIVE_STATS=new TCPSentMessageStatBytes();
+
+    /**
+     * <tt>Statistic</tt> for "Give Stat" messages sent over UDP
+     */ 
+    public static final Statistic UDP_GIVE_STATS=new UDPSentMessageStatBytes();
+
+
 	/**
 	 * <tt>Statistic</tt> for Gnutella meta-vendor messages sent over 
 	 * TCP.

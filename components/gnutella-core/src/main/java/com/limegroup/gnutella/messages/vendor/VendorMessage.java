@@ -87,7 +87,14 @@ public abstract class VendorMessage extends Message {
     protected VendorMessage(byte[] vendorIDBytes, int selector, int version, 
                             byte[] payload) 
         throws BadPacketException {
-        super(F_VENDOR_MESSAGE, (byte)1, LENGTH_MINUS_PAYLOAD + payload.length);
+        this(vendorIDBytes, selector, version, payload, Message.N_UNKNOWN);
+    }
+    
+    protected VendorMessage(byte[] vendorIDBytes, int selector, int version, 
+                            byte[] payload, int network) 
+                                                throws BadPacketException  {
+        super(F_VENDOR_MESSAGE, (byte)1, LENGTH_MINUS_PAYLOAD + payload.length,
+              network);
         if ((vendorIDBytes.length != 4)) {
             if( RECORD_STATS )
                 ReceivedErrorStat.VENDOR_INVALID_ID.incrementStat();
@@ -109,8 +116,7 @@ public abstract class VendorMessage extends Message {
         _version = version;
         _payload = payload;
         // lastly compute the hash
-        _hashCode = computeHashCode(_version, _selector, _vendorID,
-                                    _payload);
+        _hashCode = computeHashCode(_version, _selector, _vendorID, _payload);
     }
 
     /** Should be used when encountered a Message from the Network.  Primarily
@@ -121,7 +127,14 @@ public abstract class VendorMessage extends Message {
     protected VendorMessage(byte[] guid, byte ttl, byte hops, byte[] vendorID,
                             int selector, int version, byte[] payload) 
         throws BadPacketException {
-        super(guid, (byte)0x31, ttl, hops, LENGTH_MINUS_PAYLOAD+payload.length);
+        this(guid,ttl,hops,vendorID,selector,version,payload,Message.N_UNKNOWN);
+    }
+
+    protected VendorMessage(byte[] guid, byte ttl, byte hops,byte[] vendorID,
+                            int selector, int version, byte[] payload, 
+                            int network) throws BadPacketException {
+        super(guid, (byte)0x31, ttl, hops, LENGTH_MINUS_PAYLOAD+payload.length,
+              network);
         // set the instance params....
         _vendorID = vendorID;
         _selector = selector;
