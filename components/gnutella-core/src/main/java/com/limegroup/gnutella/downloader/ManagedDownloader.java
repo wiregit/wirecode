@@ -605,7 +605,7 @@ public class ManagedDownloader implements Downloader, Serializable {
         queuedVendor = "";
         triedLocatingSources = false;
         // get the SHA1 if we can.
-        if(allFiles != null) {
+        if(allFiles != null && downloadSHA1 == null) {
             for(int i = 0; i < allFiles.length && downloadSHA1 == null; i++)
                 downloadSHA1 = allFiles[i].getSHA1Urn();
         }
