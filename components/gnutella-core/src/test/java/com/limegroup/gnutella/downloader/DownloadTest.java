@@ -8,6 +8,7 @@ import com.limegroup.gnutella.util.*;
 import com.limegroup.gnutella.downloader.*;
 import com.limegroup.gnutella.stubs.*;
 import com.limegroup.gnutella.gui.*;
+import com.limegroup.gnutella.settings.*;
 import com.limegroup.gnutella.gui.search.*;
 import javax.swing.JOptionPane;
 import junit.framework.*;
@@ -26,7 +27,7 @@ public class DownloadTest extends TestCase {
     static URN testHash = null;
     static File testFile = null;
     static { 
-        SettingsManager.instance().setLocalIsPrivate(false);
+        ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
         // Don't wait for network connections for testing
         ManagedDownloader.NO_DELAY = true;	
     } 

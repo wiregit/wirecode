@@ -8,6 +8,7 @@ import com.limegroup.gnutella.handshaking.*;
 import com.limegroup.gnutella.routing.*;
 import com.limegroup.gnutella.messages.*;
 import com.limegroup.gnutella.stubs.*;
+import com.limegroup.gnutella.settings.*;
 import com.sun.java.util.collections.*;
 
 public class ManagedConnectionBufferTest extends TestCase {
@@ -28,7 +29,7 @@ public class ManagedConnectionBufferTest extends TestCase {
         //client) send a "503 Service Unavailable" at line 77 of
         //SupernodeHandshakeResponder.
         SettingsManager.instance().loadDefaults();
-		SettingsManager.instance().setLocalIsPrivate(false);
+        ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
     }
 
     /** 

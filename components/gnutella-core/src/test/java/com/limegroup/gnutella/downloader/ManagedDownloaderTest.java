@@ -3,6 +3,7 @@ package com.limegroup.gnutella.downloader;
 import junit.framework.*;
 import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.stubs.*;
+import com.limegroup.gnutella.settings.*;
 import com.sun.java.util.collections.*;
 import java.io.*;
 
@@ -20,7 +21,7 @@ public class ManagedDownloaderTest extends TestCase {
     public void setUp() {
         try {
             SettingsManager.instance().setSaveDirectory(new File("."));
-            SettingsManager.instance().setLocalIsPrivate(false);
+            ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
         } catch (IOException e) {
             fail("Couldn't set save directory");
         }
