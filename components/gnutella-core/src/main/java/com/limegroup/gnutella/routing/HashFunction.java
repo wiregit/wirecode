@@ -21,10 +21,23 @@ public class HashFunction {
         return ret;
     }
 
+    /**
+     * Returns the n-bit hash of x, where n="bits".  That is, the returned value
+     * value can fit in "bits" unsigned bits.
+     */    
+    public static int hash(String x, int bits) {
+        //This is just a temporary hack.  The real algorithm obviously shouldn't
+        //be tied to the JDK.  Note that we don't just return x.hashCode()%bits;
+        //that wouldn't allow resizing of tables.
+        return hash(x.hashCode(), bits);
+    }       
+
     public static void main(String args[]) {
         for (int i=0; i<100; i++) {
             System.out.println(hash(i, 7));
         }
+        System.out.println(hash("Hello Chris", 10));
+        System.out.println(hash("Hallo Chris", 10));
     }
 
 
