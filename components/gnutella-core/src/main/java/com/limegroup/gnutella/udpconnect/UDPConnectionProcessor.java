@@ -17,6 +17,14 @@ public class UDPConnectionProcessor {
     /** Handle to the output stream that is the input to this connection */
     private UDPBufferedOutputStream  _input;
 
+    /** Handle to the input stream that is the output of this connection */
+    private UDPBufferedInputStream   _output;
+
+    /** A leftover chunk of data from an incoming data message.  These will 
+        always be present with a data message because the first data chunk 
+        will be from the GUID and the second chunk will be the payload. */
+    private Chunk             _trailingChunk;
+
     /** The limit on space for data to be written out */
     private int               _chunkLimit;
 
@@ -25,10 +33,10 @@ public class UDPConnectionProcessor {
     private int               _receiverWindowSpace;
 
     /** Record the desired connection timeout on the connection */
-    private long              connectTimeOut          = MAX_CONNECT_WAIT_TIME;
+    private long              _connectTimeOut         = MAX_CONNECT_WAIT_TIME;
 
     /** Record the desired read timeout on the connection */
-    private int               readTimeOut             = 0;
+    private int               _readTimeOut            = 0;
 
 	/** Predefine a common exception if the user can't receive UDP */
 	private static final IOException CANT_RECEIVE_UDP = 
@@ -128,6 +136,7 @@ public class UDPConnectionProcessor {
     /** The last time that a message was received from the other host */
 	private long              _lastReceivedTime;
 
+
     /**
      *  Try to kickoff a reliable udp connection. This method blocks until it 
 	 *  either sucessfully establishes a connection or it times out and throws
@@ -167,7 +176,8 @@ public class UDPConnectionProcessor {
     }
 
 	public InputStream getInputStream() throws IOException {
-        return null;
+        _output = new UDPBufferedInputStream(this);
+        return _output;
 	}
 
     /**
@@ -179,7 +189,11 @@ public class UDPConnectionProcessor {
         return _input;
 	}
 
+    /**
+     *  Set the read timeout for the associated input stream.
+     */
 	public void setSoTimeout(int timeout) throws SocketException {
+        _readTimeOut = timeout;
 	}
 
 	public void close() throws IOException {
@@ -353,6 +367,36 @@ public class UDPConnectionProcessor {
 	}
 
     /**
+     *  Return a chunk of data from the incoming data container.
+     */
+    public Chunk getIncomingChunk() {
+        Chunk chunk;
+
+        if ( _trailingChunk != null ) {
+            chunk = _trailingChunk;
+            _trailingChunk = null;
+            return chunk;
+        }
+    
+        // Fetch a block from the receiving window.
+        DataRecord drec = _receiveWindow.getWritableBlock();
+        if ( drec == null )
+            return null;
+        drec.written    = true;
+        DataMessage dmsg = (DataMessage) drec.msg;
+
+        // Record the second chunk of the message for the next read.
+        _trailingChunk = dmsg.getData2Chunk();
+
+        // Return the first small chunk of data from the GUID
+        return dmsg.getData1Chunk();
+    }
+
+    public int getReadTimeout() {
+        return _readTimeOut;
+    }
+
+    /**
      *  Convenience method for sending keepalive message since we might fire 
      *  these off before waiting
      */
@@ -378,11 +422,12 @@ public class UDPConnectionProcessor {
 	 */
     private synchronized void sendData(Chunk chunk) {
         try {  
+            // TODO: Should really verify that chunk starts at zero.  It does
+            // by design.
             DataMessage dm = new DataMessage(_theirConnectionID, 
 			  _sequenceNumber, chunk.data, chunk.length);
             send(dm);
-			_sendWindow.addData(_sequenceNumber, dm);  
-
+			_sendWindow.addData(dm);  
 
 			_sequenceNumber++;
 
@@ -578,7 +623,7 @@ System.out.println("Soft resending message:"+drec.msg.getSequenceNumber());
             // the other side of the connection.
 			while ( isConnecting() ) { 
 
-                if ( waitTime > connectTimeOut )
+                if ( waitTime > _connectTimeOut )
                     throw CONNECTION_TIMEOUT;
 
 				// Send a SYN packet with our connectionID 
@@ -645,7 +690,14 @@ System.out.println("Soft resending message:"+drec.msg.getSequenceNumber());
         } else if (msg instanceof DataMessage) {
             // Pass the data message to the output window
             DataMessage dmsg = (DataMessage) msg;
-			_receiveWindow.addData(_sequenceNumber, dmsg);  
+
+            // Make sure the data is not before the window start
+            if ( dmsg.getSequenceNumber() >= _receiveWindow.getWindowStart() ) {
+                _receiveWindow.addData(dmsg);  
+                // TODO: You are not enforcing any real upper limit 
+            } else {
+System.out.println("Received duplicate block num: "+ dmsg.getSequenceNumber());
+            }
 
             // Ack the Data message
             safeSendAck(msg);

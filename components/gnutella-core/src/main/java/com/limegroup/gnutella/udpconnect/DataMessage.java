@@ -33,4 +33,30 @@ public class DataMessage extends UDPConnectionMessage {
 
       	super(guid, ttl, hops, payload);
     }
+
+    /**
+     *  Return the data in the GUID as the data1 chunk.
+     */
+    public Chunk getData1Chunk() {
+        if ( _data1Length == 0 )
+            return null;
+        Chunk chunk = new Chunk();
+        chunk.data   = _data1;
+        chunk.start  = _data1Offset;
+        chunk.length = _data1Length;
+        return chunk;
+    }
+
+    /**
+     *  Return the data in the payload as the data2 chunk/
+     */
+    public Chunk getData2Chunk() {
+        if ( _data2Length == 0 )
+            return null;
+        Chunk chunk = new Chunk();
+        chunk.data   = _data2;
+        chunk.start  = _data2Offset;
+        chunk.length = _data2Length;
+        return chunk;
+    }
 }

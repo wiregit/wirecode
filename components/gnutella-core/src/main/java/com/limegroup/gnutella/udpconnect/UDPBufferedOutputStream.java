@@ -112,9 +112,16 @@ public class UDPBufferedOutputStream extends OutputStream {
     }
 
     /**
-     * Closing output stream has no effect. 
+     *  Closing output stream has no effect. 
      */
     public void close() throws IOException {
+    }
+
+    /**
+     *  Flushing currently does nothing.
+     *  TODO: If needed, it can wait for all data to be read.
+     */
+    public void flush() throws IOException {
     }
 
     /**
@@ -135,11 +142,13 @@ public class UDPBufferedOutputStream extends OutputStream {
 			// Return the oldest chunk 
 			rChunk        = new Chunk();
 			rChunk.data   = (byte[]) chunks.remove(0);
+            rChunk.start  = 0; // Keep this to zero here
 			rChunk.length = rChunk.data.length;
 		} else if (activeCount > 0) {
 			// Return a partial chunk and allocate a fresh one
 			rChunk        = new Chunk();
 			rChunk.data   = activeChunk;
+            rChunk.start  = 0; // Keep this to zero here
 			rChunk.length = activeCount;
     		allocateNewChunk();
 		} else {

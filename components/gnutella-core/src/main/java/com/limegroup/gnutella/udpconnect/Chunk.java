@@ -5,5 +5,6 @@ package com.limegroup.gnutella.udpconnect;
  */
 public class Chunk {
 	public byte[] data;
+    public int    start;
 	public int    length;
 }

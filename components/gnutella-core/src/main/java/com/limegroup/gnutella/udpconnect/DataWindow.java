@@ -24,7 +24,6 @@ public class DataWindow
 	private HashMap window;
 	private int     windowStart;
 	private int     windowSize;
-	private int     endBlock;
 	private long    averageRTT;
 	private long    smoothRTT;
 	private long    lowRTT;
@@ -42,21 +41,20 @@ public class DataWindow
 		windowStart = start;
 		windowSize  = size;
 		window      = new HashMap(size+2);
-		endBlock    = Integer.MAX_VALUE;
 		averageRTT  = 0;
 		lowRTT      = 0;
 		lowRTTCount = 0;
 	}
 
     /*
-     *  Add a new message to the window.  TODO: Not based on packet.
+     *  Add a new message to the window.  
      */
-	public synchronized DataRecord addData(int pnum, UDPConnectionMessage msg) {
+	public synchronized DataRecord addData(UDPConnectionMessage msg) {
 		DataRecord d;
 		d          = new DataRecord();
-		d.pnum     = pnum;
+		d.pnum     = msg.getSequenceNumber();
 		d.msg      = msg;
-		d.pkey     = String.valueOf(pnum);
+		d.pkey     = String.valueOf(d.pnum);
 		d.sends    = 0;
 		d.written  = false;
 		d.acks     = 0;
@@ -67,20 +65,9 @@ public class DataWindow
         return d;
 	}
 
-    /*
-     *  Record the end of the transfer location.  Obsolete.
+    /** 
+     *  Get the block based on the sequenceNumber.
      */
-	public void setEndBlock(int blockNum) {
-		endBlock = blockNum;
-	}
-
-    /*
-     *  Get the end of the transfer location.  Obsolete.
-     */
-	public int getEndBlock() {
-		return endBlock;
-	}
-
 	public synchronized DataRecord getBlock(int pnum) {
 		String     pkey = String.valueOf(pnum);
 		DataRecord d    = (DataRecord) window.get(pkey);
