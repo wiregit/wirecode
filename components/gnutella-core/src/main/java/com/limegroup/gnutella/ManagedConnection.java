@@ -905,7 +905,7 @@ public class ManagedConnection
      * by null.
      */
     public void handlePingReply(PingReply pingReply,
-                                ManagedConnection receivingConnection) {
+                                ReplyHandler receivingConnection) {
         send(pingReply);
     }
 
@@ -916,7 +916,7 @@ public class ManagedConnection
      * by null.
      */
     public void handleQueryReply(QueryReply queryReply,
-                                 ManagedConnection receivingConnection) {
+                                 ReplyHandler receivingConnection) {
         send(queryReply);
     }
 
@@ -927,7 +927,7 @@ public class ManagedConnection
      * by null.
      */
     public void handlePushRequest(PushRequest pushRequest,
-                                  ManagedConnection receivingConnection) {
+                                  ReplyHandler receivingConnection) {
         send(pushRequest);
     }
 
