@@ -817,7 +817,6 @@ public class RouterService {
 							 final MediaType type) {
 
 		try {
-			_lastQueryTime = System.currentTimeMillis();
             QueryRequest qr = null;
             if ((new GUID(guid)).addressesMatch(getAddress(), getPort())) {
                 // if the guid is encoded with my address, mark it as needing out
@@ -832,9 +831,7 @@ public class RouterService {
             }
             else
                 qr = QueryRequest.createQuery(guid, query, richQuery, type);
-			verifier.record(qr, type);
-            RESULT_HANDLER.addQuery(qr); // so we can leaf guide....
-			router.sendDynamicQuery(qr);
+            recordAndSendQuery(qr, type);
 		} catch(Throwable t) {
 			ErrorService.error(t);
 		}
@@ -846,7 +843,6 @@ public class RouterService {
 	 */
 	public static void queryWhatIsNew(final byte[] guid, final MediaType type) {
 		try {
-			_lastQueryTime = System.currentTimeMillis();
             QueryRequest qr = null;
             if ((new GUID(guid)).addressesMatch(getAddress(), getPort())) {
                 // if the guid is encoded with my address, mark it as needing out
@@ -860,14 +856,21 @@ public class RouterService {
             }
             else
                 qr = QueryRequest.createWhatIsNewQuery(guid, (byte)2, type);
-			verifier.record(qr, type);
-            RESULT_HANDLER.addQuery(qr); // so we can leaf guide....
-			router.sendDynamicQuery(qr);
+            recordAndSendQuery(qr, type);
 		} catch(Throwable t) {
 			ErrorService.error(t);
 		}
 	}
 
+    /** Just aggregates some common code in query() and queryWhatIsNew().
+     */ 
+    private static void recordAndSendQuery(final QueryRequest qr, 
+                                           final MediaType type) {
+        _lastQueryTime = System.currentTimeMillis();
+        verifier.record(qr, type);
+        RESULT_HANDLER.addQuery(qr); // so we can leaf guide....
+        router.sendDynamicQuery(qr);
+    }
 
 	/**
 	 * Accessor for the last time a query was originated from this host.
