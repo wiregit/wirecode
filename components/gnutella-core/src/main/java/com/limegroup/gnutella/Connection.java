@@ -1385,10 +1385,13 @@ public class Connection {
     public boolean allowNewPings() {
     	synchronized(PING_LOCK) {
 	        long curTime = System.currentTimeMillis();
+			
+			// don't allow new pings if the connection could drop any second
+			if(!isStable(curTime)) return false;
 	        if(curTime < _nextPingTime) {
 	            return false;
 	        } 
-			_nextPingTime = System.currentTimeMillis() + 1600;
+			_nextPingTime = System.currentTimeMillis() + 2500;
 	        return true;
     	}
     }
@@ -1406,6 +1409,9 @@ public class Connection {
     public boolean allowNewPongs() {
     	synchronized(PONG_LOCK) {
 		    long curTime = System.currentTimeMillis();
+
+			// don't allow new pongs if the connection could drop any second
+			if(!isStable(curTime)) return false;
 		    if(curTime < _nextPongTime) {
 		        return false;
 		    } 
