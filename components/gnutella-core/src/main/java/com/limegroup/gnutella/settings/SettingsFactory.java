@@ -225,8 +225,7 @@ public final class SettingsFactory {
             // save the properties to disk.
             toSave.save( out, HEADING);            
         } catch(FileNotFoundException e) {
-            if(!IOUtils.handleException(e, null))//use the generic message
-                ErrorService.error(e);
+            ErrorService.error(e);
         } catch (IOException e) {
 			ErrorService.error(e);
         } finally {
