@@ -146,7 +146,9 @@ public final class UrnCache {
             oos.writeObject(URN_MAP);
             oos.close();
         } catch (Exception e) {
-            // no great loss
+            ActivityCallback callback = 
+                RouterService.instance().getActivityCallback();
+            callback.error(ActivityCallback.INTERNAL_ERROR, e);
         }
     }
 
