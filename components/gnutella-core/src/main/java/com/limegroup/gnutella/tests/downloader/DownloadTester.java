@@ -114,7 +114,7 @@ public class DownloadTester {
     private static void testSimpleSwarm() {
         System.out.print("-Testing swarming from two sources...");
         //Throttle rate at 10KB/s to give opportunities for swarming.
-        final int RATE=10;
+        final int RATE=500;
         //The first uploader got a range of 0-100%.  After the download receives
         //50%, it will close the socket.  But the uploader will send some data
         //between the time it sent byte 50% and the time it receives the FIN
@@ -144,7 +144,7 @@ public class DownloadTester {
 
     private static void testUnbalancedSwarm() {
         System.out.print("-Testing swarming from two unbalanced sources...");
-        final int RATE=10;
+        final int RATE=500;
         final int FUDGE_FACTOR=RATE*1024;  
         uploader1.setRate(RATE);
         uploader2.setRate(RATE/10);
@@ -172,7 +172,7 @@ public class DownloadTester {
 
     private static void testSwarmWithInterrupt() {
         System.out.print("-Testing swarming from two sources (one broken)...");
-        final int RATE=10;
+        final int RATE=500;
         final int STOP_AFTER = TestFile.length()/4;       
         final int FUDGE_FACTOR=RATE*1024;  
         uploader1.setRate(RATE);
@@ -201,7 +201,7 @@ public class DownloadTester {
 
     private static void testStealerInterrupted() {
         System.out.print("-Testing unequal swarming with stealer dying...");
-        final int RATE=10;
+        final int RATE=500;
         //second half of file + 1/8 of the file
         final int STOP_AFTER = 5*TestFile.length()/8;
         final int FUDGE_FACTOR=RATE*1024;  
@@ -232,7 +232,7 @@ public class DownloadTester {
 
     private static void testAddDownload() {
         System.out.print("-Testing addDownload (increases swarming)...");
-        final int RATE=10;
+        final int RATE=500;
         final int FUDGE_FACTOR=15000;  
         uploader1.setRate(RATE);
         uploader2.setRate(RATE);
@@ -277,7 +277,7 @@ public class DownloadTester {
 
     private static void testOverlapCheckGrey() {
         System.out.print("-Testing overlap checking from Grey area...");
-        final int RATE=10;
+        final int RATE=500;
         uploader1.setRate(RATE);
         uploader2.setRate(RATE);
         uploader2.setCorruption(true);
@@ -306,7 +306,7 @@ public class DownloadTester {
 
     private static void testOverlapCheckWhite() {
         System.out.print("-Testing overlap checking from White area...");
-        final int RATE=10;
+        final int RATE=500;
         uploader1.setCorruption(true);
         uploader1.stopAfter(TestFile.length()/8);//blinding fast
         uploader2.setRate(RATE);
@@ -332,7 +332,7 @@ public class DownloadTester {
     }
 
 //     private static void testGUI() {
-//         final int RATE=10;
+//         final int RATE=500;
 //         uploader1.setCorruption(true);
 //         uploader1.setRate(RATE);
 //         uploader2.setRate(RATE);

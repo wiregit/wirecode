@@ -132,7 +132,7 @@ public class ManagedDownloader implements Downloader, Serializable {
      *  incoming push connection. */
     private static final int PUSH_INVALIDATE_TIME=5*60;  //5 minutes
     /** The smallest interval that can be split for parallel download */
-    private static final int MIN_SPLIT_SIZE=10000;      //10 KB        
+    private static final int MIN_SPLIT_SIZE=100000;      //100 KB        
     /** The number of bytes to overlap when swarming and resuming, used to help
      *  verify that different sources are serving the same content. */
     private static final int OVERLAP_BYTES=500;
