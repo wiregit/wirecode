@@ -642,7 +642,7 @@ public class DownloadManager implements BandwidthTracker {
     }
 
 
-    private synchronized boolean conflicts(URN urn) {
+    public synchronized boolean conflicts(URN urn) {
         Iterator iter = active.iterator();
         while(iter.hasNext()) {
             ManagedDownloader md = (ManagedDownloader)iter.next();

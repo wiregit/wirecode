@@ -105,7 +105,7 @@ public class RouterService {
 	/**
 	 * <tt>DownloadManager</tt> for handling HTTP downloading.
 	 */
-    private static final DownloadManager downloader = new DownloadManager();
+    private static DownloadManager downloader = new DownloadManager();
 
 	/**
 	 * <tt>UploadManager</tt> for handling HTTP uploading.

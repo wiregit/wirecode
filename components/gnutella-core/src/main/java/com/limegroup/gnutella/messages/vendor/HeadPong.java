@@ -62,12 +62,14 @@ public class HeadPong extends VendorMessage {
 	
 	/**
 	 * instead of using the HTTP codes, use bit values.  The first three 
-	 * possible values are mutually exclusive though.
+	 * possible values are mutually exclusive though.  DOWNLOADING is
+	 * possible only if PARTIAL_FILE is set as well.
 	 */
 	private static final byte FILE_NOT_FOUND= (byte)0x0;
 	private static final byte COMPLETE_FILE= (byte)0x1;
 	private static final byte PARTIAL_FILE = (byte)0x2;
 	private static final byte FIREWALLED = (byte)0x4;
+	private static final byte DOWNLOADING = (byte)0x8;
 	
 	/**
 	 * all our slots are full..
@@ -112,9 +114,14 @@ public class HeadPong extends VendorMessage {
 	private byte [] _vendorId;
 	
 	/**
-	 * whether the other host can receive unsolicited udp
+	 * whether the other host can receive tcp
 	 */
 	private boolean _isFirewalled;
+	
+	/**
+	 * whether the other host is currently downloading the file
+	 */
+	private boolean _isDownloading;
 	
 	/**
 	 * creates a message object with data from the network.
@@ -129,10 +136,10 @@ public class HeadPong extends VendorMessage {
 			throw new BadPacketException("bad payload");
 		
 		
-		//if we are version 1, the first byte has to be FILE_NOT_FOUND, PARTIAL_FILE 
-		//or COMPLETE_FILE
+		//if we are version 1, the first byte has to be FILE_NOT_FOUND, PARTIAL_FILE, 
+		//COMPLETE_FILE, FIREWALLED or DOWNLOADING
 		if (version == VERSION && 
-				payload[1]>6) 
+				payload[1]>0xF) 
 			throw new BadPacketException("invalid payload for version "+version);
 		
 		try {
@@ -167,7 +174,11 @@ public class HeadPong extends VendorMessage {
 		//if we have a partial file and the pong carries ranges, parse their list
 		if ((code & COMPLETE_FILE) == COMPLETE_FILE) 
 			_completeFile=true;
-		else 
+		else {
+			//also check if the host is downloading the file
+			if ( (code & DOWNLOADING) == DOWNLOADING)
+				_isDownloading=true;
+			
 			if ( (_features & HeadPing.INTERVALS) == 
 				HeadPing.INTERVALS){
 			
@@ -176,7 +187,7 @@ public class HeadPong extends VendorMessage {
 				dais.readFully(ranges);
 				_ranges = IntervalSet.parseBytes(ranges);
 			}
-		
+		}
 		//parse any included firewalled altlocs
 		if ((_features & HeadPing.PUSH_ALTLOCS) == HeadPing.PUSH_ALTLOCS) {
 			int size = dais.readShort();
@@ -249,8 +260,15 @@ public class HeadPong extends VendorMessage {
 			retCode = FIREWALLED;
 		
 		//we have the file... is it complete or not?
-		if (desc instanceof IncompleteFileDesc)
+		if (desc instanceof IncompleteFileDesc) {
 			retCode = (byte) (retCode | PARTIAL_FILE);
+			
+			//also check if the file is currently being downloaded 
+			//or is waiting for sources.  This does not care for queued downloads.
+			DownloadManager dm = RouterService.getDownloadManager();
+			if (dm.conflicts(urn))
+				retCode = (byte) (retCode | DOWNLOADING);
+		}
 		else 
 			retCode = (byte) (retCode | COMPLETE_FILE);
 		caos.write(retCode);
@@ -440,6 +458,10 @@ public class HeadPong extends VendorMessage {
 	
 	public boolean isBusy() {
 		return _queueStatus >= BUSY;
+	}
+	
+	public boolean isDownloading() {
+		return _isDownloading;
 	}
 }
 	
