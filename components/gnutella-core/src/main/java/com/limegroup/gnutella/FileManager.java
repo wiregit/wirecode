@@ -5,9 +5,6 @@
  *       may be shared through the client.  It keeps them
  *       in the list _files.  There are methods for adding
  *       one file, or a whole directory.
- *
- * Updated by Sumeet Thadani 8/17/2000. Changed the search method so that
- * searches are possible with Regular Expressions. Imported necessary package
  */
 
 package com.limegroup.gnutella;
@@ -15,6 +12,8 @@ package com.limegroup.gnutella;
 import java.io.*;
 import com.sun.java.util.collections.*;
 import com.limegroup.gnutella.util.StringUtils;
+import com.limegroup.gnutella.util.Trie;
+import com.limegroup.gnutella.util.ArrayListUtil;
 
 public class FileManager{
     /** the total size of all files, in bytes.
@@ -28,6 +27,12 @@ public class FileManager{
      *  f[i]._path is in the shared folder with the shareable extension.
      *  LOCKING: obtain this before modifying. */
     private ArrayList /* of FileDesc */ _files;
+    /** an index mapping keywords in file names to the index in _files.
+     *  A keyword of a filename f is defined to be a maximal sequence of 
+     *  characters without a character from DELIMETERS.  INVARIANT: TODO..
+     */
+    private Trie /* String -> List<Integer> */ _index;
+    static final String DELIMETERS=" -.+/\\*";
     private String[] _extensions;
 
     private static FileManager _instance = new FileManager();
@@ -42,6 +47,7 @@ public class FileManager{
         _size = 0;
         _numFiles = 0;
         _files = new ArrayList();
+        _index = new Trie();
         _extensions = new String[0];
         _sharedDirectories = new HashSet();
 
@@ -146,6 +152,32 @@ public class FileManager{
             _size += n;                         /* the appropriate info */
             _files.add(new FileDesc(_files.size(), name, path,  n));
             _numFiles++;
+            
+            //TODO: save space by not adding path components to Trie, or using
+            //a special value for the value.  Likewise for common extensions
+            //like "mp3".  Perhaps this logic could go into Trie, e.g., a 
+            //"shareValue" method.
+
+            //Update index...
+            String[] keywords=StringUtils.split(path.toLowerCase(), DELIMETERS);
+            for (int i=0; i<keywords.length; i++) {
+                String keyword=keywords[i];
+                Integer j=new Integer(_files.size()-1);
+                List indices=(List)_index.get(keyword);
+                //...by adding new mappings...
+                if (indices==null) {
+                    indices=new ArrayList();
+                    indices.add(j);
+                    _index.put(keyword, indices);
+                }
+                //...or modifying existing mappings.
+                else {
+                    if (! indices.contains(j))
+                        indices.add(j);
+                }
+            }
+            System.out.println("After adding \""+path+"\", got: ");
+            System.out.println("   "+_index);
         }
     }
 
@@ -203,6 +235,17 @@ public class FileManager{
                 _files.set(i,null);
                 _numFiles--;
                 _size-=fd._size;
+
+                //Remove references to this from index.
+                String[] keywords=StringUtils.split(fd._path.toLowerCase(),
+                                                    DELIMETERS);
+                for (int j=0; j<keywords.length; j++) {
+                    String keyword=keywords[j];
+                    List indices=(List)_index.get(keyword);
+                    Assert.that(indices!=null, "File wasn't properly indexed.");
+                    indices.remove(new Integer(i));
+                    Assert.that(! indices.contains(new Integer(i))); //TODO3
+                }
                 return true;  //No more files in list will match this.
             }
         }
@@ -337,21 +380,43 @@ public class FileManager{
         //then you need to make _files volatile and work on a local reference,
         //i.e., "_files=this._files"
 
-        // Don't allocate until needed
-        ArrayList response_list=null;
+        Set matches=null;
 
-        for(int i=0; i < _files.size(); i++) {
-            FileDesc desc = (FileDesc)_files.get(i);
-            if (desc==null)
-                continue;
-            String file_name = desc._path;  //checking the path too..
-            if (StringUtils.contains(file_name, query, true)) {
-                if (response_list==null)
-                    response_list=new ArrayList();
-                response_list.add(_files.get(i));
-            }
+        //For each keyword in the query.... TODO2: avoid calling split by
+        //adding offset option to Trie.getPrefixedBy.
+        String[] keywords=StringUtils.split(query, DELIMETERS);
+        for (int i=0; i<keywords.length; i++) {
+            //Find all the files matching that keyword.  TODO2: avoid calling
+            //toLowerCase by making Trie have case insensitive option.
+            String keyword=keywords[i].toLowerCase();
+            Iterator /* of List<Integer> */ iter=_index.getPrefixedBy(keyword);
+            //TODO1: avoid allocations, perhaps by making Trie a multimap.
+            Set matches2=new TreeSet(ArrayListUtil.integerComparator());
+            while (iter.hasNext()) {
+                List indices=(List)iter.next();
+                for (Iterator iter2=indices.iterator(); iter2.hasNext() ; ) {
+                    Integer j=(Integer)iter2.next();
+                    matches2.add(j);
+                }
+            }         
+            if (i==0)
+                matches=matches2;
+            else
+                matches.retainAll(matches2);
+            //Optimization: if a keyword failed, don't check others..
+            if (matches.size()==0)
+                break;
         }
-        return response_list;
+        if (matches==null || matches.size()==0)
+            return null;
+        else {
+            ArrayList ret=new ArrayList();
+            for (Iterator iter=matches.iterator(); iter.hasNext(); ) {
+                int i=((Integer)iter.next()).intValue();
+                ret.add(_files.get(i));
+            }
+            return ret;
+        }
     }
 
     /** Unit test--REQUIRES JAVA2 FOR USE OF CREATETEMPFILE */
