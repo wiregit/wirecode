@@ -65,7 +65,7 @@ class NIOInputStream {
     /**
      * Notification that a read can happen on the SocketChannel.
      */
-    boolean readChannel() throws IOException {
+    void readChannel(SelectionKey sk) throws IOException {
         synchronized(bufferLock) {
             int read = 0;
             
@@ -80,7 +80,8 @@ class NIOInputStream {
     
             // if there's room in the buffer, we're interested in more reading ...
             // if not, we're not interested in more reading.
-            return buffer.hasRemaining();
+            if(!buffer.hasRemaining())
+                sk.interestOps(sk.interestOps() & ~SelectionKey.OP_READ);
         }
     }
     

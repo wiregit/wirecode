@@ -39,6 +39,9 @@ class NIODispatcher implements Runnable {
     /** Pending queue. */
     private final List PENDING = new LinkedList();
     
+    /** Lock for interest -- necessary because it can be called from muliple threads. */
+    private final Object INTEREST_LOCK = new Object();
+    
     /** Register interest in accepting */
     void registerAccept(SelectableChannel channel, NIOHandler attachment) {
         register(channel, attachment, SelectionKey.OP_ACCEPT);
@@ -90,8 +93,11 @@ class NIODispatcher implements Runnable {
     private void interest(SelectableChannel channel, int op) {
         try {
             SelectionKey sk = channel.keyFor(selector);
-            if(sk != null && sk.isValid())
-                sk.interestOps(sk.interestOps() | op);
+            if(sk != null && sk.isValid()) {
+                synchronized(INTEREST_LOCK) {
+                    sk.interestOps(sk.interestOps() | op);
+                }
+            }
         } catch(CancelledKeyException cke) {
             // It is possible to register interest on any thread, which means
             // that the key could have been cancelled at any time.
@@ -177,9 +183,7 @@ class NIODispatcher implements Runnable {
         if (!sk.isValid())
             return;
         
-        boolean more = handler.handleRead();
-        if(!more)
-            sk.interestOps(sk.interestOps() & ~SelectionKey.OP_READ);
+        handler.handleRead(sk);
         // else it's already set.
     }
     
@@ -195,11 +199,7 @@ class NIODispatcher implements Runnable {
         if (!sk.isValid())
             return;
         
-        boolean more  = handler.handleWrite();
-        if(!more)
-            sk.interestOps(sk.interestOps() & ~SelectionKey.OP_WRITE);
-            
-        // else it's already set.
+        handler.handleWrite(sk);
     }
     
     /**

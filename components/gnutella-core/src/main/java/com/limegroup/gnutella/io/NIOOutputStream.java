@@ -63,7 +63,7 @@ class NIOOutputStream {
     /**
      * Notification that a write can happen on the SocketChannel.
      */
-    boolean writeChannel() throws IOException {// write everything we can.
+    void writeChannel(SelectionKey sk) throws IOException {// write everything we can.
         synchronized(bufferLock) {
             buffer.flip();
             while(buffer.hasRemaining() && channel.write(buffer) > 0);
@@ -75,7 +75,8 @@ class NIOOutputStream {
                 
             // if we were able to write everything, we're not interested in more writing.
             // otherwise, we are interested.
-            return buffer.position() > 0;
+            if(buffer.position() == 0)
+                sk.interestOps(sk.interestOps() & ~SelectionKey.OP_WRITE);
         }
     }
     

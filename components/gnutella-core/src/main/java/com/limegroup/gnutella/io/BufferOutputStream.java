@@ -59,7 +59,6 @@ import com.limegroup.gnutella.RouterService;
             // there's data in the buffer now, the channel can write it.
             NIODispatcher.instance().interestWrite(channel);
         }
-        LOG.debug("Stopped writing one byte.");
     }
     
     /** Writes a chunk of data to the buffer */
@@ -76,7 +75,6 @@ import com.limegroup.gnutella.RouterService;
                 // now that there's data in the buffer, write with the channel
                 NIODispatcher.instance().interestWrite(channel);
             }
-            LOG.debug("Stopped writing");
         }
     }
     
@@ -96,7 +94,6 @@ import com.limegroup.gnutella.RouterService;
                     throw new InterruptedIOException(ix);
                 }
             }   
-            LOG.debug("Stopping flushing");
         }
     }
     
