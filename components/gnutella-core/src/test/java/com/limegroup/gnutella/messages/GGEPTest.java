@@ -463,6 +463,208 @@ public class GGEPTest extends TestCase {
         Assert.assertTrue("One is not Two!!", one.equals(two));
     }
 
+
+    public void testMalformedGGEP() {
+        GGEP one = null;
+        byte[] bytes = new byte[24];
+        bytes[0] = GGEP.GGEP_PREFIX_MAGIC_NUMBER;
+        bytes[1] = (byte)0x05;
+        bytes[2] = (byte)'B';
+        bytes[3] = (byte)'H';
+        bytes[4] = (byte)'O';
+        bytes[5] = (byte)'S';
+        bytes[6] = (byte)'T';
+        bytes[7] = (byte)0x40;
+        bytes[8] = (byte)0x87;
+        bytes[9] =  (byte)'S';
+        bytes[10] = (byte)'U';
+        bytes[11] = (byte)'S';
+        bytes[12] = (byte)'H';
+        bytes[13] = (byte)'E';
+        bytes[14] = (byte)'E';
+        bytes[15] = (byte)'L';
+        bytes[16] = (byte)0x47;
+        bytes[17] = (byte)'D';
+        bytes[18] = (byte)'A';
+        bytes[19] = (byte)'S';
+        bytes[20] = (byte)'W';
+        bytes[21] = (byte)'A';
+        bytes[22] = (byte)'N';
+        bytes[23] = (byte)'I';                
+
+        // test first case where no magic number....
+        bytes[0] = (byte) 'I';
+        try {
+            one = new GGEP(bytes,0,null);
+        }
+        catch (BadGGEPBlockException hopefullySo) {
+        }
+        catch (Exception hopefullyNot) {
+            Assert.assertTrue("Unexpected Exception!  Not handled in GGEP!",
+                              false);
+        }
+
+        // now test a ID Len that is lying!
+        bytes = new byte[6];
+        bytes[0] = GGEP.GGEP_PREFIX_MAGIC_NUMBER;
+        bytes[1] = (byte)0x05;
+        bytes[2] = (byte)'B';
+        bytes[3] = (byte)'H';
+        bytes[4] = (byte)'O';
+        bytes[5] = (byte)'S';
+        try {
+            one = new GGEP(bytes,0,null);
+        }
+        catch (BadGGEPBlockException hopefullySo) {
+        }
+        catch (Exception hopefullyNot) {
+            Assert.assertTrue("Unexpected Exception!  Not handled in GGEP!",
+                              false);
+        }
+
+        // too many data length fields...
+        bytes = new byte[24];
+        bytes[0] = GGEP.GGEP_PREFIX_MAGIC_NUMBER;
+        bytes[1] = (byte)0x05;
+        bytes[2] = (byte)'B';
+        bytes[3] = (byte)'H';
+        bytes[4] = (byte)'O';
+        bytes[5] = (byte)'S';
+        bytes[6] = (byte)'T';
+        bytes[7] = (byte)0xbf;
+        bytes[8] = (byte)0xbf;
+        bytes[9] = (byte)0xbf;
+        bytes[10] = (byte)'U';
+        bytes[11] = (byte)'S';
+        bytes[12] = (byte)'H';
+        bytes[13] = (byte)'E';
+        bytes[14] = (byte)'E';
+        bytes[15] = (byte)'L';
+        bytes[16] = (byte)0x47;
+        bytes[17] = (byte)'D';
+        bytes[18] = (byte)'A';
+        bytes[19] = (byte)'S';
+        bytes[20] = (byte)'W';
+        bytes[21] = (byte)'A';
+        bytes[22] = (byte)'N';
+        bytes[23] = (byte)'I';                
+        try {
+            one = new GGEP(bytes,0,null);
+        }
+        catch (BadGGEPBlockException hopefullySo) {
+        }
+        catch (Exception hopefullyNot) {
+            Assert.assertTrue("Unexpected Exception!  Not handled in GGEP!",
+                              false);
+        }
+        
+
+        // not enough data length fields...
+        bytes = new byte[9];
+        bytes[0] = GGEP.GGEP_PREFIX_MAGIC_NUMBER;
+        bytes[1] = (byte)0x05;
+        bytes[2] = (byte)'B';
+        bytes[3] = (byte)'H';
+        bytes[4] = (byte)'O';
+        bytes[5] = (byte)'S';
+        bytes[6] = (byte)'T';
+        bytes[7] = (byte)0xbf;
+        bytes[8] = (byte)0xbf;
+        try {
+            one = new GGEP(bytes,0,null);
+        }
+        catch (BadGGEPBlockException hopefullySo) {
+        }
+        catch (Exception hopefullyNot) {
+            Assert.assertTrue("Unexpected Exception!  Not handled in GGEP!",
+                              false);
+        }
+
+        // not enough bytes!
+        bytes = new byte[0];
+        try {
+            one = new GGEP(bytes,0,null);
+        }
+        catch (BadGGEPBlockException hopefullySo) {
+        }
+        catch (Exception hopefullyNot) {
+            Assert.assertTrue("Unexpected Exception!  Not handled in GGEP!",
+                              false);
+        }
+
+        // not enough data fields...
+        bytes = new byte[22];
+        bytes[0] = GGEP.GGEP_PREFIX_MAGIC_NUMBER;
+        bytes[1] = (byte)0x05;
+        bytes[2] = (byte)'B';
+        bytes[3] = (byte)'H';
+        bytes[4] = (byte)'O';
+        bytes[5] = (byte)'S';
+        bytes[6] = (byte)'T';
+        bytes[7] = (byte)0x40;
+        bytes[8] = (byte)0x87;
+        bytes[9] =  (byte)'S';
+        bytes[10] = (byte)'U';
+        bytes[11] = (byte)'S';
+        bytes[12] = (byte)'H';
+        bytes[13] = (byte)'E';
+        bytes[14] = (byte)'E';
+        bytes[15] = (byte)'L';
+        bytes[16] = (byte)0x47;
+        bytes[17] = (byte)'D';
+        bytes[18] = (byte)'A';
+        bytes[19] = (byte)'S';
+        bytes[20] = (byte)'W';
+        bytes[21] = (byte)'A';
+        try {
+            one = new GGEP(bytes,0,null);
+        }
+        catch (BadGGEPBlockException hopefullySo) {
+        }
+        catch (Exception hopefullyNot) {
+            Assert.assertTrue("Unexpected Exception!  Not handled in GGEP!",
+                              false);
+        }
+
+        // just a messed up GGEP block...
+        bytes = new byte[22];
+        bytes[0] = GGEP.GGEP_PREFIX_MAGIC_NUMBER;
+        bytes[1] = (byte)0x05;
+        bytes[2] = (byte)'B';
+        bytes[3] = (byte)'H';
+        bytes[4] = (byte)'O';
+        bytes[5] = (byte)'S';
+        bytes[6] = (byte)'T';
+        bytes[7] = (byte)0x40;
+        bytes[8] = (byte)'S';
+        bytes[9] =  (byte)'S';
+        bytes[10] = (byte)'U';
+        bytes[11] = (byte)'S';
+        bytes[12] = (byte)'H';
+        bytes[13] = (byte)'E';
+        bytes[14] = (byte)'E';
+        bytes[15] = (byte)'L';
+        bytes[16] = (byte)0x47;
+        bytes[17] = (byte)'D';
+        bytes[18] = (byte)'A';
+        bytes[19] = (byte)'S';
+        bytes[20] = (byte)'W';
+        bytes[21] = (byte)'A';
+        bytes[21] = (byte)'N';
+        bytes[21] = (byte)'I';
+        try {
+            one = new GGEP(bytes,0,null);
+        }
+        catch (BadGGEPBlockException hopefullySo) {
+        }
+        catch (Exception hopefullyNot) {
+            Assert.assertTrue("Unexpected Exception!  Not handled in GGEP!",
+                              false);
+        }
+
+    }
+
+
     public static void main(String argv[]) {
         junit.textui.TestRunner.run(suite());
     }
