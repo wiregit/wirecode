@@ -4,6 +4,7 @@ import com.limegroup.gnutella.util.BucketQueue;
 import com.sun.java.util.collections.*;
 import java.io.*;
 import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.Date;
 
 /**
@@ -226,7 +227,23 @@ public class HostCatcher {
     public void spy(PingReply pr, ManagedConnection receivingConnection) {
         Endpoint e=new Endpoint(pr.getIP(), pr.getPort(),
                     pr.getFiles(), pr.getKbytes());
-
+                    
+        //add the endpoint
+        add(e,receivingConnection);
+    }
+    
+    /**
+     * Adds the passed endpoint to the set of hosts maintained. The endpoint 
+     * may not get added due to various reasons (including it might be our
+     * address itself, we migt be connected to it etc.). Also adding this
+     * endpoint may lead to the removal of some other endpoint from the
+     * cache.
+     * @param e Endpoint to be added
+     * @param receivingConnection The connection on which we received the
+     * endpoint
+     */
+    public void add(Endpoint e,ManagedConnection receivingConnection)
+    {
         //Skip if we're connected to it.
         if (manager.isConnected(e))
             return;
@@ -236,8 +253,14 @@ public class HostCatcher {
             return;
 
         //Skip if this is the router.
-        if (isRouter(pr.getIPBytes())) 
+        try{
+            if (isRouter(e.getHostBytes())) 
+                return;
+        }
+        catch(UnknownHostException uhe){
+            //return in this case, without adding the host
             return;
+        }
 
         //Current policy: "Pong cache" connections are considered good.  Private
         //addresses are considered real bad (negative weight).  This means that
