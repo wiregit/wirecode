@@ -46,10 +46,10 @@ class LicenseCache {
     /**
      * Determines if the license is verified for the given URN and URI.
      */
-    synchronized boolean isLicensed(URN urn, URI uri) {
+    synchronized boolean isVerifiedAndValid(URN urn, URI uri) {
         License license = (License)licenses.get(uri.toString());
         if(license != null) {
-            if(!license.isValid())
+            if(!license.isValid(urn))
                 return false;
             URN expect = license.getExpectedURN();
             if(expect != null)

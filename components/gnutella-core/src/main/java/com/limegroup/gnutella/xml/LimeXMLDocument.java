@@ -376,15 +376,28 @@ public class LimeXMLDocument implements Serializable {
     }
     
     /**
+     * Returns the license string.
+     */
+    public String getLicenseString() {
+        if(hasCCLicense) {
+            for(Iterator i = fieldToValue.entrySet().iterator(); i.hasNext(); ) {
+                Map.Entry next = (Map.Entry)i.next();
+                if(((String)next.getKey()).endsWith(XML_LICENSE_ATTRIBUTE))
+                    return (String)next.getValue();
+            }
+        }
+        return null;
+    }
+    
+    /**
      * Returns the license.
      */
     public License getLicense() {
-        for(Iterator i = fieldToValue.entrySet().iterator(); i.hasNext(); ) {
-            Map.Entry next = (Map.Entry)i.next();
-            if(((String)next.getKey()).endsWith(XML_LICENSE_ATTRIBUTE))
-                return LicenseFactory.create((String)next.getValue());
-        }
-        return null;
+        String license = getLicenseString();
+        if(license != null)
+            return LicenseFactory.create(license);
+        else
+            return null;
     }
 
     /**

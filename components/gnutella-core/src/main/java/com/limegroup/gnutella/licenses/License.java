@@ -10,6 +10,7 @@ import com.limegroup.gnutella.URN;
  */
 public interface License {
     
+    static final int NO_LICENSE = -1;
     static final int UNVERIFIED = 0;
     static final int VERIFYING = 1;
     static final int VERIFIED = 2;

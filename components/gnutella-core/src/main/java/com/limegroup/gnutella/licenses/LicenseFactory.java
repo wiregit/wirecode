@@ -21,11 +21,11 @@ public final class LicenseFactory {
      * Checks if the specified license-URI is valid for the given URN
      * without doing any expensive lookups.
      */
-    public static boolean isValid(URN urn, String licenseString) {
+    public static boolean isVerifiedAndValid(URN urn, String licenseString) {
         URI uri = getLicenseURI(licenseString);
         if(uri == null)
             return false;
-        return LicenseCache.instance().isLicensed(urn, uri);
+        return LicenseCache.instance().isVerifiedAndValid(urn, uri);
     }    
     
     /**
