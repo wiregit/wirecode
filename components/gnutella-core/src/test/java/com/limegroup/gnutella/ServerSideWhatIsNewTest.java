@@ -42,6 +42,9 @@ public class ServerSideWhatIsNewTest
     private static File susheel = null;
     private static File tempFile1 = null;
     private static File tempFile2 = null;
+    private static File winInstaller = null;
+    private static File linInstaller = null;
+    private static File osxInstaller = null;
 
     public ServerSideWhatIsNewTest(String name) {
         super(name);
@@ -67,7 +70,7 @@ public class ServerSideWhatIsNewTest
 		UltrapeerSettings.FORCE_ULTRAPEER_MODE.setValue(false);
 		ConnectionSettings.NUM_CONNECTIONS.setValue(0);
 		ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
-		SharingSettings.EXTENSIONS_TO_SHARE.setValue("txt;");
+		SharingSettings.EXTENSIONS_TO_SHARE.setValue("txt;exe;bin;dmg");
         try {
         SharingSettings.setDirectories( new File[] { _sharedDir, _savedDir } );
         }
@@ -80,8 +83,12 @@ public class ServerSideWhatIsNewTest
         // now move them to the share dir
         CommonUtils.copy(berkeley, new File(_sharedDir, "berkeley.txt"));
         CommonUtils.copy(susheel, new File(_sharedDir, "susheel.txt"));
+        
         berkeley = new File(_sharedDir, "berkeley.txt");
         susheel = new File(_sharedDir, "susheel.txt");
+        winInstaller = new File(_sharedDir, "LimeWireWin3.69.0010.exe");
+        linInstaller = new File(_sharedDir, "LimeWireLinux.bin");
+        osxInstaller = new File(_sharedDir, "LimeWireOSX.dmg");
         // make sure results get through
         SearchSettings.MINIMUM_SEARCH_QUALITY.setValue(-2);
     }        
@@ -228,7 +235,9 @@ public class ServerSideWhatIsNewTest
         for (; (i < 15) && (rs.getNumSharedFiles() < 2); i++)
             Thread.sleep(1000);
         if (i == 15) assertTrue(false);
-        
+
+        // we should be sharing two files - two text files.
+        assertEquals(2, rs.getNumSharedFiles());
 
         CreationTimeCache ctCache = CreationTimeCache.instance();
         FileManager fm = rs.getFileManager();
@@ -344,7 +353,7 @@ public class ServerSideWhatIsNewTest
         tempFile2 = new File(_sharedDir, "tempFile2.txt");
         assertTrue(tempFile1.exists());
         assertTrue(tempFile2.exists());
-        
+
         rs.getFileManager().loadSettings(false);
         int i = 0;
         for (; (i < 15) && (rs.getNumSharedFiles() < 4); i++)
@@ -719,6 +728,75 @@ public class ServerSideWhatIsNewTest
         assertTrue(newFile.exists());
         URN newFileURN = fm.getURNForFile(newFile);
         assertEquals(cTime[0], ctCache.getCreationTime(newFileURN));
+    }
+
+    
+    public void testInstallersNotSharedInCache() throws Exception {
+        FileManager fm = rs.getFileManager();
+        CreationTimeCache ctCache = CreationTimeCache.instance();
+
+        winInstaller =
+            CommonUtils.getResourceFile("com/limegroup/gnutella/Backend.java");
+        linInstaller =
+            CommonUtils.getResourceFile("com/limegroup/gnutella/GUIDTest.java");
+        osxInstaller =
+            CommonUtils.getResourceFile("com/limegroup/gnutella/UrnTest.java");
+        CommonUtils.copy(winInstaller, 
+                         new File(_sharedDir, "LimeWireWin3.69.0010.exe"));
+        CommonUtils.copy(linInstaller, 
+                         new File(_sharedDir, "LimeWireLinux.bin"));
+        CommonUtils.copy(osxInstaller, 
+                         new File(_sharedDir, "LimeWireOSX.dmg"));
+
+        rs.getFileManager().loadSettings(false);
+        int i = 0;
+        for (; (i < 15) && (rs.getNumSharedFiles() < 5); i++)
+            Thread.sleep(1000);
+        if (i == 15) assertTrue("num shared files? " + rs.getNumSharedFiles(),
+                                false);
+
+        // we should be sharing two files - two text files and three installers
+        // but the creation time cache should only have the two text files
+        // as entries....
+        assertEquals(5, rs.getNumSharedFiles());
+
+        {
+            Map urnToLong = 
+                (Map)PrivilegedAccessor.getValue(ctCache, "URN_TO_TIME_MAP");
+            assertEquals(""+urnToLong, 2, urnToLong.size());
+        }
+        {
+            Map longToUrns =
+                (Map)PrivilegedAccessor.getValue(ctCache, "TIME_TO_URNSET_MAP");
+            assertEquals(""+longToUrns, 2, longToUrns.size());
+        }
+
+        // make sure the installer urns are not in the cache
+        {
+            assertTrue(winInstaller.exists());
+            URN installerURN = fm.getURNForFile(winInstaller);
+            assertNull(ctCache.getCreationTime(installerURN));
+        }
+        {
+            assertTrue(winInstaller.exists());
+            URN installerURN = fm.getURNForFile(linInstaller);
+            assertNull(ctCache.getCreationTime(installerURN));
+        }
+        {
+            assertTrue(winInstaller.exists());
+            URN installerURN = fm.getURNForFile(osxInstaller);
+            assertNull(ctCache.getCreationTime(installerURN));
+        }
+        // make sure berkeley and susheel are in the cache.
+        {
+            assertTrue(berkeley.exists());
+            assertNotNull(ctCache.getCreationTime(fm.getURNForFile(berkeley)));
+        }
+        {
+            assertTrue(susheel.exists());
+            assertNotNull(ctCache.getCreationTime(fm.getURNForFile(susheel)));
+        }
+
     }
         
 

@@ -898,15 +898,20 @@ public abstract class FileManager {
                 indices.add(fileIndex);
             }
 		
-            // Commit the time in the CreactionTimeCache
-            URN mainURN = fileDesc.getSHA1Urn();
-            CreationTimeCache ctCache = CreationTimeCache.instance();
-            synchronized (ctCache) {
-                Long cTime = ctCache.getCreationTime(mainURN);
-                if (cTime == null)
-                    ctCache.addTime(mainURN, file.lastModified());
-                // this call may be superfluous but it is quite fast....
-                ctCache.commitTime(mainURN);
+            // Commit the time in the CreactionTimeCache, but don't share
+            // the installer.  We populare free limewire's with free installers
+            // so we have to make sure we don't influence the what is new
+            // result set.
+            if (!isInstallerFile(file)) {
+                URN mainURN = fileDesc.getSHA1Urn();
+                CreationTimeCache ctCache = CreationTimeCache.instance();
+                synchronized (ctCache) {
+                    Long cTime = ctCache.getCreationTime(mainURN);
+                    if (cTime == null)
+                        ctCache.addTime(mainURN, file.lastModified());
+                    // this call may be superfluous but it is quite fast....
+                    ctCache.commitTime(mainURN);
+                }
             }
 
             // Ensure file can be found by URN lookups
@@ -916,6 +921,31 @@ public abstract class FileManager {
             return fileDesc;
         }
     }
+
+    /** Simple test that checks whether this might be an installer.
+     *  Is this test internationalized?  Not yet but maybe it should be....
+     */
+    private boolean isInstallerFile(File file) {
+        String fileName = file.getName().toLowerCase();
+        
+        // filename can't be less than 'limewire.***'
+        if (fileName.length() < 12) return false;
+        String pre = fileName.substring(0, 8);
+
+        // there might not be a dot so make sure
+        int lastDotIndex = fileName.lastIndexOf('.');
+        if (lastDotIndex < 0) return false;
+        String post = fileName.substring(lastDotIndex);
+
+        if (pre.equals("limewire") &&
+            (post.equals(".dmg") || post.equals(".bin") || 
+             post.equals(".zip") || post.equals(".exe") ||
+             post.equals(".tgz"))
+            ) return true;
+        
+        return false;
+    }
+
 
     /**
      * Adds an incomplete file to be used for partial file sharing.
