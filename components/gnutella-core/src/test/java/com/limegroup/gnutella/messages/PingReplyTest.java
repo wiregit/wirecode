@@ -75,7 +75,7 @@ public class PingReplyTest extends com.limegroup.gnutella.util.BaseTestCase {
         assertNotEquals(pr.getGUID(), testPR.getGUID());
         assertEquals(pr.getTTL(), testPR.getTTL());
         assertEquals(pr.getPort(), testPR.getPort());
-        assertEquals(pr.getIP(), testPR.getIP());
+        assertEquals(pr.getInetAddress(), testPR.getInetAddress());
         assertEquals(pr.getFiles(), testPR.getFiles());
         assertEquals(pr.getKbytes(), testPR.getKbytes());
         assertEquals(pr.isUltrapeer(), testPR.isUltrapeer());
@@ -170,7 +170,7 @@ public class PingReplyTest extends com.limegroup.gnutella.util.BaseTestCase {
         assertEquals(u4, pr.getFiles());
         long kbytes=pr.getKbytes();
         assertEquals(Long.toHexString(kbytes), u4, kbytes);
-        String ip2=pr.getIP();
+        String ip2=pr.getAddress();
         assertEquals("254.0.0.1", ip2);
         assertTrue(! pr.isUltrapeer());
     }      
@@ -269,7 +269,7 @@ public class PingReplyTest extends com.limegroup.gnutella.util.BaseTestCase {
         
         //Start testing
         assertEquals("wrong port", 15, pr.getPort());
-        String ip = pr.getIP();
+        String ip = pr.getAddress();
         assertEquals("wrong IP", "16.16.16.16", ip);
         assertEquals("wrong files", 15, pr.getFiles());
         assertEquals("Wrong share size", 15, pr.getKbytes());
@@ -473,7 +473,7 @@ public class PingReplyTest extends com.limegroup.gnutella.util.BaseTestCase {
         assertEquals(pr1.getFiles(), pr2.getFiles());
         assertEquals(pr1.getKbytes(), pr2.getKbytes());
         assertEquals(pr1.getPort(), pr2.getPort());
-        assertEquals(pr1.getIP(), pr2.getIP());
+        assertEquals(pr1.getInetAddress(), pr2.getInetAddress());
 
         assertTrue(! pr2.hasGGEPExtension());
         assertEquals("pong should not have a daily uptime", -1,
