@@ -53,8 +53,8 @@ public class UDPConnectionProcessor {
     /** Record the desired connection timeout on the connection */
     private long              _connectTimeOut         = MAX_CONNECT_WAIT_TIME;
 
-    /** Record the desired read timeout on the connection */
-    private int               _readTimeOut            = 0;
+    /** Record the desired read timeout on the connection, defaults to 1 minute */
+    private int               _readTimeOut            = 1 * 60 * 1000;
 
 	/** Predefine a common exception if the user can't receive UDP */
 	private static final IOException CANT_RECEIVE_UDP = 

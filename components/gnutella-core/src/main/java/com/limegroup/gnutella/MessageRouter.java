@@ -1274,7 +1274,7 @@ public abstract class MessageRouter {
                 try {
                     sock = Sockets.connect(addrToContact, portToContact, 12000);
                     OutputStream os = sock.getOutputStream();
-                    os.write("CONNECT BACK\r\n\n\n".getBytes());
+                    os.write("CONNECT BACK\r\n\r\n".getBytes());
                     os.flush();
                     try {
                         Thread.sleep(500); // let the other side get it.

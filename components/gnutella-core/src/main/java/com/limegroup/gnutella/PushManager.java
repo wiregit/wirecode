@@ -94,6 +94,9 @@ public final class PushManager {
         			String giv = "GIV 0:" + guid + "/file\n\n";
         			ostream.write(giv.getBytes());
         			ostream.flush();
+        			
+        			// try to read a GET or HEAD for only 30 seconds.
+        			s.setSoTimeout(30 * 1000);
 
                     //read GET or HEAD and delegate appropriately.
                     String word = IOUtils.readWord(s.getInputStream(), 4);
