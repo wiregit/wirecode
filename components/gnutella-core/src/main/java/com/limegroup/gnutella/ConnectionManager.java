@@ -38,6 +38,7 @@ public class ConnectionManager implements Runnable {
     public boolean stats;
 
     /** Variables for stastical purpouses */
+    /*NOTE: THESE VARIABLES ARE NOT SYNCHRONISED...SO THE STATISTICS MAY NOT BE 100% ACCURATE.
     public int total; //total number of messages sent and received
     public  int PReqCount; //Ping Request count
     public int PRepCount; //Ping Reply count
@@ -168,7 +169,8 @@ public class ConnectionManager implements Runnable {
 	try{
 	    Stat s = new Stat(this);
 	    Thread stat = new Thread(s);
-	    stat.start();
+	    if (stats==true)
+		stat.start();
 	}
 	catch(Exception e){
 	    ConnectionManager.error("Error in Statistics thread!");
