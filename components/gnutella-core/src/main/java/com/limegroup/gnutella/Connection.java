@@ -300,9 +300,17 @@ public class Connection implements Runnable {
 		else if (m instanceof QueryRequest){
 		    Connection inConnection = routeTable.get(m.getGUID());
 		    if (inConnection==null){
+
+			// Feed to the UI Monitor
+			ActivityCallback ui=manager.getCallback();
+			if (ui!=null) 
+			    ui.handleQueryString(((QueryRequest)m).getQuery());
+
 			//reduce TTL,increment hops, If old val of TTL was 0 drop message
-			if (manager.stats==true)
-			    manager.QReqCount++;//keep stats if stats turned on
+			//NOTE: This is Num Local Searches so always count it
+			//if (manager.stats==true)  
+			manager.QReqCount++;//keep stats if stats turned on
+
 			if (m.hop()!=0){
 			    routeTable.put(m.getGUID(),this); //add to Reply Route Table
 			    manager.sendToAllExcept(m,this); //broadcast to other hosts
@@ -352,6 +360,8 @@ public class Connection implements Runnable {
 		    }
 		}
 		else if (m instanceof QueryReply){
+
+
 		    // System.out.println("Recieved a Querry Reply");
 		    Connection outConnection = routeTable.get(m.getGUID());
 		    if(outConnection!=null){ //we have a place to route it
