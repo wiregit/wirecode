@@ -12,7 +12,7 @@
 <property name="routing" value="com/limegroup/gnutella/routing"/>
 <property name="chat" value="com/limegroup/gnutella/chat"/>
 <property name="gnutella" value="com/limegroup/gnutella"/>
-<property name="gnutella" value="com/limegroup/gnutella/handshaking"/>
+<property name="handshaking" value="com/limegroup/gnutella/handshaking"/>
 <property name="mp3" value="com/limegroup/gnutella/mp3"/>
 <property name="security" value="com/limegroup/gnutella/security"/>
 
