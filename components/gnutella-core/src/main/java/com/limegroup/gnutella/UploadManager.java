@@ -1093,6 +1093,7 @@ public final class UploadManager implements BandwidthTracker {
                 stLocal.nextToken();
                 // had better be the client GUID
                 fileName = stLocal.nextToken();
+                UploadStat.PUSH_PROXY.incrementStat();
             } else {
                 //NORMAL CASE
                 // parse this for the appropriate information

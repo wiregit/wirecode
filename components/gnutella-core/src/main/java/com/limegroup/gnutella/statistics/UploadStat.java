@@ -124,6 +124,12 @@ public class UploadStat extends AdvancedStatistic {
         new UploadStat();
         
     /**
+     * Statistic for the number of push proxy requests we receive.
+     */
+    public static final Statistic PUSH_PROXY =
+        new UploadStat();
+        
+    /**
      * Statistic for the number of update file requests we receive.
      */
     public static final Statistic UPDATE_FILE =
