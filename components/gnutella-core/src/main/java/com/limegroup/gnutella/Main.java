@@ -3,6 +3,7 @@ package com.limegroup.gnutella;
 import java.io.*;
 import com.sun.java.util.collections.*;
 import com.limegroup.gnutella.chat.*;
+import com.limegroup.gnutella.xml.MetaFileManager;
 
 /**
  * The command-line UI for the Gnutella servent.
@@ -20,10 +21,11 @@ public class Main implements ActivityCallback {
 	//                            callback,
 	//                            new StandardMessageRouter(callback));
     //} else {
-        service=new RouterService(callback,
-              (new StandardMessageRouter(callback)));
+	service=new RouterService(callback,
+	    (new StandardMessageRouter(callback)), 
+	    new MetaFileManager());
                                   
-        service.initialize();
+	service.initialize();
         
 		//}
 
