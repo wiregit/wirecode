@@ -142,6 +142,10 @@ public class ServerSideHeadTest extends BaseTestCase {
      * tests the scenario where a ping requests to be sent elsewhere.
      */
     public void testRedirectPing() throws Exception {
+    	
+    	PrivilegedAccessor.setValue(UDPService.instance(),
+    			"_acceptedUnsolicitedIncoming",new Boolean(false));
+    	
     	MessageRouter router = RouterService.getMessageRouter();
     	
     	router.handleUDPMessage(ping3,datagram3);
