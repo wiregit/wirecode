@@ -99,7 +99,9 @@ public class ConnectionManager {
         watchdog.setDaemon(true);
 		watchdog.start();
 
-        setKeepAlive(_settings.getKeepAlive());
+		if(_settings.getConnectOnStartup()) {
+			setKeepAlive(_settings.getKeepAlive());
+		}
         //setMaxIncomingConnections(
 		//SettingsManager.instance().getMaxIncomingConnections());
     }

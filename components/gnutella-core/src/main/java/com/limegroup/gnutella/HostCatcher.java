@@ -93,6 +93,7 @@ public class HostCatcher {
      */
     public HostCatcher(ActivityCallback callback) {
         this.callback=callback;
+        routerConnectorThread=new RouterConnectorThread();
     }
 
     /**
@@ -107,7 +108,6 @@ public class HostCatcher {
 	 * Connects to the router in a background thread.
 	 */
 	public void connectToRouter() {
-        routerConnectorThread=new RouterConnectorThread();
         routerConnectorThread.start();
 	}
 
