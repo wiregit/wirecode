@@ -112,6 +112,9 @@ public class Connection implements Runnable {
     /** The consumer's queue. */
     private volatile Buffer oldOutputQueue=new Buffer(QUEUE_SIZE);
     private boolean connectionClosed=false;
+    /** True iff the output thread should write the queue immediately.
+     *  Synchronized by outputQueueLock. */
+    private boolean flushImmediately=false;
 
     /** Trigger an opening connection to shutdown after it opens */
     private boolean doShutdown;
@@ -325,6 +328,19 @@ public class Connection implements Runnable {
         }
     }
 
+    /** Ensures that any data queued in this is written to output as
+     *  soon as possible.  Normally, there is no need to call this
+     *  method; the output buffers are automatically flushed every few
+     *  seconds (at most).  However, it may be necessary to call this
+     *  method in situations where latencies are not tolerable, e.g.,
+     *  in the network discoverer. */
+    public void flush() {
+        synchronized (outputQueueLock) {
+            flushImmediately=true;
+            outputQueueLock.notify();
+        }
+    }
+
     /** Repeatedly sends all the queued data every few seconds. */
     private class OutputRunner implements Runnable {
         public void run() {
@@ -334,9 +350,10 @@ public class Connection implements Runnable {
                 //queue is not empty)... 
                 synchronized (outputQueueLock) {
                     try {
-                        if (outputQueue.getSize()<BATCH_SIZE)
+                        if (!flushImmediately && outputQueue.getSize()<BATCH_SIZE)
                             outputQueueLock.wait(QUEUE_TIME);
                     } catch (InterruptedException e) { }
+                    flushImmediately=false;
                     if (outputQueue.isEmpty())
                         continue;
                     //...and swap outputQueue and oldOutputQueue.
