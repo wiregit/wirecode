@@ -51,6 +51,9 @@ public class I18NConvert {
             catch(IOException e) {
                 throw new ExceptionInInitializerError(e);
             }
+            catch(ClassNotFoundException cnf) {
+                throw new ExceptionInInitializerError(cnf);
+            }
         }
     }
 
