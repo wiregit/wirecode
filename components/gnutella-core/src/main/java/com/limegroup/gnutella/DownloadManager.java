@@ -344,10 +344,33 @@ public class DownloadManager implements BandwidthTracker {
             callback.downloadsComplete();
     }
 
-
-    /* Initiates a search for files similar to rfd.
+    /** Currently, this method simply extracts the filename from each rfd in
+     *    rfds.  In the future, we may want to be smarter or more cute....
      */
-    public void sendQuery(RemoteFileDesc[] rfd) {
+    private final String[] extractQueryStrings(RemoteFileDesc[] rfds) {
+        String[] retStrings = new String[rfds.length];
+        for (int i = 0; i < rfds.length; i++)
+            retStrings[i] = rfds[i].getFileName();
+        return retStrings;
+    }
+
+    private final QueryRequest[] constructQueryRequests(String[] queryStrings) {
+        final int minSpeed = 0;  // minSpeed of 0 is used in StandardSearchView...
+        QueryRequest[] retQRs= new QueryRequest[queryStrings.length];
+        for (int i = 0; i < queryStrings.length; i++)
+            retQRs[i] = new QueryRequest(SettingsManager.instance().getTTL(),
+                                         minSpeed, queryStrings[i]);
+        return retQRs;
+    }
+
+    /** Initiates a search for files similar to rfd.
+     * PRE: rfds is a array of length 0 or more of non-null RemoteFileDesc objects.
+     */
+    public void sendQuery(RemoteFileDesc[] rfds) {
+        String[] qStrings= extractQueryStrings(rfds);
+        QueryRequest[] qReqs = constructQueryRequests(qStrings);
+        for (int i = 0; i < qReqs.length; i++)
+            router.broadcastQueryRequest(qReqs[i]);            
     }
 
 
