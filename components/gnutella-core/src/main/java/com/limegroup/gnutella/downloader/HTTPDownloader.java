@@ -228,7 +228,7 @@ public class HTTPDownloader implements BandwidthTracker {
         URN sha1 = _rfd.getSHA1Urn();
 		if ( sha1 != null )
 		    HTTPUtils.writeHeader(HTTPHeaderName.GNUTELLA_CONTENT_URN, sha1, out);
-		if(alts != null && alts.size() > 0) {
+		if(alts != null && alts.numberOfAlternateLocations() > 0) {
 			HTTPUtils.writeHeader(HTTPHeaderName.ALT_LOCATION, alts, out);
 		}
         //TODO1: is this range correct??
