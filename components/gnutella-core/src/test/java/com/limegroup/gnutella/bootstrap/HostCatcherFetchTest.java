@@ -25,6 +25,7 @@ public class HostCatcherFetchTest extends TestCase {
     }
 
     public void setUp() {
+        SettingsManager.instance().setBannedIps(new String[0]);
         // we don't actually need the service, we just need it
         // to start up the other services.
         new RouterService( new ActivityCallbackStub() );
@@ -60,7 +61,7 @@ public class HostCatcherFetchTest extends TestCase {
                 }
             };
             responder.start();
-            
+
             //Now make sure that exactly one fetch was issued.
             assertTrue("getAnEndpoint didn't return anything.", hc.getAnEndpoint()!=null);
             assertEquals("first look at hostfiles", 1, gWebCache.hostfiles);
@@ -90,7 +91,7 @@ public class HostCatcherFetchTest extends TestCase {
 
     /** Indirectly checks that the GWebCache isn't initially hit when there is a
      *  gnutella.net file. */
-    public void testGetAnEndpoint_DelayedFetch() {        
+    public void testGetAnEndpoint_DelayedFetch() {
         try {
             //Fill up hc with crap pongs.
             for (int i=0; i<20; i++) 
