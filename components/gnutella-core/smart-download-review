@@ -1,14 +1,29 @@
+------------------ DONE
 core/com/limegroup/gnutella/DownloadManager.java
    ***I'm not sure I like passing the original query string as an
-      argument to getFile after all DONE
- 
-   ***in handleQueryReply, don't catch Exception e.  Same in
-canonicalize. DONE
+      argument to getFile after all DONE 
+   ***in handleQueryReply, don't catch Exception e.  Same in canonicalize. DONE
    ***need synchronization for handleQueryReply DONE
    ***in handleQueryReply, you shouldn't add rfd to more than one
       downloader.  (This is easiest to implement if you re-order loops.) DONE
- 
    ***canonicalization should remove ALL non-alphanumeric characters. DONE
+
+core/com/limegroup/gnutella/Downloader.java
+   ***why bother with REQUERYING_NETWORK if we've got WAITING_FOR_RESULTS DONE
+
+core/com/limegroup/gnutella/QueryReply.java
+   ***remove arg to calculateQueryReply.  Document. DONE
+   ***get rid of catch Exception e DONE
+   ***Don't write "modified by..." at top of file DONE
+ 
+core/com/limegroup/gnutella/RouterService.java
+   *** why is sendQRToDownloadManager public? DONE
+ 
+------------------ PENDING
+core/com/limegroup/gnutella/GUID.java
+   ***1 in 255 chance of false positive is still too high.  Use two bytes.
+
+core/com/limegroup/gnutella/DownloadManager.java
    ***I'm worried that too many re-queries will be sent for one
       download group.  The assumption is that most of the entries of
       a smart download group will be canonicalized to the same thing.
@@ -23,19 +38,6 @@ core/com/limegroup/gnutella/downloader/ManagedDownloader.java
    ***can't lots of requeries happen if a result comes in that doesn't work?
    ***I'm worried about the code that is similar to TableLine here
  
-core/com/limegroup/gnutella/Downloader.java
-   ***why bother with REQUERYING_NETWORK if we've got WAITING_FOR_RESULTS
-
-core/com/limegroup/gnutella/GUID.java
-   ***1 in 255 chance of false positive is still too high.  Use two bytes.
-core/com/limegroup/gnutella/QueryReply.java
-   ***remove arg to calculateQueryReply.  Document.
-   ***get rid of catch Exception e
-   ***Don't write "modified by..." at top of file
- 
-core/com/limegroup/gnutella/RouterService.java
-   *** why is sendQRToDownloadManager public?
 core/com/limegroup/gnutella/StandardMessageRouter.java
    *** better to just hold reference to DownloadManager than go
        through RS....if it's possible. 
- 
