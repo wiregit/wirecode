@@ -101,6 +101,17 @@ public abstract class AbstractStatistic implements Statistic {
 			return _buffer;
 		}
 	}
+	
+	// inherit doc comment
+	public void clearData() {
+	    _current = 0;
+	    _total = 0;
+	    _totalStatsRecorded = 0;
+	    _max = 0;
+	    synchronized(_buffer) {
+	        _buffer.clear();
+	    }
+	}
 
 	// inherit doc comment
 	public void storeCurrentStat() {

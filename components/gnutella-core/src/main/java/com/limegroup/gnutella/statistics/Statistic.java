@@ -61,6 +61,13 @@ public interface Statistic {
 	 *  this statistic
 	 */
 	IntBuffer getStatHistory();	
+	
+	/**
+	 * Clears the current data stored in this statistic.
+	 * Useful for statistics that want to be analyzed repeatedly
+	 * in a single session, starting from scratch each time.
+	 */
+	void clearData();
 
 	/**
 	 * Stores the current set of gathered statistics into the history set,
