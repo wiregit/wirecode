@@ -336,7 +336,6 @@ public final class UDPConnectionTest extends BaseTestCase {
 
         // Read from reader
         rval = istream.read();
-        uconn2.close();
 
         // Validate the results
         assertEquals("Read at end of stream should be -1", 
@@ -391,7 +390,6 @@ public final class UDPConnectionTest extends BaseTestCase {
 
         // Read from reader
         rval = istream.read(bdata);
-        uconn2.close();
 
         // Validate the results
         assertEquals("Read at end of stream should be -1", 
@@ -461,7 +459,6 @@ public final class UDPConnectionTest extends BaseTestCase {
 
         // Read from reader
         rval = istream.read(bdata);
-        uconn2.close();
 
         // Validate the results
         assertEquals("Read at end of stream should be -1", 
