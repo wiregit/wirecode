@@ -116,11 +116,13 @@ public class MetaFileManager extends FileManager {
                                            (nonMP3FileToHash,schemas[i]);
                     //Note: the collection may have size==0!
                     mapper.add(schemas[i],collection);
-                }
+                }                
             }//end of if, we may be initialized, may have been interrupted 
             // fell through...
-            if (!Thread.currentThread().isInterrupted())
-                initialized = true;
+            /* We never set it to true.
+              if (!Thread.currentThread().isInterrupted())
+              initialized = true;
+            */
             //            showXMLData();
         }//end of synchronized block
     }//end of loadSettings.
