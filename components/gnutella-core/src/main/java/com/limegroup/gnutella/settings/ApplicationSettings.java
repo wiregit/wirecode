@@ -175,6 +175,8 @@ public class ApplicationSettings extends LimeProps {
 
     /**
      * the default locale to use if not specified
+     * used to set the locale for connections which don't have X_LOCALE_PREF
+     * header or pings and pongs that don't advertise locale preferences.
      */
     public static final StringSetting DEFAULT_LOCALE = 
         FACTORY.createStringSetting("DEFAULT_LOCALE", "en");

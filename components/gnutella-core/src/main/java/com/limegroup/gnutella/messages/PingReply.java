@@ -376,7 +376,7 @@ public class PingReply extends Message implements Serializable, IpPort {
                                     supportsUnicast(),
                                     getClientLocale(),
                                     getNumFreeLocaleSlots());
-        else 
+        else //don't create newGGEPWithLocale if locale was not specified
             return PingReply.create(guid, 
                                     getTTL(), getPort(),
                                     getIPBytes(), getFiles(), getKbytes(),

@@ -637,7 +637,7 @@ public class Connection implements IpPort {
                 } 
                 else if(code == HandshakeResponse.LOCALE_NO_MATCH) {
                     //if reponder's locale preferencing was set 
-                    //and didn't match the locale this code is set.
+                    //and didn't match the locale this code is used.
                     //(currently in use by the dedicated connectionfetcher)
                     throw NoGnutellaOkException.CLIENT_REJECT_LOCALE;
                 }

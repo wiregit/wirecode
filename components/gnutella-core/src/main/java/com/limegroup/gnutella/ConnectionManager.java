@@ -547,7 +547,7 @@ public class ConnectionManager {
     }
 
     /**
-     * @return true if there are locale reserved slots false otherwise
+     * @return the number of locale reserved slots to be filled
      *
      * An ultrapeer may not have Free LimeWire Non Leaf Slots but may still
      * have free slots that are reserved for locales

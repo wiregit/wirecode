@@ -161,6 +161,10 @@ public final class QueryHandler {
     private boolean _probeQuerySent;
 
     /**
+     * used to preference which connections to use when searching
+     * if the search comes from a leaf with a certain locale preference
+     * then those connections (of this ultrapeer) which match the 
+     * locale will be used before the other connections.
      */
     private String _prefLocale;
 

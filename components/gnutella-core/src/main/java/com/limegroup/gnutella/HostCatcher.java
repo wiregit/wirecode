@@ -440,7 +440,7 @@ public class HostCatcher implements HostListener {
             // Add it to our free leaf slots list if it has free leaf slots and
             // is an Ultrapeer.
             if(pr.hasFreeUltrapeerSlots() 
-               ||
+               || //or if the locales match and it has free locale pref. slots
                (ApplicationSettings.LANGUAGE.getValue()
                 .equals(pr.getClientLocale()) && pr.getNumFreeLocaleSlots() > 0)) {
                 addToFixedSizeSet(endpoint, FREE_ULTRAPEER_SLOTS_SET);
