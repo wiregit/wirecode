@@ -242,9 +242,9 @@ public abstract class Message
         if (length!=0) {
             payload=new byte[length];
             for (int i=0; i<length; ) {
-            int got=in.read(payload, i, length-i);
-            if (got==-1) throw new IOException("Connection closed.");
-            i+=got;
+                int got=in.read(payload, i, length-i);
+                if (got==-1) throw new IOException("Connection closed.");
+                i+=got;
             }
         }
         else
@@ -282,11 +282,7 @@ public abstract class Message
             //messages except for their function codes.  I've started this
             //refactoring with PushRequest and PingReply.
             case F_PING:
-                if (PARSE_GROUP_PINGS && length>=15) {
-				    // Build a GroupPingRequest
-                    return new GroupPingRequest(guid,ttl,hops,payload);
-				}
-				else if (length>0) //Big ping
+				if (length>0) //Big ping
                     return new PingRequest(guid,ttl,hops,payload);
                 return new PingRequest(guid,ttl,hops);
 
