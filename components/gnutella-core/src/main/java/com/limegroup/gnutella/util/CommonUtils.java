@@ -1043,6 +1043,12 @@ public final class CommonUtils {
      * @return String containing the cleaned filename
      */
     public static String convertFileName(String name) {
+		
+		// if the name is too long, reduce it.  We don't go all the way
+		// up to 256 because we don't know how long the directory 
+		if(name.length() > 180) {
+			name = name.substring(0, 180);
+		}
         for (int i = 0; i < ILLEGAL_CHARS_ANY_OS.length; i++) 
             name = name.replace(ILLEGAL_CHARS_ANY_OS[i], '_');
 		
