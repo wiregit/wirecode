@@ -904,19 +904,8 @@ public class Connection {
      *   arise.
      */
     public void send(Message m) throws IOException {
-        try {
-            m.write(_out);
-        } catch(NullPointerException npe) {
-            //If the remote-connection closed while we were deflating data,
-            //then the native deflateBytes method in the Deflater will
-            //throw an NPE.  We'll interpret that as a 'connection closed'
-            //iff writing was deflated.
-            if(isWriteDeflated())
-                throw CONNECTION_CLOSED;
-            else
-                throw npe;
-        }
-        
+        m.write(_out);
+                
         _bytesSent += m.getTotalLength();
         // we attempt to set _compressedBytesSent here, but in all
         // likelyhood, it will not be updated.  the true value is
@@ -929,18 +918,7 @@ public class Connection {
      * Flushes any buffered messages sent through the send method.
      */
     public void flush() throws IOException {
-        try {
-            _out.flush();
-        } catch(NullPointerException npe) {
-            //If the remote-connection closed while we were deflating data,
-            //then the native deflateBytes method in the Deflater will
-            //throw an NPE.  We'll interpret that as a 'connection closed'
-            //iff writing was deflated.
-            if(isWriteDeflated())
-                throw CONNECTION_CLOSED;
-            else
-                throw npe;
-        }
+        _out.flush();
         
         // we must set the compressedBytesSent here because flush
         // forces the deflater to deflate the output.

@@ -11,11 +11,11 @@ import java.util.zip.*;
  * The code was taken from the comments at those respective pages and
  * modified slightly.
  */
-public class CompressingOutputStream extends DeflaterOutputStream {
+public final class CompressingOutputStream extends DeflaterOutputStream {
     
     public CompressingOutputStream (final OutputStream out, final Deflater flate) {
       super(out, flate);
-    }    
+    }
 
     private static final byte [] EMPTYBYTEARRAY = new byte [0];
     /**
@@ -38,6 +38,16 @@ public class CompressingOutputStream extends DeflaterOutputStream {
         def.setLevel(Deflater.DEFAULT_COMPRESSION);
         deflate();
 
-        out.flush();
+        super.flush();
+    }
+    
+    protected void deflate() throws IOException {
+        try {
+            super.deflate();
+        } catch(NullPointerException e) {
+            //This will happen if 'end' was called on the deflater
+            //while we were deflating.
+            throw new IOException("deflater was ended");
+        }
     }
 } // class
