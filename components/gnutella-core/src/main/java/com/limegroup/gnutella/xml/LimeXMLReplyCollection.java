@@ -119,6 +119,7 @@ public class LimeXMLReplyCollection{
                 Map.Entry entry = (Map.Entry)iter.next();
                 File file = (File)entry.getKey();
                 URN hash = (URN)entry.getValue();
+                debug("looking up: " + hash + ", " + file);
                 Object xml = null;
                 LimeXMLDocument doc = null;
                 
@@ -155,11 +156,20 @@ public class LimeXMLReplyCollection{
                 
                 if( doc == null ) // no document, ignore.
                     continue;
+                    
+                // Verify the file still exists on disk.
+                String actualName = null;
+                try {
+                    actualName = file.getCanonicalPath();
+                } catch(IOException ioe) {
+                    continue; // it doesn't exist on disk, ignore.
+                }
+                doc.setIdentifier(actualName); // set the identifier
+                doc.setXMLUrn(hash); // set the XML Urn for easy lookups
                                 
                 // We have a document, add it.
                 addReply(hash, doc);
             }
-            checkDocuments(fileToHash);
         }
     
         debug("LimeXMLReplyCollection(): returning.");
@@ -185,9 +195,10 @@ public class LimeXMLReplyCollection{
                     ID3Reader.readDocument(file,onlyID3);
                     String joinedXML = 
                     joinAudioXMLStrings(id3XML, xmlStr);
-                    if( joinedXML == null )
+                    if( joinedXML == null ) {
+                        debug("poorly joined XML");
                         return ID3Reader.readDocument(file);
-                    else 
+                    } else
                         return new LimeXMLDocument(joinedXML);
                 }
                 else // only id3 data with mp3 files
@@ -226,52 +237,6 @@ public class LimeXMLReplyCollection{
             }
         }
         return retList;
-    }
-
-    /** This method resolves any discrepancy between the identifier in the 
-     *  LimeXMLDocument with the actual file name of the file the
-     *  LimeXMLDocument refers to.
-     */
-    private void checkDocuments(Map fileToHash){
-        synchronized (fileToHash) {
-        // FLOW:
-        // 1. get the set of files
-        // 2. for each file, see if it has a doc associated with it.
-        // 3. if the file has a doc, then see if the id of the doc conflicts
-        //    with the actual file name.
-        // 1
-        Iterator iter = fileToHash.entrySet().iterator();
-        if (iter == null)
-            return;
-        while(iter.hasNext()){
-            Map.Entry entry = (Map.Entry)iter.next();
-            File file  = (File)entry.getKey();
-            URN hash = (URN)entry.getValue();
-            LimeXMLDocument doc;
-            synchronized(mainMap){
-                doc = (LimeXMLDocument)mainMap.get(hash);
-            }
-            // 2
-            if(doc==null)
-                continue;
-
-            // 3
-            String actualName = null;
-            try {
-                actualName = file.getCanonicalPath();
-            }catch (IOException ioe) {
-                synchronized(mainMap){
-                    mainMap.remove(hash);
-                    //File don't exist - remove meta-data
-                }
-                //Assert.that(false,"Cannot find actual file name.");
-            }
-            String identifier = doc.getIdentifier();
-            if(!actualName.equalsIgnoreCase(identifier))
-                doc.setIdentifier(actualName);
-            doc.setXMLUrn(hash);
-        }
-        }
     }
 
     /**
