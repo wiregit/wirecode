@@ -427,7 +427,7 @@ public final class QueryUnicaster {
     }
 
 
-    private class QueryBundle {
+    private static class QueryBundle {
         public static final int MAX_RESULTS = 250;
         public static final int MAX_QUERIES = 1000;
         final QueryRequest _qr;
