@@ -103,6 +103,17 @@ public class FileManager {
 	
     }
 
+    public synchronized void addDirectories(String dir_names) {
+	
+	String[] dirs = HTTPUtil.stringSplit(dir_names, ';');
+
+	int length = dirs.length;
+
+	for (int i=0; i < length; i++) {
+	    addDirectory(dirs[i]);
+	}
+	
+    }
 
     public synchronized void addDirectory(String dir_name) { /* the addDirectory method */
 	File myFile = new File(dir_name);       /* recursively adds all of */
