@@ -380,6 +380,10 @@ public final class QueryHandler {
         // return if we don't have any connections to query at this time
         if(remainingConnections == 0) return 0;
 
+        // pretend we have fewer connections than we do in case we
+        // lost some
+        if(remainingConnections > 4) remainingConnections -= 4;
+
         boolean probeConnection = false;
         if(mc == null) {
             if(QUERY.getHops() == 0) {
@@ -447,7 +451,9 @@ public final class QueryHandler {
 
         // if we're sending the query down a probe connection, send it at
         // ttl=2, as we've already sent it at TTL=1
-        if(ttl == 1 && probeConnection) {
+        if(ttl == 1 && 
+           ((mc.isUltrapeerQueryRoutingConnection() &&
+            !mc.hitsQueryRouteTable(QUERY)) || probeConnection)) {
             ttl = 2;
         }
         QueryRequest query = createQuery(QUERY, ttl);
