@@ -26,7 +26,7 @@ public class SettingsManager {
 	/**
 	 * Constant string for the name of the windows library to load.
 	 */
-	public final String WINDOWS_LIBRARY_NAME = "LimeWire18.dll";
+	//public final String WINDOWS_LIBRARY_NAME = "LimeWire18.dll";
 
 	/**
 	 * Default name of the shared directory.
@@ -166,7 +166,11 @@ public class SettingsManager {
 	private final boolean DEFAULT_MINIMIZE_TO_TRAY    = true;
 	private final boolean DEFAULT_SHOW_CLOSE_DIALOG   = true;
 	private final String  DEFAULT_CLASSPATH           
-		= "LimeWire.jar" + File.pathSeparator + "collections.jar";
+		= "LimeWire.jar" + File.pathSeparator + 
+		"collections.jar" + File.pathSeparator + 
+		"xerces.jar" + File.pathSeparator + 
+		"media.jar" + File.pathSeparator + 
+		"sound.jar";
 	private final String  DEFAULT_MAIN_CLASS           
 		= "com.limegroup.gnutella.gui.Main";
 
@@ -1278,7 +1282,7 @@ public class SettingsManager {
      * @return <tt>true</tt> if quick connect is active, <tt>false</tt>
      *         otherwise
      */
-    public boolean getUseQuickConnect(){return _useQuickConnect;}
+    public boolean getUseQuickConnect(){return true;}
     
     /**
      * Returns an array of servers to automatically connect to via "quick
