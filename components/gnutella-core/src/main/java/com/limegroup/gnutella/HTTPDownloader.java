@@ -8,6 +8,7 @@
 
 package com.limegroup.gnutella;
 
+import com.limegroup.gnutella.downloader.*;
 import java.io.*;
 import java.net.*;
 
@@ -133,7 +134,7 @@ public class HTTPDownloader {
 			String str = conn.getHeaderField(0);
 			if (str != null) {
 				if ( str.indexOf(" 404 ") > 0 )
-					throw new FileNotFoundException();
+					throw new com.limegroup.gnutella.downloader.FileNotFoundException();
 				if  ( str.indexOf(" 503 ") > 0 )
 					throw new TryAgainLaterException();
 			}
@@ -208,7 +209,7 @@ public class HTTPDownloader {
 		
 		// Handle a 404 error from Gnotella/Gnutella
 		else if ( str.equals("4") || str.startsWith("4 File Not Found") ) 
-			throw new FileNotFoundException();
+			throw new com.limegroup.gnutella.downloader.FileNotFoundException();
 		
 		// Look for the HTTP OK (0 OK)
 		else if ( ! str.equals("0 OK") ) {			
@@ -413,123 +414,6 @@ public class HTTPDownloader {
 
 
 	}
-
-	// }
-
-/******************* EXCEPTIONS *************************/
-/**
- * These should maybe be moved into their own files?
- */
-
-/**
- *  Basically just a renamed ConnectException
- */
-private class CantConnectException extends IOException {
-	public CantConnectException() { super("Can't Connect"); }
-	public CantConnectException(String msg) { super(msg); }
-}
-
-/**
- *  Thrown when the Incomplete Directory is null
- */
-private class NullIncompleteDirectoryException extends IOException {
-	public NullIncompleteDirectoryException() {
-		super("Incomplete Directory Is Null"); }
-	public NullIncompleteDirectoryException(String msg) {
-		super(msg); }
-}
-
-/**
- * Basically just a renamed MalformedURLException
- */
-private class BadURLException extends IOException {
-	public BadURLException() { super("Bad URL"); }
-	public BadURLException(String msg) { super(msg); }
-}
-
-/**
- * Thrown when a file is not found, ie an HTTP 404 
- */
-private class FileNotFoundException extends IOException {
-	public FileNotFoundException() { super("File Not Found"); }
-	public FileNotFoundException(String msg) { super(msg); }
-}
-
-/**
- * Thrown when the slots are filled, and the client should
- * try again later, ie an HTTP 503
- */
-private class TryAgainLaterException extends IOException {
-	public TryAgainLaterException() { super("Try Again Later"); }
-	public TryAgainLaterException(String msg) { super(msg); }
-}
-
-/**
- * Thrown when the ByteReader is null
- */
-
-private class ReaderIsNullException extends IOException {
-	public ReaderIsNullException() { super("Reader is Null"); }
-	public ReaderIsNullException(String msg) { super(msg); }
-}
-
-/**
- * Thrown when no 'HTTP OK' or the equivalent is not recieved
- */
-private class NoHTTPOKException extends IOException {
-	public NoHTTPOKException() { super("No HTTP OK"); }
-	public NoHTTPOKException(String msg) { super(msg); }
-}
-
-/**
- * Thrown in replace of IndexOutOfBoundsException or NumberFormatException
- */
-private class ProblemReadingHeaderException extends IOException {
-	public ProblemReadingHeaderException() { super("Problem Reading Header"); }
-	public ProblemReadingHeaderException(String msg) { super(msg); }
-}
-
-/**
- * Thrown if the file already exists in the download directory
- */
-private class FileExistsException extends IOException {
-	public FileExistsException() { super("File Already Exists"); }
-	public FileExistsException(String msg) { super(msg); }
-}
-
-/**
- * Thrown when the download path is invalid
- */
-private class InvalidPathException extends IOException {
-	public InvalidPathException() { super("Invalid Path"); }
-	public InvalidPathException(String msg) { super(msg); }
-}
-
-/**
- * Thrown if too much has been downloaded, and the file is too big
- */
-private class FileTooLargeException extends IOException {
-	public FileTooLargeException() { super("File Too Large"); }
-	public FileTooLargeException(String msg) { super(msg); }
-}
-
-/**
- * Thrown if the file couldn't be moved to the Library
- */
-private class FileCantBeMovedException extends IOException {
-	public FileCantBeMovedException() { super("File Couldn't Be Moved"); }
-	public FileCantBeMovedException(String msg) { super(msg); }
-}
-
-/**
- * Thrown id the downloaded file is incomplete
- */
-private class FileIncompleteException extends IOException {
-	public FileIncompleteException() { super("File Incomplete"); }
-	public FileIncompleteException(String msg) { super(msg); }
-}
-
-
 
 }
 
