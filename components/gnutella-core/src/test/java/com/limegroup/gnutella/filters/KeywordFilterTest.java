@@ -12,7 +12,7 @@ import com.limegroup.gnutella.messages.*;
  */
 public class KeywordFilterTest extends BaseTestCase {
     
-    SpamFilter filter=new KeywordFilter();
+    KeywordFilter filter=new KeywordFilter();
     QueryRequest qr=null;    
     
 	public KeywordFilterTest(String name) {
