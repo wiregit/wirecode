@@ -173,6 +173,11 @@ public final class HandshakeResponse {
     private final boolean PONG_CACHING;
 
     /**
+     * Constant for whether or not this node supports GUESS.
+     */
+    private final boolean GUESS_CAPABLE;
+
+    /**
      * Creates a <tt>HandshakeResponse</tt> which defaults the status code and 
      * status message to be "200 Ok" and uses the desired headers in the response. 
      * @param headers the headers to use in the response. 
@@ -229,6 +234,8 @@ public final class HandshakeResponse {
             HeaderNames.CONTENT_ENCODING, HeaderNames.DEFLATE_VALUE);
         PONG_CACHING = 
             isVersionOrHigher(headers, HeaderNames.X_PONG_CACHING, 0.1F);
+        GUESS_CAPABLE = 
+            isVersionOrHigher(headers, HeaderNames.X_GUESS, 0.1F);
     }
     
     /**
@@ -673,10 +680,7 @@ public final class HandshakeResponse {
 	 *  connection supports GUESS, <tt>false</tt> otherwise
 	 */
 	public boolean isGUESSCapable() {
-		int version = getGUESSVersion();
-		if(version == -1) return false;
-		else if(version < 20 && version > 0) return true;
-		return false;
+        return GUESS_CAPABLE;
 	}
 
 	/**
@@ -688,27 +692,6 @@ public final class HandshakeResponse {
 	 */
 	public boolean isGUESSUltrapeer() {
 		return isGUESSCapable() && isUltrapeer();
-	}
-
-
-	/**
-	 * Returns the version of the GUESS search scheme supported by the node
-	 * at the other end of the connection.  This returns the version in
-	 * whole numbers.  So, if the supported GUESS version is 0.1, this 
-	 * will return 1.  If the other client has not sent an X-Guess header
-	 * this returns -1.
-	 *
-	 * @return the version of GUESS supported, reported as a whole number,
-	 *  or -1 if GUESS is not supported
-	 */
-	public int getGUESSVersion() {
-		String value = HEADERS.getProperty(HeaderNames.X_GUESS);
-		if(value == null) return -1;
-		else {
-			float version = Float.valueOf(value).floatValue();
-			version *= 10;
-			return (int)version;
-		}
 	}
 
     /** Returns true iff this connection is a temporary connection as per
