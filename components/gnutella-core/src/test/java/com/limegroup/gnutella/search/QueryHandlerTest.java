@@ -44,8 +44,15 @@ public final class QueryHandlerTest extends BaseTestCase {
                                          params);
         List connections = new LinkedList();
         for(int i=0; i<15; i++) {
-            connections.add(new TestConnection(10));
+            connections.add(new NewConnection(10));
         }           
+        
+        for(int i=0; i<15; i++) {
+            connections.add(new OldConnection(5));
+        }                   
+
+        QueryRequest query = QueryRequest.createQuery("test");
+        m.invoke(null, new Object[]{connections});        
     }
 
 
@@ -95,12 +102,12 @@ public final class QueryHandlerTest extends BaseTestCase {
 
         List connections = new LinkedList();
         for(int i=0; i<15; i++) {
-            connections.add(new TestConnection(10));
+            connections.add(new NewConnection(10));
         }   
 
         QueryHandler handler = 
             QueryHandler.createHandler(QueryRequest.createQuery("test"),
-                                       new TestConnection(8),
+                                       new NewConnection(8),
                                        new TestResultCounter(0));
         try {
             handler.sendQuery();
@@ -155,7 +162,7 @@ public final class QueryHandlerTest extends BaseTestCase {
         // should be relatively high, causing us to hit the theoretical 
         // horizon limit!
 
-        for(int i=0; i<tcm.CONNECTIONS.size()-2; i++) {
+        for(int i=0; i<tcm.getInitializedConnections2().size()-2; i++) {
             Thread.sleep(2000);
             handler.sendQuery();
         }        
@@ -167,48 +174,6 @@ public final class QueryHandlerTest extends BaseTestCase {
                    (tcm.getNumQueries() <= 12));
     }
 
-    /**
-     * Helper class that supplies the list of connections for searching.
-     */
-    private static final class TestConnectionManager extends ConnectionManager {
-
-        /**
-         * The list of <tt>Connection</tt> instances
-         */
-        private final List CONNECTIONS;
-       
-        /**
-         * Creates a new <tt>ConnectionManager</tt> with a list of 
-         * <tt>TestConnection</tt>s for testing.
-         */
-        TestConnectionManager() {
-            super(new DummyAuthenticator());
-            CONNECTIONS = new LinkedList();
-            for(int i=0; i<20; i++) {
-                CONNECTIONS.add(new TestConnection(15));
-            }
-        }
-
-        /**
-         * Accessor for the custom list of connections.
-         */
-        public List getInitializedConnections2() {
-            return CONNECTIONS;
-        }
-
-        /**
-         * Returns the total number of queries received over all connections.
-         */
-        public int getNumQueries() {
-            int numQueries = 0;
-            Iterator iter = CONNECTIONS.iterator();
-            while(iter.hasNext()) {
-                TestConnection tc = (TestConnection)iter.next();
-                numQueries += tc.getNumQueries();
-            }
-            return numQueries;
-        }
-    }
 
     /**
      * Test to make sure that the theoretical horizon we've reached
@@ -222,7 +187,7 @@ public final class QueryHandlerTest extends BaseTestCase {
                                                      Byte.TYPE});
         
         // test for a degree 19, ttl 4 network
-        ManagedConnection mc = new TestConnection(19);
+        ManagedConnection mc = new NewConnection(19);
         int horizon = 0;
         for(int i=0; i<19; i++) {
             horizon += 
@@ -232,7 +197,7 @@ public final class QueryHandlerTest extends BaseTestCase {
         assertEquals("incorrect horizon", 117325, horizon);
 
         // test for a degree 30, ttl 3 network
-        mc = new TestConnection(30);
+        mc = new NewConnection(30);
         horizon = 0;
         for(int i=0; i<30; i++) {
             horizon += 
@@ -258,12 +223,12 @@ public final class QueryHandlerTest extends BaseTestCase {
                                                      List.class});
         List connections = new LinkedList();
         for(int i=0; i<15; i++) {
-            connections.add(new TestConnection(10));
+            connections.add(new NewConnection(10));
         }
 
         QueryHandler handler = 
             QueryHandler.createHandler(QueryRequest.createQuery("test"),
-                                       new TestConnection(8),
+                                       new NewConnection(8),
                                        new TestResultCounter(0));
         
         m.invoke(null, new Object[]{handler, connections});
@@ -297,12 +262,12 @@ public final class QueryHandlerTest extends BaseTestCase {
 
         List connections = new LinkedList();
         for(int i=0; i<15; i++) {
-            connections.add(new TestConnection(10));
+            connections.add(new NewConnection(10));
         }   
 
         QueryHandler handler = 
             QueryHandler.createHandler(QueryRequest.createQuery("test"),
-                                       new TestConnection(8),
+                                       new NewConnection(8),
                                        new TestResultCounter(0));
         
         
@@ -339,64 +304,5 @@ public final class QueryHandlerTest extends BaseTestCase {
             return RESULTS;
         }
     }
-    
-    /**
-     * Helper class that overrides getNumIntraUltrapeerConnections for
-     * testing the horizon calculation and testing the new search
-     * architecture.
-     */
-    private static final class TestConnection extends ManagedConnection {
-        
-        private final int CONNECTIONS;
-
-        private int _numQueries = 0;
-
-        private int _totalTTL = 0;
-
-        private boolean _receivedQuery;
-
-        TestConnection(int connections) {
-            super("60.76.5.3", 4444);
-            CONNECTIONS = connections;
-        }
-
-        public int getNumIntraUltrapeerConnections() {
-            return CONNECTIONS;
-        }
-
-        /**
-         * Override the stability check method -- assume we're always stable.
-         */
-        public boolean isStable(long time) {
-            return true;
-        }
-
-        public void send(Message msg) {
-            if(!(msg instanceof QueryRequest)) return;
-
-            _receivedQuery = true;
-            _numQueries++;
-            QueryRequest qr = (QueryRequest)msg;
-            int ttl = qr.getTTL();
-
-            if(ttl > headers().getMaxTTL()) {
-                // the TTL is higher than we specified
-                throw new IllegalArgumentException("ttl too high: "+ttl);
-            }
-
-            _totalTTL += ttl;
-        }
-
-        int getNumQueries() {
-            return _numQueries;
-        }
-
-        int getTotalTTL() {
-            return _totalTTL;
-        }
-
-        boolean receivedQuery() {
-            return _receivedQuery;
-        }
-    }
+   
 }

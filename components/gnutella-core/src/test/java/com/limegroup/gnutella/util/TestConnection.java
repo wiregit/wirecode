@@ -72,15 +72,15 @@ public abstract class TestConnection extends ManagedConnection {
         _totalTTL += ttl;
     }
     
-    int getNumQueries() {
+    public int getNumQueries() {
         return _numQueries;
     }
     
-    int getTotalTTL() {
+    public int getTotalTTL() {
         return _totalTTL;
     }
     
-    boolean receivedQuery() {
+    public boolean receivedQuery() {
         return _receivedQuery;
     }
 }
