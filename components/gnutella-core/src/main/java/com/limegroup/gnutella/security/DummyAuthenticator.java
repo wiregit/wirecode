@@ -17,8 +17,6 @@ public class DummyAuthenticator implements Authenticator
      */
     public Set authenticate(String username, String passwd, String domain)
     {
-        Set retSet = new HashSet();
-        retSet.add(User.DEFAULT_DOMAIN);
-        return retSet;
+        return User.createDefaultDomainSet();
     }
 }
