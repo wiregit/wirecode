@@ -18,7 +18,8 @@ import java.net.*;
  * <ol>
  *   <li>Try normal downloads from all locations that are not private and
  *       do not have the push flag set.  Try these one at a time, from
- *       fastest to slowest.
+ *       fastest to slowest.  If disconnected during a download, resume 
+ *       immediately, though not more than 3 times.
  *   <li>Send push requests to any N hosts that we weren't reached above,
  *       in parallel.  N is currently 6, but typically fewer pushes are 
  *       typically sent.  If N is small, this could be prioritized too.
@@ -47,6 +48,9 @@ public class ManagedDownloader implements Downloader {
     ///////////////////////// Policy Controls ///////////////////////////
     /** The number of tries to make */
     private static final int TRIES=100;
+    /** The number of successive resumes to try. (So if the server kills
+     *  you RESUME_TRIES+1 times, you'll give up.*/
+    private static final int RESUME_TRIES=2;
     /** The max number of push tries to make, per host. */
     private static final int PUSH_TRIES=2;
     /** The max number of pushes to send in parallel. */
@@ -200,6 +204,10 @@ public class ManagedDownloader implements Downloader {
                         return;
                     }
                     
+                    //Nothing left to do?
+                    if (files.size()==0 && pushFiles.size()==0)
+                        break;                    
+
                     //2. Send pushes for those hosts that we couldn't connect to.
                     sendPushes();
 
@@ -253,48 +261,82 @@ public class ManagedDownloader implements Downloader {
                         continue;
                     }
                     try {
-                        //Make a new downloader.  Only actually start it if this
-                        //is still wanted.  The construction of the downloader
-                        //cannot go in the synchronized statement since it may
-                        //be blocking.
-                        setState(CONNECTING, rfd.getHost());
-//                          System.out.println("Trying normal download from "
-//                                             +rfd.getHost());
-                        HTTPDownloader dloader2=new HTTPDownloader(
-                            rfd.getFileName(), rfd.getHost(), rfd.getPort(),
-                            rfd.getIndex(), rfd.getClientGUID(),
-                            rfd.getSize(), false, CONNECT_TIME);
-                        synchronized (ManagedDownloader.this) {
-                            if (stopped) {
-                                dloader2.stop();
-                                throw new InterruptedException();
-                            }
-                            dloader=dloader2;
-                            setState(DOWNLOADING);
-                        }
-                        dloader.start();
-                        setState(COMPLETE);
-                        return true;
+                        boolean success=downloadWithResume(rfd);
+                        if (success) 
+                            return true;  
+                        //Otherwise we'll skip this guy for now but come back to
+                        //it later.                            
+                    } catch (CantConnectException e) {
+                        //Host unreachable.  Try push later.
+//                          System.out.println("    Host not reachable.");
+                        iter.remove();  //Don't call files.remove(..)!
+                        pushFiles.add(new RFDPushPair(rfd));
                     } catch (TryAgainLaterException e) {
                         //Go on to next one.  We will try normal attempt later.
 //                          System.out.println("    Got busy signal.");
                         continue;
                     } catch (IOException e) {
+//                          System.out.println("    Misc. IO problem.");
+                        //Miscellaneous problems.  Don't try again.
+                        iter.remove();
+                    } finally {
                         //Was this forcibly closed? 
                         synchronized (ManagedDownloader.this) {
                             if (stopped)
                                 throw new InterruptedException();
                         }
-                        //Nope, it was a normal IO problem.  Try push later.
-                        //TODO2: if this is interrupted, retry same file.
-                        iter.remove();  //Don't call files.remove(..)!
-                        pushFiles.add(new RFDPushPair(rfd));
                     }
                 }
                 return false;
             } finally {
                 manager.yieldSlot(ManagedDownloader.this);         
             }
+        }
+
+        /** Attempts to download rfd, retrying as necessary if interrupted. 
+         *  Throws the same subclasses of IOException as HTTPDownloader if
+         *  there are download problems.  Returns false if we're interrupted too
+         *  many times.  Returns true if the download was successfuly.  Throws
+         *  InterruptedIOException if killed during the process.
+         *      @modifies this */
+        private boolean downloadWithResume(RemoteFileDesc rfd) 
+                throws IOException, InterruptedException {
+            //Make a new downloader.  Repeatedly try resuming the
+            //download if we get disconnected, but not more than
+            //RESUME_TRIES times.
+            boolean resume=false;
+            int resumesTried=0;
+            do {
+                setState(CONNECTING, rfd.getHost());
+                //Create downloader.  Since this is blocking it
+                //cannot go in the synchronized statement.  Also, we
+                //must check if stopped afterwards since creating a
+                //downloader MAY be blocking depending if
+                //SocketOpener is used.
+                HTTPDownloader dloader2=new HTTPDownloader(
+                     rfd.getFileName(), rfd.getHost(), rfd.getPort(),
+                     rfd.getIndex(), rfd.getClientGUID(),
+                     rfd.getSize(), resume, CONNECT_TIME);
+                synchronized (ManagedDownloader.this) {
+                    if (stopped) {
+                        dloader2.stop();
+                        throw new InterruptedException();
+                    }
+                    dloader=dloader2;
+                    setState(DOWNLOADING);
+                }
+                //Start download. If interrupted, set flag and repeat.
+                try { 
+                    dloader.start();
+                    setState(COMPLETE);
+                    return true;
+                } catch (FileIncompleteException e) {
+//                      System.out.println("    Interrupted");
+                    resume=true;
+                }
+                resumesTried++;
+            } while (resume && resumesTried<=RESUME_TRIES);
+            return false;
         }
 
         /** Sends pushes to those locations we couldn't connect to above. 
