@@ -32,6 +32,10 @@ public class ConnectionManagerStub extends ConnectionManager {
             c.close();
     }
     
+    public void properRemove(ManagedConnection c) {
+    	super.remove(c);
+    }
+    
     public boolean isSupernode() {
         return _isSupernode;
     }        
