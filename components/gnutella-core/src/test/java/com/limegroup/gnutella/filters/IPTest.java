@@ -36,65 +36,12 @@ public class IPTest extends com.limegroup.gnutella.util.BaseTestCase {
         assertTrue(iplist.contains ("0.0.0.0"));
         assertTrue(iplist.contains ("255.255.255.255"));
         assertTrue(iplist.contains ("255.255.255.0"));
+        assertTrue(!iplist.contains ("255.0.255.255"));
+        assertTrue(!iplist.contains ("192.168.1.2/255.255.255.0"));
         assertTrue(iplist.contains ("192.168.0.2"));
         assertTrue(iplist.contains ("192.168.0.1"));
         assertTrue(!iplist.contains ("192.168.1.1"));
         assertTrue(iplist.contains ("10.0.1.1"));
-        assertTrue(!iplist.contains ("10.1.0.1"));
-
-        iplist.removeElement ("0.0.0.0");
-
-        assertTrue(!iplist.contains ("0.0.0.0"));
-        assertTrue(iplist.contains ("255.255.255.255"));
-        assertTrue(iplist.contains ("255.255.255.0"));
-        assertTrue(iplist.contains ("192.168.0.2"));
-        assertTrue(iplist.contains ("192.168.0.1"));
-        assertTrue(!iplist.contains ("192.168.1.1"));
-        assertTrue(iplist.contains ("10.0.1.1"));
-        assertTrue(!iplist.contains ("10.1.0.1"));
-
-        iplist.removeElement ("255.255.255.255");
-
-        assertTrue(!iplist.contains ("0.0.0.0"));
-        assertTrue(!iplist.contains ("255.255.255.255"));
-        assertTrue(iplist.contains ("255.255.255.0"));
-        assertTrue(iplist.contains ("192.168.0.2"));
-        assertTrue(iplist.contains ("192.168.0.1"));
-        assertTrue(!iplist.contains ("192.168.1.1"));
-        assertTrue(iplist.contains ("10.0.1.1"));
-        assertTrue(!iplist.contains ("10.1.0.1"));
-
-        iplist.removeElement ("192.168.0.1");
-
-        assertTrue(!iplist.contains ("0.0.0.0"));
-        assertTrue(!iplist.contains ("255.255.255.255"));
-        assertTrue(iplist.contains ("255.255.255.0"));
-        assertTrue(iplist.contains ("192.168.0.2"));
-        assertTrue(iplist.contains ("192.168.0.1"));
-        assertTrue(!iplist.contains ("192.168.1.1"));
-        assertTrue(iplist.contains ("10.0.1.1"));
-        assertTrue(!iplist.contains ("10.1.0.1"));
-
-        iplist.removeElement ("192.168.0.*");
-
-        assertTrue(!iplist.contains ("0.0.0.0"));
-        assertTrue(!iplist.contains ("255.255.255.255"));
-        assertTrue(iplist.contains ("255.255.255.0"));
-        assertTrue(!iplist.contains ("192.168.0.2"));
-        assertTrue(!iplist.contains ("192.168.0.1"));
-        assertTrue(!iplist.contains ("192.168.1.1"));
-        assertTrue(iplist.contains ("10.0.1.1"));
-        assertTrue(!iplist.contains ("10.1.0.1"));
-
-        iplist.removeElement ("10.0.0.0/255.255.0.0");
-
-        assertTrue(!iplist.contains ("0.0.0.0"));
-        assertTrue(!iplist.contains ("255.255.255.255"));
-        assertTrue(iplist.contains ("255.255.255.0"));
-        assertTrue(!iplist.contains ("192.168.0.2"));
-        assertTrue(!iplist.contains ("192.168.0.1"));
-        assertTrue(!iplist.contains ("192.168.1.1"));
-        assertTrue(!iplist.contains ("10.0.1.1"));
         assertTrue(!iplist.contains ("10.1.0.1"));
     }
 
@@ -126,6 +73,8 @@ public class IPTest extends com.limegroup.gnutella.util.BaseTestCase {
         assertTrue(a.equals(f));
         assertTrue(f.equals(a));
         assertTrue(a.hashCode()==f.hashCode());
+        assertTrue(d.equals(e));
+        assertTrue(f.equals(e));
     }
 
 

@@ -60,7 +60,6 @@ public final class IPFilter extends SpamFilter {
         //Hack.  Ideally we'd call Message.ip2string.
         return (new Endpoint(ip, 0)).getHostname();
     }
-    
 }
 
 

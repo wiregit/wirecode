@@ -16,93 +16,77 @@ import com.limegroup.gnutella.Assert;
 class IP {
     private long addr;
     private long mask;
-    private static final long DEFAULT_MASK = 0xffffffffL; //255.255.255.255
-
-    // Constructors
-    IP (String ip_str) {
-        this(stringToIP(ip_str));
-    }
-
-    IP (String[] ip_str) {
-        this(stringToIP(ip_str));
-    }
-
-    IP (long _addr, long _mask) {
-        this.addr = _addr & _mask;
-        this.mask = _mask;
-    }
-
-    IP (long _addr) {
-        this.addr = _addr;
-        this.mask = DEFAULT_MASK;
-    }
-
-    IP (IP ip) {
-        this.addr = ip.addr & ip.mask;
-        this.mask = ip.mask;
-    }
 
     /**
-     * Convert String containing an ip_address to IP-object
-     * @param String of the format "0.0.0.0" or "0.0.0.0/0.0.0.0" or "0.0.0.0/0"
-     *  representing ip_address/subnetmask
-     * @return IP containing ip_address and subnetmask converted to 
-     * long-variables
+     * Creates an IP object
+     * 
+     * @param ip_str a String of the format "0.0.0.0", "0.0.0.0/0.0.0.0", 
+     *               or "0.0.0.0/0" as an argument.
      */
-    private static IP stringToIP (String ip_str) {
+    IP (String ip_str) throws IllegalArgumentException {
         StringTokenizer tokenizer = new StringTokenizer (ip_str, "/");
-        if ( tokenizer.countTokens() == 1)  //assume a simple IP "0.0.0.0"
-            return new IP ( stringToLong(ip_str.replace('*', '0')),
-                            parseForWildChars(ip_str));
-        // maybe an IP of the form "0.0.0.0/0.0.0.0" or "0.0.0.0/0"
-        else if (tokenizer.countTokens() == 2) { 
-            String[] ip = { tokenizer.nextToken(), tokenizer.nextToken() };
-            return stringToIP ( ip );
+        if ( tokenizer.countTokens() == 1) { //assume a simple IP "0.0.*.*"
+            this.addr = stringToLong(ip_str.replace('*', '0'));
+            this.mask = createNetmaskFromWildChars(ip_str);
+        } else if (tokenizer.countTokens() == 2) {
+            // maybe an IP of the form "0.0.0.0/0.0.0.0" or "0.0.0.0/0"
+            this.addr = stringToLong(tokenizer.nextToken());
+            this.mask = parseNetmask(tokenizer.nextToken());
         } else 
-            throw new IllegalArgumentException();
+            throw new IllegalArgumentException("Could not parse address: " + 
+                                               ip_str);
     }
 
     /**
-     * Convert String[] containing an ip_address to IP-object
-     * @param String[] of the format {"0.0.0.0", "0.0.0.0"} representing
-     *  {ip_address, subnetmask}
-     * @return IP containing ip_address and subnetmask converted to 
-     * long-variables
+     * Convert String containing an netmask to long variable containing
+     * a bitmask
+     * @param mask String containing a netmask of the format "0.0.0.0" or
+     *          containing an unsigned integer < 32 if this netmask uses the
+     *          simplified bsd syntax.
+     * @return long containing the subnetmask
      */
-    private static IP stringToIP (String[] ip_str) {
-        if (ip_str.length != 2)
-            throw new IllegalArgumentException();
-        else {
-            // probably an IP with subnet mask "0.0.0.0/0.0.0.0"
-            if (ip_str[1].indexOf('.') != -1) 
-                return new IP ( stringToLong(ip_str[0].replace('*', '0')), 
-                                stringToLong(ip_str[1]) & 
-                                parseForWildChars(ip_str[0]));
-            else {// try an IP with simplified subnetmask "0.0.0.0/0" 
-                long mask = 0;
-                try {
-                    int i = 0;
-                    for (; i < Integer.parseInt(ip_str[1]); i++ ) {
-                        mask ++;
-                        mask = mask << 1;
+    private static long parseNetmask (String mask) 
+        throws IllegalArgumentException {
+        final String exceptionString = "Could not parse netmask: ";
+        StringTokenizer tokenizer = new StringTokenizer(mask, ".");
+        // assume simple syntax, an integer <= 32
+        if (tokenizer.countTokens() == 1) {
+            try {
+                // if the String contains the number k, we should return a
+                // mask of k ones followed by (32 - k) zeroes
+                short k = Short.parseShort(mask);
+                if (k > 32 || k < 0) 
+                    throw new IllegalArgumentException (exceptionString + mask);
+                else {
+                    long netmask = 0;
+                    for (int i = 0; i < k; i++) {
+                        // move the bit first because we want
+                        // the last 1 at position 0 of the long
+                        // variable
+                        netmask = netmask << 1;
+                        netmask++;
                     }
-                    mask = mask << (31 - i);
-                } catch (NumberFormatException e) {
-                    //drop exception, simply ignore the mask.
-                } 
-                return new IP ( stringToLong(ip_str[0].replace('*', '0')), 
-                                mask );
-            }    
-        }
+                    netmask = netmask << (32 - k);
+                    return netmask;
+                }
+            } catch (NumberFormatException e) {
+                throw new IllegalArgumentException (exceptionString + mask);
+            }
+        } else if (tokenizer.countTokens() == 4) {// assume format: "0.0.0.0"
+            return stringToLong(mask);
+        } else 
+            throw new IllegalArgumentException (exceptionString + mask);
     }        
     
     /**
-     * Convert String containing an ip_address or subnetmask to long
+     * Convert String containing an ip_address or subnetmask to long 
+     * containing a bitmask.
      * @param String of the format "0.0.0..." presenting ip_address or 
      * subnetmask
-     * @return long 
+     * @return long containing a bit representation of the ip address
      */
-    private static long stringToLong (String ip_str) {
+    private static long stringToLong (String ip_str) 
+        throws IllegalArgumentException {
         StringTokenizer tokenizer = new StringTokenizer(ip_str, ".");
         
         long ip = 0;
@@ -110,12 +94,12 @@ class IP {
         for (int i = 0; i < 4; i++) {
             try {
                 ip = ip << 8;
-                // if number of tokens !=4, either use
+                // if tokenizer.countTokens() < 4, simply add zeros
                 if (tokenizer.hasMoreTokens()) 
-                    // the first four tokens or add "0"-tokens
             	    ip += Short.parseShort(tokenizer.nextToken());
             } catch (NumberFormatException e) {
-                throw new IllegalArgumentException();
+                throw new IllegalArgumentException("Could not parse address or mask: "
+                                                   + ip_str);
             }
         }
         return ip;
@@ -126,7 +110,8 @@ class IP {
      * @param String of the format W.X.Y.Z, W, X, Y and Z can be numbers or '*'
      * @return long with a subnet mask
      */
-    private static long parseForWildChars (String s) {
+    private static long createNetmaskFromWildChars (String s) 
+        throws IllegalArgumentException {
         StringTokenizer tokenizer = new StringTokenizer(s, ".");
         long _mask = 0;
         
@@ -137,35 +122,6 @@ class IP {
                 _mask += 0xff;
         }
         return _mask;
-    }
-    
-    /**
-     * @return ip address
-     */
-    long getAddr () {
-        return this.addr;
-    }
-    
-    /**
-     * @return subnet mask
-     */
-    long getMask () {
-        return this.mask;
-    }
-    
-    /**
-     * @return long variable containing the ip_address with the applied mask
-     */
-    public long getMaskedAddr () {
-        return (mask & addr);
-    }
-    
-    /**
-     * @return long variable containing the inverted ip_address with the applied
-     *  mask 
-     */
-    public long getIMaskedAddr () {
-        return (mask & ~addr & DEFAULT_MASK);
     }
     
     /**
@@ -197,5 +153,4 @@ class IP {
     public int hashCode() {
         return (int)(addr^mask);
     }
-    
 }
