@@ -1427,16 +1427,18 @@ public class ConnectionManager {
             // If the connection was killed while initializing, we shouldn't
             // announce its initialization
             connectionOpen = connectionInitialized(mc);
+            if(connectionOpen) {
+                // check to see if this is the first leaf to ultrapeer 
+                // connection we've made.  if it is, then we're a leaf,
+                // and we'll switch the keep alive to the number of 
+                // Ultrapeer connections to maintain as a leaf
+                if(mc.isClientSupernodeConnection()) {
+                    gotShieldedClientSupernodeConnection();
+                }
+            }
         }
         if(connectionOpen) {
             RouterService.getCallback().connectionInitialized(mc);
-            //check if we are a client node, and now opened a connection 
-            //to ultrapeer. In this case, we will drop all other connections
-            //and just keep this one
-            //check for shieldedclient-ultrapeer connection
-            if(mc.isClientSupernodeConnection()) {
-                gotShieldedClientSupernodeConnection();
-            }
         }
     }
 
