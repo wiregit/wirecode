@@ -106,7 +106,7 @@ public class WriteRegulator {
         rtt = sentWait + 1;
         if  (rtt == 0) 
             rtt = 10;
-        int baseWait   = Math.min(realRTT, 2000)/6;  
+        int baseWait   = Math.min(realRTT, 2000)/4;  
         //
         // Want to ideally achieve a steady state location in writing and 
         // reading window.  Don't want to get too far ahead or too far behind
@@ -174,7 +174,7 @@ public class WriteRegulator {
           (((baseWait * windowSize) / _skipLimit) * 2) / 4;
 
         // If our RTT time is going up, figure out what to do
-        if ( rtt != 0 && baseWait != 0 && 
+        if ( rtt != 0 && baseWait != 0 && usedSpots >= 10 &&
              (windowDelay < rtt || rtt > maxRTT) ) {
             if(LOG.isDebugEnabled())  
                 LOG.debug(
