@@ -688,14 +688,21 @@ public class DownloadManager implements BandwidthTracker {
      *     @modifies router 
      */
     public boolean sendPush(RemoteFileDesc file) {
+        // multicast push requests must have a TTL of 1
+        byte ttl = file.isReplyToMulticast() ? 
+            1 : SettingsManager.instance().getTTL();
+            
         PushRequest pr=new PushRequest(GUID.makeGuid(),
-                                       SettingsManager.instance().getTTL(),
+                                       ttl,
                                        file.getClientGUID(),
                                        file.getIndex(),
                                        RouterService.getAddress(),
                                        RouterService.getPort());
         try {
-            router.sendPushRequest(pr);
+            if( file.isReplyToMulticast() )
+                router.sendMulticastPushRequest(pr);
+            else
+                router.sendPushRequest(pr);
         } catch (IOException e) {
             return false;
         }

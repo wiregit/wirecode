@@ -351,6 +351,10 @@ public abstract class MessageRouter {
      *  port of the client node.
      */
 	public void handleMulticastMessage(Message msg, DatagramPacket datagram) {
+    
+        Assert.that(msg.isMulticast(),
+            "non multicast message in handleMulticastMessage");
+    
         // no multicast messages should ever have been
         // set with a TTL greater than 1.
         if( msg.getTTL() > 1 )
@@ -1579,6 +1583,23 @@ public abstract class MessageRouter {
             replyHandler.handlePushRequest(push, null);
         else
             throw new IOException("no route for push");
+    }
+    
+    /**
+     * Sends a push request to the multicast network.  No lookups are
+     * performed in the push route table, because the message will always
+     * be broadcast to everyone.
+     */
+    protected void sendMulticastPushRequest(PushRequest push) {
+        if(push == null) {
+            throw new NullPointerException("null push");
+        }
+        
+        // must have a TTL of 1
+        Assert.that(push.getTTL() == 1, "multicast push ttl not 1");
+        
+        MulticastService.instance().send(push);
+        SentMessageStatHandler.MULTICAST_PUSH_REQUESTS.addMessage(push);
     }
 
 

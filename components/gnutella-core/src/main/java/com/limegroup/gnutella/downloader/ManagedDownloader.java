@@ -1705,7 +1705,7 @@ public class ManagedDownloader implements Downloader, Serializable {
 
         File incompleteFile=incompleteFileManager.getFile(rfd);
         HTTPDownloader ret;
-        boolean needsPush=needsPush(rfd);
+        boolean needsPush = needsPush(rfd);
         synchronized (this) {
             currentLocation=rfd.getHost();
             //If we're just increasing parallelism, stay in DOWNLOADING
@@ -1748,7 +1748,7 @@ public class ManagedDownloader implements Downloader, Serializable {
 
         synchronized(threadLock) {
             // only wait if we actually were able to send the push
-            if ( manager.sendPush(rfd) ) {                    
+            if ( manager.sendPush(rfd) ) {    
                 //No loop is actually needed here, assuming spurious
                 //notify()'s don't occur.  (They are not allowed by the Java
                 //Language Specifications.)  Look at acceptDownload for
@@ -2219,9 +2219,9 @@ public class ManagedDownloader implements Downloader, Serializable {
     /** Returns true iff rfd should be attempted by push download, either 
      *  because it is a private address or was unreachable in the past. */
     private static boolean needsPush(RemoteFileDesc rfd) {
-        // if replying to multicast, don't push
+        // if replying to multicast, do a push.
         if ( rfd.isReplyToMulticast() )
-            return false;
+            return true;
         //Return true if rfd is private or unreachable
         if (rfd.isPrivate())
             return true;
