@@ -223,7 +223,7 @@ public interface SettingsInterface
     public static final int     DEFAULT_PORT           = 6346;
     /** Default network connection speed */
     public static final int     DEFAULT_SPEED          = 56;
-    public static final int     DEFAULT_UPLOAD_SPEED   = 100;
+    public static final int     DEFAULT_UPLOAD_SPEED   = 50;
     /** Default limit for the number of searches */
     public static final byte    DEFAULT_SEARCH_LIMIT   = (byte)64;
     /** Default client/gu id */
@@ -262,7 +262,7 @@ public interface SettingsInterface
     };
     public static final int     DEFAULT_PARALLEL_SEARCH  = 5;
     public static final int     DEFAULT_MAX_SIM_DOWNLOAD = 4;
-    public static final int     DEFAULT_MAX_UPLOADS      = 4;
+    public static final int     DEFAULT_MAX_UPLOADS      = 8;
     public static final boolean DEFAULT_CLEAR_UPLOAD     = false;
     public static final boolean DEFAULT_CLEAR_DOWNLOAD   = false;
     public static final int     DEFAULT_SEARCH_ANIMATION_TIME = 45;
