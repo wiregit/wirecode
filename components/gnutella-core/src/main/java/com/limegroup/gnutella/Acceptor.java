@@ -8,7 +8,6 @@ import com.limegroup.gnutella.chat.*;
 import com.limegroup.gnutella.http.*;
 import com.limegroup.gnutella.util.*;
 import com.limegroup.gnutella.filters.IPFilter;
-import com.limegroup.gnutella.statistics.*;
 import com.limegroup.gnutella.settings.*;
 import com.limegroup.gnutella.browser.ExternalControl;
 
@@ -449,15 +448,9 @@ public class Acceptor implements Runnable {
                 //2. Incoming upload via HTTP
                 else if (word.equals("GET")) {
 					um.acceptUpload(HTTPRequestMethod.GET, _socket);
-					if(!CommonUtils.isJava118()) {
-						HTTPStat.HTTP_GET_REQUESTS.incrementStat();
-					}
                 }
 				else if (word.equals("HEAD")) {
 					um.acceptUpload(HTTPRequestMethod.HEAD, _socket);
-					if(!CommonUtils.isJava118()) {
-						HTTPStat.HTTP_HEAD_REQUESTS.incrementStat();
-					}
 				}
                 //3. Incoming download via push/HTTP.
                 else if (word.equals("GIV")) {

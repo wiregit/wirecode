@@ -382,6 +382,13 @@ public final class HTTPUploader implements Uploader {
 		}
 	}
 	
+	/**
+	 * Returns the current HTTPRequestMethod being used to upload.
+	 */
+	public HTTPRequestMethod getMethod() {
+	    return _method;
+	}
+	
 	OutputStream getOutputStream() {return _ostream;}
 	InputStream getInputStream() {return _fis;}
 

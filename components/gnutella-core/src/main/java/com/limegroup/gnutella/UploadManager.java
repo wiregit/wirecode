@@ -3,6 +3,7 @@ package com.limegroup.gnutella;
 import com.limegroup.gnutella.uploader.*;
 import com.limegroup.gnutella.http.*;
 import com.limegroup.gnutella.util.*;
+import com.limegroup.gnutella.statistics.HTTPStat;
 import java.net.*;
 import java.io.*;
 import com.sun.java.util.collections.*;
@@ -123,10 +124,10 @@ public final class UploadManager implements BandwidthTracker {
     public void acceptUpload(final HTTPRequestMethod method, Socket socket) {
         debug(" accepting upload");
         HTTPUploader uploader = null;
-        HTTPRequestMethod currentMethod=method;
         long startTime = -1;
 		try {
             int queued = -1;
+            HTTPRequestMethod currentMethod=method;
             boolean startedNewFile = false;
             String oldFileName = "";
             //do uploads
@@ -145,19 +146,28 @@ public final class UploadManager implements BandwidthTracker {
                 //   an old one, but we do need to know it's new.
                 if ( uploader == null ) {
                     startedNewFile = true;
-                //2) A new file is being downloaded on this socket.
+                //2) A new file is being downloaded on this socket or
+                //   the request method changed (head -> get or get -> head)
                 //   We need to clean up the old one.
-                } else if ( !oldFileName.equalsIgnoreCase(fileName) ) {
+                } else if ( currentMethod != uploader.getMethod() ||
+                            !oldFileName.equalsIgnoreCase(fileName) ) {
                     startedNewFile = true;
-                    if ( currentMethod != HTTPRequestMethod.HEAD )
+                    if ( uploader.getMethod() != HTTPRequestMethod.HEAD )
                         cleanupFinishedUploader(uploader, startTime);
                 } else {
                     startedNewFile = false;
                 }
                 
-                if(startedNewFile) 
+                if(startedNewFile)  {
                     uploader = new HTTPUploader(currentMethod, fileName, 
 											socket, line._index);
+                    if(!CommonUtils.isJava118()) {
+                        if (currentMethod == HTTPRequestMethod.GET)
+					        HTTPStat.HTTP_GET_REQUESTS.incrementStat();
+                        else if (currentMethod == HTTPRequestMethod.HEAD)
+				            HTTPStat.HTTP_HEAD_REQUESTS.incrementStat();
+                    }
+                }
                 else
                     uploader.reinitialize(currentMethod);
                 
@@ -212,7 +222,8 @@ public final class UploadManager implements BandwidthTracker {
         } catch(ArrayIndexOutOfBoundsException ae) {
             debug(uploader + " AIOOBE thrown, closing socket");
         } finally {
-            if ( currentMethod != HTTPRequestMethod.HEAD)
+            if ( uploader != null &&
+              uploader.getMethod() != HTTPRequestMethod.HEAD)
                 cleanupFinishedUploader(uploader, startTime);
                         
             synchronized(this) {
@@ -242,7 +253,7 @@ public final class UploadManager implements BandwidthTracker {
     private void cleanupFinishedUploader(Uploader uploader,
                                          long startTime) {
         debug(uploader + " cleaning up finished uploader ");
-        if ( uploader == null ) return;
+        Assert.that(uploader != null, "null uploader in cleanupFinished");
         
         if ( uploader.getState() == Uploader.BROWSE_HOST ||
              uploader.getState() == Uploader.UPDATE_FILE )
@@ -282,7 +293,7 @@ public final class UploadManager implements BandwidthTracker {
                                    String host) throws IOException {
         debug(uploader + " processing new uploader ");
                                     
-        if ( uploader == null ) return -1;
+        Assert.that(uploader != null, "null uploader in processNew");
         
         if( uploader.getState() == Uploader.BROWSE_HOST ||
             uploader.getState() == Uploader.UPDATE_FILE )
