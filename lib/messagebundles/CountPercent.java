@@ -5,18 +5,21 @@ import java.util.*;
 import java.io.*;
 
 public class CountPercent {
-    static final String PRE_LINK = "http://www.limewire.org/fisheye/viewrep/~raw,r=MAIN/limecvs/lib/messagebundles/";    
-    private static final String ENGLISH_LINK = PRE_LINK + "MessagesBundle.properties";
+    static final String PRE_LINK = "http://www.limewire.org/fisheye/viewrep/~raw,r=MAIN/limecvs/lib/messagebundles/";
+    private static final String BUNDLE_NAME = "MessagesBundle";
+    private static final String PROPS_EXT = ".properties";
+    private static final String UTF8_EXT = ".UTF-8.txt";
+    private static final String ENGLISH_LINK = PRE_LINK + BUNDLE_NAME + PROPS_EXT;
     
     public static void main(String[] args) throws Exception {
         new CountPercent(args);
     }
     
-    final NumberFormat pc;
-    final NumberFormat rc;
-    final DateFormat df;
-    final Map langs;
-    final int total;
+    private final NumberFormat pc;
+    private final NumberFormat rc;
+    private final DateFormat df;
+    private final Map langs;
+    private final int total;
     
     CountPercent(String[] args) throws Exception {
         pc = NumberFormat.getPercentInstance(Locale.US);
@@ -28,7 +31,7 @@ public class CountPercent {
         rc.setMinimumIntegerDigits(4);
         rc.setMaximumIntegerDigits(4);
         
-        df = DateFormat.getDateInstance(DateFormat.LONG);
+        df = DateFormat.getDateInstance(DateFormat.LONG, Locale.US);
         
         Set advanced = getAdvancedKeys();        
         langs = new TreeMap();
@@ -45,6 +48,100 @@ public class CountPercent {
             pc.setMinimumIntegerDigits(3);
             printStatistics();
         }
+    }
+    
+    private Set getAdvancedKeys() throws Exception {
+        BufferedReader reader = new BufferedReader(new FileReader(new File(BUNDLE_NAME + PROPS_EXT)));
+        String read = reader.readLine();
+        while (read != null &&
+               !read.startsWith("## TRANSLATION OF ALL ADVANCED RESOURCE STRINGS AFTER THIS LIMIT IS OPTIONAL"))
+            read = reader.readLine();
+        
+        StringBuffer sb = new StringBuffer();
+        while (read != null) {
+            sb.append("\n").append(read);
+            read = reader.readLine();
+        }
+        InputStream in = new ByteArrayInputStream(sb.toString().getBytes());
+        Properties p = new Properties();
+        p.load(in);
+        
+        in.close();
+        reader.close();
+        return p.keySet();
+    }
+    
+    private void loadLanguages(Set advanced, Map langs) {
+        File lib = new File(".");
+        if (!lib.isDirectory())
+            return;
+        
+        String[] files = lib.list();
+        for (int i = 0; i < files.length; i++) {
+            if (!files[i].startsWith(BUNDLE_NAME + "_") ||
+                !files[i].endsWith(PROPS_EXT) ||
+                 files[i].startsWith(BUNDLE_NAME + "_en"))
+                continue;
+            
+            String linkFileName = files[i];
+            // see if a .UTF-8.txt file exists; if so, use that as the link.
+            int idxProperties = linkFileName.indexOf(PROPS_EXT);
+            File utf8 = new File(lib, linkFileName.substring(0, idxProperties) + UTF8_EXT);
+            if (utf8.exists())
+                linkFileName = utf8.getName();
+            
+            try {
+                InputStream in =
+                    new FileInputStream(new File(lib, files[i]));
+                loadFile(langs, in, advanced, linkFileName);
+            } catch (FileNotFoundException fnfe) {
+                // oh well.
+            }
+        }
+    }
+    
+    /**
+     * Loads a single file into a List.
+     */
+    private void loadFile(Map langs, InputStream in, Set advanced, String filename) {
+        try {
+            in = new BufferedInputStream(in);
+            final Properties p = new Properties();
+            p.load(in);
+            removeAdvanced(advanced, p);
+            
+            String lc = p.getProperty("LOCALE_LANGUAGE_CODE", "");
+            String cc = p.getProperty("LOCALE_COUNTRY_CODE", "");
+            String vc = p.getProperty("LOCALE_VARIANT_CODE", "");
+            String sc = p.getProperty("LOCALE_SCRIPT_CODE", "");
+            String ln = p.getProperty("LOCALE_LANGUAGE_NAME", lc);
+            String cn = p.getProperty("LOCALE_COUNTRY_NAME", cc);
+            String vn = p.getProperty("LOCALE_VARIANT_NAME", vc);
+            String sn = p.getProperty("LOCALE_SCRIPT_NAME", sc);
+            String dn = p.getProperty("LOCALE_ENGLISH_LANGUAGE_NAME", ln);
+            
+            langs.put(new LanguageInfo(lc, cc, vc, sc,
+                                       ln, cn, vn, sn,
+                                       dn, filename), p);
+        } catch (IOException e) {
+            // ignore.
+        } finally {
+            if (in != null)
+                try { in.close(); } catch (IOException ioe) {}
+        }
+    }
+    
+    private Properties getEnglish() throws Exception {
+        Properties p = new Properties();
+        InputStream in = new FileInputStream(new File(BUNDLE_NAME + PROPS_EXT));
+        p.load(in);
+        in.close();
+        return p;
+    }
+    
+    private void removeAdvanced(Set a, Properties p) {
+        for (Iterator i = a.iterator(); i.hasNext(); )
+            p.remove(i.next());
     }
     
     private void printStatistics() throws Exception {
@@ -103,99 +200,6 @@ public class CountPercent {
         buildEndOfPage(page);
         byte[] out = page.toString().getBytes("UTF-8");
         System.out.write(out, 0, out.length);
-    }
-    
-    private Properties getEnglish() throws Exception {
-        Properties p = new Properties();
-        InputStream in = new FileInputStream(new File("MessagesBundle.properties"));
-        p.load(in);
-        in.close();
-        return p;
-    }
-    
-    private Set getAdvancedKeys() throws Exception {
-        BufferedReader reader = new BufferedReader(new FileReader(new File("MessagesBundle.properties")));
-        String read = reader.readLine();
-        while(read != null && !read.startsWith("## TRANSLATION OF ALL ADVANCED RESOURCE STRINGS AFTER THIS LIMIT IS OPTIONAL"))
-            read = reader.readLine();
-        
-        StringBuffer sb = new StringBuffer();
-        while(read != null) {
-            sb.append("\n").append(read);
-            read = reader.readLine();
-        }
-        InputStream in = new ByteArrayInputStream(sb.toString().getBytes());
-        Properties p = new Properties();
-        p.load(in);
-        
-        in.close();
-        reader.close();
-        return p.keySet();
-    }
-    
-    private void removeAdvanced(Set a, Properties p) {
-        for (Iterator i = a.iterator(); i.hasNext(); )
-            p.remove(i.next());
-    }
-    
-    private void loadLanguages(Set advanced, Map langs) {
-        File lib = new File(".");
-        if (!lib.isDirectory())
-            return;
-        
-        String[] files = lib.list();
-        for (int i = 0; i < files.length; i++) {
-            if (!files[i].startsWith("MessagesBundle_") ||
-                !files[i].endsWith(".properties") ||
-                 files[i].startsWith("MessagesBundle_en"))
-                continue;
-            
-            String linkFileName = files[i];
-            // see if a UTF-8.txt file exists.  if so, use that as the link.
-            int idxProperties = linkFileName.indexOf(".properties");
-            File utf8 = new File(lib, linkFileName.substring(0, idxProperties) + ".UTF-8.txt");
-            if (utf8.exists())
-                linkFileName = utf8.getName();
-            
-            try {
-                InputStream in =
-                    new FileInputStream(new File(lib, files[i]));
-                loadFile(langs, in, advanced, linkFileName);
-            } catch(FileNotFoundException fnfe) {
-                // oh well.
-            }
-        }
-    }
-    
-    /**
-     * Loads a single file into a List.
-     */
-    private void loadFile(Map langs, InputStream in, Set advanced, String filename) {
-        Properties p = new Properties();
-        try {
-            in = new BufferedInputStream(in);
-            p.load(in);
-            removeAdvanced(advanced, p);
-            
-            String lc = p.getProperty("LOCALE_LANGUAGE_CODE");
-            String cc = p.getProperty("LOCALE_COUNTRY_CODE");
-            String vc = p.getProperty("LOCALE_VARIANT_CODE");
-            String ln = p.getProperty("LOCALE_LANGUAGE_NAME");
-            String sc = p.getProperty("LOCALE_SCRIPT_CODE");
-            String cn = p.getProperty("LOCALE_COUNTRY_NAME");
-            String vn = p.getProperty("LOCALE_VARIANT_NAME");
-            String sn = p.getProperty("LOCALE_SCRIPT_NAME");
-            String dn = p.getProperty("LOCALE_ENGLISH_LANGUAGE_NAME");
-            
-            langs.put(new LanguageInfo(lc, cc, vc, sc,
-                                       ln, cn, vn, sn,
-                                       dn, filename), p);
-        } catch (IOException e) {
-            // ignore.
-        } finally {
-            if (in != null)
-                try { in.close(); } catch(IOException ioe) {}
-        }
     }
     
     private void buildStartOfPage(StringBuffer page) {
@@ -467,7 +471,7 @@ public class CountPercent {
         page.append(
   "<tr>\n" +
    "<td colspan=\"3\" valign=\"top\"><hr noshade size=\"1\">\n" +
-    "Languages written with Latin characters:</td>\n" +
+    "Languages written with Latin (Western European) characters:</td>\n" +
   "</tr>\n" +
   "<tr>\n" +
    "<td valign=\"top\">\n" +
@@ -529,6 +533,7 @@ class LanguageInfo implements Comparable {
     private final String languageCode;
     private final String countryCode;
     private final String variantCode;
+    private final String scriptCode;
     private final String languageName;
     private final String countryName;
     private final String variantName;
@@ -546,13 +551,14 @@ class LanguageInfo implements Comparable {
                         String ln, String cn, String vn, String sn,
                         String dn, String fn) {
         languageCode = lc.trim();
-        countryCode = cc.trim();
-        variantCode = vc.trim();
+        countryCode  = cc.trim();
+        variantCode  = vc.trim();
+        scriptCode   = sc.trim();
         languageName = ln.trim();
-        countryName = cn.trim();
-        variantName = vn.trim();
-        scriptName = sn.trim();
-        displayName = dn.trim();
+        countryName  = cn.trim();
+        variantName  = vn.trim();
+        scriptName   = sn.trim();
+        displayName  = dn.trim();
         fileName = fn.trim();
     }
     
@@ -573,12 +579,28 @@ class LanguageInfo implements Comparable {
             return languageName + " (" + countryName + ")";
     }
     
+    /**
+     * Used to map the list of locales to their properties data.
+     * Must be unique per loaded properties file.
+     */
     public int compareTo(Object other) {
-        LanguageInfo o = (LanguageInfo)other;
-        return displayName.compareTo(o.displayName);
+        final LanguageInfo o = (LanguageInfo)other;
+        int comp = languageCode.compareTo(o.languageCode);
+        if (comp != 0)
+            return comp;
+        comp = countryCode.compareTo(o.countryCode);
+        if (comp != 0)
+            return comp;
+        return variantCode.compareTo(o.variantCode);
     }
     
-    public String getCode() { return languageCode; }
+    public String getCode() {
+        if (!variantCode.equals(""))
+            return languageCode + "_" + countryCode + "_" + variantCode;
+        if (!countryCode.equals(""))
+            return languageCode + "_" + countryCode;
+        return languageCode;
+    }
     
     public String getScript() { return scriptName; }
     
