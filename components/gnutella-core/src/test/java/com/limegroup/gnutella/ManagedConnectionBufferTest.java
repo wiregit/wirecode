@@ -9,7 +9,7 @@ import com.limegroup.gnutella.connection.BIOMessageWriter;
 import com.limegroup.gnutella.connection.CompositeQueue;
 import com.limegroup.gnutella.connection.Connection;
 import com.limegroup.gnutella.connection.MessageWriter;
-import com.limegroup.gnutella.connection.NIOMessageWriter;
+import com.limegroup.gnutella.connection.TestNIOMessageReader;
 import com.limegroup.gnutella.handshaking.*;
 import com.limegroup.gnutella.routing.*;
 import com.limegroup.gnutella.messages.*;
@@ -85,6 +85,12 @@ public class ManagedConnectionBufferTest extends BaseTestCase {
 		
 		out.initialize();
 		in = acceptor.accept();
+        
+        if(CommonUtils.isJava14OrLater() &&
+           ConnectionSettings.USE_NIO.getValue()) {
+            PrivilegedAccessor.setValue(in, "_messageReader", 
+                TestNIOMessageReader.createReader());
+        }
         assertNotNull("in should not be null", in);
 		assertTrue("out.write should be deflated", out.isWriteDeflated());
 		assertTrue("out.read should be deflated", out.isReadDeflated());
@@ -102,6 +108,12 @@ public class ManagedConnectionBufferTest extends BaseTestCase {
 		
 		out.initialize();
 		in = acceptor.accept();
+        
+        if(CommonUtils.isJava14OrLater() &&
+           ConnectionSettings.USE_NIO.getValue()) {
+            PrivilegedAccessor.setValue(in, "_messageReader", 
+                TestNIOMessageReader.createReader());
+        }
         assertNotNull("in should not be null", in);
 		assertTrue("out.write should be !deflated",! out.isWriteDeflated());
 		assertTrue("out.read should be !deflated", !out.isReadDeflated());
@@ -601,16 +613,17 @@ public class ManagedConnectionBufferTest extends BaseTestCase {
         startOutputRunner(out);
         assertInstanceof("didn't recieve queryrequest", 
             QueryRequest.class, in.reader().read());
+            
         assertInstanceof("didn't recieve pingrequest", 
             PingRequest.class, in.reader().read());
 
         //tail...<wrap>...head
         stopOutputRunner(out);
-        //out.stopOutputRunner(); 
+
         out.send(QueryRequest.createQuery("a", (byte)3));
         out.send(hopped(new PingRequest((byte)5)));
         startOutputRunner(out);
-        //out.startOutputRunner();
+
         assertInstanceof("didn't recieve pingrequest",
             PingRequest.class, in.reader().read());
         assertInstanceof("didn't recieve queryrequest",
@@ -625,14 +638,12 @@ public class ManagedConnectionBufferTest extends BaseTestCase {
         //  PING: 
         //  OTHER: reset
         stopOutputRunner(out);
-        //out.stopOutputRunner(); 
         out.send(new PingRequest((byte)1));
         out.send(new QueryReply(new byte[16], (byte)5, 6341, new byte[4], 0, 
                                 new Response[0], new byte[16], false));
         out.send(new ResetTableMessage(1024, (byte)2));
         out.send(QueryRequest.createQuery("a", (byte)3));
         startOutputRunner(out);
-        //out.startOutputRunner();
         m=in.reader().read();
         assertInstanceof("Got: "+m, QueryRequest.class, m);
         m=in.reader().read();
@@ -724,11 +735,11 @@ public class ManagedConnectionBufferTest extends BaseTestCase {
         throws Exception {
         if(CommonUtils.isJava14OrLater() && 
            ConnectionSettings.USE_NIO.getValue()) {
-               Object obj = PrivilegedAccessor.getValue(mc, "_messageWriter");
-               MessageWriter writer = 
-                   (MessageWriter)PrivilegedAccessor.getValue(obj, 
-                        "DELEGATE");  
-               writer.setClosed(true);          
+           Object obj = PrivilegedAccessor.getValue(mc, "_messageWriter");
+           MessageWriter writer = 
+               (MessageWriter)PrivilegedAccessor.getValue(obj, 
+                    "DELEGATE");  
+           writer.setClosed(true);          
         } else {
 
             Object obj = PrivilegedAccessor.getValue(mc, "_messageWriter");
@@ -755,11 +766,12 @@ public class ManagedConnectionBufferTest extends BaseTestCase {
         throws Exception {
         if(CommonUtils.isJava14OrLater() && 
            ConnectionSettings.USE_NIO.getValue()) {
-               Object obj = PrivilegedAccessor.getValue(mc, "_messageWriter");
-               MessageWriter writer = 
-                   (MessageWriter)PrivilegedAccessor.getValue(obj, 
-                        "DELEGATE");  
-               writer.setClosed(false);             
+            //ConnectionSettings.READ_ACTIVE.setValue(true);
+            Object obj = PrivilegedAccessor.getValue(mc, "_messageWriter");
+            MessageWriter writer = 
+                (MessageWriter)PrivilegedAccessor.getValue(obj, 
+                    "DELEGATE");  
+            writer.setClosed(false);             
         } else {
             Object obj = PrivilegedAccessor.getValue(mc, "_messageWriter");
             BIOMessageWriter writer = 
