@@ -3,6 +3,7 @@ package com.limegroup.gnutella;
 import junit.framework.*;
 import java.io.*;
 import com.sun.java.util.collections.*;
+import com.limegroup.gnutella.util.FixedsizePriorityQueue;
 import com.limegroup.gnutella.tests.stubs.ActivityCallbackStub;
 
 public class HostCatcherTest extends TestCase {  
@@ -19,12 +20,30 @@ public class HostCatcherTest extends TestCase {
     /** Returns a new HostCatcher connected to stubs.  YOU MAY WANT TO CALL
      *  EXPIRE to force bootstrap pongs. */
     public void setUp() {
+        HostCatcher.DEBUG=true;
         //This creates an acceptor thread.  We should probably use an Acceptor
         //stub or write a tearDown() method.
         hc=new HostCatcher(new ActivityCallbackStub());
         hc.initialize(new Acceptor(6346, null),
                       new ConnectionManager(null, null));
     }
+    
+    /** Tests that FixedsizePriorityQueue can hold two endpoints with same
+     *  priority but different ip's.  This was a problem at one point. */
+    public void testEndpointPriorities() {
+        Endpoint e1=new Endpoint("18.239.0.146", 6346);
+        Endpoint e2=new Endpoint("18.239.0.147", 6347);
+        assertTrue(! e1.equals(e2));
+        assertTrue(! e2.equals(e1));
+        assertTrue(e1.compareTo(e2)==0);
+        assertTrue(e2.compareTo(e1)==0);
+        
+        FixedsizePriorityQueue queue=new FixedsizePriorityQueue(10);
+        assertNull(queue.insert(e1, 0));
+        assertNull(queue.insert(e2, 0));
+        assertEquals(2, queue.size());
+    }
+
 
     public void testAddPriorities() {
         //Endpoints.
@@ -189,10 +208,22 @@ public class HostCatcherTest extends TestCase {
                           new byte[] {(byte)18, (byte)239, (byte)0, (byte)142},
                           0l, 0l, false, 1000),
                    null);
+            hc.add(new PingReply(GUID.makeGuid(), (byte)7, 6342,
+                          new byte[] {(byte)18, (byte)239, (byte)0, (byte)142},
+                          0l, 0l, false, 1000),
+                   null);  //duplicate
             hc.add(new PingReply(GUID.makeGuid(), (byte)7, 6343,
                           new byte[] {(byte)18, (byte)239, (byte)0, (byte)143},
                           0l, 0l, false, 30),
                    null);
+            hc.add(new PingReply(GUID.makeGuid(), (byte)7, 6343,
+                          new byte[] {(byte)18, (byte)239, (byte)0, (byte)143},
+                          0l, 0l, false, 30),
+                   null);  //duplicate (well, with lower uptime)
+            hc.add(new PingReply(GUID.makeGuid(), (byte)7, 6343,
+                          new byte[] {(byte)192, (byte)168, (byte)0, (byte)1},
+                          0l, 0l, false, 3000),
+                   null);  //private address (ignored)
             File tmp=File.createTempFile("hc_test", ".net" );
             hc.write(tmp.getAbsolutePath());
 
@@ -208,6 +239,44 @@ public class HostCatcherTest extends TestCase {
                 new Endpoint("18.239.0.141", 6341)));
             assertTrue(hc.getAnEndpoint().equals(
                 new Endpoint("18.239.0.143", 6343)));
+            assertEquals(0, hc.getNumHosts());
+
+            //Cleanup.
+            tmp.delete();
+        } catch (IOException e) {
+            assertTrue("Unexpected IO problem: "+e, false);
+        } catch (InterruptedException e) {
+            assertTrue("Unexpected InterruptedException "+e, false);
+        }
+    }
+
+    /** Tests that only the best hosts are remembered. */
+    public void testBestPermanent() {  
+        HostCatcher.DEBUG=false;  //Too darn slow
+        try {
+            //1. Write
+            final int N=HostCatcher.PERMANENT_SIZE+20;
+            for (int i=1; i<=N; i++) {
+                hc.add(new PingReply(GUID.makeGuid(), (byte)7, i,
+                           new byte[] {(byte)18, (byte)239, (byte)0, (byte)142},
+                           0l, 0l, false, i),
+                       null);
+            }
+            File tmp=File.createTempFile("hc_test", ".net" );
+            hc.write(tmp.getAbsolutePath());            
+
+            //2. Read
+            SettingsManager.instance().setQuickConnectHosts(new String[0]);
+            setUp();
+            HostCatcher.DEBUG=false;  //Too darn slow
+            hc.read(tmp.getAbsolutePath());
+            assertTrue(hc.getNumUltrapeerHosts()==0);
+            for (int i=N; i>N-HostCatcher.PERMANENT_SIZE; i--) {
+                assertTrue(hc.getNumHosts()>0);
+                assertEquals(new Endpoint("18.239.0.142", i),
+                             hc.getAnEndpoint());
+
+            }
 
             //Cleanup.
             tmp.delete();
@@ -250,5 +319,9 @@ public class HostCatcherTest extends TestCase {
         } catch (InterruptedException e) {
             assertTrue("Unexpected InterruptedException "+e, false);
         }
+    }
+
+    public static void main(String argv[]) {
+        junit.textui.TestRunner.run(suite());
     }
 }

@@ -39,16 +39,20 @@ import com.limegroup.gnutella.tests.stubs.ActivityCallbackStub;
  * average daily uptime.  These are stored in the gnutella.net file.  
  */
 public class HostCatcher {    
+    //These constants are package-access for testing.  
+    //That's ok as they're final.
+
     /** The number of supernode pongs to store. */
-    private static final int GOOD_SIZE=400;
-    /** The number of normal pongs to store. */
-    private static final int NORMAL_SIZE=100;
+    static final int GOOD_SIZE=400;
+    /** The number of normal pongs to store. 
+     *  This should be large enough to store all permanent addresses. */
+    static final int NORMAL_SIZE=1000;
     /** The number of private IP pongs to store. */
-    private static final int BAD_SIZE=15;
-    private static final int SIZE=GOOD_SIZE+NORMAL_SIZE+BAD_SIZE;
+    static final int BAD_SIZE=15;
+    static final int SIZE=GOOD_SIZE+NORMAL_SIZE+BAD_SIZE;
 
     /** The number of permanent locations to store in gnutella.net */
-    private static final int PERMANENT_SIZE=1000;
+    static final int PERMANENT_SIZE=NORMAL_SIZE;
 
     static final int GOOD_PRIORITY=2;
     static final int NORMAL_PRIORITY=1;
@@ -59,7 +63,8 @@ public class HostCatcher {
      * normal, then private addresses.  Within each priority level, recent hosts
      * are prioritized over older ones.  Our representation consists of a set
      * and a queue, both bounded in size.  The set lets us quickly check if
-     * there are duplicates, while the queue provides ordering.
+     * there are duplicates, while the queue provides ordering--a classic
+     * space/time tradeoff.
      *
      * INVARIANT: queue contains no duplicates and contains exactly the
      *  same elements as set.
@@ -74,9 +79,15 @@ public class HostCatcher {
      * during the next session, though not necessarily likely to have slots
      * available now.  In this way, they act more like bootstrap hosts than
      * normal pongs.  This list is written to gnutella.net and used to
-     * initialize queue on startup. */
+     * initialize queue on startup.  To prevent duplicates, we also maintain a
+     * set of all addresses, like with queue/set.
+     *
+     * INVARIANT: permanentHosts contains no duplicates and contains exactly
+     *  the same elements and permanentHostsSet
+     * LOCKING: obtain this' monitor before modifying either */
     private FixedsizePriorityQueue /* of Endpoint */ permanentHosts=
         new FixedsizePriorityQueue(PERMANENT_SIZE);
+    private Set /* of Endpoint */ permanentHostsSet=new HashSet();
     
 
     /** The bootstrap hosts from the QUICK_CONNECT_HOSTS property, e.g.,
@@ -152,7 +163,7 @@ public class HostCatcher {
             throws FileNotFoundException, IOException {
         BufferedReader in=null;
         in=new BufferedReader(new FileReader(filename));
-        for (int i=0; i<SIZE; i++) {
+        while (true) {
             String line=in.readLine();
             if (line==null)   //nothing left to read?  Done.
                 break;
@@ -280,6 +291,7 @@ public class HostCatcher {
      * @return true iff e was actually added 
      */
     private boolean add(Endpoint e, int priority, int uptime) {
+        repOk();
         //We used to check that we're not connected to e, but now we do that in
         //ConnectionFetcher after a call to getAnEndpoint.  This is not a big
         //deal, since the call to "set.contains(e)" below ensures no duplicates.
@@ -336,13 +348,15 @@ public class HostCatcher {
         //situation occur.
         if (alwaysNotifyKnownHost || notifyGUI) 
             callback.knownHost(e);
+        repOk();
         return ret;
     }
 
     /**
      * Adds an address to the permanent list of this without marking it for
      * immediate fetching.  This method is when connecting to a host and reading
-     * its Uptime header.
+     * its Uptime header.  If e is already in the permanent list, it is not
+     * re-added, though its key may be adjusted.
      *
      * @param pr the pong containing the address/port to add.  MODIFIES:
      *  e.getWeight().  Caller should not modify this afterwards.
@@ -350,10 +364,21 @@ public class HostCatcher {
      * @return true iff e was actually added 
      */
     private synchronized boolean addPermanent(Endpoint e, int uptimeSeconds) {
-        //TODO: should we check that e does not exist in permanentHosts with a
-        //different key?
+        if (e.isPrivateAddress())
+            return false;
+        if (permanentHostsSet.contains(e))
+            //TODO: we could adjust the key
+            return false;
+
         e.setWeight(uptimeSeconds);
-        return permanentHosts.insert(e)!=e;  //was element other than e rejected?
+        if (permanentHosts.insert(e, e.getWeight())!=e) {
+            //Was actually added.
+            permanentHostsSet.add(e);
+            return true;
+        } else {
+            //Uptime not good enough to add.
+            return false;
+        }
     }
     
     /** Returns BAD_PRIORITY if e private, NORMAL_PRIORITY otherwise. */
@@ -586,11 +611,46 @@ public class HostCatcher {
     }
 
     public String toString() {
-        return queue.toString();
+        return "[volatile:"+queue.toString()
+               +", permanent:"+permanentHosts.toString()+"]";
     }
 
     public void setAlwaysNotifyKnownHost(boolean notifyKnownHost) {
         alwaysNotifyKnownHost = notifyKnownHost;
+    }
+
+    /** Enable very slow rep checking?  Package access for use by
+     *  HostCatcherTest. */
+    static boolean DEBUG=false;
+    /** Checks invariants. Very slow; method body should be enabled for testing
+     *  purposes only. */
+    protected void repOk() {
+        if (!DEBUG)
+            return;
+
+        //Check set == queue
+        outer:
+        for (Iterator iter=set.iterator(); iter.hasNext(); ) {
+            Object e=iter.next();
+            for (Iterator iter2=queue.iterator(); iter2.hasNext(); ) {
+                if (e.equals(iter2.next()))
+                    continue outer;
+            }
+            Assert.that(false, "Couldn't find "+e+" in queue");
+        }
+        for (Iterator iter=queue.iterator(); iter.hasNext(); ) {
+            Assert.that(set.contains(iter.next()));
+        }
+
+        //Check permanentHosts === permanentHostsSet
+        for (Iterator iter=permanentHosts.iterator(); iter.hasNext(); )
+            Assert.that(permanentHostsSet.contains(iter.next()));
+        for (Iterator iter=permanentHostsSet.iterator(); iter.hasNext(); ) {
+            Object e=iter.next();
+            Assert.that(permanentHosts.contains(e),
+                        "Couldn't find "+e+" from "
+                        +permanentHostsSet+" in "+permanentHosts);
+        }
     }
 
     //Unit test: tests/com/.../gnutella/HostCatcherTest.java   

@@ -4,12 +4,19 @@ import junit.framework.*;
 import com.sun.java.util.collections.*;
 
 public class FixedsizePriorityQueueTest extends TestCase {
-    private final Integer one=new Integer(1);
-    private final Integer two=new Integer(2);
-    private final Integer three=new Integer(3);
-    private final Integer four=new Integer(4);
-    private final Integer five=new Integer(5);
-    private final Integer six=new Integer(6);
+    private final String one="one";
+    private final String two="two";
+    private final String three="three";
+    private final String four="four";
+    private final String five="five";
+    private final String six="six";
+    
+    /**
+     * The default queue for testing, with a capacity of 4 and the elements 2,
+     * 3, and 4.
+     * @see setUp.
+     */
+    private FixedsizePriorityQueue q;
 
     public FixedsizePriorityQueueTest(String name) {
         super(name);
@@ -19,74 +26,122 @@ public class FixedsizePriorityQueueTest extends TestCase {
         return new TestSuite(FixedsizePriorityQueueTest.class);
     }    
     
-    public void testAll() {
-        FixedsizePriorityQueue q=new FixedsizePriorityQueue(
-            4, ArrayListUtil.integerComparator());
+    public void setUp() {
+        FixedsizePriorityQueue.DEBUG=true;
+        q=new FixedsizePriorityQueue(4);
+        q.insert(three, 3);
+        q.insert(four, 4);
+        q.insert(two, 2);
+    }
+
+    public void testSize() {
+        assertEquals(3, q.size());
+    }
+
+    public void testCapacity() {
+        assertEquals(4, q.capacity());
+    }
+
+    public void testMin() {
+        assertEquals(two, q.getMin());
+        q=new FixedsizePriorityQueue(4);
         try {
-            assertEquals(six, q.getMax());
+            q.getMin();
             fail("No no such element exception");
         } catch (NoSuchElementException e) { }
+    }
 
-        assertNull(q.insert(two));
-        assertNull(q.insert(three));
-        assertEquals(2, q.size());
-        assertEquals(4, q.capacity());
-        assertNull(q.insert(one));
-        assertNull(q.insert(four));
-                
-        assertEquals(one, q.insert(five));
-        assertEquals(two, q.insert(six));
-        assertNull(q.insert(five));   //already there
-        assertEquals(4, q.size());
-        assertEquals(4, q.capacity());
+    public void testMax() {
+        assertEquals(four, q.getMax());
+        q=new FixedsizePriorityQueue(4);
+        try {
+            q.getMax();
+            fail("No no such element exception");
+        } catch (NoSuchElementException e) { }
+    }
 
-        assertEquals(three, q.getMin());
-        assertEquals(six, q.getMax());
+    public void testContains() {
+        assertTrue(! q.contains(one));
+        assertTrue(q.contains(two));
+        assertTrue(q.contains(three));
+        assertTrue(q.contains(four));
+        assertTrue(! q.contains(five));
+    }
 
+    public void testIterator() {
         Iterator iter=q.iterator();
+        assertEquals(two, iter.next());
+        assertEquals(three, iter.next());
+        assertEquals(four, iter.next());
+        assertTrue(!iter.hasNext());
+    }
+        
+    public void testInsert() {
+        //Three basic cases in the insert code:
+        //a) no elements removed
+        assertNull(q.insert(five, 5));        //2, 3, 4, 5
+        Iterator iter=q.iterator();
+        assertEquals(two, iter.next());
+        assertEquals(three, iter.next());
+        assertEquals(four, iter.next());
+        assertEquals(five, iter.next());
+        assertTrue(! iter.hasNext());
+
+        //c) this element removed (i.e., this not added)
+        assertEquals(one, q.insert(one, 1));  //2, 3, 4, 5 (case c)
+        iter=q.iterator();
+        assertEquals(two, iter.next());
+        assertEquals(three, iter.next());
+        assertEquals(four, iter.next());
+        assertEquals(five, iter.next());
+        assertTrue(! iter.hasNext());
+
+        //b) smallest element removed
+        assertEquals(two, q.insert(six, 6));  //3, 4, 5, 6 (case b)
+        iter=q.iterator();
         assertEquals(three, iter.next());
         assertEquals(four, iter.next());
         assertEquals(five, iter.next());
         assertEquals(six, iter.next());
         assertTrue(! iter.hasNext());
-    }
 
+        //Test duplicates
+        assertEquals(three, q.insert(six, 6)); //4, 5, 6, 6
+        assertEquals(four, q.insert(six, 6));  //5, 6, 6, 6
+        assertEquals(five, q.insert(six, 6));  //6, 6, 6, 6
+        iter=q.iterator();
+        assertEquals(six, iter.next());
+        assertEquals(six, iter.next());
+        assertEquals(six, iter.next());
+        assertEquals(six, iter.next());
+        assertTrue(! iter.hasNext());
+    }
+  
     /*
     public void testPerformance() {
-        int SIZE=500;
-        MyInteger[] numbers=new MyInteger[100000];
+        int SIZE=1000;
+        Integer[] numbers=new Integer[100000];
         java.util.Random rand=new java.util.Random();
         for (int i=0; i<numbers.length; i++) 
             numbers[i]=new MyInteger(rand.nextInt());
 
         BinaryHeap q1=new BinaryHeap(SIZE);
         long start=System.currentTimeMillis();
-        for (int i=0; i<q1.size(); i++) 
+        for (int i=0; i<numbers.length; i++) 
             q1.insert(numbers[i]);
         long stop=System.currentTimeMillis();
         System.out.println("Elapsed time for BinaryHeap: "
                            +(stop-start));
-        q1=null;
 
         FixedsizePriorityQueue q2=new FixedsizePriorityQueue(SIZE);
         start=System.currentTimeMillis();
         for (int i=0; i<numbers.length; i++) 
-            q2.insert(numbers[i]);
+            q2.insert(numbers[i], numbers[i].getInt());
         stop=System.currentTimeMillis();
         System.out.println("Elapsed time for FixedSizePriorityQueue: "
                            +(stop-start));
-    }
 
-    class MyInteger implements com.sun.java.util.collections.Comparable {
-        private int n;
-
-        public MyInteger(int n) {
-            this.n=n;
-        }
-
-        public int compareTo(Object o) {
-            return n-((MyInteger)o).n;
-        }
+        assertEquals(q2.getMax(), q1.getMax());        
     }
     */
 }
