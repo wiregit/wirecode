@@ -385,9 +385,10 @@ public class DownloadManager implements BandwidthTracker {
     private final String[] invalidWords = {"the", "an", "a"};
     private final HashSet wordSet = new HashSet(Arrays.asList(invalidWords));
     /** Canonicalizes a file name - gets rid of articles, etc...
+     *  @param map Adds the canonicalized elements to this map.
      */    
-    private final String canonicalize(String fileName) {
-        final StringBuffer retString = new StringBuffer();
+    private final void canonicalize(String fileName,
+                                    Map map) {
         // separate by whitespace and _ 
         StringTokenizer st = new StringTokenizer(fileName, FileManager.DELIMETERS);
         while (st.hasMoreTokens()) {
@@ -399,35 +400,54 @@ public class DownloadManager implements BandwidthTracker {
                 continue;
             }
             catch (NumberFormatException ignored) {}
-            retString.append(currToken + " ");
+            { // success
+                Integer occurrences = (Integer) map.get(currToken);
+                if (occurrences == null)
+                    occurrences = new Integer(1);
+                else
+                    occurrences = new Integer(occurrences.intValue()+1);
+                map.put(currToken, occurrences);
+            }
         }
-        return retString.toString();
     }
 
-    /** Extract a canonical name from the RFD.
+    /** @return A String Array of size 1 that is a intersection of all the
+     *  canonicalized rfd filename values.
      */
-    private final String[] extractQueryStrings(RemoteFileDesc[] rfds) {
-        String[] retStrings = new String[rfds.length];
-        for (int i = 0; i < rfds.length; i++)
-            retStrings[i] = canonicalize(ripExtension(rfds[i].getFileName()));
+    private final String[] extractQueryStrings(String[] names) {
+        String[] retStrings = new String[1];
+        // used for intersection
+        Map words = new HashMap();
+        
+        for (int i = 0; i < names.length; i++) 
+            canonicalize(ripExtension(names[i]), words);
+        
+        // create the query string....
+        StringBuffer sb = new StringBuffer();
+        Iterator keys = words.keySet().iterator();
+        while (keys.hasNext()) {
+            String currKey = (String) keys.next();
+            Integer count = (Integer) words.get(currKey);
+            // if the string 'intersected', add it....
+            if (count.intValue() == names.length)
+                sb.append(currKey + " ");
+        }
+        
+        retStrings[0] = sb.toString();
         return retStrings;
     }
 
-    /** Removes duplicates from the array.
-     *  @param in The String[] to remove duplicates from.
-     *  @return A String[] with unique elements....
-     */
-    private final String[] removeDuplicates(String[] in) {
-        String[] out = null;
-        ArrayList list = new ArrayList();
-        for (int i = 0; i < in.length; i++)
-            if (! list.contains(in[i]))
-                list.add(in[i]);
-        out = new String[list.size()];
-        for (int j = 0; j < out.length; j++)
-            out[j] = (String) list.get(j);
-        return out;
+
+    void extractQueryStringUNITTEST() {
+        String[] queries = {"Susheel_Daswani_Neil_Daswani",
+                            "Susheel Ruchika Mahesh Kyle Daswani",
+                            "Susheel" + FileManager.DELIMETERS + "Daswani",
+                            "Sumeet (Susheel) Anurag (Daswani)Chris"};
+        String[] retStrings = extractQueryStrings(queries);
+        System.out.println(retStrings[0]);      
     }
+
+
 
     private final QueryRequest[] constructQueryRequests(String[] queryStrings) {
         final int minSpeed = 0;  // minSpeed of 0 is used in StandardSearchView...
@@ -439,12 +459,21 @@ public class DownloadManager implements BandwidthTracker {
         return retQRs;
     }
 
+
     /** Initiates a search for files similar to rfd.
      * PRE: rfds is a array of length 0 or more of non-null RemoteFileDesc objects.
      */
     public void sendQuery(RemoteFileDesc[] rfds) {
-        String[] qStrings= removeDuplicates(extractQueryStrings(rfds));
+        // convert....
+        String[] names = new String[rfds.length];
+        for (int i = 0; i < rfds.length; i++)
+            names[i] = rfds[i].getFileName();
+
+        // construct QRs
+        String[] qStrings= extractQueryStrings(names);
         QueryRequest[] qReqs = constructQueryRequests(qStrings);
+
+        // send away....
         for (int i = 0; i < qReqs.length; i++)
             router.broadcastQueryRequest(qReqs[i]);            
     }
@@ -592,6 +621,11 @@ public class DownloadManager implements BandwidthTracker {
             e.printStackTrace();
     }
 
-
+    /*
+    public static void main(String argv[]) {
+        DownloadManager dm = new DownloadManager();
+        dm.extractQueryStringUNITTEST();
+    }
+    */
 
 }
