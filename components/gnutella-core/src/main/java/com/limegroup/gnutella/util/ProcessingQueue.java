@@ -79,13 +79,16 @@ public class ProcessingQueue {
      */
     private class Processor implements Runnable {
         public void run() {
-            while(true) {
-                try {
+            try {
+                while(true) {
                     while(QUEUE.size() > 0) {
                         Runnable next = (Runnable)QUEUE.remove(0);
                         next.run();
                     }
-                } finally {
+
+                    // Ideally this would be in a finally clause -- but if it
+                    // is then we can potentially ignore exceptions that were
+                    // thrown.
                     synchronized(ProcessingQueue.this) {
                         // If something was added before we grabbed the lock,
                         // process those items immediately instead of waiting
@@ -103,13 +106,23 @@ public class ProcessingQueue {
                         // instead of exiting.
                         if(!QUEUE.isEmpty())
                             continue;
-                        // Otherwise, set the runner to be null so that the thread
-                        // is restarted when a new item is added.
-                        else {
-                            _runner = null;
+                        // Otherwise, exit
+                        else
                             break;
-                        }
                     }
+                }
+            } finally {
+                // We must restart a new runner if something was added.
+                // It's highly unlikely that something was added between
+                // the try of one synchronized block & the finally of another,
+                // but it technically is possible.
+                // We cannot loop here because we'd lose any exceptions
+                // that may have been thrown.
+                synchronized(ProcessingQueue.this) {
+                    if(!QUEUE.isEmpty())
+                        startRunner();
+                    else
+                        _runner = null;
                 }
             }
         }
