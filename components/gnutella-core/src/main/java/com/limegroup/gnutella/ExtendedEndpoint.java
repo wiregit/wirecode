@@ -169,7 +169,7 @@ public class ExtendedEndpoint extends Endpoint {
      *  files, even on systems that normally use "\r\n" for end-of-line.  This
      *  has the nice advantage of making gnutella.net files portable across
      *  platforms. */
-    private static final String EOL="\n";
+    static final String EOL="\n";
 
     /**
      * Writes this' state to a single line of out.  Does not flush out.
@@ -208,24 +208,17 @@ public class ExtendedEndpoint extends Endpoint {
     }
 
     /**
-     * Parses a new ExtendedEndpoint from the given stream.
+     * Parses a new ExtendedEndpoint.
      *
-     * @param in the source of data
-     * @return the next ExtendedEndpoint from the stream, or null
-     *  if EOF reached
+     * @param line a single line read from the stream
+     * @return the endpoint constructed from the line
      * @exception IOException problem reading from in, e.g., EOF reached
      *  prematurely
-     * @exception ParseException data not in proper format, but parsing
-     *  can probably continue at current positition.  Does NOT necessarily
-     *  set the offset of the exception properly.
+     * @exception ParseException data not in proper format.  Does NOT 
+     *  necessarily set the offset of the exception properly.
      * @see write
      */
-    public static ExtendedEndpoint read(BufferedReader in) 
-            throws IOException, ParseException {
-        String line=in.readLine();
-        if (line==null)   //nothing left to read?  Done.
-            return null;
-
+    public static ExtendedEndpoint read(String line) throws ParseException {
         //Break the line into fields.  Skip if badly formatted.  Note that
         //subsequent delimeters are NOT coalesced.
         String[] linea=StringUtils.splitNoCoalesce(line, FIELD_SEPARATOR);

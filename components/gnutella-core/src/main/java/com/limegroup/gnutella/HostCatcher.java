@@ -1,6 +1,7 @@
 package com.limegroup.gnutella;
 
 import com.limegroup.gnutella.util.*;
+import com.limegroup.gnutella.bootstrap.*;
 import com.sun.java.util.collections.*;
 import java.io.*;
 import java.net.InetAddress;
@@ -93,6 +94,10 @@ public class HostCatcher {
         new FixedsizePriorityQueue(ExtendedEndpoint.priorityComparator(),
                                    PERMANENT_SIZE);
     private Set /* of ExtendedEndpoint */ permanentHostsSet=new HashSet();
+
+    
+    /** The GWebCache bootstrap system. */
+    private BootstrapServerManager gWebCache=new BootstrapServerManager(this);
     
 
     /** The bootstrap hosts from the QUICK_CONNECT_HOSTS property, e.g.,
@@ -170,10 +175,21 @@ public class HostCatcher {
         List /* of ExtendedEndpoint */ buffer=new ArrayList(NORMAL_SIZE);
         BufferedReader in=new BufferedReader(new FileReader(filename));
         while (true) {
+            String line=in.readLine();
+            if (line==null)
+                break;
+
+            //If endpoint a special GWebCache endpoint?  If so, add it to
+            //gWebCache but not this.
             try {
-                ExtendedEndpoint e=ExtendedEndpoint.read(in);
-                if (e==null)   //EOF
-                    break;
+                BootstrapServer e=new BootstrapServer(line);
+                gWebCache.addBootstrapServer(e);
+                continue;
+            } catch (ParseException ignore) { }
+
+            //Is it a normal endpoint?
+            try {
+                ExtendedEndpoint e=ExtendedEndpoint.read(line);
                 buffer.add(e);
             } catch (ParseException pe) {
                 continue;
@@ -217,6 +233,14 @@ public class HostCatcher {
     synchronized void write(String filename) throws IOException {
         repOk();
         FileWriter out=new FileWriter(filename);       
+        //Write servers from GWebCache to output.
+        synchronized (gWebCache) {
+            for (Iterator iter=gWebCache.getBootstrapServers();iter.hasNext();){
+                BootstrapServer e=(BootstrapServer)iter.next();
+                out.write(e.toString());
+                out.write(ExtendedEndpoint.EOL);
+            }
+        }
         //Write elements of permanent from worst to best.  Order matters, as it
         //allows read() to put them into queue in the right order without any
         //difficulty.
@@ -636,6 +660,10 @@ public class HostCatcher {
         for (; i>=0; i--)
             //3. Put best pongs back into good priority
             add(buffer[i], GOOD_PRIORITY);        
+
+        //Connect to a GWebCache
+        gWebCache.fetchEndpointsAsync();
+        gWebCache.fetchBootstrapServersAsync();
     }
 
     /**
