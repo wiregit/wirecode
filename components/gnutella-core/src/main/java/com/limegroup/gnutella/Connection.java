@@ -61,7 +61,7 @@ import org.apache.commons.logging.Log;
  * by the contract of the X-Max-TTL header, illustrated by sending lower
  * TTL traffic generally.
  */
-public class Connection {
+public class Connection implements IpPort {
     
     private static final Log LOG = LogFactory.getLog(Connection.class);
 	
@@ -1257,22 +1257,23 @@ public class Connection {
     * 
     * @return the IP address of the remote host as a string
     */
-    public String getIPString() {
+    public String getAddress() {
         return _host;
     }
 
     /**
-     * Accessor for the port number this connection is listening on.  Note that this 
-     * is NOT the port of the socket itself.  For incoming connections, the getPort
-     * method of the java.net.Socket class returns the ephemeral port that the
-     * host connected with.  This port, however, is the port the remote host is
-     * listening on for new connections, which we set using Gnutella connection
-     * headers in the case of incoming connections.  For outgoing connections,
-     * this is the port we used to connect to them -- their listening port.
+     * Accessor for the port number this connection is listening on.  Note that 
+     * this is NOT the port of the socket itself.  For incoming connections,  
+     * the getPort method of the java.net.Socket class returns the ephemeral 
+     * port that the host connected with.  This port, however, is the port the 
+     * remote host is listening on for new connections, which we set using 
+     * Gnutella connection headers in the case of incoming connections.  For 
+     * outgoing connections, this is the port we used to connect to them -- 
+     * their listening port.
      * 
      * @return the listening port for the remote host
      */
-    public int getListeningPort() {
+    public int getPort() {
         return _port;
     }
     
