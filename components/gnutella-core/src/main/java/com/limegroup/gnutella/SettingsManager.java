@@ -40,7 +40,8 @@ public class SettingsManager implements SettingsInterface {
     private volatile byte     _searchLimit;
     private volatile String   _clientID;
     private volatile int      _maxIncomingConn;
-    private volatile String   _saveDirectory;
+    private volatile File     _saveDirectory;
+    private volatile File     _incompleteDirectory;
     private volatile String   _directories;
     private volatile String   _extensions;
     private volatile String[] _bannedIps;
@@ -264,7 +265,7 @@ public class SettingsManager implements SettingsInterface {
                 }
 
                 else if(key.equals(SAVE_DIRECTORY)) {
-                    setSaveDirectory(p);
+                    setSaveDirectory(new File(p));
                 }
 
                 else if(key.equals(DIRECTORIES)) {
@@ -601,39 +602,35 @@ public class SettingsManager implements SettingsInterface {
 	/** returns the maximum number of uploads per person */
     public int getUploadsPerPerson(){return _uploadsPerPerson;}
 
-    /** returns the directory to save to */
-    public String getSaveDirectory() {
-		
-        File file = new File(_saveDirectory);
-        if(!file.isDirectory()) file.mkdirs();
+    /** 
+	 * Returns the directory for saving files.
+	 *
+	 * @return  A <code>File</code> instance denoting the abstract
+	 *          pathname of the save directory.
+	 *
+	 * @throws  NullPointerException 
+	 *          If the save directory is null.
+	 */
+    public File getSaveDirectory() {
 		return _saveDirectory;
     }
 
     /** 
-	 * returns the incomplete directory.  it determines the incomplete
-	 * directory dynamically based on the save directory.
+	 * Returns a new <code>File</code> instance that denotes the abstract
+	 * pathname of the directory for saving incomplete files.
+	 *
+	 * @return  A <code>File</code> instance denoting the abstract
+	 *          pathname of the directory for saving incomplete files.
 	 */
-    public String getIncompleteDirectory() {
-		String saveDir = getSaveDirectory();
-		File saveFileDir = new File(saveDir);
-		String parentDir = saveFileDir.getParent();
-		
-		// if getParent returns null, simply use the current directory
-		// as the parent.
-		if(parentDir == null) parentDir = CURRENT_DIRECTORY;
-		File incFile = new File(parentDir, "Incomplete");
-		incFile.mkdirs();
-		return incFile.getAbsolutePath();		
+    public File getIncompleteDirectory() {
+		return _incompleteDirectory;
     }
 
     /** 
 	 * returns the default save directory path. 
 	 */	
     public String getSaveDefault() {		
-		String defaultPath = CURRENT_DIRECTORY;		
-		if(!defaultPath.endsWith(File.separator))
-			defaultPath += File.separator;
-		return defaultPath + SAVE_DIRECTORY_NAME;
+		return new File(SAVE_DIRECTORY_NAME).getAbsolutePath();
     }
 
     /** returns the directories to search */
@@ -1107,19 +1104,37 @@ public class SettingsManager implements SettingsInterface {
      ******************************************************/
 
     /** 
-	 * set the directory for saving files 
+	 * Sets the directory for saving files. 
+	 *
+	 * @param   saveDir  A <code>File</code> instance denoting the 
+	 *                   platform-specific pathname of the directory 
+	 *                   for saving files.  
+	 *
+	 * @throws  IOException 
+	 *          If the directory denoted by the directory pathname
+	 *          String parameter did not exist prior to this method
+	 *          call and could not be created, or if the canonical
+	 *          path could not be retrieved from the file system.
+	 * 
+	 * @throws  NullPointerException 
+	 *          If the "dir" parameter is null.
 	 */
-    public void setSaveDirectory(String dir) {
-        File saveFile = new File(dir);
-		try {
-			if(!saveFile.isDirectory()) {
-				if(!saveFile.mkdirs()) throw new IllegalArgumentException();
-			}
-			_saveDirectory = saveFile.getCanonicalPath();
-			_props.put(SAVE_DIRECTORY, _saveDirectory);
-		} catch(IOException ioe) {
-			throw new IllegalArgumentException();
+    public void setSaveDirectory(File saveDir) throws IOException {
+		if(saveDir == null) throw new NullPointerException();
+		String parentDir = saveDir.getParent();
+
+		File incDir = new File(parentDir, "Incomplete");
+		if(!saveDir.isDirectory()) {
+			if(!saveDir.mkdirs()) throw new IOException();
 		}
+
+		if(!incDir.isDirectory()) {
+			if(!incDir.mkdirs()) throw new IOException();
+		}
+		_saveDirectory       = saveDir;
+		_incompleteDirectory = incDir;
+		
+		_props.put(SAVE_DIRECTORY, saveDir);
     }
 
     /** 
@@ -1714,23 +1729,35 @@ public class SettingsManager implements SettingsInterface {
         return ret;
     }
     
+	// unit tests
+//  	public static void main(String args[]) {
+//  		SettingsManager settings = SettingsManager.instance();
+//  		String incDir  = settings.getIncompleteDirectory();
+//  		String saveDir = settings.getSaveDirectory();
+//  		String saveDefaultDir = settings.getSaveDefault();
 
+//  		File incFile = new File(incDir);
+//  		File saveFile = new File(saveDir);
+//  		File saveDefaultFile = new File(saveDefaultDir);
+//  		System.out.println("incDir:         "+incDir);
+//  		System.out.println("saveDir:        "+saveDir);
+//  		System.out.println("saveDefaultDir: "+saveDefaultDir);		
+//  		System.out.println("incDir isDirectory():         "+incFile.isDirectory());
+//  		System.out.println("saveDir isDirectory():        "+saveFile.isDirectory());
+//  		System.out.println("saveDefaultDir isDirectory(): "+saveDefaultFile.isDirectory());
+//  		System.out.println("host list path: " + settings.getHostList());
+//  	}
+	
+	
 	public static void main(String args[]) {
-		SettingsManager settings = SettingsManager.instance();
-		String incDir  = settings.getIncompleteDirectory();
-		String saveDir = settings.getSaveDirectory();
-		String saveDefaultDir = settings.getSaveDefault();
+        boolean installed = true;
+        String s = String.valueOf(installed);
+		System.out.println("string: "+s);
 
-		File incFile = new File(incDir);
-		File saveFile = new File(saveDir);
-		File saveDefaultFile = new File(saveDefaultDir);
-		System.out.println("incDir:         "+incDir);
-		System.out.println("saveDir:        "+saveDir);
-		System.out.println("saveDefaultDir: "+saveDefaultDir);		
-		System.out.println("incDir isDirectory():         "+incFile.isDirectory());
-		System.out.println("saveDir isDirectory():        "+saveFile.isDirectory());
-		System.out.println("saveDefaultDir isDirectory(): "+saveDefaultFile.isDirectory());
-		System.out.println("host list path: " + settings.getHostList());
+		
+		Boolean b = new Boolean(s);
+		System.out.println("boolean: "+b.booleanValue());
+        //_props.put(INSTALLED, s);
 	}
 
     //      /** Unit test */
