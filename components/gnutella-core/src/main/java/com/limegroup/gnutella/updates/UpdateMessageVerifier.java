@@ -57,7 +57,9 @@ public class UpdateMessageVerifier {
             return false;
         } catch (IOException iox) { //could not read public key?
             return false;
-        } finally {
+        } catch (ClassCastException ccx) {
+        	return false;
+        }finally {
             if(ois != null) {
                 try {
                     ois.close();
@@ -87,6 +89,8 @@ public class UpdateMessageVerifier {
             return false;
         } catch (SignatureException sx) {
             return false;
+        } catch (ClassCastException ccx){
+        	return false;
         }
     }
 

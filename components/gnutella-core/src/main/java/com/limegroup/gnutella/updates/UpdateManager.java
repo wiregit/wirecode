@@ -67,11 +67,7 @@ public class UpdateManager {
             UpdateMessageVerifier verifier = 
                           new UpdateMessageVerifier(content, true);//from disk
             boolean verified = false;
-            try {
-                verified = verifier.verifySource();
-            } catch(ClassCastException ccx) {
-                verified = false;
-            }
+            verified = verifier.verifySource();
             if(!verified) {
                 latestVersion = CommonUtils.getLimeWireVersion();
                 return;
