@@ -27,27 +27,20 @@ public abstract class MessageRouter
     private ForMeReplyHandler _forMeReplyHandler = new ForMeReplyHandler();
 
     /**
-     * Keeps track of query route table state for each "new client" connection
-     * This helps you decide where to send queries.  (Compare with
-     * _querySourceTable, which helps filter duplicate queries and decide where
-     * to send responses.)  Connections are added to this in two places: when
-     * propogating tables or receiving updates.
-     *
-     * INVARIANT: for all keys c, !c.isOldClient.  (Note that there
-     *  may be new connections not yet added to the domain of the map.)
-     * LOCKING: obtain _queryInfoTable's monitor.  
+     * The lock to hold before updating or propogating tables.  TODO3: it's 
+     * probably possible to use finer-grained locking.
      */
-    private HashMap /* ManagedConnection -> ManagedConnectionQueryInfo */ 
-        _queryInfoTable = new HashMap();
-
+    private Object queryUpdateLock=new Object();
     /**
      * The time when we should next broadcast route table updates.
+     * (Route tables are stored per connection in ManagedConnectionQueryInfo.)
+     * LOCKING: obtain queryUpdateLock
      */
     private long nextQueryUpdateTime=0l;
-    /**
-     * The time to wait between route table updates, in milliseconds.
+    /** 
+     * The time to wait between route table updates, in milliseconds. 
      */
-    private long QUERY_ROUTE_UPDATE_TIME=1000*15;  //15 seconds for testing
+    private long QUERY_ROUTE_UPDATE_TIME=1000*15;  //15 seconds for testing 
 
     /**
      * Maps QueryRequest GUIDs to QueryReplyHandlers
@@ -188,9 +181,6 @@ public abstract class MessageRouter
      */
     public void removeConnection(ManagedConnection connection)
     {
-        synchronized (_queryInfoTable) {
-            _queryInfoTable.remove(connection);
-        }
         _querySourceTable.removeReplyHandler(connection);
         _pushSourceTable.removeReplyHandler(connection);
     }
@@ -540,20 +530,20 @@ public abstract class MessageRouter
             ManagedConnection c = (ManagedConnection)list.get(i);
             if(c != receivingConnection) {
                 //Send query along any connection to an old client, or to a new
-                //client with routing information for the given keyword.
-                synchronized (_queryInfoTable) {
-                    ManagedConnectionQueryInfo qi=
-                        (ManagedConnectionQueryInfo)_queryInfoTable.get(c);
-                    if (qi==null) 
-                        //Either a new client, or an old client that's not yet
-                        //sent us a table message.
-                        c.send(queryRequest);
-                    else if (!qi.lastReceived.isPatched() 
-                                 || qi.lastReceived.contains(queryRequest))
-                        //A new client with routing entry, or one that hasn't yet
-                        //finished sending the patch.
-                        c.send(queryRequest);              
-                }
+                //client with routing information for the given keyword.  TODO:
+                //because of some very obscure optimization rules, it's actually
+                //possible that qi could be non-null but not initialized.  Need
+                //to be more careful about locking here.
+                ManagedConnectionQueryInfo qi=c.getQueryRouteState();
+                if (qi==null) 
+                    //Either a new client, or an old client that's not yet
+                    //sent us a table message.
+                    c.send(queryRequest);
+                else if (!qi.lastReceived.isPatched() 
+                             || qi.lastReceived.contains(queryRequest))
+                    //A new client with routing entry, or one that hasn't yet
+                    //finished sending the patch.
+                    c.send(queryRequest);              
             }
         }
     }
@@ -788,16 +778,14 @@ public abstract class MessageRouter
      */
     public void handleRouteTableMessage(RouteTableMessage m,
                                         ManagedConnection receivingConnection) {
-        synchronized (_queryInfoTable) { 
-            //Mutate query route table associated with receivingConnection.  
-            //(This is legal.)  Create a new one if none exists.
-            ManagedConnectionQueryInfo qi=
-                (ManagedConnectionQueryInfo)
-                    _queryInfoTable.get(receivingConnection);
+        //Mutate query route table associated with receivingConnection.  
+        //(This is legal.)  Create a new one if none exists.
+        synchronized (queryUpdateLock) {
+            ManagedConnectionQueryInfo qi=receivingConnection.getQueryRouteState();
             if (qi==null) {
                 //There's really no need to check if c is an old client here.
                 qi=new ManagedConnectionQueryInfo();
-                _queryInfoTable.put(receivingConnection, qi);            
+                receivingConnection.setQueryRouteState(qi);
             }
             try {
                 qi.lastReceived.update(m);    
@@ -814,7 +802,7 @@ public abstract class MessageRouter
      *     @modifies connections
      */    
     public void forwardQueryRouteTables() {
-        synchronized (_queryInfoTable) {
+        synchronized (queryUpdateLock) {
             //Check time.  Skip or update.
             long time=System.currentTimeMillis();
             if (time<nextQueryUpdateTime) 
@@ -826,13 +814,12 @@ public abstract class MessageRouter
             List list=_manager.getInitializedConnections();
             for(int i=0; i<list.size(); i++) {                        
                 ManagedConnection c=(ManagedConnection)list.get(i);
-                ManagedConnectionQueryInfo qi=
-                    (ManagedConnectionQueryInfo)_queryInfoTable.get(c);
+                ManagedConnectionQueryInfo qi=c.getQueryRouteState();
                 if (qi==null) {
                     if (c.isOldClient())
                         continue;
                     qi=new ManagedConnectionQueryInfo();
-                    _queryInfoTable.put(c, qi);            
+                    c.setQueryRouteState(qi);
                 }
                     
                 //Create table to send on this connection...
@@ -853,8 +840,9 @@ public abstract class MessageRouter
     /**
      * Creates a query route table appropriate for forwarding to connection c.
      * This will not include information from c.
+     *     @requires queryUpdateLock held
      */
-    public QueryRouteTable createRouteTable(ManagedConnection c) {
+    private QueryRouteTable createRouteTable(ManagedConnection c) {
         //TODO: choose size according to what's been propogated.
         QueryRouteTable ret=new QueryRouteTable(
             QueryRouteTable.DEFAULT_TABLE_SIZE,
@@ -864,12 +852,12 @@ public abstract class MessageRouter
         addQueryRoutingEntries(ret);
 
         //...and those of all neighbors except c.  Use higher TTLs on these.
-        for (Iterator iter=_queryInfoTable.keySet().iterator(); iter.hasNext(); ) {
-            ManagedConnection c2=(ManagedConnection)iter.next();
+        List list=_manager.getInitializedConnections();
+        for(int i=0; i<list.size(); i++) { 
+            ManagedConnection c2=(ManagedConnection)list.get(i);
             if (c2==c)
                 continue;
-            ManagedConnectionQueryInfo qi=(ManagedConnectionQueryInfo)
-                _queryInfoTable.get(c2);
+            ManagedConnectionQueryInfo qi=c2.getQueryRouteState();
             if (qi!=null)
                 ret.addAll(qi.lastReceived);
         }

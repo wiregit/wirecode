@@ -4,7 +4,7 @@ import java.io.*;
 import java.net.*;
 import com.limegroup.gnutella.util.Buffer;
 import com.sun.java.util.collections.*;
-import com.limegroup.gnutella.routing.RouteTableMessage;
+import com.limegroup.gnutella.routing.*;
 
 /**
  * A Connection that is managed.  Includes a loopForMessages method that runs
@@ -68,6 +68,14 @@ public class ManagedConnection
      * instantianted when the first ping is received.
      */
     private ManagedConnectionPingInfo pingInfo = null;
+    /**
+     * The query routing state for each "new client" connection, or null if the
+     * connection doesn't support QRP.  Helps you decide when to send queries.
+     * (Compare with _querySourceTable of MessageRouter, which helps filter
+     * duplicate queries and decide where to send responses.)  
+     */
+    private volatile ManagedConnectionQueryInfo queryInfo = null;
+
 
     /** The total number of bytes sent/received since last checked. 
      *  These are not synchronized and not guaranteed to be 100% accurate. */
@@ -741,6 +749,18 @@ public class ManagedConnection
     public boolean isOldClient() {
         return _isOldClient;
     }
+
+    /** Returns the query route state associated with this. */
+    public ManagedConnectionQueryInfo getQueryRouteState() {
+        return queryInfo;
+    }
+
+    /** Associates the given query route state with this.  Typically this method
+     *  is called once per connection. */
+    public void setQueryRouteState(ManagedConnectionQueryInfo qi) {
+        this.queryInfo=qi;
+    }
+        
 
     /** Unit test.  Only tests statistics methods. */
     /*
