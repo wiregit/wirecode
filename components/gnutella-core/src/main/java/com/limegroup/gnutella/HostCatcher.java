@@ -11,14 +11,25 @@ import java.io.*;
  * maintain full connectivity.  
  */
 public class HostCatcher {
-    //Currently implemented with a set. 
-    //TODO3: prioritize the elements of the set based on extra info
-    //(e.g., connection speed, number of files) gathered in spy(..)
-    protected Set /* of Endpoint */ set=new HashSet();
+    /** The untested set of connections to try.  This could ultimately
+      * be prioritized by extra info (e.g., connection speed, number
+      * of files) gathered in spy(..).  Succesful connections from
+      * this are added to the elected set.  This is NOT synchronized
+      * directly; rather you should manually grab its monitor before
+      * modifying it.  */
+    protected Set /* of Endpoint */ candidates=new HashSet();
+
+    /** Where to add new connections. */
     protected Router router;
 
+    /** The good connections we've made.  We keep this around to write
+      * it to disk.  This is NOT synchronized directly; rather you
+      * should manually grab its monitor before modifying it */
+    protected Set /* of Endpoint */ elected=new HashSet();
+    
+
     private void error(String message) {
-	System.err.println(message);
+	System.err.println(message);   //Sssshhh!
     }
 
     /** 
@@ -41,7 +52,7 @@ public class HostCatcher {
 	try {
 	    in=new BufferedReader(new FileReader(filename));
 	} catch (FileNotFoundException e) {
-	    error("File not found.");
+	    error("HostCatcher couldn't find gnutella.net file: ignoring");
 	    return;
 	}
 	while (true) {
@@ -53,7 +64,7 @@ public class HostCatcher {
 		return; //fatal
 	    }
 	    if (line==null)   //nothing left to read?  Done.
-		return;
+		break;
 
 	    //Break the line into host and port.  Skip if badly formatted.
 	    int index=line.indexOf(':');
@@ -73,62 +84,120 @@ public class HostCatcher {
 	    }
 	    
 	    //Everything passed!  Add it.
-	    set.add(new Endpoint(host, port));	    
-	}
+	    candidates.add(new Endpoint(host, port));	    
+	}	
     }
 
+    /**
+     * @modifies the file named filename
+     * @effects writes this to the given file. Those hosts who
+     *  actually accepted connections are written first.
+     */
+    public void write(String filename) throws IOException {
+	FileWriter out=new FileWriter(filename);
+	synchronized(elected) {
+	    writeInternal(out, elected);
+	}
+	synchronized(candidates) {
+	    writeInternal(out, candidates);
+	}
+	out.close();	
+    }
+
+    private void writeInternal(Writer out, Set set) throws IOException {
+	Iterator enum=set.iterator();
+	while (enum.hasNext()) {
+	    Endpoint e=(Endpoint)enum.next();
+	    out.write(e.toString()+"\n");
+	}
+    }
+    
     /** 
      * @modifies this
      * @effects adds any hosts listed in m to this
      */
     public void spy(Message m) {
-	Assert.that(false,"TODO1: Unimplemented!"); 	
+	String ip=null;
+	int port=6346;
+	if (m instanceof PingReply) {
+	    ip=((PingReply)m).getIP();
+	    port=port;
+	} 
+	//We could also get ip addresses from query hits and push
+	//requests, but then we have to guess the ports for incoming
+	//connections.  (These only give ports for HTTP.)
+	else {
+	    return;
+	}
+	synchronized(candidates) {
+	    candidates.add(new Endpoint(ip, port));
+	}
+    }
+
+    /** 
+     * @modifies this
+     * @effects notifies this that c is a good connection and should be
+     *  written to disk later.
+     */
+    public void addGood(Connection c) {
+	String host=c.sock.getInetAddress().getHostAddress();
+	int port=c.sock.getPort();
+	synchronized (elected) {
+	    elected.add(new Endpoint(host,port));
+	}	
     }
 
     /**
      * @modifies router
-     * @effects returns a new outgoing connection to some host in this, and 
-     *  adds the connection to router.  If no such host can be found, throws
-     *  NoSuchElementException.
+     * @effects returns a new outgoing connection to some host in this,
+     *  adds the connection to router, and removes it from this (atomically).
+     *  If no such host can be found, throws NoSuchElementException.  This
+     *  method <i>is</i> thread-safe, but it can be run in parallel with
+     *  itself.
      */
     public Connection choose() throws NoSuchElementException {
-	Iterator iter=set.iterator();
-	while (iter.hasNext()) {
-	    Endpoint e=(Endpoint)iter.next();
+	while (true) {
+	    Endpoint e=null;
+	    //1. While we have this' monitor, get an endpoint and
+	    //   remove it from this.	   
+	    synchronized (candidates) {
+		Iterator iter=candidates.iterator();	
+		if (! iter.hasNext()) 
+		    throw new NoSuchElementException();
+		e=(Endpoint)iter.next();
+		candidates.remove(e);
+		System.out.print("Establishing outgoing connection on "
+				  +e.toString()+"...");
+	    }
+	    //2. Now--without the lock--try to establish connection. If
+	    //   successful, add the endpoint to the elected set so we 
+	    //   can write to disk and try later.
 	    try {
 		Connection ret=new Connection(router,e.hostname,e.port);
+		synchronized(elected) {
+		    elected.add(e);
+		}
+		System.out.println("OK");
 		return ret;
 	    } catch (IOException exc) {
-		//Assume if it's no good now, it's no good later.
-		set.remove(e);
+		System.out.println("FAILED");
 		continue;
 	    }
 	}
-	throw new NoSuchElementException();
-    }
-    
-    /**
-     * @modifies this
-     * @effects conn is not in this.  May even "blacklist" the 
-     *  host in the future.
-     */
-    public void remove(Connection conn) {
-	//Kinda tricky to implement, because socket's name 
-	//may be numerical or symbolic
-	Assert.that(false,"TODO1: Unimplemented!"); 
     }
 
-    String toString() {
-	return set.toString();
+    public String toString() {
+	return "("+elected.toString()+", "+candidates.toString()+")";
     }
 
     /** Unit test.  First arg is filename */
     public static void main(String args[]) {
 	HostCatcher hc=new HostCatcher(new Router(), args[0]);
-	System.out.println(hc.choose());
+	System.out.println(hc.toString());
     }
 }
 
+/** Immutable. */
 class Endpoint {
     String hostname;
     int port;
@@ -138,7 +207,20 @@ class Endpoint {
 	this.port=port;
     }
 
-    String toString() {
+    public String toString() {
 	return hostname+":"+port;
     }
+    
+    public boolean equals(Object o) {
+	if (! (o instanceof Endpoint))
+	    return false;
+	Endpoint e=(Endpoint)o;
+	return hostname.equals(e.hostname) && port==e.port;
+    }
+
+    public int hashCode() {
+	//This is good enough, since one host rarely has multiple ports.
+	return hostname.hashCode();
+    }
 }
+
