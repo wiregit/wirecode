@@ -39,7 +39,7 @@ private ConnectionManager manager = null;
 /**
 *	Queue of EndPoints (hosts) for BFS traversal of hosts
 */
-private LinkedList hostQueue = (linkedList)(Collections.synchronizedList(new LinkedList()));
+private LinkedList hostQueue = new LinkedList();
 
 /** 
 *	Object for synchronizing access to graph
@@ -102,7 +102,7 @@ try
 	//Keep on outputting the DOT file from which Graph can be constructed
 	while(true)
 	{
-		//Make a copy the graph object (of type HashMap) so that other threads can continue
+		//Make a copy of the graph object (of type HashMap) so that other threads can continue
 		//We will work on the copy of the object to avoid contention
 
 		Map graphCopy;
@@ -113,6 +113,7 @@ try
 		}//copy made
 
 		//output the graph to file
+		GraphInOut.makeDotFile(graphCopy);
 
 		//sleep for some time
 

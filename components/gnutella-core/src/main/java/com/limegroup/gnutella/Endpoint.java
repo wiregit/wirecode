@@ -18,6 +18,16 @@ public class Endpoint implements Cloneable{
     public String toString() {
 	return hostname+":"+port;
     }
+
+	public String getHostname()
+	{
+		return hostname;
+	}
+
+	public int getPort()
+	{
+		return port;
+	}
     
     public boolean equals(Object o) {
 	if (! (o instanceof Endpoint))

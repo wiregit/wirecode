@@ -48,7 +48,7 @@ private NetworkDiscoverer parent;
 *	PING replies (PONGS) after sending an initial PING
 *	After this much amount of time, the thread will not wait for PONGS
 */
-private static final long TIME_TO_WAIT_FOR_PONGS = 5000; //5 seconds
+private static final long TIME_TO_WAIT_FOR_PONGS = 30000; //30 seconds
 
 /**
 *	Endpoint to which this thread is connected
@@ -88,7 +88,23 @@ try
 
 
 	//Open connection to a host
-	connection = getOpenedConnection();
+	while(true)
+	{
+		try
+		{
+			connection = getOpenedConnection();
+			if(connection != null)
+				break;
+		}
+		catch(NoSuchElementException nsee)
+		{
+			//Wait for sometime when the hostcatcher gets some elements
+			Thread.sleep(30000); //30 seconds
+
+			//DEBUG
+			System.out.println("no hostto connect");
+		}	
+	}	
 
 	//Opening a connection also sends the first initial PING request to the
 	//client to which we opened connection
@@ -181,11 +197,14 @@ private Connection getOpenedConnection() throws NoSuchElementException
 	//See if there's a host:port pair (Endpoint) in the hostQueue
 	try
 	{
-		//get the last eleement from the queue
-		e = (Endpoint)hostQueue.getLast();
-		//remove it from the queue
-		hostQueue.removeLast();
-		
+		//get the last element from the queue
+		//synchronize it
+		synchronized(hostQueue)
+		{
+			e = (Endpoint)hostQueue.getLast();
+			//remove it from the queue
+			hostQueue.removeLast();
+		}
 	}
 	catch(NoSuchElementException nsee)
 	{

@@ -95,6 +95,9 @@ public static void makeDotFile(Map graph)
 	{
 		Map.Entry e = (Map.Entry) iterator.next();
 
+		//output the node
+		out.println(e.getKey() + "");
+
 		//Get the iterator over the connected nodes
 		connectedIterator = ((Set)e.getValue()).iterator();
 
@@ -133,5 +136,14 @@ private static String getNewFileName()
 	return new String(filePrefix + count + ".dot");
 }
 
+/**
+*	Converts Endpoint to a form that can be used as a node identifier 
+*	@param ep The endpoint for which we need String representation (a valid identifier)
+*	@return The identifier representation
+*/
+private static String getIdentifier(Endpoint ep)
+{
+
+}
 
 }
