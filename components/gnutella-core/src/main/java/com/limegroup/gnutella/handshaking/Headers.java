@@ -9,7 +9,12 @@ import com.limegroup.gnutella.util.CommonUtils;
  * This class contains the headers that all LimeWires pass in connection
  * handshakes.
  */
-public class Headers extends Properties {
+public abstract class Headers extends Properties {
+
+    /**
+     * Constant for the version of query routing we use.
+     */
+    private static final String QUERY_ROUTING_VERSION = "0.1";
 
     protected Headers(String remoteIP) {
 		put(HeaderNames.LISTEN_IP, "");
@@ -28,7 +33,7 @@ public class Headers extends Properties {
 									RouterService.getPort());
             return e.getHostname()+":"+e.getPort();
         } else {
-            return getProperty(key, defaultValue);
+            return super.getProperty(key, defaultValue);
         }
     }
     
@@ -38,7 +43,7 @@ public class Headers extends Properties {
 									RouterService.getPort());
             return e.getHostname()+":"+e.getPort();
         } else {
-            return getProperty(key);
+            return super.getProperty(key);
         }
     }
     
@@ -48,13 +53,12 @@ public class Headers extends Properties {
      */
     private static void addCommonHeaders(Properties props) {
         props.put(HeaderNames.X_QUERY_ROUTING, 
-				  HeaderNames.QUERY_ROUTING_VERSION);
+				  QUERY_ROUTING_VERSION);
         props.put(HeaderNames.USER_AGENT,
 				  CommonUtils.getHttpServer());       
         props.put(HeaderNames.GGEP, "0.5");
 		props.put(HeaderNames.X_GUESS, "0.1");
-        props.put(HeaderNames.X_VENDOR_MESSAGE,
-                  HeaderNames.VM_VERSION);
+        props.put(HeaderNames.X_VENDOR_MESSAGE, "0.1");
 
         // even though these are only really used by Ultrapeers, we
         // include them with leaves to as an indication that they
@@ -62,7 +66,12 @@ public class Headers extends Properties {
         props.put(HeaderNames.X_DEGREE, 
                   Integer.toString(ConnectionManager.ULTRAPEER_CONNECTIONS));
 		props.put(HeaderNames.X_ULTRAPEER_QUERY_ROUTING, 
-                  HeaderNames.QUERY_ROUTING_VERSION);
+                  QUERY_ROUTING_VERSION);
+
+        props.put(HeaderNames.X_MAX_TTL, "4");
+        props.put(HeaderNames.X_DYNAMIC_QUERY, "0.1");
+        
+        
         UpdateManager u = UpdateManager.instance();
         String latestVersion = u.getVersion();
         if(!latestVersion.equals("@version@"))//don't send header for @version@
