@@ -339,53 +339,47 @@ public class ManagedDownloader implements Downloader, Serializable {
         return true;
     }
 
-    public synchronized void launch() {
+
+    /** This is a blocking call.  Threading it may make sense.
+     */
+    public synchronized File getDownloadFragment() {
         //We haven't started yet.
         if (dloader==null)
-            return;
+            return null;
 
         //Unfortunately this must be done in a background thread because the
         //copying (see below) can take a lot of time.  If we can avoid the copy
         //in the future, we can avoid the thread.
-        Thread worker=new Thread() {
-            public void run() {              
-                String name=dloader.getFileName();
-                File file=null;
+        String name=dloader.getFileName();
+        File file=null;
 
-                //a) If the file is being downloaded, create *copy* of
-                //incomplete file.  The copy is needed because some programs,
-                //notably Windows Media Player, attempt to grab exclusive file
-                //locks.  If the download hasn't started, the incomplete file
-                //may not even exist--not a problem.
-                if (dloader.getAmountRead()<dloader.getFileSize()) {
-                    File incomplete=incompleteFileManager.
-                        getFile(name, dloader.getFileSize());            
-                    file=new File(incomplete.getParent(),
-                                  IncompleteFileManager.PREVIEW_PREFIX
-                                      +incomplete.getName());
-                    if (! CommonUtils.copy(incomplete, file)) //note side-effect
-                        return;
-                }
-                //b) Otherwise, choose completed file.
-                else {
-					File saveDir = null;
-					try {
-						saveDir = SettingsManager.instance().getSaveDirectory();
-					} catch(java.io.FileNotFoundException fnfe) {
-						// simply return if we could not get the save directory.
-						return;
-					}
-					file=new File(saveDir,name);     
-				}
-
-                try {
-                    Launcher.launchFile(file);
-                } catch (IOException e) { }
+        //a) If the file is being downloaded, create *copy* of
+        //incomplete file.  The copy is needed because some programs,
+        //notably Windows Media Player, attempt to grab exclusive file
+        //locks.  If the download hasn't started, the incomplete file
+        //may not even exist--not a problem.
+        if (dloader.getAmountRead()<dloader.getFileSize()) {
+            File incomplete=incompleteFileManager.
+            getFile(name, dloader.getFileSize());            
+            file=new File(incomplete.getParent(),
+                          IncompleteFileManager.PREVIEW_PREFIX
+                          +incomplete.getName());
+            if (! CommonUtils.copy(incomplete, file)) //note side-effect
+                return null;
+        }
+        //b) Otherwise, choose completed file.
+        else {
+            File saveDir = null;
+            try {
+                saveDir = SettingsManager.instance().getSaveDirectory();
+            } catch(java.io.FileNotFoundException fnfe) {
+                // simply return if we could not get the save directory.
+                return null;
             }
-        };
-        worker.setDaemon(true);
-        worker.setName("Launcher thread");
-        worker.start();
+            file=new File(saveDir,name);     
+        }
+        
+        return file;
     }
 
     /** Actually does the download. */

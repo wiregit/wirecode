@@ -38,12 +38,11 @@ public interface Downloader extends BandwidthTracker {
     public boolean resume() throws AlreadyDownloadingException;
 
     /**
-     * Launches the downloaded file with the appropriate program.  If the
-     * download isn't complete, launches whatever has been downloaded, taking
+     * Retuns the downloaded file.  If the
+     * download isn't complete, returns whatever has been downloaded, taking
      * extra work (e.g., copying) if necessary to avoid file locking problems.  
-     * Returns immediately, regardless of whether the launch worked or not.
      */
-    public void launch();
+    public File getDownloadFragment();
 
     /**
      * Returns the state of this: one of QUEUED, CONNECTING, DOWNLOADING,
