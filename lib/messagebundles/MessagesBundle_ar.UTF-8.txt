@@ -1,5 +1,5 @@
 ﻿################################################################################
-# Messages Bundle for LimeWire 3.7.10
+# Messages Bundle for LimeWire 3.8.2
 # Default locale for: Arabic - Egypt, Middle-East
 # Thanks to Marwa El-Dawy.
 ################################################################################
@@ -463,7 +463,6 @@ DOWNLOAD_BUSY_HOSTS=مضيفون مشغولون
 #??? DOWNLOAD_QUEUED_HOSTS=Remotely queued
 DOWNLOAD_SEARCHING=يتم الآن تحديد مواقع المصادر...
 #??? DOWNLOAD_COULD_NOT_READ_SNAPSHOT=Sorry, but LimeWire was unable to restart your old downloads.
-#??? DOWNLOAD_DISK_FULL=LimeWire cannot download the selected file because your hard drive is full. To download more files, you must free up space on your hard drive.
 
 ###################################################################
 # Key/value pairs for UploadView
@@ -814,6 +813,14 @@ NO_INTERNET=يبدو أن جهازك ليس لديه اتصال إنترنت ن�
 # keep trying.
 ################################################################################
 NO_INTERNET_RETRYING=يبدو أن جهازك غير متصل بالإنترنت الآن. سيحاول LimeWire تلقائيا الاتصال إلا إذا اخترت "قطع الاتصال" من قائمة ملف.
+
+################################################################################
+# Key/Value pairs for friendly error messages.
+# Every kind of error MUST be implemented for all types.
+# Currently, the only error is DISK_FULL and the only types are DOWNLOAD and GENERIC.
+################################################################################
+#??? ERROR_DISK_FULL_DOWNLOAD=LimeWire cannot download the selected file because your hard drive is full. To download more files, you must free up space on your hard drive.
+#??? ERROR_DISK_FULL_GENERIC=LimeWire was unable to write a necessary file because your hard drive is full. To continue using LimeWire you must free up space on your hard drive.
 
 ################################################################################
 # Key/Value pairs for internal error messages
@@ -1422,7 +1429,7 @@ STATS_LIME_RECEIVED_TCP_MESSAGES_LABEL=عدد الرسائل الكلي التي
 STATS_LIME_RECEIVED_TCP_PING_REQUESTS_TITLE=Pings
 #??? STATS_LIME_RECEIVED_TCP_PING_REQUESTS_LABEL=TCP pings received from all Gnutella clients versus other LimeWires.
 STATS_LIME_RECEIVED_TCP_PING_REPLIES_TITLE=Pongs
-#??? ST?TS_LIME_RECEIVED_TCP_PING_REPLIES_LABEL=TCP pongs received from all Gnutella clients versus other LimeWires.
+#??? STATS_LIME_RECEIVED_TCP_PING_REPLIES_LABEL=TCP pongs received from all Gnutella clients versus other LimeWires.
 STATS_LIME_RECEIVED_TCP_QUERIES_TITLE=استعلامات
 #??? STATS_LIME_RECEIVED_TCP_QUERIES_LABEL=TCP queries received from all Gnutella clients versus other LimeWires.
 #??? STATS_LIME_RECEIVED_TCP_QUERY_REPLIES_TITLE=Query hits
@@ -1946,7 +1953,7 @@ ALL_HTTP_UNKNOWN_REQUESTS=طلبات غير معلومة
 ALL_HTTP_BANNED_REQUESTS=مضيفون ممنوعون
 #??? ALL_HTTP_CLOSED_REQUESTS=Closed immediately
 
-# Advanced Download statistics.
+# Advanced Download statistics
 DOWNLOAD_RESPONSE_OK=تم القبول
 DOWNLOAD_BUSY=مشغول
 DOWNLOAD_FILE_NOT_FOUND=الملف غير موجود
@@ -1975,7 +1982,7 @@ DOWNLOAD_RANGE_UNAVAILABLE=المدى غير متاح
 #??? DOWNLOAD_PUSH_FAILURE_LOST=Failed push (lost connection)
 #??? DOWNLOAD_TCP_CONNECT_TIME=TCP connect time
 
-# Advanced Upload statistics.
+# Advanced Upload statistics
 #??? UPLOAD_STAT_PUSH_PROXY_SUCCESS=Successful push proxy
 #??? UPLOAD_STAT_PUSH_PROXY_BAD=Malformed push proxy
 #??? UPLOAD_STAT_PUSH_PROXY_FAILED=Failed push proxy
@@ -2005,7 +2012,7 @@ DOWNLOAD_RANGE_UNAVAILABLE=المدى غير متاح
 #??? UPLOAD_STAT_STALLED=Stalled
 #??? UPLOAD_STAT_COMPLETED_FILE=Completed file transfers
 
-# Advanced Handshaking Stats
+# Advanced Handshaking statistics
 #??? LEAF_OUTGOING_REJECT_LEAF=Out rej. (leaf)
 #??? LEAF_OUTGOING_REJECT_OLD_UP=Out rej. (old Ultrapeer)
 #??? LEAF_OUTGOING_ACCEPT=Out acc.
@@ -2040,7 +2047,7 @@ DOWNLOAD_RANGE_UNAVAILABLE=المدى غير متاح
 #??? OUTGOING_OTHER_ULTRAPEER_REJECT=Other Ultrapeers
 #??? OUTGOING_OTHER_LEAF_REJECT=Other leaves
 
-# Advanced OOB Stats
+# Advanced OOB statistics
 #??? ALL_OOB_REQUESTS=Responses requested
 #??? ALL_OOB_RESPONSES=Responses received
 #??? ALL_OOB_BYPASSED=Responses bypassed
