@@ -732,6 +732,10 @@ public class ConnectionManager {
             int peers = getNumInitializedConnections();
             int nonLimeWirePeers = _nonLimeWirePeers;
             
+            if(!allowUltrapeer2UltrapeerConnection(hr)) {
+                return false;
+            }
+            
             // Reserve RESERVED_NON_LIMEWIRE_PEERS slots
             // for non-limewire peers to ensure that the network
             // is well connected.
@@ -750,6 +754,25 @@ public class ConnectionManager {
 		return false;
     }
 
+    /**
+     * Utility method for determining whether or not the connection should be
+     * allowed as an Ultrapeer<->Ultrapeer connection.  We may not allow the 
+     * connection for a variety of reasons, including lack of support for 
+     * specific features that are vital for good performance, or clients of
+     * specific vendors that are leechers or have serious bugs that make them
+     * detrimental to the network.
+     * 
+     * @param hr the <tt>HandshakeResponse</tt> instance containing the 
+     *  connections headers of the remote host
+     * @return <tt>true</tt> if the connection should be allowed, otherwise
+     *  <tt>false</tt>
+     */
+    private boolean allowUltrapeer2UltrapeerConnection(HandshakeResponse hr) {
+        String userAgent = hr.getUserAgent();
+        if(userAgent.startsWith("Morpheus")) return false;
+        return true;
+    }
+    
 	/** Returns the number of connections to other ultrapeers.  Caller MUST hold
      *  this' monitor. */
     private int ultrapeerConnections() {
