@@ -781,15 +781,28 @@ public class DownloadManager implements BandwidthTracker {
         
         // Send as multicast if it's multicast.
         if( file.isReplyToMulticast() ) {
-            PushRequest pr = new PushRequest(GUID.makeGuid(),
-                                     (byte)1, //ttl
-                                     file.getClientGUID(),
-                                     file.getIndex(),
-                                     RouterService.getNonForcedAddress(),
-                                     RouterService.getNonForcedPort() );
-            router.sendMulticastPushRequest(pr);
-            return true;
+            byte[] addr = RouterService.getNonForcedAddress();
+            int port = RouterService.getNonForcedPort();
+            if( NetworkUtils.isValidAddress(addr) &&
+                NetworkUtils.isValidPort(port) ) {
+                PushRequest pr = new PushRequest(GUID.makeGuid(),
+                                         (byte)1, //ttl
+                                         file.getClientGUID(),
+                                         file.getIndex(),
+                                         addr,
+                                         port);
+                router.sendMulticastPushRequest(pr);
+                return true;
+            }
         }
+        
+        // Make sure we know our correct address/port.
+        // If we don't, we can't send pushes yet.
+        byte[] addr = RouterService.getAddress();
+        int port = RouterService.getPort();
+        if( !NetworkUtils.isValidAddress(addr) || 
+            !NetworkUtils.isValidPort(port) )
+            return false;
         
         // If it wasn't multicast, try sending to the proxies if it had them.
         Set proxies = file.getPushProxies();
@@ -809,18 +822,16 @@ public class DownloadManager implements BandwidthTracker {
             final String requestString = "/gnutella/push-proxy?ServerID=" + 
                 Base32.encode(file.getClientGUID());
             final String nodeString = "X-Node:";
-            final String nodeValue = 
-                NetworkUtils.ip2string(RouterService.getAddress()) +
-                ":" + RouterService.getPort();
+            final String nodeValue = NetworkUtils.ip2string(addr) + ":" + port;
 
             // try to contact each proxy
             Iterator iter = proxies.iterator();
             while(iter.hasNext() && !requestSuccessful) {
                 PushProxyInterface ppi = (PushProxyInterface)iter.next();
                 try {
-                    String ip = ppi.getPushProxyAddress().getHostName();
-                    int port = ppi.getPushProxyPort();
-                    URL url = new URL("http", ip, port, requestString);
+                    String ppIp = ppi.getPushProxyAddress().getHostName();
+                    int ppPort = ppi.getPushProxyPort();
+                    URL url = new URL("http",ppIp, ppPort, requestString);
                     HttpURLConnection connection = 
                     (HttpURLConnection) url.openConnection();
                     connection.setUseCaches(false);
@@ -845,8 +856,8 @@ public class DownloadManager implements BandwidthTracker {
                             ConnectionSettings.TTL.getValue(),
                             file.getClientGUID(),
                             file.getIndex(),
-                            RouterService.getAddress(),
-                            RouterService.getPort());
+                            addr,
+                            port);
 
         try {
             router.sendPushRequest(pr);
