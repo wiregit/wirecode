@@ -54,7 +54,7 @@ public class BestCandidatesVendorMessage extends VendorMessage {
 	
 	
 	/**
-	 * see superclass
+	 * creates a an object from data from the network
 	 */
 	protected BestCandidatesVendorMessage(byte[] guid, byte ttl, byte hops,
 			 int version, byte[] payload)

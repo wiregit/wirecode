@@ -10,7 +10,7 @@ import com.limegroup.gnutella.Connection;
 import com.limegroup.gnutella.util.IpPort;
 
 /**
- * A class representing a candidate for election.
+ * An interface representing a candidate for election.
  */
 public interface Candidate extends IpPort{
 	
