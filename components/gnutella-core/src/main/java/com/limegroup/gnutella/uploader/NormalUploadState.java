@@ -24,6 +24,7 @@ public class NormalUploadState implements UploadState {
 	private InputStream _fis;
 	private int _amountRead;
 	private int _uploadBegin;
+    private int _uploadEnd;
 
     /** Flag indicating whether we should close the connection after serving
      * the request or not */
@@ -46,9 +47,16 @@ public class NormalUploadState implements UploadState {
             _fis =  _uploader.getInputStream();
             _amountRead = _uploader.amountUploaded();
             _uploadBegin =  _uploader.getUploadBegin();
+            _uploadEnd =  _uploader.getUploadEnd();
+            
+            //guard clause
+            if(_fileSize < _uploadBegin)
+                return;
+            
+            //if invalid end-index, then upload upto the end of file
+            if(_uploadEnd <= 0 || _uploadEnd <= _uploadBegin)
+                _uploadEnd = _fileSize;
 
-            /* prepare the file to be read */
-            // prepareFile();
             /* write the header information to the socket */
             writeHeader();
             /* write the file to the socket */
@@ -68,6 +76,9 @@ public class NormalUploadState implements UploadState {
                     c = _fis.read(buf);
                     if (c == -1)
                         break;
+                    //dont upload more than asked
+                    if( c > (_uploadEnd - _amountRead))
+                        c = _uploadEnd - _amountRead;
                     try {
                         _ostream.write(buf, 0, c);
                     } catch (java.net.SocketException e) {
@@ -75,14 +86,16 @@ public class NormalUploadState implements UploadState {
                     }
                     _amountRead += c;
                     _uploader.setAmountUploaded(_amountRead);
+                    
+                    //finish uploading if the desired amount has been uploaded
+                    if(_amountRead >= _uploadEnd)
+                        break;
                 }
 
             } else {
                 //Normal case: throttle uploads. Similar to above but we
                 //sleep after sending data.
-            outerLoop:
                 while (true) {
-
                     // int max = _uploader.getManager().calculateBurstSize();
                     int max = _uploader.getManager().calculateBandwidth();
                     int burstSize=max*CYCLE_TIME;
@@ -93,7 +106,10 @@ public class NormalUploadState implements UploadState {
                     while (burstSent<burstSize) {
                         c = _fis.read(buf);
                         if (c == -1)
-                            break outerLoop;  //get out of BOTH loops
+                            return;
+                        //dont upload more than asked
+                            if( c > (_uploadEnd - _amountRead))
+                                c = _uploadEnd - _amountRead;
                         try {
                             _ostream.write(buf, 0, c);
                         } catch (java.net.SocketException e) {
@@ -102,6 +118,10 @@ public class NormalUploadState implements UploadState {
                         _amountRead += c;
                         _uploader.setAmountUploaded(_amountRead);
                         burstSent += c;
+                        //finish uploading if the desired amount 
+                        //has been uploaded
+                        if(_amountRead >= _uploadEnd)
+                            break;
                     }
 
                     // Date stop=new Date();
@@ -187,7 +207,7 @@ public class NormalUploadState implements UploadState {
 		String type = getMimeType();       /* write this method later  */
 		str = "Content-type:" + type + "\r\n";
 		_ostream.write(str.getBytes());
-		str = "Content-length:"+ (_fileSize - _uploadBegin) + "\r\n";
+		str = "Content-length:"+ (_uploadEnd - _uploadBegin) + "\r\n";
 		_ostream.write(str.getBytes());
 		
 		// Version 0.5 of limewire misinterpreted Content-range
