@@ -731,8 +731,8 @@ public class QueryRouteTable {
         qrt2.addAll(qrt);
         Assert.that(qrt2.bitTable.get(0));
         Assert.that(qrt2.bitTable.get(1));
-        Assert.that(qrt2.bitTable.get(2));
-        Assert.that(qrt2.bitTable.get(3));
+        Assert.that(!qrt2.bitTable.get(2));
+        Assert.that(!qrt2.bitTable.get(3));
 
         qrt=new QueryRouteTable(4);  // 1 2 4 X ==> 2 3 5
         qrt2=new QueryRouteTable(3);
