@@ -206,6 +206,8 @@ public class Connection {
         return _outgoing;
     }
 
+    /** A tiny allocation optimization; see Message.read(InputStream,byte[]). */
+    private byte[] HEADER_BUF=new byte[23];
     /**
      * Receives a message.  This method is NOT thread-safe.  Behavior is
      * undefined if two threads are in a receive call at the same time for a
@@ -219,7 +221,7 @@ public class Connection {
     public Message receive() throws IOException, BadPacketException {
         Message m = null;
         while (m == null) {
-            m = Message.read(_in);
+            m = Message.read(_in, HEADER_BUF);
         }
         return m;
     }

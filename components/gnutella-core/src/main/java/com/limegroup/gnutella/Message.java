@@ -74,7 +74,7 @@ public abstract class Message implements Serializable{
               byte hops, int length) {
         this.guid=guid; this.func=func; this.ttl=ttl;
         this.hops=hops; this.length=length;
-        repOk();
+        //repOk();
     }
 
     /**
@@ -92,10 +92,21 @@ public abstract class Message implements Serializable{
      */
     public static Message read(InputStream in)
             throws BadPacketException, IOException {
+        return Message.read(in, new byte[23]);
+    }
+
+    /**
+     * @requires buf.length==23
+     * @effects exactly like Message.read(in), but buf is used as scratch for
+     *  reading the header.  This is an optimization that lets you avoid
+     *  repeatedly allocating 23-byte arrays.  buf may be used when this returns,
+     *  but the contents are not guaranteed to contain any useful data.  
+     */
+    static Message read(InputStream in, byte[] buf)
+            throws BadPacketException, IOException {
         //1. Read header bytes from network.  If we timeout before any
         //   data has been read, return null instead of throwing an
         //   exception.
-        byte[] buf=new byte[23]; //23=size of header (in bytes)
         for (int i=0; i<23; ) {
             int got;
             try {
