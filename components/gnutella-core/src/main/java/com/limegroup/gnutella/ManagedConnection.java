@@ -999,6 +999,8 @@ public class ManagedConnection
                 if(_firstResponse && _host != null){
                     //try using the cookie if we have
                     user = COOKIES.getUserInfo(_host);
+                    //turn the flag off
+                    _firstResponse = false;
                 }
 
                 //if we dont have cookie, of we have already used the
