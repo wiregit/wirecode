@@ -40,7 +40,7 @@ public abstract class MessageRouter
     /** 
      * The time to wait between route table updates, in milliseconds. 
      */
-    private long QUERY_ROUTE_UPDATE_TIME=1000*60*10; //10 minutes
+    private long QUERY_ROUTE_UPDATE_TIME=1000*60*5; //5 minutes
     
     /**
      * Maps PingRequest GUIDs to PingReplyHandlers
@@ -630,27 +630,29 @@ public abstract class MessageRouter
      *     @modifies connections
      */    
     public void forwardQueryRouteTables() {
-        synchronized (queryUpdateLock) {
-            //Check time.  Skip or update.
-            long time=System.currentTimeMillis();
-            if (time<nextQueryUpdateTime) 
-                return;
-            nextQueryUpdateTime=time+QUERY_ROUTE_UPDATE_TIME;
+        //As a tiny optimization, we skip the propogate if we have not in
+        //shielded mode.
+        if (! _manager.hasShieldedClientSupernodeConnection())
+            return;
 
+        synchronized (queryUpdateLock) {
             //For all connections to new hosts c needing an update...
             //TODO3: use getInitializedConnections2?
             List list=_manager.getInitializedConnections();
             for(int i=0; i<list.size(); i++) {                        
                 ManagedConnection c=(ManagedConnection)list.get(i);
                 
-                //check if we do need to forward the query route tables
-                //Presently, it will be sent only by a shielded-client to
-                //its supernode
-                if(_manager.isSupernode() || 
-                    !c.isSupernodeConnection()){
-                    return;
-                }
+                //There should only be one leaf/supernode connection.  But we
+                //can recover gracefully if that for some reason isn't the case.
+                if (! c.isClientSupernodeConnection()) 
+                    continue;
                 
+                //Check the time to decide if it needs an update.
+                long time=System.currentTimeMillis();
+                if (time<c.getNextQRPForwardTime())
+                    continue;
+                c.setNextQRPForwardTime(time+QUERY_ROUTE_UPDATE_TIME);
+
                 ManagedConnectionQueryInfo qi=c.getQueryRouteState();
                 if (qi==null) {
                     qi=new ManagedConnectionQueryInfo();

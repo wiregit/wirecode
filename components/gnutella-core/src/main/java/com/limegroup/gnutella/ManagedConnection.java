@@ -187,6 +187,10 @@ public class ManagedConnection
      * duplicate queries and decide where to send responses.)  
      */
     private volatile ManagedConnectionQueryInfo queryInfo = null;
+    /** The next time I should send a query route table to this connection.
+     *  Valid only for client-supernode connections. */
+    private long _nextQRPForwardTime;
+
 
     /** The total number of bytes sent/received since last checked. 
      *  These are not synchronized and not guaranteed to be 100% accurate. */
@@ -815,6 +819,20 @@ public class ManagedConnection
             return false;
         else
             return !Boolean.valueOf(value).booleanValue();
+    }
+
+    /** Returns the system time that we should next forward a query route table
+     *  along this connection.  Only valid if isClientSupernodeConnection() is
+     *  true. */
+    public long getNextQRPForwardTime() {
+        return _nextQRPForwardTime;
+    }
+
+    /** Sets the system time that we should next forward a query route table
+     *  along this connection.  Only valid if isClientSupernodeConnection() is
+     *  true. */
+    public void setNextQRPForwardTime(long time) {
+        _nextQRPForwardTime=time;
     }
 
     public void setKillable(boolean killable) {
