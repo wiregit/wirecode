@@ -273,16 +273,27 @@ public final class ID3Reader {
             else if(ID3Editor.GENRE_ID.equals(frameID)) {
                 //ID3v2 frame for genre has the byte used in ID3v1 encoded
                 //within it -- we need to parse that out
-                int index = frameContent.indexOf(")");
+                int startIndex = frameContent.indexOf("(");
+                int endIndex = frameContent.indexOf(")");
+                boolean hasV1Data = startIndex>-1 && endIndex > -1;
                 //Note: It's possible that the user entered her own genre in
                 //which case there could be spurious braces, the id3v2 braces
-                //enclose values between 0 - 127 so the index of the closing
-                //brace should be either 2, 3 or 4, maybe 5 as seen in the field
-                if(index == -1 ||
-                   !(index==2 || index==3 || index==4 || index==5) )
-                    data.setGenre(frameContent);
+                //enclose values between 0 - 127 
+                if(hasV1Data) { //we have braces check if it's valid
+                    String genreByte = 
+                    frameContent.substring(startIndex+1, endIndex);
+                    try {
+                        int i = Integer.parseInt(genreByte);
+                        if(i<0 || i> 127)
+                            hasV1Data = false;
+                    } catch (NumberFormatException nfx) {
+                        hasV1Data = false;
+                    }
+                }
+                if(hasV1Data) 
+                    data.setGenre(frameContent.substring(endIndex+1));
                 else 
-                    data.setGenre(frameContent.substring(index+1));
+                    data.setGenre(frameContent);
             }
         }
         return data;
