@@ -75,10 +75,10 @@ public final class ThemeSettings extends AbstractSettings {
 				if(zipFile.isFile()) {
 					long zipMod = zipFile.lastModified();
 					if(jarMod > zipMod) {
-						CommonUtils.copyResourceFile(THEMES[i], 
-													 new File(THEME_DIR_FILE, 
-															  THEMES[i]), true);
+						CommonUtils.copyResourceFile(THEMES[i], zipFile, true);
 					}
+				} else if(!zipFile.exists()) {
+					CommonUtils.copyResourceFile(THEMES[i], zipFile, true);
 				}
 			}
 		}
