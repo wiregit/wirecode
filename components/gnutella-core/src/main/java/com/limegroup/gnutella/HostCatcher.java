@@ -143,15 +143,6 @@ public class HostCatcher {
      *  initially allowed to. */
     private long nextAllowedFetchTime=Long.MAX_VALUE;
 
-    /**
-     * whether or not to always notify the activity callback implementor that
-     * a host was added to the host catcher.  This is used when the hostcatcher
-     * is used with the SimplePongCacheServer to always notify when a host was
-     * added.
-     */
-    private boolean alwaysNotifyKnownHost=false;
-
-
 	/**
 	 * Constant for the host file to read from and write to.
 	 */
@@ -385,7 +376,7 @@ public class HostCatcher {
         if (pr.isUltrapeer()) {
             // Add it to our free leaf slots list if it has free leaf slots and
             // is an Ultrapeer.
-            if(pr.hasFreeLeafSlots() && pr.isUltrapeer()) {
+            if(pr.hasFreeLeafSlots()) {
                 synchronized(FREE_LEAF_SLOTS) {
                     FREE_LEAF_SLOTS.add(endpoint);
                     
@@ -428,7 +419,7 @@ public class HostCatcher {
      */
     public boolean add(Endpoint host, int priority) {
         LOG.trace("adding host");
-        return add(new ExtendedEndpoint(host.getHostname(), host.getPort()), 
+        return add(new ExtendedEndpoint(host.getAddress(), host.getPort()), 
             priority);
     }
 
@@ -454,19 +445,18 @@ public class HostCatcher {
         //deal, since the call to "set.contains(e)" below ensures no duplicates.
         //Skip if this would connect us to our listening port.  TODO: I think
         //this check is too strict sometimes, which makes testing difficult.
-        if (NetworkUtils.isMe(e.getHostname(), e.getPort()))
+        if (NetworkUtils.isMe(e.getAddress(), e.getPort()))
             return false;
 
         //Skip if this host is banned.
-        if (RouterService.getAcceptor().isBannedIP(e.getHostname()))
+        if (RouterService.getAcceptor().isBannedIP(e.getAddress()))
             return false;
 
         //Add to permanent list, regardless of whether it's actually in queue.
         //Note that this modifies e.
         addPermanent(e);
 
-        boolean ret=false;
-        boolean notifyGUI=false;
+        boolean ret = false;
         synchronized(this) {
             // Don't add this host if it has previously failed.
             if(EXPIRED_HOSTS.contains(e)) {
@@ -487,30 +477,11 @@ public class HostCatcher {
                 if (ejected!=null) {
                     ENDPOINT_SET.remove(ejected);
                 }         
-
-                //If this is not full, notify the callback.  If this is full,
-                //the GUI's display of the host catcher will differ from this.
-                //This is acceptable; the user really doesn't need to see so
-                //many hosts, and implementing the alternatives would require
-                //many changes to ActivityCallback and probably a more efficient
-                //representation on the GUI side.
-                if (ejected==null)
-                    notifyGUI=true;
                 
                 this.notify();
             }
         }
 
-        //we notify the callback in two different situations.  One situation, we
-        //always notify the GUI (e.g., a SimplePongCacheServer which needs to 
-        //know when a new host was added).  The second situation is if the host 
-        //catcher is not full, so that the endpoint is added to the GUI for the 
-        //user to view and use.  The second situation occurs the majority of 
-        //times and only in special cases such as a SimplePongCacheServer would 
-        //the first situation occur.
-        if (alwaysNotifyKnownHost || notifyGUI) {
-            RouterService.getCallback().knownHost(e);
-		}
         repOk();
         return ret;
     }
@@ -525,7 +496,7 @@ public class HostCatcher {
      * @return true iff e was actually added 
      */
     private synchronized boolean addPermanent(ExtendedEndpoint e) {
-        if (NetworkUtils.isPrivateAddress(e.getHostname()))
+        if (NetworkUtils.isPrivateAddress(e.getAddress()))
             return false;
         if (permanentHostsSet.contains(e))
             //TODO: we could adjust the key
@@ -771,10 +742,6 @@ public class HostCatcher {
     public String toString() {
         return "[volatile:"+ENDPOINT_QUEUE.toString()
                +", permanent:"+permanentHosts.toString()+"]";
-    }
-
-    public void setAlwaysNotifyKnownHost(boolean notifyKnownHost) {
-        alwaysNotifyKnownHost = notifyKnownHost;
     }
 
     /** Enable very slow rep checking?  Package access for use by
