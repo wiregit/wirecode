@@ -1041,6 +1041,10 @@ public class FileManager {
         //sometimes returns more results (>255) than we actually send out.
         //That's wasted work.
         IntSet matches = null;
+        //Trie requires that getPrefixedBy(String, int, int) passes
+        //an already case-changed string.  Both search & urnSearch
+        //do thise kind of match, so we canonicalise the case for them.
+        str = _index.canonicalCase(str);        
         matches = search( str,
                           matches);
         if(request.getQueryUrns().size() > 0) {

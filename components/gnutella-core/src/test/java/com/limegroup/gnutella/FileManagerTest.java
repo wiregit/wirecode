@@ -4,11 +4,15 @@ import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.util.PrivilegedAccessor;
 import com.limegroup.gnutella.messages.*;
 import junit.framework.*;
+
+import com.limegroup.gnutella.messages.QueryRequest;
+import com.limegroup.gnutella.util.CommonUtils;
+import com.sun.java.util.collections.*;
 import java.io.*;
 
 public class FileManagerTest extends com.limegroup.gnutella.util.BaseTestCase {
 
-    private static final String EXTENSION = "XYZ";
+    private static final String EXTENSION = "xyz";
     
     private File f1 = null;
     private File f2 = null;
@@ -73,8 +77,21 @@ public class FileManagerTest extends com.limegroup.gnutella.util.BaseTestCase {
             1, fman.getNumFiles());
         assertEquals("Unexpected size of filemanager",
             1, fman.getSize());
+            
+        // it is important to check the query at all bounds,
+        // including tests for case.
         responses=fman.query(QueryRequest.createQuery("unit",(byte)3));
         assertEquals("Unexpected number of responses", 1, responses.length);
+        responses=fman.query(QueryRequest.createQuery("FileManager", (byte)3));
+        assertEquals("Unexpected number of responses", 1, responses.length);
+        responses=fman.query(QueryRequest.createQuery("test", (byte)3));
+        assertEquals("Unexpected number of responses", 1, responses.length);
+        responses=fman.query(QueryRequest.createQuery("file", (byte)3));
+        assertEquals("Unexpected number of responses", 1, responses.length);
+        responses=fman.query(QueryRequest.createQuery(
+            "FileManager_UNIT_tEsT", (byte)3));
+        assertEquals("Unexpected number of responses", 1, responses.length);        
+                
         
         // should not be able to remove unshared file
         assertTrue("should have not been able to remove f3", 
@@ -225,6 +242,106 @@ public class FileManagerTest extends com.limegroup.gnutella.util.BaseTestCase {
         assertEquals("files differ", responses[1].getName(), f5.getName());
         assertEquals("files differ", responses[2].getName(), f6.getName());
     }
+    
+	/**
+	 * Tests URN requests on the FileManager.
+	 */
+	public void testUrnRequests() throws Exception {
+	    addFilesToLibrary();
+
+		for(int i = 0; i < fman.getNumFiles(); i++) {
+			FileDesc fd = fman.get(i);
+			Response testResponse = new Response(fd);
+			URN urn = fd.getSHA1Urn();
+			assertEquals("FileDescs should match", fd, 
+						 fman.getFileDescForUrn(urn));
+			
+			// first set does not include any requested types
+			// third includes both
+			Set requestedUrnSet0 = new HashSet();
+			Set requestedUrnSet1 = new HashSet();
+			Set requestedUrnSet2 = new HashSet();
+			Set requestedUrnSet3 = new HashSet();
+			requestedUrnSet1.add(UrnType.ANY_TYPE);
+			requestedUrnSet2.add(UrnType.SHA1);
+			requestedUrnSet3.add(UrnType.ANY_TYPE);
+			requestedUrnSet3.add(UrnType.SHA1);
+			Set[] requestedUrnSets = {requestedUrnSet0, requestedUrnSet1, 
+									  requestedUrnSet2, requestedUrnSet3};
+			Set queryUrnSet = new HashSet();
+			queryUrnSet.add(urn);
+			for(int j = 0; j < requestedUrnSets.length; j++) {
+				QueryRequest qr = QueryRequest.createQuery(
+                                requestedUrnSets[j], queryUrnSet);
+				Response[] responses = fman.query(qr);
+				assertEquals("there should only be one response", 1, responses.length);
+				assertEquals("responses should be equal", testResponse, responses[0]);		
+			}
+		}
+	}
+
+	/**
+	 * Tests sending request that do not explicitly request any URNs -- traditional
+	 * requests -- to make sure that they do return URNs in their responses.
+	 */
+	public void testThatUrnsAreReturnedWhenNotRequested() throws Exception {
+	    addFilesToLibrary();
+	    
+		for(int i = 0; i < fman.getNumFiles(); i++) {
+			FileDesc fd = fman.get(i);
+			Response testResponse = new Response(fd);
+			URN urn = fd.getSHA1Urn();
+			QueryRequest qr = QueryRequest.createQuery(fd.getName());
+			Response[] responses = fman.query(qr);
+			assertNotNull("didn't get a response for query " + qr, responses);
+			assertEquals("need just one response", 1, responses.length);
+			assertEquals("responses should be equal", testResponse, responses[0]);
+			Set urnSet = responses[0].getUrns();
+			URN[] responseUrns = (URN[])urnSet.toArray(new URN[0]);
+			// this is just a sanity check
+			assertEquals("urns should be equal", urn, responseUrns[0]);		
+		}
+	}	
+	
+	private void addFilesToLibrary() throws Exception {
+		String dirString = "com/limegroup/gnutella";
+		File testDir = CommonUtils.getResourceFile(dirString);
+		testDir = testDir.getCanonicalFile();
+		assertTrue("could not find the gnutella directory",
+		    testDir.isDirectory());
+		
+        File[] files = testDir.listFiles(new FileFilter() { 
+            public boolean accept(File file) {
+                return !file.isDirectory() && file.getName().indexOf("$")!=-1;
+            }
+        });
+		assertNotNull("no files to test against", files);
+		assertNotEquals("no files to test against", 0, files.length);
+
+        waitForLoad();
+
+   		for(int i=0; i<files.length; i++) {
+			if(!files[i].isFile()) continue;
+			File shared = new File(
+			    _sharedDir, files[i].getName() + "." + EXTENSION);
+			//System.out.println("[" + i + "] " + files[i]);
+			assertTrue("unable to get file",
+			    CommonUtils.copy( files[i], shared));
+            assertTrue(fman.addFileIfShared(shared));
+		}
+        
+        
+        // the below test depends on the filemanager loading shared files in 
+        // alphabetical order, and listFiles returning them in alphabetical
+        // order since neither of these must be true, a length check can
+        // suffice instead.
+        //for(int i=0; i<files.length; i++)
+        //    assertEquals(files[i].getName()+".tmp", 
+        //                 fman.get(i).getFile().getName());
+            
+        assertEquals("unexpected number of shared files",
+            files.length, fman.getNumFiles() );
+    }	    
 
 
     File createNewTestFile(int size) throws Exception {

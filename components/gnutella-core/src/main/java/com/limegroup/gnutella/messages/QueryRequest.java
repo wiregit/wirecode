@@ -150,6 +150,26 @@ public class QueryRequest extends Message implements Serializable{
 	}
 	
 	/**
+	 * Creates a new query for the specified UrnType set and URN set.
+	 *
+	 * @param urnTypeSet the <tt>Set</tt> of <tt>UrnType</tt>s to request.
+	 * @param urnSet the <tt>Set</tt> of <tt>URNs</tt>s to request.
+	 * @return a new <tt>QueryRequest</tt> for the specied UrnTypes and URNs
+	 * @throws <tt>NullPointerException</tt> if either sets are null.
+	 */
+	public static QueryRequest createQuery(Set urnTypeSet, Set urnSet) {
+	    if(urnSet == null)
+	        throw new NullPointerException("null urnSet");
+	    if(urnTypeSet == null)
+	        throw new NullPointerException("null urnTypeSet");
+	    return new QueryRequest(newQueryGUID(false), DEFAULT_TTL, "\\", "",
+	                            urnTypeSet, urnSet, null,
+	                            !RouterService.acceptedIncomingConnection(),
+	                            Message.N_UNKNOWN);
+    }
+	    
+	
+	/**
 	 * Creates a requery for when we don't know the hash of the file --
 	 * we don't know the hash.
 	 *
