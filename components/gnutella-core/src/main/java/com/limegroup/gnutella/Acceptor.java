@@ -224,8 +224,8 @@ public class Acceptor extends Thread {
 		int tempPort = settings.getPort();
 		ActivityCallback callback = RouterService.getCallback();
 
-        //0. Get local address.  This must be done here--not in the static
-        //   initializer--because it can block under certain conditions.
+        //0. Get local address.  This must be done here because it can
+        //   block under certain conditions.
         //   See the notes for _address.
         try {
             setAddress(InetAddress.getLocalHost().getAddress());
