@@ -224,6 +224,11 @@ public interface Downloader extends BandwidthTracker {
 	 * @return the chunk size for the given download
 	 */
 	public int getChunkSize();
+	
+	/**
+	 * @return the amount of data lost due to corruption
+	 */
+	public int getAmountLost();
 
 
 }

@@ -2946,6 +2946,10 @@ public class ManagedDownloader implements Downloader, Serializable {
 		return commonOutFile.getVerifiedBlockSize();
 	}
 	
+	public int getAmountLost() {
+		return commonOutFile.getAmountLost();
+	}
+	
     /**
      * @return true if the table we remembered from previous sessions, contains
      * Takes into consideration when the download is taking place - ie the

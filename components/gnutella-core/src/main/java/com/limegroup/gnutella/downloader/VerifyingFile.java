@@ -64,6 +64,11 @@ public class VerifyingFile {
      * The eventual completed size of the file we're writing.
      */
     private final int completedSize;
+	
+	/**
+	 * How much data did we lose due to corruption
+	 */
+	private int lostSize;
     
     /**
      * The VerifyingFile uses an IntervalSet to keep track of the blocks written
@@ -503,6 +508,13 @@ public class VerifyingFile {
         return verifiedBlocks.getSize();
     }
   
+	/**
+	 * @return how much data was lost due to corruption
+	 */
+	public synchronized int getAmountLost() {
+		return lostSize;
+	}
+	
     /**
      * Determines if all blocks have been written to disk and verified
      */
@@ -637,7 +649,8 @@ public class VerifyingFile {
                 pendingBlocks.delete(_interval);
                 if (good) 
                     verifiedBlocks.add(_interval);
-                LOG.debug("verifying: "+_interval+" state:"+dumpState());
+                else
+					lostSize += (_interval.high - _interval.low + 1);
             }
         }
         
