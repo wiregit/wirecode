@@ -194,15 +194,15 @@ public class HostCatcher {
         }
 
         //2.) Write out the connections in the Ping Reply cache.
-        PingReplyCache pongCache = PingReplyCache.instance();
-        for (Iterator iter=pongCache.iterator(); iter.hasNext(); ) {
-            PingReply pr = ((PingReplyCacheEntry)iter.next()).getPingReply();
-            Endpoint e = new Endpoint(pr.getIP(), pr.getPort());
-            if (connections.contains(e))
-                continue;
-            connections.add(e);
-            writeInternal(out, e);
-        }
+//          PingReplyCache pongCache = PingReplyCache.instance();
+//          for (Iterator iter=pongCache.iterator(); iter.hasNext(); ) {
+//              PingReply pr = ((PingReplyCacheEntry)iter.next()).getPingReply();
+//              Endpoint e = new Endpoint(pr.getIP(), pr.getPort());
+//              if (connections.contains(e))
+//                  continue;
+//              connections.add(e);
+//              writeInternal(out, e);
+//          }
 
         //2.) Write hosts in reserve cache that are not in connections--in order.
         for (int i=reserveCacheQueue.size()-1; i>=0; i--) {
