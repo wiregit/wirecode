@@ -412,12 +412,6 @@ public class LimeXMLDocument implements Serializable {
             catch (NumberFormatException ignored) {
                 // the string is fine, it is a valid genre...
             }
-            finally {
-                if (retValue.equals("")) {
-                    fieldToValue.remove(fieldName);
-                    retValue = null;
-                }
-            }
         }
         return retValue;
     }
@@ -463,6 +457,7 @@ public class LimeXMLDocument implements Serializable {
         return ret;
     }
 
+
     /*
     //Unit Tester    
     public static void main(String args[]){
@@ -497,16 +492,32 @@ public class LimeXMLDocument implements Serializable {
             System.out.println("Sumeet : value "+value);
        }
         ripIDTest();
+        debugTest1();
     }
-    */
-
+    
+    public static void debugTest1() {
+        String s="<?xml version=\"1.0\"?><audios xsi:noNamespaceSchemaLocation=\"http://www.limewire.com/schemas/audio.xsd\"><audio type=\"song\" album=\" \" genre=\" \"/></audios>";
+        try {
+            LimeXMLDocument d = new LimeXMLDocument(s);
+            System.out.println("Document d = "+d);
+            String v = d.getValue("audios__audio__type__");
+            System.out.println("Type val = |"+v+"|");
+            v = d.getValue("audios__audio__album__");
+            System.out.println("Album val = |"+v+"|");
+            v = d.getValue("audios__audio__genre__");
+            System.out.println("Genre val = |"+v+"|");
+        } catch (Exception e ) {
+            e.printStackTrace();
+        }
+    }
+    
     static void ripIDTest() {
-        final String xml = "<?xml version=\"1.0\"?><backslash xsi:noNamespaceSchemaLocation=\"http://www.limewire.com/schemas/slashdotNews.xsd\"><story identifier=\"robbie hranac\"><image>J. Lo</image><title>Oops, I did it Again!</title></story></backslash>";
-
-        Assert.that(ripIdentifier(xml).equals("<?xml version=\"1.0\"?><backslash xsi:noNamespaceSchemaLocation=\"http://www.limewire.com/schemas/slashdotNews.xsd\"><story ><image>J. Lo</image><title>Oops, I did it Again!</title></story></backslash>"));
+    final String xml = "<?xml version=\"1.0\"?><backslash xsi:noNamespaceSchemaLocation=\"http://www.limewire.com/schemas/slashdotNews.xsd\"><story identifier=\"robbie hranac\"><image>J. Lo</image><title>Oops, I did it Again!</title></story></backslash>";
+    
+    Assert.that(ripIdentifier(xml).equals("<?xml version=\"1.0\"?><backslash xsi:noNamespaceSchemaLocation=\"http://www.limewire.com/schemas/slashdotNews.xsd\"><story ><image>J. Lo</image><title>Oops, I did it Again!</title></story></backslash>"));
     }
-
-
+    
+    */
 
     /**
      * finds the structure of the document by looking at the names of 
