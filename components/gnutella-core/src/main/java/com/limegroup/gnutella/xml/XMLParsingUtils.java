@@ -108,6 +108,7 @@ public class XMLParsingUtils {
 //         Result r = parse(xml);
 //         Assert.that(r.schemaURI.equals("http://www.limewire.com/schemas/audio.xsd"));
 //         Assert.that(r.type.equals("audio"));
+//         Assert.that(r.canonicalKeyPrefix.equals("audios__audio__"));
 //         List list = new ArrayList();
 //         Map map = new TreeMap(Comparators.stringComparator());
 //         map.put("audios__audio__genre__","Rock");
