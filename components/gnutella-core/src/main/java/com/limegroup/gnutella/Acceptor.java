@@ -100,9 +100,13 @@ public class Acceptor implements Runnable {
     /**
      * Returns this' address to use for ping replies, query replies,
      * and pushes.
+     * 
+     * @param checkForce whether or not to check if the IP address is forced.
+     *   If false, the forced IP address will never be used.
+     *   If true, the forced IP address will only be used if one is set.
      */
-    public byte[] getAddress() {
-		if(SettingsManager.instance().getForceIPAddress())
+    public byte[] getAddress(boolean checkForce) {
+		if(checkForce && SettingsManager.instance().getForceIPAddress())
 			return SettingsManager.instance().getForcedIPAddress();
         synchronized (Acceptor.class) {
             return _address;

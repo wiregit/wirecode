@@ -29,10 +29,6 @@ public class BrowseHostHandler {
      */
     private MessageRouter _router = null;
 
-    /** The Acceptor instance.  Used for getting system props...
-     */
-    private Acceptor _acceptor = null;
-
     /** The GUID to be used for incoming QRs from the Browse Request.
      */
     private GUID _guid = null;
@@ -52,16 +48,14 @@ public class BrowseHostHandler {
      * incoming QReps...
      * @param router A instance of a MessageRouter, so I can route messages if
      * needs be.
-     * @param acceptor A instance of the Acceptor, need it for accepting :)
      * @param guid The GUID you have associated on the front end with the
      * results of this Browse Host request.
      * @param serventID May be null, non-null if I need to push
      */
     public  BrowseHostHandler(ActivityCallback callback, MessageRouter router,
-                              Acceptor acceptor, GUID guid, GUID serventID) {
+                              GUID guid, GUID serventID) {
         _callback = callback;
         _router = router;
-        _acceptor = acceptor;
         _guid = guid;
         _serventID = serventID;
     }
@@ -100,8 +94,8 @@ public class BrowseHostHandler {
 												 (byte)6,
 												 _serventID.bytes(), 
 												 SPECIAL_INDEX,
-												 _acceptor.getAddress(),
-												 _acceptor.getPort());
+												 RouterService.getAddress(),
+												 RouterService.getPort());
                 // register with the map so i get notified about a response to my
                 // Push.
                 synchronized (_pushedHosts) {
@@ -137,8 +131,8 @@ public class BrowseHostHandler {
         // ask for the browse results..
         str = "GET / HTTP/1.1" + LF;
         oStream.write(str.getBytes());
-        str = "Host: " + Message.ip2string(_acceptor.getAddress()) + 
-              ":" + _acceptor.getPort() + LF;
+        str = "Host: " + Message.ip2string(RouterService.getAddress()) + 
+              ":" + RouterService.getPort() + LF;
         oStream.write(str.getBytes());
         str = "User-Agent: " + CommonUtils.getVendor() + LF;
         oStream.write(str.getBytes());

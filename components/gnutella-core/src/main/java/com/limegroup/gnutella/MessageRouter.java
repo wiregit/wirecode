@@ -1485,6 +1485,8 @@ public abstract class MessageRouter {
 			boolean chat = SettingsManager.instance().getChatEnabled();
 			
 			boolean mcast = queryRequest.isMulticast();
+			// if it is a multicasted response, use the non-forced address.
+			if ( mcast ) ip = RouterService.getNonForcedAddress();
 
             // create the new queryReply
             List qrList = createQueryReply(guid, ttl, port, ip, speed, 

@@ -34,8 +34,6 @@ public class DownloadManager implements BandwidthTracker {
     private ActivityCallback callback;
     /** The message router to use for pushes. */
     private MessageRouter router;
-    /** Used for get addresses in pushes. */
-    private Acceptor acceptor;
     /** Used to check if the file exists. */
     private FileManager fileManager;
     /** The repository of incomplete files 
@@ -83,15 +81,16 @@ public class DownloadManager implements BandwidthTracker {
     /** 
      * Initializes this manager. <b>This method must be called before any other
      * methods are used.</b> 
-     *     @param callback the UI callback to notify of download changes
-     *     @param router the message router to use for sending push requests
-     *     @param acceptor used to get my IP address and port for pushes
-     *     @param fileManager used to check if files exist
+     *     @uses RouterService.getCallback for the UI callback 
+     *       to notify of download changes
+     *     @uses RouterService.getMessageRouter for the message 
+     *       router to use for sending push requests
+     *     @uses RouterService.getFileManager for the FileManager
+     *       to check if files exist
      */
     public void initialize() {
         this.callback = RouterService.getCallback();
         this.router = RouterService.getMessageRouter();
-        this.acceptor = RouterService.getAcceptor();
         this.fileManager = RouterService.getFileManager();
     }
 
@@ -484,13 +483,15 @@ public class DownloadManager implements BandwidthTracker {
     public void handleQueryReply(QueryReply qr) {
         // first check if the qr is of 'sufficient quality', if not just
         // short-circuit.
-        if (qr.calculateQualityOfService(!acceptor.acceptedIncoming()) < 1)
+        if (qr.calculateQualityOfService(
+                !RouterService.acceptedIncomingConnection()) < 1)
             return;
 
         // get them as RFDs....
         RemoteFileDesc[] rfds = null;
         try { 
-            rfds = qr.toRemoteFileDescArray(acceptor.acceptedIncoming());
+            rfds = qr.toRemoteFileDescArray(
+                    RouterService.acceptedIncomingConnection());
         }
         catch (BadPacketException bpe) {
             debug(bpe);
@@ -692,8 +693,8 @@ public class DownloadManager implements BandwidthTracker {
                                        SettingsManager.instance().getTTL(),
                                        file.getClientGUID(),
                                        file.getIndex(),
-                                       acceptor.getAddress(),
-                                       acceptor.getPort());
+                                       RouterService.getAddress(),
+                                       RouterService.getPort());
         try {
             router.sendPushRequest(pr);
         } catch (IOException e) {

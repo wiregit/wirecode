@@ -380,7 +380,7 @@ public final class RouterService {
 			ConnectionSettings.LOCAL_IS_PRIVATE.getValue()) {
 			return;
         } else {
-            byte[] managerIP=acceptor.getAddress();
+            byte[] managerIP=acceptor.getAddress(true);
             if (Arrays.equals(cIP, managerIP)
                 && portnum==acceptor.getPort())
                 return;
@@ -1044,8 +1044,7 @@ public final class RouterService {
 	public static void doBrowseHost(String host, int port, 
                              GUID guid, GUID serventID) {
         BrowseHostHandler handler = new BrowseHostHandler(callback, router,
-                                                          acceptor, guid,
-                                                          serventID);
+                                                          guid, serventID);
         handler.browseHost(host, port);
 	}
 
@@ -1113,8 +1112,18 @@ public final class RouterService {
 	 * @return the raw IP address for this host
 	 */
 	public static byte[] getAddress() {
-		return acceptor.getAddress();
+		return acceptor.getAddress(true);
 	}
+	
+	/**
+	 * Returns the Non-Forced IP address for this host.
+	 *
+	 * @return the non-forced IP address for this host
+	 */
+	public static byte[] getNonForcedAddress() {
+	    return acceptor.getAddress(false);
+	}
+	
 
     /**
      * Returns the port used for downloads and messaging connections.
