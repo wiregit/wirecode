@@ -249,10 +249,6 @@ public class MagnetDownloader extends ManagedDownloader implements Serializable 
         //make ResponseVerifier.getSearchTerms/score(keywords[], name) public?
         if (_textQuery!=null) {
             int score=ResponseVerifier.score(_textQuery, null, other);
-System.out.println(
-  "score="+score+
-  " textQ="+_textQuery+
-  " other="+other);
             if (score==100)
                 return true;
         }
