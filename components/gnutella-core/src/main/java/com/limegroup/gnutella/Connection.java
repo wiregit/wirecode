@@ -216,6 +216,8 @@ public class Connection {
     private Boolean _isLeaf=null;
     /** if I am a leaf connected to a supernode  */
     private Boolean _isUltrapeer=null;
+    /** if I am an Ultrapeer peering to another Ultrapeer */
+    private Boolean _isUltrapeerToUltrapeer=null;
 
     /**
      * The "soft max" ttl to use for this connection.
@@ -1311,7 +1313,7 @@ public class Connection {
        }
     }
 
-
+    
     /** Returns the vendor string reported by this connection, i.e., 
      *  the USER_AGENT property, or null if it wasn't set.
      *  @return the vendor string, or null if unknown */
@@ -1532,11 +1534,11 @@ public class Connection {
 	 * could be using reflector indexing, for example. 
 	 */
     public boolean isSupernodeSupernodeConnection() {
-        if(_isUltrapeer == null) {
-            _isUltrapeer = 
-                new Boolean(isClientSupernodeConnection2());
+        if(_isUltrapeerToUltrapeer == null) {
+            _isUltrapeerToUltrapeer = 
+                new Boolean(isSupernodeSupernodeConnection2());
         }
-        return _isUltrapeer.booleanValue();
+        return _isUltrapeerToUltrapeer.booleanValue();
     }
 
     private boolean isSupernodeSupernodeConnection2() {
