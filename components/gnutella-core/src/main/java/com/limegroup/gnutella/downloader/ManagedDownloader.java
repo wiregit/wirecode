@@ -1231,7 +1231,9 @@ public class ManagedDownloader implements Downloader, Serializable {
             //If we're just increasing parallelism, stay in DOWNLOADING
             //state.  Otherwise the following call is needed to restart
             //the timer.
-            if (dloaders.size()==0)
+            if (dloaders.size()==0 && getState()!=COMPLETE && 
+               getState()!=ABORTED && getState()!=GAVE_UP && 
+               getState()!=COULDNT_MOVE_TO_LIBRARY && getState()!=CORRUPT_FILE)
                 setState(CONNECTING, 
                          needsPush ? PUSH_CONNECT_TIME : NORMAL_CONNECT_TIME);
         }
