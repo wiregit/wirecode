@@ -1316,7 +1316,8 @@ public class ManagedDownloader implements Downloader, Serializable {
 			// making this call now is necessary to avoid writing the 
 			// same alternate locations back to the requester as they sent 
 			// in their original headers
-			if (fileDesc != null) {
+			if (fileDesc != null && 
+                fileDesc.getSHA1Urn().equals(totalAlternateLocations.getSHA1Urn())) {
 				fileDesc.addAlternateLocationCollection(totalAlternateLocations);
 				//tell the library we have alternate locations
 				callback.handleSharedFileUpdate(completeFile);
