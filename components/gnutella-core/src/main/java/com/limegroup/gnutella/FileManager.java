@@ -32,6 +32,8 @@ public class FileManager{
 
     private static FileManager _myFileManager;
 
+	private MDFiveCalculator _mdfive;
+
     java.util.Hashtable _sharedHash;
 
     public FileManager() {               /* the constructor initializes */
@@ -39,6 +41,7 @@ public class FileManager{
         _numFiles = 0;
         _files = new ArrayList();
         _extensions = new String[0];
+		_mdfive = new MDFiveCalculator();
 
     }
 
@@ -94,10 +97,12 @@ public class FileManager{
         int size = list.size();
         Response[] response = new Response[size];
         FileDesc desc;
+		Response r;
         for(int j=0; j < size; j++) {
             desc = (FileDesc)list.get(j);
-            response[j] =
-            new Response(desc._index, desc._size, desc._name);
+			r = new Response(desc._index, desc._size, desc._name); 
+			r.setMeta(desc.getMeta());
+            response[j] = r;
         }
         return response;
     }
@@ -145,7 +150,11 @@ public class FileManager{
         if (hasExtension(name)) {
             int n = (int)myFile.length();       /* the list, and increments */
             _size += n;                         /* the appropriate info */
-            _files.add(new FileDesc(_files.size(), name, path,  n));
+			FileDesc fd = new FileDesc(_files.size(), name, path,  n);
+			int md5 = _mdfive.getValue(myFile);
+			Integer myint = new Integer(md5);
+			fd.setMeta(myint.toString());
+            _files.add(fd);
             _numFiles++;
         }
     }

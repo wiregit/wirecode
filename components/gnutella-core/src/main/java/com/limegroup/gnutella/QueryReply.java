@@ -124,6 +124,9 @@ public class QueryReply extends Message implements Serializable{
         payload[6]=ip[3];
         ByteOrder.int2leb((int)speed,payload,7);
 
+		String metaStr;
+		byte[] metaBytes;
+
         //Write each response at index i
         int i=11;
         for (int left=n; left>0; left--) {
@@ -140,8 +143,29 @@ public class QueryReply extends Message implements Serializable{
             i+=name.length();
             //Write double null terminator.
             payload[i]=(byte)0;
-            payload[i+1]=(byte)0;
-            i+=2;
+
+
+			// THIS IS WHERE I"M PUTTIND THE META DATA
+			i++; // i is in the position right after the first null
+
+			metaStr = r.getMeta();
+			if (!metaStr.equals("")) {
+				metaBytes = metaStr.getBytes();
+				int len = metaBytes.length;
+				int k;
+				for (k=0; k < len; k++) {
+					payload[i+k] = metaBytes[k];  // array index out of bounds...y?
+				}
+				// i += k+1;
+				i += k;
+			}
+
+			// END OF META SECTION
+
+            payload[i]=(byte)0;
+            // payload[i+1]=(byte)0;
+            // i+=2;
+			i++;
         }
 
         //Write footer at payload[i...i+16-1]
@@ -188,7 +212,9 @@ public class QueryReply extends Message implements Serializable{
         int ret=0;
         for (int i=0; i<responses.length; i++)
             //8 bytes for index and size, plus name and two null terminators
-            ret += 8+responses[i].getName().length()+2;
+            ret += (8+responses[i].getName().length()+2+
+					responses[i].getMeta().getBytes().length);
+		System.out.println("ret: " + ret);
         return ret;
     }
 
@@ -276,9 +302,11 @@ public class QueryReply extends Message implements Serializable{
 				
 				//Search for remaining null terminator.
 				for ( j=j+1; ; j++) {
+					System.out.print(payload[j]);
 					if (payload[j]==(byte)0)
 						break;
 				}
+				System.out.println("");
 				// i=j+1;
 				i = j+1;
             }
@@ -300,7 +328,7 @@ public class QueryReply extends Message implements Serializable{
 				ppmi.print();
 			}
 			
-
+			// is there going to be a problem detecting bad packets?
 
          //     if (i<payload.length-16)
 //              throw new BadPacketException("Extra data after "
