@@ -14,8 +14,6 @@ import com.limegroup.gnutella.util.CommonUtils;
  * Unit tests for LimeXMLSchema
  */
 public class LimeXMLSchemaTest extends BaseTestCase {
-    
-    private long T=100;
             
 	public LimeXMLSchemaTest(String name) {
 		super(name);

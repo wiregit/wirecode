@@ -120,20 +120,4 @@ public class LimeXMLSchemaRepository
         return schemaURIs;
         
     }
-    
-    
-    public static void main(String[] args)
-    {
-        Test();
-    }
-    
-    private static void Test()
-    {
-        String[] availableSchemas 
-            = LimeXMLSchemaRepository.instance().getAvailableSchemaURIs();
-        for(int i=0; i < availableSchemas.length; i++)
-        {
-            System.out.println("schema = " + availableSchemas[i]);
-        }
-    }
 }
