@@ -6,7 +6,7 @@ import java.net.InetAddress;
 
 import junit.framework.Test;
 
-import com.limegroup.gnutella.GUID;
+import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.upelection.Candidate;
@@ -403,7 +403,24 @@ public class VendorMessageTest extends com.limegroup.gnutella.util.BaseTestCase 
     	//also test one with newer mask - should be trimmed to our mask
     	req = new GiveUPVendorMessage(guid, 1,2,(byte)0xFF);
     	assertTrue(req.asks4Feature(GiveUPVendorMessage.FEATURE_MASK));
-    	assertEquals(0,req.getFormat() & 0xF0);
+    	assertEquals(0,req.getFormat() & ~GiveUPVendorMessage.FEATURE_MASK);
+    }
+    
+    public void testFeaturesVM() throws Exception {
+    	FeaturesVendorMessage fvm = new FeaturesVendorMessage();
+    	testWrite(fvm);
+    	testRead(fvm);
+    	
+    	ByteArrayOutputStream baos = new ByteArrayOutputStream();
+    	fvm.write(baos);
+    	ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
+    	fvm = (FeaturesVendorMessage)Message.read(bais);
+    	
+    	assertEquals(CommonUtils.getJavaVersion(),fvm.getJVM());
+    	assertEquals(CommonUtils.getOS().toLowerCase(),fvm.getOS());
+    	assertEquals(RouterService.getFileManager().getNumFiles(),fvm.getFileShared());
+    	assertTrue(RouterService.getConnectionManager().getMeasuredUpstreamBandwidth() 
+    			== fvm.getBandidth());
     }
     
     public void testBestCandidatesVendorMessage() throws Exception {
