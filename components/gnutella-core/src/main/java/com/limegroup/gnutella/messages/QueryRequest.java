@@ -1242,6 +1242,13 @@ public class QueryRequest extends Message implements Serializable{
     }
 
         
+    /** Returns true if the input bytes match the OOB address of this query.
+     */
+    public boolean matchesReplyAddress(byte[] ip) {
+        return (new GUID(getGUID())).matchesIP(ip);
+    }
+
+        
     /** Returns the port to send a out-of-band reply to.  Only useful
      *  when desiresOutOfBandReplies() == true.
      */

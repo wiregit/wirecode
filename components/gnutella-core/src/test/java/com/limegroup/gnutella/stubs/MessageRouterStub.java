@@ -15,7 +15,8 @@ import com.sun.java.util.collections.List;
 public class MessageRouterStub extends MessageRouter {
 
     protected boolean respondToQueryRequest(QueryRequest queryRequest,
-										  byte[] clientGUID) {
+                                            byte[] clientGUID,
+                                            ReplyHandler handler) {
         return false;
     }
 

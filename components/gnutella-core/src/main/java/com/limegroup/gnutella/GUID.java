@@ -193,6 +193,11 @@ public class GUID implements  com.sun.java.util.collections.Comparable {
         return getIP(this.bytes);
     }
 
+    /** Same as matchesIP(this.bytes) */
+    public boolean matchesIP(byte[] bytes) {
+        return matchesIP(bytes, this.bytes);
+    }
+
     /** Same as getPort(this.bytes) */
     public int getPort() {
         return getPort(this.bytes);
@@ -292,6 +297,17 @@ public class GUID implements  com.sun.java.util.collections.Comparable {
      */
     public static String getIP(byte[] guidBytes) {
         return NetworkUtils.ip2string(guidBytes);
+    }
+
+    /** Gets bytes 0-4 as a dotted ip address.
+     */
+    public static boolean matchesIP(byte[] ipBytes, byte[] guidBytes) {
+        if (ipBytes.length != 4)
+            throw new IllegalArgumentException("Bad byte[] length = " +
+                                               ipBytes.length);
+        for (int i = 0; i < ipBytes.length; i++)
+            if (ipBytes[i] != guidBytes[i]) return false;
+        return true;
     }
 
     /** Gets bytes 13-14 as a port.

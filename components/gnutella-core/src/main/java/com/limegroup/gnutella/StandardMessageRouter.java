@@ -7,6 +7,7 @@ import com.limegroup.gnutella.xml.*;
 import com.limegroup.gnutella.util.*;
 import com.limegroup.gnutella.messages.vendor.*;
 import com.limegroup.gnutella.settings.ChatSettings;
+import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.statistics.RoutedQueryStat;
 import com.sun.java.util.collections.*;
 
@@ -156,7 +157,8 @@ public class StandardMessageRouter extends MessageRouter {
 
 
     protected boolean respondToQueryRequest(QueryRequest queryRequest,
-                                            byte[] clientGUID) {
+                                            byte[] clientGUID,
+                                            ReplyHandler handler) {
 
         // This is a special What is Query - we can only answer queries which
         // have version numbers at or below our supported version
@@ -193,13 +195,13 @@ public class StandardMessageRouter extends MessageRouter {
             }
         }
 
-        return sendResponses(responses, queryRequest);
+        return sendResponses(responses, queryRequest, handler);
         
     }
 
     //This method needs to be public because the Peer-Server code uses it.
-    public boolean sendResponses(Response[] responses, 
-                               QueryRequest query) {
+    public boolean sendResponses(Response[] responses, QueryRequest query,
+                                 ReplyHandler handler) {
         // if either there are no responses or, the
         // response array came back null for some reason,
         // exit this method
@@ -212,9 +214,9 @@ public class StandardMessageRouter extends MessageRouter {
         // send it off as usual.  only send out-of-band if you are GUESS-
         // capable (being GUESS capable implies that you can receive 
         // incoming TCP) AND not firewalled AND not servicing too many
-        // uploads
+        // uploads AND not connected to AND query is hopped enough
         if (query.desiresOutOfBandReplies() && (query.getHops() > 1) &&
-            !query.isFirewalledSource() &&
+            !isConnectedTo(query, handler) &&
             RouterService.isGUESSCapable() && 
             RouterService.acceptedIncomingConnection() &&
             !RouterService.getUploadManager().isBusy()) {
@@ -276,6 +278,18 @@ public class StandardMessageRouter extends MessageRouter {
         
         return true;
 
+    }
+
+    /** Returns whether or not we are connected to the originator of this query.
+     *  PRE: assumes query.desiresOutOfBandReplies == true
+     */
+    private final boolean isConnectedTo(QueryRequest query, 
+                                        ReplyHandler handler) {
+        // special case for testing - hate to do this but what can we do?
+        // if the query has a hop of 1 (or less), we can assume we are connected.
+        if (!ConnectionSettings.LOCAL_IS_PRIVATE.getValue())
+            return (query.getHops() <= 1);
+        return query.matchesReplyAddress(handler.getInetAddress().getAddress());
     }
 
     /** 

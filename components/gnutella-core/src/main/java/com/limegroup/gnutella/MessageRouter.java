@@ -863,7 +863,7 @@ public abstract class MessageRouter {
             locallyEvaluate = false;
             
             // do respond with files that we may have, though
-            respondToQueryRequest(request, _clientGUID);
+            respondToQueryRequest(request, _clientGUID, handler);
             
             multicastQueryRequest(request);
             
@@ -900,7 +900,7 @@ public abstract class MessageRouter {
                 !RouterService.acceptedIncomingConnection() &&
                 !ApplicationSettings.SERVER.getValue())
                 return;
-            respondToQueryRequest(request, _clientGUID);
+            respondToQueryRequest(request, _clientGUID, handler);
         }
     }
 
@@ -1779,7 +1779,8 @@ public abstract class MessageRouter {
      * This method is called from the default handleQueryRequest.
      */
     protected abstract boolean respondToQueryRequest(QueryRequest queryRequest,
-                                                  byte[] clientGUID);
+                                                     byte[] clientGUID,
+                                                     ReplyHandler handler);
 
     /**
      * The default handler for PingRequests received in
