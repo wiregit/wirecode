@@ -521,7 +521,7 @@ public class FileManagerTest extends com.limegroup.gnutella.util.BaseTestCase {
         out.flush();
         out.close();
         //Needed for comparisons between "C:\Progra~1" and "C:\Program Files".			
-        return FileManager.getCanonicalFile(file);
+        return FileUtils.getCanonicalFile(file);
     }
 
     /** Same a createNewTestFile but doesn't actually allocate the requested
