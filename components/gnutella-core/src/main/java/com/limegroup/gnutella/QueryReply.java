@@ -83,7 +83,7 @@ public class QueryReply extends Message implements Serializable{
 
 
     /** Creates a new query reply.  The number of responses is responses.length
-     *  The Browse Host GGEP extension is on by default.  
+     *  The Browse Host GGEP extension is ON by default.  
      *
      *  @requires  0 < port < 2^16 (i.e., can fit in 2 unsigned bytes),
      *    ip.length==4 and ip is in <i>BIG-endian</i> byte order,
@@ -103,7 +103,7 @@ public class QueryReply extends Message implements Serializable{
      * Creates a new QueryReply with a BearShare 2.2.0-style QHD.  The QHD with
      * the LIME vendor code and the given busy and push flags.  Note that this
      * constructor has no support for undefined push or busy bits.
-     * The Browse Host GGEP extension is on by default.  
+     * The Browse Host GGEP extension is ON by default.  
      *
      * @param needsPush true iff this is firewalled and the downloader should
      *  attempt a push without trying a normal download.
@@ -130,7 +130,7 @@ public class QueryReply extends Message implements Serializable{
      * Creates a new QueryReply with a BearShare 2.2.0-style QHD.  The QHD with
      * the LIME vendor code and the given busy and push flags.  Note that this
      * constructor has no support for undefined push or busy bits.
-     * The Browse Host GGEP extension is on by default.  
+     * The Browse Host GGEP extension is ON by default.  
      *
      * @param needsPush true iff this is firewalled and the downloader should
      *  attempt a push without trying a normal download.
@@ -703,8 +703,8 @@ public class QueryReply extends Message implements Serializable{
             int busyFlagT=UNDEFINED;
             int uploadedFlagT=UNDEFINED;
             int measuredSpeedFlagT=UNDEFINED;
-            int supportsChatT=FALSE;
-            int supportsBrowseHostT=FALSE;
+            int supportsChatT=UNDEFINED;
+            int supportsBrowseHostT=UNDEFINED;
             
             //a) extract vendor code
             try {
@@ -1004,7 +1004,7 @@ public class QueryReply extends Message implements Serializable{
     }
 
     /** Unit test.  TODO: these badly need to be factored. */
-    /*    
+    /*
     public static void main(String args[]) {
         byte[] ip={(byte)0xFF, (byte)0, (byte)0, (byte)0x1};
         long u4=0x00000000FFFFFFFFl;
@@ -1372,6 +1372,7 @@ public class QueryReply extends Message implements Serializable{
             Assert.that(qr.getHadSuccessfulUpload()==false);
             Assert.that(qr.getIsMeasuredSpeed()==true);
             Assert.that(qr.getSupportsChat()==false);
+            Assert.that(qr.getSupportsBrowseHost()==true);
         } catch (BadPacketException e) {
             Assert.that(false);
         } catch (NoSuchElementException e) {
@@ -1385,11 +1386,12 @@ public class QueryReply extends Message implements Serializable{
             Assert.that(false);
         }
         byte[] bytes=out.toByteArray();
+        final int ggepLen = GGEPUtil.getQRGGEP(true).length;
         //Length includes header, query hit header and footer, responses, and
-        //QHD (public and private)
-        Assert.that(bytes.length==(23+11+16)+(8+10+2)+(8+14+2)+(4+1+QueryReply.COMMON_PAYLOAD_LEN+1+1));
-        Assert.that(bytes[bytes.length-16-6]==0x1d); //11101
-        Assert.that(bytes[bytes.length-16-5]==0x11); //10001
+        //QHD (public and private), and default Browse Host block
+        Assert.that(bytes.length==(23+11+16)+(8+10+2)+(8+14+2)+(4+1+QueryReply.COMMON_PAYLOAD_LEN+1+1)+ggepLen);
+        Assert.that(bytes[bytes.length-16-6-ggepLen]==0x3d); //00111101
+        Assert.that(bytes[bytes.length-16-5-ggepLen]==0x31); //00110001
 
         //Create from scratch with no bits set
         responses=new Response[2];
