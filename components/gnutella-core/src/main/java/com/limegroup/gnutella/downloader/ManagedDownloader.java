@@ -233,9 +233,28 @@ public class ManagedDownloader implements Downloader, Serializable {
                                "download.log");
             log=new PrintStream(new FileOutputStream(file),
                                 true);   //autoflush
+            log.print("Java version ");
+            log.print(CommonUtils.getJavaVersion());
+            log.print(" from ");
+            log.println(prop("java.vendor"));
+            log.print(CommonUtils.getOS());
+            log.print(" v. ");
+            log.print(prop("os.version"));
+            log.print(" on ");
+            log.println(prop("os.arch"));
         } catch (IOException e) {
             System.err.println("Warning: couldn't create download log.");
         }
+    }
+
+    /** 
+	 * Returns the System property with the given name, or
+     * "?" if it is unknown. 
+	 */
+    private static final String prop(String name) {
+        String value = System.getProperty(name);
+        if (value == null) return "?";
+        else return value;
     }
 
     /**
