@@ -39,12 +39,14 @@ public final class AlternateLocationCollectionTest extends com.limegroup.gnutell
 		}
 
 
+        boolean created = false;
 		Iterator iter = _alternateLocations.iterator();
 		for(AlternateLocation al = (AlternateLocation)iter.next(); 
 			iter.hasNext();   al = (AlternateLocation)iter.next()) {
-			if(_alCollection == null) {
+			if(!created) {
 				_alCollection = 
 					AlternateLocationCollection.createCollection(al.getSHA1Urn());
+                created = true;
 			}
 			_alCollection.addAlternateLocation(al);
 		}
@@ -157,4 +159,41 @@ public final class AlternateLocationCollectionTest extends com.limegroup.gnutell
 		//	   _alCollection.equals(alc2));
 		
 	}
+	
+	/**
+	 * Tests that locations are succesfully removed.
+	 */
+	public void testCanRemoveLocation() {
+	    Iterator iter = _alternateLocations.iterator();
+	    int total = _alCollection.numberOfAlternateLocations();
+	    int i = 0;
+		for(AlternateLocation al = (AlternateLocation)iter.next(); 
+			iter.hasNext();   al = (AlternateLocation)iter.next()) {
+                i++;
+			    assertTrue("unable to remove al: " + al,
+			        _alCollection.removeAlternateLocation(al));
+                assertEquals("size is off", 
+                    total-i, _alCollection.numberOfAlternateLocations() );
+		}
+    }
+    
+    /**
+     * Tests that locations cannot be readded after being removed.
+     */
+    public void testCantAddAfterRemove() {
+	    Iterator iter = _alternateLocations.iterator();
+	    int total = _alCollection.numberOfAlternateLocations();
+	    int i = 0;
+		for(AlternateLocation al = (AlternateLocation)iter.next(); 
+			iter.hasNext();   al = (AlternateLocation)iter.next()) {
+                i++;
+			    assertTrue("unable to remove al: " + al,
+			        _alCollection.removeAlternateLocation(al));
+                assertEquals("size is off", 
+                    total-i, _alCollection.numberOfAlternateLocations() );
+                _alCollection.addAlternateLocation(al);
+                assertEquals("size is off", 
+                    total-i, _alCollection.numberOfAlternateLocations() );                
+		}
+    }        
 }

@@ -18,14 +18,23 @@ public final class AlternateLocationCollection
 	implements HTTPHeaderValue, AlternateLocationCollector {
 
 	/**
-	 * <tt>Map</tt> of <tt>AlternateLocation</tt> instances that map to
+	 * <tt>Set</tt> of <tt>AlternateLocation</tt> instances that map to
 	 * <tt>AlternateLocation</tt> instances.  
      * LOCKING: obtain LOCATIONS monitor when iterating -- otherwise 
 	 *          it's synchronized on its own
      * INVARIANT: _alternateLocations.get(k)==k
 	 */
-	private final SortedMap LOCATIONS = 
-		Collections.synchronizedSortedMap(new TreeMap());
+	private final SortedSet LOCATIONS = 
+		Collections.synchronizedSortedSet(new TreeSet());
+		
+    /**
+     * <tt>Set</tt> of <tt>AlternateLocation</tt> instances that we've
+     * removed from this collection.  Attempts to add to this collection
+     * will first check to see if the location has been previously removed.
+     * If so, we will not re-add them.
+     */
+    private final Set REMOVED =
+        Collections.synchronizedSet(new HashSet());
 
     /**
      * SHA1 <tt>URN</tt> for this collection.
@@ -123,11 +132,15 @@ public final class AlternateLocationCollection
 		if(!sha1.equals(SHA1)) {
 			throw new IllegalArgumentException("SHA1 does not match");
 		}
+		
+		// do not add this if it was previously removed.
+		if ( wasRemoved(al) ) {
+		    return;
+        }
 
 		URL url = al.getUrl();
-		Set keySet = LOCATIONS.keySet();
 		synchronized(LOCATIONS) {
-			Iterator iter = keySet.iterator();
+			Iterator iter = LOCATIONS.iterator();
 			while(iter.hasNext()) {
 				AlternateLocation curAl = (AlternateLocation)iter.next();
 				URL curUrl = curAl.getUrl();
@@ -152,15 +165,62 @@ public final class AlternateLocationCollection
 		// at the end of the map because they have the oldest possible
 		// date according to the date class, namely:
 		// January 1, 1970, 00:00:00 GMT.
-		LOCATIONS.put(al, al);
+		LOCATIONS.add(al);
 
 		// if the collection of alternate locations is getting too big,
 		// remove the last element (the least desirable alternate location)
 		// from the Map
 		if(LOCATIONS.size() > 100) {
-			LOCATIONS.remove(LOCATIONS.lastKey());
+			LOCATIONS.remove(LOCATIONS.last());
 		}
 	}
+	
+	/**
+	 * Removes this <tt>AlternateLocation</tt> from the list.  This will
+	 * iterate through the list to locate an alternate location with the same
+	 * URL and remove that.
+	 */
+	 public boolean removeAlternateLocation(AlternateLocation al) {
+	    URN sha1 = al.getSHA1Urn();
+        if(!sha1.equals(SHA1)) {
+			return false; // it cannot be in this list if it has a different SHA1
+		}
+		
+		synchronized(LOCATIONS) {
+			Iterator iter = LOCATIONS.iterator();
+			while(iter.hasNext()) {
+				AlternateLocation curAl = (AlternateLocation)iter.next();
+				if ( curAl.equalsURL(al) ) {
+				    LOCATIONS.remove(curAl);
+				    REMOVED.add(curAl);
+				    return true;
+                }
+			}
+		}
+		return false;
+    }
+    
+    /**
+     * Determines if this <tt>AlternateLocation</tt> was once removed
+     * from this collection.
+     */
+    public boolean wasRemoved(AlternateLocation al) {
+        URN sha1 = al.getSHA1Urn();
+        // it could never have been added (or removed) if the sh1 is different
+        if(!sha1.equals(SHA1))
+            return false;
+            
+        synchronized(REMOVED) {
+            Iterator iter = REMOVED.iterator();
+            while(iter.hasNext()) {
+                AlternateLocation curAl = (AlternateLocation)iter.next();
+                if( curAl.equalsURL(al) )
+                    return true;
+            }
+        }
+        return false;
+    }
+                    
 
 	/**
      * Implements the <tt>AlternateLocationCollector</tt> interface.
@@ -173,7 +233,7 @@ public final class AlternateLocationCollection
      * @throws <tt>IllegalArgumentException</tt> if the SHA1 of the
      *  collection to add does not match the collection of <tt>this</tt>
      */
-	public synchronized void 
+	public void 
         addAlternateLocationCollection(AlternateLocationCollection alc) {
         if(alc == null) {
             throw new NullPointerException("ALC is null");
@@ -181,10 +241,9 @@ public final class AlternateLocationCollection
 		if(!alc.getSHA1Urn().equals(SHA1)) {
 			throw new IllegalArgumentException("SHA1 does not match");
 		}
-		Map map = alc.LOCATIONS;
-		Collection values = map.values();
-		synchronized(map) { // we must synchronize iteration over the map
-			Iterator iter = values.iterator();
+		Set set = alc.LOCATIONS;
+		synchronized(set) { // we must synchronize iteration over the map
+			Iterator iter = set.iterator();
 			while(iter.hasNext()) {
 				AlternateLocation curLoc = (AlternateLocation)iter.next();
 				this.addAlternateLocation(curLoc);
@@ -246,7 +305,7 @@ public final class AlternateLocationCollection
 	 * @return a randomized <tt>Collection</tt> of <tt>AlternateLocation</tt>s
 	 */
 	public Collection values() {
-		List list = new ArrayList(LOCATIONS.values());
+		List list = new ArrayList(LOCATIONS);
 		Collections.shuffle(list);
 		return list;
 	}
@@ -264,7 +323,7 @@ public final class AlternateLocationCollection
 	 */	
 	public String httpStringValue() {
         // TODO: Could this be a performance issue??
-		List list = new LinkedList(LOCATIONS.values());
+		List list = new LinkedList(LOCATIONS);
         list = list.subList(0, list.size() >= 10 ? 10 : list.size());
 
 		// we have our own copy, so we don't need to synchronize
@@ -283,7 +342,7 @@ public final class AlternateLocationCollection
 
     // Implements AlternateLocationCollector interface -- 
     // inherit doc comment
-	public synchronized int numberOfAlternateLocations() { 
+	public int numberOfAlternateLocations() { 
 		return LOCATIONS.size();
     }
 
@@ -298,7 +357,7 @@ public final class AlternateLocationCollection
 		StringBuffer sb = new StringBuffer();
 		sb.append("Alternate Locations: ");
 		synchronized(LOCATIONS) {
-			Iterator iter = LOCATIONS.values().iterator();
+			Iterator iter = LOCATIONS.iterator();
 			while(iter.hasNext()) {
 				AlternateLocation curLoc = (AlternateLocation)iter.next();
 				sb.append(curLoc.toString());

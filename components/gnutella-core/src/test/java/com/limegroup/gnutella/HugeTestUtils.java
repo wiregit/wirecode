@@ -355,7 +355,7 @@ public final class HugeTestUtils {
 		for(int i=0; i<EQUAL_SHA1_LOCATIONS.length; i++) {
 			try {
 				EQUAL_SHA1_LOCATIONS[i] = 
-					AlternateLocation.createAlternateLocation(EQUAL_URLS[0]);
+					AlternateLocation.createAlternateLocation(EQUAL_URLS[i]);
 			} catch(IOException e) {
 				// this should not happen
 				ErrorService.error(e);

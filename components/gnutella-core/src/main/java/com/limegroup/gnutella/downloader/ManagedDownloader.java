@@ -1681,14 +1681,17 @@ public class ManagedDownloader implements Downloader, Serializable {
                 try {
                     threadLock.wait(PUSH_CONNECT_TIME);  
                 } catch(InterruptedException e) {//
+                    removeAlternateLocation(rfd);
                     return null;
                 }
             }
         }
         //Done waiting or were notified.
         Socket pushSocket = (Socket)threadLockToSocket.remove(threadLock);
-        if (pushSocket==null) 
+        if (pushSocket==null) {
+            removeAlternateLocation(rfd);
             return null; 
+        }
         
         miniRFDToLock.remove(mrfd);//we are not going to use it after this
         ret = new HTTPDownloader(pushSocket, rfd, incompleteFile,
@@ -1698,6 +1701,7 @@ public class ManagedDownloader implements Downloader, Serializable {
             //initializing the byteReader with this call.
             ret.connectTCP(0);//just initializes the byteReader in this case
         } catch(IOException iox) {
+            removeAlternateLocation(rfd);
             return null; 
         }
         return ret;
@@ -1746,9 +1750,11 @@ public class ManagedDownloader implements Downloader, Serializable {
                 return 0;
             } catch (FileNotFoundException fnfx) {
                 debug("fnfx thrown in assignAndRequest "+dloader);
+                removeAlternateLocation(dloader.getRemoteFileDesc());
                 return 0;//discard the rfd of dloader
             } catch (NotSharingException nsx) {
                 debug("nsx thrown in assignAndRequest "+dloader);
+                removeAlternateLocation(dloader.getRemoteFileDesc());
                 return 0;//discard the rfd of dloader
             } catch (QueuedException qx) { 
                 debug("queuedEx thrown in AssignAndRequest sleeping.."+dloader);
@@ -1766,6 +1772,7 @@ public class ManagedDownloader implements Downloader, Serializable {
                 return 1;
             } catch (IOException iox) {
                 debug("iox thrown in assignAndRequest "+dloader);
+                removeAlternateLocation(dloader.getRemoteFileDesc());                
                 return 0; //discard the rfd of dloader
             } finally {
                 //add alternate locations, which we could have gotten from 
@@ -1835,6 +1842,34 @@ public class ManagedDownloader implements Downloader, Serializable {
 			addDownload(value.createRemoteFileDesc(rfd.getSize()), false);
 		}
 	}
+	
+	/**
+	 * Remove this RFD from the alternate locations collection.
+	 */
+	private void removeAlternateLocation(RemoteFileDesc rfd) {
+	    if ( totalAlternateLocations == null ||
+	        !totalAlternateLocations.hasAlternateLocations() ) {
+	        return;
+        }
+	    
+        AlternateLocation toRemove = null;
+	    try {
+	        toRemove = AlternateLocation.createAlternateLocation(rfd);
+        } catch(Exception failed) {
+            return; // can't remove if we can't create.
+        }
+        
+	    // remove this location
+	    totalAlternateLocations.removeAlternateLocation(toRemove);
+    }
+	
+	/**
+	 * Returns the number of alternate locations that this download is using.
+	 */
+	public int getNumberOfAlternateLocations() {
+	    if ( totalAlternateLocations == null ) return 0;
+	    return totalAlternateLocations.numberOfAlternateLocations();
+    }
 
     /**
      * Assigns a white part of the file to a HTTPDownloader and returns it.

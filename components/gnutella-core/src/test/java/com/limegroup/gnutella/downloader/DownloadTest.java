@@ -63,7 +63,8 @@ public class DownloadTest extends com.limegroup.gnutella.util.BaseTestCase {
     private static TestUploader uploader3;
     private static TestUploader uploader4;
 	private static DownloadManager dm;// = new DownloadManager();
-	private static final ActivityCallbackStub callback = new ActivityCallbackStub();
+	private static final ActivityCallbackStub callback = new MyCallback();
+	private static ManagedDownloader DOWNLOADER = null;
 	
 	/**
 	 * The list of tests to run.
@@ -89,8 +90,9 @@ public class DownloadTest extends com.limegroup.gnutella.util.BaseTestCase {
 	private static final int OVERLAP_CHECK_WHITE = 18;
 	private static final int OVERLAP_CHECK_GREY = 19;
 	private static final int SIMPLE_ALTERNATE_LOCATIONS = 20;
-
-    static { 
+    private static final int ALTERNATE_LOCATIONS_ARE_REMOVED = 21;
+    
+    public static void globalSetUp() {
 		RouterService rs = new RouterService(callback);
         dm = rs.getDownloadManager();
         dm.initialize();
@@ -117,6 +119,7 @@ public class DownloadTest extends com.limegroup.gnutella.util.BaseTestCase {
     }
     
     public void setUp() {
+        DOWNLOADER = null;
 
         ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
         // Don't wait for network connections for testing
@@ -659,6 +662,74 @@ public class DownloadTest extends com.limegroup.gnutella.util.BaseTestCase {
         assertLessThan("u1 did all the work", TestFile.length()/2+FUDGE_FACTOR, u1);
         assertLessThan("u2 did all the work", TestFile.length()/2+FUDGE_FACTOR, u2);
     }
+    
+    public void testAlternateLocationsAreRemoved() throws Exception {  
+        // This is a modification of simple swarming based on alternate location
+        // for the second swarm
+        shouldRun(ALTERNATE_LOCATIONS_ARE_REMOVED);
+        debug("-Testing swarming from two sources one based on alt...");
+        
+        //Throttle rate at 10KB/s to give opportunities for swarming.
+        final int RATE=500;
+        final int STOP_AFTER = 1*TestFile.length()/10 - 1;          
+        final int FUDGE_FACTOR=RATE*1024;  
+        uploader1.setRate(RATE);
+        uploader2.setRate(RATE);
+        uploader2.stopAfter(STOP_AFTER);
+        uploader3.setRate(RATE);
+        RemoteFileDesc rfd1=newRFDWithURN(PORT_1, 100, TestFile.hash().toString());
+        RemoteFileDesc rfd2=newRFDWithURN(PORT_2, 100, TestFile.hash().toString());
+        RemoteFileDesc rfd3=newRFDWithURN(PORT_3, 100, TestFile.hash().toString());        
+        RemoteFileDesc[] rfds = {rfd1};
+
+        //Prebuild an uploader alts in lieu of rdf2
+        AlternateLocationCollection ualt = 
+			AlternateLocationCollection.createCollection(rfd2.getSHA1Urn());
+
+        URL url2 = rfd2.getUrl();
+        URL url3 = rfd3.getUrl();        
+        AlternateLocation al2 =
+			AlternateLocation.createAlternateLocation(url2);
+        AlternateLocation al3 =
+			AlternateLocation.createAlternateLocation(url3);
+        ualt.addAlternateLocation(al2);
+        ualt.addAlternateLocation(al3);
+
+        uploader1.setAlternateLocations(ualt);
+
+        tGeneric(rfds);
+
+        //Make sure there weren't too many overlapping regions.
+        int u1 = uploader1.amountUploaded();
+        int u2 = uploader2.amountUploaded();
+        int u3 = uploader3.amountUploaded();        
+        debug("\tu1: "+u1+"\n");
+        debug("\tu2: "+u2+"\n");
+        debug("\tu3: "+u3+"\n");        
+        debug("\tTotal: "+(u1+u2+u3)+"\n");
+        
+        // This is the real test.
+        // We expect 2 alternate locations, one for the original RFD
+        // that we sent to DownloadManager, and one for the alternate
+        // location that was succesful.  The altnerate location that
+        // failed should be removed from the list.
+        // The location is actually being removed in
+        // ManagedDownloader.establishConnection(RemoteFileDesc).
+        // This is because the download stalled, but we were able to recieve
+        // info, and ManagedDownloader attempts to reconnect.  TestUploader
+        // will refuse the connection, and ManagedDownloader will try to send
+        // a push (which of course fails), and then it assumes that the
+        // location has left the network, and removes it from the list.
+        assertEquals("bad alt loc wasn't removed", 
+            2, DOWNLOADER.getNumberOfAlternateLocations()
+        );
+
+        //Note: The amount downloaded from each uploader will not 
+        //be equal, because the uploaders are stated at different times.
+        assertGreaterThan("u1 did no work", 0, u1);
+        assertEquals("u2 did more work than needed", STOP_AFTER, u2);
+        assertGreaterThan("u3 did no work", 0, u3);
+    }    
 
     public void testWeirdAlternateLocations() throws Exception {  
         shouldRun(WIERD_ALTERNATE_LOCATIONS);
@@ -1070,6 +1141,12 @@ public class DownloadTest extends com.limegroup.gnutella.util.BaseTestCase {
     static void debug(String message) {
         if(DEBUG) 
             System.out.print(message);
+    }
+    
+    private static final class MyCallback extends ActivityCallbackStub {
+        public void addDownload(Downloader d) {
+            DOWNLOADER = (ManagedDownloader)d;
+        }  
     }
 }
 
