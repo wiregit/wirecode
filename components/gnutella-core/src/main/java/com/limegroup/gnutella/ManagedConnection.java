@@ -366,7 +366,7 @@ public class ManagedConnection extends Connection
         _outputQueue[PRIORITY_WATCHDOG]     //LIFO, no timeout or priorities
             = new SimpleMessageQueue(1, Integer.MAX_VALUE, BIG_QUEUE_SIZE, true);
         _outputQueue[PRIORITY_PUSH]
-            = new PriorityMessageQueue(4, BIG_QUEUE_TIME, BIG_QUEUE_SIZE);
+            = new PriorityMessageQueue(6, BIG_QUEUE_TIME, BIG_QUEUE_SIZE);
         _outputQueue[PRIORITY_QUERY_REPLY]
             = new PriorityMessageQueue(6, BIG_QUEUE_TIME, BIG_QUEUE_SIZE);
         _outputQueue[PRIORITY_QUERY]      
