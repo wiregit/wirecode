@@ -86,6 +86,10 @@ public class UploadTest {
             passed=download(file, "Range: bytes=-5","vwxyz");
             test("Last bytes of file",passed);
 
+            passed=download(file, "Range: bytes=-30",
+                            "abcdefghijklmnopqrstuvwxyz");
+            test("Too big negative range request",passed);
+
 
             passed=download(file, "Range:   bytes=  2  -  5 ", "cdef");
             test("Lots of extra space",passed);

@@ -375,7 +375,8 @@ public class HTTPUploader implements Uploader {
                         //A range request for "-3" means return the last 3 bytes
                         //of the file.  (LW used to incorrectly return bytes
                         //0-3.)  
-                        _uploadBegin = _fileSize-Integer.parseInt(second);
+                        _uploadBegin = Math.max(0,
+                                            _fileSize-Integer.parseInt(second));
 						_uploadEnd = _fileSize;
 					} catch (NumberFormatException e) {
 						throw new IOException();
