@@ -62,8 +62,8 @@ public class URLOpener {
         } catch (InterruptedException e) {
             if (connection==null)
                 timedOut=true;
-            //else
-                //close(connection);
+            else
+                close(connection);
             throw new IOException();
         }
 
@@ -83,25 +83,25 @@ public class URLOpener {
             URLConnection conn=null;
             try {
                 conn=url.openConnection();
-                //conn.connect();
+                conn.connect();
             } catch (IOException e) { }                
 
             synchronized (URLOpener.this) {
-                //if (timedOut && conn!=null)
-                    //close(conn);
-                //else {
+                if (timedOut && conn!=null)
+                    close(conn);
+                else {
                     connection=conn;   //may be null
                     URLOpener.this.notify();
-					//}
+				}
             }
         }
     }
 
     /** If conn is an HttpURLConnection, calls the disconnect() method.
      *      @modifies conn */
-//      private static void close(URLConnection conn) {
-//          if (conn instanceof HttpURLConnection) {
-//              ((HttpURLConnection)conn).disconnect();
-//          }
-//      }
+      private static void close(URLConnection conn) {
+          if (conn instanceof HttpURLConnection) {
+              ((HttpURLConnection)conn).disconnect();
+          }
+      }
 }
