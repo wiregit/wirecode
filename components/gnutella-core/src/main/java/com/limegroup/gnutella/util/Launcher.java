@@ -86,7 +86,7 @@ public class Launcher {
 	 */
 	private static String _errorMessage;
 
-	private static final String NATIVE_LAUNCHER_NAME = "NativeLauncher.dll";
+	private static final String NATIVE_LAUNCHER_NAME = "LimeWire.dll";
 
 
 	/** 
