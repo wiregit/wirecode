@@ -113,9 +113,9 @@ public class HostCatcherTest extends com.limegroup.gnutella.util.BaseTestCase {
         //PingReply's.
         setUp();
         // Adding a private should add 1 more to numPrivateHosts
-        hc.add(new PingReply(new byte[16], (byte)3, 6346, 
-                             new byte[] {(byte)192,(byte)168,(byte)0,(byte)1},
-                             0, 0),
+        hc.add(PingReply.createExternal(new byte[16], (byte)3, 6346, 
+                                        new byte[] {(byte)192,(byte)168,(byte)0,(byte)1}, 
+                                        false),
                null);
         assertEquals("private PingReply added as ultrapeer",
 					 0 ,hc.getNumUltrapeerHosts());
@@ -125,9 +125,9 @@ public class HostCatcherTest extends com.limegroup.gnutella.util.BaseTestCase {
                     1, hc.getNumPrivateHosts());
 
         setUp();
-        hc.add(new PingReply(new byte[16], (byte)3, 6346, 
-                             new byte[] {(byte)18,(byte)239,(byte)0,(byte)1},
-                             0, 0),
+        hc.add(PingReply.createExternal(new byte[16], (byte)3, 6346, 
+                                        new byte[] {(byte)18,(byte)239,(byte)0,(byte)1},
+                                        false),
                null);
         assertEquals("normal PingReply added as ultrapeer",
                 0, hc.getNumUltrapeerHosts());
@@ -138,9 +138,9 @@ public class HostCatcherTest extends com.limegroup.gnutella.util.BaseTestCase {
 
 
         setUp();
-        hc.add(new PingReply(new byte[16], (byte)3, 6346, 
-                             new byte[] {(byte)18,(byte)239,(byte)0,(byte)1},
-                             0, 0, true),
+        hc.add(PingReply.createExternal(new byte[16], (byte)3, 6346, 
+                                        new byte[] {(byte)18,(byte)239,(byte)0,(byte)1},
+                                        true),
                null);
         assertEquals("ultrapeer PingReply not added as ultrapeer",
                 1, hc.getNumUltrapeerHosts());
@@ -204,25 +204,30 @@ public class HostCatcherTest extends com.limegroup.gnutella.util.BaseTestCase {
         //Systm.out.println("-Testing write of permanent nodes to Gnutella.net");
         //1. Create HC, add entries, write to disk.
         hc.add(new Endpoint("18.239.0.141", 6341), false);//default time=345
-        hc.add(new PingReply(GUID.makeGuid(), (byte)7, 6342,
-                      new byte[] {(byte)18, (byte)239, (byte)0, (byte)142},
-                      0l, 0l, false, 1000, false),
+        hc.add(PingReply.createExternal(GUID.makeGuid(), (byte)7, 6342,
+                                        new byte[] {(byte)18, (byte)239, (byte)0, (byte)142},
+                                        1000,
+                                        false),
                null);
-        hc.add(new PingReply(GUID.makeGuid(), (byte)7, 6342,
-                      new byte[] {(byte)18, (byte)239, (byte)0, (byte)142},
-                      0l, 0l, false, 1000, false),
+        hc.add(PingReply.createExternal(GUID.makeGuid(), (byte)7, 6342,
+                                        new byte[] {(byte)18, (byte)239, (byte)0, (byte)142},
+                                        1000,
+                                        false),
                null);  //duplicate
-        hc.add(new PingReply(GUID.makeGuid(), (byte)7, 6343,
-                      new byte[] {(byte)18, (byte)239, (byte)0, (byte)143},
-                      0l, 0l, false, 30, false),
+        hc.add(PingReply.createExternal(GUID.makeGuid(), (byte)7, 6343,
+                                        new byte[] {(byte)18, (byte)239, (byte)0, (byte)143},
+                                        30,
+                                        false),
                null);
-        hc.add(new PingReply(GUID.makeGuid(), (byte)7, 6343,
-                      new byte[] {(byte)18, (byte)239, (byte)0, (byte)143},
-                      0l, 0l, false, 30, false),
+        hc.add(PingReply.createExternal(GUID.makeGuid(), (byte)7, 6343,
+                                        new byte[] {(byte)18, (byte)239, (byte)0, (byte)143},
+                                        30,
+                                        false),
                null);  //duplicate (well, with lower uptime)
-        hc.add(new PingReply(GUID.makeGuid(), (byte)7, 6343,
-                      new byte[] {(byte)192, (byte)168, (byte)0, (byte)1},
-                      0l, 0l, false, 3000, false),
+        hc.add(PingReply.createExternal(GUID.makeGuid(), (byte)7, 6343,
+                                        new byte[] {(byte)192, (byte)168, (byte)0, (byte)1},
+                                        3000,
+                                        false),
                null);  //private address (ignored)
         File tmp=File.createTempFile("hc_test", ".net" );
         hc.write(tmp);
@@ -249,22 +254,25 @@ public class HostCatcherTest extends com.limegroup.gnutella.util.BaseTestCase {
         //1. Fill up host catcher with PERMANENT_SIZE+1 mid-level pongs
         //(various uptimes).
         final int N=HostCatcher.PERMANENT_SIZE;
-        for (int i=0; i<=N; i++) {
-            hc.add(new PingReply(GUID.makeGuid(), (byte)7, i,
-                       new byte[] {(byte)18, (byte)239, (byte)0, (byte)142},
-                       0l, 0l, false, i+10, false),
+        for (int i=0; i<=N; i++) {            
+            hc.add(PingReply.createExternal(GUID.makeGuid(), (byte)7, i,
+                                            new byte[] {(byte)18, (byte)239, (byte)0, (byte)142},
+                                            i+10,
+                                            false),
                    null);
         }
         //Now add bad pong--which isn't really added
-        hc.add(new PingReply(GUID.makeGuid(), (byte)7, N+1,
-                       new byte[] {(byte)18, (byte)239, (byte)0, (byte)142},
-                       0l, 0l, false, 0, false),
-                   null);
+        hc.add(PingReply.createExternal(GUID.makeGuid(), (byte)7, N+1,
+                                        new byte[] {(byte)18, (byte)239, (byte)0, (byte)142},
+                                        0,
+                                        false),
+               null);
         //Now re-add port 0 (which was kicked out earlier).  Note that this
         //would fail if line 346 of HostCatcher were not executed.
-        hc.add(new PingReply(GUID.makeGuid(), (byte)7, 0,
-                       new byte[] {(byte)18, (byte)239, (byte)0, (byte)142},
-                       0l, 0l, false, N+100, false),
+        hc.add(PingReply.createExternal(GUID.makeGuid(), (byte)7, 0,
+                                        new byte[] {(byte)18, (byte)239, (byte)0, (byte)142},
+                                        N+100,
+                                        false),
                null);
 
         File tmp=File.createTempFile("hc_test", ".net" );

@@ -154,10 +154,11 @@ public class LeafRoutingTest extends com.limegroup.gnutella.util.BaseTestCase {
          assertTrue(m instanceof PingRequest);
          PingRequest pr=(PingRequest)m;
          byte[] localhost=new byte[] {(byte)127, (byte)0, (byte)0, (byte)1};
-         PingReply reply=new PingReply(pr.getGUID(), (byte)7,
+         PingReply reply = 
+             PingReply.createExternal(pr.getGUID(), (byte)7,
                                        c.getLocalPort(), 
                                        ultrapeer ? ultrapeerIP : oldIP,
-                                       0, 0, ultrapeer);
+                                       ultrapeer);
          reply.hop();
          c.send(reply);
          c.flush();

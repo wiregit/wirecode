@@ -51,9 +51,10 @@ public class UnicastSimulator {
     private void createPongs() throws Exception {
         _pongs = new PingReply[NUM_LISTENERS];
         for (int i = 0; i < NUM_LISTENERS; i++) {
-            _pongs[i] = new PingReply(GUID.makeGuid(), (byte) 5, 
-                                      PORT_RANGE_BEGIN+i, _localAddress, 
-                                      10, 100, true);
+            _pongs[i] = 
+                PingReply.createExternal(GUID.makeGuid(), (byte)5,
+                                         PORT_RANGE_BEGIN+i, _localAddress, 
+                                         true);                                         
             Assert.that(_pongs[i].isMarked());
         }
     }
@@ -215,11 +216,12 @@ public class UnicastSimulator {
                                 QueryKey.getQueryKey(datagram.getAddress(),
                                                      datagram.getPort(),
                                                      key, pad);
-                            PingReply pRep = new PingReply(pr.getGUID(),
-                                                           (byte)1,
-                                                           port,
-                                                           _localAddress,
-                                                           2, 2, true, qk);
+                            PingReply pRep =
+                                PingReply.createQueryKeyReply(pr.getGUID(),
+                                                              (byte)1,
+                                                              port,
+                                                              _localAddress,
+                                                              2, 2, true, qk);
                             send(socket, pRep, datagram.getAddress(),
                                  datagram.getPort());
                         }

@@ -576,8 +576,7 @@ public final class UltrapeerRoutingTest extends BaseTestCase {
 
         //Send reply
         drain(ULTRAPEER_1);        
-        PingReply pong = 
-			new PingReply(m.getGUID(), (byte)7, 6344, new byte[4], 3, 7);
+        PingReply pong = PingReply.create(m.getGUID(), (byte)7, 6344, new byte[4]);
 
         ULTRAPEER_2.send(pong);
         ULTRAPEER_2.flush();
@@ -674,10 +673,8 @@ public final class UltrapeerRoutingTest extends BaseTestCase {
 
         drain(LEAF);       
 
-        PingReply pong=new PingReply(m.getGUID(),
-                                     (byte)7,
-                                     (byte)0,
-                                     payload2);
+        PingReply pong = 
+            PingReply.createFromNetwork(m.getGUID(), (byte)7, (byte)0, payload2);
         ULTRAPEER_1.send(pong);
         ULTRAPEER_1.flush();
 
@@ -720,9 +717,10 @@ public final class UltrapeerRoutingTest extends BaseTestCase {
 	 * tables (that had no corresponding ping) are not forwarded.
 	 */
     public void testMisroutedPong() throws Exception {
-        Message m = new PingReply(GUID.makeGuid(), 
-								  (byte)6, 7399, new byte[4], 
-								  0, 0, false);                                
+        Message m = 
+            PingReply.createExternal(GUID.makeGuid(), (byte)6, 7399, 
+                                     new byte[4], false);
+
         ULTRAPEER_1.send(m);
         ULTRAPEER_1.flush();
               
@@ -739,9 +737,7 @@ public final class UltrapeerRoutingTest extends BaseTestCase {
     public void testUltrapeerPong() throws Exception {
         byte[] guid=GUID.makeGuid();
         byte[] ip={(byte)18, (byte)239, (byte)0, (byte)143};
-        Message m=new PingReply(guid, 
-                                (byte)7, 7399, ip, 
-                                0, 0, true);                                
+        Message m = PingReply.createExternal(guid, (byte)7, 7399, ip, true);
         ULTRAPEER_1.send(m);
         ULTRAPEER_1.flush();
               
@@ -760,7 +756,6 @@ public final class UltrapeerRoutingTest extends BaseTestCase {
 	 */
     public void testDropAndDuplicate() throws Exception {
         //Send query request from leaf, received by ultrapeer (and ULTRAPEER_2)
-        //QueryRequest qr=new QueryRequest(TTL, 0, "crap", false);
         QueryRequest qr = QueryRequest.createQuery("crap");
         LEAF.send(qr);
         LEAF.flush();

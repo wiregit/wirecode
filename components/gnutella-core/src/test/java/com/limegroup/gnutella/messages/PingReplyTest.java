@@ -15,12 +15,17 @@ public class PingReplyTest extends com.limegroup.gnutella.util.BaseTestCase {
         return buildTestSuite(PingReplyTest.class);
     }
 
+    public static void main(String[] args) {
+        junit.textui.TestRunner.run(suite());
+    }
+
     public void testNewPong() {
         long u4=0x00000000FFFFFFFFl;
         int u2=0x0000FFFF;
         byte[] ip={(byte)0xFF, (byte)0x00, (byte)0x00, (byte)0x1};
-        PingReply pr=new PingReply(new byte[16], (byte)0,
-                                   u2, ip, u4, u4);
+        PingReply pr = PingReply.create(new byte[16], (byte)0,
+                                        u2, ip, u4, u4);
+
         assertEquals(u2, pr.getPort());
         assertEquals(u4, pr.getFiles());
         long kbytes=pr.getKbytes();
@@ -36,34 +41,42 @@ public class PingReplyTest extends com.limegroup.gnutella.util.BaseTestCase {
     //TODO: check construction from raw bytes
 
     public void testPongMarking() {
-        PingReply pr=new PingReply(new byte[16], (byte)2, 6346, new byte[4],
-                         0, 0, false);
+        PingReply pr = 
+            PingReply.createExternal(new byte[16], (byte)2, 6346, new byte[4],
+                                     false);
+
+        
         assertTrue(! pr.isMarked());        
         // all pongs should have a GGEP extension now....
         assertTrue("pong should have GGEP ext", pr.hasGGEPExtension());
-        pr=new PingReply(new byte[16], (byte)2, 6346, new byte[4],
-                         0, 0, true);
+
+        pr = PingReply.createExternal(new byte[16], (byte)2, 6346, new byte[4],
+                                      true);
         assertTrue(pr.isMarked());
         // all pongs should have a GGEP extension now....
         assertTrue("pong should have GGEP ext", pr.hasGGEPExtension());
-        pr=new PingReply(new byte[16], (byte)2, 6346, new byte[4],
-                         5, 2348, false);        
+
+        pr = PingReply.create(new byte[16], (byte)2, 6346, new byte[4],
+                              5, 2348, false, 0, false);        
         assertTrue(! pr.isMarked());
         assertEquals(2348, pr.getKbytes());
         // all pongs should have a GGEP extension now....
         assertTrue("pong should have GGEP ext", pr.hasGGEPExtension());
-        pr=new PingReply(new byte[16], (byte)2, 6346, new byte[4],
-                         5, 2348, true);
+
+        pr = PingReply.create(new byte[16], (byte)2, 6346, new byte[4],
+                              5, 2348, true, 0, true);
         assertTrue(pr.isMarked());
         // all pongs should have a GGEP extension now....
         assertTrue("pong should have GGEP ext", pr.hasGGEPExtension());
-        pr=new PingReply(new byte[16], (byte)2, 6346, new byte[4],
-                         5, 345882, false);
+
+        pr = PingReply.create(new byte[16], (byte)2, 6346, new byte[4],
+                              5, 345882, false, 0, false);
         assertTrue(! pr.isMarked());
         // all pongs should have a GGEP extension now....
         assertTrue("pong should have GGEP ext", pr.hasGGEPExtension());
-        pr=new PingReply(new byte[16], (byte)2, 6346, new byte[4],
-                         5, 345882, true);
+
+        pr = PingReply.create(new byte[16], (byte)2, 6346, new byte[4],
+                              5, 345882, true, -1, true);
         assertTrue(pr.isMarked());
         // after added unicast support, all Ultrapeer Pongs have GGEP extension
         assertTrue("pong should have GGEP ext", pr.hasGGEPExtension());
@@ -111,7 +124,7 @@ public class PingReplyTest extends com.limegroup.gnutella.util.BaseTestCase {
         payload[14] = (byte) 65;
         payload[15] = (byte) 66;
         PingReply pr=null;
-        pr = new PingReply(new byte[16], (byte)2, (byte)4, payload);
+        pr = PingReply.createFromNetwork(new byte[16], (byte)2, (byte)4, payload);
         assertTrue(! pr.hasGGEPExtension());
 
         assertEquals("pong should not have a daily uptime", -1,
@@ -137,8 +150,8 @@ public class PingReplyTest extends com.limegroup.gnutella.util.BaseTestCase {
 
     public void testBasicGGEP() throws Exception {
         // create a pong
-        PingReply pr=new PingReply(new byte[16], (byte)3, 6349, new byte[4],
-                                   0l, 0l);        
+        PingReply pr = 
+            PingReply.createExternal(new byte[16], (byte)3, 6349, new byte[4], false);
         ByteArrayOutputStream baos=new ByteArrayOutputStream();
         pr.write(baos);
 
@@ -164,8 +177,10 @@ public class PingReplyTest extends com.limegroup.gnutella.util.BaseTestCase {
      *  more extensions are added. */
     public void testGGEPEncodeDecode() throws Exception {
         //Create pong
-        PingReply pr=new PingReply(new byte[16], (byte)3, 6349, new byte[4],
+
+        PingReply pr = PingReply.create(new byte[16], (byte)3, 6349, new byte[4],
                                    0l, 0l, true, 523, true);        
+
         ByteArrayOutputStream baos=new ByteArrayOutputStream();
         try {
             pr.write(baos);
@@ -243,8 +258,9 @@ public class PingReplyTest extends com.limegroup.gnutella.util.BaseTestCase {
      *  more extensions are added. */
     public void testGGEPEncodeDecodeNoGUESS() throws Exception {
         //Create pong
-        PingReply pr=new PingReply(new byte[16], (byte)3, 6349, new byte[4],
-                                   0l, 0l, true, 523, false);        
+
+        PingReply pr=PingReply.create(new byte[16], (byte)3, 6349, new byte[4],
+                                      0l, 0l, true, 523, false);        
         ByteArrayOutputStream baos=new ByteArrayOutputStream();
         try {
             pr.write(baos);
@@ -311,8 +327,8 @@ public class PingReplyTest extends com.limegroup.gnutella.util.BaseTestCase {
     public void testStripGGEP2() throws Exception {
         byte[] guid=GUID.makeGuid();
         byte[] ip={(byte)18, (byte)239, (byte)3, (byte)144};
-        PingReply pr1=new PingReply(guid, (byte)3, 6349, ip,
-                                    13l, 14l, false, 4321, false);           
+        PingReply pr1 = PingReply.create(guid, (byte)3, 6349, ip,
+                                    13l, 14l, false, 4321, false); 
         PingReply pr2=(PingReply)pr1.stripExtendedPayload();
         assertTrue(Arrays.equals(pr1.getGUID(), pr2.getGUID()));
         assertEquals(pr1.getHops(), pr2.getHops());
@@ -359,8 +375,9 @@ public class PingReplyTest extends com.limegroup.gnutella.util.BaseTestCase {
         GUID guid = new GUID(GUID.makeGuid());
         byte[] ip={(byte)18, (byte)239, (byte)3, (byte)144};
         qk = QueryKey.getQueryKey(randBytes, true);
-        PingReply pr = new PingReply(guid.bytes(), (byte) 1, 6346, ip,
-                                     2, 2, true, qk);
+        PingReply pr = 
+            PingReply.createQueryKeyReply(guid.bytes(), (byte) 1, 6346, ip,
+                                          2, 2, true, qk);
         assertTrue(pr.getQueryKey().equals(qk));
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         pr.write(baos);
@@ -375,3 +392,5 @@ public class PingReplyTest extends com.limegroup.gnutella.util.BaseTestCase {
     // implementation does not cover this it seems, so it should fail ;)
 
 }
+
+

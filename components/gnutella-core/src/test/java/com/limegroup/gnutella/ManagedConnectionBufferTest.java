@@ -118,12 +118,12 @@ public class ManagedConnectionBufferTest extends BaseTestCase {
         m=new QueryReply(new byte[16], (byte)5, 6341, new byte[4], 0, 
                          new Response[0], new byte[16], false);
         out.send(m);
-        m=new PingReply(new byte[16], (byte)5, 6343, new byte[4], 0, 0);
+        m=PingReply.create(new byte[16], (byte)5, 6343, new byte[4]);
         m.hop();  m.hop();  m.hop();
         out.send(m);
         out.send(new ResetTableMessage(1024, (byte)2));
-        out.send(new PingReply(new byte[16], (byte)1, 6342, new byte[4], 0, 0));
-        m=new PingReply(new byte[16], (byte)3, 6340, new byte[4], 0, 0);
+        out.send(PingReply.create(new byte[16], (byte)1, 6342, new byte[4]));
+        m = PingReply.create(new byte[16], (byte)3, 6340, new byte[4]);
         m.hop();
         m.hop();
         out.send(m);

@@ -19,6 +19,33 @@ import junit.framework.*;
  * LimeWire.
  */
 public class DownloadTest extends com.limegroup.gnutella.util.BaseTestCase {
+
+    /**
+     * Port for the first uploader.
+     */
+    private static final int PORT_1 = 6320;
+
+    /**
+     * Port for the second uploader.
+     */
+    private static final int PORT_2 = 6321;
+
+    /**
+     * Port for the third uploader.
+     */
+    private static final int PORT_3 = 6322;
+
+
+    /**
+     * Port for the fourth uploader.
+     */
+    private static final int PORT_4 = 6323;
+
+    /**
+     * Port for the fifth uploader.
+     */
+    private static final int PORT_5 = 6324;
+
     private static final String filePath =
         "com/limegroup/gnutella/downloader/DownloadTestData/";
     
@@ -95,10 +122,10 @@ public class DownloadTest extends com.limegroup.gnutella.util.BaseTestCase {
         // Don't wait for network connections for testing
         ManagedDownloader.NO_DELAY = true;
         
-        uploader1=new TestUploader("6346", 6346);
-        uploader2=new TestUploader("6347", 6347);
-        uploader3=new TestUploader("6348", 6348);
-        uploader4=new TestUploader("6349", 6349);
+        uploader1=new TestUploader("PORT_1", PORT_1);
+        uploader2=new TestUploader("PORT_2", PORT_2);
+        uploader3=new TestUploader("PORT_3", PORT_3);
+        uploader4=new TestUploader("PORT_4", PORT_4);
         
         deleteAllFiles();
         
@@ -188,7 +215,7 @@ public class DownloadTest extends com.limegroup.gnutella.util.BaseTestCase {
     ////////////////////////// Test Cases //////////////////////////
     
     private static void tOverlapCheckSpeed(int rate) throws Exception {
-        RemoteFileDesc rfd=newRFDWithURN(6346, 100);
+        RemoteFileDesc rfd=newRFDWithURN(PORT_1, 100);
         debug("-Measuring time for download at rate "+rate+"... \n");
         uploader1.setRate(rate);
         long start1=System.currentTimeMillis();
@@ -230,7 +257,7 @@ public class DownloadTest extends com.limegroup.gnutella.util.BaseTestCase {
         shouldRun(SIMPLE_DOWNLOAD);
         debug("-Testing non-swarmed download...");
         
-        RemoteFileDesc rfd=newRFD(6346, 100);
+        RemoteFileDesc rfd=newRFD(PORT_1, 100);
         RemoteFileDesc[] rfds = {rfd};
         tGeneric(rfds);
     }
@@ -248,8 +275,8 @@ public class DownloadTest extends com.limegroup.gnutella.util.BaseTestCase {
         final int FUDGE_FACTOR=RATE*1024;  
         uploader1.setRate(RATE);
         uploader2.setRate(RATE);
-        RemoteFileDesc rfd1=newRFD(6346, 100);
-        RemoteFileDesc rfd2=newRFD(6347, 100);
+        RemoteFileDesc rfd1=newRFD(PORT_1, 100);
+        RemoteFileDesc rfd2=newRFD(PORT_2, 100);
         RemoteFileDesc[] rfds = {rfd1,rfd2};
         
         tGeneric(rfds);
@@ -276,8 +303,8 @@ public class DownloadTest extends com.limegroup.gnutella.util.BaseTestCase {
         final int FUDGE_FACTOR=RATE*1024;  
         uploader1.setRate(RATE);
         uploader2.setRate(RATE/10);
-        RemoteFileDesc rfd1=newRFD(6346, 100);
-        RemoteFileDesc rfd2=newRFD(6347, 100);
+        RemoteFileDesc rfd1=newRFD(PORT_1, 100);
+        RemoteFileDesc rfd2=newRFD(PORT_2, 100);
         RemoteFileDesc[] rfds = {rfd1,rfd2};
 
         tGeneric(rfds);
@@ -308,8 +335,8 @@ public class DownloadTest extends com.limegroup.gnutella.util.BaseTestCase {
         uploader1.setRate(RATE);
         uploader2.setRate(RATE);
         uploader2.stopAfter(STOP_AFTER);
-        RemoteFileDesc rfd1=newRFD(6346, 100);
-        RemoteFileDesc rfd2=newRFD(6347, 100);
+        RemoteFileDesc rfd1=newRFD(PORT_1, 100);
+        RemoteFileDesc rfd2=newRFD(PORT_2, 100);
         RemoteFileDesc[] rfds = {rfd1,rfd2};
 
         tGeneric(rfds);
@@ -339,8 +366,8 @@ public class DownloadTest extends com.limegroup.gnutella.util.BaseTestCase {
         uploader1.setRate(RATE/10);
         uploader2.setRate(RATE);
         uploader2.stopAfter(STOP_AFTER);
-        RemoteFileDesc rfd1=newRFD(6346, 100);
-        RemoteFileDesc rfd2=newRFD(6347, 100);
+        RemoteFileDesc rfd1=newRFD(PORT_1, 100);
+        RemoteFileDesc rfd2=newRFD(PORT_2, 100);
         RemoteFileDesc[] rfds = {rfd1,rfd2};
 
         tGeneric(rfds);
@@ -369,8 +396,8 @@ public class DownloadTest extends com.limegroup.gnutella.util.BaseTestCase {
         final int FUDGE_FACTOR=RATE*1024;  
         uploader1.setRate(RATE);
         uploader2.setRate(RATE);
-        RemoteFileDesc rfd1=newRFD(6346, 100);
-        RemoteFileDesc rfd2=newRFD(6347, 100);
+        RemoteFileDesc rfd1=newRFD(PORT_1, 100);
+        RemoteFileDesc rfd2=newRFD(PORT_2, 100);
 
         Downloader download=null;
 
@@ -406,8 +433,8 @@ public class DownloadTest extends com.limegroup.gnutella.util.BaseTestCase {
         final int RATE=500;
         uploader1.setRate(0);//stalling uploader
         uploader2.setRate(RATE);
-        RemoteFileDesc rfd1=newRFD(6346, 100);
-        RemoteFileDesc rfd2=newRFD(6347, 100);
+        RemoteFileDesc rfd1=newRFD(PORT_1, 100);
+        RemoteFileDesc rfd2=newRFD(PORT_2, 100);
         RemoteFileDesc[] rfds = {rfd1,rfd2};
 
         tGeneric(rfds);
@@ -443,8 +470,8 @@ public class DownloadTest extends com.limegroup.gnutella.util.BaseTestCase {
         uploader1.setRate(RATE);
         uploader2.setRate(RATE/100);
         uploader2.setCorruption(true);
-        RemoteFileDesc rfd1=newRFD(6346, 100);
-        RemoteFileDesc rfd2=newRFD(6347, 100);
+        RemoteFileDesc rfd1=newRFD(PORT_1, 100);
+        RemoteFileDesc rfd2=newRFD(PORT_2, 100);
         
         Downloader download=null;
         //Start one location, wait a bit, then add another.
@@ -475,8 +502,8 @@ public class DownloadTest extends com.limegroup.gnutella.util.BaseTestCase {
         uploader1.setCorruption(true);
         uploader1.stopAfter(TestFile.length()/8);//blinding fast
         uploader2.setRate(RATE);
-        RemoteFileDesc rfd1=newRFD(6346, 100);
-        RemoteFileDesc rfd2=newRFD(6347, 100);
+        RemoteFileDesc rfd1=newRFD(PORT_1, 100);
+        RemoteFileDesc rfd2=newRFD(PORT_2, 100);
         
         Downloader download=null;
 
@@ -507,7 +534,7 @@ public class DownloadTest extends com.limegroup.gnutella.util.BaseTestCase {
                          
         final int RATE=100;
         uploader1.setRate(RATE);
-        RemoteFileDesc rfd1 = newRFDWithURN(6346,100,
+        RemoteFileDesc rfd1 = newRFDWithURN(PORT_1,100,
         "urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB");
         Downloader download = null;
         
@@ -524,7 +551,7 @@ public class DownloadTest extends com.limegroup.gnutella.util.BaseTestCase {
         shouldRun(SIMPLE_ALTERNATE_LOCATIONS);
         debug("-Testing AlternateLocation write...");
         
-        RemoteFileDesc rfd1=newRFDWithURN(6346, 100, TestFile.hash().toString());
+        RemoteFileDesc rfd1=newRFDWithURN(PORT_1, 100, TestFile.hash().toString());
         RemoteFileDesc[] rfds = {rfd1};
 
         tGeneric(rfds);
@@ -555,8 +582,8 @@ public class DownloadTest extends com.limegroup.gnutella.util.BaseTestCase {
         shouldRun(TWO_ALTERNATE_LOCATIONS);
         debug("-Testing Two AlternateLocations...");
         
-        RemoteFileDesc rfd1=newRFDWithURN(6346, 100, TestFile.hash().toString());
-        RemoteFileDesc rfd2=newRFDWithURN(6347, 100, TestFile.hash().toString());
+        RemoteFileDesc rfd1=newRFDWithURN(PORT_1, 100, TestFile.hash().toString());
+        RemoteFileDesc rfd2=newRFDWithURN(PORT_2, 100, TestFile.hash().toString());
         RemoteFileDesc[] rfds = {rfd1,rfd2};
 
         tGeneric(rfds);
@@ -603,8 +630,8 @@ public class DownloadTest extends com.limegroup.gnutella.util.BaseTestCase {
         final int FUDGE_FACTOR=RATE*1024;  
         uploader1.setRate(RATE);
         uploader2.setRate(RATE);
-        RemoteFileDesc rfd1=newRFDWithURN(6346, 100, TestFile.hash().toString());
-        RemoteFileDesc rfd2=newRFDWithURN(6347, 100, TestFile.hash().toString());
+        RemoteFileDesc rfd1=newRFDWithURN(PORT_1, 100, TestFile.hash().toString());
+        RemoteFileDesc rfd2=newRFDWithURN(PORT_2, 100, TestFile.hash().toString());
         RemoteFileDesc[] rfds = {rfd1};
 
         //Prebuild an uploader alts in lieu of rdf2
@@ -637,7 +664,7 @@ public class DownloadTest extends com.limegroup.gnutella.util.BaseTestCase {
         shouldRun(WIERD_ALTERNATE_LOCATIONS);
         debug("-Testing AlternateLocation write...");
         
-        RemoteFileDesc rfd1=newRFDWithURN(6346, 100, TestFile.hash().toString());
+        RemoteFileDesc rfd1=newRFDWithURN(PORT_1, 100, TestFile.hash().toString());
         RemoteFileDesc[] rfds = {rfd1};
 
 
@@ -648,7 +675,7 @@ public class DownloadTest extends com.limegroup.gnutella.util.BaseTestCase {
 
         ualt.addAlternateLocation(HugeTestUtils.EQUAL_SHA1_LOCATIONS[0]);
 		//AlternateLocation.createAlternateLocation(
-		//genericURL("http://211.211.211.211:6347/get/0/foobar.txt")));
+		//genericURL("http://211.211.211.211:PORT_2/get/0/foobar.txt")));
         ualt.addAlternateLocation(HugeTestUtils.EQUAL_SHA1_LOCATIONS[1]);
 		//  AlternateLocation.createAlternateLocation(
 		//      genericURL("http://211.211.211.211/get/0/foobar.txt")));
@@ -699,10 +726,10 @@ public class DownloadTest extends com.limegroup.gnutella.util.BaseTestCase {
         uploader1.stopAfter(STOP_AFTER);
         uploader2.setRate(RATE);
         uploader3.setRate(RATE);
-        RemoteFileDesc rfd1=newRFDWithURN(6346, 100, TestFile.hash().toString());
-        RemoteFileDesc rfd2=newRFDWithURN(6347, 100, TestFile.hash().toString());
-        RemoteFileDesc rfd3=newRFDWithURN(6348, 100, TestFile.hash().toString());
-        RemoteFileDesc rfd4=newRFDWithURN(6349, 100, TestFile.hash().toString());
+        RemoteFileDesc rfd1=newRFDWithURN(PORT_1, 100, TestFile.hash().toString());
+        RemoteFileDesc rfd2=newRFDWithURN(PORT_2, 100, TestFile.hash().toString());
+        RemoteFileDesc rfd3=newRFDWithURN(PORT_3, 100, TestFile.hash().toString());
+        RemoteFileDesc rfd4=newRFDWithURN(PORT_4, 100, TestFile.hash().toString());
         RemoteFileDesc[] rfds = {rfd1,rfd2,rfd3};
 
         //Prebuild an uploader alt in lieu of rdf4
@@ -742,8 +769,8 @@ public class DownloadTest extends com.limegroup.gnutella.util.BaseTestCase {
 	/*
     private static void tTwoAlternatesButOneWithNoSHA1() {  
         debug("-Testing Two Alternates but one with no sha1...");
-        RemoteFileDesc rfd1=newRFDWithURN(6346, 100, TestFile.hash().toString());
-        RemoteFileDesc rfd2=newRFDWithURN(6347, 100); // No SHA1
+        RemoteFileDesc rfd1=newRFDWithURN(PORT_1, 100, TestFile.hash().toString());
+        RemoteFileDesc rfd2=newRFDWithURN(PORT_2, 100); // No SHA1
         RemoteFileDesc[] rfds = {rfd1,rfd2};
 
         tGeneric(rfds);
@@ -788,8 +815,8 @@ public class DownloadTest extends com.limegroup.gnutella.util.BaseTestCase {
         uploader1.setRate(RATE);
         uploader1.setBusy(true);
         uploader2.setRate(RATE/4);//slower downloader - guarantee second spot
-        RemoteFileDesc rfd1=newRFD(6346, 100);
-        RemoteFileDesc rfd2=newRFD(6347, 100);
+        RemoteFileDesc rfd1=newRFD(PORT_1, 100);
+        RemoteFileDesc rfd2=newRFD(PORT_2, 100);
         RemoteFileDesc[] rfds = {rfd1,rfd2};
         tGeneric(rfds);        
 
@@ -806,7 +833,7 @@ public class DownloadTest extends com.limegroup.gnutella.util.BaseTestCase {
         debug("-Testing queued downloader. \n");
         
         uploader1.setQueue(true);
-        RemoteFileDesc rfd1 = newRFD(6346, 100);
+        RemoteFileDesc rfd1 = newRFD(PORT_1, 100);
         RemoteFileDesc[] rfds = {rfd1};
         //the queued downloader will resend the query after sleeping,
         //and then it shold complete the download, because TestUploader
@@ -834,8 +861,8 @@ public class DownloadTest extends com.limegroup.gnutella.util.BaseTestCase {
         final int FUDGE_FACTOR=RATE*1024;  
         uploader1.setBusy(true);
         uploader2.setRate(RATE);
-        RemoteFileDesc rfd1=newRFDWithURN(6346, 100);
-        RemoteFileDesc rfd2=newRFDWithURN(6347, 100);
+        RemoteFileDesc rfd1=newRFDWithURN(PORT_1, 100);
+        RemoteFileDesc rfd2=newRFDWithURN(PORT_2, 100);
         RemoteFileDesc[] rfds = {rfd1};
 
         //Prebuild an uploader alts in lieu of rdf2
@@ -885,12 +912,12 @@ public class DownloadTest extends com.limegroup.gnutella.util.BaseTestCase {
         byte[] localhost={(byte)127, (byte)0, (byte)0, (byte)1};
         Response[] responses=new Response[1];
         responses[0]=new Response(0l, file.length(), file.getName());
-        QueryReply qr=new QueryReply(guid, (byte)5, 6346,
+        QueryReply qr=new QueryReply(guid, (byte)5, PORT_1,
                                      localhost, Integer.MAX_VALUE,
                                      responses, new byte[16]);
         responses=new Response[1];
         responses[0]=new Response(0l, file.length(), file.getName());
-        qr=new QueryReply(guid, (byte)5, 6347,
+        qr=new QueryReply(guid, (byte)5, PORT_2,
                           localhost, Integer.MAX_VALUE,
                           responses, new byte[16]);
 

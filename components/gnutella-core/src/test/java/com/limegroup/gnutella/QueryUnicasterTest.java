@@ -40,6 +40,10 @@ public class QueryUnicasterTest extends com.limegroup.gnutella.util.BaseTestCase
     public static Test suite() {
         return buildTestSuite(QueryUnicasterTest.class);
     }
+
+    public static void main(String[] args) {
+        junit.textui.TestRunner.run(suite());
+    }
     
     public void setUp() throws Exception {
         _rs.start();
@@ -303,11 +307,14 @@ public class QueryUnicasterTest extends com.limegroup.gnutella.util.BaseTestCase
                                 QueryKey.getQueryKey(datagram.getAddress(),
                                                      datagram.getPort(),
                                                      key, pad);
-                            PingReply pRep = new PingReply(pr.getGUID(),
-                                                           (byte)1,
-                                                           port,
-                                                           localhost,
-                                                           2, 2, true, qk);
+                            
+                            PingReply pRep = 
+                                PingReply.createQueryKeyReply(pr.getGUID(), 
+                                                              (byte)1,
+                                                              port,
+                                                              localhost,
+                                                              2,2, true,
+                                                              qk);
                             pRep.hop();
                             debug("QueryUnicasterTest.udpLoop(): sending QK.");
                             QueryUnicaster.instance().handleQueryKeyPong(pRep);

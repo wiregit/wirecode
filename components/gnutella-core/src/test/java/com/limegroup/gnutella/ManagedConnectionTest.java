@@ -115,18 +115,20 @@ public class ManagedConnectionTest extends com.limegroup.gnutella.util.BaseTestC
         //For testing.  You may need to ensure that HORIZON_UPDATE_TIME is
         //non-final to compile.
         mc.HORIZON_UPDATE_TIME=1*200;   
-        PingReply pr1=new PingReply(
+
+        PingReply pr1 = PingReply.create(
             GUID.makeGuid(), (byte)3, 6346,
             new byte[] {(byte)127, (byte)0, (byte)0, (byte)1},
-            1, 10);
-        PingReply pr2=new PingReply(
+            1, 10, false, 0, false);
+
+        PingReply pr2= PingReply.create(
             GUID.makeGuid(), (byte)3, 6347,
             new byte[] {(byte)127, (byte)0, (byte)0, (byte)1},
-            2, 20);
-        PingReply pr3=new PingReply(
+            2, 20, false, 0, false);
+        PingReply pr3= PingReply.create(
             GUID.makeGuid(), (byte)3, 6346,
             new byte[] {(byte)127, (byte)0, (byte)0, (byte)2},
-            3, 30);
+            3, 30, false, 0, false);
 
         assertEquals("unexpected number of files", 0, mc.getNumFiles());
         assertEquals("unexpected number of hosts", 0, mc.getNumHosts());

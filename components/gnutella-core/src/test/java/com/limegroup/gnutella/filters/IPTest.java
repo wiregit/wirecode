@@ -19,6 +19,10 @@ public class IPTest extends com.limegroup.gnutella.util.BaseTestCase {
         return new TestSuite(IPTest.class);
     }
 
+    public static void main(String[] args) {
+        junit.textui.TestRunner.run(suite());
+    }
+
     public void testIPListLegacy() {
         IPList iplist = new IPList();
 
@@ -90,7 +94,7 @@ public class IPTest extends com.limegroup.gnutella.util.BaseTestCase {
         assertTrue(filter.allow("13.0.0.1"));
         byte[] address={(byte)18, (byte)239, (byte)0, (byte)144};
         assertTrue(filter.allow(
-            new PingReply(new byte[16], (byte)3, 6346, address, 0l, 0l)));
+            PingReply.createExternal(new byte[16], (byte)3, 6346, address, false)));
         byte[] address2=new byte[] {(byte)18, (byte)239, (byte)0, (byte)143};
         assertTrue(! filter.allow(
             new QueryReply(new byte[16], (byte)3, 6346, address2, 0,
