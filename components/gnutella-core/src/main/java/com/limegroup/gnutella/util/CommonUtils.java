@@ -407,9 +407,6 @@ public final class CommonUtils {
     public synchronized static File getUserSettingsDir() {
         File settingsDir = new File(getUserHomeDir(), 
                                     LIMEWIRE_PREFS_DIR_NAME);
-
-        // make sure Windows files are moved
-        moveWindowsFiles(settingsDir);
         if(CommonUtils.isMacOSX()) {            
             File tempSettingsDir = new File(getUserHomeDir(), 
                                             "Library/Preferences");
@@ -417,8 +414,14 @@ public final class CommonUtils {
 		} 
 
         if(!settingsDir.isDirectory()) {
-            settingsDir.mkdirs();
+            if(!settingsDir.mkdirs()) {
+                String msg = "could not create preferences directory: "+
+                    settingsDir;
+                throw new RuntimeException(msg);
+            }
         }
+        // make sure Windows files are moved
+        moveWindowsFiles(settingsDir);
         return settingsDir;
     }
 
@@ -455,9 +458,6 @@ public final class CommonUtils {
             File curDirFile  = new File(currentDir, USER_FILES[i]);
             if(curUserFile.isFile()) {
                 continue;
-            }
-            if(!settingsDir.isDirectory()) {
-                settingsDir.mkdirs();
             }
             copy(curDirFile, curUserFile);
         }
