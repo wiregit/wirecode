@@ -65,7 +65,7 @@ public class ConnectionManager {
 	/** The maximum number of connections to maintain to older Ultrapeers
 	 * that have low-degrees of intra-Ultrapeer connections --
 	 * connections to the "low-density" network.*/
-	private static final int MAX_LOW_DEGREE_ULTRAPEERS = 20;
+	private static final int MAX_LOW_DEGREE_ULTRAPEERS = 15;
 
     /** Minimum number of connections that an ultrapeer with leaf connections
      * must have. */
@@ -184,7 +184,6 @@ public class ConnectionManager {
      * launches the ConnectionWatchdog and the initial ConnectionFetchers.
      */
     public void initialize() {
-        _router = RouterService.getMessageRouter();
         _catcher = RouterService.getHostCatcher();
 
         // Start a thread to police connections.
@@ -202,12 +201,12 @@ public class ConnectionManager {
     public ManagedConnection createConnectionBlocking(String hostname, int portnum) 
 		throws IOException {
         ManagedConnection c = 
-			new ManagedConnection(hostname, portnum, _router, this);
+			new ManagedConnection(hostname, portnum);
 
         // Initialize synchronously
         initializeExternallyGeneratedConnection(c);
         // Kick off a thread for the message loop.
-        new OutgoingConnectionThread(c, false);
+        new OutgoingConnector(c, false);
 
         return c;
     }
@@ -219,10 +218,15 @@ public class ConnectionManager {
     public void createConnectionAsynchronously(
             String hostname, int portnum) {
 
+		Runnable outgoingRunner = 
+			new OutgoingConnector(new ManagedConnection(hostname, portnum),
+								  true);
         // Initialize and loop for messages on another thread.
-        new OutgoingConnectionThread(
-		    new ManagedConnection(hostname, portnum, _router, this),
-                true);
+
+		Thread outgoingConnectionRunner = 
+			new Thread(outgoingRunner, "OutgoingConnectionThread");
+		outgoingConnectionRunner.setDaemon(true);
+		outgoingConnectionRunner.start();
     }
 
 
@@ -238,7 +242,7 @@ public class ConnectionManager {
          Thread.currentThread().setName("IncommingConnectionThread");
          ManagedConnection connection=null;
          try {
-             connection = new ManagedConnection(socket, _router, this);
+             connection = new ManagedConnection(socket);
              initializeExternallyGeneratedConnection(connection);
          } catch (IOException e) {
              if(connection != null){
@@ -586,8 +590,8 @@ public class ConnectionManager {
         //than N-K connections.  With time, this converges on all good
         //connections.
         
-        boolean isUltrapeerAware=ultrapeerHeader!=null;
-        boolean isLeaf=ConnectionHandshakeHeaders.isFalse(ultrapeerHeader);
+        boolean isUltrapeerAware = ultrapeerHeader!=null;
+        boolean isLeaf = ConnectionHandshakeHeaders.isFalse(ultrapeerHeader);
 
         //Don't allow anything if disconnected or shielded leaf.  This rule is
         //critical to the working of gotShieldedClientSupernodeConnection.
@@ -621,6 +625,7 @@ public class ConnectionManager {
 					 MAX_LOW_DEGREE_ULTRAPEERS - RESERVED_GOOD_CONNECTIONS);
 			}
 
+			System.out.println("ConnectionManager::allowConnection 4"); 
 			// otherwise, it is a high degree connection, so allow it if we 
 			// need more connections
 			return (trustedVendor(userAgentHeader) &&
@@ -995,7 +1000,7 @@ public class ConnectionManager {
         c.close();
 
         // 3) Clean up route tables.
-        _router.removeConnection(c);
+        RouterService.getMessageRouter().removeConnection(c);
 
         // 4) Notify the listener
         RouterService.getCallback().connectionClosed(c); 
@@ -1422,29 +1427,27 @@ public class ConnectionManager {
      * ManagedConnections created through createConnectionAsynchronously and
      * createConnectionBlocking
      */
-    private class OutgoingConnectionThread
-            extends Thread {
-        private ManagedConnection _connection;
-        private boolean _doInitialization;
+    private class OutgoingConnector implements Runnable {
+        private final ManagedConnection _connection;
+        private final boolean _doInitialization;
 
         /**
-         * The constructor calls start(), so allow you need to do
-         * is construct the thread.
+		 * Creates a new <tt>OutgoingConnector</tt> instance that will 
+		 * attempt to create a connection to the specified host.
+		 *
+		 * @param connection the host to connect to
          */
-        public OutgoingConnectionThread(
-                ManagedConnection connection,
-                boolean doInitialization) {
+        public OutgoingConnector(ManagedConnection connection,
+								 boolean initialize) {
             _connection = connection;
-            _doInitialization = doInitialization;
-            setName("OutgoingConnectionThread");
-            setDaemon(true);
-            start();
+            _doInitialization = initialize;
         }
 
         public void run() {
-            try { 
-                if(_doInitialization)
-                    initializeExternallyGeneratedConnection(_connection);
+            try {
+				if(_doInitialization) {
+					initializeExternallyGeneratedConnection(_connection);
+				}
 
 				startConnection(_connection);
             } catch(IOException e) {
@@ -1541,8 +1544,7 @@ public class ConnectionManager {
             Assert.that(endpoint != null);
 
             ManagedConnection connection = new ManagedConnection(
-                endpoint.getHostname(), endpoint.getPort(), _router,
-                ConnectionManager.this);
+                endpoint.getHostname(), endpoint.getPort());
 
             try {
                 //Try to connect, recording success or failure so HostCatcher
