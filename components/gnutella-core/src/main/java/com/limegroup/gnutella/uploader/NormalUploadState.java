@@ -50,11 +50,6 @@ public final class NormalUploadState implements HTTPMessage {
 	private final FileDesc FILE_DESC;
 
 	/**
-	 * Constant for the MIME type to return.
-	 */
-	private final String MIME_TYPE = "application/binary";
-
-	/**
 	 * Constructs a new <tt>NormalUploadState</tt>, establishing all 
 	 * invariants.
 	 *
@@ -147,7 +142,7 @@ public final class NormalUploadState implements HTTPMessage {
 
 	public void writeMessageBody(OutputStream ostream) throws IOException {
         try {            
-            long a = _fis.skip(_uploadBegin);
+            _fis.skip(_uploadBegin);
             upload(ostream);
         } catch(IOException e) {
             _stalledChecker.deactivate(); // no need to kill now
