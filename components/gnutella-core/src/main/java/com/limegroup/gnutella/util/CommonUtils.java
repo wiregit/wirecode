@@ -68,12 +68,6 @@ public final class CommonUtils {
 	private static boolean _isSolaris = false;
 
 	/**
-	 * Variable for whether or not the localhost is running on a private
-	 * ip address.
-	 */
-	private static boolean _isPrivateAddress = true;
-	
-	/**
 	 * Make sure the constructor can never be called.
 	 */
 	private CommonUtils() {}
@@ -103,40 +97,6 @@ public final class CommonUtils {
 				_isMacClassic = true;
 			}			
 		}
-		
-		// determine whether or not the local host is a private ip address
-		byte[] bytes = null;
-		try {
-			bytes = InetAddress.getLocalHost().getAddress();
-		} catch(UnknownHostException uhe) {
-			_isPrivateAddress = true;
-		}
-
-		// 10.0.0.0 - 10.255.255.255
-        if (bytes[0]==(byte)10)
-            _isPrivateAddress = true;
-
-		// 172.16.0.0 - 172.31.255.255
-        else if (bytes[0]==(byte)172 &&
-                 bytes[1]>=(byte)16 &&
-                 bytes[1]<=(byte)31)
-            _isPrivateAddress = true;
-
-		// 192.168.0.0 - 192.168.255.255   
-        else if (bytes[0]==(byte)192 &&
-                 bytes[1]==(byte)168)
-            _isPrivateAddress = true; 
-
-		// 0.0.0.0 - Gnutella (well BearShare really) convention
-        else if (bytes[0]==(byte)0 &&
-                 bytes[1]==(byte)0 &&
-                 bytes[2]==(byte)0 &&
-                 bytes[3]==(byte)0)
-            _isPrivateAddress = true;
-		
-		// otherwise, we're not firewalled
-        else
-			_isPrivateAddress = false;
 	}
 
 	/**
@@ -298,15 +258,4 @@ public final class CommonUtils {
         return ok;
     }
 
-    /**
-     * Returns true if this is a private IP address as defined by
-     * RFC 1918.  In the case that this has a symbolic name that
-     * cannot be resolved, returns true.
-	 *
-	 * @return <tt>true</tt> if the localhost has a private ip address,
-	 *         <tt>false</tt> otherwise
-     */
-    public static boolean isPrivateAddress() {
-		return _isPrivateAddress;
-    }
 }

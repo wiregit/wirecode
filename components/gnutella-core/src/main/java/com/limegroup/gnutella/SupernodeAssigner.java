@@ -56,13 +56,6 @@ public final class SupernodeAssigner implements Runnable {
 	private boolean SUPERNODE_OS = CommonUtils.isSupernodeOS();
 	
 	/**
-	 * Constant <tt>boolean</tt> for whether or not this node should
-	 * be considered firewalled.
-	 */
-	private boolean FIREWALLED = CommonUtils.isPrivateAddress() ||
-		!SETTINGS.getEverAcceptedIncoming();
-	
-	/**
 	 * Constant for the average uptime measured over the all of the
 	 * times this node has been run.
 	 */
@@ -178,7 +171,7 @@ public final class SupernodeAssigner implements Runnable {
             MINIMUM_REQUIRED_DOWNSTREAM_BYTES_PER_SECOND)) &&
             (AVERAGE_UPTIME >= MINIMUM_AVERAGE_UPTIME) &&
 			(_currentUptime >= MINIMUM_CURRENT_UPTIME) &&
-			(!FIREWALLED) &&
+			(SETTINGS.getEverAcceptedIncoming()) &&
 			(SUPERNODE_OS));
         
         // if this is supernode capable, make sure we record it
@@ -191,19 +184,6 @@ public final class SupernodeAssigner implements Runnable {
 	 * and downloads.
 	 */
 	private void collectBandwidthData() {
-//		System.out.println("_maxDownstreamBytesPerSec: "+_maxDownstreamBytesPerSec);
-//        System.out.println();
-//        System.out.println("_maxUpstreamBytesPerSec: "+_maxUpstreamBytesPerSec);
-//        System.out.println();
-//        System.out.println("_currentUptime: " + _currentUptime);
-//        System.out.println();
-//        System.out.println("AVERAGE_UPTIME: " + AVERAGE_UPTIME);
-//        System.out.println();
-//        System.out.println("FIREWALLED: " + FIREWALLED);
-//        System.out.println();
-//        System.out.println("SUPERNODE_OS: " + SUPERNODE_OS);
-//        System.out.println();
-//        System.out.println("isSupernodeCapable: "+isSupernodeCapable());
 		_currentUptime += TIMER_DELAY_IN_SECONDS;
         int newUpstreamBytes   = _uploadTracker.getNewBytesTransferred();
         int newDownstreamBytes = _downloadTracker.getNewBytesTransferred();
