@@ -175,15 +175,18 @@ public final class UploadManager implements BandwidthTracker {
                 // If we're starting a new uploader, clean the old one up
                 // and then create a new one.
                 if(startedNewFile) {
+                    // reset the queued status, so pipelined
+                    // requests go through the queue again.
+                    queued = -1;
                     debug(uploader + " starting new file");
                     if (uploader != null) {
                         cleanupFinishedUploader(uploader, startTime);
                     }
-                uploader = new HTTPUploader(currentMethod,
-                                            fileName, 
-									        socket,
-									        line._index,
-									        watchdog);
+                    uploader = new HTTPUploader(currentMethod,
+                                                fileName, 
+						    			        socket,
+							    		        line._index,
+								    	        watchdog);
                 }
                 // Otherwise (we're continuing an uploader),
                 // reinitialize the existing HTTPUploader.
