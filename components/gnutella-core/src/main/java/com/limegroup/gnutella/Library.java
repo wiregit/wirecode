@@ -63,16 +63,17 @@ public class Library {
     /* execute the file of a given path if */
     /* the OS is windows */
     public static boolean execute(String path) {
-
+	
 	File f = new File(path);
-	if (!f.exists())
+	if (!f.isFile())
 	    return false;
 	Properties props = System.getProperties();
 	String os = props.getProperty("os.name");
 	if (os.indexOf("Windows") != -1) {
 	    try {
 		Runtime runtime = Runtime.getRuntime();
-		runtime.exec("cmd /c " + path);
+		String str = "cmd /c " + "\""+f.toString()+"\"";
+		Process p1 = runtime.exec(str);
 	    }catch (Exception e) {
 		return false;
 	    }
