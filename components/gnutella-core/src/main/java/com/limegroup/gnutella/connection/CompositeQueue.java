@@ -180,7 +180,7 @@ public final class CompositeQueue {
     
             //Update statistics
             int dropped = _queues[priority].resetDropped();
-            CONNECTION.addSentDropped(dropped);
+            CONNECTION.stats().addSentDropped(dropped);
             _size += 1-dropped;
             
             // optimization -- make sure we start with a priority that actually
@@ -217,7 +217,7 @@ public final class CompositeQueue {
                 synchronized (_queueLock) {
                     msg = queue.removeNext();
                     int dropped = queue.resetDropped();
-                    CONNECTION.addSentDropped(dropped);
+                    CONNECTION.stats().addSentDropped(dropped);
                     _size -= (msg==null?0:1) + dropped;  //maintain invariant
                     if (_size == 0) {
                         emptied = true;
@@ -234,7 +234,7 @@ public final class CompositeQueue {
                 //up incoming data until that time is reached, or the
                 //data is explicitly flushed.
                 CONNECTION.sendMessage(msg);
-                CONNECTION.addSent();
+                CONNECTION.stats().addSent();
             }
             
             // Optimization: the if statement below is not needed for

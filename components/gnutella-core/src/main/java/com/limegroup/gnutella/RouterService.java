@@ -656,8 +656,8 @@ public class RouterService {
         for (Iterator iter=manager.getInitializedConnections().iterator();
              iter.hasNext(); ) {
             ManagedConnection c=(ManagedConnection)iter.next();
-            count += c.getNumMessagesSent();
-            count += c.getNumMessagesReceived();
+            count += c.stats().getNumMessagesSent();
+            count += c.stats().getNumMessagesReceived();
         }
 		return count;
     }
@@ -673,8 +673,8 @@ public class RouterService {
         for (Iterator iter=manager.getInitializedConnections().iterator();
              iter.hasNext(); ) {
             ManagedConnection c=(ManagedConnection)iter.next();
-            msgs = c.getNumMessagesSent();
-            msgs += c.getNumMessagesReceived();
+            msgs = c.stats().getNumMessagesSent();
+            msgs += c.stats().getNumMessagesReceived();
 			if ( msgs > messageThreshold )
 				count++;
         }

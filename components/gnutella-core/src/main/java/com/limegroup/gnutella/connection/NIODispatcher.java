@@ -241,7 +241,7 @@ public final class NIODispatcher implements Runnable {
 						continue;
 					}
 
-                    mc.addReceived();
+                    mc.stats().addReceived();
                     // make sure this message isn't considered spam                    
                     if(!mc.isSpam(msg)) {
                         // TODO:: don't use RouterService
@@ -252,7 +252,7 @@ public final class NIODispatcher implements Runnable {
                             ReceivedMessageStatHandler.TCP_FILTERED_MESSAGES.
                                 addMessage(msg);
                         }
-                        mc.addReceivedDropped();
+                        mc.countDroppedMessage();
                     }
 				} catch (BadPacketException e) {
                     MessageReadErrorStat.BAD_PACKET_EXCEPTIONS.incrementStat();

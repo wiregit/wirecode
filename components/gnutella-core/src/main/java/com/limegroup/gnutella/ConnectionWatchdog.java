@@ -61,9 +61,9 @@ public final class ConnectionWatchdog implements Runnable {
 
         /** Takes a snapshot of the given connection. */
         ConnectionState(ManagedConnection c) {
-            this.sentDropped=c.getNumSentMessagesDropped();
-            this.sent=c.getNumMessagesSent();
-            this.received=c.getNumMessagesReceived();            
+            this.sentDropped = c.stats().getNumSentMessagesDropped();
+            this.sent = c.stats().getNumMessagesSent();
+            this.received = c.stats().getNumMessagesReceived();            
         }
 
         /**
