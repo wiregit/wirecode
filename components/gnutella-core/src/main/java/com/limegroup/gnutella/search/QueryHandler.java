@@ -345,35 +345,6 @@ public final class QueryHandler {
         return newHosts;
 	}
     
-    /**
-     * Helper class the holds a <tt>ManagedConnection</tt> and a TTL for sending
-     * a query to that handler.
-     */
-    private static class ConnectionTTLPair {
-        
-        /**
-         * Constant for the <tt>ManagedConnection</tt>.
-         */
-        private final ManagedConnection MC;
-
-        /**
-         * Constant for the TTL.
-         */
-        private final byte TTL;
-
-        /**
-         * Creates a new <tt>ConnectionTTLPair</tt> with the specified 
-         * <tt>Connection</tt> and TTL.
-         *
-         * @param mc the <tt>RequestHandler</tt> that the request should be sent
-         *  to
-         * @param ttl the time to live for the query to send
-         */
-        ConnectionTTLPair(ManagedConnection mc, byte ttl) {
-            MC = mc;
-            TTL = ttl;
-        }
-    }
 
     /**
      * Helper method that creates the list of nodes to query for the probe.
@@ -441,7 +412,8 @@ public final class QueryHandler {
         
         // scale the number of hosts to send the query to based on the
         // file's apparent abundance
-        int connectionsToUse = (int)((double)hitConnections.size()/popularity);
+        int connectionsToUse = 
+            (int)((double)hitConnections.size()/popularity);
         
         if(popularity > 0.5) {
             
