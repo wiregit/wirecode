@@ -5,6 +5,7 @@ import com.limegroup.gnutella.util.*;
 import com.bitzi.util.*;
 import com.sun.java.util.collections.*;
 import java.io.*;
+import java.util.Date;
 import java.security.*;
 import java.util.Enumeration;
 
@@ -45,6 +46,8 @@ public final class FileDesc {
 	 */
     private final Collection /* of URNS */ URNS; 
 
+	private Map /* of AlternateLocations */ _alternateLocations;
+
 	/**
 	 * Constant for the <tt>File</tt> instance.
 	 */
@@ -73,6 +76,31 @@ public final class FileDesc {
 		//this.calculateUrns();
 		//}
     }
+
+	/**
+	 * Adds the specified <tt>AlternateLocation</tt> instance to the list
+	 * of alternate locations for this this file.
+	 *
+	 * @param al the <tt>AlternateLocation</tt> instance to add
+	 */
+	public synchronized void addAlternateLocation(AlternateLocation al) {
+		if(_alternateLocations == null) {
+			// we use a TreeMap to both filter duplicates and provide
+			// ordering based on the timestamp
+			_alternateLocations = new TreeMap();
+		}
+		Date timestamp = al.getTimestamp();
+		if(timestamp != null) {
+			_alternateLocations.put(timestamp, al);
+		}
+		else {
+			// this means that the alternate location has no date 
+			// specified, so we consider it as old as it can possibly
+			// be for the date class (0 milliseconds since 
+			// January 1, 1970, 00:00:00 GMT).
+			_alternateLocations.put(new Date(0), al);
+		}
+	}
 
 	/**
 	 * Returns a new <tt>Response</tt> instance for the data in this
