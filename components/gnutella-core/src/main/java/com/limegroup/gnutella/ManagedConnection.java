@@ -434,7 +434,15 @@ public class ManagedConnection extends Connection
      * down the connection on IOException
      */
     public Message receive() throws IOException, BadPacketException {
-        Message m = super.receive();
+        Message m = null;
+        
+        try {
+            m = super.receive();
+        } catch(IOException e) {
+            if( _manager != null )
+                _manager.remove(this);
+            throw e;
+        }
         
         // record received message in stats
         addReceived();
@@ -447,7 +455,15 @@ public class ManagedConnection extends Connection
      */
     public Message receive(int timeout)
             throws IOException, BadPacketException, InterruptedIOException {
-        Message m = super.receive(timeout);
+        Message m = null;
+        
+        try {
+            m = super.receive(timeout);
+        } catch(IOException e) {
+            if( _manager != null )
+                _manager.remove(this);
+            throw e;
+        }
         
         // record received message in stats
         addReceived();
@@ -627,8 +643,12 @@ public class ManagedConnection extends Connection
                     repOk();
                 }                
             } catch (IOException e) {
+                if(_manager != null)
+                    _manager.remove(ManagedConnection.this);
                 _runnerDied=true;
             } catch(Throwable t) {
+                if(_manager != null)
+                    _manager.remove(ManagedConnection.this);
                 _runnerDied=true;
                 ErrorService.error(t);
             }
