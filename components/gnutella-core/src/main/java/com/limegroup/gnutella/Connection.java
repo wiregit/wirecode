@@ -791,20 +791,39 @@ public class Connection {
                 continue;                  //ignore lines without ':'
             String key=line.substring(0, i);
             String value=line.substring(i+1).trim();
-            if (HeaderNames.REMOTE_IP.equals(key) &&
-                ConnectionSettings.FORCE_IP_ADDRESS.getValue()) {
-                StringSetting adr=ConnectionSettings.FORCED_IP_ADDRESS_STRING;
-                String addr = adr.getValue();
-                if(NetworkUtils.isValidAddress(value) &&
-                   !NetworkUtils.isPrivateAddress(value) &&
-                   !value.equals(addr)) {
-        	        adr.setValue(value);
-        	        RouterService.addressChanged();
-                }
-            }
+            if (HeaderNames.REMOTE_IP.equals(key))
+                changeAddress(value);
             HEADERS_READ.put(key, value);
         }
     }
+    
+    /**
+     * Determines if the address should be changed and changes it if
+     * necessary.
+     */
+    public void changeAddress(final String v) {
+        // invalid or private, exit
+        if(!NetworkUtils.isValidAddress(v) || NetworkUtils.isPrivateAddress(v))
+            return;
+            
+        // If we're forcing, change that if necessary.
+        if( ConnectionSettings.FORCE_IP_ADDRESS.getValue() ) {
+            StringSetting addr = ConnectionSettings.FORCED_IP_ADDRESS_STRING;
+            if(!v.equals(addr.getValue())) {
+                addr.setValue(v);
+                RouterService.addressChanged();
+            }
+        }
+        // Otherwise, if our current address is invalid, change.
+        else if(!NetworkUtils.isValidAddress(RouterService.getAddress())) {
+            try {
+                InetAddress ia = InetAddress.getByName(v);
+                // will auto-call addressChanged.
+                RouterService.getAcceptor().setAddress(ia);
+            } catch(UnknownHostException ignored) {}
+        }
+    }
+            
 
     /**
      * Writes s to out, with no trailing linefeeds.  Called only from
