@@ -1130,7 +1130,46 @@ public class ConnectionManager {
         //(Too much parallelism increases chance of simultaneous connects,
         //resulting in too many connections.)  Note that we assume that all
         //connections being fetched right now will become ultrapeers.
-        int need = Math.min(20, 4*neededConnections) 
+        int multiple;
+        
+        // The end result of the following logic, assuming _keepAlive
+        // is 32 for Ultrapeers, is:
+        // When we have 22 active peer connections, we fetch
+        // (27-current)*2 connections.
+        // All other times, for Ultrapeers, we will fetch
+        // (32-current)*4, up to a maximum of 20.
+        // For leaves, assuming they maintin 4 Ultrapeers,
+        // we will fetch (4-current)*4 connections.
+        
+        // If we have not accepted incoming, fetch 4 times
+        // as many connections as we need.
+        if( !RouterService.acceptedIncomingConnection() ) {
+            multiple = 4;
+        }
+        // Otherwise, if we're a leaf, not ultrapeer capable,
+        // or have not become an Ultrapeer to anyone,
+        // also fetch 4 times as many connections as we need.
+        else if( isShieldedLeaf() || !isSupernode() ||
+                 getNumUltrapeerConnections() == 0 ) {
+            multiple = 4;
+        }
+        // Otherwise (we are actively Ultrapeering to someone)
+        // If we needed more than connections, still fetch
+        // 4 times as many connections as we need.
+        else if( neededConnections > 10 ) {
+            multiple = 4;
+        }
+        // Otherwise, if we need less than 10 connections,
+        // decrement the amount of connections we need by 5,
+        // leaving 5 slots open for newcomers to use,
+        // and decrease the rate at which we fetch to
+        // 2 times the amount of connections.
+        else {
+            multiple = 2;
+            neededConnections -= 5;
+        }
+            
+        int need = Math.min(20, multiple*neededConnections) 
                  - _fetchers.size()
                  - _initializingFetchedConnections.size();
 
