@@ -242,12 +242,7 @@ public final class UploadManager implements BandwidthTracker {
                 assertAsConnecting( uploader.getState() );
         
                 setInitialUploadingState(uploader);
-                try {
-                    uploader.readHeader(iStream);
-                } catch(IOException ioe) {
-                    uploader.setState(Uploader.INTERRUPTED);
-                    throw ioe;
-                }
+                uploader.readHeader(iStream);
                 setUploaderStateOffHeaders(uploader);
                 
                 debug(uploader+" HTTPUploader created and read all headers");
@@ -308,6 +303,11 @@ public final class UploadManager implements BandwidthTracker {
             }//end of while
         } catch(IOException ioe) {//including InterruptedIOException
             debug(uploader + " IOE thrown, closing socket");
+            // if there was a spurious IOException and we hadn't already
+            // changed the state to complete (meaning we never completed
+            // sending the response), then it is interrupted.
+            if( uploader.getState() != Uploader.COMPLETE )
+                uploader.setState(Uploader.INTERRUPTED);
         } finally {
             if( uploader != null )
                 assertAsFinished( uploader.getState() );
@@ -513,12 +513,7 @@ public final class UploadManager implements BandwidthTracker {
             // or reject the uploader.
             else {
                 // note that checkAndQueue can throw an IOException
-                try {
-                    queued = checkAndQueue(uploader, socket);
-                } catch(IOException ioe) {
-                    uploader.setState(Uploader.INTERRUPTED);
-                    throw ioe;
-                }
+                queued = checkAndQueue(uploader, socket);
                 Assert.that(queued != -1);
             
             }
@@ -609,9 +604,6 @@ public final class UploadManager implements BandwidthTracker {
             uploader.initializeStreams();
             uploader.writeResponse();
             uploader.setState(Uploader.COMPLETE);
-        } catch(IOException failed) {
-            uploader.setState(Uploader.INTERRUPTED);
-            throw failed;
         } finally {
             uploader.closeFileStreams();
         }
