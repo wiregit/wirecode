@@ -196,11 +196,13 @@ public class UploadManager implements BandwidthTracker {
         long startTime=-1;
 
         // check if it complies with the restrictions.
-        //and set the uploader state accordingly
+        // and set the uploader state accordingly
         boolean accepted=insertAndTest(uploader, host);
+        // note if this is a Browse Host Upload...
+        boolean isBHUploader=(uploader.getState() == Uploader.BROWSE_HOST);
 
         // don't want to show browse host status in gui...
-        if (uploader.getState() != Uploader.BROWSE_HOST)
+        if (!isBHUploader)
             //We are going to notify the gui about the new upload, and let it 
             //decide what to do with it - will act depending on it's state
             _callback.addUpload(uploader);
@@ -213,7 +215,7 @@ public class UploadManager implements BandwidthTracker {
         //Now the acceptPushDownload method connects directly.
         
         synchronized(this) { 
-            if (accepted) 
+            if (accepted && !isBHUploader) 
                 _activeUploads++; 
         }
 
@@ -239,9 +241,10 @@ public class UploadManager implements BandwidthTracker {
                                   uploader.amountUploaded());
             removeFromMapAndList(uploader, host);
             removeAttemptingPush(host, index);
-            if (accepted)
+            if (accepted && !isBHUploader)
                 _activeUploads--;
-            _callback.removeUpload(uploader);		
+            if (!isBHUploader) // it was never added
+                _callback.removeUpload(uploader);		
         }
     }
 
