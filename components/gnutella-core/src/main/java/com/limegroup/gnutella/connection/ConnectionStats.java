@@ -1,7 +1,10 @@
 package com.limegroup.gnutella.connection;
 
+import com.limegroup.gnutella.BandwidthTrackerImpl;
+import com.limegroup.gnutella.ByteOrder;
 import com.limegroup.gnutella.Connection;
 import com.limegroup.gnutella.HorizonCounter;
+import com.limegroup.gnutella.InsufficientDataException;
 import com.limegroup.gnutella.messages.PingReply;
 
 /**
@@ -81,7 +84,16 @@ public final class ConnectionStats {
      * Whether or not horizon counting is enabled from this connection.
      */
     private boolean _horizonEnabled = true;
-    
+
+    /** 
+     * The bandwidth trackers for the up/downstream.
+     * These are not synchronized and not guaranteed to be 100% accurate.
+     */
+    private BandwidthTrackerImpl _upBandwidthTracker=
+        new BandwidthTrackerImpl();
+    private BandwidthTrackerImpl _downBandwidthTracker=
+        new BandwidthTrackerImpl();
+            
     /**
      * Constant for the <tt>Connection</tt> instance that this stat handler
      * tracks stats for.
@@ -328,5 +340,47 @@ public final class ConnectionStats {
             return;
         
         HorizonCounter.instance().addPong(pingReply);
+    }
+    
+    /**
+     * Takes a snapshot of the upstream and downstream bandwidth since the last
+     * call to measureBandwidth.
+     * @see BandwidthTracker#measureBandwidth 
+     */
+    public void measureBandwidth() {
+        _upBandwidthTracker.measureBandwidth(
+             ByteOrder.long2int(getBytesSent()));
+        _downBandwidthTracker.measureBandwidth(
+             ByteOrder.long2int(getBytesReceived()));
+    }
+
+    /**
+     * Returns the upstream bandwidth between the last two calls to
+     * measureBandwidth.
+     * @see BandwidthTracker#measureBandwidth 
+     */
+    public float getMeasuredUpstreamBandwidth() {
+        float retValue = 0; //initialize to default
+        try {
+            retValue = _upBandwidthTracker.getMeasuredBandwidth();
+        } catch(InsufficientDataException ide) {
+            return 0;
+        }
+        return retValue;
+    }
+
+    /**
+     * Returns the downstream bandwidth between the last two calls to
+     * measureBandwidth.
+     * @see BandwidthTracker#measureBandwidth 
+     */
+    public float getMeasuredDownstreamBandwidth() {
+        float retValue = 0;
+        try {
+            retValue = _downBandwidthTracker.getMeasuredBandwidth();
+        } catch (InsufficientDataException ide) {
+            return 0;
+        }
+        return retValue;
     }
 }
