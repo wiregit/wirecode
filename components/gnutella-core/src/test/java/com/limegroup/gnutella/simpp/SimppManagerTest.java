@@ -311,19 +311,107 @@ public class SimppManagerTest extends BaseTestCase {
     }
 
     public void testTamperedSimppSigRejected() {
+        //1. Set up limewire correctly
+        _simppMessageNumber = MIDDLE;
+        changeSimppFile();
 
+        //2. Set up the test connection, to have the new version, and to expect
+        //a simpp request from limewire
+        TestConnection conn = null;
+        try {
+            conn = new TestConnection(DEF_SIGNATURE, true, true, NEW);
+        } catch(IOException iox) {
+            fail("could not set up test connection");
+        }
+        conn.start();
+        try {
+            Thread.sleep(6000);//let the message exchange take place
+        } catch (InterruptedException ix) {
+            fail("interrupted while waiting for simpp exchange to complete");
+        }
+        //3. OK. LimeWire should have upgraded now. 
+        SimppManager man = SimppManager.instance();
+        assertEquals("Simpp manager did not update simpp version", 
+                                                     MIDDLE, man.getVersion());
+        conn.killConnection();
     }
 
     public void testTamperedSimppDataRejected() {
+       //1. Set up limewire correctly
+        _simppMessageNumber = MIDDLE;
+        changeSimppFile();
 
+        //2. Set up the test connection, to have the new version, and to expect
+        //a simpp request from limewire
+        TestConnection conn = null;
+        try {
+            conn = new TestConnection(DEF_MESSAGE, true, true, NEW);
+        } catch(IOException iox) {
+            fail("could not set up test connection");
+        }
+        conn.start();
+        try {
+            Thread.sleep(6000);//let the message exchange take place
+        } catch (InterruptedException ix) {
+            fail("interrupted while waiting for simpp exchange to complete");
+        }
+        //3. OK. LimeWire should have upgraded now. 
+        SimppManager man = SimppManager.instance();
+        assertEquals("Simpp manager did not update simpp version", 
+                                                     MIDDLE, man.getVersion());
+        conn.killConnection();
     }
 
     public void testBadSimppXMLRejected() {
+        //1. Set up limewire correctly
+        _simppMessageNumber = MIDDLE;
+        changeSimppFile();
 
+        //2. Set up the test connection, to have the new version, and to expect
+        //a simpp request from limewire
+        TestConnection conn = null;
+        try {
+            conn = new TestConnection(BAD_XML, true, true, NEW);
+        } catch(IOException iox) {
+            fail("could not set up test connection");
+        }
+        conn.start();
+        try {
+            Thread.sleep(6000);//let the message exchange take place
+        } catch (InterruptedException ix) {
+            fail("interrupted while waiting for simpp exchange to complete");
+        }
+        //3. OK. LimeWire should have upgraded now. 
+        SimppManager man = SimppManager.instance();
+        assertEquals("Simpp manager did not update simpp version", 
+                                                     MIDDLE, man.getVersion());
+        conn.killConnection();
     }
 
     public void testGargabeDataRejected() {
+        //1. Set up limewire correctly
+        _simppMessageNumber = MIDDLE;
+        changeSimppFile();
 
+        //2. Set up the test connection, to have the new version, and to expect
+        //a simpp request from limewire
+        TestConnection conn = null;
+        try {
+            conn = new TestConnection(RANDOM_BYTES, true, true, NEW);
+        } catch(IOException iox) {
+            fail("could not set up test connection");
+        }
+        conn.start();
+        try {
+            Thread.sleep(6000);//let the message exchange take place
+        } catch (InterruptedException ix) {
+            fail("interrupted while waiting for simpp exchange to complete");
+        }
+        //3. OK. LimeWire should have upgraded now. 
+        SimppManager man = SimppManager.instance();
+        assertEquals("Simpp manager did not update simpp version", 
+                                                     MIDDLE, man.getVersion());
+        conn.killConnection();
     }
 
     public void testIOXLeavesSimppUnchanged() {
