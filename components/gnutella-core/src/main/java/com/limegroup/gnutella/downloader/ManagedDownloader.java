@@ -2547,11 +2547,12 @@ public class ManagedDownloader implements Downloader, Serializable {
                 getState()!=ABORTED && getState()!=GAVE_UP && 
                 getState()!=COULDNT_MOVE_TO_LIBRARY && getState()!=CORRUPT_FILE 
                 && getState()!=HASHING && getState()!=SAVING && 
-                queuedThreads.size()==0)
-                if(Thread.currentThread().isInterrupted())
-                    return null; // we were signalled to stop.
-                setState(CONNECTING, 
-                         needsPush ? PUSH_CONNECT_TIME : NORMAL_CONNECT_TIME);
+                queuedThreads.size()==0) {
+                    if(Thread.currentThread().isInterrupted())
+                        return null; // we were signalled to stop.
+                    setState(CONNECTING, 
+                            needsPush ? PUSH_CONNECT_TIME : NORMAL_CONNECT_TIME);
+                }
         }
 
         if(LOG.isDebugEnabled())
