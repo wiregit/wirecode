@@ -33,14 +33,20 @@ public class ManagedDownloader implements Downloader {
     
 
     /** The current state.  One of Downloader.CONNECTING, Downloader.ERROR,
-      *  etc. */
-    private int state=QUEUED;
+      *  etc.   Should be modified only through setState. */
+    private int state;
+    /** The time as returned by Date.getTime() that this entered the current
+        state.  Should be modified only through setState. */        
+    private long stateTime;
     /** If started, the thread trying to do the downloads.  Otherwise null. */
     private Thread dloaderThread=null;
     /** The connection we're using for the current attempt, or last attempt if
      *  we aren't actively downloading.  Or null if we've never attempted a
      *  download. */
     private HTTPDownloader dloader=null;
+    /** The current address we're trying, or last address if waiting, or null
+     *  if unknown. */
+    private String lastAddress=null;
     /** True iff this has been forcibly stopped. */
     private boolean stopped=false;
     /** A queue of incoming HTTPDownloaders from push downloads.  Call wait()
@@ -67,6 +73,8 @@ public class ManagedDownloader implements Downloader {
     public ManagedDownloader(DownloadManager manager, RemoteFileDesc[] files) {
         this.manager=manager;
         this.files=files;
+        setState(QUEUED);
+
         this.dloaderThread=new Thread(new ManagedDownloadRunner());
         dloaderThread.setDaemon(true);
         dloaderThread.start();
@@ -115,7 +123,7 @@ public class ManagedDownloader implements Downloader {
         //thing is to set the stopped flag.  That guarantees run will terminate
         //eventually.
         stopped=true;   
-        state=ABORTED;
+        setState(ABORTED);
         //This guarantees any downloads in progress will be killed.  New
         //downloads will not start because of the flag above.
         if (dloader!=null)
@@ -182,15 +190,6 @@ public class ManagedDownloader implements Downloader {
             }           
         }
 
-        /** Sets this' state, taking care of locking.
-         *      @requires newState one of the constants defined in Downloader
-         *      @modifies this */
-        private void setState(int newState) {
-            synchronized (ManagedDownloader.this) {
-                state=newState;
-            }
-        }
-
         /** Tries download from all locations.  Blocks waiting for a download
          *  slot first.  Returns true iff a location succeeded.  Throws
          *  InterruptedException if a call to stop() is detected.  */
@@ -212,7 +211,7 @@ public class ManagedDownloader implements Downloader {
                         //is still wanted.  The construction of the downloader
                         //cannot go in the synchronized statement since it may
                         //be blocking.
-                        setState(CONNECTING);
+                        setState(CONNECTING, rfd.getHost());
                         HTTPDownloader dloader2=new HTTPDownloader(
                             rfd.getFileName(), rfd.getHost(), rfd.getPort(),
                             rfd.getIndex(), rfd.getClientGUID(),
@@ -295,7 +294,8 @@ public class ManagedDownloader implements Downloader {
                 try {
                     setState(QUEUED);
                     manager.waitForSlot(ManagedDownloader.this);                    
-                    setState(DOWNLOADING);
+                    setState(DOWNLOADING,
+                             dloader.getInetAddress().getHostAddress());
                     dloader.start();
                     synchronized (ManagedDownloader.this) {
                         if (stopped)
@@ -335,6 +335,26 @@ public class ManagedDownloader implements Downloader {
         }
     }
 
+    /** Sets this' state, taking care of locking.  lastAddress is only well-defined
+     *  for some states and is ignored if null.
+     *      @requires newState one of the constants defined in Downloader
+     *      @modifies this.state, this.stateTime, this.lastAddress */
+    private void setState(int newState, String lastAddress) {
+        synchronized (this) {
+            this.state=newState;
+            if (lastAddress!=null)
+                this.lastAddress=lastAddress;
+            this.stateTime=(new Date()).getTime();
+        }
+    }
+
+    /** Sets this' state, taking care of locking.
+     *      @requires newState one of the constants defined in Downloader
+     *      @modifies this.state, this.stateTime */
+    private void setState(int newState) {
+        setState(newState, lastAddress);
+    }
+
     /***************************************************************************
      * Accessors that delegate to dloader. Synchronized because dloader can
      * change.  
@@ -342,6 +362,24 @@ public class ManagedDownloader implements Downloader {
 
     public synchronized int getState() {
         return state;
+    }
+
+    public synchronized int getRemainingStateTime() {
+        long now=(new Date()).getTime();
+        switch (state) {
+        case CONNECTING:
+            return timeDiff(now, CONNECT_TIME);
+        case WAITING_FOR_RETRY:
+            return timeDiff(now, WAITING_FOR_RETRY);
+        default:
+            return Integer.MAX_VALUE;                
+        }
+    }
+        
+    private int timeDiff(long nowTime, long stateLength) {
+        long elapsed=nowTime-stateTime;
+        long remaining=stateLength-elapsed;
+        return (int)Math.max(remaining, 0)/1000;
     }
 
     public synchronized String getFileName() {
@@ -365,11 +403,8 @@ public class ManagedDownloader implements Downloader {
             return 0;
     }
 
-    public synchronized InetAddress getInetAddress() {
-        if (dloader!=null)
-            return dloader.getInetAddress();
-        else 
-            return null;
+    public synchronized String getHost() {
+        return lastAddress;
     }
 }
 

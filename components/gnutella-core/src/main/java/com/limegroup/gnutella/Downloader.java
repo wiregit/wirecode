@@ -35,6 +35,12 @@ public interface Downloader {
      */
     public int getState();
 
+    /**
+     * Returns an upper bound on the amount of time this will stay in the current
+     * state, in seconds.  Returns Integer.MAX_VALUE if unknown.
+     */
+    public int getRemainingStateTime();
+
     /** 
      * Returns the name of the file this is downloading.
      */
@@ -55,5 +61,5 @@ public interface Downloader {
      * Returns the address of the downloader, or null if this is not currently
      * connected. 
      */
-    public InetAddress getInetAddress();
+    public String getHost();
 }
