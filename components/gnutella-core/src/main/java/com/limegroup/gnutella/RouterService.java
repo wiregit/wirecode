@@ -1006,4 +1006,16 @@ public final class RouterService {
 	public static void error(int errorCode, Throwable trace) {
 		callback.error(errorCode, trace);
 	}
+
+	/**
+	 * Returns whether or not this node is capable of sending its own
+	 * GUESS queries.  This would not be the case only if this node
+	 * has not successfully received an incoming UDP packet.
+	 *
+	 * @return <tt>true</tt> if this node is capable of running its own
+	 *  GUESS queries, <tt>false</tt> otherwise
+	 */
+	public static boolean isGUESSCapable() {
+		return udpService.isGUESSCapable();
+	}
 }
