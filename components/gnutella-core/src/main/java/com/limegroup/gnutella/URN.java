@@ -281,15 +281,17 @@ public final class URN {
 	 * Checks for URN equality.  For URNs to be equal, their URN strings must
 	 * be equal.
 	 *
-	 * @param urn the URN to compare against
+	 * @param o the object to compare against
 	 * @return <tt>true</tt> if the URNs are equal, <tt>false</tt> otherwise
 	 */
-	public boolean equals(Object urn) {
-		if(urn == this) return true;
-		if(!(urn instanceof URN)) {
+	public boolean equals(Object o) {
+		if(o == this) return true;
+		if(!(o instanceof URN)) {
 			return false;
 		}
-		return ((URN)urn).getURNString().equals(URN_STRING);
+		URN urn = (URN)o;
+		return (URN_STRING == null ? urn.URN_STRING == null : 
+				URN_STRING.equals(urn.URN_STRING));
 	}
 
 	/**
