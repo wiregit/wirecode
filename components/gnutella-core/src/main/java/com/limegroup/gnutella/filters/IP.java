@@ -14,7 +14,7 @@ import com.limegroup.gnutella.Assert;
  *
  * @author Gregorio Roper
  */
-class IP {
+public class IP {
     private static final String MSG = "Could not parse: ";
 
     private final long addr;
@@ -26,7 +26,7 @@ class IP {
      * @param ip_str a String of the format "0.0.0.0", "0.0.0.0/0.0.0.0",
      *               or "0.0.0.0/0" as an argument.
      */
-    IP (final String ip_str) throws IllegalArgumentException {
+    public IP (final String ip_str) throws IllegalArgumentException {
         int slash = ip_str.indexOf("/");
         if ( slash == -1) { //assume a simple IP "0.0.*.*"
             this.addr = stringToLong(ip_str);
