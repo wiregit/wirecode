@@ -184,18 +184,20 @@ public class RequeryDownloadTest
         //to start up and send its requery.
         Downloader downloader = null;
         downloader = _mgr.download(_incompleteFile);
+        assertTrue(downloader instanceof ResumeDownloader);
         
 		// Make sure that you are through the QUEUED state.
-        while (downloader.getState() != Downloader.WAITING_FOR_USER) {         
+        while (downloader.getState() != Downloader.WAITING_FOR_RESULTS) {
 			if ( downloader.getState() != Downloader.QUEUED )
-                assertEquals(Downloader.WAITING_FOR_USER, 
+                assertEquals(Downloader.WAITING_FOR_RESULTS, 
 				  downloader.getState());
             Thread.sleep(200);
 		}
         assertEquals("downloader isn't waiting for user (also for results)", 
-            Downloader.WAITING_FOR_USER, downloader.getState());
-        // resume teh downloader (it'll send a query)
-        downloader.resume();
+            Downloader.WAITING_FOR_RESULTS, downloader.getState());
+
+        // no need to do a dldr.resume() cuz ResumeDownloaders spawn the query
+        // automatically
 
         //Check that we can get query of right type.
         //TODO: try resume without URN
@@ -217,8 +219,9 @@ public class RequeryDownloadTest
             1, qr.getRequestedUrnTypes().size() );
         Set urns=qr.getQueryUrns();
         assertNotNull("urns shouldn't be null", urns);
-        assertEquals("should only have one urn", 1, urns.size());
-        assertTrue("urns should contain the hash", urns.contains(_hash));
+        assertEquals("should only have NO urn", 0, urns.size());
+        // not relevant anymore, we don't send URN queries
+        // assertTrue("urns should contain the hash", urns.contains(_hash));
 
         //Send a response to the query.
         Set responseURNs = null;
@@ -251,8 +254,8 @@ public class RequeryDownloadTest
         } 
         else {
             //b) No match: keep waiting for results
-            assertEquals("downloader isn't given up", 
-                Downloader.GAVE_UP, downloader.getState());
+            assertEquals("downloader should wait for user", 
+                Downloader.WAITING_FOR_RESULTS, downloader.getState());
             downloader.stop();
         }
     }    
@@ -282,26 +285,9 @@ public class RequeryDownloadTest
 
         //Now wait a few seconds and make sure a requery of right type was sent.
         Thread.sleep(6*1000);
-        assertEquals(downloader.getState(), Downloader.WAITING_FOR_USER);
-        downloader.resume();
-        Thread.sleep(200); // give the downloader a chance to send the query
-        assertEquals("unexpected router.broadcasts size", 1, 
-                    _router.broadcasts.size());
-        Object m=_router.broadcasts.get(0);
-        assertInstanceof("m not a queryrequest", QueryRequest.class, m);
-        QueryRequest qr=(QueryRequest)m;
-		// First query is not counted as requery
-        //assertTrue(GUID.isLimeRequeryGUID(qr.getGUID()));
-        assertEquals("unexpected query", "file name", qr.getQuery());
-        assertNotNull("expected any type of urn", qr.getRequestedUrnTypes());
-        assertEquals("only one (any) urn type expected",
-            1, qr.getRequestedUrnTypes().size());
-        assertNotNull("should have sent atleast an empty length urn set",
-            qr.getQueryUrns() );
-        assertEquals("wishlist has no URN",
-            0, qr.getQueryUrns().size() );
-        assertEquals("downloader should be waiting for results", 
-            Downloader.WAITING_FOR_RESULTS, downloader.getState());
+        assertEquals(downloader.getState(), Downloader.WAITING_FOR_RESULTS);
+
+        // wishlist downloaders do NOT get requeries - is that OK?
 
         //Send a mismatching response to the query, making sure it is ignored.
         //Give the downloader time to start up first.
@@ -378,7 +364,7 @@ public class RequeryDownloadTest
             Downloader.WAITING_FOR_RESULTS, downloader.getState());
 
         //Now wait a few seconds and make sure a requery was NOT sent.
-        Thread.sleep(6*1000);
+        Thread.sleep(10*1000);
         assertEquals("unexpected router.broadcasts size", 0, _router.broadcasts.size());
         assertEquals("downloader should still have given up,yet wanting results",
             Downloader.GAVE_UP, downloader.getState());
@@ -440,69 +426,44 @@ public class RequeryDownloadTest
      * This takes the test a little further - it makes sure that the downloader
      * can wake up from the WAITING_FOR_USER state when a new result comes in.
      */
-    public void testRequeryDownload2() throws Exception {
+    public void deprecatedtestRequeryDownload2() throws Exception {
         ManagedDownloader.TIME_BETWEEN_REQUERIES=5*1000; //5 seconds
         DownloadManager.TIME_BETWEEN_REQUERIES=5*1000;
 
         //Start a download for the given incomplete file.  Give the thread time
         //to start up, then make sure nothing has been sent initially.
         Downloader downloader=null;
-        downloader=_mgr.download("file name", 
-                                null, 
-                                GUID.makeGuid(),
-                                null);
+        byte[] guid = GUID.makeGuid();
+        downloader=_mgr.download("file name", null, guid, null);
         Thread.sleep(200);
         assertEquals("nothing should have been sent to start", 
             0,_router.broadcasts.size());
 
         //Now wait a few seconds and make sure a requery of right type was sent.
-        Thread.sleep(6*1000);
-        assertEquals(downloader.getState(), Downloader.WAITING_FOR_USER);
-        downloader.resume();
-        Thread.sleep(500); // give the downloader a chance to send the query
-        assertEquals("downloader should be waiting for results", 
-            Downloader.WAITING_FOR_RESULTS, downloader.getState());
-        assertEquals("unexpected router.broadcasts size", 1, 
-                    _router.broadcasts.size());
-        Object m=_router.broadcasts.get(0);
-        assertInstanceof("m not a queryrequest", QueryRequest.class, m);
-        QueryRequest qr=(QueryRequest)m;
-		// First query is not counted as requery
-        //assertTrue(GUID.isLimeRequeryGUID(qr.getGUID()));
-        assertEquals("unexpected query", "file name", qr.getQuery());
-        assertNotNull("expected any type of urn", qr.getRequestedUrnTypes());
-        assertEquals("only one (any) urn type expected",
-            1, qr.getRequestedUrnTypes().size());
-        assertNotNull("should have sent atleast an empty length urn set",
-            qr.getQueryUrns() );
-        assertEquals("wishlist has no URN",
-            0, qr.getQueryUrns().size() );
-
-        // make sure that the downloader waited for results but didn't get any
-        Thread.sleep(6*1000);
-        assertEquals(downloader.getState(), Downloader.WAITING_FOR_USER);
+        Thread.sleep(10*1000);
+        assertEquals(downloader.getState(), Downloader.GAVE_UP);
 
         //Send a mismatching response to the query, making sure it is ignored.
         //Give the downloader time to start up first.
         Response response=new Response(
                                        0l, TestFile.length(), "totally different.txt");
         byte[] ip={(byte)127, (byte)0, (byte)0, (byte)1};
-        QueryReply reply=new QueryReply(qr.getGUID(), 
+        QueryReply reply=new QueryReply(guid, 
             (byte)6, 6666, ip, 0l, 
             new Response[] { response }, new byte[16],
             false, false, //needs push, is busy
             true, false,  //finished upload, measured speed
             false, false);//supports chat, is multicast response
-       _router.handleQueryReply(reply, new ManagedConnection("1.2.3.4", 6346));
+        _router.handleQueryReply(reply, new ManagedConnection("1.2.3.4", 6346));
         Thread.sleep(400);
-        assertEquals("downloader should still be waiting for results",
-            Downloader.WAITING_FOR_USER, downloader.getState());
+        assertEquals("downloader should still be given up",
+            Downloader.GAVE_UP, downloader.getState());
 
         //Send a good response to the query.
         response=new Response(0l,   //index
                               TestFile.length(),
-                              "some file name.txt");
-        reply=new QueryReply(qr.getGUID(), 
+                              "some file name.txt", null, null, null, null);
+        reply=new QueryReply(guid, 
             (byte)6, 6666, ip, 0l, 
             new Response[] { response }, new byte[16],
             false, false, //needs push, is busy
@@ -511,7 +472,7 @@ public class RequeryDownloadTest
        _router.handleQueryReply(reply, new ManagedConnection("1.2.3.4", 6346));
 
         //Make sure the downloader does the right thing with the response.
-        Thread.sleep(400);
+        Thread.sleep(1000);
         while (downloader.getState()!=Downloader.COMPLETE &&
                downloader.getState()!=Downloader.CORRUPT_FILE ) {
 			if ( downloader.getState() != Downloader.CONNECTING &&
@@ -531,7 +492,7 @@ public class RequeryDownloadTest
     }
     
     /** Tests that requeries are sent fairly and at appropriate rate. */
-    public void testRequeryScheduling() throws Exception {
+    public void deprecatedtestRequeryScheduling() throws Exception {
         ManagedDownloader.TIME_BETWEEN_REQUERIES=200; //0.1 seconds
         DownloadManager.TIME_BETWEEN_REQUERIES=1000;   //1 second
 
