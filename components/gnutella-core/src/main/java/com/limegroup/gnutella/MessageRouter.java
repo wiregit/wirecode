@@ -2565,21 +2565,11 @@ public abstract class MessageRouter {
      * unless the same person has pinged us too recently.
      */
     private void handleHeadPing(HeadPing ping, DatagramPacket datagram) {
-    	
-
     	InetAddress host = datagram.getAddress();
     	int port = datagram.getPort();
-    	FileManager fmanager = RouterService.getFileManager();
-    	UploadManager umanager = RouterService.getUploadManager();
-    	UDPService uservice = UDPService.instance();
-    	
     	if (_udpHeadRequests.add(host)) {
-    		
     		HeadPong pong = new HeadPong(ping);
-
-    		uservice.send(pong, host, port);
-    
-
+    		UDPService.instance().send(pong, host, port);
     	}
     }
     
@@ -2593,16 +2583,10 @@ public abstract class MessageRouter {
      * 
      */
     private void handleHeadPing(HeadPing ping, ManagedConnection conn) {
-    	
-    	FileManager fmanager = RouterService.getFileManager();
-    	UploadManager umanager = RouterService.getUploadManager();
-    	UDPService uservice = UDPService.instance();
-    	
-    	if (_udpHeadRequests.add(conn.getInetAddress())){
+        if (_udpHeadRequests.add(conn.getInetAddress())){
     		HeadPong pong = new HeadPong(ping);
     		conn.send(pong);
     	}
-    		
     }
     
     
