@@ -64,7 +64,7 @@ public class ConnectionManager {
 	/** The maximum number of connections to maintain to older Ultrapeers
 	 * that have low-degrees of intra-Ultrapeer connections --
 	 * connections to the "low-density" network.*/
-	private static final int MAX_LOW_DEGREE_ULTRAPEERS = 3;
+	private static final int MAX_LOW_DEGREE_ULTRAPEERS = 10;
 
     /** Minimum number of connections that an ultrapeer with leaf connections
      * must have. */
@@ -644,8 +644,7 @@ public class ConnectionManager {
     private static boolean trustedVendor(String userAgentHeader) {
         if(userAgentHeader == null) return false;
         return (userAgentHeader.startsWith("LimeWire") ||
-				userAgentHeader.startsWith("Swapper") ||
-				userAgentHeader.startsWith("BearShare"));
+				userAgentHeader.startsWith("Swapper"));
     }
         
 
@@ -1266,6 +1265,7 @@ public class ConnectionManager {
         //or the supernode status is forced, dont change mode
         int connections=getNumInitializedConnections()
                        +getNumInitializedClientConnections();
+        
         if (UltrapeerSettings.FORCE_ULTRAPEER_MODE.getValue() 
             || (isSupernode() && connections > 0))
             return false;
