@@ -151,7 +151,7 @@ public final class QueryDispatcher implements Runnable {
             iter = toRemove.iterator();
             while (iter.hasNext()) {
                 QueryHandler qh = (QueryHandler)iter.next();
-                map.remove(new GUID(qh.getGUID()));
+                map.remove(qh.getGUID());
             }
         }     
     }
@@ -184,7 +184,7 @@ public final class QueryDispatcher implements Runnable {
                 Iterator iter = NEW_QUERIES.iterator();
                 while (iter.hasNext()) {
                     QueryHandler qh = (QueryHandler) iter.next();
-                    QUERIES.put(new GUID(qh.getGUID()), qh);
+                    QUERIES.put(qh.getGUID(), qh);
                 }
             }
 			NEW_QUERIES.clear();
@@ -214,7 +214,7 @@ public final class QueryDispatcher implements Runnable {
             iter = expiredQueries.iterator();
             while (iter.hasNext()) {
                 QueryHandler qh = (QueryHandler) iter.next();
-                QUERIES.remove(new GUID(qh.getGUID()));
+                QUERIES.remove(qh.getGUID());
             }
         }
         _done = true;
