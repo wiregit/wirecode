@@ -1,6 +1,7 @@
 package com.limegroup.gnutella;
 
 import java.io.*;
+import java.net.*;
 import com.limegroup.gnutella.routing.QueryRouteTable;
 import com.sun.java.util.collections.*;
 
@@ -107,12 +108,18 @@ public class StandardMessageRouter
 		Iterator iter = unicastEndpoints.iterator();
 		while(iter.hasNext()) {
 			Endpoint host = (Endpoint)iter.next();
-			PingReply reply = new PingReply(request.getGUID(), 1, host.getPort(),
-											host.getHostBytes(), 0, 0, true);
 			try {
-				sendPingReply(reply);
-			} catch(IOException e) {
-				// we can't do anything other than try to send it
+				byte[] address = host.getHostBytes();
+				PingReply reply = new PingReply(request.getGUID(), (byte)1, 
+												host.getPort(),
+												address, (long)0, (long)0, 
+												true);
+				try {
+					sendPingReply(reply);
+				} catch(IOException e) {
+					// we can't do anything other than try to send it
+				}
+			} catch(UnknownHostException e) {
 			}
 		}
 	}
