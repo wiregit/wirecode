@@ -75,6 +75,8 @@ class NIODispatcher implements Runnable {
         synchronized(PENDING_LOCK) {
             list.add(new Object[] { channel, attachment });
         }
+        LOG.trace("Waking selector up.");
+        selector.wakeup();
     }
     
     /** Registers a SelectableChannel as being interested in a write again. */
@@ -92,7 +94,7 @@ class NIODispatcher implements Runnable {
     }
     
     /**
-     * Cancel SelesctionKey, close Channel and "free" the attachment
+     * Cancel SelectionKey, close Channel and "free" the attachment
      */
     private void cancel(SelectionKey sk, NIOHandler handler) {
         sk.cancel();
@@ -150,8 +152,8 @@ class NIODispatcher implements Runnable {
         
         boolean finished = channel.finishConnect();
         if(finished) {
+            sk.interestOps(0); // interested in nothing just yet.
             handler.handleConnect();
-            sk.interestOps(SelectionKey.OP_WRITE | SelectionKey.OP_READ);
         } else
             cancel(sk, handler);
     }
@@ -230,11 +232,17 @@ class NIODispatcher implements Runnable {
                 
         while(true) {
             
+            //try {
+             //   Thread.sleep(50);
+            //} catch(InterruptedException ix) {
+             //   LOG.warn("Selector interrupted", ix);
+           // }
+            
             addPendingItems();
 
             LOG.debug("Selecting");
             try {
-                n = selector.select(50);
+                n = selector.select();
             } catch (NullPointerException err) {
                 LOG.warn("npe", err);
                 continue;

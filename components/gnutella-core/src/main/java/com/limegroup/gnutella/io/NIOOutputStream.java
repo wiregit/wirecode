@@ -47,6 +47,7 @@ class NIOOutputStream implements ReadHandler {
             throw new IllegalStateException("already init'd!");
         this.buffer = ByteBuffer.allocate(8192); // TODO: use a ByteBufferPool
         NIODispatcher.instance().registerRead(source, this);
+        NIODispatcher.instance().interestWrite(channel);
     }
     
     /**

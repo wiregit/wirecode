@@ -49,6 +49,7 @@ class NIOInputStream implements WriteHandler {
 
         this.buffer = ByteBuffer.allocate(8192); // TODO: use a ByteBufferPool
         NIODispatcher.instance().registerWrite(sink, this);
+        NIODispatcher.instance().interestRead(channel);
     }
     
     /**

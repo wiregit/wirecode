@@ -34,10 +34,10 @@ public class NIOSocket extends Socket implements ConnectHandler, ReadHandler, Wr
         socket = s;
         writer = new NIOOutputStream(this, channel);
         reader = new NIOInputStream(this, channel);
-        NIODispatcher.instance().registerReadWrite(channel, this);
-        connectedTo = s.getInetAddress();
         writer.init();
         reader.init();
+        NIODispatcher.instance().registerReadWrite(channel, this);
+        connectedTo = s.getInetAddress();
     }
     
     public NIOSocket() throws IOException {
