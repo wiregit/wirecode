@@ -57,6 +57,12 @@ public final class ThemeSettings extends LimeProps {
         "windows_theme."+EXTENSION;
         
     /**
+     * The default name of the gtk laf theme file name.
+     */
+    public static final String GTK_LAF_THEME_NAME =
+        "GTK_theme." + EXTENSION;
+        
+    /**
      * The default name of the theme file name for non-OS X pro users.
      */
     public static final String PRO_THEME_NAME =
@@ -86,6 +92,11 @@ public final class ThemeSettings extends LimeProps {
     static final File WINDOWS_LAF_THEME_FILE =
         new File(THEME_DIR_FILE, WINDOWS_LAF_THEME_NAME);
         
+    /**
+     * The full path to the GTK theme file for the GTK LAF
+     */
+    static final File GTK_LAF_THEME_FILE =
+        new File(THEME_DIR_FILE, GTK_LAF_THEME_NAME);
         
     /**
      * The full path to the pro only theme.
@@ -224,6 +235,13 @@ public final class ThemeSettings extends LimeProps {
         return THEME_FILE.getValue().equals(THEME_DEFAULT);
     }
     
+    /**
+     * Determines if the current theme is the GTK theme.
+     */
+    public static boolean isGTKTheme() {
+        return THEME_FILE.getValue().equals(GTK_LAF_THEME_FILE);
+    }
+    
     /** 
      * Determines whether or not the current theme is the windows theme,
      * designed to be used for the windows laf.
@@ -260,7 +278,7 @@ public final class ThemeSettings extends LimeProps {
      * Determines if the current theme is the native theme.
      */
     public static boolean isNativeTheme() {
-        return isNativeOSXTheme() || isWindowsTheme();
+        return isNativeOSXTheme() || isWindowsTheme() || isGTKTheme();
     }
     
     /**
@@ -305,6 +323,9 @@ public final class ThemeSettings extends LimeProps {
         } else if(CommonUtils.isWindowsXP() && CommonUtils.isJava14OrLater()) {
             theme = WINDOWS_LAF_THEME_FILE;
             dir = new File(THEME_DIR_FILE, "windows_theme");
+        } else if(CommonUtils.isLinux() && CommonUtils.isJava15OrLater()) {
+            theme = GTK_LAF_THEME_FILE;
+            dir = new File(THEME_DIR_FILE, "GTK_theme");
         } else {
             theme = LIMEWIRE_THEME_FILE;
             dir = new File(THEME_DIR_FILE, "limewire_theme");

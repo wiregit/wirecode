@@ -630,6 +630,18 @@ public final class CommonUtils {
 		    && !version.startsWith("1.1")  
 		    && !version.startsWith("1.0"); 
 	}
+	
+	/**
+	 * Returns whether or not the current JVM is 1.5.x or later.
+	 */
+	public static boolean isJava15OrLater() {
+        String version=CommonUtils.getJavaVersion();
+        return !version.startsWith("1.4")
+		    && !version.startsWith("1.3") 
+            && !version.startsWith("1.2") 
+		    && !version.startsWith("1.1")  
+		    && !version.startsWith("1.0"); 
+    }   
 
     /** 
 	 * Attempts to copy the first 'amount' bytes of file 'src' to 'dst',
