@@ -25,6 +25,7 @@ import com.limegroup.gnutella.messages.vendor.ReplyNumberVendorMessage;
 import com.limegroup.gnutella.messages.vendor.UDPConnectBackVendorMessage;
 import com.limegroup.gnutella.search.QueryHandler;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
+import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.util.Sockets;
 
 /**
@@ -50,7 +51,10 @@ public class ClientSideOutOfBandReplyTest extends ClientSideTestCase {
     public static void main(String[] args) {
         junit.textui.TestRunner.run(suite());
     }
-         
+
+    private static void doSettings() {
+	ConnectionSettings.DO_NOT_BOOTSTRAP.setValue(true);
+    }
     
     ///////////////////////// Actual Tests ////////////////////////////
 
