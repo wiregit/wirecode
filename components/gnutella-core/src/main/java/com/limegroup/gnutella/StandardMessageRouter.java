@@ -207,7 +207,8 @@ public class StandardMessageRouter
             // create the new queryReply
             queryReply = new QueryReply(guid, ttl, port, ip,
                                         speed, res, clientGUID, 
-										!incoming, busy, uploaded, measuredSpeed);
+										!incoming, busy, uploaded, measuredSpeed,
+                                        true);  //supports chat
 
             // try to send the new queryReply
             try {
