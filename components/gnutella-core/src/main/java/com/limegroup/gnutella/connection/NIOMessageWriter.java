@@ -187,21 +187,22 @@ public final class NIOMessageWriter implements MessageWriter {
     }
     
 
-    /* (non-Javadoc)
-     * @see com.limegroup.gnutella.connection.MessageWriter#simpleWrite(com.limegroup.gnutella.messages.Message)
+    /**
+     * Same as write(Message msg) in the NIO case.
      */
     public void simpleWrite(Message msg) throws IOException {
         write(msg);   
     }
 
-    /* (non-Javadoc)
-     * @see com.limegroup.gnutella.connection.MessageWriter#flush()
+    /**
+     * Does nothing in the NIO case.
      */
     public void flush() throws IOException {}
 
 
-    /* (non-Javadoc)
-     * @see com.limegroup.gnutella.connection.MessageWriter#setClosed(boolean)
+    /** 
+     * Sets the state of this message writer to closed.  Used primarily for
+     * TESTING, particularly in ManagedConnectionBufferTest.
      */
     public void setClosed(boolean closed) {
         _closed = closed;
