@@ -96,6 +96,7 @@ public final class ForMeReplyHandler implements ReplyHandler {
 	
 	public void countDroppedMessage() {}
 	
+	// inherit doc comment
 	public boolean isSupernodeClientConnection() {
 		return false;
 	}
