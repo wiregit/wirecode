@@ -4,9 +4,11 @@ import java.net.*;
 import java.io.*;
 
 /**
- * This class listens for incoming messages on the open UDP port,
- * dispatching those message the appropriate message routers and 
- * reply handlers.
+ * This class handles UDP messaging services.  It both sends and
+ * receives messages, routing received messages to their appropriate
+ * handlers.  This also handles issues related to the GUESS proposal, 
+ * such as making sure that the UDP and TCP port match and sending
+ * UDP acks for queries.
  *
  * @see UDPReplyHandler
  * @see MessageRouter
@@ -14,7 +16,7 @@ import java.io.*;
 public final class UDPService implements Runnable {
 
 	/**
-	 * Constant for the single <tt>UDPAcceptor</tt> instance.
+	 * Constant for the single <tt>UDPService</tt> instance.
 	 */
 	private static final UDPService INSTANCE = new UDPService();
 
@@ -26,6 +28,8 @@ public final class UDPService implements Runnable {
 	/**
 	 * Constant for the size of UDP messages to accept -- dependent upon
 	 * IP-layer fragmentation.
+	 *
+	 * TODO:: MAKE BIGGER??
 	 */
 	private final int BUFFER_SIZE = 1024 * 32;
 
