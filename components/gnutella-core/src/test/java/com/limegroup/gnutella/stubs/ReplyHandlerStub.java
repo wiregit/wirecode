@@ -112,6 +112,8 @@ public class ReplyHandlerStub implements ReplyHandler {
 	public void handleUPListVM(UPListVendorMessage m) {
 		
 	}
+    public void setUDPCapable(boolean b) {}
+    public boolean isUDPCapable() {return true;}
 }
 
 
