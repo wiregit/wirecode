@@ -578,7 +578,7 @@ public class ManagedDownloader implements Downloader, Serializable {
 
     /** Returns the keywords for a requery, i.e., the keywords found in all
      *  filenames.  REQUIRES: allFiles.length MUST be greater than 0. */
-    private final String extractQueryString() {
+    private final synchronized String extractQueryString() {
         //Intersect words(allFiles[i]), for all i.
         Assert.that(allFiles.length>0, "Precondition violated");
         Set intersection=keywords(allFiles[0].getFileName());

@@ -182,8 +182,13 @@ public final class SearchResultHandler {
             //Throw away files that are two big to fit in an integer.
             long size = response.getSize();
             long index = response.getIndex();
+            String name = response.getName();
             long maxIndex = LimeXMLProperties.DEFAULT_NONFILE_INDEX;
             if (size>Integer.MAX_VALUE || index > maxIndex)
+                continue;
+            if(size <=0)//size of 0 or less?
+                continue;
+            if(name==null || name.trim().equals(""))
                 continue;
             int score = RouterService.score(replyGUID,response);
             if(isSpecificXMLSearch && (score == 0)) continue;
