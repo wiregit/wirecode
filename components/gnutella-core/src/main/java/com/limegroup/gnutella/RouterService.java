@@ -885,7 +885,7 @@ public class RouterService
         return manager.hasClientSupernodeConnection();
     }
 
-    public void sendQRToDownloadManager(QueryReply qr) {
+    void sendQRToDownloadManager(QueryReply qr) {
         if (downloader != null)
             downloader.handleQueryReply(qr);
     }
