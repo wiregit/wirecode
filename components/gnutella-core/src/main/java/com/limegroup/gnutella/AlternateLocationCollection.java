@@ -80,12 +80,13 @@ public final class AlternateLocationCollection
 		// if there are no alternate locations, simply return
 		if(_alternateLocations == null) return null;
 
-		Iterator iter = _alternateLocations.values().iterator();	   
+		Iterator iter = _alternateLocations.values().iterator();	 
+		final String commaSpace = ", "; 
 		StringBuffer writeBuffer = new StringBuffer();
 		while(iter.hasNext()) {
 			writeBuffer.append(((HTTPHeaderValue)iter.next()).httpStringValue());
 			if(iter.hasNext()) {
-				writeBuffer.append(", ");
+				writeBuffer.append(commaSpace);
 			}
 		}
 		return writeBuffer.toString();
