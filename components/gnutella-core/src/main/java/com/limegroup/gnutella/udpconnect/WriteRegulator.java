@@ -106,7 +106,7 @@ public class WriteRegulator {
         rtt = sentWait + 1;
         if  (rtt == 0) 
             rtt = 10;
-        int baseWait   = Math.min(realRTT, 2000)/3;  
+        int baseWait   = Math.min(realRTT, 2000)/6;  
         //
         // Want to ideally achieve a steady state location in writing and 
         // reading window.  Don't want to get too far ahead or too far behind
