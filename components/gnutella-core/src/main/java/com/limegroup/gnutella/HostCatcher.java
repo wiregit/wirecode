@@ -105,7 +105,6 @@ public class HostCatcher {
     private Acceptor acceptor;
     private ConnectionManager manager;
     private ActivityCallback callback;
-    private SettingsManager settings=SettingsManager.instance();
 
     /**
      * whether or not to always notify the activity callback implementor that
