@@ -21,7 +21,7 @@ public class BootstrapServerTest extends TestCase {
         try {
             String s1="HTTP://server.com/dir/script.php";
             BootstrapServer e1=new BootstrapServer(s1);
-            assertEquals(s1, e1.getURL().toString());
+            assertEquals(s1.toLowerCase(), e1.getURL().toString());
         } catch (ParseException e) {
             fail("Unexpected exception");
         }
