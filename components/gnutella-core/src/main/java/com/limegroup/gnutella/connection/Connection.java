@@ -1423,7 +1423,7 @@ public class Connection implements ReplyHandler, PushProxyInterface {
     /**
      * Closes the Connection's socket and thus the connection itself.
      */
-    void close() {
+    public void close() {
         
         // the writer can be null for testing
         if(_messageWriter != null) {
