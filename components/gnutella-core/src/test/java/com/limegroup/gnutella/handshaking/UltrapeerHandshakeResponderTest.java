@@ -32,6 +32,16 @@ public final class UltrapeerHandshakeResponderTest extends BaseTestCase {
     public static void main(String[] args) {
         junit.textui.TestRunner.run(suite());
     }
+    
+    /**
+     * Always assume we're encoding & accept it.  This simplifies the testing.
+     * For further tests on whether how handshaking works in response to these
+     * settings, see HandshakeResponseTest.
+     */    
+    public void setUp() {
+        ConnectionSettings.ACCEPT_DEFLATE.setValue(true);
+        ConnectionSettings.ENCODE_DEFLATE.setValue(true);
+    }    
 
     /**
      * Tests the method for responding to outgoing connection attempts.
@@ -87,9 +97,9 @@ public final class UltrapeerHandshakeResponderTest extends BaseTestCase {
         assertTrue("should not be an Ultrapeer", !hr.isUltrapeer());
         assertTrue("should be becoming an leaf", hr.isLeaf());
         assertTrue("should be accepted", hr.isAccepted());
-        assertEquals("should only have one header", 1, hr.props().size());
-        assertTrue("should not deflate if we're becoming a leaf",
-                !hr.isDeflateEnabled());
+        assertEquals("should have two headers", 2, hr.props().size());
+        assertTrue("should be deflating",
+                hr.isDeflateEnabled());
         ConnectionSettings.IGNORE_KEEP_ALIVE.setValue(false);
     }
 

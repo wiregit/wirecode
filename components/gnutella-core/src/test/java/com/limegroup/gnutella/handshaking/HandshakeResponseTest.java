@@ -293,6 +293,49 @@ public final class HandshakeResponseTest extends BaseTestCase {
         hr = HandshakeResponse.createResponse(props);
         assertTrue("should not be deflate enabled", !hr.isDeflateEnabled());
     }
+    
+    /**
+     * Tests the isDeflateAccepted method.  Note the wierd condition
+     * with ConnectionSettings.ENCODE_DEFLATE
+     */
+    public void testIsDeflateAccepted() throws Exception {
+        Properties props = new Properties();
+        HandshakeResponse hr;
+        
+        // These are all the normal cases, where the servent
+        // is allowed to write back a Content-Encoding: deflate
+        ConnectionSettings.ENCODE_DEFLATE.setValue(true);
+
+        props.put("Accept-Encoding", "deflate");
+        hr = HandshakeResponse.createResponse(props);
+        assertTrue("should be deflate enabled", hr.isDeflateAccepted());
+
+        props.put("Accept-Encoding", "gobblygook");
+        hr = HandshakeResponse.createResponse(props);
+        assertTrue("should not be deflate enabled", !hr.isDeflateAccepted());
+
+        props.clear();
+        hr = HandshakeResponse.createResponse(props);
+        assertTrue("should not be deflate enabled", !hr.isDeflateAccepted());
+        
+        // This is the other case, where the servent is now allowed
+        // to write back a Content-Encoding: deflate.
+        // In order to short-circuit the HandshakeResponders, we pretend
+        // that all incoming responses simply do not have an Accept-Encoding
+        // line if the servent cannot deflate output.
+        ConnectionSettings.ENCODE_DEFLATE.setValue(false);
+        props.put("Accept-Encoding", "deflate");
+        hr = HandshakeResponse.createResponse(props);
+        assertTrue("should not be deflate enabled", !hr.isDeflateAccepted());
+
+        props.put("Accept-Encoding", "gobblygook");
+        hr = HandshakeResponse.createResponse(props);
+        assertTrue("should not be deflate enabled", !hr.isDeflateAccepted());
+
+        props.clear();
+        hr = HandshakeResponse.createResponse(props);
+        assertTrue("should not be deflate enabled", !hr.isDeflateAccepted());                
+    }    
 
     /**
      * Test to make sure that Ultrapeer headers are created correctly.
