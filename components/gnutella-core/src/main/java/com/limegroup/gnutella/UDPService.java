@@ -341,11 +341,9 @@ public final class UDPService implements Runnable {
                     } 
                     catch(BindException be) {
                         // oh well, if we can't bind our socket, ignore it.. 
-                        return;
                     } 
                     catch(NoRouteToHostException nrthe) {
                         // oh well, if we can't find that host, ignore it ...
-                        return;
                     } 
                     catch(IOException ioe) {
                         //If we're full, just drop it.  UDP is unreliable like 
