@@ -20,7 +20,7 @@ public class MessageReaderProxy implements MessageReader {
     public MessageReaderProxy(Connection conn) {
         if(CommonUtils.isJava14OrLater() &&
            ConnectionSettings.USE_NIO.getValue()) {
-            DELEGATE = NIOMessageReader.createReader();       
+            DELEGATE = NIOMessageReader.createReader(conn);       
         } else {
             DELEGATE = BIOMessageReader.createReader(conn);
         }
@@ -54,4 +54,11 @@ public class MessageReaderProxy implements MessageReader {
         return DELEGATE.read(i);
     }
 
+    public void routeMessage(Message msg) {
+        DELEGATE.routeMessage(msg);
+    }
 }
+
+
+
+

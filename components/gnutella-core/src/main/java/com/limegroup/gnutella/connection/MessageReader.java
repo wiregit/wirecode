@@ -34,5 +34,7 @@ public interface MessageReader {
      */
     Message read(int i) throws IOException, BadPacketException, 
         InterruptedIOException;
+
+    void routeMessage(Message msg);
     
 }
