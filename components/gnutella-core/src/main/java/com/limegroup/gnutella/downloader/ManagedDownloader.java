@@ -264,7 +264,7 @@ public class ManagedDownloader implements Downloader {
     /** Actually does the download. */
     private class ManagedDownloadRunner implements Runnable {
         public void run() {
-            try {
+            //try {
                 //Until there are no more downloads left to try...
                 for (int i=0; i<TRIES && !stopped; i++) {
                     synchronized (ManagedDownloader.this) {
@@ -303,11 +303,12 @@ public class ManagedDownloader implements Downloader {
                     setState(GAVE_UP);
                     manager.remove(ManagedDownloader.this, false);
                 }
-            } finally {
+			//}  finally {
                 //Clean up any queued push downloads.  Also clean up dloader if
                 //still existing.  This isn't needed if an IOException thrown by
                 //Downloader.start means stop need not be called.  But better to
                 //be safe.
+
                 synchronized (ManagedDownloader.this) {
                     stopped=true;
                     for (Iterator iter=pushQueue.iterator(); iter.hasNext(); )
@@ -315,7 +316,7 @@ public class ManagedDownloader implements Downloader {
                     if (dloader!=null)
                         dloader.stop();
                 }
-            }
+            //}
         }
 
 
