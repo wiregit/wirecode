@@ -177,20 +177,20 @@ public class ConnectionTest extends TestCase {
         out.close();
         sleep(200);                        //give time for FIN to be propogated
         in.read();
-        assertTrue(inListener.closed);     //TODO: occasionally fails
+        assertTrue(inListener.closed);     
         assertTrue(! outListener.closed);  //should not generate ERROR event
     }
 
 
-//     public void testWriteToClosed() {
-//         out.close();
-//         in.write(new PingRequest((byte)3));//it takes TWO writes to get FIN
-//         in.write(new PingRequest((byte)4));
-//         in.write(new PingRequest((byte)5));
-//         sleep(200);
-//         assertTrue(inListener.closed);     //TODO: occasionally fails
-//         assertTrue(! outListener.closed);  //should not generate ERROR event
-//     }
+    public void testWriteToClosed() {
+        out.close();
+        in.write(new PingRequest((byte)3));//it takes TWO writes to get FIN
+        in.write(new PingRequest((byte)4));
+        in.write(new PingRequest((byte)5));
+        sleep(200);
+        assertTrue(inListener.closed);     
+        assertTrue(! outListener.closed);  //should not generate ERROR event
+    }
 
     private void sleep(long msecs) {
         try {

@@ -921,9 +921,12 @@ public class Connection {
         // method is called asynchronously before the socket is initialized.
         _closed = true;
         if(_socket != null) {
-            try {
-                _socket.close();
-            } catch(IOException e) {}
+            //There is a bug in Java 1.4 where s.close() does not work if the
+            //socket s was created from a SocketChannel and s.setSoTimeout() was
+            //ever called.  The work around is to shutdown the input and output
+            //streams independently.
+            try { _socket.shutdownInput(); } catch(IOException e) {}
+            try { _socket.shutdownOutput(); } catch(IOException e) {}
         }
     }
 
