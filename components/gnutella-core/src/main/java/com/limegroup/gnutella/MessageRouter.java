@@ -233,7 +233,7 @@ public abstract class MessageRouter
 		} else if (msg instanceof QueryReply) {			
             handleQueryReply((QueryReply)msg, handler);
 		} else if(msg instanceof PingRequest) {
-			handlePingRequestPossibleDuplicate((PingRequest)msg, handler);
+			handleUDPPingRequestPossibleDuplicate((PingRequest)msg, handler);
 		} else if(msg instanceof PingReply) {
 			handlePingReply((PingReply)msg, handler);
 		} else if(msg instanceof PushRequest) {
@@ -248,11 +248,23 @@ public abstract class MessageRouter
      * if the request has already been seen.  If not, calls handlePingRequest.
      */
     final void handlePingRequestPossibleDuplicate(
-        PingRequest pingRequest, ReplyHandler receivingConnection)
+        PingRequest pingRequest, ReplyHandler handler)
     {
         if(_pingRouteTable.tryToRouteReply(pingRequest.getGUID(),
-										   receivingConnection))
-            handlePingRequest(pingRequest, receivingConnection);
+										   handler))
+            handlePingRequest(pingRequest, handler);
+    }
+
+    /**
+     * The handler for PingRequests received in
+     * ManagedConnection.loopForMessages().  Checks the routing table to see
+     * if the request has already been seen.  If not, calls handlePingRequest.
+     */
+    final void handleUDPPingRequestPossibleDuplicate(
+        PingRequest pingRequest, ReplyHandler handler)
+    {
+        if(_pingRouteTable.tryToRouteReply(pingRequest.getGUID(), handler))
+            handleUDPPingRequest(pingRequest, handler);
     }
 
     /**
@@ -318,6 +330,29 @@ public abstract class MessageRouter
 
         respondToPingRequest(pingRequest, _acceptor);
     }
+
+
+    /**
+     * The default handler for PingRequests received in
+     * ManagedConnection.loopForMessages().  This implementation updates stats,
+     * does the broadcast, and generates a response.
+     *
+     * You can customize behavior in three ways:
+     *   1. Override. You can assume that duplicate messages
+     *      (messages with the same GUID that arrived via different paths) have
+     *      already been filtered.  If you want stats updated, you'll
+     *      have to call super.handlePingRequest.
+     *   2. Override broadcastPingRequest.  This allows you to use the default
+     *      handling framework and just customize request routing.
+     *   3. Implement respondToPingRequest.  This allows you to use the default
+     *      handling framework and just customize responses.
+     */
+    protected void handleUDPPingRequest(PingRequest pingRequest,
+										ReplyHandler handler)
+    {
+        _numPingRequests++;
+        respondToUDPPingRequest(pingRequest, _acceptor);
+    }
     
     
     /**
@@ -341,11 +376,13 @@ public abstract class MessageRouter
         _numQueryRequests++;
 
 		// in the case of UDP queries, the following check should
-		// never evaluate to true
+		// never evaluate to true (we've already incremented the ttl)
         if(queryRequest.getTTL() > 0) {
             broadcastQueryRequest(queryRequest, handler, _manager);
 		} 
 			
+		// always forward any queries to leaves -- this only does
+		// anything when this node's an UltraPeer
 		forwardQueryRequestToLeaves(queryRequest, handler, _manager);
         respondToQueryRequest(queryRequest, _acceptor, _clientGUID);
     }
@@ -467,9 +504,21 @@ public abstract class MessageRouter
      * Adds the QueryRequest to the unicaster module.  Not much work done here,
      * see QueryUnicaster for more details.
      */
-    protected void unicastQueryRequest(QueryRequest queryRequest) {
-        QueryUnicaster.instance().addQuery(queryRequest);
-    }
+    protected synchronized void unicastQueryRequest(final QueryRequest query) {
+		// set the TTL on outgoing udp queries to 1
+		query.setTTL((byte)1);
+				
+		QueryUnicaster.instance().addQuery(query);
+
+//  		try {
+//  			InetAddress localHost = InetAddress.getLocalHost();
+//  			UDPAcceptor.instance().send(query, localHost, 6346);
+//  		} catch(UnknownHostException e) {
+//  			e.printStackTrace();
+//  		} catch(Exception e) {
+//  			e.printStackTrace();
+//  		}
+	}
 
 
     /**
@@ -559,8 +608,21 @@ public abstract class MessageRouter
      * sendPingReply(PingReply).
      * This method is called from the default handlePingRequest.
      */
-    protected abstract void respondToPingRequest(PingRequest pingRequest,
+    protected abstract void respondToPingRequest(PingRequest request,
                                                  Acceptor acceptor);
+
+	/**
+	 * Responds to a ping received over UDP -- implementations
+	 * handle this differently from pings received over TCP, as it is 
+	 * assumed that the requester only wants pongs from other nodes
+	 * that also support UDP messaging.
+	 *
+	 * @param request the <tt>PingRequest</tt> to service
+	 * @param handler the <tt>ReplyHandler</tt> that will handle 
+	 *  sending the replies
+	 */
+    protected abstract void respondToUDPPingRequest(PingRequest request,
+													Acceptor acceptor);
 
 
     /**
@@ -657,7 +719,7 @@ public abstract class MessageRouter
             //GUID.  Note that replies destined for me all always delivered to
             //the GUI.
             if (rrp.getBytesRouted()<MAX_REPLY_ROUTE_BYTES ||
-                    rrp.getReplyHandler()==_forMeReplyHandler) {
+				rrp.getReplyHandler()==_forMeReplyHandler) {
                 rrp.getReplyHandler().handleQueryReply(queryReply,
                                                        receivingConnection);
             }
@@ -828,7 +890,7 @@ public abstract class MessageRouter
                 
                 //Not every connection need be a leaf/supernode connection.
                 if (! (c.isClientSupernodeConnection() 
-                          && c.isQueryRoutingEnabled())) 
+					   && c.isQueryRoutingEnabled())) 
                     continue;
                 
                 //Check the time to decide if it needs an update.
@@ -850,7 +912,6 @@ public abstract class MessageRouter
                 //TODO2: use incremental and interleaved update
                 for (Iterator iter=table.encode(qi.lastSent); iter.hasNext(); ) {  
                     RouteTableMessage m=(RouteTableMessage)iter.next();
-                    //System.out.println("    Sending "+m.toString()+" to "+c);
                     c.send(m);
                 }
                 qi.lastSent=table;
@@ -921,17 +982,18 @@ public abstract class MessageRouter
 
         int numHops = queryRequest.getHops();
 
+		final int REPLY_LIMIT = 10;
         while (numResponses > 0) {
             int arraySize;
             // if there are more than 255 responses,
             // create an array of 255 to send in the queryReply
             // otherwise, create an array of whatever size is left.
-            if (numResponses < 255) {
+            if (numResponses < REPLY_LIMIT) {
                 // break;
                 arraySize = numResponses;
             }
             else
-                arraySize = 255;
+                arraySize = REPLY_LIMIT;
 
             Response[] res;
             // a special case.  in the common case where there
