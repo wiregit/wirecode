@@ -327,11 +327,20 @@ public final class CommonUtils {
         if (!version.equals("@" + "version" + "@")) {
             try {
                 int firstDot = version.indexOf(".");
-                String minusMajor = version.substring(firstDot+1);
-                int secondDot = minusMajor.indexOf(".");
-                String minorStr = minusMajor.substring(0, secondDot);
-                String service = minusMajor.substring(secondDot+1);
-                return new Integer(service).intValue();
+                int secondDot = version.indexOf(".", firstDot+1);
+                
+                int p = secondDot+1;
+                int q = p;
+                
+                while(q < version.length() && 
+                            Character.isDigit(version.charAt(q))) {
+                    q++;
+                }
+                
+                if (p != q) {
+                    String service = version.substring(p, q);
+                    return new Integer(service).intValue();
+                }
             }
             catch (NumberFormatException nfe) {
             }
