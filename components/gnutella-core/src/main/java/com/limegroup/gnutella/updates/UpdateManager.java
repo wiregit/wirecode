@@ -83,7 +83,7 @@ public class UpdateManager {
 
         if(myVersion.equalsIgnoreCase(latestVersion)) //are we equal?
             return;
-        if(isGreaterVersion(myVersion,latestVersion))
+        if(!isGreaterVersion(latestVersion,myVersion))
             return;
         //OK. myVersion < latestVersion
         String guiMessage = latestVersion+". "+message;
