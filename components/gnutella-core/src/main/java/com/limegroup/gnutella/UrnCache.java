@@ -24,12 +24,14 @@ public final class UrnCache {
     private static final File URN_CACHE_FILE = new File("fileurns.cache");
 
     /**
-     * UrnCache instance variable.
+     * UrnCache instance variable.  LOCKING: obtain UrnCache.class.
      */
     private static UrnCache instance = null;
 
     /**
-     * UrnCache container.
+     * UrnCache container.  LOCKING: obtain this.  Although URN_MAP is static,
+     * UrnCache is a singleton, so obtaining UrnCache's monitor is sufficient--
+     * and slightly more convenient.
      */
     private static final Map /* UrnSetKey -> HashSet */ URN_MAP =
 		createMap();
@@ -47,7 +49,7 @@ public final class UrnCache {
 	 *
 	 * @return the <tt>UrnCache</tt> instance
      */
-    public static UrnCache instance() {
+    public static synchronized UrnCache instance() {
 		if (instance == null) {
 			instance = new UrnCache();
 		}
@@ -71,7 +73,7 @@ public final class UrnCache {
 	 *  speficied <tt>File</tt> instance, guaranteed to be non-null and 
 	 *  unmodifiable, but possibly empty
      */
-    public Set getUrns(File file) {
+    public synchronized Set getUrns(File file) {
         // don't trust failed mod times
         if (file.lastModified() == 0L) {
 			return EMPTY_SET;
@@ -135,7 +137,9 @@ public final class UrnCache {
     /**
      * Write cache so that we only have to calculate them once.
      */
-    public void persistCache() {
+    public synchronized void persistCache() {
+        //It's not ideal to hold a lock while writing to disk, but I doubt think
+        //it's a problem in practice.
         try {
             ObjectOutputStream oos = 
 			    new ObjectOutputStream(new FileOutputStream(URN_CACHE_FILE));
