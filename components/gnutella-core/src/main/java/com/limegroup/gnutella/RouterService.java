@@ -58,6 +58,11 @@ public class RouterService
     private FileManager fileManager;
     private ChatManager chatManager;//keep the reference around...prevent class GC
     private SimpleTimer timer;
+
+	/**
+	 * Constant for the <tt>UDPAcceptor</tt> instance that handles UDP 
+	 * messages.
+	 */
 	private final UDPAcceptor udpAcceptor;
     
     /**
@@ -71,7 +76,16 @@ public class RouterService
     private boolean isShuttingDown;
 
     private static RouterService me = null;
-    /* @return May return null, be careful....
+
+    /**
+	 * Accessor for the <tt>RouterService</tt> instance.  This is a bit of a
+	 * hack in that it does not really follow traditional singleton, as this
+	 * may return <tt>null</tt>.  Equally as dangerous, this can return an
+	 * instance that is not fully initialized.
+	 *
+	 * @return the <tt>RouterService</tt> instance, which can be uninitialized
+	 *  if initialize has not been called, and which can be <tt>null</tt> if
+	 *  the constructor has not been called
      */
     public static RouterService instance() {
         return me;
@@ -90,6 +104,9 @@ public class RouterService
                          FileManager fManager,
                          Authenticator authenticator) {
   		this.callback = activityCallback;
+		SettingsManager settings = SettingsManager.instance();
+  		int port = settings.getPort();
+  		this.acceptor = new Acceptor(port, callback);
   		this.router = router;
         this.fileManager = fManager;
         this.authenticator = authenticator;
@@ -106,8 +123,6 @@ public class RouterService
 	 */
   	public void initialize() {
 		SettingsManager settings = SettingsManager.instance();
-  		int port = settings.getPort();
-  		this.acceptor = new Acceptor(port, callback);
   		this.manager = createConnectionManager();
   		this.catcher = createHostCatcher();
   		this.downloader = new DownloadManager();
@@ -118,12 +133,12 @@ public class RouterService
 
 		// Now, link all the pieces together, starting the various threads.
 		this.catcher.initialize(acceptor, manager,
-								SettingsManager.instance().getHostList());
+								settings.getHostList());
 		this.router.initialize(acceptor, manager, catcher, uploadManager,
 							   downloader, callback, fileManager);
 		this.manager.initialize(router, catcher);		
 		//this.uploadManager.initialize(callback, router, acceptor,fileManager);
-		this.acceptor.initialize(manager, router, downloader, uploadManager);
+		this.acceptor.initialize(manager, downloader, uploadManager);
         this.chatManager.setActivityCallback(callback);
 
 		//We used to call the following code here:
