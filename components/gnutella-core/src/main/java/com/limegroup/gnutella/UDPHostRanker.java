@@ -2,6 +2,7 @@ package com.limegroup.gnutella;
 
 import com.limegroup.gnutella.messages.PingRequest;
 import com.limegroup.gnutella.util.IpPort;
+import com.limegroup.gnutella.util.ManagedThread;
 import com.sun.java.util.collections.Collection;
 import com.sun.java.util.collections.Iterator;
 
@@ -30,12 +31,18 @@ public class UDPHostRanker {
      * @throws <tt>NullPointerException</tt> if the hosts argument is 
      *  <tt>null</tt> or if the listener argument is <tt>null</tt>
      */
-    public static UDPHostRanker rank(Collection hosts,
-                                     MessageListener listener){
+    public static void rank(final Collection hosts,
+                            final MessageListener listener) {
         if(hosts == null) {
             throw new NullPointerException("null hosts not allowed");
         }
-        return new UDPHostRanker(hosts, listener);
+        Thread ranker = new ManagedThread(new Runnable() {
+            public void run() {
+                new UDPHostRanker(hosts, listener);
+            }
+        }, "UDPHostRanker");
+        ranker.setDaemon(true);
+        ranker.start();
     }
     
     /**
@@ -64,8 +71,15 @@ public class UDPHostRanker {
         if (listener != null) ROUTER.registerMessageListener(pingGUID, 
                                                              listener);
 
+        final int MAX_SENDS = 15;
         Iterator iter = hosts.iterator();
-        while(iter.hasNext()) {
+        for(int i = 0; iter.hasNext(); i++) {
+            if(i == MAX_SENDS) {
+                try {
+                    Thread.sleep(1000);
+                } catch(InterruptedException ignored) {}
+                i = 0;
+            }
             IpPort host = (IpPort)iter.next();
             UDPService.instance().send(ping, host);
         }
