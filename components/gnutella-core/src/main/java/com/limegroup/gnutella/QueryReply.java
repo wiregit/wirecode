@@ -58,6 +58,9 @@ public class QueryReply extends Message implements Serializable{
     /** The mask for extracting the busy flag from the QHD common area. */
     private static final byte SPEED_MASK=(byte)0x10;
 
+    /** The xml chunk that contains metadata about xml responses*/
+    private String xmlCollectionString = "";
+
 
     /** Creates a new query reply.  The number of responses is responses.length
      *
@@ -70,7 +73,7 @@ public class QueryReply extends Message implements Serializable{
     public QueryReply(byte[] guid, byte ttl,
             int port, byte[] ip, long speed, Response[] responses,
             byte[] clientGUID) {
-        this(guid, ttl, port, ip, speed, responses, clientGUID, 
+        this(guid, ttl, port, ip, speed, responses, clientGUID, "",
              false, false, false, false, false);
     }
 
@@ -93,22 +96,52 @@ public class QueryReply extends Message implements Serializable{
             byte[] clientGUID,
             boolean needsPush, boolean isBusy,
             boolean finishedUpload, boolean measuredSpeed) {
-        this(guid, ttl, port, ip, speed, responses, clientGUID, 
+        this(guid, ttl, port, ip, speed, responses, clientGUID, "",
              true, needsPush, isBusy, finishedUpload, measuredSpeed);
     }
+
+
+    /** 
+     * Creates a new QueryReply with a BearShare 2.2.0-style QHD.  The QHD with
+     * the LIME vendor code and the given busy and push flags.  Note that this
+     * constructor has no support for undefined push or busy bits.
+     *
+     * @param needsPush true iff this is firewalled and the downloader should
+     *  attempt a push without trying a normal download.
+     * @param isBusy true iff this server is busy, i.e., has no more upload slots.  
+     * @param finishedUpload true iff this server has successfully finished an 
+     *  upload
+     * @param measuredSpeed true iff speed is measured, not as reported by the
+     *  user
+     * @param xmlCollectionString The (non-null) String containing aggregated
+     * and indexed information regarding file metadata.
+     */
+    public QueryReply(byte[] guid, byte ttl, 
+            int port, byte[] ip, long speed, Response[] responses,
+            byte[] clientGUID, String xmlCollectionString,
+            boolean needsPush, boolean isBusy,
+            boolean finishedUpload, boolean measuredSpeed) {
+        this(guid, ttl, port, ip, speed, responses, clientGUID, 
+             xmlCollectionString, true, needsPush, isBusy, 
+             finishedUpload, measuredSpeed);
+    }
+
+
 
     /** 
      * Internal constructor.  Only creates QHD if includeQHD==true.  
      */
     private QueryReply(byte[] guid, byte ttl, 
              int port, byte[] ip, long speed, Response[] responses,
-             byte[] clientGUID,
+             byte[] clientGUID, String xmlCollectionString,
              boolean includeQHD, boolean needsPush, boolean isBusy,
              boolean finishedUpload, boolean measuredSpeed) {
         super(guid, Message.F_QUERY_REPLY, ttl, (byte)0,
-              //11 bytes for header, plus file records, plus optional 7 byte QHD
-              //without private area, plus 16-byte footer
-              11 + rLength(responses) + (includeQHD ? 4+3 : 0) + 16);
+              11 +                           // 11 bytes of header
+              rLength(responses) +           // file records size
+              (includeQHD ? 4+3+(xmlCollectionString.getBytes()).length : 0) + 
+                                             // optional 7 + xml_len byte QHD
+              16);                           // 16-byte footer
         Assert.that((port&0xFFFF0000)==0);
         Assert.that(ip.length==4);
         Assert.that((speed&0xFFFFFFFF00000000l)==0);
@@ -139,10 +172,6 @@ public class QueryReply extends Message implements Serializable{
             i+=nameBytes.length;
             //Write first null terminator.
             payload[i++]=(byte)0;
-            //insert metadata b/w the nulls
-            byte[] metaBytes = r.getMetaBytes();
-            System.arraycopy(metaBytes, 0, payload, i, metaBytes.length);
-            i+=metaBytes.length;
             //add the second null terminator
             payload[i++]=(byte)0;
         }
@@ -168,6 +197,12 @@ public class QueryReply extends Message implements Serializable{
                 | (isBusy ? BUSY_MASK : 0) 
                 | (finishedUpload ? UPLOADED_MASK : 0)
                 | (measuredSpeed ? SPEED_MASK : 0));
+            //d) xml stuff.  this will probably move :)
+            byte[] xmlCollectionBytes = xmlCollectionString.getBytes();
+            System.arraycopy(xmlCollectionBytes, 0, 
+                             payload, i, xmlCollectionBytes.length);
+            // adjust i...
+            i += xmlCollectionBytes.length;
         }        
 
         //Write footer at payload[i...i+16-1]
@@ -210,8 +245,7 @@ public class QueryReply extends Message implements Serializable{
             //8 bytes for index and size, plus name and two null terminators
             //response.getNameBytesSize() returns the size of the 
             //file name in bytes
-            ret += 8+responses[i].getNameBytesSize()+1/*regular part*/+
-            responses[i].getMetaBytesSize()+1/*meta part*/;
+            ret += 8+responses[i].getNameBytesSize()+1/*regular part*/+1;
         return ret;
     }
 
@@ -226,6 +260,15 @@ public class QueryReply extends Message implements Serializable{
     public void writePayload(OutputStream out) throws IOException {
         out.write(payload);
     }
+
+
+    /** Return the associated xml metadata string if the queryreply
+     *  contained one.
+     */
+    public String getXMLCollectionString() {
+        return xmlCollectionString;
+    }
+
 
     /** Return the number of results N in this query. */
     public short getResultCount() {
@@ -262,6 +305,19 @@ public class QueryReply extends Message implements Serializable{
         List list=Arrays.asList(responses);
         return list.iterator();
     }
+
+
+    /** Returns a List that will yield the results, each as an
+     *  instance of the Response class.  Throws BadPacketException if
+     *  this data couldn't be extracted.  */
+    public List getResultsAsList() throws BadPacketException {
+        parseResults();
+        if (responses==null)
+            throw new BadPacketException();
+        List list=Arrays.asList(responses);
+        return list;
+    }
+
 
     /** 
      * Returns the name of this' vendor, all capitalized.  Throws
@@ -513,6 +569,14 @@ public class QueryReply extends Message implements Serializable{
             if (i>payload.length-16)
                 throw new BadPacketException(
                     "Common payload length too large.");
+
+            // d) currently, the xml metadata about the file is stored in the
+            // private area of the QHD.  this will probably change...
+            xmlCollectionString = new String(payload, i, payload.length-16-i);
+            System.out.println("QueryReply.parseResults2(): " +
+                               " xmlCollectionString = " + 
+                               xmlCollectionString);
+            
 
             //All set.  Accept parsed values.
             Assert.that(vendorT!=null);
