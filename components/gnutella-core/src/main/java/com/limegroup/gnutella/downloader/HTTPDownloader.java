@@ -241,38 +241,14 @@ public class HTTPDownloader implements BandwidthTracker {
 			return;
         int code=parseHTTPCode(str);	
 
-		//Accept any 2xx's, but reject other codes.
-		if ( (code < 200) || (code >= 300) ) {
-			if (code == 404)
-				throw new 
-				    com.limegroup.gnutella.downloader.FileNotFoundException();
-			else if (code == 410)
-				throw new 
-                    com.limegroup.gnutella.downloader.NotSharingException();
-			else if (code == 503) {
-                try {
-                    supportsQueueing();
-                } catch(QueuedException qx) {
-                    throw qx;
-                } catch(IOException ignored) {
-                    //socket closed, no tokens or not queued.
-                }
-                //no exception or IOException? not queued.
-				throw new TryAgainLaterException();
-                // a general catch for 4xx and 5xx's
-                // should maybe be a different exception?
-                // else if ( (code >= 400) && (code < 600) ) 
-            }
-			else 
-				throw new IOException();			
-		}
-
+        //Note: According to the specification there are 5 headers, LimeWire
+        //ignores 2 of them - queue length, and maxUploadSlots.
+        int[] refQueueInfo = {-1,-1,-1};
         //Now read each header...
 		while (true) {            
 			str = _byteReader.readLine();			
             if (str==null || str.equals(""))
                 break;
-
             //As of LimeWire 1.9, we ignore the "Content-length" header;
             //handling an unexpectedly low Content-length value is no different
             //from handling premature connection termination.  Look at LimeWire
@@ -293,8 +269,35 @@ public class HTTPDownloader implements BandwidthTracker {
 			else if(HTTPHeaderName.ALT_LOCATION.matchesStartOfString(str)) {
 				readAlternateLocations(str, _alternateLocationsReceived);
 			}
+            else if(str.toUpperCase().startsWith("X-QUEUE")) {
+                parseQueueHeaders(str,refQueueInfo);
+            }                
         }
-        
+
+
+		//Accept any 2xx's, but reject other codes.
+		if ( (code < 200) || (code >= 300) ) {
+			if (code == 404)
+				throw new 
+				    com.limegroup.gnutella.downloader.FileNotFoundException();
+			else if (code == 410)
+				throw new 
+                    com.limegroup.gnutella.downloader.NotSharingException();
+			else if (code == 503) {
+                int min = refQueueInfo[0];
+                int max = refQueueInfo[1];
+                int pos = refQueueInfo[2];
+                if(min != -1 && max != -1 && pos != -1)
+                    throw new QueuedException(min,max,pos);
+                //no QueuedException? not queued.
+				throw new TryAgainLaterException();
+                // a general catch for 4xx and 5xx's
+                // should maybe be a different exception?
+                // else if ( (code >= 400) && (code < 600) ) 
+            }
+			else 
+				throw new IOException();			
+		}        
     }
 
 	/**
@@ -364,63 +367,41 @@ public class HTTPDownloader implements BandwidthTracker {
 		}
     }
     
-    /**
-     * Note: Called when we encounter a 503, and need to check if the uploader
-     * has queued us or not. Consuming all the headers is required, because
-     * if queued, we intend to use the same stream again, and residual headers
-     * will cause problems. Further, these headers are of no use to anyone else.
-     */
-    private void supportsQueueing() throws IOException, QueuedException {
+    private void parseQueueHeaders(String str, int[] refQueueInfo)  {
         //Note: According to the specification there are 5 headers, LimeWire
-        //ignores 2 of them - queue length, and maxUploadSlots.
-        int position = -1;
-        int minPollTime = -1;
-        int maxPollTime = -1;
-        //        boolean done = false;
-        String str = _byteReader.readLine();
+        //ignores 2 of them - queue length, and maxUploadSlots.        
         if(str==null)
-            throw new IOException();
-        while(!str.equals("")) {//still need info & headers exist
-            StringTokenizer tokenizer = new StringTokenizer(str," ,:=");
-            if(!tokenizer.hasMoreTokens()) { //no tokens on new line??
-                str = _byteReader.readLine();//could throw exception
-                continue; //TODO: Is this correct or should we throw IOX here??
-            }
-            
-            String token = tokenizer.nextToken();
-            if(!token.equals("X-Queue")) {
-                str = _byteReader.readLine();//could throw exception
-                continue;
-            }
+            return;
+        StringTokenizer tokenizer = new StringTokenizer(str," ,:=");
+        if(!tokenizer.hasMoreTokens())  //no tokens on new line??
+            return;
+        
+        String token = tokenizer.nextToken();
+        if(!token.equalsIgnoreCase("X-Queue"))
+            return;
 
-            while(tokenizer.hasMoreTokens()) {
-                token = tokenizer.nextToken();
-                String value;
-                try {
-                    if(token.equals("pollMin")) {
-                        value = tokenizer.nextToken();
-                        minPollTime = Integer.parseInt(value);
-                    }
-                    else if(token.equals("pollMax")) {
-                        value = tokenizer.nextToken();
-                        maxPollTime = Integer.parseInt(value);
-                    }
-                    else if(token.equals("position")) {
-                        value = tokenizer.nextToken();
-                        position = Integer.parseInt(value);
-                    }
-                } catch(NumberFormatException nfx) {
-                    throw new IOException();
-                } catch(NoSuchElementException nsex) {
-                    throw new IOException();
+        while(tokenizer.hasMoreTokens()) {
+            token = tokenizer.nextToken();
+            String value;
+            try {
+                if(token.equalsIgnoreCase("pollMin")) {
+                    value = tokenizer.nextToken();
+                    refQueueInfo[0] = Integer.parseInt(value);
                 }
-            } //end of inner while - done parsing this line.
-            str = _byteReader.readLine();//could throw exception
-        }//end of outer while - we have all the info we need.
-        //OK. now we have all the info we need.
-        if(minPollTime==-1 && maxPollTime==-1 && position==-1)
-            throw new IOException();
-        throw new QueuedException(minPollTime, maxPollTime, position);
+                else if(token.equalsIgnoreCase("pollMax")) {
+                    value = tokenizer.nextToken();
+                    refQueueInfo[1] = Integer.parseInt(value);
+                }
+                else if(token.equalsIgnoreCase("position")) {
+                    value = tokenizer.nextToken();
+                    refQueueInfo[2] = Integer.parseInt(value);
+                }
+            } catch(NumberFormatException nfx) {//bad headers drop connection
+                Arrays.fill(refQueueInfo,-1);
+            } catch(NoSuchElementException nsex) {//bad headers drop connection
+                Arrays.fill(refQueueInfo,-1);
+            }
+        } //end of while - done parsing this line.
     }
 
     /** 
