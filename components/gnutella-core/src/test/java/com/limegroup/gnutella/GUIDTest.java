@@ -2,6 +2,7 @@ package com.limegroup.gnutella;
 
 import junit.framework.*;
 import com.sun.java.util.collections.*;
+import java.net.*;
 
 /**
  * Unit tests for GUID.
@@ -261,4 +262,30 @@ public class GUIDTest extends com.limegroup.gnutella.util.BaseTestCase {
             g1.hashCode(), g2.hashCode());  //not strictly REQUIRED
         //System.out.println("Hash: "+Integer.toHexString(g2.hashCode()));
     }
+
+
+    public void testAddressEncodedGUID() throws Exception {
+        InetAddress nyu = InetAddress.getByName("www.nyu.edu");
+        byte[] nyuBytes = nyu.getAddress();
+        final int port = 17834;
+        byte[] portBytes = new byte[2];
+        ByteOrder.short2leb((short) port, portBytes, 0);
+
+        // test construction
+        byte[] guidBytes = GUID.makeAddressEncodedGuid(nyuBytes, port);
+        for (int i = 0; i < 4; i++)
+            assertEquals("bytes should be equal!", guidBytes[i], nyuBytes[i]);
+        assertEquals("bytes should be equal!", guidBytes[13], portBytes[0]);
+        assertEquals("bytes should be equal!", guidBytes[14], portBytes[1]);
+
+        // construction looks good - lets test accessors....
+        GUID guid = new GUID(guidBytes);
+        assertEquals("IP Strings not the same!!", guid.getIP(), 
+                     nyu.getHostAddress());
+        assertEquals("Ports are not the same!!", guid.getPort(), port);
+
+        // test comparator
+        assertTrue(guid.addressesMatch(nyuBytes, port));
+    }
+
 }

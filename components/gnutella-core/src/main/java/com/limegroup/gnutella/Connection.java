@@ -1106,6 +1106,15 @@ public class Connection {
     }
 
     /**
+     * Returns true if the this connection is potentially on the 'same' network.
+     */
+    public boolean isConnectBackCapable() throws IllegalStateException {
+        byte[] local = getLocalAddress().getAddress();
+        byte[] remote = getInetAddress().getAddress();
+        return (local[0] != remote[0]);
+    }
+
+    /**
      * Returns the time this connection was established, in milliseconds
      * since January 1, 1970.
      *

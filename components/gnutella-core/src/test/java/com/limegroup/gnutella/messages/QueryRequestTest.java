@@ -9,6 +9,7 @@ import java.io.*;
 import java.util.StringTokenizer;
 import junit.framework.*;
 import junit.extensions.*;
+import java.net.InetAddress;
 
 /**
  * This class tests the QueryRequest class with HUGE v0.94 extensions.
@@ -651,6 +652,52 @@ public final class QueryRequestTest extends BaseTestCase {
             GUID.makeGuid(), (byte)0, (byte)0, payload, Message.N_UNKNOWN);
         assertTrue(qr.desiresXMLResponses());
         assertTrue(qr.isFirewalledSource());
+
+        // now test out-of-band stuff
+        // ---------------------------------------------------------
+        InetAddress stanford = InetAddress.getByName("www.stanford.edu");
+        byte[] stanfordGuid = GUID.makeAddressEncodedGuid(stanford.getAddress(),
+                                                          6346);
+
+        // firewalled, wanting rich, desiring out-of-band - though as policy 
+        // we never allow this - 11100100
+        payload[0] = (byte) 0xE4;
+        qr = QueryRequest.createNetworkQuery(
+            stanfordGuid, (byte)0, (byte)0, payload, Message.N_UNKNOWN);
+        assertTrue(qr.isFirewalledSource());
+        assertTrue(qr.desiresXMLResponses());
+        assertTrue(qr.desiresOutOfBandReplies());
+        assertEquals("IP's not equal!", stanford.getHostAddress(), 
+                     qr.getReplyAddress());
+        assertEquals("Port's not equal!", 6346, qr.getReplyPort());
+
+        // firewalled, not wanting rich, desiring out-of-band - this can never
+        // really happen because if you are firewalled how can you accept
+        // out-of-band? - 11000100
+        payload[0] = (byte) 0xC4;
+        qr = QueryRequest.createNetworkQuery(
+            stanfordGuid, (byte)0, (byte)0, payload, Message.N_UNKNOWN);
+        assertTrue(qr.isFirewalledSource());
+        assertTrue(!qr.desiresXMLResponses());
+        assertTrue(qr.desiresOutOfBandReplies());
+        assertEquals("IP's not equal!", stanford.getHostAddress(), 
+                     qr.getReplyAddress());
+        assertEquals("Port's not equal!", 6346, qr.getReplyPort());
+
+        // not firewalled, not wanting rich, desiring out-of-band - the only
+        // case we care about. - 10000100
+        payload[0] = (byte) 0x84;
+        qr = QueryRequest.createNetworkQuery(
+            stanfordGuid, (byte)0, (byte)0, payload, Message.N_UNKNOWN);
+        assertTrue(!qr.isFirewalledSource());
+        assertTrue(!qr.desiresXMLResponses());
+        assertTrue(qr.desiresOutOfBandReplies());
+        assertEquals("IP's not equal!", stanford.getHostAddress(), 
+                     qr.getReplyAddress());
+        assertEquals("Port's not equal!", 6346, qr.getReplyPort());
+
+        // ---------------------------------------------------------
+
         
         // make sure that a multicast source overrides that firewalled bit.
         payload[0] = (byte) 0xE0;

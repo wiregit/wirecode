@@ -157,7 +157,7 @@ public final class UDPService implements Runnable {
 	public void run() {
         try {
             byte[] datagramBytes = new byte[BUFFER_SIZE];
-            MessageRouter router = RouterService.getMessageRouter();                                
+            MessageRouter router = RouterService.getMessageRouter();
             while (true) {
                 // prepare to receive
                 DatagramPacket datagram = new DatagramPacket(datagramBytes, 
@@ -262,7 +262,7 @@ public final class UDPService implements Runnable {
 	 *  GUESS queries, <tt>false</tt> otherwise
 	 */	
 	public boolean isGUESSCapable() {
-		return _acceptedSolicitedIncoming && _acceptedUnsolicitedIncoming;
+		return canReceiveUnsolicited() && canReceiveSolicited();
 	}
 
 	/**
@@ -273,6 +273,16 @@ public final class UDPService implements Runnable {
 	 */	
 	public boolean canReceiveUnsolicited() {
 		return _acceptedUnsolicitedIncoming;
+	}
+
+	/**
+	 * Returns whether or not this node is capable of receiving SOLICITED
+     * UDP packets.  
+	 *
+	 * @return <tt>true</tt> if this node has accepted a SOLICITED UDP packet.
+	 */	
+	public boolean canReceiveSolicited() {
+		return _acceptedSolicitedIncoming;
 	}
 
 	/**

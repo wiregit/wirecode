@@ -1,6 +1,8 @@
 package com.limegroup.gnutella;
 
 import com.sun.java.util.collections.*;
+import com.limegroup.gnutella.util.NetworkUtils;
+import com.limegroup.gnutella.messages.Message;
 
 /**
  * A 16-bit globally unique ID.  Immutable.<p>
@@ -43,6 +45,18 @@ import com.sun.java.util.collections.*;
  * Note that this still leaves 10-12 bytes for randomness.  That's plenty of
  * distinct GUID's.  And there's only a 1 in 65000 chance of mistakenly
  * identifying a LimeWire.
+
+ * Furthermore, LimeWire GUIDs may be 'marked' by containing address info.  In
+ * particular:
+ * <ol>
+ * <li>G[0][3] = 4-octet IP address.  G[13][14] = 2-byte port (little endian).
+ * </ol>
+ * Note that there is no way to tell from a guid if it has been marked in this
+ * manner.  You need to have some indication external to the guid (i.e. for
+ * queries the minSpeed field might have a bit set to indicate this).  Also,
+ * this reduces the amount of guids per IP to 2^48 - plenty since IP and port
+ * comboes are themselves unique.
+ *  
  */
 public class GUID implements  com.sun.java.util.collections.Comparable {
     /** The size of a GUID. */
@@ -104,6 +118,29 @@ public class GUID implements  com.sun.java.util.collections.Comparable {
         return ret;
     }
 
+    /** Create a guid with an ip and port encoded within.
+     *  @exception IllegalArgumentException thrown if ip.length != 4 or if the
+     *  port is not a valid value.
+     */
+    public static byte[] makeAddressEncodedGuid(byte[] ip, int port) 
+        throws IllegalArgumentException {
+        
+        if (ip.length != 4)
+            throw new IllegalArgumentException("IP address too big!");
+        if (!NetworkUtils.isValidPort(port))
+            throw new IllegalArgumentException("Port is invalid: " + port);
+
+        byte[] ret = makeGuid();
+
+        // put the IP in there....
+        for (int i = 0; i < 4; i++)
+            ret[i] = ip[i];
+
+        // put the port in there....
+        ByteOrder.short2leb((short) port, ret, 13);
+        
+        return ret;
+    }
 
     /** Returns LimeWire's secret tag described above. */
     static short tag(short a, short b) {
@@ -131,6 +168,25 @@ public class GUID implements  com.sun.java.util.collections.Comparable {
         return isLimeRequeryGUID(this.bytes);
     }
 
+
+    /** Same as addressesMatch(this.bytes, ....) */
+    public boolean addressesMatch(byte[] ip, int port)
+        throws IllegalArgumentException {
+        return addressesMatch(this.bytes, ip, port);
+    }
+
+    /** Same as getIP(this.bytes) */
+    public String getIP() {
+        return getIP(this.bytes);
+    }
+
+    /** Same as getPort(this.bytes) */
+    public int getPort() {
+        return getPort(this.bytes);
+    }
+
+
+    
     private static boolean checkMatching(byte[] bytes, 
                                          int first,
                                          int second,
@@ -194,6 +250,41 @@ public class GUID implements  com.sun.java.util.collections.Comparable {
         //       http://www.ics.uci.edu/~ejw/authoring/uuid-guid/
         //                              draft-leach-uuids-guids-01.txt    
         return (bytes[8]&0xc0)==0x80;
+    }
+
+    /** @return true if the input ip and port match the one encoded in the guid.
+     *  @exception IllegalArgumentException thrown if ip.length != 4 or if the
+     *  port is not a valid value.     
+     */
+    public static boolean addressesMatch(byte[] guidBytes, byte[] ip, int port) 
+        throws IllegalArgumentException {
+
+        if (ip.length != 4)
+            throw new IllegalArgumentException("IP address too big!");
+        if (!NetworkUtils.isValidPort(port))
+            throw new IllegalArgumentException("Port is invalid: " + port);
+
+        byte[] portBytes = new byte[2];
+        ByteOrder.short2leb((short) port, portBytes, 0);
+
+        return ((guidBytes[0] == ip[0]) &&
+                (guidBytes[1] == ip[1]) &&
+                (guidBytes[2] == ip[2]) &&
+                (guidBytes[3] == ip[3]) &&
+                (guidBytes[13] == portBytes[0]) &&
+                (guidBytes[14] == portBytes[1]));
+    }
+
+    /** Gets bytes 0-4 as a dotted ip address.
+     */
+    public static String getIP(byte[] guidBytes) {
+        return Message.ip2string(guidBytes);
+    }
+
+    /** Gets bytes 13-14 as a port.
+     */
+    public static int getPort(byte[] guidBytes) {
+        return ByteOrder.ubytes2int(ByteOrder.leb2short(guidBytes, 13));
     }
 
     /** Same as isNewGUID(this.bytes). */

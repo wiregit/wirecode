@@ -19,6 +19,8 @@ public abstract class VendorMessage extends Message {
     protected static final int F_HOPS_FLOW = 4;
     protected static final int F_TCP_CONNECT_BACK = 7;
     protected static final int F_UDP_CONNECT_BACK = 7;
+    protected static final int F_LIME_ACK = 11;
+    protected static final int F_REPLY_NUMBER = 12;
     
     protected static final byte[] F_LIME_VENDOR_ID = {(byte) 76, (byte) 73,
                                                       (byte) 77, (byte) 69};
@@ -192,6 +194,16 @@ public abstract class VendorMessage extends Message {
             // HOPS FLOW MESSAGE
             return new HopsFlowVendorMessage(guid, ttl, hops, version, 
                                              restOf);
+        if ((selector == F_LIME_ACK) && 
+            (Arrays.equals(vendorID, F_LIME_VENDOR_ID)))
+            // LIME ACK MESSAGE
+            return new LimeACKVendorMessage(guid, ttl, hops, version, 
+                                            restOf);
+        if ((selector == F_REPLY_NUMBER) && 
+            (Arrays.equals(vendorID, F_LIME_VENDOR_ID)))
+            // REPLY NUMBER MESSAGE
+            return new ReplyNumberVendorMessage(guid, ttl, hops, version, 
+                                                restOf);
         if ((selector == F_TCP_CONNECT_BACK) && 
             (Arrays.equals(vendorID, F_BEAR_VENDOR_ID)))
             // TCP CONNECT BACK

@@ -993,10 +993,12 @@ public class ManagedConnection extends Connection
             softMaxHops = hops.getHopValue();
         }
         else if (vm instanceof MessagesSupportedVendorMessage) {
-            if(ConnectionSettings.LOCAL_IS_PRIVATE.getValue() &&
-               isLocal()) {
+            // if we are ignoring local addresses and the connection is local
+            // or the guy has a similar address then ignore
+            if(ConnectionSettings.LOCAL_IS_PRIVATE.getValue() && 
+               (isLocal() || !isConnectBackCapable()))
                 return;
-            }
+
             // do i need to send any ConnectBack messages????
             if (!UDPService.instance().canReceiveUnsolicited() &&
                 (_numUDPConnectBackRequests < MAX_UDP_CONNECT_BACK_ATTEMPTS) &&
