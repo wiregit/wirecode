@@ -8,10 +8,14 @@ import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.Date;
 
-import com.limegroup.gnutella.downloader.*;
-import com.limegroup.gnutella.*;
-import com.limegroup.gnutella.util.*;
-
+import com.limegroup.gnutella.ByteReader;
+import com.limegroup.gnutella.Constants;
+import com.limegroup.gnutella.ErrorService;
+import com.limegroup.gnutella.util.CommonUtils;
+import com.limegroup.gnutella.util.IOUtils;
+import com.limegroup.gnutella.util.URLDecoder;
+import java.util.StringTokenizer;
+import java.net.URLEncoder;
 
 /**
  * Listens on an HTTP port, accepts incoming connections, and dispatches 
@@ -28,6 +32,8 @@ public class HTTPAcceptor implements Runnable {
     private static final String MAGNET         = "magnet:?";
 	/** HTTP no content return */
 	private static final String NOCONTENT      = "HTTP/1.1 204 No Content\r\n";
+	/** Magnet detail command */
+    private static final String MAGNETDETAIL   = "magcmd/detail?";
 
     /**
      * The socket that listens for incoming connections. Can be changed to
@@ -114,6 +120,13 @@ public class HTTPAcceptor implements Runnable {
             return;
         }
     }
+
+    /**
+     *  Return the listening port.
+     */
+    public int getPort() {
+		return _port;
+	}
 
     /** @modifies this, network
      *  @effects accepts http/magnet requests
@@ -290,6 +303,16 @@ public class HTTPAcceptor implements Runnable {
 			    // upload browsed files
 		        HTTPHandler.create(socket, str);
 			}
+        } else if (str.indexOf(MAGNETDETAIL) >= 0) {
+            int loc = 0;
+            if ((loc = str.indexOf(MAGNETDETAIL)) < 0)
+                return;
+            int loc2 = str.lastIndexOf(" HTTP");
+            String command = 
+                  str.substring(loc+MAGNETDETAIL.length(), loc2);
+            String page=MagnetHTML.buildMagnetDetailPage(command);
+            
+            HTTPHandler.createPage(socket, page);
 		} else if (str.indexOf(MAGNET) >= 0) {
 			// trigger an operation
 			int loc  = str.indexOf(MAGNET);
@@ -319,18 +342,19 @@ public class HTTPAcceptor implements Runnable {
 		returnNoContent(socket);
 	}
 
-	private void returnNoContent(Socket socket) {
-		try {
-			
-			BufferedOutputStream out =
-			  new BufferedOutputStream(socket.getOutputStream());
-			String s = NOCONTENT;
-			byte[] bytes=s.getBytes();
-			out.write(bytes);
-			out.flush();
-			
-			socket.close();
-		} catch (IOException e) {
-		}
-	}
+    private void returnNoContent(Socket socket) {
+        try {
+            
+            BufferedOutputStream out =
+              new BufferedOutputStream(socket.getOutputStream());
+            String s = NOCONTENT;
+            byte[] bytes=s.getBytes();
+            out.write(bytes);
+            out.flush();
+            
+            socket.close();
+        } catch (IOException e) {
+        }
+    }
 }
+
