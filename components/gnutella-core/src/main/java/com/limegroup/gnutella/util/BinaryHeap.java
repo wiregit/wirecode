@@ -144,26 +144,36 @@ public class BinaryHeap
     }
 
     /**
-     * @requires this is not full
      * @modifies this
-     * @effects inserts x into this.
+     * @effects inserts x into this.  If this is full, one of the "smaller"
+     *  elements of this (i.e., not the largest if this has more than one
+     *  element, though not necessarily the smallest) is removed and returned.
+     *  Otherwise, returns null; 
      */
-    public void insert(Comparable x)
+    public Comparable insert(Comparable x)
     {
-        int i;
+        Comparable ret=null;
+        //Normal case
+        if (currentSize<maxSize) {
+            currentSize++;
+        } 
+        //Overflow
+        else {
+            ret=array[currentSize];
+        }
 
         //Assume that the object is placed in the currentSize+1 location Compare
         //x with its parent. If x is larger than the parent, swap the parent and
         //x. Now again repeat the steps now that the x is in the new swapped
         //position
-
-        for(i = ++currentSize; (i > 1) && (x.compareTo(array[i/2]) > 0); i = i/2)
+        int i;
+        for(i = currentSize; (i > 1) && (x.compareTo(array[i/2]) > 0); i = i/2)
         {
             array[i] = array[i/2];
         }
 
         array[i] = x;
-
+        return ret;
     }//end of insert
 
     /**
@@ -232,6 +242,7 @@ public class BinaryHeap
         MyInteger two=new MyInteger(2);
         MyInteger three=new MyInteger(3);
         MyInteger four=new MyInteger(4);
+        MyInteger five=new MyInteger(5);
 
         Assert.that(q.isEmpty());
         Assert.that(q.capacity()==4);
@@ -259,6 +270,22 @@ public class BinaryHeap
             q.extractMax();
             Assert.that(false);
         } catch (NoSuchElementException e) { }
+
+        //try inserting when overfilled
+        Assert.that(q.insert(one)==null);
+        Assert.that(q.insert(four)==null);
+        Assert.that(q.insert(three)==null);
+        Assert.that(q.insert(two)==null);
+        System.out.println("The following tests are STRONGER than required"
+                           +" the specification of insert.");
+        System.out.println("(The spec does not say that the smallest"
+                           +" element is removed on overflow.)");
+        Assert.that(q.insert(five)!=null);
+        Assert.that(q.extractMax().equals(five));      
+        Assert.that(q.extractMax().equals(four));
+        Assert.that(q.extractMax().equals(three));
+        Assert.that(q.extractMax().equals(two));
+        Assert.that(q.isEmpty());
     }
 
     //For testing with Java 1.1.8
@@ -277,7 +304,10 @@ public class BinaryHeap
             else
                 return 0;
         }
+
+        public String toString() {
+            return String.valueOf(val);
+        }
     }
     */
-
 }//end of class BinaryHeap
