@@ -140,12 +140,32 @@ public class CountPercent {
             String linkFileName = files[i];
             int idxProperties = linkFileName.indexOf(PROPS_EXT);
             File utf8 = new File(lib, linkFileName.substring(0, idxProperties) + UTF8_EXT);
-            if (utf8.exists())
+            boolean skipUTF8LeadingBOM;
+            if (utf8.exists()) {
+                /* properties files are normally read as streams of ISO-8859-1 bytes
+                but we want to check the UTF-8 source file. The non ASCII characters
+                in key values will be read as sequences of Extended Latin 1 characters
+                instead of the actual Unicode character coded as Unicode escapes
+                in the .properties file. So they won't have the actual run-time value;
+                however it allows easier checking and validation here for messages
+                printed on the Console, that will output ISO-8859-1; the result output
+                still be interpretable as Unicode UTF-8. */
                 linkFileName = utf8.getName();
+                skipUTF8LeadingBOM = true;
+            } else
+                skipUTF8LeadingBOM = false;
             
             try {
                 InputStream in =
-                    new FileInputStream(new File(lib, files[i]));
+                    new FileInputStream(new File(lib, linkFileName/*files[i]*/));
+                if (skipUTF8LeadingBOM) try { /* skip the three-bytes leading BOM */
+                   /* the leading BOM (U+FEFF), if present is coded in UTF-8 as three
+                    * bytes: 0xEF, 0xBB, 0xBF */
+                   in.mark(3);
+                   if (in.read() != 0xEF || in.read() != 0xBB || in.read() != 0xBF)
+                       in.reset();
+                } catch (java.io.IOException ioe) {
+                }
                 loadFile(langs, in, linkFileName);
             } catch (FileNotFoundException fnfe) {
                 // oh well.
