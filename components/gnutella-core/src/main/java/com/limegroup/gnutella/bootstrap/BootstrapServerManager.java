@@ -172,6 +172,10 @@ public class BootstrapServerManager {
                 //We don't know whether the host is an ultrapeer or not, but we
                 //need to force a higher priority to prevent repeated fetching.
                 //(See HostCatcher.expire)
+
+				// TODO: Can this cause a problem with the X-Try-Ultrapeer headers?
+				//       Might this cause a problem with reporting private addresses
+				//       in those headers?
                 _catcher.add(host, true);       
                 responses++;
             } catch (IllegalArgumentException bad) { 
