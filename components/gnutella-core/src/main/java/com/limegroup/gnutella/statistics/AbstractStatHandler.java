@@ -49,6 +49,12 @@ public abstract class AbstractStatHandler {
 	protected static final StatisticsManager STATS_MANAGER = 
 		StatisticsManager.instance();
 
+
+	private static final Statistic BANDWIDTH_BYTE_STAT_STUB =
+		new AdvancedStatistic() {
+			public void addData() {}
+		};
+
 	/**
 	 * Creates a new <tt>ReceivedMessageStatHandler</tt> instance.  
 	 * Private constructor to ensure that no other classes can
@@ -68,6 +74,23 @@ public abstract class AbstractStatHandler {
 		LIME_NUMBER_STAT = limeNumberStat;
 		LIME_BYTE_STAT = limeByteStat;
 		BANDWIDTH_BYTE_STAT = bandwidthByteStat;
+	} 
+
+	/**
+	 * Creates a new <tt>ReceivedMessageStatHandler</tt> instance.  
+	 * Private constructor to ensure that no other classes can
+	 * construct this class, following the type-safe enum pattern.
+	 *
+	 * @param numberStat the statistic that is simply incremented with
+	 *  each new message
+	 * @param byteStat the statistic for keeping track of the total bytes
+	 */
+	protected AbstractStatHandler(Statistic numberStat, 
+								  Statistic byteStat,
+								  Statistic limeNumberStat,
+								  Statistic limeByteStat) {
+		this(numberStat, byteStat, limeNumberStat, limeByteStat, 
+			 BANDWIDTH_BYTE_STAT_STUB);
 	} 
 
 
