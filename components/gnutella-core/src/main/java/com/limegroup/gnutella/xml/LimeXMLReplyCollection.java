@@ -103,10 +103,10 @@ public class LimeXMLReplyCollection{
         Iterator docs;
         synchronized(mainMapLock){
             docs = mainMap.values().iterator();
-        }
-        while(docs.hasNext()){
-            LimeXMLDocument d = (LimeXMLDocument)docs.next();
-            retList.addAll(d.getKeyWords());
+            while(docs.hasNext()){
+                LimeXMLDocument d = (LimeXMLDocument)docs.next();
+                retList.addAll(d.getKeyWords());
+            }
         }
         return retList;
     }
