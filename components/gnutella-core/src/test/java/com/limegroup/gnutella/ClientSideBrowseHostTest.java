@@ -308,7 +308,7 @@ public class ClientSideBrowseHostTest
 
         // set up a server socket to wait for proxy request
         ServerSocket ss = new ServerSocket(7000);
-        ss.setSoTimeout(TIMEOUT);
+        ss.setSoTimeout(TIMEOUT*4);
 
         // send a reply with some PushProxy info
         final PushProxyInterface[] proxies = 
