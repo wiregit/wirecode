@@ -656,6 +656,12 @@ public class UDPConnectionProcessor {
             drec.sentTime     = _lastSendTime;
 			drec.sends++;
 
+            if( LOG.isDebugEnabled() && 
+               (_lastSendTime - _lastDataSendTime) > 2000)  {
+                LOG.debug("SendData lag = "+
+                  (_lastSendTime - _lastDataSendTime));
+            }
+
             // Record when data was sent for future scheduling
             _lastDataSendTime = _lastSendTime;
 
