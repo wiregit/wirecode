@@ -10,9 +10,12 @@ import com.sun.java.util.collections.*;
  */
 
 public class GUID /* implements Comparable */ {
-    private static int SZ=16;
+    /** The size of a GUID. */
+    private static final int SZ=16;
+    /** Used to generated new GUID's. */
+    private static Random rand=new Random();
 
-    //invariant: bytes.length==SZ
+    /** The contents of the GUID.  INVARIANT: bytes.length==SZ */
     private byte[] bytes;
 
     public GUID(byte[] bytes) {
@@ -20,9 +23,36 @@ public class GUID /* implements Comparable */ {
         this.bytes=bytes;
     }
 
+    /** Returns the bytes for a new GUID. */
+    public static byte[] makeGuid() {
+        byte[] ret=new byte[16];
+        rand.nextBytes(ret);
+        ret[8]=(byte)0xFF;    //Mark as "new" GUID.  (See isNewGUID().)
+        ret[15]=(byte)0x00;   //Version number is 0.
+        return ret;
+    }
+
+    /** Returns true if this is a GUID created by the Windows CoCreateGUID()
+     *  routine.  Note that the converse does not hold; this method may
+     *  also return true for other randomly generated GUID's. */      
+    public boolean isWindowsGUID() {    
+        //Windows GUID's are of the form 10------, where "1" is the most
+        //significant bit and "-" means "don't care".  See the internet
+        //draft by Salz and Leach:
+        //       http://www.ics.uci.edu/~ejw/authoring/uuid-guid/
+        //                              draft-leach-uuids-guids-01.txt    
+        return (bytes[8]&0xc0)==0x80;
+    }
+
+    /** Returns true if this is a GUID from newer Gnutella clients, e.g.,
+     *  LimeWire and BearShare. */
+    public boolean isNewGUID() {
+        //Is byte 8 all 1's?  Note that we downcast 0xFF first so both sides of
+        //the equality are automatically widened, with the same sign extension.
+        return bytes[8]==(byte)0xFF;
+    }
+
     public boolean equals(Object o) {
-//      System.out.println("Calling equals on "+o.toString()
-//               +" and "+this.toString());
         if (! (o instanceof GUID))
             return false;
         byte[] bytes2=((GUID)o).bytes();
@@ -39,18 +69,6 @@ public class GUID /* implements Comparable */ {
             sum+=bytes[i];
         return sum;
     }
-
-//      public int compareTo(Object o) {
-//      if (! (o instanceof GUID))
-//          throw new ClassCastException();
-//      GUID other=(GUID)o;
-//      if (this.equals(other))
-//          return 0;
-//      else if (this.hashCode()<other.hashCode())
-//          return -1;
-//      else
-//          return 1;
-//      }
 
     /** Warning: this exposes the rep!  Do not modify returned value. */
     public byte[] bytes() {
@@ -89,11 +107,6 @@ public class GUID /* implements Comparable */ {
         }
         return buf.toString().toUpperCase();
     }
-
-
-    public static byte[] makeGuid() {
-        return Message.makeGuid();
-    }
     
     /**
      *  Create a GUID bytes from a hex string version.
@@ -116,58 +129,79 @@ public class GUID /* implements Comparable */ {
         }
     }
 
-//      public static void main(String args[]) {
-//      byte[] b1=new byte[16];
-//      byte[] b2=new byte[16];
-//      for (int i=0; i<16; i++) {
-//          b1[i]=(byte)i;
-//          b2[i]=(byte)i;
-//      }
-//      GUID g1=new GUID(b1);
-//      GUID g2=new GUID(b1);
-//      Assert.that(g1.equals(g2));
-//      Assert.that(g2.equals(g1));
-//      Assert.that(g1.hashCode()==g2.hashCode());
+    /*
+    public static void main(String args[]) {
+        byte[] b1=new byte[16];
+        byte[] b2=new byte[16];
+        for (int i=0; i<16; i++) {
+            b1[i]=(byte)i;
+            b2[i]=(byte)i;
+        }
+        GUID g1=new GUID(b1);
+        GUID g2=new GUID(b1);
+        Assert.that(g1.equals(g2));
+        Assert.that(g2.equals(g1));
+        Assert.that(g1.hashCode()==g2.hashCode());
 
-//      Hashtable t=new Hashtable();
-//      String out=null;
-//      t.put(g1,"test");
-//      Assert.that(t.containsKey(g1),"Contains 1");
-//      out=(String)t.get(g1);
-//      Assert.that(out!=null, "Null test 1");
-//      Assert.that(out.equals("test"), "Get test 1");
+        Hashtable t=new Hashtable();
+        String out=null;
+        t.put(g1,"test");
+        Assert.that(t.containsKey(g1),"Contains 1");
+        out=(String)t.get(g1);
+        Assert.that(out!=null, "Null test 1");
+        Assert.that(out.equals("test"), "Get test 1");
 
-//      Assert.that(t.containsKey(g2),"Contains 2");
-//      out=(String)t.get(g2);
-//      Assert.that(out!=null, "Null test 2");
-//      Assert.that(out.equals("test"), "Get test 2");
+        Assert.that(t.containsKey(g2),"Contains 2");
+        out=(String)t.get(g2);
+        Assert.that(out!=null, "Null test 2");
+        Assert.that(out.equals("test"), "Get test 2");
 
-//      String hexString="FF010A00000000000000000000000001";
-//      byte[] bytes=new byte[16];
-//      bytes[0]=(byte)255;
-//      bytes[1]=(byte)1;
-//      bytes[2]=(byte)10;
-//      bytes[15]=(byte)1;
+        String hexString="FF010A00000000000000000000000001";
+        byte[] bytes=new byte[16];
+        bytes[0]=(byte)255;
+        bytes[1]=(byte)1;
+        bytes[2]=(byte)10;
+        bytes[15]=(byte)1;
 
-//      String s=(new GUID(bytes)).toHexString();
-//      Assert.that(s.equals(hexString));
-//      byte[] bytes2=GUID.fromHexString(s);
-//      Assert.that(Arrays.equals(bytes2,bytes));
+        String s=(new GUID(bytes)).toHexString();
+        Assert.that(s.equals(hexString));
+        byte[] bytes2=GUID.fromHexString(s);
+        Assert.that(Arrays.equals(bytes2,bytes));
 
-//      try {
-//          GUID.fromHexString("aa01");
-//          Assert.that(false);
-//      } catch (IllegalArgumentException e) {
-//          Assert.that(true);
-//      }
+        try {
+            GUID.fromHexString("aa01");
+            Assert.that(false);
+        } catch (IllegalArgumentException e) {
+            Assert.that(true);
+        }
 
-//      try {
-//          GUID.fromHexString("ff010a0000000000000000000000000z");
-//          Assert.that(false);
-//      } catch (IllegalArgumentException e) {
-//          Assert.that(true);
-//      }
-//      }
+        try {
+            GUID.fromHexString("ff010a0000000000000000000000000z");
+            Assert.that(false);
+        } catch (IllegalArgumentException e) {
+            Assert.that(true);
+        }
+
+        //Try new GUID generator.
+        bytes=GUID.makeGuid();     g1=new GUID(bytes);
+        Assert.that(bytes[8]==(byte)0xFF);
+        Assert.that(bytes[15]==(byte)0x00);
+        Assert.that(g1.isNewGUID());
+        Assert.that(! g1.isWindowsGUID());               
+        
+        //Try isWindowsGUID (again)
+        bytes[8]=(byte)0xc0;   g1=new GUID(bytes);
+        Assert.that(! g1.isWindowsGUID());
+        bytes[8]=(byte)0x80;   g1=new GUID(bytes);
+        Assert.that(g1.isWindowsGUID());
+        
+        //Try isNewGUID (again)
+        bytes[8]=(byte)0xFE;   g1=new GUID(bytes);
+        Assert.that(! g1.isNewGUID());
+        bytes[8]=(byte)0xFF;  bytes[15]=(byte)0x00;   g1=new GUID(bytes);
+        Assert.that(g1.isNewGUID());
+    }
+    */
 }
 
 
