@@ -2,7 +2,6 @@ package com.limegroup.gnutella;
 
 import com.sun.java.util.collections.*;
 import com.limegroup.gnutella.util.NetworkUtils;
-import com.limegroup.gnutella.messages.Message;
 
 /**
  * A 16-bit globally unique ID.  Immutable.<p>

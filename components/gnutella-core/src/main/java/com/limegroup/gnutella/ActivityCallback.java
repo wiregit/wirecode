@@ -1,12 +1,10 @@
 package com.limegroup.gnutella;
 
 import java.io.File;
-import com.limegroup.gnutella.messages.*;
-import com.limegroup.gnutella.chat.*;
-import com.limegroup.gnutella.xml.*;
-import com.limegroup.gnutella.search.*;
+
+import com.limegroup.gnutella.chat.Chatter;
+import com.limegroup.gnutella.search.HostData;
 import com.limegroup.gnutella.security.User;
-import com.sun.java.util.collections.*;
 
 /**
  *  Callback to notify the GUI of asynchronous backend events.
