@@ -1558,7 +1558,7 @@ public class ConnectionManager {
 		}
 
 		// this can throw IOException
-		conn.loopForMessages();
+		conn.reader().startReading();
 	}
     
     /**
