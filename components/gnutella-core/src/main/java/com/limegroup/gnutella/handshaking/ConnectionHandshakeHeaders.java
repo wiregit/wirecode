@@ -26,6 +26,7 @@ public class ConnectionHandshakeHeaders
         "X-Domains-Authenticated";
     public static final String X_TEMP_CONNECTION    = "X-Temp-Connection";
     public static final String REMOTE_IP            = "Remote-IP";
+    public static final String UPTIME               = "Uptime";
 
     /**
      * Returns true if v.toLowerCase().equals("true").

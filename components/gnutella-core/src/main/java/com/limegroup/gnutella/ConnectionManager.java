@@ -6,6 +6,7 @@ import com.sun.java.util.collections.*;
 
 import java.util.Properties;
 import java.util.StringTokenizer;
+import java.text.ParseException;
 
 import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.security.Authenticator;
@@ -1124,6 +1125,24 @@ public class ConnectionManager {
             }
         }
         
+        //If possible, record the uptime in the HostCatcher for possible
+        //inclusion in the permanent list, i.e., gnutella.net.  If uptime isn't
+        //set, we probably already recorded the default uptime when we fetched
+        //the connection--assuming it wasn't incoming.
+        String uptime=connection.getProperty(ConnectionHandshakeHeaders.UPTIME);
+        if (uptime!=null) {      
+            try {
+                if (connection.isOutgoing())
+                    _catcher.addPermanent(new Endpoint(connection.getOrigHost(),
+                                                      connection.getOrigPort()),
+                                          UptimeHeaders.decodeUptime(uptime));
+                else if (remoteAddress!=null)
+                    _catcher.addPermanent(new Endpoint(remoteAddress), 
+                                          UptimeHeaders.decodeUptime(uptime));
+            } catch (ParseException ignore) {                 
+            }
+        }
+
         //We used to check X_NEED_SUPERNODE here, but that is no longer
         //necessary.
     }
