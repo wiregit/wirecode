@@ -363,55 +363,11 @@ public final class ServerSideOutOfBandReplyTest extends BaseTestCase {
     // BEGIN TESTS
     // ------------------------------------------------------
 
-    // make sure that the Ultrapeer discards out-of-band query requests that
-    // have an improper address associated with it
-    public void testIdentity() throws Exception {
-        drainAll();
-
-        byte[] crapIP = {0,0,0,0};
-        QueryRequest query = QueryRequest.createOutOfBandQuery("berkeley", 
-                                                               crapIP, 6346);
-        LEAF.send(query);
-        LEAF.flush();
-
-        // ultrapeers should NOT get the QR
-        assertTrue(getFirstQueryRequest(ULTRAPEER_1) == null);
-        assertTrue(getFirstQueryRequest(ULTRAPEER_2) == null);
-        
-        // try a good query
-        query = QueryRequest.createOutOfBandQuery("berkeley", 
-                                                  LEAF.getLocalAddress().getAddress(),
-                                                  6346);
-        LEAF.send(query);
-        LEAF.flush();
-
-        // ultrapeers should get the QR
-        assertTrue(getFirstQueryRequest(ULTRAPEER_1) != null);
-        assertTrue(getFirstQueryRequest(ULTRAPEER_2) != null);
-
-        // LEAF should get the reply
-        assertTrue(getFirstQueryReply(LEAF) != null);
-    }
-
-    // a node should NOT send a reply out of band via UDP if it is not
-    // far away (low hop)
-    public void testLowHopOutOfBandRequest() throws Exception {
-        drainAll();
-
-        QueryRequest query = 
-            QueryRequest.createOutOfBandQuery("susheel",
-                                              UDP_ACCESS.getLocalAddress().getAddress(),
-                                              UDP_ACCESS.getLocalPort());
-        ULTRAPEER_2.send(query);
-        ULTRAPEER_2.flush();
-
-        // ULTRAPEER_2 should get a reply via TCP
-        assertTrue(getFirstQueryReply(ULTRAPEER_2) != null);
-    }
-
     // tests basic out of band functionality
     // this tests no UDP support - it should just send a UDP reply
-    public void testOutOfBandRequest() throws Exception {
+    // this test is DEPRECATED - we do not send out-of-band replies unless
+    // you are GUESS-capable
+    public void notestOutOfBandRequest() throws Exception {
         drainAll();
 
         QueryRequest query = 
@@ -443,8 +399,8 @@ public final class ServerSideOutOfBandReplyTest extends BaseTestCase {
     // tests basic out of band functionality
     // this tests solicited UDP support - it should participate in ACK exchange
     public void testOutOfBandRequestWithSolicitedSupport() throws Exception {
-        // set up solicited UDP support
         DatagramPacket pack = null;
+        // set up solicited UDP support
         {
             drainAll();
             PingReply pong = 
@@ -478,6 +434,42 @@ public final class ServerSideOutOfBandReplyTest extends BaseTestCase {
             pack = new DatagramPacket(baos.toByteArray(), 
                                       baos.toByteArray().length,
                                       pack.getAddress(), pack.getPort());
+            UDP_ACCESS.send(pack);
+        }
+
+        // set up unsolicited UDP support
+        {
+            // tell the UP i can support UDP connect back
+            MessagesSupportedVendorMessage support = 
+                MessagesSupportedVendorMessage.instance();
+            ULTRAPEER_1.send(support);
+            ULTRAPEER_1.flush();
+
+            byte[] cbGuid = null;
+            int cbPort = -1;
+            while (cbGuid == null) {
+                try {
+                    Message m = ULTRAPEER_1.receive(TIMEOUT);
+                    if (m instanceof UDPConnectBackVendorMessage) {
+                        UDPConnectBackVendorMessage udp = 
+                            (UDPConnectBackVendorMessage) m;
+                        cbGuid = udp.getConnectBackGUID().bytes();
+                        cbPort = udp.getConnectBackPort();
+                    }
+                }
+                catch (Exception ie) {
+                    assertTrue("did not get the UDP CB message!", false);
+                }
+            }
+
+            // ok, now just do a connect back to the up so unsolicited support
+            // is all set up
+            PingRequest pr = new PingRequest(cbGuid, (byte) 1, (byte) 0);
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            pr.write(baos);
+            pack = new DatagramPacket(baos.toByteArray(), 
+                                      baos.toByteArray().length,
+                                      ULTRAPEER_1.getInetAddress(), cbPort);
             UDP_ACCESS.send(pack);
         }
 
@@ -704,6 +696,52 @@ public final class ServerSideOutOfBandReplyTest extends BaseTestCase {
             }
         }
         catch (IOException expected) {}
+    }
+
+    // make sure that the Ultrapeer discards out-of-band query requests that
+    // have an improper address associated with it
+    public void testIdentity() throws Exception {
+        drainAll();
+
+        byte[] crapIP = {0,0,0,0};
+        QueryRequest query = QueryRequest.createOutOfBandQuery("berkeley", 
+                                                               crapIP, 6346);
+        LEAF.send(query);
+        LEAF.flush();
+
+        // ultrapeers should NOT get the QR
+        assertTrue(getFirstQueryRequest(ULTRAPEER_1) == null);
+        assertTrue(getFirstQueryRequest(ULTRAPEER_2) == null);
+        
+        // try a good query
+        query = QueryRequest.createOutOfBandQuery("berkeley", 
+                                                  LEAF.getLocalAddress().getAddress(),
+                                                  6346);
+        LEAF.send(query);
+        LEAF.flush();
+
+        // ultrapeers should get the QR
+        assertTrue(getFirstQueryRequest(ULTRAPEER_1) != null);
+        assertTrue(getFirstQueryRequest(ULTRAPEER_2) != null);
+
+        // LEAF should get the reply
+        assertTrue(getFirstQueryReply(LEAF) != null);
+    }
+
+    // a node should NOT send a reply out of band via UDP if it is not
+    // far away (low hop)
+    public void testLowHopOutOfBandRequest() throws Exception {
+        drainAll();
+
+        QueryRequest query = 
+            QueryRequest.createOutOfBandQuery("susheel",
+                                              UDP_ACCESS.getLocalAddress().getAddress(),
+                                              UDP_ACCESS.getLocalPort());
+        ULTRAPEER_2.send(query);
+        ULTRAPEER_2.flush();
+
+        // ULTRAPEER_2 should get a reply via TCP
+        assertTrue(getFirstQueryReply(ULTRAPEER_2) != null);
     }
 
     

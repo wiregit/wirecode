@@ -1453,9 +1453,13 @@ public abstract class MessageRouter {
                                        FOR_ME_REPLY_HANDLER);
             // Here we can do a couple of things - if the query wants
             // out-of-band replies we should do things differently.  else just
-            // send it off as usual.  only send out-of-band if you aren't 
-            // directly connected.
-            if (!query.desiresOutOfBandReplies() || (query.getHops() < 2)) 
+            // send it off as usual.  only send out-of-band if you are GUESS-
+            // capable (being GUESS capable implies that you can receive 
+            // incoming TCP) and not firewalled
+            if (!query.desiresOutOfBandReplies() || 
+                (query.getHops() < 2) ||
+                !RouterService.isGUESSCapable() || 
+                !RouterService.acceptedIncomingConnection())
                 rrp.getReplyHandler().handleQueryReply(queryReply, null);
             else {
                 // special out of band handling....
@@ -1468,32 +1472,26 @@ public abstract class MessageRouter {
                 }
                 int port = query.getReplyPort();
                 
-                if (!UDPService.instance().canReceiveSolicited()) 
-                    // if i can't receive solicited traffic, then just send
-                    // the reply out of band
-                    UDPService.instance().send(queryReply, addr, port);
-                else {
-                    // send a ReplyNumberVM to the host - he'll ACK you if he
-                    // wants the whole shebang
-                    ReplyNumberVendorMessage vm = null;
-                    GUID guid = new GUID(query.getGUID());
-                    try {
-                        int resultCount = queryReply.getResultCount();
-                        vm = new ReplyNumberVendorMessage(guid, resultCount);
+                // send a ReplyNumberVM to the host - he'll ACK you if he
+                // wants the whole shebang
+                ReplyNumberVendorMessage vm = null;
+                GUID guid = new GUID(query.getGUID());
+                try {
+                    int resultCount = queryReply.getResultCount();
+                    vm = new ReplyNumberVendorMessage(guid, resultCount);
+                }
+                catch (BadPacketException bpe) {
+                    throw new IOException("Could not construct VM:" + bpe);
+                }
+                // store reply by guid for later retrieval
+                synchronized (_outOfBandReplies) {
+                    if (_outOfBandReplies.size() < MAX_BUFFERED_REPLIES) {
+                        _outOfBandReplies.put(new TimedGUID(guid), 
+                                              queryReply);
+                        UDPService.instance().send(vm, addr, port);
                     }
-                    catch (BadPacketException bpe) {
-                        throw new IOException("Could not construct VM:" + bpe);
-                    }
-                    // store reply by guid for later retrieval1
-                    synchronized (_outOfBandReplies) {
-                        if (_outOfBandReplies.size() < MAX_BUFFERED_REPLIES) {
-                            _outOfBandReplies.put(new TimedGUID(guid), 
-                                                  queryReply);
-                            UDPService.instance().send(vm, addr, port);
-                        }
-                        // else "tough noogies, i'm too busy" - shouldn't
-                        // happen much
-                    }
+                    // else "tough noogies, i'm too busy" - shouldn't
+                    // happen much
                 }
             }
         }
