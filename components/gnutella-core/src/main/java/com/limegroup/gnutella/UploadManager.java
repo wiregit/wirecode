@@ -270,12 +270,14 @@ public final class UploadManager implements BandwidthTracker {
             //We are going to notify the gui about the new upload, and let
             //it decide what to do with it - will act depending on it's
             //state
-            RouterService.getCallback().addUpload(uploader);
-			FileDesc fd = uploader.getFileDesc();
-			if(fd != null) {
-				fd.incrementAttemptedUploads();
-				RouterService.getCallback().handleSharedFileUpdate(fd.getFile());
-			}
+            if ( uploader.getMethod() != HTTPRequestMethod.HEAD ) {
+                RouterService.getCallback().addUpload(uploader);
+    			FileDesc fd = uploader.getFileDesc();
+    			if(fd != null) {
+    				fd.incrementAttemptedUploads();
+    				RouterService.getCallback().handleSharedFileUpdate(fd.getFile());
+    			}
+            }
         }
         
         if(queued == QUEUED) { //we were queued
@@ -321,7 +323,8 @@ public final class UploadManager implements BandwidthTracker {
             // then set a flag in the upload manager...
             _hadSuccesfulUpload = true;
             // is this necessary? -- i'm pretty sure it is.
-            if ( !isBHUploader ) {
+            if ( !isBHUploader &&
+              uploader.getMethod() != HTTPRequestMethod.HEAD) {
                 FileDesc fd = uploader.getFileDesc();
 				if(fd != null) {
 					fd.incrementCompletedUploads();
@@ -339,8 +342,6 @@ public final class UploadManager implements BandwidthTracker {
             if (startTime>0)
                 reportUploadSpeed(finishTime-startTime,
                                   uploader.amountUploaded());
-           // if (!isBHUploader) // it was added earlier if !BrowseHost - remove.
-           //     RouterService.getCallback().removeUpload(uploader);
             return queued;
         }
     }

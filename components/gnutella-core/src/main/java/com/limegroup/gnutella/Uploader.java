@@ -1,5 +1,6 @@
 package com.limegroup.gnutella;
 
+import com.limegroup.gnutella.http.HTTPRequestMethod;
 import java.io.IOException;
 import java.net.*;
 
@@ -115,6 +116,11 @@ public interface Uploader extends BandwidthTracker {
 	public boolean isHeaderParsed();
 
     public boolean supportsQueueing();
+    
+    /**
+     * returns the current request method.
+     */
+    public HTTPRequestMethod getMethod();
 
 }
 

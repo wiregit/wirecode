@@ -356,6 +356,8 @@ public final class HTTPUploader implements Uploader {
 	
 	OutputStream getOutputStream() {return _ostream;}
 	InputStream getInputStream() {return _fis;}
+	
+	public HTTPRequestMethod getMethod() { return _method; }
 
 	/**
 	 * Sets the number of bytes that have been uploaded along for this
