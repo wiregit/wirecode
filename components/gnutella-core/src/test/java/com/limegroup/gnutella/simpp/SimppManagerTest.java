@@ -3,10 +3,12 @@ package com.limegroup.gnutella.simpp;
 import junit.framework.Test;
 import com.limegroup.gnutella.util.*;
 import com.limegroup.gnutella.settings.*;
+import com.limegroup.gnutella.messages.vendor.*;
 import java.io.*;
 import java.net.*;
 import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.stubs.*;
+
 
 public class SimppManagerTest extends BaseTestCase {
     
@@ -38,7 +40,7 @@ public class SimppManagerTest extends BaseTestCase {
 
     private static File RANDOM_BYTES_FILE;
 
-    private static final int PORT = 6346;
+    static final int PORT = 6346;
 
     private static File _simppFile;
 
@@ -49,7 +51,7 @@ public class SimppManagerTest extends BaseTestCase {
     }
 
     public static Test suite() {
-        return buildTestSuite(SimppManagerTest.class);
+        return buildTestSuite(SimppManagerTest.class,"testNewerSimppRequested");
     }
 
     public static void main(String[] args) {
@@ -100,16 +102,17 @@ public class SimppManagerTest extends BaseTestCase {
                                                    new String[] {"*.*.*.*"} );
         FilterSettings.WHITE_LISTED_IP_ADDRESSES.setValue(
                                                    new String[] {"127.*.*.*"});
+		ConnectionSettings.WATCHDOG_ACTIVE.setValue(false);
         ConnectionSettings.PORT.setValue(PORT);
-		ConnectionSettings.CONNECT_ON_STARTUP.setValue(false);
+        ConnectionSettings.ENCODE_DEFLATE.setValue(false);
+		ConnectionSettings.CONNECT_ON_STARTUP.setValue(true);
         UltrapeerSettings.EVER_ULTRAPEER_CAPABLE.setValue(true);
 		UltrapeerSettings.DISABLE_ULTRAPEER_MODE.setValue(false);
 		UltrapeerSettings.FORCE_ULTRAPEER_MODE.setValue(true);
-		UltrapeerSettings.MAX_LEAVES.setValue(5);
+        UltrapeerSettings.MAX_LEAVES.setValue(5);
 		ConnectionSettings.NUM_CONNECTIONS.setValue(5);
 		ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);	
 		ConnectionSettings.USE_GWEBCACHE.setValue(false);
-		ConnectionSettings.WATCHDOG_ACTIVE.setValue(false);
 
     }
     
@@ -171,6 +174,60 @@ public class SimppManagerTest extends BaseTestCase {
         assertEquals("garbage bytes accepted", 0, man.getVersion());
     }
 
+    public void testOlderSimppNotRequested() {
+        //TODO
+    }
+
+    public void testSameSimppNotRequested() {
+        //TODO
+    }
+
+    public void testNewerSimppRequested() {
+        //1. Set up limewire correctly
+        _simppMessageNumber = MIDDLE;
+        changeSimppFile();
+
+        //2. Set up the test connection, to have the new version, and to expect
+        //a simpp request from limewire
+        TestConnection conn = null;
+        try {
+            conn = new TestConnection(PORT, NEW, true);
+        } catch(IOException iox) {
+            fail("could not set up test connection");
+        }
+        conn.start();
+        try {
+            Thread.sleep(100000);//let the message exchange take place
+        } catch (InterruptedException ix) {
+            fail("interrupted while waiting for simpp exchange to complete");
+        }
+        //3. OK. LimeWire should have upgraded now. 
+        SimppManager man = SimppManager.instance();
+        assertEquals("Simpp manager did not update simpp version", 
+                                                          3, man.getVersion());
+        conn.killConnection();
+    }
+
+    public void testTamperedSimppSigRejected() {
+
+    }
+
+    public void testTamperedSimppDataRejected() {
+
+    }
+
+    public void testBadSimppXMLRejected() {
+
+    }
+
+    public void testGargabeDataRejected() {
+
+    }
+
+    public void testIOXLeavesSimppUnchanged() {
+
+    }
+
     ////////////////////////////////private methods///////////////////////////
     
     private static void changeSimppFile() {
@@ -200,6 +257,9 @@ public class SimppManagerTest extends BaseTestCase {
         } catch (NoSuchFieldException nsfx) {
             fail("unable to nullify SimppManager.INSTANCE");
         }
+        //reload the SimppManager and Capabilities VM
+        SimppManager.instance();
+        CapabilitiesVM.instance();
     }
 
 }

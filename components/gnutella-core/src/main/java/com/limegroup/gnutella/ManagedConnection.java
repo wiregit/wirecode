@@ -967,6 +967,7 @@ public class ManagedConnection extends Connection
             Message m=null;
             try {
                 m = receive();
+                System.out.println("\t\t\t"+m);
                 if (m==null)
                     continue;
             } catch (BadPacketException e) {
