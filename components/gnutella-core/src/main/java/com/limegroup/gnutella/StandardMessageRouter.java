@@ -271,6 +271,11 @@ public class StandardMessageRouter
         Iterator words = _fileManager.getKeyWords().iterator();
         while(words.hasNext())
             qrt.add((String)words.next());
+        // get 'indivisible' words and handle appropriately - you don't want the
+        // qrt to divide these guys up....
+        Iterator indivisibleWords = _fileManager.getIndivisibleKeyWords().iterator();
+        while (indivisibleWords.hasNext()) 
+            qrt.addIndivisible((String) indivisibleWords.next());
         /*
           File[] files = _fileManager.getSharedFiles(null);
           for (int i=0; i<files.length; i++)
