@@ -829,7 +829,7 @@ public class QueryRequest extends Message implements Serializable{
             throw new IllegalArgumentException("Bad capability = " +
                                                capabilitySelector);
         _capabilitySelector = capabilitySelector;
-        if ((metaFlagMask > 0) && (metaFlagMask < 4) || (metaFlagMask > 251))
+        if ((metaFlagMask > 0) && (metaFlagMask < 4) || (metaFlagMask > 248))
             throw new IllegalArgumentException("Bad Meta Flag = " +
                                                metaFlagMask);
         if (metaFlagMask > 0)
@@ -1032,9 +1032,15 @@ public class QueryRequest extends Message implements Serializable{
                         if (ggep.hasKey(GGEP.GGEP_HEADER_WHAT_IS))
                             _capabilitySelector = 
                                 ggep.getInt(GGEP.GGEP_HEADER_WHAT_IS);
-                        if (ggep.hasKey(GGEP.GGEP_HEADER_META))
+                        if (ggep.hasKey(GGEP.GGEP_HEADER_META)) {
                             _metaMask = 
                                 new Integer(ggep.getInt(GGEP.GGEP_HEADER_META));
+                            // if the value is something we can't handle, don't
+                            // even set it
+                            if ((_metaMask.intValue() < 4) ||
+                                (_metaMask.intValue() > 248))
+                                _metaMask = null;
+                        }
                     }
                     catch (BadGGEPBlockException ignored) {}
                     catch (BadGGEPPropertyException ignored) {}
