@@ -183,24 +183,4 @@ public class MediaType implements Serializable {
         // Added by Sumeet Thadani to allow a rich search window to be popped up.
         return new MediaType[] {any, text, programs, audio, video, images};
     }
-    
-    //public static void main(String args[]) {
-    //    MediaType[] types = getDefaultMediaTypes();
-    //    MediaType mt;
-    //
-    //    mt = types[0]; /* SCHEMA_ANY_TYPE */
-    //    Assert.that(mt.matches("foo.jpg"));
-    //    Assert.that(mt.matches("foo"));
-    //    Assert.that(mt.matches(""));
-    //
-    //    mt = types[1]; /* SCHEMA_DOCUMENTS */
-    //    Assert.that(mt.toString().equals(SCHEMA_DOCUMENTS));
-    //    Assert.that(mt.matches("foo.html"));
-    //    Assert.that(mt.matches("foo.HTML"));
-    //    Assert.that(mt.matches("foo.ps"));
-    //    Assert.that(mt.matches("foo.PS"));
-    //    Assert.that(! mt.matches("foo.jpg"));
-    //    Assert.that(! mt.matches("foo"));
-    //    Assert.that(! mt.matches("foo."));
-    //}
 }
