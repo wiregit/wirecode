@@ -886,7 +886,7 @@ public abstract class FileManager {
             }
 		
             // Populate the creation time cache if necessary
-            URN mainURN = (URN) urns.iterator().next();
+            URN mainURN = fileDesc.getSHA1Urn();
             Long cTime = CreationTimeCache.instance().getCreationTime(mainURN);
             if (cTime == null)
                 CreationTimeCache.instance().addTime(mainURN, 
@@ -994,6 +994,7 @@ public abstract class FileManager {
     public FileDesc fileChanged(File f) {
         Long cTime = 
             CreationTimeCache.instance().getCreationTime(getURNForFile(f));
+        Assert.that(cTime != null);
         FileDesc removed = removeFileIfShared(f);
         if( removed == null ) // nothing removed, exit.
             return null;
