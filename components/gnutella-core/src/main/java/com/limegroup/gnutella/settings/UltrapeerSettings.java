@@ -22,7 +22,7 @@ public final class UltrapeerSettings extends AbstractSettings {
 	 * Setting for whether or not to disable Ultrapeer mode.
 	 */
 	public static final BooleanSetting DISABLE_ULTRAPEER_MODE =
-		CFG_FACTORY.createBooleanSetting("DISABLE_SUPERNODE_MODE", false);
+		FACTORY.createBooleanSetting("DISABLE_SUPERNODE_MODE", false);
 
 	
 	/**
