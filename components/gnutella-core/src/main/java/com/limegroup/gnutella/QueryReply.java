@@ -1,6 +1,7 @@
 package com.limegroup.gnutella;
 
 import java.io.*;
+import java.net.*;
 import com.sun.java.util.collections.*;
 import com.limegroup.gnutella.messages.*;
 
@@ -805,38 +806,40 @@ public class QueryReply extends Message implements Serializable{
             throw bpe;
         }
     
-        RemoteFileDesc[] retArray = new RemoteFileDesc[responses.size()];
-        
-        Iterator respIter = responses.iterator();
-        int index = 0;
-        // these will be used over and over....
-        final String ip = getIP();
-        final int port = getPort();
-        final int qual = 
-        calculateQualityOfService(!RouterService.instance().acceptedIncomingConnection());
-        final long speed = getSpeed();
-        final byte[] clientGUID = getClientGUID();
-        boolean supportsChat = false;
-        boolean supportsBrowseHost = false;
-        try {
-            supportsChat = getSupportsChat();
-            supportsBrowseHost = getSupportsBrowseHost();
-        }
-        catch (BadPacketException ignored) {} // don't let chat kill me....
-        
+        RemoteFileDesc[] retArray = new RemoteFileDesc[responses.size()];                
         // construct RFDs....
-        while (respIter.hasNext()) {
+        Iterator respIter = responses.iterator();
+		for(int index=0; respIter.hasNext(); index++) {
             Response currResp = (Response) respIter.next();
-            retArray[index++] = new RemoteFileDesc(ip, port, 
-                                                   currResp.getIndex(),
-                                                   currResp.getName(),
-                                                   (int) currResp.getSize(),
-                                                   clientGUID, (int) speed,
-                                                   supportsChat, 
-                                                   qual,
-												   supportsBrowseHost,
-												   currResp.getDocument(),
-												   currResp.getUrns());
+
+			
+			long responseIndex  = currResp.getIndex();
+			long responseSize   = currResp.getSize(); 
+			String responseName = currResp.getName();
+			
+			String fileName = "";
+
+			// if it's a Chord response, use the specialized RemoteFileDesc
+			// constructor
+			if(responseIndex == 0 && 
+			   responseSize == 0 && 
+			   (responseName == null || responseName.equals(""))) {
+				URN sha1 = currResp.getSHA1Urn();
+				if(sha1 == null) {
+					retArray[index] = null;
+					continue;
+				}
+				fileName = "/uri-res/N2R?" + sha1.httpStringValue(); 
+			} else {
+				fileName = "/get/"+responseIndex+"/"+responseName;
+			}
+			try {
+				URL url = new URL("http", getIP(), getPort(), fileName); 
+				retArray[index] = new RemoteFileDesc(url, currResp, this);
+			} catch(MalformedURLException e) {
+				retArray[index] = null;
+				continue;
+			}
         }
         
         return retArray;
