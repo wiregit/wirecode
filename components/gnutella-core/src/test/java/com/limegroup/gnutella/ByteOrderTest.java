@@ -32,6 +32,15 @@ public class ByteOrderTest extends BaseTestCase {
 		junit.textui.TestRunner.run(suite());
 	}
 	
+	public void testReverse() {
+	    byte[] x1 = { (byte)1, (byte)2, (byte)3, (byte)4 };
+	    byte[] x2 = ByteOrder.reverse(x1);
+	    assertEquals(4, x2[0]);
+	    assertEquals(3, x2[1]);
+        assertEquals(2, x2[2]);
+        assertEquals(1, x2[3]);
+    }
+	
 	public void testLeb2ShortAndShort2Leb() {
     
         byte[] x1={(byte)0x2, (byte)0x1};  //{x1[0], x1[1]}
@@ -158,6 +167,18 @@ public class ByteOrderTest extends BaseTestCase {
             ByteOrder.leb2int(new byte[] {(byte)0x7f, (byte)0x1c, (byte)0x1}, 0, 3));
           assertEquals(0x1c,
             ByteOrder.leb2int(new byte[] {(byte)0x7f, (byte)0x1c, (byte)0x1}, 1, 1));
-          //TODO: expand tests to cover exceptional cases and negative values
+          assertEquals(0x1011c7f,
+            ByteOrder.leb2int(new byte[] {(byte)0xac, (byte)0x7f, (byte)0x1c,
+                                          (byte)0x1, (byte)0x1}, 1, 4));
+            
+          try {
+            ByteOrder.leb2int(new byte[] {}, 0, 0);
+            fail("illegalargument expected.");
+          } catch(IllegalArgumentException ignored) {}
+          
+          try {
+            ByteOrder.leb2int(new byte[] {}, 0, 5);
+            fail("illegalargument expected.");
+          } catch(IllegalArgumentException ignored) {}            
    }    
 }        
