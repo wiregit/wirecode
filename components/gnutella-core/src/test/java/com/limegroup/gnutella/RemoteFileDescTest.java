@@ -4,8 +4,9 @@ import java.net.URL;
 
 import junit.framework.Test;
 
-import com.sun.java.util.collections.HashSet;
-import com.sun.java.util.collections.Set;
+import com.limegroup.gnutella.http.HTTPConstants;
+import com.limegroup.gnutella.messages.QueryReply;
+import com.sun.java.util.collections.*;
 
 /**
  * This class tests the methods of the <tt>RemoteFileDesc</tt> class.
@@ -95,5 +96,56 @@ public final class RemoteFileDescTest extends com.limegroup.gnutella.util.BaseTe
 		    urlString.indexOf(colonPort+"//"), -1);
 		assertNotEquals("unexpected double slash",
 		    -1, urlString.indexOf(":3000/"));
+	}
+	
+	/**
+	 * tests if the rfd correctly determines if it is altloc and push capable
+	 */
+	public void testIsAltlocPushCapable() throws Exception {
+		
+		PushProxyInterface ppi = new QueryReply.PushProxyContainer("1.2.3.4",6346);
+		PushProxyInterface ppi2 = new QueryReply.PushProxyContainer("1.2.3.4",6346);
+		Set proxies = new HashSet();
+		Set proxies2 = new HashSet();
+		proxies.add(ppi);
+		proxies2.add(ppi);
+		proxies2.add(ppi2);
+		
+        PushEndpoint pe = new PushEndpoint(GUID.makeGuid(),proxies);
+        PushEndpoint pe2 = new PushEndpoint(GUID.makeGuid(),proxies2);
+        //test an rfd with push proxies
+        
+		 RemoteFileDesc fwalled = new RemoteFileDesc("127.0.0.1",6346,10,HTTPConstants.URI_RES_N2R+
+                HugeTestUtils.URNS[0].httpStringValue(), 10, 
+                pe.getClientGUID(), 10, true, 2, true, null, 
+                HugeTestUtils.URN_SETS[0],
+                false,true,"",0,proxies,-1);
+		 
+		 assertTrue(Arrays.equals(pe.getClientGUID(),fwalled.getClientGUID()));
+		 
+		 RemoteFileDesc nonfwalled = 
+			new RemoteFileDesc("www.limewire.org", 6346, 10, HTTPConstants.URI_RES_N2R+
+							   HugeTestUtils.URNS[1].httpStringValue(), 10, 
+							   GUID.makeGuid(), 10, true, 2, true, null, 
+							   HugeTestUtils.URN_SETS[1],
+                               false,false,"",0,null, -1);
+		 
+		 RemoteFileDesc differentPE = new RemoteFileDesc(fwalled,pe2);
+		 assertTrue(Arrays.equals(pe2.getClientGUID(),differentPE.getClientGUID()));
+		 
+		 //both rfds should report as being altloc capable, but only
+		 //the firewalled rfd should be pushCapable
+		 assertTrue(fwalled.isAltLocCapable());
+		 assertTrue(fwalled.needsPush());
+		 assertTrue(nonfwalled.isAltLocCapable());
+		 assertFalse(nonfwalled.needsPush());
+		 
+		 //now create an rfd which claims to be firewalled but has no push proxies
+		 RemoteFileDesc fwalledNotGood = 
+		 	new RemoteFileDesc(fwalled, new PushEndpoint(GUID.makeGuid()));
+		 
+		 //it should not be a capable altloc.
+		 assertFalse(fwalledNotGood.isAltLocCapable());
+		 assertFalse(fwalledNotGood.needsPush());
 	}
 }

@@ -449,17 +449,24 @@ public class VendorMessageTest extends com.limegroup.gnutella.util.BaseTestCase 
     	assertEquals(HeadPing.PLAIN, ping.getFeatures());
     	assertFalse(ping.requestsAltlocs());
     	assertFalse(ping.requestsRanges());
+    	assertFalse(ping.requestsPushLocs());
     	
+
 
 
 
    		ping = new HeadPing(urn, 0xFF);
 
     	
+
     	
+
+    	assertTrue(ping.requestsPushLocs());
 
     	assertTrue(ping.requestsAltlocs());
     	assertTrue(ping.requestsRanges());
+
+
 
     	
     	ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -469,7 +476,7 @@ public class VendorMessageTest extends com.limegroup.gnutella.util.BaseTestCase 
     	
     	assertEquals(ping.getUrn(), ping2.getUrn());
     	assertEquals(ping.getFeatures(),ping2.getFeatures());
-    	    	
+
     	testWrite(ping);
     }
     

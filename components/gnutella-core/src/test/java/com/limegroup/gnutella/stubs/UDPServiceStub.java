@@ -1,7 +1,8 @@
-package com.limegroup.gnutella;
+package com.limegroup.gnutella.stubs;
 
 import com.limegroup.gnutella.util.*;
 import com.limegroup.gnutella.messages.*;
+import com.limegroup.gnutella.*;
 import java.net.*;
 import java.io.*;
 import java.util.*;

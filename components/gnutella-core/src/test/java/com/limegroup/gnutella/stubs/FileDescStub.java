@@ -19,6 +19,7 @@ public class FileDescStub extends FileDesc {
     public static final int DEFAULT_SIZE = 1126400;
     
     private AlternateLocationCollection _altLocCollection;
+    private AlternateLocationCollection _pushLocCollection;
     
     static {
         DEFAULT_SET = new HashSet();
@@ -77,7 +78,18 @@ public class FileDescStub extends FileDesc {
 		    return _altLocCollection;
 	}
 	
+	public AlternateLocationCollection getPushAlternateLocationCollection() {
+        if(_pushLocCollection == null)
+            return super.getPushAlternateLocationCollection();
+        else
+		    return _pushLocCollection;
+	}
+	
 	public void setAlternateLocationCollection(AlternateLocationCollection what) {
 		_altLocCollection=what;
+	}
+	
+	public void setPushAlternateLocationCollection(AlternateLocationCollection what) {
+		_pushLocCollection=what;
 	}
 }
