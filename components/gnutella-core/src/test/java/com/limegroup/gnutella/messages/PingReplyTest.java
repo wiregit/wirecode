@@ -38,19 +38,29 @@ public class PingReplyTest extends TestCase {
         PingReply pr=new PingReply(new byte[16], (byte)2, 6346, new byte[4],
                          0, 0, false);
         assertTrue(! pr.isMarked());        
+        // all pongs should have a GGEP extension now....
+        assertTrue(pr.hasGGEPExtension());
         pr=new PingReply(new byte[16], (byte)2, 6346, new byte[4],
                          0, 0, true);
         assertTrue(pr.isMarked());
+        // all pongs should have a GGEP extension now....
+        assertTrue(pr.hasGGEPExtension());
         pr=new PingReply(new byte[16], (byte)2, 6346, new byte[4],
                          5, 2348, false);        
         assertTrue(! pr.isMarked());
         assertTrue(pr.getKbytes()==2348);
+        // all pongs should have a GGEP extension now....
+        assertTrue(pr.hasGGEPExtension());
         pr=new PingReply(new byte[16], (byte)2, 6346, new byte[4],
                          5, 2348, true);
         assertTrue(pr.isMarked());
+        // all pongs should have a GGEP extension now....
+        assertTrue(pr.hasGGEPExtension());
         pr=new PingReply(new byte[16], (byte)2, 6346, new byte[4],
                          5, 345882, false);
         assertTrue(! pr.isMarked());
+        // all pongs should have a GGEP extension now....
+        assertTrue(pr.hasGGEPExtension());
         pr=new PingReply(new byte[16], (byte)2, 6346, new byte[4],
                          5, 345882, true);
         assertTrue(pr.isMarked());
@@ -156,6 +166,7 @@ public class PingReplyTest extends TestCase {
         byte[] bytes=baos.toByteArray(); 
         int idLength=GGEP.GGEP_HEADER_DAILY_AVERAGE_UPTIME.length();
         int udpLength=GGEP.GGEP_HEADER_UNICAST_SUPPORT.length();
+        int vcLength=GGEP.GGEP_HEADER_VENDOR_INFO.length();
         int ggepLength=1   //magic number
                       +1   //"DUPTIME" extension flags
                       +idLength //ID
@@ -164,7 +175,11 @@ public class PingReplyTest extends TestCase {
                       +1   //"UDP" extension flags
                       +udpLength // ID
                       +1   //data length
-                      +1;  //data bytes
+                      +1   //data bytes
+                      +1   //"VC" extension flags
+                      +vcLength // ID
+                      +1   // data length
+                      +5;  // data bytes
         assertTrue("Length: "+bytes.length, bytes.length==(23+14+ggepLength));
         int offset=23+14;                              //GGEP offset
         assertTrue(bytes[offset]==(byte)0xc3);         //GGEP magic number
@@ -175,9 +190,16 @@ public class PingReplyTest extends TestCase {
         assertTrue(bytes[offset+2+idLength+4]==(byte)'G');
         assertTrue(bytes[offset+2+idLength+5]==(byte)'U');
         assertTrue(bytes[offset+2+idLength+6]==(byte)'E');
-                     //...etc.
-        assertTrue(bytes[bytes.length-2-(3+udpLength)]==(byte)0x0B); //little byte of 523
-        assertTrue(bytes[bytes.length-1-(3+udpLength)]==(byte)0x02); //big byte of 523
+        assertTrue(bytes[offset+2+idLength+4+udpLength+3]==(byte)'V');
+        assertTrue(bytes[offset+2+idLength+4+udpLength+4]==(byte)'C');
+        assertTrue(bytes[offset+2+idLength+4+udpLength+6]==(byte)'L');
+        assertTrue(bytes[offset+2+idLength+4+udpLength+7]==(byte)'I');
+        assertTrue(bytes[offset+2+idLength+4+udpLength+8]==(byte)'M');
+        assertTrue(bytes[offset+2+idLength+4+udpLength+9]==(byte)'E');
+        assertTrue(bytes[offset+2+idLength+4+udpLength+10]==39);
+        //...etc.
+        assertTrue(bytes[bytes.length-2-(3+udpLength)-(7+vcLength)]==(byte)0x0B); //little byte of 523
+        assertTrue(bytes[bytes.length-1-(3+udpLength)-(7+vcLength)]==(byte)0x02); //big byte of 523
 
 
         //Decode and check contents.
@@ -189,6 +211,11 @@ public class PingReplyTest extends TestCase {
             assertTrue(pong.hasGGEPExtension());
             assertTrue(pong.getDailyUptime()==523);
             assertTrue(pong.supportsUnicast()==true);
+            assertTrue(pong.getVendor().equals("LIME"));
+            assertTrue("Major Version = " + pong.getVendorMajorVersion(), 
+                       pong.getVendorMajorVersion()==2);
+            assertTrue("Minor Version = " + pong.getVendorMinorVersion(), 
+                       pong.getVendorMinorVersion()==7);
         } catch (BadPacketException e) {
             fail("Couldn't extract uptime");
         } catch (IOException e) {
