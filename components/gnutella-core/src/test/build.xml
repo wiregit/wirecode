@@ -26,9 +26,11 @@
   <property name="tests"       value="com/limegroup/gnutella/tests/"/>
   <property name="reports"     value="reports"/>
   <property name="datadir"     value="${basedir}"/>
+  <property name="cloverdir"   value="clover"/>
   <property name="pmd"         value="lib/pmd.jar"/>
   <property name="jaxen"       value="lib/jaxen-core-1.0-fcs.jar"/>
   <property name="saxpath"     value="lib/saxpath-1.0-fcs.jar"/>
+  <property name="cloverjar"   value="lib/clover.jar"/>
 
   <!-- constants -->
   <property name="DEBUG" value="yes" />
@@ -56,7 +58,36 @@
 	<pathelement location="${pmd}"/>
 	<pathelement location="${jaxen}"/>
 	<pathelement location="${saxpath}"/>
+	<pathelement location="${cloverjar}"/>
   </path>
+  
+  <!-- CLOVER SETUP TASKS -->
+  
+  <taskdef resource="clovertasks"/>
+  
+  <target name="with.clover" depends="prepare">
+     <clover-setup initString="${cloverdir}/limeCloverCoverage.db">
+       <fileset dir="${coredir}" defaultexcludes="yes"/> 
+     </clover-setup>
+  </target>
+  
+  <target name="clover.html" depends="with.clover">
+     <clover-report>
+       <current outfile="${cloverdir}/html">
+         <format type="html"/> 
+       </current>	 
+     </clover-report>
+  </target>
+  
+  <target name="clover.clean">
+    <delete dir="${cloverdir}"/>
+  </target>
+  
+  <target name="clover.all">
+    <antcall target="with.clover"/>
+    <antcall target="test all"/>
+    <antcall target="clover.html"/>
+  </target>
 
   <!-- Initialization stuff -->
   <target name="init" >
@@ -67,7 +98,8 @@
   <!-- CLEAN -->
   <target name="clean">
 	<delete dir="${builddir}"/>
-    <ant target="clean reports"/>
+    <antcall target="clean reports"/>
+    <antcall target="clover.clean"/>
   </target>
   
   <!-- clean just the reports -->
@@ -85,6 +117,7 @@
     <mkdir dir="${builddir}"/>
     <mkdir dir="${reports}"/>
     <mkdir dir="${reports}/html"/>
+     <mkdir dir="${cloverdir}"/>    
   </target>
 
  <!-- builds all files, including tests, in the project to the specified directory-->
@@ -92,7 +125,8 @@
    <javac debug="on" optimize="off" deprecation="off"
 	      srcdir="${coredir}:${guidir}:${basedir}"
 	      destdir="${builddir}" nowarn="${NOWARN}"
-		  excludes="macosx/**, ${tests}**, ${settings}, **.gif,**.class,**.bat,**.sh,**.jar, **.xml">
+		  excludes="macosx/**"
+		  fork="true" memoryMaximumSize="100m">
 
      <classpath refid="default.classpath" />
    </javac>
