@@ -6,7 +6,8 @@ import com.sun.java.util.collections.*;
 import java.net.*;
 import java.util.Stack;
 
-/** This class runs a single thread which sends unicast UDP queries to a master
+/** 
+ * This class runs a single thread which sends unicast UDP queries to a master
  * list of unicast-enabled hosts every n milliseconds.  It interacts with
  * HostCatcher to find unicast-enabled hosts.  It also allows for stopping of
  * individual queries by reply counts.
@@ -35,21 +36,24 @@ public final class QueryUnicaster {
     // should the _querier be running?
     private boolean _shouldRun = true;
 
-    /** The map of Queries I need to send every iteration.
-     *  The map is from GUID to QueryBundle.  The following invariant is
-     *  maintained:
-     *  GUID -> QueryBundle where GUID == QueryBundle._qr.getGUID()
+    /** 
+     * The map of Queries I need to send every iteration.
+     * The map is from GUID to QueryBundle.  The following invariant is
+     * maintained:
+     * GUID -> QueryBundle where GUID == QueryBundle._qr.getGUID()
      */
     private Map _queries;
 
-    /** Maps leaf connections to the queries they've spawned.
-     *  The map is from ReplyHandler to a Set (of GUIDs).
+    /**
+     * Maps leaf connections to the queries they've spawned.
+     * The map is from ReplyHandler to a Set (of GUIDs).
      */
     private Map _querySets;
 
-    /** The unicast enabled hosts I should contact for queries.  Add to the
-     *  front, remove from the end.  Therefore, the OLDEST entries are at the
-     *  end.
+    /** 
+     * The unicast enabled hosts I should contact for queries.  Add to the
+     * front, remove from the end.  Therefore, the OLDEST entries are at the
+     * end.
      */
     private LinkedList _queryHosts;
 
@@ -65,8 +69,9 @@ public final class QueryUnicaster {
      */
     private long _lastPingTime = 0;
 
-	/** Variable for how many test pings have been sent out to determine 
-	 *  whether or not we can accept incoming connections.
+	/** 
+     * Variable for how many test pings have been sent out to determine 
+	 * whether or not we can accept incoming connections.
 	 */
 	private int _testUDPPingsSent = 0;
 
@@ -95,8 +100,9 @@ public final class QueryUnicaster {
     //----------------------------------------------------
 
 
-    /** Returns a List of unicast Endpoints.  These Endpoints are the NEWEST 
-     *  we've seen.
+    /** 
+     * Returns a List of unicast Endpoints.  These Endpoints are the NEWEST 
+     * we've seen.
      */
     public List getUnicastEndpoints() {
         List retList = new ArrayList();
@@ -113,12 +119,13 @@ public final class QueryUnicaster {
         return retList;
     }
 
-	/** Returns a <tt>GUESSEndpoint</tt> from the current cache of 
-	 *  GUESS endpoints.
+	/** 
+     * Returns a <tt>GUESSEndpoint</tt> from the current cache of 
+	 * GUESS endpoints.
 	 *
-	 *  @return a <tt>GUESSEndpoint</tt> from the list of GUESS hosts
-	 *   to query, or <tt>null</tt> if there are no available hosts
-	 *   to return
+	 * @return a <tt>GUESSEndpoint</tt> from the list of GUESS hosts
+	 *  to query, or <tt>null</tt> if there are no available hosts
+	 *  to return
 	 */
 	public GUESSEndpoint getUnicastEndpoint() {
 		synchronized(_queryHosts) {
@@ -147,9 +154,10 @@ public final class QueryUnicaster {
             _querier.start();
     }
 
-    /** The main work to be done.
-     *  If there are queries, get a unicast enabled UP, and send each Query to
-     *  it.  Then sleep and try some more later...
+    /** 
+     * The main work to be done.
+     * If there are queries, get a unicast enabled UP, and send each Query to
+     * it.  Then sleep and try some more later...
      */
     private void queryLoop() {
         UDPService udpService = UDPService.instance();
@@ -197,9 +205,11 @@ public final class QueryUnicaster {
         }
     }
 
-    /** A quick purging of query GUIDS from the _queries Map.  The
-     *  queryLoop uses this to so it doesn't have to hold the _queries
-     *  lock for too long.
+ 
+    /** 
+     * A quick purging of query GUIDS from the _queries Map.  The
+     * queryLoop uses this to so it doesn't have to hold the _queries
+     * lock for too long.
      */
     private void purgeGuidsInternal() {
         synchronized (_qGuidsToRemove) {
@@ -224,9 +234,10 @@ public final class QueryUnicaster {
     }
 
 
-    /** @return true if the query was added (maybe false if it existed).
-     *  @param query The Query to add, to start unicasting.
-     *  @param reference The originating connection.  OK if NULL.
+    /** 
+     * @return true if the query was added (maybe false if it existed).
+     * @param query The Query to add, to start unicasting.
+     * @param reference The originating connection.  OK if NULL.
      */
     public boolean addQuery(QueryRequest query, ReplyHandler reference) {
         debug("QueryUnicaster.addQuery(): entered.");
@@ -282,8 +293,9 @@ public final class QueryUnicaster {
         }
     }
 
-    /** Returns whether or not the Endpoint refers to me!  True if it doesn't,
-        false if it does (NOT not me == me).
+    /** 
+     * Returns whether or not the Endpoint refers to me!  True if it doesn't,
+     * false if it does (NOT not me == me).
      */
     private boolean notMe(InetAddress address, int port) {
         boolean retVal = true;
@@ -303,8 +315,9 @@ public final class QueryUnicaster {
         return retVal;
     }
 
-    /** Gets rid of a Query according to ReplyHandler.  
-     *  Use this if a leaf connection dies and you want to stop the query.
+    /** 
+     * Gets rid of a Query according to ReplyHandler.  
+     * Use this if a leaf connection dies and you want to stop the query.
      */
     void purgeQuery(ReplyHandler reference) {
         debug("QueryUnicaster.purgeQuery(RH): entered.");
@@ -321,8 +334,9 @@ public final class QueryUnicaster {
         debug("QueryUnicaster.purgeQuery(RH): returning.");
     }
 
-    /** Gets rid of a Query according to GUID.  Use this if a leaf connection
-     *  dies and you want to stop the query.
+    /** 
+     * Gets rid of a Query according to GUID.  Use this if a leaf connection
+     * dies and you want to stop the query.
      */
     void purgeQuery(GUID queryGUID) {
         debug("QueryUnicaster.purgeQuery(GUID): entered.");
@@ -338,8 +352,9 @@ public final class QueryUnicaster {
     }
 
 
-    /** Add results to a query so we can invalidate it when enough results are
-     *  received.
+    /** 
+     * Add results to a query so we can invalidate it when enough results are
+     * received.
      */
     private void addResults(GUID queryGUID, int numResultsToAdd) {
         synchronized (_queries) {
@@ -411,9 +426,10 @@ public final class QueryUnicaster {
     }
 
 
-    /** Temporary DS that keeps holds Objects and evicts the oldest entry when
-     *  the threshold is reached.
-     *  Handles all synchronization.
+    /** 
+     * Temporary DS that keeps holds Objects and evicts the oldest entry when
+     * the threshold is reached.
+     * Handles all synchronization.
      */ 
     private class FixedSizeList {
         
