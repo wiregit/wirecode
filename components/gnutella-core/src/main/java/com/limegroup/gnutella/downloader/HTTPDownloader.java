@@ -102,7 +102,7 @@ public class HTTPDownloader {
     }
 
     /** 
-     * Initializes this without timeout; same as connect(0).
+     * Initializes this without timeout; same as connect(0). 
      * @see connect(int)
      */
     public void connect() throws IOException {
