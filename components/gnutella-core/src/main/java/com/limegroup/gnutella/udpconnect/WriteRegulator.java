@@ -162,7 +162,7 @@ public class WriteRegulator {
             maxRTT      = ((lowRTT*7) / 5);  
         } else {
             // Capacity doesn't seem to be limited so only kick in if extreme
-            maxRTT      = ((lowRTT*15) / 5);
+            maxRTT      = ((lowRTT*25) / 5);
         }
 
         // We want at least 2 round trips per full window time
