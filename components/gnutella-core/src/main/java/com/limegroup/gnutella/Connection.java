@@ -351,8 +351,7 @@ public class Connection {
      */
     public void initialize(int timeout) 
 		throws IOException, NoGnutellaOkException, BadHandshakeException {
-        String expectString;
- 
+
         if(isOutgoing())
             _socket=Sockets.connect(_host, _port, timeout);
 
