@@ -9,6 +9,12 @@ import java.io.*;
 public class Endpoint implements Cloneable, Serializable{
     String hostname;
     int port;
+
+/**
+* Needed for Network Discovery. Records information regarding wthether the neighbours
+* of this node has been identified or not
+*/
+public boolean processed = false;
     
 public Endpoint(String hostname, int port) {
 	this.hostname=hostname;
