@@ -181,6 +181,11 @@ public final class HandshakeResponse {
 	 * Constant for whether or not this node supports GUESS.
 	 */
 	private final boolean IS_CRAWLER;
+	
+	/**
+	 * Constant for whether or not this node is a LimeWire (or derivative)
+	 */
+	private final boolean IS_LIMEWIRE;
 
     /**
      * Creates a <tt>HandshakeResponse</tt> which defaults the status code and 
@@ -243,6 +248,9 @@ public final class HandshakeResponse {
             isVersionOrHigher(headers, HeaderNames.X_GUESS, 0.1F);
         IS_CRAWLER = 
         	isVersionOrHigher(headers, HeaderNames.CRAWLER, 0.1F);
+        IS_LIMEWIRE =
+            extractStringHeaderValue(headers, HeaderNames.USER_AGENT).
+                toLowerCase().startsWith("limewire");
     }
     
     /**
@@ -666,6 +674,14 @@ public final class HandshakeResponse {
 	public boolean isHighDegreeConnection() {
         return HIGH_DEGREE;
 	}
+	
+	/**
+	 * Returns whether or not we think this connection is from a LimeWire
+	 * or a derivative of LimeWire
+	 */
+	public boolean isLimeWire() {
+	    return IS_LIMEWIRE;
+    }
 
     /**
      * Returns whether or not this is connection passed the headers to be

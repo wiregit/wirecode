@@ -1415,6 +1415,13 @@ public class Connection {
     }
     
     /**
+     * Returns whether or not the remote host is a LimeWire (or derivative)
+     */
+    public boolean isLimeWire() {
+        return _headers.isLimeWire();
+    }
+    
+    /**
      * Returns true if the outgoing stream is deflated.
      *
      * @return true if the outgoing stream is deflated.

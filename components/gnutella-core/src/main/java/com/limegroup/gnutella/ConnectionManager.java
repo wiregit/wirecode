@@ -27,6 +27,26 @@ import com.limegroup.gnutella.filters.IPFilter;
  * in message broadcasting.  For this reason, the code is highly tuned to avoid
  * locking in the getInitializedConnections() methods.  Adding and removing
  * connections is a slower operation.<p>
+ *
+ * LimeWire follows the following connection strategy:<br>
+ * As a leaf, LimeWire will ONLY connect to 'good' Ultrapeers.  The definition
+ * of good is constantly changing.  For a current view of 'good', review
+ * HandshakeResponse.isGoodUltrapeer().  LimeWire leaves will NOT deny
+ * a connection to an ultrapeer even if they've reached their maximum
+ * desired number of connections (currently 4).  This means that if 5
+ * connections resolve simultaneously, the leaf will remain connected to all 5.
+ * <br>
+ * As an Ultrapeer, LimeWire will seek outgoing connections for 5 less than
+ * the number of it's desired peer slots.  This is done so that newcomers
+ * on the network have a better chance of finding an ultrapeer with a slot
+ * open.  LimeWire ultrapeers will allow ANY other ultrapeer to connect to it,
+ * and to ensure that the network does not become too LimeWire-centric, it
+ * reserves 3 slots for non-LimeWire peers.  LimeWire ultrapeers will allow
+ * ANY leaf to connect, so long as there are atleast 15 slots open.  Beyond
+ * that number, LimeWire will only allow 'good' leaves.  To see what consitutes
+ * a good leave, view HandshakeResponse.isGoodLeaf().  To ensure that the
+ * network does not remain too LimeWire-centric, it reserves 3 slots for
+ * non-LimeWire leaves.<p>
  * 
  * ConnectionManager has methods to get up and downstream bandwidth, but it 
  * doesn't quite fit the BandwidthTracker interface.
@@ -50,12 +70,20 @@ public class ConnectionManager {
 	 * advances in search architecture.
 	 */
     public static final int RESERVED_GOOD_LEAF_CONNECTIONS = 
-        UltrapeerSettings.MAX_LEAVES.getValue() - 15;  
- 
-    /** Similar to RESERVED_GOOD_CONNECTIONS, but measures the number of slots
-     *  allowed for bad leaf connections.  A value of zero means that only
-     *  LimeWire's leaves are allowed.  */
-    public static final int ALLOWED_BAD_LEAF_CONNECTIONS = 2;
+        UltrapeerSettings.MAX_LEAVES.getValue() - 15;
+        
+    /**
+     * The number of leaf connections reserved for non LimeWire clients.
+     * This is done to ensure that the network is not solely LimeWire centric.
+     * This number MUST BE LESS THAN RESERVED_GOOD_LEAF_CONNECTIONS.
+     */
+    public static final int RESERVED_NON_LIMEWIRE_LEAVES = 3;
+    
+    /**
+     * The number of ultrapeer connections reserved for non LimeWire clients.
+     * This is done to ensure that the network is not solely LimeWire centric.
+     */
+    public static final int RESERVED_NON_LIMEWIRE_PEERS = 3;
 
     /** The maximum number of ultrapeer endpoints to give out from the host
      *  catcher in X_TRY_ULTRAPEER headers. */
@@ -105,6 +133,10 @@ public class ConnectionManager {
      * INVARIANT: _shieldedConnections is the number of connections
      *   in _initializedConnections for which isClientSupernodeConnection()
      *   is true.
+     * INVARIANT: _nonLimeWireLeaves is the number of connections
+     *   in _initializedClientConnections for which isLimeWire is false
+     * INVARIANT: _nonLimeWirePeers is the number of connections
+     *   in _initializedConnections for which isLimeWire is false
      *
      * LOCKING: _connections, _initializedConnections and
      *   _initializedClientConnections MUST NOT BE MUTATED.  Instead they should
@@ -122,6 +154,8 @@ public class ConnectionManager {
         _initializedClientConnections = new ArrayList();
         
     private volatile int _shieldedConnections = 0;
+    private volatile int _nonLimeWireLeaves = 0;
+    private volatile int _nonLimeWirePeers = 0;
 
     /**
      * For authenticating users
@@ -608,45 +642,62 @@ public class ConnectionManager {
                 return false;
 		} else if (hr.isLeaf() || leaf) {
             // Leaf. As the spec. says, this assumes we are an ultrapeer.
-            // If the leaf supports features we're looking for, accept it
-            // if we have slots.  Otherwise, only accept it if it's a 
-            // trusted vendor and we have slots availble for older clients
-			if(hr.isGoodLeaf()) {
-                return getNumInitializedClientConnections() <
-                    UltrapeerSettings.MAX_LEAVES.getValue();
-			} else {
-				return getNumInitializedClientConnections() <
-					(trustedVendor(hr.getUserAgent()) ?
-					 (UltrapeerSettings.MAX_LEAVES.getValue() - 
-                      RESERVED_GOOD_LEAF_CONNECTIONS) :
-					 ALLOWED_BAD_LEAF_CONNECTIONS);
-			}
-            //return getNumInitializedClientConnections() 
-			//  < (trustedVendor(hr.getUserAgent())
-			//   ? MAX_LEAVES : ALLOWED_BAD_LEAF_CONNECTIONS);
-
+            int leaves = getNumInitializedClientConnections();
+            int nonLimeWireLeaves = _nonLimeWireLeaves;
+            
+            // Reserve RESERVED_NON_LIMEWIRE_LEAVES slots
+            // for non-limewire leaves to ensure that the network
+            // is well connected.
+            if(!hr.isLimeWire()) {
+                if( leaves < MAX_LEAVES &&
+                    nonLimeWireLeaves < RESERVED_NON_LIMEWIRE_LEAVES ) {
+                    return true;
+                }
+            }
+            
+            // Reserve RESERVED_GOOD_LEAF_CONNECTIONS slots to ensure
+            // that the majority of clients on the network are properly
+            // behaved.  We must add the leftover quota of reserved
+            // non-limewire leaves to ensure we reserve the correct amount.
+            if(hr.isGoodLeaf()) {
+                return (leaves + RESERVED_NON_LIMEWIRE_LEAVES - 
+                        nonLimeWireLeaves) < MAX_LEAVES;
+            }            
+            
+            // Otherwise, if:
+            //  It was a LimeWire that was not a 'good leaf' OR
+            //  It was not a LimeWire, not a good leaf, and we didn't have
+            //   the reserve space left it.
+            // Then allow it only if we have enough space for the 'good'
+            // leaves.  (This implicitly will reserve space, if needed,
+            // for non-limewire leaves because the GOOD number is always
+            // larger).
+            return leaves < (MAX_LEAVES - RESERVED_GOOD_LEAF_CONNECTIONS);
+                            
         } else if (hr.isUltrapeer()) {
-            //2. Ultrapeer.  Preference trusted vendors using BearShare's
-            //clumping algorithm (see above).		   
-
-			//if(goodConnection(hr)) {
-				// otherwise, it is a high degree connection, so allow it if we 
-				// need more connections
-				//return connections < ULTRAPEER_CONNECTIONS;
-			//}
-			
-			// USE THIS FOR TESTING DEFLATE IN THE WILD,
-			// TO EVENTUALLY HAVE ALL CONNECTIONS BE DEFLATE-ENABLED.
-			// If this is our last few connections, only allow it if it
-			// accepts deflate-encoding.
-			//if( connections >= ULTRAPEER_CONNECTIONS-6 ) {
-			//    return hr.isDeflateAccepted();
-			//}
-
-			// if it's not a new high-density connection, only allow it if
-			// our number of connections is below the maximum number of old
-			// connections to allow
-			return hasFreeUltrapeerSlots(); 
+            // Note that this code is NEVER CALLED when we are a leaf.
+            // As a leaf, we will allow however many ultrapeers we happen
+            // to connect to.
+            // Thus, we only worry about the case we're connecting to
+            // another ultrapeer (internally or externally generated)
+            
+            int peers = getNumInitializedConnections();
+            int nonLimeWirePeers = _nonLimeWirePeers;
+            
+            // Reserve RESERVED_NON_LIMEWIRE_PEERS slots
+            // for non-limewire peers to ensure that the network
+            // is well connected.
+            if(!hr.isLimeWire()) {
+                if( peers < ULTRAPEER_CONNECTIONS &&
+                    nonLimeWirePeers < RESERVED_NON_LIMEWIRE_PEERS ) {
+                    return true;
+                }
+            }
+            
+            // Otherwise, allow only if we've left enough room for the quota'd
+            // number of non-limewire peers.
+            return (peers + RESERVED_NON_LIMEWIRE_PEERS - nonLimeWirePeers)
+                   < ULTRAPEER_CONNECTIONS;
         }
 		return false;
     }
@@ -721,7 +772,7 @@ public class ConnectionManager {
     public boolean supernodeNeeded() {
         //if more than 90% slots are full, return true         
 		if(getNumInitializedClientConnections() >= 
-           (UltrapeerSettings.MAX_LEAVES.getValue() * 0.9)){
+           (MAX_LEAVES * 0.9)){
             return true;
         } else {
             //else return false
@@ -958,14 +1009,18 @@ public class ConnectionManager {
                 _initializedConnections=newConnections;
                 //maintain invariant
                 if(c.isClientSupernodeConnection())
-                    _shieldedConnections++;                
-            }else{
+                    _shieldedConnections++;
+                if(!c.isLimeWire())
+                    _nonLimeWirePeers++;
+            } else {
                 //REPLACE _initializedClientConnections with the list
                 //_initializedClientConnections+[c]
                 List newConnections
                     =new ArrayList(_initializedClientConnections);
                 newConnections.add(c);
                 _initializedClientConnections=newConnections;
+                if(!c.isLimeWire())
+                    _nonLimeWireLeaves++;                
             }
 	        // do any post-connection initialization that may involve sending.
 	        c.postInit();
@@ -1069,6 +1124,8 @@ public class ConnectionManager {
                 //maintain invariant
                 if(c.isClientSupernodeConnection())
                     _shieldedConnections--;                
+                if(!c.isLimeWire())
+                    _nonLimeWirePeers--;
             }
         }else{
             //check in _initializedClientConnections
@@ -1080,6 +1137,8 @@ public class ConnectionManager {
                 newConnections.addAll(_initializedClientConnections);
                 newConnections.remove(c);
                 _initializedClientConnections=newConnections;
+                if(!c.isLimeWire())
+                    _nonLimeWireLeaves--;
             }
         }        
         
@@ -1175,7 +1234,8 @@ public class ConnectionManager {
         // 2 times the amount of connections.
         else {
             multiple = 2;
-            neededConnections -= 5;
+            neededConnections -= 5 + RESERVED_NON_LIMEWIRE_PEERS;
+            
         }
             
         int need = Math.min(20, multiple*neededConnections) 
