@@ -4,6 +4,7 @@ import com.limegroup.gnutella.stubs.*;
 import com.limegroup.gnutella.xml.*;
 import com.limegroup.gnutella.util.*;
 import com.limegroup.gnutella.security.*;
+import com.limegroup.gnutella.settings.*;
 import java.io.*;
 import java.util.*;
 
@@ -15,13 +16,40 @@ import java.util.*;
  * <tt>ActivityCallbackStub</tt>.  Otherwise, all classes are 
  * constructed as they normally would be in the client.
  */
-public final class Backend {
+public class Backend {
 
-	private final RouterService ROUTER_SERVICE;
+	/**
+	 * The <tt>RouterService</tt> instance the constructs the backend.
+	 */
+	private RouterService ROUTER_SERVICE;
 
 	private final File TEMP_DIR = new File("temp");
 
 	private final Timer TIMER = new Timer();
+
+	/**
+	 * The number of milliseconds to wait before automatically shutting off.
+	 */
+	private final int TIMEOUT;
+
+	/**
+	 * The <tt>MessageRouter</tt> instance to use.
+	 */
+	private final MessageRouter ROUTER;
+	
+	/**
+	 * The <tt>ActivityCallback</tt> to use.
+	 */
+	private final ActivityCallback CALLBACK;
+
+	/**
+	 * The files that should be copied to a temporary directory on startup and
+	 * returned to their original locations on shutdown.
+	 */
+	private final File[] FILES_TO_SAVE = {
+		new File(CommonUtils.getUserSettingsDir(), "gnutella.net"),
+		new File(CommonUtils.getUserSettingsDir(), "limewire.props"),
+	};
 
 
 	public static Backend createBackend(ActivityCallback callback, int timeout){
@@ -62,6 +90,40 @@ public final class Backend {
 	public static Backend createLongLivedBackend(MessageRouter router) {
 		return new Backend(new ActivityCallbackStub(), router, 0);
 	}
+
+	/**
+	 * Creates a new <tt>Backend</tt> that will only accept connections
+	 * from the local machine.
+	 *
+	 * @param timeout the number of milliseconds to wait before automatically
+	 *  shutting down
+	 */
+	public static Backend createLocalBackend(int timeout) {
+		return new LocalBackend(new ActivityCallbackStub(), null, timeout);
+	}
+
+	/**
+	 * Creates a new <tt>Backend</tt> that will only accept connections
+	 * from the local machine.
+	 *
+	 * @param callback the <tt>ActivityCallback</tt> instance to use
+	 */
+	public static Backend createLocalBackend(ActivityCallback callback) {
+		return new LocalBackend(callback, null, 0);
+	}
+
+	/**
+	 * Creates a new <tt>Backend</tt> that will only accept connections
+	 * from the local machine.
+	 *
+	 * @param callback the <tt>ActivityCallback</tt> instance to use
+	 * @param router the <tt>MessageRouter</tt> to use
+	 */
+	public static Backend createLocalBackend(ActivityCallback callback, 
+											 MessageRouter router) {
+		return new LocalBackend(callback, router, 0);
+	}
+											 
     
 
     private Backend(ActivityCallback callback, int timeout) {
@@ -75,22 +137,46 @@ public final class Backend {
      * In that case, be sure to call shutdown() yourself!!  Any positive timeout
      * will cause the BackEnd to be shutoff in timeout milliseconds.
 	 */
-	private Backend(ActivityCallback callback, MessageRouter router,
-                    int timeout) {
+	protected Backend(ActivityCallback callback, MessageRouter router,
+					  int timeout) {
 		System.out.println("STARTING BACKEND"); 
-		File gnutellaDotNet = new File("gnutella.net");
-		File propsFile = new File("limewire.props");
-		
-		// remove hosts file to get rid of variable conditions across
-		// test runs
-		gnutellaDotNet.delete();
+		makeSharedDirectory();
+		copySettingsFiles();
+		setStandardSettings();
+		CALLBACK = callback;
+		ROUTER = router;
+		TIMEOUT = timeout;
+	}
 
-		// remove props file to get rid of variable settings
-		propsFile.delete();
+	/**
+	 * Starts all backend threads.
+	 */
+	public void start() {
+        if (ROUTER == null)
+            ROUTER_SERVICE = new RouterService(CALLBACK);
+        else
+            ROUTER_SERVICE = new RouterService(CALLBACK, ROUTER);
+        ROUTER_SERVICE.start();
+		ROUTER_SERVICE.connect();
+		try {
+			// sleep to let the file manager initialize
+			Thread.sleep(2000);
+		} catch(InterruptedException e) {
+		}
+		System.out.println("BACKEND LISTENING ON PORT: "+RouterService.getPort()); 
+        if (TIMEOUT > 0) {
+            TIMER.schedule(new TimerTask() {
+                    public void run() {
+                        shutdown("AUTOMATED");
+                    }
+                }, TIMEOUT);
+        }		
+	}
 
-		SettingsManager settings = SettingsManager.instance();
-		settings.setPort(6346);
-		settings.setKeepAlive(1);
+	/**
+	 * Creates a temporary shared directory for testing purposes.
+	 */
+	protected void makeSharedDirectory() {
 		TEMP_DIR.mkdirs();
 		TEMP_DIR.deleteOnExit();
 		File coreDir = new File("com/limegroup/gnutella");				
@@ -99,30 +185,46 @@ public final class Backend {
 		for(int i=0; i<files.length; i++) {
 			if(!files[i].isFile()) continue;
 			copyResourceFile(files[i]);
-		}
+		}		
+	}
 
-
+	/**
+	 * Sets the standard settings for a test backend, such as the ports, the
+	 * number of connections to maintain, etc.
+	 */
+	protected void setStandardSettings() {
+		SettingsManager settings = SettingsManager.instance();
+		settings.setPort(6346);
+		//settings.setKeepAlive(1);
 		settings.setDirectories(new File[] {TEMP_DIR});
 		settings.setExtensions("java");
-		settings.setGuessEnabled(true);		
+		ConnectionSettings.KEEP_ALIVE.setValue(1);
+		SearchSettings.GUESS_ENABLED.setValue(true);
+		UltrapeerSettings.DISABLE_ULTRAPEER_MODE.setValue(false);
+		UltrapeerSettings.EVER_ULTRAPEER_CAPABLE.setValue(true);
+		UltrapeerSettings.FORCE_ULTRAPEER_MODE.setValue(true);
+		ConnectionSettings.EVER_ACCEPTED_INCOMING.setValue(true);
+		ConnectionSettings.CONNECT_ON_STARTUP.setValue(false);
+	}
 
-        if (router == null)
-            ROUTER_SERVICE = new RouterService(callback);
-        else
-            ROUTER_SERVICE = new RouterService(callback, router);
-        ROUTER_SERVICE.start();
-		try {
-			// sleep to let the file manager initialize
-			Thread.sleep(2000);
-		} catch(InterruptedException e) {
+	
+
+	protected void copySettingsFiles() {
+		for(int i=0; i<FILES_TO_SAVE.length; i++) {
+			File curDirFile = new File(FILES_TO_SAVE[i].getName());
+			curDirFile.delete();
+			FILES_TO_SAVE[i].renameTo(curDirFile);
 		}
-        if (timeout > 0) {
-            TIMER.schedule(new TimerTask() {
-                    public void run() {
-                        shutdown("AUTOMATED");
-                    }
-                }, timeout);
-        }
+	}
+
+
+	protected void restoreSettingsFiles() {
+		for(int i=0; i<FILES_TO_SAVE.length; i++) {
+			File curDirFile = new File(FILES_TO_SAVE[i].getName());
+			FILES_TO_SAVE[i].delete();
+			curDirFile.renameTo(FILES_TO_SAVE[i]);
+			curDirFile.delete();
+		}		
 	}
 
 	/**
@@ -141,10 +243,7 @@ public final class Backend {
 	public void shutdown(String msg) {
 		System.out.println("BACKEND SHUTDOWN: "+msg); 
 		ROUTER_SERVICE.shutdown();
-		File propsFile = new File("limewire.props");
-		File gnutellaDotNet = new File("gnutella.net");		
-		propsFile.delete();
-		gnutellaDotNet.delete();	
+		restoreSettingsFiles();
 		System.exit(0);
 	}
 
@@ -194,7 +293,8 @@ public final class Backend {
 	 * run off of.
 	 */
 	public static void main(String[] args) {
-		Backend.createBackend(200*1000);
+		Backend be = Backend.createLocalBackend(Integer.parseInt(args[0]));
+		be.start();
 	}
 }
 
