@@ -254,6 +254,11 @@ public class AltLocDigest implements BloomFilter {
         return parseDigest(digest,0,digest.length);
     }
     
+    
+    public int getElementSize() {
+        return _elementSize;
+    }
+    
     public void and(BloomFilter other) {
         AltLocDigest digest = (AltLocDigest) other;
         _values.and(digest._values);

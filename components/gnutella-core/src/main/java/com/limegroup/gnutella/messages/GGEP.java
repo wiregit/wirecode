@@ -441,8 +441,18 @@ public class GGEP {
      * Adds a key which is already compressed
      */
     public void putAndCompress(String key, byte[] value) throws IllegalArgumentException {
+        validateKey(key);
         value = IOUtils.deflate(value);
+        validateValue(value);
         _props.put(key, new CompressedData(value));
+    }
+    
+    /**
+     * @return whether the data we retrieve with the given key will be compressed. 
+     */
+    public boolean isCompressedData(String key) {
+        Object obj = _props.get(key);
+        return obj != null && obj instanceof CompressedData;
     }
 
     /** 

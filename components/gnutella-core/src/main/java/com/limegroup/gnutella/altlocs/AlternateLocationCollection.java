@@ -46,6 +46,12 @@ public final class AlternateLocationCollection
      */
 	private final URN SHA1;
 	
+	/**
+	 * cached references for the last clean digests of this collection.
+	 * LOCKING: this
+	 */
+	private AltLocDigest _digest, _pushDigest;
+	
     /**
      * Factory constructor for creating a new 
      * <tt>AlternateLocationCollection</tt> for this <tt>URN</tt>.
@@ -155,6 +161,13 @@ public final class AlternateLocationCollection
                 LOCATIONS.add(alt); //add incremented version
 
             }
+            
+            // also add to the filter(s)
+            if (_digest != null && al instanceof DirectAltLoc)
+                _digest.add(al);
+            else if (_pushDigest != null && al instanceof PushAltLoc)
+                _pushDigest.add(al);
+                
             return ret;
         }
     }
@@ -170,6 +183,13 @@ public final class AlternateLocationCollection
 			return false; //it cannot be in this list if it has a different SHA1
 		
 		synchronized(this) {
+		    
+		    // purge the corresponding digest since we can't remove stuff
+		    if (al instanceof DirectAltLoc)
+		        _digest = null;
+		    else 
+		        _pushDigest = null;
+		    
             AlternateLocation loc = (AlternateLocation)LOCATIONS.get(al);
             if(loc==null) //it's not in locations, cannot remove
                 return false;
@@ -419,50 +439,44 @@ public final class AlternateLocationCollection
         return getDigest(AltLocDigest.DEFAULT_ELEMENT_SIZE);
     }
     
-    public AltLocDigest getDigest(int elementSize) {
+    public synchronized AltLocDigest getDigest(int elementSize) {
+        if (_digest != null && _digest.getElementSize() == elementSize)
+            return _digest;
+        
         AltLocDigest digest = new AltLocDigest();
         digest.setElementSize(elementSize);
-        FixedSizeSortedSet clone;
     	
-    	
-    	synchronized(this) {
-    		clone =(FixedSizeSortedSet)LOCATIONS.clone();
-    	}
-    	
-    	for (Iterator iter = clone.iterator();iter.hasNext();) {
+    	for (Iterator iter = LOCATIONS.iterator();iter.hasNext();) {
     	    Object o = iter.next();
     		if (!(o instanceof DirectAltLoc))
     			continue;
     		
-    		DirectAltLoc current = (DirectAltLoc)o;
-    		digest.add(current);
+    		digest.add(o);
     	}
     	
-    	return digest;
+    	_digest = digest;
+    	return _digest;
     }
     
     public AltLocDigest getPushDigest() {
         return getPushDigest(AltLocDigest.DEFAULT_ELEMENT_SIZE);
     }
     
-    public AltLocDigest getPushDigest(int elementSize) {
+    public synchronized AltLocDigest getPushDigest(int elementSize) {
+        if (_pushDigest != null && _pushDigest.getElementSize() == elementSize)
+            return _pushDigest;
+        
         AltLocDigest digest = new AltLocDigest();
         digest.setElementSize(elementSize);
-        FixedSizeSortedSet clone;
     	
-    	synchronized(this) {
-    		clone =(FixedSizeSortedSet)LOCATIONS.clone();
-    	}
-    	
-    	for (Iterator iter = clone.iterator();iter.hasNext();) {
+    	for (Iterator iter = LOCATIONS.iterator();iter.hasNext();) {
     	    Object o = iter.next();
     		if (!(o instanceof PushAltLoc))
     			continue;
     		
-    		PushAltLoc current = (PushAltLoc)o;
-    		digest.add(current);
+    		digest.add(o);
     	}
-    	
-    	return digest;
+    	_pushDigest = digest;
+    	return _pushDigest;
     }
 }
