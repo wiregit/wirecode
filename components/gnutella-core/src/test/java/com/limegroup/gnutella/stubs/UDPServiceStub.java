@@ -87,8 +87,8 @@ public final class UDPServiceStub extends UDPService {
 	/**
      *  Create receiver for each simulated incoming connection
 	 */
-	public void addReceiver(int toPort, int fromPort, int delay) {
-		Receiver r = new Receiver(toPort, fromPort, delay);
+	public void addReceiver(int toPort, int fromPort, int delay, int pctFlaky) {
+		Receiver r = new Receiver(toPort, fromPort, delay, pctFlaky);
 		synchronized(RECEIVER_LIST) {
 			RECEIVER_LIST.add(r);
 		}
@@ -108,14 +108,18 @@ public final class UDPServiceStub extends UDPService {
         private final int       _toPort;
         private final int       _fromPort;
         private final int       _delay;
+        private final int       _pctFlaky;
 		private MessageRouter   _router;
+        private Random          _random;
         
-        Receiver(int toPort, int fromPort, int delay) {
+        Receiver(int toPort, int fromPort, int delay, int pctFlaky) {
             _messages = new ArrayList();
             _toPort   = toPort;
             _fromPort = fromPort;
             _delay    = delay;
+            _pctFlaky = pctFlaky;
 			_router   = RouterService.getMessageRouter();
+            _random   = new Random();
         	setDaemon(true);
 			start();
         }
@@ -146,10 +150,18 @@ public final class UDPServiceStub extends UDPService {
 
 				time = System.currentTimeMillis();
 			    synchronized(_messages) {
-					if (_messages.size() > 0)
+                    msg = null;
+					while (_messages.size() > 0) {
 						msg = (MessageWrapper) _messages.get(0);	
-					else
-						msg = null;
+
+                        // Drop message if in flaky range
+                        int num = _random.nextInt(100);
+                        if (num < _pctFlaky) {
+                            msg = null;  
+                        } else {
+                            break;
+                        }
+                    }
 					if (msg != null ) {
 						waitTime = msg._scheduledTime - time;
 					} else {
