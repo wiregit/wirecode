@@ -107,7 +107,7 @@ public class I18NConvert {
     	for(int i = 0; i < len; i++) {
     	    c = nfkd.charAt(i);
     	    if(!_excluded.get(c)) {
-    		lower = (String)_cMap.get(String.valueOf(c));
+                lower = (String)_cMap.get(String.valueOf(c));
     		if(lower != null)
     		    buf.append(lower);
     		else
