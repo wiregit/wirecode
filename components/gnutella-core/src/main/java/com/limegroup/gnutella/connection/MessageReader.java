@@ -2,7 +2,6 @@ package com.limegroup.gnutella.connection;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.nio.channels.SelectableChannel;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.SocketChannel;
 
@@ -142,7 +141,6 @@ public final class MessageReader {
         
         // if there's more header to read, return to read it on the next pass
         if(!readHeader(channel)) {
-            System.out.println("MessageReader::createMessage::read only part");
             return null;
         }
         
@@ -150,11 +148,7 @@ public final class MessageReader {
         // return the message, or it will not read all of the payload, in which
         // case it will return null, leaving us to keep reading the rest on the
         // next pass.
-        Message msg = readPayload(key, network);
-        if(msg == null) {
-            System.out.println("MessageReader::createMessage::read only part of payload");
-        }
-        return msg;
+        return readPayload(key, network);
     }
 
     /**
@@ -167,7 +161,6 @@ public final class MessageReader {
      *  occurred during reading
      */
     private boolean readHeader(SocketChannel channel) throws IOException {
-        System.out.println("MessageReader::readHeader");
         if(!HEADER.hasRemaining()) return true;
         
         if(channel.read(HEADER) < 0) {
@@ -192,7 +185,6 @@ public final class MessageReader {
        
     private Message readPayload(SelectionKey key, int network) 
         throws IOException, BadPacketException {
-        System.out.println("MessageReader::readPayload");
         SocketChannel channel = (SocketChannel)key.channel();
         // if we've made it this far, the entire header has been
         // successfully read, so read the payload
