@@ -293,7 +293,11 @@ public final class RouteTableTest extends BaseTestCase {
             return false;
         }
 
-        public boolean isGoodConnection() {
+        public boolean isGoodUltrapeer() {
+            return true;
+        }
+
+        public boolean isGoodLeaf() {
             return true;
         }
     }
