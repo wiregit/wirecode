@@ -466,12 +466,18 @@ public final class NIODispatcher implements Runnable {
 		// try to make sure the channel's open instead of just
 		// hammering our way into ClosedChannelExceptions -- 
 		// more efficient and cleaner
-		if(channel.isOpen()) {
-			try {
-                channel.register(SELECTOR, ops, conn);
-            } catch (ClosedChannelException e) {
-                // no problem -- just don't register it
+		if(!channel.isOpen()) return;
+        
+		try {
+            channel.register(SELECTOR, ops, conn);
+            if((ops & SelectionKey.OP_WRITE) != 0)  {
+                conn.setWriteRegistered(true);
+            } else  {
+                conn.setWriteRegistered(false);
             }
-		}
+        } catch (ClosedChannelException e) {
+            // no problem -- just don't register it
+        }
+
 	}
 }
