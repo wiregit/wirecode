@@ -30,7 +30,7 @@ public class MessageTestUtils {
         GGEP ggep = newGGEP(20, true, true);
         
         PingReply pr = PingReply.create(GUID.makeGuid(), (byte)1, 6346, 
-            new byte[]{1,1,1,1}, 10, 10, false, ggep);
+            new byte[]{1,1,1,1}, 10, 10, true, ggep);
         return pr;
     }
 
