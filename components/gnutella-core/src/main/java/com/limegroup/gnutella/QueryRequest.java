@@ -131,8 +131,8 @@ public class QueryRequest extends Message implements Serializable{
             // set the firewall bit if i'm firewalled
             if (isFirewalled)
                 minSp |= 0x01;
-            // specify if i want rich results....
-            if ((richQuery != null) && !richQuery.equals(""))
+            // LimeWire's ALWAYS want rich results....
+            if (true)
                 minSp |= 0x02;
         }
         this.minSpeed=minSp;
