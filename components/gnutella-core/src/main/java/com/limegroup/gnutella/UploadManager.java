@@ -865,11 +865,10 @@ public final class UploadManager implements BandwidthTracker {
 	 *  <tt>false</tt> otherwise
 	 */
 	private boolean isMalformedURNGet(final String requestLine) {
-	    // we want to move to the double //
-	    int slashes = requestLine.indexOf("//");
-	    
-	    if ( slashes != -1 ) {
-	        return isURNGet(requestLine.substring(slashes+1));
+	    // the malformed request will always start with /get/0//
+	    if ( requestLine.startsWith("/get/0//") ) {
+	        // the valid request starts with the last slash of the malformation
+	        return isURNGet(requestLine.substring(7));
         }
 	    
 	    return false;
@@ -973,8 +972,8 @@ public final class UploadManager implements BandwidthTracker {
 	 */
 	private HttpRequestLine parseMalformedURNGet(final String requestLine) 
 		throws IOException {
-        int slashes = requestLine.indexOf("//");
-		return parseURNGet(requestLine.substring(slashes+1));
+		// this assumes the malformation is a /get/0/ before the /uri-res..
+		return parseURNGet(requestLine.substring(7));
 	}
 	
 
