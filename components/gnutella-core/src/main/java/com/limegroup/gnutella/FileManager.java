@@ -63,6 +63,12 @@ public class FileManager {
      * canonicalized files, sorted by a FileComparator. */
     private Map /* of File -> IntSet */ _sharedDirectories;
 
+	/**
+	 * Constant member for the <tt>FileDescLoader</tt> instance that handles
+	 * the creation and loading of <tt>FileDesc</tt> instances.
+	 */
+	private final FileDescLoader _fileDescLoader;
+
     /** The thread responsisble for adding contents of _sharedDirectories to
      *  this, or null if no load has yet been triggered.  This is necessary
      *  because indexing files can be slow.  Interrupt this thread to stop the
@@ -110,6 +116,7 @@ public class FileManager {
         _urnIndex = new Hashtable();
         _extensions = new TreeSet(new StringComparator());
         _sharedDirectories = new TreeMap(new FileComparator());
+		_fileDescLoader = new FileDescLoader(this);
     }
 
     /** Asynchronously loads all files by calling loadSettings.  Sets this'
@@ -615,15 +622,12 @@ public class FileManager {
         if (!hasExtension(file.getName())) {
 			return false;
 		}
-		String path = file.getAbsolutePath();
 		long fileLength = file.length();  
 		if (fileLength>Integer.MAX_VALUE || fileLength<0)
 			return false;
 		_size += fileLength;
 		int fileIndex = _files.size();
-		long modTime = file.lastModified();
-		HashSet urns = UrnCache.instance().getUrns(path, modTime);
-		FileDesc fileDesc = new FileDesc(file, fileIndex, urns);
+		FileDesc fileDesc = _fileDescLoader.createFileDesc(file, fileIndex);
 		_files.add(fileDesc);
 		_numFiles++;
 		
@@ -638,6 +642,7 @@ public class FileManager {
 		if (_callback!=null)
 			_callback.addSharedFile(file, parent);
 		
+		String path = file.getAbsolutePath();
 		//Index the filename.  For each keyword...
 		String[] keywords=StringUtils.split(path, DELIMETERS);
 		for (int i=0; i<keywords.length; i++) {
@@ -654,11 +659,7 @@ public class FileManager {
 		}
 		
 		// Ensure file can be found by URN lookups
-		updateUrnIndex(fileDesc);
-		if(fileDesc.shouldCalculateUrns()) {
-			// more URNs available if we can wait; background it
-			backgroundCalculateAndUpdate(fileDesc);
-		}
+		this.updateUrnIndex(fileDesc);
 		
 		return true;
     }
@@ -668,7 +669,7 @@ public class FileManager {
      * @effects enters the given FileDesc into the _urnIndex under all its 
      * reported URNs
      */
-    private synchronized void updateUrnIndex(FileDesc fileDesc) {
+    public synchronized void updateUrnIndex(FileDesc fileDesc) {
         if (fileDesc._urns != null) {
             Iterator iter = fileDesc._urns.iterator();
             while (iter.hasNext()) {
@@ -683,35 +684,6 @@ public class FileManager {
         }
     }
     
-    //
-    // Support for calculation of hash urns in the background
-    // 
-    private Thread backgrounder;
-    private Vector pendingFileDescs = new Vector() /* of FileDesc */;
-    private void backgroundCalculateAndUpdate(FileDesc fileDesc) {
-        // add to the queue
-        pendingFileDescs.add(fileDesc);
-        // spwan thread if it isn't already working
-        if(backgrounder==null || !backgrounder.isAlive()) {
-            backgrounder = new Thread() 
-                {
-                    public void run() {
-                        // keep chugging as long as queue is filled
-                        while(!pendingFileDescs.isEmpty()) {
-                            FileDesc fd = (FileDesc)pendingFileDescs.elementAt(0);
-                            pendingFileDescs.removeElementAt(0);
-                            fd.calculateUrns();
-							UrnCache.instance().
-							    persistUrns(fd._path,fd._modTime,fd._urns);
-                            updateUrnIndex(fd);
-                        }
-                    }
-                };
-            backgrounder.setPriority(Thread.currentThread().getPriority()-1);
-            backgrounder.start();
-        }
-
-    }
 
     /**
      * @modifies this
@@ -1045,7 +1017,8 @@ public class FileManager {
                     } else {
                         // was invalid; consider rehashing
                         if(fd.shouldCalculateUrns()) {
-                            backgroundCalculateAndUpdate(fd);
+							//backgroundCalculateAndUpdate(fd);
+							_fileDescLoader.loadFileDesc(fd);
                         }
                     }
                 }
@@ -1054,17 +1027,6 @@ public class FileManager {
         return ret;
     }
     
-    /**
-     * Opens an input stream to the resource specified by the passed
-     * file descriptor
-     */
-    public InputStream getInputStream(FileDesc fdesc) throws IOException
-    {
-        // get the fileInputStream
-		String path = fdesc._path;
-		File myFile = new File(path);
-		return new FileInputStream(myFile);
-    }
 
 
     ///////////////////////////////////// Testing //////////////////////////////
