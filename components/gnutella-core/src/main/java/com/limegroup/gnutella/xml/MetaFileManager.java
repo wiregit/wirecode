@@ -42,7 +42,7 @@ public class MetaFileManager extends FileManager {
     private void addAudioMetadata(Response[] responses){
         if (responses == null)//responses may be null
             return;
-        String audioURI = "http://www.limewire.com/schemas/audios.xsd";
+        String audioURI = "http://www.limewire.com/schemas/audio.xsd";
         SchemaReplyCollectionMapper map=SchemaReplyCollectionMapper.instance();
         LimeXMLReplyCollection coll = map.getReplyCollection(audioURI);
         if(coll == null)//if there schemas are not loaded
@@ -106,7 +106,7 @@ public class MetaFileManager extends FileManager {
                     i++){
                     //One ReplyCollection per schema
                     String s = LimeXMLSchema.getDisplayString(schemas[i]);
-                    if (s.equalsIgnoreCase("audios")){
+                    if (s.equalsIgnoreCase("audio")){
                         //Map nameToFile = getAllMP3FilesRecursive();
                         collection=new LimeXMLReplyCollection
                         (schemas[i],mp3FileToHash);

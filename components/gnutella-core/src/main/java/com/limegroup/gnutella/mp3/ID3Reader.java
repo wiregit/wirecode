@@ -12,7 +12,7 @@ import com.limegroup.gnutella.xml.*;
  */
 public final class ID3Reader {
     private static final String schemaURI = 
-         "http://www.limewire.com/schemas/audios.xsd";
+         "http://www.limewire.com/schemas/audio.xsd";
 
     /**
      * Attempts to read an ID3 tag from the specified file.

@@ -105,7 +105,7 @@ public class Response {
         }
         if(bearShare1 || bearShare2 || gnotella){//some metadata we understand
             this.metadata = "<audios xsi:noNamespaceSchemaLocation="+
-                 "\"http://www.limewire.com/schemas/audios.xsd\">"+
+                 "\"http://www.limewire.com/schemas/audio.xsd\">"+
                  "<audio title=\""+name+"\" bitrate=\""+bitrate+
                  "\" length=\""+length+"\">"+
                  "</audio></audios>";
