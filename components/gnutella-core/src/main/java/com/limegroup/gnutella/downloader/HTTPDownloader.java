@@ -76,6 +76,7 @@ public class HTTPDownloader implements BandwidthTracker {
 	
 	private boolean _chatEnabled = false; // for now
     private boolean _browseEnabled = false; // also for now
+    private String _server = "";
 
     /** For implementing the BandwidthTracker interface. */
     private BandwidthTrackerImpl bandwidthTracker=new BandwidthTrackerImpl();
@@ -317,7 +318,10 @@ public class HTTPDownloader implements BandwidthTracker {
 			}
             else if(HTTPHeaderName.QUEUE.matchesStartOfString(str)) {
                 parseQueueHeaders(str, refQueueInfo);
-            }                
+            }
+            else if (HTTPHeaderName.SERVER.matchesStartOfString(str)) {
+                _server = readServer(str);
+            }
         }
 
 
@@ -384,6 +388,19 @@ public class HTTPDownloader implements BandwidthTracker {
 			}
 		}
 	}
+	
+	/**
+	 * Reads the Server header.  All information after the ':' is considered
+	 * to be the Server.
+	 */
+	public static String readServer(final String serverHeader) {
+	    int colon = serverHeader.indexOf(':');
+	    // if it existed & wasn't at the end...
+	    if ( colon != -1 && colon < serverHeader.length()-1 )
+	        return serverHeader.substring(colon+1).trim();
+        else
+            return "";
+    }
 
     /**
      * Returns the HTTP response code from the given string, throwing
@@ -642,6 +659,8 @@ public class HTTPDownloader implements BandwidthTracker {
 	public boolean browseEnabled() {
 		return _browseEnabled;
 	}
+	
+	public String getVendor() { return _server; }
 
 	public long getIndex() {return _index;}
   	public String getFileName() {return _filename;}

@@ -2422,6 +2422,15 @@ public class ManagedDownloader implements Downloader, Serializable {
         }
         return buf.iterator();
     }
+    
+    public synchronized String getVendor() {
+        if ( dloaders.size() > 0 ) {
+            HTTPDownloader dl = (HTTPDownloader)dloaders.get(0);
+            return dl.getVendor();
+        } else {
+            return "";
+        }   
+    }
 
     public synchronized int getRetriesWaiting() {
         return retriesWaiting;

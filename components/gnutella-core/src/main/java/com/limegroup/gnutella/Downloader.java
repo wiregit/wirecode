@@ -105,6 +105,11 @@ public interface Downloader extends BandwidthTracker {
      * addresses.  Result meaningful only in the DOWNLOADING state.
      */
     public Iterator /* of Endpoint */ getHosts();
+    
+    /**
+     * Returns the vendor of the last downloading host.
+     */
+    public String getVendor();
 	
 	/**
 	 * Returns a chat-enabled <tt>Endpoint</tt> instance for this
