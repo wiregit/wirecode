@@ -326,6 +326,7 @@ public abstract class MessageRouter {
 			handleUDPPingRequestPossibleDuplicate((PingRequest)msg, 
 												  handler, datagram);
 		} else if(msg instanceof PingReply) {
+            System.out.println("RECEIVED UDP PONG"); 
 			if(RECORD_STATS)
 				ReceivedMessageStatHandler.UDP_PING_REPLIES.addMessage(msg);
             handleUDPPingReply((PingReply)msg, handler, address, port);
@@ -1393,7 +1394,7 @@ public abstract class MessageRouter {
                                    ReplyHandler handler) {
         //update hostcatcher (even if the reply isn't for me)
         boolean newAddress = 
-		    RouterService.getHostCatcher().add(reply, handler);
+		    RouterService.getHostCatcher().add(reply);
 
         if(newAddress && 
            (handler.supportsPongCaching() || 
