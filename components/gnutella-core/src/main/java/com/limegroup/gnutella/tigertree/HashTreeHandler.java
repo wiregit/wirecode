@@ -34,6 +34,8 @@ import org.apache.commons.logging.LogFactory;
  */
 class HashTreeHandler {
     private static final Log LOG = LogFactory.getLog(HashTreeHandler.class);
+    
+    private static final String OUTPUT_TYPE = "application/dime";
 
     private static final String SERIALIZED_TREE_TYPE =
         "http://open-content.net/spec/thex/breadthfirst";
@@ -111,6 +113,14 @@ class HashTreeHandler {
     public int getLength() {
         return GENERATOR.getLength();
     }
+
+    /**
+     * Determines the mime type of the output.
+     */
+    public String getType() {
+        return OUTPUT_TYPE;
+    }
+
     /**
      * A simple XML DIMERecord.
      */

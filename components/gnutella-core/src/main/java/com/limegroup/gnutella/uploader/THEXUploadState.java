@@ -79,7 +79,12 @@ public class THEXUploadState implements HTTPMessage {
         HTTPUtils.writeHeader(
             HTTPHeaderName.CONTENT_LENGTH,
             TREE.getOutputLength(),
-            os);        
+            os);
+            
+        HTTPUtils.writeHeader(
+            HTTPHeaderName.CONTENT_TYPE,
+            TREE.getOutputType(),
+            os);
         
         os.write("\r\n");
         

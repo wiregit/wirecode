@@ -307,7 +307,14 @@ public final class HashTree implements HTTPHeaderValue, Serializable {
      */
     public int getOutputLength() {
         return getTreeWriter().getLength();
-    }        
+    }
+    
+    /**
+     * Determines the type of the output.
+     */
+    public String getOutputType() {
+        return getTreeWriter().getType();
+    }
 
     /**
      * Calculates which depth we want to use for the HashTree. For small files
@@ -431,17 +438,16 @@ public final class HashTree implements HTTPHeaderValue, Serializable {
             }
             // node hashed, add the hash to our internal List.
             ret.add(tt.digest());
+            
+            // verify sanity of the hashing.
             if(offset == fileSize) {
-                // if read isn't already -1, assert that the next read will
-                // be -1.
-                if(read != -1) {
-                    read = is.read();
-                    if(read != -1) {
-                        LOG.warn("More data than fileSize!");
-                        throw new IOException("unknown file size.");
-                    }
+                // if read isn't already -1, the next read MUST be -1.
+                // it wouldn't already be -1 if the fileSize was a multiple
+                // of BLOCK_SIZE * 128
+                if(read != -1 && is.read() != -1) {
+                    LOG.warn("More data than fileSize!");
+                    throw new IOException("unknown file size.");
                 }
-                break;
             } else if(read == -1 && offset != fileSize) {
                 if(LOG.isWarnEnabled()) {
                     LOG.warn("couldn't hash whole file. " +

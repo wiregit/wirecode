@@ -22,7 +22,7 @@ class HashTreeNodeManager {
      *
      * This will use up MAX_NODES * 24 + overhead bytes of memory.
      */
-    private static final int MAX_NODES = 2000;    
+    private static final int MAX_NODES = 500;    
     
     /**
      * Mapping of Tree to all nodes in that tree.

@@ -12,19 +12,21 @@ public final class CountingOutputStream extends FilterOutputStream {
     private int _count = 0;
     private boolean _isCounting = true;
     
-    public CountingOutputStream (final OutputStream in) {
-        super(in);
+    public CountingOutputStream (final OutputStream out) {
+        super(out);
     }
     
     public void write(int b) throws IOException {
-        super.write(b);
+        out.write(b);
         if(_isCounting)
             _count++;
         return;
     }
     
     public void write(byte[] b, int off, int len) throws IOException {
-        super.write(b, off, len);
+        // do NOT call super.write(b, off, len) as that will call
+        // write(b) and double-count each byte.
+        out.write(b, off, len);
         if(_isCounting)
             _count += len - off;
     }

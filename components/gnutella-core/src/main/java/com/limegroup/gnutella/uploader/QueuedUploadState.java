@@ -53,27 +53,16 @@ public class QueuedUploadState implements HTTPMessage {
             }
         }
         
-        if (UPLOADER.isFirstReply()) {
-            // write x-features header once because the downloader is
-            // supposed to cache that information anyway
-            Set features = new HashSet();
-            features.add(ConstantHTTPHeaderValue.BROWSE_FEATURE);
-            if (ChatSettings.CHAT_ENABLED.getValue())
-                features.add(ConstantHTTPHeaderValue.CHAT_FEATURE);
-            // Write X-Features header.
-            if (features.size() > 0) {
-                HTTPUtils.writeHeader(HTTPHeaderName.FEATURES,
-                        new HTTPHeaderValueCollection(features),
-                                      ostream);
-            }
+        if (UPLOADER.isFirstReply())
+            HTTPUtils.writeFeatures(ostream);
             
-            // write X-Thex-URI header with root hash if we have already 
-            // calculated the tigertree
-            if (FILE_DESC.getHashTree()!=null)
-                HTTPUtils.writeHeader(HTTPHeaderName.THEX_URI,
-                                      FILE_DESC.getHashTree(),
-                                      ostream);                    
-        }
+        // write X-Thex-URI header with root hash if we have already 
+        // calculated the tigertree
+        if (FILE_DESC.getHashTree()!=null)
+            HTTPUtils.writeHeader(HTTPHeaderName.THEX_URI,
+                                  FILE_DESC.getHashTree(),
+                                  ostream);                    
+
         str = "\r\n";
         ostream.write(str.getBytes());
     }
