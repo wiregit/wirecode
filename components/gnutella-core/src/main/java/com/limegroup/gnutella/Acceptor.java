@@ -285,6 +285,9 @@ public class Acceptor implements Runnable {
             //2. Try 10 different ports
             for (int i=0; i<10; i++) {
 				tempPort = i+6346;
+				// do not try to bind to the multicast port.
+				if (tempPort == ConnectionSettings.MULTICAST_PORT.getValue())
+				    continue;
                 try {
                     setListeningPort(tempPort);
 					_port = tempPort;
