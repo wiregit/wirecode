@@ -1,8 +1,27 @@
 package com.limegroup.gnutella.util;
 
+/**
+ * Abstract clas to use for different normalization implementations
+ * Helper functions like blockSplit are also defined here.
+ */
 abstract class AbstractI18NConverter {
 
+    /**
+     * This method should return the converted form of the string s
+     * this method should also split s into the different
+     * unicode blocks
+     * @param s String to be converted
+     * @return the converted string
+     */
     public abstract String getNorm(String s);
+    
+    /**
+     * Should return an array of keywords built from parameter s.
+     * After normalizing String s the string should be 
+     * split and an array of String(s) should be built.
+     * @param s source string to split into keywords
+     * @return an array of keywords created from s
+     */
     public abstract String[] getKeywords(String s);
 
     /**

@@ -11,7 +11,8 @@ import com.ibm.icu.text.Normalizer;
 
 /**
  * class that handles the removal of accents, etc.
- * this class now uses the Normalizer of icu4j
+ * Non 118 JVM's will use the icu4j package for 
+ * conversion.
  */
 public class I18NConvert {
 
@@ -22,7 +23,9 @@ public class I18NConvert {
     private final AbstractI18NConverter _convertDelegator;
 
     /**
-     * constructor : load in the excluded codepoints and the case map
+     * constructor : 
+     * instantiates a implementation of abstract class AbstractI18NConverter
+     * depeneding on JVM (118 or not)
      */
     private I18NConvert() {
         if(CommonUtils.isJava118()) 
@@ -36,10 +39,12 @@ public class I18NConvert {
         return _instance;
     }
 
+    /** delgate to AbstractI18NConverter intance */
     public String getNorm(String s) {
         return _convertDelegator.getNorm(s);
     }
 
+    /** delgate to AbstractI18NConverter intance */
     public String[] getKeywords(String s) {
         return _convertDelegator.getKeywords(s);
     }

@@ -9,10 +9,21 @@ import com.ibm.icu.text.Normalizer;
 
 final class I18NConvertICU extends AbstractI18NConverter {
 
+    /** excluded codepoints (like accents) */
     private final java.util.BitSet _excluded;
-    private final Map _cMap;
+    /** certain chars to be replaced by space (like commas, etc) */
     private final java.util.BitSet _replaceWithSpace;
+    private final Map _cMap;
 
+    /**
+     * constructor:
+     * this subclass of AbstractI18NConverter uses the icu4j's 
+     * pacakges to normalize Strings.  
+     * _excluded and _replaceWithSpace (BitSet) are read in from
+     * files created by UDataFileCreator and are used to 
+     * remove accents, etc. and replace certain code points with
+     * ascii space (\u0020)
+     */
     I18NConvertICU() {
     	java.util.BitSet bs = null;
         java.util.BitSet bs2 = null;

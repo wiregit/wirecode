@@ -4,11 +4,16 @@ import com.limegroup.gnutella.ErrorService;
 import java.io.*;
 import java.util.*;
 
+/**
+ * 118 compatible class that handles normalization 
+ * (removal of accents, etc)
+ */
 final class I18NConvert118 extends AbstractI18NConverter {
     
     private Trie _convert, _kc;
     java.util.BitSet _ex;
 
+    /** read in the necessary data files created by UDataFileCreator */
     I18NConvert118() {
         _convert = new Trie(false);
         _kc = new Trie(false);
@@ -40,15 +45,39 @@ final class I18NConvert118 extends AbstractI18NConverter {
             ErrorService.error(ce);
         }
     }
-
+    
+    /** 
+     * returns the normalized form of string s
+     * the returned string will also have space between
+     * the unicode blocks.
+     * @param s String to be converted
+     * @return the converted string
+     */
     public String getNorm(String s) {
         return blockSplit(kmp(dekmp(s)));
     }
 
+    /**
+     * Returns an array of keywords built from parameter s.
+     * The string s will be first converted (removal of accents, etc.)
+     * then split into the unicode blocks, then the array will be created
+     * by splitting the string by 'space'.  The conversion will convert
+     * all delim characters to '\u0020' so we just split with '\u0020'
+     * @param s source string to split into keywords
+     * @return an array of keywords created from s
+     */
     public String[] getKeywords(String s) {
         return StringUtils.split(getNorm(s), " ");
     }
 
+    /**
+     * Return the decomposed form of parameter s. For each char
+     * in the String s, we do a look up using the data class
+     * for the decomposed format (this format is not strictly 
+     * a NFKD format since it will also remove accents and symbols)
+     * @param s string to decompose
+     * @return the converted string
+     */
     private String dekmp(String s) {
         if(s.length() == 0) return  s;
         else {
@@ -59,6 +88,14 @@ final class I18NConvert118 extends AbstractI18NConverter {
         }
     }
     
+    /**
+     * Return the composed form of string s. Do a look up on the data
+     * class for any entries that would combine two chars at a time.
+     * Similar to composition described in Technical Report 15 on 
+     * www.unicode.org site.
+     * @param s String to be composed
+     * @return converted form
+     */
     private String kmp(String s) {
         if(s.length() == 0) return s;
         else {
@@ -66,22 +103,36 @@ final class I18NConvert118 extends AbstractI18NConverter {
             StringBuffer b = new StringBuffer();
             String comped = "";
             
-            //need to check for more than two
             for(int i = 1, n = s.length(); i < n; i++) {
-                comped = getKC(String.valueOf(first) + String.valueOf(s.charAt(i)));
+                //see if these two chars can be combined according
+                //to the look up table
+                comped = getKC(String.valueOf(first) + String.valueOf(s.charAt(i)));                
+                
+                //able to compose so we set the composed char to
+                //the first to see if more compositions can be made
                 if(comped != null) 
                     first = comped.charAt(0);
                 else {
+                    //the two chars weren't composed so append to
+                    //buffer and set the first char to the next char
                     b.append(first);
                     first = s.charAt(i);
                 }
             }
-            
+
+            //append the last char used
             b.append(first);
             return b.toString();
         }
     }
 
+    /**
+     * converts the hex representation of a String to a String
+     * ie. 0020 -> " "
+     *     0061 0062 -> "ab"
+     * @param s String to convert
+     * @return converted s
+     */
     private String code2char(String s) {
         StringBuffer b = new StringBuffer();
         
@@ -113,3 +164,11 @@ final class I18NConvert118 extends AbstractI18NConverter {
     }
     
 }
+
+
+
+
+
+
+
+
