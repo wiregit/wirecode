@@ -1034,7 +1034,7 @@ public class UploaderTest extends com.limegroup.gnutella.util.BaseTestCase {
 
         Socket sb=psf.getSocketB();
         File tmp=File.createTempFile("UploadManager_Test", "dat");
-        VerifyingFile vf = new VerifyingFile();
+        VerifyingFile vf = new VerifyingFile(0);
         vf.open(tmp);
         HTTPDownloader downloader = 
 			new HTTPDownloader(sb, rfd, vf);
