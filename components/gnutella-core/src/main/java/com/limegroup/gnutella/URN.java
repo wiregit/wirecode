@@ -14,46 +14,20 @@ import java.security.*;
  *
  * @see UrnCache
  * @see FileDesc
- * @see UrnFactory
+ * @see URNFactory
+ @ @see UrnType
  */
 public final class URN implements HTTPHeaderValue, Serializable {
-
-	/**
-	 * Constant for the leading URN string identifier, as specified in
-	 * RFC 2141.  This is equal to "urn:", although note that this
-	 * should be used in a case-insensitive manner in compliance with
-	 * the URN specification (RFC 2141).
-	 */
-	public static final transient String URN_NAMESPACE_ID = "urn:";
-
-	/**
-	 * The identifier for a SHA1 Namespace Identifier string.  This
-	 * is "sha1" and should also be used in a case-insensitive manner.
-	 */
-	private static final transient String SHA1 = "sha1";
-
-	/**
-	 * Constant for the bitprint Namespace Identifier string.  This 
-	 * is "bitprint" and should be used in a case-insensitive manner.
-	 */
-	private static final transient String BITPRINT = "bitprint";
-	
-	/**
-	 * Constant for the URN identifier constant combined with the
-	 * SHA1 identifier constant.  This is used to identify SHA1 URNs.
-	 */
-	public static final transient String URN_SHA1 = 
-		URN_NAMESPACE_ID+SHA1;
-
-	/**
-	 * Constant code for a SHA1 URN.
-	 */
-	public static final transient int SHA1_URN = 100;
 
 	/**
 	 * The string representation of the URN.
 	 */
 	private transient String _urnString;
+
+	/**
+	 * Variable for the <tt>UrnType</tt> instance for this URN.
+	 */
+	private transient UrnType _urnType;
 
 	/**
 	 * Cached hash code that is lazily initialized.
@@ -71,12 +45,11 @@ public final class URN implements HTTPHeaderValue, Serializable {
 	 * @throws <tt>IllegalArgumentException</tt> if the URN type specified
 	 *  is invalid
 	 */
-	public URN(final File file, final int urnType) throws IOException {
-		switch(urnType) {
-		case SHA1_URN:
+	public URN(final File file, final UrnType urnType) throws IOException {
+		if(urnType == UrnType.SHA1) {
 			this._urnString = URN.createSHA1String(file);
-			break;
-		default:
+			this._urnType = urnType;
+		} else {
 			throw new IllegalArgumentException("INVALID URN TYPE SPECIFIED");
 		}
 	}
@@ -94,6 +67,7 @@ public final class URN implements HTTPHeaderValue, Serializable {
 			throw new IOException("INVALID URN STRING");
 		}
 		this._urnString = urnString;
+		this._urnType = UrnType.createUrnType(URN.getTypeString(_urnString));
 	}
 
 	/**
@@ -106,8 +80,17 @@ public final class URN implements HTTPHeaderValue, Serializable {
 	 *
 	 * urn:sha1:
 	 */
-	public String getTypeString() {
-		return _urnString.substring(0,_urnString.indexOf(':',4)+1);		
+	private static String getTypeString(String fullUrnString) {
+		return fullUrnString.substring(0,fullUrnString.indexOf(':',4)+1);		
+	}
+
+	/**
+	 * Returns the <tt>UrnType</tt> instance for this <tt>URN</tt>.
+	 *
+	 * @return the <tt>UrnType</tt> instance for this <tt>URN</tt>
+	 */
+	public UrnType getUrnType() {
+		return _urnType;
 	}
 
 	// implements HTTPHeaderValue
@@ -125,23 +108,6 @@ public final class URN implements HTTPHeaderValue, Serializable {
 	 */
 	public static boolean isUrn(final String urnString) {
 		return URN.isValidUrn(urnString);
-	}
-
-	/**
-	 * Returns whether or not the string argument is a urn type that
-	 * we know about.
-	 *
-	 * @param urnString to string to check 
-	 * @return <tt>true</tt> if it is a valid URN type, <tt>false</tt>
-	 *  otherwise
-	 */
-	public static boolean isUrnType(String urnString) {
-		final String urnStringLower = urnString.toLowerCase();
-		if(urnStringLower.equals(URN.URN_NAMESPACE_ID) || 
-		   urnStringLower.equals(URN.URN_SHA1 + ":")) {
-			return true;
-		}
-		return false;
 	}
 
 	/**
@@ -175,7 +141,7 @@ public final class URN implements HTTPHeaderValue, Serializable {
 		// note that all URNs are case-insensitive for the "urn:<type>:" part,
 		// but some MAY be case-sensitive thereafter (SHA1/Base32 is case 
 		// insensitive)
-		return URN_SHA1 + ":" + Base32.encode(sha1);
+		return UrnType.URN_NAMESPACE_ID+UrnType.SHA1_STRING+":"+Base32.encode(sha1);
 	}
 
 	/**
@@ -217,29 +183,12 @@ public final class URN implements HTTPHeaderValue, Serializable {
 		int colon2Index = urnString.indexOf(":", colon1Index+1);
 		
 		if((colon2Index == -1) || 
-		   !urnStr.equalsIgnoreCase(URN.URN_NAMESPACE_ID) ||
-		   !isValidNamespaceIdentifier(urnString.substring(colon1Index+1, 
-														   colon2Index)) ||
+		   !urnStr.equalsIgnoreCase(UrnType.URN_NAMESPACE_ID) ||
+		   !UrnType.isSupportedUrnNamespace(urnString.substring(colon1Index+1,
+																colon2Index)) ||
 		   !isValidNamespaceSpecificString(urnString.substring(colon2Index+1))) {
 			return false;
 		}		
-		return true;
-	}
-
-	/**
-	 * Returns whether or not the specified Namespace Identifier String (NID) 
-	 * is a valid NID.
-	 *
-	 * @param NID the Namespace Identifier String for a URN
-	 * @return <tt>true</tt> if the NID is valid, <tt>false</tt> otherwise
-	 */
-	private static boolean isValidNamespaceIdentifier(final String NID) {					
-		// we should add other namespace identifiers to this check as
-		// they become registered
-		if(!NID.equalsIgnoreCase(URN.SHA1) &&
-		   !NID.equalsIgnoreCase(URN.BITPRINT)) {
-			return false;
-		}
 		return true;
 	}
 
@@ -260,7 +209,7 @@ public final class URN implements HTTPHeaderValue, Serializable {
 			return false;
 		}
 		return true;
-	}	//}
+	}
 
 	/**
 	 * Returns whether or not this URN is a SHA1 URN.  Note that a bitprint
@@ -269,7 +218,7 @@ public final class URN implements HTTPHeaderValue, Serializable {
 	 * @return <tt>true</tt> if this is a SHA1 URN, <tt>false</tt> otherwise
 	 */
 	public boolean isSHA1() {
-		return _urnString.toLowerCase().startsWith(URN_SHA1);
+		return _urnType.isSHA1();
 	}
 
 	/**
@@ -286,8 +235,8 @@ public final class URN implements HTTPHeaderValue, Serializable {
 		}
 		URN urn = (URN)o;
 		
-		return (_urnString == null ? urn._urnString == null : 
-				_urnString.equals(urn._urnString));
+		return (_urnString.equals(urn._urnString) &&
+				_urnType == urn._urnType);
 	}
 
 	/**
@@ -303,6 +252,7 @@ public final class URN implements HTTPHeaderValue, Serializable {
 		if(hashCode == 0) {
 			int result = 17;
 			result = (37*result) + this._urnString.hashCode();
+			result = (37*result) + this._urnType.hashCode();
 			hashCode = result;
 		}
 		return hashCode;
@@ -326,6 +276,7 @@ public final class URN implements HTTPHeaderValue, Serializable {
 		throws IOException {
 		s.defaultWriteObject();
 		s.writeObject(_urnString);
+		s.writeObject(_urnType);
 	}
 
 	/**
@@ -336,8 +287,16 @@ public final class URN implements HTTPHeaderValue, Serializable {
 		throws IOException, ClassNotFoundException {
 		s.defaultReadObject();
 		_urnString = (String)s.readObject();
-		if(URN.isValidUrn(_urnString)) {
+		_urnType = (UrnType)s.readObject();
+		if(!URN.isValidUrn(_urnString)) {
 			throw new InvalidObjectException("invalid urn: "+_urnString);
+		}
+		if(_urnType.isSHA1()) {
+			// this preserves instance equality for all SHA1 run types
+			_urnType = UrnType.SHA1;
+		}
+		else {
+			throw new InvalidObjectException("invalid urn type: "+_urnType);
 		}
 		
 	}
