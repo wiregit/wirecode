@@ -254,24 +254,6 @@ public class ManagedConnection
 	 * various properties.
 	 */
 	private final SettingsManager SETTINGS = SettingsManager.instance();
-    
-    /** 
-     * Creates an outgoing connection. 
-     *
-     * @param host the address to connect to in symbolic or dotted-quad format
-     *  If host names a special bootstrap server, e.g., "router.limewire.com",
-     *  this may take special action, like trying "router4.limewire.com" instead
-     *  with a 0.4 handshake.
-     * @param port the port to connect to
-     * @param router where to report messages
-     * @param where to report my death.  Also used for reject connections.
-     */
-    //ManagedConnection(String host,
-	//                int port,
-    //                  MessageRouter router,
-    //                  ConnectionManager manager) {
-    //    this(translateHost(host), port, router, manager, isRouter(host));
-    //}
 
     /**
      * Creates an outgoing connection.  The connection is considered a special
@@ -283,7 +265,6 @@ public class ManagedConnection
 							 int port,
 							 MessageRouter router,
 							 ConnectionManager manager) {
-		//boolean isRouter) {
         //If a router connection, connect as 0.4 by setting responders to null.
         //(Yes, it's a hack, but this is how Connection(String,int) is
         //implemented.)  Otherwise connect at 0.6 with re-negotiation, setting
@@ -296,11 +277,9 @@ public class ManagedConnection
 			   (HandshakeResponder)new SupernodeHandshakeResponder(manager, host) :
 			   (HandshakeResponder)new ClientHandshakeResponder(manager, host)),
               true);
-		//!isRouter);
         
         _router = router;
         _manager = manager;
-        //_isRouter = isRouter;
     }
 
     /**
@@ -327,9 +306,6 @@ public class ManagedConnection
     public void initialize()
             throws IOException, NoGnutellaOkException, BadHandshakeException {
         //Establish the socket (if needed), handshake.
-        //if (_isRouter)
-		//  super.initialize();   //no timeout for bootstrap server
-        //else
 		super.initialize(CONNECT_TIMEOUT);
 
         //Instantiate queues.  TODO: for ultrapeer->leaf connections, we can
@@ -556,7 +532,6 @@ public class ManagedConnection
                             break;
                     }
 
-					// TODO:: THIS SEND IS NOT CURRENTLY RECORDED IN STATISTICS
                     ManagedConnection.super.send(m);
                     _bytesSent+=m.getTotalLength();
                 }
@@ -1143,6 +1118,26 @@ public class ManagedConnection
             com.limegroup.gnutella.handshaking.
                 ConnectionHandshakeHeaders.USER_AGENT);
     }
+
+	/**
+	 * Accessor for the reported number of intra-Ultrapeer connections
+	 * this connection attempts to maintain.  If the node is not an
+	 * Ultrapeer, this returns 0.  If it is an Ultrapeer but does not
+	 * support this header, we assume that it tries to maintain 6 intra-
+	 * Ultrapeer connections.
+	 *
+	 * @return the number of intra-Ultrapeer connections the connected node
+	 *  attempts to maintain, as reported in the X-Degree handshake header
+	 *  or guessed at otherwise
+	 */
+	public int getNumIntraUltrapeerConnections() {
+		String connections = getProperty(ConnectionHandshakeHeaders.X_DEGREE);
+		if(connections == null) {
+			if(isSupernodeConnection()) return 6;
+			return 0;
+		}
+		return Integer.valueOf(connections).intValue();
+	}
 
 
     /** Returns true iff this connection wrote "Ultrapeer: false".
