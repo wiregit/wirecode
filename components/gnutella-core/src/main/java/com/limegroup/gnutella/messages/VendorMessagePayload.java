@@ -94,7 +94,36 @@ public abstract class VendorMessagePayload {
         }
         return null;
     }
+
     
+    /**
+     * @return true if the two VMPs have identical signatures - no more, no 
+     * less.  Does not take version into account, but if different versions
+     * have different payloads, they'll differ.
+     */
+    public boolean equals(Object other) {
+        if (other instanceof VendorMessagePayload) {
+            VendorMessagePayload vmp = (VendorMessagePayload) other;
+            return ((_selector == vmp._selector) &&
+                    (Arrays.equals(_vendorID, vmp._vendorID)) &&
+                    (Arrays.equals(getPayload(), vmp.getPayload()))
+                    );
+        }
+        return false;
+    }
+   
+    public int hashCode() {
+        int hashCode = 0;
+        hashCode += _version;
+        hashCode += _selector;
+        for (int i = 0; i < _vendorID.length; i++)
+            hashCode += (int) _vendorID[i];
+        byte[] payload = getPayload();
+        for (int i = 0; i < payload.length; i++)
+            hashCode += (int) payload[i];
+        return hashCode;
+    }
+ 
     //----------------------
     
     //----------------------
