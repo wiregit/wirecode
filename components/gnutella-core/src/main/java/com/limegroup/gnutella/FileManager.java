@@ -29,7 +29,7 @@ public class FileManager {
 	_size = 0;                       /* all the provate variables */
 	_numFiles = 0;
 	_files = new ArrayList();
-	_extensions = null;
+	_extensions = new String[0];
 	
     }
     
@@ -47,7 +47,7 @@ public class FileManager {
 	_size = 0;
 	_numFiles = 0;
 	_files = new ArrayList();
-	_extensions = null;
+	_extensions = new String[0];
     }
 
     public Response[] query(QueryRequest request) {
