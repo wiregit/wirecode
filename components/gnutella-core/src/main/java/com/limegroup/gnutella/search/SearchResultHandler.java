@@ -167,7 +167,7 @@ public final class SearchResultHandler {
             LOG.debug("bad packet reading qr", bpe);
             return false;
         }
-        
+
         // always handle reply to multicast queries.
         if( !data.isReplyToMulticastQuery() && !qr.isBrowseHostReply() ) {
             // note that the minimum search quality will always be greater
@@ -183,12 +183,14 @@ public final class SearchResultHandler {
             }
             // if the other side is firewalled AND
             // we're not on close IPs AND
-            // (we are firewalled OR we are a private IP)
-            // then drop the reply.
+            // (we are firewalled OR we are a private IP) AND 
+            // no chance for FW transfer then drop the reply.
             if(data.isFirewalled() && 
                !NetworkUtils.isVeryCloseIP(qr.getIPBytes()) &&               
                (!RouterService.acceptedIncomingConnection() ||
-                NetworkUtils.isPrivateAddress(RouterService.getAddress()))
+                NetworkUtils.isPrivateAddress(RouterService.getAddress())) &&
+               !(UDPService.instance().canReceiveSolicited() && 
+                 qr.getSupportsFWTransfer())
                )  {
                LOG.debug("Ignoring from firewall funkiness");
                return false;

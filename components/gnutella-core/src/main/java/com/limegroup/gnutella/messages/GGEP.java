@@ -45,6 +45,8 @@ public class GGEP extends Object {
     public static final String GGEP_HEADER_CLIENT_LOCALE = "LOC";
     /** The extension header (key) for creation time */
     public static final String GGEP_HEADER_CREATE_TIME = "CT";
+    /** The extension header (key) for Firewalled Transfer support in Hits. */
+    public static final String GGEP_HEADER_FW_TRANS = "FW";
 
     /** The maximum size of a extension header (key). */
     public static final int MAX_KEY_SIZE_IN_BYTES = 15;

@@ -11,6 +11,7 @@ import com.limegroup.gnutella.messages.vendor.*;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.*;
 import com.limegroup.gnutella.upelection.*;
+import com.limegroup.gnutella.udpconnect.*;
 import com.sun.java.util.collections.*;
 import java.util.StringTokenizer;
 import java.io.*;
@@ -59,6 +60,11 @@ public abstract class MessageRouter {
      * The maximum number of bypassed results to remember per query.
      */
     private final int MAX_BYPASSED_RESULTS = 150;
+
+    /**
+     * The maximum number of PushRequests per expire time.
+     */
+    private final int MAX_PUSH_REQUESTS = 5;
 
     /**
      * Maps PingRequest GUIDs to PingReplyHandlers.  Stores 2-4 minutes,
@@ -132,6 +138,14 @@ public abstract class MessageRouter {
     	Collections.synchronizedSet(new FixedSizeExpiringSet(200,
     			ConnectionSettings.SOLICITED_GRACE_PERIOD.getValue()/2));
 
+    
+    /**
+     * Keeps track of what hosts have sent us PushRequests lately.  Only allow
+     * up to MAX_PUSH_REQUESTS per Expire time.
+     */
+    private static final FixedsizeHashMap _pushRequests =
+        new FixedsizeHashMap(200);
+
 	/**
 	 * Constant handle to the <tt>QueryUnicaster</tt> since it is called
 	 * upon very frequently.
@@ -192,6 +206,12 @@ public abstract class MessageRouter {
      */
     private PromotionManager _promotionManager;
     
+    /**
+     * Router for UDPConnection messages.
+     */
+	private final UDPMultiplexor _udpConnectionMultiplexor =
+	    UDPMultiplexor.instance(); 
+
     /**
      * Creates a MessageRouter.  Must call initialize before using.
      */
@@ -422,6 +442,14 @@ public abstract class MessageRouter {
 		// Verify that the address and port are valid.
 		// If they are not, we cannot send any replies to them.
 		if(!RouterService.isIpPortValid()) return;
+
+		// Send UDPConnection messages on to the connection multiplexor
+		// for routing to the appropriate connection processor
+		if ( msg instanceof UDPConnectionMessage ) {
+		    _udpConnectionMultiplexor.routeMessage(
+			  (UDPConnectionMessage)msg, address, port);
+			return;
+		}
 
 		ReplyHandler handler = new UDPReplyHandler(address, port);
 		
@@ -908,10 +936,13 @@ public abstract class MessageRouter {
             // anything when this node's an Ultrapeer
             forwardQueryRequestToLeaves(request, handler);
             
-            // if I'm not firewalled AND the source isn't firewalled reply ....
-            if (request.isFirewalledSource() &&
-                !RouterService.acceptedIncomingConnection() &&
-                !ApplicationSettings.SERVER.getValue())
+            // if (I'm firewalled AND the source is firewalled) AND 
+            // NOT(he can do a FW transfer and so can i) then don't reply...
+            if ((request.isFirewalledSource() &&
+                 !RouterService.acceptedIncomingConnection()) &&
+                !(request.canDoFirewalledTransfer() &&
+                  UDPService.instance().canReceiveSolicited())
+                )
                 return;
             respondToQueryRequest(request, _clientGUID, handler);
         }
@@ -1989,6 +2020,14 @@ public abstract class MessageRouter {
             _pushRouteTable.getReplyHandler(request.getClientGUID());
 
         if(replyHandler != null) {
+            if (replyHandler instanceof ForMeReplyHandler) {
+                // make sure the guy isn't hammering us
+                String ip = NetworkUtils.ip2string(request.getIP());
+                Integer i = (Integer) _pushRequests.get(ip);
+                Integer newI = new Integer((i==null) ? 1 : i.intValue() + 1);
+                _pushRequests.put(ip, newI);
+                if (newI.intValue() > MAX_PUSH_REQUESTS) return;
+            }
             replyHandler.handlePushRequest(request, handler);
         }
         else {
@@ -2201,6 +2240,14 @@ public abstract class MessageRouter {
 			boolean mcast = queryRequest.isMulticast() && 
                 (queryRequest.getTTL() + queryRequest.getHops()) == 1;
 			
+            // We should mark our hits if the remote end can do a firewalled
+            // transfer AND so can we AND we don't accept tcp incoming AND our
+            // external address is valid (needed for input into the reply)
+            final boolean fwTransfer = 
+                queryRequest.canDoFirewalledTransfer() && 
+                UDPService.instance().canReceiveSolicited() &&
+                !RouterService.acceptedIncomingConnection() &&
+                NetworkUtils.isValidAddress(RouterService.getExternalAddress());
             
 			if ( mcast ) {
                 ttl = 1; // not strictly necessary, but nice.
@@ -2209,7 +2256,8 @@ public abstract class MessageRouter {
             List replies =
                 createQueryReply(guid, ttl, speed, res, 
                                  _clientGUID, busy, uploaded, 
-                                 measuredSpeed, mcast);
+                                 measuredSpeed, mcast,
+                                 fwTransfer);
 
             //add to the list
             queryReplies.addAll(replies);
@@ -2231,7 +2279,8 @@ public abstract class MessageRouter {
                                              boolean busy, 
                                              boolean uploaded, 
                                              boolean measuredSpeed, 
-                                             boolean isFromMcast);
+                                             boolean isFromMcast,
+                                             boolean shouldMarkForFWTransfer);
 
     /**
      * Handles a message to reset the query route table for the given
@@ -2590,6 +2639,8 @@ public abstract class MessageRouter {
             try {
                 _tcpConnectBacks.clear();
                 _udpConnectBacks.clear();
+                // also expire the number of PushRequest per host
+                _pushRequests.clear();
             } 
             catch(Throwable t) {
                 ErrorService.error(t);

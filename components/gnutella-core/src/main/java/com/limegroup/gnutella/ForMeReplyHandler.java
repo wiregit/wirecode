@@ -171,7 +171,7 @@ public final class ForMeReplyHandler implements ReplyHandler {
      * There's no point in sending them a GIV to have them send a GET
      * just to return a 404 or Busy or Malformed Request, etc..
      */
-	public void handlePushRequest(PushRequest pushRequest, ReplyHandler handler) {
+	public void handlePushRequest(PushRequest pushRequest, ReplyHandler handler){
         //Ignore push request from banned hosts.
         if (handler.isPersonalSpam(pushRequest))
             return;
@@ -195,31 +195,13 @@ public final class ForMeReplyHandler implements ReplyHandler {
             return;
         }
         
-        int index = (int)pushRequest.getIndex();
-
-        FileManager fm = RouterService.getFileManager();
-        if(!fm.isValidIndex(index)) {
-            return;
-        }
-
         String req_guid_hexstring =
             (new GUID(pushRequest.getClientGUID())).toString();
 
-        
-        FileDesc desc = fm.get(index);
-        
-        // if the file has been unshared, return
-        if(desc == null) {
-            return;
-        }
-
-        String file = desc.getName();
-
         RouterService.getPushManager().
-            acceptPushUpload(file, h, port, 
-                             index, req_guid_hexstring,
-                             pushRequest.isMulticast() // force accept
-                             );
+        acceptPushUpload(h, port, req_guid_hexstring,
+                         pushRequest.isMulticast(), // force accept
+                         pushRequest.isFirewallTransferPush());
 	}
 	
 	public boolean isOpen() {

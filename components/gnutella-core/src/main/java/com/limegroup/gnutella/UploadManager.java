@@ -235,8 +235,11 @@ public class UploadManager implements BandwidthTracker {
                 
                 if(iStream == null)
                     iStream = new BufferedInputStream(socket.getInputStream());
-
+                
+                LOG.trace("parsing http line.");
                 HttpRequestLine line = parseHttpRequest(socket, iStream);
+                if (LOG.isTraceEnabled())
+                    LOG.trace("line = " + line);
 
                 if(LOG.isDebugEnabled())
                     LOG.debug(uploader + " successfully parsed request");
@@ -1185,9 +1188,11 @@ public class UploadManager implements BandwidthTracker {
 		// open the stream from the socket for reading
 		ByteReader br = new ByteReader(iStream);
 		
+        LOG.trace("trying to read request.");
         // read the first line. if null, throw an exception
         String str = br.readLine();
-        
+        if (LOG.isTraceEnabled()) LOG.trace("request is: " + str);
+
         try {
 
             if (str == null) {
@@ -1471,6 +1476,11 @@ public class UploadManager implements BandwidthTracker {
          * Guaranteed to be non null.
          */
         final Map _params;
+
+        public String toString() {
+            return "Index = " + _index + ", FileName = " + _fileName +
+            ", is HTTP1.1? " + _http11 + ", Parameters = " + _params;
+        }
         
         /**
          * Flag for whether or not the get request had the correct password.

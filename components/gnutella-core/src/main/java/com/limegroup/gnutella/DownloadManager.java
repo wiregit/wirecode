@@ -6,10 +6,12 @@ import com.limegroup.gnutella.downloader.*;
 import com.limegroup.gnutella.settings.*;
 import com.limegroup.gnutella.util.*;
 import com.limegroup.gnutella.http.HttpClientManager;
+import com.limegroup.gnutella.udpconnect.UDPConnection;
 import com.sun.java.util.collections.*;
 import java.io.*;
 import java.net.*;
 import com.limegroup.gnutella.util.URLDecoder;
+import com.limegroup.gnutella.util.IOUtils;
 import com.limegroup.gnutella.util.NetworkUtils;
 import com.bitzi.util.Base32;
 import org.apache.commons.httpclient.methods.HeadMethod;
@@ -978,7 +980,7 @@ public class DownloadManager implements BandwidthTracker {
 
     }
     
-    private boolean sendPushTCP(RemoteFileDesc file, byte []guid) {
+    private boolean sendPushTCP(final RemoteFileDesc file, final byte[] guid) {
     	LOG.trace("DM.sendPushTCP(): entered.");
     	
     	byte[] addr = RouterService.getAddress();
@@ -998,22 +1000,42 @@ public class DownloadManager implements BandwidthTracker {
             boolean requestSuccessful = false;
 
             // set up request
+
+            // if this is a FW to FW transfer, we must consider special stuff
+            final boolean shouldDoFWTransfer = 
+                file.supportsFWTransfer() &&
+                UDPService.instance().canReceiveSolicited() &&
+                !RouterService.acceptedIncomingConnection();
+            if (shouldDoFWTransfer &&
+                !NetworkUtils.isValidAddress(RouterService.getExternalAddress())
+                )
+                // i can't do crap - i need a valid external address for this
+                // guy to talk to - no need to send a push cuz it won't work
+                return false;
+
             final String requestString = "/gnutella/push-proxy?ServerID=" + 
-                Base32.encode(file.getClientGUID());
-            final String nodeString = "X-Node";
-            final String nodeValue = NetworkUtils.ip2string(addr) + ":" + port;
+                Base32.encode(file.getClientGUID()) +
+                // if this will result in a firewalled transfer, send the
+                // appropriate control index
+                (shouldDoFWTransfer ? ("&file=" + PushRequest.FW_TRANS_INDEX) :
+                 "");
+            final String nodeString = "X-Node:";
+            byte[] nodeAddrToSend = shouldDoFWTransfer ?
+                                    RouterService.getExternalAddress() : addr;
+            final String nodeValue = NetworkUtils.ip2string(nodeAddrToSend) + 
+                                     ":" + port;
 
             // try to contact each proxy
             Iterator iter = proxies.iterator();
             while(iter.hasNext() && !requestSuccessful) {
                 PushProxyInterface ppi = (PushProxyInterface)iter.next();
-                String ppIp = ppi.getPushProxyAddress().getHostAddress();
-                int ppPort = ppi.getPushProxyPort();
+                final String ppIp = ppi.getPushProxyAddress().getHostAddress();
+                final int ppPort = ppi.getPushProxyPort();
                 String connectTo = 
                     "http://" + ppIp + ":" + ppPort + requestString;
                 HeadMethod head = new HeadMethod(connectTo);
                 head.addRequestHeader(nodeString, nodeValue);
-                head.addRequestHeader("Cache-Control", "no-cache");                
+                head.addRequestHeader("Cache-Control", "no-cache");
                 HttpClient client = HttpClientManager.getNewClient();
                 if(LOG.isTraceEnabled())
                     LOG.trace("Push Proxy Requesting with: " + connectTo);
@@ -1023,6 +1045,32 @@ public class DownloadManager implements BandwidthTracker {
                         if(LOG.isInfoEnabled())
                             LOG.info("Succesful push proxy: " + connectTo);
                         requestSuccessful = true;
+                        if (shouldDoFWTransfer) {
+                            // we need to open up our NAT for incoming UDP, so
+                            // start the UDPConnection.  The other side should
+                            // do it soon too so hopefully we can communicate.
+                            Thread startPushThread = new ManagedThread() {
+                                    public void managedRun() {
+                                        try {
+                                            Socket fwTrans = 
+                                            new UDPConnection(file.getHost(),
+                                                              file.getPort());
+                                            // TODO: put this out to Acceptor in
+                                            // the future
+                                            InputStream is =
+                                                fwTrans.getInputStream();
+                                            String word = 
+                                                IOUtils.readWord(is, 4);
+                                            if (word.equals("GIV"))
+                                                acceptDownload(fwTrans);
+                                            else
+                                                fwTrans.close();
+                                        }
+                                        catch (IOException crap) {}
+                                    }
+                                };
+                            startPushThread.start();
+                        }
                     } else {
                         if(LOG.isWarnEnabled())
                             LOG.warn("Invalid push proxy: " + connectTo +
@@ -1160,7 +1208,7 @@ public class DownloadManager implements BandwidthTracker {
         }   
 
         //2. Parse and return the fields.
-        try {            
+        try {
             //a) Extract file index.  IndexOutOfBoundsException
             //   or NumberFormatExceptions will be thrown here if there's
             //   a problem.  They're caught below.
