@@ -134,7 +134,7 @@ final class HeadRequester implements Runnable {
                     }
                 }
             }
-        } catch(Exception e) {
+        } catch(Throwable e) {
             ErrorService.error(e);
         }
 	}
