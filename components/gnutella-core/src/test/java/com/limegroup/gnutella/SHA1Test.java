@@ -31,7 +31,7 @@ public class SHA1Test extends BaseTestCase {
     }
     
     public static Test suite() {
-        return buildTestSuite(SHA1Test.class, "testFiles");
+        return buildTestSuite(SHA1Test.class);
     }
     
     public static void main(String[] args) {
