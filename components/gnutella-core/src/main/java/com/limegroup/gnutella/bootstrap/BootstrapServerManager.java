@@ -6,6 +6,7 @@ import java.util.Random;
 import java.text.ParseException;
 import com.sun.java.util.collections.*;
 import com.limegroup.gnutella.*;
+import com.limegroup.gnutella.util.CommonUtils;
 
 /**
  * A list of GWebCache servers.  Provides methods to fetch address addresses
@@ -124,8 +125,10 @@ public class BootstrapServerManager {
     /////////////////////////// Request Types ////////////////////////////////
 
     abstract class GWebCacheRequest {
-        /** Appends parameters to the given url. */
-        public abstract String requestURL(String url);
+        /** Returns the parameters for the given request, minus the "?" and any
+         *  leading or trailing "&".  These will be appended after common
+         *  parameters (e.g, "client"). */
+        public abstract String parameters();
         /** Called when if were unable to connect to the URL, got a non-standard
          *  HTTP response code, or got an ERROR method.  Default value: remove
          *  it from the list. */
@@ -147,12 +150,12 @@ public class BootstrapServerManager {
     
     class HostfileRequest extends GWebCacheRequest {
         private int responses=0;
-        public String requestURL(String url) {
-            return url+"?hostfile=1";
+        public String parameters() {
+            return "hostfile=1";
         }
         public void handleResponseData(BootstrapServer server, String line) {
             try {
-                //Endpoint's constructor won't choke on "ERROR", so we check.            
+                //Endpoint's constructor won't choke on "ERROR", so we check.
                 Endpoint host=new Endpoint(line);                    
                 _catcher.add(host, true);
                 responses++;
@@ -168,8 +171,8 @@ public class BootstrapServerManager {
 
     class UrlfileRequest extends GWebCacheRequest {
         private int responses=0;
-        public String requestURL(String url) {
-            return url+"?urlfile=1";
+        public String parameters() {
+            return "urlfile=1";
         }
         public void handleResponseData(BootstrapServer server, String line) {
             try {
@@ -199,7 +202,7 @@ public class BootstrapServerManager {
         public UpdateRequest(Endpoint myIP) {
             this.myIP=myIP;
         }
-        public String requestURL(String url) {
+        public String parameters() {
             //The url of good server.  There's a small chance that we send a
             //host its own address.  TODO: the encoding method we use is
             //deprecated because it doesn't take care of character conversion
@@ -216,14 +219,14 @@ public class BootstrapServerManager {
             //Some of these case are disallowed by sendUpdatesAsync, but we
             //handle all of them here.
             if (urlPart==null && ipPart==null)
-                return url;
+                return "";
             else if (urlPart!=null && ipPart==null)
-                return url+"?"+urlPart;
+                return urlPart;
             else if (urlPart==null && ipPart!=null)
-                return url+"?"+ipPart;
+                return ipPart;
             else {
                 Assert.that(urlPart!=null && ipPart!=null);
-                return url+"?"+ipPart+"&"+urlPart;            
+                return ipPart+"&"+urlPart;            
             }
         }
         public void handleResponseData(BootstrapServer server, String line) {
@@ -274,11 +277,16 @@ public class BootstrapServerManager {
     private void requestFromOneHost(GWebCacheRequest request,
                                     BootstrapServer server) {
         try {
-            URL url=new URL(request.requestURL(server.getURL().toString()));
+            //Prepare the request.
+            URL url=new URL(server.getURL().toString()
+                +"?client="+CommonUtils.QHD_VENDOR_NAME
+                +"&version="+URLEncoder.encode(CommonUtils.getLimeWireVersion())
+                +"&"+request.parameters());
             URLConnection connection=url.openConnection();
             BufferedReader in=new BufferedReader(
                                   new InputStreamReader(
                                       connection.getInputStream()));
+
             //For each line of data (excludes HTTP headers)...
             boolean firstLine=true;
             boolean errors=false;

@@ -3,9 +3,11 @@ package com.limegroup.gnutella.bootstrap;
 import junit.framework.*;
 import com.sun.java.util.collections.*;
 import java.io.*;
+import java.net.URLEncoder;
 import java.text.ParseException;
 import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.stubs.*;
+import com.limegroup.gnutella.util.CommonUtils;
 
 /**
  * Unit tests for BootstrapServerManager.
@@ -23,6 +25,9 @@ public class BootstrapServerManagerTest extends TestCase {
     final int RESPONSES_PER_SERVER=12;
     final static int PORT=6700;
     final static String DIRECTORY="/path/to/script.php";
+    final static String COMMON_PARAMS="client=LIME&version="
+        +URLEncoder.encode(CommonUtils.getLimeWireVersion());
+
     /** Our backend. */
     TestBootstrapServerManager bman;
     TestHostCatcher catcher;
@@ -78,7 +83,8 @@ public class BootstrapServerManagerTest extends TestCase {
         //Check that backend sent right requests.  Only the second host should
         //have been contacted.
         assertEquals(null, s3.getRequest());   //wasn't reachable
-        assertEquals("GET "+DIRECTORY+"?hostfile=1 HTTP/1.1", s2.getRequest());
+        assertEquals("GET "+DIRECTORY+"?"+COMMON_PARAMS+"&hostfile=1 HTTP/1.1", 
+                     s2.getRequest());
         assertEquals(null, s1.getRequest());   //wasn't contacted
         //...and got right results.
         for (int i=0; i<RESPONSES_PER_SERVER; i++) 
@@ -106,8 +112,10 @@ public class BootstrapServerManagerTest extends TestCase {
 
         //Check that backend sent right request.  We had to contact the second
         //host because the first didn't send enough data.
-        assertEquals("GET "+DIRECTORY+"?urlfile=1 HTTP/1.1", s3.getRequest());
-        assertEquals("GET "+DIRECTORY+"?urlfile=1 HTTP/1.1", s2.getRequest());
+        assertEquals("GET "+DIRECTORY+"?"+COMMON_PARAMS+"&urlfile=1 HTTP/1.1", 
+                     s3.getRequest());
+        assertEquals("GET "+DIRECTORY+"?"+COMMON_PARAMS+"&urlfile=1 HTTP/1.1", 
+                     s2.getRequest());
         assertEquals(null, s1.getRequest());   //wasn't contacted
         //Check that we got the right results.  First make sure we kept the old
         //server list...
@@ -196,7 +204,8 @@ public class BootstrapServerManagerTest extends TestCase {
         s3.setResponseData("OK\r\n");
         bman.sendUpdatesAsync(new Endpoint("18.239.0.144", 6347));
         sleep();
-        assertEquals("GET "+DIRECTORY+"?ip=18.239.0.144:6347 HTTP/1.1", 
+        assertEquals("GET "+DIRECTORY+"?"+COMMON_PARAMS
+                           +"&ip=18.239.0.144:6347 HTTP/1.1", 
                      s3.getRequest());
         assertEquals(null, s2.getRequest());
         assertEquals(null, s1.getRequest());
@@ -210,7 +219,8 @@ public class BootstrapServerManagerTest extends TestCase {
         s2.setResponseData("OK\r\n");
         bman.sendUpdatesAsync(new Endpoint("18.239.0.145", 6348));
         sleep();
-        assertEquals("GET "+DIRECTORY+"?ip=18.239.0.145:6348&url="
+        assertEquals("GET "+DIRECTORY+"?"+COMMON_PARAMS
+                     +"&ip=18.239.0.145:6348&url="
                      +"http%3A%2F%2F127.0.0.1%3A6702%2Fpath%2Fto%2Fscript.php"
                      +" HTTP/1.1", 
                      s2.getRequest());
@@ -222,11 +232,13 @@ public class BootstrapServerManagerTest extends TestCase {
         s2.setResponseData("OK\r\n");
         bman.sendUpdatesAsync(new Endpoint("18.239.0.144", 6347));
         sleep();
-        assertEquals("GET "+DIRECTORY+"?ip=18.239.0.144:6347 HTTP/1.1", 
+        assertEquals("GET "+DIRECTORY+"?"+COMMON_PARAMS
+                     +"&ip=18.239.0.144:6347 HTTP/1.1", 
                      s3.getRequest());
         //Yes, url3 is sent to s2 even though url3 never sent OK.  TODO: fix
         //this.
-        assertEquals("GET "+DIRECTORY+"?ip=18.239.0.144:6347&url="
+        assertEquals("GET "+DIRECTORY+"?"+COMMON_PARAMS
+                     +"&ip=18.239.0.144:6347&url="
                      +"http%3A%2F%2F127.0.0.1%3A6702%2Fpath%2Fto%2Fscript.php"
                      +" HTTP/1.1", 
                      s2.getRequest());

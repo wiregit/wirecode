@@ -18,6 +18,13 @@ public final class CommonUtils {
 	 */
 	private static final String LIMEWIRE_VERSION = "@version@";
 	
+    /**
+     * The vendor code for QHD and GWebCache.  WARNING: to avoid character
+     * encoding problems, this is hard-coded in QueryReply as well.  So if you
+     * change this, you must change QueryReply.
+     */
+    public static final String QHD_VENDOR_NAME = "LIME";
+
 	/** 
 	 * Constant for the java system properties.
 	 */
