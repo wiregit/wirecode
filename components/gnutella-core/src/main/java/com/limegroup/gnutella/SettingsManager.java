@@ -291,7 +291,7 @@ public final class SettingsManager {
 	private final boolean DEFAULT_EVER_ACCEPTED_INCOMING = false;
     
     //settings for Supernode implementation
-    private final int DEFAULT_MAX_SHIELDED_CLIENT_CONNECTIONS = 50;
+    private final int DEFAULT_MAX_SHIELDED_CLIENT_CONNECTIONS = 75;
     private volatile int DEFAULT_MIN_SHIELDED_CLIENT_CONNECTIONS = 4;
     
 	
