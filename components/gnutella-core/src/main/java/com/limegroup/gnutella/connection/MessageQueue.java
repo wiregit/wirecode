@@ -82,6 +82,11 @@ public final class MessageQueue {
         return _buf.size();
     }
 
+    /** Returns true if this has any queued messages. */
+    public boolean isEmpty() {
+        return _buf.isEmpty();
+    }
+
     public String toString() {
         return _buf.toString();
     }
