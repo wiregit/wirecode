@@ -2,10 +2,12 @@ package com.limegroup.gnutella.downloader;
 
 import junit.framework.*;
 import com.limegroup.gnutella.*;
+import com.limegroup.gnutella.stubs.*;
 import com.sun.java.util.collections.*;
 import java.io.*;
 
 public class ManagedDownloaderTest extends TestCase {
+    final static int PORT=6666;
 
     public ManagedDownloaderTest(String name) {
         super(name);
@@ -15,6 +17,15 @@ public class ManagedDownloaderTest extends TestCase {
         return new TestSuite(ManagedDownloaderTest.class);
     }
     
+    public void setUp() {
+        try {
+            SettingsManager.instance().setSaveDirectory(new File("."));
+            SettingsManager.instance().setLocalIsPrivate(false);
+        } catch (IOException e) {
+            fail("Couldn't set save directory");
+        }
+    }
+
     public void testLegacy() {
         ManagedDownloader.unitTest();
     }
@@ -63,6 +74,98 @@ public class ManagedDownloaderTest extends TestCase {
             fail("Couldn't make requery");
         }
     }
+    
+    /** Tests that the progress is retained for deserialized downloaders. */
+    public void testSerializedProgress() {        
+        DownloadManager manager=new DownloadManagerStub();
+        FileManager fileman=new FileManagerStub();
+        ActivityCallback callback=new ActivityCallbackStub();
+
+        IncompleteFileManager ifm=new IncompleteFileManager();
+        RemoteFileDesc rfd=newRFD("some file.txt");
+        File incompleteFile=ifm.getFile(rfd);
+        int amountDownloaded=100;
+        VerifyingFile vf=new VerifyingFile(false);
+        vf.addInterval(new Interval(0, amountDownloaded-1));  //inclusive
+        ifm.addEntry(incompleteFile, vf);
+
+        //Start downloader, make it sure requeries, etc.
+        ManagedDownloader downloader=new ManagedDownloader(
+            new RemoteFileDesc[] { rfd }, ifm);
+        downloader.initialize(manager, fileman, callback);
+        try { Thread.sleep(200); } catch (InterruptedException e) { }
+        //assertEquals(Downloader.WAITING_FOR_RESULTS, downloader.getState());
+        assertEquals(amountDownloaded, downloader.getAmountRead());
+
+        try {
+            //Serialize it!
+            ByteArrayOutputStream baos=new ByteArrayOutputStream();
+            ObjectOutputStream out=new ObjectOutputStream(baos);
+            out.writeObject(downloader);
+            out.flush(); out.close();
+            downloader.stop();
+
+            //Deserialize it as a different instance.  Initialize.
+            ObjectInputStream in=new ObjectInputStream(
+                new ByteArrayInputStream(baos.toByteArray()));
+            downloader=(ManagedDownloader)in.readObject();
+            in.close();
+            downloader.initialize(manager, fileman, callback);
+        } catch (IOException e) {
+            e.printStackTrace();
+            fail("Couldn't serialize");
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+            fail("No class");
+        }
+
+        //Check same state as before serialization.
+        try { Thread.sleep(200); } catch (InterruptedException e) { }
+        //assertEquals(Downloader.WAITING_FOR_RESULTS, downloader.getState());
+        assertEquals(amountDownloaded, downloader.getAmountRead());
+        downloader.stop();
+    }
+
+    /** Tests that the progress is not 0% when resume button is hit while
+     *  requerying.  This was caused by the call to cleanup() from
+     *  tryAllDownloads3() and was reported by Sam Berlin. */
+    public void testRequeryProgress() {
+        TestUploader uploader=null;
+        ManagedDownloader downloader=null;
+        try {
+            //Start uploader and download.
+            uploader=new TestUploader("ManagedDownloaderTest", PORT);
+            uploader.stopAfter(100);
+            downloader=new ManagedDownloader(
+                new RemoteFileDesc[] {newRFD("some file.txt")},
+                new IncompleteFileManager());
+            downloader.initialize(new DownloadManagerStub(), 
+                                  new FileManagerStub(),
+                                  new ActivityCallbackStub());
+            //Wait for it to download until error.
+            try { Thread.sleep(2000); } catch (InterruptedException e) { }
+            assertEquals(Downloader.WAITING_FOR_RESULTS, 
+                         downloader.getState());
+            assertEquals(100, 
+                         downloader.getAmountRead());
+            //Hit resume, make sure progress not erased.
+            try { 
+                downloader.resume(); 
+            } catch (AlreadyDownloadingException e) {
+                fail("No other downloads!");
+            }
+            try { Thread.sleep(1000); } catch (InterruptedException e) { }
+            assertEquals(Downloader.WAITING_FOR_RESULTS, 
+                         downloader.getState());
+            assertEquals(100, 
+                         downloader.getAmountRead());
+        } finally {
+            if (uploader!=null)
+                uploader.stopThread();
+            if (downloader!=null)
+                downloader.stop();
+        }
+    }
 
     private static RemoteFileDesc newRFD(String name) {
         return newRFD(name, null);
@@ -78,7 +181,7 @@ public class ManagedDownloaderTest extends TestCase {
                 fail("Couldn't create URN");
             }
         }        
-        return new RemoteFileDesc("1.2.3.4", 6346, 13l,
+        return new RemoteFileDesc("127.0.0.1", PORT, 13l,
                                   name, 1024,
                                   new byte[16], 56, false, 4, true, null, urns);
     }

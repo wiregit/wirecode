@@ -22,7 +22,9 @@ import java.net.*;
  * multiple hosts.  See the accompanying white paper for details.<p>
  *
  * Subclasses may refine the requery behavior by overriding the
- * newRequery(), allowAddition(..), and addDownload(..) methods.<p>
+ * newRequery(), allowAddition(..), and addDownload(..) methods.
+ * ResumeDownloader overrides the initialize() method to guarantee 
+ * that progress is initially non-zero.<p>
  * 
  * This class implements the Serializable interface but defines its own
  * writeObject and readObject methods.  This is necessary because parts of the
@@ -359,23 +361,17 @@ public class ManagedDownloader implements Downloader, Serializable {
     
     /**
      * Creates a new ManagedDownload to download the given files.  The download
-     * attempts to begin immediately; there is no need to call initialize.
-     * Non-blocking.
-     *     @param manager the delegate for queueing purposes. Also the callback
-     *      for changes in state.
+     * does not start until initialize(..) is called, nor is it safe to call
+     * any other methods until that point.
      *     @param files the list of files to get.  This stops after ANY of the
      *      files is downloaded.
      *     @param incompleteFileManager the repository of incomplete files for
      *      resuming
      */
-    public ManagedDownloader(DownloadManager manager,
-                             RemoteFileDesc[] files,
-                             FileManager fileManager,
-                             IncompleteFileManager incompleteFileManager,
-                             ActivityCallback callback) {
+    public ManagedDownloader(RemoteFileDesc[] files,
+                             IncompleteFileManager incompleteFileManager) {
         this.allFiles=files;
         this.incompleteFileManager=incompleteFileManager;
-        initialize(manager, fileManager, callback);
     }
 
     /** 
@@ -459,6 +455,17 @@ public class ManagedDownloader implements Downloader, Serializable {
         };
         dloaderManagerThread.setDaemon(true);
         dloaderManagerThread.start();       
+    }
+
+    /** If incompleteFile has already been set, i.e., because a download is in
+     *  progress, does nothing.  Otherwise sets incompleteFile and
+     *  commonOutFile.  Subclasses may override this to force the initial
+     *  progress to be non-zero. */
+    protected void initializeIncompleteFile(File incompleteFile) {
+        if (this.incompleteFile!=null)
+            return;
+        this.incompleteFile=incompleteFile;
+        this.commonOutFile=incompleteFileManager.getEntry(incompleteFile);
     }
 
     /**
@@ -2043,7 +2050,6 @@ public class ManagedDownloader implements Downloader, Serializable {
     private void cleanup() {
         miniRFDToLock.clear();
         threadLockToSocket.clear();
-        commonOutFile = null;
         if(needed != null) //it's null while before we try first bucket
             needed.clear();
         busy = null;

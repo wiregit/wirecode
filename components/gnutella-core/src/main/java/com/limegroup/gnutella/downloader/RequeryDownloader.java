@@ -29,20 +29,14 @@ public class RequeryDownloader extends ManagedDownloader
     /**
      * Creates a new RequeryDownloader - a RequeryDownloader has no files
      * initially associated with it, but it may have them later (via calls to
-     * addDownload().
-     * Non-blocking.
-     *     @param manager the delegate for queueing purposes.  Also the callback
-     *      for changes in state.
+     * addDownload().  Non-blocking.     
      *     @param incompleteFileManager the repository of incomplete files for
      *      resuming
+     *     @param add the keywords to requery with
      */
-    public RequeryDownloader(DownloadManager manager,
-                             FileManager fileManager,
-                             IncompleteFileManager incompleteFileManager,
-                             AutoDownloadDetails add,
-                             ActivityCallback callback) {
-        super(manager, new RemoteFileDesc[0], fileManager,
-              incompleteFileManager,callback);
+    public RequeryDownloader(IncompleteFileManager incompleteFileManager,
+                             AutoDownloadDetails add) {
+        super(new RemoteFileDesc[0], incompleteFileManager);
         Assert.that(add != null, 
                     "Instantiated with a null AutoDownloadDetail!");
         _add = add;

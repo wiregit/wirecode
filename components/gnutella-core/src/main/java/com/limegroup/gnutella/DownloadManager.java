@@ -249,7 +249,8 @@ public class DownloadManager implements BandwidthTracker {
         //Start download asynchronously.  This automatically moves downloader to
         //active if it can.
         ManagedDownloader downloader=new ManagedDownloader(
-            this, files, fileManager, incompleteFileManager, callback);
+            files, incompleteFileManager);
+        downloader.initialize(this, fileManager, callback);
         waiting.add(downloader);
         callback.addDownload(downloader);
         //Save this' state to disk for crash recovery.
@@ -307,13 +308,11 @@ public class DownloadManager implements BandwidthTracker {
             String name=incompleteFileManager.getCompletedName(incompleteFile);
             int size=ByteOrder.long2int(
                 incompleteFileManager.getCompletedSize(incompleteFile));
-            downloader = new ResumeDownloader(this,
-                                              fileManager,
-                                              incompleteFileManager,
-                                              callback,
+            downloader = new ResumeDownloader(incompleteFileManager,
                                               incompleteFile,
                                               name,
                                               size);
+            downloader.initialize(this, fileManager, callback);
         } catch (IllegalArgumentException e) {
             throw new CantResumeException(incompleteFile.getName());
         }
@@ -362,10 +361,9 @@ public class DownloadManager implements BandwidthTracker {
         //worth it.
         incompleteFileManager.purge(false);
 
-        Downloader downloader = new RequeryDownloader(this,
-                                                      fileManager,
-                                                      incompleteFileManager,
-                                                      add, callback);
+        RequeryDownloader downloader=
+            new RequeryDownloader(incompleteFileManager,add);
+        downloader.initialize(this, fileManager, callback);
         waiting.add(downloader);
         callback.addDownload(downloader);
         //Save this' state to disk for crash recovery.

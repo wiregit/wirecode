@@ -16,9 +16,15 @@ public class ResumeDownloaderTest extends TestCase {
     static final String name="filename.txt";
     static final URN hash=TestFile.hash();
     static final int size=1111;
+    static final int amountDownloaded=500;
     static final RemoteFileDesc rfd=newRFD(name, size, hash);
     static final IncompleteFileManager ifm=new IncompleteFileManager();
     static final File incompleteFile=ifm.getFile(rfd);
+    static {
+        VerifyingFile vf=new VerifyingFile(false);
+        vf.addInterval(new Interval(0, amountDownloaded-1));  //inclusive
+        ifm.addEntry(incompleteFile, vf);
+    }
 
     public ResumeDownloaderTest(String name) {
         super(name);
@@ -30,12 +36,11 @@ public class ResumeDownloaderTest extends TestCase {
 
     /** Returns a new ResumeDownloader with stubbed-out DownloadManager, etc. */
     private static ResumeDownloader newResumeDownloader() {
-        return new ResumeDownloader(
-             new DownloadManagerStub(), 
-             new FileManagerStub(), 
-             ifm,
-             new ActivityCallbackStub(),
-             incompleteFile, name, size);
+        ResumeDownloader ret=new ResumeDownloader(ifm,incompleteFile,name,size);
+        ret.initialize(new DownloadManagerStub(), 
+                       new FileManagerStub(), 
+                       new ActivityCallbackStub());
+        return ret;
     }
 
     private static RemoteFileDesc newRFD(String name, int size, URN hash) {
@@ -48,6 +53,45 @@ public class ResumeDownloaderTest extends TestCase {
     }
 
     ////////////////////////////////////////////////////////////////////////////
+
+    /** Tests that the progress is not 0% while requerying.
+     *  This issue was reported by Sam Berlin. */
+    public void testRequeryProgress() {
+        ResumeDownloader downloader=newResumeDownloader();
+        try { Thread.sleep(200); } catch (InterruptedException e) { }
+        assertEquals(Downloader.WAITING_FOR_RESULTS, downloader.getState());
+        assertEquals(amountDownloaded, downloader.getAmountRead());
+
+        try {
+            //Serialize it!
+            ByteArrayOutputStream baos=new ByteArrayOutputStream();
+            ObjectOutputStream out=new ObjectOutputStream(baos);
+            out.writeObject(downloader);
+            out.flush(); out.close();
+            downloader.stop();
+
+            //Deserialize it as a different instance.  Initialize.
+            ObjectInputStream in=new ObjectInputStream(
+                new ByteArrayInputStream(baos.toByteArray()));
+            downloader=(ResumeDownloader)in.readObject();
+            in.close();
+            downloader.initialize(new DownloadManagerStub(),
+                                  new FileManagerStub(),
+                                  new ActivityCallbackStub());
+        } catch (IOException e) {
+            e.printStackTrace();
+            fail("Couldn't serialize");
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+            fail("No class");
+        }
+
+        //Check same state as before serialization.
+        try { Thread.sleep(200); } catch (InterruptedException e) { }
+        assertEquals(Downloader.WAITING_FOR_RESULTS, downloader.getState());
+        assertEquals(amountDownloaded, downloader.getAmountRead());
+        downloader.stop();
+    }
 
     /** Tests serialization of version 1.2 of ResumeDownloader.
      *  (LimeWire 2.7.0/2.7.1 beta.)

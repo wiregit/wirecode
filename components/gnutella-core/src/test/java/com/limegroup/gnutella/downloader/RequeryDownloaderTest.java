@@ -27,9 +27,10 @@ public class RequeryDownloaderTest extends TestCase {
         VerifyingFile vf = new VerifyingFile(true);
         vf.addInterval(new Interval(10,20));
         ifm.addEntry(new File("T-10-test.txt"), vf);
-        RequeryDownloader downloader=new RequeryDownloader(
-            new DownloadManager(), new FileManager(), ifm, details,
-            new ActivityCallbackStub());
+        RequeryDownloader downloader=new RequeryDownloader(ifm, details);
+        downloader.initialize(new DownloadManager(), 
+                              new FileManager(),
+                              new ActivityCallbackStub());
         try {
             File tmp=File.createTempFile("RequeryDownloader_test", "dat");
             ObjectOutputStream out=new ObjectOutputStream(new FileOutputStream(tmp));

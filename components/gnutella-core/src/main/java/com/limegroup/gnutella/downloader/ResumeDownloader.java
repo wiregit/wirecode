@@ -42,19 +42,24 @@ public class ResumeDownloader extends ManagedDownloader
      *  IncompleteFileManager.getCompletedName(incompleteFile)
      * @param size the size of the completed file, which MUST be the result of
      *  IncompleteFileManager.getCompletedSize(incompleteFile) */
-    public ResumeDownloader(DownloadManager manager,
-                            FileManager fileManager,
-                            IncompleteFileManager incompleteFileManager,
-                            ActivityCallback callback,
+    public ResumeDownloader(IncompleteFileManager incompleteFileManager,
                             File incompleteFile,
                             String name,
                             int size) {
-        super(manager, new RemoteFileDesc[0], fileManager,
-              incompleteFileManager,callback);
+        super(new RemoteFileDesc[0], incompleteFileManager);
         this._incompleteFile=incompleteFile;
         this._name=name;
         this._size=size;
         this._hash=incompleteFileManager.getCompletedHash(incompleteFile);
+    }
+
+    /** Overrides ManagedDownloader to ensure that progress is initially
+     *  non-zero and file previewing works. */
+    public void initialize(DownloadManager manager, 
+                           FileManager fileManager, 
+                           ActivityCallback callback) {
+        initializeIncompleteFile(_incompleteFile);
+        super.initialize(manager, fileManager, callback);
     }
 
     /**
