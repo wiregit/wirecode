@@ -369,7 +369,7 @@ public class Connection implements Runnable {
 
 			    FileManager fm = FileManager.getFileManager();
 			    
-			    int kilobytes = fm.getSize()/1000;
+			    int kilobytes = fm.getSize()/1024;
 			    int num_files = fm.getNumFiles();
 
 			    Message pingReply = new PingReply(m.getGUID(),(byte)(m.getHops()+1),
