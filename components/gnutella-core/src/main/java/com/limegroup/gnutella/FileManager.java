@@ -90,8 +90,13 @@ public class FileManager{
 
     }
     
-    public synchronized void addFile(String path) { /* the addFile method adds */ 
-	File myFile = new File(path);  /* just one single file to */
+    public synchronized void addFile(String path) { 
+	File myFile = new File(path);  
+
+	if (!myFile.exists())               
+	    return;                        
+	                                    /* the addFile method adds */ 
+                                            /* just one single file to */
 	String name = myFile.getName();     /* the name of the file */
 	int n = (int)myFile.length();       /* the list, and increments */
 	_size += n;                         /* the appropriate info */
@@ -132,6 +137,8 @@ public class FileManager{
 
     public synchronized void addDirectory(String dir_name) { /* the addDirectory method */
 	File myFile = new File(dir_name);       /* recursively adds all of */
+	if (!myFile.exists())
+	    return;
 	File[] file_list = myFile.listFiles();  /* the files in a specified */
 	int n = file_list.length;               /* directory */
 
