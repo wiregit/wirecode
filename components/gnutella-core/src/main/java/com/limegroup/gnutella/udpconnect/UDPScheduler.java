@@ -142,7 +142,7 @@ public class UDPScheduler extends ManagedThread {
     /**
      *  Shortcut test for a second thread to deal with the new schedule handoff
      */
-    class UpdateThread extends Thread {
+    class UpdateThread extends ManagedThread {
         ArrayList _listSchedule,_listUnregister,_listRegister;
 
         /**
@@ -175,7 +175,7 @@ public class UDPScheduler extends ManagedThread {
         /**
          *  Process incoming event updates by interacting with the main thread.
          */
-        public void run() {
+        public void managedRun() {
             UDPTimerEvent evt;
             ArrayList localListSchedule,localListUnregister,localListRegister;
             while (true) {
