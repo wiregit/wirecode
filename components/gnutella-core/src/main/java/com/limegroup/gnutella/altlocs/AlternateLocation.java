@@ -416,7 +416,13 @@ public final class AlternateLocation implements
             return -1;//he is demoted, and I am not
         }
         //both have the same value for _demoted
-        return (_count - other._count);
+        int ret = _count - other._count;
+        if(ret!=0)
+            return ret;
+        ret = this.URL.getHost().compareTo(other.URL.getHost());
+        if(ret!=0)
+            return ret;
+        return (this.URL.getPort() - other.URL.getPort());
     }
 
 	/**

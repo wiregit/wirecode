@@ -275,7 +275,6 @@ public class TestUploader {
         AlternateLocationCollection goodLocs = null;
         while (true) {
             String line=input.readLine();
-            System.out.println(line);
             //DownloadTest.debug(line+"\n"); 
             if (firstLine) {
                 request=line;
@@ -315,14 +314,12 @@ public class TestUploader {
         if(_sha1!=null) {
             if(incomingAltLocs == null)
                 incomingAltLocs = AlternateLocationCollection.create(_sha1);
-            System.out.println("Sumeet:adding n-alts "+(badLocs!=null));
             if(badLocs!=null) {
                 synchronized(badLocs) {
                     Iterator iter = badLocs.iterator();
                     incomingAltLocs.remove((AlternateLocation)iter.next());
                 }
             }
-            System.out.println("Sumeet:adding good alts"+(goodLocs!=null));
             if(goodLocs!=null) {
                 synchronized(goodLocs) {
                     Iterator iter = goodLocs.iterator();

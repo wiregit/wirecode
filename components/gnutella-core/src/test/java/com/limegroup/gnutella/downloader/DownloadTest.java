@@ -856,6 +856,7 @@ public class DownloadTest extends com.limegroup.gnutella.util.BaseTestCase {
         assertTrue( !u2Alt.contains(al) );
         
         //check that u1 is demoted in u2's Collection
+        //Sumeet:TODO: add this test back
         FixedSizeSortedSet set = 
         (FixedSizeSortedSet)PrivilegedAccessor.getValue(u2Alt,"LOCATIONS");
         AlternateLocation loc = (AlternateLocation)set.first();

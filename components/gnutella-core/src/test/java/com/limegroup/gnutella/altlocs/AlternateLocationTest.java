@@ -1,7 +1,7 @@
-package com.limegroup.gnutella;
+package com.limegroup.gnutella.altlocs;
 
 import com.sun.java.util.collections.*;
-import com.limegroup.gnutella.altlocs.*;
+import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.settings.*;
 import com.limegroup.gnutella.http.*;
@@ -251,6 +251,15 @@ public final class AlternateLocationTest extends com.limegroup.gnutella.util.Bas
 		}
 	}
 
+    public void testDemotedEquals() throws Exception {
+        AlternateLocation loc1 = AlternateLocation.create(equalLocs[0]);
+        AlternateLocation loc2 = AlternateLocation.create(equalLocs[0]);
+        assertEquals("locations should be equal", loc1, loc2);
+        loc2.demote();
+        assertEquals("locations should be equal", loc1, loc2);
+    }
+
+
 	/**
 	 * Test the equals method.
 	 */
@@ -365,10 +374,11 @@ public final class AlternateLocationTest extends com.limegroup.gnutella.util.Bas
 	 * identical regardless of whether or not they have different fractions
 	 * of that second, which is the behavior we want.
 	 */
-	public void testAlternateLocationCompareToWithEqualUrlsDifferentDates() throws Exception {
+	public void testAlternateLocationCompareToWithEqualUrlsDifferentDates() 
+                                                             throws Exception {
 		// make sure that alternate locations with the same urls and different
-		// timestamps are considered different
-		for(int i=0; i<(HugeTestUtils.VALID_NONTIMESTAMPED_LOCS.length-1); i++) {
+		// timestamps are considered same
+		for(int i=0;i<(HugeTestUtils.VALID_NONTIMESTAMPED_LOCS.length-1); i++) {
 			String nonTSloc0 = HugeTestUtils.VALID_NONTIMESTAMPED_LOCS[i];
 			String nonTSloc1 = HugeTestUtils.VALID_NONTIMESTAMPED_LOCS[i];
 
@@ -377,13 +387,11 @@ public final class AlternateLocationTest extends com.limegroup.gnutella.util.Bas
 				// differentiates properly
 				String loc0 = nonTSloc0 + " "+VALID_TIMESTAMPS[j];
 				String loc1 = nonTSloc1 + " "+VALID_TIMESTAMPS[j+1];
-				AlternateLocation curLoc0 = 
-		            AlternateLocation.create(loc0);
-				AlternateLocation curLoc1 = 
-		            AlternateLocation.create(loc1);
+				AlternateLocation curLoc0 = AlternateLocation.create(loc0);
+				AlternateLocation curLoc1 = AlternateLocation.create(loc1);
 				int z = curLoc0.compareTo(curLoc1);
-				assertNotEquals("locations should compare to different values:\r\n"+
-						   curLoc0 + "\r\n" + curLoc1+"\r\n", 0, z);
+				assertEquals("locations should compare to same values:\r\n"+
+                             curLoc0 + "\r\n" + curLoc1+"\r\n", 0, z);
 			}
 		}
 	}

@@ -130,19 +130,20 @@ public final class AlternateLocationCollection
 			throw new IllegalArgumentException("SHA1 does not match");
 		
 		synchronized(this) {
-            AlternateLocation alt = null;
-            if(LOCATIONS.contains(al))
-                alt = (AlternateLocation)(LOCATIONS.tailSet(al).first());
+            AlternateLocation alt = (AlternateLocation)LOCATIONS.get(al);
+            boolean ret = false;
             if(alt==null) {//it was not in collections.
-                LOCATIONS.add(al);//no need to increment, no need to promote
-                return true;
+                ret = true;
+                LOCATIONS.add(al);
             }
             else {
+                LOCATIONS.remove(alt);
                 alt.increment();
                 alt.promote();
-                LOCATIONS.add(alt); //put it back
-                return false;
+                ret =  false;
+                LOCATIONS.add(alt); //add incremented version
             }
+            return ret;
         }
     }
 	
@@ -157,16 +158,17 @@ public final class AlternateLocationCollection
 			return false; //it cannot be in this list if it has a different SHA1
 		
 		synchronized(this) {
-            AlternateLocation loc = null;
-            if(LOCATIONS.contains(al))
-                loc = (AlternateLocation)(LOCATIONS.tailSet(al).first());
+            AlternateLocation loc = (AlternateLocation)LOCATIONS.get(al);
             if(loc==null) //it's not in locations, cannot remove
                 return false;
-            if(loc.getDemoted()) //we did remove it...don't add it back
-                return true;            
+            if(loc.getDemoted()) {//if its demoted remove it
+                LOCATIONS.remove(loc);
+                return true;         
+            }   
             else {
+                LOCATIONS.remove(loc);
                 loc.demote(); //one more strike and you are out...
-                LOCATIONS.add(loc); //put it back
+                LOCATIONS.add(loc); //make it replace the older loc
                 return false;
             }
 		}
