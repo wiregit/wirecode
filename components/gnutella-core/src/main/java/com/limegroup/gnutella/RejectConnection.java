@@ -71,7 +71,7 @@ class RejectConnection extends Connection
                 //this is the only kind of message we will deal with in Reject Connection
                 //If any other kind of message comes in we drop
 
-                System.out.println("gonna send pongs");
+                //System.out.println("gonna send pongs");
                 //get and send the pongs with good hosts info to the connected host
                 sendPongs(m.getGUID());
 
@@ -102,13 +102,11 @@ class RejectConnection extends Connection
 
             //iterate over the endpoints
             for(int i=0; i < endpoints.length; i++)
-
             {
-                System.out.println("Endpoint[" + i + "]=" + endpoints[i]);
+                //System.out.println("Endpoint[" + i + "]=" + endpoints[i]);
                 // make a pong with this host info, set the TTL to 1
 
                 try
-
                 {
                     PingReply pr = new PingReply(guid,(byte)1,endpoints[i].getPort(),
                     endpoints[i].getHostBytes(), endpoints[i].getFiles(),
