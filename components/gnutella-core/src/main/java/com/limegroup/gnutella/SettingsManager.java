@@ -144,9 +144,9 @@ public final class SettingsManager {
     /** Default setting for the time to live */
     private final byte    DEFAULT_TTL            = (byte)6;
     /** Default setting for the soft maximum time to live */
-    private final byte    DEFAULT_SOFT_MAX_TTL   = (byte)6;
+    //private final byte    DEFAULT_SOFT_MAX_TTL   = (byte)6;
     /** Default setting for the hard maximum time to live */
-    private final byte    DEFAULT_MAX_TTL        = (byte)16;
+    //private final byte    DEFAULT_MAX_TTL        = (byte)16;
     /** Default maximum packet length */
     private final int     DEFAULT_MAX_LENGTH     = 65536;
     /** Default timeout */
@@ -562,8 +562,8 @@ public final class SettingsManager {
     private volatile int      _forcedPort;
 	private volatile boolean  _allowBroswer;
     private volatile byte     _ttl;
-    private volatile byte     _softmaxttl;
-    private volatile byte     _maxttl;
+    //private volatile byte     _softmaxttl;
+    //private volatile byte     _maxttl;
     private volatile int      _maxLength;
     private volatile int      _timeout;
     private volatile int      _persistentHTTPConnectionTimeout;
@@ -742,10 +742,10 @@ public final class SettingsManager {
             try {
                 key = (String)enum.nextElement();
                 p = tempProps.getProperty(key);
-                if(key.equals(TTL)) {
-                    setTTL(Byte.parseByte(p));
-                }
-				else if(key.equals(ALLOW_BROWSER)) {
+                //if(key.equals(TTL)) {
+				//  setTTL(Byte.parseByte(p));
+                //}
+				if(key.equals(ALLOW_BROWSER)) {
 					boolean bs;
 					if (p.equals("true"))
                         bs=true;
@@ -755,12 +755,12 @@ public final class SettingsManager {
                         break;
                     setAllowBrowser(bs);
 				}
-                else if(key.equals(SOFT_MAX_TTL)) {
-                    setSoftMaxTTL(Byte.parseByte(p));
-                }
-                else if(key.equals(MAX_TTL)) {
-                    setMaxTTL(Byte.parseByte(p));
-                }
+                //else if(key.equals(SOFT_MAX_TTL)) {
+				//  setSoftMaxTTL(Byte.parseByte(p));
+                //}
+                //else if(key.equals(MAX_TTL)) {
+				//  setMaxTTL(Byte.parseByte(p));
+                //}
                 else if(key.equals(MAX_LENGTH)) {
                     setMaxLength(Integer.parseInt(p));
                 }
@@ -1150,8 +1150,8 @@ public final class SettingsManager {
 	 */
     public void loadDefaults() {
 		setAllowBrowser(DEFAULT_ALLOW_BROWSER);
-        setMaxTTL(DEFAULT_MAX_TTL);
-        setSoftMaxTTL(DEFAULT_SOFT_MAX_TTL);
+        //setMaxTTL(DEFAULT_MAX_TTL);
+        //setSoftMaxTTL(DEFAULT_SOFT_MAX_TTL);
         setTTL(DEFAULT_TTL);
         setMaxLength(DEFAULT_MAX_LENGTH);
         setTimeout(DEFAULT_TIMEOUT);
@@ -1259,14 +1259,16 @@ public final class SettingsManager {
 	 */
 	public boolean getAllowBrowser() {return _allowBroswer;}
 
-    /** Returns the time to live */
+    /** Returns the time to live -- this is only really still here
+	 *  for testing purposes.
+	 */
     public byte getTTL(){return _ttl;}
 
     /** return the soft maximum time to live */
-    public byte getSoftMaxTTL(){return _softmaxttl;}
+    //public byte getSoftMaxTTL(){return _softmaxttl;}
 
     /** Returns the maximum time to live*/
-    public byte getMaxTTL(){return _maxttl;}
+    //public byte getMaxTTL(){return _maxttl;}
 
     /** Returns the maximum allowable length of packets*/
     public int getMaxLength(){return _maxLength;}
@@ -2141,15 +2143,15 @@ public final class SettingsManager {
     /**
 	 * Sets the hard maximum time to live.
 	 */
-    public void setMaxTTL(byte maxttl) throws IllegalArgumentException {
-        if(maxttl < 0 || maxttl > 50)
-            throw new IllegalArgumentException();
-        else {
-            _maxttl = maxttl;
-            String s = Byte.toString(_maxttl);
-            PROPS.put(MAX_TTL, s);
-        }
-    }
+//     public void setMaxTTL(byte maxttl) throws IllegalArgumentException {
+//         if(maxttl < 0 || maxttl > 50)
+//             throw new IllegalArgumentException();
+//         else {
+//             _maxttl = maxttl;
+//             String s = Byte.toString(_maxttl);
+//             PROPS.put(MAX_TTL, s);
+//         }
+//     }
 
     public void setBasicInfoForQuery(int basicInfo) {
         _basicQueryInfo = basicInfo;
@@ -2331,28 +2333,28 @@ public final class SettingsManager {
     /**
 	 * Sets the time to live.
 	 */
-    public void setTTL(byte ttl) {
-        if (ttl < 1 || ttl > 14)
-            throw new IllegalArgumentException();
-        else {
-            _ttl = ttl;
-            String s = Byte.toString(_ttl);
-            PROPS.put(TTL, s);
-        }
-    }
+	private void setTTL(byte ttl) {
+		//if (ttl < 1 || ttl > 14)
+		//   throw new IllegalArgumentException();
+		//else {
+		_ttl = ttl;
+		String s = Byte.toString(_ttl);
+		PROPS.put(TTL, s);
+			 //}
+     }
 
     /**
 	 * Sets the soft maximum time to live.
 	 */
-    public void setSoftMaxTTL(byte softmaxttl) {
-        if (softmaxttl < 0 || softmaxttl > 14)
-            throw new IllegalArgumentException();
-        else {
-            _softmaxttl = softmaxttl;
-            String s = Byte.toString(softmaxttl);
-            PROPS.put(SOFT_MAX_TTL, s);
-        }
-    }
+//     public void setSoftMaxTTL(byte softmaxttl) {
+//         if (softmaxttl < 0 || softmaxttl > 14)
+//             throw new IllegalArgumentException();
+//         else {
+//             _softmaxttl = softmaxttl;
+//             String s = Byte.toString(softmaxttl);
+//             PROPS.put(SOFT_MAX_TTL, s);
+//         }
+//     }
 
     /**
 	 * Sets the port to connect on
