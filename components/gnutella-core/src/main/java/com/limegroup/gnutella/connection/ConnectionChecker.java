@@ -53,7 +53,6 @@ public final class ConnectionChecker implements Runnable {
      * in minimal traffic to these sites.  NON-FINAL FOR TESTING.
      */
     private static String[] STANDARD_HOSTS = {
-        "http://www.microsoft.com",
         "http://www.wanadoo.fr",
         "http://www.tiscali.com",
         "http://www.ntt.com",
