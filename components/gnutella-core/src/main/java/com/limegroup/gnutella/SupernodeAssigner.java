@@ -153,7 +153,7 @@ public final class SupernodeAssigner {
      * are not met.  If the user has disabled supernode support, 
      * sets EVER_SUPERNODE_CAPABLE to false.
 	 */
-	public void setSupernodeCapable() {
+	private void setSupernodeCapable() {
         if (UltrapeerSettings.DISABLE_ULTRAPEER_MODE.getValue()) {
 			UltrapeerSettings.EVER_ULTRAPEER_CAPABLE.setValue(false);
             return;
@@ -175,7 +175,7 @@ public final class SupernodeAssigner {
             //AND I have accepted incoming messages over UDP
             //RouterService.isGUESSCapable() &&
             //AND am I a capable OS?
-			SUPERNODE_OS;
+			SUPERNODE_OS;		
         
         // if this is supernode capable, make sure we record it
         if(isSupernodeCapable) {
