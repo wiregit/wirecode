@@ -111,7 +111,7 @@ public class RouterService
   		this.catcher = createHostCatcher();
   		this.downloader = new DownloadManager();
   		this.uploadManager = new UploadManager(this.callback, this.router, 
-											   this.acceptor, this.fileManager);
+											   this.fileManager);
 
         this.chatManager = ChatManager.instance();
 
