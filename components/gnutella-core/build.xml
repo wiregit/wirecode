@@ -40,9 +40,14 @@
 
 <!-- Core -->
 <target name="core" depends="init">
-	<javac debug="${DEBUG}" optimize="${OPTIMIZE}" deprecation="${DEPRECATION}"
-		srcdir="${basedir}" destdir="${basedir}"
-		excludes="${tests}/**">
+	<javac debug="${DEBUG}" 
+           optimize="${OPTIMIZE}" 
+           deprecation="${DEPRECATION}"
+		   srcdir="${basedir}" 
+           destdir="${basedir}"
+           excludes="${tests}/**"
+           target="1.1"
+    >
     <classpath refid="default.classpath" />
     </javac>
 </target>
