@@ -216,7 +216,7 @@ public final class SupernodeAssigner {
 			 _maxDownstreamBytesPerSec >= 
 			 MINIMUM_REQUIRED_DOWNSTREAM_KBYTES_PER_SECOND*2 &&
 			 //AND I'm not a modem (in case estimate wrong)
-			 (SETTINGS.getConnectionSpeed() > SpeedConstants.CABLE_SPEED_INT) &&
+			 (SETTINGS.getConnectionSpeed() > SpeedConstants.MODEM_SPEED_INT) &&
 			 //AND is my average uptime OR current uptime high enough?
 			 (SETTINGS.getAverageUptime() >= MINIMUM_AVERAGE_UPTIME ||
 			  _currentUptime >= MINIMUM_CURRENT_UPTIME_FORCE) &&
