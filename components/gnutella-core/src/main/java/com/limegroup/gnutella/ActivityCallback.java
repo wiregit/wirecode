@@ -59,7 +59,7 @@ public interface ActivityCallback
      *
      * @requires "directory" is a directory
      */
-    public void addSharedDirectory(File directory);
+    public void addSharedDirectory(final File dir, final File parent);
 
     /**
      * Notifies the GUI that the given file has been shared.  This method is
@@ -69,7 +69,7 @@ public interface ActivityCallback
      * @requires f is a file, addSharedDirectory has been called with parent 
      *  as an argument, and parent contains f 
      */
-    public void addSharedFile(File file, File parent);
+    public void addSharedFile(final File file, final File parent);
            
 
     /**
