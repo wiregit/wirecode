@@ -50,6 +50,11 @@ public final class NIOMessageWriter implements MessageWriter {
      * this writer for write events.
      */
     private volatile boolean _registered = false;
+    
+    /**
+     * Variable used to open and close this writer.  ONLY USED FOR TESTING.
+     */
+    private boolean _closed = false;
 	
     
     /**
@@ -77,6 +82,7 @@ public final class NIOMessageWriter implements MessageWriter {
 	 * of sending a message.  
 	 */
 	public synchronized boolean hasPendingMessage() {
+        if(_closed) return true;
 		return _message != null;
 	}
 	
@@ -97,6 +103,7 @@ public final class NIOMessageWriter implements MessageWriter {
         // so we should start our application-level buffering of messages to
         // make sure we prioritize certain traffic over others
         if(hasPendingMessage()) {
+            System.out.println("NIOMessageWriter::adding to queue: "+msg);
             QUEUE.add(msg);
                 
             // should already be registered, but just in case...    
@@ -139,6 +146,7 @@ public final class NIOMessageWriter implements MessageWriter {
                 return true;
             }
     		Message msg = QUEUE.removeNext();
+            System.out.println("NIOMessageWriter::removed from queue: "+msg);
             Assert.that(msg != null, "should have obtained queued message");
             return write(msg);
     	} else if(!CHANNEL.isConnected()) {
@@ -146,6 +154,7 @@ public final class NIOMessageWriter implements MessageWriter {
         } else {
     	    CHANNEL.write(_message);
         	if(!_message.hasRemaining()) {
+                System.out.println("NIOMessageWriter::wrote to channel");
         		_message = null;
                 return QUEUE.size() == 0;
         	} else {
@@ -156,18 +165,12 @@ public final class NIOMessageWriter implements MessageWriter {
     }
 
     private void register() {
-        if(!_registered) {
+        if(!_registered && !_closed) {
             NIODispatcher.instance().addWriter(CONNECTION);
             _registered = true;
         }      
     }
     
-    /**
-     * Closes the NIO writer.
-     * 
-     * @see com.limegroup.gnutella.connection.MessageWriter#close()
-     */
-    public void close() {}
 
     /* (non-Javadoc)
      * @see com.limegroup.gnutella.connection.MessageWriter#simpleWrite(com.limegroup.gnutella.messages.Message)
@@ -192,6 +195,22 @@ public final class NIOMessageWriter implements MessageWriter {
      */
     public void setRegistered(boolean b) {
         _registered = b;
+    }
+
+    /* (non-Javadoc)
+     * @see com.limegroup.gnutella.connection.MessageWriter#setClosed(boolean)
+     */
+    public void setClosed(boolean closed) {
+        _closed = closed;
+        if(!closed) {
+            try {
+                while(!write()) {}
+            } catch (IOException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+        }
+        
     }
     
 }

@@ -1424,7 +1424,7 @@ public class Connection implements ReplyHandler, PushProxyInterface {
         // the writer can be null for testing
         if(_messageWriter != null) {
             // notify the message writing thread to finish sending and die
-            _messageWriter.close();
+            _messageWriter.setClosed(true);
         }
         
         // Setting this flag insures that the socket is closed if this
