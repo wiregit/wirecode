@@ -263,14 +263,14 @@ public class LeafRoutingTest extends BaseTestCase {
             assertEquals("unexpected size of X-Try-Ultrapeers list hosts: "+hosts, 
                          4, s.size());
             //byte[] localhost=new byte[] {(byte)127, (byte)0, (byte)0, (byte)1};
-            assertTrue("expected Ultrapeer not present in list",
-                       s.contains(new Endpoint(ultrapeerIP, 6350)));
-            assertTrue("expected Ultrapeer not present in list",
-                       s.contains(new Endpoint(ultrapeerIP, 6351)));
-            assertTrue("expected Ultrapeer not present in list",
-                       s.contains(new Endpoint(ultrapeerIP, 6352)));
-            assertTrue("expected Ultrapeer not present in list",
-                       s.contains(new Endpoint(ultrapeerIP, 6353)));
+            assertContains("expected Ultrapeer not present in list",
+                       s, new Endpoint(ultrapeerIP, 6350));
+            assertContains("expected Ultrapeer not present in list",
+                       s, new Endpoint(ultrapeerIP, 6351));
+            assertContains("expected Ultrapeer not present in list",
+                       s, new Endpoint(ultrapeerIP, 6352));
+            assertContains("expected Ultrapeer not present in list",
+                       s, new Endpoint(ultrapeerIP, 6353));
 
             //assertTrue("expected Ultrapeer not present in list",
             //           s.contains(new Endpoint(localhost, 6350))); 

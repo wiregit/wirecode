@@ -1,6 +1,7 @@
 package com.limegroup.gnutella.util;
 
 import junit.framework.TestCase;
+import com.sun.java.util.collections.Collection;
     
 /**
  * A set of assert comparisons to check greater than / less than
@@ -17,6 +18,8 @@ public class AssertComparisons extends TestCase {
     private static final int NOT_EQUAL = 5;
     private static final int NOT_SAME = 6;
     private static final int NOT_INSTANCE_OF = 7;
+    private static final int CONTAINS = 8;
+    private static final int NOT_CONTAINS = 9;
     
     /**
      * Named constructor.
@@ -25,6 +28,38 @@ public class AssertComparisons extends TestCase {
         super(name);
     }
     
+    /**
+     * Assert that the collection contains the object.
+     */
+    static public void assertContains(Collection col, Object obj) {
+        assertContains(null, col, obj);
+    }
+    
+    /**
+     * Asserts that the collection contains the object.  If it doesn't,
+     * an AssertionFailedError is thrown with the given message.
+     */
+    static public void assertContains(String msg, Collection col, Object obj) {
+        if(!col.contains(obj))
+            fail(formatComparison(CONTAINS, msg, obj, col));
+    }
+    
+    /**
+     * Assert that the collection does not contain the object.
+     */
+    static public void assertNotContains(Collection col, Object obj) {
+        assertNotContains(null, col, obj);
+    }
+    
+    /**
+     * Asserts that the collection does not contain the object.  If it does
+     * an AssertionFailedError is thrown with the given message.
+     */
+    static public void assertNotContains(String msg, Collection col, Object obj) {
+        if(col.contains(obj))
+            fail(formatComparison(NOT_CONTAINS, msg, obj, col));
+    }
+
     /**
      * Asserts that actual is an instance of class expected. If it isn't,
      * an AssertionFailedError is thrown.
@@ -745,7 +780,11 @@ public class AssertComparisons extends TestCase {
         case NOT_EQUAL:
             compare = "something other than"; break;
         case NOT_SAME:
-            compare = "something other than"; break;            
+            compare = "something other than"; break;
+        case CONTAINS:
+            compare = "to contain"; break;
+        case NOT_CONTAINS:
+            compare = "to not contain"; break;
         }
         String formatted = "";
         if ( message != null )
