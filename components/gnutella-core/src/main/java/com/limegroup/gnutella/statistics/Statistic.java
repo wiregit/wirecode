@@ -8,7 +8,7 @@ public interface Statistic {
 	/**
 	 * Constant for the number of records to hold for each statistic.
 	 */
-	public static final int HISTORY_LENGTH = 180;
+	public static final int HISTORY_LENGTH = 200;
 
 	/**
 	 * Accessor for the total number of this statistic recorded.
