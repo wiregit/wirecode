@@ -75,6 +75,16 @@ public final class ServerSideConnectBackRedirectTest extends BaseTestCase {
     private static DatagramSocket UDP_ACCESS;
 
     /**
+     * Just a TCP connection to use for testing.
+     */
+    private static ServerSocket TCP_ACCESS;
+
+    /**
+     * The port for TCP_ACCESS
+     */ 
+    private static final int TCP_ACCESS_PORT = 10776;
+
+    /**
 	 * Second Ultrapeer connection
      */
     private static Connection ULTRAPEER_2;
@@ -105,6 +115,7 @@ public final class ServerSideConnectBackRedirectTest extends BaseTestCase {
 						   );
 
         UDP_ACCESS = new DatagramSocket();
+        TCP_ACCESS = new ServerSocket(TCP_ACCESS_PORT);
 
         ULTRAPEER_2 = 
 			new Connection("localhost", PORT,
@@ -320,6 +331,45 @@ public final class ServerSideConnectBackRedirectTest extends BaseTestCase {
         }
         tempSock.close();
     }
+
+
+    public void testTCPConnectBackRedirect() throws Exception {
+        drainAll();
+        
+        GUID cbGuid = new GUID(GUID.makeGuid());
+        TCPConnectBackRedirect tcp = 
+            new TCPConnectBackRedirect(InetAddress.getLocalHost(),
+                                       TCP_ACCESS.getLocalPort());
+        
+        LEAF.send(tcp);
+        LEAF.flush();
+        
+        // we should NOT get a incoming connection
+        TCP_ACCESS.setSoTimeout(1000);
+        try {
+            TCP_ACCESS.accept();
+            assertTrue(false);
+        }
+        catch (IOException good) {
+        }
+
+        cbGuid = new GUID(GUID.makeGuid());
+        tcp = new TCPConnectBackRedirect(InetAddress.getLocalHost(),
+                                         TCP_ACCESS.getLocalPort());
+        
+        ULTRAPEER_1.send(tcp);
+        ULTRAPEER_1.flush();
+
+        // we should get a incoming connection
+        try {
+            TCP_ACCESS.accept();
+        }
+        catch (IOException good) {
+            assertTrue(false);
+        }
+
+    }
+
 
 
 
