@@ -541,8 +541,7 @@ public class DownloadManager implements BandwidthTracker {
         // get them as RFDs....
         RemoteFileDesc[] rfds = null;
         try { 
-            rfds = qr.toRemoteFileDescArray(
-                    RouterService.acceptedIncomingConnection());
+            rfds = qr.toRemoteFileDescArray();
         }
         catch (BadPacketException bpe) {
             debug(bpe);
