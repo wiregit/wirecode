@@ -539,32 +539,24 @@ public class Connection implements Runnable {
                     Connection inConnection = routeTable.get(m.getGUID()); 
                     //connection has never been encountered before...
                     if (inConnection==null && !isRouteSpam(m)){
-                        //reduce TTL, increment hops. If old val of TTL was 0 drop message
-                        if (manager.stats==true)
-                            manager.PReqCount++;//keep track of statistics if stats is turned on.
-                        if (m.hop()!=0){
-                            routeTable.put(m.getGUID(),this);//add to Reply Route Table
+                        routeTable.put(m.getGUID(),this);//add to Reply Route Table
+                        //Reduce TTL, increment hops.  Respond regardless of the
+                        //TTL, but forward only if TTL was >1.
+                        if (m.hop()>1) {
                             manager.sendToAllExcept(m, this);//broadcast to other hosts
-                            byte[] ip=sock.getLocalAddress().getAddress(); //little endian
-
-                            FileManager fm = FileManager.getFileManager();
-                
-                            int kilobytes = fm.getSize()/1024;
-                            int num_files = fm.getNumFiles();
-
-                            Message pingReply = 
-							new PingReply(m.getGUID(),
-										  (byte)(m.getHops()+1),
-										  manager.getListeningPort(),
-										  ip, num_files, kilobytes);
-							
-                            send(pingReply);
-                            if (manager.stats==true)
-                                manager.PRepCount++;//keep stats if stats is turned on
                         }
-                        else{//TTL is zero
-                            //do nothing (drop the message).
-                        }
+
+                        byte[] ip=sock.getLocalAddress().getAddress();                         
+                        FileManager fm = FileManager.getFileManager();               
+                        int kilobytes = fm.getSize()/1024;
+                        int num_files = fm.getNumFiles();
+                        
+                        Message pingReply = 
+                        new PingReply(m.getGUID(),
+                                      (byte)(m.getHops()+1),
+                                      manager.getListeningPort(),
+                                      ip, num_files, kilobytes);                        
+                        send(pingReply);
                     }
                     else{// message has already been processed before
                         //do nothing (drop message)
@@ -601,57 +593,43 @@ public class Connection implements Runnable {
                 else if (m instanceof QueryRequest){
                     Connection inConnection = routeTable.get(m.getGUID());
                     if (inConnection==null && !isRouteSpam(m)){
+                        routeTable.put(m.getGUID(),this); //add to Reply Route Table
 
                         // Feed to the UI Monitor
                         ActivityCallback ui=manager.getCallback();
                         if (ui!=null && personalFilter.allow(m)) 
                             ui.handleQueryString(((QueryRequest)m).getQuery());
 
-                        //reduce TTL,increment hops, If old val of TTL was 0 drop message
-                        //NOTE: This is Num Local Searches so always count it
-                        //if (manager.stats==true)  
-                        manager.QReqCount++;//keep stats if stats turned on
-
-                        if (m.hop()!=0){
-                            routeTable.put(m.getGUID(),this); //add to Reply Route Table
+                        //Reduce TTL, increment hops.  Handle regardless of the
+                        //TTL, but forward only if TTL was >1.
+                        if (m.hop()>1) {
                             manager.sendToAllExcept(m,this); //broadcast to other hosts
-             
-                            FileManager fm = FileManager.getFileManager();
-                            Response[] responses = fm.query((QueryRequest)m);
-                
-                            if (responses.length > 0) {
-                                byte[] guid = m.getGUID();
-                                byte ttl = (byte)(m.getHops() +1);
-                                int port = manager.getListeningPort();
-                                byte[] ip=sock.getLocalAddress().getAddress(); //little endian
-                                long speed = SettingsManager.instance().getConnectionSpeed();
-                                byte[] clientGUID = manager.ClientId.bytes();
-
-                                // changing the port here to test push:
-                
-                                //Modified by Sumeet Thadani
-                                // If the number of responses is more 255, we are going to 
-                                // drop the responses after index 255. This can be corrected 
-                                //post beta, so that the extra responses can be sent along as
-                                //another query reply.
-                                if (responses.length > 255){
-                                    Response[] res = new Response[255];
-                                    for(int i=0; i<255;i++)
-                                        res[i] = responses[i]; //copy first 255 elements of old array
-                                    responses = res;//old array will be garbage collected
-                                }
-                                QueryReply qreply = new QueryReply(guid, ttl, port, ip, 
-                                                                   speed, responses, clientGUID);
-                                //QueryReply qreply = new QueryReply(guid, ttl, 1234, ip, 
-                                //               speed, responses, clientGUID);                
-                                send(qreply);
-                                if(manager.stats == true)
-                                    manager.QRepCount++;//keep stats if stats is turned on
-
-                            }
                         }
-                        else{//TTL is zero
-                            //do nothing(drop the message)
+             
+                        FileManager fm = FileManager.getFileManager();
+                        Response[] responses = fm.query((QueryRequest)m);
+                        
+                        //If we have a match...
+                        if (responses.length > 0) {
+                            byte[] guid = m.getGUID();
+                            byte ttl = (byte)(m.getHops() +1);
+                            int port = manager.getListeningPort();
+                            byte[] ip=sock.getLocalAddress().getAddress();
+                            long speed = SettingsManager.instance().getConnectionSpeed();
+                            byte[] clientGUID = manager.ClientId.bytes();
+                                                        
+                            //If the number of responses is more 255, we are
+                            //going to drop the responses after index 255.
+                            //TODO: send multiple query replies?
+                            if (responses.length > 255){
+                                Response[] res = new Response[255];
+                                for(int i=0; i<255;i++)
+                                    res[i] = responses[i]; //copy first 255 elements of old array
+                                responses = res;//old array will be garbage collected
+                            }
+                            QueryReply qreply = new QueryReply(guid, ttl, port, ip, 
+                                                               speed, responses, clientGUID);
+                            send(qreply);
                         }
                     }
                     else{//message has been entry in Route Table, has already been processed.
