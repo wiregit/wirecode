@@ -67,10 +67,9 @@ public class ManagedDownloader implements Downloader, Serializable {
      */
     private static final int RETRY_ATTEMPTS = 4;
 
-    /** Lock used to communicate between addDownload and tryAllDownloads.
+    /** the size of the approx matcher 2d buffer...
      */
-    private RequeryLock reqLock = new RequeryLock();
-
+    private static final int MATCHER_BUF_SIZE = 120;
     
 
     ////////////////////////// Core Variables /////////////////////////////
@@ -132,6 +131,11 @@ public class ManagedDownloader implements Downloader, Serializable {
     /** The name of the last location we tried to connect to. (We may be
      *  downloading from multiple other locations. */
     private String currentLocation;
+    /** Lock used to communicate between addDownload and tryAllDownloads.
+     */
+    private RequeryLock reqLock = new RequeryLock();
+
+
 
 	/** The list of all chat-enabled hosts for this <tt>ManagedDownloader</tt>
 	 *  instance.
@@ -184,6 +188,7 @@ public class ManagedDownloader implements Downloader, Serializable {
         //done in initialize, as that could cause problems in resume().
         pushLock=new Object();
         reqLock=new RequeryLock();
+        matcher=new ApproximateMatcher(MATCHER_BUF_SIZE);
     }
 
     /** 
@@ -259,13 +264,15 @@ public class ManagedDownloader implements Downloader, Serializable {
     }
 
     private final float MATCH_PRECISION = 0.8f;
-    private ApproximateMatcher matcher = new ApproximateMatcher();
+    private ApproximateMatcher matcher =new ApproximateMatcher(MATCHER_BUF_SIZE);
     private final boolean namesClose(final String one, 
                                      final String two) {
         boolean retVal = false;
-        retVal = matcher.matches(matcher.process(one),
-                                 matcher.process(two),
-                                 MATCH_PRECISION);
+        synchronized (matcher) {
+            retVal = matcher.matches(matcher.process(one),
+                                     matcher.process(two),
+                                     MATCH_PRECISION);
+        }
         return retVal;
     }
 
@@ -281,9 +288,11 @@ public class ManagedDownloader implements Downloader, Serializable {
     public boolean conflictsLAX(RemoteFileDesc other) {
 
         if (!initDone) {
-            matcher.setIgnoreCase(true);
-            matcher.setIgnoreWhitespace(true);
-            matcher.setCompareBackwards(true);
+            synchronized (matcher) {
+                matcher.setIgnoreCase(true);
+                matcher.setIgnoreWhitespace(true);
+                matcher.setCompareBackwards(true);
+            }
             initDone = true;
         }
 
