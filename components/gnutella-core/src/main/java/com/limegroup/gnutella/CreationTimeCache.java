@@ -220,7 +220,8 @@ public final class CreationTimeCache {
                 else {
                     URN currURN = (URN) innerIter.next();
                     FileDesc fd = fileManager.getFileDescForUrn(currURN);
-                    if (filter.allow(fd.getName())) urnList.add(currURN);
+                    if ((fd != null) && filter.allow(fd.getName())) 
+                        urnList.add(currURN);
                 }
             }
         }
