@@ -330,14 +330,13 @@ public class PushEndpoint implements HTTPHeaderValue{
 	}
 	
 	public int hashCode() {
-	    return _clientGUID.hashCode();
+	    return _guid.hashCode();
 	}
 	
 	public boolean equals(Object other) {
 		
 		//this method ignores the version of firewall-to-firewall 
-		//transfers supported.
-		
+		//transfers supported, the features and the sets of proxies
 		if (other == null)
 			return false;
 		if (!(other instanceof PushEndpoint))
@@ -346,7 +345,7 @@ public class PushEndpoint implements HTTPHeaderValue{
 		PushEndpoint o = (PushEndpoint)other;
 		
 		//same guid
-		return Arrays.equals(_clientGUID,o.getClientGUID());
+		return  _guid.equals(o._guid); 
 	}
 	
 	public String toString() {

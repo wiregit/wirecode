@@ -2,6 +2,7 @@ package com.limegroup.gnutella.altlocs;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.util.Map;
 import java.util.StringTokenizer;
 
 import junit.framework.Test;
@@ -14,6 +15,7 @@ import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.http.HTTPConstants;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.util.*;
+
 import java.util.*;
 
 
@@ -383,23 +385,37 @@ public final class AlternateLocationCollectionTest extends BaseTestCase {
 		proxies.add(ppi);
 		proxies2.add(ppi2);proxies2.add(ppi3);proxies2.add(ppi4);
 		
+		Map m= (Map)PrivilegedAccessor.getValue(PushEndpoint.class, "GUID_PROXY_MAP");
+		
         PushEndpoint pe = new PushEndpoint(GUID.makeGuid(),proxies);
         PushEndpoint pe2 = new PushEndpoint(GUID.makeGuid(),proxies2);
 
+        GUID localGuid = (GUID)PrivilegedAccessor.getValue(pe,"_guid");
+        m.put(localGuid,proxies);
+        
+        localGuid = (GUID)PrivilegedAccessor.getValue(pe2,"_guid");
+        m.put(localGuid,proxies2);
+        
+        assertNotNull(pe.getProxies());
+        assertNotNull(pe2.getProxies());
+        
 		Set peSet = new HashSet();
 		peSet.add(pe);peSet.add(pe2);
         
 		RemoteFileDesc fwalled = new RemoteFileDesc("127.0.0.1",6346,10,HTTPConstants.URI_RES_N2R+
-                HugeTestUtils.URNS[0].httpStringValue(), 10, 
-                pe.getClientGUID(), 10, true, 2, true, null, 
-                HugeTestUtils.URN_SETS[0],
-                false,true,"",0,proxies,-1);
+                HugeTestUtils.URNS[0].httpStringValue(), 
+                10, 10, true, 2, true, 
+                null, HugeTestUtils.URN_SETS[0], false,
+                true,"ALT",0,0,
+                pe);
+		
 		RemoteFileDesc fwalled2 = new RemoteFileDesc(fwalled,pe2);
+
+		assertEquals(proxies.size(),fwalled.getPushProxies().size());
 		
 		AlternateLocation firewalled = AlternateLocation.create(fwalled);
 		AlternateLocation firewalled2 = AlternateLocation.create(fwalled2);
 		
-
 		
 		_alCollection.add(firewalled);
 		
@@ -421,7 +437,7 @@ public final class AlternateLocationCollectionTest extends BaseTestCase {
 		Set set = new HashSet(NetworkUtils.unpackPushEPs(data));
 		
 		assertEquals(2,set.size());
-		
+		assertEquals(2,peSet.size());
 		set.retainAll(peSet);
 		
 		assertEquals(2,set.size());
