@@ -275,23 +275,30 @@ public final class ID3Reader {
                 //within it -- we need to parse that out
                 int startIndex = frameContent.indexOf("(");
                 int endIndex = frameContent.indexOf(")");
-                boolean hasV1Data = startIndex>-1 && endIndex > -1;
+                int genreCode = -1;
+                
                 //Note: It's possible that the user entered her own genre in
                 //which case there could be spurious braces, the id3v2 braces
                 //enclose values between 0 - 127 
-                if(hasV1Data) { //we have braces check if it's valid
+                
+                // Custom genres are just plain text and default genres (known
+                // from id3v1) are referenced with values enclosed by braces and
+                // with optional refinements which I didn't implement here.
+                // http://www.id3.org/id3v2.3.0.html#TCON
+                if(startIndex > -1 && endIndex > -1) { 
+                    //we have braces check if it's valid
                     String genreByte = 
                     frameContent.substring(startIndex+1, endIndex);
+                    
                     try {
-                        int i = Integer.parseInt(genreByte);
-                        if(i<0 || i> 127)
-                            hasV1Data = false;
+                        genreCode = Integer.parseInt(genreByte);
                     } catch (NumberFormatException nfx) {
-                        hasV1Data = false;
+                        genreCode = -1;
                     }
                 }
-                if(hasV1Data) 
-                    data.setGenre(frameContent.substring(endIndex+1));
+                
+                if(genreCode >= 0 && genreCode <= 127)
+                    data.setGenre(getGenreString((short)genreCode));
                 else 
                     data.setGenre(frameContent);
             }
