@@ -101,7 +101,7 @@ public final class MulticastService implements Runnable {
     MulticastSocket newListeningSocket(int port, InetAddress group) throws IOException {
         try {
             MulticastSocket sock = new MulticastSocket(port);
-            sock.setTTL((byte)3);
+            sock.setTimeToLive(3);
             sock.joinGroup(group);
             _port = port;
             _group = group;            
