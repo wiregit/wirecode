@@ -4,6 +4,7 @@ import java.net.*;
 import java.nio.channels.ServerSocketChannel;
 import java.io.*;
 import com.limegroup.gnutella.chat.*;
+import com.limegroup.gnutella.connection.*;
 import com.limegroup.gnutella.http.*;
 import com.limegroup.gnutella.util.*;
 import com.limegroup.gnutella.filters.IPFilter;

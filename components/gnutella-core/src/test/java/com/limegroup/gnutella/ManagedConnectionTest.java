@@ -6,6 +6,7 @@ import java.io.*;
 import java.util.Properties;
 
 import com.limegroup.gnutella.connection.Connection;
+import com.limegroup.gnutella.connection.ConnectionManager;
 import com.limegroup.gnutella.handshaking.*;
 import com.limegroup.gnutella.messages.*;
 import com.limegroup.gnutella.stubs.*;
@@ -267,7 +268,7 @@ public class ManagedConnectionTest extends BaseTestCase {
         //When receive() or sendQueued() gets IOException, it calls
         //ConnectionManager.remove().  This in turn calls
         //ManagedConnection.close().  Our stub does this.
-        ConnectionManager manager=new ConnectionManagerStub(true);
+        ConnectionManager manager = new ConnectionManagerStub(true);
 
         //1. Locally closed
         //acceptor=new com.limegroup.gnutella.MiniAcceptor(null, PORT);

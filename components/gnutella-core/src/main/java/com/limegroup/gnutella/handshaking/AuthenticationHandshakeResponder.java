@@ -1,6 +1,7 @@
 package com.limegroup.gnutella.handshaking;
 
 import com.limegroup.gnutella.*;
+import com.limegroup.gnutella.connection.*;
 import com.limegroup.gnutella.security.*;
 import com.limegroup.gnutella.settings.*;
 import com.limegroup.gnutella.util.StringUtils;

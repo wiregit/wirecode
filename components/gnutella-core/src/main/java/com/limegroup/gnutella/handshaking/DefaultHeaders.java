@@ -4,6 +4,7 @@ import java.util.Properties;
 import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.updates.*;
 import com.limegroup.gnutella.util.CommonUtils;
+import com.limegroup.gnutella.connection.*;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 
 /**

@@ -1,6 +1,7 @@
 package com.limegroup.gnutella;
 
 import com.limegroup.gnutella.util.CommonUtils;
+import com.limegroup.gnutella.connection.*;
 import com.limegroup.gnutella.settings.*;
 import com.limegroup.gnutella.statistics.*;
 

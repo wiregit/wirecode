@@ -1,8 +1,8 @@
 package com.limegroup.gnutella;
 
+import com.limegroup.gnutella.connection.ConnectionManager;
 import com.limegroup.gnutella.messages.*;
 import com.limegroup.gnutella.util.*;
-import com.limegroup.gnutella.stubs.*;
 import com.limegroup.gnutella.security.*;
 import junit.framework.*;
 import com.sun.java.util.collections.*;
@@ -138,10 +138,6 @@ public final class PongCacherTest extends BaseTestCase {
         pongs = PC.getBestPongs();
         assertEquals("unexpected number of cached pongs", 
                      PongCacher.NUM_PONGS_PER_HOP+1, pongs.size());
-
-        BucketQueue queue = 
-            (BucketQueue)PrivilegedAccessor.getValue(PC, "PONGS");
-
 
         Iterator iter = pongs.iterator();
         PingReply pr = (PingReply)iter.next();

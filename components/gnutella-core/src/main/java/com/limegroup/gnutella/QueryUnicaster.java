@@ -8,7 +8,6 @@ import com.limegroup.gnutella.util.*;
 import com.sun.java.util.collections.*;
 import java.io.IOException;
 import java.net.*;
-import java.util.Stack;
 
 /** 
  * This class runs a single thread which sends unicast UDP queries to a master
@@ -416,7 +415,7 @@ public final class QueryUnicaster {
      * Gets rid of a Query according to ReplyHandler.  
      * Use this if a leaf connection dies and you want to stop the query.
      */
-    void purgeQuery(ReplyHandler reference) {
+    public void purgeQuery(ReplyHandler reference) {
         debug("QueryUnicaster.purgeQuery(RH): entered.");
         if (reference == null)
             return;

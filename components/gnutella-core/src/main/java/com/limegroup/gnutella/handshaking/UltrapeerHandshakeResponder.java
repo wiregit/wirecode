@@ -3,8 +3,8 @@ package com.limegroup.gnutella.handshaking;
 import java.io.IOException;
 import java.util.Properties;
 
-import com.limegroup.gnutella.ConnectionManager;
 import com.limegroup.gnutella.RouterService;
+import com.limegroup.gnutella.connection.ConnectionManager;
 import com.limegroup.gnutella.util.NetworkUtils;
 
 /**

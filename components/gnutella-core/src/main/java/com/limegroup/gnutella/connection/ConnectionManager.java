@@ -1,4 +1,4 @@
-package com.limegroup.gnutella;
+package com.limegroup.gnutella.connection;
 
 import java.net.*;
 import java.io.*;
@@ -7,12 +7,19 @@ import com.sun.java.util.collections.*;
 import java.util.Properties;
 import java.util.StringTokenizer;
 
+import com.limegroup.gnutella.Assert;
+import com.limegroup.gnutella.Constants;
+import com.limegroup.gnutella.Endpoint;
+import com.limegroup.gnutella.ErrorService;
+import com.limegroup.gnutella.HostCatcher;
+import com.limegroup.gnutella.QueryUnicaster;
+import com.limegroup.gnutella.RouterService;
+import com.limegroup.gnutella.SupernodeAssigner;
 import com.limegroup.gnutella.messages.*;
 import com.limegroup.gnutella.util.*;
 import com.limegroup.gnutella.security.Authenticator;
 import com.limegroup.gnutella.handshaking.*;
 import com.limegroup.gnutella.settings.*;
-import com.limegroup.gnutella.connection.*;
 import com.limegroup.gnutella.filters.IPFilter;
 
 /**
@@ -202,7 +209,7 @@ public class ConnectionManager {
      * If there are already too many connections in the manager, this method
      * will launch a RejectConnection to send pongs for other hosts.
      */
-     void acceptConnection(Socket socket) {
+     public void acceptConnection(Socket socket) {
          //1. Initialize connection.  It's always safe to recommend new headers.
          Thread.currentThread().setName("IncommingConnectionThread");
          Connection connection = new Connection(socket);
@@ -412,7 +419,7 @@ public class ConnectionManager {
     /**
      * @return the number of free leaf slots.
      */
-    int getNumFreeLeafSlots() {
+    public int getNumFreeLeafSlots() {
         if (isSupernode())
 			return MAX_LEAVES - 
 				getNumInitializedClientConnections();
@@ -424,7 +431,7 @@ public class ConnectionManager {
     /**
      * @return the number of free non-leaf slots.
      */
-    int getNumFreeNonLeafSlots() {
+    public int getNumFreeNonLeafSlots() {
         return ULTRAPEER_CONNECTIONS - getNumInitializedConnections();
     }
 
