@@ -304,8 +304,7 @@ public final class SettingsManager {
 	/**
 	 * Value for the default minimum speed to allow in search results.
 	 */
-	private final int DEFAULT_MINIMUM_SEARCH_SPEED = 
-		SpeedConstants.MODEM_SPEED_INT;
+	private final int DEFAULT_MINIMUM_SEARCH_SPEED = 0;
 
 	/**
 	 * Constant default value for the maximum number of bytes ever passed
