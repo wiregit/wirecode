@@ -300,6 +300,18 @@ public class QueryRequest extends Message implements Serializable{
 	}
 
 
+    public static QueryRequest createOutOfBandQuery(String query,
+                                                    byte[] ip, int port) {
+        if(query == null) {
+            throw new NullPointerException("null query");
+        }
+		if(query.length() == 0) {
+			throw new IllegalArgumentException("empty query");
+		}
+        return new QueryRequest(GUID.makeAddressEncodedGuid(ip, port),
+                                DEFAULT_TTL, query, "", true);
+    }                                
+    
 
 	/**
 	 * Creates a new query for the specified file name, with no XML.
@@ -571,6 +583,21 @@ public class QueryRequest extends Message implements Serializable{
     private QueryRequest(byte[] guid, byte ttl, String query, String richQuery) {
         this(guid, ttl, query, richQuery, UrnType.ANY_TYPE_SET, EMPTY_SET, null,
 			 !RouterService.acceptedIncomingConnection(), Message.N_UNKNOWN, false);
+    }
+
+    /**
+     * Builds a new query from scratch, with metadata, using the given GUID.
+     * Whether or not this is a repeat query is encoded in guid.  GUID must have
+     * been created via newQueryGUID; this allows the caller to match up
+     * results.
+     *
+     * @requires 0<=minSpeed<2^16 (i.e., can fit in 2 unsigned bytes) 
+     */
+    private QueryRequest(byte[] guid, byte ttl, String query, String richQuery,
+                         boolean canReceiveOutOfBandReplies) {
+        this(guid, ttl, query, richQuery, UrnType.ANY_TYPE_SET, EMPTY_SET, null,
+			 !RouterService.acceptedIncomingConnection(), Message.N_UNKNOWN, 
+             canReceiveOutOfBandReplies);
     }
 
     /**
