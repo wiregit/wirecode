@@ -2264,6 +2264,11 @@ public final class SettingsManager {
 		if(!incDir.isDirectory()) {
 			if(!incDir.mkdirs()) throw new IOException();
 		}
+
+		if(!saveDir.canRead() || !saveDir.canWrite() ||
+		   !incDir.canRead()  || !incDir.canWrite()) {
+			throw new IOException();
+		}
 		_saveDirectory       = saveDir;
 		_incompleteDirectory = incDir;
 		
