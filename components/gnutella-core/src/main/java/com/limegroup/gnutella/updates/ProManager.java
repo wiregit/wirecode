@@ -27,6 +27,7 @@ public class ProManager {
     private final String START = "{";
     private final String END = "}";
     private final long EXPIRY = 16070400000l;//6*31*24*60*60*1000
+    private final String proFile = "PROFile";
 
     /////////////////////////External Interface////////////////////
     /**
@@ -55,7 +56,7 @@ public class ProManager {
         //read the file -- no file - we are not pro
         File file = null;
         byte[] bytes = null;
-        file = new File(CommonUtils.getUserSettingsDir(),"ProFile");
+        file = new File(CommonUtils.getUserSettingsDir(),proFile);
         if(!file.exists())
             return false;
         RandomAccessFile raf = new RandomAccessFile(file, "r");
@@ -126,7 +127,7 @@ public class ProManager {
                 if(a!=-1) {
                     if(file==null) { //create file the first time we have data
                         file=
-                        new File(CommonUtils.getUserSettingsDir(),"ProFile");
+                        new File(CommonUtils.getUserSettingsDir(),proFile);
                         fos = new FileOutputStream(file);
                     }
                     fos.write(a);
