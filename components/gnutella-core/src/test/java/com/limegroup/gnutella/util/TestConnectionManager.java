@@ -3,6 +3,7 @@ package com.limegroup.gnutella.util;
 import com.limegroup.gnutella.messages.*;
 import com.limegroup.gnutella.routing.*;
 import com.limegroup.gnutella.security.*;
+import com.limegroup.gnutella.settings.UltrapeerSettings;
 import com.limegroup.gnutella.*;
 import com.sun.java.util.collections.*;
 
@@ -77,6 +78,12 @@ public final class TestConnectionManager extends ConnectionManager {
         "hopefully", "in", "fact", "as", "well", 
         "but", "it's", "hard", "to", "know", 
     };
+    
+    /**
+     * Constant alternate keyword for use in testing.
+     */
+    public static final String ALT_LEAF_KEYWORD = "ALT_KEYWORD";
+   
 
     /**
      * Array of keywords that should not match anything in the routing
@@ -87,6 +94,17 @@ public final class TestConnectionManager extends ConnectionManager {
     };
 
     /**
+     * Factory method for generating a test manager with varied route tables from leaves.
+     * 
+     * @return a new <tt>TestConnectionManager</tt> with varied leaf route tables for
+     *   use in tests that require varied tables
+     */
+    public static TestConnectionManager createManagerWithVariedLeaves() {
+        return new TestConnectionManager(20, true, 20, 
+            UltrapeerSettings.MAX_LEAVES.getValue(), DEFAULT_MY_KEYWORDS, true);
+    }
+
+    /**
      * Convenience constructor that creates a new 
      * <tt>TestConnectionManager</tt> with all of the default settings.
      */
@@ -95,7 +113,7 @@ public final class TestConnectionManager extends ConnectionManager {
     }
 
     public TestConnectionManager(String[] myKeywords) {
-        this(20, true, 20, 30, myKeywords);
+        this(20, true, 20, 30, myKeywords, false);
     }
     
     /**
@@ -119,7 +137,7 @@ public final class TestConnectionManager extends ConnectionManager {
      *  an ultrapeer
      */
     public TestConnectionManager(int numNewConnections, boolean ultrapeer) {
-        this(numNewConnections, ultrapeer, 20, 30, DEFAULT_MY_KEYWORDS);
+        this(numNewConnections, ultrapeer, 20, 30, DEFAULT_MY_KEYWORDS, false);
     }
 
     /**
@@ -130,10 +148,12 @@ public final class TestConnectionManager extends ConnectionManager {
      *  include in the set of connections
      * @param ultrapeer whether or not this should be considered
      *  an ultrapeer
+     * @param useVaried boolean specifying whether or not leaves should
+     *   have variable routing tables
      */
     public TestConnectionManager(int numNewConnections, boolean ultrapeer,
                                  int numConnections, int numLeafConnections,
-                                 String[] myKeywords) {
+                                 String[] myKeywords, boolean useVaried) {
         super(new DummyAuthenticator());
         NUM_CONNECTIONS = numConnections;
         NUM_LEAF_CONNECTIONS = numLeafConnections;
@@ -149,10 +169,15 @@ public final class TestConnectionManager extends ConnectionManager {
             CONNECTIONS.add(curConn);            
         }
 
-        // now, give ourselves 30 leaves
+        // now, give ourselves the desired number of leaves
         for(int i=0; i<NUM_LEAF_CONNECTIONS; i++) {
-            Connection conn = new LeafConnection(
-                new String[]{LEAF_KEYWORDS[i]});
+            Connection conn;
+            if(useVaried && i > (NUM_LEAF_CONNECTIONS/2)) {
+                System.out.println("CREATING ALT LEAF..");
+                conn = new LeafConnection(new String[]{ALT_LEAF_KEYWORD});
+            } else {
+                conn = new LeafConnection(new String[]{LEAF_KEYWORDS[i]});
+            }
             LEAF_CONNECTIONS.add(conn);
         }
         ULTRAPEER = ultrapeer;
@@ -207,18 +232,31 @@ public final class TestConnectionManager extends ConnectionManager {
     }
 
     /**
-     * Returns the total number of queries received over all connections.
+     * Returns the total number of queries received over all Ultrapeer connections.
      */
-    public int getNumQueries() {
+    public int getNumUltrapeerQueries() {
+        return getNumQueries(CONNECTIONS);
+    }
+
+    /**
+     * Returns the total number of queries received over all leaf connections.
+     */
+    public int getNumLeafQueries() {
+        return getNumQueries(LEAF_CONNECTIONS);
+    }
+
+    /**
+     * Returns the total number of queries received over all leaf connections.
+     */
+    private static int getNumQueries(Collection connections) {
         int numQueries = 0;
-        Iterator iter = CONNECTIONS.iterator();
+        Iterator iter = connections.iterator();
         while(iter.hasNext()) {
             TestConnection tc = (TestConnection)iter.next();
             numQueries += tc.getNumQueries();
         }
         return numQueries;
     }
-
 
     /**
      * Returns the total number of queries received over all old connections.
