@@ -93,24 +93,26 @@
  </target>
  
  <!-- Tests all tests in the gnutella package -->
- <target name="gnutella" depends="prepare, build">
+ <target name="gnutella" depends="prepare, build" if="serversRunning">
     <junit printsummary="withOutAndErr" 
 	       haltonfailure="no"
 	       showoutput="true"
 		   fork="on"
     >
+      <sysproperty key="servers" value="all"/>
+
 	 <!-- <formatter type="plain" useFile="false"/> -->
 	  <formatter type="xml" />
 	  
 	  <classpath refid="default.classpath" />
-	  
+
 	  <test name="${GNUTELLA}.AcceptorTest"
 	        todir="${reports}" />
 	  <test name="${GNUTELLA}.AlternateLocationTest"
 	        todir="${reports}" />
 	  <test name="${GNUTELLA}.AlternateLocationCollectionTest"
 	        todir="${reports}" />
-<!--	  <test name="${GNUTELLA}.ConnectionManagerTest"
+	  <test name="${GNUTELLA}.ConnectionManagerTest"
 	        todir="${reports}" /> -->
 	  <test name="${GNUTELLA}.EndpointTest"
 	        todir="${reports}" />
@@ -336,23 +338,6 @@
     </junit>
  </target>
  
-    <!-- Tests all tests in the update package -->
- <target name="update" depends="prepare, build">
-    <junit printsummary="withOutAndErr" 
-	       haltonfailure="no"
-	       showoutput="true"
-		   fork="on"
-    >
-	 <!-- <formatter type="plain" useFile="false"/> -->
-	  <formatter type="xml" />
-	  
-	  <classpath refid="default.classpath" />
-
-	  <test name="${UPDATE}.ServletRemoteUpdateInfoTest"
-	        todir="${reports}" />
-
-    </junit>
- </target>
  
     <!-- Tests all tests in the uploader package -->
  <target name="uploader" depends="prepare, build">
@@ -436,6 +421,8 @@
  
   <!-- Runs ALL TESTS -->
  <target name="test all" depends="clean, prepare, build"> 
+
+    <antcall target="run all servers"/>
     <antcall target="gnutella"/>
     <antcall target="bootstrap"/> 
     <antcall target="downloader"/>
@@ -453,6 +440,20 @@
     <antcall target="html"/>    
  </target>
  
+ <!-- Runs all backend LimeWire servers to test against on ports starting -->
+ <!-- with 6000. -->
+ <target name="run all servers">
+    <property name="serversRunning" value="true"/>
+    <!-- Start LimeWire servers on specific ports for the tests -->
+    <parallel>
+      <antcall target="run server"/>
+      <sequential>
+        <!-- The LimeWire servers get confused if we run them both at once -->
+        <sleep seconds="10"/>
+	    <antcall target="run reject server"/>
+      </sequential>
+    </parallel> 
+ </target>
  
  <!-- Runs a specific package - passed by 'class' -->
  <target name="test package" if="package" depends="prepare, build">
@@ -485,7 +486,12 @@
 	</junit>
   </target>  
 
- <!-- Runs a specific class without building the HTML - passed by 'class' -->
+ <!-- Runs a specific class, passing the output to the shell -->
+ <!-- class name specified by class passed by 'class' -->
+ <!-- For example, to run UltrapeerRoutingTest, you would type: -->
+ <!-- ant -D"class=UltrapeerRoutingTest" test -->
+ <!-- To test, say, DownloadTest, you would type: -->
+ <!-- ant -D"class=downloader.DownloadTest" test -->
  <target name="test" if="class" depends="prepare, build">
     <junit printsummary="withOutAndErr" 
 	       haltonfailure="yes"
@@ -494,34 +500,77 @@
     >
 	  <classpath refid="default.classpath"/>
       <formatter type="plain" useFile="false"/>
-	  <test name="com.limegroup.gnutella.${class}"/>    
+	  <test name="com.limegroup.gnutella.${class}"/>        
 	</junit>
   </target>  
 
-  <!-- tests GUESS code -->
-  <target name="test guess" depends="build">
+ <!-- Runs a specific class test while also running a LimeWire -->
+ <!-- server on port 6000 that is a standardized Ultrapeer,-->
+ <!-- running on localhost only, that accepts one connection at a time. -->
+ <target name="test6000" if="class" depends="prepare, build">
     <parallel>
+
 	  <antcall target="run server"/>
 
       <sequential>
-        <sleep seconds="5"/>
-		<antcall target="test class internal">
-		  <param name="class" value="UDPServiceTest"/>
-		</antcall>
+        <sleep seconds="20"/>
+        <junit printsummary="withOutAndErr" 
+	           haltonfailure="yes"
+	           showoutput="true"
+		       fork="on" >
+	       <classpath refid="default.classpath"/>
+           <formatter type="plain" useFile="false"/>
+	       <test name="com.limegroup.gnutella.${class}"/>    
+	     </junit>
       </sequential>
-
     </parallel>
-  </target>
+ </target>  
+
+ <!-- The same as test6000, except that this runs another LimeWire-->
+ <!-- server on port 6001 that rejects all connection attempts. -->
+ <target name="test6001" if="class" depends="prepare, build">
+    <parallel>
+
+	  <antcall target="run all servers"/>
+
+      <sequential>
+        <sleep seconds="20"/>
+        <junit printsummary="withOutAndErr" 
+	           haltonfailure="yes"
+	           showoutput="true"
+		       fork="on">
+           <sysproperty key="servers" value="6001"/>
+	       <classpath refid="default.classpath"/>
+           <formatter type="plain" useFile="false"/>
+	       <test name="com.limegroup.gnutella.${class}"/>
+	     </junit>
+      </sequential>
+    </parallel>
+  </target>  
 
   
-  <!-- runs a backend server on 6346 for testing -->
-  <target name="run server" depends="build">
+  <!-- runs a backend server on 6000 for testing -->
+  <target name="run server">
 	<java classname="com.limegroup.gnutella.Backend"
 		  failonerror="true"
 	      fork="true"
 	>
      <classpath refid="default.classpath" />
-      <arg value="60000"/>
+      <arg value="100000"/>
+    </java>  
+  </target>
+
+  <!-- runs a backend server on 6001 for testing -->
+  <target name="run reject server">
+	<java classname="com.limegroup.gnutella.Backend"
+		  failonerror="true"
+	      fork="true"
+	>
+     <classpath refid="default.classpath" />
+      <arg value="80000"/>
+      <arg value="reject"/>
     </java>  
   </target>
 </project>
+
+
