@@ -3,16 +3,18 @@ package com.limegroup.gnutella;
 import junit.framework.*;
 import java.net.*;
 import java.io.*;
-import java.util.*;
+import com.sun.java.util.collections.*;
 import com.limegroup.gnutella.handshaking.*;
+import com.limegroup.gnutella.routing.*;
 import com.limegroup.gnutella.messages.*;
 import com.limegroup.gnutella.settings.*;
 import com.limegroup.gnutella.messages.vendor.*;
 import com.limegroup.gnutella.stubs.*;
+import com.limegroup.gnutella.util.*;
 
 /** This test should NOT be run by the nightly tests build.
  */
-public class VendorMessageSupportTest extends com.limegroup.gnutella.util.BaseTestCase {
+public class VendorMessageSupportTest extends BaseTestCase {
     
     private String _remoteHost = "localhost";
     private int _remotePort = 6300;
@@ -37,8 +39,8 @@ public class VendorMessageSupportTest extends com.limegroup.gnutella.util.BaseTe
     
     private ServerSocket _tcpSock = null;
     private DatagramSocket _udpSock = null;
-    private Connection _ultrapeer1 = null;
-    private Connection _ultrapeer2 = null;
+    private Connection _leaf1 = null;
+    private Connection _leaf2 = null;
 
     private boolean _testHopsFlow = true;
     private boolean _testTCPCB = true;
@@ -67,19 +69,32 @@ public class VendorMessageSupportTest extends com.limegroup.gnutella.util.BaseTe
         }
 
         try {
+
+            // Set up QRT
+            QueryRouteTable qrt = new QueryRouteTable();
+            qrt.add("susheel");
+            qrt.add("daswani");
+            qrt.add("foosball");
+
             // Set up a connection to the host....
-            _ultrapeer1=new Connection(_remoteHost, _remotePort, 
-                                       new SupernodeProperties(""),
-                                       new EmptyResponder());
-            _ultrapeer1.initialize();
+            _leaf1=new Connection(_remoteHost, _remotePort, 
+                                  new ClientProperties(""),
+                                  new EmptyResponder());
+            _leaf1.initialize();
+            for (Iterator iter=qrt.encode(null); iter.hasNext(); )
+                _leaf1.send((RouteTableMessage)iter.next());
+            _leaf1.flush();
             // don't do postInit() - you don't want him thinking
             // you support any vendor message....
             
             // Set up another connection to the host....
-            _ultrapeer2=new Connection(_remoteHost, _remotePort, 
-                                       new SupernodeProperties(""),
-                                       new EmptyResponder());
-            _ultrapeer2.initialize();
+            _leaf2=new Connection(_remoteHost, _remotePort, 
+                                  new ClientProperties(""),
+                                  new EmptyResponder());
+            _leaf2.initialize();
+            for (Iterator iter=qrt.encode(null); iter.hasNext(); )
+                _leaf2.send((RouteTableMessage)iter.next());
+            _leaf2.flush();
             // don't do postInit() - you don't want him thinking
             // you support any vendor message....
 
@@ -145,7 +160,7 @@ public class VendorMessageSupportTest extends com.limegroup.gnutella.util.BaseTe
 
 
     private void confirmSupportedMessages() throws Exception {
-        testConnection(_ultrapeer1);
+        testConnection(_leaf1);
     }
 
     private void testConnection(Connection c) throws Exception {
@@ -185,20 +200,20 @@ public class VendorMessageSupportTest extends com.limegroup.gnutella.util.BaseTe
     }
 
     private void tryHopsFlow() throws Exception {
-        drain(_ultrapeer1);
-        drain(_ultrapeer2);
+        drain(_leaf1);
+        drain(_leaf2);
 
         QueryRequest qr = new QueryRequest((byte) 3, 0, "susheel", false);
         
         // first make sure query gets through.....
-        _ultrapeer2.send(qr);
-        _ultrapeer2.flush();
+        _leaf2.send(qr);
+        _leaf2.flush();
 
         boolean gotQR = false;
         
         while (true) {
             try {
-                Message m = _ultrapeer1.receive(TIMEOUT);
+                Message m = _leaf1.receive(TIMEOUT);
                 if (m instanceof QueryRequest) 
                     if (((QueryRequest) m).getQuery().equals("susheel"))
                         gotQR = true;
@@ -215,8 +230,8 @@ public class VendorMessageSupportTest extends com.limegroup.gnutella.util.BaseTe
 
         // now send the hops flow and it shouldn't get through!!
         HopsFlowVendorMessage hops = new HopsFlowVendorMessage((byte)1);
-        _ultrapeer1.send(hops);
-        _ultrapeer1.flush();
+        _leaf1.send(hops);
+        _leaf1.flush();
 
         // wait for the hops flow message to take effect...
         try {
@@ -225,12 +240,12 @@ public class VendorMessageSupportTest extends com.limegroup.gnutella.util.BaseTe
         catch (Exception whatever) {}
 
         qr = new QueryRequest((byte) 3, 0, "daswani", false);
-        _ultrapeer2.send(qr);
-        _ultrapeer2.flush();
+        _leaf2.send(qr);
+        _leaf2.flush();
         
         while (true) {
             try {
-                Message m = _ultrapeer1.receive(TIMEOUT);
+                Message m = _leaf1.receive(TIMEOUT);
                 if (m instanceof QueryRequest) 
                     if (((QueryRequest) m).getQuery().equals("daswani"))
                         throw new Exception("Hops Flow Message Ineffectual!!!");
@@ -244,17 +259,17 @@ public class VendorMessageSupportTest extends com.limegroup.gnutella.util.BaseTe
         
         // reset Hops Flow and make sure a query gets through....
         hops = new HopsFlowVendorMessage((byte)4);
-        _ultrapeer1.send(hops);
-        _ultrapeer1.flush();
+        _leaf1.send(hops);
+        _leaf1.flush();
 
         qr = new QueryRequest((byte) 3, 0, "foosball", false);
-        _ultrapeer2.send(qr);
-        _ultrapeer2.flush();
+        _leaf2.send(qr);
+        _leaf2.flush();
 
         gotQR = false;
         while (true) {
             try {
-                Message m = _ultrapeer1.receive(TIMEOUT);
+                Message m = _leaf1.receive(TIMEOUT);
                 if (m instanceof QueryRequest) 
                     if (((QueryRequest) m).getQuery().equals("foosball"))
                         gotQR = true;
@@ -270,13 +285,13 @@ public class VendorMessageSupportTest extends com.limegroup.gnutella.util.BaseTe
     }
 
     private void tryTCPConnectBack() throws Exception {
-        drain(_ultrapeer1);
-        drain(_ultrapeer2);
+        drain(_leaf1);
+        drain(_leaf2);
         
         _tcpSock.setSoTimeout(5*1000); // wait for up to 5 seconds...
         final TCPConnectBackVendorMessage tcp = 
            new TCPConnectBackVendorMessage(_tcpSock.getLocalPort());
-        final Connection c = _ultrapeer1;
+        final Connection c = _leaf1;
         Thread sendThread = new Thread() {
             public void run() {
                 try {
@@ -305,8 +320,8 @@ public class VendorMessageSupportTest extends com.limegroup.gnutella.util.BaseTe
     }
 
     private void tryUDPConnectBack() throws Exception {
-        drain(_ultrapeer1);
-        drain(_ultrapeer2);
+        drain(_leaf1);
+        drain(_leaf2);
 
         _udpSock.setSoTimeout(5*1000); // wait for up to 5 seconds...
         GUID guid = new GUID(GUID.makeGuid());
@@ -315,7 +330,7 @@ public class VendorMessageSupportTest extends com.limegroup.gnutella.util.BaseTe
         final UDPConnectBackVendorMessage udp = 
            new UDPConnectBackVendorMessage(_udpSock.getLocalPort(),
                                            guid);
-        final Connection c = _ultrapeer1;
+        final Connection c = _leaf1;
         Thread sendThread = new Thread() {
             public void run() {
                 try {
@@ -355,8 +370,8 @@ public class VendorMessageSupportTest extends com.limegroup.gnutella.util.BaseTe
         try {
             _tcpSock.close();
             _udpSock.close();
-            _ultrapeer1.close();
-            _ultrapeer2.close();
+            _leaf1.close();
+            _leaf2.close();
         }
         catch (Exception whatever) {
         }
