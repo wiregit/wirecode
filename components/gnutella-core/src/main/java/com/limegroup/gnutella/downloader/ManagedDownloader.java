@@ -1492,10 +1492,11 @@ public class ManagedDownloader implements Downloader, Serializable {
                 queuedVendor="";//initialize
                 manager.waitForSlot(this);
                 boolean waitForRetry=false;
-                bucketNumber = 0;//reset
+                int currentBucket = 0;
                 try {
                     for (Iterator iter=buckets.buckets(); iter.hasNext(); 
-                                                              bucketNumber++) {
+                                                              currentBucket++) {
+                        bucketNumber = currentBucket;
                         //when are are done tyring with a bucket cleanup
                         cleanup();
                         files =(List)iter.next();
