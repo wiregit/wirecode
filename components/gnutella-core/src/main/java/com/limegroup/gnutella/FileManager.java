@@ -326,7 +326,12 @@ public class FileManager {
         }
 
         //List contents of directory.
+				
         File[] file_list = listFiles(directory);    /* the files in a specified */
+
+		// this can still be null in some cases (even though it is a directory)
+		if(file_list == null) return;
+
         int n = file_list.length;                   /* directory */
        
         //First add all files.  We'll add the directories later to smooth out
