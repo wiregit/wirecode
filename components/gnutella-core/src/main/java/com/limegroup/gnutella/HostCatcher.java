@@ -134,7 +134,7 @@ public class HostCatcher {
     }
 
     private void writeInternal(Writer out, Endpoint e) throws IOException {
-	out.write(e.toString()+"\n");
+	out.write(e.getHostname()+":"+e.getPort()+"\n");
     }
 
     //////////////////////////////////////////////////////////////////////
