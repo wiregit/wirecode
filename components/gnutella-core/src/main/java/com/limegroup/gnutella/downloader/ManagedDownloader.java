@@ -70,8 +70,7 @@ public class ManagedDownloader implements Downloader, Serializable {
     private static final int REQUERY_ATTEMPTS = 5;
     /** Lock used to communicate between addDownload and tryAllDownloads.
      */
-    private Object reqLock = new Object();
-    private boolean shouldWait = true;
+    private RequeryLock reqLock = new RequeryLock();
 
     
 
@@ -251,7 +250,6 @@ public class ManagedDownloader implements Downloader, Serializable {
      *  same to some entry in this, but that is not required.  
      */
     public synchronized void addDownload(RemoteFileDesc rfd) {
-        debug("ManagedDownloader.addDownload(): entered.");
         //Ignore if this was already added.  This includes existing downloaders
         //as well as busy lists.
         for (int i=0; i<allFiles.length; i++) {
@@ -273,19 +271,11 @@ public class ManagedDownloader implements Downloader, Serializable {
         //otherwise).  So instead we target the two cases we're interested:
         //waiting for downloaders to complete (by waiting on this) or waiting
         //for retry (by sleeping).
-        debug("ManagedDownloader.addDownload(): branching, state = " + 
-              getState());
         if (state==Downloader.WAITING_FOR_RETRY)
             dloaderManagerThread.interrupt();   //see tryAllDownloads    
         else if ((state==Downloader.REQUERYING_NETWORK) ||
-            (state==Downloader.WAITING_FOR_RESULTS)) {
-            debug("ManagedDownloader.addDownload():" + 
-                  " adding download to requery.");
-            synchronized (reqLock) {
-                shouldWait = false;
-                reqLock.notifyAll();
-            }
-        }
+                 (state==Downloader.WAITING_FOR_RESULTS)) 
+            reqLock.release();
         else
             this.notify();                      //see tryAllDownloads3
     }
@@ -518,18 +508,7 @@ public class ManagedDownloader implements Downloader, Serializable {
                         manager.sendQuery(allFiles);
 
                         setState(WAITING_FOR_RESULTS);
-                        synchronized (reqLock) {
-                            // max REQUERY_TIMEOUT i'll wait, best case i'll get
-                            // interrupted 
-                            debug("ManagedDownloader.tADs(): " +
-                                  "requery (" + this + ") sleeping " +
-                                  numRequeries);
-                            if (shouldWait) 
-                                reqLock.wait(REQUERY_TIMEOUT);
-                            shouldWait = true;
-                            debug("ManagedDownloader.tADs(): " + 
-                                  "requery ( " + this + ") sleep done...");
-                        }
+                        reqLock.lock();
                     }
                     else {
                         setState(GAVE_UP);
@@ -538,7 +517,6 @@ public class ManagedDownloader implements Downloader, Serializable {
                     }
                 }
             } catch (InterruptedException e) {
-                debug("ManagedDownloader.tADs(): sleep interrupted....");
                 if (stopped) {
                     setState(ABORTED);
                     manager.remove(this, false);
@@ -1179,6 +1157,37 @@ public class ManagedDownloader implements Downloader, Serializable {
     public float getMeasuredBandwidth() {
         return bandwidthTracker.getMeasuredBandwidth();
     }
+
+
+    /** Synchronization Primitive for auto-requerying....
+     *  Can be underst00d as follows:
+     *  -- The tryAllDownloads thread does a lock(), which will cause it to
+     *  wait() for up to REQUERY_TIMEOUT.  it may be woken up earlier if it gets
+     *  a requery result.  moreover, it won't wait if it has a result already...
+     *  -- The addDownload method, upon getting a result that matches, will
+     *  wake up the tryAllDownloads thread with a release().  
+     *  WARNING:  THIS IS VERY SPECIFIC SYNCHRONIZATION.  IT WAS NOT MEANT TO 
+     *  WORK WITH MORE THAN ONE PRODUCER OR ONE CONSUMER.
+     *  INVARIANT: upon entry to down(), shouldWait should be true.
+     */
+    private class RequeryLock extends Object {
+        private boolean shouldWait = true;
+        public synchronized void release() {
+            Assert.that(shouldWait == true);
+            shouldWait = false;
+            this.notifyAll();
+        }
+
+        public synchronized void lock() throws InterruptedException {
+            // max REQUERY_TIMEOUT i'll wait, best case i'll get
+            // interrupted 
+            if (shouldWait) 
+                this.wait(REQUERY_TIMEOUT);
+            shouldWait = true;
+        }
+
+    }
+
 
 
     private boolean debugOn = false;
