@@ -325,8 +325,18 @@ public abstract class FileManager {
     public synchronized boolean isValidIndex(int i) {
         return (i >= 0 && i < _files.size());
     }
-    
-    
+
+
+    /**
+     * Returns the <tt>URN<tt> for the File.  May return null;
+     */    
+    public synchronized URN getURNForFile(File f) {
+        FileDesc fd = getFileDescForFile(f);
+        if (fd != null) return fd.getSHA1Urn();
+        return null;
+    }
+
+
     /**
      * Returns the <tt>FileDesc</tt> that is wrapping this <tt>File</tt>
      * or null if the file is not shared.
@@ -982,10 +992,16 @@ public abstract class FileManager {
      *  changed, otherwise <tt>null</tt>
      */
     public FileDesc fileChanged(File f) {
+        Long cTime = 
+            CreationTimeCache.instance().getCreationTime(getURNForFile(f));
         FileDesc removed = removeFileIfShared(f);
         if( removed == null ) // nothing removed, exit.
             return null;
-        return addFileIfShared(f);
+        FileDesc fd = addFileIfShared(f);
+        if (fd != null) // replace the mod time that was input....
+            CreationTimeCache.instance().addTime(fd.getSHA1Urn(), 
+                                                 cTime.longValue());
+        return fd;
     }
 
     /**

@@ -556,6 +556,7 @@ public class RouterService {
             
             //persist urn cache
             UrnCache.instance().persistCache();
+            CreationTimeCache.instance().persistCache();
         } catch(Throwable t) {
             ErrorService.error(t);
         }
