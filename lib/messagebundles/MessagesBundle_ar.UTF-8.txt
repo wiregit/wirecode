@@ -647,6 +647,8 @@ SEARCH_WHATS_NEW_SMALL=جديد
 #? SEARCH_FILTER_RESULTS=
 #### SEARCH_BACK_TO_SEARCH=Back To Search
 #? SEARCH_BACK_TO_SEARCH=
+#### SEARCH_BLOCK_HOST=Do you want to block search results from the host at
+#? SEARCH_BLOCK_HOST=
 
 #Media Types
 #### MEDIA_ANY_TYPE=Any Type
@@ -1298,7 +1300,6 @@ INIT_SAVE_DEFAULT_BUTTON_TIP=استخدم المجلد الافتراضي
 PRO_TITLE=تحديث إلى PRO
 #### PRO_LABEL_THANKS=For TURBOcharged downloads, get LimeWire PRO. We guarantee that you will love the improved performance of PRO. Thank you for helping keep the Internet open by running LimeWire.
 PRO_LABEL_THANKS=لتنزيلات سريعة وأفضل، احصل على LimeWire PRO. نحن نضمن لك الأداء الأفضل مع PRO. شكرا لك لإبقائك على فتح الإنترنت باستخدام LimeWire.
-
 #### PRO_LABEL_QUESTION=Upgrade to LimeWire PRO?
 PRO_LABEL_QUESTION=هل ترغب في التحديث إلى LimeWire PRO?
 #### GO_PRO_TIP=Get LimeWire PRO Now
@@ -1311,6 +1312,16 @@ WHYGOPRO_TIP=ما الخدمات التي يقدمها PRO?
 GO_PRO_LATER=لاحقا
 #### GO_PRO_LATER_TIP=Get LimeWire PRO Later
 GO_PRO_LATER_TIP=الحصول على LimeWire PRO لاحقا.
+
+################################################################################
+# Key/Value pairs for the upgrade java window.
+################################################################################
+#### JAVA_UPGRADE_TITLE=Upgrade Your Java
+#? JAVA_UPGRADE_TITLE=
+#### JAVA_UPGRADE_MESSAGE=LimeWire has detected that you are using an out-of-date version of Java.  LimeWire looks and acts much better with newer versions of Java.  Features include support for scroll-wheels on mice, a Windows XP look, and many other improvements.
+#? JAVA_UPGRADE_MESSAGE=
+#### JAVA_UPGRADE_QUESTION=Would you like to get your free Java upgrade?
+#? JAVA_UPGRADE_QUESTION=
 
 ###################################################################
 # Key/value pairs for XML
@@ -1949,6 +1960,8 @@ OPTIONS_LOCALIZE_COUNTRY_BOX_LABEL=البلد
 # Key/value pairs for the save directory options window item
 # in the options window
 ################################################################################
+#### OPTIONS_SAVE_ON_CLOSE=You have made changes to some settings.  Would you like to save these changes?
+#? OPTIONS_SAVE_ON_CLOSE=
 #### OPTIONS_SAVE_DIR_TITLE=Save Directory
 OPTIONS_SAVE_DIR_TITLE=مجلد الحفظ
 #### OPTIONS_SAVE_DIR_LABEL=You can choose the directory for saving files.
