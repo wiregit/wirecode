@@ -42,6 +42,9 @@ public final class QueryHandler {
 	 */
 	private final String XML_QUERY;
 
+	/**
+	 * Constant for the payload of this query.
+	 */
 	private final byte[] PAYLOAD;
 
 	/**
@@ -210,8 +213,6 @@ public final class QueryHandler {
 		}
 		if(hasEnoughResults()) return;
 
-		int results = _resultCounter.getNumResults();
-
 		long sysTime = System.currentTimeMillis();
 		if(sysTime < _nextQueryTime) return;
 
@@ -237,6 +238,7 @@ public final class QueryHandler {
 			int remainingConnections = length - hostsQueried - 2;
 			remainingConnections = Math.max(remainingConnections, 1);
 			
+			int results = _resultCounter.getNumResults();
 			double resultsPerHost = 
 				(double)results/(double)_theoreticalHostsQueried;
 			
@@ -352,24 +354,6 @@ public final class QueryHandler {
 
 		return false;
 	}
-
-
-	/**
-	 * Creates a new <tt>QueryRequest</tt> instsnce, dynamically setting the
-	 * TTL based on a variety of factors. 
-	 *
-	 * @param queriedConnections the number of connections that have already
-	 *  been queried
-	 * @param qh the <tt>QueryHandler</tt> instance that generates
-	 *  queries for this dynamic query 
-	 * @param remainingConnections the number of connections that have yet
-	 *  to be queried
-	 * @param results the number of results received so far for this query
-	 */
-	//private QueryRequest createQuery(int queriedConnections, 
-	//							 int remainingConnections) {
-	//return createQuery((byte)2);		
-	//}
 
 	// overrides Object.toString
 	public String toString() {
