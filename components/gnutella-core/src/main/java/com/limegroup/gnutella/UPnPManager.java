@@ -24,6 +24,7 @@ import org.cybergarage.upnp.Service;
 import org.cybergarage.upnp.device.DeviceChangeListener;
 
 import com.limegroup.gnutella.settings.ApplicationSettings;
+import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.util.ManagedThread;
 import com.limegroup.gnutella.util.NetworkUtils;
 
@@ -112,11 +113,16 @@ public class UPnPManager extends ControlPoint implements DeviceChangeListener {
 	private Mapping _tcp, _udp;
 	
 	private UPnPManager() {
-		super();
+	    super();
+	    LOG.debug("Starting UPnP Manager.");
+	    try{
 		
-		LOG.debug("Starting UPnP Manager.");
-		addDeviceChangeListener(this);
-		start();
+	        addDeviceChangeListener(this);
+	        start();
+	    }catch(Exception bad) {
+	        ConnectionSettings.DISABLE_UPNP.setValue(true);
+	        ErrorService.error(bad);
+	    }
 	}
 	
 	/**
