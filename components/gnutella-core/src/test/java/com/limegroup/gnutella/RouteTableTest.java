@@ -222,6 +222,10 @@ public final class RouteTableTest extends BaseTestCase {
         public boolean isUltrapeerQueryRoutingConnection() {
             return false;
         }
+
+        public boolean isGoodConnection() {
+            return false;
+        }
     }
 
 }
