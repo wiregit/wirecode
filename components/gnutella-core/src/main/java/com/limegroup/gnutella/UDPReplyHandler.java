@@ -171,6 +171,18 @@ public final class UDPReplyHandler implements ReplyHandler {
         return false;
     }
 
+    /**
+     * Returns <tt>false</tt>, as UDP reply handlers are not "connections"
+     * in the first place, and so could never have sent the requisite
+     * headers.
+     *
+     * @return <tt>false</tt>, as UDP reply handlers are not connections
+     *  at all
+     */
+    public boolean isGoodConnection() {
+        return false;
+    }
+
 	/**
 	 * Overrides toString to print out more detailed information about
 	 * this <tt>UDPReplyHandler</tt>

@@ -66,7 +66,7 @@ public class PriorityMessageQueueTest extends BaseTestCase {
         q=new PriorityMessageQueue(1000, Integer.MAX_VALUE, 100);
         QueryRequest query = QueryRequest.createQuery("low hops", (byte)5);
         q.add(query);
-        query=QueryRequest.createQuery("high hops",(byte)7);
+        query=QueryRequest.createQuery("high hops",(byte)5);
         for (int i=0; i<8; i++)
             query.hop(); 
         q.add(query);

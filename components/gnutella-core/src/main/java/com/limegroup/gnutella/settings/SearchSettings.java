@@ -10,4 +10,10 @@ public final class SearchSettings extends AbstractSettings {
 	 */
 	public static final BooleanSetting GUESS_ENABLED =
 		CFG_FACTORY.createBooleanSetting("GUESS_ENABLED", true);
+
+    /**
+     * The TTL for probe queries.
+     */
+    public static final ByteSetting PROBE_TTL =
+        CFG_FACTORY.createByteSetting("PROBE_TTL", (byte)2);
 }

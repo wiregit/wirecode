@@ -115,7 +115,7 @@ public final class HandshakingTest extends BaseTestCase {
 	public void testNormalConnectionAccepted() throws Exception {
 		_currentConnection = 
 			new Connection("localhost", PORT, 
-						   new SupernodeProperties("localhost"),
+						   new UltrapeerHeaders("localhost"),
 						   new UltrapeerResponder());
 		_currentConnection.initialize();
 
@@ -187,7 +187,7 @@ public final class HandshakingTest extends BaseTestCase {
 	private Connection connect() throws Exception {
 		Connection conn = 
 			new Connection("localhost", PORT, 
-						   new SupernodeProperties("localhost"),
+						   new UltrapeerHeaders("localhost"),
 						   new UltrapeerResponder());
 		conn.initialize();		
 		return conn;
@@ -224,7 +224,7 @@ public final class HandshakingTest extends BaseTestCase {
 		private final String CONNECT_STRING;
 
 		private static final Properties ULTRAPEER_PROPS =
-			new SupernodeProperties("localhost");
+			new UltrapeerHeaders("localhost");
 
 		TestConnection() {
 			this(GNUTELLA_CONNECT_06);

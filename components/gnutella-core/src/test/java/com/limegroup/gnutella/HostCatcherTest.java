@@ -85,8 +85,6 @@ public class HostCatcherTest extends com.limegroup.gnutella.util.BaseTestCase {
         hc.add(new Endpoint("192.168.0.1"), false);
         assertEquals("private endpoint added as ultrapeer",
 					 0, hc.getNumUltrapeerHosts());
-        assertEquals("private endpoint added as normal",
-                     0, hc.getNumNormalHosts());
         assertEquals("private endpoint not added as private",
                     1, hc.getNumPrivateHosts());
 
@@ -95,8 +93,6 @@ public class HostCatcherTest extends com.limegroup.gnutella.util.BaseTestCase {
         hc.add(new Endpoint("18.239.0.1"), false);
         assertEquals("normal endpoint added as ultrapeer",
                 0, hc.getNumUltrapeerHosts());
-        assertEquals("normal endpoint not added as normal",
-                1, hc.getNumNormalHosts());
         assertEquals("normal endpoint added as private",
                 0, hc.getNumPrivateHosts());
 
@@ -105,8 +101,6 @@ public class HostCatcherTest extends com.limegroup.gnutella.util.BaseTestCase {
         hc.add(new Endpoint("18.239.0.1"), true);
         assertEquals("ultrapeer endpoint not added as ultrapeer",
                 1, hc.getNumUltrapeerHosts());
-        assertEquals("ultrapeer endpoint added as normal",
-                0, hc.getNumNormalHosts());
         assertEquals("ultrapeer endpoint added as private",
                 0, hc.getNumPrivateHosts());
 
@@ -119,8 +113,6 @@ public class HostCatcherTest extends com.limegroup.gnutella.util.BaseTestCase {
                null);
         assertEquals("private PingReply added as ultrapeer",
 					 0 ,hc.getNumUltrapeerHosts());
-        assertEquals("private PingReply added as normal",
-                     0, hc.getNumNormalHosts());
         assertEquals("private PingReply not added as private",
                     1, hc.getNumPrivateHosts());
 
@@ -131,8 +123,6 @@ public class HostCatcherTest extends com.limegroup.gnutella.util.BaseTestCase {
                null);
         assertEquals("normal PingReply added as ultrapeer",
                 0, hc.getNumUltrapeerHosts());
-        assertEquals("normal PingReply not added as normal",
-                1, hc.getNumNormalHosts());
         assertEquals("normal PingReply added as private",
                 0, hc.getNumPrivateHosts());
 
@@ -144,8 +134,6 @@ public class HostCatcherTest extends com.limegroup.gnutella.util.BaseTestCase {
                null);
         assertEquals("ultrapeer PingReply not added as ultrapeer",
                 1, hc.getNumUltrapeerHosts());
-        assertEquals("ultrapeer PingReply added as normal",
-                0, hc.getNumNormalHosts());
         assertEquals("ultrapeer PingReply added as private",
                 0, hc.getNumPrivateHosts());
     }
@@ -153,10 +141,8 @@ public class HostCatcherTest extends com.limegroup.gnutella.util.BaseTestCase {
     public void testIterators() {
         //System.out.println("-Testing iterators");
 
-        Iterator iter=hc.getNormalHosts(10);
-        assertTrue(! iter.hasNext());
-        iter=hc.getUltrapeerHosts(10);
-        assertTrue(! iter.hasNext());
+        Iterator iter=hc.getUltrapeerHosts(10);
+        assertTrue("should not have Ultrapeer hosts", ! iter.hasNext());
 
         assertEquals("unexpected number of ultrapeer hosts", 
             0, hc.getNumUltrapeerHosts());
@@ -182,21 +168,6 @@ public class HostCatcherTest extends com.limegroup.gnutella.util.BaseTestCase {
         assertTrue(iter.hasNext());
         assertEquals("unexpected host",
             new Endpoint("18.239.0.2", 6346), iter.next());
-        assertTrue(! iter.hasNext());
-
-        iter=hc.getNormalHosts(100);
-        assertTrue(iter.hasNext());
-        assertEquals("unexpected host",
-            new Endpoint("128.103.60.2", 6346), iter.next());
-        assertTrue(iter.hasNext());
-        assertEquals("unexpected host",
-            new Endpoint("128.103.60.1", 6346), iter.next());
-        assertTrue(! iter.hasNext());
-
-        iter=hc.getNormalHosts(1);
-        assertTrue(iter.hasNext());
-        assertEquals("unexpected host",
-            new Endpoint("128.103.60.2", 6346), iter.next());
         assertTrue(! iter.hasNext());
     }
 

@@ -19,11 +19,11 @@ import java.text.ParseException;
  * "gnutella.net").  The servent may then connect to these addresses
  * as necessary to maintain full connectivity.<p>
  *
- * The HostCatcher currently prioritizes pongs as follows.  Note that supernode
+ * The HostCatcher currently prioritizes pongs as follows.  Note that Ultrapeers
  * with a private address is still highest priority; hopefully this may allow
- * you to find local supernodes.
+ * you to find local Ultrapeers.
  * <ol>
- * <li> Supernodes.  Supernodes are identified because the number of files they
+ * <li> Ultrapeers.  Ultrapeers are identified because the number of files they
  *      are sharing is an exact power of two--a dirty but effective hack.
  * <li> Normal pongs.
  * <li> Private addresses.  This means that the host catcher will still 
@@ -48,14 +48,14 @@ public class HostCatcher {
      *  before resorting to GWebCache HOSTFILE requests. */
     public static final int GWEBCACHE_DELAY=6000;  //6 seconds    
 
-    /** The number of supernode pongs to store. */
+    /** The number of ultrapeer pongs to store. */
     static final int GOOD_SIZE=400;
     /** The number of normal pongs to store. 
      *  This should be large enough to store all permanent addresses. */
     static final int NORMAL_SIZE=1000;
     /** The number of private IP pongs to store. */
     static final int BAD_SIZE=15;
-    static final int SIZE=GOOD_SIZE+NORMAL_SIZE+BAD_SIZE;
+
 
     /** The number of permanent locations to store in gnutella.net */
     static final int PERMANENT_SIZE=NORMAL_SIZE;
@@ -277,8 +277,9 @@ public class HostCatcher {
             }
         }
 
-        //Add the endpoint, forcing it to be high priority if marked pong from a
-        //supernode.
+        //Add the endpoint, forcing it to be high priority if marked pong from 
+        //an ultrapeer.
+            
         if (pr.isMarked())
             return add(endpoint, GOOD_PRIORITY);
         else
@@ -327,6 +328,10 @@ public class HostCatcher {
         //Skip if this would connect us to our listening port.  TODO: I think
         //this check is too strict sometimes, which makes testing difficult.
         if (isMe(e.getHostname(), e.getPort()))
+            return false;
+
+        //Skip if this host is banned.
+        if (RouterService.getAcceptor().isBannedIP(e.getHostname()))
             return false;
 
         //Add to permanent list, regardless of whether it's actually in queue.
@@ -520,8 +525,8 @@ public class HostCatcher {
     }
 
     /**
-     *  Return the number of hosts, i.e.,
-     *  getNumUltrapeerHosts()+getNumNormalHosts()+getNumPrivateHosts().  
+     * Return the number of hosts, i.e.,
+     * getNumUltrapeerHosts()+getNumNormalHosts()+getNumPrivateHosts().  
      */
     public int getNumHosts() {
         return( ENDPOINT_QUEUE.size() );
@@ -532,13 +537,6 @@ public class HostCatcher {
      */
     public int getNumUltrapeerHosts() {
         return ENDPOINT_QUEUE.size(GOOD_PRIORITY);
-    }
-    
-    /**
-     * Returns the number of non-marked non-private hosts.
-     */
-    int getNumNormalHosts() {
-        return ENDPOINT_QUEUE.size(NORMAL_PRIORITY);
     }
 
     /**
@@ -579,21 +577,6 @@ public class HostCatcher {
         //Copy n best hosts into temporary buffer.
         ArrayList /* of ExtendedEndpoint */ buf=new ArrayList(n);
         for (Iterator iter=ENDPOINT_QUEUE.iterator(GOOD_PRIORITY, n); iter.hasNext(); )
-            buf.add(iter.next());
-        //And return iterator of contents.
-        return buf.iterator();
-    }
-
-    /**
-     *  Returns an iterator of the (at most) n best non-ultrapeer endpoints of
-     *  this.  It's not guaranteed that these are reachable. This can be
-     *  modified while iterating through the result, but the modifications will
-     *  not be observed.  
-     */
-    public synchronized Iterator getNormalHosts(int n) {
-        //Copy n best hosts into temporary buffer.
-        ArrayList /* of ExtendedEndpoint */ buf=new ArrayList(n);
-        for (Iterator iter=ENDPOINT_QUEUE.iterator(NORMAL_PRIORITY, n); iter.hasNext(); )
             buf.add(iter.next());
         //And return iterator of contents.
         return buf.iterator();

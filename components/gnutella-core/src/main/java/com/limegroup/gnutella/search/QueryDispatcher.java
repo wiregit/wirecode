@@ -11,7 +11,7 @@ public final class QueryDispatcher implements Runnable {
 	/**
 	 * <tt>List</tt> of outstanding queries.  
 	 */
-	private List _queries = new LinkedList();
+	private final List QUERIES = new LinkedList();
 
 	/**
 	 * <tt>List</tt> of new queries to add.
@@ -21,10 +21,11 @@ public final class QueryDispatcher implements Runnable {
 	private final List NEW_QUERIES = 
 		Collections.synchronizedList(new LinkedList());
 
-	/**
-	 * List of unexpired queries -- continually swapped with <tt>_queries</tt>.
-	 */
-	private final Set EXPIRED_QUERIES = new HashSet();
+    /**
+     * Variable for whether or not the last call to send out all pending 
+     * queries has finished.
+     */
+    private static volatile boolean _done = true;
 
 	/**
 	 * <tt>QueryDispatcher</tt> instance following singleton.
@@ -41,6 +42,7 @@ public final class QueryDispatcher implements Runnable {
 	public static QueryDispatcher instance() {
 		return INSTANCE;
 	}
+    
 
 	/**
 	 * Creates a new <tt>QueryDispatcher</tt> instance -- private constructor
@@ -65,6 +67,42 @@ public final class QueryDispatcher implements Runnable {
 		NEW_QUERIES.add(handler);		   
 	}
 
+    /**
+     * This method removes all queries for the given <tt>ReplyHandler</tt>
+     * instance.
+     *
+     * @param handler the handler that should have it's queries removed
+     */
+    public void removeReplyHandler(ReplyHandler handler) {
+        // if it's not a leaf connection, we don't care that it's closed
+        if(!handler.isSupernodeClientConnection()) return;
+        removeFromCollection(NEW_QUERIES, handler);
+        removeFromCollection(QUERIES, handler);
+    }
+
+    /**
+     * Removes the specified <tt>ReplyHandler</tt> from the specified
+     * <tt>Collection</tt>.
+     *
+     * @param coll the <tt>Collection</tt> to remove the <tt>ReplyHandler</tt>
+     *  from
+     * @param handler the <tt>ReplyHandler</tt> to remove
+     */
+    private static void removeFromCollection(Collection coll, ReplyHandler handler) {
+        List toRemove = new LinkedList();
+        synchronized(coll) {
+            Iterator iter = coll.iterator();
+            while(iter.hasNext()) {
+                QueryHandler qh = (QueryHandler)iter.next();
+                ReplyHandler rh = qh.getReplyHandler();
+                if(handler == rh) {
+                    toRemove.add(qh);
+                }
+            }
+            coll.removeAll(toRemove);
+        }        
+    }
+
 	/**
 	 * Starts the thread that processes queries.
 	 */
@@ -76,25 +114,31 @@ public final class QueryDispatcher implements Runnable {
 	 * Processes current queries.
 	 */
 	private void processQueries() {
+        if(!_done) return;
+        _done = false;
+
 		// necessary to obtain the lock because addAll iterates over
 		// NEW_QUERIES
 		synchronized(NEW_QUERIES) {
-			_queries.addAll(NEW_QUERIES);
+			QUERIES.addAll(NEW_QUERIES);
 			NEW_QUERIES.clear();
 		}
 
-		//System.out.println("QueryDispatcher::processQueries::got lock"); 
-		Iterator iter = _queries.iterator();
-		while(iter.hasNext()) {
-			QueryHandler handler = (QueryHandler)iter.next();
-			handler.sendQuery();
-			if(handler.hasEnoughResults()) {
-				EXPIRED_QUERIES.add(handler);
-			}
-		}
+        List expiredQueries = new LinkedList();
 
-		// remove any expired queries
-		_queries.removeAll(EXPIRED_QUERIES);
-		EXPIRED_QUERIES.clear();
+        synchronized(QUERIES) {
+            Iterator iter = QUERIES.iterator();
+            while(iter.hasNext()) {
+                QueryHandler handler = (QueryHandler)iter.next();
+                handler.sendQuery();
+                if(handler.hasEnoughResults()) {
+                    expiredQueries.add(handler);
+                }
+            }
+
+            // remove any expired queries
+            QUERIES.removeAll(expiredQueries);
+        }
+        _done = true;
 	}
 }

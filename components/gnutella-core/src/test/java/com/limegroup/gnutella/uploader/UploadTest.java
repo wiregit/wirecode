@@ -786,10 +786,10 @@ public class UploadTest extends com.limegroup.gnutella.util.BaseTestCase {
 
     private static class UltrapeerProperties extends Properties {
         public UltrapeerProperties() {
-            put(ConnectionHandshakeHeaders.USER_AGENT, CommonUtils.getHttpServer());
-            put(ConnectionHandshakeHeaders.X_QUERY_ROUTING, "0.1");
-            put(ConnectionHandshakeHeaders.X_SUPERNODE, "true");
-            put(ConnectionHandshakeHeaders.GGEP, "1.0");  //just for fun
+            put(HeaderNames.USER_AGENT, CommonUtils.getHttpServer());
+            put(HeaderNames.X_QUERY_ROUTING, "0.1");
+            put(HeaderNames.X_ULTRAPEER, "true");
+            put(HeaderNames.GGEP, "1.0");  //just for fun
         }
     }
     

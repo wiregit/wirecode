@@ -166,16 +166,14 @@ public abstract class MessageRouter {
     }
 
     /**
-     * A callback for ConnectionManager to clear a ManagedConnection from
+     * A callback for ConnectionManager to clear a <tt>ReplyHandler</tt> from
      * the routing tables when the connection is closed.
-	 *
-	 * TODO: we don't currently remove UDPReplyHandlers -- allowing the route
-	 * tables to grow without bound!!
      */
-    public void removeConnection(ManagedConnection connection) {
-        _pingRouteTable.removeReplyHandler(connection);
-        _queryRouteTable.removeReplyHandler(connection);
-        _pushRouteTable.removeReplyHandler(connection);
+    public void removeConnection(ReplyHandler rh) {
+        DYNAMIC_QUERIER.removeReplyHandler(rh);
+        _pingRouteTable.removeReplyHandler(rh);
+        _queryRouteTable.removeReplyHandler(rh);
+        _pushRouteTable.removeReplyHandler(rh);
     }
 
 	/**
@@ -428,7 +426,6 @@ public abstract class MessageRouter {
      */
     final void handleQueryRequestPossibleDuplicate(
         QueryRequest request, ManagedConnection receivingConnection) {
-		//System.out.println("MessageRouter::handleQueryRequestPossibleDuplicate: "+request); 
 		ResultCounter counter = 
 			_queryRouteTable.tryToRouteReply(request.getGUID(), 
 											 receivingConnection);
@@ -458,7 +455,6 @@ public abstract class MessageRouter {
 	 */
 	final boolean handleUDPQueryRequestPossibleDuplicate(QueryRequest request,
 													  ReplyHandler handler)  {
-		//System.out.println("MessageRouter::handleUDPQueryRequestPossibleDuplicate"); 
 		ResultCounter counter = 
 			_queryRouteTable.tryToRouteReply(request.getGUID(), 
 											 handler);
@@ -597,7 +593,6 @@ public abstract class MessageRouter {
     protected void handleQueryRequest(QueryRequest request,
 									  ReplyHandler handler, 
 									  ResultCounter counter) {
-		//System.out.println("MessageRouter::handleQueryRequest"); 
         // Apply the personal filter to decide whether the callback
         // should be informed of the query
         if (!handler.isPersonalSpam(request)) {
@@ -612,7 +607,7 @@ public abstract class MessageRouter {
         //else if(request.getTTL() > 0) {
 
 		if(handler.isSupernodeClientConnection()) {
-			if(handler.isHighDegreeConnection()) {
+			if(handler.isGoodConnection()) {
 				sendDynamicQuery(QueryHandler.createHandlerForNewLeaf(request, 
 																	  handler), 
 								 handler, counter);
@@ -632,7 +627,6 @@ public abstract class MessageRouter {
 		forwardQueryRequestToLeaves(request, handler);
 		
         // if I'm not firewalled and the source isn't firewalled THEN reply....
-		//System.out.println("MessageRouter::about to respond to request"); 
         if (request.isFirewalledSource() &&
             !RouterService.acceptedIncomingConnection())
             return;
@@ -710,7 +704,7 @@ public abstract class MessageRouter {
      * setting up the proper reply routing.
      */
     public void sendQueryRequest(QueryRequest request,
-                                 ManagedConnection connection) {
+                                 ManagedConnection connection) {        
         if(request == null) {
             throw new NullPointerException("null query");
         }
@@ -842,9 +836,9 @@ public abstract class MessageRouter {
             ManagedConnection mc = (ManagedConnection)list.get(i);
             if(mc != handler) {
 				boolean sent = sendRoutedQueryToHost(request, mc, handler);
-				if(sent) {
+				if(sent && RECORD_STATS) {
 					RoutedQueryStat.LEAF_SEND.incrementStat();
-				} else {
+				} else if(RECORD_STATS) {
 					RoutedQueryStat.LEAF_DROP.incrementStat();
 				}				
             }
@@ -872,7 +866,6 @@ public abstract class MessageRouter {
 		if (qi==null || qi.lastReceived==null) 
 			return false;
 		else if (qi.lastReceived.contains(query)) {
-			//System.out.println("MessageRouter::sendRoutedQueryToHost::sending query"); 
 			//A new client with routing entry, or one that hasn't started
 			//sending the patch.
 			sendQueryRequest(query, mc, handler);
@@ -930,8 +923,7 @@ public abstract class MessageRouter {
 	 
 		List list=_manager.getInitializedConnections2();
 		int limit;
-		if(handler.isHighDegreeConnection() && 
-           handler.isUltrapeerQueryRoutingConnection()) {
+		if(handler.isGoodConnection()) {
 			limit = list.size();
 		} else {
 			limit = Math.min(5, list.size());
@@ -947,11 +939,12 @@ public abstract class MessageRouter {
 				// if it's the last hop to an Ultrapeer that sends
 				// query route tables, route it.
 				if(lastHop &&
-				   mc.isUltrapeerQueryRoutingConnection()) {
+				   mc.isUltrapeerQueryRoutingConnection() &&
+                   RouterService.isSupernode()) {
 					boolean sent = sendRoutedQueryToHost(query, mc, handler);
-					if(sent) {
+					if(sent && RECORD_STATS) {
 						RoutedQueryStat.ULTRAPEER_SEND.incrementStat();
-					} else {
+					} else if(RECORD_STATS) {
 						RoutedQueryStat.ULTRAPEER_DROP.incrementStat();
 					}
 				} else {
@@ -974,7 +967,6 @@ public abstract class MessageRouter {
     public void sendQueryRequest(QueryRequest request, 
 								 ManagedConnection sendConnection, 
 								 ReplyHandler handler) {
-
 		if(request == null) {
 			throw new NullPointerException("null query");
 		}
@@ -1111,7 +1103,6 @@ public abstract class MessageRouter {
      */
     public void handleQueryReply(QueryReply queryReply,
                                  ReplyHandler handler) {
-
         if(queryReply == null) {
             throw new NullPointerException("null query reply");
         }
@@ -1138,12 +1129,14 @@ public abstract class MessageRouter {
             //GUID.  Note that replies destined for me all always delivered to
             //the GUI.
 
+            ReplyHandler rh = rrp.getReplyHandler();
+
 			// TODO: What happens if we get a TTL=0 query that's not intended
 			// for us?  At first glance, it looks like we keep forwarding it!
             if(!shouldDropReply(rrp.getBytesRouted(), queryReply.getTTL()) ||
-			   rrp.getReplyHandler()==FOR_ME_REPLY_HANDLER) {
-                rrp.getReplyHandler().handleQueryReply(queryReply,
-                                                       handler);
+			   rh == FOR_ME_REPLY_HANDLER) {
+                
+                rh.handleQueryReply(queryReply, handler);
                 // also add to the QueryUnicaster for accounting - basically,
                 // most results will not be relevant, but since it is a simple
                 // HashSet lookup, it isn't a prohibitive expense...

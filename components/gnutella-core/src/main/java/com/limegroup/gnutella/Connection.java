@@ -65,10 +65,13 @@ public class Connection {
     protected volatile boolean _closed=false;
 
     /** 
-	 * The properties read from the connection.
+	 * The headers read from the connection.
 	 */
     private final Properties HEADERS_READ = new Properties();
 
+    /**
+     * The <tt>HandshakeResponse</tt> wrapper for the connection headers.
+     */
 	private final HandshakeResponse HEADERS = 
 		new HandshakeResponse(HEADERS_READ);
 
@@ -114,7 +117,13 @@ public class Connection {
      * The number of times we will respond to a given challenge 
      * from the other side, or otherwise, during connection handshaking
      */
-    public static final int MAX_HANDSHAKE_ATTEMPTS = 5;    
+    public static final int MAX_HANDSHAKE_ATTEMPTS = 5;  
+
+    /**
+     * This time in milliseconds since 1970 that this connection was
+     * established.
+     */
+    private long _connectionTime = Long.MAX_VALUE;
 
 
     /** if I am a Ultrapeer shielding the given connection */
@@ -305,6 +314,8 @@ public class Connection {
                 initializeOutgoing();
             else
                 initializeIncoming();
+
+            _connectionTime = System.currentTimeMillis();
 						
         } catch (NoGnutellaOkException e) {
             close();
@@ -358,9 +369,11 @@ public class Connection {
 			readHeaders();
 
             //Terminate abnormally if we read something other than 200 or 401.
-            HandshakeResponse theirResponse = new HandshakeResponse(
-                connectLine.substring(GNUTELLA_06.length()).trim(), 
-                HEADERS_READ);
+            HandshakeResponse theirResponse = 
+                HandshakeResponse.createServerResponse(
+                    connectLine.substring(GNUTELLA_06.length()).trim(), 
+                    HEADERS_READ);
+
             int theirCode = theirResponse.getStatusCode();
             if (theirCode != HandshakeResponse.OK 
 				&&  theirCode != HandshakeResponse.UNAUTHORIZED_CODE)
@@ -376,7 +389,7 @@ public class Connection {
 
             sendString(GNUTELLA_06 + " " 
                 + ourResponse.getStatusLine() + CRLF);
-            sendHeaders(ourResponse.getHeaders());
+            sendHeaders(ourResponse.props());
             //Consider termination...
             if(ourResponse.getStatusCode() == HandshakeResponse.OK) {
                 if(ourResponse.getStatusMessage().equals(
@@ -452,11 +465,10 @@ public class Connection {
 			//See initializeIncoming and the code at the bottom of this
 			//loop.
 			HandshakeResponse ourResponse = 
-				RESPONSE_HEADERS.respond(new HandshakeResponse(HEADERS_READ), 
-										 false);
+				RESPONSE_HEADERS.respond(HEADERS, false);
 
             sendString(GNUTELLA_06 + " " + ourResponse.getStatusLine() + CRLF);
-            sendHeaders(ourResponse.getHeaders());                   
+            sendHeaders(ourResponse.props());                   
             //Our response should be either OK or UNAUTHORIZED for the handshake
             //to proceed.
             if((ourResponse.getStatusCode() != HandshakeResponse.OK)
@@ -482,9 +494,12 @@ public class Connection {
 			
             if (! connectLine.startsWith(GNUTELLA_06))
                 throw new IOException("Bad connect string");
-            HandshakeResponse theirResponse=new HandshakeResponse(
-                connectLine.substring(GNUTELLA_06.length()).trim(), 
-                HEADERS_READ);
+
+            HandshakeResponse theirResponse = 
+                HandshakeResponse.createServerResponse(
+                    connectLine.substring(GNUTELLA_06.length()).trim(),
+                    HEADERS_READ);
+
 
             //Decide whether to proceed.
             int ourCode=ourResponse.getStatusCode();
@@ -544,7 +559,7 @@ public class Connection {
                 String key=(String)enum.nextElement();
                 String value=props.getProperty(key);
                 // Overwrite any domainname with true IP address
-                if ( ConnectionHandshakeHeaders.REMOTE_IP.equals(key) )
+                if ( HeaderNames.REMOTE_IP.equals(key) )
                     value=getInetAddress().getHostAddress();
                 if (value==null)
                     value="";
@@ -817,6 +832,39 @@ public class Connection {
 		return _socket.getLocalAddress();
     }
 
+    /**
+     * Returns the time this connection was established, in milliseconds
+     * since January 1, 1970.
+     *
+     * @return the time this connection was established
+     */
+    public long getConnectionTime() {
+        return _connectionTime;
+    }
+
+    /**
+     * Checks whether this connection is considered a stable connection,
+     * meaning it has been up for enough time to be considered stable.
+     *
+     * @return <tt>true</tt> if the connection is considered stable,
+     *  otherwise <tt>false</tt>
+     */
+    public boolean isStable() {
+        return isStable(System.currentTimeMillis());
+    }
+
+    /**
+     * Checks whether this connection is considered a stable connection,
+     * by comparing the time it was established with the <tt>millis</tt>
+     * argument.
+     *
+     * @return <tt>true</tt> if the connection is considered stable,
+     *  otherwise <tt>false</tt>
+     */
+    public boolean isStable(long millis) {
+        return (millis - getConnectionTime())/1000 > 5;
+    }
+
     /** @return -1 if the message isn't supported, else the version number 
      *  supported.
      */
@@ -851,16 +899,6 @@ public class Connection {
         if (_messagesSupported != null)
             return _messagesSupported.supportsHopsFlow();
         return -1;
-    }
-    
-    /**
-     * Returns the headers received during connection Handshake
-     * @return the headers received during connection Handshake. All the
-     * headers received are combined together. 
-     * (headers are received twice for the incoming connections)
-     */
-    public Properties getHeaders(){
-		return (Properties)HEADERS_READ.clone();
     }
 
     /**
@@ -930,6 +968,11 @@ public class Connection {
 		return HEADERS.getUserAgent();
     }
 
+    // inherit doc comment
+    public boolean isGoodConnection() {
+        return HEADERS.isGoodConnection();
+    }
+
 	/**
 	 * Returns the number of intra-Ultrapeer connections this node maintains.
 	 * 
@@ -988,12 +1031,12 @@ public class Connection {
     /** Returns true iff this connection wrote "Ultrapeer: false".
      *  This does NOT necessarily mean the connection is shielded. */
     public boolean isLeafConnection() {
-		return HEADERS.isLeafConnection();
+		return HEADERS.isLeaf();
     }
 
     /** Returns true iff this connection wrote "Supernode: true". */
     public boolean isSupernodeConnection() {
-		return HEADERS.isSupernodeConnection();
+		return HEADERS.isUltrapeer();
     }
 
     /** 
@@ -1018,7 +1061,7 @@ public class Connection {
 
         //...and am I a leaf node?
         String value=getPropertyWritten(
-            ConnectionHandshakeHeaders.X_SUPERNODE);
+            HeaderNames.X_ULTRAPEER);
         if (value==null)
             return false;
         else 
@@ -1091,7 +1134,7 @@ public class Connection {
 
         //...and am I a supernode?
         String value=getPropertyWritten(
-            ConnectionHandshakeHeaders.X_SUPERNODE);
+            HeaderNames.X_ULTRAPEER);
         if (value==null)
             return false;
         else if (!Boolean.valueOf(value).booleanValue())
@@ -1110,7 +1153,7 @@ public class Connection {
 
 
     /** True if the remote host supports query routing (QRP).  This is only 
-     *  meaningful in the context of leaf-supernode relationships. */
+     *  meaningful in the context of leaf-ultrapeer relationships. */
     boolean isQueryRoutingEnabled() {
 		return HEADERS.isQueryRoutingEnabled();
     }

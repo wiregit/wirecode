@@ -1,6 +1,8 @@
 package com.limegroup.gnutella.handshaking;
 
+import com.limegroup.gnutella.*;
 import java.util.Properties;
+import com.sun.java.util.collections.*;
 
 /**
  * This class contains the necessary information to form a response to a 
@@ -15,14 +17,15 @@ import java.util.Properties;
  * 2) Create an instance with a custom status code, status message, and the
  *    headers used in the response.
  */
-public class HandshakeResponse {
+public final class HandshakeResponse {
+
     /**
      * The "default" status code in a connection handshake indicating that
      * the handshake was successful and the connection can be established.
      */
     public static final int OK = 200;
     
-     /**
+    /**
      * The "default" status message in a connection handshake indicating that
      * the handshake was successful and the connection can be established.
      */
@@ -93,30 +96,10 @@ public class HandshakeResponse {
     private final Properties HEADERS;
 
     /** 
-	 * if I am a Ultrapeer shielding the given connection 
-	 */
-    private Boolean _isLeaf;
-
-    /** 
-	 * if I am a leaf connected to an Ultrapeer.
-	 */
-    private Boolean _isUltrapeer;
-
-
-    /** 
 	 * is the GGEP header set?  
 	 */
     private Boolean _supportsGGEP;
-
-    /**
-     * Creates a HandshakeResponse which defaults the status code and status
-     * message to be "200 Ok" and uses no headers in the response.
-     */
-    public HandshakeResponse() {
-        statusCode = OK;
-        statusMessage = OK_MESSAGE;
-        this.HEADERS = null;
-    }    
+    
     
     /**
      * Creates a HandshakeResponse which defaults the status code and status
@@ -126,7 +109,7 @@ public class HandshakeResponse {
     public HandshakeResponse(Properties headers) {
         statusCode = OK;
         statusMessage = OK_MESSAGE;
-        this.HEADERS = headers;
+        HEADERS = headers;
     }    
 
     /**
@@ -136,11 +119,11 @@ public class HandshakeResponse {
      * @param message the response message to use.
      * @param headers the headers to use in the response.
      */
-    public HandshakeResponse(int code, String message, Properties headers) { 
-        this.statusCode = code;
-        this.statusMessage = message;
-        this.HEADERS = headers;
-    }
+     public HandshakeResponse(int code, String message, Properties headers) { 
+         this.statusCode = code;
+         this.statusMessage = message;
+         this.HEADERS = headers;
+     }
     
     /**
      * Creates a HandshakeResponse with the desired status line, 
@@ -149,8 +132,8 @@ public class HandshakeResponse {
      * HTTP status line. (e.g., "200 OK", "503 Service Not Available")
      * @param headers the headers to use in the response.
      */
-    public HandshakeResponse(String statusLine, Properties headers) { 
-        try{
+    private HandshakeResponse(String statusLine, Properties headers) { 
+        try {
             //get the status code and message out of the status line
             int statusMessageIndex = statusLine.indexOf(" ");
             this.statusCode = Integer.parseInt(statusLine.substring(0, 
@@ -167,7 +150,147 @@ public class HandshakeResponse {
         
         this.HEADERS = headers;
     }
-    
+
+    /**
+     * Constructs the response from the other host during connection
+     * handshaking.
+     *
+     * @return a new <tt>HandshakeResponse</tt> instance with the headers
+     *  sent by the other host
+     */
+    public static HandshakeResponse 
+        createServerResponse(String message, Properties headers) {
+        return new HandshakeResponse(message, headers);        
+    }
+
+    /**
+     * Creates a new <tt>HandshakeResponse</tt> instance that accepts the
+     * potential connection.
+     *
+     * @param headers the <tt>Properties</tt> instance containing the headers
+     *  to send to the node we're accepting
+     */
+    static HandshakeResponse createAcceptIncomingResponse(Properties headers) {
+        // add nodes from far away if we can in an attempt to avoid
+        // cycles
+        addHighHopsUltrapeers(RouterService.getHostCatcher(), headers);
+        return new HandshakeResponse(headers);
+    }
+
+
+    /**
+     * Creates a new <tt>HandshakeResponse</tt> instance that accepts the
+     * outgoing connection -- the final third step in the handshake.  This
+     * passes no headers, as all necessary headers have already been 
+     * exchanged.  The only possible exception is the potential inclusion
+     * of X-Ultrapeer: false.
+     *
+     * @param headers the <tt>Properties</tt> instance containing the headers
+     *  to send to the node we're accepting
+     */
+    static HandshakeResponse createAcceptOutgoingResponse(Properties headers) {
+        return new HandshakeResponse(headers);
+    }
+
+    /**
+     * Creates a new <tt>HandshakeResponse</tt> instance that rejects the
+     * potential connection.
+     *
+     * @param headers the <tt>Properties</tt> instance containing the headers
+     *  to send to the node we're rejecting
+     */
+    static HandshakeResponse createRejectIncomingResponse(Properties headers) {
+        addConnectedUltrapeers(RouterService.getConnectionManager(), headers);
+        return new HandshakeResponse(HandshakeResponse.SLOTS_FULL,
+                                     HandshakeResponse.SLOTS_FULL_MESSAGE,
+                                     headers);        
+    }
+
+    /**
+     * Creates a new <tt>HandshakeResponse</tt> instance that rejects the
+     * potential connection.
+     *
+     * @param headers the <tt>Properties</tt> instance containing the headers
+     *  to send to the node we're rejecting
+     */
+    static HandshakeResponse createRejectOutgoingResponse(Properties headers) {
+        return new HandshakeResponse(HandshakeResponse.SLOTS_FULL,
+                                     HandshakeResponse.SLOTS_FULL_MESSAGE,
+                                     headers);        
+    }
+
+    /**
+     * Adds the addresses of connected Ultrapeers for X-Try-Ultrapeer
+     * headers.  This is useful particularly when we reject the connection,
+     * as we do not care about cycles in that case.
+     *
+     * @param cm the <tt>ConnectionManager</tt> that provides data for
+     *  the headers -- this may seem an odd design, since we always have
+     *  access to the ConnectionManager, but this makes testing easier
+     * @param headers the headers we're sending to the connecting node
+     */
+    private static void addConnectedUltrapeers(ConnectionManager cm,
+                                               Properties headers) {
+        StringBuffer hostString = new StringBuffer();
+
+        //Also add neighbouring ultrapeers
+        Set connectedSupernodeEndpoints = cm.getSupernodeEndpoints();
+
+        //if nothing to add, return
+        if(connectedSupernodeEndpoints.size() < 0)
+            return;
+        
+        int i = 0;
+        for(Iterator iter = connectedSupernodeEndpoints.iterator();
+            iter.hasNext(); i++) {
+            if(i == 10) break;
+            //get the next endpoint
+            Endpoint endpoint =(Endpoint)iter.next();
+
+            //append the host information
+            hostString.append(endpoint.getHostname());
+            hostString.append(":");
+            hostString.append(endpoint.getPort());
+            if(iter.hasNext()) {
+                hostString.append(Constants.ENTRY_SEPARATOR);
+            }
+        }
+
+        //add the connected Ultrapeers to the handshake headers
+        headers.put(HeaderNames.X_TRY_ULTRAPEERS, 
+                    hostString.toString());        
+    }
+
+    /**
+     * Adds the addresses of high-hops Ultrapeers to the given set
+     * of headers, if those Ultrapeers are available.
+     *
+     * @param hc the <tt>HostCatcher</tt> for obtaining Ultrapeer
+     *  hosts to return -- this is a slightly odd design, but 
+     *  passing the host catcher as a parameter here makes testing
+     *  a little easier
+     * @param header the set of headers to add the Ultrapeers to
+     */
+    private static void addHighHopsUltrapeers(HostCatcher hc,
+                                              Properties headers) {
+        StringBuffer hostString = new StringBuffer();
+
+        //add Ultrapeer endpoints from the hostcatcher.
+        Iterator iter = hc.getUltrapeerHosts(10);
+        while(iter.hasNext()) {
+            Endpoint curHost = (Endpoint)iter.next();
+            hostString.append(curHost.getHostname());
+            hostString.append(":");
+            hostString.append(curHost.getPort());
+            if(iter.hasNext()) {
+                hostString.append(Constants.ENTRY_SEPARATOR);
+            }
+        }
+
+        headers.put(HeaderNames.X_TRY_ULTRAPEERS,
+                    hostString.toString());
+    }
+
     /** 
      * Returns the response code.
      */
@@ -197,6 +320,17 @@ public class HandshakeResponse {
     
 
     /**
+     * Returns whether or not this connection was accepted -- whether
+     * or not the connection returned Gnutella/0.6 200 OK
+     *
+     * @return <tt>true</tt> if the server returned Gnutella/0.6 200 OK,
+     *  otherwise <tt>false</tt>
+     */
+    public boolean isAccepted() {
+        return statusCode == OK;
+    }
+
+    /**
      * Returns the status code and status message together used in a 
      * status line. (e.g., "200 OK", "503 Service Not Available")
      */
@@ -205,9 +339,9 @@ public class HandshakeResponse {
     }
 
     /**
-     * Returns the headers to use in the response.
+     * Returns the headers as a <tt>Properties</tt> instance.
      */
-    public Properties getHeaders() {
+    public Properties props() {
         return HEADERS;
     }
 
@@ -224,7 +358,56 @@ public class HandshakeResponse {
     public String getUserAgent() {
         return HEADERS.getProperty(
             com.limegroup.gnutella.handshaking.
-                ConnectionHandshakeHeaders.USER_AGENT);
+                HeaderNames.USER_AGENT);
+    }
+
+    /**
+     * Returns the maximum TTL that queries originating from us and 
+     * sent from this connection should have.  If the max TTL header is
+     * not present, the default TTL is assumed.
+     *
+     * @return the maximum TTL that queries sent to this connection
+     *  should have -- this will always be 5 or less
+     */
+    public byte getMaxTTL() {
+        return extractByteHeaderValue(HEADERS, HeaderNames.X_MAX_TTL, (byte)5);
+    }
+    
+    /**
+     * Accessor for the X-Try-Ultrapeers header.  If the header does not
+     * exist or is empty, this returns the emtpy string.
+     *
+     * @return the string of X-Try-Ultrapeer hosts, or the empty string
+     *  if they do not exist
+     */
+    public String getXTryUltrapeers() {
+        return extractStringHeaderValue(HEADERS, HeaderNames.X_TRY_ULTRAPEERS);
+    }
+
+    /**
+     * This is a convenience method to see if the connection passed 
+     * the X-Try-Ultrapeer header.  This simply checks the existence of the
+     * header -- if the header was sent but is empty, this still returns
+     * <tt>true</tt>.
+     *
+     * @return <tt>true</tt> if this connection sent the X-Try-Ultrapeer
+     *  header, otherwise <tt>false</tt>
+     */
+    public boolean hasXTryUltrapeers() {
+        return headerExists(HEADERS, HeaderNames.X_TRY_ULTRAPEERS);
+    }
+
+    /**
+     * Returns whether or not this host included leaf guidance, i.e.,
+     * whether or not the host wrote:
+     *
+     * X-Ultrapeer-Needed: false
+     *
+     * @return <tt>true</tt> if the other host returned 
+     *  X-Ultrapeer-Needed: false, otherwise <tt>false</tt>
+     */
+    public boolean hasLeafGuidance() {
+        return isFalseValue(HEADERS, HeaderNames.X_ULTRAPEER_NEEDED);
     }
 
 	/**
@@ -233,17 +416,7 @@ public class HandshakeResponse {
 	 * @return the number of intra-Ultrapeer connections this node maintains
 	 */
 	public int getNumIntraUltrapeerConnections() {
-		String connections = HEADERS.getProperty(ConnectionHandshakeHeaders.X_DEGREE);
-		if(connections == null) {
-			if(isSupernodeConnection()) return 6;
-			return 0;
-		}
-		
-		try {
-			return Integer.valueOf(connections).intValue();
-		} catch(NumberFormatException e) {
-			return 0;
-		}
+        return extractIntHeaderValue(HEADERS, HeaderNames.X_DEGREE, 6);
 	}
 
 	// implements ReplyHandler interface -- inherit doc comment
@@ -251,43 +424,46 @@ public class HandshakeResponse {
 		return getNumIntraUltrapeerConnections() >= 15;
 	}
 
+    /**
+     * Returns whether or not this connections is a "good" connection,
+     * a definition that changes over time as features are added
+     * to the network.
+     *
+     * @return <tt>true</tt> if this connection is considered "good",
+     *  otherwise <tt>false</tt>
+     */
+    public boolean isGoodConnection() {
+        return isHighDegreeConnection() &&
+            isUltrapeerQueryRoutingConnection() &&
+            isMaxTTLConnection() &&
+            isDynamicQueryConnection();
+    }    
+
+
 	/**
-	 * Returns whether or not this connection is to an Ultrapeer that 
-	 * supports query routing between Ultrapeers at 1 hop.
+	 * Returns whether or not this connection supports query routing 
+     * between Ultrapeers at 1 hop.
 	 *
 	 * @return <tt>true</tt> if this is an Ultrapeer connection that
 	 *  exchanges query routing tables with other Ultrapeers at 1 hop,
 	 *  otherwise <tt>false</tt>
 	 */
 	public boolean isUltrapeerQueryRoutingConnection() {
-		if(!isSupernodeConnection()) return false;
-        String value = 
-            HEADERS.getProperty(ConnectionHandshakeHeaders.X_ULTRAPEER_QUERY_ROUTING);
-        if(value == null) return false;
-		
-        return value.equals(ConnectionHandshakeHeaders.QUERY_ROUTING_VERSION);
+        return 
+            isVersionOrHigher(HEADERS, 
+                              HeaderNames.X_ULTRAPEER_QUERY_ROUTING, 0.1F);
     }
 
 
-    /** Returns true iff this connection wrote "Ultrapeer: false".
+    /** Returns true iff this connection wrote "X-Ultrapeer: false".
      *  This does NOT necessarily mean the connection is shielded. */
-    public boolean isLeafConnection() {
-        String value=HEADERS.getProperty(ConnectionHandshakeHeaders.X_SUPERNODE);
-        if (value==null)
-            return false;
-        else
-            //X-Ultrapeer: true  ==> false
-            //X-Ultrapeer: false ==> true
-            return !Boolean.valueOf(value).booleanValue();
+    public boolean isLeaf() {
+        return isFalseValue(HEADERS, HeaderNames.X_ULTRAPEER);
     }
 
-    /** Returns true iff this connection wrote "Supernode: true". */
-    public boolean isSupernodeConnection() {
-        String value=HEADERS.getProperty(ConnectionHandshakeHeaders.X_SUPERNODE);
-        if (value==null)
-            return false;
-        else
-            return Boolean.valueOf(value).booleanValue();
+    /** Returns true iff this connection wrote "X-Ultrapeer: true". */
+    public boolean isUltrapeer() {
+        return isTrueValue(HEADERS, HeaderNames.X_ULTRAPEER);
     }
 
 
@@ -313,7 +489,7 @@ public class HandshakeResponse {
 	 *  Ultrapeer connection supports GUESS, <tt>false</tt> otherwise
 	 */
 	public boolean isGUESSUltrapeer() {
-		return isGUESSCapable() && isSupernodeConnection();
+		return isGUESSCapable() && isUltrapeer();
 	}
 
 
@@ -328,7 +504,7 @@ public class HandshakeResponse {
 	 *  or -1 if GUESS is not supported
 	 */
 	public int getGUESSVersion() {
-		String value = HEADERS.getProperty(ConnectionHandshakeHeaders.X_GUESS);
+		String value = HEADERS.getProperty(HeaderNames.X_GUESS);
 		if(value == null) return -1;
 		else {
 			float version = Float.valueOf(value).floatValue();
@@ -341,7 +517,7 @@ public class HandshakeResponse {
      the headers. */
     public boolean isTempConnection() {
         //get the X-Temp-Connection from either the headers received
-        String value=HEADERS.getProperty(ConnectionHandshakeHeaders.X_TEMP_CONNECTION);
+        String value=HEADERS.getProperty(HeaderNames.X_TEMP_CONNECTION);
         //if X-Temp-Connection header is not received, return false, else
         //return the value received
         if(value == null)
@@ -356,7 +532,7 @@ public class HandshakeResponse {
     public boolean supportsGGEP() {
         if (_supportsGGEP==null) {
 			String value = 
-				HEADERS.getProperty(ConnectionHandshakeHeaders.GGEP);
+				HEADERS.getProperty(HeaderNames.GGEP);
 			
 			//Currently we don't care about the version number.
             _supportsGGEP = new Boolean(value != null);
@@ -372,7 +548,7 @@ public class HandshakeResponse {
 	 */
 	public boolean supportsVendorMessages() {
 		String value = 
-			HEADERS.getProperty(ConnectionHandshakeHeaders.X_VENDOR_MESSAGE);
+			HEADERS.getProperty(HeaderNames.X_VENDOR_MESSAGE);
 		if ((value != null) && !value.equals("")) {		
 			return true;
 		}
@@ -387,30 +563,176 @@ public class HandshakeResponse {
 	 */
 	public String getDomainsAuthenticated() {
 		return HEADERS.getProperty(
-		    ConnectionHandshakeHeaders.X_DOMAINS_AUTHENTICATED);
+		    HeaderNames.X_DOMAINS_AUTHENTICATED);
 		
 	}
 
 	public String getVersion() {
-		return HEADERS.getProperty(ConnectionHandshakeHeaders.X_VERSION);
+		return HEADERS.getProperty(HeaderNames.X_VERSION);
 	}
 
 
     /** True if the remote host supports query routing (QRP).  This is only 
      *  meaningful in the context of leaf-supernode relationships. */
     public boolean isQueryRoutingEnabled() {
-        //We are ALWAYS QRP-enabled, so we only need to look at what the remote
-        //host wrote.
-        String value = 
-			HEADERS.getProperty(ConnectionHandshakeHeaders.X_QUERY_ROUTING);
-        if (value==null)
+        return isVersionOrHigher(HEADERS, HeaderNames.X_QUERY_ROUTING, 0.1F);
+    }
+
+    /**
+     * Returns whether or not the node on the other end of this connection
+     * uses dynamic querying.
+     *
+     * @return <tt>true</tt> if this node uses dynamic querying, otherwise
+     *  <tt>false</tt>
+     */
+    public boolean isDynamicQueryConnection() {
+        return isVersionOrHigher(HEADERS, HeaderNames.X_DYNAMIC_QUERY, 0.1F);
+    }
+
+    /**
+     * Returns whether or not this connection uses the X-Max-TTL header.
+     *
+     * @return <tt>true</tt> if the X-Max-TTL header is present, otherwise
+     *  <tt>false</tt>
+     */
+    public boolean isMaxTTLConnection() {
+        return headerExists(HEADERS, HeaderNames.X_MAX_TTL);
+    }
+
+    /**
+     * Convenience method that returns whether or not the given header 
+     * exists.
+     * 
+     * @return <tt>true</tt> if the header exists, otherwise <tt>false</tt>
+     */
+    private static boolean headerExists(Properties headers, 
+                                        String headerName) {
+        String value = headers.getProperty(headerName);
+        return value != null;
+    }
+
+
+    /**
+     * Utility method for checking whether or not a given header
+     * value is true.
+     *
+     * @param headers the headers to check
+     * @param headerName the header name to look for
+     */
+    private static boolean isTrueValue(Properties headers, String headerName) {
+        String value = headers.getProperty(headerName);
+        if(value == null) return false;
+        
+        return Boolean.valueOf(value).booleanValue();
+    }
+
+
+    /**
+     * Utility method for checking whether or not a given header
+     * value is false.
+     *
+     * @param headers the headers to check
+     * @param headerName the header name to look for
+     */
+    private static boolean isFalseValue(Properties headers, String headerName) {
+        String value = headers.getProperty(headerName);
+        if(value == null) return false;        
+        return value.equalsIgnoreCase("false");
+    }
+
+
+
+    /**
+     * Utility method that checks the headers to see if the advertised
+     * version for a specified feature is greater than or equal to the version
+     * we require (<tt>minVersion</tt>.
+     *
+     * @param headers the connection headers to evaluate
+     * @param headerName the header name for the feature to check
+     * @param minVersion the minimum version that we require for this feature
+     * 
+     * @return <tt>true</tt> if the version number for the specified feature
+     *  is greater than or equal to <tt>minVersion</tt>, otherwise 
+     *  <tt>false</tt>.
+     */
+    private static boolean isVersionOrHigher(Properties headers,
+                                             String headerName, 
+                                             float minVersion) {
+        String value = headers.getProperty(headerName);
+        if(value == null)
             return false;
         try {            
-            Float f=new Float(value);
-            return f.floatValue() >= 0.1f;   //TODO: factor into constant!
+            Float f = new Float(value);
+            return f.floatValue() >= minVersion;
         } catch (NumberFormatException e) {
             return false;
-        }
+        }        
+    }
+
+    /**
+     * Helper method for returning an int header value.  If the header name
+     * is not found, or if the header value cannot be parsed, the default
+     * value is returned.
+     *
+     * @param headers the connection headers to search through
+     * @param headerName the header name to look for
+     * @param defaultValue the default value to return if the header value
+     *  could not be properly parsed
+     * @return the int value for the header
+     */
+    private static int extractIntHeaderValue(Properties headers, 
+                                             String headerName, 
+                                             int defaultValue) {
+        String value = headers.getProperty(headerName);
+
+        if(value == null) return defaultValue;
+		try {
+			return Integer.valueOf(value).intValue();
+		} catch(NumberFormatException e) {
+			return defaultValue;
+		}
+    }
+
+    /**
+     * Helper method for returning a byte header value.  If the header name
+     * is not found, or if the header value cannot be parsed, the default
+     * value is returned.
+     *
+     * @param headers the connection headers to search through
+     * @param headerName the header name to look for
+     * @param defaultValue the default value to return if the header value
+     *  could not be properly parsed
+     * @return the byte value for the header
+     */
+    private static byte extractByteHeaderValue(Properties headers, 
+                                               String headerName, 
+                                               byte defaultValue) {
+        String value = headers.getProperty(headerName);
+
+        if(value == null) return defaultValue;
+		try {
+			return Byte.valueOf(value).byteValue();
+		} catch(NumberFormatException e) {
+			return defaultValue;
+		}
+    }
+
+    /**
+     * Helper method for returning a string header value.  If the header name
+     * is not found, or if the header value cannot be parsed, the default
+     * value is returned.
+     *
+     * @param headers the connection headers to search through
+     * @param headerName the header name to look for
+     * @return the string value for the header, or the empty string if
+     *  the header could not be found
+     */
+    private static String extractStringHeaderValue(Properties headers, 
+                                                   String headerName) {
+        String value = headers.getProperty(headerName);
+
+        if(value == null) return "";
+        return value;
     }
 
     public String toString() {

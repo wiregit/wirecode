@@ -63,6 +63,19 @@ public class ManagedConnectionTest extends com.limegroup.gnutella.util.BaseTestC
         try { Thread.sleep(msecs); } catch (InterruptedException ignored) { }
     }
 
+    
+    /**
+     * Tests the method for checking whether or not a connection is stable.
+     */
+    public void testIsStable() throws Exception {
+        Connection conn = new ManagedConnection("localhost", Backend.PORT);
+        conn.initialize();
+        
+        assertTrue("should not yet be considered stable", !conn.isStable());
+
+        Thread.sleep(6000);
+        assertTrue("connection should be considered stable", conn.isStable());
+    }
 
 	/**
 	 * Test to make sure that GGEP extensions are correctly returned in pongs.
@@ -333,10 +346,10 @@ public class ManagedConnectionTest extends com.limegroup.gnutella.util.BaseTestC
     /**
      * Handshake properties indicating no support for GGEP.
      */
-	private static class NoGGEPProperties extends SupernodeProperties {
+	private static class NoGGEPProperties extends UltrapeerHeaders {
 		public NoGGEPProperties() {
 			super("localhost");
-			remove(ConnectionHandshakeHeaders.GGEP);
+			remove(HeaderNames.GGEP);
 		}
 	}
 
@@ -346,23 +359,12 @@ public class ManagedConnectionTest extends com.limegroup.gnutella.util.BaseTestC
 
     private static ManagedConnection newConnection(String host, int port) {
         ManagedConnection mc = new ManagedConnection(host, port);
-		setStubs(mc, new ConnectionManagerStub());
 		return mc;
     }
 
     private static ManagedConnection newConnection(String host, int port,
                                                    ConnectionManager cm) {
         ManagedConnection mc = new ManagedConnection(host, port);
-		setStubs(mc, cm);
 		return mc;
     }
-
-	private static void setStubs(ManagedConnection mc, ConnectionManager cm) {
-       /* try {
-            PrivilegedAccessor.setValue(mc, "_router", new MessageRouterStub());
-            PrivilegedAccessor.setValue(mc, "_manager", cm);
-        } catch(Exception e) {
-            fail("could not initialize test", e);
-        } */		
-	}
 }

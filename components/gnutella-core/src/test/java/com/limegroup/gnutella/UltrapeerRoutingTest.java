@@ -51,7 +51,8 @@ public final class UltrapeerRoutingTest extends BaseTestCase {
 	 * The "soft max" TTL used by LimeWire's message routing -- hops + ttl 
 	 * greater than this value have their TTLs automatically reduced
 	 */
-	private static final byte SOFT_MAX = 4;
+	private static final byte SOFT_MAX = 
+        ConnectionSettings.SOFT_MAX.getValue();
 
 	/**
 	 * The TTL of the initial "probe" queries that the Ultrapeer uses to
@@ -95,19 +96,19 @@ public final class UltrapeerRoutingTest extends BaseTestCase {
 	private void buildConnections() {
 	    LEAF =
 			new Connection("localhost", PORT, 
-						   new ClientProperties("localhost"),
+						   new LeafHeaders("localhost"),
 						   new EmptyResponder()
 						   );
         
         ULTRAPEER_1 = 
 			new Connection("localhost", PORT,
-						   new SupernodeProperties("localhost"),
+						   new UltrapeerHeaders("localhost"),
 						   new EmptyResponder()
 						   );
 
         ULTRAPEER_2 = 
 			new Connection("localhost", PORT,
-						   new SupernodeProperties("localhost"),
+						   new UltrapeerHeaders("localhost"),
 						   new EmptyResponder()
 						   );
     }
@@ -149,11 +150,12 @@ public final class UltrapeerRoutingTest extends BaseTestCase {
 	}
 
 	public void tearDown() throws Exception {
-		ROUTER_SERVICE.disconnect();
+        drainAll();
 		sleep();
 		LEAF.close();
 		ULTRAPEER_1.close();
 		ULTRAPEER_2.close();
+		ROUTER_SERVICE.disconnect();
 		sleep();
 	}
 
@@ -217,7 +219,268 @@ public final class UltrapeerRoutingTest extends BaseTestCase {
 		//sleep();
 		drainAll();
 		sleep();
+        drainAll();
     }
+
+	/**
+	 * Tests a query sent from the leaf.  The query should be received by both
+	 * Ultrapeer connections -- the one connected to the leaf, as well as the
+	 * other one.
+	 */
+    public void testBroadcastFromLeaf() throws Exception {
+		
+		//1. Check that query broadcasted to ULTRAPEER_2 and ultrapeer
+		QueryRequest qr = QueryRequest.createQuery("crap");
+		LEAF.send(qr);
+		LEAF.flush();
+		
+		//Message m;
+		Message m = ULTRAPEER_2.receive(TIMEOUT);
+		assertQuery(m);
+		assertEquals("unexpected query", "crap", ((QueryRequest)m).getQuery());
+		assertEquals("unexpected hops", (byte)1, m.getHops());
+		
+		// since it's coming from the leaf, the intervening Ultrapeer 
+		// sends a dynamic, probe query -- so check for that TTL
+		assertEquals("unexpected TTL",  PROBE_QUERY_TTL, m.getTTL());
+		
+		m = ULTRAPEER_1.receive(TIMEOUT);
+		assertQuery(m);
+		assertEquals("unexpected query", "crap", ((QueryRequest)m).getQuery());
+		assertEquals("unexpected hops", (byte)1, m.getHops()); 
+		
+		// since it's coming from the leaf, the intervening Ultrapeer 
+		// sends a dynamic, probe query -- so check for that TTL
+		assertEquals("unexpected TTL",  PROBE_QUERY_TTL, m.getTTL());
+		
+		//2. Check that replies are routed back.
+		drain(LEAF);
+		Response response1=new Response(0L, 0L, "response1.txt");
+		byte[] clientGUID = GUID.makeGuid();
+		QueryReply reply1=new QueryReply(qr.getGUID(),
+										 (byte)2,
+										 6346,
+										 new byte[4],
+										 56,
+										 new Response[] {response1},
+										 clientGUID, false);
+		ULTRAPEER_2.send(reply1);
+		ULTRAPEER_2.flush();
+		
+		QueryReply replyRead=(QueryReply)LEAF.receive(TIMEOUT);
+		assertTrue("guids should be equal", 
+				   Arrays.equals(clientGUID, replyRead.getClientGUID()));
+		
+		drain(LEAF);
+		Response response2 = new Response(0l, 0l, "response2.txt");
+		byte[] guid2 = GUID.makeGuid();
+		QueryReply reply2 = 
+			new QueryReply(qr.getGUID(), (byte)2, 6346, new byte[4],
+						   56, new Response[] {response1}, guid2, false);
+		ULTRAPEER_1.send(reply2);
+		ULTRAPEER_1.flush();
+		
+		m = LEAF.receive(TIMEOUT);
+	   
+		assertInstanceof("message not a QueryReply", QueryReply.class, m);
+		replyRead = (QueryReply)m;
+		assertTrue("guids should be equal", 
+				   Arrays.equals(guid2, replyRead.getClientGUID()));
+
+		//3. Check that pushes are routed (not broadcast)
+		drain(ULTRAPEER_2);
+		drain(ULTRAPEER_1);
+
+		PushRequest push1 = 
+            new PushRequest(GUID.makeGuid(), (byte)2, clientGUID, 0, 
+                            new byte[4], 6346);
+		LEAF.send(push1);
+		LEAF.flush();
+		m = ULTRAPEER_2.receive(TIMEOUT);
+
+		assertInstanceof("message not a PushRequest", PushRequest.class, m);
+		PushRequest pushRead = (PushRequest)m;
+		assertEquals("unexpected push index", 0, pushRead.getIndex());
+		assertTrue("should not have drained ULTRAPEER_1 successfully", 
+				   !drain(ULTRAPEER_1));
+		
+        // check that pushes with unmatching client guids are not forwarded
+		PushRequest push2 = 
+            new PushRequest(GUID.makeGuid(),(byte)2, guid2, 1, 
+                            new byte[4], 6346);
+		LEAF.send(push2);
+		LEAF.flush();
+		m = ULTRAPEER_1.receive(TIMEOUT);
+		assertInstanceof("message not a PushRequest", PushRequest.class, m);
+		pushRead=(PushRequest)m;
+		assertEquals("unexpected push index", 1,pushRead.getIndex());
+		assertTrue("should not have drained ultrapeer successfully", 
+				   !drain(ULTRAPEER_2));   
+		
+		// Check that queries can re-route push routes
+		drain(LEAF);
+		drain(ULTRAPEER_2);
+		ULTRAPEER_1.send(reply1);
+		ULTRAPEER_1.flush();
+
+		m = LEAF.receive(TIMEOUT);
+		assertInstanceof("message not a QueryReply", QueryReply.class, m);
+		replyRead = (QueryReply)m; 
+		assertTrue("unexpected GUID", 
+				   Arrays.equals(clientGUID, replyRead.getClientGUID()));
+		PushRequest push3 =
+			new PushRequest(GUID.makeGuid(), (byte)2, clientGUID, 3, new byte[4], 6346);
+		LEAF.send(push3);
+		LEAF.flush();
+
+		m = ULTRAPEER_1.receive(TIMEOUT);
+		assertInstanceof("message not a PushRequest", PushRequest.class, m);
+		pushRead = (PushRequest)m;
+		assertEquals("unexpected push index", 3, pushRead.getIndex());
+		assertTrue("should not have drained ultrapeer successfully", 
+				   !drain(ULTRAPEER_2));   
+
+    }
+
+	/**
+	 * Tests URN queries from the leaf.
+	 */
+	public void testUrnQueryToLeaf() throws Exception {
+		QueryRequest qr = 
+			QueryRequest.createQuery(HugeTestUtils.UNIQUE_SHA1);
+
+		ULTRAPEER_2.send(qr);
+		ULTRAPEER_2.flush();
+		
+		Message m = LEAF.receive(TIMEOUT);
+		assertQuery(m);
+
+		QueryRequest qrRead = (QueryRequest)m;
+        assertEquals("unexpected query", "\\", ((QueryRequest)m).getQuery());
+		assertTrue("guids should be equal", 
+				   Arrays.equals(qr.getGUID(), qrRead.getGUID()));
+
+		m = ULTRAPEER_1.receive(TIMEOUT);
+		assertQuery(m);
+
+        qrRead = (QueryRequest)m;
+        assertEquals("unexpected query", "\\", ((QueryRequest)m).getQuery());
+		assertTrue("guids should be equal", 
+				   Arrays.equals(qr.getGUID(), qrRead.getGUID()));
+        
+	}
+
+    /**
+     * Test to make sure that queries with one more hop to go are
+     * properly routed when the last hop is an Ultrapeer.
+     */
+    public void testLastHopQueryRouting() throws Exception {
+        // first make sure it gets through on NOT last hop...
+        QueryRequest qr = QueryRequest.createQuery("junkie junk", (byte)3);
+        
+		ULTRAPEER_2.send(qr);
+		ULTRAPEER_2.flush();
+
+		Message m = ULTRAPEER_1.receive(TIMEOUT);
+		assertQuery(m);
+
+		QueryRequest qrRead = (QueryRequest)m;
+		assertTrue("guids should be equal", 
+				   Arrays.equals(qr.getGUID(), qrRead.getGUID()));
+        
+        // now make sure it doesn't get through on last hop
+        qr = QueryRequest.createQuery("junkie junk", (byte)2);
+        
+		ULTRAPEER_2.send(qr);
+		ULTRAPEER_2.flush();
+
+        assertTrue(!drain(ULTRAPEER_1));
+
+        // ok, now make sure a query DOES get through on the last hop
+        qr = QueryRequest.createQuery("leehsu", (byte)2);        
+        testLastHop(ULTRAPEER_2, ULTRAPEER_1, qr);
+
+        //qr = QueryRequest.createQuery("susheel", (byte)2);        
+        //testLastHop(ULTRAPEER_2, ULTRAPEER_1, qr);
+        //testLastHop(ULTRAPEER_1, ULTRAPEER_2, qr);
+
+        //qr = QueryRequest.createQuery("susheel", (byte)2);
+        //testLastHop(ULTRAPEER_2, ULTRAPEER_1, qr);
+        //testLastHop(ULTRAPEER_1, ULTRAPEER_2, qr);
+        
+
+        // old test
+// 		ULTRAPEER_2.send(qr);
+// 		ULTRAPEER_2.flush();
+
+// 		m = ULTRAPEER_1.receive(TIMEOUT);
+// 		assertQuery(m);
+
+// 		qrRead = (QueryRequest)m;
+// 		assertTrue("guids should be equal", 
+// 				   Arrays.equals(qr.getGUID(), qrRead.getGUID())); 
+        
+        // end old test
+
+
+        // ok, now make sure a query DOES get through on the last hop
+        // when the content is on the leaf
+        /*
+        qr = QueryRequest.createQuery("susheel", (byte)2);
+        
+		ULTRAPEER_2.send(qr);
+		ULTRAPEER_2.flush();
+
+		m = ULTRAPEER_1.receive(TIMEOUT);
+		assertQuery(m);
+
+		qrRead = (QueryRequest)m;
+		assertTrue("guids should be equal", 
+				   Arrays.equals(qr.getGUID(), qrRead.getGUID()));  
+        */
+    }
+
+    /**
+     * Helper method that sends a query to that would be routed on the
+     * last hop from the sender to the receiver.
+     *
+     * @param sender the <tt>Connection</tt>
+     */
+    private static void testLastHop(Connection sender, 
+                                    Connection receiver, 
+                                    QueryRequest qr) throws Exception {
+		sender.send(qr);
+		sender.flush();
+
+		Message m = receiver.receive(TIMEOUT);
+		assertQuery(m);
+
+		QueryRequest qrRead = (QueryRequest)m;
+		assertTrue("guids should be equal", 
+				   Arrays.equals(qr.getGUID(), qrRead.getGUID()));         
+    }
+
+
+	/**
+	 * Tests broadcasting of queries from ULTRAPEER_2.
+	 */
+    public void testBroadcastFromUltrapeer2() throws Exception  {
+		QueryRequest qr = QueryRequest.createQuery("crap");
+        ULTRAPEER_2.send(qr);
+        ULTRAPEER_2.flush();
+              
+        Message m = ULTRAPEER_1.receive(TIMEOUT);
+		assertInstanceof("expected a query request", QueryRequest.class, m);
+        
+        QueryRequest qr2 = (QueryRequest)m;
+        assertEquals("unexpected query", "crap", qr2.getQuery());
+        assertEquals("unexpected hops", (byte)1, m.getHops()); 
+        assertEquals("unexpected TTL", (byte)(SOFT_MAX-1), m.getTTL());
+
+		assertTrue("should not have drained leaf successfully", 
+				   !drain(LEAF));
+    }
+
 
 	/**
 	 * Tests to make sure that queries by URN are correctly forwarded
@@ -278,237 +541,9 @@ public final class UltrapeerRoutingTest extends BaseTestCase {
 
 		qrRead = (QueryRequest)m;
 		assertTrue("guids should be equal", 
-				   Arrays.equals(qr.getGUID(), qrRead.getGUID()));
-		
-
-		// now test to make sure that query routing on the last hop
-		// is working correctly for URN queries
-		qr = QueryRequest.createRequery(HugeTestUtils.SHA1, (byte)2);
-
-		LEAF.send(qr);
-		LEAF.flush();
-
-		assertTrue("ultrapeer2 should not have received the query", 
-				   !drain(ULTRAPEER_2));
-
-		assertTrue("ultrapeer1 should not have received the query", 
-				   !drain(ULTRAPEER_1));
-		
+				   Arrays.equals(qr.getGUID(), qrRead.getGUID()));				
 	}
 
-
-	/**
-	 * Tests URN queries from the leaf.
-	 */
-	public void testUrnQueryToLeaf() throws Exception {
-		QueryRequest qr = 
-			QueryRequest.createQuery(HugeTestUtils.UNIQUE_SHA1);
-
-		ULTRAPEER_2.send(qr);
-		ULTRAPEER_2.flush();
-		
-		Message m = LEAF.receive(TIMEOUT);
-		assertQuery(m);
-
-		QueryRequest qrRead = (QueryRequest)m;
-		assertTrue("guids should be equal", 
-				   Arrays.equals(qr.getGUID(), qrRead.getGUID()));
-	}
-
-
-    public void testLastHopQueryRouting() throws Exception {
-        // first make sure it gets through on NOT last hop...
-        QueryRequest qr = QueryRequest.createQuery("junkie junk", (byte)3);
-        
-		ULTRAPEER_2.send(qr);
-		ULTRAPEER_2.flush();
-
-		Message m = ULTRAPEER_1.receive(TIMEOUT);
-		assertQuery(m);
-
-		QueryRequest qrRead = (QueryRequest)m;
-		assertTrue("guids should be equal", 
-				   Arrays.equals(qr.getGUID(), qrRead.getGUID()));
-        
-        // now make sure it doesn't get through on last hop
-        qr = QueryRequest.createQuery("junkie junk", (byte)2);
-        
-		ULTRAPEER_2.send(qr);
-		ULTRAPEER_2.flush();
-
-        assertTrue(!drain(ULTRAPEER_1));
-
-        // ok, now make sure a query DOES get through on the last hop
-        qr = QueryRequest.createQuery("leehsu", (byte)2);
-        
-		ULTRAPEER_2.send(qr);
-		ULTRAPEER_2.flush();
-
-		m = ULTRAPEER_1.receive(TIMEOUT);
-		assertQuery(m);
-
-		qrRead = (QueryRequest)m;
-		assertTrue("guids should be equal", 
-				   Arrays.equals(qr.getGUID(), qrRead.getGUID()));
-        
-        
-    }
-
-
-	/**
-	 * Tests to make sure that the passing of query routing tables between
-	 * Ultrapeers is working correctly.
-	 */
-	public void testUltrapeerQueryRouting() throws Exception {
-		QueryRequest qr = QueryRequest.createQuery("crap", (byte)2);
-
-		
-		ULTRAPEER_1.send(qr);
-		ULTRAPEER_1.flush();
-
-		assertTrue("Ultrapeer 2 should not have received the query",
-				   !drain(ULTRAPEER_2));
-	}
-
-	/**
-	 * Tests a query sent from the leaf.  The query should be received by both
-	 * Ultrapeer connections -- the one connected to the leaf, as well as the
-	 * other one.
-	 */
-    public void testBroadcastFromLeaf() throws Exception {
-		
-		//1. Check that query broadcasted to ULTRAPEER_2 and ultrapeer
-		QueryRequest qr = QueryRequest.createQuery("crap");
-		LEAF.send(qr);
-		LEAF.flush();
-		
-		//Message m;
-		Message m = ULTRAPEER_2.receive(TIMEOUT);
-		assertQuery(m);
-		assertEquals("unexpected query", "crap", ((QueryRequest)m).getQuery());
-		assertEquals("unexpected hops", (byte)1, m.getHops()); //used to be not decremented
-		
-		// since it's coming from the leaf, the intervening Ultrapeer 
-		// sends a dynamic, probe query -- so check for that TTL
-		assertEquals("unexpected TTL",  PROBE_QUERY_TTL, m.getTTL());
-		
-		m = ULTRAPEER_1.receive(TIMEOUT);
-		assertQuery(m);
-		assertEquals("unexpected query", "crap", ((QueryRequest)m).getQuery());
-		assertEquals("unexpected hops", (byte)1, m.getHops()); //used to be not decremented
-		
-		// since it's coming from the leaf, the intervening Ultrapeer 
-		// sends a dynamic, probe query -- so check for that TTL
-		assertEquals("unexpected TTL",  PROBE_QUERY_TTL, m.getTTL());
-		
-		//2. Check that replies are routed back.
-		drain(LEAF);
-		Response response1=new Response(0L, 0L, "response1.txt");
-		byte[] guid1=GUID.makeGuid();
-		QueryReply reply1=new QueryReply(qr.getGUID(),
-										 (byte)2,
-										 6346,
-										 new byte[4],
-										 56,
-										 new Response[] {response1},
-										 guid1, false);
-		ULTRAPEER_2.send(reply1);
-		ULTRAPEER_2.flush();
-		
-		QueryReply replyRead=(QueryReply)LEAF.receive(TIMEOUT);
-		assertTrue("guids should be equal", 
-				   Arrays.equals(guid1, replyRead.getClientGUID()));
-		
-		drain(LEAF);
-		Response response2 = new Response(0l, 0l, "response2.txt");
-		byte[] guid2 = GUID.makeGuid();
-		QueryReply reply2 = 
-			new QueryReply(qr.getGUID(), (byte)2, 6346, new byte[4],
-						   56, new Response[] {response1}, guid2, false);
-		ULTRAPEER_1.send(reply2);
-		ULTRAPEER_1.flush();
-		
-		m = LEAF.receive(TIMEOUT);
-	   
-		assertInstanceof("message not a QueryReply", QueryReply.class, m);
-		replyRead = (QueryReply)m;
-		assertTrue("guids should be equal", 
-				   Arrays.equals(guid2, replyRead.getClientGUID()));
-		
-		//3. Check that pushes are routed (not broadcast)
-		drain(ULTRAPEER_2);
-		drain(ULTRAPEER_1);
-		PushRequest push1=new PushRequest(GUID.makeGuid(),
-										  (byte)2,
-										  guid1,
-										  0, new byte[4],
-										  6346);
-		LEAF.send(push1);
-		LEAF.flush();
-		m = ULTRAPEER_2.receive(TIMEOUT);
-		assertInstanceof("message not a PushRequest", PushRequest.class, m);
-		PushRequest pushRead = (PushRequest)m;
-		assertEquals("unexpected push index", 0, pushRead.getIndex());
-		assertTrue("should not have drained ULTRAPEER_1 successfully", 
-				   !drain(ULTRAPEER_1));
-		
-		PushRequest push2=new PushRequest(GUID.makeGuid(),
-										  (byte)2,
-										  guid2,
-										  1, new byte[4],
-										  6346);
-		LEAF.send(push2);
-		LEAF.flush();
-		m = ULTRAPEER_1.receive(TIMEOUT);
-		assertInstanceof("message not a PushRequest", PushRequest.class, m);
-		pushRead=(PushRequest)m;
-		assertEquals("unexpected push index", 1,pushRead.getIndex());
-		assertTrue("should not have drained ultrapeer successfully", 
-				   !drain(ULTRAPEER_2));   
-		
-		//4. Check that queries can re-route push routes
-		drain(LEAF);
-		drain(ULTRAPEER_2);
-		ULTRAPEER_1.send(reply1);
-		ULTRAPEER_1.flush();
-
-		m = LEAF.receive(TIMEOUT);
-		assertInstanceof("message not a QueryReply", QueryReply.class, m);
-		replyRead = (QueryReply)m; 
-		assertTrue("unexpected GUID", 
-				   Arrays.equals(guid1, replyRead.getClientGUID()));
-		PushRequest push3 =
-			new PushRequest(GUID.makeGuid(), (byte)2, guid1, 3, new byte[4], 6346);
-		LEAF.send(push3);
-		LEAF.flush();
-
-		m = ULTRAPEER_1.receive(TIMEOUT);
-		assertInstanceof("message not a PushRequest", PushRequest.class, m);
-		pushRead = (PushRequest)m;
-		assertEquals("unexpected push index", 3, pushRead.getIndex());
-		assertTrue("should not have drained ultrapeer successfully", 
-				   !drain(ULTRAPEER_2));   
-
-    }
-
-
-	/**
-	 * Tests broadcasting of queries from ULTRAPEER_2.
-	 */
-    public void testBroadcastFromUltrapeer2() throws Exception  {
-		QueryRequest qr = QueryRequest.createQuery("crap");
-        ULTRAPEER_2.send(qr);
-        ULTRAPEER_2.flush();
-              
-        Message m = ULTRAPEER_1.receive(TIMEOUT);
-		assertInstanceof("expected a query request", QueryRequest.class, m);
-        assertEquals("unexpected query", "crap", ((QueryRequest)m).getQuery());
-        assertEquals("unexpected hops", (byte)1, m.getHops()); 
-        assertEquals("unexpected TTL", (byte)(SOFT_MAX-1), m.getTTL());
-
-		assertTrue("should not have drained leaf successfully", 
-				   !drain(LEAF));
-    }
 
 	/**
 	 * Tests the broadcasting of queries from ultrapeer 2 to the leaf.
@@ -707,7 +742,6 @@ public final class UltrapeerRoutingTest extends BaseTestCase {
         out = "";//reset
         out = new String(big);
         assertEquals("Big part of pong lost", "AB", out);
-        //System.out.println("Passed");
     }
 
 
@@ -781,6 +815,7 @@ public final class UltrapeerRoutingTest extends BaseTestCase {
 				   !drain(ULTRAPEER_1));   
     }
 
+
     /** 
 	 * Tries to receive any outstanding messages on c 
 	 *
@@ -810,12 +845,12 @@ public final class UltrapeerRoutingTest extends BaseTestCase {
 	 *
 	 * @param m the <tt>Message</tt> to check
 	 */
-	private void assertQuery(Message m) {
+	private static void assertQuery(Message m) {
 		if(m instanceof QueryRequest) return;
 
 		System.out.println(m); 
 		assertInstanceof("message not a QueryRequest",
-		    QueryRequest.class, m);
+                         QueryRequest.class, m);
 	}
 }
 

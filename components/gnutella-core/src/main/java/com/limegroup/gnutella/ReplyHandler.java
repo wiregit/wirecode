@@ -92,4 +92,14 @@ public interface ReplyHandler {
      *  between Ultrapeers, otherwise <tt>false</tt>
      */
     public boolean isUltrapeerQueryRoutingConnection();
+
+    /**
+     * Returns whether or not this handler is considered a "good" connection.
+     * The definition of a good connection changes over time as new features
+     * are released.
+     * 
+     * @return <tt>true</tt> if this is considered a good connections,
+     *  otherwise <tt>false</tt>
+     */
+    public boolean isGoodConnection();
 }

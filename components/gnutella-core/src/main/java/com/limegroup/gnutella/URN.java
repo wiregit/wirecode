@@ -8,6 +8,7 @@ import java.security.*;
 import com.sun.java.util.collections.Map;
 import com.sun.java.util.collections.HashMap;
 import java.net.*;
+import java.util.Locale;
 
 /**
  * This class represents an individual Uniform Resource Name (URN), as
@@ -313,7 +314,7 @@ public final class URN implements HTTPHeaderValue, Serializable {
 	 *  <tt>false</tt>
 	 */
 	private static boolean isValidUriResSHA1Format(final String sha1String) {
-		String copy = sha1String.toLowerCase();		
+		String copy = sha1String.toLowerCase(Locale.US);		
 		if(copy.startsWith("/uri-res/n2r?urn:sha1:")) {
 			// just check the length
 			return sha1String.length() == 54;

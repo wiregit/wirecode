@@ -15,6 +15,14 @@ public class StandardMessageRouter extends MessageRouter {
     private ActivityCallback _callback;
     private FileManager _fileManager;
 
+    /**
+     * Creates a new <tt>StandardMessageRouter</tt> with the specified
+     * <tt>ActivityCallback</tt> and <tt>FileManager</tt>.
+     *
+     * @param callback the <tt>ActivityCallback</tt> instance to use
+     * @param fm the <tt>FileManager</tt> for querying the set of 
+     *  shared files
+     */
     public StandardMessageRouter(ActivityCallback callback, FileManager fm) {
         _callback = callback;
         _fileManager = fm;

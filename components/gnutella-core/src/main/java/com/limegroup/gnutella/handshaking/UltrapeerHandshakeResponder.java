@@ -6,10 +6,10 @@ import java.util.Properties;
 import java.io.IOException;
 
 /**
- * A very simple responder to be used by supernodes during the
+ * A very simple responder to be used by ultrapeers during the
  * connection handshake while accepting incoming connections
  */
-public class SupernodeHandshakeResponder 
+public class UltrapeerHandshakeResponder 
     extends AuthenticationHandshakeResponder {
 
 	/**
@@ -26,7 +26,7 @@ public class SupernodeHandshakeResponder
      * address at runtime.
      * @param host The host with whom we are handshaking
      */
-    public SupernodeHandshakeResponder(String host) {
+    public UltrapeerHandshakeResponder(String host) {
         super(RouterService.getConnectionManager(), host);
         this._manager = RouterService.getConnectionManager();
     }
@@ -51,24 +51,18 @@ public class SupernodeHandshakeResponder
 		//"second chance" like in the reject(..) method.
 
 		if(!_manager.allowConnection(response)) {			
-			return new HandshakeResponse(HandshakeResponse.SLOTS_FULL,
-										 HandshakeResponse.SLOTS_FULL_MESSAGE,
-										 new Properties());
+            return HandshakeResponse.createRejectOutgoingResponse(new Properties());
 		}
-		//Did the server request we become a leaf?
-		String neededS = response.getHeaders().
-            getProperty(ConnectionHandshakeHeaders.X_SUPERNODE_NEEDED);
 
 		Properties ret = new Properties();
-		if (neededS!=null && 
-			!Boolean.valueOf(neededS).booleanValue() && 
-			isNotBearshare(response) &&
-			_manager.allowLeafDemotion()) {
+        if(response.hasLeafGuidance() &&
+           isNotBearshare(response) &&
+           _manager.allowLeafDemotion()) {
 			//Fine, we'll become a leaf.
-			ret.put(ConnectionHandshakeHeaders.X_SUPERNODE,
-					"False");
+			ret.put(HeaderNames.X_ULTRAPEER, "False");
 		}
-		return new HandshakeResponse(ret);
+        // accept the response
+        return HandshakeResponse.createAcceptOutgoingResponse(ret);
 	}
 
 	/**
@@ -78,31 +72,31 @@ public class SupernodeHandshakeResponder
 	 */
 	private HandshakeResponse respondToIncoming(HandshakeResponse response) {
 		//Incoming connection....
-		Properties ret=new SupernodeProperties(getRemoteIP());
+		Properties ret = new UltrapeerHeaders(getRemoteIP());
 		
-		//guide the incoming connection to be a supernode/clientnode
-		ret.put(ConnectionHandshakeHeaders.X_SUPERNODE_NEEDED,
+		//guide the incoming connection to be a ultrapeer/clientnode
+		ret.put(HeaderNames.X_ULTRAPEER_NEEDED,
 				(new Boolean(_manager.supernodeNeeded())).toString());
 		
 		//give own IP address
-		ret.put(ConnectionHandshakeHeaders.LISTEN_IP,
+		ret.put(HeaderNames.LISTEN_IP,
 				Message.ip2string(RouterService.getAddress())+":"
 				+ RouterService.getPort());
 		
-		//also add some host addresses in the response
-		addHostAddresses(ret, _manager);
 		
 		//Decide whether to allow or reject.  Somewhat complicated because
 		//of ultrapeer guidance.
 
 		// TODO::add special cases for the type of client we're connecting to
 		if (reject(response)) {
-			return new HandshakeResponse(HandshakeResponse.SLOTS_FULL,
-										 HandshakeResponse.SLOTS_FULL_MESSAGE,
-										 ret);
+            // reject the connection, and let the other node know about 
+            // any Ultrapeers we're connected to
+            return HandshakeResponse.createRejectIncomingResponse(ret);
 		}
 		
-		return new HandshakeResponse(ret);
+        // accept the connection, and let the Ultrapeer know about Ultrapeers
+        // that are as many hops away as possible, to avoid cycles.
+        return HandshakeResponse.createAcceptIncomingResponse(ret);
 	}
 
 
@@ -116,7 +110,7 @@ public class SupernodeHandshakeResponder
 	 */
 	private boolean isNotBearshare(HandshakeResponse headers) {
         String userAgent = headers.getUserAgent();
-		if(userAgent == null) return false;
+		if(userAgent == null) return true;
 		return !userAgent.startsWith("BearShare");
 	}
     
@@ -129,7 +123,7 @@ public class SupernodeHandshakeResponder
         //reject the connection if !_manager.allowConnection(A, L), where A
         //is true if the connection is the connection is ultrapeer-aware and L
         //is true if the user is a leaf.  Unfortunately this fails when the
-        //incoming connection is an ultrapeer (A&&!L) because of supernode
+        //incoming connection is an ultrapeer (A&&!L) because of ultrapeer
         //guidance; we don't know whether they'll become a leaf node or not.  So
         //we use the following conservative test, and depend on the
         //old-fashioned reject connection mechanism in ConnectionManager for the
@@ -141,7 +135,7 @@ public class SupernodeHandshakeResponder
 		boolean allowedAsLeaf = _manager.allowConnectionAsLeaf(response);
 
         //Reject if not allowed now and guidance not possible.
-        return !(response.isSupernodeConnection() && allowedAsLeaf);
+        return !(response.isUltrapeer() && allowedAsLeaf);
     }
 }
 

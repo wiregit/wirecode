@@ -49,7 +49,7 @@ public class MiniAcceptor implements Runnable {
 
     /** Starts the listen socket without blocking. */
     public MiniAcceptor(int port) {
-		this(new SupernodeHandshakeResponder("localhost"), port);
+		this(new UltrapeerHandshakeResponder("localhost"), port);
     }
 
     /** Blocks until a connection is available, and returns it. 

@@ -138,7 +138,7 @@ public class QueryRequest extends Message implements Serializable{
         if(sha1 == null) {
             throw new NullPointerException("null sha1");
         } 
-		if(ttl <= 0 || ttl > 7) {
+		if(ttl <= 0 || ttl > 6) {
 			throw new IllegalArgumentException("invalid TTL: "+ttl);
 		}
 		Set sha1Set = new HashSet();
@@ -261,7 +261,7 @@ public class QueryRequest extends Message implements Serializable{
 		if(query.length() == 0) {
 			throw new IllegalArgumentException("empty query");
 		}
-		if(ttl <= 0 || ttl > 7) {
+		if(ttl <= 0 || ttl > 6) {
 			throw new IllegalArgumentException("invalid TTL: "+ttl);
 		}
 		return new QueryRequest(newQueryGUID(false), ttl, query);

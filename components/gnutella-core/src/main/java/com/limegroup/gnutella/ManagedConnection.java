@@ -297,11 +297,11 @@ public class ManagedConnection extends Connection
     public ManagedConnection(String host, int port) {
         this(host, port, 
 			 (RouterService.isSupernode() ? 
-			  (Properties)(new SupernodeProperties(host)) : 
-			  (Properties)(new ClientProperties(host))),
+			  (Properties)(new UltrapeerHeaders(host)) : 
+			  (Properties)(new LeafHeaders(host))),
 			 (RouterService.isSupernode() ?
-			  (HandshakeResponder)new SupernodeHandshakeResponder(host) :
-			  (HandshakeResponder)new ClientHandshakeResponder(host)));
+			  (HandshakeResponder)new UltrapeerHandshakeResponder(host) :
+			  (HandshakeResponder)new LeafHandshakeResponder(host)));
     }
 
 	/**
@@ -335,9 +335,9 @@ public class ManagedConnection extends Connection
     ManagedConnection(Socket socket) {
         super(socket, 
 			  RouterService.isSupernode() ? 
-			  (HandshakeResponder)(new SupernodeHandshakeResponder(
+			  (HandshakeResponder)(new UltrapeerHandshakeResponder(
 			      socket.getInetAddress().getHostAddress())) : 
-			  (HandshakeResponder)(new ClientHandshakeResponder(
+			  (HandshakeResponder)(new LeafHandshakeResponder(
 				  socket.getInetAddress().getHostAddress())));
         _manager = RouterService.getConnectionManager();
     }
@@ -513,7 +513,6 @@ public class ManagedConnection extends Connection
                         waitForQueued();
                         sendQueued();
                     } catch (IOException e) {
-						//e.printStackTrace();
                         if (_manager!=null) //may be null for testing
                             _manager.remove(ManagedConnection.this);
                         _runnerDied=true;
@@ -902,10 +901,10 @@ public class ManagedConnection extends Connection
         if(this.isOutgoing())
 			domainsAuthenticated = getDomainsAuthenticated();
 				//domainsAuthenticated = getProperty(
-                //ConnectionHandshakeHeaders.X_DOMAINS_AUTHENTICATED);
+                //HeaderNames.X_DOMAINS_AUTHENTICATED);
         else
             domainsAuthenticated = getPropertyWritten(
-                ConnectionHandshakeHeaders.X_DOMAINS_AUTHENTICATED);
+                HeaderNames.X_DOMAINS_AUTHENTICATED);
 
         //for unauthenticated connections
         if(domainsAuthenticated == null){

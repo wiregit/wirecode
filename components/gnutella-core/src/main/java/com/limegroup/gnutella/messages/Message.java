@@ -3,6 +3,7 @@ package com.limegroup.gnutella.messages;
 import com.sun.java.util.collections.*;
 import java.io.*;
 import com.limegroup.gnutella.*;
+import com.limegroup.gnutella.settings.*;
 import com.limegroup.gnutella.routing.RouteTableMessage;
 import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.messages.vendor.*;
@@ -34,6 +35,13 @@ public abstract class Message
     public static final int N_TCP = 1;
     public static final int N_UDP = 2;
     public static final int N_MULTICAST = 3;
+
+    /**
+     * Cached soft max ttl -- if the TTL+hops is greater than SOFT_MAX,
+     * the TTL is set to SOFT_MAX-hops.
+     */
+    public static final byte SOFT_MAX = 
+        ConnectionSettings.SOFT_MAX.getValue();
 
     /** Same as GUID.makeGUID.  This exists for backwards compatibility. */
     public static byte[] makeGuid() {
@@ -233,18 +241,17 @@ public abstract class Message
         //4. Check values.   These are based on the recommendations from the
         //   GnutellaDev page.  This also catches those TTLs and hops whose
         //   high bit is set to 0.
-        byte softMax = (byte)4;
         byte hardMax = (byte)14;
         if (hops<0)
             throw new BadPacketException("Negative (or very large) hops");
         else if (ttl<0)
             throw new BadPacketException("Negative (or very large) TTL");
-        else if ((hops>=softMax) && (func != F_QUERY_REPLY))
+        else if ((hops >= SOFT_MAX) && (func != F_QUERY_REPLY))
             throw new BadPacketException("Hops already exceeds soft maximum");
         else if (ttl+hops > hardMax)
             throw new BadPacketException("TTL+hops exceeds hard max; probably spam");
-        else if ((ttl+hops > softMax) && (func != F_QUERY_REPLY)) {
-            ttl=(byte)(softMax - hops);  //overzealous client;
+        else if ((ttl+hops > SOFT_MAX) && (func != F_QUERY_REPLY)) {
+            ttl=(byte)(SOFT_MAX - hops);  //overzealous client;
                                          //readjust accordingly
             Assert.that(ttl>=0);     //should hold since hops<=softMax ==>
                                      //new ttl>=0
