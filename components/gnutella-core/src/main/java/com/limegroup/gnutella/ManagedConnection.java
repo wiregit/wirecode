@@ -250,6 +250,14 @@ public class ManagedConnection
         synchronized (_outputQueueLock) {
             _myMessageStats.countSentMessage();
             _router.countMessage();
+            //if it is a broadcast ping (ie., TTL > 1) and it is not to a pong 
+            //cache server, such as "router.limewire.com", then record the 
+            //ping sent in the statistics recorder.
+            if ( (m instanceof PingRequest) && ((int)m.getTTL() > 1) &&
+                 (!_isRouter) )
+                 StatisticsRecorder.addToTotal(
+                     "pings sent", m.getTotalLength(), "bytes");
+                 
             if (_outputQueue.isFull()) {
                 //Drop case. Instead of using a FIFO replacement scheme, we
                 //use the following:
@@ -424,6 +432,14 @@ public class ManagedConnection
                 _myMessageStats.countDroppedMessage();
                 continue;
             }
+
+            //if it is a broadcast ping (ie., TTL > 1) and it is from a pong 
+            //cache server, such as "router.limewire.com", then record the 
+            //ping received in the statistics recorder.
+            if ( (m instanceof PingRequest) && ((int)m.getTTL() > 1) &&
+                 (!_isRouter) )
+                 StatisticsRecorder.addToTotal("pings received", 
+                     m.getTotalLength(), "bytes");
 
             //call MessageRouter to handle and process the message
             _router.handleMessage(m, this);
