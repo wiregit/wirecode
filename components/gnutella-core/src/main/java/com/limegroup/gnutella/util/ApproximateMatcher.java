@@ -9,18 +9,33 @@ import com.limegroup.gnutella.Assert;
  */
 public class ApproximateMatcher
 {
+    /** INVARIANT: |s1|<=|s2| */
     private String s1;
     private String s2;
     private boolean ignoreCase=false;
     private boolean compareBackwards=false;
+    private boolean specialUnderscores=false;
+    
+    /** For avoiding allocations.  This can only be used by one thread at a
+     *  time.  INVARIANT: buffer!=null => buffer is a bufSize by bufSize array.
+     */
+    private static volatile int[][] buffer;
+    private static volatile int bufSize=0;
+    
 
     /** 
      * Creates a new matcher to match s1 against s2..  The default
-     * matcher is case-sensitive and compares forwards.
+     * matcher is case-sensitive, compares forwards, and treats
+     * underscores normally.
      */
     public ApproximateMatcher( String s1, String s2) {
-        this.s1=s1;
-        this.s2=s2;
+        if (s1.length()<=s2.length()) {
+            this.s1=s1;
+            this.s2=s2;
+        } else {
+            this.s2=s1;
+            this.s1=s2;
+        }
     }
 
     /**
@@ -46,6 +61,41 @@ public class ApproximateMatcher
         this.compareBackwards=compareBackwards;
     }
 
+    /**
+     * If true, underscores and spaces are considered interchangeable when
+     * comparing.
+     *
+     * @modifies this 
+     */
+    public void setSpecialUnderscores(boolean specialUnderscores) {
+        this.specialUnderscores=specialUnderscores;
+    }
+
+    /**
+     * Allocates a buffer for use in subsequent calls to match and matches.  The
+     * strings to be matched must be less than length size for the buffer to be
+     * used.  This method is provided solely for efficiency reasons if you must
+     * match lots of strings.  <b>Only one thread may be using an
+     * ApproximateMatcher after a call to setBuffer.</b> The buffer can be
+     * released by releaseBuffer.
+     *
+     * @modifies all ApproximateMatcher classes, though this isn't observable
+     * @requires only one ApproximateMatcher used at a time until releaseBuffer.
+     */
+    public static void setBuffer(int size) {
+        bufSize=size+1;
+        buffer=new int[bufSize][bufSize]; //need "margins" of 1 on each side
+    }
+
+    /** 
+     * Releases any storage allocated by setBuffer.
+     *
+     * @modifies all ApproximateMatcher classes, though this isn't observable
+     */
+    public static void releaseBuffer() {
+        buffer=null;
+    }
+
     /*
      * Returns the edit distance between s1 and s2.  That is, returns the number
      * of insertions, deletions, or replacements necessary to transform s1 into
@@ -53,6 +103,10 @@ public class ApproximateMatcher
      * ignoreCase==true.  
      */
     public final int match() {
+        //Let m=s1.length(), n=s2.length(), and k be the edit difference between
+        //s1 and s2.  It's possible to reduce the time from O(mn) time to O(kn)
+        //time by repeated iterations of the the k-difference algorithm.  But
+        //this is a bit complicated.
         return matchInternal(Integer.MAX_VALUE);
     }
 
@@ -83,12 +137,31 @@ public class ApproximateMatcher
     }
     
 
+//      /**
+//       * If the edit distance between s1 and s2 is less than or equal to maxOps,
+//       * returns the edit distance.  Otherwise returns some number greater than
+//       * maxOps.
+//       */
+//      private final int matchInternal(final int maxOps) {
+//          //Optimization: a crude "exclusion method".  First we check if the two
+//          //strings are identical.  If not, we use the more expensive dynamic
+//          //programming algorithm on the parts of the strings that don't match.
+//          int i=diff(s1, s2);
+//          if (i<0)
+//              return 0;
+//          else
+//              return matchInternal(maxOps,
+//                                   s1.substring(i),
+//                                   s2.substring(i));
+//      }
+
+
     /**
      * If the edit distance between s1 and s2 is less than or equal to maxOps,
      * returns the edit distance.  Otherwise returns some number greater than
      * maxOps.
      */
-    private final int matchInternal(final int maxOps) {
+    private int matchInternal(final int maxOps) {
         //A classic implementation using dynamic programming.  d[i,j] is the
         //edit distance between s1[0..i-1] and s2[0..j-1] and is defined
         //recursively.  For all i, j, d[0][j]=j and d[i][0]=i; these "margins"
@@ -97,49 +170,101 @@ public class ApproximateMatcher
         //
         //There are two novel twists to the usual algorithm.  First, we fill in
         //the matrix anti-diagonally instead of one row at a time.  Secondly, we
-        //stop if the minimum value of the last two diagonals is greater than
-        //maxOps.
-        final String s1=this.s1;           //optimization
+        //only fill in part of the row.  (See Chapter 12 of Gusfield for the
+        //bounded k-difference algorithm.)  Finally, we stop if the minimum
+        //value of the last two diagonals is greater than maxOps.
         final int s1n=s1.length();
-        final String s2=this.s2;           //optimization
         final int s2n=s2.length();
+        Assert.that(s1n<=s2n);
         
-        //Optimization for common case: equal strings can be matched O(s1n) time
-        //with zero allocs.
-        if (s1n==s2n) {
-            if (equal(s1, s2))
-                return 0;
-        } 
-        //Optimization for common case: strings of vastly differing lengths
-        //don't match.
+        if (maxOps<=0)
+            return (diff(s1, s2)==-1) ? 0 : 1;
+        //Strings of vastly differing lengths don't match.  This is necessary to
+        //prevent the last return statement below from incorrectly returning
+        //zero.
         else if (Math.abs(s1n-s2n) > maxOps) {
             return maxOps+1;
         }
+        //If one of the strings is empty, the distance is trivial to calculate.
+        else if (s1n==0) { //s2n==0 ==> s1n==0           
+            return s2n;
+        }
         
-
-        int[][] d=new int[s1n+1][s2n+1];   //Note d[0][0]==0
-        int diagonals=s1n+s2n+1;           //The number of diagonals.
-        int minThisDiag;                   //The min value of this diagonal
-        int minLastDiag=0;                 //The min value of last diagonal
-
+        //Optimization: recycle buffer for matrix if possible. 
+        int[][] d;
+        if (buffer!=null
+                && (bufSize >= Math.max(s1n+1, s2n+1)))
+            d=buffer; 
+        else
+            d=new int[s1n+1][s2n+1];               //Note d[0][0]==0
+        int diagonals=2*Math.min(s1n+1, s2n+1)-1
+                         +Math.min(s2n-s1n, maxOps);
+        int minThisDiag;              //The min value of this diagonal
+        int minLastDiag=0;            //The min value of last diagonal
+        
         //For each k'th anti-diagonal except first (measured from the origin)...
-        for (int k=1; k<diagonals; k++) {
-            minThisDiag=Integer.MAX_VALUE;
-            //Fill in bottom left corner, if needed.
-            if (k<=s1n) {
-                d[k][0]=k;
-                minThisDiag=Math.min(minThisDiag, k);
+        for (int k=1; k<diagonals; k++) {            
+            //1. Calculate indices of left corner of diagonal (i1, j1) and upper
+            //right corner (i2, j2).  This is black magic.  You really need to
+            //look at a diagram to see why it works.
+            int i1=k/2+maxOps/2;
+            int j1=k/2-maxOps/2;
+            int i2=k/2-maxOps/2;
+            int j2=k/2+maxOps/2;            
+            if ((k%2)!=0) {              //odd k?
+                if ((maxOps%2)==0) {     //even maxOps?
+                    //out and away from last endpoint
+                    j1++;
+                    i2++;
+                } else {
+                    //in towards the diagonal
+                    i1++;
+                    j2++;
+                }
+            }           
+            //If endpoints don't fall on board, adjust accordingly
+            if (j1<0 || i1>s1n) {
+                i1=Math.min(k, s1n);
+                j1=k-i1;
             }
-            //Fill in upper right corner, if needed.
-            if (k<=s2n) {
-                d[0][k]=k;
-                minThisDiag=Math.min(minThisDiag, k);
+            if (i2<0 || j2>s2n) {
+                j2=Math.min(k, s2n);
+                i2=k-j2;
             }
+            
+            //2. Calculate matrix values for corners. This is just like the loop
+            //below except (1) we need to be careful of array index problems 
+            //and (2) we don't bother looking to the left of (i1, j1) or above 
+            //(i2, j2) if it's on the outer diagonal.
+            Assert.that(i1>0, "Zero i1");  //j1 may be zero
+            Assert.that(j2>0, "Zero j2");  //i2 may be zero
+            //   a) Look in towards diagonal
+            d[i1][j1]=d[i1-1][j1]+1;
+            d[i2][j2]=d[i2][j2-1]+1;                            
+            //   b) Look along the diagonal, unless on edge of matrix
+            if (j1>0) 
+                d[i1][j1]=Math.min(d[i1][j1],
+                              d[i1-1][j1-1] + diff(get(s1,i1-1), get(s2,j1-1)));
+            if (i2>0)
+                d[i2][j2]=Math.min(d[i2][j2],
+                              d[i2-1][j2-1] + diff(get(s1,i2-1), get(s2,j2-1)));
+            //   c) Look out away from the diagonal if "inner diagonal" or on
+            //   bottom row, unless on edge of matrix.
+            boolean innerDiag=(k%2)!=(maxOps%2);
+            if ((innerDiag || i1==s1n) && j1>0)
+                d[i1][j1]=Math.min(d[i1][j1],
+                                   d[i1][j1-1]+1);            
+            if (innerDiag && i2>0) 
+                d[i2][j2]=Math.min(d[i2][j2],
+                                   d[i2-1][j2]+1);
+            minThisDiag=Math.min(d[i1][j1], d[i2][j2]);
 
-            //For each element of the diagonal except the endpoints...
-            int i=Math.min(k-1,s1n);
-            int j=k-i;
-            while (i>0 && j<=s2n) {
+            //3. Calculate matrix value for each element of the diagonal except
+            //the endpoints...
+            int i=i1-1;
+            int j=j1+1;
+            while (i>i2 && j<j2) {
+                d[i][j]=1;
                 //Fill in d[i][j] using previous calculated values
                 int dij=min3(d[i-1][j-1] + diff(get(s1,i-1), get(s2,j-1)),
                              d[i-1][j]   + 1,
@@ -162,8 +287,15 @@ public class ApproximateMatcher
     }
 
     /** Returns 0 if a==b, or 1 otherwise.  Here "==" ignores case
-     *  if ignoreCase==true. */
+     *  if ignoreCase==true.  Also, ' '=='_' if specialUnderscores */
     private final int diff(char a, char b) {
+        if (specialUnderscores) {
+            if (a=='_')
+                a=' ';
+            if (b=='_')
+                b=' ';
+        }
+
         if (ignoreCase) {
             if (a==b || a==StringUtils.toOtherCase(b))
                 return 0;
@@ -177,20 +309,27 @@ public class ApproximateMatcher
         }
     }
 
-    /** True iff both strings match.  Case is ignored if ignoreCase==true.
-     *    @requires |s1|==|s2| */
-    private final boolean equal(String s1, String s2) {
+    /** Returns the first i s.t. s1[i]!=s2[i], or -1 if s1 and s2 are equal.  The
+     *  returned value is not necessarily a valid index to both strings.  For
+     *  example, equal("ab", "abc") or equal("abc", "ab") returns 2.  Case is
+     *  ignored if ignoreCase==true. */
+    private final int diff(String s1, String s2) {
         //String.compareToIgnoreCase isn't in JDK1.1.  So it's implemented here.
         //This method also has the advantage of comparing strings backwards and
         //without regard to case as necessary.
-        final int n=s1.length();
+        int s1n=s1.length();
+        int s2n=s2.length();
+        int n=Math.min(s1n, s2n);
         for (int i=0; i<n; i++) {
             char c1=get(s1, i);
             char c2=get(s2, i);
             if (diff(c1, c2)==1)
-                return false;
+                return i;
         }
-        return true;        
+        if (s1n==s2n)
+            return -1;
+        else 
+            return n;
     }
 
     /** If !compareBackwards, return a.charAt(i).
@@ -207,22 +346,33 @@ public class ApproximateMatcher
         return( Math.min( n1, Math.min( n2, n3 ) ) );
     }
 
-
     /** Unit test */
     /*
     public static void main(String[] args) {
-        ApproximateMatcher matcher=null;    
+        ApproximateMatcher matcher=new ApproximateMatcher("", "");
+        Assert.that(2/2==1);
+        Assert.that(3/2==1);
+        Assert.that(matcher.diff("", "")==-1);
+        Assert.that(matcher.diff("a", "")==0);
+        Assert.that(matcher.diff("", "a")==0);
+        Assert.that(matcher.diff("ace", "ace")==-1);
+        Assert.that(matcher.diff("abc", "acd")==1);
+        Assert.that(matcher.diff("abcdef", "abc")==3);
+        Assert.that(matcher.diff("abc", "abcdef")==3);
 
         //1. Basic tests.  Try with and without compareBackwards.
-        test("", "", 0);
+        ApproximateMatcher.setBuffer(7);
+        test("vintner", "writers", 5);
+        test("", "", 0); 
         test("a", "", 1);
         test("", "a", 1);
         test("a", "b", 1);
         test("abc", "abbd", 2);
         test("abcd", "bd", 2);
         test("abcd", "abcd", 0);
-        test("vintner", "writers", 5);
         test("k", "abcdefghiklmnopqrst", 18);
+        test("l", "abcdefghiklmnopqrst", 18);
+        ApproximateMatcher.releaseBuffer();
 
         //2. Case insensitive tests.
         matcher=new ApproximateMatcher("AbcD", "ABcdx");
@@ -249,9 +399,15 @@ public class ApproximateMatcher
                                        "abcdefghijklmnopqr1234");
         Assert.that(! matcher.matches(3));
         matcher.setCompareBackwards(true);
-        Assert.that(! matcher.matches(3));
-        
+        Assert.that(! matcher.matches(3));        
+
+        //4. Underscore test
+        matcher=new ApproximateMatcher(" a_", "_a ");
+        Assert.that(matcher.match()==2);
+        matcher.setSpecialUnderscores(true);
+        Assert.that(matcher.match()==0);
     }
+
 
     private static void test(String s1, String s2, int expected) {
         ApproximateMatcher matcher=new ApproximateMatcher(s1, s2);
@@ -262,7 +418,10 @@ public class ApproximateMatcher
 
         for (int i=-1; i<expected; i++) {
             matcher.setCompareBackwards(false);
-            Assert.that(! matcher.matches(i));
+            Assert.that(! matcher.matches(i),
+                        "i="+i+
+                        ", expected="+expected+
+                        " match="+matcher.match());
             matcher.setCompareBackwards(true);
             Assert.that(! matcher.matches(i));
         }
