@@ -747,7 +747,7 @@ public class DownloadManager implements BandwidthTracker {
                     connection.disconnect();
                 }
                 catch (MalformedURLException url) {
-                    url.printStackTrace();
+                    ErrorService.error(url);
                 }
                 catch (IOException ioe) {
                 }
