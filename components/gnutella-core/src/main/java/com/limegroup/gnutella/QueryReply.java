@@ -4,14 +4,16 @@ import java.io.*;
 import com.sun.java.util.collections.*;
 
 /**
- * A query reply.  Contains information about the responding host in
- * addition to an array of responses.  For efficiency reasons, bad query
- * reply packets may not be discovered until the getResponses
- * methods are called.<p>
+ * A query reply.  Contains information about the responding host in addition to
+ * an array of responses.  These responses are not parsed until the getResponses
+ * method is called.  For efficiency reasons, bad query reply packets may not be
+ * discovered until the getResponses methods are called.<p>
  *
- * This class has partial support for BearShare-style query trailer payloads.
- * You can extract the vendor code and push flags, but you can't create them.
- * TODO: clarify when an exception is thrown and when it is silently ignored.
+ * This class has partial support for BearShare-style query reply trailers.  You
+ * can extract the vendor code and push flags, but you can't create them.  These
+ * methods may throw BadPacketException if the metadata cannot be extracted.
+ * Note that BadPacketException does not mean that other data (namely responses)
+ * cannot be read; MissingDataException might have been a better name.
  */
 public class QueryReply extends Message implements Serializable{
     //Rep rationale: because most queries aren't directed to us (we'll just
@@ -22,15 +24,16 @@ public class QueryReply extends Message implements Serializable{
     //WARNING: see note in Message about IP addresses.
 
     private byte[] payload;
-    /** The response records in this, or null if they have not yet been
-     *  extracted from payload. */
-    private Response[] responses=null;
-    /** If responses==null, undefined.  Otherwise the vendor string, if 
-     *  defined, or "" otherwise. */
-    private String vendor="";
-    /** If responses==null, undefined.  Otherwise true if the push flag is
-     *  set, false if the flag isn't set or isn't defined. */
-    private boolean pushFlagSet=false;
+    /** True if the responses and metadata have been extracted. */
+    private volatile boolean parsed=false;        
+    /** If parsed, the response records for this, or null if they could not
+     *  be parsed. */
+    private volatile Response[] responses=null;
+    /** If parsed, the responses vendor string, if defined, or null
+     *  otherwise. */
+    private volatile String vendor=null;
+    /** If parsed and vendor!=null, true iff the push flag is set. */
+    private volatile boolean pushFlagSet;
     
 
     /** Creates a new query reply.  The number of responses is responses.length
@@ -121,7 +124,7 @@ public class QueryReply extends Message implements Serializable{
               byte[] payload) {
         super(guid, Message.F_QUERY_REPLY, ttl, hops, payload.length);
         this.payload=payload;
-        //repOk();
+        //repOk();                               
     }
 
     public void writePayload(OutputStream out) throws IOException {
@@ -157,55 +160,60 @@ public class QueryReply extends Message implements Serializable{
      *  instance of the Response class.  Throws BadPacketException if
      *  this data couldn't be extracted.  */
     public Iterator getResults() throws BadPacketException {
-        if (responses==null) {
-            parseResults();
-            Assert.that(responses!=null);
-        }
+        parseResults();
+        if (responses==null)
+            throw new BadPacketException();
         List list=Arrays.asList(responses);
         return list.iterator();
     }
 
     /** 
-     * Returns the name of this' vendor, all capitalized.  Returns "" if the the
-     * vendor wasn't specified.  
+     * Returns the name of this' vendor, all capitalized.  Throws
+     * BadPacketException if the data couldn't be extracted, either because it
+     * is missing or corrupted. 
      */
-    public String getVendor() {
-        if (responses==null) {
-            try {
-                parseResults();
-            } catch (BadPacketException e) { }
-        }
-        Assert.that(vendor!=null);
+    public String getVendor() throws BadPacketException {
+        parseResults();
+        if (vendor==null)
+            throw new BadPacketException();
         return vendor;
     }
 
-    /** Returns true if this's push flag is set, i.e., a push download is
-     *  needed.   Returns false if the flag isn't set or doesn't exist, i.e.,
-     *  because this is an older client.  
+    /** 
+     * Returns true if this's push flag is set, i.e., a push download is needed.
+     * Returns false if the flag is present but not set isn't set.  Throws
+     * BadPacketException if the flag couldn't be extracted, either because it
+     * is missing or corrupted.
      */
-    public boolean getNeedsPush() {
-        if (responses==null) {
-            try {
-                parseResults();
-            } catch (BadPacketException e) { }
-            Assert.that(responses!=null);
-        }
+    public boolean getNeedsPush() throws BadPacketException {
+        parseResults();
+        if (vendor==null)
+            throw new BadPacketException();
         return pushFlagSet;
     }
 
 
-    /** @modifies this.responses, this.pushFlagSet, this.vendor
-     *  @effects extracts response from payload and stores in responses. 
-     *    Throws BadPacketException if the responses couldn't be extracted.
-     *    Returns silently if the metainformation couldn't be extracted.
+    /** @modifies this.responses, this.pushFlagSet, this.vendor, parsed
+     *  @effects tries to extract responses from payload and store in responses. 
+     *    Tries to extract metadata and store in vendor and pushFlagSet.
+     *    You can tell if data couldn't be extracted by looking if responses
+     *    or vendor is null.
      */
-    private void parseResults() throws BadPacketException {
+    private void parseResults() {
+        if (parsed)
+            return;
+        parseResults2();
+        parsed=true;
+    }
+
+    private void parseResults2() {
         //index into payload to look for next response
         int i=11;
 
-        //1. Extract responses.  These are not copied to this.responses until they
-        //are verified.  Note, however that the metainformation need not be
-        //verified for these to be acceptable.
+        //1. Extract responses.  These are not copied to this.responses until
+        //they are verified.  Note, however that the metainformation need not be
+        //verified for these to be acceptable.  Also note that exceptions are
+        //silently caught.
         int left=getResultCount();          //number of records left to get
         Response[] responses=new Response[left];
         try {
@@ -241,30 +249,32 @@ public class QueryReply extends Message implements Serializable{
                         break;
                 }
                 i=j+1;
-
                 if (i>payload.length-16)
                     throw new BadPacketException("Missing null terminator "
                                                  +"filename");
             }
-        } catch (ArrayIndexOutOfBoundsException e) {
-            throw new BadPacketException();
-        }
-        this.responses=responses;
 
-        //2. Extract BearShare-style metainformation, if any. 
-        //The format is 
+            //All set.  Accept parsed results.
+            this.responses=responses;
+        } catch (ArrayIndexOutOfBoundsException e) {
+            return;
+        } catch (BadPacketException e) {
+            return;
+        }                
+
+        //2. Extract BearShare-style metainformation, if any.  Any
+        //exceptions are silently caught. The format is 
         //      vendor code           (4 bytes, case insensitive)
         //      common payload length (1 byte, unsigned, always>0)
         //      common payload        (length given above.  See below.)
-        //      vendor payload length (1 byte, unsigned)
-        //      vendor payload        (length given above)
+        //      vendor payload        (length until clientGUID)
         //The normal 16 byte clientGUID follows, of course.
         //
         //Currently the common payload consists of a single byte
         //whose low bit is one if we should try a push.
         try {
-			if (i > (payload.length-16-4-2-1)) {   //see above
-                return; //no metainformation!
+			if (i > (payload.length-16-4-2)) {   //see above
+                throw new BadPacketException("No metadata");
             }
             //Attempt to verify.  Results are not copied to this until verified.
             String vendorT=null;
@@ -285,22 +295,19 @@ public class QueryReply extends Message implements Serializable{
             i++;
             pushFlagSetT = (payload[i]&0x1)==1;
             i+=length;
-            length=ByteOrder.ubyte2int(payload[i]);
-            i++;
-            i+=length;                
-            if (i!=payload.length-16)
+            if (i>payload.length-16)
                 throw new BadPacketException(
-                                             "Query reply trailer length wrong");
-                
+                    "Common payload length too large.");
+
             //All set.  Accept parsed values.
             this.pushFlagSet=pushFlagSetT;
             Assert.that(vendorT!=null);
             this.vendor=vendorT.toUpperCase();
         } catch (BadPacketException e) {
-            return; //silently ignore
+            return;
         } catch (IndexOutOfBoundsException e) {
-            return; //just in case.  silently ignore.
-        }
+            return;
+        } 
     }
 
     /** Returns the 16 byte client ID (i.e., the "footer") of the
@@ -373,12 +380,18 @@ public class QueryReply extends Message implements Serializable{
             Assert.that(response.getName().equals("A"),
                         "'"+response.getName()+"'");
             Assert.that(! iter.hasNext());
-            Assert.that(qr.getVendor().equals(""));
-            Assert.that(qr.getNeedsPush()==false);
-        } catch (Exception e) {
+        } catch (BadPacketException e) {
             Assert.that(false);
-            e.printStackTrace();
         }
+        try {
+            qr.getVendor();    //undefined => exception
+            Assert.that(false);
+        } catch (BadPacketException e) { }
+        try {
+            qr.getNeedsPush(); //undefined => exception
+            Assert.that(false);
+        } catch (BadPacketException e) { }
+
 
         //Bad case: not enough space for client GUID.  We can get
         //the client GUID, but not the results.
@@ -395,10 +408,13 @@ public class QueryReply extends Message implements Serializable{
             Iterator iter=qr.getResults();
             Assert.that(false);
         } catch (BadPacketException e) { }
-        Assert.that(qr.getVendor().equals(""));
+        try {
+            qr.getVendor();
+            Assert.that(false);
+        } catch (BadPacketException e) { }
 
         //Normal case: basic metainfo with no vendor data
-        payload=new byte[11+11+(4+2+1)+16];
+        payload=new byte[11+11+(4+2+0)+16];
         payload[0]=1;            //Number of results
         payload[11+8]=(byte)65;  //The character 'A'
         payload[11+11+0]=(byte)76;   //The character 'L'
@@ -407,7 +423,6 @@ public class QueryReply extends Message implements Serializable{
         payload[11+11+3]=(byte)69;   //The character 'E'
         payload[11+11+4+0]=(byte)1;
         payload[11+11+4+1]=(byte)0xB1; //set push flag (and other stuff)
-        payload[11+11+4+2+0]=(byte)0; //no vendor data
         qr=new QueryReply(new byte[16], (byte)5, (byte)0,
                           payload);
         try {
@@ -416,8 +431,8 @@ public class QueryReply extends Message implements Serializable{
             vendor=qr.getVendor();
             Assert.that(vendor.equals("LIME"), vendor);
             Assert.that(qr.getNeedsPush()==true);
-        } catch (Exception e) {
-            e.printStackTrace();
+        } catch (BadPacketException e) {
+            System.out.println(e.toString());
             Assert.that(false);
         }
         
@@ -430,9 +445,8 @@ public class QueryReply extends Message implements Serializable{
         payload[11+11+2]=(byte)77;   //The character 'M'
         payload[11+11+3]=(byte)69;   //The character 'E'
         payload[11+11+4+0]=(byte)1;
-        payload[11+11+4+1]=(byte)0xF0; //set push flag (and other crap)
-        payload[11+11+4+2+0]=(byte)2; //one byte vendor
-        payload[11+11+4+2+1]=(byte)0xFF; //garbage data
+        payload[11+11+4+1]=(byte)0xF0; //no push flag (and other crap)
+        payload[11+11+4+2+0]=(byte)0xFF; //garbage data (ignored)
         qr=new QueryReply(new byte[16], (byte)5, (byte)0,
                           payload);
         try {
@@ -441,20 +455,47 @@ public class QueryReply extends Message implements Serializable{
             vendor=qr.getVendor();
             Assert.that(vendor.equals("LLME"), vendor);
             Assert.that(qr.getNeedsPush()==false);
-        } catch (Exception e) {
+        } catch (BadPacketException e) {
             Assert.that(false);
             e.printStackTrace();
         }
 
-        //Weird case.  No common data.
+        //Weird case.  No common data.  (Don't allow.)
         payload=new byte[11+11+(4+1+2)+16];
         payload[0]=1;            //Number of results
         payload[11+8]=(byte)65;  //The character 'A'
         payload[11+11+4+1+0]=(byte)1;
         qr=new QueryReply(new byte[16], (byte)5, (byte)0,
                           payload);
-        Assert.that(! qr.getNeedsPush());
-        Assert.that(qr.getVendor().equals(""));
+        try {
+            qr.getNeedsPush();
+            Assert.that(false);
+        } catch (BadPacketException e) { }
+        try { 
+            qr.getVendor();
+            Assert.that(false);
+        } catch (BadPacketException e) { }
+
+        //Bad case.  Common payload length lies.
+        payload=new byte[11+11+(4+2+0)+16];
+        payload[0]=1;            //Number of results
+        payload[11+8]=(byte)65;  //The character 'A'
+        payload[11+11+0]=(byte)76;   //The character 'L'
+        payload[11+11+1]=(byte)105;  //The character 'i'
+        payload[11+11+2]=(byte)77;   //The character 'M'
+        payload[11+11+3]=(byte)69;   //The character 'E'
+        payload[11+11+4+0]=(byte)2;
+        qr=new QueryReply(new byte[16], (byte)5, (byte)0,
+                          payload);
+        try {
+            qr.getResults();
+        } catch (BadPacketException e) {
+            Assert.that(false);
+        }
+        try {
+            qr.getVendor();
+            Assert.that(false);
+        } catch (BadPacketException e) { }            
     }
     */
 }
