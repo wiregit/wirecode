@@ -6,9 +6,8 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.String;
 
-import com.limegroup.gnutella.gui.MessageService;
+import com.limegroup.gnutella.gui.MainFrame;
 
-import NativeLauncher;
 
 /**
  * This code is Copyright 1999 by Eric Albert (ejalbert@cs.stanford.edu) and may 
@@ -86,7 +85,7 @@ public class Launcher {
 	 */
 	private static String _errorMessage;
 
-	private static final String WINDOWS_LIBRARY_NAME = "LimeWire.dll";
+	private static final String WINDOWS_LIBRARY_NAME = "LimeWire16c.dll";
 
 
 	/** 
@@ -136,12 +135,45 @@ public class Launcher {
 	private Launcher() {}
 	
 	/**
-	 * launches the passed-in file on the current platform. 
-	 * @requires the path String must either be a valid path name
-	 *  for the operating system, or it must be a URL of the form
-	 *  http://www.whatevername.com
+	 * Opens the specified url in a browser. 
+	 *
+	 * <p>A browser will only be opened if the underlying operating system 
+	 * recognizes the url as one that should be opened in a browser, 
+	 * namely a url that ends in .htm or .html.
+	 *
+	 * @param url  The url to open
+	 *
+	 * @return  An int indicating the success of the browser launch
+	 *
+	 * @throws IOException if the url cannot be loaded do to an IO problem
 	 */
-	public static int launch(String path) throws IOException {
+	public static int openURL(String url) throws IOException {	   
+		if(CommonUtils.isWindows()) {
+			return launchFileWindows(url);
+		}	   
+		else if(CommonUtils.isMacClassic()) {
+			launchFileMacClassic(url);
+		}
+		else if(CommonUtils.isUnix()) {
+			launchFileUnix(url);
+		}
+		return -1;
+	}
+
+	/**
+	 * Launches the file whose abstract path is specified in the 
+	 * <code>File</code> parameter.  This method will not launch any file
+	 * with .exe, .vbs, .lnk, .bat, .sys, or .com extensions, diplaying 
+	 * an error if one of the file is of one of these types.
+	 *
+	 * @param path  The path of the file to launch
+	 *
+	 * @return  An int indicating the success of the browser launch
+	 *
+	 * @throws IOException if the file cannot be launched do to an IO problem
+	 */
+	public static int launchFile(File file) throws IOException {
+		String path = file.getCanonicalPath();
 		String extCheckString = path.toLowerCase();
 		if(!extCheckString.endsWith(".exe") &&
 		   !extCheckString.endsWith(".vbs") &&
@@ -162,23 +194,29 @@ public class Launcher {
 		else {
 			String msg = "LimeWire will not launch the specified "+
 			"file for security reasons.";
-			MessageService.showError(msg);
+			MainFrame.instance().showError(msg);
 		}
-		return -1;
+		return -1;		
 	}
 
 	/**
-	 * launches the given file on Windows
-	 * @requires that we are running on Windows
+	 * Launches the given file on Windows.
+	 *
+	 * @param path The path of the file to launch
+	 *
+	 * @return An int for the exit code of the native method
 	 */
-	private static int launchFileWindows(String path) {
-		NativeLauncher nl = new NativeLauncher();
-		return nl.launchFileWindows(path);
+	private static int launchFileWindows(String path) {		
+		WindowsLauncher wl = new WindowsLauncher();
+		return wl.launchFile(path);
 	}
 
 	/** 
-	 * launches the given file on a Mac with and OS between 8.5 and 9.1
-	 * @requires that we are running on a Mac
+	 * Launches the given file on a Mac with and OS between 8.5 and 9.1.
+	 *
+	 * @param path The path of the file to launch
+	 *
+	 * @throws IOException  If the call to Runtime.exec throws an IOException
 	 */
 	private static void launchFileMacClassic(String path) throws IOException {
 		if(_macLoadedWithoutErrors) {
@@ -190,9 +228,12 @@ public class Launcher {
 	}
 
 	/**
-	 * attempts to launch the given file on Unix
-	 * @requires that we are running on a Unix system
+	 * Attempts to launch the given file on Unix.
 	 * NOTE: WE COULD DO THIS ONE BETTER!!
+	 *
+	 * @throws IOException  If the call to Runtime.exec throws an IOException
+	 *                      or if the Process created by the Runtime.exec call
+	 *                      throws an InterruptedException
 	 */
 	private static void launchFileUnix(String path) throws IOException {
 		// First, attempt to open the file in a 
@@ -207,8 +248,7 @@ public class Launcher {
 		try {
 			int exitCode = process.waitFor();
 			if (exitCode != 0) 	// if Netscape was not open
-				Runtime.getRuntime().exec(new String[] {"netscape", 
-														path});
+				Runtime.getRuntime().exec(new String[] {"netscape", path});
 			
 		} catch (InterruptedException ie) {
 			throw new IOException("InterruptedException launching browser: " 
@@ -217,8 +257,11 @@ public class Launcher {
 	}
 
 	/**  
-	 * returns the String specifying the "finder" on the mac.
-	 * @requires must be running on a mac 
+	 * Returns the String specifying the "finder" on the mac.  This should
+	 * only be called if the application is running on Mac OS 9.1 or below.
+	 *
+	 * @return A <code>String</code> instance specifying the path of the Mac
+	 *         finder
 	 */
 	private static String getMacFinder() {
 		File systemFolder;
@@ -265,10 +308,10 @@ public class Launcher {
 	}
 
 	/** 
-	 * loads specialized classes for the Mac needed to launch files
-	 * @requires that we are running on a Mac
-	 * @return <code>true</code>  if initialization succeeded
-	 *	   	<code>false</code> if initialization failed
+	 * Loads specialized classes for the Mac needed to launch files.
+	 *
+	 * @return <code>true</code>  if initialization succeeded,
+	 *	   	   <code>false</code> if initialization failed
 	 */
 	private static boolean loadMacClasses() {
 		try {
