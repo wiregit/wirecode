@@ -47,9 +47,12 @@ public final class SequenceNumberExtenderTest extends BaseTestCase {
 		lasti = 0;
 		lastiand = 0;
 		for (long i = 1; i <= finalValue; i++) {
+
+			// Shrink the sequenceNumber down to 2 bytes
 			iand     = i & 0xffff;
 
-			iand = extender.extendSequenceNumber( ((int) iand) );
+			// Extend the sequenceNumber back to 8 bytes
+			iand = extender.extendSequenceNumber( ( iand) );
 
 			if ( (lastiand + 1) != iand ) {
 				fail("Error at count: "+i+" last: "+lasti+" seqNo: "+
