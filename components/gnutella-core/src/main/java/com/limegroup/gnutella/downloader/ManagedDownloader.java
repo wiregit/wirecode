@@ -246,33 +246,67 @@ public class ManagedDownloader implements Downloader, Serializable {
     }
 
 
-    private final long SIZE_CLOSE_RANGE = 100;
+    private final long ONE_MEG_BYTES = 1000000;
+    private final long SIXTY_KB      = 60000;
     private final boolean sizeClose(long one, long two) {
         boolean retVal = false;
-        if (one == two)
+
+		float floatSizeOne = (float)one;
+		float floatSizeTwo  = (float)two;
+		// if the sizes match exactly and the file size is over
+		// about a meg, we are good to go....
+		if((floatSizeOne == floatSizeTwo) &&
+		   (floatSizeOne > ONE_MEG_BYTES)) 
             retVal = true;
-        else if (one < two) {
-            if ((one + SIZE_CLOSE_RANGE) >= two)
+        else {
+            //Similar file size (within 60k)?  This value was determined 
+            //empirically to optimize grouping aggressiveness with minimal 
+            //performance cost.
+            float sizeDiff=Math.abs(floatSizeOne - floatSizeTwo);
+            if (sizeDiff <= SIXTY_KB) 
                 retVal = true;
         }
-        else { // one > two
-            if ((two + SIZE_CLOSE_RANGE) >= one)
-                retVal = true;
-        }        
 
         return retVal;
     }
 
-    private final float MATCH_PRECISION = 0.8f;
+
+    // take the extension off the filename...
+    private String ripExtension(String fileName) {
+        String retString = null;
+        int extStart = fileName.lastIndexOf('.');
+        if (extStart == -1)
+            retString = fileName;
+        else
+            retString = fileName.substring(0, extStart);
+        return retString;
+    }
+
+
     private ApproximateMatcher matcher =new ApproximateMatcher(MATCHER_BUF_SIZE);
     private final boolean namesClose(final String one, 
                                      final String two) {
         boolean retVal = false;
+
+        // copied from TableLine...
+        //Filenames close?  This is the most expensive test, so it should go
+        //last.  Allow 10% edit difference in filenames or 6 characters,
+        //whichever is smaller.
+        int allowedDifferences=Math.round(Math.min(
+             0.10f*((float)(ripExtension(one)).length()),
+             0.10f*((float)(ripExtension(two)).length())));
+        allowedDifferences=Math.min(allowedDifferences, 6);
+
         synchronized (matcher) {
             retVal = matcher.matches(matcher.process(one),
                                      matcher.process(two),
-                                     MATCH_PRECISION);
+                                     allowedDifferences);
         }
+
+        debug("MD.namesClose(): one = " + one);
+        debug("MD.namesClose(): two = " + two);
+        debug("MD.namesClose(): retVal = " + retVal);
+            
         return retVal;
     }
 
@@ -1308,12 +1342,12 @@ public class ManagedDownloader implements Downloader, Serializable {
 
 
 
-    private boolean debugOn = false;
-    private void debug(String out) {
+    private final boolean debugOn = false;
+    private final void debug(String out) {
         if (debugOn)
             System.out.println(out);
     }
-    private void debug(Exception e) {
+    private final void debug(Exception e) {
         if (debugOn)
             e.printStackTrace();
     }
