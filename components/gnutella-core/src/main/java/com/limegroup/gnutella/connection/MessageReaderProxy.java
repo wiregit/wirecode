@@ -2,6 +2,7 @@ package com.limegroup.gnutella.connection;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InterruptedIOException;
 import java.nio.channels.SelectionKey;
 
 import com.limegroup.gnutella.messages.BadPacketException;
@@ -17,12 +18,12 @@ public class MessageReaderProxy implements MessageReader {
 
     private final MessageReader DELEGATE;
     
-    public MessageReaderProxy() {
+    public MessageReaderProxy(Connection conn) {
         if(CommonUtils.isJava14OrLater() &&
            ConnectionSettings.USE_NIO.getValue()) {
             DELEGATE = NIOMessageReader.createReader();       
         } else {
-            DELEGATE = BIOMessageReader.createReader();
+            DELEGATE = BIOMessageReader.createReader(conn);
         }
     }
     /* (non-Javadoc)
@@ -39,6 +40,26 @@ public class MessageReaderProxy implements MessageReader {
     public Message createMessageFromTCP(SelectionKey key) 
         throws BadPacketException, IOException {
         return DELEGATE.createMessageFromTCP(key);
+    }
+    
+    /* (non-Javadoc)
+     * @see com.limegroup.gnutella.connection.MessageReader#startReading()
+     */
+    public void startReading() throws IOException {
+        DELEGATE.startReading();
+    }
+    /* (non-Javadoc)
+     * @see com.limegroup.gnutella.connection.MessageReader#read()
+     */
+    public Message read() throws IOException, BadPacketException {
+        return DELEGATE.read();
+    }
+    /* (non-Javadoc)
+     * @see com.limegroup.gnutella.connection.MessageReader#read(int)
+     */
+    public Message read(int i) throws IOException, BadPacketException, 
+        InterruptedIOException {
+        return DELEGATE.read(i);
     }
 
 }

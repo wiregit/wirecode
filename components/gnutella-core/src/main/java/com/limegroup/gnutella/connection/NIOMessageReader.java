@@ -2,6 +2,7 @@ package com.limegroup.gnutella.connection;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InterruptedIOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.SocketChannel;
@@ -259,5 +260,28 @@ public final class NIOMessageReader extends AbstractMessageReader {
     public Message createMessageFromTCP(InputStream is) 
         throws BadPacketException, IOException {
         throw new IllegalStateException("attempting blocking read in NIO mode");
+    }
+
+    /**
+     * Does nothing because in the case of NIO, the Connection is added to 
+     * the NIODispatcher during it's initialization.
+     */
+    public void startReading() throws IOException {}
+
+    /* (non-Javadoc)
+     * @see com.limegroup.gnutella.connection.MessageReader#read()
+     */
+    public Message read() throws IOException, BadPacketException {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    /* (non-Javadoc)
+     * @see com.limegroup.gnutella.connection.MessageReader#read(int)
+     */
+    public Message read(int i) throws IOException, BadPacketException, 
+        InterruptedIOException {
+        // TODO Auto-generated method stub
+        return null;
     }
 }
