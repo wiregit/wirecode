@@ -27,48 +27,52 @@ public class ConnectBackVendorMessageTest extends com.limegroup.gnutella.util.Ba
     public static void main(String[] args) {
         junit.textui.TestRunner.run(suite());
     }
-
     
     public void testUDPConnectBackConstructor() throws Exception {
         byte[] guid = GUID.makeGuid();
+        UDPConnectBackVendorMessage udp = null;
         byte ttl = 1, hops = 0;
+        
         try {
-            // try a VERSION we don't support
-            UDPConnectBackVendorMessage udp = 
-                new UDPConnectBackVendorMessage(guid, ttl, hops,
-                                                UDP_VERSION+1, new byte[0]);
-            assertTrue(false);
+            // try a VERSION we don't support, with the now 2-byte payload
+            udp = new UDPConnectBackVendorMessage(guid, ttl, hops,
+                                                UDP_VERSION+1, bytes(2));
+            fail("should have thrown bpe");
         }
         catch (BadPacketException expected) {}
+        
+        try {
+            // try a VERSION we don't support, with the old 18-byte payload
+            udp = new UDPConnectBackVendorMessage(guid, ttl, hops,
+                                                UDP_VERSION+1, bytes(18));
+            fail("should have thrown bpe");
+        }
+        catch (BadPacketException expected) {}
+
         try {
             // in the next few tests, try bad sizes of the payload....
-            UDPConnectBackVendorMessage udp = 
-                new UDPConnectBackVendorMessage(guid, ttl, hops,
-                                                1, new byte[0]);
-            assertTrue(false);
+            udp = new UDPConnectBackVendorMessage(guid, ttl, hops,
+                                                UDP_VERSION, bytes(0));
+            fail("should have thrown bpe");
         }
         catch (BadPacketException expected) {}
         try {
-            UDPConnectBackVendorMessage udp = 
-                new UDPConnectBackVendorMessage(guid, ttl, hops,
-                                                1, new byte[17]);
-            assertTrue(false);
+            udp = new UDPConnectBackVendorMessage(guid, ttl, hops,
+                                                UDP_VERSION, bytes(17));
+            fail("should have thrown bpe");
         }
         catch (BadPacketException expected) {}
         try {
-            UDPConnectBackVendorMessage udp = 
-                new UDPConnectBackVendorMessage(guid, ttl, hops,
-                                                1, new byte[19]);
-            assertTrue(false);
+            udp = new UDPConnectBackVendorMessage(guid, ttl, hops,
+                                                UDP_VERSION, bytes(19));
+            fail("should have thrown bpe");
         }
         catch (BadPacketException expected) {}
 
-        // this is the correct size of the payload
-        UDPConnectBackVendorMessage udp = 
-            new UDPConnectBackVendorMessage(guid, ttl, hops,
-                                            UDP_VERSION, new byte[18]);
-        udp = new UDPConnectBackVendorMessage(guid, ttl, hops, 1, new byte[18]);
-
+        // Test version 1 constructor -- 18 bytes in payload
+        udp = new UDPConnectBackVendorMessage(guid, ttl, hops, 1, bytes(18));
+        // no bpe ...
+        
         // make sure we encode things just fine....
         GUID guidObj = new GUID(GUID.makeGuid());
 
@@ -76,21 +80,32 @@ public class ConnectBackVendorMessageTest extends com.limegroup.gnutella.util.Ba
             new UDPConnectBackVendorMessage(6346, guidObj);
         UDPConnectBackVendorMessage VendorMessage2 = 
             new UDPConnectBackVendorMessage(VendorMessage1.getGUID(), ttl, hops,
-                                            1, VendorMessage1.getPayload());
-        assertTrue(VendorMessage1.getVersion() == 1);
-        assertTrue(VendorMessage1.equals(VendorMessage2));
-        assertTrue(VendorMessage1.getConnectBackPort() == 
-                   VendorMessage2.getConnectBackPort());
-        assertTrue(VendorMessage1.getConnectBackGUID().equals(VendorMessage2.getConnectBackGUID()));
+                                            VendorMessage1.getVersion(),
+                                            VendorMessage1.getPayload());
+        assertEquals(1, VendorMessage1.getVersion());
+        assertEquals(VendorMessage2, VendorMessage1);
+        assertEquals(VendorMessage1.getConnectBackPort(),
+                     VendorMessage2.getConnectBackPort());
+        assertEquals(VendorMessage1.getConnectBackGUID(),
+                     VendorMessage2.getConnectBackGUID());
 
-        // tests that we can parse the new version
+        //Test version 2 constructor -- 2 bytes in payload.
         udp = new UDPConnectBackVendorMessage(guid, ttl, hops, UDP_VERSION, 
-                                              new byte[2]);
-        assertTrue(udp.getConnectBackGUID().equals(new GUID(guid)));
-        assertTrue(udp.getConnectBackPort() == 0);
+                                              bytes(2));
+        assertEquals(2, udp.getVersion());
+        assertEquals(udp.getConnectBackGUID(), new GUID(guid));
+        assertEquals(1, udp.getConnectBackPort());
     }
     
-
+    /**
+     * Creates a byte array whose first byte is non zero.
+     */
+    private byte[] bytes(int length) {
+        byte[] stuff = new byte[length];
+        if( length > 0 )
+            stuff[0] = 1;
+        return stuff;
+    }
 
     public void testTCPConnectBackConstructor() throws Exception {
         byte[] guid = GUID.makeGuid();
@@ -99,37 +114,37 @@ public class ConnectBackVendorMessageTest extends com.limegroup.gnutella.util.Ba
             // try a VERSION we don't support
             TCPConnectBackVendorMessage TCP = 
                 new TCPConnectBackVendorMessage(guid, ttl, hops,
-                                                TCP_VERSION+1, new byte[0]);
-            assertTrue(false);
+                                                TCP_VERSION+1, bytes(2));
+            fail("should have thrown bpe");
         }
         catch (BadPacketException expected) {}
         try {
             // in the next few tests, try bad sizes of the payload....
             TCPConnectBackVendorMessage TCP = 
                 new TCPConnectBackVendorMessage(guid, ttl, hops,
-                                                TCP_VERSION, new byte[0]);
-            assertTrue(false);
+                                                TCP_VERSION, bytes(0));
+            fail("should have thrown bpe");
         }
         catch (BadPacketException expected) {}
         try {
             TCPConnectBackVendorMessage TCP = 
                 new TCPConnectBackVendorMessage(guid, ttl, hops,
-                                                TCP_VERSION, new byte[1]);
-            assertTrue(false);
+                                                TCP_VERSION, bytes(1));
+            fail("should have thrown bpe");
         }
         catch (BadPacketException expected) {}
         try {
             TCPConnectBackVendorMessage TCP = 
                 new TCPConnectBackVendorMessage(guid, ttl, hops,
-                                                TCP_VERSION, new byte[3]);
-            assertTrue(false);
+                                                TCP_VERSION, bytes(3));
+            fail("should have thrown bpe");
         }
         catch (BadPacketException expected) {}
 
         // this is the correct size of the payload
         TCPConnectBackVendorMessage TCP = 
             new TCPConnectBackVendorMessage(guid, ttl, hops,
-                                            TCP_VERSION, new byte[2]);
+                                            TCP_VERSION, bytes(2));
 
 
         // make sure we encode things just fine....
@@ -139,9 +154,9 @@ public class ConnectBackVendorMessageTest extends com.limegroup.gnutella.util.Ba
             new TCPConnectBackVendorMessage(VendorMessage1.getGUID(),
                                             ttl, hops, TCP_VERSION, 
                                             VendorMessage1.getPayload());
-        assertTrue(VendorMessage1.equals(VendorMessage2));
-        assertTrue(VendorMessage1.getConnectBackPort() == 
-                   VendorMessage2.getConnectBackPort());
+        assertEquals(VendorMessage1, VendorMessage2);
+        assertEquals(VendorMessage1.getConnectBackPort(),
+                     VendorMessage2.getConnectBackPort());
 
     }
 
