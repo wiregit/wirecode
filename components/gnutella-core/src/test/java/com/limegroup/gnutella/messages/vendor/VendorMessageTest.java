@@ -729,12 +729,64 @@ public class VendorMessageTest extends com.limegroup.gnutella.util.BaseTestCase 
     	//req2 = new BestCandidatesVendorMessage(test2);
     	assertFalse(req.isSame(req2));
     	
+    	//also test with ttl 0 candidate being null
+    	test[1]=new RemoteCandidate("1.2.3.4",16,(short)20);
+    	test[0]=null;
+    	test2[1]=new RemoteCandidate("1.2.3.5",16,(short)20);
+    	test2[0]=null;
+    	
+    	assertFalse(req.isSame(req2));
+    	test2[1]=test[1];
+    	assertTrue(req.isSame(req2));
+    	test2[1]=null;
+    	assertFalse(req.isSame(req2));
+    	assertFalse(req2.isSame(req));
+    	test[1]=null;
+    	assertTrue(req.isSame(req2));
+    	
+    	//parsing with ttl 1 = null
+    	test[0] = new RemoteCandidate("1.2.3.4",16,(short)20);
+    	
     	req = new BestCandidatesVendorMessage(test);
     	ByteArrayOutputStream baos = new ByteArrayOutputStream();
     	req.write(baos);
     	ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
     	req2 = (BestCandidatesVendorMessage)Message.read(bais);
     	assertTrue(req.isSame(req2));
+    	
+    	//parsing with ttl 0 = null
+    	test[1] = new RemoteCandidate("1.2.3.4",16,(short)20);
+    	test[0] = null;
+    	
+    	req = new BestCandidatesVendorMessage(test);
+    	baos = new ByteArrayOutputStream();
+    	req.write(baos);
+    	bais = new ByteArrayInputStream(baos.toByteArray());
+    	req2 = (BestCandidatesVendorMessage)Message.read(bais);
+    	assertTrue(req.isSame(req2));
+    	
+    	//parsing with neither null
+    	test[1] = new RemoteCandidate("1.2.3.4",16,(short)20);
+    	test[0] = new RemoteCandidate("1.2.3.5",17,(short)30);
+    	
+    	req = new BestCandidatesVendorMessage(test);
+    	baos = new ByteArrayOutputStream();
+    	req.write(baos);
+    	bais = new ByteArrayInputStream(baos.toByteArray());
+    	req2 = (BestCandidatesVendorMessage)Message.read(bais);
+    	assertTrue(req.isSame(req2));
+    	
+    	//parsing with both null
+    	test[1] = null;
+    	test[0] = null;
+    	
+    	req = new BestCandidatesVendorMessage(test);
+    	baos = new ByteArrayOutputStream();
+    	req.write(baos);
+    	bais = new ByteArrayInputStream(baos.toByteArray());
+    	req2 = (BestCandidatesVendorMessage)Message.read(bais);
+    	assertTrue(req.isSame(req2));
+    	
     	
     	testWrite(req);
     	testRead(req);
