@@ -137,11 +137,13 @@ public class ClientSideBrowseHostTest
          Connection con = new Connection(socket, responder);
          con.initialize();
 
-        if(CommonUtils.isJava14OrLater() &&
-           ConnectionSettings.USE_NIO.getValue()) {
-           PrivilegedAccessor.setValue(con, "_messageReader", 
-                TestNIOMessageReader.createReader(con));
-        }
+         // use the test reader so that we can call "read()" in the
+         // same manner we do for blocking IO
+         if(CommonUtils.isJava14OrLater() &&
+            ConnectionSettings.USE_NIO.getValue()) {
+             PrivilegedAccessor.setValue(con, "_messageReader", 
+                 TestNIOMessageReader.createReader(con));
+         }
          replyToPing(con, ultrapeer);
          return con;
      }
