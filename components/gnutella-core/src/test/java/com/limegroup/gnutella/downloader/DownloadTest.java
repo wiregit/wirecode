@@ -65,6 +65,7 @@ public class DownloadTest extends com.limegroup.gnutella.util.BaseTestCase {
 	private static DownloadManager dm;// = new DownloadManager();
 	private static final ActivityCallbackStub callback = new MyCallback();
 	private static ManagedDownloader DOWNLOADER = null;
+	private static Object COMPLETE_LOCK = new Object();
 	
 	/**
 	 * The list of tests to run.
@@ -408,7 +409,7 @@ public class DownloadTest extends com.limegroup.gnutella.util.BaseTestCase {
         download=dm.download(new RemoteFileDesc[] {rfd1}, false);
         ((ManagedDownloader)download).addDownload(rfd2,true);
 
-        waitForComplete(download);
+        waitForComplete(false);
         if (isComplete())
             debug("pass"+"\n");
         else
@@ -479,10 +480,7 @@ public class DownloadTest extends com.limegroup.gnutella.util.BaseTestCase {
         Downloader download=null;
         //Start one location, wait a bit, then add another.
         download=dm.download(new RemoteFileDesc[] {rfd1,rfd2}, false);
-        if(deleteCorrupt)
-            waitForCorrupt(download);
-        else
-            waitForComplete(download);
+        waitForComplete(deleteCorrupt);
         debug("passed"+"\n");//got here? Test passed
         //TODO: check IncompleteFileManager, disk
     }
@@ -512,11 +510,7 @@ public class DownloadTest extends com.limegroup.gnutella.util.BaseTestCase {
 
         //Start one location, wait a bit, then add another.
         download=dm.download(new RemoteFileDesc[] {rfd1,rfd2}, false);
-
-        if(deleteCorrupt)
-            waitForCorrupt(download);
-        else
-            waitForComplete(download);
+        waitForComplete(deleteCorrupt);
         debug("passed"+"\n");//got here? Test passed
     }
     
@@ -542,11 +536,7 @@ public class DownloadTest extends com.limegroup.gnutella.util.BaseTestCase {
         Downloader download = null;
         
         download = dm.download(new RemoteFileDesc[] {rfd1}, false);        
-
-        if(deleteCorrupt)
-            waitForCorrupt(download);
-        else
-            waitForComplete(download);
+        waitForComplete(deleteCorrupt);
         debug("passed"+"\n");//got here? Test passed
     }
 
@@ -1009,7 +999,7 @@ public class DownloadTest extends com.limegroup.gnutella.util.BaseTestCase {
 
         download=dm.download(rfds, false);
 
-        waitForComplete(download);
+        waitForComplete(false);
         if (isComplete())
             debug("pass"+"\n");
         else
@@ -1081,26 +1071,6 @@ public class DownloadTest extends com.limegroup.gnutella.util.BaseTestCase {
                                   speed, false, 4, false, null, set);
     }
 
-    /** Waits for the given download to complete. */
-    private static void waitForComplete(Downloader d) {
-        //Current implementation: polling (ugh)
-        try {
-            while (d.getState()!=Downloader.COMPLETE) {
-                Thread.sleep(100);
-            }
-        } catch (InterruptedException e) { }
-    }
-
-
-    private static void waitForCorrupt(Downloader d) {
-        //Current implementation: polling (ugh)
-        try {
-            while (d.getState()!=Downloader.CORRUPT_FILE) {
-                Thread.sleep(100);
-            }
-        } catch (InterruptedException e) { }
-    }
-
     /** Returns true if the complete file exists and is complete */
     private static boolean isComplete() {
         if ( savedFile.length() < TestFile.length() ) {
@@ -1143,10 +1113,29 @@ public class DownloadTest extends com.limegroup.gnutella.util.BaseTestCase {
             System.out.print(message);
     }
     
+    private static void waitForComplete(boolean isCorrupt) {
+        synchronized(COMPLETE_LOCK) {
+            try {
+                COMPLETE_LOCK.wait();
+            } catch (InterruptedException e) {
+                //good.
+            }
+        }
+        if ( isCorrupt )
+            assertEquals("unexpected state", Downloader.CORRUPT_FILE, DOWNLOADER.getState());
+        else
+            assertEquals("unexpected state", Downloader.COMPLETE, DOWNLOADER.getState());
+    }        
+    
     private static final class MyCallback extends ActivityCallbackStub {
         public void addDownload(Downloader d) {
             DOWNLOADER = (ManagedDownloader)d;
-        }  
+        }
+        public void removeDownload(Downloader d) {
+            synchronized(COMPLETE_LOCK) {
+                COMPLETE_LOCK.notify();
+            }
+        }
     }
 }
 
