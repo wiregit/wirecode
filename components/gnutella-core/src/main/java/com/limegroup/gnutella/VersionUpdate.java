@@ -43,10 +43,17 @@ public class VersionUpdate implements Runnable
 	
 	public void check() 
 	{
-		
+
+		SettingsManager sm = SettingsManager.instance();
+		boolean checkAgain;		
+		checkAgain = sm.getCheckAgain();
+
+		if (!checkAgain)
+			return;
+
 		ByteReader br;
 		String latest = "";
-			
+
 		try {
 			// open the http connection, and grab 
 			// the file with the version number in it.
@@ -80,7 +87,7 @@ public class VersionUpdate implements Runnable
 
 		}
 
-		SettingsManager sm = SettingsManager.instance();
+
 
 		String current = sm.getCurrentVersion(); 
 		int version = compare(current, latest);
@@ -90,12 +97,12 @@ public class VersionUpdate implements Runnable
 
 			String lastChecked;
 			lastChecked = sm.getLastVersionChecked();
-			boolean checkAgain;
-			checkAgain = sm.getCheckAgain();
-			
-			checkAgain = true;
 
-			if( (checkAgain == false) && (compare(lastChecked, latest) == 0)) {
+			checkAgain = sm.getCheckAgain();
+
+			// if( (checkAgain == false) && 
+			// (compare(lastChecked, latest) == 0)) {
+			if( (compare(lastChecked, latest) == 0) ) {
 				// dont ask 
 			}
 
