@@ -370,7 +370,6 @@ public class Acceptor extends Thread {
          * as Gnutella, HTTP, or MAGNET.
          */
         public void run() {
-            System.out.println("ConnectionDispatchRunner::run"); 
 			ActivityCallback callback = RouterService.getCallback();
 			ConnectionManager cm      = RouterService.getConnectionManager();
 			UploadManager um          = RouterService.getUploadManager();
@@ -379,23 +378,16 @@ public class Acceptor extends Thread {
                 //The try-catch below is a work-around for JDK bug 4091706.
                 InputStream in=null;
                 try {
-                    System.out.println("ConnectionDispatchRunner::run::getting stream"); 
                     in=_socket.getInputStream(); 
-                    System.out.println("ConnectionDispatchRunner::run::got stream"); 
                 } catch (Exception e) {
-                    e.printStackTrace();
                     throw new IOException("could not access socket stream");
                 }
-                System.out.println("ConnectionDispatchRunner::run::setting timeout"); 
                 _socket.setSoTimeout(Constants.TIMEOUT);
-                System.out.println("ConnectionDispatchRunner::run::set timeout"); 
                 //dont read a word of size more than 8 
                 //("GNUTELLA" is the longest word we know at this time)
                 String word = IOUtils.readWord(in,8);
-                System.out.println("Acceptor:: READ WORD1: "+word); 
                 _socket.setSoTimeout(0);
 
-                System.out.println("Acceptor:: READ WORD2: "+word); 
 				// Only selectively allow localhost connections
 				if ( !word.equals("MAGNET") ) {
 					InetAddress address = _socket.getInetAddress();
