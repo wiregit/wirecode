@@ -15,7 +15,11 @@ import com.sun.java.util.collections.*;
  * BadPacketException does not mean that other data (namely responses) cannot be
  * read; MissingDataException might have been a better name.  
  * 
+ * This class also encapsulates xml metadata.  See the description of the QHD 
+ * below for more details.
+ * 
  * Modified by Sumeet Thadani (5/22/2001) to handle Rich Queries
+ * Modified by Susheel Daswani (8/20/2001) to handle the new xml QHD format.
  * 
  */
 public class QueryReply extends Message implements Serializable{
@@ -25,6 +29,14 @@ public class QueryReply extends Message implements Serializable{
     //data in the responses field.
     //
     //WARNING: see note in Message about IP addresses.
+
+    // some parameters about xml, namely the max size of a xml collection string.
+    public static final int XML_MAX_SIZE = 65535;
+    private static final String XML_MAX_SIZE_STRING = "65535";
+    
+    /** 2 bytes for public area, 2 bytes for xml length.
+     */
+    static final int COMMON_PAYLOAD_LEN = 4;
 
     private byte[] payload;
     /** True if the responses and metadata have been extracted. */
@@ -114,7 +126,9 @@ public class QueryReply extends Message implements Serializable{
      * @param measuredSpeed true iff speed is measured, not as reported by the
      *  user
      * @param xmlCollectionString The (non-null) String containing aggregated
-     * and indexed information regarding file metadata.
+     * and indexed information regarding file metadata.  In terms of byte-size, 
+     * this should not be bigger than 65535 bytes.  Anything larger will be 
+     * truncated.
      */
     public QueryReply(byte[] guid, byte ttl, 
             int port, byte[] ip, long speed, Response[] responses,
@@ -137,11 +151,11 @@ public class QueryReply extends Message implements Serializable{
              boolean includeQHD, boolean needsPush, boolean isBusy,
              boolean finishedUpload, boolean measuredSpeed) {
         super(guid, Message.F_QUERY_REPLY, ttl, (byte)0,
-              11 +                           // 11 bytes of header
-              rLength(responses) +           // file records size
-              (includeQHD ? 4+3+(xmlCollectionString.getBytes()).length : 0) + 
-                                             // optional 7 + xml_len byte QHD
-              16);                           // 16-byte footer
+              11 +                             // 11 bytes of header
+              rLength(responses) +             // file records size
+              qhdLength(includeQHD, xmlCollectionString) + 
+                                               // conditional xml-style QHD len
+              16);                             // 16-byte footer
         Assert.that((port&0xFFFF0000)==0);
         Assert.that(ip.length==4);
         Assert.that((speed&0xFFFFFFFF00000000l)==0);
@@ -159,7 +173,6 @@ public class QueryReply extends Message implements Serializable{
         payload[6]=ip[3];
         ByteOrder.int2leb((int)speed,payload,7);
 
-        //Sumeet Thadani : added metadata between the 2 nulls
         //Write each response at index i
         int i=11;
         for (int left=n; left>0; left--) {
@@ -178,17 +191,18 @@ public class QueryReply extends Message implements Serializable{
 
         //Write QHD if desired
         if (includeQHD) {
-            //TODO3: We can add some info in the QHD if the reply 
-            //contains metadata. Where? How?
             //a) vendor code.  This is hardcoded here for simplicity,
             //efficiency, and to prevent character decoding problems.
             payload[i++]=(byte)76; //'L'
             payload[i++]=(byte)73; //'I'
             payload[i++]=(byte)77; //'M'
             payload[i++]=(byte)69; //'E'
+
             //b) payload length
-            payload[i++]=(byte)2;
-            //c) common area flags and controls.  See format in parseResults2.
+            payload[i++]=(byte)COMMON_PAYLOAD_LEN;
+
+            //c) PART 1: common area flags and controls.  See format in
+            //parseResults2.
             payload[i++]=(byte)((needsPush ? PUSH_MASK : 0) 
                 | BUSY_MASK 
                 | UPLOADED_MASK 
@@ -197,12 +211,22 @@ public class QueryReply extends Message implements Serializable{
                 | (isBusy ? BUSY_MASK : 0) 
                 | (finishedUpload ? UPLOADED_MASK : 0)
                 | (measuredSpeed ? SPEED_MASK : 0));
-            //d) xml stuff.  this will probably move :)
+
+            //c) PART 2: size of XMLCollectionString + 1.
+            int xmlSize = (xmlCollectionString.getBytes()).length + 1;
+            if (xmlSize > XML_MAX_SIZE)
+                xmlSize = XML_MAX_SIZE;  // yes, truncate!
+            ByteOrder.short2leb(((short) xmlSize), payload, i);
+            i += 2;
+
+            //d) actual xml.
             byte[] xmlCollectionBytes = xmlCollectionString.getBytes();
             System.arraycopy(xmlCollectionBytes, 0, 
-                             payload, i, xmlCollectionBytes.length);
+                             payload, i, xmlSize-1);
             // adjust i...
-            i += xmlCollectionBytes.length;
+            i += xmlSize-1;
+            // write null after xml, as specified
+            payload[i++] = (byte)0;
         }        
 
         //Write footer at payload[i...i+16-1]
@@ -235,10 +259,8 @@ public class QueryReply extends Message implements Serializable{
     }
 
     /** Returns the number of bytes necessary to represent responses
-     * in the payload 
-     * Modified by Sumeet Thadani 5/22/2001 to account the Metadata part
-     * of the responses
-    */
+     *  in the payload .
+     */
     private static int rLength(Response[] responses) {
         int ret=0;
         for (int i=0; i<responses.length; i++)
@@ -247,6 +269,27 @@ public class QueryReply extends Message implements Serializable{
             //file name in bytes
             ret += 8+responses[i].getNameBytesSize()+1/*regular part*/+1;
         return ret;
+    }
+
+    /** Returns the number of bytes necessary to represent the QHD in the
+     *  payload.  Needs to take account of size of XML and whether or not to
+     *  even include a QHD.
+     */
+    private static int qhdLength(boolean includeQHD, 
+                                 String xmlCollectionString) {
+        int retInt = 0;
+        if (includeQHD) {
+            retInt += 4; // 'LIME'
+            retInt += 1; // 1 byte for size of public area
+            retInt += COMMON_PAYLOAD_LEN; 
+            // size of xml string, max XML_MAX_SIZE
+            int numBytes = (xmlCollectionString.getBytes()).length;
+            if ((numBytes + 1) > XML_MAX_SIZE)
+                retInt += XML_MAX_SIZE;
+            else
+                retInt += (numBytes + 1);
+        }
+        return retInt;
     }
 
     /** Creates a new query reply with data read from the network. */
@@ -450,7 +493,6 @@ public class QueryReply extends Message implements Serializable{
                 //The file name is supposed to be terminated by a double null
                 //terminator.  But Gnotella inserts meta-information between
                 //these null characters.  So we have to handle this.
-                //Sumeet: We also have meta info there now!!(5/22/2001)
                 //See http://gnutelladev.wego.com/go/
                 //         wego.discussion.message?groupId=139406&
                 //         view=message&curMsgId=319258&discId=140845&
@@ -475,10 +517,8 @@ public class QueryReply extends Message implements Serializable{
                     if (payload[k]==(byte)0)
                         break;
                 }
-                String meta = new String(payload,j+1, k-(j+1) );
                 responses[responses.length-left]=
-                                          new Response(index,size,name,meta);
-                //If there is no metadata meat.equals(""). We are OK.
+                                          new Response(index,size,name);
                 i=k+1;//The byte after the second null
             }
 
@@ -489,12 +529,12 @@ public class QueryReply extends Message implements Serializable{
         } catch (BadPacketException e) {
             return;
         }                
-
+        
         //2. Extract BearShare-style metainformation, if any.  Any exceptions
         //are silently caught.  The definitive reference for this format is at
         //http://www.clip2.com/GnutellaProtocol04.pdf.  Briefly, the format is 
         //      vendor code           (4 bytes, case insensitive)
-        //      common payload length (1 byte, unsigned, always>0)
+        //      common payload length (4 byte, unsigned, always>0)
         //      common payload        (length given above.  See below.)
         //      vendor payload        (length until clientGUID)
         //The normal 16 byte clientGUID follows, of course.
@@ -518,9 +558,24 @@ public class QueryReply extends Message implements Serializable{
         //
         //*Here, we use 0-(N-1) numbering.  So "0'th bit" refers to the least
         //significant bit.
+        /* ----------------------------------------------------------------
+         * QHD UPDATE 8/17/01
+         * Here is an updated QHD spec.
+         * 
+         * Byte 0-3 : Vendor Code
+         * Byte 4   : Public area size (COMMON_PAYLOAD_LEN)
+         * Byte 5-6 : Public area (as described above)
+         * Byte 7-8 : Size of XML + 1 (for a null), you need to count backward
+         * from the client GUID.
+         * Byte 9-beginning of xml : (new) private area
+         * Byte (payload.length - 16 - xmlSize (above)) - 
+                (payload.length - 16 - 1) : XML!!
+         * Byte (payload.length - 16 - 1) : NULL
+         * Last 16 Bytes: client GUID.
+         */
         try {
-			if (i > (payload.length-16-4-2)) {   //see above
-                throw new BadPacketException("No metadata");
+			if (i >= (payload.length-16)) {   //see above
+                throw new BadPacketException("No QHD");
             }
             //Attempt to verify.  Results are not copied to this until verified.
             String vendorT=null;
@@ -564,16 +619,23 @@ public class QueryReply extends Message implements Serializable{
                 if ((control & SPEED_MASK)!=0)
                     measuredSpeedFlagT = (flags&SPEED_MASK)!=0 ? TRUE : FALSE;
             }
-            i+=length;
+            i+=2; // need to get xml size, so don't go past it....
 
             if (i>payload.length-16)
-                throw new BadPacketException(
-                    "Common payload length too large.");
+                throw new BadPacketException("Incomplete QHD.");
 
-            // d) currently, the xml metadata about the file is stored in the
-            // private area of the QHD.  this will probably change...
-            xmlCollectionString = new String(payload, i, payload.length-16-i);
-
+            // d) we need to get the xml stuff.  first we should get its size,
+            // then we have to look backwards and get the actual xml...
+            int a, b, temp;
+            temp = ByteOrder.ubyte2int(payload[i++]);
+            a = temp;
+            temp = ByteOrder.ubyte2int(payload[i++]);
+            b = temp << 8;
+            int xmlSize = a | b;
+            xmlCollectionString = new String(payload, 
+                                             payload.length-16-xmlSize, 
+                                             xmlSize-1);
+            
             //All set.  Accept parsed values.
             Assert.that(vendorT!=null);
             this.vendor=vendorT.toUpperCase();
@@ -581,9 +643,13 @@ public class QueryReply extends Message implements Serializable{
             this.busyFlag=busyFlagT;
             this.uploadedFlag=uploadedFlagT;
             this.measuredSpeedFlag=measuredSpeedFlagT;
+
+            debug("QR.parseResults2(): returning w/o exception.");
         } catch (BadPacketException e) {
+            debug("QR.parseResults2(): bpe = " + e);
             return;
         } catch (IndexOutOfBoundsException e) {
+            debug("QR.parseResults2(): index exception = " + e);
             return;
         } 
     }
@@ -604,6 +670,14 @@ public class QueryReply extends Message implements Serializable{
     public String toString() {
         return "QueryReply("+getResultCount()+" hits, "+super.toString()+")";
     }
+
+    
+    public static boolean debugOn = false;
+    public static void debug(String out) {
+        if (debugOn) 
+            System.out.println(out);
+    }
+
 
     /** Unit test.  TODO: these badly need to be factored. */
     /*
@@ -693,37 +767,50 @@ public class QueryReply extends Message implements Serializable{
         } catch (BadPacketException e) { }
 
         //Test case added by Sumeet Thadani to check the metadata part
-        payload=new byte[11+8+2+2+16];
+        //Test case modified by Susheel Daswani to check the metadata part
+        payload=new byte[11+11+(4+1+4+5)+16];
         payload[0]=1;                    //Number of results
         payload[11+8]=(byte)65;          //The character 'A'
-        payload[11+10] = (byte)65;
+        payload[11+11+0]=(byte)76;   //The character 'L'
+        payload[11+11+1]=(byte)76;   //The character 'L'
+        payload[11+11+2]=(byte)77;   //The character 'M'
+        payload[11+11+3]=(byte)69;   //The character 'E'
+        payload[11+11+4+0]=(byte)QueryReply.COMMON_PAYLOAD_LEN;
+        payload[11+11+4+1+2]=(byte)5; //size of xml lsb
+        payload[11+11+4+1+3]=(byte)0; // size of xml msb
+        payload[11+11+4+1+4]=(byte)'S';   //The character 'L'
+        payload[11+11+4+1+4+1]=(byte)'U';   //The character 'L'
+        payload[11+11+4+1+4+2]=(byte)'S';   //The character 'M'
+        payload[11+11+4+1+4+3]=(byte)'H';   //The character 'E'
+        payload[11+11+4+1+4+4]=(byte)0;   //null terminator
         qr=new QueryReply(new byte[16], (byte)5, (byte)0,
                           payload);
         try {
             Iterator iter=qr.getResults();
             Response r = (Response)iter.next();
             Assert.that(r.getNameBytesSize()==1,"Sumeet test a");
-            Assert.that(r.getMetaBytesSize()==1,"Sumeet test b");
+            Assert.that(r.getMetaBytesSize()==0,"Sumeet test b");
             byte[] name = r.getNameBytes();
-            byte[] meta = r.getMetaBytes();
             Assert.that(name[0]=='A',"sumeet test c");
-            Assert.that(meta[0]=='A',"sumeet test d");
             Assert.that(r.getName().equals("A"),"Sumeet test1");
-            Assert.that(r.getMetadata().equals("A"),"Sumeet test2");
+            Assert.that(qr.getXMLCollectionString().equals("SUSH"),
+                        "Susheel test1");
         }catch(BadPacketException e){
             System.out.println("MetaResponse not created well!");
         }
 
         //Normal case: basic metainfo with no vendor data
-        payload=new byte[11+11+(4+2+0)+16];
+        payload=new byte[11+11+(4+1+4+4)+16];
         payload[0]=1;            //Number of results
         payload[11+8]=(byte)65;  //The character 'A'
         payload[11+11+0]=(byte)76;   //The character 'L'
         payload[11+11+1]=(byte)105;  //The character 'i'
         payload[11+11+2]=(byte)77;   //The character 'M'
         payload[11+11+3]=(byte)69;   //The character 'E'
-        payload[11+11+4+0]=(byte)1;
+        payload[11+11+4+0]=(byte)QueryReply.COMMON_PAYLOAD_LEN;  //The size of public area
         payload[11+11+4+1]=(byte)0xB1; //set push flag (and other stuff)
+        payload[11+11+4+1+2]=(byte)4;  // set xml length
+        payload[11+11+4+1+3]=(byte)0;
         qr=new QueryReply(new byte[16], (byte)5, (byte)0,
                           payload);
         try {
@@ -738,16 +825,19 @@ public class QueryReply extends Message implements Serializable{
         }
         
         //Normal case: basic metainfo with extra vendor data
-        payload=new byte[11+11+(4+2+3)+16];
+        payload=new byte[11+11+(4+1+4+20000)+16];
         payload[0]=1;            //Number of results
         payload[11+8]=(byte)65;  //The character 'A'
         payload[11+11+0]=(byte)76;   //The character 'L'
         payload[11+11+1]=(byte)76;   //The character 'L'
         payload[11+11+2]=(byte)77;   //The character 'M'
         payload[11+11+3]=(byte)69;   //The character 'E'
-        payload[11+11+4+0]=(byte)1;
+        payload[11+11+4+0]=(byte)QueryReply.COMMON_PAYLOAD_LEN;
         payload[11+11+4+1]=(byte)0xF0; //no push flag (and other crap)
-        payload[11+11+4+2+0]=(byte)0xFF; //garbage data (ignored)
+        payload[11+11+4+1+2]=(byte)32; //size of xml lsb
+        payload[11+11+4+1+3]=(byte)78; // size of xml msb
+        for (int i = 0; i < 20000; i++)
+            payload[11+11+4+1+4+i] = 'a';
         qr=new QueryReply(new byte[16], (byte)5, (byte)0,
                           payload);
         try {
@@ -804,16 +894,17 @@ public class QueryReply extends Message implements Serializable{
 
         //Normal case: busy bit undefined and push bits unset.
         //(We don't bother testing undefined and set.  Who cares?)
-        payload=new byte[11+11+(4+3+0)+16];
+        payload=new byte[11+11+(4+1+4+1)+16];
         payload[0]=1;                //Number of results
         payload[11+8]=(byte)65;      //The character 'A'
         payload[11+11+0]=(byte)76;   //The character 'L'
         payload[11+11+1]=(byte)105;  //The character 'i'
         payload[11+11+2]=(byte)77;   //The character 'M'
         payload[11+11+3]=(byte)69;   //The character 'E'
-        payload[11+11+4+0]=(byte)2;
+        payload[11+11+4+0]=(byte)QueryReply.COMMON_PAYLOAD_LEN;
         payload[11+11+4+1]=(byte)0x0; //no data known
-        payload[11+11+4+2]=(byte)0x0; 
+        payload[11+11+4+1+1]=(byte)0x0; 
+        payload[11+11+4+1+2]=(byte)1;         
         qr=new QueryReply(new byte[16], (byte)5, (byte)0,
                           payload);
         try {
@@ -843,16 +934,17 @@ public class QueryReply extends Message implements Serializable{
        
 
         //Normal case: busy and push bits defined and set
-        payload=new byte[11+11+(4+3+0)+16];
+        payload=new byte[11+11+(4+1+4+1)+16];
         payload[0]=1;                //Number of results
         payload[11+8]=(byte)65;      //The character 'A'
         payload[11+11+0]=(byte)76;   //The character 'L'
         payload[11+11+1]=(byte)105;  //The character 'i'
         payload[11+11+2]=(byte)77;   //The character 'M'
         payload[11+11+3]=(byte)69;   //The character 'E'
-        payload[11+11+4+0]=(byte)2;
+        payload[11+11+4]=(byte)QueryReply.COMMON_PAYLOAD_LEN;    //common payload size
         payload[11+11+4+1]=(byte)0x1d;  //111X1 
-        payload[11+11+4+2]=(byte)0x1c;  //111X0
+        payload[11+11+4+1+1]=(byte)0x1c;  //111X0
+        payload[11+11+4+1+2]=(byte)1;  // no xml, just a null, so 1
         qr=new QueryReply(new byte[16], (byte)5, (byte)0,
                           payload);
         try {
@@ -880,9 +972,10 @@ public class QueryReply extends Message implements Serializable{
         payload[11+11+1]=(byte)105;  //The character 'i'
         payload[11+11+2]=(byte)77;   //The character 'M'
         payload[11+11+3]=(byte)69;   //The character 'E'
-        payload[11+11+4+0]=(byte)2;
-        payload[11+11+4+1]=(byte)0x1c; //111X0
-        payload[11+11+4+2]=(byte)0x0;  //000X0
+        payload[11+11+4]=(byte)QueryReply.COMMON_PAYLOAD_LEN;    //common payload size
+        payload[11+11+4+1]=(byte)0x1c;  //111X1 
+        payload[11+11+4+1+1]=(byte)0x0;  //111X0
+        payload[11+11+4+1+2]=(byte)1;  // no xml, just a null, so 1
         qr=new QueryReply(new byte[16], (byte)5, (byte)0,
                           payload);
         try {
@@ -955,9 +1048,9 @@ public class QueryReply extends Message implements Serializable{
         }
         byte[] bytes=out.toByteArray();
         //Length includes header, query hit header and footer, responses, and QHD
-        Assert.that(bytes.length==(23+11+16)+(8+10+2)+(8+14+2)+(4+3));
-        Assert.that(bytes[bytes.length-16-2]==0x1d); //11101
-        Assert.that(bytes[bytes.length-16-1]==0x11); //10001
+        Assert.that(bytes.length==(23+11+16)+(8+10+2)+(8+14+2)+(4+1+QueryReply.COMMON_PAYLOAD_LEN+1));
+        Assert.that(bytes[bytes.length-16-5]==0x1d); //11101
+        Assert.that(bytes[bytes.length-16-4]==0x11); //10001
 
 
         //Create from scratch with no bits set
