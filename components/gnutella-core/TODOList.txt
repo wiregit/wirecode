@@ -1,6 +1,13 @@
 This document is a listing of what needs to get done for the GUESS
 implementation to be functional and ready for release:
 
+
+Scenarios:
+  - Mini-Network 1: Two Ultrapeers, GUESS Enabled, connected to each other
+  (call them A and B).  Two Leaves, not GUESS Enabled, one connected to A,
+  the other connected to B.
+
+
 --------------------------------------------------------------------------------
 Date Posted: 9/27/02
 Date Resolved: 
@@ -63,3 +70,28 @@ Send UDP PingReplies to any initialized Ultrapeer TCP connections.
 Notes: This feature has not been tested as much as I'd like.
 
 ********************************************************************************
+
+
+--------------------------------------------------------------------------------
+Date Posted: 10/03/02
+Date Resolved: 
+Scenario: Mini-Network 1
+
+Leaves are not receiving the correct amount of results. Should receive 3
+but only receiving 2.
+
+Notes: It seems that Ultrapeers are not forwarding Queries to Leaves.
+
+
+********************************************************************************
+
+
+
+--------------------------------------------------------------------------------
+Date Posted: 10/03/02
+Date Resolved: 
+
+
+
+********************************************************************************
+
