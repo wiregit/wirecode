@@ -57,6 +57,11 @@ public abstract class MessageRouter {
     private int MAX_ROUTE_TABLE_SIZE = 50000;  //actually 100,000 entries
 
     /**
+     * The maximum number of bypassed results to remember per query.
+     */
+    private final int MAX_BYPASSED_RESULTS = 150;
+
+    /**
      * Maps PingRequest GUIDs to PingReplyHandlers.  Stores 2-4 minutes,
      * typically around 2500 entries, but never more than 100,000 entries.
      */
@@ -961,7 +966,8 @@ public abstract class MessageRouter {
                         eps = new HashSet();
                         _bypassedResults.put(qGUID, eps);
                     }
-                    eps.add(ep);
+                    if (_bypassedResults.size() <= MAX_BYPASSED_RESULTS)
+                        eps.add(ep);
                 }
 
                 return;

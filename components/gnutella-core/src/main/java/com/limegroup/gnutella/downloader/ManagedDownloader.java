@@ -1344,6 +1344,8 @@ public class ManagedDownloader implements Downloader, Serializable {
         // the amount of time i've spent waiting for results or any other
         // special state as dictated by subclasses (getFailedState)
         long timeSpentWaiting = 0;
+        // only query GUESS sources once
+        boolean triedLocatingSources = false;
 
         //While not success and still busy...
         while (true) {
@@ -1406,12 +1408,13 @@ public class ManagedDownloader implements Downloader, Serializable {
                 }
                 
                 // try to do iterative guessing here
-                if (_originalQueryGUID != null) { 
+                if ((_originalQueryGUID != null) && !triedLocatingSources) { 
                     MessageRouter mr = RouterService.getMessageRouter();
                     Set guessLocs = mr.getGuessLocs(_originalQueryGUID);
                     
                     if ((guessLocs != null) && !guessLocs.isEmpty()) {
                         setState(ITERATIVE_GUESSING);
+                        triedLocatingSources = true;
                         boolean areThereNewResults = false;
                         URN bestURN = buckets.getBestURN();
                         for (Iterator i = guessLocs.iterator();
