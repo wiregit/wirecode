@@ -693,6 +693,9 @@ public class Connection {
                 	if(isCrawler) {
                 		throw new IOException("connection from crawler -- disconnect");
                 	}
+                	//If we told them to become a leaf and they didn't, kill'm.
+                	if(ourResponse.hasLeafGuidance() && !theirResponse.isLeaf())
+                	    throw new IOException("didn't follow protocol");
                     //a) If we wrote 200 and they wrote 200 OK, stop normally.
                     return;
                 }
