@@ -160,7 +160,7 @@ public class UploadTest extends BaseTestCase {
         //try {Thread.sleep(200); } catch (InterruptedException e) { }
             
     //} 
-    
+
     ///////////////////push downloads with HTTP1.0///////////
     public void testHTTP10Push() throws Exception {
         boolean passed = false;
@@ -1027,6 +1027,32 @@ public class UploadTest extends BaseTestCase {
             true, false, "HTTP/1.1 400 Malformed Request");
     }
 
+    ///////////////////test that creation time is given///////////
+    public void testCreationTimeGiven() throws Exception {
+
+        //0. Confirm creation time exists
+        URN urn = URN.createSHA1Urn(hash);
+        Long cTime = CreationTimeCache.instance().getCreationTime(urn);
+        assertNotNull(cTime);
+        assertTrue(cTime.longValue() > 0);
+
+        //1. Write request
+        Socket s = new Socket("localhost", PORT);
+        BufferedReader in = new BufferedReader(new InputStreamReader(
+            s.getInputStream()));
+        BufferedWriter out = new BufferedWriter(new OutputStreamWriter(
+            s.getOutputStream()));
+            
+        //2. request the file
+        String reqFile  = "/uri-res/N2R?" + hash;
+
+        downloadInternal11(reqFile, "Range: bytes=0-1", out, in,
+                           "X-Create-Time: " + cTime);
+
+    }
+    
+
+    
     /** 
      * Downloads file (stored in slot index) from address:port, returning the
      * content as a string. If header!=null, includes it as a request header.
@@ -1361,6 +1387,10 @@ public class UploadTest extends BaseTestCase {
                     return false;
             }
             return true;
+        }
+
+        public String toString() {
+            return title + " : " + contents;
         }
     }
                 
