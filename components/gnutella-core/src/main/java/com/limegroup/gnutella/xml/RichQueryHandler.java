@@ -84,8 +84,14 @@ public class RichQueryHandler{
             catch (SchemaNotFoundException snfe) {};
             if(subjectFile==null){//pure data (data about NO file)
                 index = LimeXMLProperties.DEFAULT_NONFILE_INDEX;
-                name = metadata.substring(22,33);//after <?xml version="1.0"?>
                 size = metadata.length();//Here: size = size of metadata String
+                //name is the first 10 relavent xml chars.
+                if (size > 33)
+                    name = metadata.substring(22,33);//<?xml version="1.0"?> on
+                else if (size > 22)
+                    name = metadata.substring(22,(int)size);//upto the last
+                else
+                    name =" ";//leave blank
             }
             else { //meta-data about a specific file
                 FileDesc fd = fManager.file2index(subjectFile);
