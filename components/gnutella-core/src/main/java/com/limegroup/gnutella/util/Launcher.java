@@ -324,9 +324,20 @@ public class Launcher {
 			}
 			break;
 		case WINDOWS_9x:
-			
-			command = "start "+"\""+ path+"\"";
-			Runtime.getRuntime().exec(command);
+			File f = new File(path);
+			if(f.isFile()) {			
+				FileInputStream fis = new FileInputStream(f);
+				String hex = Integer.toHexString(fis.read());
+				hex += Integer.toHexString(fis.read());
+
+				if(hex.equals("4d5a")) {
+					Utilities.showError("LimeWire will not launch executable files "+
+										"for security reasons.");
+					return;
+				}
+				command = "start "+"\""+ path+"\"";
+				Runtime.getRuntime().exec(command);
+			}
 			break;
 
 		case OTHER:
