@@ -1,6 +1,7 @@
 package com.limegroup.gnutella;
 
 import com.limegroup.gnutella.guess.GUESSEndpoint;
+import com.limegroup.gnutella.statistics.*;
 
 import java.net.*;
 import java.io.*;
@@ -155,6 +156,7 @@ public final class UDPService implements Runnable {
 		} else {
 			reply = createPingReply(guid);
 		}
+		SentMessageStat.UDP_PING_REPLIES.incrementStat();
 		send(reply, datagram.getAddress(), datagram.getPort());
 	}
 
