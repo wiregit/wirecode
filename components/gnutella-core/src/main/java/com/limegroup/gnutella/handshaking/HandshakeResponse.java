@@ -173,14 +173,24 @@ public final class HandshakeResponse {
     private final boolean PONG_CACHING;
 
     /**
-     * Creates a HandshakeResponse which defaults the status code and status
-     * message to be "200 Ok" and uses the desired headers in the response. 
+     * Creates a <tt>HandshakeResponse</tt> which defaults the status code and 
+     * status message to be "200 Ok" and uses the desired headers in the response. 
      * @param headers the headers to use in the response. 
      */
     private HandshakeResponse(Properties headers) {
         this(OK, OK_MESSAGE, headers);
     }    
 
+    /**
+     * Creates a new <tt>HandshakeResponse</tt> instance with the specified 
+     * response code and message and with no extra connection headers.
+     *
+     * @param code the status code for the response
+     * @param message the status message
+     */
+    private HandshakeResponse(int code, String message) {
+        this(code, message, new Properties());
+    }
     /**
      * Creates a HandshakeResponse with the desired status code, status message, 
      * and headers to respond with.
@@ -309,12 +319,28 @@ public final class HandshakeResponse {
 
     /**
      * Creates a new <tt>HandshakeResponse</tt> instance that rejects the
+     * potential connection.
+     *
+     * @param headers the <tt>Properties</tt> instance containing the headers
+     *  to send to the node we're rejecting
+     */
+    static HandshakeResponse createRejectOutgoingResponse(Properties headers) {
+        return new HandshakeResponse(HandshakeResponse.SLOTS_FULL,
+                                     HandshakeResponse.SLOTS_FULL_MESSAGE,
+                                     headers);        
+    }
+
+    /**
+     * Creates a new <tt>HandshakeResponse</tt> instance that rejects the
      * potential connection to a leaf.  In this case, we send high hops
      * Ultrapeers in the X-Try-Ultrapeer headers to avoid clustering as
      * much as possible.
      *
      * @param headers the <tt>Properties</tt> instance containing the headers
      *  to send to the node we're rejecting
+     *
+     * @return a new <tt>HandshakeResponse</tt> instance rejecting the 
+     *  connection and with the specified connection headers
      */
     static HandshakeResponse createLeafRejectIncomingResponse(Properties headers) {
         addHighHopsUltrapeers(RouterService.getHostCatcher(), headers);
@@ -323,17 +349,18 @@ public final class HandshakeResponse {
                                      headers);        
     }
 
+
+
     /**
      * Creates a new <tt>HandshakeResponse</tt> instance that rejects the
-     * potential connection.
+     * outgoing connection to a leaf.
      *
-     * @param headers the <tt>Properties</tt> instance containing the headers
-     *  to send to the node we're rejecting
+     * @return a new <tt>HandshakeResponse</tt> instance rejecting the 
+     *  connection and with no extra headers
      */
-    static HandshakeResponse createRejectOutgoingResponse(Properties headers) {
+    static HandshakeResponse createLeafRejectOutgoingResponse() {
         return new HandshakeResponse(HandshakeResponse.SLOTS_FULL,
-                                     HandshakeResponse.SHIELDED_MESSAGE,
-                                     headers);        
+                                     HandshakeResponse.SHIELDED_MESSAGE);        
     }
 
 
