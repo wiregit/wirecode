@@ -243,10 +243,13 @@ public final class ServerSideXMLReplyTest extends BaseTestCase {
         ULTRAPEER_1.send(query);
         ULTRAPEER_1.flush();
 
+        // wait for processing
+        Thread.sleep(750);
+
         // confirm that result has heXML.
         QueryReply reply = getFirstQueryReply(ULTRAPEER_1);
-        assertTrue(reply != null);
-        assertTrue(reply.getXMLBytes() != null);
+        assertNotNull(reply);
+        assertNotNull(reply.getXMLBytes());
         assertTrue("xml length = " + reply.getXMLBytes().length,
                    reply.getXMLBytes().length > 10);
     }
@@ -261,12 +264,188 @@ public final class ServerSideXMLReplyTest extends BaseTestCase {
         ULTRAPEER_1.send(query);
         ULTRAPEER_1.flush();
 
+        // wait for processing
+        Thread.sleep(750);
+
+
         // confirm that result has heXML.
         QueryReply reply = getFirstQueryReply(ULTRAPEER_1);
-        assertTrue(reply != null);
-        assertTrue(reply.getXMLBytes() != null);
+        assertNotNull(reply);
+        assertNotNull(reply.getXMLBytes());
         assertTrue("xml length = " + reply.getXMLBytes().length,
                    reply.getXMLBytes().length > 10);
     }
+
+    public void testBitrateExclusion() throws Exception {
+        // test that a mismatching artist name doesn't return a result
+        {
+            drainAll();
+
+            String richQuery = "<?xml version=\"1.0\"?><audios xsi:noNamespaceSchemaLocation=\"http://www.limewire.com/schemas/audio.xsd\"><audio bitrate=\"16\" artist=\"junk\"></audio></audios>";
+
+            // send a query
+            QueryRequest query = QueryRequest.createQuery("junk 16", richQuery);
+            ULTRAPEER_1.send(query);
+            ULTRAPEER_1.flush();
+
+            // wait for processing
+            Thread.sleep(750);
+
+            // confirm that we don't get a result
+            QueryReply reply = getFirstQueryReply(ULTRAPEER_1);
+            assertNull(reply);
+        }        
+
+        // test that a matching artist name does return a result
+        {
+            drainAll();
+
+            String richQuery = "<?xml version=\"1.0\"?><audios xsi:noNamespaceSchemaLocation=\"http://www.limewire.com/schemas/audio.xsd\"><audio bitrate=\"16\" artist=\"Test\"></audio></audios>";
+
+            // send a query
+            QueryRequest query = QueryRequest.createQuery("Test 16", richQuery);
+            ULTRAPEER_1.send(query);
+            ULTRAPEER_1.flush();
+
+            // wait for processing
+            Thread.sleep(750);
+
+            // confirm that we do get a result
+            QueryReply reply = getFirstQueryReply(ULTRAPEER_1);
+            assertNotNull(reply);
+            assertNotNull(reply.getXMLBytes());
+            assertTrue("xml length = " + reply.getXMLBytes().length,
+                       reply.getXMLBytes().length > 10);
+        }        
+
+        // test that a null price value doesn't return a result
+        {
+            drainAll();
+
+            String richQuery = "<?xml version=\"1.0\"?><audios xsi:noNamespaceSchemaLocation=\"http://www.limewire.com/schemas/audio.xsd\"><audio bitrate=\"16\" price=\"$19.99\"></audio></audios>";
+
+            // send a query
+            QueryRequest query = QueryRequest.createQuery("$19.99 16", 
+                                                          richQuery);
+            ULTRAPEER_1.send(query);
+            ULTRAPEER_1.flush();
+
+            // wait for processing
+            Thread.sleep(750);
+
+            // confirm that we don't get a result
+            QueryReply reply = getFirstQueryReply(ULTRAPEER_1);
+            assertNull(reply);
+        }        
+
+        // 3 fields - bitrate matches, but only one other, so no return
+        {
+            drainAll();
+
+            String richQuery = "<?xml version=\"1.0\"?><audios xsi:noNamespaceSchemaLocation=\"http://www.limewire.com/schemas/audio.xsd\"><audio bitrate=\"16\" artist=\"Test\" title=\"junk\"></audio></audios>";
+
+            // send a query
+            QueryRequest query = QueryRequest.createQuery("Test junk 16", 
+                                                          richQuery);
+            ULTRAPEER_1.send(query);
+            ULTRAPEER_1.flush();
+
+            // wait for processing
+            Thread.sleep(750);
+
+            // confirm that we don't get a result
+            QueryReply reply = getFirstQueryReply(ULTRAPEER_1);
+            assertNull(reply);
+        }        
+
+        // 3 fields - all match, should return
+        {
+            drainAll();
+
+            String richQuery = "<?xml version=\"1.0\"?><audios xsi:noNamespaceSchemaLocation=\"http://www.limewire.com/schemas/audio.xsd\"><audio bitrate=\"16\" artist=\"Test\" title=\"Test mpg\"></audio></audios>";
+
+            // send a query
+            QueryRequest query = QueryRequest.createQuery("Test mpg 16", 
+                                                          richQuery);
+            ULTRAPEER_1.send(query);
+            ULTRAPEER_1.flush();
+
+            // wait for processing
+            Thread.sleep(750);
+
+            // confirm that we do get a result
+            QueryReply reply = getFirstQueryReply(ULTRAPEER_1);
+            assertNotNull(reply);
+            assertNotNull(reply.getXMLBytes());
+            assertTrue("xml length = " + reply.getXMLBytes().length,
+                       reply.getXMLBytes().length > 10);
+        }        
+
+        // 3 fields - 1 match, 1 null, should return
+        {
+            drainAll();
+
+            String richQuery = "<?xml version=\"1.0\"?><audios xsi:noNamespaceSchemaLocation=\"http://www.limewire.com/schemas/audio.xsd\"><audio bitrate=\"16\" artist=\"Test\" type=\"Audiobook\"></audio></audios>";
+
+            // send a query
+            QueryRequest query = QueryRequest.createQuery("Test Audiobook 16", 
+                                                          richQuery);
+            ULTRAPEER_1.send(query);
+            ULTRAPEER_1.flush();
+
+            // wait for processing
+            Thread.sleep(750);
+
+            // confirm that we do get a result
+            QueryReply reply = getFirstQueryReply(ULTRAPEER_1);
+            assertNotNull(reply);
+            assertNotNull(reply.getXMLBytes());
+            assertTrue("xml length = " + reply.getXMLBytes().length,
+                       reply.getXMLBytes().length > 10);
+        }        
+
+        // 3 fields - 2 null, should not return
+        {
+            drainAll();
+
+            String richQuery = "<?xml version=\"1.0\"?><audios xsi:noNamespaceSchemaLocation=\"http://www.limewire.com/schemas/audio.xsd\"><audio bitrate=\"16\" price=\"$19.99\" type=\"Audiobook\"></audio></audios>";
+
+            // send a query
+            QueryRequest query = QueryRequest.createQuery("$19.99 Audiobook 16", 
+                                                          richQuery);
+            ULTRAPEER_1.send(query);
+            ULTRAPEER_1.flush();
+
+            // wait for processing
+            Thread.sleep(750);
+
+            // confirm that we don't get a result
+            QueryReply reply = getFirstQueryReply(ULTRAPEER_1);
+            assertNull(reply);
+        }        
+
+        // 3 fields - 1 null, 1 mismatch, should not return
+        {
+            drainAll();
+
+            String richQuery = "<?xml version=\"1.0\"?><audios xsi:noNamespaceSchemaLocation=\"http://www.limewire.com/schemas/audio.xsd\"><audio bitrate=\"16\" price=\"$19.99\" artist=\"Tester\"></audio></audios>";
+
+            // send a query
+            QueryRequest query = QueryRequest.createQuery("$19.99 Tester 16", 
+                                                          richQuery);
+            ULTRAPEER_1.send(query);
+            ULTRAPEER_1.flush();
+
+            // wait for processing
+            Thread.sleep(750);
+
+            // confirm that we don't get a result
+            QueryReply reply = getFirstQueryReply(ULTRAPEER_1);
+            assertNull(reply);
+        }        
+
+
+    }
+    
 
 }

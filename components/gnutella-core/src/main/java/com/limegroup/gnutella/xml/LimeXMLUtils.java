@@ -56,6 +56,7 @@ public class LimeXMLUtils
     private static final int GZIP = 1;
     private static final int ZLIB = 2;
 
+    public  static final String AUDIO_BITRATE_ATTR = "audios__audio__bitrate__";
 
     /**
      * Returns an instance of InputSource after reading the file, and trimming
@@ -283,6 +284,7 @@ public class LimeXMLUtils
         int size = queryNameValues.size();
         int matchCount = 0; // number of matches
         int nullCount = 0; // number of fields in query not in replyDoc.
+        boolean matchedBitrate = false;
         for(Iterator i = queryNameValues.iterator(); i.hasNext(); ) {
             Map.Entry entry = (Map.Entry)i.next();
             String currFieldName = (String)entry.getKey();
@@ -300,8 +302,11 @@ public class LimeXMLUtils
                     // a straight equals comparison
                     double rDVD = (new Double(replyDocValue)).doubleValue();
                     double qVD  = (new Double(queryValue)).doubleValue();
-                    if (rDVD == qVD)
+                    if (rDVD == qVD) {
                         matchCount++;
+                        if (currFieldName.equals(AUDIO_BITRATE_ATTR))
+                            matchedBitrate = true;
+                    }
                     continue;
                 }
                 catch (NumberFormatException nfe) {
@@ -327,6 +332,14 @@ public class LimeXMLUtils
         double matchCountD = (double)matchCount;
         double nullCountD = (double)nullCount;
         if(size > 1){
+            if (matchedBitrate) {
+                // discount a bitrate match.  matching bitrate's shouldn't
+                // influence the logic because where size is 2, a matching
+                // bitrate will result in a lot of irrelevant results.
+                sizeD--;
+                matchCountD--;
+                matchCount--;
+            }
             if( ( (nullCountD+matchCountD)/sizeD ) < MATCHING_RATE)
                 return false;
             // ok, it passed rate test, now make sure it had SOME matches...
