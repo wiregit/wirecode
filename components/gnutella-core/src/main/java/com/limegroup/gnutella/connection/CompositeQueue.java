@@ -3,7 +3,7 @@ package com.limegroup.gnutella.connection;
 import com.limegroup.gnutella.messages.Message;
 
 /**
- * A queue of messages organized by type.  Used by ManagedConnection to
+ * A queue of messages organized by type.  Used by <tt>Connection</tt> to
  * implement the SACHRIFC flow control algorithm.  Delegates to multiple
  * MessageQueues, making sure that no one type of message dominates traffic.
  * Thread-safe.<p>
@@ -95,7 +95,7 @@ public final class CompositeQueue {
     private int _size = 0;
     
     /**
-     * Constant for the <tt>ManagedConnection</tt> instance that uses this 
+     * Constant for the <tt>Connection</tt> instance that uses this 
      * queue.
      */
     private final Connection CONNECTION;
@@ -119,7 +119,7 @@ public final class CompositeQueue {
     /** 
      * Constructs a new queue with the default message buffers. 
      * 
-     * @param mc the <tt>Connection</tt> associated with this queue
+     * @param conn the <tt>Connection</tt> associated with this queue
      */
     private CompositeQueue(Connection conn, Object queueLock) {
         CONNECTION = conn;
@@ -263,7 +263,7 @@ public final class CompositeQueue {
     
     /** 
      * Tests representation invariants.  For performance reasons, this is
-     * private and final.  Make protected if ManagedConnection is subclassed.
+     * private and final.  Make protected if Connection is subclassed.
      */
     private final void repOk() {
         /*
