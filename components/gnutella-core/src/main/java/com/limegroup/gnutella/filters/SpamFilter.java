@@ -53,6 +53,10 @@ public abstract class SpamFilter {
             buf.add(kf);
         }
 
+        //3. Spammy Replies
+        SpamReplyFilter spf=new SpamReplyFilter();
+        buf.add(spf);
+
         return compose(buf);
     }
 
