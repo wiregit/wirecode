@@ -49,7 +49,7 @@ public class LazyProperties extends Properties
      *  User-Agent.*/
     protected void addCommonProperties(Properties props) {
         props.put(ConnectionHandshakeHeaders.X_QUERY_ROUTING, 
-				  ConnectionManager.QUERY_ROUTING_VERSION);
+				  ConnectionHandshakeHeaders.QUERY_ROUTING_VERSION);
         props.put(ConnectionHandshakeHeaders.USER_AGENT,
 				  CommonUtils.getHttpServer());       
         props.put(ConnectionHandshakeHeaders.GGEP, "0.5");

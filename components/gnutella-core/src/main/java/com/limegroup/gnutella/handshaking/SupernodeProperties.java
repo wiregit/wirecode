@@ -16,7 +16,7 @@ public class SupernodeProperties extends LazyProperties
         put(ConnectionHandshakeHeaders.X_DEGREE, 
 			Integer.toString(ConnectionManager.MIN_CONNECTIONS_FOR_SUPERNODE));
 		put(ConnectionHandshakeHeaders.X_ULTRAPEER_QUERY_ROUTING, 
-			ConnectionManager.QUERY_ROUTING_VERSION);
+			ConnectionHandshakeHeaders.QUERY_ROUTING_VERSION);
         addCommonProperties(this);
     }
     
