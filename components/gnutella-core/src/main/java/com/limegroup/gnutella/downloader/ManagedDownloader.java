@@ -1477,8 +1477,11 @@ public class ManagedDownloader implements Downloader, Serializable {
                         setState(ITERATIVE_GUESSING);
                         triedLocatingSources = true;
                         boolean areThereNewResults = false;
-                        URN bestURN = getBestURN();
-                        for (Iterator i = guessLocs.iterator(); i.hasNext() ; ) {
+                        final URN bestURN = getBestURN();
+                        //TODO: should we increment a stat to get a sense of
+                        //how much this is happening?
+                        for (Iterator i = guessLocs.iterator(); 
+                             (bestURN != null) && i.hasNext() ; ) {
                             // send a guess query
                             GUESSEndpoint ep = (GUESSEndpoint) i.next();
                             OnDemandUnicaster.query(ep, bestURN);
