@@ -91,12 +91,8 @@ public class LimeXMLSchemaRepository
     /**
      * Returns all availble schemas.
      */
-    public List getAllAvailableSchemas() {
-        List list = new LinkedList();
-        synchronized(_uriSchemaMap) {
-            list.addAll(_uriSchemaMap.values());
-        }
-        return list;
+    public Collection getAvailableSchemas() {
+        return Collections.unmodifiableCollection(_uriSchemaMap.values());
     }
     
     /**

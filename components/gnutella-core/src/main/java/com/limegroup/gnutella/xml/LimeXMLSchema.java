@@ -329,7 +329,7 @@ public class LimeXMLSchema
      * Returns the display name of this schema.
      */
     public String getDescription() {
-        return getDisplayString(_schemaUri);
+        return getDisplayString(_schemaURI);
     }
 
     /**

@@ -12,7 +12,7 @@ public class MediaType implements Serializable {
     static final long serialVersionUID = 3999062781289258389L;
 
     private String schema;
-    private String description;
+    private String descriptionKey;
     private String[] extensions;
     
     // These values should match standard MIME content-type
@@ -41,10 +41,10 @@ public class MediaType implements Serializable {
      *  type.  Must be all lowercase.  If null, this matches
      *  any file.
      */
-    public MediaType(String schema, String description,
+    public MediaType(String schema, String descriptionKey,
                      String[] extensions) {
         this.schema = schema;
-        this.description = description;
+        this.descriptionKey = descriptionKey;
         this.extensions = extensions;
     }
         
@@ -83,8 +83,22 @@ public class MediaType implements Serializable {
      * Returns this' description key in localizable resources
      * (now distinct from the result of the toString method)
      */
-    public String getDescription() {
-        return description;
+    public String getDescriptionKey() {
+        return descriptionKey;
+    }
+    
+    /**
+     * Returns the MIME-Type of this.
+     */
+    public String getMimeType() {
+        return schema;
+    }
+    
+    /**
+     * Determines whether or not this is a default media type.
+     */
+    public boolean isDefault() {
+        return isDefaultType(schema);
     }
     
     // Do we need lazzy instanciation ?
@@ -98,7 +112,7 @@ public class MediaType implements Serializable {
     /**
      * Retrieves the media type for the specified schema's description.
      */
-    public static boolean getSchemaForDescription(String schemaDesc) {
+    public static MediaType getMediaTypeForSchema(String schema) {
         final MediaType[] types = getDefaultMediaTypes();
         for (int i = types.length; --i >= 0;)
             if (schema.equals(types[i].schema))
