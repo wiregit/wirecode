@@ -304,7 +304,10 @@ public class UploadManager implements BandwidthTracker {
                     // we do NOT throw the IOX again because the
                     // connection is still open.
                     uploader.setState(Uploader.MALFORMED_REQUEST);
-                }
+                }catch (FreeloaderUploadingException fue){
+                    // browser request
+				     uploader.setState(Uploader.FREELOADER);
+				}
                 
                 if(LOG.isDebugEnabled())
                     LOG.debug(uploader+" HTTPUploader created and read all headers");
