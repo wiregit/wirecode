@@ -123,9 +123,16 @@ public class ResumeDownloader extends ManagedDownloader
         //results should be sent if the name OR the hashes match.  But
         //ultrapeers may insist that all keywords are in the QRP tables.
         boolean isRequery=numRequeries!=0;
-		if(isRequery && (_hash != null)) {
-			return QueryRequest.createRequery(_hash);
-		}
-		return QueryRequest.createQuery(getFileName());
+		if(isRequery) {
+		    if (_hash != null)
+		        return QueryRequest.createRequery(_hash);
+		    else
+		        return QueryRequest.createRequery(getFileName());
+		} else {
+		    if (_hash != null)
+		        return QueryRequest.createQuery(_hash);
+		    else
+		        return QueryRequest.createQuery(getFileName());
+	    }
     }
 }
