@@ -152,7 +152,14 @@ public class ConnectionManager {
     /**
      * For authenticating users
      */
-    private Authenticator _authenticator;
+    private final Authenticator _authenticator;
+
+	/**
+	 * Variable for the number of times since we attempted to force ourselves 
+	 * to become an Ultrapeer that we were told to become leaves.  If this number
+	 * is too great, we give up and become a leaf.
+	 */
+	private volatile int _leafTries;
 
     /**
      * Constructs a ConnectionManager.  Must call initialize before using.
@@ -904,29 +911,11 @@ public class ConnectionManager {
      * (keep-alive) is non-zero and recontacts the pong server as needed.  
      */
     public synchronized void connect() {
-        //HACK. People used to complain to that the connect button wasn't
-        //working when the host catcher was empty and USE_QUICK_CONNECT=false.
-        //This is not a bug; LimeWire isn't supposed to connect to the pong
-        //server in this case.  But this IS admittedly confusing.  So we force a
-        //connection to the pong server in this case by disconnecting and
-        //temporarily setting USE_QUICK_CONNECT to true.  But we have to
-        //sleep(..) a little bit before setting USE_QUICK_CONNECT back to false
-        //to give the connection fetchers time to do their thing.  Ugh.  A
-        //Thread.yield() may work here too, but that's less dependable.  And I
-        //do not want to bother with wait/notify's just for this obscure case.
-        SettingsManager settings=SettingsManager.instance();
-        boolean useHack=
-            (!settings.getUseQuickConnect())
-                && _catcher.getNumHosts()==0;
-        if (useHack) {
-            disconnect();
-        }
 
         //Tell the HostCatcher it's ok to reconnect to router.limewire.com.
         _catcher.expire();
 
         //Ensure outgoing connections is positive.
-        //int outgoing=settings.getKeepAlive();
 		int outgoing = ConnectionSettings.KEEP_ALIVE.getValue();
         if (outgoing < 1) {
 			ConnectionSettings.KEEP_ALIVE.revertToDefault();
@@ -934,16 +923,6 @@ public class ConnectionManager {
         }
         //Actually notify the backend.		
         setKeepAlive(outgoing);
-
-        //int incoming=settings.getKeepAlive();
-        //setMaxIncomingConnections(incoming);
-
-        //See note above.
-        if (useHack) {
-            try {
-                Thread.sleep(100);
-            } catch (InterruptedException e) { }
-        }
     }
     
     /** 
@@ -1256,31 +1235,50 @@ public class ConnectionManager {
     }
    
     /** 
-     * Returns true if this can safely switch from supernode to leaf mode.
-     * Typically that means there are no leaf connections, but it could be
-     * stricter.  
+     * Returns true if this can safely switch from Ultrapeer to leaf mode.
+	 * Typically this means that we are an Ultrapeer and have no leaf
+	 * connections.
+	 *
+	 * @return <tt>true</tt> if we will allow ourselves to become a leaf,
+	 *  otherwise <tt>false</tt>
      */
-    public boolean allowClientMode() {
+    public boolean allowLeafDemotion() {
+		_leafTries++;
+
         //if is a supernode, and have other connections (client or ultrapeer),
         //or the supernode status is forced, dont change mode
-        int connections=getNumInitializedConnections()
-                       +getNumInitializedClientConnections();
+        int connections = getNumInitializedConnections()
+			+ getNumInitializedClientConnections();
         
         if (UltrapeerSettings.FORCE_ULTRAPEER_MODE.getValue() 
-            || (isSupernode() && connections > 0))
+            || (isSupernode() && connections > 0)) {
             return false;
-        else
-            return true;
+		} else if(SupernodeAssigner.isTooGoodToPassUp() && _leafTries < 10) {
+			return false;
+		}
+		return true;
     }
+
+
+	/**
+	 * Notifies the connection manager that it should attempt to become an
+	 * Ultrapeer.  If we already are an Ultrapeer, this will be ignored.
+	 */
+	public void attemptToBecomeAnUltrapeer() {
+		if(isSupernode()) return;
+		_leafTries = 0;
+		disconnect();
+		connect();
+	}
     
     /**
      * Updates the addresses in the hostCache by parsing the passed string
      * @param headers The connection headers received
      * @param connection The connection on which we received the headers
      */
-    private void updateHostCache(Properties headers, ManagedConnection
-        connection){
-        //get the supernodes, and add those to the host cache
+    private void updateHostCache(Properties headers, 								 
+								 ManagedConnection connection) {
+        //get the ultrapeers, and add those to the host cache
         updateHostCache(headers.getProperty(
                 ConnectionHandshakeHeaders.X_TRY_SUPERNODES),
                 connection, true);
