@@ -68,7 +68,7 @@ public class ManagedConnectionBufferTest extends BaseTestCase {
     }
 
     public void testSendFlush() 
-            throws IOException, BadPacketException {
+		throws IOException, BadPacketException {
         PingRequest pr=null;
         long start=0;
         long elapsed=0;
@@ -81,14 +81,15 @@ public class ManagedConnectionBufferTest extends BaseTestCase {
         pr=(PingRequest)in.receive();
         elapsed=System.currentTimeMillis()-start;
         assertEquals("unexpected number of sent messages", out.getNumMessagesSent(), 1);
-        assertEquals("bytes sent differs from total length", out.getBytesSent(), pr.getTotalLength());
+        assertEquals("bytes sent differs from total length", 
+					 out.getBytesSent(), pr.getTotalLength());
         assertTrue("Unreasonably long send time: "+elapsed, elapsed<500);
         assertEquals("hopped something other than 0", pr.getHops(), 0);
         assertEquals("unexpected ttl", pr.getTTL(), 4);
     }
 
     public void testReorderBuffer() 
-            throws IOException, BadPacketException {
+		throws IOException, BadPacketException {
         //This is the most important test in our suite. TODO: simplify this by
         //breaking it into subparts, e.g., to test that twice as many replies as
         //queries are sent, that replies are ordered by GUID volume, that
@@ -219,7 +220,8 @@ public class ManagedConnectionBufferTest extends BaseTestCase {
 
         m=in.receive(); //QRP patch1
         assertTrue("m not a patchtablemessage", m instanceof PatchTableMessage);
-        assertEquals("unexpedted patchtablemessage sequencenumber", ((PatchTableMessage)m).getSequenceNumber(), 1);
+        assertEquals("unexpedted patchtablemessage sequencenumber", 
+					 ((PatchTableMessage)m).getSequenceNumber(), 1);
 
 
         m=in.receive(); //query "test"/0
@@ -228,11 +230,12 @@ public class ManagedConnectionBufferTest extends BaseTestCase {
 
         m=in.receive(); //QRP patch2
         assertTrue("m not a patchtable message", m instanceof PatchTableMessage);
-        assertEquals("unexpected patchtablemessage sequencenumber", ((PatchTableMessage)m).getSequenceNumber(), 2);
+        assertEquals("unexpected patchtablemessage sequencenumber", 
+					 ((PatchTableMessage)m).getSequenceNumber(), 2);
     }
 
     public void testBufferTimeout() 
-            throws IOException, BadPacketException {
+		throws IOException, BadPacketException {
         assertTrue(ManagedConnection.QUEUE_TIME==1000);
         
         //Drop one message
@@ -336,11 +339,11 @@ public class ManagedConnectionBufferTest extends BaseTestCase {
     }
 
     public void testDropBuffer() 
-            throws IOException, BadPacketException {
+		throws IOException, BadPacketException {
         //Send tons of messages...but don't read them
         int total=500;
 
-        int initialDropped=out.getNumSentMessagesDropped();
+        int initialDropped = out.getNumSentMessagesDropped();
         int initialSent = out.getNumMessagesSent();
         long initialBytes = out.getBytesSent();
         
