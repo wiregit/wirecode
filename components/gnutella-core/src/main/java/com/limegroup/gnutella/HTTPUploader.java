@@ -323,16 +323,16 @@ public class HTTPUploader implements Runnable {
          * uploads, check to see that the index matches the
          * filename. */
         if (_filename==null) {
-            _filename=_fdesc._name;
+            _filename=_fdesc.getName();
         } else {
-           if (! (_fdesc._name).equals(_filename))  /* matches the name */
+           if (! (_fdesc.getName()).equals(_filename))  /* matches the name */
                throw new FileNotFoundException();
         }
 
-        _sizeOfFile = _fdesc._size;
+        _sizeOfFile = _fdesc.getSize();
 
         try {
-            String f = _fdesc._path;
+            String f = _fdesc.getPath();
             File myFile = new File(f);  /* _path is the full name */
             String foo = myFile.toString();
             _fis = new FileInputStream(myFile);

@@ -18,7 +18,6 @@ import com.limegroup.gnutella.gml.GMLDocument;
 import com.limegroup.gnutella.gml.GMLParseException;
 import com.limegroup.gnutella.gml.TemplateNotFoundException;
 import com.limegroup.gnutella.gml.repository.SimpleTemplateRepository;
-import com.limegroup.gnutella.util.StringUtils;
 
 public class FileManager{
     /** the total size of all files, in bytes.
@@ -31,7 +30,7 @@ public class FileManager{
      *  shared.  INVARIANT: for all i, f[i]==null, or f[i].index==i and
      *  f[i]._path is in the shared folder with the shareable extension.
      *  LOCKING: obtain this before modifying. */
-    private ArrayList /* of FileDesc */ _files;
+    private List /* of FileDesc */ _files;
     private String[] _extensions;
 
     private static FileManager _instance = new FileManager();
@@ -87,7 +86,6 @@ public class FileManager{
         return ret;
     }
 
-
     /**
      * Returns an array of all responses matching the given request, or null if
      * there are no responses.<p>
@@ -96,23 +94,16 @@ public class FileManager{
      * allocations in the common case of no matches.)
      */
     public Response[] query(QueryRequest request) {
-        ArrayList list = search(request.getTextQuery(), request.getRichQuery());
-        if (list==null)
+        List files = search(request.getTextQuery(), request.getRichQuery());
+        if (files==null)
             return null;
 
-        int size = list.size();
-        Response[] response = new Response[size];
-        FileDesc desc;
-        for(int j=0; j < size; j++) {
-            desc = (FileDesc)list.get(j);
-            String metadata;
-            if(desc._id3Tag != null)
-                metadata = desc._id3Tag.getGMLString();
-            else
-                metadata = "";
-            response[j] =
-                new Response(desc._index, desc._size, desc._name,
-                             metadata);
+        Response[] response = new Response[files.size()];
+        int j = 0;
+        for(Iterator iterFiles = files.iterator(); iterFiles.hasNext();  ) {
+            FileDesc desc = (FileDesc)iterFiles.next();
+            response[j++] = new Response(desc.getIndex(), desc.getSize(),
+                                         desc.getName(), desc.getMetadata());
         }
         return response;
     }
@@ -154,8 +145,7 @@ public class FileManager{
             int n = (int)myFile.length();       /* the list, and increments */
             _size += n;                         /* the appropriate info */
 
-            _files.add(new FileDesc(_files.size(), name, path,  n,
-                ID3Tag.read(myFile)));
+            _files.add(new FileDesc(_files.size(), myFile));
             _numFiles++;
         }
     }
@@ -207,13 +197,13 @@ public class FileManager{
             FileDesc fd=(FileDesc)_files.get(i);
             if (fd==null)
                 continue;
-            File candidate=new File(fd._path);
+            File candidate=new File(fd.getPath());
 
             //Aha, it's shared. Unshare it by nulling it out.
             if (file.equals(candidate)) {
                 _files.set(i,null);
                 _numFiles--;
-                _size-=fd._size;
+                _size-=fd.getSize();
                 return true;  //No more files in list will match this.
             }
         }
@@ -341,46 +331,40 @@ public class FileManager{
      * Returns a list of FileDesc matching q, or null if there are no matches.
      * Subclasses may override to provide different notions of matching.
      */
-    private synchronized ArrayList search(String textQuery, String richQuery) {
+    private synchronized List search(String textQuery, String richQuery) {
         //TODO2: ideally this wouldn't be synchronized, a la ConnectionManager.
         //Doing so would allow multiple queries to proceed in parallel.  But
         //then you need to make _files volatile and work on a local reference,
         //i.e., "_files=this._files"
 
-        // Don't allocate until needed
-        ArrayList response_list=null;
-
-        // Create a GML request document from the string
-        GMLDocument requestDocument = null;
-        if(!richQuery.equals(""))
-        {
-            try
-            {
-                requestDocument =
-                    SimpleTemplateRepository.instance().parseRequest(richQuery);
-            }
-            catch(TemplateNotFoundException e) {}
-            catch(GMLParseException e) {}
-
-            if(!ID3Tag.isMatchableGMLDocument(requestDocument))
-                requestDocument = null;
+        // Create a GML request document from richQuery, keeping it only
+        // if it is the kind of GML Document that we recognize
+        GMLDocument gmlDocument = null;
+        try {
+            gmlDocument =
+                SimpleTemplateRepository.instance().parseRequest(richQuery);
+            if(!FileDesc.isGMLDocumentUnderstandable(gmlDocument))
+                gmlDocument = null;
         }
+        catch(TemplateNotFoundException e) {}
+        catch(GMLParseException e) {}
 
-        for(int i=0; i < _files.size(); i++) {
-            FileDesc desc = (FileDesc)_files.get(i);
+        // Scan the files list looking for matches
+        ArrayList response_list=null; // Don't allocate until needed
+        for(Iterator iterFiles = _files.iterator(); iterFiles.hasNext();  ) {
+            FileDesc desc = (FileDesc)iterFiles.next();
             if (desc==null)
                 continue;
-            String file_name = desc._path;  //checking the path too..
-            // Match by file name or ID3 Tag
-            if ((StringUtils.contains(file_name, textQuery, true)) ||
-                ((desc._id3Tag != null) && (requestDocument != null) &&
-                 (desc._id3Tag.matchGMLDocument(requestDocument))))
-            {
-                if (response_list==null)
+            String file_name = desc.getPath();  //checking the path too..
+            if(desc.isTextQueryMatch(textQuery) ||
+               ((gmlDocument != null) &&
+                desc.isGMLDocumentMatch(gmlDocument))) {
+                if(response_list==null)
                     response_list=new ArrayList();
-                response_list.add(_files.get(i));
+                response_list.add(desc);
             }
         }
+
         return response_list;
     }
 

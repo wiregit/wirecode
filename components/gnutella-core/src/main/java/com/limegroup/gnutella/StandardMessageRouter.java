@@ -239,10 +239,10 @@ public class StandardMessageRouter
         String req_guid_hexstring =
             (new GUID(pushRequest.getClientGUID())).toString();
 
-        FileDesc desc;
+        // Verify the validity of the index
         try
         {
-            desc = FileManager.instance().get(index);
+            FileManager.instance().get(index);
         }
         catch (IndexOutOfBoundsException e)
         {
@@ -250,7 +250,6 @@ public class StandardMessageRouter
             //not found....but why bother?
             return;
         }
-        String file = desc._name;
 
         HTTPUploader up = new HTTPUploader(h, port, index, req_guid_hexstring,
                                            _callback);
