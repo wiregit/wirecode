@@ -98,8 +98,6 @@ import com.limegroup.gnutella.util.URLDecoder;
 public class UploadManager implements BandwidthTracker {
     
     private static final Log LOG = LogFactory.getLog(UploadManager.class);
-    public static final String FV_PASS =
-        new String(""+(new Random()).nextInt(999999999));
 
     /** An enumeration of return values for queue checking. */
     private final int BYPASS_QUEUE = -1;
@@ -475,8 +473,7 @@ public class UploadManager implements BandwidthTracker {
      * those guys don't hammer.
      */
     private boolean shouldBypassQueue(HTTPUploader uploader) {
-        return (uploader.getState() != Uploader.CONNECTING &&
-                uploader.getState() != Uploader.FILE_VIEW) ||
+        return uploader.getState() != Uploader.CONNECTING ||
                uploader.getMethod() == HTTPRequestMethod.HEAD ||
                uploader.isNetworkShare();
     }
@@ -546,12 +543,6 @@ public class UploadManager implements BandwidthTracker {
         switch(uploader.getIndex()) {
         case BROWSE_HOST_FILE_INDEX:
             uploader.setState(Uploader.BROWSE_HOST);
-            return;
-        case FILE_VIEW_FILE_INDEX:
-            uploader.setState(Uploader.FILE_VIEW);
-            return;
-        case RESOURCE_INDEX:
-            uploader.setState(Uploader.RESOURCE_GET);
             return;
         case PUSH_PROXY_FILE_INDEX:
             uploader.setState(Uploader.PUSH_PROXY);
@@ -947,9 +938,6 @@ public class UploadManager implements BandwidthTracker {
         	return BANNED;
         }
         
-
-        // if this is a file view request and it is not hammering it is cool
-        if (uploader.getState() == Uploader.FILE_VIEW) return BYPASS_QUEUE;
 
         boolean isGreedy = rqc.isGreedy(uploader.getFileDesc().getSHA1Urn());
         int size = _queuedUploads.size();
@@ -1410,14 +1398,6 @@ public class UploadManager implements BandwidthTracker {
 				} catch(IllegalArgumentException e) {
 					fileName = requestLine.substring( (d+1), f);
 				}
-                // if this is a request from a file-view, trim the fileName
-                // and remember if it had the correct password
-                final String password = FV_PASS+"/";
-                if (fileName.startsWith(password)) {
-                    fileName = fileName.substring(password.length(),
-                                                  fileName.length());
-                    hadPassword = true;
-                }
                 UploadStat.TRADITIONAL_GET.incrementStat();				
             }
             //check if the protocol is HTTP1.1.
