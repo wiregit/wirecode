@@ -1825,6 +1825,8 @@ public abstract class MessageRouter {
         public boolean equals(Object other) {
             if (other instanceof GUID)
                 return _guid.equals(other);
+            else if (other instanceof GUIDBundle) 
+                return _guid.equals(((GUIDBundle) other)._guid);
             return false;
         }
 
