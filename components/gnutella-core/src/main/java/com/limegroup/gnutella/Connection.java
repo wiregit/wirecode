@@ -565,8 +565,7 @@ public class Connection {
 				RESPONSE_HEADERS.respond(theirResponse, true);
 
             Assert.that(ourResponse != null, "null ourResponse");
-            writeLine(GNUTELLA_06 + " " 
-                + ourResponse.getStatusLine() + CRLF);
+            writeLine(GNUTELLA_06 + " " + ourResponse.getStatusLine() + CRLF);
             sendHeaders(ourResponse.props());
 
             code = ourResponse.getStatusCode();

@@ -189,6 +189,7 @@ public final class UDPService implements Runnable {
                     // we do things the old way temporarily
                     InputStream in = new ByteArrayInputStream(data);
                     Message message = Message.read(in, Message.N_UDP);
+                    if(message == null) continue;                    
                     if (!isGUESSCapable()) {
                         if (message instanceof PingRequest) {
                             GUID guidReceived = new GUID(message.getGUID());
@@ -198,7 +199,6 @@ public final class UDPService implements Runnable {
                         else
                             _acceptedSolicitedIncoming = true;
                     }
-                    if(message == null) continue;
                     router.handleUDPMessage(message, datagram);
                 }
                 catch (IOException e) {

@@ -224,9 +224,13 @@ public final class LimeXMLDocumentHelper{
                 return;//dont modify the string in the hashmap. just return
             }
             int begin = str.indexOf("<");//index of header
+            Assert.that( begin != -1, str);
             begin = str.indexOf("<",begin+1);//index of outer(plural) tag-close
+            Assert.that( begin != -1, str);
             begin = str.indexOf("<",begin+1);//index of begining of current tag
+            Assert.that( begin != -1, str);            
             int end = str.lastIndexOf("<");
+            Assert.that( end != -1, str);
             str = str.substring(begin,end);
             //2.insert the index 
             int p = str.indexOf(">");

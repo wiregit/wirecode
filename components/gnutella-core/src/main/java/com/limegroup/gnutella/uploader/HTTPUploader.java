@@ -446,6 +446,9 @@ public final class HTTPUploader implements Uploader {
      * downloading implementations on their side.
      */
     private boolean isValidQueueingAgent() {
+        if( _userAgent == null )
+            return true;
+
         return !_userAgent.startsWith("Morpheus 3.0.2");
     }
     
