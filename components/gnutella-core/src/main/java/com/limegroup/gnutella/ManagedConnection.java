@@ -54,7 +54,7 @@ import com.limegroup.gnutella.updates.*;
  * This class implements ReplyHandler to route pongs and query replies that
  * originated from it.<p> 
  */
-public final class ManagedConnection extends Connection 
+public class ManagedConnection extends Connection 
 	implements ReplyHandler {
 
     /** 
