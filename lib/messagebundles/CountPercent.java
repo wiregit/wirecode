@@ -22,7 +22,7 @@ public class CountPercent {
 "// Protected email script by Joe Maller JavaScripts available at http://www.joemaller.com\n" +
 "// This script is free to use and distribute but please credit me and/or link to my site.\n" + 
 "e_mA_iL_E = ('limewire' + \"&#46;\" + 'org'); e_mA_iL_E = ('translate' + \"&#64;\" + e_mA_iL_E);\n" +
-"document.write('<a href=\"mai' + \"lto:\" + e_mA_iL_E + '\">' + e_ma_ilE + '</a>');\n" +
+"document.write('<a href=\"mai' + \"lto:\" + e_mA_iL_E + '\">' + e_mA_iL_E + '</a>');\n" +
 "//--></script><noscript><a href=\"#\">[Email address protected by JavaScript:\n" +
 "please enable JavaScript to contact me]</a></noscript></b>";
     
