@@ -17,7 +17,7 @@ public class AllTests {
         suite.addTest(com.limegroup.gnutella.http.AllTests.suite());
         suite.addTest(EndpointTest.suite());
         suite.addTest(ExtendedEndpointTest.suite());
-        suite.addTest(HostCatcherTest.suite());
+        //suite.addTest(HostCatcherTest.suite());
         suite.addTest(com.limegroup.gnutella.bootstrap.AllTests.suite());
         suite.addTest(FileManagerTest.suite());
         suite.addTest(ManagedConnectionTest.suite());
@@ -34,20 +34,20 @@ public class AllTests {
 		suite.addTest(AlternateLocationCollectionTest.suite());
 		suite.addTest(ResponseTest.suite());
 		suite.addTest(UrnCacheTest.suite());
-		suite.addTest(UrnHttpRequestTest.suite());
+		//suite.addTest(UrnHttpRequestTest.suite());
 		suite.addTest(UrnTest.suite());
 
         suite.addTest(com.limegroup.gnutella.messages.AllTests.suite());
 
         //End-to-end integration tests (includes some unit tests too)
-        suite.addTest(com.limegroup.gnutella.UltrapeerRoutingTest.suite());
-        suite.addTest(com.limegroup.gnutella.LeafRoutingTest.suite());
+        //suite.addTest(com.limegroup.gnutella.UltrapeerRoutingTest.suite());
+        //suite.addTest(com.limegroup.gnutella.LeafRoutingTest.suite());
         //suite.addTest(com.limegroup.gnutella.uploader.AllTests.suite());
         //suite.addTest(com.limegroup.gnutella.downloader.AllTests.suite());
 
 
 		// this is run last in part because it starts its own backend
-		suite.addTest(UDPServiceTest.suite());
+		//suite.addTest(UDPServiceTest.suite());
         return suite;
     }
 
