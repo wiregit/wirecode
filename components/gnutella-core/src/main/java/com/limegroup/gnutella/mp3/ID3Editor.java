@@ -264,7 +264,7 @@ public class ID3Editor {
     private boolean firstBetter(String first, String second) {
         if(first == null && second == null)
             return true;
-        if(first.equals(second))
+        if((first != null) && first.equals(second))
             return true;
         if(first != null && !"".equals(first))
             return true;
