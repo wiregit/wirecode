@@ -241,7 +241,13 @@ public class HTTPDownloader implements Runnable {
 	_downloadDir = set.getSaveDirectory();
 	
 	String pathname = _downloadDir + _filename;
-	
+	//TODO1: if  _filename has ".." or "/" in it, this
+	//is a grave security flaw!
+
+	//TODO1: if pathname exists, we probably don't want to overwrite.
+	//Alternatives: ask user, write to temporary file.  Exception:
+	//if resuming a partial download.
+
 	try {
 	    _fos = new FileOutputStream(pathname);
 	}
@@ -260,6 +266,10 @@ public class HTTPDownloader implements Runnable {
 	
 	byte[] buf = new byte[1024]; 
 
+	//TODO3: Note we ignore the file length.  In the rare case that the
+	//remote host doesn't close the connection, this will loop forever.
+	//However, this may be the sensible thing to do since many clients may
+	//get Content-length wrong.
 	while (true) {
 	    
 	    try {
@@ -313,12 +323,20 @@ public class HTTPDownloader implements Runnable {
 
 	int flag = 0;
 
+	//TODO1: what if Content-length is not the last header?
+	//Better to look for the blank line after headers.
 	while (true) {		
 		str = _br.readLine();
-		System.out.println(str);
+		//System.out.println(str);
 
 	    if (str.indexOf("Content-length:") != -1) {
-		String sub = str.substring(15);
+		String sub;
+		try {
+		    sub=str.substring(15);
+		} catch (ArrayIndexOutOfBoundsException e) {
+		    _state = ERROR;
+		    return;
+		}
 
 		sub.trim();
 		
