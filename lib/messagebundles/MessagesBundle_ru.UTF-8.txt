@@ -1,5 +1,5 @@
 ﻿################################################################################
-# Messages Bundle for LimeWire 4.2.4
+# Messages Bundle for LimeWire 4.2.6
 # Specialization for: Russian - Russia
 # Translated by Eugene Romanenko <eros2@os2.ru>
 ################################################################################
@@ -67,7 +67,7 @@ GENERAL_DEFAULT_BUTTON_LABEL=Умолчания
 #### GENERAL_BROWSE_BUTTON_LABEL=Browse...
 GENERAL_BROWSE_BUTTON_LABEL=Просмотр...
 #### GENERAL_BROWSE_HOST_LABEL=Browse Host
-GENERAL_BROWSE_HOST_LABEL=Просмотреть хост
+GENERAL_BROWSE_HOST_LABEL=Просмотреть хоста
 #### GENERAL_BROWSE_HOST_TIP=View All Files on the Selected Computer
 GENERAL_BROWSE_HOST_TIP=Просмотреть все файлы на выбранном компьютере
 
@@ -554,7 +554,7 @@ SEARCH_WISHLIST_BUTTON_LABEL=Добавить в желаемое
 #### SEARCH_WISHLIST_BUTTON_TIP=Spawn a "LimeWire Robot" to Look for the Content
 SEARCH_WISHLIST_BUTTON_TIP=Запустить "робота LimeWire" для поиска желаемого контента
 #### SEARCH_BROWSE_HOST_BUTTON_LABEL=Browse Host
-SEARCH_BROWSE_HOST_BUTTON_LABEL=Просмотреть хост
+SEARCH_BROWSE_HOST_BUTTON_LABEL=Просмотреть хоста
 #### SEARCH_BROWSE_HOST_BUTTON_TIP=View All Files on Selected Computer
 SEARCH_BROWSE_HOST_BUTTON_TIP=Просмотреть все файлы на выбранном компьютере
 #### SEARCH_CHAT_BUTTON_LABEL=Chat...
@@ -580,7 +580,7 @@ SEARCH_PUBLIC_LAUNCH_STRING=Выполнить действие
 #### SEARCH_PUBLIC_STOP_STRING=Stop Search
 SEARCH_PUBLIC_STOP_STRING=Остановить поиск
 #### SEARCH_PUBLIC_BROWSE_STRING=Browse Host
-SEARCH_PUBLIC_BROWSE_STRING=Просмотреть хост
+SEARCH_PUBLIC_BROWSE_STRING=Просмотреть хоста
 #### SEARCH_PUBLIC_CHAT_STRING=Chat With Host
 SEARCH_PUBLIC_CHAT_STRING=Чат с хостом
 #### SEARCH_PUBLIC_BITZI_LOOKUP_STRING=Bitzi Web Lookup...
@@ -855,7 +855,7 @@ DOWNLOAD_POPUP_MENU_LAUNCH=Просмотр файла
 #### DOWNLOAD_POPUP_MENU_CHAT=Chat with Host
 DOWNLOAD_POPUP_MENU_CHAT=Чат с хостом
 #### DOWNLOAD_POPUP_MENU_BROWSE=Browse Host
-DOWNLOAD_POPUP_MENU_BROWSE=Просмотр хоста
+DOWNLOAD_POPUP_MENU_BROWSE=Просмотреть хоста
 #### DOWNLOAD_PRIORITY_COLUMN=Priority
 DOWNLOAD_PRIORITY_COLUMN=Приоритет
 #### DOWNLOAD_NAME_COLUMN=Name
@@ -1136,9 +1136,9 @@ CV_STRING_ULTRAPEER=[Ultrapeer]
 #### CV_TABLE_STRING_KBPSEC=KB/s
 CV_TABLE_STRING_KBPSEC=KB/сек
 #### CV_ADD_HOST_LABEL=Host:
-#? CV_ADD_HOST_LABEL=
+CV_ADD_HOST_LABEL=Хост:
 #### CV_ADD_PORT_LABEL=Port:
-#? CV_ADD_PORT_LABEL=
+CV_ADD_PORT_LABEL=Порт:
 #### CV_ADD_DIALOG_TITLE=Add Gnutella Connection
 #? CV_ADD_DIALOG_TITLE=
 
@@ -1432,7 +1432,7 @@ LIST_EDITOR_ADD_BUTTON=Добавить...
 #### LIST_EDITOR_ADD_BUTTON_2=Add
 LIST_EDITOR_ADD_BUTTON_2=Добавить
 #### LIST_EDITOR_BROWSE_BUTTON=Browse...
-LIST_EDITOR_BROWSE_BUTTON=Просмотр...
+LIST_EDITOR_BROWSE_BUTTON=Просмотреть...
 #### LIST_EDITOR_REMOVE_BUTTON=Remove
 LIST_EDITOR_REMOVE_BUTTON=Удалить
 #### LIST_EDITOR_ADD_BUTTON_TIP=Add New List Item
@@ -1839,7 +1839,7 @@ ERROR_SAVE_META_BAD=Указан неверный формат. Изменени
 #### ERROR_REMOVE_LAST_COL=You cannot turn off all columns.
 ERROR_REMOVE_LAST_COL=Нельзя убрать все колонки.
 #### ERROR_BROWSE_HOST_FAILED_BEGIN_KEY=Could not browse host
-ERROR_BROWSE_HOST_FAILED_BEGIN_KEY=Не могу просмотреть хост
+ERROR_BROWSE_HOST_FAILED_BEGIN_KEY=Не могу просмотреть хоста
 #### ERROR_BROWSE_HOST_FAILED_END_KEY=.
 ERROR_BROWSE_HOST_FAILED_END_KEY=.
 #### ERROR_APPLYING_INVALID_THEME_FILE=The theme you are applying is invalid. LimeWire will revert to the default theme.
@@ -2511,7 +2511,7 @@ OPTIONS_PORT_BOX_LABEL=Порт для ожидания входящих сое�
 #### OPTIONS_FORCE_IP_CHECK_BOX_LABEL=Force IP
 #? OPTIONS_FORCE_IP_CHECK_BOX_LABEL=
 #### OPTIONS_FORCE_IP_PORT_LABEL=Port:
-#? OPTIONS_FORCE_IP_PORT_LABEL=
+OPTIONS_FORCE_IP_PORT_LABEL=Порт:
 
 ################################################################################
 # Key/Value pairs for the options for setting the connection strings
@@ -2536,11 +2536,11 @@ OPTIONS_PORT_BOX_LABEL=Порт для ожидания входящих сое�
 #### OPTIONS_USE_PRIVATE_NET_CHECK_BOX_LABEL=Connect to a Private Network?
 #? OPTIONS_USE_PRIVATE_NET_CHECK_BOX_LABEL=
 #### OPTIONS_PRIVATE_CACHE_IP_LABEL=Hostname
-#? OPTIONS_PRIVATE_CACHE_IP_LABEL=
+OPTIONS_PRIVATE_CACHE_IP_LABEL=Хостимя
 #### OPTIONS_PRIVATE_CACHE_PORT_LABEL=Port
-#? OPTIONS_PRIVATE_CACHE_PORT_LABEL=
+OPTIONS_PRIVATE_CACHE_PORT_LABEL=Порт
 #### OPTIONS_PRIVATE_CACHE_NAME_LABEL=Name
-#? OPTIONS_PRIVATE_CACHE_NAME_LABEL=
+OPTIONS_PRIVATE_CACHE_NAME_LABEL=Имя
 
 ################################################################################
 # Key/Value pairs for the options for automatically clearing uploads
@@ -2563,11 +2563,11 @@ OPTIONS_PROXY_LABEL=Настройка прокси для LimeWire.
 #### OPTIONS_PROXY_NO_PROXY_BUTTON_LABEL=No Proxy
 OPTIONS_PROXY_NO_PROXY_BUTTON_LABEL=Без прокси
 #### OPTIONS_PROXY_SOCKS4_BUTTON_LABEL=Socks v4
-#? OPTIONS_PROXY_SOCKS4_BUTTON_LABEL=
+OPTIONS_PROXY_SOCKS4_BUTTON_LABEL=Socks v4
 #### OPTIONS_PROXY_SOCKS5_BUTTON_LABEL=Socks v5
-#? OPTIONS_PROXY_SOCKS5_BUTTON_LABEL=
+OPTIONS_PROXY_SOCKS5_BUTTON_LABEL=Socks v5
 #### OPTIONS_PROXY_HTTP_BUTTON_LABEL=HTTP
-#? OPTIONS_PROXY_HTTP_BUTTON_LABEL=
+OPTIONS_PROXY_HTTP_BUTTON_LABEL=Прокси HTTP
 #### OPTIONS_PROXY_HOST_LABEL=Proxy
 OPTIONS_PROXY_HOST_LABEL=Хост
 #### OPTIONS_PROXY_PORT_LABEL=Port
@@ -2605,7 +2605,7 @@ STATS_ADVANCED_CHECK_BOX_LABEL=Показывать расширенную ст�
 
 # Advanced Gnutella messages panes
 #### GNUTELLA_MESSAGES=Gnutella
-#? GNUTELLA_MESSAGES=
+GNUTELLA_MESSAGES=Gnutella
 
 ###################################################################
 # Key/value pairs for network state statistics panel
@@ -3825,7 +3825,7 @@ STATS_TOTAL_DOWNSTREAM_BANDWIDTH_LABEL=Информация об входяще�
 #### UPLOAD_STAT_PUSH_PROXY_FAILED=Failed Push Proxy
 #? UPLOAD_STAT_PUSH_PROXY_FAILED=
 #### UPLOAD_STAT_BROWSE_HOST=Browse Host
-UPLOAD_STAT_BROWSE_HOST=Просмотреть хост
+UPLOAD_STAT_BROWSE_HOST=Просмотреть хоста
 #### UPLOAD_STAT_PUSH_PROXY=Push Proxy
 #? UPLOAD_STAT_PUSH_PROXY=
 #### UPLOAD_STAT_UPDATE_FILE=Update File
