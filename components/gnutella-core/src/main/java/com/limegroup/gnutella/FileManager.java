@@ -701,9 +701,26 @@ public class FileManager {
             return false;
         
         //Calculate hash OUTSIDE of lock.
-        Set urns=FileDesc.calculateAndCacheURN(file);  
+        
+        Set urns = null;
+        try {
+            urns = FileDesc.calculateAndCacheURN(file);  
+        } catch(IOException e) {
+            // there was an IO error calculating the hash, so we can't
+            // add the file
+            return false;
+        } catch(InterruptedException e) {
+            // the hash calculation was interrupted, so we can't add
+            // the file -- should get reloaded
+            return false;
+        }
         if (loadThreadInterrupted()) 
             return false;
+        
+        if(urns.size() == 0) {
+            // the URN was not calculated correctly for some reason
+            return false;
+        }
 
         synchronized (this) {
             _size += fileLength;
