@@ -23,6 +23,7 @@ public class InstantMessenger implements Chatter {
 	private String _message = "";
 	private ActivityCallback _activityCallback;
 	private ChatManager  _manager;
+	private boolean _outgoing = false;
 
 	/** constructor for an incoming chat request */
 	public InstantMessenger(Socket socket, ChatManager manager, 
@@ -47,6 +48,12 @@ public class InstantMessenger implements Chatter {
 		_port = port;
 		_manager = manager;
 		_activityCallback = callback;
+		_outgoing = true;
+	}
+
+	/** this is only called for outgoing connections, so that the
+		creation of the socket will be in the thread */
+	private void OutgoingInitializer() throws IOException  {
 		_socket =  new Socket(_host, _port);
 		OutputStream os = _socket.getOutputStream();
 		OutputStreamWriter osw = new OutputStreamWriter(os);
@@ -76,6 +83,8 @@ public class InstantMessenger implements Chatter {
 			_socket.close();
 		} catch (IOException e) {
 			
+		} catch (NullPointerException e) {
+
 		}
 	}
 
@@ -142,6 +151,15 @@ public class InstantMessenger implements Chatter {
 		}
 
 		public void run() {
+
+			if (_outgoing) {
+				try {
+					OutgoingInitializer();
+				} catch (IOException e) {
+					_activityCallback.chatUnavailable(_chatter);
+					return;
+				}
+			}
 			while (true){
 				String str;
 				try {
