@@ -86,22 +86,8 @@ public final class AlternateLocation implements HTTPHeaderValue, Comparable {
 		if(location == null || location.equals(""))
 			throw new IOException("null or empty location");
 
-		URL url = AlternateLocation.createUrl(location);        
-		if(url == null)
-			throw new IOException("could not parse url for alt loc: "+location);
-        if(!NetworkUtils.isValidPort(url.getPort()))
-            throw new IOException("invalid port");
-        if(NetworkUtils.isPrivateAddress(url.getHost()))
-            throw new IOException("invalid address");
-
-		URN sha1 = null;
-		try {
-			sha1 = URN.createSHA1UrnFromURL(url);
-		} catch(IOException e) {
-			// don't accept if there's no SHA1, as SHA1 is all we currently
-			// understand
-			throw new IOException("no SHA1 in url: "+url);
-		}
+		URL url = AlternateLocation.createUrl(location);
+		URN sha1 = URN.createSHA1UrnFromURL(url);
 		return new AlternateLocation(url, sha1);
 	}
 
@@ -124,24 +110,11 @@ public final class AlternateLocation implements HTTPHeaderValue, Comparable {
 		if(url == null) 
 			throw new NullPointerException("cannot accept null URL");
 
-
-		if(!NetworkUtils.isValidPort(url.getPort()))
-			throw new IOException("invalid port");
-        if(NetworkUtils.isPrivateAddress(url.getHost()))
-            throw new IOException("invalid address: " + url.getHost());
-
 		// create a new URL instance from the data for the given url
 		// and the urn
 		URL tempUrl = new URL(url.getProtocol(), url.getHost(), url.getPort(),
 							  url.getFile());
-		URN sha1 = null;
-		try {
-			sha1 = URN.createSHA1UrnFromURL(tempUrl);
-		} catch(IOException e) {
-			// don't accept if there's no SHA1, as SHA1 is all we currently
-			// understand
-			throw new IOException("no SHA1 in url: "+url);
-		}
+		URN sha1 = URN.createSHA1UrnFromURL(tempUrl);
 		return new AlternateLocation(tempUrl, sha1);
 	}
 
@@ -160,18 +133,11 @@ public final class AlternateLocation implements HTTPHeaderValue, Comparable {
 	 */
 	public static AlternateLocation create(final RemoteFileDesc rfd) 
 		                                                    throws IOException {
-		if(rfd == null) {
+		if(rfd == null)
 			throw new NullPointerException("cannot accept null RFD");
-		}
 
 		URN urn = rfd.getSHA1Urn();
-		if(urn == null)
-			throw new IOException("no SHA1 in RFD");
 		int port = rfd.getPort();
-		if(!NetworkUtils.isValidPort(port))
-			throw new IOException("invalid port");
-        if(NetworkUtils.isPrivateAddress(rfd.getHost()))
-            throw new IOException("rfd invalid address");
 
 		URL url = new URL("http", rfd.getHost(), port,						  
 						  HTTPConstants.URI_RES_N2R + urn.httpStringValue());
@@ -190,18 +156,16 @@ public final class AlternateLocation implements HTTPHeaderValue, Comparable {
         try {
             int port = RouterService.getPort();
             String addr = NetworkUtils.ip2string(RouterService.getAddress());
-            if(!NetworkUtils.isValidPort(port))
-                throw new IllegalArgumentException("invalid port: " + port);
-            if(!NetworkUtils.isValidAddress(addr))
-                throw new IllegalArgumentException("invalid addr: " + addr);
-            if(NetworkUtils.isPrivateAddress(addr))
-                throw new IllegalArgumentException("invalid address: " + addr);
 			url = new URL("http", addr, port,
                           HTTPConstants.URI_RES_N2R + urn.httpStringValue());
         } catch(MalformedURLException e) {
             ErrorService.error(e);
         }
-		return new AlternateLocation(url, urn);
+        try {
+		    return new AlternateLocation(url, urn);
+        } catch(IOException ioe) {
+            throw new IllegalArgumentException(ioe.getMessage());
+        }
 	}
 
 	/**
@@ -212,7 +176,17 @@ public final class AlternateLocation implements HTTPHeaderValue, Comparable {
 	 * @param date the <tt>Date</tt> timestamp for the 
 	 *  <tt>AlternateLocation</tt>
 	 */
-	private AlternateLocation(final URL url, final URN sha1) {
+	private AlternateLocation(final URL url, final URN sha1)
+	  throws IOException {
+		if(!NetworkUtils.isValidPort(url.getPort()))
+			throw new IOException("invalid port");
+        if(!NetworkUtils.isValidAddress(url.getHost()))
+            throw new IOException("invalid address");			
+        if(NetworkUtils.isPrivateAddress(url.getHost()))
+            throw new IOException("invalid address: " + url.getHost());
+        if(sha1 == null)
+            throw new IOException("invalid/null sha1");	    
+	    
 		this.URL       = url;
 		this.SHA1_URN  = sha1;
         _count = 1;
@@ -314,7 +288,13 @@ public final class AlternateLocation implements HTTPHeaderValue, Comparable {
      * could return null
      */ 
     public synchronized AlternateLocation createClone() {
-        AlternateLocation ret = new AlternateLocation(this.URL, this.SHA1_URN);
+        AlternateLocation ret = null;
+        try {
+            ret = new AlternateLocation(this.URL, this.SHA1_URN);
+        } catch(IOException ioe) {
+            ErrorService.error(ioe);
+            return null;
+        }
         ret._demoted = this._demoted;
         ret._count = this._count;
         return ret;
