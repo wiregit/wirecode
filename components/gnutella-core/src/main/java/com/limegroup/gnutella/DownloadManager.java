@@ -5,12 +5,17 @@ import com.limegroup.gnutella.search.HostData;
 import com.limegroup.gnutella.downloader.*;
 import com.limegroup.gnutella.settings.*;
 import com.limegroup.gnutella.util.CommonUtils;
+import com.limegroup.gnutella.http.HttpClientManager;
 import com.sun.java.util.collections.*;
 import java.io.*;
 import java.net.*;
 import com.limegroup.gnutella.util.URLDecoder;
 import com.limegroup.gnutella.util.NetworkUtils;
 import com.bitzi.util.Base32;
+import org.apache.commons.httpclient.HttpMethod;
+import org.apache.commons.httpclient.methods.HeadMethod;
+import org.apache.commons.httpclient.HttpClient;
+
 
 
 /** 
@@ -862,22 +867,22 @@ public class DownloadManager implements BandwidthTracker {
             Iterator iter = proxies.iterator();
             while(iter.hasNext() && !requestSuccessful) {
                 PushProxyInterface ppi = (PushProxyInterface)iter.next();
+                String ppIp = ppi.getPushProxyAddress().getHostName();
+                int ppPort = ppi.getPushProxyPort();
+                String connectTo = 
+                    "http://" + ppIp + ":" + ppPort + requestString;
+                HeadMethod head = new HeadMethod(connectTo);
+                head.addRequestHeader("Cache-Control", "no-cache");
+                head.addRequestHeader(nodeString, nodeValue);
+                HttpClient client = HttpClientManager.getNewClient();
                 try {
-                    String ppIp = ppi.getPushProxyAddress().getHostName();
-                    int ppPort = ppi.getPushProxyPort();
-                    URL url = new URL("http",ppIp, ppPort, requestString);
-                    HttpURLConnection connection = 
-                    (HttpURLConnection) url.openConnection();
-                    connection.setUseCaches(false);
-                    connection.setRequestProperty(nodeString, nodeValue);
-                    requestSuccessful = (connection.getResponseCode() == 202);
-                    connection.disconnect();
-                }
-                catch (MalformedURLException url) {
-                    ErrorService.error(url);
-                }
-                catch (IOException ioe) {
-                }
+                    client.executeMethod(head);
+                    requestSuccessful = (head.getStatusCode() == 202);
+                } catch (IOException ioe) {
+                } finally {
+                    if( head != null )
+                        head.releaseConnection();
+                }   
             }
 
             if (requestSuccessful)
