@@ -141,10 +141,10 @@ public final class ReceivedMessageStatHandler extends AbstractMessageStatHandler
 	 * over TCP.
 	 */
 	public static final ReceivedMessageStatHandler TCP_ROUTE_TABLE_MESSAGES = 
-	    new ReceivedMessageStatHandler(ReceivedMessageStat.UDP_FILTERED_MESSAGES,
-									   ReceivedMessageStatBytes.UDP_FILTERED_MESSAGES,
-									   LimeReceivedMessageStat.UDP_FILTERED_MESSAGES,
-									   LimeReceivedMessageStatBytes.UDP_FILTERED_MESSAGES,
+	    new ReceivedMessageStatHandler(ReceivedMessageStat.TCP_ROUTE_TABLE_MESSAGES, 
+									   ReceivedMessageStatBytes.TCP_ROUTE_TABLE_MESSAGES,
+									   LimeReceivedMessageStat.TCP_ROUTE_TABLE_MESSAGES, 
+									   LimeReceivedMessageStatBytes.TCP_ROUTE_TABLE_MESSAGES,
 									   "RECEIVED_TCP_ROUTE_TABLE_MESSAGES");
 	/**
 	 * <tt>ReceivedMessageStatHandler</tt> for Gnutella filtered messages received 
