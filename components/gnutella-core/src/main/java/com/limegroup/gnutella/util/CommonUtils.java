@@ -800,63 +800,7 @@ public final class CommonUtils {
             }
         }
         _xmlFilesMoved = true;
-    }    
-	
-
-	/**
-	 * Returns whether or not the QuickTime libraries are available
-	 * on the user's system.
-	 *
-	 * @return <tt>true</tt> if the QuickTime libraries are available,
-	 *  <tt>false</tt> otherwise
-	 */
-	public static boolean isQuickTimeAvailable() {
-		return CommonUtils.isMacOSX();
-	}
-	
-	/**
-	 * Returns whether or not the specified file extension is supported in 
-	 * our implementation of QuickTime.  So, this will only return 
-	 * <tt>true</tt> if both QuickTime supports the extension in general, 
-	 * and if our QuickTime implementation supports the extension.
-	 *
-	 * @param ext the extension to check for QuickTime support
-	 * @return <tt>true</tt> if QuickTime supports the file type and our 
-	 *  implementation of QuickTime supports that part of QuickTime's 
-	 *  functionality, <tt>false</tt> otherwise
-	 */
-	public static boolean isQuickTimeSupportedFormat(File file) {
-		String fileName = file.getName();
-		if(fileName.equals("") || fileName.length()<4) {
-			return false;
-		}
-		
-		int i = fileName.lastIndexOf(".");
-		if(i == -1 || i==fileName.length()) return false;
-		
-		String ext = fileName.substring(i+1).toLowerCase(Locale.US);
-		String[] supportedFormats = {
-		    "mp3", "wav", "au", "aif", "aiff"};
-		
-		for(int r=0; r<supportedFormats.length; r++) {
-			if(ext.equals(supportedFormats[r])) return true;
-		}
-		return false;
-	}
-
-	/**
-	 * Convenience method that checks both that the QuickTime for Java
-	 * libraries are available and that we can launch the specified 
-	 * file using QuickTime.
-	 *
-	 * @return <tt>true</tt> if the QuickTime for Java libraries are
-	 *  available and the file is of a type that our QuickTime players
-	 *  support, <tt>false</tt> otherwise
-	 */
-	public static boolean canLaunchFileWithQuickTime(File file) {
-		if(!isQuickTimeAvailable()) return false;
-		return isQuickTimeSupportedFormat(file);
-	}
+    }
 	     
     
     /**
