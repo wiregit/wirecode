@@ -31,6 +31,19 @@ public class SmartDownloader extends HTTPDownloader {
 		_callback = callback;
 	}
 
+	public void run() {
+
+		// not sure about the gui display portion of this
+
+		_callback.addDownload(this);
+		
+		doDownload();
+
+		_callback.removeDownload(this);
+
+	}
+
+
 
 	/* probably want to redefine doDownload() */
 	public void doDownload() {
@@ -55,6 +68,8 @@ public class SmartDownloader extends HTTPDownloader {
 			index++;
 
 		}
+		
+		_state = ERROR;
 		
 	}
 
