@@ -14,18 +14,12 @@ import com.limegroup.gnutella.util.CommonUtils;
 public final class BrowseHostUploadState implements HTTPMessage {
     
     private final HTTPUploader _uploader;
-    private final FileManager _fileManager;
-    private final MessageRouter _router;
 
 	private final ByteArrayOutputStream BAOS = 
 		new ByteArrayOutputStream();
     
-    public BrowseHostUploadState(HTTPUploader uploader, 
-								 FileManager fileManager, 
-								 MessageRouter router) {
+    public BrowseHostUploadState(HTTPUploader uploader) {
 		this._uploader = uploader;
-        this._fileManager = fileManager;
-        this._router = router;
     }
         
 	public void writeMessageHeaders(OutputStream ostream) throws IOException {
@@ -45,11 +39,13 @@ public final class BrowseHostUploadState implements HTTPMessage {
             = new QueryRequest((byte)1, 0, FileManager.INDEXING_QUERY, false);
         
         //get responses from file manager
-        Response[] responses = _fileManager.query(indexingQuery);
+        Response[] responses = 
+		    RouterService.getFileManager().query(indexingQuery);
         
         //convert to QueryReplies
-        Iterator /*<QueryReply>*/ iterator 
-            = _router.responsesToQueryReplies(responses, indexingQuery);
+        Iterator /*<QueryReply>*/ iterator = 
+		    RouterService.getMessageRouter().responsesToQueryReplies(responses, 
+																	 indexingQuery);
         
         try {
             while(iterator.hasNext()) {
