@@ -13,19 +13,26 @@ public interface Crawler {
 	public static final int TTL=4;
 	
 	/**
-	 * the number of desired UP results
+	 * the number of max possible UP results = # UPs per host to the power of TTL
 	 */
-	public static final int MAX_RESULTS=32;
+	public static final int MAX_RESULTS=(int)Math.pow(32,Crawler.TTL);
 	
 	/**
-	 * starts a blocking crawl at the default depth.  
+	 * we usually connect to 32 other guys.
+	 */
+	public static final int DEFAULT_RESULTS = 32;
+	
+	/**
+	 * starts a blocking crawl at the default depth.  If the thread is interrupted
+	 * it will return whatever results it has gathered so far. 
 	 * @return Collection of Endpoints that represent the results of the crawl.
 	 * @throws Exception something goes wrong with the crawl.
 	 */
 	public Collection crawl() throws Exception;
 	
 	/**
-	 * starts a blocking crawl at the specified depth
+	 * starts a blocking crawl at the specified depth  If the thread is interrupted
+	 * it will return whatever results it has gathered so far.
 	 * @param ttl the depth of the crawl in ttl  
 	 * @return Collection of Endpoints that represent the results of the crawl.
 	 * @throws Exception something goes wrong with the crawl.
