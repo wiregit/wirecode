@@ -182,7 +182,7 @@ public abstract class AbstractStatistic implements Statistic {
 	 * not already constructed.
 	 */
 	protected final void initializeBuffer() {
-		if(_buffer == null) {
+		if(_buffer.getSize() == 0) {
 			_buffer = new IntBuffer(HISTORY_LENGTH);
 			for(int i=0; i<HISTORY_LENGTH; i++) {
 				_buffer.addLast(0);
