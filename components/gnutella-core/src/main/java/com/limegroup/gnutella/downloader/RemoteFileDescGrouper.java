@@ -253,9 +253,10 @@ class RemoteFileDescGrouper implements Serializable {
         return sha1s[n];
     }
 
-    /** Returns the URN for the bucket with the most entries.
+    /** Returns the URN for the bucket with the most entries.  May return null.
      */
     synchronized URN getBestURN() {
+        if (sha1s.length < 1) return null;
         int index = 0;
         final int numBuckets = buckets.size();
         for (int i = 0, maxNum = 0; i < numBuckets; i++) {
@@ -265,7 +266,13 @@ class RemoteFileDescGrouper implements Serializable {
                 index = i;
             }
         }
-        return sha1s[index];
+        // at this point, index must be 0 or greater.  if it is 0, then we
+        // can assume sha1s.length >= 1 because of the check above.  just make
+        // sure that the index is not greater than sha1s.length before accessing
+        // array.  a return value of null is allowed.
+        if (index < sha1s.length)
+            return sha1s[index];
+        else return null;
     }
 
 

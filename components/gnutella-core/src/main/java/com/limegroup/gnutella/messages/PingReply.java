@@ -619,8 +619,8 @@ public class PingReply extends Message implements Serializable, IpPort {
         payload[0] = convertToGUESSFormat(CommonUtils.getUPMajorVersionNumber(),
                                           CommonUtils.getUPMinorVersionNumber()
                                           );
-        payload[1] = (byte) RouterService.getNumFreeLeafSlots();
-        payload[2] = (byte) RouterService.getNumFreeNonLeafSlots();
+        payload[1] = (byte) RouterService.getNumFreeLimeWireLeafSlots();
+        payload[2] = (byte) RouterService.getNumFreeLimeWireNonLeafSlots();
 
         // add it
         ggep.put(GGEP.GGEP_HEADER_UP_SUPPORT, payload);

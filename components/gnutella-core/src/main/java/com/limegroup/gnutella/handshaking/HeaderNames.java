@@ -78,6 +78,11 @@ public final class HeaderNames {
      * Header to indicate the version of dynamic querying in use.
      */
     public static final String X_DYNAMIC_QUERY = "X-Dynamic-Querying";
+
+    /**
+     * Header to indicate the locale that the client is running
+     */
+    public static final String X_LOCALE_PREF = "X-Locale-Pref";
     
     /**
      * Header for Content-Encoding. Useful because typing
