@@ -57,4 +57,5 @@ public class ActivityCallbackStub implements ActivityCallback {
     public void notifyUserAboutUpdate(String version, boolean isPro, boolean l){
     }
     public void fileManagerLoaded() {}
+    public void indicateNewVersion() {}
 }

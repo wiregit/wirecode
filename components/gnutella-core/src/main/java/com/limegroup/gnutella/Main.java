@@ -265,5 +265,7 @@ public class Main implements ActivityCallback, ErrorCallback {
 
     public void notifyUserAboutUpdate(String message,boolean isPro,boolean loc){
     }
+
+    public void indicateNewVersion() {}
 }
 

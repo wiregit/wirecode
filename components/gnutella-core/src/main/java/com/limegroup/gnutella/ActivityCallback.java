@@ -184,4 +184,7 @@ public interface ActivityCallback
 
 
     public String getHostValue(String key);
+
+    public void indicateNewVersion();
+
 }

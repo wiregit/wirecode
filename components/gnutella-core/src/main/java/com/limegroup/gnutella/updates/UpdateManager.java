@@ -182,6 +182,16 @@ public class UpdateManager {
                         //differnt version than advertised in the handshaking, 
                         //its not a problem - the client always does its own
                         //verification.
+                        
+                        //Emprically, the LimeWire network finds out about
+                        //updates very rapidly, so the reason to wait until the
+                        //end of the session, is reduced. Further we update
+                        //through the website, so we can tell the user that a
+                        //newer version exits, and tell her to check the website
+                        //without necessarily telling them what the new version
+                        //is. So a small indicator on the GUI will do just fine.
+
+                        RouterService.getCallback().indicateNewVersion();
                     }
                 } catch(MalformedURLException mfux) {
                     //MalformedURLException - while creating URL
