@@ -259,7 +259,7 @@ public class ManagedDownloader implements Downloader, Serializable {
 
     /*********************************************************************
      * LOCKING: obtain this's monitor before modifying any of the following.
-     * files, dloaders, busy and setState.  We should  not hold lock 
+     * files, _activeWorkers, busy and setState.  We should  not hold lock 
      * while performing blocking IO operations, however we need to ensure 
      * atomicity and thread safety for step 2 of the algorithm above. For 
      * this reason we needed to add another lock - stealLock.
@@ -272,7 +272,7 @@ public class ManagedDownloader implements Downloader, Serializable {
      * monitor for a very short time while we are updating the shared
      * datastructures, also atomicity is guaranteed since we are still
      * synchronized.  StealLock is also held for manipulations to the verifying file,
-     * and for all removal operations from the dloaders list.
+     * and for all removal operations from the _activeWorkers list.
      * 
      * stealLock->this is ok
      * stealLock->verifyingFile is ok
@@ -301,30 +301,6 @@ public class ManagedDownloader implements Downloader, Serializable {
      *  elements of type RemoteFileDesc and URLRemoteFileDesc */
     private RemoteFileDesc[] allFiles;
 
-    ///////////////////////// Policy Controls ///////////////////////////
-    /** The time to wait trying to establish each normal connection, in
-     *  milliseconds.*/
-    private static final int NORMAL_CONNECT_TIME=10000; //10 seconds
-    /** The time to wait trying to establish each push connection, in
-     *  milliseconds.  This needs to be larger than the normal time. */
-    private static final int PUSH_CONNECT_TIME=20000;  //20 seconds
-    /** The time to wait trying to establish a push connection
-     * if only a UDP push has been sent (as is in the case of altlocs) */
-    private static final int UDP_PUSH_CONNECT_TIME=6000; //6 seconds
-    /** The smallest interval that can be split for parallel download */
-    private static final int MIN_SPLIT_SIZE=100000;      //100 KB
-    /** The default chunk size - if we don't have a tree we request chunks this big */
-    private static final int DEFAULT_CHUNK_SIZE = 100000; //100 KB
-    /** The lowest (cumulative) bandwith we will accept without stealing the
-     * entire grey area from a downloader for a new one */
-    private static final float MIN_ACCEPTABLE_SPEED = 
-		DownloadSettings.MAX_DOWNLOAD_BYTES_PER_SEC.getValue() < 8 ? 
-		0.1f:
-		0.5f;
-    /** The number of bytes to overlap when swarming and resuming, used to help
-     *  verify that different sources are serving the same content. */
-    static final int OVERLAP_BYTES=10;
-    
     /**
      * The maximum amount of times we'll try to recover.
      */
@@ -359,46 +335,6 @@ public class ManagedDownloader implements Downloader, Serializable {
     /** The size of the approx matcher 2d buffer... */
     private static final int MATCHER_BUF_SIZE = 120;
     
-    /**
-     * The number of seconds to wait for hosts that don't have any ranges we
-     *  would be interested in.
-     */
-    private static final int NO_RANGES_RETRY_AFTER = 60 * 5; // 5 minutes
-    
-    /**
-     * The number of seconds to wait for hosts that failed once.
-     */
-    private static final int FAILED_RETRY_AFTER = 60 * 1; // 1 minute
-    
-    /**
-     * The number of seconds to wait for a busy host (if it didn't give us a
-     * retry after header) if we don't have any active downloaders.
-     *
-     * Note that there are some acceptable problems with the way this
-     * values are used.  Namely, if we have sources X & Y and source
-     * X is tried first, but is busy, its busy-time will be set to
-     * 1 minute.  Then source Y is tried and is accepted, source X
-     * will still retry after 1 minute.  This 'problem' is considered
-     * an acceptable issue, given the complexity of implementing
-     * a method that will work under the circumstances.
-     */
-    private static final int RETRY_AFTER_NONE_ACTIVE = 60 * 1; // 1 minute
-    
-    /**
-     * The minimum number of seconds to wait for a busy host if we do
-     * have some active downloaders.
-     *
-     * Note that there are some acceptable problems with the way this
-     * values are used.  Namely, if we have sources X & Y and source
-     * X is tried first and is accepted.  Then source Y is tried and
-     * is busy, so its busy-time is set to 10 minutes.  Then X disconnects,
-     * leaving Y with 9 or so minutes left before being retried, despite
-     * no other sources available.  This 'problem' is considered
-     * an acceptable issue, given the complexity of implementing
-     * a method that will work under the circumstances.
-     */
-    private static final int RETRY_AFTER_SOME_ACTIVE = 60 * 10; // 10 minutes
-    
 	/** The value of an unknown filename - potentially overridden in 
       * subclasses */
 	protected static final String UNKNOWN_FILENAME = "";  
@@ -423,34 +359,42 @@ public class ManagedDownloader implements Downloader, Serializable {
      *  Otherwise null. */
     private volatile Thread dloaderManagerThread;
     /** True iff this has been forcibly stopped. */
-    private volatile boolean stopped;
+    volatile boolean stopped;
     /** True iff this has been paused.  */
-    private volatile boolean paused;
+    volatile boolean paused;
 
     
-    /** The connections we're using for the current attempts. */    
-    private List /* of HTTPDownloader */ dloaders;
+    /** 
+     * The connections we're using for the current attempts.
+     * LOCKING: copy on write on this 
+     * 
+     */    
+    private volatile List /* of DownloadWorker */ _activeWorkers;
+    
     /**
      * A List of worker threads in progress.  Used to make sure that we do
      * not terminate (in tryAllDownloads3) without hope if threads are
      * connecting to hosts (i.e., removed from files) but not have not yet been
-     * added to dloaders.
+     * added to _activeWorkers.
      * Also, if the download completes and any of the threads are sleeping 
      * because it has been queued by the uploader, those threads need to be 
      * killed.
-     * LOCKING: synchronize on this 
-     * INVARIANT: dloaders.size<=threads 
+     * LOCKING: synchronize on this
+     * INVARIANT: _activeWorkers.size<=threads 
      */
-    private List /*of Threads*/ threads;
+    private List /*of DownloadWorker*/ _workers;
 
     /**
      * Stores the queued threads and the corresponding queue position
+     * LOCKING: copy on write on this
      */
-    private Map /*Thread -> Integer*/ queuedThreads;
+    private volatile Map /*DownloadWorker -> Integer*/ queuedWorkers;
 
     /** List of RemoteFileDesc to which we actively connect and request parts
-     * of the file.*/
-    private List /*of RemoteFileDesc */ files;
+     * of the file.
+     * LOCKING: this
+     */
+    private List /*of RemoteFileDesc */ rfds;
     
     /**
      * The SHA1 hash of the file that this ManagedDownloader is controlling.
@@ -568,7 +512,7 @@ public class ManagedDownloader implements Downloader, Serializable {
     /**
      * LOCKS: hashTree
      */
-    private transient final Object hashTreeLock = new Object();
+    private Object hashTreeLock;
     
     /**
      * one BandwidthTrackerImpl so we don't have to allocate one for
@@ -705,10 +649,10 @@ public class ManagedDownloader implements Downloader, Serializable {
         this.manager=manager;
 		this.fileManager=fileManager;
         this.callback=callback;
-        files = new LinkedList();
-        dloaders=new LinkedList();
-        threads=new ArrayList();
-        queuedThreads = new HashMap();
+        rfds = new LinkedList();
+        _activeWorkers=new LinkedList();
+        _workers=new ArrayList();
+        queuedWorkers = new HashMap();
 		chatList=new DownloadChatList();
         browseList=new DownloadBrowseHostList();
         stealLock = new Object();
@@ -720,6 +664,7 @@ public class ManagedDownloader implements Downloader, Serializable {
         corruptState=NOT_CORRUPT_STATE;
         corruptStateLock=new Object();
         altLock = new Object();
+	hashTreeLock = new Object();
         numMeasures = 0;
         averageBandwidth = 0f;
         queuePosition=Integer.MAX_VALUE;
@@ -737,7 +682,7 @@ public class ManagedDownloader implements Downloader, Serializable {
         // stores up to 10 locations for up to 10 minutes
         recentInvalidAlts = new FixedSizeExpiringSet(10, 10*60*1000L);
         synchronized (this) {
-            initializeFiles();
+            initializeRFDs();
 
             if(shouldInitAltLocs(deserializedFromDisk)) {
                 initializeAlternateLocations();
@@ -793,7 +738,7 @@ public class ManagedDownloader implements Downloader, Serializable {
             public void run() {
                 try {
                     receivedNewSources = false;
-                    tryAllDownloads();
+                    performDownload();
                     completeDownload();
                 } catch(Throwable t) {
                     // if any unhandled errors occurred, remove this
@@ -939,8 +884,8 @@ public class ManagedDownloader implements Downloader, Serializable {
             break;
         default:
             Assert.that(false, "invalid state: " + getState() +
-                             ", threads: " + threads.size() + 
-                             ", dloaders: " + dloaders.size());
+                             ", workers: " + _workers.size() + 
+                             ", _activeWorkers: " + _activeWorkers.size());
         }
     }   
     
@@ -1036,10 +981,10 @@ public class ManagedDownloader implements Downloader, Serializable {
     /**
      * Initialize files wrt allFiles.
      */
-    protected synchronized void initializeFiles() {
+    protected synchronized void initializeRFDs() {
         for(int i = 0; i < allFiles.length; i++)
             if(!isRFDAlreadyStored(allFiles[i]))
-                files.add(allFiles[i]);
+                rfds.add(allFiles[i]);
     }
 
     /**
@@ -1102,7 +1047,7 @@ public class ManagedDownloader implements Downloader, Serializable {
      * Adds the alternate locations from the collections as possible
      * download sources.
      */
-    private void addLocationsToDownload(AlternateLocationCollection direct,
+    void addLocationsToDownload(AlternateLocationCollection direct,
                                         AlternateLocationCollection push,
                                         int size) {
         // always add the direct alt locs.
@@ -1399,7 +1344,7 @@ public class ManagedDownloader implements Downloader, Serializable {
         boolean added = false;
         // Add to the list of RFDs to connect to.
         if (!isRFDAlreadyStored(rfd))
-            added = files.add(rfd);
+            added = rfds.add(rfd);
 
         //Append to allFiles for resume purposes if caching...
         if(cache) {
@@ -1434,9 +1379,13 @@ public class ManagedDownloader implements Downloader, Serializable {
     private synchronized boolean isRFDAlreadyStored(RemoteFileDesc rfd) {
         if( currentRFDs != null && currentRFDs.contains(rfd)) 
             return true;
-        if( files != null && files.contains(rfd)) 
+        if( rfds != null && rfds.contains(rfd)) 
             return true;
         return false;
+    }
+    
+    synchronized void addRFD(RemoteFileDesc rfd) {
+        rfds.add(rfd);
     }
     
     /**
@@ -1462,15 +1411,24 @@ public class ManagedDownloader implements Downloader, Serializable {
     public boolean acceptDownload(
             String file, Socket socket, int index, byte[] clientGUID)
             throws IOException {
+        
         MiniRemoteFileDesc mrfd=new MiniRemoteFileDesc(file,index,clientGUID);
-        Object lock =  miniRFDToLock.get(mrfd);
-        if(lock == null) //not in map. Not intended for me
+        DownloadWorker worker =  (DownloadWorker) miniRFDToLock.get(mrfd);
+        
+        if(worker == null) //not in map. Not intended for me
             return false;
-        threadLockToSocket.put(lock,socket);
-        synchronized(lock) {
-            lock.notify();
-        }
+        
+        worker.setPushSocket(socket);
+        
         return true;
+    }
+    
+    void registerPushWaiter(DownloadWorker worker, MiniRemoteFileDesc mrfd) {
+        miniRFDToLock.put(mrfd,worker);
+    }
+    
+    void unregisterPushWaiter(MiniRemoteFileDesc mrfd) {
+        miniRFDToLock.remove(mrfd);
     }
     
     /**
@@ -1533,15 +1491,17 @@ public class ManagedDownloader implements Downloader, Serializable {
             //This guarantees any downloads in progress will be killed.  New
             //downloads will not start because of the flag above. Note that this
             //does not kill downloaders that are queued...
-            for (Iterator iter=dloaders.iterator(); iter.hasNext(); ) 
-                ((HTTPDownloader)iter.next()).stop();
+            for (Iterator iter=_activeWorkers.iterator(); iter.hasNext(); ) 
+                ((DownloadWorker)iter.next()).getDownloader().stop();
     
             //...so we interrupt all threads - see connectAndDownload.
             //This is safe because worker threads can be waiting for a push 
             //or to requeury, or sleeping while queued. In every case its OK to 
             //interrupt the thread
-            for(Iterator iter=threads.iterator(); iter.hasNext(); )
-                ((Thread)iter.next()).interrupt();
+            for(Iterator iter=_workers.iterator(); iter.hasNext(); ) {
+                DownloadWorker worker = (DownloadWorker)iter.next();
+                worker.interrupt();
+            }
             
             // must capture in local variable so the value doesn't become null
             // between if & contents of if.
@@ -1562,7 +1522,7 @@ public class ManagedDownloader implements Downloader, Serializable {
      * The IncompleteFileDesc is also notified of new locations for this
      * file.
      */
-    private synchronized void informMesh(RemoteFileDesc rfd, boolean good) {
+    synchronized void informMesh(RemoteFileDesc rfd, boolean good) {
         IncompleteFileDesc ifd = null;
         //TODO3: Until IncompleteFileDesc and ManagedDownloader share a copy
         // of the AlternateLocationCollection, they must use seperate
@@ -1616,8 +1576,8 @@ public class ManagedDownloader implements Downloader, Serializable {
             Assert.that(!ploc.isDemoted());
         }
         
-        for(Iterator iter=dloaders.iterator(); iter.hasNext();) {
-            HTTPDownloader httpDloader = (HTTPDownloader)iter.next();
+        for(Iterator iter=_activeWorkers.iterator(); iter.hasNext();) {
+            HTTPDownloader httpDloader = ((DownloadWorker)iter.next()).getDownloader();
             RemoteFileDesc r = httpDloader.getRemoteFileDesc();
             
             // no need to tell uploader about itself and since many firewalled
@@ -1703,11 +1663,11 @@ public class ManagedDownloader implements Downloader, Serializable {
             lastQuerySent = -1; // inform requerying that we wanna go.
 
         // also retry any hosts that we have leftover.
-        initializeFiles();
+        initializeRFDs();
         
         // if any guys were busy, reduce their retry time to 0,
         // since the user really wants to resume right now.
-        for(Iterator i = files.iterator(); i.hasNext(); )
+        for(Iterator i = rfds.iterator(); i.hasNext(); )
             ((RemoteFileDesc)i.next()).setRetryAfter(0);
 
         if(paused) {
@@ -1732,6 +1692,18 @@ public class ManagedDownloader implements Downloader, Serializable {
             return completeFile;
         else
             return incompleteFile;
+    }
+    
+    File getIncompleteFile() {
+        return incompleteFile;
+    }
+    
+    File getCompleteFile() {
+        return completeFile;
+    }
+    
+    VerifyingFile getVerifyingFile() {
+        return commonOutFile;
     }
 
     /**
@@ -1818,7 +1790,7 @@ public class ManagedDownloader implements Downloader, Serializable {
      * @param deserialized True if this downloader was deserialized from disk,
      * false if it was newly constructed.
      */
-    protected void tryAllDownloads() {
+    protected void performDownload() {
         if(checkHosts()) {//files is global
             setState(GAVE_UP);
             return;
@@ -1891,13 +1863,13 @@ public class ManagedDownloader implements Downloader, Serializable {
      * the first try.
      */
     private synchronized long calculateWaitTime() {
-        if (files == null || files.size()==0)
+        if (rfds == null || rfds.size()==0)
             return 0;
         // waitTime is in seconds
         int waitTime = Integer.MAX_VALUE;
-        for (int i = 0; i < files.size(); i++) {
+        for (int i = 0; i < rfds.size(); i++) {
             waitTime = Math.min(waitTime, 
-                            ((RemoteFileDesc)files.get(i)).getWaitTime());
+                            ((RemoteFileDesc)rfds.get(i)).getWaitTime());
         }
         // waitTime was in seconds
         return (waitTime*1000);
@@ -1930,33 +1902,14 @@ public class ManagedDownloader implements Downloader, Serializable {
     private int tryAllDownloads2() throws InterruptedException {
         RemoteFileDesc firstDesc = null;
         synchronized (this) {
-            if (files.size()==0)
+            if (rfds.size()==0)
                 return GAVE_UP;
-            firstDesc = (RemoteFileDesc)files.get(0);
+            firstDesc = (RemoteFileDesc)rfds.get(0);
         }
-
-        //1. Verify it's safe to download.  Filename must not have "..", "/",
-        //etc.  We check this by looking where the downloaded file will end up.
-        //The completed filename is chosen somewhat arbitrarily from the first
-        //file; see case (b) of getFileName() and
-        //MagnetDownloader.getFileName().
-        //    incompleteFile is picked using an arbitrary RFD, since
-        //IncompleteFileManager guarantees that any "same" files will get the
-        //same temporary file.
-
-        File saveDir;
-        String fileName = getFileName();
+        
         try {
-            incompleteFile = incompleteFileManager.getFile(firstDesc);
-            saveDir = SharingSettings.getSaveDirectory();
-            completeFile = new File(saveDir, fileName);
-            String savePath = saveDir.getCanonicalPath();
-            String completeFileParentPath = 
-                new File(completeFile.getParent()).getCanonicalPath();
-            if (!savePath.equals(completeFileParentPath))
-                return COULDNT_MOVE_TO_LIBRARY;
-        } catch (IOException e) {
-            ErrorService.error(e, "incomplete: " + incompleteFile);
+            initializeFilesAndFolders(firstDesc);
+        } catch (IOException iox) {
             return COULDNT_MOVE_TO_LIBRARY;
         }
 
@@ -1964,16 +1917,7 @@ public class ManagedDownloader implements Downloader, Serializable {
         // initialize the HashTree
 		if( downloadSHA1 != null ) {
 		    validAlts = AlternateLocationCollection.create(downloadSHA1);
-		    boolean goodTree = false;
-		    synchronized(hashTreeLock) {
-		        hashTree = TigerTreeCache.instance().getHashTree(downloadSHA1);
-		        
-		        // if we have a valid tree, update our chunk size and disable overlap checking
-		        if (hashTree != null && hashTree.isDepthGoodEnough()) 
-		            goodTree=true;
-		    }
-		    if (goodTree)
-		        commonOutFile.setCheckOverlap(false);
+		    initializeHashTree();
         }
         
         URN fileHash;
@@ -2030,7 +1974,7 @@ public class ManagedDownloader implements Downloader, Serializable {
                 } catch(InterruptedException ignored) {}
             }
         }
-    }        
+    }  
     
     /**
      * Scans the file for corruption, returning the hash of the file on disk.
@@ -2077,7 +2021,54 @@ public class ManagedDownloader implements Downloader, Serializable {
         
         return fileHash;        
     }
+
+    private void initializeFilesAndFolders(RemoteFileDesc firstDesc) throws IOException{
+        
+        //1. Verify it's safe to download.  Filename must not have "..", "/",
+        //etc.  We check this by looking where the downloaded file will end up.
+        //The completed filename is chosen somewhat arbitrarily from the first
+        //file; see case (b) of getFileName() and
+        //MagnetDownloader.getFileName().
+        //    incompleteFile is picked using an arbitrary RFD, since
+        //IncompleteFileManager guarantees that any "same" files will get the
+        //same temporary file.
+        
+        File saveDir;
+        String fileName = getFileName();
+        try {
+            incompleteFile = incompleteFileManager.getFile(firstDesc);
+            saveDir = SharingSettings.getSaveDirectory();
+            completeFile = new File(saveDir, fileName);
+            String savePath = saveDir.getCanonicalPath();
+            String completeFileParentPath = 
+                new File(completeFile.getParent()).getCanonicalPath();
+            if (!savePath.equals(completeFileParentPath))
+                throw new IOException();
+        } catch (IOException e) {
+            ErrorService.error(e, "incomplete: " + incompleteFile);
+            throw e;
+        }
+
+        if(!initializeVerifyingFile())
+            throw new IOException();
+    }
     
+    /**
+     * checks the TT cache and if a good tree is present loads it 
+     * and sets the verifying file to not do overlap checking.
+     */
+    private void initializeHashTree() {
+        boolean goodTree = false;
+	    synchronized(hashTreeLock) {
+	        hashTree = TigerTreeCache.instance().getHashTree(downloadSHA1);
+	        
+	        // if we have a valid tree, update our chunk size and disable overlap checking
+	        if (hashTree != null && hashTree.isDepthGoodEnough()) 
+	            goodTree=true;
+	    }
+	    if (goodTree)
+	        commonOutFile.setCheckOverlap(false);
+    }
     /**
      * Recovering from the TigerTree has failed, notify the user about
      * corruption.
@@ -2171,7 +2162,7 @@ public class ManagedDownloader implements Downloader, Serializable {
 			callback.handleSharedFileUpdate(completeFile);
             HashSet set = null;
             synchronized(this) {
-                set = new HashSet(files);
+                set = new HashSet(rfds);
             }
             //If file is too small or partial sharing is off, send head request
             if(fileDesc.getSize() < HTTPDownloader.MIN_PARTIAL_FILE_BYTES ||
@@ -2282,47 +2273,111 @@ public class ManagedDownloader implements Downloader, Serializable {
     /**
      * Starts a new Worker thread for the given RFD.
      */
-    private synchronized void startWorker(final RemoteFileDesc rfd) {
-        Thread connectCreator = new ManagedThread("DownloadWorker") {
-            public void managedRun() {
-                boolean iterate = false;
-                try {
-                    iterate = connectAndDownload(rfd);
-                } catch (Throwable e) {
-                    iterate = true;
-                     // Ignore InterruptedException -- the JVM throws
-                     // them for some reason at odd times, even though
-                     // we've caught and handled all of them
-                     // appropriately.
-                    if(!(e instanceof InterruptedException)) {
-                        //This is a "firewall" for reporting unhandled
-                        //errors.  We don't really try to recover at
-                        //this point, but we do attempt to display the
-                        //error in the GUI for debugging purposes.
-                        ErrorService.error(e);
-                    }
-                } finally {
-                    synchronized (ManagedDownloader.this) {
-                        currentRFDs.remove(rfd);
-                        threads.remove(this); 
-                        if(iterate) 
-                            ManagedDownloader.this.notifyAll();
-                    }
-                }
-            }//end of run
-        };
+    private void startWorker(final RemoteFileDesc rfd) {
+        DownloadWorker worker = new DownloadWorker(this,rfd);
+        Thread connectCreator = new ManagedThread(worker);
         
         // if we'll be debugging, we want to distinguish the different workers
-        if (LOG.isDebugEnabled())
-            connectCreator.setName("DownloadWorker "+connectCreator.hashCode());
+        connectCreator.setName("DownloadWorker "+(LOG.isDebugEnabled() ? 
+                connectCreator.hashCode() +"" : ""));
         
-        threads.add(connectCreator);
-        currentRFDs.add(rfd);
+        synchronized(this) {
+            _workers.add(worker);
+            currentRFDs.add(rfd);
+        }
 
         connectCreator.start();
     }        
+    
+    /**
+     * Callback that the specified worker has finished.
+     */
+    synchronized void workerFinished(DownloadWorker finished, boolean iterate) {
+            currentRFDs.remove(finished.getRFD());
+            removeWorker(finished); 
+            if(iterate) 
+                notifyAll();
+    }
+    
+    synchronized void workerStarted(DownloadWorker worker) {
+        
+        setState(ManagedDownloader.DOWNLOADING);
+        addActiveWorker(worker);
+        chatList.addHost(worker.getDownloader());
+        browseList.addHost(worker.getDownloader());
 
+    }
+    
+    void workerFailed(DownloadWorker failed) {
+        chatList.removeHost(failed.getDownloader());
+        browseList.removeHost(failed.getDownloader());
+    }
+    
+    synchronized void workerQueued(DownloadWorker failed, int position) {
+        if ( position < queuePosition ) {
+            queuePosition = position;
+            queuedVendor = failed.getDownloader().getVendor();
+        }                    
+    }
+    
+    void removeWorker(DownloadWorker worker) {
+        removeActiveWorker(worker);
+        synchronized(this) {
+            _workers.remove(worker);
+        }
+    }
+    
+    synchronized void removeActiveWorker(DownloadWorker worker) {
+        List l = new ArrayList(getActiveWorkers());
+        l.remove(worker);
+        _activeWorkers = Collections.unmodifiableList(l);
+    }
+    
+    synchronized void addActiveWorker(DownloadWorker worker) {
+        // only add if not already added.
+        if(!getActiveWorkers().contains(worker)) {
+            List l = new ArrayList(getActiveWorkers());
+            l.add(worker);
+            _activeWorkers = Collections.unmodifiableList(l);
+        }
+    }
 
+    /**
+     * @return The alternate locations we have successfully downloaded from
+     */
+    Set getValidAlts() {
+        synchronized(altLock) {
+            Set ret;
+            
+            if (validAlts != null) {
+                ret = new HashSet();
+                for (Iterator iter = validAlts.iterator();iter.hasNext();)
+                    ret.add(iter.next());
+            } else
+                ret = Collections.EMPTY_SET;
+            
+            return ret;
+        }
+    }
+    
+    /**
+     * @return The alternate locations we have successfully downloaded from
+     */
+    Set getInvalidAlts() {
+        synchronized(altLock) {
+            Set ret;
+            
+            if (invalidAlts != null) {
+                ret = new HashSet();
+                for (Iterator iter = recentInvalidAlts.iterator();iter.hasNext();)
+                    ret.add(iter.next());
+            } else
+                ret = Collections.EMPTY_SET;
+            
+            return ret;
+        }
+    }
+    
     /** 
      * Like tryDownloads2, but does not deal with the library, cleaning
      * up corrupt files, etc.  Caller should look at corruptState to
@@ -2344,9 +2399,6 @@ public class ManagedDownloader implements Downloader, Serializable {
     private synchronized int tryAllDownloads3() throws InterruptedException {
         LOG.trace("MANAGER: entered tryAllDownloads3");
 
-        if(!initializeVerifyingFile())
-            return COULDNT_MOVE_TO_LIBRARY;
-
         //The current RFDs that are being connected to.
         currentRFDs = new LinkedList();
         int size = -1;
@@ -2365,12 +2417,12 @@ public class ManagedDownloader implements Downloader, Serializable {
             // Finished.
             if (commonOutFile.isComplete()) {
                 // Kill any leftover downloaders.
-                for (Iterator iter=dloaders.iterator(); iter.hasNext(); ) 
+                for (Iterator iter=_activeWorkers.iterator(); iter.hasNext(); ) 
                     ((HTTPDownloader)iter.next()).stop();		                
                 
                 //Interrupt all worker threads
-                for(int i=threads.size();i>0;i--) {
-                    Thread t = (Thread)threads.get(i-1);
+                for(int i=_workers.size();i>0;i--) {
+                    DownloadWorker t = (DownloadWorker )_workers.get(i-1);
                     t.interrupt();
                 }
             
@@ -2378,12 +2430,12 @@ public class ManagedDownloader implements Downloader, Serializable {
                 return COMPLETE;
             } 
     
-            if (threads.size() == 0) {                        
+            if (_workers.size() == 0) {                        
                 //No downloaders worth living for.
-                if ( files.size() > 0 && calculateWaitTime() > 0) {
+                if ( rfds.size() > 0 && calculateWaitTime() > 0) {
                     LOG.trace("MANAGER: terminating with busy");
                     return WAITING_FOR_RETRY;
-                } else if( files.size() == 0 ) {
+                } else if( rfds.size() == 0 ) {
                     LOG.trace("MANAGER: terminating w/o hope");
                     return GAVE_UP;
                 }
@@ -2391,14 +2443,14 @@ public class ManagedDownloader implements Downloader, Serializable {
                 // fallthrough ...
             }
 
-            size = files.size();
+            size = rfds.size();
             connectTo = getNumAllowedDownloads();
-            dloadsCount = dloaders.size();
+            dloadsCount = _activeWorkers.size();
             
             if(LOG.isDebugEnabled())
                 LOG.debug("MANAGER: kicking off workers, size: " + size + 
                           ", connect: " + connectTo + ", dloadsCount: " + 
-                          dloadsCount + ", threads: " + threads.size());
+                          dloadsCount + ", threads: " + _workers.size());
                 
             //OK. We are going to create a thread for each RFD. The policy for
             //the worker threads is to have one more thread than the max swarm
@@ -2411,7 +2463,7 @@ public class ManagedDownloader implements Downloader, Serializable {
                 // If the rfd was busy, that means all possible RFDs
                 // are busy, so just put it back in files and exit.
                 if( rfd.isBusy() ) {
-                    files.add(rfd);
+                    rfds.add(rfd);
                     break;
                 }
                 // else...
@@ -2428,661 +2480,6 @@ public class ManagedDownloader implements Downloader, Serializable {
         }//end of while
     }
     
-    /**
-     * Top level method of the thread. Calls three methods 
-     * a. Establish a TCP Connection.
-     * b. Assign this thread a part of the file, and do HTTP handshaking
-     * c. get the file.
-     * Each of these steps can run into errors, which have to be dealt with
-     * differently.
-     * @return true if this worker thread should notify, false otherwise.
-     * currently this method returns false iff NSEEx is  thrown. 
-     */
-    private boolean connectAndDownload(RemoteFileDesc rfd) {
-        if(LOG.isTraceEnabled())
-            LOG.trace("connectAndDownload for: " + rfd);
-        
-        //this make throw an exception if we were not able to establish a 
-        //direct connection and push was unsuccessful too
-        HTTPDownloader dloader = null;
-        
-        //Step 1. establish a TCP Connection, either by opening a socket,
-        //OR by sending a push request.
-        dloader = establishConnection(rfd);
-        
-        if(dloader == null)//any exceptions in the method internally?
-            return true;//no work was done, try to get another thread
-
-        //initilaize the newly created HTTPDownloader with whatever AltLocs we
-        //have discovered so far. These will be cleared out after the first
-        //write, from them on, only newly successful rfds will be sent as alts
-        if(validAlts != null) {
-            synchronized(altLock) {
-                Iterator iter = validAlts.iterator();
-                int count = 0;
-                while(iter.hasNext() && count < 10) {
-                	AlternateLocation current = (AlternateLocation)iter.next();
-                	dloader.addSuccessfulAltLoc(current);
-                	count++;
-                }
-                iter = recentInvalidAlts.iterator();
-                while(iter.hasNext()) {
-                	AlternateLocation current = (AlternateLocation)iter.next();
-                	dloader.addFailedAltLoc(current);
-                	count++;
-                }
-            }
-        }
-        
-        //Note: http11 is true or false depending on what we think thevalue
-        //should be for rfd is at the start, before connecting. We may later
-        //find that the we are wrong, in which case we update the rfd's http11
-        //value. But while we are in connectAndDownload we continue to use this
-        //local variable because the code is incapable of handling a change in
-        //http11 status while inside connectAndDownload.
-        boolean http11 = true;//must enter the loop
-        
-        try {
-
-        while(http11) {
-            //Step 2. OK. We have established TCP Connection. This 
-            //downloader should choose a part of the file to download
-            //and send the appropriate HTTP hearders
-            //Note: 0=disconnected,1=tcp-connected,2=http-connected            
-            ConnectionStatus status;
-            http11 = rfd.isHTTP11();
-            while(true) { //while queued, connect and sleep if we queued
-                status = null;
-                
-                HashTree ourTree;
-                synchronized(hashTreeLock) {
-                    ourTree = hashTree;
-                }
-                // request THEX from te dloader if the tree we have
-                // isn't good enough (or we don't have a tree)
-                if (dloader.hasHashTree() &&
-                  (ourTree == null || !ourTree.isDepthGoodEnough())) {
-                    status = dloader.requestHashTree();
-                    if(status.isThexResponse()) {
-                        HashTree temp = status.getHashTree();
-                        if (temp.isBetterTree(ourTree)) {
-                            synchronized(hashTreeLock){
-                                hashTree = temp;
-                                
-                                // persist the hashTree in the TigerTreeCache
-                                // because we won't save it in ManagedDownloader
-                                TigerTreeCache.instance().addHashTree(
-                                        rfd.getSHA1Urn(),
-                                        hashTree);
-                            }
-                            
-                            // update our chunk size with this new, better tree
-                            commonOutFile.setCheckOverlap(false);
-                        }
-                    }
-                }
-                
-                // before requesting the next range,
-                // consume the prior request's body
-                // if there was any.
-                dloader.consumeBodyIfNecessary();
-                synchronized(stealLock) {
-                    // if we didn't get queued doing the tree request,
-                    // request another file.
-                    try {
-                        if(status == null || !status.isQueued()) {
-                            status = assignAndRequest(dloader, http11);
-                        }
-                    } finally {
-                        if( status == null || !status.isConnected() )
-                            releaseRanges(dloader);
-                    }
-                }
-                
-                if(status.isPartialData()) {
-                    // loop again if they had partial ranges.
-                    continue;
-                } else if(status.isNoFile() || status.isNoData()) {
-                    //if they didn't have the file or we didn't need data,
-                    //break out of the loop.
-                    break;
-                }
-                
-                // must be queued or connected.
-                Assert.that(status.isQueued() || status.isConnected());
-                boolean addQueued = killQueuedIfNecessary(status);
-                
-                // we should have been told to stay alive if we're connected
-                // but it's possible that we are above our swarm capacity
-                // and nothing else was queued, in which case we really should
-                // kill ourselves, but there's no reason to not accept the
-                // extra host.
-                if(status.isConnected())
-                    break;
-                
-                Assert.that(status.isQueued());
-                // if we didn't want to stay queued
-                // or we got interrupted while sleeping,
-                // then try other sources
-                if(!addQueued || handleQueued(status, dloader))
-                    return true;
-            }
-            //we have been given a slot remove this thread from queuedThreads
-            synchronized(this) {
-                //no problem even if this thread is  not in there
-                queuedThreads.remove(Thread.currentThread()); 
-            }
-
-            switch(status.getType()) {
-            case ConnectionStatus.TYPE_NO_FILE:
-                // close the connection for now.            
-                dloader.stop();
-                return true;            
-            case ConnectionStatus.TYPE_NO_DATA:
-                // close the connection since we're finished.
-                dloader.stop();
-                return false;
-            case ConnectionStatus.TYPE_CONNECTED:
-                break;
-            default:
-                throw new IllegalStateException("illegal status: " + 
-                                                status.getType());
-            }
-
-            Assert.that(status.isConnected());
-            //Step 3. OK, we have successfully connected, start saving the
-            // file to disk
-            boolean downloadOK = false;
-            
-            try {
-                downloadOK = doDownload(dloader, http11);
-            } finally {
-                // Always release the ranges that were leftover from this download
-                releaseRanges(dloader);
-            }
-            
-            // If the download failed, don't keep trying to download.
-            if(!downloadOK)
-                break;
-        } // end of while(http11)
-        
-        } finally {
-            // we must ensure that all dloaders are removed from the data
-            // structure before returning from this method.
-            synchronized(stealLock) {
-                synchronized(this) {
-                    dloaders.remove(dloader);
-                }
-            }
-        }
-        
-        //tell manager to iterate for more sources
-        return true;
-    }
-    
-    /**
-     * Handles a queued downloader with the given ConnectionStatus.
-     * BLOCKING (while sleeping).
-     *
-     * @return true if we need to tell the manager to churn another
-     *         connection and let this one die, false if we are
-     *         going to try this connection again.
-     */
-    private boolean handleQueued(ConnectionStatus status,
-                                 HTTPDownloader dloader) {
-        try {
-            // make sure that we're not in dloaders if we're
-            // sleeping/queued.  this would ONLY be possible
-            // if some uploader was misbehaved and queued
-            // us after we succesfully managed to download some
-            // information.  despite the rarity of the situation,
-            // we should be prepared.
-            synchronized(stealLock){
-                synchronized(this) {
-                    dloaders.remove(dloader);
-                }
-            }
-            Thread.sleep(status.getQueuePollTime());//value from QueuedException
-            return false;
-        } catch (InterruptedException ix) {
-            if(LOG.isWarnEnabled())
-                LOG.warn("worker: interrupted while asleep in "+
-                  "queue" + dloader);
-            synchronized(this) {
-                queuedThreads.remove(Thread.currentThread());
-            }
-            dloader.stop(); //close connection
-            // notifying will make no diff, coz the next 
-            //iteration will throw interrupted exception.
-            return true;
-        }
-    }
-    
-    /**
-     * Interrupts a remotely queued thread if we this status is connected,
-     * or if the status is queued and our queue position is better than
-     * an existing queued status.
-     *
-     * @param status The ConnectionStatus of this downloader.
-     *
-     * @return true if this thread should be kept around, false otherwise --
-     * explicitly, there is no need to kill any threads, or if the currentThread
-     * is already in the queuedThreads, or if we did kill a thread worse than
-     * this thread.  
-     */
-    private boolean killQueuedIfNecessary(ConnectionStatus status) {
-        //Either I am queued or downloading, find the highest queued thread
-        Thread killThread = null;
-        Thread currentThread = Thread.currentThread();
-        int queuePos = status.isQueued() ? status.getQueuePosition() : -1;
-
-        synchronized(this) {
-            // No replacement required?...
-            if(getNumDownloaders() <= getSwarmCapacity()) {
-                if(status.isQueued())
-                    queuedThreads.put(currentThread, new Integer(queuePos));
-                return true;
-            }
-            
-            // Already Queued?...
-            if(queuedThreads.containsKey(currentThread)) {
-                // update position
-                if(status.isQueued())
-                    queuedThreads.put(currentThread, new Integer(queuePos));
-                return true;
-            }
-            
-            // Search for the queued thread with a slot worse than ours.
-            int highest = queuePos; // -1 if we aren't queued.            
-            for(Iterator i = queuedThreads.entrySet().iterator(); i.hasNext(); ) {
-                Map.Entry entry = (Map.Entry)i.next();
-                int currQueue = ((Integer)entry.getValue()).intValue();
-                if(currQueue > highest) {
-                    killThread = (Thread)entry.getKey();
-                    highest = currQueue;
-                }
-            }
-
-            // No one worse than us?... kill us.
-            if(killThread == null)
-                return false;
-
-            //OK. let's kill this guy 
-            killThread.interrupt();
-
-            //OK. I should add myself to queuedThreads if I am queued
-            if(status.isQueued())
-                queuedThreads.put(currentThread, new Integer(queuePos));
-            
-            return true;
-        }        
-    }
-    
-
-    /** 
-     * Returns an un-initialized (only established a TCP Connection, 
-     * no HTTP headers have been exchanged yet) connectable downloader 
-     * from the given list of locations.
-     * <p> 
-     * method tries to establish connection either by push or by normal
-     * ways.
-     * <p>
-     * If the connection fails for some reason, or needs a push the mesh needs 
-     * to be informed that this location failed.
-     * @param rfd the RemoteFileDesc to connect to
-     * <p> 
-     * The following exceptions may be thrown within this method, but they are
-     * all dealt with internally. So this method does not throw any exception
-     * <p>
-     * NoSuchElementException thrown when (both normal and push) connections 
-     * to the given rfd fail. We discard the rfd by doing nothing and return 
-     * null.
-     * @exception InterruptedException this thread was interrupted while waiting
-     * to connect. Remember this rfd by putting it back into files and return
-     * null 
-     */
-    private HTTPDownloader establishConnection(RemoteFileDesc rfd) {
-        if(LOG.isTraceEnabled())
-            LOG.trace("establishConnection(" + rfd + ")");
-        
-        if (rfd == null) //bad rfd, discard it and return null
-            return null; // throw new NoSuchElementException();
-        
-        if (stopped || paused) {//this rfd may still be useful remember it
-            synchronized(this){
-                files.add(rfd);
-            }
-            return null;
-        }
-
-        File incFile = incompleteFile;
-        HTTPDownloader ret;
-        boolean needsPush = rfd.needsPush();
-        
-        
-        synchronized (this) {
-            currentLocation=rfd.getHost();
-            //If we're just increasing parallelism, stay in DOWNLOADING
-            //state.  Otherwise the following call is needed to restart
-            //the timer.
-            if (dloaders.size()==0 && getState()!=COMPLETE && 
-                getState()!=ABORTED && getState()!=GAVE_UP && 
-                getState()!=COULDNT_MOVE_TO_LIBRARY && getState()!=CORRUPT_FILE 
-                && getState()!=HASHING && getState()!=SAVING && 
-                queuedThreads.size()==0) {
-                    if(Thread.currentThread().isInterrupted())
-                        return null; // we were signalled to stop.
-                    setState(CONNECTING, 
-                            needsPush ? PUSH_CONNECT_TIME : NORMAL_CONNECT_TIME);
-                }
-        }
-
-        if(LOG.isDebugEnabled())
-            LOG.debug("WORKER: attempting connect to "
-              + rfd.getHost() + ":" + rfd.getPort());        
-        
-        DownloadStat.CONNECTION_ATTEMPTS.incrementStat();
-
-        // for multicast replies, try pushes first
-        // and then try direct connects.
-        // this is because newer clients work better with pushes,
-        // but older ones didn't understand them
-        if( rfd.isReplyToMulticast() ) {
-            try {
-                ret = connectWithPush(rfd, incFile);
-            } catch(IOException e) {
-                try {
-                    ret = connectDirectly(rfd, incFile);
-                } catch(IOException e2) {
-                    return null; // impossible to connect.
-                }
-            }
-            return ret;
-        }        
-        
-        // otherwise, we're not multicast.
-        // if we need a push, go directly to a push.
-        // if we don't, try direct and if that fails try a push.        
-        if( !needsPush ) {
-            try {
-                ret = connectDirectly(rfd, incFile);
-                return ret;
-            } catch(IOException e) {
-                // fall through to the push ...
-            }
-        }
-        try {
-                 ret = connectWithPush(rfd, incFile);
-                 return ret;
-        } catch(IOException e) {
-                // even the push failed :(
-        }
-        
-        
-        // if we're here, everything failed.
-        
-        informMesh(rfd, false);
-        
-        return null;
-    }
-        
-
-    /**
-     * Attempts to directly connect through TCP to the remote end.
-     */
-    private HTTPDownloader connectDirectly(RemoteFileDesc rfd, 
-      File incFile) throws IOException {
-        LOG.trace("WORKER: attempt direct connection");
-        HTTPDownloader ret;
-        //Establish normal downloader.              
-        ret = new HTTPDownloader(rfd, incFile);
-        // Note that connectTCP can throw IOException
-        // (and the subclassed CantConnectException)
-        try {
-            ret.connectTCP(NORMAL_CONNECT_TIME);
-            DownloadStat.CONNECT_DIRECT_SUCCESS.incrementStat();
-        } catch(IOException iox) {
-            DownloadStat.CONNECT_DIRECT_FAILURES.incrementStat();
-            throw iox;
-        }
-        return ret;
-    }
-    
-    /**
-     * Attempts to connect by using a push to the remote end.
-     * BLOCKING.
-     */
-    private HTTPDownloader connectWithPush(RemoteFileDesc rfd,
-      File incFile) throws IOException {
-        LOG.trace("WORKER: attempt push connection");
-        HTTPDownloader ret;
-        
-        //When the push is complete and we have a socket ready to use
-        //the acceptor thread is going to notify us using this object
-        Object threadLock = new Object();
-        MiniRemoteFileDesc mrfd = new MiniRemoteFileDesc(
-                     rfd.getFileName(),rfd.getIndex(),rfd.getClientGUID());
-       
-        miniRFDToLock.put(mrfd,threadLock);
-
-        boolean pushSent;
-        synchronized(threadLock) {
-            // only wait if we actually were able to send the push
-            manager.sendPush(rfd, threadLock);
-            
-            //No loop is actually needed here, assuming spurious
-            //notify()'s don't occur.  (They are not allowed by the Java
-            //Language Specifications.)  Look at acceptDownload for
-            //details.
-            try {
-                threadLock.wait(rfd.isFromAlternateLocation()? 
-                        UDP_PUSH_CONNECT_TIME: 
-                            PUSH_CONNECT_TIME);  
-            } catch(InterruptedException e) {
-                DownloadStat.PUSH_FAILURE_INTERRUPTED.incrementStat();
-                throw new IOException("push interupted.");
-            }
-            
-        }
-        
-        //Done waiting or were notified.
-        Socket pushSocket = (Socket)threadLockToSocket.remove(threadLock);
-        if (pushSocket==null) {
-            DownloadStat.PUSH_FAILURE_NO_RESPONSE.incrementStat();
-            
-            throw new IOException("push socket is null");
-        }
-        
-        miniRFDToLock.remove(mrfd);//we are not going to use it after this
-        ret = new HTTPDownloader(pushSocket, rfd, incFile);
-        
-        //Socket.getInputStream() throws IOX if the connection is closed.
-        //So this connectTCP *CAN* throw IOX.
-        try {
-            ret.connectTCP(0);//just initializes the byteReader in this case
-            DownloadStat.CONNECT_PUSH_SUCCESS.incrementStat();
-        } catch(IOException iox) {
-            DownloadStat.PUSH_FAILURE_LOST.incrementStat();
-            throw iox;
-        }
-        return ret;
-    }
-    
-    /** 
-     * Assigns a white area or a grey area to a downloader. Sets the state,
-     * and checks if this downloader has been interrupted.
-     * @param dloader The downloader to which this method assigns either
-     * a grey area or white area.
-     * @return the ConnectionStatus.
-     */
-    private ConnectionStatus assignAndRequest(HTTPDownloader dloader,
-                                              boolean http11) {
-        RemoteFileDesc rfd = dloader.getRemoteFileDesc();
-        if(LOG.isTraceEnabled())
-            LOG.trace(Thread.currentThread().hashCode()+" assignAndRequest for: " + rfd);
-        
-        try {
-            if (commonOutFile.hasFreeBlocksToAssign()) {
-                assignWhite(dloader,http11);
-            } else {
-                assignGrey(dloader,http11); 
-            }
-        } catch(NoSuchElementException nsex) {
-            DownloadStat.NSE_EXCEPTION.incrementStat();
-            if(LOG.isDebugEnabled())            
-                LOG.debug(Thread.currentThread().hashCode()+" nsex thrown in assingAndRequest "+dloader,nsex);
-            synchronized(this) {
-                // Add to files, keep checking for stalled uploader with
-                // this rfd
-                files.add(rfd);
-            }
-            return ConnectionStatus.getNoData();
-        } catch (NoSuchRangeException nsrx) { 
-            DownloadStat.NSR_EXCEPTION.incrementStat();
-            if(LOG.isDebugEnabled())
-                LOG.debug("nsrx thrown in assignAndRequest "+dloader,nsrx);
-            synchronized(this) {
-                //forget the ranges we are preteding uploader is busy.
-                rfd.setAvailableRanges(null);
-                //if this RFD did not already give us a retry-after header
-                //then set one for it.
-                if(!rfd.isBusy())
-                    rfd.setRetryAfter(NO_RANGES_RETRY_AFTER);
-                files.add(rfd);
-            }
-            rfd.resetFailedCount();                
-            return ConnectionStatus.getNoFile();
-        } catch(TryAgainLaterException talx) {
-            DownloadStat.TAL_EXCEPTION.incrementStat();
-            if(LOG.isDebugEnabled())
-                LOG.debug("talx thrown in assignAndRequest "+dloader,talx);
-                
-            //if this RFD did not already give us a retry-after header
-            //then set one for it.
-            if ( !rfd.isBusy() ) {
-                rfd.setRetryAfter(RETRY_AFTER_NONE_ACTIVE);
-            }
-            
-            synchronized(this) {
-                 //if we already have downloads going, then raise the
-                 //retry-after if it was less than the appropriate amount
-                if(dloaders.size() > 0 &&
-                   rfd.getWaitTime() < RETRY_AFTER_SOME_ACTIVE)
-                   rfd.setRetryAfter(RETRY_AFTER_SOME_ACTIVE);
-
-                files.add(rfd);//try this rfd later
-            }
-            rfd.resetFailedCount();                
-            return ConnectionStatus.getNoFile();
-        } catch(RangeNotAvailableException rnae) {
-            DownloadStat.RNA_EXCEPTION.incrementStat();
-            if(LOG.isDebugEnabled())
-                LOG.debug("rnae thrown in assignAndRequest "+dloader,rnae);
-            rfd.resetFailedCount();                
-            informMesh(rfd, true);
-            //no need to add to files or busy we keep iterating
-            return ConnectionStatus.getPartialData();
-        } catch (FileNotFoundException fnfx) {
-            DownloadStat.FNF_EXCEPTION.incrementStat();
-            if(LOG.isDebugEnabled())
-                LOG.debug("fnfx thrown in assignAndRequest"+dloader, fnfx);
-            informMesh(rfd, false);
-            return ConnectionStatus.getNoFile();
-        } catch (NotSharingException nsx) {
-            DownloadStat.NS_EXCEPTION.incrementStat();
-            if(LOG.isDebugEnabled())
-                LOG.debug("nsx thrown in assignAndRequest "+dloader, nsx);
-            informMesh(rfd, false);
-            return ConnectionStatus.getNoFile();
-        } catch (QueuedException qx) { 
-            DownloadStat.Q_EXCEPTION.incrementStat();
-            if(LOG.isDebugEnabled())
-                LOG.debug("qx thrown in assignAndRequest "+dloader, qx);
-            synchronized(this) {
-                if(dloaders.size()==0) {
-                    if(stopped || paused ||  Thread.currentThread().isInterrupted())
-                        return ConnectionStatus.getNoData(); // we were signalled to stop.
-                    setState(REMOTE_QUEUED);
-                }
-                
-                int newPos = qx.getQueuePosition();
-                if ( newPos < queuePosition ) {
-                    queuePosition = newPos;
-                    queuedVendor = dloader.getVendor();
-                }                    
-            }
-            rfd.resetFailedCount();                
-            return ConnectionStatus.getQueued(qx.getQueuePosition(),
-                                              qx.getMinPollTime());
-        } catch(ProblemReadingHeaderException prhe) {
-            DownloadStat.PRH_EXCEPTION.incrementStat();
-            if(LOG.isDebugEnabled())
-                LOG.debug("prhe thrown in assignAndRequest "+dloader,prhe);
-            informMesh(rfd, false);
-            return ConnectionStatus.getNoFile();
-        } catch(UnknownCodeException uce) {
-            DownloadStat.UNKNOWN_CODE_EXCEPTION.incrementStat();
-            if(LOG.isDebugEnabled())
-                LOG.debug("uce (" + uce.getCode() +
-                          ") thrown in assignAndRequest " +
-                          dloader, uce);
-            informMesh(rfd, false);
-            return ConnectionStatus.getNoFile();
-        } catch (ContentUrnMismatchException cume) {
-        	DownloadStat.CONTENT_URN_MISMATCH_EXCEPTION.incrementStat();
-        	if(LOG.isDebugEnabled())
-        		LOG.debug("cume thrown in assignAndRequest " + dloader, cume);
-			return ConnectionStatus.getNoFile();
-        } catch (IOException iox) {
-            DownloadStat.IO_EXCEPTION.incrementStat();
-            if(LOG.isDebugEnabled())
-                LOG.debug("iox thrown in assignAndRequest "+dloader, iox);
-            
-            rfd.incrementFailedCount();
-            
-            // if this RFD had an IOX while reading headers/downloading
-            // less than twice in succession, try it again.
-            if( rfd.getFailedCount() < 2 ) {
-                //set retry after, wait a little before retrying this RFD
-                rfd.setRetryAfter(FAILED_RETRY_AFTER);
-                synchronized(this) {
-                    files.add(rfd); 
-                }
-            } else //tried the location twice -- it really is bad
-                informMesh(rfd, false);         
-            return ConnectionStatus.getNoFile();
-        } finally {
-            addLocationsToDownload(dloader.getAltLocsReceived(),
-                                   dloader.getPushLocsReceived(),
-                                   rfd.getSize());
-        }
-        
-        //did not throw exception? OK. we are downloading
-        if(rfd.getFailedCount() > 0)
-            DownloadStat.RETRIED_SUCCESS.incrementStat();    
-        
-        rfd.resetFailedCount();
-
-        synchronized(this) {
-            if (stopped || paused || Thread.currentThread().isInterrupted()) {
-                LOG.trace("Stopped in assignAndRequest");
-                files.add(rfd);
-                return ConnectionStatus.getNoData();
-            }
-            
-            setState(DOWNLOADING);
-
-            // only add if not already added.
-            if(!dloaders.contains(dloader))
-                dloaders.add(dloader);
-            chatList.addHost(dloader);
-            browseList.addHost(dloader);
-        }
-
-        DownloadStat.RESPONSE_OK.incrementStat();            
-        return ConnectionStatus.getConnected();
-    }
-	
 	/**
 	 * Returns the number of alternate locations that this download is using.
 	 */
@@ -3108,354 +2505,29 @@ public class ManagedDownloader implements Downloader, Serializable {
      * Returns the amount of other hosts this download can possibly use.
      */
     public synchronized int getPossibleHostCount() {
-        return (files == null ? 0 : files.size());
+        return (rfds == null ? 0 : rfds.size());
     }
     
     public synchronized int getBusyHostCount() {
-        if (files == null) 
+        if (rfds == null) 
             return 0;
 
         int busy = 0;
-        for (int i = 0; i < files.size(); i++) {
-            if ( ((RemoteFileDesc)files.get(i)).isBusy() )
+        for (int i = 0; i < rfds.size(); i++) {
+            if ( ((RemoteFileDesc)rfds.get(i)).isBusy() )
                 busy++;
         }
         return busy;
     }
 
     public synchronized int getQueuedHostCount() {
-        return queuedThreads.size();
-    }
-
-    /**
-     * Assigns a white part of the file to a HTTPDownloader and returns it.
-     * This method has side effects.
-     */
-    private void assignWhite(HTTPDownloader dloader, boolean http11) throws 
-    IOException, TryAgainLaterException, FileNotFoundException, 
-    NotSharingException , QueuedException, NoSuchRangeException,
-    NoSuchElementException {
-        //Assign "white" (unclaimed) interval to new downloader.
-        //TODO2: assign to existing downloader if possible, without
-        //      increasing parallelis
-        Interval interval = null;
-        
-        // If it's not a partial source, take the first chunk.
-        // (If it's HTTP11, take the first chunk up to CHUNK_SIZE)
-        if( !dloader.getRemoteFileDesc().isPartialSource() ) {
-            if(http11)
-                interval = commonOutFile.leaseWhite(getChunkSize());
-            else
-                interval = commonOutFile.leaseWhite();
-        }
-        // If it is a partial source, extract the first needed/available range
-        // (If it's HTTP11, take the first chunk up to CHUNK_SIZE)
-        else {
-            try {
-                IntervalSet availableRanges =
-                    dloader.getRemoteFileDesc().getAvailableRanges();
-                if(http11)
-                    interval =
-                        commonOutFile.leaseWhite(availableRanges, getChunkSize());
-                else
-                    interval = commonOutFile.leaseWhite(availableRanges);
-            } catch(NoSuchElementException nsee) {
-                // if nothing satisfied this partial source, don't throw NSEE
-                // because that means there's nothing left to download.
-                // throw NSRE, which means that this particular source is done.
-                throw new NoSuchRangeException();
-            }
-        }
-        
-        //Intervals from the IntervalSet set are INCLUSIVE on the high end, but
-        //intervals passed to HTTPDownloader are EXCLUSIVE.  Hence the +1 in the
-        //code below.  Note connectHTTP can throw several exceptions.
-        int low = interval.low;
-        int high = interval.high; // INCLUSIVE
-        dloader.connectHTTP(getOverlapOffset(low), high + 1, true);
-        //The dloader may have told us that we're going to read less data than
-        //we expect to read.  We must release the not downloading leased intervals
-        //note the confusion caused by downloading overlap
-        //regions.  We only want to release a range if the reported subrange
-        //was different, and was HIGHER than the low point.        
-        int newLow = dloader.getInitialReadingPoint();
-        int newHigh = (dloader.getAmountToRead() - 1) + newLow; // INCLUSIVE
-        if(newLow > low) {
-            if(LOG.isDebugEnabled())
-                LOG.debug("WORKER:"+Thread.currentThread().hashCode()+
-                        " Host gave subrange, different low.  Was: " +
-                          low + ", is now: " + newLow);
-            commonOutFile.releaseBlock(new Interval(low, newLow-1));
-        }
-        if(newHigh < high) {
-            if(LOG.isDebugEnabled())
-                LOG.debug("WORKER:"+Thread.currentThread().hashCode()+
-                        " Host gave subrange, different high.  Was: " +
-                          high + ", is now: " + newHigh);
-            commonOutFile.releaseBlock(new Interval(newHigh+1, high));
-        }
-        
-        if(LOG.isDebugEnabled())
-            LOG.debug("WORKER:"+Thread.currentThread().hashCode()+
-                    " assigning white " + newLow + "-" + newHigh +
-                      " to " + dloader);
-    }
-
-
-    /**
-     * Steals a grey area from the biggesr HTTPDownloader and gives it to
-     * the HTTPDownloader this method will return. 
-     * <p> 
-     * If there is less than MIN_SPLIT_SIZE left, we will assign the entire
-     * area to a new HTTPDownloader, if the current downloader is going too
-     * slow.
-     */
-    private void assignGrey(HTTPDownloader dloader, boolean http11) throws
-    NoSuchElementException,  IOException, TryAgainLaterException, 
-    QueuedException, FileNotFoundException, NotSharingException,  
-    NoSuchRangeException  {
-        //If this dloader is a partial source, don't attempt to steal...
-        //too confusing, too many problems, etc...
-        if( dloader.getRemoteFileDesc().isPartialSource() )
-            throw new NoSuchRangeException();
-
-        //Split largest "gray" interval, i.e., steal part of another
-        //downloader's region for a new downloader.  
-        //TODO3: split interval into P-|dloaders|, etc., not just half
-        //TODO3: there is a minor race condition where biggest and 
-        //      dloader could write to the same region of the file
-        //      I think it's ok, though it could result in >100% in the GUI
-        HTTPDownloader biggest = null;
-        synchronized (this) {
-	        //if (!commonOutFile.isComplete())
-            	//Assert.silent(!dloaders.isEmpty());
-            for (Iterator iter=dloaders.iterator(); iter.hasNext();) {
-                HTTPDownloader h = (HTTPDownloader)iter.next();
-                // If this guy isn't downloading, don't steal from him.
-                if(!h.isActive())
-                    continue;
-                // If we have no one to steal from, use 
-                if(biggest == null)
-                    biggest = h;
-                // Otherwise, steal only if what's left is
-                // larger and there's stuff left.
-                else {
-                    int hLeft = h.getAmountToRead() - h.getAmountRead();
-                    int bLeft = biggest.getAmountToRead() - 
-                                biggest.getAmountRead();
-                    if( hLeft > 0 && hLeft > bLeft )
-                        biggest = h;
-                }
-            }                
-        }
-        if (biggest==null) {//Not using downloader...but RFD maybe useful
-
-	    // Note: there is a rare scenario where if there are no
-	    // active downloaders but there are some connecting ones
-	    // who have already leased the entire file we will lose
-	    // this downloader.  
-	    // How much is this an issue with 99.9% of the network http1.1?
-            throw new NoSuchElementException();
-        }
-
-        //Note that getAmountToRead() and getInitialReadingPoint() are
-        //constant.  getAmountRead() is not, so we "capture" it into a
-        //variable.
-        int amountRead = biggest.getAmountRead();
-        int left = biggest.getAmountToRead()-amountRead;
-        //check if we need to steal the last chunk from a slow downloader.
-        //TODO4: Should we check left < CHUNK_SIZE+OVERLAP_BYTES
-        if ((http11 && left<getChunkSize()) || (!http11 && left < MIN_SPLIT_SIZE)){ 
-            float bandwidthVictim = -1;
-            float bandwidthStealer = -1;
-            
-            try {
-                bandwidthVictim = biggest.getAverageBandwidth();
-                biggest.getMeasuredBandwidth(); // trigger IDE.
-            } catch (InsufficientDataException ide) {
-                LOG.debug(Thread.currentThread().hashCode()+" victim does not have datapoints", ide);
-                bandwidthVictim = -1;
-            }
-            try {
-                bandwidthStealer = dloader.getAverageBandwidth();
-                dloader.getMeasuredBandwidth(); // trigger IDE.
-            } catch(InsufficientDataException ide) {
-                LOG.debug(Thread.currentThread().hashCode()+" stealer does not have datapoints", ide);
-                bandwidthStealer = -1;
-            }
-            
-            if(LOG.isDebugEnabled())
-                LOG.debug("WORKER: "+Thread.currentThread().hashCode()+" " 
-                        	+ dloader + " attempting to steal from " + 
-                          biggest + ", stealer speed [" + bandwidthStealer +
-                          "], victim speed [ " + bandwidthVictim + "]");
-            
-            // If we do have a measured bandwidth for the existing download,
-            // and it is slower than what is acceptable, let the new guy steal.
-            // OR
-            // If the new guy is of an acceptable speed and his average
-            // bandwidth is faster than the existing one, let him steal.
-            if((bandwidthVictim != -1 &&
-                bandwidthVictim < MIN_ACCEPTABLE_SPEED) ||
-               (bandwidthStealer > MIN_ACCEPTABLE_SPEED &&
-                bandwidthStealer > bandwidthVictim)) {
-                //replace (bad boy) biggest if possible
-                int start = biggest.getInitialReadingPoint() + amountRead;
-                int stop = biggest.getInitialReadingPoint() + 
-                           biggest.getAmountToRead();
-                // If we happened to finish off the download, throw NSEX
-                // and so we don't download any more.
-                if(stop <= start)
-                    throw new NoSuchElementException();
-                //Note: we are not interested in being queued at this point this
-                //line could throw a bunch of exceptions (not queuedException)
-                dloader.connectHTTP(getOverlapOffset(start), stop, false);
-                int newLow = dloader.getInitialReadingPoint();
-                int newHigh = dloader.getAmountToRead() + newLow; // EXCLUSIVE
-                // If the stealer isn't going to give us everything we need,
-                // there's no point in stealing, so throw an exception and
-                // don't steal.
-                if( newLow > start || newHigh < stop ) {
-                    if(LOG.isDebugEnabled())
-                        LOG.debug("WORKER: not stealing because stealer " +
-                                  "gave a subrange.  Expected low: " + start +
-                                  ", high: " + stop + ".  Was low: " + newLow +
-                                  ", high: " + newHigh);
-                    throw new IOException("bad stealer.");
-                }
-                if(LOG.isDebugEnabled())
-                    LOG.debug("WORKER:"+Thread.currentThread().hashCode()+
-                            " picking stolen grey "
-                      +start+"-"+stop+" from "+biggest+" to "+dloader);
-                biggest.stopAt(start);
-                biggest.stop();
-            }
-            else { //less than MIN_SPLIT_SIZE...but we are doing fine...
-                throw new NoSuchElementException();
-            }
-        }
-        else { //There is a big enough chunk to split...split it
-            int start;
-            if(http11) { //steal CHUNK_SIZE bytes from the end
-                start = biggest.getInitialReadingPoint() +
-                        biggest.getAmountToRead() - getChunkSize() + 1;
-            } else {
-                start= biggest.getInitialReadingPoint() + amountRead + left/2;
-            }
-            int stop = biggest.getInitialReadingPoint() + 
-                       biggest.getAmountToRead();
-            // If we happened to finish off the dl, don't download any more
-            if(stop <= start)
-                throw new NoSuchElementException();
-            //this line could throw a bunch of exceptions
-            dloader.connectHTTP(getOverlapOffset(start), stop, true);
-            int newLow = dloader.getInitialReadingPoint();
-            int newHigh = dloader.getAmountToRead() + newLow; // EXCLUSIVE
-            if(newHigh < stop) {
-                // We have a stealer, but he isn't going to give us all the
-                // data we want, so discard him.
-                if(LOG.isDebugEnabled())
-                    LOG.debug("WORKER: not stealing because stealer " +
-                              "gave a lower high.  Expected high: " + 
-                              stop + ".  Was high: " + newHigh);
-                throw new IOException("bad stealer");
-            }
-            
-            if(LOG.isDebugEnabled())
-                LOG.debug("WORKER: assigning split grey "
-                  +newLow+"-"+newHigh+" from "+biggest+" to "+dloader);
-            // Refocus the start with this new data, if the downloader
-            // actually gave us a higher low value.  This is so we
-            // don't tell the currently downloading guy to stop downloading
-            // data we aren't going to get.
-            if(newLow > start)
-                start = newLow;
-            biggest.stopAt(start);//we know that biggest must be http1.0
-        }
-    }
-
-
-    /**
-     * Offsets i by OVERLAP_BYTES.  Used when requesting the start-range
-     * for downloading.
-     * If we have a valid hashTree we do not request overlaps.
-     */
-    private int getOverlapOffset(int i) {
-        synchronized(hashTreeLock) {
-        return getHashTree() == null ? Math.max(0, i-OVERLAP_BYTES) : i;
-        }
-    }
-    
-    /**
-     * Attempts to run downloader.doDownload, notifying manager of termination
-     * via downloaders.notify(). 
-     * To determine when this downloader should be removed
-     * from the dloaders list: never remove the downloader
-     * from dloaders if the uploader supports persistence, unless we get an
-     * exception - in which case we do not add it back to files.  If !http11,
-     * then we remove from the dloaders in the finally block and add to files as
-     * before if no problem was encountered.   
-     * 
-     * @param downloader the normal or push downloader to use for the transfer,
-     * which MUST be initialized (i.e., downloader.connectTCP() and
-     * connectHTTP() have been called)
-     *
-     * @return true if there was no IOException while downloading, false
-     * otherwise.  
-     */
-    private boolean doDownload(HTTPDownloader downloader, boolean http11) {
-        if(LOG.isTraceEnabled())
-            LOG.trace("WORKER: about to start downloading "+downloader);
-        boolean problem = false;
-        RemoteFileDesc rfd = downloader.getRemoteFileDesc();            
-        try {
-            downloader.doDownload(commonOutFile);
-            rfd.resetFailedCount();
-            if(http11)
-                DownloadStat.SUCCESFULL_HTTP11.incrementStat();
-            else
-                DownloadStat.SUCCESFULL_HTTP10.incrementStat();
-        } catch (IOException e) {
-            if(http11)
-                DownloadStat.FAILED_HTTP11.incrementStat();
-            else
-                DownloadStat.FAILED_HTTP10.incrementStat();
-            problem = true;
-			chatList.removeHost(downloader);
-            browseList.removeHost(downloader);
-        } finally {
-            int stop=downloader.getInitialReadingPoint()
-                        +downloader.getAmountRead();
-            if(LOG.isDebugEnabled())
-                LOG.debug("    WORKER:+"+Thread.currentThread().hashCode()+
-                        " terminating from "+downloader+" at "+stop+ 
-                  " error? "+problem);
-            synchronized (this) {
-                if (problem) {
-                    downloader.stop();
-                    rfd.incrementFailedCount();
-                    // if we failed less than twice in succession,
-                    // try to use the file again much later.
-                    if( rfd.getFailedCount() < 2 ) {
-                        rfd.setRetryAfter(FAILED_RETRY_AFTER);
-                        files.add(rfd);
-                    } else
-                        informMesh(rfd, false);
-                } else {
-                    informMesh(rfd, true);
-                    if( !http11 ) // no need to add http11 dloaders to files
-                        files.add(rfd);
-                }
-            }
-        }
-        
-        return !problem;
+        return queuedWorkers.size();
     }
 
     /**
      * Release the ranges assigned to a downloader  
      */
-    private void releaseRanges(HTTPDownloader dloader) {
+    void releaseRanges(HTTPDownloader dloader) {
         int low=dloader.getInitialReadingPoint();
         int high = dloader.getInitialReadingPoint()+dloader.getAmountToRead()-1;
         //note: the high'th byte will also be downloaded.
@@ -3475,11 +2547,11 @@ public class ManagedDownloader implements Downloader, Serializable {
         //and load, but that's hard to do.  It should also avoid swarming from
         //locations without hashes if throughput is good enough.
         //and load, but that's hard to do.
-        int downloads=threads.size();
+        int downloads=_workers.size();
         return getSwarmCapacity() - downloads;
     }
 
-    private int getSwarmCapacity() {
+    int getSwarmCapacity() {
         int capacity = ConnectionSettings.CONNECTION_SPEED.getValue();
         if(capacity <= SpeedConstants.MODEM_SPEED_INT) //modems swarm = 2
             return SpeedConstants.MODEM_SWARM;
@@ -3503,7 +2575,7 @@ public class ManagedDownloader implements Downloader, Serializable {
     private synchronized RemoteFileDesc removeBest() {
         //Lock is needed here because file can be modified by
         //worker thread.
-        Iterator iter=files.iterator();
+        Iterator iter=rfds.iterator();
         //The best rfd found so far
         RemoteFileDesc ret=(RemoteFileDesc)iter.next();
 
@@ -3540,7 +2612,7 @@ public class ManagedDownloader implements Downloader, Serializable {
             }
         }
             
-        boolean removed = files.remove(ret);
+        boolean removed = rfds.remove(ret);
         Assert.that(removed == true, "unable to remove RFD.");
         return ret;
     }
@@ -3616,11 +2688,9 @@ public class ManagedDownloader implements Downloader, Serializable {
     /////////////////////////////Display Variables////////////////////////////
 
     /** Same as setState(newState, Integer.MAX_VALUE). */
-    private void setState(int newState) {
-        synchronized (this) {
-            this.state=newState;
-            this.stateTime=Long.MAX_VALUE;
-        }
+    synchronized void setState(int newState) {
+        this.state=newState;
+        this.stateTime=Long.MAX_VALUE;
     }
 
     /** 
@@ -3630,11 +2700,9 @@ public class ManagedDownloader implements Downloader, Serializable {
      * @param time the time we expect to state in this state, in 
      *  milliseconds. 
      */
-    private void setState(int newState, long time) {
-        synchronized (this) {
+    synchronized void setState(int newState, long time) {
             this.state=newState;
             this.stateTime=System.currentTimeMillis()+time;
-        }
     }
     
     /**
@@ -3714,14 +2782,14 @@ public class ManagedDownloader implements Downloader, Serializable {
         //If we're not actually downloading, we just pick some random value.
         //TODO: this can also mean we've FINISHED the download.  Luckily it
         //doesn't really matter.
-        if (dloaders.size()==0) {
+        if (_activeWorkers.size()==0) {
 			if (allFiles.length > 0)
                 return allFiles[0].getSize();
 			else 
 				return -1;
         } else 
             //Could also use currentFileSize, but this works.
-            return ((HTTPDownloader)dloaders.get(0))
+            return ((HTTPDownloader)_activeWorkers.get(0))
                       .getRemoteFileDesc().getSize();
     }
 
@@ -3753,6 +2821,11 @@ public class ManagedDownloader implements Downloader, Serializable {
     public String getAddress() {
         return currentLocation;
     }
+    
+    synchronized void setAddress(String s) {
+        currentLocation = s;
+    }
+    
                                  
     public synchronized Iterator /* of Endpoint */ getHosts() {
         return getHosts(false);
@@ -3781,8 +2854,33 @@ public class ManagedDownloader implements Downloader, Serializable {
         return queuePosition;
     }
     
-    public synchronized int getNumDownloaders() {
-        return dloaders.size() + queuedThreads.size();
+    public int getNumDownloaders() {
+        return getActiveWorkers().size() + getQueuedWorkers().size();
+    }
+    
+    List getActiveWorkers() {
+        return _activeWorkers;
+    }
+    
+    synchronized void removeQueuedWorker(DownloadWorker unQueued) {
+        Map m = new HashMap(getQueuedWorkers());
+        m.remove(unQueued);
+        queuedWorkers = Collections.unmodifiableMap(m);
+    }
+    
+    synchronized void addQueuedWorker(DownloadWorker queued, int position) {
+        Map m = new HashMap(getQueuedWorkers());
+        m.put(queued,new Integer(position));
+        queuedWorkers = Collections.unmodifiableMap(m);
+    }
+    
+    Map getQueuedWorkers() {
+        return queuedWorkers;
+    }
+    
+    int getWorkerQueuePosition(DownloadWorker worker) {
+        Integer i = (Integer) getQueuedWorkers().get(worker);
+        return i == null ? -1 : i.intValue();
     }
     
     public HashTree getHashTree() {
@@ -3790,11 +2888,27 @@ public class ManagedDownloader implements Downloader, Serializable {
             return hashTree;
         }
     }
+    
+    /**
+     * sets the HashTree the current download will use.  That affects whether
+     * we do overlap checking.
+     */
+    public void setHashTree(HashTree tree) {
+        synchronized(hashTreeLock) {
+            hashTree = tree;
+        }
+        if (tree != null)
+            commonOutFile.setCheckOverlap(false);
+    }
+    
+    public synchronized Object getStealLock() {
+        return stealLock;
+    }
 
     private final Iterator getHosts(boolean chattableOnly) {
         List /* of Endpoint */ buf=new LinkedList();
-        for (Iterator iter=dloaders.iterator(); iter.hasNext(); ) {
-            HTTPDownloader dloader=(HTTPDownloader)iter.next();            
+        for (Iterator iter=_activeWorkers.iterator(); iter.hasNext(); ) {
+            HTTPDownloader dloader=((DownloadWorker)iter.next()).getDownloader();            
             if (chattableOnly ? dloader.chatEnabled() : true) {                
                 buf.add(new Endpoint(dloader.getInetAddress().getHostAddress(),
                                      dloader.getPort()));
@@ -3804,8 +2918,8 @@ public class ManagedDownloader implements Downloader, Serializable {
     }
     
     public synchronized String getVendor() {
-        if ( dloaders.size() > 0 ) {
-            HTTPDownloader dl = (HTTPDownloader)dloaders.get(0);
+        if ( _activeWorkers.size() > 0 ) {
+            HTTPDownloader dl = ((DownloadWorker)_activeWorkers.get(0)).getDownloader();
             return dl.getVendor();
         } else if (getState() == REMOTE_QUEUED) {
             return queuedVendor;
@@ -3817,10 +2931,10 @@ public class ManagedDownloader implements Downloader, Serializable {
     public synchronized void measureBandwidth() {
         float currentTotal = 0f;
         boolean c = false;
-        Iterator iter = dloaders.iterator();
+        Iterator iter = _activeWorkers.iterator();
         while(iter.hasNext()) {
             c = true;
-            BandwidthTracker dloader = (BandwidthTracker)iter.next();
+            BandwidthTracker dloader = ((DownloadWorker)iter.next()).getDownloader();
             dloader.measureBandwidth();
 			currentTotal += dloader.getAverageBandwidth();
 		}
@@ -3829,11 +2943,11 @@ public class ManagedDownloader implements Downloader, Serializable {
 		                    / ++numMeasures;
     }
     
-    public synchronized float getMeasuredBandwidth() {
+    public float getMeasuredBandwidth() {
         float retVal = 0f;
-        Iterator iter = dloaders.iterator();
+        Iterator iter = getActiveWorkers().iterator();
         while(iter.hasNext()) {
-            BandwidthTracker dloader = (BandwidthTracker)iter.next();
+            BandwidthTracker dloader = ((DownloadWorker)iter.next()).getDownloader();
             float curr = 0;
             try {
                 curr = dloader.getMeasuredBandwidth();
@@ -3854,7 +2968,7 @@ public class ManagedDownloader implements Downloader, Serializable {
 
 	public int getChunkSize() {
 	    synchronized(hashTreeLock) {
-	        return hashTree == null ? DEFAULT_CHUNK_SIZE : hashTree.getNodeSize();
+	        return hashTree == null ? DownloadWorker.DEFAULT_CHUNK_SIZE : hashTree.getNodeSize();
 	    }
 	}
 	

@@ -310,11 +310,11 @@ public class VerifyingFile {
         if (checkOverlap) {
             // damn you, overlap checking!
             while (temp != null 
-                    && temp.high - temp.low <= ManagedDownloader.OVERLAP_BYTES)
+                    && temp.high - temp.low <= DownloadWorker.OVERLAP_BYTES)
                 temp = ranges.removeFirst();
             
             ret =
-                new Interval(temp.low+ManagedDownloader.OVERLAP_BYTES, temp.high);
+                new Interval(temp.low+DownloadWorker.OVERLAP_BYTES, temp.high);
         } else 
             ret = ranges.removeFirst();
 
