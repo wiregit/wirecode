@@ -215,12 +215,14 @@ public final class AlternateLocation implements Comparable {
 	 * Compares <tt>AlternateLocation</tt> instances by date.  
 	 *
 	 * @param obj the <tt>Object</tt> instance to be compared
-     * @return  the value <tt>0</tt> if the argument is an <tt>AlternateLocation</tt> 
-	 *  with a timestamp equal to this <tt>AlternateLocation</tt>'s timestamp; 
-	 *  a value less than <tt>0</tt> if the argument is an <tt>AlternateLocation</tt>
-	 *  with a timestamp after this <tt>AlternateLocation</tt>s timestamp; and a 
-	 *  value greater than <tt>0</tt> if the argument is an <tt>AlternateLocation</tt> 
-	 *  with a timestamp before the timestamp of this <tt>AlternateLocation</tt>
+     * @return  the value <tt>0</tt> if the argument is an 
+	 *  <tt>AlternateLocation</tt> with a timestamp equal to this 
+	 *  <tt>AlternateLocation</tt>'s timestamp; a value less than <tt>0</tt> 
+	 *  if the argument is an <tt>AlternateLocation</tt> with a timestamp 
+	 *  after this <tt>AlternateLocation</tt>s timestamp; and a value greater 
+	 *  than <tt>0</tt> if the argument is an <tt>AlternateLocation</tt> 
+	 *  with a timestamp before the timestamp of this 
+	 *  <tt>AlternateLocation</tt>
      * @exception <tt>ClassCastException</tt> if the argument is not an
      *  <tt>AlternateLocation</tt> 
 	 * @see java.util.Date
