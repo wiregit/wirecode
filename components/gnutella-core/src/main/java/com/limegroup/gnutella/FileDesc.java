@@ -13,6 +13,7 @@ public class FileDesc {
     public String _path;
     public String _name;
     public int _size;
+    public ID3Tag _id3Tag;
 
     /**
      * @param i index of the file
@@ -21,18 +22,11 @@ public class FileDesc {
      *  (e.g., "/home/local/funny.txt")
      * @param s the size of the file, in bytes
      */
-    public FileDesc(int i, String n, String p, int s) {
+    public FileDesc(int i, String n, String p, int s, ID3Tag id3Tag) {
         _index = i;
         _name = n;
         _path = p;
         _size = s;
-    }
-
-    public void print() {
-        System.out.println("Name: " + _name);
-        System.out.println("Index: " + _index);
-        System.out.println("Size: " + _size);
-        System.out.println("Path: " + _path);
-        System.out.println(" ");
+        _id3Tag = id3Tag;
     }
 }

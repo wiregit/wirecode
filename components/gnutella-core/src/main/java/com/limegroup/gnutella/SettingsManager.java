@@ -52,6 +52,7 @@ public class SettingsManager implements SettingsInterface
     private static String   directories_;
     private static String   extensions_;
     private static String   incompleteDirectory_;
+    private static String   gmlTemplateDirectory_;
     private static String[] bannedIps_;
     private static String[] bannedWords_;
     private static boolean  filterDuplicates_;
@@ -455,6 +456,7 @@ public class SettingsManager implements SettingsInterface
         setSaveDirectory(home_);
         setSaveDefault(home_);
         setIncompleteDirectory(home_);
+        setGMLTemplateDirectory(home_);
         //setInstallDir("");
         setUseQuickConnect(DEFAULT_USE_QUICK_CONNECT);
         setQuickConnectHosts(DEFAULT_QUICK_CONNECT_HOSTS);
@@ -474,8 +476,7 @@ public class SettingsManager implements SettingsInterface
         setAdvancedInfoForQuery(DEFAULT_ADVANCED_INFO_FOR_QUERY);
         setForceIPAddress(DEFAULT_FORCE_IP_ADDRESS);
         setForcedIPAddress(DEFAULT_FORCED_IP_ADDRESS);
-        setForcedIPAddressString
-        (DEFAULT_FORCED_IP_ADDRESS_STRING);
+        setForcedIPAddressString(DEFAULT_FORCED_IP_ADDRESS_STRING);
         setForcedPort(DEFAULT_FORCED_PORT);
         setFreeloaderFiles(DEFAULT_FREELOADER_FILES);
         setFreeloaderAllowed(DEFAULT_FREELOADER_ALLOWED);
@@ -551,6 +552,17 @@ public class SettingsManager implements SettingsInterface
         return incompleteDirectory_;
     }
 
+    /** returns the GML template directory */
+    public String getGMLTemplateDirectory() {
+        File file = new File(gmlTemplateDirectory_);
+        if(!file.isDirectory()) {
+            boolean dirsMade = file.mkdirs();
+            if(!dirsMade)
+                return "";
+        }
+        return gmlTemplateDirectory_;
+    }
+
     /** returns the default save directory */
     public String getSaveDefault() {
         File file = new File(saveDefault_);
@@ -599,7 +611,6 @@ public class SettingsManager implements SettingsInterface
      *  This is solely a convenience routine. */
     public String getConnectStringRemainder(){ return connectStringRemainder_; }
     public String getConnectOkString(){ return connectOkString_; }
-
 
     // SPECIALIZED METHODS FOR NETWORK DISCOVERY
     /** returns the Network Discovery specialized properties file */
@@ -833,7 +844,20 @@ public class SettingsManager implements SettingsInterface
             throw new IllegalArgumentException();
         else {
             incompleteDirectory_ = dir;
-            props_.put(INCOMPLETE_DIR, dir);
+            props_.put(SettingsInterface.INCOMPLETE_DIR, dir);
+        }
+    }
+
+    public synchronized void setGMLTemplateDirectory(String dir) {
+        if(!dir.endsWith(File.separator))
+            dir += File.separator;
+        File f = new File(dir);
+        boolean b = f.isDirectory();
+        if(b == false)
+            throw new IllegalArgumentException();
+        else {
+            gmlTemplateDirectory_ = dir;
+            props_.put(SettingsInterface.GML_TEMPLATE_DIR, dir);
         }
     }
 

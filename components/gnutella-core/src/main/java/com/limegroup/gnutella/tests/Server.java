@@ -30,8 +30,8 @@ private SThread[] sThreads;
 /**
 * A random number for random usage
 */
-private Random random = new Random();    
-   
+private Random random = new Random();
+
 
 public Server(String host, int port, int numThreads)
 {
@@ -42,7 +42,7 @@ public Server(String host, int port, int numThreads)
 
 
 
-private static void syntaxError() 
+private static void syntaxError()
 {
     System.err.println("Syntax: java com.limegroup.gnutella.tests.Server "
                        +"<host> <port> <connections>");
@@ -50,42 +50,42 @@ private static void syntaxError()
 }
 
 public static void main(String args[]) {
-    try 
+    try
     {
         //parse host and port number
         String host=args[0];
         int port=Integer.parseInt(args[1]);
         int numThreads = Integer.parseInt(args[2]);
-        
+
         //create a new server instance
         Server server =new Server(host, port, numThreads);
         server.doTest();
-    } 
-    catch (NumberFormatException e) 
+    }
+    catch (NumberFormatException e)
     {
         syntaxError();
-    } 
-    catch (ArrayIndexOutOfBoundsException e) 
+    }
+    catch (ArrayIndexOutOfBoundsException e)
     {
         syntaxError();
-    } 
+    }
 }
 
-public void doTest() 
-{      
+public void doTest()
+{
     //Start the required number of sThreads
-    
+
     //allocate the required number of SThreads
     sThreads = new SThread[numThreads];
-    
+
     //start the Threads
     for(int i=0; i < numThreads; i++)
     {
         sThreads[i] = new SThread();
         (new Thread(sThreads[i])).start();
     }
-    
-  
+
+
 }
 
 
@@ -98,7 +98,7 @@ private class SThread implements Runnable
 private Vector queryRequests = new Vector(20, 10);
 
 private boolean shouldRunResponder = false;
-    
+
 /**
 * Connecion for this thread
 */
@@ -108,7 +108,7 @@ public void run()
 {
 
     try
-    {           
+    {
         //open the connection to the servent
         connection = new Connection(host, port);
         connection.initialize();
@@ -129,7 +129,7 @@ public void run()
 //            }
 //            catch(InterruptedException ie)
 //            {
-//            } 
+//            }
 //        }
         Responder responder = new Responder();
         new Thread(responder).start();
@@ -140,7 +140,7 @@ public void run()
         System.err.println("Connections terminated; test is not valid.");
         System.exit(1);
     }
- 
+
 }//end of fn run
 
 
@@ -154,29 +154,29 @@ private class Responder implements Runnable
 /**
 * The requests received (may not be up-to-date)
 */
-QueryRequest[] requests = null;    
+QueryRequest[] requests = null;
 
 
-    
+
 public void run()
-{    
-    
+{
+
     try
     {
         while(true)
         {
-            
+
             //for efficiency reasons, the list of queryRequests is consulted for any
             //new additions, only periodically
-            
+
             int size = 0;
             while( size <= 0)
             {
-            
+
                 synchronized(queryRequests)
                 {
                     size = queryRequests.size();
-                    
+
                     if(size > 0)
                     {
                         //create the array
@@ -184,7 +184,7 @@ public void run()
 
                         //fill the array
                         Enumeration e = queryRequests.elements();
-                        for(int i=0; e.hasMoreElements(); i++) 
+                        for(int i=0; e.hasMoreElements(); i++)
                         {
                             try
                             {
@@ -199,8 +199,8 @@ public void run()
                     }
 
                 }//end of synchronization
-                
-                
+
+
                 //System.out.println("clients = " + size);
                 if(size <= 0)
                 {
@@ -220,7 +220,7 @@ public void run()
 
 
             //Now write replies as fast as possible from each of the request.
-            Response[] responses={new Response(0, 20, "file.mp3" + random.nextInt())};
+            Response[] responses={new Response(0, 20, "file.mp3" + random.nextInt(), "")};
 
             byte[] clientGUID=new byte[16]; //different for each response
             byte[] ip=new byte[4];          //different for each response
@@ -232,19 +232,19 @@ public void run()
             //send replies 1000 times before consulting for new queries
             for(int j=0; j < 1000; j++)
             {
-                for (int i=0; i < n ;i++) 
-                {    
+                for (int i=0; i < n ;i++)
+                {
                     random.nextBytes(clientGUID);
                     random.nextBytes(ip);
                     QueryReply reply=new QueryReply(requests[i].getGUID(), (byte)5, 6346,
                                                     ip, 56, responses, clientGUID);
                     reply.hop();  //so servent doesn't think it's from me
-                    connection.send(reply); 
+                    connection.send(reply);
                     connection.flush();
                     //System.out.println("reply sent");
-                }//end of inner for	
+                }//end of inner for
             }//end of outer for
-            
+
             Thread.yield();
 
         }//end of while true
@@ -252,9 +252,9 @@ public void run()
     catch(IOException ioe)
     {
         System.err.println("Connections terminated; test is not valid.");
-        System.exit(1);    
+        System.exit(1);
     }
-        
+
 }//end of run
 
 }//end of class Responder
@@ -268,24 +268,24 @@ private void addRequest(QueryRequest request)
     synchronized(queryRequests)
     {
         queryRequests.addElement(request);
-        
+
         //System.out.println("added request: " + request);
     }
 }
 
 
-/** 
+/**
 * Inner class to the SThread class. It receives the requests
 * and notifies SThread of the new requests
 */
 private class RequestReceiver implements Runnable
 {
-    
+
 public void run()
 {
     try
     {
-        //Get the query requests 
+        //Get the query requests
 
         //declare the variables to be used inside the loops
         Message m = null;
@@ -309,7 +309,7 @@ public void run()
                 //continue to the beginning of the while loop
                 continue;
             }
-            else if (m instanceof QueryRequest) 
+            else if (m instanceof QueryRequest)
             {
                 //get the request object
                 request = (QueryRequest)m;
@@ -319,20 +319,20 @@ public void run()
             }
         }
     }
-    catch(IOException e) 
+    catch(IOException e)
     {
         System.err.println("Connections terminated; test is not valid.");
         System.exit(1);
-    } 
-    catch(BadPacketException e) 
+    }
+    catch(BadPacketException e)
     {
         e.printStackTrace();
         System.err.println("Got bad packet;  test is not valid.");
         System.exit(1);
     }
-        
+
 }//end of fn run
-    
+
 }//end of class RequestReceiver
 
 }//end of class SThread

@@ -10,17 +10,17 @@ public class ByteOrder {
     public static byte[] reverse(byte[] x) {
         int n=x.length;
         byte[] ret=new byte[n];
-        for (int i=0; i<n; i++) 
+        for (int i=0; i<n; i++)
             ret[i]=x[n-i-1];
         return ret;
     }
 
-    /** 
+    /**
      *  Little-endian bytes to short
-     * 
+     *
      * @requires x.length-offset>=2
-     * @effects returns the value of x[offset..offset+2] as a short, 
-     *   assuming x is interpreted as a signed little endian number (i.e., 
+     * @effects returns the value of x[offset..offset+2] as a short,
+     *   assuming x is interpreted as a signed little endian number (i.e.,
      *   x[offset] is LSB).  If you want to interpret it as an unsigned number,
      *   call ubytes2int on the result.
      */
@@ -30,12 +30,12 @@ public class ByteOrder {
         return (short)(x1|x0);
     }
 
-    /** 
+    /**
      * Little-endian bytes to int
-     * 
+     *
      * @requires x.length-offset>=4
-     * @effects returns the value of x[offset..offset+4] as an int, 
-     *   assuming x is interpreted as a signed little endian number (i.e., 
+     * @effects returns the value of x[offset..offset+4] as an int,
+     *   assuming x is interpreted as a signed little endian number (i.e.,
      *   x[offset] is LSB) If you want to interpret it as an unsigned number,
      *   call ubytes2int on the result.
      */
@@ -68,7 +68,7 @@ public class ByteOrder {
     }
 
     /**
-     * Interprets the value of x as an unsigned byte, and returns 
+     * Interprets the value of x as an unsigned byte, and returns
      * it as integer.  For example, ubyte2int(0xFF)==255, not -1.
      */
     public static int ubyte2int(byte x) {
@@ -97,7 +97,7 @@ public class ByteOrder {
     //      Assert.that(result1==(short)258, "result1="+result1 );  //256+2;
     //      byte[] x1b=new byte[2];
     //      short2leb(result1, x1b, 0);
-    //      for (int i=0; i<2; i++) 
+    //      for (int i=0; i<2; i++)
     //          Assert.that(x1b[i]==x1[i]);
 
     //      byte[] x2={(byte)0x2, (byte)0, (byte)0, (byte)0x1};
@@ -107,9 +107,9 @@ public class ByteOrder {
 
     //      byte[] x2b=new byte[4];
     //      int2leb(result2, x2b, 0);
-    //      for (int i=0; i<4; i++) 
+    //      for (int i=0; i<4; i++)
     //          Assert.that(x2b[i]==x2[i]);
-    
+
     //      byte[] x3={(byte)0x00, (byte)0xF3, (byte)0, (byte)0xFF};
     //      int result3=leb2int(x3,0);
     //      Assert.that(result3==0xFF00F300, Integer.toHexString(result3));
@@ -130,7 +130,7 @@ public class ByteOrder {
     //      Assert.that(in2<0,"L122");
     //      Assert.that(ubytes2int(in2)==0x0000FFFF, "L123");
     //      Assert.that(ubytes2int(in2)>0, "L124");
-    
+
     //      int in3=(int)0xFFFFFFFF;
     //      Assert.that(in3<0, "L127");
     //      Assert.that(ubytes2long(in3)==0x00000000FFFFFFFFl, "L128");

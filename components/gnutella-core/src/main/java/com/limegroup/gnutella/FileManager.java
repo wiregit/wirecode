@@ -71,8 +71,8 @@ public class FileManager{
      * IndexOutOfBoundsException if the index is not valid, either because the
      * file was never shared or was "unshared".<p>
      *
-     * Design note: this is slightly unusual use of NoSuchElementException.  For
-     * example, get(0) and get(2) may throw an exception but get(1) may not.
+     * Design note: this is slightly unusual use of IndexOutOfBoundsException.
+     * For example, get(0) and get(2) may throw an exception but get(1) may not.
      * NoSuchElementException was considered as an alernative, but this can
      * create ambiguity problems between java.util and com.sun.java.util.
      */
@@ -102,8 +102,14 @@ public class FileManager{
         FileDesc desc;
         for(int j=0; j < size; j++) {
             desc = (FileDesc)list.get(j);
+            String metadata;
+            if(desc._id3Tag != null)
+                metadata = desc._id3Tag.getGMLString();
+            else
+                metadata = "";
             response[j] =
-            new Response(desc._index, desc._size, desc._name);
+                new Response(desc._index, desc._size, desc._name,
+                             metadata);
         }
         return response;
     }
@@ -144,7 +150,9 @@ public class FileManager{
         if (hasExtension(name)) {
             int n = (int)myFile.length();       /* the list, and increments */
             _size += n;                         /* the appropriate info */
-            _files.add(new FileDesc(_files.size(), name, path,  n));
+
+            _files.add(new FileDesc(_files.size(), name, path,  n,
+                ID3Tag.read(myFile)));
             _numFiles++;
         }
     }
@@ -238,7 +246,6 @@ public class FileManager{
         String[] names = HTTPUtil.stringSplit(dir_names, ';');
         _extensions =  HTTPUtil.stringSplit(
             SettingsManager.instance().getExtensions(), ';');
-
 
         // need to see if there are duplicated directories...
         int size = names.length;
@@ -441,8 +448,3 @@ public class FileManager{
     }
     */
 }
-
-
-
-
-

@@ -60,12 +60,19 @@ public class QueryReply extends Message implements Serializable{
             ByteOrder.int2leb((int)r.getIndex(),payload,i);
             ByteOrder.int2leb((int)r.getSize(),payload,i+4);
             i+=8;
-            String name=r.getName();
+
+            //Write name
             byte[] nameBytes = r.getName().getBytes();
             System.arraycopy(nameBytes, 0, payload, i, nameBytes.length);
             i+=nameBytes.length;
-            //Write double null terminator.
+            //Write null terminator.
             payload[i++]=(byte)0;
+
+
+            //Write metadata
+            byte[] metadataBytes = r.getMetadata().getBytes();
+            System.arraycopy(metadataBytes, 0, payload, i,metadataBytes.length);
+            i+=metadataBytes.length;
             payload[i++]=(byte)0;
         }
 
@@ -100,8 +107,10 @@ public class QueryReply extends Message implements Serializable{
     private static int rLength(Response[] responses) {
         int ret=0;
         for (int i=0; i<responses.length; i++)
-            //8 bytes for index and size, plus name and two null terminators
-            ret += 8+responses[i].getName().length()+2;
+            //8 bytes for index and size, plus name with null terminator and
+            // metadata with null terminators
+            ret += 8+responses[i].getName().length()+
+                   responses[i].getMetadata().length()+2;
         return ret;
     }
 
@@ -166,33 +175,36 @@ public class QueryReply extends Message implements Serializable{
         try {
             //For each record...
             for ( ; left > 0; left--) {
-            long index=ByteOrder.ubytes2long(ByteOrder.leb2int(payload,i));
-            long size=ByteOrder.ubytes2long(ByteOrder.leb2int(payload,i+4));
-            i+=8;
+                long index=ByteOrder.ubytes2long(ByteOrder.leb2int(payload,i));
+                long size=ByteOrder.ubytes2long(ByteOrder.leb2int(payload,i+4));
+                i+=8;
 
-            //The file name is supposed to be terminated by a double null
-            //terminator.  But Gnotella inserts meta-information between
-            //these null characters.  So we have to handle this.
-            //
-            //See http://gnutelladev.wego.com/go/wego.discussion.message?groupId=139406&view=message&curMsgId=319258&discId=140845&index=-1&action=view
+                //The file name is supposed to be terminated by a double null
+                //terminator.  But Gnotella inserts meta-information between
+                //these null characters.  So we have to handle this.
+                //
+                //See http://gnutelladev.wego.com/go/wego.discussion.message?groupId=139406&view=message&curMsgId=319258&discId=140845&index=-1&action=view
+                //RVOGL: But now, we insert metadata too, so we'll actually save
+                //the string
 
-            //Search for first single null terminator.
-            int j=i;
-            for ( ; ; j++) {
-                if (payload[j]==(byte)0)
-                break;
-            }
+                //Search for first single null terminator.
+                int j=i;
+                for ( ; payload[j] != (byte)0; j++);
 
-            //payload[i..j-1] is name.  This excludes the null terminator.
-            String name=new String(payload,i,j-i);
-            responses[responses.length-left]=new Response(index,size,name);
+                //payload[i..j-1] is the name.
+                //This excludes the null terminator.
+                String name=new String(payload,i,j-i);
+                i=j+1;
 
-            //Search for remaining null terminator.
-            for ( j=j+1; ; j++) {
-                if (payload[j]==(byte)0)
-                break;
-            }
-            i=j+1;
+                //Search for remaining null terminator.
+                for ( j=i; payload[j] != (byte)0; j++);
+
+                //payload[i..j-1] is the metadata.
+                //This excludes the null terminator.
+                String metadata=new String(payload,i,j-i);
+                responses[responses.length-left]=new Response(index,size,name,
+                                                              metadata);
+                i=j+1;
             }
             if (i<payload.length-16)
             throw new BadPacketException("Extra data after "

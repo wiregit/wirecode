@@ -13,13 +13,14 @@ public class Response {
      *  include the double null terminator.
      */
     private String name;
+    private String metadata;
 
     /** Creates a fresh new response.
      *
      * @requires index and size can fit in 4 unsigned bytes, i.e.,
      *  0 <= index, size < 2^32
      */
-    public Response(long index, long size, String name) {
+    public Response(long index, long size, String name, String metadata) {
         Assert.that((index & 0xFFFFFFFF00000000l)==0,
                 "Response constructor: index too big!");
         Assert.that((size &  0xFFFFFFFF00000000l)==0,
@@ -28,6 +29,7 @@ public class Response {
         this.index=index;
         this.size=size;
         this.name=name;
+        this.metadata=metadata;
     }
 
     public long getIndex() {
@@ -40,6 +42,10 @@ public class Response {
 
     public String getName() {
         return name;
+    }
+
+    public String getMetadata() {
+        return metadata;
     }
 
     public boolean equals(Object o) {

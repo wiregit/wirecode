@@ -37,6 +37,7 @@ public interface SettingsInterface
     public String     getDirectories();
     public String     getExtensions();
     public String     getIncompleteDirectory();
+    public String     getGMLTemplateDirectory();
     public String[]   getBannedIps();
     public String[]   getBannedWords();
     public boolean    getFilterDuplicates();
@@ -61,6 +62,11 @@ public interface SettingsInterface
     public String getCurrentVersion();
     public String getLastVersionChecked();
     public boolean getCheckAgain();
+
+    /* For Forced IP and Port */
+    public boolean getForceIPAddress();
+    public byte[] getForcedIPAddress();
+    public int getForcedPort();
 
     public int getFreeloaderFiles();
     public int getFreeloaderAllowed();
@@ -290,6 +296,7 @@ public interface SettingsInterface
         = "MAX_INCOMING_CONNECTIONS";
     public static final String SAVE_DIRECTORY = "DIRECTORY_FOR_SAVING_FILES";
     public static final String INCOMPLETE_DIR = "INCOMPLETE_FILE_DIRECTORY";
+    public static final String GML_TEMPLATE_DIR = "GML_TEMPLATE_DIRECTORY";
     public static final String DIRECTORIES    = "DIRECTORIES_TO_SEARCH_FOR_FILES";
     public static final String EXTENSIONS     = "EXTENSIONS_TO_SEARCH_FOR";
     public static final String BANNED_IPS     = "BLACK_LISTED_IP_ADDRESSES";

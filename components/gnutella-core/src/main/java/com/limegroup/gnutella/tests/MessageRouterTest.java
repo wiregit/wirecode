@@ -419,7 +419,7 @@ public class MessageRouterTest
             if(_reply)
             {
                 Response[] responses = new Response[1];
-                responses[0] = new Response(TEST_INDEX, 100, "bogus.mp3");
+                responses[0] = new Response(TEST_INDEX, 100, "bogus.mp3", "");
                 try
                 {
                     sendQueryReply(
