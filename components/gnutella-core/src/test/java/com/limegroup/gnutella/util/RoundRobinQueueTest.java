@@ -1,8 +1,6 @@
 
 package com.limegroup.gnutella.util;
 
-import java.util.NoSuchElementException;
-
 import junit.framework.Test;
 
 
@@ -162,14 +160,7 @@ public class RoundRobinQueueTest extends BaseTestCase {
 	}
 	
 	public void testEmpty() throws Exception {
-		try {
-			Object obj = queue.next();
-			fail("dequeued succesfully from an empty list?");
-		}catch (NoSuchElementException expected){}
-		try {
-			Object obj = setQueue.next();
-			fail("dequeued succesfully from an empty list?");
-		}catch (NoSuchElementException expected){}
-		
+		assertNull(queue.next());
+		assertNull(setQueue.next());
 	}
 }

@@ -75,14 +75,6 @@ public class BaseTestCase extends AssertComparisons implements ErrorCallback {
      */
     public static TestSuite buildTestSuite(Class cls) {
         _testClass = cls;
-        
-        String method = System.getProperty("junit.test.method");
-        if(method != null) {
-            method = method.trim();
-            if(!"".equals(method) && !"${method}".equals(method))
-                return buildTestSuite(cls, method);
-        }
-
         return new LimeTestSuite(cls);
     }
     
