@@ -332,7 +332,10 @@ public class BootstrapServerManagerTest extends BaseTestCase {
                  iter.next()) { 
             count++; 
         }        
-        assertGreaterThan(100, count);
+        
+        //we will not get any new gwebcaches unless we specifically request
+        //and even then to go from 39 to over 100 is way too optimistic
+        assertEquals(DefaultBootstrapServers.urls.length, count);
 
         //Make sure this actually got some endpoints.  Note: this requires a
         //network connection, as it actually uses GWebCache.
