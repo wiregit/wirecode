@@ -46,10 +46,10 @@ public class QueryReply extends Message {
 	//Write beginning of payload.  Downcasts are ok, even if they go negative
 	payload[0]=(byte)n;
 	ByteOrder.short2leb((short)port,payload,1);
-	payload[3]=ip[3];
-	payload[4]=ip[2];
-	payload[5]=ip[1];
-	payload[6]=ip[0];
+	payload[3]=ip[0];
+	payload[4]=ip[1];
+	payload[5]=ip[2];
+	payload[6]=ip[3];
 	ByteOrder.int2leb((int)speed,payload,7);
 	
 	//Write each response at index i
