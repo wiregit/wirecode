@@ -97,7 +97,7 @@ public class SettingsManager implements SettingsInterface
 	props_      = new Properties();
 	ndProps_    = new Properties();
 	fileSep_    = System.getProperty("file.separator");
-	home_       = System.getProperty("user.home");
+	home_       = System.getProperty("user.dir");
 	home_       += fileSep_;
 	fileName_   = home_;
 	ndFileName_ = home_;
@@ -397,7 +397,7 @@ public class SettingsManager implements SettingsInterface
 	setFilterVbs(SettingsInterface.DEFAULT_FILTER_VBS);
 	setFilterHtml(SettingsInterface.DEFAULT_FILTER_HTML);
 	setExtensions(SettingsInterface.DEFAULT_EXTENSIONS);
-	setDirectories(home_);
+	setDirectories("");
 	setSaveDirectory(home_);
 	setSaveDefault(home_);
 	setUseQuickConnect(SettingsInterface.DEFAULT_USE_QUICK_CONNECT);
@@ -715,30 +715,31 @@ public class SettingsManager implements SettingsInterface
     /** set the directories to search */
     public synchronized void setDirectories(String dir)
     {	
-	if(dir.equals(""))
-	    throw new IllegalArgumentException();
-	else
-	    {
+	// we now set no directories to share by default
+	//if(dir.equals(""))
+	//  throw new IllegalArgumentException();
+	//else
+	//  {
 		FileManager.getFileManager().reset();
 		FileManager.getFileManager().addDirectories(dir);
 		directories_ = dir;
 		props_.put(SettingsInterface.DIRECTORIES, dir);
 		writeProperties();
-	    }
+		//  }
     }
     
     /** set the extensions to search for */
     public synchronized void setExtensions(String ext)
     {
-	if(ext.equals(""))
-	    throw new IllegalArgumentException();
-	else
-	    {
+	//if(ext.equals(""))
+	//  throw new IllegalArgumentException();
+	//else
+	//  {
 		FileManager.getFileManager().setExtensions(ext);
 		extensions_ = ext;			    
 		props_.put(SettingsInterface.EXTENSIONS, ext);
 		writeProperties();
-	    }
+		//  }
     }
 
     public synchronized void setBannedIps(String[] bannedIps)
