@@ -47,7 +47,7 @@ public final class SupernodeAssigner implements Runnable {
 	 * Constant for the minimum current uptime in seconds that a node must 
 	 * have to qualify for supernode status.
 	 */
-	private final int MINIMUM_CURRENT_UPTIME = 10 * 60;    
+	private final int MINIMUM_CURRENT_UPTIME = 9 * 60;    
 
 	/**
 	 * Constant value for whether or not the operating system qualifies
@@ -72,8 +72,7 @@ public final class SupernodeAssigner implements Runnable {
 	 * Constant for the number of milliseconds between the timer's calls
 	 * to its <tt>ActionListener</tt>s.
 	 */
-    private final int TIMER_DELAY = 50 * 60 * 1000;
-//	private final int TIMER_DELAY = 5 * 60 * 1000; //5 minutes
+    private final int TIMER_DELAY = 10 * 60 * 1000; //10 minutes
 
 	/**
 	 * Constant for the number of seconds between the timer's calls
