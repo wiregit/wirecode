@@ -149,6 +149,38 @@ public class LimeXMLReplyCollection{
         }
     }
 
+    public boolean removeDoc(LimeXMLDocument doc){
+        int size = replyDocs.size();
+        boolean found = false;
+        for(int i=0;i<size;i++){
+            Object o = replyDocs.get(i);
+            if(o==doc){
+                found = true;
+                replyDocs.remove(i);
+                if(replyDocs.size() == 0){//if there are no more replies.
+                    removeFromRepository();//remove this collection from map
+                    //Note: this follows the convention of the MetaFileManager
+                    //of not adding a ReplyCollection to the map if there are
+                    //no docs in it.
+                }
+            }
+        }
+        boolean written = false;
+        if(found)
+            written = toDisk();
+        if(!written && found)//put it back to maintin consistency
+            replyDocs.add(doc);
+        else if(found && written)
+            return true;
+        return false;
+    }
+        
+    private void removeFromRepository(){
+        SchemaReplyCollectionMapper map=SchemaReplyCollectionMapper.instance();
+        map.removeReplyCollection(this.schemaURI);
+    }
+
+
     public boolean toDisk(){
         String schemaStr = LimeXMLSchema.getDisplayString(schemaURI);
         String schemaName= schemaStr+".xml";

@@ -58,4 +58,8 @@ public class SchemaReplyCollectionMapper{
         return replyCollection;
     }
 
+    protected void removeReplyCollection(String schemaURI){
+        mapper.remove(schemaURI);
+    }
+
 }
