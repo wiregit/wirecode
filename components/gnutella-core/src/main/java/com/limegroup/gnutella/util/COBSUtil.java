@@ -22,30 +22,38 @@ public class COBSUtil {
         // bytes of packet data
         final int maxEncodingLen = src.length + ((src.length+1)/254) + 1;
         ByteArrayOutputStream sink = new ByteArrayOutputStream(maxEncodingLen);
-        // 254 is the max size of a temporary block
-        ByteArrayOutputStream temp = new ByteArrayOutputStream(254);
+        int writeStartIndex = -1;
 
         while (currIndex < srcLen) {
-            if (src[currIndex] == 0)
-                code = finishBlock(code, sink, temp);
+            if (src[currIndex] == 0) {
+                // currIndex was incremented so take 1 less
+                code = finishBlock(code, sink, src, writeStartIndex,
+                                   (currIndex-1));
+                writeStartIndex = -1;
+            }
             else {
-                temp.write((int)src[currIndex]);
+                if (writeStartIndex < 0) writeStartIndex = currIndex;
                 code++;
-                if (code == 0xFF) 
-                    code = finishBlock(code, sink, temp);
+                if (code == 0xFF) {
+                    code = finishBlock(code, sink, src, writeStartIndex,
+                                       currIndex);
+                    writeStartIndex = -1;
+                }
             }
             currIndex++;
         }
 
-        finishBlock(code, sink, temp);
+        // currIndex was incremented so take 1 less
+        finishBlock(code, sink, src, writeStartIndex, (currIndex-1));
         return sink.toByteArray();
     }
 
     private static int finishBlock(int code, ByteArrayOutputStream sink, 
-                            ByteArrayOutputStream temp) throws IOException {
+                                   byte[] src, int begin, int end) 
+        throws IOException {
         sink.write(code);
-        sink.write(temp.toByteArray());
-        temp.reset();
+        if (begin > -1)
+            sink.write(src, begin, (end-begin)+1);
         return (byte) 0x01;
     }
 
