@@ -29,6 +29,7 @@ public interface SettingsInterface
     public boolean    getStats();
     public String     getClientID();
     public int        getMaxConn();
+    public String     getSaveDirectory();
     public String     getDirectories();
     public String     getExtensions();
 
@@ -85,6 +86,10 @@ public interface SettingsInterface
     public void setMaxConn(int maxConn)
 	throws IllegalArgumentException;
 
+    /** sets the directory for saving files*/
+    public void setSaveDirectory(String dir)
+	throws IllegalArgumentException;
+
     /** sets the string list of directories*/
     public void setDirectories(String directories)
 	throws IllegalArgumentException;
@@ -93,58 +98,62 @@ public interface SettingsInterface
     public void setExtensions(String extensions)
 	throws IllegalArgumentException;
 
+
     /** specialized method for writing the 
      *  properties file for the network discoverer
      */
     public void writeNDProps();
 
     /** Default setting for the time to live */
-    public static final byte    DEFAULT_TTL           = (byte)4;
+    public static final byte    DEFAULT_TTL            = (byte)4;
     /** Default setting for the maximum time to live */
-    public static final byte    DEFAULT_MAX_TTL       = (byte)10;
+    public static final byte    DEFAULT_MAX_TTL        = (byte)10;
     /** Default maximum packet length */
-    public static final int     DEFAULT_MAX_LENGTH    = 65536;
+    public static final int     DEFAULT_MAX_LENGTH     = 65536;
     /** Default timeout */
-    public static final int     DEFAULT_TIMEOUT       = 4000;
+    public static final int     DEFAULT_TIMEOUT        = 4000;
     /** Default file path for the host list */
-    public static final String  DEFAULT_HOST_LIST     = "gnutella.net";
+    public static final String  DEFAULT_HOST_LIST      = "gnutella.net";
     /** Default name for the properties file */
-    public static final String  DEFAULT_FILE_NAME     = "limewire.props";
+    public static final String  DEFAULT_FILE_NAME      = "limewire.props";
     /** Default name for the network discovery properties */
-    public static final String  DEFAULT_ND_PROPS_NAME = "nd.props";
+    public static final String  DEFAULT_ND_PROPS_NAME  = "nd.props";
     /** Default value for the keep alive */    
-    public static final int     DEFAULT_KEEP_ALIVE    = 0;
+    public static final int     DEFAULT_KEEP_ALIVE     = 0;
     /** Default port*/
-    public static final int     DEFAULT_PORT          = 6346;
+    public static final int     DEFAULT_PORT           = 6346;
     /** Default network connection speed */
-    public static final int     DEFAULT_SPEED         = 56;
+    public static final int     DEFAULT_SPEED          = 56;
     /** Default limit for the number of searches */
-    public static final byte    DEFAULT_SEARCH_LIMIT  = (byte)64;
+    public static final byte    DEFAULT_SEARCH_LIMIT   = (byte)64;
     /** Default client/gu id */
-    public static final String  DEFAULT_CLIENT_ID     = "A0B447F77853D411B05B0001023AF3D6";
+    public static final String  DEFAULT_CLIENT_ID      = "A0B447F77853D411B05B0001023AF3D6";
     /** Default boolean for stats file */
-    public static final boolean DEFAULT_STATS         = false;
+    public static final boolean DEFAULT_STATS          = false;
     /** Default maximum number of connections */
-    public static final int     DEFAULT_MAX_CONN      = 900;
-    /** Default directories for saving files */
-    public static final String  DEFAULT_DIRECTORIES   = "";
+    public static final int     DEFAULT_MAX_CONN       = 900;
+    /** Default directories for file searching */
+    public static final String  DEFAULT_SAVE_DIRECTORY = "";
+    /** Default directories for file searching */
+    public static final String  DEFAULT_DIRECTORIES    = "";
     /** Default file extensions */
-    public static final String  DEFAULT_EXTENSIONS    = "";
+    public static final String  DEFAULT_EXTENSIONS     = "";
 
     // The property key name constants 
-    public static final String TTL                  = "TTL";
-    public static final String MAX_TTL              = "MAX_TTL";
-    public static final String MAX_LENGTH           = "MAX_LENGTH";
-    public static final String TIMEOUT              = "TIMEOUT";
-    public static final String KEEP_ALIVE           = "KEEP_ALIVE";
-    public static final String PORT                 = "PORT";
-    public static final String SPEED                = "CONNECTION_SPEED";
-    public static final String SEARCH_LIMIT         = "SEARCH_LIMIT";
-    public static final String CLIENT_ID            = "CLIENT_ID";
-    public static final String STATS                = "STATS";
-    public static final String MAX_CONN             = "MAXIMUM_NUMBER_OF_CONNECTIONS";
-    public static final String DIRECTORIES          = "DIRECTORIES_TO_SEARCH_FOR_FILES";
-    public static final String EXTENSIONS           = "EXTENSIONS_TO_SEARCH_FOR";
+    public static final String TTL            = "TTL";
+    public static final String MAX_TTL        = "MAX_TTL";
+    public static final String MAX_LENGTH     = "MAX_LENGTH";
+    public static final String TIMEOUT        = "TIMEOUT";
+    public static final String KEEP_ALIVE     = "KEEP_ALIVE";
+    public static final String PORT           = "PORT";
+    public static final String SPEED          = "CONNECTION_SPEED";
+    public static final String SEARCH_LIMIT   = "SEARCH_LIMIT";
+    public static final String CLIENT_ID      = "CLIENT_ID";
+    public static final String STATS          = "STATS";
+    public static final String MAX_CONN       = "MAXIMUM_NUMBER_OF_CONNECTIONS";
+    public static final String SAVE_DIRECTORY = "DIRECTORY_FOR_SAVING_FILES";
+    public static final String DIRECTORIES    = "DIRECTORIES_TO_SEARCH_FOR_FILES";
+    public static final String EXTENSIONS     = "EXTENSIONS_TO_SEARCH_FOR";
 
     public static final String HEADER = "Properties file for the LimeWire gnutella client.\nYou can modify any of the default properties here if\nyou wish, but if your modifications do not fit the\nrange of expected values for specific properties, those\nproperties will revert to their default values.\n\n";
 }

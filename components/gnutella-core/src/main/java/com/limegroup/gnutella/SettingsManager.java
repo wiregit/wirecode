@@ -30,7 +30,8 @@ public class SettingsManager implements SettingsInterface
     private static boolean  stats_;
     private static String   clientID_;
     private static int      maxConn_;
-    private static int      localIP_;
+    private static int      localIP_;       // not yet implemented
+    private static String   saveDirectory_;
     private static String   directories_;
     private static String   extensions_;
 
@@ -217,7 +218,13 @@ public class SettingsManager implements SettingsInterface
 			}
 			catch(NumberFormatException nfe){}
 		    }		
-
+		
+		else if(key.equals(SettingsInterface.SAVE_DIRECTORY))
+		    {
+			try {setSaveDirectory(p);}
+			catch (IllegalArgumentException ie){}
+		    }
+		
 		else if(key.equals(SettingsInterface.DIRECTORIES))
 		    {
 			try {setDirectories(p);}
@@ -253,6 +260,10 @@ public class SettingsManager implements SettingsInterface
 	setMaxConn(SettingsInterface.DEFAULT_MAX_CONN);
 	setDirectories(SettingsInterface.DEFAULT_DIRECTORIES);
 	setExtensions(SettingsInterface.DEFAULT_EXTENSIONS);
+	try {setSaveDirectory(SettingsInterface.DEFAULT_SAVE_DIRECTORY);}
+	catch(IllegalArgumentException e){
+	    setSaveDirectory(getPath());
+	}
     }
 
     /** returns the time to live */
@@ -293,11 +304,14 @@ public class SettingsManager implements SettingsInterface
     /** returns the maximum number of connections to hold */
     public int getMaxConn(){return maxConn_;}
 
-    /** returns the string of file extensions*/
-    public String getExtensions(){return extensions_;}
+    /** returns the directory to save to */
+    public String getSaveDirectory(){return saveDirectory_;}
 
     /** returns the directories to search */
     public String getDirectories(){return directories_;}
+
+    /** returns the string of file extensions*/
+    public String getExtensions(){return extensions_;}
 
     // SPECIALIZED METHODS FOR NETWORK DISCOVERY
     /** returns the Network Discovery specialized properties file */
@@ -470,6 +484,21 @@ public class SettingsManager implements SettingsInterface
 		maxConn_ = maxConn;		
 		String s = Integer.toString(maxConn_);
 		props_.setProperty(SettingsInterface.MAX_CONN, s);
+		writeProperties();
+	    }
+    }
+
+    /** set the directory for saving files */
+    public void setSaveDirectory(String dir)
+    {
+	File f = new File(dir);
+	boolean b = f.isDirectory();
+	if(b == false)
+	    throw new IllegalArgumentException();
+	else
+	    {
+		saveDirectory_ = dir;
+		props_.setProperty(SettingsInterface.SAVE_DIRECTORY, dir);
 		writeProperties();
 	    }
     }
