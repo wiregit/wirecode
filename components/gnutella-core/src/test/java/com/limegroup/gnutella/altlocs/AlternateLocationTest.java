@@ -203,11 +203,13 @@ public final class AlternateLocationTest extends com.limegroup.gnutella.util.Bas
 	 */
 	public void testCreateRemoteFileDesc() throws Exception{
 		for(int i=0; i<HugeTestUtils.UNEQUAL_SHA1_LOCATIONS.length; i++) {
-			AlternateLocation al = HugeTestUtils.UNEQUAL_SHA1_LOCATIONS[i];
+			DirectAltLoc al = (DirectAltLoc) HugeTestUtils.UNEQUAL_SHA1_LOCATIONS[i];
 			RemoteFileDesc rfd = al.createRemoteFileDesc(10);
 			assertEquals("SHA1s should be equal", al.getSHA1Urn(), rfd.getSHA1Urn());
-			URL url = (URL)PrivilegedAccessor.getValue(al,"URL");
-			assertEquals("urls should be equal", url, rfd.getUrl());
+			assertEquals("hosts should be equals",al.getHost().getAddress(),
+					rfd.getHost());
+			assertEquals("ports should be equals",al.getHost().getPort(),
+					rfd.getPort());
 		}
 		
 		PushProxyInterface ppi = new QueryReply.PushProxyContainer("1.2.3.4",6346);
