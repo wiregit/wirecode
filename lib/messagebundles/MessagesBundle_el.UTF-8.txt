@@ -1,4 +1,4 @@
-################################################################################
+﻿################################################################################
 # Messages Bundle for LimeWire 4.4.6
 # Specialization for: Greek - Greece & Cyprus (Modern)
 # Thanks to Damianos Aronidis
