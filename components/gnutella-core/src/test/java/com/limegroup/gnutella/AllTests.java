@@ -13,6 +13,7 @@ public class AllTests {
         suite.addTest(com.limegroup.gnutella.util.AllTests.suite());
         suite.addTest(ExtendedEndpointTest.suite());
         suite.addTest(HostCatcherTest.suite());
+        suite.addTest(FileManagerTest.suite());
         suite.addTest(ManagedConnectionTest.suite());
         suite.addTest(GUIDTest.suite());
         suite.addTest(StatisticsTest.suite());
