@@ -217,7 +217,8 @@ public final class SearchResultHandler {
         //check if this is an oob reply from a firewalled host
         //only do it if the message arrived through udp - this way we ensure only the 
         //UDP reading thread will do this.
-        if (qr.getNetwork() == Message.N_UDP)
+        String name = Thread.currentThread().getName();
+        if (Thread.currentThread().getName().equals("UDPService-Receiver"))
         	try{
         		OOBFirewalled = _firewalledOOBHosts.contains(
         				InetAddress.getByName(qr.getOOBAddress().getAddress()));
