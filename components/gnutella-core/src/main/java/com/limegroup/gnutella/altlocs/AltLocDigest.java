@@ -13,6 +13,7 @@ import com.limegroup.gnutella.ByteOrder;
 import com.limegroup.gnutella.ErrorService;
 import com.limegroup.gnutella.util.BitSet;
 import com.limegroup.gnutella.util.BloomFilter;
+import com.limegroup.gnutella.util.DataUtils;
 import com.limegroup.gnutella.util.HashFunction;
 
 /**
@@ -180,26 +181,16 @@ public class AltLocDigest implements BloomFilter {
         } else {
             // otherwise, the slow way 
             BitSet tmp = new BitSet((ret.length-3)*8);
-            int offset = 0;
-            int mask = 1 << _elementSize-1;
-            for(int element=_values.nextSetBit(0); element >=0; 
-            	element=_values.nextSetBit(element+1)) {
-                for (int i = 0; i < _elementSize; i++) {
-                    if (((element << i) & mask) == mask) 
-                        tmp.set(offset);
-                    offset++;
-                }
-            }
             
-            // a LongBuffer -> ByteBuffer conversion would do this much faster...
-            for (int i = 0;i < tmp.length();i++) {
-                if (tmp.get(i)) 
-                    ret[3+i/8] |= (0x80 >>> (i % 8));
-            }
+            int [] values = new int[_values.cardinality()];
+            int i=0;
+            for(int element=_values.nextSetBit(0); element >=0; 
+            		element=_values.nextSetBit(element+1)) 
+                values[i++]=element;
+            byte [] packed = DataUtils.bitPack(values,_elementSize);
+            System.arraycopy(packed,0,ret,3,packed.length);
         }
-        
         return ret;
-        
     }
     
     public void write(OutputStream out) throws IOException {
@@ -233,22 +224,12 @@ public class AltLocDigest implements BloomFilter {
         AltLocDigest digest = new AltLocDigest();
         digest.setElementSize(elementSize);
         
-        // and populate it
-        offset+=24;
-        for (int i = 0; i < numElements; i++) {
-                int element=0;
-                for (int j = 0; j < elementSize; j++) {
-                        int current = data[offset / 8];
-                        int extractedBit = current & (0x80 >>> (offset % 8));
-                        extractedBit >>= (7 - (offset % 8));
-                        element <<= 1;
-                        element |= extractedBit;
-                        offset++;
-                }
-                if (element < 0) element+=256;
-                digest._values.set(element);
-        }
-
+        // unpack the values
+        int [] values = DataUtils.bitUnpack(data,3,numElements,elementSize);
+        
+        // and populate the bitset
+        for (int i = 0;i < values.length;i++) 
+            digest._values.set(values[i]);
         
         return digest;
     }

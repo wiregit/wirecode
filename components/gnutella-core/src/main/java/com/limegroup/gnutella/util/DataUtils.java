@@ -1,5 +1,6 @@
 package com.limegroup.gnutella.util;
 
+import java.io.IOException;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Set;
@@ -103,5 +104,72 @@ public final class DataUtils {
         }
         return buf.toString().toUpperCase();
     }
-
+    
+    /**
+     * packs an array of numerical values into a bit vector, where each value is
+     * represented with size bits.
+     */
+    public static byte[] bitPack(int [] values, int size) {
+        int bitSize = values.length * size;
+        int retSize = bitSize / 8;
+        if (bitSize % 8 != 0)
+            retSize++;
+        byte []ret = new byte[retSize];
+        
+        BitSet tmp = new BitSet(bitSize);
+        int offset = 0;
+        int mask = 1 << size-1;
+        for (int j = 0;j< values.length;j++) {
+            int element = values[j];
+            for (int i = 0; i < size; i++) {
+                if (((element << i) & mask) == mask) 
+                    tmp.set(offset);
+                offset++;
+            }
+        }
+        
+        for (int i = 0;i < tmp.length();i++) {
+            if (tmp.get(i)) 
+                ret[i/8] |= (0x80 >>> (i % 8));
+        }
+        
+        return ret;
+    }
+    
+    /**
+     * @param data an array of integer values, packed to bits.
+     * @param offset where in the array to start unpacking
+     * @param number the number of values to try and unpack
+     * @param size the size of each value in bits
+     * @return array of int values, unpacked.
+     * @throws IOException if there isn't enough data in the source array.
+     */
+    public static int [] bitUnpack(byte [] data,int offset, int number, int size) 
+    	throws IOException {
+        int bitSize = number * size;
+        int arraySize = bitSize / 8;
+        if (bitSize % 8 != 0)
+            arraySize++;
+        if (data.length < offset + arraySize)
+            throw new IOException("cannot unpack values");
+        
+        int []ret = new int[number];
+        // the offset here is in bits
+        offset= offset * 8;
+        for (int i = 0; i < number; i++) {
+            int element=0;
+            for (int j = 0; j < size; j++) {
+                int current = data[offset / 8];
+                int extractedBit = current & (0x80 >>> (offset % 8));
+                extractedBit >>= (7 - (offset % 8));
+                element <<= 1;
+                element |= extractedBit;
+                offset++;
+            }
+            if (element < 0) element+=256;
+            ret[i] = element;
+        }
+        
+        return ret;
+    }
 }
