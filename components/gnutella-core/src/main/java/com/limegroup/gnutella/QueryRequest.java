@@ -26,12 +26,12 @@ public class QueryRequest extends Message implements Serializable{
     /** 
 	 * The types of requested URNs.
 	 */
-    private final Set requestedUrnTypes;
+    private final Set /* of UrnType */ requestedUrnTypes;
 
     /** 
 	 * Specific URNs requested.
 	 */
-    private final Set queryUrns;
+    private final Set /* of URN */ queryUrns;
 
 	/**
 	 * Constant for an empty, unmodifiable <tt>Set</tt>.  This is necessary
@@ -103,6 +103,11 @@ public class QueryRequest extends Message implements Serializable{
      * needed.
      *
      * @requires 0<=minSpeed<2^16 (i.e., can fit in 2 unsigned bytes)
+     * @param requestedUrnTypes <tt>Set</tt> of <tt>UrnType</tt> instances
+     *  requested for this query, which may be empty or null if no types were
+     *  requested
+	 * @param queryUrns <tt>Set</tt> of <tt>URN</tt> instances requested for 
+     *  this query, which may be empty or null if no URNs were requested
      */
     public QueryRequest(byte[] guid, byte ttl, int minSpeed, 
                         String query, String richQuery, boolean isRequery,
@@ -282,22 +287,20 @@ public class QueryRequest extends Message implements Serializable{
     }
  
 	/**
-	 * Returns the <tt>Set</tt> of URN types requested for this query, or
-	 * <tt>null</tt> if there are no specified URN types.
+	 * Returns the <tt>Set</tt> of URN types requested for this query.
 	 *
-	 * @return the <tt>Set</tt> of URN types requested for this query, or
-	 * <tt>null</tt> if there are no specified URN types
+	 * @return the <tt>Set</tt> of <tt>UrnType</tt> instances requested for this
+     * query, which may be empty (not null) if no types were requested
 	 */
     public Set getRequestedUrnTypes() {
 		return requestedUrnTypes;
     }
     
 	/**
-	 * Returns the <tt>Set</tt> of <tt>URN</tt> instances for this query, or 
-	 * <tt>null</tt> if there are no URNs specified for the query.
+	 * Returns the <tt>Set</tt> of <tt>URN</tt> instances for this query.
 	 *
-	 * @return  the <tt>Set</tt> of <tt>URN</tt> instances for this query, or 
-	 * <tt>null</tt> if there are no URNs specified for the query
+	 * @return  the <tt>Set</tt> of <tt>URN</tt> instances for this query, which
+	 * may be empty (not null) if no URNs were requested
 	 */
     public Set getQueryUrns() {
 		return queryUrns;
