@@ -112,8 +112,10 @@ public final class QueryUnicaster {
 	 *  to return
 	 */
 	public GUESSEndpoint getUnicastEndpoint() {
-		if(_queryHosts.isEmpty()) return null;
-		return (GUESSEndpoint)_queryHosts.getFirst();
+		synchronized(_queryHosts) {
+			if(_queryHosts.isEmpty()) return null;
+			return (GUESSEndpoint)_queryHosts.getFirst();
+		}
 	}
 
 
