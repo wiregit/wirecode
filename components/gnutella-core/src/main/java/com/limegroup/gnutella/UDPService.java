@@ -295,6 +295,16 @@ public final class UDPService implements Runnable {
 	}
 
 	/**
+	 * Returns whether or not this node is capable of receiving UNSOLICITED
+     * UDP packets.  It is false until a UDP ConnectBack ping has been received.
+	 *
+	 * @return <tt>true</tt> if this node has accepted a UNSOLICITED UDP packet.
+	 */	
+	public boolean canReceiveUnsolicited() {
+		return _acceptedUnsolicitedIncoming;
+	}
+
+	/**
 	 * Returns whether or not the UDP socket is listening for incoming
 	 * messsages.
 	 *

@@ -960,7 +960,7 @@ public class ManagedConnection
         }
         else if (vmp instanceof MessagesSupportedVMP) {
             // do i need to send any ConnectBack messages????
-            if (!UDPService.instance().isGUESSCapable() &&
+            if (!UDPService.instance().canReceiveUnsolicited() &&
                 (_numUDPConnectBackRequests < MAX_UDP_CONNECT_BACK_ATTEMPTS) &&
                 (remoteHostSupportsUDPConnectBack() > -1)) {
                 _numUDPConnectBackRequests++;
