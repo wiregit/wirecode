@@ -1076,37 +1076,92 @@ public class ManagedDownloader implements Downloader, Serializable {
         
     }
     
-    private synchronized void updateNeeded(HTTPDownloader dloader) {
-        debug ("downloader failed. adding to white..."+
-               "Downloader: initial, read, toRead :"+
-               dloader+", "+
-               dloader.getInitialReadingPoint()+", "+
-               dloader.getAmountRead()+", "+
-               dloader.getAmountToRead());
-        int low=dloader.getInitialReadingPoint()+dloader.getAmountRead();
-        int high = low+(dloader.getAmountToRead()-dloader.getAmountRead());
-        if( (high-low) > 0) {
-            Interval in = new Interval(low,high);
-            needed.add(in);
+    /** 
+     * Returns an un-initialized (only established a TCP Connection, 
+     * no HTTP headers have been exchanged yet) connectable downloader 
+     * from the given list of locations.
+     * <p> 
+     * method tries to establish connection either by push or by normal
+     * ways.
+     * @param rfd the RemoteFileDesc to connect to
+     * @exception NoSuchElementException no locations could connect
+     * @exception InterruptedException this thread was interrupted while
+     *  waiting to connect
+     */
+    private HTTPDownloader establishConnection(RemoteFileDesc rfd)
+            throws NoSuchElementException, InterruptedException {        
+        
+        if (rfd == null)
+            throw new NoSuchElementException();
+        if (stopped)
+            throw new InterruptedException();
+
+        File incompleteFile=incompleteFileManager.getFile(rfd);
+        HTTPDownloader ret;
+        boolean needsPush=needsPush(rfd);
+        synchronized (this) {
+            currentLocation=rfd.getHost();
+            //If we're just increasing parallelism, stay in DOWNLOADING
+            //state.  Otherwise the following call is needed to restart
+            //the timer.
+            if (dloaders.size()==0)
+                setState(CONNECTING, 
+                         needsPush ? PUSH_CONNECT_TIME : NORMAL_CONNECT_TIME);
         }
+        debug("WORKER: attempting connect to "
+              +rfd.getHost()+":"+rfd.getPort());
+
+        if(!needsPush) {
+            //Establish normal downloader.
+            ret=new HTTPDownloader(rfd, incompleteFile);
+            //System.out.println("MANAGER: trying connect to "+rfd);
+            try {
+                ret.connectTCP(NORMAL_CONNECT_TIME);
+                return ret;
+            } catch (CantConnectException e) {
+                //Schedule for pushing...let it fall thro'
+            } catch (IOException e) {
+                //Miscellaneous error: never revisit.
+            }
+        }
+        //System.out.println("MANAGER: trying push to "+rfd);
+
+        //Fell thro'... either rfd  needed a push OR 
+        //we were not able to connect, so try to push anyway...
+
+        //We the push is complete and we have a socket ready to use
+        //the acceptor thread is going to notify us using this object
+        Object threadLock = new Object();
+        MiniRemoteFileDesc mrfd = new MiniRemoteFileDesc(
+                     rfd.getFileName(),rfd.getIndex(),rfd.getClientGUID());
+       
+        miniRFDToLock.put(mrfd,threadLock);
+
+        synchronized(threadLock) {
+            manager.sendPush(rfd);        
+            //No loop is actually needed here, assuming spurious
+            //notify()'s don't occur.  (They are not allowed by the Java
+            //Language Specifications.)  Look at acceptDownload for
+            //details.
+            threadLock.wait(PUSH_CONNECT_TIME);  
+        }
+        //Done waiting or were notified.
+        Socket pushSocket = (Socket)threadLockToSocket.remove(threadLock);
+        if (pushSocket==null)
+            throw new NoSuchElementException();
+        
+        miniRFDToLock.remove(mrfd);//we are not going to use it after this
+        ret = new HTTPDownloader(pushSocket, rfd, incompleteFile);
+        try {
+            //This should never really throw an exception since are only
+            //initializing the byteReader with this call.
+            ret.connectTCP(0);//just initializes the byteReader in this case
+        } catch(IOException iox) {
+            throw new NoSuchElementException();
+        }
+        return ret;
     }
     
-    /** Returns true if another downloader is allowed. */
-    private synchronized boolean allowAnotherDownload() {
-        //TODO1: this should really be done dynamically by observing capacity
-        //and load, but that's hard to do.
-        int downloads=dloaders.size();
-        int capacity=SettingsManager.instance().getConnectionSpeed();
-        if (capacity<=SpeedConstants.MODEM_SPEED_INT)
-            //Modems can't swarm.
-            return downloads<1;
-        else if (capacity<=SpeedConstants.T1_SPEED_INT)
-            //DSL, Cable, and "T1" can swarm from up to 4 locations.
-            return downloads<4;
-        else 
-            return downloads<6;
-    }
-
     /** 
      * Assigns a white area or a grey area to a downloader. Sets the state,
      * and checks if this downloader has been interrupted.
@@ -1232,93 +1287,6 @@ public class ManagedDownloader implements Downloader, Serializable {
         return Math.max(0, i-OVERLAP_BYTES);
     }
 
-    /** 
-     * Returns an un-initialized (only established a TCP Connection, 
-     * no HTTP headers have been exchanged yet) connectable downloader 
-     * from the given list of locations.
-     * <p> 
-     * method tries to establish connection either by push or by normal
-     * ways.
-     * @param rfd the RemoteFileDesc to connect to
-     * @exception NoSuchElementException no locations could connect
-     * @exception InterruptedException this thread was interrupted while
-     *  waiting to connect
-     */
-    private HTTPDownloader establishConnection(RemoteFileDesc rfd)
-            throws NoSuchElementException, InterruptedException {        
-        
-        if (rfd == null)
-            throw new NoSuchElementException();
-        if (stopped)
-            throw new InterruptedException();
-
-        File incompleteFile=incompleteFileManager.getFile(rfd);
-        HTTPDownloader ret;
-        boolean needsPush=needsPush(rfd);
-        synchronized (this) {
-            currentLocation=rfd.getHost();
-            //If we're just increasing parallelism, stay in DOWNLOADING
-            //state.  Otherwise the following call is needed to restart
-            //the timer.
-            if (dloaders.size()==0)
-                setState(CONNECTING, 
-                         needsPush ? PUSH_CONNECT_TIME : NORMAL_CONNECT_TIME);
-        }
-        debug("WORKER: attempting connect to "
-              +rfd.getHost()+":"+rfd.getPort());
-
-        if(!needsPush) {
-            //Establish normal downloader.
-            ret=new HTTPDownloader(rfd, incompleteFile);
-            //System.out.println("MANAGER: trying connect to "+rfd);
-            try {
-                ret.connectTCP(NORMAL_CONNECT_TIME);
-                return ret;
-            } catch (CantConnectException e) {
-                //Schedule for pushing...let it fall thro'
-            } catch (IOException e) {
-                //Miscellaneous error: never revisit.
-            }
-        }
-        //System.out.println("MANAGER: trying push to "+rfd);
-
-        //Fell thro'... either rfd  needed a push OR 
-        //we were not able to connect, so try to push anyway...
-
-        //We the push is complete and we have a socket ready to use
-        //the acceptor thread is going to notify us using this object
-        Object threadLock = new Object();
-        MiniRemoteFileDesc mrfd = new MiniRemoteFileDesc(
-                     rfd.getFileName(),rfd.getIndex(),rfd.getClientGUID());
-       
-        miniRFDToLock.put(mrfd,threadLock);
-
-        synchronized(threadLock) {
-            manager.sendPush(rfd);        
-            //No loop is actually needed here, assuming spurious
-            //notify()'s don't occur.  (They are not allowed by the Java
-            //Language Specifications.)  Look at acceptDownload for
-            //details.
-            threadLock.wait(PUSH_CONNECT_TIME);  
-        }
-        //Done waiting or were notified.
-        Socket pushSocket = (Socket)threadLockToSocket.remove(threadLock);
-        if (pushSocket==null)
-            throw new NoSuchElementException();
-        
-        miniRFDToLock.remove(mrfd);//we are not going to use it after this
-        ret = new HTTPDownloader(pushSocket, rfd, incompleteFile);
-        try {
-            //This should never really throw an exception since are only
-            //initializing the byteReader with this call.
-            ret.connectTCP(0);//just initializes the byteReader in this case
-        } catch(IOException iox) {
-            throw new NoSuchElementException();
-        }
-        return ret;
-    }
-
-
     /**
      * Attempts to run downloader.doDownload, notifying manager of termination
      * via downloaders.notify().  Typically tryOneDownload is invoked in
@@ -1361,6 +1329,37 @@ public class ManagedDownloader implements Downloader, Serializable {
             }
         }
     }
+
+    private synchronized void updateNeeded(HTTPDownloader dloader) {
+        debug ("downloader failed. adding to white..."+
+               "Downloader: initial, read, toRead :"+
+               dloader+", "+
+               dloader.getInitialReadingPoint()+", "+
+               dloader.getAmountRead()+", "+
+               dloader.getAmountToRead());
+        int low=dloader.getInitialReadingPoint()+dloader.getAmountRead();
+        int high = low+(dloader.getAmountToRead()-dloader.getAmountRead());
+        if( (high-low) > 0) {
+            Interval in = new Interval(low,high);
+            needed.add(in);
+        }
+    }
+
+//      /** Returns true if another downloader is allowed. */
+//      private synchronized boolean allowAnotherDownload() {
+//          //TODO1: this should really be done dynamically by observing capacity
+//          //and load, but that's hard to do.
+//          int downloads=dloaders.size();
+//          int capacity=SettingsManager.instance().getConnectionSpeed();
+//          if (capacity<=SpeedConstants.MODEM_SPEED_INT)
+//              //Modems can't swarm.
+//              return downloads<1;
+//          else if (capacity<=SpeedConstants.T1_SPEED_INT)
+//              //DSL, Cable, and "T1" can swarm from up to 4 locations.
+//              return downloads<4;
+//          else 
+//              return downloads<6;
+//    }
 
     /** 
      * Removes and returns the RemoteFileDesc with the highest quality in
