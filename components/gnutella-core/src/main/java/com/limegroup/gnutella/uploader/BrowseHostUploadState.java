@@ -108,7 +108,7 @@ public class BrowseHostUploadState implements UploadState
         return true;
     }
 
-    private final static boolean debugOn = true;
+    private final static boolean debugOn = false;
     private final void debug(String out) {
         if (debugOn)
             System.out.println(out);
