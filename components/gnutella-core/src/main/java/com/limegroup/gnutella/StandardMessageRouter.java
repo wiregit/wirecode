@@ -106,12 +106,15 @@ public class StandardMessageRouter
 		List unicastEndpoints = QueryUnicaster.instance().getUnicastEndpoints();
 		Iterator iter = unicastEndpoints.iterator();
 		while(iter.hasNext()) {
-			PingReply reply = (PingReply)iter.next();
+			Endpoint host = (Endpoint)iter.next();
+			PingReply reply = new PingReply(request.getGUID(), 1, host.getPort(),
+											host.getHostBytes(), 0, 0, true);
 			try {
 				sendPingReply(reply);
 			} catch(IOException e) {
-			}											
-		}		
+				// we can't do anything other than try to send it
+			}
+		}
 	}
 
     /**
