@@ -6,6 +6,8 @@ import java.io.OutputStream;
 import java.net.InetAddress;
 import java.net.SocketException;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
+import java.util.Iterator;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -15,6 +17,7 @@ import com.limegroup.gnutella.ErrorService;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.UDPService;
 import com.limegroup.gnutella.messages.BadPacketException;
+import com.limegroup.gnutella.settings.DownloadSettings;
 import com.limegroup.gnutella.util.NetworkUtils;
 
 /** 
@@ -216,7 +219,48 @@ public class UDPConnectionProcessor {
     /** Keep track of the reason for shutting down */
     private byte              _closeReasonCode;
 
-
+    ////////////////////////////////////////////
+    // Some settings related to skipping acks
+    ///////////////////////////////////////////
+    
+    /** Whether to skip any acks at all */
+    private final boolean _skipAcks = DownloadSettings.SKIP_ACKS.getValue();
+    /** How long each measuring period is */
+    private final int _period = DownloadSettings.PERIOD_LENGTH.getValue();
+    
+    /** How many periods to keep track of */
+    private static final int _periodHistory = DownloadSettings.PERIOD_LENGTH.getValue();
+    
+    /** 
+     * By how much does the current period need to deviate from the average
+     * before we start acking.
+     */
+    private final float _deviation = DownloadSettings.DEVIATION.getValue();
+    
+    /** Do not skip more than this many acks in a row */
+    private static final int _maxSkipAck = DownloadSettings.MAX_SKIP_ACKS.getValue();
+    
+    /** how many data packets we got each second */
+    private final int [] _periods = new int[_periodHistory];
+    
+    /** index within that array, points to the last period */
+    private int _currentPeriodId;
+    
+    /** How many data packets we received this period */
+    private int _packetsThisPeriod;
+    
+    /** whether we have enough data */
+    private boolean _enoughData;
+    
+    /** when the current second started */
+    private long _lastPeriod;
+    
+    /** how many acks we skipped in a row vs. total */
+    private int _skippedAcks, _skippedAcksTotal;
+    
+    /** how many packets we got in total */
+    private int _totalDataPackets;
+    
 	/** Allow a testing stub version of UDPService to be used */
 	private static UDPService _testingUDPService;
 
@@ -726,7 +770,13 @@ public class UDPConnectionProcessor {
            msg.getSequenceNumber(),
            _receiveWindow.getWindowStart(),   
            _receiveWindow.getWindowSpace());
-
+          
+          	if (LOG.isDebugEnabled()) {
+          	    LOG.debug("total data packets "+_totalDataPackets+
+          	            " total acks skipped "+_skippedAcksTotal+
+          	            " skipped this session "+ _skippedAcks);
+          	}
+          	_skippedAcks=0;
             send(ack);
         } catch (BadPacketException bpe) {
             // This would not be good.   
@@ -1071,6 +1121,7 @@ public class UDPConnectionProcessor {
                     _chunkLimit = _sendWindow.getWindowSpace();
                 }
             } else if (msg instanceof DataMessage) {
+                
                 // Extend the msgs sequenceNumber to 8 bytes based on past state
                 msg.extendSequenceNumber(
                   _extender.extendSequenceNumber(
@@ -1119,12 +1170,47 @@ public class UDPConnectionProcessor {
                           dmsg.getSequenceNumber());
                 }
 
-                // Ack the Data message
-                safeSendAck(msg);
+                //if this is the first data message we get, start the period now
+                if (_lastPeriod == 0)
+                    _lastPeriod = _lastReceivedTime;
+                
+                _packetsThisPeriod++;
+                _totalDataPackets++;
+                
+                //if we have enough history, see if we should skip an ack
+                if (_skipAcks && _enoughData && _skippedAcks < _maxSkipAck) {
+                    float average = 0;
+                    for (int i = 0;i < _periodHistory;i++)
+                        average+=_periods[i];
+                    
+                    average /= _periodHistory;
+                    
+                    // skip an ack if the rate at which we receive data has not dropped sharply
+                    if (_periods[_currentPeriodId] > average / _deviation) {
+                        _skippedAcks++;
+                        _skippedAcksTotal++;
+                    }
+                    else
+                        safeSendAck(msg);
+                }
+                else
+                    safeSendAck(msg);
+                
+                // if this is the end of a period, record how many data packets we got
+                if (_lastReceivedTime - _lastPeriod >= _period) {
+                    _lastPeriod = _lastReceivedTime;
+                    _currentPeriodId++;
+                    if (_currentPeriodId >= _periodHistory) {
+                        _currentPeriodId=0;
+                        _enoughData=true;
+                    }
+                    _periods[_currentPeriodId]=_packetsThisPeriod;
+                    _packetsThisPeriod=0;
+                }
+                
             } else if (msg instanceof KeepAliveMessage) {
                 // No need to extend seqNo on KeepAliveMessage since it is zero
                 KeepAliveMessage kmsg   = (KeepAliveMessage) msg;
-
                 // Extend the windowStart to 8 bytes the same 
                 // as the Ack
                 kmsg.extendWindowStart(
@@ -1156,7 +1242,7 @@ public class UDPConnectionProcessor {
                     // Reactivate writing if required
                     if ( (priorR == 0 || _waitingForDataSpace) && 
                          _receiverWindowSpace > 0 ) {
-                        if(LOG.isDebugEnabled())  
+                        if(LOG.isDebugEnabled()) 
                             LOG.debug(" -- KA wakeup");
                         writeSpaceActivation();
                     }
