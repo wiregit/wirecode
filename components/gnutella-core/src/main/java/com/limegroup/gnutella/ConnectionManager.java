@@ -77,7 +77,7 @@ public class ConnectionManager {
      * This is done to ensure that the network is not solely LimeWire centric.
      * This number MUST BE LESS THAN RESERVED_GOOD_LEAF_CONNECTIONS.
      */
-    public static final int RESERVED_NON_LIMEWIRE_LEAVES = 3;
+    public static final int RESERVED_NON_LIMEWIRE_LEAVES = 2;
     
     /**
      * The number of ultrapeer connections reserved for non LimeWire clients.
@@ -649,6 +649,10 @@ public class ConnectionManager {
                 if( leaves < UltrapeerSettings.MAX_LEAVES.getValue() &&
                     nonLimeWireLeaves < RESERVED_NON_LIMEWIRE_LEAVES ) {
                     return true;
+                } else {
+                    // If the reserved non-LimeWire slots are full, don't allow
+                    // more.
+                    return false;
                 }
             }
             
@@ -702,26 +706,7 @@ public class ConnectionManager {
 		return false;
     }
 
-	/**
-	 * Helper method for determining whether or not the connecting node is
-	 * a "trusted vendor", or a vendor that we have interacted with enough
-	 * to feel confident that they are not sending overly aggressive 
-	 * automated requeries, producing other excessive traffic, or otherwise
-	 * being abusive.
-	 *
-	 * @param userAgentHeader the user-agent for the node, as reported in
-	 *  the 0.6 handshake
-	 * @return <tt>true</tt> if the vendor is considered trusted, otherwise
-	 *  <tt>false</tt>
-	 */
-    private static boolean trustedVendor(String userAgentHeader) {
-        if(userAgentHeader == null) return false;
-        return (userAgentHeader.startsWith("LimeWire") ||
-				userAgentHeader.startsWith("Swapper"));
-    }
-        
-
-    /** Returns the number of connections to other ultrapeers.  Caller MUST hold
+	/** Returns the number of connections to other ultrapeers.  Caller MUST hold
      *  this' monitor. */
     private int ultrapeerConnections() {
         //TODO3: augment state of this if needed to avoid loop
