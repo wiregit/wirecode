@@ -478,7 +478,9 @@ public class ClientSidePushProxyTest
         
         writer.write("HTTP/1.1 410 gobbledygook");
         writer.flush();
-        Thread.sleep(300);
+        // there is something going on with timeouts here....
+        if (CommonUtils.isMacOSX())
+            Thread.sleep(300);
         httpSock.close();
 
         // await a PushRequest
