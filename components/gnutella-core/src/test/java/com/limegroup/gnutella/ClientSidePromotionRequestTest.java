@@ -98,8 +98,10 @@ public class ClientSidePromotionRequestTest extends ClientSideTestCase {
 	 * promotes itself.
 	 */
 	public void testPromotingLeaf() throws Exception {
+		UltrapeerSettings.DISABLE_ULTRAPEER_MODE.setValue(false);
 		performTest(false);
 		assertTrue(UltrapeerSettings.EVER_ULTRAPEER_CAPABLE.getValue());
+		assertTrue(RouterService.isSupernode());
 	}
 	
 
