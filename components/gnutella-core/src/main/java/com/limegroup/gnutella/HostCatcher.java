@@ -524,14 +524,14 @@ public class HostCatcher {
         return queue.toString();
     }
 
-    /** Unit test: just calls tests.HostCatcherTest, since it
-     *  is too large and complicated for this.
-     */
-    public static void main(String args[]) {
-        String newArgs[]={String.valueOf(STALE_TIME),
-                          String.valueOf(RETRY_TIME),
-                          String.valueOf(CONNECT_TIME)};
-        com.limegroup.gnutella.tests.HostCatcherTest.main(newArgs);
-    }
+//      /** Unit test: just calls tests.HostCatcherTest, since it
+//       *  is too large and complicated for this.
+//       */
+//      public static void main(String args[]) {
+//          String newArgs[]={String.valueOf(STALE_TIME),
+//                            String.valueOf(RETRY_TIME),
+//                            String.valueOf(CONNECT_TIME)};
+//          com.limegroup.gnutella.tests.HostCatcherTest.main(newArgs);
+//      }
 }
 
