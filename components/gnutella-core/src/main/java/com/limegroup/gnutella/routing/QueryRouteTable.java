@@ -28,6 +28,14 @@ import java.io.*;
  * <b>This class is NOT synchronized.</b>
  */
 public class QueryRouteTable {
+    /** The suggested default max table TTL. */
+    public static final byte DEFAULT_INFINITY=(byte)7;
+    /** What should come across the wire if a keyword is present. */
+    public static final byte KEYWORD_PRESENT=(byte)(1 - DEFAULT_INFINITY);
+    /** What should come across the wire if a keyword is absent. */
+    public static final byte KEYWORD_ABSENT=(byte)(DEFAULT_INFINITY - 1);
+    /** What should come across the wire if a keyword status is unchanged. */
+    public static final byte KEYWORD_NO_CHANGE=(byte)0;
     /** The suggested default table size. */
     public static final int DEFAULT_TABLE_SIZE=1<<14;  //16KB
     /** The maximum size of patch messages, in bytes. */
@@ -351,9 +359,9 @@ public class QueryRouteTable {
         for (int i=0; i<data.length; i++) {
             try {
                 boolean wasInfinity=(!bitTable.get(nextPatch));
-                if (data[i] == -6)
+                if (data[i] == KEYWORD_PRESENT)
                     bitTable.set(nextPatch);
-                else if (data[i] == 6)
+                else if (data[i] == KEYWORD_ABSENT)
                     bitTable.clear(nextPatch);
                 boolean isInfinity=(!bitTable.get(nextPatch));
                 if (wasInfinity && !isInfinity)
@@ -397,7 +405,7 @@ public class QueryRouteTable {
     public Iterator /* of RouteTableMessage */ encode(QueryRouteTable prev) {
         List /* of RouteTableMessage */ buf=new LinkedList();
         if (prev==null)
-            buf.add(new ResetTableMessage(bitTableLength, (byte)7));
+            buf.add(new ResetTableMessage(bitTableLength, DEFAULT_INFINITY));
         else
             Assert.that(prev.bitTableLength==this.bitTableLength,
                         "TODO: can't deal with tables of different lengths");
@@ -410,17 +418,17 @@ public class QueryRouteTable {
         for (int i=0; i<data.length; i++) {
             if (prev!=null) {
                 if (this.bitTable.get(i) == prev.bitTable.get(i))
-                    data[i] = 0;
+                    data[i] = KEYWORD_NO_CHANGE;
                 else if (this.bitTable.get(i))
-                    data[i] = -6;
+                    data[i] = KEYWORD_PRESENT;
                 else // prev.bitTable.get(i)
-                    data[i] = 6;
+                    data[i] = KEYWORD_ABSENT;
             }
             else {
                 if (this.bitTable.get(i))
-                    data[i] = -6;
+                    data[i] = KEYWORD_PRESENT;
                 else
-                    data[i] = 0;
+                    data[i] = KEYWORD_NO_CHANGE;
             }
 
             if (data[i]!=0)
@@ -548,9 +556,13 @@ public class QueryRouteTable {
     ////////////////////////////// Unit Tests ////////////////////////////////
     
     /** Unit test */
-    /* 
+    /*
     public static void main(String args[]) {
         //TODO: test handle bad packets (sequences, etc)
+
+        //-1. Just for sanity's sake....
+        Assert.that(KEYWORD_PRESENT == (byte)-6);
+        Assert.that(KEYWORD_ABSENT  == (byte)6);
 
         //0. compress/uncompress.  First we make a huge array with lots of
         //random bytes but also long strings of zeroes.  This means that
