@@ -310,5 +310,34 @@ public class RequeryDownloadTest extends TestCase {
             assertEquals(Downloader.DOWNLOADING, downloader.getState());
             try { Thread.sleep(200); } catch (InterruptedException e) { }
         }
-    }    
+    }
+    
+    /** Tests that requeries are sent fairly and at appropriate rate. */
+    public void testRequeryScheduling() {
+        ManagedDownloader.TIME_BETWEEN_REQUERIES=100; //0.1 seconds
+        DownloadManager.TIME_BETWEEN_REQUERIES=500;   //0.5 seconds
+
+        Downloader downloader1=null;
+        Downloader downloader2=null;
+        try {
+            downloader1=mgr.startRequeryDownload(
+                "aaaaa", null, GUID.makeGuid(), null);
+            downloader2=mgr.startRequeryDownload(
+                "bbbbb", null, GUID.makeGuid(), null);
+        } catch (AlreadyDownloadingException e) {
+            fail("Already downloading.");
+        }
+
+        List broadcasts=router.broadcasts;
+        try { Thread.sleep(4000); } catch (InterruptedException e) { }
+        assertTrue(broadcasts.size()>=7);    //should be 8, plus fudge factor
+        assertTrue(broadcasts.size()<=9);
+        for (int i=0; i<broadcasts.size()-1; i++) {
+            String qr1=((QueryRequest)broadcasts.get(i)).getQuery();
+            String qr2=((QueryRequest)broadcasts.get(i+1)).getQuery();
+            assertTrue(qr1.equals("aaaaa") || qr1.equals("bbbbb"));
+            assertTrue("Query "+i+" ("+qr1+") same as "+qr2,
+                       !qr1.equals(qr2));
+        }
+    }
 }
