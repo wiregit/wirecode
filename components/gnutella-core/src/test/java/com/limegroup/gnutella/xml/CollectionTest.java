@@ -9,7 +9,7 @@ import junit.framework.*;
 /** Unit test for LimeXMLReplyCollection.
  * Should run in the tests/xml directory (ie where this file is located).
  */
-public class CollectionTester extends TestCase {
+public class CollectionTest extends TestCase {
 
     final Map files = new HashMap();
     final String fileLocation = "com/limegroup/gnutella/xml/";
@@ -34,7 +34,7 @@ public class CollectionTester extends TestCase {
         XMLStringUtils.DELIMITER;
         
 
-    public CollectionTester(String name) {
+    public CollectionTest(String name) {
         super(name);
     }
     
@@ -329,7 +329,7 @@ public class CollectionTester extends TestCase {
 
     public static Test suite() {
         TestSuite suite =  new TestSuite("LimeXMLReplyCollection Unit Test");
-        suite.addTest(new TestSuite(CollectionTester.class));
+        suite.addTest(new TestSuite(CollectionTest.class));
         return suite;
     }
 
