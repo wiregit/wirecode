@@ -496,7 +496,7 @@ public final class UDPService implements Runnable {
                 return true;
             if(scan(msg, 10091, "network subsystem is unavailable"))
                 return true;
-            if(scan(msg, 10107, "Option unsupported by protocol"))
+            if(scan(msg, 10107, "option unsupported by protocol"))
                 return true;
                 
             // General invalid error on Linux
