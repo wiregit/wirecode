@@ -155,6 +155,48 @@ public class OnDemandUnicaster {
         }
     }
 
+    /** @return true if the Query Key data structure was cleared.
+     *  @param lastQueryKeyClearTime The last time query keys were cleared.
+     *  @param queryKeyClearInterval how often you like query keys to be
+     *  cleared.
+     *  This method has been disaggregated from the Expirer class for ease of
+     *  testing.
+     */ 
+    private static boolean clearDataStructures(long lastQueryKeyClearTime,
+                                               long queryKeyClearInterval) 
+        throws Throwable {
+
+        boolean clearedQueryKeys = false;
+
+        // Clear the QueryKeys if needed
+        // ------
+        if ((System.currentTimeMillis() - lastQueryKeyClearTime) >
+            queryKeyClearInterval) {
+            clearedQueryKeys = true;
+            // we just indiscriminately clear all the query keys - we
+            // could just expire 'old' ones, but the benefit is marginal
+            _queryKeys.clear();
+        }
+        // ------
+
+        // Get rid of all the buffered URNs that should be expired
+        // ------
+        synchronized (_bufferedURNs) {
+            Iterator iter = _bufferedURNs.entrySet().iterator();
+            while (iter.hasNext()) {
+                Map.Entry entry = (Map.Entry) iter.next();
+                SendLaterBundle bundle = 
+                (SendLaterBundle) entry.getValue();
+                if (bundle.shouldExpire())
+                    iter.remove();
+            }
+        }
+        // ------
+
+        return clearedQueryKeys;
+    }
+
+
     /** This is run to clear various data structures used.
      *  Made package access for easy test access.
      */
@@ -171,30 +213,9 @@ public class OnDemandUnicaster {
 
         public void run() {
             try {
-                // Clear the QueryKeys is needed
-                // ------
-                if ((System.currentTimeMillis() - _lastQueryKeyClearTime) >
-                    QUERY_KEY_CLEAR_TIME) {
+                if (clearDataStructures(_lastQueryKeyClearTime, 
+                                        QUERY_KEY_CLEAR_TIME))
                     _lastQueryKeyClearTime = System.currentTimeMillis();
-                    // we just indiscriminately clear all the query keys - we
-                    // could just expire 'old' ones, but the benefit is marginal
-                    _queryKeys.clear();
-                }
-                // ------
-
-                // Get rid of all the buffered URNs that should be expired
-                // ------
-                synchronized (_bufferedURNs) {
-                    Iterator iter = _bufferedURNs.entrySet().iterator();
-                    while (iter.hasNext()) {
-                        Map.Entry entry = (Map.Entry) iter.next();
-                        SendLaterBundle bundle = 
-                            (SendLaterBundle) entry.getValue();
-                        if (bundle.shouldExpire())
-                            iter.remove();
-                    }
-                }
-                // ------
             } 
             catch(Throwable t) {
                 ErrorService.error(t);
