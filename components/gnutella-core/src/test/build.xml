@@ -93,9 +93,17 @@
 
   <!-- Initialization stuff -->
   <target name="init" >
-    <!-- we dont do much here right now, but may do later -->
+    <available file="${jars}" type="dir" property="jars.present"/>
     <tstamp/>
+    <antcall target="checkjars"/>    
   </target>
+
+  <target name="checkjars" unless="jars.present">
+    <echo message="*******************************************************"/>
+    <echo message="*******  YOU MUST CHECKOUT THE lib MODULE *************"/>
+    <echo message="**** and place it as a sibling to this tests module ***"/>
+    <echo message="*******************************************************"/>
+ </target>
 
   <!-- CLEAN -->
   <target name="clean">
@@ -115,7 +123,7 @@
   </target>
   
   <!-- PREPARE -->
-  <target name="prepare">
+  <target name="prepare" depends="init">
     <mkdir dir="${builddir}"/>
     <mkdir dir="${reports}"/>
     <mkdir dir="${reports}/html"/>

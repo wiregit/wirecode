@@ -22,8 +22,16 @@
 
 <!-- Initialization stuff -->
 <target name="init">
-<!-- we dont do much here right now, but may do later -->
+    <available file="${jars}" type="dir" property="jars.present"/>
 	<tstamp/>
+	<antcall target="checkjars"/>
+</target>
+
+<target name="checkjars" unless="jars.present">
+    <echo message="*******************************************************"/>
+    <echo message="*******  YOU MUST CHECKOUT THE lib MODULE *************"/>
+    <echo message="**** and place it as a sibling to this core module ****"/>
+    <echo message="*******************************************************"/>
 </target>
 
 
