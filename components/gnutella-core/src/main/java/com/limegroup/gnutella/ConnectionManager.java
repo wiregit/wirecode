@@ -732,7 +732,7 @@ public class ConnectionManager {
             Assert.that(endpoint != null);
 
             ManagedConnection connection = new ManagedConnection(
-                endpoint.hostname, endpoint.port, _router,
+                endpoint.getHostname(), endpoint.getPort(), _router,
                 ConnectionManager.this);
 
             try {

@@ -19,12 +19,24 @@ com.sun.java.util.collections.Comparable
     */
     static final long serialVersionUID = 4686711693494625070L;
     
-    String hostname = null;
+    private String hostname = null;
     int port = 0;
     /** Number of files at the host, or -1 if unknown */
     private long files=-1;
     /** Size of all files on the host, or -1 if unknown */
     private long kbytes=-1;
+    
+    /**
+     * IP Address of form '144.145.146.147' will be stored as:
+     * ip[0] = 144
+     * ip[1] = 145
+     * ip[2] = 146
+     * ip[3] = 147
+     * Note: Lazy initialization may be done for this field.
+     * Therefore, apart from
+     * constructors, it should be accessed using only getter/setter methods
+     */
+    private byte[] hostBytes = null;
 
     /**
      * Needed for Network Discovery. Records information regarding
@@ -41,7 +53,7 @@ com.sun.java.util.collections.Comparable
      * The weight is used in ranking the endpoints
      */
     private transient int weight = 0;
-
+    
     /**
      * Sets the connectivity of the node
      * @param connectivity the connectivity to be set
@@ -115,18 +127,18 @@ com.sun.java.util.collections.Comparable
         int j=hostAndPort.indexOf(":");
         if (j<0)
         {
-            this.hostname=hostAndPort;
+            this.hostname = hostAndPort;
             this.port=DEFAULT;
         } else if (j==0)
         {
             throw new IllegalArgumentException();
         } else if (j==(hostAndPort.length()-1))
         {
-            this.hostname=hostAndPort.substring(0,j);
+            this.hostname = hostAndPort.substring(0,j);
             this.port=DEFAULT;
         } else
         {
-            this.hostname=hostAndPort.substring(0,j);
+            this.hostname = hostAndPort.substring(0,j);
             try
             {
                 this.port=Integer.parseInt(hostAndPort.substring(j+1));
@@ -139,10 +151,25 @@ com.sun.java.util.collections.Comparable
 
     public Endpoint(String hostname, int port)
     {
-        this.hostname=hostname;
+        this.hostname = hostname;
         this.port=port;
     }
 
+    /**
+    * Creates a new Endpoint instance
+    * @param hostBytes IP address of the host (MSB first)
+    * @param port The port number for the host
+    */
+    public Endpoint(byte[] hostBytes, int port)
+    {
+        this.hostBytes = hostBytes;
+        this.port = port;
+        
+        //initialize hostname also
+        this.hostname = Message.ip2string(hostBytes);
+    }
+    
+    
     /**
      * @param files the number of files the host has
      * @param kbytes the size of all of the files, in kilobytes
@@ -153,6 +180,21 @@ com.sun.java.util.collections.Comparable
         this.files=files;
         this.kbytes=kbytes;
     }
+    
+    /**
+    * Creates a new Endpoint instance
+    * @param hostBytes IP address of the host (MSB first)
+    * @param port The port number for the host
+    * @param files the number of files the host has
+    * @param kbytes the size of all of the files, in kilobytes
+    */
+    public Endpoint(byte[] hostBytes, int port, long files, long kbytes)
+    {
+        this(hostBytes, port);
+        this.files=files;
+        this.kbytes=kbytes;
+    }
+    
     
     /**
     * Constructs a new endpoint from pre-existing endpoint by copying the
@@ -166,6 +208,7 @@ com.sun.java.util.collections.Comparable
         this.connectivity = ep.connectivity;
         this.files = ep.files;
         this.hostname = ep.hostname;
+        this.hostBytes = ep.hostBytes;
         this.kbytes = ep.kbytes;
         this.port = ep.port;
         this.processed = ep.processed;
@@ -284,43 +327,13 @@ com.sun.java.util.collections.Comparable
      */
     public byte[] getHostBytes() throws UnknownHostException
     {
-        //check if the IP address is in numeric form or is it a hostname string
-        if(Character.isDigit(hostname.charAt(hostname.length() - 1)))
+        if(hostBytes == null)
         {
-            //it should be an IP address
-            //we may still need to check that its in proper form
-            try
-            {
-                StringTokenizer tokenizer = new StringTokenizer(hostname,".");
-                String a = tokenizer.nextToken();
-                String b = tokenizer.nextToken();
-                String c = tokenizer.nextToken();
-                String d = tokenizer.nextToken();
-
-                int a1 = Integer.parseInt(a);
-                int b1 = Integer.parseInt(b);
-                int c1 = Integer.parseInt(c);
-                int d1 = Integer.parseInt(d);
-                byte[] retBytes =
-            {(byte)a1, (byte)b1,(byte)c1,(byte)d1};
-                return retBytes;
-            }
-            catch(Exception e)
-            {
-                throw new UnknownHostException();
-            }
-
-        }
-        else
-        {
-            //it might be a domain name.
-            //try to get its IP Address
-            return InetAddress.getByName(hostname).getAddress();
-
+            hostBytes = InetAddress.getByName(hostname).getAddress();
             //the above fn call might throw UnknownHostException, but thats what
             //we want in case of DNS failure
-
         }
+        return hostBytes;
     }
 
     /**

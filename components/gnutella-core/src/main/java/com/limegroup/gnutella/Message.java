@@ -255,7 +255,7 @@ public abstract class Message implements Serializable{
 
     /** Returns the ip (given in BIG-endian) format as standard
      *  dotted-decimal, e.g., 192.168.0.1<p> */
-    protected static String ip2string(byte[] ip) {
+     static String ip2string(byte[] ip) {
         /*
           WARNING: There is some debate over whether the IP address is
           little endian or big endian.  Reverse engineering the Gnutella

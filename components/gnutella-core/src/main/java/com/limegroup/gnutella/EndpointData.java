@@ -55,31 +55,42 @@ public EndpointData(String hostname, int port)
     super(hostname,port);
 }
 
+/**
+* Creates a new EndpointData instance
+* @param hostBytes IP address of the host (MSB first)
+* @param port The port number for the host
+*/
+public EndpointData(byte[] hostBytes, int port)
+{
+    //initialize the fields in the super class
+    super(hostBytes,port);
+}
+
 
 /**
 * Creates a new EndpointData instance
-* @param hostname Hostname of the node this endpoint refers to
+* @param hostBytes IP address of the host (MSB first)
 * @param port The port number for the host
 * @param speed Spped in kbps of the host
 */
-public EndpointData(String hostname, int port, long speed)
+public EndpointData(byte[] hostBytes, int port, long speed)
 {
     //initialize the fields in the super class
-    super(hostname,port);
+    super(hostBytes,port);
     this.speed = speed;
 }
 
 /**
 * Creates a new EndpointData instance
-* @param hostname Hostname of the node this endpoint refers to
+* @param hostBytes IP address of the host (MSB first)
 * @param port The port number for the host
 * @param files the number of files the host has
 * @param kbytes the size of all of the files, in kilobytes
 */
-public EndpointData(String hostname, int port, long files, long kbytes)
+public EndpointData(byte[] hostBytes, int port, long files, long kbytes)
 {
     //initialize the fields in the super class
-    super(hostname, port, files, kbytes);
+    super(hostBytes, port, files, kbytes);
 }
 
 

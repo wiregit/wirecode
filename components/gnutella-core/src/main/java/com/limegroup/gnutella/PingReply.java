@@ -73,6 +73,19 @@ public class PingReply extends Message implements Serializable{
         return ret;
     }
 
+     /**
+     * Returns the ip address bytes (MSB first)
+     */
+    public byte[] getIPBytes() {
+        byte[] ip=new byte[4];
+        ip[0]=payload[2];
+        ip[1]=payload[3];
+        ip[2]=payload[4];
+        ip[3]=payload[5];
+        
+        return ip;
+    }
+    
     public long getFiles() {
         return ByteOrder.ubytes2long(ByteOrder.leb2int(payload,6));
     }
