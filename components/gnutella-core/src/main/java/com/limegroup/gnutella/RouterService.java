@@ -114,6 +114,12 @@ public class RouterService
         manager.createConnectionAsynchronously(hostname, portnum);
     }
 
+
+	public void connectToGroup(String group) {
+		System.out.println("Connect to: " + group );
+	}
+
+
     /**
      * @modifies this
      * @effects ensures the keep-alive is non-zero and recontacts the
