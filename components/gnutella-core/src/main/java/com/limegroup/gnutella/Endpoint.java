@@ -29,7 +29,7 @@ private int connectivity = 0;
 * Sets the connectivity of the node
 * @param connectvity the connectivity to be set 
 */
-public setConnectivity(int connectivity)
+public void setConnectivity(int connectivity)
 {
 	this.connectivity = connectivity;
 }
