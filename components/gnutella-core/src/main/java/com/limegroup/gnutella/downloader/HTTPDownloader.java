@@ -535,7 +535,9 @@ public class HTTPDownloader implements Runnable {
         if ( _amountRead == _sizeOfFile ) {
 	    String pname = _downloadDir + _filename;
 	    myFile.renameTo(new File(pname));
-            _state = COMPLETE;
+		_state = COMPLETE;
+		FileManager.getFileManager().addFile(pname);
+			
 	}
 
         else
@@ -558,13 +560,15 @@ public class HTTPDownloader implements Runnable {
                 return;
 			}
 
+			System.out.println("Header: " + str);
+
             //EOF?
             if (str==null || str.equals(""))
                 break;
 
 
-            if ((str.indexOf("Content-length:") != -1)  ||
-				(str.indexOf("Content-Length:") != -1))  {
+            if (str.toUpperCase().indexOf("CONTENT-LENGTH:") != -1)  {
+
                 String sub;
                 try {
                     sub=str.substring(15);
@@ -584,7 +588,7 @@ public class HTTPDownloader implements Runnable {
                 foundLength = true;;
             }
 
-            if (str.indexOf("Content-range:") != -1) {
+            if (str.toUpperCase().indexOf("CONTENT-RANGE:") != -1) {
     //          System.out.println("Content-range line:");
     //          System.out.println(str);
                 _resume = true;
