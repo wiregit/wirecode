@@ -187,7 +187,8 @@ public class StandardMessageRouter extends MessageRouter {
         
     }
 
-    private void sendResponses(Response[] responses, 
+    //This method needs to be public because the Peer-Server code uses it.
+    public void sendResponses(Response[] responses, 
                                QueryRequest query,
                                byte[] clientGUID) {
         // if either there are no responses or, the
