@@ -212,8 +212,13 @@ public final class NormalUploadState extends UploadState {
             // request the bytes from the throttle
             // BLOCKING (only if we need to throttle)
             int allowed = throttle.request(BLOCK_SIZE);
-            int burstSent=0;            
-            c = _fis.read(buf, 0, allowed);
+            int burstSent=0;
+            try {
+                c = _fis.read(buf, 0, allowed);
+            } catch(NullPointerException npe) {
+                // happens occasionally :(
+                throw new IOException(npe.getMessage());
+            }
             if (c == -1)
                 return;
             //dont upload more than asked
