@@ -116,7 +116,10 @@ public class RouterService
 
 
 	/**
-	 *  This is the entry point for a group connection request.
+	 * Attempts to connect to the given group.  Removes your current 
+     * connections and blocks until the group server has been contacted.
+     * If the group server is not reachable, restores connection settings
+     * and silently fails.
 	 */
 	public void connectToGroup(String group) {
 		groupConnect(group);
@@ -127,7 +130,7 @@ public class RouterService
      * Connect to remote host (establish outgoing connection).
      * Blocks until connection established but send a GroupPingRequest
      */
-    public ManagedConnection groupConnectToHostBlocking(
+    private ManagedConnection groupConnectToHostBlocking(
 	  String hostname, int portnum, String group)
             throws IOException {
 
@@ -145,7 +148,7 @@ public class RouterService
      * Connects to router and sends a GroupPingRequest.
      * Block until connected.
      */
-    public void groupConnect(String group) {
+    private void groupConnect(String group) {
         SettingsManager settings=SettingsManager.instance();
 
 		// Store the quick connect value.
