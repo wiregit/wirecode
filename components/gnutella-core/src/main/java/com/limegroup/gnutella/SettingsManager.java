@@ -3278,6 +3278,15 @@ public final class SettingsManager {
 	 */
 	public void setJarName(final String jarName) {
 		setStringValue(JAR_NAME, jarName);
+
+		// make sure that the jar name and the classpath correspond
+		// in the case where an old RunLime.jar has updated to
+		// a LimeWire version that uses JAR_NAME instead of
+		// CLASSPATH, there will be no JAR_NAME entry in 
+		// limewire.props, but there will be CLASSPATH, so this will
+		// get overwritten when setClasspath is called when the 
+		// CLASSPATH is read from the props file
+		setClasspath(jarName);
 	}
 
 	/**
@@ -3285,8 +3294,12 @@ public final class SettingsManager {
 	 *
 	 * @param classpath the classpath to set
 	 */
-	public void setClasspath(final String classpath) {
+	private void setClasspath(final String classpath) {
 		setStringValue(CLASSPATH, classpath);
+
+		// see commment above -- JAR_NAME and CLASSPATH should
+		// always be the same value
+		setJarName(classpath);
 	}
 
 	/**
