@@ -370,7 +370,7 @@ public class PushEndpoint implements HTTPHeaderValue,IpPort{
 		if (hasAddr){
 		    String address = NetworkUtils.ip2string(data,offset);
 		    offset+=4;
-		    int port = ByteOrder.leb2short(data,offset);
+		    int port = ByteOrder.ubytes2int(ByteOrder.leb2short(data,offset));
 		    offset+=2;
 		    try{
 		        addr = new IpPortImpl(address,port);
@@ -467,7 +467,8 @@ public class PushEndpoint implements HTTPHeaderValue,IpPort{
 	
 	public String toString() {
 		String ret = "PE [FEATURES:"+getFeatures()+", FWT Version:"+supportsFWTVersion()+
-			", GUID:"+_guid+", proxies:{ "; 
+			", GUID:"+_guid+", address: "+
+            getAddress()+":"+getPort()+", proxies:{ "; 
 		for (Iterator iter = getProxies().iterator();iter.hasNext();) {
 			IpPort ppi = (IpPort)iter.next();
 			ret = ret+ppi.getInetAddress()+":"+ppi.getPort()+" ";
