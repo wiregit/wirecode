@@ -132,6 +132,13 @@ public class ConnectionManager {
                                                                  this);
             try {
                 initializeExternallyGeneratedConnection(connection);
+                //We DO send ping requests on incoming connections.  This may
+                //double ping traffic, but if gives us more accurate horizon
+                //stats.  And it won't really affect traffic if people implement
+                //caching properly.
+                _router.sendPingRequest(
+                    new PingRequest(SettingsManager.instance().getTTL()),
+                    connection);
                 connection.loopForMessages();
             } catch(IOException e) {
             } catch(Exception e) {
