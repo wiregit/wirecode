@@ -81,7 +81,7 @@ public class ConnectionManager {
         // Initialize synchronously
         initializeExternallyGeneratedConnection(c);
         // Kick off a thread for the message loop.
-        new InitializedOutgoingConnectionThread(c);
+        new OutgoingConnectionThread(c, false);
 
         return c;
     }
@@ -93,8 +93,9 @@ public class ConnectionManager {
     public void createConnectionAsynchronously(
             String hostname, int portnum) {
         // Initialize and loop for messages on another thread.
-        new InitializingOutgoingConnectionThread(
-                new ManagedConnection(hostname, portnum, _router, this));
+        new OutgoingConnectionThread(
+                new ManagedConnection(hostname, portnum, _router, this),
+                true);
     }
 
     /**
@@ -419,59 +420,31 @@ public class ConnectionManager {
 
     /**
      * This thread does the initialization and the message loop for
-     * ManagedConnections create through createConnectionAsynchronously
+     * ManagedConnections create through createConnectionAsynchronously and
+     * createConnectionBlocking
      */
-    private class InitializingOutgoingConnectionThread
+    private class OutgoingConnectionThread
             extends Thread {
         private ManagedConnection _connection;
+        private boolean _doInitialization;
 
         /**
          * The constructor calls start(), so allow you need to do
          * is construct the thread.
          */
-        public InitializingOutgoingConnectionThread(
-                ManagedConnection connection) {
+        public OutgoingConnectionThread(
+                ManagedConnection connection,
+                boolean doInitialization) {
             _connection = connection;
+            _doInitialization = doInitialization;
             setDaemon(true);
             start();
         }
 
         public void run() {
             try {
-                initializeExternallyGeneratedConnection(_connection);
-                _router.sendPingRequest(
-                    new PingRequest(SettingsManager.instance().getTTL()),
-                    _connection);
-                _connection.loopForMessages();
-            } catch(IOException e) {
-            } catch(Exception e) {
-                //Internal error!
-                _callback.error(ActivityCallback.ERROR_20, e);
-            }
-        }
-    }
-
-    /**
-     * This thread does the message loop for ManagedConnections created
-     * through createConnectionBlocking
-     */
-    private class InitializedOutgoingConnectionThread
-            extends Thread {
-        private ManagedConnection _connection;
-
-        /**
-         * The constructor calls start(), so allow you need to do
-         * is construct the thread.
-         */
-        public InitializedOutgoingConnectionThread(
-                ManagedConnection connection) {
-            _connection = connection;
-            setDaemon(true);
-            start();
-        }
-
-        public void run() {
-            try {
+                if(_doInitialization)
+                    initializeExternallyGeneratedConnection(_connection);
                 _router.sendPingRequest(
                     new PingRequest(SettingsManager.instance().getTTL()),
                     _connection);
