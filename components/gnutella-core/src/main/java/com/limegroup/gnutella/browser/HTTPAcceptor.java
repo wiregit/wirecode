@@ -5,18 +5,15 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.net.BindException;
-import java.net.UnknownHostException;
 import java.util.Date;
 
 import com.limegroup.gnutella.ByteReader;
 import com.limegroup.gnutella.Constants;
 import com.limegroup.gnutella.ErrorService;
 import com.limegroup.gnutella.MessageService;
-import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.IOUtils;
-import com.limegroup.gnutella.util.URLDecoder;
 import com.limegroup.gnutella.util.ManagedThread;
+import com.limegroup.gnutella.util.URLDecoder;
 import com.limegroup.gnutella.util.Random12;
 
 /**
@@ -28,8 +25,6 @@ public class HTTPAcceptor implements Runnable {
     private static final String MAGNET_DEFAULT = "magnet10/default.js?";
 	/** Magnet request for a paused response */
     private static final String MAGNET_PAUSE   = "magnet10/pause";
-	/** Local machine ip */
-    private static final String LOCALHOST      = "127.0.0.1";
 	/** Start of Magnet URI */
     private static final String MAGNET         = "magnet:?";
 	/** HTTP no content return */
@@ -156,9 +151,9 @@ public class HTTPAcceptor implements Runnable {
                     socketError = e2;
                 }
             }
-            // no luck setting up and decent OS? show user error message
-			if(error && !CommonUtils.isMacClassic() ) 
-                MessageService.showError("ERROR_NO_PORTS_AVAILABLE");
+            // no luck setting up? show user error message
+			//if(error && !CommonUtils.isMacClassic()) 
+                //MessageService.showError("ERROR_NO_PORTS_AVAILABLE");
         }
 
         while (true) {
@@ -229,14 +224,22 @@ public class HTTPAcceptor implements Runnable {
                 String word=IOUtils.readWord(in,8);
                 _socket.setSoTimeout(0);
 
+    	    	// Only respond to localhost
+        		String hostAddress =
+    	    	    _socket.getInetAddress().getHostAddress().toLowerCase();
+    
 
-                // Incoming upload via HTTP
-                if (word.equals("GET")) {
-					handleHTTPRequest(_socket);
+        		if ("127.0.0.1".equals(hostAddress) || "localhost".equals(hostAddress) ) {
+    
+                    // Incoming upload via HTTP
+                    if (word.equals("GET")) {
+    					handleHTTPRequest(_socket);
+                    }
+    			    else if (word.equals("MAGNET")) {
+                        ExternalControl.fireMagnet(_socket);
+                    }	
                 }
-			    else if (word.equals("MAGNET")) {
-                    ExternalControl.fireMagnet(_socket);
-                }	
+                
             } catch (IOException e) {
             } catch(Throwable e) {
 				ErrorService.error(e);
@@ -254,14 +257,6 @@ public class HTTPAcceptor implements Runnable {
 	 * @param socket the <tt>Socket</tt> instance over which we're reading
 	 */
 	private void handleHTTPRequest(Socket socket) throws IOException {
-
-		// Only respond to localhost
-		String hostAddress =
-		    socket.getInetAddress().getHostAddress().toLowerCase();
-		if ( !LOCALHOST.equals(hostAddress) &&
-			 "localhost".equals(hostAddress) )
-			return;
-
 		// Set the timeout so that we don't do block reading.
         socket.setSoTimeout(Constants.TIMEOUT);
 		// open the stream from the socket for reading
@@ -289,9 +284,6 @@ public class HTTPAcceptor implements Runnable {
 				//System.out.println("Pause called:"+str);
 		        try { Thread.sleep(250); } catch(Exception e) {};
 				returnNoContent(socket);
-			} else {
-			    // upload browsed files
-		        HTTPHandler.create(socket, str);
 			}
         } else if (str.indexOf(MAGNETDETAIL) >= 0) {
             int loc = 0;
