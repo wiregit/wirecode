@@ -159,11 +159,16 @@ public class HeadPing extends VendorMessage {
 		GUID clientGuid = null;
 		boolean supportsBloom = false;
 		boolean supportsPushBloom = false;
+		AltLocDigest direct = null;
+		AltLocDigest push = null;
 		if (_ggep != null) {
+		    
+		    // see if there is a client guid
 			try {
 				clientGuid = new GUID(_ggep.getBytes(GGEP_PUSH));
 			} catch (BadGGEPPropertyException noGuid) {}
 			
+			// see if there is a properties field
 			try {
 			    byte [] props = _ggep.getBytes(GGEP_PROPS);
 			    int propSet = (int)props[props.length-1];
@@ -173,14 +178,26 @@ public class HeadPing extends VendorMessage {
 			        supportsPushBloom = true;
 			} catch (BadGGEPPropertyException bloomNotSupported) {}
 			
-			//TODO: parse bloom
+			// see if there is an altloc digest
+			try {
+			    byte [] data = _ggep.getBytes((char)GGEP_BLOOM+"d");
+			    direct = AltLocDigest.parseDigest(data,0,data.length);
+			} catch (BadGGEPPropertyException noBloom){}
+			catch(IOException badBloom) {} //ignore it?
+			
+			// see if there is a pushloc digest
+			try {
+			    byte [] data = _ggep.getBytes((char)GGEP_PUSH_BLOOM+"d");
+			    push = AltLocDigest.parseDigest(data,0,data.length);
+			} catch (BadGGEPPropertyException noBloom){}
+			catch(IOException badBloom) {} //ignore it?
         } 
 		
         _clientGUID=clientGuid;
         _supportsBloom = supportsBloom;
         _supportsPushBloom = supportsPushBloom;
-		_digest = null;
-		_pushDigest = null;
+		_digest = direct;
+		_pushDigest = push;
 	}
 	
 	/**
@@ -238,6 +255,14 @@ public class HeadPing extends VendorMessage {
 		
 		// we always support bloom filters, even if we don't carry one
 		ggep.put(GGEP_PROPS, new byte[]{(byte)(GGEP_BLOOM | GGEP_PUSH_BLOOM)});
+		
+		// if we have any filters, serialize them
+		if (filter != null && filter.length > 1) {
+		    if (filter[0] != null)
+		        ggep.put(new String((char)GGEP_BLOOM+"d"), filter[0].toBytes());
+		    if (filter[1] != null)
+		        ggep.put(new String((char)GGEP_PUSH_BLOOM+"d"), filter[1].toBytes());
+		}
 		
 		// is this a push ping?
 		if (clientGUID != null) 
