@@ -576,7 +576,10 @@ public class Connection implements ReplyHandler, PushProxyInterface {
             // This does not need to be in a finally clause, because if an
             // exception was thrown, the connection will be removed anyway.
             RESPONSE_HEADERS = null;
-              
+            
+            // create the output queues for messages
+            _messageWriter = new MessageWriterProxy(this);  
+            
             // check for updates from this host  
             UpdateManager.instance().checkAndUpdate(this);          
         } catch (NoGnutellaOkException e) {
@@ -1088,18 +1091,7 @@ public class Connection implements ReplyHandler, PushProxyInterface {
             _socket.setSoTimeout(oldTimeout);
         }
     }
-
-    
-    /**
-     * Builds queues and starts the OutputRunner.  This is intentionally not
-     * in initialize(), as we do not want to create the queues and start
-     * the OutputRunner for reject connections.
-     */
-    public void buildAndStartQueues() {
-        // at this point, everything's initialized, so create our readers and
-        // writers.
-        _messageWriter = new MessageWriterProxy(this);
-    }        
+   
     
 
     /////////////////////////////////////////////////////////////////////////
