@@ -34,7 +34,10 @@ public interface SettingsInterface
     public String     getSaveDirectory();
     public String     getDirectories();
     public String     getExtensions();
-    public String     getBannedIps();
+    public String[]   getBannedIps();
+    public String[]   getBannedWords();
+    public boolean    getFilterDuplicates();
+    public boolean    getFilterAdult();    
 
     /** special method for getting the number of files scanned */
     public int        getFilesScanned();
@@ -108,8 +111,21 @@ public interface SettingsInterface
     public void setExtensions(String extensions)
 	throws IllegalArgumentException;
    
-    public void setBannedIps(String ips) 
+    public void setBannedIps(String[] ips) 
 	throws IllegalArgumentException;
+
+    /** Set the list of words to ban in queries. 
+     *  If words is not a semicolon-separated list of white-space
+     *  free words, throws IllegalArgumentException. */
+    public void setBannedWords(String[] words)
+        throws IllegalArgumentException;
+
+    /** Sets whether duplicate packets should be ignored. */
+    public void setFilterDuplicates(boolean b);
+
+    /** Sets whether queries that are not 
+     *  family-friendly should be ignored. */
+    public void setFilterAdult(boolean b);
 
     /** specialized method for writing the 
      *  properties file for the network discoverer
@@ -153,7 +169,10 @@ public interface SettingsInterface
     /** Default file extensions */
     public static final String  DEFAULT_EXTENSIONS     = "";
     /** default banned ip addresses */
-    public static final String  DEFAULT_BANNED_IPS     = "";
+    public static final String[] DEFAULT_BANNED_IPS     = {};
+    public static final String[] DEFAULT_BANNED_WORDS   = {};
+    public static final boolean DEFAULT_FILTER_ADULT   = false;
+    public static final boolean DEFAULT_FILTER_DUPLICATES = true;
 
     // The property key name constants 
     public static final String TTL            = "TTL";
@@ -172,6 +191,9 @@ public interface SettingsInterface
     public static final String DIRECTORIES    = "DIRECTORIES_TO_SEARCH_FOR_FILES";
     public static final String EXTENSIONS     = "EXTENSIONS_TO_SEARCH_FOR";
     public static final String BANNED_IPS     = "BLACK_LISTED_IP_ADDRESSES";
+    public static final String BANNED_WORDS   = "BANNED_WORDS";
+    public static final String FILTER_DUPLICATES = "FILTER_DUPLICATES";
+    public static final String FILTER_ADULT   = "FILTER_ADULT";
 
 
     public static final String HEADER = "Properties file for the LimeWire gnutella client.\nYou can modify any of the default properties here if\nyou wish, but if your modifications do not fit the\nrange of expected values for specific properties, those\nproperties will revert to their default values.\n\n";

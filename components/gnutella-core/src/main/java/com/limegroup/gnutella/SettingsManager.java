@@ -37,7 +37,10 @@ public class SettingsManager implements SettingsInterface
     private static String   saveDirectory_;
     private static String   directories_;
     private static String   extensions_;
-    private static String   bannedIps_;
+    private static String[] bannedIps_;
+    private static String[] bannedWords_;
+    private static boolean  filterDuplicates_;
+    private static boolean  filterAdult_;
 
     /** Set up a local variable for the properties */
     private static Properties props_;
@@ -252,7 +255,36 @@ public class SettingsManager implements SettingsInterface
 	       
 		else if(key.equals(SettingsInterface.BANNED_IPS))
 		    {
-			try {setBannedIps(p);}
+			try {setBannedIps(decode(p));}
+			catch (IllegalArgumentException ie){}
+		    }
+ 		else if(key.equals(SettingsInterface.BANNED_WORDS))
+		    {
+			try {setBannedWords(decode(p));}
+			catch (IllegalArgumentException ie){}
+		    }
+		else if(key.equals(SettingsInterface.FILTER_ADULT))
+		    {
+			boolean bs;
+			if (p.equals("true"))
+			    bs=true;
+			else if (p.equals("false"))
+			    bs=false;
+			else
+			    return;
+			try {setFilterAdult(bs);}
+			catch (IllegalArgumentException ie){}
+		    }
+		else if(key.equals(SettingsInterface.FILTER_DUPLICATES))
+		    {
+			boolean bs;
+			if (p.equals("true"))
+			    bs=true;
+			else if (p.equals("false"))
+			    bs=false;
+			else
+			    return;
+			try {setFilterDuplicates(bs);}
 			catch (IllegalArgumentException ie){}
 		    }
 	    }
@@ -281,6 +313,9 @@ public class SettingsManager implements SettingsInterface
 	setDirectories(SettingsInterface.DEFAULT_DIRECTORIES);
 	setExtensions(SettingsInterface.DEFAULT_EXTENSIONS);
 	setBannedIps(SettingsInterface.DEFAULT_BANNED_IPS);
+	setBannedWords(SettingsInterface.DEFAULT_BANNED_WORDS);
+	setFilterAdult(SettingsInterface.DEFAULT_FILTER_ADULT);
+	setFilterDuplicates(SettingsInterface.DEFAULT_FILTER_DUPLICATES);
 	try {setSaveDirectory(SettingsInterface.DEFAULT_SAVE_DIRECTORY);}
 	catch(IllegalArgumentException e){
 	    setSaveDirectory(System.getProperty("user.home"));
@@ -338,7 +373,10 @@ public class SettingsManager implements SettingsInterface
     public String getExtensions(){return extensions_;}
 
     /** returns the string of file extensions*/
-    public String getBannedIps(){return bannedIps_;}
+    public String[] getBannedIps(){return bannedIps_;}
+    public String[] getBannedWords(){return bannedWords_;}
+    public boolean getFilterAdult(){return filterAdult_;}
+    public boolean getFilterDuplicates(){return filterDuplicates_;}
 
     /** specialized method for getting the number 
      *  of files scanned */
@@ -585,18 +623,59 @@ public class SettingsManager implements SettingsInterface
 	    }
     }
 
-    public void setBannedIps(String bannedIps)
+    public void setBannedIps(String[] bannedIps)
     {
 	if(bannedIps == null)
 	    throw new IllegalArgumentException();
 	else
 	    {
 		bannedIps_ = bannedIps;
-		props_.setProperty(SettingsInterface.BANNED_IPS, bannedIps);
+		props_.setProperty(SettingsInterface.BANNED_IPS, 
+				   encode(bannedIps));
 		writeProperties();
 	    }
     }
 
+    public void setBannedWords(String[] bannedWords)
+    {
+	if(bannedWords == null)
+	    throw new IllegalArgumentException();
+	else
+	    {
+		bannedWords_ = bannedWords;
+		props_.setProperty(SettingsInterface.BANNED_WORDS, 
+				   encode(bannedWords));
+		writeProperties();
+	    }
+    }
+
+    public void setFilterAdult(boolean filterAdult)
+    {
+	if(false)
+	    throw new IllegalArgumentException();
+	else
+	    {
+		filterAdult_ = filterAdult;
+		Boolean b = new Boolean(filterAdult);
+		String s = b.toString();
+		props_.setProperty(SettingsInterface.FILTER_ADULT, s);
+		writeProperties();
+	    }
+    }
+    
+    public void setFilterDuplicates(boolean filterDuplicates)
+    {
+	if(false)
+	    throw new IllegalArgumentException();
+	else
+	    {
+		filterDuplicates_ = filterDuplicates;
+		Boolean b = new Boolean(filterDuplicates);
+		String s = b.toString();
+		props_.setProperty(SettingsInterface.FILTER_DUPLICATES, s);
+		writeProperties();
+	    }
+    }
 
     /**
      *  Sets the pathname String for the file that 
@@ -651,7 +730,53 @@ public class SettingsManager implements SettingsInterface
 	} 
 	catch (Exception e){}
     }
+
+    private static final String STRING_DELIMETER=";";
+    
+    /**  Returns a string encoding of array. Inverse of decode. */
+    private static String encode(String[] array) {
+	//TODO1: ";" ==> "\;"
+	StringBuffer buf=new StringBuffer();
+	for (int i=0; i<(array.length-1); i++) { //don't put ";" after last word
+	    buf.append(array[i]);
+	    buf.append(STRING_DELIMETER);
+	}
+	if (array.length!=0)
+	    buf.append(array[array.length-1]); //add last word
+	return buf.toString();
+    }
+
+    /** Returns the array encoded in s.  Inverse of encode. */
+    private static String[] decode(String s) {
+	//TODO1: "\;" ==> ";"
+	StringTokenizer lexer=new StringTokenizer(s,STRING_DELIMETER);
+	Vector buf=new Vector();
+	while (lexer.hasMoreTokens())
+	    buf.add(lexer.nextToken());
+	String[] ret=new String[buf.size()];
+	buf.copyInto(ret);
+	return ret;
+    }    
+
+//      /** Unit test */
+//      public static void main(String args[]) {
+//  	String[] original=new String[] {"a", "bee", "see"};
+//  	String encoded=encode(original);
+//  	String[] decoded=decode(encoded);
+//  	Assert.that(Arrays.equals(original, decoded));
+
+//  	original=new String[] {"a"};
+//  	encoded=encode(original);
+//  	decoded=decode(encoded);
+//  	Assert.that(Arrays.equals(original, decoded));
+
+//  	original=new String[] {};
+//  	encoded=encode(original);
+//  	decoded=decode(encoded);
+//  	Assert.that(Arrays.equals(original, decoded));
+//      }
 }
+
 
 
 
