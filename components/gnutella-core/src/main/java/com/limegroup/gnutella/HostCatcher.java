@@ -112,10 +112,6 @@ public class HostCatcher {
      */
     private boolean alwaysNotifyKnownHost=false;
 
-	/**
-	 * Constant for the <tt>QueryUnicaster</tt> instance.
-	 */
-	private final QueryUnicaster UNICASTER = QueryUnicaster.instance();
 
 	/**
 	 * Constant for the host file to read from and write to.
@@ -270,8 +266,9 @@ public class HostCatcher {
 
         if(pr.supportsUnicast()) {
             try {
-                UNICASTER.addUnicastEndpoint(InetAddress.getByName(pr.getIP()), 
-                                             pr.getPort());
+                QueryUnicaster.instance().
+					addUnicastEndpoint(InetAddress.getByName(pr.getIP()), 
+									   pr.getPort());
             } catch(UnknownHostException e) {
                 // nothing we can do if the host is not recognized -- this
                 // should never happen for raw IP addresses, as there is
