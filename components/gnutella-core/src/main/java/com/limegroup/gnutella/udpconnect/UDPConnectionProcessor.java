@@ -955,7 +955,7 @@ log2("Received duplicate block num: "+ dmsg.getSequenceNumber());
                 _wakeupWriteEvent = true;
             }
 
-log("keepalive");
+log2("keepalive");
 		
 			// Make sure that some messages are received within timeframe
 			if ( isConnected() && 
@@ -991,7 +991,7 @@ log("sendKeepAlive");
         }
 
         public void handleEvent() {
-log("data timeout");
+log2("data timeout");
             long time = System.currentTimeMillis();
 
 			// Make sure that some messages are received within timeframe
@@ -1020,7 +1020,7 @@ log("data timeout");
         }
 
         public void handleEvent() {
-log("ack timeout");
+log2("ack timeout");
             
             if ( isConnected() ) {
                 validateAckedData();
