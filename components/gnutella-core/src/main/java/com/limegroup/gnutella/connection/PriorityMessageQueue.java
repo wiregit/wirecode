@@ -31,7 +31,7 @@ public class PriorityMessageQueue extends MessageQueue {
      *  volumes into this many buckets.  You could use different numbers of
      *  priorities according to the type of message, but this is convenient. */
     private static final int PRIORITIES=8;
-    private BucketQueue _queue;
+    private final BucketQueue _queue;
 
     /**
      * @param cycle the number of messages to return per cycle, i.e., between 
@@ -103,7 +103,7 @@ public class PriorityMessageQueue extends MessageQueue {
             return priority;
     }
 
-    protected Message removeNextInternal() {        
+    protected Message removeNextInternal() {  
         if (_queue.isEmpty())
             return null;
         else
