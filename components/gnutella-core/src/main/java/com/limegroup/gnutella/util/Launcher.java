@@ -85,46 +85,12 @@ public class Launcher {
 	 */
 	private static String _errorMessage;
 
-	private static final String WINDOWS_LIBRARY_NAME = "LimeWire16d.dll";
-
 
 	/** 
-	 * initialization block that determines the operating 
-	 * system and loads the necessary runtime data. 
+	 * Loads the necessary Mac classes if running on Mac.
 	 */
-	public static void initialize() {
-		if(CommonUtils.isWindows()) {
-			String libraryPath = CommonUtils.getCurrentDirectory();
-			File nativeLauncherLibrary = new File(libraryPath, 
-												  WINDOWS_LIBRARY_NAME);
-			
-			// return if the dll is already there
-			if(nativeLauncherLibrary.exists()) return;
-
-			ClassLoader cl = Launcher.class.getClassLoader();
-			InputStream is;
-            if (cl!=null)
-                is=cl.getResourceAsStream(WINDOWS_LIBRARY_NAME); 
-            else //Can happen if Launcher loaded by system class loader
-                is=ClassLoader.getSystemResourceAsStream(WINDOWS_LIBRARY_NAME);
-			if(is == null) return;
-
-			try {
-				FileOutputStream fos = new FileOutputStream(nativeLauncherLibrary);
-				int c;
-
-				while ((c = is.read()) != -1) fos.write(c);
-				
-				is.close();
-				fos.close();
-			} catch(FileNotFoundException fnfe) {
-				nativeLauncherLibrary.delete();
-			} catch(IOException ioe) {
-				nativeLauncherLibrary.delete();
-			}
-		}
-
-		else if(CommonUtils.isMacClassic()) {
+	static {
+		if(CommonUtils.isMacClassic()) {
 			_macLoadedWithoutErrors = loadMacClasses();		
 		}
 	}
