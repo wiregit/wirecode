@@ -93,7 +93,7 @@ public final class LeafHandshakeResponder
             HandshakingStat.LEAF_INCOMING_ACCEPT.incrementStat();
 
         //b) We're not a leaf yet, so accept the incoming connection
-        return HandshakeResponse.createAcceptIncomingResponse(ret);
+        return HandshakeResponse.createAcceptIncomingResponse(hr, ret);
     }
 }
 
