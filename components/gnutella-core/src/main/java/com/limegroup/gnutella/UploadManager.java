@@ -158,6 +158,10 @@ public final class UploadManager implements BandwidthTracker {
                 boolean giveSlot = (oldFileName.equalsIgnoreCase(fileName) &&
                                     queued==ACCEPTED);
 
+                if(giveSlot == false && 
+                   (currentMethod == HTTPRequestMethod.HEAD)) {
+                    giveSlot = true;
+                }
                 queued = doSingleUpload(uploader, socket,
 										socket.getInetAddress().getHostAddress(), 
 										line._index, giveSlot);
