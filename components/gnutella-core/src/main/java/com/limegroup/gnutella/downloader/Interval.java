@@ -7,8 +7,8 @@ import java.io.Serializable;
 import com.limegroup.gnutella.Assert;
 import com.limegroup.gnutella.ByteOrder;;
 
-/** The half-open interval [low, high) inclusive on the low end. */
-public class Interval implements Serializable, Comparable {
+/** The open interval [low, high] inclusive on the both ends. */
+public class Interval implements Serializable{
     /** Ensure backwards compatibility. */
     static final long serialVersionUID = -2562093104400487554L;
 
@@ -28,34 +28,6 @@ public class Interval implements Serializable, Comparable {
     public Interval(int singleton) {
         this.low=singleton;
         this.high=singleton;
-    }
-    
-    /**
-     * Compares this to another interval by the 'low' element of the interval.
-     * If the low elements are the same, then the high element is compared.
-     */
-    public int compareTo(Object o) {
-        Interval other = (Interval)o;
-        if( this.low != other.low )
-            return this.low - other.low;
-        else
-            return this.high - other.high;
-    }
-
-    /** 
-     * True if this and other are adjacent, i.e. the high end of one equals the
-     * low end of the other.  
-     */
-    public boolean adjacent(Interval other) {
-        return high==other.low || low==other.high;
-    }
-
-    /**
-     * True if this and other overlap.  
-     */
-    public boolean overlaps(Interval other) {
-        return (this.low<other.high && other.low<this.high) 
-            || (other.low<this.high && this.low<other.high);
     }
 
     /**
