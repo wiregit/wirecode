@@ -31,7 +31,7 @@ public class VendorMessage extends Message {
 
     /** The actual payload of the message.
      */
-    byte[] _payload = null;
+    private byte[] _payload = null;
 
     //----------------------------------
     // CONSTRUCTORS
