@@ -58,12 +58,10 @@ public final class AlternateLocationCollection
 			String curTok = st.nextToken();
 			try {
 				AlternateLocation al = AlternateLocation.createAlternateLocation(curTok);
-				if(alc == null && al.hasSHA1Urn()) {
+				if(alc == null) {
 					alc = new AlternateLocationCollection(al.getSHA1Urn());
 				}
-				if(alc != null) {
-					alc.addAlternateLocation(al);
-				}
+                alc.addAlternateLocation(al);
 			} catch(IOException e) {
 				continue;
 			}
@@ -91,11 +89,7 @@ public final class AlternateLocationCollection
 		SHA1 = sha1;
 	}
 
-	/**
-	 * Accessor for the SHA1 <tt>URN</tt> instance for this collection.
-	 *
-	 * @return the SHA1 <tt>URN</tt> for this collection
-	 */
+    // inherit doc comment
 	public URN getSHA1Urn() {
 		return SHA1;
 	}
@@ -115,9 +109,6 @@ public final class AlternateLocationCollection
 	 *  the urn for this collection
 	 */
 	public synchronized void addAlternateLocation(AlternateLocation al) {
-		if(!al.hasSHA1Urn()) {
-			throw new IllegalArgumentException("locations must have SHA1s");
-		}
 		URN sha1 = al.getSHA1Urn();
 		if(!sha1.equals(SHA1)) {
 			throw new IllegalArgumentException("SHA1 does not match");
