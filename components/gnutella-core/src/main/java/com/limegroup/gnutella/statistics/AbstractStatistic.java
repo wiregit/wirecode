@@ -23,7 +23,7 @@ public abstract class AbstractStatistic implements Statistic {
 	/**
 	 * <tt>IntBuffer</tt> for recording stats data.
 	 */
-	private IntBuffer _buffer;
+	protected IntBuffer _buffer;
 
 	/**
 	 * Long for the statistic currently being added to.
@@ -55,7 +55,7 @@ public abstract class AbstractStatistic implements Statistic {
 	/**
 	 * Lock for accessing the <tt>IntBuffer</tt>.
 	 */
-	private final Object BUFFER_LOCK = new Object(); 
+	protected final Object BUFFER_LOCK = new Object(); 
 
 	/**
 	 * The file name to write stat data to.  If this is null or the empty
@@ -184,7 +184,7 @@ public abstract class AbstractStatistic implements Statistic {
 	 * Constructs the <tt>IntBuffer</tt> with 0 for all values if it is
 	 * not already constructed.
 	 */
-	private void initializeBuffer() {
+	protected final void initializeBuffer() {
 		if(_buffer == null) {
 			_buffer = new IntBuffer(HISTORY_LENGTH);
 			for(int i=0; i<HISTORY_LENGTH; i++) {
