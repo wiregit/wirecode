@@ -348,11 +348,10 @@ public class UDPService implements Runnable {
             }
             else if (message instanceof PingReply) {
                 GUID guid = new GUID(message.getGUID());
-                if(isValidForIncoming(SOLICITED_PING_GUID, guid,
-                                      datagram))
-                    _acceptedSolicitedIncoming = true;
-                else 
+                if(!isValidForIncoming(SOLICITED_PING_GUID, guid, datagram ))
                     return;
+                
+                _acceptedSolicitedIncoming = true;
                 
                 PingReply r = (PingReply)message;
                 if (r.getMyInetAddress() != null) {
