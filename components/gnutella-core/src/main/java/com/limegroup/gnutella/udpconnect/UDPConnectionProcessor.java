@@ -1022,7 +1022,6 @@ public class UDPConnectionProcessor {
                      _receiverWindowSpace > 0 ) {
                     if(LOG.isDebugEnabled())  
                         LOG.debug(" -- ACK wakeup");
-                    System.out.println(" -- ACK wakeup");
                     writeSpaceActivation();
                 }
 
