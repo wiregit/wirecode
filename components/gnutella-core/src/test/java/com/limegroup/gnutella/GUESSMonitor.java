@@ -4,6 +4,7 @@ import com.limegroup.gnutella.messages.*;
 import com.limegroup.gnutella.stubs.*;
 import com.limegroup.gnutella.xml.*;
 import com.limegroup.gnutella.guess.*;
+import com.limegroup.gnutella.util.*;
 import java.io.*;
 import java.util.*;
 import java.net.*;
@@ -31,6 +32,7 @@ public class GUESSMonitor {
         _messageRouter = new MyMessageRouter(stub, staticFM);
         _backend = Backend.createLongLivedBackend(stub, _messageRouter);
         _backend.start();
+        _backend.getRouterService().forceKeepAlive(5);
     }
 
     public void shutdown() {
@@ -41,6 +43,7 @@ public class GUESSMonitor {
 
     public void connect() {
         _backend.getRouterService().connect();
+        _backend.getRouterService().forceKeepAlive(5);
     }
 
     public void disconnect() {
@@ -86,6 +89,7 @@ public class GUESSMonitor {
         private List _guessPongs = new Vector();
         private Set  _uniqueHosts = Collections.synchronizedSet(new HashSet());
         private Set  _badHosts = Collections.synchronizedSet(new HashSet());
+        private Buffer _lastFiveHosts = new Buffer(5);
 
         private boolean _shouldRun = true;
         public void shutdown() {
@@ -144,6 +148,12 @@ public class GUESSMonitor {
                     PingReply currPong = (PingReply) _guessPongs.remove(0);
                     if (_badHosts.contains(currPong.getIP()))
                         continue;
+                    {
+                        // don't hit the same guys too often.....
+                        if (_lastFiveHosts.contains(currPong.getIP()))
+                            continue;
+                        _lastFiveHosts.addFirst(currPong.getIP());
+                    }
                     debug("guessPongLoop(): consuming Pong = " + currPong);
                     Object[] retObjs = 
                         GUESSStatistics.getAckStatistics(currPong.getIP(),
