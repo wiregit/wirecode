@@ -28,15 +28,33 @@ public class UpdateMessageVerifier {
         parse();        
         //get the public key
         PublicKey pubKey = null;
+        FileInputStream fis = null;
+        ObjectInputStream ois = null;
         try {
-            File file = new File(CommonUtils.getUserSettingsDir(),"public.key");
-            FileInputStream fis = new FileInputStream(file);
-            ObjectInputStream ois = new ObjectInputStream(fis);
+            File file = 
+                new File(CommonUtils.getUserSettingsDir(),"public.key");
+            fis = new FileInputStream(file);
+            ois = new ObjectInputStream(fis);
             pubKey = (PublicKey)ois.readObject();
         } catch (ClassNotFoundException cnfx) {
             return false;
         } catch (IOException iox) { //could not read public key?
             return false;
+        } finally {
+            if(ois != null) {
+                try {
+                    ois.close();
+                } catch (IOException e) {
+                    // we can only try to close it...
+                }
+            } 
+            if(fis != null) {
+                try {
+                    fis.close();
+                } catch (IOException e) {
+                    // we can only try to close it...
+                }
+            }       
         }
         try {
             //initialize the verifier
