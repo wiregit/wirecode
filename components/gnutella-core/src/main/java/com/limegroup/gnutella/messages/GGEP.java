@@ -2,8 +2,6 @@ package com.limegroup.gnutella.messages;
 
 import com.sun.java.util.collections.*;
 import java.io.*;
-import com.limegroup.gnutella.Assert;
-import java.util.Enumeration;
 import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.util.StringComparator;
 import com.limegroup.gnutella.util.COBSUtil;
@@ -581,23 +579,6 @@ public class GGEP extends Object {
 		}
 		return hashCode;
 	}
-
-
-    private String toHexString(byte[] bytes) {
-        StringBuffer buf = new StringBuffer();
-        String       str;
-        int val;
-        for (int i = 0; i < bytes.length; i++) {
-            //Treating each byte as an unsigned value ensures
-            //that we don't str doesn't equal things like 0xFFFF...
-            val = ByteOrder.ubyte2int(bytes[i]);
-            str = Integer.toHexString(val);
-            while (str.length() < 2)
-                str = "0" + str;
-            buf.append(str);
-        }
-        return buf.toString().toUpperCase();
-    }
 }
 
 
