@@ -35,6 +35,12 @@ public class UDPHostRanker {
      */
     public static int LISTEN_EXPIRE_TIME = 20 * 1000;
     
+    /** Send pings every this often */
+    private static final long SEND_INTERVAL = 500;
+    
+    /** Send this many pings each time */
+    private static final int MAX_SENDS = 15;
+    
     /**
      * The current number of datagrams we've sent in the past 500 milliseconds.
      */
@@ -114,7 +120,7 @@ public class UDPHostRanker {
     /**
      * Waits for UDP listening to be activated.
      */
-    private static void waitForListening(Cancellable canceller) {
+    private static boolean waitForListening(Cancellable canceller) {
         int waits = 0;
         while(!UDPService.instance().isListening() && waits < 10 &&
               !canceller.isCancelled()) {
@@ -126,6 +132,8 @@ public class UDPHostRanker {
             }
             waits++;
         }
+        
+        return waits < 10;
     }
         
     
@@ -138,7 +146,9 @@ public class UDPHostRanker {
         final Cancellable canceller = info.canceller;
         Message message = info.message;
         
-        waitForListening(canceller);
+        // something went wrong with UDPService - don't try to send
+        if (!waitForListening(canceller))
+            return;
     
         if(message == null)
             message = PingRequest.createUDPPing();
@@ -148,15 +158,15 @@ public class UDPHostRanker {
         if (listener != null)
             ROUTER.registerMessageListener(messageGUID, listener);
 
-        final int MAX_SENDS = 15;
+        
         Iterator iter = hosts.iterator();
         while(iter.hasNext() && !canceller.isCancelled()) {
             long now = System.currentTimeMillis();
-            if(now > _lastSentTime + 500) {
+            if(now > _lastSentTime + SEND_INTERVAL) {
                 _sentAmount = 0;
             } else if(_sentAmount == MAX_SENDS) {
                 try {
-                    Thread.sleep(500);
+                    Thread.sleep(SEND_INTERVAL);
                     now = System.currentTimeMillis();
                 } catch(InterruptedException ignored) {}
                 _sentAmount = 0;

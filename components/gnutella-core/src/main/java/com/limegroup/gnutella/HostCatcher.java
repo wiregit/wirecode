@@ -144,12 +144,12 @@ public class HostCatcher {
     /**
      * map of locale (string) to sets (of endpoints).
      */
-    private final Map LOCALE_2_SET =  new HashMap();
+    private final Map LOCALE_SET_MAP =  new HashMap();
     
     /**
      * number of endpoints to keep in the locale set
      */
-    private static final int NUM_2_KEEP_LOCALE_SET = 100;
+    private static final int LOCALE_SET_SIZE = 100;
 
     /** The list of pongs with the highest average daily uptimes.  Each host's
      * weight is set to the uptime.  These are most likely to be reachable
@@ -250,6 +250,11 @@ public class HostCatcher {
      * we click connect.
      */
     private final long PONG_RANKING_EXPIRE_TIME = 20 * 1000;
+    
+    /**
+     * Stop ranking if we have this many connections.
+     */
+    private static final int MAX_CONNECTIONS = 5;
     
 	/**
 	 * Creates a new <tt>HostCatcher</tt> instance with a constant setting
@@ -356,7 +361,7 @@ public class HostCatcher {
             return false;
         int have = RouterService.getConnectionManager().
             getInitializedConnections().size();
-        if(have >= 5)
+        if(have >= MAX_CONNECTIONS)
             return false;
             
         long now = System.currentTimeMillis();
@@ -591,15 +596,15 @@ public class HostCatcher {
      */
     private synchronized void addToLocaleMap(ExtendedEndpoint endpoint) {
         String loc = endpoint.getClientLocale();
-        if(LOCALE_2_SET.containsKey(loc)) { //if set exists for ths locale
-            Set s = (Set)LOCALE_2_SET.get(loc);
-            if(s.add(endpoint) && s.size() > NUM_2_KEEP_LOCALE_SET)
+        if(LOCALE_SET_MAP.containsKey(loc)) { //if set exists for ths locale
+            Set s = (Set)LOCALE_SET_MAP.get(loc);
+            if(s.add(endpoint) && s.size() > LOCALE_SET_SIZE)
                 s.remove(s.iterator().next());
         }
         else { //otherwise create new set and add it to the map
             Set s = new HashSet();
             s.add(endpoint);
-            LOCALE_2_SET.put(loc, s);
+            LOCALE_SET_MAP.put(loc, s);
         }
     }
     
@@ -931,8 +936,8 @@ public class HostCatcher {
 
         String loc = ApplicationSettings.LANGUAGE.getValue();
 
-        if(LOCALE_2_SET.containsKey(loc)) {
-            Set locales = (Set)LOCALE_2_SET.get(loc);
+        if(LOCALE_SET_MAP.containsKey(loc)) {
+            Set locales = (Set)LOCALE_SET_MAP.get(loc);
             for(Iterator i = base.iterator(); i.hasNext(); ) {
                 Object next = i.next();
                 if(locales.contains(next)) {
@@ -1028,7 +1033,7 @@ public class HostCatcher {
         Set hosts = new HashSet();
         Iterator i;
 
-        Set locales = (Set)LOCALE_2_SET.get(loc);
+        Set locales = (Set)LOCALE_SET_MAP.get(loc);
         if(locales != null) {
             for(i = locales.iterator(); i.hasNext() && hosts.size() < 10; ) {
                 Object next = i.next();
