@@ -228,7 +228,12 @@ public class ID3Editor {
         return xmlStr;//this has been suitable modified
     }
     
+    /**
+     * Actually writes the ID3 tags out to the mp3 file.
+     */
     public int writeID3DataToDisk(String fileName) {
+        if(! LimeXMLUtils.isMP3File(fileName))
+            return LimeXMLReplyCollection.INCORRECT_FILETYPE;
         File f= null;
         RandomAccessFile file = null;
         
