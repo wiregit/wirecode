@@ -143,6 +143,8 @@ public class SettingsManager {
 		= "com.limegroup.gnutella.gui.Main";
 
 	private final boolean DEFAULT_CHAT_ENABLED        = true;
+	private final String DEFAULT_LANGUAGE             = "en";
+	private final String DEFAULT_COUNTRY              = "US";
 
     // The property key name constants
 	private final String ALLOW_BROWSER         = "ALLOW_BROWSER";
@@ -215,6 +217,9 @@ public class SettingsManager {
 	private final String MAIN_CLASS            = "MAIN_CLASS";
 
 	private final String CHAT_ENABLED          = "CHAT_ENABLED";
+
+	private final String LANGUAGE              = "LANGUAGE";
+	private final String COUNTRY               = "COUNTRY";
  
 	/** Variables for the various settings */
     private volatile boolean  _forceIPAddress;
@@ -298,9 +303,9 @@ public class SettingsManager {
 
 
     /**
-     * This method provides the only access
-     * to an instance of this class in
-     * accordance with the singleton pattern
+	 * Returns the <code>SettingsManager</code> instance.
+	 *
+	 * @return the <code>SettingsManager</code> instance
      */
     public static SettingsManager instance() {
         return _instance;
@@ -673,6 +678,12 @@ public class SettingsManager {
                 else if(key.equals(MAIN_CLASS)){
                     setMainClass(p);
                 }
+				else if(key.equals(LANGUAGE)) {
+					setLanguage(p);
+				}
+				else if(key.equals(COUNTRY)) {
+					setCountry(p);
+				}
             }
             catch(NumberFormatException nfe){ /* continue */ }
             catch(IllegalArgumentException iae){ /* continue */ }
@@ -760,6 +771,9 @@ public class SettingsManager {
 		setAppHeight(DEFAULT_APP_HEIGHT);
 
 		setChatEnabled(DEFAULT_CHAT_ENABLED);
+
+		setLanguage(DEFAULT_LANGUAGE);
+		setCountry(DEFAULT_COUNTRY);
     }
 
 
@@ -789,8 +803,7 @@ public class SettingsManager {
      * pathname of the file listing the hosts 
 	 */
     public String getHostList() {
-		File hostListFile = new File(CURRENT_DIRECTORY, HOST_LIST_NAME);		
-		return hostListFile.getAbsolutePath();
+		return new File(HOST_LIST_NAME).getAbsolutePath();		
 	}
 
     /** returns the keep alive value */
@@ -1097,19 +1110,46 @@ public class SettingsManager {
 	}
   
     /**
-     * returns the classpath string used for loading jar files
-	 * on startup.
+     * Returns the classpath string used for loading jar files on startup.
+	 *
+	 * @return the classpath <code>String</code> used for loading jar files on 
+	 *         startup.
      */
     public String getClassPath() {
         return _props.getProperty(CLASSPATH);
     }
 
     /**
-     * returns the main class to load on startup.
+     * Returns the main class to load on startup.
+	 *
+	 * @return a <code>String</code> specifying the main class to load on
+	 *         startup
      */
     public String getMainClass() {
         return _props.getProperty(MAIN_CLASS);
     }
+
+	/**
+	 * Returns a <code>String</code> instance specifying the language to use
+	 * for the application.
+	 *
+	 * @return a <code>String</code> specifying the language to use for the 
+	 *         application
+	 */
+	public String getLanguage() {
+		return _props.getProperty(LANGUAGE);
+	}
+
+	/**
+	 * Returns a <code>String</code> instance specifying the country to use
+	 * for the application.
+	 *
+	 * @return a <code>String</code> specifying the country to use for the 
+	 *         application
+	 */
+	public String getCountry() {
+		return _props.getProperty(COUNTRY);
+	}
 
     /******************************************************
      **************  END OF ACCESSOR METHODS **************
@@ -1940,6 +1980,24 @@ public class SettingsManager {
     public void setMainClass(String mainClass) {
         _props.put(MAIN_CLASS, mainClass);
     }
+
+	/**
+	 * Sets the language to use for the application.
+	 *
+	 * @param language the language to use
+	 */
+	public void setLanguage(String language) {
+		_props.put(LANGUAGE, language);
+	}
+
+	/**
+	 * Sets the country to use for the application.
+	 *
+	 * @param country the country to use
+	 */
+	public void setCountry(String country) {
+		_props.put(COUNTRY, country);
+	}
 	
     /******************************************************
      ***************  END OF MUTATOR METHODS **************
