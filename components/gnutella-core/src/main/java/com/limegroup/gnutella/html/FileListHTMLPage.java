@@ -95,13 +95,15 @@ public class FileListHTMLPage {
             final String middle3URL = "\">";
             final String endURL = "</a><br>";
             for (int i = 0; i < sharedFiles.length; i++) {
-                if (!hasEnoughAltLocs(sharedFiles[i])) continue;
-                if (!(sharedFiles[i] instanceof IncompleteFileDesc)) {
-                    final String sha1 = sharedFiles[i].getSHA1Urn().toString();
-                    final String fname = sharedFiles[i].getFile().getName();
-                    sb.append(beginURL + sha1 + middle1URL + fname + middle2URL +
-                              sha1 + middle3URL + fname + endURL);
-                }
+                if(sharedFiles[i] == null ||
+                   !hasEnoughAltLocs(sharedFiles[i]) ||
+                   sharedFiles[i] instanceof IncompleteFileDesc)
+                    continue;
+                
+                final String sha1 = sharedFiles[i].getSHA1Urn().toString();
+                final String fname = sharedFiles[i].getFile().getName();
+                sb.append(beginURL + sha1 + middle1URL + fname + middle2URL +
+                          sha1 + middle3URL + fname + endURL);
             }
         }
         
