@@ -7,6 +7,7 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.ServerSocket;
+import java.net.Socket;
 import java.util.Iterator;
 
 import junit.framework.Test;
@@ -78,14 +79,6 @@ public final class ServerSideConnectBackRedirectTest extends ServerSideTestCase 
     }
 
     public static void setUpQRPTables() throws Exception {
-        // for Ultrapeer 1
-        QueryRouteTable qrt = new QueryRouteTable();
-        qrt.add("leehsus");
-        qrt.add("berkeley");
-        for (Iterator iter=qrt.encode(null).iterator(); iter.hasNext(); ) {
-            ULTRAPEER[0].send((RouteTableMessage)iter.next());
-			ULTRAPEER[0].flush();
-        }
     }
 
     // BEGIN TESTS
@@ -98,22 +91,12 @@ public final class ServerSideConnectBackRedirectTest extends ServerSideTestCase 
 
 	    LEAF[0] = new Connection("localhost", PORT, new LeafHeaders("localhost"),
                               new EmptyResponder());
-
-        //3. routed leaf, with route table for "test"
         LEAF[0].initialize();
-        QueryRouteTable qrt = new QueryRouteTable();
-        qrt.add("berkeley");
-        qrt.add("susheel");
-        qrt.addIndivisible(HugeTestUtils.UNIQUE_SHA1.toString());
-        for (Iterator iter=qrt.encode(null).iterator(); iter.hasNext(); ) {
-            LEAF[0].send((RouteTableMessage)iter.next());
-			LEAF[0].flush();
-        }
 		assertTrue("LEAF[0] should be connected", LEAF[0].isOpen());
 
         MessagesSupportedVendorMessage msvm = 
-        (MessagesSupportedVendorMessage) getFirstMessageOfType(LEAF[0],
-        MessagesSupportedVendorMessage.class, 500);
+            (MessagesSupportedVendorMessage)getFirstMessageOfType(LEAF[0],
+                MessagesSupportedVendorMessage.class, 500);
         assertNotNull(msvm);
         assertGreaterThan(0, msvm.supportsTCPConnectBackRedirect());
         assertGreaterThan(0, msvm.supportsUDPConnectBackRedirect());
@@ -135,10 +118,8 @@ public final class ServerSideConnectBackRedirectTest extends ServerSideTestCase 
         DatagramPacket pack = new DatagramPacket(new byte[1000], 1000);
         try {
             UDP_ACCESS.receive(pack);
-            assertTrue(false);
-        }
-        catch (IOException good) {
-        }
+            fail("got UDP msg");
+        } catch (IOException good) {}
  
         cbGuid = new GUID(GUID.makeGuid());
         udp = new UDPConnectBackRedirect(cbGuid, InetAddress.getLocalHost(),
@@ -159,10 +140,9 @@ public final class ServerSideConnectBackRedirectTest extends ServerSideTestCase 
                     assertEquals(new GUID(reply.getGUID()), cbGuid);
                     break;
                 }
-            }
-            catch (IOException bad) {
-                assertTrue("Did not get reply", false);
-            }
+            } catch (IOException bad) {
+                fail("got IOX", bad);
+           }
         }
     }
 
@@ -185,10 +165,9 @@ public final class ServerSideConnectBackRedirectTest extends ServerSideTestCase 
         DatagramPacket pack = new DatagramPacket(new byte[1000], 1000);
         try {
             tempSock.receive(pack);
-            assertTrue(false);
-        }
-        catch (IOException good) {
-        }
+            fail("got UDP msg");
+        } catch (IOException good) {}
+
         tempSock.close();
     }
 
@@ -207,10 +186,8 @@ public final class ServerSideConnectBackRedirectTest extends ServerSideTestCase 
         TCP_ACCESS.setSoTimeout(1000);
         try {
             TCP_ACCESS.accept();
-            assertTrue(false);
-        }
-        catch (IOException good) {
-        }
+            fail("got IOX");
+        } catch (IOException good) {}
 
         tcp = new TCPConnectBackRedirect(InetAddress.getLocalHost(),
                                          TCP_ACCESS.getLocalPort());
@@ -220,10 +197,15 @@ public final class ServerSideConnectBackRedirectTest extends ServerSideTestCase 
 
         // we should get a incoming connection
         try {
-            TCP_ACCESS.accept();
-        }
-        catch (IOException good) {
-            assertTrue(false);
+            Socket x = TCP_ACCESS.accept();
+            byte[] read = new byte[3];
+            int n = x.getInputStream().read(read);
+            assertEquals(2, n);
+            assertEquals('\n', read[0]);
+            assertEquals('\n', read[1]);
+            assertEquals(0, read[2]);
+        } catch (IOException bad) {
+            fail("got IOX", bad);
         }
 
     }
@@ -242,10 +224,8 @@ public final class ServerSideConnectBackRedirectTest extends ServerSideTestCase 
         TCP_ACCESS.setSoTimeout(1000);
         try {
             TCP_ACCESS.accept();
-            assertTrue(false);
-        }
-        catch (IOException good) {
-        }
+            fail("got TCP connection");
+        } catch (IOException good) {}
     }
 
 
@@ -265,10 +245,8 @@ public final class ServerSideConnectBackRedirectTest extends ServerSideTestCase 
         DatagramPacket pack = new DatagramPacket(new byte[1000], 1000);
         try {
             UDP_ACCESS.receive(pack);
-            assertTrue(false);
-        }
-        catch (IOException good) {
-        }
+            fail("got UDP msg");
+        } catch (IOException good) {}
 
         TCPConnectBackRedirect tcp = 
             new TCPConnectBackRedirect(InetAddress.getLocalHost(),
@@ -281,10 +259,8 @@ public final class ServerSideConnectBackRedirectTest extends ServerSideTestCase 
         TCP_ACCESS.setSoTimeout(1000);
         try {
             TCP_ACCESS.accept();
-            assertTrue(false);
-        }
-        catch (IOException good) {
-        }
+            fail("got TCP connection");
+        } catch (IOException good) {}
 
         // simulate the running of the thread - technically i'm not testing
         // the situation precisely, but i'm confident the schedule work so the
@@ -315,9 +291,8 @@ public final class ServerSideConnectBackRedirectTest extends ServerSideTestCase 
                     assertEquals(new GUID(reply.getGUID()), cbGuid);
                     break;
                 }
-            }
-            catch (IOException bad) {
-                assertTrue("Did not get reply", false);
+            } catch (IOException bad) {
+                fail("got IOX", bad);
             }
         }
 
@@ -330,10 +305,15 @@ public final class ServerSideConnectBackRedirectTest extends ServerSideTestCase 
         // we should get a incoming connection
         TCP_ACCESS.setSoTimeout(1000);
         try {
-            TCP_ACCESS.accept();
-        }
-        catch (IOException good) {
-            assertTrue(false);
+            Socket x = TCP_ACCESS.accept();
+            byte[] read = new byte[3];
+            int n = x.getInputStream().read(read);
+            assertEquals(2, n);
+            assertEquals('\n', read[0]);
+            assertEquals('\n', read[1]);
+            assertEquals(0, read[2]);
+        } catch (IOException bad) {
+            fail("got IOX", bad);
         }
     }
 
