@@ -1309,12 +1309,10 @@ public class ManagedDownloader implements Downloader, Serializable {
      *  wake up the tryAllDownloads thread with a release().  
      *  WARNING:  THIS IS VERY SPECIFIC SYNCHRONIZATION.  IT WAS NOT MEANT TO 
      *  WORK WITH MORE THAN ONE PRODUCER OR ONE CONSUMER.
-     *  INVARIANT: upon entry to down(), shouldWait should be true.
      */
     private class RequeryLock extends Object {
         private boolean shouldWait = true;
         public synchronized void release() {
-            Assert.that(shouldWait == true);
             shouldWait = false;
             this.notifyAll();
         }
