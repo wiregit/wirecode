@@ -169,8 +169,8 @@ public final class QueryUnicaster {
         _qGuidsToRemove = new Vector();
 
         // start service...
-        _querier = new Thread() {
-			public void run() {
+        _querier = new ManagedThread() {
+			public void managedRun() {
                 try {
                     queryLoop();
                 } catch(Throwable t) {

@@ -3,6 +3,7 @@ package com.limegroup.gnutella;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.util.NetworkUtils;
 import com.limegroup.gnutella.util.IpPort;
+import com.limegroup.gnutella.util.ManagedThread;
 import com.limegroup.gnutella.messages.*;
 import java.net.*;
 import java.io.*;
@@ -117,9 +118,9 @@ public final class UDPService implements Runnable {
 	 */
 	private UDPService() {	    
         PACKETS_TO_SEND = new LinkedList();
-        UDP_RECEIVE_THREAD = new Thread(this, "UDPService-Receiver");
+        UDP_RECEIVE_THREAD = new ManagedThread(this, "UDPService-Receiver");
         UDP_RECEIVE_THREAD.setDaemon(true);
-        UDP_SEND_THREAD = new Thread(new Sender(), "UDPService-Sender");
+        UDP_SEND_THREAD = new ManagedThread(new Sender(), "UDPService-Sender");
         UDP_SEND_THREAD.setDaemon(true);
     }
 	

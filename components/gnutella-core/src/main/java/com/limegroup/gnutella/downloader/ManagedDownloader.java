@@ -578,8 +578,8 @@ public class ManagedDownloader implements Downloader, Serializable {
                 initializeAlternateLocations();
             }
         }
-        this.dloaderManagerThread=new Thread("ManagedDownload") {
-            public void run() {
+        this.dloaderManagerThread=new ManagedThread("ManagedDownload") {
+            public void managedRun() {
                 try { 
                     tryAllDownloads(deserialized);
                 } catch (Throwable e) {
@@ -1928,7 +1928,7 @@ public class ManagedDownloader implements Downloader, Serializable {
                 HeadRequester requester = new HeadRequester(set, fileHash, 
                        fileDesc, fileDesc.getAlternateLocationCollection());
                 Thread headThread = 
-                               new Thread(requester, "HEAD Request Thread");
+                               new ManagedThread(requester, "HEAD Request Thread");
                 headThread.setDaemon(true);
                 headThread.start();
             }
@@ -2171,8 +2171,8 @@ public class ManagedDownloader implements Downloader, Serializable {
                     // else...
                     currentRFDs.add(rfd);
                 }
-                Thread connectCreator = new Thread("DownloadWorker") {
-                    public void run() {
+                Thread connectCreator = new ManagedThread("DownloadWorker") {
+                    public void managedRun() {
                         boolean iterate = false;
                         try {
                             iterate = connectAndDownload(rfd);

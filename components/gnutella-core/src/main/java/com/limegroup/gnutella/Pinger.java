@@ -2,6 +2,7 @@ package com.limegroup.gnutella;
 
 import com.limegroup.gnutella.messages.*;
 import com.limegroup.gnutella.settings.*;
+import com.limegroup.gnutella.util.ManagedThread;
 
 /**
  * This class continually sends broadcast pings on behalf of an Ultrapeer
@@ -42,7 +43,7 @@ public final class Pinger implements Runnable {
      * this node if it's an Ultrapeer.
      */
     public void start() {
-        Thread pingThread = new Thread(this, "pinger thread");
+        Thread pingThread = new ManagedThread(this, "pinger thread");
         pingThread.setDaemon(true);
         pingThread.start();
     }

@@ -93,14 +93,14 @@ public class SimpleTimer {
     /**
      * Thread responsible for servicing all tasks.
      */
-    private class TimerRunnerThread extends Thread {
+    private class TimerRunnerThread extends ManagedThread {
         TimerRunnerThread(boolean isDaemon) {
             super("TimerRunner");            
             setDaemon(isDaemon);
         }
 
         /** Repeatedly runs tasks from queue as appropriate. */
-        public void run() {
+        public void managedRun() {
             try {
                 while (! _isCancelled) {
                     //1. Wait for runnable task.

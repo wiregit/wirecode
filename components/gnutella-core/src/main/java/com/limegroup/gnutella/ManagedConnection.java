@@ -674,7 +674,7 @@ public class ManagedConnection extends Connection
     }    
 
     /** Repeatedly sends all the queued data. */
-    private class OutputRunner extends Thread {
+    private class OutputRunner extends ManagedThread {
         public OutputRunner() {
             setName("OutputRunner");
             setDaemon(true);
@@ -682,7 +682,7 @@ public class ManagedConnection extends Connection
         }
 
         /** While the connection is not closed, sends all data delay. */
-        public void run() {
+        public void managedRun() {
             //Exceptions are only caught to set the _runnerDied variable
             //to make testing easier.  For non-IOExceptions, Throwable
             //is caught to notify ErrorService.

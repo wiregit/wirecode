@@ -6,13 +6,14 @@ import com.limegroup.gnutella.search.*;
 import java.util.*;
 import com.sun.java.util.collections.Arrays;
 import java.io.*;
+import com.limegroup.gnutella.util.ManagedThread;
 
 /**
  * Opens a special connection with a known server of the metadata
  * and send it the special query
  * @author  Sumeet Thadani (11/16/01)
  */
-public final class RichConnectionThread extends Thread{
+public final class RichConnectionThread extends ManagedThread{
     private String ipAddress;
     private QueryRequest query;
     private ActivityCallback callback;
@@ -29,7 +30,7 @@ public final class RichConnectionThread extends Thread{
      * opens a connection with the specified ip address and sends it a 
      * rich query request
      */
-    public void run(){
+    public void managedRun(){
 		/*
         try {
             Connection c = new Connection(ipAddress,6346);//use default port

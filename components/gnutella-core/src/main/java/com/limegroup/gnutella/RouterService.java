@@ -1120,7 +1120,7 @@ public class RouterService {
 	  final Set proxies) {
         final BrowseHostHandler handler = new BrowseHostHandler(callback, 
                                                           guid, serventID);
-        Thread asynch = new Thread( new Runnable() {
+        Thread asynch = new ManagedThread( new Runnable() {
             public void run() {
                 try {
                     handler.browseHost(host, port, proxies);

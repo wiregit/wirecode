@@ -14,6 +14,7 @@ import com.limegroup.gnutella.ErrorService;
 import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.IOUtils;
 import com.limegroup.gnutella.util.URLDecoder;
+import com.limegroup.gnutella.util.ManagedThread;
 
 /**
  * Listens on an HTTP port, accepts incoming connections, and dispatches 
@@ -54,7 +55,7 @@ public class HTTPAcceptor implements Runnable {
      * the port monitoring thread
      */
     public void start() {
-		Thread httpAcceptorThread = new Thread(this, "HTTPAcceptor");
+		Thread httpAcceptorThread = new ManagedThread(this, "HTTPAcceptor");
         httpAcceptorThread.setDaemon(true);
         httpAcceptorThread.start();
     }
@@ -201,7 +202,7 @@ public class HTTPAcceptor implements Runnable {
         }
     }
 
-    private class ConnectionDispatchRunner extends Thread {
+    private class ConnectionDispatchRunner extends ManagedThread {
         private Socket _socket;
 
         /**
@@ -219,7 +220,7 @@ public class HTTPAcceptor implements Runnable {
             this.start();
         }
 
-        public void run() {
+        public void managedRun() {
             try {
                 InputStream in = _socket.getInputStream(); 
                 _socket.setSoTimeout(Constants.TIMEOUT);

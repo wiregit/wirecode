@@ -90,7 +90,7 @@ public final class SearchResultHandler {
 	public void start() {
         //Start REPLIES consumer thread.
 		Runnable resultRunner = new ReplyProcessor();
-		Thread resultThread = new Thread(resultRunner, "Search Result Thread");
+		Thread resultThread = new ManagedThread(resultRunner, "Search Result Thread");
         resultThread.setDaemon(true);
         resultThread.start();
 	}

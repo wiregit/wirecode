@@ -1158,7 +1158,7 @@ public abstract class MessageRouter {
         // 2)
         final String addrToContact = sourceAddr.getHostAddress();
 
-        Thread connectBack = new Thread( new Runnable() {
+        Thread connectBack = new ManagedThread( new Runnable() {
             public void run() {
                 Socket sock = null;
                 OutputStream os = null;
@@ -1213,7 +1213,7 @@ public abstract class MessageRouter {
         else
             return;  // we've connected back to this guy recently....
 
-        Thread connectBack = new Thread( new Runnable() {
+        Thread connectBack = new ManagedThread( new Runnable() {
             public void run() {
                 Socket sock = null;
                 OutputStream os = null;
@@ -1973,8 +1973,8 @@ public abstract class MessageRouter {
     private void handleStatisticsMessage(final StatisticVendorMessage svm, 
                                          final ReplyHandler handler) {
         if(StatisticsSettings.RECORD_VM_STATS.getValue()) {
-            Thread statHandler = new Thread("Stat writer ") {
-                public void run() {
+            Thread statHandler = new ManagedThread("Stat writer ") {
+                public void managedRun() {
                     RandomAccessFile file = null;
                     try {
                         file = new RandomAccessFile("stats_log.log", "rw");
@@ -2349,14 +2349,14 @@ public abstract class MessageRouter {
     }
 
     /** Thread the processing of QRP Table delivery. */
-    private class QRPPropagator extends Thread {
+    private class QRPPropagator extends ManagedThread {
         public QRPPropagator() {
             setName("QRPPropagator");
             setDaemon(true);
         }
 
         /** While the connection is not closed, sends all data delay. */
-        public void run() {
+        public void managedRun() {
             try {
                 while (true) {
 					// Check for any scheduled QRP table propagations

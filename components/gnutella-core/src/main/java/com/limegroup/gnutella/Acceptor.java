@@ -139,7 +139,7 @@ public class Acceptor implements Runnable {
 	public void start() {
 	    MulticastService.instance().start();
 	    UDPService.instance().start();
-		Thread at = new Thread(this, "Acceptor");
+		Thread at = new ManagedThread(this, "Acceptor");
 		at.setDaemon(true);
 		at.start();
 	}
@@ -457,7 +457,7 @@ public class Acceptor implements Runnable {
                 ConnectionDispatchRunner dispatcher =
 					new ConnectionDispatchRunner(client);
 				Thread dispatchThread = 
-                    new Thread(dispatcher, "ConnectionDispatchRunner");
+                    new ManagedThread(dispatcher, "ConnectionDispatchRunner");
 				dispatchThread.setDaemon(true);
 				dispatchThread.start();
 

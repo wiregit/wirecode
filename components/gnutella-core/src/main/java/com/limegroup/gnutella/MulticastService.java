@@ -2,6 +2,7 @@ package com.limegroup.gnutella;
 
 import com.limegroup.gnutella.util.NetworkUtils;
 import com.limegroup.gnutella.util.CommonUtils;
+import com.limegroup.gnutella.util.ManagedThread;
 import com.limegroup.gnutella.messages.*;
 import com.sun.java.util.collections.*;
 
@@ -75,7 +76,7 @@ public final class MulticastService implements Runnable {
 	 * Constructs a new <tt>UDPAcceptor</tt>.
 	 */
 	private MulticastService() {
-	    MULTICAST_THREAD = new Thread(this, "MulticastService");
+	    MULTICAST_THREAD = new ManagedThread(this, "MulticastService");
 		MULTICAST_THREAD.setDaemon(true);
     }
 	

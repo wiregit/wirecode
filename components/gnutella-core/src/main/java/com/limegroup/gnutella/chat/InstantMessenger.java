@@ -92,7 +92,7 @@ public class InstantMessenger implements Chatter {
 	/** starts the chatting */
 	public void start() {
 		MessageReader messageReader = new MessageReader(this);
-        Thread upThread = new Thread(messageReader, "MessageReader");
+        Thread upThread = new ManagedThread(messageReader, "MessageReader");
 		upThread.setDaemon(true);
 		upThread.start();
 

@@ -2,6 +2,7 @@ package com.limegroup.gnutella;
 
 import com.limegroup.gnutella.messages.PingRequest;
 import com.limegroup.gnutella.settings.ConnectionSettings;
+import com.limegroup.gnutella.util.ManagedThread;
 import com.sun.java.util.collections.ArrayList;
 import com.sun.java.util.collections.HashMap;
 import com.sun.java.util.collections.Iterator;
@@ -53,7 +54,7 @@ public final class ConnectionWatchdog implements Runnable {
      * Starts the <tt>ConnectionWatchdog</tt> thread.
      */
     public void start() {
-        Thread watchdog = new Thread(this, "ConnectionWatchdog");
+        Thread watchdog = new ManagedThread(this, "ConnectionWatchdog");
         watchdog.setDaemon(true);
   		watchdog.start();        
     }

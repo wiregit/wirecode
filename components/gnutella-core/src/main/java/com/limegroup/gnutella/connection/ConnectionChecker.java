@@ -13,6 +13,7 @@ import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.http.HTTPHeaderName;
 import com.limegroup.gnutella.http.HttpClientManager;
 import com.limegroup.gnutella.util.CommonUtils;
+import com.limegroup.gnutella.util.ManagedThread;
 import com.sun.java.util.collections.Arrays;
 import com.sun.java.util.collections.Collections;
 import com.sun.java.util.collections.Iterator;
@@ -126,7 +127,7 @@ public final class ConnectionChecker implements Runnable {
 
         ConnectionChecker checker = new ConnectionChecker();
         Thread connectionThread = 
-            new Thread(checker, "check for live connection");
+            new ManagedThread(checker, "check for live connection");
         connectionThread.setDaemon(false);
         connectionThread.start();
         return checker;

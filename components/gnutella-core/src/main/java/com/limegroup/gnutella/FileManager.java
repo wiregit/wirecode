@@ -17,6 +17,7 @@ import com.limegroup.gnutella.util.KeyValue;
 import com.limegroup.gnutella.util.StringUtils;
 import com.limegroup.gnutella.util.Trie;
 import com.limegroup.gnutella.util.I18NConvert;
+import com.limegroup.gnutella.util.ManagedThread;
 import com.sun.java.util.collections.ArrayList;
 import com.sun.java.util.collections.Arrays;
 import com.sun.java.util.collections.Comparator;
@@ -570,8 +571,8 @@ public abstract class FileManager {
 
             final boolean notifyOnClearFinal = notifyOnClear;
             _loadThreadInterrupted = false;
-            _loadThread = new Thread("FileManager.loadSettingsBlocking") {
-                public void run() {
+            _loadThread = new ManagedThread("FileManager.loadSettingsBlocking") {
+                public void managedRun() {
 					try {
 						loadSettingsBlocking(notifyOnClearFinal);
 						RouterService.getCallback().fileManagerLoaded();

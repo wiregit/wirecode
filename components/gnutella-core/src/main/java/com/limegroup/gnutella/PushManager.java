@@ -3,6 +3,7 @@ package com.limegroup.gnutella;
 import com.limegroup.gnutella.statistics.UploadStat;
 import com.limegroup.gnutella.util.NetworkUtils;
 import com.limegroup.gnutella.util.IOUtils;
+import com.limegroup.gnutella.util.ManagedThread;
 import com.limegroup.gnutella.http.HTTPRequestMethod;
 
 import com.sun.java.util.collections.List;
@@ -101,8 +102,8 @@ public final class PushManager {
             insertAttemptingPush(host, index);
         }    
 
-        Thread runner=new Thread("PushUploadThread") {
-            public void run() {
+        Thread runner=new ManagedThread("PushUploadThread") {
+            public void managedRun() {
                 Socket s = null;
                 try {
         			// try to create the socket.

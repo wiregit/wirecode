@@ -130,7 +130,7 @@ public class ThreadWorkGroup {
         return retVal;
     }
 
-    private class WorkerThread extends Thread {
+    private class WorkerThread extends ManagedThread {
         private final WorkerInterface _worker;
         
         public WorkerThread(WorkerInterface worker) {
@@ -138,7 +138,7 @@ public class ThreadWorkGroup {
             _worker = worker;
         }
         
-        public void run() {
+        public void managedRun() {
             // isActive() is a global on/off switch
             while (isActive()) {
                 try {

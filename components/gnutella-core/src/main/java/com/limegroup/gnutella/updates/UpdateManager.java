@@ -157,8 +157,8 @@ public class UpdateManager {
             return;//so this should never happen
         final Connection c = connection;
         final String myversion = myVersion;
-        Thread checker = new Thread("UpdateFileRequestor") {
-            public void run() {
+        Thread checker = new ManagedThread("UpdateFileRequestor") {
+            public void managedRun() {
                 LOG.trace("Getting update file");
                 final String UPDATE = "/update.xml";
                 //if we get host or port incorrectly, we will not be able to 

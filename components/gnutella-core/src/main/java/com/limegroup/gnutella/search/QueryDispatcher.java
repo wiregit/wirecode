@@ -2,6 +2,7 @@ package com.limegroup.gnutella.search;
 
 import com.sun.java.util.collections.*;
 import com.limegroup.gnutella.*;
+import com.limegroup.gnutella.util.ManagedThread;
 
 /**
  * This class handles the thread that dispatches dynamic queries for Ultrapeers.
@@ -64,7 +65,7 @@ public final class QueryDispatcher implements Runnable {
 	 * Schudules the processing of queries for execution.
 	 */
 	public void start() {
-        Thread dispatcher = new Thread(this, "QueryDispatcher");
+        Thread dispatcher = new ManagedThread(this, "QueryDispatcher");
         dispatcher.setDaemon(true);
         dispatcher.start();
 	}

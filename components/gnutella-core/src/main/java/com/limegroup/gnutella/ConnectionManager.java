@@ -250,7 +250,7 @@ public class ConnectionManager {
         initializeExternallyGeneratedConnection(c);
         // Kick off a thread for the message loop.
         Thread conn =
-            new Thread(new OutgoingConnector(c, false), "OutgoingConnector");
+            new ManagedThread(new OutgoingConnector(c, false), "OutgoingConnector");
         conn.setDaemon(true);
         conn.start();
         return c;
@@ -269,7 +269,7 @@ public class ConnectionManager {
         // Initialize and loop for messages on another thread.
 
 		Thread outgoingConnectionRunner = 
-			new Thread(outgoingRunner, "OutgoingConnectionThread");
+			new ManagedThread(outgoingRunner, "OutgoingConnectionThread");
 		outgoingConnectionRunner.setDaemon(true);
 		outgoingConnectionRunner.start();
     }
@@ -1755,7 +1755,7 @@ public class ConnectionManager {
      * the thread is interrupted externally, the interrupting thread is
      * responsible for recording the death.
      */
-    private class ConnectionFetcher extends Thread {
+    private class ConnectionFetcher extends ManagedThread {
 
         /**
          * Tries to add a connection.  Should only be called from a thread
@@ -1772,7 +1772,7 @@ public class ConnectionManager {
         }
 
         // Try a single connection
-        public void run() {
+        public void managedRun() {
             try {
                 // Wait for an endpoint.
                 Endpoint endpoint = null;

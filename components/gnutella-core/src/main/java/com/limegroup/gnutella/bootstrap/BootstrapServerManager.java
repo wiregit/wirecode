@@ -308,8 +308,8 @@ public class BootstrapServerManager {
 			throw new NullPointerException("asynchronous request to null cache");
 		}
 		
-        Thread runner=new Thread() {
-            public void run() {
+        Thread runner=new ManagedThread() {
+            public void managedRun() {
                 try {
                     requestBlocking(request);
                 } catch (Throwable e) {

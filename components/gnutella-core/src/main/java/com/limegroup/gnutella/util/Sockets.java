@@ -225,7 +225,7 @@ public class Sockets {
 		public synchronized Socket connect(int timeout) 
             throws IOException {
 			//Asynchronously establish socket.
-			Thread t = new Thread(new SocketOpenerThread(), "SocketOpener");
+			Thread t = new ManagedThread(new SocketOpenerThread(), "SocketOpener");
 			t.setDaemon(true);
 			t.start();
 			
