@@ -2,6 +2,7 @@ package com.limegroup.gnutella.tests;
 
 import com.sun.java.util.collections.*;
 import com.limegroup.gnutella.*;
+import com.limegroup.gnutella.http.*;
 import com.limegroup.gnutella.util.CommonUtils;
 import junit.framework.*;
 import junit.extensions.*;

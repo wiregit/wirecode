@@ -1,6 +1,6 @@
 package com.limegroup.gnutella.tests;
 
-import com.limegroup.gnutella.*;
+import com.limegroup.gnutella.http.*;
 import junit.framework.*;
 import junit.extensions.*;
 

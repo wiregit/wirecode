@@ -1,6 +1,7 @@
 package com.limegroup.gnutella.tests;
 
 import com.limegroup.gnutella.*; 
+import com.limegroup.gnutella.http.*; 
 import com.sun.java.util.collections.*;
 import java.io.*;
 
