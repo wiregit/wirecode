@@ -268,6 +268,36 @@ public class ServerSideWhatIsNewTest
     }
 
 
+    public void testWhatIsNewQuery() throws Exception {
+        drain(testUP);
+
+        QueryRequest whatIsNewQuery = 
+            new QueryRequest(GUID.makeGuid(), (byte)2, 
+                             QueryRequest.WHAT_IS_NEW_QUERY_STRING, "", null, 
+                             null, null, false, Message.N_UNKNOWN, false, true);
+        whatIsNewQuery.hop();
+        testUP.send(whatIsNewQuery);
+        testUP.flush();
+
+        // give time to process
+        Thread.sleep(1000);
+
+        QueryReply reply = 
+            (QueryReply) getFirstInstanceOfMessageType(testUP,
+                                                       QueryReply.class);
+        assertNotNull(reply);
+        assertEquals(2, reply.getResultCount());
+        Iterator iter = reply.getResults();
+        Response currResp = (Response) iter.next();
+        assertTrue(currResp.getName().equals("berkeley.txt") ||
+                   currResp.getName().equals("susheel.txt"));
+        currResp = (Response) iter.next();
+        assertTrue(currResp.getName().equals("berkeley.txt") ||
+                   currResp.getName().equals("susheel.txt"));
+        assertFalse(iter.hasNext());
+    }
+
+
     private static void shutdown() throws IOException {
         //System.out.println("\nShutting down.");
         debug("-Shutting down");
