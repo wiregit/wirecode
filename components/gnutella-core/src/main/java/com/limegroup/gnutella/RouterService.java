@@ -102,6 +102,14 @@ public class RouterService
 	manager.remove(c);
     }
 
+    /**
+     * Clear the hostcatcher if requested
+     */
+    public void clearHostCatcher()
+    {
+	manager.catcher.clear();
+    }
+
 
     /**
      * Tell the system to send connection activity to this callback interface
