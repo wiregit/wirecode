@@ -774,8 +774,8 @@ public final class HTTPUploader implements Uploader {
             try {
                 // discard X-Node
                 st.nextToken();
-                _nodeAddress = st.nextToken();
-                _nodePort = Integer.parseInt(st.nextToken());
+                _nodeAddress = st.nextToken().trim();
+                _nodePort = Integer.parseInt(st.nextToken().trim());
             }
             catch (NumberFormatException nfe) {} // crappy port
         }
