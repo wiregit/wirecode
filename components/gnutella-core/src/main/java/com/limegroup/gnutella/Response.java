@@ -493,29 +493,7 @@ public class Response {
             }
             return endpoints == null ? Collections.EMPTY_SET : endpoints;
         }
-    }
-
-    /**
-     * Write the response data to the given byte array, as if inside a 
-	 * <tt>QueryReply</tt>.
-     */
-    public int writeToArray(byte[] array, int i) {
-        ByteOrder.int2leb((int)index,array,i);
-        ByteOrder.int2leb((int)size,array,i+4);
-        i+=4;            
-        System.arraycopy(nameBytes, 0, array, i, nameBytes.length);
-        i+=nameBytes.length;
-        //Write first null terminator.
-        array[i++]=(byte)0;
-        // write HUGE v0.93 General Extension Mechanism extensions
-        // (currently just URNs)
-		System.arraycopy(extBytes, 0, array, i, extBytes.length);
-		i+=extBytes.length;
-        //add the second null terminator
-        array[i++]=(byte)0;
-        return i;
-    }
-    
+    }    
 
     /**
      * Like writeToArray(), but writes to an OutputStream.
