@@ -1,4 +1,4 @@
-asfpackage com.limegroup.gnutella;
+package com.limegroup.gnutella;
 
 import java.io.*;
 import java.net.*;
