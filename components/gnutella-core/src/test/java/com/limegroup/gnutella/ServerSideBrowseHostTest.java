@@ -1,18 +1,12 @@
 package com.limegroup.gnutella;
 
-import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.messages.*;
-import com.limegroup.gnutella.messages.vendor.*;
 import com.limegroup.gnutella.settings.*;
 import com.limegroup.gnutella.stubs.*;
 import com.limegroup.gnutella.util.*;
 import com.limegroup.gnutella.handshaking.*;
-import com.limegroup.gnutella.security.*;
 import com.limegroup.gnutella.routing.*;
-import com.bitzi.util.*;
-
 import junit.framework.*;
-import java.util.Properties;
 import com.sun.java.util.collections.*;
 import java.io.*;
 import java.net.*;
@@ -39,7 +33,7 @@ public final class ServerSideBrowseHostTest extends BaseTestCase {
 	 * The port that the central Ultrapeer listens on, and that the other nodes
 	 * connect to it on.
 	 */
-    private static final int PORT = 6667;
+    private static final int ULTRAPEER_PORT = 6667;
 
 	/**
 	 * The timeout value for sockets -- how much time we wait to accept 
@@ -47,22 +41,6 @@ public final class ServerSideBrowseHostTest extends BaseTestCase {
 	 */
     private static final int TIMEOUT = 2000;
 
-	/**
-	 * The default TTL to use for request messages.
-	 */
-	private final static byte TTL = 7;
-
-	/**
-	 * The "soft max" TTL used by LimeWire's message routing -- hops + ttl 
-	 * greater than this value have their TTLs automatically reduced
-	 */
-	private static final byte SOFT_MAX = 3;
-
-	/**
-	 * The TTL of the initial "probe" queries that the Ultrapeer uses to
-	 * determine how widely distributed a file is.
-	 */
-	private static final byte PROBE_QUERY_TTL = 2;
 
     /**
      * Leaf connection to the Ultrapeer.
@@ -74,20 +52,12 @@ public final class ServerSideBrowseHostTest extends BaseTestCase {
      */
     private static Connection ULTRAPEER_1;
 
-    /**
-     * Ultrapeer 1 UDP connection.
-     */
-    private static DatagramSocket UDP_ACCESS;
 
     /**
 	 * Second Ultrapeer connection
      */
     private static Connection ULTRAPEER_2;
 
-    /**
-     * the client guid of the LEAF - please set in the first test.
-     */
-    private static byte[] clientGUID = null;
 
 	/**
 	 * The central Ultrapeer used in the test.
@@ -109,15 +79,13 @@ public final class ServerSideBrowseHostTest extends BaseTestCase {
 	
 	private static void buildConnections() throws Exception {
         ULTRAPEER_1 = 
-			new Connection("localhost", PORT,
+			new Connection("localhost", ULTRAPEER_PORT,
 						   new UltrapeerHeaders("localhost"),
 						   new EmptyResponder()
 						   );
 
-        UDP_ACCESS = new DatagramSocket();
-
         ULTRAPEER_2 = 
-			new Connection("localhost", PORT,
+			new Connection("localhost", ULTRAPEER_PORT,
 						   new UltrapeerHeaders("localhost"),
 						   new EmptyResponder()
 						   );
@@ -135,7 +103,7 @@ public final class ServerSideBrowseHostTest extends BaseTestCase {
             new String[] {"*.*.*.*"});
         FilterSettings.WHITE_LISTED_IP_ADDRESSES.setValue(
             new String[] {"127.*.*.*"});
-        ConnectionSettings.PORT.setValue(PORT);
+        ConnectionSettings.PORT.setValue(ULTRAPEER_PORT);
         SharingSettings.EXTENSIONS_TO_SHARE.setValue("txt;");
         // get the resource file for com/limegroup/gnutella
         File berkeley = 
@@ -159,14 +127,14 @@ public final class ServerSideBrowseHostTest extends BaseTestCase {
 	public static void globalSetUp() throws Exception {
         setSettings();
 
-        assertEquals("unexpected port", PORT, 
+        assertEquals("unexpected port", ULTRAPEER_PORT, 
 					ConnectionSettings.PORT.getValue());
 
 		ROUTER_SERVICE.start();
-		ROUTER_SERVICE.clearHostCatcher();
-		ROUTER_SERVICE.connect();	
+		RouterService.clearHostCatcher();
+		RouterService.connect();	
 		connect();
-        assertEquals("unexpected port", PORT, 
+        assertEquals("unexpected port", ULTRAPEER_PORT, 
 					 ConnectionSettings.PORT.getValue());
 	}
 
@@ -177,7 +145,7 @@ public final class ServerSideBrowseHostTest extends BaseTestCase {
 
 
 	public static void globalTearDown() throws Exception {
-		ROUTER_SERVICE.disconnect();
+		RouterService.disconnect();
 		sleep();
 		ULTRAPEER_1.close();
 		ULTRAPEER_2.close();
@@ -210,9 +178,11 @@ public final class ServerSideBrowseHostTest extends BaseTestCase {
 		buildConnections();
         //1. first Ultrapeer connection 
         ULTRAPEER_2.initialize();
+        ULTRAPEER_2.buildAndStartQueues();
 
         //2. second Ultrapeer connection
         ULTRAPEER_1.initialize();
+        ULTRAPEER_1.buildAndStartQueues();
         
         // for Ultrapeer 1
         QueryRouteTable qrt = new QueryRouteTable();
@@ -243,7 +213,7 @@ public final class ServerSideBrowseHostTest extends BaseTestCase {
         boolean ret=false;
         while (true) {
             try {
-                Message m=c.receive(TIMEOUT);
+                c.receive(TIMEOUT);
                 ret=true;
                 //System.out.println("Draining "+m+" from "+c);
             } catch (InterruptedIOException e) {
@@ -357,7 +327,7 @@ public final class ServerSideBrowseHostTest extends BaseTestCase {
         drainAll();
 
         // make sure leaf is sharing
-        assertEquals(2, ROUTER_SERVICE.getFileManager().getNumFiles());
+        assertEquals(2, RouterService.getFileManager().getNumFiles());
 
         // send a query that should be answered
         QueryRequest query = new QueryRequest(GUID.makeGuid(), (byte) 1,
@@ -378,10 +348,9 @@ public final class ServerSideBrowseHostTest extends BaseTestCase {
     }
 
     public void testHTTPRequest() throws Exception {
-        Message m = null;
         String result = null;
 
-        Socket s = new Socket("localhost", PORT);
+        Socket s = new Socket("localhost", ULTRAPEER_PORT);
         ByteReader in = new ByteReader(s.getInputStream());
         BufferedWriter out = 
             new BufferedWriter(new OutputStreamWriter(s.getOutputStream()));
@@ -412,10 +381,9 @@ public final class ServerSideBrowseHostTest extends BaseTestCase {
 
 
     public void testBadHTTPRequest1() throws Exception {
-        Message m = null;
         String result = null;
 
-        Socket s = new Socket("localhost", PORT);
+        Socket s = new Socket("localhost", ULTRAPEER_PORT);
         ByteReader in = new ByteReader(s.getInputStream());
         BufferedWriter out = 
             new BufferedWriter(new OutputStreamWriter(s.getOutputStream()));
