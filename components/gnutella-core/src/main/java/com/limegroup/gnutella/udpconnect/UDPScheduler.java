@@ -45,10 +45,11 @@ public class UDPScheduler extends ManagedThread {
     private UpdateThread                _updateThread;
     
     /**
-     * object used to make sure only one copy of the update thread exists per
+     * object used to make sure only one copy of the two threads exist per
      * enclosing object
      */
     private final Object _updateThreadLock = new Object();
+    private final Object _mainThreadLock = new Object();
 
     /**
      *  Return the UDPScheduler singleton.
@@ -92,7 +93,7 @@ public class UDPScheduler extends ManagedThread {
 	 * starts both threads if they haven't been started yet.
 	 */
 	private final void startThreads() {
-		synchronized(this) {
+		synchronized(_mainThreadLock) {
 		    if ( !_started ) {
 		        _started = true;
 		        setDaemon(true);
