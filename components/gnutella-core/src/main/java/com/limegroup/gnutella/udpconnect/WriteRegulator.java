@@ -154,9 +154,9 @@ System.out.println("hitZeroWindow _skipLimit = "+_skipLimit+
         // Compute a max target RTT given the spikyness of traffic
         int maxRTT;
         if ( smoothRTT > ((5*lowRTT)/2) ) {
-            maxRTT      = ((_sendWindow.lowRoundTripTime()*7) / 5);
+            maxRTT      = ((lowRTT*7) / 5);
         } else {
-            maxRTT      = ((_sendWindow.lowRoundTripTime()*15) / 5);
+            maxRTT      = ((lowRTT*15) / 5);
         }
         int windowDelay = 
           (((baseWait * windowSize) / _skipLimit) * 2) / 4;
