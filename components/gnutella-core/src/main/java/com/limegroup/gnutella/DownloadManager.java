@@ -375,8 +375,6 @@ public class DownloadManager implements BandwidthTracker {
 	  !qr.isChordReply())
 	  return;
 
-       System.out.println("IN DownloadManager.handleQueryReply()");
-
         // get them as RFDs....
         RemoteFileDesc[] rfds = null;
         try { 

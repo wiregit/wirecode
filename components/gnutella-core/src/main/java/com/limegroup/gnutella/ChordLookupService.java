@@ -121,6 +121,42 @@ public class ChordLookupService
 	 }
       }
 
+      public void handleQueryReply(QueryReply qrp)
+      {
+	 String host=qrp.getIP();
+	 int port=qrp.getPort();
+
+	 if(qrp.calculateQualityOfService(false)<3 || new com.limegroup.gnutella.Endpoint(host, port).isPrivateAddress()) return;
+
+	 try{
+	    Iterator results=qrp.getResults();
+	    while(results.hasNext()) {
+	       Response r=(Response)results.next();
+	       if(r.getSHA1Urn()!=null)
+	       {
+		  // Only add files 10^6 bytes or larger. These tend to be the most attractive.
+		  if(r.getSize() > 1000000) {
+		     System.out.println("Adding: "+r.getName());
+		     addRemoteFile(host,port,r.getSHA1Urn());
+		  }
+	       }
+	    }	 
+	 }catch(BadPacketException e) {
+	    // TODO: better handling
+	    e.printStackTrace();
+	 }
+      }
+
+      public void addRemoteFile(String host, int port, URN file)
+      {
+	 try{
+	    _lookup.add(file.toString(), "gnutella://"+host+":"+port);
+	 }catch(Exception e) {
+	    // TODO: better handling
+	    e.printStackTrace();	    
+	 }
+      }
+
       /**
 	 Looks up a file in the Chord DLT. This should all be
 	 done asynchronously, not like this!!!

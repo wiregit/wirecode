@@ -593,6 +593,9 @@ public abstract class MessageRouter
             _numRouteErrors++;
             receivingConnection.countDroppedMessage();
         }
+
+	// CHORD: Try to add the files in this reply into the lookup table
+        _chord.handleQueryReply(queryReply);
     }
 
     /**
