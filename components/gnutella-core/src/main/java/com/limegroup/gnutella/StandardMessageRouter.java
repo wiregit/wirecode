@@ -32,17 +32,19 @@ public class StandardMessageRouter extends MessageRouter {
 
 
     /**
-     * Responds to the PingRequest by getting information from the FileManager
-     * and the Acceptor.  However, it only sends a Ping Reply back if we
-     * can currently accept incoming connections or the hops + ttl <= 2 (to allow
-     * for crawler pings).
+     * Responds to a Gnutella ping with cached pongs.  This does special 
+     * handling for both "heartbeat" pings that were sent to ensure that
+     * the connection is still live as well as for pings from a crawler.
+     *
+     * @param 
      */
-    protected void respondToPingRequest(PingRequest pingRequest) {
+    protected void respondToPingRequest(PingRequest ping,
+                                        ReplyHandler handler) {
         //If this wasn't a handshake or crawler ping, check if we can accept
         //incoming connection for old-style unrouted connections, ultrapeers, or
         //leaves.  TODO: does this mean leaves always respond to pings?
-        int hops = (int)pingRequest.getHops();
-        int ttl = (int)pingRequest.getTTL();
+        int hops = (int)ping.getHops();
+        int ttl = (int)ping.getTTL();
         if (   (hops+ttl > 2) 
             && !_manager.allowAnyConnection())
             return;
@@ -51,7 +53,7 @@ public class StandardMessageRouter extends MessageRouter {
         // TODO:: this means that we can never send TTL=2 pings without
         // them being interpreted as from the crawler!!
         if(hops ==1 && ttl==1) {
-            handleCrawlerPing(pingRequest);
+            handleCrawlerPing(ping, handler);
             //Note that the while handling crawler ping, we dont send our own
             //pong, as that is unnecessary, since crawler already has our
             //address. We though return it below for compatibility with old
@@ -61,14 +63,9 @@ public class StandardMessageRouter extends MessageRouter {
         // handle heartbeat pings specially -- bypass pong caching code
         if(hops == 1 && ttl == 0) {
             PingReply pr = 
-                PingReply.create(pingRequest.getGUID(), (byte)1);
-            
-            try {
-                sendPingReply(pr);
-            }
-            catch(IOException e) {
-                // broken reply route, can't send
-            }
+                PingReply.create(ping.getGUID(), (byte)1);
+           
+            sendPingReply(pr, handler);
             return;
         }
 
@@ -82,28 +79,19 @@ public class StandardMessageRouter extends MessageRouter {
         if(RouterService.getConnectionManager().hasFreeSlots()  ||
            Statistics.instance().calculateDailyUptime() > 60*30) {
             PingReply pr = 
-                PingReply.create(pingRequest.getGUID(), (byte)newTTL);
+                PingReply.create(ping.getGUID(), (byte)newTTL);
             
-            try {
-                sendPingReply(pr);
-            }
-            catch(IOException e) {
-                // broken reply route, can't send
-            }
+            sendPingReply(pr, handler);
         }
 
         List pongs = PongCacher.instance().getBestPongs();
         Iterator iter = pongs.iterator();
-        byte[] guid = pingRequest.getGUID();
-        try {
-            while(iter.hasNext()) {
-                sendPingReply(((PingReply)iter.next()).mutateGUID(guid));
-            }
-        } catch(IOException e) {  
-            // this indicates that the reply route has been broken,
-            // so we stop trying to send more pongs
-        }
+        byte[] guid = ping.getGUID();
 
+        while(iter.hasNext()) {
+            sendPingReply(((PingReply)iter.next()).mutateGUID(guid),
+                          handler);
+        }
     }
 
 	/**
@@ -115,9 +103,12 @@ public class StandardMessageRouter extends MessageRouter {
 	 * @param request the <tt>PingRequest</tt> to service
      * @param datagram the <tt>DatagramPacket</tt> containing the IP
      *  and port of the client node
+     * @param handler the <tt>ReplyHandler</tt> that should handle any
+     *  replies
 	 */
 	protected void respondToUDPPingRequest(PingRequest request, 
-										   DatagramPacket datagram) {
+										   DatagramPacket datagram,
+                                           ReplyHandler handler) {
 		List unicastEndpoints = UNICASTER.getUnicastEndpoints();
 		Iterator iter = unicastEndpoints.iterator();
 		if(iter.hasNext()) {
@@ -128,12 +119,8 @@ public class StandardMessageRouter extends MessageRouter {
                                              host.getPort(),
                                              host.getAddress().getAddress(),
                                              true);
-				try {
-					sendPingReply(pr);
-				} catch(IOException e) {					
-					// we can't do anything other than try to send it
-					continue;
-				}
+
+                sendPingReply(pr, handler);
 			}
 		} else {
 			// always respond with something
@@ -145,10 +132,10 @@ public class StandardMessageRouter extends MessageRouter {
      * Handles the crawler ping of Hops=0 & TTL=2, by sending pongs 
      * corresponding to all its leaves
      * @param m The ping request received
-     * @exception In case any I/O error occurs while writing Pongs over the
-     * connection
+     * @param handler the <tt>ReplyHandler</tt> that should handle any
+     *  replies
      */
-    private void handleCrawlerPing(PingRequest m) {
+    private void handleCrawlerPing(PingRequest m, ReplyHandler handler) {
         //TODO: why is this any different than the standard pong?  In other
         //words, why no ultrapong marking, proper address calculation, etc?
         
@@ -172,10 +159,7 @@ public class StandardMessageRouter extends MessageRouter {
             //hop the message, as it is ideally coming from the connected host
             pr.hop();
             
-            try {
-                sendPingReply(pr);
-            }
-            catch(IOException e) {}
+            sendPingReply(pr, handler);
         }
         
         //pongs for the neighbors will be sent by neighbors themselves
