@@ -176,19 +176,6 @@ public final class SupernodeAssigner implements Runnable {
 	 * and downloads.
 	 */
 	private void collectBandwidthData() {
-		System.out.println("_maxDownstreamBytesPerSec: "+_maxDownstreamBytesPerSec);
-        System.out.println();
-        System.out.println("_maxUpstreamBytesPerSec: "+_maxUpstreamBytesPerSec);
-        System.out.println();
-        System.out.println("_currentUptime: " + _currentUptime);
-        System.out.println();
-        System.out.println("AVERAGE_UPTIME: " + AVERAGE_UPTIME);
-        System.out.println();
-        System.out.println("FIREWALLED: " + FIREWALLED);
-        System.out.println();
-        System.out.println("SUPERNODE_OS: " + SUPERNODE_OS);
-        System.out.println();
-        System.out.println("isSupernodeCapable: "+isSupernodeCapable());
 		_currentUptime += TIMER_DELAY_IN_SECONDS;
         int newUpstreamBytes   = _uploadTracker.getNewBytesTransferred();
         int newDownstreamBytes = _downloadTracker.getNewBytesTransferred();
