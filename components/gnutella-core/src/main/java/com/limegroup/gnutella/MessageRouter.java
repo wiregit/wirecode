@@ -2723,19 +2723,16 @@ public abstract class MessageRouter {
     	try {
     		for (int i = 0; i< BestCandidates.getCandidates().length;i++) {
     			Candidate current = BestCandidates.getCandidates()[i];
-    			if (current!= null && current.isOpen())     		{
+    			if (current!= null && current.isOpen())  {
     				current.getAdvertiser().send(msg);
     				return;
     			}
-    			else
-    				BestCandidates.getCandidates()[i]=null; 
-    			//manual purge.  BestCandidates.fail() may purge candidates to which 
-    			//we have a route at different ttl.
 
     		}
-    	}catch(IOException tooBad){
-    		BestCandidates.purgeDead();
-    	} //sending failed - not much we can do.  try to purge the new connection if its dead.
+    	}catch(IOException tooBad){} //sending failed - not much we can do
+    	finally{
+    		BestCandidates.purgeDead(); //try to purge no matter what
+    	} 
     }
     
     /**
