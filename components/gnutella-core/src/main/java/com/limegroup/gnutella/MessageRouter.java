@@ -184,7 +184,15 @@ public abstract class MessageRouter {
      * not final so that tests won't take forever.
      */
     private FixedSizeExpiringSet _UDPListRequestors = new FixedSizeExpiringSet(200, 5*1000);
-
+    
+    /**
+     * keeps a list of the peopel who advertised their best candidate.  These should be only
+     * neighboring ultrapeers.  Furthermore they shouldn't do it too often.
+     * TODO: export the values to the proper constants.
+     * Note: the alss is not final so that the tests won't take forever.
+     */
+    private FixedSizeExpiringSet _candidateAdvertisers = new FixedSizeExpiringSet(
+    		ConnectionManager.ULTRAPEER_CONNECTIONS, 14*60*1000);
     /**
      * Creates a MessageRouter.  Must call initialize before using.
      */
@@ -2588,7 +2596,16 @@ public abstract class MessageRouter {
      */
     private void handleBestCandidatesMessage(BestCandidatesVendorMessage msg, ReplyHandler advertiser) {
     	
-    	//first, add a ref of the advertiser to each candidate
+    	//make sure the advertiser is directly connected to us ultrapeer 
+    	//AND that we are an ultrapeer.
+    	if (!advertiser.isGoodUltrapeer() || !RouterService.isSupernode())
+    		return;
+    	
+    	//make sure they aren't advertising too soon.
+    	if (!_candidateAdvertisers.add(advertiser.getInetAddress()))
+    		return;
+    	
+    	//then add a ref of the advertiser to each candidate he sent
     	Candidate [] candidates = msg.getBestCandidates();
     	
     	for (int i = 0;i<candidates.length;i++) 
