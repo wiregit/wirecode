@@ -176,9 +176,10 @@ public final class ServerSideIntermediateRedirectTest
         redirUP.flush();
 
         Thread.sleep(1000);
+        ConnectionManager cm = ROUTER_SERVICE.getConnectionManager();
         // now the guy knows i support the redirect message
-        assertNotNull(ROUTER_SERVICE.getConnectionManager().getTCPRedirectUltrapeer());
-        assertNotNull(ROUTER_SERVICE.getConnectionManager().getUDPRedirectUltrapeer());
+        assertGreaterThan(0, cm.getTCPRedirectUltrapeers().size());
+        assertGreaterThan(0, cm.getUDPRedirectUltrapeers().size());
 
         // now actually test....
         { // make sure tcp vm's are redirected
@@ -262,9 +263,10 @@ public final class ServerSideIntermediateRedirectTest
 
 
         Thread.sleep(1000);
+        ConnectionManager cm = ROUTER_SERVICE.getConnectionManager();
         // now the guy knows i support the redirect message
-        assertNotNull(ROUTER_SERVICE.getConnectionManager().getTCPRedirectUltrapeer());
-        assertNotNull(ROUTER_SERVICE.getConnectionManager().getUDPRedirectUltrapeer());
+        assertGreaterThan(0, cm.getTCPRedirectUltrapeers().size());
+        assertGreaterThan(0, cm.getUDPRedirectUltrapeers().size());
 
         // now actually test....
         { // make sure tcp vm's are redirected

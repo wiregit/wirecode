@@ -1033,21 +1033,26 @@ public abstract class MessageRouter {
         // 1)
         final GUID guidToUse = udp.getConnectBackGUID();
         final int portToContact = udp.getConnectBackPort();
-        Connection redirect = _manager.getUDPRedirectUltrapeer();
-        if (redirect != null) {
-            InetAddress sourceAddr = source.getInetAddress();
-            try {
-                // make a new redirect message
-                UDPConnectBackRedirect redir = new
-                    UDPConnectBackRedirect(guidToUse, sourceAddr, portToContact);
-                // redirect it
-                redirect.send(redir);
-            }
-            catch (IOException ioe) {
-                // connection went bye-bye?
-            }
-            catch (BadPacketException bpe) {
-                ErrorService.error(bpe);
+        List redirect = _manager.getUDPRedirectUltrapeers();
+        if (redirect.size() > 0) {
+            Iterator iter = redirect.iterator();
+            while (iter.hasNext()) {
+                Connection connection = (Connection) iter.next();
+                InetAddress sourceAddr = connection.getInetAddress();
+                try {
+                    // make a new redirect message
+                    UDPConnectBackRedirect redir = 
+                        new UDPConnectBackRedirect(guidToUse, sourceAddr, 
+                                                   portToContact);
+                    // redirect it
+                    connection.send(redir);
+                }
+                catch (IOException ioe) {
+                    // connection went bye-bye?
+                }
+                catch (BadPacketException bpe) {
+                    ErrorService.error(bpe);
+                }
             }
             return;
         }
@@ -1126,21 +1131,25 @@ public abstract class MessageRouter {
 
         // 1)
         final int portToContact = tcp.getConnectBackPort();
-        Connection redirect = _manager.getTCPRedirectUltrapeer();
-        if (redirect != null) {
-            InetAddress sourceAddr = source.getInetAddress();
-            try {
-                // make a new redirect message
-                TCPConnectBackRedirect redir = new
-                    TCPConnectBackRedirect(sourceAddr, portToContact);
-                // redirect it
-                redirect.send(redir);
-            }
-            catch (IOException ioe) {
-                // connection went bye-bye?
-            }
-            catch (BadPacketException bpe) {
-                ErrorService.error(bpe);
+        List redirect = _manager.getTCPRedirectUltrapeers();
+        if (redirect.size() > 0) {
+            Iterator iter = redirect.iterator();
+            while (iter.hasNext()) {
+                Connection connection = (Connection) iter.next();
+                InetAddress sourceAddr = connection.getInetAddress();
+                try {
+                    // make a new redirect message
+                    TCPConnectBackRedirect redir = new
+                        TCPConnectBackRedirect(sourceAddr, portToContact);
+                    // redirect it
+                    connection.send(redir);
+                }
+                catch (IOException ioe) {
+                    // connection went bye-bye?
+                }
+                catch (BadPacketException bpe) {
+                    ErrorService.error(bpe);
+                }
             }
             return;
         }

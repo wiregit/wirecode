@@ -927,36 +927,40 @@ public class ConnectionManager {
 
     /**
      * Accessor for the <tt>Connection</tt> that supports TCPRedirect.  If
-     * there are none available, this will return an empty null.
+     * there are none available, this will return an empty List (length 0).
+     * Returns a max of 2.
      *
-     * @return A <tt>Connection<tt> that supports TCPRedirect or null.
+     * @return A List of <tt>Connection<tt> that supports TCPRedirect.
      * 
      */
-    public Connection getTCPRedirectUltrapeer() {
+    public List getTCPRedirectUltrapeers() {
         Iterator ultrapeers = getInitializedConnections().iterator();
-        while (ultrapeers.hasNext()) {
+        List retList = new ArrayList();
+        while (ultrapeers.hasNext() && (retList.size() < 2)) {
             ManagedConnection currMC = (ManagedConnection) ultrapeers.next();
             if (currMC.remoteHostSupportsTCPRedirect() >= 0)
-                return currMC;
+                retList.add(currMC);
         }
-        return null;
+        return retList;
     }
 
     /**
      * Accessor for the <tt>Connection</tt> that supports UDPRedirect.  If
-     * there are none available, this will return an empty null.
+     * there are none available, this will return an empty List (length 0).
+     * Returns a maximum of 2.
      *
-     * @return A <tt>Connection<tt> that supports UDPRedirect or null.
+     * @return A List of <tt>Connection<tt> that supports UDPRedirect.
      * 
      */
-    public Connection getUDPRedirectUltrapeer() {
+    public List getUDPRedirectUltrapeers() {
         Iterator ultrapeers = getInitializedConnections().iterator();
-        while (ultrapeers.hasNext()) {
+        List retList = new ArrayList();
+        while (ultrapeers.hasNext() && (retList.size() < 2)) {
             ManagedConnection currMC = (ManagedConnection) ultrapeers.next();
             if (currMC.remoteHostSupportsUDPRedirect() >= 0)
-                return currMC;
+                retList.add(currMC);
         }
-        return null;
+        return retList;
     }
 
     /**
