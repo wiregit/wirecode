@@ -1852,8 +1852,6 @@ public class UploadTest extends BaseTestCase {
             if( line == null)
                 throw new InterruptedIOException("connection closed");
                 
-            System.out.println("<< " + line);
-                
             if (line.equals(""))
                 break;
 

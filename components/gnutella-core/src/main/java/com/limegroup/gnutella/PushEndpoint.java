@@ -297,6 +297,9 @@ public class PushEndpoint implements HTTPHeaderValue{
 	 * @return a view of the current set of proxies.
 	 */
 	public Set getProxies() {
+	    if (_proxies!=null)
+	        return _proxies;
+	    
 	    GuidSetWrapper current = (GuidSetWrapper)GUID_PROXY_MAP.get(_guid);
 	    Set proxies = _proxies;
 	    if(current != null)
@@ -463,7 +466,14 @@ public class PushEndpoint implements HTTPHeaderValue{
 	    // make sure the PE points to the actual key guid
 	    _guid = guidRef;
 	    _proxies = null;
-	}	
+	}
+	
+	/**
+	 * establishes a reference to a copy of the global set of proxies
+	 */
+	public void cacheProxies() {
+	    _proxies = getProxies();
+	}
 	
 	/**
 	 * Overwrites the current known push proxies for the host specified

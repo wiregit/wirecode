@@ -1512,6 +1512,17 @@ public class ManagedDownloader implements Downloader, Serializable {
         } catch(IOException iox) {
             return;
         }
+
+        // if we are informing others about a PushLoc, we must tell the downloaders
+        // only about the set of proxies that we had at the time the connection
+        // failed or succeeded, so we cache a copy of the set we have.
+        if (forFD instanceof PushAltLoc) {
+            PushAltLoc ploc = (PushAltLoc)loc;
+            ploc.getPushAddress().cacheProxies();
+            if (!good)
+                ploc.updateProxies(false);
+        }
+        
         for(Iterator iter=dloaders.iterator(); iter.hasNext();) {
             HTTPDownloader httpDloader = (HTTPDownloader)iter.next();
             RemoteFileDesc r = httpDloader.getRemoteFileDesc();
@@ -1523,8 +1534,6 @@ public class ManagedDownloader implements Downloader, Serializable {
                     (r.getHost().equals(rfd.getHost()) && r.getPort()==rfd.getPort()) :
                     r.getPushAddr()!=null && r.getPushAddr().equals(rfd.getPushAddr()))
                 continue;
-            
-            
             
             //no need to send push altlocs to older uploaders
             if (loc instanceof DirectAltLoc || httpDloader.wantsFalts()) {
