@@ -79,8 +79,6 @@ public final class SettingsManager {
 	/** the number of uplads allowed per person at a given time */
     private final int DEFAULT_UPLOADS_PER_PERSON=3;
 
-    private final int DEFAULT_UPLOAD_QUEUE_SIZE = 10;
-
     /** default banned ip addresses */
     private final String[] DEFAULT_BLACK_LISTED_IP_ADDRESSES     = {};
     private final String[] DEFAULT_WHITE_LISTED_IP_ADDRESSES     = {};
@@ -312,7 +310,6 @@ public final class SettingsManager {
     private final String FREELOADER_ALLOWED    = "FREELOADER_ALLOWED";
 
     private final String UPLOADS_PER_PERSON    = "UPLOADS_PER_PERSON";
-    private final String UPLOAD_QUEUE_SIZE     = "UPLOAD_QUEUE_SIZE";
     private final String AVERAGE_UPTIME        = "AVERAGE_UPTIME";
     private final String TOTAL_UPTIME          = "TOTAL_UPTIME";
     private final String SESSIONS              = "SESSIONS";
@@ -462,7 +459,6 @@ public final class SettingsManager {
     private volatile int      _maxUploads;
     private volatile int      _softMaxUploads;
     private volatile int      _uploadsPerPerson;
-    private volatile int      _uploadQueueSize;
 
 	private volatile boolean  _chatEnabled;
 	private volatile boolean  _playerEnabled;
@@ -661,9 +657,6 @@ public final class SettingsManager {
 				else if(key.equals(UPLOADS_PER_PERSON)){
 					setUploadsPerPerson(Integer.parseInt(p));
 				}
-                else if(key.equals(UPLOAD_QUEUE_SIZE)) {
-                    setUploadQueueSize(Integer.parseInt(p));
-                }
                 else if(key.equals(PORT)) {
                     setPort(Integer.parseInt(p));
                 }
@@ -1029,7 +1022,6 @@ public final class SettingsManager {
         setFreeloaderAllowed(DEFAULT_FREELOADER_ALLOWED);
 
 		setUploadsPerPerson(DEFAULT_UPLOADS_PER_PERSON);
-        setUploadQueueSize(DEFAULT_UPLOAD_QUEUE_SIZE);
 		setAverageUptime(DEFAULT_AVERAGE_UPTIME);
 		setTotalUptime(DEFAULT_TOTAL_UPTIME);
         setLastShutdownTime(DEFAULT_LAST_SHUTDOWN_TIME);
@@ -1176,9 +1168,6 @@ public final class SettingsManager {
 
 	/** Returns the maximum number of uploads per person */
     public int getUploadsPerPerson(){return _uploadsPerPerson;}
-    
-    /** Returns the size of the upload queue */
-    public int getUploadQueueSize() {return  _uploadQueueSize;}
 
     /**
 	 * Returns a new <tt>File</tt> instance that denotes the abstract
@@ -1966,14 +1955,6 @@ public final class SettingsManager {
         PROPS.put(UPLOADS_PER_PERSON , s);
 	}
 
-    /**
-     * Sets the number of uploads we want to queue 
-     */
-	public void setUploadQueueSize(int size) {
-		_uploadQueueSize = size;
-		String s = Integer.toString(size);
-        PROPS.put(UPLOAD_QUEUE_SIZE , s);
-	}
 
     public void setAdvancedInfoForQuery(int advancedInfo) {
         _advancedQueryInfo = advancedInfo;
