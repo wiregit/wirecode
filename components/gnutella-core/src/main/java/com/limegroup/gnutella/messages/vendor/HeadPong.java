@@ -244,6 +244,10 @@ public class HeadPong extends VendorMessage {
     		if ((code & COMPLETE_FILE) == COMPLETE_FILE) 
 		        _completeFile=true;
     		
+    	    //check if the host is downloading the file
+    	    if ((code & DOWNLOADING) == DOWNLOADING)
+    	        _isDownloading=true;
+    		
     		// if this is a new pong, parse it as a GGEP map
     		if (version == VERSION) 
     		    parseGGEPPong(payload);
@@ -252,7 +256,7 @@ public class HeadPong extends VendorMessage {
     		
 		} catch(IOException oops) {
 			throw new BadPacketException(oops.getMessage());
-		} catch (BadGGEPBlockException oops2) {
+		} catch (BadGGEPBlockException oops2) {oops2.getMessage();
 		    throw new BadPacketException(oops2.getMessage());
 		} catch (BadGGEPPropertyException oops3) {
 		    throw new BadPacketException(oops3.getMessage());
@@ -267,7 +271,7 @@ public class HeadPong extends VendorMessage {
 	private void parseGGEPPong(byte [] payload) 
 		throws BadGGEPBlockException, BadGGEPPropertyException, BadPacketException {
 	    
-	    _ggep = new CountingGGEP(payload,8);
+	    _ggep = new CountingGGEP(payload,7);
 	    byte [] props = _ggep.get(GGEPHeadConstants.GGEP_PROPS);
 	    if (props.length < 1)
 	        throw new BadPacketException("invalid properties field");
@@ -277,10 +281,6 @@ public class HeadPong extends VendorMessage {
 	
 	private void parseLegacyPong(byte code, DataInputStream dais) 
 		throws IOException, BadPacketException {
-	    
-	    //check if the host is downloading the file
-	    if ((code & DOWNLOADING) == DOWNLOADING)
-	        _isDownloading=true;
 	    
 	    if ((_features & HeadPing.INTERVALS) == HeadPing.INTERVALS)
 	        _ranges = read32bitRanges(dais);
@@ -382,7 +382,7 @@ public class HeadPong extends VendorMessage {
     		GGEPHeadConstants.addDefaultGGEPProperties(ggep);
     		
     		//if the ping requests ranges, add them
-    		if (ping.requestsRanges())
+    		if (ping.requestsRanges() && desc instanceof IncompleteFileDesc)
     		    writeRanges(ggep,desc);
     		//if the ping requests pushlocs, add them
     		if (ping.requestsPushLocs())
@@ -435,18 +435,17 @@ public class HeadPong extends VendorMessage {
 	private void readRanges() {
 	    if (_ggep == null)
 	        return;
-	    
+
 	    if ((_ggepFeatures & GGEPHeadConstants.RANGES) != GGEPHeadConstants.RANGES)
 	        return;
-	    
+
 	    try {
 	        byte [] ranges = _ggep.getBytes((char)GGEPHeadConstants.RANGES+GGEPHeadConstants.DATA);
-	        
 	        // for now we parse only 32 bit range lists
 	        if ((ranges[0] & GGEPHeadConstants.RANGE_LIST) == GGEPHeadConstants.RANGE_LIST) {
 	            if ((ranges[0] & GGEPHeadConstants.LONG_RANGES) == 0) {
 	                ByteArrayInputStream bais = new ByteArrayInputStream(ranges,1,ranges.length -1);
-	                read32bitRanges(new DataInputStream(bais));
+	                _ranges = read32bitRanges(new DataInputStream(bais));
 	            }
 	            // else parse a 64 bit range list
 	        }
@@ -472,14 +471,14 @@ public class HeadPong extends VendorMessage {
 	private void readAltLocs() {
 	    if (_ggep == null)
 	        return;
-	    
+
 	    if ((_ggepFeatures & GGEPHeadConstants.ALTLOCS) != GGEPHeadConstants.ALTLOCS)
 	        return;
-	    
+
 	    try {
 	        byte [] altlocs = _ggep.getBytes((char)GGEPHeadConstants.ALTLOCS+GGEPHeadConstants.DATA);
 	        ByteArrayInputStream bais = new ByteArrayInputStream(altlocs);
-	        readLocs(new DataInputStream(bais));
+	        _altLocs = readLocs(new DataInputStream(bais));
 	    } catch (BadGGEPPropertyException bad){}
 	    catch(BadPacketException bad){}
 	    catch(IOException bad){}
@@ -503,14 +502,12 @@ public class HeadPong extends VendorMessage {
 	private void readPushLocs() {
 	    if (_ggep == null)
 	        return;
-	    
 	    if ((_ggepFeatures & GGEPHeadConstants.PUSHLOCS) != GGEPHeadConstants.PUSHLOCS)
 	        return;
-	    
 	    try {
 	        byte [] pushlocs = _ggep.getBytes((char)GGEPHeadConstants.PUSHLOCS+GGEPHeadConstants.DATA);
 	        ByteArrayInputStream bais = new ByteArrayInputStream(pushlocs);
-	        readPushLocs(new DataInputStream(bais));
+	        _pushLocs = readPushLocs(new DataInputStream(bais));
 	    } catch (BadGGEPPropertyException bad){}
 	    catch(BadPacketException bad){}
 	    catch(IOException bad){}
@@ -634,13 +631,13 @@ public class HeadPong extends VendorMessage {
 		byte [] ranges =ifd.getRangesAsByte();
 		
 		// if we estimate we won't be able to fit the ranges, don't put them in.
-		if (dest.getEstimatedSize()+3+ ranges.length/RANGE_COMPRESSION > PACKET_SIZE)
+		if (dest.getEstimatedSize()+3+ ranges.length*RANGE_COMPRESSION > PACKET_SIZE)
 		    return;
 		
 		// write out the format in the first byte
 		byte []toZip = new byte[ranges.length+3];
 		toZip[0] = GGEPHeadConstants.RANGE_LIST;
-		ByteOrder.short2leb((short)ranges.length,toZip,1);
+		ByteOrder.short2beb((short)ranges.length,toZip,1);
 		System.arraycopy(ranges,0,toZip,3,ranges.length);
 		dest.putAndCompress((char)GGEPHeadConstants.RANGES + GGEPHeadConstants.DATA,toZip);
 	}
@@ -648,7 +645,6 @@ public class HeadPong extends VendorMessage {
 	
 	private static final void writeLocs(CountingGGEP dest, FileDesc desc, HeadPing ping) {
 	    AlternateLocationCollection altlocs = desc.getAlternateLocationCollection();
-	    
 		//do we have any altlocs?
 		if (altlocs==null)
 			return;
@@ -665,7 +661,6 @@ public class HeadPong extends VendorMessage {
 	    // nothing will fit - too bad.
 	    if (toPack == 0)
 	        return;
-	    
 	    if (LOG.isDebugEnabled())
 			LOG.debug("trying to add up to "+toPack+"locs to pong");
 	    
@@ -673,7 +668,7 @@ public class HeadPong extends VendorMessage {
 	    AltLocDigest digest = ping.getDigest();
 
 	    // if we have a filter, filter the altlocs
-	    if (digest != null) {
+	    if (digest != null || toPack < altlocs.getAltLocsSize()) {
 	        AlternateLocationCollection temp = AlternateLocationCollection.create(altlocs.getSHA1Urn());
 	        int sent =0;
 	        for (Iterator iter = altlocs.iterator();iter.hasNext() && sent < toPack;) {
@@ -681,7 +676,7 @@ public class HeadPong extends VendorMessage {
 	            if (loc instanceof PushAltLoc)
 	                    continue;
 	            
-	            if (digest.contains(loc)) {
+	            if (digest != null && digest.contains(loc)) {
 	                filtered++;
 	                continue;
 	            }
@@ -691,12 +686,16 @@ public class HeadPong extends VendorMessage {
 	        altlocs = temp;
 	    }
 	    
+	    // if after filtering / trimming we decided not to send anything, return.
+	    if (altlocs.getAltLocsSize() == 0)
+	        return;
+	    
 	    // put the response in the ggep
 	    byte [] alts = altlocs.toBytes(toPack);
 	    byte [] tmp = new byte[alts.length+2];
 	    ByteOrder.short2beb((short)alts.length,tmp,0);
 	    System.arraycopy(alts,0,tmp,2,alts.length);
-	    dest.putAndCompress(GGEPHeadConstants.ALTLOCS+GGEPHeadConstants.DATA,tmp);
+	    dest.putAndCompress((char)GGEPHeadConstants.ALTLOCS+GGEPHeadConstants.DATA,tmp);
 	    
 	    // if the other side indicated support for statistics, add those too
 	    byte [] pingFeatures = ping._ggep.get(GGEPHeadConstants.GGEP_PROPS);
@@ -705,7 +704,7 @@ public class HeadPong extends VendorMessage {
 	        byte [] stats = new byte[4];
 	        ByteOrder.short2leb(total,stats,0);
 	        ByteOrder.short2leb(filtered,stats,2);
-	        dest.put(GGEPHeadConstants.ALT_MESH_STAT+GGEPHeadConstants.DATA,stats);
+	        dest.put((char)GGEPHeadConstants.ALT_MESH_STAT+GGEPHeadConstants.DATA,stats);
 	    }
 	}
 	
@@ -728,7 +727,6 @@ public class HeadPong extends VendorMessage {
 	    // nothing will fit - too bad.
 	    if (toPack == 0)
 	        return;
-	    
 	    if (LOG.isDebugEnabled())
 			LOG.debug("trying to add up to "+toPack+"locs to pong");
 	    
@@ -736,7 +734,7 @@ public class HeadPong extends VendorMessage {
 	    AltLocDigest digest = ping.getPushDigest();
 
 	    // if we have a filter, filter the altlocs
-	    if (digest != null) {
+	    if (digest != null || ping.requestsFWTPushLocs() || toPack < altlocs.getAltLocsSize()) {
 	        AlternateLocationCollection temp = AlternateLocationCollection.create(altlocs.getSHA1Urn());
 	        int sent =0;
 	        for (Iterator iter = altlocs.iterator();iter.hasNext() && sent < toPack;) {
@@ -751,7 +749,7 @@ public class HeadPong extends VendorMessage {
 	                    continue;
 	            }
 	            
-	            if (digest.contains(loc)) {
+	            if (digest != null && digest.contains(loc)) {
 	                filtered++;
 	                continue;
 	            }
@@ -761,12 +759,16 @@ public class HeadPong extends VendorMessage {
 	        altlocs = temp;
 	    }
 	    
+	    // if after filtering / trimming we decided not to send anything, return
+	    if (altlocs.getAltLocsSize() == 0 )
+	        return;
+	    
 	    // put the response in the ggep
 	    byte [] alts = altlocs.toBytesPush(toPack);
 	    byte [] tmp = new byte[alts.length+2];
 	    ByteOrder.short2beb((short)alts.length,tmp,0);
 	    System.arraycopy(alts,0,tmp,2,alts.length);
-	    dest.putAndCompress(GGEPHeadConstants.PUSHLOCS+GGEPHeadConstants.DATA,tmp);
+	    dest.putAndCompress((char)GGEPHeadConstants.PUSHLOCS+GGEPHeadConstants.DATA,tmp);
 	    
 	    // if the other side indicated support for statistics, add those too
 	    byte [] pingFeatures = ping._ggep.get(GGEPHeadConstants.GGEP_PROPS);
@@ -775,7 +777,7 @@ public class HeadPong extends VendorMessage {
 	        byte [] stats = new byte[4];
 	        ByteOrder.short2leb(total,stats,0);
 	        ByteOrder.short2leb(filtered,stats,2);
-	        dest.put(GGEPHeadConstants.PUSH_MESH_STAT+GGEPHeadConstants.DATA,stats);
+	        dest.put((char)GGEPHeadConstants.PUSH_MESH_STAT+GGEPHeadConstants.DATA,stats);
 	    }
 	}
 	

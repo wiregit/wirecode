@@ -96,7 +96,6 @@ public final class HugeTestUtils {
 		"www.test.org",
 		"www.limewire.org",
 		"www.eff.org",
-		"www.guerrillanews.com",
 		"natprior.org",
 		"www.census.gov",
 		"www.cmpbs.org",

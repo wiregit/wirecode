@@ -186,7 +186,7 @@ public class HeadPing extends VendorMessage {
 	public HeadPing(URN sha1, GUID clientGUID, AltLocDigest []digest, int features) {
 		super(F_LIME_VENDOR_ID, F_UDP_HEAD_PING, VERSION,
 		 		derivePayload(sha1, clientGUID, digest, features));
-		_features = (byte)(features & FEATURE_MASK);
+		_features = (byte)((features | GGEP_PING) & FEATURE_MASK);
 		_urn = sha1;
 		_clientGUID = clientGUID;
 		
@@ -207,7 +207,7 @@ public class HeadPing extends VendorMessage {
 	 * creates a plain udp head request
 	 */
 	public HeadPing (URN urn) {
-		this(urn, PLAIN);
+		this(urn, GGEP_PING);
 	}
 	
 

@@ -207,6 +207,6 @@ public class DirectAltLoc extends AlternateLocation {
 	
 	public int hash() {
 	    byte [] addr = _node.getInetAddress().getAddress();
-	    return (addr[3] << 24) | (addr[2] << 16) | (addr[1] << 8) | addr[0];
+	    return (addr[0] << 24) | (addr[1] << 16) | (addr[2] << 8) | addr[3];
 	}
 }

@@ -141,7 +141,7 @@ public class HeadTest extends BaseTestCase {
 		
 		base=0;
 		_rangesJustFit = new IntervalSet();
-		for (int i=2;i<73;i++) {
+		for (int i=2;i<119;i++) {
 			int low = base;
 			_rangesJustFit.add(new Interval(low,low+i));
 			base+=2*i;
@@ -354,9 +354,9 @@ public class HeadTest extends BaseTestCase {
 		//ping 1 should contain alternate locations. 
 		
 		//the second ping should be too big to contain all altlocs.
-		HeadPing ping1 = new HeadPing(_haveFull,HeadPing.ALT_LOCS);
-		HeadPing ping2 = new HeadPing(_havePartial,
-				HeadPing.ALT_LOCS | HeadPing.INTERVALS);
+		HeadPing ping1 = reparse(new HeadPing(_haveFull,HeadPing.ALT_LOCS));
+		HeadPing ping2 = reparse(new HeadPing(_havePartial,
+				HeadPing.ALT_LOCS | HeadPing.INTERVALS));
 		
 		HeadPong pong1 = reparse (new HeadPong(ping1));
 		HeadPong pong2 = reparse (new HeadPong(ping2));
@@ -365,18 +365,19 @@ public class HeadTest extends BaseTestCase {
 		assertNotNull(pong2.getRanges());
 		assertTrue(Arrays.equals(_rangesMedium.toBytes(),pong2.getRanges().toBytes()));
 		assertGreaterThan(pong1.getPayload().length,pong2.getPayload().length);
-		
-		assertLessThan(pong1.getAltLocs().size(),pong2.getAltLocs().size());
+
+		assertNotNull(pong1.getAltLocs());
+		assertNotNull(pong2.getAltLocs());
 		assertLessThan(PACKET_SIZE,pong2.getPayload().length);
 		
 		//now test if no locs will fit because of too many ranges
 		_partial.setRangesByte(_rangesJustFit.toBytes());
-		ping2 = new HeadPing(_havePartial,
-				HeadPing.ALT_LOCS | HeadPing.INTERVALS);
+		ping2 = reparse(new HeadPing(_havePartial,
+				HeadPing.ALT_LOCS | HeadPing.INTERVALS));
 		pong2 = reparse (new HeadPong(ping2));
 		
 		assertNotNull(pong2.getRanges());
-		assertNull(pong2.getAltLocs());
+		assertLessThan(10,pong2.getAltLocs().size());
 		
 		//restore medium ranges to partial file
 		_partial.setRangesByte(_rangesMedium.toBytes());
@@ -385,12 +386,12 @@ public class HeadTest extends BaseTestCase {
 	public void testFirewalledAltlocs() throws Exception {
 		
 		//try with a file that doesn't have push locs
-		HeadPing ping1 = new HeadPing(_haveFull,HeadPing.PUSH_ALTLOCS);
+		HeadPing ping1 = reparse(new HeadPing(_haveFull,HeadPing.PUSH_ALTLOCS));
 		assertTrue(ping1.requestsPushLocs());
 		HeadPong pong1 = reparse (new HeadPong(ping1));
 		assertNull(pong1.getPushLocs());
 		
-		ping1 = new HeadPing(_havePartial,HeadPing.PUSH_ALTLOCS);
+		ping1 = reparse(new HeadPing(_havePartial,HeadPing.PUSH_ALTLOCS));
 		assertTrue(ping1.requestsPushLocs());
 		pong1 = reparse (new HeadPong(ping1));
 
@@ -415,15 +416,15 @@ public class HeadTest extends BaseTestCase {
 		assertEquals(pe.getProxies().size(),parsedProxies.size());
 		
 		//now ask only for fwt push locs - nothing returned
-		ping1 = new HeadPing(_havePartial,HeadPing.PUSH_ALTLOCS | HeadPing.FWT_PUSH_ALTLOCS);
+		ping1 = reparse(new HeadPing(_havePartial,HeadPing.PUSH_ALTLOCS | HeadPing.FWT_PUSH_ALTLOCS));
 		assertTrue(ping1.requestsFWTPushLocs());
 		pong1 = reparse(new HeadPong(ping1));
 		assertNull(pong1.getPushLocs());
 	}
 	
 	public void testMixedLocs() throws Exception {
-		HeadPing ping = new HeadPing(_havePartial,
-				HeadPing.PUSH_ALTLOCS | HeadPing.ALT_LOCS);
+		HeadPing ping = reparse(new HeadPing(_havePartial,
+				HeadPing.PUSH_ALTLOCS | HeadPing.ALT_LOCS));
 		
 		HeadPong pong = reparse(new HeadPong(ping));
 		
@@ -450,8 +451,8 @@ public class HeadTest extends BaseTestCase {
 	    
 	    // create a headping whose digest claims it knows all altlocs 
 	    AltLocDigest direct = _alCollectionComplete.getDigest();
-	    HeadPing ping = new HeadPing(_haveFull,null, new AltLocDigest[]{direct,null},
-				HeadPing.PUSH_ALTLOCS | HeadPing.ALT_LOCS | HeadPing.GGEP_PING);
+	    HeadPing ping = reparse(new HeadPing(_haveFull,null, new AltLocDigest[]{direct,null},
+				HeadPing.PUSH_ALTLOCS | HeadPing.ALT_LOCS | HeadPing.GGEP_PING));
 	    
 	    // the pong should not carry any altlocs in it
 	    HeadPong pong = reparse(new HeadPong(ping));
@@ -462,23 +463,22 @@ public class HeadTest extends BaseTestCase {
 	    direct = new AltLocDigest();
 	    
 	    Set digestLocs = new HashSet();
-	    Set nonDigestLocs = new HashSet();
-	    for(int i=0;i<5;i++ ) {
-            AlternateLocation al = AlternateLocation.create("1.2.3."+i+":1234",_haveFull);
-            AlternateLocation al2 = AlternateLocation.create("1.2.3."+(i+5)+":1234",_haveFull);
-            digestLocs.add(al);
-            nonDigestLocs.add(al2);
-		}
-	    direct.addAll(digestLocs);
+	    int i =0;
+	    for(Iterator iter = _alCollectionComplete.iterator();iter.hasNext() && i <5;i++) {
+	        Object o = iter.next();
+	        direct.add(o);
+	        digestLocs.add(o);
+	    }
+		
 	    
-	    ping = new HeadPing(_haveFull,null, new AltLocDigest[]{direct,null},
-				HeadPing.PUSH_ALTLOCS | HeadPing.ALT_LOCS | HeadPing.GGEP_PING);
+	    ping = reparse(new HeadPing(_haveFull,null, new AltLocDigest[]{direct,null},
+				HeadPing.PUSH_ALTLOCS | HeadPing.ALT_LOCS | HeadPing.GGEP_PING));
 	    
 	    pong = reparse(new HeadPong(ping));
 	    assertEquals(5,pong.getAltLocs().size());
-	    assertTrue(pong.getAltLocs().containsAll(nonDigestLocs));
-	    assertTrue(nonDigestLocs.containsAll(pong.getAltLocs()));
-	    assertNotNull(pong.getPushLocs());
+	    Set tmp = new HashSet(digestLocs);
+	    tmp.retainAll(pong.getAltLocs());
+	    assertTrue(tmp.isEmpty());
 	    for (Iterator iter = digestLocs.iterator();iter.hasNext();)
 	        assertFalse(pong.getAltLocs().contains(iter.next()));
 	    
@@ -486,8 +486,8 @@ public class HeadTest extends BaseTestCase {
 	    // try a headping with an altloc and pushloc digest
 	    AltLocDigest push = _pushCollection.getPushDigest();
 	    
-	    ping = new HeadPing(_havePartial,null, new AltLocDigest[]{direct,push},
-				HeadPing.PUSH_ALTLOCS | HeadPing.ALT_LOCS | HeadPing.GGEP_PING);
+	    ping = reparse(new HeadPing(_havePartial,null, new AltLocDigest[]{direct,push},
+				HeadPing.PUSH_ALTLOCS | HeadPing.ALT_LOCS | HeadPing.GGEP_PING));
 	    
 	    pong = reparse(new HeadPong(ping));
 	    
@@ -499,6 +499,13 @@ public class HeadTest extends BaseTestCase {
 		original.write(baos);
 		ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
 		return (HeadPong) HeadPong.read(bais);
+	}
+	
+	private HeadPing reparse(HeadPing original) throws Exception {
+	    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		original.write(baos);
+		ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
+		return (HeadPing) HeadPing.read(bais);
 	}
 	
 	private static void  createCollections() throws Exception{

@@ -106,7 +106,6 @@ public class AltLocDigest implements BloomFilter {
         if (! (o instanceof AlternateLocation))
             return false;
         AlternateLocation loc = (AlternateLocation)o;
-        
         if (_hasher != null)
             return _values.get(_hasher.hash(loc) & _mask);
         else
