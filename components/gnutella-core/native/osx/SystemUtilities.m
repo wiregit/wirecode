@@ -11,6 +11,10 @@
 #include <sys/stat.h>
 
 
+// compile with:
+// cc -c -dynamiclib -o libSystemUtilities.o -I/System/Library/Frameworks/JavaVM.framework/Headers  SystemUtilities.m 
+// cc -dynamiclib -o libSystemUtilities.jnilib libSystemUtilities.o -framework JavaVM -framework Carbon 
+
 extern double CGSSecondsSinceLastInputEvent(unsigned long envType);
 
 JNIEXPORT jint JNICALL Java_com_limegroup_gnutella_util_SystemUtils_setFileWriteable
@@ -20,8 +24,17 @@ JNIEXPORT jint JNICALL Java_com_limegroup_gnutella_util_SystemUtils_setFileWrite
 	struct stat fileStat;
 	cFileName = (*env)->GetStringUTFChars(env, fileName, JNI_FALSE);
 	retVal = stat(cFileName, &fileStat);
-	if(retVal == 0)
-		retVal = chmod(cFileName, fileStat.st_flags | 0600);
+//	printf("attempting to set [%s], current flags: [%i], mode: [%i]\n", cFileName, fileStat.st_flags, fileStat.st_mode);
+	if(retVal == 0) {
+		int mask = S_IRUSR | S_IWUSR;
+		// OSX bases directory write permissions on the 'x' flag, not the 'w' one.
+		if((fileStat.st_mode & S_IFDIR) == S_IFDIR) {
+//			printf("marking [%s] with x flag too.\n", cFileName);
+			mask |= S_IXUSR;
+		}
+//		printf("chmoding [%s] with mask [%i]\n", cFileName, mask);
+		retVal = chmod(cFileName, fileStat.st_flags | mask);
+	}
 	// free the memory for the string
 	(*env)->ReleaseStringUTFChars(env, fileName, cFileName);
 	return retVal;

@@ -1,6 +1,7 @@
 package com.limegroup.gnutella.util;
 
 import java.io.File;
+import java.io.IOException;
 
 import junit.framework.Test;
 
@@ -64,18 +65,33 @@ public final class FileUtilsTest extends BaseTestCase {
         File testFile = File.createTempFile("test", "file");
         testFile.deleteOnExit();
         testFile.setReadOnly();
+		assertTrue(testFile.exists());
+		assertTrue(testFile.isFile());
         assertTrue(!testFile.canWrite());
-        FileUtils.setWriteable(testFile);
+        assertTrue(FileUtils.setWriteable(testFile));
         assertTrue(testFile.canWrite());
+		SystemUtils.setWriteable(testFile.getPath());
+		assertTrue(FileUtils.setWriteable(testFile));
         File testDir = new File("directory");
-        testDir.mkdir();
+		testDir.deleteOnExit();
+        testDir.mkdirs();
+		assertTrue(testDir.exists());
+		assertTrue(testDir.isDirectory());
         testDir.setReadOnly();
         assertTrue(!testDir.canWrite());
-        FileUtils.setWriteable(testDir);
+		File testInTestDir = new File(testDir, "testDirTest");
+		testInTestDir.deleteOnExit();
+		try {
+			testInTestDir.createNewFile();
+			fail("created file in test dir");
+		} catch(IOException expected) {}
+        assertTrue(FileUtils.setWriteable(testDir));
+		assertTrue(testInTestDir.createNewFile());
         assertTrue(testDir.canWrite());
         // Make sure it doesn't die if called on a file that doesn't exist
         File nowhere = new File("m'kay");
-        FileUtils.setWriteable(nowhere);
+		assertTrue(!nowhere.exists());
+        assertTrue(FileUtils.setWriteable(nowhere));
         assertTrue(!nowhere.canWrite()); // doesn't exist, can't write.
     }
 }
