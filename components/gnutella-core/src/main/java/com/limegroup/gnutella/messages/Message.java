@@ -570,6 +570,7 @@ public abstract class Message
     public String toString() {
         return "{guid="+(new GUID(guid)).toString()
              +", ttl="+ttl
+             +", hops="+hops
              +", priority="+getPriority()+"}";
     }
 

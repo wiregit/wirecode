@@ -932,8 +932,9 @@ public class PingReply extends Message implements Serializable {
 
     // overrides Object.toString
     public String toString() {
-        return "PingReply("+getIP()+":"+getPort()
-            +", "+super.toString()+")";
+        return "PingReply("+getIP()+":"+getPort()+
+            ", free slots: "+hasFreeSlots()+
+            ", "+super.toString()+")";
     }
 
     //Unit test: tests/com/limegroup/gnutella/messages/PingReplyTest
