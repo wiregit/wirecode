@@ -81,7 +81,7 @@ public class MP3Test extends com.limegroup.gnutella.util.BaseTestCase {
     public void testMP3()
         throws Exception {
         
-        de.ueberdosis.util.OutputCtr.setLevel(0);
+        de.ueberdosis.util.OutputCtr.setLevel(-1);
         ExtendedID3Tag info = null;
         
         /*
@@ -89,14 +89,14 @@ public class MP3Test extends com.limegroup.gnutella.util.BaseTestCase {
         */
         info  = newMP3Info(file[1]);
         assertEquals(info.getSize(), 21952L);
-        assertEquals(info.getBitrate() , 448);		
+        assertEquals(info.getBitrateI() , 448);		
         assertTrue(!info.getCopyright());		
         assertTrue(info.getOriginal());	
         assertTrue(!info.getPadding()); 	
-        assertEquals(info.getFrequency() , 48000);	
-        assertEquals(info.getLayer() , 1); 		
+        assertEquals(info.getFrequencyI() , 48000);	
+        assertEquals(info.getLayerI() , 1); 		
         assertEquals(info.getRuntime() , 0); 
-        assertEquals(info.getChannelModeS() , "Dual Channel");	
+        assertEquals(info.getChannelModeS() , "Dual Channel (Stereo)");	
         assertEquals(info.getEmphasisS() , "none");
         //        assertTrue(!info.hasVariableBitRate());
         
@@ -105,15 +105,15 @@ public class MP3Test extends com.limegroup.gnutella.util.BaseTestCase {
         */
         info  = newMP3Info(file[2]);
         assertEquals(info.getSize(), 26645L);
-        assertEquals(info.getBitrate() , 32);		
+        assertEquals(info.getBitrateI() , 192);		
         assertTrue(info.getCopyright());		
         assertTrue(info.getOriginal());	
         assertTrue(!info.getPadding()); 	
-        assertEquals(info.getFrequency() , 44100);	
-        assertEquals(info.getLayer() , 1); 		
-        assertEquals(info.getRuntime() , 6); 
-        assertEquals(info.getChannelModeS() , "Dual Channel");	
-        assertEquals(info.getEmphasisS() , "50/15 ms");
+        assertEquals(info.getFrequencyI() , 44100);	
+        assertEquals(info.getLayerI() , 1); 		
+        assertEquals(info.getRuntime() , 1); 
+        assertEquals(info.getChannelModeS() , "Dual Channel (Stereo)");	
+        assertEquals(info.getEmphasisS() , "50/15ms");
         //        assertTrue(!info.hasVariableBitRate());
         
         /*
@@ -121,12 +121,12 @@ public class MP3Test extends com.limegroup.gnutella.util.BaseTestCase {
         */
         info  = newMP3Info(file[3]);
         assertEquals(info.getSize(), 31104L);
-        assertEquals(info.getBitrate() , 384);		
+        assertEquals(info.getBitrateI() , 384);		
         assertTrue(!info.getCopyright());		
         assertTrue(info.getOriginal());	
         assertTrue(!info.getPadding()); 	
-        assertEquals(info.getFrequency() , 48000);	
-        assertEquals(info.getLayer() , 2); 		
+        assertEquals(info.getFrequencyI() , 48000);	
+        assertEquals(info.getLayerI() , 2); 		
         assertEquals(info.getRuntime() , 0); 
         assertEquals(info.getChannelModeS() , "Stereo");	
         assertEquals(info.getEmphasisS() , "none");
@@ -137,14 +137,14 @@ public class MP3Test extends com.limegroup.gnutella.util.BaseTestCase {
         */
         info  = newMP3Info(file[5]);
         assertEquals(info.getSize(), 232295L); 
-        assertEquals(info.getBitrate() , 58); //59-winamp(wrong) 58-encspot	
+        assertEquals(info.getBitrateI() , 192); //we current dont' support VBR
         assertTrue(info.getCopyright());		
         assertTrue(info.getOriginal());	
         assertTrue(!info.getPadding()); 	
-        assertEquals(info.getFrequency() , 44100);	
-        assertEquals(info.getLayer() , 3); 		
+        assertEquals(info.getFrequencyI() , 44100);	
+        assertEquals(info.getLayerI() , 3); 		
         assertEquals(info.getRuntime() , 31); 
-        assertEquals(info.getChannelModeS() , "Joint Stereo");	
+        assertEquals(info.getChannelModeS() , "Joint Stereo (Stereo)");	
         assertEquals(info.getEmphasisS() , "none");
         //        assertTrue(info.hasVariableBitRate());
         //		assertEquals(info.getVBRHeader().getScale() , 30);
@@ -155,12 +155,12 @@ public class MP3Test extends com.limegroup.gnutella.util.BaseTestCase {
         */	
         info  = newMP3Info(file[8]);
         assertEquals(info.getSize(), 30720L);
-        assertEquals(info.getBitrate() , 192);		
+        assertEquals(info.getBitrateI() , 192);		
         assertTrue(!info.getCopyright());	
         assertTrue(!info.getOriginal());	
         assertTrue(info.getPadding()); 	
-        assertEquals(info.getFrequency() , 44100);	
-        assertEquals(info.getLayer() , 2);		
+        assertEquals(info.getFrequencyI() , 44100);	
+        assertEquals(info.getLayerI() , 2);		
         assertEquals(info.getRuntime() , 1);	
         assertEquals(info.getChannelModeS() , "Stereo");	
         assertEquals(info.getEmphasisS() , "none");
@@ -172,14 +172,14 @@ public class MP3Test extends com.limegroup.gnutella.util.BaseTestCase {
         */	
         info  = newMP3Info(file[9]);
         assertEquals(info.getSize(), 14336L);
-        assertEquals(info.getBitrate() , 32); //18-winamp 8-encspot/////////////////////////////////////////////
+        assertEquals(info.getBitrateI() , 32); //18-winamp 8-encspot/////////////////////////////////////////////
         assertTrue(!info.getCopyright());	
         assertTrue(info.getOriginal());	
         assertTrue(!info.getPadding()); 	
-        assertEquals(info.getFrequency() , 8000);	
-        assertEquals(info.getLayer() , 3);		
-        assertEquals(info.getRuntime() , 3); //5-winamp 10-encspot/////////////////////////////////////
-        assertEquals(info.getChannelModeS() , "Single Channel");	
+        assertEquals(info.getFrequencyI() , 16000);	
+        assertEquals(info.getLayerI() , 3);		
+        assertEquals(info.getRuntime() , 10); //5-winamp 10-encspot/////////////////////////////////////
+        assertEquals(info.getChannelModeS() , "Single Channel (Mono)");	
         assertEquals(info.getEmphasisS() , "none");
         //        assertTrue(!info.hasVariableBitRate());
         //	assertEquals(info.getVBRHeader().getScale() , 95);
@@ -189,14 +189,14 @@ public class MP3Test extends com.limegroup.gnutella.util.BaseTestCase {
         */	
         info  = newMP3Info(file[10]);
         assertEquals(info.getSize(), 22572L);
-        assertEquals(info.getBitrate() , 128);		
+        assertEquals(info.getBitrateI() , 256);		
         assertTrue(!info.getCopyright());	
         assertTrue(info.getOriginal());	
         assertTrue(info.getPadding()); 	
-        assertEquals(info.getFrequency() , 22050);	
-        assertEquals(info.getLayer() , 1);		
-        assertEquals(info.getRuntime() , 1);	
-        assertEquals(info.getChannelModeS() , "Joint Stereo");	
+        assertEquals(info.getFrequencyI() , 44100);	
+        assertEquals(info.getLayerI() , 1);		
+        assertEquals(info.getRuntime() , 0);	
+        assertEquals(info.getChannelModeS() , "Joint Stereo (Stereo)");	
         assertEquals(info.getEmphasisS() , "none");
         //        assertTrue(!info.hasVariableBitRate());
 	
@@ -205,14 +205,14 @@ public class MP3Test extends com.limegroup.gnutella.util.BaseTestCase {
         */	
         info  = newMP3Info(file[11]);
         assertEquals(info.getSize(), 4224L);
-        assertEquals(info.getBitrate() , 16);		
+        assertEquals(info.getBitrateI() , 48);		
         assertTrue(!info.getCopyright());	
         assertTrue(info.getOriginal());	
         assertTrue(!info.getPadding()); 	
-        assertEquals(info.getFrequency() , 24000);	
-        assertEquals(info.getLayer() , 2);		
-        assertEquals(info.getRuntime() , 2); //1-winamp 43-musicmatch(correct)//////////////////////////
-        assertEquals(info.getChannelModeS() , "Joint Stereo");	
+        assertEquals(info.getFrequencyI() , 48000);	
+        assertEquals(info.getLayerI() , 2);		
+        assertEquals(info.getRuntime() , 0); //1-winamp 43-musicmatch(correct)//////////////////////////
+        assertEquals(info.getChannelModeS() , "Joint Stereo (Stereo)");	
         assertEquals(info.getEmphasisS() , "none");
         //        assertTrue(!info.hasVariableBitRate());
 	
@@ -222,15 +222,15 @@ public class MP3Test extends com.limegroup.gnutella.util.BaseTestCase {
         */	
         info  = newMP3Info(file[14]);
         assertEquals(info.getSize(), 789752L);
-        assertEquals(info.getBitrate() , 448); //448-winamp	210-encspot
+        assertEquals(info.getBitrateI() , 448); //448-winamp	210-encspot
         assertTrue(info.getCopyright());	
         assertTrue(!info.getOriginal());	
         assertTrue(info.getPadding()); 	
-        assertEquals(info.getFrequency() , 44100);	
-        assertEquals(info.getLayer() , 1);		
-        assertEquals(info.getRuntime() , 14); //30-encspot
-        assertEquals(info.getChannelModeS() , "Joint Stereo");	
-        assertEquals(info.getEmphasisS() , "50/15 ms");
+        assertEquals(info.getFrequencyI() , 44100);	
+        assertEquals(info.getLayerI() , 1);		
+        assertEquals(info.getRuntime() , 22); //30-encspot
+        assertEquals(info.getChannelModeS() , "Joint Stereo (Stereo)");	
+        assertEquals(info.getEmphasisS() , "50/15ms");
         //        assertTrue(!info.hasVariableBitRate()); //encspot true
 	
         /*
@@ -239,12 +239,12 @@ public class MP3Test extends com.limegroup.gnutella.util.BaseTestCase {
 
           info  = newMP3Info(file[18] );
           assertEquals(info.getSize(), 743933L);
-          assertEquals(info.getBitrate() , 40);		
+          assertEquals(info.getBitrateI() , 40);		
           assertTrue(!info.getCopyright());	
           assertTrue(!info.getOriginal());	
           assertTrue(!info.getPadding()); 	
-          assertEquals(info.getFrequency() , 8000);	
-          assertEquals(info.getLayer() , 2);		
+          assertEquals(info.getFrequencyI() , 8000);	
+          assertEquals(info.getLayerI() , 2);		
           assertEquals(info.getRuntime() , 555);	
           assertEquals(info.getChannelModeS() , "Joint Stereo");	
           assertEquals(info.getNumberOfFrames() , 3857); //39626us - 39624 winamp
