@@ -182,8 +182,8 @@ public class ClientSidePushProxyTest
                                  ultrapeer ? ultrapeerIP : oldIP,
                                  ultrapeer);
         reply.hop();
-        c.send(reply);
-        c.flush();
+        c.sendMessage(reply);
+        c.flushMessage();
      }
 
     ///////////////////////// Actual Tests ////////////////////////////
@@ -194,8 +194,8 @@ public class ClientSidePushProxyTest
         testUP = connect(rs, 6355, true);
 
         // send a MessagesSupportedMessage
-        testUP.send(MessagesSupportedVendorMessage.instance());
-        testUP.flush();
+        testUP.sendMessage(MessagesSupportedVendorMessage.instance());
+        testUP.flushMessage();
 
         // we expect to get a PushProxy request
         Message m = null;
@@ -207,8 +207,8 @@ public class ClientSidePushProxyTest
         PushProxyAcknowledgement ack = 
         new PushProxyAcknowledgement(InetAddress.getLocalHost(), 
                                      6355, new GUID(m.getGUID()));
-        testUP.send(ack);
-        testUP.flush();
+        testUP.sendMessage(ack);
+        testUP.flushMessage();
 
         // client side seems to follow the setup process A-OK
     }
@@ -224,8 +224,8 @@ public class ClientSidePushProxyTest
         QueryRequest query = new QueryRequest(GUID.makeGuid(), (byte) 1,
                                               "berkeley", null, null, null,
                                               null, false, 0, false);
-        testUP.send(query);
-        testUP.flush();
+        testUP.sendMessage(query);
+        testUP.flushMessage();
 
         // await a response
         Message m = null;
@@ -257,8 +257,8 @@ public class ClientSidePushProxyTest
                                          9000);
         
         // send the PR off
-        testUP.send(pr);
-        testUP.flush();
+        testUP.sendMessage(pr);
+        testUP.flushMessage();
 
         // we should get a incoming GIV
         Socket givSock = ss.accept();
@@ -310,8 +310,8 @@ public class ClientSidePushProxyTest
         m = new QueryReply(m.getGUID(), (byte) 1, 6355, new byte[4], 0, res, 
                            clientGUID, new byte[0], false, false, true,
                            true, false, false, proxies);
-        testUP.send(m);
-        testUP.flush();
+        testUP.sendMessage(m);
+        testUP.flushMessage();
 
         // wait a while for Leaf to process result
         Thread.sleep(1000);
@@ -413,8 +413,8 @@ public class ClientSidePushProxyTest
         m = new QueryReply(m.getGUID(), (byte) 1, 6355, new byte[4], 0, res, 
                            clientGUID, new byte[0], false, false, true,
                            true, false, false, null);
-        testUP.send(m);
-        testUP.flush();
+        testUP.sendMessage(m);
+        testUP.flushMessage();
 
         // wait a while for Leaf to process result
         Thread.sleep(1000);
@@ -460,8 +460,8 @@ public class ClientSidePushProxyTest
         m = new QueryReply(m.getGUID(), (byte) 1, 6355, new byte[4], 0, res, 
                            clientGUID, new byte[0], false, false, true,
                            true, false, false, proxies);
-        testUP.send(m);
-        testUP.flush();
+        testUP.sendMessage(m);
+        testUP.flushMessage();
 
         // wait a while for Leaf to process result
         Thread.sleep(1000);

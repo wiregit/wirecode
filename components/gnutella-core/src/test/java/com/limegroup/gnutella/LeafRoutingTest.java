@@ -177,8 +177,8 @@ public class LeafRoutingTest extends BaseTestCase {
                                      ultrapeer ? ultrapeerIP : oldIP,
                                      ultrapeer);
          reply.hop();
-         c.send(reply);
-         c.flush();
+         c.sendMessage(reply);
+         c.flushMessage();
      }
 
      ///////////////////////// Actual Tests ////////////////////////////
@@ -336,8 +336,8 @@ public class LeafRoutingTest extends BaseTestCase {
         QueryRequest query = new QueryRequest(GUID.makeGuid(), (byte) 1,  
                                               "berkeley", null, null, null,
                                               null, false, 0, false);
-        ultrapeer2.send(query);
-        ultrapeer2.flush();
+        ultrapeer2.sendMessage(query);
+        ultrapeer2.flushMessage();
         
         // hope for the result
         Message m = null;

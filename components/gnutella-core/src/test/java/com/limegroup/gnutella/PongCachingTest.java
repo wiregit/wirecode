@@ -197,8 +197,8 @@ public final class PongCachingTest extends BaseTestCase {
         qrt.add("susheel");
         qrt.addIndivisible(HugeTestUtils.UNIQUE_SHA1.toString());
         for (Iterator iter=qrt.encode(null).iterator(); iter.hasNext(); ) {
-            LEAF.send((RouteTableMessage)iter.next());
-			LEAF.flush();
+            LEAF.sendMessage((RouteTableMessage)iter.next());
+			LEAF.flushMessage();
         }
 
         // for Ultrapeer 1
@@ -206,8 +206,8 @@ public final class PongCachingTest extends BaseTestCase {
         qrt.add("leehsus");
         qrt.add("awesome");
         for (Iterator iter=qrt.encode(null).iterator(); iter.hasNext(); ) {
-            ULTRAPEER_1.send((RouteTableMessage)iter.next());
-			ULTRAPEER_1.flush();
+            ULTRAPEER_1.sendMessage((RouteTableMessage)iter.next());
+			ULTRAPEER_1.flushMessage();
         }
 
 		assertTrue("ULTRAPEER_2 should be connected", ULTRAPEER_2.isOpen());
@@ -270,8 +270,8 @@ public final class PongCachingTest extends BaseTestCase {
 		drain(LEAF);
 
         Message m = new PingRequest((byte)7);
-        ULTRAPEER_1.send(m);
-        ULTRAPEER_1.flush();        
+        ULTRAPEER_1.sendMessage(m);
+        ULTRAPEER_1.flushMessage();        
         
         Message received;
         for(int i=0; i<PongCacher.NUM_HOPS; i++) {

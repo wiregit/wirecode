@@ -104,6 +104,7 @@ public class ManagedConnectionTest extends BaseTestCase {
 		ManagedConnection out = 
             new ManagedConnection("localhost", Backend.PORT);
         out.initialize();
+        out.buildAndStartQueues();
 
         assertTrue("connection is open", out.isOpen());
         assertTrue("connection should support GGEP", out.supportsGGEP());
@@ -237,6 +238,7 @@ public class ManagedConnectionTest extends BaseTestCase {
 												   new NoGGEPProperties(),
 												   new EmptyResponder());
         out.initialize();
+        out.buildAndStartQueues();
 
         assertTrue("connection is open", out.isOpen());
 		// receive initial ping

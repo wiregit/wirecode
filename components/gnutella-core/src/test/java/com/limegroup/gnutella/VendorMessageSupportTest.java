@@ -74,8 +74,8 @@ public class VendorMessageSupportTest extends BaseTestCase {
                               new EmptyResponder());
         _leaf1.initialize();
         for (Iterator iter=qrt.encode(null).iterator(); iter.hasNext(); )
-            _leaf1.send((RouteTableMessage)iter.next());
-        _leaf1.flush();
+            _leaf1.sendMessage((RouteTableMessage)iter.next());
+        _leaf1.flushMessage();
         // don't do postInit() - you don't want him thinking
         // you support any vendor message....
         
@@ -85,8 +85,8 @@ public class VendorMessageSupportTest extends BaseTestCase {
                               new EmptyResponder());
         _leaf2.initialize();
         for (Iterator iter=qrt.encode(null).iterator(); iter.hasNext(); )
-            _leaf2.send((RouteTableMessage)iter.next());
-        _leaf2.flush();
+            _leaf2.sendMessage((RouteTableMessage)iter.next());
+        _leaf2.flushMessage();
         // don't do postInit() - you don't want him thinking
         // you support any vendor message....
     }
@@ -148,8 +148,8 @@ public class VendorMessageSupportTest extends BaseTestCase {
         QueryRequest qr = QueryRequest.createQuery("susheel", (byte)3);
         
         // first make sure query gets through.....
-        _leaf2.send(qr);
-        _leaf2.flush();
+        _leaf2.sendMessage(qr);
+        _leaf2.flushMessage();
 
         boolean gotQR = false;
         
@@ -172,8 +172,8 @@ public class VendorMessageSupportTest extends BaseTestCase {
 
         // now send the hops flow and it shouldn't get through!!
         HopsFlowVendorMessage hops = new HopsFlowVendorMessage((byte)1);
-        _leaf1.send(hops);
-        _leaf1.flush();
+        _leaf1.sendMessage(hops);
+        _leaf1.flushMessage();
 
         // wait for the hops flow message to take effect...
         try {
@@ -182,8 +182,8 @@ public class VendorMessageSupportTest extends BaseTestCase {
         catch (Exception whatever) {}
 
         qr = QueryRequest.createQuery("daswani", (byte)3);
-        _leaf2.send(qr);
-        _leaf2.flush();
+        _leaf2.sendMessage(qr);
+        _leaf2.flushMessage();
         
         while (true) {
             try {
@@ -201,8 +201,8 @@ public class VendorMessageSupportTest extends BaseTestCase {
         
         // reset Hops Flow and make sure a query gets through....
         hops = new HopsFlowVendorMessage((byte)4);
-        _leaf1.send(hops);
-        _leaf1.flush();
+        _leaf1.sendMessage(hops);
+        _leaf1.flushMessage();
 
         try {
             // wait for hops flow to be turned off....
@@ -211,8 +211,8 @@ public class VendorMessageSupportTest extends BaseTestCase {
         catch (InterruptedException ignored) {}
 
         qr = QueryRequest.createQuery("foosball", (byte)3);
-        _leaf2.send(qr);
-        _leaf2.flush();
+        _leaf2.sendMessage(qr);
+        _leaf2.flushMessage();
 
         gotQR = false;
         while (true) {
@@ -250,8 +250,8 @@ public class VendorMessageSupportTest extends BaseTestCase {
                 }
                 catch (InterruptedException whatever) {}
                 try {
-                    c.send(tcp);
-                    c.flush();
+                    c.sendMessage(tcp);
+                    c.flushMessage();
                 }
                 catch (Exception e) {
                     fail("Couldn't send tcp!!", e);
@@ -292,8 +292,8 @@ public class VendorMessageSupportTest extends BaseTestCase {
                 }
                 catch (InterruptedException whatever) {}
                 try {
-                    c.send(udp);
-                    c.flush();
+                    c.sendMessage(udp);
+                    c.flushMessage();
                 }
                 catch (Exception e) {
                     fail("Couldn't send udp!!", e);
