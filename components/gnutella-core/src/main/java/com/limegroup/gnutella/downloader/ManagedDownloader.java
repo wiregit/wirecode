@@ -368,7 +368,7 @@ public class ManagedDownloader implements Downloader, Serializable {
 				}
 
                 try {
-                    Launcher.launch(file.getAbsolutePath());
+                    Launcher.launchFile(file);
                 } catch (IOException e) { }
             }
         };
