@@ -118,12 +118,12 @@ public abstract class MessageRouter {
 	/**
 	 * Handle to the <tt>FileManager</tt> instance.
 	 */
-	private FileManager _fileManager;
+	private static FileManager _fileManager;
 	
 	/**
 	 * Constant for whether or not to record stats.
 	 */
-	private final boolean RECORD_STATS = !CommonUtils.isJava118();
+	private static final boolean RECORD_STATS = !CommonUtils.isJava118();
 
 	/**
 	 * A handle to the thread that deals with QRP Propagation
@@ -1617,8 +1617,6 @@ public abstract class MessageRouter {
      *     @modifies connections
      */    
     private void forwardQueryRouteTables() {
-		//System.out.println("MessageRouter::forwardQueryRouteTables"); 
-
 		//Check the time to decide if it needs an update.
 		long time = System.currentTimeMillis();
 
@@ -1677,7 +1675,7 @@ public abstract class MessageRouter {
      * This will not include information from c.
      *     @requires queryUpdateLock held
      */
-    private QueryRouteTable createRouteTable() {
+    private static QueryRouteTable createRouteTable() {
         //TODO: choose size according to what's been propogated.
         QueryRouteTable ret=new QueryRouteTable();
         
@@ -1691,7 +1689,7 @@ public abstract class MessageRouter {
      * Adds all query routing tables for this' files to qrt.
      *     @modifies qrt
      */
-    protected void addQueryRoutingEntries(QueryRouteTable qrt) {
+    private static void addQueryRoutingEntries(QueryRouteTable qrt) {
         Iterator words = _fileManager.getKeyWords().iterator();
         while(words.hasNext())
             qrt.add((String)words.next());
@@ -1711,7 +1709,7 @@ public abstract class MessageRouter {
 	 *
 	 * @param qrt the <tt>QueryRouteTable</tt> to add to
 	 */
-	private void addQueryRoutingEntriesForLeaves(QueryRouteTable qrt) {
+	private static void addQueryRoutingEntriesForLeaves(QueryRouteTable qrt) {
 		List leaves = _manager.getInitializedClientConnections2();
 		
 		for(int i=0; i<leaves.size(); i++) {
