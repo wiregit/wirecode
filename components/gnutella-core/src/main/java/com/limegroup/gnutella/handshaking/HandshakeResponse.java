@@ -90,7 +90,7 @@ public class HandshakeResponse {
     /**
      * Headers to use in the response to a connection handshake.
      */
-    private Properties headers;
+    private final Properties headers;
 
     /**
      * Creates a HandshakeResponse which defaults the status code and status
@@ -196,7 +196,23 @@ public class HandshakeResponse {
     }
 
     public String toString() {
-        return "<"+statusCode+", "+statusMessage+">";
+        return "<"+statusCode+", "+statusMessage+">"+headers;
     }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
