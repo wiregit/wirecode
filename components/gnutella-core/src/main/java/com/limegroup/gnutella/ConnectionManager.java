@@ -196,6 +196,8 @@ public class ConnectionManager {
          //requires some refactoring of that damn initialization code.
          
          //1. Initialize connection.  It's always safe to recommend new headers.
+         boolean wasShielded=hasShieldedClientSupernodeConnection();
+         int oldKeepAlive=_keepAlive;
          ManagedConnection connection=null;
          try {
              connection = new ManagedConnection(socket, _router, this);
@@ -209,29 +211,36 @@ public class ConnectionManager {
          
          //dont keep the connection, if we are not a supernode
          synchronized(this){
-            if(hasShieldedClientSupernodeConnection()) 
-                remove(connection);
+             if(wasShielded) {
+                 remove(connection);
+             }
          }
          
          //update the connection count
          try {   
              synchronized (_incomingConnectionsLock) {
-                 if(connection.isClientConnection())
+                 if(connection.isSupernodeClientConnection())
                      _incomingClientConnections++;
                  else
                      _incomingConnections++;
              }                  
 
-             //a) Not needed: kill.  TODO: reject as described above.
-             if((connection.isClientConnection() &&
-                (_incomingClientConnections > 
-                SettingsManager.instance().getMaxShieldedClientConnections()))
-                || (!connection.isClientConnection() && 
-                (_incomingConnections > _keepAlive))) {
-                    synchronized(this){
-                        remove(connection);
-             }
-             }else {                     
+             //a) Not needed: kill.  The test for "oldKeepAlive<=0" is needed to
+             //make disconnect() work.  We can't just look at _keepAlive because
+             //we set it to zero when getting incoming client-supernode
+             //connection.  TODO: reject as described above. This should really
+             //be done in headers whenever possible.
+             int shieldedMax=
+                SettingsManager.instance().getMaxShieldedClientConnections();
+             if (   (connection.isSupernodeClientConnection() 
+                        && _incomingClientConnections > shieldedMax)
+                 || (!connection.isClientSupernodeConnection() 
+                        && _incomingConnections > _keepAlive)
+                 || (oldKeepAlive <= 0)) {  //see above
+                 synchronized(this) {
+                     remove(connection);
+                 }
+             } else {                     
                  sendInitialPingRequest(connection);
                  connection.loopForMessages();
              }
@@ -241,10 +250,12 @@ public class ConnectionManager {
              _callback.error(ActivityCallback.INTERNAL_ERROR, e);
          } finally {
              synchronized (_incomingConnectionsLock) {
-                 if(connection.isClientConnection())
+                 if(connection.isSupernodeClientConnection())
                      _incomingClientConnections--;
                  else
                      _incomingConnections--;
+                if (connection.isClientSupernodeConnection())
+                    lostShieldedClientSupernodeConnection();
              }
          }
      }
