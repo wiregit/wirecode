@@ -460,8 +460,9 @@ public class DownloadTester {
     private static boolean isComplete() {
         if (file.length()!=TestFile.length())
             return false;
+        FileInputStream stream=null;
         try {
-            FileInputStream stream = new FileInputStream(file);
+            stream = new FileInputStream(file);
             for (int i=0 ; ; i++) {
                 int c=stream.read();
                 if (c==-1)//eof
@@ -471,6 +472,13 @@ public class DownloadTester {
             }
         } catch (IOException ioe) {
             return false;
+        } finally {
+            if (stream!=null) {
+                try {
+                    stream.close();
+                } catch (IOException ignored) {
+                }
+            }
         }
         return true;
     }
@@ -483,7 +491,9 @@ public class DownloadTester {
 
     /** Cleans up the complete file */
     private static void cleanup() {
-        file.delete();
+        boolean deleted=file.delete();
+        if (!deleted)
+            System.err.println("WARNING: couldn't delete "+file);
         uploader1.reset();
         uploader2.reset();
         uploader3.reset();
