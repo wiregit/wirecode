@@ -47,7 +47,7 @@ public class SettingsManager {
     /** Default setting for the soft maximum time to live */
     private final byte    DEFAULT_SOFT_MAX_TTL   = (byte)7;
     /** Default setting for the hard maximum time to live */
-    private final byte    DEFAULT_MAX_TTL        = (byte)10;
+    private final byte    DEFAULT_MAX_TTL        = (byte)16;
     /** Default maximum packet length */
     private final int     DEFAULT_MAX_LENGTH     = 65536;
     /** Default timeout */
@@ -342,9 +342,9 @@ public class SettingsManager {
 
 
     /**
-	 * Returns the <code>SettingsManager</code> instance.
+	 * Returns the <tt>SettingsManager</tt> instance.
 	 *
-	 * @return the <code>SettingsManager</code> instance
+	 * @return the <tt>SettingsManager</tt> instance
      */
     public static SettingsManager instance() {
         return _instance;
@@ -888,14 +888,14 @@ public class SettingsManager {
     public int getUploadsPerPerson(){return _uploadsPerPerson;}
 
     /** 
-	 * Returns a new <code>File</code> instance that denotes the abstract
+	 * Returns a new <tt>File</tt> instance that denotes the abstract
 	 * pathname of the directory for saving files.
 	 *
-	 * @return  A <code>File</code> instance denoting the abstract
+	 * @return  A <tt>File</tt> instance denoting the abstract
 	 *          pathname of the save directory.
 	 *
 	 * @throws  FileNotFoundException
-	 *          If the incomplete directory is <code>null</code>.      
+	 *          If the incomplete directory is <tt>null</tt>.      
 	 */
     public File getSaveDirectory() throws FileNotFoundException {
 		if(_saveDirectory == null) throw new FileNotFoundException();
@@ -906,14 +906,14 @@ public class SettingsManager {
 	public boolean getChatEnabled() {return _chatEnabled;}
 
     /** 
-	 * Returns a new <code>File</code> instance that denotes the abstract
+	 * Returns a new <tt>File</tt> instance that denotes the abstract
 	 * pathname of the directory for saving incomplete files.
 	 *
-	 * @return  A <code>File</code> instance denoting the abstract
+	 * @return  A <tt>File</tt> instance denoting the abstract
 	 *          pathname of the directory for saving incomplete files.
 	 *
 	 * @throws  FileNotFoundException
-	 *          If the incomplete directory is <code>null</code>.      
+	 *          If the incomplete directory is <tt>null</tt>.      
 	 */
     public File getIncompleteDirectory() throws FileNotFoundException {
 		if(_incompleteDirectory == null) throw new FileNotFoundException();
@@ -921,11 +921,11 @@ public class SettingsManager {
     }
 
     /** 
-	 * Returns a new <code>File</code> instance that denotes the abstract
+	 * Returns a new <tt>File</tt> instance that denotes the abstract
 	 * pathname of the default directory for saving incomplete files. This
 	 * is a shared directory within the current working directory.
 	 *
-	 * @return  A <code>File</code> instance denoting the abstract
+	 * @return  A <tt>File</tt> instance denoting the abstract
 	 *          pathname of the default directory for saving files.
 	 */	
     public File getSaveDefault() {		
@@ -962,13 +962,13 @@ public class SettingsManager {
 	}
     
     /** 
-	 * Returns a new <code>File</code> instance that denotes the abstract
+	 * Returns a new <tt>File</tt> instance that denotes the abstract
 	 * pathname of the file with a snapshot of current downloading files.
 	 *
 	 * <p>This file is stored in the incomplete directory and is a read-only
      * property.
 	 *
-	 * @return  A <code>File</code> instance denoting the abstract
+	 * @return  A <tt>File</tt> instance denoting the abstract
 	 *          pathname of the file with a snapshot of current downloading
 	 *          files.
 	 */
@@ -1214,7 +1214,7 @@ public class SettingsManager {
     /**
      * Returns the classpath string used for loading jar files on startup.
 	 *
-	 * @return the classpath <code>String</code> used for loading jar files on 
+	 * @return the classpath <tt>String</tt> used for loading jar files on 
 	 *         startup.
      */
     public String getClassPath() {
@@ -1224,7 +1224,7 @@ public class SettingsManager {
     /**
      * Returns the main class to load on startup.
 	 *
-	 * @return a <code>String</code> specifying the main class to load on
+	 * @return a <tt>String</tt> specifying the main class to load on
 	 *         startup
      */
     public String getMainClass() {
@@ -1232,10 +1232,10 @@ public class SettingsManager {
     }
 
 	/**
-	 * Returns a <code>String</code> instance specifying the language to use
+	 * Returns a <tt>String</tt> instance specifying the language to use
 	 * for the application.
 	 *
-	 * @return a <code>String</code> specifying the language to use for the 
+	 * @return a <tt>String</tt> specifying the language to use for the 
 	 *         application
 	 */
 	public String getLanguage() {
@@ -1243,10 +1243,10 @@ public class SettingsManager {
 	}
 
 	/**
-	 * Returns a <code>String</code> instance specifying the country to use
+	 * Returns a <tt>String</tt> instance specifying the country to use
 	 * for the application.
 	 *
-	 * @return a <code>String</code> specifying the country to use for the 
+	 * @return a <tt>String</tt> specifying the country to use for the 
 	 *         application
 	 */
 	public String getCountry() {
@@ -1534,7 +1534,7 @@ public class SettingsManager {
     /** 
 	 * Sets the directory for saving files. 
 	 *
-	 * @param   saveDir  A <code>File</code> instance denoting the 
+	 * @param   saveDir  A <tt>File</tt> instance denoting the 
 	 *                   abstract pathname of the directory for
 	 *                   saving files.  
 	 *
@@ -1572,7 +1572,7 @@ public class SettingsManager {
      * listing subdirectories that have parent directories
      * also in the string. 
 	 *
-	 * @param dirs A semicolon delimited <code>String</code> instance 
+	 * @param dirs A semicolon delimited <tt>String</tt> instance 
 	 *             containing the paths of shared directories.
 	 */
     public void setDirectories(final String dirs) {
@@ -1635,7 +1635,7 @@ public class SettingsManager {
 	 * Adds one directory to the directory string only if
      * it is a directory and is not already listed. 
 	 *
-	 * @param dir  A <code>File</code> instance denoting the 
+	 * @param dir  A <tt>File</tt> instance denoting the 
 	 *             abstract pathname of the new directory 
 	 *             to add.
 	 *
