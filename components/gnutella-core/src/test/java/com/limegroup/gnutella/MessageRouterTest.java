@@ -223,20 +223,20 @@ public final class MessageRouterTest extends BaseTestCase {
      * QRP table for this node, adding the leaves' QRP tables if
      * we're an Ultrapeer.
      */
-    public void testAddQueryRoutingEntries() throws Exception {
+    public void testCreateRouteTable() throws Exception {
         TestConnectionManager tcm = 
             new TestConnectionManager(NUM_CONNECTIONS);
         FileManager fm = new TestFileManager();
         PrivilegedAccessor.setValue(RouterService.class, "manager", tcm);
         PrivilegedAccessor.setValue(ROUTER, "_manager", tcm);        
         PrivilegedAccessor.setValue(MessageRouter.class, "_fileManager", fm);
-        Class[] params = new Class[] {QueryRouteTable.class};
+        Class[] params = new Class[] {};
 		Method m = 
             PrivilegedAccessor.getMethod(ROUTER, 
-                                         "addQueryRoutingEntries",
+                                         "createRouteTable",
                                          params);             
-        QueryRouteTable qrt = new QueryRouteTable();
-        m.invoke(ROUTER, new Object[] {qrt});
+        QueryRouteTable qrt = 
+            (QueryRouteTable)m.invoke(ROUTER, new Object[] {});
         tcm.runQRPMatch(qrt);
     }
 
