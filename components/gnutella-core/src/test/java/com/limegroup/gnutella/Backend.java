@@ -24,7 +24,7 @@ public final class Backend {
 	private final Timer TIMER = new Timer();
 
 
-	public static Backend createBackend(ActivityCallback callback, int timeout) {
+	public static Backend createBackend(ActivityCallback callback, int timeout){
 		return new Backend(callback, timeout);
 	}
 
@@ -33,10 +33,28 @@ public final class Backend {
 		return new Backend(new ActivityCallbackStub(), timeout);
 	}
 
+    /**
+     * @return a BackEnd that will live until you shutdown() it.
+     */
+	public static Backend createLongLivedBackend() {
+		return new Backend(new ActivityCallbackStub(), 0);
+	}
+    
+    
+    /**
+     * @return a BackEnd that will live until you shutdown() it.
+     */
+	public static Backend createLongLivedBackend(ActivityCallback callback) {
+		return new Backend(callback, 0);
+	}
+    
 
 
 	/**
 	 * Constructs a new <tt>Backend</tt>.
+     * @param timeout a non-positive timeout will make this BackEnd long-lived.
+     * In that case, be sure to call shutdown() yourself!!  Any positive timeout
+     * will cause the BackEnd to be shutoff in timeout milliseconds.
 	 */
 	private Backend(ActivityCallback callback, int timeout) {
 		System.out.println("STARTING BACKEND"); 
@@ -75,11 +93,13 @@ public final class Backend {
 			Thread.sleep(2000);
 		} catch(InterruptedException e) {
 		}
-		TIMER.schedule(new TimerTask() {
-			public void run() {
-				shutdown("AUTOMATED");
-			}
-		}, timeout);
+        if (timeout > 0) {
+            TIMER.schedule(new TimerTask() {
+                    public void run() {
+                        shutdown("AUTOMATED");
+                    }
+                }, timeout);
+        }
 	}
 
 	/**
