@@ -1315,7 +1315,7 @@ public class ManagedDownloader implements Downloader, Serializable {
                                 List /* of RemoteFileDesc */ files,
                                 List /* of HTTPDownloader */ terminated) {
         try {
-            downloader.doDownload(true);
+            downloader.doDownload(false);
         } catch (IOException e) {
 			chatList.removeHost(downloader);
         } catch (OverlapMismatchException e) {
