@@ -7,20 +7,17 @@ import java.util.StringTokenizer;
 import junit.framework.Test;
 
 import com.limegroup.gnutella.Connection;
-import com.limegroup.gnutella.ConnectionManager;
 import com.limegroup.gnutella.Endpoint;
-import com.limegroup.gnutella.HostCatcher;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.util.BaseTestCase;
 import com.limegroup.gnutella.util.CommonUtils;
+import com.limegroup.gnutella.util.IpPort;
 import com.limegroup.gnutella.util.PrivilegedAccessor;
 import com.limegroup.gnutella.util.TestConnectionManager;
-import com.sun.java.util.collections.HashSet;
 import com.sun.java.util.collections.Iterator;
 import com.sun.java.util.collections.LinkedList;
 import com.sun.java.util.collections.List;
-import com.sun.java.util.collections.Set;
 
 
 /**
@@ -49,6 +46,43 @@ public final class HandshakeResponseTest extends BaseTestCase {
         ConnectionSettings.ENCODE_DEFLATE.setValue(true);
     }
 
+    /**
+     * Tests the method that adds Ultrapeer hosts to the X-Try-Ultrapeer
+     * header.
+     */
+    public void testAddXTryUltrapeers() throws Exception {
+        String desiredHeader = "";
+        int port = 6346;
+        int limit = 10;
+        List hosts = new LinkedList();
+        for(int i=0; i<limit; i++) {
+            String curHost = "165.23.9."+i;
+            hosts.add(new Endpoint(curHost, port));
+            desiredHeader += curHost + ":" + port;
+            
+            // Add comma separating hosts.
+            if(i != (limit-1)) {
+                desiredHeader += ",";
+            }
+        }
+
+        Method m = 
+            PrivilegedAccessor.getMethod(HandshakeResponse.class, 
+                                         "addXTryUltrapeers",
+                                         new Class[]{Iterator.class, 
+                                                     Properties.class});
+        
+        Properties headers = new Properties();
+        m.invoke(null, new Object[] {hosts.iterator(), headers});
+        
+        // Make sure the returned list of hosts is what we expect.
+        assertEquals(desiredHeader, 
+            headers.getProperty(HeaderNames.X_TRY_ULTRAPEERS));
+        
+        IpPort[] hostArray = (IpPort[])hosts.toArray(new IpPort[0]);
+        makeSureHeadersMatch(hostArray, headers);
+    }
+    
 	/**
 	 * Tests the utility method for creating a string of IP/port pairs from a 
 	 * list of connections
@@ -73,15 +107,17 @@ public final class HandshakeResponseTest extends BaseTestCase {
 		}
 		Method m = 
 			PrivilegedAccessor.getMethod(HandshakeResponse.class, 
-				"createEndpointString", new Class[] {List.class});
+				"createEndpointString", new Class[] {Iterator.class});
 		String leafStr =
-			(String)m.invoke(HandshakeResponse.class, new Object[] {leaves});	
+			(String)m.invoke(HandshakeResponse.class, 
+                new Object[] {leaves.iterator()});	
 		
 		List leavesFromString = createListFromIPPortString(leafStr);
 		assertAllConnectionsAreEqual(leaves, leavesFromString);
 		
 		String ultrapeerStr =
-					(String)m.invoke(HandshakeResponse.class, new Object[] {ultrapeers});	
+		    (String)m.invoke(HandshakeResponse.class, 
+                new Object[] {ultrapeers.iterator()});	
 		List ultrapeersFromString = createListFromIPPortString(ultrapeerStr);
 		assertAllConnectionsAreEqual(ultrapeers, ultrapeersFromString);
 		
@@ -102,8 +138,8 @@ public final class HandshakeResponseTest extends BaseTestCase {
             c1 = (Connection)a.next();
             for(Iterator b = two.iterator(); b.hasNext();) {
                 c2 = (Connection)b.next();
-                if( c1.getIPString().equals(c2.getIPString()) &&
-                  c1.getListeningPort() == c2.getListeningPort() )
+                if( c1.getAddress().equals(c2.getAddress()) &&
+                  c1.getPort() == c2.getPort() )
                     found = true;
             }
             assertTrue("missing " + c1 + " from list two", found);
@@ -114,8 +150,8 @@ public final class HandshakeResponseTest extends BaseTestCase {
             c1 = (Connection)a.next();
             for(Iterator b = one.iterator(); b.hasNext();) {
                 c2 = (Connection)b.next();
-                if( c1.getIPString().equals(c2.getIPString()) &&
-                  c1.getListeningPort() == c2.getListeningPort() )
+                if( c1.getAddress().equals(c2.getAddress()) &&
+                  c1.getPort() == c2.getPort() )
                     found = true;
             }
             assertTrue("missing " + c1 + " from list one", found);
@@ -240,133 +276,14 @@ public final class HandshakeResponseTest extends BaseTestCase {
         assertEquals("unexpected message", "Something Totally Different", message);
     }
 
-    /**
-     * Tests the method that add Ultrapeer hosts to the X-Try-Ultrapeer
-     * header.
-     */
-    public void testAddConnectedUltrapeers() throws Exception {
 
-        // run a test with just a few Ultrapeers to make sure
-        // they're reported in the headers correctly
-        Endpoint[] hosts0 = {
-            new Endpoint("165.23.8.0", 6346),
-            new Endpoint("165.23.8.1", 6346),
-            new Endpoint("165.23.8.2", 6346)        
-        };
-
-        runConnectedTestOnHosts(hosts0);
-
-        // run a test with more than 10 Ultrapeers to make sure we 
-        // cap how many we send
-        Endpoint[] hosts1 = {
-            new Endpoint("163.23.8.0", 6346),
-            new Endpoint("163.23.8.1", 6346),
-            new Endpoint("163.23.8.2", 6346),       
-            new Endpoint("163.23.8.3", 6346),
-            new Endpoint("163.23.8.4", 6346),
-            new Endpoint("163.23.8.5", 6346),
-            new Endpoint("163.23.8.6", 6346),       
-            new Endpoint("163.23.8.7", 6346),
-            new Endpoint("163.23.8.8", 6346),       
-            new Endpoint("163.23.8.9", 6346),
-            new Endpoint("163.23.8.10", 6346),       
-            new Endpoint("163.23.8.11", 6346),
-            new Endpoint("163.23.8.12", 6346),       
-            new Endpoint("163.23.8.13", 6346),       
-            new Endpoint("163.23.8.14", 6346),
-            new Endpoint("163.23.8.15", 6346),       
-        };
-
-        runConnectedTestOnHosts(hosts1);
-    }
-
-
-    /**
-     * Tests the method that add Ultrapeer hosts to the X-Try-Ultrapeer
-     * header.
-     */
-    public void testAddHighHopsUltrapeers() throws Exception {
-
-        // run a test with just a few Ultrapeers to make sure
-        // they're reported in the headers correctly
-        Endpoint[] hosts0 = {
-            new Endpoint("165.23.8.0", 6346),
-            new Endpoint("165.23.8.1", 6346),
-            new Endpoint("165.23.8.2", 6346)        
-        };
-
-        runHighHopsTestOnHosts(hosts0);
-
-        // run a test with more than 10 Ultrapeers to make sure we 
-        // cap how many we send
-        Endpoint[] hosts1 = {
-            new Endpoint("163.23.8.0", 6346),
-            new Endpoint("163.23.8.1", 6346),
-            new Endpoint("163.23.8.2", 6346),       
-            new Endpoint("163.23.8.3", 6346),
-            new Endpoint("163.23.8.4", 6346),
-            new Endpoint("163.23.8.5", 6346),
-            new Endpoint("163.23.8.6", 6346),       
-            new Endpoint("163.23.8.7", 6346),
-            new Endpoint("163.23.8.8", 6346),       
-            new Endpoint("163.23.8.9", 6346),
-            new Endpoint("163.23.8.10", 6346),       
-            new Endpoint("163.23.8.11", 6346),
-            new Endpoint("163.23.8.12", 6346),       
-            new Endpoint("163.23.8.13", 6346),       
-            new Endpoint("163.23.8.14", 6346),
-            new Endpoint("163.23.8.15", 6346),       
-        };
-
-        runHighHopsTestOnHosts(hosts1);
-    }
-
-    /**
-     * Helper method that runs the specified array of Ultrapeer hosts
-     * through the connection method that turns them into the X-Try-Ultrapeer
-     * header.
-     */
-    private void runConnectedTestOnHosts(Endpoint[] hosts) throws Exception {
-        ConnectionManager cm = new ConnectionManagerStub(hosts);
-        
-        Properties headers = new Properties();
-
-		Method m = 
-            PrivilegedAccessor.getMethod(HandshakeResponse.class, 
-                                         "addConnectedUltrapeers",
-                                         new Class[]{ConnectionManager.class, 
-                                                     Properties.class});
-        
-        m.invoke(null, new Object[]{cm, headers});
-        makeSureHeadersMatch(hosts, headers);
-    }
-
-    /**
-     * Helper method that runs the specified array of Ultrapeer hosts
-     * through the connection method that turns them into the X-Try-Ultrapeer
-     * header.
-     */
-    private void runHighHopsTestOnHosts(Endpoint[] hosts) throws Exception {
-        HostCatcher hc = new HostCatcherStub(hosts);
-        
-        Properties headers = new Properties();
-
-		Method m = 
-            PrivilegedAccessor.getMethod(HandshakeResponse.class, 
-                                         "addHighHopsUltrapeers",
-                                         new Class[]{HostCatcher.class, 
-                                                     Properties.class});
-        
-        m.invoke(null, new Object[]{hc, headers});
-        makeSureHeadersMatch(hosts, headers);
-    }
 
     /**
      * Helper method to make sure that the X-Try-Ultrapeers header in the
      * given set of headers matches the set of hosts in the given array
      * of hosts.
      */
-    private void makeSureHeadersMatch(Endpoint[] hosts, Properties headers) {
+    private void makeSureHeadersMatch(IpPort[] hosts, Properties headers) {
         String headerHosts = 
             headers.getProperty(HeaderNames.X_TRY_ULTRAPEERS);
 
@@ -380,59 +297,15 @@ public final class HandshakeResponseTest extends BaseTestCase {
             String curHost = st.nextToken();            
             boolean match = false;
             for(int j=0; j<hosts.length; j++) {
-                Endpoint ep = hosts[j];
-                if(curHost.equals(ep.getHostname()+":"+ep.getPort())) {
+                IpPort host = hosts[j];
+                if(curHost.equals(host.getAddress()+":"+host.getPort())) {
                     match = true;
                     break;
                 }
             }
-            assertTrue("should have been a matching endpoint to: "+curHost, match);
+            assertTrue("should have been a matching endpoint to: "+curHost, 
+                match);
             i++;
-        }
-    }
-
-    /**
-     * Helper class that overrides the method for getting connected Ultrapeers
-     * for testing purposes.
-     */
-    private static class ConnectionManagerStub extends ConnectionManager {
-        private final Endpoint[] HOSTS;
-
-        ConnectionManagerStub(Endpoint[] hosts) {
-            super(null);
-            HOSTS = hosts;
-        }
-
-        // overridden to return custom endpoints for testing
-        public Set getSupernodeEndpoints() {
-            Set ultrapeers = new HashSet();
-            for(int i=0; i<HOSTS.length; i++) {
-                ultrapeers.add(HOSTS[i]);
-            }
-            return ultrapeers;
-        }
-    }
-
-    /**
-     * Helper class that overrides the method for obtaining Ultrapeer hosts
-     * for the host catcher -- used to create customized tests.
-     */
-    private static class HostCatcherStub extends HostCatcher {
-        
-        private final Endpoint[] HOSTS;
-
-        HostCatcherStub(Endpoint[] hosts) {
-            HOSTS = hosts;
-        }
-
-        // overridden to return custom endpoints for testing
-        public Iterator getUltrapeerHosts(int n) {
-            Set ultrapeers = new HashSet();
-            int limit = Math.min(HOSTS.length, n);
-            for(int i=0; i<limit; i++) {
-                ultrapeers.add(HOSTS[i]);
-            }
-            return ultrapeers.iterator();            
         }
     }
 
