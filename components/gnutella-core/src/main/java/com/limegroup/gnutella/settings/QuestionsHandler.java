@@ -46,4 +46,17 @@ public class QuestionsHandler extends AbstractSettings {
     public static final BooleanSetting BROWSE_HOST_FAILED =
         FACTORY.createBooleanSetting("BROWSE_HOST_FAILED", false);
     
+    /**
+     * Setting for unsharing directory
+     */
+    public static final IntSetting UNSHARE_DIRECTORY =
+        FACTORY.createIntSetting("UNSHARE_DIRECTORY", 0);
+        
+    /**
+     * Setting for overwriting existing files when downloading
+     */
+    public static final IntSetting OVERWRITE_EXISTING =
+        FACTORY.createIntSetting("OVERWRITE_EXISTING", 0);
+    
+    
 }
