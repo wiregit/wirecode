@@ -138,6 +138,9 @@ public class NIOSocket extends Socket implements ConnectHandler, ReadHandler, Wr
      * Shuts down this socket & all its streams.
      */
     void shutdown() {
+        if(LOG.isDebugEnabled())
+            LOG.debug("Shutting down socket & streams for: " + this);
+        
         try {
             shutdownInput();
         } catch(IOException ignored) {}
