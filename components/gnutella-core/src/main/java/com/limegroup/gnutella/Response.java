@@ -245,7 +245,16 @@ public class Response {
 		else
 			this.name = name;
 
-        this.nameBytes = this.name.getBytes();
+        byte[] temp;
+        
+        try {
+            temp = this.name.getBytes("UTF-8");
+        }
+        catch(UnsupportedEncodingException namex) {
+            temp = this.name.getBytes();
+        }
+        
+        this.nameBytes = temp;
 
 		if (urns == null)
 			this.urns = DataUtils.EMPTY_SET;
@@ -322,7 +331,7 @@ public class Response {
         while((c=is.read())!=0) {
             baos.write(c);
         }
-        String name = new String(baos.toByteArray());
+        String name = new String(baos.toByteArray(), "UTF-8");
         if(name.length() == 0) {
             throw new IOException("empty name in response");
         }

@@ -3,10 +3,24 @@ package com.limegroup.gnutella.util;
 import com.limegroup.gnutella.Constants;
 import java.util.StringTokenizer;
 import com.sun.java.util.collections.*;
+import com.limegroup.gnutella.settings.ApplicationSettings;
+import java.util.Locale;
+import java.text.Collator;
 
 
 /** Various static routines for manipulating strings.*/
 public class StringUtils {
+
+    private static Collator _col;
+    static {
+        _col = Collator.getInstance
+            (new Locale(ApplicationSettings.LANGUAGE.getValue(),
+                        ApplicationSettings.COUNTRY.getValue(),
+                        ApplicationSettings.LOCALE_VARIANT.getValue()));
+        _col.setDecomposition(Collator.FULL_DECOMPOSITION);
+        _col.setStrength(Collator.PRIMARY);
+    }
+
     
     /** Returns true if input contains the given pattern, which may contain the
      *  wildcard character '*'.  TODO: need more formal definition.  Examples:
@@ -258,7 +272,7 @@ public class StringUtils {
                     c1 = Character.toLowerCase(c1);
                     c2 = Character.toLowerCase(c2);
                     if (c1 != c2) {
-                        return c1 - c2;
+                        return _col.compare(s1, s2);
                     }
                 }
             }

@@ -110,7 +110,8 @@ public class Trie {
     public String canonicalCase(final String s) {
         if (!ignoreCase)
             return s;
-        return s.toUpperCase(Locale.US).toLowerCase(Locale.US);
+        return //s.toUpperCase(Locale.US).toLowerCase(Locale.US);
+            I18NConvert.instance().getNorm(s);
     }
 
     /**

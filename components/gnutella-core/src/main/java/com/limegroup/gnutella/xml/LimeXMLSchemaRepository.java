@@ -9,6 +9,7 @@ package com.limegroup.gnutella.xml;
 import com.sun.java.util.collections.*;
 import java.io.*;
 
+import org.xml.sax.InputSource;
 /**
  * Stores and provides access to various XML schemas that me might have.
  * Singleton class
@@ -41,8 +42,9 @@ public class LimeXMLSchemaRepository
      */
     protected void initialize()
     {
+
         //get the schema files
-        File[] schemaFiles = 
+        InputSource[] schemaFiles = 
                 LimeXMLProperties.instance().getAllXMLSchemaFiles();
         
         //if there are some files there,initialize from those files
