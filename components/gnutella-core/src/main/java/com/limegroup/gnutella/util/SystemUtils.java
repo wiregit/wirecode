@@ -29,5 +29,16 @@ public class SystemUtils {
             return 0;
     }
     
+    /**
+     * Sets a file to be writeable.  Package-access so FileUtils can delegate
+     * the filename given should ideally be a canonicalized filename.
+     */
+    static void setWriteable(String fileName) {
+        if(CommonUtils.isWindows())
+            setFileWriteable(fileName);
+    }
+            
+    
     private static final native long idleTime();
+    private static final native int setFileWriteable(String filename);
 }

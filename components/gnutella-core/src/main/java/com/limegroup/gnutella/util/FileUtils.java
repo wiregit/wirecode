@@ -162,7 +162,7 @@ public class FileUtils
             
         String cmds[] = null;
         if( CommonUtils.isWindows() )
-            cmds = new String[] { "attrib", "-r", fName};
+            SystemUtils.setWriteable(fName);
         else if ( CommonUtils.isMacClassic() )
             cmds = null; // TODO: fill in.
         else
