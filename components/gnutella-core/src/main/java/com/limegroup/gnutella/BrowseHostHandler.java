@@ -70,7 +70,8 @@ public class BrowseHostHandler {
         // 1. check if you need to push.
         //   a. if so, just send a Push out.
         //   b. if not, try direct connect.  If it doesn't work, send a push.
-        int shouldPush = needsPush(host, port);
+        int shouldPush = needsPush(host);
+        
         boolean shouldTryPush = false;
         switch (shouldPush) {
         case 0: // false
@@ -215,12 +216,17 @@ public class BrowseHostHandler {
      *  because it is a private address or was unreachable in the past. 
      *  Returns 0 otherwise....
      */
-    private static int needsPush(String host, int port) {
+    private static int needsPush(String host) {
         //Return true if rfd is private or unreachable
-        if ((new Endpoint(host, port)).isPrivateAddress())
-            return 1;
-        else
+        try {
+            if(NetworkUtils.isPrivateAddress(host))
+                return 1;
+        } catch(UnknownHostException e) {
+            // don't know, assume it's public
             return 0;
+        }
+
+        return 0;
     }
 
 
