@@ -35,6 +35,13 @@ public class GUESSMonitor {
         _backend.shutdown("GUESSMonitor exiting!");
     }
 
+    public void connect() {
+        _backend.getRouterService().connect();
+    }
+
+    public void disconnect() {
+        _backend.getRouterService().disconnect();
+    }
 
     public static void main(String argv[]) throws Exception {
         System.out.println("Type 'quit' to Exit....");
@@ -52,6 +59,10 @@ public class GUESSMonitor {
                     System.out.println(INSTRUCTIONS);
                 else if (input.equals("verbose"))
                     guessMon.switchDebug();
+                else if (input.equals("connect"))
+                    guessMon.connect();
+                else if (input.equals("disconnect"))
+                    guessMon.disconnect();
             } 
             catch (IOException ioe) {
             }
@@ -116,8 +127,8 @@ public class GUESSMonitor {
                 if (_shouldRun && (_guessPongs.size() > 0)) {
                     PingReply currPong = (PingReply) _guessPongs.remove(0);
                     debug("guessPongLoop(): consuming Pong = " + currPong);
-                    GUESSStatistics.getAckStatistics(currPong.getIP(),
-                                                     currPong.getPort());
+                    GUESSStatistics.getAckStatisticsAndPrint(currPong.getIP(),
+                                                             currPong.getPort());
                 }
             }
             debug("guessPongLoop(): returning.");

@@ -4,22 +4,40 @@ import com.limegroup.gnutella.QueryRequest;
 
 public class GUESSStatistics {
 
-    public static void getAckStatistics(String host, int port) {
-        float numAttempted = 0, numReceived = 0;
+    public static void getAckStatisticsAndPrint(String host, int port) {
+        Object[] retObjs = getAckStatistics(host, port);
+        float numSent = ((Float)retObjs[1]).floatValue();
+        float numGot = ((Float)retObjs[0]).floatValue();
+        System.out.println("GUESSStatistics.getAckStatistics():" +
+                           " Num Queries Sent : " + numSent +
+                           ", Num Acks Received : " + numGot + 
+                           " (" + ((numGot/numSent)*100) +
+                           "%)");
+    }
+
+    /* @return a Object[] of length 3.  First is a Float - num Received, second
+     * is a Float - num Sent, and last is the average time for a reply.
+     */
+    public static Object[] getAckStatistics(String host, int port) {
+        float numAttempted = 0, numReceived = 0, timeSum = 0;
         GUESSTester tester = new GUESSTester("whatever");
         while (numAttempted < 100) {
+            long startTime = System.currentTimeMillis();
             try {
-                if (tester.testAck(host, port))
+                if (tester.testAck(host, port)) {
                     numReceived++;
+                    long endTime = System.currentTimeMillis();
+                    timeSum += (endTime - startTime);
+                }
             }
             catch (Exception ignored) {}
             numAttempted++;
         }
-        System.out.println("GUESSStatistics.getAckStatistics():" +
-                           " Num Queries Sent : " + numAttempted +
-                           ", Num Acks Received : " + numReceived +
-                           " (" + ((numReceived/numAttempted)*100) +
-                           "%)");
+        Object[] retObjs = new Object[3];
+        retObjs[0] = new Float(numReceived);
+        retObjs[1] = new Float(numAttempted);
+        retObjs[2] = new Float(timeSum/numReceived);
+        return retObjs;
     }
 
 
@@ -53,7 +71,7 @@ public class GUESSStatistics {
     public static void main(String argv[]) {
         String host = argv[0];
         int    port = Integer.parseInt(argv[1]);
-        getAckStatistics(host, port);
+        getAckStatisticsAndPrint(host, port);
         if (argv.length >= 3)
             getQueryStatistics(host, port, argv[2]);
         else
