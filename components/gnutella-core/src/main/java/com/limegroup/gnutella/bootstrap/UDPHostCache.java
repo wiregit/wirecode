@@ -39,7 +39,7 @@ public class UDPHostCache {
     /**
      * The maximum number of failures to allow for a given cache.
      */
-    private static final int MAXIMUM_FAILURES = 3;
+    private static final int MAXIMUM_FAILURES = 5;
     
     /**
      * The total number of udp host caches to remember between
@@ -166,6 +166,8 @@ public class UDPHostCache {
      * Removes a given hostcache from this.
      */
     public synchronized boolean remove(ExtendedEndpoint e) {
+        if(LOG.isTraceEnabled())
+            LOG.trace("Removing endpoint: " + e);
         boolean removed1=udpHosts.remove(e);
         boolean removed2=udpHostsSet.remove(e);
         Assert.that(removed1==removed2,
@@ -222,7 +224,12 @@ public class UDPHostCache {
     private class HostExpirer implements MessageListener {
         // note that this MUST use IpPort.COMPARATOR to efficiently
         // look up ReplyHandlers vs ExtendedEndpoints
+        // this is emptied as messages are processed from hosts,
+        // to allow us to record failures as time passes.
         private final Set hosts = new TreeSet(IpPort.COMPARATOR);
+        // allHosts contains all the hosts, so that we can
+        // iterate over successful caches too.
+        private final Set allHosts;
         private byte[] guid;
         
         /**
@@ -230,6 +237,7 @@ public class UDPHostCache {
          */
         public HostExpirer(Collection hosts) {
             this.hosts.addAll(hosts);
+            allHosts = new HashSet(hosts);
         }
         
         /**
@@ -255,11 +263,22 @@ public class UDPHostCache {
          * Notification that this listener is now unregistered for the specified guid.
          */
         public void unregistered(byte[] g) {
+            // Record the failures...
             for(Iterator i = hosts.iterator(); i.hasNext(); ) {
                 ExtendedEndpoint ep = (ExtendedEndpoint)i.next();
+                if(LOG.isTraceEnabled())
+                    LOG.trace("No response from cache: " + ep);
                 ep.recordUDPHostCacheFailure();
                 if(ep.getUDPHostCacheFailures() > MAXIMUM_FAILURES)
                     remove(ep);
+            }
+            // Then record the successes...
+            allHosts.removeAll(hosts);
+            for(Iterator i = allHosts.iterator(); i.hasNext(); ) {
+                ExtendedEndpoint ep = (ExtendedEndpoint)i.next();
+                if(LOG.isTraceEnabled())
+                    LOG.trace("Valid response from cache: " + ep);
+                ep.recordUDPHostCacheSuccess();
             }
         }
     }

@@ -212,6 +212,14 @@ public class ExtendedEndpoint extends Endpoint {
     }
     
     /**
+     * Records a UDP Host Cache success.
+     */
+    public void recordUDPHostCacheSuccess() {
+        Assert.that(isUDPHostCache());
+        udpHostCacheFailures = 0;
+    }
+    
+    /**
      * Determines how many failures this UDP host cache had.
      */
     public int getUDPHostCacheFailures() {
