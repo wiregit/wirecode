@@ -568,8 +568,13 @@ public abstract class MessageRouter {
         //else if(request.getTTL() > 0) {
 
 		if(handler.isSupernodeClientConnection()) {
-			sendDynamicQuery(QueryHandler.createHandler(request), handler, 
-							 counter);
+			if(handler.isHighDegreeConnection()) {
+				sendDynamicQuery(QueryHandler.createHandlerForNewLeaf(request), 
+								 handler, counter);
+			} else {
+				sendDynamicQuery(QueryHandler.createHandlerForOldLeaf(request), 
+								 handler, counter);
+			}
 		} else if(request.getTTL() > 0) {
 			// send the request to intra-Ultrapeer connections -- this does
 			// not send the request to leaves
@@ -723,8 +728,8 @@ public abstract class MessageRouter {
 	 *  for the guid cannot be found -- this should never happen, or if any
 	 *  of the arguments is <tt>null</tt>
 	 */
-	public void sendDynamicQuery(QueryHandler qh, ReplyHandler handler,
-								 ResultCounter counter) {
+	private void sendDynamicQuery(QueryHandler qh, ReplyHandler handler,
+								  ResultCounter counter) {
 		if(qh == null) {
 			throw new NullPointerException("null QueryHandler");
 		} else if(handler == null) {
@@ -859,8 +864,7 @@ public abstract class MessageRouter {
 	 
 		List list=_manager.getInitializedConnections2();
 		int limit;
-		int connections = handler.getNumIntraUltrapeerConnections();		
-		if(connections == 30) {
+		if(handler.isHighDegreeConnection()) {
 			limit = list.size();
 		} else {
 			limit = Math.min(5, list.size());
