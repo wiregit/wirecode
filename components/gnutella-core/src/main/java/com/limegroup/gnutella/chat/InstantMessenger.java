@@ -16,7 +16,7 @@ public class InstantMessenger extends Chat {
 
 	// Attributes
 	private Socket _socket;
-	private ChatLineReader _reader;
+	private ByteReader _reader;
 	private BufferedWriter _out;
 	private String _host;
 	private int _port;
@@ -34,7 +34,7 @@ public class InstantMessenger extends Chat {
 		OutputStreamWriter osw = new OutputStreamWriter(os);
 		_out=new BufferedWriter(osw);
 		InputStream istream = _socket.getInputStream();
-		_reader = new ChatLineReader(istream);
+		_reader = new ByteReader(istream);
 		readHeader();
 	}
 
@@ -54,7 +54,7 @@ public class InstantMessenger extends Chat {
         _out.write("\r\n");
 		_out.flush();
 		InputStream istream = _socket.getInputStream();
-		_reader = new ChatLineReader(istream);
+		_reader = new ByteReader(istream);
 	}
 
 	/** starts the chatting */
@@ -81,7 +81,7 @@ public class InstantMessenger extends Chat {
 	/** send a message accross the socket to the other host */
 	public void send(String message) {
 		try {
-			_out.write(message+"\r");
+			_out.write(message+"\n");
 			_out.flush();
 		} catch (IOException e) {
 			// e.printStackTrace();
