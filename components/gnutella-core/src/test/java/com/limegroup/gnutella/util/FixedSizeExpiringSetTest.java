@@ -51,10 +51,9 @@ public class FixedSizeExpiringSetTest extends com.limegroup.gnutella.util.BaseTe
         
         try{
         	empty1.addAll(nullColl);
+        	fail("expected NullPointerException");
         }
-        catch(Throwable e){
-        	assertInstanceof(NullPointerException.class,e);
-        }
+        catch(NullPointerException e){}
         
         //add another empty set
         empty1.addAll(empty2);
