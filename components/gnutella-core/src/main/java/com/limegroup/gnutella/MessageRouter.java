@@ -40,7 +40,7 @@ public abstract class MessageRouter
     /** 
      * The time to wait between route table updates, in milliseconds. 
      */
-    private long QUERY_ROUTE_UPDATE_TIME=1000*60; //60 seconds
+    private long QUERY_ROUTE_UPDATE_TIME=1000*60*10; //10 minutes
     
     /**
      * Maps PingRequest GUIDs to PingReplyHandlers
@@ -381,20 +381,19 @@ public abstract class MessageRouter
         }
         
         //use query routing to route queries to client connections
+        //send queries only to the clients from whom query routing 
+        //table has been received
         list=_manager.getInitializedClientConnections2();
         for(int i=0; i<list.size(); i++){
             ManagedConnection c = (ManagedConnection)list.get(i);
             if(c != receivingConnection) {
-                //Send query along any connection to an old cl0ient, or to a new
-                //client with routing information for the given keyword.  TODO:
+                //TODO:
                 //because of some very obscure optimization rules, it's actually
                 //possible that qi could be non-null but not initialized.  Need
                 //to be more careful about locking here.
                 ManagedConnectionQueryInfo qi=c.getQueryRouteState();
                 if (qi==null || qi.lastReceived==null) 
-                    //Either an old client, or a new client that's not yet
-                    //sent us a table message.
-                    c.send(queryRequest);
+                    return;
                 else if (qi.lastReceived.contains(queryRequest))
                 {
                     //A new client with routing entry, or one that hasn't started
