@@ -89,7 +89,7 @@ public class SupernodeHandshakeResponder
             getProperty(ConnectionHandshakeHeaders.X_SUPERNODE_NEEDED);
             if (neededS!=null && 
 				!Boolean.valueOf(neededS).booleanValue() && 
-				isLimeWire(headers) &&
+				isNotBearshare(headers) &&
 				_manager.allowLeafDemotion())
             {
                 //Fine, we'll become a leaf.
@@ -102,16 +102,17 @@ public class SupernodeHandshakeResponder
 
 	/**
 	 * Returns whether or not the set of connection headers denotes that the
-	 * connecting host is a LimeWire -- useful in deciding whether or not
-	 * to ignore their leaf demotion request.
+	 * connecting host is a BearShare.  Since BearShare does not allow
+	 * non-BearShare leaves, we ignore it's attempt to demote us to
+	 * a leaf.
 	 *
 	 * @param headers the connection headers
 	 */
-	private boolean isLimeWire(Properties headers) {
+	private boolean isNotBearshare(Properties headers) {
         String userAgent =
 			headers.getProperty(ConnectionHandshakeHeaders.USER_AGENT);		
 		if(userAgent == null) return false;
-		return userAgent.startsWith("LimeWire");
+		return !userAgent.startsWith("BearShare");
 	}
     
     /** 
