@@ -448,6 +448,9 @@ public class ConnectionManager implements Runnable {
 	    } catch (SecurityException e) {	
 		error(ActivityCallback.ERROR_3);
 		return;
+	    } catch (Exception e) {
+		//Internal error!
+		error(ActivityCallback.ERROR_20, e);
 	    }
 	}
     }
@@ -473,6 +476,12 @@ public class ConnectionManager implements Runnable {
 	ActivityCallback callback=getCallback();
 	if (callback!=null)
 	    callback.error(msg);
+    }
+
+    private void error(int msg, Throwable t) {
+	ActivityCallback callback=getCallback();
+	if (callback!=null)
+	    callback.error(msg, t);
     }
 
     /** 

@@ -567,8 +567,19 @@ public class Connection implements Runnable {
 	}//try
 	catch (IOException e){
 	    manager.remove(this);
-	    //e.printStackTrace();
+
 	}
+	catch (Exception e) {
+	    //Internal error!  Cleanup this connection and notify the user 
+	    //of the problem.
+	    manager.remove(this);
+	    ActivityCallback ui=manager.getCallback();
+	    if (ui!=null) {
+		ui.error(ActivityCallback.ERROR_20, e);
+	    }
+	}
+
+
     }//run
 
     public String toString() {
