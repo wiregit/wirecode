@@ -34,5 +34,11 @@ public final class ConnectionSettings extends AbstractSettings {
 	public static final BooleanSetting LOCAL_IS_PRIVATE =
 		CFG_FACTORY.createBooleanSetting("LOCAL_IS_PRIVATE", true);
 
+	/**
+	 * Setting for whether or not to connect using GWebCache.
+	 */
+	public static final BooleanSetting USE_GWEBCACHE =
+		CFG_FACTORY.createBooleanSetting("USE_GWEBCACHE", false);
+
 }
 
