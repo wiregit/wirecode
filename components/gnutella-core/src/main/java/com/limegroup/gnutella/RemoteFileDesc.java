@@ -17,8 +17,11 @@ public class RemoteFileDesc {
 	private int _priority;
 
 	/** 
-	 * @param endpoint lsakjdflsjdf
-	 * @param index laksjd
+	 * @param endpoint the host information
+	 * @param index the index of the file that the client sent
+	 * @param filename the name of the file
+	 * @param clientGUID the unique identifier of the client
+	 * @param priority this is still a little up in the air
 	 */
 	public RemoteFileDesc(Endpoint endpoint, int index, String filename,
 						  byte[] clientGUID, int priority) {
