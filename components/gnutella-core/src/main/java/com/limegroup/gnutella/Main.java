@@ -259,11 +259,11 @@ public class Main implements ActivityCallback, ErrorCallback {
     public String getHostValue(String key){
         return null;
     }
-    public void browseHostFailed(GUID guid) {};
+    public void browseHostFailed(GUID guid) {}
 
-	public void setAnnotateEnabled(boolean enabled) {};
+	public void setAnnotateEnabled(boolean enabled) {}
 
     public void notifyUserAboutUpdate(String message,boolean isPro,boolean loc){
-    };
+    }
 }
 
