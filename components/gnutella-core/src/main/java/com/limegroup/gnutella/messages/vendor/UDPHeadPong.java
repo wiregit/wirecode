@@ -58,11 +58,12 @@ public class UDPHeadPong extends VendorMessage {
 	private static final int PACKET_SIZE = 512;
 	
 	/**
-	 * instead of using the HTTP codes, use byte-values.
+	 * instead of using the HTTP codes, use bit values.  The first three 
+	 * possible values are mutually exclusive though.
 	 */
-	private static final byte FILE_NOT_FOUND= (byte)0;
-	private static final byte COMPLETE_FILE= (byte)1;
-	private static final byte PARTIAL_FILE = (byte)2;
+	private static final byte FILE_NOT_FOUND= (byte)0x0;
+	private static final byte COMPLETE_FILE= (byte)0x1;
+	private static final byte PARTIAL_FILE = (byte)0x2;
 	
 	/**
 	 * all our slots are full..
@@ -151,7 +152,7 @@ public class UDPHeadPong extends VendorMessage {
 			_queueStatus = _queueStatus - 0xFF;
 		
 		//if we have a partial file and the pong carries ranges, parse their list
-		if (code == COMPLETE_FILE) 
+		if ((code & COMPLETE_FILE) == COMPLETE_FILE) 
 			_completeFile=true;
 		else 
 			if ( (_features & UDPHeadPing.INTERVALS) == 
