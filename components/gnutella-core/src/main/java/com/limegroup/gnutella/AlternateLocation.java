@@ -478,10 +478,22 @@ public final class AlternateLocation
             String urlStr = AlternateLocation.removeTimestamp(locationHeader);
             URL url = new URL(urlStr);
             String host = url.getHost();
+            int    port = url.getPort();
             if(host == null || host.equals("")) {
                 throw new IOException("invalid host in alternate location: "+
                                       "host: "+host+"header: "+locationHeader);
             }
+			// Handle bad merged alternate locations minus the spaces
+			if(test.lastIndexOf("http://") > 4) {
+                throw new IOException("messy alternate location: "+
+                                      locationHeader);
+			}
+			// Handle bad ports in alternate locations 
+            if( port < 1 || port > 0xFFFF ) {
+                throw new IOException("invalid port in alternate location: "+
+                                      "port: "+host+"header: "+locationHeader);
+            }
+
             // check for private addresses if it appears to be in dotted quad 
             // format..
             if(Character.isDigit(host.charAt(0))) {
