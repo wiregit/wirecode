@@ -381,7 +381,7 @@ public class ConnectionManager {
      *
      * @return true if this is probably connected to <tt>host</tt> 
      */
-    private boolean isConnectedTo(Endpoint host) {        
+    boolean isConnectedTo(Endpoint host) {        
         String hostName=host.getHostname();
         //A clone of the list of all connections, both initialized and
         //uninitialized, leaves and unrouted.  If Java could be prevented from

@@ -946,12 +946,18 @@ public abstract class MessageRouter {
      */
     protected void handleUDPConnectBackRedirect(UDPConnectBackRedirect udp,
                                                Connection source) {
-        
+        // only allow other UPs to send you this message....
         if (!source.isSupernodeSupernodeConnection()) return;
 
         GUID guidToUse = udp.getConnectBackGUID();
         int portToContact = udp.getConnectBackPort();
         InetAddress addrToContact = udp.getConnectBackAddress();
+
+        // only connect back if you aren't connected to the host - that is the
+        // whole point of redirect after all....
+        Endpoint endPoint = new Endpoint(addrToContact.getAddress(),
+                                         portToContact);
+        if (_manager.isConnectedTo(endPoint)) return;
 
         // TODO
         // keep track of who you tried connecting back too, don't do it too

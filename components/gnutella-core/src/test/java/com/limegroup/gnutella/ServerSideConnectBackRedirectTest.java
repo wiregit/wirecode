@@ -296,6 +296,33 @@ public final class ServerSideConnectBackRedirectTest extends BaseTestCase {
     }
 
 
+    public void testUDPConnectBackAlreadyConnected() throws Exception {
+        drainAll();
+
+        DatagramSocket tempSock = new DatagramSocket(LEAF.getSocket().getLocalPort());
+        
+        GUID cbGuid = new GUID(GUID.makeGuid());
+        UDPConnectBackRedirect udp = 
+        new UDPConnectBackRedirect(cbGuid, LEAF.getSocket().getInetAddress(),
+                                   LEAF.getSocket().getLocalPort());
+        
+        ULTRAPEER_1.send(udp);
+        ULTRAPEER_1.flush();
+
+        // we should NOT get a ping request over our UDP socket....
+        tempSock.setSoTimeout(1000);
+        DatagramPacket pack = new DatagramPacket(new byte[1000], 1000);
+        try {
+            tempSock.receive(pack);
+            assertTrue(false);
+        }
+        catch (IOException good) {
+        }
+        tempSock.close();
+    }
+
+
+
     // ------------------------------------------------------
 
 }
