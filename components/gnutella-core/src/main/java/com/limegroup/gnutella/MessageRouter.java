@@ -593,8 +593,10 @@ public abstract class MessageRouter
                         //Either a new client, or an old client that's not yet
                         //sent us a table message.
                         c.send(queryRequest);
-                    else if (qi.lastReceived.contains(queryRequest))
-                        //TODO: what if table is not fully patched?
+                    else if (!qi.lastReceived.isPatched() 
+                                 || qi.lastReceived.contains(queryRequest))
+                        //A new client with routing entry, or one that hasn't yet
+                        //finished sending the patch.
                         c.send(queryRequest);              
                 }
             }
