@@ -29,10 +29,9 @@ public class ConnectionManagerTest extends TestCase {
         SettingsManager.instance().setKeepAlive(0);
         SettingsManager.instance().setConnectOnStartup(false);
         SettingsManager.instance().setQuickConnectHosts(new String[0]);        
-        cm=new ConnectionManager(new ActivityCallbackStub(),
-                                 new DummyAuthenticator());
+        cm=new ConnectionManager(new DummyAuthenticator());
         hc=new TestHostCatcher();
-        cm.initialize(new MessageRouterStub(), hc);        
+        cm.initialize();        
     }
 
     public void tearDown() {

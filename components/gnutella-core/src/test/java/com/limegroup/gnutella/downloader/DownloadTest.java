@@ -85,19 +85,20 @@ public class DownloadTest extends TestCase {
             debug("Couldn't create temp file. \n");
             System.exit(1);
         }
-		RouterService rs = RouterService.instance();
+		RouterService rs = new RouterService(new ActivityCallbackStub());
+		//RouterService rs = RouterService.instance();
         //RouterService rs=new RouterService(null, null, null, null);
         //dm.initialize(callback, new MessageRouterStub(), 
 		//            null, new FileManagerStub());
         //dm.postGuiInit(rs);
         
-        SimpleTimer timer = new SimpleTimer(true);
+        //SimpleTimer timer = new SimpleTimer(true);
         Runnable click = new Runnable() {
             public void run() {
                 dm.measureBandwidth();
             }
         };
-        timer.schedule(click,0,SupernodeAssigner.TIMER_DELAY);
+        RouterService.schedule(click,0,SupernodeAssigner.TIMER_DELAY);
         
 //          tOverlapCheckSpeed(5);
 //          cleanup();

@@ -67,24 +67,7 @@ public class UploadTest extends TestCase {
 		SettingsManager.instance().writeProperties();
 		
 		ActivityCallback callback = new ActivityCallbackStub();
-		//FileManager fm = new MetaFileManager();
-		//fm.initialize(callback);		
-		//MessageRouter mr = new StandardMessageRouter(callback, fm);
-		//RouterService router = new RouterService(callback, mr, fm, 
-		//									 new ServerAuthenticator());
-		//router.initialize();
-		RouterService.setCallback(callback);
-		RouterService.instance();
-
-        //System.out.println(
-        //    "Please make sure your client is listening on port "+port+"\n"
-        //    +"of "+address+" and is sharing "+file+" in slot "+index+",\n"
-        //    +"with at least one incoming messaging slot.  Also, nothing\n"
-        //    +"may be listening to port "+callbackPort+".\n"
-		//	+"Finally, the file must contain all lower-case characters in\n" 
-		//	+"the alphabet, exactly like the following:\n\n"
-		//	+"abcdefghijklmnopqrstuvwxyz");
-		//System.out.println(); 
+		RouterService rs = new RouterService(callback);
 	}
 
     public void testAll() {

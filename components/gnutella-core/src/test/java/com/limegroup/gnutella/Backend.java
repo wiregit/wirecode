@@ -50,8 +50,8 @@ public final class Backend {
 		SettingsManager.instance().setDirectories(new File[] {TEMP_DIR});
 		SettingsManager.instance().setExtensions("java");
 
-		RouterService.setCallback(CALLBACK);
-		ROUTER_SERVICE = RouterService.instance();
+		//RouterService.setCallback(CALLBACK);
+		ROUTER_SERVICE = new RouterService(new ActivityCallbackStub());
 		try {
 			// sleep to let the file manager initialize
 			Thread.sleep(2000);
