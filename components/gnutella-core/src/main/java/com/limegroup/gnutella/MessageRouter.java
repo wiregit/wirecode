@@ -1311,6 +1311,7 @@ public abstract class MessageRouter {
         if(connection == null) {
             throw new NullPointerException("null connection");
         }
+        _queryRouteTable.routeReply(request.getGUID(), FOR_ME_REPLY_HANDLER);
         connection.send(request);
     }
 
