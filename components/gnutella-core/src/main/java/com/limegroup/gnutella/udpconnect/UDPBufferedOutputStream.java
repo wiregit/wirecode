@@ -3,6 +3,10 @@ package com.limegroup.gnutella.udpconnect;
 import java.io.*;
 import com.sun.java.util.collections.*;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
+
 /**
  *  Handle writing to a udp connection via a stream.  Internally, the writes 
  *  are broken up into chunks of a convenient size for UDP packets.  Blocking 
@@ -10,6 +14,10 @@ import com.sun.java.util.collections.*;
  *  UDPConnectionProcessor can't send the data currently.
  */
 public class UDPBufferedOutputStream extends OutputStream {
+
+
+    private static final Log LOG =
+      LogFactory.getLog(UDPBufferedOutputStream.class);
 
     /**
      *  The maximum blocking time of a write.
@@ -84,6 +92,10 @@ public class UDPBufferedOutputStream extends OutputStream {
      * Do a partial write from the byte array. Block if necessary.
      */
     public synchronized void write(byte b[], int off, int len) {
+
+        if(LOG.isDebugEnabled())  {
+            LOG.debug("writing len: "+len+" bytes");
+        }
 		
 		int space;   // The space available within the active chunk
 		int wlength; // The length of data to be written to the active chunk
@@ -191,12 +203,5 @@ public class UDPBufferedOutputStream extends OutputStream {
 			count++;
 
 		return count;
-    }
-
-    private static void log(String str) {
-    }
-
-    private static void log2(String str) {
-       System.err.println(str); 
     }
 }
