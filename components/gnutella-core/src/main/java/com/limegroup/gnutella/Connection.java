@@ -51,8 +51,10 @@ public class Connection {
      * flag is set in shutdown() and then checked in initialize()
      * to insure the _socket.close() happens if shutdown is called
      * asynchronously before initialize() completes.  Note that the 
-     * connection may have been remotely closed even if _closed==true.  */
-    private volatile boolean _closed=false;
+     * connection may have been remotely closed even if _closed==true.  
+     * Protected (instead of private) for testing purposes only.
+     */
+    protected volatile boolean _closed=false;
 
     /** The properties read from the connection, or null if Gnutella 0.4.  */
     private Properties _propertiesRead;
