@@ -114,7 +114,7 @@ public class MetaFileManager extends FileManager {
         FileDesc fd = super.addFileIfShared(file);
         
         // if not added or no metadata, nothing else to do.
-        if( fd == null || metadata == null )
+        if( fd == null || metadata == null || metadata.size() == 0 )
             return fd;
 
         SchemaReplyCollectionMapper mapper =
@@ -122,13 +122,17 @@ public class MetaFileManager extends FileManager {
 
         Assert.that( fd != null, "null fd just added.");
         
-        // add xml docs as appropriate
+        
+        // add xml docs as appropriate, one per schema.
+        List schemasAddedTo = new LinkedList();
         for(Iterator iter = metadata.iterator(); iter.hasNext(); ) {
             LimeXMLDocument currDoc = (LimeXMLDocument)iter.next();
             String uri = currDoc.getSchemaURI();
             LimeXMLReplyCollection collection = mapper.getReplyCollection(uri);
-            if (collection != null)
+            if (collection != null && !schemasAddedTo.contains(uri)) {
+                schemasAddedTo.add(uri);
                 collection.addReplyWithCommit(file, fd, currDoc);
+            }
         }
         
         return fd;
