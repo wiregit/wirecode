@@ -755,7 +755,8 @@ public class Acceptor implements Runnable {
     public void shutdown() {
         if(UPNP_MANAGER != null &&
            UPNP_MANAGER.isNATPresent() &&
-           UPNP_MANAGER.mappingsExist()) {
+           UPNP_MANAGER.mappingsExist() &&
+           ConnectionSettings.UPNP_IN_USE.getValue()) {
         	// reset the forced port values - must happen before we save them to disk
         	ConnectionSettings.FORCE_IP_ADDRESS.revertToDefault();
         	ConnectionSettings.FORCED_PORT.revertToDefault();
