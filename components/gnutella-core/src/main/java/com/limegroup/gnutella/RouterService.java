@@ -371,8 +371,10 @@ public final class RouterService {
         //they are aliases for this machine.
 		
         byte[] cIP = null;
+        InetAddress addr;
         try {
-            cIP=InetAddress.getByName(hostname).getAddress();
+            addr = InetAddress.getByName(hostname);
+            cIP = addr.getAddress();
         } catch(UnknownHostException e) {
             return;
         }
@@ -386,7 +388,7 @@ public final class RouterService {
                 return;
         }
 
-        if (!acceptor.isBannedIP(hostname)) {
+        if (!acceptor.isBannedIP(addr.getHostAddress())) {
             manager.createConnectionAsynchronously(hostname, portnum);
 		}
     }
