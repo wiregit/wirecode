@@ -286,7 +286,7 @@ public class ID3Editor {
         Vector frames = null;
         boolean framesPresent = false;
         try {
-            frames = id3Handler.getFrames();
+            frames = (Vector)id3Handler.getFrames().clone();
             framesPresent = true;
         } catch (NoID3v2TagException ex) {//there are no ID3v2 tags in the file
             framesPresent = false;
@@ -305,7 +305,7 @@ public class ID3Editor {
                 if(index >=0) {
                     newFrame = (ID3v2Frame)framesToUpdate.remove(index);
                     if(Arrays.equals(oldFrame.getContent(), 
-                                                        newFrame.getContent()))
+                                                       newFrame.getContent()))
                         continue;//no need to update, skip this frame
                 }
                 //we are either going to replace it if it was changed, or remove
@@ -345,10 +345,9 @@ public class ID3Editor {
         }
         if(album_ != null && !album_.equals("")) {
             frame = null;
-            frame = makeFrame("TABL", album_);
-            if(frame != null) {
+            frame = makeFrame("TALB", album_);
+            if(frame != null) 
                 updateList.add(frame);
-            }
         }
         if (year_!=null && !year_.equals("")) { 
             frame = null;
