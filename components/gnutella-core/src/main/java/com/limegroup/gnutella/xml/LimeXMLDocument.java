@@ -6,6 +6,7 @@ import java.io.Serializable;
 import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -17,6 +18,9 @@ import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
 import com.limegroup.gnutella.util.NameValue;
+import com.limegroup.gnutella.licenses.CCConstants;
+import com.limegroup.gnutella.licenses.License;
+import com.limegroup.gnutella.licenses.LicenseFactory;
 
 import org.apache.commons.logging.LogFactory;
 import org.apache.commons.logging.Log;
@@ -34,6 +38,16 @@ public class LimeXMLDocument implements Serializable {
     public static final String XML_ID_ATTRIBUTE = "identifier__";
     public static final String XML_ACTION_ATTRIBUTE = "action__";
     public static final String XML_INDEX_ATTRIBUTE = "index__";
+    public static final String XML_LICENSE_ATTRIBUTE = "license__";
+    public static final String XML_LICENSE_TYPE_ATTRIBUTE = "licensetype__";
+    
+    /**
+     * The current version of LimeXMLDocuments.
+     *
+     * Increment this number as features are added which require
+     * reparsing documents on disk.
+     */
+    private static final int CURRENT_VERSION = 1;
 
 	/**
 	 * Cached hash code for this instance.
@@ -72,20 +86,34 @@ public class LimeXMLDocument implements Serializable {
     private transient String action;
     
     /**
-     * Indicator that the LimeXMLDocument was created after
-     * LimeWire began to understand id3v2 data.
-     * Older LimeXMLDocuments are deserialized with this as false.
-     *
-     * MUST NOT BE FINAL, or else readObject won't mark it as false.
+     * The version of this LimeXMLDocument.
      */
-    private boolean supportsID3v2 = true;
-    public boolean supportsID3v2() { return supportsID3v2; }
+    private int version = CURRENT_VERSION;
+    boolean isCurrent() { return version == CURRENT_VERSION; }
+    void setCurrent() { version = CURRENT_VERSION; }
     
     /**
      * Cached list of keywords.  Because keywords are only filled up
      * upon construction, they can be cached upon retrieval.
      */
     private transient List CACHED_KEYWORDS = null;
+    
+    /**
+     * A list with the CC License URI in it.
+     * This is purely an optimization that is possible because LimeXMLDocuments
+     * do not have any other indivisible keywords.
+     */
+    private static final List INDIVISIBLE_LIST;
+    static {
+        List l = new ArrayList(1);
+        l.add(CCConstants.CC_URI_PREFIX);
+        INDIVISIBLE_LIST = Collections.unmodifiableList(l);
+    }
+    
+    /**
+     * Whether or not this document has a CC license.
+     */
+    private transient boolean hasCCLicense = false;
 
     /**
      * Constructs a LimeXMLDocument with the given string.
@@ -104,10 +132,10 @@ public class LimeXMLDocument implements Serializable {
 
         this.fieldToValue = (Map)result.get(0);
         this.schemaUri = result.schemaURI;
-        this.action = (String)fieldToValue.get(result.canonicalKeyPrefix + XML_ACTION_ATTRIBUTE);
+        setFields(result.canonicalKeyPrefix);
         
         if(!isValid())
-            throw new IOException("Invalid XML.");
+            throw new IOException("Invalid XML: " + xml);
     }
 
     /**
@@ -125,8 +153,8 @@ public class LimeXMLDocument implements Serializable {
 
         this.schemaUri = schemaURI;
         this.fieldToValue = map;
-        this.action = (String)fieldToValue.get(keyPrefix + XML_ACTION_ATTRIBUTE);
         fieldToValue.remove(keyPrefix + XML_ID_ATTRIBUTE); // remove id.
+        setFields(keyPrefix);
         
         if(!isValid())
             throw new IOException("invalid doc! "+map+" \nschema uri: "+schemaURI);
@@ -200,27 +228,50 @@ public class LimeXMLDocument implements Serializable {
      * elements of the returned list may be "Some comment-blah".
      * QRP code may want to split this into the QRP keywords
      * "Some", "comment", and "blah".
+     *
+     * Indivisible keywords are not returned.  To retrieve those,
+     * use getIndivisibleKeywords().  Indivisible keywords are
+     * those which QRP will not split up.
      */
     public List getKeyWords() {
         if( CACHED_KEYWORDS != null )
             return CACHED_KEYWORDS;
 
         List retList = new ArrayList();
-        Iterator iter = fieldToValue.values().iterator();
+        Iterator iter = fieldToValue.keySet().iterator();
         while(iter.hasNext()){
-            boolean number = true;//reset
-            String val = (String)iter.next();
-            try{
-                new Double(val); // will trigger NFE.
-            }catch(NumberFormatException e){
-                number = false;
+            String currKey = (String) iter.next();
+            String val = (String) fieldToValue.get(currKey);
+            if(val != null && !val.equals("") && !isIndivisible(currKey, val)) {
+                try {
+                    Double.parseDouble(val); // will trigger NFE.
+                    retList.add(val);
+                } catch(NumberFormatException ignored) {}
             }
-            if(!number && (val != null) && (!val.equals("")))
-                retList.add(val);
         }
         CACHED_KEYWORDS = retList;
         return retList;
     }
+
+    /**
+     * Returns all the indivisible keywords for entry into QRP tables.
+     */
+    public List getKeyWordsIndivisible() {
+        if(hasCCLicense) // optimization: the only indivisible keyword is CCLicense
+            return INDIVISIBLE_LIST;
+        else
+            return Collections.EMPTY_LIST;
+    }
+
+    /**
+     * Determines if this keyword & value is indivisible
+     * (thus making QRP not split it).
+     */
+    public boolean isIndivisible(String currKey, String val) {
+        // if this has a CC license & this it the license type attribute,
+        // then it must be indivisible.
+        return currKey.endsWith(XML_LICENSE_TYPE_ATTRIBUTE);
+    }    
 
     /**
      * Returns the unique identifier which identifies the schema this XML
@@ -315,6 +366,38 @@ public class LimeXMLDocument implements Serializable {
      */
     public Collection getValueList() {
         return fieldToValue.values();
+    }
+    
+    /**
+     * Determines if a license exists that this LimeXMLDocument knows about.
+     */
+    public boolean isLicenseAvailable() {
+        return hasCCLicense;
+    }
+    
+    /**
+     * Returns the license string.
+     */
+    public String getLicenseString() {
+        if(hasCCLicense) {
+            for(Iterator i = fieldToValue.entrySet().iterator(); i.hasNext(); ) {
+                Map.Entry next = (Map.Entry)i.next();
+                if(((String)next.getKey()).endsWith(XML_LICENSE_ATTRIBUTE))
+                    return (String)next.getValue();
+            }
+        }
+        return null;
+    }
+    
+    /**
+     * Returns the license.
+     */
+    public License getLicense() {
+        String license = getLicenseString();
+        if(license != null)
+            return LicenseFactory.create(license);
+        else
+            return null;
     }
 
     /**
@@ -462,7 +545,7 @@ public class LimeXMLDocument implements Serializable {
     }
     
     /**
-     * Looks in the fields for the ACTION, IDENTIFIER, and INDEX.
+     * Looks in the fields for the ACTION, IDENTIFIER, and INDEX, and a license.
      * Action is stored, index & identifier are removed.
      */
     private void scanFields() {
@@ -470,10 +553,37 @@ public class LimeXMLDocument implements Serializable {
         if(canonicalKey == null)
             return;
 
-        action = (String)fieldToValue.get(canonicalKey + XML_ACTION_ATTRIBUTE);
-        boolean removed = false;
-        removed |= fieldToValue.remove(canonicalKey + XML_INDEX_ATTRIBUTE) != null;
-        removed |= fieldToValue.remove(canonicalKey + XML_ID_ATTRIBUTE) != null;
+        setFields(canonicalKey);
+        fieldToValue.remove(canonicalKey + XML_INDEX_ATTRIBUTE);
+        fieldToValue.remove(canonicalKey + XML_ID_ATTRIBUTE);
+    }
+    
+    /**
+     * Stores whether or not an action or CC license are in this LimeXMLDocument.
+     */
+    private void setFields(String prefix) {
+        // store action.
+        action = (String)fieldToValue.get(prefix + XML_ACTION_ATTRIBUTE);
+
+        // deal with updating license_type based on the license
+        String license = (String)fieldToValue.get(prefix + XML_LICENSE_ATTRIBUTE);
+        String licenseType = (String)fieldToValue.get(prefix + XML_LICENSE_TYPE_ATTRIBUTE);
+        // if the license indicates it's a CC kind of license, store that.
+        if(license != null &&
+           license.indexOf(CCConstants.CC_URI_PREFIX) != -1 &&
+           license.indexOf(CCConstants.URL_INDICATOR) != -1) {
+            fieldToValue.put(prefix + XML_LICENSE_TYPE_ATTRIBUTE, CCConstants.CC_URI_PREFIX);
+            hasCCLicense = true;
+        // if the license type was 'creative commons', store it as the URI instead.
+        } else if(licenseType != null && licenseType.equals(CCConstants.CC_URI_PREFIX)) {
+            hasCCLicense = true;
+        // no license type we know about, remove it.
+        } else {
+            fieldToValue.remove(prefix + XML_LICENSE_TYPE_ATTRIBUTE);
+        }
+        
+        if(LOG.isDebugEnabled())
+            LOG.debug("Fields after setting: " + fieldToValue);
     }
     
     /**
@@ -513,7 +623,8 @@ public class LimeXMLDocument implements Serializable {
         int idx2 = full.indexOf(XMLStringUtils.DELIMITER, length);
         if(idx2 == -1)
             return null;
-        
+            
+        // insert quotes around field name if it has a space.
         return full.substring(length, idx2);
     }
 }

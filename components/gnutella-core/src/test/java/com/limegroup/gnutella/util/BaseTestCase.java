@@ -399,19 +399,10 @@ public class BaseTestCase extends AssertComparisons implements ErrorCallback {
         _incompleteDir = SharingSettings.INCOMPLETE_DIRECTORY.getValue();
         SharingSettings.setDirectories( new File[] { _sharedDir } );
 
-        // copy over the necessary schemas to the schemas dir
-        File audioSchema = 
-            CommonUtils.getResourceFile("lib/xml/schemas/audio.xsd");
-        File videoSchema =
-            CommonUtils.getResourceFile("lib/xml/schemas/video.xsd");
-        assertTrue(audioSchema.exists());
-        assertTrue(videoSchema.exists());
-        assertTrue(_xmlSchemasDir.canWrite() && _xmlSchemasDir.exists());
-        assertTrue(CommonUtils.copy(audioSchema, new File(_xmlSchemasDir,
-                                                          "audio.xsd")));
-        assertTrue(CommonUtils.copy(videoSchema, new File(_xmlSchemasDir,
-                                                          "video.xsd")));
-
+        // Expand the xml.war file.
+        File xmlWar = CommonUtils.getResourceFile("com/limegroup/gnutella/xml/xml.war");
+        assertTrue(xmlWar.exists());
+        Expand.expandFile(xmlWar, _settingsDir);
         //make sure it'll delete even if something odd happens.
         _baseDir.deleteOnExit();
     }

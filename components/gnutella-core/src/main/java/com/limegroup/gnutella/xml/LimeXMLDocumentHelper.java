@@ -46,8 +46,10 @@ public final class LimeXMLDocumentHelper{
             try {
                 parsingResult = XMLParsingUtils.parse(xmlDocument,totalResponseCount);
             } catch (SAXException sax) {
+                LOG.warn("SAX while parsing: " + xmlDocument, sax);
                 continue;// bad xml, ignore
             } catch (IOException bad) {
+                LOG.warn("IOX while parsing: " + aggregatedXML, bad);
                 return Collections.EMPTY_LIST; // abort
             }
             
@@ -64,6 +66,7 @@ public final class LimeXMLDocumentHelper{
                 try {
                     index = Integer.parseInt(sindex);
                 } catch(NumberFormatException bad) { //invalid document
+                    LOG.warn("NFE while parsing", bad);
                     return Collections.EMPTY_LIST;
                 }
                 

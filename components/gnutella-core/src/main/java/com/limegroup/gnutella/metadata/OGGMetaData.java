@@ -34,6 +34,7 @@ public class OGGMetaData extends AudioMetaData{
 	public static final String DATE_TAG = "date";
 	public static final String COMMENT_TAG = "comment";
 	public static final String ARTIST_TAG = "artist";
+	public static final String LICENSE_TAG = "license";
 	
 	public OGGMetaData(File f) throws IOException{
 		super(f);
@@ -73,6 +74,7 @@ public class OGGMetaData extends AudioMetaData{
 			setAlbum(safeQuery(ALBUM_TAG,comments[0]));
 			setComment(safeQuery(COMMENT_TAG,comments[0]));
 			setGenre(safeQuery(GENRE_TAG,comments[0]));
+			setLicense(safeQuery(LICENSE_TAG, comments[0]));
 			
 			//oggs store the year in yyyy-mm-dd format
 			String year = safeQuery(DATE_TAG,comments[0]);

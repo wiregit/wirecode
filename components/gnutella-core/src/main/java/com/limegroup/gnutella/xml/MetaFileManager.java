@@ -22,11 +22,16 @@ import com.limegroup.gnutella.metadata.AudioMetaData;
 import com.limegroup.gnutella.metadata.MetaDataReader;
 import com.limegroup.gnutella.util.NameValue;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;        
+
 /**
  * This class handles querying shared files with XML data and returning XML data
  * in replies.
  */
 public class MetaFileManager extends FileManager {
+    
+    private static final Log LOG = LogFactory.getLog(MetaFileManager.class);
     
     /**
      * Lock used when loading meta-settings.
@@ -113,9 +118,13 @@ public class MetaFileManager extends FileManager {
      * any infinite loops.
      */
     public FileDesc fileChanged(File f) {
+        if(LOG.isTraceEnabled())
+            LOG.debug("File Changed: " + f);
+        
         FileDesc fd = getFileDescForFile(f);
         if( fd == null )
             return null;
+            
         // store the creation time for later re-input
         CreationTimeCache ctCache = CreationTimeCache.instance();
         Long cTime = ctCache.getCreationTime(fd.getSHA1Urn());
@@ -434,11 +443,18 @@ public class MetaFileManager extends FileManager {
      */
     private List getXMLIndivisibleKeyWords() {
         ArrayList words = new ArrayList();
+        SchemaReplyCollectionMapper map=SchemaReplyCollectionMapper.instance();
         LimeXMLSchemaRepository rep = LimeXMLSchemaRepository.instance();
         String[] schemas = rep.getAvailableSchemaURIs();
-        for (int i = 0; i < schemas.length; i++) 
+        LimeXMLReplyCollection collection;
+        for (int i = 0; i < schemas.length; i++) {
             if (schemas[i] != null)
-                words.add(schemas[i]);        
+                words.add(schemas[i]);
+            collection = map.getReplyCollection(schemas[i]);
+            if(collection==null)//not loaded? skip it and keep goin'
+                continue;
+            words.addAll(collection.getKeyWordsIndivisible());
+        }        
         return words;
     }
     

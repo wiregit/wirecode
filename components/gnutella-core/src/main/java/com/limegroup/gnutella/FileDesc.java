@@ -21,6 +21,7 @@ import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.tigertree.HashTree;
 import com.limegroup.gnutella.tigertree.TigerTreeCache;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
+import com.limegroup.gnutella.licenses.License;
 
 
 /**
@@ -77,6 +78,11 @@ public class FileDesc implements AlternateLocationCollector {
 	 * The constant SHA1 <tt>URN</tt> instance.
 	 */
 	private final URN SHA1_URN;
+	
+	/**
+	 * The License, if one exists, for this FileDesc.
+	 */
+	private License _license;
 	
 	/**
 	 * The LimeXMLDocs associated with this FileDesc.
@@ -300,6 +306,8 @@ public class FileDesc implements AlternateLocationCollector {
 	    newDocs.addAll(_limeXMLDocs);
 	    newDocs.add(doc);
 	    doc.setIdentifier(FILE);
+	    if(doc.isLicenseAvailable())
+	        _license = doc.getLicense();
 	    _limeXMLDocs = newDocs;
     }
     
@@ -317,6 +325,10 @@ public class FileDesc implements AlternateLocationCollector {
         Assert.that(removed == oldDoc, "wrong doc removed!");
         newDocs.add(newDoc);
         newDoc.setIdentifier(FILE);
+        if(newDoc.isLicenseAvailable())
+            _license = newDoc.getLicense();
+        else if(_license != null && oldDoc.isLicenseAvailable())
+            _license = null;        
         _limeXMLDocs = newDocs;
         return true;
     }
@@ -331,6 +343,8 @@ public class FileDesc implements AlternateLocationCollector {
         List newDocs = new ArrayList(_limeXMLDocs);
         boolean removed = newDocs.remove(toRemove);
         _limeXMLDocs = newDocs;
+        if(_license != null && toRemove.isLicenseAvailable())
+            _license = null;
         return removed;
     }   
     
@@ -339,6 +353,20 @@ public class FileDesc implements AlternateLocationCollector {
      */
     public List getLimeXMLDocuments() {
         return _limeXMLDocs;
+    }
+    
+    /**
+     * Determines if a license exists on this FileDesc.
+     */
+    public boolean isLicensed() {
+        return _license != null;
+    }
+    
+    /**
+     * Returns the license associated with this FileDesc.
+     */
+    public License getLicense() {
+        return _license;
     }
 
 	/**

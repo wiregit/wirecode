@@ -148,7 +148,7 @@ class LimeXMLSchemaFieldExtractor
         
         //fill the list with field names
         fillWithFieldNames(fieldNames, 
-                           (SchemaFieldInfoList)_nameSchemaFieldInfoListMap.get(rootElementName),
+                           (List)_nameSchemaFieldInfoListMap.get(rootElementName),
                            rootElementName);
         
         //return the list of field names
@@ -163,20 +163,18 @@ class LimeXMLSchemaFieldExtractor
      * being added
      */
     private void  fillWithFieldNames(List fieldNames,
-        SchemaFieldInfoList fieldInfoList,
-        final String prefix)
-    {
+                                     List fieldInfoList,
+                                     final String prefix) {
         //get the iterator over the elements in the fieldInfoList
         Iterator iterator = fieldInfoList.iterator();
         //iterate
-        while(iterator.hasNext())
-        {
+        while(iterator.hasNext()) {
             //get the next SchemaFieldInfoPair
             SchemaFieldInfoPair fieldInfoPair = (SchemaFieldInfoPair)iterator.next();
             
             //get the field type set corresponding to this field pair's type
-            SchemaFieldInfoList newSchemaFieldInfoList 
-                = (SchemaFieldInfoList)_nameSchemaFieldInfoListMap.get(
+            List newSchemaFieldInfoList 
+                = (List)_nameSchemaFieldInfoListMap.get(
                 fieldInfoPair.getSchemaFieldInfo().getType());
             
             //get the field
@@ -332,7 +330,7 @@ class LimeXMLSchemaFieldExtractor
         }
         
         //get new field info list
-        SchemaFieldInfoList fieldInfoList = new SchemaFieldInfoList();
+        List fieldInfoList = new LinkedList();
         
         //get and process children
         NodeList children = n.getChildNodes();
@@ -358,7 +356,7 @@ class LimeXMLSchemaFieldExtractor
      * @modifies fieldInfoList
      */
     private void processChildOfComplexType(Node n, 
-        SchemaFieldInfoList fieldInfoList)
+        List fieldInfoList)
     {
             //get the name of the node
             String nodeName = n.getNodeName();
@@ -392,7 +390,7 @@ class LimeXMLSchemaFieldExtractor
      * is to be put
      * @modifies fieldInfoList
      */
-    private void processChildElementTag(Node n, SchemaFieldInfoList fieldInfoList)
+    private void processChildElementTag(Node n, List fieldInfoList)
     {
          //get attributes
         NamedNodeMap  attributes = n.getAttributes();
@@ -491,7 +489,7 @@ class LimeXMLSchemaFieldExtractor
      * is to be put
      * @modifies fieldInfoList
      */
-    private void processChildAttributeTag(Node n, SchemaFieldInfoList fieldInfoList)
+    private void processChildAttributeTag(Node n, List fieldInfoList)
     {
         //get attributes
         NamedNodeMap attributes = n.getAttributes();
@@ -523,6 +521,12 @@ class LimeXMLSchemaFieldExtractor
         //get fieldinfo object out of type
         SchemaFieldInfo fieldInfo = new SchemaFieldInfo(removeNameSpace(typeName));
         
+        Node editableAttribute = attributes.getNamedItem("editable");
+        if(editableAttribute != null) {
+            if(editableAttribute.getNodeValue().equalsIgnoreCase("false"))
+                fieldInfo.setEditable(false);
+        }
+        
         //test for enumeration
         processSimpleTypeForEnumeration(n, fieldInfo);
         
@@ -546,7 +550,7 @@ class LimeXMLSchemaFieldExtractor
      */
     private void addAttributeSchemaFieldInfoPair(
         SchemaFieldInfoPair schemaFieldInfoPair,
-        SchemaFieldInfoList fieldInfoList)
+        List fieldInfoList)
     {
         int attributeCount = 0;
         //iterate over the fieldInfoList
@@ -604,13 +608,20 @@ class LimeXMLSchemaFieldExtractor
             else
             {
                 //get the value attribute 
+                Node nameAttribute = child.getAttributes().getNamedItem("name");
                 Node valueAttribute = child.getAttributes().getNamedItem("value");
+                String name = null, value = null;
+                if(nameAttribute != null)
+                    name = nameAttribute.getNodeValue();
+                if(valueAttribute != null)
+                    value = valueAttribute.getNodeValue();
                 
                 //add the enumeration to fieldInfo
-                if(valueAttribute != null)
-                {
-                    fieldInfo.addEnumerationValue(
-                        valueAttribute.getNodeValue());
+                if(value != null && !value.equals("")) {
+                    if(name == null || name.equals(""))
+                        fieldInfo.addEnumerationNameValue(value, value);
+                    else
+                        fieldInfo.addEnumerationNameValue(name, value);
                 }
             }
         }
@@ -737,7 +748,7 @@ class LimeXMLSchemaFieldExtractor
     private void addToSchemaFieldInfoListMap(String field, String typeName)
     {
         //get new fieldinfo list
-        SchemaFieldInfoList fieldInfoList = new SchemaFieldInfoList();
+        List fieldInfoList = new LinkedList();
         fieldInfoList.add(new SchemaFieldInfoPair(DUMMY, new SchemaFieldInfo(
             removeNameSpace(typeName))));
         
@@ -784,54 +795,7 @@ class LimeXMLSchemaFieldExtractor
            return true;
        else
            return false;
-    }    
-    
-/**
- * A List (of SchemaFieldInfoPair) of fields and information corresponding to those
- */   
-private static class SchemaFieldInfoList
-{
-    private LinkedList /* of SchemaFieldInfoPair */ _elements = new LinkedList();
-   
-    /**
-     * Adds the given SchemaFieldInfo pair to the list of elements
-     * @param fieldInfoPair the field-SchemaFieldInfo pair to be added
-     */
-    public void add(SchemaFieldInfoPair fieldInfoPair)
-    {
-        //add to the _elements
-        _elements.add(fieldInfoPair);
     }
-
-    /**
-     * Adds the given fieldInfo pair at the specified index
-     * @param index Th eposition at which ato add the passed fieldInfoPair
-     * @param fieldInfoPair the field-info pair to be added
-     */
-    public void add(int index, SchemaFieldInfoPair fieldInfoPair)
-    {
-        //add to the _elements
-        _elements.add(index, fieldInfoPair);
-    }
-    
-    /**
-     * Returns an iterator over the elements
-     */
-    public Iterator iterator()
-    {
-       return _elements.iterator(); 
-    }
-    
-    /**
-     * Return string representation of all the elements
-     */
-    public String toString()
-    {
-        return _elements.toString();
-    }
-    
-}
-
 
 /**
  * Stores the field and corresponding field information

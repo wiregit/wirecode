@@ -214,12 +214,14 @@ public class LimeXMLReplyCollection {
             if( doc == null ) // no document, ignore.
                 continue;
                 
-            if(!doc.supportsID3v2() && LimeXMLUtils.isMP3File(file)) {
+            if(!doc.isCurrent()) {
                 if(LOG.isDebugEnabled())
-                    LOG.debug("reconstructing document for id3v2: " + file);
+                    LOG.debug("reconstructing old document: " + file);
                 LimeXMLDocument tempDoc = constructDocument(file);
                 if (tempDoc != null)
                     doc = tempDoc;
+                else
+                    doc.setCurrent();
             }
                 
             // Verify the doc has information in it.
@@ -274,6 +276,25 @@ public class LimeXMLReplyCollection {
             while(docs.hasNext()){
                 LimeXMLDocument d = (LimeXMLDocument)docs.next();
                 retList.addAll(d.getKeyWords());
+            }
+        }
+        return retList;
+    }
+
+    /**
+     * Gets a list of indivisible keywords from all the documents in this 
+     * collection.
+     * <p>
+     * Delegates to the individual documents and collates the list
+     */
+    protected List getKeyWordsIndivisible(){
+        List retList = new ArrayList();
+        Iterator docs;
+        synchronized(mainMap){
+            docs = mainMap.values().iterator();
+            while(docs.hasNext()){
+                LimeXMLDocument d = (LimeXMLDocument)docs.next();
+                retList.addAll(d.getKeyWordsIndivisible());
             }
         }
         return retList;
@@ -518,6 +539,9 @@ public class LimeXMLReplyCollection {
      * @return the older document, which is being replaced. Can be null.
      */
     public LimeXMLDocument replaceDoc(FileDesc fd, LimeXMLDocument newDoc) {
+        if(LOG.isTraceEnabled())
+            LOG.trace("Replacing doc in FD (" + fd + ") with new doc (" + newDoc + ")");
+        
         LimeXMLDocument oldDoc = null;
         URN hash = fd.getSHA1Urn();
         synchronized(mainMap) {
@@ -660,28 +684,24 @@ public class LimeXMLReplyCollection {
         }
         existing.populate(existingDoc);
         
-        if(!checkBetter) { //if we are not required to choose better tags
-            if(newValues.equals(existing)) // The ID3 tags are same do nothing.
-                return null;
-            else
-                return newValues;
-        }
-        
         //We are supposed to pick and chose the better set of tags
         if( newValues.equals(existing) ) {
             LOG.debug("tag read from disk is same as XML doc.");
             return null;
+        } else if(checkBetter) {
+            if(existing.betterThan(newValues)) {
+                LOG.debug("Data on disk is better, using disk data.");
+                //Note: In this case we are going to discard the LimeXMLDocument we
+                //got off the network, because the data on the file is better than
+                //the data in the query reply. Only in this case, we set the
+                //"correctDocument variable of the ID3Editor.
+                existing.setCorrectDocument(existingDoc);
+                return existing;
+            } else {
+                LOG.debug("Retrieving better fields from disk.");
+                newValues.pickBetterFields(existing);        
+            }
         }
-        else if (existing.betterThan(newValues)) {
-            //Note: In this case we are going to discard the LimeXMLDocument we
-            //got off the network, because the data on the file is better than
-            //the data in the query reply. Only in this case, we set the
-            //"correctDocument variable of the ID3Editor.
-            existing.setCorrectDocument(existingDoc);
-            return existing;
-        }
-        else
-            newValues.pickBetterFields(existing);        
             
         // Commit using this Meta data editor ... 
         return newValues;

@@ -23,14 +23,16 @@ public abstract class AudioMetaDataEditor extends MetaDataEditor {
     protected String track_;
     protected String comment_;
     protected String genre_;
+    protected String license_;
     
-    private static final String TITLE   = "audios__audio__title";
-    private static final String ARTIST  = "audios__audio__artist";
-    private static final String ALBUM   = "audios__audio__album";
-    private static final String YEAR    = "audios__audio__year";
-    private static final String TRACK   = "audios__audio__track";
-    private static final String COMMENT = "audios__audio__comments";
-    private static final String GENRE   = "audios__audio__genre";    
+    private static final String TITLE   = "audios__audio__title__";
+    private static final String ARTIST  = "audios__audio__artist__";
+    private static final String ALBUM   = "audios__audio__album__";
+    private static final String YEAR    = "audios__audio__year__";
+    private static final String TRACK   = "audios__audio__track__";
+    private static final String COMMENT = "audios__audio__comments__";
+    private static final String GENRE   = "audios__audio__genre__";    
+    private static final String LICENSE = "audios__audio__license__";
     
     /**
      * Determines if this editor matches every field of another.
@@ -47,7 +49,8 @@ public abstract class AudioMetaDataEditor extends MetaDataEditor {
                matches(year_, other.year_) &&
                matches(track_, other.track_) &&
                matches(comment_, other.comment_) &&
-               matches(genre_, other.genre_);
+               matches(genre_, other.genre_) &&
+               matches(license_, other.license_);
     }
     
     /**
@@ -55,12 +58,13 @@ public abstract class AudioMetaDataEditor extends MetaDataEditor {
      */
     public boolean betterThan(MetaDataEditor o) {
     	AudioMetaDataEditor other = (AudioMetaDataEditor)o;
-        return ( firstBetter(title_, other.title_) &&
-                 firstBetter(artist_, other.artist_) &&
-                 firstBetter(album_, other.album_) &&
-                 firstBetter(track_, other.track_) &&
-                 firstBetter(comment_, other.comment_) &&
-                 firstBetter(genre_, other.genre_) );                 
+        return firstBetter(title_, other.title_) &&
+               firstBetter(artist_, other.artist_) &&
+               firstBetter(album_, other.album_) &&
+               firstBetter(track_, other.track_) &&
+               firstBetter(comment_, other.comment_) &&
+               firstBetter(genre_, other.genre_) &&
+               firstBetter(license_, other.license_);
     }
     
     /**
@@ -81,6 +85,8 @@ public abstract class AudioMetaDataEditor extends MetaDataEditor {
            comment_ = other.comment_;
         if(firstBetter(other.genre_, genre_))
            genre_ = other.genre_;
+        if(firstBetter(other.license_, license_))
+            license_ = other.license_;
     }
     
     /**
@@ -91,7 +97,7 @@ public abstract class AudioMetaDataEditor extends MetaDataEditor {
     	if (LimeXMLUtils.isMP3File(name))
     		return new MP3DataEditor();
     	if (LimeXMLUtils.isOGGFile(name))
-    		return new OGGDataEditor(name);
+    		return new OGGDataEditor();
     	return null;
     }
 
@@ -106,5 +112,6 @@ public abstract class AudioMetaDataEditor extends MetaDataEditor {
 	    track_   = doc.getValue(TRACK);
 	    comment_ = doc.getValue(COMMENT);
 	    genre_   = doc.getValue(GENRE);
+	    license_ = doc.getValue(LICENSE);
 	}
 }

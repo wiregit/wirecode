@@ -15,8 +15,12 @@ import org.xml.sax.SAXException;
 import org.xml.sax.XMLReader;
 import org.xml.sax.helpers.DefaultHandler;
 import org.xml.sax.helpers.XMLReaderFactory;
+import org.apache.xerces.parsers.SAXParser;
 
 import com.limegroup.gnutella.ErrorService;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 /**
  * Provides just enough functionality for our simple schemas,
@@ -24,6 +28,8 @@ import com.limegroup.gnutella.ErrorService;
  * @author  tjones
  */
 public class XMLParsingUtils {
+    
+    private static final Log LOG = LogFactory.getLog(XMLParsingUtils.class);
     
 
     static final private String XML_START = "<?xml";
@@ -112,9 +118,9 @@ public class XMLParsingUtils {
         LimeParser() {
             XMLReader reader;
             try {
-                reader =
-                    XMLReaderFactory.createXMLReader("org.apache.xerces.parsers.SAXParser");
+                reader = new SAXParser();
                 reader.setContentHandler(this);
+                reader.setFeature("http://xml.org/sax/features/namespaces", false);
             }catch(SAXException bad) {
                 ErrorService.error(bad);
                 reader = null; 
@@ -141,17 +147,16 @@ public class XMLParsingUtils {
         
         public void startElement(String namespaceUri, String localName, 
                                  String qualifiedName, Attributes attributes) {
-            
             if(_isFirstElement) {
                 _isFirstElement=false; 
-                _result.canonicalKeyPrefix = localName;
+                _result.canonicalKeyPrefix = qualifiedName;
                 return;
             }
             
             if(_result.type==null) {
-                _result.type = localName;
+                _result.type = qualifiedName;
                 _result.schemaURI = "http://www.limewire.com/schemas/"+_result.type+".xsd";
-                _result.canonicalKeyPrefix += "__"+localName+"__";
+                _result.canonicalKeyPrefix += "__"+qualifiedName+"__";
             } 
             
             int attributesLength = attributes.getLength();
@@ -159,7 +164,7 @@ public class XMLParsingUtils {
                 Map attributeMap = new HashMap(attributesLength);
                 for(int i = 0; i < attributesLength; i++) {
                     attributeMap.put(_result.canonicalKeyPrefix + 
-                                     attributes.getLocalName(i) + "__",
+                                     attributes.getQName(i) + "__",
                                      attributes.getValue(i).trim());
                 }
                 _result.add(attributeMap);

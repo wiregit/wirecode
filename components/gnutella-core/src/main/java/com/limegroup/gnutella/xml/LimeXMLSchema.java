@@ -189,7 +189,7 @@ public class LimeXMLSchema {
         }
         
     }
-    
+
     /**
      * Returns the unique identifier which identifies this particular schema
      * @return the unique identifier which identifies this particular schema
@@ -260,39 +260,6 @@ public class LimeXMLSchema {
         
         //return the list of enumeration fields
         return enumerationFields;
-    }
-    
-    /**
-     * Returns Mapping from FieldName => (EnumerativeValue => Mapped Value)
-     * (String ==> Map (String => String))
-     */
-    public Map getDefaultFieldEnumerativeValueMap()
-    {
-        //create a new Map
-        Map fieldEnumerativeValueMap = new HashMap();
-        
-        //iterate over canonicalized fields, and add mappings for 
-        //only those which are of enumerative type
-        Iterator iterator = _canonicalizedFields.iterator();
-        while(iterator.hasNext())
-        {
-            //get next schema field 
-            SchemaFieldInfo schemaFieldInfo = (SchemaFieldInfo)iterator.next();
-            //get the enumerativeValueMap
-            Map enumerativeValueMap = 
-                schemaFieldInfo.getDefaultEnumerativeValueMap();
-            //if the map is not null (i.e. enumerations exist for this field,
-            //add the mapping
-            if(enumerativeValueMap != null)
-            {
-                fieldEnumerativeValueMap.put(
-                    schemaFieldInfo.getCanonicalizedFieldName(), 
-                    enumerativeValueMap);
-            }
-        }
-        
-        //return the mappings
-        return fieldEnumerativeValueMap;
     }
     
     

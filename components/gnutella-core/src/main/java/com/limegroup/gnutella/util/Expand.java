@@ -89,7 +89,7 @@ public final class Expand {
      *  any other IO error
      */
     public static void expandFile(File source, File dest) throws IOException {        
-        expandFile(source, dest, false);
+        expandFile(source, dest, false, null);
     }
 
     /**
@@ -105,6 +105,17 @@ public final class Expand {
      */
     public static void expandFile(File source, File dest, boolean overwrite) 
         throws IOException {
+            expandFile(source, dest, overwrite, null);
+    }
+    
+    /**
+     * Expands the source file to destination.  If overwrite is true, all files
+     * will be overwritten (regardless of modification time).  If 'names'
+     * is non-null, any file in 'names' will be expanded regardless of modiciation time.
+     */
+    public static void expandFile(File source, File dest, boolean overwrite, String[] names) 
+      throws IOException {
+            
         ZipInputStream zis = null;
         
         try {
@@ -122,7 +133,7 @@ public final class Expand {
                 if (ze.isDirectory()) {
                     f.mkdirs(); 
                 } else if ( ze.getTime() > f.lastModified() ||
-                            overwrite ) {
+                            overwrite || inNames(ze.getName(), names)) {
                     FileUtils.setWriteable(f);
                     byte[] buffer = new byte[1024];
                     int length = 0;
@@ -141,5 +152,14 @@ public final class Expand {
         } finally {
             IOUtils.close(zis);
         }
+    }
+    
+    private static boolean inNames(String name, String[] all) {
+        if(all == null || name == null)
+            return false;
+        for(int i = 0; i < all.length; i++)
+            if(name.startsWith(all[i]))
+                return true;
+        return false;
     }
 }

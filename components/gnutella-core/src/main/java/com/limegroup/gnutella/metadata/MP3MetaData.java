@@ -6,6 +6,7 @@ import java.io.RandomAccessFile;
 import java.io.UnsupportedEncodingException;
 import java.util.Iterator;
 import java.util.Vector;
+import java.util.StringTokenizer;
 
 import com.limegroup.gnutella.ByteOrder;
 
@@ -13,6 +14,8 @@ import de.vdheide.mp3.ID3v2;
 import de.vdheide.mp3.ID3v2Exception;
 import de.vdheide.mp3.ID3v2Frame;
 import de.vdheide.mp3.NoID3v2TagException;
+
+import com.limegroup.gnutella.licenses.CCConstants;
 
 /**
  * Provides a utility method to read ID3 Tag information from MP3
@@ -197,7 +200,7 @@ public class MP3MetaData extends AudioMetaData {
                   new String(bytes, startIndex, bytes.length-startIndex).trim();
                 setComment(frameContent);
             }
-           else if(MP3DataEditor.TRACK_ID.equals(frameID)) {
+            else if(MP3DataEditor.TRACK_ID.equals(frameID)) {
                 try {
                     setTrack(Short.parseShort(frameContent));
                 } catch (NumberFormatException ignored) {} 
@@ -234,6 +237,9 @@ public class MP3MetaData extends AudioMetaData {
                     setGenre(MP3MetaData.getGenreString((short)genreCode));
                 else 
                     setGenre(frameContent);
+            }
+            else if (MP3DataEditor.LICENSE_ID.equals(frameID)) {
+                setLicense(frameContent);
             }
         }
         
@@ -307,7 +313,7 @@ public class MP3MetaData extends AudioMetaData {
 	    case 59: return "Gangsta";
 	    case 60: return "Top 40";
 	    case 61: return "Christian Rap";
-	    case 62: return "Pop/Funk";
+	    case 62: return "Pop+Funk";
 	    case 63: return "Jungle";
 	    case 64: return "Native American";
 	    case 65: return "Cabaret";

@@ -19,6 +19,8 @@ import com.limegroup.gnutella.xml.LimeXMLDocument;
 import com.limegroup.gnutella.xml.LimeXMLUtils;
 import com.limegroup.gnutella.xml.XMLStringUtils;
 
+import com.limegroup.gnutella.licenses.CCConstants;
+
 /**
  * Simple class to encapsulate information about ID3 tags.
  * Can write the data to a NameValue list or an XML string.
@@ -36,6 +38,7 @@ public abstract class AudioMetaData extends MetaData {
     private short totalTracks =-1;
     private short disk=-1;
     private short totalDisks=-1;
+    private String license = null;
     
     public static final String ISO_LATIN_1 = "8859_1";
     public static final String UNICODE = "Unicode";
@@ -63,6 +66,8 @@ public abstract class AudioMetaData extends MetaData {
         XMLStringUtils.DELIMITER;
     public static final String SECONDS_KEY =  KEY_PREFIX + "seconds" + 
         XMLStringUtils.DELIMITER;
+    public static final String LICENSE_KEY =  KEY_PREFIX + "license" +
+        XMLStringUtils.DELIMITER;
 
     public AudioMetaData(File f) throws IOException{
     	parseFile(f);
@@ -87,7 +92,8 @@ public abstract class AudioMetaData extends MetaData {
         return "ID3Data: title[" + title + "], artist[" + artist +
                "], album[" + album + "], year[" + year + "], comment["
                + comment + "], track[" + track + "], genre[" + genre +
-               "], bitrate[" + bitrate + "], length[" + length +"]";
+               "], bitrate[" + bitrate + "], length[" + length +
+               "], license[" + license + "]";
     }          
     
     public String getTitle() { return title; }
@@ -102,6 +108,7 @@ public abstract class AudioMetaData extends MetaData {
     public String getGenre() { return genre; }
     public int getBitrate() { return bitrate; }
     public int getLength() { return length; }
+    public String getLicense() { return license; }
     
     void setTitle(String title) {
         this.title = title;
@@ -151,6 +158,10 @@ public abstract class AudioMetaData extends MetaData {
         this.length = length;
     }
     
+    void setLicense(String license) {
+        this.license = license;
+    }
+    
     /**
      * Updates this' information with data's information
      * for any fields that are currently unspecified.
@@ -174,6 +185,8 @@ public abstract class AudioMetaData extends MetaData {
             bitrate = data.bitrate;
         if(!isValid(length))
             length = data.length;
+        if(!isValid(license))
+            license = data.license;
     }
     
     /**
@@ -188,7 +201,8 @@ public abstract class AudioMetaData extends MetaData {
             && isValid(track)
             && isValid(genre)
             && isValid(bitrate)
-            && isValid(length);
+            && isValid(length)
+            && isValid(license);
     }
 
     /**
@@ -205,6 +219,7 @@ public abstract class AudioMetaData extends MetaData {
         add(list, genre, GENRE_KEY);
         add(list, bitrate, BITRATE_KEY);
         add(list, length, SECONDS_KEY);
+        add(list, license, LICENSE_KEY);
         return list;
     }
     
@@ -313,7 +328,9 @@ public abstract class AudioMetaData extends MetaData {
                 !fieldName.equals(YEAR_KEY) &&
                 !fieldName.equals(COMMENTS_KEY) &&
                 !fieldName.equals(BITRATE_KEY) &&
-                !fieldName.equals(SECONDS_KEY) );
+                !fieldName.equals(SECONDS_KEY) &&
+                !fieldName.equals(LICENSE_KEY)
+               );
     }
     
 }

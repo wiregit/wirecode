@@ -29,9 +29,9 @@ public class TestBootstrapServer {
     ServerSocket _ss;
     List _sockets = new LinkedList();
 
-    String _request;
-    String _response;
-    String _responseData="";
+    volatile String _request;
+    volatile String _response;
+    volatile String _responseData="";
     
     boolean _allowConnectionReuse = false;
     
@@ -48,6 +48,7 @@ public class TestBootstrapServer {
         _ss.setReuseAddress(true);
         _ss.bind(new InetSocketAddress(port));
         Thread runner=new RunnerThread();
+        runner.setName("TBS, Port: " + port);
         runner.start();
     }
     
@@ -76,7 +77,7 @@ public class TestBootstrapServer {
     /** Sets what this should send for any HTTP response, without any newline
      *  characters.  Default value: "HTTP/1.0 200 OK".*/
     public void setResponse(String httpResponse) {
-        this._response=httpResponse+"\r\n\r\n";  //add EOL and blank line
+        this._response=httpResponse;  //add EOL and blank line
     }
 
     /** Sets the data this should send for any HTTP response.  Default value:
@@ -144,7 +145,7 @@ public class TestBootstrapServer {
                     }
                     LOG.debug("finished reading request.");
                     _numRequests++;
-                    out.write(_response.getBytes());
+                    out.write((_response + "\r\n\r\n").getBytes());
                     out.write(_responseData.getBytes());
                     out.flush();
                     if(!_allowConnectionReuse)
