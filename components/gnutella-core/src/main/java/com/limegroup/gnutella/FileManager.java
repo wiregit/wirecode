@@ -1005,6 +1005,7 @@ public abstract class FileManager {
         
         _files.set(i,null);
         _fileToFileDesc.remove(f);
+        _needRebuild = true;
         
         // If it's an incomplete file, the only reference we 
         // have is the URN, so remove that and be done.
@@ -1045,7 +1046,7 @@ public abstract class FileManager {
 
         //Remove hash information.
         this.removeUrnIndex(fd);
-        _needRebuild = false;
+  
         repOk();
         return fd;
     }
