@@ -36,6 +36,7 @@ public final class LimeXMLDocumentHelper{
         
         Iterator xmlDocumentsIterator = XMLParsingUtils.split(aggregatedXML).iterator();
         while(xmlDocumentsIterator.hasNext()) {
+            
             String xmlDocument = (String)xmlDocumentsIterator.next();
             XMLParsingUtils.ParseResult parsingResult;
             try {
@@ -43,7 +44,7 @@ public final class LimeXMLDocumentHelper{
             } catch (SAXException sax) {
                 continue;// bad xml, ignore
             } catch (IOException bad) {
-                break; // abort
+                return Collections.EMPTY_LIST; // abort
             }
             
             String indexKey = parsingResult.canonicalKeyPrefix + "index__";
@@ -54,14 +55,18 @@ public final class LimeXMLDocumentHelper{
                 
                 Map map = (Map)mapsIterator.next();
                 
+                String sindex = (String)map.get(indexKey);
+                if (sindex == null)
+                    return Collections.EMPTY_LIST;
+                
                 int index = -1;
                 try{
-                    index = Integer.parseInt((String)map.get(indexKey));
+                    index = Integer.parseInt(sindex);
                 }catch(NumberFormatException bad) { //invalid document
                     return Collections.EMPTY_LIST;
                 }
                 
-                if (index >= documents.length || index==-1)
+                if (index >= documents.length || index < 0)
                     return Collections.EMPTY_LIST; // malicious document, can't trust it.
                 
                 documents[index] = new LimeXMLDocument(map,parsingResult.schemaURI);
