@@ -379,7 +379,8 @@ public class ManagedDownloader implements Downloader, Serializable {
         while (true) {
             try {
                 //Try each group, returning on success.
-                //TODO: use downloadManager's queue, releasing during busy wait
+                setState(QUEUED);
+                manager.waitForSlot(this);
                 boolean waitForRetry=false;
                 for (int i=0; i<buckets.length; i++) {    
                     Assert.that(buckets[i].size() > 0, "Empty bucket");
@@ -397,7 +398,8 @@ public class ManagedDownloader implements Downloader, Serializable {
                         waitForRetry=true;
                     }
                 }
-            
+                manager.yieldSlot(this);
+
                 //Wait or abort.
                 if (waitForRetry) {
                     synchronized (this) {
