@@ -863,8 +863,20 @@ public final class CommonUtils {
 	 *  file -- such as "com/limegroup/gnutella/gui/images/image.gif"
 	 */
 	public static void copyResourceFile(final String fileName) {
-		copyResourceFile(fileName, null, false);
+		copyResourceFile(fileName, null);
 	}  
+
+
+	/**
+	 * Copies the specified resource file into the current directory from
+	 * the jar file. If the file already exists, no copy is performed.
+	 *
+	 * @param fileName the name of the file to copy, relative to the jar
+	 *  file -- such as "com/limegroup/gnutella/gui/images/image.gif"
+	 */
+	public static void copyResourceFile(final String fileName, File newFile) {
+		copyResourceFile(fileName, newFile, false);		
+	}
 
 	/**
 	 * Copies the specified resource file into the current directory from
