@@ -210,6 +210,65 @@ public class LimeXMLSchema
         return Collections.unmodifiableList(_canonicalizedFields);
     }
     
+    
+    /**
+     * Returns only those fields which are of enumeration type
+     */
+    public List getEnumerationFields()
+    {
+        //create a new list
+        List enumerationFields = new LinkedList();
+        
+        //iterate over canonicalized fields, and add only those which are 
+        //of enumerative type
+        Iterator iterator = _canonicalizedFields.iterator();
+        while(iterator.hasNext())
+        {
+            //get next schema field 
+            SchemaFieldInfo schemaFieldInfo = (SchemaFieldInfo)iterator.next();
+            //if enumerative type, add to the list of enumeration fields
+            if(schemaFieldInfo.getEnumerationList() != null)
+                enumerationFields.add(schemaFieldInfo);
+        }
+        
+        //return the list of enumeration fields
+        return enumerationFields;
+    }
+    
+    /**
+     * Returns Mapping from FieldName => (EnumerativeValue => Mapped Value)
+     * (String ==> Map (String => String))
+     */
+    public Map getDefaultFieldEnumerativeValueMap()
+    {
+        //create a new Map
+        Map fieldEnumerativeValueMap = new HashMap();
+        
+        //iterate over canonicalized fields, and add mappings for 
+        //only those which are of enumerative type
+        Iterator iterator = _canonicalizedFields.iterator();
+        while(iterator.hasNext())
+        {
+            //get next schema field 
+            SchemaFieldInfo schemaFieldInfo = (SchemaFieldInfo)iterator.next();
+            //get the enumerativeValueMap
+            Map enumerativeValueMap = 
+                schemaFieldInfo.getDefaultEnumerativeValueMap();
+            //if the map is not null (i.e. enumerations exist for this field,
+            //add the mapping
+            if(enumerativeValueMap != null)
+            {
+                fieldEnumerativeValueMap.put(
+                    schemaFieldInfo.getCanonicalizedFieldName(), 
+                    enumerativeValueMap);
+            }
+        }
+        
+        //return the mappings
+        return fieldEnumerativeValueMap;
+    }
+    
+    
     /**
      * Returns all the fields(placeholders) names in this schema.
      * The field names are canonicalized as mentioned below:

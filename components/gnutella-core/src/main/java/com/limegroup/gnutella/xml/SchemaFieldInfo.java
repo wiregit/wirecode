@@ -1,7 +1,6 @@
 package com.limegroup.gnutella.xml;
 
-import java.util.List;
-import java.util.LinkedList;
+import java.util.*;
 
 /**
  * Stores information pertaining to fields (elements) in xml documents
@@ -99,5 +98,34 @@ public class SchemaFieldInfo
     {
         return _enumerationList;
     }
+    
+    /**
+     * Returns Mapping from EnumerativeValue => Mapped Value
+     * (String => String). Returns null, if no enumerative values exist
+     */
+    public Map getDefaultEnumerativeValueMap()
+    {
+        //return null, if there are no enumerative values
+        if(_enumerationList == null)
+            return null;
+        
+        //else create a new Map
+        Map enumerativeValueMap = new HashMap(
+            (int)(_enumerationList.size() * 4.0/3.0 + 1),0.75f);
+        
+        //add the default mappings to the map
+        Iterator iterator = _enumerationList.iterator();
+        while(iterator.hasNext())
+        {
+            //get the next value
+            String value = (String)iterator.next();
+            //add the mapping
+            enumerativeValueMap.put(value,value);
+        }
+        
+        //return the mappings
+        return enumerativeValueMap;
+    }
+    
     
 }//end of class FieldInfo

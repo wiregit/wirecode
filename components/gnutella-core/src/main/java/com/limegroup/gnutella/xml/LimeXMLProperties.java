@@ -376,7 +376,8 @@ public class LimeXMLProperties
     {
         //a hack. I guess, adam will provide some way so that installation
         //directory can be accesed in some other way than user.dir
-        return SettingsManager.instance().getPath();
+//        return SettingsManager.instance().getPath();
+        return "e:/work/";
     }    
     
 }//end of class
