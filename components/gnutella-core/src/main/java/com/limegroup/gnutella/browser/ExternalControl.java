@@ -232,6 +232,7 @@ public class ExternalControl {
 		    keystr = st.nextToken();
 			keystr = keystr.trim();
 			start  = keystr.indexOf("=")+1;
+			if(start == 0) continue; // no '=', ignore.
 		    cmdstr = keystr.substring(start);
 			keystr = keystr.substring(0,start-1);
             cmdstr=URLDecoder.decode(cmdstr);

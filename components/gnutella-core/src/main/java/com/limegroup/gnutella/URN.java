@@ -536,7 +536,7 @@ public final class URN implements HTTPHeaderValue, Serializable {
 	 */
 	private static boolean isValidUrn(final String urnString) {
 		int colon1Index = urnString.indexOf(":");
-		if(colon1Index == -1) {
+		if(colon1Index == -1 || colon1Index+1 > urnString.length()) {
 			return false;
 		}
 
@@ -550,7 +550,10 @@ public final class URN implements HTTPHeaderValue, Serializable {
 		// get the last colon -- this should separate the <NID>
 		// from the <NIS>
 		int colon2Index = urnString.indexOf(":", colon1Index+1);
-		if(colon2Index == -1) return false;
+		
+		if(colon2Index == -1 || colon2Index+1 > urnString.length())
+		    return false;
+		
 		String urnType = urnString.substring(0, colon2Index+1);
 		if(!UrnType.isSupportedUrnType(urnType) ||
 		   !isValidNamespaceSpecificString(urnString.substring(colon2Index+1))) {
