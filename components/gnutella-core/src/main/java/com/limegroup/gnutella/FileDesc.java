@@ -54,7 +54,7 @@ public class FileDesc implements AlternateLocationCollector {
 	 * Constant <tt>Set</tt> of <tt>URN</tt> instances for the file.  This
 	 * is immutable.
 	 */
-    private final Set /* of URNS */ URNS; 
+    private Set /* of URNS */ URNS; 
 
 	/**
 	 * Constant for the <tt>File</tt> instance.
@@ -179,7 +179,7 @@ public class FileDesc implements AlternateLocationCollector {
     public void /* of URN */ recalculateAndCacheURN() 
       throws IOException, InterruptedException {
         UrnCache.instance().removeUrns(FILE);
-        FileDesc.calculateAndCacheURN(FILE);
+        URNS = FileDesc.calculateAndCacheURN(FILE);
         SHA1_URN = extractSHA1();
     }
 
