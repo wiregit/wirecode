@@ -8,6 +8,8 @@ import com.limegroup.gnutella.altlocs.AlternateLocationCollection;
 import com.limegroup.gnutella.stubs.*;
 import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.downloader.Interval;
+import com.limegroup.gnutella.http.HTTPConstants;
+import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.settings.*;
 import com.sun.java.util.collections.*;
 
@@ -45,6 +47,8 @@ public class HeadTest extends BaseTestCase {
 	 * an interval that can fit in a packet, and one that can't
 	 */
 	static IntervalSet _ranges, _rangesMedium, _rangesTooBig;
+	
+	static PushEndpoint pe;
 	
 	
 	public HeadTest(String name) {
@@ -282,6 +286,29 @@ public class HeadTest extends BaseTestCase {
 		assertLessThan(512,pong2.getPayload().length);
 	}
 	
+	public void testFirewalledAltlocs() throws Exception {
+		HeadPing ping1 = new HeadPing(_havePartial,HeadPing.PUSH_ALTLOCS);
+		assertTrue(ping1.requestsPushLocs());
+		HeadPong pong1 = reparse (new HeadPong(ping1));
+
+		assertNull(pong1.getRanges());
+		assertNull(pong1.getAltLocs());
+		assertNotNull(pong1.getPushLocs());
+		
+		RemoteFileDesc dummy = 
+			new RemoteFileDesc("www.limewire.org", 6346, 10, HTTPConstants.URI_RES_N2R+
+							   HugeTestUtils.URNS[1].httpStringValue(), 10, 
+							   GUID.makeGuid(), 10, true, 2, true, null, 
+							   HugeTestUtils.URN_SETS[1],
+                               false,false,"",0,null, -1);
+		
+		Set received = pong1.getAllLocsRFD(dummy);
+		assertEquals(1,received.size());
+		RemoteFileDesc rfd = (RemoteFileDesc)received.toArray()[0]; 
+		PushEndpoint point = rfd.getPushAddr();
+		assertEquals(pe,point);
+	}
+	
 	private HeadPong reparse(HeadPong original) throws Exception{
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		original.write(baos);
@@ -310,7 +337,8 @@ public class HeadTest extends BaseTestCase {
 			}            
 			_alCollectionComplete.add(al);
 		}
-        assertTrue("failed to set test up",_alCollectionComplete.getAltLocsSize()==alternateLocations.size());
+        assertTrue("failed to set test up",
+        		_alCollectionComplete.getAltLocsSize()==alternateLocations.size());
         
         alternateLocations = new HashSet();
         
@@ -332,7 +360,26 @@ public class HeadTest extends BaseTestCase {
 			_alCollectionIncomplete.add(al);
 		}
 
-        assertTrue("failed to set test up",_alCollectionIncomplete.getAltLocsSize()==alternateLocations.size());
+        assertTrue("failed to set test up",
+        		_alCollectionIncomplete.getAltLocsSize()==alternateLocations.size());
+        
+        //add some firewalled altlocs to the incomplete collection
+        
+        PushProxyInterface ppi = new QueryReply.PushProxyContainer("1.2.3.4",6346);
+		Set proxies = new HashSet();
+		proxies.add(ppi);
+		
+        pe = new PushEndpoint(GUID.makeGuid(),proxies);
+        //test an rfd with push proxies
+        
+		RemoteFileDesc fwalled = new RemoteFileDesc("127.0.0.1",6346,10,HTTPConstants.URI_RES_N2R+
+                HugeTestUtils.URNS[0].httpStringValue(), 10, 
+                pe.getClientGUID(), 10, true, 2, true, null, 
+                HugeTestUtils.URN_SETS[0],
+                false,true,"",0,proxies,-1);
+		
+		AlternateLocation firewalled = AlternateLocation.create(fwalled);
+		_alCollectionIncomplete.add(firewalled);
 	}
 	
 }

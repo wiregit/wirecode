@@ -87,5 +87,9 @@ public class PushEndpointTest extends BaseTestCase {
     	PushEndpoint four = PushEndpoint.fromBytes(network);
     	assertNotEquals(six,four);
     	
+    	Set sent = new HashSet(set6);
+    	sent.retainAll(four.getProxies());
+    	assertEquals(four.getProxies().size(),sent.size());
+    	
     }
 }
