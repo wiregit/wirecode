@@ -1793,8 +1793,8 @@ public abstract class MessageRouter {
             // decrement the number of responses we have left
             numResponses-= arraySize;
 
-			// see id there are any open slots
-			boolean busy = um.isBusy();
+			// see if there are any open slots
+			boolean busy = um.isQueueFull();
             boolean uploaded = um.hadSuccesfulUpload();
 
 			// see if we have accepted an incoming connection during this session
