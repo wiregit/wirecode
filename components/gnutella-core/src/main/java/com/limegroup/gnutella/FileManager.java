@@ -1147,7 +1147,8 @@ public abstract class FileManager {
      *  table for our files all the time.  FileManager should probably keep
      *  track of the QRP table for our files and have a getQRPTable function.
      *  This would enable it to update the QRP table internally whenever our
-     *  files changed.
+     *  files changed.  This would also make the "getIndivisibleKeyWords" 
+     *  method unnecessary.
      */
     public List getKeyWords(){
         FileDesc[] fds = getAllSharedFileDescriptors();
