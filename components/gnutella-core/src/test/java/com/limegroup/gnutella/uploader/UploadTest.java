@@ -67,12 +67,14 @@ public class UploadTest extends TestCase {
 		SettingsManager.instance().writeProperties();
 		
 		ActivityCallback callback = new ActivityCallbackStub();
-		FileManager fm = new MetaFileManager();
-		fm.initialize(callback);		
-		MessageRouter mr = new StandardMessageRouter(callback, fm);
-		RouterService router = new RouterService(callback, mr, fm, 
-												 new ServerAuthenticator());
-		router.initialize();
+		//FileManager fm = new MetaFileManager();
+		//fm.initialize(callback);		
+		//MessageRouter mr = new StandardMessageRouter(callback, fm);
+		//RouterService router = new RouterService(callback, mr, fm, 
+		//									 new ServerAuthenticator());
+		//router.initialize();
+		RouterService.setCallback(callback);
+		RouterService.instance();
 
         //System.out.println(
         //    "Please make sure your client is listening on port "+port+"\n"

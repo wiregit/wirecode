@@ -18,11 +18,7 @@ public final class Backend {
 
 	private static final Backend INSTANCE = new Backend();
 
-	private final FileManager FILE_MANAGER;
-
 	private final ActivityCallback CALLBACK = new ActivityCallbackStub();
-
-	private final MessageRouter MESSAGE_ROUTER;
 
 	private final RouterService ROUTER_SERVICE;
 
@@ -53,42 +49,18 @@ public final class Backend {
 
 		SettingsManager.instance().setDirectories(new File[] {TEMP_DIR});
 		SettingsManager.instance().setExtensions("java");
-		FILE_MANAGER = new MetaFileManager();		
-		FILE_MANAGER.initialize(CALLBACK);	
+
+		RouterService.setCallback(CALLBACK);
+		ROUTER_SERVICE = RouterService.instance();
 		try {
 			// sleep to let the file manager initialize
 			Thread.sleep(2000);
 		} catch(InterruptedException e) {
 		}
-
-		MESSAGE_ROUTER = new MetaEnabledMessageRouter(CALLBACK, FILE_MANAGER);
-		ROUTER_SERVICE = new RouterService(CALLBACK, MESSAGE_ROUTER, FILE_MANAGER,
-										   new ServerAuthenticator());
-		ROUTER_SERVICE.initialize();
-
-		try {
-			while(ROUTER_SERVICE.getUdpAcceptor().getDatagramSocket().getLocalPort() == -1) {
-				Thread.yield();
-				// give all of threads time to construct everything, open the 
-				// necessary sockets, etc
-				Thread.sleep(200);
-			}
-		} catch(InterruptedException e) {
-		}
-	}
-	
-	/**
-	 * Accessor for the <tt>FileManager</tt>.
-	 */
-	public FileManager getFileManager() {
-		return FILE_MANAGER;
 	}
 
-	/**
-	 * Accessor for the <tt>UDPAcceptor</tt> instance.
-	 */
-	public UDPAcceptor getUdpAcceptor() {
-		return ROUTER_SERVICE.getUdpAcceptor();
+	public RouterService getRouterService() {
+		return ROUTER_SERVICE;
 	}
 
 	/**

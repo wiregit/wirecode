@@ -109,7 +109,7 @@ class TestHostCatcher extends HostCatcher {
     volatile int loopsDone=0;
 
     TestHostCatcher() {
-        super(new ActivityCallbackStub());
+        super();
     }
 
     public synchronized Endpoint getAnEndpoint() throws InterruptedException {

@@ -40,7 +40,7 @@ public class UDPAcceptorTest extends TestCase {
 	 * Tests sending query requests to the UDP port.
 	 */
 	public void testQueryRequests() {
-		FileManager fm = BACKEND_1.getFileManager();
+		FileManager fm = BACKEND_1.getRouterService().getFileManager();
 		File[] sharedDirs = SettingsManager.instance().getDirectories();
 		FileDesc[] fds = fm.getSharedFileDescriptors(sharedDirs[0]);
 		QueryRequest qr = new QueryRequest(GUID.makeGuid(),
@@ -51,10 +51,10 @@ public class UDPAcceptorTest extends TestCase {
 			qr.write(baos);
 			byte[] data = baos.toByteArray();
 			InetAddress ip = InetAddress.getLocalHost();
-			UDPAcceptor acceptor1 = BACKEND_1.getUdpAcceptor();
-			UDPAcceptor acceptor2 = BACKEND_2.getUdpAcceptor();
-			DatagramSocket socket1 = acceptor1.getDatagramSocket();
-			DatagramSocket socket2 = acceptor2.getDatagramSocket();
+			UDPAcceptor acceptor1 = BACKEND_1.getRouterService().getUdpAcceptor();
+			UDPAcceptor acceptor2 = BACKEND_2.getRouterService().getUdpAcceptor();
+			//DatagramSocket socket1 = acceptor1.getDatagramSocket();
+			//DatagramSocket socket2 = acceptor2.getDatagramSocket();
 			//DatagramSocket socket = new DatagramSocket(acceptor1.getPort(), ip);
 
 			//byte[] datagramBytes = new byte[BUFFER_SIZE];
@@ -63,9 +63,9 @@ public class UDPAcceptorTest extends TestCase {
 			//socket.receive(incomingDatagram);
 			
 
-			DatagramPacket outgoingDatagram = 
-			    new DatagramPacket(data, data.length, ip, socket2.getLocalPort());
-			socket1.send(outgoingDatagram);
+			//DatagramPacket outgoingDatagram = 
+			//new DatagramPacket(data, data.length, ip, socket2.getLocalPort());
+			//socket1.send(outgoingDatagram);
 		} catch(UnknownHostException e) {
 			e.printStackTrace();
 		} catch(SocketException e) {

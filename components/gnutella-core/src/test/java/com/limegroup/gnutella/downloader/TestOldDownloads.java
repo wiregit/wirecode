@@ -38,11 +38,9 @@ public class TestOldDownloads extends TestCase {
         SettingsManager.instance().setConnectOnStartup(false);
         SettingsManager.instance().setMaxSimDownload(0);  //queue everything
         TestActivityCallback callback=new TestActivityCallback();
-        DownloadManager dm=new DownloadManager();
-        RouterService rs=new RouterService(null, null, null, null);
-        dm.initialize(callback, new MessageRouterStub(), 
-                      null, new FileManagerStub());
-        assertTrue(dm.readSnapshot(new File(
+		RouterService.setCallback(callback);
+        RouterService rs = RouterService.instance();
+        assertTrue(rs.getDownloadManager().readSnapshot(new File(
                         "com/limegroup/gnutella/downloader",file)));
         assertTrue(callback.downloaders.size()==1);
         ManagedDownloader md=(ManagedDownloader)callback.downloaders.get(0);

@@ -23,9 +23,8 @@ public class HostCatcherTest extends TestCase {
         HostCatcher.DEBUG=true;
         //This creates an acceptor thread.  We should probably use an Acceptor
         //stub or write a tearDown() method.
-        hc=new HostCatcher(new ActivityCallbackStub());
-        hc.initialize(new Acceptor(6346, null),
-                      new ConnectionManager(null, null));
+        hc=new HostCatcher();
+        hc.initialize();
     }
     
     /** Tests that FixedsizePriorityQueue can hold two endpoints with same

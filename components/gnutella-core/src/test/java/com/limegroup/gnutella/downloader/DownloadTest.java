@@ -20,7 +20,8 @@ public class DownloadTest extends TestCase {
     static TestUploader uploader2=new TestUploader("6347", 6347);
     static TestUploader uploader3=new TestUploader("6348", 6348);
     static TestUploader uploader4=new TestUploader("6349", 6349);
-    static final DownloadManager dm = new DownloadManager();
+	private static final RouterService rs = RouterService.instance();
+    static final DownloadManager dm = rs.getDownloadManager();
     static final ActivityCallbackStub callback = new ActivityCallbackStub();
 
     static URN testHash = null;
@@ -85,10 +86,11 @@ public class DownloadTest extends TestCase {
             debug("Couldn't create temp file. \n");
             System.exit(1);
         }
-        RouterService rs=new RouterService(null, null, null, null);
-        dm.initialize(callback, new MessageRouterStub(), 
-                      null, new FileManagerStub());
-        dm.postGuiInit(rs);
+		RouterService rs = RouterService.instance();
+        //RouterService rs=new RouterService(null, null, null, null);
+        //dm.initialize(callback, new MessageRouterStub(), 
+		//            null, new FileManagerStub());
+        //dm.postGuiInit(rs);
         
         SimpleTimer timer = new SimpleTimer(true);
         Runnable click = new Runnable() {
@@ -813,7 +815,7 @@ public class DownloadTest extends TestCase {
         assertTrue("Search didn't happen", guid!=null);
 
         //Add normal dummy result
-        ActivityCallback callback=router.getActivityCallback();        
+        ActivityCallback callback=router.getCallback();        
         byte[] localhost={(byte)127, (byte)0, (byte)0, (byte)1};
         Response[] responses=new Response[1];
         responses[0]=new Response(0l, file.length(), file.getName());
