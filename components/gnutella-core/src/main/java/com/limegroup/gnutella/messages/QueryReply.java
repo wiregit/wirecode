@@ -906,15 +906,15 @@ public class QueryReply extends Message implements Serializable{
         /* Is the remote host firewalled? */
 		int heFirewalled;
 		
-		if ((new Endpoint(this.getIP(), this.getPort())).isPrivateAddress())
-			heFirewalled = YES;
-		else {
+		//if ((new Endpoint(this.getIP(), this.getPort())).isPrivateAddress())
+		//	heFirewalled = YES;
+		//else {
 			try {
 				heFirewalled=this.getNeedsPush()? YES : NO;
 			} catch (BadPacketException e) {
 				heFirewalled = MAYBE;
 			}
-		}
+		//}
 
         /* In the old days, busy hosts were considered bad.  Now they're ok (but
          * not great) because of alternate locations.  WARNING: before changing
