@@ -12,7 +12,7 @@ import java.io.*;
 public class PushRequest extends Message implements Serializable {
     private static final int STANDARD_PAYLOAD_SIZE=26;
 
-    public static final long FW_TRANS_INDEX = Integer.MAX_VALUE;
+    public static final long FW_TRANS_INDEX = Integer.MAX_VALUE - 2;
     
     /** The unparsed payload--because I don't care what's inside.
      *  NOTE: IP address is BIG-endian.
