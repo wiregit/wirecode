@@ -19,28 +19,30 @@ import java.util.StringTokenizer;
 public class QueryRequest extends Message implements Serializable{
     /** The minimum speed and query request, including the null terminator.
      *  We extract the minimum speed and String lazily. */
-    private final byte[] payload;
-    private final int minSpeed;
+    private final byte[] PAYLOAD;
+    private final int MIN_SPEED;
     /** The query string, if we've already extracted it.  Null otherwise. 
      *  LOCKING: obtain this' lock. */
-    private final String query;
-    private final String richQuery;
+    private final String QUERY;
+
+	/** The XML query string. */
+    private final String XML_QUERY;
 
     // HUGE v0.93 fields
     /** 
 	 * The types of requested URNs.
 	 */
-    private final Set /* of UrnType */ requestedUrnTypes;
+    private final Set /* of UrnType */ REQUESTED_URN_TYPES;
 
     /** 
 	 * Specific URNs requested.
 	 */
-    private final Set /* of URN */ queryUrns;
+    private final Set /* of URN */ QUERY_URNS;
 
     /**
      * The Query Key associated with this query -- can be null.
      */
-    private final QueryKey queryKey;
+    private final QueryKey QUERY_KEY;
 
 	/**
 	 * Constant for an empty, unmodifiable <tt>Set</tt>.  This is necessary
@@ -145,12 +147,29 @@ public class QueryRequest extends Message implements Serializable{
 								true, UrnType.SHA1_SET, sha1Set, 
 								!RouterService.acceptedIncomingConnection());
 	}
+
+	/**
+	 * Creates a new requery for the specified SHA1 value and the specified
+	 * firewall boolean.
+	 *
+	 * @param sha1 the <tt>URN</tt> of the file to search for
+	 * @param ttl the time to live (ttl) of the query
+	 * @return a new <tt>QueryRequest</tt> for the specified SHA1 value
+	 */
+	public static QueryRequest createRequery(URN sha1, byte ttl) {
+		Set sha1Set = new HashSet();
+		sha1Set.add(sha1);
+		return new QueryRequest(newQueryGUID(true), ttl, 0, "\\", "", 
+								true, UrnType.SHA1_SET, sha1Set, 
+								!RouterService.acceptedIncomingConnection());
+	}
 	
 	/**
 	 * Creates a requery for when we don't know the hash of the file --
 	 * we don't know the hash.
 	 *
 	 * @param query the query string
+	 * @return a new <tt>QueryRequest</tt> for the specified query
 	 */
 	public static QueryRequest createRequery(String query) {
 		return new QueryRequest(newQueryGUID(true), (byte)6, 0, query, "",
@@ -158,13 +177,29 @@ public class QueryRequest extends Message implements Serializable{
 								!RouterService.acceptedIncomingConnection());
 	}
 
+
 	/**
 	 * Creates a new query for the specified file name, with no XML.
 	 *
 	 * @param query the file name to search for
+	 * @return a new <tt>QueryRequest</tt> for the specified query
 	 */
 	public static QueryRequest createQuery(String query) {
 		return new QueryRequest(newQueryGUID(false), (byte)6, 0, query, "",
+								false, UrnType.ANY_TYPE_SET, EMPTY_SET, 
+								!RouterService.acceptedIncomingConnection());
+	}
+
+
+	/**
+	 * Creates a new query for the specified file name, with no XML.
+	 *
+	 * @param query the file name to search for
+	 * @param ttl the time to live (ttl) of the query
+	 * @return a new <tt>QueryRequest</tt> for the specified query and ttl
+	 */
+	public static QueryRequest createQuery(String query, byte ttl) {
+		return new QueryRequest(newQueryGUID(false), ttl, 0, query, "",
 								false, UrnType.ANY_TYPE_SET, EMPTY_SET, 
 								!RouterService.acceptedIncomingConnection());
 	}
@@ -176,6 +211,8 @@ public class QueryRequest extends Message implements Serializable{
 	 * @param guid the message GUID for the query
 	 * @param query the query string
 	 * @param xmlQuery the xml query string
+	 * @return a new <tt>QueryRequest</tt> for the specified query, xml
+	 *  query, and guid
 	 */
 	public static QueryRequest createQuery(byte[] guid, String query, 
 										   String xmlQuery) {
@@ -195,6 +232,8 @@ public class QueryRequest extends Message implements Serializable{
      *  requested
 	 * @param queryUrns <tt>Set</tt> of <tt>URN</tt> instances requested for 
      *  this query, which may be empty or null if no URNs were requested
+	 * @throws <tt>IllegalArgumentException</tt> if the query string, the xml
+	 *  query string, and the urns are all empty
      */
     public QueryRequest(byte[] guid, byte ttl, int minSpeed, 
                         String query, String richQuery, boolean isRequery,
@@ -202,6 +241,12 @@ public class QueryRequest extends Message implements Serializable{
                         QueryKey queryKey, boolean isFirewalled) {
         // don't worry about getting the length right at first
         super(guid, Message.F_QUERY, ttl, /* hops */ (byte)0, /* length */ 0);
+		if((query == null || query.length() == 0) &&
+		   (richQuery == null || richQuery.length() == 0) &&
+		   (queryUrns == null || queryUrns.size() == 0)) {
+			throw new IllegalArgumentException("cannot create empty query");
+		}		
+
         if (minSpeed == 0) {
             // user has not specified a Min Speed - go ahead and set it for
             // them, as appropriate
@@ -216,16 +261,16 @@ public class QueryRequest extends Message implements Serializable{
             if (true)
                 minSpeed |= 0x20;
         }
-        this.minSpeed=minSpeed;
+        this.MIN_SPEED=minSpeed;
 		if(query == null) {
-			this.query = "";
+			this.QUERY = "";
 		} else {
-			this.query = query;
+			this.QUERY = query;
 		}
 		if(richQuery == null) {
-			this.richQuery = "";
+			this.XML_QUERY = "";
 		} else{
-			this.richQuery = richQuery;
+			this.XML_QUERY = richQuery;
 		}
 		Set tempRequestedUrnTypes = null;
 		Set tempQueryUrns = null;
@@ -241,20 +286,20 @@ public class QueryRequest extends Message implements Serializable{
 			tempQueryUrns = EMPTY_SET;
 		}
 
-        this.queryKey = queryKey;
+        this.QUERY_KEY = queryKey;
 		
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
         try {
-            ByteOrder.short2leb((short)minSpeed,baos); // write minspeed
-            baos.write(query.getBytes());              // write query
+            ByteOrder.short2leb((short)MIN_SPEED,baos); // write minspeed
+            baos.write(QUERY.getBytes());              // write query
             baos.write(0);                             // null
             // now write any & all HUGE v0.93 General Extension Mechanism 
 			// extensions
             boolean addDelimiterBefore = false;
 			
             byte[] richQueryBytes = null;
-            if(richQuery!=null)
-                richQueryBytes = richQuery.getBytes("UTF-8");
+            if(XML_QUERY!=null)
+                richQueryBytes = XML_QUERY.getBytes("UTF-8");
             
 			// add the rich query
             addDelimiterBefore = 
@@ -273,10 +318,10 @@ public class QueryRequest extends Message implements Serializable{
 								   tempRequestedUrnTypes.iterator());
 
             // add the GGEP Extension
-            if (this.queryKey != null) {
+            if (this.QUERY_KEY != null) {
                 // get query key in byte form....
                 ByteArrayOutputStream qkBytes = new ByteArrayOutputStream();
-                this.queryKey.write(qkBytes);
+                this.QUERY_KEY.write(qkBytes);
                 // construct the GGEP block
                 GGEP ggepBlock = new GGEP(false); // do COBS
                 ggepBlock.put(GGEP.GGEP_HEADER_QUERY_KEY_SUPPORT,
@@ -293,27 +338,33 @@ public class QueryRequest extends Message implements Serializable{
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		payload=baos.toByteArray();
-		updateLength(payload.length); 
+		PAYLOAD=baos.toByteArray();
+		updateLength(PAYLOAD.length); 
 
-		this.queryUrns = Collections.unmodifiableSet(tempQueryUrns);
-		this.requestedUrnTypes = Collections.unmodifiableSet(tempRequestedUrnTypes);
+		this.QUERY_URNS = Collections.unmodifiableSet(tempQueryUrns);
+		this.REQUESTED_URN_TYPES = Collections.unmodifiableSet(tempRequestedUrnTypes);
+
     }
 
 
     /**
      * Build a new query with data snatched from network
      *
-     * @requires payload.length>=3
+     * @param guid the message guid
+	 * @param ttl the time to live of the query
+	 * @param hops the hops of the query
+	 * @param payload the query payload, containing the query string and any
+	 *  extension strings
+	 * @throws <tt>BadPacketException</tt> if this is not a valid query
      */
-    public QueryRequest(byte[] guid, byte ttl, byte hops,
-						byte[] payload) {
+    public QueryRequest(byte[] guid, byte ttl, byte hops, byte[] payload) 
+		throws BadPacketException {
         super(guid, Message.F_QUERY, ttl, hops, payload.length);
 		if(payload == null) {
-			this.payload = EMPTY_BYTE_ARRAY;
+			this.PAYLOAD = EMPTY_BYTE_ARRAY;
 		}
 		else {
-			this.payload=payload;
+			this.PAYLOAD=payload;
 		}
 		String tempQuery = "";
 		String tempRichQuery = "";
@@ -322,7 +373,7 @@ public class QueryRequest extends Message implements Serializable{
 		Set tempRequestedUrnTypes = null;
         QueryKey tempQueryKey = null;
         try {
-            ByteArrayInputStream bais = new ByteArrayInputStream(this.payload);
+            ByteArrayInputStream bais = new ByteArrayInputStream(this.PAYLOAD);
 			short sp = ByteOrder.leb2short(bais);
 			tempMinSpeed = ByteOrder.ubytes2int(sp);
             tempQuery = new String(super.readNullTerminatedBytes(bais));
@@ -392,23 +443,28 @@ public class QueryRequest extends Message implements Serializable{
         } catch (IOException ioe) {
 			ioe.printStackTrace();
         }
-		query = tempQuery;
-		richQuery = tempRichQuery;
-		minSpeed = tempMinSpeed;
+		QUERY = tempQuery;
+		XML_QUERY = tempRichQuery;
+		MIN_SPEED = tempMinSpeed;
 		if(tempQueryUrns == null) {
-			this.queryUrns = EMPTY_SET; 
+			this.QUERY_URNS = EMPTY_SET; 
 		}
 		else {
-			this.queryUrns = Collections.unmodifiableSet(tempQueryUrns);
+			this.QUERY_URNS = Collections.unmodifiableSet(tempQueryUrns);
 		}
 		if(tempRequestedUrnTypes == null) {
-			this.requestedUrnTypes = EMPTY_SET;
+			this.REQUESTED_URN_TYPES = EMPTY_SET;
 		}
 		else {
-			this.requestedUrnTypes =
+			this.REQUESTED_URN_TYPES =
 			    Collections.unmodifiableSet(tempRequestedUrnTypes);
 		}	
-        queryKey = tempQueryKey;
+        QUERY_KEY = tempQueryKey;
+		if(QUERY.length() == 0 &&
+		   XML_QUERY.length() == 0 &&
+		   QUERY_URNS.size() == 0) {
+			throw new BadPacketException("empty query");
+		}
     }
 
     /**
@@ -420,7 +476,7 @@ public class QueryRequest extends Message implements Serializable{
 	}
 
     protected void writePayload(OutputStream out) throws IOException {
-        out.write(payload);
+        out.write(PAYLOAD);
 		if(RECORD_STATS) {
 			SentMessageStatHandler.TCP_QUERY_REQUESTS.addMessage(this);
 		}
@@ -432,7 +488,7 @@ public class QueryRequest extends Message implements Serializable{
      * @return the query hit payload
      */
     public byte[] getPayload() {
-        return payload;
+        return PAYLOAD;
     }
 
     /** 
@@ -443,7 +499,7 @@ public class QueryRequest extends Message implements Serializable{
      * the raw bytes of the query string, call getQueryByteAt(int).
      */
     public String getQuery() {
-        return query;
+        return QUERY;
     }
     
 	/**
@@ -452,7 +508,7 @@ public class QueryRequest extends Message implements Serializable{
 	 * @return the rich query string
 	 */
     public String getRichQuery() {
-        return richQuery;
+        return XML_QUERY;
     }
  
 	/**
@@ -462,7 +518,7 @@ public class QueryRequest extends Message implements Serializable{
      * query, which may be empty (not null) if no types were requested
 	 */
     public Set getRequestedUrnTypes() {
-		return requestedUrnTypes;
+		return REQUESTED_URN_TYPES;
     }
     
 	/**
@@ -472,8 +528,17 @@ public class QueryRequest extends Message implements Serializable{
 	 * may be empty (not null) if no URNs were requested
 	 */
     public Set getQueryUrns() {
-		return queryUrns;
+		return QUERY_URNS;
     }
+	
+	/**
+	 * Returns whether or not this query contains URNs.
+	 *
+	 * @return <tt>true</tt> if this query contains URNs, <tt>false</tt> otherwise
+	 */
+	public boolean hasQueryUrns() {
+		return !QUERY_URNS.isEmpty();
+	}
 
     /**
 	 * Note: the minimum speed can be represented as a 2-byte unsigned
@@ -481,7 +546,7 @@ public class QueryRequest extends Message implements Serializable{
 	 * value returned is always smaller than 2^16.
 	 */
     public int getMinSpeed() {
-        return minSpeed;
+        return MIN_SPEED;
     }
 
 
@@ -489,8 +554,8 @@ public class QueryRequest extends Message implements Serializable{
      * Returns true if the query source is a firewalled servent.
      */
     public boolean isFirewalledSource() {
-        if ((minSpeed & 0x0080) > 0) {
-            if ((minSpeed & 0x0040) > 0)
+        if ((MIN_SPEED & 0x0080) > 0) {
+            if ((MIN_SPEED & 0x0040) > 0)
                 return true;
         }
         return false;
@@ -501,8 +566,8 @@ public class QueryRequest extends Message implements Serializable{
      * Returns true if the query source desires Lime meta-data in responses.
      */
     public boolean desiresXMLResponses() {
-        if ((minSpeed & 0x0080) > 0) {
-            if ((minSpeed & 0x0020) > 0)
+        if ((MIN_SPEED & 0x0080) > 0) {
+            if ((MIN_SPEED & 0x0020) > 0)
                 return true;
         }
         return false;        
@@ -514,7 +579,7 @@ public class QueryRequest extends Message implements Serializable{
      * null.  Usually only UDP QueryRequests will have non-null QueryKeys.
      */
     public QueryKey getQueryKey() {
-        return queryKey;
+        return QUERY_KEY;
     }
 
 	// inherit doc comment
