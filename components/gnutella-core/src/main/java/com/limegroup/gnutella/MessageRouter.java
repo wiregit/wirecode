@@ -133,7 +133,6 @@ public abstract class MessageRouter {
         }
         _secretKey = QueryKey.generateSecretKey();
         _secretPad = QueryKey.generateSecretPad();
-		DYNAMIC_QUERIER.start();
     }
 
     /**
@@ -142,6 +141,7 @@ public abstract class MessageRouter {
     public void initialize() {
         _manager = RouterService.getConnectionManager();
 		_callback = RouterService.getCallback();
+		DYNAMIC_QUERIER.start();
     }
 
     public String getPingRouteTableDump() {
@@ -1084,7 +1084,8 @@ public abstract class MessageRouter {
     private void handleRouteTableMessage(RouteTableMessage m,
 										 ManagedConnection receivingConnection) {
         //if not a supernode-client, ignore
-        if(! receivingConnection.isSupernodeClientConnection())
+        if(! receivingConnection.isSupernodeClientConnection() &&
+		   ! receivingConnection.isUltrapeerQueryRoutingConnection())
             return;
                                             
         //Mutate query route table associated with receivingConnection.  
