@@ -46,7 +46,7 @@ public void set(Object key, Object value)
 {
 	this.key = key;
 	this.value = value;
-}//end of constructor
+}
 
 /** Compares the instance of this class with another instance. 
 	Returns true, if the key field is same, regardless of the 

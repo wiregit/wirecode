@@ -165,6 +165,13 @@ public class SharingSettings extends LimeProps {
         FACTORY.createFileArraySetting("DIRECTORIES_TO_SHARE_NON_RECURSIVELY", new File[0]);
     
     /**
+     * Individual files that should be shared despite being located outside
+     * of any shared directory, and despite any extension limitations.
+     * */
+    public static final FileArraySetting SPECIAL_FILES_TO_SHARE =
+        FACTORY.createFileArraySetting("SPECIAL_FILES_TO_SHARE", new File[0]);
+    
+    /**
 	 * File extensions that are shared.
 	 */
     public static final StringSetting EXTENSIONS_TO_SHARE =
