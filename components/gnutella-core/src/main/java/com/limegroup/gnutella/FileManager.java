@@ -319,7 +319,6 @@ public class FileManager{
             FileDesc desc = (FileDesc)_files.get(i);
             if (desc==null)
                 continue;
-            // String file_name = desc._nameLowerCase; //_name will do too
             String file_name = desc._path;  //checking the path too..
             if (StringUtils.contains(file_name, query, true)) {
                 if (response_list==null)
