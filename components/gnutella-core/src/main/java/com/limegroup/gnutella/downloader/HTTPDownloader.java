@@ -174,6 +174,7 @@ public class HTTPDownloader implements BandwidthTracker {
     public void connectHTTP(int start, int stop ,boolean supportQueueing) 
         throws IOException, TryAgainLaterException, FileNotFoundException, 
                NotSharingException, QueuedException {
+
         _amountToRead = stop-start;
 		_initialReadingPoint = start;
         //Write GET request and headers.  TODO: we COULD specify the end of the
@@ -183,9 +184,10 @@ public class HTTPDownloader implements BandwidthTracker {
         BufferedWriter out=new BufferedWriter(osw);
         String startRange = java.lang.String.valueOf(_initialReadingPoint);
         out.write("GET "+_rfd.getUrl().getFile()+" HTTP/1.1\r\n");
+        out.write("HOST: "+_host+":"+_port+"\r\n");
         out.write("User-Agent: "+CommonUtils.getHttpServer()+"\r\n");
 
-        if(supportQueueing)
+        if(supportQueueing) 
             out.write("X-Queue: 0.1\r\n");//we support remote queueing
 
 		// Create a light-weight copy of AlternateLocations to avoid blocking
@@ -196,11 +198,10 @@ public class HTTPDownloader implements BandwidthTracker {
 		}
 
         URN sha1 = _rfd.getSHA1Urn();
-		if ( sha1 != null )
+		if ( sha1 != null ) 
 		    HTTPUtils.writeHeader(HTTPHeaderName.CONTENT_URN, sha1, out);
-		if(alts.size() > 0) {
+		if(alts.size() > 0) 
 			HTTPUtils.writeHeader(HTTPHeaderName.ALT_LOCATION, alts, out);
-		}
 
         out.write("Range: bytes=" + startRange + "-\r\n");
         SettingsManager sm=SettingsManager.instance();
