@@ -284,8 +284,9 @@ public class StringUtilsTest extends com.limegroup.gnutella.util.BaseTestCase {
         query = StringUtils.createQueryString("reallylongfilenamethatisgoingtotruncate");
         assertEquals("reallylongfilenamethatisgoingt", query);
         
+        //such query will fit any 2 out of 3 words in it.
         query = StringUtils.createQueryString("short one, reallylongotherfilename");
-        containsAll("short one", query);
+        assertEquals(2,query.split(" ").length);
         
         query = StringUtils.createQueryString("longfirstthingthatwontfitatall, but short others");
         containsAll("but short others", query);
