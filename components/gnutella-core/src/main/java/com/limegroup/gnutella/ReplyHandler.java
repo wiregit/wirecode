@@ -27,8 +27,17 @@ public interface ReplyHandler {
      */
     void handlePushRequest(PushRequest pushRequest, ReplyHandler handler);
 
+    /**
+     * Accessor for the number of messages received by this 
+     * <tt>ReplyHandler</tt>.
+     * 
+     * @return the number of messages received by this <tt>ReplyHandler</tt>
+     */
 	int getNumMessagesReceived();
 
+    /**
+     * Records a dropped message for this <tt>ReplyHandler</tt>.
+     */
 	void countDroppedMessage();
 
 	Set getDomains();
