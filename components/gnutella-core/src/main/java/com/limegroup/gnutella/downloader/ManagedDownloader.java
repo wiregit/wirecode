@@ -189,10 +189,6 @@ public class ManagedDownloader implements Downloader, Serializable {
     private RemoteFileDesc[] allFiles;
 
     ///////////////////////// Policy Controls ///////////////////////////
-    /** The number of tries to make */
-    private static final int TRIES=300;
-    /** The max number of push tries to make, per host. */
-    private static final int PUSH_TRIES=2;
     /** The time to wait trying to establish each normal connection, in
      *  milliseconds.*/
     private static final int NORMAL_CONNECT_TIME=10000; //10 seconds
@@ -662,10 +658,11 @@ public class ManagedDownloader implements Downloader, Serializable {
         Set ret=new HashSet();
         StringTokenizer st = new StringTokenizer(fileName, FileManager.DELIMETERS);
         while (st.hasMoreTokens()) {
-            final String currToken = st.nextToken().toLowerCase();;
+            final String currToken = st.nextToken().toLowerCase();
             try {                
-                //Ignore if a number.
-                Double d = new Double(currToken);
+                //Ignore if a number
+                //(will trigger NumberFormatException if not)
+                new Double(currToken);
                 continue;
             } catch (NumberFormatException normalWord) {
                 //Add non-numeric words that are not an (in)definite article.
@@ -1349,8 +1346,6 @@ public class ManagedDownloader implements Downloader, Serializable {
 
 		boolean firstSHA1RFD = true;
 		RemoteFileDesc tempRFD;
-		String rfdStr;
-		URL    rfdURL;
 		
 		// Create a new AlternateLocationCollection (if needed).
 		// The resulting collection's SHA1 is based off the
