@@ -40,6 +40,12 @@ public class BandwidthThrottle {
 
     /** The bytes to send per tick.  Modified by setThrottle. */
     private volatile int _bytesPerTick; 
+    
+    /**
+     * Whether or not we're only allowing bandwidth to be used every other
+     * second.
+     */
+    private volatile boolean _switching = false;
 
     /** The number of bytes remaining in this window. */
     private int _availableBytes; 
@@ -57,6 +63,23 @@ public class BandwidthThrottle {
     public BandwidthThrottle(float bytesPerSecond) {
         setRate(bytesPerSecond);
     }
+    
+    /**
+     * Creates a new bandwidth throttle at the given throttle rate, 
+     * only allowing bandwidth to be used every other second if
+     * switching is true.
+     * The default windows size T is used.  The bytes per windows N
+     * is calculated from bytesPerSecond.
+     *
+     * @param bytesPerSecond the limits in bytes (not bits!) per second
+     * (not milliseconds!)
+     * @param switching true if we should only allow bandwidth to be used
+     *        every other second.
+     */    
+    public BandwidthThrottle(float bytesPerSecond, boolean switching) {
+        setRate(bytesPerSecond);
+        _switching = switching;
+    }    
 
     /**
      * Sets the throttle to the given throttle rate.  The default windows size
@@ -101,8 +124,16 @@ public class BandwidthThrottle {
     /** Updates _availableBytes and _nextTickTime if possible. */
     private void updateWindow(long now) {
         if (now >= _nextTickTime) {
-            _availableBytes = _bytesPerTick;
-            _nextTickTime = now + MILLIS_PER_TICK;
+            if(!_switching || ((now/1000)%2)==0) {
+                _availableBytes = _bytesPerTick;
+                _nextTickTime = now + MILLIS_PER_TICK;
+            } else {
+                _availableBytes = 0;
+                // the next tick time is the time we'll hit
+                // the next second.
+                long diff = 1000 - (now % 1000);
+                _nextTickTime = now + diff;
+            }   
         }
     }
 

@@ -6,6 +6,7 @@ import com.limegroup.gnutella.http.*;
 import com.limegroup.gnutella.statistics.*;
 import com.limegroup.gnutella.settings.ChatSettings;
 import com.limegroup.gnutella.settings.UploadSettings;
+import com.limegroup.gnutella.util.BandwidthThrottle;
 import com.limegroup.gnutella.util.Sockets;
 import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.NetworkUtils;
@@ -59,6 +60,13 @@ public class HTTPDownloader implements BandwidthTracker {
      * host. 
      */
     private static final int MAX_RETRY_AFTER = 60 * 60; // 1 hour
+    
+    /**
+     * The throttle to use for all downloads.  Currently used to make sure
+     * we only download every other second, not for true throttling.
+     */
+    private static final BandwidthThrottle THROTTLE =
+        new BandwidthThrottle(Float.MAX_VALUE, true);
 
     /**
      * The smallest possible file to be shared with partial file sharing.
@@ -1018,7 +1026,8 @@ public class HTTPDownloader implements BandwidthTracker {
                 int left=atr - _amountRead;
                 Assert.that(left>0);
 
-                c = _byteReader.read(buf, 0, Math.min(BUF_LENGTH, left));
+                int toRead = THROTTLE.request(Math.min(BUF_LENGTH, left));
+                c = _byteReader.read(buf, 0, toRead);
                 if (c == -1) 
                     break;
                            
