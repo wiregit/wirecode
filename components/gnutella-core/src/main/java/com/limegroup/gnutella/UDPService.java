@@ -686,15 +686,20 @@ public class UDPService implements Runnable {
 	/**
 	 * 
 	 * @return whether this node can do Firewall-to-firewall transfers.
-	 * If we are not connected, or haven't received a pong yet,
-	 * see if we ever disabled fwt in the past.
-	 * If we are, the criteria are:
-	 *   - we can accept solicited udp
+	 *  Until we get back any udp packet, the answer is no.
+	 *  If we have received an udp packet but are not connected, or haven't 
+	 * received a pong carrying ip info yet, see if we ever disabled fwt in the 
+	 * past.
+	 *  If we are connected and have gotten ip pongs, the criteria are:
 	 *   - our port does not change and is the same as our tcp port
 	 *   - our ip address is the same as our address as seen from tcp 
 	 *   connections.
 	 */
 	public boolean canDoFWT(){
+	    // this does not affect EVER_DISABLED_FWT.
+	    if (!canReceiveSolicited()) 
+		return false;
+
 	    if (!RouterService.isConnected())
 	        return !ConnectionSettings.EVER_DISABLED_FWT.getValue();
 	    
@@ -705,7 +710,6 @@ public class UDPService implements Runnable {
 	        
 	        ret= 
 	            NetworkUtils.isValidAddress(RouterService.getExternalAddress()) && 
-	            canReceiveSolicited() && 
 	    		_portStable &&
 	    		_lastReportedPort==RouterService.getPort() &&
 	    		ipStable();
