@@ -12,8 +12,6 @@ public final class CharArraySetting extends Setting {
      */
     private char[] value;
 
-    public static final char[] DUMMY_CHAR_ARRAY = new char[0];
-
 
 	/**
 	 * Creates a new <tt>SettingBool</tt> instance with the specified
@@ -33,15 +31,12 @@ public final class CharArraySetting extends Setting {
 
 	CharArraySetting(Properties defaultProps, Properties props, String key, 
                                                           String defaultValue) {
-		super(defaultProps, props, key, defaultValue, null, null, null);
+		super(defaultProps, props, key, defaultValue, null);
 	}
      
 	CharArraySetting(Properties defaultProps, Properties props, String key, 
-                 char[] defaultValue, String simppKey, char[] max, char[] min) {
-		super(defaultProps, props, key, new String(defaultValue), 
-                                                           simppKey, max, min);
-        if(max != DUMMY_CHAR_ARRAY || min != DUMMY_CHAR_ARRAY)
-            throw new IllegalArgumentException("illegal max or min in setting");
+                 char[] defaultValue, String simppKey) {
+		super(defaultProps, props, key, new String(defaultValue), simppKey);
 	}
 
    
@@ -71,8 +66,4 @@ public final class CharArraySetting extends Setting {
         value = sValue.trim().toCharArray();
     }
 
-    protected boolean isInRange(String value) {
-        //cannot handle ranges for char arrays. Just return true
-        return true;
-    }
 }

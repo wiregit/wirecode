@@ -5,7 +5,7 @@ import java.util.Properties;
 /**
  * Class for an float setting.
  */
-public final class FloatSetting extends Setting {
+public final class FloatSetting extends AbstractNumberSetting {
     
     private float value;
 

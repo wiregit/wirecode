@@ -18,12 +18,12 @@ public final class StringSetting extends Setting {
 	 */
 	StringSetting(Properties defaultProps, Properties props, String key, 
                                        String defaultStr) {
-		super(defaultProps, props, key, defaultStr, null, null, null);
+		super(defaultProps, props, key, defaultStr, null);
 	}
 
 	StringSetting(Properties defaultProps, Properties props, String key, 
-                   String defaultStr, String simppKey, String max, String min) {
-		super(defaultProps, props, key, defaultStr, simppKey, max, min);
+                   String defaultStr, String simppKey) {
+		super(defaultProps, props, key, defaultStr, simppKey);
 	}
         
 	/**
@@ -50,11 +50,5 @@ public final class StringSetting extends Setting {
      */
     protected void loadValue(String sValue) {
         value = sValue;
-    }
-    
-    protected boolean isInRange(String value) {
-        //This has no meaning for strings, just return true -- all strings are
-        //"in range"
-        return true;
     }
 }

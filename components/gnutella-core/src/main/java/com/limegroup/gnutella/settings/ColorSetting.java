@@ -31,12 +31,9 @@ public final class ColorSetting extends Setting {
 
 	static ColorSetting createColorSetting(Properties defaultProps, 
 										   Properties props, String key, 
-                                           Color defaultColor, String simppKey,
-                                           Color max, Color min ) { 
-        if(max != DUMMY_COLOR || min != DUMMY_COLOR)
-            throw new IllegalArgumentException("Illegal Color max or min");
+                                         Color defaultColor, String simppKey) { 
 		return new ColorSetting(defaultProps, props, key, 
-                                formatColor(defaultColor), simppKey, max, min);
+                                formatColor(defaultColor), simppKey);
 	}
 
 	/**
@@ -51,12 +48,12 @@ public final class ColorSetting extends Setting {
 	 */
 	private ColorSetting(Properties defaultProps, Properties props, String key, 
 						                       String value) {
-		super(defaultProps, props, key, value, null, null, null);
+		super(defaultProps, props, key, value, null);
 	}
 
 	private ColorSetting(Properties defaultProps, Properties props, String key, 
-                         String value, String simppKey, Color max, Color min) {
-		super(defaultProps, props, key, value, simppKey, max, min);
+                         String value, String simppKey) {
+		super(defaultProps, props, key, value, simppKey);
 	}
 
 
@@ -111,11 +108,6 @@ public final class ColorSetting extends Setting {
 		if(green.length() == 1) green = "0" + green;
 		if(blue.length() == 1)  blue  = "0" + blue;
 		return "#" + red + green + blue;
-    }
-
-    protected boolean isInRange(String value) {
-        //No illegal ranges for colors. Just return true
-        return true;
     }
         
 }

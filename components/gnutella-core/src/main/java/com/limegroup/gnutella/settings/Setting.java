@@ -1,7 +1,6 @@
 package com.limegroup.gnutella.settings;
 
 import java.util.Properties;
-import com.limegroup.gnutella.Assert;
 
 
 /**
@@ -45,18 +44,6 @@ public abstract class Setting {
      */
     private final String SIMPP_KEY;
 
-    /**
-     * Adds a safeguard against simpp making a setting take a value beyond the
-     * reasonable max -- could be null where this makes no sense -- eg: color
-     */
-    protected final Object MAX_VALUE;
-
-    /**
-     * Adds a safeguard against simpp making a setting take a value below the
-     * reasonable min -- could be null where this makes no sense - eg: color
-     */
-    protected final Object MIN_VALUE;
-    
     
 	/**
 	 * Constructs a new setting with the specified key and default
@@ -72,13 +59,11 @@ public abstract class Setting {
 	 *  setting is already contained in the map of default settings
 	 */
 	protected Setting(Properties defaultProps, Properties props, String key, 
-                String defaultValue, String simppKey, Object max, Object min) {
+                String defaultValue, String simppKey) {
 		DEFAULT_PROPS = defaultProps;
 		PROPS = props;
 		KEY = key;
         SIMPP_KEY = simppKey;
-        MAX_VALUE = max;
-        MIN_VALUE = min;
 		DEFAULT_VALUE = defaultValue;
 		if(DEFAULT_PROPS.containsKey(key)) 
 			throw new IllegalArgumentException("duplicate setting key");
@@ -155,12 +140,6 @@ public abstract class Setting {
      * with the value specified by Simpp 
      */
     protected void setValue(String value) {
-        if(isSimppEnabled()) {
-            Assert.that(MAX_VALUE != null, "simpp setting created with no max");
-            Assert.that(MIN_VALUE != null, "simpp setting created with no min");
-            if(!isInRange(value))
-                return;
-        }
         PROPS.put(KEY, value);
         loadValue(value);
     }
@@ -173,12 +152,6 @@ public abstract class Setting {
      * Load value from property string value
      * @param sValue property string value
      */
-    abstract protected void loadValue(String sValue);
-    
-    /**
-     * The various settings must decide for themselves if this value is withing
-     * acceptable range
-     */
-    abstract protected boolean isInRange(String value);
+    abstract protected void loadValue(String sValue);    
 
 }

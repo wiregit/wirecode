@@ -5,7 +5,7 @@ import java.util.Properties;
 /**
  * Class for an int setting.
  */
-public final class IntSetting extends Setting {
+public final class IntSetting extends AbstractNumberSetting {
     
     private int value;
 

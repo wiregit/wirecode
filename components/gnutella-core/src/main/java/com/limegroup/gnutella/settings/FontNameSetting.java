@@ -15,20 +15,16 @@ public final class FontNameSetting extends Setting {
 
     String _fontName;
 
-    public static final String DUMMY_FONT_SETTING = "";
-
     FontNameSetting(Properties defaultProps, Properties props, String key,
                                                            String defaultStr) {
-        super(defaultProps, props, key, defaultStr, null, null, null);
+        super(defaultProps, props, key, defaultStr, null);
         _fontName = defaultStr;
     }
 
 
     FontNameSetting(Properties defaultProps, Properties props, String key,
-                  String defaultStr, String simppKey, String max, String min) {
-        super(defaultProps, props, key, defaultStr, simppKey, max, min);
-        if(max != DUMMY_FONT_SETTING || min != DUMMY_FONT_SETTING)
-            throw new IllegalArgumentException("illegal max or min in setting");
+                  String defaultStr, String simppKey) {
+        super(defaultProps, props, key, defaultStr, simppKey);
         _fontName = defaultStr;
     }
 
@@ -69,9 +65,4 @@ public final class FontNameSetting extends Setting {
             return false;
     }
     
-    protected boolean isInRange(String value) {
-        //No illegal ranges for file arrays. Just return true
-        return true;
-    }    
-
 }

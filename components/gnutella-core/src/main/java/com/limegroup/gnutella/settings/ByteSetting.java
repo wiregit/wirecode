@@ -5,7 +5,7 @@ import java.util.Properties;
 /**
  * Class for a byte setting.
  */
-public final class ByteSetting extends Setting {
+public final class ByteSetting extends AbstractNumberSetting {
     
     private byte value;
 

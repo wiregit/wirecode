@@ -12,8 +12,6 @@ public class StringArraySetting extends Setting {
     
     private String[] value;
 
-    public static final String[] DUMMY_STR_ARR = new String[0];
-
 	/**
 	 * Creates a new <tt>StringArraySetting</tt> instance with the specified
 	 * key and defualt value.
@@ -23,16 +21,12 @@ public class StringArraySetting extends Setting {
 	 */
 	StringArraySetting(Properties defaultProps, Properties props, String key, 
                                                        String[] defaultValue) {
-		super(defaultProps, props, key, decode(defaultValue), null, null, null);
+		super(defaultProps, props, key, decode(defaultValue), null);
 	}
 
 	StringArraySetting(Properties defaultProps, Properties props, String key, 
-                       String[] defaultValue, String simppKey, 
-                       String[] max, String[] min) {
-		super(defaultProps, props, key, decode(defaultValue),
-                                                          simppKey, max, min);
-        if(max != DUMMY_STR_ARR || min != DUMMY_STR_ARR)
-            throw new IllegalArgumentException("illegal max or min in setting");
+                       String[] defaultValue, String simppKey) {
+		super(defaultProps, props, key, decode(defaultValue), simppKey);
 	}
 
 
@@ -92,11 +86,6 @@ public class StringArraySetting extends Setting {
         }
             
         return buffer.toString();
-    }
-
-    protected boolean isInRange(String value) {
-        //No illegal ranges for string arrays. Just return true
-        return true;
     }
 
 }
