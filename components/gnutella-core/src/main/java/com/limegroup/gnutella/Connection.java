@@ -2,7 +2,6 @@ package com.limegroup.gnutella;
 
 import java.io.*;
 import java.net.*;
-//import com.jcraft.jzlib.*;
 import java.util.zip.*;
 import com.sun.java.util.collections.*;
 import java.util.Properties;
@@ -71,7 +70,6 @@ public class Connection {
      *   Deflater.getTotalOut -- The number of COMPRESSED bytes
      *   Deflater.getTotalIn  -- The number of UNCOMPRESSED bytes
      */
-    //private ZOutputStream _deflater;
     private Deflater _deflater;
     
     /**
@@ -84,6 +82,23 @@ public class Connection {
      */
     private volatile long _bytesReceived;
     
+    /**
+     * The number of compressed bytes sent to the stream.
+     * This is effectively the same as _deflater.getTotalOut(),
+     * but must be cached because Deflater's behaviour is undefined
+     * after end() has been called on it, which is done when this
+     * connection is closed.
+     */
+    private volatile long _compressedBytesSent;
+    
+    /**
+     * The number of compressed bytes read from the stream.
+     * This is effectively the same as _inflater.getTotalIn(),
+     * but must be cached because Inflater's behaviour is undefined
+     * after end() has been called on it, which is done when this
+     * connection is closed.
+     */
+    private volatile long _compressedBytesReceived;
 
     /** The possibly non-null VendorMessagePayload which describes what
      *  VendorMessages the guy on the other side of this connection supports.
@@ -97,6 +112,8 @@ public class Connection {
      * asynchronously before initialize() completes.  Note that the 
      * connection may have been remotely closed even if _closed==true.  
      * Protected (instead of private) for testing purposes only.
+     * This also protects us from calling methods on the Inflater/Deflater
+     * objects after end() has been called on them.
      */
     protected volatile boolean _closed=false;
 
@@ -180,6 +197,13 @@ public class Connection {
      * The "soft max" ttl to use for this connection.
      */
     private byte _softMax;
+    
+    /**
+     * Cache the 'connection closed' exception, so we have to allocate
+     * one for every closed connection.
+     */
+    protected static final IOException CONNECTION_CLOSED =
+        new IOException("connection closed");
 
     /**
      * Creates an uninitialized outgoing Gnutella 0.6 connection with the
@@ -322,7 +346,7 @@ public class Connection {
         // Check to see if close() was called while the socket was initializing
         if (_closed) {
             _socket.close();
-            throw new IOException("socket is closed");
+            throw CONNECTION_CLOSED;
         } 
         
         // Check to see if this is an attempt to connect to ourselves
@@ -379,11 +403,14 @@ public class Connection {
             }
             
             //wrap the streams with inflater/deflater
+            // These calls must be delayed until absolutely necessary (here)
+            // because the native construction for Deflater & Inflater 
+            // allocate buffers outside of Java's memory heap, preventing 
+            // Java from fully knowing when/how to GC.  The call to end()
+            // (done explicitly in the close() method of this class, and
+            //  implicitly in the finalization of the Deflater & Inflater)
+            // releases these buffers.
             if(isWriteDeflated()) {
-//                ZOutputStream zout = new ZOutputStream(_out, JZlib.Z_DEFAULT_COMPRESSION);
-//                zout.setFlushMode(JZlib.Z_SYNC_FLUSH);
-//                _out = zout;
-//                _deflater = zout;
                 _deflater = new Deflater();
                 _out = new CompressingOutputStream(_out, _deflater);
             }            
@@ -406,7 +433,6 @@ public class Connection {
             throw new BadHandshakeException(e);
         }
     }
-    Inflater inf = new Inflater();
 
     /** 
      * Sends and receives handshake strings for outgoing connections,
@@ -798,14 +824,17 @@ public class Connection {
         //repeatedly if the connection has been closed remotely.  This prevents
         //connections from dying.  The following works around the problem.  Note
         //that Message.read may still throw IOException below.
+        //See note on _closed for more information.
         if (_closed)
-            throw new IOException("connection closed");
+            throw CONNECTION_CLOSED;
 
         Message m = null;
         while (m == null) {
             m = Message.read(_in, HEADER_BUF, _softMax);
             if ( m != null ) {
                 _bytesReceived += m.getTotalLength();
+                if( isReadDeflated() )
+                    _compressedBytesReceived = _inflater.getTotalIn();
             }
         }
         return m;
@@ -826,7 +855,7 @@ public class Connection {
 		throws IOException, BadPacketException, InterruptedIOException {
         //See note in receive().
         if (_closed)
-            throw new IOException("connection closed");
+            throw CONNECTION_CLOSED;
 
         //temporarily change socket timeout.
         int oldTimeout=_socket.getSoTimeout();
@@ -838,6 +867,8 @@ public class Connection {
                 throw new InterruptedIOException("null message read");
             } else {
                 _bytesReceived += m.getTotalLength();
+                if( isReadDeflated() )
+                    _compressedBytesReceived = _inflater.getTotalIn();                
             }            
             return m;
         } finally {
@@ -857,8 +888,21 @@ public class Connection {
      *   arise.
      */
     public void send(Message m) throws IOException {
-        m.write(_out);
+        try {
+            m.write(_out);
+        } catch(NullPointerException npe) {
+            //If the remote-connection closed while we were deflating data,
+            //then the native deflateBytes method in the Deflater will
+            //throw an NPE.  We'll interpret that as a 'connection closed'
+            //iff writing was deflated.
+            if(isWriteDeflated())
+                throw CONNECTION_CLOSED;
+            else
+                throw npe;
+        }
         
+        // we cannot also set the compressedBytesSent here
+        // because the deflater may not have deflated them yet
         _bytesSent += m.getTotalLength();
     }
 
@@ -866,37 +910,64 @@ public class Connection {
      * Flushes any buffered messages sent through the send method.
      */
     public void flush() throws IOException {
-        _out.flush();
+        try {
+            _out.flush();
+        } catch(NullPointerException npe) {
+            //If the remote-connection closed while we were deflating data,
+            //then the native deflateBytes method in the Deflater will
+            //throw an NPE.  We'll interpret that as a 'connection closed'
+            //iff writing was deflated.
+            if(isWriteDeflated())
+                throw CONNECTION_CLOSED;
+            else
+                throw npe;
+        }
+        
+        if( isWriteDeflated() ) {
+            // we must set the compressedBytesSent here, instead of
+            // in send(Message), because flush forces the deflater
+            // to deflate the output.
+            if (!_closed)
+                _compressedBytesSent = _deflater.getTotalOut();
+        }
     }
     
-    /** Returns the number of bytes sent on this connection. */
+    /**
+     * Returns the number of bytes sent on this connection.
+     * If the outgoing stream is compressed, the return value indicates
+     * the compressed number of bytes sent.
+     */
     public long getBytesSent() {
         if(isWriteDeflated())
-            return _deflater.getTotalOut();
+            return _compressedBytesSent;
         else            
             return _bytesSent;
     }
     
     /**
      * Returns the number of uncompressed bytes sent on this connection.
-     * If the writing is not compressed, this is effectively the same
+     * If the outgoing stream is not compressed, this is effectively the same
      * as calling getBytesSent()
      */
     public long getUncompressedBytesSent() {
         return _bytesSent;
     }
     
-    /** Returns the number of bytes received on this connection. */
+    /** 
+     * Returns the number of bytes received on this connection.
+     * If the incoming stream is compressed, the return value indicates
+     * the number of compressed bytes received.
+     */
     public long getBytesReceived() {
         if(isReadDeflated())
-            return _inflater.getTotalIn();
+            return _compressedBytesReceived;
         else
             return _bytesReceived;
     }
     
     /**
      * Returns the number of uncompressed bytes read on this connection.
-     * If the reading is not compressed, this is effectively the same
+     * If the incoming stream is not compressed, this is effectively the same
      * as calling getBytesReceived()
      */
     public long getUncompressedBytesReceived() {
@@ -905,24 +976,21 @@ public class Connection {
     
     /**
      * Returns the percentage saved through compressing the outgoing data.
-     * Remember that ...
-     *   Deflater.getTotalOut -- The number of COMPRESSED bytes
-     *   Deflater.getTotalIn  -- The number of UNCOMPRESSED bytes          
+     * The value may be slightly off until the output stream is flushed,
+     * because the value of the compressed bytes is not calculated until
+     * then.
      */
     public float getSentSavedFromCompression() {
         if( !isWriteDeflated() ) return 0;
-        return 1-((float)_deflater.getTotalOut()/(float)_deflater.getTotalIn());
+        return 1-((float)_compressedBytesSent/(float)_bytesSent);
     }
     
     /**
      * Returns the percentage saved from having the incoming data compressed.
-     * Remember that ...
-     *   Inflater.getTotalOut -- The number of UNCOMPRESSED bytes
-     *   Inflater.getTotalIn  -- The number of COMPRESSED bytes     
      */
     public float getReadSavedFromCompression() {
         if( !isReadDeflated() ) return 0;
-        return 1-((float)_inflater.getTotalIn()/(float)_inflater.getTotalOut());
+        return 1-((float)_compressedBytesReceived/(float)_bytesReceived);
     }
 
     /** Returns the host set at construction */

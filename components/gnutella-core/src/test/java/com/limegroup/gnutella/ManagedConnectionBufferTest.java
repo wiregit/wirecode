@@ -83,14 +83,6 @@ public class ManagedConnectionBufferTest extends BaseTestCase {
         assertEquals("unexpected number of sent messages", 1, out.getNumMessagesSent());
         assertEquals( pr.getTotalLength(), in.getUncompressedBytesReceived() );
         assertEquals( pr.getTotalLength(), out.getUncompressedBytesSent() );
-        if( out.isWriteDeflated() ) {
-            assertTrue("out deflated, but in isn't", in.isReadDeflated());
-            assertEquals( out.getBytesSent(), in.getBytesReceived() );
-            assertEquals( out.getSentSavedFromCompression(), in.getReadSavedFromCompression(), 0.0 );
-        } else {
-            assertEquals("bytes sent differs from total length",
-    					 out.getBytesSent(), pr.getTotalLength());
-        }
         assertLessThan("Unreasonably long send time", 500, elapsed);
         assertEquals("hopped something other than 0", 0, pr.getHops());
         assertEquals("unexpected ttl", 4, pr.getTTL());

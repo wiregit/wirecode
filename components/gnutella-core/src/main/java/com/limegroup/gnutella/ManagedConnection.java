@@ -515,21 +515,25 @@ public class ManagedConnection extends Connection
 
         /** While the connection is not closed, sends all data delay. */
         public void run() {
+            // Catching any exception will remove this from the list
+            // of connections.  Catching something other than an IOException
+            // will tell ErrorService about it (because IOExceptions are
+            // expected errors from closed connections).
             try {
                 while (true) {
                     repOk();
-                    try {
-                        waitForQueued();
-                        sendQueued();
-                    } catch (IOException e) {
-                        if (_manager!=null) //may be null for testing
-                            _manager.remove(ManagedConnection.this);
-                        _runnerDied=true;
-                        return;
-                    }
+                    waitForQueued();
+                    sendQueued();
                     repOk();
-                }
+                }                
+            } catch (IOException e) {
+                if (_manager!=null) //may be null for testing
+                    _manager.remove(ManagedConnection.this);
+                _runnerDied=true;
             } catch(Throwable t) {
+                if (_manager!=null) //may be null for testing
+                    _manager.remove(ManagedConnection.this);
+                _runnerDied=true;      
                 ErrorService.error(t);
             }
         }
@@ -552,7 +556,7 @@ public class ManagedConnection extends Connection
             }
             
             if (! isOpen())
-                throw new IOException("connection closed");
+                throw CONNECTION_CLOSED;
         }
         
         /** Send several queued message of each type. */

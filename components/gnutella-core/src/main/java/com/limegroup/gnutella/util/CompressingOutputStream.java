@@ -3,6 +3,14 @@ package com.limegroup.gnutella.util;
 import java.io.*;
 import java.util.zip.*;
 
+/**
+ * Simulates zlib's Z_PARTIAL_FLUSH and Z_SYNC_FLUSH behaviour.
+ * This is a workaround for the following bugParade bugs:<br>
+ * http://developer.java.sun.com/developer/bugParade/bugs/4255743.html <br>
+ * http://developer.java.sun.com/developer/bugParade/bugs/4206909.html <br>
+ * The code was taken from the comments at those respective pages and
+ * modified slightly.
+ */
 public class CompressingOutputStream extends DeflaterOutputStream {
     
     public CompressingOutputStream (final OutputStream out, final Deflater flate) {
