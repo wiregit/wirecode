@@ -11,6 +11,8 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.net.SocketException;
+import java.util.Collections;
+import java.util.List;
 
 import junit.framework.Test;
 
@@ -137,7 +139,8 @@ public class FWTDetectionTest extends BaseTestCase {
         
         writeToGnet("127.0.0.1:"+REMOTE_PORT1+"\n");
         
-        RouterService.getHostCatcher().recoverHosts();
+        RouterService.getHostCatcher().expire();
+        RouterService.getHostCatcher().sendUDPPings();
         
         //we should receive a udp ping requesting ip
         assertTrue(ponger1.listen().requestsIP());
@@ -215,14 +218,16 @@ public class FWTDetectionTest extends BaseTestCase {
         
         writeToGnet("127.0.0.1:"+REMOTE_PORT1+"\n");
         
-        RouterService.getHostCatcher().recoverHosts();
+        RouterService.getHostCatcher().expire();
+        RouterService.getHostCatcher().sendUDPPings();
         
         //we should receive a udp ping requesting ip
         assertTrue(ponger1.listen().requestsIP());
         
         // if we have received incoming, pings should not be requesting
         ConnectionSettings.EVER_ACCEPTED_INCOMING.setValue(true);
-        RouterService.getHostCatcher().recoverHosts();
+        RouterService.getHostCatcher().expire();
+        RouterService.getHostCatcher().sendUDPPings();
         
         assertFalse(ponger1.listen().requestsIP());
         
@@ -237,7 +242,8 @@ public class FWTDetectionTest extends BaseTestCase {
         ConnectionSettings.EVER_ACCEPTED_INCOMING.setValue(false);
         
         writeToGnet("127.0.0.1:"+REMOTE_PORT1+"\n"+"127.0.0.1:"+REMOTE_PORT2+"\n");
-        RouterService.getHostCatcher().recoverHosts();
+        RouterService.getHostCatcher().expire();
+        RouterService.getHostCatcher().sendUDPPings();
         
         assertTrue(ponger1.listen().requestsIP());
         assertTrue(ponger2.listen().requestsIP());
@@ -262,7 +268,8 @@ public class FWTDetectionTest extends BaseTestCase {
         ConnectionSettings.EVER_ACCEPTED_INCOMING.setValue(false);
         
         writeToGnet("127.0.0.1:"+REMOTE_PORT1+"\n"+"127.0.0.1:"+REMOTE_PORT2+"\n");
-        RouterService.getHostCatcher().recoverHosts();
+        RouterService.getHostCatcher().expire();
+        RouterService.getHostCatcher().sendUDPPings();
         
         assertTrue(ponger1.listen().requestsIP());
         assertTrue(ponger2.listen().requestsIP());
@@ -288,7 +295,8 @@ public class FWTDetectionTest extends BaseTestCase {
     public void testPongCarriesBadPort() throws Exception{
         ConnectionSettings.EVER_ACCEPTED_INCOMING.setValue(false);
         writeToGnet("127.0.0.1:"+REMOTE_PORT1+"\n"+"127.0.0.1:"+REMOTE_PORT2+"\n");
-        RouterService.getHostCatcher().recoverHosts();
+        RouterService.getHostCatcher().expire();
+        RouterService.getHostCatcher().sendUDPPings();
         
         assertTrue(ponger1.listen().requestsIP());
         assertTrue(ponger2.listen().requestsIP());
@@ -337,7 +345,8 @@ public class FWTDetectionTest extends BaseTestCase {
         RouterService.getAcceptor().setExternalAddress(InetAddress.getLocalHost());
         
         writeToGnet("127.0.0.1:"+REMOTE_PORT1+"\n"+"127.0.0.1:"+REMOTE_PORT2+"\n");
-        RouterService.getHostCatcher().recoverHosts();
+        RouterService.getHostCatcher().expire();
+        RouterService.getHostCatcher().sendUDPPings();
         
         assertTrue(ponger1.listen().requestsIP());
         assertTrue(ponger2.listen().requestsIP());
@@ -372,7 +381,8 @@ public class FWTDetectionTest extends BaseTestCase {
         assertTrue(UDPService.instance().canDoFWT());
         writeToGnet("127.0.0.1:"+REMOTE_PORT1+"\n"+"127.0.0.1:"+REMOTE_PORT2+"\n");
         cmStub.setConnected(false);
-        RouterService.getHostCatcher().recoverHosts();
+        RouterService.getHostCatcher().expire();
+        RouterService.getHostCatcher().sendUDPPings();
         ponger1.listen();
         Endpoint badAddress = new Endpoint("1.2.3.4",RouterService.getPort());
         PingReply badGuid = PingReply.create(GUID.makeGuid(),(byte)1,badAddress);
@@ -519,6 +529,18 @@ public class FWTDetectionTest extends BaseTestCase {
         }
         public void setConnected(boolean yes) {
             connected=yes;
+        }
+        
+        public boolean isFullyConnected() {
+            return false;
+        }
+        
+        public int getPreferredConnectionCount() {
+            return 1;
+        }
+        
+        public List getInitializedConnections() {
+            return Collections.EMPTY_LIST;
         }
     }
 
