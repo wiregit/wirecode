@@ -10,11 +10,11 @@ import java.io.File;
 public class FileListHTMLPage {
 
     public final String htmlBegin =
-    "<html>\r\n<head>\r\n<metacontent=\"text/html; charset=ISO-8859-1\"\r\nhttp-equiv=\"content-type\">\r\n<title></title>\r\n</head>\r\n<body>\r\n<br>\r\n<span style=\"font-weight: bold; text-decoration: underline;\">File Listing for ";
+        "<html>\r\n<head>\r\n<title>LimeWire.org</title>\r\n<style type=\"text/css\"><!--\r\np {\r\nfont-family: Verdana, Arial, Helvetica, sans-serif;\r\nfont-size: 10px;\r\ncolor: #666666;\r\nfont-weight: bold;\r\n}\r\n-->\r\n</style>\r\n</head>\r\n<body link=\"#000000\" vlink=\"#000000\" alink=\"#339900\" marginwidth=\"0\"\r\nmarginheight=\"0\" leftmargin=\"0\" topmargin=\"0\">\r\n<br>\r\n<br>\r\n<p align=\"center\"><img src=\"http://www.limewire.org/img/logo_wh.gif\" alt=\"\"></p>\r\n<p align=\"center\">File Listing for ";
 
-    public final String htmlMiddle = "</span><br>\r\n<br>";
+    public final String htmlMiddle = "<br>\r\n</p>\r\n<p align=\"center\">\r\n";
 
-    public final String htmlEnd = "\r\n<br>\r\n</body>\r\n</html>";
+    public final String htmlEnd = "</p>\r\n<br>\r\n</body>\r\n</html>";
 
     private static final FileListHTMLPage _instance = new FileListHTMLPage();
     public static FileListHTMLPage instance() {
