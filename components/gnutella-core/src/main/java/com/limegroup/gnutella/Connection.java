@@ -832,9 +832,17 @@ public class Connection {
         while (m == null) {
             m = Message.read(_in, HEADER_BUF, _softMax);
             if ( m != null ) {
-                _bytesReceived += m.getTotalLength();
-                if( isReadDeflated() )
+                // _bytesReceived must be set differently
+                // when compressed because the inflater will
+                // read more input than a single message,
+                // making it appear as if the deflated input
+                // was actually larger.
+                if( isReadDeflated() ) {
                     _compressedBytesReceived = _inflater.getTotalIn();
+                    _bytesReceived = _inflater.getTotalOut();
+                } else {
+                    _bytesReceived += m.getTotalLength();
+                }
             }
         }
         return m;
@@ -866,9 +874,17 @@ public class Connection {
             if (m==null) {
                 throw new InterruptedIOException("null message read");
             } else {
-                _bytesReceived += m.getTotalLength();
-                if( isReadDeflated() )
-                    _compressedBytesReceived = _inflater.getTotalIn();                
+                // _bytesReceived must be set differently
+                // when compressed because the inflater will
+                // read more input than a single message,
+                // making it appear as if the deflated input
+                // was actually larger.
+                if( isReadDeflated() ) {
+                    _compressedBytesReceived = _inflater.getTotalIn();
+                    _bytesReceived = _inflater.getTotalOut();
+                } else {
+                    _bytesReceived += m.getTotalLength();
+                }           
             }            
             return m;
         } finally {
@@ -901,9 +917,12 @@ public class Connection {
                 throw npe;
         }
         
-        // we cannot also set the compressedBytesSent here
-        // because the deflater may not have deflated them yet
         _bytesSent += m.getTotalLength();
+        // we attempt to set _compressedBytesSent here, but in all
+        // likelyhood, it will not be updated.  the true value is
+        // set after the data is flushed.
+        if(!_closed && isWriteDeflated())
+            _compressedBytesSent = _deflater.getTotalOut();        
     }
 
     /**
@@ -923,13 +942,10 @@ public class Connection {
                 throw npe;
         }
         
-        if( isWriteDeflated() ) {
-            // we must set the compressedBytesSent here, instead of
-            // in send(Message), because flush forces the deflater
-            // to deflate the output.
-            if (!_closed)
-                _compressedBytesSent = _deflater.getTotalOut();
-        }
+        // we must set the compressedBytesSent here because flush
+        // forces the deflater to deflate the output.
+        if(!_closed && isWriteDeflated())
+            _compressedBytesSent = _deflater.getTotalOut();
     }
     
     /**
