@@ -49,6 +49,17 @@ public abstract class AbstractMessageReader implements MessageReader {
      */
     protected static final boolean RECORD_STATS = !CommonUtils.isJava118();
 
+    /**
+     * Utility method for checking the fields in incoming messages for validity.
+     * 
+     * @param ttl the time to live of the message
+     * @param hops the hops the message has travelled
+     * @param softMax the soft max TTL for the message
+     * @param func the function code of the message
+     * 
+     * @throws BadPacketException if any of the fields are not within expected
+     *  ranges
+     */
     protected static final void checkFields(byte ttl, byte hops, byte softMax,
         byte func) throws BadPacketException {
         //4. Check values.   These are based on the recommendations from the
