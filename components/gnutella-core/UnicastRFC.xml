@@ -172,11 +172,13 @@
 	    In several ways, this scheme is simple and easy to 
 		implement.  In particular, the system is completely transparent
 		to leaves.  From the leaf perspective, the search system has
-		not changed at all.  From the UltraPeer perspective, it is simply 
+		not changed at all.  This simplifies the design and allows 
+		any leaves not implementing this proposal to benefit from it
+		nevertheless.  From the UltraPeer perspective, it is simply 
 		a switch to sending out all queries with TTL=1 while querying
-		a much larger set of UltaPeers directly over UDP, in addition
+		a much larger set of UltraPeers directly over UDP, in addition
 		to the traditional queries on intra-UltraPeer connections over
-		TCP.
+		TCP.  
 
 
 		<vspace/>
@@ -185,33 +187,48 @@
 		must send queries iteratively to known UltraPeers via UDP,
 		stopping when enough results are received.  UltraPeers are 
 		also responsible for maintaining a full cache of other 
-		UltraPeers that they can query via UDP.
-		The following sections discuss these changes.		
+		UltraPeers that they can query via UDP.  On the server side,
+		UltraPeers must listen on a UDP port, and they must send their
+		responses over the same UDP port they are listening on.  Aside from
+		the protocol used when sending or receiving messages, however,
+		the changes are minimal.
+		The following sections discuss these changes.  In this discussion,
+		the "client" is the UltraPeer initiating the query, either on its
+		own behalf or on behalf of one of its leaves (most importantly,
+		the "client" is never a leaf -- it is always the UltraPeer).  
+		The "server" is the receiver of the query, which can either
+		be an UltraPeer or a leaf.
 	  </t> 
-	  <section anchor="algorithm" title="Basic Algorithm">
+	  <section anchor="algorithm" title="Client">
 	    <t>
-		UltraPeers query other UltraPeers one by one until they receive
-		a desired number of results or queries are sent to a maximum 
-		number of UltraPeers.  When performing this 
-		search, UltraPeers MUST NOT query the same UltraPeer more than
-		once, as doing so would defeat the purpose of the proposal.
-		If a client does not receive any results from a given 
-		UltraPeer, it MUST assume the UltraPeer has no results
-		to return, and not that the datagram was lost.  This is 
-		necessary because the datagram being lost would indicate 
-		congestion around that UltraPeer, and resending queries to
-		that UltraPeer would lead to yet higher congestion.  
-		Clients also MUST pause for a reasonable amount of time 
-		between queries to UltraPeers, perhaps about 600 milliseconds.
-		The ideal interval between queries should be determined by 
-		experimentation, but clients SHOULD send as few queries as 
-		possible without degrading user experience.  The client MUST 
-		stop querying when it either receives "enough" replies or it 
-		has queried a maximum number of UltraPeers.  A simple 
-		algorithm would be for the client to continue querying until
-		it has received 100 results or queried 1,000 UltraPeers,
-		for example.  An alternative would be for the number of 
-		results considered "enough" to decrease as a function
+		UltraPeers query other UltraPeers one by one until either:
+		  <list style="numbers">
+		    <t>
+			  The desired number of results is received.
+			</t>
+			<t>
+			  The maximum number of UltraPeers is queried.
+			</t>
+		  </list>
+		
+		The client MUST pause for a reasonable amount
+		of time between UltraPeer queries, perhaps about
+		600 milliseconds.  This gives the previous query time to supply
+		all of its results, potentially reaching the desired number
+		and ending the query.  The optimal interval between searches
+		should be determined by experimentation, but implementors MUST
+		send as few queries as possible without degrading user experience. 
+		This is a tradeoff between latency and network impact.
+
+		<vspace/>
+		<vspace/>
+		With regard to 1) above, implementors have some flexibility, 
+		particularly in their technique for
+		determing what they consider "enough" results.  
+		A simple algorithm would be for the client to continue 
+		querying until it has received 100 results or queried 1,000 UltraPeers, 
+		for example.  An alternative would be for the number of results 
+		considered "enough" to decrease as a function
 		of the number of UltraPeers searched.  This algorithm would 
 		recognize, for example, that if a search has returned no
 		results after querying 500 UlraPeers, it is unlikely
@@ -221,32 +238,96 @@
 		of UltraPeers required to service queries for rare files.
 		The details of these algorithms should also be determined 
 		through experimentation by client developers, again keeping
-		in mind that the overall 
-		goal is to reduce query and query hit traffic for 
-		everyone while maintaining searchability and improving
-		searchability for rare files.  In any case, a client 
-		MUST NOT query more than 10,000 UltraPeers for a given 
-		search.  Similarly, clients MUST NOT require more than
-		3,000 results prior to terminating the search.
+		in mind that the overall goal is to reduce query and query 
+		hit traffic for everyone while maintaining searchability and 
+		improving searchability for rare files.  Clients should also 
+		keep in mind that an overly aggressive implementation will
+		ultimately damage their own clients.
+		
+		<vspace/>
+		<vspace/>
+		When performing this search, there are several rules that
+		UltraPeers MUST follow.  These are:
+		  <list style="numbers">
+		    <t>
+			  Searches MUST NOT be sent to more than 20,000
+			  UltraPeers.
+			</t>
+			<t>
+			  Clients MUST NOT seek more than 2,000 results.
+			</t>
+			<t>
+			  Clients MUST NOT query more than 1 UltraPeer every
+			  100 milliseconds.
+			</t>
+		    <t>
+			  UltraPeers MUST NOT query the same UltraPeer more 
+			  than once.
+			</t>
+			<t>
+			  Although already implied by 4), for clarity, a node
+			  MUST NOT send a second query to an UltraPeer if it
+			  does not receive responses to the first query (it
+			  MUST NOT consider that the datagram was lost and
+			  requery as a result).
+			</t>
+		  </list>
+
+	    These numbers SHOULD be considered the absolute maximum
+		values, and they are not the settings developers should use.
+		Again, the optimal limits should be determined by 
+		experimentation, but the above rules always apply.  Implementors
+		should keep in mind that Gnutella is a network that relies on
+		the fact that other clients are not overly selfish or
+		abusive -- Gnutella relies on trust to a large degree.  
+		The overall goal of this change is to reduce 
+		query and query hit traffic for 
+		everyone while maintaining current levels of searchability 
+		and even improving
+		searchability for rare files.  The reduction in traffic
+		should reduce the bandwidth, CPU, and memory load on
+		UltraPeers, but this is only possible if developers use 
+		conservative values when writing their implementations.
+		</t>
+	  </section>
+	  <section anchor="server" title="Server">
+	    <t>
+	    The changes on the server side are less significant.  Again,
+		no changes are required for leaves.  In fact, leaves SHOULD NOT open
+		UDP ports for incoming traffic, as they never receive UDP
+		messages directly.
+		UltraPeers MUST, however, open a port
+		for incoming UDP traffic, and they MUST use the same 
+		port that they are using for incoming Gnutella messages 
+		over TCP.  When a server receives a message over its open UDP
+		port, it MUST send any replies via UDP and over the same
+		port it is listening on.  As in the current Gnutella 
+		network, all replies are sent back to the sender.  Otherwise,
+		servers should respond to messages just as if they 
+		recieved them over TCP.  Servers SHOULD accept all of the
+		traditional Gnutella messages, as defined in 
+		the <xref target="refs.gnutella_rfc">Gnutella RFC</xref>.
 		</t>
 	  </section>
 	  <section anchor="discovery" title="UltraPeer Discovery">
 	    <t>
 		  For this scheme to work, all UltraPeers must have the
-		  ability to discover other UltaPeers.  UltraPeers 
+		  ability to discover other UltraPeers that accept incoming
+		  messages over UDP.  UltraPeers 
 		  supporting this proposal MUST advertise this fact
 		  using a <xref target="ggep_pongs">GGEP extension</xref> 
 		  in pongs.  UltraPeers also MUST ensure that they always
 		  have a full cache of other UltraPeers to query.  
 		  Because leaves always query the network via their
-		  UltaPeer, leaves do not have to maintain a set of
-		  UltraPeers to query, as this is the UltraPeer's 
+		  UltraPeer, leaves do not have to maintain a set of
+		  UltraPeers to query -- this is the UltraPeer's 
 		  responsibility.		  
 		  <vspace/>
 		  <vspace/>
-		  If an UltaPeer's cache of other UltraPeers drops
+		  If an UltraPeer's cache of other UltraPeers drops
 		  below a certain threshold, for example 1000, the
-		  UltraPeer MUST take steps to refresh its cache.  
+		  UltraPeer MUST take steps to refresh its cache.  To
+		  do this, UltraPeers send pings over UDP to the 
 		  It does so using the normal broadcast ping message, 
 		  looking for 
 		  the <xref target="ggep_pongs">GGEP extension</xref> in
@@ -257,184 +338,7 @@
 		</t>
 	  </section>
 	  </section>
-	<!--
-	<section anchor="searching_architecture" title="Searching Architecture">
-	  <t>
-	    The basic architecture of this search system is simple.  Client
-		nodes query UltraPeers one by one until they receive
-		a desired number of results or queries are sent to a maximum 
-		number of UltraPeers.  
-		Clients <xref target="discovery">discover</xref> unicast-enabled
-		UltraPeers through a <xref target="ggep_pongs">GGEP
-		extension</xref> in pongs.  This is discussed in another 
-		<xref target="discovery">section</xref>.  When performing this 
-		search, clients MUST NOT query the same UltraPeer more than
-		once, as doing so would defeat the purpose of the proposal.
-		If a client does not receive any results from a given 
-		UltraPeer, it MUST be assumed the UltraPeer has no results
-		to return, and not that the datagram was lost.  This is 
-		necessary because the datagram being lost would indicate 
-		congestion around that UltraPeer, and resending queries to
-		that UltraPeer would lead to yet higher congestion.  
-		Clients also MUST pause for a reasonable amount of time 
-		between queries to UltraPeers, perhaps about 600 milliseconds.
-		The ideal interval between queries should be determined by 
-		experimentation, but clients SHOULD send as few queries as 
-		possible without degrading user experience.  The client MUST 
-		stop querying when it either receives "enough" replies or it 
-		has queried a maximum number of UltraPeers.  A simple 
-		algorithm would be for the client to continue querying until
-		it has received 100 results or queried 1,000 UltraPeers,
-		for example.  An alternative would be for the number of 
-		results considered "enough" to decrease as a function
-		of the number of UltraPeers searched.  This algorithm would 
-		recognize, for example, that if a search has returned no
-		results after querying 500 UlraPeers, it is unlikely
-		to get very many results from querying the next 500,
-		and it may be satisfied as soon as it receives any results
-		at all and stop there.  This would reduce the total number
-		of UltraPeers required to service queries for rare files.
-		The details of these algorithms should also be determined 
-		through experimentation by client developers, again keeping
-		in mind that the overall 
-		goal is to reduce query and query hit traffic for 
-		everyone while maintaining searchability and improving
-		searchability for rare files.  In any case, a client 
-		MUST NOT query more than 10,000 UltraPeers for a given 
-		query.   
-		<vspace/>
-		<vspace/>
-		Firewalls and security complicate the system.  The
-		following sections discuss the searching 
-		algorithm in detail from both the client and the server 
-		perspective.  For each, both the firewalled and the 
-		non-firewalled cases are addressed.  In this discussion, 
-		the "server" is the node responding to a query, whereas
-		the "client" is the node initiating the query.  In all
-		discussions of firewalled nodes (on both the server side and
-		the client side), the firewalled nodes are presumed to 
-		be leaves.
 
-		From the perspective of nodes initiating queries and
-		nodes responding to queries, In this discussion, 
-		the "server" is the node responding to a query, whereas
-		the "client" is the node initiating the query.  In all
-	  </t>
-	</section>
-	  <section anchor="client" title="Searching on the Client Side">
-	    <section anchor="client_not_firewalled" title="Client Not Firewalled">>
-	      <t>
-		    When the client is not firewalled, that client sends 
-		    queries via <xref target="udp">UDP datagrams</xref> 
-		    directly to UltraPeers supporting
-		    unicast queries.  The non-firewalled client bypasses 
-		    its own UltraPeers completely (the ones connected via TCP),
-		    although it MAY send TTL=1 queries to them as well over
-		    the normal TCP connection.  Such a querying client must include
-		    the <xref target="ggep_ip_port">GGEP extension</xref> in
-		    queries advertising the IP and UDP port that results should
-		    be returned to.		  
-		  </t>
-	    </section>
-	    <section anchor="client_firewalled" title="Client Firewalled">
-	      <t>
-			  If the client is firewalled, it must use one
-			  of its UltraPeers to proxy its query.  This is the case
-			  because servers cannot send replies over incoming
-			  UDP datagrams.  While firewalled clients could send outgoing
-			  queries over UDP, doing so would create 
-			  <xref target="security">security</xref> problems.  Therefore,
-			  a firewalled client must send a query to one of its
-			  UltraPeers that has the ability to serve as a search proxy.
-			  The query MUST have yet another GGEP extension that 
-			  specifies that the UltraPeer should handle the query on
-			  the leaf's behalf.  This extension is described in the
-			  <xref target="ggep">section</xref> on GGEP extensions.
-			  <vspace/>
-			  <vspace/>
-			  When the UltraPeer receives such a marked query from one
-			  of its leaves, it conducts the
-			  search precisely as if it were searching on its own,
-			  except that it routes all replies back to the leaf that
-			  initiated the query.  While this increases the load on
-			  UltraPeers, it allows firewalled leaves to use this
-			  search model without exposing the network to attack.
-			  <vspace/>
-			  <vspace/>
-			  This algorithm applies regardless of the firewalled status
-			  of any receiving clients.		  
-		  </t>
-	    </section>
-	  </section>
-	  <section anchor="server" title="Responding to Searches on the Server Side">
-	    <section anchor="server_not_firewalled" title="Server Not Firewalled">
-		  <t>
-			  When the server is not firewalled and it
-			  has matching query hits, it MUST reply via UDP to the IP and 
-			  UDP port advertised in the 
-			  query's <xref target="ggep_ip_port">GGEP extension</xref>.  The
-			  only exception is when the server is an UltraPeer.
-			  In this case, the UltraPeer should drop the query entirely
-			  if the advertised IP address does not match the IP address
-			  of the datagram itself.  This issue is discussed further in
-			  the section 
-			  on <xref target="security">security considerations</xref>.	
-		  </t>	  
-		</section>
-		<section anchor="server_firewalled" title="Server Firewalled">
-		    <t>
-			  When the server is firewalled, it sends its reply back
-			  the UltraPeer that sent it the query, ignoring any IP and 
-			  port listed for UDP responses in the 
-			  query's <xref target="ggep_ip_port">GGEP extension</xref>.
-			  So, in the firewalled case, servers (leaves in this case) 
-			  handle the query precisely as they do in the traditional
-			  Gnutella scheme.
-			  <vspace/>
-			  <vspace/>
-			  At first, this choice may seem strange, as the firewalled
-			  server could send an outgoing datagram directly to the
-			  client.  It uses the UltraPeer because hosts must use a 
-			  PUSH request when requesting its files, and the UltraPeer 
-			  must have its client GUID in its push routing tables in order 
-			  to service such a request.  If this were not the case, it 
-			  would be able respond directly to the IP and UPD port 
-			  listed in the query.  Responding through the UltraPeer
-			  allows the use of the existing push 
-			  architecture.(See <xref target="push"/>)
-			</t>
-		</section>
-	  </section>
-	  
-    <section anchor="other_cases" title="Other Cases">
-	  <section anchor="both_firewalled"
-		       title="Both Client and Server are Firewalled">
-	    <t>
-	      In the case that both the client and the server
-		  are firewalled, the client simply follows the rules for 
-		  firewalled clients, and the server simply follows the 
-		  rules for firewalled servers.
-	    </t>
-	  </section>
-	  <section anchor="legacy" 
-	           title="Searching Leaves that do Not Implement UGS">
-        <t>
-		  When an UltraPeer receives an incoming UPD query, it MUST
-		  forward that query to all appropriate leaves whether or not
-		  those leaves implement this proposal.  Older leaves will, of
-		  course, be unable to return results via UDP.  In fact, they
-		  will respond to the query just as they would any other query,
-		  gracefully ignoring the additional GGEP block.  The UltraPeer,
-		  however, has the additional responsibility of routing any of
-		  these query hits back to the sender via UDP.  This should 
-		  occur naturally depending on the implementation.  These
-		  leaves are handled in the exact same way as firewalled
-		  leaves that do implement this 
-		  proposal.  (See <xref target="server_firewalled"/>)
-		</t>
-      </section>
-	</section>
-	-->
 
       <section anchor="udp" title="UDP">
 	    <t>
@@ -821,6 +725,20 @@
 	             anchor="refs.push_proxy">
         <front>
           <title>Push Proxy v0.1</title>
+          <author initials="J.T." surname="Thomas"
+                  fullname="Jason Thomas">
+		    <address>
+			  <email>jason@jasonthomas.com</email>
+			</address>
+          </author>
+          <date month="August" year="2002" />
+        </front>
+      </reference>
+
+	  <reference target="http://groups.yahoo.com/group/the_gdf/message/9317"
+	             anchor="refs.gnutella_rfc">
+        <front>
+          <title>Gnutella Protocol</title>
           <author initials="J.T." surname="Thomas"
                   fullname="Jason Thomas">
 		    <address>
