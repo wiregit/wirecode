@@ -2,6 +2,7 @@ package com.limegroup.gnutella;
 
 import com.limegroup.gnutella.http.*; 
 import com.sun.java.util.collections.*;
+import java.net.*;
 
 /**
  * This class holds a collection of <tt>AlternateLocation</tt> instances,
@@ -10,8 +11,6 @@ import com.sun.java.util.collections.*;
  * This class is thread-safe.
  *
  * @see AlternateLocation
- * @see HTTPHeaderValue
- * @see AlternateLocationCollector
  */
 public final class AlternateLocationCollection 
 	implements HTTPHeaderValue, AlternateLocationCollector {
@@ -22,10 +21,42 @@ public final class AlternateLocationCollection
 	 */
 	private SortedMap _alternateLocations;
 
-	// implements the AlternateLocationCollector interface
-	public void addAlternateLocation(AlternateLocation al) {
+	/**
+	 * Adds a new <tt>AlternateLocation</tt> to the list.  If the 
+	 * alternate location  is already present in the collection,
+	 * it will not be added.  If an alternate location with the same
+	 * url is already in the list, this keeps the one with the more recent
+	 * timestamp, and discards the other. <p>
+	 *
+	 * Implements the <tt>AlternateLocationCollector</tt> interface.
+	 *
+	 * @param al the <tt>AlternateLocation</tt> to add	 
+	 */
+	public synchronized void addAlternateLocation(AlternateLocation al) {
 		createMap();
 
+		URL url = al.getUrl();
+		Set keySet = _alternateLocations.keySet();
+		Iterator iter = keySet.iterator();
+		while(iter.hasNext()) {
+			AlternateLocation curAl = (AlternateLocation)iter.next();
+			URL curUrl = curAl.getUrl();
+			
+			// make sure we don't store multiple alternate locations
+			// for the same url
+			if(curUrl.equals(url)) {
+				// this checks the date
+				int comp = curAl.compareTo(al);
+				if(comp  > 0) {
+					// the AlternateLocation argument is newer than the 
+					// existing one with the same URL
+					_alternateLocations.remove(curAl);
+					break;
+				} else {
+					return;
+				}
+			}
+		}
 		// note that alternate locations without a timestamp are placed
 		// at the end of the map because they have the oldest possible
 		// date according to the date class, namely:
@@ -41,8 +72,8 @@ public final class AlternateLocationCollection
 	}
 
 	// implements the AlternateLocationCollector interface
-	public void addAlternateLocationCollection(AlternateLocationCollection alc) {
-		createMap();
+	public synchronized void 
+		addAlternateLocationCollection(AlternateLocationCollection alc) {
 		Map map = alc.getMap();
 		Collection values = map.values();
 		Iterator iter = values.iterator();
