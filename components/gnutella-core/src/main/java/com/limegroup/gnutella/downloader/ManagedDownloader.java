@@ -1883,7 +1883,7 @@ public class ManagedDownloader implements Downloader, Serializable {
 			// making this call now is necessary to avoid writing the 
 			// same alternate locations back to the requester as they sent 
 			// in their original headers
-            fileDesc.addAll(validAlts);
+            addLocationsToFile(validAlts, fileDesc);
 			//tell the library we have alternate locations
 			callback.handleSharedFileUpdate(completeFile);
             HashSet set = null;
@@ -1906,7 +1906,22 @@ public class ManagedDownloader implements Downloader, Serializable {
             }
         }
         return COMPLETE;
-    }   
+    }
+    
+    /**
+     * Adds the specified AlternateLocationCollection to the Collector,
+     * cloning each location first.
+     */
+    private void addLocationsToFile(AlternateLocationCollection validAlts,
+                                    AlternateLocationCollector collector) {
+        
+        synchronized(validAlts) {
+            for(Iterator i = validAlts.iterator(); i.hasNext();) {
+                AlternateLocation al = (AlternateLocation)i.next();
+                collector.add(al.createClone());
+            }
+        }
+    }
 
     /**
      * Returns true if the file exists.
