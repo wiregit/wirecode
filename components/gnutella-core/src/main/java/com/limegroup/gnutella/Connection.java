@@ -90,18 +90,6 @@ public class Connection implements ReplyHandler, PushProxyInterface {
     private static final int MAX_TCP_CONNECT_BACK_ATTEMPTS = 10;
     
     /** 
-     * The time to wait between route table updates for leaves, 
-     * in milliseconds. 
-     */
-    private long LEAF_QUERY_ROUTE_UPDATE_TIME = 1000*60*5; //5 minutes
-
-    /** 
-     * The time to wait between route table updates for Ultrapeers, 
-     * in milliseconds. 
-     */
-    private long ULTRAPEER_QUERY_ROUTE_UPDATE_TIME = 1000*60; //1 minute
-    
-    /** 
      * The underlying socket, its address, and input and output streams.  sock,
      * in, and out are null iff this is in the unconnected state.  For thread
      * synchronization reasons, it is important that this only be modified by
@@ -258,11 +246,6 @@ public class Connection implements ReplyHandler, PushProxyInterface {
      */
     private static final IOException CONNECTION_CLOSED =
         new IOException("connection closed");
-        
-    /** 
-     * The next time I should send a query route table to this connection.
-     */
-    private long _nextQRPForwardTime;
     
     /** 
      * True iff this should not be policed by the ConnectionWatchdog, e.g.,
@@ -323,7 +306,7 @@ public class Connection implements ReplyHandler, PushProxyInterface {
      * Handle to the class that wraps all calls to the query routing tables
      * for this connection.
      */
-    private QRPHandler QRP_HANDLER = QRPHandler.createHandler();
+    private QRPHandler QRP_HANDLER = QRPHandler.createHandler(this);
     
     /** 
      * Filter for filtering out messages that are considered spam.
@@ -1993,30 +1976,6 @@ public class Connection implements ReplyHandler, PushProxyInterface {
         return _headers.isQueryRoutingEnabled();
     }
 
-
-    /** Returns the system time that we should next forward a query route table
-     *  along this connection.  Only valid if isClientSupernodeConnection() is
-     *  true. */
-    public long getNextQRPForwardTime() {
-        return _nextQRPForwardTime;
-    }
-
-    /**
-     * Increments the next time we should forward query route tables for
-     * this connection.  This depends on whether or not this is a connection
-     * to a leaf or to an Ultrapeer.
-     *
-     * @param curTime the current time in milliseconds, used to calculate 
-     *  the next update time
-     */
-    public void incrementNextQRPForwardTime(long curTime) {
-        if(isLeafConnection()) {
-            _nextQRPForwardTime = curTime + LEAF_QUERY_ROUTE_UPDATE_TIME;
-        } else {
-            // otherwise, it's an Ultrapeer
-            _nextQRPForwardTime = curTime + ULTRAPEER_QUERY_ROUTE_UPDATE_TIME;
-        }
-    }
 
     /** 
      * Returns true if this should not be policed by the ConnectionWatchdog,
