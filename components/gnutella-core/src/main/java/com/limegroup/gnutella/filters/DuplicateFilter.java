@@ -230,7 +230,7 @@ class PingPair {
     }
 }
 
-class QueryPair implements Comparable {
+class QueryPair implements com.sun.java.util.collections.Comparable {
     String query;
     int hops;
     
