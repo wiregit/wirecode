@@ -70,16 +70,20 @@ public class CountPercent {
 
         switch (action) {
         case ACTION_CHECK:
-            loadLanguages(null);
+            loadLanguages();
             checkLanguages();
             break;
         case ACTION_STATISTICS:
-            loadLanguages(basicKeys);
+            loadLanguages();
+            retainBasicKeys(basicKeys);
+            extendVariantLanguages();
             pc.setMinimumIntegerDigits(3);
             printStatistics();
             break;
         case ACTION_HTML:
-            loadLanguages(basicKeys);
+            loadLanguages();
+            retainBasicKeys(basicKeys);
+            extendVariantLanguages();
             rc.setMinimumIntegerDigits(1);
             printHTML();
             break;
@@ -115,7 +119,7 @@ public class CountPercent {
         return p.keySet();
     }
     
-    private void loadLanguages(Set basicKeys) {
+    private void loadLanguages() {
         File lib = new File(".");
         if (!lib.isDirectory())
             return;
@@ -137,15 +141,31 @@ public class CountPercent {
             try {
                 InputStream in =
                     new FileInputStream(new File(lib, files[i]));
-                LanguageInfo li = loadFile(langs, in, linkFileName);
-                /* keep only keys that are valid. */
-                if (basicKeys != null)
-                    li.getProperties().keySet().retainAll(basicKeys);
+                loadFile(langs, in, linkFileName);
             } catch (FileNotFoundException fnfe) {
                 // oh well.
             }
         }
-        
+    }
+    
+    /**
+     * Keep only resources with a basic set of valid keys.
+     */
+    private void retainBasicKeys(Set basicKeys) {
+        /* Extends missing resources with those from the base language */
+        for (Iterator i = langs.entrySet().iterator(); i.hasNext(); ) {
+            final Map.Entry entry = (Map.Entry)i.next();
+            final String code = (String)entry.getKey();
+            final LanguageInfo li = (LanguageInfo)entry.getValue();
+            final Properties props = li.getProperties();
+            props.keySet().retainAll(basicKeys);
+        }
+    }
+    
+    /**
+     * Extend variant resources from base languages.
+     */
+    private void extendVariantLanguages() {
         /* Extends missing resources with those from the base language */
         for (Iterator i = langs.entrySet().iterator(); i.hasNext(); ) {
             final Map.Entry entry = (Map.Entry)i.next();
