@@ -1167,10 +1167,10 @@ public class ManagedConnection
     }
 
     /** Returns true iff the connection is a supernode and I am a leaf, i.e., if
-     *  I wrote "Supernode: false", this connection wrote "Supernode: true" (not
-     *  necessarily in that order).  <b>Does NOT require that QRP is enabled</b>
-     *  between the two; the supernode could be using reflector indexing, for
-     *  example. */
+     *  I wrote "X-Ultrapeer: false", this connection wrote "X-Ultrapeer: true" 
+	 *  (not necessarily in that order).  <b>Does NOT require that QRP is 
+	 *  enabled</b> between the two; the supernode could be using reflector 
+	 *  indexing, for example. */
     public boolean isClientSupernodeConnection() {
         if(_isClientSupernodeConnection == null) {
             _isClientSupernodeConnection = 
@@ -1241,8 +1241,8 @@ public class ManagedConnection
     }
     
     /** Returns true iff I am a supernode shielding the given connection, i.e.,
-     *  if I wrote "Supernode: true" and this connection wrote "Supernode:
-     *  false, and <b>both support query routing</b>. */
+     *  if I wrote "X-Ultrapeer: true" and this connection wrote 
+	 *  "X-Ultrapeer: false, and <b>both support query routing</b>. */
     public boolean isSupernodeClientConnection() {
         if(_isSupernodeClientConnection == null) {
             _isSupernodeClientConnection = 
@@ -1252,8 +1252,8 @@ public class ManagedConnection
     }
     
     /** Returns true iff I am a supernode shielding the given connection, i.e.,
-     *  if I wrote "Supernode: true" and this connection wrote "Supernode:
-     *  false, and <b>both support query routing</b>. */
+     *  if I wrote "X-Ultrapeer: true" and this connection wrote 
+	 *  "X-Ultrapeer: false, and <b>both support query routing</b>. */
     private boolean isSupernodeClientConnection2() {
         //Is remote host a supernode...
         if (! isClientConnection())
