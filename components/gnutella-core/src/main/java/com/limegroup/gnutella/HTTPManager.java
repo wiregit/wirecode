@@ -184,31 +184,29 @@ public class HTTPManager {
 			if (str.indexOf("User-Agent") != -1) {
 				// check for netscape, internet explorer,
 				// or other free riding downoaders
-				if( (str.indexOf("Mozilla") != -1) ||
-					(str.indexOf("DA") != -1) ||
-					(str.indexOf("Download") != -1) ||
-					(str.indexOf("FlashGet") != -1) ||
-					(str.indexOf("GetRight") != -1) ||
-					(str.indexOf("Go!Zilla") != -1) ||
-					(str.indexOf("Inet") != -1) ||
-					(str.indexOf("MIIxpc") != -1) ||
-					(str.indexOf("MSProxy") != -1) ||
-					(str.indexOf("Mass") != -1) ||
-					(str.indexOf("MyGetRight") != -1) ||
-					(str.indexOf("NetAnts") != -1) ||
-					(str.indexOf("NetZip") != -1) ||
-					(str.indexOf("RealDownload") != -1) ||
-					(str.indexOf("SmartDownload") != -1) ||
-					(str.indexOf("Teleport") != -1) ||
-					(str.indexOf("WebDownloader") != -1) )
-				{
+				if (SettingsManager.instance().getAllowBrowser() == false) {
 					// if we are not supposed to read from them
 					// throw an exception
-					if (SettingsManager.instance().getAllowBrowser() == false)
+					if( (str.indexOf("Mozilla") != -1) ||
+						(str.indexOf("DA") != -1) ||
+						(str.indexOf("Download") != -1) ||
+						(str.indexOf("FlashGet") != -1) ||
+						(str.indexOf("GetRight") != -1) ||
+						(str.indexOf("Go!Zilla") != -1) ||
+						(str.indexOf("Inet") != -1) ||
+						(str.indexOf("MIIxpc") != -1) ||
+						(str.indexOf("MSProxy") != -1) ||
+						(str.indexOf("Mass") != -1) ||
+						(str.indexOf("MyGetRight") != -1) ||
+						(str.indexOf("NetAnts") != -1) ||
+						(str.indexOf("NetZip") != -1) ||
+						(str.indexOf("RealDownload") != -1) ||
+						(str.indexOf("SmartDownload") != -1) ||
+						(str.indexOf("Teleport") != -1) ||
+						(str.indexOf("WebDownloader") != -1) )
 						throw new IOException("Web Browser");
 					
 				}
-
 			}
 		}
 	}
