@@ -398,12 +398,14 @@ public class HTTPDownloader implements BandwidthTracker {
                 //amountToCheck can be negative; the file length isn't extended
                 //until the first write after a seek.
                 long currPos = fos.getFilePointer();
-                int amountToCheck=(int)Math.min(c,fos.length()-currPos);
+                long length=fos.length();
+                int amountToCheck=(int)Math.min(c,length-currPos);
                 if(checkOverlap && amountToCheck>0) {                    
                     fos.readFully(fileBuf,0,amountToCheck);
                     for(int i=0;i<amountToCheck;i++) {
                         if (fileBuf[i]!=0 &&  buf[i]!=fileBuf[i]) 
-                            throw new OverlapMismatchException();
+                            throw new OverlapMismatchException(
+                                currPos, length, c, amountToCheck, i);
                     }
                     //get the fp back where it was before we checked
                     fos.seek(currPos);
@@ -495,7 +497,7 @@ public class HTTPDownloader implements BandwidthTracker {
 	////////////////////////////// Unit Test ////////////////////////////////
 
     public String toString() {
-        return "<"+_host+":"+_port+", "+getFileName()+">";
+        return "<"+_host+":"+_port+", "+getFileName().hashCode()+">";
     }
 
 

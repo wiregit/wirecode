@@ -224,6 +224,18 @@ public class ManagedDownloader implements Downloader, Serializable {
 	 */
 	private DownloadChatList chatList;
 
+    private static PrintStream log=null;
+    static {
+        try {
+            File file=new File(SettingsManager.instance().getIncompleteDirectory(),
+                               "download.log");
+            log=new PrintStream(new FileOutputStream(file),
+                                true);   //autoflush
+        } catch (IOException e) {
+            System.err.println("Warning: couldn't create download log.");
+        }
+    }
+
     /**
      * Creates a new ManagedDownload to download the given files.  The download
      * attempts to begin immediately; there is no need to call initialize.
@@ -389,10 +401,6 @@ public class ManagedDownloader implements Downloader, Serializable {
                                      matcher.process(two),
                                      allowedDifferences);
         }
-
-        debug("MD.namesClose(): one = " + one);
-        debug("MD.namesClose(): two = " + two);
-        debug("MD.namesClose(): retVal = " + retVal);
             
         return retVal;
     }
@@ -1319,6 +1327,10 @@ public class ManagedDownloader implements Downloader, Serializable {
         } catch (IOException e) {
 			chatList.removeHost(downloader);
         } catch (OverlapMismatchException e) {
+            debug("    WORKER: detected corruption in "+downloader+" at "
+                  +getAmountRead()+"/"+getContentLength()+": "
+                  +e.getFileOffset()+" "+e.getFileLength()+" "+e.getBytesDownloaded()
+                  +" "+e.getAmountToCheck()+" "+e.getErrorOffset());
             corrupted=true;
             stop();
         } finally {
@@ -1630,10 +1642,16 @@ public class ManagedDownloader implements Downloader, Serializable {
 
 
 
-    private final boolean debugOn = false;
+    private final boolean debugOn = true;
     private final void debug(String out) {
-        if (debugOn)
-            System.out.println(out);
+        if (debugOn) {
+            if (log!=null) {
+                synchronized (log) {
+                    log.println(System.currentTimeMillis()+" "
+                                +this.hashCode()+" "+out);
+                }
+            }
+        }
     }
     private final void debug(Exception e) {
         if (debugOn)
