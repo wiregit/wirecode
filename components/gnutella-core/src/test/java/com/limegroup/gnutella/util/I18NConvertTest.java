@@ -1,6 +1,7 @@
 package com.limegroup.gnutella.util;
 
 import junit.framework.*;
+import java.lang.reflect.*;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -18,7 +19,6 @@ public class I18NConvertTest extends BaseTestCase {
     private final String OTHER = "OTHER";
     private final String SPLIT = "KEYWORD_SPLIT";
     private I18NConvert _instance;
-
 
     public I18NConvertTest(String name) {
         super(name);
@@ -38,44 +38,83 @@ public class I18NConvertTest extends BaseTestCase {
 
         _instance = I18NConvert.instance();
     }
-
-    public void testCase() {
-        readLines(CASE);
-    }
-
-    public void testACCENTS() {
-        _last = true;
-        readLines(ACCENTS);
-    }
-
     
-    private void readLines(String what) {
-        String line;
+    public void testConversions() {
+        readLines(CASE,0);
+        readLines(ACCENTS,0);
+        _last = true;
+        readLines(SPLIT,1);
+    }
+
+    private void readLines(String what, int which) {
+        String line = "";
         try {
             while((line = _buf.readLine()) != null &&
                   !line.equals("# END " + what)) {
-                doNorm(line, what);
+                doNorm(line, what, which);
             }
         }
         catch(IOException ioe) {
             fail("problem with i18ntest.txt file", ioe);
         }
+        catch(Throwable t) {
+            fail("proba at line : " + line, t);
+        }
+
     }
 
-    private void doNorm(String line, final String what) {
-        if(line.indexOf("#") != 0) {
+    private void doNorm(String line, final String what, int which) 
+        throws Throwable {
+
+        if(line.indexOf("# ") == -1) {
             String[] split = StringUtils.split(line, DELIM);
+            String x = getKC(getDK(split[1]));
+            if(which == 1)
+                x = _instance.getNorm(split[1]);
+
             assertEquals(what + " " + line + ":", 
                          split[0], 
-                         _instance.getNorm(split[1]));
+                         x);
         }
     }
     
-
-
     public void tearDown() throws Exception {
         System.out.println("tear down");
         if(_last && _buf != null)
             _buf.close();
     }
+
+    
+    private final String getDK(String s) 
+        throws Throwable { 
+        
+        try {
+            return ((String)
+                    PrivilegedAccessor.invokeMethod(_instance,
+                                                    "getDK",
+                                                    new Object[] {s},
+                                                    new Class[] {String.class}));
+        }
+        catch(Exception e) {
+            if(e.getCause() != null)
+                throw e.getCause();
+            throw e;
+        }
+    }
+
+    private final String getKC(String s) 
+        throws Throwable { 
+
+        return ((String)
+                PrivilegedAccessor.invokeMethod(_instance,
+                                               "getKC",
+                                               new Object[] {s},
+                                               new Class[] {String.class}));
+    }
+
 }
+
+
+
+
+
