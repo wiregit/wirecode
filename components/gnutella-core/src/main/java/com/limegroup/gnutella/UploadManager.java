@@ -56,11 +56,56 @@ public class UploadManager {
 	private static List _fullUploads =
 		Collections.synchronizedList(new LinkedList());
 
+
+	/** The callback for notifying the GUI of major changes. */
+    private ActivityCallback _callback;
+    /** The message router to use for pushes. */
+    private MessageRouter _router;
+    /** Used for get addresses in pushes. */
+    private Acceptor _acceptor;
+    /** Used to check if the file exists. */
+    private FileManager _fileManager;
 	
+
 	/** the DownloadManager does not seem to have a constructor,
 		which makes me wonder if this class should have one.  for
 		now i'll leave it in, and consult with chris later. */
 	public UploadManager() {}
+
+
+	////////////////// Main Public Interface ///////////////////
+
+	/** 
+     * Initializes this manager. <b>This method must be called before any other
+     * methods are used.</b> 
+     *     @param callback the UI callback to notify of download changes
+     *     @param router the message router to use for sending push requests
+     *     @param acceptor used to get my IP address and port for pushes
+     *     @param fileManager used to check if files exist
+     */
+    public void initialize(ActivityCallback callback,
+                           MessageRouter router,
+                           Acceptor acceptor,
+                           FileManager fileManager) {
+        _callback = callback;
+        _router = router;
+        _acceptor = acceptor;
+        _fileManager = fileManager;
+    }
+                
+
+	public void acceptUpload(Socket socket) {
+
+	}
+
+
+
+
+
+
+
+
+
 
 
 	/*******************   OLD STUFF  ***********************/
