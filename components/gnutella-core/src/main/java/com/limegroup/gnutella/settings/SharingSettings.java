@@ -83,18 +83,18 @@ public class SharingSettings extends LimeProps {
     public static final void setSaveDirectory(File saveDir) throws IOException {
 		if(saveDir == null) throw new NullPointerException();
 		if(!saveDir.isDirectory()) {
-			if(!saveDir.mkdirs()) throw new IOException();
+			if(!saveDir.mkdirs()) throw new IOException("could not create save dir");
 		}
 
 		String parentDir = saveDir.getParent();
 		File incDir = new File(parentDir, "Incomplete");
 		if(!incDir.isDirectory()) {
-			if(!incDir.mkdirs()) throw new IOException();
+			if(!incDir.mkdirs()) throw new IOException("could not create incomplete dir");
 		}
 
 		if(!saveDir.canRead() || !saveDir.canWrite() ||
 		   !incDir.canRead()  || !incDir.canWrite()) {
-			throw new IOException();
+			throw new IOException("could not write to selected directory");
 		}
 		
 		// Canonicalize the files ... 
