@@ -29,7 +29,7 @@ public final class ConnectionChecker implements Runnable {
      * Flag for whether or not we know for sure that we're connected from
      * successfully connecting to an external host.
      */
-    private boolean _connected;
+    private volatile boolean _connected;
 
     /**
      * Variable for the number of unsuccessful connection attempts.
@@ -122,6 +122,8 @@ public final class ConnectionChecker implements Runnable {
      * @return a new <tt>ConnectionChecker</tt> instance
      */
     public static ConnectionChecker checkForLiveConnection() {
+        LOG.trace("checking for live connection");
+
         ConnectionChecker checker = new ConnectionChecker();
         Thread connectionThread = 
             new Thread(checker, "check for live connection");
