@@ -1248,10 +1248,11 @@ public abstract class MessageRouter {
     private void originateLeafQuery(QueryRequest qr) {
 		List list = _manager.getInitializedConnections2();
 
-        // only send to at most 3 Ultrapeers
-        int limit = Math.min(3, list.size());
+        // only send to at most 4 Ultrapeers, as we could have more
+        // as a result of race conditions
+        int limit = Math.min(4, list.size());
         for(int i=0; i<limit; i++) {
-			ManagedConnection mc = (ManagedConnection)list.get(i);            
+			ManagedConnection mc = (ManagedConnection)list.get(i);       
             sendQueryRequest(qr, mc, FOR_ME_REPLY_HANDLER);
         }
     }
