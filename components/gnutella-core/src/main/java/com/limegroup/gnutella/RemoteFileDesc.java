@@ -60,7 +60,7 @@ public class RemoteFileDesc implements Serializable {
     /**
      * The <tt>Set</tt> of proxies for this host -- can be empty.
      */
-    private Set _proxies;
+    private transient Set _proxies;
 		
 
 	/** 
