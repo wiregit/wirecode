@@ -43,7 +43,7 @@ public final class MessageRouterTest extends BaseTestCase {
     public static void globalSetUp() throws Exception {
         //TestConnectionManager tcm = new TestConnectionManager(4);
         //PrivilegedAccessor.setValue(RouterService.class, "manager", tcm);
-        ROUTER = new StandardMessageRouter(new ActivityCallbackStub(), 
+        ROUTER = new StandardMessageRouter( 
                                            new FileManagerStub());
         ROUTER.initialize();
     }

@@ -113,7 +113,7 @@ public class GUESSMonitor extends BaseTestCase {
         }
 
         public MyMessageRouter(ActivityCallback ac, FileManager fm) {
-            super(ac, fm);
+            super(fm);
             _pongLoop = new Thread() {
                     public void run() {
                         guessPongLoop();
