@@ -848,7 +848,7 @@ public class ManagedDownloader implements Downloader, Serializable {
     /**
      * Determines if this is in a 'completed' state.
      */
-    private boolean isCompleted() {
+    public boolean isCompleted() {
         switch(getState()) {
         case COMPLETE:
         case ABORTED:
@@ -862,7 +862,7 @@ public class ManagedDownloader implements Downloader, Serializable {
     /**
      * Determines if this is in an 'active' downloading state.
      */
-    private boolean isActive() {
+    public boolean isActive() {
         switch(getState()) {
         case CONNECTING:
         case DOWNLOADING:
@@ -879,7 +879,7 @@ public class ManagedDownloader implements Downloader, Serializable {
     /**
      * Determines if this is in an 'inactive' state.
      */
-    private boolean isInactive() {
+    public boolean isInactive() {
         switch(getState()) {
         case QUEUED:
         case GAVE_UP:
