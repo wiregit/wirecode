@@ -124,7 +124,7 @@ public class ManagedDownloader implements Downloader, Serializable {
         state.  Should be modified only through setState. */
     private long stateTime;
     /** The current address we're trying, or last address if waiting, or null
-     *  if unknown. */
+		if unknown. */
     private String lastAddress;
     /** The number of tries we've made.  0 means on the first try. */
     private int tries;
@@ -357,12 +357,19 @@ public class ManagedDownloader implements Downloader, Serializable {
                         return;
                 }
                 //b) Otherwise, choose completed file.
-                else 
-                    file=new File(SettingsManager.instance().getSaveDirectory(),
-                                  name);     
+                else {
+					File saveDir = null;
+					try {
+						saveDir = SettingsManager.instance().getSaveDirectory();
+					} catch(java.io.FileNotFoundException fnfe) {
+						// simply return if we could not get the save directory.
+						return;
+					}
+					file=new File(saveDir,name);     
+				}
 
                 try {
-                    Launcher.launch(file.getAbsolutePath());
+                    Launcher.launchFile(file);
                 } catch (IOException e) { }
             }
         };
@@ -757,6 +764,15 @@ public class ManagedDownloader implements Downloader, Serializable {
         return (int)Math.max(remaining, 0)/1000;
     }
 
+
+
+	public synchronized boolean chatEnabled() {
+		if (dloader == null)
+			return false;
+		else 
+			return dloader.chatEnabled();
+	}
+
     public synchronized String getFileName() {
         if (dloader!=null)
             return dloader.getFileName();
@@ -793,6 +809,13 @@ public class ManagedDownloader implements Downloader, Serializable {
     public synchronized String getHost() {
         return lastAddress;
     }
+
+	public synchronized int getPort() {
+		if (dloader != null)
+			return dloader.getPort();
+		else
+			return 0;
+	}
 
     public synchronized int getPushesWaiting() {
         return pushFiles.size();

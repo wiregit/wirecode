@@ -4,6 +4,8 @@ import java.net.*;
 import java.io.*;
 import com.sun.java.util.collections.*;
 
+import com.limegroup.gnutella.chat.*;
+
 /**
  * Listens on ports, accepts incoming connections, and dispatches
  * threads to handle those connections.  Currently HTTP and
@@ -336,7 +338,8 @@ public class Acceptor extends Thread {
                 //   the user's value.
                 boolean useDefaultConnect=
                     SettingsManager.instance().getConnectString().equals(
-                         SettingsInterface.DEFAULT_CONNECT_STRING);
+                         SettingsManager.DEFAULT_CONNECT_STRING);
+
                 if (word.equals(SettingsManager.instance().
                         getConnectStringFirstWord())) {
                     _connectionManager.acceptConnection(_socket);
@@ -354,6 +357,10 @@ public class Acceptor extends Thread {
                 else if (word.equals("GIV")) {
                     _downloadManager.acceptDownload(_socket);
                 }
+				else if (word.equals("CHAT")) {
+					ChatManager.instance().accept(_socket);
+
+				}
                 //4. Unknown protocol
                 else {
                     throw new IOException();

@@ -3,10 +3,8 @@ package com.limegroup.gnutella.uploader;
 import java.io.*;
 
 /**
- * auth: rsoule
- * file: PushFailedUploadState.java
- * desc: an implementaiton of the UploadState interface
- *       for failed push attempts.  It really does nothing.
+ * an implementaiton of the UploadState interface
+ * for failed push attempts.  It really does nothing.
  */
 
 public class PushFailedUploadState implements UploadState {

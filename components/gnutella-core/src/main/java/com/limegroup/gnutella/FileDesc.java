@@ -1,7 +1,5 @@
 /**
- * auth: rsoule
- * file: FileDesc.java
- * desc: This class is a wrapper for file information.
+ * This class is a wrapper for file information.
  *
  * Modified by Sumeet Thadani (5/21): No need to store meta-data here
  */

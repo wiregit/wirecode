@@ -2,6 +2,7 @@ package com.limegroup.gnutella;
 
 import java.io.*;
 import com.sun.java.util.collections.*;
+import com.limegroup.gnutella.chat.*;
 
 /**
  * The command-line UI for the Gnutella servent.
@@ -26,6 +27,9 @@ public class Main implements ActivityCallback {
         
 		//}
 
+
+
+    System.out.println("For a command list type help.");
     BufferedReader in=new BufferedReader(new InputStreamReader(System.in));
     for ( ; ;) {
         System.out.print("LimeRouter> ");
@@ -33,17 +37,39 @@ public class Main implements ActivityCallback {
         String command=in.readLine();
         if (command==null)
             break;
+        else if (command.equals("help")) {
+			System.out.println("catcher                  "+
+			  "Print host catcher.");
+			System.out.println("connect <host> [<port>]  "+
+			  "Connect to a host[:port].");
+			System.out.println("help                     "+
+			  "Print this message.");
+			System.out.println("listen <port>            "+
+			  "Set the port you are listening on.");
+//  			System.out.println("push                     "+
+//  			  "Print push routes.");
+			System.out.println("query <string>           "+
+			  "Send a query to the network.");
+			System.out.println("quit                     "+
+			  "Quit the application.");
+//  			System.out.println("route                    "+
+//  			  "Print routing tables.");
+//  			System.out.println("stat                     "+
+//  			  "Print statistics.");
+			System.out.println("update                   "+
+			  "Send pings to update the statistics.");
+		}
         else if (command.equals("quit"))
             break;
-        //Print routing tables
-        else if (command.equals("route"))
-            service.dumpRouteTable();
-        //Print connections
-        else if (command.equals("push"))
-            service.dumpPushRouteTable();
+//          //Print routing tables
+//          else if (command.equals("route"))
+//              service.dumpRouteTable();
+//          //Print connections
+//          else if (command.equals("push"))
+//              service.dumpPushRouteTable();
         //Print push route
         else if (command.equals("stat")) {
-            service.dumpConnections();
+//              service.dumpConnections();
             System.out.println("Number of hosts: "+service.getNumHosts());
             System.out.println("Number of files: "+service.getNumFiles());
             System.out.println("Size of files: "+service.getTotalFileSize());
@@ -145,11 +171,16 @@ public class Main implements ActivityCallback {
 
 
     public void error(int message) {
-    error(message, null);
+		error(message, null);
     }
 
+	/**
+	 * Implements ActivityCallback.
+	 */
+    public void error(Throwable problem) {}
+
     public void error(int message, Throwable t) {
-    System.out.println("Error: "+message);
+		System.out.println("Error: "+message);
     }
 
     ///////////////////////////////////////////////////////////////////////////
@@ -208,6 +239,14 @@ public class Main implements ActivityCallback {
 	public void addSharedFile(File file, File parent) {}
 
 	public void clearSharedFiles() {}
+
+	public void acceptChat(Chatter chat) {}
+
+	public void receiveMessage(Chatter chat) {}
+	
+	public void chatUnavailable(Chatter chatter) {}
+
+	public void chatErrorMessage(Chatter chatter, String st) {}
 
 }
 

@@ -46,8 +46,6 @@ public class HostCatcher {
     private BucketQueue /* of Endpoint */ queue=
         new BucketQueue(new int[] {BAD_SIZE, NORMAL_SIZE, GOOD_SIZE});
     private Set /* of Endpoint */ set=new HashSet();
-    private static final byte[] LOCALHOST={(byte)127, (byte)0, (byte)0,
-                                           (byte)1};
 
     private Acceptor acceptor;
     private ConnectionManager manager;
@@ -84,14 +82,17 @@ public class HostCatcher {
      *  trying another. */
     private static final int CONNECT_TIME=6000;  //6 seconds
 
+    //whether or not to always notify the activity callback implementor that
+    //a host was added to the host catcher.  This is used when the hostcatcher
+    //is used with the SimplePongCacheServer to always notify when a host was
+    //added.
+    private boolean alwaysNotifyKnownHost=false;
 
     /**
      * Creates an empty host catcher.  Must call initialize before using.
      */
     public HostCatcher(ActivityCallback callback) {
         this.callback=callback;
-        routerConnectorThread=new RouterConnectorThread();
-        routerConnectorThread.start();
     }
 
     /**
@@ -101,6 +102,14 @@ public class HostCatcher {
         this.acceptor = acceptor;
         this.manager = manager;
     }
+
+	/**
+	 * Connects to the router in a background thread.
+	 */
+	public void connectToRouter() {
+        routerConnectorThread=new RouterConnectorThread();
+        routerConnectorThread.start();
+	}
 
     /**
      * Links the HostCatcher up with the other back end pieces, and, if quick
@@ -253,14 +262,14 @@ public class HostCatcher {
                 if (ejected!=null)
                     set.remove(ejected);
 
-                //If this is not full, notify the callback.  If this is full,
-                //the GUI's display of the host catcher will differ from this.
-                //This is acceptable; the user really doesn't need to see so
-                //many hosts, and implementing the alternatives would require
-                //many changes to ActivityCallback and probably a more efficient
-                //representation on the GUI side.
-                if (ejected==null)
-                    notifyGUI=true;
+                 //If this is not full, notify the callback.  If this is full,
+                 //the GUI's display of the host catcher will differ from this.
+                 //This is acceptable; the user really doesn't need to see so
+                 //many hosts, and implementing the alternatives would require
+                 //many changes to ActivityCallback and probably a more efficient
+                 //representation on the GUI side.
+                 if (ejected==null)
+                     notifyGUI=true;
 
                 this.notify();
             }
@@ -275,8 +284,21 @@ public class HostCatcher {
                 gotGoodPongLock.notify();
             }
         }
-        if (notifyGUI)
+
+        //we notify the callback in two different situations.  One situation, we
+        //always notify the GUI (e.g., a SimplePongCacheServer which needs to know
+        //when a new host was added).  The second situation is if the host catcher
+        //is not full, so that the endpoint is added to the GUI for the user to
+        //view and use.  The second situation occurs the majority of times and
+        //only in special cases such as a SimplePongCacheServer would the first 
+        //situation occur.
+        if (alwaysNotifyKnownHost) {
             callback.knownHost(e);
+        }
+        else {
+            if (notifyGUI)
+                callback.knownHost(e);
+        }
     }
 
     /**
@@ -542,7 +564,7 @@ public class HostCatcher {
      */
     private boolean isMe(String host, int port) {
         //Don't allow connections to yourself.  We have to special
-        //case connections to "localhost" or "127.0.0.1" since
+        //case connections to "localhost" or "127.*.*.*" since
         //they are aliases this machine.
         byte[] cIP;
         try {
@@ -551,7 +573,7 @@ public class HostCatcher {
             return false;
         }
 
-        if (Arrays.equals(cIP, LOCALHOST)) {
+        if (cIP[0]==(byte)127) {
             return port == acceptor.getPort();
         } else {
             byte[] managerIP = acceptor.getAddress();
@@ -562,17 +584,22 @@ public class HostCatcher {
 
     /** Returns true iff ip is the ip address of router.limewire.com.
      *      @requires ip.length==4 */
-    private boolean isRouter(byte[] ip) {
-        //Check for 64.61.25.139-143
-        return (ip[0]==(byte)64
+    private static boolean isRouter(byte[] ip) {
+        //Check for 64.61.25.139-143 and 64.61.25.171
+        return ip[0]==(byte)64
             && ip[1]==(byte)61
             && ip[2]==(byte)25
-            && ip[3]>=(byte)139
-            && ip[3]<=(byte)143);
+            && (ip[3]==(byte)171
+                    || (ip[3]>=(byte)139 && ip[3]<=(byte)143) );
+                    
     }
 
     public String toString() {
         return queue.toString();
+    }
+
+    public void setAlwaysNotifyKnownHost(boolean notifyKnownHost) {
+        alwaysNotifyKnownHost = notifyKnownHost;
     }
 
 //      /** Unit test: just calls tests.HostCatcherTest, since it
@@ -583,6 +610,23 @@ public class HostCatcher {
 //                            String.valueOf(RETRY_TIME),
 //                            String.valueOf(CONNECT_TIME)};
 //          com.limegroup.gnutella.tests.HostCatcherTest.main(newArgs);
+//      }
+
+//      public static void main(String args[]) {
+//          Assert.that(! HostCatcher.isRouter(
+//              new byte[] {(byte)127, (byte)0, (byte)0, (byte)1}));
+//          Assert.that(! HostCatcher.isRouter(
+//              new byte[] {(byte)18, (byte)239, (byte)0, (byte)1}));
+//          Assert.that(HostCatcher.isRouter(
+//              new byte[] {(byte)64, (byte)61, (byte)25, (byte)171}));
+//          Assert.that(HostCatcher.isRouter(
+//              new byte[] {(byte)64, (byte)61, (byte)25, (byte)139}));
+//          Assert.that(HostCatcher.isRouter(
+//              new byte[] {(byte)64, (byte)61, (byte)25, (byte)143}));
+//          Assert.that(! HostCatcher.isRouter(
+//              new byte[] {(byte)64, (byte)61, (byte)25, (byte)138}));
+//          Assert.that(! HostCatcher.isRouter(
+//              new byte[] {(byte)64, (byte)61, (byte)25, (byte)170}));
 //      }
 }
 

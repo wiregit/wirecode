@@ -1,9 +1,7 @@
 package com.limegroup.gnutella.uploader;
 
 /**
- * auth: rsoule
- * file: HTTPUploader.java
- * desc: Read data from disk and write to the net.
+ * Read data from disk and write to the net.
  *
  */
 //2345678|012345678|012345678|012345678|012345678|012345678|012345678|012345678|
@@ -35,6 +33,10 @@ public class HTTPUploader implements Uploader {
 	private UploadState _state;
 	private UploadManager _manager;
 	
+	private boolean  _chatEnabled;
+	private String  _chatHost;
+	private int _chatPort;
+
 	/****************** Constructors ***********************/
 	/**
 	 * There are two constructors that are necessary.  The 
@@ -282,6 +284,12 @@ public class HTTPUploader implements Uploader {
 	public String getHost() {return _hostName;}
 	public UploadManager getManager() {return _manager;}
 
+	public String getThisHost() {return _manager.getThisHost(); } 
+	public int getThisPort() {return _manager.getThisPort(); }
+
+	public boolean chatEnabled() {return _chatEnabled;}
+	public String getChatHost() {return _chatHost;}
+	public int getChatPort() {return _chatPort;}
 	/****************** private methods *******************/
 
 
@@ -304,6 +312,31 @@ public class HTTPUploader implements Uploader {
 			// break out of the loop if it is null or blank
             if ( (str==null) || (str.equals("")) )
                 break;
+
+			if (str.toUpperCase().indexOf("CHAT:") != -1) {
+				String sub;
+				try {
+					sub = str.substring(5);
+				} catch (IndexOutOfBoundsException e) {
+					throw new IOException();
+                }
+				sub = sub.trim();
+				int colon = sub.indexOf(":");
+				String host  = sub.substring(0,colon);
+				host = host.trim();
+				String sport = sub.substring(colon+1);
+				sport = sport.trim();
+
+				int port; 
+				try {
+					port = java.lang.Integer.parseInt(sport);
+				} catch (NumberFormatException e) {
+					throw new IOException();
+                }
+				_chatEnabled = true;
+				_chatHost = host;
+				_chatPort = port;
+			}
 			// Look for the Range: header
 			// it will be in one of three forms.  either
 			// ' - n ', ' m - n', or ' 0 - '

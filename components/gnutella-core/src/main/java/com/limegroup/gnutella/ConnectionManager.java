@@ -7,11 +7,17 @@ import com.sun.java.util.collections.*;
 import com.limegroup.gnutella.util.CommonUtils;
 
 /**
- * The list of all connections.  Accepts new connections and creates
- * new threads to handle them.<p>
- *
- * You should call the shutdown() method when you're done to ensure
- * that the gnutella.net file is written to disk.
+ * The list of all ManagedConnection's.  Provides a factory method for creating
+ * user-requested outgoing connections, accepts incoming connections, and
+ * fetches "automatic" outgoing connections as needed.  Creates threads for
+ * handling these connections when appropriate.  Use the setKeepAlive(int)
+ * method control the number of connections; modifying the KEEP_ALIVE property
+ * of SettingsManager does not automatically affect this.<p>
+ * 
+ * Because this is the only list of all connections, it plays an important role
+ * in message broadcasting.  For this reason, the code is highly tuned to avoid
+ * locking in the getInitializedConnections() methods.  Adding and removing
+ * connections is a slower operation.  
  */
 public class ConnectionManager {
     /* List of all connections.  This is implemented with two data structures:
@@ -91,7 +97,7 @@ public class ConnectionManager {
         _watchdog = new ConnectionWatchdog(this, _router);
         Thread watchdog=new Thread(_watchdog);
         watchdog.setDaemon(true);
-        watchdog.start();
+		watchdog.start();
 
         setKeepAlive(_settings.getKeepAlive());
         //setMaxIncomingConnections(
@@ -405,6 +411,10 @@ public class ConnectionManager {
         else
             pr = new PingRequest(SettingsManager.instance().getTTL());
         connection.send(pr);
+        //Ensure that the initial ping request is written in a timely fashion.
+        try {
+            connection.flush();
+        } catch (IOException e) { /* close it later */ }
     }
 
 
@@ -656,16 +666,19 @@ public class ConnectionManager {
                 if(_doInitialization)
                     initializeExternallyGeneratedConnection(_connection);
 
-				PingRequest pingRequest;
-
 				// Send GroupPingRequest to router
 				String origHost = _connection.getOrigHost();
 				if (origHost != null && 
-                    origHost.equals(SettingsInterface.DEDICATED_LIMEWIRE_ROUTER))
+                    origHost.equals(SettingsManager.DEDICATED_LIMEWIRE_ROUTER))
 				{
 				    String group = "none:"+_settings.getConnectionSpeed();
-				    pingRequest = _router.createGroupPingRequest(group);
+				    PingRequest pingRequest = 
+                        _router.createGroupPingRequest(group);
                     _connection.send(pingRequest);
+                    //Ensure that the initial ping request is written in a timely fashion.
+                    try {
+                        _connection.flush();
+                    } catch (IOException e) { /* close it later */ }
 				}
 				else
                 {

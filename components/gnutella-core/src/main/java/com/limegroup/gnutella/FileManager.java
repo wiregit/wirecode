@@ -372,7 +372,7 @@ public class FileManager {
             if (_callback!=null)
                 _callback.addSharedDirectory(directory, parent);
         }
-       
+      
         //First add all files.  We'll add the directories later to smooth out
         //what the user sees.  It also decreases the size of the IntSet values
         //in _sharedDirectories.  Again, this is not strictly necessary for

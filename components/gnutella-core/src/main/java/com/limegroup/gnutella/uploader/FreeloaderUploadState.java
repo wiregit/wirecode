@@ -6,11 +6,9 @@ import com.limegroup.gnutella.util.CommonUtils;
 
 
 /**
- * auth: rsoule
- * file: FreeloaderUploadState.java
- * desc: an implementaiton of the UploadState interface
- *       that sends an error message for a freeloader
- *       trying toUpload from us. 
+ *  an implementaiton of the UploadState interface
+ *  that sends an error message for a freeloader
+ *  trying toUpload from us. 
  */
 
 public class FreeloaderUploadState implements UploadState {

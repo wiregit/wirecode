@@ -27,7 +27,9 @@ public class MetaEnabledMessageRouter extends StandardMessageRouter {
                               Acceptor acceptor, byte[] clientGUID) {
         
         debug("MetaEnabledMessageRouter.sendResponses(): entered.");
-
+        
+        boolean supportsChat = true;//From this version on we do.
+        
         // if either there are no responses or, the
         // response array came back null for some reason,
         // exit this method
@@ -135,7 +137,8 @@ public class MetaEnabledMessageRouter extends StandardMessageRouter {
                                                         !incoming, 
                                                         busy, 
                                                         uploaded, 
-                                                        measuredSpeed);
+                                                        measuredSpeed,
+                                                        supportsChat);
                         }
                         catch (Exception e) {
                             continue;  // this can only happen VERY rarely...
@@ -162,7 +165,7 @@ public class MetaEnabledMessageRouter extends StandardMessageRouter {
                         LimeXMLUtils.compress(xmlCollectionString.getBytes());
                     else
                         xmlCompressed = new byte[0];
-
+                    
                     // create the new queryReply
                     queryReply = new QueryReply(guid, ttl, port, ip,
                                                 speed, res, 
@@ -170,7 +173,7 @@ public class MetaEnabledMessageRouter extends StandardMessageRouter {
                                                 xmlCompressed,
                                                 !incoming, busy, 
                                                 uploaded, 
-                                                measuredSpeed);
+                                                measuredSpeed,supportsChat);
                 }
                 catch (Exception e) {
                     return; // never expect this....

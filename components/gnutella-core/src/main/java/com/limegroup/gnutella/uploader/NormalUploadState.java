@@ -192,7 +192,7 @@ public class NormalUploadState implements UploadState {
 			"-" + ( _fileSize - 1 )+ "/" + _fileSize + "\r\n";
 			_ostream.write(str.getBytes());
 		}
-		str = "\r\n";
+		 str = "\r\n";
 		_ostream.write(str.getBytes());
 		
 	}

@@ -7,19 +7,253 @@ import java.lang.IllegalArgumentException;
 import java.util.Enumeration;
 import java.util.StringTokenizer;
 import com.limegroup.gnutella.util.StringUtils;
+import com.limegroup.gnutella.util.CommonUtils;
 
 /**
- * This class manages the property settings.  It maintains
- * default settings for values not set in the saved
- * settings files and updates those settings based on user
- * input, checking for errors where appropriate.  It also
- * saves the settings file to disk when the session
- * terminates.
+ * This class manages the property settings.  It maintains default 
+ * settings for values not set in the saved settings files and 
+ * updates those settings based on user input, checking for errors 
+ * where appropriate.  It also saves the settings file to disk when 
+ * the session terminates.
  */
 //2345678|012345678|012345678|012345678|012345678|012345678|012345678|012345678|
-public class SettingsManager implements SettingsInterface {
+public class SettingsManager {
 
 	private final String CURRENT_DIRECTORY = System.getProperty("user.dir");
+
+	/**
+	 * the default name of the shared directory.
+	 */
+	private final String  SAVE_DIRECTORY_NAME = "Shared";
+
+	/**
+	 * the name of the host list file.
+	 */
+	private final String  HOST_LIST_NAME = "gnutella.net";	
+
+    /** 
+	 * Default name for the properties file 
+	 */
+    private final String  PROPS_NAME = "limewire.props";
+
+    /** 
+	 * Default name for the network discovery properties 
+	 */
+    private final String  ND_PROPS_NAME  = "nd.props";
+
+	private final boolean DEFAULT_ALLOW_BROWSER  = false;
+    /** Default setting for the time to live */
+    private final byte    DEFAULT_TTL            = (byte)7;
+    /** Default setting for the soft maximum time to live */
+    private final byte    DEFAULT_SOFT_MAX_TTL   = (byte)7;
+    /** Default setting for the hard maximum time to live */
+    private final byte    DEFAULT_MAX_TTL        = (byte)10;
+    /** Default maximum packet length */
+    private final int     DEFAULT_MAX_LENGTH     = 65536;
+    /** Default timeout */
+    private final int     DEFAULT_TIMEOUT        = 8000;
+
+    /** Default value for the keep alive */
+    public static final int DEFAULT_KEEP_ALIVE     = 4;
+    /** Default port*/
+    private final int     DEFAULT_PORT           = 6346;
+    /** Default network connection speed */
+    private final int     DEFAULT_SPEED          = 56;
+    private final int     DEFAULT_UPLOAD_SPEED   = 100;
+    /** Default limit for the number of searches */
+    private final byte    DEFAULT_SEARCH_LIMIT   = (byte)64;
+    /** Default client guid */
+    private final String  DEFAULT_CLIENT_ID      = null;
+    /** Default maximum number of connections */
+    private final int     DEFAULT_MAX_INCOMING_CONNECTION=4;
+    /** Default directories for file searching */
+    private final String  DEFAULT_SAVE_DIRECTORY = "";
+    /** Default directories for file searching */
+    private final String  DEFAULT_DIRECTORIES    = "";
+    /** Default file extensions */
+    private final String  DEFAULT_EXTENSIONS     =
+		"html;htm;xml;txt;pdf;ps;rtf;doc;tex;mp3;wav;au;aif;aiff;ra;ram;"+
+		"mpg;mpeg;asf;qt;mov;avi;mpe;swf;dcr;gif;jpg;jpeg;jpe;png;tif;tiff;"+
+		"exe;zip;gz;gzip;hqx;tar;tgz;z;rmj;lqt;rar;ace;sit;smi;img;ogg;rm;"+
+		"bin;dmg";
+
+    private final String  DEFAULT_SERVANT_TYPE = Constants.XML_CLIENT;
+    private final String SERVANT_TYPE          = "SERVANT_TYPE";
+
+	/** the number of uplads allowed per person at a given time */
+    private final int     DEFAULT_UPLOADS_PER_PERSON=3;
+
+    /** default banned ip addresses */
+    private final String[] DEFAULT_BANNED_IPS     = {};
+    private final String[] DEFAULT_BANNED_WORDS   = {};
+    private final boolean DEFAULT_FILTER_ADULT   = false;
+    private final boolean DEFAULT_FILTER_DUPLICATES = true;
+    /** Filter .vbs files? */
+    private final boolean DEFAULT_FILTER_VBS     = true;
+    /** Filter .htm[l] files? */
+    private final boolean DEFAULT_FILTER_HTML    = false;
+    private final boolean DEFAULT_FILTER_GREEDY_QUERIES = true;
+    private final boolean DEFAULT_FILTER_BEARSHARE_QUERIES = true;
+    /** Use quick connect hosts instead of gnutella.net? */
+    private final boolean DEFAULT_USE_QUICK_CONNECT = true;
+	/** This is limewire's public pong cache */
+    public static final String  DEFAULT_LIMEWIRE_ROUTER = 
+	  "router.limewire.com";
+	/** This is limewire's dedicated pong cache */
+    public static final String DEDICATED_LIMEWIRE_ROUTER = 
+	  (CommonUtils.isMacClassic() ? "64.61.25.171" : "router4.limewire.com");
+    /** List of hosts to try on quick connect */
+    private final String[] DEFAULT_QUICK_CONNECT_HOSTS = {
+		DEFAULT_LIMEWIRE_ROUTER+":6346",
+		"connect1.gnutellanet.com:6346",
+		"connect2.gnutellanet.com:6346",
+		"connect3.gnutellanet.com:6346",
+		"connect4.gnutellanet.com:6346",
+    };
+
+    private final int     DEFAULT_PARALLEL_SEARCH  = 5;
+    private final int     DEFAULT_MAX_SIM_DOWNLOAD = 4;
+    /** Default for whether user should be prompted before downloading exe's. */
+    private final boolean DEFAULT_PROMPT_EXE_DOWNLOAD = true;
+    private final int     DEFAULT_MAX_UPLOADS      = 8;
+    private final boolean DEFAULT_CLEAR_UPLOAD     = true;
+    private final boolean DEFAULT_CLEAR_DOWNLOAD   = false;
+    private final int     DEFAULT_SEARCH_ANIMATION_TIME = 20;
+    public static final String  DEFAULT_CONNECT_STRING    
+		= "GNUTELLA CONNECT/0.4";
+    private final String  DEFAULT_CONNECT_OK_STRING 
+		= "GNUTELLA OK";
+    private final int     DEFAULT_BASIC_INFO_FOR_QUERY = 1000;
+    private final int     DEFAULT_ADVANCED_INFO_FOR_QUERY = 50;
+
+    private final boolean DEFAULT_CHECK_AGAIN        = true;
+    private final boolean DEFAULT_FORCE_IP_ADDRESS   = false;
+    private final byte[]  DEFAULT_FORCED_IP_ADDRESS  = {};
+    private final String  DEFAULT_FORCED_IP_ADDRESS_STRING = "";
+    private final int     DEFAULT_FORCED_PORT         = 6346;
+    private final int     DEFAULT_FREELOADER_FILES    = 1;
+    private final int     DEFAULT_FREELOADER_ALLOWED  = 100;
+	private final long    DEFAULT_AVERAGE_UPTIME      = 200;
+	private final long    DEFAULT_TOTAL_UPTIME        = 0;
+	private final int     DEFAULT_SESSIONS            = 1;
+	private final boolean DEFAULT_INSTALLED           = false;
+	private final int     DEFAULT_APP_WIDTH           = 640;
+	private final int     DEFAULT_APP_HEIGHT          = 620;
+	private final boolean DEFAULT_RUN_ONCE            = false;
+	private final boolean DEFAULT_SHOW_TRAY_DIALOG    = true;
+	private final boolean DEFAULT_MINIMIZE_TO_TRAY    = true;
+	private final boolean DEFAULT_SHOW_CLOSE_DIALOG   = true;
+	private final String  DEFAULT_CLASSPATH           
+		= "LimeWire.jar" + File.pathSeparator + "collections.jar";
+	private final String  DEFAULT_MAIN_CLASS           
+		= "com.limegroup.gnutella.gui.Main";
+
+	private final boolean DEFAULT_CHAT_ENABLED        = true;
+	private final String DEFAULT_LANGUAGE             = "en";
+	private final String DEFAULT_COUNTRY              = "US";
+
+	/**
+	 * The default minimum number of stars for search results, on a scale
+	 * of 0 to 3 inclusive.
+	 */
+	private final int DEFAULT_MINIMUM_SEARCH_QUALITY  = 2;
+
+	/**
+	 * Value for the default minimum speed to allow in search results.
+	 */
+	private final int DEFAULT_MINIMUM_SEARCH_SPEED = 
+		SpeedConstants.MODEM_SPEED_INT;
+
+	private final boolean DEFAULT_SEARCH_FILTER_MESSAGE_SHOWN = false;
+
+    // The property key name constants
+	private final String ALLOW_BROWSER         = "ALLOW_BROWSER";
+    private final String TTL                   = "TTL";
+    private final String SOFT_MAX_TTL          = "SOFT_MAX_TTL";
+    private final String MAX_TTL               = "MAX_TTL";
+    private final String MAX_LENGTH            = "MAX_LENGTH";
+    private final String TIMEOUT               = "TIMEOUT";
+    private final String KEEP_ALIVE            = "KEEP_ALIVE";
+    private final String PORT                  = "PORT";
+    private final String SPEED                 = "CONNECTION_SPEED";
+    private final String UPLOAD_SPEED          = "UPLOAD_SPEED";
+    private final String SEARCH_LIMIT          = "SEARCH_LIMIT";
+    private final String CLIENT_ID             = "CLIENT_ID";
+    private final String MAX_INCOMING_CONNECTIONS 
+		= "MAX_INCOMING_CONNECTIONS";
+    private final String SAVE_DIRECTORY 
+		= "DIRECTORY_FOR_SAVING_FILES";
+    private final String DIRECTORIES
+		= "DIRECTORIES_TO_SEARCH_FOR_FILES";
+    private final String EXTENSIONS            
+		= "EXTENSIONS_TO_SEARCH_FOR";
+    private final String BANNED_IPS            
+		= "BLACK_LISTED_IP_ADDRESSES";
+    private final String BANNED_WORDS          = "BANNED_WORDS";
+    private final String FILTER_DUPLICATES     = "FILTER_DUPLICATES";
+    private final String FILTER_ADULT          = "FILTER_ADULT";
+    private final String FILTER_HTML           = "FILTER_HTML";
+    private final String FILTER_VBS            = "FILTER_VBS";
+    private final String FILTER_GREEDY_QUERIES = "FILTER_GREEDY_QUERIES";
+    private final String FILTER_BEARSHARE_QUERIES 
+		= "FILTER_HIGHBIT_QUERIES";
+    private final String USE_QUICK_CONNECT     = "USE_QUICK_CONNECT";
+    private final String QUICK_CONNECT_HOSTS   = "QUICK_CONNECT_HOSTS";
+    private final String PARALLEL_SEARCH       = "PARALLEL_SEARCH";
+    private final String MAX_SIM_DOWNLOAD      = "MAX_SIM_DOWNLOAD";
+    private final String PROMPT_EXE_DOWNLOAD   = "PROMPT_EXE_DOWNLOAD";
+    private final String MAX_UPLOADS           = "MAX_UPLOADS";
+    private final String CLEAR_UPLOAD          = "CLEAR_UPLOAD";
+    private final String CLEAR_DOWNLOAD        = "CLEAR_DOWNLOAD";
+    private final String SEARCH_ANIMATION_TIME = "SEARCH_ANIMATION_TIME";
+
+    private final String CONNECT_STRING        = "CONNECT_STRING";
+    private final String CONNECT_OK_STRING     = "CONNECT_OK_STRING";
+    private final String CHECK_AGAIN           = "CHECK_AGAIN";
+    private final String BASIC_QUERY_INFO      = "BASIC_QUERY_INFO";
+    private final String ADVANCED_QUERY_INFO   = "ADVANCED_QUERY_INFO";
+    private final String FORCE_IP_ADDRESS      = "FORCE_IP_ADDRESS";
+    private final String FORCED_IP_ADDRESS     = "FORCED_IP_ADDRESS";
+    private final String FORCED_IP_ADDRESS_STRING
+        = "FORCED_IP_ADDRESS_STRING";
+    private final String FORCED_PORT           = "FORCED_PORT";
+    private final String FREELOADER_FILES      = "FREELOADER_FILES";
+    private final String FREELOADER_ALLOWED    = "FREELOADER_ALLOWED";
+
+    private final String UPLOADS_PER_PERSON    = "UPLOADS_PER_PERSON";
+    private final String AVERAGE_UPTIME        = "AVERAGE_UPTIME";
+    private final String TOTAL_UPTIME          = "TOTAL_UPTIME";
+    private final String SESSIONS              = "SESSIONS";
+	private final String INSTALLED             = "INSTALLED";
+	private final String APP_WIDTH             = "APP_WIDTH";
+	private final String APP_HEIGHT            = "APP_HEIGHT";
+	private final String RUN_ONCE              = "RUN_ONCE";
+	private final String WINDOW_X              = "WINDOW_X";
+	private final String WINDOW_Y              = "WINDOW_Y";
+	private final String SHOW_TRAY_DIALOG      = "SHOW_TRAY_DIALOG";
+	private final String MINIMIZE_TO_TRAY      = "MINIMIZE_TO_TRAY";
+	private final String SHOW_CLOSE_DIALOG     = "SHOW_CLOSE_DIALOG";
+	private final String CLASSPATH             = "CLASSPATH";
+	private final String MAIN_CLASS            = "MAIN_CLASS";
+
+	private final String CHAT_ENABLED          = "CHAT_ENABLED";
+
+	private final String LANGUAGE              = "LANGUAGE";
+	private final String COUNTRY               = "COUNTRY";
+
+	/**
+	 * Key for the minimum quality to allow in search results.
+	 */
+	private final String MINIMUM_SEARCH_QUALITY =
+		"MINIMUM_SEARCH_QAULITY";
+
+	/**
+	 * Key for the minimum speed to allow in search results.
+	 */
+	private final String MINIMUM_SEARCH_SPEED =
+		"MINIMUM_SEARCH_SPEED";
+
+	private final String SEARCH_FILTER_MESSAGE_SHOWN = "SEARCH_FILTER_MESSAGE_SHOWN";
  
 	/** Variables for the various settings */
     private volatile boolean  _forceIPAddress;
@@ -40,7 +274,8 @@ public class SettingsManager implements SettingsInterface {
     private volatile byte     _searchLimit;
     private volatile String   _clientID;
     private volatile int      _maxIncomingConn;
-    private volatile String   _saveDirectory;
+    private volatile File     _saveDirectory;
+    private volatile File     _incompleteDirectory;
     private volatile String   _directories;
     private volatile String   _extensions;
     private volatile String[] _bannedIps;
@@ -61,6 +296,8 @@ public class SettingsManager implements SettingsInterface {
     private volatile int      _maxUploads;
     private volatile int      _searchAnimationTime;
     private volatile int      _uploadsPerPerson;
+
+	private volatile boolean  _chatEnabled;          
 
     /** connectString_ is something like "GNUTELLA CONNECT..."
      *  connectStringOk_ is something like "GNUTELLA OK..."
@@ -99,19 +336,15 @@ public class SettingsManager implements SettingsInterface {
     private String    _servantType;
 
     /**
-     *  Set up the manager instance to follow the singleton pattern.
+     * Set up the manager instance to follow the singleton pattern.
      */
     private static SettingsManager _instance = new SettingsManager();
 
-    private String _curDir;
-    private String _fileName;
-    private String _ndFileName;
-
 
     /**
-     * This method provides the only access
-     * to an instance of this class in
-     * accordance with the singleton pattern
+	 * Returns the <code>SettingsManager</code> instance.
+	 *
+	 * @return the <code>SettingsManager</code> instance
      */
     public static SettingsManager instance() {
         return _instance;
@@ -125,13 +358,9 @@ public class SettingsManager implements SettingsInterface {
         _props      = new Properties();
         _ndProps    = new Properties();
 		
-        _fileName   = CURRENT_DIRECTORY + File.separator;
-        _ndFileName = CURRENT_DIRECTORY + File.separator;
-        _fileName   += PROPS_NAME;
-        _ndFileName += ND_PROPS_NAME;
         FileInputStream fis;
         try {
-            fis = new FileInputStream(_ndFileName);
+            fis = new FileInputStream(new File(ND_PROPS_NAME));
             try {_ndProps.load(fis);}
             catch(IOException ioe) {}
         }
@@ -146,7 +375,7 @@ public class SettingsManager implements SettingsInterface {
         Properties tempProps = new Properties();
         FileInputStream fis;
         try {
-            fis = new FileInputStream(_fileName);
+            fis = new FileInputStream(new File(PROPS_NAME));
             try {
                 tempProps.load(fis);
                 loadDefaults();
@@ -154,7 +383,10 @@ public class SettingsManager implements SettingsInterface {
                     fis.close();
                     validateFile(tempProps);
                 }
-                catch(IOException e){loadDefaults();}
+                catch(IOException e) {
+					// error closing the file, so continue using the 
+					// defaults.
+				}
             }
             catch(IOException e){loadDefaults();}
         }
@@ -162,12 +394,11 @@ public class SettingsManager implements SettingsInterface {
         catch(SecurityException se){loadDefaults();}
     }
 
-    /** Makes sure that each property in the file
-     *  is valid.  If not, it sets that property
-     *  to the default value.
+    /** 
+	 * Sets all of the properties manually to ensure that each
+	 * property is valid.
      */
-    private void validateFile(Properties tempProps)
-        throws IOException {
+    private void validateFile(Properties tempProps) {
         String p;
         Enumeration enum = tempProps.propertyNames();
         while(enum.hasMoreElements()){
@@ -258,7 +489,16 @@ public class SettingsManager implements SettingsInterface {
                 else if(key.equals(SEARCH_LIMIT)) {
                     setSearchLimit(Byte.parseByte(p));
                 }
-
+				else if(key.equals(CHAT_ENABLED)) {
+					boolean bs;
+                    if (p.equals("true"))
+                        bs=true;
+                    else if (p.equals("false"))
+                        bs=false;
+                    else
+                        break;
+                    setChatEnabled(bs);
+				}
                 else if(key.equals(CLIENT_ID)) {
                     setClientID(p);
                 }
@@ -269,7 +509,20 @@ public class SettingsManager implements SettingsInterface {
                 }
 
                 else if(key.equals(SAVE_DIRECTORY)) {
-                    setSaveDirectory(p);
+					try {
+						setSaveDirectory(new File(p));
+					} catch(IOException ioe) {
+						// if we get an IOException, then the save 
+						// directory could not be set for some reason,
+						// so simply use the default
+						try {
+							setSaveDirectory(getSaveDefault());							
+							addDirectory(getSaveDefault());
+						} catch(IOException ioe2) {
+							// not much we can do if this also throws
+							// an exception.
+						}
+					}
                 }
 
                 else if(key.equals(DIRECTORIES)) {
@@ -467,6 +720,22 @@ public class SettingsManager implements SettingsInterface {
                 else if(key.equals(MAIN_CLASS)){
                     setMainClass(p);
                 }
+				else if(key.equals(LANGUAGE)) {
+					setLanguage(p);
+				}
+				else if(key.equals(COUNTRY)) {
+					setCountry(p);
+				}
+				else if(key.equals(MINIMUM_SEARCH_QUALITY)) {
+					setMinimumSearchQuality(Integer.parseInt(p));
+				}
+				else if(key.equals(MINIMUM_SEARCH_SPEED)) {
+					setMinimumSearchSpeed(Integer.parseInt(p));
+				} 
+				else if(key.equals(SEARCH_FILTER_MESSAGE_SHOWN)) {
+					Boolean messageShown = new Boolean(p);
+					set17SearchMessageShown(messageShown.booleanValue());
+				}
             }
             catch(NumberFormatException nfe){ /* continue */ }
             catch(IllegalArgumentException iae){ /* continue */ }
@@ -551,6 +820,17 @@ public class SettingsManager implements SettingsInterface {
 		setShowCloseDialog(DEFAULT_SHOW_CLOSE_DIALOG);
 		setClassPath(DEFAULT_CLASSPATH);
 		setMainClass(DEFAULT_MAIN_CLASS);
+
+		setAppWidth(DEFAULT_APP_WIDTH);
+		setAppHeight(DEFAULT_APP_HEIGHT);
+
+		setChatEnabled(DEFAULT_CHAT_ENABLED);
+
+		setLanguage(DEFAULT_LANGUAGE);
+		setCountry(DEFAULT_COUNTRY);
+		setMinimumSearchQuality(DEFAULT_MINIMUM_SEARCH_QUALITY);
+		setMinimumSearchSpeed(DEFAULT_MINIMUM_SEARCH_SPEED);
+		set17SearchMessageShown(DEFAULT_SEARCH_FILTER_MESSAGE_SHOWN);
     }
 
 
@@ -560,90 +840,99 @@ public class SettingsManager implements SettingsInterface {
 
 	public boolean getAllowBrowser() {return _allowBroswer;}
 
-    /** returns the time to live */
+    /** Returns the time to live */
     public byte getTTL(){return _ttl;}
 
     /** return the soft maximum time to live */
     public byte getSoftMaxTTL(){return _softmaxttl;}
 
-    /** returns the maximum time to live*/
+    /** Returns the maximum time to live*/
     public byte getMaxTTL(){return _maxttl;}
 
-    /** returns the maximum allowable length of packets*/
+    /** Returns the maximum allowable length of packets*/
     public int getMaxLength(){return _maxLength;}
 
-    /** returns the timeout value*/
+    /** Returns the timeout value*/
     public int getTimeout(){return _timeout;}
 
     /** 
-	 * returns a string specifying the full
+	 * Returns a string specifying the full
      * pathname of the file listing the hosts 
 	 */
     public String getHostList() {
-		File hostListFile = new File(CURRENT_DIRECTORY, HOST_LIST_NAME);		
-		return hostListFile.getAbsolutePath();
+		return new File(HOST_LIST_NAME).getAbsolutePath();		
 	}
 
-    /** returns the keep alive value */
+    /** Returns the keep alive value */
     public int getKeepAlive(){return _keepAlive;}
 
-    /** returns the client's port number */
+    /** Returns the client's port number */
     public int getPort(){return _port;}
 
-    /** returns the client's connection speed in kilobits/sec
+    /** Returns the client's connection speed in kilobits/sec
      *  (not kilobytes/sec) */
     public int getConnectionSpeed(){return _connectionSpeed;}
 
     public int getUploadSpeed() { return _uploadSpeed; }
 
-    /** returns the client's search speed */
+    /** Returns the client's search speed */
     public byte getSearchLimit(){return _searchLimit;}
 
-    /** returns the client id number */
+    /** Returns the client id number */
     public String getClientID(){return _clientID;}
 
-    /** returns the maximum number of connections to hold */
+    /** Returns the maximum number of connections to hold */
     public int getMaxIncomingConnections(){return _maxIncomingConn;}
 
-	/** returns the maximum number of uploads per person */
+	/** Returns the maximum number of uploads per person */
     public int getUploadsPerPerson(){return _uploadsPerPerson;}
 
-    /** returns the directory to save to */
-    public String getSaveDirectory() {
-		
-        File file = new File(_saveDirectory);
-        if(!file.isDirectory()) file.mkdirs();
-		return _saveDirectory;
-    }
-
     /** 
-	 * returns the incomplete directory.  it determines the incomplete
-	 * directory dynamically based on the save directory.
+	 * Returns a new <code>File</code> instance that denotes the abstract
+	 * pathname of the directory for saving files.
+	 *
+	 * @return  A <code>File</code> instance denoting the abstract
+	 *          pathname of the save directory.
+	 *
+	 * @throws  FileNotFoundException
+	 *          If the incomplete directory is <code>null</code>.      
 	 */
-    public String getIncompleteDirectory() {
-		String saveDir = getSaveDirectory();
-		File saveFileDir = new File(saveDir);
-		String parentDir = saveFileDir.getParent();
-		
-		// if getParent returns null, simply use the current directory
-		// as the parent.
-		if(parentDir == null) parentDir = CURRENT_DIRECTORY;
-		File incFile = new File(parentDir, "Incomplete");
-		incFile.mkdirs();
-		return incFile.getAbsolutePath();		
+    public File getSaveDirectory() throws FileNotFoundException {
+		if(_saveDirectory == null) throw new FileNotFoundException();
+		return _saveDirectory;
+	}
+
+	/** Returns true if the chat is enabled */
+	public boolean getChatEnabled() {return _chatEnabled;}
+
+    /** 
+	 * Returns a new <code>File</code> instance that denotes the abstract
+	 * pathname of the directory for saving incomplete files.
+	 *
+	 * @return  A <code>File</code> instance denoting the abstract
+	 *          pathname of the directory for saving incomplete files.
+	 *
+	 * @throws  FileNotFoundException
+	 *          If the incomplete directory is <code>null</code>.      
+	 */
+    public File getIncompleteDirectory() throws FileNotFoundException {
+		if(_incompleteDirectory == null) throw new FileNotFoundException();
+		return _incompleteDirectory;
     }
 
     /** 
-	 * returns the default save directory path. 
+	 * Returns a new <code>File</code> instance that denotes the abstract
+	 * pathname of the default directory for saving incomplete files. This
+	 * is a shared directory within the current working directory.
+	 *
+	 * @return  A <code>File</code> instance denoting the abstract
+	 *          pathname of the default directory for saving files.
 	 */	
-    public String getSaveDefault() {		
-		String defaultPath = CURRENT_DIRECTORY;		
-		if(!defaultPath.endsWith(File.separator))
-			defaultPath += File.separator;
-		return defaultPath + SAVE_DIRECTORY_NAME;
+    public File getSaveDefault() {		
+		return new File(SAVE_DIRECTORY_NAME);
     }
 
-    /** returns the directories to search */
+    /** Returns the directories to search */
     public String getDirectories(){return _directories;}
 
 	/** returns the shared directories as an array of pathname strings. */
@@ -654,7 +943,7 @@ public class SettingsManager implements SettingsInterface {
     }
 
 	/**
-	 * returns an array of Strings of directory path names.  these are the
+	 * Returns an array of Strings of directory path names.  these are the
 	 * pathnames of the shared directories as well as the pathname of 
 	 * the Incomplete directory.
 	 */
@@ -663,25 +952,44 @@ public class SettingsManager implements SettingsInterface {
         temp.trim();
 		if(!temp.endsWith(";")) 
 			temp += ";";
-		temp += getIncompleteDirectory();
+		String incompleteDir = "";
+		try {
+			incompleteDir = getIncompleteDirectory().getAbsolutePath();
+		} catch(FileNotFoundException fnfe) {			
+		}
+		temp += incompleteDir;
         return StringUtils.split(temp, ';');		
 	}
     
-    /** Returns the name of the file used to store the downloader state.  This
-     *  file is stored in the incomplete directory and is a read-only
-     *  property. */
-    public String getDownloadSnapshotFile() {
-        return 
-            (new File(getIncompleteDirectory(), "downloads.dat")).getAbsolutePath();
+    /** 
+	 * Returns a new <code>File</code> instance that denotes the abstract
+	 * pathname of the file with a snapshot of current downloading files.
+	 *
+	 * <p>This file is stored in the incomplete directory and is a read-only
+     * property.
+	 *
+	 * @return  A <code>File</code> instance denoting the abstract
+	 *          pathname of the file with a snapshot of current downloading
+	 *          files.
+	 */
+    public File getDownloadSnapshotFile() {
+		File incompleteDir = null;
+		try {
+			incompleteDir = getIncompleteDirectory();
+		} catch(FileNotFoundException fnfe) {
+			// this is ok, as incompleteDir will remain null, and this will
+			// return the snapshot file from the current directory.
+		}
+        return (new File(incompleteDir, "downloads.dat"));
     }
 
 
-    /** returns the string of file extensions*/
+    /** Returns the string of file extensions*/
     public String getExtensions(){return _extensions;}
 
-    /** returns the string of default file extensions to share.*/
+    /** Returns the string of default file extensions to share.*/
     public String getDefaultExtensions() {
-		return SettingsInterface.DEFAULT_EXTENSIONS;
+		return DEFAULT_EXTENSIONS;
 	}
 
     public String[] getBannedIps(){return _bannedIps;}
@@ -714,10 +1022,10 @@ public class SettingsManager implements SettingsInterface {
 
 
     // SPECIALIZED METHODS FOR NETWORK DISCOVERY
-    /** returns the Network Discovery specialized properties file */
+    /** Returns the Network Discovery specialized properties file */
     public Properties getNDProps(){return _ndProps;}
 
-    /** returns the path of the properties and host list files */
+    /** Returns the path of the properties and host list files */
     public String getPath() {return CURRENT_DIRECTORY + File.separator;}
 
     public int getBasicInfoSizeForQuery() {return _basicQueryInfo;}
@@ -741,8 +1049,11 @@ public class SettingsManager implements SettingsInterface {
     }
 
 	/**
-	 * returns a boolean indicating whether or not to check again
-	 * for LimeWire updates.
+	 * Returns a boolean indicating whether or not to check again
+	 * for application updates.
+	 *
+	 * @return <tt>true</tt> if we should check again for updates,
+	 *         <tt>false</tt> otherwise
 	 */
     public boolean getCheckAgain() {
 		Boolean b = new Boolean(_props.getProperty(CHECK_AGAIN));
@@ -757,44 +1068,60 @@ public class SettingsManager implements SettingsInterface {
     }
 
 	/**
-	 * returns the average time that the user runs LimeWire.
+	 * Returns the average time that the user runs the application.
+	 *
+	 * @return the average time the user runs the application in one
+	 *         session
 	 */
 	public long getAverageUptime() {
 		return _averageUptime;
 	}
 
 	/**
-	 * returns the total amount of time that this user has run 
-	 * LimeWire.
+	 * Returns the total amount of time that this user has run 
+	 * the application.
+	 *
+	 * @return the total amount of time that the user has run the 
+	 *         the application over all sessions
 	 */
 	public long getTotalUptime() {
 		return _totalUptime;
 	}
 
 	/**
-	 * returns the number of times LimeWire has been run.
+	 * Returns the number of times the application has been run.
+	 *
+	 * @return the total number of times the application has been run
 	 */
 	public int getSessions() {
 		return _sessions;
 	}
 
 	/** 
-	 * returns a boolean indicating whether or not the program 
+	 * Returns a boolean indicating whether or not the program 
 	 * has been "installed," with the properties set correctly. 
+	 *
+	 * @return <tt>true</tt> if the application has been installed in some
+	 *         manner, either throw an installer or through our own
+	 *         installer, <tt>false</tt> otherwise
 	 */
 	public boolean getInstalled() {
 		return _installed;
 	}
 
 	/**
-	 * returns the width that the application should be sized to.
+	 * Returns the width that the application should be sized to.
+	 *
+	 * @return the width of the application main window in pixels
 	 */
 	public int getAppWidth() {
 		return Integer.parseInt(_props.getProperty(APP_WIDTH));
 	}
 
 	/**
-	 * returns the height that the application should be sized to.
+	 * Returns the height that the application should be sized to.
+	 *
+	 * @return the height of the application main window in pixels
 	 */
 	public int getAppHeight() {
 		return Integer.parseInt(_props.getProperty(APP_HEIGHT));
@@ -809,8 +1136,11 @@ public class SettingsManager implements SettingsInterface {
     }
 
 	/**
-	 * returns a boolean specifying whether or not the 
+	 * Returns a <tt>boolean</tt> specifying whether or not the 
 	 * application has been run one time or not.
+	 *
+	 * @return <tt>true</tt> if the application has been run once before
+	 *         this session, <tt>false</tt> otherwise
 	 */
 	public boolean getRunOnce() {
 		Boolean b = Boolean.valueOf(_props.getProperty(RUN_ONCE));
@@ -818,24 +1148,35 @@ public class SettingsManager implements SettingsInterface {
 	}
 
 	/**
-	 * returns an integer value for the x position of the window
+	 * Returns an integer value for the x position of the window
 	 * set by the user in a previous session.
+	 *
+	 * @return the final x position of the main application window
+	 *         in the previous session
 	 */
 	public int getWindowX() {
 		return Integer.parseInt(_props.getProperty(WINDOW_X));
 	}
 
 	/**
-	 * returns an integer value for the y position of the window
+	 * Returns an integer value for the y position of the window
 	 * set by the user in a previous session.
+	 *
+	 * @return the final y position of the main application window
+	 *         in the previous session
 	 */
 	public int getWindowY() {
 		return Integer.parseInt(_props.getProperty(WINDOW_Y));
 	}
 
 	/**
-	 * returns a boolean specifying whether or not the tray
+	 * Returns a boolean specifying whether or not the tray
 	 * dialog window should be shown.
+	 *
+	 * @return <tt>true</tt> if the dialog box prompting the user for
+	 *         whether or not they would like to reduce the application
+	 *         to the system tray should be shown, <tt>false</tt>
+	 *         otherwise
 	 */
 	public boolean getShowTrayDialog() {
 		Boolean b = Boolean.valueOf(_props.getProperty(SHOW_TRAY_DIALOG));
@@ -843,7 +1184,7 @@ public class SettingsManager implements SettingsInterface {
 	}
 
 	/**
-	 * returns a boolean specifying whether or not to minimize 
+	 * Returns a boolean specifying whether or not to minimize 
 	 * the application to the system tray.
 	 */
 	public boolean getMinimizeToTray() {
@@ -852,14 +1193,18 @@ public class SettingsManager implements SettingsInterface {
 	}
 
 	/**
-	 * returns true is an incoming connection has ever been established
+	 * Returns true is an incoming connection has ever been established
 	 * during a single session
 	 */
 	public boolean getAcceptedIncoming() {return _acceptedIncoming;}
 
 	/**
-	 * returns a boolean specifying whether or not the close
+	 * Returns a boolean specifying whether or not the close
 	 * dialog window should be shown.
+	 *
+	 * @return <tt>true</tt> if the dialog box prompting the user for
+	 *         whether or not they are sure they want to close the
+	 *         application should be shown, <tt>false</tt> otherwise
 	 */
 	public boolean getShowCloseDialog() {
 		Boolean b = Boolean.valueOf(_props.getProperty(SHOW_CLOSE_DIALOG));
@@ -867,19 +1212,73 @@ public class SettingsManager implements SettingsInterface {
 	}
   
     /**
-     * returns the classpath string used for loading jar files
-	 * on startup.
+     * Returns the classpath string used for loading jar files on startup.
+	 *
+	 * @return the classpath <code>String</code> used for loading jar files on 
+	 *         startup.
      */
     public String getClassPath() {
         return _props.getProperty(CLASSPATH);
     }
 
     /**
-     * returns the main class to load on startup.
+     * Returns the main class to load on startup.
+	 *
+	 * @return a <code>String</code> specifying the main class to load on
+	 *         startup
      */
     public String getMainClass() {
         return _props.getProperty(MAIN_CLASS);
     }
+
+	/**
+	 * Returns a <code>String</code> instance specifying the language to use
+	 * for the application.
+	 *
+	 * @return a <code>String</code> specifying the language to use for the 
+	 *         application
+	 */
+	public String getLanguage() {
+		return _props.getProperty(LANGUAGE);
+	}
+
+	/**
+	 * Returns a <code>String</code> instance specifying the country to use
+	 * for the application.
+	 *
+	 * @return a <code>String</code> specifying the country to use for the 
+	 *         application
+	 */
+	public String getCountry() {
+		return _props.getProperty(COUNTRY);
+	}
+
+	/**
+	 * Returns the minimum search quality (number of stars) to show in the
+	 * search window.
+	 *
+	 * @return the minimum search quality, on a scale of 0 to 3 inclusive
+	 */
+	public int getMinimumSearchQuality() {
+		String str = _props.getProperty(MINIMUM_SEARCH_QUALITY);
+		return Integer.parseInt(str);
+	}
+
+	/**
+	 * Returns the minimum speed for search results to display in the
+	 * search window.
+	 *
+	 * @return the minimum search speed to display
+	 */
+	public int getMinimumSearchSpeed() {
+		String str = _props.getProperty(MINIMUM_SEARCH_SPEED);
+		return Integer.parseInt(str);
+	}
+
+	public boolean get17SearchMessageShown() {
+		Boolean b = Boolean.valueOf(_props.getProperty(SEARCH_FILTER_MESSAGE_SHOWN));
+		return b.booleanValue();
+	}
 
     /******************************************************
      **************  END OF ACCESSOR METHODS **************
@@ -891,8 +1290,11 @@ public class SettingsManager implements SettingsInterface {
      ******************************************************/
 
 	/** 
-	 * updates all of the uptime settings based on the
+	 * Updates all of the uptime settings based on the
 	 * passed in time value for the most recent session. 
+	 *
+	 * @param currentTime the time the applicaiton has been run in
+	 *                    the current session
 	 */
 	public void updateUptime(int currentTime) {
 		_totalUptime += currentTime;
@@ -902,9 +1304,12 @@ public class SettingsManager implements SettingsInterface {
 	}
 
 	/**  
-	 * sets the total number of times limewire has been run -- 
+	 * Sets the total number of times the application  has been run -- 
 	 * used in calculating the average amount of time this user 
-	 * leaves limewire on.
+	 * leaves the application on.
+	 *
+	 * @param sessions the total number of sessions that the application
+	 *                 has been run
 	 */
 	private void setSessions(int sessions) {
 		if(_sessions < 1)
@@ -915,7 +1320,10 @@ public class SettingsManager implements SettingsInterface {
 	}
 
 	/** 
-	 * sets the average time this user leaves LimeWire running.
+	 * Sets the average time this user leaves the application running.
+	 *
+	 * @param averageUptime the average time this user leaves the 
+	 *                      application running
 	 */
 	private void setAverageUptime(long averageUptime) {
 		_averageUptime = averageUptime;
@@ -924,7 +1332,9 @@ public class SettingsManager implements SettingsInterface {
 	}
 
 	/** 
-	 * sets the total time this user has used LimeWire
+	 * Sets the total time this user has used the application
+	 *
+	 * @param totalUptime the total time the application has been run
 	 */
 	private void setTotalUptime(long totalUptime) {
 		_totalUptime = totalUptime;
@@ -933,7 +1343,7 @@ public class SettingsManager implements SettingsInterface {
 	}
 
     /** 
-	 * sets the maximum length of packets (spam protection)
+	 * Sets the maximum length of packets (spam protection)
 	 */
     public void setMaxLength(int maxLength) {
 		_maxLength = maxLength;
@@ -942,7 +1352,7 @@ public class SettingsManager implements SettingsInterface {
     }
 
     /** 
-	 * sets the timeout 
+	 * Sets the timeout 
 	 */
     public void setTimeout(int timeout) {
 		_timeout = timeout;
@@ -1015,7 +1425,7 @@ public class SettingsManager implements SettingsInterface {
 
 
     /** 
-	 * sets the limit for the number of searches
+	 * Sets the limit for the number of searches
      * throws an exception on negative limits
      * and limits of 10,000 or more 
 	 */
@@ -1029,7 +1439,7 @@ public class SettingsManager implements SettingsInterface {
         }
     }
 
-    /** sets the client (gu) ID number */
+    /** Sets the client (gu) ID number */
     public void setClientID(String clientID) {
 		_clientID = clientID;
 		_props.put(CLIENT_ID, _clientID);
@@ -1061,7 +1471,7 @@ public class SettingsManager implements SettingsInterface {
      * not necessarily guaranteed to be valid however.
      */
     public void setMaxIncomingConnections(int maxConn,
-                                                       boolean checkLimit)
+										  boolean checkLimit)
         throws BadConnectionSettingException {
         if (checkLimit) {
             int max=maxConnections();
@@ -1085,7 +1495,7 @@ public class SettingsManager implements SettingsInterface {
     }
 
     /** 
-	 * sets the hard maximum time to live 
+	 * Sets the hard maximum time to live 
 	 */
     public void setMaxTTL(byte maxttl) throws IllegalArgumentException {
         if(maxttl < 0 || maxttl > 50)
@@ -1122,52 +1532,76 @@ public class SettingsManager implements SettingsInterface {
      ******************************************************/
 
     /** 
-	 * set the directory for saving files 
+	 * Sets the directory for saving files. 
+	 *
+	 * @param   saveDir  A <code>File</code> instance denoting the 
+	 *                   abstract pathname of the directory for
+	 *                   saving files.  
+	 *
+	 * @throws  IOException 
+	 *          If the directory denoted by the directory pathname
+	 *          String parameter did not exist prior to this method
+	 *          call and could not be created, or if the canonical
+	 *          path could not be retrieved from the file system.
+	 * 
+	 * @throws  NullPointerException 
+	 *          If the "dir" parameter is null.
 	 */
-    public void setSaveDirectory(String dir) {
-        File saveFile = new File(dir);
-		try {
-			if(!saveFile.isDirectory()) {
-				if(!saveFile.mkdirs()) throw new IllegalArgumentException();
-			}
-			_saveDirectory = saveFile.getCanonicalPath();
-			_props.put(SAVE_DIRECTORY, _saveDirectory);
-		} catch(IOException ioe) {
-			throw new IllegalArgumentException();
+    public void setSaveDirectory(File saveDir) throws IOException {
+		if(saveDir == null) throw new NullPointerException();
+		String parentDir = saveDir.getParent();
+
+		File incDir = new File(parentDir, "Incomplete");
+		if(!saveDir.isDirectory()) {
+			if(!saveDir.mkdirs()) throw new IOException();
 		}
+
+		if(!incDir.isDirectory()) {
+			if(!incDir.mkdirs()) throw new IOException();
+		}
+		_saveDirectory       = saveDir;
+		_incompleteDirectory = incDir;
+		
+		_props.put(SAVE_DIRECTORY, saveDir.getAbsolutePath());
     }
 
     /** 
-	 * set the directories to search.  this method will filter
+	 * Sets the shared directories.  This method filters
      * out any duplicate or invalid directories in the string.
-     * note, however, that it does not currently filter out
+     * Note, however, that it does not currently filter out
      * listing subdirectories that have parent directories
-     * also in the string.  this should change at some point.
+     * also in the string. 
+	 *
+	 * @param dirs A semicolon delimited <code>String</code> instance 
+	 *             containing the paths of shared directories.
 	 */
-    public void setDirectories(String dir) {
+    public void setDirectories(final String dirs) {
         boolean dirsModified = false;
-        _directories = dir;
-        String[] dirs = getDirectoriesAsArray();
+		
+		// this is necessary because the getDirectoriesAsArray
+		// method creates its array from the _directories variable.
+		_directories = dirs;
+        String[] dirArray = getDirectoriesAsArray();
         int i = 0;
-        while(i < dirs.length) {
-            if(dirs[i] != null) {
-                File f = new File(dirs[i]);
+        while(i < dirArray.length) {
+            if(dirArray[i] != null) {
+                File f = new File(dirArray[i]);
                 if(f.isDirectory()) {
                     int count = 0;
                     int z = 0;
                     String str = "";
                     try {str = f.getCanonicalPath();}
                     catch(IOException ioe) {break;}
-                    while(z < dirs.length) {
-                        if(dirs[z] != null) {
-                            File file = new File(dirs[z]);
+                    while(z < dirArray.length) {
+                        if(dirArray[z] != null) {
+                            File file = new File(dirArray[z]);
                             String name = "";
                             try {name = file.getCanonicalPath();}
                             catch(IOException ioe) {break;}
                             if(str.equals(name)) {
                                 count++;
                                 if(count > 1) {
-                                    dirs[z] = null;
+                                    dirArray[z] = null;
                                     dirsModified = true;
                                 }
                             }
@@ -1176,7 +1610,7 @@ public class SettingsManager implements SettingsInterface {
                     }
                 }
                 else {
-                    dirs[i] = null;
+                    dirArray[i] = null;
                     dirsModified = true;
                 }
             }
@@ -1185,9 +1619,9 @@ public class SettingsManager implements SettingsInterface {
         if(dirsModified) {
             i = 0;
             StringBuffer sb = new StringBuffer();
-            while(i < dirs.length) {
-                if(dirs[i] != null) {
-                    sb.append(dirs[i]);
+            while(i < dirArray.length) {
+                if(dirArray[i] != null) {
+                    sb.append(dirArray[i]);
                     sb.append(';');
                 }
                 i++;
@@ -1198,36 +1632,41 @@ public class SettingsManager implements SettingsInterface {
     }
 
     /** 
-	 * adds one directory to the directory string (if
+	 * Adds one directory to the directory string only if
      * it is a directory and is not already listed. 
+	 *
+	 * @param dir  A <code>File</code> instance denoting the 
+	 *             abstract pathname of the new directory 
+	 *             to add.
+	 *
+	 * @throws  IOException 
+	 *          If the directory denoted by the directory pathname
+	 *          String parameter did not exist prior to this method
+	 *          call and could not be created, or if the canonical
+	 *          path could not be retrieved from the file system.
 	 */
-    public boolean addDirectory(String dir) {
-        File f = new File(dir);
-        if(f.isDirectory()) {
-            String[] dirs = getDirectoriesAsArray();
-            String newPath = "";
-            try {newPath = f.getCanonicalPath();}
-            catch(IOException ioe) {return false;}
-            // check for directory
-            int i = 0;
-            while(i < dirs.length) {
-                File file = new File(dirs[i]);
-                String name = "";
-                try {name = file.getCanonicalPath();}
-                catch(IOException ioe) {break;}
-                if(name.equals(newPath)) {
-                    return false;
-                }
-                i++;
-            }
-            if(!_directories.endsWith(";"))
-                _directories += ";";
-            _directories += newPath;
-            _directories += ";";
-            _props.put(DIRECTORIES, _directories);
-            return true;
-        }
-        return false;
+    public void addDirectory(File dir) throws IOException {
+		if(!dir.isDirectory()) throw new IOException();
+		String[] dirs = getDirectoriesAsArray();
+		String newPath = "";
+		newPath = dir.getCanonicalPath();
+		int i = 0;
+		while(i < dirs.length) {
+			File file = new File(dirs[i]);
+			String name = "";
+			name = file.getCanonicalPath();
+			if(name.equals(newPath)) {
+				// throw the exception because the shared 
+				// directory already exists
+				throw new IOException();
+			}
+			i++;
+		}
+		if(!_directories.endsWith(";"))
+			_directories += ";";
+		_directories += newPath;
+		_directories += ";";
+		_props.put(DIRECTORIES, _directories);
     }
 
     /** 
@@ -1239,7 +1678,7 @@ public class SettingsManager implements SettingsInterface {
     }
 
     /** 
-	 * sets the time to live 
+	 * Sets the time to live 
 	 */
     public void setTTL(byte ttl) {
         if (ttl < 1 || ttl > 14)
@@ -1252,7 +1691,7 @@ public class SettingsManager implements SettingsInterface {
     }
 
     /** 
-	 * sets the soft maximum time to live 
+	 * Sets the soft maximum time to live 
 	 */
     public void setSoftMaxTTL(byte softmaxttl) {
         if (softmaxttl < 0 || softmaxttl > 14)
@@ -1265,7 +1704,7 @@ public class SettingsManager implements SettingsInterface {
     }
 
     /** 
-	 * sets the port to connect on 
+	 * Sets the port to connect on 
 	 */
     public void setPort(int port) {
         // if the entered port is outside accepted
@@ -1280,7 +1719,7 @@ public class SettingsManager implements SettingsInterface {
     }
 
     /** 
-	 * sets the connection speed.  throws an
+	 * Sets the connection speed.  throws an
      * exception if you try to set the speed
      * far faster than a T3 line or less than
      * 0.
@@ -1381,6 +1820,12 @@ public class SettingsManager implements SettingsInterface {
         _props.put(PROMPT_EXE_DOWNLOAD, s);
     }
 
+	public void setChatEnabled(boolean chatEnabled) {
+		_chatEnabled = chatEnabled;
+		String s = String.valueOf(chatEnabled);
+		_props.put(CHAT_ENABLED, s);
+	}
+
 
     public void setMaxUploads(int max) {
 		_maxUploads = max;
@@ -1443,7 +1888,13 @@ public class SettingsManager implements SettingsInterface {
         }
     }
 	
-	/** set whether or not the program has been installed */
+	/** 
+	 * Sets whether or not the program has been installed, either by
+	 * a third-party installer, or by our own.
+	 *
+	 * @param installed specifies whether or not the application has
+	 *                  been installed
+	 */
 	public void setInstalled(boolean installed) {        
         _installed = installed;
         String s = String.valueOf(installed);
@@ -1567,7 +2018,7 @@ public class SettingsManager implements SettingsInterface {
      * freeloader.  For example, if files==0, no host is considered a
      * freeloader.  Throws IllegalArgumentException if files<0.
      */
-    public void setFreeloaderFiles(int files) 
+    public void setFreeloaderFiles(final int files) 
 		throws IllegalArgumentException {
         if (files<0)
             throw new IllegalArgumentException();
@@ -1578,94 +2029,119 @@ public class SettingsManager implements SettingsInterface {
 
 	
 	/**
-	 * sets the boolean for whether or not we should check again for an update.
+	 * Sets the boolean for whether or not we should check again for an update.
+	 * 
+	 * @param check <tt>boolean</tt> value specifying whether or not to check
+	 *              again for updates
 	 */
-    public void setCheckAgain(boolean check) {
+    public void setCheckAgain(final boolean check) {
 		Boolean b = new Boolean(check);
         _props.put(CHECK_AGAIN, b.toString());
     }
 
 	/**
-	 * sets the width that the application should be.
+	 * Sets the width that the application should be.
+	 *
+	 * @param width the width in pixels of the main application window
 	 */
-	public void setAppWidth(int width) {
+	public void setAppWidth(final int width) {
         String s = Integer.toString(width);
 		_props.put(APP_WIDTH, s);
 	}
 
 	/**
-	 * sets the height that the application should be.
-	 * @requires the height must be greater than zero.
+	 * Sets the height that the application should be.
+	 *
+	 * @param height the height in pixels of the main application window
 	 */
-	public void setAppHeight(int height) {
-        String s = Integer.toString(height);
-		_props.put(APP_HEIGHT, s);
+	public void setAppHeight(final int height) {
+		_props.put(APP_HEIGHT, Integer.toString(height));
 	}
 
 	/**
-	 * sets the flag for whether or not the application
-	 * has been run one time before this.
+	 * Sets the flag for whether or not the application has been run one 
+	 * time before this.
+	 *
+	 * @param runOnce <tt>boolean</tt> for whether or not the application has
+	 *                been run once
 	 */
-	public void setRunOnce(boolean runOnce) {
+	public void setRunOnce(final boolean runOnce) {
 		Boolean b = new Boolean(runOnce);
 		_props.put(RUN_ONCE, b.toString());
 	}
 
 	/**
-	 * set the x position of the window for the next
-	 * time the application is started.
+	 * Set the x position of the window for the next time the application 
+	 * is started.
+	 *
+	 * @param x the x position of the main application window
 	 */
-	public void setWindowX(int x) {
+	public void setWindowX(final int x) {
 		_props.put(WINDOW_X, Integer.toString(x));
 	}
 
 	/**
-	 * set the y position of the window for the next
-	 * time the application is started.
+	 * Set the y position of the window for the next time the application 
+	 * is started.
+	 *
+	 * @param y the y position of the main application window
 	 */
-	public void setWindowY(int y) {
+	public void setWindowY(final int y) {
 		_props.put(WINDOW_Y, Integer.toString(y));
 	}
 
 	/**
-	 * sets the flag for whether or not the tray dialog
-	 * window should be shown.
+	 * Sets the flag for whether or not the tray dialog window should be shown.
+	 *
+	 * @param showDialog <tt>boolean</tt> for whether or not the tray dialog
+	 *                   should be shown in the future
 	 */
-	public void setShowTrayDialog(boolean showDialog) {
+	public void setShowTrayDialog(final boolean showDialog) {
 		Boolean b = new Boolean(showDialog);
 		_props.put(SHOW_TRAY_DIALOG, b.toString());
 	}
 
 	/**
-	 * sets the flag for whether or not the application
-	 * should be minimized to the system tray on windows
+	 * Sets the flag for whether or not the application should be minimized 
+	 * to the system tray on windows.
+	 *
+	 * @param minimize <tt>boolean</tt> for whether or not the application
+	 *                 should be minimized to the tray 
 	 */
-	public void setMinimizeToTray(boolean minimize) {
+	public void setMinimizeToTray(final boolean minimize) {
 		Boolean b = new Boolean(minimize);
 		_props.put(MINIMIZE_TO_TRAY, b.toString());
 	}	
 
 	/**
-	 * sets whether or not the application has accepted an incoming
+	 * Sets whether or not the application has accepted an incoming
 	 * connection during this session.
+	 *
+	 * @param incoming <tt>boolean</tt> for whether or not an incoming
+	 *                 connection has been accepted within this session
 	 */
-	public void setAcceptedIncoming(boolean incoming) {
+	public void setAcceptedIncoming(final boolean incoming) {
 		_acceptedIncoming = incoming;
     }
 
 	/**
-	 * sets the flag for whether or not the close dialog
-	 * window should be shown.
+	 * Sets the flag for whether or not the close dialog window should be 
+	 * shown again.
+	 *
+	 * @param showDialog <tt>boolean</tt> for whether or not the dialog
+	 *                   window should be shown again
 	 */
-	public void setShowCloseDialog(boolean showDialog) {
+	public void setShowCloseDialog(final boolean showDialog) {
 		Boolean b = new Boolean(showDialog);
 		_props.put(SHOW_CLOSE_DIALOG, b.toString());
 	}
     
     /**
-     * sets the classpath for loading files at startup.
+     * Sets the classpath for loading files at startup.
+	 *
+	 * @param classpath the classpath to use at startup
      */
-    public void setClassPath(String classpath) {
+    public void setClassPath(final String classpath) {
         _props.put(CLASSPATH, classpath);
     }
     
@@ -1686,33 +2162,78 @@ public class SettingsManager implements SettingsInterface {
     }
 
     /**
-     * sets the main class to use at startup.
+     * Sets the main class to use at startup.
+	 *
+	 * @param mainClass the main class to load at startup
      */
-    public void setMainClass(String mainClass) {
+    public void setMainClass(final String mainClass) {
         _props.put(MAIN_CLASS, mainClass);
     }
+
+	/**
+	 * Sets the language to use for the application.
+	 *
+	 * @param language the language to use
+	 */
+	public void setLanguage(final String language) {
+		_props.put(LANGUAGE, language);
+	}
+
+	/**
+	 * Sets the country to use for the application.
+	 *
+	 * @param country the country to use
+	 */
+	public void setCountry(final String country) {
+		_props.put(COUNTRY, country);
+	}
+
+	/**
+	 * Sets the minimum quality (number of stars) for search results to
+	 * display.
+	 *
+	 * @param quality the minimum quality for search results, from 0 to 3,
+	 *                inclusive
+	 */
+	public void setMinimumSearchQuality(int quality) {
+		_props.put(MINIMUM_SEARCH_QUALITY, Integer.toString(quality));
+	}
+
+	/**
+	 * Sets the minimum speed for search results to display.
+	 *
+	 * @param speed the minimum speed to display
+	 */
+	public void setMinimumSearchSpeed(int speed) {
+		_props.put(MINIMUM_SEARCH_SPEED, Integer.toString(speed));
+	}
 	
+
+	public void set17SearchMessageShown(boolean shown) {
+		Boolean b = new Boolean(shown);
+		_props.put(SEARCH_FILTER_MESSAGE_SHOWN, b.toString());
+	}
     /******************************************************
      ***************  END OF MUTATOR METHODS **************
      ******************************************************/
 
 
     /** 
-	 * writes out the properties file to with the specified
+	 * Writes out the properties file to with the specified
      * name in the user's install directory.  This should only
 	 * get called once when the program shuts down.
      */
     public void writeProperties() {
 		FileOutputStream ostream = null;
 		try {
-			ostream = new FileOutputStream(_fileName);
+			ostream = new FileOutputStream(new File(PROPS_NAME));
 			_props.save(ostream, "");
 			ostream.close();
 		}
 		catch (Exception e){}
 		finally {
 			try {
-				ostream.close();
+				if(ostream != null) ostream.close();
 			}
 			catch(IOException io) {}
 		}
@@ -1745,24 +2266,58 @@ public class SettingsManager implements SettingsInterface {
         return ret;
     }
     
+	// unit tests
+//  	public static void main(String args[]) {
+//  		SettingsManager settings = SettingsManager.instance();
+//  		String incDir  = settings.getIncompleteDirectory();
+//  		String saveDir = settings.getSaveDirectory();
+//  		String saveDefaultDir = settings.getSaveDefault();
 
-	public static void main(String args[]) {
-		SettingsManager settings = SettingsManager.instance();
-		String incDir  = settings.getIncompleteDirectory();
-		String saveDir = settings.getSaveDirectory();
-		String saveDefaultDir = settings.getSaveDefault();
+//  		File incFile = new File(incDir);
+//  		File saveFile = new File(saveDir);
+//  		File saveDefaultFile = new File(saveDefaultDir);
+//  		System.out.println("incDir:         "+incDir);
+//  		System.out.println("saveDir:        "+saveDir);
+//  		System.out.println("saveDefaultDir: "+saveDefaultDir);		
+//  		System.out.println("incDir isDirectory():         "+incFile.isDirectory());
+//  		System.out.println("saveDir isDirectory():        "+saveFile.isDirectory());
+//  		System.out.println("saveDefaultDir isDirectory(): "+saveDefaultFile.isDirectory());
+//  		System.out.println("host list path: " + settings.getHostList());
+//  	}
+	
+//  	// test verifying that the limewire.lax file is actually a Java Properties file.
+//  	public static void main(String[] args) {
+//  		Properties props = new Properties();
+//  		FileInputStream fis;
+//  		try {
+//  			fis = new FileInputStream(new File("limewire.lax"));
+//  			props.load(fis);
+//  			Enumeration enum = props.propertyNames();
+//  			String key = "";
+//  			String value = "";
+//  			while(enum.hasMoreElements()) {
+//  				key = (String)enum.nextElement();
+//  				System.out.print(key);
+//  				System.out.print("="+props.getProperty(key));
+//  				System.out.println();
+//  			}
+//  		} catch(FileNotFoundException fnfe) {
+//  		} catch(SecurityException se) {
+//  		} catch(IOException ioe) {
+//  		}
+		
+//  	}
+	
+//  	public static void main(String args[]) {
+//          boolean installed = true;
+//          String s = String.valueOf(installed);
+//  		System.out.println("string: "+s);
 
-		File incFile = new File(incDir);
-		File saveFile = new File(saveDir);
-		File saveDefaultFile = new File(saveDefaultDir);
-		System.out.println("incDir:         "+incDir);
-		System.out.println("saveDir:        "+saveDir);
-		System.out.println("saveDefaultDir: "+saveDefaultDir);		
-		System.out.println("incDir isDirectory():         "+incFile.isDirectory());
-		System.out.println("saveDir isDirectory():        "+saveFile.isDirectory());
-		System.out.println("saveDefaultDir isDirectory(): "+saveDefaultFile.isDirectory());
-		System.out.println("host list path: " + settings.getHostList());
-	}
+		
+//  		Boolean b = new Boolean(s);
+//  		System.out.println("boolean: "+b.booleanValue());
+//          //_props.put(INSTALLED, s);
+//  	}
 
     //      /** Unit test */
     //      public static void main(String args[]) {

@@ -10,9 +10,9 @@ import com.sun.java.util.collections.*;
  * have to use the following heuristics:
  *
  * <ul>
- * <li>Two pings are considered duplicates if they have 
- * GUIDs differing by no more than K bytes, arrived within N
- * seconds, and have the same hops counts.
+ * <li>Two pings or queries are considered duplicates if they have similar
+ *  GUID's, arrived within M messages of each other, and arrived not
+ *  more than T seconds apart.
  * <li>Two queries are considered duplicates if they have 
  * the same query string, arrived within ~N seconds of each other,
  * and have the same hops counts.
@@ -23,24 +23,24 @@ import com.sun.java.util.collections.*;
 public class DuplicateFilter extends SpamFilter {  
     /**
      * The number of old pings to keep in memory.  If this is too small, we
-     * won't be filtering properly.  Assuming 10 messages arrive per second,
-     * this allows for a whopping 10 seconds worth of history.  Luckily we don't
-     * need to search all that history, except in rare cases.
+     * won't be filtering properly.  If this is too large, lookup becomes
+     * expensive.  Assuming 10 messages arrive per second, this allows for 1
+     * second worth of history. 
      *
      * INVARIANT: BUF_SIZE>1 
      */
-    private static final int BUF_SIZE=100;
+    private static final int BUF_SIZE=20;
     /** a list of the GUIDs of the last pings we saw and
      * their timestamps. 
      *
      * INVARIANT: the youngest entries have largest timestamps
      */
-    private Buffer /* of PingPair */ pings=new Buffer(BUF_SIZE);
-    /** The time, in milliseconds, allowed between similar pings. */
-    private static final int PING_LAG=4000;
+    private Buffer /* of GUIDPair */ guids=new Buffer(BUF_SIZE);
+    /** The time, in milliseconds, allowed between similar messages. */
+    private static final int GUID_LAG=500;
     /** The number of bytes in two GUIDs that must be the same to 
      * assume they came from the same host. */
-    private static final int GUID_SIMILAR=6;
+    private static final int GUID_SIMILAR=10;
 
 
 
@@ -86,32 +86,37 @@ public class DuplicateFilter extends SpamFilter {
     }
 
     ////////////////////////////////////////////////////////////////////////////
-
-
+    
     public boolean allow(Message m) {
-        if (m instanceof PingRequest)
-            return allowPing((PingRequest)m);
+        //m is allowed if
+        //1. it passes the GUID test and 
+        //2. it passes the query test if it is a query request
+        if (! allowGUID(m))
+            return false;
         else if (m instanceof QueryRequest)
             return allowQuery((QueryRequest)m);
         else
             return true;        
     }
 
-    public boolean allowPing(PingRequest pr) {
-        PingPair me=new PingPair(pr.getGUID(),
-                                 getTime(),
-                                 pr.getHops());
+    public boolean allowGUID(Message m) {
+        //Do NOT apply this filter to pongs, query replies, or pushes,
+        //since many of those will (legally) have the same GUID.       
+        if (! ((m instanceof QueryRequest) || (m instanceof PingRequest)))
+            return true;
 
-        //Consider all pings that came in within PING_LAG milliseconds 
+        GUIDPair me=new GUIDPair(m.getGUID(), getTime(), m.getHops());
+
+        //Consider all messages that came in within GUID_LAG milliseconds 
         //of this...
-        for (Iterator iter=pings.iterator(); iter.hasNext(); ) {
-            PingPair other=(PingPair)iter.next();
+        for (Iterator iter=guids.iterator(); iter.hasNext(); ) {
+            GUIDPair other=(GUIDPair)iter.next();
             //The following assertion fails for mysterious reasons on the
             //Macintosh.  Also, it can fail if the user adjusts the clock, e.g.,
             //for daylight savings time.  Luckily it need not hold for the code
             //to work correctly.  
             //  Assert.that(me.time>=other.time,"Unexpected clock behavior");
-            if ((me.time-other.time) > PING_LAG)
+            if ((me.time-other.time) > GUID_LAG)
                 //All remaining pings have smaller timestamps.
                 break;
             //If different hops, keep looking
@@ -124,11 +129,11 @@ public class DuplicateFilter extends SpamFilter {
                     matches++;
             }
             if (matches>=GUID_SIMILAR) {
-                pings.add(me);
+                guids.add(me);
                 return false;
             }
         }
-        pings.add(me);
+        guids.add(me);
         return true;        
     }
        
@@ -171,7 +176,11 @@ public class DuplicateFilter extends SpamFilter {
         QueryRequest qr=null;
 
         pr=new PingRequest((byte)2);
+        byte[] guid=pr.getGUID();
+        guid[9]++;
+        qr=new QueryRequest(guid, pr.getTTL(), pr.getHops(), new byte[3]);
         Assert.that(filter.allow(pr));
+        Assert.that(!filter.allow(qr));
         pr=new PingRequest((byte)2);
         Assert.that(filter.allow(pr)); //since GUIDs are currently random
         Assert.that(!filter.allow(pr));
@@ -179,7 +188,7 @@ public class DuplicateFilter extends SpamFilter {
         //Now, if I wait a few seconds, it should be allowed.
         synchronized (filter) {
             try {
-                filter.wait(PING_LAG*2);
+                filter.wait(GUID_LAG*2);
             } catch (InterruptedException e) { }
         }
 
@@ -214,12 +223,12 @@ public class DuplicateFilter extends SpamFilter {
     */
 }
 
-class PingPair {
+class GUIDPair {
     byte[] guid;
     long time;
     int hops;
 
-    PingPair(byte[] guid, long time, int hops) {
+    GUIDPair(byte[] guid, long time, int hops) {
         this.guid=guid;
         this.time=time;
         this.hops=hops;

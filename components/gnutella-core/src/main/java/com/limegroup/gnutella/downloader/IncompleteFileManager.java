@@ -41,7 +41,13 @@ public class IncompleteFileManager implements Serializable {
     /** Same thing as getFile(rfd), where rfd.getFile().equals(name) 
      *  and rfd.getSize()==size. */ 
     public File getFile(String name, int size) {
-        return new File(SettingsManager.instance().getIncompleteDirectory(),
-                        "T"+SEPARATOR+size+SEPARATOR+name);
+		File incDir = null;
+		try {
+			incDir = SettingsManager.instance().getIncompleteDirectory();
+		} catch(java.io.FileNotFoundException fnfe) {
+			// this is fine, as this will just create a file in the current
+			// working directory.
+		}
+        return new File(incDir,"T"+SEPARATOR+size+SEPARATOR+name);
     }
 }

@@ -1,20 +1,16 @@
 package com.limegroup.gnutella;
 
-/**
- * This is a wrapper class for information pertaining to a specific
- * file on a remote host.
- *
- * @author rsoule
- * @file RemoteFileDesc.java
- */
-
 import java.io.Serializable;
 import com.sun.java.util.collections.Comparator;
 import com.sun.java.util.collections.Comparable;
-import com.limegroup.gnutella.gui.GUIConstants;
 import com.sun.java.util.collections.Arrays;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 
+/**
+ * A reference to a single file on a remote machine.  In this respect
+ * RemoteFileDesc is similar to a URL, but it contains Gnutella-
+ * specific data as well, such as the server's 16-byte GUID.
+ */
 public class RemoteFileDesc implements Comparable, Serializable {
 
 	/**
@@ -35,15 +31,15 @@ public class RemoteFileDesc implements Comparable, Serializable {
 	 */
 
 	/* speed priorities */
-	public static final int PRIVATE_MODEM_PRIORITY       = 10;
-	public static final int PRIVATE_CABLE_PRIORITY       = 8;
-	public static final int PRIVATE_T1_PRIORITY          = 7;
-	public static final int PRIVATE_T3_PRIORITY          = 6;
+	private final int PRIVATE_MODEM_PRIORITY       = 10;
+	private final int PRIVATE_CABLE_PRIORITY       = 8;
+	private final int PRIVATE_T1_PRIORITY          = 7;
+	private final int PRIVATE_T3_PRIORITY          = 6;
 
-	public static final int PUBLIC_MODEM_PRIORITY        = 5;
-	public static final int PUBLIC_CABLE_PRIORITY        = 3;
-	public static final int PUBLIC_T1_PRIORITY           = 2;
-	public static final int PUBLIC_T3_PRIORITY           = 1;
+	private final int PUBLIC_MODEM_PRIORITY        = 5;
+	private final int PUBLIC_CABLE_PRIORITY        = 3;
+	private final int PUBLIC_T1_PRIORITY           = 2;
+	private final int PUBLIC_T3_PRIORITY           = 1;
 
 	/* how many times a download will be attempted */
 
@@ -60,6 +56,8 @@ public class RemoteFileDesc implements Comparable, Serializable {
 	private int _numAttempts;  
 
 	private LimeXMLDocument[] _xmlDocs = null;
+	private boolean _chatEnabled;
+
 
 	/** 
 	 * @param host the host's ip
@@ -69,9 +67,10 @@ public class RemoteFileDesc implements Comparable, Serializable {
 	 * @param clientGUID the unique identifier of the client
 	 * @param speed the speed of the connection
 	 */
+
 	public RemoteFileDesc(String host, int port, long index, String filename,
-						  int size, byte[] clientGUID, int speed) {
-		
+						  int size, byte[] clientGUID, int speed, 
+						  boolean chat) {
 		_numAttempts = 0;
 		_speed = speed;
 		_host = host;
@@ -80,6 +79,7 @@ public class RemoteFileDesc implements Comparable, Serializable {
 		_filename = filename;
 		_size = size;
 		_clientGUID = clientGUID;
+		_chatEnabled = chat;
 		calculateSpeedPriority();
 		calculatePriority();
 	}
@@ -95,10 +95,10 @@ public class RemoteFileDesc implements Comparable, Serializable {
      * @param xmlDocs the array of xmlDocs pertaining to this file
 	 */
 	public RemoteFileDesc(String host, int port, long index, String filename,
-						  int size, byte[] clientGUID, int speed, 
+						  int size, byte[] clientGUID, int speed,boolean chat,
                           LimeXMLDocument[] xmlDocs) {
 		
-        this(host, port, index, filename, size, clientGUID, speed);
+        this(host, port, index, filename, size, clientGUID, speed,chat);
         _xmlDocs = xmlDocs;
 	}
 
@@ -158,6 +158,8 @@ public class RemoteFileDesc implements Comparable, Serializable {
 	public int getNumAttempts() {return _numAttempts;}
 	public void setNumAttempts(int n) {_numAttempts = n;}
 	public void incrementNumAttempts() {_numAttempts++;}
+	
+	public boolean chatEnabled() {return _chatEnabled;}
 
     public LimeXMLDocument[] getXMLDocs() {return _xmlDocs;}
 
@@ -176,31 +178,31 @@ public class RemoteFileDesc implements Comparable, Serializable {
 	public int calculateSpeedPriority() {
 
 		if (isPrivate()) {
-			if (_speed <= GUIConstants.MODEM_SPEED_INT) {
+			if (_speed <= SpeedConstants.MODEM_SPEED_INT) {
 				_speed_priority = PRIVATE_MODEM_PRIORITY;
 			}
-			else if (_speed <= GUIConstants.CABLE_SPEED_INT) {
+			else if (_speed <= SpeedConstants.CABLE_SPEED_INT) {
 				_speed_priority = PRIVATE_CABLE_PRIORITY;
 			}
-			else if (_speed <= GUIConstants.T1_SPEED_INT) {
+			else if (_speed <= SpeedConstants.T1_SPEED_INT) {
 				_speed_priority = PRIVATE_T1_PRIORITY;
 			}
-			else if (_speed <= GUIConstants.T3_SPEED_INT) {
+			else if (_speed <= SpeedConstants.T3_SPEED_INT) {
 				_speed_priority = PRIVATE_T3_PRIORITY;
 			}
 		}
 		
 		else {
-			if (_speed <= GUIConstants.MODEM_SPEED_INT) {
+			if (_speed <= SpeedConstants.MODEM_SPEED_INT) {
 				_speed_priority = PUBLIC_MODEM_PRIORITY;
 			}
-			else if (_speed <= GUIConstants.CABLE_SPEED_INT) {
+			else if (_speed <= SpeedConstants.CABLE_SPEED_INT) {
 				_speed_priority = PUBLIC_CABLE_PRIORITY;
 			}
-			else if (_speed <= GUIConstants.T1_SPEED_INT) {
+			else if (_speed <= SpeedConstants.T1_SPEED_INT) {
 				_speed_priority = PUBLIC_T1_PRIORITY;
 			}
-			else if (_speed <= GUIConstants.T3_SPEED_INT) {
+			else if (_speed <= SpeedConstants.T3_SPEED_INT) {
 				_speed_priority = PUBLIC_T3_PRIORITY;
 			}
 		}

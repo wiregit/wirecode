@@ -5,12 +5,10 @@ import com.limegroup.gnutella.util.CommonUtils;
 
 
 /**
- * auth: rsoule
- * file: LimitReachedUploadState.java
- * desc: an implementaiton of the UploadState interface
- *       that sends an error message for the limit of
- *       uploads allowed has been reached. This is
- *       an HTTP 503 error.
+ * an implementaiton of the UploadState 
+ * that sends an error message for the limit of
+ * uploads allowed has been reached. This is
+ * an HTTP 503 error.
  */
 
 public class LimitReachedUploadState implements UploadState {

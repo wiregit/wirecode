@@ -143,7 +143,8 @@ public class DownloadManager {
      *     @modifies this, disk */
     public synchronized Downloader getFiles(RemoteFileDesc[] files,
                                             boolean overwrite) 
-            throws FileExistsException, AlreadyDownloadingException {
+            throws FileExistsException, AlreadyDownloadingException, 
+				   java.io.FileNotFoundException {
         //Check if file would conflict with any other downloads in progress.
         //TODO3: if only a few of many files conflicts, we could just ignore
         //them.
@@ -155,7 +156,7 @@ public class DownloadManager {
         //Check if file exists.  TODO3: ideally we'd pass ALL conflicting files
         //to the GUI, so they know what they're overwriting.
         if (! overwrite) {
-            String downloadDir = SettingsManager.instance().getSaveDirectory();
+            File downloadDir = SettingsManager.instance().getSaveDirectory();
             for (int i=0; i<files.length; i++) {
                 String filename=files[i].getFileName();
                 File completeFile = new File(downloadDir, filename);  

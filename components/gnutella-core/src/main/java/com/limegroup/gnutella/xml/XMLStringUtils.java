@@ -7,7 +7,7 @@
 package com.limegroup.gnutella.xml;
 
 import java.util.*;
-import java.io.File;
+import java.io.*;
 import com.limegroup.gnutella.SettingsManager;
 import com.limegroup.gnutella.*;
 
@@ -158,18 +158,26 @@ public class XMLStringUtils
     
     public static void saveMetaInfo(LimeXMLDocument doc, 
                                     String fileName) {
-        
-        // file needs to be properly located...
-        String path = SettingsManager.instance().getSaveDirectory();
-        String fName = path + File.separator + fileName;
-        
+        File dir = null;
+        try{
+            // file needs to be properly located...
+            dir = SettingsManager.instance().getSaveDirectory();
+        }catch (FileNotFoundException e){
+            return;//fail silently
+        }
         // get all needed info
         SchemaReplyCollectionMapper map=SchemaReplyCollectionMapper.instance();
         String uri = doc.getSchemaURI();
         LimeXMLReplyCollection collection = map.getReplyCollection(uri);
         Assert.that(collection!=null,"Cant add doc to nonexistent collection");
+        File f = new File(dir,fileName);
+        String fName = "";
+        try{
+            fName = f.getCanonicalPath();
+        }catch(IOException e){
+            return;//if cannot find path fail silently. Just return
+        }
         doc.setIdentifier(fName);
-        File f = new File(path,fileName);
         //we are adding new data
         String hash=null;
         try{

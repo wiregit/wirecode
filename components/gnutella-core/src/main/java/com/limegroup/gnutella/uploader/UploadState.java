@@ -7,14 +7,12 @@ import java.util.Date;
 // import com.sun.java.util.collections.*;
 
 /**
- * auth: rsoule
- * file: UploadState.java
- * desc: This interface encapsulates the behavior associated
- *       with different upload states.  The actual HTTPUploader
- *       class will swap different implementations of this 
- *       interface, depending on the circumstances surrounding
- *       the upload.  This is based on the STATE pattern in the 
- *       Design Patterns book.
+ * This interface encapsulates the behavior associated
+ * with different upload states.  The actual HTTPUploader
+ * class will swap different implementations of this 
+ * interface, depending on the circumstances surrounding
+ * the upload.  This is based on the STATE pattern in the 
+ * Design Patterns book.
  *
  */
 

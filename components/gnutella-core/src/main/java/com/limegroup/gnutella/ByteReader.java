@@ -1,7 +1,5 @@
 /*
- * auth: rsoule
- * file: ByteReader.java
- * desc: handles reading off of the input stream
+ * handles reading off of the input stream
  *
  */
 //2345678|012345678|012345678|012345678|012345678|012345678|012345678|012345678|
@@ -81,14 +79,13 @@ public class ByteReader {
         if (_istream == null)
             return "";
 
-        String finalString = "";
+		StringBuffer sBuffer = new StringBuffer();
 
         byte[] buf = new byte[BUFSIZE];
 
         int c = -1; //the character just read
         int i = 0;  
         int numBytes = 0;
-        //  boolean endOfLine = false;
 
         String cr = "\r";
         byte[] creturn = cr.getBytes();
@@ -118,41 +115,40 @@ public class ByteReader {
             }
 
             if (numBytes == BUFSIZE) {
-                finalString += new String(buf, 0, numBytes);
+				sBuffer.append(new String(buf, 0, numBytes));
                 i = 0;
                 numBytes = 0;
             }
 
         }
 
-        finalString += new String(buf, 0, numBytes);
-
-        return finalString;
-
+		sBuffer.append(new String(buf, 0, numBytes));
+		return sBuffer.toString();
     }
-
-    //      public static void main(String args[]) {
-    //      try {
-    //          InputStream in;
-    //          ByteReader bin;
-    //          String s;       
-
-    //          in=new StringBufferInputStream("abc\r\na\rbc\n");
-    //          bin=new ByteReader(in);
-   
-    //          s=bin.readLine(); Assert.that(s.equals("abc"), s);
-    //          s=bin.readLine(); Assert.that(s.equals("abc"), s);
-    //          s=bin.readLine(); Assert.that(s==null, s);
-    //          s=bin.readLine(); Assert.that(s==null, s);
-        
-    //          in=new StringBufferInputStream("a\ne");
-    //          bin=new ByteReader(in);
-        
-    //          s=bin.readLine(); Assert.that(s.equals("a"), s);
-    //          s=bin.readLine(); Assert.that(s==null, s);  
-    //      } catch (IOException e) {
-    //          e.printStackTrace();
-    //          Assert.that(false);
-    //      }
-    //      }
 }
+
+//    	public static void main(String args[]) {
+//    		try {
+//    			InputStream in;
+//    			ByteReader bin;
+//    			String s;       
+			
+//    			in=new StringBufferInputStream("abc\r\na\rbc\n");
+//    			bin=new ByteReader(in);
+			
+//    			s=bin.readLine(); Assert.that(s.equals("abc"), s);
+//    			s=bin.readLine(); Assert.that(s.equals("abc"), s);
+//    			s=bin.readLine(); Assert.that(s==null, s);
+//    			s=bin.readLine(); Assert.that(s==null, s);
+			
+//    			in=new StringBufferInputStream("a\ne");
+//    			bin=new ByteReader(in);
+			
+//    			s=bin.readLine(); Assert.that(s.equals("a"), s);
+//    			s=bin.readLine(); Assert.that(s==null, s);  
+//    		} catch (IOException e) {
+//    			e.printStackTrace();
+//    			Assert.that(false);
+//    		}
+//    	}
+//    }

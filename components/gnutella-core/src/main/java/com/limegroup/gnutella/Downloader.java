@@ -78,6 +78,16 @@ public interface Downloader {
      * connected. 
      */
     public String getHost();
+	/**
+     * Returns the port of the downloader, or null if this is not currently
+     * connected. 
+     */
+    public int getPort();
+
+	/**
+	 * returns true if that chat is enambled
+	 */
+	public boolean chatEnabled();
 
     /**
      * Returns the number of pushes results this is waiting for. 
@@ -96,5 +106,5 @@ public interface Downloader {
      * file.
      */
     public LimeXMLDocument[] getXMLDocs();
-
+    
 }

@@ -10,7 +10,7 @@ import com.limegroup.gnutella.util.SocketOpener;
 import java.io.*;
 import java.net.*;
 import com.limegroup.gnutella.util.CommonUtils;
-
+import java.util.StringTokenizer;
 
 /**
  * Downloads a file over an HTTP connection.  This class is as simple as possible.
@@ -31,6 +31,11 @@ public class HTTPDownloader {
 	private FileOutputStream _fos;
 	private Socket _socket;
     private File _incompleteFile;
+
+	private int _port;
+	private String _host;
+	
+	private boolean _chatEnabled = false; // for now
 
 	/**
      * Creates a server-side push download.
@@ -73,6 +78,7 @@ public class HTTPDownloader {
 		    throws IOException {
         initializeFile(rfd, incompleteFile);
         try {
+
             _socket = (new SocketOpener(rfd.getHost(), rfd.getPort())).
                                                          connect(timeout);
         } catch (IOException e) {
@@ -90,6 +96,9 @@ public class HTTPDownloader {
 		_index = rfd.getIndex();
 		_guid = rfd.getClientGUID();
 		_fileSize = rfd.getSize();
+		_port = rfd.getPort();
+		_host = rfd.getHost();
+		_chatEnabled = rfd.chatEnabled();
 
         //If the incomplete file exists, set up a resume just past the end.
         //Otherwise, begin from the start.
@@ -120,6 +129,15 @@ public class HTTPDownloader {
         out.write("GET /get/"+_index+"/"+_filename+" HTTP/1.0\r\n");
         out.write("User-Agent: "+CommonUtils.getVendor()+"\r\n");
         out.write("Range: bytes=" + startRange + "-\r\n");
+		SettingsManager sm = SettingsManager.instance();
+		if (sm.getChatEnabled() ) {
+			int port;
+			if ( sm.getForceIPAddress() )
+				port = sm.getForcedPort();
+			else 
+				port = sm.getPort();
+			out.write("Chat: " + _host + ":" + port + "\r\n");;
+		}
         out.write("\r\n");
         out.flush();
 	}
@@ -163,11 +181,17 @@ public class HTTPDownloader {
 	public int getInitialRead() {return _initialReadingPoint;}
     public InetAddress getInetAddress() {return _socket.getInetAddress();}
 
+	public boolean chatEnabled() {
+		return _chatEnabled;
+	}
+
 	/* Construction time variables */
 	public long  getIndex() {return _index;}
   	public String getFileName() {return _filename;}
   	public byte[] getGUID() {return _guid;}
+	public int getPort() {return _port;}
 
+	
 
 	/*************************************************************/
 
@@ -184,21 +208,66 @@ public class HTTPDownloader {
 		if (str==null || str.equals(""))
 			return;
 		
-		// TODO:  Now that we are no longer truncating the
-		// str, we need to correct the possible errors
-		// that we are looking for
+		// str should be some sort of HTTP connect string.
+		// The string should look like:	
+		// str = "HTTP 200 OK \r\n";
+		// We will accept any 2xx's, but reject other codes.
+		
+		// create a new String tokenizer with the space as the 
+		// delimeter.
+		StringTokenizer tokenizer = new StringTokenizer(str, " ");
+		
+		String token;
 
-  		if ( str.indexOf("503") > 0 ) 
-    			throw new TryAgainLaterException();
-		else if ( str.indexOf("404") > 0 ) 
-			throw new com.limegroup.gnutella.downloader.FileNotFoundException();
-        else if ( str.indexOf("410") > 0 )
-            throw new com.limegroup.gnutella.downloader.NotSharingException();
-		else if ( (str.indexOf("HTTP") < 0 ) && (str.indexOf("OK") < 0 ) )
+		// just a safety
+		if (! tokenizer.hasMoreTokens() )
 			throw new NoHTTPOKException();
 
+		token = tokenizer.nextToken();
+		
+		// the first token should contain HTTP
+		if (token.toUpperCase().indexOf("HTTP") < 0 )
+			throw new NoHTTPOKException();
+		
+		// the next token should be a number
+		// just a safety
+		if (! tokenizer.hasMoreTokens() )
+			throw new NoHTTPOKException();
+
+		token = tokenizer.nextToken();
+		
+		String num = token.trim();
+		int code;
+		try {
+			code = java.lang.Integer.parseInt(num);
+		} catch (NumberFormatException e) {
+			throw new ProblemReadingHeaderException();
+		}
+		
+		// accept anything that is 2xx
+		if ( (code < 200) || (code > 300) ) {
+			if (code == 404)
+				throw new 
+				    com.limegroup.gnutella.downloader.FileNotFoundException();
+			else if (code == 410)
+				throw new 
+                    com.limegroup.gnutella.downloader.NotSharingException();
+			else if (code == 503)
+				throw new TryAgainLaterException();
+			// a general catch for 4xx and 5xx's
+			// should maybe be a different exception?
+			// else if ( (code >= 400) && (code < 600) ) 
+			else 
+				throw new IOException();
+			
+		}
+
+		// if we've gotten this far, then we can assume that we should
+		// be alright to prodeed.
+
+		// str = _byteReader.readLine();
+	
 		while (true) {
-				
 			if (str.toUpperCase().indexOf("CONTENT-LENGTH:") != -1)  {
 
                 String sub;
@@ -292,12 +361,12 @@ public class HTTPDownloader {
         //1. For security, check that download location is OK.
         //   This is to prevent against any files with '.' or '/' or '\'.
 		SettingsManager settings = SettingsManager.instance();		
-		String download_dir = settings.getSaveDirectory();
+		File download_dir = settings.getSaveDirectory();
 
 		File complete_file = new File(download_dir, _filename);
 		
-		File shared = new File(download_dir);
-		String shared_path = shared.getCanonicalPath();
+		//File shared = new File(download_dir);
+		String shared_path = download_dir.getCanonicalPath();
 		
 		File parent_of_shared = new File(complete_file.getParent());
 		String path_to_parent = parent_of_shared.getCanonicalPath();
@@ -364,6 +433,121 @@ public class HTTPDownloader {
 		} else 
 			throw new FileIncompleteException();
 	}
+
+
+	/****************** UNIT TEST *********************/
+	
+//  	private HTTPDownloader(String str) {
+//  		ByteArrayInputStream stream = new ByteArrayInputStream(str.getBytes());
+//  		_byteReader = new ByteReader(stream);
+//  	}
+
+//  	public static void main(String[] argv) {
+//  		String str;
+//  		HTTPDownloader down;
+//  		boolean ok = true;
+
+//  		System.out.println("Starting Test...");
+
+//  		str = "HTTP 200 OK\r\n";
+//  		down = new HTTPDownloader(str);
+//  		try {
+//  			down.readHeader();
+//  			down.stop();
+//  		} catch (IOException e) {
+//  			// should not throw an error
+//  			Assert.that(false);
+//  		}
+		
+//  		str = "HTTP 404 File Not Found \r\n";
+//  		down = new HTTPDownloader(str);
+
+//  		try {
+//  			down.readHeader();
+//  			down.stop();
+//  			Assert.that(false);
+//  		} catch (FileNotFoundException e) {
+
+//  		} catch (IOException e) {
+//  			Assert.that(false);
+//  		}
+
+//  		str = "HTTP 410 Not Sharing \r\n";
+//  		down = new HTTPDownloader(str);
+//  		try {
+//  			down.readHeader();
+//  			down.stop();
+//  			Assert.that(false);
+//  		} catch (NotSharingException e) {
+//  		}catch (IOException e) {
+//  			Assert.that(false);
+//  		}
+
+//  		str = "HTTP 412 \r\n";
+//  		down = new HTTPDownloader(str);
+//  		try {
+//  			down.readHeader();
+//  			down.stop();
+//  			Assert.that(false);
+//  		} catch (IOException e) { 
+//  		}
+
+//  		str = "HTTP 503 \r\n";
+//  		down = new HTTPDownloader(str);
+//  		try {
+//  			down.readHeader();
+//  			down.stop();
+//  			Assert.that(false);
+//  		} catch (TryAgainLaterException e) {
+//  		} catch (IOException e) {
+//  			Assert.that(false);
+//  		}
+
+//  		str = "HTTP 210 \r\n";
+//  		down = new HTTPDownloader(str);
+//  		try {
+//  			down.readHeader();
+//  			down.stop();
+//  		} catch (IOException e) {
+//  			Assert.that(false);
+//  		}
+
+//  		str = "HTTP 204 Partial Content\r\n";
+//  		down = new HTTPDownloader(str);
+//  		try {
+//  			down.readHeader();
+//  			down.stop();
+//  		} catch (IOException e) {
+//  			Assert.that(false);
+//  		}
+
+
+//  		str = "HTTP 200 OK\r\nUser-Agent: LimeWire\r\n\r\nx";
+//  		down = new HTTPDownloader(str);
+//  		try {
+//  			down.readHeader();
+//  			Assert.that((char)down._byteReader.read()=='x');
+//  			down.stop();
+//  		} catch (IOException e) {
+//  			Assert.that(false);
+//  		}
+		
+//  		str = "200 OK\r\n";
+//  		down = new HTTPDownloader(str);
+//  		try {
+//  			down.readHeader();
+//  			down.stop();
+//  			Assert.that(false);
+//  		} catch (NoHTTPOKException e) {
+//  		}catch (IOException e) {
+//  			Assert.that(false);
+//  		}
+
+//  		System.out.println("Test SUCCEEDED!");
+
+//  	}
+
+
 }
 
 
