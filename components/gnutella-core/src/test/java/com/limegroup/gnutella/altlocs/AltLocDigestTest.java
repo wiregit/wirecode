@@ -2,7 +2,10 @@
 package com.limegroup.gnutella.altlocs;
 
 import java.io.ByteArrayOutputStream;
+import java.io.DataOutputStream;
 import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.nio.LongBuffer;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -10,10 +13,13 @@ import java.util.Set;
 
 import junit.framework.Test;
 
+import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.HugeTestUtils;
 import com.limegroup.gnutella.PushEndpoint;
 import com.limegroup.gnutella.stubs.FileDescStub;
 import com.limegroup.gnutella.util.BaseTestCase;
+import com.limegroup.gnutella.util.BitSet;
+import com.limegroup.gnutella.util.IOUtils;
 
 /**
  * Tests the functionality of the altloc digest.
@@ -25,7 +31,7 @@ public class AltLocDigestTest extends BaseTestCase {
     }
 
 	public static Test suite() {
-		return buildTestSuite(AlternateLocationCollectionTest.class);
+		return buildTestSuite(AltLocDigestTest.class);
 	}
 	
 	
@@ -59,9 +65,10 @@ public class AltLocDigestTest extends BaseTestCase {
 			_direct.add(al);
 		}
 		
+		GUID g = new GUID(GUID.makeGuid());
 		_push = AlternateLocationCollection.create(FileDescStub.DEFAULT_SHA1);
-        PushEndpoint pe = new PushEndpoint(FileDescStub.DEFAULT_SHA1.httpStringValue()+";1:2.2.2.2;1.1.1.1:2");
-        PushEndpoint pe2 = new PushEndpoint(FileDescStub.DEFAULT_SHA1.httpStringValue()+";2:3.3.3.3;2.2.2.2:3");
+        PushEndpoint pe = new PushEndpoint(g.toHexString()+";1:2.2.2.2;1.1.1.1:2");
+        PushEndpoint pe2 = new PushEndpoint(g.toHexString()+";2:3.3.3.3;2.2.2.2:3");
         pa = new PushAltLoc(pe,FileDescStub.DEFAULT_SHA1);
         pa2 = new PushAltLoc(pe2,FileDescStub.DEFAULT_SHA1);
         _push.add(pa);
