@@ -207,10 +207,10 @@ public class Sockets {
 			Runnable runner = new SocketOpenerThread();
 			Thread t = new Thread(new SocketOpenerThread());
 			t.setDaemon(true);
+			Assert.that(socket==null, "Socket already established w.o. lock.");
 			t.start();
 			
 			//Wait for socket to be established, or for timeout.
-			Assert.that(socket==null, "Socket already established w.o. lock.");
 			try {
 				this.wait(timeout);
 			} catch (InterruptedException e) {
