@@ -162,6 +162,21 @@ public class StringUtils {
         return HTTPUtil.split(s, delimeters);
     }
 
+    /** Exactly the same as a.compareToIgnoreCase(b), which unfortunately
+     *  doesn't exist in Java 1.1.8. */
+    public static int compareIgnoreCase(String a, String b) {
+        //Check out String.compareTo(String) for a description of the basic
+        //algorithm.  The ignore case extension is trivial.
+        for (int i=0; i<Math.min(a.length(), b.length()); i++) {
+            char ac=Character.toLowerCase(a.charAt(i));
+            char bc=Character.toLowerCase(b.charAt(i));
+            int diff=ac-bc;
+            if (diff!=0)
+                return diff;
+        }
+        return a.length()-b.length();
+    }
+
     /*
     public static void main(String args[]) {
         //Case methods.  Test all boundary conditions.
@@ -220,6 +235,22 @@ public class StringUtils {
         Assert.that(StringUtils.contains("abcd", "    ") == true);
                                          
         //Unit tests for split in HTTPUtil.
+
+        //Unit tests for compareToIgnoreCase.  These require Java 2.
+        testCompareIgnoreCase("", "");
+        testCompareIgnoreCase("", "b");
+        testCompareIgnoreCase("a", "");
+        testCompareIgnoreCase("abc", "AbC");
+        testCompareIgnoreCase("aXc", "ayc");
+        testCompareIgnoreCase("aXc", "aYc");
+        testCompareIgnoreCase("axc", "ayc");
+        testCompareIgnoreCase("axc", "aYc");
+        testCompareIgnoreCase("abc", "AbCdef");
+    }
+
+    private static void testCompareIgnoreCase(String a, String b) {
+        Assert.that(a.compareToIgnoreCase(b)==compareIgnoreCase(a, b));
+        Assert.that(b.compareToIgnoreCase(a)==compareIgnoreCase(b, a));
     }
     */
 }
