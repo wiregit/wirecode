@@ -1794,7 +1794,7 @@ public class ConnectionManager {
     /**
      * Sets the maximum number of connections we'll maintain.
      */
-    private void setPreferredConnections() {
+    private synchronized void setPreferredConnections() {
         // if we're disconnected, do nothing.
         if(!ConnectionSettings.ALLOW_WHILE_DISCONNECTED.getValue() &&
            _disconnectTime != 0)
@@ -1809,8 +1809,33 @@ public class ConnectionManager {
         else
             _preferredConnections = PREFERRED_CONNECTIONS_FOR_LEAF;
 
-        if(oldPreferred != _preferredConnections)
+        if(oldPreferred != _preferredConnections) {
             adjustConnectionFetchers();
+            // if we decreased the amount we want to keep,
+            // remove some connections.
+            if(oldPreferred > _preferredConnections)
+                stabilizeConnections();
+        }
+    }
+    
+    /**
+     * Stabilizes connections by removing extraneous ones.
+     *
+     * This will remove the connections that we've been connected to
+     * for the shortest amount of time.
+     */
+    private void stabilizeConnections() {
+        while(getNumInitializedConnections() > _preferredConnections) {
+            ManagedConnection newest = null;
+            for(Iterator i = _initializedConnections.iterator(); i.hasNext();){
+                ManagedConnection c = (ManagedConnection)i.next();
+                if(newest == null || 
+                   c.getConnectionTime() > newest.getConnectionTime())
+                    newest = c;
+            }
+            if(newest != null)
+                remove(newest);
+        }
     }
     
     /**
