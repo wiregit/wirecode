@@ -443,10 +443,9 @@ public class HostCatcher implements HostListener {
      */
     private synchronized void addToFixedSizeSet(ExtendedEndpoint host, 
         Set hosts) {
-        hosts.add(host);
-                
+        
         // Don't allow the free slots host to expand infinitely.
-        if(hosts.size() > 200) {
+        if(hosts.add(host) && hosts.size() > 200) {
             hosts.remove(hosts.iterator().next());
         }
         notify();
