@@ -13,6 +13,7 @@ import com.limegroup.gnutella.util.StringUtils;
  * necessary files are : CaseFolding.txt, 
  *                       MnKeep.txt, 
  *                       UnicodeData.txt
+ *                       NormalizationTest-3.2.0.txt
  */
 public class UDataFileCreator {
 
@@ -38,9 +39,15 @@ public class UDataFileCreator {
 				dontExclude, 
 				excludedChars,
 				replaceWithSpace);
+            readNTestPopKD(codepoints, tempNFKC);
             readCaseFolding(caseMap);
+            replaceCase(codepoints, caseMap, excludedChars);
             //all we need now is caseMap and excludedChars
-            writeOutObjects(caseMap, excludedChars, replaceWithSpace);
+            writeOutObjects(codepoints, 
+                            caseMap, 
+                            excludedChars, 
+                            replaceWithSpace,
+                            tempNFKC);
         }
         catch(IOException e) {
             e.printStackTrace();
@@ -52,13 +59,37 @@ public class UDataFileCreator {
     /**
      * write out object files
      */
-    private void writeOutObjects(Map caseMap, 
-				 java.util.BitSet excludedChars,
-				 java.util.BitSet replaceWithSpace) 
+    private void writeOutObjects(Map codepoint,
+                                 Map caseMap, 
+                                 java.util.BitSet excludedChars,
+                                 java.util.BitSet replaceWithSpace,
+                                 HashMap nfkc) 
         throws IOException {
+
+        FileOutputStream fo = 
+            new FileOutputStream(new File("nudata.txt"));
+
+        BufferedWriter bufo =
+            new BufferedWriter(new OutputStreamWriter(fo));
         
-        FileOutputStream fo =
-            new FileOutputStream(new File("excluded.dat"));
+        Iterator iter = codepoint.keySet().iterator();
+        while(iter.hasNext()) {
+            String s = (String)iter.next();
+            udata u = (udata)codepoint.get(s);
+
+            if(!u.deKomp.equals("")) {
+                bufo.write(s + ";");
+
+                String composition = (String)nfkc.get(u.deKomp);
+                composition = composition == null || composition.equals(u.deKomp)?"":composition;
+                bufo.write(u.deKomp + ";" + composition + ";\n");
+            }
+        }
+        
+        bufo.flush();
+        bufo.close();
+        
+        fo = new FileOutputStream(new File("excluded.dat"));
         ObjectOutputStream oo = new ObjectOutputStream(fo);
         oo.writeObject(excludedChars);
         
@@ -141,8 +172,14 @@ public class UDataFileCreator {
                 numEx++;
                 excluded.set(Integer.parseInt(parts[0],16));
             }
-            else
+            else {
                 replaceWithSpace.set(Integer.parseInt(parts[0], 16));
+                udata u = new udata();
+                //populate the category for the data wrapper
+                u.cat = parts[2];
+                u.CC = parts[3];
+                cp.put(parts[0], u);
+            }
         }
         else if(isExcluded(parts, ex)) {
             //put the codepoint into the excluded list
@@ -154,7 +191,7 @@ public class UDataFileCreator {
             udata u = new udata();
             //populate the category for the data wrapper
             u.cat = parts[2];
-            //u.CC = parts[3];
+            u.CC = parts[3];
             cp.put(parts[0], u);
         }
         return true;
@@ -179,7 +216,7 @@ public class UDataFileCreator {
     private boolean isExcluded(String[] p, java.util.BitSet ex) {
         String cat = p[2];
         String cc = p[3];
-        //char first = cat.charAt(0);
+        char first = cat.charAt(0);
         if(ex.get(Integer.parseInt(p[0].trim(), 16)))
             return false;
         else if(cat.equals("Lu") ||
@@ -192,8 +229,8 @@ public class UDataFileCreator {
                 cat.equals("Cs") ||
                 cat.equals("Co") ||
                 cat.equals("Zs") ||
-                cat.equals("So") //||
-                //first == 'P' 
+                cat.equals("So") ||
+                first == 'P' 
                 )
             return false;
         else if(cat.equals("Mn") && cc.equals("0")) {
@@ -252,6 +289,133 @@ public class UDataFileCreator {
             b.append((char)Integer.parseInt(s, 16));
         
         return b.toString();
+    }
+
+    /**
+     * reverse of code2char
+     * converts from String to hex rep
+     * ie. "ab" -> 0061 0062
+     */
+    private String char2code(String s) {
+        if(s == null) return s;
+        StringBuffer b = new StringBuffer();
+        String temp;
+        for(int i = 0, n = s.length(); i < n; i++) {
+            temp = Integer.toString(s.charAt(i), 16);
+            if(temp.length() < 4) {
+                b.append("00");
+                b.append(temp);
+            }
+            else
+                b.append(temp);
+            
+            b.append(" ");
+        }
+        
+        return b.toString().trim();
+    }
+
+    /**
+     * run thru codepoints and replace case or replace with space 0020 if
+     * necessary
+     */
+    private void replaceCase(Map codepoint, Map casF, java.util.BitSet ex) {
+        //run thru and check the codepoint or deKomp for uppercase
+        //this could probably done in the write out process?
+        Iterator iter = codepoint.keySet().iterator();
+        String code;
+        String up;
+        String[] splitUp;
+        final int CJKLow = Integer.parseInt("3400", 16);
+        final int CJKHigh = Integer.parseInt("9FA5", 16);
+        while(iter.hasNext()) {
+            code = (String)iter.next();
+            udata u = (udata)codepoint.get(code);
+            if(u.cat.indexOf("P") > -1 || u.cat.equals("Zs")) {
+                //replace all punctuation with (ascii space)
+                //and space (cat: Zs) with 0020 (ascii space)
+                u.deKomp = "0020";
+            }
+            else {
+
+                if(u.deKomp.equals("")) {
+                    up = (String)casF.get(code2char(code));
+                    if(up != null)
+                        u.deKomp = char2code(up);
+                }
+                else {
+                    StringBuffer dek = new StringBuffer();
+                    splitUp = StringUtils.split(u.deKomp, " ");
+                    boolean removed = false;
+                    for(int i = 0; i < splitUp.length; i++) {
+                        //check if it should be removed...
+                        int codeInt = Integer.parseInt(splitUp[i], 16);
+
+                        if(!ex.get(codeInt)) {
+                            up = char2code((String)casF.get(splitUp[i]));
+                            if(up != null)
+                                dek.append(up + " ");
+                            else {
+                                udata ud = (udata)codepoint.get(splitUp[i]);
+                                String cat = 
+                                    (ud == null)?"":ud.cat;
+                                if(cat.indexOf("P") > -1)
+                                    up = "0020";
+                                else
+                                    up = splitUp[i];
+                                //dek.append(splitUp[i] + " ");
+                                dek.append(up + " ");
+                            }
+                        }
+                    }
+                    u.deKomp = dek.toString().trim();
+                }
+
+            }
+        }
+    }
+
+    private void readNTestPopKD(Map c, Map kc) 
+        throws IOException {
+        //c - codepoints that weren't excluded...
+        BufferedReader buf = getBR("NormalizationTest-3.2.0.txt");
+
+        String line;
+        String[] parts;
+        char first;
+        boolean skip = false;
+
+        int hangulFirst = 0xAC00;
+        int hangulLast = 0xD7A3;
+
+        while((line = buf.readLine()) != null) {
+            first = line.charAt(0);
+            if(first != '#') {
+                if(first == '@') {
+                    if(line.indexOf("Part2") > -1)
+                        break;
+                    else if(line.indexOf("Part0") > -1)
+                        skip = true;
+                    else
+                        skip = false;
+                }
+                else {
+                    if(!skip) {
+                        line = line.substring(0, line.indexOf('#')).trim();
+                        parts = StringUtils.split(line, ";");
+                        udata u = (udata)c.get(parts[0].trim());
+
+                        if(u != null) 
+                            u.deKomp = parts[4].trim();
+                        //create a KC mapping to be used to
+                        //build final data... 
+                        kc.put(parts[4].trim(), parts[3].trim());
+                    }
+                }
+            }   
+        }
+        
+        buf.close();
     }
 
     private BufferedReader getBR(String filename) 
