@@ -1,6 +1,6 @@
 package com.limegroup.gnutella;
 
-import java.io.Serializable;
+import java.io.*;
 import com.limegroup.gnutella.util.*;
 import com.sun.java.util.collections.*;
 
@@ -12,11 +12,12 @@ import com.sun.java.util.collections.*;
  */
 public class BandwidthTrackerImpl implements Serializable {
     static final long serialVersionUID = 7694080781117787305L;
+    static final int HISTORY_SIZE=10;
 
     /** Keep 10 clicks worth of data, which we can then average to get a more
      *  accurate moving time average.
      *  INVARIANT: snapShots[0]==measuredBandwidth.floatValue() */
-    transient Buffer /* of Float */ snapShots = new Buffer(10);
+    transient Buffer /* of Float */ snapShots = new Buffer(HISTORY_SIZE);
     
     long lastTime;
     int lastAmountRead;
@@ -67,4 +68,19 @@ public class BandwidthTrackerImpl implements Serializable {
         }
         return total/size;
     }    
+
+    private void readObject(ObjectInputStream in) throws IOException {
+        snapShots=new Buffer(HISTORY_SIZE);
+        try {
+            in.defaultReadObject();
+        } catch (ClassNotFoundException e) {
+            throw new IOException("Class not found");
+        } catch (NotActiveException e) {
+            throw new IOException("Not active");
+        }
+    }
+
+    private void writeObject(ObjectOutputStream out) throws IOException {
+        out.defaultWriteObject();
+    }
 }

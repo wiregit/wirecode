@@ -260,8 +260,8 @@ public class ManagedDownloader implements Downloader, Serializable {
             stream.writeObject(incompleteFileManager);
         }
         //We used to write BandwidthTrackerImpl here. For backwards compatibility,
-        //we write null as a place-holder.  It is ignored when reading.
-		stream.writeObject(null);
+        //we write one as a place-holder.  It is ignored when reading.
+		stream.writeObject(new BandwidthTrackerImpl());
     }
 
     /** See note on serialization at top of file.  You must call initialize on
@@ -273,8 +273,8 @@ public class ManagedDownloader implements Downloader, Serializable {
             throws IOException, ClassNotFoundException {        
         allFiles=(RemoteFileDesc[])stream.readObject();
         incompleteFileManager=(IncompleteFileManager)stream.readObject();
-		//Old versions used to read BandwidthTrackerImpl here.  Now we just use null as
-        //a place holder.
+		//Old versions used to read BandwidthTrackerImpl here.  Now we just use
+		//one as a place holder.
         stream.readObject();
 
         //The following is needed to prevent NullPointerException when reading
