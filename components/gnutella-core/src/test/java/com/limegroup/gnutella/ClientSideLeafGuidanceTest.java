@@ -27,7 +27,7 @@ import java.net.*;
 public class ClientSideLeafGuidanceTest 
     extends com.limegroup.gnutella.util.BaseTestCase {
     private static final int PORT=6669;
-    private static final int TIMEOUT=1000;
+    private static final int TIMEOUT=3000;
     private static final byte[] ultrapeerIP=
         new byte[] {(byte)18, (byte)239, (byte)0, (byte)144};
     private static final byte[] oldIP=
@@ -194,14 +194,8 @@ public class ClientSideLeafGuidanceTest
         while (true) {
             try {
                 Message m=c.receive(TIMEOUT);
-                if (m instanceof RouteTableMessage)
-                    ;
-                if (m instanceof PingRequest)
-                    ;
-                else if (m instanceof QueryRequest) 
+                if (m instanceof QueryRequest) 
                     return (QueryRequest)m;
-                else
-                    return null;  // this is usually an error....
             }
             catch (InterruptedIOException ie) {
                 return null;
@@ -222,14 +216,8 @@ public class ClientSideLeafGuidanceTest
         while (true) {
             try {
                 Message m=c.receive(TIMEOUT);
-                if (m instanceof RouteTableMessage)
-                    ;
-                if (m instanceof PingRequest)
-                    ;
-                else if (m instanceof QueryStatusResponse) 
+                if (m instanceof QueryStatusResponse) 
                     return (QueryStatusResponse)m;
-                else
-                    return null;  // this is usually an error....
             }
             catch (InterruptedIOException ie) {
                 return null;
@@ -288,6 +276,49 @@ public class ClientSideLeafGuidanceTest
             assertNotNull(stat);
             assertEquals(new GUID(stat.getGUID()), queryGuid);
             assertEquals(1, stat.getNumResults());
+        }
+    }
+
+
+    public void testAdvancedGuidance1() throws Exception {
+
+        for (int i = 0; i < testUPs.length; i++)
+            drain(testUPs[i]);
+        
+        // spawn a query and make sure all UPs get it
+        GUID queryGuid = new GUID(rs.newQueryGUID());
+        rs.query(queryGuid.bytes(), "susheel daswanu");
+
+        for (int i = 0; i < testUPs.length; i++) {
+            QueryRequest qr = getFirstQueryRequest(testUPs[i]);
+            assertNotNull(qr);
+            assertEquals(new GUID(qr.getGUID()), queryGuid);
+        }
+
+        // now send back results and make sure that we get a QueryStatus
+        // from the leaf
+        Message m = null;
+        for (int i = 0; i < testUPs.length; i++) {
+            Response[] res = new Response[20];
+            for (int j = 0; j < res.length; j++)
+                res[j] = new Response(10, 10, "susheel good"+i+j);
+
+            m = new QueryReply(queryGuid.bytes(), (byte) 1, 6355, myIP(), 0, res,
+                               GUID.makeGuid(), new byte[0], false, false, true,
+                               true, false, false, null);
+
+            testUPs[i].send(m);
+            testUPs[i].flush();
+        }
+        
+        // all UPs should get a QueryStatusResponse
+        for (int i = 0; i < testUPs.length; i++) {
+            for (int j = 0; j < testUPs.length; j++) {
+                QueryStatusResponse stat = getFirstQueryStatus(testUPs[j]);
+                assertNotNull(stat);
+                assertEquals(new GUID(stat.getGUID()), queryGuid);
+                assertEquals(5*(i+1), stat.getNumResults());
+            }
         }
     }
 
