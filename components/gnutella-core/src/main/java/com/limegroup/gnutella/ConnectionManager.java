@@ -42,8 +42,26 @@ public class ConnectionManager {
     private List /* of ManagedConnection */ _initializingFetchedConnections =
         new ArrayList();
 
-    private int _keepAlive=0;
-    //private int _maxIncomingConnections=0;
+    /** 
+     * The number of connections to keep up.  Initially we will try _keepAlive
+     * outgoing connections.  At the same time we will accept up to _keepAlive
+     * incoming connections.  As outgoing connections fail, we will not accept
+     * any more incoming connections.  Hence we will converge on exactly
+     * _keepAlive incoming connections.  
+     */
+    private volatile int _keepAlive=0;
+    /** The number of incoming connections.  Used to avoid the cost of scanning
+     * through _initializedConnections when deciding whether to accept incoming..
+     *
+     *  INVARIANT: _incomingConnections>=the number of incoming connections in
+     *  _connections.  In the "steady state", i.e., when no incoming connections
+     *  are being initialized, this value is exactly equal to the number of
+     *  incoming connections.
+     *
+     *  LOCKING: obtain _incomingConnectionLock */
+    private int _incomingConnections=0;
+    /** The lock for the number of incoming connnections. */
+    private Object _incomingConnectionsLock=new Object();
 
     private MessageRouter _router;
     private HostCatcher _catcher;
@@ -133,35 +151,50 @@ public class ConnectionManager {
      * will launch a RejectConnection to send pongs for other hosts.
      */
      void acceptConnection(Socket socket) {
-         if (getNumInConnections() < getNumConnections()) {             
-            ManagedConnection connection = new ManagedConnection(socket,
-                                                                 _router,
-                                                                 this);
-            try {
-                initializeExternallyGeneratedConnection(connection);
-                //We DO send ping requests on incoming connections.  This may
-                //double ping traffic, but if gives us more accurate horizon
-                //stats.  And it won't really affect traffic if people implement
-                //caching properly.
-                _router.sendPingRequest(
-                    new PingRequest(_settings.getTTL()),
-                    connection);
-                connection.loopForMessages();
-            } catch(IOException e) {
-            } catch(Exception e) {
-                //Internal error!
-                _callback.error(ActivityCallback.ERROR_20, e);
-            }
-        }
-        else {
-            // The constructor does the whole deal -- intializing,
-            // looking for and responding to a PingRequest.  It's
-            // all synchronous, because we have a dedicated thread
-            // right here.
+         //Atomically decide whether to accept connection.  Release lock
+         //before actually managing the connection.
+         boolean allowConnection=false;
+         synchronized (_incomingConnectionsLock) {
+             if (_incomingConnections < _keepAlive) {
+                 //Yes, we'll allow it.  Increment the incoming count NOW even
+                 //before this connection is processed.  The value will be
+                 //decremented in the finally clause below.
+                 _incomingConnections++;
+                 allowConnection=true;
+             }
+         }
+         
+         if (allowConnection) {
+             //a) Handle normal connection (blocking).
+             ManagedConnection connection = new ManagedConnection(
+                 socket, _router, this);
+             try {                     
+                 initializeExternallyGeneratedConnection(connection);
+                 //We DO send ping requests on incoming connections.  This may
+                 //double ping traffic, but if gives us more accurate horizon
+                 //stats.  And it won't really affect traffic if people implement
+                 //caching properly.
+                 _router.sendPingRequest(new PingRequest(_settings.getTTL()),
+                                         connection);
+                 connection.loopForMessages();
+             } catch(IOException e) {
+             } catch(Exception e) {
+                 //Internal error!
+                 _callback.error(ActivityCallback.ERROR_20, e);
+             } finally {
+                 synchronized (_incomingConnectionsLock) {
+                     _incomingConnections--;
+                 }
+             }
+         } else {
+             //b) Handle reject connection if on windows.  The constructor does the
+             //whole deal -- intializing, looking for and responding to a
+             //PingRequest.  It's all synchronous, because we have a dedicated
+             //thread right here.
 			if(Utilities.isWindows()) {
 				new RejectConnection(socket, _catcher);
 			}
-
+            
 			// Otherwise, we're not on windows.  We did this 
 			// because we know that RejectConnection was causing
 			// problems on the Mac (periodically freezing the
@@ -177,7 +210,7 @@ public class ConnectionManager {
 				}
 				catch(IOException ioe) {}
 			}
-        }
+         }
      }
 
     /**
@@ -232,21 +265,6 @@ public class ConnectionManager {
      */
     public int getNumConnections() {
         return _connections.size();
-    }
-
-    /**
-     * @return the number of incoming connections
-     */
-    private int getNumInConnections() {
-        //This could be optimized if desired by augmenting the state of
-        //ConnectionManager.
-        int ret=0;
-        //Note that we DON'T use getInitializedConnections.
-        for (Iterator iter=getConnections().iterator(); iter.hasNext(); ) {
-            if (! ((Connection)iter.next()).isOutgoing())
-                ret++;
-        }
-        return ret;
     }
 
     /**
