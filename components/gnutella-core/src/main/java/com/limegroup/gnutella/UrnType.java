@@ -20,7 +20,7 @@ public class UrnType implements Serializable {
 	/**
 	 * Identifier string for the SHA1 type.
 	 */
-	public static final String SHA1_STRING = "sha1";
+	public static final String SHA1_STRING = "sha1:";
 
 	/**
 	 * Constant for the leading URN string identifier, as specified in
@@ -67,7 +67,7 @@ public class UrnType implements Serializable {
 	 * @return the string representation of this URN type
 	 */
 	public String toString() {
-		return URN_NAMESPACE_ID+_urnType+COLON;
+		return URN_NAMESPACE_ID+_urnType;
 	}
 
 	/**
@@ -128,21 +128,21 @@ public class UrnType implements Serializable {
 
 	/**
 	 * Factory method for obtaining <tt>UrnType</tt> instances from strings.
+	 * If the isSupportedUrnType method returns <tt>true</tt> this is
+	 * guaranteed to return a non-null UrnType.
 	 *
 	 * @param type the string representation of the urn type
 	 * @return the <tt>UrnType</tt> instance corresponding with the specified
-	 *  string
-	 * @throws <tt>IllegalArgumentException</tt> if the <tt>type</tt>
-	 *  argument does not correspond with any known type
+	 *  string, or <tt>null</tt> if the type is not supported
 	 */
 	public static UrnType createUrnType(String type) {
-		String lowerCaseType = type.toLowerCase();
-		if(lowerCaseType.equals(SHA1_STRING)) {
+		String lowerCaseType = type.toLowerCase().trim();
+		if(lowerCaseType.equals(SHA1.toString())) { 
 			return SHA1;
-		} else if(lowerCaseType.equals(SHA1.toString())) { 
-			return SHA1;
+		} else if(lowerCaseType.equals(ANY_TYPE.toString())) {
+			return ANY_TYPE;
 		} else {
-			throw new IllegalArgumentException("unknown type: "+type);
+			return null;
 		}
 	}
 
@@ -155,19 +155,9 @@ public class UrnType implements Serializable {
 	 *  otherwise
 	 */
 	public static boolean isSupportedUrnType(final String urnString) {
-		int colonIndex = urnString.indexOf(COLON);
-		if(colonIndex == -1) {
-			return false;
-		}	   
-		String typeString = urnString.toLowerCase();
-		if(typeString.equals(URN_NAMESPACE_ID)) {
-			return true;
-		}
-		typeString = typeString.substring(colonIndex+1);
-		if(typeString.equals(SHA1_STRING + COLON)) {
-			return true;
-		}
-		return false;		
+		UrnType type = UrnType.createUrnType(urnString);
+		if(type == null) return false;
+		return true;
 	}
 
 	/**
@@ -177,14 +167,14 @@ public class UrnType implements Serializable {
 	 * @return <tt>true</tt> if the namespace is supported, <tt>false</tt>
 	 *  otherwise
 	 */
-	public static boolean isSupportedUrnNamespace(final String namespaceId) {
+	//public static boolean isSupportedUrnNamespace(final String namespaceId) {
 		// we should add other namespace identifiers to this check as
 		// they become registered
-		if(namespaceId.equalsIgnoreCase(SHA1_STRING)) {
-			return true;
-		}
-		return false;
-	}
+	//if(namespaceId.equalsIgnoreCase(SHA1_STRING)) {
+	//	return true;
+	//}
+	//return false;
+	//}
 
 	// the enum constants
 
