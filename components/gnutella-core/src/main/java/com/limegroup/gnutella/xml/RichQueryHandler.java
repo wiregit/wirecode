@@ -42,7 +42,7 @@ public class RichQueryHandler{
      * connections make two different queries. Then all bad things can happen.
      */
     public synchronized Response[] query(String XMLQuery,FileManager fManager){
-        //System.out.println("Sumeet: "+XMLQuery);
+        debug("Sumeet: "+XMLQuery);
         if (XMLQuery.equals(""))
             return null;
         LimeXMLDocument queryDoc = null;
@@ -75,23 +75,14 @@ public class RichQueryHandler{
         String metadata="";
         int z =0;
         boolean valid = true;
+        debug("RQH.query(): # of resps = " + s);
         for(int i=0; i<s;i++){
             LimeXMLDocument currDoc = (LimeXMLDocument)matchingReplies.get(i);
             String subjectFile = currDoc.getIdentifier();//returns null if none
-            try {
-                metadata = currDoc.getXMLString();
-            }
-            catch (SchemaNotFoundException snfe) {};
             if(subjectFile==null){//pure data (data about NO file)
                 index = LimeXMLProperties.DEFAULT_NONFILE_INDEX;
-                size = metadata.length();//Here: size = size of metadata String
-                //name is the first 10 relavent xml chars.
-                if (size > 33)
-                    name = metadata.substring(22,33);//<?xml version="1.0"?> on
-                else if (size > 22)
-                    name = metadata.substring(22,(int)size);//upto the last
-                else
-                    name =" ";//leave blank
+                size = 0;//there is no file, so no size
+                name =" ";//leave blank
             }
             else { //meta-data about a specific file
                 FileDesc fd = fManager.file2index(subjectFile);
@@ -109,12 +100,18 @@ public class RichQueryHandler{
                     valid = false;
                 }
             }
-            if (valid){
+            if (valid) {
                 //if this code is NOT run s times 
                 //there will be nulls at the end of the array
-                res = new Response(index,size,name,metadata);                
+                res = new Response(index,size,name,currDoc);
                 retResponses[z] = res;
                 z++;
+                try {
+                    debug("RQH: xml = " + currDoc.getXMLString());
+                }
+                catch (Exception e) {
+                    e.printStackTrace();
+                }
             }
             valid = true;
         }
@@ -130,7 +127,19 @@ public class RichQueryHandler{
             retResponses = temp;
         }
 
+        debug("RQH: num Response = " + retResponses.length);
         return retResponses;
+    }
+
+
+    private final boolean debugOn = false;
+    private void debug(String out) {
+        if (debugOn)
+            System.out.println(out);
+    }
+    private void debug(Exception e) {
+        if (debugOn)
+            e.printStackTrace();
     }
 
 }

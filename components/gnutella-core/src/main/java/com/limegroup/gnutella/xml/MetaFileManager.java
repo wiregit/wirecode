@@ -114,17 +114,8 @@ public class MetaFileManager extends FileManager {
             LimeXMLDocument doc = coll.getDocForHash(hash);
             if(doc==null)
                 continue;
-            String XMLString = "";
-            try{
-                XMLString = doc.getXMLString();
-            }catch(Exception e){
-                e.printStackTrace();
-                continue;
-            }
-            if(XMLString!=null && !XMLString.equals("")){
-                //System.out.println("Sumeet audioXML="+XMLString);
-                responses[i].setMetadata(XMLString);
-            }
+            //System.out.println("Sumeet audioXML="+XMLString);
+            responses[i].setDocument(doc);            
         }
     }
     
