@@ -49,7 +49,11 @@ public final class URN {
 	 * The string representation of the URN.
 	 */
 	private final String URN_STRING;
-  
+
+	/**
+	 * Cached hash code that is lazily initialized.
+	 */
+	private volatile int hashCode = 0;  
 
 	/**
 	 * Constructs a new URN based on the specified <tt>File</tt> instance.
@@ -285,6 +289,24 @@ public final class URN {
 			return false;
 		}
 		return ((URN)urn).getURNString().equals(URN_STRING);
+	}
+
+	/**
+	 * Overrides the hashCode method of Object to meet the contract of 
+	 * hashCode.  Since we override equals, it is necessary to also 
+	 * override hashcode to ensure that two "equal" instances of this
+	 * class return the same hashCode, less we unleash unknown havoc on 
+	 * the hash-based collections.
+	 *
+	 * @return a hash code value for this object
+	 */
+	public int hashCode() {
+		if(hashCode == 0) {
+			int result = 17;
+			result = (37*result) + this.URN_STRING.hashCode();
+			hashCode = result;
+		}
+		return hashCode;
 	}
 
 	/**
