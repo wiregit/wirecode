@@ -983,16 +983,11 @@ public class FileManager {
      *  can be checked for potential positives against a QRT.
      */
     public List getIndivisibleKeyWords() {
-        File[] files = getSharedFiles(null);
-        ArrayList retList = new ArrayList();
-        UrnCache urnCache = UrnCache.instance();
-        for (int i = 0; i < files.length; i++) {
-            Set urnsForCurrFile = urnCache.getUrns(files[i]);
-            Iterator iter = urnsForCurrFile.iterator();
-            while (iter.hasNext())
-                retList.add(((URN)iter.next()).toString());
-        }
-        return retList;
+        // Took out the code that added URNs to the returned List since we are
+        // not recognizing queries with hashes anymore.  If you need the code
+        // check CVS for it ;) .
+        // Just return an empty list.
+        return new ArrayList();
     }
 
     /** Same as f.getCanonicalFile() in JDK1.3. */
