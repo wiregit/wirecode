@@ -1,6 +1,6 @@
 javac=javac -O
 
-classes = ForgetfulHashMap.class
+classes = ForgetfulHashMap.class UnmodifiableIterator.class
 
 all : $(classes)
 
