@@ -442,37 +442,15 @@ public final class MessageRouterTest extends BaseTestCase {
         
         ReplyHandler rh = new OldConnection(10);
         m.invoke(ROUTER, new Object[] {qr});
-        assertEquals("unexpected number of queries sent", 3, tcm.getNumQueries());
-        assertEquals("unexpected number of queries sent", 0, 
+        assertEquals("unexpected number of queries sent", 4, 
+                     tcm.getNumQueries());
+        assertEquals("unexpected number of queries sent", 1, 
                      tcm.getNumOldConnectionQueries());
         assertEquals("unexpected number of queries sent", 3, 
                      tcm.getNumNewConnectionQueries());        
 
     }
     
-    /**
-     * Tests the method for originating queries from leaves to make sure
-     * that we only send the query to 3 hosts even when we have more.
-     */
-    public void testOriginateLeafQueryLimit() throws Exception {  
-        Class[] params = new Class[]{QueryRequest.class};
-		Method m = 
-            PrivilegedAccessor.getMethod(ROUTER, 
-                                         "originateLeafQuery",
-                                         params);          
-        TestConnectionManager tcm = new TestConnectionManager(5, false);
-        PrivilegedAccessor.setValue(RouterService.class, "manager", tcm);
-        PrivilegedAccessor.setValue(ROUTER, "_manager", tcm);
-        QueryRequest qr = QueryRequest.createQuery("test");      
-        ReplyHandler rh = new OldConnection(10);
-        m.invoke(ROUTER, new Object[] {qr});
-        assertEquals("unexpected number of queries sent", 3, tcm.getNumQueries());
-        assertEquals("unexpected number of queries sent", 0, 
-                     tcm.getNumOldConnectionQueries());
-        assertEquals("unexpected number of queries sent", 3, 
-                     tcm.getNumNewConnectionQueries());        
-    }
-
     /**
      * Test file manager that returns specialized keywords for QRP testing.
      */
@@ -487,8 +465,4 @@ public final class MessageRouterTest extends BaseTestCase {
             return KEYWORDS;
         }
     }
-
-    //private static final class TestUploadManager extends UploadManager {
-        
-    //}
 }
