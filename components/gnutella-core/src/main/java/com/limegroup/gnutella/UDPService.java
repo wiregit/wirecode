@@ -167,7 +167,10 @@ public final class UDPService implements Runnable {
      */
     DatagramSocket newListeningSocket(int port) throws IOException {
         try {
-            return new DatagramSocket(port);
+        	DatagramSocket s = new DatagramSocket(port);
+        	if (CommonUtils.isWindows2000orXP())
+        		s.setReceiveBufferSize(64*1024);
+            return s;
         }
         catch (SocketException se) {
             throw new IOException("socket could not be set on port: "+port);
