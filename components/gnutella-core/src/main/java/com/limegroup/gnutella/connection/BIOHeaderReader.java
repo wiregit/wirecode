@@ -54,16 +54,22 @@ public final class BIOHeaderReader implements HeaderReader {
         return readHeader(Constants.TIMEOUT);
     }
     
-    /* (non-Javadoc)
-     * @see com.limegroup.gnutella.connection.HeaderReader#readHeader()
+    /**
+     * Reads the next header from this connection's socket.
+     * 
+     * @param timeout The time in milliseconds to wait for data on the socket.
+     * @return a new <tt>HTTPHeader</tt> instance for the Gnutella connection
+     *  header (which are in HTTP form), or <tt>null</tt> if we've reached the
+     *  end of the handshake -- the final \r\n
      */
     public HTTPHeader readHeader(int timeout) throws IOException {
         String header = readLine(timeout);
         if(header == null)  {
             _headersComplete = true;
-        } else  {
-            _headersComplete = false;
+            return null;
         }
+        
+        _headersComplete = false;
         // wrap the header string in an HTTPHeader instance
         return HTTPHeader.createHeader(header);
     }
