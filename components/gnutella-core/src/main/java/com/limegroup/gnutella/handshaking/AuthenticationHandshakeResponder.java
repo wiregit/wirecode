@@ -181,7 +181,7 @@ public abstract class AuthenticationHandshakeResponder
         if(response.getStatusCode() != HandshakeResponse.UNAUTHORIZED_CODE)
             return respondUnauthenticated(response, true);
         else
-            return respondOutgoingWithAuthentication(response);
+            return respondOutgoingWithAuthentication();
     }
     
     /**
@@ -190,8 +190,8 @@ public abstract class AuthenticationHandshakeResponder
      * @param response The handshake response received from the remote end
      * @return response Our response
      */
-    private HandshakeResponse respondOutgoingWithAuthentication(
-        HandshakeResponse response) throws IOException
+    private HandshakeResponse respondOutgoingWithAuthentication()
+        throws IOException
     {
         int code = HandshakeResponse.OK;
         String message = HandshakeResponse.OK_MESSAGE;
