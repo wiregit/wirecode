@@ -547,7 +547,7 @@ public class ManagedDownloader implements Downloader, Serializable {
             FileDesc fd = fileManager.getFileDescForUrn(hash);
             if( fd != null ) {
                 // Retrieve the alternate locations (without adding ourself)
-                validAlts = fd.getAlternateLocationCollectionWithoutSelf();
+                validAlts = fd.getAlternateLocationCollection();
                 Iterator iter = validAlts.iterator();
                 synchronized(validAlts) {
                     while(iter.hasNext()) {
@@ -2331,6 +2331,14 @@ public class ManagedDownloader implements Downloader, Serializable {
     }
     
     /**
+     * Returns the amount of other hosts this download can possibly use.
+     */
+    public synchronized int getNumberOfPossibleHosts() {
+        return (files == null ? 0 : files.size()) +
+               (busy == null ? 0 : busy.size());
+    }
+    
+    /**
      * Assigns a white part of the file to a HTTPDownloader and returns it.
      * This method has side effects.
      */
@@ -2656,22 +2664,18 @@ public class ManagedDownloader implements Downloader, Serializable {
                     //TODO3:Until IncompleteFileDesc and ManagedDownloader do
                     //not share a common AlternateLocation, they should get
                     //separate copies of AlternateLocations
-                    AlternateLocation loc=null;
-                    AlternateLocation loc2=null;
                     try {
-                        loc = AlternateLocation.create(rfd);
-                        loc2 = AlternateLocation.create(rfd);
-                    } catch (Exception e) {}
-                    if(loc!=null) {
+                        AlternateLocation loc = AlternateLocation.create(rfd);
+                        AlternateLocation loc2 = AlternateLocation.create(rfd);
                         informMesh(rfd,true);
-                        FileDesc desc=
+                        FileDesc desc =
                              fileManager.getFileDescForFile(incompleteFile);
-                        if(desc!=null) 
+                        if(desc != null) 
                             desc.add(loc);
                         //TODO3:IncompleteFileDesc and this should share a
                         //AlternateLocationCollection
                         addAlternateLocation(loc2);
-                    }
+                    } catch (IOException ignored) {}
                 }
             }
         }
