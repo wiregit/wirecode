@@ -182,6 +182,19 @@ public class HostCatcher {
      */
     private final Set FREE_LEAF_SLOTS = new HashSet();
     
+    /**
+     * Constant for the number of milliseconds to wait before periodically
+     * recovering hosts on probation.  Non-final for testing.
+     */
+    private static long PROBATION_RECOVERY_WAIT_TIME = 60*1000;
+
+    /**
+     * Constant for the number of milliseconds to wait between calls to 
+     * recover hosts that have been placed on probation.  
+     * Non-final for testing.
+     */
+    private static long PROBATION_RECOVERY_TIME = 60*1000;
+    
 	/**
 	 * Creates a new <tt>HostCatcher</tt> instance with a constant setting
 	 * for the host file location.
@@ -253,7 +266,8 @@ public class HostCatcher {
         };
         
         // Recover hosts on probation every minute.
-        RouterService.schedule(probationRestorer, 60000, 60000);
+        RouterService.schedule(probationRestorer, 
+            PROBATION_RECOVERY_WAIT_TIME, PROBATION_RECOVERY_TIME);
     }
 
     /**
