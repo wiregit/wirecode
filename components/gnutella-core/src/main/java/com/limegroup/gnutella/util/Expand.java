@@ -108,6 +108,7 @@ public final class Expand {
         ZipInputStream zis = null;
         
         try {
+			FileUtils.setWriteable(source);
             zis = new ZipInputStream(
                 new BufferedInputStream(new FileInputStream(source)));
             ZipEntry ze = null;
