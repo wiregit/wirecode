@@ -304,6 +304,13 @@ public class RouterService
         }
     }
 
+	/**
+	 * lower the number of connections for "low-power" mode.
+	 */
+	public void reduceConnections() {
+		manager.reduceConnections();
+	}
+
     /**
      * Remove a connection based on the host/port
      */
@@ -576,6 +583,13 @@ public class RouterService
      */
     public int getNumConnections() {
         return manager.getNumConnections();
+    }
+
+    /**
+     *  Return the number of connections to maintain
+     */
+    public int getKeepAlive() {
+        return manager.getKeepAlive();
     }
 
     /**
