@@ -22,7 +22,7 @@ public class StatisticsRecorder
      */
     private static final long WAIT_TIME = 30 * 60 * 1000; //30 minutes
     private static final String SERVLET_URL = 
-        "http://www.limewire.com:8080/update/servlet/AlphaTestStatsHandler";
+        "http://content.limewire.com:8081/update/servlet/AlphaTestStatsHandler";
     /**
      * The next time to send the statistics to the server.  Initialize to 
      * current time + WAIT_TIME so that the first time the statistics are sent
@@ -162,12 +162,10 @@ public class StatisticsRecorder
                     "\n\n");
                 out.print(generateSendString());
                 out.close();
+                InputStream input = connection.getInputStream();
             }
             catch(IOException ie)
             {
-                MessageService.showError("Unable to send network statistics " + 
-                    "to server.  Please contact support@limepeer.com  Thank " +
-                    "you.");
             }
 
         }
@@ -198,7 +196,7 @@ public class StatisticsRecorder
                         PercentageStatisticValue percentValue = 
                             (PercentageStatisticValue)value;
                         statValue = new String(percentValue.calculatePercent() + 
-                            " " + value.getMetric());
+                                               " " + value.getMetric());
                     }
                     else if (value.isAverageStatistic())
                         statValue = new String(value.calculateAverage() + " " + 
