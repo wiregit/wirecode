@@ -135,7 +135,7 @@ public class LimeXMLDocument implements Serializable {
         setFields(result.canonicalKeyPrefix);
         
         if(!isValid())
-            throw new IOException("Invalid XML.");
+            throw new IOException("Invalid XML: " + xml);
     }
 
     /**
