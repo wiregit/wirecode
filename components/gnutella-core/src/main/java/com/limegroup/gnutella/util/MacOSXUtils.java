@@ -6,6 +6,7 @@ import com.apple.cocoa.foundation.NSMutableArray;
 import com.apple.cocoa.foundation.NSMutableDictionary;
 import com.apple.cocoa.foundation.NSObject;
 import com.apple.cocoa.foundation.NSUserDefaults;
+import com.apple.cocoa.foundation.NSSystem;
 
 /**
  * A collection of utility methods for OSX.
@@ -155,6 +156,13 @@ public class MacOSXUtils {
         defaults.setPersistentDomainForName(logins, LOGIN_DOMAIN);
         // Synchronize it to disk immediately
         defaults.synchronize();
+    }
+    
+    /**
+     * Gets the full user's name.
+     */
+    public static String getUserName() {
+        return NSSystem.currentFullUserName();
     }
     
     /**

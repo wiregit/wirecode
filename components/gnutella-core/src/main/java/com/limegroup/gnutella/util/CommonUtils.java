@@ -521,11 +521,15 @@ public final class CommonUtils {
      * Returns whether or not the Cocoa Foundation classes are available.
      */
     public static boolean isCocoaFoundationAvailable() {
+        if(!isMacOSX())
+            return false;
+            
         try {
             Class.forName("com.apple.cocoa.foundation.NSUserDefaults");
             Class.forName("com.apple.cocoa.foundation.NSMutableDictionary");
             Class.forName("com.apple.cocoa.foundation.NSMutableArray");
             Class.forName("com.apple.cocoa.foundation.NSObject");
+            Class.forName("com.apple.cocoa.foundation.NSSystem");
             return true;
         } catch(ClassNotFoundException error) {
             return false;

@@ -1,13 +1,15 @@
 
 package com.limegroup.gnutella.settings;
 
+import com.limegroup.gnutella.util.MacOSXUtils;
+import com.limegroup.gnutella.util.CommonUtils;
+
 /**
  * Settings for Digital Audio Access Protocol (DAAP)
  */
 public class DaapSettings extends LimeProps {
     
-    private DaapSettings() {
-    }
+    private DaapSettings() {}
     
     /**
      * Whether or not DAAP should be enabled
@@ -28,7 +30,7 @@ public class DaapSettings extends LimeProps {
      */
     public static StringSetting DAAP_LIBRARY_NAME =
 	    (StringSetting)FACTORY.createStringSetting("DAAP_LIBRARY_NAME",
-	            System.getProperty("user.name", "Unknown") + "'s LimeWire Tunes").
+	            getPossessiveUserName() + " LimeWire Tunes").
 	    setPrivate(true);
 	
     /**
@@ -61,7 +63,7 @@ public class DaapSettings extends LimeProps {
      */
 	public static StringSetting DAAP_SERVICE_NAME =
 		(StringSetting)FACTORY.createStringSetting("DAAP_SERVICE_NAME",
-		    System.getProperty("user.name", "Unknown") + "'s LimeWire Tunes").
+		    getPossessiveUserName() + " LimeWire Tunes").
 		setPrivate(true);
 	
     /**
@@ -119,4 +121,21 @@ public class DaapSettings extends LimeProps {
      */
     public static BooleanSetting DAAP_LIBRARY_GC =
         FACTORY.createBooleanSetting("DAAP_LIBRARY_GC", true);
+        
+    /**
+     * Gets the user's name, in possessive format.
+     */
+    private static String getPossessiveUserName() {
+        String name = System.getProperty("user.name", "Unknown");
+        if(CommonUtils.isCocoaFoundationAvailable()) {
+            String n = MacOSXUtils.getUserName();
+            if(n != null)
+                name = n;
+        }
+        if(!name.endsWith("s"))
+            name += "'s";
+        else
+            name += "'";
+        return name;
+    }
 }
