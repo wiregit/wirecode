@@ -1147,7 +1147,7 @@ public class UDPConnectionProcessor {
             if ( _receiverWindowSpace <= SMALL_SEND_WINDOW ) { 
 
                 // Scale back on the writing speed if you are hitting limits
-                if ( _receiverWindowSpace <= 0 ) { 
+                if ( _receiverWindowSpace <= 0 ) 
                     _writeRegulator.hitZeroWindow();
             }
 
