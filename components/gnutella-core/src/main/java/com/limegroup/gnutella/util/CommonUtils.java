@@ -282,6 +282,11 @@ public final class CommonUtils {
         return 2;
     }
 
+    /**
+     * Accessor for whether or not this is LimeWire pro.
+     *
+     * @return <tt>true</tt> if it is pro, otherwise <tt>false</tt>
+     */
     public static boolean isPro() {
         return _isPro;
     }
@@ -711,6 +716,7 @@ public final class CommonUtils {
         _xmlFilesMoved = true;
     }    
 	
+
 	/**
 	 * Returns whether or not the QuickTime libraries are available
 	 * on the user's system.
