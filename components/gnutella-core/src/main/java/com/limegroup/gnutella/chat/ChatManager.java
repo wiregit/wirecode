@@ -1,85 +1,74 @@
-package com.limegroup.gnutella.chat;
+package com.limegroup.gnutella.chat2;
 /**
- * this class establishes a connection for a chat, either outgoing
- * or incoming, and maintains a list of all the chats currently
- * going on.
+ * a class that establishes a connection for a chat, either
+ * incoming or outgoing, and also maintains a list of all the 
+ * chats currently in progress.
+ *
+ *@author rsoule
  */
-//2345678|012345678|012345678|012345678|012345678|012345678|012345678|012345678|
 
-
+import com.sun.java.util.collections.*;
+import com.limegroup.gnutella.*;
 import java.net.*;
 import java.io.*;
-import com.sun.java.util.collections.*;
-import com.limegroup.gnutella.gui.*;
-
-import java.awt.Container;
 
 public class ChatManager {
 
-	
-	/** variable for following the singleton pattern. */
-	private static ChatManager _chatManager;
-	/** a list of all the current chats in progress */
+	// Attributes
+	private static ChatManager _chatManager = new ChatManager();
 	private List _chatsInProgress;
+	private ActivityCallback _activityCallback;
 
-	/**
-	 * private constructor for singleton
-	 */
-	private ChatManager() {
-		_chatsInProgress = new LinkedList();
-	}
-		
-	/**
-	 * return an instance of the chat manager class, following
-	 * the singleton
-	 */
+	// Operations
 	public static ChatManager instance() {
-		if (_chatManager == null)
-			_chatManager = new ChatManager();
 		return _chatManager;
 	}
 
-	/**
-	 * accepts the given socket for a one-to-one 
-	 * chat connection, like an Instant Message
-	 */
-	public void acceptIM(Socket socket) {
-		InstantMessage im;
-		try {
-			im = new InstantMessage(socket);
-			// need to add to the list:
-			// _chatsInProgress.add(im);
-			im.recieveMessage();
-		} catch (IOException e) {
-			System.out.println("error in acceptIM");
-			// unable to recieve connection.
-		}
-		System.out.println("Accepted the socket");
-		
-		
+	/** sets the activity callback so that the chats can 
+		communicate with the gui */
+	public void setActivityCallback(ActivityCallback callback) {
+		_activityCallback = callback;
 	}
 
-	/**
-	 * WATCH OUT RETURNS NULL SOMETIMES
-	 */
-	public Chatter requestIM(String host, int port) {
-		InstantMessage im;
+	/** accepts the given socket for a one-to-one
+		chat connection, like an instant messanger */
+	public void accept(Socket socket) {
+		// the Acceptor class recieved a message already, 
+		// and asks the ChatManager to create an InstantMessager
 		try {
-			im = new InstantMessage(host, port);
+			InstantMessenger im = new InstantMessenger(socket, this, 
+													   _activityCallback);
+			// insert the newly created InstantMessager into the list
+			_chatsInProgress.add((Chat)im);
+			im.start();
 		} catch (IOException e) {
-			e.printStackTrace();
-			System.out.println("can't request IM");
-			return null;
+			
 		}
-		return im;
 
 	}
 
-	/**
-	 * parses out the information for chatting from the chat request
-	 */
-	private static void parseChat(Socket socket) throws IOException {
+	/** request a chat connection from the host specified */
+	public void request(String host, int port) {
+		try {
+			InstantMessenger im = new InstantMessenger(host, port, this, 
+													   _activityCallback);
+			// insert the newly created InstantMessager into the list
+			_chatsInProgress.add((Chat)im);
+			im.start();
+		} catch (IOException e) {
+		}
+			
+	}
 
+	/** remove the instance of chat from the list of chats
+		in progress */
+	public void removeChat(Chat chat) {
+		_chatsInProgress.remove(chat);
+	}
+
+	// Private Classes
+	private ChatManager() {
+		_chatsInProgress = new LinkedList();
 	}
 
 }

@@ -1,23 +1,16 @@
-package com.limegroup.gnutella.chat;
+package com.limegroup.gnutella.chat2;
 /**
- * the chatter interface.  an implementation is passed to the
- * gui, so that messages can be sent and recieved.
- *
+ * the class that serves as the interface between a Chat
+ * instance and the gui.
+ * 
+ *@author rsoule
  */
 
-import java.io.*;
-
 public interface Chatter {
-	
-	/** sends a message across the socket */
-	public void sendMessage(String msg) throws IOException;
-	
-	/** recieves a message from the socket */
-	public String recieveMessage() throws IOException;
 
-	/** close a session */
+	// Operations
 	public void stop();
+	public void send(String message);
+	public String getMessage();
 
 }
-
-
