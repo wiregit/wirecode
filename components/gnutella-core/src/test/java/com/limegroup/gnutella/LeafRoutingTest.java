@@ -245,8 +245,12 @@ public class LeafRoutingTest extends BaseTestCase {
      */
     public void testRedirect() {
         debug("-Test X-Try/X-Try-Ultrapeer headers");
+        Properties props = new Properties();
+        
+        props.put(HeaderNames.X_ULTRAPEER, "True");
+        //props.put(HeaderNames.X_PROBE_QUERIES, PROBE_VERSION);
         Connection c=new Connection("127.0.0.1", SERVER_PORT,
-                                    new Properties(),
+                                    props,
                                     new EmptyResponder()
                                     );
 
