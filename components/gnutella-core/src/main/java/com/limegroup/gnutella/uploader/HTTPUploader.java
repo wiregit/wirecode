@@ -31,10 +31,14 @@ public class HTTPUploader implements Uploader {
 	private InputStream _fis;
 	private Socket _socket;
 	private int _amountRead;
+	// useful so we don't have to do _uploadEnd - _uploadBegin everywhere
+    private int _amountRequested;
 	private int _uploadBegin;
 	private int _uploadEnd;
 	private int _fileSize;
 	private final int _index;
+	private /* final */ String _userAgent;
+	private /* final */ boolean _headersParsed;
 	private final String _fileName;
 	private final String _hostName;
 	private final String _guid;
@@ -255,7 +259,7 @@ public class HTTPUploader implements Uploader {
 	 */
 	public void writeResponse() {
 		try {
-			readHeader();
+		    readHeader();   
 			if(_ostream != null) {
 				_method.writeHttpResponse(_state, _ostream);
 			}
@@ -267,9 +271,18 @@ public class HTTPUploader implements Uploader {
 				}
 			} catch (IOException e2) {};
 		} catch (IOException e) {
-
-			// really what we want to be doing???
-			setState(INTERRUPTED);
+            // set it to be completed if they read what they wanted.
+            // some servents (BearShare 4.0.0+) will read files in 'blocks'
+            // when swarming, and rather than interpret the disco as 
+            // interuption, it makes more sense to consider it complete,
+            // since they read what they wanted.
+            if ( _amountRead >= _amountRequested ) {
+                setState(COMPLETE);
+            }
+            else {
+			    // really what we want to be doing???
+			    setState(INTERRUPTED);
+			}
 		}
 
 		if(_alternateLocationCollection != null && _fileDesc != null) {
@@ -353,6 +366,9 @@ public class HTTPUploader implements Uploader {
 
 	// implements the Uploader interface
 	public int getFileSize() {return _fileSize;}
+	
+	// implements the Uploader interface
+	public int getAmountRequested() { return _amountRequested; }
 
 	// implements the Uploader interface
 	public int getIndex() {return _index;}
@@ -374,17 +390,15 @@ public class HTTPUploader implements Uploader {
 
 	// implements the Uploader interface
 	public int getChatPort() {return _chatPort;}
+	
+	//implements the Uploader interface
+	public String getUserAgent() { return _userAgent; }
+	
+	//implements the Uploader interface
+	public boolean isHeaderParsed() { return _headersParsed; }
 
-    /**The number of bytes read. The way we calculate the number of bytes 
-     * read is a little wierd if the range header begins from the middle of 
-     * the file (say from byte x). Then we consider that bytes 0-x have 
-     * already been read. 
-     * <p>
-     * This may lead to some wierd behaviour with chunking. For example if 
-     * a host requests the last 10% of a file, the GUI will display 90%
-     * downloaded. Later if the same host requests from 20% to 30% the 
-     * progress will reduce to 20% onwards. 
-	 * 
+    /**
+     * The number of bytes read. 
 	 * Implements the Uploader interface.
      */
 	public int amountUploaded() {return _amountRead;}
@@ -400,9 +414,9 @@ public class HTTPUploader implements Uploader {
 
     boolean getClientAcceptsXGnutellaQueryreplies() {
         return _clientAcceptsXGnutellaQueryreplies;
-    }    
+    }
 
-	/**
+    /**
 	 * Reads the HTTP header sent by the requesting client -- note that the
 	 * 'GET' portion of the request header has already been read.
 	 *
@@ -412,187 +426,266 @@ public class HTTPUploader implements Uploader {
 	private void readHeader() throws IOException {
         _uploadBegin = 0;
         _uploadEnd = 0;
-		String userAgent;
 		_clientAcceptsXGnutellaQueryreplies = false;
         
 		ByteReader br = new ByteReader(_socket.getInputStream());
         
-		// NOTE: it might improve readability to move
-		// the try and catches around the big loops.
-
-		while (true) {
-			// read the line in from the socket.
-            String str = br.readLine();
-            debug("HTTPUploader.readHeader(): str = " +  str);
-			// break out of the loop if it is null or blank
-            if ( (str==null) || (str.equals("")) )
-                break;
-			else if (str.toUpperCase().indexOf("CHAT:") != -1) {
-				String sub;
-				try {
-					sub = str.substring(5);
-				} catch (IndexOutOfBoundsException e) {
-					throw new IOException();
-                }
-				sub = sub.trim();
-				int colon = sub.indexOf(":");
-				String host  = sub.substring(0,colon);
-				host = host.trim();
-				String sport = sub.substring(colon+1);
-				sport = sport.trim();
-
-				int port; 
-				try {
-					port = java.lang.Integer.parseInt(sport);
-				} catch (NumberFormatException e) {
-					throw new IOException();
-                }
-				_chatEnabled = true;
-				_chatHost = host;
-				_chatPort = port;
-			}
-			// Look for range header of form, "Range: bytes=", "Range:bytes=",
-			// "Range: bytes ", etc.  Note that the "=" is required by HTTP, but
-            //  old versions of BearShare do not send it.  The value following the
-            //  bytes unit will be in the form '-n', 'm-n', or 'm-'.
-            else if (indexOfIgnoreCase(str, "Range:") == 0) {
-                //Set 'sub' to the value after the "bytes=" or "bytes ".  Note
-                //that we don't validate the data between "Range:" and the
-                //bytes.
-				String sub;
-				String second;
-				try {
-                    int i=str.indexOf("bytes");    //TODO: use constant
-                    if (i<0)
-                        throw new IOException();
-                    i+=6;                          //TODO: use constant
-					sub = str.substring(i);
-				} catch (IndexOutOfBoundsException e) {
-					throw new IOException();
-				}
-				// remove the white space
-                sub = sub.trim();   
-                char c;
-				// get the first character
-				try {
-					c = sub.charAt(0);
-				} catch (IndexOutOfBoundsException e) {
-					throw new IOException();
-				}
-				// - n  
-                if (c == '-') {  
-					// String second;
-					try {
-						second = sub.substring(1);
-					} catch (IndexOutOfBoundsException e) {
-						throw new IOException();
-					}
-                    second = second.trim();
-					try {
-                        //A range request for "-3" means return the last 3 bytes
-                        //of the file.  (LW used to incorrectly return bytes
-                        //0-3.)  
-                        _uploadBegin = Math.max(0,
-                                            _fileSize-Integer.parseInt(second));
-						_uploadEnd = _fileSize;
-					} catch (NumberFormatException e) {
-						throw new IOException();
-					}
-                }
-                else {                
-					// m - n or 0 -
-                    int dash = sub.indexOf("-");
-					String first;
-					try {
-						first = sub.substring(0, dash);
-					} catch (IndexOutOfBoundsException e) {
-						throw new IOException();
-					}
-                    first = first.trim();
-					try {
-						_uploadBegin = java.lang.Integer.parseInt(first);
-					} catch (NumberFormatException e) {
-						throw new IOException();
-					}
-					try {
-						second = sub.substring(dash+1);
-					} catch (IndexOutOfBoundsException e) {
-						throw new IOException();
-					}
-                    second = second.trim();
-                    if (!second.equals("")) 
-						try {
-                            //HTTP range requests are inclusive.  So "1-3" means
-                            //bytes 1, 2, and 3.  But _uploadEnd is an EXCLUSIVE
-                            //index, so increment by 1.
-							_uploadEnd = java.lang.Integer.parseInt(second)+1;
-                    } catch (NumberFormatException e) {
-						throw new IOException();
-					}
-                }
-            }
-
-			// check the User-Agent field of the header information
-			else if (indexOfIgnoreCase(str, "User-Agent:") != -1) {
-				// check for netscape, internet explorer,
-				// or other free riding downoaders
-                //Allow them to browse the host though
-				if (SettingsManager.instance().getAllowBrowser() == false
-                    && !(_stateNum == BROWSE_HOST)  
-					&& !(_fileName.toUpperCase().startsWith("LIMEWIRE"))) {
-					// if we are not supposed to read from them
-					// throw an exception
-					if( (str.indexOf("Mozilla") != -1) ||
-						(str.indexOf("DA") != -1) ||
-						(str.indexOf("Download") != -1) ||
-						(str.indexOf("FlashGet") != -1) ||
-						(str.indexOf("GetRight") != -1) ||
-						(str.indexOf("Go!Zilla") != -1) ||
-						(str.indexOf("Inet") != -1) ||
-						(str.indexOf("MIIxpc") != -1) ||
-						(str.indexOf("MSProxy") != -1) ||
-						(str.indexOf("Mass") != -1) ||
-						(str.indexOf("MyGetRight") != -1) ||
-						(str.indexOf("NetAnts") != -1) ||
-						(str.indexOf("NetZip") != -1) ||
-						(str.indexOf("RealDownload") != -1) ||
-						(str.indexOf("SmartDownload") != -1) ||
-						(str.indexOf("Teleport") != -1) ||
-						(str.indexOf("WebDownloader") != -1) ) {
-						throw new FreeloaderUploadingException();
-					}
-				}
-				userAgent = str.substring(11).trim();
-			}
-			else if(HTTPHeaderName.CONTENT_URN.matchesStartOfString(str)) {
-				URN requestedURN = HTTPUploader.readContentUrn(str);
-				if(requestedURN == null) {
-					setState(FILE_NOT_FOUND);
-				} 		
-				if(_fileDesc != null) {
-					if(!_fileDesc.containsUrn(requestedURN)) {
-						setState(FILE_NOT_FOUND);
-					}
-				}
-			}
-			else if(HTTPHeaderName.ALT_LOCATION.matchesStartOfString(str)) {
-				if(_alternateLocationCollection == null) {
-					_alternateLocationCollection = new AlternateLocationCollection();
-				}
-				HTTPUploader.readAlternateLocations(str, _alternateLocationCollection);
-			}
-            //check the "accept:" header
-            if (indexOfIgnoreCase(str, "accept:") != -1) {
-                if(indexOfIgnoreCase(str, Constants.QUERYREPLY_MIME_TYPE)
-                    != -1) {
-                    _clientAcceptsXGnutellaQueryreplies = true;
-                }
-            }
-		}
-
-		if (_uploadEnd == 0)
-			_uploadEnd = _fileSize;
+        try {
+        	while (true) {
+        		// read the line in from the socket.
+                String str = br.readLine();
+                debug("HTTPUploader.readHeader(): str = " +  str);
+                
+        		// break out of the loop if it is null or blank
+                if ( (str==null) || (str.equals("")) ) 
+                    break;
+        		else if ( readChatHeader(str)        ) ;
+                else if ( readRangeHeader(str)       ) ;
+                else if ( readUserAgentHeader(str)   ) ;
+                else if ( readContentURNHeader(str)  ) ;
+                else if ( readAltLocationHeader(str) ) ;
+                else if ( readAcceptHeader(str)      ) ;
+        	}
+        } finally {
+            // we want to ensure these are always set, regardless
+            // of if an exception was thrown.
+            
+			//if invalid end-index, then upload up to the end of file
+			if( _uploadEnd <= 0
+			   || _uploadEnd <= _uploadBegin 
+			   || _uploadEnd > _fileSize ) {
+			    _uploadEnd = _fileSize;      
+		    }		
+            _amountRequested = _uploadEnd - _uploadBegin;		
+            _headersParsed = true;
+        }
 	}
+	
+
+    /**
+     * Read the chat portion of a header.
+     * @return true if it had a chat header.
+     */
+    private boolean readChatHeader(String str) throws IOException {
+        if (str.toUpperCase().indexOf("CHAT:") == -1)
+            return false;
+    
+		String sub;
+		try {
+			sub = str.substring(5);
+		} catch (IndexOutOfBoundsException e) {
+			throw new IOException();
+        }
+		sub = sub.trim();
+		int colon = sub.indexOf(":");
+		String host  = sub.substring(0,colon);
+		host = host.trim();
+		String sport = sub.substring(colon+1);
+		sport = sport.trim();
+
+		int port; 
+		try {
+			port = java.lang.Integer.parseInt(sport);
+		} catch (NumberFormatException e) {
+			throw new IOException();
+        }
+		_chatEnabled = true;
+		_chatHost = host;
+		_chatPort = port;
+        
+        return true;
+    }
+    
+    /**
+	 * Look for range header of form, "Range: bytes=", "Range:bytes=",
+	 * "Range: bytes ", etc.  Note that the "=" is required by HTTP, but
+     * old versions of BearShare do not send it.  The value following the
+     * bytes unit will be in the form '-n', 'm-n', or 'm-'.
+     *
+     * @return true if it had a Range header
+     */
+    private boolean readRangeHeader(String str) throws IOException {
+        // was: != 0, is == -1 (that okay?)
+        if ( indexOfIgnoreCase(str, "Range:") == -1 )
+            return false;
+            
+        //Set 'sub' to the value after the "bytes=" or "bytes ".  Note
+        //that we don't validate the data between "Range:" and the
+        //bytes.
+		String sub;
+		String second;
+		try {
+            int i=str.indexOf("bytes");    //TODO: use constant
+            if (i<0)
+                throw new IOException();
+            i+=6;                          //TODO: use constant
+			sub = str.substring(i);
+		} catch (IndexOutOfBoundsException e) {
+			throw new IOException();
+		}
+		// remove the white space
+        sub = sub.trim();   
+        char c;
+		// get the first character
+		try {
+			c = sub.charAt(0);
+		} catch (IndexOutOfBoundsException e) {
+			throw new IOException();
+		}
+		// - n  
+        if (c == '-') {  
+			// String second;
+			try {
+				second = sub.substring(1);
+			} catch (IndexOutOfBoundsException e) {
+				throw new IOException();
+			}
+            second = second.trim();
+			try {
+                //A range request for "-3" means return the last 3 bytes
+                //of the file.  (LW used to incorrectly return bytes
+                //0-3.)  
+                _uploadBegin = Math.max(0,
+                                    _fileSize-Integer.parseInt(second));
+				_uploadEnd = _fileSize;
+			} catch (NumberFormatException e) {
+				throw new IOException();
+			}
+        }
+        else {                
+			// m - n or 0 -
+            int dash = sub.indexOf("-");
+			String first;
+			try {
+				first = sub.substring(0, dash);
+			} catch (IndexOutOfBoundsException e) {
+				throw new IOException();
+			}
+            first = first.trim();
+			try {
+				_uploadBegin = java.lang.Integer.parseInt(first);
+			} catch (NumberFormatException e) {
+				throw new IOException();
+			}
+			try {
+				second = sub.substring(dash+1);
+			} catch (IndexOutOfBoundsException e) {
+				throw new IOException();
+			}
+            second = second.trim();
+            if (!second.equals("")) 
+				try {
+                    //HTTP range requests are inclusive.  So "1-3" means
+                    //bytes 1, 2, and 3.  But _uploadEnd is an EXCLUSIVE
+                    //index, so increment by 1.
+					_uploadEnd = java.lang.Integer.parseInt(second)+1;
+            } catch (NumberFormatException e) {
+				throw new IOException();
+			}
+        }
+        
+        return true;
+    }
+    
+    /**
+     * Read the User-Agent field of the header
+     *
+     * @return true if the header had a UserAgent field
+     */
+    private boolean readUserAgentHeader(String str)
+		throws FreeloaderUploadingException {
+        if ( indexOfIgnoreCase(str, "User-Agent:") == -1 )
+            return false;
+        
+		// check for netscape, internet explorer,
+		// or other free riding downoaders
+        //Allow them to browse the host though
+		if (SettingsManager.instance().getAllowBrowser() == false
+            && !(_stateNum == BROWSE_HOST)  
+			&& !(_fileName.toUpperCase().startsWith("LIMEWIRE"))) {
+			// if we are not supposed to read from them
+			// throw an exception
+			if( (str.indexOf("Mozilla") != -1) ||
+				(str.indexOf("DA") != -1) ||
+				(str.indexOf("Download") != -1) ||
+				(str.indexOf("FlashGet") != -1) ||
+				(str.indexOf("GetRight") != -1) ||
+				(str.indexOf("Go!Zilla") != -1) ||
+				(str.indexOf("Inet") != -1) ||
+				(str.indexOf("MIIxpc") != -1) ||
+				(str.indexOf("MSProxy") != -1) ||
+				(str.indexOf("Mass") != -1) ||
+				(str.indexOf("MyGetRight") != -1) ||
+				(str.indexOf("NetAnts") != -1) ||
+				(str.indexOf("NetZip") != -1) ||
+				(str.indexOf("RealDownload") != -1) ||
+				(str.indexOf("SmartDownload") != -1) ||
+				(str.indexOf("Teleport") != -1) ||
+				(str.indexOf("WebDownloader") != -1) ) {
+				throw new FreeloaderUploadingException();
+			}
+		}
+		_userAgent = str.substring(11).trim();
+		
+		return true;
+    }
+    
+    /**
+	 * Read the content URN header
+	 *
+     * @return true if the header had a contentURN field
+     */
+    private boolean readContentURNHeader(String str) {
+        if ( ! HTTPHeaderName.CONTENT_URN.matchesStartOfString(str) )
+            return false;
+
+        // Do we actually set the uploading file to be the URN anywhere?
+        // Or do we expect that we recieved the right index/filename ?
+        // IE: is it possible to a client to send a GET request with 
+        // only the URN as the specifier?        
+        URN requestedURN = HTTPUploader.parseContentUrn(str);
+		if(requestedURN == null) {
+			setState(FILE_NOT_FOUND);
+		} 		
+		if(_fileDesc != null) {
+			if(!_fileDesc.containsUrn(requestedURN)) {
+				setState(FILE_NOT_FOUND);
+			}
+		}
+		
+		return true;
+	}
+	
+	/**
+	 * Read the Alternate Locations header
+	 *
+	 * @return true if the header had an alternate locations field
+	 */
+	private boolean readAltLocationHeader(String str) {
+        if ( ! HTTPHeaderName.ALT_LOCATION.matchesStartOfString(str) )
+            return false;
+        
+   		if(_alternateLocationCollection == null)
+   			_alternateLocationCollection = new AlternateLocationCollection();
+        HTTPUploader.parseAlternateLocations(str, _alternateLocationCollection);
+
+        return true;
+    }
+
+    /** 
+     * Reads the Accept heder
+     *
+     * @return true if the header had an accept field
+     */
+    private boolean readAcceptHeader(String str) {
+        if ( indexOfIgnoreCase(str, "accept:") == -1 )
+            return false;
+           
+        if(indexOfIgnoreCase(str, Constants.QUERYREPLY_MIME_TYPE) != -1)
+            _clientAcceptsXGnutellaQueryreplies = true;
+            
+        return true;
+    }	
 
 	/**
 	 * This method parses the "X-Gnutella-Content-URN" header, as specified
@@ -603,7 +696,7 @@ public class HTTPUploader implements Uploader {
 	 * @return a new <tt>URN</tt> instance for the request line, or 
 	 *  <tt>null</tt> if there was any problem creating it
 	 */
-	private static URN readContentUrn(final String contentUrnStr) {
+	private static URN parseContentUrn(final String contentUrnStr) {
 		String urnStr = HTTPUtils.extractHeaderValue(contentUrnStr);
 		
 		// return null if the header value could not be extracted
@@ -618,18 +711,18 @@ public class HTTPUploader implements Uploader {
 	}
 	
 	/**
-	 * Reads alternate location header.  The header can contain only one
+	 * Parses the alternate location header.  The header can contain only one
 	 * alternate location, or it can contain many in the same header.
 	 * This method adds them all to the <tt>FileDesc</tt> for this
 	 * uploader.  This will not allow more than 20 alternate locations
 	 * for a single file.
 	 *
 	 * @param altHeader the full alternate locations header
-	 * @param alc the <tt>AlternateLocationCollector</tt> that read alternate
+	 * @param alc the <tt>AlternateLocationCollector</tt> that reads alternate
 	 *  locations should be added to
 	 */
-	private static void readAlternateLocations(final String altHeader,
-											   final AlternateLocationCollector alc) {
+	private static void parseAlternateLocations(final String altHeader,
+												final AlternateLocationCollector alc) {
 		final String alternateLocations = HTTPUtils.extractHeaderValue(altHeader);
 
 		// return if the alternate locations could not be properly extracted

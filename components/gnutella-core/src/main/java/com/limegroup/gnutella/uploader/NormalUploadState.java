@@ -28,6 +28,7 @@ public final class NormalUploadState implements HTTPMessage {
 	private int _uploadBegin;
     /** @see HTTPUploader#getUploadEnd */
     private int _uploadEnd;
+    private int _amountRequested;
 
 	/**
 	 * <tt>FileDesc</tt> instance for the file being uploaded.
@@ -67,15 +68,11 @@ public final class NormalUploadState implements HTTPMessage {
 			_amountRead = _uploader.amountUploaded();
 			_uploadBegin =  _uploader.getUploadBegin();
 			_uploadEnd =  _uploader.getUploadEnd();
+			_amountRequested = _uploader.getAmountRequested();
 			//guard clause
 			if(_fileSize < _uploadBegin)
 				throw new IOException("Invalid Range");
-			
-			//if invalid end-index, then upload upto the end of file
-			if(_uploadEnd <= 0 
-			   || _uploadEnd <= _uploadBegin 
-			   || _uploadEnd > _fileSize)
-				_uploadEnd = _fileSize;
+		    
 			String str;
 			str = "HTTP/1.1 200 OK\r\n";
 			ostream.write(str.getBytes());
@@ -84,7 +81,7 @@ public final class NormalUploadState implements HTTPMessage {
 			String type = getMimeType();       // write this method later  
 			str = "Content-Type: " + type + "\r\n";
 			ostream.write(str.getBytes());
-			str = "Content-Length: "+ (_uploadEnd - _uploadBegin) + "\r\n";
+			str = "Content-Length: "+ (_amountRequested) + "\r\n";
 			ostream.write(str.getBytes());
 			
 			// Version 0.5 of limewire misinterpreted Content-range
@@ -132,8 +129,8 @@ public final class NormalUploadState implements HTTPMessage {
             byte[] buf = new byte[1024];
 
             long a = _fis.skip(_uploadBegin);
-            _amountRead+=a;
-            _uploader.setAmountUploaded(_amountRead);
+            //_amountRead+=a;
+            //_uploader.setAmountUploaded(_amountRead);
 
             SettingsManager manager=SettingsManager.instance();
             int speed=manager.getUploadSpeed();
@@ -167,8 +164,8 @@ public final class NormalUploadState implements HTTPMessage {
             if (c == -1)
                 break;
             //dont upload more than asked
-            if( c > (_uploadEnd - _amountRead))
-                c = _uploadEnd - _amountRead;
+            if( c > (_amountRequested - _amountRead))
+                c = _amountRequested - _amountRead;
             try {
                 ostream.write(buf, 0, c);
             } catch (java.net.SocketException e) {
@@ -178,7 +175,7 @@ public final class NormalUploadState implements HTTPMessage {
             _uploader.setAmountUploaded(_amountRead);
 
             //finish uploading if the desired amount has been uploaded
-            if(_amountRead >= _uploadEnd)
+            if(_amountRead >= _amountRequested)
                 break;
         }
     }
@@ -203,8 +200,8 @@ public final class NormalUploadState implements HTTPMessage {
                 if (c == -1)
                     return;
                 //dont upload more than asked
-                    if( c > (_uploadEnd - _amountRead))
-                        c = _uploadEnd - _amountRead;
+                if( c > (_amountRequested - _amountRead))
+                    c = _amountRequested - _amountRead;
                 try {
                     ostream.write(buf, 0, c);
                 } catch (java.net.SocketException e) {
@@ -215,10 +212,10 @@ public final class NormalUploadState implements HTTPMessage {
                 burstSent += c;
                 //finish uploading if the desired amount 
                 //has been uploaded
-                if(_amountRead >= _uploadEnd)
+                if(_amountRead >= _amountRequested)
                     return;
             }
-
+            
             // Date stop=new Date();
             long stop = System.currentTimeMillis();
 
