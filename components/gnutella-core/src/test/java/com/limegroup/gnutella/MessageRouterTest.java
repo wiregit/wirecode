@@ -55,32 +55,6 @@ public final class MessageRouterTest extends BaseTestCase {
     //}
 
     /**
-     * Test to make sure that the method to forward query requests
-     * to other hosts is working correctly.
-     */
-    public void testForwardLimitedQueryToUltrapeers() throws Exception {
-        TestConnectionManager tcm = new TestConnectionManager(4);
-        PrivilegedAccessor.setValue(RouterService.class, "manager", tcm);
-        PrivilegedAccessor.setValue(ROUTER, "_manager", tcm);
-        Class[] params = new Class[]{QueryRequest.class, ReplyHandler.class};
-		Method m = 
-            PrivilegedAccessor.getMethod(ROUTER, 
-                                         "forwardLimitedQueryToUltrapeers",
-                                         params);        
-
-        QueryRequest qr = QueryRequest.createQuery("test");      
-        ReplyHandler rh = new OldConnection(10);
-        
-        m.invoke(ROUTER, new Object[] {qr, rh});
-        assertEquals("unexpected number of queries sent", 5, 
-                     tcm.getNumQueries());
-        assertEquals("unexpected number of queries old sent", 5, 
-                     tcm.getNumOldConnectionQueries());
-        assertEquals("unexpected number of queries new sent", 0, 
-                     tcm.getNumNewConnectionQueries());
-    }
-
-    /**
      * Test to make sure that the query route tables are forwarded correctly
      * between Ultrapeers.
      */
@@ -101,11 +75,37 @@ public final class MessageRouterTest extends BaseTestCase {
         Iterator iter = connections.iterator();
         while(iter.hasNext()) {
             TestConnection tc = (TestConnection)iter.next();
-            QueryRouteTable qrt = tc.getQueryRouteTable();
+            QueryRouteTable qrt = tc.getQueryRouteTable();            
             assertTrue("route tables should match",tcm.runQRPMatch(qrt));
         }
     }
 
+
+    /**
+     * Test to make sure that the method to forward query requests
+     * to other hosts is working correctly.
+     */
+    public void testForwardLimitedQueryToUltrapeers() throws Exception {
+        TestConnectionManager tcm = new TestConnectionManager(4);
+        PrivilegedAccessor.setValue(RouterService.class, "manager", tcm);
+        PrivilegedAccessor.setValue(ROUTER, "_manager", tcm);
+        Class[] params = new Class[]{QueryRequest.class, ReplyHandler.class};
+		Method m = 
+            PrivilegedAccessor.getMethod(ROUTER, 
+                                         "forwardLimitedQueryToUltrapeers",
+                                         params);        
+
+        QueryRequest qr = QueryRequest.createQuery("test");      
+        ReplyHandler rh = new OldConnection(10);
+        
+        m.invoke(ROUTER, new Object[] {qr, rh});
+        assertEquals("unexpected number of queries sent", 15, 
+                     tcm.getNumQueries());
+        assertEquals("unexpected number of queries old sent", 15, 
+                     tcm.getNumOldConnectionQueries());
+        assertEquals("unexpected number of queries new sent", 0, 
+                     tcm.getNumNewConnectionQueries());
+    }
 
 
     /**
@@ -128,20 +128,6 @@ public final class MessageRouterTest extends BaseTestCase {
         QueryRouteTable qrt = new QueryRouteTable();
         m.invoke(ROUTER, new Object[] {qrt});
         tcm.runQRPMatch(qrt);
-
-        /*
-        for(int i=0; i<MY_KEYWORDS.length; i++) {
-            QueryRequest qr = QueryRequest.createQuery(MY_KEYWORDS[i]);
-            assertTrue("should contain the given keyword: "+qr, 
-                       qrt.contains(qr));
-        }
-
-        for(int i=0; i<NUM_LEAF_CONNECTIONS; i++) {
-            QueryRequest qr = QueryRequest.createQuery(LEAF_KEYWORDS[i]);
-            assertTrue("should contain the given keyword: "+qr, 
-                       qrt.contains(qr));
-        }
-        */
     }
 
 
@@ -163,10 +149,11 @@ public final class MessageRouterTest extends BaseTestCase {
         QueryRequest qr = QueryRequest.createQuery("test");      
         ReplyHandler rh = new OldConnection(10);
         m.invoke(ROUTER, new Object[] {qr, rh});
-        assertEquals("unexpected number of queries sent", 5, tcm.getNumQueries());
+        assertEquals("unexpected number of queries sent", 15, 
+                     tcm.getNumQueries());
         assertEquals("unexpected number of queries sent", 0, 
                      tcm.getNumOldConnectionQueries());
-        assertEquals("unexpected number of queries sent", 5, 
+        assertEquals("unexpected number of queries sent", 15, 
                      tcm.getNumNewConnectionQueries());
     }
 
@@ -226,9 +213,9 @@ public final class MessageRouterTest extends BaseTestCase {
         m.invoke(ROUTER, new Object[] {qr, rh});
         // make sure we send a query from an old connection to old 
         // connections even when it's the last hop
-        assertEquals("unexpected number of queries sent", 5, 
+        assertEquals("unexpected number of queries sent", 15, 
                      tcm.getNumQueries());
-        assertEquals("unexpected number of queries sent", 5, 
+        assertEquals("unexpected number of queries sent", 15, 
                      tcm.getNumOldConnectionQueries());
         assertEquals("unexpected number of queries sent", 0, 
                      tcm.getNumNewConnectionQueries());
