@@ -217,10 +217,10 @@ public class ManagedConnection
             SettingsManager.instance().isSupernode() ? 
             (Properties)(new SupernodeProperties(router)) : 
             (Properties)(new ClientProperties(router)),
-//            SettingsManager.instance().isSupernode() ? 
-//            new SupernodeHandshakeResponder() : new ClientHandshakeResponder()
-            null
-            , true);
+            SettingsManager.instance().isSupernode() ? 
+            (HandshakeResponder)(new SupernodeHandshakeResponder(manager)) :
+            (HandshakeResponder)(new ClientHandshakeResponder(manager)),
+            true);
         
         _router = router;
         _manager = manager;
@@ -240,7 +240,10 @@ public class ManagedConnection
     ManagedConnection(Socket socket,
                       MessageRouter router,
                       ConnectionManager manager) {
-        super(socket);
+        super(socket, 
+            SettingsManager.instance().isSupernode() ? 
+            (HandshakeResponder)(new SupernodeHandshakeResponder(manager)) : 
+            (HandshakeResponder)(new ClientHandshakeResponder(manager)));
         _router = router;
         _manager = manager;
 
@@ -823,6 +826,8 @@ public class ManagedConnection
             super(router);
             //set supernode property
             setProperty(ConnectionHandshakeHeaders.SUPERNODE, "True");
+            setProperty(ConnectionHandshakeHeaders.QUERY_ROUTING, "0.1");
+            setProperty(ConnectionHandshakeHeaders.PONG_CACHING,  "0.1");
         }
     }
     
@@ -837,12 +842,124 @@ public class ManagedConnection
             setProperty(ConnectionHandshakeHeaders.SUPERNODE, "False");
         }
     }
+
+    /**
+     * A very simple responder to be used by supernodes during the
+     * connection handshake while accepting incoming connections
+     */
+    private static class SupernodeHandshakeResponder 
+        implements HandshakeResponder{
+        ConnectionManager _manager;
+        
+        public SupernodeHandshakeResponder(ConnectionManager manager){
+            this._manager = manager;
+        }
+        
+        public HandshakeResponse respond(HandshakeResponse response, 
+            boolean outgoing) {
+            Properties ret=new Properties();
+            
+            //on outgoing connection, we have already sent headers. Send
+            //the heaaders on incoming only
+            if(!outgoing){
+                ret.setProperty(ConnectionHandshakeHeaders.SUPERNODE, "True");
+                ret.setProperty(
+                    ConnectionHandshakeHeaders.QUERY_ROUTING, "0.1");
+                ret.setProperty(ConnectionHandshakeHeaders.PONG_CACHING, "0.1");
+            }
+            return new HandshakeResponse(ret);
+        }
+    }
     
-//    private static class SupernodeHandshakeResponder
-//        implements HandshakeResponder
-//    {
-//        
-//    }
+    /**
+     * A very simple responder to be used by client-nodes during the
+     * connection handshake while accepting incoming connections
+     */
+    private static class ClientHandshakeResponder implements HandshakeResponder{
+        ConnectionManager _manager;
+        
+        public ClientHandshakeResponder(ConnectionManager manager){
+            this._manager = manager;
+        }
+        
+        public HandshakeResponse respond(HandshakeResponse response, 
+            boolean outgoing) throws IOException{
+            int code = 200;
+            String message = "OK";
+            
+            //set common properties
+            Properties ret=new Properties();
+            ret.setProperty(ConnectionHandshakeHeaders.SUPERNODE, "False");
+            ret.setProperty(ConnectionHandshakeHeaders.QUERY_ROUTING, "0.1");
+            ret.setProperty(ConnectionHandshakeHeaders.PONG_CACHING,  "0.1");
+            
+            //do stuff specific to connection direction
+            if(!outgoing){
+                //client should never accept the connection. Therefore, set the
+                //appropriate status
+                code = 503;
+                message = "I am a shielded client";
+                
+                //also add some host addresses in the response
+                String hostAddresses = getHostAddresses();
+                //set the property
+                ret.setProperty(ConnectionHandshakeHeaders.X_TRY, 
+                    hostAddresses);
+                
+                //throw the IOExceprion, to signal ConnectionManager to
+                //close the connection and cleanup
+                throw new IOException(
+                    "Shielded Client wont accept incoming Connection");
+            }else{
+                //check the headers. We must have received 'Supernode: True'
+                //to proceed
+                Properties responseProperties = response.getHeaders();
+                String supernode = responseProperties.getProperty(
+                    ConnectionHandshakeHeaders.SUPERNODE,"False");
+                if(!Boolean.getBoolean(supernode))
+                    throw new IOException(
+                        "I am a client node, and will connect to a supernode" 
+                        + "only");
+            }
+            
+            return new HandshakeResponse(code, message, ret);
+        }
+        
+        /**
+         * Returns string representing addresses of other hosts that may
+         * be connected thru gnutella.
+         * <p> Host address string returned is in the form:
+         * <p> IP Address:Port [; IPAddress:Port]* 
+         * <p> e.g. 123.4.5.67:6346; 234.5.6.78:6347
+         */
+        private String getHostAddresses(){
+            StringBuffer hostString = new StringBuffer();
+            boolean isFirstHost = true;
+            //get hosts from the connection manager (in turn hostcatcher)
+            Iterator iter = _manager.getBestHosts(10);
+            //iterate
+            while(iter.hasNext()) {
+                //get the next endpoint
+                Endpoint endpoint =(Endpoint)iter.next();
+                //if the first endpoint that we are adding
+                if(!isFirstHost){
+                    //append semicolon to separate the entries
+                    hostString.append(";");
+                }else{
+                    //unset the flag
+                    isFirstHost = false;
+                }
+                //append the host information
+                hostString.append(endpoint.getHostname());
+                hostString.append(":");
+                hostString.append(endpoint.getPort());
+            }
+            //return the hosts in string representation
+            return hostString.toString();
+        }
+        
+    }
+    
     
     
     /** Unit test.  Only tests statistics methods. */
