@@ -971,7 +971,7 @@ public final class UploadManager implements BandwidthTracker {
         //uploads, the probability that all just happen to have low capacity
         //(e.g., modems) is small.  This reduces "Try Again Later"'s at the
         //expensive of quality, making swarmed downloads work better.
-		if (current >= UploadSettings.MAX_UPLOADS.getValue()) {
+		if (current >= UploadSettings.HARD_MAX_UPLOADS.getValue()) {
             return false;
         } else if (current < UploadSettings.SOFT_MAX_UPLOADS.getValue()) {
             return true;
