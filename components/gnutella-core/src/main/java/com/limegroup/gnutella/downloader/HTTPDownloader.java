@@ -437,6 +437,16 @@ public class HTTPDownloader implements BandwidthTracker {
         _byteReader = new ByteReader(_input);
     }
     
+    /**
+     * Same as connectHTTP(start, stop, supportQueueing, -1)
+     */
+    public void connectHTTP(int start, int stop, boolean supportQueueing) 
+        throws IOException, TryAgainLaterException, FileNotFoundException, 
+             NotSharingException, QueuedException, RangeNotAvailableException,
+             ProblemReadingHeaderException, UnknownCodeException {
+        connectHTTP(start, stop, supportQueueing, -1);
+    }
+    
     /** 
      * Sends a GET request using an already open socket, and reads all 
      * headers.  The actual ranges downloaded MAY NOT be the same
