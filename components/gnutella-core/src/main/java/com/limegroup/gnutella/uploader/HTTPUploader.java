@@ -151,7 +151,6 @@ public class HTTPUploader implements Runnable {
      */
     public void connect() throws IOException {
 	//1. Establish connection.
-	System.out.println("Establishing connection...");
 	try {
 	    _socket=new Socket(_host, _port);
 	} catch (SecurityException e) {
@@ -163,7 +162,6 @@ public class HTTPUploader implements Runnable {
 	//2. Send GIV
 	Assert.that(_filename!=null);
 	String give="GIV "+_index+":"+_clientGUID+"/"+_filename+"\n\n";
-	System.out.println("Writing: '"+give+"'");			   
 	out.write(give);
 	out.flush();
 
@@ -171,13 +169,12 @@ public class HTTPUploader implements Runnable {
 	//   This code is stolen from HTTPManager.
 	//   It should really be factored into some method.
 	//   TODO2: timeout, range headers.
-	System.out.println("Waiting for GET...");
 	try {
 	    ByteReader in=new ByteReader(_socket.getInputStream());
 	    String line=in.readLine();
 	    if (line==null)
 		throw new IOException();
-	    System.out.println("Pulling apart GET...");
+
 	    if (! line.startsWith("GET "))
 		throw new IOException();
 	    String command=line.substring(4,line.length());
@@ -208,7 +205,7 @@ public class HTTPUploader implements Runnable {
 	} catch (IllegalArgumentException e) {
 	    throw new IOException();
 	}
-	System.out.println("Done.");
+
     }
 
     /** 
@@ -358,10 +355,15 @@ public class HTTPUploader implements Runnable {
 	int available = 0;
 
 	byte[] buf = new byte[1024];
+
+	int skip = 0;
+	if (_uploadBegin != 0)
+	    skip = _uploadBegin -1;
+
+	_fis.skip(skip);
+
 	while (true) {
 	    try {
-
-		_fis.skip(_uploadBegin);
 
 		if ((_uploadEnd != 0) && 
 		    (_uploadEnd == _amountRead ))

@@ -53,14 +53,15 @@ public class ByteReader {
     public int read(byte[] buf) {
 	int c = -1;
 
-	if (_istream == null)
+	if (_istream == null) {
 	    return c;
+	}
 
 	try {
 	    c = _istream.read(buf);
 	}
 	catch(IOException e) {
-	    
+
 	}
 	return c;
     }

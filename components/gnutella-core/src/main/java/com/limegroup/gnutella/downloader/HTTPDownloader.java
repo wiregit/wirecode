@@ -263,6 +263,9 @@ public class HTTPDownloader implements Runnable {
   	    URL url = new URL(_protocol, _host, _port, furl);
 	    conn = url.openConnection();
 	    conn.setRequestProperty("Range", "bytes="+ startRange + "-");
+	    conn.connect();
+	    _istream = conn.getInputStream();
+	    _br = new ByteReader(_istream);
   	}  
 	catch (Exception e) {
 	    _state = ERROR;
@@ -270,16 +273,20 @@ public class HTTPDownloader implements Runnable {
 	}
 	_resume = true;
 
+	_state = CONNECTED;
+
     }
    
     public void run() {
 	
-	_callback.addDownload(this);
-	
-	if (_mode == 1)
+	if (_mode == 1){
+	    _callback.addDownload(this);
 	    initOne();
-	else if (_mode == 2)
+	}
+	else if (_mode == 2) {
+	    _callback.addDownload(this);
 	    initTwo();
+	}
 	else if (_mode == 3) {
 	    initThree();
 	}
@@ -442,13 +449,15 @@ public class HTTPDownloader implements Runnable {
 		c = _br.read(buf);
 	    }
 	    catch (Exception e) {
+		e.printStackTrace();
 		_state = ERROR;
 		return;
 	    }
-	    
-	    if (c == -1)
+
+	    if (c == -1) {
 		break;
-	    
+	    }
+
 	    try {
 		_fos.write(buf, 0, c);
 	    }
@@ -460,7 +469,7 @@ public class HTTPDownloader implements Runnable {
 	    _amountRead+=c;
 	    
 	}
-	
+
 	try {
 	    _br.close();
 	    _fos.close();
@@ -493,6 +502,7 @@ public class HTTPDownloader implements Runnable {
 		_state = ERROR;
 		return;
 	    }
+
 	    //EOF?
 	    if (str==null || str.equals(""))
 		break;

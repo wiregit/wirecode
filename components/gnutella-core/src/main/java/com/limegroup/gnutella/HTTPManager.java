@@ -73,7 +73,7 @@ public class HTTPManager {
 	    readRange();
 
 	    HTTPUploader uploader;
-	    uploader = new HTTPUploader(s, _filename, _index, _manager, _uploadBegin, _uploadBegin);
+	    uploader = new HTTPUploader(s, _filename, _index, _manager, _uploadBegin, _uploadEnd);
 	    Thread t = new Thread(uploader);
 	    t.setDaemon(true);
 	    t.start();
