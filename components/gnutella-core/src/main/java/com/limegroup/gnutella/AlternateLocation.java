@@ -117,12 +117,12 @@ public final class AlternateLocation
 		}
 		final String DASH  = "-";
 		final String COLON = ":";
-		return new String(dateStrs[0]+DASH+
-						  dateStrs[1]+DASH+
-						  dateStrs[2]+"T"+
-						  dateStrs[3]+COLON+
-						  dateStrs[4]+COLON+
-						  dateStrs[5]+"Z");
+		return (dateStrs[0]+DASH+
+				dateStrs[1]+DASH+
+				dateStrs[2]+"T"+
+				dateStrs[3]+COLON+
+				dateStrs[4]+COLON+
+				dateStrs[5]+"Z");
 	}
 
 	/**
@@ -379,16 +379,20 @@ public final class AlternateLocation
 	}
 
 	/**
-	 * Compares <tt>AlternateLocation</tt> instances by date.  
+	 * Compares <tt>AlternateLocation</tt> instances by date.  This compares
+	 * alternate locations by how "good" we think they are, based on
+	 * their freshness.  So, an natural ordering will provide alternate
+	 * locations from latest to earliest, as the more recent locations
+	 * are the preferred locations.
 	 *
 	 * @param obj the <tt>Object</tt> instance to be compared
      * @return  the value <tt>0</tt> if the argument is an 
 	 *  <tt>AlternateLocation</tt> with a timestamp equal to this 
 	 *  <tt>AlternateLocation</tt>'s timestamp; a value less than <tt>0</tt> 
 	 *  if the argument is an <tt>AlternateLocation</tt> with a timestamp 
-	 *  after this <tt>AlternateLocation</tt>s timestamp; and a value greater 
+	 *  before this <tt>AlternateLocation</tt>s timestamp; and a value greater 
 	 *  than <tt>0</tt> if the argument is an <tt>AlternateLocation</tt> 
-	 *  with a timestamp before the timestamp of this 
+	 *  with a timestamp after the timestamp of this 
 	 *  <tt>AlternateLocation</tt>
      * @exception <tt>ClassCastException</tt> if the argument is not an
      *  <tt>AlternateLocation</tt> 
