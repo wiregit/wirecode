@@ -138,6 +138,21 @@ public class PongCacheDummyClient
             }
             
             System.out.println("Incoming connection established");
+            //handshake ping
+            PingRequest handshake = new PingRequest((byte)1);
+            try 
+            {
+                conn.send(handshake);
+                conn.flush();
+            }
+            catch (IOException ie) 
+            {
+                System.out.println("IOException sending handshake.  Closing " +
+                    "connection");
+                conn.close();
+                return;
+            }
+
             while (true)
             {
                 try 

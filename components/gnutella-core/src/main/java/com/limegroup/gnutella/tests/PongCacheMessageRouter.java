@@ -94,6 +94,16 @@ public class PongCacheMessageRouter extends MessageRouter
         }
     }
 
+    /**
+     * Override of super.sendMyOwnAddress for testing purposes.
+     */
+    public void sendMyAddress(PingRequest pingRequest, 
+                              ManagedConnection receivingConnection)
+    {
+        respondToPingRequest(pingRequest, _acceptor, receivingConnection);
+    }
+
+
     public void addIncomingConnection(ManagedConnection conn)
     {
         incomingConnections.add(conn);
