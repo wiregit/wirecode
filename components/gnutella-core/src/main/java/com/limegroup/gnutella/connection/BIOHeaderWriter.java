@@ -40,10 +40,6 @@ public final class BIOHeaderWriter implements HeaderWriter {
         OUTPUT_STREAM = conn.getOutputStream();
     }
 
-    public boolean write() throws IOException {
-        throw new IllegalStateException("no left over data in blocking writer");
-    }
-
     /**
      * Implements <tt>HeaderWriter</tt> interface.  Performs a blocking 
      * write of the specified header.
