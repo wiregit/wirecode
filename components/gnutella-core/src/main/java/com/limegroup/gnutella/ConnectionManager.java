@@ -770,20 +770,26 @@ public class ConnectionManager {
     }
     
     /**
-     * Adds connected supernode endpoints to host catcher
+     * Takes any action necessary for shutdown.  Currently that means updating
+     * the HostCatcher with connection information.
      */
-    public void cacheConnectedSupernodeEndpoints() {
-        for (Iterator iter=getInitializedConnections().iterator();
-             iter.hasNext(); ) {
-            ManagedConnection c=(ManagedConnection)iter.next();
-            //add the endpoint to hostcatcher
-            if (c.isSupernodeConnection()) {
-                _catcher.add(new Endpoint(c.getInetAddress().getHostAddress(),
-                    c.getPort()), true);
-            }
+    public void shutdown() {
+        //doneWithEndpoint(Endpoint,boolean) will be called by connection
+        //fetcher threads when they terminate (see ConnectionFetcher.run), which
+        //may or may not be after the gnutella.net file is written.  Hence we
+        //force the call here.  It's ok if doneWithEndpoint is called twice,
+        //since it coalesces multiple connect/failure data.  This whole method
+        //is somewhat expensive: O(N*K*lg K) or (N*K^2) time for N connections
+        //and a permanent list of K connections.
+        for (Iterator iter=getConnections().iterator(); iter.hasNext(); ) {
+            ManagedConnection mc=(ManagedConnection)iter.next();
+            if (mc.isOutgoing())
+                _catcher.doneWithEndpoint(mc.getOrigHost(), 
+                                          mc.getOrigPort(), 
+                                          true);
         }
     }
-    
+
     /**
      * Connects to the network.  Ensures the number of messaging connections
      * (keep-alive) is non-zero and recontacts the pong server as needed.  
@@ -1454,9 +1460,11 @@ public class ConnectionManager {
                 endpoint.getHostname(), endpoint.getPort(), _router,
                 ConnectionManager.this);
 
+            boolean success=false;
             try {
                 initializeFetchedConnection(connection, this);
                 sendInitialPingRequest(connection);
+                success=true;
                 connection.loopForMessages();
             } catch(IOException e) {
             } catch(Exception e) {
@@ -1464,7 +1472,12 @@ public class ConnectionManager {
                 _callback.error(ActivityCallback.INTERNAL_ERROR, e);
             }
             finally{
-                _catcher.doneWithEndpoint(endpoint);
+                //Record connection success or failure.  Note that success only
+                //means that we were able to connect, even though we may have
+                //been rejected.  It's important to only call this AFTER
+                //handling the connection for bootstrap purposes.  See
+                //shutdown().
+                _catcher.doneWithEndpoint(endpoint, success);
                 if (connection.isClientSupernodeConnection())
                     lostShieldedClientSupernodeConnection();
             }

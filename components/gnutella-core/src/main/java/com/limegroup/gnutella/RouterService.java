@@ -424,7 +424,7 @@ public class RouterService
         try {
             //ask the manager to add connected supernode endpoints to
             //host catcher
-            manager.cacheConnectedSupernodeEndpoints();
+            manager.shutdown();
             catcher.write(SettingsManager.instance().getHostList());
         } catch (IOException e) {}
 		finally {

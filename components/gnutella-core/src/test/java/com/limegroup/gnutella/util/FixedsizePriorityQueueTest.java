@@ -4,12 +4,12 @@ import junit.framework.*;
 import com.sun.java.util.collections.*;
 
 public class FixedsizePriorityQueueTest extends TestCase {
-    private final String one="one";
-    private final String two="two";
-    private final String three="three";
-    private final String four="four";
-    private final String five="five";
-    private final String six="six";
+    private final Integer one=new Integer(1);
+    private final Integer two=new Integer(2);
+    private final Integer three=new Integer(3);
+    private final Integer four=new Integer(4);
+    private final Integer five=new Integer(5);
+    private final Integer six=new Integer(6);
     
     /**
      * The default queue for testing, with a capacity of 4 and the elements 2,
@@ -28,10 +28,10 @@ public class FixedsizePriorityQueueTest extends TestCase {
     
     public void setUp() {
         FixedsizePriorityQueue.DEBUG=true;
-        q=new FixedsizePriorityQueue(4);
-        q.insert(three, 3);
-        q.insert(four, 4);
-        q.insert(two, 2);
+        q=new FixedsizePriorityQueue(ArrayListUtil.integerComparator(), 4);
+        assertNull(q.insert(three));
+        assertNull(q.insert(four));
+        assertNull(q.insert(two));
     }
 
     public void testSize() {
@@ -44,7 +44,7 @@ public class FixedsizePriorityQueueTest extends TestCase {
 
     public void testMin() {
         assertEquals(two, q.getMin());
-        q=new FixedsizePriorityQueue(4);
+        q=new FixedsizePriorityQueue(ArrayListUtil.integerComparator(), 4);
         try {
             q.getMin();
             fail("No no such element exception");
@@ -53,7 +53,7 @@ public class FixedsizePriorityQueueTest extends TestCase {
 
     public void testMax() {
         assertEquals(four, q.getMax());
-        q=new FixedsizePriorityQueue(4);
+        q=new FixedsizePriorityQueue(ArrayListUtil.integerComparator(), 4);
         try {
             q.getMax();
             fail("No no such element exception");
@@ -79,7 +79,7 @@ public class FixedsizePriorityQueueTest extends TestCase {
     public void testInsert() {
         //Three basic cases in the insert code:
         //a) no elements removed
-        assertNull(q.insert(five, 5));        //2, 3, 4, 5
+        assertNull(q.insert(five));        //2, 3, 4, 5
         Iterator iter=q.iterator();
         assertEquals(two, iter.next());
         assertEquals(three, iter.next());
@@ -88,7 +88,7 @@ public class FixedsizePriorityQueueTest extends TestCase {
         assertTrue(! iter.hasNext());
 
         //c) this element removed (i.e., this not added)
-        assertEquals(one, q.insert(one, 1));  //2, 3, 4, 5 (case c)
+        assertEquals(one, q.insert(one));  //2, 3, 4, 5 (case c)
         iter=q.iterator();
         assertEquals(two, iter.next());
         assertEquals(three, iter.next());
@@ -97,7 +97,7 @@ public class FixedsizePriorityQueueTest extends TestCase {
         assertTrue(! iter.hasNext());
 
         //b) smallest element removed
-        assertEquals(two, q.insert(six, 6));  //3, 4, 5, 6 (case b)
+        assertEquals(two, q.insert(six));  //3, 4, 5, 6 (case b)
         iter=q.iterator();
         assertEquals(three, iter.next());
         assertEquals(four, iter.next());
@@ -106,9 +106,9 @@ public class FixedsizePriorityQueueTest extends TestCase {
         assertTrue(! iter.hasNext());
 
         //Test duplicates
-        assertEquals(three, q.insert(six, 6)); //4, 5, 6, 6
-        assertEquals(four, q.insert(six, 6));  //5, 6, 6, 6
-        assertEquals(five, q.insert(six, 6));  //6, 6, 6, 6
+        assertEquals(three, q.insert(six)); //4, 5, 6, 6
+        assertEquals(four, q.insert(six));  //5, 6, 6, 6
+        assertEquals(five, q.insert(six));  //6, 6, 6, 6
         iter=q.iterator();
         assertEquals(six, iter.next());
         assertEquals(six, iter.next());
@@ -117,6 +117,33 @@ public class FixedsizePriorityQueueTest extends TestCase {
         assertTrue(! iter.hasNext());
     }
   
+    public void testRemoveNotFound() {
+        assertTrue(! q.remove(five));
+        Iterator iter=q.iterator();
+        assertEquals(two, iter.next());
+        assertEquals(three, iter.next());
+        assertEquals(four, iter.next());
+        assertTrue(!iter.hasNext());
+    }
+
+    public void testRemoveFound() {
+        assertTrue(q.remove(three));
+        Iterator iter=q.iterator();
+        assertEquals(two, iter.next());
+        assertEquals(four, iter.next());
+        assertTrue(!iter.hasNext());
+    }
+
+    public void testRemoveFoundOne() {
+        assertNull(q.insert(two));  //2, 2, 3, 4
+        assertTrue(q.remove(two));
+        Iterator iter=q.iterator();
+        assertEquals(two, iter.next());
+        assertEquals(three, iter.next());
+        assertEquals(four, iter.next());
+        assertTrue(!iter.hasNext());
+    }    
+
     /*
     public void testPerformance() {
         int SIZE=1000;

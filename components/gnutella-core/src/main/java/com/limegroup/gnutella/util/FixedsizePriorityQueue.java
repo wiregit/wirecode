@@ -1,10 +1,6 @@
 package com.limegroup.gnutella.util;
 
-import com.sun.java.util.collections.Comparable;
-import com.sun.java.util.collections.SortedSet;
-import com.sun.java.util.collections.TreeSet;
-import com.sun.java.util.collections.Iterator;
-import com.sun.java.util.collections.NoSuchElementException;
+import com.sun.java.util.collections.*;
 import com.limegroup.gnutella.Assert;
 
 /**
@@ -22,13 +18,9 @@ import com.limegroup.gnutella.Assert;
  * <li>FixedsizePriorityQueue can provide operations for extracting the minimum
  *     and the maximum element.  Note, however, that this is still considered
  *     a "max heap", for reasons in (1).
+ * <li>FixedsizePriorityQueue REQUIRES an explicit Comparator; it won't
+ *     use the natural ordering of values.
  * </ol>
- *
- * Like BinaryHeap, priorities are expressed by explicit integer arguments to
- * insert(..), with higher numbers representing higher priorities.  Using
- * explicit priorities avoids much of the confusion of Comparable.  In
- * particular, it makes it clear that this can contain multiple objects with the
- * same priority that are not necessarily equal.
  * 
  * <b>This class is not synchronized; that is up to the user.</b><p>
  * 
@@ -43,25 +35,26 @@ public class FixedsizePriorityQueue {
     private SortedSet /* of Node */ tree;
     /** The maximum number of elements to hold. */
     private int capacity;
+    /** Used to sort data.  Note that tree is actually sorted by Node'
+     *  natural ordering. */
+    private Comparator comparator;
+
+    /** Used to allocate Node.myID. */
+    private static int nextID=0;
 
     /**
      * Wraps data to guarantee that no two Nodes are ever equal.  This
      * is necessary to allow multiple nodes with same priority.  See
      * http://developer.java.sun.com/developer/bugParade/bugs/4229181.html
      */
-    private static class Node implements Comparable {
-        private static int nextID=0;
-
+    private class Node implements com.sun.java.util.collections.Comparable {
         /** The underlying data. */
         private Object data;     
-        /** My priority. */
-        private int priority;
         /** Used to guarantee two nodes are never equal. */
         private int myID;
 
-        Node(Object data, int priority) {
+        Node(Object data) {
             this.data=data;
-            this.priority=priority;
             this.myID=nextID++;  //allocate unique ID
         }
         
@@ -72,7 +65,7 @@ public class FixedsizePriorityQueue {
         public int compareTo(Object o) {
             Node other=(Node)o;
             //Compare by priority (primary key).
-            int c=this.priority-other.priority;
+            int c=comparator.compare(this.getData(), other.getData());
             if (c!=0)
                 return c;
             else
@@ -87,18 +80,21 @@ public class FixedsizePriorityQueue {
         }
 
         public String toString() {
-            return data.toString()+"/"+priority;
+            return data.toString();
         }
     }
 
     /**
      * Creates a new FixedsizePriorityQueue that will hold at most 
      * <tt>capacity</tt> elements.
+     * @param comparator expresses priority.  Note that
+     *  comaparator.compareTo(a,b)==0 does not imply that a.equals(b).
      * @param capacity the maximum number of elements
      * @exception IllegalArgumentException capacity negative
      */
-    public FixedsizePriorityQueue(int capacity) 
+    public FixedsizePriorityQueue(Comparator comparator, int capacity) 
             throws IllegalArgumentException {
+        this.comparator=comparator;
         if (capacity<=0)
             throw new IllegalArgumentException();
         tree=new TreeSet();
@@ -115,9 +111,9 @@ public class FixedsizePriorityQueue {
      *  to higher priority
      * @return the element ejected, possibly x, or null if none 
      */
-    public Object insert(Object x, int priority) {
+    public Object insert(Object x) {
         repOk();
-        Node node=new Node(x, priority);       
+        Node node=new Node(x);       
         if (size()<capacity()) {
             //a) Size less than capacity.  Just add x.
             boolean added=tree.add(node);
@@ -172,6 +168,25 @@ public class FixedsizePriorityQueue {
         for (Iterator iter=tree.iterator(); iter.hasNext(); ) {
             if (o.equals(((Node)iter.next()).getData()))
                 return true;
+        }
+        return false;
+    }
+
+    /** 
+     * Removes the first occurence of  o.  Runs in O(N) time, where N is
+     * number of elements in this.
+     *
+     * @param true this contained an x s.t. o.equals(x).  Note that
+     *  priority is ignored in this operation.
+     */
+    public boolean remove(Object o) {
+        //You can't just look up o in tree, as tree is sorted by priority, which
+        //isn't necessarily consistent with equals.
+        for (Iterator iter=tree.iterator(); iter.hasNext(); ) {
+            if (o.equals(((Node)iter.next()).getData())) {
+                iter.remove();
+                return true;
+            }
         }
         return false;
     }

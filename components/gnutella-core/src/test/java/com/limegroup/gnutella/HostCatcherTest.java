@@ -31,16 +31,18 @@ public class HostCatcherTest extends TestCase {
     /** Tests that FixedsizePriorityQueue can hold two endpoints with same
      *  priority but different ip's.  This was a problem at one point. */
     public void testEndpointPriorities() {
-        Endpoint e1=new Endpoint("18.239.0.146", 6346);
-        Endpoint e2=new Endpoint("18.239.0.147", 6347);
+        Endpoint e1=new ExtendedEndpoint("18.239.0.146", 6346);
+        Endpoint e2=new ExtendedEndpoint("18.239.0.147", 6347);
         assertTrue(! e1.equals(e2));
         assertTrue(! e2.equals(e1));
         assertTrue(e1.compareTo(e2)==0);
         assertTrue(e2.compareTo(e1)==0);
         
-        FixedsizePriorityQueue queue=new FixedsizePriorityQueue(10);
-        assertNull(queue.insert(e1, 0));
-        assertNull(queue.insert(e2, 0));
+        FixedsizePriorityQueue queue=new FixedsizePriorityQueue(
+            ExtendedEndpoint.priorityComparator(),
+            10);
+        assertNull(queue.insert(e1));
+        assertNull(queue.insert(e2));
         assertEquals(2, queue.size());
     }
 
@@ -110,7 +112,7 @@ public class HostCatcherTest extends TestCase {
             assertTrue(hc.getAnEndpoint().equals(
                 new Endpoint("128.103.60.1", 6346)));
             hc.add(new Endpoint("18.239.0.144", 6346), true);
-            hc.doneWithEndpoint(router1);    //got pong
+            hc.doneWithEndpoint(router1, false);    //got pong
             assertTrue(hc.getAnEndpoint().equals(
                 new Endpoint("18.239.0.144", 6346)));        
 
@@ -118,7 +120,7 @@ public class HostCatcherTest extends TestCase {
             assertTrue(router2.equals(new Endpoint("r2.b.c.d", 6347)));        
             assertTrue(hc.getAnEndpoint().equals(
                 new Endpoint("128.103.60.2", 6346)));        
-            hc.doneWithEndpoint(router2);    //did't get any pongs
+            hc.doneWithEndpoint(router2, false);    //did't get any pongs
 
             assertTrue(hc.getAnEndpoint().equals(
                 new Endpoint("128.103.60.3", 6346))); //no more bootstraps
@@ -145,10 +147,10 @@ public class HostCatcherTest extends TestCase {
             assertTrue(hc.getNumUltrapeerHosts()==0);
             Endpoint e=hc.getAnEndpoint();
             assertTrue(e.equals(new Endpoint("r1.b.c.d", 6346)));
-            hc.doneWithEndpoint(e);
+            hc.doneWithEndpoint(e, false);
             e=hc.getAnEndpoint();
             assertTrue(e.equals(new Endpoint("r2.b.c.d", 6347)));
-            hc.doneWithEndpoint(e);
+            hc.doneWithEndpoint(e, true);
             assertTrue(hc.getAnEndpoint().equals(
                 new Endpoint("18.239.0.144", 6346)));
             assertTrue(hc.getAnEndpoint().equals(
@@ -233,12 +235,12 @@ public class HostCatcherTest extends TestCase {
             hc.read(tmp.getAbsolutePath());
             assertTrue(hc.getNumUltrapeerHosts()==0);
             assertTrue("Got: "+hc.getNumHosts(), hc.getNumHosts()==3);
-            assertTrue(hc.getAnEndpoint().equals(
-                new Endpoint("18.239.0.142", 6342)));
-            assertTrue(hc.getAnEndpoint().equals(
-                new Endpoint("18.239.0.141", 6341)));
-            assertTrue(hc.getAnEndpoint().equals(
-                new Endpoint("18.239.0.143", 6343)));
+            assertEquals(new Endpoint("18.239.0.142", 6342),
+                         hc.getAnEndpoint());
+            assertEquals(new Endpoint("18.239.0.141", 6341),
+                         hc.getAnEndpoint());
+            assertEquals(new Endpoint("18.239.0.143", 6343),
+                         hc.getAnEndpoint());
             assertEquals(0, hc.getNumHosts());
 
             //Cleanup.
@@ -250,7 +252,8 @@ public class HostCatcherTest extends TestCase {
         }
     }
 
-    /** Tests that only the best hosts are remembered. */
+    /** Tests that only the best hosts are remembered. (This method is slow;
+     *  you may comment it out if performance is an issue.) */
     public void testBestPermanent() {  
         HostCatcher.DEBUG=false;  //Too darn slow
         try {
@@ -287,6 +290,48 @@ public class HostCatcherTest extends TestCase {
         }
     }
 
+    /** Test that connection history is recorded. */
+    public void testDoneWithEndpoint() {
+        try {
+            hc.add(new Endpoint("18.239.0.1"), true);  
+            hc.add(new Endpoint("18.239.0.2"), true);  //will succeed
+            hc.add(new Endpoint("18.239.0.3"), true);  //will fail
+
+            ExtendedEndpoint e3=(ExtendedEndpoint)hc.getAnEndpoint();
+            assertEquals(new Endpoint("18.239.0.3"), e3);
+            ExtendedEndpoint e2=(ExtendedEndpoint)hc.getAnEndpoint();
+            assertEquals(new Endpoint("18.239.0.2"), e2);
+
+            //record success (increases priority)
+            hc.doneWithEndpoint(e2, true); 
+            //record failure (lowers priority) with alternate form of method
+            hc.doneWithEndpoint("18.239.0.3", 6346, false);
+            //Garbage (ignored)
+            hc.doneWithEndpoint(new Endpoint("1.2.3.4", 6346), false);  
+            hc.doneWithEndpoint("18.239.0.3", 6349, true);  //different port
+
+            //Check that permanent hosts are re-arranged.
+            //Note that iterator yields worst to best.
+            Iterator iter=hc.getPermanentHosts();
+            ExtendedEndpoint e=(ExtendedEndpoint)iter.next();
+            assertEquals(new Endpoint("18.239.0.3"), e);
+            assertTrue(!e.getConnectionSuccesses().hasNext());
+            assertTrue(e.getConnectionFailures().hasNext());
+
+            e=(ExtendedEndpoint)iter.next();
+            assertEquals(new Endpoint("18.239.0.1"), e);
+            assertTrue(!e.getConnectionSuccesses().hasNext());
+            assertTrue(!e.getConnectionFailures().hasNext());
+
+            e=(ExtendedEndpoint)iter.next();
+            assertEquals(new Endpoint("18.239.0.2"), e);
+            assertTrue(e.getConnectionSuccesses().hasNext());
+            assertTrue(!e.getConnectionFailures().hasNext());
+        } catch (InterruptedException fail) {
+            fail("InterruptedException");
+        }
+    }
+
     public void testBadGnutellaDotNet() {
         //System.out.println("-Testing bad Gnutella.net");
         try {
@@ -297,7 +342,7 @@ public class HostCatcherTest extends TestCase {
             out.write("\n");                              //blank line
             out.write("18.239.0.144:A\n");                //bad port
             out.write("18.239.0.141:6347 A\n");           //bad uptime
-            out.write("18.239.0.142:6342  1000 ignore\n");//GOOD: ignore extra
+            out.write("18.239.0.142:6342,1000,a,b,c,d,e,f,g\n");//GOOD: ignore extra
             out.flush();
             out.close();
 

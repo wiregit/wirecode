@@ -6,6 +6,7 @@ import java.io.*;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Date;
+import java.text.ParseException;
 import com.limegroup.gnutella.tests.stubs.ActivityCallbackStub;
 
 
@@ -69,9 +70,9 @@ public class HostCatcher {
      * INVARIANT: queue contains no duplicates and contains exactly the
      *  same elements as set.
      * LOCKING: obtain this' monitor before modifying either.  */
-    private BucketQueue /* of Endpoint */ queue=
+    private BucketQueue /* of ExtendedEndpoint */ queue=
         new BucketQueue(new int[] {BAD_SIZE, NORMAL_SIZE, GOOD_SIZE});
-    private Set /* of Endpoint */ set=new HashSet();
+    private Set /* of ExtendedEndpoint */ set=new HashSet();
 
 
     /** The list of pongs with the highest average daily uptimes.  Each host's
@@ -85,9 +86,10 @@ public class HostCatcher {
      * INVARIANT: permanentHosts contains no duplicates and contains exactly
      *  the same elements and permanentHostsSet
      * LOCKING: obtain this' monitor before modifying either */
-    private FixedsizePriorityQueue /* of Endpoint */ permanentHosts=
-        new FixedsizePriorityQueue(PERMANENT_SIZE);
-    private Set /* of Endpoint */ permanentHostsSet=new HashSet();
+    private FixedsizePriorityQueue /* of ExtendedEndpoint */ permanentHosts=
+        new FixedsizePriorityQueue(ExtendedEndpoint.priorityComparator(),
+                                   PERMANENT_SIZE);
+    private Set /* of ExtendedEndpoint */ permanentHostsSet=new HashSet();
     
 
     /** The bootstrap hosts from the QUICK_CONNECT_HOSTS property, e.g.,
@@ -164,37 +166,16 @@ public class HostCatcher {
         BufferedReader in=null;
         in=new BufferedReader(new FileReader(filename));
         while (true) {
-            String line=in.readLine();
-            if (line==null)   //nothing left to read?  Done.
-                break;
-
-            //Break the line into host, port, and optional average daily uptime.
-            //Skip if badly formatted.
-            String[] linea=StringUtils.split(line, ": ");
-            if (linea.length==0)
+            try {
+                ExtendedEndpoint e=ExtendedEndpoint.read(in);
+                if (e==null)
+                    break;
+                //Everything passed!  Add it.  Note that first elements read are
+                //the worst elements, so end up at the tail of the queue.
+                add(e, priority(e));
+            } catch (ParseException pe) {
                 continue;
-            String host=linea[0];
-            int port=6346;      //Assume port
-            if (linea.length>=2) {
-                try {
-                    port=Integer.parseInt(linea[1]);
-                } catch (NumberFormatException nfe) {
-                    continue;
-                }
             }
-            Endpoint e = new Endpoint(host, port);
-            int uptime=expectedUptime(e);
-            if (linea.length>=3) {
-                try {
-                    uptime=Integer.parseInt(linea[2]);
-                } catch (NumberFormatException nfe) {
-                    continue;
-                }
-            }
-
-            //Everything passed!  Add it.  Note that first elements read are
-            //the worst elements, so end up at the tail of the queue.
-            add(e, priority(e), uptime);
         }
     }
 
@@ -204,26 +185,16 @@ public class HostCatcher {
      *  is prioritized by rough probability of being good.
      */
     synchronized void write(String filename) throws IOException {
+        repOk();
         FileWriter out=new FileWriter(filename);       
         //Write elements of permanent from worst to best.  Order matters, as it
         //allows read() to put them into queue in the right order without any
         //difficulty.
         for (Iterator iter=permanentHosts.iterator(); iter.hasNext(); ) {
-            Endpoint e=(Endpoint)iter.next();
-            writeInternal(out, e, e.getWeight());
+            ExtendedEndpoint e=(ExtendedEndpoint)iter.next();
+            e.write(out);
         }
-
         out.close();
-    }
-
-    private void writeInternal(Writer out, Endpoint e, int uptime) 
-            throws IOException {
-        out.write(e.getHostname());
-        out.write(":");
-        out.write(Integer.toString(e.getPort()));
-        out.write(" ");
-        out.write(Integer.toString(uptime));
-        out.write("\n");
     }
 
     ///////////////////////////// Add Methods ////////////////////////////
@@ -240,22 +211,19 @@ public class HostCatcher {
      */
     public boolean add(PingReply pr, ManagedConnection receivingConnection) {
         //Convert to endpoint
-        Endpoint e=new Endpoint(pr.getIP(), pr.getPort(),
-                    pr.getFiles(), pr.getKbytes());
-
-        int uptime;
+        ExtendedEndpoint e;
         try {
-            uptime=pr.getDailyUptime();
+            e=new ExtendedEndpoint(pr.getIP(), pr.getPort(), pr.getDailyUptime());
         } catch (BadPacketException bpe) {
-            uptime=expectedUptime(e);
+            e=new ExtendedEndpoint(pr.getIP(), pr.getPort());
         }
 
         //Add the endpoint, forcing it to be high priority if marked pong from a
         //supernode.
         if (pr.isMarked())
-            return add(e, GOOD_PRIORITY, uptime);
+            return add(e, GOOD_PRIORITY);
         else
-            return add(e, priority(e), uptime);
+            return add(e, priority(e));
     }
 
     /**
@@ -269,11 +237,12 @@ public class HostCatcher {
      * @return true iff e was actually added
      */
     public boolean add(Endpoint e, boolean forceHighPriority) {
+        ExtendedEndpoint ee=new ExtendedEndpoint(e.getHostname(), e.getPort());
         //See preamble for a discussion of priorities
         if (forceHighPriority)
-            return add(e, GOOD_PRIORITY, expectedUptime(e));
+            return add(ee, GOOD_PRIORITY);
         else
-            return add(e, priority(e), expectedUptime(e));
+            return add(ee, priority(ee));
     }
 
     /**
@@ -290,7 +259,7 @@ public class HostCatcher {
      *
      * @return true iff e was actually added 
      */
-    private boolean add(Endpoint e, int priority, int uptime) {
+    private boolean add(ExtendedEndpoint e, int priority) {
         repOk();
         //We used to check that we're not connected to e, but now we do that in
         //ConnectionFetcher after a call to getAnEndpoint.  This is not a big
@@ -311,7 +280,7 @@ public class HostCatcher {
 
         //Add to permanent list, regardless of whether it's actually in queue.
         //Note that this modifies e.
-        addPermanent(e, uptime);
+        addPermanent(e);
 
         boolean ret=false;
         boolean notifyGUI=false;
@@ -358,20 +327,17 @@ public class HostCatcher {
      * its Uptime header.  If e is already in the permanent list, it is not
      * re-added, though its key may be adjusted.
      *
-     * @param pr the pong containing the address/port to add.  MODIFIES:
-     *  e.getWeight().  Caller should not modify this afterwards.
-     * @param uptimeSeconds the time this has been up, in seconds.
+     * @param e the endpoint to add
      * @return true iff e was actually added 
      */
-    private synchronized boolean addPermanent(Endpoint e, int uptimeSeconds) {
+    private synchronized boolean addPermanent(ExtendedEndpoint e) {
         if (e.isPrivateAddress())
             return false;
         if (permanentHostsSet.contains(e))
             //TODO: we could adjust the key
             return false;
 
-        e.setWeight(uptimeSeconds);
-        if (permanentHosts.insert(e, e.getWeight())!=e) {
+        if (permanentHosts.insert(e)!=e) {
             //Was actually added.
             permanentHostsSet.add(e);
             return true;
@@ -381,24 +347,19 @@ public class HostCatcher {
         }
     }
     
+    /** Removes e from permanentHostsSet and permanentHosts. 
+     *  @return true iff this was modified */
+    private synchronized boolean removePermanent(ExtendedEndpoint e) {
+        boolean removed1=permanentHosts.remove(e);
+        boolean removed2=permanentHostsSet.remove(e);
+        Assert.that(removed1==removed2,
+                    "Queue "+removed1+" but set "+removed2);
+        return removed1;
+    }
+
     /** Returns BAD_PRIORITY if e private, NORMAL_PRIORITY otherwise. */
     private static int priority(Endpoint e) {
         return e.isPrivateAddress() ? BAD_PRIORITY : NORMAL_PRIORITY;        
-    }
-
-    /** Returns the expected average daily uptime of the given node. */
-    private static int expectedUptime(Endpoint e) {
-        //By looking at version logs, we find that the average session uptime
-        //for a host is about 8.1 minutes.  A study of connection uptimes
-        //(http://www.limewire.com/developer/lifetimes/) confirms this.
-        //Furthermore, we estimate that users connect to the network about 0.71
-        //times per day, for a total of 8.1*60*0.71=345 seconds of uptime per
-        //day.
-        //
-        //Why not use 0?  If you have to choose between a node with an unknown
-        //uptime and one with a confirmed low uptime, you'll gamble on the
-        //former; it's unlikely to be worse!
-        return 345;   //8.1 minutes * 60 sec/minute
     }
 
 
@@ -443,12 +404,12 @@ public class HostCatcher {
      *  of quick-connect settings, etc.  Throws NoSuchElementException if
      *  this is empty.
      */
-    private Endpoint getAnEndpointInternal()
+    private ExtendedEndpoint getAnEndpointInternal()
             throws NoSuchElementException {
         if (! queue.isEmpty()) {
             //            System.out.println("    GAEI: From "+set+",");
             //pop e from queue and remove from set.
-            Endpoint e=(Endpoint)queue.extractMax();
+            ExtendedEndpoint e=(ExtendedEndpoint)queue.extractMax();
             boolean ok=set.remove(e);
             //check that e actually was in set.
             Assert.that(ok, "Rep. invariant for HostCatcher broken.");
@@ -497,6 +458,15 @@ public class HostCatcher {
     }
 
     /**
+     * Returns an iterator of this' "permanent" hosts, from worst to best.
+     * This method exists primarily for testing.  THIS MUST NOT BE MODIFIED
+     * WHILE ITERATOR IS IN USE.
+     */
+    Iterator getPermanentHosts() {
+        return permanentHosts.iterator();
+    }
+
+    /**
      *  Returns an iterator of the (at most) n best ultrapeer endpoints of this.
      *  It's not guaranteed that these are reachable. This can be modified while
      *  iterating through the result, but the modifications will not be
@@ -524,12 +494,52 @@ public class HostCatcher {
     /**
      * Notifies this that the fetcher is done with the fetched connection to
      * host.  This exists primarily to tell if we're done with
-     * router.limewire.com.
+     * router.limewire.com.  
+     *
+     * @param e the address/port, which should have been returned by 
+     *  getAnEndpoint
+     * @param success true if we successfully established a messaging connection 
+     *  to e, at least temporarily; false otherwise
      */
-    public synchronized void doneWithEndpoint(Endpoint e) {
+    public synchronized void doneWithEndpoint(Endpoint e, boolean success) {
         if (e==bootstrapHostInProgress) {  //not .equals
+            //a) Was a special bootstrap host?  Keep track.
             bootstrapHostInProgress=null;
             notifyAll();  //may be able to try other bootstrap servers
+        } else {
+            //b) Normal host: update key.  TODO3: adjustKey() operation may be
+            //more efficient.
+            if (! (e instanceof ExtendedEndpoint))
+                //Should never happen, but I don't want to update public
+                //interface of this to operate on ExtendedEndpoint.
+                return;
+            ExtendedEndpoint ee=(ExtendedEndpoint)e;
+
+            removePermanent(ee);
+            if (success)
+                ee.recordConnectionSuccess();
+            else
+                ee.recordConnectionFailure();
+            addPermanent(ee);
+        }
+    }
+
+    /**
+     * Same as doneWithEndpoint(Endpoint,boolean) except that host/port need not
+     * have to have been returned by getAnEndpoint().  Expensive; runs in O(K^2)
+     * (or possible O(K lg K) with a permanent list of K entries.  Typically
+     * this method is only called for outgoing connections on shutdown.
+     * @see doneWithEndpoint(Endpoint,boolean) 
+     */
+    public synchronized void doneWithEndpoint(String host, 
+                                              int port, 
+                                              boolean success) {
+        for (Iterator iter=permanentHosts.iterator(); iter.hasNext(); ) {
+            ExtendedEndpoint ee=(ExtendedEndpoint)iter.next();
+            if (ee.getHostname().equals(host) && ee.getPort()==port) {
+                doneWithEndpoint(ee, success);
+                return;
+            }
         }
     }
 
@@ -565,9 +575,9 @@ public class HostCatcher {
         int n=getNumUltrapeerHosts();
         for (int i=0; i<n; i++) {
             try {
-                Endpoint e=getAnEndpointInternal();
+                ExtendedEndpoint e=getAnEndpointInternal();
                 //Uptime doesn't matter, since e already in permanent.
-                add(e, NORMAL_PRIORITY, 0);
+                add(e, NORMAL_PRIORITY);
             } catch (NoSuchElementException e) {
                 Assert.that(false, 
                     i+"'th getAnEndpointInternal not consistent with "+n);
@@ -639,14 +649,20 @@ public class HostCatcher {
             Assert.that(false, "Couldn't find "+e+" in queue");
         }
         for (Iterator iter=queue.iterator(); iter.hasNext(); ) {
-            Assert.that(set.contains(iter.next()));
+            Object e=iter.next();
+            Assert.that(e instanceof ExtendedEndpoint);
+            Assert.that(set.contains(e));
         }
 
         //Check permanentHosts === permanentHostsSet
-        for (Iterator iter=permanentHosts.iterator(); iter.hasNext(); )
-            Assert.that(permanentHostsSet.contains(iter.next()));
+        for (Iterator iter=permanentHosts.iterator(); iter.hasNext(); ) {
+            Object o=iter.next();
+            Assert.that(o instanceof ExtendedEndpoint);
+            Assert.that(permanentHostsSet.contains(o));
+        }
         for (Iterator iter=permanentHostsSet.iterator(); iter.hasNext(); ) {
             Object e=iter.next();
+            Assert.that(e instanceof ExtendedEndpoint);
             Assert.that(permanentHosts.contains(e),
                         "Couldn't find "+e+" from "
                         +permanentHostsSet+" in "+permanentHosts);
