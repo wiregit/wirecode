@@ -59,23 +59,6 @@ public final class AlternateLocationCollectionTest extends BaseTestCase {
         assertTrue("failed to set test up",_alCollection.getAltLocsSize()==_alternateLocations.size());
 	}
 
-    /**
-     * Test to make sure the wasRemoved method is working as expected.
-     */
-    public void testWasRemoved() throws Exception {
-        AlternateLocation al = HugeTestUtils.EQUAL_SHA1_LOCATIONS[0];
-        URN sha1 = al.getSHA1Urn();
-        AlternateLocationCollection a=AlternateLocationCollection.create(sha1);
-        AlternateLocationCollection b=AlternateLocationCollection.create(sha1);
-        AltLocCollectionsManager man = new AltLocCollectionsManager(a,b);
-        man.addLocation(al);
-        man.removeLocation(al,false);
-        assertFalse("should not have been removed", man.wasRemoved(al));
-        man.removeLocation(al,true);
-        assertTrue("loc should have been removed", man.wasRemoved(al));
-    }
-
-
 	/**
 	 * Tests that adding an <tt>AlternateLocationCollection</tt> works correctly.
 	 */
@@ -246,6 +229,47 @@ public final class AlternateLocationCollectionTest extends BaseTestCase {
                        + _alCollection, removed);
             assertEquals("size is off",total-i,_alCollection.getAltLocsSize() );
  		}
+    }
+
+    public void testClonedSharedLocsWork() {
+        AlternateLocationCollection c1=
+        AlternateLocationCollection.create(_alCollection.getSHA1Urn());
+        AlternateLocationCollection c2=
+        AlternateLocationCollection.create(_alCollection.getSHA1Urn());
+        
+        AlternateLocation[] alts = new AlternateLocation[5];
+        
+        for(int i=0; i<5; i++) {
+            AlternateLocation al = null;
+            try {
+                al= AlternateLocation.create(HugeTestUtils.EQUAL_URLS[i]);
+            } catch (MalformedURLException e) {
+                fail("unable to set up test");
+            } catch (IOException e) {
+                fail("unable to set up test");
+            }
+            alts[i] = al;
+            c1.add(al);
+        }
+        
+        try {
+            c1.add(AlternateLocation.create(HugeTestUtils.UNEQUAL_URLS[2]));
+            fail("exception should have been thrown by now");
+        } catch(Exception e) {
+            //expected behaviour
+        }        
+        
+        //add the same elements as clones to c2
+        for(int i=0; i<5; i++)
+            c2.add(alts[i].createClone());
+
+        assertEquals(c1,c2);
+        
+        for(int i=0; i<5; i++)
+            c1.add(alts[i].createClone());
+        
+        assertNotEquals(c1,c2);//alt locs should have changed.
+        
     }
 
     public void testCollectionOrder() {

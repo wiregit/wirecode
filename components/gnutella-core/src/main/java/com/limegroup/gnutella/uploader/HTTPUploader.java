@@ -84,11 +84,17 @@ public final class HTTPUploader implements Uploader {
     private BandwidthTrackerImpl bandwidthTracker=null;
 
 	/**
-	 * Stores any alternate locations specified in the HTTP headers for 
-	 * this upload.
-	 */
-	private AltLocCollectionsManager _altLocs;
-    
+	 * Stores good AlternateLocations read from the HTTP headers for this
+	 * upload.  
+     */
+	private AlternateLocationCollection _goodLocs;
+
+    /**
+     * Stores bad AlternateLocations read from the HTTP Headers for this upload
+     */
+    private AlternateLocationCollection _badLocs;
+
+
     /**
      * The number of AltLocs that this uploader has written out. It is necessary
      * to rememeber this number beacuse uploader do not want to keep repeating
@@ -145,7 +151,8 @@ public final class HTTPUploader implements Uploader {
         _supportsQueueing = false;
         _requestedURN = null;
         _clientAcceptsXGnutellaQueryreplies = false;
-        _altLocs = null;
+        _goodLocs = null;
+        _badLocs = null;
         
         // If this is the first time we are initializing it,
         // create a new bandwidth tracker and set a few more variables.
@@ -180,16 +187,12 @@ public final class HTTPUploader implements Uploader {
 	
     /**
      * Creates the valid and failed AlternateLocationCollections with the
-     * correct hash and initializes _altLocs
+     * correct hash and initializes _goodLocs and _badLocs
      */
     public void initializeAltLocs() {
         Assert.that(_fileDesc!=null,"trying to upload a null file desc");
-        AlternateLocationCollection v = 
-        AlternateLocationCollection.create(_fileDesc.getSHA1Urn());
-        AlternateLocationCollection f = 
-        AlternateLocationCollection.create(_fileDesc.getSHA1Urn());
-        
-        _altLocs = new AltLocCollectionsManager(v,f);        
+        _goodLocs = AlternateLocationCollection.create(_fileDesc.getSHA1Urn());
+        _badLocs = AlternateLocationCollection.create(_fileDesc.getSHA1Urn());
     }
     
 
@@ -224,23 +227,29 @@ public final class HTTPUploader implements Uploader {
             if ( _amountRead < _amountRequested )
                 throw e;
 		} finally {    
-    		if(_altLocs != null && _fileDesc != null) {
+    		if( _fileDesc != null) {
                 //Synchronization note: the following two synchronization blocks
                 //hold the locks of two AlternateLocationCollections
                 //simultaneously. This may seem like a festering ground for
                 //deadlocks, but this is not dangerous because the locks for
                 //goodLoc and badLocs cannot be held by more than one thread.
-                AlternateLocationCollection badLocs=_altLocs.getFailedAltLocs();
-                synchronized(badLocs) {
-                    Iterator iter = badLocs.iterator();
-                    while(iter.hasNext()) 
-                        _fileDesc.remove((AlternateLocation)iter.next());
+                synchronized(_badLocs) {
+                    Iterator iter = _badLocs.iterator();
+                    while(iter.hasNext()) {
+                        AlternateLocation loc =
+                        ((AlternateLocation)iter.next()).createClone();
+                        Assert.that(loc!=null,"problem cloning AltLoc");
+                        _fileDesc.remove(loc);
+                    }
                 }
-                AlternateLocationCollection goodLoc=_altLocs.getFailedAltLocs();
-                synchronized(goodLoc) {
-                    Iterator iter = goodLoc.iterator();
-                    while(iter.hasNext()) 
-                        _fileDesc.add((AlternateLocation)iter.next());
+                synchronized(_goodLocs) {
+                    Iterator iter = _goodLocs.iterator();
+                    while(iter.hasNext()) {
+                        AlternateLocation loc = 
+                        ((AlternateLocation)iter.next()).createClone();
+                        Assert.that(loc!=null,"problem cloning AltLoc");
+                        _fileDesc.add(loc);
+                    }
                 }
             }
         }
@@ -794,10 +803,8 @@ public final class HTTPUploader implements Uploader {
         if ( ! HTTPHeaderName.ALT_LOCATION.matchesStartOfString(str) )
             return false;
                 
-        if(_altLocs != null) {
-            AlternateLocationCollection goodLocs = _altLocs.getGoodAltLocs();
-            HTTPUploader.parseAlternateLocations(str, goodLocs, _fileDesc);
-        }
+        if(_goodLocs != null) 
+            HTTPUploader.parseAlternateLocations(str, _goodLocs, _fileDesc);
         return true;
     }
 
@@ -805,10 +812,8 @@ public final class HTTPUploader implements Uploader {
         if (!HTTPHeaderName.NALTS.matchesStartOfString(str))
             return false;
         
-        if(_altLocs != null) {
-            AlternateLocationCollection badLocs = _altLocs.getFailedAltLocs();
-            HTTPUploader.parseAlternateLocations(str,badLocs,_fileDesc);
-        }
+        if(_badLocs != null)
+            HTTPUploader.parseAlternateLocations(str,_badLocs,_fileDesc);
         return true;
     }
 

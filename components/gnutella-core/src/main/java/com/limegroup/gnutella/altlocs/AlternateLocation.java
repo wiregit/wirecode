@@ -281,6 +281,16 @@ public final class AlternateLocation implements
      * package access for demoting this.
      */
     synchronized void promote() { _demoted = false; }
+
+    /**
+     * could return null
+     */ 
+    public synchronized AlternateLocation createClone() {
+        AlternateLocation ret = new AlternateLocation(this.URL, this.SHA1_URN);
+        ret._demoted = this._demoted;
+        ret._count = this._count;
+        return ret;
+    }
     
     ///////////////////////////////helpers////////////////////////////////
 
