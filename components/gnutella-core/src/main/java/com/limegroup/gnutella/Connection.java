@@ -200,9 +200,8 @@ public class Connection implements Runnable {
      * Receives a message.
      *
      * @requires this is in the CONNECTED state
-     * @effects See specification of Message.read. Note that this <i>may</i> be
-     *  non-blocking, but there is no hard guarantee on the maximum
-     *  block time.  This is thread-safe.
+     * @effects exactly like Message.read(), but blocks until a 
+     *  message is available.
      */
     public Message receive() throws IOException, BadPacketException {
 	Assert.that(sock!=null && in!=null && out!=null, "Illegal socket state for receive");
@@ -215,6 +214,29 @@ public class Connection implements Runnable {
 	    //if (m!=null)
 	    //	System.out.println("Read "+m.toString()+"\n    from "+sock.toString());
 	    return m;
+	}
+    }
+
+    /**
+     * Receives a message with timeout.
+     *
+     * @requires this is in the CONNECTED state
+     * @effects exactly like Message.read(), but throws InterruptedIOException if
+     *  timeout!=0 and no message is read after "timeout" milliseconds.  In this
+     *  case, you should terminate the connection, as half a message may have been 
+     *  read.
+     */
+    public Message receive(int timeout) 
+	throws IOException, BadPacketException, InterruptedIOException {
+	synchronized (in) {
+	    //temporarily change socket timeout.
+	    int oldTimeout=sock.getSoTimeout();
+	    sock.setSoTimeout(timeout);
+	    try {
+		return receive();
+	    } finally {
+		sock.setSoTimeout(oldTimeout);
+	    }
 	}
     }
 
