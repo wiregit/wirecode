@@ -793,12 +793,12 @@ public class UploadManager implements BandwidthTracker {
     
     /**
      * Returns whether or not an upload request can be serviced immediately.
-     * In particular, if there are no upload slots AND no queue slots are taken
-     * this will return true.  Under any other condition this will return
-     * false.
+     * In particular, if there are more available upload slots than queued
+     * uploads this will return true. 
      */
     public synchronized boolean isServiceable() {
-        return !isBusy() && _queuedUploads.isEmpty();
+    	return hasFreeSlot(uploadsInProgress() + getNumQueuedUploads());
+        
     }
 
 	/** 
