@@ -1812,12 +1812,9 @@ public class ManagedDownloader implements Downloader, Serializable {
 	    // download locations
 		Iterator             iter = nalts.values().iterator();
 		AlternateLocation    value;
-		RemoteFileDesc       nrfd;
 		while (iter.hasNext()) {
 			value = (AlternateLocation) iter.next();
-			nrfd  = value.createRemoteFileDesc(rfd.getSize(), rfd.getUrns());
-			if (nrfd != null)
-			    addDownload(nrfd);
+			addDownload(value.createRemoteFileDesc(rfd.getSize()));
 		}
 	}
 
