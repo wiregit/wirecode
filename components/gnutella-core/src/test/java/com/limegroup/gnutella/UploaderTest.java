@@ -69,7 +69,7 @@ public class UploaderTest extends TestCase {
     public static Test suite() {
         return new TestSuite(UploaderTest.class);
     }
-    
+
     /**
      * - Bandwidth tracker works properly.
      */
@@ -374,7 +374,96 @@ public class UploaderTest extends TestCase {
             anyother.printStackTrace();
         }
     }
-
+    
+    /**
+     * Tests that two requests for the same file on the same connection, does
+     * not cause the second request to be queued.
+     */
+    public void testSameFileSameHostGivenSlot() { 
+        UploadManager upManager = new UploadManager(ac,mr,fm);
+        SettingsManager.instance().setMaxUploads(1);
+        SettingsManager.instance().setSoftMaxUploads(1);
+        SettingsManager.instance().setUploadsPerPerson(99999);
+        SettingsManager.instance().setUploadQueueSize(2);
+        //connect the first downloader.
+        PipedSocketFactory psf = null;
+        try {
+            psf = new PipedSocketFactory("127.0.0.1", "1.1.1.1",-1,-1);
+        } catch (Exception e) {
+            fail("unable to create piped socket factory");
+        }
+        final Socket sa = psf.getSocketA();
+        final UploadManager upman = upManager;
+        Thread t = new Thread() {
+            public void run() {
+                upman.acceptUpload(HTTPRequestMethod.GET, sa);
+            }
+        };
+        t.setDaemon(true);
+        t.start();
+        BufferedWriter out = null;
+        ByteReader byteReader = null;
+        String s = null;
+        try {
+            Socket sb = psf.getSocketB();
+            OutputStream os = sb.getOutputStream();
+            out = new BufferedWriter(new OutputStreamWriter(os));
+            out.write("GET /get/0/abc.txt HTTP/1.1\r\n");
+            out.write("User-Agent: "+CommonUtils.getHttpServer()+"\r\n");
+            out.write("X-Queue: 0.1\r\n");//we support remote queueing
+            out.write("Range: bytes=0-12000 \r\n");
+            out.write("\r\n");
+            out.flush();
+            byteReader = new ByteReader(sb.getInputStream());
+            s = byteReader.readLine();
+            assertEquals("HTTP/1.1 200 OK",s);
+        } catch (Exception e) {
+            fail("problem with first downloader");
+        }
+        //second request. This one will be queued at position 1        
+        try {
+            HTTPDownloader d2 = addUploader(upManager,rfd2,"1.1.1.2",true);
+            connectDloader(d2,true,rfd2,true);
+            fail("d2 should not have been given slot");
+        } catch (QueuedException qEx) {
+            assertEquals(1,qEx.getQueuePosition());
+        } catch (Exception other) {
+            fail("download should have been queued");
+        }
+        //second request from the uploader which already has the slot
+        try {
+            while(!s.equals(""))
+                s = byteReader.readLine();
+            byte[] buf = new byte[1024];
+            int d=0;
+            while(true) {
+                int u = byteReader.read(buf,0,1024);
+                d+=u;
+                if(d>11999)
+                    break;
+            }
+            out.write("GET /get/0/abc.txt HTTP/1.1\r\n");
+            out.write("User-Agent: "+CommonUtils.getHttpServer()+"\r\n");
+            out.write("X-Queue: 0.1\r\n");//we support remote queueing
+            out.write("Range: bytes=1200-2400 \r\n");
+            out.write("\r\n");
+            out.flush();
+            s = byteReader.readLine();
+            assertEquals("HTTP/1.1 200 OK",s);
+        } catch(Exception e) {
+            fail("exception thrown while trying HTTP 1.1 pipling");
+        }
+        //third uploader must be queued at position 2.
+        try {
+            HTTPDownloader d3 = addUploader(upManager,rfd3,"1.1.1.3",true);
+            connectDloader(d3,true,rfd2,true);
+        } catch (QueuedException q) {
+            assertEquals(2,q.getQueuePosition());
+        } catch (Exception other) {
+            fail("download should have been queued");
+        }
+        System.out.println("Passed");
+    }
 
 
     /** 

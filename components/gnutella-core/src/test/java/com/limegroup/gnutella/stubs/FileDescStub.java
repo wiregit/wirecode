@@ -25,10 +25,15 @@ public class FileDescStub extends FileDesc {
             public int read() {
                 return 'a';
             }
+            public int read(byte[] b) {
+                for(int i=0; i < b.length; i++)
+                    b[i] = (byte)'a';
+                return b.length;
+            }
         };
     }
     
     public long getSize() {
-        return 1000;
+        return 1126400;
     }
 }

@@ -19,6 +19,13 @@ import com.limegroup.gnutella.downloader.*; //for testing
  * @see com.limegroup.gnutella.uploader.HTTPUploader
  */
 public final class UploadManager implements BandwidthTracker {
+    
+    private final int REJECTED = 0;
+    
+    private final int QUEUED = 1;
+
+    private final int ACCEPTED = 2;
+
 	/** The callback for notifying the GUI of major changes. */
     private ActivityCallback _callback;
     /** The message router to use for pushes. */
@@ -129,6 +136,8 @@ public final class UploadManager implements BandwidthTracker {
     public void acceptUpload(HTTPRequestMethod method, Socket socket) {
         debug(" accepting upload");
 		try {
+            int queued = -1;
+            String oldFileName = "";
             //do uploads
             while(true) {
                 //parse the get line
@@ -142,8 +151,10 @@ public final class UploadManager implements BandwidthTracker {
 					return;
 				}
                 debug(" successfully parsed request");
+                
+                String fileName = line._fileName;
 
-                HTTPUploader uploader=new HTTPUploader(method, line._fileName, 
+                HTTPUploader uploader=new HTTPUploader(method, fileName, 
                               socket, line._index, this, _fileManager, _router);
                 
                 try {
@@ -153,27 +164,32 @@ public final class UploadManager implements BandwidthTracker {
                 }
                 
                 debug(uploader+" HTTPUploader created and read all headers");
+                boolean giveSlot = (oldFileName.equalsIgnoreCase(fileName) &&
+                                    queued==ACCEPTED);
 
-                boolean queued = false;
                 try {
                     //do the upload
                     queued = doSingleUpload(uploader, socket,
-                    socket.getInetAddress().getHostAddress(), line._index);
+                    socket.getInetAddress().getHostAddress(), 
+                                            line._index, giveSlot);
                 }   catch (IOException ioe) {
                     //A queued uploader was too early in responding...drop it
                     return;
                 }
                     
+                oldFileName = fileName;
+                
                 //if not to keep the connection open (either due to protocol
                 //not being HTTP 1.1, or due to error state, then return
-                if ((!line.isHTTP11()||uploader.getCloseConnection())&&!queued)
+                if ((!line.isHTTP11()||uploader.getCloseConnection())
+                                                             && queued!=QUEUED)
                     return;
                 //read the first word of the next request
                 //and proceed only if "GET" or "HEAD" request
                 debug(uploader+" waiting for next request with socket ");
                 try {
                     int oldTimeout = socket.getSoTimeout();
-                    if(!queued) {
+                    if(queued!=QUEUED) {
                         socket.setSoTimeout(SettingsManager.instance().
                                          getPersistentHTTPConnectionTimeout());
                     }
@@ -220,8 +236,8 @@ public final class UploadManager implements BandwidthTracker {
      * @exception IOException thrown if insertAndTest throws an IOException
      */
 
-    private boolean doSingleUpload(Uploader uploader, Socket socket, 
-                                   String host, int index) throws IOException {
+    private int doSingleUpload(Uploader uploader, Socket socket, String host, 
+                               int index, boolean giveSlot) throws IOException {
         long startTime=-1;
         debug(uploader+ " starting single upload");
         // note if this is a Browse Host Upload...
@@ -229,12 +245,12 @@ public final class UploadManager implements BandwidthTracker {
         // check if it complies with the restrictions.
         // and set the uploader state accordingly
         int queued = -1;
-        boolean ret = false;
         if(!isBHUploader) { //testing and book-keeping only if !browse host
             //Note the state at this point can be either FILE_NOT_FOUND, 
             //BROWSE_HOST, PUSH_FAILED or CONNECTING
             if(uploader.getState()==Uploader.CONNECTING) {
-                queued = insertAndTest(uploader, host, socket);//can throw IOEx
+                //can throw IOEx
+                queued = insertAndTest(uploader, host, socket,giveSlot);
                 debug(uploader+ " insert and test returned "+queued);
                 Assert.that(queued!=-1);
             }
@@ -249,12 +265,11 @@ public final class UploadManager implements BandwidthTracker {
 			}
         }
         
-        if(queued == 1) { //we were queued
+        if(queued == QUEUED) { //we were queued
             socket.setSoTimeout(MAX_POLL_TIME);
             uploader.setState(Uploader.QUEUED);
-            ret = true;
         }
-        else if(queued == 2) { // we have been given a slot
+        else if(queued == ACCEPTED) { // we have been given a slot
             synchronized (this) {
                 uploader.setState(Uploader.CONNECTING);
                 _activeUploadList.add(uploader);
@@ -314,7 +329,7 @@ public final class UploadManager implements BandwidthTracker {
             removeFromList(uploader);
             if (!isBHUploader) // it was added earlier if !BrowseHost - remove.
                 _callback.removeUpload(uploader);
-            return ret;
+            return queued;
         }
     }
 
@@ -449,7 +464,7 @@ public final class UploadManager implements BandwidthTracker {
      * @return 0 if rejected, 1 if queued, 2 if given a slot
      */
 	private synchronized int insertAndTest(Uploader uploader, String host,
-                                           Socket socket) throws IOException {
+                          Socket socket, boolean giveSlot) throws IOException {
         boolean limitReached = hostLimitReached(host);//greedy downloader?
         int size = _queuedUploads.size();
         int posInQueue = positionInQueue(socket);//-1 if not in queue
@@ -464,18 +479,20 @@ public final class UploadManager implements BandwidthTracker {
 
         Assert.that(maxQueueSize>0,"queue size 0, cannot use");
         Assert.that(uploader.getState()!=Uploader.BROWSE_HOST);//cannot be BH
-        
+        if(giveSlot)
+            return ACCEPTED;
+
         if(posInQueue == -1) {//this uploader is not in the queue already
             debug(uploader+"Uploader not in que(capacity:"+maxQueueSize+")");
             if(limitReached || wontAccept) { 
                 debug(uploader+" limited? "+limitReached+" wontAccept? "
                       +wontAccept);
                 uploader.setState(Uploader.LIMIT_REACHED);
-                return 0; //we rejected this uploader
+                return REJECTED; //we rejected this uploader
             }
             addToQueue(socket);
             posInQueue = size;//the index of the uploader in the queue
-            ret = 1;//we have queued it now
+            ret = QUEUED;//we have queued it now
             debug(uploader+" new uploader added to queue");
         }
         else {//we are alreacy in queue, update it
@@ -488,12 +505,12 @@ public final class UploadManager implements BandwidthTracker {
             }
             kv.setValue(new Long(System.currentTimeMillis()));
             debug(uploader+" updated queued uploader");
-            ret = 1;//queued
+            ret = QUEUED;//queued
         }
         debug(uploader+" checking if given uploader is can be accomodated ");
         //If uploader can and should be in queue, it is at this point.        
         if(!this.isBusy() && posInQueue==0) {//I have a slot &&  uploader is 1st
-            ret = 2;
+            ret = ACCEPTED;
             debug(uploader+" accepting upload");
             //remove this uploader from queue, and get its time
             _queuedUploads.remove(0);
@@ -505,7 +522,7 @@ public final class UploadManager implements BandwidthTracker {
             if(!queue) {//downloader does not support queueing
                 _queuedUploads.remove(posInQueue);//remove it
                 uploader.setState(Uploader.LIMIT_REACHED);
-                ret = 0;
+                ret = REJECTED;
             }
         }
         return ret;
