@@ -233,8 +233,7 @@ public class HostCatcher {
         try {
 			boolean supportsUnicast = pr.supportsUnicast();
             endpoint = new ExtendedEndpoint(pr.getIP(), pr.getPort(), 
-											pr.getDailyUptime(), 
-											supportsUnicast);
+											pr.getDailyUptime());
 			if(supportsUnicast) {
 				try {
 					UNICASTER.addUnicastEndpoint(InetAddress.getByName(pr.getIP()), 

@@ -60,11 +60,6 @@ public class ExtendedEndpoint extends Endpoint {
      *  DEFAULT_DAILY_UPTIME for calculations) */
     private int dailyUptime=-1;
 
-    /** Whether or not the Endpoint supports unicast Queries, as reported by the
-     *  "UDP" GGEP extension. True if reported, False if not.
-     */
-    private boolean supportsUnicast=false;
-
     /** The number of connection attempts (failures) to record. */
     static final int HISTORY_SIZE=3;
     /** Never record two connection attempts (failures) within this many
@@ -79,18 +74,6 @@ public class ExtendedEndpoint extends Endpoint {
     /** Same as connectSuccesses, but for failed connections. */
     private Buffer /* of Long */ connectFailures=new Buffer(HISTORY_SIZE);
     
-    /**
-     * Creates a new ExtendedEndpoint with uptime data AND unicast support 
-     * read from a ping reply.
-     * The creation time is set to the current system time.  It is assumed that
-     * that we have not yet attempted a connection to this.
-     */
-    public ExtendedEndpoint(String host, int port, int dailyUptime, 
-                            boolean supportsUnicast) {
-        this(host, port, dailyUptime);
-        this.supportsUnicast = supportsUnicast;
-    }
-
     /**
      * Creates a new ExtendedEndpoint with uptime data read from a ping reply.
      * The creation time is set to the current system time.  It is assumed that
@@ -130,13 +113,6 @@ public class ExtendedEndpoint extends Endpoint {
         else
             return dailyUptime;
     }
-
-    /** Returns whether or not this Endpoint supports the unicast protocol.
-     */
-    public boolean getUnicastSupport() {
-        return supportsUnicast;
-    }
-
 
     /** Records that we just successfully connected to this. */
     public void recordConnectionSuccess() {
