@@ -21,15 +21,15 @@ public class ID3Editor{
     private String comment_;
     private String genre_;
 
-    private static final String TITLE_STRING   = "title";
-    private static final String ARTIST_STRING  = "artist";
-    private static final String ALBUM_STRING   = "album";
-    private static final String YEAR_STRING    = "year";
-    private static final String TRACK_STRING   = "track";
-    private static final String COMMENT_STRING = "comments";
-    private static final String GENRE_STRING   = "genre";
-    private static final String BITRATE_STRING = "bitrate";
-    private static final String SECONDS_STRING = "seconds";
+    private static final String TITLE_STRING   = "title=\"";
+    private static final String ARTIST_STRING  = "artist=\"";
+    private static final String ALBUM_STRING   = "album=\"";
+    private static final String YEAR_STRING    = "year=\"";
+    private static final String TRACK_STRING   = "track=\"";
+    private static final String COMMENT_STRING = "comments=\"";
+    private static final String GENRE_STRING   = "genre=\"";
+    private static final String BITRATE_STRING = "bitrate=\"";
+    private static final String SECONDS_STRING = "seconds=\"";
 
     private final boolean debugOn = false;
     private void debug(String out) {
