@@ -13,12 +13,15 @@ import java.net.*;
 
 public class HTTPServerMgr implements Runnable {
 
+    private static final int BUFFSIZE = 1024; //the buffer size for IO
+
     private Socket _socket;
 
     private String _filename;
+    
+    private int _sizeOfFile;
 
-    private static final int BUFFSIZE = 1024; //the buffer size for IO
-
+    private int _amountRead;
 
     public HTTPServerMgr(Socket s, String filename) {
 
@@ -26,6 +29,26 @@ public class HTTPServerMgr implements Runnable {
 
 	_filename = filename;
 
+	_sizeOfFile = -1;
+
+	_amountRead = 0;
+
+    }
+
+
+    public String getFileName() {
+	return _filename;
+    }
+
+    public int getContentLength() {
+	return _sizeOfFile;
+    }
+    
+    public int getAmountRead() {
+	return _amountRead;
+    }
+    public InetAddress getInetAddress() {
+	return _socket.getInetAddress();
     }
 
     public void run() {
@@ -46,8 +69,6 @@ public class HTTPServerMgr implements Runnable {
 	    BufferedReader in = new BufferedReader(isr);
 
 	    String str = null;               
-	    
-	    int sizeOfData = 0;     /* the size of the data after header */ 
 
 	    while (true) {          /* reading http header information */
 		
@@ -55,33 +76,39 @@ public class HTTPServerMgr implements Runnable {
 	                                             /* check if it is */
 		if (str.indexOf("Content-length:") != -1) { 
 		                                /* the content length */
-		String sub = str.substring(16); /* get the number portion */ 
+		    String sub = str.substring(16); /* get the number portion */ 
 		
-		sub.trim();                     /* remove the whitespace */
+		    sub.trim();                     /* remove the whitespace */
 		
-		sizeOfData = java.lang.Integer.parseInt(sub);
-
-		Integer myInt = new Integer(sub); /* convert the String */
-
-		sizeOfData = myInt.intValue();    /* into an int */
+		    _sizeOfFile = java.lang.Integer.parseInt(sub);
+						
+		    in.readLine();                    /* read the /r/n */
 		
-		in.readLine();                    /* read the /r/n */
-		
-		break;                        
+		    break;                        
 		
 		}
 		
 	    }
 	    
-	    if (sizeOfData != 0) {
-		/* we now know the size of the data */
-		byte[] data = new byte[sizeOfData];  
-		/* does the istream keep its place? */
-		istream.read(data);             /* read it all in in one shot */
-		/* create the new  file */
+	    if (_sizeOfFile != -1) {
+
 		FileOutputStream myFile = new FileOutputStream(_filename);
-		
-		myFile.write(data);             /* and write out to it */
+
+		byte[] data = new byte[BUFFSIZE];
+
+		while (true) {
+
+		    int got = istream.read(data);
+
+		    if (got==-1)
+			break;
+
+		    _amountRead += got;
+
+		    myFile.write(data, 0, got);             /* and write out to it */
+
+		}
+
 	    }
 	
 	}
