@@ -473,9 +473,12 @@ public class ManagedDownloader implements Downloader, Serializable {
     static final boolean RECORD_STATS = !CommonUtils.isJava118();
 
     /**
-     * The GUID of the original query.  may be null;
+     * The GUID of the original query.  may be null.
+     * This variable should not be serialized.  The transient keyword
+     * technically is not needed since we do our own serialization but it
+     * doesn't hurt to be clear/redundant.
      */
-    private final GUID _originalQueryGUID;
+    private final transient GUID originalQueryGUID;
 
 
     /**
@@ -498,7 +501,7 @@ public class ManagedDownloader implements Downloader, Serializable {
 		}
         this.allFiles = files;
         this.incompleteFileManager = ifc;
-        this._originalQueryGUID = originalQueryGUID;
+        this.originalQueryGUID = originalQueryGUID;
     }
 
     /** 
@@ -1474,11 +1477,17 @@ public class ManagedDownloader implements Downloader, Serializable {
                     manager.remove(this, false);
                     return;
                 }
+
+                // sanity checks
+                Assert.that(getState() != GAVE_UP);
+                Assert.that(getState() != COMPLETE);
+                Assert.that(getState() != COULDNT_MOVE_TO_LIBRARY);
+                Assert.that(getState() != CORRUPT_FILE);
                 
                 // try to do iterative guessing here
-                if ((_originalQueryGUID != null) && !triedLocatingSources) { 
+                if ((this.originalQueryGUID != null) && !triedLocatingSources) { 
                     MessageRouter mr = RouterService.getMessageRouter();
-                    Set guessLocs = mr.getGuessLocs(_originalQueryGUID);
+                    Set guessLocs = mr.getGuessLocs(this.originalQueryGUID);
                     
                     if ((guessLocs != null) && !guessLocs.isEmpty()) {
                         setState(ITERATIVE_GUESSING);
@@ -3332,7 +3341,7 @@ public class ManagedDownloader implements Downloader, Serializable {
     /** @return the GUID of the query that spawned this downloader.  may be null.
      */
     public GUID getQueryGUID() {
-        return _originalQueryGUID;
+        return this.originalQueryGUID;
     }
 
     public synchronized int getState() {
