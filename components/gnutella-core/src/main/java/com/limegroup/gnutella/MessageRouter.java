@@ -116,7 +116,7 @@ public abstract class MessageRouter {
 	protected final QueryUnicaster UNICASTER = QueryUnicaster.instance();
 
 	/**
-	 * Constant for the <tt>DynamicQueryHandler</tt> that handles dynamically
+	 * Constant for the <tt>QueryDispatcher</tt> that handles dynamically
 	 * generated queries that adjust to the number of results received, the
 	 * number of connections, etc.
 	 */
@@ -703,7 +703,7 @@ public abstract class MessageRouter {
 		//unicastQueryRequest(request, handler);
         //else if(request.getTTL() > 0) {
 
-		if(handler.isSupernodeClientConnection()) {
+		if(handler.isSupernodeClientConnection() && counter != null) {
             if (request.desiresOutOfBandReplies() &&
                 (handler instanceof Connection)) {
                 // this query came from a leaf - so check if it desires out-of-band
