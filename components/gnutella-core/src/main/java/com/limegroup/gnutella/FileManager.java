@@ -1002,11 +1002,17 @@ public class FileManager {
     ////////////////////////////////// Queries ///////////////////////////////
 
     /**
-     * Returns an array of all responses matching the given request, or null if
-     * there are no responses.<p>
+     * Constant for an empty <tt>Response</tt> array to return when there are
+     * no matches.
+     */
+    private static final Response[] EMPTY_RESPONSES = new Response[0];
+
+    /**
+     * Returns an array of all responses matching the given request.  If there
+     * are no matches, the array will be empty (zero size).
      *
-     * Design note: this method returns null instead of an empty array to avoid
-     * allocations in the common case of no matches.)
+     * Design note: returning an empty array requires no extra allocations,
+     * as empty arrays are immutable.
      */
     public synchronized Response[] query(QueryRequest request) {
         String str = request.getQuery();
@@ -1019,7 +1025,7 @@ public class FileManager {
         if (str.equals(INDEXING_QUERY) || str.equals(BROWSE_QUERY)) {
             //Special case: if no shared files, return null
             if (_numFiles==0)
-                return null;
+                return EMPTY_RESPONSES;
             //Extract responses for all non-null (i.e., not deleted) files.
             Response[] ret=new Response[_numFiles];
             int j=0;
@@ -1048,7 +1054,7 @@ public class FileManager {
         }
         
         if (matches==null) {
-            return null;
+            return EMPTY_RESPONSES;
 		}
 
         Response[] response = new Response[matches.size()];
