@@ -33,7 +33,7 @@ import com.sun.java.util.collections.Iterator;
 /**
  *  Tests that an Ultrapeer correctly handles connect back redirect messages.
  *
- *  ULTRAPEER_1  ----  CENTRAL TEST ULTRAPEER  ----  ULTRAPEER_2
+ *  ULTRAPEER[0]  ----  CENTRAL TEST ULTRAPEER  ----  ULTRAPEER[1]
  *                              |
  *                              |
  *                              |
@@ -42,46 +42,7 @@ import com.sun.java.util.collections.Iterator;
  *  This test only covers Ultrapeer behavior - leaves don't participate in
  *  server side connect back stuff.
  */
-public final class ServerSideConnectBackRedirectTest extends BaseTestCase {
-
-	/**
-	 * The port that the central Ultrapeer listens on, and that the other nodes
-	 * connect to it on.
-	 */
-    private static final int PORT = 6667;
-
-	/**
-	 * The timeout value for sockets -- how much time we wait to accept 
-	 * individual messages before giving up.
-	 */
-    private static final int TIMEOUT = 2000;
-
-	/**
-	 * The default TTL to use for request messages.
-	 */
-	private final static byte TTL = 7;
-
-	/**
-	 * The "soft max" TTL used by LimeWire's message routing -- hops + ttl 
-	 * greater than this value have their TTLs automatically reduced
-	 */
-	private static final byte SOFT_MAX = 3;
-
-	/**
-	 * The TTL of the initial "probe" queries that the Ultrapeer uses to
-	 * determine how widely distributed a file is.
-	 */
-	private static final byte PROBE_QUERY_TTL = 2;
-
-    /**
-     * Leaf connection to the Ultrapeer.
-     */
-    private static Connection LEAF;
-
-    /**
-     * Ultrapeer connection.
-     */
-    private static Connection ULTRAPEER_1;
+public final class ServerSideConnectBackRedirectTest extends ServerSideTestCase {
 
     /**
      * Ultrapeer 1 UDP connection.
@@ -98,17 +59,6 @@ public final class ServerSideConnectBackRedirectTest extends BaseTestCase {
      */ 
     private static final int TCP_ACCESS_PORT = 10776;
 
-    /**
-	 * Second Ultrapeer connection
-     */
-    private static Connection ULTRAPEER_2;
-
-	/**
-	 * The central Ultrapeer used in the test.
-	 */
-	private static final RouterService ROUTER_SERVICE = 
-		new RouterService(new ActivityCallbackStub());
-
     public ServerSideConnectBackRedirectTest(String name) {
         super(name);
     }
@@ -120,130 +70,28 @@ public final class ServerSideConnectBackRedirectTest extends BaseTestCase {
 	public static void main(String[] args) {
 		junit.textui.TestRunner.run(suite());
 	}
+
+    public static Integer numUPs() {
+        return new Integer(2);
+    }
+
+    public static Integer numLeaves() {
+        return new Integer(1);
+    }
 	
-	private static void buildConnections() throws Exception {
-        ULTRAPEER_1 = 
-			new Connection("localhost", PORT,
-						   new UltrapeerHeaders("localhost"),
-						   new EmptyResponder()
-						   );
-
-        UDP_ACCESS = new DatagramSocket();
-        TCP_ACCESS = new ServerSocket(TCP_ACCESS_PORT);
-
-        ULTRAPEER_2 = 
-			new Connection("localhost", PORT,
-						   new UltrapeerHeaders("localhost"),
-						   new EmptyResponder()
-						   );
+    public static ActivityCallback getActivityCallback() {
+        return new ActivityCallbackStub();
     }
 
-    public static void setSettings() {
-        FilterSettings.BLACK_LISTED_IP_ADDRESSES.setValue(
-            new String[] {"*.*.*.*"});
-        FilterSettings.WHITE_LISTED_IP_ADDRESSES.setValue(
-            new String[] {"127.*.*.*"});
-        ConnectionSettings.PORT.setValue(PORT);
-        SharingSettings.EXTENSIONS_TO_SHARE.setValue("txt;");
-        // get the resource file for com/limegroup/gnutella
-        File berkeley = 
-            CommonUtils.getResourceFile("com/limegroup/gnutella/berkeley.txt");
-        File susheel = 
-            CommonUtils.getResourceFile("com/limegroup/gnutella/susheel.txt");
-        // now move them to the share dir        
-        CommonUtils.copy(berkeley, new File(_sharedDir, "berkeley.txt"));
-        CommonUtils.copy(susheel, new File(_sharedDir, "susheel.txt"));
-		ConnectionSettings.CONNECT_ON_STARTUP.setValue(false);
-		UltrapeerSettings.EVER_ULTRAPEER_CAPABLE.setValue(true);
-		UltrapeerSettings.DISABLE_ULTRAPEER_MODE.setValue(false);
-		UltrapeerSettings.FORCE_ULTRAPEER_MODE.setValue(true);
-		UltrapeerSettings.MAX_LEAVES.setValue(4);
-		ConnectionSettings.NUM_CONNECTIONS.setValue(3);
-		ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);	
-		ConnectionSettings.USE_GWEBCACHE.setValue(false);
-		ConnectionSettings.WATCHDOG_ACTIVE.setValue(false);
-    }
-
-	public static void globalSetUp() throws Exception {
-        setSettings();
-
-        assertEquals("unexpected port", PORT, 
-					 ConnectionSettings.PORT.getValue());
-
-		ROUTER_SERVICE.start();
-		ROUTER_SERVICE.clearHostCatcher();
-		ROUTER_SERVICE.connect();	
-		connect();
-        assertEquals("unexpected port", PORT, 
-					 ConnectionSettings.PORT.getValue());
-	}
-
-    
-    public void setUp() {
-        setSettings();
-    }
-
-
-	public static void globalTearDown() throws Exception {
-		ROUTER_SERVICE.disconnect();
-		sleep();
-        if ((LEAF != null) && LEAF.isOpen())
-            LEAF.close();
-		ULTRAPEER_1.close();
-		ULTRAPEER_2.close();
-		sleep();
-        UDP_ACCESS.close();
-        TCP_ACCESS.close();
-	}
-
-	private static void sleep() {
-		try {Thread.sleep(300);}catch(InterruptedException e) {}
-	}
-
-	/**
-	 * Drains all messages 
-	 */
- 	private static void drainAll() throws Exception {
- 		if(ULTRAPEER_1.isOpen()) {
- 			drain(ULTRAPEER_1);
- 		}
- 		if(ULTRAPEER_2.isOpen()) {
- 			drain(ULTRAPEER_2);
- 		}
- 		if((LEAF != null) && LEAF.isOpen()) {
- 			drain(LEAF);
- 		}
- 	}
-
-	/**
-	 * Connects all of the nodes to the central test Ultrapeer.
-	 */
-    private static void connect() throws Exception {
-		buildConnections();
-        //1. first Ultrapeer connection 
-        ULTRAPEER_2.initialize();
-
-        //2. second Ultrapeer connection
-        ULTRAPEER_1.initialize();
-        
+    public static void setUpQRPTables() throws Exception {
         // for Ultrapeer 1
         QueryRouteTable qrt = new QueryRouteTable();
         qrt.add("leehsus");
         qrt.add("berkeley");
         for (Iterator iter=qrt.encode(null).iterator(); iter.hasNext(); ) {
-            ULTRAPEER_1.send((RouteTableMessage)iter.next());
-			ULTRAPEER_1.flush();
+            ULTRAPEER[0].send((RouteTableMessage)iter.next());
+			ULTRAPEER[0].flush();
         }
-
-		assertTrue("ULTRAPEER_2 should be connected", ULTRAPEER_2.isOpen());
-		assertTrue("ULTRAPEER_1 should be connected", ULTRAPEER_1.isOpen());
-
-		// make sure we get rid of any initial ping pong traffic exchanges
-		sleep();
-		drainAll();
-		//sleep();
-		drainAll();
-		sleep();
     }
 
     // BEGIN TESTS
@@ -251,23 +99,26 @@ public final class ServerSideConnectBackRedirectTest extends BaseTestCase {
 
     // RUN THIS TEST FIRST
     public void testConfirmSupport() throws Exception {
-	    LEAF = new Connection("localhost", PORT, new LeafHeaders("localhost"),
+        UDP_ACCESS = new DatagramSocket();
+        TCP_ACCESS = new ServerSocket(TCP_ACCESS_PORT);
+
+	    LEAF[0] = new Connection("localhost", PORT, new LeafHeaders("localhost"),
                               new EmptyResponder());
 
         //3. routed leaf, with route table for "test"
-        LEAF.initialize();
+        LEAF[0].initialize();
         QueryRouteTable qrt = new QueryRouteTable();
         qrt.add("berkeley");
         qrt.add("susheel");
         qrt.addIndivisible(HugeTestUtils.UNIQUE_SHA1.toString());
         for (Iterator iter=qrt.encode(null).iterator(); iter.hasNext(); ) {
-            LEAF.send((RouteTableMessage)iter.next());
-			LEAF.flush();
+            LEAF[0].send((RouteTableMessage)iter.next());
+			LEAF[0].flush();
         }
-		assertTrue("LEAF should be connected", LEAF.isOpen());
+		assertTrue("LEAF[0] should be connected", LEAF[0].isOpen());
 
         MessagesSupportedVendorMessage msvm = 
-        (MessagesSupportedVendorMessage) getFirstMessageOfType(LEAF,
+        (MessagesSupportedVendorMessage) getFirstMessageOfType(LEAF[0],
         MessagesSupportedVendorMessage.class, 500);
         assertNotNull(msvm);
         assertGreaterThan(0, msvm.supportsTCPConnectBackRedirect());
@@ -282,8 +133,8 @@ public final class ServerSideConnectBackRedirectTest extends BaseTestCase {
             new UDPConnectBackRedirect(cbGuid, InetAddress.getLocalHost(),
                                        UDP_ACCESS.getLocalPort());
         
-        LEAF.send(udp);
-        LEAF.flush();
+        LEAF[0].send(udp);
+        LEAF[0].flush();
         
         // we should NOT get a ping request over our UDP socket....
         UDP_ACCESS.setSoTimeout(1000);
@@ -299,8 +150,8 @@ public final class ServerSideConnectBackRedirectTest extends BaseTestCase {
         udp = new UDPConnectBackRedirect(cbGuid, InetAddress.getLocalHost(),
                                          UDP_ACCESS.getLocalPort());
         
-        ULTRAPEER_1.send(udp);
-        ULTRAPEER_1.flush();
+        ULTRAPEER[0].send(udp);
+        ULTRAPEER[0].flush();
 
         // we should get a ping reply over our UDP socket....
         while (true) {
@@ -325,15 +176,15 @@ public final class ServerSideConnectBackRedirectTest extends BaseTestCase {
     public void testUDPConnectBackAlreadyConnected() throws Exception {
         drainAll();
 
-        DatagramSocket tempSock = new DatagramSocket(LEAF.getSocket().getLocalPort());
+        DatagramSocket tempSock = new DatagramSocket(LEAF[0].getSocket().getLocalPort());
         
         GUID cbGuid = new GUID(GUID.makeGuid());
         UDPConnectBackRedirect udp = 
-        new UDPConnectBackRedirect(cbGuid, LEAF.getSocket().getInetAddress(),
-                                   LEAF.getSocket().getLocalPort());
+        new UDPConnectBackRedirect(cbGuid, LEAF[0].getSocket().getInetAddress(),
+                                   LEAF[0].getSocket().getLocalPort());
         
-        ULTRAPEER_1.send(udp);
-        ULTRAPEER_1.flush();
+        ULTRAPEER[0].send(udp);
+        ULTRAPEER[0].flush();
 
         // we should NOT get a ping request over our UDP socket....
         tempSock.setSoTimeout(1000);
@@ -355,8 +206,8 @@ public final class ServerSideConnectBackRedirectTest extends BaseTestCase {
             new TCPConnectBackRedirect(InetAddress.getLocalHost(),
                                        TCP_ACCESS.getLocalPort());
         
-        LEAF.send(tcp);
-        LEAF.flush();
+        LEAF[0].send(tcp);
+        LEAF[0].flush();
         
         // we should NOT get a incoming connection
         TCP_ACCESS.setSoTimeout(1000);
@@ -370,8 +221,8 @@ public final class ServerSideConnectBackRedirectTest extends BaseTestCase {
         tcp = new TCPConnectBackRedirect(InetAddress.getLocalHost(),
                                          TCP_ACCESS.getLocalPort());
         
-        ULTRAPEER_1.send(tcp);
-        ULTRAPEER_1.flush();
+        ULTRAPEER[0].send(tcp);
+        ULTRAPEER[0].flush();
 
         // we should get a incoming connection
         try {
@@ -387,11 +238,11 @@ public final class ServerSideConnectBackRedirectTest extends BaseTestCase {
         drainAll();
 
         TCPConnectBackRedirect tcp = 
-            new TCPConnectBackRedirect(LEAF.getSocket().getInetAddress(),
+            new TCPConnectBackRedirect(LEAF[0].getSocket().getInetAddress(),
                                        TCP_ACCESS.getLocalPort());
         
-        ULTRAPEER_1.send(tcp);
-        ULTRAPEER_1.flush();
+        ULTRAPEER[0].send(tcp);
+        ULTRAPEER[0].flush();
 
         // we should NOT get an incoming connection
         TCP_ACCESS.setSoTimeout(1000);
@@ -412,8 +263,8 @@ public final class ServerSideConnectBackRedirectTest extends BaseTestCase {
             new UDPConnectBackRedirect(cbGuid, InetAddress.getLocalHost(),
                                        UDP_ACCESS.getLocalPort());
         
-        ULTRAPEER_2.send(udp);
-        ULTRAPEER_2.flush();
+        ULTRAPEER[1].send(udp);
+        ULTRAPEER[1].flush();
         
         // we should NOT get a ping request over our UDP because we just did this
         UDP_ACCESS.setSoTimeout(1000);
@@ -429,8 +280,8 @@ public final class ServerSideConnectBackRedirectTest extends BaseTestCase {
             new TCPConnectBackRedirect(InetAddress.getLocalHost(),
                                        TCP_ACCESS.getLocalPort());
         
-        ULTRAPEER_2.send(tcp);
-        ULTRAPEER_2.flush();
+        ULTRAPEER[1].send(tcp);
+        ULTRAPEER[1].flush();
         
         // we should NOT get a incoming connection since we did this already
         TCP_ACCESS.setSoTimeout(1000);
@@ -453,8 +304,8 @@ public final class ServerSideConnectBackRedirectTest extends BaseTestCase {
         udp = new UDPConnectBackRedirect(cbGuid, InetAddress.getLocalHost(),
                                          UDP_ACCESS.getLocalPort());
         
-        ULTRAPEER_2.send(udp);
-        ULTRAPEER_2.flush();
+        ULTRAPEER[1].send(udp);
+        ULTRAPEER[1].flush();
         
         // we should get a ping request over our UDP
         UDP_ACCESS.setSoTimeout(1000);
@@ -479,8 +330,8 @@ public final class ServerSideConnectBackRedirectTest extends BaseTestCase {
         tcp = new TCPConnectBackRedirect(InetAddress.getLocalHost(),
                                          TCP_ACCESS.getLocalPort());
         
-        ULTRAPEER_2.send(tcp);
-        ULTRAPEER_2.flush();
+        ULTRAPEER[1].send(tcp);
+        ULTRAPEER[1].flush();
         
         // we should get a incoming connection
         TCP_ACCESS.setSoTimeout(1000);
