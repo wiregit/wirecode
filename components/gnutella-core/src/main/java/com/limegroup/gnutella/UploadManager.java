@@ -661,11 +661,11 @@ public class UploadManager implements BandwidthTracker {
 	 */
 	private boolean isURNGet(final String GET_LINE) {
 		int slash1Index = GET_LINE.indexOf("/");
-		int slash2Index = GET_LINE.indexOf("/", slash1Index);
+		int slash2Index = GET_LINE.indexOf("/", slash1Index+1);
 		if((slash1Index==-1) || (slash2Index==-1)) {
 			return false;
 		}
-		String idString = GET_LINE.substring(slash1Index, slash2Index);
+		String idString = GET_LINE.substring(slash1Index+1, slash2Index);
 		return idString.equalsIgnoreCase("uri-res");
 	}
 
@@ -737,7 +737,6 @@ public class UploadManager implements BandwidthTracker {
 	 */
 	private GETLine parseURNGet(final String GET_LINE) 
 		throws IOException {		
-
 		URN urn = URNFactory.createSHA1UrnFromGetRequest(GET_LINE);
 		if(urn == null) {
 			throw new IOException("NO ERROR CREATING URN");
