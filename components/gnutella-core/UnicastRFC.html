@@ -1,7 +1,7 @@
 Content-Type: text/html
 
 <html><head><title>Gnutella Developer Forum: Gnutella UDP Extension for Scalable Searches (GUESS) v0.1</title>
-<meta http-equiv="Expires" content="Tue, 24 Sep 2002 15:54:57 +0000">
+<meta http-equiv="Expires" content="Tue, 24 Sep 2002 16:20:41 +0000">
 <STYLE type='text/css'>
     .title { color: #990000; font-size: 22px; line-height: 22px; font-weight: bold; text-align: right;
              font-family: helvetica, arial, sans-serif }
@@ -104,6 +104,8 @@ Leaf Considerations<br></b>
 Server<br></b>
 <b><a href="#server_pongs">2.2.1</a>&nbsp;
 Server Pongs<br></b>
+<b><a href="#other_server_changes">2.2.2</a>&nbsp;
+Other Server Changes<br></b>
 <b><a href="#discovery">3.</a>&nbsp;
 Ultrapeer Discovery<br></b>
 <b><a href="#broadcast_ping">3.1</a>&nbsp;
@@ -526,6 +528,8 @@ Acknowledgements<br></b>
 		    support.
 		  
 </p>
+<a name="rfc.section.2.2.2"></a><h4><a name="other_server_changes">2.2.2</a>&nbsp;Other Server Changes</h4>
+
 <p>
 		  In all other respects,
 		  servers should respond to messages just as if they 
@@ -537,7 +541,7 @@ Acknowledgements<br></b>
 		  <br>
 <br>
 
-		  On the server side, Ultrapeers also MUST start forwarding TTL=1 
+		  Ultrapeers also MUST start forwarding TTL=1 
 		  queries received over UDP to leaves.  Without this change, queries 
 		  would have to be sent with TTL=2, which would lessen the fine-grained
 		  control over the query and would eliminate benefits such as
@@ -818,13 +822,13 @@ Acknowledgements<br></b>
 <p>
 		  GUESS makes several careful design decisions.  In particular,
 		  the choice to have leaves send query hits through their Ultrapeer
-		  indead of sending them directly to the node initiating the query 
+		  instead of sending them directly to the node initiating the query 
 		  warrants more discussion.  Sending the reply through the Ultrapeer
 		  first allows the Ultrapeer to add the leaf to its push routing
 		  tables.  If the leaf is firewalled, this makes it possible for 
 		  the Ultrapeer to act as a proxy for the push request.  In addition,
 		  if leaves were to send replies directly back to the node initiating
-		  the query, the ip and port of the querying node would have to 
+		  the query, the IP address and port of the querying node would have to 
 		  somehow be added to the query itself, either through a GGEP 
 		  extension or through the Ultrapeer modifying the query on the fly
 		  before sending it to the leaf.  This makes the system 

@@ -404,7 +404,9 @@
 		    the <xref target="ggep">GGEP extension</xref> indicating GUESS 
 		    support.
 		  </t>
-		  </section>
+		</section>
+		
+		<section anchor="other_server_changes" title="Other Server Changes">
 		  <t>
 		  In all other respects,
 		  servers should respond to messages just as if they 
@@ -415,7 +417,7 @@
 		
 		  <vspace/>
 		  <vspace/>
-		  On the server side, Ultrapeers also MUST start forwarding TTL=1 
+		  Ultrapeers also MUST start forwarding TTL=1 
 		  queries received over UDP to leaves.  Without this change, queries 
 		  would have to be sent with TTL=2, which would lessen the fine-grained
 		  control over the query and would eliminate benefits such as
@@ -429,6 +431,7 @@
 		  implement the client side, they are REQUIRED to implement the 
 		  server side as well.
 		</t>
+		</section>
 	  </section>
 	</section>
 	<section anchor="discovery" title="Ultrapeer Discovery">
@@ -680,13 +683,13 @@
 	    <t>
 		  GUESS makes several careful design decisions.  In particular,
 		  the choice to have leaves send query hits through their Ultrapeer
-		  indead of sending them directly to the node initiating the query 
+		  instead of sending them directly to the node initiating the query 
 		  warrants more discussion.  Sending the reply through the Ultrapeer
 		  first allows the Ultrapeer to add the leaf to its push routing
 		  tables.  If the leaf is firewalled, this makes it possible for 
 		  the Ultrapeer to act as a proxy for the push request.  In addition,
 		  if leaves were to send replies directly back to the node initiating
-		  the query, the ip and port of the querying node would have to 
+		  the query, the IP address and port of the querying node would have to 
 		  somehow be added to the query itself, either through a GGEP 
 		  extension or through the Ultrapeer modifying the query on the fly
 		  before sending it to the leaf.  This makes the system 
