@@ -8,36 +8,48 @@ import org.apache.commons.logging.Log;
 class UpdateData implements Cloneable, UpdateInformation {
     
     private static final Log LOG = LogFactory.getLog(UpdateData.class);
-        
-    /**
-     * The oldest message this message applies to.
-     */
-    private Version version;
     
-    /**
-     * The OSes this message applies to.
-     */
-    private OS[] os;
+    /** The 'from' version. */
+    private Version fromVersion;
     
-    /**
-     * The URI to send update requests to from this message.
-     */
-    private URI updateURI;
+    /** The 'to' version. */
+    private Version toVersion;
     
-    /**
-     * The language this message is intended for.
-     */
+    /** The 'for' version. */
+    private Version forVersion;
+    
+    /** Is valid for pro? */
+    private boolean isPro;
+    
+    /** Is valid for free? */
+    private boolean isFree;
+    
+    /** The url to send this to. */
+    private String updateURL;
+    
+    /** The style of this update. */
+    private int updateStyle;
+    
+    /** The javafrom */
+    private Version fromJava;
+    
+    /** The javato */
+    private Version toJava;
+    
+    /** The OS[] this applies to. */
+    private OS[] osList;
+    
+    /** The language this applies to. */
     private String language;
     
-    /**
-     * The version this message is updating to.
-     */
-    private Version updateVersion;
-    
-    /**
-     * The text of the message.
-     */
+    /** The text of this message */
     private String updateText;
+    
+    /** The text of button1. */
+    private String button1Text;
+    
+    /** The text of button2. */
+    private String button2Text;
     
     /**
      * Constructs a new UpdateData object.
@@ -48,110 +60,106 @@ class UpdateData implements Cloneable, UpdateInformation {
      * The data.
      */
     public String toString() {
-        return "\n{ov: " + version + ", oses: " + OS.toString(os) + ", uri: " + updateURI + ", l: " + language +
-                ", uv: " + updateVersion + ", t: " + updateText + "}";
+        return "\n{" + 
+            "from: " + fromVersion + ", to: " + toVersion + ", for: " + forVersion + 
+            ", pro: " + isPro + ", free: " + isFree + ", url: " + updateURL + ", style: " + updateStyle +
+            ", javaFrom: " + fromJava + ", javaTo: " + toJava + ", osList: " + OS.toString(osList) +
+            ", language: " + language + ", text: " + updateText + "}";
+    }
+    
+    /** Sets the from */
+    void setFromVersion(Version v) { fromVersion = v; }
+    
+    /** Sets the to */
+    void setToVersion(Version v) { toVersion = v; }
+    
+    /** Sets the forVersion */
+    void setForVersion(Version v) { forVersion = v; }
+    
+    /** Sets the pro status */
+    void setPro(boolean b) { isPro = b; }
+    
+    /** Sets the free status */
+    void setFree(boolean b) { isFree = b; }
+    
+    /** Sets the update URL */
+    void setUpdateURL(String s) { updateURL = s; }
+    
+    /** Sets the style */
+    void setStyle(int s) { updateStyle = s; }
+    
+    /** Sets the fromJava */
+    void setFromJava(Version v) { fromJava = v; }
+    
+    /** Sets the toJava */
+    void setToJava(Version v) { toJava = v; }
+    
+    /** Sets the osList */
+    void setOSList(OS[] os) { osList = os; }
+    
+    /** Sets the language */
+    void setLanguage(String l) { language = l; }
+    
+    /** Sets the update text */
+    void setUpdateText(String t) { updateText = t; }
+    
+    /** Sets the button1 text */
+    void setButton1Text(String t) { button1Text = t; }
+    
+    /** Sets the button2 text */
+    void setButton2Text(String t) { button2Text = t; }
+    
+    /** Gets the language. */
+    String getLanguage() { return language; }
+    
+    /// the below getters implement UpdateInformation.
+
+    /** Gets the update version as a string. */
+    public String getUpdateVersion() { return forVersion.toString(); }
+    
+    /** Gets the update text. */
+    public String getUpdateText() { return updateText; }
+    
+    /** Gets the update URL */
+    public String getUpdateURL() { return updateURL; }
+    
+    /** Gets the update style. */
+    public int getUpdateStyle() { return updateStyle; }
+    
+    /** Gets the button1 text. */
+    public String getButton1Text() { return button1Text; }
+    
+    /** Gets the button2 text. */
+    public String getButton2Text() { return button2Text; }
+    
+    /**
+     * Determines if this matches (on all except language).
+     * The OS match is taken from CommonUtils.
+     */
+    boolean isAllowed(Version currentV, boolean currentPro, int currentStyle, Version currentJava) {
+        return currentV.compareTo(fromVersion) >= 0 && 
+               currentV.compareTo(toVersion) < 0 && 
+               currentStyle >= updateStyle &&
+               OS.hasAcceptableOS(osList) &&
+               isValidJava(currentJava) &&
+               currentPro ? isPro : isFree;
     }
     
     /**
-     * Sets the oldest version this applies to.
+     * Determines if the java versions are okay.
      */
-    void setOldestVersion(Version v) {
-        version = v;
-    }
-    
-    /**
-     * Gets the oldest version this applies to.
-     */
-    Version getOldestVersion() {
-        return version;
-    }
-    
-    /**
-     * Sets the OSes this applies to.
-     */
-    void setOS(OS[] os) {
-        this.os = os;
-    }
-    
-    /**
-     * Gets the OS this applies to.
-     */
-    OS[] getOS() {
-        return os;
-    }
-    
-    /**
-     * Determines if any of the OSes here are acceptable.
-     */
-    boolean isOSAcceptable() {
-        for(int i = 0; i < os.length; i++)
-            if(os[i].isAcceptable())
-                return true;
-        return false;
-    }
-    
-    /**
-     * Sets the update URL.
-     */
-    void setUpdateURI(URI url) {
-        updateURI = url;
-    }
-    
-    /**
-     * Gets the update URL.
-     */
-    public URI getUpdateURI() {
-        return updateURI;
-    }
-    
-    /**
-     * Sets the language.
-     */
-    void setLanguage(String lang) {
-        language = lang;
-    }
-    
-    /**
-     * Gets the language.
-     */
-    String getLanguage() {
-        return language;
-    }
-    
-    /**
-     * Sets the update version.
-     */
-    void setUpdateVersion(Version v) {
-        updateVersion = v;
-    }
-    
-    /**
-     * Gets the update version as a string.
-     */
-    public String getVersion() {
-        return updateVersion.toString();
-    }
-    
-    /**
-     * Gets the update version.
-     */
-    Version getUpdateVersion() {
-        return updateVersion;
-    }
-    
-    /**
-     * Sets the update text.
-     */
-    void setUpdateText(String text) {
-        updateText = text;
-    }
-    
-    /**
-     * Gets the update text.
-     */
-    public String getUpdateText() {
-        return updateText;
-    }
+    boolean isValidJava(Version currentV) {
+        if(currentV == null || (fromJava == null && toJava == null))
+            return true;
+            
+        if(fromJava == null)
+            return currentV.compareTo(toJava) < 0;
+        if(toJava == null)
+            return currentV.compareTo(fromJava) >= 0;
+        
+        return currentV.compareTo(fromJava) >= 0 &&
+               currentV.compareTo(toJava) < 0;
+    }   
     
     /**
      * Clones a new update data that is exactly like this one.

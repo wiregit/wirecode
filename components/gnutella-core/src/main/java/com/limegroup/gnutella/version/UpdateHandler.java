@@ -13,8 +13,8 @@ import com.limegroup.gnutella.util.IOUtils;
 import com.limegroup.gnutella.util.ProcessingQueue;
 import com.limegroup.gnutella.security.SignatureVerifier;
 import com.limegroup.gnutella.settings.ApplicationSettings;
+import com.limegroup.gnutella.settings.UpdateSettings;
 import com.limegroup.gnutella.messages.vendor.CapabilitiesVM;
-
 
 import org.apache.commons.logging.LogFactory;
 import org.apache.commons.logging.Log;
@@ -79,7 +79,6 @@ public class UpdateHandler {
         }
     }
     
-    
     /**
      * Retrieves the latest version available.
      */
@@ -116,15 +115,30 @@ public class UpdateHandler {
         CapabilitiesVM.reconstructInstance();
         RouterService.getConnectionManager().sendUpdatedCapabilities();
 
-        Version me;
+        Version limeV;
         try {
-            me = new Version(CommonUtils.getLimeWireVersion());
+            limeV = new Version(CommonUtils.getLimeWireVersion());
         } catch(VersionFormatException vfe) {
-            LOG.warn("Invalid version", vfe);
+            LOG.warn("Invalid LimeWire version", vfe);
             return;
         }
+
+        Version javaV = null;        
+        try {
+            javaV = new Version(CommonUtils.getJavaVersion());
+        } catch(VersionFormatException vfe) {
+            LOG.warn("Invalid java version", vfe);
+        }
         
-        _updateInfo = uc.getUpdateDataFor(me, getLanguage());
+        // don't allow someone to set the style to be above major.
+        int style = Math.min(UpdateInformation.STYLE_MAJOR,
+                             UpdateSettings.UPDATE_STYLE.getValue());
+        
+        _updateInfo = uc.getUpdateDataFor(limeV, 
+                                          getLanguage(),
+                                          CommonUtils.isPro(),
+                                          style,
+                                          javaV);
 
         notifyAboutInfo(uc.getTimestamp());
     }
@@ -136,6 +150,7 @@ public class UpdateHandler {
         if(_updateInfo == null)
             return;
             
+        System.out.println("There is an update availble: " + _updateInfo);
         // TODO: pass this to the GUI in a certain amount of time, if necessary.
     }
     

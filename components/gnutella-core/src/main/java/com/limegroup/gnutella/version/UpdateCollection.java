@@ -77,29 +77,33 @@ class UpdateCollection {
     }
     
     /**
-     * Gets the UpdateData that is relevent to us.
+     * Gets the UpdateData that is relevant to us.
+     * Returns null if there is no relevant update.
      */
-    UpdateData getUpdateDataFor(Version me, String lang) {
-        UpdateData data = null;
+    UpdateData getUpdateDataFor(Version currentV, String lang, boolean currentPro,
+                                int currentStyle, Version currentJava) {
+        UpdateData englishMatch = null;
+        UpdateData exactMatch = null;
+        
+        // Iterate through them till we find an acceptable version.
+        // Remember for the 'English' and 'Exact' match --
+        // If we got an exact, use that.  Otherwise, use English.
         for(Iterator i = updateDataList.iterator(); i.hasNext(); ) {
             UpdateData next = (UpdateData)i.next();
-            if( me.compareTo(next.getOldestVersion()) >= 0 && next.isOSAcceptable() ) {
-                // always accept if languages match.
-                if(lang.equals(next.getLanguage()))
-                    data = next;
-                // accept 'en' iff this is a newer msg than the existing one.
-                else if(data == null ||
-                  ( "en".equals(next.getLanguage()) &&
-                    next.getOldestVersion().compareTo(data.getOldestVersion()) > 0
-                  )
-                       )
-                    data = next;
-                // otherwise we already got a match for this version with a better language.
-            } else
-                break;
-       }
-       
-       return data;
+            if(next.isAllowed(currentV, currentPro, currentStyle, currentJava)) {
+                if(lang.equals(next.getLanguage())) {
+                    exactMatch = next;
+                    break;
+                } else if("en".equals(next.getLanguage())) {
+                    englishMatch = next;
+                }
+            }
+        }
+        
+        if(exactMatch == null)
+            return englishMatch;
+        else
+            return exactMatch;
     }
 
     /**
@@ -109,16 +113,6 @@ class UpdateCollection {
     static UpdateCollection create(String xml) {
         UpdateCollection collection = new UpdateCollection();
         collection.parse(xml);
-        
-        // sort the collection according to the oldest version numbers.
-        Collections.sort(collection.updateDataList, new Comparator() {
-            public int compare(Object a, Object b) {
-                Version v1 = ((UpdateData)a).getOldestVersion();
-                Version v2 = ((UpdateData)b).getOldestVersion();
-                return v1.compareTo(v2);
-            }
-        });
-        
         return collection;
     }
     
@@ -186,27 +180,79 @@ class UpdateCollection {
     
     /**
      * Parses a single msg item.
+     *
+     * The elements this parses are:
+     *      from     -- OPTIONAL (defaults to 0.0.0)
+     *      to       -- OPTIONAL (defaults to the 'for' value)
+     *      for      -- REQUIRED
+     *      pro      -- OPTIONAL (see free)
+     *      free     -- OPTIONAL (if both pro & free are missing, both default to true.
+                                  otherwise they defaults to false.  any non-null value == true)
+     *      url      -- REQUIRED
+     *      style    -- REQUIRED (accepts a number only.)
+     *      javafrom -- OPTIONAL (see javato)
+     *      javato   -- OPTIONAL (if both are missing, all ranges are valid.  if one is missing, defaults to above or below that.)
+     *      os       -- OPTIONAL (defaults to '*' -- accepts a comma delimited list.)
+     *
+     * If any values exist but error while parsing, the entire block is considered
+     * invalid and ignored.
      */
     private void parseMsgItem(Node msg) {
         UpdateData data = new UpdateData();
         
-        // parse the 'for' & 'os' attributes -- MUST have both.
         NamedNodeMap attr = msg.getAttributes();
-        String forText = getAttributeText(attr, "for");
-        String osText = getAttributeText(attr, "os");
-        if(forText == null || osText == null) {
-            LOG.error("no for or os attribute.");
-            return;
-        }
-            
-        try {
-            data.setOldestVersion(new Version(forText));
-        } catch(VersionFormatException vfe) {
-            LOG.error("Unable to create version from: " + forText, vfe);
+        String fromV = getAttributeText(attr, "from");
+        String toV = getAttributeText(attr, "to");
+        String forV = getAttributeText(attr, "for");
+        String pro = getAttributeText(attr, "pro");
+        String free = getAttributeText(attr, "free");
+        String url = getAttributeText(attr, "url");
+        String style = getAttributeText(attr, "style");
+        String javaFrom = getAttributeText(attr, "javafrom");
+        String javaTo = getAttributeText(attr, "javato");
+        String os = getAttributeText(attr, "os");
+        
+        if(forV == null || url == null || style == null) {
+            LOG.error("Missing required for, url, or style.");
             return;
         }
         
-        data.setOS(OS.createFromList(osText));
+        if(fromV == null)
+            fromV = "0.0.0";
+        if(toV == null)
+            toV = forV;
+
+        try {
+            data.setFromVersion(new Version(fromV));
+            data.setToVersion(new Version(toV));
+            data.setForVersion(new Version(forV));
+            if(javaFrom != null)
+                data.setFromJava(new Version(javaFrom));
+            if(javaTo != null)
+                data.setToJava(new Version(javaTo));
+        } catch(VersionFormatException vfe) {
+            LOG.error("Invalid version", vfe);
+            return;
+        }
+        
+        if(pro == null && free == null) {
+            data.setPro(true);
+            data.setFree(true);
+        } else {
+            data.setPro(pro != null);
+            data.setFree(free != null);
+        }
+        
+        data.setUpdateURL(url);
+        
+        try {
+            data.setStyle(Integer.parseInt(style));
+        } catch(NumberFormatException nfe) {
+            LOG.error("Invalid style", nfe);
+            return;
+        }
+        
+        data.setOSList(OS.createFromList(os));
         
         
         NodeList children = msg.getChildNodes();
@@ -219,38 +265,28 @@ class UpdateCollection {
     
     /**
      * Parses a single lang item.
+     *
+     * Accepts attributes 'id', 'button1', and 'button2'.
+     * 'id' is REQUIRD.  others are optional.
+     * REQUIRES a text content inside.
      */
     private void parseLangItem(UpdateData data, Node lang) {
         // Parse the id & url & current attributes -- all MUST exist.
         NamedNodeMap attr = lang.getAttributes();
-        String idText = getAttributeText(attr, "id");
-        String urlText = getAttributeText(attr, "url");
-        String currentText = getAttributeText(attr, "current");
-        String updateText = lang.getTextContent();
+        String id = getAttributeText(attr, "id");
+        String button1 = getAttributeText(attr, "button1");
+        String button2 = getAttributeText(attr, "button2");
+        String msg = lang.getTextContent();
         
-        if(idText == null || urlText == null || currentText == null || 
-           updateText == null || updateText.equals("")) {
-            LOG.error("no id, url, current, or text.");
+        if(id == null || msg == null || msg.equals("")) {
+            LOG.error("Missing id or message.");
             return;
         }
             
-        data.setLanguage(idText);
-        
-        try {
-            data.setUpdateURI(new URI(urlText.toCharArray()));
-        } catch(URIException exc) {
-            LOG.error("Unable to create uri from: " + urlText);
-            return;
-        }
-        
-        try {
-            data.setUpdateVersion(new Version(currentText));
-        } catch(VersionFormatException vfe) {
-            LOG.error("Unable to create version from: " + currentText, vfe);
-            return;
-        }
-        
-        data.setUpdateText(updateText);
+        data.setLanguage(id);
+        data.setButton1Text(button1);
+        data.setButton2Text(button2);
+        data.setUpdateText(msg);
         
         // A-Okay -- we've got a good UpdateData.
         updateDataList.add(data);

@@ -31,6 +31,13 @@ class OS {
         return all;
     }
     
+    static boolean hasAcceptableOS(OS[] oses) {
+        for(int i = 0; i < oses.length; i++)
+            if(oses[i].isAcceptable())
+                return true;
+        return false;
+    }
+    
     static String toString(OS[] oses) {
         String s = "";
         for(int i = 0; i < oses.length; i++) {
@@ -48,13 +55,16 @@ class OS {
         
         if("windows".equals(s))
             return CommonUtils.isWindows();
-        if("mac".equals(s))
+        else if("mac".equals(s))
             return CommonUtils.isAnyMac();
-        if("unix".equals(s))
-            return CommonUtils.isUnix();
-        if("linux".equals(s))
+        else if("linux".equals(s))
             return CommonUtils.isLinux();
-        if("*".equals(s))
+        else if("unix".equals(s))
+            return CommonUtils.isUnix() && !CommonUtils.isLinux();
+        else if("other".equals(s))
+            return !CommonUtils.isWindows() && !CommonUtils.isAnyMac() &&
+                   !CommonUtils.isUnix() && !CommonUtils.isLinux();
+        else if("*".equals(s))
             return true;
         
         return false;

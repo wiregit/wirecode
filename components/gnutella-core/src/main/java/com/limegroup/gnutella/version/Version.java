@@ -7,6 +7,7 @@ class Version implements Comparable {
     private final int major;
     private final int minor;
     private final int service;
+    private final int revision;
     
     /**
      * Constructs a new Version.
@@ -18,6 +19,7 @@ class Version implements Comparable {
         major = nums[0];
         minor = nums[1];
         service = nums[2];
+        revision = nums[3];
     }
     
     /**
@@ -41,7 +43,13 @@ class Version implements Comparable {
         Version other = (Version)o;
         if(major == other.major)
             if(minor == other.minor)
-                return service - other.service;
+                if(service == other.service)
+                    // if revision == other.revision
+                        // return 0;
+                    // else
+                        return revision - other.revision;
+                else
+                    return service - other.service;
             else
                 return minor - other.minor;
         else
@@ -52,8 +60,8 @@ class Version implements Comparable {
      * Parses a version for major/minor/service.
      */
     private int[] parse(String vers) throws VersionFormatException {
-	    int major, minor, service;
-	    int dot1, dot2;
+	    int major, minor, service, revision;
+	    int dot1, dot2, lastNum;
 
         dot1 = vers.indexOf(".");
 	    if(dot1 == -1)
@@ -78,13 +86,27 @@ class Version implements Comparable {
             int q = dot2 + 1;
             while(q < vers.length() &&  Character.isDigit(vers.charAt(q)))
                 q++;
-                
+            
+            lastNum = q;    
             service = Integer.parseInt(vers.substring(dot2 + 1, q));
         } catch(NumberFormatException nfe) {
             throw new VersionFormatException(vers);
         }
         
-        return new int[] { major, minor, service };
+        revision = 0;
+        try {
+            int q = lastNum + 1;
+            while (q < vers.length() && !Character.isDigit(vers.charAt(q)))
+                q++;
+                
+            if(q < vers.length())
+                revision = Integer.parseInt(vers.substring(q));
+        } catch(NumberFormatException okay) {
+            // not everything will have a revision digit.
+        }
+            
+        
+        return new int[] { major, minor, service, revision };
     }
     
 }

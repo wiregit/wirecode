@@ -21,7 +21,7 @@ import com.limegroup.gnutella.http.HTTPHeaderName;
 import com.limegroup.gnutella.http.HttpClientManager;
 import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.ManagedThread;
-import com.limegroup.gnutella.settings.ApplicationSettings;
+import com.limegroup.gnutella.settings.UpdateSettings;
 
 /**
  * Used for parsing the signed_update_file.xml and updating any values locally.
@@ -248,7 +248,7 @@ public class UpdateManager {
                         //to seven hours, otherwise if it's been seven hours
                         //since the file was published, we can show the user and
                         //update right now.
-                        long delay = ApplicationSettings.UPDATE_DELAY.getValue();
+                        long delay = UpdateSettings.UPDATE_DELAY.getValue();
                         if(System.currentTimeMillis() < makeTime+delay) {
                             Random rand = new Random();
                             long sleep = rand.nextLong() % delay;
