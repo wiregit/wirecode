@@ -124,10 +124,10 @@ public abstract class Message {
 	byte[] payload=null;		    
 	if (length!=0) {
 	    payload=new byte[length];
-	    for (int i=0; i<length; i++) { //TODO3: optimize
-		int got=in.read();
+	    for (int i=0; i<length; ) {
+		int got=in.read(payload, i, length-i);
 		if (got==-1) throw new IOException("Connection closed.");
-		payload[i]=(byte)got;
+		i+=got;
 	    }
 	}
 	
