@@ -57,10 +57,10 @@ public class StandardMessageRouter extends MessageRouter {
         // them being interpreted as from the crawler!!
         if(hops ==1 && ttl==1) {
             handleCrawlerPing(ping, handler);
+            return;
             //Note that the while handling crawler ping, we dont send our own
             //pong, as that is unnecessary, since crawler already has our
-            //address. We though return it below for compatibility with old
-            //ConnectionWatchdogPing which had TTL=2 (instead of 1).
+            //address.
         }
 
         // handle heartbeat pings specially -- bypass pong caching code
