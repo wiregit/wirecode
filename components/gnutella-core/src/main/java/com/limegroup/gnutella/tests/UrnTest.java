@@ -162,7 +162,11 @@ public final class UrnTest extends TestCase {
 		} 
 		assertTrue("should have been able to initialize gnutella dir", 
 				   _testDir.isDirectory());
+		File[] files = _testDir.listFiles();
+		assertNotNull("test directory should contain files", files);
+		assertTrue("should have more than 10 files: "+_testDir, files.length > 10);
 	}
+
 
 	/**
 	 * Tests that valid urn strings successfully construct new URN instances.
@@ -172,7 +176,7 @@ public final class UrnTest extends TestCase {
 			try {
 				URN urn = URN.createSHA1Urn(VALID_URNS[i]);
 			} catch(IOException e) {
-				assertTrue(false);				
+				assertTrue("unexpected exception: "+e, false);				
 			}
 		}
 	}
@@ -187,7 +191,8 @@ public final class UrnTest extends TestCase {
 		for(int i=0; i<INVALID_URNS.length; i++) {
 			try {
 				URN urn = URN.createSHA1Urn(INVALID_URNS[i]);
-				assertTrue(false);
+				assertTrue("should have thrown an exception on: "+
+						   INVALID_URNS[i], false);
 			} catch(IOException e) {
 			}
 		}
@@ -207,18 +212,18 @@ public final class UrnTest extends TestCase {
 					continue;
 				}
 				URN urn = URN.createSHA1Urn(curFile);
-				assertTrue(urn.isSHA1());
-				assertTrue(urn.isUrn(urn.toString()));
-				assertTrue(urn.getUrnType() == UrnType.SHA1);
+				assertTrue("should be a valid SHA1", urn.isSHA1());
+				assertTrue("should be considered a urn", urn.isUrn(urn.toString()));
+				assertTrue("should be == UrnTypes", urn.getUrnType() == UrnType.SHA1);
 				try {
 					URN newURN = URN.createSHA1Urn(urn.toString());
-					assertTrue(newURN.equals(urn));
+					assertEquals("urns should be equal", urn, newURN);
 				} catch(IOException e) {
-					assertTrue(false);
+					assertTrue("unexpected exception: "+e, false);
 				}
 			}
 		} catch(IOException e) {
-			assertTrue(false);
+			assertTrue("unexpected exception: "+e, false);
 		}
 	}
 
