@@ -458,6 +458,8 @@ public class IntervalSet {
         Assert.that(interval.high==99,"getNeededInterval broken");
         iSet.clear();
         iSet.add(new Interval(0,5));
+        iter = iSet.getNeededIntervals(6);
+        Assert.that(!iter.hasNext());
         iSet.add(new Interval(6,10));
         iter = iSet.getNeededIntervals(20);
         interval = (Interval)iter.next();
