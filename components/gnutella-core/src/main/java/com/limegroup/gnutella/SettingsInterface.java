@@ -37,7 +37,7 @@ public interface SettingsInterface {
 
 	public static final boolean DEFAULT_ALLOW_BROWSER  = false;
     /** Default setting for the time to live */
-    public static final byte    DEFAULT_TTL            = (byte)5;
+    public static final byte    DEFAULT_TTL            = (byte)7;
     /** Default setting for the soft maximum time to live */
     public static final byte    DEFAULT_SOFT_MAX_TTL   = (byte)10;
     /** Default setting for the hard maximum time to live */
