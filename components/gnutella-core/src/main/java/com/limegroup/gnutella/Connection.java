@@ -559,7 +559,7 @@ public class Connection implements IpPort {
 
             //Terminate abnormally if we read something other than 200 or 401.
             HandshakeResponse theirResponse = 
-                HandshakeResponse.createResponse(
+                HandshakeResponse.createRemoteResponse(
                     connectLine.substring(GNUTELLA_06.length()).trim(), 
                     HEADERS_READ);
             Assert.that(theirResponse != null, "null theirResponse");
@@ -741,7 +741,7 @@ public class Connection implements IpPort {
                 
 
             HandshakeResponse theirResponse = 
-                HandshakeResponse.createResponse(
+                HandshakeResponse.createRemoteResponse(
                     connectLine.substring(GNUTELLA_06.length()).trim(),
                     HEADERS_READ);
 
