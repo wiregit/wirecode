@@ -443,16 +443,10 @@ public class SettingsManager implements SettingsInterface
 	    throw new IllegalArgumentException();
 	else
 	    {
-		//try{
-		//Backend.instance().setPort(port);
 		port_ = port;
 		String s = Integer.toString(port_);
 		props_.setProperty(SettingsInterface.PORT, s);
 		writeProperties();		    
-		//}
-		//catch(IOException ioe) {		    
-		    //throw new IOException();
-		//}
 	    }
     }
 
@@ -543,26 +537,27 @@ public class SettingsManager implements SettingsInterface
 
     /** set the directories to search */
     public void setDirectories(String dir)
-    {
-	
-	if(false)
+    {	
+	if(dir == null)
 	    throw new IllegalArgumentException();
 	else
 	    {
+		FileManager.getFileManager().addDirectories(dir);
 		directories_ = dir;
 		props_.setProperty(SettingsInterface.DIRECTORIES, dir);
 		writeProperties();
 	    }
     }
-
+    
     /** set the extensions to search for */
     public void setExtensions(String ext)
     {
-	if(false)
+	if(ext == null)
 	    throw new IllegalArgumentException();
 	else
 	    {
-		extensions_ = ext;
+		FileManager.getFileManager().setExtensions(ext);
+		extensions_ = ext;			    
 		props_.setProperty(SettingsInterface.EXTENSIONS, ext);
 		writeProperties();
 	    }
