@@ -60,4 +60,12 @@ public interface MessageWriter {
      * Closes this writer -- called when the socket is closed.
      */
     void close();
+
+    /**
+     * Sets whether or not this writer is registered with any relevant write
+     * notification classes, such as <tt>NIODispatcher</tt>.
+     * 
+     * @param b registration status
+     */
+    void setRegistered(boolean b);
 }
