@@ -1,7 +1,7 @@
 <project name="Gnutella" default="build" basedir="." >
 
   <!-- set global properties for this basedir -->
-  <property name="builddir"    value="build" />
+  <property name="builddir"    value="build"/>
   <property name="messages"    value="com/limegroup/gnutella/messages" /> 
   <property name="util"        value="com/limegroup/gnutella/util" /> 
   <property name="lib"         value="../gui/lib/"/>
@@ -28,20 +28,6 @@
   <property name="DEBUG" value="yes" />
   <property name="OPTIMIZE" value="no" />
   <property name="DEPRECATION" value="yes" />
-  
-  <!-- package names -->
-  <property name="GNUTELLA" value="com.limegroup.gnutella" />
-  <property name="BOOTSTRAP" value="${GNUTELLA}.bootstrap" />
-  <property name="DOWNLOADER" value="${GNUTELLA}.downloader" />
-  <property name="FILTERS" value="${GNUTELLA}.filters" />
-  <property name="GUESS" value="${GNUTELLA}.guess" />
-  <property name="HTTP" value="${GNUTELLA}.http" />
-  <property name="MESSAGES" value="${GNUTELLA}.messages" />
-  <property name="MP3" value="${GNUTELLA}.mp3" />
-  <property name="ROUTING" value="${GNUTELLA}.routing" />
-  <property name="UPLOADER" value="${GNUTELLA}.uploader" />
-  <property name="UTIL" value="${GNUTELLA}.util" />
-  <property name="XML" value="${GNUTELLA}.xml" />
 
   <!-- default classpath for javac.  it is set as the user's CLASSPATH
        environment with the jar files necessary for compilation appended. -->
@@ -69,7 +55,7 @@
 
   <!-- CLEAN -->
   <target name="clean">
-    <delete dir="${builddir}"/>
+	<delete dir="${builddir}"/>
     <ant target="clean reports"/>
   </target>
   
@@ -89,328 +75,71 @@
  <target name="build" depends="prepare">
    <javac debug="on" optimize="off" deprecation="off"
 	      srcdir="${coredir}:${guidir}:${basedir}"
-		  destdir="${builddir}"
+	      destdir="${builddir}"
 		  excludes="${tests}**, ${settings}, **.gif,**.class,**.bat,**.sh,**.jar, **.xml">
 
      <classpath refid="default.classpath" />
    </javac>
  </target>
  
- <!-- Tests all tests in the gnutella package -->
- <target name="gnutella" depends="prepare, build">
-    <junit printsummary="withOutAndErr" 
-	       haltonfailure="no"
-	       showoutput="true"
-		   fork="on"
-    >
-	  <formatter type="xml" />
-	  
-	  <classpath refid="default.classpath" />
-
-	  <test name="${GNUTELLA}.AcceptorTest"
-	        todir="${reports}" />
-	  <test name="${GNUTELLA}.AlternateLocationTest"
-	        todir="${reports}" />
-	  <test name="${GNUTELLA}.AlternateLocationCollectionTest"
-	        todir="${reports}" />
-	  <test name="${GNUTELLA}.ConnectionManagerTest"
-	        todir="${reports}" />
-	  <test name="${GNUTELLA}.EndpointTest"
-	        todir="${reports}" />
-	  <test name="${GNUTELLA}.ExtendedEndpointTest"
-	        todir="${reports}" />
-	  <test name="${GNUTELLA}.FileDescTest"
-	        todir="${reports}" />
-	  <test name="${GNUTELLA}.FileManagerTest"
-	        todir="${reports}" />
-	  <test name="${GNUTELLA}.GUIDTest"
-	        todir="${reports}" />	        
-	  <test name="${GNUTELLA}.HostCatcherTest" 
-	        todir="${reports}" />
-	  <test name="${GNUTELLA}.LeafRoutingTest" 
-	        todir="${reports}" />
-	  <test name="${GNUTELLA}.ManagedConnectionBufferTest" 
-	        todir="${reports}" />
-      <test name="${GNUTELLA}.ManagedConnectionTest" 
-	        todir="${reports}" />
-	  <test name="${GNUTELLA}.QueryUnicasterTest" 
-	        todir="${reports}" />
-	  <test name="${GNUTELLA}.RemoteFileDescTest" 
-	        todir="${reports}" />
-	  <test name="${GNUTELLA}.ResponseTest" 
-	        todir="${reports}" />
-	  <test name="${GNUTELLA}.StatisticsTest" 
-	        todir="${reports}" />
- <!-- <test name="${GNUTELLA}.UDPServiceTest" 
-	        todir="${reports}" /> -->
-	  <test name="${GNUTELLA}.UltrapeerRoutingTest" 
-	        todir="${reports}" />
-	  <test name="${GNUTELLA}.UploaderTest" 
-	        todir="${reports}" />
-	  <test name="${GNUTELLA}.UrnCacheTest" 
-	        todir="${reports}" />
-	  <test name="${GNUTELLA}.UrnHttpRequestTest" 
-	        todir="${reports}" />
-	  <test name="${GNUTELLA}.UrnTest" 
-	        todir="${reports}" />
-
-	</junit>
-	
+ <!-- RUNS ALL TESTS. -->
+ <!-- Output goes to both XML file and stdout. -->
+ <!-- To run, type 'ant "test all"' (without the single quotes). -->
+ <!-- Formats the XML output to html. -->
+ <target name="test all">
+    <antcall target="batchunit">
+        <param name="unit" value="**/*Test.class"/>
+    </antcall>
+    <antcall target="html"/>
  </target>
  
-  <!-- Tests all tests in the bootstrap package -->
- <target name="bootstrap" depends="prepare, build">
-    <junit printsummary="withOutAndErr" 
-	       haltonfailure="no"
-	       showoutput="true"
-		   fork="on"
-    >
-	 <!-- <formatter type="plain" useFile="false"/> -->
-	  <formatter type="xml" />
-	  
-	  <classpath refid="default.classpath" />
-
-	  <test name="${BOOTSTRAP}.BootstrapServerManagerTest"
-	        todir="${reports}" />
-	  <test name="${BOOTSTRAP}.BootstrapServerTest"
-	        todir="${reports}" />
-	  <test name="${BOOTSTRAP}.HostCatcherFetchTest"
-	        todir="${reports}" />
-
-    </junit>
+  <!-- Runs a specific package - passed by 'package' -->
+  <!-- Output goes to both XML file and stdout. -->
+  <!-- To run, type 'ant -D"package=<mypackage>" "test package"' (without the single quotes). -->
+  <!-- Formats the XML output to html. -->
+ <target name="test package" if="package">
+    <antcall target="batchunit">
+        <param name="unit" value="com/limegroup/gnutella/${package}/*Test.class"/>
+    </antcall>
+    <antcall target="html"/>
  </target>
  
-  <!-- Tests all tests in the downloader package -->
- <target name="downloader" depends="prepare, build">
-    <junit printsummary="withOutAndErr" 
-	       haltonfailure="no"
-	       showoutput="true"
-		   fork="on"
-    >
-	 <!-- <formatter type="plain" useFile="false"/> -->
-	  <formatter type="xml" />
-	  
-	  <classpath refid="default.classpath" />
-
-	  <test name="${DOWNLOADER}.AutoDownloaderDetailsTest"
-	        todir="${reports}" />
-	  <test name="${DOWNLOADER}.DownloadTest"
-	        todir="${reports}" />
-	  <test name="${DOWNLOADER}.IncompleteFileManagerTest"
-	        todir="${reports}" />
-	  <test name="${DOWNLOADER}.IntervalTest"
-	        todir="${reports}" />
-	  <test name="${DOWNLOADER}.ManagedDownloaderTest"
-	        todir="${reports}" />
-      <test name="${DOWNLOADER}.MiniRemoteFileDescTest"
-	        todir="${reports}" />
-      <test name="${DOWNLOADER}.OldDownloadsTest"
-	        todir="${reports}" />	        
-      <test name="${DOWNLOADER}.RequeryDownloaderTest"
-	        todir="${reports}" />
-      <test name="${DOWNLOADER}.RequeryDownloadTest"
-	        todir="${reports}" />
-	  <test name="${DOWNLOADER}.ResumeDownloaderTest"
-	        todir="${reports}" />
-    
-    </junit>
+ <!-- Runs a specific class, passing the output to the shell & XML file-->
+ <!-- class name specified by class passed by 'class' -->
+ <!-- For example, to run UltrapeerRoutingTest, you would type: -->
+ <!-- ant -D"class=UltrapeerRoutingTest" test -->
+ <!-- To test, say, DownloadTest, you would type: -->
+ <!-- ant -D"class=downloader/DownloadTest" test -->
+ <target name="test" if="class">
+    <antcall target="batchunit">
+        <param name="unit" value="com/limegroup/gnutella/${class}.class"/>
+    </antcall>
+    <antcall target="html"/>
+ </target> 
  
+ <!-- To be used internally by 'test all', 'test package' & 'test' -->
+ <target name="batchunit" if="unit" depends="clean reports, prepare, build"> 
+        <junit printsummary="withOutAndErr"
+               haltonfailure="no"
+               failureproperty="testfailed"
+               showoutput="true"
+               fork="on"
+        >
+        
+            <classpath refid="default.classpath" />
+            
+            <formatter type="xml" />
+            <formatter type="plain" useFile="false"/>
+            
+            <batchtest fork="on"
+                       todir="${reports}" >
+                <fileset dir="${builddir}" 
+                         includes="${unit}" />
+            </batchtest>    
+        </junit>
  </target>
  
-  <!-- Tests all tests in the filters package -->
- <target name="filters" depends="prepare, build">
-    <junit printsummary="withOutAndErr" 
-	       haltonfailure="no"
-	       showoutput="true"
-		   fork="on"
-    >
-	 <!-- <formatter type="plain" useFile="false"/> -->
-	  <formatter type="xml" />
-	  
-	  <classpath refid="default.classpath" />
-
-	  <test name="${FILTERS}.GUIDFilterTest"
-	        todir="${reports}" />
-
-    </junit>
- </target>
- 
-   <!-- Tests all tests in the guess package -->
- <target name="guess" depends="prepare, build">
-    <junit printsummary="withOutAndErr" 
-	       haltonfailure="no"
-	       showoutput="true"
-		   fork="on"
-    >
-	 <!-- <formatter type="plain" useFile="false"/> -->
-	  <formatter type="xml" />
-	  
-	  <classpath refid="default.classpath" />
-
-	  <test name="${GUESS}.GUESSServerSideTest"
-	        todir="${reports}" />
-	  <test name="${GUESS}.QueryKeyTest"
-	        todir="${reports}" />
-
-    </junit>
- </target>
- 
-   <!-- Tests all tests in the http package -->
- <target name="http" depends="prepare, build">
-    <junit printsummary="withOutAndErr" 
-	       haltonfailure="no"
-	       showoutput="true"
-		   fork="on"
-    >
-	 <!-- <formatter type="plain" useFile="false"/> -->
-	  <formatter type="xml" />
-	  
-	  <classpath refid="default.classpath" />
-
-	  <test name="${HTTP}.HttpUtilsTest"
-	        todir="${reports}" />
-
-    </junit>
- </target>
- 
-    <!-- Tests all tests in the messages package -->
- <target name="messages" depends="prepare, build">
-    <junit printsummary="withOutAndErr" 
-	       haltonfailure="no"
-	       showoutput="true"
-		   fork="on"
-    >
-	 <!-- <formatter type="plain" useFile="false"/> -->
-	  <formatter type="xml" />
-	  
-	  <classpath refid="default.classpath" />
-
-	  <test name="${MESSAGES}.GGEPTest"
-	        todir="${reports}" />
-	  <test name="${MESSAGES}.MessageTest"
-	        todir="${reports}" />
-	  <test name="${MESSAGES}.PingReplyTest"
-	        todir="${reports}" />
-	  <test name="${MESSAGES}.PingRequestTest"
-	        todir="${reports}" />
-	  <test name="${MESSAGES}.PushRequestTest"
-	        todir="${reports}" />
-	  <test name="${MESSAGES}.QueryReplyTest"
-	        todir="${reports}" />
-	  <test name="${MESSAGES}.QueryRequestTest"
-	        todir="${reports}" />
-
-    </junit>
- </target>
- 
-    <!-- Tests all tests in the mp3 package -->
- <target name="mp3" depends="prepare, build">
-    <junit printsummary="withOutAndErr" 
-	       haltonfailure="no"
-	       showoutput="true"
-		   fork="on"
-    >
-	 <!-- <formatter type="plain" useFile="false"/> -->
-	  <formatter type="xml" />
-	  
-	  <classpath refid="default.classpath" />
-
-	  <test name="${MP3}.MP3Test"
-	        todir="${reports}" />
-
-    </junit>
- </target>
- 
-    <!-- Tests all tests in the routing package -->
- <target name="routing" depends="prepare, build">
-    <junit printsummary="withOutAndErr" 
-	       haltonfailure="no"
-	       showoutput="true"
-		   fork="on"
-    >
-	 <!-- <formatter type="plain" useFile="false"/> -->
-	  <formatter type="xml" />
-	  
-	  <classpath refid="default.classpath" />
-
-	  <test name="${ROUTING}.QueryRouteTableTest"
-	        todir="${reports}" />
-
-    </junit>
- </target>
- 
- 
-    <!-- Tests all tests in the uploader package -->
- <target name="uploader" depends="prepare, build">
-    <junit printsummary="withOutAndErr" 
-	       haltonfailure="no"
-	       showoutput="true"
-		   fork="on"
-    >
-	 <!-- <formatter type="plain" useFile="false"/> -->
-	  <formatter type="xml" />
-	  
-	  <classpath refid="default.classpath" />
-
-	  <test name="${UPLOADER}.UploadTest"
-	        todir="${reports}" />
-
-    </junit>
- </target>
- 
-    <!-- Tests all tests in the util package -->
- <target name="util" depends="prepare, build">
-    <junit printsummary="withOutAndErr" 
-	       haltonfailure="no"
-	       showoutput="true"
-		   fork="on"
-    >
-	 <!-- <formatter type="plain" useFile="false"/> -->
-	  <formatter type="xml" />
-	  
-	  <classpath refid="default.classpath" />
-
-	  <test name="${UTIL}.BandwidthThrottleTest"
-	        todir="${reports}" />
-	  <test name="${UTIL}.BufferTest"
-	        todir="${reports}" />
-	  <test name="${UTIL}.COBSUtilTest"
-	        todir="${reports}" />
-	  <test name="${UTIL}.FixedsizePriorityQueueTest"
-	        todir="${reports}" />
-	  <test name="${UTIL}.IOUtilsTest"
-	        todir="${reports}" />
-	  <test name="${UTIL}.Random12Test"
-	        todir="${reports}" />
-	  <test name="${UTIL}.StringUtilsTest"
-	        todir="${reports}" />
-	  <test name="${UTIL}.UtilitiesTest"
-	        todir="${reports}" />
-
-    </junit>
- </target>
- 
-     <!-- Tests all tests in the xml package -->
- <target name="xml" depends="prepare, build">
-    <junit printsummary="withOutAndErr" 
-	       haltonfailure="no"
-	       showoutput="true"
-		   fork="on"
-    >
-	  <formatter type="xml" />
-	  
-	  <classpath refid="default.classpath" />
-
-	  <test name="${XML}.CollectionTest"
-	        todir="${reports}" />
-	  <test name="${XML}.XMLDocSerializerTest"
-	        todir="${reports}" />
-
-    </junit>
- </target>
- 
- 
- <!-- Converts the XML output to pretty HTML reports -->
+  <!-- Converts the XML output to pretty HTML reports -->
  <target name="html">
 	<junitreport todir="${reports}">
 	    <fileset dir="${reports}">
@@ -418,34 +147,6 @@
 	    </fileset>	    
 	    <report format="frames" todir="${reports}/html"/>
 	</junitreport>
- </target>
- 
-  <!-- Runs ALL TESTS -->
- <target name="test all" depends="clean reports, prepare, build"> 
-
-    <parallel>
-        <antcall target="run all servers"/>
-        
-        <sequential>
-            <sleep seconds="20"/>
-            <antcall target="gnutella">
-              <param name="serversRunning" value="true"/>
-            </antcall>
-            <antcall target="bootstrap"/> 
-            <antcall target="downloader"/>
-            <antcall target="filters"/>
-            <antcall target="guess"/> 
-            <antcall target="http"/>
-            <antcall target="messages"/>
-            <antcall target="mp3"/>
-            <antcall target="routing"/>
-            <antcall target="uploader"/>
-            <antcall target="util"/>
-            <antcall target="xml"/>
-        </sequential>
-    </parallel>
-        
-    <antcall target="html"/>    
  </target>
  
  <!-- Runs all backend LimeWire servers to test against on ports starting -->
@@ -462,55 +163,6 @@
       </sequential>
     </parallel> 
  </target>
- 
- <!-- Runs a specific package - passed by 'class' -->
- <target name="test package" if="package" depends="prepare, build">
-    <antcall target="${package}"/>
-    <antcall target="html"/>
- </target>
- 
- <!-- Runs a specific class - passed by 'class' -->
- <target name="test class" if="class" depends="prepare, build">
-    <antcall target="test class internal">
-        <param name="class" value="${class}"/>
-    </antcall>
-    <antcall target="html"/>	
-    
-  </target>
-
-  
- <!-- Runs a specific class without building the HTML - passed by 'class' -->
- <target name="test class internal" if="class" depends="prepare, build">
-    <junit printsummary="withOutAndErr" 
-	       haltonfailure="no"
-	       showoutput="true"
-		   fork="on"
-    >
-	  <classpath refid="default.classpath"/>
-      <formatter type="xml" />
-	  <test name="com.limegroup.gnutella.${class}"
-	    todir="${reports}" />
-    
-	</junit>
-  </target>  
-
- <!-- Runs a specific class, passing the output to the shell -->
- <!-- class name specified by class passed by 'class' -->
- <!-- For example, to run UltrapeerRoutingTest, you would type: -->
- <!-- ant -D"class=UltrapeerRoutingTest" test -->
- <!-- To test, say, DownloadTest, you would type: -->
- <!-- ant -D"class=downloader.DownloadTest" test -->
- <target name="test" if="class" depends="prepare, build">
-    <junit printsummary="withOutAndErr" 
-	       haltonfailure="yes"
-	       showoutput="true"
-		   fork="on"
-    >
-	  <classpath refid="default.classpath"/>
-      <formatter type="plain" useFile="false"/>
-	  <test name="com.limegroup.gnutella.${class}"/>        
-	</junit>
-  </target>  
 
  <!-- Runs a specific class test while also running a LimeWire -->
  <!-- server on port 6000 that is a standardized Ultrapeer,-->
@@ -555,7 +207,6 @@
       </sequential>
     </parallel>
   </target>  
-
   
   <!-- runs a backend server on 6000 for testing -->
   <target name="run server">
