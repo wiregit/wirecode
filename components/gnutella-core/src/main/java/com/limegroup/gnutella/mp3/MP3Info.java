@@ -100,6 +100,16 @@ public final class MP3Info {
     }
 
 
+    /** @return True if this file has a VBR (bits per frame are not constant.
+     */
+    public boolean hasVariableBitRate() {
+        return _isVariableBitRate;
+    }
+
+
+    /** @return The Constant Bit Rate or Variable Bit Rate, depending on 
+     *  type of file.
+     */
     public int getBitRate() {
 
         int retInt = 0;
@@ -158,10 +168,10 @@ public final class MP3Info {
     }
 
 
-    /** This method is not useful, so it hasn't been made public.  We still need
-     *  to figure out this whole variable bit rate mumbo jumbo.
+
+    /** @return The Frame Size of this file.
      */
-    private int getNumberOfFrames() {
+    public int getNumberOfFrames() {
 
         if (!_isVariableBitRate) {
 
@@ -205,14 +215,20 @@ public final class MP3Info {
         
 
     /*
-       public static void main(String argv[]) throws Exception{
-       for (int i = 0; i < argv.length; i++) {
-       MP3Info mp3Info = new MP3Info(argv[i]);
-       System.out.println("Bitrate for file " +
-       argv[i] + " is " + mp3Info.getBitRate());
-       System.out.println("-------------------------------------");
-       }
-       }
+      public static void main(String argv[]) throws Exception{
+      for (int i = 0; i < argv.length; i++) {
+      MP3Info mp3Info = new MP3Info(argv[i]);
+      System.out.println("File: " + argv[i]);
+      System.out.print("Bitrate for file is " + mp3Info.getBitRate());
+      String vbrTag = "";
+      if (mp3Info.hasVariableBitRate())
+      vbrTag = " (VBR) ";
+      System.out.println(vbrTag);
+      System.out.println("Frame Size for file is " + 
+      mp3Info.getNumberOfFrames());
+      System.out.println("-------------------------------------");
+      }
+      }
     */
 
         
@@ -445,7 +461,17 @@ public final class MP3Info {
             // header or not
             if ((new String(inputHeader, 0, 4)).equals("Xing")) {                
                 _frames = -1;
-                retBool = false;                
+                long a, b, c, d, temp;
+                temp = ByteOrder.ubyte2int(inputHeader[11]);
+                a = temp;
+                temp = ByteOrder.ubyte2int(inputHeader[10]);
+                b = temp << 8;
+                temp = ByteOrder.ubyte2int(inputHeader[9]);
+                c = temp << 16;
+                temp = ByteOrder.ubyte2int(inputHeader[8]);
+                d = temp << 24;
+                _frames = a | b | c | d;
+                retBool = true;                
             }
             else {
     
@@ -504,7 +530,7 @@ public final class MP3Info {
 
                     // if it gets this far, everything went according
                     // to plans, so we should return true!
-                    retBool = true;
+                    retBool = false;
                 } 
                 else {
                     
@@ -518,7 +544,7 @@ public final class MP3Info {
                     // case the bitrate wouldn't be unbelievable
                     // so that's why I changed my mind and let it
                     // return true instead
-                    retBool = true;
+                    retBool = false;
                 }
             }
 
