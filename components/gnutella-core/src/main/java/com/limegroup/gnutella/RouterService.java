@@ -42,29 +42,11 @@ public class RouterService
         this.catcher = new HostCatcher(callback);
 
         // Now, link all the pieces together, starting the various threads.
-        this.catcher.initialize(acceptor, manager);
+        this.catcher.initialize(acceptor, manager,
+                                SettingsManager.instance().getHostList());
         this.router.initialize(acceptor, manager, catcher);
         this.manager.initialize(router, catcher);
         this.acceptor.initialize(manager, router);
-
-        //Now if quick connecting, try hosts.  Otherwise, populate the
-        //HostCatcher with the list from the SettingsManager
-        if (SettingsManager.instance().getUseQuickConnect()) {
-            Thread t2=new Thread() {
-                public void run() {
-                    quickConnect();
-                }
-            };
-            t2.setDaemon(true);
-            t2.start();
-        } else {
-            try {
-                this.catcher.read(SettingsManager.instance().getHostList());
-            } catch (FileNotFoundException e) {
-                callback.error(ActivityCallback.ERROR_10);
-            } catch (IOException e) {
-            }
-        }
     }
 
     /**
@@ -130,54 +112,6 @@ public class RouterService
         }
 
         manager.createConnectionAsynchronously(hostname, portnum);
-    }
-
-    /**
-     * Connects to hosts using the quick connect list.
-     * Blocks until connected.
-     */
-    public void quickConnect() {
-        SettingsManager settings=SettingsManager.instance();
-
-        // Ensure the keep alive is at least 1.
-        // Note:  Keep this in sync with connect code in StatusLine
-        if (settings.getKeepAlive()<1)
-            settings.setKeepAlive(SettingsInterface.DEFAULT_KEEP_ALIVE);
-        setKeepAlive(settings.getKeepAlive());
-
-        //Clear host catcher.  Note that if we already have outgoing
-        //connections the host catcher will fill up after clearing it.
-        //This means we won't really be trying those hosts.
-        clearHostCatcher();
-
-        //Try the quick connect hosts one by one.
-        String[] hosts=SettingsManager.instance().getQuickConnectHosts();
-        for (int i=0; i<hosts.length; i++) {
-            //Extract hostname+port
-            Endpoint e;
-            try {
-                e=new Endpoint(hosts[i]);
-            } catch (IllegalArgumentException exc) {
-                continue;
-            }
-
-            //Connect...or try to.
-            try {
-                connectToHostBlocking(e.getHostname(), e.getPort());
-            } catch (IOException exc) {
-                continue;
-            }
-
-            //Wait some time.  If we still need more, try others.
-            synchronized(this) {
-                try {
-                    wait(4000);
-                } catch (InterruptedException exc) { }
-            }
-            if (catcher.getNumHosts()>=settings.getKeepAlive()) {
-                break;
-            }
-        }
     }
 
     /**
