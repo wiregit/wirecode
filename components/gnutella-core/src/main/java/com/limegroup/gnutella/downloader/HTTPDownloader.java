@@ -11,7 +11,7 @@ package com.limegroup.gnutella;
 import java.io.*;
 import java.net.*;
 
-public class HTTPDownloader {
+public class HTTPDownloader implements Runnable {
 
     private InputStream _istream;
     private BufferedReader _in;
@@ -25,7 +25,7 @@ public class HTTPDownloader {
 
     /* The server side put */
     public HTTPDownloader(Socket s, String file, ConnectionManager m) {
-	
+			  	
 	_filename = file;
 	_amountRead = 0;
 	_sizeOfFile = -1;

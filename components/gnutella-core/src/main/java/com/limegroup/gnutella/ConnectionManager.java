@@ -301,7 +301,7 @@ public class ConnectionManager implements Runnable {
 			
 			System.out.println("handling an http...");
 
-			HTTPMgr mgr = new HTTPMgr(client, this);
+			HTTPManager mgr = new HTTPManager(client, this);
 			
 		    }
 		    else {

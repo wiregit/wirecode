@@ -11,7 +11,7 @@ package com.limegroup.gnutella;
 import java.io.*;
 import java.net.*;
 
-public class HTTPUploader {
+public class HTTPUploader implements Runnable {
 
     private OutputStream _ostream;
     private BufferedWriter _out;
@@ -112,7 +112,7 @@ public class HTTPUploader {
 	    return;
 	}
 	catch (IOException e) {
-	    _callback.error("can't open connection");
+	    _callback.error("can't opeInputStreamReader n connection");
 	    return;
 	}
 	try {
