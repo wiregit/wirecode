@@ -40,7 +40,7 @@ public final class QueryUnicaster {
      *  GUID -> QueryBundle where GUID == QueryBundle._qr.getGUID()
      *  Not a Map because I want to enforce synchronization.
      */
-    private Hashtable _queries;
+    private Map _queries;
 
     /** The unicast enabled hosts I should contact for queries.  Add to the
      *  front, remove from the end.  Therefore, the OLDEST entries are at the
@@ -103,6 +103,19 @@ public final class QueryUnicaster {
         return retList;
     }
 
+	/**
+	 * Returns a <tt>GUESSEndpoint</tt> from the current cache of 
+	 * GUESS endpoints.
+	 *
+	 * @return a <tt>GUESSEndpoint</tt> from the list of GUESS hosts
+	 *  to query, or <tt>null</tt> if there are no available hosts
+	 *  to return
+	 */
+	public GUESSEndpoint getUnicastEndpoint() {
+		if(_queryHosts.isEmpty()) return null;
+		return (GUESSEndpoint)_queryHosts.getFirst();
+	}
+
 
     private QueryUnicaster() {
         // construct DSes...
@@ -132,10 +145,9 @@ public final class QueryUnicaster {
                 UDPService udpService = UDPService.instance();
 
                 synchronized (_queries) {
-                    Iterator iter = _queries.entrySet().iterator();
+                    Iterator iter = _queries.values().iterator();
                     while (iter.hasNext()) {
-                        QueryBundle currQB = 
-                        (QueryBundle) ((Map.Entry)iter.next()).getValue();
+                        QueryBundle currQB = (QueryBundle)iter.next();
                         if ((currQB._numResults > QueryBundle.MAX_RESULTS) ||
                             (currQB._hostsQueried.size() > 
                              QueryBundle.MAX_QUERIES)
