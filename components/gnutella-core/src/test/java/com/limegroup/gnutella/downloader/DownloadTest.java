@@ -857,7 +857,7 @@ public class DownloadTest extends com.limegroup.gnutella.util.BaseTestCase {
 
         // the rate must be absurdly slow for the incomplete file.length()
         // check in HTTPDownloader to be updated.
-        final int RATE=50;
+        final int RATE=25;
         final int STOP_AFTER = TestFile.length()/3;
         final int FUDGE_FACTOR=RATE*1024;  
         uploader1.setRate(RATE);
