@@ -115,12 +115,18 @@ public class MetaEnabledMessageRouter extends StandardMessageRouter {
                         (currResps.length > 1)) 
                         splitAndAddResponses(splitResps, currResps);
                     else {
-                        // create the new queryReply
                         try {
-                            debug("MetaEnabledMessageRouter.sendResponses(): " +
-                                  " currXML = " + currXML);
-                            byte[] xmlCompressed = 
-                            LimeXMLUtils.compress(currXML.getBytes());
+
+                            // create xml bytes if possible...
+                            byte[] xmlCompressed = null;
+                            if ((currXML != null) &&
+                                (!currXML.equals("")))
+                                xmlCompressed = 
+                                LimeXMLUtils.compress(currXML.getBytes());
+                            else
+                                xmlCompressed = new byte[0];
+
+                            // create the new queryReply
                             queryReply = new QueryReply(guid, ttl, 
                                                         port, ip,
                                                         speed, currResps, 
@@ -146,10 +152,18 @@ public class MetaEnabledMessageRouter extends StandardMessageRouter {
                 }
             }
             else {  // xml is small enough, no problem.....
-                // create the new queryReply
                 try {
-                    byte[] xmlCompressed = 
-                    LimeXMLUtils.compress(xmlCollectionString.getBytes());
+                    
+                    // get xml bytes if possible....
+                    byte[] xmlCompressed = null;
+                    if ((xmlCollectionString != null) &&
+                        (!xmlCollectionString.equals("")))
+                        xmlCompressed = 
+                        LimeXMLUtils.compress(xmlCollectionString.getBytes());
+                    else
+                        xmlCompressed = new byte[0];
+
+                    // create the new queryReply
                     queryReply = new QueryReply(guid, ttl, port, ip,
                                                 speed, res, 
                                                 clientGUID, 
