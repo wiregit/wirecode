@@ -155,6 +155,7 @@ public interface SettingsInterface
     public static final String DIRECTORIES    = "DIRECTORIES_TO_SEARCH_FOR_FILES";
     public static final String EXTENSIONS     = "EXTENSIONS_TO_SEARCH_FOR";
 
+
     public static final String HEADER = "Properties file for the LimeWire gnutella client.\nYou can modify any of the default properties here if\nyou wish, but if your modifications do not fit the\nrange of expected values for specific properties, those\nproperties will revert to their default values.\n\n";
 }
 

@@ -506,6 +506,7 @@ public class SettingsManager implements SettingsInterface
     /** set the directories to search */
     public void setDirectories(String dir)
     {
+	
 	if(false)
 	    throw new IllegalArgumentException();
 	else
