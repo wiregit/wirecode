@@ -109,8 +109,6 @@ public class UploadManager implements BandwidthTracker {
      *     @param router the message router to use for sending push requests
      *     @param acceptor used to get my IP address and port for pushes
      */
-
-
     public void initialize(ActivityCallback callback,
                            MessageRouter router,
                            Acceptor acceptor,
@@ -700,15 +698,15 @@ public class UploadManager implements BandwidthTracker {
 	private GETLine parseURNGet(final String GET_LINE) 
 		throws IOException {		
 
-		URN urn = URNFactory.createSHA1URNFromGetRequest(GET_LINE);
+		URN urn = URNFactory.createSHA1UrnFromGetRequest(GET_LINE);
 		if(urn == null) {
 			throw new IOException("NO ERROR CREATING URN");
 		}
-		FileDesc desc = _fileManager.getFileDescForURN(urn);
+		FileDesc desc = _fileManager.getFileDescForUrn(urn);
 		if(desc == null) {
 			throw new IOException("NO MATCHING FILEDESC FOR URN");
 		}		
-		int fileIndex = _fileManager.getFileIndexForURN(urn);
+		int fileIndex = _fileManager.getFileIndexForUrn(urn);
 		if(fileIndex == -1) {
 			throw new IOException("NO MATCHING FILE INDEX FOR URN");
 		}
