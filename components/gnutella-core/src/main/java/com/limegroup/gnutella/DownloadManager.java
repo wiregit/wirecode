@@ -536,6 +536,7 @@ public class DownloadManager implements BandwidthTracker {
      *     @requires "GIV " was just read from s
      */
     public void acceptDownload(Socket socket) {
+        Thread.currentThread().setName("PushDownloadThread");
         try {
             //1. Read GIV line BEFORE acquiring lock, since this may block.
             GIVLine line=parseGIV(socket);
@@ -614,6 +615,7 @@ public class DownloadManager implements BandwidthTracker {
         //is needed.  But we do both just to be safe.
         active.remove(downloader);
         waiting.remove(downloader);
+        querySentMDs.remove(downloader);
         notify();  
         callback.removeDownload(downloader);
         //Save this' state to disk for crash recovery.  Note that a downloader
@@ -624,7 +626,7 @@ public class DownloadManager implements BandwidthTracker {
         // Enable auto shutdown
         if(active.isEmpty() && waiting.isEmpty())
             callback.downloadsComplete();
-    }    
+    } 
     
     /** 
      * Attempts to send the given requery to provide the given downloader with 
@@ -645,7 +647,7 @@ public class DownloadManager implements BandwidthTracker {
         //NOTE: this algorithm provides global but not local fairness.  That is,
         //if two requeries x and y are competing for a slot, patterns like
         //xyxyxy or xyyxxy are allowed, though xxxxyx is not.
-        debug("DM.sendQuery(): entered.");
+        debug("DM.sendQuery():" + query.getQuery());
         Assert.that(waiting.contains(requerier),
                     "Unknown or non-waiting MD trying to send requery.");
 
@@ -658,17 +660,19 @@ public class DownloadManager implements BandwidthTracker {
         }
 
         //Has everyone had a chance to send a query?  If so, clear the slate.
-        if (querySentMDs.size() >= waiting.size())
+        if (querySentMDs.size() >= waiting.size()) {
+            debug("DM.sendQuery(): reseting query sent queue");
             querySentMDs.clear();
+        }
 
         //If downloader has already sent a query, give someone else a turn.
         if (querySentMDs.contains(requerier)) {
             // nope, sorry, must lets others go first...
-            debug("DM.sendQuery(): sorry, wait your turn...");
+            debug("DM.sendQuery(): out of turn:" + query.getQuery());
             return false;
         }
         
-        debug("DM.sendQuery(): requery allowed!!");  
+        debug("DM.sendQuery(): requery allowed:" + query.getQuery());  
         querySentMDs.add(requerier);                  
         lastRequeryTime = System.currentTimeMillis();
         router.broadcastQueryRequest(query);
