@@ -105,18 +105,12 @@ public class ConnectionManager {
      * INVARIANT: _initializedConnections is a subset of _connections
      * INVARIANT: _initializedClientConnections is a subset of _connections
      *
-     * In addition, we maintain a set (_endpoints) for quickly telling what
-     * we're connected to.  This is marginally useful for deciding whether
-     * to store a pong in the host catcher, though not essential.
-     *
-     * INVARIANT: _endpoints contains exactly those endpoints that could be
-     * made from the elements of _connections.
-     *
-     * LOCKING: CONNECTIONS AND ENDPOINTS MUST NOT BE MUTATED.  Instead they
-     *   should be replaced as necessary with new copies.  Before replacing 
-     *   the structures, obtain this' monitor.  This avoids lock overhead
-     *   when message broadcasting, though it makes adding/removing connections
-     *   much slower.
+     * LOCKING: _connections, _initializedConnections and
+     *   _initializedClientConnections MUST NOT BE MUTATED.  Instead they should
+     *   be replaced as necessary with new copies.  Before replacing the
+     *   structures, obtain this' monitor.  This avoids lock overhead when
+     *   message broadcasting, though it makes adding/removing connections
+     *   much slower.  
      */
     private volatile List /* of ManagedConnection */ 
         _connections = new ArrayList();
@@ -124,7 +118,6 @@ public class ConnectionManager {
         _initializedConnections = new ArrayList();
     private volatile List /* of ManagedConnection */ 
         _initializedClientConnections = new ArrayList();
-    private volatile Set /* of Endpoint */ _endpoints = new HashSet();
 
     /**
      * For authenticating users
@@ -372,10 +365,34 @@ public class ConnectionManager {
     }
     
     /**
-     * @return true if there is a connection to the given host.
+     * Returns whether this (probably) has a connection to the given host.  This
+     * method is currently implemented by iterating through all connections and
+     * comparing addresses but not ports.  (Incoming connections use ephemeral
+     * ports.)  As a result, this test may conservatively return true even if
+     * this is not connected to <tt>host</tt>.  Likewise, it may it mistakenly
+     * return false if <tt>host</tt> is a multihomed system.  In the future,
+     * additional connection headers may make the test more precise.
+     *
+     * @return true if this is probably connected to <tt>host</tt> 
      */
-    public boolean isConnected(Endpoint host) {
-        return _endpoints.contains(host);
+    public boolean isConnected(Endpoint host) {        
+        String hostName=host.getHostname();
+        //A clone of the list of all connections, both initialized and
+        //uninitialized, leaves and unrouted.  If Java could be prevented from
+        //making certain code transformations, it would be safe to replace the
+        //call to "getConnections()" with "_connections", thus avoiding a clone.
+        //(Remember that _connections is never mutated.)
+        List connections=getConnections();
+        for (Iterator iter=connections.iterator(); iter.hasNext(); ) {
+            ManagedConnection mc=(ManagedConnection)iter.next();
+            try {
+                if (mc.getInetAddress().getHostAddress().equals(hostName))
+                    return true;
+            } catch (IllegalStateException e) {
+                //Connection still initializing...ignore.
+            }
+        }
+        return false;
     }
 
     /**
@@ -748,12 +765,6 @@ public class ConnectionManager {
                 newConnections.add(c);
                 _initializedClientConnections=newConnections;
             }
-
-            //REPLACE _endpoints with the set _endpoints+{c}
-            Set newEndpoints=new HashSet(_endpoints);
-            newEndpoints.add(new Endpoint(c.getInetAddress().getHostAddress(),
-                                          c.getPort()));
-            _endpoints=newEndpoints;
         }
     }
 
@@ -904,19 +915,7 @@ public class ConnectionManager {
                 newConnections.remove(c);
                 _initializedClientConnections=newConnections;
             }
-        }
-        
-        //if connection was removed from any of the initialized lists of
-        //connections, remove from the set of connected endpoints too.
-        if(removed)
-        {
-            //REPLACE _endpoints with the set _endpoints+{c}
-            Set newEndpoints=new HashSet();
-            newEndpoints.addAll(_endpoints);
-            newEndpoints.remove(new Endpoint(
-                c.getInetAddress().getHostAddress(), c.getPort()));
-            _endpoints=newEndpoints;           
-        }
+        }        
         
         // 1b) Remove from the all connections list and clean up the
         // stuff associated all connections

@@ -65,10 +65,10 @@ public class AcceptLimitTest {
         ActivityCallback callback=new ActivityCallbackStub();
         FileManager files=new FileManagerStub();
         TestMessageRouter router=new TestMessageRouter(callback, files);
-        RouterService rs=new RouterService(callback,
-                                           router,
-                                           files,
-                                           new DummyAuthenticator());
+        TestRouterService rs=new TestRouterService(callback,
+                                                   router,
+                                                   files,
+                                                   new DummyAuthenticator());
         rs.initialize();
         rs.clearHostCatcher();
         try {
@@ -195,15 +195,21 @@ public class AcceptLimitTest {
 
     ///////////////////////////////////////////////////////////////////////////
 
-    private static void testAcceptI(RouterService rs,
+    private static void testAcceptI(TestRouterService rs,
                                     TestMessageRouter router, 
                                     String host, int port) {
         System.out.println("\nTesting accept I:");
+        Assert.that(! rs.getConnectionManager().isConnected(
+                                      new Endpoint("127.0.0.1", 6346)));
         //Fill HostCatcher with bogus pongs.
         for (int i=0; i<100; i++) 
             router.addHost("1.1.1."+i, 6340, true);
 
-        Connection c=testLimit(host, port, LEAF, LEAF_CONNECTIONS, REJECT_503);        
+        Connection c=testLimit(host, port, LEAF, LEAF_CONNECTIONS, REJECT_503);    
+        Assert.that(rs.getConnectionManager().isConnected(
+                                      new Endpoint("127.0.0.1", 17)));
+        Assert.that(! rs.getConnectionManager().isConnected(
+                                      new Endpoint("27.0.0.1", 6346)));
         testPong(c, true);        
         testLimit(host, port, OLD_06, 
                   ConnectionManager.DESIRED_OLD_CONNECTIONS, 
@@ -215,7 +221,7 @@ public class AcceptLimitTest {
         testPong(c, false);
     }        
 
-    private static void testAcceptII(RouterService rs, 
+    private static void testAcceptII(TestRouterService rs, 
                                      TestMessageRouter router, 
                                      String host, int port) {
         System.out.println("\nTesting accept II:");
@@ -224,7 +230,11 @@ public class AcceptLimitTest {
             router.addHost("1.1.1."+i, 6340, true);
 
         //ignores guidance
+        Assert.that(! rs.getConnectionManager().isConnected(
+                                      new Endpoint("127.0.0.1", 17)));
         Connection c=testLimit(host, port, ULTRAPEER, KEEP_ALIVE, REJECT_SILENT); 
+        Assert.that(rs.getConnectionManager().isConnected(
+                                      new Endpoint("127.0.0.1", 17)));
         Assert.that(ConnectionHandshakeHeaders.isFalse(
             c.getProperty(ConnectionHandshakeHeaders.X_SUPERNODE_NEEDED)));
         testPong(c, true);
@@ -574,5 +584,26 @@ class TestMessageRouter extends MetaEnabledMessageRouter {
         //                             0l, 0l);                                     
         Endpoint e=new Endpoint(host, port);
         this._catcher.add(e, isUltrapeer);
+    }
+}
+
+/**
+ * Exposes a RouterService's ConnectionManager.
+ */
+class TestRouterService extends RouterService {
+    private ConnectionManager _connectionManager;
+
+    public TestRouterService(ActivityCallback callback, MessageRouter router,
+                             FileManager files, Authenticator auth) {
+        super(callback, router, files, auth);
+    }
+
+    protected ConnectionManager createConnectionManager() {
+        _connectionManager=super.createConnectionManager();
+        return _connectionManager;
+    }
+    
+    public ConnectionManager getConnectionManager() {
+        return _connectionManager;
     }
 }

@@ -760,34 +760,50 @@ public class Connection {
 
     /**
      * Returns the port of the foreign host this is connected to.
-     * @requires this is initialized.
+     * @exception IllegalStateException this is not initialized
      */
-    public int getPort() {
-        return _socket.getPort();
+    public int getPort() throws IllegalStateException {
+        try {
+            return _socket.getPort();
+        } catch (NullPointerException e) {
+            throw new IllegalStateException("Not initialized");
+        }
     }
 
     /**
      * Returns the port this is connected to locally.
-     * @requires this is initialized.
+     * @exception IllegalStateException this is not initialized
      */
-    public int getLocalPort() {
-        return _socket.getLocalPort();
+    public int getLocalPort() throws IllegalStateException {
+        try {
+            return _socket.getLocalPort();
+        } catch (NullPointerException e) {
+            throw new IllegalStateException("Not initialized");
+        }
     }
 
     /**
      * Returns the address of the foreign host this is connected to.
-     * @requires this is initialized.
+     * @exception IllegalStateException this is not initialized
      */
-    public InetAddress getInetAddress() {
-        return _socket.getInetAddress();
+    public InetAddress getInetAddress() throws IllegalStateException {
+        try {
+            return _socket.getInetAddress();
+        } catch (NullPointerException e) {
+            throw new IllegalStateException("Not initialized");
+        }
     }
 
     /**
      * Returns the local address of this.
-     * @requires this is initialized.
+     * @exception IllegalStateException this is not initialized
      */
-    public InetAddress getLocalAddress() {
-        return _socket.getLocalAddress();
+    public InetAddress getLocalAddress() throws IllegalStateException {
+        try {
+            return _socket.getLocalAddress();
+        } catch (NullPointerException e) {
+            throw new IllegalStateException("Not initialized");
+        }
     }
 
     /**

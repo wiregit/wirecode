@@ -285,11 +285,12 @@ public class HostCatcher {
      * @return true iff e was actually added
      */
     private boolean add(Endpoint e) {
-        //Skip if we're connected to it.
-        if (manager.isConnected(e))
-            return false;
+        //We used to check that we're not connected to e, but now we do that in
+        //ConnectionFetcher after a call to getAnEndpoint.  This is not a big
+        //deal, since the call to "set.contains(e)" below ensures no duplicates.
 
-        //Skip if this would connect us to our listening port.
+        //Skip if this would connect us to our listening port.  TODO: I think
+        //this check is too strict sometimes, which makes testing difficult.
         if (isMe(e.getHostname(), e.getPort()))
             return false;
 
