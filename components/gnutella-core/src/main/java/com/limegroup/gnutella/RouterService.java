@@ -18,6 +18,7 @@ import com.limegroup.gnutella.updates.*;
 import com.limegroup.gnutella.settings.*;
 import com.limegroup.gnutella.browser.*;
 import com.limegroup.gnutella.search.*;
+import com.limegroup.gnutella.tigertree.TigerTreeCache;
 
 
 /**
@@ -558,6 +559,7 @@ public class RouterService {
             //persist urn cache
             UrnCache.instance().persistCache();
             CreationTimeCache.instance().persistCache();
+            TigerTreeCache.instance().persistCache();
         } catch(Throwable t) {
             ErrorService.error(t);
         }

@@ -345,12 +345,10 @@ public class GUID implements  com.sun.java.util.collections.Comparable {
     public int compareTo(Object o) {
         if (this == o)
 			return 0;
-		else if (o == null)
-			return 1;
-		else if (!(o instanceof GUID))
-			return 1;
-		else 
+		else if (o instanceof GUID)
 			return compare(this.bytes(), ((GUID)o).bytes());
+        else
+            return 1;
     }
 
     /** Compares GUID's lexically. */
