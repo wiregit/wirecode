@@ -32,6 +32,7 @@ import com.limegroup.gnutella.settings.FilterSettings;
 import com.limegroup.gnutella.settings.SearchSettings;
 import com.limegroup.gnutella.settings.SettingsHandler;
 import com.limegroup.gnutella.settings.SharingSettings;
+import com.limegroup.gnutella.settings.SimppSettingsManager;
 import com.limegroup.gnutella.settings.UltrapeerSettings;
 
 public class BaseTestCase extends AssertComparisons implements ErrorCallback {
@@ -256,8 +257,9 @@ public class BaseTestCase extends AssertComparisons implements ErrorCallback {
     public void preSetUp() throws Exception {
         _testThread = Thread.currentThread();
         ErrorService.setErrorCallback(this);
-        setupSettings();
+        
         setupUniqueDirectories();
+        setupSettings();
         setupTestTimer();
         
         // The backend must also have its error callback reset
@@ -283,8 +285,8 @@ public class BaseTestCase extends AssertComparisons implements ErrorCallback {
         // then unload it.
         PrivilegedAccessor.setValue(SystemUtils.class, "isLoaded", Boolean.FALSE);
         
-        setupSettings();
         setupUniqueDirectories();
+        setupSettings();
     }
     
     /**
@@ -333,10 +335,13 @@ public class BaseTestCase extends AssertComparisons implements ErrorCallback {
      * Sets up settings to a pristine environment for this test.
      * Ensures that no settings are saved.
      */
-    public static void setupSettings() {
+    public static void setupSettings() throws Exception{
         SettingsHandler.setShouldSave(false);
         SettingsHandler.revertToDefault();
         ConnectionSettings.DISABLE_UPNP.setValue(true);
+        SharingSettings.setSaveDirectory(_savedDir);
+        _incompleteDir = SharingSettings.INCOMPLETE_DIRECTORY.getValue();
+        SharingSettings.setDirectories( new File[] { _sharedDir } );
     }
     
     /**
@@ -394,10 +399,6 @@ public class BaseTestCase extends AssertComparisons implements ErrorCallback {
         PrivilegedAccessor.setValue(CommonUtils.class,
                                     "SETTINGS_DIRECTORY",
                                     _settingsDir);
-
-        SharingSettings.setSaveDirectory(_savedDir);
-        _incompleteDir = SharingSettings.INCOMPLETE_DIRECTORY.getValue();
-        SharingSettings.setDirectories( new File[] { _sharedDir } );
 
         // Expand the xml.war file.
         File xmlWar = CommonUtils.getResourceFile("com/limegroup/gnutella/xml/xml.war");
