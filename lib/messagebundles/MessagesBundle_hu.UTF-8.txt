@@ -1895,7 +1895,8 @@ ERROR_THEME_OUT_OF_DATE_LATER=Később
 #? LICENSE_CC_DEED=
 #### LICENSE_CC_VERIFICATION=View Verification Page
 #? LICENSE_CC_VERIFICATION=
-
+#### LICENSE_CC=Creative Commons
+#? LICENSE_CC=
 
 ################################################################################
 # Keys for the titles of the options panes. The corresponding values represent
