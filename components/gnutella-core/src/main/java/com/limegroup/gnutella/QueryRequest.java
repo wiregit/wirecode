@@ -42,6 +42,11 @@ public class QueryRequest extends Message implements Serializable{
         out.write(payload);
     }
 
+    /** If getBytes() is called in the Strng that this method returns 
+     *  it creates an error on Japanese Macs. Therefore, if bytes from 
+     * the query are needed use the getQueryByteAt(int pseudoIndex) method
+     * below.
+     */
     public String getQuery() {
         //Use cached result if possible.  This is always safe since
         //strings are immutable.
@@ -61,9 +66,9 @@ public class QueryRequest extends Message implements Serializable{
         return query;
     }
     
-    /** This method has been added  to get number of bytes in the raw query 
-     *  the raw query is just the query part of the payload
-     *  the value this method returns is different than payload.length
+    /** Returns the  number of bytes in the raw query. The raw query is just 
+     *  the query part of the payload the value this method returns is 
+     *  different than payload.length
      * @author Sumeet Thadani
      */
     public int getQueryLength(){
@@ -74,11 +79,10 @@ public class QueryRequest extends Message implements Serializable{
             return payload.length-3;
     }
 
-    /**This method returns the byte at the specified index from the payload only
-     * It throws an ArrayIndexOutOfBoundsException if 
-     * the given index is either in
-     * within the first two bytes or goes into the null termination
-     * <p>It also assumes that the index 0 corresponds to the first byte of the 
+    /** Returns the byte at the specified index starting from the quiery only
+     * Throws an ArrayIndexOutOfBoundsException if the given index is either 
+     * within the first two bytes of the payload or goes into the null termination
+     * <p>When psedudoIndex = 0 it referes to the first byte of the 
      * query not of the whole payload
      * @author Sumeet Thadani
      */
