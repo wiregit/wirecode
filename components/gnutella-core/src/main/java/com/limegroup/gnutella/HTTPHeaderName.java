@@ -51,7 +51,7 @@ public class HTTPHeaderName {
 	 *  returns <tt>false</tt>
 	 */
 	public boolean matchesStartOfString(String str) {
-		return LOWER_CASE_NAME.startsWith(str.toLowerCase());
+		return str.toLowerCase().startsWith(LOWER_CASE_NAME);
 	}
 
 	/**
@@ -59,6 +59,16 @@ public class HTTPHeaderName {
 	 * as it should be written out to the network.
 	 */
 	public String httpStringValue() {
+		return NAME;
+	}
+
+	/**
+	 * Overrides Object.toString to give a more informative description of 
+	 * the header.
+	 *
+	 * @return the string description of this instance
+	 */
+	public String toString() {
 		return NAME;
 	}
 }
