@@ -223,6 +223,8 @@ public final class UDPService implements Runnable {
             try {
                 _socket.send(dg);
             } catch(IOException e) {
+                System.err.println("ip: "+ip);
+                System.err.println("port: "+port); 
                 e.printStackTrace();
             }
         }
