@@ -37,16 +37,16 @@ public class IPTest extends com.limegroup.gnutella.util.BaseTestCase {
         iplist.add ("192.168.0.1/255.255.255.0");
         iplist.add ("10.0.*.*");
 
-        assertTrue(iplist.contains ("0.0.0.0"));
-        assertTrue(iplist.contains ("255.255.255.255"));
-        assertTrue(iplist.contains ("255.255.255.0"));
-        assertTrue(!iplist.contains ("255.0.255.255"));
-        assertTrue(!iplist.contains ("192.168.1.2/255.255.255.0"));
-        assertTrue(iplist.contains ("192.168.0.2"));
-        assertTrue(iplist.contains ("192.168.0.1"));
-        assertTrue(!iplist.contains ("192.168.1.1"));
-        assertTrue(iplist.contains ("10.0.1.1"));
-        assertTrue(!iplist.contains ("10.1.0.1"));
+        assertTrue(iplist.contains (new IP("0.0.0.0")));
+        assertTrue(iplist.contains (new IP("255.255.255.255")));
+        assertTrue(iplist.contains (new IP("255.255.255.0")));
+        assertTrue(!iplist.contains (new IP("255.0.255.255")));
+        assertTrue(!iplist.contains (new IP("192.168.1.2/255.255.255.0")));
+        assertTrue(iplist.contains (new IP("192.168.0.2")));
+        assertTrue(iplist.contains (new IP("192.168.0.1")));
+        assertTrue(!iplist.contains (new IP("192.168.1.1")));
+        assertTrue(iplist.contains (new IP("10.0.1.1")));
+        assertTrue(!iplist.contains (new IP("10.1.0.1")));
     }
 
     public void testIPLegacy() {

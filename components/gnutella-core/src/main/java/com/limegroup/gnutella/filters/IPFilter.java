@@ -30,7 +30,13 @@ public final class IPFilter extends SpamFilter {
      * @return true iff host is a banned address
      */
     public boolean allow(String host) {
-        return goodHosts.contains(host) || !badHosts.contains(host);
+        IP ip;
+        try {
+            ip = new IP(host);
+        } catch (IllegalArgumentException e) {
+            return false;
+        }        
+        return goodHosts.contains(ip) || !badHosts.contains(ip);
     }
 
     /** 

@@ -38,13 +38,7 @@ class IPList {
      * @param String equal to an IP
      * @returns true if ip_address is contained somewhere in the list of IPs
      */
-    public boolean contains (String ip_str) {
-	IP ip;
-        try {
-            ip = new IP(ip_str);
-        } catch (IllegalArgumentException e) {
-            return false;
-        }
+    public boolean contains (IP ip) {
         for (Iterator iter=ips.iterator(); iter.hasNext(); ) {
             IP pattern=(IP)iter.next();
             if (pattern.contains(ip))

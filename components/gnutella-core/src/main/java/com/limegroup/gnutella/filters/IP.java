@@ -7,34 +7,41 @@ import com.limegroup.gnutella.Assert;
 /**
  * An IP address.  More precisely, a set of IP addresses specified by a regular
  * expression (e.g., "18.239.*.*") or a submask (e.g., "18.239.0.0/255.255.0.0".
- * Immutable, though the equals(..) and hashCode(..) methods have not been
- * overridden.  Used to implement IPFilter; the generic usefulness of this
+ * Immutable.  Used to implement IPFilter; the generic usefulness of this
  * class is questionable.
  *
- * @author Gregorio Roper 
+ * This class is heavily optimized, as IP objects are constructed for every
+ * PingReply, QueryReply, PushRequest, and internally or externally generated
+ * connection.
+ *
+ * @author Gregorio Roper
  */
 class IP {
+    private static final String MSG = "Could not parse: ";
+
     private long addr;
     private long mask;
 
     /**
      * Creates an IP object
-     * 
-     * @param ip_str a String of the format "0.0.0.0", "0.0.0.0/0.0.0.0", 
+     *
+     * @param ip_str a String of the format "0.0.0.0", "0.0.0.0/0.0.0.0",
      *               or "0.0.0.0/0" as an argument.
      */
-    IP (String ip_str) throws IllegalArgumentException {
-        StringTokenizer tokenizer = new StringTokenizer (ip_str, "/");
-        if ( tokenizer.countTokens() == 1) { //assume a simple IP "0.0.*.*"
-            this.addr = stringToLong(ip_str.replace('*', '0'));
+    IP (final String ip_str) throws IllegalArgumentException {
+        int slash = ip_str.indexOf("/");
+        if ( slash == -1) { //assume a simple IP "0.0.*.*"
+            this.addr = stringToLong(ip_str);
             this.mask = createNetmaskFromWildChars(ip_str);
-        } else if (tokenizer.countTokens() == 2) {
+        }
+        // ensure that it isn't a malformed address like
+        // 0.0.0.0/0/0
+        else if ( ip_str.lastIndexOf("/") == slash ) {
             // maybe an IP of the form "0.0.0.0/0.0.0.0" or "0.0.0.0/0"
-            this.addr = stringToLong(tokenizer.nextToken());
-            this.mask = parseNetmask(tokenizer.nextToken());
-        } else 
-            throw new IllegalArgumentException("Could not parse address: " + 
-                                               ip_str);
+            this.addr = stringToLong(ip_str.substring(0, slash));
+            this.mask = parseNetmask(ip_str.substring(slash+1));
+        } else
+            throw new IllegalArgumentException(MSG + ip_str);
     }
 
     /**
@@ -45,18 +52,17 @@ class IP {
      *          simplified bsd syntax.
      * @return long containing the subnetmask
      */
-    private static long parseNetmask (String mask) 
+    private static long parseNetmask (final String mask)
         throws IllegalArgumentException {
-        final String exceptionString = "Could not parse netmask: ";
-        StringTokenizer tokenizer = new StringTokenizer(mask, ".");
+
         // assume simple syntax, an integer <= 32
-        if (tokenizer.countTokens() == 1) {
+        if (mask.indexOf(".") == -1) {
             try {
                 // if the String contains the number k, we should return a
                 // mask of k ones followed by (32 - k) zeroes
                 short k = Short.parseShort(mask);
-                if (k > 32 || k < 0) 
-                    throw new IllegalArgumentException (exceptionString + mask);
+                if (k > 32 || k < 0)
+                    throw new IllegalArgumentException (MSG + mask);
                 else {
                     long netmask = 0;
                     for (int i = 0; i < k; i++) {
@@ -70,72 +76,108 @@ class IP {
                     return netmask;
                 }
             } catch (NumberFormatException e) {
-                throw new IllegalArgumentException (exceptionString + mask);
+                throw new IllegalArgumentException (MSG + mask);
             }
-        } else if (tokenizer.countTokens() == 4) {// assume format: "0.0.0.0"
+        } else
             return stringToLong(mask);
-        } else 
-            throw new IllegalArgumentException (exceptionString + mask);
-    }        
-    
+    }
+
     /**
-     * Convert String containing an ip_address or subnetmask to long 
+     * Convert String containing an ip_address or subnetmask to long
      * containing a bitmask.
-     * @param String of the format "0.0.0..." presenting ip_address or 
-     * subnetmask
+     * @param String of the format "0.0.0..." presenting ip_address or
+     * subnetmask.  A '*' will be converted to a '0'.
      * @return long containing a bit representation of the ip address
      */
-    private static long stringToLong (String ip_str) 
+    private static long stringToLong (final String ip_str)
         throws IllegalArgumentException {
-        StringTokenizer tokenizer = new StringTokenizer(ip_str, ".");
-        
+
         long ip = 0;
-        // convert String to a Long variable
-        for (int i = 0; i < 4; i++) {
-            try {
-                ip = ip << 8;
-                // if tokenizer.countTokens() < 4, simply add zeros
-                if (tokenizer.hasMoreTokens()) 
-            	    ip += Short.parseShort(tokenizer.nextToken());
-            } catch (NumberFormatException e) {
-                throw new IllegalArgumentException("Could not parse address or mask: "
-                                                   + ip_str);
+        int numOctets = 0;
+        int length = ip_str.length();
+
+        // loop over each octet
+        for(int i = 0; i < length; i++, numOctets++) {
+            short octet = 0;
+            // loop over each character in the octet
+            for(; i < length; i++) {
+                char c = ip_str.charAt(i);
+
+                // finished octet?
+                if ( c == '.' )
+                    break;
+
+                // convert wildcard.
+                if( c == '*' ) {
+                    c = '0';
+                } else if( c < '0' && c > '9' ) {
+                    throw new IllegalArgumentException(MSG + ip_str);
+                }
+
+                octet = (short)(octet * 10 + c - '0');
             }
+            ip = (ip << 8) + octet;
         }
-        return ip;
+
+        // if the address had less than 4 octets, push the ip over suitably..
+        for(; numOctets < 4; numOctets++)
+            ip <<= 8;
+
+        // ensure that the ip address had 4 octets.
+        if( numOctets != 4 )
+            throw new IllegalArgumentException(MSG + ip_str);
+
+         return ip;
     }
-    
+
     /**
      * Create new subnet mask from IP-address of the format 0.*.*.0
      * @param String of the format W.X.Y.Z, W, X, Y and Z can be numbers or '*'
      * @return long with a subnet mask
      */
-    private static long createNetmaskFromWildChars (String s) 
+    private static long createNetmaskFromWildChars (final String s)
         throws IllegalArgumentException {
-        StringTokenizer tokenizer = new StringTokenizer(s, ".");
-        long _mask = 0;
-        
-        for (int i = 0; i < 4; i++) {
-            _mask = _mask << 8;
-            if (tokenizer.hasMoreTokens() && 
-                !tokenizer.nextToken().equalsIgnoreCase("*"))
-                _mask += 0xff;
+
+        long mask = 0;
+        int numOctets = 0;
+        int length = s.length();
+
+        // loop over each octet
+        for(int i = 0; i < length; i++, numOctets++) {
+            short submask = 0;
+            // loop over each character in the octet
+            // if we encounter a single non '*', mask it off.
+            for(; i < length; i++) {
+                char c = s.charAt(i);
+                if( c == '.' ) break;
+                if( c != '*' ) submask = 0xff;
+            }
+            mask = (mask << 8) + submask;
         }
-        return _mask;
+
+        // if the address had less than 4 octets, push the ip over suitably..
+        for(; numOctets < 4; numOctets++)
+            mask <<= 8;
+
+        // ensure that the ip address had 4 octets.
+        if( numOctets != 4 )
+            throw new IllegalArgumentException(MSG + s);
+
+        return mask;
     }
-    
+
     /**
      * Returns if ip is contained in this.
      * @param ip a singleton IP set, e.g., one representing a single address
      */
     public boolean contains(IP ip) {
         //Example: let this=1.1.1.*=1.1.1.0/255.255.255.0
-        //         let ip  =1.1.1.2=1.1.1.2/255.255.255.255  
+        //         let ip  =1.1.1.2=1.1.1.2/255.255.255.255
         //      => ip.addr&this.mask=1.1.1.0
         //      => this.addr&this.mask=1.1.1.0
         return ((ip.addr & this.mask) == (this.addr & this.mask));
     }
-    
+
     /**
      * Returns true if other is an IP with the same address and mask.  Note that
      * "1.1.1.1/255.255.255.255" does not equal "2.2.2.2/255.255.255.255", even
