@@ -1,4 +1,4 @@
-################################################################################
+﻿################################################################################
 # Messages Bundle for LimeWire 4.2.6
 # Specialization for: Slovak - Slovakian Republic
 # Dummy resources bundle for missing translation.
