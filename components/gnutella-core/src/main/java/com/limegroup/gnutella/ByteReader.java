@@ -101,7 +101,13 @@ public class ByteReader {
         boolean keepReading = true;
         
 		do {
-			c = _istream.read();			
+		    try {
+			    c = _istream.read();
+            } catch(ArrayIndexOutOfBoundsException aiooe) {
+                // this is apparently thrown under strange circumstances.
+                // interpret as an IOException.
+                throw new IOException("aiooe.");
+            }			    
 			switch(c) {
 			    // if this was a \n character, break out of the reading loop
 			    case  N: keepReading = false;
