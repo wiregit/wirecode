@@ -75,6 +75,16 @@ public final class StatisticsManager implements Runnable {
 	}
 
 	/**
+	 * Accessor for whether or not advanced statistics should be recorded.
+	 *
+	 * @return <tt>true</tt> if advanced statistics should be recorded,
+	 *  <tt>false</tt> otherwise
+	 */
+	public boolean getRecordAdvancedStats() {
+		return _recordAdvancedStatistics;
+	}
+
+	/**
 	 * Stores the accumulated statistics for all messages into
 	 * their collections of historical data.
 	 */

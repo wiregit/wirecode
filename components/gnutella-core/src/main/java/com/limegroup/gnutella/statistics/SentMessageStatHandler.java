@@ -24,13 +24,8 @@ public final class SentMessageStatHandler extends AbstractStatHandler {
 								   Statistic byteStat,
 								   Statistic limeNumberStat,
 								   Statistic limeByteStat) {
-		super(numberStat, byteStat, limeNumberStat, limeByteStat);
-	} 
-
-	// overridden to keep track of upstream bandwdith
-	public void addMessage(Message msg) {
-		super.addMessage(msg);
-		BandwidthStat.GNUTELLA_UPSTREAM_BANDWIDTH.addData(msg.getTotalLength());
+		super(numberStat, byteStat, limeNumberStat, limeByteStat,
+			  BandwidthStat.GNUTELLA_UPSTREAM_BANDWIDTH);
 	}
 	
 

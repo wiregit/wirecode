@@ -38,6 +38,18 @@ public abstract class AbstractStatHandler {
 	private final Statistic LIME_BYTE_STAT;
 
 	/**
+	 * <tt>Statistic</tt> for the bandwidth stat to also record message
+	 * data to.
+	 */
+	private final Statistic BANDWIDTH_BYTE_STAT;
+
+	/**
+	 * Constant for the <tt>StatisticsManager</tt> for use in subclasses.
+	 */
+	private static final StatisticsManager STATS_MANAGER = 
+		StatisticsManager.instance();
+
+	/**
 	 * Creates a new <tt>ReceivedMessageStatHandler</tt> instance.  
 	 * Private constructor to ensure that no other classes can
 	 * construct this class, following the type-safe enum pattern.
@@ -49,12 +61,15 @@ public abstract class AbstractStatHandler {
 	protected AbstractStatHandler(Statistic numberStat, 
 								  Statistic byteStat,
 								  Statistic limeNumberStat,
-								  Statistic limeByteStat) {
+								  Statistic limeByteStat,
+								  Statistic bandwidthByteStat) {
 		NUMBER_STAT = numberStat;
 		BYTE_STAT = byteStat;
 		LIME_NUMBER_STAT = limeNumberStat;
 		LIME_BYTE_STAT = limeByteStat;
+		BANDWIDTH_BYTE_STAT = bandwidthByteStat;
 	} 
+
 
 	/**
 	 * Adds the specified <tt>Message</tt> to the stored data
@@ -62,11 +77,15 @@ public abstract class AbstractStatHandler {
 	 * @param msg the received <tt>Message</tt> to add to the data
 	 */
 	public void addMessage(Message msg) {
+		
+		// if we're not recording advanced stats, ignore the call
+		if(!STATS_MANAGER.getRecordAdvancedStats()) return;
 		NUMBER_STAT.incrementStat();
 		BYTE_STAT.addData(msg.getTotalLength());
+		BANDWIDTH_BYTE_STAT.addData(msg.getTotalLength());
 		if(new GUID(msg.getGUID()).isLimeGUID()) {
 			LIME_NUMBER_STAT.incrementStat();
 			LIME_BYTE_STAT.addData(msg.getTotalLength());
 		}
-	}	
+	}
 }
