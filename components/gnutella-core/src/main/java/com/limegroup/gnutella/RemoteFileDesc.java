@@ -53,7 +53,6 @@ public class RemoteFileDesc implements Serializable {
 	private static final Set EMPTY_SET = 
 		Collections.unmodifiableSet(new HashSet());
 
-
 	/** 
      * Constructs a new RemoteFileDesc with metadata.
      *
@@ -72,11 +71,32 @@ public class RemoteFileDesc implements Serializable {
 	 *  browse host
 	 * @param xmlDoc the <tt>LimeXMLDocument</tt> for the response
 	 * @param urns the <tt>Set</tt> of <tt>URN</tt>s for the file
+	 *
+	 * @throws <tt>IllegalArgumentException</tt> if any of the arguments are
+	 *  not valid
 	 */
 	public RemoteFileDesc(String host, int port, long index, String filename,
 						  int size, byte[] clientGUID, int speed, 
 						  boolean chat, int quality, boolean browseHost, 
 						  LimeXMLDocument xmlDoc, Set urns) {
+		if((port & 0xFFFF0000) != 0) {
+			throw new IllegalArgumentException("invalid port: "+port);
+		} 
+		if((speed & 0xFFFFFFFF00000000L) != 0) {
+			throw new IllegalArgumentException("invalid speed: "+speed);
+		} 
+		if(filename == null) {
+			throw new NullPointerException("null filename");
+		}
+		if(filename.equals("")) {
+			throw new IllegalArgumentException("cannot accept empty string file name");
+		}
+		if((size & 0xFFFFFFFF00000000L) != 0) {
+			throw new IllegalArgumentException("invalid size: "+size);
+		}
+		if((index & 0xFFFFFFFF00000000L) != 0) {
+			throw new IllegalArgumentException("invalid index: "+index);
+		}
 		_speed = speed;
 		_host = host;
 		_port = port;
