@@ -53,7 +53,7 @@ public class NormalUploadState implements UploadState {
             
             //guard clause
             if(_fileSize < _uploadBegin)
-                return;
+                throw new IOException("Invalid Range");
             
             //if invalid end-index, then upload upto the end of file
             if(_uploadEnd <= 0 
@@ -65,7 +65,6 @@ public class NormalUploadState implements UploadState {
             writeHeader();
             /* write the file to the socket */
             int c = -1;
-            int available = 0;
             byte[] buf = new byte[1024];
 
             long a = _fis.skip(_uploadBegin);
@@ -76,74 +75,11 @@ public class NormalUploadState implements UploadState {
             int speed=manager.getUploadSpeed();
             if (speed==100) {
                 //Special case: upload as fast as possible
-                while (true) {
-                    c = _fis.read(buf);
-                    if (c == -1)
-                        break;
-                    //dont upload more than asked
-                    if( c > (_uploadEnd - _amountRead))
-                        c = _uploadEnd - _amountRead;
-                    try {
-                        _ostream.write(buf, 0, c);
-                    } catch (java.net.SocketException e) {
-                        throw new IOException();
-                    }
-                    _amountRead += c;
-                    _uploader.setAmountUploaded(_amountRead);
-                    
-                    //finish uploading if the desired amount has been uploaded
-                    if(_amountRead >= _uploadEnd)
-                        break;
-                }
-
+                uploadUnthrottled();
             } else {
                 //Normal case: throttle uploads. Similar to above but we
                 //sleep after sending data.
-                while (true) {
-                    // int max = _uploader.getManager().calculateBurstSize();
-                    int max = _uploader.getManager().calculateBandwidth();
-                    int burstSize=max*CYCLE_TIME;
-
-                    int burstSent=0;
-                    // Date start=new Date();
-                    long start = System.currentTimeMillis();
-                    while (burstSent<burstSize) {
-                        c = _fis.read(buf);
-                        if (c == -1)
-                            return;
-                        //dont upload more than asked
-                            if( c > (_uploadEnd - _amountRead))
-                                c = _uploadEnd - _amountRead;
-                        try {
-                            _ostream.write(buf, 0, c);
-                        } catch (java.net.SocketException e) {
-                            throw new IOException();
-                        }
-                        _amountRead += c;
-                        _uploader.setAmountUploaded(_amountRead);
-                        burstSent += c;
-                        //finish uploading if the desired amount 
-                        //has been uploaded
-                        if(_amountRead >= _uploadEnd)
-                            break;
-                    }
-
-                    // Date stop=new Date();
-                    long stop = System.currentTimeMillis();
-
-                    //3.  Pause as needed so as not to exceed maxBandwidth.
-                    // int elapsed=(int)(stop.getTime()-start.getTime());
-                    int elapsed=(int)(stop-start);
-                    int sleepTime=CYCLE_TIME-elapsed;
-                    if (sleepTime>0) {
-                        try {
-                            Thread.currentThread().sleep(sleepTime);
-                        } catch (InterruptedException e) { 
-                            throw new IOException();
-                        }
-                    }
-
-                }
+                uploadThrottled();
             }
         } catch(IOException ioe) {
             //set the connection to be closed, in case of IO exception
@@ -154,6 +90,88 @@ public class NormalUploadState implements UploadState {
         _uploader.setState(_uploader.COMPLETE);
 	}
 
+    /**
+     * Uploads the file at maximum rate possible
+     * @exception IOException If there is any I/O problem while uploading file
+     */
+    private void uploadUnthrottled() throws IOException {
+        int c = -1;
+        byte[] buf = new byte[1024];
+        
+        while (true) {
+            c = _fis.read(buf);
+            if (c == -1)
+                break;
+            //dont upload more than asked
+            if( c > (_uploadEnd - _amountRead))
+                c = _uploadEnd - _amountRead;
+            try {
+                _ostream.write(buf, 0, c);
+            } catch (java.net.SocketException e) {
+                throw new IOException();
+            }
+            _amountRead += c;
+            _uploader.setAmountUploaded(_amountRead);
+
+            //finish uploading if the desired amount has been uploaded
+            if(_amountRead >= _uploadEnd)
+                break;
+        }
+    }
+    
+    /**
+     * Throttles the uploads by sleeping periodically
+     * @exception IOException If there is any I/O problem while uploading file
+     */
+    private void uploadThrottled() throws IOException {
+        while (true) {
+            // int max = _uploader.getManager().calculateBurstSize();
+            int max = _uploader.getManager().calculateBandwidth();
+            int burstSize=max*CYCLE_TIME;
+
+            int c = -1;
+            byte[] buf = new byte[1024];
+            int burstSent=0;
+            // Date start=new Date();
+            long start = System.currentTimeMillis();
+            while (burstSent<burstSize) {
+                c = _fis.read(buf);
+                if (c == -1)
+                    return;
+                //dont upload more than asked
+                    if( c > (_uploadEnd - _amountRead))
+                        c = _uploadEnd - _amountRead;
+                try {
+                    _ostream.write(buf, 0, c);
+                } catch (java.net.SocketException e) {
+                    throw new IOException();
+                }
+                _amountRead += c;
+                _uploader.setAmountUploaded(_amountRead);
+                burstSent += c;
+                //finish uploading if the desired amount 
+                //has been uploaded
+                if(_amountRead >= _uploadEnd)
+                    break;
+            }
+
+            // Date stop=new Date();
+            long stop = System.currentTimeMillis();
+
+            //3.  Pause as needed so as not to exceed maxBandwidth.
+            // int elapsed=(int)(stop.getTime()-start.getTime());
+            int elapsed=(int)(stop-start);
+            int sleepTime=CYCLE_TIME-elapsed;
+            if (sleepTime>0) {
+                try {
+                    Thread.currentThread().sleep(sleepTime);
+                } catch (InterruptedException e) { 
+                    throw new IOException();
+                }
+            }
+        }
+    }
+    
 	/************************* PRIVATE METHODS ***********************/
 	
 	/**
