@@ -748,6 +748,7 @@ public final class RouterService {
 		query(guid, query, "", minSpeed, type);
 	}
 
+
 	/**
 	 * Searches the network for files with the given metadata.
 	 * 
@@ -766,22 +767,22 @@ public final class RouterService {
 		//Thread searcherThread = new Thread("SearcherThread") {
 		//public void run() {
 		try {
+			//if(!isSupernode()) {
+			// per HUGE v0.94, ask for URNs on responses
+			Set urnTypes = new HashSet();
+			urnTypes.add(UrnType.ANY_TYPE);
+			Set urns = new HashSet();
+			QueryRequest qr = 
+				new QueryRequest(guid, (byte)6, minSpeed, 
+								 query, richQuery, false, urnTypes, urns,
+								 !acceptedIncomingConnection());
+			verifier.record(qr, type);
 			if(!isSupernode()) {
-				// per HUGE v0.94, ask for URNs on responses
-				Set urnTypes = new HashSet();
-				urnTypes.add(UrnType.ANY_TYPE);
-				QueryRequest qr = 
-					new QueryRequest(guid, SETTINGS.getTTL(), minSpeed, 
-									 query, richQuery, false, urnTypes, null,
-									 !acceptedIncomingConnection());
-				verifier.record(qr, type);
 				router.broadcastQueryRequest(qr);
 			} else {
-				QueryHandler qf = 
-					QueryHandler.createHandler(guid, query, richQuery);
-				
-				// TODO: what should we do about verifier here???
-				router.sendDynamicQuery(qf);
+				// TODO: should we really do this on the swing thread??
+				// requeries are an issue
+				router.sendDynamicQuery(QueryHandler.createHandler(qr));
 			}
 		} catch(Throwable t) {
 			RouterService.error(t);
