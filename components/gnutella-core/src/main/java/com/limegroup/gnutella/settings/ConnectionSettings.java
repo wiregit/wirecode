@@ -245,7 +245,7 @@ public final class ConnectionSettings extends LimeProps {
      * match the local locale
      */
     public static final IntSetting NUM_LOCALE_PREF =
-        FACTORY.createIntSetting("NUM_LOCALE_PREF", 3);
+        FACTORY.createIntSetting("NUM_LOCALE_PREF", 2);
     
     /**
      * how long we believe firewalls will let us send solicited udp
