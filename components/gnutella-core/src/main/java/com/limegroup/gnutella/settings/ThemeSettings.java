@@ -18,6 +18,12 @@ import java.io.*;
  */
 public final class ThemeSettings extends AbstractSettings {
 
+	/**
+	 * The extension for theme packs to allow people to search for them --
+	 * stands for "LimeWire Theme Pack".
+	 */
+	public static final String EXTENSION = "lwtp";
+
     static final File THEME_DIR_FILE =
 		new File(CommonUtils.getUserSettingsDir(), "themes");
 
@@ -26,13 +32,13 @@ public final class ThemeSettings extends AbstractSettings {
 	 * OS X.
 	 */
 	private static final String DEFAULT_THEME_NAME = 
-		"default_theme.zip";
+		"default_theme."+EXTENSION;
 
 	/**
 	 * The default name of the theme file name for OS X.
 	 */
 	private static final String DEFAULT_OSX_THEME_NAME = 
-		"default_osx_theme.zip";
+		"default_osx_theme."+EXTENSION;
 
 	
 	/**
@@ -55,7 +61,13 @@ public final class ThemeSettings extends AbstractSettings {
 	private static final String[] THEMES = {
 		DEFAULT_THEME_NAME,
 		DEFAULT_OSX_THEME_NAME,
-		"black_theme.zip",
+		"black_theme."+EXTENSION,
+		"green_theme."+EXTENSION,
+		"amber_theme."+EXTENSION,
+		"ocean_theme."+EXTENSION,
+		"pink_theme."+EXTENSION,
+		"red_theme."+EXTENSION,
+		"white_theme."+EXTENSION,
 	}; 
 	
 	/**
