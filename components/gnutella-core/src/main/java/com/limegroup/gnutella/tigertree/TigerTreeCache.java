@@ -16,7 +16,7 @@ import com.limegroup.gnutella.FileDesc;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.util.CommonUtils;
-import com.limegroup.gnutella.util.ManagedThread;
+import com.limegroup.gnutella.util.ProcessingQueue;
 import com.sun.java.util.collections.HashMap;
 import com.sun.java.util.collections.HashSet;
 import com.sun.java.util.collections.Iterator;
@@ -34,16 +34,12 @@ public final class TigerTreeCache implements Serializable {
      * TigerTreeCache instance variable.
      */
     private static TigerTreeCache instance = null;
-
+    
     /**
-     * List of FileDesc containing the Files to hash next
+     * The ProcessingQueue to do the hashing.
      */
-    private static Set toHash = new HashSet();
-
-    /**
-     * ManagedThread doing the hashing, must be null when inactive
-     */
-    static Thread _runner = null;
+    private static final ProcessingQueue QUEUE = 
+        new ProcessingQueue("TreeHashTread");
 
     private static transient final Log LOG =
         LogFactory.getLog(TigerTreeCache.class);
@@ -51,8 +47,7 @@ public final class TigerTreeCache implements Serializable {
     /**
      * TigerTreeCache container.
      */
-    private static Map /* SHA1_URN -> HashTree */
-    TREE_MAP;
+    private static Map /* SHA1_URN -> HashTree */ TREE_MAP;
 
     /**
      * File where the Mapping SHA1->TIGERTREE is stored
@@ -195,14 +190,7 @@ public final class TigerTreeCache implements Serializable {
     }
 
     private static void scheduleForHashing(FileDesc fd) {
-        toHash.add(fd);
-        if (_runner == null) {
-            _runner = new ManagedThread(new HashRunner(toHash));
-            toHash = new HashSet();
-            _runner.setName("TreeHashThread");
-            _runner.setDaemon(true);
-            _runner.start();
-        }
+        QUEUE.add(new HashRunner(fd));
     }
 
     /**
@@ -223,26 +211,19 @@ public final class TigerTreeCache implements Serializable {
         }
     }
 
+    /**
+     * Simple runnable that processes the hash of a FileDesc.
+     */
     private static class HashRunner implements Runnable {
-        private final Set TODO;
+        private final FileDesc FD;
 
-        HashRunner(Set set) {
-            TODO = set;
+        HashRunner(FileDesc fd) {
+            FD = fd;
         }
 
-        /**
-         * @see java.lang.Runnable#run()
-         */
         public void run() {
-            try {
-                for (Iterator iter = TODO.iterator(); iter.hasNext();) {
-                    FileDesc desc = (FileDesc) iter.next();
-                    HashTree tree = HashTree.createHashTree(desc);
-                    addHashTree(desc.getSHA1Urn(), tree);
-                }
-            } finally {
-                _runner = null;
-            }
+            HashTree tree = HashTree.createHashTree(FD);
+            addHashTree(FD.getSHA1Urn(), tree);
         }
     }
 }
