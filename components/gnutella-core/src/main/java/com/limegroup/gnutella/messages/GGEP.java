@@ -6,6 +6,7 @@ import com.limegroup.gnutella.Assert;
 import java.util.Enumeration;
 import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.util.StringComparator;
+import com.limegroup.gnutella.util.COBSUtil;
 
 /** 
  * A mutable GGEP extension block.  A GGEP block can be thought of as a
@@ -13,9 +14,8 @@ import com.limegroup.gnutella.util.StringComparator;
  * than 15 bytes.  The value (extension data) can be 0 to 2^24-1 bytes.  Values
  * can be formatted as a number, boolean, or generic blob of binary data.  If
  * necessary (e.g., for query replies), GGEP will COBS-encode values to remove
- * null bytes.  (TODO: THIS IS NOT CURRENTLY IMPLEMENTED.)  The order of the
- * extensions is immaterial.  Extensions supported by LimeWire have keys
- * specified in this class (prefixed by GGEP_HEADER...)  
+ * null bytes.  The order of the extensions is immaterial.  Extensions supported
+ * by LimeWire have keys specified in this class (prefixed by GGEP_HEADER...)  
  */
 public class GGEP extends Object {
 
@@ -118,10 +118,14 @@ public class GGEP extends Object {
                 byte[] data = new byte[dataLength];
                 System.arraycopy(messageBytes, currIndex, data, 0, dataLength);
 
-                // LimeWire currently does not support COBS, so anything COBS
-                // encoded is just disregarded...
-                if (encoded) 
-                    continue;
+                // cobs decode this bad boy....
+                if (encoded) {
+                    byte[] decoded = COBSUtil.cobsDecode(data);
+                    // decoded has a extra stray 0 at the end....
+                    data = new byte[decoded.length-1];
+                    System.arraycopy(decoded, 0, data, 0, 
+                                     (decoded.length-1));
+                }
 
                 // LimeWire currently does not support flate/default, so
                 // anything in this format is just disregarded...
@@ -227,13 +231,18 @@ public class GGEP extends Object {
                 String currHeader = (String) headers.next();
                 byte[] currData   = (byte[]) _props.get(currHeader);
                 int dataLen = 0;
-                if (currData != null)
+                boolean shouldEncode = shouldCOBSEncode(currData);
+                if (currData != null) {
+                    if (shouldEncode)
+                        currData = COBSUtil.cobsEncode(currData);
                     dataLen = currData.length;
+                }
                 debug("GGEP.write(): dataLen for " + currHeader + 
                       " is " + dataLen);
                 writeHeader(currHeader, dataLen, 
-                            !headers.hasNext(), out);
-                if (dataLen > 0)
+                            !headers.hasNext(), out,
+                            shouldEncode);
+                if (dataLen > 0) 
                     out.write(currData);
             }
         }
@@ -241,16 +250,23 @@ public class GGEP extends Object {
               toHexString(((ByteArrayOutputStream)out).toByteArray()));
     }
 
+
+    private final boolean shouldCOBSEncode(byte[] data) {
+        // if nulls are allowed from construction time and if nulls are present
+        // in the data...
+        return (allowNulls && containsNull(data));
+    }
+
     
     private void writeHeader(String header, final int dataLen, 
-                             boolean isLast, OutputStream out) 
-        throws IOException{
+                             boolean isLast, OutputStream out, 
+                             boolean shouldEncode) 
+        throws IOException {
 
         // 1. WRITE THE HEADER FLAGS
         // in the future, when we actually encode and compress, this code should
         // still work.  well, the code that deals with the header flags, that
         // is, you'll still need to encode/compress
-        boolean shouldEncode = false;
         boolean shouldCompress = false;
 
         int flags = 0x00;
@@ -323,12 +339,11 @@ public class GGEP extends Object {
      *  1 and 15, inclusive
      * @param value the GGEP extension data
      * @exception IllegalArgumentException key is of an illegal length;
-     *  or value contains a null bytes, null bytes are disallowed, and
-     *  COBS encoding is not supported
+     *  or value contains a null bytes, null bytes are disallowed, and if you
+     *  didn't allow nulls at construction but has nulls
      */
     public void put(String key, byte[] value) throws IllegalArgumentException {
         validateKey(key);
-        //TODO: COBS encoding.  Make validateValue more relaxed.
         validateValue(value);
         _props.put(key, value);
     }
@@ -340,8 +355,8 @@ public class GGEP extends Object {
      *  1 and 15, inclusive
      * @param value the GGEP extension data
      * @exception IllegalArgumentException key is of an illegal length;
-     *  or value contains a null bytes, null bytes are disallowed, and
-     *  COBS encoding is not supported
+     *  or value contains a null bytes, null bytes are disallowed, if you
+     *  didn't allow nulls at construction but has nulls
      */
     public void put(String key, String value) throws IllegalArgumentException {
         put(key, value==null ? null : value.getBytes());
@@ -366,9 +381,7 @@ public class GGEP extends Object {
      * Adds a key without any value.
      * @param key the name of the GGEP extension, whose length should be between
      *  1 and 15, inclusive
-     * @exception IllegalArgumentException key is of an illegal length;
-     *  or value contains a null bytes, null bytes are disallowed, and
-     *  COBS encoding is not supported
+     * @exception IllegalArgumentException key is of an illegal length.
      */
     public void put(String key) throws IllegalArgumentException {
         put(key, (byte[])null);
