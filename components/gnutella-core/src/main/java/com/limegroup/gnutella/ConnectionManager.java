@@ -1413,9 +1413,10 @@ public class ConnectionManager {
                     gotShieldedClientSupernodeConnection();
                 }
             }
-        }
-        if(connectionOpen) {
-            RouterService.getCallback().connectionInitialized(mc);
+
+            if(connectionOpen) {
+                RouterService.getCallback().connectionInitialized(mc);
+            }
         }
     }
 
