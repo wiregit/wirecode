@@ -2,10 +2,14 @@ package com.limegroup.gnutella.websearch;
 
 import com.limegroup.gnutella.util.*;
 import com.limegroup.gnutella.*;
+import com.limegroup.gnutella.xml.*;
 import com.limegroup.gnutella.http.*;
 import org.apache.commons.httpclient.*;
 import org.apache.commons.httpclient.methods.*;
 import java.io.*;
+import org.apache.xerces.parsers.*;
+import org.xml.sax.*;
+import org.w3c.dom.*;
 
 
 public class WebSearchHandler {
@@ -25,6 +29,12 @@ public class WebSearchHandler {
 
 
     private static final String IP = "&ip_addr=";
+    
+    private DOMParser parser;
+
+    public WebSearchHandler() {
+        parser = new DOMParser();
+    }
 
 
     public void search(String searchString, int searchIndex) {
@@ -49,7 +59,59 @@ public class WebSearchHandler {
             Assert.that(false, "server is not responding correctly");
         }
         System.out.println("Sumeet: got xml response:\n"+new String(response));
+        parseAndDisplay(response);
     }
 
+    private void parseAndDisplay(byte[] serverResponse) {
+        try {
+        InputSource inputSource = 
+        new InputSource(new ByteArrayInputStream(serverResponse));
+        parser.parse(inputSource);
+        Document document = parser.getDocument();
+        Element resultElement = document.getDocumentElement();
+        //attributes of the result element.
+        String v;
+        v = 
+        LimeXMLUtils.getAttributeValue(resultElement.getAttributes(),"status");
+        boolean valid = "OK".equalsIgnoreCase(v);
+        Assert.that(valid,"server not responding correctly");//TODO:remove
+        v = 
+        LimeXMLUtils.getAttributeValue(resultElement.getAttributes(),"records");
+        int numReplies = Integer.parseInt(v);
+        
+        NodeList results = resultElement.getChildNodes();
+        Assert.that(results.getLength() == numReplies, "server inconsistent");
+
+        for(int i=0; i<numReplies; i++) {
+            //Note: these nodes have the following fields:
+            //title, url, desc, bidprice, clickurl
+            Node currResult = results.item(i);
+            NodeList resultAttribs = currResult.getChildNodes();
+            String title = null;
+            String desc = null;
+            String bidPrice = null;
+            String clickURL = null;
+            for(int j=0; j < resultAttribs.getLength(); j++) {
+                Node currAttrib = resultAttribs.item(j);
+                String nodeName = currAttrib.getNodeName();
+                String val = LimeXMLUtils.getText(currAttrib.getChildNodes()); 
+                if("title".equalsIgnoreCase(nodeName))
+                    title = val;
+                else if("description".equalsIgnoreCase(nodeName))
+                    desc = val;
+                else if("bidprice".equalsIgnoreCase(nodeName))
+                    bidPrice = val;
+                else if("clickurl".equalsIgnoreCase(nodeName))
+                    clickURL = val;
+            }
+            //create a new WebResult with these attributes
+            System.out.println(title+", "+desc+", "+bidPrice+", "+clickURL);
+            WebResult result = new WebResult(title, desc, bidPrice, clickURL);
+            //TODO: add these WebResults to the GUI
+        }
+        } catch(Exception e) {
+            e.printStackTrace();
+        }
+    }
 }
 
