@@ -154,9 +154,27 @@ public class FileManager{
 		
 		int size = names.length;
 
+		File f;  // temporary file for testing existence
+		String p;  // for the canonical path of a file 
+		String name;  //the semi colon deliminated string
+
 		for (int i = 0; i < size; i++) {
-			if (!hash.containsKey(names[i]))
-				hash.put(names[i], names[i]);
+			
+			name = names[i];
+
+			f = new File(name);
+			
+			if (!f.isDirectory())
+				continue;
+			try {
+				p = f.getCanonicalPath();
+			}
+			catch (Exception e) {
+				continue;
+			}
+			if (!hash.containsKey(p)) {
+				hash.put(p, p);
+			}
 		}
 		
 		int hashsize = hash.size();
