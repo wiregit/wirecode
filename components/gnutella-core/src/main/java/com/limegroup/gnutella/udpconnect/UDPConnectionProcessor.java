@@ -417,7 +417,7 @@ public class UDPConnectionProcessor {
     /**
      *  Prepare for handling an open connection.
      */
-    private synchronized void prepareOpenConnection() {
+    private void prepareOpenConnection() {
         _connectionState = CONNECT_STATE;
         _sequenceNumber++;
         scheduleKeepAlive();
@@ -561,7 +561,8 @@ public class UDPConnectionProcessor {
      *  Test whether the connection is in connecting mode
      */
     public synchronized boolean isConnected() {
-        return (_connectionState == CONNECT_STATE);
+        return (_connectionState == CONNECT_STATE && 
+                _theirConnectionID != UDPMultiplexor.UNASSIGNED_SLOT);
     }
 
     /**
@@ -575,8 +576,9 @@ public class UDPConnectionProcessor {
      *  Test whether the connection is not fully setup
      */
 	public synchronized boolean isConnecting() {
-		return (_connectionState   == PRECONNECT_STATE ||
-                _theirConnectionID == UDPMultiplexor.UNASSIGNED_SLOT);
+	    return !isClosed() && 
+	    	(_connectionState == PRECONNECT_STATE ||
+	            _theirConnectionID == UDPMultiplexor.UNASSIGNED_SLOT);
 	}
 
     /**
@@ -940,17 +942,26 @@ public class UDPConnectionProcessor {
 
             // Keep sending and waiting until you get a Syn and an Ack from 
             // the other side of the connection.
-			while ( isConnecting() ) { 
-
-                if ( waitTime > _connectTimeOut )
-                    throw CONNECTION_TIMEOUT;
+			while ( true ) { 
 
                 // If we have received their connectionID then use it
-                if (_theirConnectionID != UDPMultiplexor.UNASSIGNED_SLOT &&
-                    _theirConnectionID != synMsg.getConnectionID()) {
-                    synMsg = 
-                      new SynMessage(_myConnectionID, _theirConnectionID);
-                } 
+			    synchronized(this){
+			        
+			        if (!isConnecting()) 
+			            break;
+			        
+			        if ( waitTime > _connectTimeOut ) { 
+			            _connectionState = FIN_STATE; 
+			            _multiplexor.unregister(this);
+			            throw CONNECTION_TIMEOUT;
+			        }
+			        
+			        if (_theirConnectionID != UDPMultiplexor.UNASSIGNED_SLOT &&
+			                _theirConnectionID != synMsg.getConnectionID()) {
+			            synMsg = 
+			                new SynMessage(_myConnectionID, _theirConnectionID);
+			        } 
+			    }
 
 				// Send a SYN packet with our connectionID 
 				send(synMsg);  
@@ -1045,7 +1056,7 @@ public class UDPConnectionProcessor {
                 } else if ( _waitingForFinAck && seqNo == _finSeqNo ) { 
                     // A fin message has been acked on shutdown
                     _waitingForFinAck = false;
-                } else {
+                } else if (_connectionState == CONNECT_STATE) {
                     // Record the ack
                     _sendWindow.ackBlock(seqNo);
                     _writeRegulator.addMessageSuccess();
