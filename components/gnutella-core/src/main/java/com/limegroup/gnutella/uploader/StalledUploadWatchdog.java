@@ -90,7 +90,10 @@ public final class StalledUploadWatchdog implements Runnable {
         else {
             closed = true;
             try {
-                ostream.close();
+                // If it was null, it was already closed
+                // by an outside source.
+                if( ostream != null )
+                    ostream.close();
             } catch(IOException ignored) {
                 //this can be ignored because we're going to close
                 //the connection anyway.
