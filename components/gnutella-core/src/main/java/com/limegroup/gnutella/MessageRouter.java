@@ -1009,6 +1009,7 @@ public abstract class MessageRouter {
             }
         }
         // else some sort of routing error or attack?
+        // or an ack for a promotion request - would rather handle it through a listener.
         // TODO: tally some stat stuff here
     }
 
@@ -2735,7 +2736,7 @@ public abstract class MessageRouter {
     		//make sure the promotion request was intended for us
     		if (Arrays.equals(msg.getCandidate().getInetAddress().getAddress(),
     				RouterService.getExternalAddress()))
-    			initiatePromotion();	
+    			initiatePromotion(msg);
     		return; 
     	}
     	
@@ -2761,9 +2762,21 @@ public abstract class MessageRouter {
     	
     }
     
-    private void initiatePromotion() {
-    	//TODO:implement ;-)
-    	throw new RuntimeException("method not implemented, this thrown for test purposes only");
+    /**
+	 * initiates the promotion process.  It sends out an udp ping to the
+     * original requestor and when the ack comes back it the listener will 
+     * start the crawl in a separate thread.
+     */
+    private void initiatePromotion(PromotionRequestVendorMessage msg) {
+    	
+    	//register a new ACK handler 
+    	GUID guid = new GUID(msg.getGUID());
+    	registerMessageListener(guid, new PromotionACKer());
+    	
+    	//ping the original requestor
+    	LimeACKVendorMessage ping = new LimeACKVendorMessage(guid,0);
+    	UDPService.instance().send( ping,
+    		msg.getRequestor().getInetAddress(),msg.getRequestor().getPort());
     }
     
     /**
