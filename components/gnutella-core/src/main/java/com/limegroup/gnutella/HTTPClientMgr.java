@@ -95,9 +95,9 @@ public class HTTPClientMgr implements Runnable {
 
 	try {/* used for writing to the socket */
 	    
-	                                   /* TODO1: this is potentially a */
-  	                                   /* security flaw.  */
-	                                   /* Double-check this is right!! */  	  
+	    /* TODO1: this is potentially a */
+	    /* security flaw.  */
+	    /* Double-check this is right!! */  	  
 	    File file = new File(_fdesc._path);  /* _path is the full name */
 
   	    fin = new BufferedReader(new FileReader(file));
@@ -127,36 +127,19 @@ public class HTTPClientMgr implements Runnable {
 	                               
   	char[] buf = new char[BUFFSIZE];   	
 
-  	while (true) {
-
-	    try {
-	    
-		int got=fin.read(buf);         /* Read the file from disk, */
-		
-		if (got==-1)
-		    break;
-		
-		_amountRead += got;
-
-		_out.write(buf, 0, got);        /* write to network. */
-		
-	    }
-
-	    catch (Exception e) {
-
-		e.printStackTrace();
-
-	    }
-  	}
-
+	int c = -1;
+	
 	try {
+	    while ( (c = fin.read())  != -1) {
+		_out.write(c);
+		_amountRead++;
+	    }
 	    _out.flush();
-
 	}
-
 	catch (Exception e) {
-
+	    e.printStackTrace();
 	}
+
     }
 
 

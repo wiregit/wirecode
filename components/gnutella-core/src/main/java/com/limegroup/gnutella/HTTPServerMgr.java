@@ -92,20 +92,31 @@ public class HTTPServerMgr implements Runnable {
 	    
 	    if (_sizeOfFile != -1) {
 
+		//  FileOutputStream myFile = new FileOutputStream(_filename);
+
+//  		byte[] data = new byte[BUFFSIZE];
+
+//  		while (true) {
+
+//  		    int got = istream.read(data);
+
+//  		    if (got==-1)
+//  			break;
+
+//  		    _amountRead += got;
+
+//  		    myFile.write(data, 0, got);      /* and write out to it */
+
+//  		}
+
 		FileOutputStream myFile = new FileOutputStream(_filename);
 
-		byte[] data = new byte[BUFFSIZE];
-
-		while (true) {
-
-		    int got = istream.read(data);
-
-		    if (got==-1)
-			break;
-
-		    _amountRead += got;
-
-		    myFile.write(data, 0, got);             /* and write out to it */
+		int count = 0;
+		int c=-1;
+		while ( (c = istream.read() ) != -1) {
+		    
+		    myFile.write(c);
+		    count++;
 
 		}
 
