@@ -513,7 +513,8 @@ public final class AlternateLocation implements HTTPHeaderValue, Comparable {
         ret = (this.URL.getPort() - other.URL.getPort());
         if(ret!=0)
             return ret;
-        ret = SHA1_URN.hashCode() - other.SHA1_URN.hashCode();
+        ret = SHA1_URN.httpStringValue().compareTo(
+            other.SHA1_URN.httpStringValue());
         if(ret != 0)
             return ret;
         return URL.getProtocol().hashCode()-other.URL.getProtocol().hashCode();
