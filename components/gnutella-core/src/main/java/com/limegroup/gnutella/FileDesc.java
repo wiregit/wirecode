@@ -188,6 +188,22 @@ public final class FileDesc {
 	}
 
 	/**
+	 * Writes the SHA1 URN for this file out to the specified stream in
+	 * the format described in HUGE v0.93.
+	 * 
+	 * @param os the <tt>OutputStream</tt> instance to write to
+	 * @exception <tt>IOException</tt> if we could not write to the
+	 *  output stream
+	 */
+	public synchronized void writeUrnTo(OutputStream os) 
+		throws IOException {
+		URN urn = this.getSHA1Urn();
+		if(urn == null) return;
+		String str = HTTPConstants.CONTENT_URN_HEADER+" "+urn+HTTPConstants.CRLF;
+		os.write(str.getBytes());
+	}
+
+	/**
 	 * Returns a new <tt>Response</tt> instance for the data in this
 	 * <tt>FileDesc</tt> for the given <tt>QueryRequest</tt>.
 	 *
