@@ -59,10 +59,14 @@ public class UploadTest extends TestCase {
 		SettingsManager.instance().setPort(port);
 		SettingsManager.instance().setDirectories(new File[] {testDir});
 		SettingsManager.instance().setExtensions("txt");
-		SettingsManager.instance().setKeepAlive(6);
+		SettingsManager.instance().setKeepAlive(8);
 		SettingsManager.instance().setMaxUploads(10);
 		SettingsManager.instance().setUploadsPerPerson(10);
 		SettingsManager.instance().setConnectOnStartup(true);
+        SettingsManager.instance().setFilterDuplicates(false);
+        SettingsManager.instance().setEverSupernodeCapable(true);
+        SettingsManager.instance().setForceSupernodeMode(true);
+        SettingsManager.instance().setDisableSupernodeMode(false);
 		SettingsManager.instance().writeProperties();
 		
 		ActivityCallback callback = new ActivityCallbackStub();
