@@ -90,7 +90,23 @@ public class HandshakeResponse {
     /**
      * Headers to use in the response to a connection handshake.
      */
-    private final Properties headers;
+    private final Properties HEADERS;
+
+    /** 
+	 * if I am a Ultrapeer shielding the given connection 
+	 */
+    private Boolean _isLeaf;
+
+    /** 
+	 * if I am a leaf connected to an Ultrapeer.
+	 */
+    private Boolean _isUltrapeer;
+
+
+    /** 
+	 * is the GGEP header set?  
+	 */
+    private Boolean _supportsGGEP;
 
     /**
      * Creates a HandshakeResponse which defaults the status code and status
@@ -99,7 +115,7 @@ public class HandshakeResponse {
     public HandshakeResponse() {
         statusCode = OK;
         statusMessage = OK_MESSAGE;
-        this.headers = null;
+        this.HEADERS = null;
     }    
     
     /**
@@ -110,7 +126,7 @@ public class HandshakeResponse {
     public HandshakeResponse(Properties headers) {
         statusCode = OK;
         statusMessage = OK_MESSAGE;
-        this.headers = headers;
+        this.HEADERS = headers;
     }    
 
     /**
@@ -123,7 +139,7 @@ public class HandshakeResponse {
     public HandshakeResponse(int code, String message, Properties headers) { 
         this.statusCode = code;
         this.statusMessage = message;
-        this.headers = headers;
+        this.HEADERS = headers;
     }
     
     /**
@@ -149,7 +165,7 @@ public class HandshakeResponse {
             this.statusMessage = DEFAULT_BAD_STATUS_MESSAGE;
         }
         
-        this.headers = headers;
+        this.HEADERS = headers;
     }
     
     /** 
@@ -192,11 +208,214 @@ public class HandshakeResponse {
      * Returns the headers to use in the response.
      */
     public Properties getHeaders() {
-        return headers;
+        return HEADERS;
+    }
+
+	/**
+	 * Accessor for an individual property.
+	 */
+	public String getProperty(String prop) {
+		return HEADERS.getProperty(prop);
+	}
+
+    /** Returns the vendor string reported by this connection, i.e., 
+     *  the USER_AGENT property, or null if it wasn't set.
+     *  @return the vendor string, or null if unknown */
+    public String getUserAgent() {
+        return HEADERS.getProperty(
+            com.limegroup.gnutella.handshaking.
+                ConnectionHandshakeHeaders.USER_AGENT);
+    }
+
+	/**
+	 * Returns the number of intra-Ultrapeer connections this node maintains.
+	 * 
+	 * @return the number of intra-Ultrapeer connections this node maintains
+	 */
+	public int getNumIntraUltrapeerConnections() {
+		String connections = HEADERS.getProperty(ConnectionHandshakeHeaders.X_DEGREE);
+		if(connections == null) {
+			if(isSupernodeConnection()) return 6;
+			return 0;
+		}
+		
+		// TODO: use something else here!!!
+		try {
+			return Integer.valueOf(connections).intValue();
+		} catch(NumberFormatException e) {
+			return 0;
+		}
+	}
+
+	// implements ReplyHandler interface -- inherit doc comment
+	public boolean isHighDegreeConnection() {
+		return getNumIntraUltrapeerConnections() > 15;
+	}
+
+	/**
+	 * Returns whether or not this connection is to an Ultrapeer that 
+	 * supports query routing between Ultrapeers at 1 hop.
+	 *
+	 * @return <tt>true</tt> if this is an Ultrapeer connection that
+	 *  exchanges query routing tables with other Ultrapeers at 1 hop,
+	 *  otherwise <tt>false</tt>
+	 */
+	public boolean isUltrapeerQueryRoutingConnection() {
+		if(!isSupernodeConnection()) return false;
+        String value = 
+            HEADERS.getProperty(ConnectionHandshakeHeaders.X_ULTRAPEER_QUERY_ROUTING);
+        if(value == null) return false;
+		
+        return value.equals(ConnectionHandshakeHeaders.QUERY_ROUTING_VERSION);
+    }
+
+
+    /** Returns true iff this connection wrote "Ultrapeer: false".
+     *  This does NOT necessarily mean the connection is shielded. */
+    public boolean isLeafConnection() {
+        String value=HEADERS.getProperty(ConnectionHandshakeHeaders.X_SUPERNODE);
+        if (value==null)
+            return false;
+        else
+            //X-Ultrapeer: true  ==> false
+            //X-Ultrapeer: false ==> true
+            return !Boolean.valueOf(value).booleanValue();
+    }
+
+    /** Returns true iff this connection wrote "Supernode: true". */
+    public boolean isSupernodeConnection() {
+        String value=HEADERS.getProperty(ConnectionHandshakeHeaders.X_SUPERNODE);
+        if (value==null)
+            return false;
+        else
+            return Boolean.valueOf(value).booleanValue();
+    }
+
+
+	/**
+	 * Returns whether or not this connection is to a client supporting
+	 * GUESS.
+	 *
+	 * @return <tt>true</tt> if the node on the other end of this 
+	 *  connection supports GUESS, <tt>false</tt> otherwise
+	 */
+	public boolean isGUESSCapable() {
+		int version = getGUESSVersion();
+		if(version == -1) return false;
+		else if(version < 20 && version > 0) return true;
+		return false;
+	}
+
+	/**
+	 * Returns whether or not this connection is to a ultrapeer supporting
+	 * GUESS.
+	 *
+	 * @return <tt>true</tt> if the node on the other end of this 
+	 *  Ultrapeer connection supports GUESS, <tt>false</tt> otherwise
+	 */
+	public boolean isGUESSUltrapeer() {
+		return isGUESSCapable() && isSupernodeConnection();
+	}
+
+
+	/**
+	 * Returns the version of the GUESS search scheme supported by the node
+	 * at the other end of the connection.  This returns the version in
+	 * whole numbers.  So, if the supported GUESS version is 0.1, this 
+	 * will return 1.  If the other client has not sent an X-Guess header
+	 * this returns -1.
+	 *
+	 * @return the version of GUESS supported, reported as a whole number,
+	 *  or -1 if GUESS is not supported
+	 */
+	public int getGUESSVersion() {
+		String value = HEADERS.getProperty(ConnectionHandshakeHeaders.X_GUESS);
+		if(value == null) return -1;
+		else {
+			float version = Float.valueOf(value).floatValue();
+			version *= 10;
+			return (int)version;
+		}
+	}
+
+    /** Returns true iff this connection is a temporary connection as per
+     the headers. */
+    public boolean isTempConnection() {
+        //get the X-Temp-Connection from either the headers received
+        String value=HEADERS.getProperty(ConnectionHandshakeHeaders.X_TEMP_CONNECTION);
+        //if X-Temp-Connection header is not received, return false, else
+        //return the value received
+        if(value == null)
+            return false;
+        else
+            return Boolean.valueOf(value).booleanValue();
+    }
+
+    /** Returns true if this supports GGEP'ed messages.  GGEP'ed messages (e.g.,
+     *  big pongs) should only be sent along connections for which
+     *  supportsGGEP()==true. */
+    public boolean supportsGGEP() {
+        if (_supportsGGEP==null) {
+			String value = 
+				HEADERS.getProperty(ConnectionHandshakeHeaders.GGEP);
+			
+			//Currently we don't care about the version number.
+            _supportsGGEP = new Boolean(value != null);
+		}
+        return _supportsGGEP.booleanValue();
+    }
+
+	/**
+	 * Determines whether or not this node supports vendor messages.  
+	 *
+	 * @return <tt>true</tt> if this node supports vendor messages, otherwise
+	 *  <tt>false</tt>
+	 */
+	public boolean supportsVendorMessages() {
+		String value = 
+			HEADERS.getProperty(ConnectionHandshakeHeaders.X_VENDOR_MESSAGE);
+		if ((value != null) && !value.equals("")) {		
+			return true;
+		}
+		return false;
+	}
+
+	/**
+	 * Returns the authenticated domains listed in the connection headers
+	 * for this connection.
+	 *
+	 * @return the string of authenticated domains for this connection
+	 */
+	public String getDomainsAuthenticated() {
+		return HEADERS.getProperty(
+		    ConnectionHandshakeHeaders.X_DOMAINS_AUTHENTICATED);
+		
+	}
+
+	public String getVersion() {
+		return HEADERS.getProperty(ConnectionHandshakeHeaders.X_VERSION);
+	}
+
+
+    /** True if the remote host supports query routing (QRP).  This is only 
+     *  meaningful in the context of leaf-supernode relationships. */
+    public boolean isQueryRoutingEnabled() {
+        //We are ALWAYS QRP-enabled, so we only need to look at what the remote
+        //host wrote.
+        String value = 
+			HEADERS.getProperty(ConnectionHandshakeHeaders.X_QUERY_ROUTING);
+        if (value==null)
+            return false;
+        try {            
+            Float f=new Float(value);
+            return f.floatValue() >= 0.1f;   //TODO: factor into constant!
+        } catch (NumberFormatException e) {
+            return false;
+        }
     }
 
     public String toString() {
-        return "<"+statusCode+", "+statusMessage+">"+headers;
+        return "<"+statusCode+", "+statusMessage+">"+HEADERS;
     }
 }
 
