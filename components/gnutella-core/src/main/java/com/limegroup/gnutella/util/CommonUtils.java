@@ -1,6 +1,5 @@
 package com.limegroup.gnutella.util;
 
-import com.limegroup.gnutella.settings.*;
 import java.util.Properties;
 import java.io.*;
 import java.net.*;
@@ -967,61 +966,6 @@ public final class CommonUtils {
 			} catch(IOException ioe) {}	// all we can do is try to close the streams
 		} 
 	}
-        
-	/**
-	 * Returns whether or not the specified port is within the valid range of
-	 * ports.
-	 *
-	 * @param port the port number to check
-	 */
-	public static boolean isValidPort(int port) {
-		if((port & 0xFFFF0000) != 0) return false;
-		return true;
-	}
-	
-	/**
-	 * Returns whether or not the supplied address is a local address.
-	 */
-	public static boolean isLocalAddress(InetAddress addr) {
-	    try {
-            InetAddress address = InetAddress.getLocalHost();
-            byte[] byteAddress = addr.getAddress();
-            return (address.equals(addr) ||
-                    byteAddress[0] == 127);
-        } catch(UnknownHostException e) {
-            return false;
-        }
-    }
-
-    /**
-     * Checks to see if the given address is a firewalled address.
-     * 
-     * @param address the address to check
-     */
-    public static boolean isPrivateAddress(byte[] address) {
-        if (address[0]==(byte)10) {
-            return true;  //10.0.0.0 - 10.255.255.255
-        } else if (address[0]==(byte)127 && 
-                   ConnectionSettings.LOCAL_IS_PRIVATE.getValue()) {
-            return true;  //127.x.x.x
-        } else if (address[0]==(byte)172 &&
-                   address[1]>=(byte)16 &&
-                   address[1]<=(byte)31) {
-            return true;  //172.16.0.0 - 172.31.255.255
-        } else if (address[0]==(byte)192 &&
-                   address[1]==(byte)168) {
-            return true; //192.168.0.0 - 192.168.255.255
-        } else if (address[0]==(byte)169 &&
-                   address[1]==(byte)254) {
-            return true; //169.254.0.0 - 169.254.255.255 (local link)
-        } else if (address[0]==(byte)0) {
-            return true; //0.0.0.0 -- reserved 
-            //} else if (address[0]>=(byte)240) {
-            //return true; //240 and above -- broadcast, multicast
-        } else {
-            return false; // otherwise, it's not private
-        }
-    }
 
     /** 
      * Replaces OS specific illegal characters from any filename with '_', 
