@@ -28,7 +28,7 @@ public final class CountingOutputStream extends FilterOutputStream {
         // write(b) and double-count each byte.
         out.write(b, off, len);
         if(_isCounting)
-            _count += len - off;
+            _count += len;
     }
     
     public void close() throws IOException {
