@@ -42,7 +42,57 @@ public final class ID3Reader {
      * This class should never be constructed.
      */
     private ID3Reader() {}
+    
+    /**
+     * Determines whether a LimeXMLDocument was corrupted by
+     * ID3Editor in the past.
+     */
+    public static boolean isCorrupted(LimeXMLDocument doc) {
+        if(!schemaURI.equals(doc.getSchemaURI()))
+            return false;
 
+        Set existing = doc.getNameValueSet();
+        for(Iterator i = existing.iterator(); i.hasNext(); ) {
+            Map.Entry entry = (Map.Entry)i.next();
+            final String name = (String)entry.getKey();
+            String value = (String)entry.getValue();
+            // album & artist were the corrupted fields ...
+            if( name.equals(ALBUM_KEY) || name.equals(ARTIST_KEY) ) {
+                if( value.length() == 30 ) {
+                    // if there is a value in the 29th char, but not
+                    // in the 28th, it's corrupted. 
+                    if( value.charAt(29) != ' ' && value.charAt(28) == ' ' )
+                        return true;
+                }
+            }
+        }
+        
+        return false;
+    }
+    
+    /**
+     * Creates a new LimeXMLDocument without corruption.
+     */
+    public static LimeXMLDocument fixCorruption(LimeXMLDocument oldDoc) {
+        Set existing = oldDoc.getNameValueSet();
+        List info = new ArrayList(existing.size());
+        for(Iterator i = existing.iterator(); i.hasNext(); ) {
+            Map.Entry entry = (Map.Entry)i.next();
+            final String name = (String)entry.getKey();
+            String value = (String)entry.getValue();
+            // album & artist were the corrupted fields ...
+            if( name.equals(ALBUM_KEY) || name.equals(ARTIST_KEY) ) {
+                if( value.length() == 30 ) {
+                    // if there is a value in the 29th char, but not
+                    // in the 28th, it's corrupted erase & trim.
+                    if( value.charAt(29) != ' ' && value.charAt(28) == ' ' )
+                        value = value.substring(0, 29).trim();
+                }
+            }
+            info.add(new NameValue(name, value));
+        }
+        return new LimeXMLDocument(info, oldDoc.getSchemaURI());
+    }
 
     /**
      * Attempts to read an ID3 tag from the specified file.
