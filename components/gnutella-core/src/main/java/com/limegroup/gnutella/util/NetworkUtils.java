@@ -244,15 +244,28 @@ public final class NetworkUtils {
      *         otherwise <tt>false</tt>.
      */
     public static boolean isMe(String host, int port) {
-        //Don't allow connections to yourself.  We have to special
-        //case connections to "localhost" or "127.*.*.*" since
-        //they are aliases this machine.
         byte[] cIP;
         try {
-            cIP=InetAddress.getByName(host).getAddress();
+            cIP = InetAddress.getByName(host).getAddress();
         } catch (IOException e) {
             return false;
         }
+        
+        return isMe(cIP, port);
+    }
+    
+    /**
+     * If host is not a valid host address, returns false.
+     * Otherwise, returns true if connecting to host:port would connect to
+     *  this servent's listening port.
+     *
+     * @return <tt>true</tt> if the specified host/port combo is this servent,
+     *         otherwise <tt>false</tt>.
+     */
+    public static boolean isMe(byte[] cIP, int port) {
+        //Don't allow connections to yourself.  We have to special
+        //case connections to "127.*.*.*" since
+        //they are aliases this machine.
 
         if (cIP[0]==(byte)127) {
             return port == RouterService.getPort();

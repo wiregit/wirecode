@@ -953,37 +953,44 @@ public class Response {
          * in one of the GGEP arrays.
          */
         static Set getLocations(GGEP[] ggeps) {
+            if (ggeps == null)
+                return DataUtils.EMPTY_SET;
             Set locations = null;
-            
-            for (int i = 0; (ggeps != null) && (i < ggeps.length); i++) {
-                Set headers = ggeps[i].getHeaders();
+            final byte[] ip = new byte[4];
+            IPFilter ipFilter = IPFilter.instance();
+            for (int i = 0; i < ggeps.length; i++) {
                 // if the block has a ALTS value, get it, parse it,
                 // and move to the next.
-                if (headers.contains(GGEP.GGEP_HEADER_ALTS)) {
-                    byte[] locBytes = null;
+                if (ggeps[i].hasKey(GGEP.GGEP_HEADER_ALTS)) {
+                    byte[] locBytes;
                     try {
                         locBytes = ggeps[i].getBytes(GGEP.GGEP_HEADER_ALTS);
                         // must be a multiple of 6
-                        if( locBytes.length % 6 != 0 )
+                        if (locBytes.length % 6 != 0)
                             continue;
                     } catch (BadGGEPPropertyException bad) {
+                        //locBytes not set, key was added without value
                         ErrorService.error(bad);
                         continue;
                     }
 
-                    for(int j = 0; j < locBytes.length; j+=6) {
-                        String host = NetworkUtils.ip2string(locBytes, j);
+                    for (int j = 0; j < locBytes.length; j += 6) {
                         int port = ByteOrder.ubytes2int(
                                     ByteOrder.leb2short(locBytes, j+4)
-                                   );
-                        if(!NetworkUtils.isValidPort(port) ||
-                           !NetworkUtils.isValidAddress(host) ||
-                           !IPFilter.instance().allow(host) ||
-                           NetworkUtils.isMe(host, port))
+                                   );                                
+                        if (!NetworkUtils.isValidPort(port))
                             continue;
-                        if( locations == null )
+                        ip[0] = locBytes[j];
+                        ip[1] = locBytes[j + 1];
+                        ip[2] = locBytes[j + 2];
+                        ip[3] = locBytes[j + 3];
+                        if (!NetworkUtils.isValidAddress(ip) ||
+                            !ipFilter.allow(ip) ||
+                            NetworkUtils.isMe(ip, port))
+                            continue;
+                        if (locations == null)
                             locations = new HashSet();
-                        locations.add(new Endpoint(host, port));
+                        locations.add(new Endpoint(ip, port));
                     }
                 }
             }

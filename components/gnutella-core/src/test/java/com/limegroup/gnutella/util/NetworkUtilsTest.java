@@ -170,5 +170,8 @@ public class NetworkUtilsTest extends com.limegroup.gnutella.util.BaseTestCase {
             NetworkUtils.isMe("localhost", 6346));
 
             NetworkUtils.isMe("127.1.2.1", 6346);
-    }    
+            
+        assertTrue("localhost bytes should be me",
+            NetworkUtils.isMe(new byte[] { (byte)127, 0, 0, 0 }, 6346));
+    }
 }
