@@ -187,7 +187,7 @@ public class StandardMessageRouter extends MessageRouter {
         
     }
 
-    public void sendResponses(Response[] responses, 
+    private void sendResponses(Response[] responses, 
                                QueryRequest query,
                                byte[] clientGUID) {
         // if either there are no responses or, the
