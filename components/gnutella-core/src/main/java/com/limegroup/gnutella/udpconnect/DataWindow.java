@@ -33,7 +33,7 @@ public class DataWindow
 	private long    windowStart;
 	private int     windowSize;
 	private long    averageRTT;
-	private long    lowRTT;
+	private long    averageLowRTT;
 	private int     lowRTTCount;
     private float   srtt;
     private float   rttvar;
@@ -234,7 +234,7 @@ public class DataWindow
      *  Return the current measure of low round trip time.
      */
     public int lowRoundTripTime() {
-        return (int) lowRTT;
+        return (int) averageLowRTT;
     }
 
 
@@ -242,7 +242,7 @@ public class DataWindow
      *  Record that a block was acked and calculate the 
      *  round trip time and averages from it.
      */
-	public DataRecord ackBlock(long pnum) {
+	public void ackBlock(long pnum) {
 		if (LOG.isDebugEnabled())
 			LOG.debug("entered ackBlock with # "+pnum);
 		DataRecord drec = getBlock(pnum);
@@ -279,28 +279,30 @@ public class DataWindow
 					if ( averageRTT == 0 ) 
 						averageRTT = rtt;
 					else {
-						averageRTT = 
-						  (averageRTT*(HIST_SIZE-1))/HIST_SIZE +
-						   rtt/HIST_SIZE;
+						float avgRTT = 
+							((float)(averageRTT*(HIST_SIZE-1)+rtt))/HIST_SIZE;
+					
+						averageRTT = (long) avgRTT; 
+						  
 					}
 		
 					// Compute a measure of the lowest RTT
-					//TODO: replace this formula with the same one used for rtt
-					if ( lowRTTCount < 10 || rtt < lowRTT ) {
-						if ( lowRTT == 0 ) 
-							lowRTT = rtt;
-						else 
-							lowRTT = 
-							  ((lowRTT+1)*(HIST_SIZE-1))/HIST_SIZE + 
-							   rtt/HIST_SIZE;
+					if ( lowRTTCount < 10 || rtt < averageLowRTT ) {
+						if ( averageLowRTT == 0 ) 
+							averageLowRTT = rtt;
+						else {
+							float lowRtt = 
+								((float)(averageLowRTT*(HIST_SIZE-1)+rtt))
+								/HIST_SIZE;
+							
+							averageLowRTT = (long)lowRtt;
+						}
 						lowRTTCount++;
 					}
 				}
 			}
 		}
-		if (LOG.isDebugEnabled())
-			LOG.debug("returning "+drec);
-		return drec;
+
 	}
 
     /** 
@@ -474,7 +476,7 @@ public class DataWindow
 	public void printFinalStats() {
 		System.out.println(
 		  " avgRTT:"+averageRTT+
-		  " lowRTT:"+lowRTT);
+		  " lowRTT:"+averageLowRTT);
 	}
 }
 

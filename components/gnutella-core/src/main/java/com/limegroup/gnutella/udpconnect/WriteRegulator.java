@@ -302,13 +302,14 @@ public class WriteRegulator {
     /**
      *  Keep track of overall successes and failures 
      */
-    class FailureTracker {
+    private class FailureTracker {
 
     	private static final int HISTORY_SIZE=100;
     	
-    	boolean _rollover =false;
-    	byte [] _data = new byte[HISTORY_SIZE];
-    	int _index;
+    	private final byte [] _data = new byte[HISTORY_SIZE];
+    	
+    	private boolean _rollover =false;
+    	private int _index;
 
 
         /**
