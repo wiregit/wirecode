@@ -247,6 +247,8 @@ public class BrowseHostHandler {
      * @exception IOException a problem occurred
      */
     private static int parseHTTPCode(String str) throws IOException {		
+        if (str == null)
+            return -1; // hopefully this won't happen, but if so just error...
 		StringTokenizer tokenizer = new StringTokenizer(str, " ");		
 		String token;
 
@@ -301,7 +303,6 @@ public class BrowseHostHandler {
      */
     private static class Expirer implements Runnable {
         public void run() {
-            debug("Expirer.run(): entered, _pushedHosts = " + _pushedHosts);
             Iterator keys = null;
             synchronized (_pushedHosts) {
                 keys = _pushedHosts.keySet().iterator();
