@@ -15,7 +15,6 @@ import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.util.StringUtils;
 import com.limegroup.gnutella.util.URLDecoder;
 
-
 public class HTTPUploader implements Uploader {
 
 	private OutputStream _ostream;
@@ -58,6 +57,12 @@ public class HTTPUploader implements Uploader {
 
     private final BandwidthTrackerImpl bandwidthTracker=
 		new BandwidthTrackerImpl();
+
+	/**
+	 * Stores any alternate locations specified in the HTTP headers for 
+	 * this upload.
+	 */
+	private AlternateLocationCollection _alternateLocationCollection;
 
 	/****************** Constructors ***********************/
 	/**
@@ -244,10 +249,11 @@ public class HTTPUploader implements Uploader {
 		} catch (IOException e) {
 			setState(INTERRUPTED);
 		}
-		// this is necessary to avoid writing the same alternate
-		// locations back to the requester as they sent in their
-		// original headers
-		_fileDesc.commitTemporaryAlternateLocations();
+
+		// making this call now is necessary to avoid writing the 
+		// same alternate locations back to the requester as they sent 
+		// in their original headers
+		_fileDesc.addAlternateLocationCollection(_alternateLocationCollection);
 	}
 
     /**
@@ -529,7 +535,10 @@ public class HTTPUploader implements Uploader {
 				_requestedURN = HTTPUploader.readContentUrn(str);
 			}
 			else if(indexOfIgnoreCase(str, HTTPConstants.ALTERNATE_LOCATION_HEADER)!=-1) {
-				HTTPUploader.readAlternateLocations(this._fileDesc, str);
+				if(_alternateLocationCollection == null) {
+					_alternateLocationCollection = new AlternateLocationCollection();
+				}
+				HTTPUploader.readAlternateLocations(str, _alternateLocationCollection);
 			}
 		}
 
@@ -584,12 +593,10 @@ public class HTTPUploader implements Uploader {
 	 * uploader.  This will not allow more than 20 alternate locations
 	 * for a single file.
 	 *
-	 * @param fileDesc the <tt>FileDesc</tt> to insert alternate 
-	 *  locations into
 	 * @param altHeader the full alternate locations header
 	 */
-	private static void readAlternateLocations(final FileDesc fileDesc,
-											   final String altHeader) {
+	private static void readAlternateLocations(final String altHeader,
+											   final AlternateLocationCollection alc) {
 		int colonIndex = altHeader.indexOf(":");
 		if(colonIndex == -1) {
 			return;
@@ -598,45 +605,20 @@ public class HTTPUploader implements Uploader {
 		    altHeader.substring(colonIndex+1).trim();
 		StringTokenizer st = new StringTokenizer(alternateLocations, ",");
 
-		// this limits the number of alternate location headers to read
-		// to 20
-		int i=0;
-		while(st.hasMoreTokens() && (i<20)) {
-			HTTPUploader.storeAlternateLocation(fileDesc, 
-												st.nextToken().trim());
-			i++;
+		while(st.hasMoreTokens()) {
+			try {
+				AlternateLocation al = new AlternateLocation(st.nextToken().trim());
+				alc.addAlternateLocation(al);
+			} catch(IOException e) {
+				e.printStackTrace();
+				// just return without adding it.
+				return;
+			}
 		}
 	}
 
 	/**
-	 * Reads an individual alternate location and adds a new 
-	 * <tt>AlternateLocation</tt> instance to the specified 
-	 * <tt>FileDesc</tt>.
-	 *
-	 * @param fileDesc the <tt>FileDesc</tt> to insert alternate locations 
-	 *  into
-	 * @param location the string representation of the individual alternate 
-	 *  location to add
-	 */
-	private static void storeAlternateLocation(final FileDesc fileDesc,
-											   final String location) {
-		// note that this removes other "whitespace" characters besides
-		// space and tab, which is not strictly correct
-		final String LINE = location.trim();		
-		AlternateLocation al = null;
-		try {
-			al = new AlternateLocation(LINE);
-		} catch(IOException e) {
-			e.printStackTrace();
-			// just return without adding it.
-			return;
-		}
-		fileDesc.addTemporaryAlternateLocation(al);
-	}
-
-	/**
-	 * a helper method to compare two strings 
-	 * ignoring their case.
+	 * Helper method to compare two stings, ignoring their case.
 	 */ 
 	private int indexOfIgnoreCase(String str, String section) {
 		// convert both strings to lower case -- this is expensive
