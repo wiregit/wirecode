@@ -14,6 +14,8 @@ public class QueryReply extends Message {
     //forward them) we extract the responses lazily as needed.
     //When they are extracted, however, it makes sense to store the parsed
     //data in the responses field.
+    //
+    //WARNING: see note in Message about IP addresses.
     
     private byte[] payload;
     /** The response records in this, or null if they have not yet been
@@ -23,7 +25,7 @@ public class QueryReply extends Message {
     /** Creates a new query reply.  The number of responses is responses.length
      *
      *  @requires  0 < port < 2^16 (i.e., can fit in 2 unsigned bytes),
-     *    ip.length==4 and ip is in <i>little-endian</i> byte order,
+     *    ip.length==4 and ip is in <i>BIG-endian</i> byte order,
      *    0 < speed < 2^32 (i.e., can fit in 4 unsigned bytes),
      *    responses.length < 2^8 (i.e., can fit in 1 unsigned byte),
      *    clientGUID.length==16
@@ -44,10 +46,10 @@ public class QueryReply extends Message {
 	//Write beginning of payload.  Downcasts are ok, even if they go negative
 	payload[0]=(byte)n;
 	ByteOrder.short2leb((short)port,payload,1);
-	payload[3]=ip[0];
-	payload[4]=ip[1];
-	payload[5]=ip[2];
-	payload[6]=ip[3];
+	payload[3]=ip[3];
+	payload[4]=ip[2];
+	payload[5]=ip[1];
+	payload[6]=ip[0];
 	ByteOrder.int2leb((int)speed,payload,7);
 	
 	//Write each response at index i
@@ -116,7 +118,7 @@ public class QueryReply extends Message {
 	ip[1]=payload[4];
 	ip[2]=payload[5];
 	ip[3]=payload[6];
-	return ip2string(ip); //takes care of byte order and signs
+	return ip2string(ip); //takes care of signs
     }
 
     public long getSpeed() {
@@ -190,7 +192,7 @@ public class QueryReply extends Message {
 
 //      /** Unit test */
 //      public static void main(String args[]) {
-//  	byte[] ip={(byte)1, (byte)0, (byte)0, (byte)0xFF};
+//  	byte[] ip={(byte)0xFF, (byte)0, (byte)0, (byte)0x1};
 //  	long u4=0x00000000FFFFFFFFl;
 //  	byte[] guid=new byte[16]; guid[0]=(byte)1; guid[15]=(byte)0xFF;	
 //  	Response[] responses=new Response[0];

@@ -7,6 +7,8 @@ import java.io.*;
  */
 
 public class PingReply extends Message {
+    //WARNING: see note in Message about IP addresses
+    
     /** All the data.  We extract the port, ip address, number of files,
      *  and number of kilobytes lazily. */
     private byte[] payload;
@@ -14,7 +16,7 @@ public class PingReply extends Message {
     /** 
      * Create a new PingReply from scratch 
      *
-     * @requires ip.length==4 and ip is in <i>little-endian</i> byte order,
+     * @requires ip.length==4 and ip is in <i>BIG-endian</i> byte order,
      *  0 < port < 2^16 (i.e., can fit in 2 unsigned bytes),
      *  0 < files and kbytes < 2^32 (i.e., can fit in 4 unsigned bytes)
      */
@@ -24,13 +26,13 @@ public class PingReply extends Message {
 	this.payload=new byte[14];
 	//It's ok if casting port, files, or kbytes turns negative.
 	ByteOrder.short2leb((short)port, payload, 0);
-	//Payload stores IP in LITTLE-ENDIAN
+	//Payload stores IP in BIG-ENDIAN
 	payload[2]=ip[0];
 	payload[3]=ip[1];
 	payload[4]=ip[2];
 	payload[5]=ip[3];
 	ByteOrder.int2leb((int)files, payload, 6);
-	ByteOrder.int2leb((int)kbytes, payload, 9);
+	ByteOrder.int2leb((int)kbytes, payload, 10);
     }
 
     /** 
@@ -67,7 +69,8 @@ public class PingReply extends Message {
 	ip[1]=payload[3];
 	ip[2]=payload[4];
 	ip[3]=payload[5];
-	return ip2string(ip); //takes care of byte order and signs
+	String ret=ip2string(ip); //takes care of signs
+	return ret;
     }
 
     public long getFiles() {
@@ -82,12 +85,13 @@ public class PingReply extends Message {
 //      public static void main(String args[]) {
 //  	long u4=0x00000000FFFFFFFFl;
 //  	int u2=0x0000FFFF;
-//  	byte[] ip={(byte)0xFF, (byte)0x00, (byte)0x00, (byte)0x01};
+//  	byte[] ip={(byte)0xFF, (byte)0x00, (byte)0x00, (byte)0x1};
 //  	PingReply pr=new PingReply(new byte[16], (byte)0,
 //  				   u2, ip, u4, u4);
 //  	Assert.that(pr.getPort()==u2);
 //  	Assert.that(pr.getFiles()==u4);
-//  	Assert.that(pr.getKbytes()==u4);
+//  	long kbytes=pr.getKbytes();
+//  	Assert.that(kbytes==u4, Long.toHexString(kbytes));
 //  	String ip2=pr.getIP();
 //  	Assert.that(ip2.equals("255.0.0.1"), ip2);
 //      }

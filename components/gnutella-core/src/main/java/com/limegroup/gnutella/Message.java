@@ -204,14 +204,22 @@ public abstract class Message {
 	return length;
     }
 
-    /** Returns the ip (given in LITTLE-endian) format as standard
-     *  dotted-decimal, e.g., 192.168.0.1 */
+    /** Returns the ip (given in BIG-endian) format as standard
+     *  dotted-decimal, e.g., 192.168.0.1<p> */
     protected static String ip2string(byte[] ip) {
+    /*
+      WARNING: There is some debate over whether the IP address is
+      little endian or big endian.  Reverse engineering the Gnutella
+      client suggests it is big endian, but Gene Kan says otherwise.
+      In any case, I'm using BIG-ENDIAN here.  See:
+      
+      http://gnutelladev.wego.com/go/wego.discussion.message?groupId=139406&view=message&curMsgId=153525&discId=140845&index=5&action=view
+    */
 	StringBuffer buf=new StringBuffer();
-	buf.append(ByteOrder.ubyte2int(ip[3])+".");
-	buf.append(ByteOrder.ubyte2int(ip[2])+".");
+	buf.append(ByteOrder.ubyte2int(ip[0])+".");
 	buf.append(ByteOrder.ubyte2int(ip[1])+".");
-	buf.append(ByteOrder.ubyte2int(ip[0])+"");
+	buf.append(ByteOrder.ubyte2int(ip[2])+".");
+	buf.append(ByteOrder.ubyte2int(ip[3])+"");
 	return buf.toString();
     }
 
@@ -223,8 +231,8 @@ public abstract class Message {
 	return func==F_PING || func==F_PUSH || func==F_QUERY;
     }
 
-    /** @modifies: this
-     *  @effects: increments hops, decrements TTL, and returns the
+    /** @modifies this
+     *  @effects increments hops, decrements TTL, and returns the
      *   OLD value of TTL.
      */
     public byte hop() {
