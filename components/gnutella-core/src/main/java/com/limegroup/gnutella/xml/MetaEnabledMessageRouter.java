@@ -45,8 +45,16 @@ public class MetaEnabledMessageRouter extends StandardMessageRouter {
         if (xmlCollectionString == null)
             xmlCollectionString = "";
 
+        byte[] xmlBytes = null;
+        try {
+            xmlBytes = xmlCollectionString.getBytes("UTF-8");
+        } catch(UnsupportedEncodingException ueex) {//no support for utf-8??
+            xmlCollectionString = "";
+            xmlBytes = xmlCollectionString.getBytes();
+        }
+        
         // it may be too big....
-        if (xmlCollectionString.length() > QueryReply.XML_MAX_SIZE) {
+        if (xmlBytes.length > QueryReply.XML_MAX_SIZE) {
             // ok, need to partition responses up once again and send out
             // multiple query replies.....
             List splitResps = new LinkedList();
@@ -56,17 +64,21 @@ public class MetaEnabledMessageRouter extends StandardMessageRouter {
                 Response[] currResps = (Response[]) splitResps.remove(0);
                 String currXML = 
                 LimeXMLDocumentHelper.getAggregateString(currResps);
-                if ((currXML.length() > QueryReply.XML_MAX_SIZE) &&
-                    (currResps.length > 1)) 
+                byte[] currXMLBytes = null;
+                try {
+                    currXMLBytes = currXML.getBytes("UTF-8");
+                } catch(UnsupportedEncodingException ueex) {
+                    currXMLBytes = "".getBytes();
+                }
+                if ((currXMLBytes.length > QueryReply.XML_MAX_SIZE) &&
+                                                        (currResps.length > 1)) 
                     splitAndAddResponses(splitResps, currResps);
                 else {
                     // create xml bytes if possible...
                     byte[] xmlCompressed = null;
-                    if ((currXML != null) &&
-                        (!currXML.equals("")))
-                        xmlCompressed = 
-                        LimeXMLUtils.compress(currXML.getBytes());
-                    else
+                    if ((currXML != null) && (!currXML.equals("")))
+                        xmlCompressed = LimeXMLUtils.compress(currXMLBytes);
+                    else //there is no XML
                         xmlCompressed = new byte[0];
                     
                     try {
@@ -87,11 +99,10 @@ public class MetaEnabledMessageRouter extends StandardMessageRouter {
         else {  // xml is small enough, no problem.....
             // get xml bytes if possible....
             byte[] xmlCompressed = null;
-            if ((xmlCollectionString != null) &&
-                (!xmlCollectionString.equals("")))
+            if (xmlCollectionString!=null && !xmlCollectionString.equals(""))
                 xmlCompressed = 
-                LimeXMLUtils.compress(xmlCollectionString.getBytes());
-            else
+                LimeXMLUtils.compress(xmlBytes);
+            else //there is no XML
                 xmlCompressed = new byte[0];
             
             try {

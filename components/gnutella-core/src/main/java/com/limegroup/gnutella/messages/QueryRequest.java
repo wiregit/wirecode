@@ -198,9 +198,11 @@ public class QueryRequest extends Message implements Serializable{
 			// extensions
             boolean addDelimiterBefore = false;
 			
+            byte[] richQueryBytes = richQuery.getBytes("UTF-8");
+            
 			// add the rich query
             addDelimiterBefore = 
-			    writeGemExtension(baos, addDelimiterBefore, richQuery);
+			    writeGemExtension(baos, addDelimiterBefore, richQueryBytes);
 
 			// add the urns
             addDelimiterBefore = 
@@ -301,7 +303,7 @@ public class QueryRequest extends Message implements Serializable{
                         ; // we've overflown and not encounted a 0x1c - discard
                     else {
                         String curExtStr = new String(extsBytes, currIndex,
-                                                      delimIndex - currIndex);
+                                          delimIndex - currIndex, "UTF-8");
                         if (URN.isUrn(curExtStr)) {
                             // it's an URN to match, of form "urn:namespace:etc"
                             URN urn = null;
