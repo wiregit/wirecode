@@ -133,7 +133,7 @@ public class ExternalControl {
 		Socket socket = null;
 		try {
 			socket = Sockets.connect(LOCALHOST, 
-		      SettingsManager.instance().getPort(), 500, true);
+		      SettingsManager.instance().getPort(), 500);
 		} catch (IOException e) {
 		    return false;
 		}

@@ -82,7 +82,7 @@ public class BrowseHostHandler {
         case 0: // false
             try {
                 // simply try connecting and getting results....
-                Socket socket = Sockets.connect(host, port, 0, true);
+                Socket socket = Sockets.connect(host, port, 0);
                 browseExchange(socket);
             }
             catch (IOException ioe) {

@@ -210,7 +210,7 @@ public class Connection {
      *  the connection during handshaking, etc.
      */
     public void initialize(int timeout) 
-            throws IOException, NoGnutellaOkException, BadHandshakeException {
+		throws IOException, NoGnutellaOkException, BadHandshakeException {
         try {
             initializeWithoutRetry(timeout);
         } catch (NoGnutellaOkException e) {
@@ -238,7 +238,7 @@ public class Connection {
         String expectString;
  
         if(isOutgoing())
-            _socket=Sockets.connect(_host, _port, timeout, true);
+            _socket=Sockets.connect(_host, _port, timeout);
 
         // Check to see if close() was called while the socket was initializing
         if (_closed) {
@@ -701,7 +701,7 @@ public class Connection {
      *  have been read.
      */
     public Message receive(int timeout)
-            throws IOException, BadPacketException, InterruptedIOException {
+		throws IOException, BadPacketException, InterruptedIOException {
         //See note in receive().
         if (_closed)
             throw new IOException("connection closed");
