@@ -141,14 +141,14 @@ public final class SearchResultHandler {
                 return false;
             }
             // if the other side is firewalled AND
-            // (we are firewalled OR 
-            //     (we are a private IP AND
-            //      the other side isn't very close to us)
-            // ) then drop the reply.
+            // we're not on close IPs AND
+            // (we are firewalled OR we are a private IP)
+            // then drop the reply.
             if(data.isFirewalled() && 
-            (!RouterService.acceptedIncomingConnection() ||
-                (NetworkUtils.isPrivateAddress(RouterService.getAddress())
-                && !NetworkUtils.isVeryCloseIP(qr.getIPBytes())))) {
+               !NetworkUtils.isVeryCloseIP(qr.getIPBytes()) &&               
+               (!RouterService.acceptedIncomingConnection() ||
+                NetworkUtils.isPrivateAddress(RouterService.getAddress())
+               ) ) {
                 return false;
             }
         }
