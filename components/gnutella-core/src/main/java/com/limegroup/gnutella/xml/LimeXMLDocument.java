@@ -664,6 +664,7 @@ public class LimeXMLDocument implements Serializable {
 	 */
 	public boolean equals(Object o) {
 		if(o == this) return true;
+		if(o == null) return false;
 		if(!(o instanceof LimeXMLDocument)) return false;
 		LimeXMLDocument xmlDoc = (LimeXMLDocument)o;
 		return ((schemaUri == null ? xmlDoc.schemaUri == null :
