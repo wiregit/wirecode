@@ -14,6 +14,9 @@ public class FileDesc {
     public String _name;
     public int _size;
 
+    /** Exactly the same as _name.toLowerCase(). */
+    public String _nameLowerCase;
+
     /**
      * @param i index of the file
      * @param n the name of the file (e.g., "funny.txt")
@@ -26,18 +29,14 @@ public class FileDesc {
         _name = n;
         _path = p;
         _size = s;
+        _nameLowerCase=_name.toLowerCase();
     }
 
     public void print() {
-
         System.out.println("Name: " + _name);
         System.out.println("Index: " + _index);
         System.out.println("Size: " + _size);
         System.out.println("Path: " + _path);
         System.out.println(" ");
-
-
     }
-
-
 }
