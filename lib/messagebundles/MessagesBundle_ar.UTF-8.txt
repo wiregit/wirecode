@@ -1,5 +1,5 @@
 ﻿################################################################################
-# Messages Bundle for LimeWire 3.7.4
+# Messages Bundle for LimeWire 3.7.10
 # Default locale for: Arabic - Egypt, Middle-East
 # Thanks to Marwa El-Dawy.
 ################################################################################
@@ -11,7 +11,7 @@ LOCALE_VARIANT_CODE=
 LOCALE_VARIANT_NAME=دولي
 LOCALE_SCRIPT_CODE=Arab
 LOCALE_SCRIPT_NAME=Arabic
-# Generated from Windows ANSI Arabic, with: native2ascii -encoding CP1256 < MessagesBundle.CP1256.txt | native2ascii -reverse -encoding UTF-8 > MessagesBundle.UTF-8.txt
+# Generated from Windows ANSI Arabic, with: native2ascii -encoding CP1256 < MessagesBundle_ar.CP1256.txt | native2ascii -reverse -encoding UTF-8 > MessagesBundle_ar.UTF-8.txt
 # Warning: correct editing of this file requires a text editor (like NotePad on Windows XP) that supports the Unicode BiDirectional algorithm, and able to insert LRE format controls.
 ################################################################################
 # Key/value pair for whether or not bold characters should be used for this
@@ -57,6 +57,7 @@ OPTIONS_BUTTONS_CANCEL_LABEL=إلغاء الأمر
 OPTIONS_BUTTONS_CANCEL_TIP=تجاهل التغييرات واغلق النافذة.
 OPTIONS_BUTTONS_APPLY_LABEL=إضافة
 OPTIONS_BUTTONS_APPLY_TIP=إضافة التغييرات.
+#??? OPTIONS_RESTART_REQUIRED=One or more options will take effect the next time LimeWire is restarted.
 
 ################################################################################
 # Key/value pairs for general terms, such as "yes" and "no"
@@ -401,6 +402,22 @@ STATISTICS_FILES=ملفات
 STATISTICS_DISCONNECTED=قطع اتصال / لايوجد ملفات متاحة
 STATISTICS_SHARING=مشاركة
 STATISTICS_SHARING_TOOLTIP=عدد الملفات التي تشاركها.
+#??? STATISTICS_CONNECTION_DISCONNECTED=disconnected
+#??? STATISTICS_CONNECTION_DISCONNECTED_TIP=You are disconnected from the network. To connect, choose Connect from the File menu.
+#??? STATISTICS_CONNECTION_CONNECTING=connecting
+#??? STATISTICS_CONNECTION_CONNECTING_TIP=You are currently connecting to the network.
+#??? STATISTICS_CONNECTION_POOR=poor
+#??? STATISTICS_CONNECTION_POOR_TIP=You are connected to few hosts and have an unstable connection the network.
+#??? STATISTICS_CONNECTION_FAIR=fair
+#??? STATISTICS_CONNECTION_FAIR_TIP=Your connection to the network is getting stronger.
+#??? STATISTICS_CONNECTION_GOOD=good
+#??? STATISTICS_CONNECTION_GOOD_TIP=You are not yet fully connected to the network, but have a very good connection.
+#??? STATISTICS_CONNECTION_EXCELLENT=excellent
+#??? STATISTICS_CONNECTION_EXCELLENT_TIP=Your connection to the network is very strong.
+#??? STATISTICS_CONNECTION_TURBO_CHARGED=TurboCharged
+#??? STATISTICS_CONNECTION_TURBO_CHARGED_TIP_FREE=You can experience TurboCharged connections all the time with LimeWire Pro.
+#??? STATISTICS_CONNECTION_TURBO_CHARGED_TIP_PRO=Your connection to the network is extremely strong.
+#??? STATISTICS_CONNECTION_QUALITY=Quality:
 
 ################################################################################
 # Key/value pairs for the download window, including labels for the
@@ -419,7 +436,7 @@ DOWNLOAD_CHAT_COLUMN=دردشة
 DOWNLOAD_PROGRESS_COLUMN=التقدم
 DOWNLOAD_SPEED_COLUMN=السرعة
 DOWNLOAD_TIME_REMAINING_COLUMN=الوقت
-#??? DOWNLOAD_SERVER_COLUMN=Vendor/version
+DOWNLOAD_SERVER_COLUMN=الموزع/الإصدارة
 #??? DOWNLOAD_STATUS_QUEUED=Queued
 DOWNLOAD_STATUS_CONNECTING=اتصال...
 DOWNLOAD_STATUS_WAITING=انتظار-المضيفون مشغولون
@@ -431,9 +448,9 @@ DOWNLOAD_STATUS_LIBRARY_MOVE_FAILED=لا يمكن النقل إلى المكتب
 DOWNLOAD_STATUS_CORRUPT_FILE=الملف غير صالح
 #??? DOWNLOAD_STATUS_REQUERYING=Querying network
 DOWNLOAD_STATUS_WAITING_FOR_REQUERY_START=انتظار
-#??? DOWNLOAD_STATUS_WAITING_FOR_REQUERY_END=ث for sources
+DOWNLOAD_STATUS_WAITING_FOR_REQUERY_END=ث للمصادر
 DOWNLOAD_STATUS_WAITING_FOR_USER=أحتاج إلى مزيد من المصادر
-#??? DOWNLOAD_STATUS_WAITING_FOR_CONN=Waiting for stable connections
+DOWNLOAD_STATUS_WAITING_FOR_CONN=انتظار اتصالات مستقرة
 DOWNLOAD_HOSTS_LABEL=المضيفون
 #??? DOWNLOAD_STATUS_REMOTE_QUEUED=Waiting in line, position
 DOWNLOAD_STATUS_HASHING=تتم الآن مراجعة محتويات الملف...
@@ -441,10 +458,12 @@ DOWNLOAD_STATUS_SAVING=يتم الآن حفظ الملف...
 DOWNLOAD_AWAITING_SOURCES=قد يحتاج LimeWire إلى إجراء بحث متقدم...
 DOWNLOAD_APPLY_NEW_THEME_START=لقد قمت بتنزيل سمة جديدة باسم "
 DOWNLOAD_APPLY_NEW_THEME_END=". هل ترغب في استخدام هذه السمة الجديدة.
-#??? DOWNLOAD_POSSIBLE_HOSTS=Possible hosts
+DOWNLOAD_POSSIBLE_HOSTS=المضيفون الممكنون
 DOWNLOAD_BUSY_HOSTS=مضيفون مشغولون
 #??? DOWNLOAD_QUEUED_HOSTS=Remotely queued
-#??? DOWNLOAD_SEARCHING=Locating sources...
+DOWNLOAD_SEARCHING=يتم الآن تحديد مواقع المصادر...
+#??? DOWNLOAD_COULD_NOT_READ_SNAPSHOT=Sorry, but LimeWire was unable to restart your old downloads.
+#??? DOWNLOAD_DISK_FULL=LimeWire cannot download the selected file because your hard drive is full. To download more files, you must free up space on your hard drive.
 
 ###################################################################
 # Key/value pairs for UploadView
@@ -465,7 +484,7 @@ UPLOAD_TABLE_STRING_CHAT=دردشة
 UPLOAD_TABLE_STRING_PROGRESS=التقدم
 UPLOAD_TABLE_STRING_SPEED=السرعة
 UPLOAD_TABLE_STRING_TIME_REMAINING=الوقت
-#??? UPLOAD_TABLE_STRING_USER_AGENT=Vendor/version
+UPLOAD_TABLE_STRING_USER_AGENT=الموزع/الإصدارة
 UPLOAD_TABLE_STRING_CONNECTING=اتصال
 UPLOAD_TABLE_STRING_UPLOADING=جاري التحميل
 #??? UPLOAD_TABLE_STRING_LIMITREACHED=Upload limit reached
@@ -508,10 +527,10 @@ CV_COLUMN_HOST=المضيف
 CV_COLUMN_STATUS=الحالة
 CV_COLUMN_MESSAGE=الرسائل (I/O)
 CV_COLUMN_BANDWIDTH=سرعة النقل (I/O)
-#??? CV_COLUMN_DROPPED=Dropped (I/O)
+CV_COLUMN_DROPPED=أسقط (I/O)
 CV_COLUMN_HOSTS=المضيفون
 CV_COLUMN_PROTOCOL=بروتوكول
-#??? CV_COLUMN_VENDOR=Vendor/Version
+CV_COLUMN_VENDOR=الموزع/الإصدارة
 CV_COLUMN_TIME=الوقت
 CV_COLUMN_COMPRESSION=مضغوط (I/O)
 CV_COLUMN_QRP_FULL=QRP (%)
@@ -522,14 +541,14 @@ CV_BUTTON_TOOLTIP_ADD=إنشاء اتصال خارجي جديد
 #??? CV_LABEL_KEEP_BEGIN=Keep approximately
 #??? CV_LABEL_KEEP_END=connections up.
 CV_TABLE_STRING_CONNECTING=جاري الاتصال...
-#??? CV_TABLE_STRING_LEAF=Leaf
-#??? CV_TABLE_STRING_ULTRAPEER=Ultrapeer
+CV_TABLE_STRING_LEAF=طرف
+CV_TABLE_STRING_ULTRAPEER=ند فائق
 CV_TABLE_STRING_STANDARD=0.6
 CV_TABLE_STRING_INCOMING=الوارد
 CV_TABLE_STRING_OUTGOING=الصادر
 CV_TABLE_STRING_CONNECTED_ON=متصل على
-#??? CV_STRING_CLIENT=[Leaf]
-#??? CV_STRING_ULTRAPEER=[Ultrapeer]
+CV_STRING_CLIENT=[طرف]
+CV_STRING_ULTRAPEER=[ند فائق]
 CV_TABLE_STRING_KBPSEC=ك.ب/ث
 
 ################################################################################
@@ -567,6 +586,11 @@ PLAYLIST_OPTIONS_CONTINUE=متصل
 PLAYLIST_DIALOG_OPEN_TITLE=اختر قائمة قراءة (*.m3u)
 PLAYLIST_DIALOG_SAVE_TITLE=حفظ قائمة القراءة باسم
 PLAYLIST_DIALOG_SAVE_SAVE=حفظ
+#??? PLAYLIST_CANNOT_PLAY_FILE=LimeWire can not play the file
+#??? PLAYLIST_FILE_UNSUPPORTED=. The file type is not recognized.
+#??? PLAYLIST_LINE_UNAVAILABLE=. No line is available for output.
+#??? PLAYLIST_FILE_MISSING=. The file cannot be found.
+#??? PLAYLIST_FILE_CORRUPT=. The file is corrupt.
 
 ################################################################################
 # Key/value pairs for the LimeWire initialization wizard that is run
@@ -620,6 +644,7 @@ INIT_SAVE_DEFAULT_BUTTON_TIP=استخدم المجلد الافتراضي
 ################################################################################
 PRO_TITLE=تحديث إلى PRO
 #??? PRO_LABEL_THANKS=For TURBOcharged downloads, get LimeWire PRO. We guarantee that you will love the improved performance of PRO. Thank you for helping keep the Internet open by running LimeWire.
+
 PRO_LABEL_QUESTION=هل ترغب في التحديث إلى LimeWire PRO?
 GO_PRO_TIP=احصل على LimeWire PRO الآن.
 WHYGOPRO=لماذا أقوم بالتحديث إلى PRO?
@@ -819,6 +844,7 @@ ERROR_PORT_UNAVAILABLE=المنفذ غير متاح. من فضلك اختر من
 #??? ERROR_BROWSE_FAILED=Could not browse files on the requested host. This machine is probably not accepting more incoming connections.
 #??? ERROR_INVALID_SAVE_DIRECTORY=Invalid directory for saving files. Please use another directory or revert to the default.
 #??? ERROR_INVALID_SAVE_DIRECTORY_WINDOW=Your save directory is not valid. It may have been deleted, you may not have permissions to write to it, or there may be another problem. Please choose a different directory.
+#??? ERROR_INVALID_SAVE_DIRECTORY_SELECTION=The selected save directory is invalid. You may not have permissions to write to the selected directory. LimeWire will revert to your previously selected directory.
 #??? ERROR_INVALID_SHARED_DIRECTORY=Invalid directory for sharing files. Please use another directory or revert to the default.
 #??? ERROR_FORCE_IP_PORT_RANGE=You must enter a port between 1 and 65535 for forcing your ip address.
 #??? ERROR_CONNECT_STRING=Connect strings must be at least length 1, contain one space, and may not contain 'GIV', 'GET', or any other HTTP keywords.
@@ -844,11 +870,15 @@ ERROR_SAVE_META_RW=حدث خطأ في الكتابة أو القراءة. لا �
 ERROR_SAVE_META_ID3=الملف تالف. لا يمكن حفظ البيانات
 ERROR_SAVE_META_DISK=حدث خطأ داخلي. لا يمكن حفظ البيانات
 #??? ERROR_SAVE_META_BAD=Incorrect format entered. Changes will not be saved.
-#??? ERROR_REMOVE_LAST_COL=You cannot turn off all columns.
+ERROR_REMOVE_LAST_COL=لا يمكنك عدم تفعيل جميع الأعمدة.
 ERROR_BROWSE_HOST_FAILED_BEGIN_KEY=لا يمكن استعراض المضيف
 ERROR_BROWSE_HOST_FAILED_END_KEY=.
 ERROR_INVALID_THEME_FILE=السمة التي قمت باختيارها غير موجودة أو غير صالحة. من فضلك قم باختيار ملف آخر أو استخدم السمة الافتراضية.
 #??? ERROR_BAD_MAGNET_LINK=Could not process bad MAGNET link
+#??? ERROR_INVALID_URLS_IN_MAGNET=One or more URLs in the MAGNET link were invalid. Your file may not download correctly.
+#??? ERROR_ITUNES_SCRIPT=LimeWire was unable to load the iTunes integration script and has turned off iTunes integration. To re-enable iTunes integration, go to LimeWire -> Preferences, choose iTunes, and check the box to enable iTunes integration.
+#??? ERROR_ITUNES_LINK=LimeWire was unable to load the necessary components for iTunes and has turned off iTunes integration. To re-enable iTunes integration, go to LimeWire -> Preferences, choose iTunes, and check the box to enable iTunes integration.
+#??? ERROR_ITUNES_INTEGRATION=An error has occurred with LimeWire's iTunes integration. To prevent further errors, LimeWire has turned off iTunes integration. To re-enable iTunes integration, go to LimeWire -> Preferences, choose iTunes, and check the box to enable iTunes integration.
 
 ################################################################################
 # Keys for the titles of the options panes. The corresponding values represent
@@ -859,14 +889,14 @@ ERROR_INVALID_THEME_FILE=السمة التي قمت باختيارها غير م
 OPTIONS_SAVE_MAIN_TITLE=حفظ
 OPTIONS_SHARED_MAIN_TITLE=مشاركة
 OPTIONS_SPEED_MAIN_TITLE=السرعة
-#??? OPTIONS_DOWNLOAD_MAIN_TITLE=Downloads
-#??? OPTIONS_UPLOAD_MAIN_TITLE=Uploads
+OPTIONS_DOWNLOAD_MAIN_TITLE=تنزيلات
+OPTIONS_UPLOAD_MAIN_TITLE=تحميلات
 OPTIONS_UPLOAD_BASIC_MAIN_TITLE=أساسي
 #??? OPTIONS_UPLOAD_SLOTS_MAIN_TITLE=Slots
 OPTIONS_CONNECTIONS_MAIN_TITLE=اتصالات
 OPTIONS_SHUTDOWN_MAIN_TITLE=إيقاف التشغيل
 OPTIONS_CHAT_MAIN_TITLE=دردشة
-#??? OPTIONS_PLAYER_MAIN_TITLE=Player
+OPTIONS_PLAYER_MAIN_TITLE=المشغل
 #??? OPTIONS_ITUNES_MAIN_TITLE=iTunes
 #??? OPTIONS_APPS_MAIN_TITLE=Helper apps
 #??? OPTIONS_BUGS_MAIN_TITLE=Bug reports
@@ -881,10 +911,10 @@ OPTIONS_SEARCH_QUALITY_MAIN_TITLE=الجودة
 OPTIONS_SEARCH_SPEED_MAIN_TITLE=السرعة
 #??? OPTIONS_FILTERS_MAIN_TITLE=Filters
 #??? OPTIONS_RESULTS_MAIN_TITLE=Keywords
-#??? OPTIONS_MESSAGES_MAIN_TITLE=Hosts
+OPTIONS_MESSAGES_MAIN_TITLE=المضيفون
 OPTIONS_ADVANCED_MAIN_TITLE=متقدم
 OPTIONS_COMPRESSION_MAIN_TITLE=الضغط
-#??? OPTIONS_PREFERENCING_MAIN_TITLE=Preferencing
+OPTIONS_PREFERENCING_MAIN_TITLE=تفضيلات
 OPTIONS_PORT_MAIN_TITLE=المنفذ
 OPTIONS_FIREWALL_MAIN_TITLE=الحوائط النارية
 OPTIONS_PRIVATE_NET_MAIN_TITLE=شبكة خاصة
@@ -1074,7 +1104,7 @@ OPTIONS_AUDIO_PLAYER_BOX_LABEL=مشغل ملفات الصوت
 ################################################################################
 # Key/value pairs for asking whether or not to display message bug reports
 ################################################################################
-#??? OPTIONS_BUGS_TITLE=Bug reports
+#??? OPTIONS_BUGS_TITLE=تقارير الخطأ
 #??? OPTIONS_BUGS_LABEL=You can choose how bug reports should be sent. To view an example bug report, click 'View example'. Choosing 'Always send immediately' will immediately contact the bug server when LimeWire encounters an internal error. Choosing 'Always ask for review' wil? tell LimeWire to ask for your approval before sending a bug to the bug server. Choosing 'Always discard bugs' will cause LimeWire to ignore all bugs (this is not recommended).
 OPTIONS_BUGS_VIEW_EXAMPLE=عرض مثال
 
@@ -1084,7 +1114,7 @@ OPTIONS_BUGS_VIEW_EXAMPLE=عرض مثال
 OPTIONS_DO_NOT_ASK_AGAIN=عدم عرض هذه الرسالة مرة أخرى
 OPTIONS_ALWAYS_USE_ANSWER=استخدم نفس الإجابة دائما
 #??? OPTIONS_POPUPS_TITLE=Popups
-#??? OPTIONS_POPUPS_LABEL=Redisplay messages for which you have chosen "عدم عرض هذه الرسالة مرة أخرى" or "استخدم نفس الإجابة دائما".
+OPTIONS_POPUPS_LABEL=إعادة عرض الرسائل التي اخترت لها "عدم عرض هذه الرسالة مرة أخرى" أو "استخدم نفس الإجابة دائما".
 OPTIONS_POPUPS_DISPLAY_CHECK_BOX_LABEL=استعادة الافتراضيات
 
 ################################################################################
@@ -1092,8 +1122,8 @@ OPTIONS_POPUPS_DISPLAY_CHECK_BOX_LABEL=استعادة الافتراضيات
 # search textfield
 ################################################################################
 OPTIONS_AUTOCOMPLETE_TITLE=استكمال تلقائي
-#??? OPTIONS_AUTOCOMPLETE_LABEL=You can enable or disable autocompletion of text fields.
-#??? OPTIONS_AUTOCOMPLETE_DISPLAY_CHECK_BOX_LABEL=Enable Autocompletion of Text Fields
+OPTIONS_AUTOCOMPLETE_LABEL=يمكنك تمكين أو عدم تمكين الاستكمال التلقائي لحقول النص.
+OPTIONS_AUTOCOMPLETE_DISPLAY_CHECK_BOX_LABEL=تمكين الاستكمال التلقائي لحقول النص.
 
 ################################################################################
 # Key/Value pairs for theme options
@@ -1146,28 +1176,28 @@ SKIN_EDITOR_BROWSE_BUTTON_TIP=استعراض الأسطح.
 # in the options window
 ################################################################################
 OPTIONS_SEARCH_MAX_TITLE=أقصى عدد من البحث
-#??? OPTIONS_SEARCH_MAX_LABEL=You can set the maximum number of simultaneous searches you can perform.
-#??? OPTIONS_SEARCH_MAX_NUMBER_LABEL=Maximum searches:
+OPTIONS_SEARCH_MAX_LABEL=يمكنك تحديد أقصى عدد من محاولات البحث يمكن عملها في نفس الوقت.
+OPTIONS_SEARCH_MAX_NUMBER_LABEL=أقصى عدد من البحث:
 
 ################################################################################
 # Key/Value pairs for search quality options in the options window
 ################################################################################
 OPTIONS_SEARCH_QUALITY_TITLE=جودة نتيجة البحث
 #??? OPTIONS_SEARCH_QUALITY_LABEL=You can select the "quality" of search results to display. Four star results indicate that the host returning the result is not firewalled and has free upload slots.
-#??? OPTIONS_SEARCH_QUALITY_FOUR_STAR_LABEL=Show only four star results
-#??? OPTIONS_SEARCH_QUALITY_THREE_AND_FOUR_STAR_LABEL=Show only three and four star results
-#??? OPTIONS_SEARCH_QUALITY_TWO_THREE_AND_FOUR_STAR_LABEL=Show only two, three, and four star results
-#??? OPTIONS_SEARCH_QUALITY_ALL_RESULTS_LABEL=Show all qualities
+OPTIONS_SEARCH_QUALITY_FOUR_STAR_LABEL=إظهار نتائج الأربع نجوم فقط.
+OPTIONS_SEARCH_QUALITY_THREE_AND_FOUR_STAR_LABEL=إظهار نتائج الثلاث او الأربع نجوم فقط.
+OPTIONS_SEARCH_QUALITY_TWO_THREE_AND_FOUR_STAR_LABEL=ظهار نتائج النجمتين، الثلاث او الأربع نجوم فقط.
+OPTIONS_SEARCH_QUALITY_ALL_RESULTS_LABEL=إظهار جميع الجودات
 
 ################################################################################
 # Key/Value pairs for minimum search result speed options
 ################################################################################
 OPTIONS_SEARCH_SPEED_TITLE=سرعة نتيجة البحث
 OPTIONS_SEARCH_SPEED_LABEL=يمكنك اختيار أقل سرعة لنتائج البحث لعرضها.
-#??? OPTIONS_SEARCH_SPEED_T3_LABEL=Show only results of T3 speed or higher
-#??? OPTIONS_SEARCH_SPEED_T1_LABEL=Show only results of T1 speed or higher
-#??? OPTIONS_SEARCH_SPEED_CABLE_LABEL=Show only results of cable/DSL speed or higher
-#??? OPTIONS_SEARCH_SPEED_ALL_LABEL=إظهار جميع السرعات
+OPTIONS_SEARCH_SPEED_T3_LABEL=إظهار الملفات من سرعة T3 أو أعلى
+OPTIONS_SEARCH_SPEED_T1_LABEL=إظهار الملفات من سرعة T1 أو أعلى
+OPTIONS_SEARCH_SPEED_CABLE_LABEL=إظهار الملفات من سرعة cable/DSL أو أعلى
+OPTIONS_SEARCH_SPEED_ALL_LABEL=إظهار جميع السرعات
 
 ################################################################################
 # Key/Value pairs for result filtering options
@@ -1199,15 +1229,15 @@ OPTIONS_SEARCH_SPEED_LABEL=يمكنك اختيار أقل سرعة لنتائج 
 ################################################################################
 #??? OPTIONS_COMPRESSION_TITLE=Compression capabilities
 #??? OPTIONS_COMPRESSION_LABEL=Traffic compression will reduce the bandwidth used, but may also increase the CPU burden. If your computer is acting much slower than normal, try disa?ling these options.
-#??? OPTIONS_COMPRESSION_DISABLE_OUTGOING_LABEL=Disable outgoing compression
-#??? OPTIONS_COMPRESSION_DISABLE_INCOMING_LABEL=Disable incoming compression
+OPTIONS_COMPRESSION_DISABLE_OUTGOING_LABEL=عدم تفعيل ضغط الصادرات
+OPTIONS_COMPRESSION_DISABLE_INCOMING_LABEL=عدم تفعيل ضغط الواردات
 
 ################################################################################
 # Key/Value pairs for the options for setting connection preferences
 # in the advanced panel of the options window
 ################################################################################
-#??? OPTIONS_CONNECT_PREF_TITLE=Connection preferencing
-#??? OPTIONS_CONNECT_PREF_LABEL=You can limit who is able to connect to you based on the number of files they share.
+OPTIONS_CONNECT_PREF_TITLE=تفضيلات الاتصال
+OPTIONS_CONNECT_PREF_LABEL=يمكنك تحديد من يستطيعون الاتصال بك بناء على عدد الملفات التي يشاركونها.
 #??? OPTIONS_CONNECT_PREF_BOX_LABEL=Files you must share to not be a freeloader:
 #??? OPTIONS_CONNECT_PREF_SLIDER_LABEL=Allow freeloaders:
 OPTIONS_CONNECT_PREF_SLIDER_MIN_LABEL=نادرا
@@ -1234,7 +1264,7 @@ OPTIONS_CONNECT_PREF_SLIDER_MAX_LABEL=دائما
 # Key/Value pairs for the options for setting the connection strings
 # in the advanced panel in the options window
 ################################################################################
-#??? OPTIONS_CONNECT_STRING_TITLE=Private network
+OPTIONS_CONNECT_STRING_TITLE=شبكة خاصة
 #??? OPTIONS_CONNECT_STRING_LABEL=You can set the connection handshake for a private Gnutella network. Other Gnutella hosts you connect to will need the same handshake.
 #??? OPTIONS_CONNECT_STRING_STRING_LABEL=Connect string
 #??? OPTIONS_CONNECT_STRING_OK_STRING_LABEL=Connect OK string
@@ -1242,9 +1272,9 @@ OPTIONS_CONNECT_PREF_SLIDER_MAX_LABEL=دائما
 ################################################################################
 # Key/Value pairs for browse for the Private Net options pane
 ################################################################################
-#??? OPTIONS_PRIVATE_NET_TITLE=Private network
-#??? OPTIONS_PRIVATE_NET_LABEL=Configure private network options for LimeWire.
-#??? OPTIONS_USE_PRIVATE_NET_CHECK_BOX_LABEL=Connect to a Private Network?
+OPTIONS_PRIVATE_NET_TITLE=شبكة خاصة
+OPTIONS_PRIVATE_NET_LABEL=تخصيص خيارات الشبكة الخاصة لLimeWire.
+OPTIONS_USE_PRIVATE_NET_CHECK_BOX_LABEL=اتصال على شبكة خاصة.
 OPTIONS_PRIVATE_CACHE_IP_LABEL=اسم المضيف
 OPTIONS_PRIVATE_CACHE_PORT_LABEL=المنفذ
 OPTIONS_PRIVATE_CACHE_NAME_LABEL=الاسم
@@ -1254,8 +1284,8 @@ OPTIONS_PRIVATE_CACHE_NAME_LABEL=الاسم
 # in the options window
 ################################################################################
 OPTIONS_STARTUP_TITLE=بداية تشغيل النظام
-#??? OPTIONS_STARTUP_LABEL=You can choose whether or not to automatically run LimeWire when your computer starts.
-#??? OPTIONS_STARTUP_CHECK_BOX_LABEL=Run on system startup
+OPTIONS_STARTUP_LABEL=يمكنك الاختيار بين عمل LimeWire تلقائيا مع بداية تشغيل النظام أو لا.
+OPTIONS_STARTUP_CHECK_BOX_LABEL=العمل مع بداية تشغيل النظام
 
 ################################################################################
 # Key/value pairs for top-level stats panels
@@ -1336,18 +1366,18 @@ STATS_RECEIVED_MULTICAST_BYTES=Multicast
 
 # number of messages
 STATS_TOTAL_RECEIVED_MESSAGES_TITLE=العدد الكلي
-#??? STATS_TOTAL_RECEIVED_MESSAGES_LABEL=All Gnutella messages received by this client.
+STATS_TOTAL_RECEIVED_MESSAGES_LABEL=جميع رسائل Gnutella التي أرسلها هذا المسخدم.
 STATS_TOTAL_RECEIVED_TCP_MESSAGES_TITLE=TCP 
-#??? STATS_TOTAL_RECEIVED_TCP_MESSAGES_LABEL=All Gnutella messages received over TCP, by message type.
+STATS_TOTAL_RECEIVED_TCP_MESSAGES_LABEL=جميع رسائل Gnutella المرسلة عبر TCP حسب نوع الرسالة.
 STATS_TOTAL_RECEIVED_UDP_MESSAGES_TITLE=UDP
-#??? STATS_TOTAL_RECEIVED_UDP_MESSAGES_LABEL=All Gnutella messages received over UDP, by message type.
+STATS_TOTAL_RECEIVED_UDP_MESSAGES_LABEL=جميع رسائل Gnutella المرسلة عبر UDP حسب نوع الرسالة.
 STATS_TOTAL_RECEIVED_MULTICAST_MESSAGES_TITLE=Multicast
-#??? STATS_TOTAL_RECEIVED_MULTICAST_MESSAGES_LABEL=All Gnutella messages received over Multicast, by message type.
-#??? STATS_RECEIVED_ALL_TITLE=TCP, UDP or Multicast
-#??? STATS_RECEIVED_ALL_LABEL=Total Gnutella messages received over TCP, UDP or Multicast.
-#??? STATS_DUPLICATE_RECEIVED_TCP_QUERIES_TITLE=Duplicate TCP
+STATS_TOTAL_RECEIVED_MULTICAST_MESSAGES_LABEL=جميع رسائل Gnutella المرسلة عبر Multicast حسب نوع الرسالة.
+STATS_RECEIVED_ALL_TITLE=TCP, UDP أو Multicast
+STATS_RECEIVED_ALL_LABEL=العدد الكلي لرسائل Gnutella المرسلة عبر TCP أو UDP أو Multicast.
+STATS_DUPLICATE_RECEIVED_TCP_QUERIES_TITLE=TCP مكرر
 #??? STATS_DUPLICATE_RECEIVED_TCP_QUERIES_LABEL=Number of duplicate queries received over TCP versus the total number of queries.
-#??? STATS_DUPLICATE_RECEIVED_MULTICAST_QUERIES_TITLE=Duplicate Multicast
+STATS_DUPLICATE_RECEIVED_MULTICAST_QUERIES_TITLE=Multicast مكرر
 #??? STATS_DUPLICATE_RECEIVED_MULTICAST_QUERIES_LABEL=Number of duplicate queries received over Multicast versus the total number of queries.
 # Advanced Gnutella Message hops/ttl for queries
 #??? STATS_QUERY_REQUEST_HOPS_TITLE=Hops
@@ -1362,18 +1392,18 @@ STATS_TOTAL_RECEIVED_MULTICAST_MESSAGES_TITLE=Multicast
 
 # number of kilobytes
 STATS_TOTAL_RECEIVED_BYTES_MESSAGES_TITLE=العدد الكلي
-#??? STATS_TOTAL_RECEIVED_BYTES_MESSAGES_LABEL=Total kilobytes for all Gnutella messages received by this client.
+STATS_TOTAL_RECEIVED_BYTES_MESSAGES_LABEL=عدد الكيلو بايتات الكلي لجميع رسائل Gnutella التي أرسلها هذا المسخدم.
 STATS_TOTAL_RECEIVED_BYTES_TCP_MESSAGES_TITLE=TCP
-#??? STATS_TOTAL_RECEIVED_BYTES_TCP_MESSAGES_LABEL=Total kilobytes for Gnutella messages received over TCP, by message type.
+STATS_TOTAL_RECEIVED_BYTES_TCP_MESSAGES_LABEL=عدد الكيلو بايتات الكلي لرسائل Gnutella المرسلة عبر TCP حسب نوع الرسالة.
 STATS_TOTAL_RECEIVED_BYTES_UDP_MESSAGES_TITLE=UDP
-#??? STATS_TOTAL_RECEIVED_BYTES_UDP_MESSAGES_LABEL=Total kilobytes for Gnutella messages received over UDP, by message type.
+STATS_TOTAL_RECEIVED_BYTES_UDP_MESSAGES_LABEL=عدد الكيلو بايتات الكلي لرسائل Gnutella المرسلة عبر UDP حسب نوع الرسالة.
 STATS_TOTAL_RECEIVED_BYTES_MULTICAST_MESSAGES_TITLE=Multicast
-#??? STATS_TOTAL_RECEIVED_BYTES_MULTICAST_MESSAGES_LABEL=Total kilobytes for Gnutella messages received over Multicast, by message type.
+STATS_TOTAL_RECEIVED_BYTES_MULTICAST_MESSAGES_LABEL=عدد الكيلو بايتات الكلي لرسائل Gnutella المرسلة عبر Multicast حسب نوع الرسالة.
 STATS_RECEIVED_BYTES_ALL_TITLE=TCP, UDP or Multicast
-#??? STATS_RECEIVED_BYTES_ALL_LABEL=Total kilobytes for Gnutella messages received over TCP, UDP or Multicast.
-#??? STATS_DUPLICATE_RECEIVED_BYTES_TCP_QUERIES_TITLE=Duplicate TCP
+STATS_RECEIVED_BYTES_ALL_LABEL=عدد الكيلو بايتات الكلي لرسائل Gnutella المرسلة عبر TCP أو UDP أو Multicast.
+STATS_DUPLICATE_RECEIVED_BYTES_TCP_QUERIES_TITLE=TCP مكرر
 #??? STATS_DUPLICATE_RECEIVED_BYTES_TCP_QUERIES_LABEL=Total kilobytes in duplicate queries received over TCP versus the total number of queries.
-#??? STATS_DUPLICATE_RECEIVED_BYTES_MULTICAST_QUERIES_TITLE=Duplicate Multicast
+STATS_DUPLICATE_RECEIVED_BYTES_MULTICAST_QUERIES_TITLE=Multicast مكرر
 #??? STATS_DUPLICATE_RECEIVED_BYTES_MULTICAST_QUERIES_LABEL=Total kilobytes in duplicate queries received over Multicast versus the total number of queries.
 # Advanced Gnutella Message hops/ttl for queries in kilobytes
 #??? STATS_QUERY_REQUEST_HOPS_BYTES_TITLE=Hops
@@ -1387,8 +1417,8 @@ STATS_RECEIVED_BYTES_ALL_TITLE=TCP, UDP or Multicast
 #??? STATS_QUERY_REPLY_TTL_BYTES_LABEL=All received query hits in kilobytes, by time to live (TTL).
 
 # number of messages received for LimeWire-specific stats -- TCP
-#??? STATS_LIME_RECEIVED_TCP_MESSAGES_TITLE=Total
-#??? STATS_LIME_RECEIVED_TCP_MESSAGES_LABEL=Total number of messages received from other LimeWires.
+STATS_LIME_RECEIVED_TCP_MESSAGES_TITLE=العدد الكلي
+STATS_LIME_RECEIVED_TCP_MESSAGES_LABEL=عدد الرسائل الكلي التي تم استقبالها من مستخدمي LimeWire الآخرون.
 #??? STATS_LIME_RECEIVED_TCP_PING_REQUESTS_TITLE=Pings
 #??? STATS_LIME_RECEIVED_TCP_PING_REQUESTS_LABEL=TCP pings received from all Gnutella clients versus other LimeWires.
 #??? STATS_LIME_RECEIVED_TCP_PING_REPLIES_TITLE=Pongs
@@ -1400,8 +1430,8 @@ STATS_RECEIVED_BYTES_ALL_TITLE=TCP, UDP or Multicast
 #??? STATS_LIME_RECEIVED_TCP_PUSH_REQUESTS_TITLE=Pushes
 #??? STATS_LIME_RECEIVED_TCP_PUSH_REQUESTS_LABEL=TCP pushes received from all Gnutella clients versus other LimeWires.
 # number of messages received for LimeWire-specific stats -- UDP
-#??? STATS_LIME_RECEIVED_UDP_MESSAGES_TITLE=Total
-#??? STATS_LIME_RECEIVED_UDP_MESSAGES_LABEL=Total number of messages received from other LimeWires.
+STATS_LIME_RECEIVED_UDP_MESSAGES_TITLE=العدد الكلي
+STATS_LIME_RECEIVED_UDP_MESSAGES_LABEL=عدد الرسائل الكلي التي تم استقبالها من مستخدمي LimeWire الآخرون.
 #??? STATS_LIME_RECEIVED_UDP_PING_REQUESTS_TITLE=Pings
 #??? STATS_LIME_RECEIVED_UDP_PING_REQUESTS_LABEL=UDP pings received from all Gnutella clients versus other LimeWires.
 #??? STATS_LIME_RECEIVED_UDP_PING_REPLIES_TITLE=Pongs
@@ -1413,8 +1443,8 @@ STATS_RECEIVED_BYTES_ALL_TITLE=TCP, UDP or Multicast
 #??? STATS_LIME_RECEIVED_UDP_PUSH_REQUESTS_TITLE=Pushes
 #??? STATS_LIME_RECEIVED_UDP_PUSH_REQUESTS_LABEL=UDP pushes received from all Gnutella clients versus other LimeWires.
 # number of messages received for LimeWire-specific stats -- Multicast
-#??? STATS_LIME_RECEIVED_MULTICAST_MESSAGES_TITLE=Total
-#??? STATS_LIME_RECEIVED_MULTICAST_MESSAGES_LABEL=Total number of messages received from other LimeWires.
+STATS_LIME_RECEIVED_MULTICAST_MESSAGES_TITLE=العدد الكلي
+STATS_LIME_RECEIVED_MULTICAST_MESSAGES_LABEL=عدد الرسائل الكلي التي تم استقبالها من مستخدمي LimeWire الآخرون.
 #??? STATS_LIME_RECEIVED_MULTICAST_PING_REQUESTS_TITLE=Pings
 #??? STATS_LIME_RECEIVED_MULTICAST_PING_REQUESTS_LABEL=Multicast pings received from all Gnutella clients versus other LimeWires.
 #??? STATS_LIME_RECEIVED_MULTICAST_PING_REPLIES_TITLE=Pongs
@@ -1428,7 +1458,7 @@ STATS_RECEIVED_BYTES_ALL_TITLE=TCP, UDP or Multicast
 
 # number of kilobytes received for LimeWire-specific stats -- TCP
 STATS_LIME_RECEIVED_BYTES_TCP_MESSAGES_TITLE=العدد الكلي
-#??? STATS_LIME_RECEIVED_BYTES_TCP_MESSAGES_LABEL=Total kilobytes received by other LimeWires.
+STATS_LIME_RECEIVED_BYTES_TCP_MESSAGES_LABEL=عدد الكيلو بايتات الكلي التي تم استقبالها من مستخدمي LimeWire الآخرون.
 #??? STATS_LIME_RECEIVED_BYTES_TCP_PING_REQUESTS_TITLE=Pings
 #??? STATS_LIME_RECEIVED_BYTES_TCP_PING_REQUESTS_LABEL=TCP pings received from all Gnutella clients versus other LimeWires.
 #??? STATS_LIME_RECEIVED_BYTES_TCP_PING_REPLIES_TITLE=Pongs
@@ -1441,7 +1471,7 @@ STATS_LIME_RECEIVED_BYTES_TCP_MESSAGES_TITLE=العدد الكلي
 #??? STATS_LIME_RECEIVED_BYTES_TCP_PUSH_REQUESTS_LABEL=TCP pushes received from all Gnutella clients versus other LimeWires?
 # number of kilobytes received for LimeWire-specific stats -- UDP
 STATS_LIME_RECEIVED_BYTES_UDP_MESSAGES_TITLE=العدد الكلي
-#??? STATS_LIME_RECEIVED_BYTES_UDP_MESSAGES_LABEL=Total kilobytes received by other LimeWires.
+STATS_LIME_RECEIVED_BYTES_UDP_MESSAGES_LABEL=عدد الكيلو بايتات الكلي التي تم استقبالها من مستخدمي LimeWire الآخرون.
 #??? STATS_LIME_RECEIVED_BYTES_UDP_PING_REQUESTS_TITLE=Pings
 #??? STATS_LIME_RECEIVED_BYTES_UDP_PING_REQUESTS_LABEL=Kilobytes for UDP pings received from all Gnutella clients versus other LimeWires.
 #??? STATS_LIME_RECEIVED_BYTES_UDP_PING_REPLIES_TITLE=Pongs
@@ -1454,7 +1484,7 @@ STATS_LIME_RECEIVED_BYTES_UDP_MESSAGES_TITLE=العدد الكلي
 #??? STATS_LIME_RECEIVED_BYTES_UDP_PUSH_REQUESTS_LABEL=Kilobytes for UDP pushes received from all Gnutella clients versus other LimeWires.
 # number of kilobytes received for LimeWire-specific stats -- Multicast
 STATS_LIME_RECEIVED_BYTES_MULTICAST_MESSAGES_TITLE=العدد الكلي
-#??? STATS_LIME_RECEIVED_BYTES_MULTICAST_MESSAGES_LABEL=Total kilobytes received by other LimeWires.
+STATS_LIME_RECEIVED_BYTES_MULTICAST_MESSAGES_LABEL=عدد الكيلو بايتات الكلي التي تم استقبالها من مستخدمي LimeWire الآخرون.
 #??? STATS_LIME_RECEIVED_BYTES_MULTICAST_PING_REQUESTS_TITLE=Pings
 #??? STATS_LIME_RECEIVED_BYTES_MULTICAST_PING_REQUESTS_LABEL=Kilobytes for Multicast pings received from all Gnutella clients versus other LimeWires.
 #??? STATS_LIME_RECEIVED_BYTES_MULTICAST_PING_REPLIES_TITLE=Pongs
@@ -1466,17 +1496,17 @@ STATS_LIME_RECEIVED_BYTES_MULTICAST_MESSAGES_TITLE=العدد الكلي
 #??? STATS_LIME_RECEIVED_BYTES_MULTICAST_PUSH_REQUESTS_TITLE=Pushes
 #??? STATS_LIME_RECEIVED_BYTES_MULTICAST_PUSH_REQUESTS_LABEL=Kilobytes for Multicast pushes received from all Gnutella clients versus other LimeWires.
 
-#??? STATS_RECEIVED_AVERAGE_MESSAGE_SIZE_TITLE=Average size
-#??? STATS_RECEIVED_AVERAGE_MESSAGE_SIZE_LABEL=The average size in kilobytes of received Gnutella messages.
-#??? STATS_RECEIVED_AVERAGE_LIME_MESSAGE_SIZE_TITLE=Average size
-#??? STATS_RECEIVED_AVERAGE_LIME_MESSAGE_SIZE_LABEL=The average size in kilobytes of received messages from LimeWires.
+STATS_RECEIVED_AVERAGE_MESSAGE_SIZE_TITLE=الحجم المتوسط
+STATS_RECEIVED_AVERAGE_MESSAGE_SIZE_LABEL=الحجم المتوسط لرسائل Gnutella  المستقبلة بالكيلو بايت.
+STATS_RECEIVED_AVERAGE_LIME_MESSAGE_SIZE_TITLE=الحجم المتوسط
+STATS_RECEIVED_AVERAGE_LIME_MESSAGE_SIZE_LABEL=الحجم المتوسط لرسائل مستخدمي LimeWire المستقبلة بالكيلو بايت.
 
 ################################################################################
 # Key/value pairs for advanced Gnutella message statistics -- qrp messages
 ################################################################################
 QRP_MESSAGES=QRP
-#??? QRP_ULTRAPEER=Ultrapeer
-#??? QRP_LEAF=Leaf
+QRP_ULTRAPEER=ند فائق
+QRP_LEAF=طرف
 
 STATS_QRP_ULTRAPEER_ROUTED_QUERIES_SENT_TITLE=تم الإرسال
 #??? STATS_QRP_ULTRAPEER_ROUTED_QUERIES_SENT_LABEL=All queries that were routed to other Ultrapeers for the last hop, using query routing tables.
@@ -1488,7 +1518,7 @@ STATS_QRP_LEAF_ROUTED_QUERIES_SENT_TITLE=تم الإرسال
 STATS_QRP_LEAF_ROUTED_QUERIES_SENT=تم الإرسال
 STATS_QRP_LEAF_ROUTED_QUERIES_DROP=لم يتم الإرسال
 
-#??? STATS_QRP_LEAF_ROUTED_QUERIES_RECEIVED_TITLE=Received
+STATS_QRP_LEAF_ROUTED_QUERIES_RECEIVED_TITLE=الواردة
 #??? STATS_QRP_LEAF_ROUTED_QUERIES_RECEIVED_LABEL=All queries that were received from routed connections.
 #??? STATS_QRP_LEAF_ROUTED_QUERIES_HIT=Hit
 #??? STATS_QRP_LEAF_ROUTED_QUERIES_MISS=False positive
@@ -1508,8 +1538,8 @@ ERROR_MESSAGES=أخطاء
 #??? STATS_ERROR_PING_REPLY_LABEL=Errors while reading ping replies.
 #??? STATS_ERROR_PUSHES_TITLE=Pushes
 #??? STATS_ERROR_PUSHES_LABEL=Errors while reading pushes.
-#??? STATS_ERROR_VENDOR_TITLE=Vendor messages
-#??? STATS_ERROR_VENDOR_LABEL=Errors while reading vendor messages.
+STATS_ERROR_VENDOR_TITLE=رسائل الموزع
+STATS_ERROR_VENDOR_LABEL=أخطاء أثناء قراءة رسائل الموزع.
 
 ################################################################################
 # Key/value pairs for advanced Gnutella message statistics -- sent messages
@@ -1530,27 +1560,27 @@ STATS_SENT_MULTICAST_BYTES=Multicast
 
 # number of messages
 STATS_TOTAL_SENT_MESSAGES_TITLE=العدد الكلي
-#??? STATS_TOTAL_SENT_MESSAGES_LABEL=All Gnutella messages sent out from this client.
+STATS_TOTAL_SENT_MESSAGES_LABEL=جميع رسائل Gnutella التي أرسلها هذا المسخدم.
 STATS_TOTAL_SENT_TCP_MESSAGES_TITLE=TCP 
-#??? STATS_TOTAL_SENT_TCP_MESSAGES_LABEL=All Gnutella messages sent over TCP, by message type.
+STATS_TOTAL_SENT_TCP_MESSAGES_LABEL=جميع رسائل Gnutella المرسلة عبر TCP حسب نوع الرسالة.
 STATS_TOTAL_SENT_UDP_MESSAGES_TITLE=UDP
-#??? STATS_TOTAL_SENT_UDP_MESSAGES_LABEL=All Gnutella messages sent over UDP, by message type.
+STATS_TOTAL_SENT_UDP_MESSAGES_LABEL=جميع رسائل Gnutella المرسلة عبر UDP حسب نوع الرسالة.
 STATS_TOTAL_SENT_MULTICAST_MESSAGES_TITLE=Multicast
-#??? STATS_TOTAL_SENT_MULTICAST_MESSAGES_LABEL=All Gnutella messages sent over Multicast, by message type.
+STATS_TOTAL_SENT_MULTICAST_MESSAGES_LABEL=جميع رسائل Gnutella المرسلة عبر Multicast حسب نوع الرسالة.
 STATS_SENT_ALL_TITLE=TCP, UDP أو Multicast
-#??? STATS_SENT_ALL_LABEL=Total Gnutella messages sent over TCP, UDP or Multicast.
+STATS_SENT_ALL_LABEL=العدد الكلي لرسائل Gnutella المرسلة عبر TCP أو UDP أو Multicast.
 
 # number of kilobytes
 STATS_TOTAL_SENT_BYTES_MESSAGES_TITLE=العدد الكلي
-#??? STATS_TOTAL_SENT_BYTES_MESSAGES_LABEL=Total kilobytes for Gnutella messages sent out from this client.
+STATS_TOTAL_SENT_BYTES_MESSAGES_LABEL=عدد الكيلو بايتات الكلي لرسائل Gnutella التي أرسلها هذا المسخدم.
 STATS_TOTAL_SENT_BYTES_TCP_MESSAGES_TITLE=TCP
-#??? STATS_TOTAL_SENT_BYTES_TCP_MESSAGES_LABEL=Total kilobytes for Gnutella messages sent over TCP, by message type.
+STATS_TOTAL_SENT_BYTES_TCP_MESSAGES_LABEL=عدد الكيلو بايتات الكلي لرسائل Gnutella المرسلة عبر TCP حسب نوع الرسالة.
 STATS_TOTAL_SENT_BYTES_UDP_MESSAGES_TITLE=UDP
-#??? STATS_TOTAL_SENT_BYTES_UDP_MESSAGES_LABEL=Total kilobytes for Gnutella messages sent over UDP, by message type.
+STATS_TOTAL_SENT_BYTES_UDP_MESSAGES_LABEL=عدد الكيلو بايتات الكلي لرسائل Gnutella المرسلة عبر UDP حسب نوع الرسالة.
 STATS_TOTAL_SENT_BYTES_MULTICAST_MESSAGES_TITLE=Multicast
-#??? STATS_TOTAL_SENT_BYTES_MULTICAST_MESSAGES_LABEL=Total kilobytes for Gnutella messages sent over Multicast, by message type.
+STATS_TOTAL_SENT_BYTES_MULTICAST_MESSAGES_LABEL=عدد الكيلو بايتات الكلي لرسائل Gnutella المرسلة عبر Multicast حسب نوع الرسالة.
 STATS_SENT_BYTES_ALL_TITLE=TCP, UDP أو Multicast
-#??? STATS_SENT_BYTES_ALL_LABEL=Total kilobytes for Gnutella messages sent over TCP, UDP or Multicast.
+STATS_SENT_BYTES_ALL_LABEL=عدد الكيلو بايتات الكلي لرسائل Gnutella المرسلة عبر TCP أو UDP أو Multicast.
 
 # number of messages sent for LimeWire-specific stats -- TCP
 STATS_LIME_SENT_TCP_MESSAGES_TITLE=العدد الكلي
@@ -1648,13 +1678,13 @@ STATS_SENT_LEAF_ROUTED_QUERIES_DROP_TITLE=لم يتم الإرسال
 # Key/value pairs for advanced Gnutella message statistics -- handshaking
 ################################################################################
 #??? HANDSHAKING=Handshaking
-#??? STATS_HANDSHAKING_LEAF_TITLE=Leaf
+STATS_HANDSHAKING_LEAF_TITLE=طرف
 #??? STATS_HANDSHAKING_LEAF_LABEL=Statistics for handshaking as a leaf.
-#??? STATS_HANDSHAKING_ULTRAPEER_TITLE=Ultrapeer
+STATS_HANDSHAKING_ULTRAPEER_TITLE=الند الفائق
 #??? STATS_HANDSHAKING_ULTRAPEER_LABEL=Statistics for handshaking as an ultrapeer.
-#??? STATS_HANDSHAKING_OUTGOING_TITLE=Outgoing
+STATS_HANDSHAKING_OUTGOING_TITLE=الصادر
 #??? STATS_HANDSHAKING_OUTGOING_LABEL=Statistics for outgoing Gnutella connection handshaking.
-#??? STATS_HANDSHAKING_INCOMING_TITLE=Incoming
+STATS_HANDSHAKING_INCOMING_TITLE=الوارد
 #??? STATS_HANDSHAKING_INCOMING_LABEL=Statistics for incoming Gnutella connection handshaking.
 #??? STATS_HANDSHAKING_OUTGOING_SERVER_REJECT_TITLE=Outgoing server reject
 #??? STATS_HANDSHAKING_OUTGOING_SERVER_REJECT_LABEL=Statistics for outgoing Gnutella connection handshaking rejections from the server.
@@ -1692,41 +1722,41 @@ STATS_FLOW_CONTROL_BYTES_TITLE=كيلو بايت
 #??? STATS_FILTERED_MESSAGES_TITLE=Filtered messages
 #??? STATS_FILTERED_MESSAGES_LABEL=Total messages filtered.
 
-#??? STATS_TOTAL_CONNECTION_ATTEMPTS_TITLE=Connections
-#??? STATS_TOTAL_CONNECTION_ATTEMPTS_LABEL=Total number of Gnutella connection attempts, either initiated internally or externally.
+STATS_TOTAL_CONNECTION_ATTEMPTS_TITLE=اتصالات
+STATS_TOTAL_CONNECTION_ATTEMPTS_LABEL=الععد الكلي لمحاولات اتصال Gnutella سواء الداخلية أو الخارجية.
 
 ################################################################################
 # Key/value pairs for advanced HTTP statistics
 ################################################################################
-#??? STATS_TOTAL_HTTP_REQUESTS_TITLE=Incoming requests
+STATS_TOTAL_HTTP_REQUESTS_TITLE=الطلبات الواردة
 #??? STATS_TOTAL_HTTP_REQUESTS_LABEL=Total incoming requests received over time. This includes all connection attempts (GET, HEAD, GIV, CHAT, GNUTELLA, MAGNET, etc...).
 
 ################################################################################
 # Key/value pairs for advanced Download statistics
 ################################################################################
-#??? DOWNLOAD_STATISTICS=Downloads
-#??? STATS_DOWNLOAD_CONNECTIONS_TITLE=Connections
+DOWNLOAD_STATISTICS=التنزيلات
+STATS_DOWNLOAD_CONNECTIONS_TITLE=اتصالات
 #??? STATS_DOWNLOAD_CONNECTIONS_LABEL=Total outgoing download connections attempts over time. This includes both direct connections and pushed requests.
-#??? STATS_DOWNLOAD_RESPONSES_TITLE=Responses
+STATS_DOWNLOAD_RESPONSES_TITLE=ردود
 #??? STATS_DOWNLOAD_RESPONSES_LABEL=Total responses received from downloaders over time. This includes Busy, File Not Found, Not Sharing, Queued, misc. IO errors, and OK responses.
-#??? STATS_DOWNLOAD_ALTERNATE_TITLE=Alt. locations
+STATS_DOWNLOAD_ALTERNATE_TITLE=المواقع البديلة
 #??? STATS_DOWNLOAD_ALTERNATE_LABEL=Total alternate locations received and removed over time. This includes locations that we actively attempt to connect to, locations that we will ignore, locations that couldn't be removed, and locations that we removed permanently from attempting to connect to.
-#??? STATS_DOWNLOAD_TRANFERS_TITLE=Transfers
+STATS_DOWNLOAD_TRANFERS_TITLE=تحويلات
 #??? STATS_DOWNLOAD_TRANFERS_LABEL=Total transfers over time. This includes both HTTP1.1 and HTTP1.0 transfers. For HTTP1.1, values are per chunk.
-#??? STATS_DOWNLOAD_TCP_CONNECT_TIME_TITLE=TCP connect time
+STATS_DOWNLOAD_TCP_CONNECT_TIME_TITLE=وقت اتصال TCP
 #??? STATS_DOWNLOAD_TCP_CONNECT_TIME_LABEL=Records the time in milliseconds to establish TCP connections for downloads. This can vary, for example, when servers are experiencing high loads.
 
 ################################################################################
 # Key/value pairs for advanced Upload statistics
 ################################################################################
-#??? UPLOAD_STATISTICS=Uploads
-#??? STATS_UPLOAD_REQUESTS_TITLE=Requests
+UPLOAD_STATISTICS=التحميلات
+STATS_UPLOAD_REQUESTS_TITLE=طلبات
 #??? STATS_UPLOAD_REQUESTS_LABEL=Total incoming upload requests. These numbers are incremented on every attempt to parse a request, and thus include every chunk for HTTP/1.1 transfers.
-#??? STATS_UPLOAD_RESPONSES_TITLE=Responses
+STATS_UPLOAD_RESPONSES_TITLE=ردود
 #??? STATS_UPLOAD_RESPONSES_LABEL=Total outgoing responses. These numbers are incremented before sending each response, and thus include every chunk for HTTP/1.1 transfers. 'Normal' is the amount of requests for which we have attempted to transf?r a portion of a file.
-#??? STATS_UPLOAD_METHODS_TITLE=Request methods
+STATS_UPLOAD_METHODS_TITLE=طرق الطلب
 #??? STATS_UPLOAD_METHODS_LABEL=Total incoming request methods. These numbers are incremented either for HTTP/1.1 transfer AFTER the initial incoming connection request or for push requests, after we have sent the initial GIV.
-#??? STATS_UPLOAD_GENERAL_TITLE=General
+STATS_UPLOAD_GENERAL_TITLE=عام
 #??? STATS_UPLOAD_GENERAL_LABEL=Total attempted, completed, interrupted or stalled uploads. These numbers are incremented per connection, not per chunk. (Stalled uploads will also be counted as an interrupted upload.)
 
 ################################################################################
@@ -1747,9 +1777,9 @@ STATS_LEGEND_AVERAGE=المتوسط
 STATS_LEGEND_MAX=أقصى قيمة
 STATS_LEGEND_TOTAL=العدد الكلي
 STATS_LEGEND_COLOR=اللون
-#??? STATS_LEGEND_CURRENT=Current
+STATS_LEGEND_CURRENT=الحالي
 
-#??? STATS_RECORD_STATS_LABEL=Write statistics for this graph to files.
+STATS_RECORD_STATS_LABEL=قم بكتابة إحصائيات هذا الشكل للملفات.
 
 # Bandwidth
 #??? UPSTREAM_BANDWIDTH=Total upstream
@@ -1759,7 +1789,7 @@ STATS_LEGEND_COLOR=اللون
 #??? HTTP_BODY_BANDWIDTH=HTTP content
 #??? GNUTELLA_BANDWIDTH=Gnutella total
 #??? GNUTELLA_HEADER_BANDWIDTH=Gnutella headers
-#??? GNUTELLA_MESSAGE_BANDWIDTH=Gnutella messages
+GNUTELLA_MESSAGE_BANDWIDTH=رسائل Gnutella
 
 # Compression
 #??? UNCOMPRESSED_UPSTREAM=Total upstream (potential)
@@ -1773,33 +1803,33 @@ STATS_LEGEND_COLOR=اللون
 
 # Advanced Gnutella All clients messages
 #??? STATS_ALL_CLIENTS=All clients
-#??? STATS_LIMEWIRE=LimeWire
+STATS_LIMEWIRE=LimeWire
 
 # Advanced Gnutella Received Messages Total
-#??? ALL_RECEIVED=Received
-#??? ALL_LIME_RECEIVED=Received LimeWire
+ALL_RECEIVED=الواردة
+ALL_LIME_RECEIVED=واردة LimeWire
 # Advanced Gnutella Received Messages TCP/UDP/Multicast
-#??? RECEIVED_ALL_TCP_MESSAGES=TCP messages
-#??? RECEIVED_ALL_UDP_MESSAGES=UDP messages
-#??? RECEIVED_ALL_MULTICAST_MESSAGES=Multicast messages
+RECEIVED_ALL_TCP_MESSAGES=رسائل TCP
+RECEIVED_ALL_UDP_MESSAGES=رسائل UDP
+RECEIVED_ALL_MULTICAST_MESSAGES=رسائل Multicast
 # Advanced Gnutella Received Messages Duplicate queries
-#??? RECEIVED_TCP_DUPLICATE_QUERIES=Duplicates
-#??? RECEIVED_MULTICAST_DUPLICATE_QUERIES=Duplicates
+RECEIVED_TCP_DUPLICATE_QUERIES=تكرار
+RECEIVED_MULTICAST_DUPLICATE_QUERIES=تكرار
 
 # Advanced Gnutella Received Kilobytes Total
-#??? ALL_RECEIVED_BYTES=Received
+ALL_RECEIVED_BYTES=الواردة
 #??? ALL_LIME_RECEIVED_BYTES=Received LimeWire
 # Advanced Gnutella Received Kilobytes TCP/UDP/Multicast
 RECEIVED_ALL_TCP_MESSAGES_BYTES=TCP رسائل
 RECEIVED_ALL_UDP_MESSAGES_BYTES=UDP رسائل
 RECEIVED_ALL_MULTICAST_MESSAGES_BYTES=Multicast رسائل
 # Advanced Gnutella Received Kilobytes Duplicate queries
-#??? RECEIVED_TCP_DUPLICATE_QUERIES_BYTES=Duplicates TCP
-#??? RECEIVED_MULTICAST_DUPLICATE_QUERIES_BYTES=Duplicates Multicast
+RECEIVED_TCP_DUPLICATE_QUERIES_BYTES=تكرار TCP
+RECEIVED_MULTICAST_DUPLICATE_QUERIES_BYTES=تكرار Multicast
 
 # Advanced Gnutella Sent Messages Total
 ALL_SENT=تم الإرسال
-#??? ALL_LIME_SENT=Sent LimeWire
+ALL_LIME_SENT=إرسال LimeWire
 # Advanced Gnutella Sent Messages TCP/UDP/Multicast
 SENT_ALL_TCP_MESSAGES=TCP رسائل
 SENT_ALL_UDP_MESSAGES=UDP رسائل
