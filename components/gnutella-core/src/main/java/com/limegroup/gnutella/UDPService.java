@@ -225,7 +225,8 @@ public final class UDPService implements Runnable {
 	 * @param ip   the <tt>InetAddress</tt> to send to
 	 * @param port the port to send to
 	 */
-    public synchronized void send(Message msg, InetAddress ip, int port) {
+    public synchronized void send(Message msg, InetAddress ip, int port) 
+      throws IOException {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         try {
             msg.write(baos);
@@ -244,15 +245,7 @@ public final class UDPService implements Runnable {
             if(_socket == null) // just drop it, don't wait - FOR NOW.  when we
                                 // thread this, we will wait...
                 return;
-            try {
-                _socket.send(dg);
-            } catch(IOException e) {
-                // this should not happen -- could mean we're having trouble
-                // getting an address
-                ErrorService.error(e);                
-                System.err.println("ip: "+ip);
-                System.err.println("port: "+port); 
-            }
+            _socket.send(dg);
         }
 	}
 

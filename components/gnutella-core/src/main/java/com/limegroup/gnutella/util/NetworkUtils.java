@@ -30,6 +30,23 @@ public final class NetworkUtils {
 	}
 	
 	/**
+	 * Returns whether or not the specified address is valid.
+	 */
+	public static boolean isValidAddress(byte[] addr) {
+	    if( addr[0] == 0 && addr[1] == 0 && addr[2] == 0 && addr[3] == 0)
+            return false;
+	    else
+	        return true;
+    }
+    
+    /**
+     * Returns whether or not the specified InetAddress is valid.
+     */
+    public static boolean isValidAddress(InetAddress addr) {
+        return isValidAddress(addr.getAddress());
+    }       
+	
+	/**
 	 * Returns whether or not the supplied address is a local address.
 	 */
 	public static boolean isLocalAddress(InetAddress addr) {

@@ -214,8 +214,13 @@ public final class MulticastService implements Runnable {
 	 */
     public synchronized void send(Message msg) {
         // only send the msg if we've initialized the port.
-        if( _port != -1 )
-            UDPService.instance().send(msg, _group, _port);
+        if( _port != -1 ) {
+            try {
+                UDPService.instance().send(msg, _group, _port);
+            } catch(IOException ioe) {
+                // multicast is never necessary, ignore.
+            }
+        }
 	}
 
 	/**

@@ -243,7 +243,12 @@ public class StandardMessageRouter extends MessageRouter {
                     ReplyNumberVendorMessage vm = 
                         new ReplyNumberVendorMessage(new GUID(query.getGUID()),
                                                      resultCount);
-                    UDPService.instance().send(vm, addr, port);                
+                    try {
+                        UDPService.instance().send(vm, addr, port);
+                    } catch(IOException ioe) {
+                        ErrorService.error(ioe,
+                            "ip/port: " + addr + ":" + port);
+                    }
                 }
                 catch (BadPacketException bpe) {
                     // should NEVER happen
