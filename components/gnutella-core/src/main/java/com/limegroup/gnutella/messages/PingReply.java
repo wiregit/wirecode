@@ -83,6 +83,16 @@ public class PingReply extends Message implements Serializable {
      */
     private static final byte[] CACHED_VENDOR = new byte[5];
 
+    /**
+     * Constant for the number of free Ultrapeer slots reported in this pong.
+     */
+    private final int NUM_FREE_ULTRAPEER_SLOTS;
+
+    /**
+     * Constant for the number of free leaf slots reported in this pong.
+     */
+    private final int NUM_FREE_LEAF_SLOTS;
+
     // performs any necessary static initialization of fields,
     // such as the vendor GGEP extension
     static {
@@ -450,6 +460,8 @@ public class PingReply extends Message implements Serializable {
         int vendorMajor = -1;
         int vendorMinor = -1;
         QueryKey key = null;
+        int numFreeLeafSlots = 0;
+        int numFreeUltrapeerSlots = 0;
         if(ggep != null) {
             if(ggep.hasKey(GGEP.GGEP_HEADER_DAILY_AVERAGE_UPTIME)) {
                 try {
@@ -500,6 +512,15 @@ public class PingReply extends Message implements Serializable {
                     // simply don't assign it
                 }
             }
+            if(ggep.hasKey(GGEP.GGEP_HEADER_UP_SUPPORT)) {
+                try {
+                    byte[] bytes = ggep.getBytes(GGEP.GGEP_HEADER_UP_SUPPORT);
+                    numFreeLeafSlots = (int)bytes[1];
+                    numFreeUltrapeerSlots = (int)bytes[2];
+                } catch(BadGGEPPropertyException e) {
+                    // don't assign it
+                }
+            }
         }
 
         HAS_GGEP_EXTENSION = ggep != null;
@@ -509,7 +530,8 @@ public class PingReply extends Message implements Serializable {
         VENDOR_MAJOR_VERSION = vendorMajor;
         VENDOR_MINOR_VERSION = vendorMinor;
         QUERY_KEY = key;
-        
+        NUM_FREE_LEAF_SLOTS = numFreeLeafSlots;
+        NUM_FREE_ULTRAPEER_SLOTS = numFreeUltrapeerSlots;
     }
 
 
@@ -567,6 +589,10 @@ public class PingReply extends Message implements Serializable {
         payload[0] = convertToGUESSFormat(CommonUtils.getUPMajorVersionNumber(),
                                           CommonUtils.getUPMinorVersionNumber()
                                           );
+
+        // TODO: we should be a little bit more careful here -- if we have, say
+        // 256 slots open, we'll think there are 0 -- not a problem now,
+        // but could be down the road
         payload[1] = (byte) RouterService.getNumFreeLeafSlots();
         payload[2] = (byte) RouterService.getNumFreeNonLeafSlots();
 
@@ -597,6 +623,28 @@ public class PingReply extends Message implements Serializable {
 		if(RECORD_STATS) {
 			SentMessageStatHandler.TCP_PING_REPLIES.addMessage(this);
 		}
+    }
+
+    /**
+     * Determines whether or not this Ultrapeer has free Ultrapeer connection
+     * slots.
+     *
+     * @return <tt>true</tt> if the Ultrapeer sending this pong has free 
+     *  Ultrapeer connection slots, otherwise <tt>false</tt>.  If the pong
+     *  did not come from an Ultrapeer, returns <tt>false</tt>
+     */
+    public boolean hasFreeUltrapeerSlots() {
+        return getNumFreeUltrapeerSlots() > 0;
+    }
+
+    /**
+     * Accesor for the number of free Ultrapeer slots this Ultrapeer has.
+     *
+     * @return The number of free Ultrapeer connection slots this Ultrapeer
+     *  has.  If the pong was not from an Ultrapeer, returns 0
+     */
+    public int getNumFreeUltrapeerSlots() {
+        return NUM_FREE_LEAF_SLOTS;
     }
 
     /**
