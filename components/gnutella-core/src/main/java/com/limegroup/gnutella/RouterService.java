@@ -169,6 +169,7 @@ public final class RouterService {
 		router.initialize();
 		manager.initialize();	   
 		downloader.initialize(); 
+        QueryUnicaster.instance().initialize();
 	    new HTTPAcceptor(callback);	
 		SupernodeAssigner sa = new SupernodeAssigner(uploadManager, 
 													 downloader, 

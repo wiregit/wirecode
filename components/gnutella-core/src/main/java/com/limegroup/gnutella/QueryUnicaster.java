@@ -34,7 +34,7 @@ public final class QueryUnicaster {
     public static final long ONE_HOUR = 1000 * 60 * 60; // 60 minutes
 
     // the instance of me....
-    private static QueryUnicaster _instance;
+    private final static QueryUnicaster _instance = new QueryUnicaster();
 
     /** Actually sends any QRs via unicast UDP messages.
      */
@@ -93,9 +93,14 @@ public final class QueryUnicaster {
 	 */
 	private final boolean RECORD_STATS = !CommonUtils.isJava118();
 
+	/**
+	 * Records whether or not someone has called init on me....
+	 */
+	private boolean _initialized = false;
+
+    /** Need to call initialize() to make sure I'm running!
+     */ 
     public static QueryUnicaster instance() {
-        if (_instance == null)
-            _instance = new QueryUnicaster();
         return _instance;
     }
 
@@ -176,15 +181,20 @@ public final class QueryUnicaster {
 
         _querier.setName("QueryUnicaster");
         _querier.setDaemon(true);
-
-        // only if settings says i can....
-        if (SearchSettings.GUESS_ENABLED.getValue())
-            _querier.start();
-
-        QueryKeyExpirer expirer = new QueryKeyExpirer();
-        RouterService.schedule(expirer, 0, 3 * ONE_HOUR);// every 3 hours
-
     }
+
+    
+    public synchronized void initialize() {
+        if (!_initialized) {
+            _querier.start();
+            
+            QueryKeyExpirer expirer = new QueryKeyExpirer();
+            RouterService.schedule(expirer, 0, 3 * ONE_HOUR);// every 3 hours
+
+            _initialized = true;
+        }
+    }
+
 
     /** 
      * The main work to be done.
