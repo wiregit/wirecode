@@ -1,6 +1,7 @@
 package com.limegroup.gnutella;
 
 import junit.framework.*;
+import com.limegroup.gnutella.xml.*;
 
 /**
  * Runs all the LimeWire tests.
@@ -15,6 +16,8 @@ public class AllTests {
         suite.addTest(ManagedConnectionTest.suite());
         suite.addTest(GUIDTest.suite());
         suite.addTest(StatisticsTest.suite());
+        suite.addTest(XMLDocSerializerTest.suite());
+        suite.addTest(CollectionTester.suite());
         return suite;
     }
 
