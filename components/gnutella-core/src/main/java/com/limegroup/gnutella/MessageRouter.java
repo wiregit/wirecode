@@ -852,15 +852,22 @@ public abstract class MessageRouter {
 
 		if(handler.isSupernodeClientConnection() && counter != null) {
             if (request.desiresOutOfBandReplies()) {
-                // this query came from a leaf - so check if it desires out-of-band
+                // this query came from a leaf - so check if it desires OOB
                 // responses and make sure that the IP it advertises is legit -
                 // if it isn't drop away....
                 // no need to check the port - if you are attacking yourself you
                 // got problems
                 String remoteAddr = handler.getInetAddress().getHostAddress();
-                if (!request.getReplyAddress().equals(remoteAddr))
-                    return;
-                // continue below, everything looks good
+                String myAddress = 
+                    NetworkUtils.ip2string(RouterService.getAddress());
+                if (request.getReplyAddress().equals(remoteAddr))
+                    ; // continue below, everything looks good
+                else if (request.getReplyAddress().equals(myAddress) && 
+                         RouterService.isOOBCapable())
+                    // i am proxying - maybe i should check my success rate but
+                    // whatever...
+                    ; 
+                else return;
             }
 
             // don't send it to leaves here -- the dynamic querier will 
