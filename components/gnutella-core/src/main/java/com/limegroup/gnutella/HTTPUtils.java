@@ -15,6 +15,11 @@ public final class HTTPUtils {
 	private static final String CRLF = "\r\n";
 
 	/**
+	 * Cached colon followed by a space to avoid excessive allocations.
+	 */
+	private static final String COLON_SPACE = ": ";
+
+	/**
 	 * Private constructor to ensure that this class cannot be constructed
 	 */
 	private HTTPUtils() {}
@@ -41,20 +46,24 @@ public final class HTTPUtils {
 		if((nameStr == null) || (valueStr == null)) {
 			throw new NullPointerException("null value in writing http header");
 		}		
-		String composite = nameStr+": "+valueStr+CRLF;
-		os.write(composite.getBytes());
+		StringBuffer sb = new StringBuffer();
+		sb.append(nameStr);
+		sb.append(COLON_SPACE);
+		sb.append(valueStr);
+		sb.append(CRLF);
+		os.write(sb.toString().getBytes());
 	}
 
-	public static void main(String[] args) {
-		try {
-			ByteArrayOutputStream baos = new ByteArrayOutputStream();
-			HTTPHeaderValue val = new AlternateLocationCollection();
-			HTTPUtils.writeHeader(HTTPHeaderName.ALT_LOCATION,
-								  val,
-								  baos);
-			System.out.println(baos); 
-		} catch(IOException e) {
-			e.printStackTrace();
-		}
+	/**
+	 * Parses out the header value from the HTTP header string.
+	 *
+	 * @return the header value for the specified full header string, or
+	 *  <tt>null</tt> if the value could not be extracted
+	 */
+	public static String extractHeaderValue(final String header) {
+		int index = header.indexOf(":");
+		if(index == 0) return null;
+		return header.substring(index+1);
 	}
+	
 }
