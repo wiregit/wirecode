@@ -2,7 +2,7 @@ package com.limegroup.gnutella.mp3;
 
 import java.io.*;
 import java.net.*;
-import com.limegroup.gnutella.ByteOrder;
+import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.xml.*;
 import com.limegroup.gnutella.util.*;
 import com.limegroup.gnutella.http.*;
@@ -42,6 +42,8 @@ public final class ID3Reader {
     private static final String SECONDS_KEY =  KEY_PREFIX + "seconds" + 
         XMLStringUtils.DELIMITER;
         
+    private static final String LICENSE_RDF_OPEN = "<license rdf:resource=\"";
+
     /**
      * This class should never be constructed.
      */
@@ -198,6 +200,7 @@ public final class ID3Reader {
         // 3. verify that the rdf has the same license as the TCOP frame did 
         try {
 
+            // 1
             // get the TCOP frame            
             MP3File mp3 = new MP3File(filename);
             TagContent content = mp3.getCopyrightText();
@@ -219,9 +222,13 @@ public final class ID3Reader {
             }
             if (!seenVerify)
                 return false;
+            if (license == null)
+                return false;
 
             // if there is someplace to verify the file at, verify the RDF
             if (st.nextToken().equalsIgnoreCase("at")) {
+                // 2
+                // connect to the verification URL
                 String urlString = st.nextToken();
                 URL url = new URL(urlString);
 
@@ -235,17 +242,58 @@ public final class ID3Reader {
                     HTTPHeaderName.CONNECTION.httpStringValue(), "close");
                 http.setRequestProperty("accept","text/html");//??
 
-                if (http.getResponseCode() != http.HTTP_ACCEPTED)
+                // make sure you can get the content and get it
+                if ((http.getResponseCode() < 200) || 
+                    (http.getResponseCode() >= 300))
                     return false;
                 
-                // TODO:
-                // we need to parse the source and see if license matches the
-                // one as detailed by the rdf tag....
-                return true;
+                Object urlContent = http.getContent();
+                if (!(urlContent instanceof InputStream))
+                    return false;
+
+                InputStream is = (InputStream) urlContent;
+                StringBuffer sb = new StringBuffer();
+                BufferedReader br = 
+                    new BufferedReader(new InputStreamReader(is));
+                String currLine = null;
+                do {
+                    currLine = br.readLine();
+                    sb.append(" " + currLine);
+                } while (currLine != null);
+                
+                // 3
+                // search content for matching license
+                String htmlContent = sb.toString();
+                File f = new File(filename);
+                if (!f.exists())
+                    return false;
+                
+                String hash = URN.createSHA1Urn(f).toString();
+                int index = htmlContent.indexOf(hash);
+                if (index < 0)
+                    return false;
+
+                htmlContent = htmlContent.substring(index);
+                index = htmlContent.indexOf(LICENSE_RDF_OPEN);
+                if (index < 0)
+                    return false;
+
+                htmlContent = 
+                    htmlContent.substring(index + LICENSE_RDF_OPEN.length());
+                index = htmlContent.indexOf("\"");
+                String retrievedLicense = htmlContent.substring(0, index);
+                if (retrievedLicense == null)
+                    return false;
+                
+                return retrievedLicense.equals(license);
             }
             else
                 return false;
 
+        }
+        catch (InterruptedException hashingFailed) {
+            ErrorService.error(hashingFailed);
+            throw new IOException();
         }
         catch (ConnectException possible) {
             return false;

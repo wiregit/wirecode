@@ -14,6 +14,7 @@ import java.io.*;
 public class ID3ReaderTest extends BaseTestCase {
         
     public final String fileNameToTest = "com/limegroup/gnutella/mp3/mpg1layIII_0h_58k-VBRq30_frame1211_44100hz_joint_XingTAG_sample.mp3";
+    public final String webPageContent = "<html> <!-- <rdf:RDF xmlns=\"http://web.resource.org/cc/\" xmlns:dc=\"http://purl.org/dc/elements/1.1/\" xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\"> <Work rdf:about=\"urn:sha1:BJ5VVVC26NXKOKYGCODPU6JDP4ZLHABM\"> <dc:date>2002</dc:date> <dc:format>audio/mp3</dc:format> <dc:identifier>http://mirrors.creativecommons.org/copyremix/Analogue Popkick - Two June.mp3</dc:identifier> <dc:rights><Agent><dc:title>Analogue Popkick</dc:title></Agent></dc:rights> <dc:title>Two June</dc:title> <dc:type rdf:resource=\"http://purl.org/dc/dcmitype/Sound\" /> <license rdf:resource=\"http://creativecommons.org/licenses/by-nc-sa/1.0/\" /> </Work>  <Work rdf:about=\"urn:sha1:B2QGGOTVTOFJA4224FFO3MVHMOKQJFPI\"> <dc:date>2002</dc:date> <dc:format>audio/mp3</dc:format> <dc:identifier>http://mirrors.creativecommons.org/copyremix/Bm RELOCATION PROGRAM - Superego Exchange.mp3</dc:identifier> <dc:rights><Agent><dc:title>Bm RELOCATION PROGRAM</dc:title></Agent></dc:rights> <dc:title>superego exchange</dc:title> <dc:type rdf:resource=\"http://purl.org/dc/dcmitype/Sound\" /> <license rdf:resource=\"http://creativecommons.org/licenses/by-nc-sa/1.0/\" /> </Work> </rdf:RDF>--> </html>";
 
 	public ID3ReaderTest(String name) {
 		super(name);
@@ -34,8 +35,10 @@ public class ID3ReaderTest extends BaseTestCase {
                 public void run() {
                     try {
                         Socket s = ss.accept();
-                        String output = "HTTP/1.1 OK\r\n\r\n";
+                        String output = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n";
                         s.getOutputStream().write(output.getBytes());
+                        s.getOutputStream().flush();
+                        s.getOutputStream().write(webPageContent.getBytes());
                         s.getOutputStream().flush();
                         s.close();
                     }
@@ -47,8 +50,8 @@ public class ID3ReaderTest extends BaseTestCase {
         answerThread.start();
         Thread.sleep(1000);
 
-        assertTrue(!ID3Reader.hasVerifiedLicense(fileNameToTest));
-
+        assertTrue(ID3Reader.hasVerifiedLicense(fileNameToTest));
+        ss.close();
     }
 
 }
