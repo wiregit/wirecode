@@ -115,6 +115,12 @@ public class UPnPManager extends ControlPoint implements DeviceChangeListener {
 	/** The tcp and udp mappings created this session */
 	private Mapping _tcp, _udp;
 	
+	/**
+	 * Lock that waitForDevice and deviceAdded share for device notification. 
+	 * LOCKING: MUST grab this' lock first.
+	 */
+	private final Object DEVICE_LOCK = new Object();
+	
 	private UPnPManager() {
 	    super();
 	    
@@ -179,14 +185,17 @@ public class UPnPManager extends ControlPoint implements DeviceChangeListener {
 	 * Waits for a small amount of time before the device is discovered.
 	 */
 	public synchronized void waitForDevice() {
-	    // already have it.
-	    if(isNATPresent())
-	        return;
-	        
-        // otherwise, wait till we grab it.
-        try {
-            wait(WAIT_TIME);
-        } catch(InterruptedException ie) {}
+	    
+	    synchronized(DEVICE_LOCK) {
+    	    // already have it.
+    	    if(isNATPresent())
+    	        return;
+    	        
+            // otherwise, wait till we grab it.
+            try {
+                DEVICE_LOCK.wait(WAIT_TIME);
+            } catch(InterruptedException ie) {}
+        }
         
     }
 	
@@ -221,7 +230,9 @@ public class UPnPManager extends ControlPoint implements DeviceChangeListener {
 		} else {
 		    if(LOG.isDebugEnabled())
 		        LOG.debug("Found service, router: " + _router.getFriendlyName() + ", service: " + _service);
-            notify();
+            synchronized(DEVICE_LOCK) {
+                DEVICE_LOCK.notify();
+            }
 			stop();
 		}
 	}
