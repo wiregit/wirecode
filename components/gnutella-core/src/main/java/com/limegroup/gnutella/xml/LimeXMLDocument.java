@@ -21,7 +21,7 @@ public class LimeXMLDocument{
     
     protected Map fieldToValue;
     protected String schemaUri;
-    protected String XMLString;//this is what is sent back on the wire.
+    //protected String XMLString;//this is what is sent back on the wire.
     /** 
      * Field corresponds to the name of the file for which this
      * meta-data corresponds to. It can be null if the data is pure meta-data
@@ -33,7 +33,7 @@ public class LimeXMLDocument{
     public LimeXMLDocument(String XMLString) throws SAXException, 
                                         SchemaNotFoundException, IOException{
         InputSource doc = new InputSource(new StringReader(XMLString));
-        this.XMLString = XMLString;
+        //this.XMLString = XMLString;
         initialize(doc);
     }
     
