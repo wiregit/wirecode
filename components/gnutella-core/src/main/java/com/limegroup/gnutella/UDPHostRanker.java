@@ -98,7 +98,7 @@ public class UDPHostRanker {
         for(int i = 0; iter.hasNext() && !canceller.isCancelled(); i++) {
             if(i == MAX_SENDS) {
                 try {
-                    Thread.sleep(1000);
+                    Thread.sleep(500);
                 } catch(InterruptedException ignored) {}
                 i = 0;
             }

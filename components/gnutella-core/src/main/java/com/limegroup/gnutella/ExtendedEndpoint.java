@@ -79,6 +79,10 @@ public class ExtendedEndpoint extends Endpoint {
     /** the locale of the client that this endpoint represents */
     private String _clientLocale = 
         ApplicationSettings.DEFAULT_LOCALE.getValue();
+        
+    /** Whether or not this is a udp hostcache. */
+    private boolean udpHostCache = false;
+    
 
     /** locale of this client */
     private final static String ownLocale =
@@ -187,6 +191,20 @@ public class ExtendedEndpoint extends Endpoint {
     public void setClientLocale(String l) {
         _clientLocale = l;
     }
+    
+    /**
+     * Determines if this is an ExtendedEndpoint for a UDP Host Cache.
+     */
+    public boolean isUDPHostCache() {
+        return udpHostCache;
+    }
+    
+    /**
+     * Sets if this a UDP host cache endpoint.
+     */
+    public void setUDPHostCache(boolean cache) {
+        udpHostCache = cache;
+    }
 
     private void recordConnectionAttempt(Buffer buf, long now) {
         if (buf.isEmpty()) {
@@ -245,6 +263,9 @@ public class ExtendedEndpoint extends Endpoint {
         write(out, getConnectionFailures());
         out.write(FIELD_SEPARATOR);
         out.write(_clientLocale);
+        out.write(FIELD_SEPARATOR);
+        if(isUDPHostCache())
+            out.write("true");
         out.write(EOL);
     }
 
@@ -334,6 +355,11 @@ public class ExtendedEndpoint extends Endpoint {
         //6. locale of the connection (optional)
         if(linea.length>=6) {
             ret.setClientLocale(linea[5]);
+        }
+        
+        //7. udp-host
+        if(linea.length>=7) {
+            ret.setUDPHostCache(linea[6].equalsIgnoreCase("true"));
         }
 
         return ret;

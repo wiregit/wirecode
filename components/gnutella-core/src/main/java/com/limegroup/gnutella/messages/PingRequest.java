@@ -58,7 +58,7 @@ public class PingRequest extends Message {
     public PingRequest(byte ttl) {
         super((byte)0x0, ttl, (byte)0);
         _ggeps=new GGEP[1];
-        addLocale();
+        addBasicGGEPs();
     }
     
     /**
@@ -69,17 +69,7 @@ public class PingRequest extends Message {
     public PingRequest(byte [] guid,byte ttl) {
         super(guid,(byte)0x0, ttl, (byte)0,0);
         _ggeps=new GGEP[1];
-        addLocale();
-    }
-    
-    /**
-     * Creates an outgoing group ping. Used only by boot-strap server
-     *
-     * @param length is length of the payload of the GroupPing = 
-     * 14(port+ip+files+kbytes)+group.length + 1(null)
-     */
-    protected PingRequest(byte ttl, byte length) {
-        super((byte)0x0, ttl, (byte)length);
+        addBasicGGEPs();
     }
 
     public static PingRequest createQueryKeyRequest() {
@@ -172,14 +162,18 @@ public class PingRequest extends Message {
     }
 
     /**
-     * add locale information to the GGEP.
+     * Adds all basic GGEP information to the outgoing ping.
+     * Currently adds a Locale field and a
+     * "I understand packed ip/ports & UDP Host Caches" field.
      */
-    private void addLocale() {
+    private void addBasicGGEPs() {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         try {
             GGEP ggep = new GGEP(true);
             ggep.put(GGEP.GGEP_HEADER_CLIENT_LOCALE,
                      ApplicationSettings.LANGUAGE.getValue());
+            ggep.put(GGEP.GGEP_HEADER_SUPPORT_CACHE_PONGS);
+                     
             _ggeps[0]=ggep;
             ggep.write(baos);
             baos.write(0);

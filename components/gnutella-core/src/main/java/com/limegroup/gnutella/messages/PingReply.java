@@ -6,6 +6,8 @@ import java.io.OutputStream;
 import java.io.Serializable;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.util.List;
+import java.util.Collections;
 
 import com.limegroup.gnutella.Assert;
 import com.limegroup.gnutella.ByteOrder;
@@ -28,6 +30,17 @@ import com.limegroup.gnutella.util.NetworkUtils;
  * to "mark" pongs as being from supernodes.
  */
 public class PingReply extends Message implements Serializable, IpPort {
+    
+    /**
+     * The list of extra ip/ports contained in this reply.
+     */
+    private final List PACKED_IP_PORTS;
+
+    /**
+     * Constant for whether or not this PingReply contains the GGEP field
+     * for being a udp host cache.
+     */
+    private final boolean UDP_HOST_CACHE;
 
     /**
      * Constant for the number of ultrapeer slots for this host.
@@ -589,8 +602,19 @@ public class PingReply extends Message implements Serializable, IpPort {
                 }
                 
                 myPort = ByteOrder.leb2short(data,4);
-                
             }
+            
+            if(ggep.hasKey(GGEP.GGEP_HEADER_PACKED_IPPORTS)) {
+                byte[] data = null;
+                try {
+                    data = ggep.getBytes(GGEP.GGEP_HEADER_PACKED_IPPORTS);
+                } catch(BadGGEPPropertyException bad) {
+                    throw new BadPacketException(bad.getMessage());
+                }
+                if(data == null || data.length % 6 != 0)
+                    throw new BadPacketException("invalid data");
+            }
+                
         }
 
         return new PingReply(guid, ttl, hops, payload, ggep, ip);
@@ -631,6 +655,8 @@ public class PingReply extends Message implements Serializable, IpPort {
         int slots = -1; //-1 didn't get it.
         InetAddress myIP=null;
         int myPort=0;
+        boolean udphostcache = false;
+        List packedIPs = Collections.EMPTY_LIST;
         
         // TODO: the exceptions thrown here are messy
         if(ggep != null) {
@@ -725,7 +751,7 @@ public class PingReply extends Message implements Serializable, IpPort {
                 byte [] myip = new byte[4];
                 System.arraycopy(data,0,myip,0,4);
                 
-                if (NetworkUtils.isValidAddress(myip))
+                if (NetworkUtils.isValidAddress(myip)) {
                     try{
                         myIP = InetAddress.getByAddress(myip);
                         myPort = ByteOrder.ubytes2int(ByteOrder.leb2short(data,4));
@@ -742,10 +768,24 @@ public class PingReply extends Message implements Serializable, IpPort {
                     }catch(UnknownHostException bad) {
                         //keep the ip address null and the port 0
                     }
-                
-
-                
+                }
             }
+            
+            if(ggep.hasKey(GGEP.GGEP_HEADER_UDP_HOST_CACHE)) {
+                udphostcache = true;
+            }
+            
+            if(ggep.hasKey(GGEP.GGEP_HEADER_PACKED_IPPORTS)) {
+                byte[] data = null;
+                try {
+                    data = ggep.getBytes(GGEP.GGEP_HEADER_PACKED_IPPORTS);
+                } catch(BadGGEPPropertyException bad) {}
+                if(data != null) {
+                    try {
+                        packedIPs = NetworkUtils.unpackIps(data);
+                    } catch(BadPacketException bpe) {}
+                }
+            }            
 
         }
         _myIP=myIP;
@@ -762,6 +802,8 @@ public class PingReply extends Message implements Serializable, IpPort {
         FREE_ULTRAPEER_SLOTS = freeUltrapeerSlots;
         CLIENT_LOCALE = locale;
         FREE_LOCALE_SLOTS = slots;
+        UDP_HOST_CACHE = udphostcache;
+        PACKED_IP_PORTS = packedIPs;
     }
 
 
@@ -1056,7 +1098,13 @@ public class PingReply extends Message implements Serializable, IpPort {
     public QueryKey getQueryKey() {
         return QUERY_KEY;
     }
-
+    
+    /**
+     * Gets the list of packed IP/Ports.
+     */
+    public List /* of IPPort */ getPackedIPPorts() {
+        return PACKED_IP_PORTS;
+    }
 
     /**
      * Returns whether or not this pong has a GGEP extension.
@@ -1241,6 +1289,13 @@ public class PingReply extends Message implements Serializable, IpPort {
 
     public int getNumFreeLocaleSlots() {
         return FREE_LOCALE_SLOTS;
+    }
+    
+    /**
+     * Accessor for host cacheness.
+     */
+    public boolean isUDPHostCache() {
+        return UDP_HOST_CACHE;
     }
 
     //Unit test: tests/com/limegroup/gnutella/messages/PingReplyTest

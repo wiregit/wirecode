@@ -45,6 +45,12 @@ public class GGEP extends Object {
     public static final String GGEP_HEADER_ALTS = "ALT";
     /** The extention header (key) for IpPort request */
     public static final String GGEP_HEADER_IPPORT="IP";
+    /** The extension header (key) for UDP HostCache pongs. */
+    public static final String GGEP_HEADER_UDP_HOST_CACHE = "UDPHC";
+    /** The extension header (key) for indicating support for packed ip/ports & udp host caches. */
+    public static final String GGEP_HEADER_SUPPORT_CACHE_PONGS = "SCP";
+    /** The extension header (key) for packed IP/Ports */
+    public static final String GGEP_HEADER_PACKED_IPPORTS="IPP";
     /**
      * The extension header (key) for a feature query.
      * This is 'WH' for legacy reasons, because 'What is New' was the first.
