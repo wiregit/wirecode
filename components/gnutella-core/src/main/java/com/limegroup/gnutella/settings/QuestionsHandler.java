@@ -33,5 +33,11 @@ public class QuestionsHandler extends AbstractSettings {
      */
     public static final IntSetting SHOULD_DELETE_FILE =
         FACTORY.createIntSetting("SHOULD_DELETE_FILE", 0);
+        
+    /**
+     * Setting for whether or not to ask about discarding corrupt downloads
+     */
+    public static final IntSetting CORRUPT_DOWNLOAD =
+        FACTORY.createIntSetting("CORRUPT_DOWNLOAD", 0);
     
 }
