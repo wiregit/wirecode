@@ -69,7 +69,7 @@ final class HeadRequester implements Runnable {
 			RemoteFileDesc rfd = (RemoteFileDesc)iter.next();
 			if(QueryReply.isFirewalledQuality(rfd.getQuality())) {
 				// do not attempt to make a HEAD request to firewalled hosts
-				continue;
+                continue;
 			}
 			URN urn = rfd.getSHA1Urn();
 			if(urn == null) continue;
@@ -90,6 +90,9 @@ final class HeadRequester implements Runnable {
 					httpConnection.setRequestProperty(
 						HTTPHeaderName.ALT_LOCATION.httpStringValue(),
 						TOTAL_ALTS.httpStringValue());
+                    httpConnection.setRequestProperty(
+                        HTTPHeaderName.CONNECTION.httpStringValue(),
+                        "close");
 					httpConnection.connect();
 					String contentUrn = httpConnection.getHeaderField
 					    (HTTPHeaderName.CONTENT_URN.httpStringValue());
@@ -111,7 +114,8 @@ final class HeadRequester implements Runnable {
 					}
 					AlternateLocationCollection alc = 
 					    AlternateLocationCollection.createCollectionFromHttpValue(altLocs);
-					COLLECTOR.addAlternateLocationCollection(alc);						
+					COLLECTOR.addAlternateLocationCollection(alc);
+                    httpConnection.disconnect();
 				} catch(IOException e) {
 					continue;
 				}					
