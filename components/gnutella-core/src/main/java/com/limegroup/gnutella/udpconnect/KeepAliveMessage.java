@@ -29,7 +29,8 @@ public class KeepAliveMessage extends UDPConnectionMessage {
           /* his connectionID                 */ connectionID, 
           /* opcode                           */ OP_KEEPALIVE, 
           /* Keepalive has no sequenceNumber  */ (byte) 0, 
-          /* window Start and Space           */ buildByteArray(windowStart,                                                       windowSpace),
+          /* window Start and Space           */ 
+          buildByteArray(windowStart, (windowSpace < 0 ? 0 : windowSpace)),
           /* 2 short ints => 4 bytes          */ 4
           );
         _windowStart = windowStart;

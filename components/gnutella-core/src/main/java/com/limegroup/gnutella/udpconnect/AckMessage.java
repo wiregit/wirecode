@@ -20,7 +20,8 @@ public class AckMessage extends UDPConnectionMessage {
           /* his connectionID           */ connectionID, 
           /* opcode                     */ OP_ACK, 
           /* sequenceNumber             */ sequenceNumber, 
-          /* window Start and Space     */ buildByteArray(windowStart,                                                       windowSpace),
+          /* window Start and Space     */ 
+          buildByteArray(windowStart, (windowSpace < 0 ? 0 : windowSpace)),
           /* 2 short ints => 4 bytes    */ 4
           );
         _windowStart = windowStart;
