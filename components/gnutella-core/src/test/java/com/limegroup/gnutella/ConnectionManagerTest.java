@@ -266,9 +266,10 @@ public class ConnectionManagerTest extends com.limegroup.gnutella.util.BaseTestC
         private boolean isOutgoing;
         private int sent;
         private int received;
+        private static int lastHost = 0;
 
         public TestManagedConnection(boolean isOutgoing, int sent, int received) {
-            super("1.2.3.4", 6346);
+            super("1.2.3." + ++lastHost, 6346);
             this.isOutgoing=isOutgoing;
             this.sent=sent;
             this.received=received;
