@@ -37,7 +37,7 @@ public class Acceptor extends Thread {
      *
      * Why are all three needed?  Step (3) is needed because (2) can often fail
      * due to a JDK bug #4073539, or if your address changes via DHCP.  Step (2)
-     * is needed because (3) ignores local addresses of 127.0.0.1.  Step (1) is
+     * is needed because (3) ignores local addresses of 127.x.x.x.  Step (1) is
      * needed because (2) can't occur in the main thread, as it may block
      * because the update checker is trying to resolve addresses.  (See JDK bug
      * #4147517.)  Note this may delay the time to create a listening socket by
@@ -62,8 +62,8 @@ public class Acceptor extends Thread {
      * @modifes this
      * @effects sets the IP address to use in pongs and query replies.  If addr
      *  is localhost (127.0.0.1), this is not modified.  This method must be
-	 *  to get around JDK bug #4073539, as well as to try to handle the case of a
-     *  computer whose IP address keeps changing.
+	 *  to get around JDK bug #4073539, as well as to try to handle the case 
+	 *  of a computer whose IP address keeps changing.
 	 */
 	public static synchronized void setAddress(byte[] addr) {
         //Ignore localhost.
