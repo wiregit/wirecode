@@ -660,6 +660,24 @@ public abstract class MessageRouter
         return _numMessages;
     }
 
+    /**
+     * Returns the address used for downloads and messaging connections.
+     * Used to fill out the My-Address header in ManagedConnection.
+     * @see Acceptor#getAddress
+     */
+    public byte[] getAddress() {
+        return _acceptor.getAddress();
+    }
+
+    /**
+     * Returns the port used for downloads and messaging connections.
+     * Used to fill out the My-Address header in ManagedConnection.
+     * @see Acceptor#getPort
+     */    
+    public int getPort() {
+        return _acceptor.getPort();
+    }
+    
     //
     // End Statistics Accessors
     //
