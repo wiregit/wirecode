@@ -109,7 +109,7 @@ public final class QueryHandlerTest extends BaseTestCase {
 
         assertEquals("unexpected number of probe queries sent", 3, tcm.getNumQueries());        
         
-        Thread.sleep(6000);
+        Thread.sleep(8000);
 
         handler.sendQuery();
 
