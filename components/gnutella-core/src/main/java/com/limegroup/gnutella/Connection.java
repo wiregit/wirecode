@@ -1215,10 +1215,17 @@ public class Connection {
         }
         
         // tell the inflater & deflater that we're done with them.
-        if( _deflater != null )
-            _deflater.end();
-        if( _inflater != null )
-            _inflater.end();
+        // These calls are dangerous, because we don't know that the
+        // stream isn't currently deflating or inflating, and the access
+        // to the deflater/inflater is not synchronized (it shouldn't be).
+        // This can lead to NPE's popping up in unexpected places.
+        // Fortunately, the calls aren't explicitly necessary because
+        // when the deflater/inflaters are garbage-collected they will call
+        // end for us.
+        //if( _deflater != null )
+        //    _deflater.end();
+        //if( _inflater != null )
+        //    _inflater.end();
         
        // closing _in (and possibly _out too) can cause NPE's
        // in Message.read (and possibly other places),
