@@ -71,6 +71,11 @@ public final class CommonUtils {
 	private static boolean _isWindowsNTor2000orXP = false;
 
 	/** 
+	 * Variable for whether or not we're on 2000 or XP.
+	 */
+	private static boolean _isWindows2000orXP = false;
+
+	/** 
 	 * Variable for whether or not we're on Windows 95.
 	 */
 	private static boolean _isWindows95 = false;
@@ -155,6 +160,9 @@ public final class CommonUtils {
 			os.indexOf("windows 2000")!= -1 ||
 			os.indexOf("windows xp")!= -1)
 			_isWindowsNTor2000orXP = true;
+		if (os.indexOf("windows 2000")!= -1 ||
+			os.indexOf("windows xp")!= -1)
+			_isWindows2000orXP = true;
 		if(os.indexOf("windows 95") != -1)
 		   _isWindows95 = true;
 		if(os.indexOf("windows 98") != -1)
@@ -348,14 +356,25 @@ public final class CommonUtils {
 	}
 
 	/**
-	 * Returns whether or not the os is some version of Windows.
+	 * Returns whether or not the os is Windows NT, 2000, or XP.
 	 *
-	 * @return <tt>true</tt> if the application is running on Windows NT 
-	 *         or 2000, <tt>false</tt> otherwise
+	 * @return <tt>true</tt> if the application is running on Windows NT,
+	 *  2000, or XP <tt>false</tt> otherwise
 	 */
 	public static boolean isWindowsNTor2000orXP() {
 		return _isWindowsNTor2000orXP;
 	}
+
+	/**
+	 * Returns whether or not the os is 2000 or XP.
+	 *
+	 * @return <tt>true</tt> if the application is running on 2000 or XP,
+	 *  <tt>false</tt> otherwise
+	 */
+	public static boolean isWindows2000orXP() {
+		return _isWindows2000orXP;
+	}
+
 
 	/** 
 	 * Returns whether or not the os is Mac 9.1 or earlier.
