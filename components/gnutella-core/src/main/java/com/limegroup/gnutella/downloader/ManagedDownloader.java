@@ -656,6 +656,7 @@ public class ManagedDownloader implements Downloader, Serializable {
         invalidAlts = new FixedSizeExpiringSet(1000,60*60*1000L);
         // stores up to 10 locations for up to 10 minutes
         recentInvalidAlts = new FixedSizeExpiringSet(10, 10*60*1000L);
+        initializeFiles();
         synchronized (this) {
             if(shouldInitAltLocs(deserializedFromDisk)) {
                 initializeAlternateLocations();
@@ -1517,6 +1518,8 @@ public class ManagedDownloader implements Downloader, Serializable {
             // requery.
             if(getState() == WAITING_FOR_USER)
                 sendRequery();
+            // also retry any hosts that we have leftover.
+            initializeFiles();
         }
         
         // Notify the manager that we want to resume.
@@ -1623,7 +1626,6 @@ public class ManagedDownloader implements Downloader, Serializable {
      * false if it was newly constructed.
      */
     protected void tryAllDownloads() {
-        initializeFiles();
         if(checkHosts()) {//files is global
             setState(GAVE_UP);
             return;
