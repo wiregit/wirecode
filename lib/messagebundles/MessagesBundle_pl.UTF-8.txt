@@ -315,7 +315,7 @@ MENU_HELP_ABOUT_ACCESSIBLE=Ogólne informacje o programie.
 #??? TABLES_DISPLAY_TOOLTIPS=Extended Tooltips
 
 ################################################################################
-# Keys/value pairs for SearchView stuff....
+# Keys/value pairs for SearchView stuff...
 ################################################################################
 #??? SEARCH_NOT_CONNECTED=You are not connected to the network. To connect, select "Connect" from the "File" menu.
 SEARCH_DOWNLOAD_BUTTON_LABEL=Pobierz
@@ -432,7 +432,7 @@ PLAYLIST_DELETE_BUTTON_TIP=Usuwanie wybranego pliku z playlisty.
 PLAYLIST_FILE_DESCRIPTION=Plików playlisty (*.m3u)
 
 ################################################################################
-# Key/value pairs for the integrated media player....
+# Key/value pairs for the integrated media player...
 ################################################################################
 MEDIA_PLAYER_DEFAULT_STRING=Odtwarzacz LimeWire
 #??? MEDIA_PLAY_BUTTON_TIP=Play
@@ -446,7 +446,7 @@ PASSWORD_DIALOG_USERNAME_FIELD_LABEL=Użytkownik
 PASSWORD_DIALOG_PASSWORD_FIELD_LABEL=Hasło
 
 ################################################################################
-# Key/value pairs for Statistics String....
+# Key/value pairs for Statistics String...
 ################################################################################
 STATISTICS_AVAILABLE=dostępne
 STATISTICS_FILES=plików
@@ -516,7 +516,7 @@ DOWNLOAD_STATUS_REMOTE_QUEUED=Zdalnie skolejkowane na pozycji
 #??? DOWNLOAD_POSSIBLE_HOSTS=Possible hosts
 #??? DOWNLOAD_BUSY_HOSTS=Busy hosts
 #??? DOWNLOAD_QUEUED_HOSTS=Remotely queued
-#??? DOWNLOAD_SEARCHING=Locating sources....
+#??? DOWNLOAD_SEARCHING=Locating sources...
 #??? DOWNLOAD_COULD_NOT_READ_SNAPSHOT=Sorry, but LimeWire was unable to restart your old downloads.
 #??? DOWNLOAD_MAGNET_DIALOG=Would you like to download
 #??? DOWNLOAD_FROM=from
@@ -1340,7 +1340,7 @@ OPTIONS_SKIN_BROWSE_BUTTON_TIP=Służy do zmiany skórki na inną.
 OPTIONS_SKIN_PREVIEW_BUTTON_TIP=Przyjrzyj się wybranej skórce.
 OPTIONS_SKIN_DEFAULT_BUTTON_TIP=Nie zakładaj skórki na LimeWire.
 OPTIONS_SKIN_DOWNLOAD_SKINS_BUTTON_TIP=Pobieranie nowych skórek z www.javootoo.com...
-SKIN_APPLY_MESSAGE=LimeWire zmieni skórkę dopiero po jego ponownym uruchomieniu....
+SKIN_APPLY_MESSAGE=LimeWire zmieni skórkę dopiero po jego ponownym uruchomieniu...
 SKIN_RESTART_NEEDED=LimeWire powinien zostać ponownie uruchomiony, aby było widać tę skórkę.
 
 ################################################################################

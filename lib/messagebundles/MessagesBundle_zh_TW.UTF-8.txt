@@ -10,7 +10,7 @@ LOCALE_COUNTRY_NAME=中國台灣, 香港, 澳門
 LOCALE_VARIANT_CODE=
 LOCALE_VARIANT_NAME=國際
 LOCALE_SCRIPT_CODE=Hani
-LOCALE_SCRIPT_NAME=Han
+LOCALE_SCRIPT_NAME=Far-East Asian
 LOCALE_ENGLISH_LANGUAGE_NAME=Chinese (Traditional)
 # UTF-8 file created on Windows 2000/XP NotePad with Big5 "細明體" MingLiU font.
 ################################################################################
@@ -315,7 +315,7 @@ MENU_HELP_ABOUT_ACCESSIBLE=關於 LimeWire 的信息
 #??? TABLES_DISPLAY_TOOLTIPS=Extended tooltips
 
 ################################################################################
-# Keys/value pairs for SearchView stuff....
+# Keys/value pairs for SearchView stuff...
 ################################################################################
 #??? SEARCH_NOT_CONNECTED=You are not connected to the network. To connect, select "Connect" from the "File" menu.
 SEARCH_DOWNLOAD_BUTTON_LABEL=下載
@@ -432,7 +432,7 @@ PLAYLIST_DELETE_BUTTON_TIP=從 播放列表中删除選中的文件
 PLAYLIST_FILE_DESCRIPTION=播放列表的文件 (*.m3u)
 
 ################################################################################
-# Key/value pairs for the integrated media player....
+# Key/value pairs for the integrated media player...
 ################################################################################
 MEDIA_PLAYER_DEFAULT_STRING=LimeWire 多媒體播放機
 #??? MEDIA_PLAY_BUTTON_TIP=Play
@@ -446,7 +446,7 @@ PASSWORD_DIALOG_USERNAME_FIELD_LABEL=用戶名
 PASSWORD_DIALOG_PASSWORD_FIELD_LABEL=密碼
 
 ################################################################################
-# Key/value pairs for Statistics String....
+# Key/value pairs for Statistics String...
 ################################################################################
 STATISTICS_AVAILABLE=可用的
 STATISTICS_FILES=文件
@@ -516,7 +516,7 @@ DOWNLOAD_HOSTS_LABEL=主機
 #??? DOWNLOAD_POSSIBLE_HOSTS=Possible hosts
 #??? DOWNLOAD_BUSY_HOSTS=Busy hosts
 #??? DOWNLOAD_QUEUED_HOSTS=Remotely queued
-#??? DOWNLOAD_SEARCHING=Locating sources....
+#??? DOWNLOAD_SEARCHING=Locating sources...
 #??? DOWNLOAD_COULD_NOT_READ_SNAPSHOT=Sorry, but LimeWire was unable to restart your old downloads.
 #??? DOWNLOAD_MAGNET_DIALOG=Would you like to download
 #??? DOWNLOAD_FROM=from
@@ -661,7 +661,7 @@ PLAYLIST_OPTIONS_STRING=播放選項:
 PLAYLIST_OPTIONS_CONTINUE=連續
 PLAYLIST_OPTIONS_SHUFFLE=跳跃
 PLAYLIST_DIALOG_OPEN_TITLE=選擇播放列表 (.m3u)
-PLAYLIST_DIALOG_SAVE_TITLE=儲存播放列表到....
+PLAYLIST_DIALOG_SAVE_TITLE=儲存播放列表到...
 PLAYLIST_DIALOG_SAVE_SAVE=儲存
 #??? PLAYLIST_CANNOT_PLAY_FILE=LimeWire can not play the file
 #??? PLAYLIST_FILE_UNSUPPORTED=. The file type is not recognized.
