@@ -278,8 +278,9 @@ public class RemoteFileDesc implements Serializable {
     }
 
     public String toString() {
-        return  "<"+getHost()+":"+getPort()+", "
-               +getFileName()+"/"+getSize()+", "
-               +getSpeed()+">";
+        return  ("<"+getHost()+":"+getPort()+", "
+				 +getFileName()+"/"+getSize()+", "
+				 +getSpeed()+", "
+				 +getSHA1Urn()+">");
     }
 }
