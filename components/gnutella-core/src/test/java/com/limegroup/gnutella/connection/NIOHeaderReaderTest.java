@@ -89,6 +89,10 @@ public class NIOHeaderReaderTest extends BaseTestCase {
         } 
     }
     
+    /**
+     * Helper class that creates a socket that returns a "dummy" socket and
+     * channel -- useful for testing.
+     */
     private static final class TestSocket extends Socket  {
         public SocketChannel getChannel()   {
             return new TestChannel();
@@ -104,55 +108,42 @@ public class NIOHeaderReaderTest extends BaseTestCase {
         } 
     }
     
+    /**
+     * "Dummy" test channel useful to avoid having to set up real sockets for
+     * testing.
+     */
     private static final class TestChannel extends SocketChannel  {
 
         public TestChannel()  {
             super(null);
         }
         
-        /* (non-Javadoc)
-         * @see java.nio.channels.SocketChannel#finishConnect()
-         */
+        // stub method
         public boolean finishConnect() throws IOException {
-            // TODO Auto-generated method stub
             return false;
         }
 
-        /* (non-Javadoc)
-         * @see java.nio.channels.SocketChannel#isConnected()
-         */
+        // stub method
         public boolean isConnected() {
-            // TODO Auto-generated method stub
             return false;
         }
 
-        /* (non-Javadoc)
-         * @see java.nio.channels.SocketChannel#isConnectionPending()
-         */
+        // stub method
         public boolean isConnectionPending() {
-            // TODO Auto-generated method stub
             return false;
         }
 
-        /* (non-Javadoc)
-         * @see java.nio.channels.SocketChannel#socket()
-         */
+        // stub method
         public Socket socket() {
-            // TODO Auto-generated method stub
             return null;
         }
 
-        /* (non-Javadoc)
-         * @see java.nio.channels.SocketChannel#connect(java.net.SocketAddress)
-         */
+        // stub method
         public boolean connect(SocketAddress arg0) throws IOException {
-            // TODO Auto-generated method stub
             return false;
         }
 
-        /* (non-Javadoc)
-         * @see java.nio.channels.SocketChannel#read(java.nio.ByteBuffer)
-         */
+        // stub method
         public int read(ByteBuffer buf) throws IOException {
             
             int numRead = 0;
@@ -165,44 +156,29 @@ public class NIOHeaderReaderTest extends BaseTestCase {
             return numRead;
         }
 
-        /* (non-Javadoc)
-         * @see java.nio.channels.SocketChannel#write(java.nio.ByteBuffer)
-         */
+        // stub method
         public int write(ByteBuffer arg0) throws IOException {
-            // TODO Auto-generated method stub
             return 0;
         }
 
-        /* (non-Javadoc)
-         * @see java.nio.channels.SocketChannel#read(java.nio.ByteBuffer[], int, int)
-         */
-        public long read(ByteBuffer[] arg0, int arg1, int arg2) throws IOException {
-            // TODO Auto-generated method stub
+        // stub method
+        public long read(ByteBuffer[] arg0, int arg1, int arg2) 
+            throws IOException {
             return 0;
         }
 
-        /* (non-Javadoc)
-         * @see java.nio.channels.SocketChannel#write(java.nio.ByteBuffer[], int, int)
-         */
-        public long write(ByteBuffer[] arg0, int arg1, int arg2) throws IOException {
-            // TODO Auto-generated method stub
+        // stub method
+        public long write(ByteBuffer[] arg0, int arg1, int arg2) 
+            throws IOException {
             return 0;
         }
 
-        /* (non-Javadoc)
-         * @see java.nio.channels.spi.AbstractSelectableChannel#implCloseSelectableChannel()
-         */
-        protected void implCloseSelectableChannel() throws IOException {
-            // TODO Auto-generated method stub
-            
+        // stub method
+        protected void implCloseSelectableChannel() throws IOException {       
         }
 
-        /* (non-Javadoc)
-         * @see java.nio.channels.spi.AbstractSelectableChannel#implConfigureBlocking(boolean)
-         */
-        protected void implConfigureBlocking(boolean arg0) throws IOException {
-            // TODO Auto-generated method stub
-            
+        // stub method
+        protected void implConfigureBlocking(boolean arg0) throws IOException { 
         }
         
     }
@@ -219,7 +195,7 @@ public class NIOHeaderReaderTest extends BaseTestCase {
         
 
         ConnectionSettings.PREFERENCING_ACTIVE.setValue(false);
-         final Connection conn = 
+        final Connection conn = 
             new Connection("localhost", SERVER_PORT, 
                 new UltrapeerHeaders("localhost"),
                 new UltrapeerHandshakeResponder("localhost"));
@@ -228,15 +204,16 @@ public class NIOHeaderReaderTest extends BaseTestCase {
          // start a connection that will write it's Gnutella headers using
          // non-blocking writes.
          Thread connectThread = new Thread(new Runnable() {
-                 public void run() {
-                     try {
-                         conn.initialize();
-                     } catch(IOException e) {
-                         // don't care about this exception -- this can happen when
-                         // apparently when the test thread dies and the socket closes??
-                     }
+             public void run() {
+                 try {
+                     conn.initialize();
+                 } catch(IOException e) {
+                     // don't care about this exception -- this can happen when
+                     // apparently when the test thread dies and the socket 
+                     // closes??
                  }
-             });
+             }
+         });
 
          connectThread.setDaemon(true);
          connectThread.start();
