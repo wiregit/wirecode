@@ -44,7 +44,7 @@ public class GUESSMonitor extends BaseTestCase {
         _backend = new RouterService(stub, _messageRouter);
         //_backend = Backend.createLongLivedBackend(stub, _messageRouter);
         _backend.start();
-        RouterService.forceKeepAlive(8);
+        //RouterService.forceKeepAlive(8);
         //_backend.getRouterService().forceKeepAlive(5);
     }
 
@@ -58,7 +58,7 @@ public class GUESSMonitor extends BaseTestCase {
         //_backend.getRouterService().connect();
         //_backend.getRouterService().forceKeepAlive(5);
         RouterService.connect();
-        RouterService.forceKeepAlive(5);
+        //RouterService.forceKeepAlive(5);
     }
 
     public void disconnect() {

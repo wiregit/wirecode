@@ -49,7 +49,7 @@ public final class LeafHandshakeResponderTest extends BaseTestCase {
      */
     public void testRespondToOutgoingUltrapeer() throws Exception {
         UltrapeerSettings.FORCE_ULTRAPEER_MODE.setValue(false);
-        ConnectionSettings.IGNORE_KEEP_ALIVE.setValue(true);
+        ConnectionSettings.ALLOW_WHILE_DISCONNECTED.setValue(true);
 
         // test the 3 Ultrapeer cases -- 
 
@@ -98,7 +98,7 @@ public final class LeafHandshakeResponderTest extends BaseTestCase {
         assertTrue("should have been accepted", hr.isAccepted());
         assertEquals("should only have deflate header", 1, hr.props().size());
         assertTrue("should be deflated", hr.isDeflateEnabled());
-        ConnectionSettings.IGNORE_KEEP_ALIVE.setValue(false);
+        ConnectionSettings.ALLOW_WHILE_DISCONNECTED.setValue(false);
     }
 
     /**
@@ -108,7 +108,7 @@ public final class LeafHandshakeResponderTest extends BaseTestCase {
      * connection attempts should fail.
      */
     public void testRespondToOutgoingLeaf() throws Exception {
-        ConnectionSettings.IGNORE_KEEP_ALIVE.setValue(true);
+        ConnectionSettings.ALLOW_WHILE_DISCONNECTED.setValue(true);
 
         LeafHandshakeResponder responder = 
             new LeafHandshakeResponder("23.3.4.5");
@@ -132,7 +132,7 @@ public final class LeafHandshakeResponderTest extends BaseTestCase {
         assertEquals("should not have any headers", 0, hr.props().size());
 
         // clean up settings
-        ConnectionSettings.IGNORE_KEEP_ALIVE.setValue(false);
+        ConnectionSettings.ALLOW_WHILE_DISCONNECTED.setValue(false);
     }
 
 
@@ -142,7 +142,7 @@ public final class LeafHandshakeResponderTest extends BaseTestCase {
     public void testRespondToIncomingUltrapeer() throws Exception {
         UltrapeerSettings.FORCE_ULTRAPEER_MODE.setValue(false);
         ConnectionSettings.PREFERENCING_ACTIVE.setValue(true);
-        ConnectionSettings.IGNORE_KEEP_ALIVE.setValue(true);
+        ConnectionSettings.ALLOW_WHILE_DISCONNECTED.setValue(true);
 
         LeafHandshakeResponder responder = 
             new LeafHandshakeResponder("23.3.4.5");
@@ -166,7 +166,7 @@ public final class LeafHandshakeResponderTest extends BaseTestCase {
      */
     public void testRespondToIncomingLeaf() throws Exception {
         ConnectionSettings.PREFERENCING_ACTIVE.setValue(true);
-        ConnectionSettings.IGNORE_KEEP_ALIVE.setValue(true);        
+        ConnectionSettings.ALLOW_WHILE_DISCONNECTED.setValue(true);        
         // the ultrapeer we'll be testing against
         LeafHandshakeResponder responder = 
             new LeafHandshakeResponder("23.3.4.5");

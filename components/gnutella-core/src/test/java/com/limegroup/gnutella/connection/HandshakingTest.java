@@ -62,7 +62,7 @@ public final class HandshakingTest extends BaseTestCase {
 		ConnectionSettings.PORT.setValue(TEST_PORT);
 		ConnectionSettings.WATCHDOG_ACTIVE.setValue(false);
 		//ConnectionSettings.REMOVE_ENABLED.setValue(false);
-		ConnectionSettings.IGNORE_KEEP_ALIVE.setValue(true);
+		ConnectionSettings.ALLOW_WHILE_DISCONNECTED.setValue(true);
 		//ConnectionSettings.NUM_CONNECTIONS.setValue(1);
 		//RouterService rs = new RouterService(new ActivityCallbackStub());
 		//rs.start();		
@@ -86,9 +86,10 @@ public final class HandshakingTest extends BaseTestCase {
 			try {
 				Connection curConn = connect();
 
-				CONNECTIONS.add(curConn);				
+				CONNECTIONS.add(curConn);
 
 				sleep(200);
+				setPreferredConnectons();
 
 				if(i == 5) {
 					// extra check to make sure these connections are 
@@ -97,20 +98,18 @@ public final class HandshakingTest extends BaseTestCase {
 				}
 
 				if(i == ConnectionManager.ULTRAPEER_CONNECTIONS) {
-
 					// this should throw an IOException because the connection 
 					// should  really be closed
 					curConn.receive(6000);
 					fail("accepted beyond max connections");
 				}
 			} catch(IOException e) {
-				if(i < ConnectionManager.ULTRAPEER_CONNECTIONS) {
-					e.printStackTrace();
-					fail("unexpected exception: "+e);
-				}
+				if(i < ConnectionManager.ULTRAPEER_CONNECTIONS)
+					fail("allowed only: " + i, e);
 				// otherwise, we expected the exception
 			}
 		}
+
 		clear(CONNECTIONS);
 	}
 
@@ -182,8 +181,7 @@ public final class HandshakingTest extends BaseTestCase {
 			Thread.sleep(millis);
 		}
 		catch(InterruptedException e) {
-			e.printStackTrace();
-			fail("unexpected exception: "+e);
+			fail(e);
 		}
 
 	}
@@ -253,57 +251,15 @@ public final class HandshakingTest extends BaseTestCase {
 				fail("could not initialize test", e);
 			}		
 		}
-		
-
-		/*
-		public void initialize() 
-			throws IOException, NoGnutellaOkException, BadHandshakeException {
-
-			System.out.println("TestConnection::inititialize"); 
-			Socket socket = Sockets.connect("localhost", Backend.PORT, 0);
-			try {
-				PrivilegedAccessor.setValue(this, "_socket", socket);
-			} catch(Exception e) {
-				fail("could not initialize test", e);
-			}		
-			
-			try {
-				Object[] args = new Object[1];
-				args[0] = CONNECT_STRING;
-				System.out.println("TestConnection::initialize:"+args[0]); 
-				PrivilegedAccessor.invokeMethod(this, "sendString", args);
-			} catch(InvocationTargetException e) {
-				throw new IOException("exception from initialize");
-			} catch(Exception e) {
-				e.printStackTrace();
-				fail("unexpected exception", e);
-			}
-
-			try {
-				Object[] args = new Object[1];
-				args[0] = CONNECT_STRING;
-				System.out.println("TestConnection::initialize:"+args[0]); 
-
-				args[0] = ULTRAPEER_PROPS;
-				PrivilegedAccessor.invokeMethod(this, "sendHeaders", args);
-
-				PrivilegedAccessor.invokeMethod(this, "concludeOutgoingHandshake", 
-												new Class[0]);
-			} catch(InvocationTargetException e) {
-				throw new IOException("exception from initialize");
-			} catch(Exception e) {
-				e.printStackTrace();
-				fail("unexpected exception", e);
-			}
-		}
-		*/
 	}
-
+	
 	/**
-	 * 
+	 * Enforces that the preferred connections are set in ConnectionManager.
+	 * This will always be done on a system that supports idle time, but we
+	 * need to enforce that its done on other systems (such as Linux).
 	 */
-	//private static class ZeroPointFourHandshake 
-	//extends AuthenticationHandshakeResponder {
-		
-	//}
+	private void setPreferredConnectons() throws Exception {
+	    PrivilegedAccessor.invokeMethod(RouterService.getConnectionManager(), 
+	        "setPreferredConnections", null);
+    }
 }
