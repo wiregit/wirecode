@@ -775,7 +775,8 @@ public class ManagedConnection
 
             // Run through the route spam filter and drop accordingly.
             if (!_routeFilter.allow(m)) {
-				MessageStatistics.addFilteredTCPMessage();
+				MessageStat.ALL_FILTERED_MESSAGES.incrementStat();
+				//MessageStatistics.addFilteredTCPMessage();
                 //_router.countFilteredMessage();
                 _numReceivedMessagesDropped++;
                 continue;

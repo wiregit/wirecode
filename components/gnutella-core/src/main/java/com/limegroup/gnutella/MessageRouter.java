@@ -3,7 +3,7 @@ package com.limegroup.gnutella;
 import com.limegroup.gnutella.util.Utilities;
 import com.limegroup.gnutella.security.User;
 import com.limegroup.gnutella.routing.*;
-import com.limegroup.gnutella.statistics.MessageStatistics;
+import com.limegroup.gnutella.statistics.*;
 
 import com.sun.java.util.collections.*;
 import java.io.IOException;
@@ -197,24 +197,24 @@ public abstract class MessageRouter
         msg.hop();
 	   
         if(msg instanceof PingRequest) {
-			MessageStatistics.addTCPPingRequest();
+			MessageStat.TCP_PING_REQUESTS.incrementStat();
             handlePingRequestPossibleDuplicate((PingRequest)msg, 
 											   receivingConnection);
 		} else if (msg instanceof PingReply) {
-			MessageStatistics.addTCPPingReply();
+			MessageStat.TCP_PING_REPLIES.incrementStat();
             handlePingReply((PingReply)msg, receivingConnection);
 		} else if (msg instanceof QueryRequest) {
-			MessageStatistics.addTCPQueryRequest();
+			MessageStat.TCP_QUERY_REQUESTS.incrementStat();
             handleQueryRequestPossibleDuplicate(
                 (QueryRequest)msg, receivingConnection);
 		} else if (msg instanceof QueryReply) {
-			MessageStatistics.addTCPQueryReply();
+			MessageStat.TCP_QUERY_REPLIES.incrementStat();
             handleQueryReply((QueryReply)msg, receivingConnection);
 		} else if (msg instanceof PushRequest) {
-			MessageStatistics.addTCPPushRequest();
+			MessageStat.TCP_PUSH_REQUESTS.incrementStat();
             handlePushRequest((PushRequest)msg, receivingConnection);
 		} else if (msg instanceof RouteTableMessage) {
-			MessageStatistics.addTCPRouteTableMessage();
+			MessageStat.TCP_ROUTE_TABLE_MESSAGES.incrementStat();
             handleRouteTableMessage((RouteTableMessage)msg,
                                     receivingConnection);
 		}
@@ -243,20 +243,20 @@ public abstract class MessageRouter
 		UDPReplyHandler handler = new UDPReplyHandler(address, port);
 		
         if (msg instanceof QueryRequest) {
-			MessageStatistics.addUDPQueryRequest();
+			MessageStat.UDP_QUERY_REQUESTS.incrementStat();
 			// a TTL above zero may indicate a malicious client, as UDP
 			// messages queries should not be sent with TTL above 1.
 			if(msg.getTTL() > 0) return;
             handleUDPQueryRequestPossibleDuplicate((QueryRequest)msg, 
 												   handler);
 		} else if (msg instanceof QueryReply) {			
-			MessageStatistics.addUDPQueryReply();
+			MessageStat.UDP_QUERY_REPLIES.incrementStat();
             handleQueryReply((QueryReply)msg, handler);
 		} else if(msg instanceof PingRequest) {
-			MessageStatistics.addUDPPingRequest();
+			MessageStat.UDP_PING_REQUESTS.incrementStat();
 			handleUDPPingRequestPossibleDuplicate((PingRequest)msg, handler);
 		} else if(msg instanceof PingReply) {
-			MessageStatistics.addUDPPingReply();
+			MessageStat.UDP_PING_REPLIES.incrementStat();
 			PingReply reply = (PingReply)msg;
 			if((reply.getPort() != port) || 
 			   (!reply.getIP().equals(address.getHostAddress()))) {
@@ -265,7 +265,7 @@ public abstract class MessageRouter
 			}
 			handlePingReply((PingReply)msg, handler);
 		} else if(msg instanceof PushRequest) {
-			MessageStatistics.addUDPPushRequest();
+			MessageStat.UDP_PUSH_REQUESTS.incrementStat();
 			handlePushRequest((PushRequest)msg, handler);
 		}
     }
@@ -683,7 +683,7 @@ public abstract class MessageRouter
         }
         else
         {
-			MessageStatistics.addRouteError();
+			MessageStat.PING_REPLY_ROUTE_ERRORS.incrementStat();
             //_numRouteErrors++;
             handler.countDroppedMessage();
         }
@@ -758,7 +758,8 @@ public abstract class MessageRouter
         }
         else
         {
-			MessageStatistics.addRouteError();
+			MessageStat.QUERY_REPLY_ROUTE_ERRORS.incrementStat();
+			//MessageStatistics.addRouteError();
             //_numRouteErrors++;
             handler.countDroppedMessage();
         }
@@ -788,7 +789,8 @@ public abstract class MessageRouter
         }
         else
         {
-			MessageStatistics.addRouteError();
+			MessageStat.PUSH_REQUEST_ROUTE_ERRORS.incrementStat();
+			//MessageStatistics.addRouteError();
             //_numRouteErrors++;
             handler.countDroppedMessage();
         }
