@@ -636,7 +636,7 @@ public class Connection implements ReplyHandler, PushProxyInterface {
 
         // create the read/write classes for messages
         _messageWriter = new MessageWriterProxy(this); 
-        _messageReader = new MessageReaderProxy(this);
+        _messageReader = new MessageReaderProxy(this, HANDSHAKER);
         
                      
         // check for updates from this host  
@@ -1010,7 +1010,7 @@ public class Connection implements ReplyHandler, PushProxyInterface {
         if(_socket == null) {
             throw new IllegalStateException("Not initialized");
         }
-        if(!_socket.isConnected()) {
+        if(!_socket.isConnected()) { 
             throw new IllegalStateException("not connected");
         }
         return _socket.getInetAddress();
@@ -1690,7 +1690,6 @@ public class Connection implements ReplyHandler, PushProxyInterface {
     public ConnectionStats stats() {
         return STATS;
     }
-
 
     
     // overrides Object.toString
