@@ -44,6 +44,15 @@ public class SequenceNumberExtender {
 	public  SequenceNumberExtender() {
 	}
 
+    /**
+     *  For testing only
+     */
+    public  SequenceNumberExtender(long base) {
+        base     = base & 0xffffffffffff0000l;
+        lowBase  = base;
+        highBase = base;
+    }
+
 	public long extendSequenceNumber(long sequenceNumber) {
 		long extendedSeqNo;
 		if ( sequenceNumber >= HIGH_BASE_SWITCH_POINT && 
