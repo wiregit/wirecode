@@ -17,10 +17,10 @@ import java.util.List;
  * Has a singleton pattern.
  * @author Sumeet Thadani
  */
-class RichQueryHandler{
+public class RichQueryHandler{
     
     static RichQueryHandler instance;// the instance
-    private final int INDEX = 75000;//TODO1:Ask Chris what this should be
+    public static final int INDEX = 75000;//TODO1:Ask Chris what this should be
     
     /**
      * Call this method to get the singleton

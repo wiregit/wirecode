@@ -126,6 +126,7 @@ public class QueryReply extends Message implements Serializable{
             //insert metadata b/w the nulls
             byte[] metaBytes = r.getMetaBytes();
             System.arraycopy(metaBytes, 0, payload, i, metaBytes.length);
+            i+=metaBytes.length;
             //add the second null terminator
             payload[i++]=(byte)0;
         }
@@ -356,7 +357,6 @@ public class QueryReply extends Message implements Serializable{
                         break;
                 }
                 String meta = new String(payload,j+1, k-(j+1) );
-                
                 responses[responses.length-left]=
                                           new Response(index,size,name,meta);
                 //If there is no metadata meat.equals(""). We are OK.
