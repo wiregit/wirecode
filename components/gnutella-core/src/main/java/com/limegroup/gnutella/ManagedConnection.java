@@ -730,7 +730,7 @@ public class ManagedConnection extends Connection
      * reasonable amount of time.  Does NOT clean up route tables in the case
      * of an IOException.
      */
-    void loopToReject(HostCatcher catcher) {
+    void loopToReject() {
         //IMPORTANT: note that we do not use this' send or receive methods.
         //This is an important optimization to prevent calling
         //RouteTable.removeReplyHandler when the connection is closed.
