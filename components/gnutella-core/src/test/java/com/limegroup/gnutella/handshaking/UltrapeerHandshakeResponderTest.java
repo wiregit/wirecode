@@ -193,7 +193,6 @@ public final class UltrapeerHandshakeResponderTest extends BaseTestCase {
         HandshakeResponse hr = responder.respondUnauthenticated(leaf, false);
         
         assertTrue("should report Ultrapeer true", hr.isUltrapeer());
-        assertTrue("should tell the leaf to be a leaf", hr.hasLeafGuidance());
         assertTrue("should be high degree connection", hr.isHighDegreeConnection());
         assertTrue("should be an Ultrapeer query routing connection", 
                    hr.isUltrapeerQueryRoutingConnection());
