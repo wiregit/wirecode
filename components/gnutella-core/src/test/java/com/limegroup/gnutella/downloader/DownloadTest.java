@@ -850,6 +850,13 @@ public class DownloadTest extends TestCase {
             debug("pass"+"\n");
         else
             check(false, "FAILED: complete corrupt");
+
+        IncompleteFileManager ifm=dm.getIncompleteFileManager();
+        for (int i=0; i<rfds.length; i++) {
+            File incomplete=ifm.getFile(rfds[i]);
+            VerifyingFile vf=ifm.getEntry(incomplete);
+            assertEquals(null, vf);
+        }
     }
 
 

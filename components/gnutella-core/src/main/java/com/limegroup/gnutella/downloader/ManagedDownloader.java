@@ -1163,10 +1163,14 @@ public class ManagedDownloader implements Downloader, Serializable {
         completeFile.delete();
         //Try moving file.  If we couldn't move the file, i.e., because
         //someone is previewing it or it's on a different volume, try copy
-        //instead.  If that failed, notify user.
+        //instead.  If that failed, notify user.  
+        //   If move is successful, we should remove the corresponding blocks
+        //from the IncompleteFileManager, though this is not strictly necessary
+        //because IFM.purge() is called frequently in DownloadManager.
         if (!incompleteFile.renameTo(completeFile))
             if (! CommonUtils.copy(incompleteFile, completeFile))
                 return COULDNT_MOVE_TO_LIBRARY;
+        incompleteFileManager.removeEntry(incompleteFile);
 
         //Add file to library.
         // first check if it conflicts with the saved dir....

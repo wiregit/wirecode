@@ -734,6 +734,11 @@ public class DownloadManager implements BandwidthTracker {
             e.printStackTrace();
     }
 
+    /** FOR TESTING ONLY: returns this' list of partially downloaded blocks. */
+    public IncompleteFileManager getIncompleteFileManager() {
+        return incompleteFileManager;
+    }
+
 
     /*
     public static void main(String argv[]) {
