@@ -949,7 +949,7 @@ public class ManagedDownloader implements Downloader, Serializable {
 
 				try {
 				    totalAlternateLocations.addAlternateLocation(
-					    AlternateLocation.createAlternateLocation(rfd));
+					    AlternateLocation.createAlternateLocation(tempRFD));
 				} catch( IOException e ) {
                 }  
 			}
