@@ -587,15 +587,15 @@ public class PingReply extends Message implements Serializable, IpPort {
 
                 try {
                     byte[] bytes = ggep.getBytes(GGEP.GGEP_HEADER_VENDOR_INFO);
-                    if(bytes.length > 4) {
+                    if(bytes.length > 4)
                         vendorMajor = (bytes[4] >> 4);
-                    }
                 } catch (BadGGEPPropertyException e) {
                     // simply don't assign it
                 }
                 try {
                     byte[] bytes = ggep.getBytes(GGEP.GGEP_HEADER_VENDOR_INFO);
-                    vendorMinor = (bytes[4] & 15);
+                    if(bytes.length > 4)
+                        vendorMinor = (bytes[4] & 15);
                 }
                 catch (BadGGEPPropertyException e) {
                     // simply don't assign it
