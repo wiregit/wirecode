@@ -4,7 +4,7 @@ import com.limegroup.gnutella.*;
 
 /**
  * This class contains a type-safe enumeration of statistics for
- * individual Gnutella messages that have been sent from other 
+ * individual Gnutella messages that have been sent to other 
  * nodes on the network.  Each statistic maintains its own history, 
  * all messages sent over a specific number of time intervals, 
  * etc.
