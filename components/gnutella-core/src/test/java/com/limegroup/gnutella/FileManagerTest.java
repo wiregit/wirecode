@@ -114,10 +114,10 @@ public class FileManagerTest extends com.limegroup.gnutella.util.BaseTestCase {
         f2 = createNewTestFile(3);
         f3 = createNewTestFile(11);
 
-        assertTrue("should not have been able to share file",
-                  !fman.addFileIfShared(new File("C:\\bad.ABCDEF")));
-        assertTrue("should have been able to share file", 
-                  fman.addFileIfShared(f2));
+        assertEquals("should not have been able to share file",
+                  -1, fman.addFileIfShared(new File("C:\\bad.ABCDEF")));
+        assertNotEquals("should have been able to share file", 
+                  -1, fman.addFileIfShared(f2));
         assertEquals("unexpected number of files", 2, fman.getNumFiles());
         assertEquals("unexpected fman size", 4, fman.getSize());
         responses=fman.query(QueryRequest.createQuery("unit", (byte)3));
@@ -161,8 +161,8 @@ public class FileManagerTest extends com.limegroup.gnutella.util.BaseTestCase {
         fman.removeFileIfShared(f2);
 
         //Add a new second file, with new index.
-        assertTrue("should have been able to add shared file", 
-            fman.addFileIfShared(f3));
+        assertNotEquals("should have been able to add shared file", 
+            -1, fman.addFileIfShared(f3));
         assertEquals("unexpected file size", 12, fman.getSize());
         assertEquals("unexpedted number of files", 2, fman.getNumFiles());
         responses=fman.query(QueryRequest.createQuery("unit", (byte)3));
@@ -228,17 +228,17 @@ public class FileManagerTest extends com.limegroup.gnutella.util.BaseTestCase {
         
         //Try to add a huge file.  (It will be ignored.)
         f4=createFakeTestFile(Integer.MAX_VALUE+1l);
-        assertTrue("shouldn't have been able to add shared file", 
-            !fman.addFileIfShared(f4));
+        assertEquals("shouldn't have been able to add shared file", 
+            -1, fman.addFileIfShared(f4));
         assertEquals("unexpected number of files", 1, fman.getNumFiles());
         assertEquals("unexpected fman size", 11, fman.getSize());
         //Add really big files.
         f5=createFakeTestFile(Integer.MAX_VALUE-1);
         f6=createFakeTestFile(Integer.MAX_VALUE);
-        assertTrue("should have been able to add shared file",
-            fman.addFileIfShared(f5));
-        assertTrue("should have been able to add shared file",
-            fman.addFileIfShared(f6));
+        assertNotEquals("should have been able to add shared file",
+            -1, fman.addFileIfShared(f5));
+        assertNotEquals("should have been able to add shared file",
+            -1, fman.addFileIfShared(f6));
         assertEquals("unexpected number of files", 3, fman.getNumFiles());
         assertEquals("unexpected fman size",
             Integer.MAX_VALUE, fman.getSize());
@@ -463,7 +463,7 @@ public class FileManagerTest extends com.limegroup.gnutella.util.BaseTestCase {
 			Set urnSet = responses[0].getUrns();
 			URN[] responseUrns = (URN[])urnSet.toArray(new URN[0]);
 			// this is just a sanity check
-			assertEquals("urns should be equal", urn, responseUrns[0]);		
+			assertEquals("urns should be equal for " + fd, urn, responseUrns[0]);		
 		}
 		assertTrue("wasn't able to find any unique classes to check against.", checked);
 	}
@@ -494,7 +494,7 @@ public class FileManagerTest extends com.limegroup.gnutella.util.BaseTestCase {
 			    _sharedDir, files[i].getName() + "." + EXTENSION);
 			assertTrue("unable to get file",
 			    CommonUtils.copy( files[i], shared));
-            assertTrue(fman.addFileIfShared(shared));
+            assertNotEquals(-1, fman.addFileIfShared(shared));
 		}
         
         
