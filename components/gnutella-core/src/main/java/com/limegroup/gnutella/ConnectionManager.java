@@ -1435,10 +1435,13 @@ public class ConnectionManager {
                 _dedicatedPrefFetcher = new ConnectionFetcher(true);
                 Runnable interrupted = new Runnable() {
                         public void run() {
-                            if (_dedicatedPrefFetcher == null)
-                                return;
-                            _dedicatedPrefFetcher.interrupt();
-                            _dedicatedPrefFetcher = null;
+                            synchronized(ConnectionManager.this) {
+                                if (_dedicatedPrefFetcher == null)
+                                    return;
+                                _dedicatedPrefFetcher.interrupt();
+                                _dedicatedPrefFetcher = null;
+                                _needPref = false;
+                            }
                         }
                     };
                 // shut off this guy if he didn't have any luck
