@@ -57,7 +57,7 @@ public class MulticastTest extends BaseTestCase {
         String ip = InetAddress.getLocalHost().getHostAddress();
         FilterSettings.WHITE_LISTED_IP_ADDRESSES.setValue(
             new String[] {ip});
-        ConnectionSettings.PORT.setValue(PORT);
+        ConnectionSettings.PORT.setValue(TEST_PORT);
         SharingSettings.EXTENSIONS_TO_SHARE.setValue("mp3;");
         File mp3 = CommonUtils.getResourceFile(MP3_NAME);
         assertTrue(mp3.exists());

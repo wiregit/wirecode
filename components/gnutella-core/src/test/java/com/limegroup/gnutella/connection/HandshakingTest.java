@@ -48,7 +48,7 @@ public final class HandshakingTest extends BaseTestCase {
 	public void setUp() throws Exception {
 		//launchBackend();
 		setStandardSettings();
-		ConnectionSettings.PORT.setValue(PORT);
+		ConnectionSettings.PORT.setValue(TEST_PORT);
 		ConnectionSettings.WATCHDOG_ACTIVE.setValue(false);
 		//ConnectionSettings.REMOVE_ENABLED.setValue(false);
 		ConnectionSettings.IGNORE_KEEP_ALIVE.setValue(true);
@@ -110,7 +110,7 @@ public final class HandshakingTest extends BaseTestCase {
 	 */
 	public void testNormalConnectionAccepted() throws Exception {
 		_currentConnection = 
-			new Connection("localhost", PORT, 
+			new Connection("localhost", TEST_PORT, 
 						   new UltrapeerHeaders("localhost"),
 						   new UltrapeerResponder());
 		_currentConnection.initialize();
@@ -182,7 +182,7 @@ public final class HandshakingTest extends BaseTestCase {
 	 */
 	private Connection connect() throws Exception {
 		Connection conn = 
-			new Connection("localhost", PORT, 
+			new Connection("localhost", TEST_PORT, 
 						   new UltrapeerHeaders("localhost"),
 						   new UltrapeerResponder());
 		conn.initialize();		
@@ -228,7 +228,7 @@ public final class HandshakingTest extends BaseTestCase {
 		}
 
 		TestConnection(String connectString) {
-			super("localhost", PORT, 
+			super("localhost", TEST_PORT, 
 				  ULTRAPEER_PROPS,
 				  new UltrapeerResponder());		
 			CONNECT_STRING = connectString;
