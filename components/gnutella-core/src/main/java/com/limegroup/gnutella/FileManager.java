@@ -77,7 +77,7 @@ public class FileManager{
     public void setExtensions(String str) {   
         /* recieves a semi-colon separated list of extensions */
         _extensions =  HTTPUtil.stringSplit(str, ';');
-        int length = _extensions.length;
+        // int length = _extensions.length;
     }
 
     public boolean hasExtension(String filename) {
