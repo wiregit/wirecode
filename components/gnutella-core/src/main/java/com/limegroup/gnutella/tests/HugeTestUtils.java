@@ -151,6 +151,10 @@ final class HugeTestUtils {
 		"www",
 		"test",
 		"http://www",
+		"http://www ",
+		"http: www",
+		"www.test.com",
+		"http://www.test.com"
 	};
 	
 
