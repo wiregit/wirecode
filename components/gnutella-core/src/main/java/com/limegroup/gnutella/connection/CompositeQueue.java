@@ -2,8 +2,8 @@ package com.limegroup.gnutella.connection;
 
 import java.io.IOException;
 
-import com.limegroup.gnutella.ManagedConnection;
-import com.limegroup.gnutella.messages.*;
+import com.limegroup.gnutella.Connection;
+import com.limegroup.gnutella.messages.Message;
 
 /**
  * A queue of messages organized by type.  Used by ManagedConnection to
@@ -53,14 +53,14 @@ public final class CompositeQueue {
     
     /** 
      * The max time to keep queries, pings, and pongs in the queues, in
-     *  milliseconds.  Package-access for testing purposes only! 
+     * milliseconds.  Public for testing purposes only! 
      */
     public static int QUEUE_TIME = 5*1000;
     
     /** 
      * The number of different priority levels. 
      */
-    private static final int PRIORITIES = 8;
+    private static final int PRIORITIES = 7;
     
     /** 
      * Names for each priority. "Other" includes QRP messages and is NOT
@@ -74,14 +74,6 @@ public final class CompositeQueue {
     private static final int PRIORITY_PING_REPLY  = 4;
     private static final int PRIORITY_PING        = 5;
     private static final int PRIORITY_OTHER       = 6;       
-    
-	/**
-	 * Separate priority for queries that we originate.  These are very
-	 * high priority because we don't want to drop queries that are
-	 * originating from us -- we want to largely bypass the message
-	 * queues when we are first sending a query out on the network.
-	 */
-	private static final int PRIORITY_OUR_QUERY = 7;
 
 
     /** 
@@ -109,7 +101,7 @@ public final class CompositeQueue {
      * Constant for the <tt>ManagedConnection</tt> instance that uses this 
      * queue.
      */
-    private final ManagedConnection CONNECTION;
+    private final Connection CONNECTION;
     
     /**
      * Lock for the output queue.
@@ -119,11 +111,12 @@ public final class CompositeQueue {
     /**
      * Creates a new <tt>CompositeQueue</tt> instance.
      * 
+     * @param conn the <tt>Connection</tt> that uses the queue
      * @return a new <tt>CompositeQueue</tt> instance
      */
-    public static CompositeQueue createQueue(ManagedConnection mc, 
+    public static CompositeQueue createQueue(Connection conn, 
         Object queueLock) {
-        return new CompositeQueue(mc, queueLock);
+        return new CompositeQueue(conn, queueLock);
     }
     
     /** 
@@ -131,8 +124,8 @@ public final class CompositeQueue {
      * 
      * @param mc the <tt>ManagedConnection</tt> associated with this queue
      */
-    private CompositeQueue(ManagedConnection mc, Object queueLock) {
-        CONNECTION = mc;
+    private CompositeQueue(Connection conn, Object queueLock) {
+        CONNECTION = conn;
         _queueLock = queueLock;
     }
     
@@ -160,8 +153,6 @@ public final class CompositeQueue {
             = new PriorityMessageQueue(1, QUEUE_TIME, QUEUE_SIZE);
         queues[PRIORITY_PING]       
             = new PriorityMessageQueue(1, QUEUE_TIME, QUEUE_SIZE);
-		queues[PRIORITY_OUR_QUERY]
-			= new PriorityMessageQueue(10, BIG_QUEUE_TIME, BIG_QUEUE_SIZE);
         queues[PRIORITY_OTHER]        //FIFO, no timeout
             = new SimpleMessageQueue(1, Integer.MAX_VALUE, BIG_QUEUE_SIZE, 
                 false);
