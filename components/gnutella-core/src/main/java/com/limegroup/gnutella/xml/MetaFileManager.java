@@ -338,7 +338,9 @@ public class MetaFileManager extends FileManager {
      * in the names of the files.
      */
     public List getKeyWords(){
-         ArrayList words = (ArrayList)super.getKeyWords();
+        List words = super.getKeyWords();
+        if (words == null)
+            words = new ArrayList();
         //Now get a list of keywords from each of the ReplyCollections
         SchemaReplyCollectionMapper map=SchemaReplyCollectionMapper.instance();
         LimeXMLSchemaRepository rep = LimeXMLSchemaRepository.instance();
@@ -352,6 +354,23 @@ public class MetaFileManager extends FileManager {
         return words;
     }
     
+
+    /** @return A List of KeyWords from the FS that one does NOT want broken
+     *  upon hashing into a QRT.  Initially being used for schema uri hashing.
+     */
+    public List getIndivisibleKeyWords() {
+        List words = super.getIndivisibleKeyWords();
+        if (words == null)
+            words = new ArrayList();
+        LimeXMLSchemaRepository rep = LimeXMLSchemaRepository.instance();
+        String[] schemas = rep.getAvailableSchemaURIs();
+        for (int i = 0; i < schemas.length; i++) 
+            if (schemas[i] != null)
+                words.add(schemas[i]);        
+        return words;
+    }
+
+
     /**
      * Used only for showing the current XML data in the system. This method
      * is used only for the purpose of testing. It is not used for anything 
