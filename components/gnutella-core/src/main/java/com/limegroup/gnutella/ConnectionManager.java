@@ -1216,10 +1216,7 @@ public class ConnectionManager {
         } catch(IOException e) {
             synchronized(ConnectionManager.this) {
                 _initializingFetchedConnections.remove(mc);
-                removeInternal(mc);
-                // We've removed a connection, so the need for connections went
-                // up.  We may need to launch a fetcher.
-                adjustConnectionFetchers();
+                remove(mc);
             }
             throw e;
         }
