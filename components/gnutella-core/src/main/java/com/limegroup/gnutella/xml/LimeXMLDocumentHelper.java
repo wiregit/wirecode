@@ -166,31 +166,6 @@ public final class LimeXMLDocumentHelper{
         }
         return retStringB.toString();
     }
-        
-
-    private static final String SCHEMA_PRECEDE_STRING = "SchemaLocation";
-
-    /** @return the schema uri for the given input xml.  may return null.
-     */
-    private static String getSchemaURI(String xml) {
-        String retString = null;
-        int i = xml.indexOf(SCHEMA_PRECEDE_STRING);
-        if (i > -1) {
-            i += SCHEMA_PRECEDE_STRING.length();
-            if (xml.charAt(i++) == '=') 
-                if ((xml.charAt(i) == '\'') || ((xml.charAt(i) == '"'))) {
-                    char delim = xml.charAt(i);
-                    int begin = ++i;
-                    while (xml.charAt(i) != delim)
-                        i++;
-                    int end = i;
-                    retString = xml.substring(begin,end);
-            
-                }
-        }
-        return retString;
-    }
-
 
     private static void aggregateResponse(HashMap uriToString, 
                                          LimeXMLDocument doc, int index) {
