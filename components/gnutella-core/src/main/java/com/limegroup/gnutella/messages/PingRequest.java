@@ -86,12 +86,19 @@ public class PingRequest extends Message {
         addGGEPs(ggeps);
     }
 
+    /**
+     * Creates a Query Key ping.
+     */
     public static PingRequest createQueryKeyRequest() {
         List l = new LinkedList();
         l.add(new NameValue(GGEP.GGEP_HEADER_QUERY_KEY_SUPPORT));
         return new PingRequest(GUID.makeGuid(), (byte)1, l);
     }
     
+    /**
+     * Creates a TTL 1 Ping for faster bootstrapping, intended
+     * for sending to UDP hosts.
+     */
     public static PingRequest createUDPPing() {
         GUID guid;
         List l = new LinkedList();
@@ -109,6 +116,22 @@ public class PingRequest extends Message {
         l.add(new NameValue(GGEP.GGEP_HEADER_SUPPORT_CACHE_PONGS, data));
         return new PingRequest(guid.bytes(), (byte)1, l);
     }
+    
+    /**
+     * Creates a TTL 1 Ping for faster bootstrapping, intended
+     * for sending to the multicast network.
+     */
+    public static PingRequest createMulticastPing() {
+        GUID guid = new GUID();
+        byte[] data = new byte[1];
+        if(RouterService.isSupernode())
+            data[0] = 0x1;
+        else
+            data[0] = 0x0;
+        List l = new LinkedList();
+        l.add(new NameValue(GGEP.GGEP_HEADER_SUPPORT_CACHE_PONGS, data));
+        return new PingRequest(guid.bytes(), (byte)1, l);
+    }    
             
 
     /////////////////////////////methods///////////////////////////

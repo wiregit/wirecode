@@ -1605,6 +1605,9 @@ public class QueryReply extends Message implements Serializable{
         public int hashCode() {
             return _addr.hashCode() * _port;
         }
-
+        
+        public String toString() {
+            return getAddress() + ":" + getPort();
+        }
     }
 } //end QueryReply

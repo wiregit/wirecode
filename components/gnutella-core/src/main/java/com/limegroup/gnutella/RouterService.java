@@ -1096,6 +1096,17 @@ public class RouterService {
     public static int getNumOldConnections() {
         return manager.getNumOldConnections();
     }
+    
+	/**
+	 * Returns whether or not this client currently has any initialized 
+	 * connections.
+	 *
+	 * @return <tt>true</tt> if the client does have initialized connections,
+	 *  <tt>false</tt> otherwise
+	 */
+	public static boolean isFullyConnected() {
+		return manager.isFullyConnected();
+	}    
 
 	/**
 	 * Returns whether or not this client currently has any initialized 

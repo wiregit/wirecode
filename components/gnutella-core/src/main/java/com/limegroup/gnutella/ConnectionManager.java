@@ -579,6 +579,13 @@ public class ConnectionManager {
         return Math.max(0, ConnectionSettings.NUM_LOCALE_PREF.getValue()
                         - _localeMatchingPeers);
     }
+    
+    /**
+     * Determines if we've reached our maximum number of preferred connections.
+     */
+    public boolean isFullyConnected() {
+        return _initializedConnections.size() >= _preferredConnections;
+    }    
 
 	/**
 	 * Returns whether or not the client has an established connection with
@@ -1361,28 +1368,20 @@ public class ConnectionManager {
         if(isConnected() || _catcher == null) {
             return;
         }
-
-        // Read hosts from disk again if we're running out.
-        recoverHosts();
-
+        
         _connectionAttempts = 0;
         _lastConnectionCheck = 0;
         _lastSuccessfulConnect = 0;
 
 
-        //Tell the HostCatcher to retrieve more bootstrap servers
-        //if necessary. (Only fetch if we haven't received a reply
-        //within a week.)
-        long fetched = ConnectionSettings.LAST_GWEBCACHE_FETCH_TIME.getValue();
-        if( fetched + DataUtils.ONE_WEEK <= System.currentTimeMillis() ) {
-            if(LOG.isDebugEnabled())
-                LOG.debug("Fetching more bootstrap servers. " +
-                          "Last fetch time: " + fetched);
-            _catcher.expire();
-        }
-
+        // Notify HostCatcher that we've connected.
+        _catcher.expire();
+        
         // Set the number of connections we want to maintain
         setPreferredConnections();
+        
+        // tell the catcher to start pinging people.
+        _catcher.sendUDPPings();
     }
 
     /**
@@ -1801,26 +1800,21 @@ public class ConnectionManager {
         //get the ultrapeers, and add those to the host cache
         String hostAddresses = headers.getXTryUltrapeers();
 
-
         //tokenize to retrieve individual addresses
         StringTokenizer st = new StringTokenizer(hostAddresses,
             Constants.ENTRY_SEPARATOR);
-        //iterate over the tokens
+
+        List hosts = new ArrayList(st.countTokens());
         while(st.hasMoreTokens()){
-            //get an address
             String address = st.nextToken().trim();
-            Endpoint e;
-            try{
-                e = new Endpoint(address);
-            }
-            catch(IllegalArgumentException iae){
+            try {
+                Endpoint e = new Endpoint(address);
+                hosts.add(e);
+            } catch(IllegalArgumentException iae){
                 continue;
             }
-
-            //set the good priority, if specified
-            //add it to the catcher
-            _catcher.add(e, true);
         }
+        _catcher.add(hosts);        
     }
 
 

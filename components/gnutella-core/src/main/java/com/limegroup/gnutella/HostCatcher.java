@@ -25,9 +25,11 @@ import com.limegroup.gnutella.bootstrap.UDPHostCache;
 import com.limegroup.gnutella.messages.PingReply;
 import com.limegroup.gnutella.messages.PingRequest;
 import com.limegroup.gnutella.settings.ApplicationSettings;
+import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.util.BucketQueue;
 import com.limegroup.gnutella.util.Cancellable;
 import com.limegroup.gnutella.util.CommonUtils;
+import com.limegroup.gnutella.util.DataUtils;
 import com.limegroup.gnutella.util.FixedsizePriorityQueue;
 import com.limegroup.gnutella.util.IpPort;
 import com.limegroup.gnutella.util.NetworkUtils;
@@ -238,6 +240,17 @@ public class HostCatcher {
      */
     private volatile int _catchersWaiting = 0;
     
+    /**
+     * The last allowed time that we can continue ranking pongs.
+     */
+    private long lastAllowedPongRankTime = 0;
+    
+    /**
+     * The amount of time we're allowed to do pong ranking after
+     * we click connect.
+     */
+    private final long PONG_RANKING_EXPIRE_TIME = 20 * 1000;
+    
 	/**
 	 * Creates a new <tt>HostCatcher</tt> instance with a constant setting
 	 * for the host file location.
@@ -256,16 +269,6 @@ public class HostCatcher {
      * "<host>:port\n".  Lines not in this format are silently ignored.
      */
     public void initialize() {
-        //Read gnutella.net
-        LOG.trace("START readHostsFile");
-        readHostsFile();
-        LOG.trace("STOP readHostsFile");
-        
-        LOG.trace("START sendUDPPings");
-        sendUDPPings();
-        LOG.trace("STOP sendUDPPings");
-        
-        
         LOG.trace("START scheduling");
         //Register to send updates every hour (starting in one hour) if we're a
         //supernode and have accepted incoming connections.  I think we should
@@ -321,21 +324,55 @@ public class HostCatcher {
     /**
      * Sends UDP pings to hosts read from disk.
      */
-    private void sendUDPPings() {
+    public void sendUDPPings() {
         // We need the lock on this so that we can copy the set of endpoints.
         synchronized(this) {
+            rank(new HashSet(ENDPOINT_SET));
+        }
+    }
+    
+    /**
+     * Rank the collection of hosts.
+     */
+    private void rank(Collection hosts) {
+        if(needsPongRanking()) {
             UDPHostRanker.rank(
-                new HashSet(ENDPOINT_SET),
-                null,
+                hosts,
                 // cancel when connected -- don't send out any more pings
                 new Cancellable() {
                     public boolean isCancelled() {
-                        return RouterService.isConnected();
+                        return !needsPongRanking();
                     }
-                },
-                PingRequest.createUDPPing()
+                }
             );
         }
+    }
+    
+    /**
+     * Determines if UDP Pongs need to be sent out.
+     */
+    private boolean needsPongRanking() {
+        if(RouterService.isFullyConnected())
+            return false;
+        int have = RouterService.getConnectionManager().
+            getInitializedConnections().size();
+        if(have >= 5)
+            return false;
+            
+        long now = System.currentTimeMillis();
+        if(now > lastAllowedPongRankTime)
+            return false;
+
+        int size;
+        if(RouterService.isSupernode())
+            size = FREE_ULTRAPEER_SLOTS_SET.size();
+        else
+            size = FREE_LEAF_SLOTS_SET.size();
+
+        int preferred = RouterService.getConnectionManager().
+            getPreferredConnectionCount();
+        
+        return size < preferred - have;
     }
     
     /**
@@ -467,6 +504,7 @@ public class HostCatcher {
         
         // if the pong carried packed IP/Ports, add those as their own
         // endpoints.
+        rank(pr.getPackedIPPorts());
         for(Iterator i = pr.getPackedIPPorts().iterator(); i.hasNext(); ) {
             IpPort ipp = (IpPort)i.next();
             ExtendedEndpoint ep = new ExtendedEndpoint(ipp.getAddress(), ipp.getPort());
@@ -564,6 +602,16 @@ public class HostCatcher {
             LOCALE_2_SET.put(loc, s);
         }
     }
+    
+    /**
+     * Adds a collection of addresses to this.
+     */
+    public void add(Collection endpoints) {
+        rank(endpoints);
+        for(Iterator i = endpoints.iterator(); i.hasNext(); )
+            add((Endpoint)i.next(), true);
+            
+    }
 
 
     /**
@@ -571,14 +619,14 @@ public class HostCatcher {
      * This method is used when getting an address from headers instead of the
      * normal ping reply.
      *
-     * @param pr the pong containing the address/port to add.  MODIFIES:
-     *  e.getWeight().  Caller should not modify this afterwards.
+     * @param pr the pong containing the address/port to add.
      * @param forceHighPriority true if this should always be of high priority
      * @return true iff e was actually added
      */
     public boolean add(Endpoint e, boolean forceHighPriority) {
         if(!isValidHost(e))
             return false;
+            
         
         if (forceHighPriority)
             return add(e, GOOD_PRIORITY);
@@ -879,25 +927,23 @@ public class HostCatcher {
      * tries to return an endpoint that matches the locale of this client
      * from the passed in set.
      */
-    private ExtendedEndpoint preferenceWithLocale(Set s) {
+    private ExtendedEndpoint preferenceWithLocale(Set base) {
 
         String loc = ApplicationSettings.LANGUAGE.getValue();
 
         if(LOCALE_2_SET.containsKey(loc)) {
             Set locales = (Set)LOCALE_2_SET.get(loc);
-            Set retain = new HashSet(s);
-            retain.retainAll(locales);
-
-            if(retain.size() != 0) { //preferenced 
-                Iterator itr = retain.iterator();
-                ExtendedEndpoint ee = (ExtendedEndpoint)itr.next();
-                locales.remove(ee);
-                s.remove(ee);
-                return ee;
-            }//else we just return the first endpoint in the passed in set
+            for(Iterator i = base.iterator(); i.hasNext(); ) {
+                Object next = i.next();
+                if(locales.contains(next)) {
+                    i.remove();
+                    locales.remove(next);
+                    return (ExtendedEndpoint)next;
+                }
+            }
         }
         
-        Iterator iter = s.iterator();
+        Iterator iter = base.iterator();
         ExtendedEndpoint ee = (ExtendedEndpoint)iter.next();
         iter.remove();
         return ee;
@@ -975,32 +1021,27 @@ public class HostCatcher {
      * preference the set so we try to return those endpoints that match
      * passed in locale "loc"
      */
-    private Collection getPreferencedCollection(Set s, String loc) {
+    private Collection getPreferencedCollection(Set base, String loc) {
         if(loc == null || loc.equals(""))
             loc = ApplicationSettings.DEFAULT_LOCALE.getValue();
-        int i = 0;
-        Set returnSet = new HashSet();
-        Set copy;
-        Iterator itr;
 
-        if(LOCALE_2_SET.containsKey(loc)) { //try to preference
-            Set locales = (Set)LOCALE_2_SET.get(loc);
-            copy = new HashSet(s);
-            copy.retainAll(locales);
-            itr = copy.iterator();
-            for(;itr.hasNext() && i < 10; i++) 
-                returnSet.add(itr.next());
-        }
+        Set hosts = new HashSet();
+        Iterator i;
 
-        if(i < 10) {
-            copy = new HashSet(s);
-            copy.removeAll(returnSet); //make sure we don't have duplicates
-            itr = copy.iterator();
-            for(;itr.hasNext() && i < 10; i++)
-                returnSet.add(itr.next());
+        Set locales = (Set)LOCALE_2_SET.get(loc);
+        if(locales != null) {
+            for(i = locales.iterator(); i.hasNext() && hosts.size() < 10; ) {
+                Object next = i.next();
+                if(base.contains(next))
+                    hosts.add(next);
+            }
         }
         
-        return returnSet;
+        for(i = base.iterator(); i.hasNext() && hosts.size() < 10;) {
+            hosts.add(i.next());
+        }
+        
+        return hosts;
     }
 
 
@@ -1011,7 +1052,16 @@ public class HostCatcher {
     public synchronized void expire() {
         //Fetch more GWebCache urls once per session.
         //(Well, once per connect really--good enough.)
-        gWebCache.fetchBootstrapServersAsync();
+        long now = System.currentTimeMillis();
+        long fetched = ConnectionSettings.LAST_GWEBCACHE_FETCH_TIME.getValue();
+        if( fetched + DataUtils.ONE_WEEK <= now ) {
+            if(LOG.isDebugEnabled())
+                LOG.debug("Fetching more bootstrap servers. " +
+                          "Last fetch time: " + fetched);
+            gWebCache.fetchBootstrapServersAsync();
+        }
+        recoverHosts();
+        lastAllowedPongRankTime = now + PONG_RANKING_EXPIRE_TIME;
     }
 
     /**
@@ -1105,9 +1155,6 @@ public class HostCatcher {
         // Read the hosts file again.  This will also notify any waiting 
         // connection fetchers from previous connection attempts.
         readHostsFile();
-        
-        // Send our pings again.
-        sendUDPPings();        
     }
 
     /**
@@ -1139,15 +1186,26 @@ public class HostCatcher {
     }
     
     /**
-     * Runnable that looks for GWebCache or UDPHostCache entries.
+     * Runnable that looks for GWebCache, UDPHostCache or multicast hosts.
+     * This tries, in order:
+     * 1) Multicasting a ping.
+     * 2) Sending UDP pings to UDPHostCaches.
+     * 3) Connecting via TCP to GWebCaches.
      */
-    private class Bootstrapper implements Runnable {        
+    private class Bootstrapper implements Runnable {
+        
+        /**
+         * The next allowed multicast time.
+         */
+        private long nextAllowedMulticastTime = 0;
+        
         /**
          * The next time we're allowed to fetch via GWebCache.
          * Incremented after each succesful fetch.
          */
         private long nextAllowedFetchTime = 0;
         
+        /**
         /**
          * The delay to wait before the next time we contact a GWebCache.
          * Upped after each attempt at fetching.
@@ -1159,6 +1217,12 @@ public class HostCatcher {
          * GWebCaches.
          */
         private static final int POST_UDP_DELAY = 30 * 1000;
+        
+        /**
+         * How long we must wait after each multicast ping before
+         * we attempt a newer multicast ping.
+         */
+        private static final int POST_MULTICAST_DELAY = 60 * 1000;
 
         /**
          * Determines whether or not it is time to get more hosts,
@@ -1170,8 +1234,10 @@ public class HostCatcher {
                 return;
             
             long now = System.currentTimeMillis();
-            // if no possible udp hosts & not allowed gwebcache, wait.
-            if(udpHostCache.getSize() == 0 && now < nextAllowedFetchTime)
+            
+            if(udpHostCache.getSize() == 0 &&
+               now < nextAllowedFetchTime &&
+               now < nextAllowedMulticastTime)
                 return;
                 
             //if we don't need hosts, exit.
@@ -1204,15 +1270,58 @@ public class HostCatcher {
          * Fetches more hosts, updating the next allowed time to fetch.
          */
         synchronized void getHosts(long now) {
+            // alway try multicast first.
+            if(multicastFetch(now))
+                return;
+                
+            // then try udp host caches.
+            if(udpHostCacheFetch(now))
+                return;
+                
+            // then try gwebcaches
+            if(gwebCacheFetch(now))
+                return;
+                
+            // :-(
+        }
+        
+        /**
+         * Attempts to fetch via multicast, returning true
+         * if it was able to.
+         */
+        private boolean multicastFetch(long now) {
+            if(nextAllowedMulticastTime < now) {
+                LOG.trace("Fetching via multicast");
+                PingRequest pr = PingRequest.createMulticastPing();
+                MulticastService.instance().send(pr);
+                nextAllowedMulticastTime = now + POST_MULTICAST_DELAY;
+                return true;
+            }
+            return false;
+        }
+        
+        /**
+         * Attempts to fetch via udp host caches, returning true
+         * if it was able to.
+         */
+        private boolean udpHostCacheFetch(long now) {
             // if we had udp host caches to fetch from, use them.
             if(udpHostCache.fetchHosts()) {
+                LOG.trace("Fetching via UDP");
                 nextAllowedFetchTime = now + POST_UDP_DELAY;
-                return;
-            } // else didn't attempt to contact any UDP hosts.
-            
+                return true;
+            }
+            return false;
+        }
+        
+        /**
+         * Attempts to fetch via gwebcaches, returning true
+         * if it was able to.
+         */
+        private boolean gwebCacheFetch(long now) {
             // if we aren't allowed to contact gwebcache's yet, exit.
             if(now < nextAllowedFetchTime)
-                return;
+                return false;
             
             int ret = gWebCache.fetchEndpointsAsync();
             switch(ret) {
@@ -1222,21 +1331,21 @@ public class HostCatcher {
                 if(LOG.isDebugEnabled())
                     LOG.debug("Fetching hosts.  Next allowed time: " +
                               nextAllowedFetchTime);
-                break;
+                return true;
             case BootstrapServerManager.FETCH_IN_PROGRESS:
                 LOG.debug("Tried to fetch, but was already fetching.");
-                break;
+                return true;
             case BootstrapServerManager.CACHE_OFF:
                 LOG.debug("Didn't fetch, gWebCache's turned off.");
-                break;
+                return false;
             case BootstrapServerManager.FETCHED_TOO_MANY:
                 LOG.debug("We've received a bunch of endpoints already, didn't fetch.");
                 MessageService.showError("GWEBCACHE_FETCHED_TOO_MANY");
-                break;
+                return false;
             case BootstrapServerManager.NO_CACHES_LEFT:
                 LOG.debug("Already contacted each gWebCache, didn't fetch.");
                 MessageService.showError("GWEBCACHE_NO_CACHES_LEFT");
-                break;
+                return false;
             default:
                 throw new IllegalArgumentException("invalid value: " + ret);
             }
