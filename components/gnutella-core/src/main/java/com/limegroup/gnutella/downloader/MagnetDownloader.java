@@ -6,6 +6,7 @@ import com.limegroup.gnutella.util.*;
 import com.limegroup.gnutella.http.HttpClientManager;
 import java.io.*;
 import java.net.*;
+
 import com.sun.java.util.collections.*;
 import org.apache.commons.httpclient.HttpMethod;
 import org.apache.commons.httpclient.methods.HeadMethod;
@@ -71,10 +72,7 @@ public class MagnetDownloader extends ManagedDownloader implements Serializable 
      * @param defaultURLs the initial locations to try (exact source), or null 
      *  if unknown
      */
-    public MagnetDownloader(DownloadManager manager,
-                            FileManager filemanager,
-                            IncompleteFileManager ifm,
-                            ActivityCallback callback,
+    public MagnetDownloader(IncompleteFileManager ifm,
                             URN urn,
                             String textQuery,
                             String filename,
@@ -98,9 +96,8 @@ public class MagnetDownloader extends ManagedDownloader implements Serializable 
 			//Send HEAD request to default location (if present)to get its size.
 			//This can block, so it must be done here instead of in constructor.
 			//See class overview and ManagedDownloader.tryAllDownloads.
-			RemoteFileDesc defaultRFD=createRemoteFileDesc(_defaultURLs[i],
-														   _filename,
-														   _urn);
+			RemoteFileDesc defaultRFD = 
+                createRemoteFileDesc(_defaultURLs[i], _filename, _urn);
 			if (defaultRFD!=null) {
 				//Add the faked up location before starting download. Note that 
 				//we must force ManagedDownloader to accept this RFD in case 
@@ -121,15 +118,19 @@ public class MagnetDownloader extends ManagedDownloader implements Serializable 
      * is provided, issues a HEAD request to get the file size.  If this fails,
      * returns null.  Package-access and static for easy testing.
      */
-    static RemoteFileDesc createRemoteFileDesc(String defaultURL,
-                                               String filename,
-                                               URN urn) {
+    private static RemoteFileDesc createRemoteFileDesc(String defaultURL,
+        String filename, URN urn) {
         if (defaultURL==null)
             return null;
 
         try {
-            URL url=new URL(defaultURL);
-            int port=url.getPort();
+            // Use the URL class to do a little parsing for us.
+            URL url = new URL(defaultURL);
+
+            // Then create the URL-encoded URL based on the parsed values.
+            url = new URL(url.getProtocol(), url.getHost(), url.getPort(),
+                URLEncoder.encode(url.getFile()));
+            int port = url.getPort();
             if (port<0)
                 port=80;      //assume default for HTTP (not 6346)
 
