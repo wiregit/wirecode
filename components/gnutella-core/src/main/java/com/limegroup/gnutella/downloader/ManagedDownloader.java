@@ -2868,7 +2868,8 @@ public class ManagedDownloader implements Downloader, Serializable {
                 LOG.debug("WORKER: Host gave subrange, different low.  Was: " +
                           low + ", is now: " + newLow);
             addToNeeded(new Interval(low, newLow-1));
-        } if(newHigh < high) {
+        }
+        if(newHigh < high) {
             if(LOG.isDebugEnabled())
                 LOG.debug("WORKER: Host gave subrange, different high.  Was: " +
                           high + ", is now: " + newHigh);
