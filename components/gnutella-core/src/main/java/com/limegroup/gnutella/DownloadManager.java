@@ -1007,6 +1007,10 @@ public class DownloadManager implements BandwidthTracker {
         	return true;
         }
         
+        // in case this is a failover push, remove the host from the set
+        if (file.getOOBAddress()!=null)
+        	_udpFailover.remove(file.getOOBAddress().getInetAddress());
+        
         //send the push through tcp.
         pr = 
         	new PushRequest(GUID.makeGuid(),
