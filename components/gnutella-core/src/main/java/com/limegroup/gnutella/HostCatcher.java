@@ -112,11 +112,14 @@ public class HostCatcher {
     public synchronized void write(String filename) throws IOException {
 	FileWriter out=new FileWriter(filename);
 	//1) Write connections we're connected to--in no particular order.
-	//   Also add the connections to a set for step (2).
+	//   Also add the connections to a set for step (2).  Ignore incoming
+	//   connections, since the remote host's port is ephemeral.
 	Set connections=new HashSet();
 	if (manager!=null) {
 	    for (Iterator iter=manager.connections(); iter.hasNext(); ) {
 		Connection c=(Connection)iter.next();
+		if (! c.isOutgoing()) //ignore incoming
+		    continue;
 		Endpoint e=new Endpoint(c.getInetAddress().getHostAddress(),
 					c.getPort());
 		connections.add(e);
