@@ -1653,19 +1653,32 @@ public abstract class MessageRouter {
 			    port = RouterService.getNonForcedPort();
             }
 
-            QueryReply reply = 
-                new QueryReply(guid, ttl, port, ip, speed, res, 
-                               _clientGUID, !incoming, busy, uploaded, 
-                               measuredSpeed, chat, mcast);
+            List replies =
+                createQueryReply(guid, ttl, port, ip, speed, res, 
+                                 _clientGUID, !incoming, busy, uploaded, 
+                                 measuredSpeed, chat, mcast);
 
             //add to the list
-            queryReplies.add(reply);
+            queryReplies.addAll(replies);
 
         }//end of while
         
         return queryReplies.iterator();
     }
 
+    /**
+     * Abstract method for creating query hits.  Subclasses must specify
+     * how this list is created.
+     *
+     * @return a <tt>List</tt> of <tt>QueryReply</tt> instances
+     */
+    protected abstract List createQueryReply(byte[] guid, byte ttl, int port, 
+                                             byte[] ip , long speed, Response[] res,
+                                             byte[] clientGUID, boolean notIncoming,
+                                             boolean busy, boolean uploaded, 
+                                             boolean measuredSpeed, 
+                                             boolean supportsChat,
+                                             boolean isFromMcast);
 
     /**
      * Handles a message to reset the query route table for the given
