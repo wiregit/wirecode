@@ -430,19 +430,33 @@ public class ConnectionManager {
 	}
 
     /** 
-     * Sends two ping requests to the connection.  First ping request has a TTL of
-     * 1 for handshaking purposes.  Then, send another ping request with TTL of 7
-     * to get some pongs back.
+     * Sends initial ping requests to the connection.  First ping request has a
+     * TTL of 1 for handshaking purposes if needed.  Then, send another ping
+     * request with TTL of 7 to get some pongs back.  
      */
     private void sendInitialPingRequest(ManagedConnection connection) {
-        //only send handshake ping, if not a connection to a router (e.g., 
-        //router.limewire.com)
-        if (!isRouterConnection(connection)) {
+        //Send a handshake ping to incoming connections in order to discover
+        //their ports.  (We only know the ephemeral ports.)  These ports can be
+        //given to crawlers later.
+        //
+        //There are two reasons for not sending pongs to outgoing connections.
+        //First, we already know their ports--after all, we just connected to
+        //them--so it would be wasteful.  More importantly, a pong cache like
+        //router.limewire.com will send many pongs in response to a handshake
+        //ping--not just its own address.  MessageRouter.handlePingReply would
+        //not know whether to add these pongs to its pong cache or to call
+        //connection.setRemotePong.  You might think to call
+        //connection.isRouterConnection, but that is not sufficient.  For
+        //example, the user may have typed "router.limewire.com" directly into
+        //the GUI.
+        if (!connection.isOutgoing()) {
             PingRequest handshake = new PingRequest((byte)1);
             //record the GUID of the handshake ping
             connection.setHandshakeGUID(handshake.getGUID());
             connection.send(handshake);
         }
+        //Send a full-fledged ping.  TODO3: don't send if you don't need pongs,
+        //especially if connection doesn't support pong caching.
         PingRequest initialPing = 
             new PingRequest((byte)MessageRouter.MAX_TTL_FOR_CACHE_REFRESH);
         connection.send(initialPing);

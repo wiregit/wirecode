@@ -574,30 +574,15 @@ public abstract class MessageRouter
                                    ManagedConnection receivingConnection)
     {
         //If pingReply is a handshake ping, store it in receivingConnection.
-        //Recall that the handshake ping is sent when creating a connection in
-        //order to discover the ports of incoming connections, among other
-        //things.  These ports (and addresses!) can be given to crawlers later.
-        //
-        //Here's the catch: what do you do with handshake pongs from outgoing
-        //connections?  If you don't add them to the cache, you won't be able to
-        //manually connect (through the GUI) to host discovery services like
-        //router.limewire.com.  On the other hand, if you store them in the
-        //cache, you may later give out the addresses of people who can't accept
-        //incoming connections.  Thankfully there is an easy solution; only add
-        //outgoing handshake pongs to the cache if their addresses and ports
-        //don't match the address and port of the connection.  The problem is
-        //that if someone forces their port, you add bogus pongs to the cache.
-        //Similar things happen if you connect to "127.0.0.1".
+        //See ConnectionManager.sendInitialPingRequest for more details.
         if (pingReply.getHops()==1
                && matches(pingReply.getGUID(),
-                          receivingConnection.getHandshakeGUID())
-               && (!receivingConnection.isOutgoing() 
-                      || matches(pingReply, receivingConnection))) {
+                          receivingConnection.getHandshakeGUID()) ) {
             receivingConnection.setRemotePong(pingReply);
             return;
         }
         
-        //add to cache and send pong to other connections, if it was 
+        //Add to cache and send pong to other connections, if it was
         //successfully added to the cache.
         if (_catcher.addToCache(pingReply, receivingConnection))
         {
@@ -614,15 +599,6 @@ public abstract class MessageRouter
         if (g1==null || g2==null)
             return false;
         return (new GUID(g1)).equals(new GUID(g2));
-    }
-
-    /** Returns true iff pong has the same address and port as conn. */
-    private static boolean matches(PingReply pong, Connection conn) {
-        byte[] pb=pong.getIPBytes();
-        byte[] cb=conn.getInetAddress().getAddress();
-        return pong.getPort()==conn.getOrigPort()
-            && Arrays.equals(pong.getIPBytes(),
-                             conn.getInetAddress().getAddress());
     }
                                    
 
