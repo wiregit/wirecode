@@ -123,6 +123,8 @@ public class Sockets {
             //   is not done lazily.  (See chapter 12.3.4 of the Java Language
             //   Specification.)  So we use reflection.
             InetSocketAddress addr = new InetSocketAddress(host, port);
+
+            // make sure the address was resolved to an InetAddress
             if (addr.isUnresolved())
                 throw new IOException("Couldn't resolve address");
             Socket sock = SocketChannel.open().socket();
