@@ -103,9 +103,15 @@ public final class HandshakeResponse {
     
     /**
      * Cached boolean for whether or not this is considered a considered a
-     * "good" connection.
+     * "good" leaf connection.
      */
-    private final boolean GOOD;
+    private final boolean GOOD_LEAF;
+
+    /**
+     * Cached boolean for whether or not this is considered a considered a
+     * "good" ultrapeer connection.
+     */
+    private final boolean GOOD_ULTRAPEER;
 
     /**
      * Cached value for the number of Ultrapeers this Ultrapeer attempts
@@ -184,10 +190,19 @@ public final class HandshakeResponse {
              isVersionOrHigher(HEADERS, HeaderNames.X_DYNAMIC_QUERY, 0.1F);
          PROBE_QUERIES = 
              isVersionOrHigher(HEADERS, HeaderNames.X_PROBE_QUERIES, 0.1F);
-         GOOD = isHighDegreeConnection() &&
+         //GOOD = isHighDegreeConnection() &&
+         //  isUltrapeerQueryRoutingConnection() &&
+         //  (getMaxTTL() < 5) &&
+         //  isDynamicQueryConnection();
+
+         GOOD_LEAF = isHighDegreeConnection() &&
              isUltrapeerQueryRoutingConnection() &&
              (getMaxTTL() < 5) &&
              isDynamicQueryConnection();
+
+         GOOD_ULTRAPEER = isGoodLeaf() && 
+             supportsProbeQueries();
+             
 
          ULTRAPEER = isTrueValue(HEADERS, HeaderNames.X_ULTRAPEER);
          LEAF = isFalseValue(HEADERS, HeaderNames.X_ULTRAPEER);
@@ -525,17 +540,26 @@ public final class HandshakeResponse {
 	}
 
     /**
-     * Returns whether or not this connections is a "good" connection,
-     * a definition that changes over time as features are added
-     * to the network.
+     * Returns whether or not this is connection passed the headers to be
+     * considered a "good" leaf.
      *
-     * @return <tt>true</tt> if this connection is considered "good",
-     *  otherwise <tt>false</tt>
+     * @return <tt>true</tt> if this is considered a "good" leaf, otherwise
+     *  <tt>false</tt>
      */
-    public boolean isGoodConnection() {
-        return GOOD;
-    }    
+    public boolean isGoodLeaf() {
+        return GOOD_LEAF;
+    }
 
+    /**
+     * Returns whether or not this is connection passed the headers to be
+     * considered a "good" ultrapeer.
+     *
+     * @return <tt>true</tt> if this is considered a "good" ultrapeer, otherwise
+     *  <tt>false</tt>
+     */
+    public boolean isGoodUltrapeer() {
+        return GOOD_ULTRAPEER;
+    }
 
 	/**
 	 * Returns whether or not this connection supports query routing 
