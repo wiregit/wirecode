@@ -868,65 +868,73 @@ log2("Received duplicate block num: "+ dmsg.getSequenceNumber());
      *  and schedule next write time.
      */
     public synchronized void writeData() {
-		// If the input has not been started then wait again
-		if ( _input == null ) {
-	        scheduleWriteDataEvent(WRITE_STARTUP_WAIT_TIME);
-			return;
-		}
 
-        // If someone wanted us to wait a bit then don't send data now
-        if ( _skipADataWrite ) {
-            _skipADataWrite = false;
-            return;
+        while (true) {
+            // If the input has not been started then wait again
+            if ( _input == null ) {
+                scheduleWriteDataEvent(WRITE_STARTUP_WAIT_TIME);
+                return;
+            }
+
+            // If someone wanted us to wait a bit then don't send data now
+            if ( _skipADataWrite ) {
+                _skipADataWrite = false;
+                return;
+            }
+
+            // Reset special flags for long wait times
+            _waitingForDataAvailable = false;
+            _waitingForDataSpace = false;
+
+            // If there is room to send something then send data if available
+            if ( getChunkLimit() > 0 ) {
+                // Get data and send it
+                Chunk chunk = _input.getChunk();
+                if ( chunk != null )
+                    sendData(chunk);
+            } else {
+                // if no room to send data then wait for the window to Open
+                scheduleWriteDataEvent(Long.MAX_VALUE);
+                _waitingForDataSpace = true;
+            }
+
+            // Don't wait for next write if there is no chunk available.
+            // Writes will get rescheduled if a chunk becomes available.
+            synchronized(_input) {
+    log("calling getPending");
+                if ( _input.getPendingChunks() == 0 ) {
+                    scheduleWriteDataEvent(Long.MAX_VALUE);
+                    _waitingForDataAvailable = true;
+                    return;
+                }
+            }
+            
+            // Compute how long to wait
+            // TODO: Simplify experimental algorithm and plug it in
+            //long waitTime = (long)_sendWindow.getRTO() / 6l;
+            long currTime = System.currentTimeMillis();
+            long waitTime = _writeRegulator.getSleepTime(currTime);
+
+            if ( _receiverWindowSpace <= SMALL_SEND_WINDOW ) { 
+                // If send window getting small
+                // then wait longer
+                waitTime *= SMALL_WINDOW_MULTIPLE;
+
+                // Scale back on the writing speed if you are hitting limits
+                _writeRegulator.hitZeroWindow();
+            }
+
+            // Initially ensure waitTime is not too low
+            if (waitTime == 0 && _sequenceNumber < 10 ) 
+                waitTime = DEFAULT_RTO_WAIT_TIME;
+
+            // Only wait if the waitTime is more than zero
+            if ( waitTime > 0 ) {
+                long time = System.currentTimeMillis() + waitTime;
+                scheduleWriteDataEvent(time);
+                break;
+            }
         }
-
-		// Reset special flags for long wait times
-		_waitingForDataAvailable = false;
-		_waitingForDataSpace = false;
-
-		// If there is room to send something then send data if available
-		if ( getChunkLimit() > 0 ) {
-			// Get data and send it
-		    Chunk chunk = _input.getChunk();
-			if ( chunk != null )
-		    	sendData(chunk);
-		} else {
-			// if no room to send data then wait for the window to Open
-			scheduleWriteDataEvent(Long.MAX_VALUE);
-			_waitingForDataSpace = true;
-		}
-
-		// Don't wait for next write if there is no chunk available.
-		// Writes will get rescheduled if a chunk becomes available.
-		synchronized(_input) {
-log("calling getPending");
-			if ( _input.getPendingChunks() == 0 ) {
-				scheduleWriteDataEvent(Long.MAX_VALUE);
-				_waitingForDataAvailable = true;
-				return;
-			}
-		}
-		
-		// Compute how long to wait
-		// TODO: Simplify experimental algorithm and plug it in
-		//long waitTime = (long)_sendWindow.getRTO() / 6l;
-        long currTime = System.currentTimeMillis();
-        long waitTime = _writeRegulator.getSleepTime(currTime);
-
-        if ( _receiverWindowSpace <= SMALL_SEND_WINDOW ) { 
-            // If send window getting small
-            // then wait longer
-            waitTime *= SMALL_WINDOW_MULTIPLE;
-
-            // Scale back on the writing speed if you are hitting limits
-            _writeRegulator.hitZeroWindow();
-
-        }
-		if (waitTime == 0) 
-			waitTime = DEFAULT_RTO_WAIT_TIME;
-
-        long time = System.currentTimeMillis() + waitTime;
-        scheduleWriteDataEvent(time);
     }
 
     /** 
