@@ -88,10 +88,11 @@ public class ConnectionManager {
 
         // Start a thread to police connections.
         // Perhaps this should use a low priority?
-        _watchdog = new ConnectionWatchdog(this, _router);
-        Thread watchdog=new Thread(_watchdog);
-        watchdog.setDaemon(true);
-        watchdog.start();
+//          _watchdog = new ConnectionWatchdog(this, _router);
+//          Thread watchdog=new Thread(_watchdog);
+//          watchdog.setDaemon(true);
+//          watchdog.start();
+        System.err.println("WARNING: ConnectionWatchdog disabled.");
 
         setKeepAlive(_settings.getKeepAlive());
         //setMaxIncomingConnections(
