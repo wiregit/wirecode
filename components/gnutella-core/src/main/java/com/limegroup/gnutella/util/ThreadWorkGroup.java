@@ -132,7 +132,9 @@ public class ThreadWorkGroup {
 
     private class WorkerThread extends Thread {
         private final WorkerInterface _worker;
+        
         public WorkerThread(WorkerInterface worker) {
+            super("WorkerThread"); // TODO: Use name of WorkerInterface
             _worker = worker;
         }
         
