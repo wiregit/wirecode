@@ -77,14 +77,8 @@ public class ManagedDownloader implements Downloader {
      *  arrive, so it must not be too small.  A value of * tries==0 represents
      *  the first try.  */
     private long calculateWaitTime() {
-        if (tries<5)
-            return 20*1000l;     //20 seconds first 5 times
-        else if (tries<15)
-            return 40*1000l;     //40 seconds next 10 tries
-        else if (tries<30)
-            return 90*1000l;     //1.5 minutes next 15 tries
-        else
-            return 5*60*1000l;   //5 minutes after that
+        //60 seconds: same as BearShare.
+        return 60*1000;
     }
 
 
