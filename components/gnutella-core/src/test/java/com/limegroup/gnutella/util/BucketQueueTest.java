@@ -1,7 +1,6 @@
 package com.limegroup.gnutella.util;
 
 import junit.framework.*;
-import com.limegroup.gnutella.util.PrivilegedAccessor;
 import com.limegroup.gnutella.util.BaseTestCase;
 import com.sun.java.util.collections.*;
 
@@ -24,7 +23,24 @@ public class BucketQueueTest extends BaseTestCase {
 		junit.textui.TestRunner.run(suite());
 	}
 
-
+    /**
+     * Tests the method for removing objects.
+     * 
+     * @throws Exception
+     */
+    public void testRemoveAll() throws Exception {
+        Object o = new Object();
+        int priorities = 10;
+        BucketQueue bq = new BucketQueue(priorities, 5);
+        for(int i=0; i<priorities; i++) {
+            bq.insert(o, i);
+            assertTrue("should have successfully removed object",
+                bq.removeAll(o));
+            assertTrue("queue should be empty", bq.isEmpty());
+        }
+    }
+    
+    
     public void testIterator() throws Exception {
         BucketQueue bq = new BucketQueue(5, 10);
         //Integer curInt = new Integer(4);
@@ -40,6 +56,7 @@ public class BucketQueueTest extends BaseTestCase {
         //  Integer curInt = (Integer)iter.next();
         //}
     }
+   
 	
 	public void testLegacy() {
         Endpoint e4=new Endpoint("1.2.3.4", 1); e4.setWeight(4);
