@@ -1,6 +1,5 @@
 package com.limegroup.gnutella.updates;
 
-import com.limegroup.gnutella.handshaking.*;
 import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.util.*;
 import com.limegroup.gnutella.http.*;
@@ -116,7 +115,7 @@ public class UpdateManager {
                 final String UPDATE = "/update.xml";
                 //if we get host or port incorrectly, we will not be able to 
                 //establish a connection and just return, its fail safe. 
-                String ip = c.getOrigHost();
+                String ip = c.getIPString();
                 int port = c.getListeningPort();
                 byte[] data = null;
                 try {
