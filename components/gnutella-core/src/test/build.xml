@@ -14,6 +14,7 @@
   <property name="mp3sp"       value="${lib}mp3sp14.jar"/>
   <property name="ui"          value="${lib}ui.jar"/>
   <property name="mrj"         value="${lib}MRJToolkitStubs.jar"/>
+  <property name="osx"         value="${lib}MRJ141Stubs.jar"/>
   <property name="mac"         value="${lib}MacStubs.jar"/>
   <property name="quicktime"   value="${lib}QTJava.zip"/>
   <property name="skins"       value="${lib}skinlf.jar"/>
@@ -41,6 +42,7 @@
     <pathelement location="${mp3sp}" />
 	<pathelement location="${ui}" />
     <pathelement location="${mrj}" />
+    <pathelement location="${osx}" />
 	<pathelement location="${mac}" />
 	<pathelement location="${quicktime}"/>
 	<pathelement location="lib/junit.jar"/>
