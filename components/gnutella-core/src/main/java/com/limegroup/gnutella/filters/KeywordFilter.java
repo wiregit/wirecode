@@ -13,8 +13,6 @@ import java.util.Locale;
 public class KeywordFilter extends SpamFilter {
     /** INVARIANT: strings in ban contain only lowercase */
     private List /* of String */ ban=new ArrayList();
-    /** For converting strings to lower case. */
-    private Locale locale=Locale.getDefault();
 
     /** 
      * @modifies this
