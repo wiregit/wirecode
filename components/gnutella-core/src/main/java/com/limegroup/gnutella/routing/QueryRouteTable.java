@@ -19,7 +19,7 @@ public class QueryRouteTable {
     /** The suggested default table size. */
     public static final int DEFAULT_TABLE_SIZE=65536;
     /** The suggested default max table TTL. */
-    public static final byte DEFAULT_INFINITY=(byte)10;
+    public static final byte DEFAULT_INFINITY=(byte)7;
 
     /** 
      * The table of keywords and their associated TTLs.  Each value table[i] is
@@ -45,6 +45,11 @@ public class QueryRouteTable {
     private int nextPatch;
     /** True if this has been fully patched following a reset. */
     private boolean isPatched;
+
+    /** Creates a QueryRouteTable with default sizes. */
+    public QueryRouteTable() {
+        this(DEFAULT_TABLE_SIZE, DEFAULT_INFINITY);
+    }
 
     /** 
      * Creates a new QueryRouteTable that has space for initialSize keywords
@@ -94,9 +99,9 @@ public class QueryRouteTable {
 
     /**
      * For all keywords k in filename, adds <k, ttl> to this.
-     * Useful for testing.
+     * <b>For testing purposes only.</b>
      */
-    private void add(String filename, int ttl) {
+    public void add(String filename, int ttl) {
         String[] keywords=HashFunction.keywords(filename);
         for (int i=0; i<keywords.length; i++) {
             int hash=HashFunction.hash(keywords[i], table.length);
@@ -117,6 +122,52 @@ public class QueryRouteTable {
             table[i]=(byte)Math.min(table[i], qrt.table[i]+1);
     }
 
+    /** Returns true if this has been fully patched following a reset. */
+    public boolean isPatched() {
+        return isPatched;
+    }
+
+    /** Returns the number of entries in this. */
+    public int entries() {
+        int count=0;
+        for (int i=0; i<table.length; i++) {
+            if (table[i]<infinity)
+                count++;
+        }
+        return count;
+    }        
+
+    /** True if o is a QueryRouteTable with the same entries of this. */
+    public boolean equals(Object o) {
+        if (! (o instanceof QueryRouteTable))
+            return false;
+
+        //TODO: two qrt's can be equal even if they have different TTL ranges.
+        QueryRouteTable other=(QueryRouteTable)o;
+        if (this.table.length!=other.table.length)
+            return false;
+
+        for (int i=0; i<this.table.length; i++) {
+            if (this.table[i]!=other.table[i])
+                return false;
+        }
+        return true;
+    }
+
+    public String toString() {
+        StringBuffer buf=new StringBuffer();
+        buf.append("{");
+        for (int i=0; i<table.length; i++) {
+            if (table[i]<infinity)
+                buf.append(i+"/"+table[i]+", ");
+        }
+        buf.append("}");
+        return buf.toString();
+    }
+
+
+    ////////////////////// Core Encoding and Decoding //////////////////////
+
     /*
      * Adds or removes keywords according to m.  Does not resize this.
      *     @modifies this 
@@ -136,9 +187,12 @@ public class QueryRouteTable {
             return;
         }
     }
+    //All encoding works in a pipelined manner, by continually modifying a byte
+    //array called 'data'.  We could avoid a lot of allocations here if memory 
+    //is at a premium.
 
     private void handlePatch(PatchTableMessage m) throws BadPacketException {
-        //1. Verify that m belongs in this sequence.
+        //0. Verify that m belongs in this sequence.
         if (sequenceSize!=-1 && sequenceSize!=m.getSequenceSize())
             throw new BadPacketException("Inconsistent seq size: "
                                          +m.getSequenceSize()
@@ -147,9 +201,8 @@ public class QueryRouteTable {
             throw new BadPacketException("Inconsistent seq number: "
                                          +m.getSequenceNumber()
                                          +" vs. "+sequenceNumber);
-        Assert.that(m.getEntryBits()==8, "TODO: entry bits not implemented");
 
-        //2. Add data[0...] to table[nextPatch...]
+        //1. Uncompress as needed.
         byte[] data=m.getData();
         if (m.getCompressor()==PatchTableMessage.COMPRESSOR_GZIP) {
             try {
@@ -160,8 +213,12 @@ public class QueryRouteTable {
         } else if (m.getCompressor()!=PatchTableMessage.COMPRESSOR_NONE) {
             throw new BadPacketException("Unknown compression scheme.");
         }
+        if (m.getEntryBits()==4) 
+            data=unhalve(data);
+        else if (m.getEntryBits()!=8)
+            throw new BadPacketException("Unknown value for entry bits");
 
-            
+        //2. Add data[0...] to table[nextPatch...]            
         for (int i=0; i<data.length; i++) {
             try {
                 table[nextPatch]+=data[i];
@@ -210,6 +267,7 @@ public class QueryRouteTable {
         //1. Calculate patch array
         byte[] data=new byte[table.length];
         boolean needsPatch=false;
+        boolean needsFullByte=false;
         for (int i=0; i<data.length; i++) {
             if (prev!=null)
                 data[i]=(byte)(this.table[i]-prev.table[i]);
@@ -218,6 +276,8 @@ public class QueryRouteTable {
 
             if (data[i]!=0)
                 needsPatch=true;
+            if (data[i]<-8 || data[i]>7) //can this fit in 4 signed bits?
+                needsFullByte=true;
         }
         //As an optimization, we don't send message if no changes.
         if (!needsPatch) {
@@ -225,7 +285,14 @@ public class QueryRouteTable {
             return buf.iterator();
         }
 
-        //2. Try compression
+
+        //2. Try compression.
+        byte bits=8;
+        if (! needsFullByte) {
+            data=halve(data);
+            bits=4;
+        }
+
         byte[] patchCompressed=compress(data);
         byte compression=PatchTableMessage.COMPRESSOR_NONE;
         if (patchCompressed.length<data.length) {
@@ -235,13 +302,18 @@ public class QueryRouteTable {
         }
                    
 
+        //Create message and return.  TODO: chunking.
         buf.add(new PatchTableMessage((short)1, (short)1,
-                                      compression, (byte)8, 
+                                      compression, bits,
                                       data, 0, data.length));
         
         return buf.iterator();        
     }
 
+
+    ///////////////// Helper Functions for Codec ////////////////////////
+
+    /** Returns a GZIP'ed version of data. */
     private static byte[] compress(byte[] data) {
         try {
             ByteArrayOutputStream baos=new ByteArrayOutputStream();
@@ -257,8 +329,8 @@ public class QueryRouteTable {
         }
     }
 
-    /** Uncompresses the given GZIP'ed bytes.  Throws IOException if the
-     *  data is corrupt. */
+    /** Returns the uncompressed version of the given GZIP'ed bytes.  Throws
+     *  IOException if the data is corrupt. */
     private static byte[] uncompress(byte[] data) throws IOException {
         ByteArrayInputStream bais=new ByteArrayInputStream(data);
         GZIPInputStream gis=new GZIPInputStream(bais);
@@ -272,45 +344,45 @@ public class QueryRouteTable {
         return baos.toByteArray();
     }
 
-    /** Returns true if this has been fully patched following a reset. */
-    public boolean isPatched() {
-        return isPatched;
+    /** Returns an array R of length array.length/2, where R[i] consists of the
+     *  low nibble of array[2i] concatentated with the low nibble of array[2i+1].
+     *  Note that unhalve(halve(array))=array if all elements of array fit can 
+     *  fit in four signed bytes.
+     *      @requires array.length is a multiple of two */
+    private static byte[] halve(byte[] array) {
+        byte[] ret=new byte[array.length/2];
+        for (int i=0; i<ret.length; i++)
+            ret[i]=(byte)((array[2*i]<<4) | (array[2*i+1]&0xF));
+        return ret;
     }
-        
 
-    ////////////////////////////////////////////////////////////////////////////
-
-    /** True if o is a QueryRouteTable with the same entries of this. */
-    public boolean equals(Object o) {
-        if (! (o instanceof QueryRouteTable))
-            return false;
-
-        //TODO: two qrt's can be equal even if they have different TTL ranges.
-        QueryRouteTable other=(QueryRouteTable)o;
-        if (this.table.length!=other.table.length)
-            return false;
-
-        for (int i=0; i<this.table.length; i++) {
-            if (this.table[i]!=other.table[i])
-                return false;
+    /** Returns an array of R of length array.length*2, where R[i] is the the
+     *  sign-extended high nibble of floor(i/2) if i even, or the sign-extended
+     *  low nibble of floor(i/2) if i odd. */        
+    private static byte[] unhalve(byte[] array) {
+        byte[] ret=new byte[array.length*2];
+        for (int i=0; i<array.length; i++) {
+            ret[2*i]=(byte)(array[i]>>4);     //sign extension
+            ret[2*i+1]=extendNibble((byte)(array[i]&0xF));
         }
-        return true;
+        return ret;
+    }    
+    
+    /** Sign-extends the low nibble of b, i.e., 
+     *  returns (from MSB to LSB) b[3]b[3]b[3]b[3]b[3]b[2]b[1]b[0]. */
+    private static byte extendNibble(byte b) {
+        if ((b&0x8)!=0)   //negative nibble; sign-extend.
+            return (byte)(0xF0 | b);
+        else
+            return b;        
     }
 
-    public String toString() {
-        StringBuffer buf=new StringBuffer();
-        buf.append("{");
-        for (int i=0; i<table.length; i++) {
-            if (table[i]<infinity)
-                buf.append(i+"/"+table[i]+", ");
-        }
-        buf.append("}");
-        return buf.toString();
-    }
 
-
+    ////////////////////////////// Unit Tests ////////////////////////////////
+    
     /** Unit test */
     public static void main(String args[]) {
+        //TODO: handle bad packets (sequences, etc)
         //0. compress/uncompress
         byte[] data=new byte[1000];  data[1]=(byte)7;  data[100]=(byte)7;
         byte[] dataCompressed=compress(data);
@@ -323,6 +395,18 @@ public class QueryRouteTable {
             Assert.that(false, "Bad GZIP data.");
         }           
 
+        //0.1. halve/unhalve
+        Assert.that(extendNibble((byte)0x03)==0x03);
+        Assert.that(extendNibble((byte)0x09)==(byte)0xF9);
+        byte[] big={(byte)1, (byte)7, (byte)-1, (byte)-8};
+        byte[] small={(byte)0x17, (byte)0xF8};
+        Assert.that(Arrays.equals(halve(big), small));
+        {
+            byte[] out=unhalve(small);
+            for (int i=0; i<out.length; i++)
+                System.out.println(i+": "+out[i]);
+        }
+        Assert.that(Arrays.equals(unhalve(small), big));
 
         QueryRouteTable qrt=new QueryRouteTable(1000, (byte)7);
         qrt.add("good book");
@@ -338,10 +422,12 @@ public class QueryRouteTable {
 
         //2. addAll tests
         QueryRouteTable qrt2=new QueryRouteTable(1000, (byte)7);
+        Assert.that(qrt2.entries()==0);
         qrt2.add("new", 3);
         qrt2.add("book", 1);
         qrt2.addAll(qrt);     //{book/1, good/2, new/3, bad/4}
         QueryRouteTable qrt3=new QueryRouteTable(1000, (byte)7);
+        Assert.that(qrt2.entries()==4);
         qrt3.add("book", 1);
         qrt3.add("good", 2);
         qrt3.add("new", 3);
@@ -391,11 +477,12 @@ public class QueryRouteTable {
 
         //4. encode-decode test--without compression.  (We know compression
         //won't work because the table is very small and filled with random bytes.)
-        qrt=new QueryRouteTable(10, (byte)7);
+        qrt=new QueryRouteTable(10, (byte)10);
         Random rand=new Random();
         for (int i=0; i<qrt.table.length; i++)
             qrt.table[i]=(byte)rand.nextInt(qrt.infinity+1);
-        qrt2=new QueryRouteTable(10, (byte)7);
+        qrt.table[0]=(byte)1;
+        qrt2=new QueryRouteTable(10, (byte)10);
         Assert.that(! qrt2.equals(qrt));
 
         for (iter=qrt.encode(qrt2); iter.hasNext(); ) {
