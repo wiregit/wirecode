@@ -63,21 +63,12 @@ public final class Launcher {
 	 * the applications associated with specific creator codes on the Mac.
 	 */
 	private static Method _findApplication;
-		
-	/**
-	 * Launcher class for opening applications on windows.
-	 */
-	private static WindowsLauncher _windowsLauncher;
-   
 
 	/** 
 	 * Loads the necessary Mac classes if running on Mac.
 	 */
 	static {
-		if(CommonUtils.isWindows()) {
-			_windowsLauncher = new WindowsLauncher();
-		}
-		else if(CommonUtils.isMacClassic() || CommonUtils.isMacOSX()) {
+	    if(CommonUtils.isMacClassic() || CommonUtils.isMacOSX()) {
 			try {
 				loadMacClasses();		
 			} catch(IOException ioe) {
