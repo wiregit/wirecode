@@ -65,13 +65,16 @@ public class StandardMessageRouter extends MessageRouter {
         // daily uptime is more than 1/2 hour
         if(RouterService.getConnectionManager().hasFreeSlots() ||
            Statistics.instance().calculateDailyUptime() > 60*30) {
+
             PingReply pr = 
                 PingReply.create(pingRequest.getGUID(), (byte)newTTL);
             
             try {
                 sendPingReply(pr);
             }
-            catch(IOException e) {}
+            catch(IOException e) {
+                // broken reply route, can't send
+            }
         }
 
         List pongs = PongCacher.instance().getBestPongs();
