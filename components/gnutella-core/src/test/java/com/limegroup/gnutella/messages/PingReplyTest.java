@@ -19,6 +19,81 @@ public class PingReplyTest extends com.limegroup.gnutella.util.BaseTestCase {
         junit.textui.TestRunner.run(suite());
     }
 
+    /**
+     * Tests the method for creating a pong from the network.
+     */
+    public void testCreatePongFromNetwork() throws Exception {
+        byte[] guid = new GUID().bytes();
+        byte[] payload = new byte[2];
+
+        // make sure we reject invalid payload sizes
+        try {
+            PingReply pong = 
+                PingReply.createFromNetwork(guid, (byte)4, (byte)3,
+                                            payload);
+            fail("should have not accepted payload size");
+        } catch(BadPacketException e) {
+            // expected because the payload size is invalid
+        }
+
+        // make sure we reject null guids
+        payload = new byte[PingReply.STANDARD_PAYLOAD_SIZE];
+        try {
+            PingReply pong = 
+                PingReply.createFromNetwork(null, (byte)4, (byte)3,
+                                            payload);
+            fail("should have not accepted null guid");
+        } catch(NullPointerException e) {
+            // expected because the payload size is invalid
+        }        
+
+        // make sure we reject null payloads
+        try {
+            PingReply pong = 
+                PingReply.createFromNetwork(guid, (byte)4, (byte)3,
+                                            null);
+            fail("should have not accepted null payload");
+        } catch(NullPointerException e) {
+            // expected because the payload size is invalid
+        }        
+
+        // make sure we reject bad ggep
+        GGEP ggep = new GGEP(true);
+        payload = new byte[3];
+        // set 'LIM'  -- incorrect value to make sure it fails
+        System.arraycopy("LIM".getBytes(),
+                         0, payload, 0,
+                         2);
+         // add it
+        ggep.put(GGEP.GGEP_HEADER_VENDOR_INFO, payload);  
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        ggep.write(baos);
+
+        byte[] extensions = baos.toByteArray();
+        payload = 
+            new byte[PingReply.STANDARD_PAYLOAD_SIZE+extensions.length];
+
+        System.arraycopy(extensions, 0, 
+                         payload, PingReply.STANDARD_PAYLOAD_SIZE, 
+                         extensions.length);
+        try {
+            PingReply pong = 
+                PingReply.createFromNetwork(guid, (byte)4, (byte)3,
+                                            payload);
+            fail("should have not accepted bad GGEP in payload");
+        } catch(BadPacketException e) {
+            // expected because the payload size is invalid
+        }                
+
+        // test one that should go through fine
+        payload = new byte[PingReply.STANDARD_PAYLOAD_SIZE];
+
+        // this one should go through
+        PingReply pong = 
+            PingReply.createFromNetwork(guid, (byte)4, (byte)3,
+                                        payload);
+    }
+
     public void testNewPong() {
         long u4=0x00000000FFFFFFFFl;
         int u2=0x0000FFFF;
