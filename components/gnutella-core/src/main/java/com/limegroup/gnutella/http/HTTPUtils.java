@@ -38,8 +38,14 @@ public final class HTTPUtils {
 	public static void writeHeader(HTTPHeaderName name, HTTPHeaderValue value, 
 								   OutputStream os) 
 		throws IOException {
-		if(name == null || value == null || os == null) {
-			throw new NullPointerException("null value in writing http header");
+		if(name == null) {
+			throw new NullPointerException("null name in writing http header");
+		} else if(value == null) {
+			throw new NullPointerException("null value in writing http header: "+
+										   name);
+		} else if(os == null) {
+			throw new NullPointerException("null os in writing http header: "+
+										   name);
 		}
 		os.write(createHeader(name, value).getBytes());
 	}
@@ -58,8 +64,14 @@ public final class HTTPUtils {
 	public static void writeHeader(HTTPHeaderName name, HTTPHeaderValue value, 
 								   Writer out) 
 		throws IOException {
-		if(name == null || value == null || out == null) {
-			throw new NullPointerException("null value in writing http header");
+		if(name == null) {
+			throw new NullPointerException("null name in writing http header");
+		} else if(value == null) {
+			throw new NullPointerException("null value in writing http header: "+
+										   name);
+		} else if(out == null) {
+			throw new NullPointerException("null os in writing http header: "+
+										   name);
 		}
 		out.write(createHeader(name, value));
 	}
