@@ -740,6 +740,9 @@ public abstract class MessageRouter {
             
             // do respond with files that we may have, though
             respondToQueryRequest(request, _clientGUID);
+            
+            multicastQueryRequest(request);
+            
 			if(handler.isGoodLeaf()) {
 				sendDynamicQuery(QueryHandler.createHandlerForNewLeaf(request, 
 																	  handler,
@@ -1754,8 +1757,11 @@ public abstract class MessageRouter {
 
 			boolean chat = SettingsManager.instance().getChatEnabled();
 			
-			boolean mcast = queryRequest.isMulticast();
-			// if it is a multicasted response, use the non-forced address.
+            // We only want to return a "reply to multicast query" QueryReply
+            // if the request was at its first hop.
+			boolean mcast = queryRequest.isMulticast() && queryRequest.getHops() == 1;
+			
+            // if it is a multicasted response, use the non-forced address.
 			if ( mcast ) {
 			    ip = RouterService.getNonForcedAddress();
 			    port = RouterService.getNonForcedPort();
