@@ -1527,19 +1527,6 @@ public class ConnectionManager {
 	}
     
     /**
-     * @requires n>0
-     * @effects returns an iterator that yields up the best n non-ultrapeer
-     *  endpoints of this.  It's not guaranteed that these are reachable. This
-     *  can be modified while iterating through the result, but the modifications
-     *  will not be observed.  
-     */
-    public synchronized Iterator getNormalHosts(int n) {
-        //TODO: this method doesn't really belong here.  It's used because parts
-        //of ManagedConnection have a reference to this but not the HostCatcher.
-        return RouterService.getHostCatcher().getNormalHosts(n);
-    }
-
-    /**
      * Asynchronously fetches a connection from hostcatcher, then does
      * then initialization and message loop.
      *
