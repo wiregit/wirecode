@@ -47,32 +47,12 @@
     </javac>
 </target>
 
-	
-
 <!-- CLEAN -->
 <target name="clean">
 	<delete>
 		<fileset dir="${basedir}/com" includes="**/*.class"/>
 	</delete>
 </target>
-
-<!-- CLEAN RELEASE -->
-<target name="cleanrelease">
-	<delete>
-		<fileset dir="${releasedir}/com" includes="**/*.class"/>
-	</delete>
-</target>
-
-<!-- RELEASE -->
-<target name="release" depends="init">
-	<javac debug="no" optimize="yes"
-		srcdir="${basedir}" destdir="${releasedir}"
-		includes="${downloader}/**,${filters}/**,${uploader}/**,${util}/**,${gnutella}/*,${xml}/**,${routing}/**,${chat}/**,${mp3}/**,${security}/**,${handshaking}/**"
-	>
-      <classpath refid="default.classpath" />
-    </javac>
-</target>
-
 </project>
 
 
