@@ -12,6 +12,7 @@ import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.upelection.RemoteCandidate;
 import com.limegroup.gnutella.util.*;
 import com.limegroup.gnutella.*;
+import com.limegroup.gnutella.upelection.*;
 
 public class VendorMessageTest extends com.limegroup.gnutella.util.BaseTestCase {
     public VendorMessageTest(String name) {
@@ -415,6 +416,33 @@ public class VendorMessageTest extends com.limegroup.gnutella.util.BaseTestCase 
         assertTrue(ack.getListeningPort() == 6346);
         testWrite(ack);
         testRead(req);
+    }
+    
+    public void testPromotionRequestVM() throws Exception {
+    	Candidate a = new RemoteCandidate("1.2.3.4",15,(short)20);
+    	Candidate b = new RemoteCandidate("1.2.3.5",20,(short)30);
+    	
+    	PromotionRequestVendorMessage prvm = new PromotionRequestVendorMessage(a,b,0);
+    	
+    	testWrite(prvm);
+    	
+    	// test constructor from another message
+    	PromotionRequestVendorMessage prvm2 = new PromotionRequestVendorMessage(prvm);
+    	
+    	assertTrue(prvm2.getCandidate().isSame(prvm.getCandidate()));
+    	assertTrue(prvm2.getRequestor().isSame(prvm.getRequestor()));
+    	assertEquals(prvm.getDistance()+1,prvm2.getDistance());
+    	
+    	//serialization
+    	ByteArrayOutputStream baos = new ByteArrayOutputStream();
+    	prvm.write(baos);
+    	ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
+    	
+    	prvm2 = (PromotionRequestVendorMessage) Message.read(bais);
+    	
+    	assertTrue(prvm2.getCandidate().isSame(prvm.getCandidate()));
+    	assertTrue(prvm2.getRequestor().isSame(prvm.getRequestor()));
+    	assertEquals(prvm.getDistance(),prvm2.getDistance());
     }
 
 

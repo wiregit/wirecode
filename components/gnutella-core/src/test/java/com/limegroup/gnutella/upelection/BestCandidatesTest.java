@@ -356,6 +356,53 @@ public class BestCandidatesTest extends BaseTestCase {
 	}
 	
 	/**
+	 * tests the functionality of the getRoute method
+	 */
+	public void testGetRoute() throws Exception {
+		
+		//create an update
+		Candidate [] update = new Candidate[2];
+		update[0]=goodCandidate;
+		update[1]=badCandidate;
+		
+		BestCandidates.update(update);
+		
+		//1 an endpoint we don't have in the table and an insane ttl
+		IpPort ip = new IpPortPair("9.9.9.9",20);
+		
+		Connection ret = BestCandidates.getRoute(ip,5);
+		
+		assertNull(ret);
+		
+		//2 an endpoint we have, but at negative ttl
+		
+		ip = goodCandidate;
+		ret = BestCandidates.getRoute(ip,-2);
+		
+		assertNull(ret);
+		
+		//3 an endpoint we have, but not at the request ttl
+		
+		ret = BestCandidates.getRoute(ip,0);
+		
+		assertNull(ret);
+		
+		//4 an endpoint we have and it is within the request ttl
+		
+		ret = BestCandidates.getRoute(ip,2);
+		
+		assertNotNull(ret);
+		assertTrue(goodCandidate.getAdvertiser().isSame(ret));
+		
+		//5 one more we have, at ttl 0
+		ip = mediocreCandidate;
+		ret = BestCandidates.getRoute(ip,0);
+		
+		assertNotNull(ret);
+		assertTrue(mediocreCandidate.getAdvertiser().isSame(ret));
+		
+	}
+	/**
 	 * tests the election of a new connection once the route fails.
 	 */
 	public void testRouteFailedToLeaf() throws Exception {
