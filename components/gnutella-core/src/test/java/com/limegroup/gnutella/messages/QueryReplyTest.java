@@ -515,6 +515,62 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.BaseTestCa
         assertTrue(qr.getSupportsBrowseHost());
         assertFalse(qr.isReplyToMulticastQuery());
 
+        //Create extended QHD from scratch with different bits set
+        // Do not set multicast, as that will unset pushing, busy, etc..
+        // and generally confuse the test.
+        responses=new Response[2];
+        responses[0]=new Response(11,22,"SMDNKD.txt");
+        responses[1]=new Response(0x2FF2,0xF11F,"OneMore file  ");
+        // first take input of proxies
+        String[] hosts = {"www.limewire.com", "www.limewire.org",
+                          "www.susheeldaswani.com"};
+        Set proxies = new HashSet();
+        for (int i = 0; i < hosts.length; i++)
+            proxies.add(new QueryReply.PushProxyContainer(hosts[i], 6346));
+        qr=new QueryReply(guid, (byte)5,
+                          0xFFFF, ip, u4, responses,
+                          guid, new byte[0],
+                          true, false, false, true, false, false, true,
+                          proxies);
+        
+        assertEquals("LIME", qr.getVendor());
+        assertTrue(qr.getNeedsPush());
+        assertFalse(qr.getIsBusy());
+        assertFalse(qr.getHadSuccessfulUpload());
+        assertTrue(qr.getIsMeasuredSpeed());
+        assertFalse(qr.getSupportsChat());
+        assertTrue(qr.getSupportsBrowseHost());
+        assertFalse(qr.isReplyToMulticastQuery());
+        assertTrue(qr.getSupportsFWTransfer());
+
+        //And check raw bytes....
+        out=new ByteArrayOutputStream();
+        qr.write(out);
+
+        bytes=out.toByteArray();
+        ggepLen = _ggepUtil.getQRGGEP(true, false, true,
+                                      proxies).length;
+        //Length includes header, query hit header and footer, responses, and
+        //QHD (public and private)
+        assertEquals(
+            (23+11+16)+(8+10+2)+(8+14+2)+(4+1+QueryReply.COMMON_PAYLOAD_LEN+1+1)+ggepLen,
+            bytes.length
+        );
+        assertEquals(0x3d, bytes[bytes.length-16-6-ggepLen]); //11101
+        assertEquals(0x31, bytes[bytes.length-16-5-ggepLen]); //10001
+
+        // check read back....
+        qr=(QueryReply)Message.read(new ByteArrayInputStream(bytes));
+        assertEquals("LIME", qr.getVendor());
+        assertTrue(qr.getNeedsPush());
+        assertFalse(qr.getIsBusy());
+        assertFalse(qr.getHadSuccessfulUpload());
+        assertTrue(qr.getIsMeasuredSpeed());
+        assertFalse(qr.getSupportsChat());
+        assertTrue(qr.getSupportsBrowseHost());
+        assertFalse(qr.isReplyToMulticastQuery());
+        assertTrue(qr.getSupportsFWTransfer());
+
         //Create from scratch with no bits set
         responses=new Response[2];
         responses[0]=new Response(11,22,"Sample.txt");
@@ -620,14 +676,19 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.BaseTestCa
     }
 
     public void testBasicPushProxyGGEP() throws Exception {
-        basicTest(false, false);
-        basicTest(false, true);
-        basicTest(true, false);
-        basicTest(true, true);
+        basicTest(false, false, false);
+        basicTest(false, true, false);
+        basicTest(true, false, false);
+        basicTest(true, true, false);
+        basicTest(false, false, true);
+        basicTest(false, true, true);
+        basicTest(true, false, true);
+        basicTest(true, true, true);
     }
 
     public void basicTest(final boolean browseHost, 
-                          final boolean multicast) throws Exception {
+                          final boolean multicast,
+                          final boolean fwTransfer) throws Exception {
         int numHeaders = 1;
 
         // first take input of proxies
@@ -637,7 +698,7 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.BaseTestCa
         for (int i = 0; i < hosts.length; i++)
             proxies.add(new QueryReply.PushProxyContainer(hosts[i], 6346));
         GGEP testGGEP = new GGEP(_ggepUtil.getQRGGEP(browseHost, multicast, 
-                                                     false, proxies), 
+                                                     fwTransfer, proxies), 
                                  0, null);
         if (browseHost) {
             numHeaders++;
@@ -646,6 +707,10 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.BaseTestCa
         if (multicast) {
             numHeaders++;
             assertTrue(testGGEP.hasKey(GGEP.GGEP_HEADER_MULTICAST_RESPONSE));
+        }
+        if (fwTransfer) {
+            numHeaders++;
+            assertTrue(testGGEP.hasKey(GGEP.GGEP_HEADER_FW_TRANS));
         }
         assertTrue(testGGEP.hasKey(GGEP.GGEP_HEADER_PUSH_PROXY));
         assertEquals(numHeaders, testGGEP.getHeaders().size());
