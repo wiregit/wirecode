@@ -260,8 +260,6 @@ public class Main implements ActivityCallback {
     }
 
     public void uploadsComplete() {}
-
-	public void restoreApplication() {}
         
 }
 

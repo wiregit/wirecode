@@ -361,11 +361,8 @@ public class Acceptor extends Thread {
                 }
 				else if (word.equals("CHAT")) {
 					ChatManager.instance().accept(_socket);
-				}
-                else if (word.equals("SHOW")) {
-                    showWindow(_socket);
-                }
 
+				}
                 //4. Unknown protocol
                 else {
                     throw new IOException();
@@ -375,36 +372,6 @@ public class Acceptor extends Thread {
                 try { _socket.close(); } catch (IOException e2) { }
             }
         }
-
-		/**
-		 * Shows the main LimeWire application window and writes the
-		 * message out to the socket confirming that the main window
-		 * is being shown successfully.
-		 *
-		 * @param socket the <tt>Socket</tt> that received the show
-		 *  request
-		 */
-		private void showWindow(Socket socket) {
-			try {
-				if(socket.getInetAddress().getAddress().equals("127.0.0.1")) {
-					return;
-				}
-				BufferedOutputStream out = 
-				    new BufferedOutputStream(socket.getOutputStream());
-				out.write("TRUE\n\r".getBytes());
-				out.flush();
-				_callback.restoreApplication();
-			} catch(IOException ioe) {
-				// nothing to do here??
-			}
-			finally {
-				try {
-					socket.close();
-				} catch(IOException ioe) {
-					// nothing more we can really do
-				}
-			}
-		}
     }
 
     /** Added to fix bug where banned IP added is not effective until restart

@@ -152,12 +152,7 @@ public interface ActivityCallback
      * @return The authentication information input by user
      */
     public User getUserAuthenticationInfo(String host);
-
-
-	/**
-	 * Brings the applications to its visible state.
-	 */
-	public void restoreApplication();    
+    
     
 
     /** Could not establish a listening port. */
