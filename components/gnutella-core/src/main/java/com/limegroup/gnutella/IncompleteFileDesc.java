@@ -1,6 +1,7 @@
 package com.limegroup.gnutella;
 
 import java.io.File;
+import java.io.BufferedInputStream;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
@@ -90,7 +91,7 @@ public class IncompleteFileDesc extends FileDesc implements HTTPHeaderValue {
         if (_verifyingFile.isCorrupted())
             throw new FileNotFoundException("data is corrupt");
         
-        return new FileInputStream(getFile());
+        return new BufferedInputStream(new FileInputStream(getFile()));
     }
     
     /**
