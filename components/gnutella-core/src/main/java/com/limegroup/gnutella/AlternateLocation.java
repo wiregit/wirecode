@@ -65,11 +65,6 @@ public final class AlternateLocation
 
 		URL url = AlternateLocation.createUrl(location);
 
-        if(url.getPort()==-1) {
-			//System.out.println("Sumeet: about to throw IOX");
-            throw new IOException("No port set on the URL");
-        }
-
 		if(url == null) {
 			throw new IOException("could not parse url for alt loc: "+
 								  location);
@@ -438,8 +433,10 @@ public final class AlternateLocation
 		String test = locationHeader.toLowerCase();
 
 		if(test.startsWith("http")) {
-			return new URL(AlternateLocation.removeTimestamp(locationHeader));
-
+            URL ret=new URL(AlternateLocation.removeTimestamp(locationHeader));
+            if (ret.getPort()==-1)
+                ret = new URL("HTTP",ret.getHost(),80,ret.getFile());
+            return ret;
 		} else {
 			// we could not understand the beginning of the alternate location
 			// line
