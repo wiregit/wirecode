@@ -33,24 +33,43 @@ public class NativeException extends RuntimeException {
     
     public static final int NOT_ENOUGH_MEMORY = -108;
     
-    private final int errorCode;
+    private int[] errorCodes;
     
     public NativeException(int errorCode) {
-        super(createMessage(errorCode));
-        this.errorCode = errorCode;
+        this(createMessage(errorCode), new int[]{errorCode});
     }
     
     public NativeException(String msg, int errorCode) {
-        super(msg);
-        this.errorCode = errorCode;
+        this(msg, new int[]{errorCode});
     }
     
-    public int getErrorCode() {
-        return errorCode;
+    public NativeException(String msg, int[] errorCodes) {
+        super(msg);
+        this.errorCodes = errorCodes;
+    }
+    
+    public int[] getErrorCodes() {
+        return errorCodes;
     }
     
     public String getMessage() {
-        return (super.getMessage() + " (" + errorCode + ")");
+        StringBuffer buffer = new StringBuffer();
+        buffer.append(super.getMessage());
+        
+        if (errorCodes.length != 0) {
+            buffer.append(" (");
+            
+            for(int i = 0; i < errorCodes.length; i++) {
+                buffer.append(errorCodes[i]);
+                if (i < errorCodes.length-1) {
+                    buffer.append(",");
+                }
+            }
+            
+            buffer.append(")");
+        }
+        
+        return buffer.toString();
     }
     
     protected static String createMessage(int errorCode) {
