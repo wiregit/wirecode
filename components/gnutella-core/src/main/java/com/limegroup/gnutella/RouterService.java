@@ -478,6 +478,19 @@ public class RouterService
         return qr.getGUID();
     }
 
+    /**
+     * Searches the network with with a rich query
+     * The type of returned files is the same as "any"
+     */
+    public byte[] query(String query, String richQuery, int minSpeed) {
+        QueryRequest qr=new QueryRequest(SettingsManager.instance().getTTL(),
+                                         minSpeed, query, richQuery);
+        verifier.record(qr, null);
+        router.broadcastQueryRequest(qr);
+        return qr.getGUID();
+    }
+
+
     /** Same as query(query, minSpeed, null), i.e.,
       * searches for files of any type. */
     public byte[] query(String query, int minSpeed) {

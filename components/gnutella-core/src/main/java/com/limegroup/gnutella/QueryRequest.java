@@ -31,7 +31,7 @@ public class QueryRequest extends Message implements Serializable{
         payload[i]=(byte)0;//Null terminate the plain text query
         i++;
         byte[] richBytes = richQuery.getBytes();
-        System.arraycopy(qbytes,0,payload,i,richBytes.length);
+        System.arraycopy(richBytes,0,payload,i,richBytes.length);
         i += richBytes.length;
         payload[i] = (byte)0;//Null to terminate the rich query.
         i++; //just so the records are straight. 
