@@ -2,16 +2,16 @@ package com.limegroup.gnutella.xml;
 
 import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.messages.*;
-import com.limegroup.gnutella.settings.*;
 import java.io.*;
 import com.sun.java.util.collections.*;
 
-//imports to make the test code work
-import com.limegroup.gnutella.util.NameValue;
-
+/**
+ * This class handles querying shared files with XML data and returning XML data
+ * in replies.
+ */
 public class MetaFileManager extends FileManager {
     private final Object META_LOCK = new Object();
-    boolean initialized = false;
+    private boolean initialized = false;
     
     /**
      * Overrides FileManager.query.
@@ -101,7 +101,7 @@ public class MetaFileManager extends FileManager {
      * added file.
      */
 	public int addFileIfShared(File file, List metadata) {
-        int addedAt = super.addFileIfShared(file, metadata);
+        int addedAt = super.addFileIfShared(file);
         
         // if not added or no metadata, nothing else to do.
         if( addedAt == -1 || metadata == null )
@@ -112,7 +112,6 @@ public class MetaFileManager extends FileManager {
 
         FileDesc fd = super.get(addedAt);
         Assert.that( fd != null, "null fd just added.");
-        URN xmlHash = fd.getSHA1Urn();
         
         // add xml docs as appropriate
         for(Iterator iter = metadata.iterator(); iter.hasNext(); ) {
