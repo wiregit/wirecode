@@ -1,6 +1,7 @@
 package com.limegroup.gnutella;
 
 import java.net.*;
+import java.nio.channels.ServerSocketChannel;
 import java.io.*;
 import com.limegroup.gnutella.chat.*;
 import com.limegroup.gnutella.http.*;
@@ -229,7 +230,15 @@ public class Acceptor implements Runnable {
             //a) Try new port.
             ServerSocket newSocket=null;
             try {
-                newSocket=new ServerSocket(port);
+                if(CommonUtils.isJava14OrLater() && 
+                   ConnectionSettings.USE_NIO.getValue()) {
+                    ServerSocketChannel ssc = ServerSocketChannel.open();
+                    ssc.configureBlocking(true);
+                    ssc.socket().bind(new InetSocketAddress(port));
+                    newSocket = ssc.socket();
+                } else {
+                    newSocket = new ServerSocket(port);
+                }
             } catch (IOException e) {
                 udpServiceSocket.close();
                 throw e;
@@ -350,7 +359,12 @@ public class Acceptor implements Runnable {
                 synchronized (SOCKET_LOCK) {
                     if (_socket!=null) {
                         try {
-                            client=_socket.accept();
+                            if(CommonUtils.isJava14OrLater() &&
+                               ConnectionSettings.USE_NIO.getValue()) {
+                                client = _socket.getChannel().accept().socket();      
+                            } else {                
+                                client = _socket.accept();
+                            }
                         } catch (IOException e) {
                             continue;
                         }
@@ -439,8 +453,8 @@ public class Acceptor implements Runnable {
                 //The try-catch below is a work-around for JDK bug 4091706.
                 InputStream in=null;
                 try {
-                    in=_socket.getInputStream(); 
-                } catch (Exception e) {
+                    in = _socket.getInputStream(); 
+                } catch (IOException e) {
                     if( RECORD_STATS )
                         HTTPStat.CLOSED_REQUESTS.incrementStat();
                     throw new IOException("could not access socket stream");
