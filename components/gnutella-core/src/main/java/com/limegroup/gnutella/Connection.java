@@ -1673,21 +1673,35 @@ public class Connection {
 
     // overrides Object.toString
     public String toString() {
-        return "CONNECTION: host=" + _host  + " port=" + _port +", userAgent=" + getUserAgent(); 
+        return "CONNECTION: host=" + _host  + " port=" + _port; 
     }
     
-    // override equals so that the same hosts are equal
-	public boolean equals(Object o) {
-		if(o == this) return true;
-		if(!(o instanceof Connection)) return false;
-		Connection otherConnection = (Connection)o;
-		return _host.equals(otherConnection._host); 
-	}
-	
-	// overridden so that equal ip/port pairs are equal
-	public int hashCode() {
-		return 17 * _host.hashCode();
-	}
+
+    // Technically, a Connection object can be equal in various ways...
+    // Connections can be said to be equal if the pipe the information is
+    // travelling through is the same.
+    // Or they can be equal if the remote host is the same, even if the
+    // two connections are on different channels.
+    // Ideally, our equals method would use the second option, however
+    // this has problems with tests because of the setup of various
+    // tests, connecting multiple connection objects to a central
+    // testing Ultrapeer, uncorrectly labelling each connection
+    // as equal.
+    // Using pipe equality (by socket) also fails because
+    // the socket doesn't exist for outgoing connections until
+    // the connection is established, but the equals method is used
+    // before then.
+    // Until necessary, the equals & hashCode methods are therefore
+    // commented out and sameness equality is being used.
+    
+//	public boolean equals(Object o) {
+//      return super.equals(o);
+//	}
+//	
+
+//	public int hashCode() {
+//      return super.hashCode();
+//	}
     
     
     /////////////////////////// Unit Tests  ///////////////////////////////////
