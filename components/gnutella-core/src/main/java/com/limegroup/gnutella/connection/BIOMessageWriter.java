@@ -24,18 +24,12 @@ public final class BIOMessageWriter implements MessageWriter, Runnable {
      */
     private final Object OUTPUT_QUEUE_LOCK = new Object();
     
-    /**
-     * Cache the 'connection closed' exception, so we have to allocate
-     * one for every closed connection.
-     */
-    protected static final IOException CONNECTION_CLOSED =
-        new IOException("connection closed");    
 
     /**
      * Handle to the message queue that keeps track of priorities for messages
      * to be sent.
      */
-    private CompositeQueue _queue;
+    private CompositeQueue QUEUE;
     
     /**
      * Creates a new <tt>MessageWriter</tt> instance for the specified 
@@ -54,16 +48,11 @@ public final class BIOMessageWriter implements MessageWriter, Runnable {
      * @param conn the <tt>ManagedConnection</tt> for this writer
      */
     private BIOMessageWriter(ManagedConnection conn) {
-        CONNECTION = conn;        
-    }
-    
-    /**
-     * Starts the thread for this reader.  
-     */
-    public void start() {
-        Thread blockingReader = new Thread(this, "blocking message reader");
-        blockingReader.setDaemon(true);
-        blockingReader.start();
+        CONNECTION = conn;  
+        QUEUE = CompositeQueue.createQueue(CONNECTION, OUTPUT_QUEUE_LOCK);     
+        Thread blockingWriter = new Thread(this, "blocking message writer");
+        blockingWriter.setDaemon(true);
+        blockingWriter.start(); 
     }
     
     /* (non-Javadoc)
@@ -77,13 +66,9 @@ public final class BIOMessageWriter implements MessageWriter, Runnable {
     /* (non-Javadoc)
      * @see com.limegroup.gnutella.connection.MessageWriter#write(com.limegroup.gnutella.messages.Message)
      */
-    public boolean write(Message m) throws IOException {
+    public boolean write(Message msg) {
         synchronized (OUTPUT_QUEUE_LOCK) {
-            if(_queue == null) {
-                _queue = CompositeQueue.createQueue(CONNECTION);
-            }
-            
-            _queue.add(m);
+            QUEUE.add(msg);
             OUTPUT_QUEUE_LOCK.notify();
         }
         return true;
@@ -96,7 +81,15 @@ public final class BIOMessageWriter implements MessageWriter, Runnable {
         // TODO Auto-generated method stub
         return false;
     }
-
+    
+    /**
+     * Accessor for the size of the queue.
+     * 
+     * @return the size of the queue
+     */
+    public int size() {
+        return QUEUE.size();
+    }
 
     /** While the connection is not closed, sends all data delay. */
     public void run() {
@@ -127,7 +120,7 @@ public final class BIOMessageWriter implements MessageWriter, Runnable {
         //protect _queued.
         synchronized (OUTPUT_QUEUE_LOCK) {
             while (CONNECTION.isOpen() && 
-                   _queue.size()==0) {           
+                   QUEUE.size()==0) {           
                 try {
                     OUTPUT_QUEUE_LOCK.wait();
                 } catch (InterruptedException e) {
@@ -136,70 +129,58 @@ public final class BIOMessageWriter implements MessageWriter, Runnable {
             }
         }
         
-        if (! CONNECTION.isOpen())
-            throw CONNECTION_CLOSED;
+        if (! CONNECTION.isOpen()) {
+            throw new IOException("connection closed");
+        }
     }
     
-    /** Send several queued message of each type. */
-    private final void sendQueued() throws IOException {        
-        //1. For each priority i send as many messages as desired for that
-        //type.  As an optimization, we start with the buffer of the last
-        //message sent, wrapping around the buffer.  You can also search
-        //from 0 to the end.
-        //int start = _lastPriority;
-        //int i=start;
-        //do {                   
-            //IMPORTANT: we only obtain _outputQueueLock while touching the
-            //queue, not while actually sending (which can block).
-            //boolean emptied = false;
-            while (true) {
-                Message msg = null;
-                synchronized (OUTPUT_QUEUE_LOCK) {
-                    msg = _queue.removeNext();
-                    //int dropped=queue.resetDropped();
-                    //addSentDropped(dropped);
-                    //_queued-=(m==null?0:1)+dropped;  //maintain invariant
-                    //if (_queue.size() == 0) {
-                      //  emptied = true;        
-                    //}
-                    
-                    // if m is null, the queue is empty                
-                    if (msg == null)
-                        break;
-                }
-
-                //Note that if the ougoing stream is compressed
-                //(isWriteDeflated()), this call may not actually
-                //do anything.  This is because the Deflater waits
-                //until an optimal time to start deflating, buffering
-                //up incoming data until that time is reached, or the
-                //data is explicitly flushed.
-                CONNECTION.send(msg);
-            }
-            
-            //Optimization: the if statement below is not needed for
-            //correctness but works nicely with the _priorityHint trick.
-            //if (emptied)
-              //  break;
-            //i=(i+1)%PRIORITIES;
-        //} while (i!=start);
-        
-        
-        //2. Now force data from Connection's BufferedOutputStream into the
-        //kernel's TCP send buffer.  It doesn't force TCP to
-        //actually send the data to the network.  That is determined
-        //by the receiver's window size and Nagle's algorithm.
-        //Note that if the outgoing stream is compressed 
-        //(isWriteDeflated()), then this call may block while the
-        //Deflater deflates the data.
-        CONNECTION.flush();
+    /**
+     * Send several queued message of each type. The number of each type of
+     * message sent depends on the message type.
+     * 
+     * @throws IOException if there is an IO error sending or flushing the
+     *  data
+     */
+    private final void sendQueued() throws IOException {    
+        QUEUE.write();
     }
 
+    /**
+     * Closes the writer.
+     */
+    public void close() {
+        synchronized(OUTPUT_QUEUE_LOCK) {
+            OUTPUT_QUEUE_LOCK.notify();
+        }
+    }
+    
+    /**
+     * Used in tests to restart processing messages from the queue.
+     */
+    public void start() {
+        Thread blockingWriter = new Thread(this, "blocking message writer");
+        blockingWriter.setDaemon(true);
+        blockingWriter.start(); 
+    }
+    
+    public void resetPriority() {
+        QUEUE.resetPriority();
+    }
+    
+    /**
+     * Accessor for the queue lock, used in testing.
+     * 
+     * @return the queue lock object
+     */
+    public Object getLock() {
+        return OUTPUT_QUEUE_LOCK;
+    }
+    
     /** 
      * Tests representation invariants.  For performance reasons, this is
      * private and final.  Make protected if ManagedConnection is subclassed.
      */
-    private final void repOk() {
+    private void repOk() {
         /*
         //Check _queued invariant.
         synchronized (_outputQueueLock) {
