@@ -68,8 +68,8 @@ public class DownloadManager implements BandwidthTracker {
     /**
      * rfd that we have sent an udp push and are waiting a connection from.
      */
-    private Set /* of InetAddress */ _udpFailover = 
-    	Collections.synchronizedSet(new HashSet());
+    private Map /* of InetAddress -> Set of RFDs*/ _udpFailover = 
+    	Collections.synchronizedMap(new HashMap());
     
     /**
      * how long we think should take a host that receives an udp push
@@ -744,7 +744,14 @@ public class DownloadManager implements BandwidthTracker {
             int index=line.index;
             byte[] clientGUID=line.clientGUID;
             
-            _udpFailover.remove(socket.getInetAddress());
+            // if the push was sent through udp, make sure we cancel
+            // the failover push.
+            Set files = (Set)_udpFailover.get(socket.getInetAddress());
+            
+            if (files!=null) {
+            	files.remove(file);
+            	_udpFailover.put(socket.getInetAddress(),files);
+            }
 
             //2. Attempt to give to an existing downloader.
             synchronized (this) {
@@ -993,8 +1000,18 @@ public class DownloadManager implements BandwidthTracker {
         		LOG.info("Sending push request through udp "+pr);
             
             
-            // remember that we are waiting a push from this host.
-            _udpFailover.add(file.getOOBAddress().getInetAddress());
+            // remember that we are waiting a push from this host 
+        	//for the specific file.
+        	InetAddress key = file.getOOBAddress().getInetAddress();
+        	
+        	Set files = (Set)_udpFailover.get(key);
+        	
+        	if (files==null)
+        		files = new HashSet();
+        	
+        	files.add(file.getFileName());
+        	
+            _udpFailover.put(key,files);
         	
             // schedule the failover tcp pusher
         	RouterService.schedule(new PushFailoverRequestor(file),
@@ -1177,8 +1194,10 @@ public class DownloadManager implements BandwidthTracker {
 		}
 		
 		public void run() {
-			if (_udpFailover.contains(
-					_file.getOOBAddress().getInetAddress()))
+			InetAddress key = _file.getOOBAddress().getInetAddress();
+			Set files = (Set) _udpFailover.get(key);
+			
+			if (files!=null && files.contains(_file.getFileName()))
 				sendPush(_file,false);
 		}
 	}
