@@ -6,7 +6,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.String;
 
-import com.limegroup.gnutella.gui.MainFrame;
+import com.limegroup.gnutella.gui.GUIMediator;
 
 
 /**
@@ -27,6 +27,7 @@ import com.limegroup.gnutella.gui.MainFrame;
  *
  * @author Eric Albert, Adam Fisk
  */
+ //2345678|012345678|012345678|012345678|012345678|012345678|012345678|012345678|
 public class Launcher {
 	/** 
 	 * Caches whether any classes, methods, etc
@@ -160,7 +161,7 @@ public class Launcher {
 		else {
 			String msg = "LimeWire will not launch the specified "+
 			"file for security reasons.";
-			MainFrame.instance().showError(msg);
+			GUIMediator.instance().showError(msg);
 		}
 		return -1;		
 	}
