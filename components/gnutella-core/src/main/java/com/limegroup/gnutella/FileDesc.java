@@ -112,6 +112,8 @@ public final class FileDesc {
 	 * complete on large files.
      */
     public void calculateUrns() {
+		// update modTime
+		_modTime = _file.lastModified();
 		URN urn = new URN(_file);
 		String urnStr = urn.getURNString();
 		if(urnStr == null) return;
@@ -137,7 +139,7 @@ public final class FileDesc {
         // now check if given urn matches
         Iterator iter = _urns.iterator();
         while(iter.hasNext()){
-            if (urn.equals((URN)iter.next())) {
+            if (urn.equals(((URN)iter.next()).getURNString())) {
                 return true;
             }
         }
