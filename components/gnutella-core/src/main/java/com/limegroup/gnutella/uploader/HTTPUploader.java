@@ -16,7 +16,6 @@ public class HTTPUploader implements Runnable {
     private int BUFFSIZE = 1024;
 
     private OutputStream _ostream;
-    private BufferedWriter _out;
     
     private String _filename;
     private int _index;
@@ -28,12 +27,10 @@ public class HTTPUploader implements Runnable {
     private Socket _socket;   
     private FileManager _fmanager;
     private FileDesc _fdesc;	
-    private BufferedReader _fin;
     private String _host;
     
     FileInputStream _fis;
-    BufferedInputStream _bis;
-    BufferedOutputStream _bos;
+
 
     public HTTPUploader(Socket s, String file, 
 			int index, ConnectionManager m) {
@@ -72,11 +69,6 @@ public class HTTPUploader implements Runnable {
 	
 	try {
 	    _ostream = _socket.getOutputStream();
-	    if (_ostream == null)
-		System.out.println("ostream is null");
-	       
-	    // OutputStreamWriter osw = new OutputStreamWriter(_ostream);
-  	    // _out = new BufferedWriter(osw, 1); 
 	}
 	catch (Exception e) {
 	    System.out.println("ERROR C");
@@ -85,23 +77,16 @@ public class HTTPUploader implements Runnable {
 
 	try {
 	    String f = _fdesc._path;
-	    System.out.println("The path is " + f);
 	    
 	    File myFile = new File(f);  /* _path is the full name */
-	    // _fin = new BufferedReader(new FileReader(myFile));
 
 	    String foo = myFile.toString();
 	    
-	    System.out.println("myFile: " + foo);
-
 	    _fis = new FileInputStream(myFile);
-	
-	    if (_fis == null)
-		System.out.println("fis is null");
+
 	}
 
 	catch (Exception e) {
-	    System.out.println("ERROR D");
 	    uploadError("unable to open file");
 	}
 
@@ -110,10 +95,6 @@ public class HTTPUploader implements Runnable {
     
     public HTTPUploader(String protocal, String host, 
 			  int port, String file, ConnectionManager m ) {
-
-	System.out.println("In the second upload constructor");
-
-	System.out.println("host " + host + ", port " + port);
 
 	_host = host;
 	_filename = file;
@@ -127,27 +108,21 @@ public class HTTPUploader implements Runnable {
 	    _fdesc = (FileDesc)_fmanager._files.get(_index);
 	}                                /* if its not found... */
 	catch (ArrayIndexOutOfBoundsException e) {
-	    System.out.println("The Error is here: array index out of bounds");
 	    doNoSuchFile();              /* send an HTTP error */
 	    return;
 	}
 
-	System.out.println("The name: " + _fdesc._name);
-	System.out.println("THe _filename: " + _filename.trim());
-
-
 	/* check to see if the index */
 	if (! _fdesc._name.equals(_filename.trim())) { /* matches the name */
-	    System.out.println("The Error is here: index != filename");
-	    // doNoSuchFile();
-  	    // return;
+	    doNoSuchFile();
+	    return;
   	}
 	
 	_sizeOfFile = _fdesc._size;
 
 	try {
 	    File myFile = new File(_fdesc._path);  /* _path is the full name */
-	    _fin = new BufferedReader(new FileReader(myFile));
+	    _fis = new FileInputStream(myFile);
 	}
 	
 	catch (Exception e) {
@@ -170,8 +145,6 @@ public class HTTPUploader implements Runnable {
 	}
 	try {
 	    _ostream = conn.getOutputStream();
-	    OutputStreamWriter osr = new OutputStreamWriter(_ostream);
-	    _out = new BufferedWriter(osr);
 	}
 	catch (IOException e) {
 	    uploadError("can't open output stream");
@@ -217,14 +190,14 @@ public class HTTPUploader implements Runnable {
 
     public void writeHeader() {
 	try {
-	//      _out.write("HTTP 200 OK \r\n");
-//  	    _out.write("Server: Gnutella \r\n");
-//  	    String type = getMimeType();       /* write this method later  */
-//  	    _out.write("Content-type:" + type + "\r\n"); 	
-//  	    _out.write("Content-length:"+ _sizeOfFile + "\r\n");
-//  	    _out.write("\r\n");
-//  	    _out.flush();
-
+	    
+	    // _out.write("HTTP 200 OK \r\n");
+	    // _out.write("Server: Gnutella \r\n");
+	    // String type = getMimeType();       /* write this method later  */
+	    // _out.write("Content-type:" + type + "\r\n"); 	
+	    // _out.write("Content-length:"+ _sizeOfFile + "\r\n");
+	    // _out.write("\r\n");
+	    // _out.flush();
 
 	    String str = "HTTP 200 OK \r\n";
 
@@ -252,65 +225,11 @@ public class HTTPUploader implements Runnable {
 	System.out.println("In the upload run");
 	
 	_callback.addUpload(this);
-	doUploadTwo();
+	doUpload();
 	_callback.removeUpload(this);
     }
 
     public void doUpload() {
-
-        writeHeader();
-	int c = -1;
-	int available = 0;
-
-	// _bis = new BufferedInputStream(_fis);
-	// _bos = new BufferedOutputStream(_ostream);
-	// byte[] buf = new byte[1024]; 
-  	// try {
-	//   OutputStream _ostream = _socket.getOutputStream();
-	// }
-	// catch (IOException e) {
-	// }
-	
-	while (true){
-	    try {
-		c = _fis.read();
-	    }
-	    catch (IOException e) {
-		uploadError("Unable to read from the file");		
-		e.printStackTrace();
-	    }
-	    if (c == -1)
-		break;
-	    try {
-		if (_ostream == null)
-  		    System.out.println("ostream is null");
-		_ostream.write(c);
-
-	    }		
-	    catch (IOException e) {
-		uploadError("Unable to write to the socket");		
-		e.printStackTrace();
-	    }
-
-	    // _amountRead += c;
-
-	    // System.out.println("after second try/catch");
-
-	    //_amountRead += c;
-	    _amountRead++;
-
-	}
-
-	try {
-	    _out.close();
-	}
-	catch (IOException e) {
-	    uploadError("Unable to close the socket");		
-	} 
-	
-    }
-
-    public void doUploadTwo() {
 	writeHeader();
 	int c = -1;
 	int available = 0;
@@ -335,46 +254,12 @@ public class HTTPUploader implements Runnable {
 
 	}
 	try {
-	    _out.close();
+	    _ostream.close();
 	}
 	catch (IOException e) {
 	    uploadError("Unable to close the socket");		
 	}
 
-
-    }
-    
-    public void doSchmupload() {
-
-        writeHeader();
-	
-	int c = -1;
-	
-	int available = 0;
-
-	byte[] buff;
-
-	_bis = new BufferedInputStream(_fis);
-	_bos = new BufferedOutputStream(_ostream);
-
-  	try {
-  	    while (true){
-		System.out.println("amount just read "  + c);
-		available = _bis.available();
-		buff = new byte[available];		
-  		c = _bis.read(buff);
-  		if (c == -1)
-  		    break;
-		_bos.write(buff);
-  		_amountRead += c;
-  	    }
-	    _out.flush();
-  	}
-	
-  	catch (Exception e) {
-  	    uploadError("Unable to read from the file");
-  	    return;
-  	}
 
     }
     
@@ -386,13 +271,14 @@ public class HTTPUploader implements Runnable {
     
     private void doNoSuchFile() {
 	/* Sends a 404 Not Found message */
-	String str;
-	
 	try {
 	    /* is this the right format? */ 
-	    _out.write("HTTP 404 Not Found \r\n");   
-	    _out.write("\r\n");     /* Even if it is, can Gnutella */ 
-	    _out.flush();    /* clients handle it? */          
+	    String str;
+	    str = "HTTP 404 Not Found \r\n";   
+	    _ostream.write(str.getBytes());
+	    str = "\r\n";     /* Even if it is, can Gnutella */ 
+	    _ostream.write(str.getBytes());
+	    _ostream.flush();    /* clients handle it? */          
 	}
 	
 	catch (Exception e) {
