@@ -137,10 +137,11 @@ public class Connection implements ReplyHandler, PushProxyInterface {
      */
     private Deflater _deflater;
 
-    /** The possibly non-null VendorMessagePayload which describes what
-     *  VendorMessages the guy on the other side of this connection supports.
+    /** 
+     * The possibly non-null VendorMessagePayload which describes what
+     * VendorMessages the guy on the other side of this connection supports.
      */
-    protected MessagesSupportedVendorMessage _messagesSupported = null;
+    private MessagesSupportedVendorMessage _messagesSupported;
     
     /**
      * Trigger an opening connection to close after it opens.  This
@@ -152,7 +153,7 @@ public class Connection implements ReplyHandler, PushProxyInterface {
      * This also protects us from calling methods on the Inflater/Deflater
      * objects after end() has been called on them.
      */
-    protected volatile boolean _closed=false;
+    private volatile boolean _closed = false;
 
     /** 
      * The headers read from the connection.
@@ -255,7 +256,7 @@ public class Connection implements ReplyHandler, PushProxyInterface {
      * Cache the 'connection closed' exception, so we have to allocate
      * one for every closed connection.
      */
-    protected static final IOException CONNECTION_CLOSED =
+    private static final IOException CONNECTION_CLOSED =
         new IOException("connection closed");
         
     /** 
@@ -418,7 +419,7 @@ public class Connection implements ReplyHandler, PushProxyInterface {
     /**
      * Call this method when you want to handle us to handle a VM.  We may....
      */
-    protected void handleVendorMessage(VendorMessage vm) {
+    public void handleVendorMessage(VendorMessage vm) {
         if (vm instanceof MessagesSupportedVendorMessage)
             _messagesSupported = (MessagesSupportedVendorMessage) vm;
             
@@ -857,7 +858,7 @@ public class Connection implements ReplyHandler, PushProxyInterface {
      * Call this method when the Connection has been initialized and accepted
      * as 'long-lived'.
      */
-    protected void postInit() {
+    public void postInit() {
         try { // TASK 1 - Send a MessagesSupportedVendorMessage if necessary....
             if(headers().supportsVendorMessages()) {
                 send(MessagesSupportedVendorMessage.instance());
@@ -1065,6 +1066,7 @@ public class Connection implements ReplyHandler, PushProxyInterface {
 
     /** A tiny allocation optimization; see Message.read(InputStream,byte[]). */
     private byte[] HEADER_BUF=new byte[23];
+    
     /**
      * Receives a message.  This method is NOT thread-safe.  Behavior is
      * undefined if two threads are in a receive call at the same time for a
@@ -1075,7 +1077,7 @@ public class Connection implements ReplyHandler, PushProxyInterface {
      *  message is available.  A half-completed message
      *  results in InterruptedIOException.
      */
-    protected Message receive() throws IOException, BadPacketException {
+    public Message receive() throws IOException, BadPacketException {
         //On the Macintosh, sockets *appear* to return the same ping reply
         //repeatedly if the connection has been closed remotely.  This prevents
         //connections from dying.  The following works around the problem.  Note
@@ -1529,7 +1531,7 @@ public class Connection implements ReplyHandler, PushProxyInterface {
      * @return <tt>true</tt> if this connection is a local address,
      *  otherwise <tt>false</tt>
      */
-    protected boolean isLocal() {
+    public boolean isLocal() {
         return NetworkUtils.isLocalAddress(_socket.getInetAddress());
     }
 
