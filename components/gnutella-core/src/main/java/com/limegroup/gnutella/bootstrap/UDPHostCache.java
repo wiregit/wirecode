@@ -29,7 +29,7 @@ public class UDPHostCache {
      * The total number of udp host caches to remember between
      * launches, or at any given time.
      */
-    private static final int PERMANENT_SIZE = 100;
+    public static final int PERMANENT_SIZE = 100;
     
     /**
      * A sorted (by uptime) list of UDP caches.
@@ -60,6 +60,13 @@ public class UDPHostCache {
             ExtendedEndpoint e = (ExtendedEndpoint)iter.next();
             e.write(out);
         }
+    }
+    
+    /**
+     * Returns the number of UDP Host Caches this knows about.
+     */
+    public synchronized int getSize() {
+        return udpHostsSet.size();
     }
     
     /**

@@ -469,6 +469,8 @@ public class HostCatcher {
 				addUnicastEndpoint(pr.getInetAddress(), pr.getPort());
         }
         
+        // if the pong carried packed IP/Ports, add those as their own
+        // endpoints.
         for(Iterator i = pr.getPackedIPPorts().iterator(); i.hasNext(); ) {
             IpPort ipp = (IpPort)i.next();
             ExtendedEndpoint ep = new ExtendedEndpoint(ipp.getAddress(), ipp.getPort());
@@ -476,6 +478,7 @@ public class HostCatcher {
                 add(ep, GOOD_PRIORITY);
         }
         
+        // if it was a UDPHostCache pong, just add it as that.
         if(endpoint.isUDPHostCache())
             return addUDPHostCache(endpoint);
 
@@ -1133,14 +1136,7 @@ public class HostCatcher {
     /**
      * Runnable that looks for GWebCache or UDPHostCache entries.
      */
-    private class Bootstrapper implements Runnable {
-        
-        /**
-         * The next time we're allowed to fetch via UDP.
-         * Incremented after each successful fetch.
-         */
-        private long nextAllowedUDPFetchTime = 0;
-        
+    private class Bootstrapper implements Runnable {        
         /**
          * The next time we're allowed to fetch via GWebCache.
          * Incremented after each succesful fetch.
@@ -1152,11 +1148,6 @@ public class HostCatcher {
          * Upped after each attempt at fetching.
          */
         private int delayGWebCache = 20 * 1000;
-        
-        /**
-         * The delay to wait before the next time we contact a UDP HostCache.
-         */
-        private static final int delayUDP = 5 * 60 * 1000;
         
         /**
          * How long we must wait after contacting UDP before we can contact
@@ -1174,8 +1165,8 @@ public class HostCatcher {
                 return;
             
             long now = System.currentTimeMillis();
-            // if it isn't time yet, wait till it is.
-            if(now < nextAllowedGWebCacheFetchTime && now < nextAllowedUDPFetchTime)
+            // if no possible udp hosts & not allowed gwebcache, wait.
+            if(udpHostCache.getSize() == 0 && now < nextAllowedGWebCacheFetchTime)
                 return;
                 
             //if we don't need hosts, exit.
@@ -1192,7 +1183,6 @@ public class HostCatcher {
          */
         void resetFetchTime() {
             nextAllowedGWebCacheFetchTime = 0;
-            nextAllowedUDPFetchTime = 0;
         }
         
         /**
@@ -1209,14 +1199,11 @@ public class HostCatcher {
          * Fetches more hosts, updating the next allowed time to fetch.
          */
         synchronized void getHosts(long now) {
-            if(now >= nextAllowedUDPFetchTime) {
-                // if we had udp host caches to fetch from, use them.
-                if(udpHostCache.fetchHosts()) {
-                    nextAllowedUDPFetchTime = now + delayUDP;
-                    nextAllowedGWebCacheFetchTime = now + POST_UDP_DELAY;
-                    return;
-                } // else didn't attempt to contact any UDP hosts.
-            }
+            // if we had udp host caches to fetch from, use them.
+            if(udpHostCache.fetchHosts()) {
+                nextAllowedGWebCacheFetchTime = now + POST_UDP_DELAY;
+                return;
+            } // else didn't attempt to contact any UDP hosts.
             
             // if we aren't allowed to contact gwebcache's yet, exit.
             if(now < nextAllowedGWebCacheFetchTime)

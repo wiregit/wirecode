@@ -2,11 +2,14 @@ package com.limegroup.gnutella;
 
 import java.io.File;
 import java.io.FileWriter;
+import java.io.ByteArrayOutputStream;
 import java.util.Iterator;
 import java.util.Set;
 
 import junit.framework.Test;
 
+
+import com.limegroup.gnutella.messages.GGEP;
 import com.limegroup.gnutella.messages.PingReply;
 import com.limegroup.gnutella.settings.FilterSettings;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
@@ -14,6 +17,9 @@ import com.limegroup.gnutella.util.BaseTestCase;
 import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.FixedsizePriorityQueue;
 import com.limegroup.gnutella.util.PrivilegedAccessor;
+import com.limegroup.gnutella.bootstrap.UDPHostCache;
+import com.limegroup.gnutella.bootstrap.BootstrapServerManager;
+
 
 public class HostCatcherTest extends BaseTestCase {  
     private HostCatcher hc;
@@ -158,20 +164,19 @@ public class HostCatcherTest extends BaseTestCase {
      */
     public void testHitsGWebCacheIfHostsFail() throws Exception {
         HostCatcher.DEBUG = false;
-        HostCatcher catcher = new HostCatcher();
+        PrivilegedAccessor.setValue(RouterService.class, "catcher", hc);
+        StubGWebBootstrapper stub = new StubGWebBootstrapper();
+        PrivilegedAccessor.setValue(hc, "gWebCache", stub);
         
-        catcher.initialize();
-        
-        PrivilegedAccessor.setValue(RouterService.class, "catcher", catcher);
         String startAddress = "30.4.5.";
         for(int i=0; i<250; i++) {
             Endpoint curHost = new Endpoint(startAddress+i, 6346);
-            catcher.add(curHost, true);
+            hc.add(curHost, true);
         }
         
  
         for(int i=0; i<250; i++) {
-            Endpoint host = catcher.getAnEndpoint();
+            Endpoint host = hc.getAnEndpoint();
             assertTrue("unexpected address", 
                 host.getAddress().startsWith(startAddress));
         }
@@ -179,20 +184,56 @@ public class HostCatcherTest extends BaseTestCase {
         
         for(int i=0; i<250; i++) {
             Endpoint curHost = new Endpoint(startAddress+i, 6346);
-            catcher.doneWithConnect(curHost, false);
+            hc.doneWithConnect(curHost, false);
         }
         
-        Endpoint gWebCacheHost = catcher.getAnEndpoint();  
-
-
-        // This time, the host should not be one of the addresses we added,
-        // since it should come from the cache.  There's some remote chance of
-        // collision, but it's unlikely.
-        assertFalse("unexpected address", 
-            gWebCacheHost.getAddress().startsWith(startAddress));       
+        assertFalse(stub.fetched);
+        Endpoint gWebCacheHost = hc.getAnEndpoint();
+        assertTrue(stub.fetched);
+        assertEquals(stub.host, gWebCacheHost.getAddress());
         
         HostCatcher.DEBUG = true;
     }
+    
+    /**
+     * Tests to make sure that the UDP Host Cache is used before 
+     * GWebCaches are used, if we know of any host caches.
+     */
+    public void testUDPCachesUsedBeforeGWebCaches() throws Exception {
+        assertEquals(0, hc.getNumHosts());
+        PrivilegedAccessor.setValue(RouterService.class, "catcher", hc);        
+        
+        StubGWebBootstrapper gw = new StubGWebBootstrapper();
+        StubUDPBootstrapper udp = new StubUDPBootstrapper();
+        PrivilegedAccessor.setValue(hc, "gWebCache", gw);
+        PrivilegedAccessor.setValue(hc, "udpHostCache", udp);
+        
+        Endpoint firstHost = hc.getAnEndpoint();
+        assertTrue(udp.fetched);
+        assertFalse(gw.fetched);
+        assertEquals(udp.host, firstHost.getAddress());
+        udp.fetched = false;
+        
+        // Since udp was done quickly and only gave us one host (and we
+        // just used it), the next request will spark a GW request.
+        long timeBefore = System.currentTimeMillis();
+        Endpoint secondHost = hc.getAnEndpoint();
+        long timeAfter = System.currentTimeMillis();
+        assertFalse(udp.fetched);
+        assertTrue(gw.fetched);
+        assertEquals(gw.host, secondHost.getAddress());
+        assertGreaterThan(15 * 1000, timeAfter - timeBefore);
+        gw.fetched = false;
+        udp.expired = false;
+        
+        // Now another fetch will wait until time passes enough to retry
+        // udp (too long before retrying a GW)
+        Endpoint thirdHost = hc.getAnEndpoint();
+        assertTrue(udp.fetched);
+        assertFalse(gw.fetched);
+        assertEquals(udp.host, thirdHost.getAddress());
+    }
+        
     
     /**
      * Tests to make sure that we ignore hosts that have expired.
@@ -384,14 +425,23 @@ public class HostCatcherTest extends BaseTestCase {
         
         // private address (ignored)
         hc.add(PingReply.createExternal(GUID.makeGuid(), (byte)7, 6343,
-            new byte[] {(byte)192, (byte)168, (byte)0, (byte)1}, 3000, false));  
+            new byte[] {(byte)192, (byte)168, (byte)0, (byte)1}, 3000, false));
+            
+        // udp host caches ..
+        hc.add(new ExtendedEndpoint("1.2.3.4", 6346).setUDPHostCache(true), false);
+        hc.add(new ExtendedEndpoint("1.2.3.5", 6341).setUDPHostCache(true), false);
+            
         File tmp=File.createTempFile("hc_test", ".net" );
         hc.write(tmp);
 
         //2. read HC from file.
-        setUp();
+        setUp(); // make sure we clear from memory the stuff we just added.
+        UDPHostCache uhc = (UDPHostCache)PrivilegedAccessor.getValue(hc, "udpHostCache");
+        assertEquals(0, uhc.getSize());
+        assertEquals(0, hc.getNumHosts());
         hc.read(tmp);
-        assertTrue("Got: "+hc.getNumHosts(), hc.getNumHosts()==3);
+        assertEquals(2, uhc.getSize());        
+        assertEquals(3, hc.getNumHosts());
         assertEquals(new Endpoint("18.239.0.142", 6342),
                      hc.getAnEndpoint());
         assertEquals(new Endpoint("18.239.0.141", 6341),
@@ -399,7 +449,6 @@ public class HostCatcherTest extends BaseTestCase {
         assertEquals(new Endpoint("18.239.0.143", 6343),
                      hc.getAnEndpoint());
         assertEquals(0, hc.getNumHosts());
-
         //Cleanup.
         tmp.delete();
     }
@@ -418,8 +467,7 @@ public class HostCatcherTest extends BaseTestCase {
         //Now add bad pong--which isn't really added
         hc.add(PingReply.createExternal(GUID.makeGuid(), (byte)7, N+2,
             new byte[] {(byte)18, (byte)239, (byte)0, (byte)142}, 0, false));
-        //Now re-add port 1 (which was kicked out earlier).  Note that this
-        //would fail if line 346 of HostCatcher were not executed.
+        //Now re-add port 1 (which was kicked out earlier).
         hc.add(PingReply.createExternal(GUID.makeGuid(), (byte)7, 1,
             new byte[] {(byte)18, (byte)239, (byte)0, (byte)142}, N+101,false));
 
@@ -514,8 +562,109 @@ public class HostCatcherTest extends BaseTestCase {
         //Clean up
         tmp.delete();
     }
+    
+    public void testUDPHostCacheAdded() throws Exception {
+        UDPHostCache uhc = (UDPHostCache)PrivilegedAccessor.getValue(hc, "udpHostCache");
+        assertEquals(0, hc.getNumHosts());
+        assertEquals(0, uhc.getSize());
+        
+        // Test with UDPHC pongs.
+        GGEP ggep = new GGEP(true);
+        ggep.put(GGEP.GGEP_HEADER_UDP_HOST_CACHE);
+        PingReply pr = PingReply.create(GUID.makeGuid(), (byte)1, 1,
+                    new byte[] { 1, 1, 1, 1 },
+                    (long)0, (long)0, false, ggep);
+        hc.add(pr);
+        
+        assertEquals(0, hc.getNumHosts());
+        assertEquals(1, uhc.getSize());
+        
+        // Test with an endpoint.
+        ExtendedEndpoint ep = new ExtendedEndpoint("3.2.3.4", 6346);
+        ep.setUDPHostCache(true);
+        hc.add(ep, false);
+        assertEquals(0, hc.getNumHosts());
+        assertEquals(2, uhc.getSize());
+    }
+    
+    public void testPackedIPPongsAreUsed() throws Exception {
+        assertEquals(0, hc.getNumHosts());
+        
+        GGEP ggep = new GGEP(true);
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        out.write(new byte[] { 1, 1, 1, 1, 1, 0 } );
+        out.write(new byte[] { 1, 2, 3, 4, 2, 0 } );
+        out.write(new byte[] { 3, 4, 2, 3, 3, 0 } );
+        out.write(new byte[] { (byte)0xFE, 0, 0, 3, 4, 0 } );
+        ggep.put(GGEP.GGEP_HEADER_PACKED_IPPORTS, out.toByteArray());
+        PingReply pr = PingReply.create(
+            GUID.makeGuid(), (byte)1, 1, new byte[] { 4, 3, 2, 1 },
+            0, 0, false, ggep);
+        
+        hc.add(pr);
+        assertEquals(5, hc.getNumHosts());
+    }
+    
+    public void testPackedIPsWithUHC() throws Exception {
+        UDPHostCache uhc = (UDPHostCache)PrivilegedAccessor.getValue(hc, "udpHostCache");
+        assertEquals(0, hc.getNumHosts());
+        assertEquals(0, uhc.getSize());
+        
+        GGEP ggep = new GGEP(true);
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        out.write(new byte[] { 1, 1, 1, 1, 1, 0 } );
+        out.write(new byte[] { 1, 2, 3, 4, 2, 0 } );
+        out.write(new byte[] { 3, 4, 2, 3, 3, 0 } );
+        out.write(new byte[] { (byte)0xFE, 0, 0, 3, 4, 0 } );
+        ggep.put(GGEP.GGEP_HEADER_PACKED_IPPORTS, out.toByteArray());
+        ggep.put(GGEP.GGEP_HEADER_UDP_HOST_CACHE);
+        PingReply pr = PingReply.create(
+            GUID.makeGuid(), (byte)1, 1, new byte[] { 4, 3, 2, 1 },
+            0, 0, false, ggep);
+        
+        hc.add(pr);
+        assertEquals(4, hc.getNumHosts());
+        assertEquals(1, uhc.getSize());
+    }
+        
 
     public static void main(String argv[]) {
         junit.textui.TestRunner.run(suite());
+    }
+    
+    private static class StubGWebBootstrapper extends BootstrapServerManager {
+        private boolean fetched = false;
+        private String host = "123.234.132.143";
+        
+        public int fetchEndpointsAsync() {
+            fetched = true;
+            Endpoint ep = new Endpoint(host, 6346);
+            RouterService.getHostCatcher().add(ep, false);
+            
+            return FETCH_IN_PROGRESS;
+        }
+    }
+    
+    private static class StubUDPBootstrapper extends UDPHostCache {
+        private boolean fetched = false;
+        private String host = "143.123.234.132";
+        private boolean expired = false;
+        
+        public boolean fetchHosts() {
+            if(expired)
+                return false;
+            expired = true;
+            fetched = true;
+            Endpoint ep = new Endpoint(host, 6346);
+            RouterService.getHostCatcher().add(ep, false);
+            return true;
+        }
+        
+        public int getSize() {
+            if(expired)
+                return 0;
+            else
+                return 1;
+        }
     }
 }

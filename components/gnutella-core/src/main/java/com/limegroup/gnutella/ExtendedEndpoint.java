@@ -202,8 +202,9 @@ public class ExtendedEndpoint extends Endpoint {
     /**
      * Sets if this a UDP host cache endpoint.
      */
-    public void setUDPHostCache(boolean cache) {
+    public ExtendedEndpoint setUDPHostCache(boolean cache) {
         udpHostCache = cache;
+        return this;
     }
 
     private void recordConnectionAttempt(Buffer buf, long now) {
