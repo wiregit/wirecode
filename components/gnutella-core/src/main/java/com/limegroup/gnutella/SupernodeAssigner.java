@@ -1,6 +1,7 @@
 package com.limegroup.gnutella;
 
 import com.limegroup.gnutella.util.CommonUtils;
+import com.limegroup.gnutella.settings.*;
 import java.awt.event.*;
 
 /**
@@ -92,7 +93,7 @@ public final class SupernodeAssigner {
 	 * Variable for the maximum number of bytes per second transferred 
 	 * downstream over the history of the application.
 	 */
-	private int _maxUpstreamBytesPerSec = 
+	private int _maxUpstreamBytesPerSec =
         SETTINGS.getMaxUpstreamBytesPerSec();
 
 	/**
@@ -153,8 +154,8 @@ public final class SupernodeAssigner {
      * sets EVER_SUPERNODE_CAPABLE to false.
 	 */
 	public void setSupernodeCapable() {
-        if (SETTINGS.getDisableSupernodeMode()) {
-            SETTINGS.setEverSupernodeCapable(false);
+        if (UltrapeerSettings.DISABLE_ULTRAPEER_MODE.getValue()) {
+			UltrapeerSettings.EVER_ULTRAPEER_CAPABLE.setValue(false);
             return;
         }
 
@@ -170,14 +171,14 @@ public final class SupernodeAssigner {
             (SETTINGS.getAverageUptime() >= MINIMUM_AVERAGE_UPTIME ||
              _currentUptime >= MINIMUM_CURRENT_UPTIME) &&
             //AND am I not firewalled?
-			SETTINGS.getEverAcceptedIncoming() &&
-            //AND I have accepted incoming messages over UDP
-            RouterService.isGUESSCapable() &&
+			ConnectionSettings.EVER_ACCEPTED_INCOMING.getValue() &&
             //AND am I a capable OS?
 			SUPERNODE_OS;
         
         // if this is supernode capable, make sure we record it
-        if(isSupernodeCapable) SETTINGS.setEverSupernodeCapable(true);
+        if(isSupernodeCapable) {
+			UltrapeerSettings.EVER_ULTRAPEER_CAPABLE.setValue(true);
+		}
 	}
 
 	/**

@@ -2,6 +2,7 @@ package com.limegroup.gnutella;
 
 import com.limegroup.gnutella.guess.*;
 import com.limegroup.gnutella.statistics.*;
+import com.limegroup.gnutella.settings.*;
 import com.limegroup.gnutella.util.*;
 import com.sun.java.util.collections.*;
 import java.net.*;
@@ -141,6 +142,9 @@ public final class QueryUnicaster {
 	}
 
 
+	/**
+	 * Constructs a new <tt>QueryUnicaster</tt> and starts its query loop.
+	 */
     private QueryUnicaster() {
         // construct DSes...
         _queries = new Hashtable();
@@ -159,9 +163,11 @@ public final class QueryUnicaster {
                 }
 			}
 		};
+
         // only if settings says i can....
-        if (SettingsManager.instance().getGuessEnabled())
+        if (SearchSettings.GUESS_ENABLED.getValue()) { 
             _querier.start();
+		}
     }
 
     /** 
@@ -294,7 +300,7 @@ public final class QueryUnicaster {
     /** Just feed me ExtendedEndpoints - I'll check if I could use them or not.
      */
     public void addUnicastEndpoint(InetAddress address, int port) {
-        if (!SettingsManager.instance().getGuessEnabled()) return;
+        if (!SearchSettings.GUESS_ENABLED.getValue()) return;
         if (notMe(address, port)) {
 			GUESSEndpoint endpoint = new GUESSEndpoint(address, port);
 			addUnicastEndpoint(endpoint);
@@ -314,7 +320,7 @@ public final class QueryUnicaster {
 			_queryHosts.notify();
 			if(UDPService.instance().isListening() &&
 			   !RouterService.isGUESSCapable() &&
-			   _testUDPPingsSent < 5) {
+			   _testUDPPingsSent < 10) {
 				PingRequest pr = new PingRequest((byte)1);
 				UDPService.instance().send(pr, endpoint.getAddress(), 
 										   endpoint.getPort());

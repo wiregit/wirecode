@@ -12,7 +12,9 @@ import com.limegroup.gnutella.security.Cookies;
 import com.limegroup.gnutella.util.*;
 import com.limegroup.gnutella.connection.*;
 import com.limegroup.gnutella.updates.*;
+import com.limegroup.gnutella.settings.*;
 import com.limegroup.gnutella.browser.*;
+
 
 /**
  * A facade for the entire LimeWire backend.  This is the GUI's primary way of
@@ -172,9 +174,9 @@ public final class RouterService {
 													 manager);
 		sa.start();
 
-		if(SETTINGS.getConnectOnStartup()) {
+		if(ConnectionSettings.CONNECT_ON_STARTUP.getValue()) {
 			// Make sure connections come up ultra-fast (beyond default keepAlive)		
-			int outgoing = SETTINGS.getKeepAlive();
+			int outgoing = ConnectionSettings.KEEP_ALIVE.getValue();
 			if ( outgoing > 0 ) 
 				connect();
 		}
@@ -478,7 +480,7 @@ public final class RouterService {
         if(newKeep < 0)
             throw new BadConnectionSettingException(
                 BadConnectionSettingException.NEGATIVE_VALUE,
-                SETTINGS.getKeepAlive());
+				ConnectionSettings.KEEP_ALIVE.getValue());
         
         //TODO: we may want to re-enable this...with a higher limit.
         ////The request for increasing keep alive if we are leaf node is invalid
@@ -511,7 +513,7 @@ public final class RouterService {
         //expire the HostCatcher if the keep alive was zero.  This is similar to
         //calling connect(), except that it does not get the keep alive from
         //SettingsManager.
-        if (manager.getKeepAlive()==0)
+        if (ConnectionSettings.KEEP_ALIVE.getValue() == 0) //manager.getKeepAlive()==0)
             catcher.expire();
         forceKeepAlive(newKeep);
     }
@@ -1158,6 +1160,7 @@ public final class RouterService {
 	 *  GUESS queries, <tt>false</tt> otherwise
 	 */
 	public static boolean isGUESSCapable() {
-		return udpService.isGUESSCapable() && SETTINGS.getGuessEnabled();
+		return udpService.isGUESSCapable() && 
+			SearchSettings.GUESS_ENABLED.getValue();
 	}
 }
