@@ -54,6 +54,12 @@ public class FilterSettings extends LimeProps {
 	 */    
     public static final BooleanSetting FILTER_HIGHBIT_QUERIES =
         FACTORY.createBooleanSetting("FILTER_HIGHBIT_QUERIES", true);
+
+    /**
+	 * An array of URNs the user has blocked.
+	 */    
+    public static final StringArraySetting BLOCKED_URNS =
+        FACTORY.createStringArraySetting("BLOCKED_URNS", new String[0]);
     
     /**
 	 * An array of ip addresses that the user has banned.

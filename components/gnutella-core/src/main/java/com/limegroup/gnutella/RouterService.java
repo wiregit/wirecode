@@ -27,6 +27,7 @@ import com.limegroup.gnutella.downloader.HTTPDownloader;
 import com.limegroup.gnutella.downloader.IncompleteFileManager;
 import com.limegroup.gnutella.filters.IPFilter;
 import com.limegroup.gnutella.filters.MutableGUIDFilter;
+import com.limegroup.gnutella.filters.ResponseFilter;
 import com.limegroup.gnutella.filters.SpamFilter;
 import com.limegroup.gnutella.handshaking.HeaderNames;
 import com.limegroup.gnutella.messages.QueryRequest;
@@ -837,6 +838,14 @@ public class RouterService {
         }
         
         UDPReplyHandler.setPersonalFilter(SpamFilter.newPersonalFilter());
+    }
+
+    /**
+     * Notifies the backend that response filter settings have changed, and that
+     * extra work must be done.
+     */
+    public static void adjustResponseFilters() {
+        ResponseFilter.instance().refresh();
     }
 
     /**

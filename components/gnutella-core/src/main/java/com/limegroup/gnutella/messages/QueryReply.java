@@ -13,6 +13,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
@@ -25,6 +26,7 @@ import com.limegroup.gnutella.PushProxyInterface;
 import com.limegroup.gnutella.Response;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.UDPService;
+import com.limegroup.gnutella.filters.ResponseFilter;
 import com.limegroup.gnutella.search.HostData;
 import com.limegroup.gnutella.settings.SearchSettings;
 import com.limegroup.gnutella.statistics.DroppedSentMessageStatHandler;
@@ -150,8 +152,8 @@ public class QueryReply extends Message implements Serializable{
      *    clientGUID.length==16
      */
     public QueryReply(byte[] guid, byte ttl,
-            int port, byte[] ip, long speed, Response[] responses,
-            byte[] clientGUID, boolean isMulticastReply) {
+                      int port, byte[] ip, long speed, Response[] responses,
+                      byte[] clientGUID, boolean isMulticastReply) {
         this(guid, ttl, port, ip, speed, responses, clientGUID, 
              DataUtils.EMPTY_BYTE_ARRAY,
              false, false, false, false, false, false, true, isMulticastReply,
@@ -175,11 +177,11 @@ public class QueryReply extends Message implements Serializable{
      * @param supportsChat true iff the host currently allows chatting.
      */
     public QueryReply(byte[] guid, byte ttl, 
-            int port, byte[] ip, long speed, Response[] responses,
-            byte[] clientGUID,
-            boolean needsPush, boolean isBusy,
-            boolean finishedUpload, boolean measuredSpeed,boolean supportsChat,
-            boolean isMulticastReply) {
+                      int port, byte[] ip, long speed, Response[] responses,
+                      byte[] clientGUID,
+                      boolean needsPush, boolean isBusy,
+                      boolean finishedUpload, boolean measuredSpeed,boolean supportsChat,
+                      boolean isMulticastReply) {
         this(guid, ttl, port, ip, speed, responses, clientGUID, 
              DataUtils.EMPTY_BYTE_ARRAY,
              true, needsPush, isBusy, finishedUpload,
@@ -211,11 +213,11 @@ public class QueryReply extends Message implements Serializable{
      * xmlBytes.length > XML_MAX_SIZE
      */
     public QueryReply(byte[] guid, byte ttl, 
-            int port, byte[] ip, long speed, Response[] responses,
-            byte[] clientGUID, byte[] xmlBytes,
-            boolean needsPush, boolean isBusy,
-            boolean finishedUpload, boolean measuredSpeed,boolean supportsChat,
-            boolean isMulticastReply) 
+                      int port, byte[] ip, long speed, Response[] responses,
+                      byte[] clientGUID, byte[] xmlBytes,
+                      boolean needsPush, boolean isBusy,
+                      boolean finishedUpload, boolean measuredSpeed,boolean supportsChat,
+                      boolean isMulticastReply) 
         throws IllegalArgumentException {
         this(guid, ttl, port, ip, speed, responses, clientGUID, 
              xmlBytes, needsPush, isBusy,  finishedUpload, measuredSpeed, 
@@ -247,11 +249,11 @@ public class QueryReply extends Message implements Serializable{
      * xmlBytes.length > XML_MAX_SIZE
      */
     public QueryReply(byte[] guid, byte ttl, 
-            int port, byte[] ip, long speed, Response[] responses,
-            byte[] clientGUID, byte[] xmlBytes,
-            boolean needsPush, boolean isBusy,
-            boolean finishedUpload, boolean measuredSpeed,boolean supportsChat,
-            boolean isMulticastReply, Set proxies) 
+                      int port, byte[] ip, long speed, Response[] responses,
+                      byte[] clientGUID, byte[] xmlBytes,
+                      boolean needsPush, boolean isBusy,
+                      boolean finishedUpload, boolean measuredSpeed,boolean supportsChat,
+                      boolean isMulticastReply, Set proxies) 
         throws IllegalArgumentException {
         this(guid, ttl, port, ip, speed, responses, clientGUID, 
              xmlBytes, true, needsPush, isBusy, 
@@ -289,11 +291,11 @@ public class QueryReply extends Message implements Serializable{
      * xmlBytes.length > XML_MAX_SIZE
      */
     public QueryReply(byte[] guid, byte ttl, 
-            int port, byte[] ip, long speed, Response[] responses,
-            byte[] clientGUID, byte[] xmlBytes,
-            boolean needsPush, boolean isBusy,
-            boolean finishedUpload, boolean measuredSpeed,boolean supportsChat,
-            boolean isMulticastReply, boolean supportsFWTransfer, Set proxies) 
+                      int port, byte[] ip, long speed, Response[] responses,
+                      byte[] clientGUID, byte[] xmlBytes,
+                      boolean needsPush, boolean isBusy,
+                      boolean finishedUpload, boolean measuredSpeed,boolean supportsChat,
+                      boolean isMulticastReply, boolean supportsFWTransfer, Set proxies) 
         throws IllegalArgumentException {
         this(guid, ttl, port, ip, speed, responses, clientGUID, 
              xmlBytes, true, needsPush, isBusy, 
@@ -364,13 +366,13 @@ public class QueryReply extends Message implements Serializable{
      * Internal constructor.  Only creates QHD if includeQHD==true.  
      */
     private QueryReply(byte[] guid, byte ttl, 
-             int port, byte[] ip, long speed, Response[] responses,
-             byte[] clientGUID, byte[] xmlBytes,
-             boolean includeQHD, boolean needsPush, boolean isBusy,
-             boolean finishedUpload, boolean measuredSpeed,
-             boolean supportsChat, boolean supportsBH,
-             boolean isMulticastReply, boolean supportsFWTransfer, 
-             Set proxies) {
+                       int port, byte[] ip, long speed, Response[] responses,
+                       byte[] clientGUID, byte[] xmlBytes,
+                       boolean includeQHD, boolean needsPush, boolean isBusy,
+                       boolean finishedUpload, boolean measuredSpeed,
+                       boolean supportsChat, boolean supportsBH,
+                       boolean isMulticastReply, boolean supportsFWTransfer, 
+                       Set proxies) {
         super(guid, Message.F_QUERY_REPLY, ttl, (byte)0,
               0,                               // length, update later
               16);                             // 16-byte footer
@@ -385,7 +387,7 @@ public class QueryReply extends Message implements Serializable{
 			throw new IllegalArgumentException("invalid ip length: "+ip.length);
         } else if(!NetworkUtils.isValidAddress(ip)) {
             throw new IllegalArgumentException("invalid address: " + 
-                    NetworkUtils.ip2string(ip));
+                                               NetworkUtils.ip2string(ip));
 		} else if((speed & 0xFFFFFFFF00000000l) != 0) {
 			throw new IllegalArgumentException("invalid speed: "+speed);
 		} else if(n >= 256) {
@@ -550,6 +552,13 @@ public class QueryReply extends Message implements Serializable{
     public short getResultCount() {
         //The result of ubyte2int always fits in a short, so downcast is ok.
         return (short)ByteOrder.ubyte2int(_payload[0]);
+    }
+
+    /** Return the number of filtered results N in this query. */
+    public short getFilteredResultCount() {
+        if(_responses==null) 
+            return 0;
+        return (short)_responses.length;
     }
 
     public int getPort() {
@@ -812,6 +821,22 @@ public class QueryReply extends Message implements Serializable{
                 responses[responses.length-left] = r;
                 i+=r.getLength();
             }
+            //Filter out responses
+            ResponseFilter responseFilter = ResponseFilter.instance();
+            List allowedResponses = new ArrayList(responses.length);
+            for(int n=0; n< responses.length; n++) {
+                Response r = responses[n];
+                if(responseFilter.allow(r)) 
+                    allowedResponses.add(r);
+            }
+            responses = new Response[allowedResponses.size()];
+            int index = 0;
+            Iterator iter = allowedResponses.iterator();
+            while(iter.hasNext()) {
+                Response r = (Response)iter.next();
+                responses[index] = r;
+                index++;
+            }
             //All set.  Accept parsed results.
             this._responses=responses;
         } catch (ArrayIndexOutOfBoundsException e) {
@@ -868,7 +893,7 @@ public class QueryReply extends Message implements Serializable{
          * Byte 10-X: GGEP area
          * Byte X-beginning of xml : (new) private area
          * Byte (payload.length - 16 - xmlSize (above)) - 
-                (payload.length - 16 - 1) : XML!!
+         (payload.length - 16 - 1) : XML!!
          * Byte (payload.length - 16 - 1) : NULL
          * Last 16 Bytes: client GUID.
          */
@@ -927,7 +952,7 @@ public class QueryReply extends Message implements Serializable{
                     int magicIndex = i + 2;
                     for (; 
                          (_payload[magicIndex]!=GGEP.GGEP_PREFIX_MAGIC_NUMBER) &&
-                         (magicIndex < _payload.length);
+                             (magicIndex < _payload.length);
                          magicIndex++)
                         ; // get the beginning of the GGEP stuff...
                     try {
@@ -980,7 +1005,7 @@ public class QueryReply extends Message implements Serializable{
 
             if (i>_payload.length-16)
                 throw new BadPacketException(
-                    "Common payload length too large.");
+                                             "Common payload length too large.");
             
             //All set.  Accept parsed values.
             Assert.that(vendorT!=null);
@@ -1304,7 +1329,7 @@ public class QueryReply extends Message implements Serializable{
                             } catch (BadPacketException malformedPair) {}
                         }                        
                     }
-                 } catch (BadGGEPPropertyException bad) {}
+                } catch (BadGGEPPropertyException bad) {}
             }
             
             if(proxies == null)
@@ -1374,7 +1399,7 @@ public class QueryReply extends Message implements Serializable{
          * @param fromNetwork 6 bytes - first 4 are IP, next 2 are port
          */
         public static IPPortCombo getCombo(byte[] fromNetwork)
-          throws BadPacketException {
+            throws BadPacketException {
             return new IPPortCombo(fromNetwork);
         }
         
