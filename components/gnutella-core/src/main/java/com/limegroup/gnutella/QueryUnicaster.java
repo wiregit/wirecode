@@ -289,7 +289,7 @@ public final class QueryUnicaster {
             while (iter.hasNext())
                 purgeQuery((GUID) iter.next());
         }
-        debug("QueryUnicaster.purgeQuery(): returning.");
+        debug("QueryUnicaster.purgeQuery(RH): returning.");
     }
 
     /** Gets rid of a Query according to GUID.  Use this if a leaf connection
@@ -297,9 +297,7 @@ public final class QueryUnicaster {
      */
     void purgeQuery(GUID queryGUID) {
         debug("QueryUnicaster.purgeQuery(GUID): entered.");
-        synchronized (_queries) {
-            _queries.remove(queryGUID);
-        }
+        _queries.remove(queryGUID);
         debug("QueryUnicaster.purgeQuery(GUID): returning.");
     }
 
