@@ -777,36 +777,53 @@ public class ManagedDownloader implements Downloader, Serializable {
      *  filenames.  REQUIRES: allFiles.length MUST be greater than 0. */
     private final synchronized String extractQueryString() {
         Assert.that(allFiles.length>0, "Precondition violated");
+        String retString = null;
 
         final int MAX_LEN = 30;
 
         // Put the keywords into a string, up to MAX_LEN
         Set intersection=keywords(allFiles[0].getFileName());
         if (intersection.size() < 1) // nothing to extract!
-            return StringUtils.truncate(allFiles[0].getFileName(), 30);
-        StringBuffer sb = new StringBuffer();
-        int numWritten = 0;
-        for (Iterator keys=intersection.iterator(); 
-             keys.hasNext() && (numWritten < MAX_LEN); 
-             ) {
-            String currKey = (String) keys.next();
-
-            // if we have space to add the keyword
-            if ((numWritten + currKey.length()) < MAX_LEN) {
-                if (numWritten > 0) // add a space if we've written before
-                    sb.append(" ");
-                sb.append(currKey); // add the new keyword
-                numWritten += currKey.length() + (numWritten == 0 ? 0 : 1);
+            retString = StringUtils.truncate(allFiles[0].getFileName(), 30);
+        else {
+            StringBuffer sb = new StringBuffer();
+            int numWritten = 0;
+            for (Iterator keys=intersection.iterator(); 
+                 keys.hasNext() && (numWritten < MAX_LEN); 
+                 ) {
+                String currKey = (String) keys.next();
+                
+                // if we have space to add the keyword
+                if ((numWritten + currKey.length()) < MAX_LEN) {
+                    if (numWritten > 0) // add a space if we've written before
+                        sb.append(" ");
+                    sb.append(currKey); // add the new keyword
+                    numWritten += currKey.length() + (numWritten == 0 ? 0 : 1);
+                }
             }
+        
+            retString = sb.toString();
+
+            //one small problem - if every keyword in the filename is
+            //greater than MAX_LEN, then the string returned will be empty.
+            //if this happens just truncate the first word....
+            if (retString.equals(""))
+                retString = StringUtils.truncate(allFiles[0].getFileName(), 30);
         }
-        
-        //TODO: one small problem - if every keyword in the filename is greater
-        //than MAX_LEN, then the string returned will be empty.  we won't
-        //handle this case as it is HIGHLY improbable.
-        
-        String retString = sb.toString();
+
+        // Added a bunch of asserts to catch bugs.  There is some form of
+        // input we are not considering in our algorithms....
         Assert.that(retString.length() <= MAX_LEN);
-        return I18NConvert.instance().getNorm(retString);
+        Assert.that(!retString.equals(""), 
+                    "Original filename: " + allFiles[0].getFileName());
+        Assert.that(retString != null, 
+                    "Original filename: " + allFiles[0].getFileName());
+        retString = I18NConvert.instance().getNorm(retString);
+        Assert.that(!retString.equals(""), 
+                    "I18N: Original filename: " + allFiles[0].getFileName());
+        Assert.that(retString != null, 
+                    "I18N: Original filename: " + allFiles[0].getFileName());
+        return retString;
     }
 
     /** Returns the canonicalized non-trivial search keywords in fileName. */
