@@ -320,6 +320,7 @@ public class HostCatcher {
      * @return true iff e was actually added 
      */
     private boolean add(ExtendedEndpoint e, int priority) {
+        if(e.isPrivateAddress()) return false;
         repOk();
         //We used to check that we're not connected to e, but now we do that in
         //ConnectionFetcher after a call to getAnEndpoint.  This is not a big
