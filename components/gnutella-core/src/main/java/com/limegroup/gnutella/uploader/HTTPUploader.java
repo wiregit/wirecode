@@ -118,43 +118,50 @@ public final class HTTPUploader implements Uploader {
         }            
 		try {			
 			_ostream = _socket.getOutputStream();
+        } catch(IOException e) {
+            // the connection was broken
+			setState(FILE_NOT_FOUND);            
+        }
 
-            //special case for certain states
-            switch(index) {
-            case UploadManager.BROWSE_HOST_FILE_INDEX:
-                setState(BROWSE_HOST);
-                return;
-            case UploadManager.UPDATE_FILE_INDEX:
-                setState(UPDATE_FILE);
-                return;
-            case UploadManager.BAD_URN_QUERY_INDEX:
-                setState(FILE_NOT_FOUND);
-                return;
-            case UploadManager.MALFORMED_REQUEST_INDEX:
-                setState(MALFORMED_REQUEST);
-                return;
-            }
+        //special case for certain states
+        switch(index) {
+        case UploadManager.BROWSE_HOST_FILE_INDEX:
+            setState(BROWSE_HOST);
+            return;
+        case UploadManager.UPDATE_FILE_INDEX:
+            setState(UPDATE_FILE);
+            return;
+        case UploadManager.BAD_URN_QUERY_INDEX:
+            setState(FILE_NOT_FOUND);
+            return;
+        case UploadManager.MALFORMED_REQUEST_INDEX:
+            setState(MALFORMED_REQUEST);
+            return;
+        }
             
-			_fileDesc = RouterService.getFileManager().get(_index);
-			_fileSize = (int)_fileDesc.getSize();
-
-            // if the requested name does not match our name on disk,
-			// report File Not Found
-			if(!_fileName.equals(_fileDesc.getName())) {
-				setState(FILE_NOT_FOUND);
-			}
-			else {
-				// get the fileInputStream
-				_fis = _fileDesc.createInputStream();
-				setState(CONNECTING);
-			}
-		} catch (IndexOutOfBoundsException e) {
-			setState(FILE_NOT_FOUND);
-		} catch (IOException e) {
-			// this occurs if the output stream could not be opened to
-			// the socket or if the input stream could not be created
-			// from the file
-			setState(FILE_NOT_FOUND);
+        FileManager fm = RouterService.getFileManager();
+        if(fm.isValidIndex(_index)) {
+            _fileDesc = fm.get(_index);
+        } 
+        if(_fileDesc == null) {
+            setState(FILE_NOT_FOUND);
+        }
+        _fileSize = (int)_fileDesc.getSize();
+        
+        // if the requested name does not match our name on disk,
+        // report File Not Found
+        if(!_fileName.equals(_fileDesc.getName())) {
+            setState(FILE_NOT_FOUND);
+        }
+        else {
+            try {
+                // get the fileInputStream
+                _fis = _fileDesc.createInputStream();
+                setState(CONNECTING);
+			} catch(FileNotFoundException e) {
+                // could not access the file on disk
+                setState(FILE_NOT_FOUND);
+            }
 		}
 	}
 		
