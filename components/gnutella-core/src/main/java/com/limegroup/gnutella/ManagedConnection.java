@@ -443,7 +443,6 @@ public class ManagedConnection extends Connection
                 _manager.remove(this);
             throw e;
         }
-        
         // record received message in stats
         addReceived();
         return m;

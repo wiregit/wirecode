@@ -133,6 +133,13 @@ public class FileUtils
     }
     
     /**
+     * Set of all files that we couldn't set writeable
+     * so we don't check again.
+     */
+    private static final Set UNWRITEABLE =
+        Collections.synchronizedSet(new HashSet());
+    
+    /**
      * Utility method to set a file as non read only.
      * If the file is already writable, does nothing.
      *
@@ -140,7 +147,7 @@ public class FileUtils
      *  be unset.
      */
     public static boolean setWriteable(File f) {
-        if( f.canWrite() )
+        if( f.canWrite() || !f.exists() )
             return true;
             
         String fName;
@@ -149,6 +156,9 @@ public class FileUtils
         } catch(IOException ioe) {
             fName = f.getPath();
         }
+        
+        if( UNWRITEABLE.contains(fName) )
+            return false;
             
         String cmds[] = null;
         if( CommonUtils.isWindows() )
@@ -167,7 +177,11 @@ public class FileUtils
             catch(IOException ignored) { }
             catch(InterruptedException ignored) { }
         }
-
-        return f.canWrite();
+        
+        if( !f.canWrite() ) {
+            UNWRITEABLE.add(fName);
+            return false;
+        } else
+            return true;
     }
 }
