@@ -446,9 +446,14 @@ public final class SettingsManager {
 	private final String WINDOW_Y              = "WINDOW_Y";
 	private final String MINIMIZE_TO_TRAY      = "MINIMIZE_TO_TRAY";
 	private final String SHUTDOWN_AFTER_TRANSFERS = "SHUTDOWN_AFTER_TRANSFERS";
-	//private final String CLASSPATH             = "CLASSPATH";
-	//private final String MAIN_CLASS            = "MAIN_CLASS";
-	private final String JAR_NAME              = "JAR_NAME";
+
+	// this is necessary for pre-LW 2.4.0 RunLime classes
+	private final String CLASSPATH = "CLASSPATH";
+
+	/**
+	 * This key for the jar file to load to start the program.
+	 */
+	private final String JAR_NAME = "JAR_NAME";
 
 	/**
 	 * Constant key for whether or not chat is enabled.
@@ -3219,6 +3224,7 @@ public final class SettingsManager {
 	 */
 	public void setJarName(final String jarName) {
 		setStringValue(JAR_NAME, jarName);
+		setStringValue(CLASSPATH, jarName);
 	}
 
 	/**
