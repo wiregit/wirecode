@@ -168,6 +168,12 @@ public class ConnectionManager {
      * boolean to check if a locale matching connection is needed.
      */
     private volatile boolean _needPref = true;
+    
+    /**
+     * boolean of whether or not the interruption of the prefFetcher thread
+     * has been scheduled.
+     */
+    private boolean _needPrefInterrupterScheduled = false;
 
     /**
      * List of all connections.  The core data structures are lists, which allow
@@ -720,12 +726,24 @@ public class ConnectionManager {
             _preferredConnections <=0 ) {
             return false;
 		} else if (RouterService.isShieldedLeaf()) {
-		    // Allow incoming if the other side is a good ultrapeer and we
-		    // aren't at our max.
-		    if(hr.isGoodUltrapeer() &&
-		       _shieldedConnections < _preferredConnections) {
+		    // If it's not good, never allow it.
+		    if(!hr.isGoodUltrapeer()) {
+		        return false;
+		    // if we have slots, allow it.
+		    } else if (_shieldedConnections < _preferredConnections) {
+		        // if it matched our preference, we don't need to preference
+		        // anymore.
+		        if(checkLocale(hr.getLocalePref()))
+		            _needPref = false;
 		        return true;
             } else {
+                // if we were still trying to get a locale connection
+                // and this one matches, allow it, 'cause no one else matches.
+                // (we would have turned _needPref off if someone matched.)
+                if(_needPref && checkLocale(hr.getLocalePref()))
+                    return true;
+
+                // don't allow it.
                 return false;
             }
 		} else if (hr.isLeaf() || leaf) {
@@ -1448,19 +1466,23 @@ public class ConnectionManager {
             //clients locale
             if(RouterService.isShieldedLeaf()
                && _needPref
+               && !_needPrefInterrupterScheduled
                && _dedicatedPrefFetcher == null) {
                 _dedicatedPrefFetcher = new ConnectionFetcher(true);
                 Runnable interrupted = new Runnable() {
                         public void run() {
                             synchronized(ConnectionManager.this) {
+                                // always finish once this runs.
+                                _needPref = false;
+
                                 if (_dedicatedPrefFetcher == null)
                                     return;
                                 _dedicatedPrefFetcher.interrupt();
                                 _dedicatedPrefFetcher = null;
-                                _needPref = false;
                             }
                         }
                     };
+                _needPrefInterrupterScheduled = true;
                 // shut off this guy if he didn't have any luck
                 RouterService.schedule(interrupted, 15 * 1000, 0);
             }
