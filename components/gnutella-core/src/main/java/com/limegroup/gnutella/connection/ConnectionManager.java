@@ -222,6 +222,7 @@ public class ConnectionManager {
              return;
          }
          
+         // TODO: Make sure this actually is started correctly and everything
          /*    
          try {   
 			 startConnection(connection);			 
@@ -251,6 +252,10 @@ public class ConnectionManager {
     public synchronized void remove(Connection conn) {
 		// removal may be disabled for tests
 		if(!ConnectionSettings.REMOVE_ENABLED.getValue()) return;     
+        
+        if(conn.isOutgoing() && !conn.isInitialized()) {
+            _initializingFetchedConnections.remove(conn);
+        }
         removeInternal(conn);
 
         adjustConnectionFetchers();
@@ -271,7 +276,7 @@ public class ConnectionManager {
      * to add more threads.  Ignores request if a shielded leaf node
      * and newKeep>1 (sic).
      */
-    public synchronized void setKeepAlive(int newKeep) {        
+    public synchronized void setKeepAlive(int newKeep) {
         _keepAlive = newKeep;
         adjustConnectionFetchers();
     }
@@ -922,8 +927,8 @@ public class ConnectionManager {
      * This is called from initializeExternallyGeneratedConnection, for 
      * incoming connections
      */
-    private void connectionInitializingIncoming(Connection c) {
-        connectionInitializing(c);
+    private void connectionInitializingIncoming(Connection conn) {
+        connectionInitializing(conn);
     }
     
     /**
@@ -931,31 +936,31 @@ public class ConnectionManager {
      * removed from the list of open connections during its initialization.
      * Should only be called from a thread that has this' monitor.
      */
-    private boolean connectionInitialized(Connection c) {
-        if(_connections.contains(c)) {
+    private boolean connectionInitialized(Connection conn) {
+        if(_connections.contains(conn)) {
             
             //update the appropriate list of connections
-            if(!c.isSupernodeClientConnection()){
+            if(!conn.isSupernodeClientConnection()){
                 //REPLACE _initializedConnections with the list
                 //_initializedConnections+[c]
                 List newConnections=new ArrayList(_initializedConnections);
-                newConnections.add(c);
+                newConnections.add(conn);
                 _initializedConnections=newConnections;
                 //maintain invariant
-                if(c.isClientSupernodeConnection())
+                if(conn.isClientSupernodeConnection())
                     _shieldedConnections++;                
             } else{
                 //REPLACE _initializedClientConnections with the list
                 //_initializedClientConnections+[c]
                 List newConnections
                     =new ArrayList(_initializedClientConnections);
-                newConnections.add(c);
+                newConnections.add(conn);
                 _initializedClientConnections=newConnections;
             }
 	        // do any post-connection initialization that may involve sending.
-	        c.postInit();
+	        conn.postInit();
 	        // sending the ping request.
-    		sendInitialPingRequest(c);            
+    		sendInitialPingRequest(conn);            
             return true;
         }
         return false;
@@ -1283,16 +1288,6 @@ public class ConnectionManager {
             setKeepAlive(PREFERRED_CONNECTIONS_FOR_LEAF);    
     }
     
-    /** 
-     * Indicates that the node is in client mode and has lost a leaf
-     * to ultrapeer connection.
-     */
-    private synchronized void lostShieldedClientSupernodeConnection() {
-        //Does nothing!  adjustConnectionFetchers takes care of everything now.
-        //I'm leaving this method here as a nice place holder in case we
-        //need to take action in the future.
-    }
-    
     /**
      * Processes the headers received during connection handshake and updates
      * itself with any useful information contained in those headers.
@@ -1493,7 +1488,7 @@ public class ConnectionManager {
     }
     
     // TODO: threading issues????
-    public void handleConnectionInitialization(Connection conn) 
+    public synchronized void handleConnectionInitialization(Connection conn) 
         throws IOException  {
 
         // if the connection received headers, process the headers to
@@ -1535,15 +1530,14 @@ public class ConnectionManager {
      *
      * @param conn the <tt>Connection</tt> to finish initializing
      */
-    private void completeConnectionInitialization(Connection conn) {
-        boolean connectionOpen = false;
+    private synchronized void completeConnectionInitialization(Connection conn) {
         synchronized(this) {
             if(conn.isOutgoing()) {
                 _initializingFetchedConnections.remove(conn);
             }
             // If the connection was killed while initializing, we shouldn't
             // announce its initialization
-            connectionOpen = connectionInitialized(conn);
+            boolean connectionOpen = connectionInitialized(conn);
             if(connectionOpen) {
                 // check to see if this is the first leaf to ultrapeer 
                 // connection we've made.  if it is, then we're a leaf,
@@ -1677,6 +1671,7 @@ public class ConnectionManager {
 
             Assert.that(endpoint != null);
 
+
             Connection connection = new Connection(
                 endpoint.getHostname(), endpoint.getPort());
 
@@ -1702,10 +1697,10 @@ public class ConnectionManager {
                 //Internal error!
                 ErrorService.error(e);
             }
-            finally{
-                if (connection.isClientSupernodeConnection())
-                    lostShieldedClientSupernodeConnection();
-            }
+            //finally{
+              //  if (connection.isClientSupernodeConnection())
+                //    lostShieldedClientSupernodeConnection();
+            //}
         }
 	}
 }
