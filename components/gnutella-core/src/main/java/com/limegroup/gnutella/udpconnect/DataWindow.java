@@ -56,7 +56,7 @@ public class DataWindow
 	public DataRecord addData(UDPConnectionMessage msg) {
 		if (LOG.isDebugEnabled())
 			LOG.debug("adding message seq "+msg.getSequenceNumber()+ " window start "+windowStart);
-		LOG.info("map size is "+window.size());
+
 		DataRecord d = new DataRecord(msg.getSequenceNumber(),msg);
 		window.put(d.pkey, d);
 
