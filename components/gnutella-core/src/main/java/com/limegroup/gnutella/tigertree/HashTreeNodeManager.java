@@ -66,7 +66,8 @@ class HashTreeNodeManager {
      * Registers the given list of nodes for the tree.
      */
     void register(HashTree tree, List nodes) {
-        insertEntry(tree, nodes);
+        if(!MAP.containsKey(tree))
+            insertEntry(tree, nodes);
     }
 
     /**

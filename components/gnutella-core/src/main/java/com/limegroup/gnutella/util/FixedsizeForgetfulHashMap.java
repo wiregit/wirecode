@@ -295,6 +295,10 @@ public class FixedsizeForgetfulHashMap implements Map
      */
     public Object removeLRUEntry()
     {
+        //if there are no elements, return null.
+        if(isEmpty())
+            return null;
+        
         //get an element from the remove list to remove
         DoublyLinkedList.ListElement toRemove = removeList.removeFirst();
 
