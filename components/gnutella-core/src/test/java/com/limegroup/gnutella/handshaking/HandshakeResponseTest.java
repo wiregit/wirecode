@@ -155,7 +155,7 @@ public final class HandshakeResponseTest extends BaseTestCase {
      */
     private void makeSureHeadersMatch(Endpoint[] hosts, Properties headers) {
         String headerHosts = 
-            headers.getProperty(ConnectionHandshakeHeaders.X_TRY_SUPERNODES);
+            headers.getProperty(HeaderNames.X_TRY_ULTRAPEERS);
 
         assertNotNull("should have X-Try-Ultrapeer header", headerHosts);
         StringTokenizer st = new StringTokenizer(headerHosts, ",");

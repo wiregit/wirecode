@@ -221,7 +221,7 @@ public class LeafRoutingTest extends com.limegroup.gnutella.util.BaseTestCase {
             c.initialize();
             fail("handshake should not have succeeded");
         } catch (IOException e) {
-			String hosts=c.headers().getProperty(ConnectionHandshakeHeaders.X_TRY);
+			String hosts=c.headers().getProperty(HeaderNames.X_TRY);
             //System.out.println("X-Try: "+hosts);
             assertNotNull("hosts should not be null", hosts);
             Set s=list2set(hosts);
@@ -230,7 +230,7 @@ public class LeafRoutingTest extends com.limegroup.gnutella.util.BaseTestCase {
             assertEquals("unexpected size of X-Try hosts list", 0, s.size());
 
             hosts=c.headers().getProperty(
-                                ConnectionHandshakeHeaders.X_TRY_SUPERNODES);
+                                HeaderNames.X_TRY_ULTRAPEERS);
             //System.out.println("X-Try-Ultrapeers: "+hosts);
             assertNotNull("unexpected null value", hosts);
             s=list2set(hosts);
@@ -375,10 +375,10 @@ public class LeafRoutingTest extends com.limegroup.gnutella.util.BaseTestCase {
         public HandshakeResponse respond(HandshakeResponse response, 
                 boolean outgoing) throws IOException {
             Properties props=new Properties();
-            props.put(ConnectionHandshakeHeaders.USER_AGENT, 
+            props.put(HeaderNames.USER_AGENT, 
                       CommonUtils.getHttpServer());
-            props.put(ConnectionHandshakeHeaders.X_QUERY_ROUTING, "0.1");
-            props.put(ConnectionHandshakeHeaders.X_SUPERNODE, "True");
+            props.put(HeaderNames.X_QUERY_ROUTING, "0.1");
+            props.put(HeaderNames.X_ULTRAPEER, "True");
             return new HandshakeResponse(props);
         }
     }

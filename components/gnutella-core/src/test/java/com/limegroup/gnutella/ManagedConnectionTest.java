@@ -333,10 +333,10 @@ public class ManagedConnectionTest extends com.limegroup.gnutella.util.BaseTestC
     /**
      * Handshake properties indicating no support for GGEP.
      */
-	private static class NoGGEPProperties extends SupernodeProperties {
+	private static class NoGGEPProperties extends UltrapeerHeaders {
 		public NoGGEPProperties() {
 			super("localhost");
-			remove(ConnectionHandshakeHeaders.GGEP);
+			remove(HeaderNames.GGEP);
 		}
 	}
 

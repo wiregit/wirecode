@@ -95,19 +95,19 @@ public final class UltrapeerRoutingTest extends BaseTestCase {
 	private void buildConnections() {
 	    LEAF =
 			new Connection("localhost", PORT, 
-						   new ClientProperties("localhost"),
+						   new LeafHeaders("localhost"),
 						   new EmptyResponder()
 						   );
         
         ULTRAPEER_1 = 
 			new Connection("localhost", PORT,
-						   new SupernodeProperties("localhost"),
+						   new UltrapeerHeaders("localhost"),
 						   new EmptyResponder()
 						   );
 
         ULTRAPEER_2 = 
 			new Connection("localhost", PORT,
-						   new SupernodeProperties("localhost"),
+						   new UltrapeerHeaders("localhost"),
 						   new EmptyResponder()
 						   );
     }
