@@ -2131,6 +2131,8 @@ public abstract class MessageRouter {
     }
 
     private void updateMessage(QueryRequest request, ReplyHandler handler) {
+        if(! (handler instanceof Connection) )
+            return;
         Connection c  = (Connection) handler;
         if(request.getHops()==1 && c.isOldLimeWire()) {
             if(Constants.updateReply ==null) 
