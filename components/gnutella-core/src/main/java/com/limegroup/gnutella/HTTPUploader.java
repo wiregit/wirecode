@@ -377,24 +377,25 @@ public class HTTPUploader implements Runnable {
         try {
             String str = "HTTP 200 OK \r\n";
 
+			String version = SettingsManager.instance().getCurrentVersion();
+
             _ostream.write(str.getBytes());
-            str = "Server: Gnutella \r\n";
+            str = "Server: LimeWire " + version + " \r\n";
             _ostream.write(str.getBytes());
             String type = getMimeType();       /* write this method later  */
             str = "Content-type:" + type + "\r\n";
             _ostream.write(str.getBytes());
-            str = "Content-length:"+ _sizeOfFile + "\r\n";
+            str = "Content-length:"+ (_sizeOfFile - _uploadBegin) + "\r\n";
             _ostream.write(str.getBytes());
 
-          //    int end;
-    //          if (_uploadEnd != 0)
-    //          end = _uploadEnd;
-    //          else
-    //          end = _sizeOfFile;
-
-            str = "Content-range: bytes=" + (_uploadBegin + 1) +
-            "-" + _sizeOfFile + "/" + _sizeOfFile + "\r\n";
-
+			// Version 0.5 of limewire misinterpreted Content-range
+			// to be 1 - n instead of 0 - (n-1), but because this is
+			// an optional field in the regular case, we don't need
+			// to send it.
+			if (_uploadBegin != 0) {
+				str = "Content-range: bytes=" + _uploadBegin  +
+				"-" + ( _sizeOfFile - 1 )+ "/" + _sizeOfFile + "\r\n";
+			}
 
             _ostream.write(str.getBytes());
 
@@ -524,13 +525,14 @@ public class HTTPUploader implements Runnable {
             final int cycleTime=1000;
         outerLoop:
             while (true) {
-                //1. Calculate max upload bandwidth for this connection.  The
-                //user has specified a theoretical link bandwidth and the
-                //percentage of this bandwidth to use for uploads. We divide
-                //this bandwidth equally among all the uploads in progress.
-                //TODO: if one connection isn't using all the bandwidth, some
-                //coul get more.
-                int theoreticalBandwidth=manager.getConnectionSpeed();
+                //1. Calculate max upload bandwidth for this connection in
+                //kiloBYTES/sec.  The user has specified a theoretical link bandwidth
+                //(in kiloBITS/s) and the percentage of this bandwidth to use for
+                //uploads. We divide this bandwidth equally among all the
+                //uploads in progress.  TODO: if one connection isn't using all
+                //the bandwidth, some coul get more.
+                int theoreticalBandwidth=
+                    (int)(((float)manager.getConnectionSpeed())/8.f);
                 int maxBandwidth=(int)(theoreticalBandwidth*((float)speed/100.)
                                              /(float)uploadCount);
 
