@@ -21,13 +21,36 @@ public class Acceptor extends Thread {
     private volatile ServerSocket _socket=null;
     private int _port=0;
     private Object _socketLock=new Object();
-    private byte[] _address;
+
+    private static volatile byte[] _address;
 
     private Vector _badHosts = new Vector();
 
     private ConnectionManager _manager;
     private MessageRouter _router;
     private ActivityCallback _callback;
+
+	//  Statically initialize address which should be replaced by a true socket
+	//
+    static {
+        try {
+            _address = InetAddress.getLocalHost().getAddress();
+        } catch (Exception e) {
+            //In case of UnknownHostException or SecurityException, we have
+            //no choice but to use a fake address: all zeroes.
+            _address = new byte[4];
+        }
+	}
+
+	/**
+	 *  For proper IP Adress, we need to set this from a real socket connection
+	 *  This is to get around bug #4073539 from sun.
+	 */
+	public static synchronized void setAddress(byte [] addr) {
+	    _address = addr;
+	}
+
+    
 
     /**
      * Creates an acceptor that tries to listen to incoming connections
@@ -40,13 +63,6 @@ public class Acceptor extends Thread {
         _port = port;
         _callback = callback;
 
-        try {
-            _address = InetAddress.getLocalHost().getAddress();
-        } catch (Exception e) {
-            //In case of UnknownHostException or SecurityException, we have
-            //no choice but to use a fake address: all zeroes.
-            _address = new byte[4];
-        }
 
         String[] allHosts = SettingsManager.instance().getBannedIps();
         for (int i=0; i<allHosts.length; i++)
@@ -308,9 +324,8 @@ public class Acceptor extends Thread {
         }
         throw new IOException();
     }
+
+
+
+
 }
-
-
-
-
-

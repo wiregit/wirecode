@@ -137,6 +137,9 @@ public class Connection {
             throw new IOException();
         }
 
+		// Set the Acceptors IP address
+		Acceptor.setAddress( _socket.getLocalAddress().getAddress() );
+
         _in = new BufferedInputStream(_socket.getInputStream());
         _out = new BufferedOutputStream(_socket.getOutputStream());
 
