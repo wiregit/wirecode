@@ -1165,28 +1165,31 @@ public class DownloadManager implements BandwidthTracker {
             return;
         }
         
-    	//remember that we are waiting a push from this host 
-        //for the specific file.
-        byte[] key = file.getClientGUID();
-        synchronized(UDP_FAILOVER) {
-        	Set files = (Set)UDP_FAILOVER.get(key);
-        	if (files==null)
-        		files = new HashSet();
-        	files.add(file.getFileName());
-        	UDP_FAILOVER.put(key,files);
-        }
+    	// remember that we are waiting a push from this host 
+        // for the specific file.
+        // do not send tcp pushes to results from alternate locations.
+        if (!file.isFromAlternateLocation()) {
+            synchronized(UDP_FAILOVER) {
+                byte[] key = file.getClientGUID();
+                Set files = (Set)UDP_FAILOVER.get(key);
+                if (files==null)
+                    files = new HashSet();
+                files.add(file.getFileName());
+                UDP_FAILOVER.put(key,files);
+            }
         	
-        // schedule the failover tcp pusher, which will run
-        // if we don't get a response from the UDP push
-        // within the UDP_PUSH_FAILTIME timeframe
-        RouterService.schedule(new Runnable(){
-        	public void run() {
-        	    // Add it to a ProcessingQueue, so the TCP connection 
-        	    // doesn't bog down RouterService's scheduler
-        	    // The FailoverRequestor will thus run in another thread.
-        		FAILOVERS.add(new PushFailoverRequestor(file, guid, toNotify));
-        	}
-        }, UDP_PUSH_FAILTIME, 0);
+            // schedule the failover tcp pusher, which will run
+            // if we don't get a response from the UDP push
+            // within the UDP_PUSH_FAILTIME timeframe
+            RouterService.schedule(new Runnable(){
+                public void run() {
+                    // Add it to a ProcessingQueue, so the TCP connection 
+                    // doesn't bog down RouterService's scheduler
+                    // The FailoverRequestor will thus run in another thread.
+                    FAILOVERS.add(new PushFailoverRequestor(file, guid, toNotify));
+                }
+            }, UDP_PUSH_FAILTIME, 0);
+        }
 
     	sendPushUDP(file,guid);
     }
