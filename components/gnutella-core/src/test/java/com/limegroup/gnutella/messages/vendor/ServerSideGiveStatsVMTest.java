@@ -193,10 +193,15 @@ public final class ServerSideGiveStatsVMTest extends BaseTestCase {
     }
 
     public static void setSettings() {
+        String localIP = null;
+        try {
+            localIP = InetAddress.getLocalHost().getHostAddress();
+        }
+        catch (Exception ignored) {}
         FilterSettings.BLACK_LISTED_IP_ADDRESSES.setValue(
             new String[] {"*.*.*.*"});
         FilterSettings.WHITE_LISTED_IP_ADDRESSES.setValue(
-            new String[] {"127.*.*.*"});
+            new String[] {localIP,"127.*.*.*"});
         ConnectionSettings.PORT.setValue(PORT);
         SharingSettings.EXTENSIONS_TO_SHARE.setValue("txt;");
         // get the resource file for com/limegroup/gnutella
