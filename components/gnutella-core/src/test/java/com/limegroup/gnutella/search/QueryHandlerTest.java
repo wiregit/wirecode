@@ -44,7 +44,7 @@ public final class QueryHandlerTest extends BaseTestCase {
                                          params);
         List connections = new LinkedList();
         for(int i=0; i<15; i++) {
-            connections.add(new NewConnection(10));
+            connections.add(NewConnection.createConnection());
         }           
         
         for(int i=0; i<15; i++) {
@@ -52,7 +52,7 @@ public final class QueryHandlerTest extends BaseTestCase {
         }                   
 
         QueryRequest query = QueryRequest.createQuery("test");
-        m.invoke(null, new Object[]{connections});        
+        m.invoke(null, new Object[]{connections, query});        
     }
 
 
@@ -102,19 +102,13 @@ public final class QueryHandlerTest extends BaseTestCase {
 
         List connections = new LinkedList();
         for(int i=0; i<15; i++) {
-            connections.add(new NewConnection(10));
+            connections.add(NewConnection.createConnection());
         }   
 
         QueryHandler handler = 
             QueryHandler.createHandler(QueryRequest.createQuery("test"),
-                                       new NewConnection(8),
+                                       NewConnection.createConnection(),
                                        new TestResultCounter(0));
-        try {
-            handler.sendQuery();
-            fail("should have failed due to null result counter");
-        } catch(NullPointerException e) {
-            // this is expected before the result counter is set
-        }
 
         TestConnectionManager tcm = new TestConnectionManager();
 
@@ -187,7 +181,7 @@ public final class QueryHandlerTest extends BaseTestCase {
                                                      Byte.TYPE});
         
         // test for a degree 19, ttl 4 network
-        ManagedConnection mc = new NewConnection(19);
+        ManagedConnection mc = NewConnection.createConnection(19);
         int horizon = 0;
         for(int i=0; i<19; i++) {
             horizon += 
@@ -197,7 +191,7 @@ public final class QueryHandlerTest extends BaseTestCase {
         assertEquals("incorrect horizon", 117325, horizon);
 
         // test for a degree 30, ttl 3 network
-        mc = new NewConnection(30);
+        mc = NewConnection.createConnection(30);
         horizon = 0;
         for(int i=0; i<30; i++) {
             horizon += 
@@ -223,12 +217,12 @@ public final class QueryHandlerTest extends BaseTestCase {
                                                      List.class});
         List connections = new LinkedList();
         for(int i=0; i<15; i++) {
-            connections.add(new NewConnection(10));
+            connections.add(NewConnection.createConnection(10));
         }
 
         QueryHandler handler = 
             QueryHandler.createHandler(QueryRequest.createQuery("test"),
-                                       new NewConnection(8),
+                                       NewConnection.createConnection(8),
                                        new TestResultCounter(0));
         
         m.invoke(null, new Object[]{handler, connections});
@@ -262,12 +256,12 @@ public final class QueryHandlerTest extends BaseTestCase {
 
         List connections = new LinkedList();
         for(int i=0; i<15; i++) {
-            connections.add(new NewConnection(10));
+            connections.add(NewConnection.createConnection(10));
         }   
 
         QueryHandler handler = 
             QueryHandler.createHandler(QueryRequest.createQuery("test"),
-                                       new NewConnection(8),
+                                       NewConnection.createConnection(8),
                                        new TestResultCounter(0));
         
         

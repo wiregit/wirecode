@@ -250,7 +250,7 @@ public final class MessageRouterTest extends BaseTestCase {
                                          params);        
 
         QueryRequest qr = QueryRequest.createQuery("test");      
-        ReplyHandler rh = new NewConnection(10);
+        ReplyHandler rh = NewConnection.createConnection(10);
         
         m.invoke(ROUTER, new Object[] {qr, rh});
         assertEquals("unexpected number of queries sent", NUM_CONNECTIONS, 
@@ -278,7 +278,7 @@ public final class MessageRouterTest extends BaseTestCase {
                                          params);        
 
         QueryRequest qr = QueryRequest.createQuery("test");      
-        ReplyHandler rh = new NewConnection(10);
+        ReplyHandler rh = NewConnection.createConnection(10);
         m.invoke(ROUTER, new Object[] {qr, rh});
         assertEquals("unexpected number of queries sent", NUM_CONNECTIONS, 
                      tcm.getNumQueries());
@@ -305,7 +305,7 @@ public final class MessageRouterTest extends BaseTestCase {
                                          params);        
 
         QueryRequest qr = QueryRequest.createQuery("test");      
-        ReplyHandler rh = new NewConnection(10);
+        ReplyHandler rh = NewConnection.createConnection(10);
         m.invoke(ROUTER, new Object[] {qr, rh});
         assertEquals("unexpected number of queries sent", NUM_CONNECTIONS, 
                      tcm.getNumQueries());
@@ -333,7 +333,7 @@ public final class MessageRouterTest extends BaseTestCase {
                                          params);        
 
         QueryRequest qr = QueryRequest.createQuery("test", (byte)1);      
-        ReplyHandler rh = new NewConnection(10);
+        ReplyHandler rh = NewConnection.createConnection(10);
         m.invoke(ROUTER, new Object[] {qr, rh});
 
         // the query should not have been sent along any of the connections,
@@ -364,7 +364,7 @@ public final class MessageRouterTest extends BaseTestCase {
                                          params);        
 
         QueryRequest qr = QueryRequest.createQuery("test", (byte)1);      
-        ReplyHandler rh = new NewConnection(10);
+        ReplyHandler rh = NewConnection.createConnection(10);
         m.invoke(ROUTER, new Object[] {qr, rh});
 
         // the query should not have been sent along any of the connections,
