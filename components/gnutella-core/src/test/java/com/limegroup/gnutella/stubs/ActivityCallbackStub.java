@@ -28,7 +28,7 @@ public class ActivityCallbackStub implements ActivityCallback {
 	public void chatUnavailable(Chatter chatter) { }	
 	public void chatErrorMessage(Chatter chatter, String str) { }
     public void addSharedDirectory(final File directory, final File parent) { }
-    public void addSharedFile(final File file, final File parent) { }
+    public void addSharedFile(final FileDesc file, final File parent) { }
 	public void clearSharedFiles() { }           
     public void downloadsComplete() { }
     public void uploadsComplete() { }
@@ -44,4 +44,6 @@ public class ActivityCallbackStub implements ActivityCallback {
     public void browseHostFailed(GUID guid) {};
     public void setAnnotateEnabled(boolean enabled) {};
     public String getHostValue(String key) { return null;}
+    public void handleSharedFileUpdate(File file) { }
+
 }
