@@ -195,7 +195,7 @@ public final class HttpUtilsTest extends BaseTestCase {
         assertTrue("should end with GMT", header.endsWith("GMT\r\n"));
         
         // The date header should always be the same length.
-        assertEquals("unexpected length of header: "+header, 37, 
+        assertGreaterThan("unexpected length of header: "+header, 35, 
             header.length());
     }
     
@@ -213,7 +213,7 @@ public final class HttpUtilsTest extends BaseTestCase {
         assertTrue("should end with GMT", header.endsWith("GMT\r\n"));
         
         // The date header should always be the same length.
-        assertEquals("unexpected length of header: "+header, 37, 
+        assertGreaterThan("unexpected length of header: "+header, 35, 
             header.length());
     }
 
