@@ -14,6 +14,14 @@ public class UDPConnection extends Socket {
     /**
      *  Create the UDPConnection.
      */
+    public UDPConnection(String ip, int port) throws IOException {
+		// Handle the real work in the processor
+		this(InetAddress.getByName(ip), port);
+    }
+
+    /**
+     *  Create the UDPConnection.
+     */
     public UDPConnection(InetAddress ip, int port) throws IOException {
 		// Handle the real work in the processor
 		_processor = new UDPConnectionProcessor(ip, port);

@@ -154,7 +154,7 @@ public class ClientSideFirewalledTransferTest extends ClientSideTestCase {
         // test that the client responds to a PushRequest
         PushRequest pr = new PushRequest(GUID.makeGuid(), (byte) 1, 
                                          RouterService.getMessageRouter()._clientGUID,
-                                         Integer.MAX_VALUE, 
+                                         PushRequest.FW_TRANS_INDEX, 
                                          InetAddress.getLocalHost().getAddress(),
                                          9000);
         
@@ -238,7 +238,7 @@ public class ClientSideFirewalledTransferTest extends ClientSideTestCase {
         beginIndex = currLine.indexOf("&file=") + 6;
         String longString = currLine.substring(beginIndex, beginIndex+10);
         long index = Long.parseLong(longString);
-        assertEquals(index, Integer.MAX_VALUE);
+        assertEquals(index, PushRequest.FW_TRANS_INDEX);
 
         // make sure the node sends the correct X-Node
         currLine = reader.readLine();

@@ -3,6 +3,7 @@ package com.limegroup.gnutella;
 import com.limegroup.gnutella.statistics.UploadStat;
 import com.limegroup.gnutella.util.*;
 import com.limegroup.gnutella.http.HTTPRequestMethod;
+import com.limegroup.gnutella.udpconnect.UDPConnection;
 
 import com.sun.java.util.collections.List;
 import com.sun.java.util.collections.LinkedList;
@@ -11,7 +12,6 @@ import java.util.Date;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.Socket;
-
 
 /**
  * Manages state for push upload requests.
@@ -66,11 +66,14 @@ public final class PushManager {
 	 * @param guid the unique identifying client guid of the uploading client
      * @param forceAllow whether or not to force the UploadManager to send
      *  accept this request when it comes back.
+     * @param isFWTransfer whether or not to use a UDP pipe to service this
+     * upload.
 	 */
 	public void acceptPushUpload(final String host, 
                                  final int port, 
                                  final String guid,
-                                 final boolean forceAllow) {
+                                 final boolean forceAllow,
+                                 final boolean isFWTransfer) {
                                     
         if( host == null )
             throw new NullPointerException("null host");
@@ -100,7 +103,10 @@ public final class PushManager {
                 Socket s = null;
                 try {
         			// try to create the socket.
-        			s = Sockets.connect(host, port, CONNECT_TIMEOUT);
+                    if (isFWTransfer)
+                        s = new UDPConnection(host, port);
+                    else 
+                        s = Sockets.connect(host, port, CONNECT_TIMEOUT);
         			// open a stream for writing to the socket
         			OutputStream ostream = s.getOutputStream();        
         			String giv = "GIV 0:" + guid + "/file\n\n";

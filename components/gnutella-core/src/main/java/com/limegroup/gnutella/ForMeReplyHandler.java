@@ -113,13 +113,10 @@ public final class ForMeReplyHandler implements ReplyHandler {
         String req_guid_hexstring =
             (new GUID(pushRequest.getClientGUID())).toString();
 
-        if (pushRequest.isFirewallTransferPush())
-            ; // do a firewalled transfer
-        else
-            RouterService.getPushManager().
-            acceptPushUpload(h, port, req_guid_hexstring,
-                             pushRequest.isMulticast() // force accept
-                             );
+        RouterService.getPushManager().
+        acceptPushUpload(h, port, req_guid_hexstring,
+                         pushRequest.isMulticast(), // force accept
+                         pushRequest.isFirewallTransferPush());
 	}
 	
 	public boolean isOpen() {
