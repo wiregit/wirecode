@@ -190,9 +190,6 @@ public final class UrnCache {
                     iter.remove();
                 }
             } else {
-                Assert.silent(false,
-                    "expected UrnSetKey, was [" + next +
-                    "], type [" + next.getClass() + "]");
                 iter.remove();
             }
         }

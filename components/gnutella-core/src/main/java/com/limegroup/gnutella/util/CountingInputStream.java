@@ -27,6 +27,12 @@ public final class CountingInputStream extends FilterInputStream {
         return read;
     }
     
+    public long skip(long n) throws IOException {
+        long skipped = super.skip(n);
+        _count += (int)skipped;
+        return skipped;
+    }
+    
     public void close() throws IOException {
         in.close();
     }
