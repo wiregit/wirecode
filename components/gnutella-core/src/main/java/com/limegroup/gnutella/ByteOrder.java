@@ -25,8 +25,8 @@ public class ByteOrder {
      *   call ubytes2int on the result.
      */
     public static short leb2short(byte[] x, int offset) {
-	short x0=(short)x[offset];
-	short x1=(short)(x[offset+1]<<8);
+	int x0=(x[offset]) & 0x000000FF;
+	int x1=(x[offset+1]<<8);
 	return (short)(x1|x0);
     }
 
@@ -40,10 +40,12 @@ public class ByteOrder {
      *   call ubytes2int on the result.
      */
     public static int leb2int(byte[] x, int offset) {
-	int x0=x[offset];
-	int x1=x[offset+1]<<8;
-	int x2=x[offset+2]<<16;
-	int x3=x[offset+3]<<24;
+	//Must mask value after left-shifting, since case from byte
+	//to int copies most significant bit to the left!
+	int x0=x[offset] & 0x000000FF;
+	int x1=(x[offset+1]<<8) & 0x0000FF00;
+	int x2=(x[offset+2]<<16) & 0x00FF0000;
+	int x3=(x[offset+3]<<24);
 	return x3|x2|x1|x0;
     }
 
@@ -54,9 +56,6 @@ public class ByteOrder {
 	buf[offset]=(byte)(x & (short)0x00FF);
 	buf[offset+1]=(byte)((short)(x>>8) & (short)0x00FF);
     }
-
-
-
 
     /**
      * Int to little-endian bytes: writes x to buf[offset..]
@@ -105,10 +104,19 @@ public class ByteOrder {
 //  	//2^24+2 = 16777216+2 = 16777218
 //  	int result2=leb2int(x2,0);
 //  	Assert.that(result2==16777218, "result2="+result2);
+
 //  	byte[] x2b=new byte[4];
 //  	int2leb(result2, x2b, 0);
 //  	for (int i=0; i<4; i++) 
 //  	    Assert.that(x2b[i]==x2[i]);
+	
+//  	byte[] x3={(byte)0x00, (byte)0xF3, (byte)0, (byte)0xFF};
+//  	int result3=leb2int(x3,0);
+//  	Assert.that(result3==0xFF00F300, Integer.toHexString(result3));
+
+//  	byte[] x4={(byte)0xFF, (byte)0xF3};
+//  	short result4=leb2short(x4,0);
+//  	Assert.that(result4==(short)0xF3FF, Integer.toHexString(result4));
 
 //  	byte in=(byte)0xFF; //255 if unsigned, -1 if signed.
 //  	int out=(int)in;
