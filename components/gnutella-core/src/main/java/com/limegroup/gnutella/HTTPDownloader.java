@@ -223,6 +223,8 @@ public class HTTPDownloader {
 			throw new NoHTTPOKException();
 
 		while (true) {
+
+			System.out.println("STR: " + str);
 				
 			if (str.toUpperCase().indexOf("CONTENT-LENGTH:") != -1)  {
 
@@ -306,7 +308,7 @@ public class HTTPDownloader {
             } // end of content range if
 
 			str = _byteReader.readLine();
-			
+
             //EOF?
             if (str==null || str.equals(""))
                 break;

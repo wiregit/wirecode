@@ -73,31 +73,9 @@ public class NormalUploadState implements UploadState {
             final int cycleTime=1000;
         outerLoop:
             while (true) {
-                //1. Calculate max upload bandwidth for this connection in
-                // kiloBYTES/sec.  The user has specified a theoretical link 
-				// bandwidth (in kiloBITS/s) and the percentage of this 
-                // bandwidth to use for uploads. We divide this bandwidth 
-                // equally among all the uploads in progress.  
-				// TODO: if one connection isn't using all
-                // the bandwidth, some coul get more.
-                int theoreticalBandwidth=
-				(int)(((float)manager.getConnectionSpeed())/8.f);
+				// The UploadManager now calculates the burst size;
+				int burstSize = _uploader.getBurstSize();
 
-				// NEED TO CHANGE THIS!!!!!! THIS IS A HACK TO GET
-				// COMPILING WORKING
-				// int maxBandwidth
-				//    =(int)(theoreticalBandwidth*((float)speed/100.)
-				//(float)_uploadCount);
-				int maxBandwidth = 1;
-
-                // 2. Send burstSize bytes of data as fast as possible, 
-				// recording the time to send this.  How big should 
-				// burstSize be?  We want the total time to complete 
-				// one send/sleep iteration to be about one second. 
-                // (Any less is inefficient.  Any more might cause
-                // the user to see erratic transfer speeds.)  So we send
-                // 1000*maxBandwidth bytes.
-                int burstSize=maxBandwidth*cycleTime;
                 int burstSent=0;
                 Date start=new Date();
                 while (burstSent<burstSize) {

@@ -96,7 +96,7 @@ public class UploadManager {
 		// check if it complies with the restrictions.
 		// if no, send an error.  
 		// if yes, constroct the uploader
-		uploader = new HTTPUploader(line._file, socket, line._index);
+		uploader = new HTTPUploader(line._file, socket, line._index, this);
 
 		String host = socket.getInetAddress().getHostAddress();
 
@@ -119,7 +119,7 @@ public class UploadManager {
 		clearFailedPushes();
 
 		Uploader uploader;
-		uploader = new HTTPUploader(file, host, port, index, guid);
+		uploader = new HTTPUploader(file, host, port, index, guid, this);
 		// check to see if the file is in the attempted pushes
 		// or if the upload limits have been reached for some 
 		// reason.
@@ -139,6 +139,23 @@ public class UploadManager {
 		upThread.setDaemon(true);
 		upThread.start();
 		
+	}
+
+	/** 
+     * This method was added to adopt BearShare's busy bit
+     * in the Query Hit Descriptor.  It takes no parameters
+	 * and returns 'true' if there are no slots available
+	 * for uploading.  It returns 'false' if there are slots
+	 * available.  
+     */
+	public boolean isBusy() {
+		// testTotalUploadLimit returns true is there are
+		// slots available, false otherwise.
+		return (! testTotalUploadLimit());
+	}
+
+	public int uploadsInProgress() {
+		return _uploadsInProgress.size();
 	}
 
 	//////////////////////// Private Interface /////////////////////////
@@ -273,6 +290,92 @@ public class UploadManager {
 		
 	}
 
+
+	////////////////// Handle Bandwith Allocation //////////////////
+
+	/**
+	 * calculates the appropriate burst size for the allocating
+	 * bandwith on the upload.
+	 * @return burstSize.  if it is the special case, in which 
+	 *         we want to upload as quickly as possible, it will 
+	 *         return -1.  otherwise, it will return the burstsize;
+	 */
+	public int calculateBurstSize() {
+
+		SettingsManager manager = SettingsManager.instance();
+		int speed = manager.getUploadSpeed();
+
+		// There is a special case when the speed is 100, 
+		// which means we want to try to Upload as quickly
+		// as possible.
+		if (speed == 100) {
+			// NEED TO SEND SOMETHING TO INDICATE THIS
+			// return *something*
+			return -1;
+		}
+
+		// Normal Case:
+		
+		final int cycleTime=1000;
+
+		// 1. Calculate max upload bandwidth for this connection in
+		// kiloBYTES/sec.  The user has specified a theoretical link 
+		// bandwidth (in kiloBITS/s) and the percentage of this 
+		// bandwidth to use for uploads. We divide this bandwidth 
+		// equally among all the uploads in progress.  
+		// TODO: if one connection isn't using all
+		// the bandwidth, some coul get more.
+		int theoreticalBandwidth 
+		= (int)(((float)manager.getConnectionSpeed())/8.f);
+   
+		int uploadCount = uploadsInProgress();
+		
+		int maxBandwidth 
+		= (int)((theoreticalBandwidth*((float)speed/100))
+			  /(float)uploadCount);
+		
+		int burstSize = maxBandwidth*cycleTime;
+
+		return burstSize;
+
+	}
+
+	////////////////// Private Bandwith Calculation //////////////////
+	
+	/**
+	 * @return the total bandwith available for uploads
+	 */
+	private int getTotalBandwith() {
+
+		SettingsManager manager = SettingsManager.instance();
+		// To calculate the total bandwith available for
+		// uploads, there are two properties.  The first
+		// is what the user *thinks* their connection
+		// speed is.  Note, that they may have set this
+		// wrong, but we have no way to tell.
+		int connectionSpeed  
+		= (int)(((float)manager.getConnectionSpeed())/8.f);
+   
+		// the second number is the speed that they have 
+		// allocated to uploads.  This is really a percentage
+		// that the user is willing to allocate.
+		int speed = manager.getUploadSpeed();
+		
+		// the total bandwith available then, is the percentage
+		// allocated of the total bandwith.
+		int totalBandwith = (int)((connectionSpeed*((float)speed/100)));
+		return totalBandwith;
+	}
+
+	/**
+	 * @return a percentage of bandwith available.
+	 */
+	private float getBandwithPercentage() {
+		return 0;
+	}
+
+
+
 	//////////////////////// Handle Parsing /////////////////////////
 
 	
@@ -359,6 +462,7 @@ public class UploadManager {
 		}  // run
 	} // class UploadRunner
 	
+
 	/**
 	 * keeps track of the host and time of pushed files
 	 */
