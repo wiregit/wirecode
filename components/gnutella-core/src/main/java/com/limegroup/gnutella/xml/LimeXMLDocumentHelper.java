@@ -166,7 +166,7 @@ public final class LimeXMLDocumentHelper{
         //iterate over the map and close all the strings out.
         Iterator iter = uriToString.values().iterator();
         while(iter.hasNext()) {
-            String str = (String)iter.next();
+            String str = ((StringBuffer)iter.next()).toString();
             int begin = str.indexOf("<",2);//index of opening outer(plural)
             int end = str.indexOf(" ",begin);
             String tail  = "</"+str.substring(begin+1,end)+">";
@@ -182,8 +182,9 @@ public final class LimeXMLDocumentHelper{
         if(doc == null)//response has no document
             return;
         String uri = doc.getSchemaURI();
-        String currString = (String)uriToString.get(uri);
-        if(currString == null || currString == "") {//no entry so far
+        StringBuffer currStringB = (StringBuffer)uriToString.get(uri);
+
+        if(currStringB == null) {//no entry so far
             //1. add the outer (plural form) - w/o the end
             String str = null;
             try {
@@ -209,16 +210,16 @@ public final class LimeXMLDocumentHelper{
                 p=q;
             String first = str.substring(0,p);
             String last = str.substring(p);
-            StringBuffer strB = new StringBuffer(first.length()+
+            StringBuffer strB = new StringBuffer(first.length() +
                                                  15 + last.length());
             // str = first+" index=\""+index+"\" "+last;
             strB.append(first);
             strB.append(" index=\"");
-            strB.append(""+index);
+            strB.append(index);
             strB.append("\" ");
             strB.append(last);
             //3. add the entry in the map
-            uriToString.put(uri,strB.toString());
+            uriToString.put(uri, strB);
         }
         else {            
             //1.strip the plural form out of the xml string
@@ -241,17 +242,16 @@ public final class LimeXMLDocumentHelper{
                    p = q;
             String first = str.substring(0,p);
             String last = str.substring(p);
-            StringBuffer strB = new StringBuffer(currString);
             //  str = first+" index=\""+index+"\" "+last;
             //  currString = currString+str;
-            strB.append(first);
-            strB.append(" index=\"");
-            strB.append(""+index);
-            strB.append("\" ");
-            strB.append(last);
+            currStringB.append(first);
+            currStringB.append(" index=\"");
+            currStringB.append(index);
+            currStringB.append("\" ");
+            currStringB.append(last);
             //3.concatinate the remaining xml to currString
             //4.put it back into the map
-            uriToString.put(uri,strB.toString());
+            uriToString.put(uri,currStringB);
         }
     }
 
