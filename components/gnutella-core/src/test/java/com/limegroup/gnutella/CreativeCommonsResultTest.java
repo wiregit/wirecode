@@ -10,6 +10,7 @@ import com.limegroup.gnutella.routing.*;
 import com.limegroup.gnutella.security.*;
 import com.limegroup.gnutella.stubs.*;
 import com.limegroup.gnutella.util.*;
+import com.limegroup.gnutella.licenses.*;
 import com.bitzi.util.*;
 
 import junit.framework.*;
@@ -174,9 +175,9 @@ public class CreativeCommonsResultTest
 
     ///////////////////////// Actual Tests ////////////////////////////
 
-    // MUST RUN THIS TEST FIRST
-    public void testCCResultsXMLSearch() throws Exception {
-
+    // PLEASE RUN THIS TEST FIRST
+    public void testQRPExchange() throws Exception {
+        
         Thread.sleep(2000); // give time to verify files
         assertEquals(2, rs.getNumSharedFiles());
 
@@ -185,9 +186,42 @@ public class CreativeCommonsResultTest
             assertTrue("should be open", testUPs[i].isOpen());
             assertTrue("should be up -> leaf",
                 testUPs[i].isSupernodeClientConnection());
-            drain(testUPs[i], 500);
+            if (i < (testUPs.length - 1))
+                drain(testUPs[i], 500);
         }
 
+        final int upIndex = testUPs.length - 1;
+        QueryRouteTable qrt = new QueryRouteTable();
+        BitSet retSet = (BitSet) PrivilegedAccessor.getValue(qrt,"bitTable");
+        assertEquals(0, retSet.cardinality());
+        // need to wait for QRP table to be sent
+        Thread.sleep(15000);
+        try {
+            Message m = null;
+            while (true) {
+                m = testUPs[upIndex].receive(500);
+                if (m instanceof ResetTableMessage)
+                    qrt.reset((ResetTableMessage) m);
+                else if (m instanceof PatchTableMessage)
+                    qrt.patch((PatchTableMessage) m);
+            }
+        }
+        catch (InterruptedIOException bad) {
+            // we are waiting for all messages to be processed
+        }
+
+        retSet = (BitSet) PrivilegedAccessor.getValue(qrt,"bitTable");
+        assertGreaterThan(0, retSet.cardinality());
+
+        // send a query that should hit in the qrt
+        String richQuery = "<?xml version=\"1.0\"?><audios xsi:noNamespaceSchemaLocation=\"http://www.limewire.com/schemas/audio.xsd\"><audio license=\"http://creativecommons.org/licenses/\"></audio></audios>";
+        QueryRequest query = QueryRequest.createQuery("", richQuery);
+
+        assertTrue(qrt.contains(query));
+    }
+    
+    
+    public void testCCResultsXMLSearch() throws Exception {
         // just make an incoming to the leaf so it knows it will respond to
         // queries
         Socket s = new Socket(InetAddress.getLocalHost(), PORT);
@@ -196,23 +230,23 @@ public class CreativeCommonsResultTest
         String richQuery = "<?xml version=\"1.0\"?><audios xsi:noNamespaceSchemaLocation=\"http://www.limewire.com/schemas/audio.xsd\"><audio license=\"http://creativecommons.org/licenses/\"></audio></audios>";
 
         // we should send a query to the leaf and get results.
-        QueryRequest query = QueryRequest.createQuery("cc",
-                                                      richQuery);
+        QueryRequest query = QueryRequest.createQuery("", richQuery);
         testUPs[1].send(query);
         testUPs[1].flush();
 
         QueryReply reply = getFirstQueryReply(testUPs[1]);
         assertNotNull(reply);
         assertEquals(new GUID(query.getGUID()), new GUID(reply.getGUID()));
-        assertEquals(2, reply.getResultCount());
+        assertEquals(""+reply.getResultsAsList(), 2, reply.getResultCount());
+
         /**
          * This is currently not working.  I've tested it with two LWs and it
          * seems to work nicely but for some reason the license stuff isn't 
          * returned in this test.  Will investigate more....
-           String hexML = new String(reply.getXMLBytes());
-           assertTrue(hexML, hexML.indexOf("license=\"Creative Commons\"") > 0);
+         String hexML = new String(reply.getXMLBytes());
+         assertTrue(hexML,
+        hexML.indexOf("license=\"http://creativecommons.org/licenses\"") > 0);
         */
-
     }
 
 

@@ -208,6 +208,13 @@ public class QueryRouteTable {
                 i=k+1;
             }
         }
+        iter=richQuery.getKeyWordsIndivisible().iterator();
+        while(iter.hasNext()) {
+            hash = HashFunction.hash((String)iter.next(), bits);
+            if (contains(hash))//don't know the URI? can't answer query
+                matchCount++;
+            wordCount++;
+        }
         if (wordCount<3)
             //less than three word? 100% match required
             return wordCount==matchCount;
