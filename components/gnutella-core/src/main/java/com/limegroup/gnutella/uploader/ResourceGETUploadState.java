@@ -13,7 +13,10 @@ import com.limegroup.gnutella.util.CommonUtils;
  */
 public final class ResourceGETUploadState implements HTTPMessage {
 
-    private byte[] _resourceBytes = null;
+    public final String NOT_FOUND = "HTTP/1.1 404 Not Found";
+    public final String INT_ERROR = "HTTP/1.1 500 Internal Error";
+
+    private byte[] _resourceBytes = new byte[0];
     private final HTTPUploader _uploader;
 
     public ResourceGETUploadState(HTTPUploader uploader) {
@@ -36,15 +39,17 @@ public final class ResourceGETUploadState implements HTTPMessage {
                                 (_resourceBytes.length - read));
         }
         catch (FileNotFoundException fnfe) {
-            String str = "HTTP/1.1 404 Not Found\r\n";
+            String str = NOT_FOUND + "\r\n";
             ostream.write(str.getBytes());
             ostream.flush();
+            _resourceBytes = NOT_FOUND.getBytes();
             return;
         }
         catch (IOException ioe) {
-            String str = "HTTP/1.1 500 Internal Error\r\n";
+            String str = INT_ERROR + "\r\n";
             ostream.write(str.getBytes());
             ostream.flush();
+            _resourceBytes = INT_ERROR.getBytes();
             return;
         }
      
