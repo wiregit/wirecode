@@ -99,8 +99,12 @@ public class BrowseHostHandler {
      * @param host The IP of the host you want to browse.
      * @param port The port of the host you want to browse.
      * @param proxies the <tt>Set</tt> of push proxies to try
+     * @param canDoFWTransfer Whether or not this guy can do a firewall
+     * transfer.
      */
-    public void browseHost(String host, int port, Set proxies) {
+    public void browseHost(String host, int port, Set proxies, 
+                           boolean canDoFWTransfer) {
+        LOG.trace("starting browse protocol.");
         setState(STARTED);
         // flow of operation:
         // 1. check if you need to push.
@@ -108,6 +112,7 @@ public class BrowseHostHandler {
         //   b. if not, try direct connect.  If it doesn't work, send a push.
         int shouldPush = needsPush(host);
         
+        LOG.trace("push needed? " + shouldPush);
         boolean shouldTryPush = false;
         switch (shouldPush) {
         case 0: // false
@@ -116,6 +121,7 @@ public class BrowseHostHandler {
                 setState(DIRECTLY_CONNECTING);
                 Socket socket = Sockets.connect(host, port,
                                                 DIRECT_CONNECT_TIME);
+                LOG.trace("direct connect successful");
                 browseExchange(socket);
             } catch (IOException ioe) {
                 // try pushing for fun.... (if we have the guid of the servent)
@@ -132,13 +138,14 @@ public class BrowseHostHandler {
                     new RemoteFileDesc(host, port, SPECIAL_INDEX, "fake", 0, 
                                        _serventID.bytes(), 0, false, 0, false,
                                        null, null,false,false,"",0l, proxies,
-                                       false);
+                                       canDoFWTransfer);
                 // register with the map so i get notified about a response to my
                 // Push.
                 synchronized (_pushedHosts) {
                     _pushedHosts.put(_serventID, new PushRequestDetails(this));
                 }
                 
+                LOG.trace("trying push.");
                 setState(PUSHING);
 
                 // send the Push after registering in case you get a response 
@@ -150,6 +157,7 @@ public class BrowseHostHandler {
                     }
                     failed();
                 }
+                LOG.trace("push was successful.");
             }
             break;
         }

@@ -1232,16 +1232,17 @@ public class RouterService {
      * @param serventID The guid of the client to browse from.  I need this in
      * case I need to push....
      * @param proxies the list of PushProxies we can use - may be null.
+     * @param canDoFWTransfer true if the remote host supports fw transfer
 	 */
 	public static BrowseHostHandler doAsynchronousBrowseHost(
 	  final String host, final int port, GUID guid, GUID serventID, 
-	  final Set proxies) {
+	  final Set proxies, final boolean canDoFWTransfer) {
         final BrowseHostHandler handler = new BrowseHostHandler(callback, 
                                                           guid, serventID);
         Thread asynch = new ManagedThread( new Runnable() {
             public void run() {
                 try {
-                    handler.browseHost(host, port, proxies);
+                    handler.browseHost(host, port, proxies, canDoFWTransfer);
                 } catch(Throwable t) {
                     ErrorService.error(t);
                 }

@@ -95,7 +95,7 @@ public class ClientSideBrowseHostTest extends ClientSideTestCase {
         RouterService.doAsynchronousBrowseHost(callback.getRFD().getHost(),
                                 callback.getRFD().getPort(),
                                 new GUID(GUID.makeGuid()), new GUID(clientGUID),
-                                null);
+                                null, false);
 
         // wait for the incoming HTTP request
         Socket httpSock = ss.accept();
@@ -193,7 +193,7 @@ public class ClientSideBrowseHostTest extends ClientSideTestCase {
         RouterService.doAsynchronousBrowseHost(callback.getRFD().getHost(),
                                 callback.getRFD().getPort(),
                                 new GUID(GUID.makeGuid()), new GUID(clientGUID),
-                                proxies);
+                                proxies, false);
 
         // wait for the incoming PushProxy request
         Socket httpSock = ss.accept();
@@ -324,7 +324,7 @@ public class ClientSideBrowseHostTest extends ClientSideTestCase {
         RouterService.doAsynchronousBrowseHost(callback.getRFD().getHost(),
                                 callback.getRFD().getPort(),
                                 new GUID(GUID.makeGuid()), new GUID(clientGUID),
-                                proxies);
+                                proxies, false);
 
         // nothing works for the guy, we should get a PushRequest
         do {
