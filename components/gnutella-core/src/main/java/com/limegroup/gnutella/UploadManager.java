@@ -214,7 +214,8 @@ public final class UploadManager implements BandwidthTracker {
             }
 
             //ensure the uploader is removed from the GUI
-            if (uploader.getState() != uploader.BROWSE_HOST)
+            if (uploader != null && 
+                (uploader.getState() != uploader.BROWSE_HOST))
                 RouterService.getCallback().removeUpload(uploader);            
             
             debug("closing socket");
