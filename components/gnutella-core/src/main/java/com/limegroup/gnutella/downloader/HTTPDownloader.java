@@ -43,7 +43,8 @@ public class HTTPDownloader implements Runnable {
     private ByteReader _br;
     private int _mode;
 
-    private int _state;
+    private int    _state;
+	private String _stateString = null;
 
     private boolean _resume;
     private boolean        _wasShutdown = false;
@@ -153,6 +154,7 @@ public class HTTPDownloader implements Runnable {
     public int getContentLength() {return _sizeOfFile;}
     public int getAmountRead() {return _amountRead;}
     public int getState() {return _state;}
+	public String getStateString() { return _stateString; }
     public void setResume() {_resume = true;}
 
     public InetAddress getInetAddress() {
@@ -229,6 +231,7 @@ public class HTTPDownloader implements Runnable {
         String furl = "/get/" + String.valueOf(_index) + "/" + _filename;
 
         _state = NOT_CONNECTED;
+        conn = null;
 
         try {
             URL url = new URL(_protocol, _host, _port, furl);
@@ -242,6 +245,21 @@ public class HTTPDownloader implements Runnable {
             return;
         }
         catch (IOException e) {
+
+			// Handle immediate error cases
+			String str=conn.getHeaderField(0);
+			if ( str != null && str.indexOf(" 404 ") > 0 )
+			{
+				_state = ERROR;
+				_stateString = "File Not Found";
+				return;
+			}
+			else if ( str != null && str.indexOf(" 503 ") > 0 )
+			{
+				_state = ERROR;
+				_stateString = "Try Again Later";
+				return;
+			}
             sendPushRequest();
             return;
         }
@@ -314,7 +332,7 @@ public class HTTPDownloader implements Runnable {
         } else if (_state == ERROR) {
             _callback.removeDownload(this);
         }
-        //TODO: what if in queued state?
+        //TODO: what if in queued state?  -  GUI Currently Handles it.
     }
 
     public void resume() {
@@ -431,17 +449,19 @@ public class HTTPDownloader implements Runnable {
 
     public void doDownload() {
         readHeader();
+		if ( _state == ERROR )
+			return;
 	
         SettingsManager set = SettingsManager.instance();
 
         _downloadDir = set.getSaveDirectory();
 
-	String incompleteDir = set.getIncompleteDirectory();
+	    String incompleteDir = set.getIncompleteDirectory();
 
         String pathname = incompleteDir +  _filename;
         File myFile = new File(pathname);
 
-	String path = _downloadDir + _filename;
+	    String path = _downloadDir + _filename;
         File myTest = new File(path);
 
         if ((myTest.exists()) && (!_resume)) {
@@ -536,6 +556,7 @@ public class HTTPDownloader implements Runnable {
             //EOF?
             if (str==null || str.equals(""))
                 break;
+
 
             if (str.indexOf("Content-length:") != -1) {
                 String sub;
