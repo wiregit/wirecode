@@ -28,7 +28,7 @@ public class PromotionManager {
 	/**
 	 * if we don't get a pong from the request[or|ee] within 30 secs, discard.
 	 */
-	private static final long REQUEST_TIMEOUT = 30*1000;
+	private static long REQUEST_TIMEOUT = 30*1000;
 	
 	/**
 	 * a ref to the thread which resets the state
@@ -225,7 +225,8 @@ public class PromotionManager {
 				//if we didn't get interrupted by now the candidate
 				//has failed to reply or has successfully promoted
 				//itself to an UP.  Either way,
-				BestCandidates.fail(_promotionPartner);
+				if (RouterService.isSupernode())
+					BestCandidates.fail(_promotionPartner);
 				
 				//and clear the state
 				synchronized(_promotionLock) {

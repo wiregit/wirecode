@@ -22,6 +22,10 @@ public class CandidateAdvertiser implements Runnable {
 	
 	
 	public void run() {
+		//this task is scheduled even on leafs because they may become UPs later on.
+		//so it is necessary to make sure we do not advertise while we are a leaf
+		if (!RouterService.isSupernode())
+			return;
 		
 		//first update our best leaf, i.e. find the one with the longest uptime
 		//that is also not firewalled, isGoodLeaf, etc.
