@@ -5,7 +5,7 @@ import java.io.InterruptedIOException;
 import java.nio.channels.SelectionKey;
 
 import com.limegroup.gnutella.messages.BadPacketException;
-import com.limegroup.gnutella.messages.Message;
+import com.limegroup.gnutella.messages.*;
 import com.sun.java.util.collections.LinkedList;
 import com.sun.java.util.collections.List;
 
@@ -21,8 +21,13 @@ public class TestNIOMessageReader extends NIOMessageReader {
      */
     private final Object READ_LOCK = new Object();
         
-    public static NIOMessageReader createReader() {
-        return new TestNIOMessageReader();
+    public static NIOMessageReader createReader(Connection conn) {
+        
+        return new TestNIOMessageReader(conn);
+    }
+
+    private TestNIOMessageReader(Connection conn) {
+        super(conn);
     }
     
     /**
@@ -86,5 +91,13 @@ public class TestNIOMessageReader extends NIOMessageReader {
                 return (Message)MESSAGES.remove(0);
             }
         }  
-    }   
+    } 
+
+    /**
+     * Does nothing since test readers don't route messages.
+     */
+    public void routeMessage(Message msg) {}
 }
+
+
+
