@@ -76,10 +76,11 @@ public class ConnectionManager {
 	/**
 	 * The number of Ultrapeer connections to ideally maintain.
 	 */
-	public static final int ULTRAPEER_CONNECTIONS = 20;
+	public static final int ULTRAPEER_CONNECTIONS =
+        ConnectionSettings.KEEP_ALIVE.getValue();
 
     /** Ideal number of connections for a leaf.  */
-    public static final int PREFERRED_CONNECTIONS_FOR_LEAF = 3;
+    public static final int PREFERRED_CONNECTIONS_FOR_LEAF = 2;
 
 	//public static final int HIGH_DEGREE_CONNECTIONS_FOR_LEAF = 2;
 
@@ -135,7 +136,8 @@ public class ConnectionManager {
         new ArrayList();
 
 
-    /* List of all connections.  The core data structures are lists, which allow
+    /**
+     * List of all connections.  The core data structures are lists, which allow
      * fast iteration for message broadcast purposes.  Actually we keep a couple
      * of lists: the list of all initialized and uninitialized connections
      * (_connections), the list of all initialized non-leaf connections
@@ -325,6 +327,7 @@ public class ConnectionManager {
 		// removal may be disabled for tests
 		if(!ConnectionSettings.REMOVE_ENABLED.getValue()) return;        
         removeInternal(c);
+
         adjustConnectionFetchers();
     }
 
@@ -1098,8 +1101,8 @@ public class ConnectionManager {
 
         // Start connection fetchers as necessary
         while(need > 0) {
-            new ConnectionFetcher(); // This kicks off a thread and registers
-                                     // the fetcher in the list
+            // This kicks off the thread for the fetcher
+            _fetchers.add(new ConnectionFetcher());
             need--;
         }
 
@@ -1183,8 +1186,6 @@ public class ConnectionManager {
     /** 
      * Indicates that we are a client node, and have received ultrapeer
      * connection.  This may choose to adjust its keep-alive. 
-     * @param ultrapeerConnection the newly initialized leaf-ultrapeer
-     *  connection
      */
     private synchronized void gotShieldedClientSupernodeConnection() {
         //How many leaf connections should we have?  There's a tension between
@@ -1516,8 +1517,6 @@ public class ConnectionManager {
          * locking requirement.
          */
         public ConnectionFetcher() {
-            // Record the fetcher creation
-            _fetchers.add(this);
             setName("ConnectionFetcher");
 
             // Kick off the thread.
