@@ -70,6 +70,9 @@ public class NIOMessageReader extends AbstractMessageReader {
 
         // read all data in the buffer
         while(buffer.hasRemaining()) {
+            
+            // If BadPacketException is thrown, the header and payload buffers
+            // will be cleared to read another message.
             Message msg = createMessage(HEADER, PAYLOAD, conn, buffer);
             if(msg != null) { 
                 routeMessage(msg);
@@ -79,9 +82,6 @@ public class NIOMessageReader extends AbstractMessageReader {
                 // simply reset the read point.
                 HEADER.clear();
                 PAYLOAD.clear();
-            } else {
-                Assert.that(!buffer.hasRemaining(), 
-                    "should not be any data in the buffer");
             }
         }
     }
@@ -389,12 +389,13 @@ public class NIOMessageReader extends AbstractMessageReader {
 		byte ttl   = header.get(TTL_OFFSET);
 		byte hops  = header.get(HOPS_OFFSET);
 		
-		//  Check values. 
+		// Check values. 
 		byte softMax = conn.getSoftMax();
         
+        // We may bump down the TTL if it and/or the hops are too high.
         ttl = checkFields(ttl, hops, softMax, func);
 
-		// dispatch based on opcode.
+		// Dispatch based on opcode.
 		payloadBuffer.flip();     
 		byte[] payload = new byte[length];
 		payloadBuffer.get(payload, 0, length);
