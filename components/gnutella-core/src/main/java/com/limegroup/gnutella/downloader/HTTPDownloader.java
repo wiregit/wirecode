@@ -121,7 +121,7 @@ public class HTTPDownloader implements Runnable {
         _index = index;
         _port = port;
         _guid = guid;
-            _sizeOfFile = size;
+		_sizeOfFile = size;
     }
 
     public void setDownloadInfo(HTTPDownloader down) {
@@ -204,6 +204,8 @@ public class HTTPDownloader implements Runnable {
 
         _state = CONNECTED;
 
+        _resume = false;
+
         //Note that the following code is similar to initTwo except
         //that it does not use the built in Java URL/URLConnection
         //classes (since we've already
@@ -267,6 +269,8 @@ public class HTTPDownloader implements Runnable {
             _state = ERROR;
             return;
         }
+
+        _resume = false;
 
         _state = CONNECTED;
     }
