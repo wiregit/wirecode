@@ -51,6 +51,11 @@ public final class AlternateLocation implements HTTPHeaderValue,
 	 * Cached hash code that is lazily initialized.
 	 */
 	private volatile int hashCode = 0;
+	
+	/**
+	 * in case we do not have af ull url store the name here.
+	 */
+	private String _fileName;
 
     /**
      * LOCKING: obtain this' monitor while changing/accessing _count and 
@@ -190,7 +195,7 @@ public final class AlternateLocation implements HTTPHeaderValue,
 						  HTTPConstants.URI_RES_N2R + urn.httpStringValue());
 			return new AlternateLocation(url, urn);
 		}else {
-			return new AlternateLocation(rfd.getPushAddr(),urn);
+			return new AlternateLocation(rfd.getPushAddr(),urn,rfd.getFileName());
 		}
 	}
 
@@ -256,7 +261,7 @@ public final class AlternateLocation implements HTTPHeaderValue,
 	 * @param sha1
 	 * @throws IOException
 	 */
-	private AlternateLocation(final PushEndpoint address, final URN sha1) 
+	private AlternateLocation(final PushEndpoint address, final URN sha1, final String name) 
 		throws IOException {
 		
 		if(sha1 == null)
@@ -270,6 +275,7 @@ public final class AlternateLocation implements HTTPHeaderValue,
 		_pushAddress = address;
 		
 		DISPLAY_STRING= ""; //eventually this will be a proper X-Alt header
+		_fileName = name;
 		URL= null;
 	}
 
@@ -327,13 +333,24 @@ public final class AlternateLocation implements HTTPHeaderValue,
 		Set urnSet = new HashSet();
 		urnSet.add(getSHA1Urn());
         int quality = 3;
-		return new RemoteFileDesc(URL.getHost(), URL.getPort(),
+		RemoteFileDesc ret; 
+		if (URL!=null)
+			ret = new RemoteFileDesc(URL.getHost(), URL.getPort(),
 								  0, URL.getFile(), size,  
 								  DataUtils.EMPTY_GUID, 1000,
 								  true, quality, false, null, urnSet, false,
                                   false, //assume altLoc is not firewalled
                                   ALT_VENDOR,//Never displayed, and we don't know
                                   System.currentTimeMillis(), null, -1);
+		else if (_pushAddress!=null)
+			ret = new RemoteFileDesc("1.1.1.1",6346,0,_fileName,size,
+					_pushAddress.getClientGUID(), 1000, true, quality, false, null,
+					urnSet,false, true,ALT_VENDOR,System.currentTimeMillis(),
+					_pushAddress.getProxies(),-1);
+		else
+			throw new Error("an altloc didn't have URL or PE - bad.");
+		
+		return ret;
 	}
 
     /**
@@ -361,7 +378,7 @@ public final class AlternateLocation implements HTTPHeaderValue,
         	if (URL!=null)
         		ret = new AlternateLocation(this.URL, this.SHA1_URN);
         	else if (_pushAddress !=null)
-        		ret = new AlternateLocation(_pushAddress,SHA1_URN);
+        		ret = new AlternateLocation(_pushAddress,SHA1_URN,_fileName);
         	else
         		throw new Error("an altloc had neither URL nor PE - bad.");
         } catch(IOException ioe) {

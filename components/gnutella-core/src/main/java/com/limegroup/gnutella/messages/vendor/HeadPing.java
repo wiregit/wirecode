@@ -9,7 +9,9 @@ import java.io.UnsupportedEncodingException;
 /**
  * An UDP equivalent of the HEAD request method with a twist.
  * 
- * It can be routed like a push request to firewalled alternate locations.
+ * Eventually, it will be routed like a push request 
+ * to firewalled alternate locations.
+ * 
  * As long as the pinging host can receive solicited udp 
  * it can be firewalled as well.
  * 

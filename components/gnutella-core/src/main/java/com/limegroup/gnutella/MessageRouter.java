@@ -80,12 +80,8 @@ public abstract class MessageRouter {
     private RouteTable _pushRouteTable = 
         new RouteTable(7*60, MAX_ROUTE_TABLE_SIZE);
     
-    /**
-     * maps HeadPong clientGUIDs to UDPReplyHandlers. 2 seconds
-     * is plenty of time since HeadPings get answered immediately.
-     */
-    private RouteTable _headPongRouteTable =
-    	new RouteTable(2,MAX_ROUTE_TABLE_SIZE);
+    private RouteTable _headPongRouteTable = 
+        new RouteTable(2, MAX_ROUTE_TABLE_SIZE);
 
     /** How long to buffer up out-of-band replies.
      */
@@ -428,11 +424,6 @@ public abstract class MessageRouter {
         	if(RECORD_STATS)
         		;//TODO: add the statistics recording code
         	handleHeadPing((HeadPing)msg, receivingConnection);
-        }
-        else if (msg instanceof HeadPong) {
-        	if(RECORD_STATS)
-        		;//TODO: add the statistics recording code
-        	handleHeadPongTCP((HeadPong)msg);
         }
         
         //This may trigger propogation of query route tables.  We do this AFTER
@@ -2600,14 +2591,14 @@ public abstract class MessageRouter {
     	if (_udpHeadRequests.add(host)) {
     		
     		//this ping needs to be routed.
-    		if (ping.getClientGuid()!=null) 
-    			routeHeadPing(ping,datagram);
-    		else {
+    	//	if (ping.getClientGuid()!=null) 
+    	//		routeHeadPing(ping,datagram);
+    	//	else {
     		
     			HeadPong pong = new HeadPong(ping);
     		
     			uservice.send(pong, host, port);
-    		}
+    	//	}
     	}
     }
     
@@ -2642,8 +2633,7 @@ public abstract class MessageRouter {
      * unless the same person has pinged us too recently.
      * 
      * Note: if I'm a leaf, I can only receive these pings
-     * from my Ultrapeer which is proxying them for
-     * someone else.  In this case, the time limit is ignored.
+     * from my Ultrapeer(s). In this case, the time limit is ignored.
      * 
      */
     private void handleHeadPing(HeadPing ping, ManagedConnection conn) {
@@ -2666,19 +2656,6 @@ public abstract class MessageRouter {
     		
     }
     
-    /**
-     * for now just sends the pong back to the pinger.
-     * @param pong
-     */
-    private void handleHeadPongTCP(HeadPong pong) {
-    	ReplyHandler handler = 
-    		_headPongRouteTable.getReplyHandler(pong.getGUID());
-    	
-    	if (handler!=null) {
-    		handler.send(pong);
-    		_headPongRouteTable.removeReplyHandler(handler);
-    	}
-    }
     
     private static class QueryResponseBundle {
         public final QueryRequest _query;
