@@ -21,10 +21,8 @@ import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.downloader.Interval;
 import com.limegroup.gnutella.http.HTTPConstants;
 import com.limegroup.gnutella.http.HTTPHeaderValue;
-import com.sun.java.util.collections.Vector;
 import com.sun.java.util.collections.Collections;
 import com.sun.java.util.collections.Iterator;
-import com.sun.java.util.collections.Vector;
 import com.sun.java.util.collections.ArrayList;
 import com.sun.java.util.collections.List;
 
@@ -358,7 +356,7 @@ public final class HashTree implements HTTPHeaderValue, Serializable {
      */
     private static List createTTNodes(int nodeSize, long fileSize,
                                       InputStream is) throws IOException {
-        Vector ret = new Vector();
+        List ret = new ArrayList();
         MessageDigest tt = new TigerTree();
         byte[] block = new byte[BLOCK_SIZE * 128];
         long offset = 0;
@@ -415,7 +413,7 @@ public final class HashTree implements HTTPHeaderValue, Serializable {
      */
     static List createParentGeneration(List nodes) {
         MessageDigest md = new Tiger();
-        List ret = new Vector();
+        List ret = new ArrayList();
         Iterator iter = nodes.iterator();
         while (iter.hasNext()) {
             byte[] left = (byte[]) iter.next();

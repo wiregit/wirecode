@@ -2,7 +2,7 @@
  * (PD) 2003 The Bitzi Corporation Please see http://bitzi.com/publicdomain for
  * more info.
  * 
- * $Id: TigerTree.java,v 1.1.2.1 2004-03-11 20:50:30 sberlin Exp $
+ * $Id: TigerTree.java,v 1.1.2.2 2004-03-18 01:17:06 sberlin Exp $
  */
 package com.bitzi.util;
 
@@ -12,8 +12,11 @@ import java.math.BigInteger;
 import java.security.DigestException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.Enumeration;
-import java.util.Vector;
+
+
+import com.sun.java.util.collections.List;
+import com.sun.java.util.collections.ArrayList;
+import com.sun.java.util.collections.Iterator;
 
 /**
  * Implementation of THEX tree hash algorithm, with Tiger as the internal
@@ -41,7 +44,7 @@ public class TigerTree extends MessageDigest {
     private MessageDigest tiger;
 
     /** Interim tree node hash values */
-    private Vector nodes;
+    private List nodes;
 
     /**
      * Constructor
@@ -51,7 +54,7 @@ public class TigerTree extends MessageDigest {
         buffer = new byte[BLOCKSIZE];
         bufferOffset = 0;
         byteCount = 0;
-        nodes = new Vector();
+        nodes = new ArrayList();
         tiger = new Tiger();
     }
 
@@ -105,24 +108,24 @@ public class TigerTree extends MessageDigest {
 
         // composite neighboring nodes together up to top value
         while (nodes.size() > 1) {
-            Vector newNodes = new Vector();
-            Enumeration iter = nodes.elements();
-            while (iter.hasMoreElements()) {
-                byte[] left = (byte[]) iter.nextElement();
-                if (iter.hasMoreElements()) {
-                    byte[] right = (byte[]) iter.nextElement();
+            List newNodes = new ArrayList();
+            Iterator iter = nodes.iterator();
+            while (iter.hasNext()) {
+                byte[] left = (byte[]) iter.next();
+                if (iter.hasNext()) {
+                    byte[] right = (byte[]) iter.next();
                     tiger.reset();
                     tiger.update((byte) 1); // node prefix
                     tiger.update(left, 0, left.length);
                     tiger.update(right, 0, right.length);
-                    newNodes.addElement(tiger.digest());
+                    newNodes.add(tiger.digest());
                 } else {
-                    newNodes.addElement(left);
+                    newNodes.add(left);
                 }
             }
             nodes = newNodes;
         }
-        System.arraycopy(nodes.elementAt(0), 0, buf, offset, HASHSIZE);
+        System.arraycopy(nodes.get(0), 0, buf, offset, HASHSIZE);
         engineReset();
         return HASHSIZE;
     }
@@ -130,7 +133,7 @@ public class TigerTree extends MessageDigest {
     protected void engineReset() {
         bufferOffset = 0;
         byteCount = 0;
-        nodes = new Vector();
+        nodes = new ArrayList();
         tiger.reset();
     }
 
@@ -153,7 +156,7 @@ public class TigerTree extends MessageDigest {
         tiger.update(buffer, 0, bufferOffset);
         if ((bufferOffset == 0) & (nodes.size() > 0))
             return; // don't remember a zero-size hash except at very beginning
-        nodes.addElement(tiger.digest());
+        nodes.add(tiger.digest());
     }
 
     /**
