@@ -44,7 +44,7 @@ public class PingRanker extends SourceRanker implements MessageListener, Cancell
      * IpPorts to whom we have sent a ping out to but have not received a response.
      * Each entry points to the RFD it was extracted from
      */
-    private Map pingedHosts;
+    private TreeMap pingedHosts;
     
     /**
      * Hosts that have responded to our pings, mapping HeadPong -> RFD
@@ -70,7 +70,9 @@ public class PingRanker extends SourceRanker implements MessageListener, Cancell
         
         if (!verifiedHosts.isEmpty()) 
             ret =(RemoteFileDesc) verifiedHosts.remove(verifiedHosts.firstKey());
-        else {
+        else if (!pingedHosts.isEmpty()){
+            ret =(RemoteFileDesc) pingedHosts.remove(pingedHosts.firstKey());
+        }else {
             ret = getNewRFD();
             newHosts.remove(ret);
         }
@@ -147,7 +149,7 @@ public class PingRanker extends SourceRanker implements MessageListener, Cancell
     }
     
     public synchronized boolean hasMore() {
-        return !(verifiedHosts.isEmpty() && newHosts.isEmpty());
+        return !(verifiedHosts.isEmpty() && newHosts.isEmpty() && pingedHosts.isEmpty());
     }
     
     public synchronized void processMessage(Message m, ReplyHandler handler) {
