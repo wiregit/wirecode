@@ -31,12 +31,16 @@ public class RemoteFileDesc implements Serializable {
 	private final int _size;
 	private final boolean _chatEnabled;
     private final int _quality;
+
     /** RemoteFileDesc can only be constructed with a single piece of metadata.
      *  However, historically RemoteFileDesc stored an array of metadata.  Hence
      *  we must be prepared to read this data from a serialized downloads.dat
      *  file.  In other words, _xmlDocs is typically null or a single non-null
-     *  element, unless this was deserialized from an older version.  */
-    private final LimeXMLDocument[] _xmlDocs;
+     *  element, unless this was deserialized from an older version.  
+	 * 
+	 *  INVARIANT: _xmlDocs != null -> _xmlDocs.length != 0
+	 */
+    private LimeXMLDocument[] _xmlDocs;
 	private Set _urns;
 	private boolean _browseHostEnabled;
 
@@ -91,7 +95,7 @@ public class RemoteFileDesc implements Serializable {
 	}
 
     private void readObject(ObjectInputStream stream) 
-                                   throws IOException, ClassNotFoundException {
+		throws IOException, ClassNotFoundException {
         stream.defaultReadObject();
         //Older downloads.dat files do not have _urns, so _urns will be null
         //(the default Java value).  Hence we also initialize
@@ -100,6 +104,11 @@ public class RemoteFileDesc implements Serializable {
             _urns = EMPTY_SET;
             _browseHostEnabled= false;
         }
+		// preserve the invariant that the LimeXMLDocument array either be
+		// null or have at least one element
+		if(_xmlDocs != null && _xmlDocs.length == 0) {
+			_xmlDocs = null;
+		}
     }
     
 
