@@ -1,6 +1,7 @@
 package com.limegroup.gnutella;
 
 import com.limegroup.gnutella.*;
+import com.limegroup.gnutella.util.CommonUtils;
 import junit.framework.*;
 import junit.extensions.*;
 import java.io.*;
@@ -167,16 +168,7 @@ public final class UrnTest extends com.limegroup.gnutella.util.BaseTestCase {
 			}
 		}
 
-		_testDir = new File("com/limegroup/gnutella");
-		if(!_testDir.isDirectory()) {
-			_testDir = new File("core/com/limegroup/gnutella");
-		}
-		if(!_testDir.isDirectory()) {
-			_testDir = new File("tests/com/limegroup/gnutella");
-		} 
-		if(!_testDir.isDirectory()) {
-			_testDir = new File("limewire/tests/com/limegroup/gnutella");
-		} 
+		_testDir = CommonUtils.getResourceFile("com/limegroup/gnutella");
 		assertTrue("should have been able to initialize gnutella dir", 
 				   _testDir.isDirectory());
 		File[] files = _testDir.listFiles();
