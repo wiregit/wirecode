@@ -168,10 +168,9 @@ public class ManagedDownloader implements Downloader, Serializable {
     private List /* of HTTPDownloader */ dloaders;
     /** True iff this has been forcibly stopped. */
     private boolean stopped;
-    /** The cumulative number of corrupt bytes encountered when checking
-     * overlapping regions when resuming and/or swarming.  Reset for each bucket
-     * in tryAllDownloads2. */
-    private int corruptBytes;
+    /** True iff a corrupt byte has been detected and this has been stopped by
+     *  the thread detecting the problem.  INVARIANT: corrupted=>stopped.  */
+    private boolean corrupted;
     
     /** The lock for pushes (see below).  Used intead of THIS to prevent missing
      *  notify's.  See readObject for note on serialization.  LOCKING: use
@@ -287,6 +286,7 @@ public class ManagedDownloader implements Downloader, Serializable {
         dloaders=new LinkedList();
 		chatList=new DownloadChatList();
         stopped=false;
+        corrupted=false;   //if resuming, cleanupCorrupt() already called
         setState(QUEUED);
             
         this.dloaderManagerThread=new Thread() {
@@ -775,8 +775,8 @@ public class ManagedDownloader implements Downloader, Serializable {
      *  "identical" instances of RemoteFileDesc.  Unreachable locations
      *  are removed from files.
      * @return COMPLETE if a file was successfully downloaded
-     *         CORRUPT_FILE more than zero bytes mismatched when checking overlapping
-     *             regions of resume or swarm
+     *         CORRUPT_FILE a bytes mismatched when checking overlapping
+     *             regions of resume or swarm, and all downloader were aborted
      *         COULDNT_MOVE_TO_LIBRARY the download completed but the
      *             temporary file couldn't be moved to the library
      *         WAITING_FOR_RETRY if no file was downloaded, but it makes sense 
@@ -819,11 +819,17 @@ public class ManagedDownloader implements Downloader, Serializable {
         }           
 
         //2. Do the download
-        corruptBytes=0; //New bucket...reset the corruptByte count.
-        int status=tryAllDownloads3(files);
-        if (corruptBytes>0) {
-            cleanupCorrupt(incompleteFile, completeFile.getName());
-            return CORRUPT_FILE;
+        int status;
+        try {
+            status=tryAllDownloads3(files);
+        } catch (InterruptedException e) {
+            //Convert InterruptedException&corrupted to "return CORRUPT_FILE".
+            if (corrupted) {
+                cleanupCorrupt(incompleteFile, completeFile.getName());
+                return CORRUPT_FILE;
+            } else {
+                throw e;
+            }
         }
         if (status!=COMPLETE)
             return status;
@@ -901,9 +907,23 @@ public class ManagedDownloader implements Downloader, Serializable {
     }
 
 
-    /** Like tryDownloads2, but does not deal with the library and hence cannot
-     *  return COULDNT_MOVE_TO_LIBRARY or CORRUPT_FILE.  Also requires that
-     *  files.size()>0. */
+    /** 
+     * Like tryDownloads2, but does not deal with the library, cleaning
+     * up corrupt files, etc.
+     *
+     * @param files a list of files to pick from, all of which MUST be
+     *  "identical" instances of RemoteFileDesc.  Unreachable locations
+     *  are removed from files.
+     * @return COMPLETE if a file was successfully downloaded
+     *         WAITING_FOR_RETRY if no file was downloaded, but it makes sense 
+     *             to try again later because some hosts reported busy.
+     *             The caller should usually wait before retrying.
+     *         GAVE_UP the download attempt failed, and there are 
+     *             no more locations to try.
+     * @exception InterruptedException if the user stop()'ed this download
+     *  or a corrupt byte was detected.  (Calls to resume() do not result
+     *  in InterruptedException.)
+     */
     private int tryAllDownloads3(final List /* of RemoteFileDesc */ files) 
             throws InterruptedException {
         //The parts of the file we still need to download.
@@ -927,7 +947,9 @@ public class ManagedDownloader implements Downloader, Serializable {
         //While there is still an unfinished region of the file...
         while (true) {
             synchronized (this) {
-                if (dloaders.size()==0 && needed.size()==0) {
+                if (stopped) {
+                    throw new InterruptedException();
+                } else if (dloaders.size()==0 && needed.size()==0) {
                     //Finished.
                     return COMPLETE;
                 } else if (dloaders.size()==0 
@@ -949,8 +971,8 @@ public class ManagedDownloader implements Downloader, Serializable {
                 if (! allowAnotherDownload())
                     break;
                 try {
-                    startBestDownload(files, needed,
-                                      busy, terminated);
+                    startBestDownload(files, needed, busy, terminated);
+                                                 //throws InterruptedException
                 } catch (NoSuchElementException e) {
                     break;
                 }
@@ -1225,13 +1247,14 @@ public class ManagedDownloader implements Downloader, Serializable {
     private void tryOneDownload(HTTPDownloader downloader, 
                                 List /* of RemoteFileDesc */ files,
                                 List /* of HTTPDownloader */ terminated) {
-        int cb = 0;//local corrupt bytes. Cumulative updated in synchronized.
         try {
-            cb = downloader.doDownload(true);
+            downloader.doDownload(true);
         } catch (IOException e) {
 			chatList.removeHost(downloader);
-        }
-        finally {
+        } catch (OverlapMismatchException e) {
+            corrupted=true;
+            stop();
+        } finally {
             //int stop=downloader.getInitialReadingPoint()
             //            +downloader.getAmountRead();
             //System.out.println("    WORKER: terminating from "+downloader
@@ -1240,7 +1263,6 @@ public class ManagedDownloader implements Downloader, Serializable {
             //RemoteFileDesc.  TODO2: use measured speed if possible.
             RemoteFileDesc rfd=downloader.getRemoteFileDesc();
             synchronized (this) {
-                corruptBytes += cb;
                 dloaders.remove(downloader);
                 terminated.add(downloader);
                 files.add(rfd);

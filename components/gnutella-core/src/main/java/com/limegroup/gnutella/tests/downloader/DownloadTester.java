@@ -74,10 +74,11 @@ public class DownloadTester {
             HTTPDownloader downloader=new HTTPDownloader(
                 rfd, file, 0, TestFile.length());
             downloader.connect();
-            int corrupt=downloader.doDownload(true);        
-            Assert.that(corrupt==0, "corrupt file");
+            downloader.doDownload(true);        
         } catch (IOException e) {
             Assert.that(false, "Unexpected exception: "+e);
+        } catch (OverlapMismatchException e) {
+            Assert.that(false, "Unexpected mismatch");
         }
         long elapsed1=System.currentTimeMillis()-start1;
         
@@ -94,10 +95,11 @@ public class DownloadTester {
             HTTPDownloader downloader=new HTTPDownloader(
                 rfd, file, 0, TestFile.length());
             downloader.connect();
-            int corrupt=downloader.doDownload(false);        
-            Assert.that(corrupt==0, "corrupt file");
+            downloader.doDownload(false);        
         } catch (IOException e) {
             Assert.that(false, "Unexpected exception: "+e);
+        } catch (OverlapMismatchException e) {
+            Assert.that(false, "Unexpected mismatch");
         }
         long elapsed2=System.currentTimeMillis()-start2;
         System.out.println("  No check="+elapsed2+", check="+elapsed1);
@@ -279,7 +281,7 @@ public class DownloadTester {
         System.out.print("-Testing overlap checking from Grey area...");
         final int RATE=500;
         uploader1.setRate(RATE);
-        uploader2.setRate(RATE);
+        uploader2.setRate(RATE/100);
         uploader2.setCorruption(true);
         RemoteFileDesc rfd1=newRFD(6346, 100);
         RemoteFileDesc rfd2=newRFD(6347, 100);
@@ -299,6 +301,8 @@ public class DownloadTester {
             return;
         }
         waitForCorrupt(download);
+        check(download.getAmountRead()<2*TestFile.length()/3, 
+              "Didn't interrupt soon enough: "+download.getAmountRead());
         System.out.println("passed");//got here? Test passed
         //TODO: check IncompleteFileManager, disk
     }

@@ -354,24 +354,25 @@ public class HTTPDownloader {
     /*
      * Downloads the content from the server and writes it to a temporary
      * file.  Blocking.  This MUST be initialized via connect() beforehand, and
-     * doDownload MUST NOT have already been called.
+     * doDownload MUST NOT have already been called.  If checkOverlap, the
+     * incomplete file is compared with the data being downloaded; if there is
+     * a mismatch, OverlapMismatchException is thrown immediately.
      *  
      * @param checkOverlap check the existing contents of the incomplete file 
      *  before writing to it.
-     * @return the number of CORRUPT bytes. If !checkOverlap returns 0.
-     * @exception FileIncompleteException transfer interrupted, either
-     *  locally or remotely.  TODO: is this ALWAYS thrown during 
-     *  interruption?
-     * @exception IOException file couldn't be downloaded for some other reason 
+     * @exception OverlapMismatchException part of the incomplete file on
+     *  disk didn't match data read from network.
+     * @exception IOException download was interrupted, typically (but not
+     *  always) because the other end closed the connection.
      */
-	public int doDownload(boolean checkOverlap) throws IOException {
+	public void doDownload(boolean checkOverlap) 
+            throws IOException, OverlapMismatchException {
         RandomAccessFile fos = new RandomAccessFile(_incompleteFile, "rw");
         try {            
             fos.seek(_initialReadingPoint);
             int c = -1;
             byte[] buf = new byte[BUF_LENGTH];
             byte[] fileBuf = new byte[BUF_LENGTH];
-            int corruptBytes = 0;
             
             while (true) {
                 //1. Read from network.  It's possible that we've read more than
@@ -399,7 +400,7 @@ public class HTTPDownloader {
                     fos.readFully(fileBuf,0,amountToCheck);
                     for(int i=0;i<amountToCheck;i++) {
                         if (fileBuf[i]!=0 &&  buf[i]!=fileBuf[i]) 
-                            corruptBytes++;
+                            throw new OverlapMismatchException();
                     }
                     //get the fp back where it was before we checked
                     fos.seek(currPos);
@@ -415,7 +416,6 @@ public class HTTPDownloader {
                 //TODO: what if corruptBytes>0?
                 throw new FileIncompleteException();  
             }
-            return corruptBytes;
         } finally {
             _byteReader.close();
             try {
