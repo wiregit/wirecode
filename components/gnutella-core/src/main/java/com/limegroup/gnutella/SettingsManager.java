@@ -262,7 +262,7 @@ public class SettingsManager implements SettingsInterface
 	setExtensions(SettingsInterface.DEFAULT_EXTENSIONS);
 	try {setSaveDirectory(SettingsInterface.DEFAULT_SAVE_DIRECTORY);}
 	catch(IllegalArgumentException e){
-	    setSaveDirectory(getPath());
+	    setSaveDirectory(System.getProperty("user.home"));
 	}
     }
 
