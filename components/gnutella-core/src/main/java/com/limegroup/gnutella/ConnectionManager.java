@@ -421,7 +421,7 @@ public class ConnectionManager {
      *@return the number of ultrapeer -> ultrapeer connections.
      */
     public synchronized int getNumUltrapeerConnections() {
-        return ultrapeerConnections();
+        return ultrapeerToUltrapeerConnections();
     }
     
     /**
@@ -695,11 +695,26 @@ public class ConnectionManager {
         int ret=0;
         for (Iterator iter=_initializedConnections.iterator(); iter.hasNext();){
             ManagedConnection mc=(ManagedConnection)iter.next();
-            if (mc.isSupernodeSupernodeConnection())
+            if (mc.isSupernodeConnection())
                 ret++;
         }
         return ret;
     }
+    
+    /**
+     * Returns the number of connections that are ultrapeer -> ultrapeer.
+     * Caller MUST hold this' monitor.
+     */
+    private int ultrapeerToUltrapeerConnections() {
+        //TODO3: augment state of this if needed to avoid loop
+        int ret=0;
+        for (Iterator iter=_initializedConnections.iterator(); iter.hasNext();){
+            ManagedConnection mc=(ManagedConnection)iter.next();
+            if (mc.isSupernodeSupernodeConnection())
+                ret++;
+        }
+        return ret;     
+    }   
 
     /** Returns the number of old-fashioned unrouted connections.  Caller MUST
      *  hold this' monitor. */
