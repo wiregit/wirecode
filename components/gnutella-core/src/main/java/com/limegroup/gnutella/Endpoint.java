@@ -132,9 +132,40 @@ public class Endpoint implements Cloneable, Serializable, Comparable{
     
     
     /** Returns the size of all files the host has, in kilobytes, 
-     *  or -1 if I don't know */   
+    *  or -1 if I don't know, it also makes sure that the kbytes/files 
+    *  ratio is not ridiculous, in which case it normalizes the values
+    */   
     public long getKbytes() {
-        return kbytes;
+        try
+        {
+            if(kbytes/files < 15000)  //ie avg file size less than 15MB
+            {
+                return kbytes;
+            }
+            else if(kbytes/files < 70000 && files < 8) //ie avg file size less
+            {                               //than 70MB, and num-files < 8
+                                            //might be some video files
+                                            //but with more number of files
+                                            //maintaining such a ratio may not 
+                                            //be possible
+                return kbytes;
+            }
+            else if(kbytes/files < 15000000) //ie avg file size less than 15GB
+            {
+                                             //user might have sent number of 
+                                             //bytes instead of number of kbytes
+                return kbytes/1000;
+                
+            }
+        }
+        catch(ArithmeticException ae)
+        {
+            return 0;   //as files=0 throws ArithmeticException, that should
+                        //make the kbytes also zero
+        }
+        
+        
+        return -1;
     }
 
     /** Sets the size of all files the host has, in kilobytes, 
