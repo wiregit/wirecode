@@ -410,11 +410,61 @@ public class RouterService
      * Forces the backend to try to establish newKeep connections by kicking
      * off connection fetchers as needed.  Does not affect the KEEP_ALIVE
      * property.
-     *
      * @param newKeep the desired total number of messaging connections
      */
-    public void setKeepAlive(int newKeep) {
+    public void forceKeepAlive(int newKeep) {
+        //no validation done
+        
+        //set the new keep alive
         manager.setKeepAlive(newKeep);
+    }
+    
+    /**
+     * Validates the passed new keep alive, and sets the backend to 
+     * try to establish newKeep connections by kicking
+     * off connection fetchers as needed.  Does not affect the KEEP_ALIVE
+     * property.
+     * @param newKeep the desired total number of messaging connections
+     * @exception if the suggested keep alive value is not suitable
+     */
+    public void setKeepAlive(int newKeep) throws BadConnectionSettingException {
+        
+        //validate the keep alive value
+
+        //Negative keep alive is invalid
+        if(newKeep < 0)
+            throw new BadConnectionSettingException(
+                BadConnectionSettingException.NEGATIVE_VALUE,
+                SettingsManager.instance().getKeepAlive());
+        
+        //The request for increasing keep alive if we are leaf node is invalid
+        if ((newKeep > 1) && hasClientSupernodeConnection())
+            throw new BadConnectionSettingException(
+                BadConnectionSettingException.TOO_HIGH_FOR_LEAF, 1);
+
+        //max connections for this connection speed
+        int max = SettingsManager.instance().maxConnections();
+        if (manager.hasSupernodeClientConnection()) {
+            //Also the request to decrease the keep alive below a minimum
+            //level is invalid, if we are an Ultrapeer with leaves
+            if (newKeep < manager.MIN_CONNECTIONS_FOR_SUPERNODE)
+                throw new BadConnectionSettingException(
+                BadConnectionSettingException.TOO_LOW_FOR_ULTRAPEER,
+                manager.MIN_CONNECTIONS_FOR_SUPERNODE);
+            else if (newKeep > manager.MIN_CONNECTIONS_FOR_SUPERNODE 
+                && newKeep > max)
+                throw new BadConnectionSettingException(
+                BadConnectionSettingException.TOO_HIGH_FOR_SPEED,
+                manager.MIN_CONNECTIONS_FOR_SUPERNODE > max ?
+                    manager.MIN_CONNECTIONS_FOR_SUPERNODE : max);
+        } else if (newKeep > max)
+            //cant have too many connections based upon node's speed
+            throw new BadConnectionSettingException(
+                BadConnectionSettingException.TOO_HIGH_FOR_SPEED,
+                max);
+
+        //set the new keep alive
+        forceKeepAlive(newKeep);
     }
 
     /**
@@ -874,6 +924,10 @@ public class RouterService
 
     public boolean hasClientSupernodeConnection() {
         return manager.hasClientSupernodeConnection();
+    }
+    
+    public boolean hasSupernodeClientConnection() {
+        return manager.hasSupernodeClientConnection();
     }
 
 }

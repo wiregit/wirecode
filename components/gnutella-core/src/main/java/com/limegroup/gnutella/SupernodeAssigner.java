@@ -168,6 +168,8 @@ public final class SupernodeAssigner implements Runnable {
                     MINIMUM_REQUIRED_UPSTREAM_KBYTES_PER_SECOND ||
              _maxDownstreamBytesPerSec >= 
                     MINIMUM_REQUIRED_DOWNSTREAM_KBYTES_PER_SECOND) &&
+            //AND I'm not a modem (in case estimate wrong)
+            (SETTINGS.getConnectionSpeed() > SpeedConstants.MODEM_SPEED_INT) &&
             //AND is my average uptime OR current uptime high enough?
             (SETTINGS.getAverageUptime() >= MINIMUM_AVERAGE_UPTIME ||
              _currentUptime >= MINIMUM_CURRENT_UPTIME) &&

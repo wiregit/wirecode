@@ -1,5 +1,6 @@
 package com.limegroup.gnutella.downloader;
 
+import com.apple.mrj.*;
 import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.util.*;
 import com.limegroup.gnutella.xml.*;
@@ -502,6 +503,19 @@ public class ManagedDownloader implements Downloader, Serializable {
         if (!incompleteFile.renameTo(completeFile))
             if (! CommonUtils.copy(incompleteFile, completeFile))
                 return COULDNT_MOVE_TO_LIBRARY;
+
+		//Set the Mac ITunes file type and creator if we're on Mac
+		//and it's an mp3 file
+		if(CommonUtils.isAnyMac() 
+		       && completeFile.getName().toLowerCase().endsWith("mp3")){
+			try {
+				MRJFileUtils.setFileTypeAndCreator(completeFile,
+												   new MRJOSType("MPG3"),
+												   new MRJOSType("hook"));
+			} catch(IOException ioe) {
+				// nothing we really can do if the call doesn't work
+			}
+		}
         //Add file to library.
         // first check if it conflicts with the saved dir....
         if (fileExists(completeFile))

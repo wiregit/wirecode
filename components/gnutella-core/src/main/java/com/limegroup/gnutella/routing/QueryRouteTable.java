@@ -18,7 +18,7 @@ import java.io.*;
  */
 public class QueryRouteTable {
     /** The suggested default table size. */
-    public static final int DEFAULT_TABLE_SIZE=1<<13;  //8KB
+    public static final int DEFAULT_TABLE_SIZE=1<<14;  //16KB
     /** The suggested default max table TTL. */
     public static final byte DEFAULT_INFINITY=(byte)7;
     /** The maximum size of patch messages, in bytes. */

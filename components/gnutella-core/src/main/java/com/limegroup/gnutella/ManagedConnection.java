@@ -221,10 +221,8 @@ public class ManagedConnection
      *  because this is a connection to a Clip2 reflector. */
     private boolean _isKillable=true;
     
-    /**
-     * The host to which are opening connection
-     */
-    private String _host = null;
+    //if I am a supernode shielding the given connection
+    private Boolean _isSupernodeClientConnection=null;
 
     /**
      * The domain to which this connection is authenticated
@@ -243,7 +241,6 @@ public class ManagedConnection
                       MessageRouter router,
                       ConnectionManager manager) {
         this(host, port, router, manager, false);
-        this._host = host;
     }
 
     /**
@@ -993,6 +990,17 @@ public class ManagedConnection
      *  if I wrote "Supernode: true" and this connection wrote "Supernode:
      *  false, and <b>both support query routing</b>. */
     public boolean isSupernodeClientConnection() {
+        if(_isSupernodeClientConnection == null) {
+            _isSupernodeClientConnection = 
+                new Boolean(isSupernodeClientConnection2());
+        }
+        return _isSupernodeClientConnection.booleanValue();
+    }
+    
+    /** Returns true iff I am a supernode shielding the given connection, i.e.,
+     *  if I wrote "Supernode: true" and this connection wrote "Supernode:
+     *  false, and <b>both support query routing</b>. */
+    private boolean isSupernodeClientConnection2() {
         //Is remote host a supernode...
         if (! isClientConnection())
             return false;

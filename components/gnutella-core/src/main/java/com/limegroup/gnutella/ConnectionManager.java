@@ -128,6 +128,16 @@ public class ConnectionManager {
     private Authenticator _authenticator;
 
     /**
+     * Minimum umber of connections that a supernode with leaf connections,
+     * must have
+     */
+    public static final int MIN_CONNECTIONS_FOR_SUPERNODE = 6;
+    
+    /** The maximum number of ultrapeer endpoints to give out from the host
+     *  catcher in X_TRY_SUPERNODES headers. */
+    private int MAX_SUPERNODE_ENDPOINTS=10;
+
+    /**
      * Constructs a ConnectionManager.  Must call initialize before using.
      * @param authenticator Authenticator instance for authenticating users
      */
@@ -244,6 +254,12 @@ public class ConnectionManager {
              //addition of this new connection
              incrementConnectionCount(connection, false);    
              //keep handling the messages on the connection
+
+             //if a leaf connected to us, ensure that we have enough non-leaf
+             //connections opened
+             if(connection.isSupernodeClientConnection())
+                ensureConnectionsForSupernode();
+             
              sendInitialPingRequest(connection);
              connection.loopForMessages();
          } catch(IOException e) {
@@ -338,12 +354,28 @@ public class ConnectionManager {
      * and newKeep>1 (sic).
      */
     public synchronized void setKeepAlive(int newKeep) {
-        if (newKeep>1 && hasClientSupernodeConnection())
+        //The request for increasing keep alive if we are leaf node is invalid.
+        //This logic is duplicated in RouterService.setKeepAlive.
+        if ((newKeep > 1) && hasClientSupernodeConnection())
             return;
+        
         _keepAlive = newKeep;
         adjustConnectionFetchers();
     }
-
+    
+    /**
+     * Ensures that if a node is acting as supernode, it has atleast 
+     * some minimum number of connections opened
+     */ 
+    public synchronized void ensureConnectionsForSupernode(){
+        //Note: not holding the _incomingConnectionsLock as just reading the 
+        //volatile value
+        if(_incomingClientConnections > 0 
+            && _keepAlive < MIN_CONNECTIONS_FOR_SUPERNODE){
+            setKeepAlive(MIN_CONNECTIONS_FOR_SUPERNODE);
+        }
+    }
+    
     /**
      * Tells whether the node is gonna be a supernode or not
      * @return true, if supernode, false otherwise
@@ -369,6 +401,16 @@ public class ConnectionManager {
             ManagedConnection first=(ManagedConnection)connections.get(0);
             return first.isClientSupernodeConnection();
         }
+    }
+    
+    /**
+     * Returns true if this is a super node with a connection to a leaf. 
+     */
+    public boolean hasSupernodeClientConnection() {
+        if(_incomingClientConnections > 0)
+            return true;
+        else
+            return false;
     }
     
     /**
@@ -593,10 +635,11 @@ public class ConnectionManager {
     }
 
     /**
-     * Returns the endpoints it is connected to
+     * Returns the endpoints of the best known ultrapeers.  This include
+     * both ultrapeers we are connected to and marked ultrapeer pongs.
      * @return Returns the endpoints it is connected to. 
      */ 
-    public Set getConnectedSupernodeEndpoints(){
+    public Set getSupernodeEndpoints(){
         Set retSet = new HashSet();
         //get an iterator over _initialized connections, and iterate to
         //fill the retSet with supernode endpoints
@@ -608,6 +651,13 @@ public class ConnectionManager {
                 retSet.add(new Endpoint(
                     connection.getInetAddress().getAddress(),
                     connection.getOrigPort()));
+        }
+        //add the best few endpoints from the hostcatcher.  TODO: limit this
+        //to N entries?
+        Iterator iterator=_catcher.getBestHosts();
+        for (int i=0; iterator.hasNext() && i<MAX_SUPERNODE_ENDPOINTS; i++) {
+            Endpoint e=(Endpoint)iterator.next();
+            retSet.add(e);
         }
         return retSet;
     }
