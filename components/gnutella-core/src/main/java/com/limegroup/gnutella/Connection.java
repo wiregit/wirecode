@@ -425,11 +425,11 @@ public class Connection implements Runnable {
 				byte[] clientGUID = manager.ClientId.getBytes();
 
 				// changing the port here to test push:
-			//  	QueryReply qreply = new QueryReply(guid, ttl, port, ip, 
-//  								   speed, responses, clientGUID);
+			  	QueryReply qreply = new QueryReply(guid, ttl, port, ip, 
+  								   speed, responses, clientGUID);
 
-				QueryReply qreply = new QueryReply(guid, ttl, 1234, ip, 
-								   speed, responses, clientGUID);
+		//  		QueryReply qreply = new QueryReply(guid, ttl, 1234, ip, 
+//  								   speed, responses, clientGUID);
 
 				send(qreply);
 				if(manager.stats == true)
@@ -504,8 +504,26 @@ public class Connection implements Runnable {
 			//make HTTP connection with originator
 			//TODO1: Rob makes HHTTP connection
 			System.out.println("Establishing HTTP");
+
+
 			
 			String host = new String(req.getIP());
+
+			System.out.println("Host in Conn " + host);
+			System.out.println("Host in Conn " + req.getIP());
+
+			byte[] ip = req.getIP();
+
+			StringBuffer buf=new StringBuffer();
+			buf.append(ByteOrder.ubyte2int(ip[0])+".");
+			buf.append(ByteOrder.ubyte2int(ip[1])+".");
+			buf.append(ByteOrder.ubyte2int(ip[2])+".");
+			buf.append(ByteOrder.ubyte2int(ip[3])+"");
+			String h = buf.toString();
+
+			System.out.println("Host in Conn " + h);
+
+
 			int port = req.getPort();
 			
 			FileManager fmanager = FileManager.getFileManager();
@@ -519,7 +537,7 @@ public class Connection implements Runnable {
 			String file = desc._name;
 			
 			HTTPUploader up = new 
-			    HTTPUploader("http", host, port, file, manager);
+			    HTTPUploader("http", h, port, file, manager);
 
 			up.run();
 

@@ -16,6 +16,7 @@ public class HTTPDownloader implements Runnable {
 
     private InputStream _istream;
     private BufferedReader _in;
+	    
 
     private String _filename;
     private int _sizeOfFile;
@@ -60,7 +61,7 @@ public class HTTPDownloader implements Runnable {
 
 	URLConnection conn;
 
-	port = 1111; // For Testing.
+	// port = 1111; // For Testing.
 
 	String furl = "/get/" + String.valueOf(index) + "/" + file;
 
@@ -125,11 +126,12 @@ public class HTTPDownloader implements Runnable {
 
 	// am i passing the right guid's? 
 
-	//  PushRequest push = new PushRequest(guid, ttl, clientGUID, 
+	PushRequest push = new PushRequest(guid, ttl, clientGUID, 
+  					   index, ip, port);
+	
+	//  PushRequest push = new PushRequest(clientGUID, ttl, guid,  
 //  					   index, ip, port);
-
-	PushRequest push = new PushRequest(clientGUID, ttl, guid,  
-					   index, ip, port);
+	
 	try {
 
 	    System.out.println("Sending push Request");

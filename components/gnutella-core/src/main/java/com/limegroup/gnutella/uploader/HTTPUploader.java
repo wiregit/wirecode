@@ -43,26 +43,17 @@ public class HTTPUploader implements Runnable {
 	_fmanager = FileManager.getFileManager();
 	_fdesc = null;
 	
+	    
 
 	try {	                         /* look for the file */
-	    System.out.println("THe # of files " + _fmanager._files.size());
 	    _fdesc = (FileDesc)_fmanager._files.get(_index);
 	}                                /* if its not found... */
 	catch (ArrayIndexOutOfBoundsException e) {
-	    System.out.println("A");
 	    doNoSuchFile();              /* send an HTTP error */
 	    return;
 	}
 	/* check to see if the index */
 	if (! _fdesc._name.equals(_filename.trim())) { /* matches the name */
-  	    System.out.println("filename: " + _filename.trim());
-  	    System.out.println("name: " + _fdesc._name);
-
-  	    System.out.println(((FileDesc)_fmanager._files.get(_index-1))._name);
-  	    System.out.println(((FileDesc)_fmanager._files.get(_index+1))._name);
-
-
-  	    System.out.println("B");
   	    doNoSuchFile();
     	    return;
     	}
@@ -183,7 +174,8 @@ public class HTTPUploader implements Runnable {
 	    return _socket.getInetAddress();
 	else {
 	    try {
-		return InetAddress.getByName(_host);
+		System.out.println("Host " + new String(_host));
+		return InetAddress.getByName(new String(_host));
 	    }
 	    catch (Exception e) {
 		System.out.println("The get by name didn't work");
@@ -230,7 +222,6 @@ public class HTTPUploader implements Runnable {
 	
 	catch (Exception e) {
 	    uploadError("Unable to read from the file");
-	    
 	    return;
 	    
 	}
@@ -269,6 +260,7 @@ public class HTTPUploader implements Runnable {
 
     private void uploadError(String str)
     {
+	System.out.println(str);
 	// These should not go anywhere for uploads
     }
 
