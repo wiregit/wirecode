@@ -308,7 +308,7 @@ public class PushEndpoint implements HTTPHeaderValue{
 	 */
 	public Set getProxies() {
 	    // if this PE exists, the mapping will not have been finalized.
-	    Set current = (Set)GUID_PROXY_MAP.get(_clientGUID);
+	    Set current = (Set)GUID_PROXY_MAP.get(_guid);
 	    
 		return Collections.unmodifiableSet(current);
 	}
