@@ -171,10 +171,15 @@ public class LimeXMLDocument{
     //Unit Tester
     public static void main(String args[]){
         //File f = new File("C:/down/xerces-1_3_1/data","personal-schema.xml");
+        Runtime rt = Runtime.getRuntime();
+        long mem = rt.totalMemory()- rt.freeMemory();
+        System.out.println("Sumeet : Used memory is "+mem);
         File f = new File("C:/home/etc/xml","all-books-pub.xml");
         LimeXMLDocument l = new LimeXMLDocument(f);
         Map m = l.fieldToValue;
         int size = m.size();
+        long mem1 = rt.totalMemory()- rt.freeMemory();
+        System.out.println("Sumeet : Used memory is "+mem1);
         Iterator keys = m.keySet().iterator();
         for(int j =0; j<size; j++){
             String key = (String)keys.next();            
