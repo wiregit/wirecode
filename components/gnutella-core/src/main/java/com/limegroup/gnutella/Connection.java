@@ -351,6 +351,11 @@ public class Connection implements Runnable {
                 try {
                     flushLock.wait();
                 } catch (InterruptedException e) { }
+                try {
+                    //Flush is needed in case the wait() returns
+                    //prematurely.
+                    out.flush();
+                } catch (IOException e) { /* throw to caller? */ }
             }
         }
     }
