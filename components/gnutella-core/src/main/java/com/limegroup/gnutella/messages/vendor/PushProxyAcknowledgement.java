@@ -87,7 +87,7 @@ public final class PushProxyAcknowledgement extends VendorMessage {
         try {
             // i do it during construction....
             QueryReply.IPPortCombo combo = 
-                new QueryReply.IPPortCombo(addr.getHostName(), port);
+                new QueryReply.IPPortCombo(addr.getHostAddress(), port);
             return combo.toBytes();
         }
         catch (UnknownHostException uhe) {
