@@ -486,18 +486,18 @@ public final class MessageRouterTest extends BaseTestCase {
 
         // make sure that queries from leaves are simply sent to
         // the first three hosts
-        TestConnectionManager tcm = new TestConnectionManager(3, false);
+        TestConnectionManager tcm = new TestConnectionManager(2, false);
         PrivilegedAccessor.setValue(RouterService.class, "manager", tcm);
         PrivilegedAccessor.setValue(ROUTER, "_manager", tcm);
         QueryRequest qr = QueryRequest.createQuery("test");      
 
         
         m.invoke(ROUTER, new Object[] {qr});
-        assertEquals("unexpected number of queries sent", 4, 
+        assertEquals("unexpected number of queries sent", 3, 
                      tcm.getNumUltrapeerQueries());
         assertEquals("unexpected number of queries sent", 1, 
-                     tcm.getNumOldConnectionQueries());
-        assertEquals("unexpected number of queries sent", 3, 
+                    tcm.getNumOldConnectionQueries());
+        assertEquals("unexpected number of queries sent", 2, 
                      tcm.getNumNewConnectionQueries());        
 
     }
