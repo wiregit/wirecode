@@ -16,7 +16,7 @@ public final class UltrapeerSettings extends AbstractSettings {
 	 * Setting for whether or not to force Ultrapeer mode.
 	 */
 	public static final BooleanSetting FORCE_ULTRAPEER_MODE =
-		CFG_FACTORY.createBooleanSetting("FORCE_SUPERNODE_MODE", false);
+		FACTORY.createBooleanSetting("FORCE_SUPERNODE_MODE", false);
 
 	/**
 	 * Setting for whether or not to disable Ultrapeer mode.
@@ -29,6 +29,6 @@ public final class UltrapeerSettings extends AbstractSettings {
 	 * Setting for the maximum leaf connections.
 	 */
 	public static final IntSetting MAX_LEAVES =
-		CFG_FACTORY.createIntSetting("MAX_LEAVES", 30);
+		FACTORY.createIntSetting("MAX_LEAVES", 30);
 }
 
