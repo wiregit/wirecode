@@ -128,6 +128,10 @@ public class FixedSizeExpiringSet implements Set, Collection {
         if (arg0 == null)
             return false;
         expire(size() >= _maxSize);
+        
+        if (_map.containsKey(arg0)) //contract requires it!
+        	return false; 
+        
         _map.put(arg0, new Long(System.currentTimeMillis() + _expireTime));
         return true;
     }

@@ -19,6 +19,7 @@ import com.limegroup.gnutella.updates.*;
 import com.limegroup.gnutella.settings.*;
 import com.limegroup.gnutella.browser.*;
 import com.limegroup.gnutella.search.*;
+import com.limegroup.gnutella.upelection.*;
 import com.limegroup.gnutella.tigertree.TigerTreeCache;
 
 import org.apache.commons.logging.LogFactory;
@@ -115,6 +116,11 @@ public class RouterService {
      * <tt>PushManager</tt> for handling push requests.
      */
     private static PushManager pushManager = new PushManager();
+    
+    /**
+     * <tt>PromotionManager</tt> for handling promotions to Ultrapeer.
+     */
+    private static PromotionManager promotionManager = new PromotionManager();
 
 	
     private static final ResponseVerifier verifier = new ResponseVerifier();
@@ -424,6 +430,14 @@ public class RouterService {
      */
 	public static SearchResultHandler getSearchResultHandler() {
 		return RESULT_HANDLER;
+	}
+	
+	/**
+	 * Accessor for the <tt>PromotionManager</tt> instance.
+	 * @return the <tt>PromotionManager</tt> in use.
+	 */
+	public static PromotionManager getPromotionManager() {
+		return promotionManager;
 	}
 
     /**

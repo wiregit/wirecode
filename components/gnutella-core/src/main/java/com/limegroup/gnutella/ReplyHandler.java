@@ -162,6 +162,11 @@ public interface ReplyHandler {
      * Handles StatisticVendorMessage using this ReplyHandler
      */ 
     public void handleStatisticVM(StatisticVendorMessage m) throws IOException;
+    
+    /**
+     * Handles the UDP analog of reply to "Crawler:" header
+     */
+    public void handleUDPCrawlerPong(UDPCrawlerPong m);
 
 }
 
