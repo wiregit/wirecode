@@ -349,7 +349,7 @@ public abstract class Message
 
     /** Returns the ip (given in BIG-endian) format as standard
      *  dotted-decimal, e.g., 192.168.0.1<p> */
-     static final String ip2string(byte[] ip) {
+     public static final String ip2string(byte[] ip) {
          return ip2string(ip, 0);
      }
          
