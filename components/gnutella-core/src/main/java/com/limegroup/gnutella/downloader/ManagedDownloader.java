@@ -2344,6 +2344,10 @@ public class ManagedDownloader implements Downloader, Serializable {
                     }
                 }
                 
+                // before requesting the next range,
+                // consume the prior request's body
+                // if there was any.
+                dloader.consumeBodyIfNecessary();
                 synchronized(stealLock) {
                     // if we didn't get queued doing the tree request,
                     // request another file.

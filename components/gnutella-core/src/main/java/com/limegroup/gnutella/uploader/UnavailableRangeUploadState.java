@@ -32,12 +32,6 @@ public class UnavailableRangeUploadState implements HTTPMessage {
     private static final String INACTIVE_RETRY_AFTER = "" + (60 * 60);
 
 	/**
-	 * The error message to send in the message body.
-	 */
-	private static final byte[] ERROR_MESSAGE = 
-		"The requested range is not available".getBytes();
-
-	/**
 	 * Creates a new <tt>UnavailableRangeUploadState</tt> with the specified
 	 * <tt>FileDesc</tt>.
 	 *
@@ -56,7 +50,7 @@ public class UnavailableRangeUploadState implements HTTPMessage {
 		ostream.write(str.getBytes());
 		str = "Content-Type: text/plain\r\n";
 		ostream.write(str.getBytes());
-		str = "Content-Length: " + ERROR_MESSAGE.length + "\r\n";
+		str = "Content-Length: 0\r\n";
 		ostream.write(str.getBytes());
 		if(FILE_DESC != null) {
 			// write the URN in case the caller wants it
@@ -89,7 +83,7 @@ public class UnavailableRangeUploadState implements HTTPMessage {
 	}
     
 	public void writeMessageBody(OutputStream ostream) throws IOException {
-		ostream.write(ERROR_MESSAGE);
+		// no message, do nothing.
 	}
 	
 	public boolean getCloseConnection() {

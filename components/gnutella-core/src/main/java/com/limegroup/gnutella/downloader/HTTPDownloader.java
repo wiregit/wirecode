@@ -97,6 +97,17 @@ public class HTTPDownloader implements BandwidthTracker {
     /** The index to start reading from the server and start writing to the
      *  file. */
 	private int _initialReadingPoint;
+	
+	/**
+	 * The content-length of the output, useful only for when we
+	 * want to read & discard the body of the HTTP message.
+	 */
+	private int _contentLength;
+	
+	/**
+	 * Whether or not the body has been consumed.
+	 */
+	private boolean _bodyConsumed = true;
 
 	private ByteReader _byteReader;
 	private Socket _socket;  //initialized in HTTPDownloader(Socket) or connect
@@ -341,7 +352,9 @@ public class HTTPDownloader implements BandwidthTracker {
         _amountToRead = stop-start;
         _totalAmountRead += _amountRead;
         _amountRead = 0;
-		_initialReadingPoint = start;
+        _initialReadingPoint = start;
+        _bodyConsumed = false;
+        _contentLength = 0;
 		
 		// features to be sent with the X-Features header
         Set features = new HashSet();
@@ -444,6 +457,18 @@ public class HTTPDownloader implements BandwidthTracker {
         //Read response.
         readHeaders();
 	}
+	
+	/**
+	 * Consumes the body of the HTTP message that was previously exchanged,
+	 * if necessary.
+	 */
+    public void consumeBodyIfNecessary() {
+        try {
+            if(!_bodyConsumed)
+                consumeBody(_contentLength);
+        } catch(IOException ignored) {}
+        _bodyConsumed = true;
+    }
 	
     /**
      * Returns the ConnectionStatus from the request.
@@ -615,10 +640,9 @@ public class HTTPDownloader implements BandwidthTracker {
                 
 			if(!CommonUtils.isJava118()) 
 				BandwidthStat.HTTP_HEADER_DOWNSTREAM_BANDWIDTH.addData(str.length());
-            //As of LimeWire 1.9, we ignore the "Content-length" header;
-            //handling an unexpectedly low Content-length value is no different
-            //from handling premature connection termination.  Look at LimeWire
-            //1.8 and earlier for parsing code.
+            //As of LimeWire 1.9, we ignore the "Content-length" header for
+            //handling normal download flow.  The Content-Length is only
+            //used for reading/discarding some HTTP body messages.
 			
             //For "Content-Range" headers, we store what the remote side is
             //going to give us.  Users should examine the interval and
@@ -639,6 +663,8 @@ public class HTTPDownloader implements BandwidthTracker {
                 _initialReadingPoint = low;
                 _amountToRead = high - low;
             }
+            else if(HTTPHeaderName.CONTENT_LENGTH.matchesStartOfString(str))
+                _contentLength = readContentLength(str);
             else if(HTTPHeaderName.CONTENT_URN.matchesStartOfString(str))
 				checkContentUrnHeader(str, _rfd.getSHA1Urn());
             else if(HTTPHeaderName.GNUTELLA_CONTENT_URN.matchesStartOfString(str))
@@ -818,6 +844,22 @@ public class HTTPDownloader implements BandwidthTracker {
 	        return serverHeader.substring(colon+1).trim();
         else
             return "";
+    }
+    
+    /**
+     * Reads the Content-Length.  Invalid Content-Lengths are set to 0.
+     */
+    public static int readContentLength(final String header) {
+        String value = HTTPUtils.extractHeaderValue(header);
+        if(value == null)
+            return 0;
+        else {
+            try {
+                return Integer.parseInt(value.trim());
+            } catch(NumberFormatException nfe) {
+                return 0;
+            }
+        }
     }
 
     /**
