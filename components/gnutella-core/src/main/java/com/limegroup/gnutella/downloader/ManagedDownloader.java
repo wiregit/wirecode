@@ -1375,9 +1375,12 @@ public class ManagedDownloader implements Downloader, Serializable {
             //interrupt the thread
             for(Iterator iter=threads.iterator(); iter.hasNext(); )
                 ((Thread)iter.next()).interrupt();
-
-            if(dloaderManagerThread != null)
-                dloaderManagerThread.interrupt();
+            
+            // must capture in local variable so the value doesn't become null
+            // between if & contents of if.
+            Thread dlMan = dloaderManagerThread;
+            if(dlMan != null)
+                dlMan.interrupt();
             else
                 LOG.warn("MANAGER: no thread to interrupt");
         }
