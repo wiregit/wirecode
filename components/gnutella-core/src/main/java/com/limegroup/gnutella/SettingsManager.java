@@ -34,6 +34,11 @@ public class SettingsManager implements SettingsInterface
     /** Set up a local variable for the properties */
     private static Properties props_;
 
+    /** Specialized properties file for the
+     *  network discoverer
+     */
+    private static Properties ndProps_;
+
     /**
      *  Set up the manager instance to follow the
      *  singleton pattern.
@@ -41,6 +46,7 @@ public class SettingsManager implements SettingsInterface
     private static SettingsManager instance_;
 
     private String fileName_;
+    private String ndFileName_;
 
     /**
      * This method provides the only access
@@ -60,6 +66,21 @@ public class SettingsManager implements SettingsInterface
     private SettingsManager()
     {
 	props_ = new Properties();
+	ndProps_ = new Properties();
+	fileName_ = System.getProperty("user.home");
+	fileName_ = fileName_ + System.getProperty("file.separator");
+	ndFileName_ = fileName_;
+	fileName_ = fileName_ + SettingsInterface.DEFAULT_FILE_NAME;
+	ndFileName_ = ndFileName_ + SettingsInterface.DEFAULT_ND_PROPS_NAME;
+	try {
+	    FileInputStream fis = new FileInputStream(ndFileName_);
+	    try {
+		ndProps_.load(fis);
+	    }
+	    catch(IOException ioe) {}
+	}
+	catch(FileNotFoundException fne){}
+	
        	initSettings();
     }
 
@@ -67,9 +88,6 @@ public class SettingsManager implements SettingsInterface
     private void initSettings()
     {
 	Properties tempProps = new Properties();
-	fileName_ = System.getProperty("user.home");
-	fileName_ = fileName_ + System.getProperty("file.separator");
-	fileName_ = fileName_ + SettingsInterface.FILE_NAME;
         try {
 	    FileInputStream fis = new FileInputStream(fileName_);
 	    try {
@@ -355,6 +373,16 @@ public class SettingsManager implements SettingsInterface
 	return maxConn_;
     }
 
+    public Properties getNDProps()
+    {
+	return ndProps_;
+    }
+
+    public String getPath()
+    {
+	return System.getProperty("user.home");
+    }
+
  
     /**
      *  Mutator methods 
@@ -428,17 +456,18 @@ public class SettingsManager implements SettingsInterface
 	//System.out.println(home);
 	//String fileName;
 	
-	//int l = hostList.length();
+	//int l = home.length();
 	//int counter = 0;
-	//char[] c = hostList.toCharArray();
+	//char[] c = home.toCharArray();
 	//while(counter < l)
-	    //{
-		//System.out.println("char: " + c[counter]);
-		//counter++;
-		//}
+	//  {
+	//System.out.println("char: " + c[counter]);
+	//counter++;
+	//  }
+	
 
 	File f = new File(hostList);
-	if(f.exists() == true)
+	if(f.isFile() == true)
 	    hostList_ = hostList;
 	else
 	    {
@@ -551,6 +580,16 @@ public class SettingsManager implements SettingsInterface
 		props_.setProperty(SettingsInterface.MAX_CONN, s);
 		writeProperties();
 	    }
+    }
+
+    public void writeNDProps()
+    {
+	try {
+	    FileOutputStream ostream = new FileOutputStream(ndFileName_);
+	    props_.store(ostream, "HEADER");
+	    ostream.close();
+	} 
+	catch (Exception e){}
     }
 
     private void writeProperties()

@@ -1,5 +1,7 @@
 package com.limegroup.gnutella;
 
+import java.util.*;
+
 /**
  *  This class sets up an interface for the SettingsManager
  *  It's designed to make life simpler, so hopefully it 
@@ -14,19 +16,24 @@ package com.limegroup.gnutella;
 
 public interface SettingsInterface
 {    
-    /** Accessor methods */
-    public byte     getTTL();
-    public byte     getMaxTTL();
-    public int      getMaxLength();
-    public int      getTimeOut();
-    public String   getHostList();
-    public int      getKeepAlive();
-    public int      getPort();
-    public int      getConnectionSpeed();
-    public short    getSearchSpeed();
-    public boolean  getStats();
-    public String   getClientID();
-    public int      getMaxConn();
+    // Accessor methods 
+    public byte       getTTL();
+    public byte       getMaxTTL();
+    public int        getMaxLength();
+    public int        getTimeOut();
+    public String     getHostList();
+    public int        getKeepAlive();
+    public int        getPort();
+    public int        getConnectionSpeed();
+    public short      getSearchSpeed();
+    public boolean    getStats();
+    public String     getClientID();
+    public int        getMaxConn();
+
+    /** returns the Properties file for Network Discovery */
+    public Properties getNDProps();
+
+    public String getPath();
 
 
     /** set the user time to live */
@@ -81,6 +88,11 @@ public interface SettingsInterface
     public void setMaxConn(int maxConn)
 	throws IllegalArgumentException;
 
+    /** specialized method for writing the 
+     *  properties file for the network discoverer
+     */
+    public void writeNDProps();
+
     /** Default setting for the time to live */
     public static byte    DEFAULT_TTL          = (byte)4;
     /** Default setting for the maximum time to live */
@@ -93,7 +105,9 @@ public interface SettingsInterface
     public static String  DEFAULT_HOST_LIST    = "gnutella.net";
 
     /** Default name for the properties file */
-    public static String  FILE_NAME            = "limewire.props";
+    public static String  DEFAULT_FILE_NAME    = "limewire.props";
+    /** Default name for the network discovery properties */
+    public static String  DEFAULT_ND_PROPS_NAME     = "nd.props";
     /** Default value for the keep alive */    
     public static int     DEFAULT_KEEP_ALIVE   = 0;
     /** Default port*/
