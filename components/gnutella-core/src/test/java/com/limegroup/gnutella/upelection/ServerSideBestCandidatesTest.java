@@ -25,6 +25,7 @@ public class ServerSideBestCandidatesTest extends BaseTestCase {
 	
 	private static final long NEW_TIMEOUT=300;
 	
+	static BestCandidates _bestCandidates;
 	
 	static ConnectionManagerStub _manager;
 	
@@ -80,11 +81,17 @@ public class ServerSideBestCandidatesTest extends BaseTestCase {
 		PrivilegedAccessor.setValue(CandidateAdvertiser.class,"UP_INTERVAL", 
 				new Long(NEW_TIMEOUT));
 		
-		PrivilegedAccessor.setValue(Connection.class,"ADVERTISEMENT_INTERVAL",
+		PrivilegedAccessor.setValue(CandidateHandler.class,"ADVERTISEMENT_INTERVAL",
 				new Long(NEW_TIMEOUT));
+		
+		
 		
 		_remote1 = new RemoteCandidate("1.2.3.4",15,(short)20);
 		_remote2 = new RemoteCandidate("1.2.3.5",15,(short)10);
+		
+		_bestCandidates = BestCandidates.instance();
+		
+		
 		
 		}catch(Exception e) {
 			e.printStackTrace();
@@ -96,7 +103,17 @@ public class ServerSideBestCandidatesTest extends BaseTestCase {
 	 */
 	public void setUp() {
 		
-		BestCandidates.purge();
+		_bestCandidates.purge();
+		
+		try{
+			CandidateAdvertiser old = (CandidateAdvertiser)
+				PrivilegedAccessor.getValue(_bestCandidates,"_advertiser");
+			if (old!=null)
+				old.cancel();
+			
+			PrivilegedAccessor.setValue(_bestCandidates,"_advertiser", new CandidateAdvertiser());	
+			
+		}catch(Exception e) {e.printStackTrace();}
 		
 	}
 	
@@ -109,7 +126,7 @@ public class ServerSideBestCandidatesTest extends BaseTestCase {
 		assertEquals(3,RouterService.getConnectionManager().getNumInitializedConnections());
 		
 		//wait until the initialize call is issued
-		Thread.sleep(2*NEW_TIMEOUT+20);
+		Thread.sleep(2*NEW_TIMEOUT+60);
 		
 		//make sure all UPs receive the announcement.
 		assertEquals(BestCandidatesVendorMessage.class,_UP1.getLastSent().getClass());
@@ -172,7 +189,7 @@ public class ServerSideBestCandidatesTest extends BaseTestCase {
 		List oneLeaf = new LinkedList();
 		oneLeaf.add(_leaf1);
 		_manager.setInitializedClientConnections(oneLeaf);
-		BestCandidates.routeFailed(_leaf2);
+		_bestCandidates.routeFailed(_leaf2);
 		
 		
 		Thread.sleep(2*NEW_TIMEOUT);
@@ -205,7 +222,7 @@ public class ServerSideBestCandidatesTest extends BaseTestCase {
 	public void testUPAdvertising() throws Exception {
 		assertFalse(_UP1.isSame(_UP2));
 		Thread.sleep(2*NEW_TIMEOUT+20);
-		assertNotNull(BestCandidates.getCandidates()[0]);
+		assertNotNull(_bestCandidates.getCandidates()[0]);
 		//at this stage the ultrapeers have received a candidate at our ttl0.
 		//one of them will advertise their candidate at ttl0, and everyone should
 		//get a candidate at ttl1.
@@ -217,8 +234,8 @@ public class ServerSideBestCandidatesTest extends BaseTestCase {
 		
 		_UP1.handleVendorMessage(bcvm);
 		
-		assertNotNull(BestCandidates.getCandidates()[0]);
-		assertNotNull(BestCandidates.getCandidates()[1]);
+		assertNotNull(_bestCandidates.getCandidates()[0]);
+		assertNotNull(_bestCandidates.getCandidates()[1]);
 		
 		//sleep some time
 		
@@ -243,15 +260,16 @@ public class ServerSideBestCandidatesTest extends BaseTestCase {
 		
 		//another UP advertises a worse candidate at ttl0.  The ultrapeers 
 		//should not receive anything.
+		update = new Candidate[2];
 		update[0]=_remote2;
 		update[1]=null;
 		bcvm = new BestCandidatesVendorMessage(update);
 		
 		_UP2.handleVendorMessage(bcvm);
 		
-		assertNotNull(BestCandidates.getCandidates()[0]);
-		assertNotNull(BestCandidates.getCandidates()[1]);
-		assertTrue(_remote1.isSame(BestCandidates.getCandidates()[1]));
+		assertNotNull(_bestCandidates.getCandidates()[0]);
+		assertNotNull(_bestCandidates.getCandidates()[1]);
+		assertTrue(_remote1.isSame(_bestCandidates.getCandidates()[1]));
 		
 		//sleep some time
 		
@@ -275,13 +293,16 @@ public class ServerSideBestCandidatesTest extends BaseTestCase {
 		assertTrue(_remote1.isSame(bcvm.getBestCandidates()[1]));
 		
 		//however, if _UP1 advertises _remote2, there should be an update.
+		assertTrue(update[0].isSame(_remote2));
 		bcvm = new BestCandidatesVendorMessage(update);
 		
 		_UP1.handleVendorMessage(bcvm);
 		
-		assertNotNull(BestCandidates.getCandidates()[0]);
-		assertNotNull(BestCandidates.getCandidates()[1]);
-		assertTrue(_remote2.isSame(BestCandidates.getCandidates()[1]));
+		assertNotNull(_bestCandidates.getCandidates()[0]);
+		assertNotNull(_bestCandidates.getCandidates()[1]);
+		assertTrue(_remote2.isSame(_bestCandidates.getCandidates()[1]));
+		assertTrue(_remote2.getAdvertiser().isSame(_UP1));
+		assertTrue(_remote2.isSame(_UP1.getCandidates()[0]));
 		
 		Thread.sleep(NEW_TIMEOUT+20);
 		//all ups should switch to remote2
@@ -302,10 +323,13 @@ public class ServerSideBestCandidatesTest extends BaseTestCase {
 		assertTrue(_remote2.isSame(bcvm.getBestCandidates()[1]));
 		
 		//lets make UP2 advertise remote1 now.  It should override remote2
+		update = new Candidate[2];
 		update[0]=_remote1;
 		bcvm = new BestCandidatesVendorMessage(update);
 		
 		_UP2.handleVendorMessage(bcvm);
+		assertTrue(_UP2.isSame(_remote1.getAdvertiser()));
+		assertTrue(_remote2.getAdvertiser().isSame(_UP1));
 		
 		Thread.sleep(NEW_TIMEOUT+20);
 		
@@ -331,13 +355,16 @@ public class ServerSideBestCandidatesTest extends BaseTestCase {
 		_manager.setInitializedConnections(l);
 		assertEquals(2,RouterService.getConnectionManager().getNumInitializedConnections());
 		
-		BestCandidates.routeFailed(_UP2);
+		assertTrue(_remote2.isSame(_UP1.getCandidates()[0]));
 		
-		Thread.sleep(NEW_TIMEOUT+20);
+		_bestCandidates.routeFailed(_UP2);
+		
+		Thread.sleep(NEW_TIMEOUT+40);
 		
 		bcvm = (BestCandidatesVendorMessage) _UP1.getLastSent();
 		
 		assertTrue(_leaf1.isSame(bcvm.getBestCandidates()[0]));
+		assertFalse(_remote1.isSame(bcvm.getBestCandidates()[1])); //remove
 		assertTrue(_remote2.isSame(bcvm.getBestCandidates()[1]));
 		
 		bcvm = (BestCandidatesVendorMessage) _UP3.getLastSent();
@@ -351,14 +378,20 @@ public class ServerSideBestCandidatesTest extends BaseTestCase {
 	 * 	utility class to represent an UP connection
 	 */
 	static class UPConn extends ManagedConnectionStub {
+		
 		public UPConn(String host, int port) {
 			super(host,port);
+			try {
+				PrivilegedAccessor.setValue(this,"_candidateHandler", new CandidateHandler(this));
+			}catch(Exception e){
+				e.printStackTrace();
+			}
 		}
 		public int remoteHostSupportsBestCandidates() {
 			return BestCandidatesVendorMessage.VERSION;
 		}
 		
-	/*	public void send(Message m){
+		/*public void send(Message m){
 			System.out.println(m.getClass());
 			super.send(m);
 		}/*
@@ -374,6 +407,10 @@ public class ServerSideBestCandidatesTest extends BaseTestCase {
 		
 		public boolean isGoodUltrapeer() {
 			return true;
+		}
+		
+		public short getUptime() {
+			return 30;
 		}
 	}
 }

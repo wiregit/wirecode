@@ -10,8 +10,7 @@ import com.limegroup.gnutella.util.PrivilegedAccessor;
  */
 public class CandidateAdvertiserStub extends CandidateAdvertiser {
 	
-	public CandidateAdvertiserStub() {
-		super(false);
+	public CandidateAdvertiserStub() { //don't schedule advertisement
 	}
 	/* (non-Javadoc)
 	 * @see com.limegroup.gnutella.util.ManagedThread#managedRun()
