@@ -564,6 +564,7 @@ public class Connection {
         _messageReader = MessageReader.createReader();
         
         if(CommonUtils.isJava14OrLater()) {
+            System.out.println("Connection::initialize:: making non-blocking");
             _socket.getChannel().configureBlocking(false);
 			NIODispatcher.instance().addReader(this);
         }
@@ -997,13 +998,11 @@ public class Connection {
         if (! supportsGGEP())
             m = m.stripExtendedPayload();
 
-        synchronized (this) {
-            // TODO: re-enable stats!
-            //_numMessagesSent++;
+        synchronized (QUEUE) {
             QUEUE.add(m);
             
-//          TODO: re-enable stats!
-            //_numSentMessagesDropped+=QUEUE.resetDropped();    
+            // record any dropped messages
+            addDropped(QUEUE.resetDropped());    
         }        
         if (! isBlocking()) {
             //NON-BLOCKING IO: attempt to write queued data, not necessarily
@@ -1022,6 +1021,7 @@ public class Connection {
         return getChannel().isBlocking();
     }
 
+    
     /**
      * Like Connection.write(), but may write more than one message.  May also
      * call listener.needsWrite.  If this is a blocking connection, blocks until
@@ -1042,7 +1042,7 @@ public class Connection {
             // Add more queued data if possible.
             if (!_messageWriter.hasPendingMessage()) {
                 Message m = null;
-                synchronized (this) {
+                synchronized (QUEUE) {
                     m = QUEUE.removeNext();
                     // should not be reading from QUEUE if there's nothing 
                     // left on it
@@ -1064,7 +1064,6 @@ public class Connection {
                     return false;
                 } catch (IOException e) {
                     // TODO we probably want to throw this!!
-                    e.printStackTrace();
                     return true;
                 }
                 //if (hasUnsentData)
