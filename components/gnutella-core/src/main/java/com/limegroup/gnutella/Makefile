@@ -9,6 +9,7 @@ classes = Main.class ConnectionManager.class RouteTable.class \
 	PushRequest.class ByteOrder.class HostCatcher.class \
 	ForgetfulHashMap.class Endpoint.class \
 	SettingsInterface.class SettingsManager.class \
+	HTTPClientMgr.class HTTPMgr.class HTTPServerMgr.class HTTPUtil.class
 
 
 all : $(classes) gui networkdiscoverer
