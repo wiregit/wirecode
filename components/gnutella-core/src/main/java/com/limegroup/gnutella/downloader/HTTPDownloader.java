@@ -36,7 +36,7 @@ public class HTTPDownloader {
 	 * @param file the name of the file	
 	 * @param index the index of the file that the client sent
 	 * @param guid the unique identifier of the client
-	 *
+	 * @exception CantConnectException couldn't connect to the host.
 	 */
 	public HTTPDownloader(String file, Socket socket, 
 							 int index, byte[] guid) 
@@ -57,6 +57,7 @@ public class HTTPDownloader {
      * @param timeout the amount of time, in milliseconds, to wait
      *  when establishing a connection.   Must be non-negative.  A
      *  timeout of 0 means no timeout.
+     * @exception CantConnectException couldn't connect to the host.
      */
 	public HTTPDownloader(String file, String host, 
 							 int port, int index, byte[] guid, 
@@ -83,16 +84,14 @@ public class HTTPDownloader {
 			
 			// now, check to see if a file of that name alread
 			// exists in the temporary directory.
-			String incompletePath;
-			incompletePath = incompleteDir + _filename;
-			File incompleteFile = new File(incompletePath);
+			File incompleteFile = new File(incompleteDir, _filename);
 			// incompleteFile represents the file as it would
-			// be named in the temporary incomplete directory.
-			
+			// be named in the temporary incomplete directory.			
 			if (incompleteFile.exists()) {
 				// dont alert an error if the file doesn't 
 				// exist, just assume a starting range of 0;
 				_initialReadingPoint = (int)incompleteFile.length();
+                _amountRead = _initialReadingPoint;
 			}
 		}
 
@@ -106,44 +105,45 @@ public class HTTPDownloader {
 	private void connect(String host, int port,
                          String file, int index,
                          int timeout ) 
-		throws IOException {
-        Socket socket = (new SocketOpener(host, port)).connect(timeout);
-        connect(socket, file, index);
+		throws CantConnectException {
+        try {
+            Socket socket = (new SocketOpener(host, port)).connect(timeout);
+            connect(socket, file, index);
+        } catch (IOException e) {
+            throw new CantConnectException();
+        }
 	}
 
 	private void connect(Socket s, String file, int index) throws IOException {
 		_socket = s;
-		try {
-            //The try-catch below is a work-around for JDK bug 4091706.
-            InputStream istream=null;
-            try {
-                istream=_socket.getInputStream(); 
-            } catch (Exception e) {
-                throw new IOException();
-            }
-			_byteReader = new ByteReader(istream);
-			OutputStream os = _socket.getOutputStream();
-			OutputStreamWriter osw = new OutputStreamWriter(os);
-			BufferedWriter out=new BufferedWriter(osw);
-			String startRange = java.lang.String.valueOf(_initialReadingPoint);
-			out.write("GET /get/"+index+"/"+file+" HTTP/1.0\r\n");
-			out.write("User-Agent: LimeWire\r\n");
-			out.write("Range: bytes=" + startRange + "-\r\n");
-			out.write("\r\n");
-			out.flush();
-		} catch (ConnectException e) {
-			throw new CantConnectException();
-		} catch (java.net.MalformedURLException e) {
-			throw new BadURLException();
-		} 
+
+        //The try-catch below is a work-around for JDK bug 4091706.
+        InputStream istream=null;
+        try {
+            istream=_socket.getInputStream(); 
+        } catch (Exception e) {
+            throw new IOException();
+        }
+        _byteReader = new ByteReader(istream);
+        OutputStream os = _socket.getOutputStream();
+        OutputStreamWriter osw = new OutputStreamWriter(os);
+        BufferedWriter out=new BufferedWriter(osw);
+        String startRange = java.lang.String.valueOf(_initialReadingPoint);
+        out.write("GET /get/"+index+"/"+file+" HTTP/1.0\r\n");
+        out.write("User-Agent: LimeWire\r\n");
+        out.write("Range: bytes=" + startRange + "-\r\n");
+        out.write("\r\n");
+        out.flush();
 	}
 	
 	/** 
-     * Start the download.  Throws IOException if the headers
-     * couldn't be read, there remote host has no more download slots,
-     * or the download was interrupted.  (In the future different exceptions
-     * will be thrown for each of these cases.
+     * Start the download, returning when done.  Throws IOException if
+     * there is a problem.
      *     @modifies this
+     *     @exception TryAgainLaterException the host is busy
+     *     @exception NotSharingException the host isn't sharing files
+     *     @exception FileIncompleteException transfer interrupted, either
+     *      locally or remotely
      */
 	public void start() throws IOException {
 		readHeader();
