@@ -93,6 +93,9 @@ public final class AlternateLocation
 		try {
 			sha1 = URN.createSHA1UrnFromURL(url);
 		} catch(IOException e) {
+			// don't accept if there's no SHA1, as SHA1 is all we currently
+			// understand
+			throw new IOException("no SHA1 in url: "+url);
 		}
 		return new AlternateLocation(url, date, sha1);
 	}
@@ -109,14 +112,15 @@ public final class AlternateLocation
 	 *  <tt>null</tt>
 	 * @throws <tt>MalformedURLException</tt> if a copy of the supplied 
 	 *  <tt>URL</tt> instance cannot be successfully created
-	 * @throws <tt>IllegalArgumentException</tt> if the url argument is not a
+	 * @throws <tt>IOException</tt> if the url argument is not a
 	 *  valid location for any reason
 	 */
 	public static AlternateLocation createAlternateLocation(final URL url) 
-		throws MalformedURLException {
+		throws MalformedURLException, IOException {
 		if(url == null) {
 			throw new NullPointerException("cannot accept null URL");
 		}
+
 		if((url.getPort() & 0xFFFF0000) != 0) {
 			throw new IllegalArgumentException("invalid port: "+url.getPort());
 		}
@@ -130,7 +134,9 @@ public final class AlternateLocation
 		try {
 			sha1 = URN.createSHA1UrnFromURL(tempUrl);
 		} catch(IOException e) {
-			// still accept if there's no SHA1 we can extract
+			// don't accept if there's no SHA1, as SHA1 is all we currently
+			// understand
+			throw new IOException("no SHA1 in url: "+url);
 		}
 		return new AlternateLocation(tempUrl, date, sha1);
 	}
@@ -155,9 +161,13 @@ public final class AlternateLocation
 		}
 		URN urn = rfd.getSHA1Urn();
 		if(urn == null) {
-			throw new IOException("no SHA1 in RFD");
+			throw new IllegalArgumentException("no SHA1 in RFD");
 		}
-		URL url = new URL("http", rfd.getHost(), rfd.getPort(),						  
+		int port = rfd.getPort();
+		if((port & 0xFFFF0000) != 0) {
+			throw new IllegalArgumentException("invalid port: "+port);
+		}		
+		URL url = new URL("http", rfd.getHost(), port,						  
 						  HTTPConstants.URI_RES_N2R + urn.httpStringValue());
 		return new AlternateLocation(url, new Date(), urn);
 	}
@@ -489,10 +499,10 @@ public final class AlternateLocation
                                       locationHeader);
 			}
 			// Handle bad ports in alternate locations 
-            if( port < 1 || port > 0xFFFF ) {
-                throw new IOException("invalid port in alternate location: "+
-                                      "port: "+port+"header: "+locationHeader);
-            }
+			if((port & 0xFFFF0000) != 0) {
+				throw new IOException("invalid port in alternate location: "+
+									  "port: "+port+"header: "+locationHeader);
+			}
 
             // check for private addresses if it appears to be in dotted quad 
             // format..
@@ -504,7 +514,7 @@ public final class AlternateLocation
                 } 
             }
             if(url.getPort()==-1)
-                url = new URL("HTTP",url.getHost(),80,url.getFile());
+                url = new URL("http",url.getHost(),80,url.getFile());
 			return url;
 		} else {
 			// we could not understand the beginning of the alternate location
