@@ -79,7 +79,8 @@ public class RequeryDownloader extends ManagedDownloader
             return super.newRequery(numRequeries);
         //Otherwise just spit out the original search keywords.
         return new QueryRequest(SettingsManager.instance().getTTL(),
-                                0, getQuery(), true);
+                                0, getQuery(), true, 
+                                !RouterService.acceptedIncomingConnection());
     }
 
     /**
