@@ -48,7 +48,8 @@ public class Main implements ActivityCallback {
 			int port=6346;
 			if (commands.length>=3)
 			    port=Integer.parseInt(commands[2]);
-			service.connectToHost(commands[1], port);
+			service.connectToHost( 
+			  new Connection(commands[1], port));
 		    } catch (IOException e) {
 			System.out.println("Couldn't establish connection.");
 		    } catch (NumberFormatException e) {
@@ -71,7 +72,9 @@ public class Main implements ActivityCallback {
 
     /////////////////////////// ActivityCallback methods //////////////////////
 
-    public void addConnection(String host, int port, int type, int status) {
+    public void addConnection(Connection c, int type, int status) {
+	String host = c.getOrigHost();
+	int    port = c.getOrigPort();
 	String direction=null;
 	String direction2=null;
 	if (type==ActivityCallback.CONNECTION_OUTGOING) {
@@ -91,11 +94,15 @@ public class Main implements ActivityCallback {
 	    Assert.that(false,"Unknown connection status");
     }
 
-    public void removeConnection(String host, int port) {
+    public void removeConnection(Connection c) {
+	String host = c.getOrigHost();
+	int    port = c.getOrigPort();
 	System.out.println("Connection to "+host+":"+port+" closed.");
     }
 
-    public void updateConnection(String host, int port, int status) {
+    public void updateConnection(Connection c, int status) {
+	String host = c.getOrigHost();
+	int    port = c.getOrigPort();
 	if (status==ActivityCallback.STATUS_CONNECTED)
 	    System.out.println("Connected to "+host+":"+port+".");
 	else {

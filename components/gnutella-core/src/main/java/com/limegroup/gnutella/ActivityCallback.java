@@ -19,17 +19,17 @@ public interface ActivityCallback
     /**
      *  Handle a new connection.
      */
-    public void addConnection(String host, int port, int type, int status);
+    public void addConnection(Connection c, int type, int status);
 
     /**
      *  Handle a removed connection.
      */
-    public void removeConnection(String host, int port);
+    public void removeConnection(Connection c);
 
     /**
      *  Change the status of a connection
      */
-    public void updateConnection(String host, int port, int status);
+    public void updateConnection(Connection c, int status);
 
     /**
      *  Add a known host/port

@@ -67,10 +67,14 @@ public class Connection implements Runnable {
     private OutputStream out;
     private boolean incoming;
 
+    /** Trigger an opening connection to shutdown after it opens */
+    private boolean doShutdown;
+
     /** The number of packets I sent and received.  This includes bad packets. 
      *  These are synchronized by out and in, respectively. */
     private int sent=0;
     private int received=0;
+    private int dropped=0;
     
     /** Statistics about horizon size. */
     public long totalFileSize;
@@ -89,6 +93,7 @@ public class Connection implements Runnable {
 	this.host=host;
 	this.port=port;
 	this.incoming=false;
+	this.doShutdown=false;
     }
 
     /** 
@@ -111,10 +116,23 @@ public class Connection implements Runnable {
 	//Handshake
 	sendString(CONNECT);
 	expectString(OK);
+	if ( doShutdown )
+	    sock.close();
     }
 
     /** 
-     * Creates an incoming, connected connection around an existing socket.
+     * Allows for the creation of an incoming connection.
+     * Note:  You must call init incoming for a incoming socket.
+     */
+    public Connection(String host, int port, boolean incoming) {	
+	this.host=host;
+	this.port=port;
+	this.incoming=incoming;
+	this.doShutdown=false;
+    }    
+
+    /** 
+     * Initialize an incoming, connected connection around an existing socket.
      *
      * @requires the word "GNUTELLA " and nothing else has just been read from sock
      * @modifies network
@@ -122,7 +140,7 @@ public class Connection implements Runnable {
      *  handshake.  Throws IOException if the connection couldn't be established.
      *  DOES NOT ADD THIS TO MANAGER. 
      */
-    public Connection(Socket sock) throws IOException {
+    public void initIncoming(Socket sock) throws IOException {
 	this.sock=sock;
 	this.in=new BufferedInputStream(sock.getInputStream());
 	this.out=new BufferedOutputStream(sock.getOutputStream());
@@ -131,6 +149,8 @@ public class Connection implements Runnable {
 	//Handshake
 	expectString(CONNECT_WITHOUT_FIRST_WORD);
 	sendString(OK);
+	if ( doShutdown )
+	    sock.close();
     }    
 
     protected synchronized void sendString(String s) throws IOException {
@@ -180,8 +200,9 @@ public class Connection implements Runnable {
      * Receives a message.
      *
      * @requires this is in the CONNECTED state
-     * @effects exactly like Message.read(), but blocks until a 
-     *  message is available.
+     * @effects See specification of Message.read. Note that this <i>may</i> be
+     *  non-blocking, but there is no hard guarantee on the maximum
+     *  block time.  This is thread-safe.
      */
     public Message receive() throws IOException, BadPacketException {
 	Assert.that(sock!=null && in!=null && out!=null, "Illegal socket state for receive");
@@ -194,29 +215,6 @@ public class Connection implements Runnable {
 	    //if (m!=null)
 	    //	System.out.println("Read "+m.toString()+"\n    from "+sock.toString());
 	    return m;
-	}
-    }
-
-    /**
-     * Receives a message with timeout.
-     *
-     * @requires this is in the CONNECTED state
-     * @effects exactly like Message.read(), but throws InterruptedIOException if
-     *  timeout!=0 and no message is read after "timeout" milliseconds.  In this
-     *  case, you should terminate the connection, as half a message may have been 
-     *  read.
-     */
-    public Message receive(int timeout) 
-	throws IOException, BadPacketException, InterruptedIOException {
-	synchronized (in) {
-	    //temporarily change socket timeout.
-	    int oldTimeout=sock.getSoTimeout();
-	    sock.setSoTimeout(timeout);
-	    try {
-		return receive();
-	    } finally {
-		sock.setSoTimeout(oldTimeout);
-	    }
 	}
     }
 
@@ -291,10 +289,12 @@ public class Connection implements Runnable {
 			}
 			else{//TTL is zero
 			    //do nothing (drop the message).
+			    dropped++;
 			}
 		    }
 		    else{// message has already been processed before
 			//do nothing (drop message)
+			dropped++;
 		    }
 		}
 		else if (m instanceof PingReply){
@@ -317,6 +317,7 @@ public class Connection implements Runnable {
 		    }
 		    else { //Route Table does not know what to do with message
 			//do nothing...drop the message
+			dropped++;
 		    }
 		}
 		else if (m instanceof QueryRequest){
@@ -379,6 +380,7 @@ public class Connection implements Runnable {
 		    }
 		    else{//message has been entry in Route Table, has already been processed.
 			//do nothing (drop message)
+			dropped++;
 		    }
 		}
 		else if (m instanceof QueryReply){
@@ -406,6 +408,7 @@ public class Connection implements Runnable {
 		    }
 		    else{//route table does not know what to do this message
 			//do nothing...drop the message
+			dropped++;
 		    }
 		}
 		else if (m instanceof PushRequest){
@@ -430,6 +433,7 @@ public class Connection implements Runnable {
 		    else{// the message has arrived in error
 			//System.out.println("Sumeet: Message arrived in error");
 			//do nothing.....drop the message
+			dropped++;
 		    }
 		}// else if		
 	    }//while
@@ -440,16 +444,8 @@ public class Connection implements Runnable {
     }//run
 
     public String toString() {
-	//hack!
-	if (this==ConnectionManager.ME_CONNECTION)
-	    return "Connection(<ME>)";
-	//unconnected outgoing connection
-	else if (sock==null) 
-	    return "Connection(unconnected, "+host+":"+port+")";
-	//normal, connected connection
-	else
-	    return "Connection("+(incoming?"incoming":"outgoing")
-		+", "+sock.toString()+", "+sent+", "+received+")";
+	return "Connection("+(incoming?"incoming":"outgoing")
+	    +", "+host+":"+port+", "+sent+", "+received+")";
     }
 
     public boolean isOutgoing() {
@@ -460,9 +456,20 @@ public class Connection implements Runnable {
      *  Shutdown the Connections socket and thus the connection itself.
      */
     public void shutdown() {
+	doShutdown = true;
 	try {
 	    sock.close();
 	} catch(Exception e) {}
+    }
+
+    /** Returns the host set at construction */
+    public String getOrigHost() {
+	return host;
+    }
+
+    /** Returns the port set at construction */
+    public int getOrigPort() {
+	return port;
     }
 
     /** Returns the port of the foreign host this is connected to. */
@@ -507,33 +514,19 @@ public class Connection implements Runnable {
 	return totalFileSize;
     }   
 
-//      public static void main(String args[]) {
-//  	System.out.println(ConnectionManager.ME_CONNECTION.toString());
-//  	System.out.println((new Connection("somehost.com",123)).toString());
+    /** Returns the number of messages sent on this connection */
+    public long getNumSent() {
+	return sent;
+    }
 
-//  	Connection c=new Connection("localhost", 6346);
-//  	try {
-//  	    c.connect();
-//  	    System.out.print("This should pause for 5 seconds...");
-//  	    try {
-//  		c.receive(5000);
-//  	    } catch (InterruptedIOException e) { 
-//  	    } catch (BadPacketException e) {
-//  		System.out.println("I wasn't expecting BadPacketException!");
-//  	    } catch (IOException e) {
-//  		System.out.println("I wasn't expecting IOException!");
-//  	    }
-//  	    System.out.println("done.");
-//  	    System.out.println("This should hang forever...");
-//  	    try {
-//  		c.receive(0);
-//  	    } catch (BadPacketException e) {
-//  		System.out.println("I wasn't expecting BadPacketException!");
-//  	    } catch (IOException e) {
-//  		System.out.println("I wasn't expecting IOException!");
-//  	    }
-//  	} catch (IOException e) {
-//  	    System.out.println("Got IOException");
-//  	}
-//      }	
+    /** Returns the number of messages received on this connection */
+    public long getNumReceived() {
+	return received;
+    }
+
+    /** Returns the number of messages dropped on this connection */
+    public long getNumDropped() {
+	return dropped;
+    }
+
 }

@@ -177,11 +177,15 @@ public class HostCatcher {
      */
     public Connection choose() throws NoSuchElementException {
 	while (true) {
+	    // Return if the manager has enough
+	    if ( manager != null && !manager.doYouWishToContinue() )
+		return null;
 	    Endpoint e=getAnEndpoint();	
+	    Connection ret = null;
 	    try {
+		ret = new Connection(e.hostname,e.port);
 		if (manager!=null)
-		    manager.tryingToConnect(e.hostname,e.port, false);
-		Connection ret=new Connection(e.hostname,e.port);
+		    manager.tryingToConnect(ret, false);
 		ret.connect();
 		//Note that we've given out e for future reference
 		synchronized(chosen) {
@@ -190,7 +194,7 @@ public class HostCatcher {
 		return ret;
 	    } catch (IOException exc) {
 		if (manager!=null)
-		    manager.failedToConnect(e.hostname,e.port);
+		    manager.failedToConnect(ret);
 		continue;
 	    }
 	}
@@ -280,6 +284,31 @@ public class HostCatcher {
     {
 	if ( manager!=null && manager.getCallback() != null )
 	    manager.getCallback().knownHost(e);
+    }
+
+    /**
+     *  Remove unwanted or used entries
+     */
+    public void removeHost(String host, int port) {
+	synchronized(likelys) {
+	    removeHost(host, port, likelys);
+	}
+	//Followed by gnutella.net entries...
+	synchronized(maybes) {
+	    removeHost(host, port, maybes);
+	}
+    }
+
+    private void removeHost(String host, int port, Set set) {
+	Iterator enum=set.iterator();
+	while (enum.hasNext()) {
+	    Endpoint e=(Endpoint)enum.next();
+	    if ( e.hostname.equals(host) && e.port == port )
+	    {
+		set.remove(e);
+		return;
+	    }
+	}
     }
 
     public String toString() {

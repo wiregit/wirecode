@@ -73,11 +73,10 @@ public class RouterService
     /**
      * Connect to remote host (establish outgoing connection)
      */
-    public void connectToHost( String host, int port ) throws IOException
+    public void connectToHost( Connection c ) throws IOException
     {
 	try {
-	    manager.tryingToConnect(host,port,false);
-	    Connection c=new Connection(host, port);
+	    manager.tryingToConnect(c,false);
 	    c.connect();
 	    c.setManager(manager);
 	    manager.add(c); //calls ActivityCallback.updateConnection
@@ -88,7 +87,7 @@ public class RouterService
 	    tc.setDaemon(true);
 	    tc.start();
 	} catch (IOException e) {
-	    manager.failedToConnect(host, port);
+	    manager.failedToConnect(c);
 	    throw e;
 	}
     }
@@ -96,32 +95,12 @@ public class RouterService
     /**
      * Remove a connection based on the host/port
      */
-    public void removeConnection( String host, int port )
+    public void removeConnection( Connection c )
     {
-	Connection conn = findConnection( host, port );
-	conn.shutdown();
-	if ( conn != null )
-	    manager.remove(conn);
+	c.shutdown();
+	manager.remove(c);
     }
 
-    /**
-     *  Find a Connection given a host/port
-     */
-    private Connection findConnection(String host, int port)
-    {
-	Iterator    iter = manager.connections();
-	Connection  conn;
-
-	while ( iter.hasNext() )
-	{
-	    conn = (Connection) iter.next();
-	    if ( conn.getPort() != port )
-		continue;
-	    if ( host.equals( conn.getInetAddress().getHostAddress() ) )
-		return( conn );
-	}
-	return(null);
-    }
 
     /**
      * Tell the system to send connection activity to this callback interface
@@ -131,6 +110,9 @@ public class RouterService
         manager.setActivityCallback( callback );
     }
 
+    /**
+     * Shut stuff down and write the gnutella.net file
+     */
     public void shutdown()
     {
 	manager.shutdown(); //write gnutella.net
@@ -245,5 +227,11 @@ public class RouterService
 	return( manager.QReqCount );
     }
 
+    /**
+     *  Remove unwanted or used entries from host catcher 
+     */
+    public void removeHost(String host, int port) {
+	manager.catcher.removeHost(host, port);
+    }
 }
 

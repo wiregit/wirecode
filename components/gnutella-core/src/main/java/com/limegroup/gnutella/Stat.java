@@ -51,6 +51,8 @@ public class Stat implements Runnable{
 		pr.println("Query requests : " + man.QReqCount + " (" + ((man.QReqCount*100)/man.total) +"%)" );
 		pr.println("Query replies : " + man.QRepCount + " (" + ((man.QRepCount*100)/man.total) +"%)" );
 		pr.println("Push requests : " + man.pushCount + " (" + ((man.pushCount*100)/man.total) +"%)" );
+		//pr.println("Total files : " + man.totalFiles );
+		//pr.println("Total size : " + man.totalSize );
 		pr.println("-------------------------------------------------" );
 		pr.flush();
 	    }

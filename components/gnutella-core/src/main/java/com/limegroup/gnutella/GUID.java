@@ -68,6 +68,25 @@ public class GUID /* implements Comparable */ {
 	return buf.toString();
     }
 
+    /** 
+     *  Create a hex version of a GUID for compact display and storage
+     *  Note that the client guid should be read in with the 
+     *  Integer.parseByte(String s, int radix)  call like this in reverse
+     */
+    public String toHexString() {
+	StringBuffer buf=new StringBuffer();
+	int val;
+	for (int i=0; i<SZ; i += 4)
+	{
+	    val = bytes[i];
+	    val = (val * 256) + bytes[i+1];
+	    val = (val * 256) + bytes[i+2];
+	    val = (val * 256) + bytes[i+3];
+	    buf.append( Integer.toHexString(val) );	  
+	}
+	return buf.toString();
+    }
+
     public static void main(String args[]) {
 	byte[] b1=new byte[16];
 	byte[] b2=new byte[16];
