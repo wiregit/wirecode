@@ -27,15 +27,15 @@ public final class AlternateLocation
 	private final URL URL;
 
 	/**
-	 * <tt>Date</tt> instance for conveniently making time comparisons
-	 * betwween <tt>AlternateLocation</tt> instances.
-	 */
-	private final Date DATE;
-
-	/**
 	 * The <tt>String</tt> instance as it is written in the header.
 	 */
 	private final String OUTPUT_DATE_TIME;
+
+	/**
+	 * Contant long representation of the time in milliseconds since 
+	 * January 1, 1970, 00:00:00 GMT.
+	 */
+	private final long TIME;
 	
 
 	/**
@@ -56,12 +56,16 @@ public final class AlternateLocation
 		
 		if(!AlternateLocation.isTimestamped(LOCATION)) {
 			OUTPUT_DATE_TIME = null;		
-			DATE = new Date(0);
+			
+			// just set the time to be as old as possible since there's
+			// no date information -- this makes comparisons easier
+			TIME = new Date(0).getTime();
 		}
 		else {
 			// this can be null
 			OUTPUT_DATE_TIME = AlternateLocation.extractDateTimeString(LOCATION);			
-			DATE = AlternateLocation.createDateInstance(OUTPUT_DATE_TIME);
+			Date date = AlternateLocation.createDateInstance(OUTPUT_DATE_TIME);
+			TIME = date.getTime();
 		}		
 	}
 
@@ -80,8 +84,9 @@ public final class AlternateLocation
 		this.URL = new URL(fullUrl);
 
 		// make the date the current time
-		this.DATE = new Date();
-		this.OUTPUT_DATE_TIME = AlternateLocation.convertDateToString(this.DATE);
+		Date date = new Date();
+		TIME = date.getTime();
+		this.OUTPUT_DATE_TIME = AlternateLocation.convertDateToString(date);
 	}
 
 	/**
@@ -185,14 +190,15 @@ public final class AlternateLocation
 	}
 
 	/**
-	 * Returns the <tt>Date</tt> instance for this alternate location.
+	 * A new <tt>Date</tt> instance representing the timestamp for this 
+	 * alternate location.
 	 *
-	 * @return the <tt>Date</tt> instance for this alternate location, or
-	 *  <tt>null</tt> if this alternate location does not have a timestamp
+	 * @return a new <tt>Date</tt> instance representing the timestamp for this 
+	 * alternate location
 	 */
 	public Date getTimestamp() {
 		// this is fine because the Date class is immutable
-		return DATE;
+		return new Date(TIME);
 	}
 
 	/**
@@ -401,9 +407,8 @@ public final class AlternateLocation
 	public int compareTo(Object obj) {
 		if(this.equals(obj)) return 0;
 		AlternateLocation al = (AlternateLocation)obj;		
-		long thisTime    = DATE.getTime();
 		long anotherTime = al.getTimestamp().getTime();
-		return (thisTime<anotherTime ? 1 : (thisTime==anotherTime ? 0 : -1));
+		return (TIME<anotherTime ? 1 : (TIME==anotherTime ? 0 : -1));
 	}
 
 	/**
@@ -424,7 +429,7 @@ public final class AlternateLocation
 		Date date = al.getTimestamp();
 		URL url = al.getUrl();
 		if(al.isTimestamped() && this.isTimestamped()) {
-			if(date.compareTo(DATE) != 0) {
+			if(date.compareTo(this.getTimestamp()) != 0) {
 				return false;
 			}
 		}
