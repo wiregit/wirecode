@@ -1,13 +1,18 @@
 package com.limegroup.gnutella.browser;
 
-import java.net.*;
-import java.io.*;
-import com.sun.java.util.collections.*;
+import java.io.BufferedOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.ServerSocket;
+import java.net.Socket;
+import java.net.UnknownHostException;
 import java.util.Date;
 
-import com.limegroup.gnutella.*;
-import com.limegroup.gnutella.http.*;
-import com.limegroup.gnutella.util.*;
+import com.limegroup.gnutella.ByteReader;
+import com.limegroup.gnutella.Constants;
+import com.limegroup.gnutella.ErrorService;
+import com.limegroup.gnutella.util.CommonUtils;
+import com.limegroup.gnutella.util.IOUtils;
 import com.limegroup.gnutella.util.URLDecoder;
 
 
