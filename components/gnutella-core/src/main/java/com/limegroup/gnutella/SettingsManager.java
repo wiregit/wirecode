@@ -159,7 +159,7 @@ public class SettingsManager {
 	private final boolean DEFAULT_SHOW_TRAY_DIALOG    = true;
 	private final boolean DEFAULT_MINIMIZE_TO_TRAY    = true;
 	private final boolean DEFAULT_SHOW_CLOSE_DIALOG   = true;
-	private final String  DEFAULT_CLASSPATH           
+	public final String  DEFAULT_CLASSPATH           
 		= "LimeWire.jar" + File.pathSeparator + "collections.jar";
 	private final String  DEFAULT_MAIN_CLASS           
 		= "com.limegroup.gnutella.gui.Main";
@@ -1631,7 +1631,7 @@ public class SettingsManager {
      * @return <tt>true</tt> if this node has ever met supernode requirements,
      *         <tt>false</tt> otherwise
      */
-    public boolean getEverSupernodCapable() {
+    public boolean getEverSupernodeCapable() {
         Boolean b = 
             Boolean.valueOf(PROPS.getProperty(EVER_SUPERNODE_CAPABLE));
         return b.booleanValue();
