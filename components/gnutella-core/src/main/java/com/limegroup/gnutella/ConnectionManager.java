@@ -523,7 +523,7 @@ public class ConnectionManager {
      * false otherwise
      */
      public boolean allowConnection(HandshakeResponse hr) {
-         return allowConnection(hr, false);
+         return allowConnection(hr, !hr.isUltrapeer());
      }
 
     

@@ -51,8 +51,10 @@ public class UltrapeerHandshakeResponder
 		//already have enough old-fashioned connections, reject it.  We've
 		//already given ultrapeer guidance at this point, so there's no
 		//"second chance" like in the reject(..) method.
+		if(!response.isUltrapeer())
+		    return HandshakeResponse.createRejectOutgoingResponse();
 
-		if(!_manager.allowConnection(response)) {			
+		if(!_manager.allowConnection(response)) {
             return HandshakeResponse.createRejectOutgoingResponse();
 		}
 
@@ -150,11 +152,12 @@ public class UltrapeerHandshakeResponder
 
         boolean allowedNow = _manager.allowConnection(response);
 		if(allowedNow) return false;
+		
+		// no more room for this leaf, reject.
+		if( !response.isUltrapeer() )
+		    return true; // nothing we can do.
 
-		boolean allowedAsLeaf = _manager.allowConnectionAsLeaf(response);
-
-        //Reject if not allowed now and guidance not possible.
-        return !(response.isUltrapeer() && allowedAsLeaf);
+		return !_manager.allowConnectionAsLeaf(response);
     }
 }
 
