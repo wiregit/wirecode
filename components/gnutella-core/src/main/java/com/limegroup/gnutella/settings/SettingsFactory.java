@@ -49,7 +49,7 @@ public final class SettingsFactory {
 	 *
 	 * @param settingsStream the <tt>InputStream</tt> to load
 	 */
-	public void reload(File file) {//InputStream settingsStream) {
+	public void reload(File file) {
         try {
             PROPS.load(new FileInputStream(file));
         } catch(IOException e) {
