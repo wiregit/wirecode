@@ -83,8 +83,9 @@ public class DownloadTester {
         long start1=System.currentTimeMillis();
         try {
             HTTPDownloader downloader=new HTTPDownloader(
-                rfd, file, 0, TestFile.length());
-            downloader.connect();
+                rfd, file);
+            downloader.connectTCP(0);
+            downloader.connectHTTP(0,TestFile.length());
             downloader.doDownload(true);        
         } catch (IOException e) {
             Assert.that(false, "Unexpected exception: "+e);
@@ -104,8 +105,9 @@ public class DownloadTester {
         long start2=System.currentTimeMillis();
         try {
             HTTPDownloader downloader=new HTTPDownloader(
-                rfd, file, 0, TestFile.length());
-            downloader.connect();
+                rfd, file);
+            downloader.connectTCP(0);
+            downloader.connectHTTP(0, TestFile.length());
             downloader.doDownload(false);        
         } catch (IOException e) {
             Assert.that(false, "Unexpected exception: "+e);

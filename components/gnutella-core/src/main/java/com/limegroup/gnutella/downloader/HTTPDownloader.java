@@ -60,8 +60,9 @@ public class HTTPDownloader implements BandwidthTracker {
     private BandwidthTrackerImpl bandwidthTracker=new BandwidthTrackerImpl();
 
     /**
-     * Creates an uninitialized client-side normal download.  Call connect() on
-     * this before any other methods.  Non-blocking.
+     * Creates an uninitialized client-side normal download.  Call 
+     * connectTCP and connectHTTP() on this before any other methods.  
+     * Non-blocking.
      *
      * @param rfd complete information for the file to download, including
      *  host address and port
@@ -71,18 +72,15 @@ public class HTTPDownloader implements BandwidthTracker {
      *  the file
      * @param stop the last byte to read+1
      */
-	public HTTPDownloader(RemoteFileDesc rfd,
-                          File incompleteFile,
-                          int start,
-                          int stop) {
+	public HTTPDownloader(RemoteFileDesc rfd, File incompleteFile) {
         //Dirty secret: this is implemented with the push constructor!
-        this(null, rfd, incompleteFile, start, stop);
+        this(null, rfd, incompleteFile);
         _isPush=false;
 	}	
 
 	/**
-     * Creates an uninitialized server-side push download.  Call connect() on
-     * this before any other methods.  Non-blocking.
+     * Creates an uninitialized server-side push download.  Call 
+     * connectHTTP() on this before any other methods.  Non-blocking.
      * 
      * @param socket the socket to download from.  The "GIV..." line must
      *  have been read from socket.  HTTP headers may not have been read or 
@@ -91,15 +89,9 @@ public class HTTPDownloader implements BandwidthTracker {
      *  host address and port
      * @param incompleteFile the temp file to use while downloading, which need
      *  not exist.
-     * @param start the place to start reading from network and writing to
-     *  the file
-     * @param stop the last byte to read+1
      */
-	public HTTPDownloader(Socket socket,
-                          RemoteFileDesc rfd,
-                          File incompleteFile,
-                          int start,
-                          int stop) {
+	public HTTPDownloader(Socket socket, RemoteFileDesc rfd, 
+                          File incompleteFile) {
         _isPush=true;
         _rfd=rfd;
         _socket=socket;
@@ -113,8 +105,6 @@ public class HTTPDownloader implements BandwidthTracker {
 		_chatEnabled = rfd.chatEnabled();
         
 		_amountRead = 0;
-        _amountToRead = stop-start;
-		_initialReadingPoint = start;
     }
 
 
@@ -125,25 +115,21 @@ public class HTTPDownloader implements BandwidthTracker {
      * @see connect(int)
      */
     public void connect() throws IOException {
-        connect(0);
+        connectTCP(0);        
     }
 
     /** 
      * Initializes this by connecting to the remote host (in the case of a
-     * normal client-side download), sending a GET request, and reading all
-     * headers.  Blocks for up to timeout milliseconds trying to connect, unless
-     * timeout is zero, in which case there is no timeout.  This MUST be
-     * uninitialized, i.e., connect may not be called more than once.
+     * normal client-side download). Blocks for up to timeout milliseconds 
+     * trying to connect, unless timeout is zero, in which case there is 
+     * no timeout.  This MUST be uninitialized, i.e., connectTCP may not be 
+     * called more than once.
      *
      * @param timeout the timeout to use for connecting, in milliseconds,
      *  or zero if no timeout
      * @exception CantConnectException could not establish a TCP connection
-     * @exception TryAgainLaterException the host is busy
-     * @exception FileNotFoundException the host doesn't recognize the file
-     * @exception NotSharingException the host isn't sharing files (BearShare)
-     * @exception miscellaneous error 
      */
-	public void connect(int timeout) throws IOException {        
+	public void connectTCP(int timeout) throws IOException {        
         //Connect, if not already done.  Ignore 
         //The try-catch below is a work-around for JDK bug 4091706.
         InputStream istream=null;
@@ -159,7 +145,23 @@ public class HTTPDownloader implements BandwidthTracker {
             throw new CantConnectException();
         }
         _byteReader = new ByteReader(istream);
-
+    }
+    
+    /** Sends a GET request using an already open socket, and reads all 
+     * headers. 
+     * <p>
+     * @param start The byte at which the HTTPDownloader should begin
+     * @param stop The byte at which the HTTPDownloader should stop
+     * <p>
+     * @exception TryAgainLaterException the host is busy
+     * @exception FileNotFoundException the host doesn't recognize the file
+     * @exception NotSharingException the host isn't sharing files (BearShare)
+     * @exception IOException miscellaneous  error 
+     */
+    public void connectHTTP (int start, int stop) throws IOException,
+    TryAgainLaterException, FileNotFoundException, NotSharingException {
+        _amountToRead = stop-start;
+		_initialReadingPoint = start;
         //Write GET request and headers.  TODO: we COULD specify the end of the
         //range (i.e., start+bytes).  But why bother?
         OutputStream os = _socket.getOutputStream();
