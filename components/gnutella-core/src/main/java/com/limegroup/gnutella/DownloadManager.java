@@ -872,8 +872,8 @@ public class DownloadManager implements BandwidthTracker {
                 String connectTo = 
                     "http://" + ppIp + ":" + ppPort + requestString;
                 HeadMethod head = new HeadMethod(connectTo);
-                head.addRequestHeader("Cache-Control", "no-cache");
                 head.addRequestHeader(nodeString, nodeValue);
+                head.addRequestHeader("Cache-Control", "no-cache");                
                 HttpClient client = HttpClientManager.getNewClient();
                 try {
                     client.executeMethod(head);
