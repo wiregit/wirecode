@@ -1,10 +1,7 @@
 package com.limegroup.gnutella.browser;
 
 /**
- * @author zab
- *
- * moved this guy in his own class so that I can get info from 
- * outside of the package.
+ * Contains information fields extracted from a magnet link.
  */
 public class MagnetOptions {
 	public static final String MAGNET    = "magnet:?";
