@@ -237,7 +237,7 @@ public final class ID3Reader {
     /**
      * Takes a short and returns the corresponding genre string
      */
-    private String getGenreString(short genre){
+    public static String getGenreString(short genre){
         switch(genre){
         case 0: return "Blues";
         case 1: return "Classic Rock";
@@ -249,11 +249,11 @@ public final class ID3Reader {
         case 7: return "Hip-Hop";
         case 8: return "Jazz";
         case 9: return "Metal";
-        case 10: return  "New Age";
+        case 10: return "New Age";
         case 11: return "Oldies";
         case 12: return "Other";
         case 13: return "Pop";
-        case 14 : return "R &amp; B";
+        case 14: return "R &amp; B";
         case 15: return "Rap";
         case 16: return "Reggae";
         case 17: return "Rock";

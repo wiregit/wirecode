@@ -6,6 +6,7 @@ import java.io.*;
 import com.limegroup.gnutella.util.*;
 import org.apache.xerces.parsers.DOMParser;
 import com.limegroup.gnutella.Assert;
+import com.limegroup.gnutella.mp3.ID3Reader;
 import org.xml.sax.*;
 import org.w3c.dom.*;
 
@@ -394,9 +395,31 @@ public class LimeXMLDocument implements Serializable {
 
 
     public String getValue(String fieldName){
-
+        String retValue = null;
         fieldName = fieldName.trim();
-        return (String)fieldToValue.get(fieldName);
+        retValue = (String)fieldToValue.get(fieldName);
+        /** The following HACK is necessitated by my omission of
+         *  getGenreString() in the new ID3Editor.readDocument() method.
+         *  That method has been fixed, but certain clients still have issues.
+         *  So we need to turn any numbers into the appropriate genre...
+         */
+        if (fieldName.equals("audios__audio__genre__") && (retValue != null)) {
+            try {
+                short index = Short.parseShort(retValue);
+                retValue = ID3Reader.getGenreString(index);
+                fieldToValue.put(fieldName, retValue);
+            }
+            catch (NumberFormatException ignored) {
+                // the string is fine, it is a valid genre...
+            }
+            finally {
+                if (retValue.equals("")) {
+                    fieldToValue.remove(fieldName);
+                    retValue = null;
+                }
+            }
+        }
+        return retValue;
     }
     
 
