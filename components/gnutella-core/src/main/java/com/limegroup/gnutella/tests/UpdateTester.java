@@ -1,7 +1,5 @@
 /**
- * file: UpdateTester.java
- * auth: afisk
- * desc: This class constructs a small gui to test updates.
+ * This class constructs a small gui to test updates.
  */
 //2345678|012345678|012345678|012345678|012345678|012345678|012345678|012345678|
 
@@ -75,11 +73,11 @@ public class UpdateTester extends JFrame {
 	 * main method to kick off the test.
 	 */
 	public static void main(String args[]) {
-		CommonUtils.initialize();
+		//CommonUtils.initialize();
 		SettingsManager.instance();
         FileManager.instance();
-        try {UIManager.setLookAndFeel(new LimeLookAndFeel());}
-        catch (UnsupportedLookAndFeelException ulafe) {}
+        //try {UIManager.setLookAndFeel(new LimeLookAndFeel());}
+        //catch (UnsupportedLookAndFeelException ulafe) {}
 		UpdateTester tester = new UpdateTester();
 		//UpdateManager manager = UpdateManager.instance();
 		//manager.startTest("1.1", "Mac OS");

@@ -59,7 +59,7 @@ public class ConnectionManager {
      *  incoming connections.
      *
      *  LOCKING: obtain _incomingConnectionLock */
-    private int _incomingConnections=0;
+    private volatile int _incomingConnections=0;
     /** The lock for the number of incoming connnections. */
     private Object _incomingConnectionsLock=new Object();
 
@@ -107,6 +107,7 @@ public class ConnectionManager {
      */
     public ManagedConnection createConnectionBlocking(
             String hostname, int portnum) throws IOException {
+
         ManagedConnection c = new ManagedConnection(hostname, portnum, _router,
                                                     this);
 
@@ -124,6 +125,7 @@ public class ConnectionManager {
      */
     public void createConnectionAsynchronously(
             String hostname, int portnum) {
+
         // Initialize and loop for messages on another thread.
         new OutgoingConnectionThread(
                 new ManagedConnection(hostname, portnum, _router, this),
@@ -139,8 +141,15 @@ public class ConnectionManager {
      */
     public ManagedConnection createRouterConnection(
             String hostname, int portnum) throws IOException {
-        ManagedConnection c = new ManagedConnection(hostname, portnum, _router,
-                                                    this, true);
+
+		// Use dedicated pong server instead of defaul for LimeWire
+		if ( hostname.equals(SettingsManager.DEFAULT_LIMEWIRE_ROUTER) ) {
+			hostname = SettingsManager.DEDICATED_LIMEWIRE_ROUTER;
+		}
+
+        ManagedConnection c = 
+		  new ManagedConnection(hostname, portnum, _router, this, true);
+
         // Initialize synchronously
         initializeExternallyGeneratedConnection(c);
         // Kick off a thread for the message loop.
@@ -181,18 +190,18 @@ public class ConnectionManager {
              } catch(IOException e) {
              } catch(Exception e) {
                  //Internal error!
-                 _callback.error(ActivityCallback.ERROR_20, e);
+                 _callback.error(ActivityCallback.INTERNAL_ERROR, e);
              } finally {
                  synchronized (_incomingConnectionsLock) {
                      _incomingConnections--;
                  }
              }
          } else {
-             //b) Handle reject connection if on windows.  The constructor does the
-             //whole deal -- intializing, looking for and responding to a
-             //PingRequest.  It's all synchronous, because we have a dedicated
-             //thread right here.
-			if(CommonUtils.isWindows()) {
+             //b) Handle reject connection if not on a Mac with OS 9.1 or below.  
+			 //The constructor does the whole deal -- intializing, looking for 
+			 //and responding to a PingRequest.  It's all synchronous, because 
+			 //we have a dedicated thread right here.
+			if(!CommonUtils.isMacClassic()) {
 				new RejectConnection(socket, _catcher);
 			}
             
@@ -234,6 +243,14 @@ public class ConnectionManager {
         return _keepAlive;
     }
 
+	/**
+	 * this method reduces the number of connections
+	 */
+	public synchronized void reduceConnections() {
+		int newKeepAlive = Math.min(_keepAlive, 2);
+		setKeepAlive(newKeepAlive);
+	}
+
     /**
      * Reset how many connections you want and start kicking more off
      * if required.  This IS synchronized because we don't want threads
@@ -262,7 +279,8 @@ public class ConnectionManager {
     }
 
     /**
-     * @return the number of connections
+     * @return the number of connections, which is greater than or equal
+     *  to the number of initialized connections.
      */
     public int getNumConnections() {
         return _connections.size();
@@ -657,7 +675,7 @@ public class ConnectionManager {
             } catch(IOException e) {
             } catch(Exception e) {
                 //Internal error!
-                _callback.error(ActivityCallback.ERROR_20, e);
+                _callback.error(ActivityCallback.INTERNAL_ERROR, e);
             }
         }
     }
@@ -709,7 +727,7 @@ public class ConnectionManager {
             } catch(IOException e) {
             } catch(Exception e) {
                 //Internal error!
-                _callback.error(ActivityCallback.ERROR_20, e);
+                _callback.error(ActivityCallback.INTERNAL_ERROR, e);
             }
 
             //SettingsManager settings = SettingsManager.instance();
@@ -803,7 +821,7 @@ public class ConnectionManager {
             } catch(IOException e) {
             } catch(Exception e) {
                 //Internal error!
-                _callback.error(ActivityCallback.ERROR_20, e);
+                _callback.error(ActivityCallback.INTERNAL_ERROR, e);
             }
         }
     }

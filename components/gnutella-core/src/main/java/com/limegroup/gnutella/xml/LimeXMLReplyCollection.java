@@ -30,12 +30,23 @@ class LimeXMLReplyCollection{
     public String getSchemaURI(){
         return schemaURI;
     }
+
+    public List getCollectionList(){
+        return replyDocs;
+    }
+
     
+    /**
+     * Returns and empty list if there are not matching documents with
+     * that correspond to the same schema as the query.
+     */    
     public List getMatchingReplies(LimeXMLDocument queryDoc){
         int size = replyDocs.size();
         List matchingReplyDocs = new ArrayList();
         for(int i=0;i<size;i++){            
             LimeXMLDocument currReplyDoc = (LimeXMLDocument)replyDocs.get(i);
+            //Note: currReplyDoc may be null, in which case match will return 
+            // false
             boolean match = match(currReplyDoc, queryDoc);
             if(match){
                 matchingReplyDocs.add(currReplyDoc);
@@ -49,11 +60,18 @@ class LimeXMLReplyCollection{
         replyDocs.add(replyDoc);
     }
 
+
+    public void appendCollectionList(List newReplyCollection){
+        replyDocs.addAll(newReplyCollection);
+    }
+
     private boolean match(LimeXMLDocument replyDoc, LimeXMLDocument queryDoc){
+        if(replyDoc==null)
+            return false;
         //First find the names of all the fields in the query
         List queryNameValues = queryDoc.getNameValueList();
-        List fieldNames = new ArrayList();
         int size = queryNameValues.size();
+        List fieldNames = new ArrayList(size);
         for(int i=0; i<size; i++){
             NameValue nameValue = (NameValue)queryNameValues.get(i);
             String fieldName = nameValue.getName();
@@ -70,7 +88,7 @@ class LimeXMLReplyCollection{
             if(replyDocValue == null)
                 nullCount++;
             if(replyDocValue.equals(queryValue))
-                matchCount++;            
+                matchCount++;
         }
         //The metric of a correct match is that whatever fields are specified
         //in the query must have perfect match with the fields in the reply

@@ -123,7 +123,7 @@ class LimeXMLSchemaFieldExtractor
     {
         try
         {
-            //reInitialize fields
+            //reInitialize fields(internal datastructures)
             reInitializeMemberFields();
             
             //traverse the document

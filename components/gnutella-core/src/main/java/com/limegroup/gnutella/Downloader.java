@@ -1,5 +1,6 @@
 package com.limegroup.gnutella;
 
+import com.limegroup.gnutella.downloader.AlreadyDownloadingException;
 import java.net.InetAddress;
 
 /**
@@ -24,11 +25,22 @@ public interface Downloader {
     public void stop();
 
     /**
-     * Resumes this.  If the download is GAVE_UP, tries all locations again.  If
-     * WAITING_FOR_RETRY, forces the retry immediately.  Otherwise does nothing.  
-     *     @modifies this
+     * Resumes this.  If the download is GAVE_UP, tries all locations again and
+     * returns true.  If WAITING_FOR_RETRY, forces the retry immediately and
+     * returns true.  If some other downloader is currently downloading the
+     * file, throws AlreadyDowloadingException.  Otherwise does nothing and
+     * returns false. 
+     *     @modifies this 
      */
-    public void resume();
+    public boolean resume() throws AlreadyDownloadingException;
+
+    /**
+     * Launches the downloaded file with the appropriate program.  If the
+     * download isn't complete, launches whatever has been downloaded, taking
+     * extra work (e.g., copying) if necessary to avoid file locking problems.  
+     * Returns immediately, regardless of whether the launch worked or not.
+     */
+    public void launch();
 
     /**
      * Returns the state of this: one of QUEUED, CONNECTING, DOWNLOADING,

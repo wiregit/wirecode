@@ -147,22 +147,9 @@ public class DownloadManager {
         //Check if file would conflict with any other downloads in progress.
         //TODO3: if only a few of many files conflicts, we could just ignore
         //them.
-        for (int i=0; i<files.length; i++) {
-            //Active downloads...
-            for (Iterator iter=active.iterator(); iter.hasNext(); ) {
-                ManagedDownloader md=(ManagedDownloader)iter.next();
-                if (md.conflicts(files[i]))
-                    throw new AlreadyDownloadingException(
-                        files[i].getFileName());
-            }
-            //Queued downloads...
-            for (Iterator iter=waiting.iterator(); iter.hasNext(); ) {
-                ManagedDownloader md=(ManagedDownloader)iter.next();
-                if (md.conflicts(files[i]))
-                    throw new AlreadyDownloadingException(
-                        files[i].getFileName());
-            }
-        }
+        String conflict=conflicts(files, null);
+        if (conflict!=null)
+            throw new AlreadyDownloadingException(conflict);
 
 
         //Check if file exists.  TODO3: ideally we'd pass ALL conflicting files
@@ -187,6 +174,35 @@ public class DownloadManager {
         return downloader;
     }   
     
+    /**
+     * Returns the name of any of the files in 'files' conflict with any of the
+     * downloads in this except for dloader, which may be null.  Returns null if
+     * there are no conflicts.  This is used before starting and resuming
+     * downloads.  
+     */
+    public synchronized String conflicts(RemoteFileDesc[] files,
+                                         ManagedDownloader dloader) {
+        for (int i=0; i<files.length; i++) {
+            //Active downloads...
+            for (Iterator iter=active.iterator(); iter.hasNext(); ) {
+                ManagedDownloader md=(ManagedDownloader)iter.next();
+                if (dloader!=null && md==dloader)
+                    continue;
+                if (md.conflicts(files[i]))                   
+                    return files[i].getFileName();
+            }
+            //Queued downloads...
+            for (Iterator iter=waiting.iterator(); iter.hasNext(); ) {
+                ManagedDownloader md=(ManagedDownloader)iter.next();
+                if (dloader!=null && md==dloader)
+                    continue;
+                if (md.conflicts(files[i]))
+                    return files[i].getFileName();
+            }
+        }
+        return null;
+    }
+
     /**
      * Accepts the given socket for a push download to this host.
      * If the GIV is for a file that was never requested or has already

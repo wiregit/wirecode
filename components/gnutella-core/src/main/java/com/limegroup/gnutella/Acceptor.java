@@ -51,7 +51,7 @@ public class Acceptor extends Thread {
     private MessageRouter _router;
     private ActivityCallback _callback;
 
-	private boolean _acceptedIncoming = false;
+	private volatile boolean _acceptedIncoming = false;
 
     private static final byte[] LOCALHOST={(byte)127, (byte)0, (byte)0,
                                            (byte)1};
@@ -241,7 +241,7 @@ public class Acceptor extends Thread {
 
             // If we still don't have a socket, there's an error
             if(_socket == null)
-                _callback.error(ActivityCallback.ERROR_0);
+                _callback.error(ActivityCallback.PORT_ERROR);
         }
 
         if (_port!=oldPort) {
@@ -285,16 +285,17 @@ public class Acceptor extends Thread {
 
 				// we have accepted an incoming socket.
 				_acceptedIncoming = true;
+				SettingsManager.instance().setAcceptedIncoming(_acceptedIncoming);
 
                 //Dispatch asynchronously.
                 new ConnectionDispatchRunner(client);
 
             } catch (SecurityException e) {
-                _callback.error(ActivityCallback.ERROR_3);
+                _callback.error(ActivityCallback.SOCKET_ERROR);
                 return;
             } catch (Exception e) {
                 //Internal error!
-                _callback.error(ActivityCallback.ERROR_20, e);
+                _callback.error(ActivityCallback.INTERNAL_ERROR, e);
             }
         }
     }

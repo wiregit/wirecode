@@ -11,7 +11,7 @@ package com.limegroup.gnutella;
 import java.io.Serializable;
 import com.sun.java.util.collections.Comparator;
 import com.sun.java.util.collections.Comparable;
-import com.limegroup.gnutella.gui.GUIStyles;
+import com.limegroup.gnutella.gui.GUIConstants;
 import com.sun.java.util.collections.Arrays;
 
 public class RemoteFileDesc implements Comparable, Serializable {
@@ -153,31 +153,31 @@ public class RemoteFileDesc implements Comparable, Serializable {
 	public int calculateSpeedPriority() {
 
 		if (isPrivate()) {
-			if (_speed <= GUIStyles.MODEM_SPEED_INT) {
+			if (_speed <= GUIConstants.MODEM_SPEED_INT) {
 				_speed_priority = PRIVATE_MODEM_PRIORITY;
 			}
-			else if (_speed <= GUIStyles.CABLE_SPEED_INT) {
+			else if (_speed <= GUIConstants.CABLE_SPEED_INT) {
 				_speed_priority = PRIVATE_CABLE_PRIORITY;
 			}
-			else if (_speed <= GUIStyles.T1_SPEED_INT) {
+			else if (_speed <= GUIConstants.T1_SPEED_INT) {
 				_speed_priority = PRIVATE_T1_PRIORITY;
 			}
-			else if (_speed <= GUIStyles.T3_SPEED_INT) {
+			else if (_speed <= GUIConstants.T3_SPEED_INT) {
 				_speed_priority = PRIVATE_T3_PRIORITY;
 			}
 		}
 		
 		else {
-			if (_speed <= GUIStyles.MODEM_SPEED_INT) {
+			if (_speed <= GUIConstants.MODEM_SPEED_INT) {
 				_speed_priority = PUBLIC_MODEM_PRIORITY;
 			}
-			else if (_speed <= GUIStyles.CABLE_SPEED_INT) {
+			else if (_speed <= GUIConstants.CABLE_SPEED_INT) {
 				_speed_priority = PUBLIC_CABLE_PRIORITY;
 			}
-			else if (_speed <= GUIStyles.T1_SPEED_INT) {
+			else if (_speed <= GUIConstants.T1_SPEED_INT) {
 				_speed_priority = PUBLIC_T1_PRIORITY;
 			}
-			else if (_speed <= GUIStyles.T3_SPEED_INT) {
+			else if (_speed <= GUIConstants.T3_SPEED_INT) {
 				_speed_priority = PUBLIC_T3_PRIORITY;
 			}
 		}

@@ -143,7 +143,14 @@ public class StandardMessageRouter
         byte ttl = (byte)(queryRequest.getHops() + 1);
         int port = acceptor.getPort();
         byte[] ip = acceptor.getAddress();
-        long speed = SettingsManager.instance().getConnectionSpeed();
+
+        //Return measured speed if possible, or user's speed otherwise.
+        long speed = _uploadManager.measuredUploadSpeed();
+        boolean measuredSpeed=true;
+        if (speed==-1) {
+            speed=SettingsManager.instance().getConnectionSpeed();
+            measuredSpeed=false;
+        }
 
         int numResponses = responses.length;
         int index = 0;
@@ -190,6 +197,7 @@ public class StandardMessageRouter
 
 			// see id there are any open slots
 			boolean busy = _uploadManager.isBusy();
+            boolean uploaded = _uploadManager.hadSuccesfulUpload();
 
 			// see if we have ever accepted an incoming connection
 			boolean incoming = _acceptor.acceptedIncoming();
@@ -197,7 +205,7 @@ public class StandardMessageRouter
             // create the new queryReply
             queryReply = new QueryReply(guid, ttl, port, ip,
                                         speed, res, clientGUID, 
-										!incoming, busy);
+										!incoming, busy, uploaded, measuredSpeed);
 
             // try to send the new queryReply
             try {
