@@ -6,6 +6,7 @@ import java.text.ParseException;
 import com.sun.java.util.collections.*;
 import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.util.*;
+import com.limegroup.gnutella.http.HTTPHeaderName;
 
 /**
  * A list of GWebCache servers.  Provides methods to fetch address addresses
@@ -306,8 +307,15 @@ public class BootstrapServerManager {
                 +"?client="+CommonUtils.QHD_VENDOR_NAME
                 +"&version="+URLEncoder.encode(CommonUtils.getLimeWireVersion())
                 +"&"+request.parameters());
-            URLConnection connection=url.openConnection();
+            HttpURLConnection connection=
+                (HttpURLConnection)url.openConnection();
             connection.setUseCaches(false);
+            connection.setRequestProperty(
+                "User-Agent",
+                CommonUtils.getHttpServer());
+            connection.setRequestProperty(                    //no persistence
+                HTTPHeaderName.CONNECTION.httpStringValue(),
+                "close");
             //Always use ISO-8859-1 encoding to avoid misinterpreting bytes as
             //weird characters on international systems.
             in=new BufferedReader(
