@@ -437,10 +437,9 @@ public class Acceptor extends Thread {
                 }	
                 //4. Unknown protocol
                 else {
-                    throw new IOException();
+                    throw new IOException("UNKOWN PROTOCOL: "+word);
                 }
             } catch (IOException e) {
-                e.printStackTrace();
                 //handshake failed: try to close connection.
                 try { _socket.close(); } catch (IOException e2) { }
             } catch(Throwable e) {
