@@ -12,7 +12,7 @@ lax.application.name=LimeWire.exe
 #   the Java classpath necessary to run this application
 #   Can be separated by colons or semicolons
 
-lax.class.path=collections.jar;swing.jar;LimeWire14.jar;lax.jar;
+lax.class.path=collections.jar;swing.jar;LimeWire.jar;lax.jar;
 
 
 #   LAX.COMMAND.LINE.ARGS
