@@ -99,6 +99,21 @@ public class LimeXMLProperties
         + File.separator + "httpmapping.xml";
     
      /**
+     * The property that denotes the
+     * name of the file that contains information about the schemas, queries
+     * corresponding to which are to be transformed to database requests for
+     * processing
+     */
+    private static final String DATABASE_MAPPING_FILE = "DATABASE_MAPPING_FILE";
+     /**
+      * Name of the file that contains information about the schemas, queries
+      * corresponding to which are to be transformed to database requests for
+      * processing
+      */
+    private static final String DATABASE_MAPPING_FILE_DEF =  "etc"
+        + File.separator + "databasemapping.xml";
+    
+     /**
      * The property that denotes the 
      * name of the file that contains schema => QueryHandler mappings for 
      * the schemas that are to be handled directly without any transformation
@@ -228,6 +243,20 @@ public class LimeXMLProperties
             HTTP_MAPPING_FILE_DEF);
 
         return getPath() + httpMappingFile;   
+    }
+    
+    /**
+     * Returns the name of the file that contains basic mapping information
+     * regarding the schemas which need to be mapped to jdbc database 
+     * requests
+     */
+    public String getDatabaseMappingFile()
+    {
+        String databaseMappingFile = _properties.getProperty(
+            DATABASE_MAPPING_FILE, 
+            DATABASE_MAPPING_FILE_DEF);
+
+        return getPath() + databaseMappingFile;   
     }
     
     /**
