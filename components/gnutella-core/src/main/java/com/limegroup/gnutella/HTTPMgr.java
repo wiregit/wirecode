@@ -78,12 +78,12 @@ public class HTTPMgr {
 	                                       /* is there a better way? */
 	    _filename = parse_two[0];
 
-	    HTTPClientMgr client;
-	    client = new HTTPClientMgr(s, _filename, _index, _manager);    
+	    // HTTPClientMgr client;
+	    // client = new HTTPClientMgr(s, _filename, _index, _manager);    
 
-	    Thread t = new Thread(client);
-	    t.setDaemon(true);
-	    t.start();
+	    // Thread t = new Thread(client);
+	    // t.setDaemon(true);
+	    // t.start();
 
 	}
 
@@ -91,11 +91,11 @@ public class HTTPMgr {
 
 	    if (_filename != null) {
 		
-		HTTPServerMgr server;
-		server = new HTTPServerMgr(s, _filename, _manager);
-		Thread t = new Thread(server);
-		t.setDaemon(true);
-		t.start();
+		// HTTPServerMgr server;
+		// server = new HTTPServerMgr(s, _filename, _manager);
+		// Thread t = new Thread(server);
+		// t.setDaemon(true);
+		// t.start();
 		
 	    }
 

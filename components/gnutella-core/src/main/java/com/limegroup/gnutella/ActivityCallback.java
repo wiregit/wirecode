@@ -47,13 +47,13 @@ public interface ActivityCallback
     public void handleQueryString( String query );
 
     /** Add a file to the download window */
-    public void addDownload(HTTPServerMgr mgr);
+    public void addDownload(HTTPDownloader d);
 
-    public void removeDownload(HTTPServerMgr mgr);
+    public void removeDownload(HTTPDownloader d);
 
-    public void addUpload(HTTPClientMgr mgr);
+    public void addUpload(HTTPUploader u);
 
-    public void removeUpload(HTTPClientMgr mgr);
+    public void removeUpload(HTTPUploader u);
 
 
     /**

@@ -189,13 +189,13 @@ public class Main implements ActivityCallback {
 
     /*******************************/
 
-    public void addDownload(HTTPServerMgr mgr) {}
+    public void addDownload(HTTPDownloader mgr) {}
 
-    public void removeDownload(HTTPServerMgr mgr) {}
+    public void removeDownload(HTTPDownloader mgr) {}
 
-    public void addUpload(HTTPClientMgr mgr) {}
+    public void addUpload(HTTPUploader mgr) {}
 
-    public void removeUpload(HTTPClientMgr mgr) {}
+    public void removeUpload(HTTPUploader mgr) {}
 
 }
 
