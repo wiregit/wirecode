@@ -615,7 +615,7 @@ public class ManagedConnection extends Connection
 
         // if Hops Flow is in effect, and this is a QueryRequest, and the
         // hoppage is too biggage, discardage time...
-	int smh = softMaxHops;
+    	int smh = softMaxHops;
         if ((smh > -1) &&
             (m instanceof QueryRequest) &&
             (m.getHops() >= smh))
@@ -733,7 +733,19 @@ public class ManagedConnection extends Connection
 
     /** Repeatedly sends all the queued data. */
     private class OutputRunner extends ManagedThread {
+        
+        /** how long to wait before forcing a flush */
+        private final long FLUSH_DELAY;
+        /** the next time we def. need to flush */
+        private long _nextFlushTime = -1;
+        
         public OutputRunner() {
+            long timeToWait = ConnectionSettings.FLUSH_DELAY_TIME.getValue();
+            if(timeToWait > 0 && isSupernodeSupernodeConnection())
+                FLUSH_DELAY = timeToWait;
+            else
+                FLUSH_DELAY = 0;
+
             setName("OutputRunner");
             setDaemon(true);
             start();
@@ -773,7 +785,7 @@ public class ManagedConnection extends Connection
             synchronized (_outputQueueLock) {
                 while (isOpen() && _queued==0) {           
                     try {
-                        _outputQueueLock.wait();
+                        _outputQueueLock.wait(FLUSH_DELAY); // this works even if FLUSH_DELAY == 0
                     } catch (InterruptedException e) {
                         Assert.that(false, "OutputRunner Interrupted");
                     }
@@ -827,7 +839,6 @@ public class ManagedConnection extends Connection
                 i=(i+1)%PRIORITIES;
             } while (i!=start);
             
-            
             //2. Now force data from Connection's BufferedOutputStream into the
             //kernel's TCP send buffer.  It doesn't force TCP to
             //actually send the data to the network.  That is determined
@@ -835,7 +846,15 @@ public class ManagedConnection extends Connection
             //Note that if the outgoing stream is compressed 
             //(isWriteDeflated()), then this call may block while the
             //Deflater deflates the data.
-            ManagedConnection.super.flush();
+            
+            // if we're not delaying flushes, don't do any currentTimeMillis() calls
+            if(FLUSH_DELAY == 0) {
+                ManagedConnection.super.flush();
+            } else if(System.currentTimeMillis() >= _nextFlushTime) {
+                ManagedConnection.super.flush();
+                _nextFlushTime = System.currentTimeMillis() + FLUSH_DELAY;
+            }
+            
         }
     } //end OutputRunner
 

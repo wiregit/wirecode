@@ -310,6 +310,13 @@ public final class ConnectionSettings extends LimeProps {
         FACTORY.createSettableBooleanSetting("UNSET_FIREWALLED_FROM_CONNECTBACK",
                                              false,
                                              "connectbackfirewall");
+                                             
+    /**
+     * Time in milliseconds to delay prior to flushing data on peer -> peer connections
+     */
+    public static final LongSetting FLUSH_DELAY_TIME =
+        FACTORY.createSettableLongSetting("FLUSH_DELAY_TIME", 200, "flushdelay", 300, 0);
+                                            
     
     /**
      * Helper method left from Settings Manager
