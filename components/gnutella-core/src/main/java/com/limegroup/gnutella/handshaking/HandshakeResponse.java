@@ -566,13 +566,11 @@ public final class HandshakeResponse {
         // If we don't have enough hosts for the X-Try-Ultrapeers header, add
         // hosts that we're connected to.
         if(hosts.size() < 10) {
-            System.out.println("HandshakeResponse::getting host from CM");
             List connections = 
                 RouterService.getConnectionManager().getInitializedConnections();
             Iterator iter = connections.iterator();
             for(int i=0; iter.hasNext() && i<(10-hosts.size()); i++) {
                 IpPort host = (IpPort)iter.next();
-                System.out.println(host);
                 hosts.add(host);
             }
         }
