@@ -210,7 +210,7 @@ public class ClientSideFirewalledTransferTest extends ClientSideTestCase {
             assertTrue(false);
         }
         catch (InterruptedIOException expected) {}
-
+        ss.close();
     }
 
 
@@ -241,14 +241,17 @@ public class ClientSideFirewalledTransferTest extends ClientSideTestCase {
         Response[] res = new Response[1];
         res[0] = new Response(10, 10, "boalt.org");
         m = new QueryReply(m.getGUID(), (byte) 1, 9000, myIP(), 0, res, 
-                           clientGUID, new byte[0], false, false, true,
+                           clientGUID, new byte[0], true, false, true,
                            true, false, false, true, proxies);
         testUP[0].send(m);
         testUP[0].flush();
 
         // wait a while for Leaf to process result
         Thread.sleep(1000);
-        assertTrue(((MyActivityCallback)getCallback()).getRFD() != null);
+        final RemoteFileDesc rfd =((MyActivityCallback)getCallback()).getRFD(); 
+        assertNotNull(rfd);
+        assertNotNull(rfd.getPushAddr());
+        assertTrue(rfd.needsPush());
 
         // tell the leaf to download the file, should result in push proxy
         // request
@@ -257,8 +260,7 @@ public class ClientSideFirewalledTransferTest extends ClientSideTestCase {
             public void run() {
                 try {
                     Thread.sleep(2000);
-                    RouterService.download((new RemoteFileDesc[] 
-                                            {((MyActivityCallback)getCallback()).getRFD() }), 
+                    RouterService.download((new RemoteFileDesc[]{rfd}), 
                                            true, fGuid);
                 }
                 catch (Exception damn) {
