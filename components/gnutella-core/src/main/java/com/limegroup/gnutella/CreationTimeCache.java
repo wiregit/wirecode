@@ -140,25 +140,29 @@ public final class CreationTimeCache {
         // if i'm using FM, always grab that lock first and then me.  be quick
         // about it though :)
         synchronized (RouterService.getFileManager()) {
-        synchronized (this) {
-        Iterator iter = URN_TO_TIME_MAP.entrySet().iterator();
-        while (iter.hasNext()) {
-            Map.Entry currEntry = (Map.Entry) iter.next();
-            URN currURN = (URN) currEntry.getKey();
-            Long cTime = (Long) currEntry.getValue();
-            
-            // check to see if file still exists
-            // NOTE: technically a URN can map to multiple FDs, but I only want
-            // to know about one.  getFileDescForUrn prefers FDs over iFDs.
-            FileDesc fd =
-                RouterService.getFileManager().getFileDescForUrn(currURN);
-            if ((fd == null) || (fd.getFile() == null) || 
-                !fd.getFile().exists()) {
-                iter.remove();
-                if (shouldClearURNSetMap) removeURNFromURNSet(currURN, cTime);
+            synchronized (this) {
+                Iterator iter = URN_TO_TIME_MAP.entrySet().iterator();
+                while (iter.hasNext()) {
+                    Map.Entry currEntry = (Map.Entry) iter.next();
+                    if(!(currEntry.getKey() instanceof URN) ||
+                       !(currEntry.getValue() instanceof Long)) {
+                        iter.remove();
+                        continue;
+                    }
+                    URN currURN = (URN) currEntry.getKey();
+                    Long cTime = (Long) currEntry.getValue();
+                    
+                    // check to see if file still exists
+                    // NOTE: technically a URN can map to multiple FDs, but I only want
+                    // to know about one.  getFileDescForUrn prefers FDs over iFDs.
+                    FileDesc fd = RouterService.getFileManager().getFileDescForUrn(currURN);
+                    if ((fd == null) || (fd.getFile() == null) || !fd.getFile().exists()) {
+                        iter.remove();
+                        if (shouldClearURNSetMap)
+                            removeURNFromURNSet(currURN, cTime);
+                    }
+                }
             }
-        }
-        }
         }
     }
 
