@@ -6,15 +6,20 @@ import java.util.StringTokenizer;
 
 import junit.framework.Test;
 
+import com.limegroup.gnutella.Connection;
 import com.limegroup.gnutella.ConnectionManager;
 import com.limegroup.gnutella.Endpoint;
 import com.limegroup.gnutella.HostCatcher;
+import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.util.BaseTestCase;
 import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.PrivilegedAccessor;
+import com.limegroup.gnutella.util.TestConnectionManager;
 import com.sun.java.util.collections.HashSet;
 import com.sun.java.util.collections.Iterator;
+import com.sun.java.util.collections.LinkedList;
+import com.sun.java.util.collections.List;
 import com.sun.java.util.collections.Set;
 
 
@@ -44,6 +49,101 @@ public final class HandshakeResponseTest extends BaseTestCase {
         ConnectionSettings.ENCODE_DEFLATE.setValue(true);
     }
 
+	/**
+	 * Tests the utility method for creating a string of IP/port pairs from a 
+	 * list of connections
+	 * 
+	 * @throws Exception if anything unexpected occurs
+	 */
+	public void testCreateEndpointString() throws Exception {
+		List leaves = new LinkedList();
+		List ultrapeers = new LinkedList();
+		String leafAddress = "10.254.0.";
+		String ultrapeerAddress = "20.23.0.";
+		Properties props = new Properties();
+		UltrapeerHandshakeResponder UHR = 
+			new UltrapeerHandshakeResponder("20.34.90.1");
+		for(int i=0; i<30; i++) {
+			Connection conn = 
+				new Connection(leafAddress+i, 6346, props, UHR);
+			leaves.add(conn);
+			conn = 
+				new Connection(ultrapeerAddress+i, 6346, props, UHR);
+			ultrapeers.add(conn);
+		}
+		Method m = 
+			PrivilegedAccessor.getMethod(HandshakeResponse.class, 
+				"createEndpointString", new Class[] {List.class});
+		String leafStr =
+			(String)m.invoke(HandshakeResponse.class, new Object[] {leaves});	
+		
+		List leavesFromString = createListFromIPPortString(leafStr);
+		assertEquals(leaves, leavesFromString);
+		
+		String ultrapeerStr =
+					(String)m.invoke(HandshakeResponse.class, new Object[] {ultrapeers});	
+		List ultrapeersFromString = createListFromIPPortString(ultrapeerStr);
+		assertEquals(ultrapeers, ultrapeersFromString);
+		
+	}
+	
+	/**
+	 * Helper method for creating a list from a string of ip/port pairs separated
+	 * by commas, as per the Ultrapeer crawler format.
+	 * 
+	 * @param ipPorts the string of IP/port pairs
+	 * @return a new List of Connections from the IP/port pairs
+	 */
+	private List createListFromIPPortString(String ipPorts) {
+		StringTokenizer st = new StringTokenizer(ipPorts, ",");
+		List list = new LinkedList();
+		Properties props = new Properties();
+		UltrapeerHandshakeResponder UHR = 
+			new UltrapeerHandshakeResponder("20.34.90.1");
+		while(st.hasMoreTokens()) {
+			String ipPort = st.nextToken();
+			StringTokenizer ipPortST = new StringTokenizer(ipPort, ":");
+			Connection conn = new Connection(ipPortST.nextToken(), 
+				Integer.parseInt(ipPortST.nextToken()), props, UHR);
+			list.add(conn);
+		}
+		return list;
+	}
+	
+	/**
+	 * Tests the method for determining whether or not a given handshake is
+	 * from the crawler or not.
+	 */
+	public void testIsCrawler() throws Exception {
+		Properties props = new Properties();
+		props.put(HeaderNames.CRAWLER, "0.1");
+		HandshakeResponse hr = new HandshakeResponse(200, "OK", props);
+		assertTrue("should be crawler", hr.isCrawler());
+		hr = new HandshakeResponse(200, "OK", new Properties());
+		assertFalse("should not be crawler", hr.isCrawler());
+		//props.put()
+		//HandshakeResponse hr = HandshakeResponse.createCrawlerResponse();
+			
+	}
+
+	/**
+	 * Tests the method for creating a response to the crawler.
+	 */
+	public void testCreateCrawlerResponse() throws Exception {
+		TestConnectionManager tcm = new TestConnectionManager();
+		PrivilegedAccessor.setValue(RouterService.class, "manager", tcm);
+		HandshakeResponse hr = HandshakeResponse.createCrawlerResponse();
+		Properties headers = hr.props();
+		String leaves = headers.getProperty(HeaderNames.LEAVES);
+		String ultrapeers = headers.getProperty(HeaderNames.PEERS);
+		System.out.println("leaves: "+leaves);
+		System.out.println("ultrapeers: "+ultrapeers);
+		List leafList = createListFromIPPortString(leaves);
+		List ultrapeerList = createListFromIPPortString(ultrapeers);
+		assertTrue("leaf list should not be empty", !leafList.isEmpty());
+		assertTrue("ultrapeer list should not be empty", !ultrapeerList.isEmpty());
+	}
+	
     /**
      * Tests the method for checking whether or not the specified
      * host supports probe queries.
