@@ -1420,20 +1420,7 @@ public class ManagedDownloader implements Downloader, Serializable {
         stopped=true;
         
         synchronized(this) {
-            //This guarantees any downloads in progress will be killed.  New
-            //downloads will not start because of the flag above. Note that this
-            //does not kill downloaders that are queued...
-            for (Iterator iter=_activeWorkers.iterator(); iter.hasNext(); ) 
-                ((DownloadWorker)iter.next()).getDownloader().stop();
-    
-            //...so we interrupt all threads - see connectAndDownload.
-            //This is safe because worker threads can be waiting for a push 
-            //or to requeury, or sleeping while queued. In every case its OK to 
-            //interrupt the thread
-            for(Iterator iter=_workers.iterator(); iter.hasNext(); ) {
-                DownloadWorker worker = (DownloadWorker)iter.next();
-                worker.interrupt();
-            }
+            killAllWorkers();
             
             // must capture in local variable so the value doesn't become null
             // between if & contents of if.
@@ -1442,6 +1429,13 @@ public class ManagedDownloader implements Downloader, Serializable {
                 dlMan.interrupt();
             else
                 LOG.warn("MANAGER: no thread to interrupt");
+        }
+    }
+    
+    private void killAllWorkers() {
+        for (Iterator iter = _workers.iterator(); iter.hasNext();) {
+            DownloadWorker doomed = (DownloadWorker) iter.next();
+            doomed.interrupt();
         }
     }
     
@@ -2325,17 +2319,7 @@ public class ManagedDownloader implements Downloader, Serializable {
             
             // Finished.
             if (commonOutFile.isComplete()) {
-                // Kill any leftover downloaders.
-                for (Iterator iter=_activeWorkers.iterator(); iter.hasNext(); ) {
-                    DownloadWorker worker = (DownloadWorker)iter.next();
-                    worker.getDownloader().stop();
-                }
-                
-                //Interrupt all worker threads
-                for(int i=_workers.size();i>0;i--) {
-                    DownloadWorker t = (DownloadWorker )_workers.get(i-1);
-                    t.interrupt();
-                }
+                killAllWorkers();
             
                 LOG.trace("MANAGER: terminating because of completion");
                 return COMPLETE;
