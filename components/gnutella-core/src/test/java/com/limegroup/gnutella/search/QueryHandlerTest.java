@@ -197,7 +197,7 @@ public final class QueryHandlerTest extends BaseTestCase {
         // should be relatively high, causing us to hit the theoretical 
         // horizon limit!
 
-        for(int i=0; i<tcm.getInitializedConnections2().size()-2; i++) {
+        for(int i=0; i<tcm.getInitializedConnections().size()-2; i++) {
             Thread.sleep(2000);
             handler.sendQuery();
         }        

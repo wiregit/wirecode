@@ -181,7 +181,7 @@ public final class MessageRouterTest extends BaseTestCase {
                                          params);        
         m.invoke(ROUTER, new Object[]{});
         
-        List connections = tcm.getInitializedConnections2();
+        List connections = tcm.getInitializedConnections();
         Iterator iter = connections.iterator();
         while(iter.hasNext()) {
             TestConnection tc = (TestConnection)iter.next();

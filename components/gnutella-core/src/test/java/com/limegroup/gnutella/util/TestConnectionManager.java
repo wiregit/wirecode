@@ -215,15 +215,8 @@ public final class TestConnectionManager extends ConnectionManager {
     /**
      * Accessor for the custom list of connections.
      */
-    public List getInitializedConnections2() {
-        return CONNECTIONS;
-    }
-
-    /**
-     * Accessor for the custom list of connections.
-     */
     public List getInitializedConnections() {
-        return new LinkedList(CONNECTIONS);
+        return CONNECTIONS;
     }
 
     public List getInitializedClientConnections() {
