@@ -923,6 +923,8 @@ public final class CommonUtils {
 	 *
 	 * @param fileName the name of the file to copy, relative to the jar
 	 *  file -- such as "com/limegroup/gnutella/gui/images/image.gif"
+     * @param newFile the new <tt>File</tt> instance where the resource file
+     *  will be copied to
 	 */
 	public static void copyResourceFile(final String fileName, File newFile) {
 		copyResourceFile(fileName, newFile, false);		
@@ -934,6 +936,11 @@ public final class CommonUtils {
 	 *
 	 * @param fileName the name of the file to copy, relative to the jar 
 	 *  file -- such as "com/limegroup/gnutella/gui/images/image.gif"
+     * @param newFile the new <tt>File</tt> instance where the resource file
+     *  will be copied to -- if this argument is null, the file will be
+     *  copied to the current directory
+     * @param forceOverwrite specifies whether or not to overwrite the 
+     *  file if it already exists
 	 */
     public static void copyResourceFile(final String fileName, File newFile, 
 										final boolean forceOverwrite) {
@@ -975,7 +982,8 @@ public final class CommonUtils {
 			}
 			while (c == bufferSize); //(# of bytes read)c will = bufferSize until EOF
 			
-		} catch(Exception e) {	
+		} catch(IOException e) {	
+            e.printStackTrace();
 			//if there is any error, delete any portion of file that did write
 			newFile.delete();
 		} finally {
