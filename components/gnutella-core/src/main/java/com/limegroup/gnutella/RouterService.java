@@ -678,6 +678,9 @@ public class RouterService
                                          minSpeed, query);
         verifier.record(qr, type);
         router.broadcastQueryRequest(qr);
+
+        if (autoDL)
+            downloader.registerAutomaticDownload(guid, query, null, type);
     }
 
     /**
@@ -694,6 +697,9 @@ public class RouterService
                                          minSpeed, query, richQuery);
         verifier.record(qr, type);
         router.broadcastQueryRequest(qr);
+
+        if (autoDL)
+            downloader.registerAutomaticDownload(guid, query, richQuery, type);
         /* 
          * We don't really use this. for now
          //Rich query?

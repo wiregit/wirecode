@@ -640,6 +640,19 @@ public class DownloadManager implements BandwidthTracker {
             e.printStackTrace();
     }
 
+
+    ///////////////////// AUTO DOWNLOADER FUNCTIONALITY //////////////////
+    /////////////////////             BEGIN             //////////////////
+
+    public void registerAutomaticDownload(byte[] guid, String query,
+                                          String richQuery, MediaType type) {
+
+    }
+
+
+    /////////////////////              END              //////////////////
+
+
     /*
     public static void main(String argv[]) {
         DownloadManager dm = new DownloadManager();
