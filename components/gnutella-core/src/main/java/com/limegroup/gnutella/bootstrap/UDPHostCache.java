@@ -256,6 +256,16 @@ public class UDPHostCache {
     }
     
     /**
+     * Creates and adds a host/port as a UDP host cache.
+     */
+    private createAndAdd(String host, int port) {
+        try {
+            ExtendendEndpoint ep = new ExtendedEndpoint(host, port).setUDPHostCache(true);
+            add(ep);
+        } catch(IllegalArgumentException ignored) {}
+    }
+    
+    /**
      * Listener that listens for message from the specified hosts,
      * marking any hosts that did not have a message processed
      * as failed host caches, causing them to increment a failure
