@@ -656,6 +656,16 @@ public class Acceptor implements Runnable {
     public boolean isBannedIP(String ip) {        
         return !IPFilter.instance().allow(ip);
     }
+    
+    /**
+     * Returns whether <tt>ip</tt> is a banned address.
+     * @param ip an address in resolved dotted-quad format, e.g., 18.239.0.144
+     * @return true iff ip is a banned address.
+     */
+    public boolean isBannedIP(byte[] addr) {        
+        return !IPFilter.instance().allow(addr);
+    }
+    
 
     private class IncomingValidator implements Runnable {
         public IncomingValidator() {}

@@ -46,6 +46,9 @@ public class Sockets {
 	 * Cached <tt>connect</tt> method.
 	 */
 	private static Method _connectMethod;
+	
+    private static volatile int _attempts=0;
+    
 
 	// statically initialize the socket classes we can so that
 	// we don't have it inefficiently look them up each time
@@ -79,6 +82,14 @@ public class Sockets {
 	 * Ensure this cannot be constructed.
 	 */
 	private Sockets() {}
+	
+	public static int getAttempts() {
+	    return _attempts;
+	}
+	
+	public static void clearAttempts() {
+	    _attempts=0;
+	}
 
     /**
      * Sets the SO_KEEPALIVE option on the socket, if this platform supports it.
@@ -148,6 +159,7 @@ public class Sockets {
 					return connectSocksV5(host, port, timeout);
 			}
 		}
+        _attempts++;
 		return connectPlain(host, port, timeout);
 	}
 

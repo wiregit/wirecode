@@ -252,6 +252,32 @@ public final class ConnectionSettings extends LimeProps {
      */
     public static final IntSetting NUM_LOCALE_PREF =
         FACTORY.createIntSetting("NUM_LOCALE_PREF", 3);
+        
+    /**
+     * Setting to disable bootstrapping.. used only in tests.
+     */
+    public static final BooleanSetting DO_NOT_BOOTSTRAP = 
+        FACTORY.createBooleanSetting("DO_NOT_BOOTSTRAP",false);
+        
+    /**
+     * Setting to not send a multicast bootstrap ping.
+     */
+    public static final BooleanSetting DO_NOT_MULTICAST_BOOTSTRAP =
+        FACTORY.createBooleanSetting("DO_NOT_MULTICAST_BOOTSTRAP", false);
+        
+    /**
+     * how many attempts to connect to a remote host must elapse
+     * before we start accepting non-LW vendors as UPs
+     */
+    public static final IntSetting LIME_ATTEMPTS =
+        FACTORY.createIntSetting("LIME_ATTEMPTS",50);
+        
+    /**
+     * Setting for whether or not connections should be allowed to be made
+     * while we're disconnected.
+     */
+    public static final BooleanSetting ALLOW_WHILE_DISCONNECTED =
+        FACTORY.createBooleanSetting("ALLOW_WHILE_DISCONNECTED", false);
 
     /**
      * Helper method left from Settings Manager

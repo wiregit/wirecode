@@ -17,16 +17,7 @@ import com.limegroup.gnutella.util.IpPort;
 
 import java.io.Writer;
 import java.io.IOException;
-import java.util.Iterator;
-import java.util.Set;
-import java.util.HashSet;
-import java.util.TreeSet;
-import java.util.LinkedList;
-import java.util.Collection;
-import java.util.List;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.Collections;
+import com.sun.java.util.collections.*;
 
 import org.apache.commons.logging.LogFactory;
 import org.apache.commons.logging.Log;

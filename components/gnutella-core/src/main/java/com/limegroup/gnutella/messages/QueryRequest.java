@@ -1128,7 +1128,7 @@ public class QueryRequest extends Message implements Serializable{
 
             // add the What Is header
             if (_capabilitySelector > 0)
-                ggepBlock.put(GGEP.GGEP_HEADER_WHAT_IS, _capabilitySelector);
+                ggepBlock.put(GGEP.GGEP_HEADER_FEATURE_QUERY, _capabilitySelector);
 
             // add a GGEP-block if we shouldn't proxy
             if (doNotProxy)
@@ -1222,9 +1222,9 @@ public class QueryRequest extends Message implements Serializable{
                             byte[] qkBytes = ggep.getBytes(QK_SUPP);
                             tempQueryKey = QueryKey.getQueryKey(qkBytes, false);
                         }
-                        if (ggep.hasKey(GGEP.GGEP_HEADER_WHAT_IS))
+                        if (ggep.hasKey(GGEP.GGEP_HEADER_FEATURE_QUERY))
                             _capabilitySelector = 
-                                ggep.getInt(GGEP.GGEP_HEADER_WHAT_IS);
+                                ggep.getInt(GGEP.GGEP_HEADER_FEATURE_QUERY);
                         if (ggep.hasKey(GGEP.GGEP_HEADER_NO_PROXY))
                             _doNotProxy = true;
                         if (ggep.hasKey(GGEP.GGEP_HEADER_META)) {

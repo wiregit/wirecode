@@ -1,21 +1,31 @@
 package com.limegroup.gnutella.bootstrap;
 
-import java.io.*;
-import java.net.*;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.URLEncoder;
+import java.net.UnknownHostException;
 import java.text.ParseException;
+import java.util.Random;
 import com.sun.java.util.collections.*;
-import com.limegroup.gnutella.*;
-import com.limegroup.gnutella.util.*;
-import com.limegroup.gnutella.settings.*;
-import com.limegroup.gnutella.http.HTTPHeaderName;
-import com.limegroup.gnutella.http.HttpClientManager;
+
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpMethod;
 import org.apache.commons.httpclient.methods.GetMethod;
-
-import org.apache.commons.logging.LogFactory;
 import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
+import com.limegroup.gnutella.Assert;
+import com.limegroup.gnutella.Endpoint;
+import com.limegroup.gnutella.ErrorService;
+import com.limegroup.gnutella.HostCatcher;
+import com.limegroup.gnutella.RouterService;
+import com.limegroup.gnutella.http.HTTPHeaderName;
+import com.limegroup.gnutella.http.HttpClientManager;
+import com.limegroup.gnutella.settings.ApplicationSettings;
+import com.limegroup.gnutella.settings.ConnectionSettings;
+import com.limegroup.gnutella.util.*;
 
 /**
  * A list of GWebCache servers.  Provides methods to fetch address addresses
@@ -103,7 +113,7 @@ public class BootstrapServerManager {
     
     /** Source of randomness for picking servers.
      *  TODO: this is thread-safe, right? */
-    private Random12 _rand=new Random12();    
+    private Random12 _rand=new Random12();
     
     /** True if a thread is currently executing a hostfile request. 
      *  LOCKING: this (don't want multiple fetches) */
@@ -228,14 +238,17 @@ public class BootstrapServerManager {
 	 * @throws <tt>NullPointerException</tt> if the ip param is <tt>null</tt>
      */
     public synchronized void sendUpdatesAsync(Endpoint myIP) {
-		if(myIP == null) {
+		if(myIP == null)
 			throw new NullPointerException("cannot accept null update IP");
-		}
+
         addDefaultsIfNeeded();
+
         //For now we only send updates if the "ip=" parameter is null,
         //regardless of whether we have a url.
-        if (!myIP.isPrivateAddress())
-            requestAsync(new UpdateRequest(myIP), "GWebCache update");
+        try {
+            if (!NetworkUtils.isPrivateAddress(myIP.getHostBytes()))
+                requestAsync(new UpdateRequest(myIP), "GWebCache update");
+        } catch(UnknownHostException ignored) {}
     }
 
     /**

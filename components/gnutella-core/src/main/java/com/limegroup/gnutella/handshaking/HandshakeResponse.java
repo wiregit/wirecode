@@ -1,16 +1,15 @@
 package com.limegroup.gnutella.handshaking;
 
-import com.limegroup.gnutella.*;
+import java.io.IOException;
+import java.util.Properties;
+import java.util.StringTokenizer;
+import com.sun.java.util.collections.*;
+
+import com.limegroup.gnutella.RouterService;
+import com.limegroup.gnutella.settings.ApplicationSettings;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.IpPort;
-import com.limegroup.gnutella.settings.ApplicationSettings;
-
-import java.util.Properties;
-import com.sun.java.util.collections.*;
-
-import java.io.*;
-import java.util.StringTokenizer;
 
 /**
  * This class contains the necessary information to form a response to a 
@@ -38,6 +37,16 @@ public final class HandshakeResponse {
      * the handshake was successful and the connection can be established.
      */
     public static final String OK_MESSAGE = "OK";
+    
+    /**
+     * HTTP response code for the crawler.
+     */
+    public static final int CRAWLER_CODE = 593;
+    
+    /**
+     * HTTP response message for the crawler.
+     */
+    public static final String CRAWLER_MESSAGE = "Hi";
 
     /** The error code that a shielded leaf node should give to incoming
      *  connections.  */
@@ -190,7 +199,7 @@ public final class HandshakeResponse {
     private final boolean GUESS_CAPABLE;
     
 	/**
-	 * Constant for whether or not this node supports GUESS.
+	 * Constant for whether or not this is a crawler.
 	 */
 	private final boolean IS_CRAWLER;
 	
@@ -401,6 +410,7 @@ public final class HandshakeResponse {
 		
         // add our user agent
         headers.put(HeaderNames.USER_AGENT, CommonUtils.getHttpServer());
+        headers.put(HeaderNames.X_ULTRAPEER, ""+RouterService.isSupernode());
         
 		// add any leaves
         List leaves = 
@@ -415,8 +425,8 @@ public final class HandshakeResponse {
 		headers.put(HeaderNames.PEERS,
 			createEndpointString(ultrapeers, ultrapeers.size()));
 			
-		return new HandshakeResponse(HandshakeResponse.OK,
-			HandshakeResponse.OK_MESSAGE, headers);        
+		return new HandshakeResponse(HandshakeResponse.CRAWLER_CODE,
+			HandshakeResponse.CRAWLER_MESSAGE, headers);        
 	}
 	
     /**
@@ -574,51 +584,10 @@ public final class HandshakeResponse {
      * @return a new <tt>Properties</tt> instance with the X-Try-Ultrapeers
      *  header set according to the incoming headers from the remote host
      */
-    private static Properties addXTryHeader(HandshakeResponse hr, 
-        Properties headers) {
-        Set hosts = new HashSet();
-        if(hr.isUltrapeer()) {
-            hosts.addAll(
-                RouterService.getHostCatcher().
-                getUltrapeersWithFreeUltrapeerSlots(hr.getLocalePref()));
-        } else {
-            hosts.addAll(
-                RouterService.getHostCatcher().
-                getUltrapeersWithFreeLeafSlots(hr.getLocalePref()));
-        }
-        
-        // If we don't have enough hosts for the X-Try-Ultrapeers header, add
-        // hosts that we're connected to.
-        
-        //is this efficient?
-        if(hosts.size() < 10) {
-            //we first try to get the connections that match the locale.
-            List conns = 
-                RouterService.getConnectionManager().
-                getInitializedConnectionsMatchLocale(hr.getLocalePref());
-            Iterator itr = conns.iterator();
-            for(int i = hosts.size(); itr.hasNext() && i < 10; i++) {
-                IpPort host = (IpPort)itr.next();
-                hosts.add(host);
-            }
-            
-            //if we still don't have enough hosts, get them from the list
-            //of all initialized connection
-            if(hosts.size() < 10) {
-                //list returned is unmmodifiable
-                conns =
-                    new LinkedList
-                    (RouterService.getConnectionManager()
-                     .getInitializedConnections());
-                //returned list may contain duplicates
-                conns.removeAll(hosts);
-                itr = conns.iterator();
-                for(int i = hosts.size();itr.hasNext() && i < 10; i++) {
-                    IpPort host = (IpPort)itr.next();
-                    hosts.add(host);
-                }
-            }
-        }
+    private static Properties addXTryHeader(HandshakeResponse hr, Properties headers) {
+        Collection hosts =
+            RouterService.getPreferencedHosts(
+                hr.isUltrapeer(), hr.getLocalePref(),10);
         
         headers.put(HeaderNames.X_TRY_ULTRAPEERS,
                     createEndpointString(hosts));

@@ -6,15 +6,24 @@
 
 package com.limegroup.gnutella.util;
 
+import com.sun.java.util.collections.*;
+
 /**
  * Holds a name value pair. The name is an instance of String, the value can
  * be any object. 
  * @author  asingla
  */
-public final class NameValue {
+public final class NameValue implements Map.Entry {
 
     private final String _name;
     private Object _value;
+    
+    /**
+     * Creates a new NameValue with a null value.
+     */
+    public NameValue(String name) {
+        this(name, null);
+    }
     
     /** Creates new NameValue */
     public NameValue(String name, Object value) {
@@ -26,12 +35,18 @@ public final class NameValue {
         return _name;
     }
     
+    public Object getKey() {
+        return _name;
+    }
+    
     public Object getValue() {
         return _value;
     }
 	
-	public void setValue(Object value) {
+	public Object setValue(Object value) {
+	    Object old = _value;
 		this._value = value;
+		return old;
 	}
         
     public String toString() {

@@ -659,20 +659,20 @@ public class RouterService {
             ErrorService.error(t);
         }
     }
-
-    /**
-     * Forces the backend to try to establish newKeep connections by kicking
-     * off connection fetchers as needed.  Does not affect the NUM_CONNECTIONS
-     * property.
-     * @param newKeep the desired total number of messaging connections
-     */
-    public static void forceKeepAlive(int newKeep) {
-        //no validation done
-        
-        //set the new keep alive
-        manager.setKeepAlive(newKeep);
-    }
-    
+//
+//    /**
+//     * Forces the backend to try to establish newKeep connections by kicking
+//     * off connection fetchers as needed.  Does not affect the NUM_CONNECTIONS
+//     * property.
+//     * @param newKeep the desired total number of messaging connections
+//     */
+//    public static void forceKeepAlive(int newKeep) {
+//        //no validation done
+//        
+//        //set the new keep alive
+//        manager.setKeepAlive(newKeep);
+//    }
+//    
     /**
      * Validates the passed new keep alive, and sets the backend to 
      * try to establish newKeep connections by kicking
@@ -681,51 +681,51 @@ public class RouterService {
      * @param newKeep the desired total number of messaging connections
      * @exception if the suggested keep alive value is not suitable
      */
-    public static void setKeepAlive(int newKeep) throws BadConnectionSettingException {
-        
-        //validate the keep alive value
-
-        //Negative keep alive is invalid
-        if(newKeep < 0)
-            throw new BadConnectionSettingException(
-                BadConnectionSettingException.NEGATIVE_VALUE,
-				ConnectionSettings.NUM_CONNECTIONS.getValue());
-        
-        //TODO: we may want to re-enable this...with a higher limit.
-        ////The request for increasing keep alive if we are leaf node is invalid
-        //if ((newKeep > 1) && hasClientSupernodeConnection())
-        //    throw new BadConnectionSettingException(
-        //       BadConnectionSettingException.TOO_HIGH_FOR_LEAF, 1);
-
-        //max connections for this connection speed
-        int max = ConnectionSettings.getMaxConnections();
-        if (manager.hasSupernodeClientConnection()) {
-            //Also the request to decrease the keep alive below a minimum
-            //level is invalid, if we are an Ultrapeer with leaves
-            if (newKeep < ConnectionManager.ULTRAPEER_CONNECTIONS)
-                throw new BadConnectionSettingException(
-                BadConnectionSettingException.TOO_LOW_FOR_ULTRAPEER,
-                ConnectionManager.ULTRAPEER_CONNECTIONS);
-            else if (newKeep > ConnectionManager.ULTRAPEER_CONNECTIONS 
-                && newKeep > max)
-                throw new BadConnectionSettingException(
-                BadConnectionSettingException.TOO_HIGH_FOR_SPEED,
-                ConnectionManager.ULTRAPEER_CONNECTIONS > max ?
-                    ConnectionManager.ULTRAPEER_CONNECTIONS : max);
-        } else if (newKeep > max)
-            //cant have too many connections based upon node's speed
-            throw new BadConnectionSettingException(
-                BadConnectionSettingException.TOO_HIGH_FOR_SPEED,
-                max);
-
-        //set the new keep alive.  To allow connections to bootstrap servers, we
-        //expire the HostCatcher if the keep alive was zero.  This is similar to
-        //calling connect(), except that it does not get the keep alive from
-        //SettingsManager.
-        if (ConnectionSettings.NUM_CONNECTIONS.getValue() == 0) //manager.getKeepAlive()==0)
-            catcher.expire();
-        forceKeepAlive(newKeep);
-    }
+//    public static void setKeepAlive(int newKeep) throws BadConnectionSettingException {
+//        
+//        //validate the keep alive value
+//
+//        //Negative keep alive is invalid
+//        if(newKeep < 0)
+//            throw new BadConnectionSettingException(
+//                BadConnectionSettingException.NEGATIVE_VALUE,
+//				ConnectionSettings.NUM_CONNECTIONS.getValue());
+//        
+//        //TODO: we may want to re-enable this...with a higher limit.
+//        ////The request for increasing keep alive if we are leaf node is invalid
+//        //if ((newKeep > 1) && hasClientSupernodeConnection())
+//        //    throw new BadConnectionSettingException(
+//        //       BadConnectionSettingException.TOO_HIGH_FOR_LEAF, 1);
+//
+//        //max connections for this connection speed
+//        int max = ConnectionSettings.getMaxConnections();
+//        if (manager.hasSupernodeClientConnection()) {
+//            //Also the request to decrease the keep alive below a minimum
+//            //level is invalid, if we are an Ultrapeer with leaves
+//            if (newKeep < ConnectionManager.ULTRAPEER_CONNECTIONS)
+//                throw new BadConnectionSettingException(
+//                BadConnectionSettingException.TOO_LOW_FOR_ULTRAPEER,
+//                ConnectionManager.ULTRAPEER_CONNECTIONS);
+//            else if (newKeep > ConnectionManager.ULTRAPEER_CONNECTIONS 
+//                && newKeep > max)
+//                throw new BadConnectionSettingException(
+//                BadConnectionSettingException.TOO_HIGH_FOR_SPEED,
+//                ConnectionManager.ULTRAPEER_CONNECTIONS > max ?
+//                    ConnectionManager.ULTRAPEER_CONNECTIONS : max);
+//        } else if (newKeep > max)
+//            //cant have too many connections based upon node's speed
+//            throw new BadConnectionSettingException(
+//                BadConnectionSettingException.TOO_HIGH_FOR_SPEED,
+//                max);
+//
+//        //set the new keep alive.  To allow connections to bootstrap servers, we
+//        //expire the HostCatcher if the keep alive was zero.  This is similar to
+//        //calling connect(), except that it does not get the keep alive from
+//        //SettingsManager.
+//        if (ConnectionSettings.NUM_CONNECTIONS.getValue() == 0) //manager.getKeepAlive()==0)
+//            catcher.expire();
+//        forceKeepAlive(newKeep);
+//    }
 
     /**
      * Notifies the backend that spam filters settings have changed, and that
@@ -1024,6 +1024,48 @@ public class RouterService {
     public static boolean isMandragoreWorm(byte[] guid, Response response) {
         return verifier.isMandragoreWorm(guid, response);
     }
+    
+    /**
+     * Returns a collection of IpPorts, preferencing hosts with open slots.
+     * If isUltrapeer is true, this preferences hosts with open ultrapeer slots,
+     * otherwise it preferences hosts with open leaf slots.
+     *
+     * Preferences via locale, also.
+     * 
+     * @param num How many endpoints to try to get
+     */
+    public static Collection getPreferencedHosts(boolean isUltrapeer, String locale, int num) {
+        
+        // note that we need to use a TreeSet because the objects returned
+        // from the various adding calls below will be different types,
+        // and hashCode & equals won't be respected.
+        Set hosts = new TreeSet(IpPort.COMPARATOR);
+        
+        if(isUltrapeer)
+            hosts.addAll(catcher.getUltrapeersWithFreeUltrapeerSlots(locale,num));
+        else
+            hosts.addAll(catcher.getUltrapeersWithFreeLeafSlots(locale,num));
+        
+        // If we don't have enough hosts, add more.
+        
+        if(hosts.size() < num) {
+            //we first try to get the connections that match the locale.
+            List conns = manager.getInitializedConnectionsMatchLocale(locale);
+            for(Iterator i = conns.iterator(); i.hasNext() && hosts.size() < num;)
+                hosts.add(i.next());
+            
+            //if we still don't have enough hosts, get them from the list
+            //of all initialized connection
+            if(hosts.size() < num) {
+                //list returned is unmmodifiable
+                conns = manager.getInitializedConnections();
+                for(Iterator i = conns.iterator(); i.hasNext() && hosts.size() < num;)
+                    hosts.add(i.next());
+            }
+        }
+        
+        return hosts;
+    }
 
     /**
      *  Returns the number of messaging connections.
@@ -1066,6 +1108,17 @@ public class RouterService {
     public static int getNumOldConnections() {
         return manager.getNumOldConnections();
     }
+    
+	/**
+	 * Returns whether or not this client currently has any initialized 
+	 * connections.
+	 *
+	 * @return <tt>true</tt> if the client does have initialized connections,
+	 *  <tt>false</tt> otherwise
+	 */
+	public static boolean isFullyConnected() {
+		return manager.isFullyConnected();
+	}    
 
 	/**
 	 * Returns whether or not this client currently has any initialized 

@@ -1,10 +1,12 @@
 package com.limegroup.gnutella.messages;
 
+import java.io.IOException;
+import java.io.OutputStream;
+
 import com.sun.java.util.collections.*;
-import java.io.*;
-import com.limegroup.gnutella.*;
-import com.limegroup.gnutella.util.COBSUtil;
-import com.limegroup.gnutella.util.Comparators;
+
+import com.limegroup.gnutella.ByteOrder;
+import com.limegroup.gnutella.util.*;
 
 /** 
  * A mutable GGEP extension block.  A GGEP block can be thought of as a
@@ -15,7 +17,7 @@ import com.limegroup.gnutella.util.Comparators;
  * null bytes.  The order of the extensions is immaterial.  Extensions supported
  * by LimeWire have keys specified in this class (prefixed by GGEP_HEADER...)  
  */
-public class GGEP extends Object {
+public class GGEP {
 
     /** The extension header (key) for Browse Host. */
     public static final String GGEP_HEADER_BROWSE_HOST = "BH";
@@ -35,14 +37,32 @@ public class GGEP extends Object {
     public static final String GGEP_HEADER_PUSH_PROXY = "PUSH";
     /** The extension header (key) for AlternateLocation support */
     public static final String GGEP_HEADER_ALTS = "ALT";
-    /** The extension header (key) for WhatIs(New/....) support */
-    public static final String GGEP_HEADER_WHAT_IS = "WH";
+    /** The extention header (key) for IpPort request */
+    public static final String GGEP_HEADER_IPPORT="IP";
+    /** The extension header (key) for UDP HostCache pongs. */
+    public static final String GGEP_HEADER_UDP_HOST_CACHE = "UDPHC";
+    /** The extension header (key) for indicating support for packed ip/ports & udp host caches. */
+    public static final String GGEP_HEADER_SUPPORT_CACHE_PONGS = "SCP";
+    /** The extension header (key) for packed IP/Ports */
+    public static final String GGEP_HEADER_PACKED_IPPORTS="IPP";
+    /** The extension header (key) for packed UDP Host Caches */
+    public static final String GGEP_HEADER_PACKED_HOSTCACHES="PHC";
+    
+    /**
+     * The extension header (key) for a feature query.
+     * This is 'WH' for legacy reasons, because 'What is New' was the first.
+     */
+    public static final String GGEP_HEADER_FEATURE_QUERY = "WH";
     /** The extension header disabling OOB proxying. */
     public static final String GGEP_HEADER_NO_PROXY = "NP";
     /** The extension header (key) for MetaType query support */
     public static final String GGEP_HEADER_META = "M";
     /** The extension header (key) for client locale */
     public static final String GGEP_HEADER_CLIENT_LOCALE = "LOC";
+    /** The extension header (key) for creation time */
+    public static final String GGEP_HEADER_CREATE_TIME = "CT";
+    /** The extension header (key) for Firewalled Transfer support in Hits. */
+    public static final String GGEP_HEADER_FW_TRANS = "FW";
 
     /** The maximum size of a extension header (key). */
     public static final int MAX_KEY_SIZE_IN_BYTES = 15;
@@ -60,8 +80,7 @@ public class GGEP extends Object {
      * strings.  But strings are conventient for keys since they define hashCode
      * and equals.
      */
-    private final Map /*String->byte[]*/ _props = 
-        new TreeMap(Comparators.stringComparator());
+    private final Map /*String->byte[]*/ _props = new TreeMap(Comparators.stringComparator());
 
     /**
      * False iff this should COBS encode values to prevent null bytes.
@@ -95,7 +114,14 @@ public class GGEP extends Object {
      */
     public GGEP() {
         this(false);
-    }    
+    }
+    
+    /**
+     * Constructs a new GGEP message with the given bytes & offset.
+     */
+    public GGEP(byte[] data, int offset) throws BadGGEPBlockException {
+        this(data, offset, null);
+    }
 
     /** Constructs a GGEP instance based on the GGEP block beginning at
      *  messageBytes[beginOffset].  If you are unsure of whether or not there is
@@ -127,8 +153,7 @@ public class GGEP extends Object {
             // bit order is interpreted as 76543210
             try {
                 sanityCheck(messageBytes[currIndex]);
-            }
-            catch (ArrayIndexOutOfBoundsException malformedInput) {
+            } catch (ArrayIndexOutOfBoundsException malformedInput) {
                 throw new BadGGEPBlockException();
             }
             onLastExtension = isLastExtension(messageBytes[currIndex]);
@@ -142,8 +167,7 @@ public class GGEP extends Object {
             try {
                 extensionHeader = new String(messageBytes, currIndex,
                                              headerLen);
-            }
-            catch (StringIndexOutOfBoundsException inputIsMalformed) {
+            } catch (StringIndexOutOfBoundsException inputIsMalformed) {
                 throw new BadGGEPBlockException();
             }
 
@@ -163,25 +187,25 @@ public class GGEP extends Object {
                 try {
                     System.arraycopy(messageBytes, currIndex, data, 0, 
                                      dataLength);
-                }
-                catch (ArrayIndexOutOfBoundsException malformedInput) {
+                } catch (ArrayIndexOutOfBoundsException malformedInput) {
                     throw new BadGGEPBlockException();
                 }
 
-                // cobs decode this bad boy....
                 if (encoded) {
                     try {
                         data = COBSUtil.cobsDecode(data);
-                    }
-                    catch (IOException badCobsEncoding) {
+                    } catch (IOException badCobsEncoding) {
                         throw new BadGGEPBlockException("Bad COBS Encoding");
                     }
                 }
 
-                // LimeWire currently does not support flate/default, so
-                // anything in this format is just disregarded...
-                if (compressed)
-                    continue;
+                if (compressed) {
+                    try {
+                        data = IOUtils.inflate(data);
+                    } catch(IOException badData) {
+                        throw new BadGGEPBlockException("Bad compressed data");
+                    }
+                }
 
                 extensionData = data;
 
@@ -189,12 +213,30 @@ public class GGEP extends Object {
             }
 
             // ok, everything checks out, just slap it in the hashmapper...
-            _props.put(extensionHeader, extensionData);
+            if(compressed)
+                _props.put(extensionHeader, new NeedsCompression(extensionData));
+            else
+                _props.put(extensionHeader, extensionData);
 
         }
         if ((endOffset != null) && (endOffset.length > 0))
             endOffset[0] = currIndex;
     }
+    
+    public static GGEP[] read(byte[] b, int i) throws BadGGEPBlockException {
+        return new GGEP[] { new GGEP(b, i) };
+    }
+    
+    public static GGEP[] read(byte[] b, int i, int[] ia) throws BadGGEPBlockException {
+        return new GGEP[] { new GGEP(b, i, ia) };
+    }
+    
+    /**
+     * Merges the other's GGEP with this' GGEP.
+     */
+    public void merge(GGEP other) {
+        _props.putAll(other._props);
+    }   
 
     private void sanityCheck(byte headerFlags) throws BadGGEPBlockException {
         // the 4th bit in the header's first byte must be 0.
@@ -279,17 +321,23 @@ public class GGEP extends Object {
             // for each header, write the GGEP header and data
             while (headers.hasNext()) {
                 String currHeader = (String) headers.next();
-                byte[] currData   = (byte[]) _props.get(currHeader);
+                byte[] currData   = get(currHeader);
                 int dataLen = 0;
                 boolean shouldEncode = shouldCOBSEncode(currData);
+                boolean shouldCompress = shouldCompress(currHeader);
                 if (currData != null) {
-                    if (shouldEncode)
+                    if (shouldCompress) {
+                        currData = IOUtils.deflate(currData);
+                        if(currData.length > MAX_VALUE_SIZE_IN_BYTES)
+                            throw new IllegalArgumentException("value for ["
+                              + currHeader + "] too large after compression");
+                    } if (shouldEncode)
                         currData = COBSUtil.cobsEncode(currData);
                     dataLen = currData.length;
                 }
                 writeHeader(currHeader, dataLen, 
                             !headers.hasNext(), out,
-                            shouldEncode);
+                            shouldEncode, shouldCompress);
                 if (dataLen > 0) 
                     out.write(currData);
             }
@@ -302,11 +350,14 @@ public class GGEP extends Object {
         // in the data...
         return (!notNeedCOBS && containsNull(data));
     }
-
+    
+    private final boolean shouldCompress(String header) {
+        return (_props.get(header) instanceof NeedsCompression);
+    }
     
     private void writeHeader(String header, final int dataLen, 
                              boolean isLast, OutputStream out, 
-                             boolean shouldEncode) 
+                             boolean isEncoded, boolean isCompressed) 
         throws IOException {
 
         // 1. WRITE THE HEADER FLAGS
@@ -317,12 +368,12 @@ public class GGEP extends Object {
 
         int flags = 0x00;
         if (isLast)
-            flags = flags | 0x80;
-        if (shouldEncode)
-            flags = flags | 0x40;
-        if (shouldCompress)
-            flags = flags | 0x20;
-        flags = flags | header.getBytes().length;
+            flags |= 0x80;
+        if (isEncoded)
+            flags |= 0x40;
+        if (isCompressed)
+            flags |= 0x20;
+        flags |= header.getBytes().length;
         out.write(flags);
 
         // 2. WRITE THE HEADER
@@ -348,62 +399,40 @@ public class GGEP extends Object {
         out.write(toWrite);
     }
 
+    ////////////////////////// Key/Value Mutators and Accessors ////////////////
+    
     /**
-     * Constructs an array of all GGEP blocks starting at
-     *  messageBytes[beginOffset].
-     *  @param messageBytes The input bytes to attempt to read one or more GGEP
-     *  blocks from.
-     *  @param beginOffset The begin index of the (first) GGEP prefix.
-     *  @param endOffset If the reader wants to know where the last GGEP block
-     *     was read, fill this with a blank int[1] and the endOffset will
-     *     be placed here.  Otherwise, null is allowed.
-     *  @exception BadGGEPBlockException Thrown if ANY block could not be parsed
-     *  correctly.
+     * Adds all the specified key/value pairs.
+     * TODO: Allow a value to be compressed.
      */
-    public static GGEP[] read(byte[] messageBytes,
-                              final int beginOffset,
-                              int[] endOffset) 
-        throws BadGGEPBlockException {
-
-        GGEP[] retGGEPs = null;
-        List ggeps = new ArrayList();
-        int currIndex[] = {beginOffset};
-
-        while ((messageBytes.length > currIndex[0]) && 
-               (messageBytes[currIndex[0]] == GGEP_PREFIX_MAGIC_NUMBER))
-            ggeps.add(new GGEP(messageBytes, currIndex[0], currIndex));
-        
-        if (ggeps.size() == 0)
-            throw new BadGGEPBlockException();
-        
-        Object[] array = ggeps.toArray();
-        retGGEPs = new GGEP[array.length];
-        for (int i = 0; i < array.length; i++)
-            retGGEPs[i] = (GGEP)array[i];
-
-        if( endOffset != null && endOffset.length > 0 )
-            endOffset[0] = currIndex[0];
-
-        return retGGEPs;
+    public void putAll(List /* of NameValue */ fields) throws IllegalArgumentException {
+        for(Iterator i = fields.iterator(); i.hasNext(); ) {
+            NameValue next = (NameValue)i.next();
+            String key = next.getName();
+            Object value = next.getValue();
+            if(value == null)
+                put(key);
+            else if(value instanceof byte[])
+                put(key, (byte[])value);
+            else if(value instanceof String)
+                put(key, (String)value);
+            else if(value instanceof Integer)
+                put(key, ((Integer)value).intValue());
+            else if(value instanceof Long)
+                put(key, ((Long)value).longValue());
+            else
+                throw new IllegalArgumentException("Unknown value: " + value);
+        }
     }
     
     /**
-     * Utility method for calling read(messageBytes, beginOffset, null).
-     * Constructs an array of all GGEP blocks starting at
-     *  messageBytes[beginOffset]. 
-     *  @param messageBytes The input bytes to attempt to read one or more GGEP
-     *  blocks from.
-     *  @param beginOffset The begin index of the (first) GGEP prefix.
-     *  @exception BadGGEPBlockException Thrown if ANY block could not be parsed
-     *  correctly.
+     * Adds a key with data that should be compressed.
      */
-    public static GGEP[] read(byte[] messageBytes,
-                              final int beginOffset)
-        throws BadGGEPBlockException {
-            return read(messageBytes, beginOffset, null);
+    public void putCompressed(String key, byte[] value) throws IllegalArgumentException {
+        validateKey(key);
+        //validateValue(value); // done when writing.  TODO: do here?
+        _props.put(key, new NeedsCompression(value));
     }
-
-    ////////////////////////// Key/Value Mutators and Accessors ////////////////
 
     /** 
      * Adds a key with raw byte value.
@@ -450,6 +479,21 @@ public class GGEP extends Object {
     }
 
     /** 
+     * Adds a key with long value.
+     * @param key the name of the GGEP extension, whose length should be between
+     *  1 and 15, inclusive
+     * @param value the GGEP extension data, which should be an unsigned long
+     * @exception IllegalArgumentException key is of an illegal length; or value
+     *  is negative; or value contains a null bytes, null bytes are disallowed,
+     *  and COBS encoding is not supported 
+     */
+    public void put(String key, long value) throws IllegalArgumentException {
+        if (value<0)  //TODO: ?
+            throw new IllegalArgumentException("Negative value");
+        put(key, ByteOrder.long2minLeb(value));
+    }
+
+    /** 
      * Adds a key without any value.
      * @param key the name of the GGEP extension, whose length should be between
      *  1 and 15, inclusive
@@ -468,7 +512,7 @@ public class GGEP extends Object {
      *  is always thrown for extensions with no data; use hasKey instead.
      */
     public byte[] getBytes(String key) throws BadGGEPPropertyException {
-        byte[] ret=(byte[])_props.get(key);
+        byte[] ret= get(key);
         if (ret==null)
             throw new BadGGEPPropertyException();
         return ret;
@@ -502,6 +546,23 @@ public class GGEP extends Object {
             throw new BadGGEPPropertyException("Integer too big");
         return ByteOrder.leb2int(bytes, 0, bytes.length);
     }
+    
+    /**
+     * Returns the value for a key as a long.
+     * @param key the name of the GGEP extension
+     * @return the GGEP extension data associated with the key
+     * @exception BadGGEPPropertyException extension not found, was corrupt,
+     *  or has no associated data.   Note that BadGGEPPropertyException is
+     *  is always thrown for extensions with no data; use hasKey instead.
+     */
+    public long getLong(String key) throws BadGGEPPropertyException {
+        byte[] bytes=getBytes(key);
+        if (bytes.length<1)
+            throw new BadGGEPPropertyException("No bytes");
+        if (bytes.length>8)
+            throw new BadGGEPPropertyException("Integer too big");
+        return ByteOrder.leb2long(bytes, 0, bytes.length);
+    }
 
     /**
      * Returns whether this has the given key.
@@ -519,6 +580,17 @@ public class GGEP extends Object {
      */
     public Set getHeaders() {
         return _props.keySet();
+    }
+    
+    /**
+     * Gets the byte[] data from props.
+     */
+    public byte[] get(String key) {
+        Object value = _props.get(key);
+        if(value instanceof NeedsCompression)
+            return ((NeedsCompression)value).data;
+        else
+            return (byte[])value;
     }
 
     private void validateKey(String key) throws IllegalArgumentException {
@@ -545,7 +617,6 @@ public class GGEP extends Object {
         }
         return false;
     }
-
     
     //////////////////////////////// Miscellany ///////////////////////////////
 
@@ -567,8 +638,8 @@ public class GGEP extends Object {
     private boolean subset(GGEP other) {
         for (Iterator iter=this._props.keySet().iterator(); iter.hasNext(); ) {
             String key=(String)iter.next();
-            byte[] v1=(byte[])this._props.get(key);
-            byte[] v2=(byte[])other._props.get(key);
+            byte[] v1= this.get(key);
+            byte[] v2= other.get(key);
             //Remember that v1 and v2 can be null.
             if ((v1==null) != (v2==null))
                 return false;
@@ -584,6 +655,17 @@ public class GGEP extends Object {
 			hashCode = 37 * _props.hashCode();
 		}
 		return hashCode;
+	}
+	
+	/**
+	 * Marker class that wraps a byte[] value, if that value
+	 * is going to require compression upon write.
+	 */
+	private static class NeedsCompression {
+	    final byte[] data;
+	    NeedsCompression(byte[] data) {
+	        this.data = data;
+	    }
 	}
 }
 

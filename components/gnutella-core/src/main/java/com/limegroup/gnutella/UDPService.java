@@ -604,18 +604,16 @@ public final class UDPService implements Runnable {
 
     private static class MLImpl implements MessageListener {
         public boolean _gotIncoming = false;
-        private final GUID _guid;
-        public MLImpl(GUID guid) {
-            _guid = guid;
-        }
 
-        public void processMessage(Message m) {
-            if ((m instanceof PingRequest) &&
-                (_guid.equals(new GUID(m.getGUID()))))
+        public void processMessage(Message m, ReplyHandler handler) {
+            if ((m instanceof PingRequest))
                 _gotIncoming = true;
         }
+        
+        public void registered(byte[] guid) {}
+        public void unregistered(byte[] guid) {}
     }
-
+    
     private class IncomingValidator implements Runnable {
         public IncomingValidator() {}
         public void run() {
@@ -635,8 +633,8 @@ public final class UDPService implements Runnable {
                 ) {
                 
                 final GUID cbGuid = new GUID(GUID.makeGuid());
-                final MLImpl ml = new MLImpl(cbGuid);
-                mr.registerMessageListener(cbGuid, ml);
+                final MLImpl ml = new MLImpl();
+                mr.registerMessageListener(cbGuid.bytes(), ml);
                 // send a connectback request to a few peers and clear
                 if(cm.sendUDPConnectBackRequests(cbGuid))  {
                     _lastConnectBackTime = System.currentTimeMillis();
@@ -648,7 +646,7 @@ public final class UDPService implements Runnable {
                                     // we set according to the message listener
                                     _acceptedUnsolicitedIncoming = 
                                         ml._gotIncoming;
-                                mr.unregisterMessageListener(cbGuid);
+                                mr.unregisterMessageListener(cbGuid.bytes(), ml);
                             }
                         };
                     RouterService.schedule(checkThread, 
@@ -656,7 +654,7 @@ public final class UDPService implements Runnable {
                                            0);
                 }
                 else
-                    mr.unregisterMessageListener(cbGuid);
+                    mr.unregisterMessageListener(cbGuid.bytes(), ml);
             }
         }
     }

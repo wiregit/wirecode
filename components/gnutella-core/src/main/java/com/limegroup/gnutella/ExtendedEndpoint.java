@@ -1,10 +1,17 @@
 package com.limegroup.gnutella;
 
-import java.io.*;
-import com.sun.java.util.collections.*;
-import com.limegroup.gnutella.util.*;
-import com.limegroup.gnutella.settings.ApplicationSettings;
+import java.io.IOException;
+import java.io.Writer;
 import java.text.ParseException;
+
+import com.sun.java.util.collections.*;
+
+import com.limegroup.gnutella.settings.ConnectionSettings;
+import com.limegroup.gnutella.settings.ApplicationSettings;
+import com.limegroup.gnutella.util.CommonUtils;
+import com.limegroup.gnutella.util.Buffer;
+import com.limegroup.gnutella.util.StringUtils;
+import com.limegroup.gnutella.util.NetworkUtils;
 
 /**
  * An endpoint with additional history information used to prioritize
@@ -27,11 +34,8 @@ import java.text.ParseException;
  * This "poor man's serialization" is used to help HostCatcher implement the
  * reading and writing of gnutella.net files.<p>
  *
- * ExtendedEndpoint does not override the compareTo method for two reasons:
- * <ul>
- * <li>It creates confusion between java.lang.Comparable and
- *     com.sun.java.util.collections.Comparable 
- * <li>It creates confusion between compareTo and equals.
+ * ExtendedEndpoint does not override the compareTo method because
+ * it creates confusion between compareTo and equals.
  * </ul> 
  * For comparing by priority, users should use the return value of 
  * priorityComparator()
@@ -78,6 +82,14 @@ public class ExtendedEndpoint extends Endpoint {
     /** the locale of the client that this endpoint represents */
     private String _clientLocale = 
         ApplicationSettings.DEFAULT_LOCALE.getValue();
+        
+    /**
+     * The number of times this has failed while attempting to connect
+     * to a UDP host cache.
+     * If -1, this is NOT a udp host cache.
+     */
+    private int udpHostCacheFailures = -1;
+    
 
     /** locale of this client */
     private final static String ownLocale =
@@ -103,6 +115,17 @@ public class ExtendedEndpoint extends Endpoint {
         super(host, port);
         this.timeRecorded=now();
     }
+    
+    /** 
+     * Creates a new ExtendedEndpoint without extended uptime information.  (The
+     * default will be used.)  The creation time is set to the current system
+     * time.  It is assumed that we have not yet attempted a connection to this.  
+     * Does not valid the host address.
+     */
+    public ExtendedEndpoint(String host, int port, boolean strict) { 
+        super(host, port, strict);
+        this.timeRecorded=now();
+    }    
     
     /**
      * creates a new ExtendedEndpoint with the specified locale.
@@ -186,6 +209,59 @@ public class ExtendedEndpoint extends Endpoint {
     public void setClientLocale(String l) {
         _clientLocale = l;
     }
+    
+    /**
+     * Determines if this is an ExtendedEndpoint for a UDP Host Cache.
+     */
+    public boolean isUDPHostCache() {
+        return udpHostCacheFailures != -1;
+    }
+    
+    /**
+     * Records a UDP Host Cache failure.
+     */
+    public void recordUDPHostCacheFailure() {
+        Assert.that(isUDPHostCache());
+        udpHostCacheFailures++;
+    }
+    
+    /**
+     * Decrements the failures for this UDP Host Cache.
+     *
+     * This is intended for use when the network has died and
+     * we really don't want to consider the host a failure.
+     */
+    public void decrementUDPHostCacheFailure() {
+        Assert.that(isUDPHostCache());
+        // don't go below 0.
+        udpHostCacheFailures = Math.max(0, udpHostCacheFailures-1);
+    }
+    
+    /**
+     * Records a UDP Host Cache success.
+     */
+    public void recordUDPHostCacheSuccess() {
+        Assert.that(isUDPHostCache());
+        udpHostCacheFailures = 0;
+    }
+    
+    /**
+     * Determines how many failures this UDP host cache had.
+     */
+    public int getUDPHostCacheFailures() {
+        return udpHostCacheFailures;
+    }
+    
+    /**
+     * Sets if this a UDP host cache endpoint.
+     */
+    public ExtendedEndpoint setUDPHostCache(boolean cache) {
+        if(cache == true)
+            udpHostCacheFailures = 0;
+        else
+            udpHostCacheFailures = -1;
+        return this;
+    }
 
     private void recordConnectionAttempt(Buffer buf, long now) {
         if (buf.isEmpty()) {
@@ -228,15 +304,15 @@ public class ExtendedEndpoint extends Endpoint {
     public void write(Writer out) throws IOException {
         out.write(getAddress());
         out.write(":");
-        out.write(Integer.toString(getPort()));
+        out.write(getPort() + "");
         out.write(FIELD_SEPARATOR);
         
         if (dailyUptime>=0)
-            out.write(Integer.toString(dailyUptime));
+            out.write(dailyUptime + "");
         out.write(FIELD_SEPARATOR);
 
         if (timeRecorded>=0)
-            out.write(Long.toString(timeRecorded));
+            out.write(timeRecorded + "");
         out.write(FIELD_SEPARATOR);
 
         write(out, getConnectionSuccesses());
@@ -244,16 +320,18 @@ public class ExtendedEndpoint extends Endpoint {
         write(out, getConnectionFailures());
         out.write(FIELD_SEPARATOR);
         out.write(_clientLocale);
+        out.write(FIELD_SEPARATOR);
+        if(isUDPHostCache())
+            out.write(udpHostCacheFailures + "");
         out.write(EOL);
     }
 
-    /** Writes elements of LONGS to OUT. */
-    private void write(Writer out, Iterator /* of Long */ longs) 
+    /** Writes Objects to 'out'. */
+    private void write(Writer out, Iterator objects) 
                        throws IOException {
-        while (longs.hasNext()) {
-            long n=((Long)longs.next()).longValue();
-            out.write(Long.toString(n));
-            if (longs.hasNext())
+        while (objects.hasNext()) {
+            out.write(objects.next().toString());
+            if (objects.hasNext())
                 out.write(LIST_SEPARATOR);            
         }
     }
@@ -280,19 +358,34 @@ public class ExtendedEndpoint extends Endpoint {
         //1. Host and port.  As a dirty trick, we use existing code in Endpoint.
         //Note that we strictly validate the address to work around corrupted
         //gnutella.net files from an earlier version
+        boolean pureNumeric;
+        
         String host;
         int port;
         try {
-            Endpoint tmp=new Endpoint(linea[0], true);
+            Endpoint tmp=new Endpoint(linea[0], true); // require numeric.
             host=tmp.getAddress();
             port=tmp.getPort();
+            pureNumeric = true;
         } catch (IllegalArgumentException e) {
-            throw new ParseException("Couldn't extract address and port", 0);
+            // Alright, pure numeric failed -- let's try constructing without
+            // numeric & without requiring a DNS lookup.
+            try {
+                Endpoint tmp = new Endpoint(linea[0], false, false);
+                host = tmp.getAddress();
+                port = tmp.getPort();
+                pureNumeric = false;
+            } catch(IllegalArgumentException e2) {
+                ParseException e3 = new ParseException("Couldn't extract address and port from: " + linea[0], 0);
+                if(CommonUtils.isJava14OrLater())
+                    e3.initCause(e2);
+                throw e3;
+            }
         }
 
         //Build endpoint without any optional data.  (We'll set it if possible
         //later.)
-        ExtendedEndpoint ret=new ExtendedEndpoint(host, port);                
+        ExtendedEndpoint ret=new ExtendedEndpoint(host, port, false);                
 
         //2. Average uptime (optional)
         if (linea.length>=2) {
@@ -334,6 +427,23 @@ public class ExtendedEndpoint extends Endpoint {
         if(linea.length>=6) {
             ret.setClientLocale(linea[5]);
         }
+        
+        //7. udp-host
+        if(linea.length>=7) {
+            try {
+                int i = Integer.parseInt(linea[6]);
+                if(i >= 0)
+                    ret.udpHostCacheFailures = i;
+            } catch(NumberFormatException nfe) {}
+        }
+        
+        // validate address if numeric.
+        if(pureNumeric && !NetworkUtils.isValidAddress(host))
+            throw new ParseException("invalid dotted addr: " + ret, 0);        
+            
+        // validate that non UHC addresses were numeric.
+        if(!ret.isUDPHostCache() && !pureNumeric)
+            throw new ParseException("illegal non-UHC endpoint: " + ret, 0);
 
         return ret;
     }
@@ -354,29 +464,42 @@ public class ExtendedEndpoint extends Endpoint {
      * </ul>
      */
     public static Comparator priorityComparator() {
-        return new PriorityComparator();
+        return PRIORITY_COMPARATOR;
     }
+    
+    /**
+     * The sole priority comparator.
+     */
+    private static final Comparator PRIORITY_COMPARATOR = new PriorityComparator();
 
     static class PriorityComparator implements Comparator {
         public int compare(Object extEndpoint1, Object extEndpoint2) {
             ExtendedEndpoint a=(ExtendedEndpoint)extEndpoint1;
             ExtendedEndpoint b=(ExtendedEndpoint)extEndpoint2;
 
-            boolean bLoc = ownLocale.equals(b.getClientLocale());
-            //TODO: preference locale first or after connectScore?
-            if(ownLocale.equals(a.getClientLocale())) {
-                if(!bLoc) 
-                    return 1;
-            }
-            else if(bLoc) 
-                return -1;
-
             int ret=a.connectScore()-b.connectScore();
-            if (ret!=0) 
+            if(ret != 0) 
                 return ret;
-            else
-                return a.getDailyUptime() - b.getDailyUptime();
+     
+            ret = a.localeScore() - b.localeScore();
+            if(ret != 0)
+                return ret;
+                
+            return a.getDailyUptime() - b.getDailyUptime();
         }
+    }
+    
+    /**
+     * Returns +1 if their locale matches our, -1 otherwise.
+     * Returns 0 if locale preferencing isn't enabled.
+     */
+    private int localeScore() {
+        if(!ConnectionSettings.USE_LOCALE_PREF.getValue())
+            return 0;
+        if(ownLocale.equals(_clientLocale))
+            return 1;
+        else
+            return -1;
     }
     
     /** Returns +1 (last connection attempt was a success), 0 (no connection
@@ -391,7 +514,7 @@ public class ExtendedEndpoint extends Endpoint {
         else {            
             long success=((Long)connectSuccesses.last()).longValue();
             long failure=((Long)connectFailures.last()).longValue();
-            //Can use success-failure because of overflow/underflow.
+            //Can't use success-failure because of overflow/underflow.
             if (success>failure)
                 return 1;
             else if (success<failure)
