@@ -293,9 +293,9 @@ public class LimeXMLDocument implements Serializable {
      * Sets the schema URI for this document
      * @param schemaURI schema URI to be set
      */
-    //public void setSchemaURI(String schemaURI){
-	//  this.schemaUri = schemaURI;
-    //}
+    public void setSchemaURI(String schemaURI){
+		this.schemaUri = schemaURI;
+    }
     
     
     /**

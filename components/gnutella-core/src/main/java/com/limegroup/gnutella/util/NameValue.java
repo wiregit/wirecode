@@ -14,7 +14,7 @@ package com.limegroup.gnutella.util;
 public final class NameValue {
 
     private final String _name;
-    private final Object _value;
+    private Object _value;
     
     /** Creates new NameValue */
     public NameValue(String name, Object value) {
@@ -29,6 +29,10 @@ public final class NameValue {
     public Object getValue() {
         return _value;
     }
+	
+	public void setValue(Object value) {
+		this._value = value;
+	}
         
     public String toString() {
         return "name = " + _name + " value = " + _value;
