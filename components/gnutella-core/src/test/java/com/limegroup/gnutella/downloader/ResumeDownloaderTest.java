@@ -37,10 +37,11 @@ public class ResumeDownloaderTest extends com.limegroup.gnutella.util.BaseTestCa
     static final int amountDownloaded=500;
     static final RemoteFileDesc rfd=newRFD(name, size, hash);
     static final IncompleteFileManager ifm=new IncompleteFileManager();
-    static final File incompleteFile=ifm.getFile(rfd);
+    static File incompleteFile;
     
     public static void globalSetUp() throws Exception {
         new RouterService(new ActivityCallbackStub());
+        incompleteFile=ifm.getFile(rfd);
         VerifyingFile vf=new VerifyingFile(false);
         vf.addInterval(new Interval(0, amountDownloaded-1));  //inclusive
         ifm.addEntry(incompleteFile, vf);

@@ -172,7 +172,13 @@ class RemoteFileDescGrouper implements Serializable {
      */
     synchronized int add(RemoteFileDesc rfd, boolean checkExisting) {
         repOk();
-        File incompleteFile=incompleteFileManager.getFile(rfd);
+        File incompleteFile = null;
+
+        try {
+            incompleteFile = incompleteFileManager.getFile(rfd);
+        } catch(IOException ioe) {
+            return -1;
+        }
 
         //Compare the incomplete file for rfd with the incomplete file for each
         //bucket.  Note that all elements of a bucket have the same incomplete
@@ -330,9 +336,13 @@ class RemoteFileDescGrouper implements Serializable {
             List bucket=(List)buckets.get(i);
             File tmp1=(File)incompletes.get(i);
             for (int j=0; j<bucket.size(); j++) {
-                File tmp2=incompleteFileManager.getFile(
-                                    (RemoteFileDesc)bucket.get(j));
-                Assert.that(tmp1.equals(tmp2));
+                try {
+                    File tmp2=incompleteFileManager.getFile(
+                                        (RemoteFileDesc)bucket.get(j));
+                    Assert.that(tmp1.equals(tmp2));
+                } catch(IOException ioe) {
+                    Assert.that(false, ioe.getMessage());
+                }
             }
         }
 

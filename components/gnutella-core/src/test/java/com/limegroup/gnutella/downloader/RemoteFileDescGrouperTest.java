@@ -73,7 +73,7 @@ public class RemoteFileDescGrouperTest extends com.limegroup.gnutella.util.BaseT
     }
 
 
-    public void testLegacy() {
+    public void testLegacy() throws Throwable {
         //Test bucketing.  Note that the 1-star result is ignored.
         RemoteFileDescGrouper grouper=null;
         RemoteFileDesc[] allFiles=null;

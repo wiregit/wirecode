@@ -646,8 +646,12 @@ public class ManagedDownloader implements Downloader, Serializable {
      * should attempt to download other.  
      */
     public boolean conflicts(RemoteFileDesc other) {
-        File otherFile=incompleteFileManager.getFile(other);
-        return conflicts(otherFile);
+        try {
+            File otherFile=incompleteFileManager.getFile(other);
+            return conflicts(otherFile);
+        } catch(IOException ioe) {
+            return false;
+        }
     }
 
     /**
@@ -662,9 +666,13 @@ public class ManagedDownloader implements Downloader, Serializable {
             //should return false if in COULDNT_DOWNLOAD state.
             for (int i=0; i<allFiles.length; i++) {
                 RemoteFileDesc rfd=(RemoteFileDesc)allFiles[i];
-                File thisFile=incompleteFileManager.getFile(rfd);
-                if (thisFile.equals(incFile))
-                    return true;
+                try {
+                    File thisFile=incompleteFileManager.getFile(rfd);
+                    if (thisFile.equals(incFile))
+                        return true;
+                } catch(IOException ioe) {
+                    return false;
+                }
             }
         }
         return false;
@@ -1714,20 +1722,21 @@ public class ManagedDownloader implements Downloader, Serializable {
         //    incompleteFile is picked using an arbitrary RFD from the bucket, since
         //IncompleteFileManager guarantees that any "same" files will get the
         //same temporary file.
-        incompleteFile=incompleteFileManager.getFile(
-                                                  (RemoteFileDesc)files.get(0));
 
         File saveDir;
         String fileName = getFileName();
         try {
+            incompleteFile = incompleteFileManager.getFile(
+                                         (RemoteFileDesc)files.get(0));
             saveDir = SharingSettings.getSaveDirectory();
-            completeFile=new File(saveDir, fileName);
-            String savePath = saveDir.getCanonicalPath();		
+            completeFile = new File(saveDir, fileName);
+            String savePath = saveDir.getCanonicalPath();
             String completeFileParentPath = 
-            new File(completeFile.getParent()).getCanonicalPath();
+                new File(completeFile.getParent()).getCanonicalPath();
             if (!savePath.equals(completeFileParentPath))
-                throw new InvalidPathException();  
+                return COULDNT_MOVE_TO_LIBRARY;
         } catch (IOException e) {
+            ErrorService.error(e, "incomplete: " + incompleteFile);
             return COULDNT_MOVE_TO_LIBRARY;
         }
 
@@ -1997,9 +2006,14 @@ public class ManagedDownloader implements Downloader, Serializable {
                 if(commonOutFile==null) {//no entry in incompleteFM
                     LOG.trace("creating a verifying file");
                     commonOutFile = new VerifyingFile(true);
-                    //we must add an entry for this in IncompleteFileManager
-                    incompleteFileManager.
+                    try {
+                        //we must add an entry in IncompleteFileManager
+                        incompleteFileManager.
                                    addEntry(incompleteFile,commonOutFile);
+                    } catch(IOException ioe) {
+                        ErrorService.error(ioe, "file: " + incompleteFile);
+                        return COULDNT_MOVE_TO_LIBRARY;
+                    }
                     {//debugging block
                       FileDesc fd = 
                         fileManager.getFileDescForFile(incompleteFile);
@@ -2016,6 +2030,7 @@ public class ManagedDownloader implements Downloader, Serializable {
                             }
                             Assert.silent(false, 
                               "URNs in FM and IFM don't match.\n" +
+                              "Type: " + this.getClass().getName() + "\n" +
                               "Bucket Hash: " + bHash + "\n" +
                               "FD Hash    : " + fd.getSHA1Urn() + "\n" +
                               "IncompleteFile: " + incompleteFile + "\n" +

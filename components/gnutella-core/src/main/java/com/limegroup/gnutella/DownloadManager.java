@@ -4,6 +4,7 @@ import com.limegroup.gnutella.messages.*;
 import com.limegroup.gnutella.search.HostData;
 import com.limegroup.gnutella.downloader.*;
 import com.limegroup.gnutella.settings.*;
+import com.limegroup.gnutella.util.FileUtils;
 import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.http.HttpClientManager;
 import com.sun.java.util.collections.*;
@@ -492,6 +493,7 @@ public class DownloadManager implements BandwidthTracker {
         //Instantiate downloader, validating incompleteFile first.
         ResumeDownloader downloader=null;
         try {
+            incompleteFile = FileUtils.getCanonicalFile(incompleteFile);
             String name=IncompleteFileManager.getCompletedName(incompleteFile);
             int size=ByteOrder.long2int(
                 IncompleteFileManager.getCompletedSize(incompleteFile));
@@ -500,6 +502,8 @@ public class DownloadManager implements BandwidthTracker {
                                               name,
                                               size);
         } catch (IllegalArgumentException e) {
+            throw new CantResumeException(incompleteFile.getName());
+        } catch (IOException ioe) {
             throw new CantResumeException(incompleteFile.getName());
         }
         

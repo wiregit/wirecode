@@ -189,8 +189,11 @@ public class IncompleteFileManager implements Serializable {
      * multiple downloads could be downloading to "FILE A", and "file a",
      * although only "file a" exists on disk and is being written to by
      * both.
+     *
+     * @throws IOException if there was an IOError while determining the
+     * file's name.
      */
-    public synchronized File getFile(RemoteFileDesc rfd) {
+    public synchronized File getFile(RemoteFileDesc rfd) throws IOException {
 	    File incDir = SharingSettings.INCOMPLETE_DIRECTORY.getValue();
 		//make sure its created.. (the user might have deleted it)
 		incDir.mkdirs();
@@ -211,9 +214,7 @@ public class IncompleteFileManager implements Serializable {
                 for (int i=1 ; ; i++) {
                     file = new File(incDir, 
                             tempName(convertedName, rfd.getSize(), i));
-                    try {
-                        file = FileUtils.getCanonicalFile(file);
-                    } catch(IOException ignored) {}
+                    file = FileUtils.getCanonicalFile(file);
                     if (! hashes.values().contains(file))
                         break;
                 }
@@ -225,9 +226,7 @@ public class IncompleteFileManager implements Serializable {
             //No hash.
             File f = new File(incDir, 
                         tempName(convertedName, rfd.getSize(), 0));
-            try {
-                f = FileUtils.getCanonicalFile(f);
-            } catch(IOException ignored) {}
+            f = FileUtils.getCanonicalFile(f);
             return f;
         }
     }
@@ -319,13 +318,13 @@ public class IncompleteFileManager implements Serializable {
                 File f = (File)entry.getValue();
                 try {
                     f = FileUtils.getCanonicalFile(f);
+                    // We must purge old entries that had mapped
+                    // multiple URNs to uncanonicalized files.
+                    // This is done by ensuring that we only add
+                    // this entry to the map if no other URN points to it.
+                    if(!retMap.values().contains(f))
+                        retMap.put(urn, f);
                 } catch(IOException ioe) {}
-                // We must purge old entries that had mapped
-                // multiple URNs to uncanonicalized files.
-                // This is done by ensuring that we only add
-                // this entry to the map if no other URN points to it.
-                if(!retMap.values().contains(f))
-                    retMap.put(urn, f);
             }
         }
         return retMap;
@@ -360,8 +359,8 @@ public class IncompleteFileManager implements Serializable {
                     File f = (File)incompleteFile;
                     try {
                         f = FileUtils.getCanonicalFile(f);
+                        retMap.put(f, vf);
                     } catch(IOException ignored) {}
-                    retMap.put(f, vf);
                 }
             }
         }//end of for
@@ -418,21 +417,14 @@ public class IncompleteFileManager implements Serializable {
      * Associates the incompleteFile with the VerifyingFile vf.
      * Notifies FileManager about a new Incomplete File.
      */
-    public synchronized void addEntry(File incompleteFile, VerifyingFile vf) {
+    public synchronized void addEntry(File incompleteFile, VerifyingFile vf) 
+      throws IOException {
         // We must canonicalize the file.
-        boolean ioproblem = false;
-        try {
-            incompleteFile = FileUtils.getCanonicalFile(incompleteFile);
-        } catch(IOException ignored) {
-            ioproblem = true;
-        }
+        incompleteFile = FileUtils.getCanonicalFile(incompleteFile);
 
         blocks.put(incompleteFile,vf);
         
-        // If there was no IO problem getting the canonicalized file,
-        // allow this to be partially shared.
-        if(!ioproblem)
-            registerIncompleteFile(incompleteFile);
+        registerIncompleteFile(incompleteFile);
     }
 
     public synchronized VerifyingFile getEntry(File incompleteFile) {

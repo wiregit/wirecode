@@ -104,7 +104,7 @@ public class IncompleteFileManagerTest extends com.limegroup.gnutella.util.BaseT
     
 
     /** Different name or size ==> different temp file */
-    public void testGetFile_DifferentSize() {
+    public void testGetFile_DifferentSize() throws Throwable {
         rfd1=newRFD("some file name", 1839, null);
         rfd2=newRFD("some file name", 1223, null);
         assertTrue(! IncompleteFileManager.same(rfd1, rfd2));
@@ -116,7 +116,7 @@ public class IncompleteFileManagerTest extends com.limegroup.gnutella.util.BaseT
     /** 
      * You should be able to resume to a file with same hash but different name.
      */
-    public void testGetFile_DifferentNameSameHash() {
+    public void testGetFile_DifferentNameSameHash() throws Throwable {
         rfd1=newRFD("some file name", 1839, 
                     "urn:sha1:GLSTHIPQGSSZTS5FJUPAKPZWUGYQYPFB");
         rfd2=newRFD("another file name", 1839, 
@@ -130,7 +130,7 @@ public class IncompleteFileManagerTest extends com.limegroup.gnutella.util.BaseT
     /** 
      * You should NOT be able to resume to file w/ same name but different hash.
      */
-    public void testGetFile_SameNameDifferentHash() {
+    public void testGetFile_SameNameDifferentHash() throws Throwable {
         rfd1=newRFD("some file name", 1839, 
                     "urn:sha1:GLSTHIPQGSSZTS5FJUPAKPZWUGYQYPFB");
         rfd2=newRFD("some file name", 1839, 
@@ -142,7 +142,7 @@ public class IncompleteFileManagerTest extends com.limegroup.gnutella.util.BaseT
     }
 
     /** Risky resumes are allowed: no hashes */
-    public void testGetFile_NoHash() {
+    public void testGetFile_NoHash() throws Throwable {
         rfd1=newRFD("some file name", 1839, null);
         rfd2=newRFD("some file name", 1839, 
                     "urn:sha1:GLSTHIPQGSSZTS5FJUPAKPZWUGYQYPFB");
@@ -153,7 +153,7 @@ public class IncompleteFileManagerTest extends com.limegroup.gnutella.util.BaseT
     }
 
     /** Checks that removeEntry clears blocks AND hashes. */
-    public void testRemoveEntry() {       
+    public void testRemoveEntry() throws Throwable {       
         //Populate IFM with a hash.
         rfd1=newRFD("some file name", 1839, 
                     "urn:sha1:GLSTHIPQGSSZTS5FJUPAKPZWUGYQYPFB"); 
@@ -201,12 +201,12 @@ public class IncompleteFileManagerTest extends com.limegroup.gnutella.util.BaseT
         assertEquals(0, fm.getNumIncompleteFiles()); // back to 0 shared.
     }   
 
-    public void testCompletedHash_NotFound() {
+    public void testCompletedHash_NotFound() throws Throwable{
         File tmp2=new File("T-1839-some file name");
         assertNull(ifm.getCompletedHash(tmp2));
     }
 
-    public void testCompletedHash_Found() {
+    public void testCompletedHash_Found() throws Throwable {
         rfd1=newRFD("some file name", 1839, 
                     "urn:sha1:GLSTHIPQGSSZTS5FJUPAKPZWUGYQYPFB");
         File tmp1=ifm.getFile(rfd1);
@@ -219,12 +219,12 @@ public class IncompleteFileManagerTest extends com.limegroup.gnutella.util.BaseT
         }
     }
 
-    public void testCompletedName() {
+    public void testCompletedName() throws Throwable {
         File tmp1=new File("T-1839-some file.txt");
         assertEquals("some file.txt", ifm.getCompletedName(tmp1));
     }
 
-    public void testCompletedName_IllegalArgument() {
+    public void testCompletedName_IllegalArgument() throws Throwable {
         try {
             ifm.getCompletedName(new File("no dash.txt"));
             fail("Accepted bad file");
@@ -241,12 +241,12 @@ public class IncompleteFileManagerTest extends com.limegroup.gnutella.util.BaseT
         } catch (IllegalArgumentException pass) { }
     }
 
-    public void testCompletedSize() {
+    public void testCompletedSize() throws Throwable {
         File tmp1=new File("T-1839-some file.txt");
         assertEquals(1839, ifm.getCompletedSize(tmp1));
     }
 
-    public void testCompletedSize_IllegalArgument() {
+    public void testCompletedSize_IllegalArgument() throws Throwable {
         try {
             ifm.getCompletedSize(new File("no dash.txt"));
             fail("Accepted bad file");
@@ -269,7 +269,7 @@ public class IncompleteFileManagerTest extends com.limegroup.gnutella.util.BaseT
     }
 
     /** Tests that hash information is purged when calling purge(true). */
-    public void testPurgeHash_Yes() {
+    public void testPurgeHash_Yes() throws Throwable {
         //These files have the same hash, but no blocks have been written.
         RemoteFileDesc rfd1=newRFD("file name.txt", 1839, 
                                    "urn:sha1:GLSTHIPQGSSZTS5FJUPAKPZWUGYQYPFB");
@@ -303,7 +303,7 @@ public class IncompleteFileManagerTest extends com.limegroup.gnutella.util.BaseT
     }
 
     /** Tests that hash information is not purged when calling purge(false). */
-    public void testPurgeHash_No() {
+    public void testPurgeHash_No() throws Throwable {
         RemoteFileDesc rfd1=newRFD("file name.txt", 1839, 
                                    "urn:sha1:GLSTHIPQGSSZTS5FJUPAKPZWUGYQYPFB");
         RemoteFileDesc rfd2=newRFD("other file.txt", 1839, 
