@@ -1,6 +1,5 @@
 package com.limegroup.gnutella;
 
-import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.NetworkUtils;
 import com.limegroup.gnutella.messages.*;
 import java.net.*;
