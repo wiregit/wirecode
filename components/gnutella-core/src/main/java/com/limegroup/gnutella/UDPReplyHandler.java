@@ -147,16 +147,16 @@ public final class UDPReplyHandler implements ReplyHandler {
 		return false;
 	}
 
-	/** 
-	 * Implements <tt>ReplyHandler</tt> interface -- always returns -1, since
-	 * we don't know how many intra-Ultrapeer connections a UDP host
-	 * maintains.
+	/**
+	 * Returns whether or not this connection is a high-degree connection,
+	 * meaning that it maintains a high number of intra-Ultrapeer connections.
+	 * In the case of UDP reply handlers, this always returns <tt>false<tt>.
 	 *
-	 * @return -1, since we don't know how many intra-Ultrapeer connections 
-	 *  a UDP host maintains.
+	 * @return <tt>false</tt> because, by definition, a UDP 'connection' is not
+	 *  a connection at all
 	 */
-	public int getNumIntraUltrapeerConnections() {
-		return -1;
+	public boolean isHighDegreeConnection() {
+		return false;
 	}
 
 	/**

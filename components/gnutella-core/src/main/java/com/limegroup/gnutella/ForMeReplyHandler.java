@@ -135,16 +135,18 @@ public final class ForMeReplyHandler implements ReplyHandler {
 		return !RouterService.isSupernode();
 	}
 
-	/** 
-	 * Implements <tt>ReplyHandler</tt> interface -- returns the number of
-	 * intra-Ultrapeer connections this host maintains.
+	/**
+	 * Returns whether or not this connection is a high-degree connection,
+	 * meaning that it maintains a high number of intra-Ultrapeer connections.
+	 * Because this connection really represents just this node, it always
+	 * returns <tt>false</tt>/
 	 *
-	 * @return returns the number of intra-Ultrapeer connections this host 
-	 *  maintains
+	 * @return <tt>false</tt>, since this reply handler signifies only this
+	 *  node -- its connections don't matter.
 	 */
-	public int getNumIntraUltrapeerConnections() {
-		return ConnectionManager.MIN_CONNECTIONS_FOR_SUPERNODE;
-	}
+	public boolean isHighDegreeConnection() {
+		return false;
+	}	
 }
 
 
