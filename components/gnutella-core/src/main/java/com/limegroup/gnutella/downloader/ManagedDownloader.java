@@ -2228,14 +2228,13 @@ public class ManagedDownloader implements Downloader, Serializable {
         }
     }
     
-    public synchronized String getFileName() {        
-		return _fileName;
+    public synchronized String getFileName() {       
+		if(_fileName != null) return _fileName;
 
         //Return the most specific information possible.  Case (b) is critical
         //for picking the downloaded file name; see tryAllDownloads2.  See also
         //http://core.limewire.org/issues/show_bug.cgi?id=122.
 
-        /*
         String ret = null;
         //a) Return names of one of the active downloaders.
         if (dloaders.size()>0)
@@ -2250,9 +2249,8 @@ public class ManagedDownloader implements Downloader, Serializable {
         //d) Give up.  Note that subclass may take action.
         else
             ret = UNKNOWN_FILENAME;
-		*/
 
-        //return CommonUtils.convertFileName(ret);
+        return CommonUtils.convertFileName(ret);
     }
 
 
