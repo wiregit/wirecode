@@ -33,27 +33,26 @@ public class HTTPUploader implements Uploader {
 	private int _uploadBegin;
 	private int _uploadEnd;
 	private int _fileSize;
-	private int _index;
-	private String _fileName;
-	private String _hostName;
-	private String _guid;
-	private int _port;
+	private final int _index;
+	private final String _fileName;
+	private final String _hostName;
+	private final String _guid;
+	private final int _port;
 	private int _stateNum = CONNECTING;
 
 	private UploadState _state;
 	private final UploadManager _manager;
-    private MessageRouter _router;
+    private final MessageRouter _router;
 	
-	private boolean  _chatEnabled;
-	private String  _chatHost;
+	private boolean _chatEnabled;
+	private String _chatHost;
 	private int _chatPort;
-    private FileManager _fileManager;
-	private URN _urn = null;
+    private final FileManager _fileManager;
 
 	/**
 	 * The URN specified in the X-Gnutella-Content-URN header, if any.
 	 */
-	private URN _requestedURN = null;
+	private URN _requestedURN;
 
 	/**
 	 * <tt>Map</tt> instance for storing unique alternate locations sent in 
@@ -61,6 +60,9 @@ public class HTTPUploader implements Uploader {
 	 */
 	private Map _alternateLocations = null;
 
+	/**
+	 * The descriptor for the file we're uploading.
+	 */
 	private FileDesc _fileDesc;
     
     /**
@@ -97,14 +99,10 @@ public class HTTPUploader implements Uploader {
 		_index = index;
 		_amountRead = 0;
         _fileManager = fm;
-        _router = router;
-		FileDesc desc;
-		boolean indexOut = false;
-		boolean ioexcept = false;
-        
-		try {
-			// This line can't be moved, or FileNotFoundUploadState
-			// will have a null pointer exception.
+        _router = router;        
+		_guid = null;
+		_port = 0;
+		try {			
 			_ostream = _socket.getOutputStream();
 
             //special case for browse host
@@ -115,16 +113,23 @@ public class HTTPUploader implements Uploader {
 
 			_fileDesc = _fileManager.get(_index);
 			_fileSize = (int)_fileDesc.getSize();
-			_urn = _fileDesc.getSHA1Urn();
-            
-            setState(CONNECTING);
+
+            // if the requested name does not match our name on disk,
+			// report File Not Found
+			if(!_fileName.equals(_fileDesc.getName())) {
+				setState(FILE_NOT_FOUND);
+			}
+			else {
+				setState(CONNECTING);
+				// get the fileInputStream
+				_fis = _fileDesc.createInputStream();
+			}
 		} catch (IndexOutOfBoundsException e) {
-			// this is an unlikely case, but if for
-			// some reason the index is no longer valid.
 			setState(FILE_NOT_FOUND);
 		} catch (IOException e) {
-			// FileManager.get() throws an IOException if
-			// the file has been deleted
+			// this occurs if the output stream could not be opened to
+			// the socket or if the input stream could not be created
+			// from the file
 			setState(INTERRUPTED);
 		}
 	}
@@ -136,16 +141,16 @@ public class HTTPUploader implements Uploader {
      * does not take a socket. An uploader created with this constructor 
      * must eventually connect to the downloader using the connect method of 
      * this class
-     * @param file The name of the file to be uploaded
+     * @param fileName The name of the file to be uploaded
      * @param host The downloaders ip address
      * @param port The port at which the downloader is listneing 
      * @param index index of file to be uploaded
      */
-	public HTTPUploader(String file, String host, int port, int index,
-						String guid, UploadManager m, FileManager fm,
+	public HTTPUploader(String fileName, String host, int port, int index,
+						String guid, UploadManager um, FileManager fm,
                         MessageRouter router) {
-		_fileName = file;
-		_manager = m;
+		_fileName = fileName;
+		_manager = um;
 		_index = index;
 		_uploadBegin = 0;
 		_amountRead = 0;
@@ -157,9 +162,19 @@ public class HTTPUploader implements Uploader {
 		try {
 			_fileDesc = _fileManager.get(_index);
 			_fileSize = _fileDesc._size;
-			setState(CONNECTING);
+            // if the requested name does not match our name on disk,
+			// report File Not Found
+			if(!_fileName.equals(_fileDesc.getName())) {
+				setState(FILE_NOT_FOUND);
+			}
+			else {
+				setState(CONNECTING);
+				_fis = _fileDesc.createInputStream();
+			}
 		} catch (IndexOutOfBoundsException e) {
 			setState(PUSH_FAILED);
+		} catch (IOException e) {
+			setState(FILE_NOT_FOUND);
 		}
 	}
 
@@ -228,12 +243,6 @@ public class HTTPUploader implements Uploader {
 	 * error information.
 	 */
 	public void start() {
-		try {
-            if(_stateNum != BROWSE_HOST)
-                prepareFile();
-		} catch (IOException e) {
-			setState(FILE_NOT_FOUND);
-		}
 		try {
 			readHeader();
 			_state.doUpload(this);		   
@@ -351,10 +360,6 @@ public class HTTPUploader implements Uploader {
 	public int getState() {return _stateNum;}
 	public String getHost() {return _hostName;}
 	public UploadManager getManager() {return _manager;}
-
-	public String getThisHost() {return _manager.getThisHost(); } 
-	public int getThisPort() {return _manager.getThisPort(); }
-
 	public boolean chatEnabled() {return _chatEnabled;}
 	public String getChatHost() {return _chatHost;}
 	public int getChatPort() {return _chatPort;}
@@ -366,7 +371,7 @@ public class HTTPUploader implements Uploader {
 	 * @return the <tt>URN</tt> instance for the file being uploaded, which
 	 *  can be <tt>null</tt> if no URN has been assigned
 	 */
-	public URN getUrn() {return _urn;}
+	public URN getUrn() {return _fileDesc.getSHA1Urn();}
 
 	/**
 	 * Returns the requested <tt>URN</tt> as specified in the 
@@ -659,40 +664,6 @@ public class HTTPUploader implements Uploader {
 		String bbb = section.toLowerCase();
 		// then look for the index...
 		return aaa.indexOf(bbb);
-	}
-
-
-	/**
-	 * prepares the file to be read for sending accross the socket
-	 */
-	private void prepareFile() throws IOException {
-		// get the appropriate file descriptor
-		FileDesc fdesc;
-		try {
-			fdesc = _fileManager.get(_index);
-		} catch (IndexOutOfBoundsException e) {
-			throw new IOException();
-		}
-		
-		/* For regular (client-side) uploads, get name. 
-		 * For pushed (server-side) uploads, check to see that 
-		 * the index matches the filename. */
-		String name = fdesc._name;
-		if (_fileName == null) {
-            _fileName = name;
-        } else {
-			/* matches the name */
-			if ( !name.equals(_fileName) ) {
-				throw new IOException();
-			}
-        }
-
-		// set the file size
-        _fileSize = fdesc._size;
-
-		// get the fileInputStream
-		_fis = fdesc.createInputStream();
-
 	}
   
     public void measureBandwidth() {
