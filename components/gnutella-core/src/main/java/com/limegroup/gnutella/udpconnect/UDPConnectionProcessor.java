@@ -947,6 +947,7 @@ log2("Received duplicate block num: "+ dmsg.getSequenceNumber());
 
         public void handleEvent() {
             long time = System.currentTimeMillis();
+log2("keepalive: "+ time);
 
             // If write event went to sleep and it is needed then
             // wakeup writing
@@ -955,7 +956,6 @@ log2("Received duplicate block num: "+ dmsg.getSequenceNumber());
                 _wakeupWriteEvent = true;
             }
 
-log2("keepalive");
 		
 			// Make sure that some messages are received within timeframe
 			if ( isConnected() && 
@@ -980,6 +980,7 @@ log("sendKeepAlive");
             // Reschedule keepalive timer
             _eventTime = _lastSendTime + KEEPALIVE_WAIT_TIME;
             _scheduler.scheduleEvent(this);
+log2("end keepalive: "+ System.currentTimeMillis());
         }
     }
     /** 
@@ -991,7 +992,7 @@ log("sendKeepAlive");
         }
 
         public void handleEvent() {
-log2("data timeout");
+log2("data timeout :"+ System.currentTimeMillis());
             long time = System.currentTimeMillis();
 
 			// Make sure that some messages are received within timeframe
@@ -1007,6 +1008,7 @@ log2("data timeout");
             if ( isConnected() ) {
                 writeData();
             }
+log2("end data timeout: "+ System.currentTimeMillis());
         }
     }
 
@@ -1020,11 +1022,11 @@ log2("data timeout");
         }
 
         public void handleEvent() {
-log2("ack timeout");
-            
+log2("ack timeout: "+ System.currentTimeMillis());
             if ( isConnected() ) {
                 validateAckedData();
             }
+log2("end ack timeout: "+ System.currentTimeMillis());
         }
     }
     //

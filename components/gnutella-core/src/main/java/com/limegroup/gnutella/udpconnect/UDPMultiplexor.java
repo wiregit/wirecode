@@ -93,7 +93,9 @@ public class UDPMultiplexor {
 				if ( con != null && 
 					 con.isConnecting() &&
 					 con.matchAddress(senderIP, senderPort) ) {
+System.err.println("before handleMessage:"+System.currentTimeMillis());
 					 con.handleMessage(msg);
+System.err.println("after handleMessage:"+System.currentTimeMillis());
 					 break;
 				} 
 			}
@@ -104,7 +106,9 @@ public class UDPMultiplexor {
 			con = _connections[connID];
 			if ( con != null &&
                  con.matchAddress(senderIP, senderPort) ) {
+System.err.println("before2 handleMessage:"+System.currentTimeMillis());
 				con.handleMessage(msg);
+System.err.println("after2 handleMessage:"+System.currentTimeMillis());
 			}
 		}
 	}
