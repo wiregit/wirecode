@@ -178,6 +178,13 @@ public final class CapabilitiesVM extends VendorMessage {
     public int supportsSIMPP() {
         return supportsCapability(SIMPP_CAPABILITY_BYTES);
     }
+    
+    /**
+     * Returns the current Update version.
+     */
+    public int supportsUpdate() {
+        return supportsCapability(LIME_UPDATE_BYTES);
+    }
 
     // override super
     public boolean equals(Object other) {

@@ -26,23 +26,8 @@ import com.limegroup.gnutella.handshaking.LeafHeaders;
 import com.limegroup.gnutella.handshaking.NoGnutellaOkException;
 import com.limegroup.gnutella.handshaking.UltrapeerHandshakeResponder;
 import com.limegroup.gnutella.handshaking.UltrapeerHeaders;
-import com.limegroup.gnutella.messages.BadPacketException;
-import com.limegroup.gnutella.messages.Message;
-import com.limegroup.gnutella.messages.PingReply;
-import com.limegroup.gnutella.messages.PingRequest;
-import com.limegroup.gnutella.messages.PushRequest;
-import com.limegroup.gnutella.messages.QueryReply;
-import com.limegroup.gnutella.messages.QueryRequest;
-import com.limegroup.gnutella.messages.vendor.CapabilitiesVM;
-import com.limegroup.gnutella.messages.vendor.HopsFlowVendorMessage;
-import com.limegroup.gnutella.messages.vendor.MessagesSupportedVendorMessage;
-import com.limegroup.gnutella.messages.vendor.PushProxyAcknowledgement;
-import com.limegroup.gnutella.messages.vendor.PushProxyRequest;
-import com.limegroup.gnutella.messages.vendor.QueryStatusResponse;
-import com.limegroup.gnutella.messages.vendor.SimppRequestVM;
-import com.limegroup.gnutella.messages.vendor.TCPConnectBackVendorMessage;
-import com.limegroup.gnutella.messages.vendor.UDPConnectBackVendorMessage;
-import com.limegroup.gnutella.messages.vendor.VendorMessage;
+import com.limegroup.gnutella.messages.*;
+import com.limegroup.gnutella.messages.vendor.*;
 import com.limegroup.gnutella.routing.PatchTableMessage;
 import com.limegroup.gnutella.routing.QueryRouteTable;
 import com.limegroup.gnutella.routing.ResetTableMessage;
@@ -57,6 +42,7 @@ import com.limegroup.gnutella.util.BandwidthThrottle;
 import com.limegroup.gnutella.util.ManagedThread;
 import com.limegroup.gnutella.util.StringUtils;
 import com.limegroup.gnutella.util.ThrottledOutputStream;
+import com.limegroup.gnutella.version.UpdateHandler;
 
 /**
  * A Connection managed by a ConnectionManager.  Includes a loopForMessages
@@ -1333,6 +1319,13 @@ public class ManagedConnection extends Connection
                 SimppRequestVM simppReq = new SimppRequestVM();
                 send(simppReq);
             }
+            
+            // see if there's a new update message.
+            if(capVM.supportsUpdate() > UpdateHandler.instance().getLatestVersion()) {
+                // request an update message.
+                send(new UpdateRequest());
+            }
+                
         }
         else if (vm instanceof MessagesSupportedVendorMessage) {        
             // If this is a ClientSupernodeConnection and the host supports

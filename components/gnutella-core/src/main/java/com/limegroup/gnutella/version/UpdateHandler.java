@@ -6,12 +6,15 @@ import java.io.RandomAccessFile;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 
+import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.FileUtils;
 import com.limegroup.gnutella.util.IOUtils;
 import com.limegroup.gnutella.util.ProcessingQueue;
 import com.limegroup.gnutella.security.SignatureVerifier;
 import com.limegroup.gnutella.settings.ApplicationSettings;
+import com.limegroup.gnutella.messages.vendor.CapabilitiesVM;
+
 
 import org.apache.commons.logging.LogFactory;
 import org.apache.commons.logging.Log;
@@ -110,6 +113,8 @@ public class UpdateHandler {
         FileUtils.verySafeSave(CommonUtils.getUserSettingsDir(), FILENAME, data);
         _lastId = uc.getId();
         _lastBytes = data;
+        CapabilitiesVM.reconstructInstance();
+        RouterService.getConnectionManager().sendUpdatedCapabilities();
 
         Version me;
         try {
@@ -120,6 +125,7 @@ public class UpdateHandler {
         }
         
         _updateInfo = uc.getUpdateDataFor(me, getLanguage());
+
         notifyAboutInfo(uc.getTimestamp());
     }
     
