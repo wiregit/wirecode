@@ -831,9 +831,18 @@ public abstract class MessageRouter {
     protected void handleReplyNumberMessage(ReplyNumberVendorMessage reply,
                                             DatagramPacket datagram) {
         try {
+            GUID qGUID = new GUID(reply.getGUID());
+            int numResults = 
+            RouterService.getSearchResultHandler().getNumResultsForQuery(qGUID);
+
+            // see if we need more results for this query....
+            // TODO: remember this location for a future, 'find more sources'
+            // targeted GUESS query.
+            if ((numResults<0) || (numResults>QueryHandler.ULTRAPEER_RESULTS))
+                return;
+            
             LimeACKVendorMessage ack = 
-                 new LimeACKVendorMessage(new GUID(reply.getGUID()),
-                                          reply.getNumResults());
+                new LimeACKVendorMessage(qGUID, reply.getNumResults());
             UDPService.instance().send(ack, datagram.getAddress(),
                                        datagram.getPort());
             if (RECORD_STATS)

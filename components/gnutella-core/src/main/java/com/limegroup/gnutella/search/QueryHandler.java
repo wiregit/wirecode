@@ -26,7 +26,7 @@ public final class QueryHandler {
 	 * The number of results to try to get if we're an Ultrapeer originating
 	 * the query.
 	 */
-	private static final int ULTRAPEER_RESULTS = 150;
+	public static final int ULTRAPEER_RESULTS = 150;
 
 	/**
 	 * The number of results to try to get if the query came from an old
