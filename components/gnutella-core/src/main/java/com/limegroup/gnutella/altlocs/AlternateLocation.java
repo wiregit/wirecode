@@ -264,19 +264,14 @@ public final class AlternateLocation implements
 	public RemoteFileDesc createRemoteFileDesc(int size) {
 		Set urnSet = new HashSet();
 		urnSet.add(getSHA1Urn());
-        if(_old) {
-            return new RemoteFileDesc(URL.getHost(), URL.getPort(),
-                                      0, URL.getFile(), size,  
-                                      EMPTY_GUID, 1000,
-                                      true, 2, false, null, urnSet, false,
-                                      false, //assume altLoc is not firewalled
-                                      "ALT",//Never displayed, and we don't know
-                                      System.currentTimeMillis(), null);
-        }
-		return new RemoteFileDesc(URL.getHost(), URL.getPort(),
-								  0, URL.getFile(), size,  
-								  EMPTY_GUID, 1000,
-								  true, 3, false, null, urnSet, false,
+        int quality = 3;       
+        if(_old) 
+            quality = 2;
+
+        return new RemoteFileDesc(URL.getHost(), URL.getPort(),
+                                  0, URL.getFile(), size,  
+                                  EMPTY_GUID, 1000,
+                                  true, quality, false, null, urnSet, false,
                                   false, //assume altLoc is not firewalled
                                   "ALT",//Never displayed, and we don't know
                                   System.currentTimeMillis(), null);
