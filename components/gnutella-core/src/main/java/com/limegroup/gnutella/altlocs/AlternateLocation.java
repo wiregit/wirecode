@@ -3,6 +3,7 @@ package com.limegroup.gnutella.altlocs;
 import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.filters.IP;
 import com.limegroup.gnutella.http.*;
+import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.util.*;
 import java.net.*;
 import java.util.StringTokenizer;
@@ -213,10 +214,28 @@ public abstract class AlternateLocation implements HTTPHeaderValue,
 		if(urn == null) throw new NullPointerException("null sha1");
         
 		try {
-			if (RouterService.acceptedIncomingConnection())
+		    
+		    // We try to guess whether we are firewalled or not.  If the node
+		    // has just started up and has not yet received an incoming connection
+		    // our best bet is to see if we have received a connection in the past.
+		    //
+		    // However it is entirely possible that we have received connection in 
+		    // the past but are firewalled this session, so if we are connected
+		    // we see if we received a conn this session only.
+		    
+		    boolean open;
+		    
+		    if (RouterService.isConnected())
+		        open = RouterService.acceptedIncomingConnection();
+		    else
+		        open = ConnectionSettings.EVER_ACCEPTED_INCOMING.getValue();
+		    
+		    
+			if (open)
 				return new DirectAltLoc(urn);
 			else 
 				return new PushAltLoc(urn);
+			
 		}catch(IOException bad) {
 			ErrorService.error(bad);
 			return null;

@@ -58,7 +58,7 @@ public class PushAltLoc extends AlternateLocation {
 		
 		super(sha1);
 		_fileName="ALT";
-		_pushAddress = new PushEndpointForSelf();
+		_pushAddress = PushEndpointForSelf.instance();
 	}
 	
 	protected String generateHTTPString() {

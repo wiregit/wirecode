@@ -1,4 +1,3 @@
-
 package com.limegroup.gnutella;
 
 import com.sun.java.util.collections.*;
