@@ -134,9 +134,14 @@ public final class ServerSideOutOfBandReplyTest extends BaseTestCase {
         settings.setAllowedIps(new String[] {"127.*.*.*"});
         settings.setPort(PORT);
         settings.setExtensions("txt;");
-        File shareDir[] = {new File("com/limegroup/gnutella")};
-        assertTrue(shareDir[0].isDirectory());
-        settings.setDirectories(shareDir);
+        // get the resource file for com/limegroup/gnutella
+        File berkeley = 
+            CommonUtils.getResourceFile("com/limegroup/gnutella/berkeley.txt");
+        File susheel = 
+            CommonUtils.getResourceFile("com/limegroup/gnutella/susheel.txt");
+        // now move them to the share dir        
+        CommonUtils.copy(berkeley, new File(_sharedDir, "berkeley.txt"));
+        CommonUtils.copy(susheel, new File(_sharedDir, "susheel.txt"));
 		ConnectionSettings.CONNECT_ON_STARTUP.setValue(false);
 		UltrapeerSettings.EVER_ULTRAPEER_CAPABLE.setValue(true);
 		UltrapeerSettings.DISABLE_ULTRAPEER_MODE.setValue(false);
