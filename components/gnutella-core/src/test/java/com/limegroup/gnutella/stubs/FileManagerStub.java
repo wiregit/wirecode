@@ -14,5 +14,9 @@ public class FileManagerStub extends FileManager {
     public FileDesc get(int i) {
         return fdStub;
     }
+    
+    public boolean isValidIndex(int i) {
+        return true;
+    }
 }
 

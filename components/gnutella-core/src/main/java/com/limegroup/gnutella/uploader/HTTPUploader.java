@@ -146,9 +146,10 @@ public final class HTTPUploader implements Uploader {
         } 
         if(_fileDesc == null) {
             setState(FILE_NOT_FOUND);
+            return;
         }
-        _fileSize = (int)_fileDesc.getSize();
         
+        _fileSize = (int)_fileDesc.getSize();        
         // if the requested name does not match our name on disk,
         // report File Not Found
         if(!_fileName.equals(_fileDesc.getName())) {
