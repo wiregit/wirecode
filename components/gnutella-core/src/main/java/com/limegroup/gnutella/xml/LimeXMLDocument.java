@@ -197,7 +197,21 @@ public class LimeXMLDocument{
         //return XMLString;
         String ret = constructXML(getNameValueList(),schemaUri);
         return ret;
-    }            
+    }
+    
+    public String getXMLStringWithIdentifier(){
+        String ret = constructXML(getNameValueList(),schemaUri);
+        //Insert the identifier name in the xmlString
+        int index = ret.indexOf(">");//end of the header string
+        if (index < 0)
+            return ret;  // do not insert anything if not valid xml
+        index = ret.indexOf(">",++index);//index of end of root element
+        String first = ret.substring(0,index);
+        String last = ret.substring(index);
+        String middle = " identifier=\""+identifier+"\"";
+        ret = first+middle+last;
+        return ret;
+    }
 
     //Unit Tester    
     public static void main(String args[]){
