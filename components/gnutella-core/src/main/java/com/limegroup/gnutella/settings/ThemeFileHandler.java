@@ -19,6 +19,11 @@ public final class ThemeFileHandler {
 	 */
 	private static SettingsFactory FACTORY;	
 
+    /**
+     * Private constructor to ensure that this class is not constructed.
+     */
+    private ThemeFileHandler() {}
+
 	static {
 		reload();
 	}
@@ -34,21 +39,18 @@ public final class ThemeFileHandler {
 			new File(new File(CommonUtils.getUserSettingsDir(),"themes"), 
 					 dirName);
 
+        // this will be ignored if the directory is already present
+        themeDir.mkdirs();
+            
+        // unpack the zip 
+        try {
+            Expand.expandFile(themeFile, themeDir);
+        } catch(IOException e) {
+            // this should never really happen, so report it
+            ErrorService.error(e);						
+        }
+
 		final File THEME_PROPS = new File(themeDir, "theme.txt");
-
-		// unpack the zip if we haven't already
-		if(!themeDir.isDirectory() ||
-		   (themeDir.lastModified() < themeFile.lastModified()) ||
-		   !THEME_PROPS.isFile()) {
-
-			themeDir.mkdirs();
-            try {
-                Expand.expandFile(themeFile, themeDir);
-            } catch(IOException e) {
-				// this should never really happen, so report it
-				ErrorService.error(e);						
-            }
-		} 
 		handleFactory(THEME_PROPS);		
 		ThemeSettings.THEME_DIR.setValue(themeDir);
 	}
