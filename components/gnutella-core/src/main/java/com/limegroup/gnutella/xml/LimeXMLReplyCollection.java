@@ -43,8 +43,13 @@ public class LimeXMLReplyCollection{
     public static final int FAILED_GENRE  = 10;
     public static final int HASH_FAILED  = 11;
 
-
-    public LimeXMLReplyCollection(Map fileToHash, String URI, 
+    /**
+     * @param hashSet The set of Hashes you want us to make a collection out of.
+     * @param URI This collection's schema URI
+     * @param fm A pointer to the system wide (Meta)FileManager .
+     * @param audio Whether this is a collection of audio files.
+     */
+    public LimeXMLReplyCollection(Set hashSet, String URI, 
                                   FileManager fm, boolean audio) {
         this.schemaURI = URI;
         this.metaFileManager = (MetaFileManager)fm;
@@ -68,7 +73,7 @@ public class LimeXMLReplyCollection{
             shouldWrite = true;
 
         if (this.audio) // special processing for mp3s needed
-            constructAudioCollection(fileToHash, hashToXMLStr);
+            constructAudioCollection(hashSet, hashToXMLStr);
 
         // OLD VS. NEW - this code is here because we are changing the
         // representation of the .sxml file for LimeWire 2.5 and on.  Now the
@@ -100,8 +105,8 @@ public class LimeXMLReplyCollection{
             }
         }
 
-        if (fileToHash != null)
-            checkDocuments(fileToHash,false);
+        if (hashSet != null)
+            checkDocuments(hashSet,false);
 
         debug("LimeXMLReplyCollection(): returning with shouldWrite = " +
               shouldWrite);
@@ -114,43 +119,41 @@ public class LimeXMLReplyCollection{
      * Handle creation of a Audio Collection.  Special because we need to read
      * ID3s, etc.
      */
-    private void constructAudioCollection(Map fileToHash, Map hashToXMLStr) {
+    private void constructAudioCollection(Set hashSet, Map hashToXMLStr) {
         ID3Reader id3Reader = new ID3Reader();
         // for each file, get the hash, then get the fileXMLString, and
         // (possiblY) join it with the ID3 info.  Then add the reply.
-        synchronized(fileToHash){
-            Iterator iter = fileToHash.keySet().iterator();
-            LimeXMLDocument doc = null;
-            boolean solo = false; //rich data only from ID3?
-            while(iter.hasNext()) {
-                File file = (File)iter.next();
-                String hash = metaFileManager.readFromMap(file, audio);
-                // don't call remove.  if two files conflict by hash (a definite
-                // possibility) you don't want to recalculate the doc.  so just
-                // keep it around.  but are we doing extra work in the main
-                // constructor - not really, doing a get is no biggie.  don't
-                // how much this is going to happen anyways, so the cost should
-                // be small. 
-                Object xml = hashToXMLStr.get(hash);
-                try{
-                    if (xml instanceof LimeXMLDocument) // NEW
-                        doc = (LimeXMLDocument) xml;
-                    else { // OLD
-                        String fileXMLString = (String) xml;
-                        solo = ((fileXMLString == null) || 
-                                fileXMLString.equals(""));
-                        String xmlString = id3Reader.readDocument(file,solo);
-                        if(!solo)
-                            xmlString = 
-                            joinAudioXMLStrings(xmlString,fileXMLString);
-                        doc = new LimeXMLDocument(xmlString);
-                    }
-                    addReply(hash,doc);
+        Iterator iter = hashSet.iterator();
+        LimeXMLDocument doc = null;
+        boolean solo = false; //rich data only from ID3?
+        while(iter.hasNext()) {
+            File file = (File)iter.next();
+            String hash = metaFileManager.readFromMap(file, audio);
+            // don't call remove.  if two files conflict by hash (a definite
+            // possibility) you don't want to recalculate the doc.  so just
+            // keep it around.  but are we doing extra work in the main
+            // constructor - not really, doing a get is no biggie.  don't
+            // how much this is going to happen anyways, so the cost should
+            // be small. 
+            Object xml = hashToXMLStr.get(hash);
+            try{
+                if (xml instanceof LimeXMLDocument) // NEW
+                    doc = (LimeXMLDocument) xml;
+                else { // OLD
+                    String fileXMLString = (String) xml;
+                    solo = ((fileXMLString == null) || 
+                            fileXMLString.equals(""));
+                    String xmlString = id3Reader.readDocument(file,solo);
+                    if(!solo)
+                        xmlString = 
+                        joinAudioXMLStrings(xmlString,fileXMLString);
+                    doc = new LimeXMLDocument(xmlString);
                 }
-                catch(Exception e){
-                }
+                addReply(hash,doc);
             }
-        }//end of synch
+            catch(Exception e){
+            }
+        }
     }
     
 
@@ -172,41 +175,39 @@ public class LimeXMLReplyCollection{
         return retList;
     }
 
-    private void checkDocuments(Map fileToHash, boolean mp3){
+    private void checkDocuments(Set hashSet, boolean mp3){
         //compare fileNames  from documents in mainMap to 
         //actual filenames as per the map
-        synchronized(fileToHash){
-            Iterator iter = null;
-            if (fileToHash.keySet() != null)
-                iter = fileToHash.keySet().iterator();
-            if (iter == null)
-                return;
-            while(iter.hasNext()){
-                File file  = (File)iter.next();
-                String hash=metaFileManager.readFromMap(file,mp3);
-                LimeXMLDocument doc;
-                synchronized(mainMap){
-                    doc = (LimeXMLDocument)mainMap.get(hash);
-                }
-                if(doc==null)//File in current round has no docs of this schema
-                    continue;
-                String actualName = null;
-                try {
-                    actualName = file.getCanonicalPath();
-                }catch (IOException ioe) {
-                    synchronized(mainMap){
-                        mainMap.remove(hash);
-                        //File don't exist - remove meta-data
-                    }
-                    //Assert.that(false,"Cannot find actual file name.");
-                }
-                String identifier = doc.getIdentifier();
-                if(!actualName.equalsIgnoreCase(identifier))
-                    doc.setIdentifier(actualName);
-                //TODO: Commit this to disk if any of the docs was dirty!
-                //toDisk("");//write the change out to disk
+        Iterator iter = null;
+        if (hashSet != null)
+            iter = hashSet.iterator();
+        if (iter == null)
+            return;
+        while(iter.hasNext()){
+            File file  = (File)iter.next();
+            String hash=metaFileManager.readFromMap(file,mp3);
+            LimeXMLDocument doc;
+            synchronized(mainMap){
+                doc = (LimeXMLDocument)mainMap.get(hash);
             }
-        }//end of synchronized block
+            if(doc==null)//File in current round has no docs of this schema
+                continue;
+            String actualName = null;
+            try {
+                actualName = file.getCanonicalPath();
+            }catch (IOException ioe) {
+                synchronized(mainMap){
+                    mainMap.remove(hash);
+                    //File don't exist - remove meta-data
+                }
+                //Assert.that(false,"Cannot find actual file name.");
+            }
+            String identifier = doc.getIdentifier();
+            if(!actualName.equalsIgnoreCase(identifier))
+                doc.setIdentifier(actualName);
+            //TODO: Commit this to disk if any of the docs was dirty!
+            //toDisk("");//write the change out to disk
+        }
     }
 
     /**
