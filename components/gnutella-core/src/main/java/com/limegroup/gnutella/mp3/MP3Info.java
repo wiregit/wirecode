@@ -349,7 +349,8 @@ public final class MP3Info {
 		}
 		finally { //cleanup
 			try {				
-				fis.close(); 
+				if( fis != null )
+				    fis.close(); 
 			} catch (IOException e) {}//ignore
 		}
     }
