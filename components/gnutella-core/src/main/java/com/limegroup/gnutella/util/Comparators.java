@@ -36,6 +36,13 @@ public final class Comparators {
     private static final Comparator FILE_COMPARATOR = new FileComparator();
     
     /**
+     * <tt>Comparator</tt> for comparing two <tt>String</tt>s regardless of
+     * case.
+     */
+    private static final Comparator CASE_INSENSITIVE_STRING_COMPARATOR =
+        new CaseInsensitiveStringComparator();
+    
+    /**
      * Ensure that this class cannot be constructed.
      */
     private Comparators() {}
@@ -91,6 +98,18 @@ public final class Comparators {
     public static Comparator fileComparator() {
         return FILE_COMPARATOR;
     }
+    
+    /**
+     * Instance accessor for the <tt>Comparator</tt> for case insensitive
+     * <tt>String</tt>s.  This is an instance because the
+     * <tt>CaseInsensitiveStringComparator</tt> has no state, allowing a single
+     * instance to be used whenever a <tt>Comparator</tt> is needed.
+     *
+     * @return the <tt>CaseInsensitiveStringComparator</tt> instance
+     */
+    public static Comparator caseInsensitiveStringComparator() {
+        return CASE_INSENSITIVE_STRING_COMPARATOR;
+    }
 
     /**
      * Compares two <tt>Long</tt>s.  Useful for storing Java
@@ -116,11 +135,26 @@ public final class Comparators {
     private static final class InverseLongComparator implements 
         Comparator, Serializable {
         private static final long serialVersionUID = 316426787496198051L;
+                                                             
      
         public int compare(Object o1, Object o2) {
             return -longCompareTo((Long)o1, (Long)o2);
         }
     }
+    
+    /**
+     * Compares to <tt>String</tt> objects.  The comparison is done
+     * without regard to case.
+     */
+    public static final class CaseInsensitiveStringComparator implements
+        Comparator, Serializable {
+        private static final long serialVersionUID = 263123571237995212L;
+        
+        public int compare(Object o1, Object o2) {
+            return StringUtils.compareIgnoreCase((String)o1, (String)o2);
+        }
+    }
+            
     
     /**
      * Compares two <code>Long</code> objects numerically.  This function is
