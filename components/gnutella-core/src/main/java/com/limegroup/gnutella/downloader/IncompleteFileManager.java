@@ -70,14 +70,16 @@ public class IncompleteFileManager implements Serializable {
         return lastModified<purgeTime;            
     }
 
-    /** Creates a new TemporaryFile object to for a normal of the given
+    /** Returns the fully-qualified temporary download file for the given
      *  file/location pair.  The location of the file is determined by the
-     *  INCOMPLETE_DIRECTORY property.  The disk is not modified.
+     *  INCOMPLETE_DIRECTORY property.  For example, getFile("test.txt", 1999) 
+     *  may return "C:\Program Files\LimeWire\Incomplete\T-1999-Test.txt". 
+     *  The disk is not modified.<p>
      *
      *  This method gives duplicate files the same temporary file.  That is, for
      *  all rfd_i and rfd_j
      *
-     *       rfd_i~=rfd_j <==> getFile(rfd_i).equals(getFile(rfd_j))  
+     *       rfd_i~=rfd_j <==> getFile(rfd_i).equals(getFile(rfd_j))<p>  
      * 
      *  Currently rfd_i~=rfd_j if rfd_i.getName().equals(rfd_j) &&
      *  rfd_i.getSize()==rfd_j.getSize().  In the future, this definition may be
@@ -143,7 +145,8 @@ public class IncompleteFileManager implements Serializable {
 
     /**
      * Notes that bytes low to high-1 of incompleteFile has been has been
-     * written to disk.  
+     * written to disk.  This method is idempotent; it is acceptable to call
+     * it multiple times with overlapping intervals.
      *
      * @param incompleteFile a fully qualified temporary file, i.e., the result
      *  of getFile
