@@ -318,52 +318,8 @@ public class UDPService implements Runnable {
                     InputStream in = new ByteArrayInputStream(data);
                     Message message = Message.read(in, Message.N_UDP, IN_HEADER_BUF);
                     if(message == null) continue;                    
-                    if (!isGUESSCapable()) {
-                        if (message instanceof PingRequest) {
-                            GUID guid = new GUID(message.getGUID());
-                            if(isValidForIncoming(CONNECT_BACK_GUID, guid,
-                                                  datagram))
-                                _acceptedUnsolicitedIncoming = true;
-                            _lastUnsolicitedIncomingTime =
-                                System.currentTimeMillis();
-                        }
-                        else if (message instanceof PingReply) {
-                            GUID guid = new GUID(message.getGUID());
-                            if(isValidForIncoming(SOLICITED_PING_GUID, guid,
-                                                  datagram))
-                                _acceptedSolicitedIncoming = true;
-                            
-                            PingReply r = (PingReply)message;
-                            if (r.getMyInetAddress() != null) {
-                                
-                                byte [] newAddr = r.getMyInetAddress().getAddress();
-                                
-                                synchronized(this){ 
-                                    
-                                    _receivedIPPong=true;
-                                    
-                                    // we may receive a late pong after the isp has
-                                    // changed our address.  We should not let that pong
-                                    // affect us. (port is unaffected)
-                                    if (_previousIP==null || 
-                                            !Arrays.equals(_previousIP,newAddr)) 
-                                        _lastReportedIP=newAddr;
-                                
-                                    if (_lastReportedPort!=r.getMyPort()) {
-                                        _portStable=false;
-                                        _lastReportedPort=r.getMyPort();
-                                    }
-                                }
-                            }
-                            
-                        }
-                    }
-                    // ReplyNumberVMs are always sent in an unsolicited manner,
-                    // so we can use this fact to keep the last unsolicited up
-                    // to date
-                    if (message instanceof ReplyNumberVendorMessage)
-                        _lastUnsolicitedIncomingTime = 
-                            System.currentTimeMillis();
+                    
+                    updateState(message,datagram);
                     router.handleUDPMessage(message, datagram);
                 }
                 catch (IOException e) {
@@ -377,6 +333,55 @@ public class UDPService implements Runnable {
         } catch(Throwable t) {
             ErrorService.error(t);
         }
+	}
+	
+	private void updateState(Message message,DatagramPacket datagram) {
+	    if (!isGUESSCapable()) {
+            if (message instanceof PingRequest) {
+                GUID guid = new GUID(message.getGUID());
+                if(isValidForIncoming(CONNECT_BACK_GUID, guid,
+                                      datagram))
+                    _acceptedUnsolicitedIncoming = true;
+                _lastUnsolicitedIncomingTime =
+                    System.currentTimeMillis();
+            }
+            else if (message instanceof PingReply) {
+                GUID guid = new GUID(message.getGUID());
+                if(isValidForIncoming(SOLICITED_PING_GUID, guid,
+                                      datagram))
+                    _acceptedSolicitedIncoming = true;
+                
+                PingReply r = (PingReply)message;
+                if (r.getMyInetAddress() != null) {
+                    
+                    byte [] newAddr = r.getMyInetAddress().getAddress();
+                    
+                    synchronized(this){ 
+                        
+                        _receivedIPPong=true;
+                        
+                        // we may receive a late pong after the isp has
+                        // changed our address.  We should not let that pong
+                        // affect us. (port is unaffected)
+                        if (_previousIP==null || 
+                                !Arrays.equals(_previousIP,newAddr)) 
+                            _lastReportedIP=newAddr;
+                    
+                        if (_lastReportedPort!=r.getMyPort()) {
+                            _portStable=false;
+                            _lastReportedPort=r.getMyPort();
+                        }
+                    }
+                }
+                
+            }
+        }
+        // ReplyNumberVMs are always sent in an unsolicited manner,
+        // so we can use this fact to keep the last unsolicited up
+        // to date
+        if (message instanceof ReplyNumberVendorMessage)
+            _lastUnsolicitedIncomingTime = 
+                System.currentTimeMillis();
 	}
 	
 	/**
