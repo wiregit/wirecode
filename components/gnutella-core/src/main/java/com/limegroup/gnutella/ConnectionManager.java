@@ -74,7 +74,6 @@ public class ConnectionManager {
     /* Sister backend classes. */
     private MessageRouter _router;
     private HostCatcher _catcher;
-    //private ActivityCallback _callback;
 	private SettingsManager _settings;
 	private ConnectionWatchdog _watchdog;
 
