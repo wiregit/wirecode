@@ -1,6 +1,7 @@
 package com.limegroup.gnutella.uploader;
 
 import com.limegroup.gnutella.*;
+import com.sun.java.util.collections.*;
 import java.io.*;
 import java.util.Date;
 import com.limegroup.gnutella.util.CommonUtils;
@@ -34,6 +35,11 @@ public class NormalUploadState implements UploadState {
 	 */
 	private URN _urn;
 
+	/**
+	 * <tt>FileDesc</tt> instance for the file being uploaded.
+	 */
+	private FileDesc _fileDesc;
+
     /** Flag indicating whether we should close the connection after serving
      * the request or not */
     private boolean _closeConnection = false;
@@ -57,6 +63,7 @@ public class NormalUploadState implements UploadState {
             _uploadBegin =  _uploader.getUploadBegin();
             _uploadEnd =  _uploader.getUploadEnd();
 			_urn = _uploader.getUrn();
+			_fileDesc = _uploader.getFileDesc();
             
             //guard clause
             if(_fileSize < _uploadBegin)
@@ -253,19 +260,47 @@ public class NormalUploadState implements UploadState {
 			_ostream.write(str.getBytes());
 		}
 		if(_urn != null) {
-			str = HTTPConstants.CONTENT_URN_HEADER + _urn + HTTPConstants.CRLF;
+			str = HTTPConstants.CONTENT_URN_HEADER+" "+_urn+HTTPConstants.CRLF;
 			_ostream.write(str.getBytes());
 		}
+		if(_fileDesc != null) {
+			_fileDesc.writeAlternateLocationsTo(_ostream);
+		}
+		
 		 str = "\r\n";
 		_ostream.write(str.getBytes());
 		
 	}
+
     
     //inherit doc comment
-    public boolean getCloseConnection()
-    {
+    public boolean getCloseConnection() {
         return _closeConnection;
     }
+
+	/*
+	public static void main(String[] args) {
+		NormalUploadState nus = new NormalUploadState();
+		FileDesc fd = new FileDesc(new File("NormalUploadState.java"), 0, 
+								   new HashSet());
+		String alt0 = "Alt-Location: http://Y.Y.Y.Y:6352/get/2/"+
+		"lime%20capital%20management%2001.mpg "+
+		"2002-04-09T20:32:33Z";
+		nus._ostream = new ByteArrayOutputStream();	   
+		try {
+			nus._urn = new URN("urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB");
+			AlternateLocation al = new AlternateLocation(alt0);
+			fd.addAlternateLocation(al);
+			nus._fileDesc = fd;			
+			nus.writeHeader();
+		} catch(IOException e) {
+			e.printStackTrace();
+		}
+		System.out.println("NORMAL UPLOAD HEADER:");
+		System.out.println(); 
+		System.out.println(nus._ostream); 
+	}
+	*/
     
 }
 
