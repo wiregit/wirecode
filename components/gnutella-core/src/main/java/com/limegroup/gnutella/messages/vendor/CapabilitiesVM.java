@@ -127,7 +127,7 @@ public final class CapabilitiesVM extends VendorMessage {
     /** @return A CapabilitiesVM with the set of messages 
      *  this client supports.
      */
-    public static CapabilitiesVM instance() {
+    public synchronized static CapabilitiesVM instance() {
         if (_instance == null)
             _instance = new CapabilitiesVM();
         return _instance;
@@ -185,7 +185,9 @@ public final class CapabilitiesVM extends VendorMessage {
         _simppVersion = newSimppVersion;
         //nullify the older instance so a newer one is created with the correct
         //simppVersion, a new _capabilitiesSupported will be created
-        _instance = null;
+        synchronized(CapabilitiesVM.class) {
+            _instance = null;
+        }
     }
 
     
