@@ -1010,7 +1010,7 @@ public class ManagedDownloader implements Downloader, Serializable {
 
         
             //OK. We are going to create a thread for each RFD, 
-            for(int i=0; i<=connectTo && i<size; i++) {
+            for(int i=0; i<connectTo && i<size; i++) {
                 final RemoteFileDesc rfd = removeBest(files);
                 Thread connectCreator = new Thread() {
                     public void run() {
