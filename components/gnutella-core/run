@@ -5,4 +5,9 @@
 CLASSPATH=".;lib/collections.jar;lib/xerces.jar;lib/MRJToolkitStubs.jar;lib/logicrypto.jar"
 export CLASSPATH
 
+
+export CLASSPATH
+PATH=$PATH:../core/bin
+export PATH
+
 java com.limegroup.gnutella.Main
