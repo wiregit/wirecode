@@ -710,7 +710,7 @@ public class HTTPUploader implements Uploader {
             return false;
         
         String s = HTTPUtils.extractHeaderValue(str);
-        float version = Float.parseFloat(s);
+        float version = (new Float(s)).floatValue();
         if (version > 0) 
             _supportsQueueing = true;
 
