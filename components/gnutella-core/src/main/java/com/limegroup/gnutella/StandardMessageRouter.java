@@ -39,9 +39,7 @@ public class StandardMessageRouter extends MessageRouter
      * can currently accept incoming connections or the hops + ttl <= 2 (to allow
      * for crawler pings).
      */
-    protected void respondToPingRequest(PingRequest pingRequest,
-                                        Acceptor acceptor)
-    {
+    protected void respondToPingRequest(PingRequest pingRequest) {
         //If this wasn't a handshake or crawler ping, check if we can accept
         //incoming connection for old-style unrouted connections, ultrapeers, or
         //leaves.  TODO: does this mean leaves always respond to pings?
@@ -65,19 +63,19 @@ public class StandardMessageRouter extends MessageRouter
         if ( (hops+ttl) <=2)
             newTTL = 1;
         
-        int num_files = _fileManager.getNumFiles();
-        int kilobytes = _fileManager.getSize()/1024;
+        int num_files = RouterService.getNumSharedFiles();
+        int kilobytes = RouterService.getSharedFileSize()/1024;
 
         //We mark our ping replies if currently in the supernode state.
-        boolean markPong=_manager.isSupernode();
+        boolean markPong=RouterService.isSupernode();
         //Daily average uptime.  If too slow, use FRACTIONAL_UPTIME property.
         //This results in a GGEP extension, which will be stripped before
         //sending it to older clients.
         int dailyUptime=Statistics.instance().calculateDailyUptime();
         PingReply pingReply = new PingReply(pingRequest.getGUID(),
                                             (byte)newTTL,
-                                            acceptor.getPort(),
-                                            acceptor.getAddress(),
+                                            RouterService.getPort(),
+                                            RouterService.getAddress(),
                                             num_files,
                                             kilobytes,
                                             markPong,
@@ -100,17 +98,16 @@ public class StandardMessageRouter extends MessageRouter
 	 *
 	 * @param request the <tt>PingRequest</tt> to service
 	 */
-	protected void respondToUDPPingRequest(PingRequest request, 
-										   Acceptor acceptor) {
+	protected void respondToUDPPingRequest(PingRequest request) {
 		List unicastEndpoints = QueryUnicaster.instance().getUnicastEndpoints();
 		Iterator iter = unicastEndpoints.iterator();
 		while(iter.hasNext()) {
 			Endpoint host = (Endpoint)iter.next();
 			try {
-				byte[] address = host.getHostBytes();
 				PingReply reply = new PingReply(request.getGUID(), (byte)1, 
 												host.getPort(),
-												address, (long)0, (long)0, 
+												host.getHostBytes(), 
+												(long)0, (long)0, 
 												true);
 				try {
 					sendPingReply(reply);
@@ -177,34 +174,29 @@ public class StandardMessageRouter extends MessageRouter
      */
     public GroupPingRequest createGroupPingRequest(String group)
     {
-        int num_files = _fileManager.getNumFiles();
-        int kilobytes = _fileManager.getSize()/1024;
+        int num_files = RouterService.getNumSharedFiles();
+        int kilobytes = RouterService.getSharedFileSize()/1024;
         
         //also append everSupernodeCapable flag to the group
         GroupPingRequest pingRequest =
           new GroupPingRequest(SettingsManager.instance().getTTL(),
-            _acceptor.getPort(), _acceptor.getAddress(),
+            RouterService.getPort(), RouterService.getAddress(),
             num_files, kilobytes, group + ":"
             + SettingsManager.instance().getEverSupernodeCapable());
         return( pingRequest );
     }
 
     protected void respondToQueryRequest(QueryRequest queryRequest,
-                                         Acceptor acceptor,
-                                         byte[] clientGUID)
-    {
-
+                                         byte[] clientGUID) {
         // Run the local query
-        //FileManager fm = FileManager.instance();
         Response[] responses = _fileManager.query(queryRequest);
 
-        sendResponses(responses, queryRequest, acceptor, clientGUID);
+        sendResponses(responses, queryRequest, clientGUID);
         
     }
 
     public void sendResponses(Response[] responses, 
 							  QueryRequest queryRequest,
-							  Acceptor acceptor,
 							  byte[] clientGUID) {
         // if either there are no responses or, the
         // response array came back null for some reason,
