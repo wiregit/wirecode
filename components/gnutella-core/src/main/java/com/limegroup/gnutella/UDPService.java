@@ -313,6 +313,7 @@ public final class UDPService implements Runnable {
     private class Sender implements Runnable {
         
         public void run() {
+            boolean hasReportedNullSocket = false;
             SendBundle currBundle = null;
             while (true) {
 
@@ -333,9 +334,16 @@ public final class UDPService implements Runnable {
                 // ------
                 synchronized (_sendLock) {
                     // we could be changing ports, just drop the message, 
-                    //tough luck
-                    if (_socket == null) 
-                        return;
+                    // tough luck
+                    if (_socket == null) {
+                        if (!hasReportedNullSocket) {
+                            hasReportedNullSocket = true;
+                            Exception npe = 
+                                new NullPointerException("Null UDP Socket!!");
+                            ErrorService.error(npe);
+                        }
+                        continue;
+                    }
                     try {
                         _socket.send(currBundle._dp);
                     } 
