@@ -73,7 +73,7 @@ public final class CCLicenseTest extends BaseTestCase {
 	    assertTrue(l.isVerified());
 	    assertTrue(l.isValid(null));
 	    assertTrue(l.isValid(URN.createSHA1Urn("urn:sha1:MSMBC5VEUDLTC26UT5W7GZBAKZHCY2MD")));
-	    assertTrue(l.isValid(URN.createSHA1Urn("urn:sha1:SAMBC5VEUDLTC26UT5W7GZBAKZHCY2MD")));	    
+	    assertFalse(l.isValid(URN.createSHA1Urn("urn:sha1:SAMBC5VEUDLTC26UT5W7GZBAKZHCY2MD")));	    
 	    assertTrue(c.completed);
 	    
     }
