@@ -74,9 +74,17 @@ public class Response {
         //System.out.println("Between nulls is "+betweenNulls);
         String length="";
         String bitrate="";
+        String first="";
+        String second="";
         StringTokenizer tok = new StringTokenizer(betweenNulls);
-        String first = tok.nextToken();
-        String second = tok.nextToken();
+        try{
+            first = tok.nextToken();
+            second = tok.nextToken();
+        }catch(Exception e){//If I catch an exception, all bets are off.
+            first="";
+            second="";
+            betweenNulls="";
+        }
         boolean bearShare1 = false;        
         boolean bearShare2 = false;
         boolean gnotella = false;
