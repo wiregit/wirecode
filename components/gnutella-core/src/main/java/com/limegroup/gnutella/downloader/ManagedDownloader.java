@@ -2200,11 +2200,10 @@ public class ManagedDownloader implements Downloader, Serializable {
     /**
      * Callback that the specified worker has finished.
      */
-    synchronized void workerFinished(DownloadWorker finished, boolean iterate) {
+    synchronized void workerFinished(DownloadWorker finished) {
             currentRFDs.remove(finished.getRFD());
             removeWorker(finished); 
-            if(iterate) 
-                notifyAll();
+            notify();
     }
     
     synchronized void workerStarted(DownloadWorker worker) {
@@ -2320,6 +2319,10 @@ public class ManagedDownloader implements Downloader, Serializable {
                 throw new InterruptedException();
             } 
             
+            // are we just about to finish downloading the file?
+            
+            commonOutFile.waitForPendingIfNeeded();
+            
             // Finished.
             if (commonOutFile.isComplete()) {
                 // Kill any leftover downloaders.
@@ -2365,19 +2368,22 @@ public class ManagedDownloader implements Downloader, Serializable {
             //limit, which if successfully starts downloading or gets a better
             //queued slot than some other worker kills the lowest worker in some
             //remote queue.
-            for(int i=0; i< (connectTo+1) && i<size && 
-                              dloadsCount < getSwarmCapacity(); i++) {
-                RemoteFileDesc rfd = removeBest();
-                // If the rfd was busy, that means all possible RFDs
-                // are busy, so just put it back in files and exit.
-                if( rfd.isBusy() ) {
-                    rfds.add(rfd);
-                    break;
-                }
-                // else...
-                startWorker(rfd);
-            }//end of for 
-                
+            if (commonOutFile.hasFreeBlocksToAssign() > 0 || stealingCanHappen()) {
+                for(int i=0; i< (connectTo+1) && i<size && 
+                dloadsCount < getSwarmCapacity(); i++) {
+                    RemoteFileDesc rfd = removeBest();
+                    // If the rfd was busy, that means all possible RFDs
+                    // are busy, so just put it back in files and exit.
+                    if( rfd.isBusy() ) {
+                        rfds.add(rfd);
+                        break;
+                    }
+                    // else...
+                    startWorker(rfd);
+                }//end of for 
+            } else if (LOG.isDebugEnabled())
+                LOG.debug("no blocks but can't steal - sleeping");
+            
             //wait for a notification before we continue.
             try {
                 //if no workers notify in 4 secs, iterate. This is a problem
@@ -2386,6 +2392,18 @@ public class ManagedDownloader implements Downloader, Serializable {
                 this.wait(4000); // note that this relinquishes the lock
             } catch (InterruptedException ignored) {}
         }//end of while
+    }
+    
+    /**
+     * @return true if we have more than one worker or the last one is slow
+     */
+    private boolean stealingCanHappen() {
+        List active = getActiveWorkers();
+        if (active.size() != 1)
+            return false;
+            
+        DownloadWorker lastOne = (DownloadWorker)active.get(0);
+        return lastOne.isSlow();
     }
     
 	/**

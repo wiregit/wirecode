@@ -1670,11 +1670,12 @@ public class HTTPDownloader implements BandwidthTracker {
 
     /**
      * Instructs this stop just before reading the given byte.
+     * This cannot be used to increase the initial range.
      * @param stop the index just past the last byte to read;
      *  stop-1 is the index of the last byte to be downloaded
      */
     public synchronized void stopAt(int stop) {
-        _amountToRead=(stop-_initialReadingPoint);
+        _amountToRead = Math.min(_amountToRead,stop-_initialReadingPoint);
     }
     
     public void startAt(int start) {

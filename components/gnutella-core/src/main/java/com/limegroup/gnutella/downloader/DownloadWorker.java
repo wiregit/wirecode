@@ -194,16 +194,13 @@ public class DownloadWorker implements Runnable {
         // first get a handle of our thread object
         _myThread = Thread.currentThread();
         
-        boolean iterate = false;
-        
         try {
             // if I was interrupted before being started, don't do anything.
             if (_interrupted)
                 throw new InterruptedException();
             
-            iterate = connectAndDownload();
+            connectAndDownload();
         } catch (Throwable e) {
-            iterate = true;
              // Ignore InterruptedException -- the JVM throws
              // them for some reason at odd times, even though
              // we've caught and handled all of them
@@ -216,7 +213,7 @@ public class DownloadWorker implements Runnable {
                 ErrorService.error(e);
             }
         } finally {
-            _manager.workerFinished(this, iterate);
+            _manager.workerFinished(this);
         }
     }
     
@@ -230,7 +227,7 @@ public class DownloadWorker implements Runnable {
      * @return true if this worker thread should notify, false otherwise.
      * currently this method returns false iff NSEEx is  thrown. 
      */
-    private boolean connectAndDownload() {
+    private void connectAndDownload() {
         if(LOG.isTraceEnabled())
             LOG.trace("connectAndDownload for: " + _rfd);
         
@@ -242,7 +239,7 @@ public class DownloadWorker implements Runnable {
         _downloader = establishConnection();
         
         if(_downloader == null)//any exceptions in the method internally?
-            return true;//no work was done, try to get another thread
+            return;//no work was done, try to get another thread
 
         //initilaize the newly created HTTPDownloader with whatever AltLocs we
         //have discovered so far. These will be cleared out after the first
@@ -334,7 +331,7 @@ public class DownloadWorker implements Runnable {
                 // or we got interrupted while sleeping,
                 // then try other sources
                 if(!addQueued || handleQueued(status))
-                    return true;
+                    return;
             }
             
             
@@ -345,11 +342,11 @@ public class DownloadWorker implements Runnable {
             case ConnectionStatus.TYPE_NO_FILE:
                 // close the connection for now.            
                 _downloader.stop();
-                return true;            
+                return;            
             case ConnectionStatus.TYPE_NO_DATA:
                 // close the connection since we're finished.
                 _downloader.stop();
-                return false;
+                return;
             case ConnectionStatus.TYPE_CONNECTED:
                 break;
             default:
@@ -374,9 +371,6 @@ public class DownloadWorker implements Runnable {
             // structure before returning from this method.
             _manager.removeActiveWorker(this);
         }
-        
-        //tell manager to iterate for more sources
-        return true;
     }
     
     private ConnectionStatus requestTHEXIfNeeded() {
@@ -740,9 +734,9 @@ public class DownloadWorker implements Runnable {
             if (_commonOutFile.hasFreeBlocksToAssign() > 0) {
                 assignWhite(http11);
             } else {
-		synchronized(_stealLock) {
-                	assignGrey(); 
-		}
+                synchronized(_stealLock) {
+                    assignGrey(); 
+                }
             }
             
         } catch(NoSuchElementException nsex) {
@@ -956,30 +950,37 @@ public class DownloadWorker implements Runnable {
         if( _downloader.getRemoteFileDesc().isPartialSource() )
             throw new NoSuchRangeException();
 
-        //Split largest "gray" interval, i.e., steal another
-        //downloader's region for a new downloader.  
-        HTTPDownloader biggest = findBiggestDownloader();
+        HTTPDownloader slowest = findSlowestDownloader();
                         
-        if (biggest==null) //Not using this downloader...but RFD maybe useful
+        if (slowest==null) {//Not using this downloader...but RFD maybe useful
+            if (LOG.isDebugEnabled())
+                LOG.debug("didn't find anybody to steal from");
             throw new NoSuchElementException();
-        
-
-		if (!shouldSteal(biggest))
-            throw new NoSuchElementException();
-		
-        //replace (bad boy) biggest if possible
-        int start,stop;
-        synchronized(biggest) {
-            start = Math.max(biggest.getInitialReadingPoint() + biggest.getAmountRead(),
-                    biggest.getInitialWritingPoint());
-            
-            stop = biggest.getInitialReadingPoint() + biggest.getAmountToRead();
         }
+		
+        // see what ranges is the victim requesting
+        int start,stop;
+        synchronized(slowest) {
+            start = Math.max(slowest.getInitialReadingPoint() + slowest.getAmountRead(),
+                    slowest.getInitialWritingPoint());
+            
+            stop = slowest.getInitialReadingPoint() + slowest.getAmountToRead();
+        }
+        
+        if (start == stop)
+            throw new NoSuchElementException();
         
         _shouldRelease=false;
         //Note: we are not interested in being queued at this point this
         //line could throw a bunch of exceptions (not queuedException)
         _downloader.connectHTTP(start, stop, false);
+        
+        synchronized(slowest) {
+            start = Math.max(slowest.getInitialReadingPoint() + slowest.getAmountRead(),
+                    slowest.getInitialWritingPoint());
+            
+            stop = slowest.getInitialReadingPoint() + slowest.getAmountToRead();
+        }
         
         int myLow = _downloader.getInitialReadingPoint();
         int myHigh = _downloader.getAmountToRead() + myLow; // EXCLUSIVE
@@ -1001,15 +1002,15 @@ public class DownloadWorker implements Runnable {
         if(LOG.isDebugEnabled()) {
             LOG.debug("WORKER:"+
                     " picking stolen grey "
-                    +start+"-"+stop+" from "+biggest+" to "+_downloader);
+                    +start+"-"+stop+" from "+slowest+" to "+_downloader);
         }
         
         // stop the victim
         int newStart;
-        synchronized(biggest) {
+        synchronized(slowest) {
             // free up whatever the victim wrote while we were connecting
             // unless that data is already verified or pending verification
-            newStart = biggest.getInitialReadingPoint() + biggest.getAmountRead();
+            newStart = slowest.getInitialReadingPoint() + slowest.getAmountRead();
 			
 			// the victim may have even completed their download while we were
 	        // connecting
@@ -1018,7 +1019,7 @@ public class DownloadWorker implements Runnable {
 			
             // tell the victim to stop downloading at the point the thief 
             // can start downloading
-			biggest.stopAt(Math.max(newStart,myLow));
+			slowest.stopAt(Math.max(newStart,myLow));
         }
         
         if (newStart > start && LOG.isDebugEnabled()) {
@@ -1032,10 +1033,16 @@ public class DownloadWorker implements Runnable {
 	}
     
     /**
-     * @return the httpdownloader that has leased the biggest chunk of the file
+     * @return the httpdownloader that is going slowest.
      */
-    private HTTPDownloader findBiggestDownloader() {
-        HTTPDownloader biggest = null;
+    private HTTPDownloader findSlowestDownloader() {
+        HTTPDownloader slowest = null;
+        final float ourSpeed = getOurSpeed();
+        float slowestSpeed = ourSpeed;
+        
+        // are we too slow to steal?
+        if (ourSpeed == -1)
+            return null;
         
         for (Iterator iter=_manager.getActiveWorkers().iterator(); iter.hasNext();) {
             HTTPDownloader h = ((DownloadWorker) iter.next()).getDownloader();
@@ -1044,66 +1051,36 @@ public class DownloadWorker implements Runnable {
             if(!h.isActive())
                 continue;
             
-            // If we have no one to steal from, use 
-            if(biggest == null)
-                biggest = h;
-            
-            // Otherwise, steal only if what's left is
-            // larger and there's stuff left.
-            else {
-                int hLeft = h.getAmountToRead() - h.getAmountRead();
-                int bLeft = biggest.getAmountToRead() - 
-                biggest.getAmountRead();
-                if( hLeft > 0 && hLeft > bLeft )
-                    biggest = h;
+            // see if he is the slowest one
+            float hisSpeed = 0;
+            try {
+                h.getMeasuredBandwidth();
+                hisSpeed = h.getAverageBandwidth(); 
+            } catch (InsufficientDataException ide) {
+                continue;
             }
+            
+            if (hisSpeed < slowestSpeed) {
+                slowestSpeed = hisSpeed;
+                slowest = h;
+            }
+            
         }
-        
-        return biggest;
+        return slowest;
     }
     
-    /**
-     * If this downloader is faster than the victim
-     * OR
-     * If we don't know how fast is this downloader but the victim is slow,
-     * let this steal.
-     * 
-     * @return whether our downloader should steal from the given downloader
-     */
-    private boolean shouldSteal(HTTPDownloader biggest) {
-        // check if we need to steal from a slow downloader.
-        float bandwidthVictim = -1;
-        float bandwidthStealer = -1;
-        
+    private float getOurSpeed() {
         try {
-            bandwidthVictim = biggest.getAverageBandwidth();
-            biggest.getMeasuredBandwidth(); // trigger IDE.
-        } catch (InsufficientDataException ide) {
-            LOG.debug("victim does not have datapoints", ide);
-            bandwidthVictim = -1;
+            _downloader.getMeasuredBandwidth();
+            return _downloader.getAverageBandwidth();
+        } catch (InsufficientDataException bad) {
+            return -1;
         }
-        
-        try {
-            bandwidthStealer = _downloader.getAverageBandwidth();
-            _downloader.getMeasuredBandwidth(); // trigger IDE.
-        } catch(InsufficientDataException ide) {
-            LOG.debug("stealer does not have datapoints", ide);
-            bandwidthStealer = -1;
-        }
-        
-        if(LOG.isDebugEnabled()) {
-            LOG.debug("WORKER: "+
-                    _downloader + " attempting to steal from " + 
-                    biggest + ", stealer speed [" + bandwidthStealer +
-                    "], victim speed [ " + bandwidthVictim + "]");
-        }
-        
-        
-        return biggest.getAmountRead() < biggest.getAmountToRead() && 
-                (bandwidthStealer > bandwidthVictim ||
-                    (bandwidthVictim != -1 &&
-                            bandwidthVictim < MIN_ACCEPTABLE_SPEED && 
-                            bandwidthStealer == -1));
+    }
+    
+    boolean isSlow() {
+        float ourSpeed = getOurSpeed();
+        return ourSpeed != -1 && ourSpeed < MIN_ACCEPTABLE_SPEED;
     }
     
     ////// various handlers for failure states of the assign process /////

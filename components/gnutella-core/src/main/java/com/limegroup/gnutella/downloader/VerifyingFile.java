@@ -430,6 +430,19 @@ public class VerifyingFile {
     }
     
     /**
+     * If the last remaining chunks of the file are currently pending verification,
+     * wait until it finishes.
+     */
+    public synchronized void waitForPendingIfNeeded() throws InterruptedException{
+        while (!isComplete() &&
+                verifiedBlocks.getSize() + pendingBlocks.getSize()  == completedSize) {
+            if (LOG.isDebugEnabled())
+                LOG.debug("waiting for a pending chunk to verify..");
+            wait();
+        }
+    }
+    
+    /**
      * @return whether we think we will not be able to complete this file
      */
     public synchronized boolean isHopeless() {
@@ -552,6 +565,8 @@ public class VerifyingFile {
                     partialBlocks.add(_interval);
                 else
                     lostSize += (_interval.high - _interval.low + 1);
+                
+                VerifyingFile.this.notify(); // the ManagedDownloader thread.
             }
         }
         
