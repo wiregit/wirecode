@@ -1123,7 +1123,9 @@ public class ManagedDownloader implements Downloader, Serializable {
             ifd = (IncompleteFileDesc)fd;
             if(!bucketHash.equals(ifd.getSHA1Urn())) {
                 // Assert that the SHA1 of the IFD and the bucketHash match.
-                Assert.silent(false, "wrong IFD.");
+                Assert.silent(false, "wrong IFD.\n" +
+                                "ours:   " + incompleteFile +
+                              "\ntheirs: " + ifd.getFile());
                 fileManager.removeFileIfShared(incompleteFile);
                 ifd = null; // do not use, it's bad.
             }
@@ -2012,6 +2014,8 @@ public class ManagedDownloader implements Downloader, Serializable {
         //local variable because the code is incapable of handling a change in
         //http11 status while inside connectAndDownload.
         boolean http11 = true;//must enter the loop
+        
+        try {
 
         while(http11) {
             //Step 2. OK. We have established TCP Connection. This 
@@ -2038,6 +2042,15 @@ public class ManagedDownloader implements Downloader, Serializable {
                     Assert.that(qInfo[0]>-1&&qInfo[1]>-1,
                                                     "inconsistent queue data");
                     try {
+                        // make sure that we're not in dloaders if we're
+                        // sleeping/queued.  this would ONLY be possible
+                        // if some uploader was misbehaved and queued
+                        // us after we succesfully managed to download some
+                        // information.  despite the rarity of the situation,
+                        // we should be prepared.
+                        synchronized(this) {
+                            dloaders.remove(dloader);
+                        }
                         Thread.sleep(qInfo[0]);//value from QueuedException
                     } catch (InterruptedException ix) {
                         debug("worker: interrupted while asleep in "+
@@ -2058,7 +2071,7 @@ public class ManagedDownloader implements Downloader, Serializable {
                 queuedThreads.remove(Thread.currentThread()); 
             } 
 
-            //Now, connected is either 0 or 2
+            //Now, connected is either 0, 2 or 3.
             Assert.that(connected==0 || connected==2 || connected==3,
                         "invalid return from assignAndRequest "+connected);
             if(connected==0) { // File Not Found, Try Again Later, etc...
@@ -2076,6 +2089,14 @@ public class ManagedDownloader implements Downloader, Serializable {
             if(!downloadOK)
                 break;
         } // end of while(http11)
+        
+        } finally {
+            // we must ensure that all dloaders are removed from the data
+            // structure before returning from this method.
+            synchronized(this) {
+                dloaders.remove(dloader);
+            }
+        }
         
         //came out of the while loop, http1.0 spawn a thread
         return true;
@@ -2512,7 +2533,9 @@ public class ManagedDownloader implements Downloader, Serializable {
                 return 0;//throw new InterruptedException();
             }
             synchronized(this) {
-                dloaders.add(dloader);
+                // only add if not already added.
+                if(!dloaders.contains(dloader))
+                    dloaders.add(dloader);
                 chatList.addHost(dloader);
                 browseList.addHost(dloader);
             }
@@ -2612,7 +2635,7 @@ public class ManagedDownloader implements Downloader, Serializable {
     QueuedException, FileNotFoundException, NotSharingException,  
     NoSuchRangeException  {
         //If this dloader is a partial source, don't attempt to steal...
-        //to confusing, too many problems, etc...
+        //too confusing, too many problems, etc...
         if( dloader.getRemoteFileDesc().isPartialSource() )
             throw new NoSuchRangeException();
 
@@ -2626,9 +2649,9 @@ public class ManagedDownloader implements Downloader, Serializable {
         HTTPDownloader biggest=null;
         synchronized (this) {
             for (Iterator iter=dloaders.iterator(); iter.hasNext();) {
-                HTTPDownloader h=(HTTPDownloader)iter.next();
-                if (biggest==null 
-                    || h.getAmountToRead()>biggest.getAmountToRead())
+                HTTPDownloader h = (HTTPDownloader)iter.next();
+                if (h.isActive() && (biggest==null ||
+                  h.getAmountToRead() > biggest.getAmountToRead()))
                     biggest=h;
             }                
         }
@@ -2869,8 +2892,6 @@ public class ManagedDownloader implements Downloader, Serializable {
                     if( !http11 ) // no need to add http11 dloaders to files
                         files.add(rfd);
                 }
-                
-                dloaders.remove(downloader);
             }
         }
         

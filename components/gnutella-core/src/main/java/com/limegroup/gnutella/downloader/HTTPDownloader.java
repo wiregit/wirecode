@@ -114,6 +114,12 @@ public class HTTPDownloader implements BandwidthTracker {
 
     /** For implementing the BandwidthTracker interface. */
     private BandwidthTrackerImpl bandwidthTracker=new BandwidthTrackerImpl();
+    
+    /**
+     * Whether or not this HTTPDownloader is currently attempting to read
+     * information from the network.
+     */
+    private boolean _isActive = false;
 
     /**
      * Creates an uninitialized client-side normal download.  Call 
@@ -781,6 +787,7 @@ public class HTTPDownloader implements BandwidthTracker {
         _socket.setSoTimeout(10*60*1000);//downloading, can stall upto 10 mins
         long currPos = _initialReadingPoint;
         try {
+            _isActive = true;
             int c = -1;
             byte[] buf = new byte[BUF_LENGTH];
             
@@ -821,6 +828,7 @@ public class HTTPDownloader implements BandwidthTracker {
                 throw new FileIncompleteException();  
             }
         } finally {
+            _isActive = false;
             if(!isHTTP11())
                 _byteReader.close();
         }
@@ -856,6 +864,7 @@ public class HTTPDownloader implements BandwidthTracker {
 	public int getAmountRead() {return _amountRead;}
 	public int getTotalAmountRead() {return _totalAmountRead + _amountRead;}
 	public int getAmountToRead() {return _amountToRead;}
+	public boolean isActive() { return _isActive; }
 
     /** 
      * Forces this to not write past the given byte of the file, if it has not
