@@ -186,18 +186,21 @@ public class RequeryDownloadTest
         downloader = _mgr.download(_incompleteFile);
         
 		// Make sure that you are through the QUEUED state.
-        while (downloader.getState() != Downloader.GAVE_UP) {         
+        while (downloader.getState() != Downloader.WAITING_FOR_USER) {         
 			if ( downloader.getState() != Downloader.QUEUED )
-                assertEquals(Downloader.GAVE_UP, 
+                assertEquals(Downloader.WAITING_FOR_USER, 
 				  downloader.getState());
             Thread.sleep(200);
 		}
-        assertEquals("downloader isn't given up (also waiting for results)", 
-            Downloader.GAVE_UP, downloader.getState());
+        assertEquals("downloader isn't waiting for user (also for results)", 
+            Downloader.WAITING_FOR_USER, downloader.getState());
+        // resume teh downloader (it'll send a query)
+        downloader.resume();
 
         //Check that we can get query of right type.
         //TODO: try resume without URN
-        assertEquals("unexpected router.broadcasts size", 1,_router.broadcasts.size());
+        assertEquals("unexpected router.broadcasts size", 1, 
+                     _router.broadcasts.size());
         Object m=_router.broadcasts.get(0);
         assertInstanceof("m should be a query request", QueryRequest.class, m);
         QueryRequest qr=(QueryRequest)m;

@@ -154,7 +154,6 @@ public class ManagedDownloaderTest extends com.limegroup.gnutella.util.BaseTestC
         RemoteFileDesc[] rfds={
             newRFD("Susheel_Daswani_Neil_Daswani.txt",
                    "urn:sha1:GLSTHIPQGSSZTS5FJUPAKPZWUGYQYPFB"),
-            newRFD("Susheel Ruchika Mahesh Kyle Daswani.txt"),
             newRFD("Susheel/cool\\Daswani.txt",
                    "urn:sha1:LSTHGIPQGSSZTS5FJUPAKPZWUGYQYPFB"),
             newRFD("Sumeet (Susheel) Anurag (Daswani)Chris.txt"),
@@ -164,17 +163,19 @@ public class ManagedDownloaderTest extends com.limegroup.gnutella.util.BaseTestC
         TestManagedDownloader downloader=new TestManagedDownloader(rfds);
         QueryRequest qr=downloader.newRequery2();
         assertNotNull("Couldn't make query", qr);
-        assertTrue(qr.getQuery().equals("daswani susheel") ||
-                   qr.getQuery().equals("susheel daswani"));
+        assertTrue(qr.getQuery().equals("neil daswani susheel") ||
+                   qr.getQuery().equals("neil susheel daswani") ||
+                   qr.getQuery().equals("daswani neil susheel") ||
+                   qr.getQuery().equals("daswani susheel neil") ||
+                   qr.getQuery().equals("susheel neil daswani") ||
+                   qr.getQuery().equals("susheel daswani neil"));
         assertEquals(224, qr.getMinSpeed());
         // the guid should be a lime guid but not a lime requery guid
         assertTrue((GUID.isLimeGUID(qr.getGUID())) && 
                    !(GUID.isLimeRequeryGUID(qr.getGUID())));
         assertEquals("", qr.getRichQuery());
         Set urns=qr.getQueryUrns();
-        assertEquals(1, urns.size());
-        assertTrue(urns.contains(URN.createSHA1Urn(
-            "urn:sha1:GLSTHIPQGSSZTS5FJUPAKPZWUGYQYPFB")));
+        assertEquals(0, urns.size());
     }
 
     /** Catches a bug with earlier keyword intersection code. */
@@ -253,8 +254,8 @@ public class ManagedDownloaderTest extends com.limegroup.gnutella.util.BaseTestC
             downloader.initialize(new DownloadManagerStub(), 
                                   new FileManagerStub(),
                                   new ActivityCallbackStub(), false);
-            //Wait for it to download until error.
-            try { Thread.sleep(6000); } catch (InterruptedException e) { }
+            //Wait for it to download until error, need to wait 
+            try { Thread.sleep(66000); } catch (InterruptedException e) { }
             // no more auto requeries - so the download should be waiting for
             // input from the user
             assertEquals("should be waiting for user",
