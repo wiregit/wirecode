@@ -6,9 +6,7 @@ import com.sun.java.util.collections.*;
 //2345678|012345678|012345678|012345678|012345678|012345678|012345678|012345678|
 
 /**
- * A Gnutella connection. A connection is either INCOMING or OUTGOING;
- * the difference doesn't really matter. It is also in one of three
- * states: UNCONNECTED, CONNECTING, or CONNECTED.<p>
+ * A Gnutella connection. A connection is either INCOMING or OUTGOING.
  *
  * This class provides the core logic for handling the Gnutella
  * protocol.  This includes sending replies to requests but not
@@ -22,29 +20,23 @@ import com.sun.java.util.collections.*;
  * <pre>
  *   //1. Setup manager and connection.
  *   ConnectionManager cm=new ConnectionManager();
- *   Connection c=new Connection(host, port);
- *   c.connect();                  //actually connect
- *
- *   //2. Send initial ping request.  The second line is a complete hack
- *   //   hack so that we know responses are for this.
- *   PingRequest pr=new PingRequest(SettingsManager.instance().getTTL()); //Send initial ping.
- *   cm.fromMe(pr);
- *   c.send(pr);
- *
- *   //3. Handle everything else asynchronously
- *   cm.add(c);                    //connnections in cm can broadcast via c
- *   c.setManager(cm);             //c can broadcast via cm
- *   Thread t=new Thread(c);       //create new handler thread
- *   t.start();                    //services connection by calling run()
+ *   cm.createConnection(host, port);
  * </pre>
  *
  * The second use is for "do it yourselfers".  This is useful for
- * Gnutella spiders.  In this case, you don't set a ConnectionManager
- * and don't call the run() method.<p>
+ * Gnutella spiders. This goes something like this:<p>
  *
- * You will note that the first constructor doesn't actually connect
- * this.  For that you must call connect().  While this is awkward,
- * it is intentional, as it makes interfacing with the GUI easier.<p>
+ * <pre>
+ *   Connection c = new Connection(host, port);
+ *   c.initialize();
+ * </pre>
+ *
+ * You will note that the constructors don't actually connect
+ * this.  For that you must call intialize().  While this is awkward,
+ * it is intentional, as it dealing with connection failures easier
+ * The constuctor doesn't throw an exception, and the constructor does not
+ * run for an unreasonable amount of time (i.e., the constructor does not
+ * use the network).<p>
  *
  * All connections have two underlying spam filters: a personal filter
  * (controls what I see) and a route filter (also controls what I pass
@@ -67,9 +59,9 @@ public class Connection {
 
     /**
      * Trigger an opening connection to shutdown after it opens.  This
-     * flag is set in shutdown() and then checked in the constructor
+     * flag is set in shutdown() and then checked in initialize()
      * to insure the _socket.close() happens if shutdown is called
-     * asynchronously before the constructor completes.
+     * asynchronously before initialize() completes.
      */
     private boolean _shutdownCalled;
 
@@ -277,22 +269,34 @@ public class Connection {
         return _port;
     }
 
-    /** Returns the port of the foreign host this is connected to. */
+    /**
+     * Returns the port of the foreign host this is connected to.
+     * @requires this is initialized.
+     */
     public int getPort() {
         return _socket.getPort();
     }
 
-    /** Returns the port this is connected to locally. */
+    /**
+     * Returns the port this is connected to locally.
+     * @requires this is initialized.
+     */
     public int getLocalPort() {
         return _socket.getLocalPort();
     }
 
-    /** Returns the address of the foreign host this is connected to. */
+    /**
+     * Returns the address of the foreign host this is connected to.
+     * @requires this is initialized.
+     */
     public InetAddress getInetAddress() {
         return _socket.getInetAddress();
     }
 
-    /** Returns the local address of this. */
+    /**
+     * Returns the local address of this.
+     * @requires this is initialized.
+     */
     public InetAddress getLocalAddress() {
         return _socket.getLocalAddress();
     }
