@@ -1153,8 +1153,13 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
             RouterService.download(new RemoteFileDesc[] { rfd }, false, 
                 new GUID(guid));
         
-        Thread.sleep(1000);
-        assertEquals(Downloader.ITERATIVE_GUESSING, downloader.getState());
+        final int MAX_TRIES = 60;
+        for (int i = 0; i <= MAX_TRIES; i++) {
+            Thread.sleep(500);
+            if (downloader.getState() == Downloader.ITERATIVE_GUESSING)
+                break;
+            if (i == MAX_TRIES) fail("didn't GUESS!!");
+        }
 
         // we should start getting guess queries on all UDP ports
         for (int i = 0; i < UDP_ACCESS.length; i++) {
