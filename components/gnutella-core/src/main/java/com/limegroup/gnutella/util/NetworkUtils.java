@@ -279,12 +279,16 @@ public final class NetworkUtils {
     }
     
     /**
-     * parses an ip:port byte-packed values.  If the size of the array is 
-     * not divisible by six, the extra bytes at the end are discarded.
+     * parses an ip:port byte-packed values.  
      * 
      * @return a collection of <tt>IpPort</tt> objects.
+     * @throws BadPacketException if an invalid Ip is found or the size 
+     * is not divisble by six
      */
-    public static Collection unpackIps(byte [] data) {
+    public static Collection unpackIps(byte [] data) throws BadPacketException{
+    	if (data.length % 6 != 0)
+    		throw new BadPacketException("invalid size");
+    	
     	int size = data.length/6;
     	List ret = new Vector(size);
     	byte [] current = new byte[6];
@@ -292,9 +296,7 @@ public final class NetworkUtils {
     	
     	for (int i=0;i<size;i++) {
     		System.arraycopy(data,i*6,current,0,6);
-    		try {
-    			ret.add(QueryReply.IPPortCombo.getCombo(current));
-    		}catch(BadPacketException ignored) {}
+    		ret.add(QueryReply.IPPortCombo.getCombo(current));
     	}
     	
     	return ret;

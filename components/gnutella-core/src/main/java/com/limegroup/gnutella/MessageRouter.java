@@ -128,9 +128,9 @@ public abstract class MessageRouter {
      * set the minimum interval too high.  Right now it is half of what we
      * believe to be the solicited grace period.
      */
-    private static final FixedSizeExpiringSet _udpHeadRequests =
-    	new FixedSizeExpiringSet(200,
-    			ConnectionSettings.SOLICITED_GRACE_PERIOD.getValue()/2);
+    private static final Set _udpHeadRequests =
+    	Collections.synchronizedSet(new FixedSizeExpiringSet(200,
+    			ConnectionSettings.SOLICITED_GRACE_PERIOD.getValue()/2));
 
 	/**
 	 * Constant handle to the <tt>QueryUnicaster</tt> since it is called
@@ -417,6 +417,11 @@ public abstract class MessageRouter {
             handleStatisticsMessage(
                             (StatisticVendorMessage)msg, receivingConnection);
         }
+        else if (msg instanceof HeadPing) {
+        	if(RECORD_STATS)
+        		;//TODO: add the statistics recording code
+        	handleHeadPing((HeadPing)msg, receivingConnection);
+        }
         
         //This may trigger propogation of query route tables.  We do this AFTER
         //any handshake pings.  Otherwise we'll think all clients are old
@@ -520,10 +525,10 @@ public abstract class MessageRouter {
         		;//TODO: add the statistics recording code
         	handleUDPCrawlerPing((UDPCrawlerPing)msg, handler);
         }
-        else if (msg instanceof UDPHeadPing) {
+        else if (msg instanceof HeadPing) {
         	if(RECORD_STATS)
         		;//TODO: add the statistics recording code
-        	handleUDPHeadPing((UDPHeadPing)msg, datagram);
+        	handleHeadPing((HeadPing)msg, datagram);
         }
         notifyMessageListener(msg);
     }
@@ -2561,23 +2566,45 @@ public abstract class MessageRouter {
     }
     
     /**
-     * replies to an udp head ping, unless the same person has pinged us 
-     * too recently.
+     * replies to a head ping that came through udp, 
+     * unless the same person has pinged us too recently.
+     * 
+     * if the ping requests to be forwarded, do so only if we 
+     * have the file and are not busy.
      */
-    private void handleUDPHeadPing(UDPHeadPing ping, DatagramPacket datagram) {
+    private void handleHeadPing(HeadPing ping, DatagramPacket datagram) {
     	
 
-    	//since this message can arrive through udp and is handled by 
-    	//single thread, the access is not synchronized
     	InetAddress host = datagram.getAddress();
     	int port = datagram.getPort();
     	if (_udpHeadRequests.add(host)) {
-    		UDPHeadPong pong = new UDPHeadPong(ping);
+    		HeadPong pong = new HeadPong(ping);
     		if (ping.getAddress() == null)
     			UDPService.instance().send(pong, host, port);
-    		else
-    			UDPService.instance().send(pong,ping.getAddress());
+    		else 
+    			if (pong.hasFile() && !pong.isBusy())
+    				UDPService.instance().send(pong,ping.getAddress());
     	}
+    }
+    
+    /**
+     * replies to a head ping that came through tcp
+     * unless the same person has pinged us too recently.
+     * 
+     * if the ping requests to be forwarded, do so only if we 
+     * have the file and are not busy.
+     */
+    private void handleHeadPing(HeadPing ping, ManagedConnection conn) {
+    	
+    	if (_udpHeadRequests.add(conn.getInetAddress())) {
+    		HeadPong pong = new HeadPong(ping);
+    		if (ping.getAddress() == null)
+    			conn.send(pong);
+    		else
+    			if (pong.hasFile() && !pong.isBusy())
+    				UDPService.instance().send(pong,ping.getAddress());
+    	}
+    	
     }
     
     private static class QueryResponseBundle {
@@ -2650,7 +2677,8 @@ public abstract class MessageRouter {
                 return;
             // busy hosts don't want to receive any queries, if this node is not
             // busy, we need to reset the HopsFlow value
-            boolean isBusy = RouterService.getUploadManager().isBusy();
+            boolean isBusy = RouterService.getUploadManager().isBusy() &&
+		RouterService.getUploadManager().getNumQueuedUploads() > 0;
             
             // state changed? don't bother the ultrapeer with information
             // that it already knows. we need to inform new ultrapeers, though.

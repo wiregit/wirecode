@@ -336,10 +336,10 @@ public abstract class VendorMessage extends Message {
         	return new UDPCrawlerPong(guid,ttl,hops,version,restOf);
         if ((selector == F_UDP_HEAD_PING) &&
         		(Arrays.equals(vendorID, F_LIME_VENDOR_ID)))
-        	return new UDPHeadPing(guid,ttl,hops,version,restOf);
+        	return new HeadPing(guid,ttl,hops,version,restOf);
         if ((selector == F_UDP_HEAD_PONG) &&
         		(Arrays.equals(vendorID, F_LIME_VENDOR_ID)))
-        	return new UDPHeadPong(guid,ttl,hops,version,restOf);
+        	return new HeadPong(guid,ttl,hops,version,restOf);
         
         if( RECORD_STATS )
                 ReceivedErrorStat.VENDOR_UNRECOGNIZED.incrementStat();

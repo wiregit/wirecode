@@ -176,7 +176,8 @@ public class StandardMessageRouter extends MessageRouter {
         // slots are full.  This allows some spillover into our queue that
         // is necessary because we're always returning more total hits than
         // we have slots available.
-        if(RouterService.getUploadManager().isBusy())  {
+        if(RouterService.getUploadManager().isBusy() &&
+		RouterService.getUploadManager().getNumQueuedUploads() > 0)  {
             return false;
         }
                                                 

@@ -1,4 +1,3 @@
-
 package com.limegroup.gnutella.messages.vendor;
 
 import java.io.*;
@@ -12,7 +11,7 @@ import com.limegroup.gnutella.util.*;
 import com.sun.java.util.collections.*;
 
 /**
- * a response to an UDPHeadPing.  It is a trimmed down version of the standard HEAD response,
+ * a response to an HeadPing.  It is a trimmed down version of the standard HEAD response,
  * since we are trying to keep the sizes of the udp packets small.
  * 
  * This message can also be used for punching firewalls if the ping requests so. 
@@ -44,7 +43,7 @@ import com.sun.java.util.collections.*;
  * n*8 bytes - n intervals (if requested && file partial && fits in packet)
  * the rest - altlocs (if requested) 
  */
-public class UDPHeadPong extends VendorMessage {
+public class HeadPong extends VendorMessage {
 	
 	/**
 	 * cache references to the upload manager and file manager for
@@ -115,7 +114,7 @@ public class UDPHeadPong extends VendorMessage {
 	/**
 	 * creates a message object with data from the network.
 	 */
-	protected UDPHeadPong(byte[] guid, byte ttl, byte hops,
+	protected HeadPong(byte[] guid, byte ttl, byte hops,
 			 int version, byte[] payload)
 			throws BadPacketException {
 		super(guid, ttl, hops, F_LIME_VENDOR_ID, F_UDP_HEAD_PONG, version, payload);
@@ -137,7 +136,7 @@ public class UDPHeadPong extends VendorMessage {
 		DataInputStream dais = new DataInputStream(new ByteArrayInputStream(payload));
 		
 		//read and mask the features
-		_features = (byte) (dais.readByte() & UDPHeadPing.FEATURE_MASK);
+		_features = (byte) (dais.readByte() & HeadPing.FEATURE_MASK);
 		
 		//read the response code
 		byte code = dais.readByte();
@@ -164,8 +163,8 @@ public class UDPHeadPong extends VendorMessage {
 		if ((code & COMPLETE_FILE) == COMPLETE_FILE) 
 			_completeFile=true;
 		else 
-			if ( (_features & UDPHeadPing.INTERVALS) == 
-				UDPHeadPing.INTERVALS){
+			if ( (_features & HeadPing.INTERVALS) == 
+				HeadPing.INTERVALS){
 			
 				short rangeLength=dais.readShort();
 				byte [] ranges = new byte [rangeLength];
@@ -174,7 +173,7 @@ public class UDPHeadPong extends VendorMessage {
 			}
 		
 		//parse any included altlocs
-		if ((_features & UDPHeadPing.ALT_LOCS) == UDPHeadPing.ALT_LOCS) {
+		if ((_features & HeadPing.ALT_LOCS) == HeadPing.ALT_LOCS) {
 			int size = dais.readShort();
 			byte [] altlocs = new byte[size];
 			dais.readFully(altlocs);
@@ -190,7 +189,7 @@ public class UDPHeadPong extends VendorMessage {
 	/**
 	 * creates a message object as a response to a udp head request.
 	 */
-	public UDPHeadPong(UDPHeadPing ping) {
+	public HeadPong(HeadPing ping) {
 		super(F_LIME_VENDOR_ID, F_UDP_HEAD_PONG, VERSION,
 		 		derivePayload(ping));
 		setGUID(new GUID(ping.getGUID()));
@@ -202,7 +201,7 @@ public class UDPHeadPong extends VendorMessage {
 	 * of the message.
 	 * @param ping the original UDP head ping to respond to
 	 */
-	private static byte [] derivePayload(UDPHeadPing ping)  {
+	private static byte [] derivePayload(HeadPing ping)  {
 		
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		CountingOutputStream caos = new CountingOutputStream(baos);
@@ -312,9 +311,9 @@ public class UDPHeadPong extends VendorMessage {
 		//update the flags now.
 		
 		if (didNotSendRanges)
-			ret[0] = (byte) (ret[0] & ~UDPHeadPing.INTERVALS);
+			ret[0] = (byte) (ret[0] & ~HeadPing.INTERVALS);
 		if (didNotSendAltLocs)
-			ret[0] = (byte) (ret[0] & ~UDPHeadPing.ALT_LOCS);
+			ret[0] = (byte) (ret[0] & ~HeadPing.ALT_LOCS);
 		
 		return ret;
 	}
@@ -369,6 +368,10 @@ public class UDPHeadPong extends VendorMessage {
 	
 	public int getQueueStatus() {
 		return _queueStatus;
+	}
+	
+	public boolean isBusy() {
+		return _queueStatus >= BUSY;
 	}
 }
 	

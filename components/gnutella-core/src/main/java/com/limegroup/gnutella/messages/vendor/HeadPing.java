@@ -1,4 +1,3 @@
-
 package com.limegroup.gnutella.messages.vendor;
 
 import com.limegroup.gnutella.*;
@@ -19,7 +18,7 @@ import java.io.UnsupportedEncodingException;
  * 
  */
 
-public class UDPHeadPing extends VendorMessage {
+public class HeadPing extends VendorMessage {
 	public static final int VERSION = 1;
 	
 	public static final int PLAIN = 0x0;
@@ -38,7 +37,7 @@ public class UDPHeadPing extends VendorMessage {
 	/**
 	 * creates a message object with data from the network.
 	 */
-	protected UDPHeadPing(byte[] guid, byte ttl, byte hops,
+	protected HeadPing(byte[] guid, byte ttl, byte hops,
 			 int version, byte[] payload)
 			throws BadPacketException {
 		super(guid, ttl, hops, F_LIME_VENDOR_ID, F_UDP_HEAD_PING, version, payload);
@@ -59,12 +58,8 @@ public class UDPHeadPing extends VendorMessage {
 		
 		
 		//parse the urn string.
-		String urnStr = null;
-		try {
-			urnStr = new String(payload,1,41,"US-ASCII");
-		}catch(UnsupportedEncodingException impossible) {
-			ErrorService.error(impossible);
-		}
+		String urnStr = new String(payload,1,41);
+		
 		
 		if (!URN.isUrn(urnStr))
 			throw new BadPacketException("udp head request did not contain an urn");
@@ -93,7 +88,7 @@ public class UDPHeadPing extends VendorMessage {
 	 * @param sha1 the urn to get information about.
 	 * @param features which features to include in the response
 	 */
-	public UDPHeadPing(URN urn, int features) {
+	public HeadPing(URN urn, int features) {
 		 super(F_LIME_VENDOR_ID, F_UDP_HEAD_PING, VERSION,
 		 		derivePayload(urn, features,null));
 		 _urn = urn;
@@ -107,7 +102,7 @@ public class UDPHeadPing extends VendorMessage {
 	 * @param urn the sha1 to provide information about
 	 * @param address the address to send the reply to.
 	 */
-	public UDPHeadPing(URN urn, IpPort address) {
+	public HeadPing(URN urn, IpPort address) {
 		super(F_LIME_VENDOR_ID, F_UDP_HEAD_PING, VERSION,
 		 		derivePayload(urn, FIREWALL_REDIRECT,address));
 		 _urn = urn;
@@ -118,7 +113,7 @@ public class UDPHeadPing extends VendorMessage {
 	/**
 	 * creates a plain udp head request
 	 */
-	public UDPHeadPing (URN urn) {
+	public HeadPing (URN urn) {
 		this(urn, PLAIN);
 	}
 	
