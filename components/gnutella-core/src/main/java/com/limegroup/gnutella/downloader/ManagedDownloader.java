@@ -3223,8 +3223,9 @@ public class ManagedDownloader implements Downloader, Serializable {
         //      I think it's ok, though it could result in >100% in the GUI
         HTTPDownloader biggest = null;
         synchronized (this) {
-            if (dloaders.isEmpty() && !commonOutFile.isComplete()) {
-                Assert.silent(commonOutFile.hasFreeBlocksToAssign());
+            if (dloaders.isEmpty() && 
+                    !commonOutFile.isComplete() &&
+                    commonOutFile.hasFreeBlocksToAssign()) {
                 assignWhite(dloader,http11);
                 return;
             }
