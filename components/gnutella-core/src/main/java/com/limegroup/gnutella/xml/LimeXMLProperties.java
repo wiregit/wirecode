@@ -36,6 +36,9 @@ public class LimeXMLProperties
      */
     private static LimeXMLProperties _instance = new LimeXMLProperties();
 
+    /**
+     * Name of the file that contains the properties used by this class 
+     */
     private static final String XML_PROPS_FILENAME = "xml.props";
     
     //Property names and defualt values
@@ -45,6 +48,10 @@ public class LimeXMLProperties
      */
     private static final String XML_SCHEMA_DIR = "XML_SCHEMA_DIR";
 
+    /**
+     * The property that denotes the directory in which XML Documents will be 
+     * kept for querying and responding.
+     */
     private static final String XML_DOCS_DIR = "XML_DOCS_DIR";
 
 
@@ -55,6 +62,10 @@ public class LimeXMLProperties
     private static final String XML_SCHEMA_DIR_DEF = "etc" + File.separator + 
                                                 "schemas" + File.separator;
     
+    /**
+     * The name of the directory in which XML Documents will be 
+     * kept for querying and responding.
+     */
     private static final String XML_DOCS_DIR_DEF = "etc" + File.separator + 
                                                 "xml" + File.separator;
     /**
@@ -112,6 +123,18 @@ public class LimeXMLProperties
      */
     private static final String KEYWORD_LIST_FILE_DEF =  "etc"
         + File.separator + "keywords.list";
+    
+    /**
+     * The property that denotes the 
+     * number of query dispatcher threads to be created
+     */
+    private static final String NUM_QUERY_DISPATCHER_THREADS = 
+        "NUM_QUERY_DISPATCHER_THREADS";
+    /**
+     * name of the property that denotes the 
+     * number of query dispatcher threads to be created
+     */
+    private static final int NUM_QUERY_DISPATCHER_THREADS_DEF = 5;
     
     
     /**
@@ -205,6 +228,24 @@ public class LimeXMLProperties
             HTTP_MAPPING_FILE_DEF);
 
         return getPath() + httpMappingFile;   
+    }
+    
+    /**
+     * Returns the number of query dispatcher threads to be created
+     */
+    public int getNumQueryDispatcherThreads()
+    {
+        try
+        {
+            return Integer.parseInt(_properties.getProperty(
+                NUM_QUERY_DISPATCHER_THREADS, 
+                NUM_QUERY_DISPATCHER_THREADS_DEF + ""));
+        }
+        catch(Exception e)
+        {
+            return NUM_QUERY_DISPATCHER_THREADS_DEF;
+        }
+        
     }
     
     /**
