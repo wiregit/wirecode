@@ -521,9 +521,12 @@ public final class HTTPUploader implements Uploader {
 	 * Implements the Uploader interface.
      */
 	public int amountUploaded() {
-	    if(_stateNum == THEX_REQUEST)
-	        return _ostream.getAmountWritten();
-	    else
+	    if(_stateNum == THEX_REQUEST) {
+	        if(_ostream == null)
+	            return 0;
+	        else
+	            return _ostream.getAmountWritten();
+	    } else
 	        return _amountRead;
     }
 	
@@ -534,9 +537,12 @@ public final class HTTPUploader implements Uploader {
 	 * Implements the Uploader interface.
 	 */
 	public int getTotalAmountUploaded() {
-	    if(_stateNum == THEX_REQUEST)
-	        return _ostream.getAmountWritten();
-	    else
+	    if(_stateNum == THEX_REQUEST) {
+	        if(_ostream == null)
+	            return 0;
+	        else
+	            return _ostream.getAmountWritten();
+	    } else
 	        return _totalAmountRead + _amountRead;
     }
 
