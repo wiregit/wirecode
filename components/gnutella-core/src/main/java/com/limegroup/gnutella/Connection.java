@@ -25,7 +25,7 @@ import java.io.*;
  *
  *   //2. Send initial ping request.  The second line is a complete hack
  *   //   hack so that we know responses are for this.
- *   PingRequest pr=new PingRequest(Const.TTL); //Send initial ping.
+ *   PingRequest pr=new PingRequest(SettingsManager.instance().getTTL()); //Send initial ping.
  *   cm.fromMe(pr);
  *   c.send(pr); 
  *
@@ -343,7 +343,7 @@ public class Connection implements Runnable {
 			    if (responses.length > 0) {
 				byte[] guid = m.getGUID();
 				// System.out.println("the guid " + guid);
-				byte ttl = Const.TTL;
+				byte ttl = SettingsManager.instance().getTTL();
 				// System.out.println("the ttl " + ttl);
 				int port = manager.getListeningPort();
 				// System.out.println("the port " + port);

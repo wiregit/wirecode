@@ -116,7 +116,7 @@ public abstract class Message {
 	//2.5 If the length is hopelessly off (this includes lengths >
 	//    than 2^31 bytes, throw an irrecoverable exception to
 	//    cause this connection to be closed.
-	if (length<0 || length>Const.MAX_LENGTH)
+	if (length<0 || length>SettingsManager.instance().getMaxLength())
 	    throw new IOException("Unreasonable message length: "+length);
 
 	//3. Read rest of payload.  This must be done even for bad
@@ -133,9 +133,9 @@ public abstract class Message {
 	
 	//4. Check values.   This catches those TTLs and hops whose
 	//   high bit is set to 0.
-	if (ttl<0 || ttl>Const.MAX_TTL) 
+	if (ttl<0 || ttl>SettingsManager.instance().getMaxTTL()) 
 	    throw new BadPacketException("Unreasonable TTL: "+ttl);
-	if (hops<0 || hops>Const.MAX_TTL) 
+	if (hops<0 || hops>SettingsManager.instance().getMaxTTL()) 
 	    throw new BadPacketException("Unreasonable hops: "+hops);	 
 
 	//Dispatch based on opcode. 

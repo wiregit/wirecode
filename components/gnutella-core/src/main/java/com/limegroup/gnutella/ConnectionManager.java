@@ -32,7 +32,7 @@ public class ConnectionManager implements Runnable {
     /** List of all connections.  This is <i>not</i> synchronized, so you must
      * always hold this' monitor before modifying it. */
     private List /* of Connection */ connections=new ArrayList();
-    public  HostCatcher catcher=new HostCatcher(this,Const.HOSTLIST);
+    public  HostCatcher catcher=new HostCatcher(this,SettingsManager.instance().getHostList());
 
     private int keepAlive=0;
     private ActivityCallback callback;
@@ -71,26 +71,18 @@ public class ConnectionManager implements Runnable {
 	this(6346);
     }  
     
-    /** 
-     *This method is used to get important properties (ClientId for now) at initialization
-     *If the property is not set, a value is given to the property.
-     */
     public void propertyManager(){
-	ClientId = LimeProperties.getProperties().getProperty("clientID");
+	ClientId = SettingsManager.instance().getClientID();
 	if (ClientId == null){
-	    ClientId = new String(Message.makeGuid() );
-	    LimeProperties.getProperties().setProperty("ClientID",ClientId);
+	    ClientId = new String(Message.makeGuid());
+	    SettingsManager.instance().setClientID(ClientId);
 	}
-	String statVal=LimeProperties.getProperties().getProperty("stats");
-	if (statVal==null)
-	    LimeProperties.getProperties().setProperty("stats","off");
-	else {
-	    if (statVal.equals("on"))
-		stats= true;
-	    else 
-		stats= false;
-	}	  
-    }
+	boolean statVal = SettingsManager.instance().getStats();
+	if(statVal)
+	    stats = true;
+	else
+	    stats = false;	
+    }	  
 
     /** 
      * Associate a GUID with this host
@@ -450,7 +442,7 @@ public class ConnectionManager implements Runnable {
      */
     public void shutdown() {
 	try {
-	    catcher.write(Const.HOSTLIST);
+	    catcher.write(SettingsManager.instance().getHostList());
 	} catch (IOException e) { }
     }
 
@@ -503,7 +495,7 @@ class ConnectionFetcher extends Thread {
 		    //Send initial ping request.  HACK: use routeTable to
 		    //designate that replies are for me.  Do this *before*
 		    //sending message.
-		    PingRequest pr=new PingRequest(Const.TTL);
+		    PingRequest pr=new PingRequest(SettingsManager.instance().getTTL());
 		    manager.fromMe(pr);
 		    c.send(pr); 
 		} catch (IOException e) {

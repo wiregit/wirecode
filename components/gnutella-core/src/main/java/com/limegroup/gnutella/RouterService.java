@@ -33,12 +33,12 @@ public class RouterService
      */
     public void initManager()
     {
-	manager.setKeepAlive(Const.KEEP_ALIVE);
+	manager.setKeepAlive(SettingsManager.instance().getKeepAlive());
 	Thread t=new Thread(manager);
 	t.setDaemon(true);
 	t.start();	
 	//FileManager.getFileManager().addDirectory("E:/My Music");
-        new LimeProperties("Neutella.props",true);
+        //new LimeProperties("Neutella.props",true);
         manager.propertyManager();
     }
 
@@ -81,7 +81,7 @@ public class RouterService
 	    c.connect();
 	    c.setManager(manager);
 	    manager.add(c); //calls ActivityCallback.updateConnection
-	    PingRequest pr=new PingRequest(Const.TTL);
+	    PingRequest pr=new PingRequest(SettingsManager.instance().getTTL());
 	    manager.fromMe(pr);
 	    c.send(pr);
 	    Thread tc=new Thread(c);
@@ -198,7 +198,7 @@ public class RouterService
     
 	//Send ping to everyone.  Call to fromMe() notes that replies
 	//are to me.
-	PingRequest pr=new PingRequest(Const.TTL);
+	PingRequest pr=new PingRequest(SettingsManager.instance().getTTL());
 	manager.fromMe(pr);
 	try {
 	    manager.sendToAll(pr);
@@ -214,7 +214,7 @@ public class RouterService
      * want to wrap the bytes with a GUID object for simplicity.)
      */
     public byte[] query(String query, int minSpeed) {
-	QueryRequest qr=new QueryRequest(Const.TTL, minSpeed, query);
+	QueryRequest qr=new QueryRequest(SettingsManager.instance().getTTL(), minSpeed, query);
 	manager.fromMe(qr);
 	try {
 	    manager.sendToAll(qr);
