@@ -413,10 +413,10 @@ public final class HandshakeResponse {
      *  headers
      */
     static HandshakeResponse 
-        createRejectIncomingResponse(HandshakeResponse hr) {
+        createUltrapeerRejectIncomingResponse(HandshakeResponse hr) {
         return new HandshakeResponse(HandshakeResponse.SLOTS_FULL,
-                                     HandshakeResponse.SLOTS_FULL_MESSAGE,
-                                     createXTryHeader(hr));        
+            HandshakeResponse.SLOTS_FULL_MESSAGE,
+            addXTryHeader(hr, new Properties()));        
     }
 
 
@@ -451,8 +451,8 @@ public final class HandshakeResponse {
     static HandshakeResponse 
         createLeafRejectIncomingResponse(HandshakeResponse hr) {
         return new HandshakeResponse(HandshakeResponse.SLOTS_FULL,
-                                     HandshakeResponse.SHIELDED_MESSAGE,
-                                     createXTryHeader(hr));        
+            HandshakeResponse.SHIELDED_MESSAGE,
+            addXTryHeader(hr, new Properties()));  
     }
 
     /**
@@ -565,18 +565,6 @@ public final class HandshakeResponse {
     
         headers.put(HeaderNames.X_TRY_ULTRAPEERS, createEndpointString(hosts));
         return headers;
-    }
-    
-    /**
-     * Utility method for creating a set of headers with the X-Try-Ultrapeers
-     * header set according to the headers from the remote host.
-     * 
-     * @param hr the <tt>HandshakeResponse</tt> of the incoming request
-     * @return a new <tt>Properties</tt> instance with the X-Try-Ultrapeers
-     *  header set according to the incoming headers from the remote host
-     */
-    private static Properties createXTryHeader(HandshakeResponse hr) {
-        return addXTryHeader(hr, new Properties());
     }
     
 
