@@ -16,7 +16,11 @@ public class SimppSettingsManager {
 
     /**
      * A cache of the values we had for the settings before the simpp settings
-     * were applied to them
+     * were applied to them.  
+     * <p>
+     * Note: This is a utility added to allow LimeWire to revert to non-simpp
+     * settings, ie. the user pref settings. 
+     * Note 2: See note in revertToUserPrefs method
      */
     private final HashMap /* Setting -> String*/ _userPrefs;
 
@@ -120,7 +124,12 @@ public class SimppSettingsManager {
     
     /**
      * Call this method if you want to restore the values of the settings the
-     * activateSimppSettings method set
+     * activateSimppSettings method set. 
+     * 
+     * Note: As of now, nothing will cause this method to be called, we could
+     * save a little memory by not having this method, and not having the
+     * _userPrefs map around, but it may be useful...who knows where this code
+     * will go...
      */
     public void revertToUserPrefs() {
         if(_isDefault) //we are already at default values
