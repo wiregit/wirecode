@@ -49,6 +49,11 @@ public class ManagedConnectionBufferTest extends com.limegroup.gnutella.util.Bas
 		out.initialize();
 		in = acceptor.accept();
     }
+    
+    public void tearDown() throws Exception {
+        in.close();
+        out.close();
+    }
 
     public void testSendFlush() 
             throws IOException, BadPacketException {
