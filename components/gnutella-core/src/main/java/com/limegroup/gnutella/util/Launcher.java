@@ -103,8 +103,13 @@ public class Launcher {
 			if(nativeLauncherLibrary.exists()) return;
 
 			ClassLoader cl = Launcher.class.getClassLoader();
-			InputStream is = cl.getResourceAsStream(WINDOWS_LIBRARY_NAME); 
+			InputStream is;
+            if (cl!=null)
+                is=cl.getResourceAsStream(WINDOWS_LIBRARY_NAME); 
+            else //Can happen if Launcher loaded by system class loader
+                is=ClassLoader.getSystemResourceAsStream(WINDOWS_LIBRARY_NAME);
 			if(is == null) return;
+
 			try {
 				FileOutputStream fos = new FileOutputStream(nativeLauncherLibrary);
 				int c;
