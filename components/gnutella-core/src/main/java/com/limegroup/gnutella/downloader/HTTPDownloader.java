@@ -576,9 +576,15 @@ class PushRequestedFile {
 	PushRequestedFile prf=(PushRequestedFile)o;
 	return Arrays.equals(clientGUID, prf.clientGUID)	    
 	    && filename.equals(prf.filename)
-	    //Because of the following line, hosts that used faked 
-	    //IP addresses will not be able to connect to you.
-  	    && Arrays.equals(ip, prf.ip)
+	    //If the following line is uncommented,
+	    //the IP address on the socket must match that 
+	    //of the query reply.  But this will almost
+	    //always fail if the remote host is behind a firewall--
+	    //which is the whole reason to use pushes in the
+	    //first place!  Yes, this is a potential security
+	    //flaw.  TODO: We should really allow users to adjust
+	    //whether they want to take the risk.
+//    	    && Arrays.equals(ip, prf.ip)
 	    && index==prf.index;
     }
     
