@@ -1,9 +1,9 @@
 package com.limegroup.gnutella.util;
 
-import junit.framework.Test;
-
 import java.util.Iterator;
 import java.util.NoSuchElementException;
+
+import junit.framework.Test;
 
 /**
  * Tests TrieNode.

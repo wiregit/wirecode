@@ -1,12 +1,18 @@
 
 package com.limegroup.gnutella.metadata;
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
+import java.io.RandomAccessFile;
+import java.io.UnsupportedEncodingException;
+import java.util.Iterator;
+import java.util.Vector;
+
 import com.limegroup.gnutella.ByteOrder;
-import com.limegroup.gnutella.ErrorService;
-import com.limegroup.gnutella.xml.*;
-import com.limegroup.gnutella.util.*;
-import java.util.*;
-import de.vdheide.mp3.*;
+
+import de.vdheide.mp3.ID3v2;
+import de.vdheide.mp3.ID3v2Exception;
+import de.vdheide.mp3.ID3v2Frame;
+import de.vdheide.mp3.NoID3v2TagException;
 
 /**
  * Provides a utility method to read ID3 Tag information from MP3

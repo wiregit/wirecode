@@ -1,13 +1,27 @@
 package com.limegroup.gnutella.messages;
 
-import com.limegroup.gnutella.*;
-import com.limegroup.gnutella.guess.*;
-import com.limegroup.gnutella.statistics.*;
-import com.limegroup.gnutella.settings.ApplicationSettings;
-import java.io.*;
-import java.net.*;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.Serializable;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 
-import com.limegroup.gnutella.util.*;
+import com.limegroup.gnutella.Assert;
+import com.limegroup.gnutella.ByteOrder;
+import com.limegroup.gnutella.Endpoint;
+import com.limegroup.gnutella.ErrorService;
+import com.limegroup.gnutella.RouterService;
+import com.limegroup.gnutella.Statistics;
+import com.limegroup.gnutella.UDPService;
+import com.limegroup.gnutella.guess.QueryKey;
+import com.limegroup.gnutella.settings.ApplicationSettings;
+import com.limegroup.gnutella.statistics.DroppedSentMessageStatHandler;
+import com.limegroup.gnutella.statistics.ReceivedErrorStat;
+import com.limegroup.gnutella.statistics.SentMessageStatHandler;
+import com.limegroup.gnutella.util.CommonUtils;
+import com.limegroup.gnutella.util.IpPort;
+import com.limegroup.gnutella.util.NetworkUtils;
 
 /**
  * A ping reply message, aka, "pong".  This implementation provides a way

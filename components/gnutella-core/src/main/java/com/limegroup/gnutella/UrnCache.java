@@ -1,23 +1,21 @@
 package com.limegroup.gnutella;
 
+import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
-
-import com.limegroup.gnutella.util.CommonUtils;
-import com.limegroup.gnutella.util.DataUtils;
-import com.limegroup.gnutella.util.ConverterObjectInputStream;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
+
+import com.limegroup.gnutella.util.CommonUtils;
+import com.limegroup.gnutella.util.ConverterObjectInputStream;
 
 /**
  * This class contains a systemwide URN cache that persists file URNs (hashes)

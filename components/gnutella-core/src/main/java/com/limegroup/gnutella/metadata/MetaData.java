@@ -1,9 +1,11 @@
 
 package com.limegroup.gnutella.metadata;
 
-import com.limegroup.gnutella.xml.LimeXMLUtils;
+import java.io.File;
+import java.io.IOException;
 import java.util.List;
-import java.io.*;
+
+import com.limegroup.gnutella.xml.LimeXMLUtils;
 
 /**
  * subclass for all data objects that contain the metadata 

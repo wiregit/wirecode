@@ -1,16 +1,29 @@
 package com.limegroup.gnutella;
 
-import java.io.*;
-import java.net.*;
-import com.limegroup.gnutella.messages.*;
-import com.limegroup.gnutella.xml.*;
-import com.limegroup.gnutella.util.*;
-import com.limegroup.gnutella.messages.vendor.*;
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.DatagramPacket;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Set;
+
+import com.limegroup.gnutella.messages.FeatureSearchData;
+import com.limegroup.gnutella.messages.PingReply;
+import com.limegroup.gnutella.messages.PingRequest;
+import com.limegroup.gnutella.messages.QueryReply;
+import com.limegroup.gnutella.messages.QueryRequest;
+import com.limegroup.gnutella.messages.vendor.ReplyNumberVendorMessage;
 import com.limegroup.gnutella.settings.ChatSettings;
-import com.limegroup.gnutella.settings.ConnectionSettings;
-import com.limegroup.gnutella.statistics.RoutedQueryStat;
 import com.limegroup.gnutella.statistics.ReceivedMessageStat;
-import java.util.*;
+import com.limegroup.gnutella.statistics.RoutedQueryStat;
+import com.limegroup.gnutella.util.DataUtils;
+import com.limegroup.gnutella.util.NetworkUtils;
+import com.limegroup.gnutella.xml.LimeXMLDocumentHelper;
+import com.limegroup.gnutella.xml.LimeXMLUtils;
 
 /**
  * This class is the message routing implementation for TCP messages.

@@ -1,7 +1,8 @@
 
 package com.limegroup.gnutella.util;
 
-import java.util.*;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * a Round Robin queue where elements are unique.

@@ -1,20 +1,48 @@
 package com.limegroup.gnutella.uploader;
 
-import java.io.*;
-import java.net.*;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.InetAddress;
+import java.net.Socket;
+import java.net.UnknownHostException;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Set;
 import java.util.StringTokenizer;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import java.util.*;
-import com.limegroup.gnutella.*;
-import com.limegroup.gnutella.http.*;
-import com.limegroup.gnutella.statistics.*;
-import com.limegroup.gnutella.util.*;
-import com.limegroup.gnutella.settings.*;
-import com.limegroup.gnutella.altlocs.*;
+import com.limegroup.gnutella.Assert;
+import com.limegroup.gnutella.BandwidthTrackerImpl;
+import com.limegroup.gnutella.ByteReader;
+import com.limegroup.gnutella.Constants;
+import com.limegroup.gnutella.FileDesc;
+import com.limegroup.gnutella.InsufficientDataException;
+import com.limegroup.gnutella.RouterService;
+import com.limegroup.gnutella.URN;
+import com.limegroup.gnutella.UploadManager;
+import com.limegroup.gnutella.Uploader;
+import com.limegroup.gnutella.altlocs.AlternateLocation;
+import com.limegroup.gnutella.altlocs.AlternateLocationCollection;
+import com.limegroup.gnutella.altlocs.AlternateLocationCollector;
+import com.limegroup.gnutella.altlocs.DirectAltLoc;
+import com.limegroup.gnutella.altlocs.PushAltLoc;
+import com.limegroup.gnutella.http.HTTPConstants;
+import com.limegroup.gnutella.http.HTTPHeaderName;
+import com.limegroup.gnutella.http.HTTPMessage;
+import com.limegroup.gnutella.http.HTTPRequestMethod;
+import com.limegroup.gnutella.http.HTTPUtils;
+import com.limegroup.gnutella.http.ProblemReadingHeaderException;
+import com.limegroup.gnutella.settings.SharingSettings;
+import com.limegroup.gnutella.statistics.BandwidthStat;
 import com.limegroup.gnutella.udpconnect.UDPConnection;
+import com.limegroup.gnutella.util.CountingOutputStream;
+import com.limegroup.gnutella.util.NetworkUtils;
+import com.limegroup.gnutella.util.StringUtils;
 
 /**
  * Maintains state for an HTTP upload request.  This class follows the

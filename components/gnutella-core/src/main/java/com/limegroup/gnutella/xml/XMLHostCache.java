@@ -1,8 +1,13 @@
 package com.limegroup.gnutella.xml;
 
-import java.io.*;
-import java.util.*;
-import java.net.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStream;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+import java.util.ArrayList;
+import java.util.Properties;
+import java.util.StringTokenizer;
 
 /** This class provides IP addresses for specialized gnutella content
     deliverers.

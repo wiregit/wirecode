@@ -1,15 +1,20 @@
 package com.limegroup.gnutella.util;
 
-import junit.framework.*;
-import java.io.*;
-import java.net.*;
-import com.limegroup.gnutella.stubs.*;
-import com.limegroup.gnutella.*;
-import com.limegroup.gnutella.http.*;
-import com.limegroup.gnutella.settings.*;
-import com.limegroup.gnutella.util.*;
-import org.apache.commons.httpclient.*;
-import org.apache.commons.httpclient.methods.*;
+import java.io.IOException;
+import java.net.Socket;
+
+import junit.framework.Test;
+
+import org.apache.commons.httpclient.HttpClient;
+import org.apache.commons.httpclient.HttpMethod;
+import org.apache.commons.httpclient.SimpleHttpConnectionManager;
+import org.apache.commons.httpclient.methods.GetMethod;
+
+import com.limegroup.gnutella.RouterService;
+import com.limegroup.gnutella.http.HTTPHeaderName;
+import com.limegroup.gnutella.http.HttpClientManager;
+import com.limegroup.gnutella.settings.ConnectionSettings;
+import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 
 
 public class ProxyTest extends BaseTestCase {

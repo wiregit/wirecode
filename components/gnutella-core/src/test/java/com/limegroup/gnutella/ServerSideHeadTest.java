@@ -1,16 +1,24 @@
 package com.limegroup.gnutella;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
+import java.net.InetAddress;
+import java.util.Arrays;
+
 import junit.framework.Test;
 
-import com.limegroup.gnutella.util.*;
-import com.limegroup.gnutella.stubs.*;
-import com.limegroup.gnutella.settings.*;
-import com.limegroup.gnutella.messages.vendor.*;
-import com.limegroup.gnutella.messages.*;
-
-import java.net.*;
-import java.io.*;
-import java.util.*;
+import com.limegroup.gnutella.messages.Message;
+import com.limegroup.gnutella.messages.vendor.HeadPing;
+import com.limegroup.gnutella.messages.vendor.HeadPong;
+import com.limegroup.gnutella.settings.ConnectionSettings;
+import com.limegroup.gnutella.stubs.ActivityCallbackStub;
+import com.limegroup.gnutella.stubs.FileDescStub;
+import com.limegroup.gnutella.stubs.FileManagerStub;
+import com.limegroup.gnutella.util.BaseTestCase;
+import com.limegroup.gnutella.util.PrivilegedAccessor;
 
 /**
  * tests the server side handling of head pings through UDP.

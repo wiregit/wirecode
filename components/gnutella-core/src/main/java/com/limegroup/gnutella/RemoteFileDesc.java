@@ -1,18 +1,27 @@
 package com.limegroup.gnutella;
 
-import java.io.*;
-import java.util.*;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.Serializable;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Set;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import com.limegroup.gnutella.altlocs.AlternateLocation;
 import com.limegroup.gnutella.downloader.URLRemoteFileDesc;
-import com.limegroup.gnutella.xml.*;
-import com.limegroup.gnutella.http.*;
-import com.limegroup.gnutella.settings.ConnectionSettings;
-import com.limegroup.gnutella.util.*;
-import com.bitzi.util.Base32;
-import java.net.*;
-
-import org.apache.commons.logging.LogFactory;
-import org.apache.commons.logging.Log;
+import com.limegroup.gnutella.http.HTTPConstants;
+import com.limegroup.gnutella.util.DataUtils;
+import com.limegroup.gnutella.util.IntervalSet;
+import com.limegroup.gnutella.util.IpPort;
+import com.limegroup.gnutella.util.NetworkUtils;
+import com.limegroup.gnutella.xml.LimeXMLDocument;
 
 /**
  * A reference to a single file on a remote machine.  In this respect

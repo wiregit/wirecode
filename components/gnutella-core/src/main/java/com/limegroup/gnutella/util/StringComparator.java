@@ -1,7 +1,7 @@
 package com.limegroup.gnutella.util;
 
-import java.util.Comparator;
 import java.io.Serializable;
+import java.util.Comparator;
 
 /**
  * Compares two Strings via String.compareTo(String).  Useful for storing Java

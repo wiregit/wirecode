@@ -2,6 +2,7 @@
 package com.limegroup.gnutella.settings;
 
 import java.util.Properties;
+
 import com.limegroup.gnutella.util.StringUtils;
 
 /**

@@ -13,12 +13,14 @@
  */
 package com.limegroup.gnutella.security;
 
-import com.limegroup.gnutella.util.CommonUtils;
+import java.io.File;
+import java.io.FileInputStream;
+import java.security.MessageDigest;
+
+import junit.framework.Test;
 
 import com.limegroup.gnutella.util.BaseTestCase;
-import java.security.*;
-import junit.framework.Test;
-import java.io.*;
+import com.limegroup.gnutella.util.CommonUtils;
 
 public class SHA1Test extends BaseTestCase {
     

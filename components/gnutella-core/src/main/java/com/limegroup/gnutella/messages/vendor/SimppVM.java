@@ -1,6 +1,6 @@
 package com.limegroup.gnutella.messages.vendor;
 
-import com.limegroup.gnutella.messages.*;
+import com.limegroup.gnutella.messages.BadPacketException;
 
 public final class SimppVM extends VendorMessage {
     

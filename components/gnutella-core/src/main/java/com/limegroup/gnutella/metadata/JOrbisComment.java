@@ -31,15 +31,26 @@
  */
 package com.limegroup.gnutella.metadata;
 
-import java.io.*;
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 
-import com.jcraft.jogg.*;
-import com.jcraft.jorbis.*;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
-import org.apache.commons.logging.*;
-
+import com.jcraft.jogg.Packet;
+import com.jcraft.jogg.Page;
+import com.jcraft.jogg.StreamState;
+import com.jcraft.jogg.SyncState;
+import com.jcraft.jorbis.Comment;
+import com.jcraft.jorbis.Info;
 import com.limegroup.gnutella.ErrorService;
-import com.limegroup.gnutella.util.*;
+import com.limegroup.gnutella.util.FileUtils;
 
 
 public class JOrbisComment {

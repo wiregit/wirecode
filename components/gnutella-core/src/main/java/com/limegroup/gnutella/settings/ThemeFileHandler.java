@@ -1,12 +1,7 @@
 package com.limegroup.gnutella.settings;
 
-import com.limegroup.gnutella.util.*;
-import com.limegroup.gnutella.*;
-import java.io.*;
-import java.util.Properties;
-import java.util.Enumeration;
-import java.util.zip.*;
-import java.awt.*;
+import java.awt.Color;
+import java.io.File;
 
 /**
  * This class contains key/value pairs for the current "theme."  The

@@ -1,12 +1,12 @@
 package com.limegroup.gnutella.xml;
 
 import java.io.File;
+import java.util.Iterator;
+import java.util.List;
 
 import com.limegroup.gnutella.FileDesc;
 import com.limegroup.gnutella.Response;
 import com.limegroup.gnutella.RouterService;
-import java.util.List;
-import java.util.Iterator;
 
 
 /**

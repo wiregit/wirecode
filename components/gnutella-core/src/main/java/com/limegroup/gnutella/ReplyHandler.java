@@ -1,10 +1,15 @@
 package com.limegroup.gnutella;
 
-import com.limegroup.gnutella.messages.*;
-import java.util.*;
-import com.limegroup.gnutella.messages.vendor.*;
-import java.io.*;
-import java.net.*;
+import java.io.IOException;
+import java.net.InetAddress;
+import java.util.Set;
+
+import com.limegroup.gnutella.messages.Message;
+import com.limegroup.gnutella.messages.PingReply;
+import com.limegroup.gnutella.messages.PushRequest;
+import com.limegroup.gnutella.messages.QueryReply;
+import com.limegroup.gnutella.messages.vendor.SimppVM;
+import com.limegroup.gnutella.messages.vendor.StatisticVendorMessage;
 
 /**
  * An interface for those things that handle replies and thus are placed

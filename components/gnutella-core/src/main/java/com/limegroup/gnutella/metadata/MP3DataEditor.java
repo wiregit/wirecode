@@ -6,24 +6,24 @@ import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.io.UnsupportedEncodingException;
-
-import com.limegroup.gnutella.xml.*;
-import com.limegroup.gnutella.util.*;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Vector;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
+import com.limegroup.gnutella.util.FileUtils;
+import com.limegroup.gnutella.xml.LimeXMLReplyCollection;
+import com.limegroup.gnutella.xml.LimeXMLUtils;
+
 import de.vdheide.mp3.ID3v2;
 import de.vdheide.mp3.ID3v2DecompressionException;
 import de.vdheide.mp3.ID3v2Exception;
 import de.vdheide.mp3.ID3v2Frame;
 import de.vdheide.mp3.NoID3v2TagException;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 /**
  * an editor specifically for mp3 files with id3 tags

@@ -1,12 +1,28 @@
 package com.limegroup.gnutella.udpconnect;
 
-import java.io.*;
-import java.net.*;
-import java.util.*;
-import com.limegroup.gnutella.chat.*;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.InetAddress;
+import java.util.Set;
+
+import com.limegroup.gnutella.ActivityCallback;
+import com.limegroup.gnutella.Connection;
+import com.limegroup.gnutella.Downloader;
+import com.limegroup.gnutella.Endpoint;
+import com.limegroup.gnutella.ErrorCallback;
+import com.limegroup.gnutella.ErrorService;
+import com.limegroup.gnutella.FileDesc;
+import com.limegroup.gnutella.FileManagerEvent;
+import com.limegroup.gnutella.GUID;
+import com.limegroup.gnutella.RemoteFileDesc;
+import com.limegroup.gnutella.RouterService;
+import com.limegroup.gnutella.UDPService;
+import com.limegroup.gnutella.Uploader;
+import com.limegroup.gnutella.chat.Chatter;
+import com.limegroup.gnutella.search.HostData;
 import com.limegroup.gnutella.security.User;
-import com.limegroup.gnutella.search.*;
-import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.util.ManagedThread;
 
 /**

@@ -1,16 +1,24 @@
 package com.limegroup.gnutella;
 
-import com.limegroup.gnutella.util.SystemUtils;
-import com.limegroup.gnutella.util.IntWrapper;
-import com.limegroup.gnutella.http.*; 
-import com.limegroup.gnutella.security.SHA1;
-import com.bitzi.util.*;
-import java.io.*;
-import java.security.*;
-import java.util.Map;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InvalidObjectException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
+import java.net.URL;
+import java.security.MessageDigest;
 import java.util.HashMap;
-import java.net.*;
 import java.util.Locale;
+import java.util.Map;
+
+import com.bitzi.util.Base32;
+import com.limegroup.gnutella.http.HTTPConstants;
+import com.limegroup.gnutella.http.HTTPHeaderValue;
+import com.limegroup.gnutella.security.SHA1;
+import com.limegroup.gnutella.util.IntWrapper;
+import com.limegroup.gnutella.util.SystemUtils;
 
 /**
  * This class represents an individual Uniform Resource Name (URN), as

@@ -1,7 +1,7 @@
 package com.limegroup.gnutella;
 
-import com.limegroup.gnutella.messages.*;
-import com.limegroup.gnutella.settings.*;
+import com.limegroup.gnutella.messages.PingRequest;
+import com.limegroup.gnutella.settings.PingPongSettings;
 import com.limegroup.gnutella.util.ManagedThread;
 
 /**

@@ -1,7 +1,9 @@
 package com.limegroup.gnutella.downloader;
 
-import com.limegroup.gnutella.*;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+
+import com.limegroup.gnutella.Endpoint;
 
 /**
  * This class keeps track of chattable <tt>HTTPDownloader</tt> instances for

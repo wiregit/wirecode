@@ -1,11 +1,19 @@
 package com.limegroup.gnutella.messages.vendor;
 
-import java.io.*;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Set;
+
 import com.limegroup.gnutella.ByteOrder;
-import com.limegroup.gnutella.messages.BadPacketException;
-import com.limegroup.gnutella.statistics.*;
-import java.util.*;
 import com.limegroup.gnutella.ErrorService;
+import com.limegroup.gnutella.messages.BadPacketException;
+import com.limegroup.gnutella.statistics.SentMessageStatHandler;
 
 /** The message that lets other know what messages you support.  Everytime you
  *  add a subclass of VendorMessage you should modify this class (assuming your

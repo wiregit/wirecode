@@ -10,7 +10,6 @@
 package com.limegroup.gnutella.security;
 
 
-import java.security.*;
 import junit.framework.Test;
 
 public class TigerTest extends com.limegroup.gnutella.util.BaseTestCase {

@@ -1,18 +1,27 @@
 
 package com.limegroup.gnutella;
 
-import com.limegroup.gnutella.util.*;
-import com.limegroup.gnutella.xml.LimeXMLDocument;
-import com.limegroup.gnutella.stubs.*;
-import com.limegroup.gnutella.*;
-import com.limegroup.gnutella.settings.*;
-import com.limegroup.gnutella.messages.*;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
+import java.net.InetAddress;
+import java.net.ServerSocket;
+import java.net.Socket;
+import java.net.UnknownHostException;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 import junit.framework.Test;
 
-import java.util.*;
-import java.net.*;
-import java.io.*;
+import com.limegroup.gnutella.messages.Message;
+import com.limegroup.gnutella.messages.PushRequest;
+import com.limegroup.gnutella.settings.ConnectionSettings;
+import com.limegroup.gnutella.stubs.ActivityCallbackStub;
+import com.limegroup.gnutella.util.BaseTestCase;
+import com.limegroup.gnutella.util.PrivilegedAccessor;
+import com.limegroup.gnutella.xml.LimeXMLDocument;
 
 /**
  * Tests the issuing of Push Request through udp and failover to tcp.

@@ -1,13 +1,19 @@
 package com.limegroup.gnutella;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.InputStream;
+import java.util.Iterator;
+import java.util.Set;
+
+import com.limegroup.gnutella.altlocs.AlternateLocation;
+import com.limegroup.gnutella.altlocs.AlternateLocationCollection;
+import com.limegroup.gnutella.downloader.Interval;
 import com.limegroup.gnutella.downloader.ManagedDownloader;
 import com.limegroup.gnutella.downloader.VerifyingFile;
-import com.limegroup.gnutella.downloader.Interval;
+import com.limegroup.gnutella.http.HTTPHeaderValue;
 import com.limegroup.gnutella.tigertree.HashTree;
-import java.util.*;
-import java.io.*;
-import com.limegroup.gnutella.http.*;
-import com.limegroup.gnutella.altlocs.*;
 
 /**
  * This class extends FileDesc and wraps an incomplete File, 

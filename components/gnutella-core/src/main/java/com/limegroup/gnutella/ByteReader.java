@@ -6,7 +6,8 @@
 
 package com.limegroup.gnutella;
 
-import java.io.*;
+import java.io.IOException;
+import java.io.InputStream;
 
 /** 
  * Provides the readLine method of a BufferedReader with no no automatic

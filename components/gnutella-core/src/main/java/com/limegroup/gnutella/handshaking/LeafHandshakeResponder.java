@@ -1,10 +1,11 @@
 package com.limegroup.gnutella.handshaking;
 
-import com.limegroup.gnutella.*;
-import java.util.Properties;
 import java.io.IOException;
-import com.limegroup.gnutella.statistics.HandshakingStat;
+import java.util.Properties;
+
+import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.settings.ApplicationSettings;
+import com.limegroup.gnutella.statistics.HandshakingStat;
 
 /**
  * A very simple responder to be used by leaf-nodes during the

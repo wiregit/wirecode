@@ -1,11 +1,10 @@
 package com.limegroup.gnutella;
 
 import java.net.InetAddress;
-
-import junit.framework.Test;
-
 import java.util.Arrays;
 import java.util.Hashtable;
+
+import junit.framework.Test;
 
 /**
  * Unit tests for GUID.

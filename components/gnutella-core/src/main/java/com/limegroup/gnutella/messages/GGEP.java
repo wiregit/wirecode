@@ -1,8 +1,16 @@
 package com.limegroup.gnutella.messages;
 
-import java.util.*;
-import java.io.*;
-import com.limegroup.gnutella.*;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeMap;
+
+import com.limegroup.gnutella.ByteOrder;
 import com.limegroup.gnutella.util.COBSUtil;
 import com.limegroup.gnutella.util.Comparators;
 

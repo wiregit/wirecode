@@ -1,9 +1,10 @@
 package com.limegroup.gnutella.util;
 
+import java.util.Iterator;
+
 import junit.framework.Test;
 
 import com.limegroup.gnutella.util.DoublyLinkedList.ListElement;
-import java.util.Iterator;
 
 /**
  * Unit tests for DoublyLinkedList

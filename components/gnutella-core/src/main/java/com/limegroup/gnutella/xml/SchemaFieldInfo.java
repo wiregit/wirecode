@@ -1,6 +1,10 @@
 package com.limegroup.gnutella.xml;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Stores information pertaining to fields (elements) in xml documents

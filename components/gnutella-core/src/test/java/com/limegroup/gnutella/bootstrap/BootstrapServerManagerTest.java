@@ -2,6 +2,9 @@ package com.limegroup.gnutella.bootstrap;
 
 import java.net.URLEncoder;
 import java.text.ParseException;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
 import junit.framework.Test;
 
@@ -11,9 +14,6 @@ import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.util.BaseTestCase;
 import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.PrivilegedAccessor;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
 
 /**
  * Unit tests for BootstrapServerManager.

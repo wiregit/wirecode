@@ -1,18 +1,26 @@
 package com.limegroup.gnutella.search;
 
-import com.limegroup.gnutella.*;
-import com.limegroup.gnutella.messages.*;
-import com.limegroup.gnutella.messages.vendor.*;
-import com.limegroup.gnutella.settings.SearchSettings;
-import com.limegroup.gnutella.util.*;
-import com.limegroup.gnutella.xml.*;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Set;
+import java.util.Vector;
 
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.util.*;
-
-import org.apache.commons.logging.LogFactory;
 import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
+import com.limegroup.gnutella.GUID;
+import com.limegroup.gnutella.RemoteFileDesc;
+import com.limegroup.gnutella.Response;
+import com.limegroup.gnutella.RouterService;
+import com.limegroup.gnutella.UDPService;
+import com.limegroup.gnutella.messages.BadPacketException;
+import com.limegroup.gnutella.messages.QueryReply;
+import com.limegroup.gnutella.messages.QueryRequest;
+import com.limegroup.gnutella.messages.vendor.QueryStatusResponse;
+import com.limegroup.gnutella.settings.SearchSettings;
+import com.limegroup.gnutella.util.NetworkUtils;
 
 /**
  * Handles incoming search results from the network.  This class parses the 

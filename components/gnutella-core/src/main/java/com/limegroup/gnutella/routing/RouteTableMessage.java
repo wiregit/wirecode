@@ -1,9 +1,10 @@
 package com.limegroup.gnutella.routing;
 
-import com.limegroup.gnutella.*;
-import com.limegroup.gnutella.messages.*;
-import com.limegroup.gnutella.util.*;
-import java.io.*;
+import java.io.IOException;
+import java.io.OutputStream;
+
+import com.limegroup.gnutella.messages.BadPacketException;
+import com.limegroup.gnutella.messages.Message;
 
 /**
  * An abstract class representing all variants of the new ROUTE_TABLE_UPDATE

@@ -1,8 +1,9 @@
 package com.limegroup.gnutella;
 
-import com.limegroup.gnutella.downloader.AlreadyDownloadingException;
-import java.util.Iterator;
 import java.io.File;
+import java.util.Iterator;
+
+import com.limegroup.gnutella.downloader.AlreadyDownloadingException;
 
 /**
  * The downloader interface.  The UI maintains a list of Downloader's and uses

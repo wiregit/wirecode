@@ -2,13 +2,13 @@ package com.limegroup.gnutella;
 
 import java.io.File;
 import java.io.FileFilter;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 
 import junit.framework.Test;
 
 import com.limegroup.gnutella.util.CommonUtils;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
 
 /**
  * Tests the public methods of the UrnCache class.

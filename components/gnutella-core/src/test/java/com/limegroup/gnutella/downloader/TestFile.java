@@ -1,17 +1,15 @@
 package com.limegroup.gnutella.downloader;
 
 import java.io.File;
-import java.io.IOException;
-import java.io.RandomAccessFile;
-import java.io.InputStream;
 import java.io.FileInputStream;
-
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.RandomAccessFile;
 import java.lang.reflect.InvocationTargetException;
 
 import com.limegroup.gnutella.ErrorService;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.tigertree.HashTree;
-
 import com.limegroup.gnutella.util.PrivilegedAccessor;
 
 public class TestFile {

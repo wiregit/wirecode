@@ -1,13 +1,15 @@
 package com.limegroup.gnutella.messages.vendor;
 
-import java.io.*;
-import java.util.*;
-import com.limegroup.gnutella.Assert;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.util.Arrays;
+
 import com.limegroup.gnutella.ByteOrder;
-import com.limegroup.gnutella.messages.Message;
-import com.limegroup.gnutella.messages.BadPacketException;
-import com.limegroup.gnutella.statistics.ReceivedErrorStat;
 import com.limegroup.gnutella.ErrorService;
+import com.limegroup.gnutella.messages.BadPacketException;
+import com.limegroup.gnutella.messages.Message;
+import com.limegroup.gnutella.statistics.ReceivedErrorStat;
 
 /** Vendor Messages are Gnutella Messages that are NEVER forwarded after
  *  recieved.

@@ -1,8 +1,11 @@
 package com.limegroup.gnutella.search;
 
-import com.limegroup.gnutella.*;
-import com.limegroup.gnutella.messages.*;
-import java.util.*;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+
+import com.limegroup.gnutella.ManagedConnection;
+import com.limegroup.gnutella.messages.QueryRequest;
 
 /**
  * This class handles query "probes."  Probe queries are the initial queries

@@ -3,6 +3,9 @@ package com.limegroup.gnutella;
 import java.io.File;
 import java.net.DatagramPacket;
 import java.net.InetAddress;
+import java.util.Arrays;
+import java.util.LinkedList;
+import java.util.List;
 
 import junit.framework.Test;
 
@@ -20,9 +23,6 @@ import com.limegroup.gnutella.util.BaseTestCase;
 import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.PrivilegedAccessor;
 import com.limegroup.gnutella.xml.MetaFileManager;
-import java.util.Arrays;
-import java.util.LinkedList;
-import java.util.List;
 
 public class MulticastTest extends BaseTestCase {
 

@@ -3,18 +3,16 @@ package com.limegroup.gnutella.stubs;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import com.limegroup.gnutella.*;
-import com.limegroup.gnutella.messages.*;
-import com.limegroup.gnutella.messages.vendor.*;
-import java.util.*;
-import java.net.*;
+import java.util.Set;
 
 import com.limegroup.gnutella.ReplyHandler;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.PingReply;
 import com.limegroup.gnutella.messages.PushRequest;
 import com.limegroup.gnutella.messages.QueryReply;
-import java.util.Set;
+import com.limegroup.gnutella.messages.vendor.SimppVM;
+import com.limegroup.gnutella.messages.vendor.StatisticVendorMessage;
+import com.limegroup.gnutella.messages.vendor.UDPCrawlerPong;
 
 /**
  * Stub for the <tt>ReplyHandler</tt> interface.

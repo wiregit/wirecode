@@ -1,13 +1,26 @@
 package com.limegroup.gnutella;
 
-import java.io.*;
-import com.limegroup.gnutella.altlocs.*;
-import java.util.*;
+import java.io.BufferedInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
+
+import com.limegroup.gnutella.altlocs.AlternateLocation;
+import com.limegroup.gnutella.altlocs.AlternateLocationCollection;
+import com.limegroup.gnutella.altlocs.AlternateLocationCollector;
+import com.limegroup.gnutella.altlocs.DirectAltLoc;
 import com.limegroup.gnutella.settings.SharingSettings;
-import com.limegroup.gnutella.xml.LimeXMLDocument;
 import com.limegroup.gnutella.tigertree.HashTree;
 import com.limegroup.gnutella.tigertree.TigerTreeCache;
-import com.limegroup.gnutella.util.DataUtils;
+import com.limegroup.gnutella.xml.LimeXMLDocument;
 
 
 /**

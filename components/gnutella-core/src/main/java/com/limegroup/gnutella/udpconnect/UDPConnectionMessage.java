@@ -1,8 +1,10 @@
 package com.limegroup.gnutella.udpconnect;
 
-import java.io.*;
-import com.limegroup.gnutella.messages.Message;
+import java.io.IOException;
+import java.io.OutputStream;
+
 import com.limegroup.gnutella.messages.BadPacketException;
+import com.limegroup.gnutella.messages.Message;
 
 /** Outline of message to allow a reliable udp protocol to be built on top of
  *  Gnutella messages.

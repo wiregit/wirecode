@@ -1,12 +1,17 @@
 package com.limegroup.gnutella.chat;
 
-import java.util.*;
-import com.limegroup.gnutella.*;
-import com.limegroup.gnutella.settings.*;
-import com.limegroup.gnutella.util.Comparators;
+import java.io.IOException;
+import java.net.Socket;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
 
-import java.net.*;
-import java.io.*;
+import com.limegroup.gnutella.ActivityCallback;
+import com.limegroup.gnutella.RouterService;
+import com.limegroup.gnutella.settings.ChatSettings;
+import com.limegroup.gnutella.settings.FilterSettings;
+import com.limegroup.gnutella.util.Comparators;
 
 /**
  * This class establishes a connection for a chat, either

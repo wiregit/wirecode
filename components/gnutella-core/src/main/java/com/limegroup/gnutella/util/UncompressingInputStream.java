@@ -1,7 +1,9 @@
 package com.limegroup.gnutella.util;
 
-import java.io.*;
-import java.util.zip.*;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.zip.Inflater;
+import java.util.zip.InflaterInputStream;
 
 /**
  * The counterpart to CompressingOutputStream.  This class extends

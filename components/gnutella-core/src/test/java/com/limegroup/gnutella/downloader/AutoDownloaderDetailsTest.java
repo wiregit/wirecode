@@ -11,7 +11,6 @@ import junit.framework.Test;
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.MediaType;
 import com.limegroup.gnutella.RemoteFileDesc;
-import com.limegroup.gnutella.util.ConverterObjectInputStream;
 
 public class AutoDownloaderDetailsTest extends com.limegroup.gnutella.util.BaseTestCase {
 

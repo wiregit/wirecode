@@ -1,20 +1,37 @@
 package com.limegroup.gnutella.browser;
 
-import com.limegroup.gnutella.*; 
-import com.limegroup.gnutella.util.URLDecoder;
-import com.limegroup.gnutella.util.*;
-import com.limegroup.gnutella.downloader.*;
-import com.limegroup.gnutella.settings.*;
-import java.util.*;
+import java.io.BufferedOutputStream;
+import java.io.BufferedWriter;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.net.Socket;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
 import java.util.StringTokenizer;
-import java.net.*;
-import java.io.*;
 
 import org.apache.commons.httpclient.URI;
 import org.apache.commons.httpclient.URIException;
-
-import org.apache.commons.logging.LogFactory;
 import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
+import com.limegroup.gnutella.ActivityCallback;
+import com.limegroup.gnutella.ByteReader;
+import com.limegroup.gnutella.Constants;
+import com.limegroup.gnutella.ErrorService;
+import com.limegroup.gnutella.MessageService;
+import com.limegroup.gnutella.RouterService;
+import com.limegroup.gnutella.URN;
+import com.limegroup.gnutella.downloader.AlreadyDownloadingException;
+import com.limegroup.gnutella.downloader.FileExistsException;
+import com.limegroup.gnutella.settings.ConnectionSettings;
+import com.limegroup.gnutella.util.CommonUtils;
+import com.limegroup.gnutella.util.NetworkUtils;
+import com.limegroup.gnutella.util.Sockets;
+import com.limegroup.gnutella.util.URLDecoder;
 
 public class ExternalControl {
     

@@ -1,9 +1,20 @@
 package com.limegroup.gnutella.updates;
 
-import java.net.*;
-import com.limegroup.gnutella.*;
-import com.limegroup.gnutella.util.*;
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InterruptedIOException;
+import java.io.OutputStream;
+import java.io.RandomAccessFile;
+import java.net.InetSocketAddress;
+import java.net.ServerSocket;
+import java.net.Socket;
+
+import com.limegroup.gnutella.Assert;
+import com.limegroup.gnutella.ByteReader;
+import com.limegroup.gnutella.Constants;
+import com.limegroup.gnutella.ErrorService;
+import com.limegroup.gnutella.util.CommonUtils;
 
 
 public class TestConnection {

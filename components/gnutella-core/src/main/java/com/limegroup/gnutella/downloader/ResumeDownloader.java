@@ -1,9 +1,14 @@
 package com.limegroup.gnutella.downloader;
 
-import com.limegroup.gnutella.*;
-import com.limegroup.gnutella.messages.*;
-import java.io.*;
-import java.util.*;
+import java.io.File;
+import java.io.Serializable;
+
+import com.limegroup.gnutella.ActivityCallback;
+import com.limegroup.gnutella.DownloadManager;
+import com.limegroup.gnutella.FileManager;
+import com.limegroup.gnutella.RemoteFileDesc;
+import com.limegroup.gnutella.URN;
+import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.util.StringUtils;
 
 /**

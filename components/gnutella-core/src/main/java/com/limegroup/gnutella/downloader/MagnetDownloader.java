@@ -1,22 +1,29 @@
 package com.limegroup.gnutella.downloader;
 
-import com.limegroup.gnutella.*;
-import com.limegroup.gnutella.messages.*;
-import com.limegroup.gnutella.util.*;
-import com.limegroup.gnutella.http.HttpClientManager;
-import java.io.*;
-import java.net.*;
+import java.io.IOException;
+import java.io.Serializable;
+import java.net.URL;
+import java.util.HashSet;
+import java.util.Set;
 
-import java.util.*;
-import org.apache.commons.httpclient.HttpMethod;
-import org.apache.commons.httpclient.methods.HeadMethod;
 import org.apache.commons.httpclient.HttpClient;
+import org.apache.commons.httpclient.HttpMethod;
 import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.httpclient.URI;
 import org.apache.commons.httpclient.URIException;
-
-import org.apache.commons.logging.LogFactory;
+import org.apache.commons.httpclient.methods.HeadMethod;
 import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
+import com.limegroup.gnutella.Assert;
+import com.limegroup.gnutella.RemoteFileDesc;
+import com.limegroup.gnutella.ResponseVerifier;
+import com.limegroup.gnutella.SpeedConstants;
+import com.limegroup.gnutella.URN;
+import com.limegroup.gnutella.http.HttpClientManager;
+import com.limegroup.gnutella.messages.QueryRequest;
+import com.limegroup.gnutella.util.CommonUtils;
+import com.limegroup.gnutella.util.StringUtils;
 
 /**
  * A ManagedDownloader for MAGNET URIs.  Unlike a ManagedDownloader, a

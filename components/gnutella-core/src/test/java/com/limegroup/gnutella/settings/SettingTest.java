@@ -3,6 +3,7 @@ package com.limegroup.gnutella.settings;
 import java.awt.Color;
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Properties;
 
 import junit.framework.Test;
@@ -10,7 +11,6 @@ import junit.framework.TestSuite;
 
 import com.limegroup.gnutella.util.BaseTestCase;
 import com.limegroup.gnutella.util.CommonUtils;
-import java.util.Arrays;
 
 /**
  * Tests the setting for character arrays.

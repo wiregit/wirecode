@@ -1,14 +1,21 @@
 package com.limegroup.gnutella.util;
 
-import com.limegroup.gnutella.Constants;
-import java.util.StringTokenizer;
-import java.util.*;
-import com.limegroup.gnutella.Assert;
-import com.limegroup.gnutella.FileManager;
-import com.limegroup.gnutella.settings.SearchSettings;
-import com.limegroup.gnutella.settings.ApplicationSettings;
-import java.util.Locale;
 import java.text.Collator;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Locale;
+import java.util.Set;
+import java.util.StringTokenizer;
+import java.util.Vector;
+
+import com.limegroup.gnutella.Assert;
+import com.limegroup.gnutella.Constants;
+import com.limegroup.gnutella.FileManager;
+import com.limegroup.gnutella.settings.ApplicationSettings;
+import com.limegroup.gnutella.settings.SearchSettings;
 
 
 /** Various static routines for manipulating strings.*/

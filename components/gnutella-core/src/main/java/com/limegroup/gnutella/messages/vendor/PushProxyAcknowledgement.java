@@ -1,10 +1,13 @@
 package com.limegroup.gnutella.messages.vendor;
 
-import com.limegroup.gnutella.*;
-import com.limegroup.gnutella.messages.*;
-import com.limegroup.gnutella.statistics.*;
-import java.io.*;
-import java.net.*;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+
+import com.limegroup.gnutella.GUID;
+import com.limegroup.gnutella.messages.BadPacketException;
+import com.limegroup.gnutella.messages.QueryReply;
 
 /** In Vendor Message parlance, the "message type" of this VMP is "BEAR/7".
  *  Used to ask a host you connect to do a TCP ConnectBack.

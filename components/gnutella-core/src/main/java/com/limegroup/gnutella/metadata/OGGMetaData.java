@@ -1,9 +1,12 @@
 
 package com.limegroup.gnutella.metadata;
 
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
 
-import com.jcraft.jorbis.*;
+import com.jcraft.jorbis.Comment;
+import com.jcraft.jorbis.JOrbisException;
+import com.jcraft.jorbis.VorbisFile;
 
 
 /**

@@ -6,6 +6,7 @@ import com.limegroup.gnutella.gui.search.DisplayManager;
 import com.limegroup.gnutella.settings.ApplicationSettings;
 import com.limegroup.gnutella.util.BaseTestCase;
 import com.limegroup.gnutella.util.PrivilegedAccessor;
+import com.sun.naming.internal.ResourceManager;
 
 
 //this is in the com.limegroup.gnutella.gui.search but this calss

@@ -1,6 +1,10 @@
 package com.limegroup.gnutella;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.TreeMap;
+
 import com.limegroup.gnutella.search.ResultCounter;
 
 /**

@@ -1,12 +1,13 @@
 package com.limegroup.gnutella.util;
 
-import junit.framework.Test;
-
-import com.limegroup.gnutella.downloader.Interval;
 import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Random;
+
+import junit.framework.Test;
+
+import com.limegroup.gnutella.downloader.Interval;
 
 /**
  * Unit tests for IntervalSet

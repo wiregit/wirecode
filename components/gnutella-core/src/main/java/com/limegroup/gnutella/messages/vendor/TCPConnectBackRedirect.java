@@ -1,12 +1,15 @@
 package com.limegroup.gnutella.messages.vendor;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+
 import com.limegroup.gnutella.ByteOrder;
-import com.limegroup.gnutella.messages.BadPacketException;
-import com.limegroup.gnutella.statistics.*;
-import com.limegroup.gnutella.util.NetworkUtils;
 import com.limegroup.gnutella.ErrorService;
-import java.io.*;
-import java.net.*;
+import com.limegroup.gnutella.messages.BadPacketException;
+import com.limegroup.gnutella.util.NetworkUtils;
 
 /** In Vendor Message parlance, the "message type" of this VMP is "LIME/7".
  *  Used to ask a host that you are connected to to try and connect back to a

@@ -1,17 +1,30 @@
 package com.limegroup.gnutella.xml;
 
-import java.util.*;
-import java.util.StringTokenizer;
+import java.io.IOException;
+import java.io.Serializable;
+import java.io.StringReader;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Locale;
-import java.io.*;
-import com.limegroup.gnutella.util.*;
+import java.util.Map;
+import java.util.Set;
+import java.util.StringTokenizer;
+import java.util.TreeMap;
+
 import org.apache.xerces.parsers.DOMParser;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.NamedNodeMap;
+import org.w3c.dom.Node;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
 
-import com.limegroup.gnutella.metadata.AudioMetaData;
 import com.limegroup.gnutella.metadata.MP3MetaData;
-
-import org.xml.sax.*;
-import org.w3c.dom.*;
+import com.limegroup.gnutella.util.Comparators;
+import com.limegroup.gnutella.util.NameValue;
 
 
 /**

@@ -1,8 +1,8 @@
 package com.limegroup.gnutella.util;
 
-import junit.framework.Test;
-
 import java.util.NoSuchElementException;
+
+import junit.framework.Test;
 
 /**
  * Unit tests for IntSet

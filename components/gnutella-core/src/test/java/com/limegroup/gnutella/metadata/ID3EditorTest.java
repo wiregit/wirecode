@@ -2,7 +2,6 @@ package com.limegroup.gnutella.metadata;
 
 import junit.framework.Test;
 
-import com.limegroup.gnutella.metadata.MP3DataEditor;
 import com.limegroup.gnutella.util.BaseTestCase;
 import com.limegroup.gnutella.util.PrivilegedAccessor;
 

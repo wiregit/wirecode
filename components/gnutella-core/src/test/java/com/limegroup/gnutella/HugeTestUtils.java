@@ -1,15 +1,13 @@
 package com.limegroup.gnutella;
 
 import java.io.IOException;
-import java.net.InetAddress;
 import java.net.MalformedURLException;
 import java.net.URL;
-
-import com.limegroup.gnutella.altlocs.AlternateLocation;
-import com.limegroup.gnutella.altlocs.DirectAltLoc;
-import com.limegroup.gnutella.http.HTTPConstants;
 import java.util.HashSet;
 import java.util.Set;
+
+import com.limegroup.gnutella.altlocs.AlternateLocation;
+import com.limegroup.gnutella.http.HTTPConstants;
 
 /**
  * This class provides convenient data and utility functions to

@@ -1,6 +1,5 @@
 package com.limegroup.gnutella.filters;
 
-import com.limegroup.gnutella.Assert;
 import com.limegroup.gnutella.ByteOrder;
 
 /**

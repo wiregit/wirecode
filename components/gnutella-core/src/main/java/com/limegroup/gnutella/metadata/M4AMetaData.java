@@ -1,11 +1,17 @@
 
 package com.limegroup.gnutella.metadata;
 
-import java.io.*;
+import java.io.DataInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.HashMap;
+import java.util.Map;
 
-import com.limegroup.gnutella.util.*;
 import com.limegroup.gnutella.ByteOrder;
-import java.util.*;
+import com.limegroup.gnutella.util.CountingInputStream;
+import com.limegroup.gnutella.util.IOUtils;
 
 /**
  * Limited metadata parsing of m4a files.  This is based on code published

@@ -1,6 +1,7 @@
 package com.limegroup.gnutella.util;
 
-import java.util.*;
+import java.util.Iterator;
+import java.util.LinkedList;
 
 
 

@@ -1,6 +1,7 @@
 package com.limegroup.gnutella.stubs;
 
 import java.io.File;
+import java.util.Set;
 
 import com.limegroup.gnutella.ActivityCallback;
 import com.limegroup.gnutella.Connection;
@@ -14,7 +15,6 @@ import com.limegroup.gnutella.Uploader;
 import com.limegroup.gnutella.chat.Chatter;
 import com.limegroup.gnutella.search.HostData;
 import com.limegroup.gnutella.security.User;
-import java.util.Set;
 
 /**
  * A stub for ActivityCallback.  Does nothing.

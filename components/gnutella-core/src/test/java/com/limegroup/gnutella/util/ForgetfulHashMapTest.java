@@ -1,9 +1,9 @@
 package com.limegroup.gnutella.util;
 
-import junit.framework.Test;
-
 import java.util.HashMap;
 import java.util.Map;
+
+import junit.framework.Test;
 
 /**
  * Unit tests for ForgetfulHashMap

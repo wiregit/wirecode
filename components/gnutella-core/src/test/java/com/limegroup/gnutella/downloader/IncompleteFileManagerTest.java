@@ -6,6 +6,9 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Set;
 
 import junit.framework.Test;
 
@@ -20,9 +23,6 @@ import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.ConverterObjectInputStream;
 import com.limegroup.gnutella.util.PrivilegedAccessor;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Set;
 
 public class IncompleteFileManagerTest extends com.limegroup.gnutella.util.BaseTestCase {
     private IncompleteFileManager ifm;

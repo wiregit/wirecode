@@ -3,22 +3,40 @@
  */
 package com.limegroup.gnutella.messages.vendor;
 
-import com.limegroup.gnutella.*;
-import com.limegroup.gnutella.messages.*;
-import com.limegroup.gnutella.messages.vendor.*;
-import com.limegroup.gnutella.settings.*;
-import com.limegroup.gnutella.stubs.*;
-import com.limegroup.gnutella.util.*;
-import com.limegroup.gnutella.handshaking.*;
-import com.limegroup.gnutella.security.*;
-import com.limegroup.gnutella.routing.*;
-
-import junit.framework.*;
-import java.util.Properties;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
+import java.net.InetAddress;
+import java.util.Iterator;
+import java.util.List;
 import java.util.StringTokenizer;
-import java.util.*;
-import java.io.*;
-import java.net.*;
+
+import junit.framework.Test;
+
+import com.limegroup.gnutella.Connection;
+import com.limegroup.gnutella.Constants;
+import com.limegroup.gnutella.CountingConnection;
+import com.limegroup.gnutella.Endpoint;
+import com.limegroup.gnutella.ExtendedEndpoint;
+import com.limegroup.gnutella.GUID;
+import com.limegroup.gnutella.RouterService;
+import com.limegroup.gnutella.UDPService;
+import com.limegroup.gnutella.handshaking.LeafHeaders;
+import com.limegroup.gnutella.handshaking.UltrapeerHeaders;
+import com.limegroup.gnutella.messages.BadPacketException;
+import com.limegroup.gnutella.messages.Message;
+import com.limegroup.gnutella.settings.ApplicationSettings;
+import com.limegroup.gnutella.settings.ConnectionSettings;
+import com.limegroup.gnutella.settings.FilterSettings;
+import com.limegroup.gnutella.settings.UltrapeerSettings;
+import com.limegroup.gnutella.stubs.ActivityCallbackStub;
+import com.limegroup.gnutella.util.BaseTestCase;
+import com.limegroup.gnutella.util.EmptyResponder;
+import com.limegroup.gnutella.util.FixedSizeExpiringSet;
+import com.limegroup.gnutella.util.PrivilegedAccessor;
 
 
 /**

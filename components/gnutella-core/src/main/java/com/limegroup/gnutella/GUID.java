@@ -1,6 +1,8 @@
 package com.limegroup.gnutella;
 
-import java.util.*;
+import java.util.Comparator;
+import java.util.Random;
+
 import com.limegroup.gnutella.util.NetworkUtils;
 
 /**

@@ -1,16 +1,37 @@
 package com.limegroup.gnutella.messages;
 
-import com.limegroup.gnutella.*;
-import com.limegroup.gnutella.util.I18NConvert;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.Serializable;
+import java.io.UnsupportedEncodingException;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Set;
+
+import org.xml.sax.SAXException;
+
+import com.limegroup.gnutella.ByteOrder;
+import com.limegroup.gnutella.ErrorService;
+import com.limegroup.gnutella.FileManager;
+import com.limegroup.gnutella.GUID;
+import com.limegroup.gnutella.MediaType;
+import com.limegroup.gnutella.RouterService;
+import com.limegroup.gnutella.UDPService;
+import com.limegroup.gnutella.URN;
+import com.limegroup.gnutella.UrnType;
+import com.limegroup.gnutella.guess.QueryKey;
+import com.limegroup.gnutella.settings.SearchSettings;
+import com.limegroup.gnutella.statistics.DroppedSentMessageStatHandler;
+import com.limegroup.gnutella.statistics.ReceivedErrorStat;
+import com.limegroup.gnutella.statistics.SentMessageStatHandler;
 import com.limegroup.gnutella.util.CommonUtils;
-import com.limegroup.gnutella.settings.*;
-import com.limegroup.gnutella.statistics.*;
-import com.limegroup.gnutella.guess.*;
+import com.limegroup.gnutella.util.I18NConvert;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 import com.limegroup.gnutella.xml.SchemaNotFoundException;
-import java.io.*;
-import java.util.*;
-import org.xml.sax.SAXException;
 
 /**
  * This class creates Gnutella query messages, either from scratch, or

@@ -4,6 +4,8 @@ package com.limegroup.gnutella.xml;
 import java.io.File;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
+import java.util.List;
 
 import junit.framework.Test;
 
@@ -15,8 +17,6 @@ import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.util.I18NConvert;
 import com.limegroup.gnutella.util.PrivilegedAccessor;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Tests the MetaFileManager.  Subclass FileManagerTest so that

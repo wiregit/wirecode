@@ -1,6 +1,5 @@
 package com.limegroup.gnutella.downloader;
 
-import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -9,6 +8,7 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.Iterator;
 import java.util.StringTokenizer;
 
 import org.apache.commons.logging.Log;
@@ -25,13 +25,11 @@ import com.limegroup.gnutella.filters.IPFilter;
 import com.limegroup.gnutella.http.HTTPHeaderName;
 import com.limegroup.gnutella.http.HTTPUtils;
 import com.limegroup.gnutella.settings.FilterSettings;
+import com.limegroup.gnutella.util.AssertComparisons;
 import com.limegroup.gnutella.util.BandwidthThrottle;
 import com.limegroup.gnutella.util.IntPair;
 import com.limegroup.gnutella.util.PrivilegedAccessor;
 import com.limegroup.gnutella.util.RoundRobinQueue;
-import com.limegroup.gnutella.util.ThrottledOutputStream;
-import com.limegroup.gnutella.util.AssertComparisons;
-import java.util.Iterator;
 
 public class TestUploader extends AssertComparisons {    
     

@@ -1,7 +1,7 @@
 
 package com.limegroup.gnutella.util;
 
-import java.util.*;
+import java.util.Map;
 
 /**
 * This class stores a pair of a property key, and its corresponding value.

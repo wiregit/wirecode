@@ -6,8 +6,15 @@
 
 package com.limegroup.gnutella.xml;
 
-import java.util.*;
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Stores and provides access to various XML schemas that me might have.

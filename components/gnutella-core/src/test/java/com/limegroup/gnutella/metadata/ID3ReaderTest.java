@@ -1,13 +1,14 @@
 package com.limegroup.gnutella.metadata;
 
 
+import java.io.File;
+import java.io.IOException;
+
 import junit.framework.Test;
 
-import java.io.*;
-
-import com.limegroup.gnutella.metadata.MP3MetaData;
-import com.limegroup.gnutella.metadata.MetaData;
-import com.limegroup.gnutella.util.*;
+import com.limegroup.gnutella.util.BaseTestCase;
+import com.limegroup.gnutella.util.CommonUtils;
+import com.limegroup.gnutella.util.PrivilegedAccessor;
 
 public class ID3ReaderTest extends BaseTestCase {
 

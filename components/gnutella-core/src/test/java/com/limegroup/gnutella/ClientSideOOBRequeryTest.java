@@ -11,6 +11,9 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.Socket;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 import junit.framework.Test;
 
@@ -32,9 +35,6 @@ import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.PrivilegedAccessor;
 import com.limegroup.gnutella.util.Sockets;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
 
 /**
  * Checks whether (multi)leaves avoid forwarding messages to ultrapeers, do

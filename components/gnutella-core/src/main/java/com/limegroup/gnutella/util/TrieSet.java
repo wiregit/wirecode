@@ -1,7 +1,5 @@
 package com.limegroup.gnutella.util;
 
-import com.limegroup.gnutella.util.Trie;
-
 import java.util.Iterator;
 
 /**

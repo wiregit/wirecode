@@ -1,11 +1,16 @@
 package com.limegroup.gnutella.simpp;
 
-import java.io.*;
-import org.xml.sax.*;
-import com.limegroup.gnutella.util.*;
-import com.limegroup.gnutella.*;
-import com.limegroup.gnutella.messages.vendor.*;
-import com.limegroup.gnutella.settings.*;
+import java.io.File;
+import java.io.IOException;
+import java.io.RandomAccessFile;
+
+import org.xml.sax.SAXException;
+
+import com.limegroup.gnutella.RouterService;
+import com.limegroup.gnutella.messages.vendor.CapabilitiesVM;
+import com.limegroup.gnutella.settings.SimppSettingsManager;
+import com.limegroup.gnutella.util.CommonUtils;
+import com.limegroup.gnutella.util.ProcessingQueue;
 
 /**
  * Used for managing signed messages published by LimeWire, and chaning settings

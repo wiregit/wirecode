@@ -1,9 +1,9 @@
 package com.limegroup.gnutella.filters;
 
-import com.limegroup.gnutella.*;
-import com.limegroup.gnutella.settings.*;
-import com.limegroup.gnutella.messages.*;
 import java.util.Vector;
+
+import com.limegroup.gnutella.messages.Message;
+import com.limegroup.gnutella.settings.FilterSettings;
 
 /**
  * A filter to eliminate Gnutella spam.  Subclass to implement custom

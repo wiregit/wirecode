@@ -1,6 +1,6 @@
 package com.limegroup.gnutella.statistics;
 
-import com.limegroup.gnutella.messages.*;
+import com.limegroup.gnutella.messages.Message;
 
 /**
  * Specialized subclass for recording Gnutella message data.

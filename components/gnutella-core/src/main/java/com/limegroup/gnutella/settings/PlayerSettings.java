@@ -1,6 +1,5 @@
 package com.limegroup.gnutella.settings;
 
-import com.limegroup.gnutella.util.CommonUtils;
 
 /**
  * Settings for Music Player

@@ -1,9 +1,10 @@
 package com.limegroup.gnutella.downloader;
 
+import java.util.HashMap;
+
 import junit.framework.Test;
 
 import com.limegroup.gnutella.GUID;
-import java.util.HashMap;
 
 public class MiniRemoteFileDescTest extends com.limegroup.gnutella.util.BaseTestCase {
 

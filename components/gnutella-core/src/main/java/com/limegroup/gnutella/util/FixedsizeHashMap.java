@@ -1,7 +1,7 @@
 package com.limegroup.gnutella.util;
 
-import java.util.*;
-import com.limegroup.gnutella.util.*;
+import java.util.HashMap;
+import java.util.Set;
 
 /**
  * This class implements fixed size HashMap. If its get full, no new entry

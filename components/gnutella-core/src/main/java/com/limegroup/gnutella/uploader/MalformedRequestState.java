@@ -1,11 +1,15 @@
 package com.limegroup.gnutella.uploader;
 
-import com.limegroup.gnutella.http.*;
-import com.limegroup.gnutella.util.CommonUtils;
-import java.io.*;
+import java.io.IOException;
+import java.io.OutputStream;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
+import com.limegroup.gnutella.http.ConstantHTTPHeaderValue;
+import com.limegroup.gnutella.http.HTTPHeaderName;
+import com.limegroup.gnutella.http.HTTPUtils;
+import com.limegroup.gnutella.util.CommonUtils;
 
 /**
  * This class handles the case where the request was malformed.

@@ -1,24 +1,39 @@
 package com.limegroup.gnutella.messages.vendor;
 
-import java.io.*;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
-import com.limegroup.gnutella.util.*;
+import junit.framework.Test;
+
+import com.limegroup.gnutella.Acceptor;
+import com.limegroup.gnutella.GUID;
+import com.limegroup.gnutella.HugeTestUtils;
+import com.limegroup.gnutella.ManagedConnectionStub;
+import com.limegroup.gnutella.PushEndpoint;
+import com.limegroup.gnutella.RemoteFileDesc;
+import com.limegroup.gnutella.RouterService;
+import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.altlocs.AlternateLocation;
 import com.limegroup.gnutella.altlocs.AlternateLocationCollection;
 import com.limegroup.gnutella.altlocs.PushAltLoc;
-import com.limegroup.gnutella.stubs.*;
-import com.limegroup.gnutella.*;
-import com.limegroup.gnutella.downloader.IncompleteFileManager;
 import com.limegroup.gnutella.downloader.Interval;
-import com.limegroup.gnutella.downloader.ManagedDownloader;
-import com.limegroup.gnutella.http.HTTPConstants;
-import com.limegroup.gnutella.messages.QueryReply;
-import com.limegroup.gnutella.settings.*;
-import java.util.*;
-
-import java.util.Random;
-
-import junit.framework.Test;
+import com.limegroup.gnutella.settings.UploadSettings;
+import com.limegroup.gnutella.stubs.ConnectionManagerStub;
+import com.limegroup.gnutella.stubs.FileDescStub;
+import com.limegroup.gnutella.stubs.FileManagerStub;
+import com.limegroup.gnutella.stubs.IncompleteFileDescStub;
+import com.limegroup.gnutella.stubs.MessageRouterStub;
+import com.limegroup.gnutella.stubs.UploadManagerStub;
+import com.limegroup.gnutella.util.BaseTestCase;
+import com.limegroup.gnutella.util.IntervalSet;
+import com.limegroup.gnutella.util.PrivilegedAccessor;
 
 /**
  * this class tests the handling of udp head requests and responses.

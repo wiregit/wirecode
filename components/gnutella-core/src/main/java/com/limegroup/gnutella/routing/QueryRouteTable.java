@@ -1,13 +1,22 @@
 package com.limegroup.gnutella.routing;
 
-import com.limegroup.gnutella.*;
-import com.limegroup.gnutella.messages.*;
-import com.limegroup.gnutella.util.Utilities;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Set;
+import java.util.zip.DataFormatException;
+import java.util.zip.DeflaterOutputStream;
+import java.util.zip.Inflater;
+
+import com.limegroup.gnutella.Assert;
+import com.limegroup.gnutella.URN;
+import com.limegroup.gnutella.messages.BadPacketException;
+import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.util.BitSet;
-import com.limegroup.gnutella.xml.*;
-import java.util.*;
-import java.util.zip.*;
-import java.io.*;
+import com.limegroup.gnutella.util.Utilities;
+import com.limegroup.gnutella.xml.LimeXMLDocument;
 
 //Please note that &#60; and &#62; are the HTML escapes for '<' and '>'.
 

@@ -1,6 +1,8 @@
 package com.limegroup.gnutella.util;
 
-import java.util.*;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Vector;
 
 /**
  * A reuseable class that allows for a WorkGroup of WorkerInterface threads to

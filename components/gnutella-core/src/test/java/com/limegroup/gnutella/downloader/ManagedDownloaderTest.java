@@ -7,17 +7,40 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.lang.reflect.Method;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import junit.framework.Test;
 
-import com.limegroup.gnutella.*;
+import com.limegroup.gnutella.ActivityCallback;
+import com.limegroup.gnutella.Downloader;
+import com.limegroup.gnutella.Endpoint;
+import com.limegroup.gnutella.ErrorService;
+import com.limegroup.gnutella.FileDesc;
+import com.limegroup.gnutella.FileManager;
+import com.limegroup.gnutella.GUID;
+import com.limegroup.gnutella.MessageRouter;
+import com.limegroup.gnutella.PushEndpoint;
+import com.limegroup.gnutella.RemoteFileDesc;
+import com.limegroup.gnutella.RouterService;
+import com.limegroup.gnutella.SpeedConstants;
+import com.limegroup.gnutella.URN;
+import com.limegroup.gnutella.altlocs.AlternateLocation;
+import com.limegroup.gnutella.altlocs.AlternateLocationCollection;
+import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.settings.ConnectionSettings;
-import com.limegroup.gnutella.stubs.*;
-import com.limegroup.gnutella.altlocs.*;
-import com.limegroup.gnutella.messages.QueryReply;
+import com.limegroup.gnutella.stubs.ActivityCallbackStub;
+import com.limegroup.gnutella.stubs.ConnectionManagerStub;
+import com.limegroup.gnutella.stubs.DownloadManagerStub;
+import com.limegroup.gnutella.stubs.FileManagerStub;
+import com.limegroup.gnutella.stubs.IncompleteFileDescStub;
+import com.limegroup.gnutella.stubs.MessageRouterStub;
 import com.limegroup.gnutella.util.PrivilegedAccessor;
-import java.util.*;
 
 public class ManagedDownloaderTest extends com.limegroup.gnutella.util.BaseTestCase {
     final static int PORT=6666;

@@ -1,11 +1,9 @@
 
 package com.limegroup.gnutella.messages.vendor;
 
-import com.limegroup.gnutella.messages.BadPacketException;
+import com.limegroup.gnutella.ByteOrder;
 import com.limegroup.gnutella.GUID;
-
-
-import com.limegroup.gnutella.*;
+import com.limegroup.gnutella.messages.BadPacketException;
 
 /**
  * a request for a given ultrapeer's ultrapeer connections.

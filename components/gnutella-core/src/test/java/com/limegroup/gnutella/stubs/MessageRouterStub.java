@@ -1,16 +1,16 @@
 package com.limegroup.gnutella.stubs;
 
 import java.net.DatagramPacket;
+import java.util.LinkedList;
+import java.util.List;
 
+import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.MessageRouter;
 import com.limegroup.gnutella.ReplyHandler;
 import com.limegroup.gnutella.Response;
 import com.limegroup.gnutella.messages.PingRequest;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.routing.QueryRouteTable;
-import com.limegroup.gnutella.GUID;
-import java.util.LinkedList;
-import java.util.List;
 
 /** A stub for MessageRouter that does nothing. */
 public class MessageRouterStub extends MessageRouter {

@@ -1,6 +1,5 @@
 package com.limegroup.gnutella.statistics;
 
-import com.limegroup.gnutella.*;
 
 /**
  * Wrapper class for keeping track of Gnutella message data.  For a given

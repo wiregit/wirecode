@@ -1,13 +1,16 @@
 package com.limegroup.gnutella.updates;
 
-import java.security.*;
-import java.io.*;
-import com.limegroup.gnutella.*;
-import com.limegroup.gnutella.util.*;
-import com.bitzi.util.*;
-import org.xml.sax.*;
-import com.limegroup.gnutella.security.*;
-import java.util.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.UnsupportedEncodingException;
+import java.security.PublicKey;
+
+import com.bitzi.util.Base32;
+import com.limegroup.gnutella.ErrorService;
+import com.limegroup.gnutella.security.SignatureVerifier;
+import com.limegroup.gnutella.util.CommonUtils;
 
 /**
  * Provides static methods, which accept an InputStream and use the 

@@ -1,7 +1,9 @@
 package com.limegroup.gnutella.util;
 
+import java.util.ConcurrentModificationException;
+import java.util.NoSuchElementException;
+
 import com.limegroup.gnutella.Assert;
-import java.util.*;
 
 /** 
  * A very simple fixed-size double-ended queue, i.e., a circular buffer.

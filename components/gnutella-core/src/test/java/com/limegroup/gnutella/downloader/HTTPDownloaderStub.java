@@ -1,11 +1,13 @@
 package com.limegroup.gnutella.downloader;
 
-import java.io.IOException;
 import java.io.File;
+import java.io.IOException;
 import java.net.InetAddress;
 
-import com.limegroup.gnutella.*;
-import com.limegroup.gnutella.altlocs.*;
+import com.limegroup.gnutella.InsufficientDataException;
+import com.limegroup.gnutella.RemoteFileDesc;
+import com.limegroup.gnutella.altlocs.AlternateLocation;
+import com.limegroup.gnutella.altlocs.AlternateLocationCollection;
 import com.limegroup.gnutella.http.ProblemReadingHeaderException;
 
 /**

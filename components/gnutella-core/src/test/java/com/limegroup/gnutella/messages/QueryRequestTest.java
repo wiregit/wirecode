@@ -4,24 +4,24 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.InetAddress;
-
-import junit.framework.Test;
-
-import com.limegroup.gnutella.GUID;
-import com.limegroup.gnutella.HugeTestUtils;
-import com.limegroup.gnutella.URN;
-import com.limegroup.gnutella.UrnType;
-import com.limegroup.gnutella.MediaType;
-import com.limegroup.gnutella.guess.QueryKey;
-import com.limegroup.gnutella.settings.SearchSettings;
-import com.limegroup.gnutella.util.BaseTestCase;
-import com.limegroup.gnutella.util.CommonUtils;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Random;
 import java.util.Set;
+
+import junit.framework.Test;
+
+import com.limegroup.gnutella.GUID;
+import com.limegroup.gnutella.HugeTestUtils;
+import com.limegroup.gnutella.MediaType;
+import com.limegroup.gnutella.URN;
+import com.limegroup.gnutella.UrnType;
+import com.limegroup.gnutella.guess.QueryKey;
+import com.limegroup.gnutella.settings.SearchSettings;
+import com.limegroup.gnutella.util.BaseTestCase;
+import com.limegroup.gnutella.util.CommonUtils;
 
 /**
  * This class tests the QueryRequest class with HUGE v0.94 extensions.

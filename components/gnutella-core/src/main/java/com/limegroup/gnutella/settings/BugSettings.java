@@ -1,7 +1,8 @@
 package com.limegroup.gnutella.settings;
 
-import com.limegroup.gnutella.util.CommonUtils;
 import java.io.File;
+
+import com.limegroup.gnutella.util.CommonUtils;
 
 /**
  * Settings to deal with bugs

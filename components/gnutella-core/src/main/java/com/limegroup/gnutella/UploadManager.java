@@ -1,22 +1,45 @@
 package com.limegroup.gnutella;
 
-import com.limegroup.gnutella.downloader.Interval;
-import com.limegroup.gnutella.uploader.*;
-import com.limegroup.gnutella.http.*;
-import com.limegroup.gnutella.settings.*;
-import com.limegroup.gnutella.util.*;
-import com.limegroup.gnutella.statistics.UploadStat;
-import com.bitzi.util.Base32;
-import java.net.*;
-import java.io.*;
-import java.util.*;
-import com.limegroup.gnutella.util.URLDecoder;
-import com.limegroup.gnutella.util.IOUtils;
-import java.util.StringTokenizer;
+import java.io.BufferedInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.Socket;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Locale;
+import java.util.Map;
+import java.util.Random;
+import java.util.Set;
+import java.util.StringTokenizer;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
+import com.bitzi.util.Base32;
+import com.limegroup.gnutella.downloader.Interval;
+import com.limegroup.gnutella.http.HTTPConstants;
+import com.limegroup.gnutella.http.HTTPRequestMethod;
+import com.limegroup.gnutella.http.ProblemReadingHeaderException;
+import com.limegroup.gnutella.settings.ConnectionSettings;
+import com.limegroup.gnutella.settings.SharingSettings;
+import com.limegroup.gnutella.settings.UploadSettings;
+import com.limegroup.gnutella.statistics.UploadStat;
+import com.limegroup.gnutella.uploader.FreeloaderUploadingException;
+import com.limegroup.gnutella.uploader.HTTPUploader;
+import com.limegroup.gnutella.uploader.LimitReachedUploadState;
+import com.limegroup.gnutella.uploader.PushProxyUploadState;
+import com.limegroup.gnutella.uploader.StalledUploadWatchdog;
+import com.limegroup.gnutella.util.Buffer;
+import com.limegroup.gnutella.util.FixedSizeExpiringSet;
+import com.limegroup.gnutella.util.FixedsizeForgetfulHashMap;
+import com.limegroup.gnutella.util.IOUtils;
+import com.limegroup.gnutella.util.KeyValue;
+import com.limegroup.gnutella.util.URLDecoder;
 
 /**
  * This class parses HTTP requests and delegates to <tt>HTTPUploader</tt>

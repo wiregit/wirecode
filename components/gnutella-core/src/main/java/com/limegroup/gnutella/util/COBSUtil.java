@@ -1,6 +1,8 @@
 package com.limegroup.gnutella.util;
 
-import java.io.*;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+
 import com.limegroup.gnutella.ByteOrder;
 
 /** For implementation details, please see:

@@ -1,12 +1,12 @@
 package com.limegroup.gnutella.xml;
 
 import java.io.File;
+import java.util.Iterator;
+import java.util.Map;
 
 import junit.framework.Test;
 
 import com.limegroup.gnutella.util.CommonUtils;
-import java.util.Iterator;
-import java.util.Map;
 
 /** This class tests that present and future versions are compatible with older
  * versions of LimeXMLDocument.  Basically, for every version the current

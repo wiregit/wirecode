@@ -3,6 +3,9 @@ package com.limegroup.gnutella.util;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 
 import junit.framework.AssertionFailedError;
 import junit.framework.Test;
@@ -13,8 +16,6 @@ import junit.framework.TestSuite;
 import com.limegroup.gnutella.Backend;
 import com.limegroup.gnutella.ErrorCallback;
 import com.limegroup.gnutella.ErrorService;
-
-import java.util.*;
 
 /**
  * A modified TestSuite that allows the backends

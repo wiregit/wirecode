@@ -1,16 +1,21 @@
 package com.limegroup.gnutella.udpconnect;
 
-import java.io.*;
-import java.net.*;
-import com.limegroup.gnutella.messages.BadPacketException;
-import com.limegroup.gnutella.RouterService;
-import com.limegroup.gnutella.UDPService;
-import com.limegroup.gnutella.Acceptor;
-import com.limegroup.gnutella.ErrorService;
-import com.limegroup.gnutella.util.NetworkUtils;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.InetAddress;
+import java.net.SocketException;
+import java.net.UnknownHostException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
+import com.limegroup.gnutella.Acceptor;
+import com.limegroup.gnutella.ErrorService;
+import com.limegroup.gnutella.RouterService;
+import com.limegroup.gnutella.UDPService;
+import com.limegroup.gnutella.messages.BadPacketException;
+import com.limegroup.gnutella.util.NetworkUtils;
 
 /** 
  *  Manage a reliable udp connection for the transfer of data.

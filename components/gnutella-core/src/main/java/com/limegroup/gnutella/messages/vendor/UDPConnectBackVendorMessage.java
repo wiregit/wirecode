@@ -1,12 +1,16 @@
 package com.limegroup.gnutella.messages.vendor;
 
-import com.limegroup.gnutella.messages.BadPacketException;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+
 import com.limegroup.gnutella.ByteOrder;
-import com.limegroup.gnutella.GUID;
-import com.limegroup.gnutella.statistics.*;
-import com.limegroup.gnutella.util.NetworkUtils;
 import com.limegroup.gnutella.ErrorService;
-import java.io.*;
+import com.limegroup.gnutella.GUID;
+import com.limegroup.gnutella.messages.BadPacketException;
+import com.limegroup.gnutella.statistics.SentMessageStatHandler;
+import com.limegroup.gnutella.util.NetworkUtils;
 
 /** In Vendor Message parlance, the "message type" of this VMP is "GTKG/7".
  *  Used to ask a host you connect to do a UDP ConnectBack.

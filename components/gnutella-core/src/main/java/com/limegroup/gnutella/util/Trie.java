@@ -1,9 +1,11 @@
 package com.limegroup.gnutella.util;
 
-import com.limegroup.gnutella.Assert;
-
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.Locale;
+import java.util.NoSuchElementException;
+
+import com.limegroup.gnutella.Assert;
 
 /**
  * An information reTRIEval tree, a.k.a., a prefix tree.  A Trie is similar to

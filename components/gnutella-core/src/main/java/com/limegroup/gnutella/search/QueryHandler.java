@@ -1,14 +1,25 @@
 
 package com.limegroup.gnutella.search;
 
-import com.limegroup.gnutella.messages.*;
-import com.limegroup.gnutella.routing.*;
-import com.limegroup.gnutella.*;
-import com.limegroup.gnutella.settings.ApplicationSettings;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
-import org.apache.commons.logging.LogFactory;
 import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
+import com.limegroup.gnutella.Connection;
+import com.limegroup.gnutella.ConnectionManager;
+import com.limegroup.gnutella.ErrorService;
+import com.limegroup.gnutella.ForMeReplyHandler;
+import com.limegroup.gnutella.GUID;
+import com.limegroup.gnutella.ManagedConnection;
+import com.limegroup.gnutella.MessageRouter;
+import com.limegroup.gnutella.ReplyHandler;
+import com.limegroup.gnutella.RouterService;
+import com.limegroup.gnutella.messages.BadPacketException;
+import com.limegroup.gnutella.messages.QueryRequest;
+import com.limegroup.gnutella.routing.QueryRouteTable;
 
 /**
  * This class is a factory for creating <tt>QueryRequest</tt> instances

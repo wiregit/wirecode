@@ -3,13 +3,13 @@ package com.limegroup.gnutella.stubs;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-
-import com.limegroup.gnutella.FileDesc;
-import com.limegroup.gnutella.URN;
-import com.limegroup.gnutella.ErrorService;
-import com.limegroup.gnutella.altlocs.AlternateLocationCollection;
 import java.util.HashSet;
 import java.util.Set;
+
+import com.limegroup.gnutella.ErrorService;
+import com.limegroup.gnutella.FileDesc;
+import com.limegroup.gnutella.URN;
+import com.limegroup.gnutella.altlocs.AlternateLocationCollection;
 
 public class FileDescStub extends FileDesc {
     public static final String DEFAULT_URN =

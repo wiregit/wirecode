@@ -1,10 +1,11 @@
 package com.limegroup.gnutella;
 
-import java.io.*;
-import com.limegroup.gnutella.*;
-import com.limegroup.gnutella.handshaking.*;
-import com.limegroup.gnutella.messages.*;
+import java.io.IOException;
 import java.util.Properties;
+
+import com.limegroup.gnutella.handshaking.HandshakeResponder;
+import com.limegroup.gnutella.messages.BadPacketException;
+import com.limegroup.gnutella.messages.Message;
 
 public class CountingConnection extends Connection {
     

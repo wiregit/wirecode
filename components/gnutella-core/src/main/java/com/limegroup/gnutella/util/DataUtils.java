@@ -1,6 +1,9 @@
 package com.limegroup.gnutella.util;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.Set;
+
 import com.limegroup.gnutella.ByteOrder;
 
 /**

@@ -1,23 +1,28 @@
 package com.limegroup.gnutella.tigertree;
 
-import java.io.*;
-import java.lang.reflect.*;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.RandomAccessFile;
+import java.lang.reflect.InvocationTargetException;
+import java.util.Iterator;
+import java.util.List;
 
 import junit.framework.Test;
 
 import com.bitzi.util.Base32;
-
+import com.limegroup.gnutella.URN;
+import com.limegroup.gnutella.dime.DIMEGenerator;
+import com.limegroup.gnutella.dime.DIMEParser;
+import com.limegroup.gnutella.dime.DIMERecord;
 import com.limegroup.gnutella.downloader.Interval;
 import com.limegroup.gnutella.util.BaseTestCase;
-import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.PrivilegedAccessor;
 import com.limegroup.gnutella.util.UUID;
-import com.limegroup.gnutella.dime.*;
-
-import java.util.Iterator;
-import java.util.List;
-import java.util.HashMap;
 
 /**
  * Unit tests for HashTree

@@ -1,6 +1,6 @@
 package com.limegroup.gnutella.connection;
 
-import com.limegroup.gnutella.messages.*;
+import com.limegroup.gnutella.messages.Message;
 
 /**
  * A priority queue for messages.  Used by ManagedConnection to implement the

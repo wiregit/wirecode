@@ -1,16 +1,20 @@
 package com.limegroup.gnutella.handshaking;
 
-import com.limegroup.gnutella.*;
+import java.io.IOException;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Properties;
+import java.util.Set;
+import java.util.StringTokenizer;
+
+import com.limegroup.gnutella.RouterService;
+import com.limegroup.gnutella.settings.ApplicationSettings;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.IpPort;
-import com.limegroup.gnutella.settings.ApplicationSettings;
-
-import java.util.Properties;
-import java.util.*;
-
-import java.io.*;
-import java.util.StringTokenizer;
 
 /**
  * This class contains the necessary information to form a response to a 

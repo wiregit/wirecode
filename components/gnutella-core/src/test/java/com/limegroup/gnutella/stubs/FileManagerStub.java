@@ -1,16 +1,18 @@
 package com.limegroup.gnutella.stubs;
 
 import java.io.File;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Vector;
 
-import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.FileDesc;
 import com.limegroup.gnutella.FileManager;
 import com.limegroup.gnutella.Response;
+import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
-import java.util.*;
-
-import java.io.IOException;
 
 /**
  * A simple FileManager that shares one file of (near) infinite length.

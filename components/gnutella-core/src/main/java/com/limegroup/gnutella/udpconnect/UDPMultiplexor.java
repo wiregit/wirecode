@@ -1,8 +1,7 @@
 package com.limegroup.gnutella.udpconnect;
 
 import java.lang.ref.WeakReference;
-import java.net.*;
-import com.limegroup.gnutella.messages.BadPacketException;
+import java.net.InetAddress;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;

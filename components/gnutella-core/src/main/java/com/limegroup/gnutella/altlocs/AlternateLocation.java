@@ -1,13 +1,19 @@
 package com.limegroup.gnutella.altlocs;
 
-import com.limegroup.gnutella.*;
-import com.limegroup.gnutella.filters.IP;
-import com.limegroup.gnutella.http.*;
-import com.limegroup.gnutella.settings.ConnectionSettings;
-import com.limegroup.gnutella.util.*;
-import java.net.*;
+import java.io.IOException;
+import java.net.URL;
 import java.util.StringTokenizer;
-import java.io.*;
+
+import com.limegroup.gnutella.Endpoint;
+import com.limegroup.gnutella.ErrorService;
+import com.limegroup.gnutella.PushEndpoint;
+import com.limegroup.gnutella.RemoteFileDesc;
+import com.limegroup.gnutella.RouterService;
+import com.limegroup.gnutella.URN;
+import com.limegroup.gnutella.filters.IP;
+import com.limegroup.gnutella.http.HTTPHeaderValue;
+import com.limegroup.gnutella.settings.ConnectionSettings;
+import com.limegroup.gnutella.util.IpPort;
 
 /**
  * This class encapsulates the data for an alternate resource location, as 

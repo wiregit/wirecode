@@ -1,8 +1,12 @@
 package com.limegroup.gnutella.updates;
 
-import com.limegroup.gnutella.util.*;
-import java.io.*;
-import java.util.*;
+import java.io.BufferedInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.NoSuchElementException;
+import java.util.StringTokenizer;
+
+import com.limegroup.gnutella.util.CommonUtils;
 
 /**
  * Finds out the Mac address of the machine. 

@@ -1,9 +1,16 @@
 package com.limegroup.gnutella.html;
 
-import com.limegroup.gnutella.*;
-import com.limegroup.gnutella.util.*;
 import java.io.File;
 import java.net.URLEncoder;
+
+import com.limegroup.gnutella.FileDesc;
+import com.limegroup.gnutella.FileManager;
+import com.limegroup.gnutella.IncompleteFileDesc;
+import com.limegroup.gnutella.MessageResourceService;
+import com.limegroup.gnutella.RouterService;
+import com.limegroup.gnutella.UploadManager;
+import com.limegroup.gnutella.util.NetworkUtils;
+import com.limegroup.gnutella.util.StringUtils;
 
 /**
  * Creates a HTML listing of shared files and/or magnet links.

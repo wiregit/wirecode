@@ -2,6 +2,8 @@ package com.limegroup.gnutella;
 
 import java.io.File;
 import java.io.FileWriter;
+import java.util.Iterator;
+import java.util.Set;
 
 import junit.framework.Test;
 
@@ -12,8 +14,6 @@ import com.limegroup.gnutella.util.BaseTestCase;
 import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.FixedsizePriorityQueue;
 import com.limegroup.gnutella.util.PrivilegedAccessor;
-import java.util.Iterator;
-import java.util.Set;
 
 public class HostCatcherTest extends BaseTestCase {  
     private HostCatcher hc;

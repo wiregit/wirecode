@@ -1,41 +1,25 @@
 package com.limegroup.gnutella;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.InputStreamReader;
-import java.io.InterruptedIOException;
-import java.io.OutputStreamWriter;
 import java.io.ByteArrayOutputStream;
-import java.net.InetAddress;
-import java.net.ServerSocket;
-import java.net.DatagramSocket;
+import java.io.InterruptedIOException;
 import java.net.DatagramPacket;
+import java.net.DatagramSocket;
+import java.net.InetAddress;
 import java.net.Socket;
-import java.util.StringTokenizer;
+import java.util.Random;
+import java.util.Set;
 
 import junit.framework.Test;
 
-import com.bitzi.util.Base32;
-import com.limegroup.gnutella.Acceptor;
-import com.limegroup.gnutella.UDPService;
 import com.limegroup.gnutella.messages.Message;
-import com.limegroup.gnutella.messages.PushRequest;
 import com.limegroup.gnutella.messages.PingRequest;
-import com.limegroup.gnutella.messages.QueryReply;
-import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.messages.vendor.MessagesSupportedVendorMessage;
+import com.limegroup.gnutella.messages.vendor.ReplyNumberVendorMessage;
 import com.limegroup.gnutella.messages.vendor.TCPConnectBackVendorMessage;
 import com.limegroup.gnutella.messages.vendor.UDPConnectBackVendorMessage;
-import com.limegroup.gnutella.messages.vendor.ReplyNumberVendorMessage;
 import com.limegroup.gnutella.search.HostData;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
-import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.PrivilegedAccessor;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Set;
-import java.util.Random;
 
 /**
  * Checks whether (multi)leaves avoid forwarding messages to ultrapeers, do

@@ -1,7 +1,8 @@
 package com.limegroup.gnutella.settings;
 
-import com.limegroup.gnutella.Assert;
 import java.util.Properties;
+
+import com.limegroup.gnutella.Assert;
 
 public abstract class AbstractNumberSetting extends Setting{
 

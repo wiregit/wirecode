@@ -1,8 +1,8 @@
 package com.limegroup.gnutella.util;
 
 import java.io.FilterOutputStream;
-import java.io.OutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 
 /**
  * OutputStream that counts the number of bytes attempted to write.

@@ -5,8 +5,6 @@
 
 package com.limegroup.gnutella.util;
 
-import java.util.*;
-import java.io.*;
 
 public class LimitedList {
     

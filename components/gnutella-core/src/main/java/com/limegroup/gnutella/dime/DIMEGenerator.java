@@ -1,10 +1,10 @@
 package com.limegroup.gnutella.dime;
 
-import java.util.List;
-import java.util.LinkedList;
-import java.util.Iterator;
-import java.io.OutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 
 /**
  * Parser for writing DIMERecords to a stream.

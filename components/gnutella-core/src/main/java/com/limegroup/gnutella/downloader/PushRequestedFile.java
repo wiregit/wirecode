@@ -1,8 +1,9 @@
 package com.limegroup.gnutella.downloader;
 
-import com.limegroup.gnutella.GUID;
-import java.util.Date;
 import java.util.Arrays;
+import java.util.Date;
+
+import com.limegroup.gnutella.GUID;
 
 /** 
  * A file that we requested via a push message.  Used for "authenticating"

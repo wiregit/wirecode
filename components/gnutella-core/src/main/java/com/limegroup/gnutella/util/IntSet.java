@@ -1,6 +1,8 @@
 package com.limegroup.gnutella.util;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.NoSuchElementException;
+
 import com.limegroup.gnutella.Assert;
 
 /**

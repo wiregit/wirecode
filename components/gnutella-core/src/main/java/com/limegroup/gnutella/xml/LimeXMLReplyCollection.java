@@ -1,17 +1,36 @@
 package com.limegroup.gnutella.xml;
 
-import com.limegroup.gnutella.*;
-import com.limegroup.gnutella.metadata.*;
-import com.limegroup.gnutella.util.Trie;
-import com.limegroup.gnutella.util.DataUtils;
-import com.limegroup.gnutella.util.I18NConvert;
-import com.limegroup.gnutella.util.ConverterObjectInputStream;
-import java.util.*;
-import java.io.*;
-import org.xml.sax.*;
+import java.io.BufferedInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
-import org.apache.commons.logging.LogFactory;
 import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
+import com.limegroup.gnutella.Assert;
+import com.limegroup.gnutella.FileDesc;
+import com.limegroup.gnutella.IncompleteFileDesc;
+import com.limegroup.gnutella.RouterService;
+import com.limegroup.gnutella.URN;
+import com.limegroup.gnutella.metadata.AudioMetaData;
+import com.limegroup.gnutella.metadata.MetaDataEditor;
+import com.limegroup.gnutella.metadata.MetaDataReader;
+import com.limegroup.gnutella.util.ConverterObjectInputStream;
+import com.limegroup.gnutella.util.I18NConvert;
+import com.limegroup.gnutella.util.Trie;
 
 /**
  *  Stores a schema and a list of replies corresponding to that schema.

@@ -6,7 +6,9 @@
 
 package com.limegroup.gnutella.xml;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
 
 /**
  * Provides utility methods to process the canonicalized strings we use to

@@ -1,9 +1,14 @@
 package com.limegroup.gnutella;
 
-import com.limegroup.gnutella.util.*;
-import com.limegroup.gnutella.messages.*;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+
+import com.limegroup.gnutella.messages.PingReply;
 import com.limegroup.gnutella.settings.ApplicationSettings;
-import java.util.*;
+import com.limegroup.gnutella.util.BucketQueue;
 
 /**
  * This class caches pongs from the network.  Caching pongs saves considerable

@@ -1,7 +1,10 @@
 package com.limegroup.gnutella.messages;
 
-import com.limegroup.gnutella.util.*;
-import java.io.*;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+
+import com.limegroup.gnutella.util.Data;
 
 public final class StaticMessages {
 

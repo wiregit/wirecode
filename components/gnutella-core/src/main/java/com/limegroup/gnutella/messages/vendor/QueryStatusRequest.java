@@ -1,11 +1,11 @@
 package com.limegroup.gnutella.messages.vendor;
 
-import com.limegroup.gnutella.messages.BadPacketException;
-import com.limegroup.gnutella.ByteOrder;
+import java.io.IOException;
+import java.io.OutputStream;
+
 import com.limegroup.gnutella.GUID;
-import com.limegroup.gnutella.statistics.*;
+import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.util.DataUtils;
-import java.io.*;
 
 /** In Vendor Message parlance, the "message type" of this message is "BEAR/11".
  *  Sent to a servent (a leaf usually) to inquire about the status of a query

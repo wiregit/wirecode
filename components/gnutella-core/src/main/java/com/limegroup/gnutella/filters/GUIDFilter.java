@@ -1,7 +1,6 @@
 package com.limegroup.gnutella.filters;
 
-import com.limegroup.gnutella.*;
-import com.limegroup.gnutella.messages.*;
+import com.limegroup.gnutella.messages.Message;
 
 /** 
  * Blocks GUIDs from runaway Qtrax queries.

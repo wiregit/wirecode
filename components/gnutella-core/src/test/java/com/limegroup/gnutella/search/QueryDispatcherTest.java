@@ -1,5 +1,9 @@
 package com.limegroup.gnutella.search;
 
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Set;
+
 import junit.framework.Test;
 
 import com.limegroup.gnutella.ReplyHandler;
@@ -10,9 +14,6 @@ import com.limegroup.gnutella.stubs.ReplyHandlerStub;
 import com.limegroup.gnutella.util.BaseTestCase;
 import com.limegroup.gnutella.util.PrivilegedAccessor;
 import com.limegroup.gnutella.util.TestResultCounter;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Set;
 
 /**
  * This class tests the dispatching of dynamic queries for ourselves 

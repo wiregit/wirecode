@@ -1,12 +1,13 @@
 package com.limegroup.gnutella.uploader;
 
+import java.io.IOException;
+import java.io.OutputStream;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.statistics.UploadStat;
-import java.io.OutputStream;
-import java.io.IOException;
-
-import org.apache.commons.logging.LogFactory;
-import org.apache.commons.logging.Log;
 
 /**
  * Kills an OutputStream after a certain amount of time has passed.<p>

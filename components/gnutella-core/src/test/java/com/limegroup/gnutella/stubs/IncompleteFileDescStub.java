@@ -4,14 +4,14 @@ package com.limegroup.gnutella.stubs;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.HashSet;
+import java.util.Set;
 
 import com.limegroup.gnutella.ErrorService;
 import com.limegroup.gnutella.IncompleteFileDesc;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.altlocs.AlternateLocation;
 import com.limegroup.gnutella.altlocs.AlternateLocationCollection;
-import java.util.HashSet;
-import java.util.Set;
 
 /**
  * A stub that is identical to FileDescStub.  The code uses instanceof,

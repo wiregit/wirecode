@@ -1,6 +1,6 @@
 package com.limegroup.gnutella.statistics;
 
-import com.limegroup.gnutella.util.*;
+import com.limegroup.gnutella.util.IntBuffer;
 
 /**
  * Interface for generalized access to a <tt>Statistic</tt>.

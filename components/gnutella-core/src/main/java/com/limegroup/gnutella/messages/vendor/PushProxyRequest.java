@@ -1,11 +1,11 @@
 package com.limegroup.gnutella.messages.vendor;
 
-import com.limegroup.gnutella.messages.BadPacketException;
-import com.limegroup.gnutella.ByteOrder;
+import java.io.IOException;
+import java.io.OutputStream;
+
 import com.limegroup.gnutella.GUID;
-import com.limegroup.gnutella.statistics.*;
+import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.util.DataUtils;
-import java.io.*;
 
 /** In Vendor Message parlance, the "message type" of this message is "LIME/20".
  *  Used to ask a Ultrapeer you are connected to to be your PushProxy.

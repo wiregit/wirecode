@@ -6,7 +6,6 @@ import java.io.OutputStream;
 import com.limegroup.gnutella.http.ConstantHTTPHeaderValue;
 import com.limegroup.gnutella.http.HTTPHeaderName;
 import com.limegroup.gnutella.http.HTTPUtils;
-import com.limegroup.gnutella.http.HTTPMessage;
 import com.limegroup.gnutella.util.CommonUtils;
 
 

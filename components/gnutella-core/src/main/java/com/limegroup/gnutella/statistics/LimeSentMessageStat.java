@@ -1,6 +1,5 @@
 package com.limegroup.gnutella.statistics;
 
-import com.limegroup.gnutella.*;
 
 /**
  * This class contains a type-safe enumeration of statistics for

@@ -1,10 +1,7 @@
 package com.limegroup.gnutella.dime;
 
-import java.io.ByteArrayOutputStream;
 import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.io.InputStream;
+import java.io.ByteArrayOutputStream;
 
 import junit.framework.Test;
 

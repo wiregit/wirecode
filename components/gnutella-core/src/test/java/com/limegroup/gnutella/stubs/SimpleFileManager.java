@@ -1,13 +1,13 @@
 package com.limegroup.gnutella.stubs;
 
 import java.io.File;
+import java.util.List;
 
 import com.limegroup.gnutella.FileDesc;
 import com.limegroup.gnutella.FileManager;
 import com.limegroup.gnutella.Response;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
-import java.util.List;
 
 /**
  * A file manager that behaves exactly like FileManager would if

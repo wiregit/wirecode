@@ -1,10 +1,11 @@
 package com.limegroup.gnutella.util;
 
-import junit.framework.TestCase;
-import java.util.Collection;
 import java.util.Arrays;
-import java.util.List;
+import java.util.Collection;
 import java.util.LinkedList;
+import java.util.List;
+
+import junit.framework.TestCase;
     
 /**
  * A set of assert comparisons to check greater than / less than

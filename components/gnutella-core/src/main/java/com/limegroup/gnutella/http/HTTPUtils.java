@@ -1,17 +1,20 @@
 package com.limegroup.gnutella.http;
 
-import com.limegroup.gnutella.util.*;
-import com.limegroup.gnutella.settings.ChatSettings;
-import com.limegroup.gnutella.statistics.*;
-import com.limegroup.gnutella.*;
-import java.io.*;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.Writer;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.Locale;
-import java.util.TimeZone;
-import java.util.Set;
 import java.util.HashSet;
+import java.util.Locale;
+import java.util.Set;
+import java.util.TimeZone;
+
+import com.limegroup.gnutella.RouterService;
+import com.limegroup.gnutella.UDPService;
+import com.limegroup.gnutella.settings.ChatSettings;
+import com.limegroup.gnutella.statistics.BandwidthStat;
 
 /**
  * This class supplies general facilities for handling HTTP, such as

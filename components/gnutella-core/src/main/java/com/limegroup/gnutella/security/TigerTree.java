@@ -2,27 +2,22 @@
  * (PD) 2003 The Bitzi Corporation Please see http://bitzi.com/publicdomain for
  * more info.
  * 
- * $Id: TigerTree.java,v 1.3 2004-10-12 20:19:37 zlatinb Exp $
+ * $Id: TigerTree.java,v 1.4 2004-10-12 21:45:28 zlatinb Exp $
  */
 package com.limegroup.gnutella.security;
 
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.math.BigInteger;
 import java.security.DigestException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
-import java.security.Security;
 import java.security.Provider;
-
-
-import java.util.List;
+import java.security.Security;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 
-import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.ErrorService;
+import com.limegroup.gnutella.util.CommonUtils;
 
 /**
  * Implementation of THEX tree hash algorithm, with Tiger as the internal

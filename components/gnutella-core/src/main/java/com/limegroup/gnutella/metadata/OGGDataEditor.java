@@ -1,14 +1,14 @@
 
 package com.limegroup.gnutella.metadata;
 
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
 
-import com.jcraft.jorbis.*;
-import com.jcraft.jogg.*;
- 
-import com.limegroup.gnutella.ErrorService;
+import com.jcraft.jorbis.Comment;
+import com.jcraft.jorbis.JOrbisException;
+import com.jcraft.jorbis.VorbisFile;
+import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.xml.LimeXMLReplyCollection;
-import com.limegroup.gnutella.util.*;
 
 /**
  * class which handles specifically the annotation of OGG files.

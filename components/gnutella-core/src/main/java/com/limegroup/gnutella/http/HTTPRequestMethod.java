@@ -1,6 +1,7 @@
 package com.limegroup.gnutella.http;
 
-import java.io.*;
+import java.io.IOException;
+import java.io.OutputStream;
 
 /**
  * Type-safe enum for HTTP request methods, as specified in RFC 2616.

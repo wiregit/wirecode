@@ -1,6 +1,7 @@
 package com.limegroup.gnutella.settings;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Controls access to all Settings classes, providing easy ways

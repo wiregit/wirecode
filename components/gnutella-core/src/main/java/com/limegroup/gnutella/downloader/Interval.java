@@ -2,10 +2,8 @@ package com.limegroup.gnutella.downloader;
 
 import java.io.Serializable;
 
-
-
-import com.limegroup.gnutella.Assert;
-import com.limegroup.gnutella.ByteOrder;;
+import com.limegroup.gnutella.ByteOrder;
+;
 
 /** The open interval [low, high] inclusive on the both ends. */
 public class Interval implements Serializable{

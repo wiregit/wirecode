@@ -1,8 +1,15 @@
 package com.limegroup.gnutella.util;
 
 
-import java.util.*;
-import com.limegroup.gnutella.*;
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.SortedSet;
+import java.util.TreeSet;
+
+import com.limegroup.gnutella.Assert;
 
 /**
  * A simple fixed size sorted set.  Uses two structures internally, a SortedSet

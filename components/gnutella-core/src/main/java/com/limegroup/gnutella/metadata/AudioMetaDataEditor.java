@@ -3,9 +3,10 @@ package com.limegroup.gnutella.metadata;
 
 import java.io.IOException;
 
-import com.limegroup.gnutella.xml.LimeXMLUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
-import org.apache.commons.logging.*;
+import com.limegroup.gnutella.xml.LimeXMLUtils;
 
 /**
  * a metadata editor for audio files.

@@ -1,6 +1,6 @@
 package com.limegroup.gnutella.downloader;
 
-import java.io.*;
+import java.io.IOException;
 
 public class QueuedException extends IOException {
     //All package access. 

@@ -1,9 +1,18 @@
 package com.limegroup.gnutella.util;
 
-import java.net.*;
-import com.limegroup.gnutella.*;
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.net.InetSocketAddress;
+import java.net.ServerSocket;
+import java.net.Socket;
 import java.util.StringTokenizer;
+
+import com.limegroup.gnutella.Assert;
+import com.limegroup.gnutella.ByteReader;
+import com.limegroup.gnutella.ErrorService;
 
 public class FakeProxyServer {
 

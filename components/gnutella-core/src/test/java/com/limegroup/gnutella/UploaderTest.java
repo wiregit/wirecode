@@ -3,26 +3,26 @@ package com.limegroup.gnutella;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.net.Socket;
-import java.io.InputStream;
-
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Vector;
 
 import junit.framework.Test;
 
+import com.limegroup.gnutella.downloader.ConnectionStatus;
 import com.limegroup.gnutella.downloader.HTTPDownloader;
 import com.limegroup.gnutella.downloader.QueuedException;
 import com.limegroup.gnutella.downloader.TryAgainLaterException;
 import com.limegroup.gnutella.downloader.UnknownCodeException;
-import com.limegroup.gnutella.downloader.ConnectionStatus;
 import com.limegroup.gnutella.http.HTTPRequestMethod;
 import com.limegroup.gnutella.settings.UploadSettings;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
-import com.limegroup.gnutella.stubs.FileManagerStub;
 import com.limegroup.gnutella.stubs.FileDescStub;
-import com.limegroup.gnutella.tigertree.HashTree;
+import com.limegroup.gnutella.stubs.FileManagerStub;
 import com.limegroup.gnutella.uploader.StalledUploadWatchdog;
 import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.PipedSocketFactory;

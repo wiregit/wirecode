@@ -1,7 +1,7 @@
 package com.limegroup.gnutella.handshaking;
 
-import com.limegroup.gnutella.http.HTTPHeaderName;
 import com.limegroup.gnutella.http.ConstantHTTPHeaderValue;
+import com.limegroup.gnutella.http.HTTPHeaderName;
 
 /**
  * Provides names for the headers used in the gnutella connection handshake

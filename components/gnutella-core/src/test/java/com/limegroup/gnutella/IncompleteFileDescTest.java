@@ -1,14 +1,14 @@
 package com.limegroup.gnutella;
 
 import java.io.File;
+import java.util.HashSet;
+import java.util.Set;
 
 import junit.framework.Test;
 
 import com.limegroup.gnutella.downloader.Interval;
 import com.limegroup.gnutella.downloader.VerifyingFile;
 import com.limegroup.gnutella.util.BaseTestCase;
-import java.util.HashSet;
-import java.util.Set;
 
 public class IncompleteFileDescTest extends BaseTestCase {
     

@@ -1,11 +1,11 @@
 package com.limegroup.gnutella.util;
 
-import junit.framework.Test;
-
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
+
+import junit.framework.Test;
 
 public class FixedSizeSortedSetTest extends BaseTestCase {
     

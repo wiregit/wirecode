@@ -1,11 +1,19 @@
 package com.limegroup.gnutella.settings;
 
-import java.util.*;
-import java.io.*;
-import com.limegroup.gnutella.simpp.*;
-import com.limegroup.gnutella.*;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Properties;
+import java.util.Set;
 
-import org.apache.commons.logging.*;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
+import com.limegroup.gnutella.ErrorService;
+import com.limegroup.gnutella.simpp.SimppManager;
 
 public class SimppSettingsManager {
     

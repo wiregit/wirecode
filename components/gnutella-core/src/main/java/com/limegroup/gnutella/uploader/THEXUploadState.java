@@ -7,22 +7,12 @@ import java.io.StringWriter;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.limegroup.gnutella.FileDesc;
-import com.limegroup.gnutella.RemoteFileDesc;
-import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.http.ConstantHTTPHeaderValue;
-import com.limegroup.gnutella.http.HTTPHeaderValueCollection;
-import com.limegroup.gnutella.http.HTTPConstants;
 import com.limegroup.gnutella.http.HTTPHeaderName;
-import com.limegroup.gnutella.http.HTTPMessage;
 import com.limegroup.gnutella.http.HTTPUtils;
-import com.limegroup.gnutella.settings.ChatSettings;
 import com.limegroup.gnutella.tigertree.HashTree;
-import com.limegroup.gnutella.util.ThrottledOutputStream;
 import com.limegroup.gnutella.util.BandwidthThrottle;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Set;
+import com.limegroup.gnutella.util.ThrottledOutputStream;
 
 /**
  * Sends the THEX tree as an HTTP message.

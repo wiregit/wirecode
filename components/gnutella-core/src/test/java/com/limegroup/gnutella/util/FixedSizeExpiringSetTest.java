@@ -1,8 +1,9 @@
 package com.limegroup.gnutella.util;
 
-import junit.framework.Test;
+import java.util.ArrayList;
+import java.util.Collection;
 
-import java.util.*;
+import junit.framework.Test;
 
 
 

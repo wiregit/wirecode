@@ -2,6 +2,9 @@
 package com.limegroup.gnutella.altlocs;
 
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 
 import com.limegroup.gnutella.ErrorService;
 import com.limegroup.gnutella.PushEndpoint;
@@ -10,10 +13,6 @@ import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.http.HTTPConstants;
-
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
 
 /**
  * A firewalled altloc.

@@ -1,7 +1,7 @@
 package com.limegroup.gnutella.settings;
 
+import java.io.File;
 import java.util.Properties;
-import java.io.*;
 
 /**
  * This class handles settings for <tt>File</tt>s.

@@ -1,11 +1,16 @@
 package com.limegroup.gnutella.statistics;
 
-import com.limegroup.gnutella.util.*;
-import java.util.*;
-import java.io.*;
-import java.lang.reflect.*;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.Writer;
+import java.lang.reflect.Field;
+import java.util.Arrays;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.StringTokenizer;
+
 import com.limegroup.gnutella.ErrorService;
+import com.limegroup.gnutella.util.IntBuffer;
 
 /**
  * This class provides a default implementation of the <tt>Statistic</tt>

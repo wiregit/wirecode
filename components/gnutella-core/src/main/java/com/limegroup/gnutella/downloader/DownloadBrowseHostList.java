@@ -1,7 +1,9 @@
 package com.limegroup.gnutella.downloader;
 
-import com.limegroup.gnutella.*;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+
+import com.limegroup.gnutella.RemoteFileDesc;
 
 /**
  * This class keeps track of browsable <tt>HTTPDownloader</tt> instances for

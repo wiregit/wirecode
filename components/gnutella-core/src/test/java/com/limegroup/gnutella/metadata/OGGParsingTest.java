@@ -1,12 +1,11 @@
 package com.limegroup.gnutella.metadata;
 
-import com.limegroup.gnutella.metadata.AudioMetaData;
-import com.limegroup.gnutella.metadata.MetaData;
-import com.limegroup.gnutella.util.*;
+import java.io.File;
 
 import junit.framework.Test;
 
-import java.io.*;
+import com.limegroup.gnutella.util.BaseTestCase;
+import com.limegroup.gnutella.util.CommonUtils;
 
 /**
  * test for the parsing of OGG file's metadata

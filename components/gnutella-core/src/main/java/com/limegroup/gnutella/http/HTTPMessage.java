@@ -1,6 +1,7 @@
 package com.limegroup.gnutella.http;
 
-import java.io.*;
+import java.io.IOException;
+import java.io.OutputStream;
 
 /**
  * This class defines the basic functionality of a class capable of writing

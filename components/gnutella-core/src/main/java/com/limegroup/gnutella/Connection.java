@@ -1,19 +1,45 @@
 package com.limegroup.gnutella;
 
-import java.io.*;
-import java.net.*;
-import java.util.zip.*;
-import java.util.Properties;
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InterruptedIOException;
+import java.io.OutputStream;
+import java.net.InetAddress;
+import java.net.Socket;
+import java.net.UnknownHostException;
 import java.util.Enumeration;
-import com.limegroup.gnutella.messages.*;
-import com.limegroup.gnutella.messages.vendor.*;
-import com.limegroup.gnutella.handshaking.*;
-import com.limegroup.gnutella.settings.*;
-import com.limegroup.gnutella.util.*;
-import com.limegroup.gnutella.statistics.*;
+import java.util.Properties;
+import java.util.zip.Deflater;
+import java.util.zip.Inflater;
 
-import org.apache.commons.logging.LogFactory;
 import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
+import com.limegroup.gnutella.handshaking.BadHandshakeException;
+import com.limegroup.gnutella.handshaking.HandshakeResponder;
+import com.limegroup.gnutella.handshaking.HandshakeResponse;
+import com.limegroup.gnutella.handshaking.HeaderNames;
+import com.limegroup.gnutella.handshaking.NoGnutellaOkException;
+import com.limegroup.gnutella.messages.BadPacketException;
+import com.limegroup.gnutella.messages.Message;
+import com.limegroup.gnutella.messages.vendor.CapabilitiesVM;
+import com.limegroup.gnutella.messages.vendor.MessagesSupportedVendorMessage;
+import com.limegroup.gnutella.messages.vendor.SimppVM;
+import com.limegroup.gnutella.messages.vendor.StatisticVendorMessage;
+import com.limegroup.gnutella.messages.vendor.VendorMessage;
+import com.limegroup.gnutella.settings.ConnectionSettings;
+import com.limegroup.gnutella.settings.StringSetting;
+import com.limegroup.gnutella.statistics.BandwidthStat;
+import com.limegroup.gnutella.statistics.CompressionStat;
+import com.limegroup.gnutella.statistics.ConnectionStat;
+import com.limegroup.gnutella.statistics.HandshakingStat;
+import com.limegroup.gnutella.util.CompressingOutputStream;
+import com.limegroup.gnutella.util.IpPort;
+import com.limegroup.gnutella.util.NetworkUtils;
+import com.limegroup.gnutella.util.Sockets;
+import com.limegroup.gnutella.util.UncompressingInputStream;
 
 /**
  * A Gnutella messaging connection.  Provides handshaking functionality and

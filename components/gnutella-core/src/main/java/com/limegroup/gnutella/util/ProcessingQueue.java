@@ -1,7 +1,5 @@
 package com.limegroup.gnutella.util;
 
-import com.limegroup.gnutella.util.ManagedThread;
-
 import java.util.List;
 import java.util.Vector;
 

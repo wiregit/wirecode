@@ -1,10 +1,9 @@
 package com.limegroup.gnutella.messages.vendor;
 
-import com.limegroup.gnutella.*;
-import com.limegroup.gnutella.util.*;
-import com.limegroup.gnutella.messages.BadPacketException;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
+
+import com.limegroup.gnutella.URN;
+import com.limegroup.gnutella.messages.BadPacketException;
 
 /**
  * An UDP equivalent of the HEAD request method with a twist.

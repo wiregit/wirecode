@@ -1,20 +1,20 @@
 package com.limegroup.gnutella;
 
 import java.net.InetAddress;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 
 import junit.framework.Test;
 
 import com.limegroup.gnutella.messages.PingReply;
 import com.limegroup.gnutella.security.ServerAuthenticator;
+import com.limegroup.gnutella.settings.ApplicationSettings;
 import com.limegroup.gnutella.util.BaseTestCase;
 import com.limegroup.gnutella.util.BucketQueue;
 import com.limegroup.gnutella.util.MessageTestUtils;
 import com.limegroup.gnutella.util.PrivilegedAccessor;
 import com.limegroup.gnutella.util.UltrapeerConnectionManager;
-import com.limegroup.gnutella.settings.ApplicationSettings;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
 
 /**
  * Tests the <tt>PongCacher</tt> class that maintains a cache of the best most

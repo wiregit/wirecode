@@ -1,9 +1,12 @@
 package com.limegroup.gnutella.routing;
 
-import com.limegroup.gnutella.*;
-import com.limegroup.gnutella.messages.*;
-import com.limegroup.gnutella.statistics.*;
-import java.io.*;
+import java.io.IOException;
+import java.io.OutputStream;
+
+import com.limegroup.gnutella.ByteOrder;
+import com.limegroup.gnutella.messages.BadPacketException;
+import com.limegroup.gnutella.statistics.DroppedSentMessageStatHandler;
+import com.limegroup.gnutella.statistics.SentMessageStatHandler;
 
 
 /**

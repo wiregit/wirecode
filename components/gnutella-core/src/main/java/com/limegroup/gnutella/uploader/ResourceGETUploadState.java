@@ -1,11 +1,11 @@
 package com.limegroup.gnutella.uploader;
 
-import com.limegroup.gnutella.*;
-import com.limegroup.gnutella.messages.*;
-import com.limegroup.gnutella.http.*;
-import com.limegroup.gnutella.html.*;
-import java.io.*;
-import java.util.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.OutputStream;
+
 import com.limegroup.gnutella.util.CommonUtils;
 
 /**

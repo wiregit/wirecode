@@ -1,6 +1,6 @@
 package com.limegroup.gnutella.guess;
 
-import java.net.*;
+import java.net.InetAddress;
 
 /**
  * Simple host/port pair for endpoints used in GUESS.  The use of the

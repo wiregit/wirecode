@@ -1,14 +1,21 @@
 
 package com.limegroup.gnutella.uploader;
 
-import java.io.*;
-import com.limegroup.gnutella.*;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.Writer;
+import java.util.Iterator;
+import java.util.Set;
 
+import com.limegroup.gnutella.FileDesc;
+import com.limegroup.gnutella.IncompleteFileDesc;
+import com.limegroup.gnutella.PushProxyInterface;
+import com.limegroup.gnutella.RouterService;
+import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.http.HTTPHeaderName;
 import com.limegroup.gnutella.http.HTTPHeaderValueCollection;
 import com.limegroup.gnutella.http.HTTPMessage;
 import com.limegroup.gnutella.http.HTTPUtils;
-import java.util.*;
 
 /**
  * an Upload State.  has some utility methods all upload states can use.

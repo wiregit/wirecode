@@ -1,12 +1,23 @@
 package com.limegroup.gnutella.simpp;
 
-import java.net.*;
-import java.util.*;
-import com.limegroup.gnutella.*;
-import com.limegroup.gnutella.messages.*;
-import com.limegroup.gnutella.messages.vendor.*;
-import com.limegroup.gnutella.util.*;
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.RandomAccessFile;
+import java.net.Socket;
+
+import com.limegroup.gnutella.Assert;
+import com.limegroup.gnutella.ByteReader;
+import com.limegroup.gnutella.ErrorService;
+import com.limegroup.gnutella.messages.BadPacketException;
+import com.limegroup.gnutella.messages.Message;
+import com.limegroup.gnutella.messages.vendor.CapabilitiesVM;
+import com.limegroup.gnutella.messages.vendor.CapabilitiesVMStubHelper;
+import com.limegroup.gnutella.messages.vendor.SimppRequestVM;
+import com.limegroup.gnutella.messages.vendor.SimppVM;
+import com.limegroup.gnutella.util.BaseTestCase;
+import com.limegroup.gnutella.util.CommonUtils;
 
 
 public class TestConnection {

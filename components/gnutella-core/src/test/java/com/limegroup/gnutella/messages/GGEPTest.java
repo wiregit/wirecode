@@ -1,11 +1,10 @@
 package com.limegroup.gnutella.messages;
 
 import java.io.ByteArrayOutputStream;
-
-import junit.framework.Test;
-
 import java.util.Arrays;
 import java.util.Set;
+
+import junit.framework.Test;
 
 public class GGEPTest extends com.limegroup.gnutella.util.BaseTestCase {
     public GGEPTest(String name) {

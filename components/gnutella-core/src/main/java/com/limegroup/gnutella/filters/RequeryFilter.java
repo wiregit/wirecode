@@ -1,9 +1,8 @@
 package com.limegroup.gnutella.filters;
 
-import com.limegroup.gnutella.*;
-import com.limegroup.gnutella.messages.*;
-import java.util.*;
-import java.util.Locale;
+import com.limegroup.gnutella.GUID;
+import com.limegroup.gnutella.messages.Message;
+import com.limegroup.gnutella.messages.QueryRequest;
 
 /** 
  * Blocks over-zealous automated requeries.

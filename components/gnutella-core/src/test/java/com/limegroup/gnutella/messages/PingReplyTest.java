@@ -4,6 +4,8 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.InetAddress;
+import java.util.Arrays;
+import java.util.Random;
 
 import junit.framework.Test;
 
@@ -14,8 +16,6 @@ import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.guess.QueryKey;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.util.PrivilegedAccessor;
-import java.util.Arrays;
-import java.util.Random;
 
 public class PingReplyTest extends com.limegroup.gnutella.util.BaseTestCase {
     

@@ -1,6 +1,8 @@
 package com.limegroup.gnutella;
 
 import java.io.File;
+import java.util.Arrays;
+import java.util.Iterator;
 
 import junit.framework.Test;
 
@@ -21,8 +23,6 @@ import com.limegroup.gnutella.settings.UltrapeerSettings;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.util.BaseTestCase;
 import com.limegroup.gnutella.util.EmptyResponder;
-import java.util.Arrays;
-import java.util.Iterator;
 
 /**
  * The most important end-to-end message routing test.  Checks whether

@@ -7,8 +7,8 @@
  */
 package com.limegroup.gnutella.upelection;
 
-import com.limegroup.gnutella.util.*;
 import com.limegroup.gnutella.ReplyHandler;
+import com.limegroup.gnutella.util.FixedSizeExpiringSet;
 
 public class PromotionManager {
 	

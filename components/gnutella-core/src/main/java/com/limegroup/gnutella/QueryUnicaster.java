@@ -1,12 +1,29 @@
 package com.limegroup.gnutella;
 
-import com.limegroup.gnutella.messages.*;
-import com.limegroup.gnutella.guess.*;
-import com.limegroup.gnutella.statistics.*;
-import com.limegroup.gnutella.settings.*;
-import com.limegroup.gnutella.util.*;
-import java.util.*;
-import java.net.*;
+import java.net.InetAddress;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Hashtable;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.Vector;
+
+import com.limegroup.gnutella.guess.GUESSEndpoint;
+import com.limegroup.gnutella.guess.QueryKey;
+import com.limegroup.gnutella.messages.PingReply;
+import com.limegroup.gnutella.messages.PingRequest;
+import com.limegroup.gnutella.messages.QueryReply;
+import com.limegroup.gnutella.messages.QueryRequest;
+import com.limegroup.gnutella.settings.ConnectionSettings;
+import com.limegroup.gnutella.settings.SearchSettings;
+import com.limegroup.gnutella.statistics.SentMessageStatHandler;
+import com.limegroup.gnutella.util.Buffer;
+import com.limegroup.gnutella.util.ManagedThread;
+import com.limegroup.gnutella.util.NetworkUtils;
 
 /** 
  * This class runs a single thread which sends unicast UDP queries to a master

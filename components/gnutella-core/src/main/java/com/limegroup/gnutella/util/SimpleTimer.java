@@ -1,8 +1,9 @@
 package com.limegroup.gnutella.util;
 
-import com.limegroup.gnutella.ErrorService;
 import java.util.Timer;
 import java.util.TimerTask;
+
+import com.limegroup.gnutella.ErrorService;
 
 
 /**

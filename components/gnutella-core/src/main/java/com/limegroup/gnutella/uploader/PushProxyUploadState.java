@@ -1,17 +1,21 @@
 package com.limegroup.gnutella.uploader;
 
-import com.limegroup.gnutella.*;
-import com.limegroup.gnutella.messages.*;
-import com.limegroup.gnutella.http.*;
-import java.io.*;
-import java.net.*;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.net.InetAddress;
+import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import java.util.*;
-import com.limegroup.gnutella.util.*;
-import com.limegroup.gnutella.statistics.*;
+import com.limegroup.gnutella.Constants;
+import com.limegroup.gnutella.GUID;
+import com.limegroup.gnutella.RouterService;
+import com.limegroup.gnutella.messages.PushRequest;
+import com.limegroup.gnutella.statistics.UploadStat;
+import com.limegroup.gnutella.util.CommonUtils;
+import com.limegroup.gnutella.util.NetworkUtils;
 
 /**
  * An implementaiton of the UploadState interface

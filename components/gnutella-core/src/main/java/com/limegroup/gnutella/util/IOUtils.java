@@ -1,7 +1,9 @@
 package com.limegroup.gnutella.util;
 
-import java.io.*;
-import com.limegroup.gnutella.ErrorService;
+import java.io.EOFException;
+import java.io.IOException;
+import java.io.InputStream;
+
 import com.limegroup.gnutella.MessageService;
 
 /**

@@ -1,14 +1,22 @@
 package com.limegroup.gnutella;
 
-import com.limegroup.gnutella.messages.*;
-import com.limegroup.gnutella.messages.vendor.*;
-import com.limegroup.gnutella.util.*;
-import com.limegroup.gnutella.statistics.*;
-import com.limegroup.gnutella.filters.SpamFilter;
-import java.util.*;
-import com.limegroup.gnutella.settings.ApplicationSettings;
 import java.io.IOException;
-import java.net.*;
+import java.net.InetAddress;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
+
+import com.limegroup.gnutella.filters.SpamFilter;
+import com.limegroup.gnutella.messages.Message;
+import com.limegroup.gnutella.messages.PingReply;
+import com.limegroup.gnutella.messages.PushRequest;
+import com.limegroup.gnutella.messages.QueryReply;
+import com.limegroup.gnutella.messages.vendor.SimppVM;
+import com.limegroup.gnutella.messages.vendor.StatisticVendorMessage;
+import com.limegroup.gnutella.messages.vendor.UDPCrawlerPong;
+import com.limegroup.gnutella.settings.ApplicationSettings;
+import com.limegroup.gnutella.statistics.SentMessageStatHandler;
+import com.limegroup.gnutella.util.NetworkUtils;
 
 /**
  * This class is an implementation of <tt>ReplyHandler</tt> that is 

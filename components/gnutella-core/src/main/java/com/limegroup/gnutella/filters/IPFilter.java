@@ -1,13 +1,13 @@
 package com.limegroup.gnutella.filters;
 
-import java.util.*;
-import com.limegroup.gnutella.*;
-import com.limegroup.gnutella.messages.*;
-import com.limegroup.gnutella.settings.*;
-import com.limegroup.gnutella.util.NetworkUtils;
-
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+
+import com.limegroup.gnutella.messages.Message;
+import com.limegroup.gnutella.messages.PingReply;
+import com.limegroup.gnutella.messages.PushRequest;
+import com.limegroup.gnutella.messages.QueryReply;
+import com.limegroup.gnutella.settings.FilterSettings;
 
 /**
  * Blocks messages and hosts based on IP address.  Formerly know as

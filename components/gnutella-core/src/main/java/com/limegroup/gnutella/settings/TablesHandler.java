@@ -1,6 +1,7 @@
 package com.limegroup.gnutella.settings;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Handles preferences for tables.  Stored settings include

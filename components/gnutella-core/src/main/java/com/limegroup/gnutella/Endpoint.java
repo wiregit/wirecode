@@ -1,10 +1,11 @@
 package com.limegroup.gnutella;
 
-import java.io.*;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import com.limegroup.gnutella.util.*;
-import java.lang.ref.WeakReference;
+
+import com.limegroup.gnutella.util.IpPort;
+import com.limegroup.gnutella.util.NetworkUtils;
+import com.limegroup.gnutella.util.StringUtils;
 
 /**
  * Immutable IP/port pair.  Also contains an optional number and size

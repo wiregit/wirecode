@@ -1,10 +1,14 @@
 package com.limegroup.gnutella;
 
-import java.io.*;
-import java.util.*;
-import com.limegroup.gnutella.util.*;
-import com.limegroup.gnutella.settings.ApplicationSettings;
+import java.io.IOException;
+import java.io.Writer;
 import java.text.ParseException;
+import java.util.Comparator;
+import java.util.Iterator;
+
+import com.limegroup.gnutella.settings.ApplicationSettings;
+import com.limegroup.gnutella.util.Buffer;
+import com.limegroup.gnutella.util.StringUtils;
 
 /**
  * An endpoint with additional history information used to prioritize

@@ -1,7 +1,10 @@
 package com.limegroup.gnutella.util;
 
-import com.limegroup.gnutella.ErrorService;
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.ObjectInputStream;
 
 /**
  * 118 compatible class that handles normalization 

@@ -1,13 +1,20 @@
 package com.limegroup.gnutella.simpp;
 
-import java.security.*;
-import java.security.spec.*;
-import java.io.*;
-import com.limegroup.gnutella.*;
-import com.limegroup.gnutella.security.*;
-import com.limegroup.gnutella.util.*;
-import com.bitzi.util.*;
-import org.xml.sax.*;
+import java.io.File;
+import java.io.IOException;
+import java.io.RandomAccessFile;
+import java.io.UnsupportedEncodingException;
+import java.security.KeyFactory;
+import java.security.NoSuchAlgorithmException;
+import java.security.PublicKey;
+import java.security.spec.EncodedKeySpec;
+import java.security.spec.InvalidKeySpecException;
+import java.security.spec.X509EncodedKeySpec;
+
+import com.bitzi.util.Base32;
+import com.limegroup.gnutella.ErrorService;
+import com.limegroup.gnutella.security.SignatureVerifier;
+import com.limegroup.gnutella.util.CommonUtils;
 
 public class SimppDataVerifier {
     

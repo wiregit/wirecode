@@ -1,9 +1,20 @@
 package com.limegroup.gnutella.util;
 
-import java.io.*;
-import java.util.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.FilenameFilter;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
-import com.limegroup.gnutella.*;
+import com.limegroup.gnutella.FileDesc;
+import com.limegroup.gnutella.RouterService;
+import com.limegroup.gnutella.UploadManager;
 
 /**
  *  This class provides static functions to load/store the files.

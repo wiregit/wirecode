@@ -1,7 +1,12 @@
 package com.limegroup.gnutella.security;
 
-import java.security.*;
-import com.limegroup.gnutella.*;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.security.PublicKey;
+import java.security.Signature;
+import java.security.SignatureException;
+
+import com.limegroup.gnutella.ErrorService;
 
 public class SignatureVerifier {
     

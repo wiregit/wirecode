@@ -6,6 +6,8 @@ import java.io.FileOutputStream;
 import java.io.OutputStream;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.util.HashSet;
+import java.util.Set;
 
 import junit.framework.Test;
 
@@ -13,18 +15,16 @@ import com.limegroup.gnutella.altlocs.AlternateLocation;
 import com.limegroup.gnutella.downloader.VerifyingFile;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.routing.QueryRouteTable;
-import com.limegroup.gnutella.settings.SearchSettings;
 import com.limegroup.gnutella.settings.ConnectionSettings;
+import com.limegroup.gnutella.settings.SearchSettings;
 import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.stubs.SimpleFileManager;
 import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.FileUtils;
 import com.limegroup.gnutella.util.I18NConvert;
-import com.limegroup.gnutella.util.StringUtils;
 import com.limegroup.gnutella.util.PrivilegedAccessor;
-import java.util.HashSet;
-import java.util.Set;
+import com.limegroup.gnutella.util.StringUtils;
 
 public class FileManagerTest extends com.limegroup.gnutella.util.BaseTestCase {
 

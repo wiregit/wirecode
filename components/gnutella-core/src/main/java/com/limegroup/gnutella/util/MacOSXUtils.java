@@ -1,7 +1,11 @@
 package com.limegroup.gnutella.util;
 
-import com.apple.cocoa.foundation.*;
 import java.util.Enumeration;
+
+import com.apple.cocoa.foundation.NSMutableArray;
+import com.apple.cocoa.foundation.NSMutableDictionary;
+import com.apple.cocoa.foundation.NSObject;
+import com.apple.cocoa.foundation.NSUserDefaults;
 
 /**
  * A collection of utility methods for OSX.

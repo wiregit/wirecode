@@ -1,30 +1,54 @@
 package com.limegroup.gnutella;
 
-import java.io.*;
-import java.net.*;
-import java.util.*;
+import java.io.File;
+import java.io.IOException;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import com.limegroup.gnutella.bootstrap.BootstrapServerManager;
-import com.limegroup.gnutella.messages.*;
-import com.limegroup.gnutella.filters.*;
-import com.limegroup.gnutella.downloader.*;
-import com.limegroup.gnutella.uploader.*;
-import com.limegroup.gnutella.chat.*;
-import com.limegroup.gnutella.xml.*;
-import com.limegroup.gnutella.security.ServerAuthenticator;
+import com.limegroup.gnutella.browser.HTTPAcceptor;
+import com.limegroup.gnutella.chat.ChatManager;
+import com.limegroup.gnutella.chat.Chatter;
+import com.limegroup.gnutella.downloader.AlreadyDownloadingException;
+import com.limegroup.gnutella.downloader.CantResumeException;
+import com.limegroup.gnutella.downloader.FileExistsException;
+import com.limegroup.gnutella.downloader.HTTPDownloader;
+import com.limegroup.gnutella.downloader.IncompleteFileManager;
+import com.limegroup.gnutella.filters.IPFilter;
+import com.limegroup.gnutella.filters.MutableGUIDFilter;
+import com.limegroup.gnutella.filters.SpamFilter;
+import com.limegroup.gnutella.messages.QueryRequest;
+import com.limegroup.gnutella.search.QueryDispatcher;
+import com.limegroup.gnutella.search.SearchResultHandler;
 import com.limegroup.gnutella.security.Authenticator;
 import com.limegroup.gnutella.security.Cookies;
+import com.limegroup.gnutella.security.ServerAuthenticator;
+import com.limegroup.gnutella.settings.ApplicationSettings;
+import com.limegroup.gnutella.settings.ConnectionSettings;
+import com.limegroup.gnutella.settings.FilterSettings;
+import com.limegroup.gnutella.settings.SearchSettings;
+import com.limegroup.gnutella.settings.SettingsHandler;
+import com.limegroup.gnutella.settings.SharingSettings;
+import com.limegroup.gnutella.settings.SimppSettingsManager;
+import com.limegroup.gnutella.simpp.SimppManager;
 import com.limegroup.gnutella.statistics.OutOfBandThroughputStat;
-import com.limegroup.gnutella.util.*;
-import com.limegroup.gnutella.updates.*;
-import com.limegroup.gnutella.simpp.*;
-import com.limegroup.gnutella.settings.*;
-import com.limegroup.gnutella.browser.*;
-import com.limegroup.gnutella.search.*;
-import com.limegroup.gnutella.upelection.*;
 import com.limegroup.gnutella.tigertree.TigerTreeCache;
-
-import org.apache.commons.logging.LogFactory;
-import org.apache.commons.logging.Log;
+import com.limegroup.gnutella.updates.UpdateManager;
+import com.limegroup.gnutella.upelection.PromotionManager;
+import com.limegroup.gnutella.uploader.NormalUploadState;
+import com.limegroup.gnutella.util.ManagedThread;
+import com.limegroup.gnutella.util.NetworkUtils;
+import com.limegroup.gnutella.util.SimpleTimer;
+import com.limegroup.gnutella.xml.MetaFileManager;
 
 /**
  * A facade for the entire LimeWire backend.  This is the GUI's primary way of

@@ -1,16 +1,22 @@
 package com.limegroup.gnutella;
 
 
-import com.limegroup.gnutella.util.NetworkUtils;
+import java.io.IOException;
+import java.lang.ref.WeakReference;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Set;
+import java.util.StringTokenizer;
+import java.util.WeakHashMap;
+
 import com.limegroup.gnutella.http.HTTPConstants;
 import com.limegroup.gnutella.http.HTTPHeaderValue;
 import com.limegroup.gnutella.http.HTTPUtils;
-import com.limegroup.gnutella.messages.*;
-
-import java.util.*;
-import java.io.IOException;
-import java.lang.ref.WeakReference;
-import java.net.UnknownHostException;
+import com.limegroup.gnutella.messages.BadPacketException;
+import com.limegroup.gnutella.messages.QueryReply;
+import com.limegroup.gnutella.util.NetworkUtils;
 
 
 /**

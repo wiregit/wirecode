@@ -1,6 +1,8 @@
 package com.limegroup.gnutella.udpconnect;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Iterator;
+
 import com.limegroup.gnutella.util.ManagedThread;
 
 /** 

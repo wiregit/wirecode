@@ -1,12 +1,19 @@
 package com.limegroup.gnutella.updates;
 
-import org.apache.xerces.parsers.*;
-import com.limegroup.gnutella.xml.*;
-import com.limegroup.gnutella.*;
-import com.limegroup.gnutella.settings.*;
-import org.xml.sax.*;
-import org.w3c.dom.*;
-import java.io.*;
+import java.io.IOException;
+import java.io.StringReader;
+
+import org.apache.xerces.parsers.DOMParser;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
+
+import com.limegroup.gnutella.Assert;
+import com.limegroup.gnutella.settings.ApplicationSettings;
+import com.limegroup.gnutella.xml.LimeXMLUtils;
 
 public class UpdateFileParser {
     

@@ -1,18 +1,27 @@
 package com.limegroup.gnutella.altlocs;
 
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeMap;
 
 import junit.framework.Test;
 
-import com.limegroup.gnutella.*;
+import com.limegroup.gnutella.Endpoint;
+import com.limegroup.gnutella.GUID;
+import com.limegroup.gnutella.HugeTestUtils;
+import com.limegroup.gnutella.PushEndpoint;
+import com.limegroup.gnutella.PushProxyInterface;
+import com.limegroup.gnutella.RemoteFileDesc;
+import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.http.HTTPConstants;
+import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.settings.ConnectionSettings;
-import com.limegroup.gnutella.util.*;
-import java.util.*;
-
-import com.limegroup.gnutella.messages.*;
+import com.limegroup.gnutella.util.PrivilegedAccessor;
 
 /**
  * This class tests the methods of the <tt>AlternateLocation</tt> class.

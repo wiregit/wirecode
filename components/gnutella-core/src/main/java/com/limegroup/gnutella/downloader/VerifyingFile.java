@@ -1,12 +1,21 @@
 package com.limegroup.gnutella.downloader;
 
-import java.util.*;
-import java.io.*;
-import com.limegroup.gnutella.util.*;
-import com.limegroup.gnutella.tigertree.HashTree;
+import java.io.BufferedInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.RandomAccessFile;
+import java.util.Iterator;
+import java.util.List;
+import java.util.NoSuchElementException;
 
-import org.apache.commons.logging.LogFactory;
 import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
+import com.limegroup.gnutella.tigertree.HashTree;
+import com.limegroup.gnutella.util.FileUtils;
+import com.limegroup.gnutella.util.IntervalSet;
 
 /**
  * All the HTTPDownloaders associated with a ManagedDownloader will commit

@@ -5,28 +5,28 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.xerces.parsers.DOMParser;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+import org.xml.sax.EntityResolver;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
-import org.xml.sax.EntityResolver;
 
 import com.bitzi.util.Base32;
-import com.limegroup.gnutella.Assert;
-import com.limegroup.gnutella.dime.*;
+import com.limegroup.gnutella.dime.DIMEGenerator;
+import com.limegroup.gnutella.dime.DIMEParser;
+import com.limegroup.gnutella.dime.DIMERecord;
 import com.limegroup.gnutella.util.UUID;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Arrays;
-import java.util.Collections;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 /**
  * @author Gregorio Roper

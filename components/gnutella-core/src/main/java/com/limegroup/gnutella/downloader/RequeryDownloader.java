@@ -1,8 +1,8 @@
 package com.limegroup.gnutella.downloader;
 
-import com.limegroup.gnutella.*;
-import com.limegroup.gnutella.messages.*;
-import java.io.*;
+import com.limegroup.gnutella.Assert;
+import com.limegroup.gnutella.GUID;
+import com.limegroup.gnutella.RemoteFileDesc;
 
 /** 
  * DEPRECATED.  Used to be a 'wishlist' downloader, however now it only exists

@@ -1,10 +1,11 @@
 package com.limegroup.gnutella.util;
 
+import java.util.Iterator;
+import java.util.NoSuchElementException;
+
 import junit.framework.Test;
 
 import com.limegroup.gnutella.Endpoint;
-import java.util.Iterator;
-import java.util.NoSuchElementException;
 
 /**
  * Unit tests for BucketQueue

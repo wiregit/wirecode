@@ -3,19 +3,16 @@ package com.limegroup.gnutella.dime;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.UnsupportedEncodingException;
-
-import com.limegroup.gnutella.Assert;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.limegroup.gnutella.util.DataUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import com.limegroup.gnutella.ByteOrder;
 import com.limegroup.gnutella.ErrorService;
-
-import org.apache.commons.logging.LogFactory;
-import org.apache.commons.logging.Log;
+import com.limegroup.gnutella.util.DataUtils;
 
 /**
  * Class holding a DIMERecord as part of a DIME Message.

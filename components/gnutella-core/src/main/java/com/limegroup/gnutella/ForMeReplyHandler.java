@@ -1,18 +1,34 @@
 package com.limegroup.gnutella;
 
-import com.limegroup.gnutella.messages.*;
-import com.limegroup.gnutella.util.*;
-import com.limegroup.gnutella.search.*;
-import com.limegroup.gnutella.settings.*;
-import com.limegroup.gnutella.messages.vendor.*;
-import com.limegroup.gnutella.xml.*;
-import java.util.*;
-import java.net.*;
-import java.io.UnsupportedEncodingException;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
-import org.apache.commons.logging.LogFactory;
 import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
+import com.limegroup.gnutella.messages.BadPacketException;
+import com.limegroup.gnutella.messages.Message;
+import com.limegroup.gnutella.messages.PingReply;
+import com.limegroup.gnutella.messages.PushRequest;
+import com.limegroup.gnutella.messages.QueryReply;
+import com.limegroup.gnutella.messages.vendor.SimppVM;
+import com.limegroup.gnutella.messages.vendor.StatisticVendorMessage;
+import com.limegroup.gnutella.search.SearchResultHandler;
+import com.limegroup.gnutella.settings.ApplicationSettings;
+import com.limegroup.gnutella.settings.SharingSettings;
+import com.limegroup.gnutella.settings.UploadSettings;
+import com.limegroup.gnutella.util.FixedsizeForgetfulHashMap;
+import com.limegroup.gnutella.util.IntWrapper;
+import com.limegroup.gnutella.util.NetworkUtils;
+import com.limegroup.gnutella.xml.LimeXMLDocument;
+import com.limegroup.gnutella.xml.LimeXMLDocumentHelper;
+import com.limegroup.gnutella.xml.LimeXMLUtils;
 
 /**
  * This is the class that goes in the route table when a request is

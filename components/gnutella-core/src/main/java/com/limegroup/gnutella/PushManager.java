@@ -1,20 +1,19 @@
 package com.limegroup.gnutella;
 
-import com.limegroup.gnutella.statistics.UploadStat;
-import com.limegroup.gnutella.util.*;
-import com.limegroup.gnutella.http.HTTPRequestMethod;
-import com.limegroup.gnutella.udpconnect.UDPConnection;
-
-import java.util.List;
-import java.util.LinkedList;
-import java.util.Iterator;
-import java.util.Date;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.Socket;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
+import com.limegroup.gnutella.http.HTTPRequestMethod;
+import com.limegroup.gnutella.statistics.UploadStat;
+import com.limegroup.gnutella.udpconnect.UDPConnection;
+import com.limegroup.gnutella.util.IOUtils;
+import com.limegroup.gnutella.util.ManagedThread;
+import com.limegroup.gnutella.util.NetworkUtils;
+import com.limegroup.gnutella.util.Sockets;
 
 /**
  * Manages state for push upload requests.

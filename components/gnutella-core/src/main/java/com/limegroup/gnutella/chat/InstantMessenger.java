@@ -1,9 +1,19 @@
 package com.limegroup.gnutella.chat;
 
-import com.limegroup.gnutella.*;
-import com.limegroup.gnutella.util.*;
-import java.net.*;
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.net.Socket;
+
+import com.limegroup.gnutella.ActivityCallback;
+import com.limegroup.gnutella.Constants;
+import com.limegroup.gnutella.ErrorService;
+import com.limegroup.gnutella.util.CommonUtils;
+import com.limegroup.gnutella.util.ManagedThread;
 
 /**
  * this class is a subclass of Chat, also implementing

@@ -1,17 +1,24 @@
 package com.limegroup.gnutella.downloader;
 
-import com.limegroup.gnutella.*;
-import com.limegroup.gnutella.messages.*;
-import com.limegroup.gnutella.altlocs.*;
-import com.limegroup.gnutella.http.*;
-import com.limegroup.gnutella.util.CommonUtils;
-import java.util.*;
+import java.io.IOException;
+import java.net.URL;
+import java.util.Iterator;
+import java.util.Set;
+
+import org.apache.commons.httpclient.Header;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpMethod;
-import org.apache.commons.httpclient.Header;
 import org.apache.commons.httpclient.methods.HeadMethod;
-import java.net.*;
-import java.io.*;
+
+import com.limegroup.gnutella.ErrorService;
+import com.limegroup.gnutella.RemoteFileDesc;
+import com.limegroup.gnutella.URN;
+import com.limegroup.gnutella.altlocs.AlternateLocationCollection;
+import com.limegroup.gnutella.altlocs.AlternateLocationCollector;
+import com.limegroup.gnutella.http.HTTPHeaderName;
+import com.limegroup.gnutella.http.HttpClientManager;
+import com.limegroup.gnutella.messages.QueryReply;
+import com.limegroup.gnutella.util.CommonUtils;
 
 /**
  * This class handles sending HTTP HEAD requests to alternate locations,

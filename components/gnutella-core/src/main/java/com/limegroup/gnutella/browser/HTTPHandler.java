@@ -1,12 +1,13 @@
 package com.limegroup.gnutella.browser;
 
-import java.net.*;
-import java.io.*;
-import java.util.*;
-import java.util.Date;
-import com.limegroup.gnutella.*;
-import com.limegroup.gnutella.util.CommonUtils;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.net.Socket;
 import java.util.StringTokenizer;
+
+import com.limegroup.gnutella.util.CommonUtils;
 
 /**
  *  Handle a pure HTTP request

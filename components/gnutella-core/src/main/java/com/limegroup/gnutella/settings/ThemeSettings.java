@@ -1,12 +1,19 @@
 package com.limegroup.gnutella.settings;
 
-import com.limegroup.gnutella.*;
-import com.limegroup.gnutella.util.*;
-import java.util.*;
+import java.io.File;
+import java.io.IOException;
+import java.util.Enumeration;
+import java.util.Locale;
+import java.util.StringTokenizer;
+import java.util.zip.ZipEntry;
 import java.util.zip.ZipException;
 import java.util.zip.ZipFile;
-import java.util.zip.ZipEntry;
-import java.io.*;
+
+import com.limegroup.gnutella.ErrorService;
+import com.limegroup.gnutella.MessageService;
+import com.limegroup.gnutella.util.CommonUtils;
+import com.limegroup.gnutella.util.Expand;
+import com.limegroup.gnutella.util.FileUtils;
 
 /**
  * Class for handling all LimeWire settings that are stored to disk.  To

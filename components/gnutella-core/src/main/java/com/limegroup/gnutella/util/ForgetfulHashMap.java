@@ -1,6 +1,8 @@
 package com.limegroup.gnutella.util;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
 
 /**
  * A mapping that "forgets" keys and values using a FIFO replacement

@@ -1,6 +1,9 @@
 package com.limegroup.gnutella.search;
 
 import java.lang.reflect.Method;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 
 import junit.framework.Test;
 
@@ -13,9 +16,6 @@ import com.limegroup.gnutella.util.OldConnection;
 import com.limegroup.gnutella.util.PrivilegedAccessor;
 import com.limegroup.gnutella.util.TestConnection;
 import com.limegroup.gnutella.util.TestResultCounter;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
 
 
 /**

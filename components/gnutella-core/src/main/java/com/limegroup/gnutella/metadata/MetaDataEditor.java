@@ -1,10 +1,10 @@
 package com.limegroup.gnutella.metadata;
 
-import org.apache.commons.logging.*;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
-
-import java.util.*;
-import com.limegroup.gnutella.xml.*;
+import com.limegroup.gnutella.xml.LimeXMLDocument;
+import com.limegroup.gnutella.xml.LimeXMLUtils;
 
 
 /**

@@ -3,12 +3,12 @@ package com.limegroup.gnutella.routing;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
+import java.util.Arrays;
 
 import junit.framework.Test;
 
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.util.BaseTestCase;
-import java.util.Arrays;
 
 /**
  * Unit tests for PatchTableMessage

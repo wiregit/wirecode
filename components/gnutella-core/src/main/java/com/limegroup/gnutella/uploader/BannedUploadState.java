@@ -3,7 +3,6 @@ package com.limegroup.gnutella.uploader;
 import java.io.IOException;
 import java.io.OutputStream;
 
-import com.limegroup.gnutella.http.HTTPMessage;
 import com.limegroup.gnutella.util.CommonUtils;
 
 /**

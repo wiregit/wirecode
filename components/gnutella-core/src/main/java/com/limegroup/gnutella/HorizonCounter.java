@@ -1,6 +1,8 @@
 package com.limegroup.gnutella;
 
-import java.util.*;
+import java.util.HashSet;
+import java.util.Set;
+
 import com.limegroup.gnutella.messages.PingReply;
 
 

@@ -1,12 +1,15 @@
 	
 package com.limegroup.gnutella;
 
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+
 import junit.framework.Test;
 
-import com.limegroup.gnutella.stubs.MessageRouterStub;
-import com.limegroup.gnutella.util.*;
-import com.limegroup.gnutella.messages.*;
-import java.util.*;
+import com.limegroup.gnutella.messages.QueryReply;
+import com.limegroup.gnutella.util.BaseTestCase;
+import com.limegroup.gnutella.util.PrivilegedAccessor;
 
 /**
  * tests the PushEndpoint class.

@@ -1,12 +1,13 @@
 package com.limegroup.gnutella;
 
-import com.limegroup.gnutella.messages.PingRequest;
-import com.limegroup.gnutella.settings.ConnectionSettings;
-import com.limegroup.gnutella.util.IpPort;
-import com.limegroup.gnutella.util.ManagedThread;
-import com.limegroup.gnutella.util.Cancellable;
 import java.util.Collection;
 import java.util.Iterator;
+
+import com.limegroup.gnutella.messages.PingRequest;
+import com.limegroup.gnutella.settings.ConnectionSettings;
+import com.limegroup.gnutella.util.Cancellable;
+import com.limegroup.gnutella.util.IpPort;
+import com.limegroup.gnutella.util.ManagedThread;
 
 /**
  * Sends Gnutella pings via UDP to a set of hosts and calls back to a listener

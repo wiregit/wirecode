@@ -1,12 +1,26 @@
 package com.limegroup.gnutella.xml;
 
-import com.limegroup.gnutella.*;
-import com.limegroup.gnutella.util.*;
-import com.limegroup.gnutella.messages.*;
-import com.limegroup.gnutella.metadata.*;
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Set;
 
-import java.io.*;
-import java.util.*;
+import com.limegroup.gnutella.Assert;
+import com.limegroup.gnutella.CreationTimeCache;
+import com.limegroup.gnutella.ErrorService;
+import com.limegroup.gnutella.FileDesc;
+import com.limegroup.gnutella.FileManager;
+import com.limegroup.gnutella.FileManagerEvent;
+import com.limegroup.gnutella.Response;
+import com.limegroup.gnutella.RouterService;
+import com.limegroup.gnutella.messages.QueryRequest;
+import com.limegroup.gnutella.metadata.AudioMetaData;
+import com.limegroup.gnutella.metadata.MetaDataReader;
+import com.limegroup.gnutella.util.NameValue;
 
 /**
  * This class handles querying shared files with XML data and returning XML data

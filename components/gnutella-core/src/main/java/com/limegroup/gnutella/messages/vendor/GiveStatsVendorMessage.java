@@ -1,9 +1,10 @@
 package com.limegroup.gnutella.messages.vendor;
 
-import com.limegroup.gnutella.messages.*;
-import com.limegroup.gnutella.statistics.*;
-import com.limegroup.gnutella.*;
-import java.io.*;
+import java.io.IOException;
+import java.io.OutputStream;
+
+import com.limegroup.gnutella.messages.BadPacketException;
+import com.limegroup.gnutella.statistics.SentMessageStatHandler;
 
 /**
  * VendorMessage for sending a LimeWire node a request for statistics.

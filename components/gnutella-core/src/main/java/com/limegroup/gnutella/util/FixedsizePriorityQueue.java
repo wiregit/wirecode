@@ -1,6 +1,11 @@
 package com.limegroup.gnutella.util;
 
-import java.util.*;
+import java.util.Comparator;
+import java.util.Iterator;
+import java.util.NoSuchElementException;
+import java.util.SortedSet;
+import java.util.TreeSet;
+
 import com.limegroup.gnutella.Assert;
 
 /**

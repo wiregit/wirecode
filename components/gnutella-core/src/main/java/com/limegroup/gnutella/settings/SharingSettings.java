@@ -1,10 +1,13 @@
 
 package com.limegroup.gnutella.settings;
 
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
+import java.util.HashSet;
+import java.util.Set;
+
 import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.FileUtils;
-import java.util.*;
 
 /**
  * Settings for sharing

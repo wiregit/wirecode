@@ -1,9 +1,12 @@
 package com.limegroup.gnutella;
 
-import java.util.*;
-import com.limegroup.gnutella.messages.*;
-import com.limegroup.gnutella.xml.*;
-import com.limegroup.gnutella.util.*;
+import java.util.HashSet;
+import java.util.List;
+
+import com.limegroup.gnutella.messages.QueryRequest;
+import com.limegroup.gnutella.util.ForgetfulHashMap;
+import com.limegroup.gnutella.util.StringUtils;
+import com.limegroup.gnutella.xml.LimeXMLDocument;
 
 /**
  * Records information about queries so that responses can be validated later.

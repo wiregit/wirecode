@@ -2,6 +2,9 @@ package com.limegroup.gnutella.routing;
 
 
 import java.io.ByteArrayOutputStream;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.Random;
 import java.util.zip.Inflater;
 
 import junit.framework.Test;
@@ -11,9 +14,6 @@ import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.util.BitSet;
 import com.limegroup.gnutella.util.PrivilegedAccessor;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.Random;
 
 public class QueryRouteTableTest extends com.limegroup.gnutella.util.BaseTestCase {
     public QueryRouteTableTest(String name) {

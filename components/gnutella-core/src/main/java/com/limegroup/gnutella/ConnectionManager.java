@@ -1,23 +1,41 @@
 package com.limegroup.gnutella;
 
-import java.net.*;
-import java.io.*;
-import java.util.*;
-
+import java.io.IOException;
+import java.net.Socket;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Properties;
+import java.util.Set;
 import java.util.StringTokenizer;
 
-import com.limegroup.gnutella.messages.*;
-import com.limegroup.gnutella.messages.vendor.*;
-import com.limegroup.gnutella.util.*;
-import com.limegroup.gnutella.security.Authenticator;
-import com.limegroup.gnutella.handshaking.*;
-import com.limegroup.gnutella.settings.*;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import com.limegroup.gnutella.connection.ConnectionChecker;
 import com.limegroup.gnutella.filters.IPFilter;
-
-import org.apache.commons.logging.LogFactory;
-import org.apache.commons.logging.Log;
+import com.limegroup.gnutella.handshaking.BadHandshakeException;
+import com.limegroup.gnutella.handshaking.HandshakeResponse;
+import com.limegroup.gnutella.handshaking.HeaderNames;
+import com.limegroup.gnutella.handshaking.NoGnutellaOkException;
+import com.limegroup.gnutella.messages.Message;
+import com.limegroup.gnutella.messages.PingRequest;
+import com.limegroup.gnutella.messages.vendor.QueryStatusResponse;
+import com.limegroup.gnutella.messages.vendor.TCPConnectBackVendorMessage;
+import com.limegroup.gnutella.messages.vendor.UDPConnectBackVendorMessage;
+import com.limegroup.gnutella.security.Authenticator;
+import com.limegroup.gnutella.settings.ApplicationSettings;
+import com.limegroup.gnutella.settings.ConnectionSettings;
+import com.limegroup.gnutella.settings.QuestionsHandler;
+import com.limegroup.gnutella.settings.UltrapeerSettings;
+import com.limegroup.gnutella.util.DataUtils;
+import com.limegroup.gnutella.util.ManagedThread;
+import com.limegroup.gnutella.util.NetworkUtils;
+import com.limegroup.gnutella.util.Sockets;
+import com.limegroup.gnutella.util.SystemUtils;
 
 /**
  * The list of all ManagedConnection's.  Provides a factory method for creating

@@ -1,15 +1,21 @@
 package com.limegroup.gnutella.util;
 
-import com.limegroup.gnutella.settings.*;
-import com.limegroup.gnutella .*;
+import java.io.IOException;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
+import java.util.Vector;
+
+import com.limegroup.gnutella.ByteOrder;
+import com.limegroup.gnutella.PushEndpoint;
+import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.filters.IP;
 import com.limegroup.gnutella.filters.IPList;
-import com.limegroup.gnutella.messages.*;
-import java.io.*;
-import java.net.*;
-import java.util.*;
-
-import java.util.Arrays;
+import com.limegroup.gnutella.messages.BadPacketException;
+import com.limegroup.gnutella.messages.QueryReply;
+import com.limegroup.gnutella.settings.ConnectionSettings;
 
 /**
  * This class handles common utility functions for networking tasks.

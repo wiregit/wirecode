@@ -1,9 +1,7 @@
 package com.limegroup.gnutella.util;
 
-import com.limegroup.gnutella.Assert;
-
-import java.util.NoSuchElementException;
 import java.util.Iterator;
+import java.util.NoSuchElementException;
 
 /** 
  * A class for maintaining the objects in a binary heap form, i.e., a classic

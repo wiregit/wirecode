@@ -1,9 +1,9 @@
 package com.limegroup.gnutella.util;
 
 import java.io.File;
-import com.limegroup.gnutella.util.Expand;
-import com.limegroup.gnutella.xml.LimeXMLUtils;
+
 import com.bitzi.util.Base32;
+import com.limegroup.gnutella.xml.LimeXMLUtils;
 
 /**
  *  Support methods for the unpacking and launching of pmf file types.

@@ -1,9 +1,9 @@
 package com.limegroup.gnutella;
 
-import junit.framework.Test;
-
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+
+import junit.framework.Test;
 
 import com.limegroup.gnutella.util.BaseTestCase;
 

@@ -1,16 +1,29 @@
 package com.limegroup.gnutella;
 
-import java.io.*;
-import java.net.*;
-import java.util.*;
+import java.io.BufferedInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.Socket;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Set;
 import java.util.StringTokenizer;
-import com.limegroup.gnutella.messages.*;
-import com.limegroup.gnutella.udpconnect.UDPConnection;
-import com.limegroup.gnutella.util.*;
-import com.limegroup.gnutella.settings.*;
 
-import org.apache.commons.logging.LogFactory;
 import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
+import com.limegroup.gnutella.messages.BadPacketException;
+import com.limegroup.gnutella.messages.Message;
+import com.limegroup.gnutella.messages.QueryReply;
+import com.limegroup.gnutella.settings.ConnectionSettings;
+import com.limegroup.gnutella.udpconnect.UDPConnection;
+import com.limegroup.gnutella.util.CommonUtils;
+import com.limegroup.gnutella.util.ManagedThread;
+import com.limegroup.gnutella.util.NetworkUtils;
+import com.limegroup.gnutella.util.Sockets;
 
 /**
  * Handles all stuff necessary for browsing of networks hosts. 

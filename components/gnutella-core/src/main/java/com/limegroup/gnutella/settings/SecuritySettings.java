@@ -1,6 +1,7 @@
 package com.limegroup.gnutella.settings;
 
 import java.io.File;
+
 import com.limegroup.gnutella.util.CommonUtils;
 
 /**

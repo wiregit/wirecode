@@ -1,7 +1,8 @@
 package com.limegroup.gnutella.downloader;
 
-import java.util.*;
-import com.limegroup.gnutella.*;
+import java.util.Arrays;
+
+import com.limegroup.gnutella.GUID;
 
 /**
  * keeps file, clientGUID, and index of the file we are getting.

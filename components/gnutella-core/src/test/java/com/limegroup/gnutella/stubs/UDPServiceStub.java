@@ -1,12 +1,29 @@
 package com.limegroup.gnutella.stubs;
 
-import com.limegroup.gnutella.*;
-import com.limegroup.gnutella.util.*;
-import com.limegroup.gnutella.messages.*;
-import com.limegroup.gnutella.*;
-import java.net.*;
-import java.io.*;
-import java.util.*;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
+import java.net.InetAddress;
+import java.net.NoRouteToHostException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Random;
+
+import com.limegroup.gnutella.ErrorCallback;
+import com.limegroup.gnutella.ErrorService;
+import com.limegroup.gnutella.GUID;
+import com.limegroup.gnutella.MessageRouter;
+import com.limegroup.gnutella.RouterService;
+import com.limegroup.gnutella.UDPService;
+import com.limegroup.gnutella.messages.BadPacketException;
+import com.limegroup.gnutella.messages.Message;
+import com.limegroup.gnutella.util.IpPort;
+import com.limegroup.gnutella.util.ManagedThread;
+import com.limegroup.gnutella.util.NetworkUtils;
+import com.limegroup.gnutella.util.ProcessingQueue;
 
 /**
  * This class allows the creation of a UDPService instances with 

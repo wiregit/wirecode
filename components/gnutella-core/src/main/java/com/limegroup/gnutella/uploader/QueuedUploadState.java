@@ -1,13 +1,13 @@
 package com.limegroup.gnutella.uploader;
 
-import com.limegroup.gnutella.*;
-import com.limegroup.gnutella.settings.ChatSettings;
-import com.limegroup.gnutella.http.*;
+import java.io.IOException;
+import java.io.OutputStream;
 
-import java.io.*;
-import java.util.Set;
-import java.util.HashSet;
-import java.util.Iterator;
+import com.limegroup.gnutella.Assert;
+import com.limegroup.gnutella.UploadManager;
+import com.limegroup.gnutella.http.ConstantHTTPHeaderValue;
+import com.limegroup.gnutella.http.HTTPHeaderName;
+import com.limegroup.gnutella.http.HTTPUtils;
 
 public class QueuedUploadState extends UploadState {
 

@@ -1,8 +1,8 @@
 package com.limegroup.gnutella.util;
 
-import junit.framework.Test;
-
 import java.util.Arrays;
+
+import junit.framework.Test;
 
 /**
  * Unit tests for Utilities

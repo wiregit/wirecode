@@ -3,7 +3,6 @@ package com.limegroup.gnutella.metadata;
 
 import junit.framework.Test;
 
-import com.limegroup.gnutella.metadata.MP3Info;
 import com.limegroup.gnutella.util.CommonUtils;
 /**
  * Test MP3Info class

@@ -1,19 +1,18 @@
 package com.limegroup.gnutella;
 
-import com.limegroup.gnutella.util.ManagedThread;
-import com.limegroup.gnutella.util.Comparators;
-import com.limegroup.gnutella.settings.SharingSettings;
-
 import java.io.File;
 import java.io.IOException;
-
-import java.util.Set;
 import java.util.HashSet;
-import java.util.TreeSet;
 import java.util.Iterator;
+import java.util.Set;
+import java.util.TreeSet;
 
-import org.apache.commons.logging.LogFactory;
 import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
+import com.limegroup.gnutella.settings.SharingSettings;
+import com.limegroup.gnutella.util.Comparators;
+import com.limegroup.gnutella.util.ManagedThread;
 
 /**
  * Manages saved files.

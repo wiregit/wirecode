@@ -1,12 +1,12 @@
 package com.limegroup.gnutella.udpconnect;
 
-import junit.framework.Test;
-
-import com.limegroup.gnutella.util.BaseTestCase;
-
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+
+import junit.framework.Test;
+
 import com.limegroup.gnutella.messages.Message;
+import com.limegroup.gnutella.util.BaseTestCase;
 
 /**
  * Unit tests for UDPConnectionMessages

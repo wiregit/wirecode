@@ -1,7 +1,6 @@
 package com.limegroup.gnutella;
 
 import com.limegroup.gnutella.stubs.ConnectionManagerStub;
-import com.limegroup.gnutella.stubs.MessageRouterStub;
 import com.limegroup.gnutella.util.PrivilegedAccessor;
 
 /** 

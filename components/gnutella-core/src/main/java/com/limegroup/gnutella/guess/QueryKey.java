@@ -1,10 +1,14 @@
 package com.limegroup.gnutella.guess;
 
-import java.util.*;
-import java.io.*;
-import org.logi.crypto.keys.DESKey;
-import com.limegroup.gnutella.ByteOrder;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.net.InetAddress;
+import java.util.Arrays;
+import java.util.Random;
+
+import org.logi.crypto.keys.DESKey;
+
+import com.limegroup.gnutella.ByteOrder;
 
 /**
  * Abstraction for a Query Key as detailed in the GUESS protocol spec.

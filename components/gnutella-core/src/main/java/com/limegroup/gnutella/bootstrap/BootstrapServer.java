@@ -1,11 +1,12 @@
 package com.limegroup.gnutella.bootstrap;
 
-import java.net.*;
 import java.text.ParseException;
-import com.limegroup.gnutella.util.StringUtils;
 
 import org.apache.commons.httpclient.URI;
 import org.apache.commons.httpclient.URIException;
+
+import com.limegroup.gnutella.HostCatcher;
+import com.limegroup.gnutella.util.StringUtils;
 
 /**
  * A URL for a GWebCache endpoint, plus some additional connection

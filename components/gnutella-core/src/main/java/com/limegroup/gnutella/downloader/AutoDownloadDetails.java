@@ -1,13 +1,23 @@
 package com.limegroup.gnutella.downloader;
 
-import com.limegroup.gnutella.*;
-import com.limegroup.gnutella.util.*;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.Serializable;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.StringTokenizer;
+import java.util.Vector;
+
+import org.xml.sax.SAXException;
+
+import com.limegroup.gnutella.FileManager;
+import com.limegroup.gnutella.MediaType;
+import com.limegroup.gnutella.RemoteFileDesc;
+import com.limegroup.gnutella.ResponseVerifier;
+import com.limegroup.gnutella.util.ApproximateMatcher;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 import com.limegroup.gnutella.xml.SchemaNotFoundException;
-import java.util.*;
-import java.util.StringTokenizer;
-import java.io.*;
-import org.xml.sax.SAXException;
 
 /** 
  * Encapsulates important details about a auto download.  Serializable for 

@@ -1,15 +1,13 @@
 package com.limegroup.gnutella.util;
 
 import java.io.BufferedInputStream;
-import java.io.ObjectInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import com.limegroup.gnutella.ErrorService;
-import com.limegroup.gnutella.util.ConverterObjectInputStream;
-import com.ibm.icu.text.Normalizer;
-
-import java.util.Map;
+import java.io.ObjectInputStream;
 import java.util.HashMap;
+import java.util.Map;
+
+import com.ibm.icu.text.Normalizer;
 
 final class I18NConvertICU extends AbstractI18NConverter {
 

@@ -1,10 +1,12 @@
 package com.limegroup.gnutella;
 
+import java.io.IOException;
+import java.util.Set;
+
 import junit.framework.Test;
 
-import java.io.*;
-import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.BadPacketException;
+import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.messages.vendor.MessagesSupportedVendorMessage;
@@ -12,7 +14,6 @@ import com.limegroup.gnutella.messages.vendor.QueryStatusResponse;
 import com.limegroup.gnutella.search.HostData;
 import com.limegroup.gnutella.search.SearchResultHandler;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
-import java.util.Set;
 
 /**
  * Checks whether (multi)leaves avoid forwarding messages to ultrapeers, do

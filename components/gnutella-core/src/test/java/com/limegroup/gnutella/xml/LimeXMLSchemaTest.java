@@ -1,13 +1,13 @@
 package com.limegroup.gnutella.xml;
 
 import java.io.File;
+import java.util.Iterator;
 
 import junit.framework.Test;
 
 import com.limegroup.gnutella.util.BaseTestCase;
 import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.Expand;
-import java.util.Iterator;
 
 
 /**

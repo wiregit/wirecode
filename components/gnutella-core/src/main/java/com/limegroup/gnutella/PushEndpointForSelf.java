@@ -1,6 +1,7 @@
 package com.limegroup.gnutella;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.Set;
 
 import com.limegroup.gnutella.udpconnect.UDPConnection;
 /**

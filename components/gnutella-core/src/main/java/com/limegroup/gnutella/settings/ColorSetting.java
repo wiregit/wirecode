@@ -1,7 +1,7 @@
 package com.limegroup.gnutella.settings;
 
-import java.util.Properties;
 import java.awt.Color;
+import java.util.Properties;
 
 
 /**

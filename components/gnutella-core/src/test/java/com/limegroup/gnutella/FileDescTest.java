@@ -3,6 +3,10 @@ package com.limegroup.gnutella;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Set;
 
 import junit.framework.Test;
 
@@ -10,10 +14,6 @@ import com.limegroup.gnutella.altlocs.AlternateLocation;
 import com.limegroup.gnutella.altlocs.PushAltLoc;
 import com.limegroup.gnutella.http.HTTPConstants;
 import com.limegroup.gnutella.util.CommonUtils;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Set;
 
 /**
  * Test the public methods of the <tt>FileDesc</tt> class.

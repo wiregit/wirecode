@@ -1,8 +1,12 @@
 package com.limegroup.gnutella.udpconnect;
 
-import java.io.*;
-import java.net.*;
-import com.limegroup.gnutella.messages.BadPacketException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.InetAddress;
+import java.net.Socket;
+import java.net.SocketException;
+import java.net.SocketImplFactory;
 
 /** 
  *  Create a reliable udp connection interface.

@@ -1,10 +1,14 @@
 package com.limegroup.gnutella;
 
+import com.limegroup.gnutella.settings.ApplicationSettings;
+import com.limegroup.gnutella.settings.ConnectionSettings;
+import com.limegroup.gnutella.settings.DownloadSettings;
+import com.limegroup.gnutella.settings.UltrapeerSettings;
+import com.limegroup.gnutella.settings.UploadSettings;
+import com.limegroup.gnutella.statistics.BandwidthStat;
 import com.limegroup.gnutella.util.CommonUtils;
-import com.limegroup.gnutella.util.NetworkUtils;
 import com.limegroup.gnutella.util.ManagedThread;
-import com.limegroup.gnutella.settings.*;
-import com.limegroup.gnutella.statistics.*;
+import com.limegroup.gnutella.util.NetworkUtils;
 
 /**
  * This class determines whether or not this node has all of the necessary

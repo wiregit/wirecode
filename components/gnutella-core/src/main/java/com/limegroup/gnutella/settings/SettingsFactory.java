@@ -1,11 +1,23 @@
 package com.limegroup.gnutella.settings;
 
-import com.limegroup.gnutella.*;
-import com.limegroup.gnutella.util.*;
+import java.awt.Color;
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
 import java.util.Properties;
-import java.io.*;
-import java.awt.*;
-import java.util.*;
+
+import com.limegroup.gnutella.ErrorService;
+import com.limegroup.gnutella.MessageService;
+import com.limegroup.gnutella.util.FileUtils;
+import com.limegroup.gnutella.util.StringUtils;
 
 /**
  * Class for handling all LimeWire settings that are stored to disk.  To

@@ -2,6 +2,9 @@ package com.limegroup.gnutella;
 
 import java.lang.reflect.Method;
 import java.net.InetAddress;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.List;
 
 import junit.framework.Test;
 
@@ -16,9 +19,6 @@ import com.limegroup.gnutella.util.PrivilegedAccessor;
 import com.limegroup.gnutella.util.TestConnection;
 import com.limegroup.gnutella.util.TestConnectionManager;
 import com.limegroup.gnutella.xml.MetaFileManager;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.List;
 
 /**
  * This class tests the <tt>MessageRouter</tt>.

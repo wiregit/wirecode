@@ -1,11 +1,7 @@
 package com.limegroup.gnutella.xml;
 
-import com.limegroup.gnutella.*;
-import com.limegroup.gnutella.messages.*;
-import com.limegroup.gnutella.search.*;
-import java.util.*;
-import java.util.Arrays;
-import java.io.*;
+import com.limegroup.gnutella.ActivityCallback;
+import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.util.ManagedThread;
 
 /**

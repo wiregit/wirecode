@@ -1,8 +1,9 @@
 package com.limegroup.gnutella.messages.vendor;
 
-import com.limegroup.gnutella.*;
-import com.limegroup.gnutella.util.*;
-import java.io.*;
+import java.io.ByteArrayOutputStream;
+
+import com.limegroup.gnutella.ByteOrder;
+import com.limegroup.gnutella.GUID;
 
 public class CapabilitiesVMStubHelper {
     

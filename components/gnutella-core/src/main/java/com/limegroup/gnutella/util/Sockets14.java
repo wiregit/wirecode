@@ -1,9 +1,9 @@
 package com.limegroup.gnutella.util;
 
-import java.net.SocketAddress;
+import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.Socket;
-import java.io.IOException;
+import java.net.SocketAddress;
 
 /**
  * Simple class that constructs a Socket

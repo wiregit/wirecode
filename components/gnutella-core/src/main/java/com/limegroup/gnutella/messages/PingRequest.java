@@ -1,9 +1,13 @@
 package com.limegroup.gnutella.messages;
 
-import com.limegroup.gnutella.statistics.*;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+
 import com.limegroup.gnutella.ErrorService;
 import com.limegroup.gnutella.settings.ApplicationSettings;
-import java.io.*;
+import com.limegroup.gnutella.statistics.DroppedSentMessageStatHandler;
+import com.limegroup.gnutella.statistics.SentMessageStatHandler;
 
 /**
  * A Gnutella ping message.

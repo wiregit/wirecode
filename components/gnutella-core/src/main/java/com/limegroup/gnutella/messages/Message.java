@@ -1,13 +1,21 @@
 package com.limegroup.gnutella.messages;
 
-import java.util.*;
-import java.io.*;
-import com.limegroup.gnutella.*;
-import com.limegroup.gnutella.settings.*;
-import com.limegroup.gnutella.statistics.ReceivedErrorStat;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InterruptedIOException;
+import java.io.OutputStream;
+import java.io.Serializable;
+import java.util.Iterator;
+
+import com.limegroup.gnutella.Assert;
+import com.limegroup.gnutella.ByteOrder;
+import com.limegroup.gnutella.GUID;
+import com.limegroup.gnutella.messages.vendor.VendorMessage;
 import com.limegroup.gnutella.routing.RouteTableMessage;
-import com.limegroup.gnutella.util.CommonUtils;
-import com.limegroup.gnutella.messages.vendor.*;
+import com.limegroup.gnutella.settings.ConnectionSettings;
+import com.limegroup.gnutella.settings.MessageSettings;
+import com.limegroup.gnutella.statistics.ReceivedErrorStat;
 import com.limegroup.gnutella.udpconnect.UDPConnectionMessage;
 
 /**

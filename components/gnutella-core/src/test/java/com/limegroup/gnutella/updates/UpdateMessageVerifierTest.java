@@ -5,7 +5,8 @@ import java.io.RandomAccessFile;
 
 import junit.framework.Test;
 
-import com.limegroup.gnutella.util.*;
+import com.limegroup.gnutella.util.BaseTestCase;
+import com.limegroup.gnutella.util.CommonUtils;
 
 /**
  * Unit tests for UpdateMessageVerifier

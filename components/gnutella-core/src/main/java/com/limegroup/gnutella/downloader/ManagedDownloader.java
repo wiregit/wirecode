@@ -1,27 +1,73 @@
 package com.limegroup.gnutella.downloader;
 
-import com.limegroup.gnutella.*;
+import java.io.File;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
+import java.net.Socket;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.NoSuchElementException;
+import java.util.Set;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
+import com.limegroup.gnutella.ActivityCallback;
+import com.limegroup.gnutella.Assert;
+import com.limegroup.gnutella.BandwidthTracker;
+import com.limegroup.gnutella.BandwidthTrackerImpl;
+import com.limegroup.gnutella.DownloadManager;
+import com.limegroup.gnutella.Downloader;
+import com.limegroup.gnutella.Endpoint;
+import com.limegroup.gnutella.ErrorService;
+import com.limegroup.gnutella.FileDesc;
+import com.limegroup.gnutella.FileManager;
+import com.limegroup.gnutella.GUID;
+import com.limegroup.gnutella.IncompleteFileDesc;
+import com.limegroup.gnutella.InsufficientDataException;
+import com.limegroup.gnutella.MessageRouter;
+import com.limegroup.gnutella.RemoteFileDesc;
+import com.limegroup.gnutella.RouterService;
+import com.limegroup.gnutella.SavedFileManager;
+import com.limegroup.gnutella.SpeedConstants;
+import com.limegroup.gnutella.UDPService;
+import com.limegroup.gnutella.URN;
+import com.limegroup.gnutella.UrnCache;
+import com.limegroup.gnutella.altlocs.AlternateLocation;
+import com.limegroup.gnutella.altlocs.AlternateLocationCollection;
+import com.limegroup.gnutella.altlocs.AlternateLocationCollector;
+import com.limegroup.gnutella.altlocs.DirectAltLoc;
+import com.limegroup.gnutella.altlocs.PushAltLoc;
 import com.limegroup.gnutella.filters.IPFilter;
-import com.limegroup.gnutella.messages.*;
-import com.limegroup.gnutella.http.*;
-import com.limegroup.gnutella.util.*;
-import com.limegroup.gnutella.xml.*;
-import com.limegroup.gnutella.settings.*;
-import com.limegroup.gnutella.altlocs.*;
+import com.limegroup.gnutella.guess.GUESSEndpoint;
+import com.limegroup.gnutella.guess.OnDemandUnicaster;
+import com.limegroup.gnutella.http.ProblemReadingHeaderException;
+import com.limegroup.gnutella.messages.QueryRequest;
+import com.limegroup.gnutella.settings.ConnectionSettings;
+import com.limegroup.gnutella.settings.DownloadSettings;
+import com.limegroup.gnutella.settings.SharingSettings;
+import com.limegroup.gnutella.settings.UploadSettings;
 import com.limegroup.gnutella.statistics.DownloadStat;
-import com.limegroup.gnutella.guess.*;
 import com.limegroup.gnutella.tigertree.HashTree;
 import com.limegroup.gnutella.tigertree.TigerTreeCache;
-
-import java.io.*;
-import java.net.*;
-
-import java.util.StringTokenizer;
-
-import java.util.*;
-
-import org.apache.commons.logging.LogFactory;
-import org.apache.commons.logging.Log;
+import com.limegroup.gnutella.util.ApproximateMatcher;
+import com.limegroup.gnutella.util.CommonUtils;
+import com.limegroup.gnutella.util.DataUtils;
+import com.limegroup.gnutella.util.FileUtils;
+import com.limegroup.gnutella.util.FixedSizeExpiringSet;
+import com.limegroup.gnutella.util.IOUtils;
+import com.limegroup.gnutella.util.IntervalSet;
+import com.limegroup.gnutella.util.ManagedThread;
+import com.limegroup.gnutella.util.StringUtils;
+import com.limegroup.gnutella.xml.LimeXMLDocument;
 
 /**
  * A smart download.  Tries to get a group of similar files by delegating

@@ -1,28 +1,18 @@
 package com.limegroup.gnutella;
 
 import java.io.BufferedWriter;
-import java.io.File;
 import java.io.OutputStreamWriter;
-import java.net.DatagramSocket;
 import java.net.Socket;
+import java.util.Iterator;
 
 import junit.framework.Test;
 
-import com.limegroup.gnutella.handshaking.UltrapeerHeaders;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.routing.QueryRouteTable;
 import com.limegroup.gnutella.routing.RouteTableMessage;
-import com.limegroup.gnutella.settings.ConnectionSettings;
-import com.limegroup.gnutella.settings.FilterSettings;
-import com.limegroup.gnutella.settings.SharingSettings;
-import com.limegroup.gnutella.settings.UltrapeerSettings;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
-import com.limegroup.gnutella.util.BaseTestCase;
-import com.limegroup.gnutella.util.CommonUtils;
-import com.limegroup.gnutella.util.EmptyResponder;
-import java.util.Iterator;
 
 /**
  *  Tests that an Ultrapeer correctly handles all aspects of PushProxy.  For

@@ -5,8 +5,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.net.BindException;
-import java.net.UnknownHostException;
 import java.util.Date;
 import java.util.Random;
 
@@ -14,10 +12,9 @@ import com.limegroup.gnutella.ByteReader;
 import com.limegroup.gnutella.Constants;
 import com.limegroup.gnutella.ErrorService;
 import com.limegroup.gnutella.MessageService;
-import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.IOUtils;
-import com.limegroup.gnutella.util.URLDecoder;
 import com.limegroup.gnutella.util.ManagedThread;
+import com.limegroup.gnutella.util.URLDecoder;
 
 /**
  * Listens on an HTTP port, accepts incoming connections, and dispatches 

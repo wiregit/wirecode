@@ -1,15 +1,39 @@
 package com.limegroup.gnutella.messages;
 
-import com.limegroup.gnutella.*;
-import com.limegroup.gnutella.search.HostData;
-import com.limegroup.gnutella.udpconnect.UDPConnection;
-import com.limegroup.gnutella.util.*;
-import com.limegroup.gnutella.statistics.*;
-import com.limegroup.gnutella.settings.*;
-import java.io.*;
-import java.net.*;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.Serializable;
+import java.io.UnsupportedEncodingException;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Locale;
-import java.util.*;
+import java.util.Set;
+
+import com.limegroup.gnutella.Assert;
+import com.limegroup.gnutella.ByteOrder;
+import com.limegroup.gnutella.ErrorService;
+import com.limegroup.gnutella.GUID;
+import com.limegroup.gnutella.PushProxyInterface;
+import com.limegroup.gnutella.Response;
+import com.limegroup.gnutella.RouterService;
+import com.limegroup.gnutella.UDPService;
+import com.limegroup.gnutella.search.HostData;
+import com.limegroup.gnutella.settings.SearchSettings;
+import com.limegroup.gnutella.statistics.DroppedSentMessageStatHandler;
+import com.limegroup.gnutella.statistics.ReceivedErrorStat;
+import com.limegroup.gnutella.statistics.SentMessageStatHandler;
+import com.limegroup.gnutella.udpconnect.UDPConnection;
+import com.limegroup.gnutella.util.DataUtils;
+import com.limegroup.gnutella.util.IpPort;
+import com.limegroup.gnutella.util.NetworkUtils;
 
 /**
  * A query reply.  Contains information about the responding host in addition to

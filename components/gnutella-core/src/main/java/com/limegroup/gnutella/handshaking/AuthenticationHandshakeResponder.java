@@ -1,13 +1,14 @@
 package com.limegroup.gnutella.handshaking;
 
-import com.limegroup.gnutella.*;
-import com.limegroup.gnutella.security.*;
-import com.limegroup.gnutella.settings.*;
-import com.limegroup.gnutella.util.StringUtils;
-import com.limegroup.gnutella.util.CommonUtils;
-import java.util.Properties;
 import java.io.IOException;
-import java.util.*;
+import java.util.Properties;
+import java.util.Set;
+
+import com.limegroup.gnutella.ConnectionManager;
+import com.limegroup.gnutella.security.Cookies;
+import com.limegroup.gnutella.security.User;
+import com.limegroup.gnutella.settings.SecuritySettings;
+import com.limegroup.gnutella.util.StringUtils;
 
 /**
  * An authentication-capable responder to be used during handshake.

@@ -1,14 +1,23 @@
 package com.limegroup.gnutella.xml;
 
-import java.util.*;
-import java.io.*;
+import java.io.IOException;
+import java.io.StringReader;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Locale;
-import org.apache.xerces.parsers.DOMParser;
-import org.xml.sax.*;
-import org.w3c.dom.*;
 
-import com.limegroup.gnutella.*;
-import com.limegroup.gnutella.util.DataUtils;
+import org.apache.xerces.parsers.DOMParser;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
+
+import com.limegroup.gnutella.Assert;
+import com.limegroup.gnutella.Response;
 
 
 public final class LimeXMLDocumentHelper{

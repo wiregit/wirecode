@@ -1,13 +1,13 @@
 package com.limegroup.gnutella.util;
 
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.lang.String;
 import java.util.StringTokenizer;
-import com.limegroup.gnutella.settings.URLHandlerSettings;
+
 import com.limegroup.gnutella.MediaType;
-import com.limegroup.gnutella.util.PackagedMediaFileUtils;
+import com.limegroup.gnutella.settings.URLHandlerSettings;
 
 
 /**

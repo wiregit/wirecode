@@ -10,8 +10,7 @@ package com.limegroup.gnutella.util;
 
 //package java.util;
 
-import java.util.*;
-import java.io.*;
+import java.io.IOException;
 
 /**
  * This class implements a vector of bits that grows as needed. Each 

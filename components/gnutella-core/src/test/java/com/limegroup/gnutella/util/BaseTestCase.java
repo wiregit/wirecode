@@ -3,7 +3,12 @@ package com.limegroup.gnutella.util;
 import java.io.File;
 import java.io.IOException;
 import java.io.InterruptedIOException;
-import java.net.*;
+import java.net.Socket;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.StringTokenizer;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import junit.framework.Test;
 import junit.framework.TestCase;
@@ -28,13 +33,6 @@ import com.limegroup.gnutella.settings.SearchSettings;
 import com.limegroup.gnutella.settings.SettingsHandler;
 import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.settings.UltrapeerSettings;
-import com.limegroup.gnutella.util.SystemUtils;
-
-import java.util.StringTokenizer;
-import java.util.List;
-import java.util.LinkedList;
-import java.util.TimerTask;
-import java.util.Timer;
 
 public class BaseTestCase extends AssertComparisons implements ErrorCallback {
     

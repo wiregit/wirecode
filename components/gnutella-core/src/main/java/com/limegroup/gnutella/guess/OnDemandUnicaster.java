@@ -1,9 +1,17 @@
 package com.limegroup.gnutella.guess;
 
-import java.util.*;
-import java.net.*;
-import com.limegroup.gnutella.*;
-import com.limegroup.gnutella.messages.*;
+import java.net.InetAddress;
+import java.util.Hashtable;
+import java.util.Iterator;
+import java.util.Map;
+
+import com.limegroup.gnutella.ErrorService;
+import com.limegroup.gnutella.RouterService;
+import com.limegroup.gnutella.UDPService;
+import com.limegroup.gnutella.URN;
+import com.limegroup.gnutella.messages.PingReply;
+import com.limegroup.gnutella.messages.PingRequest;
+import com.limegroup.gnutella.messages.QueryRequest;
 
 /** Utility class for sending GUESS queries.
  */

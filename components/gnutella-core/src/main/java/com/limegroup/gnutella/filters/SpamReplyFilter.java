@@ -1,6 +1,8 @@
 package com.limegroup.gnutella.filters;
 
-import com.limegroup.gnutella.messages.*;
+import com.limegroup.gnutella.messages.BadPacketException;
+import com.limegroup.gnutella.messages.Message;
+import com.limegroup.gnutella.messages.QueryReply;
 
 /** 
  * Filter for replies that are abusing the network.

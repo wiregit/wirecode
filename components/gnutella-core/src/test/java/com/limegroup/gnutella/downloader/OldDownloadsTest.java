@@ -1,5 +1,8 @@
 package com.limegroup.gnutella.downloader;
 
+import java.util.LinkedList;
+import java.util.List;
+
 import junit.framework.Test;
 
 import org.apache.commons.logging.Log;
@@ -12,8 +15,6 @@ import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.DownloadSettings;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.util.CommonUtils;
-import java.util.LinkedList;
-import java.util.List;
 
 /**
  * Tests backwards compatibility with old downloads.dat files.

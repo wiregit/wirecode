@@ -1,10 +1,11 @@
 package com.limegroup.gnutella.downloader;
 
-import com.limegroup.gnutella.*;
-import com.limegroup.gnutella.xml.LimeXMLDocument;
-import java.net.URL;
 import java.io.Serializable;
+import java.net.URL;
 import java.util.Set;
+
+import com.limegroup.gnutella.RemoteFileDesc;
+import com.limegroup.gnutella.xml.LimeXMLDocument;
 
 /**
  * A RemoteFileDesc augmented with a URL, which might be different from the

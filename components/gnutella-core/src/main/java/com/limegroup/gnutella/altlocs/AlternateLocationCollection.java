@@ -1,12 +1,15 @@
 package com.limegroup.gnutella.altlocs;
 
-import com.limegroup.gnutella.http.*; 
-import com.limegroup.gnutella.util.*;
-import java.util.*;
-import java.net.*;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.util.Iterator;
 import java.util.StringTokenizer;
-import java.io.*;
-import com.limegroup.gnutella.*;
+
+import com.limegroup.gnutella.ByteOrder;
+import com.limegroup.gnutella.ErrorService;
+import com.limegroup.gnutella.URN;
+import com.limegroup.gnutella.http.HTTPHeaderValue;
+import com.limegroup.gnutella.util.FixedSizeSortedSet;
 
 /**
  * This class holds a collection of <tt>AlternateLocation</tt> instances,

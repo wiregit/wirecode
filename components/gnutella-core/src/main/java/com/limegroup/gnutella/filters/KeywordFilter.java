@@ -1,9 +1,14 @@
 package com.limegroup.gnutella.filters;
 
-import com.limegroup.gnutella.*;
-import com.limegroup.gnutella.messages.*;
-import java.util.*;
-import java.util.Locale;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+
+import com.limegroup.gnutella.Response;
+import com.limegroup.gnutella.messages.BadPacketException;
+import com.limegroup.gnutella.messages.Message;
+import com.limegroup.gnutella.messages.QueryReply;
+import com.limegroup.gnutella.messages.QueryRequest;
 
 /** 
  * A spam filter that removes certain "bad" keywords. 

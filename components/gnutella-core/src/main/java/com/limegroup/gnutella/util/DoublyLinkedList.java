@@ -6,8 +6,8 @@
 
 package com.limegroup.gnutella.util;
 
-import java.util.*;
-import com.limegroup.gnutella.Assert;
+import java.util.Iterator;
+import java.util.NoSuchElementException;
 
 /**
 * A classic doubly-linked list.  Unlike the LinkedList class in the JDK, this

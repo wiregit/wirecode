@@ -1,11 +1,16 @@
 package com.limegroup.gnutella.util;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.Iterator;
+import java.util.List;
+import java.util.NoSuchElementException;
+import java.util.SortedSet;
+import java.util.TreeSet;
+
 import com.limegroup.gnutella.Assert;
 import com.limegroup.gnutella.ByteOrder;
-import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.downloader.Interval;
-import com.limegroup.gnutella.http.ProblemReadingHeaderException;
 
 /**
  * A "range" version of IntSet. This is a first cut of the class and does

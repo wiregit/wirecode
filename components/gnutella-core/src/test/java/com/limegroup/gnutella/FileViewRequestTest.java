@@ -1,24 +1,19 @@
 package com.limegroup.gnutella;
 
-import java.io.*;
-import java.net.*;
-import java.util.*;
+import java.io.DataInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
 
 import junit.framework.Test;
 
-import com.bitzi.util.Base32;
-import com.limegroup.gnutella.messages.Message;
-import com.limegroup.gnutella.messages.PushRequest;
-import com.limegroup.gnutella.messages.QueryReply;
-import com.limegroup.gnutella.messages.QueryRequest;
-import com.limegroup.gnutella.search.HostData;
-import com.limegroup.gnutella.util.CommonUtils;
-import com.limegroup.gnutella.stubs.ActivityCallbackStub;
-import com.limegroup.gnutella.uploader.*;
 import com.limegroup.gnutella.html.FileListHTMLPage;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
+import com.limegroup.gnutella.stubs.ActivityCallbackStub;
+import com.limegroup.gnutella.uploader.BannedUploadState;
+import com.limegroup.gnutella.uploader.FileViewUploadState;
+import com.limegroup.gnutella.util.CommonUtils;
 
 /**
  * Checks whether (multi)leaves avoid forwarding messages to ultrapeers, do

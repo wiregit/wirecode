@@ -1,22 +1,26 @@
 package com.limegroup.gnutella;
 
-import java.io.*;
-import java.net.*;
-import java.util.StringTokenizer;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
+import java.net.InetAddress;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import junit.framework.Test;
 
-import com.bitzi.util.Base32;
-import com.limegroup.gnutella.Acceptor;
-import com.limegroup.gnutella.messages.*;
-import com.limegroup.gnutella.messages.vendor.MessagesSupportedVendorMessage;
-import com.limegroup.gnutella.messages.vendor.TCPConnectBackVendorMessage;
+import com.limegroup.gnutella.messages.Message;
+import com.limegroup.gnutella.messages.PingReply;
+import com.limegroup.gnutella.messages.PingRequest;
 import com.limegroup.gnutella.search.HostData;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
-import com.limegroup.gnutella.util.CommonUtils;
-import com.limegroup.gnutella.util.PrivilegedAccessor;
 import com.limegroup.gnutella.util.IpPort;
-import java.util.*;
+import com.limegroup.gnutella.util.PrivilegedAccessor;
 
 /**
  * Checks whether (multi)leaves avoid forwarding messages to ultrapeers, do

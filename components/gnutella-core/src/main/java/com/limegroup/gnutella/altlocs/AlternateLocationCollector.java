@@ -1,6 +1,6 @@
 package com.limegroup.gnutella.altlocs;
 
-import com.limegroup.gnutella.*;
+import com.limegroup.gnutella.URN;
 
 /**
  * Interface for classes that serve as collection points for alternate sources

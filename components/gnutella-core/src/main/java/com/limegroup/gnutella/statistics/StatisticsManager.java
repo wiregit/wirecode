@@ -1,8 +1,11 @@
 package com.limegroup.gnutella.statistics;
 
-import com.limegroup.gnutella.*;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 
-import java.util.*;
+import com.limegroup.gnutella.ErrorService;
+import com.limegroup.gnutella.RouterService;
 
 /**
  * Class for managing statistics recording.

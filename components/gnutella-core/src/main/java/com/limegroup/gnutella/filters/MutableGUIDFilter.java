@@ -1,12 +1,11 @@
 package com.limegroup.gnutella.filters;
 
-import com.limegroup.gnutella.messages.Message;
-import com.limegroup.gnutella.messages.QueryReply;
-
-import com.limegroup.gnutella.GUID;
-
 import java.util.Set;
 import java.util.TreeSet;
+
+import com.limegroup.gnutella.GUID;
+import com.limegroup.gnutella.messages.Message;
+import com.limegroup.gnutella.messages.QueryReply;
 
 /**
  * Filter for query replies based on the GUID

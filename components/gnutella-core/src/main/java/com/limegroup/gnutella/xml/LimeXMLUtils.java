@@ -5,26 +5,43 @@
  */
 
 package com.limegroup.gnutella.xml;
-import java.io.*;
-import java.util.*;
+import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.StringReader;
+import java.io.Writer;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
+import java.util.zip.DeflaterOutputStream;
+import java.util.zip.GZIPInputStream;
+import java.util.zip.InflaterInputStream;
+
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+
 import org.w3c.dom.Document;
+import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
-import org.w3c.dom.NamedNodeMap;
-import org.xml.sax.SAXException;
-import javax.xml.parsers.ParserConfigurationException;
-import com.limegroup.gnutella.*;
-import com.limegroup.gnutella.util.*;
 import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
 
-// for compression
-import java.util.zip.*;
-import java.util.Locale;
-
-// for hashing
-import java.security.*;
+import com.limegroup.gnutella.Assert;
+import com.limegroup.gnutella.ErrorService;
+import com.limegroup.gnutella.Response;
+import com.limegroup.gnutella.util.I18NConvert;
 
 /**
  * Contains utility methods

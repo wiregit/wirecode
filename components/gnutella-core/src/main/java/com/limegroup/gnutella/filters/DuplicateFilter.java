@@ -1,10 +1,14 @@
 package com.limegroup.gnutella.filters;
 
-import com.limegroup.gnutella.*;
-import com.limegroup.gnutella.messages.*;
+import java.util.HashSet;
+import java.util.Set;
+
+import com.limegroup.gnutella.GUID;
+import com.limegroup.gnutella.messages.Message;
+import com.limegroup.gnutella.messages.PingRequest;
+import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.util.Buffer;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
-import java.util.*;
 
 /**
  * A spam filter that tries to eliminate duplicate packets from

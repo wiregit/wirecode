@@ -1,12 +1,12 @@
 package com.limegroup.gnutella.downloader;
 
-import java.io.IOException;
 import java.io.File;
+import java.io.IOException;
 
 import junit.framework.Test;
 
-import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.ByteReader;
+import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.http.ProblemReadingHeaderException;
 import com.limegroup.gnutella.util.PrivilegedAccessor;
 

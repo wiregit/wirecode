@@ -1,9 +1,12 @@
 package com.limegroup.gnutella.search;
 
-import com.limegroup.gnutella.*;
-import com.limegroup.gnutella.messages.*;
-import com.limegroup.gnutella.util.*;
-import java.util.*;
+import java.util.Set;
+
+import com.limegroup.gnutella.ByteOrder;
+import com.limegroup.gnutella.RouterService;
+import com.limegroup.gnutella.messages.BadPacketException;
+import com.limegroup.gnutella.messages.QueryReply;
+import com.limegroup.gnutella.util.NetworkUtils;
 
 /**
  * This class contains data about a host that has returned a query hit,

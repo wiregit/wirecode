@@ -3,6 +3,8 @@ package com.limegroup.gnutella;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.OutputStream;
+import java.util.HashSet;
+import java.util.Set;
 
 import junit.framework.Test;
 
@@ -12,8 +14,6 @@ import com.limegroup.gnutella.messages.GGEP;
 import com.limegroup.gnutella.util.PrivilegedAccessor;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 import com.limegroup.gnutella.xml.LimeXMLSchemaRepository;
-import java.util.HashSet;
-import java.util.Set;
 
 /**
  * This class tests the Response class.

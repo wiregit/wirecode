@@ -1,19 +1,11 @@
 package com.limegroup.gnutella;
 
-import com.limegroup.gnutella.messages.*;
-import com.limegroup.gnutella.settings.*;
-import com.limegroup.gnutella.search.*;
-import com.limegroup.gnutella.handshaking.*;
-import com.limegroup.gnutella.stubs.*;
-import com.limegroup.gnutella.util.*;
-import com.bitzi.util.*;
+import java.net.Socket;
 
-import junit.framework.*;
-import java.util.Properties;
-import java.util.StringTokenizer;
-import java.util.*;
-import java.io.*;
-import java.net.*;
+import junit.framework.Test;
+
+import com.limegroup.gnutella.settings.ConnectionSettings;
+import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 
 /**
  * Checks whether (multi)leaves avoid forwarding messages to ultrapeers, do

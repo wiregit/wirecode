@@ -1,7 +1,12 @@
 package com.limegroup.gnutella;
 
-import java.io.*;
-import java.util.*;
+import java.io.IOException;
+import java.io.InvalidObjectException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * This class defines the types of URNs supported in the application and 

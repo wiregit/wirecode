@@ -2,10 +2,9 @@ package com.limegroup.gnutella.messages;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.util.Arrays;
 
 import junit.framework.Test;
-
-import java.util.Arrays;
 
 public class PushRequestTest extends com.limegroup.gnutella.util.BaseTestCase {
     public PushRequestTest(String name) {

@@ -1,17 +1,31 @@
 package com.limegroup.gnutella;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InterruptedIOException;
+import java.net.BindException;
+import java.net.ConnectException;
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
+import java.net.InetAddress;
+import java.net.NoRouteToHostException;
+import java.net.SocketException;
+import java.util.Arrays;
+
+import com.limegroup.gnutella.guess.GUESSEndpoint;
+import com.limegroup.gnutella.messages.BadPacketException;
+import com.limegroup.gnutella.messages.Message;
+import com.limegroup.gnutella.messages.PingReply;
+import com.limegroup.gnutella.messages.PingRequest;
+import com.limegroup.gnutella.messages.vendor.ReplyNumberVendorMessage;
 import com.limegroup.gnutella.settings.ConnectionSettings;
-import com.limegroup.gnutella.util.NetworkUtils;
 import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.IpPort;
 import com.limegroup.gnutella.util.ManagedThread;
+import com.limegroup.gnutella.util.NetworkUtils;
 import com.limegroup.gnutella.util.ProcessingQueue;
-import com.limegroup.gnutella.guess.GUESSEndpoint;
-import com.limegroup.gnutella.messages.*;
-import com.limegroup.gnutella.messages.vendor.ReplyNumberVendorMessage;
-import java.net.*;
-import java.io.*;
-import java.util.*;
 
 /**
  * This class handles UDP messaging services.  It both sends and

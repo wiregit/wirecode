@@ -1,9 +1,11 @@
 package com.limegroup.gnutella.security;
 
-import java.util.*;
-import java.io.*;
+import java.io.IOException;
+import java.io.Serializable;
+import java.util.HashMap;
+import java.util.Map;
 
-import com.limegroup.gnutella.settings.*;
+import com.limegroup.gnutella.settings.SecuritySettings;
 import com.limegroup.gnutella.util.FileUtils;
 
 /**

@@ -1,21 +1,24 @@
 package com.limegroup.gnutella.udpconnect;
 
-import junit.framework.Test;
-import java.io.*;
-import java.net.*;
+import java.io.BufferedInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.InetAddress;
 
-import com.limegroup.gnutella.util.BaseTestCase;
-import com.limegroup.gnutella.stubs.UDPServiceStub;
-import com.limegroup.gnutella.RouterService;
+import junit.framework.Test;
+
 import com.limegroup.gnutella.Acceptor;
+import com.limegroup.gnutella.ByteReader;
+import com.limegroup.gnutella.Constants;
 import com.limegroup.gnutella.ErrorService;
+import com.limegroup.gnutella.RouterService;
+import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
+import com.limegroup.gnutella.stubs.UDPServiceStub;
+import com.limegroup.gnutella.util.BaseTestCase;
 import com.limegroup.gnutella.util.IOUtils;
 import com.limegroup.gnutella.util.ManagedThread;
-import com.limegroup.gnutella.Constants;
-import com.limegroup.gnutella.ByteReader;
-import com.limegroup.gnutella.util.NetworkUtils;
-import com.limegroup.gnutella.settings.ConnectionSettings;
 
 /**
  * Put full UDPConnection system through various tests.

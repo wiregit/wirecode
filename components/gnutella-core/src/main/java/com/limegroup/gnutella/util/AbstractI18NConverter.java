@@ -1,6 +1,5 @@
 package com.limegroup.gnutella.util;
 
-import java.io.IOException;
 
 /**
  * Abstract clas to use for different normalization implementations

@@ -1,31 +1,64 @@
 package com.limegroup.gnutella.downloader;
 
-import com.limegroup.gnutella.*;
+import java.io.BufferedOutputStream;
+import java.io.BufferedWriter;
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.net.InetAddress;
+import java.net.Socket;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.NoSuchElementException;
+import java.util.Set;
+import java.util.StringTokenizer;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
+import com.limegroup.gnutella.Assert;
+import com.limegroup.gnutella.BandwidthTracker;
+import com.limegroup.gnutella.BandwidthTrackerImpl;
+import com.limegroup.gnutella.ByteReader;
+import com.limegroup.gnutella.Constants;
+import com.limegroup.gnutella.CreationTimeCache;
+import com.limegroup.gnutella.InsufficientDataException;
+import com.limegroup.gnutella.PushEndpoint;
+import com.limegroup.gnutella.PushEndpointForSelf;
+import com.limegroup.gnutella.RemoteFileDesc;
+import com.limegroup.gnutella.RouterService;
+import com.limegroup.gnutella.UDPService;
+import com.limegroup.gnutella.URN;
+import com.limegroup.gnutella.altlocs.AlternateLocation;
+import com.limegroup.gnutella.altlocs.AlternateLocationCollection;
+import com.limegroup.gnutella.altlocs.DirectAltLoc;
+import com.limegroup.gnutella.altlocs.PushAltLoc;
 import com.limegroup.gnutella.filters.IPFilter;
-import com.limegroup.gnutella.http.*;
-import com.limegroup.gnutella.statistics.*;
-import com.limegroup.gnutella.tigertree.HashTree;
+import com.limegroup.gnutella.http.ConstantHTTPHeaderValue;
+import com.limegroup.gnutella.http.HTTPConstants;
+import com.limegroup.gnutella.http.HTTPHeaderName;
+import com.limegroup.gnutella.http.HTTPHeaderValueCollection;
+import com.limegroup.gnutella.http.HTTPUtils;
+import com.limegroup.gnutella.http.ProblemReadingHeaderException;
 import com.limegroup.gnutella.settings.ChatSettings;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.DownloadSettings;
 import com.limegroup.gnutella.settings.UploadSettings;
+import com.limegroup.gnutella.statistics.BandwidthStat;
+import com.limegroup.gnutella.statistics.DownloadStat;
+import com.limegroup.gnutella.statistics.NumericalDownloadStat;
+import com.limegroup.gnutella.tigertree.HashTree;
 import com.limegroup.gnutella.udpconnect.UDPConnection;
 import com.limegroup.gnutella.util.BandwidthThrottle;
-import com.limegroup.gnutella.util.IntervalSet;
-import com.limegroup.gnutella.util.Sockets;
 import com.limegroup.gnutella.util.CommonUtils;
-import com.limegroup.gnutella.util.NetworkUtils;
 import com.limegroup.gnutella.util.CountingInputStream;
-import com.limegroup.gnutella.util.StringUtils;
-import com.limegroup.gnutella.http.HTTPHeaderValueCollection;
-import java.io.*;
-import java.net.*;
-import java.util.StringTokenizer;
-import java.util.*;
-import com.limegroup.gnutella.altlocs.*;
-
-import org.apache.commons.logging.LogFactory;
-import org.apache.commons.logging.Log;
+import com.limegroup.gnutella.util.IntervalSet;
+import com.limegroup.gnutella.util.NetworkUtils;
+import com.limegroup.gnutella.util.Sockets;
 
 /**
  * Downloads a file over an HTTP connection.  This class is as simple as

@@ -1,13 +1,12 @@
 package com.limegroup.gnutella;
 
 import java.io.StringWriter;
+import java.util.Comparator;
+import java.util.Iterator;
 
 import junit.framework.Test;
 
 import com.limegroup.gnutella.settings.ApplicationSettings;
-
-import java.util.Comparator;
-import java.util.Iterator;
 
 /**
  * Unit tests for ExtendedEndpoint.

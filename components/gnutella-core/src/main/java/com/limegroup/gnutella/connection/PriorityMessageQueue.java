@@ -1,8 +1,9 @@
 package com.limegroup.gnutella.connection;
 
-import com.limegroup.gnutella.*;
-import com.limegroup.gnutella.messages.*;
-import com.limegroup.gnutella.util.*;
+import com.limegroup.gnutella.messages.Message;
+import com.limegroup.gnutella.messages.PingReply;
+import com.limegroup.gnutella.messages.QueryReply;
+import com.limegroup.gnutella.util.BucketQueue;
 
 
 /**

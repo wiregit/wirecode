@@ -2,14 +2,12 @@ package com.limegroup.gnutella.messages;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.util.Arrays;
 
 import junit.framework.Test;
 
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.settings.ApplicationSettings;
-import com.limegroup.gnutella.util.PrivilegedAccessor;
-
-import java.util.Arrays;
 
 public class PingRequestTest extends com.limegroup.gnutella.util.BaseTestCase {
     public PingRequestTest(String name) {

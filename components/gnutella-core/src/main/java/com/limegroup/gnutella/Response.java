@@ -1,30 +1,31 @@
 package com.limegroup.gnutella;
 
-import com.limegroup.gnutella.altlocs.AlternateLocation;
-import com.limegroup.gnutella.altlocs.AlternateLocationCollection;
-import com.limegroup.gnutella.altlocs.DirectAltLoc;
-import com.limegroup.gnutella.filters.IPFilter;
-import com.limegroup.gnutella.messages.GGEP;
-import com.limegroup.gnutella.messages.HUGEExtension;
-import com.limegroup.gnutella.messages.BadGGEPBlockException;
-import com.limegroup.gnutella.messages.BadGGEPPropertyException;
-import com.limegroup.gnutella.search.HostData;
-import com.limegroup.gnutella.util.NetworkUtils;
-import com.limegroup.gnutella.util.DataUtils;
-import com.limegroup.gnutella.xml.LimeXMLDocument;
-import com.limegroup.gnutella.xml.SchemaNotFoundException;
-
-import java.io.IOException;
-import java.io.OutputStream;
-import java.io.InputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.UnknownHostException;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Set;
 import java.util.StringTokenizer;
 
 import org.xml.sax.SAXException;
-import java.util.*;
+
+import com.limegroup.gnutella.altlocs.AlternateLocationCollection;
+import com.limegroup.gnutella.altlocs.DirectAltLoc;
+import com.limegroup.gnutella.filters.IPFilter;
+import com.limegroup.gnutella.messages.BadGGEPPropertyException;
+import com.limegroup.gnutella.messages.GGEP;
+import com.limegroup.gnutella.messages.HUGEExtension;
+import com.limegroup.gnutella.search.HostData;
+import com.limegroup.gnutella.util.DataUtils;
+import com.limegroup.gnutella.util.NetworkUtils;
+import com.limegroup.gnutella.xml.LimeXMLDocument;
+import com.limegroup.gnutella.xml.SchemaNotFoundException;
 
 
 /**

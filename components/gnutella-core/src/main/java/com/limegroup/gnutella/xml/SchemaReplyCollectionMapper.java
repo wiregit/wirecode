@@ -1,6 +1,7 @@
 package com.limegroup.gnutella.xml;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
 
 
 /** 

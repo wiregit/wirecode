@@ -1,20 +1,28 @@
 package com.limegroup.gnutella;
 
-import com.limegroup.gnutella.*;
-import com.limegroup.gnutella.messages.*;
-import com.limegroup.gnutella.messages.vendor.*;
-import com.limegroup.gnutella.settings.*;
-import com.limegroup.gnutella.stubs.*;
-import com.limegroup.gnutella.util.*;
-import com.limegroup.gnutella.handshaking.*;
-import com.limegroup.gnutella.security.*;
-import com.limegroup.gnutella.routing.*;
+import java.io.File;
+import java.net.DatagramSocket;
+import java.net.ServerSocket;
+import java.util.Iterator;
 
-import junit.framework.*;
-import java.util.Properties;
-import java.util.*;
-import java.io.*;
-import java.net.*;
+import junit.framework.Test;
+
+import com.limegroup.gnutella.handshaking.LeafHeaders;
+import com.limegroup.gnutella.handshaking.UltrapeerHeaders;
+import com.limegroup.gnutella.messages.FeatureSearchData;
+import com.limegroup.gnutella.messages.Message;
+import com.limegroup.gnutella.messages.QueryRequest;
+import com.limegroup.gnutella.messages.vendor.CapabilitiesVM;
+import com.limegroup.gnutella.routing.QueryRouteTable;
+import com.limegroup.gnutella.routing.RouteTableMessage;
+import com.limegroup.gnutella.settings.ConnectionSettings;
+import com.limegroup.gnutella.settings.FilterSettings;
+import com.limegroup.gnutella.settings.SharingSettings;
+import com.limegroup.gnutella.settings.UltrapeerSettings;
+import com.limegroup.gnutella.stubs.ActivityCallbackStub;
+import com.limegroup.gnutella.util.BaseTestCase;
+import com.limegroup.gnutella.util.CommonUtils;
+import com.limegroup.gnutella.util.EmptyResponder;
 
 /**
  *  Tests that an Ultrapeer correctly handles connect back redirect messages.

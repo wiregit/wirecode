@@ -1,6 +1,6 @@
 package com.limegroup.gnutella;
 
-import com.limegroup.gnutella.settings.*;
+import com.limegroup.gnutella.settings.ApplicationSettings;
 
 /**
  * Maintains various session statistics, like uptime.  Implements the Singleton

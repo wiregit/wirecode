@@ -1,12 +1,14 @@
 package com.limegroup.gnutella.handshaking;
 
 import java.util.Properties;
-import com.limegroup.gnutella.*;
-import com.limegroup.gnutella.updates.*;
+
+import com.limegroup.gnutella.ConnectionManager;
+import com.limegroup.gnutella.RouterService;
+import com.limegroup.gnutella.settings.ApplicationSettings;
+import com.limegroup.gnutella.settings.ConnectionSettings;
+import com.limegroup.gnutella.updates.UpdateManager;
 import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.NetworkUtils;
-import com.limegroup.gnutella.settings.ConnectionSettings;
-import com.limegroup.gnutella.settings.ApplicationSettings;
 
 /**
  * This class contains the headers that all LimeWires pass in connection

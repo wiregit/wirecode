@@ -1,7 +1,10 @@
 package com.limegroup.gnutella;
 
-import java.io.*;
-import java.util.*;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.util.HashSet;
+import java.util.Set;
 
 import junit.framework.Test;
 
