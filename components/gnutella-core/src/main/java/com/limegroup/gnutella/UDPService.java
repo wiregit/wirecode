@@ -52,11 +52,16 @@ public final class UDPService implements Runnable {
 	private final int BUFFER_SIZE = 1024 * 32;
 
 	/**
-	 * Variable for whether or not this node is capable of running its
-	 * own GUESS-style searches, dependent upon whether or not it
-	 * has successfully received an incoming UDP packet.
+     * True if the UDPService has ever recieved an incoming (presumably)
+     * solicited UDP packet.
 	 */
-	private boolean _isGUESSCapable = false;
+	private boolean _receivedSolicited = false;
+
+	/**
+     * True if the UDPService has ever recieved an incoming unsolicited UDP
+     * packet.
+	 */
+	private boolean _receivedUnsolicited = false;
 
 	/**
 	 * The thread for listening of incoming messages.
@@ -68,6 +73,11 @@ public final class UDPService implements Runnable {
 	 */
 	private QueryUnicaster UNICASTER = QueryUnicaster.instance();
 
+    /**
+     * The GUID use to signal that the a unsolicited UDP packet was received.
+     */
+    private GUID _unsolicitedGUID = null;
+
 	/**
 	 * Instance accessor.
 	 */
@@ -76,9 +86,11 @@ public final class UDPService implements Runnable {
 	}
 
 	/**
-	 * Constructs a new <tt>UDPAcceptor</tt>.
+	 * Constructs a new <tt>UDPService</tt>.
 	 */
-	private UDPService() {}
+	private UDPService() {
+        _unsolicitedGUID = new GUID(GUID.makeGuid());
+    }
 
     /** 
      * Returns a new DatagramSocket that is bound to the given port.  This
@@ -172,7 +184,6 @@ public final class UDPService implements Runnable {
                 // ----------------------------*                
                 // process packet....
                 // *----------------------------
-                _isGUESSCapable = true;
                 byte[] data = datagram.getData();
                 int length = datagram.getLength();
                 try {
@@ -180,8 +191,14 @@ public final class UDPService implements Runnable {
                     InputStream in = new ByteArrayInputStream(data);
                     Message message = Message.read(in);		
                     if(message == null) continue;
-                    //if (message instanceof QueryRequest)
-					//sendAcknowledgement(datagram, message.getGUID());
+                    // while we aren't GUESS capable, try to become it....
+                    if (!isGUESSCapable()) {
+                        GUID incomingGUID = new GUID(message.getGUID());
+                        if (_unsolicitedGUID.equals(incomingGUID))
+                            _receivedUnsolicited = true;
+                        else
+                            _receivedSolicited = true;
+                    }
                     router.handleUDPMessage(message, datagram);				
                 }
                 catch (IOException e) {
@@ -240,7 +257,7 @@ public final class UDPService implements Runnable {
 	 *  GUESS queries, <tt>false</tt> otherwise
 	 */	
 	public boolean isGUESSCapable() {
-		return _isGUESSCapable;
+		return _receivedUnsolicited && _receivedSolicited;
 	}
 
 	/**
@@ -254,6 +271,13 @@ public final class UDPService implements Runnable {
 		if(_socket == null) return false;
 		return (_socket.getLocalPort() != -1);
 	}
+
+    /**
+     * Use this GUID when sending ConnectBack requests.
+     */
+    public GUID getUDPConnectBackGUID() {
+        return _unsolicitedGUID;
+    }
 
 	/** 
 	 * Overrides Object.toString to give more informative information
