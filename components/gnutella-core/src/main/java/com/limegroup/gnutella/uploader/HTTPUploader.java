@@ -249,18 +249,22 @@ public class HTTPUploader implements Uploader {
 	 * This method also handles storing any newly discovered alternate 
 	 * locations for this file in the corresponding <tt>FileDesc</tt>.  The
 	 * new alternate locations are discovered through the requesting client's
-	 * HTTP headers.
+	 * HTTP headers.<p>
 	 *
 	 * Implements the <tt>Uploader</tt> interface.
 	 */
 	public void writeResponse() {
 		try {
 			readHeader();
-			_method.writeHttpResponse(_state, _ostream);
+			if(_ostream != null) {
+				_method.writeHttpResponse(_state, _ostream);
+			}
 		} catch (FreeloaderUploadingException e) { 
 			setState(FREELOADER);
 			try {
-				_method.writeHttpResponse(_state, _ostream);
+				if(_ostream != null) {
+					_method.writeHttpResponse(_state, _ostream);
+				}
 			} catch (IOException e2) {};
 		} catch (IOException e) {
 			setState(INTERRUPTED);
