@@ -254,27 +254,27 @@ public final class QueryUnicaster {
                 _queryHosts.wait();
             }
             debug("QueryUnicaster.getUnicastHost(): got a host!");
-
-            if (_queryHosts.size() < MIN_ENDPOINTS) {
-                // send a ping to the guy you are popping if cache too small
-                ExtendedEndpoint toReturn = 
-                (ExtendedEndpoint) _queryHosts.pop();
-                // if i haven't pinged him 'recently', then ping him...
-                if (_pingList.add(toReturn)) {  
-                    PingRequest pr = new PingRequest((byte)1);
-                    UDPAcceptor udpService = UDPAcceptor.instance();
-                    try {
-                        InetAddress ip = 
-                        InetAddress.getByName(toReturn.getHostname());
-                        // send the query
-                        udpService.send(pr, ip, toReturn.getPort());
-                    }
-                    catch (UnknownHostException ignored) {}
-                }
-                return toReturn;
-            }
-            return (ExtendedEndpoint) _queryHosts.pop();
         }
+
+        if (_queryHosts.size() < MIN_ENDPOINTS) {
+            // send a ping to the guy you are popping if cache too small
+            ExtendedEndpoint toReturn = 
+            (ExtendedEndpoint) _queryHosts.pop();
+            // if i haven't pinged him 'recently', then ping him...
+            if (_pingList.add(toReturn)) {  
+                PingRequest pr = new PingRequest((byte)1);
+                UDPAcceptor udpService = UDPAcceptor.instance();
+                try {
+                    InetAddress ip = 
+                    InetAddress.getByName(toReturn.getHostname());
+                    // send the query
+                    udpService.send(pr, ip, toReturn.getPort());
+                }
+                catch (UnknownHostException ignored) {}
+            }
+            return toReturn;
+        }
+        return (ExtendedEndpoint) _queryHosts.pop();
     }
 
 
