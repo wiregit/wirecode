@@ -919,7 +919,7 @@ public class ManagedConnection
      *  if I wrote "Supernode: true" and this connection wrote "Supernode:
      *  false, and <b>both support query routing</b>. */
     public boolean isSupernodeClientConnection() {
-        if(_isSupernodeClientConnection != null) {
+        if(_isSupernodeClientConnection == null) {
             _isSupernodeClientConnection = 
                 new Boolean(isSupernodeClientConnection2());
         }
