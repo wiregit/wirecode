@@ -68,9 +68,7 @@ public class UpdateManagerTest extends BaseTestCase {
 
         //Set the version to a lower version
         PrivilegedAccessor.setValue(CommonUtils.class, "testVersion", "3.2.2");
-        
-        //TODO1: make these version files with the messages using the private
-        //key and add them to tests.
+        //Get access to all the test files we need.
         File updateDir = new File("com/limegroup/gnutella/updates");
         OLD_VERSION_FILE = new File(updateDir, "old_verFile.xml"); 
         NEW_VERSION_FILE = new File(updateDir,"new_verFile.xml");
@@ -80,7 +78,7 @@ public class UpdateManagerTest extends BaseTestCase {
         File pub2 = new File(CommonUtils.getUserSettingsDir(),"public.key");
         CommonUtils.copy(pub, pub2);
         updateXMLFile = new File(CommonUtils.getUserSettingsDir(),"update.xml");
-        //TODO:Store older file and replace at the end.
+        //set the version file to be the old one. 
         updateVersion = OLD;
         changeUpdateFile();
         RouterService rs = new RouterService(new ActivityCallbackStub());
@@ -98,35 +96,58 @@ public class UpdateManagerTest extends BaseTestCase {
             fail("problem setting up test");
         }
     }
-        
+    
+    /**
+     * Tests that UpdateManager thinks the version it knows about is the one on
+     * disk so long as it is verified correctly
+     */
     public void testSimpleVersionCheck() {
         UpdateManager man = UpdateManager.instance();
-        assertEquals("Problem with old update file", "2.9.3",man.getVersion());
+        assertEquals("Problem with old update file", "2.9.3", man.getVersion());
+    }
+
+    public void testBadSignatureFails() {
+        //First test bad signaute with the file.
+        updateVersion = DEF_SIGNATURE;
+        changeUpdateFile();
+        UpdateManager man = UpdateManager.instance();
+        assertEquals("Accepted defective signature", "3.2.2", man.getVersion());
+    }
+
+    public void testNewerVersionAccepted() {
+        updateVersion = NEW;
+        changeUpdateFile();
+        UpdateManager man = UpdateManager.instance();
+        assertEquals("Problem with new update file", "3.6.3", man.getVersion());
+    }
+
+    public void testBadMessageFails() {
+        updateVersion = DEF_MESSAGE;
+        changeUpdateFile();
+        UpdateManager man = UpdateManager.instance();
+        assertEquals("Problem with new update file", "3.2.2", man.getVersion());
     }
 
 
-    public void testNoMessageOnAtVersion() {
-        InputStream is = null;
-        OutputStream os = null;
-        try {
-            Socket s = new Socket("localhost",PORT);
-            os = s.getOutputStream();
-            is = s.getInputStream();
-        } catch(Exception e) {
-            fail("unable to make a connection with it");
-        }
-    }
-
-//      public void testBadSignatureFails() {
-
+//      public void testNoMessageOnAtVersion() {
+//          InputStream is = null;
+//          OutputStream os = null;
+//          Socket s = new Socket("localhost",PORT);
+//          os = s.getOutputStream();
+//          is = s.getInputStream();
 //      }
 
-//     public void testBadMessageFails() {
+
+//      public void testBadSignatureFailsOnNetwork() {
+//          //Now do it with the network
+//      }
+
+//     public void testBadMessageFailsOnNetwork() {
 
 //      }
 
 
-//      public void testNewerVersionAccepted() {
+//      public void testNewerVersionAcceptedonNetwork() {
 
 //      }
 
