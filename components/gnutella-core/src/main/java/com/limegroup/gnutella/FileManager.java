@@ -1263,9 +1263,7 @@ public abstract class FileManager {
         if (fileLength>Integer.MAX_VALUE || fileLength<=0) 
         	return false;
         
-        // we don't check for hidden files because this feature was not
-        // supported in 1.1.8
-        if (file.isDirectory() || !file.canRead() ) 
+        if (file.isDirectory() || !file.canRead() || file.isHidden() ) 
             return false;        
         if (!file.getName().toUpperCase().startsWith("LIMEWIRE") && 
             !hasExtension(file.getName())) {
