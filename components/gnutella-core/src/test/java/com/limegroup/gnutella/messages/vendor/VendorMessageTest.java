@@ -9,6 +9,8 @@ import junit.framework.Test;
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.Message;
+import com.limegroup.gnutella.upelection.Candidate;
+import com.limegroup.gnutella.util.*;
 
 public class VendorMessageTest extends com.limegroup.gnutella.util.BaseTestCase {
     public VendorMessageTest(String name) {
@@ -384,6 +386,41 @@ public class VendorMessageTest extends com.limegroup.gnutella.util.BaseTestCase 
         assertTrue(ack.getListeningPort() == 6346);
         testWrite(ack);
         testRead(req);
+    }
+    
+    
+    public void testGiveUPVendorMessage() throws Exception {
+    	GUID guid = new GUID(GUID.makeGuid());
+    	GiveUPVendorMessage req = new GiveUPVendorMessage(guid, 1,2,GiveUPVendorMessage.PLAIN);
+    	assertEquals(1, req.getNumberUP());
+    	assertEquals(2, req.getNumberLeaves());
+    	assertFalse(req.asks4ConnectionTime());
+    	assertFalse(req.asks4LocaleInfo());
+    	assertTrue(req.asks4Feature(GiveUPVendorMessage.PLAIN));
+    	testWrite(req);
+    	testRead(req);
+    	
+    	//also test one with newer mask - should be trimmed to our mask
+    	req = new GiveUPVendorMessage(guid, 1,2,(byte)0xFF);
+    	assertTrue(req.asks4Feature(GiveUPVendorMessage.FEATURE_MASK));
+    	assertEquals(0,req.getFormat() & 0xF0);
+    }
+    
+    public void testBestCandidatesVendorMessage() throws Exception {
+    	Candidate [] test = new Candidate[2];
+    	test[0] = new Candidate("1.2.3.4",15,(short)20);
+    	test[1] = new Candidate("1.2.3.5",15,(short)20);
+    	BestCandidatesVendorMessage req = new BestCandidatesVendorMessage(test);
+    	
+    	//pack the candidates into a byte, see if the result is the same
+    	byte [] testbyte = new byte [16];
+    	System.arraycopy(test[0].toBytes(),0,testbyte,0,8);
+    	System.arraycopy(test[1].toBytes(),0,testbyte,8,8);
+    	
+    	assertEquals(new String(testbyte), new String(req.getPayload()));
+    	
+    	testWrite(req);
+    	testRead(req);
     }
 
 

@@ -99,9 +99,18 @@ public class ReplyHandlerStub implements ReplyHandler {
         return true;
     }
 
+
     public String getLocalePref() {
         return "en";
     }
+
+
+	/* (non-Javadoc)
+	 * @see com.limegroup.gnutella.ReplyHandler#handleUPListVM(com.limegroup.gnutella.messages.vendor.UPListVendorMessage)
+	 */
+	public void handleUPListVM(UPListVendorMessage m) {
+		
+	}
 
 }
 

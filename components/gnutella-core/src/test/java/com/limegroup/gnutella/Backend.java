@@ -152,10 +152,9 @@ public class Backend extends com.limegroup.gnutella.util.BaseTestCase {
         return true;
     }
 
-
     
     /** Simple thread to copy backend stdout and stderr */
-    private static class CopyThread extends Thread {
+    protected static class CopyThread extends Thread {
         private InputStream is;
         private PrintStream os;
         
@@ -181,7 +180,7 @@ public class Backend extends com.limegroup.gnutella.util.BaseTestCase {
      * @param port the port number
      * @return true if port is in use
      */
-    private static boolean isPortInUse(int port) {
+    protected static boolean isPortInUse(int port) {
         try {
             Socket sock = new Socket("127.0.0.1", port);
             try { sock.close(); } catch (IOException ex) {}
@@ -306,10 +305,11 @@ public class Backend extends com.limegroup.gnutella.util.BaseTestCase {
 	/**
 	 * Main method is necessary to run a stand-alone server that tests can be 
 	 * run off of.
+	 * 
 	 */
 	public static void main(String[] args) throws IOException {
         boolean shutdown = false;
-
+        
         int port = Integer.parseInt(args[args.length-1]);
         if (shutdown) {
             shutdown(port == REJECT_PORT);
@@ -325,16 +325,21 @@ public class Backend extends com.limegroup.gnutella.util.BaseTestCase {
 	 */
 	//private Backend(boolean reject) throws IOException {
 	private Backend(int port) throws IOException {
+		this(port, 
+				port == BACKEND_PORT ? SHUTDOWN_PORT : 
+				port == REJECT_PORT ? SHUTDOWN_REJECT_PORT :
+                port == LEAF_PORT ? SHUTDOWN_LEAF_PORT :
+                -1, 
+				new ActivityCallbackStub());
+	}
+	
+	protected Backend(int port, int shutdownPort, ActivityCallback callback) throws IOException {
         super("Backend");
 		System.out.println(port == REJECT_PORT ? "STARTING REJECT BACKEND" :
                            port == LEAF_PORT ? "STARTING LEAF BACKEND" :
                            port == BACKEND_PORT ? "STARTING NORMAL BACKEND" :
                            "STARTING UNKNOWN BACKEND");
         
-        int shutdownPort = (port == BACKEND_PORT ? SHUTDOWN_PORT : 
-                            port == REJECT_PORT ? SHUTDOWN_REJECT_PORT :
-                            port == LEAF_PORT ? SHUTDOWN_LEAF_PORT :
-                            -1);
 
         ServerSocket shutdownSocket = null;
         boolean reject = (port == REJECT_PORT);
@@ -344,7 +349,7 @@ public class Backend extends com.limegroup.gnutella.util.BaseTestCase {
             preSetUp();
     		setStandardSettings(port);
             populateSharedDirectory();
-            ROUTER_SERVICE = new RouterService(new ActivityCallbackStub());
+            ROUTER_SERVICE = new RouterService(callback);
             ROUTER_SERVICE.start();
             if (!reject) RouterService.connect();
 
@@ -414,7 +419,7 @@ public class Backend extends com.limegroup.gnutella.util.BaseTestCase {
 	 * Sets the standard settings for a test backend, such as the ports, the
 	 * number of connections to maintain, etc.
 	 */
-	private void setStandardSettings(int port) {
+	protected void setStandardSettings(int port) {
         SharingSettings.EXTENSIONS_TO_SHARE.setValue(SHARED_EXTENSION);
 
 		SearchSettings.GUESS_ENABLED.setValue(true);
