@@ -356,9 +356,16 @@ public class ManagedDownloader implements Downloader, Serializable {
                         return;
                 }
                 //b) Otherwise, choose completed file.
-                else 
-                    file=new File(SettingsManager.instance().getSaveDirectory(),
-                                  name);     
+                else {
+					File saveDir = null;
+					try {
+						saveDir = SettingsManager.instance().getSaveDirectory();
+					} catch(java.io.FileNotFoundException fnfe) {
+						// simply return if we could not get the save directory.
+						return;
+					}
+					file=new File(saveDir,name);     
+				}
 
                 try {
                     Launcher.launch(file.getAbsolutePath());
