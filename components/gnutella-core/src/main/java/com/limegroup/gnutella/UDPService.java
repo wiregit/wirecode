@@ -268,9 +268,9 @@ public final class UDPService implements Runnable {
                 // UDP and unreliable, continually throwing the exception prolly
                 // isn't necessary
                 // TODO: see major TODO up top....
-                if( (ioe.getMessage() != null) &&
-                    (ioe.getMessage().indexOf("Datagram send failed") >= 0) &&
-                    CommonUtils.isWindows() )
+                if( CommonUtils.isWindows() &&
+                    (ioe.getMessage() != null) &&
+                    (ioe.getMessage().indexOf("Datagram send failed") >= 0) )
                     return;
                 throw ioe;
             }
