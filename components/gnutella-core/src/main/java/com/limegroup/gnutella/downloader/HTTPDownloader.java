@@ -260,12 +260,16 @@ public class HTTPDownloader implements BandwidthTracker {
             }
         }
         
-        // Add ourselves to the mesh if we have downloaded a large enough
-        // portion of the file AND we have accepted an incoming connection
-        // during this session.
-        if (RouterService.acceptedIncomingConnection() &&
+        // Add ourselves to the mesh if:
+        //  This rfd has a SHA1
+        //  We have downloaded a large enough portion of the file
+        //  and We have accepted incoming during this session.
+        if (_rfd.getSHA1Urn() != null && 
+          RouterService.acceptedIncomingConnection() &&
           _incompleteFile.length() > _minPartialFileSize) {
-
+            if( alts == null ) // will be null if altsToSend is null.
+                alts = AlternateLocationCollection.createCollection(
+                    _rfd.getSHA1Urn() );
             AlternateLocation al =
                 AlternateLocation.createAlternateLocation(alts.getSHA1Urn());
             alts.addAlternateLocation(al);
