@@ -8,6 +8,6 @@ import com.limegroup.gnutella.*;
  */
 public class AllowFilter extends SpamFilter {
     public boolean allow(Message m) {
-	return true;
+        return true;
     }
 }

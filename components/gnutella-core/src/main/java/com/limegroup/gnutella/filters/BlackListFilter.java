@@ -19,17 +19,17 @@ public class BlackListFilter extends SpamFilter{
     /** Constructs a new BlackListFilter containing the addresses listed
      *  in the SettingsManager. */
     protected BlackListFilter(){
-	String[] allHosts = SettingsManager.instance().getBannedIps();
-	for (int i=0; i<allHosts.length; i++)
-	    badHosts.add(allHosts[i]);
+        String[] allHosts = SettingsManager.instance().getBannedIps();
+        for (int i=0; i<allHosts.length; i++)
+            badHosts.add(allHosts[i]);
     }
     
     /** To ensure the singleton pattern
      */
     public static BlackListFilter instance(){
-	if (instance == null)
-	    instance = new BlackListFilter();
-	return instance;
+        if (instance == null)
+            instance = new BlackListFilter();
+        return instance;
     }
     
     /** 
@@ -38,9 +38,9 @@ public class BlackListFilter extends SpamFilter{
      *  modified.</i>
      */
     public void add(String badGuy){
-	if (badHosts.contains(badGuy))
-	    return; // no duplicates please
-	badHosts.add(badGuy);
+        if (badHosts.contains(badGuy))
+            return; // no duplicates please
+        badHosts.add(badGuy);
     }
 
     /** 
@@ -49,10 +49,10 @@ public class BlackListFilter extends SpamFilter{
      *  modified.</i>
      */
     public void delete(String goodGuy){
-	String newAllHosts= "";
-	if (!(badHosts.contains(goodGuy)))
-	    return; // no need to remove somthing thats not there
-	badHosts.removeElement(goodGuy);
+        String newAllHosts= "";
+        if (!(badHosts.contains(goodGuy)))
+            return; // no need to remove somthing thats not there
+        badHosts.removeElement(goodGuy);
     }
 
     /**
@@ -61,7 +61,7 @@ public class BlackListFilter extends SpamFilter{
      *  modified.</i>
      */
     public void clear() {
-	badHosts.clear();
+        badHosts.clear();
     }
     
     /** Checks if a given host is in the the bad hosts list 
@@ -70,38 +70,38 @@ public class BlackListFilter extends SpamFilter{
      *  a bad guy
      */
     public boolean check(String host){
-	if (badHosts.contains(host))
-	    return true;
-	return false;
+        if (badHosts.contains(host))
+            return true;
+        return false;
     }
 
     /** This method will be called from Connection, when Query Replies or Ping Replies come in
-     *  We cannot findout about host ip addresses in Ping Requests and 	Query Requests 
+     *  We cannot findout about host ip addresses in Ping Requests and  Query Requests 
      * (for anonymity reasons)
      */
     public boolean allow(Message m){
-	String ip;
-	if( (m instanceof PingReply)){
-	    PingReply pr = (PingReply)m;
-	    ip = pr.getIP();
-	}
-	else if ( (m instanceof QueryReply) ){
-	    QueryReply qr = (QueryReply)m;
-	    ip = qr.getIP();
-	}
-	else // we dont want to block other kinds of messages
-	    return true;
-	// now check the ip
-	if (badHosts.contains(ip))
-	    return false;
-	return true;
+        String ip;
+        if( (m instanceof PingReply)){
+            PingReply pr = (PingReply)m;
+            ip = pr.getIP();
+        }
+        else if ( (m instanceof QueryReply) ){
+            QueryReply qr = (QueryReply)m;
+            ip = qr.getIP();
+        }
+        else // we dont want to block other kinds of messages
+            return true;
+        // now check the ip
+        if (badHosts.contains(ip))
+            return false;
+        return true;
     }
     
     /*
-    //unit tests
-    public static void main(String args[]){
-	BlackListFilter fil = BlackListFilter.instance(new ConnectionManager());
-	System.out.println("value "+ fil.check("192.192.192.197"));
-    }
+      //unit tests
+      public static void main(String args[]){
+      BlackListFilter fil = BlackListFilter.instance(new ConnectionManager());
+      System.out.println("value "+ fil.check("192.192.192.197"));
+      }
     */
 }

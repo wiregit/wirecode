@@ -5,16 +5,16 @@ package com.limegroup.gnutella;
  *  visual world.
  */
 public interface ActivityCallback
-{	
-	/**  Flag an outgoing connection type */
-	public static final int CONNECTION_OUTGOING = 1;
-	/**  Flag an incoming connection type */
-	public static final int CONNECTION_INCOMING = 2;
+{   
+    /**  Flag an outgoing connection type */
+    public static final int CONNECTION_OUTGOING = 1;
+    /**  Flag an incoming connection type */
+    public static final int CONNECTION_INCOMING = 2;
 
-	/**  The connection is being setup */
-	public static final int STATUS_CONNECTING = 1;
-	/**  The connection is established */
-	public static final int STATUS_CONNECTED = 2;
+    /**  The connection is being setup */
+    public static final int STATUS_CONNECTING = 1;
+    /**  The connection is established */
+    public static final int STATUS_CONNECTED = 2;
 
     /**
      *  Handle a new connection.
@@ -63,24 +63,24 @@ public interface ActivityCallback
 
 
     /**
-	 * Equivalent to error(errorCode, t).
+     * Equivalent to error(errorCode, t).
      */
     public void error(int errorCode);
 
     /**
      * @requires errorCode is a number matching up with one of the
-	 * predefined error messages, e.g., "15" to show GUIStyles.E_15.
-	 *
+     * predefined error messages, e.g., "15" to show GUIStyles.E_15.
+     *
      * @effects displays one the predefined error message
-	 *  corresponding to errorCode.  If t!=null, also displays the
-	 *  stack trace of t; in this case, the associated error message
-	 *  should explain the stack trace to the user.  
-	 */
+     *  corresponding to errorCode.  If t!=null, also displays the
+     *  stack trace of t; in this case, the associated error message
+     *  should explain the stack trace to the user.  
+     */
     public void error(int errorCode, Throwable t);
-	
+    
 
-	/**
-	 * @requires a 
+    /**
+     * @requires a 
 
     /** Constants for the various errors
      *  See GUIStyles.java for the 
@@ -88,8 +88,8 @@ public interface ActivityCallback
     
     //maybe use this array instead?  we'll see
     public static final int[] ERROR_MESSAGES = {0,1,2,3,4,
-						5,6,7,8,9,
-						10,11,12};
+                                                5,6,7,8,9,
+                                                10,11,12};
 
     /** list of errors reported in the GUI
      *  the associated strings for these 
@@ -123,9 +123,9 @@ public interface ActivityCallback
     public static final int ERROR_12 = 12;
     /** error finding the router host */
     public static final int ERROR_13 = 13;
-	/** internal error */
-	public static final int ERROR_20 = 20;
-	
+    /** internal error */
+    public static final int ERROR_20 = 20;
+    
 }
 
 

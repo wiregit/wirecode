@@ -29,126 +29,126 @@ public class FileScan {
     private LimitedList _list;
     
     public FileScan() {
-	_list = new LimitedList();
-	_filters = new String[0];
+        _list = new LimitedList();
+        _filters = new String[0];
     }
 
     public void setExtensions(String[] e) {
-	_extensions = e;
+        _extensions = e;
     }
     
     public void setFilters(String[] f) {
-	_filters = f;
+        _filters = f;
     }
 
     public boolean hasExtension(String filename) {
-	int begin = filename.lastIndexOf(".");
-	if (begin == -1)
-	    return false;
+        int begin = filename.lastIndexOf(".");
+        if (begin == -1)
+            return false;
 
-	int end = filename.length();
-	String ext = filename.substring(begin, end);
+        int end = filename.length();
+        String ext = filename.substring(begin, end);
 
-	int length = _extensions.length;
-	for (int i = 0; i < length; i++) {
-	    if (ext.equalsIgnoreCase(_extensions[i])) {
-		return true;
-	    }
-	}
-	return false;
+        int length = _extensions.length;
+        for (int i = 0; i < length; i++) {
+            if (ext.equalsIgnoreCase(_extensions[i])) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public boolean hasFilter(String pathname) {
 
-	int length = _filters.length;
-	
-	for (int i = 0; i < length; i++) {
-	    if (pathname.indexOf(_filters[i]) != -1)
-		return true;
-	}
-	
-	return false;
+        int length = _filters.length;
+    
+        for (int i = 0; i < length; i++) {
+            if (pathname.indexOf(_filters[i]) != -1)
+                return true;
+        }
+    
+        return false;
 
     }
 
     public void print() {
-	_list.print();
-	
+        _list.print();
+    
     }
 
     public void add(String pathname) {
-	add(pathname, MAX_DEPTH);
-	
+        add(pathname, MAX_DEPTH);
+    
     }
     public void add(String pathname, int depth) {
-	
-	if (depth == 0) 
-	    return;
+    
+        if (depth == 0) 
+            return;
 
-	depth--;
+        depth--;
 
-	File file = new File(pathname);
-	if (!file.isDirectory())
-	    return;
-	
-	File[] files = listFiles(file);
-	int num_files = files.length;
-	
-	for( int i=0; i < num_files; i++ ) {
-	    File f = files[i];
-	    if ( f.isDirectory() ) {
-		addDirectory(f.getAbsolutePath());
-		add(f.getAbsolutePath(), depth);
-	    }
-	    
-	}	
-	
+        File file = new File(pathname);
+        if (!file.isDirectory())
+            return;
+    
+        File[] files = listFiles(file);
+        int num_files = files.length;
+    
+        for( int i=0; i < num_files; i++ ) {
+            File f = files[i];
+            if ( f.isDirectory() ) {
+                addDirectory(f.getAbsolutePath());
+                add(f.getAbsolutePath(), depth);
+            }
+        
+        }   
+    
     } 
     
     private File[] listFiles(File dir)
     {
-	String [] fnames   = dir.list();
-	File   [] theFiles = new File[fnames.length];
-	
-	for ( int i = 0; i < fnames.length; i++ )
-	    {
-		theFiles[i] = new File(dir, fnames[i]);
-	    }
+        String [] fnames   = dir.list();
+        File   [] theFiles = new File[fnames.length];
+    
+        for ( int i = 0; i < fnames.length; i++ )
+        {
+            theFiles[i] = new File(dir, fnames[i]);
+        }
 
-	return theFiles;
+        return theFiles;
     }
 
     public void addDirectory(String pathname) {
-	File dir = new File(pathname);
-	if (!dir.isDirectory())
-	    return;
-	File[] files = listFiles(dir);
-	int num_files = files.length;
-	
-	int mem = 0;
-	int num = 0;
+        File dir = new File(pathname);
+        if (!dir.isDirectory())
+            return;
+        File[] files = listFiles(dir);
+        int num_files = files.length;
+    
+        int mem = 0;
+        int num = 0;
 
-	for (int i = 0; i < num_files; i++) {
-	    File f = files[i];
-	    String name = f.getName();
-	    if ( ( hasExtension(name) )
-		 && (!hasFilter(pathname) ) ) {
-		mem+=f.length();
-		num++;
-	    }	
+        for (int i = 0; i < num_files; i++) {
+            File f = files[i];
+            String name = f.getName();
+            if ( ( hasExtension(name) )
+                 && (!hasFilter(pathname) ) ) {
+                mem+=f.length();
+                num++;
+            }   
 
 
-	}
+        }
 
-	int key = calculateKey(num, mem);
+        int key = calculateKey(num, mem);
 
-	_list.add(new Pair(key, dir), key);
-	
+        _list.add(new Pair(key, dir), key);
+    
     }
     
     public int calculateKey(int num_files, int size_files) {
-	int key = (num_files * NUM_WEIGHT) + (size_files * MEM_WEIGHT);
-	return key;
+        int key = (num_files * NUM_WEIGHT) + (size_files * MEM_WEIGHT);
+        return key;
     }
 
 }

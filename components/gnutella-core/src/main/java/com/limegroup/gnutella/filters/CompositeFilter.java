@@ -12,14 +12,14 @@ public class CompositeFilter extends SpamFilter {
      * @effects creates a new spam filter from a number of other filters.
      */
     public CompositeFilter(SpamFilter[] filters) {
-	this.delegates=filters;
+        this.delegates=filters;
     }
     
     public boolean allow(Message m) {
-	for (int i=0; i<delegates.length; i++) {
-	    if (! delegates[i].allow(m))
-		return false;
-	}
-	return true;
+        for (int i=0; i<delegates.length; i++) {
+            if (! delegates[i].allow(m))
+                return false;
+        }
+        return true;
     }
 }
