@@ -154,8 +154,6 @@ public class NIOHandshaker extends AbstractHandshaker {
             // method
             handleRemoteIP(header);
             
-            //System.out.println(header.getHeaderNameString()+": "+
-              //  header.getHeaderValueString());
             HEADERS_READ.put(header.getHeaderNameString(),
                 header.getHeaderValueString());
             headersRead++;
@@ -458,7 +456,6 @@ public class NIOHandshaker extends AbstractHandshaker {
          *  is complete
          */
         public HandshakeReadState read() throws IOException  {
-            //System.out.println("OutgoingResponseReadHeaderState::read");
             // First make sure we read all of the headers.
             if(readHeaders())  {
                 _readComplete = true;
@@ -512,6 +509,8 @@ public class NIOHandshaker extends AbstractHandshaker {
      */
     private final class IncomingRequestReadState 
         implements HandshakeReadState  {
+            
+        private String _requestLine;    
 
         /**
          * Reads an incoming handshake request and writes the appropriate 
@@ -524,12 +523,14 @@ public class NIOHandshaker extends AbstractHandshaker {
          */
         public HandshakeReadState read() throws IOException {
             // read the response status line
-            String connectLine = NIOHandshaker.this._headerReader.readConnect();
 
-            // if they didn't give an expected response format, abort
-            if (!notLessThan06(connectLine))  {
-                throw new IOException("Unexpected connect: "+connectLine);
-            }     
+            if(_requestLine == null) {    
+                _requestLine = NIOHandshaker.this._headerReader.readConnect();
+                // if they didn't give an expected response format, abort
+                if (!notLessThan06(_requestLine))  {
+                    throw new IOException("Unexpected connect: "+_requestLine);
+                } 
+            }    
             
             // First make sure we read all of the headers.
             if(!readHeaders())  {
@@ -661,6 +662,11 @@ public class NIOHandshaker extends AbstractHandshaker {
                 readHeaders(USER_INPUT_WAIT_TIME); 
             } else {
                 connectLine = _headerReader.readConnect(); 
+                
+                // TODO1:: Major issue here.  What if this call fails?  We also
+                // need to handle any leftover data that we've read -- this is
+                // really the key case where we can read too much, and probably
+                // will!!
                 readHeaders();
             }
     
