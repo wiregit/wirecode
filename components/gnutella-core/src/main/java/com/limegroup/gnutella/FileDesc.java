@@ -13,7 +13,7 @@ import java.util.Enumeration;
  * This class contains data frr an individual shared file.  It also provides
  * various utility methods for checking against the encapsulated data.
  */
-public final class FileDesc {
+public final class FileDesc implements AlternateLocationCollector {
     
 	/**
 	 * Constant for the index of this <tt>FileDesc</tt> instance in the 
@@ -50,8 +50,8 @@ public final class FileDesc {
 	 * <tt>Map</tt> of <tt>AlternateLocation</tt> instances, keyed by
 	 * <tt>AlternateLocation</tt>s.
 	 */
-	private Map /*AlternateLocation->AlternateLocation*/
-		_alternateLocations;
+	//private Map /*AlternateLocation->AlternateLocation*/
+	//_alternateLocations;
 
 	/**
 	 * <tt>Map</tt> of temporary <tt>AlternateLocation</tt> instances, 
@@ -59,13 +59,16 @@ public final class FileDesc {
 	 * any temporary locations that should not be reported in HTTP
 	 * headers, at least for now.
 	 */
-	private Map /*AlternateLocation->AlternateLocation*/
-		_temporaryAlternateLocations;
+	//private Map /*AlternateLocation->AlternateLocation*/
+	//_temporaryAlternateLocations;
 
 	/**
 	 * Constant for the <tt>File</tt> instance.
 	 */
 	private final File FILE;
+
+	private final AlternateLocationCollection ALT_LOCS = 
+		new AlternateLocationCollection();
 		
     /**
 	 * Constructs a new <tt>FileDesc</tt> instance from the specified 
@@ -109,19 +112,24 @@ public final class FileDesc {
 	 *
 	 * @param al the <tt>AlternateLocation</tt> instance to add
 	 */
-	public synchronized void addAlternateLocation(AlternateLocation al) {
-		if(_alternateLocations == null) {
-			// we use a TreeMap to both filter duplicates and provide
-			// ordering based on the timestamp
-			_alternateLocations = 
-			    new TreeMap(AlternateLocation.createComparator());
-		}
+	public void addAlternateLocation(AlternateLocation al) {
+		ALT_LOCS.addAlternateLocation(al);
+	}
 
-		// note that alternate locations without a timestamp are placed
-		// at the end of the map because they have the oldest possible
-		// date according to the date class, namely:
-		// January 1, 1970, 00:00:00 GMT.
-		_alternateLocations.put(al, al);
+	public void addAlternateLocationCollection(AlternateLocationCollection alc) {
+		ALT_LOCS.addAlternateLocationCollection(alc);
+	}
+
+	public AlternateLocationCollector getAlternateLocationCollector() {
+		return ALT_LOCS;
+	}
+
+	public boolean hasAlternateLocations() {
+		return ALT_LOCS.hasAlternateLocations();
+	}
+
+	public String httpStringValue() {
+		return ALT_LOCS.httpStringValue();
 	}
 
 	/**
@@ -136,68 +144,19 @@ public final class FileDesc {
 	 * @param al the <tt>AlternateLocation</tt> instance to add to the 
 	 *  temporary list.
 	 */
-	public synchronized void addTemporaryAlternateLocation(AlternateLocation al) {
-		if(_temporaryAlternateLocations == null) {
-			// we use a TreeMap to both filter duplicates and provide
-			// ordering based on the timestamp
-			_temporaryAlternateLocations = 
-			    new TreeMap(AlternateLocation.createComparator());
-		}
-
-		// note that alternate locations without a timestamp are placed
-		// at the end of the map because they have the oldest possible
-		// date according to the date class, namely:
-		// January 1, 1970, 00:00:00 GMT.
-		_temporaryAlternateLocations.put(al, al);
-	}
+	//public void addTemporaryAlternateLocation(AlternateLocation al) {
+	//ALT_LOCS.addTemporaryAlternateLocation(al);
+	//}
 
 	/**
 	 * Moves all temporary alternate locations to the "official" list of
 	 * alternate locations for this file that will be reported in
 	 * HTTP headers.
 	 */
-	public synchronized void commitTemporaryAlternateLocations() {
-		// if there are no temporary locations to commit, just return
-		if(_temporaryAlternateLocations == null) {
-			return;
-		}
-		if(_alternateLocations == null) {
-			_alternateLocations =
-			    new TreeMap(AlternateLocation.createComparator());
-		}
-		_alternateLocations.putAll(_temporaryAlternateLocations);
+	//public void commitTemporaryAlternateLocations() {
+	//ALT_LOCS.commitTemporaryAlternateLocations();
+	//}
 
-		// clear out all the temporary locations.  we could set this to
-		// null, but there's a good chance that if a file was asigned
-		// temporary alternate locations once, then it will be again
-		_temporaryAlternateLocations.clear();
-	}
-
-	/**
-	 * Writes the alternate locations to the specified output stream as
-	 * an HTTP header, as specified in the format specified in HUGE v0.93.
-	 *
-	 * @param os the <tt>OutputStream</tt> instance to write to
-	 * @exception <tt>IOException</tt> if we could not write to the
-	 *  output stream
-	 */
-	public synchronized void writeAlternateLocationsTo(OutputStream os) 
-		throws IOException {
-		// if there are no alternate locations, simply return
-		if(_alternateLocations == null) return;
-
-		Iterator iter = _alternateLocations.values().iterator();	   
-		StringBuffer writeBuffer = new StringBuffer();
-		writeBuffer.append(HTTPConstants.ALTERNATE_LOCATION_HEADER+" ");
-		while(iter.hasNext()) {
-			writeBuffer.append(((AlternateLocation)iter.next()).toString());
-			if(iter.hasNext()) {
-				writeBuffer.append(", ");
-			}
-		}
-		writeBuffer.append(HTTPConstants.CRLF);		
-		os.write(writeBuffer.toString().getBytes());
-	}
 
 	/**
 	 * Writes the SHA1 URN for this file out to the specified stream in
