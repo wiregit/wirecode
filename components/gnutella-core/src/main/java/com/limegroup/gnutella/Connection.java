@@ -108,10 +108,6 @@ public class Connection implements Runnable {
     public long numFiles;
     public long numHosts;
 
-    static final String CONNECT="GNUTELLA CONNECT/0.4\n\n";
-    static final String CONNECT_WITHOUT_FIRST_WORD="CONNECT/0.4\n\n";
-    static final String OK="GNUTELLA OK\n\n";
-
     /** 
      * Creates a new outgoing connection in the unconnected state.
      * You must call connect() to actually establish the connection.
@@ -143,8 +139,9 @@ public class Connection implements Runnable {
 	out=new BufferedOutputStream(sock.getOutputStream());
 
 	//Handshake
-	sendString(CONNECT);
-	expectString(OK);
+	SettingsManager settings=SettingsManager.instance();
+	sendString(settings.getConnectString()+"\n\n");
+	expectString(settings.getConnectOkString()+"\n\n");
 	if ( doShutdown )
 	    sock.close();
     }
@@ -178,8 +175,9 @@ public class Connection implements Runnable {
 	this.incoming=true;
 
 	//Handshake
-	expectString(CONNECT_WITHOUT_FIRST_WORD);
-	sendString(OK);
+	SettingsManager settings=SettingsManager.instance();
+	expectString(settings.getConnectStringRemainder()+"\n\n");
+	sendString(settings.getConnectOkString()+"\n\n");
 	if ( doShutdown )
 	    sock.close();
     }    

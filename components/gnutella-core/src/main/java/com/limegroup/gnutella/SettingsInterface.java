@@ -51,6 +51,8 @@ public interface SettingsInterface
     /** special method for getting the number of files scanned */
     public int        getFilesScanned();
     public int        getSearchAnimationTime();
+    public String     getConnectString();
+    public String     getConnectOkString();
 
     /** returns the Properties file for Network Discovery */
     public Properties getNDProps();
@@ -150,6 +152,13 @@ public interface SettingsInterface
     public void setClearCompletedDownload(boolean b);
     public void setSearchAnimationTime(int seconds);
 
+    /** Sets the handshake string for initializing outgoing connections,
+     *  without trailing newlines. */
+    public void setConnectString(String connect);
+    /** Sets the handshake string for initializing outgoing connections,
+     *  without trailing newlines. */
+    public void setConnectOkString(String ok);
+
     /** specialized method for writing the 
      *  properties file for the network discoverer
      */
@@ -215,6 +224,8 @@ public interface SettingsInterface
     public static final boolean DEFAULT_CLEAR_UPLOAD     = false;
     public static final boolean DEFAULT_CLEAR_DOWNLOAD   = false;
     public static final int     DEFAULT_SEARCH_ANIMATION_TIME = 45;
+    public static final String  DEFAULT_CONNECT_STRING    = "GNUTELLA CONNECT/0.4";
+    public static final String  DEFAULT_CONNECT_OK_STRING = "GNUTELLA OK";
 
     // The property key name constants 
     public static final String TTL            = "TTL";
@@ -246,6 +257,9 @@ public interface SettingsInterface
     public static final String CLEAR_DOWNLOAD = "CLEAR_DOWNLOAD";
     public static final String SEARCH_ANIMATION_TIME = "SEARCH_ANIMATION_TIME";
     public static final String SAVE_DEFAULT   = "SAVE_DEFAULT";
+
+    public static final String CONNECT_STRING = "CONNECT_STRING";
+    public static final String CONNECT_OK_STRING = "CONNECT_OK_STRING";
     
     public static final String HEADER = "Properties file for the LimeWire"+
 	" gnutella client.\nYou can modify any of the default"+

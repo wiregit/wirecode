@@ -404,7 +404,7 @@ public class ConnectionManager implements Runnable {
 
 		    c = null;
 
-		    if (word.equals("GNUTELLA")) {
+		    if (word.equals(SettingsManager.instance().getConnectStringFirstWord())) {
 			//a) Gnutella connection
 
 			if(getNumConnections() < SettingsManager.instance().getMaxConn() ){//

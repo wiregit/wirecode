@@ -55,6 +55,17 @@ public class SettingsManager implements SettingsInterface
     private static int      searchAnimationTime_;
     private static String   saveDefault_;
 
+    /** connectString_ is something like "GNUTELLA CONNECT..."
+     *  connectStringOk_ is something like "GNUTELLA OK..."
+     *  INVARIANT: connectString_=connectStringFirstWord_+" "+connectStringRemainder_
+     *             connectString!=""
+     *             connectStringFirstWord does not contain spaces
+     */             
+    private static String   connectString_;
+    private static String   connectStringFirstWord_;
+    private static String   connectStringRemainder_;
+    private static String   connectOkString_;
+
     /** Set up a local variable for the properties */
     private static Properties props_;
 
@@ -365,6 +376,16 @@ public class SettingsManager implements SettingsInterface
 			try{setSaveDefault(p);}
 			catch(IllegalArgumentException e){}
 		    }
+		else if(key.equals(SettingsManager.CONNECT_STRING))
+		    {
+			try{setConnectString(p);}
+			catch(IllegalArgumentException e){}
+		    }
+		else if(key.equals(SettingsManager.CONNECT_OK_STRING))
+		    {
+			try{setConnectOkString(p);}
+			catch(IllegalArgumentException e){}
+		    }
 	    }
 	    catch(ClassCastException cce){}
 	}
@@ -406,6 +427,8 @@ public class SettingsManager implements SettingsInterface
 	setClearCompletedDownload(SettingsInterface.DEFAULT_CLEAR_DOWNLOAD);
 	setMaxSimDownload(SettingsInterface.DEFAULT_MAX_SIM_DOWNLOAD);
 	setSearchAnimationTime(SettingsInterface.DEFAULT_SEARCH_ANIMATION_TIME);
+	setConnectString(SettingsInterface.DEFAULT_CONNECT_STRING);
+	setConnectOkString(SettingsInterface.DEFAULT_CONNECT_OK_STRING);
     }
 
     /** returns the time to live */
@@ -477,6 +500,15 @@ public class SettingsManager implements SettingsInterface
     public boolean getClearCompletedUpload(){return clearCompletedUpload_;} 
     public boolean getClearCompletedDownload(){return clearCompletedDownload_;} 
     public int getSearchAnimationTime(){ return searchAnimationTime_; }
+
+    public String getConnectString(){ return connectString_; }
+    /** Returns the first word of the connect string.   
+     *  This is solely a convenience routine. */
+    public String getConnectStringFirstWord(){ return connectStringFirstWord_; }
+    /** Returns the remaing words of the connect string, without the leading space.   
+     *  This is solely a convenience routine. */
+    public String getConnectStringRemainder(){ return connectStringRemainder_; }
+    public String getConnectOkString(){ return connectOkString_; }
 
  
     /** specialized method for getting the number 
@@ -937,6 +969,52 @@ public class SettingsManager implements SettingsInterface
 	    }
     }
 
+    public void setConnectString(String connect) throws IllegalArgumentException {
+	int i=connect.indexOf(" ");
+	String firstWord;
+	String remainder;
+	
+	if (connect.length()<1)
+	    throw new IllegalArgumentException();
+
+	//No space in connect or (first) space is last is problematic.
+	if (i==-1 || i==(connect.length()-1)) {
+	    throw new IllegalArgumentException();
+	}
+
+	firstWord=connect.substring(0,i);
+	remainder=connect.substring(i+1);
+
+
+	//Disallow GIV and GET.  Also disallow other HTTP methods
+	//in case we want them in the future.
+	String uppered=firstWord.toUpperCase();
+	if (uppered.equals("GIV") 
+	    || uppered.equals("GET")
+	    || uppered.equals("PUT")
+	    || uppered.equals("POST")
+	    || uppered.equals("HEAD")
+	    || uppered.equals("DELETE")) {
+	    throw new IllegalArgumentException();
+	}
+	    
+	//Everything ok.
+	connectString_=connect;
+	connectStringFirstWord_=firstWord;
+	connectStringRemainder_=remainder;
+
+	props_.put(SettingsInterface.CONNECT_STRING, connect);
+	writeProperties();
+    }
+
+    public void setConnectOkString(String ok) throws IllegalArgumentException {
+	if (ok.length()<1)
+	    throw new IllegalArgumentException();
+
+	connectOkString_=ok;
+	props_.put(SettingsInterface.CONNECT_OK_STRING, ok);
+	writeProperties();
+    }
 
     /** writes out the Network Discovery specialized 
      *  properties file
@@ -1007,6 +1085,17 @@ public class SettingsManager implements SettingsInterface
 //  	encoded=encode(original);
 //  	decoded=decode(encoded);
 //  	Assert.that(Arrays.equals(original, decoded));
+
+//  	SettingsManager manager=SettingsManager.instance();
+//  	manager.setConnectString("TEST STRING");
+//  	Assert.that(manager.getConnectString().equals("TEST STRING"));
+//  	Assert.that(manager.getConnectStringFirstWord().equals("TEST"));
+//  	Assert.that(manager.getConnectStringRemainder().equals("STRING"));
+
+//  	manager.setConnectString("TEST");
+//  	Assert.that(manager.getConnectString().equals("TEST"));
+//  	Assert.that(manager.getConnectStringFirstWord().equals("TEST"));
+//  	Assert.that(manager.getConnectStringRemainder().equals(""));
 //      }
 }
 
