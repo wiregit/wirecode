@@ -166,7 +166,7 @@ public final class UltrapeerQueryRouteTableTest extends BaseTestCase {
 	}
 
     private static class TestCallback extends ActivityCallbackStub {
-        public void handleQueryResult(HostData hd, Response res, List docs) {
+        public void handleQueryResult(RemoteFileDesc rfd, HostData hd) {
             REPLIES.add(new Object());
         }
     }
