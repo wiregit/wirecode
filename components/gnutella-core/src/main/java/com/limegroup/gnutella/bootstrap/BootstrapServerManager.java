@@ -348,7 +348,16 @@ public class BootstrapServerManager {
                  +"?client="+CommonUtils.QHD_VENDOR_NAME
                  +"&version="+URLEncoder.encode(CommonUtils.getLimeWireVersion())
                  +"&"+request.parameters();
-        HttpMethod get = new GetMethod(connectTo);
+        HttpMethod get;
+        try {
+            get = new GetMethod(connectTo);
+        } catch(IllegalArgumentException iae) {
+            LOG.warn("Invalid server", iae);
+            // invalid uri? begone.
+            request.handleError(server);
+            return;
+        }
+            
         get.addRequestHeader("Cache-Control", "no-cache");
         get.addRequestHeader("User-Agent", CommonUtils.getHttpServer());
         get.addRequestHeader(HTTPHeaderName.CONNECTION.httpStringValue(),
@@ -396,11 +405,11 @@ public class BootstrapServerManager {
             LOG.warn("Exception while handling server", ioe);
             request.handleError(server);
         } finally {
-            //Close the connection.
-            if (in!=null)
-                try { in.close(); } catch (IOException e) { }
-            if (get != null)
+            // release the connection.
+            if (get != null) {
                 get.releaseConnection();
+                get.abort();
+            }   
         }
     }
 
