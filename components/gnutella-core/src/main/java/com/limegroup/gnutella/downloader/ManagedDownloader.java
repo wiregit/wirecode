@@ -1861,7 +1861,8 @@ public class ManagedDownloader implements Downloader, Serializable {
             //limit, which if successfully starts downloading or gets a better
             //queued slot than some other worker kills the lowest worker in some
             //remote queue.
-            for(int i=0; i< (connectTo+1) && i<size; i++) {
+            for(int i=0; i< (connectTo+1) && i<size && 
+                              getNumDownloaders() < getSwarmCapacity(); i++) {
                 final RemoteFileDesc rfd = removeBest(files);
                 Thread connectCreator = new Thread("DownloadWorker") {
                     public void run() {
@@ -2043,7 +2044,7 @@ public class ManagedDownloader implements Downloader, Serializable {
         synchronized(this) {            
             if(getNumDownloaders() < getSwarmCapacity())
                 return true;//no need to kill a thread, but pretend like we did
-            if(queuedThrreads.contains(Thread.currentThread())
+            if(queuedThreads.containsKey(Thread.currentThread()))
                return true;//we are already in there, pretend we killed a thread
             Iterator iter = queuedThreads.keySet().iterator();
             while(iter.hasNext()) {
@@ -2824,7 +2825,7 @@ public class ManagedDownloader implements Downloader, Serializable {
         return Math.max(getSwarmCapacity() - downloads, 0);
     }
 
-    priavte int getSwarmCapacity() {
+    private int getSwarmCapacity() {
         int capacity = ConnectionSettings.CONNECTION_SPEED.getValue();
         if(capacity <= SpeedConstants.MODEM_SPEED_INT) //modems swarm = 2
             return 2;
