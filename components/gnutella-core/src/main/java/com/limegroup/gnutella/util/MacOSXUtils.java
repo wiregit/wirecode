@@ -156,7 +156,7 @@ public class MacOSXUtils {
      * being @version@), then a dummy directory of 
      * /Applications/LimeWire/LimeWire.app/ is returned.
      */
-    public static String getAppDir() {
+    private static String getAppDir() {
         if(CommonUtils.isTestingVersion()) {
             return "/Applications/LimeWire/" + APP_NAME;
         } else {
