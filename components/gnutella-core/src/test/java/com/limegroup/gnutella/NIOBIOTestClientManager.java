@@ -57,13 +57,19 @@ public class NIOBIOTestClientManager {
      * Runs the desired number of clients.
      */
     private NIOBIOTestClientManager(int num, int delay) {
+        System.out.println("Making "+num+" connections to "+SERVER_ADDRESS+
+            " with each client sending a message every "+delay+" milliseconds.");
         
         for(int i=0; i<num; i++) {
             new TestClient(delay);
             try {
-                Thread.sleep(50);
+                Thread.sleep(200);
             } catch (InterruptedException e) {
                 e.printStackTrace();
+            }
+            
+            if(i % 10 == 0) {
+                System.out.println(i+" connected");
             }
         }
         System.out.println("ALL CLIENTS CONNECTED");
