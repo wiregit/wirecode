@@ -21,58 +21,58 @@ import java.util.StringTokenizer;
 
 public class SettingsManager implements SettingsInterface
 {
-    private static boolean forceIPAddress_;
-    private static byte[]  forcedIPAddress_;
-    private static String  forcedIPAddressString_;
-    private static int forcedPort_;
+    private boolean forceIPAddress_;
+    private byte[]  forcedIPAddress_;
+    private String  forcedIPAddressString_;
+    private int forcedPort_;
 
     /** lastVersionChecked is the most recent version number checked.  Also,
      * there is a boolean for don't check again. */
-    private static final String CURRENT_VERSION=DEFAULT_LAST_VERSION_CHECKED;
+    private final String CURRENT_VERSION=DEFAULT_LAST_VERSION_CHECKED;
     private String lastVersionChecked_;
     private boolean checkAgain_;
 
-    boolean write_ = false;
+    private boolean write_ = false;
     /** Variables for the various settings */
-	private static boolean  allowBroswer_;
-    private static byte     ttl_;
-    private static byte     softmaxttl_;
-    private static byte     maxttl_;
-    private static int      maxLength_;
-    private static int      timeout_;
-    private static String   hostList_;
-    private static int      keepAlive_;
-    private static int      port_;
-    private static int      connectionSpeed_;
-    private static int      uploadSpeed_;
-    private static byte     searchLimit_;
-    private static String   clientID_;
-    private static int      maxIncomingConn_;
-    private static int      localIP_;  // not yet implemented
-    private static String   saveDirectory_;
-    private static String   directories_;
-    private static String   extensions_;
-    private static String   incompleteDirectory_;
-    private static String[] bannedIps_;
-    private static String[] bannedWords_;
-    private static boolean  filterDuplicates_;
-    private static boolean  filterAdult_;
-    private static boolean  filterVbs_;
-    private static boolean  filterHtml_;
-    private static boolean  filterGreedyQueries_;
-    private static boolean  filterBearShare_;
-    private static boolean  useQuickConnect_;
-    private static String[] quickConnectHosts_;
-    private static int      parallelSearchMax_;
-    private static boolean  clearCompletedUpload_;
-    private static boolean  clearCompletedDownload_;
-    private static int      maxSimDownload_;
-    private static int      maxUploads_;
+	private boolean  allowBroswer_;
+    private byte     ttl_;
+    private byte     softmaxttl_;
+    private byte     maxttl_;
+    private int      maxLength_;
+    private int      timeout_;
+    private String   hostList_;
+    private int      keepAlive_;
+    private int      port_;
+    private int      connectionSpeed_;
+    private int      uploadSpeed_;
+    private byte     searchLimit_;
+    private String   clientID_;
+    private int      maxIncomingConn_;
+    private int      localIP_;  // not yet implemented
+    private String   saveDirectory_;
+    private String   directories_;
+    private String   extensions_;
+    private String   incompleteDirectory_;
+    private String[] bannedIps_;
+    private String[] bannedWords_;
+    private boolean  filterDuplicates_;
+    private boolean  filterAdult_;
+    private boolean  filterVbs_;
+    private boolean  filterHtml_;
+    private boolean  filterGreedyQueries_;
+    private boolean  filterBearShare_;
+    private boolean  useQuickConnect_;
+    private String[] quickConnectHosts_;
+    private int      parallelSearchMax_;
+    private boolean  clearCompletedUpload_;
+    private boolean  clearCompletedDownload_;
+    private int      maxSimDownload_;
+    private int      maxUploads_;
 
-    private static int      searchAnimationTime_;
-    private static String   saveDefault_;
+    private int      searchAnimationTime_;
+    private String   saveDefault_;
 
-    private static int      uploadsPerPerson_;
+    private int      uploadsPerPerson_;
 
     /** connectString_ is something like "GNUTELLA CONNECT..."
      *  connectStringOk_ is something like "GNUTELLA OK..."
@@ -80,22 +80,22 @@ public class SettingsManager implements SettingsInterface
      *             connectString!=""
      *             connectStringFirstWord does not contain spaces
      */
-    private static String   connectString_;
-    private static String   connectStringFirstWord_;
-    private static String   connectStringRemainder_;
-    private static String   connectOkString_;
-    private static int      basicQueryInfo_;
-    private static int      advancedQueryInfo_;
-    private static int      freeLoaderFiles_;
-    private static int      freeLoaderAllowed_;
+    private String   connectString_;
+    private String   connectStringFirstWord_;
+    private String   connectStringRemainder_;
+    private String   connectOkString_;
+    private int      basicQueryInfo_;
+    private int      advancedQueryInfo_;
+    private int      freeLoaderFiles_;
+    private int      freeLoaderAllowed_;
 
     /** Set up a local variable for the properties */
-    private static Properties props_;
+    private Properties props_;
 
     /** Specialized properties file for the
      *  network discoverer
      */
-    private static Properties ndProps_;
+    private Properties ndProps_;
 
     /**
      *  Set up the manager instance to follow the
