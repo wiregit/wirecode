@@ -37,6 +37,9 @@ public class QueryRouteTable {
     /** The max distance (measured in hops) of files tracked by this, i.e., the 
      *  value used in table for infinity. */
     private byte infinity;
+    /** The number of entries in this, used to make entries() run in O(1) time.
+     *  INVARIANT: entries=number of i s.t. table[i]<infinity */
+    private int entries;
 
     /** The last message received of current sequence, or -1 if none. */
     private int sequenceNumber;
@@ -76,6 +79,7 @@ public class QueryRouteTable {
         this.table=new byte[initialSize];
         Arrays.fill(table, infinity);
         this.infinity=infinity;
+        this.entries=0;
         this.sequenceNumber=-1;
         this.sequenceSize=-1;
         this.nextPatch=0;
@@ -116,7 +120,11 @@ public class QueryRouteTable {
         String[] keywords=HashFunction.keywords(filename);
         for (int i=0; i<keywords.length; i++) {
             int hash=HashFunction.hash(keywords[i], table.length);
-            table[hash]=(byte)Math.min(ttl, table[hash]);
+            if (ttl<table[hash]) {
+                if (table[hash]>=infinity)
+                    entries++;  //added new entry
+                table[hash]=(byte)ttl;
+            }
         }
     }
 
@@ -134,6 +142,7 @@ public class QueryRouteTable {
         //
         //          for (int i=0; i<table.length; i++)
         //              table[i]=(byte)Math.min(table[i], qrt.table[i]+1);
+        //              //update entries accordingly
 
         int m=qrt.table.length;
         int m2=this.table.length;
@@ -151,7 +160,11 @@ public class QueryRouteTable {
                     other=this.infinity;
                 else
                     other=(byte)(qrt.table[i]+1);
-                table[i2]=(byte)Math.min(table[i2], other);
+                if (other<table[i2]) {
+                    if (table[i2]>=infinity)
+                        entries++; //added new entry
+                    table[i2]=other;
+                }
             }
         }
     }
@@ -163,12 +176,7 @@ public class QueryRouteTable {
 
     /** Returns the number of entries in this. */
     public int entries() {
-        int count=0;
-        for (int i=0; i<table.length; i++) {
-            if (table[i]<infinity)
-                count++;
-        }
-        return count;
+        return entries;
     }        
 
     /** True if o is a QueryRouteTable with the same entries of this. */
@@ -264,7 +272,13 @@ public class QueryRouteTable {
         //3. Add data[0...] to table[nextPatch...]            
         for (int i=0; i<data.length; i++) {
             try {
+                boolean wasInfinity=(table[nextPatch]>=infinity);
                 table[nextPatch]+=data[i];
+                boolean isInfinity=(table[nextPatch]>=infinity);
+                if (wasInfinity && !isInfinity)
+                    entries++;  //added entry
+                else if (!wasInfinity && isInfinity)
+                    entries--;  //removed entry
             } catch (IndexOutOfBoundsException e) {
                 throw new BadPacketException("Tried to patch "+nextPatch
                                              +" of an "+data.length
@@ -492,7 +506,11 @@ public class QueryRouteTable {
 
         QueryRouteTable qrt=new QueryRouteTable(1000, (byte)7);
         qrt.add("good book");
+        Assert.that(qrt.entries()==2);
         qrt.add("bad", 3);   //{good/1, book/1, bad/3}
+        Assert.that(qrt.entries()==3);
+        qrt.add("bad", 4);   //{good/1, book/1, bad/3}
+        Assert.that(qrt.entries()==3);
 
         //1. Simple keyword tests (add, contains)
         Assert.that(! qrt.contains(new QueryRequest((byte)4, 0, "garbage")));
@@ -555,6 +573,7 @@ public class QueryRouteTable {
                     ==PatchTableMessage.COMPRESSOR_DEFLATE);
         }
         Assert.that(qrt2.equals(qrt));
+        Assert.that(qrt.entries()==qrt2.entries());
 
         Iterator iter=qrt2.encode(qrt);
         Assert.that(! iter.hasNext());
@@ -641,6 +660,7 @@ public class QueryRouteTable {
         Assert.that(qrt2.table[0]==(byte)2);
         Assert.that(qrt2.table[1]==(byte)3);
         Assert.that(qrt2.table[2]==(byte)5);
+        Assert.that(qrt2.entries()==3);
 
         qrt=new QueryRouteTable(3, (byte)7);  // 1 4 X ==> 2 2 5 X
         qrt2=new QueryRouteTable(4, (byte)7);
@@ -652,6 +672,7 @@ public class QueryRouteTable {
         Assert.that(qrt2.table[1]==(byte)2, "Got: "+qrt2.table[1]);
         Assert.that(qrt2.table[2]==(byte)5);
         Assert.that(qrt2.table[3]==qrt.infinity);
+        Assert.that(qrt2.entries()==3);
 
         //5b. Black-box test for addAll.
         qrt=new QueryRouteTable(100, (byte)7);
