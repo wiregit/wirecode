@@ -612,57 +612,55 @@ public class FileManager {
      *  file is in the shared directory.</b> 
      */
     private synchronized boolean addFile(File file) {
-        String path = file.getAbsolutePath();   //TODO: right method?
-        String name = file.getName();    
-        if (hasExtension(name)) {
-            long n = file.length();  
-            if (n>Integer.MAX_VALUE || n<0)
-                return false;
-            _size += n;
-            int fileIndex = _files.size();
-			long modTime = (new File(path)).lastModified();
-			HashSet urns = UrnCache.instance().getUrns(path, modTime);
-			FileDesc fileDesc = new FileDesc(fileIndex, name, path, (int)n,
-											 modTime, urns);
-            _files.add(fileDesc);
-            _numFiles++;
-
-            //Register this file with its parent directory.
-            File parent=getParentFile(file);
-            Assert.that(parent!=null, "Null parent to \""+file+"\"");
-            IntSet siblings=(IntSet)_sharedDirectories.get(parent);
-            Assert.that(siblings!=null,
-                "Add directory \""+parent+"\" not in "+_sharedDirectories);
-            boolean added=siblings.add(fileIndex);
-            Assert.that(added, "File "+fileIndex+" already found in "+siblings);
-            if (_callback!=null)
-                _callback.addSharedFile(file, parent);
-
-            //Index the filename.  For each keyword...
-            String[] keywords=StringUtils.split(path, DELIMETERS);
-            for (int i=0; i<keywords.length; i++) {
-                String keyword=keywords[i];
-                //Ensure there _index has a set of indices associated with
-                //keyword.
-                IntSet indices=(IntSet)_index.get(keyword);
-                if (indices==null) {
-                    indices=new IntSet();
-                    _index.add(keyword, indices);
-                }
-                //Add fileIndex to the set.
-                indices.add(fileIndex);
-            }
-            
-            // Ensure file can be found by URN lookups
-            updateUrnIndex(fileDesc);
-            if(fileDesc.shouldCalculateUrns()) {
-                // more URNs available if we can wait; background it
-                backgroundCalculateAndUpdate(fileDesc);
-            }
-            
-            return true;
-        }
-        return false;
+        if (!hasExtension(file.getName())) {
+			return false;
+		}
+		String path = file.getAbsolutePath();
+		long fileLength = file.length();  
+		if (fileLength>Integer.MAX_VALUE || fileLength<0)
+			return false;
+		_size += fileLength;
+		int fileIndex = _files.size();
+		long modTime = file.lastModified();
+		HashSet urns = UrnCache.instance().getUrns(path, modTime);
+		FileDesc fileDesc = new FileDesc(file, fileIndex, urns);
+		_files.add(fileDesc);
+		_numFiles++;
+		
+		//Register this file with its parent directory.
+		File parent=getParentFile(file);
+		Assert.that(parent!=null, "Null parent to \""+file+"\"");
+		IntSet siblings=(IntSet)_sharedDirectories.get(parent);
+		Assert.that(siblings!=null,
+					"Add directory \""+parent+"\" not in "+_sharedDirectories);
+		boolean added=siblings.add(fileIndex);
+		Assert.that(added, "File "+fileIndex+" already found in "+siblings);
+		if (_callback!=null)
+			_callback.addSharedFile(file, parent);
+		
+		//Index the filename.  For each keyword...
+		String[] keywords=StringUtils.split(path, DELIMETERS);
+		for (int i=0; i<keywords.length; i++) {
+			String keyword=keywords[i];
+			//Ensure there _index has a set of indices associated with
+			//keyword.
+			IntSet indices=(IntSet)_index.get(keyword);
+			if (indices==null) {
+				indices=new IntSet();
+				_index.add(keyword, indices);
+			}
+			//Add fileIndex to the set.
+			indices.add(fileIndex);
+		}
+		
+		// Ensure file can be found by URN lookups
+		updateUrnIndex(fileDesc);
+		if(fileDesc.shouldCalculateUrns()) {
+			// more URNs available if we can wait; background it
+			backgroundCalculateAndUpdate(fileDesc);
+		}
+		
+		return true;
     }
 
     /**
