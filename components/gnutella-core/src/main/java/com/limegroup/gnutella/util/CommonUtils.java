@@ -1,6 +1,5 @@
 package com.limegroup.gnutella.util;
 
-import com.limegroup.gnutella.Assert;
 import java.util.Properties;
 import java.io.*;
 import java.net.*;
@@ -589,7 +588,10 @@ public final class CommonUtils {
         File currentDir = CommonUtils.getCurrentDirectory();
         for(int i=0; i<USER_FILES.length; i++) {
             File curUserFile = new File(settingsDir, USER_FILES[i]);
-            File curDirFile  = new File(currentDir, USER_FILES[i]);
+            File curDirFile  = new File(currentDir,  USER_FILES[i]);
+            
+            // if the file already exists in the user's home directory,
+            // don't copy it
             if(curUserFile.isFile()) {
                 continue;
             }
@@ -683,7 +685,7 @@ public final class CommonUtils {
         } else if ( o2 == null ) {
             retval = 1;
         } else if ( o1.getClass() == String.class ) {
-            retval = StringUtils.compareIgnoreCase( (String)o1, (String)o2 );
+            retval = compareIgnoreCase( (String)o1, (String)o2 );
         } else if( o1 instanceof com.sun.java.util.collections.Comparable ) {
             retval =
                 ((com.sun.java.util.collections.Comparable)o1).compareTo(o2);
@@ -705,6 +707,21 @@ public final class CommonUtils {
         return retval;
     } 
 
+    /** 
+     * Utility method to avoid loading of StringUtils class.
+     */
+    private static int compareIgnoreCase(String a, String b) {
+        //Check out String.compareTo(String) for a description of the basic
+        //algorithm.  The ignore case extension is trivial.
+        for (int i=0; i<Math.min(a.length(), b.length()); i++) {
+            char ac=Character.toLowerCase(a.charAt(i));
+            char bc=Character.toLowerCase(b.charAt(i));
+            int diff=ac-bc;
+            if (diff!=0)
+                return diff;
+        }
+        return a.length()-b.length();
+    }
 
 	/**
 	 * Copies the specified resource file into the current directory from
