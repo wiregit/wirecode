@@ -1,8 +1,6 @@
 /*
  * This class keeps state related to the promotion process.
  * 
- * 
- * 
  */
 package com.limegroup.gnutella.upelection;
 
@@ -17,6 +15,11 @@ import java.net.InetAddress;
 public class PromotionManager {
 	
 	private static long REQUEST_TIMEOUT = Constants.MINUTE;
+	
+	/**
+	 * ref to the UDP service.  Not final so that tests can change it.
+	 */
+	static UDPService _udpService = UDPService.instance();
 	
 	/**
 	 * LOCKS _promotionPartner
@@ -63,6 +66,7 @@ public class PromotionManager {
      * At the moment we just drop it.
      */
     public void initiatePromotion(PromotionRequestVendorMessage msg) {
+    	
     	//set the promotion partner
     	IpPortPair requestor = new IpPortPair (
 				msg.getRequestor().getAddress(),
@@ -82,7 +86,7 @@ public class PromotionManager {
     	
     	//ping the original requestor
     	PromotionACKVendorMessage ping = new PromotionACKVendorMessage();
-    	UDPService.instance().send( ping, _promotionPartner);
+    	_udpService.send( ping, _promotionPartner);
     }
     
     /**
@@ -117,7 +121,7 @@ public class PromotionManager {
 		}
 	}
 	
-	public void handleACK(PromotionACKVendorMessage message, IpPort sender) {
+	public void handleACK(IpPort sender) {
 		//cache the current status
 		boolean isSupernode = RouterService.isSupernode();
 		
@@ -150,7 +154,7 @@ public class PromotionManager {
     	else {
     		//we are the originally requesting UP, ACK back.
     		PromotionACKVendorMessage pong = new PromotionACKVendorMessage();
-    		UDPService.instance().send(pong, sender);
+    		_udpService.send(pong, sender);
 
     	}
 	}
@@ -177,7 +181,7 @@ public class PromotionManager {
 		PromotionRequestVendorMessage msg = 
 			new PromotionRequestVendorMessage((Candidate)_promotionPartner);
 		
-		//RouterService.getMessageRouter().forwardPromotionRequest(msg);	
+		RouterService.getMessageRouter().forwardPromotionRequest(msg);	
 		
 	}
 	

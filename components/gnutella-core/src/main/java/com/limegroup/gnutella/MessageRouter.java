@@ -2628,8 +2628,8 @@ public abstract class MessageRouter {
     private void handlePromotionACKVendorMessage(PromotionACKVendorMessage message, 
     			ReplyHandler handler, DatagramPacket datagram) {
     	
-    	_promotionManager.handleACK(message,
-    			new Endpoint(datagram.getAddress().getHostAddress(),datagram.getPort()));
+    	_promotionManager.handleACK(
+    			new IpPortPair(datagram.getAddress(),datagram.getPort()));
     	
     }
     

@@ -25,7 +25,7 @@ import com.sun.java.util.collections.*;
  * @see QueryUnicaster
  *
  */
-public final class UDPService implements Runnable {
+public class UDPService implements Runnable {
 
 	/**
 	 * Constant for the single <tt>UDPService</tt> instance.
@@ -127,7 +127,7 @@ public final class UDPService implements Runnable {
 	/**
 	 * Constructs a new <tt>UDPAcceptor</tt>.
 	 */
-	private UDPService() {	    
+	protected UDPService() {	    
         UDP_RECEIVE_THREAD = new ManagedThread(this, "UDPService-Receiver");
         UDP_RECEIVE_THREAD.setDaemon(true);
         SEND_QUEUE = new ProcessingQueue("UDPService-Sender");
