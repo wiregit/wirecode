@@ -204,12 +204,12 @@ public class NormalUploadState implements UploadState {
 		String str;
 		str = "HTTP 200 OK \r\n";
 		_ostream.write(str.getBytes());
-		str = "Server: "+CommonUtils.getVendor()+"\r\n";
+		str = "Server: "+CommonUtils.getHttpServer()+"\r\n";
 		_ostream.write(str.getBytes());
 		String type = getMimeType();       /* write this method later  */
-		str = "Content-type:" + type + "\r\n";
+		str = "Content-Type: " + type + "\r\n";
 		_ostream.write(str.getBytes());
-		str = "Content-length:"+ (_uploadEnd - _uploadBegin) + "\r\n";
+		str = "Content-Length: "+ (_uploadEnd - _uploadBegin) + "\r\n";
 		_ostream.write(str.getBytes());
 
 		// Version 0.5 of limewire misinterpreted Content-range
@@ -223,7 +223,7 @@ public class NormalUploadState implements UploadState {
         // _uploadEnd is an EXCLUSIVE index internally, but HTTP uses
         // an INCLUSIVE index.
 		if (_uploadBegin != 0) {
-			str = "Content-range: bytes " + _uploadBegin  +
+			str = "Content-Range: bytes " + _uploadBegin  +
 			"-" + ( _uploadEnd - 1 )+ "/" + _fileSize + "\r\n";
 			_ostream.write(str.getBytes());
 		}
