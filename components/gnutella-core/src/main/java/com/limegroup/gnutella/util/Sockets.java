@@ -135,9 +135,10 @@ public class Sockets {
                     new Object[] { addr, new Integer(timeout) });
                 return ret;
             } catch (InvocationTargetException e) {
-                //ioException.getTargetException() should be an instance of
-                //IOexception, but this is safer.
-                throw new IOException(e.getMessage()); 
+                Throwable e2 = e.getTargetException();
+                if( !(e2 instanceof IOException) )
+                    ErrorService.error(e2);
+                throw (IOException)e2;
             } catch(InstantiationException e) {
                 // this should never happen -- display the error
                 ErrorService.error(e);
