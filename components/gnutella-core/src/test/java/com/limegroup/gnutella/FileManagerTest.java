@@ -191,7 +191,7 @@ public class FileManagerTest extends com.limegroup.gnutella.util.BaseTestCase {
         assertEquals("unexpected files length", 2, files.length);
         assertEquals("files differ", files[0], f1);
         assertEquals("files differ", files[1], f3);
-        files=fman.getSharedFiles(null);
+        files=fman.getAllSharedFiles();
         assertEquals("unexpected files length", 2, files.length);
         assertEquals("files differ", files[0], f1);
         assertEquals("files differ", files[1], f3);
