@@ -220,7 +220,7 @@ class HTMLOutput {
 "       </tr>\n" +
 "      </table>\n" +
 "     </blockquote>\n" +
-"     So to provide a translation, one just needs to append the translated text after\n" +
+"     To provide a translation, one just needs to append the translated text after\n" +
 "     the equal sign, and remove the leading comment mark and space.<br />\n" +
 "     <br />\n");
     }
@@ -255,8 +255,8 @@ class HTMLOutput {
 "       may be difficult for native language users.&nbsp; Providing a more complete\n" +
 "       translation would be very much appreciated.");
         buildStatus(newpage, langsEmbryonic,
-"       are only embryonic and actually need a complete translation.\n" +
-"       The current files are only there for demonstration purpose.");
+"       are only embryonic and need a complete translation.&nbsp; \n" +
+"       The current files are largely untranslated.");
         newpage.append(
 "     </ol>\n");
     }
@@ -293,14 +293,14 @@ class HTMLOutput {
 "     <b><big>Which Tool or Editor Is Needed to Work on Translations?</big></b><br />\n" + 
 "     <br />\n" + 
 "     For <b>Western European Latin-based languages</b>, which can use the US-ASCII\n" +
-"     or ISO-8859-1 character set, any text editor (such as NotePad on Windows) can\n" +
+"     or ISO-8859-1 character set, any text editor (such as Notepad on Windows) can\n" +
 "     be used on Windows and Linux.&nbsp; Once a file is completed, it can be sent as a\n" +
 "     simple text file to\n" +
       HTML_TRANSLATE_EMAIL_ADDRESS + ".<br />\n" +
 "     <br />\n" +
 "     For <b>Central European languages</b>, the preferred format is a simple text\n" +
-"     file encoded with the ISO-8859-2 character set, or an UTF-8 encoded simple\n" +
-"     text file (which can be edited with NotePad on Windows 2000/XP), or a\n" +
+"     file encoded with the ISO-8859-2 character set, or a UTF-8 encoded simple\n" +
+"     text file (which can be edited with Notepad on Windows 2000/XP), or a\n" +
 "     correctly marked-up HTML document such as HTML email, or a Word document.<br />\n" +
 "     <br />\n" +
 "     For <b>other European languages</b>, the preferred format is a plain-text\n" +
@@ -312,40 +312,36 @@ class HTMLOutput {
 "     <br />\n" +
 "     For <b>Semitic languages</b> (Arabic, Hebrew...), the preferred format is a\n" +
 "     plain-text file edited with a editor that supports the right-to-left layout,\n" +
-"     encoded preferably with UTF-8 or a ISO-8859-* character set, in logical order.\n" +
+"     encoded preferably with UTF-8 or a ISO-8859-* character set, in logical order.&nbsp; \n" +
 "     Be careful with the relative order of keys and values, and with the\n" +
 "     appearance of ASCII punctuations around right-to-left words: make sure that\n" +
 "     your editor uses the RTL layout with the edited text aligned on the right;\n" +
-"     please don't insert BiDi control overrides; but you may need to place LRE/PDF\n" +
+"     please do not insert BiDi control overrides; but you may need to place LRE/PDF\n" +
 "     marks (U+202B/U+202C) locally around non-Semitic words inserted within Semitic\n" +
 "     sentences.&nbsp; Also the &quot;<code>\\n</code>&quot; sequences that encode a newline\n" +
-"     will be displayed within semitic text as &quot;<code>n\\</code>&quot;: don't use\n" +
+"     will be displayed within semitic text as &quot;<code>n\\</code>&quot;: do not use\n" +
 "     BiDi overrides for such special sequence whose appearance in your editor is not\n" +
 "     important, but that MUST be entered with a leading backslash before the &quot;n&quot;\n" +
 "     character.<br />\n" +
 "     <br />\n" +
 "     For <b>Asian Languages</b>, the preferred submission format is a Unicode text\n" +
-"     file encoded with UTF-8.&nbsp; Users of Windows 2000/XP can use NotePad but you\n" +
+"     file encoded with UTF-8.&nbsp; Users of Windows 2000/XP can use Notepad but you\n" +
 "     must explicitly select the UTF-8 encoding when saving your file.&nbsp; Users of\n" +
 "     localized versions of Windows 95/98/ME can only save their file in the native\n" +
 "     local &quot;ANSI&quot; encoding, and should then send us their translation by\n" +
 "     copying and pasting it in the content body of the email.<br />\n" +
 "     <br />\n" +
-"     <b>Mac users</b> should use a word-processor and send us their\n" +
-"     translations in an unambiguous format.&nbsp; Mac OS 8/9 &quot;SimpleText&quot;\n" +
-"     files use a Mac-specific encoding for international languages\n" +
-"     (additionally, SimpleText is too much limited to edit large files), and a\n" +
-"     specific format for text attachments (we may enventually have difficulties to\n" +
-"     decipher some Mac encodings used in simple text files attachment).&nbsp; On Mac OSX,\n" +
+"     <b>Mac users</b> should use a word processor and send us their\n" +
+"     translations in an unambiguous format.&nbsp; On Mac OSX,\n" +
 "     the best tool is &quot;TextEdit&quot;, from the Jaguar accessories, with\n" +
 "     which you can directly edit and save plain-text files encoded with UTF-8.<br />\n" +
 "     <br />\n" +
-"     <b>Linux users</b> can also participate if they have a correctly setup\n" +
+"     <b>Linux users</b> can also participate if they have a correct\n" +
 "     environment for their locale.&nbsp; Files can be edited with &quot;vi&quot;,\n" +
-"     &quot;emacs&quot;, or graphical editors for X11.<br />\n" +
+"     &quot;emacs&quot;, or other editors.<br />\n" +
 "     <br />\n" +
-"     For other information about internationalization standards, language and\n" +
-"     country codes, character sets and encodings, you may visit these web pages:<br />\n" +
+"     For further information about internationalization standards, language and\n" +
+"     country codes, character sets and encodings, the following web pages may be helpful:<br />\n" +
 "     <ul>\n" +
 "      <li>Language codes: <a href=\"http://www.loc.gov/standards/iso639-2/englangn.html\"\n" +
 "       target=\"_blank\">http://www.loc.gov/standards/iso639-2/englangn.html</a></li>\n" +
@@ -360,14 +356,41 @@ class HTMLOutput {
 "     </ul>\n" +
 "     An excellent tutorial on various character sets, including the ASCII variants, the\n" +
 "     ISO-8859 family, the Windows &quot;ANSI code pages&quot;, Macintosh character codes,\n" +
-"     and Unicode (or its ISO/IEC 10646 repertoire) can be found on:\n" +
+"     and Unicode (or its ISO/IEC 10646 repertoire) can be found at\n" +
 "     <a href=\"http://www.cs.tut.fi/~jkorpela/chars.html\"\n" +
-"     target=\"_blank\">http://www.cs.tut.fi/~jkorpela/chars.html</a><br />\n" +
+"     target=\"_blank\">http://www.cs.tut.fi/~jkorpela/chars.html</a>.<br />\n" +
+"     <br />\n" +
+"     <b><big>General Considerations for Translators</big></b><br />\n" +
+"     <br />\n" +
+"     During the translation process, you may <a\n" +
+"     href=\"http://www.limewire.org/mailinglist.shtml\">subscribe to the translate mailing list</a>\n" +
+"     where you may benefit from other translators' questions and knowledge.<br />\n" + 
+"     <br />\n" + 
+"     Do not start with the existing message bundle installed with your current\n" +
+"     version of LimeWire.&nbsp; Make sure you<b>work on the latest version of a message bundle</b>.&nbsp; \n" +
+"     You can get the latest bundle by clicking on a language in the list on the right side of this page.<br />\n" +
+"     <br />\n" +
+"     When translating, adopt the common terminology used in your localized\n" +
+"     operating system.&nbsp; In some cases, some terms were imported from English,\n" +
+"     despite other terms already existing in your own language.&nbsp; If a local term can\n" +
+"     be used unambiguously, please use it in preference to the English term, even\n" +
+"     if you have seen many uses of this English term on web sites.&nbsp; A good\n" +
+"     translation must be understood by people who are not entirely savvy with\n" +
+"     Internet and computer jargon.&nbsp; Pay particularly attention to the\n" +
+"     non-technical translation of common terms: download, upload, host, byte,\n" +
+"     firewall, address, file, directory, # (number of), leaf (terminal node), etc.<br />\n" +
+"     <br />\n" +
+"     Avoid translating word for word and do not use blindly automatic translators.&nbsp; \n" +
+"     Be imaginative but make a clear and concise translation.&nbsp; For button\n" +
+"     labels and column names, do not translate them with long sentences, as they\n" +
+"     need to be short.&nbsp; Suppress some articles, or use abbreviations if necessary.&nbsp; \n" +
+"     If there are problems translating some difficult terms, write to the translate\n" +
+"     list (in English or French) for assistance.<br />\n" +
 "     <br />\n" +
 "     <b><big>How to Submit Corrections or Enhancements for Your Language</big></b><br />\n" +
 "     <br />\n" +
 "     Users that do not have the correct tools to edit a message bundle can send us\n" +
-"     an email in English or in French that explains their needs.\n" +
+"     an email in English or in French that explains their needs.&nbsp; \n" +
 "     For any discussion with the contributing translators you may write to\n" +
       HTML_TRANSLATE_EMAIL_ADDRESS + ".<br />\n" +
 "     <br />\n" +
@@ -379,36 +402,39 @@ class HTMLOutput {
 "     <b>For simple few corrections or additions</b>, just send the corrected lines\n" +
 "     in the content body of an email (making sure to select the correct character encoding\n" +
 "     in your email tool before sending it so that non-ASCII characters are not lost or\n" +
-"     replaced), with your comments.&nbsp; <i>We will review your translations and integrate\n" +
-"     them into our existing versions after review.</i><br />\n" +
+"     replaced), with your comments.<br />\n" +
+"     <br />\n" +
+"     <i>We will review submitted translations and integrate\n" +
+"     valuable contributions as quickly as possible.</i><br />\n" +
 "     <br />\n" +
 "     <b><big>How to Test a New Translation</big></b><br />\n" +
 "     <br />\n" +
 "     Only Windows and Unix simple text editors can create a plain-text file which\n" +
 "     will work in LimeWire, and only for languages using the Western European\n" +
-"     Latin character set.&nbsp; Don't use &quot;SimpleText&quot; on Mac OS to edit\n" +
+"     Latin character set.&nbsp; Do not use &quot;SimpleText&quot; on Mac OS to edit\n" +
 "     properties files as SimpleText does not create plain-text files.&nbsp; Other\n" +
 "     translations need to be converted into regular properties files, encoded\n" +
 "     using the ISO-8859-1 Latin character set and Unicode escape sequences, with a\n" +
 "     tool &quot;native2ascii&quot; found in the Java Development Kit.<br />\n" +
 "     <br />\n" +
 "     You do not need to rename your translated and converted bundle, which can\n" +
-"     coexist with the English version.&nbsp; LimeWire will load the appropriate\n" +
-"     resources file according to the &quot;<code>LANGUAGE=</code>&quot;, and\n" +
+"     co-exist with the English version.&nbsp; LimeWire will load the appropriate\n" +
+"     resource file according to the &quot;<code>LANGUAGE=</code>&quot;, and\n" +
 "     &quot;<code>COUNTRY=</code>&quot; settings stored in your\n" +
-"     &quot;<code>limewire.props</code>&quot; preferences file.&nbsp; Lookup for the\n" +
-"     correct language code to use, in the list beside.<br />\n" +
+"     &quot;<code>limewire.props</code>&quot; preferences file.&nbsp; The list on the right\n" +
+"     can help you to find the correct language code to use.<br />\n" +
 "     <br />\n" +
-"     Bundles are stored in a single <b>zipped archive</b>\n" +
+"     Bundles are stored in a single compressed archive\n" +
 "     named &quot;MessagesBundles.jar&quot; installed with LimeWire.&nbsp; All bundles\n" +
 "     are named &quot;MessagesBundle_xx.properties&quot;, where &quot;xx&quot; is replaced by\n" +
-"     the language code (as shown on the table beside).\n" +
+"     the language code.&nbsp; \n" +
 "     Note that bundles for languages using non-Western European Latin characters\n" +
 "     will be converted from UTF-8 to ASCII using a special format with hexadecimal\n" +
 "     Unicode escape sequences, prior to their inclusion in this archive.&nbsp; This can be\n" +
-"     performed using the <code>native2ascii</code> tool from the Java Development Kit.\n" +
-"     If you don't know how to proceed to test the translation yourself,\n" +
-"     ask us for assistance at the same email address used for your contributions.<br />\n" +
+"     performed using the <code>native2ascii</code> tool from the Java Development Kit.&nbsp; \n" +
+"     If you do not know how to proceed to test the translation yourself,\n" +
+"     ask us for assistance at\n" +
+      HTML_TRANSLATE_EMAIL_ADDRESS + ".<br />\n" +
 "     <br />\n" +
 "     <b><big>How to Create a New Translation</big></b><br />\n" +
 "     <br />\n" +
@@ -417,38 +443,6 @@ class HTMLOutput {
 "     official.&nbsp; Before starting\n" +
 "     your work, please contact us at\n" +
       HTML_TRANSLATE_EMAIL_ADDRESS + ".<br />\n" +
-"     <br />\n" +
-"     During the translation process, you may subscribe to the translate list (see above)\n" +
-"     where you will benefit from other contributions sent to this address.<br />\n" + 
-"     <br />\n" + 
-"     Do not start with the existing message bundle installed with your current\n" +
-"     servent.&nbsp; <b>Work on the latest version of a message bundle</b> from\n" +
-"     the list of languages on the top right of this page.<br />\n" +
-"     <br />\n" +
-"     When translating, adopt the <b>common terminology</b> used in your localized\n" +
-"     operating system.&nbsp; In some cases, some terms were imported from English,\n" +
-"     despite other terms already existed in your own language.&nbsp; If a local term can\n" +
-"     be used unambiguously, please use it in preference to the English term, even\n" +
-"     if you have seen many uses of this English term on web sites.&nbsp; A good\n" +
-"     translation must be understood by most native people that are not addicted to\n" +
-"     the Internet and computers &quot;jargon&quot;.&nbsp; Pay particularly attention to the\n" +
-"     non-technical translation of common terms: download, upload, host, byte,\n" +
-"     firewall, address, file, directory, # (number of), leaf (terminal node)...<br />\n" +
-"     <br />\n" +
-"     Avoid translating word for word, do not use blindly automatic translators,\n" +
-"     be imaginative but make a <b>clear and concise</b> translation.&nbsp; For button\n" +
-"     labels and column names, don't translate them with long sentences, as they\n" +
-"     may be truncated; suppress some articles, or use abbreviations if needed.\n" +
-"     If there are problems translating some difficult terms, write to the translate\n" +
-"     list (in English or French) for assistance, and subscribe to this list to\n" +
-"     receive comments from users or other translators.<br />\n" +
-"     <br />\n" +
-"     After you've plugged in your translations into your language's message\n" +
-"     bundle, send your copy as a plain-text file attachment to\n" +
-      HTML_TRANSLATE_EMAIL_ADDRESS + ".<br />\n" +
-"     <br />\n" +
-"     <i>We will review your translations and integrate them into our existing\n" +
-"     versions after review.</i><br />\n"+
 "     <br />\n" +
 "    </td>\n" + /* End of column 1 (spacing) */
 "    <td>&nbsp;&nbsp;&nbsp;</td>\n" + /* Column 2 (spacing) */
