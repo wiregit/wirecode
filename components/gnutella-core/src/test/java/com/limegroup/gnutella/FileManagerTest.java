@@ -6,16 +6,19 @@ import com.limegroup.gnutella.util.PrivilegedAccessor;
 import junit.framework.*;
 
 import com.limegroup.gnutella.settings.*;
+import com.limegroup.gnutella.altlocs.AlternateLocation;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.downloader.VerifyingFile;
 import com.limegroup.gnutella.stubs.SimpleFileManager;
 import com.sun.java.util.collections.*;
 import java.io.*;
+import java.net.*;
 
 public class FileManagerTest extends com.limegroup.gnutella.util.BaseTestCase {
 
     private static final String EXTENSION = "XYZ";
+    private static final int MAX_LOCATIONS = 10;
     
     private File f1 = null;
     private File f2 = null;
@@ -36,8 +39,18 @@ public class FileManagerTest extends com.limegroup.gnutella.util.BaseTestCase {
         return buildTestSuite(FileManagerTest.class);
     }
     
+    public static void globalSetUp() throws Exception {
+        ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
+        try {
+            RouterService.getAcceptor().setAddress(InetAddress.getLocalHost());
+        } catch (UnknownHostException e) {
+        } catch (SecurityException e) {
+        }        
+    }
+    
 	public void setUp() throws Exception {
         SharingSettings.EXTENSIONS_TO_SHARE.setValue(EXTENSION);
+        ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
         	    
 	    cleanFiles(_sharedDir, false);
 	    fman = new SimpleFileManager();
@@ -486,6 +499,34 @@ public class FileManagerTest extends com.limegroup.gnutella.util.BaseTestCase {
 		assertTrue("wasn't able to find any unique classes to check against.", checked);
 	}
 	
+	/**
+	 * Tests that alternate locations are returned in responses.
+	 */
+	public void testThatAlternateLocationsAreReturned() throws Exception {
+	    addFilesToLibrary();
+	    addAlternateLocationsToFiles();
+
+        boolean checked = false;
+		for(int i = 0; i < fman.getNumFiles(); i++) {
+			FileDesc fd = fman.get(i);
+			Response testResponse = new Response(fd);
+			QueryRequest qr = QueryRequest.createQuery(fd.getName());
+			Response[] hits = fman.query(qr);
+			assertNotNull("didn't get a response for query " + qr, hits);
+			// we can only do this test on 'unique' names, so if we get more than
+			// one response, don't test.
+			if ( hits.length != 1 ) continue;
+			checked = true;
+			assertEquals("responses should be equal", testResponse, hits[0]);
+			assertEquals("should have 10 other alts",
+			    10, testResponse.getLocations().size());
+			assertEquals("should have equal alts",
+			    testResponse.getLocations(), hits[0].getLocations());
+		}
+		assertTrue("wasn't able to find any unique classes to check against.", checked);
+    }	
+	
+	
 	private void addFilesToLibrary() throws Exception {
 		String dirString = "com/limegroup/gnutella";
 		File testDir = CommonUtils.getResourceFile(dirString);
@@ -515,7 +556,6 @@ public class FileManagerTest extends com.limegroup.gnutella.util.BaseTestCase {
             assertNotEquals(null, fman.addFileIfShared(shared));
 		}
         
-        
         // the below test depends on the filemanager loading shared files in 
         // alphabetical order, and listFiles returning them in alphabetical
         // order since neither of these must be true, a length check can
@@ -526,8 +566,18 @@ public class FileManagerTest extends com.limegroup.gnutella.util.BaseTestCase {
             
         assertEquals("unexpected number of shared files",
             testFiles.length, fman.getNumFiles() );
-    }	    
-
+    }
+    
+    private void addAlternateLocationsToFiles() throws Exception {
+        FileDesc[] fds = fman.getAllSharedFileDescriptors();
+        for(int i = 0; i < fds.length; i++) {
+            String urn = fds[i].getSHA1Urn().httpStringValue();
+            for(int j = 0; j < MAX_LOCATIONS + 5; j++) {
+                String loc = "http://1.2.3." + j + ":6346/uri-res/N2R?" + urn;
+                fds[i].add(AlternateLocation.create(loc));
+            }
+        }
+    }
 
     File createNewTestFile(int size) throws Exception {
 		File file = File.createTempFile("FileManager_unit_test", 
