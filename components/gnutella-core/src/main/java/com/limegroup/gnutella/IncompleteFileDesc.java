@@ -112,7 +112,7 @@ public class IncompleteFileDesc extends FileDesc implements HTTPHeaderValue {
         // otherwise, iterate through and individually add them, to make
         // sure they get added to the downloader.
         int added = 0;
-        for(Iterator iter = alc.values().iterator(); iter.hasNext(); ) {
+        for(Iterator iter = alc.iterator(); iter.hasNext(); ) {
             AlternateLocation al = (AlternateLocation)iter.next();
             if( super.add(al) ) {
                 md.addDownload(al.createRemoteFileDesc((int)getSize()),false);

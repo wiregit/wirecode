@@ -1,8 +1,7 @@
 package com.limegroup.gnutella.altlocs;
 
 import com.limegroup.gnutella.http.*; 
-import com.limegroup.gnutella.util.Random12;
-import com.limegroup.gnutella.util.FixedsizeForgetfulHashMap;
+import com.limegroup.gnutella.util.*;
 import com.sun.java.util.collections.*;
 import java.net.*;
 import java.util.StringTokenizer;
@@ -18,7 +17,7 @@ import com.limegroup.gnutella.*;
 public final class AlternateLocationCollection 
 	implements HTTPHeaderValue, AlternateLocationCollector {
 	    
-    private static final int MAX_LOCATIONS = 100;
+    private static final int MAX_SIZE = 100;
 
 	/**
 	 * <tt>Map</tt> of <tt>AlternateLocation</tt> instances that map to
@@ -27,28 +26,21 @@ public final class AlternateLocationCollection
 	 * entry inserted is removed when the limit is reached.
      * LOCKING: obtain this' monitor when iterating -- otherwise 
 	 *          it's synchronized on its own
-     * <p>
-     * INVARIANT: LOCATIONS.get(k)==k
      *
      * There must be a seperate _locations variable to do equals comparisons
      * on.  SynchronizedMap.equals(SynchronizedMap) won't work, because
      * the synchronized map does not extend Fixedsize.., and Fixedsize..
      * uses private variables for the equals comparison.
 	 */
-    //Sumeet:TODO2: Should this be a map
+    //Sumeet:TODO2: 
     //TODO1: Make sure the synchronization of this class works.
-	private final Map LOCATIONS=new FixedsizeForgetfulHashMap(MAX_LOCATIONS);
+	private final FixedSizeSortedSet LOCATIONS=new FixedSizeSortedSet(MAX_SIZE);
         
     /**
      * SHA1 <tt>URN</tt> for this collection.
      */
 	private final URN SHA1;
 	
-	/**
-	 * Random Number instance for use with httpStringValue()
-	 */
-	private static final Random12 random12 = new Random12();
-
     /**
      * Factory constructor for creating a new 
      * <tt>AlternateLocationCollection</tt> for this <tt>URN</tt>.
@@ -121,10 +113,8 @@ public final class AlternateLocationCollection
 	/**
 	 * Adds a new <tt>AlternateLocation</tt> to the list.  If the 
 	 * alternate location  is already present in the collection,
-	 * it will not be added.  If an alternate location with the same
-	 * url is already in the list, this keeps the one with the more recent
-	 * timestamp, and discards the other. <p>
-	 *
+	 * it's count will be incremented.  
+     *
 	 * Implements the <tt>AlternateLocationCollector</tt> interface.
 	 *
 	 * @param al the <tt>AlternateLocation</tt> to add 
@@ -141,13 +131,16 @@ public final class AlternateLocationCollection
 			throw new IllegalArgumentException("SHA1 does not match");
 		
 		synchronized(this) {
-            AlternateLocation old = (AlternateLocation)LOCATIONS.get(al);
-            if(old==null) {
-                LOCATIONS.put(al,al);
+            AlternateLocation alt = null;
+            if(LOCATIONS.contains(al))
+                alt = (AlternateLocation)(LOCATIONS.tailSet(al).first());
+            if(alt==null) {//it was not in collections.
+                LOCATIONS.add(al);//no need to increment
                 return true;
             }
             else {
-                old.increment();
+                alt.increment();
+                LOCATIONS.add(alt); //put it back
                 return false;
             }
         }
@@ -164,15 +157,16 @@ public final class AlternateLocationCollection
 			return false; //it cannot be in this list if it has a different SHA1
 		
 		synchronized(this) {
-            AlternateLocation loc = (AlternateLocation)LOCATIONS.get(al);
+            AlternateLocation loc = null;
+            if(LOCATIONS.contains(al))
+                loc = (AlternateLocation)(LOCATIONS.tailSet(al).first());
             if(loc==null) //it's not in locations, cannot remove
                 return false;
-            if(loc.getCount() == 0) {
-                LOCATIONS.remove(al);
-                return true;
-            }
+            if(loc.getCount() == 0) //we did remove it...don't add it back
+                return true;            
             else {
                 loc.decrement();
+                LOCATIONS.add(loc); //put it back
                 return false;
             }
 		}
@@ -201,7 +195,7 @@ public final class AlternateLocationCollection
 		//two threads at the same time, we could have a deadlock
 		int added = 0;
 		synchronized(alc) {
-			Iterator iter = alc.LOCATIONS.keySet().iterator();
+			Iterator iter = alc.LOCATIONS.iterator();
 			while(iter.hasNext()) {
 				AlternateLocation curLoc = (AlternateLocation)iter.next();
 				if( add(curLoc) )
@@ -224,29 +218,9 @@ public final class AlternateLocationCollection
      * @return true is this contains loc
      */
     public synchronized boolean contains(AlternateLocation loc) {
-        for(Iterator iter = LOCATIONS.keySet().iterator();iter.hasNext();) {
-            AlternateLocation al = (AlternateLocation)iter.next();
-            if(al.equals(loc))//todo1: is this correct
-                return true;
-        }
-        return false;
+        return LOCATIONS.contains(loc);
     }
         
-	/**
-	 * Returns a <tt>Collection</tt> of <tt>AlternateLocation</tt>s that has
-	 * been randomized to avoid distributed DOS attacks on servants.
-	 *
-	 * @return a randomized <tt>Collection</tt> of <tt>AlternateLocation</tt>s
-	 */
-	public Collection values() {
-        List list;
-        synchronized(this) {
-		    list = new ArrayList(LOCATIONS.keySet());
-        }
-		Collections.shuffle(list);
-		return list;
-	}
-
 	/**
 	 * Implements the <tt>HTTPHeaderValue</tt> interface.
 	 *
@@ -264,16 +238,9 @@ public final class AlternateLocationCollection
         //Sumeet:TODO2: improve randomization of altlocs
         //Sumeet:TODO2: send all for n-alts
         synchronized(this) {
-	        Iterator iter = LOCATIONS.keySet().iterator();
-            int start = random12.nextInt(LOCATIONS.size());
-            start=Math.max(0, start-10);// start from 0, or 10 before this one.
-            
-            //traverse blindly through X amount of times.
-            for(int i = 0; i < start; i++)
-                iter.next();
-            
+	        Iterator iter = LOCATIONS.iterator();            
             // then write out the next 10.
-            for(int i = 0; i < start+10 && iter.hasNext(); i++) {
+            for(int i = 0; i < 10 && iter.hasNext(); i++) {
 			    writeBuffer.append((
                            (HTTPHeaderValue)iter.next()).httpStringValue());
 			    writeBuffer.append(commaSpace);
@@ -298,7 +265,7 @@ public final class AlternateLocationCollection
     
     public Iterator iterator() {
         //Sumeet:TODO1: synchronization needs checking
-        return LOCATIONS.keySet().iterator();
+        return LOCATIONS.iterator();
     }
 
 	/**
@@ -312,7 +279,7 @@ public final class AlternateLocationCollection
 		StringBuffer sb = new StringBuffer();
 		sb.append("Alternate Locations: ");
 		synchronized(this) {
-			Iterator iter = LOCATIONS.keySet().iterator();
+			Iterator iter = LOCATIONS.iterator();
 			while(iter.hasNext()) {
 				AlternateLocation curLoc = (AlternateLocation)iter.next();
 				sb.append(curLoc.toString());
