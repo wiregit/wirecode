@@ -75,7 +75,7 @@ public class MediaType implements Serializable {
                 "pdf", "ps", "eps", "epsf",
                 "rtf", "wri", "doc", "mcw", "wps",
                 "xls", "wk1", "dif", "csv", "ppt",
-                "hlp", "chm",
+                "hlp", "chm", "lit", 
                 "tex", "texi", "latex", "info", "man"
             });
             
