@@ -16,28 +16,27 @@ import java.io.*;
  */
 public final class Backend {
 
+	private static final Backend INSTANCE = new Backend();
+
+	private final ActivityCallback CALLBACK = new ActivityCallbackStub();
+
 	private final RouterService ROUTER_SERVICE;
 
-	private final File TEMP_DIR;
+	private final File TEMP_DIR = new File("temp");
 
-    private static int tempDirNum = 0;
 
 	/**
-	 * Factory method.  Returns a new, unique backend.
+	 * Instance accessor for the <tt>Backend</tt>.
 	 */
-	public synchronized static Backend getBackendInstance() {
-        Backend retBackend = new Backend(tempDirNum++);
-        return retBackend;
+	public static Backend instance() {
+		return INSTANCE;
 	}
 
 	/**
 	 * Constructs a new <tt>Backend</tt>.
 	 */
-	private Backend(int version) {
+	private Backend() {
 		SettingsManager settings = SettingsManager.instance();
-        int port = settings.getPort();
-        settings.setPort(port+version);
-        TEMP_DIR = new File("temp"+version);        
 		TEMP_DIR.mkdirs();
 		TEMP_DIR.deleteOnExit();
 		File coreDir = new File("com/limegroup/gnutella");				
@@ -51,7 +50,9 @@ public final class Backend {
 		SettingsManager.instance().setDirectories(new File[] {TEMP_DIR});
 		SettingsManager.instance().setExtensions("java");
 
+		//RouterService.setCallback(CALLBACK);
 		ROUTER_SERVICE = new RouterService(new ActivityCallbackStub());
+        ROUTER_SERVICE.start();
 		try {
 			// sleep to let the file manager initialize
 			Thread.sleep(2000);
