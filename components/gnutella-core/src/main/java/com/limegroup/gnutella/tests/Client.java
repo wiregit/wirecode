@@ -201,7 +201,7 @@ public void run()
         for(int i=0; i < NUM_MESSAGES ; i++) 
         {
                 Message m = c.receive();
-                System.out.println("received" + m); 
+                //System.out.println("received" + m); 
         }
         long endTime = new Date().getTime();
         

@@ -110,7 +110,7 @@ public void run()
     try
     {           
         //open the connection to the servent
-        connection =new Connection(host, port);
+        connection = new Connection(host, port);
         connection.connect();
 
         //start a request receiver thread
@@ -201,7 +201,7 @@ public void run()
                 }//end of synchronization
                 
                 
-                System.out.println("clients = " + size);
+                //System.out.println("clients = " + size);
                 if(size <= 0)
                 {
                     //Sleep for some time
@@ -229,8 +229,8 @@ public void run()
 
             int n = requests.length;
 
-            //send replies 50 times before consulting for new queries
-            for(int j=0; j < 50; j++)
+            //send replies 20 times before consulting for new queries
+            for(int j=0; j < 200; j++)
             {
                 for (int i=0; i < n ;i++) 
                 {    
@@ -240,7 +240,7 @@ public void run()
                                                     ip, 56, responses, clientGUID);
                     reply.hop();  //so servent doesn't think it's from me
                     connection.send(reply); 
-                    System.out.println("reply sent");
+                    //System.out.println("reply sent");
                 }//end of inner for	
             }//end of outer for
             
@@ -268,7 +268,7 @@ private void addRequest(QueryRequest request)
     {
         queryRequests.add(request);
         
-        System.out.println("added request: " + request);
+        //System.out.println("added request: " + request);
     }
 }
 
