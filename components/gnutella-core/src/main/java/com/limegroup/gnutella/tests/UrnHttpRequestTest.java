@@ -100,7 +100,7 @@ public final class UrnHttpRequestTest extends TestCase {
 	public void testHttpUrnRequest() {
 		for(int i=0; i<_fileManager.getNumFiles(); i++) {
 			FileDesc fd = _fileManager.get(i);
-			String request = "GET /uri-res/N2R?"+fd.getSHA1Urn().httpStringValue()+
+			String request = "/uri-res/N2R?"+fd.getSHA1Urn().httpStringValue()+
 			" HTTP/1.1\r\n\r\n";
 			sendRequestThatShouldSucceed(request, fd);
 		}
@@ -113,7 +113,7 @@ public final class UrnHttpRequestTest extends TestCase {
 	public void testTraditionalGetForReturnedUrn() {
 		for(int i=0; i<_fileManager.getNumFiles(); i++) {
 			FileDesc fd = _fileManager.get(i);
-			String request = "GET /get/"+fd.getIndex()+"/"+fd.getName()+" HTTP/1.1\r\n"+
+			String request = "/get/"+fd.getIndex()+"/"+fd.getName()+" HTTP/1.1\r\n"+
 			HTTPHeaderName.CONTENT_URN.httpStringValue()+": "+fd.getSHA1Urn()+"\r\n\r\n";
 			sendRequestThatShouldSucceed(request, fd);
 		}				
@@ -127,7 +127,7 @@ public final class UrnHttpRequestTest extends TestCase {
 	public void testTraditionalGetWithContentUrn() {
 		for(int i=0; i<_fileManager.getNumFiles(); i++) {
 			FileDesc fd = _fileManager.get(i);
-			sendRequestThatShouldSucceed("GET /get/"+fd.getIndex()+"/"+fd.getName()+ 
+			sendRequestThatShouldSucceed("/get/"+fd.getIndex()+"/"+fd.getName()+ 
 										 " HTTP/1.1\r\n\r\n", fd);
 		}
 	}
@@ -140,7 +140,7 @@ public final class UrnHttpRequestTest extends TestCase {
 	public void testTraditionalGetWithInvalidContentUrn() {
 		for(int i=0; i<_fileManager.getNumFiles(); i++) {
 			FileDesc fd = _fileManager.get(i);
-			String request = "GET /get/"+fd.getIndex()+"/"+fd.getName()+" HTTP/1.1\r\n"+
+			String request = "/get/"+fd.getIndex()+"/"+fd.getName()+" HTTP/1.1\r\n"+
 			HTTPHeaderName.CONTENT_URN.httpStringValue()+": "+
 			"urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB"+"\r\n\r\n";
 			sendRequestThatShouldFail(request, fd, STATUS_404);
@@ -154,7 +154,7 @@ public final class UrnHttpRequestTest extends TestCase {
 	public void testInvalidTraditionalGetWithValidContentUrn() {
 		for(int i=0; i<_fileManager.getNumFiles(); i++) {
 			FileDesc fd = _fileManager.get(i);
-			String request = "GET /get/"+fd.getIndex()+"/"+fd.getName()+"invalid"+" HTTP/1.1\r\n"+
+			String request = "/get/"+fd.getIndex()+"/"+fd.getName()+"invalid"+" HTTP/1.1\r\n"+
 			HTTPHeaderName.CONTENT_URN.httpStringValue()+": "+fd.getSHA1Urn();
 			sendRequestThatShouldFail(request, fd, STATUS_404);
 		}				
@@ -169,7 +169,7 @@ public final class UrnHttpRequestTest extends TestCase {
 		SettingsManager.instance().setMaxUploads(0);
 		for(int i=0; i<_fileManager.getNumFiles(); i++) {
 			FileDesc fd = _fileManager.get(i);
-			String request = "GET /get/"+fd.getIndex()+"/"+fd.getName()+" HTTP/1.1\r\n"+
+			String request = "/get/"+fd.getIndex()+"/"+fd.getName()+" HTTP/1.1\r\n"+
 			HTTPHeaderName.CONTENT_URN.httpStringValue()+": "+fd.getSHA1Urn()+"\r\n\r\n";
 			sendRequestThatShouldFail(request, fd, STATUS_503);
 		}				
@@ -190,6 +190,8 @@ public final class UrnHttpRequestTest extends TestCase {
 			String reply = sock.getOutputStream().toString();
 			StringTokenizer st = new StringTokenizer(reply, "\r\n");
 			boolean contentUrnHeaderPresent = false;
+			boolean OKPresent = false;
+			assertTrue("HTTP response headers should be present: "+fd, st.countTokens()>0);
 			while(st.hasMoreTokens()) {
 				String curString = st.nextToken();
 				if(HTTPHeaderName.ALT_LOCATION.matchesStartOfString(curString)) {
@@ -199,7 +201,7 @@ public final class UrnHttpRequestTest extends TestCase {
 					try {
 						curUrn = URNFactory.createUrnFromContentUrnHttpHeader(curString);
 					} catch(IOException e) {
-						assertTrue("unexpeced exception: "+e, false);
+						assertTrue("unexpected exception: "+e, false);
 					}
 					assertEquals(HTTPHeaderName.CONTENT_URN.toString()+"s should be equal",
 								 fd.getSHA1Urn(), curUrn);
@@ -213,9 +215,12 @@ public final class UrnHttpRequestTest extends TestCase {
 					assertEquals("sizes should match", (int)fd.getSize(), 
 								 Integer.parseInt(value));						
 				} else if(HTTPHeaderName.SERVER.matchesStartOfString(curString)) {
-				continue;
-				}					
+					continue;
+				} else if(curString.equals("HTTP/1.1 200 OK")) {
+					OKPresent = true;
+				}		
 			}
+			assertTrue("HTTP/1.1 200 OK should have been returned: "+fd, OKPresent);
 			assertTrue("content URN header should always be reported:\r\n"+
 					   fd+"\r\n"+
 					   "reply: "+reply,
