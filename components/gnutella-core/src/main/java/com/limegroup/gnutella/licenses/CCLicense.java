@@ -125,14 +125,7 @@ class CCLicense implements License, Serializable, Cloneable {
      * Determines if the CC License is valid with this URN.
      */
     public boolean isValid(URN urn) {
-        Work work = getWork(urn);
-        if(work == null)
-            return false;
-            
-        if(work.expectedURN == null || urn == null)
-            return true;
-            
-        return work.expectedURN.equals(urn);
+        return getWork(urn) != null;
     }
     
     /**
@@ -288,9 +281,9 @@ class CCLicense implements License, Serializable, Cloneable {
         }
         
         // There's no existing work for this item, so lets add one.
-        work = new Work(urn, url);
+        work = new Work(url);
         if(LOG.isDebugEnabled())
-            LOG.debug("Adding new " + work);
+            LOG.debug("Adding new " + work + " for urn: " + urn);
 
         if(allWorks == null)
             allWorks = new HashMap();
@@ -341,7 +334,6 @@ class CCLicense implements License, Serializable, Cloneable {
     private static class Work implements Serializable {
         private static final long serialVersionUID =  -1719502030054241350L;
                 
-        URN expectedURN;
         URL licenseURL;
         List required;
         List permitted;
@@ -350,8 +342,7 @@ class CCLicense implements License, Serializable, Cloneable {
         // for de-serializing.
         Work() { }
         
-        Work(URN urn, URL url) {
-            expectedURN = urn;
+        Work(URL url) {
             licenseURL = url;
         }
         
@@ -360,7 +351,7 @@ class CCLicense implements License, Serializable, Cloneable {
         }
         
         public String toString() {
-            return "work:: urn:" + expectedURN + ", license: " + licenseURL;
+            return "work:: license: " + licenseURL;
         }
     }   
     
@@ -419,11 +410,20 @@ class CCLicense implements License, Serializable, Cloneable {
         
         Node doc = parser.getDocument().getDocumentElement();
         NodeList children = doc.getChildNodes();
+        
+        // Do a first pass for Work elements.
+        if(parseWork) {
+            for(int i = 0; i < children.getLength(); i++) {
+                Node child = (Node)children.item(i);
+                if(child.getNodeName().equals("Work"))
+                    parseWorkItem(child);
+            }
+        }
+        
+        // And a second pass for License elements.
         for(int i = 0; i < children.getLength(); i++) {
             Node child = (Node)children.item(i);
-            if(parseWork && child.getNodeName().equals("Work"))
-                parseWorkItem(child);
-            else if(child.getNodeName().equals("License"))
+            if(child.getNodeName().equals("License"))
                 parseLicenseItem(child);
         }
             
