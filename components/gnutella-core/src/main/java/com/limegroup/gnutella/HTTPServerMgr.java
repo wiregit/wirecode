@@ -14,24 +14,21 @@ import java.net.*;
 public class HTTPServerMgr implements Runnable {
 
     private static final int BUFFSIZE = 1024; //the buffer size for IO
-
     private Socket _socket;
-
     private String _filename;
-    
     private int _sizeOfFile;
-
     private int _amountRead;
-
     private ConnectionManager _manager;
+    private ActivityCallback _callback;
+    
 
-    public HTTPServerMgr(Socket s, String filename, ConnectionManager m) {
+    public HTTPServerMgr(Socket s, String filename_path, ConnectionManager m) {
 
 	_socket = s;
 
 	_manager = m;
 
-	_filename = filename;
+	_filename = filename_path;
 
 	_sizeOfFile = -1;
 
@@ -57,33 +54,49 @@ public class HTTPServerMgr implements Runnable {
 
     public void run() {
 	
-	ActivityCallback callback = _manager.getCallback();
+	_callback = _manager.getCallback();
 	
-	callback.addDownload(this);
+	_callback.addDownload(this);
 	
 	download();
 
-	callback.removeDownload(this);
+	_callback.removeDownload(this);
 
     }
 
     public void download() {
 
-	System.out.println("doing the download...");
+	InputStream istream;
+	BufferedReader in;
 
 	try {
 
-	    InputStream istream = _socket.getInputStream();
+	    istream = _socket.getInputStream();
 	                                /* get the data from the socket */
 	    InputStreamReader isr = new InputStreamReader(istream);
-	    BufferedReader in = new BufferedReader(isr);
+	    in = new BufferedReader(isr);
 
-	    String str = null;               
+	}
 
+	catch (Exception e) {
+	    
+	    _callback.error("Unable to get the inputstream from the socket");
+	    return;
+	    
+	}
+	
+	
+	String str = null;               
+	
+	try { 
+	    
 	    while (true) {          /* reading http header information */
 		
 		str = in.readLine();      /* get the line */ 
-	                                             /* check if it is */
+		
+		System.out.println("The str " + str);
+
+		/* check if it is */
 		if (str.indexOf("Content-length:") != -1) { 
 		                                /* the content length */
 		    String sub = str.substring(16); /* get the number portion */ 
@@ -92,6 +105,8 @@ public class HTTPServerMgr implements Runnable {
 		
 		    _sizeOfFile = java.lang.Integer.parseInt(sub);
 						
+		    System.out.println("The sub " + sub);
+
 		    in.readLine();                    /* read the /r/n */
 		
 		    break;                        
@@ -100,24 +115,8 @@ public class HTTPServerMgr implements Runnable {
 		
 	    }
 	    
+	    
 	    if (_sizeOfFile != -1) {
-
-		//  FileOutputStream myFile = new FileOutputStream(_filename);
-
-//  		byte[] data = new byte[BUFFSIZE];
-
-//  		while (true) {
-
-//  		    int got = istream.read(data);
-
-//  		    if (got==-1)
-//  			break;
-
-//  		    _amountRead += got;
-
-//  		    myFile.write(data, 0, got);      /* and write out to it */
-
-//  		}
 
 		FileOutputStream myFile = new FileOutputStream(_filename);
 
@@ -126,10 +125,12 @@ public class HTTPServerMgr implements Runnable {
 		while ( (c = istream.read() ) != -1) {
 		    
 		    myFile.write(c);
+		    _amountRead += c;
 		    count++;
+		    
 
 		}
-
+		
 	    }
 	
 	}
