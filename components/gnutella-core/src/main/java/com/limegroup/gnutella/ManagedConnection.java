@@ -932,7 +932,6 @@ public class ManagedConnection
                 ret.setProperty(ConnectionHandshakeHeaders.SUPERNODE, "True");
                 ret.setProperty(
                     ConnectionHandshakeHeaders.QUERY_ROUTING, "0.1");
-                ret.setProperty(ConnectionHandshakeHeaders.PONG_CACHING, "0.1");
                 
                 //also add some host addresses in the response 
                 String hostAddresses = getHostAddresses(_manager);
@@ -964,7 +963,6 @@ public class ManagedConnection
             Properties ret=new Properties();
             ret.setProperty(ConnectionHandshakeHeaders.SUPERNODE, "False");
             ret.setProperty(ConnectionHandshakeHeaders.QUERY_ROUTING, "0.1");
-            ret.setProperty(ConnectionHandshakeHeaders.PONG_CACHING,  "0.1");
             
             //do stuff specific to connection direction
             if(!outgoing){
@@ -978,11 +976,6 @@ public class ManagedConnection
                 //set the property
                 ret.setProperty(ConnectionHandshakeHeaders.X_TRY, 
                     hostAddresses);
-                
-                //throw the IOExceprion, to signal ConnectionManager to
-                //close the connection and cleanup
-                throw new IOException(
-                    "Shielded Client wont accept incoming Connection");
             }
             
             return new HandshakeResponse(code, message, ret);
