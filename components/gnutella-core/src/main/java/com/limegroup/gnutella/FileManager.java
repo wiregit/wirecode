@@ -42,17 +42,17 @@ public class FileManager {
      *  INVARIANT: all extensions are lower case. */
     private Set /* of String */ _extensions;
     /** The list of shared directories and their contents.  More formally, a
-     *  mapping whose keys are shared directories--and any subdirectories
-     *  reachable through those directories--sorted by FileComparator's.  The
-     *  value for any key is the set of indices of all shared files in that
-     *  directory.  INVARIANT: for any key k with value v in _sharedDirectories,
-     *  for all i in v,
+     *  mapping whose keys are shared directories and any subdirectories
+     *  reachable through those directories.  The value for any key is the set
+     *  of indices of all shared files in that directory.  INVARIANT: for any
+     *  key k with value v in _sharedDirectories, for all i in v,
      *       _files[i]._path==k+_files[i]._name.
      *  Likewise, for all i s.t. _files[i]!=null,
      *       _sharedDirectories.get(
      *            _files[i]._path-_files[i]._name).contains(i).
      * Here "==" is shorthand for file path comparison and "a-b" is short for
-     * string 'a' with suffix 'b' removed. */
+     * string 'a' with suffix 'b' removed.  INVARIANT: all keys in this are
+     * canonicalized files, sorted by a FileComparator. */
     private Map /* of File -> IntSet */ _sharedDirectories;
 
     /** The thread responsisble for adding contents of _sharedDirectories to
@@ -225,17 +225,26 @@ public class FileManager {
      *  If the _loadThread is interrupted while adding the contents of the
      *  directory, it returns immediately.  */
     private void addDirectory(File directory, File parent) {
-        if (!directory.exists() || !directory.isDirectory())
-            return;       
+        //We have to get the canonical path to make sure "D:\dir" and "d:\DIR"
+        //are the same on Windows but different on Unix.
+        try {
+            directory=getCanonicalFile(directory);
+            if (!directory.exists() || !directory.isDirectory())
+                return;       
+        } catch (IOException e) {
+            return;  //doesn't exist?
+        }
+
         synchronized (this) {
-            if (_sharedDirectories.get(directory)!=null) 
+            if (_sharedDirectories.get(directory)!=null)
+                //directory already added.  Don't re-add.
                 return;
             _sharedDirectories.put(directory, new IntSet());
             //_callback.addSharedDirectory(directory, parent);
         }
 
-        File[] file_list = listFiles(directory);   /* the files in a specified */
-        int n = file_list.length;               /* directory */
+        File[] file_list = listFiles(directory);    /* the files in a specified */
+        int n = file_list.length;                   /* directory */
        
         // go through file_list
         // get file name
@@ -245,9 +254,9 @@ public class FileManager {
         //   less fragmented
         for (int i=0; i<n && !_loadThread.isInterrupted(); i++) {
             if (file_list[i].isDirectory())     /* the recursive call */
-                addDirectory(file_list[i], directory);
+                addDirectory((File)file_list[i], directory);
             else                                /* add the file with the */
-                addFile(file_list[i]);  /* addFile method */
+                addFile((File)file_list[i]); 
         }
     }
 
@@ -262,11 +271,16 @@ public class FileManager {
      * with HTTPDownloader.  For consistency, it should take a File.  
      */
     public synchronized void addFileIfShared(String path) {
-        Assert.that(_sharedDirectories != null);
-
-        File f = new File(path);
-        if (!f.exists())
+        //Make sure capitals are resolved properly, etc.
+        File f = null;
+        try {
+            f=getCanonicalFile(new File(path));
+            if (!f.exists())
+                return;
+        } catch (IOException e) {
             return;
+        }
+
         File dir = getParentFile(f);
         if (dir==null)
             return;
@@ -295,11 +309,12 @@ public class FileManager {
 
             //Register this file with its parent directory.
             File parent=getParentFile(file);
-            Assert.that(parent!=null, "Null parent to \""+parent+"\"");
+            Assert.that(parent!=null, "Null parent to \""+file+"\"");
             IntSet siblings=(IntSet)_sharedDirectories.get(parent);
             Assert.that(siblings!=null,
-                "The path \""+parent+"\" was not in shared directory list.");
-            siblings.add(j);
+                "Add directory \""+parent+"\" not in "+_sharedDirectories);
+            boolean added=siblings.add(j);
+            Assert.that(added, "File "+j+" already found in "+siblings);
             //_callback.addSharedFile(file, parent);
 
             //Index the filename.  For each keyword...
@@ -327,7 +342,14 @@ public class FileManager {
      *  the file's index will not be assigned to any other files.
      *  Note that the file is not actually removed from disk.
      */
-    public synchronized boolean removeFileIfShared(File file) {
+    public synchronized boolean removeFileIfShared(File f) {
+        //Take care of case, etc.
+        try {
+            f=getCanonicalFile(f);
+        } catch (IOException e) {
+            return false;
+        }
+
         //Look for a file matching <file>...
         for (int i=0; i<_files.size(); i++) {
             FileDesc fd=(FileDesc)_files.get(i);
@@ -336,10 +358,18 @@ public class FileManager {
             File candidate=new File(fd._path);
 
             //Aha, it's shared. Unshare it by nulling it out.
-            if (file.equals(candidate)) {
+            if (f.equals(candidate)) {
                 _files.set(i,null);
                 _numFiles--;
                 _size-=fd._size;
+
+                //Remove references to this from directory listing
+                File parent=getParentFile(f);
+                IntSet siblings=(IntSet)_sharedDirectories.get(parent);
+                Assert.that(siblings!=null,
+                    "Rem directory \""+parent+"\" not in "+_sharedDirectories);
+                boolean removed=siblings.remove(i);
+                Assert.that(removed, "File "+i+" not found in "+siblings);
 
                 //Remove references to this from index.
                 String[] keywords=StringUtils.split(fd._path,
@@ -371,30 +401,43 @@ public class FileManager {
         return _extensions.contains(ext);
     }
 
+    /** Same as f.getParentFile() in JDK1.3. */
+    public static File getParentFile(File f) {
+        //Strip off any trailing "\"'s to work around limitations in JDK1.1.8.
+        //This isn't actually needed in this file, because f is always
+        //canonicalized if a directory, but it can't hurt.f
+        while (true) {
+            String name=f.getAbsolutePath();
+            if (name.endsWith(File.separator))
+                break;
+            f=new File(name.substring(0, name.length()-1));
+        }
+        
+        //Now list contents of directory.
+        String name=f.getParent();
+        if (name==null)
+            return null;
+        else 
+            return new File(name);
+    }
+    
+    /** Same as the f.listFiles() in JDK1.3. */
+    public static File[] listFiles(File f) {
+        String[] children=f.list();
+        if (children==null)
+            return null;
 
-    /**
-     *  Build the equivalent of the File.listFiles() utility in jdk1.2.2
-     */
-    private static File[] listFiles(File dir)
-    {
-        String [] fnames   = dir.list();
-        File   [] theFiles = new File[fnames.length];
-
-        for ( int i = 0; i < fnames.length; i++ )
-        {
-            theFiles[i] = new File(dir, fnames[i]);
+        File[] ret = new File[children.length];
+        for (int i=0; i<children.length; i++) {
+            ret[i] = new File(f, children[i]);
         }
 
-        return theFiles;
+        return ret;
     }
 
-    /** Equivalent to f.getParentFile in Java 1.2+. */
-    private static File getParentFile(File f) {
-        String parentPath=f.getParent();
-        if (parentPath==null)
-            return null;
-        else
-            return new File(parentPath);
+    /** Same as f.getCanonicalFile() in JDK1.3. */
+    public static File getCanonicalFile(File f) throws IOException {
+        return new File(f.getCanonicalPath());
     }
 
 
