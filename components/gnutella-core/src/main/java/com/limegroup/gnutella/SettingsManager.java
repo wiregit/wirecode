@@ -541,6 +541,9 @@ public class SettingsManager implements SettingsInterface {
 		setShowCloseDialog(DEFAULT_SHOW_CLOSE_DIALOG);
 		setClassPath(DEFAULT_CLASSPATH);
 		setMainClass(DEFAULT_MAIN_CLASS);
+
+		setAppWidth(DEFAULT_APP_WIDTH);
+		setAppHeight(DEFAULT_APP_HEIGHT);
     }
 
 
