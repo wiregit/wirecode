@@ -33,14 +33,78 @@ public final class QueryRequestTest extends com.limegroup.gnutella.util.BaseTest
 	}
 
 	/**
+	 * Tests to make sure that queries with no query string, no xml, and no
+	 * URNs are not accepted.
+	 */
+	public void testEmptyQueryNotAccepted() {
+		QueryRequest qr = null;
+		try {
+			qr = new QueryRequest(GUID.makeGuid(), (byte)4, 0, "", "", false,
+								  CommonUtils.EMPTY_SET, CommonUtils.EMPTY_SET, 
+								  false);
+			fail("exception should have been thrown");
+		} catch(IllegalArgumentException e) {
+		}		
+		try {
+			//String is double null-terminated.
+			byte[] payload = new byte[2+3];
+			//payload[2]=(byte)65;
+			qr = new QueryRequest(new byte[16], (byte)0, (byte)0, payload);
+			fail("exception should have been thrown");
+		} catch(BadPacketException e) {
+		}
+	}
+
+	public void testStillAcceptedIfOnlyPartsAreEmpty() throws Exception {
+		QueryRequest qr = null;
+		qr = new QueryRequest(GUID.makeGuid(), (byte)4, 0, "blah", "", false,
+							  CommonUtils.EMPTY_SET, CommonUtils.EMPTY_SET, 
+							  false);
+
+		qr = new QueryRequest(GUID.makeGuid(), (byte)4, 0, "", "blah", false,
+							  CommonUtils.EMPTY_SET, CommonUtils.EMPTY_SET, 
+							  false);
+
+		qr = new QueryRequest(GUID.makeGuid(), (byte)4, 0, "", "", false,
+							  CommonUtils.EMPTY_SET, 
+							  HugeTestUtils.URN_SETS[0], 
+							  false);
+
+		//String is double null-terminated.
+		byte[] payload = new byte[2+3];
+		payload[2] = (byte)65;
+		qr = new QueryRequest(new byte[16], (byte)0, (byte)0, payload);
+
+		
+		// now test everything empty but URN
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		baos.write((short)2);
+		baos.write(0); // null query
+		baos.write(0); // first null
+		
+		// no encoding problems in english
+		baos.write(HugeTestUtils.URNS[0].toString().getBytes()); 		
+		baos.write(0); // last null
+
+		qr = new QueryRequest(new byte[16], (byte)0, (byte)0, payload);
+	}
+
+	/**
 	 * Contains the legacy unit test that was formerly in QueryReqest.
 	 */
-	public void testLegacyUnitTest() {
+	public void testLegacyUnitTest() throws Exception {
         int u2=0x0000FFFF;
-        QueryRequest qr=new QueryRequest((byte)3,u2,"", false);
+        QueryRequest qr = null;
+		try {
+			qr = new QueryRequest((byte)3,u2,"", false);
+			fail("should not have accepted empty query");
+		} catch(IllegalArgumentException e) {
+			// expected for empty query
+		}
        
+		qr = new QueryRequest((byte)3, u2, "blah", false);
 		assertEquals("min speeds should be equal", u2, qr.getMinSpeed());
-		assertEquals("queries should be equal", "", qr.getQuery());
+		assertEquals("queries should be equal", "blah", qr.getQuery());
 
         qr=new QueryRequest((byte)3, 1,"ZZZ", false);		
 		assertEquals("min speeds should be equal", (byte)1, qr.getMinSpeed());
@@ -61,10 +125,15 @@ public final class QueryRequestTest extends com.limegroup.gnutella.util.BaseTest
 
 		assertEquals("queries should be equal", "A", qr.getQuery());
 
-        //String is empty.
-        payload = new byte[2+1];
-        qr = new QueryRequest(new byte[16], (byte)0, (byte)0, payload);
-		assertEquals("queries should be equal", "", qr.getQuery());
+		try {
+			//String is empty.
+			payload = new byte[2+1];
+			qr = new QueryRequest(new byte[16], (byte)0, (byte)0, payload);
+			fail("should not have accepted query");
+			//assertEquals("queries should be equal", "", qr.getQuery());
+		} catch(BadPacketException e) {
+			// this is expected for an empty query
+		}
 	}
 
 
@@ -155,9 +224,14 @@ public final class QueryRequestTest extends com.limegroup.gnutella.util.BaseTest
 					}
 				}
 				baos[i].write(0);
-				QueryRequest qr = new QueryRequest(GUID.makeGuid(), (byte)6, 
-												   (byte)4, 
-												   baos[i].toByteArray());
+				QueryRequest qr = null;
+				try {
+					qr = new QueryRequest(GUID.makeGuid(), (byte)6, 
+										  (byte)4, 
+										  baos[i].toByteArray());
+				} catch(BadPacketException e) {
+					fail("should have accepted query: "+qr);
+				}
 				assertEquals("speeds should be equal", 0, qr.getMinSpeed());
 				assertEquals("queries should be equal", 
 							 HugeTestUtils.QUERY_STRINGS[i], qr.getQuery());
@@ -374,7 +448,7 @@ public final class QueryRequestTest extends com.limegroup.gnutella.util.BaseTest
 
 
 
-    public void testNewMinSpeedUse() {
+    public void testNewMinSpeedUse() throws Exception {
         
         QueryRequest qr = null;
 
@@ -382,8 +456,9 @@ public final class QueryRequestTest extends com.limegroup.gnutella.util.BaseTest
         // --------------------------------------
         //String is empty.
         byte[] payload = new byte[2+1];
-        // these two don't matter....
-        payload[2] = (byte) 0;
+        // these two don't matter....give a query string, otherwise the query
+		// will be rejected
+        payload[2] = (byte) 65;
         payload[1] = (byte) 0;
 
         // not firewalled and not wanting rich, just 10000000
