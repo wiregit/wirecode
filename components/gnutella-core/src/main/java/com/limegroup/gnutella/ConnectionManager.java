@@ -958,6 +958,22 @@ public class ConnectionManager {
     }
     
     /**
+     * return a list of initialized client connection that matches the parameter
+     * String loc.
+     * create a new linkedlist to return.
+     */
+    public List getInitializedClientConnectionsMatchLocale(String loc) {
+    	List matches = new LinkedList();
+        for(Iterator itr= _initializedClientConnections.iterator();
+            itr.hasNext();) {
+            Connection conn = (Connection)itr.next();
+            if(loc.equals(conn.getLocalePref()))
+                matches.add(conn);
+        }          
+        return matches;
+    }
+    
+    /**
      * @requires returned value not modified
      * @effects returns a list of this' initialized connections.  <b>This
      *  exposes the representation of this, but is needed in some cases

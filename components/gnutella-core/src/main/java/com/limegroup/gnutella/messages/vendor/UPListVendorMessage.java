@@ -9,6 +9,7 @@ import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.util.*;
 import com.limegroup.gnutella.connection.*;
 import com.limegroup.gnutella.messages.*;
+import com.limegroup.gnutella.settings.ApplicationSettings;
 
 import com.sun.java.util.collections.*;
 
@@ -82,28 +83,53 @@ public class UPListVendorMessage extends VendorMessage {
 				endpointsLeaf.add(c);
 		}
 		
-		//TODO:when the locale pref stuff gets merged, sort the results by locale pref
-		//and do not randomize
 		//the ping does not carry info about which locale to preference to, so we'll just
 		//preference any locale.  In reality we will probably have only connections only to 
 		//this host's pref'd locale so they will end up in the pong.
 		
-		//then see how many of each kind the client requested, if necessary trim
-		if (request.getNumberUP() != request.ALL && 
+		if (!request.asks4LocaleInfo()) {
+		//do a randomized trim.
+			if (request.getNumberUP() != request.ALL && 
 				request.getNumberUP() < endpointsUP.size()) {
-			//randomized trim
-			int index = (int) Math.floor(Math.random()*
+				//randomized trim
+				int index = (int) Math.floor(Math.random()*
 					(endpointsUP.size()-request.getNumberUP()));
-			endpointsUP = endpointsUP.subList(index,index+request.getNumberUP());
-		}
-		if (request.getNumberLeaves() != request.ALL && 
-				request.getNumberLeaves() < endpointsLeaf.size()) {
-			//randomized trim
-			int index = (int) Math.floor(Math.random()*
+				endpointsUP = endpointsUP.subList(index,index+request.getNumberUP());
+			}
+			if (request.getNumberLeaves() != request.ALL && 
+					request.getNumberLeaves() < endpointsLeaf.size()) {
+				//randomized trim
+				int index = (int) Math.floor(Math.random()*
 					(endpointsLeaf.size()-request.getNumberLeaves()));
-			endpointsLeaf = endpointsLeaf.subList(index,index+request.getNumberLeaves());
+				endpointsLeaf = endpointsLeaf.subList(index,index+request.getNumberLeaves());
+			}
+		} else {
+			String myLocale = ApplicationSettings.LANGUAGE.getValue();
+			
+			//move the connections with the locale pref to the head of the lists
+			//we prioritize these disregarding the other criteria (such as isGoodUltrapeer, etc.)
+			List prefedcons = RouterService.getConnectionManager().
+					getInitializedConnectionsMatchLocale(myLocale);
+			
+			endpointsUP.removeAll(prefedcons);
+			prefedcons.addAll(endpointsUP); 
+			endpointsUP=prefedcons;
+			
+			prefedcons = RouterService.getConnectionManager().
+				getInitializedClientConnectionsMatchLocale(myLocale);
+	
+			endpointsLeaf.removeAll(prefedcons);
+			prefedcons.addAll(endpointsLeaf); 
+			endpointsLeaf=prefedcons;
+			
+			//then trim down to the requested number
+			if (request.getNumberUP() != request.ALL && 
+					request.getNumberUP() < endpointsUP.size())
+				endpointsUP = endpointsUP.subList(0,request.getNumberUP());
+			if (request.getNumberLeaves() != request.ALL && 
+					request.getNumberLeaves() < endpointsLeaf.size())
+				endpointsLeaf = endpointsLeaf.subList(0,request.getNumberLeaves());
 		}
-		
 		
 		//serialize the Endpoints to a byte []
 		int bytesPerResult = 6;
@@ -147,7 +173,8 @@ public class UPListVendorMessage extends VendorMessage {
 			}
 				
 			if (request.asks4LocaleInfo()){
-				//TODO: when locale pref gets merged put the 2-byte language code here
+				//I'm assuming the language code is always 2 bytes, no?
+				System.arraycopy(c.getLocalePref().getBytes(),0,result,index,2);
 				index+=2;
 			}
 			
@@ -175,7 +202,7 @@ public class UPListVendorMessage extends VendorMessage {
     }
 	
 	/**
-	 * see parent comment
+	 * create message with data from network.
 	 */
 	public UPListVendorMessage(byte[] guid, byte ttl, byte hops,
 			 int version, byte[] payload)
@@ -227,18 +254,16 @@ public class UPListVendorMessage extends VendorMessage {
 						" dump of current byte block: "+current);
 			
 			//store the result in an ExtendedEndpoint
-			ExtendedEndpoint result; 
+			ExtendedEndpoint result = new ExtendedEndpoint(combo.getAddress(),combo.getPort()); 
 			
-			if(_connectionTime)  //FIXME: when the locale changes to EE get merged, add a setter rather than doing this 
-				result= new ExtendedEndpoint(combo.getAddress(),
-								combo.getPort(),
-								ByteOrder.leb2short(payload,i+6));
-			else 
-				result= new ExtendedEndpoint(combo.getAddress(),
-						combo.getPort());
+			//add connection lifetime
+			if(_connectionTime)   
+				result.setDailyUptime(ByteOrder.leb2short(payload,i+6));
 			
+			//add locale info.
 			if (_localeInfo) {
-				//add the locale info to the extendedEndpoint
+				String langCode = new String(payload, i+8,2);
+				result.setClientLocale(langCode);
 			}
 			 _ultrapeers.add(result);
 			
