@@ -398,7 +398,7 @@ public final class ServerSideOutOfBandReplyTest extends BaseTestCase {
 
     // tests basic out of band functionality
     // this tests solicited UDP support - it should participate in ACK exchange
-    public void testOutOfBandRequestWithSolicitedSupport() throws Exception {
+    public void testBasicOutOfBandRequest() throws Exception {
         DatagramPacket pack = null;
         // set up solicited UDP support
         {
@@ -476,7 +476,7 @@ public final class ServerSideOutOfBandReplyTest extends BaseTestCase {
         drainAll();
 
         QueryRequest query = 
-            QueryRequest.createOutOfBandQuery("susheel",
+            QueryRequest.createOutOfBandQuery("txt",
                                               InetAddress.getLocalHost().getAddress(),
                                               UDP_ACCESS.getLocalPort());
         query.hop();
@@ -508,7 +508,7 @@ public final class ServerSideOutOfBandReplyTest extends BaseTestCase {
         // make sure the GUID is correct
         assertTrue(Arrays.equals(query.getGUID(), message.getGUID()));
         ReplyNumberVendorMessage reply = (ReplyNumberVendorMessage) message;
-        assertTrue(reply.getNumResults() == 1);
+        assertTrue(reply.getNumResults() == 2);
 
         // ok - we should ACK the ReplyNumberVM
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -520,7 +520,27 @@ public final class ServerSideOutOfBandReplyTest extends BaseTestCase {
                                   pack.getAddress(), pack.getPort());
         UDP_ACCESS.send(pack);
 
-        // now we should get the reply!
+        // now we should get TWO replies, each with one response
+        //1)
+        while (!(message instanceof QueryReply)) {
+            UDP_ACCESS.setSoTimeout(500);
+            pack = new DatagramPacket(new byte[1000], 1000);
+            try {
+                UDP_ACCESS.receive(pack);
+            }
+            catch (IOException bad) {
+                assertTrue("Did not get reply", false);
+            }
+            InputStream in = new ByteArrayInputStream(pack.getData());
+            // as long as we don't get a ClassCastException we are good to go
+            message = Message.read(in);
+        }
+        // make sure this is the correct QR
+        assertTrue(Arrays.equals(message.getGUID(), ack.getGUID()));
+        assertTrue(((QueryReply)message).getResultCount() == 1);
+
+        //2) null out 'message' so we can get the next reply....
+        message = null;
         while (!(message instanceof QueryReply)) {
             UDP_ACCESS.setSoTimeout(500);
             pack = new DatagramPacket(new byte[1000], 1000);
