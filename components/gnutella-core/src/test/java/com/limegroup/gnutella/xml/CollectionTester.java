@@ -45,6 +45,12 @@ public class CollectionTester extends TestCase {
         if (!swing.exists())
             Assert.assertTrue("Could not find necessary file!", false);
         files.clear();
+        Assert.assertTrue("Necessary file nullfile.null cannot be found!",
+                          mason.exists());
+        Assert.assertTrue("Necessary file vader.mp3 cannot be found!",
+                          vader.exists());
+        Assert.assertTrue("Necessary file swing.mp3 cannot be found!",
+                          swing.exists());
         files.add(mason);
         files.add(vader);
         files.add(swing);
@@ -273,6 +279,10 @@ public class CollectionTester extends TestCase {
         File videoFile = new File(fileLocation + "video.collection");
         File newAudio  = new File("lib/xml/data/audio.sxml");
         File newVideo  = new File("lib/xml/data/video.sxml");
+        Assert.assertTrue("Necessary file audio.collection cannot be found!",
+                          audioFile.exists());
+        Assert.assertTrue("Necessary file video.collection cannot be found!",
+                          videoFile.exists());
         audioFile.renameTo(newAudio);
         videoFile.renameTo(newVideo);
     }

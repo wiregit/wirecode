@@ -22,6 +22,8 @@ public class XMLDocSerializerTest extends TestCase {
     }
 
     private void basicTest(File file) {
+        Assert.assertTrue("File " + file + " cannot be found!",
+                          file.exists());
         try {
             LimeXMLReplyCollection.MapSerializer ms =
             new LimeXMLReplyCollection.MapSerializer(file);
