@@ -123,6 +123,7 @@ public class UDPScheduler extends ManagedThread {
          *  Initialize the list of pending event updates
          */
         public UpdateThread() {
+            super("UDPUpdateThread");
             _listSchedule = new ArrayList();
             _listRegister = new ArrayList();
         }
