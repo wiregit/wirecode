@@ -169,6 +169,7 @@ public class Connection {
             //reset the flags
             _isClientConnection = false;
             _isSupernodeConnection = false;
+            _propertiesRead = null;
             //If an outgoing attempt at Gnutella 0.6 failed, and the user
             //has requested we try lower protocol versions, try again.
             if (_negotiate 
