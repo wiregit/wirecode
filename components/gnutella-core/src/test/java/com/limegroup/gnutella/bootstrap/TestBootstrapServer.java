@@ -21,7 +21,9 @@ public class TestBootstrapServer {
      *  @exception IOException this couldn't list on the port */    
     public TestBootstrapServer(int port) throws IOException { 
         setResponse("HTTP/1.0 200 OK");
-        _ss=new ServerSocket(port);
+        _ss=new ServerSocket();
+        _ss.setReuseAddress(true);
+        _ss.bind(new InetSocketAddress(port));
         Thread runner=new RunnerThread();
         runner.start();
     }
