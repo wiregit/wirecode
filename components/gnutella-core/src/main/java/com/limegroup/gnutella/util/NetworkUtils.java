@@ -45,7 +45,18 @@ public final class NetworkUtils {
      */
     public static boolean isValidAddress(InetAddress addr) {
         return isValidAddress(addr.getAddress());
-    }       
+    }
+    
+    /**
+     * Returns whether or not the specified host is a valid address.
+     */
+    public static boolean isValidAddress(String host) {
+        try {
+            return isValidAddress(InetAddress.getByName(host));
+        } catch(UnknownHostException uhe) {
+            return false;
+        }
+    }
 	
 	/**
 	 * Returns whether or not the supplied address is a local address.
@@ -151,14 +162,18 @@ public final class NetworkUtils {
      * address is private.  Delegates to 
      * <tt>isPrivateAddress(byte[] address)</tt>.
      *
+     * Returns true if the host is unknown.
+     *
      * @return <tt>true</tt> if the specified address is private,
      *  otherwise <tt>false</tt>
-     * @throws <tt>UnknownHostException</tt> if the address is 
-     *  unknown in the <tt>InetAddress</tt> lookup
      */
-    public static boolean isPrivateAddress(String address) 
-        throws UnknownHostException {
-        return isPrivateAddress(InetAddress.getByName(address).getAddress());
+    public static boolean isPrivateAddress(String address) {
+        try {
+            return isPrivateAddress(
+                InetAddress.getByName(address).getAddress());
+        } catch(UnknownHostException uhe) {
+            return true;
+        }
     }
 
     /** 
