@@ -831,9 +831,7 @@ public class RouterService {
                 OutOfBandThroughputStat.OOB_QUERIES_SENT.incrementStat();
             }
             else
-                qr = QueryRequest.createQuery(guid, 
-                                              query, 
-                                              richQuery);
+                qr = QueryRequest.createQuery(guid, query, richQuery, type);
 			verifier.record(qr, type);
             RESULT_HANDLER.addQuery(qr); // so we can leaf guide....
 			router.sendDynamicQuery(qr);

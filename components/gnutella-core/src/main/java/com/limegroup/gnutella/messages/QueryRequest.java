@@ -561,6 +561,46 @@ public class QueryRequest extends Message implements Serializable{
 	}
 
 	/**
+	 * Creates a new query with the specified guid, query string, and
+	 * xml query string.
+	 *
+	 * @param guid the message GUID for the query
+	 * @param query the query string
+	 * @param xmlQuery the xml query string
+	 * @return a new <tt>QueryRequest</tt> for the specified query, xml
+	 *  query, and guid
+	 * @throws <tt>NullPointerException</tt> if the <tt>query</tt> argument
+	 *  is <tt>null</tt>, if the <tt>xmlQuery</tt> argument is <tt>null</tt>,
+	 *  or if the <tt>guid</tt> argument is <tt>null</tt>
+	 * @throws <tt>IllegalArgumentException</tt> if the guid length is
+	 *  not 16, if both the query strings are empty, or if the XML does
+	 *  not appear to be valid
+	 */
+	public static QueryRequest createQuery(byte[] guid, String query, 
+										   String xmlQuery, MediaType type) {
+        query = I18NConvert.instance().getNorm(query);
+		if(guid == null) {
+			throw new NullPointerException("null guid");
+		}
+		if(guid.length != 16) {
+			throw new IllegalArgumentException("invalid guid length");
+		}
+        if(query == null) {
+            throw new NullPointerException("null query");
+        }
+        if(xmlQuery == null) {
+            throw new NullPointerException("null xml query");
+        }
+		if(query.length() == 0 && xmlQuery.length() == 0) {
+			throw new IllegalArgumentException("empty query");
+		}
+		if(xmlQuery.length() != 0 && !xmlQuery.startsWith("<?xml")) {
+			throw new IllegalArgumentException("invalid XML");
+		}
+		return new QueryRequest(guid, DEFAULT_TTL, query, xmlQuery, type);
+	}
+
+	/**
 	 * Creates a new query from the existing query with the specified
 	 * ttl.
 	 *
@@ -812,6 +852,21 @@ public class QueryRequest extends Message implements Serializable{
         this(guid, ttl, query, richQuery, UrnType.ANY_TYPE_SET, EMPTY_SET, null,
 			 !RouterService.acceptedIncomingConnection(), Message.N_UNKNOWN,
              false, 0, false, 0);
+    }
+
+    /**
+     * Builds a new query from scratch, with metadata, using the given GUID.
+     * Whether or not this is a repeat query is encoded in guid.  GUID must have
+     * been created via newQueryGUID; this allows the caller to match up
+     * results.
+     *
+     * @requires 0<=minSpeed<2^16 (i.e., can fit in 2 unsigned bytes) 
+     */
+    private QueryRequest(byte[] guid, byte ttl, String query, String richQuery,
+                         MediaType type) {
+        this(guid, ttl, query, richQuery, UrnType.ANY_TYPE_SET, EMPTY_SET, null,
+			 !RouterService.acceptedIncomingConnection(), Message.N_UNKNOWN,
+             false, 0, false, getMetaFlag(type));
     }
 
     /**
