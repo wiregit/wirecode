@@ -6,8 +6,6 @@ import java.io.*;
 
 import com.limegroup.gnutella.settings.*;
 import com.limegroup.gnutella.*;
-import com.limegroup.gnutella.stubs.*;
-
 import com.limegroup.gnutella.messages.*;
 import com.limegroup.gnutella.routing.*;
 
@@ -84,7 +82,7 @@ public class BaseTestCase extends AssertComparisons implements ErrorCallback {
         TestSuite suite = new LimeTestSuite();
         LimeTestSuite.setTestClass(cls);
         for (int ii = 0; ii < tests.length; ii++) {
-            suite.addTest(suite.createTest(cls, tests[ii]));
+            suite.addTest(TestSuite.createTest(cls, tests[ii]));
         }
         suite.addTest(warning("Warning - Full test suite has not been run."));
         return suite;
@@ -467,7 +465,7 @@ public class BaseTestCase extends AssertComparisons implements ErrorCallback {
         boolean ret=false;
         for(int i = 0; i < 100; i++) {
             try {
-                Message m = c.receive(timeout);
+                c.receive(timeout);
                 ret = true;
                 i = 0;
             } catch (InterruptedIOException e) {
