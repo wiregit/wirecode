@@ -46,6 +46,9 @@ public interface ActivityCallback
      */
     public void handleQueryString( String query );
 
+    /** Add a file to the download window */
+    public void addDownload();
+
     /**
      * A miscellaneous error not fitting in any other category.
      */
