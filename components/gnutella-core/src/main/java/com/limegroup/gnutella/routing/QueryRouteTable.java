@@ -1,6 +1,7 @@
 package com.limegroup.gnutella.routing;
 
 import com.limegroup.gnutella.*;
+import com.limegroup.gnutella.util.Utilities;
 import com.limegroup.gnutella.xml.*;
 import com.sun.java.util.collections.*;
 import java.util.zip.*;
@@ -92,7 +93,7 @@ public class QueryRouteTable {
      */
     public boolean contains(QueryRequest qr) {
         int ttl=qr.getTTL();
-        byte bits=log2(table.length);
+        byte bits=Utilities.log2(table.length);
 
         //1. First we check that all the normal keywords of qr are in the route
         //   table.  Note that this is done with zero allocations!  Also note
@@ -174,15 +175,6 @@ public class QueryRouteTable {
     private final boolean contains(int hash, int ttl) {
         return table[hash]<=ttl && table[hash]<infinity;
     }
-
-    /**
-     * @requires num be a power of 2.
-     */
-    private static byte log2(int num)
-    {
-        //TODO: can do this more efficiently through bit operations
-        return (byte)(Math.log(num)/Math.log(2));
-    }
     
     /**
      * For all keywords k in filename, adds <k, 1> to this.
@@ -199,7 +191,8 @@ public class QueryRouteTable {
         String[] words=HashFunction.keywords(filename);
         String[] keywords=HashFunction.getPrefixes(words);
         for (int i=0; i<keywords.length; i++) {
-            int hash=HashFunction.hash(keywords[i], log2(table.length));
+            int hash=HashFunction.hash(keywords[i], 
+                                       Utilities.log2(table.length));
             if (ttl<table[hash]) {
                 if (table[hash]>=infinity)
                     entries++;  //added new entry
@@ -211,7 +204,8 @@ public class QueryRouteTable {
 
     public void addIndivisible(String iString) {
         final int ttl = 1;
-        final int hash = HashFunction.hash(iString, log2(table.length));
+        final int hash = HashFunction.hash(iString, 
+                                           Utilities.log2(table.length));
         if (ttl < table[hash]) {
             if (table[hash] >= infinity)
                 entries++;  //added new entry
