@@ -27,9 +27,13 @@ public class MessagesSupportedVendorMessageTest extends TestCase {
         try {
             MessagesSupportedVendorMessage vmp = 
                 MessagesSupportedVendorMessage.instance();
-            assertTrue(vmp.supportsTCPConnectBack() > -1);
-            assertTrue(vmp.supportsUDPConnectBack() > -1);
-            assertTrue(vmp.supportsHopsFlow() > -1);
+            assertTrue(vmp.supportsTCPConnectBack() > 0);
+            assertTrue(vmp.supportsUDPConnectBack() > 0);
+            assertTrue(vmp.supportsHopsFlow() > 0);
+            assertTrue(vmp.supportsMessage("BEAR".getBytes(),7) > 0);
+            assertTrue(vmp.supportsMessage("BEAR".getBytes(),4) > 0);
+            assertTrue(vmp.supportsMessage("GTKG".getBytes(),7) > 0);
+                                                 
         
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             vmp.write(baos);
@@ -38,9 +42,12 @@ public class MessagesSupportedVendorMessageTest extends TestCase {
             MessagesSupportedVendorMessage vmpRead = 
                 (MessagesSupportedVendorMessage) Message.read(bais);
             assertTrue(vmp.equals(vmpRead));
-            assertTrue(vmpRead.supportsTCPConnectBack() > -1);
-            assertTrue(vmpRead.supportsUDPConnectBack() > -1);
-            assertTrue(vmpRead.supportsHopsFlow() > -1);
+            assertTrue(vmpRead.supportsTCPConnectBack() > 0);
+            assertTrue(vmpRead.supportsUDPConnectBack() > 0);
+            assertTrue(vmpRead.supportsHopsFlow() > 0);
+            assertTrue(vmp.supportsMessage("BEAR".getBytes(),7) > 0);
+            assertTrue(vmp.supportsMessage("BEAR".getBytes(),4) > 0);
+            assertTrue(vmp.supportsMessage("GTKG".getBytes(),7) > 0);
         }
         catch (Exception noway) {
             assertTrue(false);
