@@ -77,7 +77,7 @@ public final class UltrapeerQueryRouteTableTest extends BaseTestCase {
             CALLBACK, MESSAGE_ROUTER, FMAN);
         ROUTER_SERVICE.start();
         
-        RouterService.connectToHostAsynchronously("localhost", Backend.PORT);    
+        RouterService.connectToHostAsynchronously("localhost", Backend.BACKEND_PORT);    
         Thread.sleep(3000);
         assertTrue("should be connected", RouterService.isConnected());
     }

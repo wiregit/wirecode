@@ -157,7 +157,7 @@ public class ConnectionManagerTest extends com.limegroup.gnutella.util.BaseTestC
      * Test to make sure that a good host is successfully connected to.
      */
     public void testGoodHost() {
-        CATCHER.endpoint = new Endpoint("localhost", Backend.PORT);
+        CATCHER.endpoint = new Endpoint("localhost", Backend.BACKEND_PORT);
         
         RouterService.connect();
         sleep();
