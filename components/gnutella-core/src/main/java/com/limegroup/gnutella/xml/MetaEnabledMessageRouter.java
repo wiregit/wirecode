@@ -16,7 +16,7 @@ public class MetaEnabledMessageRouter extends StandardMessageRouter {
     }
   
 
-    private final boolean debugOn = true;
+    private final boolean debugOn = false;
     private void debug(String out) {
         if (debugOn)
             System.out.println(out);
