@@ -73,7 +73,6 @@ public class RichQueryHandler{
         long index=-1;
         long size=-1;
         String name="";
-        String metadata="";
         int z =0;
         boolean valid = true;
         debug("RQH.query(): # of resps = " + s);
