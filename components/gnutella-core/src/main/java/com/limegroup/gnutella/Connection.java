@@ -1775,6 +1775,9 @@ public class Connection {
 		return _headers.supportsGGEP();
     }
 
+    public void sendVendorMessage(VendorMessage vm) throws IOException {
+        send(vm);
+    }
 
     /** True if the remote host supports query routing (QRP).  This is only 
      *  meaningful in the context of leaf-ultrapeer relationships. */

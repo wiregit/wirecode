@@ -4,6 +4,7 @@ import com.limegroup.gnutella.messages.*;
 import com.limegroup.gnutella.util.*;
 import com.limegroup.gnutella.search.*;
 import com.limegroup.gnutella.settings.*;
+import com.limegroup.gnutella.messages.vendor.*;
 import com.sun.java.util.collections.*;
 import java.net.*;
 
@@ -262,6 +263,10 @@ public final class ForMeReplyHandler implements ReplyHandler {
             // may want to do something else here if we ever use this!
             return null;
         }
+    }
+    
+    public void sendVendorMessage(VendorMessage vm) {
+        Assert.that(false, "ForMeReplyHandler asked to send vendor message");
     }
 
     /**

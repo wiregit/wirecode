@@ -2,6 +2,8 @@ package com.limegroup.gnutella;
 
 import com.limegroup.gnutella.messages.*;
 import com.sun.java.util.collections.*;
+import com.limegroup.gnutella.messages.vendor.*;
+import java.io.*;
 import java.net.*;
 
 /**
@@ -150,4 +152,10 @@ public interface ReplyHandler {
      *  enough to be considered "stable"
      */
     boolean isStable();
+
+    /**
+     * Sends the VendorMessage using this ReplyHandler
+     */ 
+    public void sendVendorMessage(VendorMessage vm) throws IOException;
+
 }

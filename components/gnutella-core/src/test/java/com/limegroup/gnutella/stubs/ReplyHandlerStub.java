@@ -2,6 +2,7 @@ package com.limegroup.gnutella.stubs;
 
 import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.messages.*;
+import com.limegroup.gnutella.messages.vendor.*;
 import com.sun.java.util.collections.*;
 import java.net.*;
 
@@ -81,6 +82,8 @@ public class ReplyHandlerStub implements ReplyHandler {
             return null;
         }
     }
+
+    public void sendVendorMessage(VendorMessage vm) { }
 
     public boolean isStable() {
         return true;

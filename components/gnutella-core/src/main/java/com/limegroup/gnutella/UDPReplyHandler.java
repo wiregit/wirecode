@@ -1,6 +1,7 @@
 package com.limegroup.gnutella;
 
 import com.limegroup.gnutella.messages.*;
+import com.limegroup.gnutella.messages.vendor.*;
 import com.limegroup.gnutella.util.*;
 import com.limegroup.gnutella.statistics.*;
 import com.sun.java.util.collections.*;
@@ -219,6 +220,15 @@ public final class UDPReplyHandler implements ReplyHandler {
     public boolean allowNewPings() {
         return true;
     }
+
+    /**
+     * sends a Vendor Message to the host/port in this reply handler by UDP
+     * datagram.
+     */
+    public void sendVendorMessage(VendorMessage vm) throws IOException {        
+        UDPService.instance().send(vm, IP, PORT);
+    }
+    
 
 
     // inherit doc comment

@@ -21,12 +21,11 @@ public class StatisticVendorMessage extends VendorMessage {
                                                      throws BadPacketException {
         super(guid, ttl, hops, F_LIME_VENDOR_ID, F_GIVE_STATS, version,
               payload);
-        //TODO: write the payload out to a file.
     }
 
     /**
      * Constructor to make a StatisticVendorMessage in response to a
-     * GiveStatisticsVendorMessage
+     * GiveStatisticsVendorMessage. This is an outgoing StatisticVendorMessage
      */
     public StatisticVendorMessage(GiveStatsVendorMessage giveStatVM) 
                                                   throws BadPacketException {
