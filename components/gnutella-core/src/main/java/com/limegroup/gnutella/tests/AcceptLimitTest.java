@@ -59,6 +59,7 @@ public class AcceptLimitTest {
         settings.setEverSupernodeCapable(true);
         settings.setDisableSupernodeMode(false);
         settings.setMaxShieldedClientConnections(LEAF_CONNECTIONS);
+        settings.setKeepAlive(KEEP_ALIVE);
         ActivityCallback callback=new ActivityCallbackStub();
         FileManager files=new FileManagerStub();
         TestMessageRouter router=new TestMessageRouter(callback, files);
@@ -266,6 +267,10 @@ public class AcceptLimitTest {
             try {
                 ret=connect(host, port, type);
             } catch (IOException e) {
+                e.printStackTrace();
+                if (e instanceof NoGnutellaOkException) {
+                    System.out.println("Code: "+((NoGnutellaOkException)e).getCode());
+                }
                 Assert.that(false, "Connection "+i+" disallowed");
             }
             buffer.add(ret);
