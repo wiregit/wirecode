@@ -176,8 +176,13 @@ public class UpdateHandler {
         long random = Math.abs(new Random().nextLong() % delay);
         long timestamp = uc.getTimestamp();
         long then = timestamp + random;
+        long threeDays = 1000 * 60 * 60 * 24 * 3;
         final int id = uc.getId();
-        if(now < then) {
+        // If now is before the time we can show it, 
+        // or the time on the computer is hopelessly off, 
+        // that being three days before the timestamp, where the timestamp
+        // is supposed to be the current time of publishing, then delay. 
+        if(now < then && !(fromDisk && now+threeDays < timestamp)) {
             if(LOG.isInfoEnabled())
                 LOG.info("Delaying Update." +
                          "\nNow    : " + now + 
