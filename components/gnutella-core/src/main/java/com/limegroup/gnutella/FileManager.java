@@ -40,7 +40,10 @@ public class FileManager {
      * Likewise for all i, for all k in _files[i]._path, _index.get(k)
      * contains i. */
     private Trie /* String -> IntSet  */ _index;
-
+    /** an index mapping appropriately case-normalized URN strings to
+     * the indices in _files.  */
+    private Hashtable /* String -> IntSet  */ _urnIndex;
+    
     /** The set of extensions to share, sorted by StringComparator. 
      *  INVARIANT: all extensions are lower case. */
     private Set /* of String */ _extensions;
@@ -102,6 +105,7 @@ public class FileManager {
         _numFiles = 0;
         _files = new ArrayList();
         _index = new Trie(true);  //ignore case
+        _urnIndex = new Hashtable();
         _extensions = new TreeSet(new StringComparator());
         _sharedDirectories = new TreeMap(new FileComparator());
     }
@@ -142,6 +146,29 @@ public class FileManager {
         if (ret==null)
             throw new IndexOutOfBoundsException();
         return ret;
+    }
+
+   /**
+     * Returns the FileDesc matching the passed-in path and size, if any,
+     * null otherwise. Kind of silly, definitely inefficient, but only
+     * needed rarely, from library view, because there's no sharing of
+     * data structures for local files
+     */
+    public FileDesc getFileDescMatching(String path, int size) {
+        // linear probe. thankfully it's rare
+        Iterator iter = _files.iterator();
+        while(iter.hasNext()) {
+            FileDesc candidate = (FileDesc)iter.next();
+            if (candidate==null) continue;
+            // do quicker check first
+            if (size!=candidate._size) continue;
+            if (path.equals(candidate._path)) {
+                // bingo
+                return candidate;
+            }
+        }
+        // none found
+        return null;
     }
 
 
@@ -542,10 +569,11 @@ public class FileManager {
             long n = file.length();  
             if (n>Integer.MAX_VALUE || n<0)
                 return false;
-            _size += n;                    
-            _files.add(new FileDesc(_files.size(), name, path,  (int)n));
+            _size += n;
+            int fileIndex = _files.size();
+            FileDesc fileDesc = new FileDesc(fileIndex, name, path,  (int)n);
+            _files.add(fileDesc);
             _numFiles++;
-            int j=_files.size()-1;              //this' index
 
             //Register this file with its parent directory.
             File parent=getParentFile(file);
@@ -553,8 +581,8 @@ public class FileManager {
             IntSet siblings=(IntSet)_sharedDirectories.get(parent);
             Assert.that(siblings!=null,
                 "Add directory \""+parent+"\" not in "+_sharedDirectories);
-            boolean added=siblings.add(j);
-            Assert.that(added, "File "+j+" already found in "+siblings);
+            boolean added=siblings.add(fileIndex);
+            Assert.that(added, "File "+fileIndex+" already found in "+siblings);
             if (_callback!=null)
                 _callback.addSharedFile(file, parent);
 
@@ -569,14 +597,69 @@ public class FileManager {
                     indices=new IntSet();
                     _index.add(keyword, indices);
                 }
-                //Add j to the set.
-                indices.add(j);
+                //Add fileIndex to the set.
+                indices.add(fileIndex);
             }
+            
+            // Ensure file can be found by URN lookups
+            updateUrnIndex(fileDesc);
+            if(fileDesc.shouldCalculateUrns()) {
+                // more URNs available if we can wait; background it
+                backgroundCalculateAndUpdate(fileDesc);
+            }
+            
             return true;
         }
         return false;
     }
 
+    /**
+     * @modifies this
+     * @effects enters the given FileDesc into the _urnIndex under all its 
+     * reported URNs
+     */
+    private synchronized void updateUrnIndex(FileDesc fileDesc) {
+        if (fileDesc._urns != null) {
+            Iterator iter = fileDesc._urns.iterator();
+            while (iter.hasNext()) {
+                String urn = (String)iter.next();
+                IntSet indices=(IntSet)_urnIndex.get(urn);
+                if (indices==null) {
+                    indices=new IntSet();
+                    _urnIndex.put(urn, indices);
+                }
+                indices.add(fileDesc._index);
+            }
+        }
+    }
+    
+    //
+    // Support for calculation of hash urns in the background
+    // 
+    private Thread backgrounder;
+    private Vector pendingFileDescs = new Vector() /* of FileDesc */;
+    private void backgroundCalculateAndUpdate(FileDesc fileDesc) {
+        // add to the queue
+        pendingFileDescs.add(fileDesc);
+        // spwan thread if it isn't already working
+        if(backgrounder==null || !backgrounder.isAlive()) {
+            backgrounder = new Thread() 
+                {
+                    public void run() {
+                        // keep chugging as long as queue is filled
+                        while(!pendingFileDescs.isEmpty()) {
+                            FileDesc fd = (FileDesc)pendingFileDescs.elementAt(0);
+                            pendingFileDescs.removeElementAt(0);
+                            fd.calculateUrns();
+                            updateUrnIndex(fd);
+                        }
+                    }
+                };
+            backgrounder.setPriority(Thread.currentThread().getPriority()-1);
+            backgrounder.start();
+        }
+
+    }
 
     /**
      * @modifies this
@@ -775,7 +858,7 @@ public class FileManager {
                     continue;                    
                 Assert.that(j<ret.length,
                             "_numFiles is too small");
-                Response r=new Response(desc._index, desc._size, desc._name);
+                Response r= desc.responseFor(request);
                 ret[j]=r;
                 j++;
             }
@@ -787,7 +870,13 @@ public class FileManager {
         //Normal case: query the index to find all matches.  TODO: this
         //sometimes returns more results (>255) than we actually send out.
         //That's wasted work.
-        IntSet matches = search(str);
+        IntSet matches = null;
+        matches = search( str,
+                          matches);
+        if ( request.getQueryUrns()!=null ) {
+            matches = urnSearch(request.getQueryUrns().iterator(),matches);
+        }
+        
         if (matches==null)
             return null;
 
@@ -798,7 +887,7 @@ public class FileManager {
                  j++) {            
             int i=iter.next();
             FileDesc desc = (FileDesc)_files.get(i);
-            response[j] = new Response(desc._index, desc._size, desc._name);
+            response[j] = desc.responseFor(request);
         }
         return response;
     }
@@ -822,11 +911,11 @@ public class FileManager {
      * matching.  The caller of this method must not mutate the returned
      * value.
      */
-    protected IntSet search(String query) {
+    protected IntSet search(String query, IntSet priors) {
         //As an optimization, we lazily allocate all sets in case there are no
         //matches.  TODO2: we can avoid allocating sets when getPrefixedBy
         //returns an iterator of one element and there is only one keyword.
-        IntSet ret=null;
+        IntSet ret=priors;
 
         //For each keyword in the query....  (Note that we avoid calling
         //StringUtils.split and take advantage of Trie's offset/limit feature.)
@@ -879,6 +968,38 @@ public class FileManager {
             return null;
         else 
             return ret;
+    }
+    
+    /**
+     * Find all files with matching full URNs
+     */
+    protected IntSet urnSearch(Iterator urnsIter,IntSet priors) {
+        IntSet ret = priors;
+        while(urnsIter.hasNext()) {
+            String urn = (String)urnsIter.next();
+            // TODO (eventually): case-normalize URNs as appropriate
+            // for now, though, prevalent practice is same as local: 
+            // lowercase "urn:<type>:", uppercase Base32 SHA1
+            IntSet hits = (IntSet)_urnIndex.get(urn);
+            if(hits!=null) {
+                // double-check hits to ensure they're still valid
+                IntSet.IntSetIterator iter = hits.iterator();
+                while(iter.hasNext()) {
+                    FileDesc fd = (FileDesc)_files.get(iter.next());
+                    if(fd.satisfiesUrn(urn)) {
+                        // still valid
+                        if(ret==null) ret = new IntSet();
+                        ret.add(fd._index);
+                    } else {
+                        // was invalid; consider rehashing
+                        if(fd.shouldCalculateUrns()) {
+                            backgroundCalculateAndUpdate(fd);
+                        }
+                    }
+                }
+            }
+        }
+        return ret;
     }
     
     /**

@@ -425,6 +425,9 @@ public class RouterService
         
         //save cookies
         Cookies.instance().save();
+        
+        //persist urn cache
+        FileDesc.persistCache();
     }
 
     /**
@@ -658,8 +661,13 @@ public class RouterService
         //figure out
         //anu creating rich query (by duplicating the normal query into
         //both plain and rich areas
+        
+        // per HUGE v0.93, ask for any available URNs on responses
+        HashSet reqUrns = new HashSet();
+        reqUrns.add("urn:");
+
         QueryRequest qr=new QueryRequest(SettingsManager.instance().getTTL(),
-                                         minSpeed, query);
+                                         minSpeed, query, null, false, reqUrns, null);
         verifier.record(qr, type);
         router.broadcastQueryRequest(qr);
         return qr.getGUID();
@@ -677,8 +685,13 @@ public class RouterService
     public byte[] query(String query, String richQuery, 
                         int minSpeed, MediaType type) {
         //System.out.println("Sumeet rich query coming...");
+                            
+        // per HUGE v0.93, ask for URNs on responses
+        HashSet reqUrns = new HashSet();
+        reqUrns.add("urn:");
+
         QueryRequest qr=new QueryRequest(SettingsManager.instance().getTTL(),
-                                         minSpeed, query, richQuery);
+                                         minSpeed, query, richQuery, false, reqUrns, null);
         verifier.record(qr, type);
         router.broadcastQueryRequest(qr);
         /* 

@@ -1,6 +1,8 @@
 package com.limegroup.gnutella;
 
 import java.util.StringTokenizer;
+import java.io.*;
+import com.sun.java.util.collections.*;
 
 /**
  * A single result from a query reply message.
@@ -24,6 +26,12 @@ public class Response {
 
     private byte[] metaBytes;
 
+    /** Per HUGE v0.93 proposal, urns includes returned urn-values
+     */
+    private HashSet urns;
+    // HUGE v.093 GeneralExtensionMechanism between-the-null extensions
+    private byte[] extBytes;
+    
     /** Creates a fresh new response.
      *
      * @requires index and size can fit in 4 unsigned bytes, i.e.,
@@ -66,70 +74,182 @@ public class Response {
      * be converted into a LimeXMLDocument
      */
     public Response(String betweenNulls, long index, long size, String name){
-        Assert.that((index & 0xFFFFFFFF00000000l)==0,
-                    "Response constructor: index too big!");
-        Assert.that((size &  0xFFFFFFFF00000000l)==0,
-                    "Response constructor: size too big!");
-        //create an XML string out of the data between the nulls
-        //System.out.println("Between nulls is "+betweenNulls);
-        String length="";
-        String bitrate="";
-        String first="";
-        String second="";
-        StringTokenizer tok = new StringTokenizer(betweenNulls);
-        try{
-            first = tok.nextToken();
-            second = tok.nextToken();
-        }catch(Exception e){//If I catch an exception, all bets are off.
-            first="";
-            second="";
-            betweenNulls="";
+        this(index,size,name,""); // reuse standard constructor
+        //now handle between-the-nulls
+        StringTokenizer stok = new StringTokenizer(betweenNulls,"\u001c"); // HUGE v0.93 GEM delimiter
+        while(stok.hasMoreTokens()) {
+            this.handleLegacyOrGemExtensionString(stok.nextToken());
         }
-        boolean bearShare1 = false;        
-        boolean bearShare2 = false;
-        boolean gnotella = false;
-        if(second.startsWith("kbps"))
-            bearShare1 = true;
-        else if (first.endsWith("kbps"))
-            bearShare2 = true;
-        if(bearShare1){
-            bitrate = first;
+    }
+    
+    protected void handleLegacyOrGemExtensionString(String ext) {      
+        if (ext.startsWith("urn:")||ext.startsWith("URN:")) {
+            // it's a HUGE v0.93 URN name for the same files
+            if (urns == null) urns = new HashSet();
+            addUrn(ext);
+        } else {
+            // it's legacy between-the-nulls gump
+            //create an XML string out of the data between the nulls
+            String length="";
+            String bitrate="";
+            String first="";
+            String second="";
+            StringTokenizer tok = new StringTokenizer(ext);
+            try{
+                first = tok.nextToken();
+                second = tok.nextToken();
+            }catch(Exception e){//If I catch an exception, all bets are off.
+                first="";
+                second="";
+            }
+            boolean bearShare1 = false;        
+            boolean bearShare2 = false;
+            boolean gnotella = false;
+            if(second.startsWith("kbps"))
+                bearShare1 = true;
+            else if (first.endsWith("kbps"))
+                bearShare2 = true;
+            if(bearShare1){
+                bitrate = first;
+            }
+            else if (bearShare2){
+                int j = first.indexOf("kbps");
+                bitrate = first.substring(0,j);
+            }
+            if(bearShare1 || bearShare2){
+                while(tok.hasMoreTokens())
+                    length=tok.nextToken();
+                //OK we have the bitrate and the length
+            }
+            else if (ext.endsWith("kHz")){//Gnotella
+                gnotella = true;
+                length=first;
+                //extract the bitrate from second
+                int i=second.indexOf("kbps");
+                if(i>-1)//see if we can find the bitrate                
+                    bitrate = second.substring(0,i);
+                else//not gnotella, after all...some other format we do not know
+                    gnotella=false;
+            }
+            if(bearShare1 || bearShare2 || gnotella){//some metadata we understand
+                this.metadata = "<audios xsi:noNamespaceSchemaLocation="+
+                     "\"http://www.limewire.com/schemas/audio.xsd\">"+
+                     "<audio title=\""+name+"\" bitrate=\""+bitrate+
+                     "\" seconds=\""+length+"\">"+
+                     "</audio></audios>";
+                this.metaBytes=metadata.getBytes();
+            }
+            else{
+                this.metadata= "";
+                this.metaBytes = metadata.getBytes();
+            }
+            this.index=index;
+            this.size=size;
+            this.name=name;
+            this.nameBytes = name.getBytes(); 
         }
-        else if (bearShare2){
-            int j = first.indexOf("kbps");
-            bitrate = first.substring(0,j);
+    }
+
+    /**
+     * write as if inside a QueryReply
+     */
+    public int writeToArray(byte[] array, int i) {
+        ByteOrder.int2leb((int)index,array,i);
+        ByteOrder.int2leb((int)size,array,i+4);
+        i+=8;            
+        System.arraycopy(nameBytes, 0, array, i, nameBytes.length);
+        i+=nameBytes.length;
+        //Write first null terminator.
+        array[i++]=(byte)0;
+        // write HUGE v0.93 General Extension Mechanism extensions
+        // (currently just URNs)
+        if (urns != null) {
+            updateExtBytes();
+            System.arraycopy(extBytes, 0, array, i, extBytes.length);
+            i+=extBytes.length;
         }
-        if(bearShare1 || bearShare2){
-            while(tok.hasMoreTokens())
-                length=tok.nextToken();
-            //OK we have the bitrate and the length
+        //add the second null terminator
+        array[i++]=(byte)0;
+        return i;
+    }
+    
+    protected void updateExtBytes() {
+        if (extBytes != null) {
+            // already up-to-date
+            return;
         }
-        else if (betweenNulls.endsWith("kHz")){//Gnotella
-            gnotella = true;
-            length=first;
-            //extract the bitrate from second
-            int i=second.indexOf("kbps");
-            if(i>-1)//see if we can find the bitrate                
-                bitrate = second.substring(0,i);
-            else//not gnotella, after all...some other format we do not know
-                gnotella=false;
+        try {
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            if (urns != null ) {
+                Iterator iter = urns.iterator();
+                while (iter.hasNext()) {
+                    String urn = (String)iter.next();
+                    baos.write(urn.getBytes());
+                    if (iter.hasNext()) {
+                        baos.write(0x1c);
+                    }
+                }
+            }
+            extBytes = baos.toByteArray();
+        } catch (IOException ioe) {
+            System.out.println("Response.updateExtBytes() IOException");
+            extBytes = new byte[0];
         }
-        if(bearShare1 || bearShare2 || gnotella){//some metadata we understand
-            this.metadata = "<audios xsi:noNamespaceSchemaLocation="+
-                 "\"http://www.limewire.com/schemas/audio.xsd\">"+
-                 "<audio title=\""+name+"\" bitrate=\""+bitrate+
-                 "\" seconds=\""+length+"\">"+
-                 "</audio></audios>";
-            this.metaBytes=metadata.getBytes();
+    }
+    
+    /**
+     */
+    public int getLength() {
+        // must match same number of bytes writeToArray() will write
+        updateExtBytes();
+        return 8 +                   // index and size
+               nameBytes.length +
+               1 +                   // null
+               extBytes.length +
+               1;                    // final null
+    }
+    
+    /**
+     * utility function for instantiating individual responses from inputstream
+     */
+    public static Response readFromStream(InputStream is) throws IOException {
+        // extract file index & size
+        long index=ByteOrder.ubytes2long(ByteOrder.leb2int(is));
+        long size=ByteOrder.ubytes2long(ByteOrder.leb2int(is));
+
+        //The file name is terminated by a null terminator.  
+        // A second null indicates the end of this response.
+        // Gnotella & others insert meta-information between
+        // these null characters.  So we have to handle this.
+        // See http://gnutelladev.wego.com/go/
+        //         wego.discussion.message?groupId=139406&
+        //         view=message&curMsgId=319258&discId=140845&
+        //         index=-1&action=view
+
+        // Extract the filename
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        int c;
+        while((c=is.read())!=0) {
+            baos.write(c);
         }
-        else{
-            this.metadata= "";
-            this.metaBytes = metadata.getBytes();
+        String name=new String(baos.toByteArray());
+
+        // Extract extra info, if any
+        baos.reset();
+        while((c=is.read())!=0) {
+            baos.write(c);
         }
-        this.index=index;
-        this.size=size;
-        this.name=name;
-        this.nameBytes = name.getBytes(); 
+        String betweenNulls=new String(baos.toByteArray());
+        if(betweenNulls==null || betweenNulls.equals("")) {
+            return new Response(index,size,name);
+        } else {
+            return new Response(betweenNulls,index,size,name);
+        }
+    }
+    
+    public void addUrn(String urn){
+        if (urns == null) urns = new HashSet();
+        urns.add(urn);
     }
 
     /**
@@ -181,7 +301,10 @@ public class Response {
 		return metadata;
 	}
 
-    
+    public HashSet getUrns() {
+            return urns;
+    }
+  
     /**
      * returns true if metadata is not XML, but ToadNode's response
 
