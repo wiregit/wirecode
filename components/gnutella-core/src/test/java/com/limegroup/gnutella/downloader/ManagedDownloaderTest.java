@@ -39,10 +39,6 @@ public class ManagedDownloaderTest extends com.limegroup.gnutella.util.BaseTestC
     }
     
     public static void globalSetUp() throws Exception{
-        PrivilegedAccessor.setValue(RouterService.getAcceptor(),
-                "_acceptedIncoming",new Boolean(true));
-        assertTrue(RouterService.acceptedIncomingConnection());
-        
         ConnectionManagerStub cmStub = new ConnectionManagerStub() {
             public boolean isConnected() {
                 return true;
@@ -71,6 +67,10 @@ public class ManagedDownloaderTest extends com.limegroup.gnutella.util.BaseTestC
      */
     public void testFirewalledLocs() throws Exception {
     	
+        PrivilegedAccessor.setValue(RouterService.getAcceptor(),
+                "_acceptedIncoming",new Boolean(true));
+        assertTrue(RouterService.acceptedIncomingConnection());
+        
     	//first make sure we are sharing an incomplete file
     	
     	URN partialURN = 
@@ -164,6 +164,10 @@ public class ManagedDownloaderTest extends com.limegroup.gnutella.util.BaseTestC
     	test = RouterService.getFileManager().getFileDescForUrn(partialURN);
     	AlternateLocationCollection col2 = test.getAlternateLocationCollection();
     	assertEquals(0,col2.getAltLocsSize());
+    	
+    	PrivilegedAccessor.setValue(RouterService.getAcceptor(),
+                "_acceptedIncoming",new Boolean(false));
+        assertFalse(RouterService.acceptedIncomingConnection());
     	
     }
     
@@ -280,8 +284,8 @@ public class ManagedDownloaderTest extends com.limegroup.gnutella.util.BaseTestC
                    qr.getQuery().equals("daswani susheel neil") ||
                    qr.getQuery().equals("susheel neil daswani") ||
                    qr.getQuery().equals("susheel daswani neil"));
-        // SPECIAL_MINSPEED_MASK | SPECIAL_XML_MASK = A0 = 160
-        assertEquals(160, qr.getMinSpeed());
+        // minspeed mask | firewalled | xml | firewall transfer = 226
+        assertEquals(226, qr.getMinSpeed());
         // the guid should be a lime guid but not a lime requery guid
         assertTrue((GUID.isLimeGUID(qr.getGUID())) && 
                    !(GUID.isLimeRequeryGUID(qr.getGUID())));
