@@ -109,10 +109,133 @@ public class QueryUnicasterTest extends TestCase {
         _shouldRun = false;
         for (int i = 0; i < NUM_UDP_LOOPS; i++)
             udpLoopers[i].interrupt();
+
+        // wait for them to stop...
+        try {
+            Thread.sleep(2 * 1000);
+        }
+        catch (InterruptedException ignored) {}
+        
+        // get rid of old query...
+        QueryReply qRep = generateFakeReply(qr.getGUID(), 251);
+        QueryUnicaster.instance().handleQueryReply(qRep);        
     }
 
 
-    
+
+    public void testResultMaxOut() {
+        // clear out messages...
+        _messages.clear();
+        // start up threads...
+        _shouldRun = true;
+
+        // start udp hosts....
+        Thread[] udpLoopers = new Thread[NUM_UDP_LOOPS];
+        for (int i = 0; i < NUM_UDP_LOOPS; i++) {
+            final int index = i;
+            udpLoopers[i] = new Thread() {
+                    public void run() {
+                        udpLoop(5000 + index);
+                    }
+                };
+            udpLoopers[i].start();
+        }
+
+        // add a Query
+        QueryRequest qr = new QueryRequest((byte)2, 0, "Daswani");
+        QueryUnicaster.instance().addQuery(qr);
+
+        // add these endpoints....
+        for (int i = 0; i < NUM_UDP_LOOPS; i++) {
+            ExtendedEndpoint ee = new ExtendedEndpoint("127.0.0.1",
+                                                       5000 + i,
+                                                       0, true);
+            QueryUnicaster.instance().addUnicastEndpoint(ee);
+            if (i % 5 == 0) {
+                try {
+                    // give some time for queries to get out...
+                    Thread.sleep(200);
+                }
+                catch (InterruptedException ignored) {}
+            }
+            
+            //add some results...
+            QueryReply qRep = generateFakeReply(qr.getGUID(),
+                                                getNumberBetween(25, 35));
+            QueryUnicaster.instance().handleQueryReply(qRep);
+        }
+
+        // give udpLoopers time to execute
+        // get messages from vector, should be a message or a ping
+        // wait some seconds for thread to do work.  this is not scientific 
+        // but should do the job...
+        try {
+            Thread.sleep(3 * 1000);
+        }
+        catch (InterruptedException ignored) {}
+        int numMessages = 0, numQRs = 0, numPings = 0;
+        while (!_messages.isEmpty()) {
+            Message currMessage = (Message) _messages.remove(0);
+            numMessages++;
+            if (currMessage instanceof QueryRequest) {
+                QueryRequest currQR = (QueryRequest) currMessage;
+                assertTrue(currQR.getQuery().equals("Daswani"));
+                numQRs++;
+            }
+            else if (currMessage instanceof PingRequest) {
+                numPings++;
+            }
+            else
+                assertTrue("A different message encountered! : " + 
+                           currMessage, 
+                           false);  // this should never happen!
+        }
+        assertTrue(numMessages == (numPings + numQRs));
+        assertTrue("numQRs = " + numQRs, numQRs < 11); // 15 * 25 >> 250
+        debug("QueryUnicasterTest.testQueries(): numMessages = " +
+              numMessages);
+        debug("QueryUnicasterTest.testQueries(): numQRs = " +
+              numQRs);
+        debug("QueryUnicasterTest.testQueries(): numPings = " +
+              numPings);
+
+        // shut off udp listeners....
+        _shouldRun = false;
+        for (int i = 0; i < NUM_UDP_LOOPS; i++) 
+            udpLoopers[i].interrupt();
+
+        // wait for them to stop...
+        try {
+            Thread.sleep(2 * 1000);
+        }
+        catch (InterruptedException ignored) {}
+    }
+
+
+
+    private QueryReply generateFakeReply(byte[] guid, int numResponses) {
+        Response[] resps = new Response[numResponses];
+        for (int i = 0; i< resps.length; i++)
+            resps[i] = new Response(i, i, ""+i);
+        byte[] ip = {(byte)127, (byte)0, (byte)0, (byte)1};
+        QueryReply toReturn = new QueryReply(guid,
+                                             (byte) 2,
+                                             0, ip, 0, resps,
+                                             GUID.makeGuid());
+        return toReturn;
+    }
+
+
+    /** returns a number from low to high (both inclusive).
+     */
+    private int getNumberBetween(int low, int high) {
+        Random rand = new Random();
+        int retInt = low - 1;
+        while (retInt < low)
+            retInt = rand.nextInt(high+1);
+        return retInt;
+    }
+        
 
         
 	/**
@@ -122,17 +245,18 @@ public class QueryUnicasterTest extends TestCase {
         DatagramSocket socket = null;
 		try {
 			socket = new DatagramSocket(port);
+            socket.setSoTimeout(1000);
             debug("QueryUnicasterTest.udpLoop(): listening on port " +
                   port);
 			//socket.setSoTimeout(SOCKET_TIMEOUT);
 		} 
         catch (SocketException e) {
-            debug("QueryUnicasterTest.udpLoop(): could listen on port " +
+            debug("QueryUnicasterTest.udpLoop(): couldn't listen on port " +
                   port);
 			return;
 		}
         catch (RuntimeException e) {
-            debug("QueryUnicasterTest.udpLoop(): could listen on port " +
+            debug("QueryUnicasterTest.udpLoop(): couldn't listen on port " +
                   port);
 			return;
 		}
