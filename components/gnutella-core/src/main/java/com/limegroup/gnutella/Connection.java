@@ -511,8 +511,8 @@ public class Connection implements ReplyHandler, PushProxyInterface {
             // Set the Acceptors IP address
             RouterService.getAcceptor().setAddress( localAddress );
             
-            _in = getInputStream();
-            _out = getOutputStream();
+            _in = createInputStream();
+            _out = createOutputStream();
             if (_in == null) throw new IOException("null input stream");
             else if(_out == null) throw new IOException("null output stream");
         } catch (Exception e) {
@@ -1076,7 +1076,7 @@ public class Connection implements ReplyHandler, PushProxyInterface {
      * compressed bytes, ensuring that we do not attempt to request
      * more data (and thus sleep while throttling) than we will actually write.
      */
-    protected OutputStream getOutputStream()  throws IOException {
+    private OutputStream createOutputStream() throws IOException {
         return new ThrottledOutputStream(_socket.getOutputStream(), _throttle);
     }
 
@@ -1085,7 +1085,7 @@ public class Connection implements ReplyHandler, PushProxyInterface {
      * By default this is a BufferedInputStream.
      * Subclasses may override to decorate the stream.
      */
-    protected InputStream getInputStream() throws IOException {
+    private InputStream createInputStream() throws IOException {
         return new BufferedInputStream(_socket.getInputStream());
     }    
     
@@ -2170,31 +2170,36 @@ public class Connection implements ReplyHandler, PushProxyInterface {
      *         loop to continue.
      */
     void loopForMessages() throws IOException {
-        MessageRouter router = RouterService.getMessageRouter();
-        while (true) {
-            Message m=null;
-            try {
-                m = receive();
-                if (m==null)
+        if(CommonUtils.isJava14OrLater() && 
+           ConnectionSettings.USE_NIO.getValue()) {
+           NIODispatcher.instance().addReader(this); 
+        } else {
+            MessageRouter router = RouterService.getMessageRouter();
+            while (true) {
+                Message m=null;
+                try {
+                    m = receive();
+                    if (m==null)
+                        continue;
+                } catch (BadPacketException e) {
+                    // Don't increment any message counters here.  It's as if
+                    // the packet never existed
                     continue;
-            } catch (BadPacketException e) {
-                // Don't increment any message counters here.  It's as if
-                // the packet never existed
-                continue;
-            }
-
-            // Run through the route spam filter and drop accordingly.
-            if (isSpam(m)) {
-                if(!CommonUtils.isJava118()) {
-                    ReceivedMessageStatHandler.TCP_FILTERED_MESSAGES.
-                        addMessage(m);
                 }
-                stats().countDroppedMessage();
-                continue;
+    
+                // Run through the route spam filter and drop accordingly.
+                if (isSpam(m)) {
+                    if(!CommonUtils.isJava118()) {
+                        ReceivedMessageStatHandler.TCP_FILTERED_MESSAGES.
+                            addMessage(m);
+                    }
+                    stats().countDroppedMessage();
+                    continue;
+                }
+    
+                //call MessageRouter to handle and process the message
+                router.handleMessage(m, this);            
             }
-
-            //call MessageRouter to handle and process the message
-            router.handleMessage(m, this);            
         }
     }
 
