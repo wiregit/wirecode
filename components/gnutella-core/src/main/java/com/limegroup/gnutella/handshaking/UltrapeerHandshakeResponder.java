@@ -107,8 +107,9 @@ public class UltrapeerHandshakeResponder
 		    ret.put(HeaderNames.CONTENT_ENCODING, HeaderNames.DEFLATE_VALUE);
 		}		
 		
-        // accept the connection, and let the Ultrapeer know about Ultrapeers
-        // that are as many hops away as possible, to avoid cycles.
+        // accept the connection, and let the connecting node know about 
+        // Ultrapeers that are as many hops away as possible, to avoid 
+        // cycles.
         return HandshakeResponse.createAcceptIncomingResponse(ret);
 	}
 
