@@ -154,6 +154,8 @@ public final class TigerTreeCache implements Serializable {
             return new HashMap();
         } catch(NoClassDefFoundError e) {
             return new HashMap();
+        } catch(NullPointerException npe) {
+            return new HashMap();
         } finally {
             if (ois != null) {
                 try {
