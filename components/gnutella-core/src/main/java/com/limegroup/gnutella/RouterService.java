@@ -1102,7 +1102,7 @@ public class RouterService {
 	 */
 	public static void doBrowseHost(String host, int port, 
                                     GUID guid, GUID serventID,
-                                    PushProxyInterface[] proxies) {
+                                    Set proxies) {
         BrowseHostHandler handler = new BrowseHostHandler(callback, router,
                                                           guid, serventID);
         handler.browseHost(host, port, proxies);

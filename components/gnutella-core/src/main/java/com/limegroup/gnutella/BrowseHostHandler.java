@@ -62,12 +62,13 @@ public class BrowseHostHandler {
     }
 
     /** 
+     * Browses the files on the specified host and port.
+     *
      * @param host The IP of the host you want to browse.
      * @param port The port of the host you want to browse.
+     * @param proxies the <tt>Set</tt> of push proxies to try
      */
-    public void browseHost(String host, int port, 
-                           PushProxyInterface[] proxies) {
-
+    public void browseHost(String host, int port, Set proxies) {
         // flow of operation:
         // 1. check if you need to push.
         //   a. if so, just send a Push out.
@@ -96,8 +97,8 @@ public class BrowseHostHandler {
             else {
                 RemoteFileDesc fakeRFD = 
                     new RemoteFileDesc(host, port, SPECIAL_INDEX, "fake", 0, 
-                                       _serventID.bytes(), 0, false, 0, false,
-                                       null, null, false, proxies);
+                                       _serventID.bytes(), 0, false, 0, 
+                                       false, null, null, false, proxies);
                 // register with the map so i get notified about a response to my
                 // Push.
                 synchronized (_pushedHosts) {
@@ -337,8 +338,8 @@ public class BrowseHostHandler {
         }
     }
 
-    private class PushRequestDetails { 
-        public BrowseHostHandler bhh;
+    private static class PushRequestDetails { 
+        private BrowseHostHandler bhh;
         private long timeStamp;
         
         public PushRequestDetails(BrowseHostHandler bhh) {

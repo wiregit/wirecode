@@ -712,8 +712,8 @@ public class DownloadManager implements BandwidthTracker {
      */
     public boolean sendPush(RemoteFileDesc file) {
         debug("DM.sendPush(): entered.");
-        PushProxyInterface[] proxies = file.getPushProxies();
-        if (proxies != null) {
+        Set proxies = file.getPushProxies();
+        if (!proxies.isEmpty()) {
             //TODO: investigate not sending a HTTP request to a proxy
             //you are directly connected to.  How much of a problem is this?
             //Probably not much of one at all.  Classic example of code
@@ -734,10 +734,12 @@ public class DownloadManager implements BandwidthTracker {
                 ":" + RouterService.getPort();
 
             // try to contact each proxy
-            for (int i = 0; (i < proxies.length) && !requestSuccessful; i++) {
+            Iterator iter = proxies.iterator();
+            while(iter.hasNext() && !requestSuccessful) {
+                PushProxyInterface ppi = (PushProxyInterface)iter.next();
                 try {
-                    String ip = proxies[i].getPushProxyAddress().getHostName();
-                    int port = proxies[i].getPushProxyPort();
+                    String ip = ppi.getPushProxyAddress().getHostName();
+                    int port = ppi.getPushProxyPort();
                     URL url = new URL("http", ip, port, requestString);
                     HttpURLConnection connection = 
                     (HttpURLConnection) url.openConnection();
