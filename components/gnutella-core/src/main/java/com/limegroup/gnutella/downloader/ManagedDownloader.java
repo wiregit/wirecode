@@ -598,6 +598,11 @@ public class ManagedDownloader implements Downloader, Serializable {
                         ManagedDownloader.this.manager.internalError(e);
                 }
                 manager.yieldSlot(this);
+                if (stopped) {
+                    setState(ABORTED);
+                    manager.remove(this, false);
+                    return;
+                }
 
                 // should i send a requery?
                 final long currTime = System.currentTimeMillis();
@@ -612,7 +617,6 @@ public class ManagedDownloader implements Downloader, Serializable {
 
 
                 // FLOW:
-                // 0.  If I was stopped, well, stop :) .
                 // 1.  If there is a retry to try (at least 1), then sleep for
                 // the time you should sleep to wait for busy hosts.  Also do
                 // some counting to let the GUI know how many guys you are
@@ -625,11 +629,6 @@ public class ManagedDownloader implements Downloader, Serializable {
                 //        time is reached but we've incremented past the number
                 //        of requeries allowed.
                 //    B.  Else, give up.
-                if (stopped) {
-                    setState(ABORTED);
-                    manager.remove(this, false);
-                    return;
-                }
                 if (waitForRetry) {
                     synchronized (this) {
                         retriesWaiting=0;
