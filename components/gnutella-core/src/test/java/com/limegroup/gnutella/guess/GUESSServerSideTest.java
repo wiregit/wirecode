@@ -18,7 +18,7 @@ public class GUESSServerSideTest extends TestCase {
 	 */
 	private final int BUFFER_SIZE = 8192;
 
-	private final int SOCKET_TIMEOUT = 3*1000; // 3 second wait for a message
+	private final int SOCKET_TIMEOUT = 5*1000; // 5 second wait for a message
 
     private boolean _shouldRun = true;
     private boolean shouldRun() {
@@ -33,7 +33,7 @@ public class GUESSServerSideTest extends TestCase {
     
     public GUESSServerSideTest(String name) {
         super(name);
-        System.out.println("YOU MUST RUN THIS TEST WITH A ULTRAPEER WITH A NON-FORCED ADDRESS!!!");
+        System.out.println("YOU MUST RUN THIS TEST WITH A ULTRAPEER WITH A NON-FORCED ADDRESS!!!  KEEP IN MIND THAT THIS TEST MAY NOT ALWAYS WORK - IT DOES USE UDP AFTER ALL!!");
 		_backend = Backend.createBackend(0);
         try {
             // wait for backend to get up to speed
@@ -85,7 +85,52 @@ public class GUESSServerSideTest extends TestCase {
             cleanUp();
             assertTrue("Couldn't get a QueryKey!!", false);
         }
-        
+
+        // send a normal ping, should get a pong....
+        pr = new PingRequest((byte)1);
+        send(pr, address, port);
+        try {
+            PingReply pRep = (PingReply) receive();
+            assertTrue(pRep.getQueryKey() == null);
+        }
+        catch (Exception damn) {
+            damn.printStackTrace();
+            cleanUp();
+            assertTrue("Didn't get a Pong!!", false);
+        }
+
+        // first try a bad QueryKey....
+        byte[] fakeQueryKey = new byte[8];
+        (new Random()).nextBytes(fakeQueryKey);
+        QueryRequest crapQuery = 
+            new QueryRequest(GUID.makeGuid(), (byte) 1, 0, "susheel", null, 
+                             false, null, null, 
+                             QueryKey.getQueryKey(fakeQueryKey));
+        send(crapQuery, address, port);
+        try {
+            receive();
+            cleanUp();
+            assertTrue("Fake Query Key worked!!", false);
+        }
+        catch (Exception shouldHappen) {
+        }
+
+        // now try a legit one....
+        byte[] guid = GUID.makeGuid();
+        QueryRequest goodQuery = 
+            new QueryRequest(guid, (byte) 1, 0, "susheel", null, 
+                             false, null, null, qkToUse);
+        send(goodQuery, address, port);
+        try {
+            PingReply pRep = (PingReply) receive();
+            assertTrue(Arrays.equals(pRep.getGUID(), guid));
+        }
+        catch (Exception damn) {
+            damn.printStackTrace();
+            cleanUp();
+            assertTrue("Good Query Key didn't work!!", false);
+        }
+                             
         cleanUp();
     }
 
