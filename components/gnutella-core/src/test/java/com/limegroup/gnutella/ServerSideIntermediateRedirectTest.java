@@ -224,6 +224,21 @@ public final class ServerSideIntermediateRedirectTest extends BaseTestCase {
 		assertTrue("ULTRAPEER_2 should be connected", ULTRAPEER_2.isOpen());
 		assertTrue("ULTRAPEER_1 should be connected", ULTRAPEER_1.isOpen());
 
+	    LEAF = new Connection("localhost", PORT, new LeafHeaders("localhost"),
+                              new EmptyResponder());
+
+        //3. routed leaf, with route table for "test"
+        LEAF.initialize();
+        qrt = new QueryRouteTable();
+        qrt.add("berkeley");
+        qrt.add("susheel");
+        qrt.addIndivisible(HugeTestUtils.UNIQUE_SHA1.toString());
+        for (Iterator iter=qrt.encode(null).iterator(); iter.hasNext(); ) {
+            LEAF.send((RouteTableMessage)iter.next());
+			LEAF.flush();
+        }
+		assertTrue("LEAF should be connected", LEAF.isOpen());
+
 		// make sure we get rid of any initial ping pong traffic exchanges
 		sleep();
 		drainAll();
@@ -235,7 +250,43 @@ public final class ServerSideIntermediateRedirectTest extends BaseTestCase {
     // BEGIN TESTS
     // ------------------------------------------------------
 
-    public void testNoRedirectCandidates() {
+    public void testNoRedirectCandidates() throws Exception {
+
+        // ok, currently there are no redirect ultrapeers, so both a TCPCB
+        // and a UDPCB should be serviced by the tested Ultrapeer
+        TCPConnectBackVendorMessage tcp = 
+            new TCPConnectBackVendorMessage(TCP_ACCESS_PORT);
+        LEAF.send(tcp);
+        LEAF.flush();
+
+        try {
+            Socket s = TCP_ACCESS.accept();
+            s.close();
+        }
+        catch (InterruptedIOException bad) {
+            assertTrue(false);
+        }
+
+        GUID cbGuid = new GUID(GUID.makeGuid());
+        UDPConnectBackVendorMessage udp =
+            new UDPConnectBackVendorMessage(UDP_ACCESS.getLocalPort(), cbGuid);
+        LEAF.send(udp);
+        LEAF.flush();
+
+        try {
+            DatagramPacket pack = new DatagramPacket(new byte[1000], 1000);
+            UDP_ACCESS.setSoTimeout(TIMEOUT);
+            UDP_ACCESS.receive(pack);
+            ByteArrayInputStream bais = new ByteArrayInputStream(pack.getData());
+            PingRequest ping = (PingRequest) Message.read(bais);
+            assertEquals(cbGuid, new GUID(ping.getGUID()));
+        }
+        catch (InterruptedIOException bad) {
+            assertTrue(false);
+        }
+        catch (ClassCastException bad) {
+            assertTrue(false);
+        }
     }
     
 
