@@ -250,7 +250,6 @@ public final class UDPService implements Runnable {
                         continue;
                     } 
                     catch(IOException e) {
-                    	e.printStackTrace(System.out);
                         continue;
                     } 
                 }
