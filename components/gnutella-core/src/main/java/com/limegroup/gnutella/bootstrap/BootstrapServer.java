@@ -23,7 +23,7 @@ public class BootstrapServer {
     //TODO: factor code with ExtendedEndpoint?
 
     /** The URL to server's script, e.g., "http://path/to/script.php". */        
-    private URL _url;
+    private final URL _url;
 
     /** 
      * Constructs a new BootstrapServer from a URL or an extended
