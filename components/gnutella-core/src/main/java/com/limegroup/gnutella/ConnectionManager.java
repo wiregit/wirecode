@@ -76,10 +76,10 @@ public class ConnectionManager {
 	/**
 	 * The number of Ultrapeer connections to ideally maintain.
 	 */
-	public static final int ULTRAPEER_CONNECTIONS = 25;
+	public static final int ULTRAPEER_CONNECTIONS = 15;
 
     /** Ideal number of connections for a leaf.  */
-    public static final int PREFERRED_CONNECTIONS_FOR_LEAF = 2;
+    public static final int PREFERRED_CONNECTIONS_FOR_LEAF = 3;
 
 	//public static final int HIGH_DEGREE_CONNECTIONS_FOR_LEAF = 2;
 
@@ -94,7 +94,7 @@ public class ConnectionManager {
 	 * release time, that was only LimeWire, but it will likely soon include
 	 * BearShare.
 	 */
-    public static final int RESERVED_GOOD_CONNECTIONS = 15;  
+    public static final int RESERVED_GOOD_CONNECTIONS = 0;  
 
 
 	/**
@@ -102,7 +102,7 @@ public class ConnectionManager {
 	 * described above, the definition of good constantly changes with 
 	 * advances in search architecture.
 	 */
-    public static final int RESERVED_GOOD_LEAF_CONNECTIONS = 10;  
+    public static final int RESERVED_GOOD_LEAF_CONNECTIONS = 15;  
  
     /** Similar to RESERVED_GOOD_CONNECTIONS, but measures the number of slots
      *  allowed for bad leaf connections.  A value of zero means that only
@@ -658,11 +658,11 @@ public class ConnectionManager {
 
 			int connections = getNumInitializedConnections();
 
-			if(goodConnection(hr)) {
+			//if(goodConnection(hr)) {
 				// otherwise, it is a high degree connection, so allow it if we 
 				// need more connections
-				return connections < ULTRAPEER_CONNECTIONS;
-			}
+				//return connections < ULTRAPEER_CONNECTIONS;
+			//}
 
 			// if it's not a new high-density connection, only allow it if
 			// our number of connections is below the maximum number of old
@@ -670,8 +670,6 @@ public class ConnectionManager {
 			return connections < 
 				//(trustedVendor(hr.getUserAgent()) ? 
 				ULTRAPEER_CONNECTIONS - RESERVED_GOOD_CONNECTIONS;
-			//MAX_LOW_DEGREE_ULTRAPEERS : 
-			// MAX_LOW_DEGREE_ULTRAPEERS - RESERVED_GOOD_CONNECTIONS);
         }
 		return false;
     }
