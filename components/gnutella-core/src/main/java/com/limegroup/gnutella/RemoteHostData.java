@@ -42,7 +42,7 @@ public class RemoteHostData {
                 Arrays.equals(_clientGUID, other._clientGUID) );
     }
 
-    public int hashcode() {
+    public int hashCode() {
         if(_hashcode == 0) {
             int result = 17;
             result = (37* result)+_host.hashCode();
