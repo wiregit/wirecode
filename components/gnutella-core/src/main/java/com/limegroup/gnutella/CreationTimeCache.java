@@ -222,19 +222,18 @@ public final class CreationTimeCache {
                 URN currURN = (URN) innerIter.next();
                 FileDesc fd = fileManager.getFileDescForUrn(currURN);
                 // unfortunately fds can turn into ifds so ignore
-                if (fd instanceof IncompleteFileDesc) {
+                if ((fd == null) || (fd instanceof IncompleteFileDesc)) {
                     if (toRemove == null) toRemove = new ArrayList();
                     toRemove.add(currURN);
                     continue;
                 }
 
                 if (filter == null) urnList.add(currURN);
-                else if ((fd != null) && filter.allow(fd.getName())) 
-                    urnList.add(currURN);
+                else if (filter.allow(fd.getName())) urnList.add(currURN);
             }
         }
 
-        // clear any ifd's that may have snuck into structures
+        // clear any ifd's or unshared files that may have snuck into structures
         if (toRemove != null) {
             Iterator removees = toRemove.iterator();
             while (removees.hasNext()) {
