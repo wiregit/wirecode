@@ -12,7 +12,6 @@ import com.limegroup.gnutella.util.NetworkUtils;
  * significant byte.  LimeWire GUID's have the following properties:
  *
  * <ol>
- * <li>G[8]==0xFF.  This serves to identify "new GUIDs", e.g. from BearShare.
  * <li>G[15]=0x00.  This is reserved for future use.
  * <li>G[9][10]= tag(G[4][5], G[6][7]).  This is LimeWire's "secret" 
  *  proprietary marking. 
@@ -23,6 +22,10 @@ import com.limegroup.gnutella.util.NetworkUtils;
  * constants.  These two byte values are then multiplied together to form a 4
  * byte product.  The middle two bytes of this product are the tag.  <b>Sign IS
  * considered during this process, since Java does that by default.</b><p>
+ *
+ * As of 9/2004, LimeWire GUIDs used to be marked as such:
+ * <li>G[8]==0xFF.  This serves to identify "new GUIDs", e.g. from BearShare.
+ * This marking was deprecated.
  *
  * In addition, LimeWire GUIDs may be marked as follows:
  * <ol>
@@ -44,7 +47,7 @@ import com.limegroup.gnutella.util.NetworkUtils;
  * Note that this still leaves 10-12 bytes for randomness.  That's plenty of
  * distinct GUID's.  And there's only a 1 in 65000 chance of mistakenly
  * identifying a LimeWire.
-
+ *
  * Furthermore, LimeWire GUIDs may be 'marked' by containing address info.  In
  * particular:
  * <ol>
@@ -111,7 +114,6 @@ public class GUID implements Comparable {
         rand.nextBytes(ret);
 
         //Apply common tags.
-        ret[8]=(byte)0xFF;    //Mark as "new" GUID.  (See isNewGUID().)
         ret[15]=(byte)0x00;   //Version number is 0.
 
         //Apply LimeWire's marking.
@@ -328,13 +330,19 @@ public class GUID implements Comparable {
         return ByteOrder.ubytes2int(ByteOrder.leb2short(guidBytes, 13));
     }
 
-    /** Same as isNewGUID(this.bytes). */
+    /** Same as isNewGUID(this.bytes). 
+     * @deprecated This method was hardly ever used in the first place, but
+     * don't use it in the future.
+     */
     public final boolean isNewGUID() {
         return isNewGUID(this.bytes);
     }
     
     /** Returns true if this is a GUID from newer Gnutella clients, e.g.,
-     *  LimeWire and BearShare. */
+     *  LimeWire and BearShare. 
+     * @deprecated This method was hardly ever used in the first place, but
+     * don't use it in the future.
+     */
     public static boolean isNewGUID(byte[] bytes) {
         //Is byte 8 all 1's?  Note that we downcast 0xFF first so both sides of
         //the equality are automatically widened, with the same sign extension.
