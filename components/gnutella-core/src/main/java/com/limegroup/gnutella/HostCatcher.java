@@ -75,7 +75,7 @@ public class HostCatcher {
     private Object gotGoodPongLock=new Object();
 
     /** The number of MILLISECONDS a server's pong is valid for. */
-    private static final int STALE_TIME=30*60*1000; //30 minutes
+    private static final int STALE_TIME=90*60*1000; //90 minutes
     /** The number of MILLISECONDS to wait before retrying quick-connect. */
     private static final int RETRY_TIME=5*60*1000; //5 minutes
     /** The amount of MILLISECONDS to wait after starting a connection before
@@ -222,6 +222,10 @@ public class HostCatcher {
 
         //Skip if this would connect us to our listening port.
         if (isMe(e.getHostname(), e.getPort()))
+            return;
+
+        //Skip if this is the router.
+        if (isRouter(pr.getIPBytes())) 
             return;
 
         //Current policy: "Pong cache" connections are considered good.  Private
@@ -552,6 +556,17 @@ public class HostCatcher {
             return (Arrays.equals(cIP, managerIP) &&
                     (port==acceptor.getPort()));
         }
+    }
+
+    /** Returns true iff ip is the ip address of router.limewire.com.
+     *      @requires ip.length==4 */
+    private boolean isRouter(byte[] ip) {
+        //Check for 64.61.25.139-143
+        return (ip[0]==(byte)64
+            && ip[1]==(byte)61
+            && ip[2]==(byte)25
+            && ip[3]>=(byte)139
+            && ip[3]<=(byte)143);
     }
 
     public String toString() {
