@@ -14,8 +14,8 @@ import java.net.UnknownHostException;
 public class Endpoint implements Cloneable, Serializable,
 com.sun.java.util.collections.Comparable
 {
-    String hostname;
-    int port;
+    String hostname = null;
+    int port = 0;
     /** Number of files at the host, or -1 if unknown */
     private long files=-1;
     /** Size of all files on the host, or -1 if unknown */
@@ -147,6 +147,24 @@ com.sun.java.util.collections.Comparable
         this(hostname, port);
         this.files=files;
         this.kbytes=kbytes;
+    }
+    
+    /**
+    * Constructs a new endpoint from pre-existing endpoint by copying the
+    * fields
+    * @param ep The endpoint from whom to initialize the member fields of
+    * this new endpoint
+    */
+    public Endpoint(Endpoint ep)
+    {
+        //copy the fields
+        this.connectivity = ep.connectivity;
+        this.files = ep.files;
+        this.hostname = ep.hostname;
+        this.kbytes = ep.kbytes;
+        this.port = ep.port;
+        this.processed = ep.processed;
+        this.weight = ep.weight;
     }
 
     public String toString()
