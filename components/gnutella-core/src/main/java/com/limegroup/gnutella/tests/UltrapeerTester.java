@@ -49,12 +49,9 @@ public class UltrapeerTester extends TestCase {
         ActivityCallback callback=new ActivityCallbackStub();
         FileManager files=new FileManagerStub();
         MessageRouter router=new MessageRouterStub();
-        RouterService rs=new RouterService(callback,
-                                           router,
-                                           files,
-                                           new DummyAuthenticator());
+        RouterService rs=new RouterService(callback);
         assertTrue("Bad port: "+settings.getPort(), settings.getPort()==PORT);
-        rs.initialize();
+        rs.start();
         rs.clearHostCatcher();
         rs.connect();
 
