@@ -715,9 +715,6 @@ public class DownloadManager implements BandwidthTracker {
         //1. Read  "GIV 0:BC1F6870696111D4A74D0001031AE043/sample.txt\n\n"
         String command;
         try {
-            //We set the timeout now so we don't block reading
-            //connection strings.  We reset it before actually downloading.
-            s.setSoTimeout(SettingsManager.instance().getTimeout());
             //The try-catch below is a work-around for JDK bug 4091706.
             InputStream istream=null;
             try {

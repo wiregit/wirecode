@@ -47,12 +47,12 @@ public class DownloadTester {
             };
         timer.schedule(click,0,SupernodeAssigner.TIMER_DELAY);
 
-//         testOverlapCheckSpeed(5);
-//         cleanup();
-//         testOverlapCheckSpeed(25);
-//         cleanup();
-//         testOverlapCheckSpeed(125);
-//         cleanup();
+//          testOverlapCheckSpeed(5);
+//          cleanup();
+//          testOverlapCheckSpeed(25);
+//          cleanup();
+//          testOverlapCheckSpeed(125);
+//          cleanup();
 
         testSimpleDownload();
         cleanup();
@@ -91,10 +91,10 @@ public class DownloadTester {
         uploader1.setRate(rate);
         long start1=System.currentTimeMillis();
         try {
-            HTTPDownloader downloader=new HTTPDownloader(
-                rfd, file, 0, TestFile.length());
-            downloader.connect();
-            downloader.doDownload(true,null);        
+            HTTPDownloader downloader=new HTTPDownloader(rfd, file);
+            downloader.connectTCP(0);
+            downloader.connectHTTP(0,TestFile.length());
+            downloader.doDownload(true,null);
         } catch (IOException e) {
             Assert.that(false, "Unexpected exception: "+e);
         } 
@@ -110,10 +110,10 @@ public class DownloadTester {
         
         long start2=System.currentTimeMillis();
         try {
-            HTTPDownloader downloader=new HTTPDownloader(
-                rfd, file, 0, TestFile.length());
-            downloader.connect();
-            downloader.doDownload(false,null);        
+            HTTPDownloader downloader=new HTTPDownloader(rfd, file);
+            downloader.connectTCP(0);
+            downloader.connectHTTP(0, TestFile.length());
+            downloader.doDownload(false,null);
         } catch (IOException e) {
             Assert.that(false, "Unexpected exception: "+e);
         } 
@@ -472,8 +472,10 @@ public class DownloadTester {
 
     /** Returns true if the complete file exists and is complete */
     private static boolean isComplete() {
-        if (file.length()!=TestFile.length())
+        if (file.length()!=TestFile.length()) {
+            System.out.println("File too small"+file.length());
             return false;
+        }
         FileInputStream stream=null;
         try {
             stream = new FileInputStream(file);
@@ -481,10 +483,13 @@ public class DownloadTester {
                 int c=stream.read();
                 if (c==-1)//eof
                     break;
-                if ((byte)c!=TestFile.getByte(i))
+                if ((byte)c!=TestFile.getByte(i)) {
+                    System.out.println("Bad byte at "+i);
                     return false;
+                }
             }
         } catch (IOException ioe) {
+            ioe.printStackTrace();
             return false;
         } finally {
             if (stream!=null) {
