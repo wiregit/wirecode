@@ -92,7 +92,7 @@ public class BandwidthThrottle {
             if (_availableBytes != 0)
                 break;
             try {
-                Thread.currentThread().sleep(_nextTickTime - now);
+                Thread.sleep(_nextTickTime - now);
             } catch (InterruptedException e) {  //TODO: propogate
             }
         }
