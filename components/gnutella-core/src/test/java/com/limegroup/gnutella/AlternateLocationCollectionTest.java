@@ -1,21 +1,19 @@
 package com.limegroup.gnutella;
 
-import com.limegroup.gnutella.*;
-import com.limegroup.gnutella.util.*;
-import com.limegroup.gnutella.http.*;
-import com.sun.java.util.collections.*;
-import junit.framework.*;
-import junit.extensions.*;
-import java.io.*;
-import java.net.*;
 import java.util.StringTokenizer;
+
+import junit.framework.Test;
+
+import com.limegroup.gnutella.util.BaseTestCase;
+import com.sun.java.util.collections.HashSet;
+import com.sun.java.util.collections.Iterator;
+import com.sun.java.util.collections.Set;
 
 /**
  * Test the public methods of the <tt>FileDesc</tt> class.
  */
 public final class AlternateLocationCollectionTest extends BaseTestCase {
 
-	private Set _urnSet;
 	private Set _alternateLocations;
 
 	private AlternateLocationCollection _alCollection;
