@@ -25,7 +25,7 @@ import com.sun.java.util.collections.HashMap;
 public class HashTreeTest extends BaseTestCase {
     
     private static final String filename = 
-     "com/limegroup/gnutella/mp3/mpg4_golem160x90first120.avi";
+     "com/limegroup/gnutella/metadata/mpg4_golem160x90first120.avi";
     private static final File file = CommonUtils.getResourceFile(filename);
     
     // urn & tigertree root from bitcollider
