@@ -309,6 +309,34 @@ public final class CommonUtils {
         long length=src.length();
         return copy(src, (int)length, dst)==length;
     }
+    
+    /**
+     * Returns the user home directory.
+     *
+     * @return the <tt>File</tt> instance denoting the abstract pathname of
+     *  the user's home directory
+     */
+    public static File getUserHomeDir() {
+        return new File(System.getProperty("user.home"));
+    }
+    
+    /**
+     * Returns the directory where all user settings should be stored.  This
+     * is where all application data should be stored.  If the directory does
+     * does not already exist, this attempts to create the directory, although
+     * this is not guaranteed to succeed.
+     *
+     * @return the <tt>File</tt> instance denoting the user's home 
+     *  directory for the application
+     */
+    public static File getUserSettingsDir() {
+        final String USER_HOME_STR = System.getProperty("user.home");
+        final File HOME_DIR = new File(USER_HOME_STR, ".limewire");
+        if(!HOME_DIR.isDirectory()) {
+            HOME_DIR.mkdirs();
+        }
+        return HOME_DIR;
+    }
 
     /*
     public static void main(String args[]) {
