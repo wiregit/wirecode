@@ -24,13 +24,13 @@ public class OGGMetaData extends AudioMetaData{
 	//a set of recommended headers by the spec:
 	//note we parse only those tags relevant to the Lime XML Audio schema
 	
-	private static final String TITLE_TAG = "title";
-	private static final String TRACK_TAG = "tracknumber";
-	private static final String ALBUM_TAG = "album";
-	private static final String GENRE_TAG = "genre";
-	private static final String DATE_TAG = "date";
-	private static final String COMMENT_TAG = "comment";
-	private static final String ARTIST_TAG = "artist";
+	public static final String TITLE_TAG = "title";
+	public static final String TRACK_TAG = "tracknumber";
+	public static final String ALBUM_TAG = "album";
+	public static final String GENRE_TAG = "genre";
+	public static final String DATE_TAG = "date";
+	public static final String COMMENT_TAG = "comment";
+	public static final String ARTIST_TAG = "artist";
 	
 	public OGGMetaData(File f) throws IOException{
 		super(f);
@@ -56,7 +56,7 @@ public class OGGMetaData extends AudioMetaData{
 		setLength((int)vfile.time_total(-1));
 		
 		comments = vfile.getComment();
-		if (comments.length > 0) {
+		if (comments.length > 0 && comments[0]!=null) {
 			
 			
 			setTitle(comments[0].query(TITLE_TAG));

@@ -90,7 +90,8 @@ public abstract class MetaDataEditor {
      * factory method which returns an instance of MetaDataEditor which
      * should be used with the specific file
      * @param name the name of the file to be annotated
-     * @return the MetaDataEditor that will do the annotation.
+     * @return the MetaDataEditor that will do the annotation.  null if the
+     * lime xml repository should be used.
      */
     public static MetaDataEditor getEditorForFile(String name) {
     	if (!LimeXMLUtils.isSupportedFormat(name))
