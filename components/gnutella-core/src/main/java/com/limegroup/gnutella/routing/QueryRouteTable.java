@@ -1,5 +1,6 @@
 package com.limegroup.gnutella.routing;
 
+import java.io.OutputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Iterator;
@@ -12,10 +13,12 @@ import java.util.zip.Inflater;
 
 import com.limegroup.gnutella.Assert;
 import com.limegroup.gnutella.URN;
+import com.limegroup.gnutella.ErrorService;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.util.BitSet;
 import com.limegroup.gnutella.util.Utilities;
+import com.limegroup.gnutella.util.IOUtils;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 
 //Please note that &#60; and &#62; are the HTML escapes for '<' and '>'.
@@ -639,17 +642,18 @@ public class QueryRouteTable {
 
     /** Returns a GZIP'ed version of data. */
     private byte[] compress(byte[] data) {
+        OutputStream dos = null;
         try {
             ByteArrayOutputStream baos=new ByteArrayOutputStream();
-            DeflaterOutputStream dos=new DeflaterOutputStream(baos);
+            dos = new DeflaterOutputStream(baos);
             dos.write(data, 0, data.length);
             dos.close();                      //flushes bytes
             return baos.toByteArray();
         } catch (IOException e) {
-            //This should REALLY never happen because no devices are involved.
-            //But could we propogate it up.
-            Assert.that(false, "Couldn't write to byte stream");
+            ErrorService.error(e);
             return null;
+        } finally {
+            IOUtils.close(dos);
         }
     }
 

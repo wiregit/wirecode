@@ -42,6 +42,7 @@ import com.limegroup.gnutella.Assert;
 import com.limegroup.gnutella.ErrorService;
 import com.limegroup.gnutella.Response;
 import com.limegroup.gnutella.util.I18NConvert;
+import com.limegroup.gnutella.util.IOUtils;
 
 /**
  * Contains utility methods
@@ -669,12 +670,13 @@ public class LimeXMLUtils
 
     /** Returns a ZLIB'ed version of data. */
     private static byte[] compressZLIB(byte[] data) {
+        DeflaterOutputStream gos = null;
         try {
             ByteArrayOutputStream baos=new ByteArrayOutputStream();
-            DeflaterOutputStream gos=new DeflaterOutputStream(baos);
+            gos=new DeflaterOutputStream(baos);
             gos.write(data, 0, data.length);
             gos.flush();
-            gos.close();                      //flushes bytes
+            gos.close(); // required to flush data  -- flush doesn't do it.
             //            System.out.println("compression savings: " + ((1-((double)baos.toByteArray().length/(double)data.length))*100) + "%");
             return baos.toByteArray();
         } catch (IOException e) {
@@ -682,6 +684,8 @@ public class LimeXMLUtils
             //But could we propogate it up.
             Assert.that(false, "Couldn't write to byte stream");
             return null;
+        } finally {
+            IOUtils.close(gos);
         }
     }
 
@@ -774,15 +778,20 @@ public class LimeXMLUtils
      *  IOException if the data is corrupt. */
     private static byte[] uncompressGZIP(byte[] data) throws IOException {
         ByteArrayInputStream bais=new ByteArrayInputStream(data);
-        InflaterInputStream gis=new GZIPInputStream(bais);
-        ByteArrayOutputStream baos=new ByteArrayOutputStream();
-        while (true) {
-            int b=gis.read();
-            if (b==-1)
-                break;
-            baos.write(b);
+        InflaterInputStream gis = null;
+        try {
+            gis =new GZIPInputStream(bais);
+            ByteArrayOutputStream baos=new ByteArrayOutputStream();
+            while (true) {
+                int b=gis.read();
+                if (b==-1)
+                    break;
+                baos.write(b);
+            }
+            return baos.toByteArray();
+        } finally {
+            IOUtils.close(gis);
         }
-        return baos.toByteArray();
     }
 
         
@@ -791,15 +800,20 @@ public class LimeXMLUtils
      *  IOException if the data is corrupt. */
     private static byte[] uncompressZLIB(byte[] data) throws IOException {
         ByteArrayInputStream bais=new ByteArrayInputStream(data);
-        InflaterInputStream gis=new InflaterInputStream(bais);
-        ByteArrayOutputStream baos=new ByteArrayOutputStream();
-        while (true) {
-            int b=gis.read();
-            if (b==-1)
-                break;
-            baos.write(b);
+        InflaterInputStream gis = null;
+        try {
+            gis =new InflaterInputStream(bais);
+            ByteArrayOutputStream baos=new ByteArrayOutputStream();
+            while (true) {
+                int b=gis.read();
+                if (b==-1)
+                    break;
+                baos.write(b);
+            }
+            return baos.toByteArray();
+        } finally {
+            IOUtils.close(gis);
         }
-        return baos.toByteArray();
     }
 
 

@@ -28,6 +28,7 @@ import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.settings.ApplicationSettings;
 import com.limegroup.gnutella.util.StringUtils;
+import com.limegroup.gnutella.util.IOUtils;
 
 public class UDPCrawlerPong extends VendorMessage {
 	
@@ -380,10 +381,10 @@ public class UDPCrawlerPong extends VendorMessage {
 			
 			ByteArrayInputStream bais = 
 				new ByteArrayInputStream(payload,agentsOffset+2,agentsSize);
-			
-			try {
 				
-				GZIPInputStream gais = new GZIPInputStream(bais);
+			GZIPInputStream gais = null;
+			try {
+				gais = new GZIPInputStream(bais);
 				DataInputStream dais = new DataInputStream(gais);
 				byte [] length = new byte[2];
 				dais.readFully(length);
@@ -394,6 +395,8 @@ public class UDPCrawlerPong extends VendorMessage {
 				_agents = new String(agents);
 			}catch(IOException bad ) {
 				throw new BadPacketException("invalid compressed agent data");
+			} finally {
+			    IOUtils.close(gais);
 			}
 		}
 		
