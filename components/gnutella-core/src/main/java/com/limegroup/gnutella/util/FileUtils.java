@@ -228,9 +228,13 @@ public class FileUtils
         }
         
         // If that didn't work, try copying the file.
-        if (!success)
+        if (!success) {
             success = CommonUtils.copy(a, b);
-
+            //if copying succeeded, get rid of the original
+            //at this point any active uploads will have been killed
+            if (success)
+            	a.delete();
+        }
         return success;
     }
 }
