@@ -6,15 +6,24 @@ package com.limegroup.gnutella.util;
  */
 public class SystemUtils {
     
+    final static boolean isLoaded;
+    
     static {
-        // Only load the library on systems where we've made it.
-        if(CommonUtils.isMacOSX())
-            System.loadLibrary("SystemUtilities");
-        else if(CommonUtils.isWindows()) {
-            System.loadLibrary("GenericWindowsUtils");
-            if(CommonUtils.isWindows2000orXP())
-                System.loadLibrary("WindowsV5PlusUtils");
+        boolean canLoad;
+        try {
+            // Only load the library on systems where we've made it.
+            if(CommonUtils.isMacOSX())
+                System.loadLibrary("SystemUtilities");
+            else if(CommonUtils.isWindows()) {
+                System.loadLibrary("GenericWindowsUtils");
+                if(CommonUtils.isWindows2000orXP())
+                    System.loadLibrary("WindowsV5PlusUtils");
+            }
+            canLoad = true;
+        } catch(UnsatisfiedLinkError noGo) {
+            canLoad = false;
         }
+        isLoaded = canLoad;
     }
     
     private SystemUtils() {}
@@ -40,10 +49,12 @@ public class SystemUtils {
      *  operating system, otherwise <tt>false</tt>
      */
     public static boolean supportsIdleTime() {
-        if(CommonUtils.isWindows2000orXP())
-            return true;
-        else if(CommonUtils.isMacOSX())
-            return true;
+        if(isLoaded) {
+            if(CommonUtils.isWindows2000orXP())
+                return true;
+            else if(CommonUtils.isMacOSX())
+                return true;
+        }
             
         return false;
     }
@@ -52,7 +63,7 @@ public class SystemUtils {
      * Sets the number of open files, if supported.
      */
     public static long setOpenFileLimit(int max) {
-        if(CommonUtils.isMacOSX())
+        if(isLoaded && CommonUtils.isMacOSX())
             return setOpenFileLimit0(max);
         else
             return -1;
@@ -63,7 +74,7 @@ public class SystemUtils {
      * the filename given should ideally be a canonicalized filename.
      */
     static void setWriteable(String fileName) {
-        if(CommonUtils.isWindows())
+        if(isLoaded && CommonUtils.isWindows())
             setFileWriteable(fileName);
     }
             
