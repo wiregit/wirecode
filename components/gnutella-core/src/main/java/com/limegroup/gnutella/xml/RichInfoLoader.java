@@ -145,7 +145,7 @@ class RichInfoLoader {
     private void test(){
 	File f = null;
 	try{
-	    f = new File(XMLProperties.instance().getXMLSchemaDir(),"gen-books.xsd");
+	    f = new File(LimeXMLProperties.instance().getXMLSchemaDir(),"gen-books.xsd");
 	}catch(Exception e){
 	    e.printStackTrace();
 	}
