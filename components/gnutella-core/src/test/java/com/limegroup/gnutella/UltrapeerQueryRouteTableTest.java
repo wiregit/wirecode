@@ -127,7 +127,10 @@ public final class UltrapeerQueryRouteTableTest extends BaseTestCase {
         assertTrue("should have received replies", !REPLIES.isEmpty());
         
         QueryRequest qSent = (QueryRequest)SENT.get(0);
-        assertEquals("wrong ttl", 1, qSent.getTTL());
+        
+        // Since the Ultrapeer only has one connection, the TTL should be the
+        // maximum "probe" TTL of 2
+        assertEquals("wrong ttl", 2, qSent.getTTL());
         assertEquals("wrong hops", 0, qSent.getHops());
         assertEquals("wrong query", qr.getQuery(), qSent.getQuery());
         assertEquals("wrong guid", qr.getGUID(), qSent.getGUID());        
