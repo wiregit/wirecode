@@ -107,6 +107,7 @@ public class ManagedConnectionTest extends BaseTestCase {
 		ManagedConnection out = 
             new ManagedConnection("localhost", Backend.PORT);
         out.initialize();
+        out.buildAndStartQueues();        
 
         assertTrue("connection is open", out.isOpen());
         assertTrue("connection should support GGEP", out.supportsGGEP());
@@ -240,6 +241,7 @@ public class ManagedConnectionTest extends BaseTestCase {
 												   new NoGGEPProperties(),
 												   new EmptyResponder());
         out.initialize();
+        out.buildAndStartQueues();
 
         assertTrue("connection is open", out.isOpen());
 		// receive initial ping
@@ -277,6 +279,7 @@ public class ManagedConnectionTest extends BaseTestCase {
         //acceptor=new com.limegroup.gnutella.MiniAcceptor(null, PORT);
 		out = new ManagedConnection("localhost", Backend.PORT);
         out.initialize();            
+        out.buildAndStartQueues();
 
         //in=acceptor.accept(); 
 		assertTrue("connection should be open", out.isOpen());
@@ -300,6 +303,7 @@ public class ManagedConnectionTest extends BaseTestCase {
 		//2. Remote close: discovered on read
 		ManagedConnection out = new ManagedConnection("localhost", PORT);
 		out.initialize();            
+		out.buildAndStartQueues();
         Connection in = acceptor.accept(); 
         assertTrue("connection should be open", out.isOpen());
         assertTrue("runner should not be dead", !out.runnerDied());
@@ -323,6 +327,7 @@ public class ManagedConnectionTest extends BaseTestCase {
         acceptor = new com.limegroup.gnutella.MiniAcceptor(PORT);
         out = new ManagedConnection("localhost", PORT);
         out.initialize();            
+        out.buildAndStartQueues();
         in = acceptor.accept(); 
         assertTrue("connection should be open", out.isOpen());
         assertTrue("runner should not be dead", !out.runnerDied());
