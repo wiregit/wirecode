@@ -396,6 +396,27 @@ public class ConnectionManager {
 		return _initializedClientConnections.size();
     }
 
+    /**
+     * @return the number of free leaf slots.
+     */
+    int getNumFreeLeafSlots() {
+        if (isSupernode())
+            return SettingsManager.instance().getMaxShieldedClientConnections()-
+            getNumInitializedClientConnections();
+        else
+            return 0;
+    }
+
+    
+    /**
+     * @return the number of free non-leaf slots.
+     */
+    int getNumFreeNonLeafSlots() {
+        return getKeepAlive() - getNumInitializedConnections();
+    }
+
+
+
 	/**
 	 * Returns whether or not the client has an established connection with
 	 * another Gnutella client.

@@ -980,6 +980,24 @@ public final class RouterService {
         return manager.hasSupernodeClientConnection();
     }
 
+
+    /**
+     * @return the number of free leaf slots.
+     */
+    public static int getNumFreeLeafSlots() {
+            return manager.getNumFreeLeafSlots();
+    }
+
+    
+    /**
+     * @return the number of free non-leaf slots.
+     */
+    public static int getNumFreeNonLeafSlots() {
+        return manager.getNumFreeNonLeafSlots();
+    }
+
+
+
     /**
      * Sets the flag for whether or not LimeWire is currently in the process of 
 	 * shutting down.

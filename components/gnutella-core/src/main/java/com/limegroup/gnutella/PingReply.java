@@ -146,9 +146,9 @@ public class PingReply extends Message implements Serializable {
 
             if (isUltrapeer) { 
                 // indicate guess support
-                byte[] vNum = 
-                {convertToGUESSFormat(CommonUtils.getGUESSMajorVersionNumber(),
-                                      CommonUtils.getGUESSMinorVersionNumber())};
+                byte[] vNum = {
+                convertToGUESSFormat(CommonUtils.getGUESSMajorVersionNumber(),
+                                     CommonUtils.getGUESSMinorVersionNumber())};
                 ggep.put(GGEP.GGEP_HEADER_UNICAST_SUPPORT, vNum);
 
                 // indicate UP support
@@ -171,6 +171,16 @@ public class PingReply extends Message implements Serializable {
 
 
     private static void addUltrapeerExtension(GGEP ggep) {
+        byte[] payload = new byte[3];
+        // put version
+        payload[0] = convertToGUESSFormat(CommonUtils.getUPMajorVersionNumber(),
+                                          CommonUtils.getUPMinorVersionNumber()
+                                          );
+        payload[1] = (byte) RouterService.getNumFreeLeafSlots();
+        payload[2] = (byte) RouterService.getNumFreeNonLeafSlots();
+
+        // add it
+        ggep.put(GGEP.GGEP_HEADER_UP_SUPPORT, payload);
     }
 
 
@@ -182,7 +192,7 @@ public class PingReply extends Message implements Serializable {
                          CommonUtils.QHD_VENDOR_NAME.getBytes().length);
         payload[4] = convertToGUESSFormat(CommonUtils.getMajorVersionNumber(),
                                           CommonUtils.getMinorVersionNumber());
-        // add it
+         // add it
         ggep.put(GGEP.GGEP_HEADER_VENDOR_INFO, payload);
     }
 
