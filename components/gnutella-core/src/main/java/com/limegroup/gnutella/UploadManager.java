@@ -493,13 +493,15 @@ public final class UploadManager implements BandwidthTracker {
             //remove this uploader from queue, and get its time
             _queuedUploads.remove(0);
         }
-        if(!queue) {//downloader does not support queueing
+        else {
             //(!busy && posInQueue>0) || (busy && we are somewhere in the queue)
-            //In either of these cases, if uploader does not support queueing, 
-            //it should be removed from the queue.            
-            _queuedUploads.remove(posInQueue);//remove it
-            uploader.setState(Uploader.LIMIT_REACHED);
-            ret = 0;
+            //In either of these cases, if uploader does not support queueing,
+            //it should be removed from the queue.
+            if(!queue) {//downloader does not support queueing
+                _queuedUploads.remove(posInQueue);//remove it
+                uploader.setState(Uploader.LIMIT_REACHED);
+                ret = 0;
+            }
         }
         return ret;
     }
