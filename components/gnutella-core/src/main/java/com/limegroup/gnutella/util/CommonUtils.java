@@ -135,11 +135,15 @@ public final class CommonUtils {
 	private static final File CURRENT_DIRECTORY =
 		new File(PROPS.getProperty("user.dir"));
 
-
     /**
      * Variable for whether or this this is a PRO version of LimeWire. 
      */
     private static boolean _isPro = false;
+    
+    /**
+     * Variable for the settings directory.
+     */
+    static File SETTINGS_DIRECTORY = null;
 
 
 	/**
@@ -557,6 +561,9 @@ public final class CommonUtils {
 	 *  does not exist
      */
     public synchronized static File getUserSettingsDir() {
+        
+        if ( SETTINGS_DIRECTORY != null ) return SETTINGS_DIRECTORY;
+        
         File settingsDir = new File(getUserHomeDir(), 
                                     LIMEWIRE_PREFS_DIR_NAME);
         if(CommonUtils.isMacOSX()) {            
@@ -576,6 +583,8 @@ public final class CommonUtils {
         moveWindowsFiles(settingsDir);
         // make sure old metadata files are moved
         moveXMLFiles(settingsDir);
+        // cache the directory.
+        SETTINGS_DIRECTORY = settingsDir;
         return settingsDir;
     }
 

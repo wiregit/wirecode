@@ -189,6 +189,7 @@ public final class RouterService {
 	 * been constructed.
 	 */
 	public void start() {
+	    if ( _started ) return;
         _started = true;
 
 		// Now, link all the pieces together, starting the various threads.

@@ -108,7 +108,7 @@ public final class SettingsFactory {
 	        Setting set = (Setting)ii.next();
 	        set.revertToDefault();
 	    }
-	    SettingsManager.instance().loadDefaults();
+        SettingsManager.instance().loadDefaults();
 	    
 	}
     
