@@ -798,7 +798,7 @@ ERROR_INTERNAL_OK=Ok
 ERROR_INTERNAL_ALWAYS_SEND=いつも送信
 ERROR_INTERNAL_ALWAYS_REVIEW=いつも視察
 ERROR_INTERNAL_ALWAYS_DISCARD=いつも放棄する
-ERROR_INTERNAL_SERVLET_FAILED=ライムワイヤーのバグ・サーバーに接続できませんでした。ライムワイヤーのデバッギングのために、エラーをコピーしbugs@limewire.comまで電子メールをお送りください。有難うございます。
+ERROR_INTERNAL_SERVLET_FAILED=ライムワイヤーのバグ・サーバーに接続できませんでした. ライムワイヤーのデバッギングのために、エラーをコピーし bugs@limewire.comまで電子メールをお送りください。 有難うございます。
 
 ################################################################################
 # Key/Value pairs for error messages
