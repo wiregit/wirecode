@@ -40,6 +40,12 @@ public final class AlternateLocation
 	private final long TIME;
 
 	/**
+	 * Constant for the sha1 urn for this <tt>AlternateLocation</tt> --
+	 * can be <tt>null</tt>.
+	 */
+	private final URN SHA1_URN;
+
+	/**
 	 * Cached hash code that is lazily initialized.
 	 */
 	private volatile int hashCode = 0;
@@ -82,21 +88,29 @@ public final class AlternateLocation
                                       location);
 			}
 		}
-		return new AlternateLocation(url, date);
+
+		URN sha1 = null;
+		try {
+			sha1 = URN.createSHA1UrnFromURL(url);
+		} catch(IOException e) {
+		}
+		return new AlternateLocation(url, date, sha1);
 	}
 
 
 	/**
-	 * Creates a new <tt>AlternateLocation</tt> instance for the givel 
+	 * Creates a new <tt>AlternateLocation</tt> instance for the given 
 	 * <tt>URL</tt> instance.  This constructor creates an alternate
 	 * location with the current date and time as its timestamp.
 	 * This can be used, for example, for newly uploaded files.
 	 *
 	 * @param url the <tt>URL</tt> instance for the resource
-	 * @throws <tt>MalformedURLException</tt> if a <tt>URL</tt> instance
-	 *  could not be succussfully constructed from the supplied arguments
 	 * @throws <tt>NullPointerException</tt> if the <tt>url</tt> argument is 
 	 *  <tt>null</tt>
+	 * @throws <tt>MalformedURLException</tt> if a copy of the supplied 
+	 *  <tt>URL</tt> instance cannot be successfully created
+	 * @throws <tt>IllegalArgumentException</tt> if the url argument is not a
+	 *  valid location for any reason
 	 */
 	public static AlternateLocation createAlternateLocation(final URL url) 
 		throws MalformedURLException {
@@ -112,7 +126,13 @@ public final class AlternateLocation
 							  url.getFile());
 		// make the date the current time
 		Date date = new Date();
-		return new AlternateLocation(tempUrl, date);
+		URN sha1 = null;
+		try {
+			sha1 = URN.createSHA1UrnFromURL(tempUrl);
+		} catch(IOException e) {
+			// still accept if there's no SHA1 we can extract
+		}
+		return new AlternateLocation(tempUrl, date, sha1);
 	}
 
 	/**
@@ -137,11 +157,9 @@ public final class AlternateLocation
 		if(urn == null) {
 			throw new IOException("no SHA1 in RFD");
 		}
-		String urlStr = ("http://"+rfd.getHost()+":"+rfd.getPort()+
-						 "/get/"+String.valueOf(rfd.getIndex())+
-						 "/"+URLEncoder.encode(rfd.getFileName()));
-		URL url = new URL(urlStr);
-		return new AlternateLocation(url, new Date());
+		URL url = new URL("http", rfd.getHost(), rfd.getPort(),						  
+						  HTTPConstants.URI_RES_N2R + urn.httpStringValue());
+		return new AlternateLocation(url, new Date(), urn);
 	}
 
 	/**
@@ -152,9 +170,10 @@ public final class AlternateLocation
 	 * @param date the <tt>Date</tt> timestamp for the 
 	 *  <tt>AlternateLocation</tt>
 	 */
-	private AlternateLocation(final URL url, final Date date) {
-		this.URL = url;
-		this.TIME = date.getTime();
+	private AlternateLocation(final URL url, final Date date, final URN sha1) {
+		this.URL       = url;
+		this.TIME      = date.getTime();
+		this.SHA1_URN  = sha1;
 		if(TIME == 0) {
 			this.OUTPUT_DATE_TIME = null;
 		} else {
@@ -182,6 +201,26 @@ public final class AlternateLocation
 			// nevertheless
 			return null;
 		}
+	}
+
+	/**
+	 * Returns whether or not this <tt>AlternateLocation</tt> has a SHA1 urn.
+	 *
+	 * @return <tt>true</tt> if there is a SHA1 urn, otherwise <tt>false</tt>
+	 */
+	public boolean hasSHA1Urn() {
+		return SHA1_URN != null;
+	}
+
+	/**
+	 * Accessor for the SHA1 urn for this <tt>AlternateLocation</tt>.
+	 * 
+	 * @return the SHA1 urn for the this <tt>AlternateLocation</tt>, or 
+	 *  <tt>null</tt> if there is none
+	 */
+	public URN getSHA1Urn() {
+		// can be null
+		return SHA1_URN;
 	}
 
 	/**
