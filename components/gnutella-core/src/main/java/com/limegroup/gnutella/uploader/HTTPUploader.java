@@ -484,7 +484,7 @@ public class HTTPUploader implements Uploader {
 			}
             //check the "accept:" header
             if (indexOfIgnoreCase(str, "accept:") != -1) {
-                if(indexOfIgnoreCase(str, "application/x-gnutella-queryreplies")
+                if(indexOfIgnoreCase(str, Constants.QUERYREPLY_MIME_TYPE)
                     != -1) {
                     _clientAcceptsXGnutellaQueryreplies = true;
                 }

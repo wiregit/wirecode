@@ -930,7 +930,7 @@ public class RouterService
             URLConnection conn 
                 = (new URL("http://"+host+":"+port)).openConnection();
             conn.setRequestProperty("accept", 
-                "application/x-gnutella-queryreplies");
+                                    Constants.QUERYREPLY_MIME_TYPE);
             InputStream in = conn.getInputStream();
             
             while(true) {
