@@ -79,12 +79,20 @@ public final class BIOMessageWriter implements MessageWriter, Runnable {
         blockingWriter.start(); 
     }
     
-    /* (non-Javadoc)
-     * @see com.limegroup.gnutella.connection.MessageWriter#write()
+    /**
+     * Does nothing in the blocking writers case.  For blocking writes, the 
+     * caller should always use the write(Message msg) method.  This is because
+     * the blocking writer has its own thread that constantly removes messages
+     * from the queue and writes them.
+     * 
+     * @throws IllegalStateException whenever this method is called
+     * @throws IOException never -- IllegalStateException is always thrown
+     *  first
+     * @return IllegalStateException is thrown before ever returning anything
      */
     public boolean write() throws IOException {
-        // TODO Auto-generated method stub
-        return false;
+        throw new IllegalStateException("blocking writes should use " +
+            "write(Message msg) method");
     }
     
     /**
@@ -182,8 +190,13 @@ public final class BIOMessageWriter implements MessageWriter, Runnable {
         }
     }     
 
-    /* (non-Javadoc)
-     * @see com.limegroup.gnutella.connection.MessageWriter#write(com.limegroup.gnutella.messages.Message)
+    /**
+     * Adds the specified <tt>Message</tt> to teh message writing queue.
+     * 
+     * @param msg the <tt>Message</tt> to write
+     * 
+     * @return always returns <tt>true</tt> because the message is always
+     *  successfully added to the queues
      */
     public boolean write(Message msg) {
         synchronized (QUEUE_LOCK) {
@@ -193,12 +206,16 @@ public final class BIOMessageWriter implements MessageWriter, Runnable {
         return true;
     }
 
-    /* (non-Javadoc)
-     * @see com.limegroup.gnutella.connection.MessageWriter#hasPendingMessage()
+    /**
+     * Determines whether or not this writer has pending messages that have 
+     * not yet been written to the network.  In practice, this call should not
+     * be needed for blocking writes.
+     * 
+     * @return <tt>true</tt> if there are pending messages to write on this
+     *  connection, otherwise <tt>false</tt>
      */
     public boolean hasPendingMessage() {
-        // TODO Auto-generated method stub
-        return false;
+        return QUEUE.size() != 0; 
     }
     
     /**
@@ -210,7 +227,10 @@ public final class BIOMessageWriter implements MessageWriter, Runnable {
         return QUEUE.size();
     }
 
-    /** While the connection is not closed, sends all data delay. */
+    /** 
+     * Continually waits for and sends new messages while this connection 
+     * remains open.
+     */
     public void run() {
         //Exceptions are only caught to set the _runnerDied variable
         //to make testing easier.  For non-IOExceptions, Throwable
