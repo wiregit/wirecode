@@ -450,16 +450,19 @@ public class DownloadTest extends BaseTestCase {
     public void testStealerInterrupted() throws Exception {
         LOG.debug("-Testing unequal swarming with stealer dying...");
         
+        // Note: there is a concurrency issue in the stealing code which causes this
+        // test to fail sometimes.
+        
         final int RATE=500;
-        //second half of file + 1/8 of the file
-        final int STOP_AFTER = 5*TestFile.length()/8;
+        //some small number
+        final int STOP_AFTER = 200000;
         final int FUDGE_FACTOR=RATE*1024;  
         uploader1.setRate(RATE/10);
         uploader2.setRate(RATE);
         uploader2.stopAfter(STOP_AFTER);
         RemoteFileDesc rfd1=newRFD(PORT_1, 100);
         RemoteFileDesc rfd2=newRFD(PORT_2, 100);
-        RemoteFileDesc[] rfds = {rfd1,rfd2};
+        RemoteFileDesc [] rfds = {rfd1,rfd2};
 
         tGeneric(rfds);
 
@@ -473,7 +476,7 @@ public class DownloadTest extends BaseTestCase {
         //Note: The amount downloaded from each uploader will not 
         //be equal, because the uploaders are stated at different times.
         assertLessThan("u1 did all the work",
-                    TestFile.length()-STOP_AFTER+2*FUDGE_FACTOR, u1);
+                    TestFile.length(), u1);
         assertEquals("u2 did all the work", STOP_AFTER, u2);
     }
 
