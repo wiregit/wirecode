@@ -252,6 +252,13 @@ public final class ConnectionSettings extends LimeProps {
      */
     public static final IntSetting NUM_LOCALE_PREF =
         FACTORY.createIntSetting("NUM_LOCALE_PREF", 3);
+    
+    /**
+     * how long we believe firewalls will let us send solicited udp
+     * traffic.
+     */
+    public static final LongSetting SOLICITED_GRACE_PERIOD =
+    	FACTORY.createLongSetting("SOLICITED_GRACE_PERIOD",30000l);
 
     /**
      * Helper method left from Settings Manager
