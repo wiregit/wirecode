@@ -5,6 +5,7 @@ import com.limegroup.gnutella.messages.*;
 import com.limegroup.gnutella.http.*;
 import com.limegroup.gnutella.util.*;
 import com.limegroup.gnutella.xml.*;
+import com.limegroup.gnutella.settings.ThemeSettings;
 import com.limegroup.gnutella.statistics.DownloadStat;
 import com.sun.java.util.collections.*;
 import java.util.Date;
@@ -1295,14 +1296,19 @@ public class ManagedDownloader implements Downloader, Serializable {
         //same temporary file.
         incompleteFile=incompleteFileManager.getFile(
                                                   (RemoteFileDesc)files.get(0));
-        File sharedDir;
+        File saveDir;
+        String fileName = getFileName();
         try {
-            sharedDir=SettingsManager.instance().getSaveDirectory();
-            completeFile=new File(sharedDir, getFileName());
-            String sharedPath = sharedDir.getCanonicalPath();		
+            // if we're downloading a theme file, save in the theme dir.
+            if( fileName.toLowerCase().endsWith(".lwtp") )
+                saveDir = ThemeSettings.THEME_DIR_FILE;
+            else 
+                saveDir=SettingsManager.instance().getSaveDirectory();
+            completeFile=new File(saveDir, fileName);
+            String savePath = saveDir.getCanonicalPath();		
             String completeFileParentPath = 
             new File(completeFile.getParent()).getCanonicalPath();
-            if (!sharedPath.equals(completeFileParentPath))
+            if (!savePath.equals(completeFileParentPath))
                 throw new InvalidPathException();  
         } catch (IOException e) {
             return COULDNT_MOVE_TO_LIBRARY;
