@@ -396,6 +396,48 @@ public class ConnectionManager {
     public boolean hasSupernodeClientConnection() {
         return getNumInitializedClientConnections() > 0;
     }
+
+    /**
+     * Returns whether or not this node has any available connection
+     * slots.  This is only relevant for Ultrapeers -- leaves will 
+     * always return <tt>false</tt> to this call since they do not 
+     * accept any incoming connections, at least for now.
+     *
+     * @return <tt>true</tt> if this node is an Ultrapeer with free
+     *  leaf or Ultrapeer connections slots, otherwise <tt>false</tt>
+     */
+    public boolean hasFreeSlots() {
+        return isSupernode() && 
+            (hasFreeUltrapeerSlots() || hasFreeLeafSlots());
+    }
+
+    /**
+     * Utility method for determing whether or not we have any available
+     * Ultrapeer connection slots.  If this node is a leaf, it will
+     * always return <tt>false</tt>.
+     *
+     * @return <tt>true</tt> if there are available Ultrapeer connection
+     *  slots, otherwise <tt>false</tt>
+     */
+    private boolean hasFreeUltrapeerSlots() {
+        return isSupernode() &&            
+            (getNumInitializedConnections() <
+             ULTRAPEER_CONNECTIONS);
+    }
+
+    /**
+     * Utility method for determing whether or not we have any available
+     * leaf connection slots.  If this node is a leaf, it will
+     * always return <tt>false</tt>.
+     *
+     * @return <tt>true</tt> if there are available leaf connection
+     *  slots, otherwise <tt>false</tt>
+     */
+    private boolean hasFreeLeafSlots() {
+        return isSupernode() &&
+            (getNumInitializedClientConnections() <
+             UltrapeerSettings.MAX_LEAVES.getValue());  
+    }
     
     /**
      * Returns whether this (probably) has a connection to the given host.  This
@@ -650,8 +692,7 @@ public class ConnectionManager {
             //Preference trusted vendors using BearShare's clumping algorithm
             //(see above).
 			if(hr.isGoodLeaf()) {
-				return getNumInitializedClientConnections() < 
-                    UltrapeerSettings.MAX_LEAVES.getValue();
+				return hasFreeLeafSlots(); 
 			} else {
 				return getNumInitializedClientConnections() <
 					(trustedVendor(hr.getUserAgent()) ?
@@ -666,8 +707,6 @@ public class ConnectionManager {
         } else if (hr.isUltrapeer()) {
             //2. Ultrapeer.  Preference trusted vendors using BearShare's
             //clumping algorithm (see above).		   
-
-			int connections = getNumInitializedConnections();
 
 			//if(goodConnection(hr)) {
 				// otherwise, it is a high degree connection, so allow it if we 
@@ -686,9 +725,7 @@ public class ConnectionManager {
 			// if it's not a new high-density connection, only allow it if
 			// our number of connections is below the maximum number of old
 			// connections to allow
-			return connections < 
-				//(trustedVendor(hr.getUserAgent()) ? 
-				ULTRAPEER_CONNECTIONS - RESERVED_GOOD_CONNECTIONS;
+			return hasFreeUltrapeerSlots(); 
         }
 		return false;
     }
