@@ -62,10 +62,11 @@ public abstract class DefaultHeaders extends Properties {
             props.put(HeaderNames.ACCEPT_ENCODING, HeaderNames.DEFLATE_VALUE);
         
         props.put(HeaderNames.X_PONG_CACHING, "0.1");
-        UpdateManager u = UpdateManager.instance();
-        String latestVersion = u.getVersion();
-        // don't send null versions or @version@ versions.
-        if(latestVersion != null && !latestVersion.equals("@version@"))
+        
+        UpdateManager updateManager = UpdateManager.instance();
+        String latestVersion = updateManager.getVersion();
+        // only send if we had a valid file on disk & its not @version@.
+        if(updateManager.isValid() && !latestVersion.equals("@version@"))
             props.put(HeaderNames.X_VERSION, latestVersion);
     }
     

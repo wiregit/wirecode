@@ -39,6 +39,11 @@ public class UpdateManager {
     private static UpdateManager INSTANCE=null;
 
     public static final String SPECIAL_VERSION = "@version@";
+    
+    /**
+     * Whether or not we think we have a valid file on disk.
+     */ 
+    private boolean isValid;
 
     /**
      * Constructor, reads the latest update.xml file from the last run on the
@@ -70,8 +75,18 @@ public class UpdateManager {
             usesLocale = parser.usesLocale();
         } catch(SAXException sax) {
             latestVersion = CommonUtils.getLimeWireVersion();
+            isValid = false;
         } catch(IOException iox) {
             latestVersion = CommonUtils.getLimeWireVersion();
+            isValid = false;
+        } catch(VerifyError error) {
+            // report the bug, but still allow things to continue.
+            // otherwise LimeWire is rendered completely useless
+            // (it won't connect to anyone because it can't build the
+            //  DefaultHeaders)
+            latestVersion = CommonUtils.getLimeWireVersion();
+            isValid = false;
+            ErrorService.error(error);
         } finally {
             if(raf != null) {
                 try {
@@ -90,6 +105,13 @@ public class UpdateManager {
     public synchronized String getVersion() {
         Assert.that(latestVersion!=null,"version not initilaized");
         return latestVersion;
+    }
+    
+    /**
+     * Returns whether or not we have a valid file on disk.
+     */
+    public boolean isValid() {
+        return isValid();
     }
     
     /**
@@ -201,6 +223,8 @@ public class UpdateManager {
                 } catch(SAXException sx) {
                     //SAXException - parsing the xml
                     return; //We can't continue...forget it.
+                } catch(Throwable t) {
+                    ErrorService.error(t);
                 } finally {
                     if( get != null )
                         get.releaseConnection();
@@ -281,6 +305,9 @@ public class UpdateManager {
             if(!renamed) {
                 nf.delete();
                 throw new IOException();
+            } else {
+                // everything went a-okay, we have a valid file.
+                isValid = true;
             }
         } 
         else { //delete the file. The .ver file will be unpacked
