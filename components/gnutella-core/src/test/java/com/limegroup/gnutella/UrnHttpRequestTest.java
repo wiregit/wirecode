@@ -10,8 +10,7 @@ import java.net.*;
 import java.util.*;
 
 /**
- * This class tests H
-TTP requests involving URNs, as specified in HUGE v094,
+ * This class tests HTTP requests involving URNs, as specified in HUGE v094,
  * utilizing the X-Gnutella-Content-URN header and the 
  * X-Gnutella-Alternate-Location header.
  */
