@@ -156,7 +156,7 @@ public class SharingSettings extends LimeProps {
 		"mpg;mpeg;asf;qt;mov;avi;mpe;swf;dcr;gif;jpg;jpeg;jpe;png;tif;tiff;"+
 		"exe;zip;gz;gzip;hqx;tar;tgz;z;rmj;lqt;rar;ace;sit;smi;img;ogg;rm;"+
 		"bin;dmg;jve;nsv;med;mod;7z;iso;lwtp;pmf;m4a;idx;bz2;sea;pf;arc;arj;"+
-		"bz;tbz;mime;taz;ua;toast;lit"
+		"bz;tbz;mime;taz;ua;toast;lit";
     
     /**
 	 * The shared directories (an array of Files!).
