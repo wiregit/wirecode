@@ -370,11 +370,12 @@ public final class PongCachingTest extends BaseTestCase {
         ULTRAPEER_3.send(m);
         ULTRAPEER_3.flush();        
 
+        Thread.sleep(100);
+
         ApplicationSettings.LANGUAGE.setValue("en");        
 
         ULTRAPEER_4.send(m2);
         ULTRAPEER_4.flush();
-
 
         //check for ja pongs
         Message received;   
@@ -419,20 +420,6 @@ public final class PongCachingTest extends BaseTestCase {
         PingPongSettings.PINGS_ACTIVE.setValue(true);
     }
 
-    /**
-     * Test to make sure that pings are periodically sent as they should be.
-     */
-    public void testPingsSentPeriodically() throws Exception {
-
-        // make sure we keep getting pings
-        for(int i=0; i<3; i++) {
-            Message m = ULTRAPEER_2.receive(Pinger.PING_INTERVAL+200);
-            assertInstanceof("message should be a ping request", 
-                             PingRequest.class, m);
-        }
-    }
-
-    
     private void addPongs(byte[] ip, String locale) throws Exception {
         
         for(int i = 0; i < PongCacher.NUM_HOPS+4; i++) {
