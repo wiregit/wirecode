@@ -2,9 +2,17 @@
 
   <!-- set global properties for this basedir -->
   <property name="basedir" value="." />
+  <property name="builddir" value="build" />
   <property name="tests" value="com/limegroup/gnutella" /> 
   <property name="messages" value="com/limegroup/gnutella/messages" /> 
-  <property name="util" value="com/limegroup/gnutella/util" /> 
+  <property name="util"        value="com/limegroup/gnutella/util" /> 
+  <property name="lib"         value="../gui/lib/"/>
+  <property name="collections" value="${lib}collections.jar"/>
+  <property name="xerces"      value="${lib}xerces.jar"/>
+  <property name="junit"       value="${lib}junit.jar"/>
+  <property name="coredir" value="../core"/>
+  <property name="guidir" value="../gui"/>
+  <property name="settings" value="${coredir}/com/limegroup/gnutella/settings"/>
 
   <!-- constants -->
   <property name="DEBUG" value="yes" />
@@ -15,13 +23,14 @@
        environment with the jar files necessary for compilation appended. -->
   <path id="default.classpath" >
     <pathelement path="${CLASSPATH}" />
-    <pathelement location="lib/collections.jar" />
-    <pathelement location="lib/core.jar" />
-    <pathelement location="lib/xerces.jar" />
-    <pathelement location="lib/jl011.jar" />
-    <pathelement location="lib/MRJToolkitStubs.jar" />
-	<pathelement location="lib/MacStubs.jar" />
-	<pathelement location="lib/QTJava.zip"/>
+    <pathelement location="${lib}collections.jar" />
+    <pathelement location="${coredir}" />
+    <pathelement location="${lib}xerces.jar" />
+    <pathelement location="${lib}jl011.jar" />
+	<pathelement location="${lib}ui.jar" />
+    <pathelement location="${lib}MRJToolkitStubs.jar" />
+	<pathelement location="${lib}MacStubs.jar" />
+	<pathelement location="${lib}QTJava.zip"/>
   </path>
 
   <!-- Initialization stuff -->
@@ -65,6 +74,30 @@
     <delete>
       <fileset dir="${basedir}" includes="**/*.class,*.class" />
     </delete>
+  </target>
+
+ <!-- builds all files, including tests, in the project to the specified directory-->
+ <target name="build tests">
+   <mkdir dir="build"/>
+   <javac debug="on" optimize="off" deprecation="on"
+	      srcdir="${coredir}:${guidir}:${basedir}"
+		  destdir="${builddir}"
+		  excludes="${settings}**">
+     <classpath refid="default.classpath" />
+   </javac>
+ </target>
+
+  <!-- tests all classes -->
+  <target name="test all" depends="build tests">
+    <junit printsummary="withOutAndErr" haltonfailure="yes">
+	  <formatter type="plain" useFile="false"/>
+	  <test name="com.limegroup.gnutella.AllTests" />
+	  <classpath>
+	    <pathelement location="${builddir}"/>
+	    <pathelement location="${collections}"/>
+	    <pathelement location="${xerces}"/>
+	  </classpath>
+	</junit>
   </target>
 
 </project>
