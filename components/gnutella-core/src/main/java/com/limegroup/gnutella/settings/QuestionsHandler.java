@@ -6,29 +6,25 @@ import java.io.*;
 
 
 /**
- * This class is the superclass for all LimeWire "general" settings classes.
- * General settings are all stored in limewire.props in the appropriate
- * platform-specific directory.  This class allows settings to be conveniently
- * grouped into subclasses by setting type.  For example, a "DownloadSettings"
- * subclass could contain any settings specifically for downloads.
+ * This controls all 'Do not ask this again' or
+ * 'Always use this answer' questions.
  */
-public abstract class AbstractSettings {
-    /**
-	 * Default name for the properties file.
-	 */
-    private static final String PROPS_NAME = "limewire.props";
-    
+public class QuestionsHandler {    
     /**
      * properties file
      */
     private static final File PROPS_FILE;
     
+    /**
+     * Name for file that stores answers to
+     * all  the 'do not ask this again' or 'always use this answer' questions
+     * 
+     */
+    private static final String FILE_NAME = "questions.props";    
+    
 	/**
 	 * Constant for the <tt>SettingsFactory</tt> that subclasses can use
 	 * to create new settings which will be stored in the properties file.
-     * This should be reserved for settings taht are user maintained or 
-     * otherwise record a state that should be carried forward from one 
-     * session to the next.
 	 */
 	protected static final SettingsFactory FACTORY;
     
@@ -39,7 +35,7 @@ public abstract class AbstractSettings {
     
     static {
         File settingsDir = CommonUtils.getUserSettingsDir();
-        PROPS_FILE = new File(settingsDir, PROPS_NAME);
+        PROPS_FILE = new File(settingsDir, FILE_NAME);
         FACTORY = new SettingsFactory(PROPS_FILE, "LimeWire properties file");
     }
 
@@ -95,4 +91,19 @@ public abstract class AbstractSettings {
     public static boolean getShouldSave() {
         return _shouldSave;
     }
+    
+    //////////// The actual questions ///////////////
+    
+    /** 
+    * Setting for whether or not to allow multiple instances of LimeWire.
+    */ 
+    public static final BooleanSetting MONITOR_VIEW = 
+        FACTORY.createBooleanSetting("MONITOR_VIEW", false);
+
+    /**
+     * Setting for whether or not to ask if you want to delete files.
+     */
+    public static final IntSetting SHOULD_DELETE_FILE =
+        FACTORY.createIntSetting("SHOULD_DELETE_FILE", 0);
+    
 }
