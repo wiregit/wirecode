@@ -96,11 +96,18 @@ public class UpdateManager {
     public void checkAndUpdate(Connection connection) {
 		String nv = connection.getVersion();
         debug("myVersion:"+latestVersion+" theirs: "+nv);
-        if(!isGreaterVersion(nv,latestVersion))
+        String myVersion = null;
+        if(latestVersion.equals(SPECIAL_VERSION))
+            //if I have @version@ on disk check against my real version
+            myVersion = CommonUtils.getLimeWireVersion();
+        else //use the original value of latestVersion
+            myVersion = latestVersion;
+        if(!isGreaterVersion(nv,myVersion))
             return;        
         if(nv.equals(SPECIAL_VERSION))// should never see this on the network!!
             return;//so this should never happen
         final Connection c = connection;
+        final String myversion = myVersion;
         Thread checker = new Thread() {
             public void run() {
                 debug("Getting update file");
@@ -154,7 +161,7 @@ public class UpdateManager {
                     String newVersion = parser.getVersion();
                     if(newVersion==null)
                         return;
-                    if(isGreaterVersion(newVersion,latestVersion)) {
+                    if(isGreaterVersion(newVersion,myversion)) {
                         debug("committing new update file");
                         synchronized(UpdateManager.this) {
                             commitVersionFile(data);//could throw an exception
