@@ -40,6 +40,7 @@ class Version implements Comparable {
      * Compares two versions.
      */
     public int compareTo(Object o) {
+        int retVal;
         Version other = (Version)o;
         if(major == other.major)
             if(minor == other.minor)
@@ -47,13 +48,15 @@ class Version implements Comparable {
                     // if revision == other.revision
                         // return 0;
                     // else
-                        return revision - other.revision;
+                        retVal = revision - other.revision;
                 else
-                    return service - other.service;
+                    retVal = service - other.service;
             else
-                return minor - other.minor;
+                retVal = minor - other.minor;
         else
-            return major - other.major;
+            retVal = major - other.major;
+            
+        return retVal;
     }
     
     /**

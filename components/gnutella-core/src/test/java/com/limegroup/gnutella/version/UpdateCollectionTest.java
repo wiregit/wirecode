@@ -27,75 +27,81 @@ public final class UpdateCollectionTest extends BaseTestCase {
 		junit.textui.TestRunner.run(suite());
 	}
 	
-	public void testCreation() throws Exception {
+	public void testBasicCreation() throws Exception {
 	    
 	    UpdateCollection uc = UpdateCollection.create(
 	        "<update id='42' timestamp=\"150973213135\">" +
-	            "<msg for='1.2.3' os='*'>" +
-	                "<lang id='en' url='http://www.limewire.com/update' current='4.6.0'>" +
+	            "<msg for='4.6.0' url='http://www.limewire.com/update' style='2'>" +
+	                "<lang id='en'>" +
 	                    "<![CDATA[<html><body>This is the text</body></html>]]>" +
 	                "</lang>" +
-	                "<lang id='es' url='http://www.limewire.com/update/es' current='4.9.0'>" +
-	                    "<![CDATA[<html><body>Hola, no habla espanol.</body></html>]]>" +
-	                "</lang>" +
-	                "<lang id='bad' current='4.6.0'>" +
-	                    "<![CDATA[<html><body>This is bad text</body></html>]]>" +
-	                "</lang>" +
-	                "<lang id='badder' url='http://www.limewire.com/update'>" +
-	                    "<![CDATA[<html><body>This is badder text</body></html>]]>" +
-	                "</lang>" +
-	                "<lang id='worst' url='http://www.limewire.com/update' current='4.6.0'>" +
+	                "<lang id='es' button1='b1' button2='b2'>" +
+	                    "Hola, no habla espanol." +
+	                "</lang>" +	                
+	                "<lang id='notext'></lang>" +
+	            "</msg>" +
+	            "<msg/> " +
+	            "<msg for='4.1.2' url='http://limewire.com/hi'>" +
+	                "<lang id='en'>" + 
+	                    "This didn't have a style, it should be ignored." +
 	                "</lang>" +
 	            "</msg>" +
-	            "<msg for='3.2.4' os='Windows, Unix'>" +
-	                "<lang id='en' url='http://www.limewire.com/update' current='4.1.2'>" +
-	                    "<![CDATA[<html><body>This is the other text.</body></html>]]>" +
+	            "<msg for='4.1.2' style='3'>" +
+	                "<lang id='en'>" + 
+	                    "This didn't have a URL, it should be ignored." +
 	                "</lang>" +
-	                "<lang id='es' url='http://www.limewire.com/update/es' current='4.3.4'>" +
-	                    "<![CDATA[<html><body>Hola, no habla espanol (other).</body></html>]]>" +
+	            "</msg>" +
+	            "<msg style='3' url='nostyle'>" +
+	                "<lang id='en'>" + 
+	                    "This didn't have a 'for', it should be ignored." +
 	                "</lang>" +
-	            "</msg>" +	            
+	            "</msg>" +	            	            
 	        "</update>");
 	        
-        assertEquals(uc.getUpdateData().toString(), 4, uc.getUpdateData().size());
+        // First make sure it ignored the invalid msgs.
+        assertEquals(uc.getUpdateData().toString(), 2, uc.getUpdateData().size());
         assertEquals(42, uc.getId());
         assertEquals(150973213135L, uc.getTimestamp());
 	    
 	    UpdateData data;
 	    
-	    Version two = new Version("2.0.0");
-	    data = uc.getUpdateDataFor(two, "en");
-	    assertNotNull(data);
-	    assertEquals("http://www.limewire.com/update", data.getUpdateURI().toString());
-	    assertEquals("<html><body>This is the text</body></html>", data.getUpdateText());
-	    assertEquals("4.6.0", data.getUpdateVersion().toString());
-	    
-	    data = uc.getUpdateDataFor(two, "es");
-	    assertNotNull(data);
-	    assertEquals("http://www.limewire.com/update/es", data.getUpdateURI().toString());
-	    assertEquals("<html><body>Hola, no habla espanol.</body></html>", data.getUpdateText());
-	    assertEquals("4.9.0", data.getUpdateVersion().toString());
-	    
-        data = uc.getUpdateDataFor(two, "de");
-	    assertNotNull(data);
-	    assertEquals("http://www.limewire.com/update", data.getUpdateURI().toString());
-	    assertEquals("<html><body>This is the text</body></html>", data.getUpdateText());
-	    assertEquals("4.6.0", data.getUpdateVersion().toString());
-	    
-	    Version ttf = new Version("3.2.4");
-	    data = uc.getUpdateDataFor(ttf, "en");
-	    assertNotNull(data);
-	    assertEquals("http://www.limewire.com/update", data.getUpdateURI().toString());
-	    assertEquals("<html><body>This is the other text.</body></html>", data.getUpdateText());
-	    assertEquals("4.1.2", data.getUpdateVersion().toString());
-
-	    data = uc.getUpdateDataFor(ttf, "es");	    
-	    assertNotNull(data);
-	    assertEquals("http://www.limewire.com/update/es", data.getUpdateURI().toString());
-	    assertEquals("<html><body>Hola, no habla espanol (other).</body></html>", data.getUpdateText());
-	    assertEquals("4.3.4", data.getUpdateVersion().toString());
-	    
-	    data = uc.getUpdateDataFor(new Version("0.0.0"), "en");
+        // if we already have 4.6.0, this should find nothing.     
+	    data = uc.getUpdateDataFor(new Version("4.6.0"), "en", false, UpdateInformation.STYLE_MAJOR, null);
 	    assertNull(data);
+	    
+	    // if we're above 4.6.0, this should find nothing.
+	    data = uc.getUpdateDataFor(new Version("4.7.0"), "en", false, UpdateInformation.STYLE_MAJOR, null);
+	    assertNull(data);
+	    
+	    // if we only want critical updates, this should find nothing.
+	    data = uc.getUpdateDataFor(new Version("0.0.0"), "en", false, UpdateInformation.STYLE_CRITICAL, null);
+	    assertNull(data);
+	    
+	    // find the english version.
+	    data = uc.getUpdateDataFor(new Version("0.0.0"), "en", false, UpdateInformation.STYLE_MAJOR, null);
+	    assertEquals("en", data.getLanguage());
+	    assertEquals("<html><body>This is the text</body></html>", data.getUpdateText());
+	    assertEquals("4.6.0", data.getUpdateVersion());
+	    assertEquals(UpdateInformation.STYLE_MAJOR, data.getUpdateStyle());
+	    assertNull(data.getButton1Text());
+	    assertNull(data.getButton2Text());
+	    
+	    // find the spanish version.
+	    data = uc.getUpdateDataFor(new Version("4.5.123509781 Pro"), "es", true, UpdateInformation.STYLE_MINOR, null);
+	    assertEquals("es", data.getLanguage());
+	    assertEquals("Hola, no habla espanol.", data.getUpdateText());
+	    assertEquals("4.6.0", data.getUpdateVersion());
+	    assertEquals(UpdateInformation.STYLE_MAJOR, data.getUpdateStyle());
+	    assertEquals("b1", data.getButton1Text());
+	    assertEquals("b2", data.getButton2Text());
+	    
+	    // can't find deutch, so defaults to english.
+	    data = uc.getUpdateDataFor(new Version("4.0.0"), "de", false, UpdateInformation.STYLE_BETA, null);
+	    assertEquals("en", data.getLanguage());
+	    assertEquals("<html><body>This is the text</body></html>", data.getUpdateText());
+	    assertEquals("4.6.0", data.getUpdateVersion());
+	    assertEquals(UpdateInformation.STYLE_MAJOR, data.getUpdateStyle());
+	    assertNull(data.getButton1Text());
+	    assertNull(data.getButton2Text());
     }
 }

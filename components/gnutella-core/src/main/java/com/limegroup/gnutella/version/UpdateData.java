@@ -139,10 +139,10 @@ class UpdateData implements Cloneable, UpdateInformation {
     boolean isAllowed(Version currentV, boolean currentPro, int currentStyle, Version currentJava) {
         return currentV.compareTo(fromVersion) >= 0 && 
                currentV.compareTo(toVersion) < 0 && 
-               currentStyle >= updateStyle &&
+               currentStyle <= updateStyle &&
                OS.hasAcceptableOS(osList) &&
                isValidJava(currentJava) &&
-               currentPro ? isPro : isFree;
+               (currentPro ? isPro : isFree);
     }
     
     /**

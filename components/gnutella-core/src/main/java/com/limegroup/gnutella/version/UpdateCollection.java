@@ -252,6 +252,8 @@ class UpdateCollection {
             return;
         }
         
+        if(os == null)
+            os = "*";
         data.setOSList(OS.createFromList(os));
         
         
