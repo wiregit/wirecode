@@ -11,6 +11,7 @@ package com.limegroup.gnutella;
 import com.sun.java.util.collections.Comparator;
 import com.sun.java.util.collections.Comparable;
 import com.limegroup.gnutella.gui.GUIStyles;
+import com.sun.java.util.collections.Arrays;
 
 public class RemoteFileDesc implements Comparable {
 
@@ -213,7 +214,20 @@ public class RemoteFileDesc implements Comparable {
 		}
 	}
 
-	
-
+	/** Returns true iff o is a RemoteFileDesc with the same value as this.
+     *  Priority and number of attempts is ignored in doing the comparison! */
+    public boolean equals(Object o) {
+        if (! (o instanceof RemoteFileDesc))
+            return false;
+        RemoteFileDesc other=(RemoteFileDesc)o;
+        
+        return _host.equals(other._host)
+            && _port==other._port
+            && _filename.equals(other._filename)
+            && _index==other._index 
+            && Arrays.equals(_clientGUID, other._clientGUID)
+            && _speed==other._speed
+            && _size==other._size;
+    }
 
 }
