@@ -1988,7 +1988,6 @@ public class ManagedDownloader implements Downloader, Serializable {
             LOG.warn("hash verification problem, fileHash="+
                            fileHash+", ourHash="+downloadSHA1);
 
-        treeRecoveryFailed(downloadSHA1);
         synchronized(corruptStateLock) {
             // immediately set as corrupt,
             // will change to non-corrupt later if user ignores
@@ -1996,8 +1995,7 @@ public class ManagedDownloader implements Downloader, Serializable {
             // Note that no prompting or waiting will be done if hashTree
             // is null, but we still want to use promptAboutCorruptDownload
             // because it removes the file from being shared.
-            promptAboutCorruptDownload();
-            waitForCorruptResponse();
+			treeRecoveryFailed(downloadSHA1);
         }
         
         return fileHash;        
@@ -2040,16 +2038,19 @@ public class ManagedDownloader implements Downloader, Serializable {
      */
     private void initializeHashTree() {
         boolean goodTree = false;
-	    synchronized(hashTreeLock) {
-	        hashTree = TigerTreeCache.instance().getHashTree(downloadSHA1);
-	        
-	        // if we have a valid tree, update our chunk size and disable overlap checking
-	        if (hashTree != null && hashTree.isDepthGoodEnough()) 
-	            goodTree=true;
-	    }
+		HashTree tree = TigerTreeCache.instance().getHashTree(downloadSHA1); 
+	    
+		// if we have a valid tree, update our chunk size and disable overlap checking
+		if (tree != null && tree.isDepthGoodEnough()) {
+			synchronized(hashTreeLock) {
+				hashTree = tree;
+				goodTree=true;
+			}
+		}
 	    if (goodTree)
 	        commonOutFile.setCheckOverlap(false);
     }
+	
     /**
      * Recovering from the TigerTree has failed, notify the user about
      * corruption.

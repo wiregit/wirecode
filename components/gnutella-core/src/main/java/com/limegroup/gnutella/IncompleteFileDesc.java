@@ -234,7 +234,7 @@ public class IncompleteFileDesc extends FileDesc implements HTTPHeaderValue {
      */
      public Interval getAvailableSubRange(int low, int high) {
         synchronized(_verifyingFile) {
-            for (Iterator iter = _verifyingFile.getBlocks(); iter.hasNext(); ) {
+            for (Iterator iter = _verifyingFile.getVerifiedBlocks(); iter.hasNext(); ) {
                 Interval interval = (Interval) iter.next();
                 if ((interval.low <= high && low <= interval.high))
                 	// overlap found 

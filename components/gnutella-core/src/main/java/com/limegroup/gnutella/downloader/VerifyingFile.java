@@ -14,10 +14,12 @@ import java.util.NoSuchElementException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.limegroup.gnutella.Assert;
 import com.limegroup.gnutella.tigertree.HashTree;
 import com.limegroup.gnutella.util.FileUtils;
 import com.limegroup.gnutella.util.IntervalSet;
 import com.limegroup.gnutella.util.ProcessingQueue;
+
 
 /**
  * All the HTTPDownloaders associated with a ManagedDownloader will commit
@@ -163,23 +165,81 @@ public class VerifyingFile {
         if(fos == null)
             throw new DiskException("no file?");
         
-        // remove from leased blocks before writing to disk.  
-        // In case any of the disk io (checking overlap, saving) throws,
-        // the chunk will get re-downloaded.
-        Interval intvl = new Interval((int)currPos,(int)currPos+numBytes-1);
-        if (verifiedBlocks.getOverlapIntervals(intvl).size() > 0 ||
-                partialBlocks.getOverlapIntervals(intvl).size() > 0 ||
-                pendingBlocks.getOverlapIntervals(intvl).size() > 0)
-            LOG.debug("bad, writing over verified area "+dumpState(),new Exception());
-        
+        Interval intvl = saveToDisk(currPos,numBytes,buf);
+		
+        // 4. if write went ok, add this interval to the partial blocks
+        if (LOG.isDebugEnabled())
+            LOG.debug("adding chunk "+intvl+" to partialBlocks");
         leasedBlocks.delete(intvl);
-        
-        try {
+        partialBlocks.add(intvl);
+
+		//5. verify chunks
+        checkVerifyableChunks();
+    }
+
+	/**
+	 * Saves the given interval to disk. If it overlaps
+	 * with any already written interval, it gets trimmed if we
+	 * have a HashTree.
+	 * 
+	 * @return the interval that was actually written to disk
+	 */
+	private Interval saveToDisk(long currPos, int numBytes, byte [] buf) 
+	throws DiskException{
+		Interval intvl = new Interval((int)currPos,(int)currPos+numBytes-1);
+		try {
             if(checkOverlap) 
                 checkOverlap(intvl, buf);
-            
-            //Got this far? Either no need to check, or it checks out OK.
-            
+            else {
+				// since we are mixing overlapping intervals with non-overlapping,
+				// it is possible to have an interval downloaded when we didn't have a
+				// tree which overlaps with an interval we downloaded after we
+				// found the tree.  We do not want to overwrite any already written data.
+				
+				// find any overlapping regions
+				List overlaps = verifiedBlocks.getOverlapIntervals(intvl);
+				overlaps.addAll(partialBlocks.getOverlapIntervals(intvl));
+				overlaps.addAll(pendingBlocks.getOverlapIntervals(intvl));
+				
+				// if we have overlapping regions, we need to trim the interval
+				if (!overlaps.isEmpty()) {
+					if (LOG.isDebugEnabled())
+						LOG.debug("found overlapping region(s):"+overlaps);
+					
+					IntervalSet temp = new IntervalSet();
+					temp.add(intvl);
+					
+					// remove them from our interval
+					for (Iterator iter = overlaps.iterator();iter.hasNext();) 
+						temp.delete((Interval)iter.next());
+					
+					// overlaps should have been at the edges of the 
+					// interval, so we should have a single interval left
+					List resultList = temp.getAllIntervalsAsList();
+					Assert.silent(resultList.size() == 1);
+					
+					Interval trimmed = (Interval)resultList.get(0);
+					
+					// that interval should be at most 2*OVERLAP_BYTES smaller
+					// than the original.  Otherwise we have a problem
+					Assert.silent(trimmed.high - trimmed.low >= 
+						intvl.high - intvl.low - 2 * DownloadWorker.OVERLAP_BYTES);
+					
+					if (LOG.isDebugEnabled())
+						LOG.debug("after removing overlaps, the interval is "+trimmed);
+					
+					// trim the data buffer to the new interval
+					byte [] newbuf = new byte[trimmed.high - trimmed.low +1];
+					System.arraycopy(buf,trimmed.low - (int)currPos,newbuf,0,newbuf.length);
+					
+					// update the parameters
+					buf = newbuf;
+					currPos = trimmed.low;
+					numBytes = newbuf.length;
+					intvl = trimmed;
+				}
+            }
+			
             //2. get the fp back to the position we want to write to.
             fos.seek(currPos);
             //3. Write to disk.
@@ -188,31 +248,8 @@ public class VerifyingFile {
             throw new DiskException(diskIO);
         }
         
-        //4. if write went ok, add this interval to the partial blocks
-        if (LOG.isDebugEnabled())
-            LOG.debug("adding chunk "+intvl+" to partialBlocks");
-        partialBlocks.add(intvl);
-        
-        //5. if we have a tree, see if there is a complete chunk in the partial list
-        HashTree tree = managedDownloader.getHashTree(); 
-        if (tree != null) {
-            for (Iterator iter = findVerifyableBlocks().iterator();iter.hasNext();)  {
-                Interval i = (Interval) iter.next();
-                partialBlocks.delete(i);
-                pendingBlocks.add(i);
-                if (LOG.isDebugEnabled())
-                    LOG.debug("will schedule for verification "+i);
-                CHUNK_VERIFIER.add(new ChunkVerifier(i,tree));
-            }
-        } else
-            // if we couldn't find a tree during the entire download, 
-            // we have to bite the bullet and rely on SHA1 alone
-            if (partialBlocks.getSize() == completedSize) {
-                Interval all = partialBlocks.removeFirst();
-                verifiedBlocks.add(all);
-        }
-    }
-
+		return intvl;
+	}
     /**
      * checks whether data supposed to go at an interval on disk matches with any
      * previous data written to the disk
@@ -245,6 +282,10 @@ public class VerifyingFile {
             int j = findInitialPoint(overlapInterval,intvl.low);
             for(int i=0;i<amountToCheck;i++,j++) {
                 if (data[j]!=fileBuf[i]) { //corrupt bytes
+					
+					if (LOG.isWarnEnabled())
+						LOG.warn("corruption found in checkOverlap");
+					
                     isCorrupted = true; // flag as corrupted.
                     if(managedDownloader!=null)//md may be null for testing
                         managedDownloader.promptAboutCorruptDownload();
@@ -253,6 +294,31 @@ public class VerifyingFile {
         }
     }
     
+	/**
+	 * Schedules those chunks that can be verified against the hash tree
+	 * for verification.
+	 */
+	private void checkVerifyableChunks() {
+        // if we have a tree, see if there is a completed chunk in the partial list
+		HashTree tree = managedDownloader.getHashTree(); 
+		if (tree != null) {
+			for (Iterator iter = findVerifyableBlocks().iterator();iter.hasNext();)  {
+				Interval i = (Interval) iter.next();
+				partialBlocks.delete(i);
+				pendingBlocks.add(i);
+				if (LOG.isDebugEnabled())
+					LOG.debug("will schedule for verification "+i);
+				CHUNK_VERIFIER.add(new ChunkVerifier(i,tree));
+			}
+		} else
+			// if we couldn't find a tree during the entire download, 
+			// we have to bite the bullet and rely on SHA1 alone
+			if (partialBlocks.getSize() == completedSize) {
+				Interval all = partialBlocks.removeFirst();
+				verifiedBlocks.add(all);
+			}
+	}
+	
     /**
      * iterates through the pending blocks and checks if the recent write has created
      * some (verifiable) full chunks.  Its not possible to verify more than two chunks
@@ -289,7 +355,6 @@ public class VerifyingFile {
                 verifyable.add(last);
             }
         }
-                
         
         return verifyable;
     }
