@@ -223,5 +223,29 @@ public class BestCandidates {
 		}
 	}
 	
+	/**
+	 * Finds a connection on which a specific message should be forwarded to.
+	 * up to certain ttl away.
+	 * 
+	 * @param c the IpPort that we wish to get the route for
+	 * @param ttl look for candidates no farther than that ttl
+	 * @return the <tt>Connection</tt> that we should route the request on
+	 */
+	public static Connection getRoute(IpPort c, int ttl) {
+		
+		
+		synchronized(instance){
+			if (instance._best==null)
+				return null;
+			
+			int size = Math.max(ttl, instance._best.length-1);
+			
+			for (int i =0;i<=size;i++)
+				if (c.isSame(instance._best[i]))
+					return instance._best[i].getAdvertiser();
+		}
+		return null;
+	}
+	
 	
 }

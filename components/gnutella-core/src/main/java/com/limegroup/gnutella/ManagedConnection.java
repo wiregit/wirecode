@@ -295,6 +295,11 @@ public class ManagedConnection extends Connection
     private boolean _horizonEnabled = true;
 
     /**
+     * whether this connection is a connection from someone we tried to
+     * promote recently.
+     */
+    private boolean _isCandidate = false;
+    /**
      * Creates a new outgoing connection to the specified host on the
 	 * specified port.  
 	 *
@@ -311,6 +316,19 @@ public class ManagedConnection extends Connection
 			  (HandshakeResponder)new LeafHandshakeResponder(host)));
     }
 
+    /**
+     * factory method which allows the creation of Ultrapeer2Ultrapeer connection
+     * even if we are leaf.  Useful for promoting to ultrapeer.
+     * @param host the host to connect to
+     * @param port the port the host is listening on
+     * @return the new connection object.
+     */
+    public static ManagedConnection forceUP2UPConnection (String host, int port) {
+    	return new ManagedConnection(host, port, 
+    		new UltrapeerHeaders(host), new ForcedUltrapeerHandshakeResponder(host));
+    	
+    }
+    
 	/**
 	 * More customizable constructor used for testing.
 	 */
@@ -339,14 +357,39 @@ public class ManagedConnection extends Connection
      * @effects wraps a connection around socket and does the rest of the
      *  Gnutella handshake.
      */
-    ManagedConnection(Socket socket) {
-        super(socket, 
-			  RouterService.isSupernode() ? 
-			  (HandshakeResponder)(new UltrapeerHandshakeResponder(
-			      socket.getInetAddress().getHostAddress())) : 
-			  (HandshakeResponder)(new LeafHandshakeResponder(
-				  socket.getInetAddress().getHostAddress())));
+	ManagedConnection(Socket socket) {
+        super(socket, decideWhichResponder(socket));
         _manager = RouterService.getConnectionManager();
+        //for some reason the field RESPONSE_HEADERS becomes null later on,
+        //so I'm performing this check now.
+        _isCandidate = RESPONSE_HEADERS instanceof ForcedUltrapeerHandshakeResponder;
+    }
+
+    /**
+     * decides what kind of responsder to assign to the incoming connection.
+     * 
+     * a) if the node is leaf it assigns a LeafHandshakeResponder.
+     * b) if it is an ultrapeer and is not promoting anybody it assigns 
+     * an UltrapeerHandshakeResponder.
+     * c) if it is an ultrapeer and is promoting, and the socket corresponds
+     * to the leaf we are trying to promote, it assigns a 
+     * ForcedUltrapeerHandshakeResponder.
+     * 
+     * @param socket the socket on which the connection is arriving.
+     * @return the appropriate HandshakeResponder to use.
+     */
+    private static final HandshakeResponder decideWhichResponder(Socket socket) {
+    	
+    	String host = socket.getInetAddress().getHostAddress();
+    	
+    	if (RouterService.isSupernode()) {
+    		if (RouterService.getPromotionManager().
+    				isPromoting(new IpPortPair(socket))) {
+    			return new ForcedUltrapeerHandshakeResponder(host);
+    		}
+    		return new UltrapeerHandshakeResponder(host);
+    	}
+		return new LeafHandshakeResponder(host);
     }
 
 

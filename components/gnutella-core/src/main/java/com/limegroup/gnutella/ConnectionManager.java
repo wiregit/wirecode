@@ -2121,5 +2121,66 @@ public class ConnectionManager {
                 ApplicationSettings.DEFAULT_LOCALE.getValue();
         return ApplicationSettings.LANGUAGE.getValue().equals(loc);
     }
+    
+    
+    /**
+     * tries to become an ulrapeer by first disconnecting all existing leaf connections
+     * and then adding the guaranteed up2up connection.  Used for promotion.
+     * 
+     * @param host the host to connect to that we are sure has a slot waiting for us
+     * @param port the port that host is listening to
+     */
+    public void becomeAnUPWithBackupConn(IpPort target) throws IOException {
+   
+    	String host = target.getAddress();
+    	int port = target.getPort();
+    	
+    	//first, see if we are already connected to that host
+    	//and if so, close the connection since morphing is not yet implemented
+    	for (Iterator iter = _initializedConnections.iterator();iter.hasNext();) {
+    		ManagedConnection c = (ManagedConnection) iter.next();
+    		if (c.isSame(target))
+    			remove(c);
+    	}
+    	
+    	
+    	//this connection must not fail.  If it does, the process will be aborted. 
+		final ManagedConnection UPconn = ManagedConnection.forceUP2UPConnection(host,port);
+		UPconn.initialize();
+		processConnectionHeaders(UPconn);
+		
+		//if we got here, the connection is initialized
+		//shut down the other connections
+		disconnect(); 
+		
+		//now add our backup connection to the lists.
+		//this duplicates some code from initializeExternallyGeneratedConnection
+		RouterService.getCallback().connectionInitializing(UPconn);
+		synchronized(this) {
+			connectionInitializing(UPconn);
+			completeConnectionInitialization(UPconn,false);
+		}
+		
+		//start the connection
+		Thread connectionRunner = new ManagedThread(
+				new OutgoingConnector(UPconn,false));
+		connectionRunner.start();
+		
+		//sleep some time to get the connection initialized, etc.
+		try {
+			Thread.sleep(1000);
+		}catch(InterruptedException iex){}
+		
+		//become an UP! :)
+		UltrapeerSettings.EVER_ULTRAPEER_CAPABLE.setValue(true);
+		
+		//fetch UP connections using the classic method.  This should be removed
+		//when the crawler is implemented
+		recoverHosts();
+		setKeepAlive(ConnectionSettings.NUM_CONNECTIONS.getValue());
+		
+		//TODO: don't forget to set the last disconnect time
+		
+    }
 
 }

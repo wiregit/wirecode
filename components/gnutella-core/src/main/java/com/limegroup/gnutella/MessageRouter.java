@@ -412,6 +412,13 @@ public abstract class MessageRouter {
         	receivingConnection.handleVendorMessage(
         			(VendorMessage)msg);
         }
+        else if (msg instanceof PromotionRequestVendorMessage) {
+        	if(RECORD_STATS) 
+                ;//TODO: add the statistics recording code
+        	handlePromotionRequestVM(
+        			(PromotionRequestVendorMessage)msg,
+        			receivingConnection);
+        }
         //This may trigger propogation of query route tables.  We do this AFTER
         //any handshake pings.  Otherwise we'll think all clients are old
         //clients.
@@ -2543,6 +2550,87 @@ public abstract class MessageRouter {
     		return; 
     	UDPCrawlerPong newMsg = new UDPCrawlerPong(msg);
     	handler.handleUDPCrawlerPong(newMsg);
+    }
+    
+    /**
+     * handles a PromotionRequest received from the network.
+     * 
+     * There are two possible scenarios:
+     * A. We are the target leaf - initiate the promotion process
+     * B. We are a forwarding UP - check for validity and forward
+     *  
+     * @param msg the received message
+     * @param handler the connection we received the message on.
+     */
+    public void handlePromotionRequestVM(PromotionRequestVendorMessage msg, Connection sender) {
+    	
+    	//first make sure the other side is an UP 
+    	//since only UPs should send these messages
+    	if (!sender.isGoodUltrapeer()) {
+    		return;
+    	}
+    	//then check the distance field, and if it is 0 verify the sender
+    	if (msg.getDistance() == 0 &&
+    			! msg.getRequestor().isSame(sender)) 
+    		return;
+				
+    	
+    	//if we are a leaf and we are the target, start the promotion process.
+    	
+    	if(!RouterService.isSupernode()) {
+    		
+    		//make sure the promotion request was intended for us
+    		if (Arrays.equals(msg.getCandidate().getInetAddress().getAddress(),
+    				RouterService.getAddress()) ||
+					!ConnectionSettings.LOCAL_IS_PRIVATE.getValue())  
+					//msg.getCandidate().getInetAddress().isLoopbackAddress()) //keep this one around
+    			//for testing purposes allows requests from localhost
+    			
+    			_promotionManager.initiatePromotion(msg); 
+    	}
+    	//*********************
+    	//we are an ultrapeer that needs to forward this query.
+    	//*********************
+    	else if (msg.getDistance() >1)
+    		return;
+    	else
+    		forwardPromotionRequest(new PromotionRequestVendorMessage(msg));
+    	
+    }
+    
+    
+    
+    /**
+     * forwards a promotion request to a candidate.  This method will route
+     * the Promotion Request VM to the appropriate destination.
+     * If the route to the target is no longer open, the message is dropped
+     * and the candidate purged from the table.
+     *  
+     * @param msg the PromotionRequestVendorMEssage to forward
+     */
+    public void forwardPromotionRequest(PromotionRequestVendorMessage msg) {
+    	
+    	Connection route = BestCandidates.getRoute(msg.getCandidate(), 
+    			2-msg.getDistance());
+    	
+    	if (route!=null && route.isOpen())
+    		try  {
+    			route.send(msg);
+    		}catch(IOException tooBad) {}  //sending failed.  Not much we can do
+    	 
+    }
+    
+    /**
+     * handles an ACK for a promotion request message.
+     * delegates the call to promotion manager.
+     * 
+     */
+    private void handlePromotionACKVendorMessage(PromotionACKVendorMessage message, 
+    			ReplyHandler handler, DatagramPacket datagram) {
+    	
+    	_promotionManager.handleACK(message,
+    			new Endpoint(datagram.getAddress().getHostAddress(),datagram.getPort()));
+    	
     }
     
     private static class QueryResponseBundle {

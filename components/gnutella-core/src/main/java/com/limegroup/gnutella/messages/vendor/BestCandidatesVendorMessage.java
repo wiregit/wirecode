@@ -24,7 +24,8 @@ public class BestCandidatesVendorMessage extends VendorMessage {
 	 * creates a new message containing the best candidate ultrapeers at 0 1 hops
 	 * respectively.  They are in serialized ExtendedEndpoint form.
 	 * 
-	 * @param bestCandidates an array of ExtendedEndpoints.  If we only have data about our
+	 * @param bestCandidates an array of <tt>Candidate</tt> objects.  
+	 * If we only have data about our
 	 * own best leaf, make the second element null.
 	 */
 	public BestCandidatesVendorMessage(Candidate []bestCandidates) {

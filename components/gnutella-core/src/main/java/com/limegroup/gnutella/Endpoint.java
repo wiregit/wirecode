@@ -9,7 +9,7 @@ import com.limegroup.gnutella.util.*;
  * Immutable IP/port pair.  Also contains an optional number and size
  * of files, mainly for legacy reasons.
  */
-public class Endpoint implements Cloneable, Serializable, IpPort,
+public class Endpoint extends IpPortPair implements Cloneable, Serializable, 
 com.sun.java.util.collections.Comparable
 {
     /**
@@ -17,8 +17,6 @@ com.sun.java.util.collections.Comparable
     */
     static final long serialVersionUID = 4686711693494625070L;
     
-    private String hostname = null;
-    int port = 0;
     /** Number of files at the host, or -1 if unknown */
     private long files=-1;
     /** Size of all files on the host, or -1 if unknown */
@@ -144,6 +142,7 @@ com.sun.java.util.collections.Comparable
     public Endpoint(String hostAndPort, boolean requireNumeric) 
         throws IllegalArgumentException
     {
+    	super("",0);
         final int DEFAULT=6346;
         int j=hostAndPort.indexOf(":");
         if (j<0)
@@ -195,12 +194,11 @@ com.sun.java.util.collections.Comparable
     }
 
     public Endpoint(String hostname, int port) {
+    	super(hostname,port);
         if(!NetworkUtils.isValidPort(port))
             throw new IllegalArgumentException("invalid port: "+port);
         if(!NetworkUtils.isValidAddress(hostname))
             throw new IllegalArgumentException("invalid address: " + hostname);
-        this.hostname = hostname;
-        this.port=port;
     }
 
     /**
@@ -209,15 +207,14 @@ com.sun.java.util.collections.Comparable
     * @param port The port number for the host
     */
     public Endpoint(byte[] hostBytes, int port) {
+    	super(NetworkUtils.ip2string(hostBytes),port);
         if(!NetworkUtils.isValidPort(port))
             throw new IllegalArgumentException("invalid port: "+port);
         if(!NetworkUtils.isValidAddress(hostBytes))
             throw new IllegalArgumentException("invalid address");
-        this.hostBytes = hostBytes;
-        this.port = port;
         
-        //initialize hostname also
-        this.hostname = NetworkUtils.ip2string(hostBytes);
+        this.hostBytes = hostBytes;
+        
     }
     
     
@@ -255,6 +252,7 @@ com.sun.java.util.collections.Comparable
     */
     public Endpoint(Endpoint ep)
     {
+    	super(ep.hostname,ep.port);
         //copy the fields
         this.connectivity = ep.connectivity;
         this.files = ep.files;
@@ -271,35 +269,10 @@ com.sun.java.util.collections.Comparable
         return hostname+":"+port + " connectivity=" + connectivity + " files="
         + files + " kbytes=" + kbytes;
     }
-
-    public String getAddress()
-    {
-        return hostname;
-    }
     
-    /**
-     * Accessor for the <tt>InetAddress</tt> instance for this host.  Implements
-     * <tt>IpPort</tt> interface.
-     * 
-     * @return the <tt>InetAddress</tt> for this host, or <tt>null</tt> if the
-     *  <tt>InetAddress</tt> cannot be created
-     */
-    public InetAddress getInetAddress() {
-        try {
-            return InetAddress.getByName(hostname);
-        } catch (UnknownHostException e) {
-            return null;
-        }
-    }
-
     public void setHostname(String hostname)
     {
         this.hostname = hostname;
-    }
-
-    public int getPort()
-    {
-        return port;
     }
 
     /** Returns the number of files the host has, or -1 if I don't know */
@@ -448,12 +421,5 @@ com.sun.java.util.collections.Comparable
             return a[0]==b[0] && a[1]==b[1] && a[2]==b[2];
     }
     
-    //Implements IpPort interface
-    public boolean isSame(IpPort o) {
-    	if (o==null)
-    		return false;
-    	return getInetAddress().equals(o.getInetAddress()) &&
-			getPort() == o.getPort();
-    }
 }
 

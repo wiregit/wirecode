@@ -33,6 +33,8 @@ public abstract class VendorMessage extends Message {
     protected static final int F_ULTRAPEER_LIST = 6;
     protected static final int F_FEATURES = 23;
     protected static final int F_BEST_CANDIDATES =24;
+    protected static final int F_PROMOTION_ACK = 25;
+    protected static final int F_PROMOTION_REQUEST = 26;
     
     protected static final byte[] F_LIME_VENDOR_ID = {(byte) 76, (byte) 73,
                                                       (byte) 77, (byte) 69};
@@ -340,6 +342,12 @@ public abstract class VendorMessage extends Message {
         if ((selector == F_BEST_CANDIDATES) &&
         		(Arrays.equals(vendorID, F_LIME_VENDOR_ID)))
         	return new BestCandidatesVendorMessage(guid,ttl,hops,version,restOf);
+        if ((selector == F_PROMOTION_ACK) &&
+        		(Arrays.equals(vendorID, F_LIME_VENDOR_ID)))
+        	return new PromotionACKVendorMessage(guid,ttl,hops,version,restOf);
+        if ((selector == F_PROMOTION_REQUEST) &&
+        		(Arrays.equals(vendorID, F_LIME_VENDOR_ID)))
+        	return new PromotionRequestVendorMessage(guid,ttl,hops,version,restOf);
         
         if( RECORD_STATS )
                 ReceivedErrorStat.VENDOR_UNRECOGNIZED.incrementStat();
