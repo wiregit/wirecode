@@ -96,23 +96,21 @@ public class ManagedDownloader implements Downloader, Serializable {
      *  INVARIANT: files is sorted by priority.
      *  LOCKING: obtain this' monitor */
     private List /* RemoteFileDesc */ files;
-    /** The files to get by pushes, each represented by a RFDPushPair.
-     *  These are not sorted.  They contain former members of files. */
-    private List /* of RFDPushPair */ pushFiles;
-    /** If started, the thread trying to do the downloads.  Otherwise null. */
-    private Thread dloaderThread;
+    /** If started, the thread trying to coordinate all downloads.  
+     *  Otherwise null. */
+    private Thread dloaderManagerThread;
+    /** The thread actually transferring files, a child of dloadManagerThread, 
+     *  or null if waiting for retry, etc. */
+    private volatile Thread dloaderThread;
     /** The connection we're using for the current attempt, or last attempt if
      *  we aren't actively downloading.  Or null if we've never attempted a
      *  download. */
     private HTTPDownloader dloader;
     /** True iff this has been forcibly stopped. */
     private boolean stopped;
-    /** A queue of incoming HTTPDownloaders from push downloads.  Call wait()
-     *  and notify() on this if it changes.  Add to tail, remove from head. */
-    private List /* of HTTPDownloader */ pushQueue;
-    /** The list of all files we've requested via push messages.  Only files
-     * matching this description may be accepted from incoming connections. */
-    private List /* of PushRequestedFile */ requested;
+//      /** The list of all files we've requested via push messages.  Only files
+//       * matching this description may be accepted from incoming connections. */
+//      private List /* of PushRequestedFile */ requested;
 
 
     ///////////////////////// Variables for GUI Display  /////////////////
@@ -170,36 +168,25 @@ public class ManagedDownloader implements Downloader, Serializable {
     public void initialize(DownloadManager manager) {
         this.manager=manager;
 
-        //Sort files by size and store in this.files and this.pushFiles.  Note
-        //that Arrays.sort(..)  sorts in ASCENDING order, so we iterate through
-        //the array backwards.
+        //Sort files by size and store in this.files.  Note that Arrays.sort(..)
+        //sorts in ASCENDING order, so we iterate through the array backwards.
         Arrays.sort(allFiles, new RemoteFileDesc.RemoteFileDescComparator());
         this.files=new LinkedList();
-        this.pushFiles=new LinkedList();
         for (int i=allFiles.length-1; i>=0; i--) {
             RemoteFileDesc rfd=allFiles[i];
-            //As an optimization, we can skip normal download attempts
-            //from private IP addresses.  If the host is on the same
-            //private network as us, a push download should work anyway.
-            //If the host is on a different network, this couldn't
-            //possibly work.  TODO2: look at push flag here as well.
-            if (isPrivate(rfd))
-                this.pushFiles.add(new RFDPushPair(rfd));
-            else                
-                this.files.add(rfd);
+            this.files.add(rfd);
         }
 
         this.dloader=null;
         stopped=false;
-        pushQueue=new LinkedList();
-        requested=new LinkedList();
+//          requested=new LinkedList();
         setState(QUEUED);
         this.lastAddress=null;
         this.tries=0;
             
-        this.dloaderThread=new Thread(new ManagedDownloadRunner());
-        dloaderThread.setDaemon(true);
-        dloaderThread.start();       
+        this.dloaderManagerThread=new Thread(new ManagedDownloadRunner());
+        dloaderManagerThread.setDaemon(true);
+        dloaderManagerThread.start();       
     }
 
     /**
@@ -214,12 +201,6 @@ public class ManagedDownloader implements Downloader, Serializable {
             for (Iterator iter=files.iterator(); iter.hasNext(); ) {
                 RemoteFileDesc rfd=(RemoteFileDesc)iter.next();
                 File thisFile=incompleteFileManager.getFile(rfd);
-                if (thisFile.equals(otherFile))
-                    return true;
-            }
-            for (Iterator iter=pushFiles.iterator(); iter.hasNext(); ) {
-                RFDPushPair pair=(RFDPushPair)iter.next();
-                File thisFile=incompleteFileManager.getFile(pair.rfd);
                 if (thisFile.equals(otherFile))
                     return true;
             }
@@ -240,50 +221,51 @@ public class ManagedDownloader implements Downloader, Serializable {
     public boolean acceptDownload(
             String file, Socket socket, int index, byte[] clientGUID)
             throws IOException {
-        //Authentication: check if we requested file from this host via push.
-        //This ignores timestamps.  So first we clear out very old entries.
-        RemoteFileDesc rfd=null;   //The original rfd.  See below.
-        PushRequestedFile prf=new PushRequestedFile(clientGUID, file, index);
-        synchronized (this) {
-            purgeOldPushRequests();
-            if (! requested.contains(prf))
-                return false;
+//          //Authentication: check if we requested file from this host via push.
+//          //This ignores timestamps.  So first we clear out very old entries.
+//          RemoteFileDesc rfd=null;   //The original rfd.  See below.
+//          PushRequestedFile prf=new PushRequestedFile(clientGUID, file, index);
+//          synchronized (this) {
+//              purgeOldPushRequests();
+//              if (! requested.contains(prf))
+//                  return false;
 
-            //Get original RemoteFileDesc to get file size to find temporary
-            //file.  Unfortunately the size is NOT available from the GIV line.
-            //(That's sort of a flaw of the Gnutella protocol.)  So we search
-            //through the list of files in this, comparing file index numbers
-            //and client GUID's.  We also check filenames, though this is not
-            //strictly needed.
-            for (Iterator iter=pushFiles.iterator(); iter.hasNext(); ) {
-                rfd=((RFDPushPair)iter.next()).rfd;
-                if (rfd.getIndex()==index 
-                        && rfd.getFileName().equals(file)
-                        && (new GUID(rfd.getClientGUID())).
-                            equals(new GUID(clientGUID)))
-                    break;
-            }
-            Assert.that(rfd!=null, "No match for supposedly requested file");
-        }
+//              //Get original RemoteFileDesc to get file size to find temporary
+//              //file.  Unfortunately the size is NOT available from the GIV line.
+//              //(That's sort of a flaw of the Gnutella protocol.)  So we search
+//              //through the list of files in this, comparing file index numbers
+//              //and client GUID's.  We also check filenames, though this is not
+//              //strictly needed.
+//              for (Iterator iter=pushFiles.iterator(); iter.hasNext(); ) {
+//                  rfd=((RFDPushPair)iter.next()).rfd;
+//                  if (rfd.getIndex()==index 
+//                          && rfd.getFileName().equals(file)
+//                          && (new GUID(rfd.getClientGUID())).
+//                              equals(new GUID(clientGUID)))
+//                      break;
+//              }
+//              Assert.that(rfd!=null, "No match for supposedly requested file");
+//          }
 
-        //Authentication ok.  Make and queue downloader.  Notify downloader
-        //thread to consume this downloader.  If downloader isn't waiting, this
-        //may not be serviced for some time.
-        HTTPDownloader downloader=new HTTPDownloader(
-            socket, rfd, incompleteFileManager.getFile(rfd));
+//          //Authentication ok.  Make and queue downloader.  Notify downloader
+//          //thread to consume this downloader.  If downloader isn't waiting, this
+//          //may not be serviced for some time.
+//          HTTPDownloader downloader=new HTTPDownloader(
+//              socket, rfd, incompleteFileManager.getFile(rfd));
             
             
-        synchronized (this) {
-            //If stopped or stopping, don't add this or it may not be cleaned
-            //up.
-            if (stopped) {
-                downloader.stop();
-                return false;
-            }
-            pushQueue.add(downloader);
-            this.notify();
-        }
-        return true;
+//          synchronized (this) {
+//              //If stopped or stopping, don't add this or it may not be cleaned
+//              //up.
+//              if (stopped) {
+//                  downloader.stop();
+//                  return false;
+//              }
+//              pushQueue.add(downloader);
+//              this.notify();
+//          }
+//          return true;
+        return false;
     }
 
     public synchronized void stop() {
@@ -300,13 +282,12 @@ public class ManagedDownloader implements Downloader, Serializable {
         //fact, this may not do anything at all if the thread is just about to
         //enter the wait!  Still this is nice in case the thread is waiting for
         //a long time.
-        if (dloaderThread!=null)
-            dloaderThread.interrupt();
+        if (dloaderManagerThread!=null)
+            dloaderManagerThread.interrupt();
     }
 
     public synchronized boolean resume() throws AlreadyDownloadingException {
-        //It's not strictly necessary to check all these states, but it can't
-        //hurt.
+        //Ignore request if already in the download cycle.
         if (! (state==WAITING_FOR_RETRY || state==GAVE_UP))
             return false;
         //Sometimes a resume can cause a conflict.  So we check.
@@ -320,10 +301,9 @@ public class ManagedDownloader implements Downloader, Serializable {
             //running in this and it may be safely resumed.
             initialize(this.manager);
         } else {
-            //The current download is only affected if waiting to retry--which
-            //is exactly what we want.
-            if (dloaderThread!=null)
-                dloaderThread.interrupt();
+            //Interrupt any waits.
+            if (dloaderManagerThread!=null)
+                dloaderManagerThread.interrupt();
         }
         return true;
     }
@@ -379,173 +359,226 @@ public class ManagedDownloader implements Downloader, Serializable {
 
     /** Actually does the download. */
     private class ManagedDownloadRunner implements Runnable {
+        private static final int SUCCESS=0;
+        private static final int DISCONNECTED=-1;
+        private static final int WAIT_FOR_RETRY=-2;
+        private static final int NO_MORE_LOCATIONS=-3;       
+
         public void run() {
-            try {
-                //Until there are no more downloads left to try...
-                for (int i=0; i<TRIES && !stopped; i++) {
-                    synchronized (ManagedDownloader.this) {
-                        ManagedDownloader.this.tries=i;
-                    }
-
-                    try {
-                        int success=tryAllDownloads();
-                        if (success==1) {
-                            //a) Success!
-                            manager.remove(ManagedDownloader.this, true);
-                            return;
-                        } else if (success==-1) {
-                            //b) No more files to try
-                            break;
-                        } else {
-                            //c) No success, but try again
-                        }
-                    } catch (InterruptedException e) {
-                        if (stopped) {
-                            //d) Aborted by user
-                            break;
-                        } else {
-                            //e) Manually restarted (resumed) by user
-                        }
-                    }
-                }
-
-                if (stopped) {
-                    //We've been aborted.  Remove this self from active queue or
-                    //waiting set.
-                    setState(ABORTED);
-                    manager.remove(ManagedDownloader.this, false);
-                } else {                  
-                    //Gave up.  No more files or exceeded tries.
-                    setState(GAVE_UP);
-                    manager.remove(ManagedDownloader.this, false);
-                }
-             
-            } finally {
-                //Clean up any queued push downloads.  Also clean up dloader if
-                //still existing.  This isn't needed if an IOException thrown by
-                //Downloader.start means stop need not be called.  But better to
-                //be safe.
-
+            //Until there are no more downloads left to try...
+            for (int i=0; i<TRIES && !stopped; i++) {
                 synchronized (ManagedDownloader.this) {
-                    stopped=true;
-                    for (Iterator iter=pushQueue.iterator(); iter.hasNext(); )
-                        ((HTTPDownloader)iter.next()).stop();
-                    if (dloader!=null)
-                        dloader.stop();
+                    ManagedDownloader.this.tries=i;
                 }
+
+                try {
+                    int success=tryAllDownloads();
+                    if (success==SUCCESS) {
+                        //a) Success!
+                        manager.remove(ManagedDownloader.this, true);
+                        return;
+                    } else if (success==DISCONNECTED) {
+                        //b) Need to resume
+                        continue;
+                    } else if (success==WAIT_FOR_RETRY) {
+                        //c) All busy.  Wait.
+                        setState(WAITING_FOR_RETRY);
+                        Thread.sleep(calculateWaitTime());
+                        continue;
+                    } else if (success==NO_MORE_LOCATIONS) {
+                        //b) No more files to try
+                        break;
+                    } else {
+                        Assert.that(false,
+                            "Bad return value from tryAllDownloads"+success);
+                    }
+                } catch (InterruptedException e) {
+                    if (stopped) {
+                        //d) Aborted by user
+                        break;
+                    } else {
+                        //e) Manually restarted (resumed) by user
+                    }
+                }
+            }
+
+            //No luck.
+            if (stopped) {
+                //We've been aborted.  Remove this self from active queue or
+                //waiting set.
+                setState(ABORTED);
+                manager.remove(ManagedDownloader.this, false);
+            } else {                  
+                //Gave up.  No more files or exceeded tries.
+                setState(GAVE_UP);
+                manager.remove(ManagedDownloader.this, false);
             }
         }
 
 
         /**
-         * Tries one round of downloads from all locations.  Returns 1 if a file
-         * was successfully downloaded (though not necessarily moved to
-         * library.)  Returns 0 if no file was downloaded, but it makes sense to
-         * try again later, either because there are busy hosts or more pushes
-         * to send.  Returns -1 if there are no more locations to try.  Throws
-         * InterruptedException if the user resume()'s or stop()'s this.<p>
-         *
-         * Many policies are possible.  The current one is to first try to
-         * download from all non-private locations, resuming as necessary until
-         * only busy hosts remain.  Then send a round of pushes and waits for
-         * results.  (This also serves as retries.)  
+         * Tries downloading from all locations until all locations fail,
+         * one location succeeds, or one location is interrupted.
+         * 
+         * @return SUCCESS if a file was successfully downloaded.  In rare 
+         *             cases, the file may not have been moved to the library.
+         *         DISCONNECTED if a download started but was aborted remotely.
+         *             This usually means a resume is in order.
+         *         WAIT_FOR_RETRY if no file was downloaded, but it makes sense 
+         *             to try again later because some hosts reported busy.
+         *             The caller should usually wait before retrying.
+         *         NO_MORE_LOCATIONS the download attempt failed, and there are 
+         *             no more locations to try.
+         * @param InterruptedException if the user stop()'ed this download. 
+         *  (Calls to resume() do not result in InterruptedException.)
          */
         private int tryAllDownloads() throws InterruptedException {
-            //Nothing left to do?
-            if (files.size()==0 && pushFiles.size()==0)
-                return -1;
+            //A copy of files.  This lets failed connect threads remove entries
+            //from files without causing ConcurrentModificationException.
+            LinkedList filesLeft=new LinkedList(files); 
 
-            //1. TRY ALL NORMAL DOWNLOADS FIRST.  Note that this
-            //modifies files and pushFiles.  Exit if success.
-            boolean success=tryNormalDownloads();
-            if (success)
-                return 1;
-            
-            //Nothing left to do?  This happens when tryNormalDownloads
-            //removes element from files without adding it to pushFiles.
-            if (files.size()==0 && pushFiles.size()==0)
-                return -1;
+            //While there are more locations to try...
+            setState(CONNECTING, filesLeft.size()+" locations");
+            while (filesLeft.size()>0 && !stopped) {
+                System.out.println("MANAGER: spawning connect");
+                //1. Start up to five locations in parallel, asynchronously.
+                for (int i=0; i<PARALLEL_PUSH && filesLeft.size()>0; i++) {
+                    final RemoteFileDesc rfd=removeBest(filesLeft);
+                    final HTTPDownloader downloader=new HTTPDownloader(
+                        rfd, incompleteFileManager.getFile(rfd));
+                    Thread worker=new Thread() {
+                         public void run() {
+                             tryOneDownload(downloader, rfd);
+                         }
+                    };
+                    worker.start();
+                }
+                
+                //2. Wait for a winner to be declared or all to die.  If
+                //multiple thread connect, all but the first will terminate
+                //themselves.  TODO: we can optimize by adding a
+                //while(..)/wait() sequence
+                try {
+                    Thread.sleep(CONNECT_TIME);
+                } catch (InterruptedException e) {
+                    Assert.that(stopped==true,
+                        "ManagedDownloader thread interrupted illegally");
+                    throw new InterruptedException();
+                }
+                
+                //3.  If we got a downloader, wait for it to finish.  Note that
+                //we don't obtain a lock here.  If dloaderThread becomes
+                //non-null after we check for it, we'll discover this during the
+                //next iteration of the loop.  Although we'll start more threads
+                //during this time, they will quickly die when they see they are
+                //no longer needed.
+                System.out.println("MANAGER: waiting for join ");
+                if (dloaderThread!=null) {
+                    try {
+                        dloaderThread.join();
+                        System.out.println("MANAGER: join complete");
+                    } catch (InterruptedException e) {
+                        Assert.that(stopped==true,
+                            "ManagedDownloader thread interrupted illegally");
+                        throw new InterruptedException();
+                    }
 
-            //2. SEND PUSHES FOR THOSE HOSTS THAT WE COULDN'T CONNECT TO.
-            sendPushes();
+                    if (stopped)
+                        throw new InterruptedException();
 
-            //3. WAIT A WHILE BEFORE RETRYING.  ACCEPT ANY PUSHES.
-            success=waitForPushDownloads();
-            if (success) 
-                return 1;
-
-            //Increment push attempts and purge ones that have been
-            //attempted too much.  This used to be done during
-            //sendPushes, but it made the getPushesWaiting method harder
-            //to implement.
-            synchronized (ManagedDownloader.this) {
-                for (Iterator iter=pushFiles.iterator();
-                     iter.hasNext(); ) {
-                    RFDPushPair pair=(RFDPushPair)iter.next();
-                    pair.pushAttempts++;
-                    if (pair.pushAttempts>=PUSH_TRIES)
-                        iter.remove();   //can't call pushFiles.remove(..)
+                    if (dloader.getAmountRead()==dloader.getFileSize())
+                        return SUCCESS;
+                    else {
+                        //Interrupted.  Clear winner to allow others a chance.
+                        synchronized (ManagedDownloader.this) {
+                            dloader=null;
+                            dloaderThread=null;
+                        }
+                        return DISCONNECTED;
+                    }                    
                 }
             }
 
-            return 0;
+            //All locations failed.
+            if (stopped)
+                throw new InterruptedException();
+            else if (files.size()>0)
+                return WAIT_FOR_RETRY;
+            else
+                return NO_MORE_LOCATIONS;
         }
 
-
-        /** Tries download from all locations.  Blocks waiting for a download
-         *  slot first.  Returns true iff a location succeeded (though not
-         *  necessarily moved to library.)  Throws InterruptedException if a
-         *  call to stop() is detected.
-         *      @modifies this.files, this.pushFiles, network  */
-        private boolean tryNormalDownloads() throws InterruptedException {
+        /**
+         * Attempts to initializes and run downloader.  Removes rfd from files
+         * if the connection attempt failed with anything other than 503 Try
+         * Again Later.  Closes this if some other downloader has already
+         * started downloading.<p>
+         *
+         * Typically tryOneDownload is invoked in parallel for a number of
+         * candidate locations; at most one will succeed.  These threads
+         * are created by dloaderManagerThread.
+         * 
+         * @param downloader the normal or push downloader to use for the transfer,
+         *  which MUST be uninitialized (i.e., downloader.connect() has not been
+         *  called)
+         * @param rfd the file to download.  This MUST match the name, index, 
+         *  address, etc. of downloader.  It is passed in order to remove
+         */
+        private void tryOneDownload(HTTPDownloader downloader,
+                                    RemoteFileDesc rfd) {
+            System.out.println("    WORKER ("+rfd+"): connecting");
+            //Try to connect.
+            if (stopped==true)
+                return;
             try {
-                setState(QUEUED);
-                manager.waitForSlot(ManagedDownloader.this);
-                //The list of files to try, a subset of files.
-                LinkedList filesLeft=new LinkedList(files);
-
-                //While there are still non-busy hosts to try...
-                while (! filesLeft.isEmpty()) {
-                    //Download from best host, taking into account the savings
-                    //of resume.
-                    RemoteFileDesc rfd=removeBest(filesLeft);
-                    try {                        
-                        downloadWithResume(rfd);
-                        //No exception means success!
-                        return true;
-                    } catch (CantConnectException e) {
-                        //Host unreachable.  Try push later.
-                        synchronized (ManagedDownloader.this) {
-                            files.remove(rfd);
-                            pushFiles.add(new RFDPushPair(rfd));
-                        }
-                    } catch (TryAgainLaterException e) {
-                        //Go on to next one.  We will try normal attempt later.
-                    } catch (FileIncompleteException e) {
-                        //Interrupted!  Add it back in so we try it again.
-                        filesLeft.add(rfd);
-                    } catch (FileCantBeMovedException e) {
-                        //Couldn't move to library.  Treat like a success,
-                        //but put this in a different state.
-                        setState(COULDNT_MOVE_TO_LIBRARY);
-                        return true;
-                    } catch (IOException e) {
-                        //Miscellaneous problems.  Don't try again.
-                        synchronized (ManagedDownloader.this) {
-                            files.remove(rfd);
-                        }
-                    } finally {
-                        //Was this forcibly closed?
-                        synchronized (ManagedDownloader.this) {
-                            if (stopped)
-                                throw new InterruptedException();
-                        }
-                    }
+                downloader.connect();
+            } catch (TryAgainLaterException e) {
+                //Fine.  Leave rfd in the list so we can try later.
+                return;
+            } catch (IOException e) {
+                //Couldn't connect.  Delete this guy from the list of files.
+                //TODO: distguish between "can't connect" and other HTTP errors.
+                //For "can't connect", try push download or reconnect before
+                //giving up.
+                synchronized (ManagedDownloader.this) {
+                    files.remove(rfd);
+                    return;
                 }
-                return false;
-            } finally {
-                manager.yieldSlot(ManagedDownloader.this);
+            } 
+
+            //Connect succeeded.  Now try to be the "winning" download.
+            synchronized (ManagedDownloader.this) {
+                if (dloader==null) {
+                    //Yay! I'm the first download to work.
+                    dloader=downloader;
+                    dloaderThread=Thread.currentThread();
+                } else {
+                    //Someone beat me.  Die.
+                    System.out.println("    WORKER ("+rfd+"): aborting");
+                    downloader.stop();
+                    return;
+                }
             }
+
+            //I won the race.  Start download.
+            System.out.println("    WORKER ("+rfd+"): downloading");
+            setState(DOWNLOADING, rfd.getHost());
+            try {
+                if (stopped==true)
+                    return;
+                dloader.doDownload();
+                setState(COMPLETE);
+            } catch (FileIncompleteException e) {
+                //Retry will be triggered by run() method, presumably from this
+                //location. 
+            } catch (FileCantBeMovedException e) {
+                //Couldn't move to library.  Treat like a success,
+                //but put this in a different state.
+                setState(COULDNT_MOVE_TO_LIBRARY);
+            } catch (IOException e) {
+                //Miscellaneous problems.  Might have been stopped by the user.
+            } 
+            System.out.println("    WORKER ("+rfd+"): terminating");
         }
 
 
@@ -587,113 +620,31 @@ public class ManagedDownloader implements Downloader, Serializable {
         }
 
 
-        /** Attempts to resumptively download rfd.  If no incomplete file for rfd
-         *  exists, starts the download from scratch.  Does not automatically try
-         *  resume if this is interrupted.
-         *
-         *  @exception FileIncompleteException if the download was remotely
-         *   interrupted
-         *  @exception IOException if there was a miscellaneous download
-         *   Any of the subclasses thrown by HTTPDownloader may be thrown here.
-         *  @exception InterruptedException if locally killed by the user during
-         *   the process.
-         *  @modifies this */
-        private void downloadWithResume(RemoteFileDesc rfd)
-                throws IOException, InterruptedException {
-            setState(CONNECTING, rfd.getHost());
-            //Create downloader. Since this is blocking it cannot go in the
-            //synchronized statement.  Also, we must check if stopped
-            //afterwards since creating a downloader MAY be blocking
-            //depending if SocketOpener is used.
-            HTTPDownloader dloader2=new HTTPDownloader(
-                rfd, CONNECT_TIME, incompleteFileManager.getFile(rfd));
-            synchronized (ManagedDownloader.this) {
-                if (stopped) {
-                    dloader2.stop();
-                    throw new InterruptedException();
-                }
-                dloader=dloader2;
-                setState(DOWNLOADING);
-            }
-            //Start download...
-            dloader.start();
-            setState(COMPLETE);
-            return;
-        }
-
-        /** Send pushes to those locations we couldn't connect to above. */
-        private void sendPushes() {
-            //Just to ensure memory is bounded, remove old push request from
-            //list.  This is different than requested.clear()!
-            synchronized (ManagedDownloader.this) {
-                purgeOldPushRequests();
-            }
-            //For each file that needs a push.  Just to be safe we limit
-            //the number of pushes sent at any time.
-            Iterator iter=pushFiles.iterator();
-            for (int i=0; i<PARALLEL_PUSH && iter.hasNext(); i++) {
-                //Send the push. Mark that we requested the file, for
-                //authentication purposes.
-                RFDPushPair pair=(RFDPushPair)iter.next();
-                RemoteFileDesc rfd=pair.rfd;
-                PushRequestedFile prf=new PushRequestedFile(rfd.getClientGUID(),
-                                                            rfd.getFileName(),
-                                                            rfd.getIndex());
-                synchronized (ManagedDownloader.this) {
-                    requested.add(prf);
-                }
-                manager.sendPush(rfd);
-            }
-        }
-
-        /** Waits at least WAIT_TIME milliseconds.  If any push downloads come in,
-         * handle them, acquiring a download slot first.  Return true if one of
-         * these downloads is successful.  Throws InterruptedException if a call
-         * to stop() or resume() is detected. */
-        private boolean waitForPushDownloads()
-                 throws InterruptedException {
-            Date start=new Date();
-            long totalWait=calculateWaitTime();
-            //Repeat until time has expired...
-            while (true) {
-                //1. Wait for downloader.  Time is calculated as needed.
-                synchronized (ManagedDownloader.this) {
-                    setState(WAITING_FOR_RETRY);
-                    while (pushQueue.isEmpty()) {
-                        Date now=new Date();
-                        long elapsed=now.getTime()-start.getTime();
-                        long waitTime=totalWait-elapsed;
-                        if (waitTime<=0)
-                            return false;
-                        ManagedDownloader.this.wait(waitTime);
-                    }
-                    dloader=(HTTPDownloader)pushQueue.remove(0);
-                }
-
-                //2. Try download.  We may need to wait for a download slot
-                //first.  Ideally we'd preempt some other download, but that is
-                //complex.
-                try {
-                    setState(QUEUED);
-                    manager.waitForSlot(ManagedDownloader.this);
-                    setState(DOWNLOADING,
-                             dloader.getInetAddress().getHostAddress());
-                    dloader.start();
-                    setState(COMPLETE);
-                    return true;
-                } catch (IOException e) {
-                    //Was this forcibly closed?  Or was it a normal IO problem?
-                    //TODO2: if this is interrupted, retry same file.
-                    synchronized (ManagedDownloader.this) {
-                        if (stopped)
-                            throw new InterruptedException();
-                    }
-                } finally {
-                    manager.yieldSlot(ManagedDownloader.this);
-                }
-            }
-        }
-    }
+//          /** Send pushes to those locations we couldn't connect to above. */
+//          private void sendPushes() {
+//              //Just to ensure memory is bounded, remove old push request from
+//              //list.  This is different than requested.clear()!
+//              synchronized (ManagedDownloader.this) {
+//                  purgeOldPushRequests();
+//              }
+//              //For each file that needs a push.  Just to be safe we limit
+//              //the number of pushes sent at any time.
+//              Iterator iter=pushFiles.iterator();
+//              for (int i=0; i<PARALLEL_PUSH && iter.hasNext(); i++) {
+//                  //Send the push. Mark that we requested the file, for
+//                  //authentication purposes.
+//                  RFDPushPair pair=(RFDPushPair)iter.next();
+//                  RemoteFileDesc rfd=pair.rfd;
+//                  PushRequestedFile prf=new PushRequestedFile(rfd.getClientGUID(),
+//                                                              rfd.getFileName(),
+//                                                              rfd.getIndex());
+//                  synchronized (ManagedDownloader.this) {
+//                      requested.add(prf);
+//                  }
+//                  manager.sendPush(rfd);
+//              }
+//          }
+    }  //end class ManagedDownloadRunner
 
     private static boolean isPrivate(RemoteFileDesc rfd) {
         String host=rfd.getHost();
@@ -706,14 +657,14 @@ public class ManagedDownloader implements Downloader, Serializable {
      *      @requires this monitor held
      *      @modifies requested */
     private void purgeOldPushRequests() {
-        Date time=new Date();
-        time.setTime(time.getTime()-(PUSH_INVALIDATE_TIME*1000));
-        Iterator iter=requested.iterator();
-        while (iter.hasNext()) {
-            PushRequestedFile prf=(PushRequestedFile)iter.next();
-            if (prf.before(time))
-                iter.remove();
-        }
+//          Date time=new Date();
+//          time.setTime(time.getTime()-(PUSH_INVALIDATE_TIME*1000));
+//          Iterator iter=requested.iterator();
+//          while (iter.hasNext()) {
+//              PushRequestedFile prf=(PushRequestedFile)iter.next();
+//              if (prf.before(time))
+//                  iter.remove();
+//          }
     }
 
     /** Sets this' state, taking care of locking.  lastAddress is only well-defined
@@ -778,8 +729,8 @@ public class ManagedDownloader implements Downloader, Serializable {
         //If we're not actually downloading, we just pick some random name.
         else if (! files.isEmpty())
             return ((RemoteFileDesc)files.get(0)).getFileName();
-        else if (! pushFiles.isEmpty())
-            return ((RFDPushPair)pushFiles.get(0)).rfd.getFileName();
+//          else if (! pushFiles.isEmpty())
+//              return ((RFDPushPair)pushFiles.get(0)).rfd.getFileName();
         //The downloader is about to die, but respond anyway.
         else
             return null;
@@ -791,8 +742,8 @@ public class ManagedDownloader implements Downloader, Serializable {
         //If we're not actually downloading, we just pick some random value.
         else if (! files.isEmpty())
             return ((RemoteFileDesc)files.get(0)).getSize();
-        else if (! pushFiles.isEmpty())
-            return ((RFDPushPair)pushFiles.get(0)).rfd.getSize();
+//          else if (! pushFiles.isEmpty())
+//              return ((RFDPushPair)pushFiles.get(0)).rfd.getSize();
         //The downloader is about to die, but respond anyway.
         else
             return 0;
@@ -817,7 +768,8 @@ public class ManagedDownloader implements Downloader, Serializable {
 	}
 
     public synchronized int getPushesWaiting() {
-        return pushFiles.size();
+        return 0;
+//          return pushFiles.size();
     }
 
     public synchronized int getRetriesWaiting() {

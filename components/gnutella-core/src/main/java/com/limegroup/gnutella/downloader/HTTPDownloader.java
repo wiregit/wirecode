@@ -15,7 +15,17 @@ import java.util.StringTokenizer;
 /**
  * Downloads a file over an HTTP connection.  This class is as simple as possible.
  * It does not deal with retries, prioritizing hosts, etc.  Nor does it check
- * whether a file already exists; it just writes over anything on disk.
+ * whether a file already exists; it just writes over anything on disk.<p>
+ *
+ * It is necessary to explicitly initialize an HTTPDownloader with the
+ * connect(..)  method.  (Hence HTTPDownloader behaves much like Connection.)
+ * Typical use is as follows: 
+ *
+ * <pre>
+ * HTTPDownloader dl=new HTTPDownloader(host, port);
+ * dl.connect();
+ * dl.doDownload();
+ * </pre>
  */
 public class HTTPDownloader {
 
@@ -37,60 +47,38 @@ public class HTTPDownloader {
 	
 	private boolean _chatEnabled = false; // for now
 
+    /**
+     * Creates an uninitialized client-side normal download.  Call connect() on
+     * this before any other methods.  Non-blocking.
+     *
+     * @param rfd complete information for the file to download, including
+     *  host address and port
+     * @param incompleteFile the temp file to use while downloading.  No other 
+     *  thread or process should be using this file, at least when doDownload
+     *  is called 
+     */
+	public HTTPDownloader(RemoteFileDesc rfd,
+                          File incompleteFile) {
+        //Dirty secret: this is implemented with the push constructor!
+        this(null, rfd, incompleteFile);
+	}	
+
 	/**
-     * Creates a server-side push download.
+     * Creates an uninitialized server-side push download.  Call connect() on
+     * this before any other methods.  Non-blocking.
      * 
      * @param socket the socket to download from.  The "GIV..." line must
      *  have been read from socket.  HTTP headers may not have been read or 
      *  buffered.
-	 * @param rfd complete information for the file to download.  Note that
-     *  the host address and port in this is ignored.
-     * @param incompleteFile the temp file to use while downloading.  No other 
-     *  thread or process should be using this file.
-     *
-	 * @exception CantConnectException couldn't connect to the host.
-	 */
-	public HTTPDownloader(Socket socket, 
-                          RemoteFileDesc rfd,
-                          File incompleteFile) 
-		    throws IOException {
-        initializeFile(rfd, incompleteFile);
-        _socket=socket;
-		connect();		
-	}
-	
-    /**
-     * Creates a client-side normal download.
-     *
      * @param rfd complete information for the file to download, including
      *  host address and port
-     * @param timeout the amount of time, in milliseconds, to wait
-     *  when establishing a connection.   Must be non-negative.  A
-     *  timeout of 0 means no timeout.
      * @param incompleteFile the temp file to use while downloading.  No other 
-     *  thread or process should be using this file.
-     *
-     * @exception CantConnectException couldn't connect to the host.
+     *  thread or process should be using this file, at least when doDownload
+     *  is called 
      */
-	public HTTPDownloader(RemoteFileDesc rfd,
-                          int timeout,
-                          File incompleteFile) 
-		    throws IOException {
-        initializeFile(rfd, incompleteFile);
-        try {
-
-            _socket = (new SocketOpener(rfd.getHost(), rfd.getPort())).
-                                                         connect(timeout);
-        } catch (IOException e) {
-            throw new CantConnectException();
-        }
-        connect();
-	}
-
-    /** Sets up this' instance variables according to rfd and incompleteFile,
-     *  except for _byteReader, _fos, _socket
-     *      @modifies this  */
-    private void initializeFile(RemoteFileDesc rfd, File incompleteFile) {
+	public HTTPDownloader(Socket socket,
+                          RemoteFileDesc rfd,
+                          File incompleteFile) {
         _incompleteFile=incompleteFile;
 		_filename = rfd.getFileName();
 		_index = rfd.getIndex();
@@ -110,18 +98,31 @@ public class HTTPDownloader {
         }
     }
 
-    /** Sends the HTTP GET along the given socket. 
-     *       @requires this initialized except for _byteReader, _fos
-     *       @modifies this._byteReader, network */
-	private void connect() throws IOException {
+    /** 
+     * Initializes this by connecting to the remote host (in the case of a
+     * normal client-side download), sending a GET request, and reading all
+     * headers.  Blocking.  This MUST be uninitialized, i.e., connect may
+     * not be called more than once..
+     * 
+     * @exception TryAgainLaterException the host is busy
+     * @exception FileNotFoundException the host doesn't recognize the file
+     * @exception NotSharingException the host isn't sharing files
+     * @exception IOException couldn't contact server, or miscellaneous error 
+     */
+	public void connect() throws IOException {        
+        //Connect, if not already done.  Ignore 
         //The try-catch below is a work-around for JDK bug 4091706.
         InputStream istream=null;
-        try {
+        try {            
+            if (_socket==null) 
+                _socket=new Socket(_host, _port);
             istream=_socket.getInputStream(); 
         } catch (Exception e) {
             throw new IOException();
         }
         _byteReader = new ByteReader(istream);
+
+        //Write GET request and headers
         OutputStream os = _socket.getOutputStream();
         OutputStreamWriter osw = new OutputStreamWriter(os);
         BufferedWriter out=new BufferedWriter(osw);
@@ -135,22 +136,12 @@ public class HTTPDownloader {
 		}
         out.write("\r\n");
         out.flush();
+
+        //Read response.
+        readHeader();
 	}
 	
-	/** 
-     * Start the download, returning when done.  Throws IOException if
-     * there is a problem.
-     *     @modifies this
-     *     @exception TryAgainLaterException the host is busy
-     *     @exception NotSharingException the host isn't sharing files
-     *     @exception FileIncompleteException transfer interrupted, either
-     *      locally or remotely
-     *     @exception FileCantBeMovedException file couldn't be moved to library
-     */
-	public void start() throws IOException {
-		readHeader();
-		doDownload();
-	}
+
 
     /** 
      * Stops this immediately.  This method is always safe to call.
@@ -188,9 +179,11 @@ public class HTTPDownloader {
 
 	
 
-	/*************************************************************/
 
-	/* PRIVATE INTERNAL METHODS */
+    /*
+     * Reads the headers from this, setting _initialReadingPoint and _fileSize.
+     * Throws any of the exceptions listed in connect().  
+     */
 	private void readHeader() throws IOException {
 
 		String str = " ";
@@ -352,7 +345,21 @@ public class HTTPDownloader {
         }
     }
 
-	private void doDownload() throws IOException {
+    /*
+     * Downloads the content from the server, writes it to a temporary
+     * file, and copies the temporary file to the library.  Blocking.
+     * This MUST be initialized via connect() beforehand, and doDownload
+     * MUST NOT have already been called.
+     *  
+     * @exception FileIncompleteException transfer interrupted, either
+     *  locally or remotely.  TODO: is this ALWAYS thrown during 
+     *  interruption?
+     * @exception FileCantBeMovedException file downloaded but  couldn't be
+     *  moved to library
+     * @exception IOException file couldn't be downloaded for some other
+     *  reason
+     */
+	public void doDownload() throws IOException {
         //1. For security, check that download location is OK.
         //   This is to prevent against any files with '.' or '/' or '\'.
 		SettingsManager settings = SettingsManager.instance();		
