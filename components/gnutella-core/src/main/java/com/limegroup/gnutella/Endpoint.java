@@ -139,19 +139,20 @@ public class Endpoint implements Cloneable, Serializable, Comparable{
     public long getKbytes() {
         try
         {
-            if(kbytes/files < 15000)  //ie avg file size less than 15MB
+            if(kbytes/files < 35000)  //ie avg file size less than 35MB
             {
                 return kbytes;
             }
-            else if(kbytes/files < 70000 && files < 8) //ie avg file size less
-            {                               //than 70MB, and num-files < 8
+            else if(kbytes/files < 150000 && files < 8) //ie avg file size less
+            {                               //than 150MB, and num-files < 8
                                             //might be some video files
                                             //but with more number of files
                                             //maintaining such a ratio may not 
                                             //be possible
                 return kbytes;
             }
-            else if(kbytes/files < 15000000) //ie avg file size less than 15GB
+            else if(kbytes/files < 150000000) //ie avg file size less than 150GB
+                                              //but more than 150MB
             {
                                              //user might have sent number of 
                                              //bytes instead of number of kbytes
