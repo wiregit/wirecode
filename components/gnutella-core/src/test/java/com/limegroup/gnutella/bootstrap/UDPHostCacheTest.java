@@ -294,16 +294,15 @@ public class UDPHostCacheTest extends BaseTestCase {
         cache.write(writer);
         String written = writer.toString();
         BufferedReader reader = new BufferedReader(new StringReader(written));
-        // note: these tests are dependent on the order of the
-        //       way UDPHostCache internally stores the values.
-        //       thus, this is more stringent than it needs to be.
-        String read = reader.readLine();
-        assertTrue(read, read.startsWith("www.eff.org:6346"));
-        read = reader.readLine();
-        assertTrue(read, read.startsWith("1.2.3.4:6346"));
-        read = reader.readLine();
-        assertTrue(read, read.startsWith("www.limewire.com:6346"));
-        read = reader.readLine();
+        List readLines = new LinkedList();
+        readLines.add(reader.readLine());
+        readLines.add(reader.readLine());
+        readLines.add(reader.readLine());
+        assertStartsWithInList("www.eff.org:6346", readLines);
+        assertStartsWithInList("1.2.3.4:6346", readLines);
+        assertStartsWithInList("www.limewire.com:6346", readLines);
+        assertEquals(readLines.toString(), 0, readLines.size());
+        assertEquals(null, reader.readLine());
     }
     
     public void testRecordingFailuresAndSuccesses() throws Exception {
@@ -427,6 +426,19 @@ public class UDPHostCacheTest extends BaseTestCase {
         assertEquals(3, e5.getUDPHostCacheFailures());
         assertEquals(5, cache.getSize()); // e4 was readded.
     }
+    
+    private void assertStartsWithInList(String find, List list) throws Exception {
+        boolean found = false;
+        for(Iterator i = list.iterator(); i.hasNext();) {
+            String read = (String)i.next();
+            if(read.startsWith(find)) {
+                found = true;
+                i.remove();
+                break;
+            }
+        }
+        assertTrue("missing: " + find + ", had: " + list, found);
+    }    
     
     private void routeFor(String host, byte[] guid) throws Exception {
         PingReply pr = PingReply.create(guid, (byte)1);
