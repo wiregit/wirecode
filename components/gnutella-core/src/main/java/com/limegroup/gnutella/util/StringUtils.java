@@ -238,19 +238,33 @@ public class StringUtils {
         return ret;
     }
 
-    /** Exactly the same as a.compareToIgnoreCase(b), which unfortunately
+    /** Exactly the same as s1.compareToIgnoreCase(s2), which unfortunately
      *  doesn't exist in Java 1.1.8. */
-    public static int compareIgnoreCase(String a, String b) {
+    public static int compareIgnoreCase(String s1, String s2) {
         //Check out String.compareTo(String) for a description of the basic
         //algorithm.  The ignore case extension is trivial.
-        for (int i=0; i<Math.min(a.length(), b.length()); i++) {
-            char ac=Character.toLowerCase(a.charAt(i));
-            char bc=Character.toLowerCase(b.charAt(i));
-            int diff=ac-bc;
-            if (diff!=0)
-                return diff;
+        //We need to compare both uppercase and lowercase characters because
+        //some characters have two distinct associated upper or lower cases
+        //or exist in title case (such as "Dz").  We start by comparing the
+        //upper case conversion because duplicate uppercases occur less often.
+        final int n1 = s1.length(), n2 = s2.length();
+        final int lim = Math.min(n1, n2);
+        for (int k = 0; k < lim; k++) {
+            char c1 = s1.charAt(k);
+            char c2 = s2.charAt(k);
+            if (c1 != c2) { // avoid conversion if characters are equal
+                c1 = Character.toUpperCase(c1);
+                c2 = Character.toUpperCase(c2);
+                if (c1 != c2) { // avoid conversion if uppercases are equal
+                    c1 = Character.toLowerCase(c1);
+                    c2 = Character.toLowerCase(c2);
+                    if (c1 != c2) {
+                        return c1 - c2;
         }
-        return a.length()-b.length();
+    }
+            }
+        }
+        return n1 - n2;
     }
 
     /** 
@@ -258,13 +272,22 @@ public class StringUtils {
      * @return true iff s.toUpperCase().startsWith(prefix.toUpperCase())
      */
     public static boolean startsWithIgnoreCase(String s, String prefix) {
-        if (s.length() < prefix.length())
+        final int pl = prefix.length();
+        if (s.length() < pl)
             return false;
-        for (int i=0; i<prefix.length(); i++) {
-            char sc=Character.toUpperCase(s.charAt(i));
-            char pc=Character.toUpperCase(prefix.charAt(i));
+        for (int i = 0; i < pl; i++) {
+            char sc = s.charAt(i);
+            char pc = prefix.charAt(i);
+            if (sc != pc) {
+                sc = Character.toUpperCase(sc);
+                pc = Character.toUpperCase(pc);
+                if (sc != pc) {
+                    sc = Character.toLowerCase(sc);
+                    pc = Character.toLowerCase(pc);
             if (sc!=pc)
                 return false;
+                }
+            }
         }
         return true;
     }
