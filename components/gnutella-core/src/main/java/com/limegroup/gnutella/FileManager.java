@@ -111,8 +111,12 @@ public class FileManager{
 
 
 
-    
-    public synchronized void addFile(String path) { 
+    /**
+     * @modifies this
+     * @effects adds the given file to this, if it exists.
+     *  <b>WARNING: this is a potential security hazard.</b> 
+     */
+    private synchronized void addFile(String path) { 
         File myFile = new File(path);  
 
         if (!myFile.exists())               
@@ -145,6 +149,12 @@ public class FileManager{
     
     }
 
+    /**
+     * @modifies this
+     * @effects adds the given file to this, if it exists
+     *  and if it is shared.
+     *  <b>WARNING: this is a potential security hazard.</b> 
+     */
 	public synchronized void addFileIfShared(String path) {
 		
 		if (_sharedHash == null)
@@ -175,7 +185,11 @@ public class FileManager{
 	}
 
    
-
+    /**
+     * @modifies this
+     * @effects recursively adds the following directories
+     *  to this.  <b>WARNING: this is a potential security hazard.</b> 
+     */
     public synchronized void addDirectories(String dir_names) {
     
         String[] names = HTTPUtil.stringSplit(dir_names, ';');
