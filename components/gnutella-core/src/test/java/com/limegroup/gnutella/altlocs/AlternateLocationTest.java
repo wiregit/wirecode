@@ -167,11 +167,9 @@ public final class AlternateLocationTest extends com.limegroup.gnutella.util.Bas
         GUID guid = new GUID(rfd.getClientGUID());
         m.put(guid,Collections.EMPTY_SET);
 
-        // this should throw an exception since there are no proxies.
-        try {
-            AlternateLocation.create(rfd);
-            fail("should not have created altloc without proxies");
-        }catch(IOException expected){}
+
+        AlternateLocation.create(rfd);
+
         
         
 
@@ -438,10 +436,13 @@ public final class AlternateLocationTest extends com.limegroup.gnutella.util.Bas
         
         //try an altloc with no push proxies
         clientGUID = new GUID(GUID.makeGuid());
-        try{
-        	pal = (PushAltLoc) AlternateLocation.create(clientGUID.toHexString()+";",urn,true);
-        	fail("created a push altloc without any proxies");
-        }catch(IOException expected ){}
+      	pal = (PushAltLoc) AlternateLocation.create(clientGUID.toHexString()+";",urn,true);
+      	
+      	// try skipping invalid ip:port strings
+      	pal = (PushAltLoc) AlternateLocation.create(
+        		clientGUID.toHexString()+";"+ "1.2.3.4/:12",urn,true);
+        assertTrue(pal.getPushAddress().getProxies().isEmpty());
+        
         
         //try some invalid ones
         try {
@@ -458,13 +459,6 @@ public final class AlternateLocationTest extends com.limegroup.gnutella.util.Bas
         	pal = (PushAltLoc) AlternateLocation.create(null,urn,true);
         	fail("created altloc from null string");
         }catch(IOException expected) {}
-        
-        try {
-        	pal = (PushAltLoc) AlternateLocation.create(
-        			clientGUID.toHexString()+";"+ "1.2.3.4/:12",urn,true);
-        	fail("created altloc from invalid address string");
-        }catch(IOException expected) {}
-        
         
     }
 

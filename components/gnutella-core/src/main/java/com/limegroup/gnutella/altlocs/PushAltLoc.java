@@ -35,9 +35,6 @@ public class PushAltLoc extends AlternateLocation {
 		
 		if (address == null)
 			throw new IOException("null address");
-		if (address.getProxies().isEmpty())
-			throw new IOException("no proxies for altloc");
-		
 		
 		_pushAddress = address;
 	}

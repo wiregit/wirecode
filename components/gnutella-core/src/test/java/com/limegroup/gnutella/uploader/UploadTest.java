@@ -15,12 +15,14 @@ import com.limegroup.gnutella.ConnectionManager;
 import com.limegroup.gnutella.FileDesc;
 import com.limegroup.gnutella.FileManager;
 import com.limegroup.gnutella.GUID;
+import com.limegroup.gnutella.PushEndpoint;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.UploadManager;
 import com.limegroup.gnutella.CreationTimeCache;
 import com.limegroup.gnutella.altlocs.AlternateLocation;
 import com.limegroup.gnutella.altlocs.AlternateLocationCollection;
+import com.limegroup.gnutella.altlocs.PushAltLoc;
 import com.limegroup.gnutella.dime.DIMEParser;
 import com.limegroup.gnutella.dime.DIMERecord;
 import com.limegroup.gnutella.downloader.Interval;
@@ -648,6 +650,63 @@ public class UploadTest extends BaseTestCase {
         assertEquals("wrong # locs", 1, FD.getAltLocsSize());
         assertEquals(al, alc.iterator().next());
     }        
+    
+    /**
+     * tests that when reading the NFAlt header we only remove proxies
+     */
+    public void testRemovingNFAlt() throws Exception {
+        
+        boolean passed;
+        GUID g = new GUID(GUID.makeGuid());
+        AlternateLocationCollection alc = FD.getAlternateLocationCollection();
+        alc.clear();
+        
+        assertEquals(0,FD.getAltLocsSize());
+        URN urn = URN.createSHA1Urn(hash);
+        
+        Map m =(Map)PrivilegedAccessor.getValue(PushEndpoint.class,"GUID_PROXY_MAP");
+        PushAltLoc abc = (PushAltLoc)AlternateLocation.create(
+                g.toHexString()+";1.1.1.1:1;2.2.2.2:2;3.3.3.3:3",
+                urn,
+                true);
+        
+        String abcHttp = abc.httpStringValue();
+        m.clear();
+        
+        PushAltLoc bcd=(PushAltLoc)AlternateLocation.create(
+                g.toHexString()+";2.2.2.2:2;3.3.3.3:3;4.4.4.4:4",
+                urn,
+                true);
+        
+        String bcdHttp = bcd.httpStringValue();
+        
+        FD.add(bcd);
+        assertEquals(1,FD.getAltLocsSize());
+        
+        passed=download("/uri-res/N2R?" + hash,
+                "X-NFAlt: " + abcHttp,
+                "abcdefghijklmnopqrstuvwxyz",
+                null);
+        assertTrue("alt failed", passed);
+        
+        //two of the proxies of bcd should be gone
+        assertEquals("wrong # locs", 2, FD.getAltLocsSize());
+        assertEquals("wrong # proxies",1,bcd.getPushAddress().getProxies().size());
+        
+        
+        //now repeat, sending all three original proxies of bce as NFAlts
+        Thread.sleep(1000);
+        passed=download("/uri-res/N2R?" + hash,
+                "X-NFAlt: " + bcdHttp,
+                "abcdefghijklmnopqrstuvwxyz",
+                null);
+        assertTrue("alt failed", passed);
+        
+        // all proxies should be gone, and bcd should be removed from 
+        // the filedesc
+        assertEquals("wrong # locs", 1, FD.getAltLocsSize());
+        assertEquals("wrong # proxies",0,bcd.getPushAddress().getProxies().size());
+    }
     
     // unfortunately we can't test with private addresses
     // because all these connections require that local_is_private
