@@ -54,6 +54,8 @@ public class PRVMHandlingTest extends BaseTestCase {
 	 */
 	static Candidate _up1_ttl1, _up2_ttl2;
 	
+	static BestCandidates _bestCandidates = BestCandidates.instance();
+	
 	public PRVMHandlingTest(String str){
 		super(str);
 	}
@@ -117,12 +119,14 @@ public class PRVMHandlingTest extends BaseTestCase {
 	public void setUp() {
 		try {
 			
-			Candidate []candidates = BestCandidates.getCandidates();
+			Candidate []candidates = new Candidate[3];
 			candidates[0]=_leaf;
 			candidates[1]=_up1_ttl1;
 			candidates[2]=_up2_ttl2;
 			
-			assertTrue(_up1_ttl1.isSame(BestCandidates.getBest()));
+			PrivilegedAccessor.setValue(_bestCandidates,"_best",candidates);
+			
+			assertTrue(_up1_ttl1.isSame(_bestCandidates.getBest()));
 			
 			_up1.setLastSent(null);
 			_up2.setLastSent(null);
@@ -240,7 +244,7 @@ public class PRVMHandlingTest extends BaseTestCase {
 			new PromotionRequestVendorMessage(_up1_ttl1,
 					new RemoteCandidate(_up2.getAddress(),_up2.getPort(),(short)1),0);
 		
-		assertTrue(BestCandidates.getCandidates()[1].isSame(_up1_ttl1));
+		assertTrue(_bestCandidates.getCandidates()[1].isSame(_up1_ttl1));
 		
 		RouterService.getMessageRouter().handlePromotionRequestVM(toUP,_up2);
 		
@@ -254,7 +258,7 @@ public class PRVMHandlingTest extends BaseTestCase {
 			new PromotionRequestVendorMessage(_up2_ttl2,
 					new RemoteCandidate(_up1.getAddress(),_up1.getPort(),(short)1),0);
 		
-		assertTrue(BestCandidates.getCandidates()[1].isSame(_up1_ttl1));
+		assertTrue(_bestCandidates.getCandidates()[1].isSame(_up1_ttl1));
 		
 		RouterService.getMessageRouter().handlePromotionRequestVM(toUP,_up1);
 		
