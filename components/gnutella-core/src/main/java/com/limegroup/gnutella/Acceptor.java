@@ -37,9 +37,11 @@ import com.limegroup.gnutella.util.NetworkUtils;
 public class Acceptor implements Runnable {
 
     private static final Log LOG = LogFactory.getLog(Acceptor.class);
-    static long INCOMING_EXPIRE_TIME = 150 * 60 * 60 * 1000; // 2.5 hours
-    static long WAIT_TIME_AFTER_REQUESTS = 30 * 1000; // 30 seconds
-    static long TIME_BETWEEN_VALIDATES = 40 * 60 * 1000; // 40 mins
+
+    // various time delays for checking of firewalled status.
+    static long INCOMING_EXPIRE_TIME = 30 * 60 * 1000;   // 30 minutes
+    static long WAIT_TIME_AFTER_REQUESTS = 30 * 1000;    // 30 seconds
+    static long TIME_BETWEEN_VALIDATES = 10 * 60 * 1000; // 10 minutes
 
     /**
      * The socket that listens for incoming connections. Can be changed to
@@ -105,10 +107,6 @@ public class Acceptor implements Runnable {
      * we start up since we try once when we start up.
      */
     private volatile long _lastConnectBackTime = System.currentTimeMillis();
-    void resetLastConnectBackTime() {
-        _lastConnectBackTime = 
-             System.currentTimeMillis() - INCOMING_EXPIRE_TIME;
-    }
 
 	/**
      * @modifes this
@@ -355,14 +353,28 @@ public class Acceptor implements Runnable {
 
 
 	/**
-	 * This method lets you know if this class has accepted
-	 * an incoming connection at any point during the session.
-	 * The boolean variable _acceptedIncoming is set to false
-	 * by default, and true as soon as a connection is established.
+	 * Determines whether or not LimeWire has detected it is firewalled or not.
 	 */
 	public boolean acceptedIncoming() {
         return _acceptedIncoming;
 	}
+	
+	/**
+	 * Updates the firewalled status with info from this socket.
+	 */
+	private void checkFirewall(Socket socket) {
+		// we have accepted an incoming socket -- only record
+        // that we've accepted incoming if it's definitely
+        // not from our local subnet and we aren't connected to
+        // the host already.
+        if(isOutsideConnection(socket.getInetAddress())) {
+            synchronized (Acceptor.class) {
+                _acceptedIncoming = true;
+                ConnectionSettings.EVER_ACCEPTED_INCOMING.setValue(true);
+                _lastIncomingTime = System.currentTimeMillis();
+            }
+        }
+    }
 
 
     /** @modifies this, network, SettingsManager
@@ -463,6 +475,7 @@ public class Acceptor implements Runnable {
                         continue;
                     }
                 }
+                
 
                 //Check if IP address of the incoming socket is in _badHosts
 				
@@ -472,24 +485,16 @@ public class Acceptor implements Runnable {
                     client.close();
                     continue;
                 }
+                
+                // if we want to unset firewalled from any connection, 
+                // do it here.
+                if(!ConnectionSettings.UNSET_FIREWALLED_FROM_CONNECTBACK.getValue())
+                    checkFirewall(client);
 				
                 // Set our IP address of the local address of this socket.
                 InetAddress localAddress = client.getLocalAddress();
                 setAddress( localAddress );                
 
-				// we have accepted an incoming socket -- only record
-                // that we've accepted incoming if it's definitely
-                // not from our local subnet and we aren't connected to
-                // the host already.
-                if(isOutsideConnection(address)) {
-                    synchronized (Acceptor.class) {
-                        _acceptedIncoming = true;
-                        ConnectionSettings.EVER_ACCEPTED_INCOMING.setValue(
-                            _acceptedIncoming);
-                        _lastIncomingTime = System.currentTimeMillis();
-                    }
-                }
-                
                 //Dispatch asynchronously.
                 ConnectionDispatchRunner dispatcher =
 					new ConnectionDispatchRunner(client);
@@ -498,8 +503,6 @@ public class Acceptor implements Runnable {
 				dispatchThread.setDaemon(true);
 				dispatchThread.start();
 
-            } catch (SecurityException e) {
-                ErrorService.error(e);
             } catch (Throwable e) {
                 ErrorService.error(e);
             }
@@ -519,10 +522,8 @@ public class Acceptor implements Runnable {
         if(!ConnectionSettings.LOCAL_IS_PRIVATE.getValue())
             return true;
     
-        String host = addr.getHostAddress();
         byte[] bytes = addr.getAddress();
-        return !RouterService.getConnectionManager().isConnectedTo(host) &&
-               !RouterService.getUDPConnectionManager().isConnectedTo(addr) && 
+        return !RouterService.isConnectedTo(addr) &&
                !NetworkUtils.isCloseIP(bytes, getAddress(false)) &&
                !NetworkUtils.isLocalAddress(addr);
 	}
@@ -560,6 +561,7 @@ public class Acceptor implements Runnable {
 			ConnectionManager cm = RouterService.getConnectionManager();
 			UploadManager um     = RouterService.getUploadManager();
 			DownloadManager dm   = RouterService.getDownloadManager();
+			Acceptor ac = RouterService.getAcceptor();
             try {
                 //The try-catch below is a work-around for JDK bug 4091706.
                 InputStream in=null;
@@ -567,7 +569,7 @@ public class Acceptor implements Runnable {
                     in=_socket.getInputStream(); 
                 } catch (IOException e) {
                     HTTPStat.CLOSED_REQUESTS.incrementStat();
-                    throw new IOException(e.getMessage());
+                    throw e;
                 } catch(NullPointerException e) {
                     // This should only happen extremely rarely.
                     // JDK bug 4091706
@@ -576,9 +578,9 @@ public class Acceptor implements Runnable {
                 _socket.setSoTimeout(Constants.TIMEOUT);
                 //dont read a word of size more than 8 
                 //("GNUTELLA" is the longest word we know at this time)
-                String word = IOUtils.readWord(in,8);
+                String word = IOUtils.readLargestWord(in,8);
                 _socket.setSoTimeout(0);
-
+                
 				// Only selectively allow localhost connections
 				if ( !word.equals("MAGNET") ) {
 					InetAddress address = _socket.getInetAddress();
@@ -607,7 +609,6 @@ public class Acceptor implements Runnable {
                     HTTPStat.GNUTELLA_LIMEWIRE_REQUESTS.incrementStat();
                     cm.acceptConnection(_socket);
                 }
-                //2. Incoming upload via HTTP
                 else if (word.equals("GET")) {
 					HTTPStat.GET_REQUESTS.incrementStat();
 					um.acceptUpload(HTTPRequestMethod.GET, _socket, false);
@@ -616,7 +617,6 @@ public class Acceptor implements Runnable {
 					HTTPStat.HEAD_REQUESTS.incrementStat();
 					um.acceptUpload(HTTPRequestMethod.HEAD, _socket, false);
 				}
-                //3. Incoming download via push/HTTP.
                 else if (word.equals("GIV")) {
                     HTTPStat.GIV_REQUESTS.incrementStat();
                     dm.acceptDownload(_socket);
@@ -628,15 +628,25 @@ public class Acceptor implements Runnable {
 			    else if (word.equals("MAGNET")) {
 			        HTTPStat.MAGNET_REQUESTS.incrementStat();
                     ExternalControl.fireMagnet(_socket);
-                }	
-                //4. Unknown protocol
+                }
+                else if (word.equals("CONNECT") || word.equals("\n\n")) {
+                    //HTTPStat.CONNECTBACK_RESPONSE.incrementStat();
+                    // technically we could just always checkFirewall here, since
+                    // we really always want to -- but since we're gonna check
+                    // all incoming connections if this isn't set, might as well
+                    // check and prevent a double-check.
+                    if(ConnectionSettings.UNSET_FIREWALLED_FROM_CONNECTBACK.getValue())
+                        ac.checkFirewall(_socket);
+                    IOUtils.close(_socket);
+                }
                 else {
                     HTTPStat.UNKNOWN_REQUESTS.incrementStat();
-                    throw new IOException("UNKOWN PROTOCOL: "+word);
+                    if(LOG.isErrorEnabled())
+                        LOG.error("Unknown protocol: " + word);
+                    IOUtils.close(_socket);
                 }
             } catch (IOException e) {
-                //handshake failed: try to close connection.
-                try { _socket.close(); } catch (IOException e2) { }
+                IOUtils.close(_socket);
             } catch(Throwable e) {
 				ErrorService.error(e);
 			}
@@ -651,12 +661,23 @@ public class Acceptor implements Runnable {
     public boolean isBannedIP(byte[] addr) {        
         return !IPFilter.instance().allow(addr);
     }
+    
+    /**
+     * Resets the last connectback time.
+     */
+    void resetLastConnectBackTime() {
+        _lastConnectBackTime = 
+             System.currentTimeMillis() - INCOMING_EXPIRE_TIME;
+    }    
 
+    /**
+     * (Re)validates acceptedIncoming.
+     */
     private class IncomingValidator implements Runnable {
         public IncomingValidator() {}
         public void run() {
-            // clear and revalidate if 1) we haven't had in incoming in an hour
-            // or 2) we've never had incoming and we haven't checked in an hour
+            // clear and revalidate if 1) we haven't had in incoming 
+            // or 2) we've never had incoming and we haven't checked
             final long currTime = System.currentTimeMillis();
             final ConnectionManager cm = RouterService.getConnectionManager();
             if (
@@ -670,15 +691,15 @@ public class Acceptor implements Runnable {
                 // _acceptedIncoming IF some requests were sent.
                 if(cm.sendTCPConnectBackRequests())  {
                     _lastConnectBackTime = System.currentTimeMillis();
-                    Runnable checkThread = new Runnable() {
-                            public void run() {
-                                synchronized (Acceptor.class) {
-                                    if (_lastIncomingTime < currTime)
-                                        _acceptedIncoming = false;
-                                }
+                    Runnable resetter = new Runnable() {
+                        public void run() {
+                            synchronized (Acceptor.class) {
+                                if (_lastIncomingTime < currTime)
+                                    _acceptedIncoming = false;
                             }
-                        };
-                    RouterService.schedule(checkThread, 
+                        }
+                    };
+                    RouterService.schedule(resetter, 
                                            WAIT_TIME_AFTER_REQUESTS, 0);
                 }
             }

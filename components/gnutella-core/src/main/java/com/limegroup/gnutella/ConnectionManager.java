@@ -1118,55 +1118,17 @@ public class ConnectionManager {
     }
 
     /**
-     * Accessor for the <tt>Connection</tt> that supports TCPRedirect.  If
-     * there are none available, this will return an empty List (length 0).
-     * Returns a max of 2.
-     *
-     * @return A List of <tt>Connection<tt> that supports TCPRedirect.
-     *
-     */
-    public List getTCPRedirectUltrapeers() {
-        Iterator ultrapeers = getInitializedConnections().iterator();
-        List retList = new ArrayList(2);
-        while (ultrapeers.hasNext() && (retList.size() < 2)) {
-            ManagedConnection currMC = (ManagedConnection) ultrapeers.next();
-            if (currMC.remoteHostSupportsTCPRedirect() >= 0)
-                retList.add(currMC);
-        }
-        return retList;
-    }
-
-    /**
-     * Accessor for the <tt>Connection</tt> that supports UDPRedirect.  If
-     * there are none available, this will return an empty List (length 0).
-     * Returns a maximum of 2.
-     *
-     * @return A List of <tt>Connection<tt> that supports UDPRedirect.
-     *
-     */
-    public List getUDPRedirectUltrapeers() {
-        Iterator ultrapeers = getInitializedConnections().iterator();
-        List retList = new ArrayList(2);
-        while (ultrapeers.hasNext() && (retList.size() < 2)) {
-            ManagedConnection currMC = (ManagedConnection) ultrapeers.next();
-            if (currMC.remoteHostSupportsUDPRedirect() >= 0)
-                retList.add(currMC);
-        }
-        return retList;
-    }
-
-    /**
      * Sends a TCPConnectBack request to (up to) 2 connected Ultrapeers.
      * @returns false if no requests were sent, otherwise true.
      */
     public boolean sendTCPConnectBackRequests() {
         int sent = 0;
-        final Message cb =
-            new TCPConnectBackVendorMessage(RouterService.getPort());
-        Iterator ultrapeers = getInitializedConnections().iterator();
-        for ( ; (sent < 2) && ultrapeers.hasNext();) {
-            ManagedConnection currMC = (ManagedConnection) ultrapeers.next();
-            if (currMC.remoteHostSupportsTCPConnectBack() >= 0) {
+        final Message cb = new TCPConnectBackVendorMessage(RouterService.getPort());
+        List peers = new ArrayList(getInitializedConnections());
+        Collections.shuffle(peers);
+        for(Iterator i = peers.iterator(); i.hasNext() && sent < 5; ) {
+            ManagedConnection currMC = (ManagedConnection)i.next();
+            if (currMC.remoteHostSupportsTCPRedirect() >= 0) {
                 currMC.send(cb);
                 sent++;
             }
@@ -1183,9 +1145,10 @@ public class ConnectionManager {
         int sent =  0;
         final Message cb =
             new UDPConnectBackVendorMessage(RouterService.getPort(), cbGuid);
-        Iterator ultrapeers = getInitializedConnections().iterator();
-        for (; (sent < 4) && ultrapeers.hasNext();) {
-            ManagedConnection currMC = (ManagedConnection) ultrapeers.next();
+        List peers = new ArrayList(getInitializedConnections());
+        Collections.shuffle(peers);
+        for(Iterator i = peers.iterator(); i.hasNext() && sent < 5; ) {
+            ManagedConnection currMC = (ManagedConnection)i.next();
             if (currMC.remoteHostSupportsUDPConnectBack() >= 0) {
                 currMC.send(cb);
                 sent++;

@@ -8,6 +8,7 @@ import java.util.zip.DeflaterOutputStream;
 import java.util.zip.InflaterInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.net.Socket;
 
 import com.limegroup.gnutella.MessageService;
 import com.limegroup.gnutella.ErrorService;
@@ -108,7 +109,44 @@ public class IOUtils {
             }
         }
     }
-
+    
+    /**
+     * Reads a word, but if the connection closes, returns the largest word read
+     * instead of throwing an IOX.
+     */
+    public static String readLargestWord(InputStream in, int maxSize)
+      throws IOException {
+        final char[] buf = new char[maxSize];
+        int i = 0;
+        //iterate till maxSize + 1 (for white space)
+        while (true) {
+            int got;
+            try {
+                got = in.read();
+                if(got == -1) {
+                    if(i == 0)
+                        throw new IOException("could not read any word.");
+                    else
+                        return new String(buf, 0, i);
+                } else if (got >= 0) {
+                    if ((char)got != ' ') { //didn't get word. Exclude space.
+                        if (i < maxSize) { //We dont store the last letter
+                            buf[i++] = (char)got;
+                            continue;
+                        }
+                        //if word of size upto maxsize not found, throw an
+                        //IOException. (Fixes bug 26 in 'core' project)
+                        throw new IOException("could not read word");
+                    }
+                    return new String(buf, 0, i);
+                }
+                throw new IOException("unknown got amount");
+            } catch (ArrayIndexOutOfBoundsException aioobe) {
+                // thrown in strange circumstances of in.read(), consider IOX.
+                throw new IOException("unexpected aioobe");
+            }
+        }
+    }
     
     public static long ensureSkip(InputStream in, long length) throws IOException {
     	long skipped = 0;
@@ -134,6 +172,22 @@ public class IOUtils {
         if(out != null) {
             try {
                 out.close();
+            } catch(IOException ignored) {}
+        }
+    }
+    
+    public static void close(Socket s) {
+        if(s != null) {
+            try {
+                close(s.getInputStream());
+            } catch(IOException ignored) {}
+
+            try {
+                close(s.getOutputStream());
+            } catch(IOException ignored) {}
+
+            try {
+                s.close();
             } catch(IOException ignored) {}
         }
     }

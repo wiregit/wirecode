@@ -4,6 +4,7 @@ import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.Socket;
+import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -877,6 +878,21 @@ public class UploadManager implements BandwidthTracker {
 	public boolean hadSuccesfulUpload() {
 		return _hadSuccesfulUpload;
 	}
+	
+	public synchronized boolean isConnectedTo(InetAddress addr) {
+	    for(Iterator i = _queuedUploads.iterator(); i.hasNext(); ) {
+	        Socket socket = (Socket)i.next();
+	        if(socket != null && socket.getInetAddress().equals(addr))
+	            return true;
+	    }
+	    for(Iterator i = _activeUploadList.iterator(); i.hasNext(); ) {
+	        HTTPUploader next = (HTTPUploader)i.next();
+	        InetAddress host = next.getConnectedHost();
+	        if(host != null && host.equals(addr))
+	            return true;
+	    }
+	    return false;
+    }
 	
 	/**
 	 * Kills all uploads that are uploading the given FileDesc.

@@ -412,6 +412,16 @@ public final class HTTPUploader implements Uploader {
     }
     
     /**
+     * Returns the InetAddress of the socket we're connected to.
+     */
+    public InetAddress getConnectedHost() {
+        if(_socket == null)
+            return null;
+        else
+            return _socket.getInetAddress();
+    }
+    
+    /**
       * Determines if this is uploading to via a UDP transfer.
       */
     boolean isUDPTransfer() {

@@ -22,6 +22,7 @@ import com.limegroup.gnutella.routing.QueryRouteTable;
 import com.limegroup.gnutella.routing.RouteTableMessage;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.util.EmptyResponder;
+import com.limegroup.gnutella.util.IOUtils;
 
 /**
  *  Tests that an Ultrapeer correctly handles connect back redirect messages.
@@ -198,12 +199,9 @@ public final class ServerSideConnectBackRedirectTest extends ServerSideTestCase 
         // we should get a incoming connection
         try {
             Socket x = TCP_ACCESS.accept();
-            byte[] read = new byte[3];
-            int n = x.getInputStream().read(read);
-            assertEquals(2, n);
-            assertEquals('\n', read[0]);
-            assertEquals('\n', read[1]);
-            assertEquals(0, read[2]);
+            // just like Acceptor reads words.
+            String word = IOUtils.readLargestWord(x.getInputStream(), 8);
+            assertEquals("CONNECT", word);
         } catch (IOException bad) {
             fail("got IOX", bad);
         }

@@ -606,6 +606,22 @@ public class RouterService {
             manager.createConnectionAsynchronously(hostname, portnum);
 		}
     }
+    
+    /**
+     * Determines if you're connected to the given host.
+     */
+    public static boolean isConnectedTo(InetAddress addr) {
+        // ideally we would check download sockets too, but
+        // because of the way ManagedDownloader is built, it isn't
+        // too practical.
+        // TODO: rewrite ManagedDownloader
+        
+        String host = addr.getHostAddress();
+        return manager.isConnectedTo(host) ||
+               UDPMultiplexor.instance().isConnectedTo(addr) ||
+               uploadManager.isConnectedTo(addr); // ||
+               // dloadManager.isConnectedTo(addr);
+    }
 
     /**
      * Connects to the network.  Ensures the number of messaging connections

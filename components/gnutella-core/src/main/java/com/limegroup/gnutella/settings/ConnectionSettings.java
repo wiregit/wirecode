@@ -287,6 +287,15 @@ public final class ConnectionSettings extends LimeProps {
      */
     public static final BooleanSetting DO_NOT_MULTICAST_BOOTSTRAP =
         FACTORY.createBooleanSetting("DO_NOT_MULTICAST_BOOTSTRAP", false);
+        
+    /**
+     * Setting for whether or not firewalled checking is done from any
+     * incoming connection or just connectbacks.
+     */
+    public static final BooleanSetting UNSET_FIREWALLED_FROM_CONNECTBACK =
+        FACTORY.createSettableBooleanSetting("UNSET_FIREWALLED_FROM_CONNECTBACK",
+                                             false,
+                                             "connectbackfirewall");
     
     /**
      * Helper method left from Settings Manager

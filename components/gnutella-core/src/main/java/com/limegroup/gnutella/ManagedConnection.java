@@ -1340,29 +1340,21 @@ public class ManagedConnection extends Connection
                 send(req);
             }
 
-            // if we are ignoring local addresses and the connection is local
-            // or the guy has a similar address then ignore
-            if(ConnectionSettings.LOCAL_IS_PRIVATE.getValue() && 
-               (isLocal() || !isConnectBackCapable()))
-                return;
-
             // do i need to send any ConnectBack messages????
             if (!UDPService.instance().canReceiveUnsolicited() &&
                 (_numUDPConnectBackRequests < MAX_UDP_CONNECT_BACK_ATTEMPTS) &&
-                (remoteHostSupportsUDPConnectBack() > -1)) {
-                GUID connectBackGUID =
-                    RouterService.getUDPConnectBackGUID();
-                UDPConnectBackVendorMessage udp = 
-                    new UDPConnectBackVendorMessage(RouterService.getPort(),
-                                                    connectBackGUID);
+                (remoteHostSupportsUDPRedirect() > -1)) {
+                GUID connectBackGUID = RouterService.getUDPConnectBackGUID();
+                Message udp = new UDPConnectBackVendorMessage(RouterService.getPort(),
+                                                              connectBackGUID);
                 send(udp);
                 _numUDPConnectBackRequests++;
             }
+
             if (!RouterService.acceptedIncomingConnection() &&
                 (_numTCPConnectBackRequests < MAX_TCP_CONNECT_BACK_ATTEMPTS) &&
-                (remoteHostSupportsTCPConnectBack() > -1)) {
-                TCPConnectBackVendorMessage tcp =
-                   new TCPConnectBackVendorMessage(RouterService.getPort());
+                (remoteHostSupportsTCPRedirect() > -1)) {
+                Message tcp = new TCPConnectBackVendorMessage(RouterService.getPort());
                 send(tcp);
                 _numTCPConnectBackRequests++;
             }

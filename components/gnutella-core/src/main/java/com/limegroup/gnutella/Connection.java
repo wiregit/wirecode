@@ -1322,15 +1322,6 @@ public class Connection implements IpPort {
     }
 
     /**
-     * Returns true if the this connection is potentially on the 'same' network.
-     */
-    public boolean isConnectBackCapable() throws IllegalStateException {
-        byte[] remote = getInetAddress().getAddress();
-        byte[] local = _socket.getLocalAddress().getAddress();
-        return !NetworkUtils.isCloseIP(local, remote);
-    }
-
-    /**
      * Returns the time this connection was established, in milliseconds
      * since January 1, 1970.
      *

@@ -80,24 +80,6 @@ public final class ServerSideIntermediateRedirectTest
     }
 
     public static void setUpQRPTables() throws Exception {
-        // for Ultrapeer 1
-        QueryRouteTable qrt = new QueryRouteTable();
-        qrt.add("leehsus");
-        qrt.add("berkeley");
-        for (Iterator iter=qrt.encode(null).iterator(); iter.hasNext(); ) {
-            ULTRAPEER[0].send((RouteTableMessage)iter.next());
-			ULTRAPEER[0].flush();
-        }
-
-        //3. routed leaf, with route table for "test"
-        qrt = new QueryRouteTable();
-        qrt.add("berkeley");
-        qrt.add("susheel");
-        qrt.addIndivisible(HugeTestUtils.UNIQUE_SHA1.toString());
-        for (Iterator iter=qrt.encode(null).iterator(); iter.hasNext(); ) {
-            LEAF[0].send((RouteTableMessage)iter.next());
-			LEAF[0].flush();
-        }
     }
 
     // BEGIN TESTS
@@ -116,12 +98,9 @@ public final class ServerSideIntermediateRedirectTest
 
         try {
             TCP_ACCESS.setSoTimeout(TIMEOUT);
-            Socket s = TCP_ACCESS.accept();
-            s.close();
-            assertTrue(false);
-        }
-        catch (InterruptedIOException expected) {
-        }
+            TCP_ACCESS.accept();
+            fail("got a socket");
+        } catch (InterruptedIOException expected) {}
 
         GUID cbGuid = new GUID(GUID.makeGuid());
         UDPConnectBackVendorMessage udp =
@@ -135,12 +114,9 @@ public final class ServerSideIntermediateRedirectTest
             UDP_ACCESS.receive(pack);
             ByteArrayInputStream bais = new ByteArrayInputStream(pack.getData());
             PingRequest ping = (PingRequest) Message.read(bais);
-            assertTrue(false);
-        }
-        catch (InterruptedIOException expected) {
-        }
-        catch (ClassCastException fine) {
-        }
+            fail("Got a message");
+        } catch (InterruptedIOException expected) {}
+        catch (ClassCastException fine) {}
     }
 
 
@@ -151,26 +127,15 @@ public final class ServerSideIntermediateRedirectTest
                                             new EmptyResponder());
         
         redirUP.initialize();
-        QueryRouteTable qrt = new QueryRouteTable();
-        qrt.add("leehsus");
-        qrt.add("berkeley");
-        for (Iterator iter=qrt.encode(null).iterator(); iter.hasNext(); ) {
-            redirUP.send((RouteTableMessage)iter.next());
-			redirUP.flush();
-        }
         assertTrue(redirUP.isOpen());
         drain(redirUP);
 
-        MessagesSupportedVendorMessage msvm = 
-            MessagesSupportedVendorMessage.instance();
+        Message msvm = MessagesSupportedVendorMessage.instance();
         redirUP.send(msvm);
         redirUP.flush();
 
         Thread.sleep(1000);
         ConnectionManager cm = ROUTER_SERVICE.getConnectionManager();
-        // now the guy knows i support the redirect message
-        assertGreaterThan(0, cm.getTCPRedirectUltrapeers().size());
-        assertGreaterThan(0, cm.getUDPRedirectUltrapeers().size());
 
         // now actually test....
         { // make sure tcp vm's are redirected
@@ -185,8 +150,7 @@ public final class ServerSideIntermediateRedirectTest
                                               TIMEOUT);
             assertNotNull(tcpR);
             assertEquals(TCP_ACCESS_PORT, tcpR.getConnectBackPort());
-            assertTrue(tcpR.getConnectBackAddress().getHostAddress(),
-                       tcpR.getConnectBackAddress().getHostAddress().indexOf("127.0.0.1") >= 0);
+            assertEquals("127.0.0.1", tcpR.getConnectBackAddress().getHostAddress());
         }
 
         { // make sure udp vm's are redirected
@@ -203,7 +167,7 @@ public final class ServerSideIntermediateRedirectTest
                                               TIMEOUT);
             assertNotNull(udpR);
             assertEquals(UDP_ACCESS.getLocalPort(), udpR.getConnectBackPort());
-            assertTrue(udpR.getConnectBackAddress().getHostAddress().indexOf("127.0.0.1") >= 0);
+            assertEquals("127.0.0.1", udpR.getConnectBackAddress().getHostAddress());
             assertEquals(cbGuid, udpR.getConnectBackGUID());
         }
 
@@ -218,18 +182,10 @@ public final class ServerSideIntermediateRedirectTest
                                             new EmptyResponder());
         
         redirUP1.initialize();
-        QueryRouteTable qrt = new QueryRouteTable();
-        qrt.add("leehsus");
-        qrt.add("berkeley");
-        for (Iterator iter=qrt.encode(null).iterator(); iter.hasNext(); ) {
-            redirUP1.send((RouteTableMessage)iter.next());
-			redirUP1.flush();
-        }
         assertTrue(redirUP1.isOpen());
         drain(redirUP1);
 
-        MessagesSupportedVendorMessage msvm = 
-            MessagesSupportedVendorMessage.instance();
+        Message msvm = MessagesSupportedVendorMessage.instance();
         redirUP1.send(msvm);
         redirUP1.flush();
 
@@ -238,13 +194,6 @@ public final class ServerSideIntermediateRedirectTest
                                             new EmptyResponder());
         
         redirUP2.initialize();
-        qrt = new QueryRouteTable();
-        qrt.add("leehsus");
-        qrt.add("berkeley");
-        for (Iterator iter=qrt.encode(null).iterator(); iter.hasNext(); ) {
-            redirUP2.send((RouteTableMessage)iter.next());
-			redirUP2.flush();
-        }
         assertTrue(redirUP2.isOpen());
         drain(redirUP2);
 
@@ -255,9 +204,6 @@ public final class ServerSideIntermediateRedirectTest
 
         Thread.sleep(1000);
         ConnectionManager cm = ROUTER_SERVICE.getConnectionManager();
-        // now the guy knows i support the redirect message
-        assertGreaterThan(0, cm.getTCPRedirectUltrapeers().size());
-        assertGreaterThan(0, cm.getUDPRedirectUltrapeers().size());
 
         // now actually test....
         { // make sure tcp vm's are redirected
@@ -277,8 +223,7 @@ public final class ServerSideIntermediateRedirectTest
                                                   TIMEOUT);
             assertNotNull(tcpR);
             assertEquals(TCP_ACCESS_PORT, tcpR.getConnectBackPort());
-            assertTrue(tcpR.getConnectBackAddress().getHostAddress(),
-                       tcpR.getConnectBackAddress().getHostAddress().indexOf("127.0.0.1") >= 0);
+            assertEquals("127.0.0.1", tcpR.getConnectBackAddress().getHostAddress());
         }
 
         { // make sure udp vm's are redirected
@@ -300,7 +245,7 @@ public final class ServerSideIntermediateRedirectTest
                                                   TIMEOUT);
             assertNotNull(udpR);
             assertEquals(UDP_ACCESS.getLocalPort(), udpR.getConnectBackPort());
-            assertTrue(udpR.getConnectBackAddress().getHostAddress().indexOf("127.0.0.1") >= 0);
+            assertEquals("127.0.0.1", udpR.getConnectBackAddress().getHostAddress());
             assertEquals(cbGuid, udpR.getConnectBackGUID());
         }
 

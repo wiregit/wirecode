@@ -79,6 +79,8 @@ import com.limegroup.gnutella.util.NetworkUtils;
 import com.limegroup.gnutella.util.NoMoreStorageException;
 import com.limegroup.gnutella.util.Sockets;
 import com.limegroup.gnutella.util.Utilities;
+import com.limegroup.gnutella.util.IOUtils;
+import com.limegroup.gnutella.util.ProcessingQueue;
 
 
 /**
@@ -177,6 +179,12 @@ public abstract class MessageRouter {
      */
     private static final FixedsizeHashMap _udpConnectBacks = 
         new FixedsizeHashMap(200);
+        
+    /**
+     * The maximum numbers of ultrapeers to forward a UDPConnectBackRedirect
+     * message to, per forward.
+     */
+    private static final int MAX_UDP_CONNECTBACK_FORWARDS = 5;
 
     /**
      * Keeps track of what hosts we have recently tried to connect back to via
@@ -185,6 +193,18 @@ public abstract class MessageRouter {
      */
     private static final FixedsizeHashMap _tcpConnectBacks = 
         new FixedsizeHashMap(200);
+        
+    /**
+     * The maximum numbers of ultrapeers to forward a TCPConnectBackRedirect
+     * message to, per forward.
+     */
+    private static final int MAX_TCP_CONNECTBACK_FORWARDS = 5;        
+    
+    /**
+     * The processingqueue to add tcpconnectback socket connections to.
+     */
+    private static final ProcessingQueue TCP_CONNECT_BACKER =
+        new ProcessingQueue("TCPConnectBack");
     
     /**
      * keeps track of which hosts have sent us head pongs.  We may choose
@@ -1121,40 +1141,31 @@ public abstract class MessageRouter {
 
 
     /**
-     * Basically, just get the correct parameters, create a temporary 
-     * DatagramSocket, and send a Ping.
-     * This method will soon change to just forward a new message, a 
-     * UDPConnectBackRedirect, to a third party.
+     * Forwards the UDPConnectBack to neighboring peers
+     * as a UDPConnectBackRedirect request.
      */
     protected void handleUDPConnectBackRequest(UDPConnectBackVendorMessage udp,
                                                Connection source) {
-        // two options here:
-        // 1) if we are connected to an Ultrapeer that supports UDPCBRedirect
-        //    messages, just transplant the info from this CB into a Redirect
-        //    message and forward it to that Ultrapeer.
-        // 2) if we can't a find a UP that supports redirect, then just do the
-        //    old procedure (do the connect back yourself).  We will deprecate
-        //    this as the user base upgrades....
 
-        // 1)
-        final GUID guidToUse = udp.getConnectBackGUID();
-        final int portToContact = udp.getConnectBackPort();
+        GUID guidToUse = udp.getConnectBackGUID();
+        int portToContact = udp.getConnectBackPort();
         InetAddress sourceAddr = source.getInetAddress();
-        List redirect = _manager.getUDPRedirectUltrapeers();
-        if (redirect.size() > 0) {
-            UDPConnectBackRedirect redir = null;
-            // make a new redirect message
-            redir = new UDPConnectBackRedirect(guidToUse, sourceAddr, 
-                                               portToContact);
-            Iterator iter = redirect.iterator();
-            while (iter.hasNext())
-                ((ManagedConnection)iter.next()).send(redir);
-            return;
-        }
+        Message msg = new UDPConnectBackRedirect(guidToUse, sourceAddr, 
+                                                 portToContact);
 
-        // 2)
-        // we used to do old style ConnectBacks here but no use - the chances
-        // not having ANY redirct candidates is small.
+        int sentTo = 0;
+        List peers = new ArrayList(_manager.getInitializedConnections());
+        Collections.shuffle(peers);
+        for(Iterator i = peers.iterator(); i.hasNext() && sentTo < MAX_UDP_CONNECTBACK_FORWARDS;) {
+            ManagedConnection currMC = (ManagedConnection)i.next();
+            if(currMC == source)
+                continue;
+
+            if (currMC.remoteHostSupportsUDPRedirect() >= 0) {
+                currMC.send(msg);
+                sentTo++;
+            }
+        }
     }
 
 
@@ -1165,7 +1176,8 @@ public abstract class MessageRouter {
     protected void handleUDPConnectBackRedirect(UDPConnectBackRedirect udp,
                                                Connection source) {
         // only allow other UPs to send you this message....
-        if (!source.isSupernodeSupernodeConnection()) return;
+        if (!source.isSupernodeSupernodeConnection())
+            return;
 
         GUID guidToUse = udp.getConnectBackGUID();
         int portToContact = udp.getConnectBackPort();
@@ -1175,7 +1187,8 @@ public abstract class MessageRouter {
         // whole point of redirect after all....
         Endpoint endPoint = new Endpoint(addrToContact.getAddress(),
                                          portToContact);
-        if (_manager.isConnectedTo(endPoint.getAddress())) return;
+        if (_manager.isConnectedTo(endPoint.getAddress()))
+            return;
 
         // keep track of who you tried connecting back too, don't do it too
         // much....
@@ -1184,13 +1197,12 @@ public abstract class MessageRouter {
         if (placeHolder == null) {
             try {
                 _udpConnectBacks.put(addrString, new Object());
-            }
-            catch (NoMoreStorageException nomo) {
+            } catch (NoMoreStorageException nomo) {
                 return;  // we've done too many connect backs, stop....
             }
-        }
-        else
+        } else {
             return;  // we've connected back to this guy recently....
+        }
 
         PingRequest pr = new PingRequest(guidToUse.bytes(), (byte) 1,
                                          (byte) 0);
@@ -1200,41 +1212,29 @@ public abstract class MessageRouter {
 
 
     /**
-     * Basically, just get the correct parameters, create a Socket, and
-     * send a "/n/n".
-     * This method will soon change to just forward a new message, a 
-     * UDPConnectBackRedirect, to a third party.
+     * Forwards the request to neighboring Ultrapeers as a
+     * TCPConnectBackRedirect message.
      */
     protected void handleTCPConnectBackRequest(TCPConnectBackVendorMessage tcp,
                                                Connection source) {
-
-        // two options here:
-        // 1) if we are connected to an Ultrapeer that supports TCPCBRedirect
-        //    messages, just transplant the info from this CB into a Redirect
-        //    message and forward it to that Ultrapeer.
-        // 2) if we can't a find a UP that supports redirect, then just do the
-        //    old procedure (do the connect back yourself).  We will deprecate
-        //    this as the user base upgrades....
-
-        // 1)
         final int portToContact = tcp.getConnectBackPort();
         InetAddress sourceAddr = source.getInetAddress();
-        List redirect = _manager.getTCPRedirectUltrapeers();
-        if (redirect.size() > 0) {
-            TCPConnectBackRedirect redir = null;
-            // make a new redirect message
-            redir = new TCPConnectBackRedirect(sourceAddr, portToContact);
-            Iterator iter = redirect.iterator();
-            while (iter.hasNext())
-                ((ManagedConnection)iter.next()).send(redir);
-            return;
-        }
+        Message msg = new TCPConnectBackRedirect(sourceAddr, portToContact);
 
-        // 2)
-        // we used to do old style ConnectBacks here but no use - the chances
-        // not having ANY redirct candidates is small.
+        int sentTo = 0;
+        List peers = new ArrayList(_manager.getInitializedConnections());
+        Collections.shuffle(peers);
+        for(Iterator i = peers.iterator(); i.hasNext() && sentTo < MAX_TCP_CONNECTBACK_FORWARDS;) {
+            ManagedConnection currMC = (ManagedConnection)i.next();
+            if(currMC == source)
+                continue;
+
+            if (currMC.remoteHostSupportsTCPRedirect() >= 0) {
+                currMC.send(msg);
+                sentTo++;
+            }
+        }        
     }
-
 
     /**
      * Basically, just get the correct parameters, create a Socket, and
@@ -1243,7 +1243,8 @@ public abstract class MessageRouter {
     protected void handleTCPConnectBackRedirect(TCPConnectBackRedirect tcp,
                                                 Connection source) {
         // only allow other UPs to send you this message....
-        if (!source.isSupernodeSupernodeConnection()) return;
+        if (!source.isSupernodeSupernodeConnection())
+            return;
 
         final int portToContact = tcp.getConnectBackPort();
         final String addrToContact =tcp.getConnectBackAddress().getHostAddress();
@@ -1251,7 +1252,8 @@ public abstract class MessageRouter {
         // only connect back if you aren't connected to the host - that is the
         // whole point of redirect after all....
         Endpoint endPoint = new Endpoint(addrToContact, portToContact);
-        if (_manager.isConnectedTo(endPoint.getAddress())) return;
+        if (_manager.isConnectedTo(endPoint.getAddress()))
+            return;
 
         // keep track of who you tried connecting back too, don't do it too
         // much....
@@ -1259,35 +1261,32 @@ public abstract class MessageRouter {
         if (placeHolder == null) {
             try {
                 _tcpConnectBacks.put(addrToContact, new Object());
-            }
-            catch (NoMoreStorageException nomo) {
+            } catch (NoMoreStorageException nomo) {
                 return;  // we've done too many connect backs, stop....
             }
-        }
-        else
+        } else {
             return;  // we've connected back to this guy recently....
+        }
 
-        Thread connectBack = new ManagedThread( new Runnable() {
+        TCP_CONNECT_BACKER.add(new Runnable() {
             public void run() {
                 Socket sock = null;
-                OutputStream os = null;
                 try {
-                    sock = Sockets.connect(addrToContact, portToContact, 12);
-                    os = sock.getOutputStream();
-                    os.write("\n\n".getBytes());
+                    sock = Sockets.connect(addrToContact, portToContact, 12000);
+                    OutputStream os = sock.getOutputStream();
+                    os.write("CONNECT BACK\r\n\n\n".getBytes());
+                    os.flush();
+                    try {
+                        Thread.sleep(500); // let the other side get it.
+                    } catch(InterruptedException ignored) {}
                 } catch (IOException ignored) {
-                } catch (SecurityException ignored) {
                 } catch (Throwable t) {
                     ErrorService.error(t);
                 } finally {
-                    if(sock != null)
-                        try { sock.close(); } catch(IOException ignored) {}
-                    if(os != null)
-                        try { os.close(); } catch(IOException ignored) {}
+                    IOUtils.close(sock);
                 }
             }
-        }, "TCPConnectBackThread");
-        connectBack.start();
+        });
     }
 
 
