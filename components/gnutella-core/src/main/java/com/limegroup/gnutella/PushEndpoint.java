@@ -171,7 +171,7 @@ public class PushEndpoint implements HTTPHeaderValue{
 		int fwtVersion =0;
 		
 		while(tok.hasMoreTokens() && proxies.size() < 4) {
-			String current = tok.nextToken();
+			String current = tok.nextToken().trim();
 			
 			// see if this token is the fwt header
 			// if this token fails to parse we abort since we must know
