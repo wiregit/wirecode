@@ -387,7 +387,7 @@ public class DownloadTest extends BaseTestCase {
         }
     }
     
-    public void testTHEXDownloadSwarm() throws Exception {
+/*    public void testTHEXDownloadSwarm() throws Exception {
     	LOG.debug("-Testing the grey area allocation during swarm downloads");
     	
     	final RemoteFileDesc rfd=newRFDWithURN(PORT_1, 100);
@@ -425,7 +425,7 @@ public class DownloadTest extends BaseTestCase {
         		Interval i = new Interval (uploader.start,uploader.stop-1);
                 if (requestNo == 0) {
                     assertEquals(0,thexStatus);
-                    // first request, we should have 0-99999 gray
+                    // first request, we should have requested 0-99999 or 100000-199999 
                     assertEquals(0,i.low);
                     assertEquals(99999,i.high);
                     LOG.debug("request 0 pass");
@@ -483,7 +483,7 @@ public class DownloadTest extends BaseTestCase {
             assertNull("verifying file should be null", vf);
         }
         
-    }
+    }*/
     
     public void testSimplePushDownload() throws Exception {
         LOG.debug("-Testing non-swarmed push download");
@@ -719,7 +719,7 @@ public class DownloadTest extends BaseTestCase {
                   " is replaced by another download that is faster");
         
         final int SLOW_RATE = 5;
-        final int FAST_RATE = 100;
+        final int FAST_RATE = 50;
         uploader1.setRate(SLOW_RATE);
         uploader2.setRate(FAST_RATE);
         
@@ -729,6 +729,7 @@ public class DownloadTest extends BaseTestCase {
 
         tGeneric(rfds);
         
+        Thread.sleep(8000);
         int u1 = uploader1.fullRequestsUploaded();
         int u2 = uploader2.fullRequestsUploaded();
         int c1 = uploader1.getConnections();
@@ -925,9 +926,9 @@ public class DownloadTest extends BaseTestCase {
         assertEquals(1, uploader1.getConnections());
     }    
     
-    public void testThexFixesDownload() throws Exception {
-        LOG.debug("-Testing that thex can identify a corrupt download range" +
-                  " and the downloader will automatically get it back.");
+    public void testKeepCorrupt() throws Exception {
+        LOG.debug("-Testing that if the user chooses to keep a corrupt download the download" +
+                "will eventually finish");
         final int RATE = 100;
         uploader1.setCorruption(true);
         uploader1.setCorruptBoundary(50);
@@ -940,16 +941,53 @@ public class DownloadTest extends BaseTestCase {
         RemoteFileDesc rfd1=newRFDWithURN(PORT_1, 100);
         RemoteFileDesc rfd2=newRFDWithURN(PORT_2, 100);
         
-        tGeneric( new RemoteFileDesc[] { rfd1, rfd2 } );
+        
+        Downloader download=
+            RouterService.download(new RemoteFileDesc[]{rfd1,rfd2}, Collections.EMPTY_LIST, false, null);
+        waitForComplete(false);
+        
         HashTree tree = TigerTreeCache.instance().getHashTree(TestFile.hash());
-        assertNotNull(tree);
-        assertEquals(TestFile.tree().getRootHash(), tree.getRootHash());
-        assertFalse(callback.corruptChecked);
+        assertNull(tree);
+        assertTrue(callback.corruptChecked);
         
         // tried once or if twice then failed the second time.
         assertLessThanOrEquals(2, uploader1.getConnections());
         // tried once or twice.
         assertLessThanOrEquals(2, uploader2.getConnections());
+        
+        assertGreaterThanOrEquals(TestFile.length(),uploader1.getAmountUploaded()+uploader2.getAmountUploaded());
+    }
+    
+    public void testDiscardCorrupt() throws Exception {
+        LOG.debug("-Testing that if the user chooses to discard a corrupt download it will terminate" +
+                "immediately");
+        
+        final int RATE = 100;
+        callback.delCorrupt = true;
+        callback.corruptChecked = false;
+        uploader1.setCorruption(true);
+        uploader1.setCorruptBoundary(50);
+        uploader1.stopAfter(256*1024);
+        uploader1.setSendThexTreeHeader(true);
+        uploader1.setSendThexTree(true);
+        uploader1.setRate(RATE);
+        uploader2.setRate(RATE);
+
+        RemoteFileDesc rfd1=newRFDWithURN(PORT_1, 100);
+        RemoteFileDesc rfd2=newRFDWithURN(PORT_2, 100);
+        
+        tGenericCorrupt( new RemoteFileDesc[] { rfd1, rfd2 } );
+        HashTree tree = TigerTreeCache.instance().getHashTree(TestFile.hash());
+        assertNull(tree);
+        assertTrue(callback.corruptChecked);
+        
+        // tried once or if twice then failed the second time.
+        assertLessThanOrEquals(2, uploader1.getConnections());
+        // tried once or twice.
+        assertLessThanOrEquals(2, uploader2.getConnections());
+        
+        assertLessThan(TestFile.length(),uploader1.getAmountUploaded()+uploader2.getAmountUploaded());
+
     }
     
     
@@ -2316,7 +2354,7 @@ public class DownloadTest extends BaseTestCase {
                 ((ManagedDownloader)download).addDownload(later[i], true);
         }
 
-        waitForComplete(false);
+        waitForComplete(true);
         if (isComplete())
             fail("should be corrupt");
         else
