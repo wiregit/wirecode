@@ -577,9 +577,15 @@ public class Connection implements ReplyHandler, PushProxyInterface {
             // exception was thrown, the connection will be removed anyway.
             RESPONSE_HEADERS = null;
             
+            if(CommonUtils.isJava14OrLater() && 
+               ConnectionSettings.USE_NIO.getValue()) {
+                _socket.getChannel().configureBlocking(false);       
+            }
             // create the output queues for messages
-            _messageWriter = new MessageWriterProxy(this);  
-            
+            _messageWriter = new MessageWriterProxy(this); 
+            _messageReader = new MessageReaderProxy();
+             
+            NIODispatcher.instance().addReader(this);
             // check for updates from this host  
             UpdateManager.instance().checkAndUpdate(this);          
         } catch (NoGnutellaOkException e) {
