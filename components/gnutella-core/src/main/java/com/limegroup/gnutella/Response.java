@@ -2,6 +2,7 @@ package com.limegroup.gnutella;
 
 import java.util.StringTokenizer;
 import com.limegroup.gnutella.xml.*;
+import com.limegroup.gnutella.messages.*;
 import org.xml.sax.SAXException;
 import java.io.*;
 import com.sun.java.util.collections.*;
@@ -270,6 +271,9 @@ public class Response {
             baos.write(c);
         }
         String name = new String(baos.toByteArray());
+        if(name.length() == 0) {
+            throw new IOException("empty name in response");
+        }
 
         // Extract extra info, if any
         baos.reset();
