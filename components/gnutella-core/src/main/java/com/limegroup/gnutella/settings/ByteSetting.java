@@ -6,6 +6,8 @@ import java.util.Properties;
  * Class for a byte setting.
  */
 public final class ByteSetting extends Setting {
+    
+    private byte value;
 
 	/**
 	 * Creates a new <tt>SettingBool</tt> instance with the specified
@@ -24,7 +26,7 @@ public final class ByteSetting extends Setting {
 	 * @return the value of this setting
 	 */
 	public byte getValue() {
-		return Byte.parseByte(PROPS.getProperty(KEY));
+		return value;
 	}
 
 	/**
@@ -33,6 +35,14 @@ public final class ByteSetting extends Setting {
 	 * @param value the value to store
 	 */
 	public void setValue(byte value) {
-		PROPS.put(KEY, String.valueOf(value));
+		super.setValue(String.valueOf(value));
 	}
+     
+    /**
+     * Load value from property string value
+     * @param sValue property string value
+     */
+    protected void loadValue(String sValue) {
+        value = Byte.parseByte(sValue);
+    }
 }

@@ -6,6 +6,8 @@ import java.util.Properties;
  * Class for a long setting.
  */
 public final class LongSetting extends Setting {
+    
+    private long value;
 
 	/**
 	 * Creates a new <tt>SettingBool</tt> instance with the specified
@@ -24,7 +26,7 @@ public final class LongSetting extends Setting {
 	 * @return the value of this setting
 	 */
 	public long getValue() {
-		return Long.parseLong(PROPS.getProperty(KEY));
+        return value;
 	}
 
 	/**
@@ -33,6 +35,14 @@ public final class LongSetting extends Setting {
 	 * @param value the value to store
 	 */
 	public void setValue(long value) {
-		PROPS.put(KEY, String.valueOf(value));
+		super.setValue(String.valueOf(value));
 	}
+    
+    /** Load value from property string value
+     * @param sValue property string value
+     *
+     */
+    protected void loadValue(String sValue) {
+		value = Long.parseLong(sValue);
+    }
 }

@@ -6,6 +6,9 @@ import java.util.Properties;
  * Class for a boolean setting.
  */
 public final class BooleanSetting extends Setting {
+    
+    /** Curernve value of settings */
+    private boolean value;
 
 	/**
 	 * Creates a new <tt>BooleanSetting</tt> instance with the specified
@@ -25,7 +28,7 @@ public final class BooleanSetting extends Setting {
 	 * @return the value of this setting
 	 */
 	public boolean getValue() {
-		return Boolean.valueOf(PROPS.getProperty(KEY)).booleanValue();
+		return value;
 	}
 
 	/**
@@ -34,6 +37,14 @@ public final class BooleanSetting extends Setting {
 	 * @param bool the <tt>boolean</tt> to store
 	 */
 	public void setValue(boolean bool) {
-		PROPS.put(KEY, String.valueOf(bool));
+        super.setValue(String.valueOf(bool));
 	}
+    
+    /**
+     * Load value from property string value
+     * @param sValue property string value
+     */
+    protected void loadValue(String sValue) {
+        value = Boolean.valueOf(sValue).booleanValue();
+    }
 }

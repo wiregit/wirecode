@@ -53,12 +53,37 @@ abstract class Setting {
 			throw new IllegalArgumentException("duplicate setting key");
 		}
 		DEFAULT_PROPS.put(KEY, defaultValue);
+        loadValue(defaultValue);
 	}
+    
+    /**
+     * Reload value from properties object
+     */
+    public void reload() {
+        String value = PROPS.getProperty(KEY);
+        if (value == null) value = DEFAULT_VALUE;
+        loadValue(value);
+    }
 
 	/**
 	 * Revert to the default value.
 	 */
 	public void revertToDefault() {
-		PROPS.put(KEY, DEFAULT_VALUE);
+        setValue(DEFAULT_VALUE);
 	}
+    
+    /**
+     * Set new property value
+     * @param value new property value
+     */
+    protected void setValue(String value) {
+        PROPS.put(KEY, value);
+        loadValue(value);
+    }
+    
+    /**
+     * Load value from property string value
+     * @param sValue property string value
+     */
+    abstract protected void loadValue(String sValue);
 }

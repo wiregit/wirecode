@@ -9,6 +9,8 @@ import java.text.NumberFormat;
  * Class for an <tt>Color</tt> setting.
  */
 public final class ColorSetting extends Setting {
+    
+    private Color value;
 
 	/**
 	 * Creates a new <tt>ColorSetting</tt> instance with the specified
@@ -20,13 +22,7 @@ public final class ColorSetting extends Setting {
 	static ColorSetting createColorSetting(Properties defaultProps, 
 										   Properties props, 
 										   String key, Color defaultColor) {	  
-		String red   = Integer.toHexString(defaultColor.getRed());
-		String green = Integer.toHexString(defaultColor.getGreen());
-		String blue  = Integer.toHexString(defaultColor.getBlue());	
-		if(red.length() == 1)   red   = "0" + red;
-		if(green.length() == 1) green = "0" + green;
-		if(blue.length() == 1)  blue  = "0" + blue;
-		return new ColorSetting(defaultProps, props, key, "#"+red+green+blue);
+		return new ColorSetting(defaultProps, props, key, formatColor(defaultColor));
 	}
 
 	/**
@@ -51,11 +47,7 @@ public final class ColorSetting extends Setting {
 	 * @return the value of this setting
 	 */
 	public Color getValue() {
-		String hexColor = PROPS.getProperty(KEY);
-		int r = Integer.parseInt(hexColor.substring(1, 3), 16);
-		int g = Integer.parseInt(hexColor.substring(3, 5), 16);
-		int b = Integer.parseInt(hexColor.substring(5, 7), 16);
-		return new Color(r,g,b);
+        return value;
 	}
 
 	/**
@@ -64,12 +56,34 @@ public final class ColorSetting extends Setting {
 	 * @param value the value to store
 	 */
 	public void setValue(Color value) {
-		String red   = Integer.toHexString(value.getRed());
-		String green = Integer.toHexString(value.getGreen());
-		String blue  = Integer.toHexString(value.getBlue());	
+        super.setValue(formatColor(value));
+        this.value = value;
+	}
+	/**
+	 * Accessor for the value of this setting.
+	 * 
+	 * @return the value of this setting
+	 */
+	protected void loadValue(String sValue) {
+		int r = Integer.parseInt(sValue.substring(1, 3), 16);
+		int g = Integer.parseInt(sValue.substring(3, 5), 16);
+		int b = Integer.parseInt(sValue.substring(5, 7), 16);
+		value = new Color(r,g,b);
+	}
+    
+    /**
+     * Converot color to string property value
+     * @param color color
+     * @return the string property value
+     */
+    private static String formatColor(Color color) {
+		String red   = Integer.toHexString(color.getRed());
+		String green = Integer.toHexString(color.getGreen());
+		String blue  = Integer.toHexString(color.getBlue());	
 		if(red.length() == 1)   red   = "0" + red;
 		if(green.length() == 1) green = "0" + green;
 		if(blue.length() == 1)  blue  = "0" + blue;
-		PROPS.put(KEY, "#"+red+green+blue);
-	}
+		return "#" + red + green + blue;
+    }
+        
 }

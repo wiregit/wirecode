@@ -6,6 +6,8 @@ import java.util.Properties;
  * Class for an int setting.
  */
 public final class IntSetting extends Setting {
+    
+    private int value;
 
 	/**
 	 * Creates a new <tt>IntSetting</tt> instance with the specified
@@ -24,7 +26,7 @@ public final class IntSetting extends Setting {
 	 * @return the value of this setting
 	 */
 	public int getValue() {
-		return Integer.parseInt(PROPS.getProperty(KEY));
+        return value;
 	}
 
 	/**
@@ -33,6 +35,15 @@ public final class IntSetting extends Setting {
 	 * @param value the value to store
 	 */
 	public void setValue(int value) {
-		PROPS.put(KEY, String.valueOf(value));
+		super.setValue(String.valueOf(value));
 	}
+    
+    /** Load value from property string value
+     * @param sValue property string value
+     *
+     */
+    protected void loadValue(String sValue) {
+		value = Integer.parseInt(sValue);
+    }
+    
 }

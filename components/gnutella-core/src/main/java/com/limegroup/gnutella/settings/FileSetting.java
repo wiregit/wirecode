@@ -7,6 +7,8 @@ import java.io.*;
  * This class handles settings for <tt>File</tt>s.
  */
 public final class FileSetting extends Setting {
+    
+    private File value;
 
 	/**
 	 * Creates a new <tt>SettingBool</tt> instance with the specified
@@ -25,7 +27,7 @@ public final class FileSetting extends Setting {
 	 * @return the value of this setting
 	 */
 	public File getValue() {
-		return new File(PROPS.getProperty(KEY));
+        return value;
 	}
 
 	/**
@@ -34,6 +36,14 @@ public final class FileSetting extends Setting {
 	 * @param value the value to store
 	 */
 	public void setValue(File value) {
-		PROPS.put(KEY, value.getAbsolutePath());
+		super.setValue(value.getAbsolutePath());
 	}
+     
+    /**
+     * Load value from property string value
+     * @param sValue property string value
+     */
+    protected void loadValue(String sValue) {
+        value = new File(sValue);
+    }
 }

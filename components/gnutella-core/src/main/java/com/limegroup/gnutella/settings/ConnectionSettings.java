@@ -32,7 +32,7 @@ public final class ConnectionSettings extends AbstractSettings {
 	 * private, and therefore ignored when connecting
 	 */
 	public static final BooleanSetting LOCAL_IS_PRIVATE =
-		FACTORY.createBooleanSetting("LOCAL_IS_PRIVATE", true);
+		CFG_FACTORY.createBooleanSetting("LOCAL_IS_PRIVATE", true);
 
 }
 

@@ -14,8 +14,6 @@ import java.awt.*;
  */
 public final class ThemeFileHandler {
 
-	private static final Properties DEFAULT_PROPS = new Properties();
-
 	/**
 	 * Handle to the <tt>SettingsFactory</tt> for theme settings.
 	 */
@@ -60,9 +58,9 @@ public final class ThemeFileHandler {
 	 */
 	private static void handleFactory(File file) {
 		if(FACTORY == null) {
-			FACTORY = SettingsFactory.createFromFile(file, DEFAULT_PROPS);				
+			FACTORY = new SettingsFactory(file);				
 		} else {
-			FACTORY.reload(file);
+			FACTORY.reload();
 		}
 	}
 

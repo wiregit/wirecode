@@ -6,6 +6,8 @@ import java.util.Properties;
  * Class for a string setting.
  */
 public final class StringSetting extends Setting {
+    
+    String value;
 
 	/**
 	 * Creates a new <tt>SettingBool</tt> instance with the specified
@@ -24,7 +26,7 @@ public final class StringSetting extends Setting {
 	 * @return the value of this setting
 	 */
 	public String getValue() {
-		return PROPS.getProperty(KEY);
+        return value;
 	}
 
 	/**
@@ -33,6 +35,15 @@ public final class StringSetting extends Setting {
 	 * @param str the <tt>String</tt> to store
 	 */
 	public void setValue(String str) {
-		PROPS.put(KEY, str);
+		super.setValue(str);
 	}
+    
+    /** Load value from property string value
+     * @param sValue property string value
+     *
+     */
+    protected void loadValue(String sValue) {
+        value = sValue;
+    }
+    
 }
