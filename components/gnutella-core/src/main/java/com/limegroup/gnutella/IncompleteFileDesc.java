@@ -6,6 +6,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
 
 import com.limegroup.gnutella.altlocs.AlternateLocation;
@@ -97,7 +98,7 @@ public class IncompleteFileDesc extends FileDesc implements HTTPHeaderValue {
     public boolean add(AlternateLocation al) {
         boolean ret = super.add(al);
         if (ret) {
-            ManagedDownloader md = _verifyingFile.getManagedDownloader();
+            ManagedDownloader md = getMyDownloader();
             if( md != null )
                 md.addDownload(al.createRemoteFileDesc((int)getSize()),false);
         }
@@ -127,7 +128,7 @@ public class IncompleteFileDesc extends FileDesc implements HTTPHeaderValue {
      * ManagedDownloader of new locations for this.
      */
 	public int addAll(AlternateLocationCollection alc) {
-	    ManagedDownloader md = _verifyingFile.getManagedDownloader();
+	    ManagedDownloader md = getMyDownloader();
 	    
         // if no downloader, just add the collection.
 	    if( md == null )
@@ -148,11 +149,16 @@ public class IncompleteFileDesc extends FileDesc implements HTTPHeaderValue {
         return added;
 	}
 	
+    private ManagedDownloader getMyDownloader() {
+        return RouterService.getDownloadManager().getDownloaderForURN(getSHA1Urn());
+    }
+    
 	/**
 	 * Returns whether or not we are actively downloading this file.
 	 */
 	public boolean isActivelyDownloading() {
-	    ManagedDownloader md = _verifyingFile.getManagedDownloader();
+        
+        ManagedDownloader md = getMyDownloader();
 	    
 	    if(md == null)
 	        return false;

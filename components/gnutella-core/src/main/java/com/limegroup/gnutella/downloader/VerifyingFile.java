@@ -52,17 +52,15 @@ public class VerifyingFile {
      */
     private static final float MAX_CORRUPTION = 0.1f;
     
+    /** The default chunk size - if we don't have a tree we request chunks this big */
+    static final int DEFAULT_CHUNK_SIZE = 100000; //100 KB
+    
     /**
      * The file we're writing to / reading from.
      * LOCKING: itself. this->fos is ok
      */
     private RandomAccessFile fos;
 
-    /**
-     * The ManagedDownloader this is working for.
-     */
-    private ManagedDownloader managedDownloader; 
-    
     /**
      * The eventual completed size of the file we're writing.
      */
@@ -99,6 +97,8 @@ public class VerifyingFile {
      */
     private IntervalSet pendingBlocks;
     
+    private HashTree hashTree;
+    
     /**
      * Constructs a new VerifyingFile, without a given completion size.
      *
@@ -126,11 +126,10 @@ public class VerifyingFile {
      *
      * If there is no completion size, this fails.
      */
-    public void open(File file, ManagedDownloader md) throws IOException {
+    public void open(File file) throws IOException {
         if(completedSize == -1)
             throw new IllegalStateException("cannot open for unknown size.");
         
-        this.managedDownloader = md;
         // Ensure that the directory this file is in exists & is writeable.
         File parentFile = FileUtils.getParentFile(file);
         if( parentFile != null ) {
@@ -187,7 +186,6 @@ public class VerifyingFile {
 		}
 		
 		////////////
-		
         saveToDisk(currPos,length,buf);
 		
         // 4. if write went ok, add this interval to the partial blocks
@@ -223,15 +221,15 @@ public class VerifyingFile {
 	 */
 	private void checkVerifyableChunks() {
         // if we have a tree, see if there is a completed chunk in the partial list
-		HashTree tree = managedDownloader.getHashTree(); 
-		if (tree != null) {
+		 
+		if (hashTree != null) {
 			for (Iterator iter = findVerifyableBlocks().iterator();iter.hasNext();)  {
 				Interval i = (Interval) iter.next();
 				partialBlocks.delete(i);
 				pendingBlocks.add(i);
 				if (LOG.isDebugEnabled())
 					LOG.debug("will schedule for verification "+i);
-				CHUNK_VERIFIER.add(new ChunkVerifier(i,tree));
+				CHUNK_VERIFIER.add(new ChunkVerifier(i,hashTree));
 			}
 		} else
 			// if we couldn't find a tree during the entire download, 
@@ -253,7 +251,7 @@ public class VerifyingFile {
         
         List verifyable = new ArrayList(2);
         List partial = partialBlocks.getAllIntervalsAsList();
-        int chunkSize = managedDownloader.getChunkSize();
+        int chunkSize = getChunkSize();
         int lastChunkOffset = completedSize - (completedSize % chunkSize);
         
         for (int i = 0; i < partial.size() ; i++) {
@@ -319,6 +317,7 @@ public class VerifyingFile {
     /**
      * Returns the first block of data that needs to be written
      * and is within the specified set of ranges.
+     * The parameter IntervalSet is modified
      */
     public synchronized Interval leaseWhite(IntervalSet ranges)
       throws NoSuchElementException {
@@ -365,6 +364,9 @@ public class VerifyingFile {
         return verifiedBlocks.getAllIntervals();
     }
     
+    /**
+     * @return byte-packed representation of the verified blocks.
+     */
     public synchronized byte [] toBytes() {
     	return verifiedBlocks.toBytes();
     }
@@ -432,14 +434,6 @@ public class VerifyingFile {
     }
     
     /**
-     * if the file has become too corrupt prompt the user to cancel it
-     */
-    public void promptIfHopeless() {
-        if (isHopeless())
-            managedDownloader.promptAboutCorruptDownload();
-    }
-    
-    /**
      * Determines if there are any blocks that are not assigned
      * or written.
      */
@@ -463,21 +457,6 @@ public class VerifyingFile {
         try { 
             fos.close();
         } catch (IOException ioe) {}
-    }
-    
-    /**
-     * Clears the ManagedDownloader variable, allowing it to be GC'ed.
-     */
-    public void clearManagedDownloader() {
-        managedDownloader = null;
-    }   
-    
-    /**
-     * Returns the ManagedDownloader this VerifyingFile is associated with.
-     * If this VerifyingFile is closed, the return value will be null.
-     */
-    public ManagedDownloader getManagedDownloader() {
-        return managedDownloader;
     }
     
     /////////////////////////private helpers//////////////////////////////
@@ -526,6 +505,22 @@ public class VerifyingFile {
         leasedBlocks.add(in);
     }
     
+    public synchronized HashTree getHashTree() {
+            return hashTree;
+    }
+    
+    /**
+     * sets the HashTree the current download will use.  That affects whether
+     * we do overlap checking.
+     */
+    public synchronized void setHashTree(HashTree tree) {
+        hashTree = tree;
+    }
+    
+    public synchronized int getChunkSize() {
+        return hashTree == null ? DEFAULT_CHUNK_SIZE : hashTree.getNodeSize();
+    }
+    
     /**
      * a Runnable that verifies chunks without locking the VerifyingFile during
      * intensive cpu or i/o operations. After verification, the completed regions 
@@ -564,7 +559,7 @@ public class VerifyingFile {
             try {
 				synchronized(fos) {
 					fos.seek(i.low);
-					fos.read(b);
+					fos.readFully(b);
 				}
             }catch (IOException bad) {
                 // we failed reading back from the file - assume block is corrupt

@@ -451,17 +451,6 @@ public class ManagedDownloader implements Downloader, Serializable {
     private Object altLock;
 
     /**
-     * stores a HashTree that will be requested if we find it.
-     * LOCKING: hashTreeLock
-     */
-    private HashTree hashTree = null;
-    
-    /**
-     * LOCKS: hashTree
-     */
-    private Object hashTreeLock;
-    
-    /**
      * one BandwidthTrackerImpl so we don't have to allocate one for
      * each download every time we write a snapshot.
      */
@@ -610,7 +599,6 @@ public class ManagedDownloader implements Downloader, Serializable {
         corruptState=NOT_CORRUPT_STATE;
         corruptStateLock=new Object();
         altLock = new Object();
-	hashTreeLock = new Object();
         numMeasures = 0;
         averageBandwidth = 0f;
         queuePosition=Integer.MAX_VALUE;
@@ -1407,10 +1395,6 @@ public class ManagedDownloader implements Downloader, Serializable {
         return paused == true;
     }
     
-    public boolean isStopped() {
-        return stopped;
-    }
-
     /**
      * Stops this download.
      */
@@ -1651,10 +1635,10 @@ public class ManagedDownloader implements Downloader, Serializable {
             return incompleteFile;
     }
     
-    VerifyingFile getVerifyingFile() {
-        return commonOutFile;
+    public URN getSHA1Urn() {
+        return downloadSHA1;
     }
-
+    
     /**
      * Returns the first fragment of the incomplete file,
      * copied to a new file, or the completeFile if the download
@@ -1723,8 +1707,6 @@ public class ManagedDownloader implements Downloader, Serializable {
      * Cleans up information before this downloader is removed from memory.
      */
     public synchronized void finish() {
-        if( commonOutFile != null )
-            commonOutFile.clearManagedDownloader();
         if(allFiles != null) {
             for(int i = 0; i < allFiles.length; i++)
                 allFiles[i].setDownloading(false);
@@ -1951,14 +1933,12 @@ public class ManagedDownloader implements Downloader, Serializable {
 
         // unshare the file if we didn't have a tree
         // otherwise we will have shared only the parts that verified
-        if (getHashTree() == null) 
+        if (commonOutFile.getHashTree() == null) 
             fileManager.removeFileIfShared(incompleteFile);
         
         // purge the tree
         TigerTreeCache.instance().purgeTree(downloadSHA1);
-        synchronized(hashTreeLock) {
-            hashTree = null;
-        }
+        commonOutFile.setHashTree(null);
 
         // ask what to do next 
         promptAboutCorruptDownload();
@@ -1982,7 +1962,7 @@ public class ManagedDownloader implements Downloader, Serializable {
         //same temporary file.
         
         File saveDir;
-        String fileName = getFileName();fileName.indexOf("1");
+        String fileName = getFileName();
         try {
             incompleteFile = incompleteFileManager.getFile(firstDesc);
             saveDir = SharingSettings.getSaveDirectory();
@@ -2006,9 +1986,7 @@ public class ManagedDownloader implements Downloader, Serializable {
 	    
 		// if we have a valid tree, update our chunk size and disable overlap checking
 		if (tree != null && tree.isDepthGoodEnough()) {
-			synchronized(hashTreeLock) {
-				hashTree = tree;
-			}
+				commonOutFile.setHashTree(tree);
 		}
     }
 	
@@ -2066,9 +2044,9 @@ public class ManagedDownloader implements Downloader, Serializable {
             SavedFileManager.instance().addSavedFile(file, urns);
             
             // save the trees!
-            if (downloadSHA1 != null && downloadSHA1.equals(fileHash) && hashTree != null) {
+            if (downloadSHA1 != null && downloadSHA1.equals(fileHash) && commonOutFile.getHashTree() != null) {
                 TigerTreeCache.instance(); 
-                TigerTreeCache.addHashTree(downloadSHA1,hashTree);
+                TigerTreeCache.addHashTree(downloadSHA1,commonOutFile.getHashTree());
             }
         }
 
@@ -2175,8 +2153,6 @@ public class ManagedDownloader implements Downloader, Serializable {
            (int)IncompleteFileManager.getCompletedSize(incompleteFile);
 
         synchronized (incompleteFileManager) {
-            if( commonOutFile != null )
-                commonOutFile.clearManagedDownloader();
             //get VerifyingFile
             commonOutFile= incompleteFileManager.getEntry(incompleteFile);
         }
@@ -2194,7 +2170,7 @@ public class ManagedDownloader implements Downloader, Serializable {
         }
         //need to get the VerifyingFile ready to write
         try {
-            commonOutFile.open(incompleteFile,this);
+            commonOutFile.open(incompleteFile);
         } catch(IOException e) {
             if(!IOUtils.handleException(e, "DOWNLOAD"))
                 ErrorService.error(e);
@@ -2774,7 +2750,7 @@ public class ManagedDownloader implements Downloader, Serializable {
         }
     }
     
-    synchronized void addQueuedWorker(DownloadWorker queued, int position) {
+    private synchronized void addQueuedWorker(DownloadWorker queued, int position) {
         Map m = new HashMap(getQueuedWorkers());
         m.put(queued,new Integer(position));
         queuedWorkers = Collections.unmodifiableMap(m);
@@ -2846,23 +2822,6 @@ public class ManagedDownloader implements Downloader, Serializable {
                 
     }
     
-    
-    public HashTree getHashTree() {
-        synchronized(hashTreeLock) {
-            return hashTree;
-        }
-    }
-    
-    /**
-     * sets the HashTree the current download will use.  That affects whether
-     * we do overlap checking.
-     */
-    public void setHashTree(HashTree tree) {
-        synchronized(hashTreeLock) {
-            hashTree = tree;
-        }
-    }
-    
     private final Iterator getHosts(boolean chattableOnly) {
         List /* of Endpoint */ buf=new LinkedList();
         for (Iterator iter=_activeWorkers.iterator(); iter.hasNext(); ) {
@@ -2924,12 +2883,6 @@ public class ManagedDownloader implements Downloader, Serializable {
         return averageBandwidth;
 	}	    
 
-	public int getChunkSize() {
-	    synchronized(hashTreeLock) {
-	        return hashTree == null ? DownloadWorker.DEFAULT_CHUNK_SIZE : hashTree.getNodeSize();
-	    }
-	}
-	
 	public int getAmountVerified() {
         VerifyingFile ourFile;
         synchronized(this) {
@@ -2945,6 +2898,10 @@ public class ManagedDownloader implements Downloader, Serializable {
         }
 		return ourFile == null ? 0 : ourFile.getAmountLost();
 	}
+    
+    public int getChunkSize() {
+        return commonOutFile.getChunkSize();
+    }
 	
     /**
      * @return true if the table we remembered from previous sessions, contains

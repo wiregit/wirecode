@@ -1577,6 +1577,7 @@ public class HTTPDownloader implements BandwidthTracker {
                            
 				BandwidthStat.HTTP_BODY_DOWNSTREAM_BANDWIDTH.addData(c);
 
+                
 				synchronized(this) {
 				    if (_isActive) {
                         
@@ -1599,7 +1600,7 @@ public class HTTPDownloader implements BandwidthTracker {
                         
                         // if are past our initial writing point, but we had to skip some bytes 
                         // or were told to stop sooner, trim the buffer
-                        byte [] toWrite;
+                        byte []toWrite;
                         if (skipped > 0 || _amountRead+c >= _amountToRead) {
                             c = Math.min(c,_amountToRead - _amountRead);
                             if (LOG.isDebugEnabled())
@@ -1611,10 +1612,10 @@ public class HTTPDownloader implements BandwidthTracker {
                         } else
                             toWrite = buf;
                         
-                        _amountRead+=c;
                         // write to disk
-				        _incompleteFile.writeBlock(currPos,c,toWrite);
+                        _incompleteFile.writeBlock(currPos,c,toWrite);
 				        
+                        _amountRead+=c;
 				        currPos += c;//update the currPos for next iteration
 				        
 				    }
@@ -1624,9 +1625,6 @@ public class HTTPDownloader implements BandwidthTracker {
 				        break;
 				    }
 				} 
-                
-                // if we got too corrupted, notify the user
-                _incompleteFile.promptIfHopeless();
             }  // end of while loop
 
             synchronized(this) {

@@ -87,8 +87,6 @@ public class DownloadWorker implements Runnable {
     ///////////////////////// Policy Controls ///////////////////////////
     /** The smallest interval that can be split for parallel download */
     private static final int MIN_SPLIT_SIZE=16*1024;      //16 KB
-    /** The default chunk size - if we don't have a tree we request chunks this big */
-    static final int DEFAULT_CHUNK_SIZE = 100000; //100 KB
     
     /** The lowest (cumulative) bandwith we will accept without stealing the
      * entire grey area from a downloader for a new one */
@@ -384,7 +382,7 @@ public class DownloadWorker implements Runnable {
     }
     
     private ConnectionStatus requestTHEXIfNeeded() {
-        HashTree ourTree = _manager.getHashTree();
+        HashTree ourTree = _commonOutFile.getHashTree();
         
         ConnectionStatus status = null;
         // request THEX from te _downloader if the tree we have
@@ -395,7 +393,7 @@ public class DownloadWorker implements Runnable {
             if(status.isThexResponse()) {
                 HashTree temp = status.getHashTree();
                 if (temp.isBetterTree(ourTree)) {
-                    _manager.setHashTree(temp);
+                    _commonOutFile.setHashTree(temp);
                 }
             }
         }
@@ -494,7 +492,7 @@ public class DownloadWorker implements Runnable {
         if (_rfd == null) //bad rfd, discard it and return null
             return null; // throw new NoSuchElementException();
         
-        if (_manager.isStopped() || _manager.isPaused()) {//this rfd may still be useful remember it
+        if (_manager.isCancelled() || _manager.isPaused()) {//this rfd may still be useful remember it
             _manager.addRFD(_rfd);
             return null;
         }
@@ -697,6 +695,10 @@ public class DownloadWorker implements Runnable {
             problem = true;
 			_manager.workerFailed(this);
         } finally {
+            // if we got too corrupted, notify the user
+            if (_commonOutFile.isHopeless())
+                _manager.promptAboutCorruptDownload();
+            
             int stop=_downloader.getInitialReadingPoint()
                         +_downloader.getAmountRead();
             if(LOG.isDebugEnabled())
@@ -926,7 +928,7 @@ public class DownloadWorker implements Runnable {
     }
 
     private int findChunkSize() {
-        int chunkSize = _manager.getChunkSize();
+        int chunkSize = _commonOutFile.getChunkSize();
         int free = _commonOutFile.hasFreeBlocksToAssign();
         
         // if we have less than one free chunk, take half of that
