@@ -513,7 +513,6 @@ public class ManagedConnection extends Connection
                         waitForQueued();
                         sendQueued();
                     } catch (IOException e) {
-						//e.printStackTrace();
                         if (_manager!=null) //may be null for testing
                             _manager.remove(ManagedConnection.this);
                         _runnerDied=true;
