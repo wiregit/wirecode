@@ -27,6 +27,7 @@ public class HTTPDownloader implements Runnable {
     private ActivityCallback _callback;
     private Socket _socket;
     private String _downloadDir;
+    private BufferedInputStream _bis;
 
     /* The server side put */
     public HTTPDownloader(Socket s, String file, ConnectionManager m) {
@@ -188,20 +189,27 @@ public class HTTPDownloader implements Runnable {
 		
 		FileOutputStream myFile = new FileOutputStream(_filename);
 		
+		BufferedOutputStream bos = new BufferedOutputStream(myFile);
+
 		int count = 0;
 		int c = -1;
 		
+		_bis = new BufferedInputStream(_istream);
+
+		
+
 		while (true) {
 		    
-		    int buf_size = _istream.available();
+		    int buf_size = _bis.available();
 
 		    System.out.println("THe amount available: " + buf_size);
 
 		    byte[] buf = new byte[buf_size];
-		    c = _istream.read(buf);
+		    c = _bis.read(buf);
 		    if (c == -1) 
 			break;
-		    myFile.write(buf);
+		    // myFile.write(buf);
+		    bos.write(buf);
 		    _amountRead+=c;
 		    count++;
 		    
@@ -255,6 +263,15 @@ public class HTTPDownloader implements Runnable {
 	}
 	    
     }
+
+    public void shutdown()
+    {
+	try {
+	    _socket.close();
+	} catch (Exception e) {
+	}
+    }
+
 
 
 }
