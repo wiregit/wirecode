@@ -212,6 +212,10 @@ public abstract class MessageRouter
 	/**
      * The handler for all message types.  Processes a message based on the 
      * message type.
+	 *
+	 * @param msg the <tt>Message</tt> received
+	 * @param datagram the <tt>DatagramPacket</tt> containing the IP and 
+	 *  port of the client node
      */	
 	public void handleUDPMessage(Message msg, DatagramPacket datagram)
     {
@@ -1219,4 +1223,5 @@ public abstract class MessageRouter
     {
         return _numMessages;
     }
+
 }
