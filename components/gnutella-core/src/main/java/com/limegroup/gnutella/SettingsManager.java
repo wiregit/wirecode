@@ -189,7 +189,6 @@ public final class SettingsManager {
 	  (CommonUtils.isMacClassic() ? "64.61.25.171" : "router4.limewire.com");
     /** List of hosts to try on quick connect */
     private final String[] DEFAULT_QUICK_CONNECT_HOSTS = {
-		"216.27.158.74:6356",
 		DEFAULT_LIMEWIRE_ROUTER+":6346",
 		"connect1.gnutellanet.com:6346",
 		"connect2.gnutellanet.com:6346",
