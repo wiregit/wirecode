@@ -398,7 +398,7 @@ MENU_VIEW_LIBRARY_ACCESSIBLE=显示 收藏 窗口.
 MENU_VIEW_THEMES_TITLE=皮肤 (A)
 #### MENU_VIEW_THEMES_TITLE_MNEMONIC=A
 MENU_VIEW_THEMES_TITLE_MNEMONIC=A
-#### MENU_VIEW_THEMES_GET_MORE=Get more skins
+#### MENU_VIEW_THEMES_GET_MORE=Get More Skins
 #? MENU_VIEW_THEMES_GET_MORE=
 #### MENU_VIEW_THEMES_GET_MORE_MNEMONIC=G
 MENU_VIEW_THEMES_GET_MORE_MNEMONIC=G
@@ -410,7 +410,7 @@ MENU_VIEW_THEMES_GET_MORE_MNEMONIC=G
 MENU_VIEW_THEMES_REFRESH_MNEMONIC=R
 #### MENU_VIEW_THEMES_REFRESH_ACCESSIBLE=Reload available skins from disk
 #? MENU_VIEW_THEMES_REFRESH_ACCESSIBLE=
-#### MENU_VIEW_THEMES_USE_DEFAULT=Use default
+#### MENU_VIEW_THEMES_USE_DEFAULT=Use Default
 #? MENU_VIEW_THEMES_USE_DEFAULT=
 #### MENU_VIEW_THEMES_USE_DEFAULT_MNEMONIC=D
 MENU_VIEW_THEMES_USE_DEFAULT_MNEMONIC=D
@@ -1742,8 +1742,10 @@ ERROR_INTERNAL_OK=确定
 ################################################################################
 # Key/Value pairs for error messages
 ################################################################################
-#### ERROR_DAAP_LOOPBACK_FAILED=LimeWire was unable to start the Digital Audio Access Protocol (for sharing files in iTunes) because a Microsoft patch is required. LimeWire can direct you to Microsoft's page with information if you want to use this feature. Click 'Yes' to go to the patch, 'No' to disable this feature, or 'Cancel' to decide later.
+#### ERROR_DAAP_LOOPBACK_FAILED=LimeWire was unable to start the Digital Audio Access Protocol (for sharing files in iTunes) because a Microsoft patch is required or a firewall is blocking access. LimeWire can direct you to Microsoft's page with information if you want to use this feature. Click 'Yes' to go to the patch, 'No' to disable this feature, or 'Cancel' to decide later.
 #? ERROR_DAAP_LOOPBACK_FAILED=
+#### ERROR_DAAP_LOOPBACK_FAILED_NONXP=LimeWire was unable to start the Digital Audio Access Protocol (for sharing files in iTunes) because a firewall is blocking access. To continue using this feature, click 'Yes' and change your firewall allow 'LimeWire.exe' full access to incoming and outgoing connections. To disable this feature, click 'No'.
+#? ERROR_DAAP_LOOPBACK_FAILED_NONXP=
 #### ERROR_DAAP_START_FAILED=LimeWire was unable to start the Digital Audio Access Protocol Service (for sharing files in iTunes). This feature will be turned off. You can turn it back on in options, under iTunes -> Sharing.
 #? ERROR_DAAP_START_FAILED=
 #### ERROR_DAAP_RUN_ERROR=LimeWire encountered an error in the Digital Audio Access Protocol (for sharing files in iTunes). This feature will be turned off. You can turn it back on in options, under iTunes -> Sharing.
