@@ -1141,6 +1141,10 @@ public class UDPConnectionProcessor {
                     // if no room to send data then wait for the window to Open
                     scheduleWriteDataEvent(Long.MAX_VALUE);
                     _waitingForDataSpace = true;
+
+            		if(LOG.isDebugEnabled())  
+                		LOG.debug("Shutdown SendData cL:"+_chunkLimit+
+						  " rWS:"+ _receiverWindowSpace);
                 }
             }
 
@@ -1150,6 +1154,8 @@ public class UDPConnectionProcessor {
                 if ( _inputFromOutputStream.getPendingChunks() == 0 ) {
                     scheduleWriteDataEvent(Long.MAX_VALUE);
                     _waitingForDataAvailable = true;
+            		if(LOG.isDebugEnabled())  
+                		LOG.debug("Shutdown SendData no pending");
                     return;
                 }
             }
