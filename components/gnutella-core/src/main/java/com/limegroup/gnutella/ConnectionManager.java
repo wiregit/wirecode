@@ -682,7 +682,7 @@ public class ConnectionManager {
      *  as an optimization.</b>  All lookup values in the returned value
      *  are guaranteed to run in linear time.
      */
-    List getInitializedConnections2() {
+    public List getInitializedConnections2() {
         return _initializedConnections;
     }
     
@@ -1379,7 +1379,7 @@ public class ConnectionManager {
 
     /**
      * This thread does the initialization and the message loop for
-     * ManagedConnections create through createConnectionAsynchronously and
+     * ManagedConnections created through createConnectionAsynchronously and
      * createConnectionBlocking
      */
     private class OutgoingConnectionThread
