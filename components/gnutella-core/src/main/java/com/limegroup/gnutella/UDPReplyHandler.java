@@ -1,5 +1,6 @@
 package com.limegroup.gnutella;
 
+import com.limegroup.gnutella.messages.*;
 import com.limegroup.gnutella.util.*;
 import com.limegroup.gnutella.statistics.*;
 import com.sun.java.util.collections.*;

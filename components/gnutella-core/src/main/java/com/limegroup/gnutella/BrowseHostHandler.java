@@ -4,6 +4,7 @@ import java.io.*;
 import java.net.*;
 import com.sun.java.util.collections.*;
 import java.util.StringTokenizer;
+import com.limegroup.gnutella.messages.*;
 import com.limegroup.gnutella.util.*;
 
 /** Handles all stuff necessary for browsing of networks hosts. 
@@ -207,7 +208,7 @@ public class BrowseHostHandler {
                 if(m instanceof QueryReply) {
                     debug("BHH.browseExchange(): read a QR");        
                     QueryReply queryReply = (QueryReply)m;
-                    m.setGUID(_guid);
+                    queryReply.rerouteViaGUID(_guid);
                     if (_callback != null)
                         _callback.handleQueryReply(queryReply);
                 }

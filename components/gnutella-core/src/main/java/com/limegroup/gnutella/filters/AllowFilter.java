@@ -1,6 +1,7 @@
 package com.limegroup.gnutella.filters;
 
 import com.limegroup.gnutella.*;
+import com.limegroup.gnutella.messages.*;
 
 /** 
  * A filter that allows anything.  Use when you don't want to filter

@@ -1,7 +1,7 @@
-package com.limegroup.gnutella;
+package com.limegroup.gnutella.messages;
 
+import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.util.*;
-import com.limegroup.gnutella.messages.*;
 import com.limegroup.gnutella.statistics.*;
 import java.io.*;
 import com.sun.java.util.collections.*;
@@ -957,6 +957,10 @@ public class QueryReply extends Message implements Serializable{
 			DroppedSentMessageStatHandler.TCP_QUERY_REPLIES.addMessage(this);
 		}
 	}
+
+    public void rerouteViaGUID(GUID guid) {
+        this.setGUID(guid);
+    }
 
     public final static boolean debugOn = false;
     public static void debug(String out) {

@@ -1,6 +1,7 @@
 package com.limegroup.gnutella.filters;
 
 import com.sun.java.util.collections.*;
+import com.limegroup.gnutella.messages.*;
 import com.limegroup.gnutella.*;
 
 /**

@@ -6,6 +6,7 @@ import java.io.*;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import com.limegroup.gnutella.util.StringUtils;
+import com.limegroup.gnutella.messages.*;
 
 /**
  * Immutable IP/port pair.  Also contains an optional number and size

@@ -1,6 +1,7 @@
 package com.limegroup.gnutella;
 
 import java.io.File;
+import com.limegroup.gnutella.messages.*;
 import com.limegroup.gnutella.chat.*;
 import com.limegroup.gnutella.security.User;
 import com.sun.java.util.collections.*;

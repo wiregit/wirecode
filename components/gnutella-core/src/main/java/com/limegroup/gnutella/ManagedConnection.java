@@ -6,6 +6,7 @@ import com.limegroup.gnutella.util.*;
 import com.limegroup.gnutella.security.*;
 import com.sun.java.util.collections.*;
 import java.util.Properties;
+import com.limegroup.gnutella.messages.*;
 import com.limegroup.gnutella.routing.*;
 import com.limegroup.gnutella.handshaking.*;
 import com.limegroup.gnutella.connection.*;

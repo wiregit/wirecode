@@ -1,6 +1,7 @@
 package com.limegroup.gnutella.uploader;
 
 import com.limegroup.gnutella.*;
+import com.limegroup.gnutella.messages.*;
 import com.limegroup.gnutella.http.*;
 import java.io.*;
 import com.sun.java.util.collections.*;

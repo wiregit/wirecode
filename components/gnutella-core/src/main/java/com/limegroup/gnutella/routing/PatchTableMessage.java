@@ -1,6 +1,7 @@
 package com.limegroup.gnutella.routing;
 
 import com.limegroup.gnutella.*;
+import com.limegroup.gnutella.messages.*;
 import com.sun.java.util.collections.Arrays;
 import java.io.*;
 

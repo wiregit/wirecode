@@ -4,6 +4,7 @@ import java.io.*;
 import com.sun.java.util.collections.*;
 import com.limegroup.gnutella.util.*;
 import com.limegroup.gnutella.xml.*;
+import com.limegroup.gnutella.messages.*;
 
 /**
  * The list of all shared files.  Provides operations to add and remove

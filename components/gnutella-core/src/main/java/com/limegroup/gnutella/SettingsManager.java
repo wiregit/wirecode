@@ -15,6 +15,7 @@ import java.awt.event.*;
 import com.limegroup.gnutella.util.StringUtils;
 import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.settings.*;
+import com.limegroup.gnutella.messages.*;
 
 /**
  * This class manages the property settings.  It maintains default

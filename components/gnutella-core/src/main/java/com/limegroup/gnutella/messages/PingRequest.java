@@ -1,8 +1,7 @@
-package com.limegroup.gnutella;
+package com.limegroup.gnutella.messages;
 
 import com.limegroup.gnutella.util.*;
 import com.limegroup.gnutella.statistics.*;
-import com.limegroup.gnutella.messages.*;
 import java.io.*;
 
 /**

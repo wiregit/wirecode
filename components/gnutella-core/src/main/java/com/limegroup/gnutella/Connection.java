@@ -7,6 +7,7 @@ import java.util.Properties;
 import java.util.Enumeration;
 import com.limegroup.gnutella.handshaking.*;
 import com.limegroup.gnutella.util.Sockets;
+import com.limegroup.gnutella.messages.*;
 
 /**
  * A Gnutella messaging connection.  Provides handshaking functionality and

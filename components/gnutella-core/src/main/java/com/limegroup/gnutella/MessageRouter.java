@@ -5,6 +5,7 @@ import com.limegroup.gnutella.security.User;
 import com.limegroup.gnutella.routing.*;
 import com.limegroup.gnutella.guess.*;
 import com.limegroup.gnutella.statistics.*;
+import com.limegroup.gnutella.messages.*;
 
 import com.sun.java.util.collections.*;
 import java.io.IOException;
