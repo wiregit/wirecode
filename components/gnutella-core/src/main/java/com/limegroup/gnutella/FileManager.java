@@ -1011,10 +1011,17 @@ public class FileManager {
      * failed or no matching FileDesc could be found.
      */
     public int fileChanged(File f) {
-        FileDesc fd = removeFileIfShared(f);
-        if( fd == null ) // could not remove
+        try {
+            f = getCanonicalFile(f);
+        } catch(IOException ioe) {
             return -1;
-        int addedAt = addFileIfShared(f, fd.getLimeXMLDocuments());
+        }
+        FileDesc fd = (FileDesc)_fileToFileDesc.get(f);
+        List xmlDocs = new LinkedList();
+        xmlDocs.addAll(fd.getLimeXMLDocuments());
+        FileDesc removed = removeFileIfShared(f);        
+        Assert.that( fd == removed, "did not remove valid fd.");
+        int addedAt = addFileIfShared(f, xmlDocs);
         return addedAt;
     }
 
@@ -1031,7 +1038,9 @@ public class FileManager {
         //Take care of case, etc.
         try {
             f=getCanonicalFile(f);
+            System.out.println("f: " + f);
         } catch (IOException e) {
+            e.printStackTrace();
             repOk();
             return null;
         }

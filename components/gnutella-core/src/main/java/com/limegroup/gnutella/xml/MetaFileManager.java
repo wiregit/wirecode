@@ -74,10 +74,15 @@ public class MetaFileManager extends FileManager {
             SchemaReplyCollectionMapper.instance();            
             
         //Get the schema URI of each document and remove from the collection
+        // We must remember the schemas and then remove the doc, or we will
+        // get a concurrent mod exception because removing the doc also
+        // removes it from the FileDesc.
         List xmlDocs = fd.getLimeXMLDocuments();
-        for(Iterator i = xmlDocs.iterator(); i.hasNext(); ) {
-            LimeXMLDocument doc = (LimeXMLDocument)i.next();
-            String uri = doc.getSchemaURI();
+        List schemas = new LinkedList();
+        for(Iterator i = xmlDocs.iterator(); i.hasNext(); )
+            schemas.add( ((LimeXMLDocument)i.next()).getSchemaURI() );
+        for(Iterator i = schemas.iterator(); i.hasNext(); ) {
+            String uri = (String)i.next();
             LimeXMLReplyCollection col = mapper.getReplyCollection(uri);
             if( col != null )
                 col.removeDoc( fd );
