@@ -260,7 +260,7 @@ public class LeafRoutingTest extends com.limegroup.gnutella.util.BaseTestCase {
         drain(old1);
         drain(old2);
 
-        QueryRequest qr=new QueryRequest((byte)7, 0, "crap", false);
+		QueryRequest qr = QueryRequest.createQuery("crap", (byte)7);
         ultrapeer1.send(qr);
         ultrapeer1.flush();
 

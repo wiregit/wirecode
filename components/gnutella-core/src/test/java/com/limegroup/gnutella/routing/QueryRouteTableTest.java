@@ -160,19 +160,16 @@ public class QueryRouteTableTest extends com.limegroup.gnutella.util.BaseTestCas
 
         //1. Simple keyword tests (add, contains)
         //we have moved to 1-bit entry per hash, so either absent or present....
-        assertTrue(! qrt.contains(new QueryRequest((byte)4, 0, "garbage",
-                                                   false)));
-        assertTrue(qrt.contains(new QueryRequest((byte)2, 0, "bad", false)));
-        assertTrue(qrt.contains(new QueryRequest((byte)3, 0, "bad", false)));
-        assertTrue(qrt.contains(new QueryRequest((byte)4, 0, "bad", false)));
-        assertTrue(qrt.contains(new QueryRequest((byte)2, 0, "good bad", 
-                                                 false)));
-        assertTrue(! qrt.contains(new QueryRequest((byte)3, 0, "good bd", 
-                                                   false)));
-        assertTrue(qrt.contains(new QueryRequest((byte)3, 0, 
-                                                  "good bad book", false)));
-        assertTrue(! qrt.contains(new QueryRequest((byte)3, 0, 
-                                                    "good bad bok", false)));
+        assertTrue(! qrt.contains(QueryRequest.createQuery("garbage",(byte)4)));
+        assertTrue(qrt.contains(QueryRequest.createQuery("bad", (byte)2)));
+        assertTrue(qrt.contains(QueryRequest.createQuery("bad", (byte)3)));
+        assertTrue(qrt.contains(QueryRequest.createQuery("bad", (byte)4)));
+        assertTrue(qrt.contains(QueryRequest.createQuery("good bad", (byte)2)));
+        assertTrue(! qrt.contains(QueryRequest.createQuery("good bd", (byte)3)));
+        assertTrue(qrt.contains(QueryRequest.createQuery(
+                                                  "good bad book", (byte)3)));
+        assertTrue(! qrt.contains(QueryRequest.createQuery(
+                                                    "good bad bok", (byte)3)));
 
         //2. addAll tests
         QueryRouteTable qrt2=new QueryRouteTable(1000);
@@ -323,12 +320,12 @@ public class QueryRouteTableTest extends com.limegroup.gnutella.util.BaseTestCas
         qrt.add("bad");   //{good/1, book/1, bad/3}
         qrt2=new QueryRouteTable(512);
         qrt2.addAll(qrt);
-        assertTrue(qrt2.contains(new QueryRequest((byte)4, 0, "bad", false)));
-        assertTrue(qrt2.contains(new QueryRequest((byte)4, 0, "good", false)));
+        assertTrue(qrt2.contains(QueryRequest.createQuery("bad", (byte)4)));
+        assertTrue(qrt2.contains(QueryRequest.createQuery("good", (byte)4)));
         qrt2=new QueryRouteTable(32);
         qrt2.addAll(qrt);
-        assertTrue(qrt2.contains(new QueryRequest((byte)4, 0, "bad", false)));
-        assertTrue(qrt2.contains(new QueryRequest((byte)4, 0, "good", false)));
+        assertTrue(qrt2.contains(QueryRequest.createQuery("bad", (byte)4)));
+        assertTrue(qrt2.contains(QueryRequest.createQuery("good", (byte)4)));
 
         //6. Test sequence numbers.
         qrt=new QueryRouteTable();   //a. wrong sequence after reset

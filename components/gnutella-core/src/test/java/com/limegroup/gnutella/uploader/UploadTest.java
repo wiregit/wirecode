@@ -381,7 +381,7 @@ public class UploadTest extends com.limegroup.gnutella.util.BaseTestCase {
             //Establish push route
 		Connection c = createConnection();
 		c.initialize();
-		QueryRequest query=new QueryRequest((byte)3, 0, "txt", false);
+		QueryRequest query=QueryRequest.createQuery("txt", (byte)3);
             c.send(query);
             c.flush();
             QueryReply reply=null;
@@ -441,7 +441,7 @@ public class UploadTest extends com.limegroup.gnutella.util.BaseTestCase {
         //Establish push route
 		Connection c = createConnection();
         c.initialize();
-        QueryRequest query = new QueryRequest((byte)3, 0, "txt", false);
+        QueryRequest query = QueryRequest.createQuery("txt", (byte)3);
         c.send(query);
         c.flush();
         QueryReply reply=null;
@@ -659,7 +659,7 @@ public class UploadTest extends com.limegroup.gnutella.util.BaseTestCase {
         //Establish push route
 		Connection c = createConnection();
         c.initialize();
-        QueryRequest query=new QueryRequest((byte)3, 0, "txt", false);
+        QueryRequest query=QueryRequest.createQuery("txt", (byte)3);
         c.send(query);
         c.flush();
         QueryReply reply=null;

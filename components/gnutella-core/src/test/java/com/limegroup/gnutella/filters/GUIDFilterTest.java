@@ -34,8 +34,7 @@ public class GUIDFilterTest extends com.limegroup.gnutella.util.BaseTestCase {
         guid[2]=(byte)0x42;
         guid[3]=(byte)0x62;
         guid[4]=(byte)0x5A;
-        QueryRequest query=new QueryRequest(guid, (byte)3, 0, "test query",
-                                            false);
+		QueryRequest query = QueryRequest.createQuery("test query", (byte)3);
         assertTrue(! filter.allow(query));
     }
 
@@ -45,8 +44,7 @@ public class GUIDFilterTest extends com.limegroup.gnutella.util.BaseTestCase {
         guid[2]=(byte)0x42;
         guid[3]=(byte)0x62;
         guid[4]=(byte)0x5B;
-        QueryRequest query=new QueryRequest(guid, (byte)3, 0, "test query", 
-                                            false);
+		QueryRequest query = QueryRequest.createQuery("test query", (byte)3);
         assertTrue(filter.allow(query));
     }
 
@@ -56,8 +54,7 @@ public class GUIDFilterTest extends com.limegroup.gnutella.util.BaseTestCase {
         guid[2]=(byte)0x42;
         guid[3]=(byte)0x62;
         guid[4]=(byte)0x5A;
-        QueryRequest query=new QueryRequest(guid, (byte)3, 0, "test query",
-                                            false);
+		QueryRequest query = QueryRequest.createQuery("test query", (byte)3);
         assertTrue(filter.allow(query));
     }
 }

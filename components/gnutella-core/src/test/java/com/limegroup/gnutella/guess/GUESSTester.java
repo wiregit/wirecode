@@ -105,9 +105,8 @@ public class GUESSTester extends com.limegroup.gnutella.util.BaseTestCase {
     public void testSmall() {
         try {
             assertTrue(testAck("10.254.0.19", 6346) > 0);
-            assertTrue(testQuery("10.254.0.19", 6346,
-                                 new QueryRequest((byte) 1, 0, 
-                                                  "morrissey", false)) != null);
+            assertNotNull(testQuery("10.254.0.19", 6346,
+									QueryRequest.createQuery("morrissey", (byte)1)));
         }
         catch (Exception whatever) {
             assertTrue(false);
@@ -122,7 +121,7 @@ public class GUESSTester extends com.limegroup.gnutella.util.BaseTestCase {
         synchronized (_pongLock) {
             _pong = null;
         }
-        QueryRequest qr = new QueryRequest((byte)1, 0, "susheel", false);
+		QueryRequest qr = QueryRequest.createQuery("susheel", (byte)1);
         InetAddress addr = InetAddress.getByName(host);
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         qr.write(baos);
