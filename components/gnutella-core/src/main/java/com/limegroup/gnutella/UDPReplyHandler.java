@@ -49,7 +49,7 @@ public final class UDPReplyHandler implements ReplyHandler {
 	 * @param handler the <tt>ReplyHandler</tt> to use for sending the reply
 	 */
 	public void handlePingReply(PingReply pong, ReplyHandler handler) {
-		send(pong);
+		UDPAcceptor.instance().send(pong, IP, PORT);
 	}
 
 	/**
@@ -62,7 +62,7 @@ public final class UDPReplyHandler implements ReplyHandler {
 	 * @param handler the <tt>ReplyHandler</tt> to use for sending the reply
 	 */
 	public void handleQueryReply(QueryReply hit, ReplyHandler handler) {
-		send(hit);
+		UDPAcceptor.instance().send(hit, IP, PORT);
 	}
 
 	/**
@@ -75,31 +75,7 @@ public final class UDPReplyHandler implements ReplyHandler {
 	 * @param handler the <tt>ReplyHandler</tt> to use for sending the reply
 	 */
 	public void handlePushRequest(PushRequest request, ReplyHandler handler) {
-		send(request);
-	}
-
-	/**
-	 * Sends the <tt>Message</tt> via UDP to the port and IP address for 
-	 * this <tt>UDPReplyHandler</tt>.
-	 *
-	 * @param msg the <tt>Message</tt> to send
-	 */
-	private synchronized void send(Message msg) {
-		ByteArrayOutputStream baos = new ByteArrayOutputStream();
-		try {
-			msg.write(baos);
-		} catch(IOException e) {
-			// can't send the hit, so return
-			return;
-		}
-
-		byte[] data = baos.toByteArray();
-		DatagramPacket dg = new DatagramPacket(data, data.length, IP, PORT); 
-		try {
-			UDPAcceptor.instance().sendDatagram(dg);
-		} catch(IOException e) {
-			// not sure what to do here -- try again??
-		}
+		UDPAcceptor.instance().send(request, IP, PORT);
 	}
 
 	public void countDroppedMessage() {

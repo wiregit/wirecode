@@ -1,6 +1,7 @@
 package com.limegroup.gnutella;
 
 import com.sun.java.util.collections.*;
+import java.net.*;
 import java.util.Stack;
 
 /** This class runs a single thread which sends unicast UDP queries to a master
@@ -25,6 +26,7 @@ public class QueryUnicaster {
     private boolean _shouldRun = true;
 
     /** The list of Queries I need to send every iteration.
+     *  Not a List because I want to enforce synchronization.
      */
     private Vector _queries;
 
@@ -61,6 +63,40 @@ public class QueryUnicaster {
             try {
                 waitForQueries();
                 Endpoint toQuery = getUnicastHost();
+                List toRemove = new ArrayList();
+                UDPAcceptor udpService = UDPAcceptor.instance();
+
+                synchronized (_queries) {
+                    Iterator iter = _queries.iterator();
+                    while (iter.hasNext()) {
+                        QueryBundle currQB = (QueryBundle) iter.next();
+                        if ((currQB._numResults > QueryBundle.MAX_RESULTS) ||
+                            (currQB._hostsQueried.size() > 
+                             QueryBundle.MAX_QUERIES)
+                            )
+                            toRemove.add(currQB);
+                        else if (currQB._hostsQueried.contains(toQuery))
+                            ; // don't send another....
+                        else {
+                            try {
+                                InetAddress ip = 
+                                InetAddress.getByName(toQuery.getHostname());
+                                // send the query
+                                udpService.send(currQB._qr, ip, 
+                                                toQuery.getPort());
+                                currQB._hostsQueried.add(toQuery);
+                            }
+                            catch (UnknownHostException ignored) {}
+                        }
+                    }
+                }
+                
+                // purge stale queries...
+                Iterator removee = toRemove.iterator();
+                while (removee.hasNext()) {
+                    QueryBundle currQB = (QueryBundle) removee.next();
+                    _queries.remove(currQB);
+                }
 
                 Thread.sleep(ITERATION_TIME);
             }
@@ -120,7 +156,10 @@ public class QueryUnicaster {
 
 
     private class QueryBundle {
+        public static final int MAX_RESULTS = 250;
+        public static final int MAX_QUERIES = 1000;
         QueryRequest _qr = null;
+        // the number of results received per Query...
         int _numResults = 0;
         /** The Set of Endpoints queried for this Query.
          */

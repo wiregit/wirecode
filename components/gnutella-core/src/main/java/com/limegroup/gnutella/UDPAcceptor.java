@@ -82,16 +82,32 @@ public final class UDPAcceptor implements Runnable {
 		}
 	}
 
+
 	/**
-	 * Sends the <tt>DatagramPacket</tt> out on the open socket.
-	 *
-	 * @param datagram the <tt>DatagramPacket</tt> to send
-	 * @throws <tt>IOException</tt> if there is an output error writing
-	 *  to the socket
+	 * Sends the <tt>Message</tt> via UDP to the port and IP address specified.
+     *
+	 * @param msg  the <tt>Message</tt> to send
+	 * @param ip   the <tt>InetAddress</tt> to send to
+	 * @param port the <tt>port</tt> to send to
 	 */
-	public void sendDatagram(DatagramPacket datagram) throws IOException {
-		_socket.send(datagram);
+    public synchronized void send(Message msg, InetAddress ip, int port) {
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		try {
+			msg.write(baos);
+		} catch(IOException e) {
+			// can't send the hit, so return
+			return;
+		}
+
+		byte[] data = baos.toByteArray();
+		DatagramPacket dg = new DatagramPacket(data, data.length, ip, port); 
+		try {
+            _socket.send(dg);
+		} catch(IOException e) {
+			// not sure what to do here -- try again??
+		}
 	}
+
 
 	/** 
 	 * Overrides Object.toString to give more informative information
