@@ -2,6 +2,8 @@ package com.limegroup.gnutella.routing;
 
 import com.limegroup.gnutella.*;
 import com.sun.java.util.collections.*;
+import java.util.zip.*;
+import java.io.*;
 
 //Please note that &#60; and &#62; are the HTML escapes for '<' and '>'.
 
@@ -15,7 +17,7 @@ import com.sun.java.util.collections.*;
  */
 public class QueryRouteTable {
     /** The suggested default table size. */
-    public static final int DEFAULT_TABLE_SIZE=8192;
+    public static final int DEFAULT_TABLE_SIZE=65536;
     /** The suggested default max table TTL. */
     public static final byte DEFAULT_INFINITY=(byte)10;
 
@@ -145,12 +147,21 @@ public class QueryRouteTable {
             throw new BadPacketException("Inconsistent seq number: "
                                          +m.getSequenceNumber()
                                          +" vs. "+sequenceNumber);
-        Assert.that(m.getCompressor()==PatchTableMessage.COMPRESSOR_NONE,
-                    "TODO: uncompress");
         Assert.that(m.getEntryBits()==8, "TODO: entry bits not implemented");
 
         //2. Add data[0...] to table[nextPatch...]
         byte[] data=m.getData();
+        if (m.getCompressor()==PatchTableMessage.COMPRESSOR_GZIP) {
+            try {
+                data=uncompress(data);
+            } catch (IOException e) {
+                throw new BadPacketException("Data not properly GZIP'ed!");
+            }
+        } else if (m.getCompressor()!=PatchTableMessage.COMPRESSOR_NONE) {
+            throw new BadPacketException("Unknown compression scheme.");
+        }
+
+            
         for (int i=0; i<data.length; i++) {
             try {
                 table[nextPatch]+=data[i];
@@ -196,30 +207,69 @@ public class QueryRouteTable {
             Assert.that(prev.table.length==this.table.length,
                         "TODO: can't deal with tables of different lengths");
 
-        //TODO: different values of entryBits, split messages, compression,
-        //avoid updates if nothings changed
-        boolean gotDifference=false;
-        byte[] patch=new byte[table.length];
-        for (int i=0; i<patch.length; i++) {
+        //1. Calculate patch array
+        byte[] data=new byte[table.length];
+        boolean needsPatch=false;
+        for (int i=0; i<data.length; i++) {
             if (prev!=null)
-                patch[i]=(byte)(this.table[i]-prev.table[i]);
+                data[i]=(byte)(this.table[i]-prev.table[i]);
             else
-                patch[i]=(byte)(this.table[i]-infinity);
+                data[i]=(byte)(this.table[i]-infinity);
 
-            if (patch[i]!=0)
-                gotDifference=true;
+            if (data[i]!=0)
+                needsPatch=true;
         }
         //As an optimization, we don't send message if no changes.
-        if (! gotDifference) {
+        if (!needsPatch) {
             buf.clear();
             return buf.iterator();
         }
 
+        //2. Try compression
+        byte[] patchCompressed=compress(data);
+        byte compression=PatchTableMessage.COMPRESSOR_NONE;
+        if (patchCompressed.length<data.length) {
+            //...Hooray!  Compression was efficient.
+            data=patchCompressed;
+            compression=PatchTableMessage.COMPRESSOR_GZIP;
+        }
+                   
+
         buf.add(new PatchTableMessage((short)1, (short)1,
-                                      PatchTableMessage.COMPRESSOR_NONE,
-                                      (byte)8, patch, 0, patch.length));
+                                      compression, (byte)8, 
+                                      data, 0, data.length));
         
         return buf.iterator();        
+    }
+
+    private static byte[] compress(byte[] data) {
+        try {
+            ByteArrayOutputStream baos=new ByteArrayOutputStream();
+            GZIPOutputStream gos=new GZIPOutputStream(baos);
+            gos.write(data, 0, data.length);
+            gos.close();                      //flushes bytes
+            return baos.toByteArray();
+        } catch (IOException e) {
+            //TODO: this should REALLY never happen because no devices are
+            //involved.  But could we propogate it up.
+            Assert.that(false, "Couldn't write to byte stream");
+            return null;
+        }
+    }
+
+    /** Uncompresses the given GZIP'ed bytes.  Throws IOException if the
+     *  data is corrupt. */
+    private static byte[] uncompress(byte[] data) throws IOException {
+        ByteArrayInputStream bais=new ByteArrayInputStream(data);
+        GZIPInputStream gis=new GZIPInputStream(bais);
+        ByteArrayOutputStream baos=new ByteArrayOutputStream();
+        while (true) {
+            int b=gis.read();
+            if (b==-1)
+                break;
+            baos.write(b);
+        }
+        return baos.toByteArray();
     }
 
     /** Returns true if this has been fully patched following a reset. */
@@ -261,6 +311,19 @@ public class QueryRouteTable {
 
     /** Unit test */
     public static void main(String args[]) {
+        //0. compress/uncompress
+        byte[] data=new byte[1000];  data[1]=(byte)7;  data[100]=(byte)7;
+        byte[] dataCompressed=compress(data);
+        Assert.that(dataCompressed.length<data.length);
+        try {
+            byte[] dataUncompressed=uncompress(dataCompressed);
+            Assert.that(Arrays.equals(data, dataUncompressed),
+                        "Compress/uncompress loop failed");
+        } catch (IOException e) {
+            Assert.that(false, "Bad GZIP data.");
+        }           
+
+
         QueryRouteTable qrt=new QueryRouteTable(1000, (byte)7);
         qrt.add("good book");
         qrt.add("bad", 3);   //{good/1, book/1, bad/3}
@@ -286,7 +349,7 @@ public class QueryRouteTable {
         Assert.that(qrt2.equals(qrt3));
         Assert.that(qrt3.equals(qrt2));
 
-        //3. encode-decode test.
+        //3. encode-decode test--with compression
         //qrt={good/1, book/1, bad/3}
         qrt2=new QueryRouteTable(1000, (byte)7);
         for (Iterator iter=qrt.encode(null); iter.hasNext(); ) {
@@ -297,12 +360,15 @@ public class QueryRouteTable {
             } catch (BadPacketException e) {
                 System.out.println("Got bad packet "+m);
             }
+            if (m instanceof PatchTableMessage)
+                Assert.that(((PatchTableMessage)m).getCompressor()
+                    ==PatchTableMessage.COMPRESSOR_GZIP);
         }
         Assert.that(qrt2.equals(qrt), "Got \n    "+qrt2+"\nexpected\n    "+qrt);
         System.out.println("");
 
         qrt.add("bad", 2);
-        qrt.add("other", 4); //{good/1, book/1, bad/2, other/4}
+        qrt.add("other", 4); //qrt={good/1, book/1, bad/2, other/4}
         Assert.that(! qrt2.equals(qrt));
         for (Iterator iter=qrt.encode(qrt2); iter.hasNext(); ) {
             RouteTableMessage m=(RouteTableMessage)iter.next();
@@ -312,6 +378,9 @@ public class QueryRouteTable {
             } catch (BadPacketException e) {
                 System.out.println("Got bad packet "+m);
             }
+            if (m instanceof PatchTableMessage)
+                Assert.that(((PatchTableMessage)m).getCompressor()
+                    ==PatchTableMessage.COMPRESSOR_GZIP);
         }
         Assert.that(qrt2.equals(qrt));
 
@@ -319,5 +388,28 @@ public class QueryRouteTable {
         Assert.that(! iter.hasNext());
         iter=(new QueryRouteTable(1000, (byte)7)).encode(null);  //blank table
         Assert.that(! iter.hasNext());
+
+        //4. encode-decode test--without compression.  (We know compression
+        //won't work because the table is very small and filled with random bytes.)
+        qrt=new QueryRouteTable(10, (byte)7);
+        Random rand=new Random();
+        for (int i=0; i<qrt.table.length; i++)
+            qrt.table[i]=(byte)rand.nextInt(qrt.infinity+1);
+        qrt2=new QueryRouteTable(10, (byte)7);
+        Assert.that(! qrt2.equals(qrt));
+
+        for (iter=qrt.encode(qrt2); iter.hasNext(); ) {
+            RouteTableMessage m=(RouteTableMessage)iter.next();
+            System.out.println("Got "+m);
+            try { 
+                qrt2.update(m); 
+            } catch (BadPacketException e) {
+                System.out.println("Got bad packet "+m);
+            }
+            if (m instanceof PatchTableMessage)
+                Assert.that(((PatchTableMessage)m).getCompressor()
+                    ==PatchTableMessage.COMPRESSOR_NONE);
+        }
+        Assert.that(qrt2.equals(qrt));
     }
 }
