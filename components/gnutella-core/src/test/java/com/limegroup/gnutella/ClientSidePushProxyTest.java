@@ -556,17 +556,8 @@ public class ClientSidePushProxyTest
             return rfd;
         }
 
-        public void handleQueryResult(HostData data, 
-                                                   Response response, 
-                                                   List docs) {
-            rfd = new RemoteFileDesc(data.getIP(), data.getPort(),
-                                     response.getIndex(), 
-                                     response.getName(),
-                                     (int) response.getSize(), 
-                                     data.getClientGUID(),
-                                     0, data.isChatEnabled(), 3, false,
-                                     null, null, false, false, "",0,
-                                     data.getPushProxies());
+        public void handleQueryResult(RemoteFileDesc rfd, HostData data) {
+            this.rfd = rfd;
         }
     }
 
