@@ -1,16 +1,15 @@
 package com.limegroup.gnutella.connection;
 
-import com.limegroup.gnutella.*;
-import com.limegroup.gnutella.messages.*;
-import com.limegroup.gnutella.util.*;
+import com.limegroup.gnutella.messages.Message;
+import com.limegroup.gnutella.util.Buffer;
 
 
 /**
  * Simple LIFO or FIFO message queue.
  */
 public class SimpleMessageQueue extends MessageQueue {
-    private Buffer _buf;
-    private boolean _lifo;
+    private final Buffer _buf;
+    private final boolean _lifo;
     
     /**
      * @param cycle the number of messages to return per cycle, i.e., between 
