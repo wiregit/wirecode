@@ -668,12 +668,7 @@ public class HTTPUploader implements Runnable {
 		int numAllowed = SettingsManager.instance().getUploadsPerPerson();
 
 		/* if there are more uploads than allowed */
-		/* then throw an exception */
-
-		System.out.println("The number allowed: " + numAllowed);
-		System.out.println("The number uploads: " + numUploads);
-		
-
+		/* then throw an exception */		
 		if (numAllowed < numUploads) {
 			doLimitReachedAfterConnect();
 			throw new IOException("Too Many Uploads in Progress");
