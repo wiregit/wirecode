@@ -700,7 +700,6 @@ public class UploadManager implements BandwidthTracker {
 	private GETLine parseURNGet(final String GET_LINE) 
 		throws IOException {		
 
-		//URN urn = this.getURN(GET_LINE);
 		URN urn = URNFactory.createSHA1URNFromGetRequest(GET_LINE);
 		if(urn == null) {
 			throw new IOException("NO ERROR CREATING URN");
