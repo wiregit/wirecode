@@ -1043,7 +1043,7 @@ public final class CommonUtils {
      * @return String containing the cleaned filename
      */
     public static String convertFileName(String name) {
-        for (int i = 0; i < ILLEGAL_CHARS_ANY_OS.length; i) 
+        for (int i = 0; i < ILLEGAL_CHARS_ANY_OS.length; i++) 
             name = name.replace(ILLEGAL_CHARS_ANY_OS[i], '_');
 		
         if ( _isWindows ) {
