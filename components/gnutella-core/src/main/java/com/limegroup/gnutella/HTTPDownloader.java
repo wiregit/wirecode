@@ -194,7 +194,7 @@ public class HTTPDownloader implements Runnable {
 		System.out.println("THe Pathname is " + pathname);
 
 
-		FileOutputStream myFile = new FileOutputStream(_filename);
+		// FileOutputStream myFile = new FileOutputStream(pathname);
 		
 		// BufferedOutputStream bos = new BufferedOutputStream(myFile);
 
@@ -220,9 +220,9 @@ public class HTTPDownloader implements Runnable {
 //  		}
 
 		FileOutputStream fos = new FileOutputStream(pathname);
-		BufferedOutputStream bos = new BufferedOutputStream(fos);
-		OutputStreamWriter osw = new OutputStreamWriter(bos); 
-		BufferedWriter out = new BufferedWriter(osw); 
+		//  BufferedOutputStream bos = new BufferedOutputStream(fos);
+//  		OutputStreamWriter osw = new OutputStreamWriter(bos); 
+//  		BufferedWriter out = new BufferedWriter(osw); 
 		
 		char[] buf = new char[1024];
 
@@ -234,14 +234,14 @@ public class HTTPDownloader implements Runnable {
 //  		}
 
 
-		while ((c = _in.read()) != -1) {
+		while ((c = _istream.read()) != -1) {
 		    
-		    out.write(c);
+		    fos.write(c);
 		    _amountRead+=c;
 
 		}
 
-		out.close();
+		fos.close();
 
 		System.out.println("THe FINAL amount read: " + _amountRead);
 		System.out.println("THe size of the file: " + _sizeOfFile);
