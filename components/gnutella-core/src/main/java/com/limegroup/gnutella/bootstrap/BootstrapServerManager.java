@@ -293,21 +293,25 @@ public class BootstrapServerManager {
                                         
     private void requestFromOneHost(GWebCacheRequest request,
                                     BootstrapServer server) {
+        BufferedReader in=null;
         try {
-            //Prepare the request.
+            //Prepare the request.  TODO: it would be great to add connection
+            //timeouts, but URLConnection doesn't give us control over that.
+            //One option on Java 1.4 is to set some system properties, e.g.,
+            //http.defaultSocketTimeout.  See for example
+            //   developer.java.sun.com/developer/bugParade/bugs/4143518.html
             URL url=new URL(server.getURL().toString()
                 +"?client="+CommonUtils.QHD_VENDOR_NAME
                 +"&version="+URLEncoder.encode(CommonUtils.getLimeWireVersion())
                 +"&"+request.parameters());
             URLConnection connection=url.openConnection();
-            BufferedReader in=new BufferedReader(
-                                  new InputStreamReader(
-                                      connection.getInputStream()));
+            in=new BufferedReader(
+                   new InputStreamReader(connection.getInputStream()));
 
             //For each line of data (excludes HTTP headers)...
             boolean firstLine=true;
             boolean errors=false;
-            while (true) {                
+            while (true) {                          
                 String line=in.readLine();
                 if (line==null)
                     break;
@@ -326,10 +330,12 @@ public class BootstrapServerManager {
             //don't send a host its own url in update requests.
             if (!errors)
                 _lastConnectable=server;
-            //Close the connection.  TODO: is this really the preferred way?
-            in.close();   
         } catch (IOException ioe) {
             request.handleError(server);
+        } finally {
+            //Close the connection.  TODO: is this really the preferred way?
+            if (in!=null)
+                try { in.close(); } catch (IOException e) { }
         }
     }
 
