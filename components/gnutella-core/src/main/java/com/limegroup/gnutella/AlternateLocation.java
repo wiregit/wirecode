@@ -658,41 +658,19 @@ public final class AlternateLocation
 	/**
 	 * Creates a new <tt>RemoteFileDesc</tt> from this AlternateLocation
      *
+	 * @param size the size of the file for the new <tt>RemoteFileDesc</tt> 
+	 *  -- this is necessary to make sure the download bucketing works 
+	 *  correctly
 	 * @return new <tt>RemoteFileDesc</tt> based off of this, or 
 	 *  <tt>null</tt> if the <tt>RemoteFileDesc</tt> could not be created
 	 */
-	public RemoteFileDesc createRemoteFileDesc(int size, Set urns) {
+	public RemoteFileDesc createRemoteFileDesc(int size) {
+		Set urnSet = new HashSet();
+		urnSet.add(getSHA1Urn());
 		return new RemoteFileDesc(URL.getHost(), URL.getPort(),
 								  0, URL.getFile(), size,  
 								  GUID.makeGuid(), 1000,
-								  true, 3, false, null, urns);
-		/*
-		RemoteFileDesc ret = null;
-
-		// Determine if this is a classic Gnutella location 
-		// and if yes, handle it by parsing the index and filename
-		// otherwise, we can't currently handle
-		String fname = URL.getFile();
-		fname = URLDecoder.decode(fname);
-		if (fname != null && fname.startsWith("/get/")) {
-			fname = fname.substring(5);
-			int dloc = fname.indexOf("/");
-			if ( dloc >= 1 ) {
-				String snum = fname.substring(0,dloc);
-				int    index = 0;
-				try {
-				    index = Integer.parseInt(snum);
-				} catch(NumberFormatException e) {
-					return null;
-				}
-				fname = fname.substring(dloc+1);
-		        ret = new RemoteFileDesc(URL.getHost(), URL.getPort(),
-				  index, fname, size,  GUID.makeGuid(), 1000,
-				  true, 3, false, null, urns);
-			}
-		}
-		return ret;
-		*/
+								  true, 3, false, null, urnSet);
 	}
 
 	/**
