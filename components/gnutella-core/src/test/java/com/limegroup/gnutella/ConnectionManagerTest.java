@@ -1,15 +1,11 @@
 package com.limegroup.gnutella;
 
-import junit.framework.*;
-import java.util.Properties;
-import com.limegroup.gnutella.handshaking.*;
-import com.limegroup.gnutella.settings.*;
+import junit.framework.Test;
+
+import com.limegroup.gnutella.settings.ConnectionSettings;
+import com.limegroup.gnutella.settings.UltrapeerSettings;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
-import com.limegroup.gnutella.security.DummyAuthenticator;
-import com.limegroup.gnutella.stubs.MessageRouterStub;
-import com.limegroup.gnutella.MiniAcceptor;
-import com.limegroup.gnutella.util.*;
-import com.sun.java.util.collections.*;
+import com.limegroup.gnutella.util.PrivilegedAccessor;
 
 /**
  * PARTIAL unit tests for ConnectionManager.  Makes sure HostCatcher is notified
@@ -41,7 +37,7 @@ public class ConnectionManagerTest extends com.limegroup.gnutella.util.BaseTestC
                 
         PrivilegedAccessor.setValue(ROUTER_SERVICE,"catcher",CATCHER);       
 
-        PrivilegedAccessor.setValue(ROUTER_SERVICE.getConnectionManager(),
+        PrivilegedAccessor.setValue(RouterService.getConnectionManager(),
                                     "_catcher",CATCHER);
                                     
         ROUTER_SERVICE.start();
@@ -191,26 +187,6 @@ public class ConnectionManagerTest extends com.limegroup.gnutella.util.BaseTestC
         }
     }
     
-   public void testComparator() throws Exception {
-        TestManagedConnection i13=new TestManagedConnection(false, 1, 3);
-        TestManagedConnection o13=new TestManagedConnection(true, 1, 3);
-        TestManagedConnection i10=new TestManagedConnection(false, 1, 0);
-        TestManagedConnection o10=new TestManagedConnection(true, 1, 0);
-        
-        List l=new ArrayList(); l.add(i13); l.add(o13); l.add(i10); l.add(o10);
-        Collections.sort(l, newManagedConnectionComparator());
-        assertSame(o10, l.get(0));
-        assertSame(o13, l.get(1));
-        assertSame(i10, l.get(2));
-        assertSame(i13, l.get(3));
-    }
-    
-    private static Comparator newManagedConnectionComparator() throws Exception {
-        Class mcc = PrivilegedAccessor.getClass(
-            ConnectionManager.class, "ManagedConnectionComparator" );
-        return (Comparator)PrivilegedAccessor.invokeConstructor(
-            mcc, null );
-    }
     
     private void initializeStart(ManagedConnection c) throws Exception {
         PrivilegedAccessor.invokeMethod( RouterService.getConnectionManager(),
