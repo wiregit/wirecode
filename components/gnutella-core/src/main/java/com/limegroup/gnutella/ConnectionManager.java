@@ -11,7 +11,6 @@ import com.limegroup.gnutella.messages.*;
 import com.limegroup.gnutella.util.*;
 import com.limegroup.gnutella.security.Authenticator;
 import com.limegroup.gnutella.handshaking.*;
-import com.limegroup.gnutella.statistics.*;
 import com.limegroup.gnutella.settings.*;
 import com.limegroup.gnutella.filters.IPFilter;
 

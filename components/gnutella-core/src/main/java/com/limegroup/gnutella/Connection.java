@@ -3,7 +3,6 @@ package com.limegroup.gnutella;
 import java.io.*;
 import java.net.*;
 import java.util.zip.*;
-import com.sun.java.util.collections.*;
 import java.util.Properties;
 import java.util.Enumeration;
 import com.limegroup.gnutella.messages.*;
