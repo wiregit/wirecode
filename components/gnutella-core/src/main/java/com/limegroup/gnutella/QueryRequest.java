@@ -55,36 +55,6 @@ public class QueryRequest extends Message implements Serializable{
 	private final static byte[] EMPTY_BYTE_ARRAY = new byte[0];
 
     /**
-     * Builds a new query from scratch, with metadata, using the given GUID.
-     * Whether or not this is a repeat query is encoded in guid.  GUID must have
-     * been created via newQueryGUID; this allows the caller to match up
-     * results.
-     *
-     * @requires 0<=minSpeed<2^16 (i.e., can fit in 2 unsigned bytes) 
-     */
-    public QueryRequest(byte[] guid, byte ttl, int minSpeed, String query, 
-						String richQuery) {
-        this(guid, ttl, minSpeed, query, richQuery, false, null, null);
-    }
-
-    /**
-     * Builds a new query from scratch, with no metadata, using the given GUID.
-     * Whether or not this is a repeat query is encoded in guid.  GUID must have
-     * been created via newQueryGUID; this allows the caller to match up results
-     */
-    public QueryRequest(byte[] guid, byte ttl, int minSpeed, String query) {
-        this(guid, ttl, minSpeed, query, "");
-    }
-
-    /**
-     * Builds a new query from scratch, with no metadata, with a default GUID.
-     */
-    public QueryRequest(byte ttl, int minSpeed, String query) {
-        this(newQueryGUID(false), ttl, minSpeed, query, "", false, null, null);
-    }
-
-
-    /**
      * Builds a new query from scratch, with no metadata, marking the GUID
      * as a requery iff isRequery.
      */
@@ -94,30 +64,19 @@ public class QueryRequest extends Message implements Serializable{
 			 null, null);
     }
 
-
-    /**
-     * Builds a new query from scratch, with metadata, marking the GUID
-     * as a requery iff isRequery.
-     */
-    public QueryRequest(byte ttl, int minSpeed, 
-                        String query, String richQuery,
-                        boolean isRequery) {
-        this(newQueryGUID(isRequery), ttl, minSpeed, query, richQuery, isRequery, 
-			 null, null);
-    }
-
     /**
      * Builds a new query from scratch but you can flag it as a Requery, if 
      * needed.
      *
      * @requires 0<=minSpeed<2^16 (i.e., can fit in 2 unsigned bytes)
-     */
+     */	
     public QueryRequest(byte[] guid, byte ttl, int minSpeed, 
                         String query, String richQuery, boolean isRequery,
                         Set requestedUrnTypes, Set queryUrns) {
         this(guid, ttl, minSpeed, query, richQuery, isRequery, 
              requestedUrnTypes, queryUrns, null, null);
-    }
+	}
+	
 
 
     /**
