@@ -167,6 +167,19 @@ public class Buffer implements Cloneable {
         return ret;
     }
 
+
+    /**
+     * Returns true if the input object x is in the buffer.
+     */
+    public boolean contains(Object x) {
+        Iterator iterator = iterator();
+        while (iterator.hasNext())
+            if (iterator.next().equals(x))
+                return true;
+        return false;
+    }
+
+
     /**
      * Returns the head of this, or throws NoSuchElementException if
      * this is empty.
