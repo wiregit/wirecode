@@ -273,7 +273,14 @@ public abstract class VendorMessage extends Message {
         if ((selector == F_UDP_CONNECT_BACK_REDIR) && 
             (Arrays.equals(vendorID, F_LIME_VENDOR_ID)))
             return new UDPConnectBackRedirect(guid, ttl, hops, version, restOf);
-
+        if ((selector == F_GIVE_STATS) && 
+            (Arrays.equals(vendorID, F_LIME_VENDOR_ID)))
+            return new GiveStatsVendorMessage(guid, ttl, hops, version, restOf,
+                                              Message.N_UNKNOWN);
+        if ((selector == F_STATISTICS) && 
+            (Arrays.equals(vendorID, F_LIME_VENDOR_ID)))
+            return new StatisticVendorMessage(guid, ttl, hops, version, restOf);
+        
 
         if( RECORD_STATS )
                 ReceivedErrorStat.VENDOR_UNRECOGNIZED.incrementStat();

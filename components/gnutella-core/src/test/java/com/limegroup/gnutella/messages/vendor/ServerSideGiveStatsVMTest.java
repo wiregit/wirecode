@@ -543,21 +543,20 @@ public final class ServerSideGiveStatsVMTest extends BaseTestCase {
         resps = r3;
         reply1 = new QueryReply(GUID1.bytes(),(byte)3, 
              LEAF_1.getListeningPort(),ipBytes,0l, resps,l1GUID.bytes(), false);
-        LEAF_2.send(reply1);
+        LEAF_3.send(reply1);
 
         Response[] r4 = {new Response(1l, 13l, "sumeet.txt") };
         resps = r4;
         reply1 = new QueryReply(GUID1.bytes(),(byte)3, 
              LEAF_1.getListeningPort(),ipBytes,0l, resps,l1GUID.bytes(), false);
-        LEAF_2.send(reply1);
-
+        ULTRAPEER_1.send(reply1);
 
         //Leaf 1 final score incoming queries = 2, query replies = 2
         //Leaf 2 final score incoming queries = 2, query replies = 1
         //LEAF_3 final score incoming queries = 1 query replies = 1
         //LEAF_4 final score incoming queries = 0 query replies = 0
-        //UP1 final score incoming queries = 3 query replies = 1        
-        //UP2 final score incoming queries = 3 query replies = 0
+        //UP1 final score incoming queries = 2 query replies = 1        
+        //UP2 final score incoming queries = 2 query replies = 0
 
         //OK. Now we can send the Give Stats Message to the central UP, and see
         //what the response is
@@ -567,8 +566,9 @@ public final class ServerSideGiveStatsVMTest extends BaseTestCase {
         GiveStatsVendorMessage statsVM = new GiveStatsVendorMessage(
                              GiveStatsVendorMessage.PER_CONNECTION_STATS, 
                              GiveStatsVendorMessage.GNUTELLA_INCOMING_TRAFFIC, 
-                             Message.N_TCP);
+                             Message.N_TCP);        
         TCP_TEST_LEAF.send(statsVM);
+        TCP_TEST_LEAF.flush();        
         
         StatisticVendorMessage statsAck = 
         (StatisticVendorMessage)getFirstInstanceOfMessageType(TCP_TEST_LEAF,
