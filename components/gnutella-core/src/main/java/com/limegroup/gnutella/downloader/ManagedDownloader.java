@@ -333,7 +333,7 @@ public class ManagedDownloader implements Downloader, Serializable {
     /** The current incomplete file that we're downloading, or the last
      *  incomplete file if we're not currently downloading, or null if we
      *  haven't started downloading.  Used for previewing purposes. */
-    private File incompleteFile;
+    //private File incompleteFile;
     /** The fully-qualified name of the downloaded file when this completes, or
      *  null if we haven't started downloading. Used for previewing purposes. */
     private File completeFile;
@@ -518,11 +518,11 @@ public class ManagedDownloader implements Downloader, Serializable {
      *  commonOutFile.  Subclasses may override this to force the initial
      *  progress to be non-zero.
      */
-    protected void initializeIncompleteFile(File incompleteFile) {
+    protected void initializeIncompleteFile(File incFile) {
         if (this.incompleteFile!=null)
             return;
-        this.incompleteFile=incompleteFile;
-        this.commonOutFile=incompleteFileManager.getEntry(incompleteFile);
+        this.incompleteFile=incFile;
+        this.commonOutFile=incompleteFileManager.getEntry(incFile);
     }
     
     /**
@@ -570,7 +570,7 @@ public class ManagedDownloader implements Downloader, Serializable {
      * @param incompleteFile an incomplete file, which SHOULD be the return
      *  value of IncompleteFileManager.getFile
      */
-    public boolean conflicts(File incompleteFile) {
+    public boolean conflicts(File incFile) {
         synchronized (this) {
             //TODO3: this is stricter than necessary.  What if a location has
             //been removed?  Tricky without global variables.  At the least we
@@ -578,7 +578,7 @@ public class ManagedDownloader implements Downloader, Serializable {
             for (int i=0; i<allFiles.length; i++) {
                 RemoteFileDesc rfd=(RemoteFileDesc)allFiles[i];
                 File thisFile=incompleteFileManager.getFile(rfd);
-                if (thisFile.equals(incompleteFile))
+                if (thisFile.equals(incFile))
                     return true;
             }
         }
@@ -1638,24 +1638,24 @@ public class ManagedDownloader implements Downloader, Serializable {
     /** Removes all entries for incompleteFile from incompleteFileManager 
      *  and attempts to rename incompleteFile to "CORRUPT-i-...".  Deletes
      *  incompleteFile if rename fails. */
-    private void cleanupCorrupt(File incompleteFile, String name) {
+    private void cleanupCorrupt(File incFile, String name) {
         corruptFileBytes=getAmountRead();        
-        incompleteFileManager.removeEntry(incompleteFile);
+        incompleteFileManager.removeEntry(incFile);
 
         //Try to rename the incomplete file to a new corrupt file in the same
         //directory (INCOMPLETE_DIRECTORY).
         boolean renamed = false;
         for (int i=0; i<10 && !renamed; i++) {
-            corruptFile=new File(incompleteFile.getParent(),
+            corruptFile=new File(incFile.getParent(),
                                  "CORRUPT-"+i+"-"+name);
             if (corruptFile.exists())
                 continue;
-            renamed=incompleteFile.renameTo(corruptFile);
+            renamed=incFile.renameTo(corruptFile);
         }
 
         //Could not rename after ten attempts?  Delete.
         if(!renamed) {
-            incompleteFile.delete();
+            incFile.delete();
             this.corruptFile=null;
         }
     }
@@ -1686,25 +1686,25 @@ public class ManagedDownloader implements Downloader, Serializable {
             needed=new IntervalSet(); 
             {//all variables in this block have limited scope
                 RemoteFileDesc rfd=(RemoteFileDesc)files.get(0);
-                File incompleteFile=incompleteFileManager.getFile(rfd);
+                File incFile=incompleteFileManager.getFile(rfd);
                 synchronized (incompleteFileManager) {
                     if( commonOutFile != null )
                         commonOutFile.clearManagedDownloader();
                     //get VerifyingFile
                     commonOutFile=
-                    incompleteFileManager.getEntry(incompleteFile);
+                    incompleteFileManager.getEntry(incFile);
                 }
                 if(commonOutFile==null) {//no entry in incompleteFM
                     debug("creating a verifying file");
                     commonOutFile = new VerifyingFile(true);
                     //we must add an entry for this in IncompleteFileManager
                     incompleteFileManager.
-                                   addEntry(incompleteFile,commonOutFile);
+                                   addEntry(incFile,commonOutFile);
                 }
                                 
                 //need to get the VerifyingFile ready to write
                 try {
-                    commonOutFile.open(incompleteFile,this);
+                    commonOutFile.open(incFile,this);
                 } catch(IOException e) {
                     // This is a serious problem if it happens.
                     // TODO: add better checking to make sure it's possible
@@ -1934,7 +1934,7 @@ public class ManagedDownloader implements Downloader, Serializable {
             return null;
         }
 
-        File incompleteFile = incompleteFileManager.getFile(rfd);
+        File incFile = incompleteFileManager.getFile(rfd);
         HTTPDownloader ret;
         boolean needsPush = needsPush(rfd);
         
@@ -1965,10 +1965,10 @@ public class ManagedDownloader implements Downloader, Serializable {
             // DO NOT PUT MULTICAST RFDs IN AlTERNATE LOCATIONS.
             removeAlternateLocation(rfd);
             try {
-                ret = connectWithPush(rfd, incompleteFile);
+                ret = connectWithPush(rfd, incFile);
             } catch(IOException e) {
                 try {
-                    ret = connectDirectly(rfd, incompleteFile);
+                    ret = connectDirectly(rfd, incFile);
                 } catch(IOException e2) {
                     return null; // impossible to connect.
                 }
@@ -1981,7 +1981,7 @@ public class ManagedDownloader implements Downloader, Serializable {
         // if we don't, try direct and if that fails try a push.        
         if( !needsPush ) {
             try {
-                ret = connectDirectly(rfd, incompleteFile);
+                ret = connectDirectly(rfd, incFile);
                 return ret;
             } catch(IOException e) {
                 // oh well, fall through to the push.
@@ -1992,7 +1992,7 @@ public class ManagedDownloader implements Downloader, Serializable {
         removeAlternateLocation(rfd);
         
         try {
-            ret = connectWithPush(rfd, incompleteFile);
+            ret = connectWithPush(rfd, incFile);
             return ret;
         } catch(IOException e) {
             // even the push failed :(
@@ -2007,10 +2007,10 @@ public class ManagedDownloader implements Downloader, Serializable {
      * Attempts to directly connect through TCP to the remote end.
      */
     private HTTPDownloader connectDirectly(RemoteFileDesc rfd, 
-      File incompleteFile) throws IOException {
+      File incFile) throws IOException {
         HTTPDownloader ret;
         //Establish normal downloader.              
-        ret = new HTTPDownloader(rfd, incompleteFile,totalAlternateLocations);
+        ret = new HTTPDownloader(rfd, incFile,totalAlternateLocations);
         // Note that connectTCP can throw IOException
         // (and the subclassed CantConnectException)
         try {
@@ -2030,7 +2030,7 @@ public class ManagedDownloader implements Downloader, Serializable {
      * BLOCKING.
      */
     private HTTPDownloader connectWithPush(RemoteFileDesc rfd,
-      File incompleteFile) throws IOException {
+      File incFile) throws IOException {
       
         HTTPDownloader ret;
         
@@ -2074,7 +2074,7 @@ public class ManagedDownloader implements Downloader, Serializable {
         }
         
         miniRFDToLock.remove(mrfd);//we are not going to use it after this
-        ret = new HTTPDownloader(pushSocket, rfd, incompleteFile,
+        ret = new HTTPDownloader(pushSocket, rfd, incFile,
 		  totalAlternateLocations);
         
         //Socket.getInputStream() throws IOX if the connection is closed.
