@@ -2891,21 +2891,6 @@ public class ManagedDownloader implements Downloader, Serializable {
         return state;
     }
 
-    public synchronized int getRemainingStateTime() {
-        long remaining;
-        switch (state) {
-        case CONNECTING:
-        case WAITING_FOR_RETRY:
-            remaining=stateTime-System.currentTimeMillis();
-            return (int)Math.max(remaining, 0)/1000;
-        case WAITING_FOR_RESULTS:
-            remaining=stateTime-System.currentTimeMillis();
-            return (int)Math.max(remaining, 0)/1000;
-        default:
-            return Integer.MAX_VALUE;
-        }
-    }
-    
     public synchronized String getFileName() {       
         //Return the most specific information possible.  Case (b) is critical
         //for picking the downloaded file name; see tryAllDownloads2.  See also
