@@ -126,7 +126,7 @@ public class BaseTestCase extends AssertComparisons implements ErrorCallback {
      *  backend fails
      */
     public static void launchAllBackends() throws IOException {
-        launchBackend(Backend.PORT);
+        launchBackend(Backend.BACKEND_PORT);
         launchBackend(Backend.REJECT_PORT);
     }
 
@@ -135,7 +135,7 @@ public class BaseTestCase extends AssertComparisons implements ErrorCallback {
      * @throws IOException if attempt to launch backend server fails
      */
     public static void launchBackend() throws IOException {
-        launchBackend(Backend.PORT);
+        launchBackend(Backend.BACKEND_PORT);
     }
     
     /**
