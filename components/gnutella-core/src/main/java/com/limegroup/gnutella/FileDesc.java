@@ -111,7 +111,7 @@ public final class FileDesc implements AlternateLocationCollector {
 	 *  <tt>false</tt> otherwise
 	 */
 	public boolean hasUrns() {
-		return _urns.isEmpty();
+		return !_urns.isEmpty();
 	}
 
 	/**
