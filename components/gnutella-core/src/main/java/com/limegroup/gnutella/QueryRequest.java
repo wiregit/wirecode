@@ -53,13 +53,17 @@ public class QueryRequest extends Message implements Serializable{
 		}
         buildPayload(); // now the length has been set
 		if(this.queryUrns == null) {
-			this.queryUrns = Collections.EMPTY_SET; 
+			// this is necessary because Collections.EMPTY_SET is not
+			// serializable in collections 1.1
+			this.queryUrns = Collections.unmodifiableSet(new HashSet()); 
 		}
 		else {
 			this.queryUrns = Collections.unmodifiableSet(queryUrns);
 		}
 		if(this.requestedUrnTypes == null) {
-			this.requestedUrnTypes = Collections.EMPTY_SET;
+			// this is necessary because Collections.EMPTY_SET is not
+			// serializable in collections 1.1
+			this.requestedUrnTypes = Collections.unmodifiableSet(new HashSet());
 		}
 		else {
 			this.requestedUrnTypes =
@@ -113,13 +117,13 @@ public class QueryRequest extends Message implements Serializable{
             System.out.println("QueryRequest.scanPayload() IOException");
         }
 		if(this.queryUrns == null) {
-			this.queryUrns = Collections.EMPTY_SET; 
+			this.queryUrns = Collections.unmodifiableSet(new HashSet()); 
 		}
 		else {
 			this.queryUrns = Collections.unmodifiableSet(queryUrns);
 		}
 		if(this.requestedUrnTypes == null) {
-			this.requestedUrnTypes = Collections.EMPTY_SET;
+			this.requestedUrnTypes = Collections.unmodifiableSet(new HashSet());
 		}
 		else {
 			this.requestedUrnTypes =
