@@ -1026,17 +1026,18 @@ public class SettingsManager implements SettingsInterface
 		if(!incFile.isDirectory()) {
 			incFile.mkdirs();
 		}
-		String saveDir = saveFile.getAbsolutePath();
-		String incDir  = incFile.getAbsolutePath();
-		if(!saveDir.endsWith(File.separator)) {
-			saveDir += File.separator;
+		String saveDir = "";
+		String incDir = "";
+		try {
+			saveDir = saveFile.getCanonicalPath();
+			incDir  = incFile.getCanonicalPath();
+			saveDirectory_ = saveDir;
+			incompleteDirectory_ = incDir;
+			props_.put(SAVE_DIRECTORY, saveDirectory_);
+		} catch(IOException ioe) {
+			// this call to set save directory will simply fail
+			// if an io error occurs.
 		}
-		if(!incDir.endsWith(File.separator)) {
-			incDir += File.separator;
-		}
-		saveDirectory_ = saveDir;
-		incompleteDirectory_ = incDir;
-		props_.put(SAVE_DIRECTORY, saveDirectory_);
     }
 
     /* set the directories to search.  this is synchronized
