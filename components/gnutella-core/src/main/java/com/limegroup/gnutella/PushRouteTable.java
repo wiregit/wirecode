@@ -47,7 +47,7 @@ public class PushRouteTable{
      *which connection to send out a push requst on. See get
      */
     public synchronized void put(Connection c, Message m){
-	PushRequest mes = (PushRequest)m;
+	QueryReply  mes = (QueryReply)m;
 	String Guid = new String(m.getGUID());
 	String DestinationGuid = new String(mes.getClientGUID());
 	String key = Guid+"|"+DestinationGuid;

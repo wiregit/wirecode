@@ -146,7 +146,7 @@ public class Connection implements Runnable {
 	    out.flush();
 	    sent++;
 	}
-	//System.out.println("Wrote "+m.toString()+"\n   to "+sock.toString());
+	System.out.println("Wrote "+m.toString()+"\n   to "+sock.toString());
     }
 
     /** 
@@ -160,8 +160,8 @@ public class Connection implements Runnable {
 	synchronized(in) {
 	    Message m=Message.read(in);
 	    received++;  //keep statistics.
-	    //if (m!=null)
-	    //System.out.println("Read "+m.toString()+"\n    from "+sock.toString());
+	    if (m!=null)
+	    System.out.println("Read "+m.toString()+"\n    from "+sock.toString());
 	    return m;
 	}
     }
@@ -248,7 +248,9 @@ public class Connection implements Runnable {
 		else if (m instanceof QueryReply){
 		    Connection outConnection = routeTable.get(m.getGUID());
 		    if(outConnection!=null){ //we have a place to route it
+			System.out.println("Sumeet:found connection");
 			pushRouteTable.put(this, m);//first store this in pushRouteTable
+			System.out.println("Sumeet: stored reply in push route table");
 			if (outConnection.equals(this)){ //I am the destination
 			    //TODO1: This needs to be interfaced with Rob
 			    //Unpack message
@@ -258,7 +260,9 @@ public class Connection implements Runnable {
 			    // interface with GUI client 
 			}
 			else {//message needs to be routed.
+			    System.out.println("Sumeet:About to route reply");
 			    outConnection.send(m);//send the message along on its route
+			    System.out.println("Sumeet:Sent query reply");
 			}
 		    }
 		    else{//route table does not know what to do this message
@@ -266,6 +270,7 @@ public class Connection implements Runnable {
 		    }
 		}
 		else if (m instanceof PushRequest){
+		    System.out.println("Sumeet:We have a push request");
 		    Connection nextHost = pushRouteTable.get(m);
 		    PushRequest req = (PushRequest)m;
 		    String DestinationId = new String(req.getClientGUID());

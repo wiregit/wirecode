@@ -26,5 +26,5 @@ public class Const {
     public static String HOSTLIST="gnutella.net";
 
     /** The number of outgoing connections to maintain */
-    public static int KEEP_ALIVE=4;
+    public static int KEEP_ALIVE=0;
 }
