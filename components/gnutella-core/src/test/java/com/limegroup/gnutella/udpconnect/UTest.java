@@ -115,7 +115,7 @@ public class UTest implements ActivityCallback, ErrorCallback {
 		reader.start();
 
 		for (int i = 0; i < numBytes; i++) {
-			ostream.write(i % 128);
+			ostream.write(i % 256);
 			if ( (i % 1000) == 0 ) 
 				log2("Write status: "+i);
 		}
@@ -143,7 +143,7 @@ public class UTest implements ActivityCallback, ErrorCallback {
 			try {
 				for (int i = 0; i < numBytes; i++) {
 					rval = istream.read();
-					if ( rval != (i % 128) ) {
+					if ( rval != (i % 256) ) {
 						log2("Error on read expected: "+i
 						  +" received: "+rval);
 						break;
@@ -171,7 +171,7 @@ public class UTest implements ActivityCallback, ErrorCallback {
 		try {
 			for (int i = 0; i < numBytes; i++) {
 				rval = istream.read();
-				if ( rval != (i % 128) ) {
+				if ( rval != (i % 256) ) {
 					log2("Error on read expected: "+i
 					  +" received: "+rval);
 					break;
