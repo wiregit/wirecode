@@ -54,16 +54,16 @@ public class UltrapeerHandshakeResponder
 		if(!response.isUltrapeer())
 		    return HandshakeResponse.createRejectOutgoingResponse();
 
-		if(!_manager.allowConnection(response)) {
+		if(!_manager.allowConnection(response))
             return HandshakeResponse.createRejectOutgoingResponse();
-		}
 
 		Properties ret = new Properties();
-        if(response.hasLeafGuidance() &&
-           isNotBearshare(response) &&
-           _manager.allowLeafDemotion()) {
-			//Fine, we'll become a leaf.
-			ret.put(HeaderNames.X_ULTRAPEER, "False");
+        if(response.hasLeafGuidance()) {
+            // Become a leaf if its a good ultrapeer & we can do it.
+            if(_manager.allowLeafDemotion() && response.isGoodUltrapeer())
+                ret.put(HeaderNames.X_ULTRAPEER, "False");
+            else //Had guidance, but we aren't going to be a leaf.
+                return HandshakeResponse.createRejectOutgoingResponse();
 		}
 
 		// deflate if we can ...
@@ -90,10 +90,6 @@ public class UltrapeerHandshakeResponder
 		//Incoming connection....
 		Properties ret = new UltrapeerHeaders(getRemoteIP());
 		
-		//guide the incoming connection to be a ultrapeer/clientnode
-		ret.put(HeaderNames.X_ULTRAPEER_NEEDED,
-				(new Boolean(_manager.supernodeNeeded())).toString());
-		
 		//give own IP address
 		ret.put(HeaderNames.LISTEN_IP,
 				NetworkUtils.ip2string(RouterService.getAddress())+":"
@@ -102,7 +98,7 @@ public class UltrapeerHandshakeResponder
 		//Decide whether to allow or reject.  Somewhat complicated because
 		//of ultrapeer guidance.
 
-		if (reject(response)) {
+		if (reject(response, ret)) {
             // reject the connection, and let the other node know about 
             // any Ultrapeers we're connected to
             return HandshakeResponse.createRejectIncomingResponse();
@@ -138,26 +134,51 @@ public class UltrapeerHandshakeResponder
     /** 
      * Returns true if this incoming connections should be rejected with a 503. 
      */
-    private boolean reject(HandshakeResponse response) { 
-        //Under some circumstances, we can decide to reject a connection during
-        //handshaking because no slots are available.  You might think you could
-        //reject the connection if !_manager.allowConnection(A, L), where A
-        //is true if the connection is the connection is ultrapeer-aware and L
-        //is true if the user is a leaf.  Unfortunately this fails when the
-        //incoming connection is an ultrapeer (A&&!L) because of ultrapeer
-        //guidance; we don't know whether they'll become a leaf node or not.  So
-        //we use the following conservative test, and depend on the
-        //old-fashioned reject connection mechanism in ConnectionManager for the
-        //other cases.       
-
-        boolean allowedNow = _manager.allowConnection(response);
-		if(allowedNow) return false;
-		
-		// no more room for this leaf, reject.
-		if( !response.isUltrapeer() )
-		    return true; // nothing we can do.
-
-		return !_manager.allowConnectionAsLeaf(response);
+    private boolean reject(HandshakeResponse response, Properties ret) { 
+        // See if this connection can be allowed as a leaf.
+        boolean allowedAsLeaf = _manager.allowConnectionAsLeaf(response);
+        
+        // If the user wasn't an ultrapeer, accept or reject
+        // based on whether or not it was allowed.
+        // This is because leaf connections cannot upgrade to ultrapeers,
+        // so the allowAsLeaf was the final check.
+        if( response.isLeaf() )
+            return !allowedAsLeaf;
+            
+        // Otherwise (if the user is an ultrapeer), there are a few things...
+        boolean supernodeNeeded = _manager.supernodeNeeded();
+        
+        // If we can accept them and we don't need more supernodes,
+        // guide them to become a leaf
+        if( allowedAsLeaf && !supernodeNeeded) {
+            ret.put(HeaderNames.X_ULTRAPEER_NEEDED, Boolean.FALSE.toString());
+            return false;
+        }
+        
+        boolean allowedAsUltrapeer = _manager.allowConnection(response);
+        
+        // If supernode is needed or we can't accept them as a leaf,
+        // see if we can accept them as a supernode.
+        if( allowedAsUltrapeer ) {
+            // not strictly necessary ...
+            ret.put(HeaderNames.X_ULTRAPEER_NEEDED, Boolean.TRUE.toString());
+            return false;
+        }
+        
+        // In all other cases, we must reject the connection.
+        // These are:
+        // 1)  !allowedAsLeaf && !allowedAsUltrapeer
+        // 2)  supernodeNeeded && !alloweedAsUltrapeer
+        // The reasoning behind 1) is that we cannot accept them as a either a
+        // leaf or an ultrapeer, so we must reject.
+        // The reasoning behind 2) is that the network needs a supernode, but
+        // we are currently unable to service that need, so we must reject.
+        // Theoretically, it is possible to allow them as a leaf even if
+        // a supernode was needed, but that would lower the amount of
+        // well-connected supernodes, ultimately hurting the network.
+        // This means that the last 10% of leaf slots will always be reserved
+        // for connections that are unable to be ultrapeers.
+        return true;
     }
 }
 
