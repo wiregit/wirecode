@@ -404,7 +404,7 @@ public final class CommonUtils {
      *  directory for the application, or <tt>null</tt> if that directory 
 	 *  does not exist
      */
-    public static File getUserSettingsDir() {
+    public synchronized static File getUserSettingsDir() {
         File settingsDir = new File(getUserHomeDir(), 
                                     LIMEWIRE_PREFS_DIR_NAME);
 
@@ -446,7 +446,7 @@ public final class CommonUtils {
      * and the files that should be used, should always be saved in 
      * the user's home LimeWire preferences directory.
      */
-    private static void moveWindowsFiles(File settingsDir) {
+    private synchronized static void moveWindowsFiles(File settingsDir) {
         if(!isWindows()) return;
         if(_windowsFilesMoved) return;
         File currentDir = CommonUtils.getCurrentDirectory();
@@ -456,7 +456,7 @@ public final class CommonUtils {
             if(curUserFile.isFile()) {
                 continue;
             }
-            if(settingsDir.isDirectory()) {
+            if(!settingsDir.isDirectory()) {
                 settingsDir.mkdirs();
             }
             copy(curDirFile, curUserFile);
