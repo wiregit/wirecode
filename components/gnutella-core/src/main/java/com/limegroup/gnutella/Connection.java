@@ -523,14 +523,7 @@ public class Connection implements Runnable {
 			//unpack message
 			//make HTTP connection with originator
 			//TODO1: Rob makes HHTTP connection
-			System.out.println("Establishing HTTP");
-
-
-			
 			String host = new String(req.getIP());
-
-			System.out.println("Host in Conn " + host);
-			System.out.println("Host in Conn " + req.getIP());
 
 			byte[] ip = req.getIP();
 
