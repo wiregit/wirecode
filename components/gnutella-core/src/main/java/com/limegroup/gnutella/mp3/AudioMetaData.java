@@ -17,9 +17,9 @@ import java.io.*;
  * Can write the data to a NameValue list or an XML string.
  */
 public abstract class AudioMetaData extends MetaData {
-    private String title;
+    private String title ;
     private String artist;
-    private String album;
+    private String album ;
     private String year;
     private String comment;
     private short track = -1;

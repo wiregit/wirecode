@@ -79,7 +79,7 @@ public abstract class AudioMetaDataEditor extends MetaDataEditor {
     	if (LimeXMLUtils.isMP3File(name))
     		return new MP3DataEditor();
     	if (LimeXMLUtils.isOGGFile(name))
-    		return new OGGDataEditor();
+    		return new OGGDataEditor(name);
     	return null;
     }
 

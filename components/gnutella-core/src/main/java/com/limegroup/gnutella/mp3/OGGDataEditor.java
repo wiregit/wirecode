@@ -8,6 +8,7 @@ import com.jcraft.jogg.*;
  
 import com.limegroup.gnutella.ErrorService;
 import com.limegroup.gnutella.xml.LimeXMLReplyCollection;
+import com.limegroup.gnutella.util.*;
 
 /**
  * class which handles specifically the annotation of OGG files.
@@ -19,18 +20,39 @@ public class OGGDataEditor extends AudioMetaDataEditor {
 	
 	File _file;
 	
+	/**
+	 * The constructor for this editor tries to read data from an existing file.
+	 * It is possible to invoke this constructor with one file and then commit
+	 * the changes to another - it is up to the user.
+	 * @param fileName the filename to create the editor for
+	 */
+	protected OGGDataEditor(String fileName) {
+		_file = CommonUtils.getResourceFile(fileName);
+		
+		//first populate our own data fields..
+		//if an exception is thrown the fields remain blank, which is ok.
+		if (_file.exists())
+			try {
+				OGGMetaData existing = (OGGMetaData)MetaData.parse(_file);
+				artist_=existing.getArtist();
+				album_=existing.getAlbum();
+				title_=existing.getTitle();
+				year_=existing.getYear();
+				track_=new String(""+existing.getTrack());
+				comment_=existing.getComment();
+				genre_= existing.getGenre();
+			}catch(IOException ignored) {}
+	}
+	
 	/* (non-Javadoc)
 	 * @see com.limegroup.gnutella.mp3.MetaDataEditor#commitMetaData(java.lang.String)
 	 */
 	public int commitMetaData(String filename) {
 		VorbisFile vfile = null;
 		try{
-			_file = new File(filename);
+			_file = CommonUtils.getResourceFile(filename);
 			vfile = new VorbisFile(filename);
 			Comment [] comments = vfile.getComment();
-			
-			
-			
 			
 			//do things the hard way (grr)
 			
