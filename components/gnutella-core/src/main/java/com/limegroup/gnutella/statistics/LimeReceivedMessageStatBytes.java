@@ -218,10 +218,17 @@ public class LimeReceivedMessageStatBytes extends AdvancedKilobytesStatistic {
 	    new UDPReceivedMessageStatBytes();
 
 	/**
-	 * <tt>Statistic</tt> for Gnutella route table messages received 
+	 * <tt>Statistic</tt> for Gnutella reset route table messages received 
 	 * over TCP.
 	 */
-	public static final Statistic TCP_ROUTE_TABLE_MESSAGES = 
+	public static final Statistic TCP_RESET_ROUTE_TABLE_MESSAGES = 
+	    new TCPReceivedMessageStatBytes();
+
+	/**
+	 * <tt>Statistic</tt> for Gnutella patch route table messages received 
+	 * over TCP.
+	 */
+	public static final Statistic TCP_PATCH_ROUTE_TABLE_MESSAGES = 
 	    new TCPReceivedMessageStatBytes();
 	    
 	/**

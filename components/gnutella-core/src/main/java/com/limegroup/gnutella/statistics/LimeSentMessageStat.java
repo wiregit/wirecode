@@ -199,10 +199,17 @@ public class LimeSentMessageStat extends AdvancedStatistic {
 	    new UDPLimeSentMessageStat();
 
 	/**
-	 * <tt>Statistic</tt> for Gnutella route table messages sent 
+	 * <tt>Statistic</tt> for Gnutella reset route table messages sent 
 	 * over TCP.
 	 */
-	public static final Statistic TCP_ROUTE_TABLE_MESSAGES = 
+	public static final Statistic TCP_RESET_ROUTE_TABLE_MESSAGES = 
+	    new TCPLimeSentMessageStat();
+
+	/**
+	 * <tt>Statistic</tt> for Gnutella patch route table messages sent 
+	 * over TCP.
+	 */
+	public static final Statistic TCP_PATCH_ROUTE_TABLE_MESSAGES = 
 	    new TCPLimeSentMessageStat();
 
 	/**
