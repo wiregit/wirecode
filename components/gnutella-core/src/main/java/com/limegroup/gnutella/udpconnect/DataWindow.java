@@ -90,14 +90,17 @@ public class DataWindow
 	}
 
     /** 
-     *  Get the number of slots in use.
+     *  Get the number of slots in use.  This excludes written data.
      */
     public synchronized int getUsedSpots() {
-        String pkey;
-        int    count = 0;
+        DataRecord d;
+        String     pkey;
+        int        count = 0;
         for (int i = windowStart; i < windowStart+windowSize+1; i++) {
             pkey = String.valueOf(i);
-            if (window.get(pkey) != null)
+            // Count the spots that are full and not written
+            if ( (d = (DataRecord) window.get(pkey)) != null &&
+                  !d.written )
                 count++;
         }
         return(count);
@@ -360,17 +363,17 @@ public class DataWindow
 		int lastBlock     = -1;
 
 		// Find the last block
-        /*  Why is this code here???
 		for (int i = maxBlock; i < newMaxBlock; i++) {
 			d = getBlock(i);
 			if ( d != null )
 				lastBlock = i;
 		}
-        */
 
 		// Advance the window up to windowSize before lastBlock and clear old
-		// blocks
-        for (int i = windowStart; i < windowSize+1; i++) {
+		// blocks - This ensures that the data is successfully acked before 
+        // it is removed.  Note: windowSpace must reflect the true 
+        // potential space.
+        for (int i = windowStart; i < lastBlock - windowSize; i++) {
             pkey = String.valueOf(i);
             d = (DataRecord) window.get(pkey);
             if ( d != null && d.written) {
