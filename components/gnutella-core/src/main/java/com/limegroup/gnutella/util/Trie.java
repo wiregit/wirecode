@@ -105,9 +105,22 @@ public class Trie {
      * @requires this not modified while iterator in use.  
      */
     public Iterator getPrefixedBy(String prefix) {
+        return getPrefixedBy(prefix, 0, prefix.length());
+    }
+
+    /**
+     * Exactly like getPrefixedBy(String), except that only
+     * prefix[startsOffset...stopOffset-1] (inclusive) is considered the
+     * prefix. This is useful as an optimization in certain applications to
+     * avoid allocations.
+     *
+     * @requires 0<=startOffset<=stopOffset<=prefix.length
+     */
+    public Iterator getPrefixedBy(String prefix,
+                                  int startOffset, int stopOffset) {
         TrieNode node=root;
         //1. Find first node start with prefix in tree.
-        for (int i=0; i<prefix.length(); i++) {
+        for (int i=startOffset; i<stopOffset; i++) {
             node=node.get(canonicalCase(prefix.charAt(i)));
             if (node==null) 
                 return new EmptyIterator();
@@ -260,7 +273,21 @@ public class Trie {
         iter=t.getPrefixedBy("a");
         Assert.that(iter.next()==anVal);
         Assert.that(iter.next()==antVal);
-        Assert.that(! iter.hasNext());        
+        Assert.that(! iter.hasNext());      
+
+        //Prefix tests
+        t=new Trie(false);
+        Assert.that(t.put("an", anVal)==null);
+        iter=t.getPrefixedBy("XanXX");
+        Assert.that(! iter.hasNext());
+        iter=t.getPrefixedBy("XanXX", 1, 4);
+        Assert.that(! iter.hasNext());
+        iter=t.getPrefixedBy("XanXX", 1, 3);
+        Assert.that(iter.next()==anVal);
+        Assert.that(! iter.hasNext());
+        iter=t.getPrefixedBy("XanXX", 1, 2);
+        Assert.that(iter.next()==anVal);
+        Assert.that(! iter.hasNext());
     }
 }
 

@@ -32,12 +32,30 @@ public class FileManager{
      *  characters without a character from DELIMETERS.  INVARIANT: TODO..
      */
     private Trie /* String -> List<Integer> */ _index;
-    static final String DELIMETERS=" -.+/*()\\";
+
     private String[] _extensions;
 
     private static FileManager _instance = new FileManager();
 
     private Set _sharedDirectories;
+
+    static final String DELIMETERS=" -.+/*()\\";
+    private static final boolean isDelimeter(char c) {
+        switch (c) {
+        case ' ':
+        case '-':
+        case '.':
+        case '+':
+        case '/':
+        case '*':
+        case '(':
+        case ')':
+        case '\\':
+            return true;
+        default:
+            return false;
+        }
+    }
 
     private FileManager() {
         // We'll initialize all the instance variables so that the FileManager
@@ -378,23 +396,34 @@ public class FileManager{
         //then you need to make _files volatile and work on a local reference,
         //i.e., "_files=this._files"
 
+        //TODO1: handle clip2 indexing query
+        
         Set matches=null;
 
-        //For each keyword in the query.... TODO2: avoid calling split by
-        //adding offset option to Trie.getPrefixedBy.
-        String[] keywords=StringUtils.split(query, DELIMETERS);
-        for (int i=0; i<keywords.length; i++) {
-            //Find all the files matching that keyword.  TODO2: avoid calling
-            //toLowerCase by making Trie have case insensitive option.
-            String keyword=keywords[i];
-            Iterator /* of List<Integer> */ iter=_index.getPrefixedBy(keyword);
+        //For each keyword in the query....  (Note that we avoid calling
+        //StringUtils.split and take advantage of Trie's offset/limit feature.)
+        for (int i=0; i<query.length(); ) {
+            if (isDelimeter(query.charAt(i))) {
+                i++;
+                continue;
+            }
+            int j;
+            for (j=i+1; j<query.length(); j++) {
+                if (isDelimeter(query.charAt(j)))
+                    break;
+            }
+            //Now keywords[i...j-1] is the keyword to search for.
+            System.out.println("Keyword: \""+query.substring(i, j)+"\"");
+
+            Iterator /* of List<Integer> */ iter=
+                _index.getPrefixedBy(query, i, j);
             //TODO1: avoid allocations, perhaps by making Trie a multimap.
             Set matches2=new TreeSet(ArrayListUtil.integerComparator());
             while (iter.hasNext()) {
                 List indices=(List)iter.next();
                 for (Iterator iter2=indices.iterator(); iter2.hasNext() ; ) {
-                    Integer j=(Integer)iter2.next();
-                    matches2.add(j);
+                    Integer k=(Integer)iter2.next();
+                    matches2.add(k);
                 }
             }         
             if (i==0)
@@ -404,6 +433,8 @@ public class FileManager{
             //Optimization: if a keyword failed, don't check others..
             if (matches.size()==0)
                 break;
+
+            i=j;
         }
         if (matches==null || matches.size()==0)
             return null;
