@@ -47,12 +47,6 @@ public class QuestionsHandler extends AbstractSettings {
         FACTORY.createIntSetting("UNSHARE_DIRECTORY", 0);
         
     /**
-     * Setting for overwriting existing files when downloading
-     */
-    public static final IntSetting OVERWRITE_EXISTING =
-        FACTORY.createIntSetting("OVERWRITE_EXISTING", 0);
-        
-    /**
      * Setting for the theme changed message
      */
     public static final BooleanSetting THEME_CHANGED =
