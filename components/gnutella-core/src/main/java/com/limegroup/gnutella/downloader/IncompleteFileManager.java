@@ -373,9 +373,8 @@ public class IncompleteFileManager implements Serializable {
                     //the value of interval.high. An effect of this is that
                     //an older client with a newer download.dat downloads one
                     //byte extra for each interval.
-                    interval.high = interval.high-1;
-                    if(interval.high >= interval.low)
-                        vf.addInterval(interval);
+                    interval= new Interval(interval.low,interval.high-1);
+                    vf.addInterval(interval);
                 }
                         retMap.put(f, vf);
             }

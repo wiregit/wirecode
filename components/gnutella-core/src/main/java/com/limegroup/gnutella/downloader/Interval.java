@@ -13,8 +13,8 @@ public class Interval implements Serializable{
     static final long serialVersionUID = -2562093104400487554L;
 
     /** INVARIANT: low<=high */
-    public int low;
-    public int high;
+    public final int low;
+    public final int high;
 
     /** @requires low<=high */
     public Interval(int low, int high) {
@@ -57,5 +57,6 @@ public class Interval implements Serializable{
     	ByteOrder.int2beb(high,res,4);
     	return res;
     }
+   
 
 }
