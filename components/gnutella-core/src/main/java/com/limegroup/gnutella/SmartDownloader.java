@@ -33,7 +33,6 @@ public class SmartDownloader extends HTTPDownloader {
 		_acceptor = acceptor;
 		_filename = files[0].getFileName();
 		_amountRead = 0;
-		// _sizeOfFile = -1; // 
 		_sizeOfFile = files[0].getSize();
 		_downloadDir = "";
 		_stateString = "";
@@ -151,7 +150,7 @@ public class SmartDownloader extends HTTPDownloader {
             if (!p.equals(shared_path)) {
                 _state = NOT_CONNECTED;
                 return false;
-            }
+            } 
         } catch (Exception e) {
             _state = NOT_CONNECTED;
             return false;
