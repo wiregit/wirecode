@@ -151,6 +151,7 @@ public class NormalUploadState implements UploadState {
             throw ioe;
         }
 
+        _uploader.setState(_uploader.COMPLETE);
 	}
 
 	/************************* PRIVATE METHODS ***********************/
