@@ -17,7 +17,8 @@ public final class ColorSetting extends Setting {
 	 * @param key the constant key to use for the setting
 	 * @param defaultColor the default value to use for the setting
 	 */
-	static ColorSetting createColorSetting(Properties defaultProps, Properties props, 
+	static ColorSetting createColorSetting(Properties defaultProps, 
+										   Properties props, 
 										   String key, Color defaultColor) {	  
 		String red   = Integer.toHexString(defaultColor.getRed());
 		String green = Integer.toHexString(defaultColor.getGreen());
@@ -25,10 +26,19 @@ public final class ColorSetting extends Setting {
 		if(red.length() == 1)   red   = "0" + red;
 		if(green.length() == 1) green = "0" + green;
 		if(blue.length() == 1)  blue  = "0" + blue;
-		return new ColorSetting(defaultProps, props, key, red+green+blue);
+		return new ColorSetting(defaultProps, props, key, "#"+red+green+blue);
 	}
 
-	
+	/**
+	 * Creates a new <tt>ColorSetting</tt> instance with the specified 
+	 * key and default value.
+	 *
+	 * @param defaultProps the <tt>Properties</tt> file that stores the 
+	 *  defaults
+	 * @param props the <tt>Properties</tt> file to store this color
+	 * @param key the constant key to use for the setting
+	 * @param value the default value to use for the setting
+	 */
 	private ColorSetting(Properties defaultProps, Properties props, 
 						 String key, String value) {
 		super(defaultProps, props, key, value);
@@ -42,9 +52,9 @@ public final class ColorSetting extends Setting {
 	 */
 	public Color getValue() {
 		String hexColor = PROPS.getProperty(KEY);
-		int r = Integer.parseInt(hexColor.substring(0, 2), 16);
-		int g = Integer.parseInt(hexColor.substring(2, 4), 16);
-		int b = Integer.parseInt(hexColor.substring(4, 6), 16);
+		int r = Integer.parseInt(hexColor.substring(1, 3), 16);
+		int g = Integer.parseInt(hexColor.substring(3, 5), 16);
+		int b = Integer.parseInt(hexColor.substring(5, 7), 16);
 		return new Color(r,g,b);
 	}
 
@@ -60,6 +70,6 @@ public final class ColorSetting extends Setting {
 		if(red.length() == 1)   red   = "0" + red;
 		if(green.length() == 1) green = "0" + green;
 		if(blue.length() == 1)  blue  = "0" + blue;
-		PROPS.put(KEY, red+green+blue);
+		PROPS.put(KEY, "#"+red+green+blue);
 	}
 }
