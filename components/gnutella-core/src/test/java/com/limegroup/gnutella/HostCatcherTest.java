@@ -160,6 +160,40 @@ public class HostCatcherTest extends TestCase {
         }
     }
 
+    /** Ensures threads woken up when waiting for a bootstrap host. */
+    public void testExpireEmpty() {
+        //Start fetcher and give it time to block in getAnEndpoint().
+        SettingsManager.instance().setQuickConnectHosts(new String[0]);
+        TestFetcher fetcher=new TestFetcher();
+        fetcher.start();
+        try { Thread.sleep(100); } catch (InterruptedException e) { }
+
+        //Make sure fetcher hasn't mad progress.
+        assertNull(fetcher.result);
+
+        //Add quick-connect hosts and notify.
+        SettingsManager.instance().setQuickConnectHosts(
+            new String[] {"r1.b.c.d:6346"});
+        hc.expire();
+
+        //Make sure fetcher has made progress.  Timeout just prevents test from
+        //blocking.
+        try {
+            fetcher.join(1000);
+        } catch (InterruptedException e) { }
+        assertEquals(new Endpoint("r1.b.c.d", 6346), fetcher.result);
+    }
+
+    class TestFetcher extends Thread {
+        volatile Endpoint result;
+        public void run() {
+            try {
+                result=hc.getAnEndpoint();
+            } catch (InterruptedException e) { }
+        }
+    }
+
+
     public void testIterators() {
         //System.out.println("-Testing iterators");
 

@@ -566,6 +566,8 @@ public class HostCatcher {
         for (int i=0; i<hosts.length; i++) {
             Endpoint e=new Endpoint(hosts[i]);
             bootstrapHosts.addLast(e);
+            //This may allow some fetchers to progress.
+            notify();
         }
         
         //Move the N ultrapeer hosts from GOOD to NORMAL.  This forces
