@@ -46,8 +46,6 @@ public class HostCatcher {
     private BucketQueue /* of Endpoint */ queue=
         new BucketQueue(new int[] {BAD_SIZE, NORMAL_SIZE, GOOD_SIZE});
     private Set /* of Endpoint */ set=new HashSet();
-    private static final byte[] LOCALHOST={(byte)127, (byte)0, (byte)0,
-                                           (byte)1};
 
     private Acceptor acceptor;
     private ConnectionManager manager;
@@ -566,7 +564,7 @@ public class HostCatcher {
      */
     private boolean isMe(String host, int port) {
         //Don't allow connections to yourself.  We have to special
-        //case connections to "localhost" or "127.0.0.1" since
+        //case connections to "localhost" or "127.*.*.*" since
         //they are aliases this machine.
         byte[] cIP;
         try {
@@ -575,7 +573,7 @@ public class HostCatcher {
             return false;
         }
 
-        if (Arrays.equals(cIP, LOCALHOST)) {
+        if (cIP[0]==(byte)127) {
             return port == acceptor.getPort();
         } else {
             byte[] managerIP = acceptor.getAddress();
