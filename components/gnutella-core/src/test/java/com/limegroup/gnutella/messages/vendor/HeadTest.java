@@ -64,6 +64,8 @@ public class HeadTest extends BaseTestCase {
 		return buildTestSuite(HeadTest.class);
 	}
 	
+	private static final byte [] SOMEGUID=GUID.makeGuid();
+	
 	/**
 	 * sets up the testing environment for the UDPHeadPong.
 	 * two files are shared - _complete and _incomplete
@@ -74,6 +76,26 @@ public class HeadTest extends BaseTestCase {
 	 * @throws Exception
 	 */
 	public static void globalSetUp() throws Exception{
+	    
+	    MessageRouterStub mrStub = new MessageRouterStub() {
+	        public byte[] getOurGUID() {
+	            return SOMEGUID;
+	        }
+	    };
+	    
+	    PrivilegedAccessor.setValue(RouterService.class,"router",mrStub);
+	    
+	    ManagedConnectionStub mStub = new ManagedConnectionStub();
+	    final Set conns = new HashSet();
+	    conns.add(mStub);
+	    
+	    ConnectionManagerStub cmStub = new ConnectionManagerStub() {
+	        public Set getPushProxies() {
+	            return conns;
+	        }
+	    };
+	    
+	    PrivilegedAccessor.setValue(RouterService.class,"manager",cmStub);
 		//PrivilegedAccessor.setValue(RouterService.class,"acceptor", new AcceptorStub());
 		_fm = new FileManagerStub();
 		_um = new UploadManagerStub();
