@@ -192,7 +192,7 @@ public class StandardMessageRouter
             // create the new queryReply
             queryReply = new QueryReply(guid, ttl, port, ip,
                                         speed, res, clientGUID, 
-										incoming, busy);
+										!incoming, busy);
 
             // try to send the new queryReply
             try {
