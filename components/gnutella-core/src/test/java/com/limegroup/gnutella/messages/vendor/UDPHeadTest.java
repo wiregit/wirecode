@@ -1,7 +1,7 @@
 
 package com.limegroup.gnutella.messages.vendor;
 
-import java.io.IOException;
+import java.io.*;
 
 import com.limegroup.gnutella.util.*;
 import com.limegroup.gnutella.altlocs.AlternateLocation;
@@ -9,6 +9,7 @@ import com.limegroup.gnutella.altlocs.AlternateLocationCollection;
 import com.limegroup.gnutella.stubs.*;
 import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.downloader.Interval;
+import com.limegroup.gnutella.settings.*;
 import com.sun.java.util.collections.*;
 
 import java.util.Random;
@@ -113,10 +114,145 @@ public class UDPHeadTest extends BaseTestCase {
 		
 	}
 	
+	/**
+	 * tests the scenario where the file cannot be found.
+	 */
+	public void testFileNotFound() throws Exception {
+		UDPHeadPing ping = new UDPHeadPing(_notHave);
+		UDPHeadPong pong = new UDPHeadPong(ping);
+		
+		assertEquals(pong.getGUID(),ping.getGUID());
+		
+		//if we don't have the file we don't set the firewalled bit
+		assertFalse(pong.isFirewalled());
+		assertFalse(pong.hasFile());
+		assertFalse(pong.hasCompleteFile());
+		assertNull(pong.getAltLocs());
+		assertNull(pong.getRanges());
+	}
+	
+	/**
+	 * tests the scenarios where an incomplete and complete files are
+	 * behind firewall or open.
+	 */
+	public void testFirewalled() throws Exception {
+		Acceptor acceptor = RouterService.getAcceptor();
+		PrivilegedAccessor.setValue(acceptor,"_acceptedIncoming", new Boolean(false));
+		assertFalse(RouterService.acceptedIncomingConnection());
+		
+		UDPHeadPing ping = new UDPHeadPing(_haveFull);
+		UDPHeadPing pingi = new UDPHeadPing(_havePartial);
+		UDPHeadPong pong = reparse(new UDPHeadPong(ping));
+		UDPHeadPong pongi = reparse(new UDPHeadPong(pingi));
+		
+		assertEquals(ping.getGUID(),pong.getGUID());
+		assertEquals(pingi.getGUID(),pongi.getGUID());
+		
+		assertTrue(pong.hasFile());
+		assertTrue(pong.isFirewalled());
+		assertTrue(pong.hasCompleteFile());
+		assertNull(pong.getAltLocs());
+		assertNull(pong.getRanges());
+		
+		assertTrue(pongi.hasFile());
+		assertTrue(pongi.isFirewalled());
+		assertFalse(pongi.hasCompleteFile());
+		assertNull(pongi.getAltLocs());
+		assertNull(pongi.getRanges());
+		
+		PrivilegedAccessor.setValue(acceptor,"_acceptedIncoming", new Boolean(true));
+		assertTrue(RouterService.acceptedIncomingConnection());
+		
+		ping = new UDPHeadPing(_haveFull);
+		pingi = new UDPHeadPing(_havePartial);
+		pong = reparse(new UDPHeadPong(ping));
+		pongi = reparse(new UDPHeadPong(pingi));
+		
+		assertEquals(pong.getGUID(),ping.getGUID());
+		assertEquals(pingi.getGUID(),pongi.getGUID());
+		
+		assertFalse(pong.isFirewalled());
+		assertTrue(pong.hasFile());
+		assertTrue(pong.hasCompleteFile());
+		assertNull(pong.getAltLocs());
+		assertNull(pong.getRanges());
+		
+		assertTrue(pongi.hasFile());
+		assertFalse(pongi.isFirewalled());
+		assertFalse(pongi.hasCompleteFile());
+		assertNull(pongi.getAltLocs());
+		assertNull(pongi.getRanges());
+	}
+	
+	/**
+	 * tests requesting ranges from complete, incomplete files
+	 * as well as requesting too big ranges to fit in packet.
+	 */
+	public void testRanges() throws Exception {
+		
+		UDPHeadPing ping = new UDPHeadPing(_haveFull,UDPHeadPing.INTERVALS);
+		UDPHeadPing pingi = new UDPHeadPing(_havePartial,UDPHeadPing.INTERVALS);
+		
+		UDPHeadPong pong = reparse(new UDPHeadPong(ping));
+		UDPHeadPong pongi = reparse(new UDPHeadPong(pingi));
+		
+		assertTrue(pong.hasCompleteFile());
+		assertFalse(pongi.hasCompleteFile());
+		
+		assertNull(pong.getRanges());
+		assertNotNull(pongi.getRanges());
+		
+		assertTrue(Arrays.equals(_ranges.toBytes(),pongi.getRanges().toBytes()));
+		
+		//now make the incomplete file desc carry ranges which are too big to
+		//fit in a packet
+		_partial.setRangesByte(_rangesTooBig.toBytes());
+		
+		pingi = new UDPHeadPing(_haveFull,UDPHeadPing.INTERVALS);
+		pongi = reparse(new UDPHeadPong(pingi));
+		
+		assertNull(pongi.getRanges());
+	}
+	
+	/**
+	 * tests various values for the queue rank
+	 */
+	public void testQueueStatus() throws Exception {
+		UDPHeadPing ping = new UDPHeadPing(_havePartial);
+		
+		UDPHeadPong pong = reparse(new UDPHeadPong(ping));
+		
+		int allFree =  pong.getQueueStatus();
+		assertLessThan(0,allFree);
+		
+		_um.setUploadsInProgress(10);
+		pong = reparse(new UDPHeadPong(ping));
+		assertEquals(allFree+10,pong.getQueueStatus());
+		
+		_um.setNumQueuedUploads(5);
+		pong = reparse(new UDPHeadPong(ping));
+		assertEquals(5,pong.getQueueStatus());
+		
+		_um.setUploadsInProgress(UploadSettings.HARD_MAX_UPLOADS.getValue());
+		_um.setNumQueuedUploads(0);
+		pong = reparse(new UDPHeadPong(ping));
+		assertEquals(0,pong.getQueueStatus());
+		
+		_um.setIsBusy(true);
+		_um.setNumQueuedUploads(UploadSettings.UPLOAD_QUEUE_SIZE.getValue());
+		pong = reparse(new UDPHeadPong(ping));
+		assertGreaterThanOrEquals(127,pong.getQueueStatus());
+	}
+	
+	private UDPHeadPong reparse(UDPHeadPong original) throws Exception{
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		original.write(baos);
+		ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
+		return (UDPHeadPong) UDPHeadPong.read(bais);
+	}
+	
 	private static void  createCollections() throws Exception{
-		
-		
-		
+			
 		Set alternateLocations = new HashSet();
         
 		for(int i=0; i<HugeTestUtils.EQUAL_SHA1_LOCATIONS.length; i++) {
@@ -160,5 +296,4 @@ public class UDPHeadTest extends BaseTestCase {
         assertTrue("failed to set test up",_alCollectionIncomplete.getAltLocsSize()==alternateLocations.size());
 	}
 	
-	public void testSetUp() {}
 }
