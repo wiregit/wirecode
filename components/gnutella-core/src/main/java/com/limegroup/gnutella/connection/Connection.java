@@ -497,43 +497,42 @@ public class Connection implements ReplyHandler, PushProxyInterface {
      */
     public void initialize(int timeout) 
         throws IOException, NoGnutellaOkException, BadHandshakeException {
+            
+        boolean connectRegistered = false;
         if(isOutgoing())  {
+            // If it's an outgoing connection, we need to obtain the socket.
             if(ConnectionSettings.USE_NIO.getValue()) {
                 _socket = Sockets.connectNIO(_host, _port, timeout);
+                
+                // The NIO socket creation is non-blocking, so the socket may
+                // not be fully connected, and we need to register for 
+                // connection events.
                 if(!_socket.isConnected())  {
                     NIODispatcher.instance().addConnector(this);
+                    connectRegistered = true;
                 }
             } else {
                 _socket = Sockets.connect(_host, _port, timeout);
             }
         } else if(ConnectionSettings.USE_NIO.getValue()) {
-            // otherwise, it's an incoming connection, and we need to add this
-            // as a reader
+            // Otherwise, it's an incoming connection and we're using NIO, 
+            // and we need to add this as a reader.
             NIODispatcher.instance().addReader(this);
         }
         
         if (_closed) {
             throw CONNECTION_CLOSED;
         } 
+        
+        System.out.println("socket: "+_socket);
 
-        // Check to see if this is an attempt to connect to ourselves
-        // TODO: make sure Socket.getInetAddress() works fine even when it's 
-        // not fully connected
-        InetAddress localAddress = _socket.getLocalAddress();
-        if (ConnectionSettings.LOCAL_IS_PRIVATE.getValue() &&
-            _socket.getInetAddress().equals(localAddress) &&
-            _port == ConnectionSettings.PORT.getValue()) {
-            throw new IOException("Connection to self");
-        }      
 
-        // TODO: switch to new method of doing this on the main line
-        RouterService.getAcceptor().setAddress( localAddress );  
         
         // If we're not using NIO, then we know the socket is already
         // fully connected, and we can go ahead with the handshake
         if(!ConnectionSettings.USE_NIO.getValue())  {
             blockingHandshake();              
-        } else if(isOutgoing() && _socket.isConnected())  {
+        } else if(isOutgoing() && !connectRegistered)  {
             // if our socket is already connected and it's an outgoing 
             // connection, we need to notify the handshaker to start the
             // handshake
@@ -552,6 +551,19 @@ public class Connection implements ReplyHandler, PushProxyInterface {
      *  completing the handshake, etc
      */
     private void blockingHandshake() throws IOException  {
+        
+        // Check to see if this is an attempt to connect to ourselves
+        // TODO: make sure Socket.getInetAddress() works fine even when it's 
+        // not fully connected
+        InetAddress localAddress = _socket.getLocalAddress();
+        if (ConnectionSettings.LOCAL_IS_PRIVATE.getValue() &&
+            _socket.getInetAddress().equals(localAddress) &&
+            _port == ConnectionSettings.PORT.getValue()) {
+            throw new IOException("Connection to self");
+        }      
+
+        // TODO: switch to new method of doing this on the main line
+        RouterService.getAcceptor().setAddress( localAddress );  
         try {
             _in = new BufferedInputStream(_socket.getInputStream());
             _out = new ThrottledOutputStream(
@@ -578,6 +590,7 @@ public class Connection implements ReplyHandler, PushProxyInterface {
      * connection is ready to process Gnutella messages.
      */
     public void handshakeComplete() throws IOException  {
+        System.out.println("Connection::handshakeComplete");
         _headers = 
             HandshakeResponse.createResponse(HANDSHAKER.getHeadersRead());
         _headersWritten = 
@@ -630,7 +643,10 @@ public class Connection implements ReplyHandler, PushProxyInterface {
         // check for updates from this host  
         UpdateManager.instance().checkAndUpdate(this);   
         
-        _initialized = true ;          
+        _initialized = true ;  
+        
+        RouterService.getConnectionManager().
+            handleConnectionInitialization(this);    
     }
     
 
@@ -869,7 +885,7 @@ public class Connection implements ReplyHandler, PushProxyInterface {
      * @throws IOException if an i/o error occurs over the course of this write
      */
     public boolean write() throws IOException {
-        if(HANDSHAKER.handshakeComplete()) {
+        if(HANDSHAKER.writeComplete()) {
             return _messageWriter.write();
         } 
         return HANDSHAKER.write();
@@ -1140,6 +1156,8 @@ public class Connection implements ReplyHandler, PushProxyInterface {
      * Closes the Connection's socket and thus the connection itself.
      */
     public void close() {
+        // don't close if we've already closed
+        if(_closed == true) return;
         
         // the writer can be null for testing
         if(_messageWriter != null) {

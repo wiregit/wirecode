@@ -31,6 +31,11 @@ public abstract class AbstractHandshaker implements Handshaker {
     protected static final String CONNECT         = "CONNECT/";
     
     /**
+     * Time to wait for inut from user at the remote end. (in milliseconds)
+     */
+    protected static final int USER_INPUT_WAIT_TIME = 2 * 60 * 1000; //2 min
+    
+    /**
      * The number of times we will respond to a given challenge 
      * from the other side, or otherwise, during connection handshaking
      */

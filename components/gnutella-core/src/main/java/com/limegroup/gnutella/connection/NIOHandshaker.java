@@ -1,15 +1,19 @@
 package com.limegroup.gnutella.connection;
 
 import java.io.IOException;
+import java.net.InetAddress;
 import java.nio.ByteBuffer;
+import java.nio.CharBuffer;
 import java.util.Enumeration;
 import java.util.Properties;
 
 import com.limegroup.gnutella.Assert;
+import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.handshaking.HandshakeResponder;
 import com.limegroup.gnutella.handshaking.HandshakeResponse;
 import com.limegroup.gnutella.handshaking.NoGnutellaOkException;
 import com.limegroup.gnutella.http.HTTPHeader;
+import com.limegroup.gnutella.settings.ConnectionSettings;
 
 /**
  * This class performs non-blocking handshaking, responding to read and write
@@ -28,6 +32,8 @@ public class NIOHandshaker extends AbstractHandshaker {
     private HandshakeReadState _readState;
 
     private int _handshakeAttempts;
+    
+    private boolean _isCrawler;
     
     /**
      * Creates a new <tt>NIOHandshaker</tt> for the specified connection.
@@ -61,8 +67,8 @@ public class NIOHandshaker extends AbstractHandshaker {
             _writeState = new OutgoingRequestWriteState();
             _readState = new OutgoingResponseReadState();
         } else  {
-            //_writeState = new IncomingResponseWriteState();
-            
+            _writeState = new IncomingResponseWriteState();
+            _readState = new IncomingRequestReadState();
         }
     }
     
@@ -114,6 +120,18 @@ public class NIOHandshaker extends AbstractHandshaker {
      *  TCP buffers
      */
     public boolean handshake() throws IOException, NoGnutellaOkException {
+        
+        // Check to see if this is an attempt to connect to ourselves
+        InetAddress localAddress = CONNECTION.getSocket().getLocalAddress();
+        if (ConnectionSettings.LOCAL_IS_PRIVATE.getValue() &&
+            CONNECTION.getSocket().getInetAddress().equals(localAddress) &&
+            CONNECTION.getPort() == ConnectionSettings.PORT.getValue()) {
+            throw new IOException("Connection to self");
+        }      
+
+        // TODO: switch to new method of doing this on the main line
+        RouterService.getAcceptor().setAddress( localAddress );  
+        
         if(_headerReader != null)  {
             throw new IllegalStateException("two calls to handshake!");
         }
@@ -154,6 +172,7 @@ public class NIOHandshaker extends AbstractHandshaker {
         while(headersRead < MAX_HEADERS_TO_READ)  {
             HTTPHeader header = _headerReader.readHeader();
             if(_headerReader.headersComplete()) {
+                _headers = HandshakeResponse.createResponse(HEADERS_READ);
                 // we're all done
                 return true;
             } 
@@ -171,6 +190,19 @@ public class NIOHandshaker extends AbstractHandshaker {
         }
         throw new IOException("too many headers read");
     }
+    
+    /**
+     * Reads headers with a timeout.
+     * 
+     * @param timeout the timeout to allow while reading headers
+     * @return <tt>true</tt> if all of the headers were successfully read,
+     *  otherwise <tt>false</tt>
+     * @throws IOException if an IO error occurs while reading the headers
+     */
+    private boolean readHeaders(int timeout) throws IOException  {
+        // TODO: make this work with timeouts??
+        return readHeaders();
+    }
 
     /**
      * Writes handshaking data to the network depending on the current state
@@ -181,6 +213,9 @@ public class NIOHandshaker extends AbstractHandshaker {
      * @throws IOException if there is an IO error writing data to the network
      */
     public boolean write() throws IOException  {
+        if(_writeState == null)  {
+            throw new IllegalStateException("_writeState should not be null");
+        }
         _writeState = _writeState.write();
         
         return !_writeState.hasRemaining();  
@@ -197,8 +232,11 @@ public class NIOHandshaker extends AbstractHandshaker {
      * @throws IOException if there was an IO error writing to the buffer
      */
     private boolean writeBuffer(ByteBuffer buffer) throws IOException  {
+        //System.out.println(buffer.asCharBuffer());
+        //printBuffer(buffer);
         CONNECTION.getSocket().getChannel().write(buffer);
         if(buffer.hasRemaining())  {
+            
             if(!CONNECTION.writeRegistered())  {
                 NIODispatcher.instance().addWriter(CONNECTION);
             } 
@@ -208,17 +246,15 @@ public class NIOHandshaker extends AbstractHandshaker {
         }
         return true;       
     }
+    
+    private static void printBuffer(ByteBuffer buffer)  {
+        buffer.flip();
+        //CharBuffer cb = buffer.asCharBuffer();
+        for(int i=0; i<buffer.limit(); i++)  {
+            System.out.print((char)buffer.get(i));
+        }
+    }
 
-    /**
-     * Accessor for whether or not the connection handshaking process is 
-     * complete.
-     * 
-     * @return <tt>true</tt> if the connection handshaking process if complete,
-     *  otherwise <tt>false</tt>
-     */
-    public boolean handshakeComplete() {
-        return _handshakeComplete;
-    }    
 
 
     /**
@@ -277,6 +313,7 @@ public class NIOHandshaker extends AbstractHandshaker {
          * @throws IOException if an IO error occurs during writing
          */
         public HandshakeWriteState write() throws IOException {
+            System.out.println("NIOHandshaker::OutgoingRequestWriteState::write");
             if(writeBuffer(_requestBuffer))  {
                 return new OutgoingResponseWriteState();
             }
@@ -316,6 +353,7 @@ public class NIOHandshaker extends AbstractHandshaker {
          * X-Ultrapeer: False
          */
         public HandshakeWriteState write() throws IOException {
+            System.out.println("NIOHandshaker::OutgoingResponseWriteState::write");
             if(_handshakeAttempts > MAX_HANDSHAKE_ATTEMPTS) {
                 //If we didn't successfully return out of the method, throw an 
                 //exception to indicate that handshaking didn't reach any 
@@ -323,19 +361,22 @@ public class NIOHandshaker extends AbstractHandshaker {
                 throw NoGnutellaOkException.UNRESOLVED_SERVER;
             }
             if(!writeBuffer(_responseBuffer)) {
+                System.out.println("NIOHandshaker::OutgoingResponseWriteState::write"+
+                    "REMAINING");
                 _hasRemaining = true;
                 return this;
             }
+            _hasRemaining = false;
             _handshakeAttempts++;
             int code = _ourResponse.getStatusCode();
             //Consider termination...
             if(code == HandshakeResponse.OK) {
+                System.out.println("NIOHandshaker::OutgoingResponseWriteState::write OK");
                 if(HandshakeResponse.OK_MESSAGE.equals(
                     _ourResponse.getStatusMessage())){
                     //a) Terminate normally if we wrote "200 OK".
-                    // We're all done writing in this case
-                    _hasRemaining = false;
-                    _handshakeComplete = true;
+                    // We're all done writing in this case.
+                    _writeComplete = true;
                     CONNECTION.handshakeComplete();
                     return null;
                 } else {
@@ -343,14 +384,8 @@ public class NIOHandshaker extends AbstractHandshaker {
                     
                     // set the state to read the response again
                     _readState = new OutgoingResponseReadState();
-                    
-                    // We have nothing left to send.  Our _responseBuffer will
-                    // be reset when we read their response in the processing
-                    // of the next read.
-                    _hasRemaining = false;
-                    
-                    // TODO: make sure we set the state correctly to keep 
-                    // looping -- _hasRemaining???
+                              
+                    // should stay in this write state
                     return this;
                 }
             } else {                
@@ -381,10 +416,20 @@ public class NIOHandshaker extends AbstractHandshaker {
         implements HandshakeReadState  {
 
         
-        /* (non-Javadoc)
-         * @see com.limegroup.gnutella.connection.NIOHandshaker.HandshakeReadState#read()
+        /**
+         * Reads the response status to an outgoing hanshake attempt, 
+         * progressing to the header reading state if the status line was read
+         * correctly.
+         * 
+         * @return <tt>this</tt> if the expected response status line was not 
+         *  completely read, meaning that we cannot progress to the next state, 
+         *  and the return value form a read call to a new 
+         *  <tt>OutgoingResponseReadHeaderState</tt> if the response line was 
+         *  successfully read
          */
         public HandshakeReadState read() throws IOException {
+            System.out.println("NIOHandshaker::OutgoingResponseReadState::read");
+            // read the response status line
             String connectLine = NIOHandshaker.this._headerReader.readConnect();
             
             // if we only read a partial header, stay in this state and try to
@@ -418,11 +463,19 @@ public class NIOHandshaker extends AbstractHandshaker {
             CONNECT_LINE = connectLine;        
         }
     
+        /**
+         * Reads the response headers to an outgoing connection handshake 
+         * attempt.  This is the final read state for outgoing connections.
+         * 
+         * @return <tt>this</tt> if the headers were not completely read,
+         *  otherwise <tt>null</tt> to indicate that the handshake reading
+         *  is complete
+         */
         public HandshakeReadState read() throws IOException  {
 
             // First make sure we read all of the headers.
             if(readHeaders())  {
-                _handshakeComplete = true;
+                _readComplete = true;
             } else {
                 return this;
             }
@@ -453,10 +506,213 @@ public class NIOHandshaker extends AbstractHandshaker {
             _responseBuffer = 
                 createBuffer(GNUTELLA_06 + " " + _ourResponse.getStatusLine(), 
                     _ourResponse.props());
-            write();
+            
+            // Proceed to write our response if we're not already registered
+            // for write events. If we are registered for write events, we'll
+            // be notified as soon as TCP buffer space becomes available, and
+            // we'll write then        
+            if(!CONNECTION.writeRegistered())  {
+                write();
+            }
     
             // we're all done with reading
             return null;
         }
     }
+    
+    /**
+     * This class handles reading an incoming handshake request.
+     */
+    private final class IncomingRequestReadState 
+        implements HandshakeReadState  {
+
+        /**
+         * Reads an incoming handshake request and writes the appropriate 
+         * response if possible.
+         * 
+         * @return <tt>this</tt> if the read did not successfully complete,
+         *  otherwise <tt>null</tt>, indicating that all handshake data has 
+         *  been read
+         * @throws IOException if an IO error occurs during the read
+         */
+        public HandshakeReadState read() throws IOException {
+            // read the response status line
+            String connectLine = NIOHandshaker.this._headerReader.readConnect();
+
+            System.out.println("NIOHandshaker::IncomingRequestReadState::read: "+
+                connectLine);
+            // if they didn't give an expected response format, abort
+            if (!connectLine.startsWith(GNUTELLA_06))  {
+                throw new IOException("Unexpected connect: "+connectLine);
+            }     
+            
+            // First make sure we read all of the headers.
+            if(readHeaders())  {
+                _readComplete = true;
+            } else {
+                return this;
+            }  
+            
+            
+            // Proceed to write our response if we're not already registered
+            // for write events. If we are registered for write events, we'll
+            // be notified as soon as TCP buffer space becomes available, and
+            // we'll write then        
+            if(!CONNECTION.writeRegistered())  {
+                write();
+            }
+            
+            // we're all done with reading the request -- next we need to read
+            // their response
+            return new IncomingResponseReadState();
+            
+        }
+        
+    }
+    
+    /**
+     * Write state for writing the response to an incoming connection request.
+     * The response consists of a status line, such as:
+     * 
+     * GNUTELLA/0.6 503 I am a shielded leaf node 
+     * 
+     * or:
+     * 
+     * GNUTELLA/0.6 200 OK
+     * 
+     * followed by Gnutella connection headers.
+     */
+    private final class IncomingResponseWriteState 
+        extends AbstractHandshakeWriteState  {
+
+
+        /**
+         * Writes the response to an incoming connection request.  Our response
+         * depends upon whether or not we have free connection slots available
+         * and what features the connecting client supports.
+         */
+        public HandshakeWriteState write() throws IOException {
+
+            // If we've gone beyond the maximum number of handshake attempts,
+            // throw an exception
+            if(_handshakeAttempts > MAX_HANDSHAKE_ATTEMPTS) {
+                //If we didn't successfully return out of the method, throw an 
+                //exception to indicate that handshaking didn't reach any 
+                //conclusion.  The values here are kind of a hack.
+                throw NoGnutellaOkException.UNRESOLVED_SERVER;
+            }
+            
+            // Is this a connection from the crawler?  We store this data to
+            // know whether or not to disconnect later after reading
+            _isCrawler = _headers.isCrawler(); 
+            
+            // If we're not finishing an incomplete write call, 
+            if(!_hasRemaining)   {       
+                
+                //Note: in the following code, it appears that we're ignoring
+                //the response code written by the initiator of the connection.
+                //However, you can prove that the last code was always 200 OK.
+                //See initializeIncoming and the code at the bottom of this
+                //loop.
+                _ourResponse = 
+                    RESPONSE_HEADERS.respond(_headers, false);  
+                _responseBuffer = 
+                    createBuffer(GNUTELLA_06 + " " + _ourResponse.getStatusLine(), 
+                        _ourResponse.props());
+            }
+                    
+            if(!writeBuffer(_responseBuffer)) {
+                _hasRemaining = true;
+                return this;
+            }
+            _hasRemaining = false;
+            _handshakeAttempts++;
+            
+            // Our response should be either OK or UNAUTHORIZED for the 
+            // handshake to proceed.
+            int code = _ourResponse.getStatusCode();
+            if((code != HandshakeResponse.OK) && 
+               (code != HandshakeResponse.UNAUTHORIZED_CODE)) {
+                if(code == HandshakeResponse.SLOTS_FULL) {
+                    throw NoGnutellaOkException.CLIENT_REJECT;
+                } else {
+                    throw NoGnutellaOkException.createClientUnknown(code);
+                }
+            }
+            
+            // Otherwise, we're accepting the connection with 
+            // GNUTELLA/0.6 200 OK.  There is no next write state for incoming
+            // connections, so return null
+            return null;
+        }
+            
+    }
+
+    /**
+     * This class handles reading an incoming handshake request.
+     */
+    private final class IncomingResponseReadState 
+        implements HandshakeReadState  {
+
+        /**
+         * Reads an incoming handshake response -- the final state for incoming
+         * connection handshakes.
+         * 
+         * @return <tt>this</tt> if the read did not successfully complete,
+         *  otherwise <tt>null</tt>, indicating that all handshake data has 
+         *  been read
+         * @throws IOException if an IO error occurs during the read
+         */
+        public HandshakeReadState read() throws IOException {
+            //3. read the response from the other side.  If we asked the other
+            //side to authenticate, give more time so as to receive user input
+            String connectLine;
+            if(_ourResponse.getStatusCode() 
+               == HandshakeResponse.UNAUTHORIZED_CODE){
+                connectLine = _headerReader.readConnect(USER_INPUT_WAIT_TIME);  
+                  readHeaders(USER_INPUT_WAIT_TIME); 
+                  _headers = HandshakeResponse.createResponse(HEADERS_READ);
+            } else {
+                connectLine = _headerReader.readConnect(); 
+                readHeaders();
+            }
+    
+            if (! connectLine.startsWith(GNUTELLA_06))
+                throw new IOException("Bad connect string");
+
+            HandshakeResponse theirResponse = 
+                HandshakeResponse.createResponse(
+                    connectLine.substring(GNUTELLA_06.length()).trim(),
+                        HEADERS_READ);
+
+
+              //Decide whether to proceed.
+              int code = _ourResponse.getStatusCode();
+              if(code == HandshakeResponse.OK) {
+                  if(theirResponse.getStatusCode() == HandshakeResponse.OK) {
+                      // if it's the crawler, we throw an exception to make  
+                      // sure we correctly disconnect
+                      if(_isCrawler) {
+                          throw new IOException("crawler -- disconnect");
+                      }
+                      
+                      _writeComplete = true;
+                      
+                      //a) If we wrote 200 and they wrote 200 OK, stop normally.
+                      return null;
+                  }
+              } else {
+                  Assert.that(code==HandshakeResponse.UNAUTHORIZED_CODE,
+                              "Response code: "+code);
+                  if(theirResponse.getStatusCode()==HandshakeResponse.OK)  {
+                      //b) If we wrote 401 and they wrote "200...", keep looping.
+                      
+                      return this;
+                  }
+              }
+              //c) Terminate abnormally
+              throw NoGnutellaOkException.
+                  createServerUnknown(theirResponse.getStatusCode());            
+            }
+        }
 }

@@ -2,6 +2,7 @@ package com.limegroup.gnutella.connection;
 
 import java.net.*;
 import java.io.*;
+
 import com.sun.java.util.collections.*;
 
 import java.util.Properties;
@@ -216,10 +217,12 @@ public class ConnectionManager {
          try {
              initializeExternallyGeneratedConnection(connection);
          } catch (IOException e) {
+             // TODO: isn't the connection already removed??
 			 connection.close();
              return;
          }
-             
+         
+         /*    
          try {   
 			 startConnection(connection);			 
          } catch(IOException e) {
@@ -234,6 +237,7 @@ public class ConnectionManager {
             if (connection.isClientSupernodeConnection())
                 lostShieldedClientSupernodeConnection();
          }
+         */
      }
 
      
@@ -943,7 +947,7 @@ public class ConnectionManager {
                 //maintain invariant
                 if(c.isClientSupernodeConnection())
                     _shieldedConnections++;                
-            }else{
+            } else{
                 //REPLACE _initializedClientConnections with the list
                 //_initializedClientConnections+[c]
                 List newConnections
@@ -1032,60 +1036,60 @@ public class ConnectionManager {
      * is already held.  This version does not kick off ConnectionFetchers;
      * only the externally exposed version of remove does that.
      */
-    private void removeInternal(Connection c) {
+    private void removeInternal(Connection conn) {
         // 1a) Remove from the initialized connections list and clean up the
         // stuff associated with initialized connections.  For efficiency 
         // reasons, this must be done before (2) so packets are not forwarded
         // to dead connections (which results in lots of thrown exceptions).
-        if(!c.isSupernodeClientConnection()){
-            int i = _initializedConnections.indexOf(c);
+        if(!conn.isSupernodeClientConnection()){
+            int i = _initializedConnections.indexOf(conn);
             if (i != -1) {
                 //REPLACE _initializedConnections with the list
                 //_initializedConnections-[c]
                 List newConnections = new ArrayList();
                 newConnections.addAll(_initializedConnections);
-                newConnections.remove(c);
+                newConnections.remove(conn);
                 _initializedConnections = newConnections;
                 //maintain invariant
-                if(c.isClientSupernodeConnection())
+                if(conn.isClientSupernodeConnection())
                     _shieldedConnections--;                
             }
         }else{
             //check in _initializedClientConnections
-            int i = _initializedClientConnections.indexOf(c);
+            int i = _initializedClientConnections.indexOf(conn);
             if (i != -1) {
                 //REPLACE _initializedClientConnections with the list
                 //_initializedClientConnections-[c]
                 List newConnections = new ArrayList();
                 newConnections.addAll(_initializedClientConnections);
-                newConnections.remove(c);
+                newConnections.remove(conn);
                 _initializedClientConnections = newConnections;
             }
         }        
         
         // 1b) Remove from the all connections list and clean up the
         // stuff associated all connections
-        int i=_connections.indexOf(c);
+        int i=_connections.indexOf(conn);
         if (i != -1) {
             //REPLACE _connections with the list _connections-[c]
             List newConnections = new ArrayList(_connections);
-            newConnections.remove(c);
+            newConnections.remove(conn);
             _connections = newConnections;
         }
 
         // 2) Ensure that the connection is closed.  This must be done before
         // step (3) to ensure that dead connections are not added to the route
         // table, resulting in dangling references.
-        c.close();
+        conn.close();
 
         // 3) Clean up route tables.
-        RouterService.getMessageRouter().removeConnection(c);
+        RouterService.getMessageRouter().removeConnection(conn);
 
         // 4) Notify the listener
-        RouterService.getCallback().connectionClosed(c); 
+        RouterService.getCallback().connectionClosed(conn); 
 
         // 5) Clean up Unicaster
-        QueryUnicaster.instance().purgeQuery(c);
+        QueryUnicaster.instance().purgeQuery(conn);
     }
 
     /**
@@ -1237,7 +1241,15 @@ public class ConnectionManager {
             processConnectionHeaders(conn);
         }
         
-        completeConnectionInitialization(conn, true);
+        // if we're using NIO, we'll be notified when to handle connection
+        // initialization
+        //if(ConnectionSettings.USE_NIO.getValue()) return;
+        
+        // Otherwise, the handshake is complete and we should finish 
+        // initialization
+        //handleConnectionInitialization(conn);
+        
+        //completeConnectionInitialization(conn);
     }
 
     /** 
@@ -1278,7 +1290,7 @@ public class ConnectionManager {
      * @param headers The headers to be processed
      * @param connection The connection on which we received the headers
      */
-    private void processConnectionHeaders(Connection connection){
+    public void processConnectionHeaders(Connection connection){
         if(!connection.receivedHeaders()) {
             return;
         }
@@ -1407,73 +1419,109 @@ public class ConnectionManager {
      *
      * @throws IOException on failure.  No cleanup is necessary if this happens.
      */
-    private void initializeExternallyGeneratedConnection(Connection c)
+    private void initializeExternallyGeneratedConnection(Connection conn)
 		throws IOException {
         //For outgoing connections add it to the GUI and the fetcher lists now.
         //For incoming, we'll do this below after checking incoming connection
         //slots.  This keeps reject connections from appearing in the GUI, as
         //well as improving performance slightly.
-        if (c.isOutgoing()) {
+        if (conn.isOutgoing()) {
             synchronized(this) {
-                connectionInitializing(c);
+                connectionInitializing(conn);
                 // We've added a connection, so the need for connections went 
                 // down.
                 adjustConnectionFetchers();
             }
-            RouterService.getCallback().connectionInitializing(c);
+            RouterService.getCallback().connectionInitializing(conn);
         }
             
         try {
-            c.initialize();
+            conn.initialize();
 
         } catch(IOException e) {
-            remove(c);
+            remove(conn);
             throw e;
         }
         finally {
             //if the connection received headers, process the headers to
             //take steps based on the headers
-            processConnectionHeaders(c);
+            processConnectionHeaders(conn);
         }
 
-		
+        // if we're using NIO, we'll be notified when to handle connection
+        // initialization
+		//if(ConnectionSettings.USE_NIO.getValue()) return;
+        
+        //handleConnectionInitialization(conn);
+        
         //If there's not space for the connection, reject it.  This mechanism
         //works for Gnutella 0.4 connections, as well as some odd cases for 0.6
         //connections.  Sometimes Connections are handled by headers
         //directly.
-        if (!c.isOutgoing() && !allowConnection(c)) {
+//        if (!conn.isOutgoing() && !allowConnection(conn)) {
+//            //No need to remove, since it hasn't been added to any lists.
+//            throw new IOException("No space for connection");
+//        }
+//
+//        //For incoming connections, add it to the GUI.  For outgoing connections
+//        //this was done at the top of the method.  See note there.
+//        if (! conn.isOutgoing()) {
+//            synchronized(this) {
+//                connectionInitializingIncoming(conn);
+//                // We've added a connection, so the need for connections went 
+//                // down.
+//                adjustConnectionFetchers();
+//            }
+//            RouterService.getCallback().connectionInitializing(conn);
+//        }
+//
+//        completeConnectionInitialization(conn);
+    }
+    
+    // TODO: threading issues????
+    public void handleConnectionInitialization(Connection conn) 
+        throws IOException  {
+            
+        System.out.println("ConnectionManager::handleConnectionInitialization");
+        // if the connection received headers, process the headers to
+        // take steps based on the headers
+        //processConnectionHeaders(conn);     
+        
+        //If there's not space for the connection, reject it.  This mechanism
+        //works for Gnutella 0.4 connections, as well as some odd cases for 0.6
+        //connections.  Sometimes Connections are handled by headers
+        //directly.
+        if (!conn.isOutgoing() && !allowConnection(conn)) {
             //No need to remove, since it hasn't been added to any lists.
             throw new IOException("No space for connection");
         }
 
         //For incoming connections, add it to the GUI.  For outgoing connections
         //this was done at the top of the method.  See note there.
-        if (! c.isOutgoing()) {
+        if (!conn.isOutgoing()) {
             synchronized(this) {
-                connectionInitializingIncoming(c);
-                // We've added a connection, so the need for connections went down.
+                connectionInitializingIncoming(conn);
+                // We've added a connection, so the need for connections went 
+                // down.
                 adjustConnectionFetchers();
             }
-            RouterService.getCallback().connectionInitializing(c);
+            RouterService.getCallback().connectionInitializing(conn);
         }
 
-        completeConnectionInitialization(c, false);
+        completeConnectionInitialization(conn);   
+        
+        startConnection(conn);
     }
 
     /**
      * Performs the steps necessary to complete connection initialization.
      *
-     * @param mc the <tt>Connection</tt> to finish initializing
-     * @param fetched Specifies whether or not this connection is was fetched
-     *  by a connection fetcher.  If so, this removes that connection from 
-     *  the list of fetched connections being initialized, keeping the
-     *  connection fetcher data in sync
+     * @param conn the <tt>Connection</tt> to finish initializing
      */
-    private void completeConnectionInitialization(Connection conn, 
-                                                  boolean fetched) {
+    private void completeConnectionInitialization(Connection conn) {
         boolean connectionOpen = false;
         synchronized(this) {
-            if(fetched) {
+            if(conn.isOutgoing()) {
                 _initializingFetchedConnections.remove(conn);
             }
             // If the connection was killed while initializing, we shouldn't
@@ -1531,16 +1579,16 @@ public class ConnectionManager {
 				if(_doInitialization) {
 					initializeExternallyGeneratedConnection(_connection);
 				}
-				startConnection(_connection);
+				//startConnection(_connection);
             } catch(IOException e) {
             } catch(Throwable e) {
                 //Internal error!
                 ErrorService.error(e);
             }
-            finally{
-                if (_connection.isClientSupernodeConnection())
-                    lostShieldedClientSupernodeConnection();
-            }
+            //finally{
+              //  if (_connection.isClientSupernodeConnection())
+                //    lostShieldedClientSupernodeConnection();
+            //}
         }
     }
 
@@ -1628,7 +1676,7 @@ public class ConnectionManager {
                     throw e;
                 }
 
-				startConnection(connection);
+				//startConnection(connection);
             } catch(IOException e) {
             } catch(Throwable e) {
                 //Internal error!

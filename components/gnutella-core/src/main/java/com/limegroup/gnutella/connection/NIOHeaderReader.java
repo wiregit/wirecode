@@ -71,6 +71,7 @@ public final class NIOHeaderReader implements HeaderReader {
             // If we get a complete header, return it.  Otherwise, we'll 
             // read more
             if(header != null)  {
+                System.out.println(header);
                 return HTTPHeader.createHeader(header);
             }
         } 

@@ -259,6 +259,7 @@ public final class NIODispatcher implements Runnable {
         Connection conn = (Connection)key.attachment();      
         // Attempt to complete the connection sequence
         try {
+            System.out.println("NIODispatcher::about to finish connect");
             if(sc.finishConnect()) {
                 key.cancel();
                 
@@ -280,7 +281,8 @@ public final class NIODispatcher implements Runnable {
             } catch(IOException ioe) {
                 // nothing to do
             }
-            RouterService.getConnectionManager().remove(conn);
+            key.cancel();
+            RouterService.removeConnection(conn);
         }
     }
     
@@ -377,7 +379,7 @@ public final class NIODispatcher implements Runnable {
         // ignore invalid keys
         if(!key.isValid()) return;
         Connection conn = (Connection)key.attachment();
-        if(conn.handshaker().handshakeComplete())  {
+        if(conn.handshaker().readComplete())  {
             try {
                 MessageReader reader = conn.reader();
                 Message msg = reader.createMessageFromTCP(key);
@@ -392,6 +394,7 @@ public final class NIODispatcher implements Runnable {
             } catch (BadPacketException e) {
                 MessageReadErrorStat.BAD_PACKET_EXCEPTIONS.incrementStat();
             } catch (IOException e) {
+                key.cancel();
                 // remove the connection if we got an IOException
                 RouterService.removeConnection(conn);
                 MessageReadErrorStat.IO_EXCEPTIONS.incrementStat();
@@ -400,6 +403,7 @@ public final class NIODispatcher implements Runnable {
             try {
                 conn.handshaker().read();
             } catch (IOException e) {
+                key.cancel();
                 RouterService.removeConnection(conn);
             }
         }
@@ -453,6 +457,7 @@ public final class NIODispatcher implements Runnable {
                 conn.setWriteRegistered(false);
             } 
         } catch (IOException e) {
+            key.cancel();
             RouterService.removeConnection(conn);
         }  
     }

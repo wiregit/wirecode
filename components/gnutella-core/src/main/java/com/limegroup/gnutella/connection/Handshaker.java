@@ -32,7 +32,14 @@ public interface Handshaker {
      * @return <tt>true</tt> if the handshaking process has completed, 
      *  otherwise <tt>false</tt>
      */
-    public boolean handshakeComplete();
+    //public boolean handshakeComplete();
+    
+    public boolean readComplete();
+    
+    /**
+     * @return
+     */
+    public boolean writeComplete();
 
     /**
      * Accessor for the headers that have been read from the remote host.

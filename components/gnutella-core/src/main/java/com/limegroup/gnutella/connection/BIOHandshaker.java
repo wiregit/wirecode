@@ -18,12 +18,6 @@ import com.limegroup.gnutella.http.HTTPHeader;
  * an error occurs.
  */
 public final class BIOHandshaker extends AbstractHandshaker {
-
-
-    /**
-     * Time to wait for inut from user at the remote end. (in milliseconds)
-     */
-    public static final int USER_INPUT_WAIT_TIME = 2 * 60 * 1000; //2 min
           
     /**
      * Creates a new blocking handshaker for the specified connection with
