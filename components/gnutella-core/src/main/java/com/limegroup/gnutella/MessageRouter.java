@@ -1527,7 +1527,7 @@ public abstract class MessageRouter {
         list.add(new QueryReply(guid, ttl, port, ip,
                                 speed, res, _clientGUID, 
                                 notIncoming, busy, uploaded, 
-                                measuredSpeed, chat));
+                                measuredSpeed, chat, false));
         return list;
     }
                                     

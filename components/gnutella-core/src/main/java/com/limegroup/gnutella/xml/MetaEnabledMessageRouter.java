@@ -87,7 +87,8 @@ public class MetaEnabledMessageRouter extends StandardMessageRouter {
                                                     currResps, _clientGUID, 
                                                     xmlCompressed, notIncoming, 
                                                     busy, uploaded, 
-                                                    measuredSpeed, supportsChat);
+                                                    measuredSpeed, supportsChat,
+                                                    false);
                         queryReplies.add(queryReply);
                     }
                     catch (IllegalArgumentException ignored) {
@@ -110,7 +111,7 @@ public class MetaEnabledMessageRouter extends StandardMessageRouter {
                 queryReply = new QueryReply(guid, ttl, port, ip, speed, res, 
                                             _clientGUID, xmlCompressed,
                                             notIncoming, busy, uploaded, 
-                                            measuredSpeed,supportsChat);
+                                            measuredSpeed,supportsChat, false);
                 queryReplies.add(queryReply);
             }
             catch (IllegalArgumentException ignored) {

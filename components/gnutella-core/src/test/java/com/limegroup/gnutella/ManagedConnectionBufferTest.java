@@ -91,7 +91,7 @@ public class ManagedConnectionBufferTest extends com.limegroup.gnutella.util.Bas
         m.hop();
         out.send(m);
         m=new QueryReply(new byte[16], (byte)5, 6340, new byte[4], 0, 
-                         new Response[0], new byte[16]);
+                         new Response[0], new byte[16], false);
         m.setPriority(30000);
         out.send(m);
         out.send(new PushRequest(new byte[16], (byte)5, new byte[16],
@@ -101,7 +101,7 @@ public class ManagedConnectionBufferTest extends com.limegroup.gnutella.util.Bas
         out.send(new PushRequest(new byte[16], (byte)5, new byte[16],
                                  0, new byte[4], 6342));
         m=new QueryReply(new byte[16], (byte)5, 6341, new byte[4], 0, 
-                         new Response[0], new byte[16]);
+                         new Response[0], new byte[16], false);
         out.send(m);
         m=new PingReply(new byte[16], (byte)5, 6343, new byte[4], 0, 0);
         m.hop();  m.hop();  m.hop();
@@ -113,7 +113,7 @@ public class ManagedConnectionBufferTest extends com.limegroup.gnutella.util.Bas
         m.hop();
         out.send(m);
         m=new QueryReply(new byte[16], (byte)5, 6342, new byte[4], 0, 
-                         new Response[0], new byte[16]);
+                         new Response[0], new byte[16], false);
         m.setPriority(1000);
         out.send(m);
         out.send(new PatchTableMessage((short)1, (short)2, 
@@ -294,7 +294,7 @@ public class ManagedConnectionBufferTest extends com.limegroup.gnutella.util.Bas
         out.stopOutputRunner(); 
         out.send(new PingRequest((byte)1));
         out.send(new QueryReply(new byte[16], (byte)5, 6341, new byte[4], 0, 
-                                new Response[0], new byte[16]));
+                                new Response[0], new byte[16], false));
         out.send(new ResetTableMessage(1024, (byte)2));
         out.send(new QueryRequest((byte)3, 0, "a", false));
         out.startOutputRunner();

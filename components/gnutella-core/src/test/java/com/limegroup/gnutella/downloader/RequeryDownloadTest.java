@@ -229,7 +229,7 @@ public class RequeryDownloadTest extends com.limegroup.gnutella.util.BaseTestCas
             new Response[] { response }, new byte[16],
             false, false, //needs push, is busy
             true, false,  //finished upload, measured speed
-            false);       //supports chat
+            false, false);//supports chat, is multicast response....
         ManagedConnection stubConnection=new ManagedConnectionStub();
         router.handleQueryReply(reply, stubConnection);
 
@@ -297,7 +297,7 @@ public class RequeryDownloadTest extends com.limegroup.gnutella.util.BaseTestCas
             new Response[] { response }, new byte[16],
             false, false, //needs push, is busy
             true, false,  //finished upload, measured speed
-            false);       //supports chat
+            false, false);//supports chat, is multicast response
         ManagedConnection stubConnection=new ManagedConnectionStub();
         router.handleQueryReply(reply, stubConnection);
         try { Thread.sleep(400); } catch (InterruptedException e) { }
@@ -315,7 +315,7 @@ public class RequeryDownloadTest extends com.limegroup.gnutella.util.BaseTestCas
             new Response[] { response }, new byte[16],
             false, false, //needs push, is busy
             true, false,  //finished upload, measured speed
-            false);       //supports chat
+            false, false);//supports chat, is multicast response
         router.handleQueryReply(reply, stubConnection);
 
         //Make sure the downloader does the right thing with the response.

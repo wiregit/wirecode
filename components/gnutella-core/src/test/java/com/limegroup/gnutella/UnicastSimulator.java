@@ -197,7 +197,7 @@ public class UnicastSimulator {
                         QueryReply qr = new QueryReply(inGUID, (byte) 5,
                                                        port, _localAddress,
                                                        0, resps, 
-                                                       GUID.makeGuid());
+                                                       GUID.makeGuid(), false);
                         // send the QR...
                         send(socket, qr, datagram.getAddress(),
                              datagram.getPort());

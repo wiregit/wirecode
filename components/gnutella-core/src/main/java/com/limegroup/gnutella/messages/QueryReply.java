@@ -59,6 +59,9 @@ public class QueryReply extends Message implements Serializable{
      /** If parsed, one of TRUE (client supports browse host), 
       * FALSE, or UNDEFINED. */
     private volatile int supportsBrowseHost=FALSE;
+     /** If parsed, one of TRUE (reply sent in response to a multicast query), 
+      * FALSE, or UNDEFINED. */
+    private volatile int replyToMulticast=FALSE;
     
     private static final int TRUE=1;
     private static final int FALSE=0;
@@ -84,6 +87,9 @@ public class QueryReply extends Message implements Serializable{
 	/** The raw ip address of the host returning the hit.*/
 	private byte[] _address = new byte[4];
 
+    /** Our static and final instance of the GGEPUtil helper class.
+     */
+    private static final GGEPUtil _ggepUtil = new GGEPUtil();
 
     /** Creates a new query reply.  The number of responses is responses.length
      *  The Browse Host GGEP extension is ON by default.  
@@ -96,9 +102,9 @@ public class QueryReply extends Message implements Serializable{
      */
     public QueryReply(byte[] guid, byte ttl,
             int port, byte[] ip, long speed, Response[] responses,
-            byte[] clientGUID) {
+            byte[] clientGUID, boolean isMulticastReply) {
         this(guid, ttl, port, ip, speed, responses, clientGUID, new byte[0],
-             false, false, false, false, false, false, true);
+             false, false, false, false, false, false, true, isMulticastReply);
     }
 
 
@@ -121,11 +127,12 @@ public class QueryReply extends Message implements Serializable{
             int port, byte[] ip, long speed, Response[] responses,
             byte[] clientGUID,
             boolean needsPush, boolean isBusy,
-            boolean finishedUpload, boolean measuredSpeed,boolean supportsChat) {
+            boolean finishedUpload, boolean measuredSpeed,boolean supportsChat,
+            boolean isMulticastReply) {
         this(guid, ttl, port, ip, speed, responses, clientGUID, new byte[0],
              true, needsPush, isBusy, finishedUpload,
              measuredSpeed,supportsChat,
-             true);
+             true, isMulticastReply);
     }
 
 
@@ -155,11 +162,12 @@ public class QueryReply extends Message implements Serializable{
             int port, byte[] ip, long speed, Response[] responses,
             byte[] clientGUID, byte[] xmlBytes,
             boolean needsPush, boolean isBusy,
-            boolean finishedUpload, boolean measuredSpeed,boolean supportsChat) 
+            boolean finishedUpload, boolean measuredSpeed,boolean supportsChat,
+            boolean isMulticastReply) 
         throws IllegalArgumentException {
         this(guid, ttl, port, ip, speed, responses, clientGUID, 
              xmlBytes, true, needsPush, isBusy, 
-             finishedUpload, measuredSpeed,supportsChat,true);
+             finishedUpload, measuredSpeed,supportsChat, true, isMulticastReply);
         if (xmlBytes.length > XML_MAX_SIZE)
             throw new IllegalArgumentException();
         _xmlBytes = xmlBytes;        
@@ -209,11 +217,12 @@ public class QueryReply extends Message implements Serializable{
              byte[] clientGUID, byte[] xmlBytes,
              boolean includeQHD, boolean needsPush, boolean isBusy,
              boolean finishedUpload, boolean measuredSpeed,
-             boolean supportsChat, boolean supportsBH) {
+             boolean supportsChat, boolean supportsBH,
+             boolean isMulticastReply) {
         super(guid, Message.F_QUERY_REPLY, ttl, (byte)0,
               11 +                             // 11 bytes of header
               rLength(responses) +             // file records size
-              qhdLength(includeQHD, xmlBytes, supportsBH) + 
+              qhdLength(includeQHD, xmlBytes, supportsBH, isMulticastReply) + 
                                                // conditional xml-style QHD len
               16);                             // 16-byte footer
         // you aren't going to send this.  it will throw an exception above in
@@ -265,7 +274,7 @@ public class QueryReply extends Message implements Serializable{
             payload[i++]=(byte)COMMON_PAYLOAD_LEN;
 
             // size of standard, no options, ggep block...
-            int ggepLen = GGEPUtil.getQRGGEP(false).length;
+            int ggepLen = _ggepUtil.getQRGGEP(false, false).length;
 
             //c) PART 1: common area flags and controls.  See format in
             //parseResults2.
@@ -278,7 +287,8 @@ public class QueryReply extends Message implements Serializable{
                 | (isBusy ? BUSY_MASK : 0) 
                 | (finishedUpload ? UPLOADED_MASK : 0)
                 | (measuredSpeed ? SPEED_MASK : 0)
-                | (supportsBH ? GGEP_MASK : (ggepLen > 0 ? GGEP_MASK : 0)) );
+                | (supportsBH || isMulticastReply ? 
+                   GGEP_MASK : (ggepLen > 0 ? GGEP_MASK : 0)) );
 
 
             //d) PART 2: size of xmlBytes + 1.
@@ -293,7 +303,8 @@ public class QueryReply extends Message implements Serializable{
             payload[i++]=(byte)(supportsChat ? CHAT_MASK : 0);
 
             //f) the GGEP block
-            byte[] ggepBytes = GGEPUtil.getQRGGEP(supportsBH);
+            byte[] ggepBytes = _ggepUtil.getQRGGEP(supportsBH,
+                                                   isMulticastReply);
             System.arraycopy(ggepBytes, 0,
                              payload, i, ggepBytes.length);
             i += ggepBytes.length;
@@ -351,7 +362,8 @@ public class QueryReply extends Message implements Serializable{
      */
     private static int qhdLength(boolean includeQHD, 
                                  byte[] xmlBytes, 
-                                 boolean supportsBH) {
+                                 boolean supportsBH,
+                                 boolean isMulticastReply) {
         int retInt = 0;
         if (includeQHD) {
             retInt += 4; // 'LIME'
@@ -359,7 +371,7 @@ public class QueryReply extends Message implements Serializable{
             retInt += COMMON_PAYLOAD_LEN; 
             // the size of the GGEP block for Query Replies with optional Browse
             // Host flag...
-            retInt += GGEPUtil.getQRGGEP(supportsBH).length;
+            retInt += _ggepUtil.getQRGGEP(supportsBH, isMulticastReply).length;
             retInt += 1;//One byte in the private area for chat
             // size of xml string, max XML_MAX_SIZE            
             int numBytes = xmlBytes.length;
@@ -576,6 +588,32 @@ public class QueryReply extends Message implements Serializable{
         }
     }
     
+    /** 
+     * Returns true iff the reply was sent in response to a multicast query.
+     * @return true, iff the reply was sent in response to a multicast query,
+     * false otherwise
+     * @exception Throws BadPacketException if
+     * the flag couldn't be extracted, either because it is missing or
+     * corrupted.  Typically this exception is treated the same way as returning
+     * false. 
+     */
+    public boolean isReplyToMulticastQuery() throws BadPacketException {
+        parseResults();
+
+        switch (replyToMulticast) {
+        case UNDEFINED:
+            throw new BadPacketException();
+        case TRUE:
+            return true;
+        case FALSE:
+            return false;
+        default:
+            Assert.that(false, "Bad value for replyToMulticast: "
+                + replyToMulticast);
+            return false;
+        }
+    }
+    
     /** @modifies this.responses, this.pushFlagSet, this.vendor, parsed
      *  @effects tries to extract responses from payload and store in responses. 
      *    Tries to extract metadata and store in vendor and pushFlagSet.
@@ -679,6 +717,7 @@ public class QueryReply extends Message implements Serializable{
             int measuredSpeedFlagT=UNDEFINED;
             int supportsChatT=UNDEFINED;
             int supportsBrowseHostT=UNDEFINED;
+            int replyToMulticastT=UNDEFINED;
             
             //a) extract vendor code
             try {
@@ -728,9 +767,15 @@ public class QueryReply extends Message implements Serializable{
                     GGEP[] ggepBlocks = null;
                     try {
                         // if there are GGEPs, see if Browse Host supported...
+                        // TODO: stop using GGEP.read(2) - move to GGEP.read(3)
+                        // or fix up GGEP.read(2)
                         ggepBlocks = GGEP.read(payload, magicIndex);
-                        if (GGEPUtil.allowsBrowseHost(ggepBlocks))
+                        if (_ggepUtil.allowsBrowseHost(ggepBlocks))
                             supportsBrowseHostT = TRUE;
+                        if (_ggepUtil.replyToMulticastQuery(ggepBlocks))
+                            replyToMulticastT = TRUE;
+                        else
+                            replyToMulticastT = FALSE;
                     }
                     catch (BadGGEPBlockException ignored) {
                     }
@@ -782,6 +827,7 @@ public class QueryReply extends Message implements Serializable{
             this.measuredSpeedFlag=measuredSpeedFlagT;
             this.supportsChat=supportsChatT;
             this.supportsBrowseHost=supportsBrowseHostT;
+            this.replyToMulticast=replyToMulticastT;
 
             debug("QR.parseResults2(): returning w/o exception.");
 
@@ -970,6 +1016,125 @@ public class QueryReply extends Message implements Serializable{
     public static void debug(Exception e) {
         if (debugOn) 
             e.printStackTrace();
+    }
+
+    /** Handles all our GGEP stuff.  Caches potential GGEP blocks for efficiency.
+     */
+    static class GGEPUtil {
+        /** The standard GGEP block for a LimeWire QueryReply.  
+         *  Currently has no keys.
+         */
+        private final byte[] _standardGGEP;
+        
+        /** A GGEP block that has the 'Browse Host' extension.  Useful for Query
+         *  Replies.
+         */
+        private final byte[] _bhGGEP;
+        
+        /** A GGEP block that has the 'Multicast Source' extension.  
+         *  Useful for Query Replies for a Query from a multicast source.
+         */
+        private final byte[] _mcGGEP;
+        
+        /** A GGEP block that has everything a QR could possible need.
+         */
+        private final byte[] _comboGGEP;
+        
+        public GGEPUtil() {
+            ByteArrayOutputStream oStream = new ByteArrayOutputStream();
+            
+            // the standard GGEP has nothing.
+            try {
+                GGEP standard = new GGEP(false);
+                standard.write(oStream);
+            }
+            catch (IOException writeError) {
+            }
+            _standardGGEP = oStream.toByteArray();
+            
+            // a GGEP block with JUST BHOST
+            oStream.reset();
+            try {
+                GGEP bhost = new GGEP(false);
+                bhost.put(GGEP.GGEP_HEADER_BROWSE_HOST);
+                bhost.write(oStream);
+            }
+            catch (IOException writeError) {
+            }
+            _bhGGEP = oStream.toByteArray();
+            Assert.that(_bhGGEP != null);
+
+            // a GGEP block with JUST MCAST
+            oStream.reset();
+            try {
+                GGEP mcast = new GGEP(false);
+                mcast.put(GGEP.GGEP_HEADER_MULTICAST_RESPONSE);
+                mcast.write(oStream);
+            }
+            catch (IOException writeError) {
+            }
+            _mcGGEP = oStream.toByteArray();
+            Assert.that(_mcGGEP != null);
+
+            // a GGEP block with everything....
+            oStream.reset();
+            try {
+                GGEP combo = new GGEP(false);
+                combo.put(GGEP.GGEP_HEADER_MULTICAST_RESPONSE);
+                combo.put(GGEP.GGEP_HEADER_BROWSE_HOST);
+                combo.write(oStream);
+            }
+            catch (IOException writeError) {
+            }
+            _comboGGEP = oStream.toByteArray();
+            Assert.that(_comboGGEP != null);
+        }
+        
+        /** @return The appropriate byte[] corresponding to the GGEP block you
+         * desire. 
+         */
+        public byte[] getQRGGEP(boolean supportsBH,
+                                boolean isMulticastResponse) {
+            byte[] retGGEPBlock = _standardGGEP;
+            if (supportsBH && isMulticastResponse)
+                retGGEPBlock = _comboGGEP;
+            else if (supportsBH)
+                retGGEPBlock = _bhGGEP;
+            else if (isMulticastResponse)
+                retGGEPBlock = _mcGGEP;
+            return retGGEPBlock;
+        }
+
+
+        /** @return whether or not browse host support can be inferred from this
+         * block of GGEPs.
+         */
+        public boolean allowsBrowseHost(GGEP[] ggeps) {
+            boolean retBool = false;
+            for (int i = 0; 
+                 (ggeps != null) && (i < ggeps.length) && !retBool; 
+                 i++) {
+                Set headers = ggeps[i].getHeaders();
+                retBool = headers.contains(GGEP.GGEP_HEADER_BROWSE_HOST);
+            }
+            return retBool;
+        }
+
+        /** @return whether or not it can be inferred that this reply is in
+            response to a multicast query.
+         */
+        public boolean replyToMulticastQuery(GGEP[] ggeps) {
+            boolean retBool = false;
+            for (int i = 0; 
+                 (ggeps != null) && (i < ggeps.length) && !retBool; 
+                 i++) {
+                Set headers = ggeps[i].getHeaders();
+                retBool = headers.contains(GGEP.GGEP_HEADER_MULTICAST_RESPONSE);
+            }
+            return retBool;
+        }
+
+
     }
 
 } //end QueryReply

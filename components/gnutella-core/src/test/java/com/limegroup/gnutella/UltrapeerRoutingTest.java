@@ -353,7 +353,7 @@ public class UltrapeerRoutingTest extends com.limegroup.gnutella.util.BaseTestCa
 										 new byte[4],
 										 56,
 										 new Response[] {response1},
-										 guid1);
+										 guid1, false);
 		ULTRAPEER_2.send(reply1);
 		ULTRAPEER_2.flush();
 		
@@ -366,7 +366,7 @@ public class UltrapeerRoutingTest extends com.limegroup.gnutella.util.BaseTestCa
 		byte[] guid2 = GUID.makeGuid();
 		QueryReply reply2 = 
 			new QueryReply(qr.getGUID(), (byte)2, 6346, new byte[4],
-						   56, new Response[] {response1}, guid2);
+						   56, new Response[] {response1}, guid2, false);
 		ULTRAPEER_1.send(reply2);
 		ULTRAPEER_1.flush();
 		

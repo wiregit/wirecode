@@ -234,7 +234,7 @@ public class QueryUnicasterTest extends com.limegroup.gnutella.util.BaseTestCase
         QueryReply toReturn = new QueryReply(guid,
                                              (byte) 2,
                                              0, ip, 0, resps,
-                                             GUID.makeGuid());
+                                             GUID.makeGuid(), false);
         return toReturn;
     }
 
