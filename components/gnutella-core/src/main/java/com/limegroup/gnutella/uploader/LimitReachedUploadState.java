@@ -1,5 +1,6 @@
 package com.limegroup.gnutella.uploader;
 
+import com.limegroup.gnutella.*;
 import java.io.*;
 import com.limegroup.gnutella.util.CommonUtils;
 
@@ -31,6 +32,10 @@ public class LimitReachedUploadState implements UploadState {
 		ostream.write(str.getBytes());
 		str = "Content-Length: " + errMsg.length() + "\r\n";
 		ostream.write(str.getBytes());
+		FileDesc fileDesc = uploader.getFileDesc();
+		if(fileDesc != null) {
+			fileDesc.writeAlternateLocationsTo(ostream);
+		}
 		str = "\r\n";
 		ostream.write(str.getBytes());
 		ostream.write(errMsg.getBytes());
