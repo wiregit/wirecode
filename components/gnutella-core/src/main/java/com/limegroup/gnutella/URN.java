@@ -61,15 +61,15 @@ public final class URN {
 	 * costly operation as a result.
 	 *
 	 * @param file the <tt>File</tt> instance to construct the URN from
-	 * @param URN_TYPE the type of URN to construct for the <tt>File</tt>
+	 * @param urnType the type of URN to construct for the <tt>File</tt>
 	 *  instance, such as SHA1_URN
 	 * @throws <tt>IllegalArgumentException</tt> if the URN type specified
 	 *  is invalid
 	 */
-	public URN(final File FILE, final int URN_TYPE) throws IOException {
-		switch(URN_TYPE) {
+	public URN(final File file, final int urnType) throws IOException {
+		switch(urnType) {
 		case SHA1_URN:
-			this.URN_STRING = URN.createSHA1String(FILE);
+			this.URN_STRING = URN.createSHA1String(file);
 			break;
 		default:
 			throw new IllegalArgumentException("INVALID URN TYPE SPECIFIED");
@@ -80,15 +80,15 @@ public final class URN {
 	 * Constructs a new <tt>URN</tt> instance from the specified string
 	 * representation of a URN.  
 	 *
-	 * @param URN_STRING the URN string to use for constructing this URN 
+	 * @param urnString the URN string to use for constructing this URN 
 	 *  instance
 	 * @throws <tt>IOException</tt> if the supplies URN string is not valid
 	 */
-	public URN(final String URN_STRING) throws IOException {
-		if(!URN.isValidURN(URN_STRING)) {
+	public URN(final String urnString) throws IOException {
+		if(!URN.isValidUrn(urnString)) {
 			throw new IOException("INVALID URN STRING");
 		}
-		this.URN_STRING = URN_STRING;
+		this.URN_STRING = urnString;
 	}
 
 	/**
@@ -109,12 +109,12 @@ public final class URN {
 	 * Returns whether or not the URN_STRING argument is a valid URN 
 	 * string, as specified in RFC 2141.
 	 *
-	 * @param URN_STRING the urn string to check for validity
+	 * @param urnString the urn string to check for validity
 	 * @return <tt>true</tt> if the string argument is a URN, 
 	 *  <tt>false</tt> otherwise
 	 */
-	public static boolean isURN(final String URN_STRING) {
-		return URN.isValidURN(URN_STRING);
+	public static boolean isUrn(final String urnString) {
+		return URN.isValidUrn(urnString);
 	}
 
 	/**
@@ -125,10 +125,10 @@ public final class URN {
 	 * @return <tt>true</tt> if it is a valid URN type, <tt>false</tt>
 	 *  otherwise
 	 */
-	public static boolean isURNType(String urnString) {
-		final String URN_STRING = urnString.toLowerCase();
-		if(URN_STRING.equals(URN.URN_NS_ID) || 
-		   URN_STRING.equals(URN.URN_SHA1 + ":")) {
+	public static boolean isUrnType(String urnString) {
+		final String urnStringLower = urnString.toLowerCase();
+		if(urnStringLower.equals(URN.URN_NS_ID) || 
+		   urnStringLower.equals(URN.URN_SHA1 + ":")) {
 			return true;
 		}
 		return false;
@@ -182,13 +182,13 @@ public final class URN {
 	 * where phrases enclosed in quotes are required and where "<NID>" is the
 	 * Namespace Identifier and "<NSS>" is the Namespace Specific String.
 	 *
-	 * @param URN_STRING the <tt>String</tt> instance containing the get request
+	 * @param urnString the <tt>String</tt> instance containing the get request
 	 * @return a <tt>String</tt> containing the URN for the get request
 	 * @throws <tt>IOException</tt> if there is an error parsing out the URN
 	 *  from the line
 	 */
-	private static boolean isValidURN(final String URN_STRING) {
-		int colon1Index = URN_STRING.indexOf(":");
+	private static boolean isValidUrn(final String urnString) {
+		int colon1Index = urnString.indexOf(":");
 		if(colon1Index == -1) {
 			return false;
 		}
@@ -202,16 +202,17 @@ public final class URN {
 
 		// get the "urn:" substring so we can make sure it's there,
 		// ignoring case
-		String urnStr = URN_STRING.substring(0, colon1Index+1);
+		String urnStr = urnString.substring(0, colon1Index+1);
 
 		// get the last colon -- this should separate the <NID>
 		// from the <NIS>
-		int colon2Index = URN_STRING.indexOf(":", colon1Index+1);
+		int colon2Index = urnString.indexOf(":", colon1Index+1);
 		
 		if((colon2Index == -1) || 
 		   !urnStr.equalsIgnoreCase(URN.URN_NS_ID) ||
-		   !isValidNID(URN_STRING.substring(colon1Index+1, colon2Index)) ||
-		   !isValidNSS(URN_STRING.substring(colon2Index+1))) {
+		   !isValidNamespaceIdentifier(urnString.substring(colon1Index+1, 
+														   colon2Index)) ||
+		   !isValidNamespaceSpecificString(urnString.substring(colon2Index+1))) {
 			return false;
 		}		
 		return true;
@@ -224,7 +225,7 @@ public final class URN {
 	 * @param NID the Namespace Identifier String for a URN
 	 * @return <tt>true</tt> if the NID is valid, <tt>false</tt> otherwise
 	 */
-	private static boolean isValidNID(final String NID) {					
+	private static boolean isValidNamespaceIdentifier(final String NID) {					
 		// we should add other namespace identifiers to this check as
 		// they become registered
 		if(!NID.equalsIgnoreCase(URN.SHA1) &&
@@ -241,7 +242,7 @@ public final class URN {
 	 * @param NSS the Namespace Specific String for a URN
 	 * @return <tt>true</tt> if the NSS is valid, <tt>false</tt> otherwise
 	 */
-	private static boolean isValidNSS(final String NSS) {
+	private static boolean isValidNamespaceSpecificString(final String NSS) {
 		int length = NSS.length();
 
 		// checks to make sure that it either is the length of a 32 
@@ -263,7 +264,7 @@ public final class URN {
 	 * @return the string representation of the URN, or <tt>null</tt> if none
 	 *  has been assigned
 	 */
-	public String getURNString() {
+	public String getUrnString() {
 		return URN_STRING;
 	}
 
@@ -322,7 +323,7 @@ public final class URN {
 	}
 
 	
-	/*
+	
 	public static void main(String[] args) {
 		String [] validURNS = {
 		    "urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB",
@@ -413,11 +414,11 @@ public final class URN {
 				if(!curFile.isFile()) {
 					System.out.println("FILE NOT A FILE: "+curFile); 
 				}
-				URN urn = URNFactory.createSHA1URN(curFile);
+				URN urn = URNFactory.createSHA1Urn(curFile);
 				if(!urn.isSHA1()) {
 					System.out.println("SHA1 TEST FAILED ON FILE: "+curFile); 
 				}
-				if(!urn.isURN(urn.getURNString())) {
+				if(!urn.isUrn(urn.getUrnString())) {
 					System.out.println("VALID URN TEST FAILED ON FILE: "+curFile); 
 				}
 				if(!urn.getTypeString().equals(URN.URN_SHA1 +":")) {
@@ -465,14 +466,14 @@ public final class URN {
 		};
 		
 		for(int i=0; i<validURNTypes.length; i++) {
-			if(!URN.isURNType(validURNTypes[i])) {
+			if(!URN.isUrnType(validURNTypes[i])) {
 				System.out.println("isURNType failed for valid type: "+i+
 								   " "+validURNTypes[i]); 
 			}
 		}
 
 		for(int i=0; i<invalidURNTypes.length; i++) {
-			if(URN.isURNType(invalidURNTypes[i])) {
+			if(URN.isUrnType(invalidURNTypes[i])) {
 				encounteredFailure = true;
 				System.out.println("isURNType failed for invalid type: "+i+
 								   " "+invalidURNTypes[i]); 
@@ -480,7 +481,7 @@ public final class URN {
 		}
 
 		if(!encounteredFailure) {
-			System.out.println("isURNType METHOD TEST PASSED"); 
+			System.out.println("isUrnType METHOD TEST PASSED"); 
 		}
 
 		// ALL TESTS HAVE PASSED
@@ -488,7 +489,5 @@ public final class URN {
 		if(!encounteredFailure) {
 			System.out.println("ALL TESTS PASSED"); 
 		}
-	}
-	*/
-	
+	}		
 }
