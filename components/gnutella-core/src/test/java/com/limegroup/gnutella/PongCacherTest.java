@@ -36,7 +36,7 @@ public final class PongCacherTest extends BaseTestCase {
     }
 
     public static void globalSetUp() throws Exception {
-        PC.start();
+        //PC.start();
     }
 
     /**
@@ -55,7 +55,7 @@ public final class PongCacherTest extends BaseTestCase {
         PC.addPong(pong);        
 
 
-        Thread.sleep(PongCacher.REFRESH_INTERVAL+200);
+        //Thread.sleep(PongCacher.REFRESH_INTERVAL+200);
         pongs = PC.getBestPongs();
         assertEquals("unexpected number of cached pongs", 
                      1, pongs.size());        
@@ -63,7 +63,7 @@ public final class PongCacherTest extends BaseTestCase {
         pong = PingReply.create(new GUID().bytes(), (byte)5);
         PC.addPong(pong);        
 
-        Thread.sleep(PongCacher.REFRESH_INTERVAL+200);
+        //Thread.sleep(PongCacher.REFRESH_INTERVAL+200);
 
         pongs = PC.getBestPongs();
         assertEquals("unexpected number of cached pongs", 
@@ -76,7 +76,7 @@ public final class PongCacherTest extends BaseTestCase {
             PC.addPong(curPong);
         }
 
-        Thread.sleep(PongCacher.REFRESH_INTERVAL+200);
+        //Thread.sleep(PongCacher.REFRESH_INTERVAL+200);
         pongs = PC.getBestPongs();
 
         assertEquals("unexpected number of cached pongs", 
@@ -89,7 +89,7 @@ public final class PongCacherTest extends BaseTestCase {
         highHopPong.hop();
         PC.addPong(highHopPong);
 
-        Thread.sleep(PongCacher.REFRESH_INTERVAL+200);
+        //Thread.sleep(PongCacher.REFRESH_INTERVAL+200);
         pongs = PC.getBestPongs();
         assertEquals("unexpected number of cached pongs", 
                      PongCacher.NUM_CACHED_PONGS, pongs.size());
@@ -110,7 +110,7 @@ public final class PongCacherTest extends BaseTestCase {
         highHopPong2.hop();
         PC.addPong(highHopPong2);
 
-        Thread.sleep(PongCacher.REFRESH_INTERVAL+200);
+        //Thread.sleep(PongCacher.REFRESH_INTERVAL+200);
         pongs = PC.getBestPongs();
         assertEquals("unexpected number of cached pongs", 
                      PongCacher.NUM_CACHED_PONGS, pongs.size());   
@@ -142,12 +142,12 @@ public final class PongCacherTest extends BaseTestCase {
         assertEquals("unexpected bucket queue size", 2, bq.size());
         assertEquals("unexpected bucket queue size", 2, bq.size(0));
 
-        for(int i=bq.size(0); i<PongCacher.PONGS_PER_HOP+2; i++) {
+        for(int i=bq.size(0); i<PongCacher.NUM_CACHED_PONGS+2; i++) {
             PC.addPong(pong);
         }
         
         assertEquals("unexpected bucket queue size", 
-                     PongCacher.PONGS_PER_HOP, bq.size(0));
+                     PongCacher.NUM_CACHED_PONGS, bq.size(0));
     }
 }
 
