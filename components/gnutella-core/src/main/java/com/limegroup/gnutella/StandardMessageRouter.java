@@ -3,6 +3,7 @@ package com.limegroup.gnutella;
 import java.io.*;
 import java.net.*;
 import com.limegroup.gnutella.routing.QueryRouteTable;
+import com.limegroup.gnutella.guess.GUESSEndpoint;
 import com.sun.java.util.collections.*;
 
 public class StandardMessageRouter extends MessageRouter
@@ -102,19 +103,17 @@ public class StandardMessageRouter extends MessageRouter
 		List unicastEndpoints = UNICASTER.getUnicastEndpoints();
 		Iterator iter = unicastEndpoints.iterator();
 		while(iter.hasNext()) {
-			Endpoint host = (Endpoint)iter.next();
+			GUESSEndpoint host = (GUESSEndpoint)iter.next();
+			PingReply reply = new PingReply(request.getGUID(), (byte)1, 
+											host.getPort(),
+											host.getAddress().getAddress(), 
+											(long)0, (long)0, 
+											true);
 			try {
-				PingReply reply = new PingReply(request.getGUID(), (byte)1, 
-												host.getPort(),
-												host.getHostBytes(), 
-												(long)0, (long)0, 
-												true);
-				try {
-					sendPingReply(reply);
-				} catch(IOException e) {
-					// we can't do anything other than try to send it
-				}
-			} catch(UnknownHostException e) {
+				sendPingReply(reply);
+			} catch(IOException e) {					
+				// we can't do anything other than try to send it
+				continue;
 			}
 		}
 	}
