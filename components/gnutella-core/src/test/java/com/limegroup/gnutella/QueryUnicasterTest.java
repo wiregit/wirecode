@@ -24,10 +24,17 @@ public class QueryUnicasterTest extends TestCase {
     private boolean shouldRun() {
         return _shouldRun;
     }
+    
+    private static boolean anError = false;
 
     static {
-		Backend backend = Backend.createBackend(40*1000);
-        backend.start();
+        
+        try {
+    		Backend backend = Backend.createBackend(40*1000);
+            backend.start();
+        } catch (Throwable t) {
+            anError = true;
+        }
     }
 
 
@@ -40,6 +47,10 @@ public class QueryUnicasterTest extends TestCase {
 
     public static Test suite() {
         return new TestSuite(QueryUnicasterTest.class);
+    }
+    
+    public void setUp() {
+        if ( anError ) fail( "error during Backend creation" );
     }
 
     

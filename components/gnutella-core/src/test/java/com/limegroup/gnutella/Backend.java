@@ -179,7 +179,11 @@ public class Backend {
 	protected void makeSharedDirectory() {
 		TEMP_DIR.mkdirs();
 		TEMP_DIR.deleteOnExit();
-		File coreDir = new File("com/limegroup/gnutella");				
+		File coreDir = new File( 
+		    Backend.class.getClassLoader().getResource(
+		        "com/limegroup/gnutella"
+		    ).getFile()
+		);
 		File[] files = coreDir.listFiles();
 
 		for(int i=0; i<files.length; i++) {
@@ -197,7 +201,7 @@ public class Backend {
 		settings.setPort(6346);
 		//settings.setKeepAlive(1);
 		settings.setDirectories(new File[] {TEMP_DIR});
-		settings.setExtensions("java");
+		settings.setExtensions("class");
 		ConnectionSettings.KEEP_ALIVE.setValue(1);
 		SearchSettings.GUESS_ENABLED.setValue(true);
 		UltrapeerSettings.DISABLE_ULTRAPEER_MODE.setValue(false);
