@@ -2572,9 +2572,6 @@ public abstract class MessageRouter {
     /**
      * replies to a head ping that came through udp, 
      * unless the same person has pinged us too recently.
-     * 
-     * if the ping requests to be forwarded, do so only if we 
-     * have the file and are not busy.
      */
     private void handleHeadPing(HeadPing ping, DatagramPacket datagram) {
     	
@@ -2585,23 +2582,16 @@ public abstract class MessageRouter {
     	UploadManager umanager = RouterService.getUploadManager();
     	UDPService uservice = UDPService.instance();
     	if (_udpHeadRequests.add(host)) {
+    		
     		HeadPong pong = new HeadPong(ping);
-    		if (ping.getAddress() == null)
-    			uservice.send(pong, host, port);
-    		else 
-    			if (!uservice.canReceiveUnsolicited() &&
-    					fmanager.getFileDescForUrn(ping.getUrn()) != null &&
-    					!umanager.isQueueFull())
-    				uservice.send(pong,ping.getAddress());
+    		uservice.send(pong, host, port);
+    		
     	}
     }
     
     /**
      * replies to a head ping that came through tcp
      * unless the same person has pinged us too recently.
-     * 
-     * if the ping requests to be forwarded, do so only if we 
-     * have the file and are not busy.
      */
     private void handleHeadPing(HeadPing ping, ManagedConnection conn) {
     	
@@ -2611,13 +2601,7 @@ public abstract class MessageRouter {
     	
     	if (_udpHeadRequests.add(conn.getInetAddress())) {
     		HeadPong pong = new HeadPong(ping);
-    		if (ping.getAddress() == null)
-    			conn.send(pong);
-    		else
-    			if(!uservice.canReceiveUnsolicited() &&
-    					fmanager.getFileDescForUrn(ping.getUrn()) != null &&
-    					!umanager.isQueueFull())
-    				uservice.send(pong,ping.getAddress());
+    		conn.send(pong);
     	}
     	
     }
