@@ -166,10 +166,9 @@ public class I18NSendReceiveTest
      * Adds an expected reply to the expected reply list.
      */
     private void addExpectedReply(List list, String name) throws Exception {
-        // Get the name as it is on disk.
         File f = new File("com/limegroup/gnutella/" + name);
         assertTrue("file: " + name + " doesn't exist", f.exists());
-        f = f.getCanonicalFile(); // necessary.
+        f = f.getCanonicalFile(); // necessary to get the name as it is on disk
         list.add(f.getName());
     }
 
