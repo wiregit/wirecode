@@ -9,6 +9,7 @@ import com.limegroup.gnutella.settings.*;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.downloader.VerifyingFile;
+import com.limegroup.gnutella.stubs.SimpleFileManager;
 import com.sun.java.util.collections.*;
 import java.io.*;
 
@@ -39,7 +40,7 @@ public class FileManagerTest extends com.limegroup.gnutella.util.BaseTestCase {
         SharingSettings.EXTENSIONS_TO_SHARE.setValue(EXTENSION);
         	    
 	    cleanFiles(_sharedDir, false);
-	    fman = new FileManager();
+	    fman = new SimpleFileManager();
 	    PrivilegedAccessor.setValue(fman, "_callback", new FManCallback());
 	    
 	}
@@ -95,8 +96,8 @@ public class FileManagerTest extends com.limegroup.gnutella.util.BaseTestCase {
                 
         
         // should not be able to remove unshared file
-        assertTrue("should have not been able to remove f3", 
-				   !fman.removeFileIfShared(f3));
+        assertNull("should have not been able to remove f3", 
+				   fman.removeFileIfShared(f3));
 				   
         assertEquals("first file should be f1", f1, fman.get(0).getFile());
         
@@ -140,9 +141,9 @@ public class FileManagerTest extends com.limegroup.gnutella.util.BaseTestCase {
         f3 = createNewTestFile(11);
 
         //Remove file that's shared.  Back to 1 file.                        
-        assertTrue("shouldn't have been able to remove unshared file", 
-            !fman.removeFileIfShared(f3));
-        assertTrue("should have been able to remove shared file", 
+        assertNull("shouldn't have been able to remove unshared file", 
+            fman.removeFileIfShared(f3));
+        assertNotNull("should have been able to remove shared file", 
             fman.removeFileIfShared(f2));
         assertEquals("unexpected fman size", 1, fman.getSize());
         assertEquals("unexpected number of files", 1, fman.getNumFiles());
