@@ -83,6 +83,8 @@ public class FileManagerStub extends FileManager {
     }
     
     public FileDesc getFileDescForFile(File f) {
+        if (_files==null)
+            return fdStub;
     	return (FileDesc)_files.get(f);
     }
 }
