@@ -54,19 +54,8 @@ public final class UploadManager implements BandwidthTracker {
 	private List /* of Uploaders */ _activeUploadList =
 		new LinkedList();
 
-	/**
-	 * The number of uploads in progress from each host. If the number
-	 * of uploads by a single user exceeds the SettingsManager's
-	 * uploadsPerPerson_ variable, then the upload is denied, 
-	 * and the used gets a Try Again Later message.
-	 */
-	private Map /* String -> Integer */ _uploadsInProgress =
-		new HashMap();
     /**
      * The number of uploads that are actually transferring data.
-     *
-     * INVARIANT: _activeUploads is always less than or equal to the
-     * summation of the values of _uploadsInProgress
      */
     private volatile int _activeUploads= 0;
 
@@ -239,7 +228,7 @@ public final class UploadManager implements BandwidthTracker {
             if (startTime>0)
                 reportUploadSpeed(finishTime-startTime,
                                   uploader.amountUploaded());
-            removeFromMapAndList(uploader, host);
+            removeFromList(uploader);
             if (accepted && !isBHUploader)
                 _activeUploads--;
             if (!isBHUploader) // it was never added
@@ -372,13 +361,14 @@ public final class UploadManager implements BandwidthTracker {
      *  If uploader has exceeded its limits, places it in LIMIT_REACHED state.
      *  Always accept Browse Host requests, though....
      *  Notifies callback of this.
-     *      @modifies _uploadsInProgress, uploader, _callback */
+     *      @modifies uploader, _callback 
+     */
 	private synchronized boolean insertAndTest(Uploader uploader, 
                                                String host) {
-		// add to the Map
-		insertIntoMapAndList(uploader, host);
+		// add to the List
+		insertIntoList(uploader);
 
-		if ( ( (! testPerHostLimit(host) ) ||
+		if ( ( (! hostLimitReached(host) ) ||
                ( this.isBusy() ) ) &&
              uploader.getState() != Uploader.BROWSE_HOST ) {                 
             uploader.setState(Uploader.LIMIT_REACHED);
@@ -387,18 +377,10 @@ public final class UploadManager implements BandwidthTracker {
         return true;
 	}
 
-    /** Increments the count of uploads in progress for host. 
-     *      @modifies _uploadsInProgress */
-	private void insertIntoMapAndList(Uploader uploader, String host) {
-		int numUploads = 1;
-		// check to see if the map aleady contains
-		// a reference to this host.  if so, get its
-		// value.
-		if ( _uploadsInProgress.containsKey(host) ) {
-			Integer myInteger = (Integer)_uploadsInProgress.get(host);
-			numUploads += myInteger.intValue();
-		}
-		_uploadsInProgress.put(host, new Integer(numUploads));	
+    /** 
+     * Increments the count of uploads in progress for host. 
+     */
+	private void insertIntoList(Uploader uploader) {
 		_activeUploadList.add(uploader);
 	}
 
@@ -410,17 +392,7 @@ public final class UploadManager implements BandwidthTracker {
 	 * This method also removes the <tt>Uploader</tt> from the <tt>List</tt>
 	 * of active uploads.
 	 */
-  	private void removeFromMapAndList(Uploader uploader, String host) {
-  		if ( _uploadsInProgress.containsKey(host) ) {
-  			Integer myInteger = (Integer)_uploadsInProgress.get(host);
-  			int numUploads = myInteger.intValue();
-  			if (numUploads == 1) 
-  				_uploadsInProgress.remove(host);
-  			else {
-  				--numUploads;
-				_uploadsInProgress.put(host, new Integer(numUploads));
-  			}
-  		}
+  	private void removeFromList(Uploader uploader) {
 		_activeUploadList.remove(uploader);
 
 		// Enable auto shutdown
@@ -428,17 +400,17 @@ public final class UploadManager implements BandwidthTracker {
 			_callback.uploadsComplete();
   	}
 	
-	private boolean testPerHostLimit(String host) {
-		if ( _uploadsInProgress.containsKey(host) ) {
-			Integer value = (Integer)_uploadsInProgress.get(host);
-			int current = value.intValue();
-			int max = SettingsManager.instance().getUploadsPerPerson();
-			if (current > max)
-				return false;
-		}
-		return true;
+	private synchronized boolean hostLimitReached(String host) {
+        int max = SettingsManager.instance().getUploadsPerPerson();
+        int i=0;
+        Iterator iter = _activeUploadList.iterator();
+        while(iter.hasNext()) { //count active uploads to this host
+            Uploader u = (Uploader)iter.next();
+            if(u.getHost().equals(host))
+                i++;
+        }
+        return i<=max;
 	}
-		
 
 	/**
 	 * Returns true iff another upload is allowed.  Note that because this test
