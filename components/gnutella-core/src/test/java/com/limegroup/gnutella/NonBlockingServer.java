@@ -163,8 +163,10 @@ public class NonBlockingServer implements Runnable {
                     e.printStackTrace();
                 }
                 
-                selectedKeys.clear();
+                
             }
+            
+            selectedKeys.clear();
         }
     }
 
