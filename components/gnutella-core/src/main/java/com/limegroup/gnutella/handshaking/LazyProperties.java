@@ -56,6 +56,14 @@ public class LazyProperties extends Properties
 		props.put(ConnectionHandshakeHeaders.X_GUESS, "0.1");
         props.put(ConnectionHandshakeHeaders.X_VENDOR_MESSAGE,
                   ConnectionHandshakeHeaders.VM_VERSION);
+
+        // even though these are only really used by Ultrapeers, we
+        // include them with leaves to as an indication that they
+        // understand these protocols
+        put(ConnectionHandshakeHeaders.X_DEGREE, 
+			Integer.toString(ConnectionManager.ULTRAPEER_CONNECTIONS));
+		put(ConnectionHandshakeHeaders.X_ULTRAPEER_QUERY_ROUTING, 
+			ConnectionHandshakeHeaders.QUERY_ROUTING_VERSION);
         UpdateManager u = UpdateManager.instance();
         String latestVersion = u.getVersion();
         if(!latestVersion.equals("@version@"))//don't send header for @version@
