@@ -333,10 +333,17 @@ public final class QueryHandler {
 	private static int sendProbeQuery(QueryHandler handler, List list) {
 		byte ttl = 2;
 		QueryRequest query = createQuery(handler.QUERY, ttl);
-        int limit = Math.min(3, list.size());
         int newHosts = 0;
-		for(int i=0; i<limit; i++) {
+
+        int hostsQueried = 0;
+        int i = 0;
+        while(hostsQueried<3 && i<list.size()) {
 			ManagedConnection mc = (ManagedConnection)list.get(i);
+            if(!mc.isStable()) {
+                // count the index
+                i++;
+                continue;
+            }
 			RouterService.getMessageRouter().sendQueryRequest(query, mc, 
                                                               handler.REPLY_HANDLER);
 
@@ -344,6 +351,9 @@ public final class QueryHandler {
 			handler.QUERIED_HANDLERS.add(mc);
 
 			newHosts += calculateNewHosts(mc, ttl);
+
+            hostsQueried++;
+            i++;
 		}
         return newHosts;
 	}
