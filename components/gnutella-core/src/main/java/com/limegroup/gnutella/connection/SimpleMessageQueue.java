@@ -31,12 +31,11 @@ public class SimpleMessageQueue extends MessageQueue {
         this._lifo=lifo;
     }
 
-    public void add(Message m) {
-        if (_buf.addLast(m)!=null)
-            super._dropped++;
+    protected Message addInternal(Message m) {
+        return (Message)_buf.addLast(m);
     }
 
-    public Message removeNextInternal() {
+    protected Message removeNextInternal() {
         if (_buf.isEmpty())
             return null;
 

@@ -243,6 +243,7 @@ public class Buffer implements Cloneable {
         }
         //Adjust tail pointer accordingly.
         tail=decrement(tail);
+        buf[tail] = null;
         return ret;
     }
 
@@ -288,8 +289,7 @@ public class Buffer implements Cloneable {
      * @effects removes all elements of this.
      */
     public void clear() {
-        head=0;
-        tail=0;
+        while (!isEmpty()) removeFirst();
     }
 
     /** 

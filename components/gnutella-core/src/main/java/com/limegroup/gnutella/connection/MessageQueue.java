@@ -46,10 +46,21 @@ public abstract class MessageQueue {
 
     /** 
      * Adds m to this.  Message may be dropped in the process; find out how many
-     * by calling resetDropped().  (Subclasses should be sure to update the
-     * _dropped field!)  
+     * by calling resetDropped().
      */
-    public abstract void add(Message m);
+    public void add(Message m) {
+        Message dropmsg = addInternal(m);
+        if (dropmsg != null) {
+            _dropped++;
+            dropmsg.recordDrop();
+        }
+    }
+    
+    /**
+     * Add m to this, returns any message that had to dropped to make room in
+     * a queue.
+     */
+    protected abstract Message addInternal(Message m);
 
     /** 
      * Removes and returns the next message to send from this during this cycle.
@@ -71,6 +82,7 @@ public abstract class MessageQueue {
                 return null;     //Nothing left, give up.
             if (m.getCreationTime()<expireTime) {
                 _dropped++;
+                m.recordDrop();
                 continue;        //Too old.  Keep searching.
             }
 

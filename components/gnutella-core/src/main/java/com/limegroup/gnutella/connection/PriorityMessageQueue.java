@@ -50,14 +50,8 @@ public class PriorityMessageQueue extends MessageQueue {
         this._queue=new BucketQueue(PRIORITIES, capacity);
     }
 
-    public void add(Message m) {
-		Message droppedMessage = (Message)_queue.insert(m, priority(m));
-		if(droppedMessage != null) {
-			droppedMessage.recordDrop();
-			super._dropped++;
-		}
-        //if (_queue.insert(m, priority(m))!=null)
-		//  super._dropped++;
+    protected Message addInternal (Message m) {
+        return (Message)_queue.insert(m, priority(m));
     }
 
     /** Calculates a m's priority according to its message type.  Larger values
@@ -110,7 +104,7 @@ public class PriorityMessageQueue extends MessageQueue {
             return priority;
     }
 
-    public Message removeNextInternal() {        
+    protected Message removeNextInternal() {        
         if (_queue.isEmpty())
             return null;
         else
