@@ -4,7 +4,8 @@ import junit.framework.*;
 import junit.extensions.*;
 import java.io.*;
 import java.net.*;
-import java.util.*;
+import java.util.Properties;
+import com.sun.java.util.collections.*;
 import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.util.*;
 import com.limegroup.gnutella.messages.*;
@@ -13,6 +14,8 @@ import com.limegroup.gnutella.security.*;
 import com.limegroup.gnutella.xml.*;
 import com.limegroup.gnutella.stubs.*;
 import com.limegroup.gnutella.handshaking.*;
+import com.limegroup.gnutella.downloader.VerifyingFile;
+import com.limegroup.gnutella.downloader.Interval;
 
 /**
  * Test that a client uploads a file correctly.  Depends on a file
@@ -22,6 +25,8 @@ public class UploadTest extends com.limegroup.gnutella.util.BaseTestCase {
     private static String address;
     private static final int PORT = 6668;
     /** The file name, plain and encoded. */
+    private static String testDirName = "com/limegroup/gnutella/uploader/data";
+    private static String incName = "partial alphabet.txt";
     private static String file="alphabet test file#2.txt";
     private static String encodedFile="alphabet%20test+file%232.txt";
     /** The file contents. */
@@ -29,10 +34,14 @@ public class UploadTest extends com.limegroup.gnutella.util.BaseTestCase {
     /** The hash of the file contents. */
     private static final String hash=   "urn:sha1:GLIQY64M7FSXBSQEZY37FIM5QQSA2OUJ";
     private static final String badHash="urn:sha1:GLIQY64M7FSXBSQEZY37FIM5QQSA2SAM";
+    private static final String incompleteHash =
+        "urn:sha1:INCOMCPLETEXBSQEZY37FIM5QQSA2OUJ";
     private static final int index=0;
     /** Our listening port for pushes. */
     private static final int callbackPort = 6671;
     private UploadManager upMan;
+    /** The verifying file for the shared incomplete file */
+    private static final VerifyingFile vf = new VerifyingFile(false);
 
     private static final RouterService ROUTER_SERVICE =
         new RouterService(new ActivityCallbackStub());
@@ -61,7 +70,7 @@ public class UploadTest extends com.limegroup.gnutella.util.BaseTestCase {
         SettingsManager.instance().setAllowedIps(new String[] {"127.*.*.*"});
 		SettingsManager.instance().setPort(PORT);
         //This assumes we're running in the limewire/tests directory
-		File testDir = CommonUtils.getResourceFile("com/limegroup/gnutella/uploader/data");
+		File testDir = CommonUtils.getResourceFile(testDirName);
 		assertTrue("shared directory could not be found", testDir.isDirectory());
 		assertTrue("test file should be in shared directory", 
 				   new File(testDir, file).isFile());
@@ -80,13 +89,29 @@ public class UploadTest extends com.limegroup.gnutella.util.BaseTestCase {
         UltrapeerSettings.FORCE_ULTRAPEER_MODE.setValue(true);
         UltrapeerSettings.EVER_ULTRAPEER_CAPABLE.setValue(true);
 
-        if ( !ROUTER_SERVICE.isStarted() )
-            ROUTER_SERVICE.start();			    
+        if ( !ROUTER_SERVICE.isStarted() ) {
+            ROUTER_SERVICE.start();
+            Thread.sleep(2000);
+        }
 	    
         assertEquals("ports should be equal",
                      PORT, SettingsManager.instance().getPort());
                      
         upMan = RouterService.getUploadManager();
+        
+        FileManager fm = RouterService.getFileManager();
+        File incFile = new File(_incompleteDir, incName);
+        CommonUtils.copyResourceFile(testDirName + "/" + incName, incFile);
+        URN urn = URN.createSHA1Urn(incompleteHash);
+        Set urns = new HashSet();
+        urns.add(urn);
+        fm.addIncompleteFile(
+            incFile,
+            urns,
+            incName,
+            1981,
+            vf );
+        assertEquals( 1, fm.getNumIncompleteFiles() );
 
 
         try {Thread.sleep(300); } catch (InterruptedException e) { }
@@ -111,7 +136,7 @@ public class UploadTest extends com.limegroup.gnutella.util.BaseTestCase {
         //needed to work as part of AllTests.  I'm not sure why.
         //try {Thread.sleep(200); } catch (InterruptedException e) { }
             
-    //}
+    //} 
     
     ///////////////////push downloads with HTTP1.0///////////
     public void testHTTP10Push() throws Exception {
@@ -313,33 +338,51 @@ public class UploadTest extends com.limegroup.gnutella.util.BaseTestCase {
     }
     
 /////////////////Miscellaneous tests for acceptable failure behaviour//////////
+    public void testIncompleteFileUpload() throws Exception {
+        tFailureHeaderRequired(
+            "/uri-res/N2R?" + incompleteHash, null, true,
+                "HTTP/1.1 503 Requested Range Unavailable");
+    }
+    
+    public void testIncompleteFileWithRanges() throws Exception {
+        // add a range to the incomplete file.
+        Interval iv = new Interval(50, 102500);
+        vf.addInterval(iv);
+        tFailureHeaderRequired(
+            "/uri-res/N2R?" + incompleteHash, null, true,
+                "X-Available-Ranges: bytes 50-102499");
+    }    
+
     public void testHTTP11WrongURI() throws Exception {
         tFailureHeaderRequired(
-            "/uri-res/N2R?" + badHash, true, "HTTP/1.1 404 Not Found");
+            "/uri-res/N2R?" + badHash, null, true,
+                "HTTP/1.1 404 Not Found");
     }
     
     public void testHTTP10WrongURI() throws Exception {
         // note that the header will be returned with 1.1
         // even though we sent with 1.0
         tFailureHeaderRequired(
-            "/uri-res/N2R?" + badHash, false, "HTTP/1.1 404 Not Found");
+            "/uri-res/N2R?" + badHash, null, false,
+                "HTTP/1.1 404 Not Found");
     }
     
     public void testHTTP11MalformedURI() throws Exception {
         tFailureHeaderRequired(
-            "/uri-res/N2R?" + "no more school", true,
-            "HTTP/1.1 400 Malformed Request");
+            "/uri-res/N2R?" + "no more school", null, true,
+                "HTTP/1.1 400 Malformed Request");
     }
     
     public void testHTTP10MalformedURI() throws Exception {
         tFailureHeaderRequired(
-            "/uri-res/N2R?" + "no more school", false,
-            "HTTP/1.1 400 Malformed Request");
+            "/uri-res/N2R?" + "no more school", null, false,
+                "HTTP/1.1 400 Malformed Request");
     }
     
 	public void testHTTP11MalformedGet() throws Exception {
         tFailureHeaderRequired(
-            "/get/some/dr/pepper", true, "HTTP/1.1 400 Malformed Request");
+            "/get/some/dr/pepper", null, true,
+                "HTTP/1.1 400 Malformed Request");
     }
 
     /** 
@@ -866,9 +909,11 @@ public class UploadTest extends com.limegroup.gnutella.util.BaseTestCase {
      * Tests various cases for failed downloads, ensuring
      * that the correct header is sent back.
      */
-    public void tFailureHeaderRequired(String file, 
-                                boolean http11,
-                                String requiredHeader) throws Exception {
+    public void tFailureHeaderRequired(String file,
+                                       String sendHeader,
+                                       boolean http11,
+                                       String requiredHeader)
+                                        throws Exception {
         Socket s = null;
         try {
             //1. Establish connection.
@@ -885,7 +930,7 @@ public class UploadTest extends com.limegroup.gnutella.util.BaseTestCase {
             //   to make sure that failures keep the connection alive
             //   if requested.
             if( http11 ) {
-                downloadInternal("GET", file, null, out, in,
+                downloadInternal("GET", file, sendHeader, out, in,
                                  requiredHeader, http11);
             }                
             

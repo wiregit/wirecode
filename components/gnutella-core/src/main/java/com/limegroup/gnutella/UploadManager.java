@@ -451,11 +451,13 @@ public final class UploadManager implements BandwidthTracker {
             } 
             // If the index was invalid or the file was unshared, FNF.
             if(fd == null) {
+                debug(uploader + " fd is null");
                 uploader.setState(Uploader.FILE_NOT_FOUND);
                 return;
             }
             // If the name they want isn't the name we have, FNF.
             if(!uploader.getFileName().equals(fd.getName())) {
+                debug(uploader + " wrong file name");
                 uploader.setState(Uploader.FILE_NOT_FOUND);
                 return;
             }
@@ -463,6 +465,7 @@ public final class UploadManager implements BandwidthTracker {
             try {
                 uploader.setFileDesc(fd);
             } catch(IOException ioe) {
+                debug(uploader + " could not create file stream");
                 uploader.setState(Uploader.FILE_NOT_FOUND);
                 return;
             }
@@ -482,6 +485,7 @@ public final class UploadManager implements BandwidthTracker {
             // If it's the wrong URN, File Not Found it.
             URN urn = uploader.getRequestedURN();
     		if(fd != null && urn != null && !fd.containsUrn(urn)) {
+    		    debug(uploader + " wrong content urn");
                 uploader.setState(Uploader.FILE_NOT_FOUND);
                 return;
             }
