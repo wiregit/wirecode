@@ -315,7 +315,7 @@ public class DownloadTest extends BaseTestCase {
     /**
      * Tests a basic download that does not swarm.
      */
-    /*public void testSimpleDownload10() throws Exception {
+    public void testSimpleDownload10() throws Exception {
         LOG.debug("-Testing non-swarmed download...");
         
         RemoteFileDesc rfd=newRFD(PORT_1, 100);
