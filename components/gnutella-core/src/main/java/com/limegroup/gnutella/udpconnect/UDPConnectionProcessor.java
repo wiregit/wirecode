@@ -304,10 +304,11 @@ public class UDPConnectionProcessor {
 		}
 	}
 
+	// TODO synchronization deadlock
     /**
      *  Activate writing if we were waiting for data to write
      */
-    public synchronized void writeDataActivation() {
+    public void writeDataActivation() {
 		if ( _waitingForDataAvailable ) {
 			_waitingForDataAvailable = false;
 
@@ -826,6 +827,7 @@ log("Received duplicate block num: "+ dmsg.getSequenceNumber());
 		// Don't wait for next write if there is no chunk available.
 		// Writes will get rescheduled if a chunk becomes available.
 		synchronized(_input) {
+log("calling getPending");
 			if ( _input.getPendingChunks() == 0 ) {
 				scheduleWriteDataEvent(Long.MAX_VALUE);
 				_waitingForDataAvailable = true;
