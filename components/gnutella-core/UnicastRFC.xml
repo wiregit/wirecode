@@ -527,7 +527,11 @@
 		  were clearly not designed to handle large numbers of 
 		  simultaneous connections.  As opposed to UDP, TCP also 
 		  uses significantly more bandwidth and increases delay 
-		  due to re-transmission.  As others have noted, however, 
+		  due to re-transmission.  
+		  
+		  <vspace/>
+		  <vspace/>
+		  As others have noted, 
 		  the reliability of TCP is not a requirement for Gnutella 
 		  messages.<xref target="refs.agthorr"/>  If a message is lost, 
 		  who cares?  In fact, these queries and their associated hits 
@@ -537,7 +541,14 @@
 		  very quickly, making performance a concern while reliability 
 		  is not a requirement.  In fact, with the high transience of 
 		  Gnutella nodes, reliability cannot be expected and is an 
-		  impediment to search performance.  Clients wishing to 
+		  impediment to search performance.  UDP also arguably 
+		  simplifies the algorithm for searching a large number of 
+		  nodes, as you no longer need to worry about issues such 
+		  as timeouts.  
+
+		  <vspace/>
+		  <vspace/>
+		  Clients wishing to 
 		  implement this change MUST do so over UDP, as a TCP 
 		  implementation would incur excessive overhead for other 
 		  nodes, and would be impossible without a new, transient 
@@ -772,7 +783,7 @@
 		  path leaves the network or is otherwise unable to pass the
 		  push request, the push will not reach the intended
 		  node.  With the adoption of this proposal, success rates for 
-		  push request should increase dramatically, as the node 
+		  push requests should increase dramatically, as the node 
 		  serving the file will only be from 1 to 3 hops away 
 		  (depending on whether the searching and replying nodes
 		  are leaves or Ultrapeers). 
