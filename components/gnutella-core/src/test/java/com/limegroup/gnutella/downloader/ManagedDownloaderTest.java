@@ -22,7 +22,7 @@ public class ManagedDownloaderTest extends com.limegroup.gnutella.util.BaseTestC
     }
     
     public static Test suite() {
-        return buildTestSuite(ManagedDownloaderTest.class,"testLegacy");
+        return buildTestSuite(ManagedDownloaderTest.class);
     }
     
     public void setUp() {
