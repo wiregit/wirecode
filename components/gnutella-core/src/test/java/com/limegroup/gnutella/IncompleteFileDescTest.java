@@ -9,6 +9,8 @@ import junit.framework.Test;
 import com.limegroup.gnutella.downloader.Interval;
 import com.limegroup.gnutella.downloader.VerifyingFile;
 import com.limegroup.gnutella.util.BaseTestCase;
+import com.limegroup.gnutella.util.IntervalSet;
+import com.limegroup.gnutella.util.PrivilegedAccessor;
 
 public class IncompleteFileDescTest extends BaseTestCase {
     
@@ -40,46 +42,46 @@ public class IncompleteFileDescTest extends BaseTestCase {
             vf);
     }
     
-    public void testGetAvailableRanges() {
+    public void testGetAvailableRanges() throws Exception {
         // no ranges now.
         assertEquals("bytes", ifd.getAvailableRanges());
         
         // add a small range and ensure it doesn't get listed.
         Interval small = new Interval(0);
-        vf.addInterval(small);
+        addInterval(small);
         assertEquals(ifd.getAvailableRanges(),
             "bytes", ifd.getAvailableRanges());
         
         Interval notLargeEnough = new Interval(0, 102398);
-        vf.addInterval(notLargeEnough);
+        addInterval(notLargeEnough);
         assertEquals(ifd.getAvailableRanges(),
             "bytes", ifd.getAvailableRanges());
         
         // extend from the middle ...
         Interval extended = new Interval(102300, 102500);
-        vf.addInterval(extended);
+        addInterval(extended);
         assertEquals(ifd.getAvailableRanges(),
             "bytes 0-102499", ifd.getAvailableRanges());
         
         // add one not connected ...
         Interval other = new Interval(102550, 204950);
-        vf.addInterval(other);
+        addInterval(other);
         assertEquals(ifd.getAvailableRanges(),
             "bytes 0-102499, 102550-204949", ifd.getAvailableRanges());
     }
     
-    public void testisRangeSatisfiable() {
+    public void testisRangeSatisfiable() throws Exception {
         // no ranges.
         assertFalse( ifd.isRangeSatisfiable(0, 0) );
         assertFalse( ifd.isRangeSatisfiable(0, 150) );
         
         // add a range.
         Interval small = new Interval(0);
-        vf.addInterval(small);
+        addInterval(small);
         assertTrue( ifd.isRangeSatisfiable(0, 0) );
         
         Interval medium = new Interval(0, 102399);
-        vf.addInterval(medium);
+        addInterval(medium);
         assertTrue( ifd.isRangeSatisfiable(0, 102399) );
         assertTrue( ifd.isRangeSatisfiable(50,100000) );
         assertFalse( ifd.isRangeSatisfiable(0, 102401) );
@@ -88,15 +90,22 @@ public class IncompleteFileDescTest extends BaseTestCase {
         
         // extend from the middle ...
         Interval extended = new Interval(102300, 102500);
-        vf.addInterval(extended);
+        addInterval(extended);
         assertTrue( ifd.isRangeSatisfiable(0, 102500) );
         assertFalse( ifd.isRangeSatisfiable(1,102501) );
         
         // add one not connected ...
         Interval other = new Interval(102550, 204950);
-        vf.addInterval(other);
+        addInterval(other);
         assertTrue( ifd.isRangeSatisfiable( 102550, 204950) );
         assertFalse( ifd.isRangeSatisfiable(102399, 102550) );
+    }
+    
+    private void addInterval(Interval i) throws Exception {
+        IntervalSet set = (IntervalSet)
+            PrivilegedAccessor.getValue(vf,"verifiedBlocks");
+        
+        set.add(i);
     }
 }
         
