@@ -193,6 +193,18 @@ public class HostCatcher {
      */
     private static long PROBATION_RECOVERY_TIME = 60*1000;
     
+    /**
+     * Constant for the size of the set of hosts put on probation.  Public for
+     * testing.
+     */
+    public static final int PROBATION_HOSTS_SIZE = 500;
+
+    /**
+     * Constant for the size of the set of expired hosts.  Public for
+     * testing.  
+     */
+    public static final int EXPIRED_HOSTS_SIZE = 500;
+    
 	/**
 	 * Creates a new <tt>HostCatcher</tt> instance with a constant setting
 	 * for the host file location.
@@ -748,18 +760,6 @@ public class HostCatcher {
     /** Enable very slow rep checking?  Package access for use by
      *  HostCatcherTest. */
     static boolean DEBUG=false;
-
-    /**
-     * Constant for the size of the set of hosts put on probation.  Public for
-     * testing.
-     */
-    public static final int PROBATION_HOSTS_SIZE = 500;
-
-    /**
-     * Constant for the size of the set of expired hosts.  Public for
-     * testing.  
-     */
-    public static final int EXPIRED_HOSTS_SIZE = 500;
 
     
     /** Checks invariants. Very slow; method body should be enabled for testing
