@@ -27,11 +27,12 @@ public abstract class TestConnection extends ManagedConnection {
      */
     protected QueryRouteTable QRT;
     
+    
     TestConnection(int connections) {
         super("60.76.5.3", 4444);
         CONNECTIONS = connections;
     }
-    
+
     /**
      * @param connections2
      * @param b
@@ -64,10 +65,6 @@ public abstract class TestConnection extends ManagedConnection {
         return QRT;
     }
 
-    public void originateQuery(QueryRequest query) {
-        send(query);
-    }
-
     /**
      * Overridden to keep track of messages sent.
      */
@@ -78,7 +75,8 @@ public abstract class TestConnection extends ManagedConnection {
             try {
                 QRT.patch((PatchTableMessage)msg);
             } catch (BadPacketException e) {
-                throw new IllegalArgumentException("should not have received a bad packet");
+                throw new IllegalArgumentException("should not have received "+
+                    "a bad packet");
             }
         }
 
@@ -87,8 +85,9 @@ public abstract class TestConnection extends ManagedConnection {
         _receivedQuery = true;
         _numQueries++;
         QueryRequest qr = (QueryRequest)msg;
-        if(_queriesMustBeInRoutingTables && !hitsQueryRouteTable(qr))  {
-            throw new IllegalArgumentException("received query that's not in table1: "+qr+" "+this);
+        if(_queriesMustBeInRoutingTables && !qrp().hitsQueryRouteTable(qr))  {
+            throw new IllegalArgumentException("received query that's not in "+
+                "table1: "+qr+" "+this);
         }
         int ttl = qr.getTTL();
         _totalTTL += ttl;
