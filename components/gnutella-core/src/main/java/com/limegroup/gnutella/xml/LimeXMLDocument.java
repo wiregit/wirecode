@@ -5,23 +5,104 @@
  */
 
 package com.limegroup.gnutella.xml;
-import java.io.*;
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
+import java.io.File;
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.StringReader;
+import java.util.List;
 import com.limegroup.gnutella.util.NameValue;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import org.w3c.dom.Document;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import org.w3c.dom.Element;
+import org.xml.sax.EntityResolver;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
+
 
 /**
- *
- * @author  asingla
+ * @author  Sumeet Thadani
  * @version
+ * A LimeXMLDocument is basically a hashmap that maps a
+ * Names of fields to the values as per a XML document.
  */
-public abstract class LimeXMLDocument
-{
+public class LimeXMLDocument{
     
-
-    /** Creates new LimeXMLDocument */
-    public LimeXMLDocument(){
-	
+    private Map fieldToValue;
+    
+    //constructor
+    public LimeXMLDocument(String XMLString){
+        DocumentBuilderFactory documentBuilderFactory = 
+        DocumentBuilderFactory.newInstance();
+        
+        documentBuilderFactory.setValidating(true);
+        documentBuilderFactory.setNamespaceAware(true);
+        DocumentBuilder documentBuilder =null;
+        try{
+            documentBuilder = documentBuilderFactory.newDocumentBuilder();
+        }catch(ParserConfigurationException e){
+            e.printStackTrace();
+        }
+        InputSource doc = new InputSource(new StringReader(XMLString));
+        Document document = null;
+        try{
+            document = documentBuilder.parse(doc);
+        }catch(SAXException e){
+            e.printStackTrace();
+        }catch (IOException e){
+            e.printStackTrace();
+        }
     }
+    
+    //
+    public LimeXMLDocument(File f){
+        String XMLString="";
+        String buffer="";
+        String xmlStruct="";
+        InputSource schema;
+        try {
+            BufferedReader br = new BufferedReader(new FileReader(f));
+            while(buffer!=null){
+                buffer=br.readLine();
+                if (buffer!=null){
+                    buffer=buffer.trim();
+                    xmlStruct = xmlStruct+buffer;
+                }
+            }
+            xmlStruct = xmlStruct.trim();
+        }catch(IOException e){
+            e.printStackTrace();
+        }
+        //this(xmlStruct);
+        DocumentBuilderFactory documentBuilderFactory = 
+        DocumentBuilderFactory.newInstance();
+        
+        documentBuilderFactory.setValidating(true);
+        documentBuilderFactory.setNamespaceAware(true);
+        DocumentBuilder documentBuilder=null;
+        try{
+            documentBuilder = documentBuilderFactory.newDocumentBuilder();
+        }catch(ParserConfigurationException e){
+            e.printStackTrace();
+        }
+        InputSource doc = new InputSource(new StringReader(XMLString));
+        Document document = null;
+        try{
+            document = documentBuilder.parse(doc);
+        }catch (SAXException e){
+            e.printStackTrace();
+        } catch (IOException e){
+            e.printStackTrace();
+        }
+        
+    }
+    
     
     /**
      * Returns a List <NameValue>, where each name-value corresponds to a
@@ -53,5 +134,10 @@ public abstract class LimeXMLDocument
         //return an instance of ArrayList <NameValue>
         return null;
     }
-    
+
+    //Unit Tester
+    public static void main(String args[]){
+        File f = new File("C:/home/etc/xml","all-books-gen.xml");
+        LimeXMLDocument l = new LimeXMLDocument(f);
+    }
 }
