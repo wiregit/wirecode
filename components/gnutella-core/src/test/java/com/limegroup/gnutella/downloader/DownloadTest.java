@@ -20,9 +20,8 @@ public class DownloadTest extends TestCase {
     static TestUploader uploader2=new TestUploader("6347", 6347);
     static TestUploader uploader3=new TestUploader("6348", 6348);
     static TestUploader uploader4=new TestUploader("6349", 6349);
-	private static final RouterService rs = RouterService.instance();
-    static final DownloadManager dm = rs.getDownloadManager();
-    static final ActivityCallbackStub callback = new ActivityCallbackStub();
+	static final DownloadManager dm = new DownloadManager();
+	static final ActivityCallbackStub callback = new ActivityCallbackStub();	
 
     static URN testHash = null;
     static File testFile = null;
@@ -34,7 +33,7 @@ public class DownloadTest extends TestCase {
     public static Test suite() {
         return new TestSuite(DownloadTest.class);
     }
-    
+
     public void tearDown() {
         //1. Kill all the upload threads.
         uploader1.stopThread();
