@@ -60,7 +60,8 @@ public class PingReplyTest extends com.limegroup.gnutella.util.BaseTestCase {
         // Connection status doesn't matter for ultrapeer slots -- we just 
         // subtract the number of connections we have from the desired number
         assertEquals("unexpected number ultrapeer slots", 
-            ConnectionSettings.NUM_CONNECTIONS.getValue(), 
+            ConnectionSettings.NUM_CONNECTIONS.getValue() -
+            ConnectionManager.RESERVED_NON_LIMEWIRE_PEERS, 
             pr.getNumUltrapeerSlots());
         
         // Switch ConnectionManager to report different values for free leaf
@@ -78,7 +79,9 @@ public class PingReplyTest extends com.limegroup.gnutella.util.BaseTestCase {
         assertTrue("slots unexpectedly not full", !pr.hasFreeUltrapeerSlots());
         
         // Should now have leaf slots
-        assertEquals("unexpected number leaf slots", 10, pr.getNumLeafSlots());
+        assertEquals("unexpected number leaf slots", 
+                     10 - ConnectionManager.RESERVED_NON_LIMEWIRE_LEAVES, 
+                     pr.getNumLeafSlots());
         
         // Connection status doesn't matter for ultrapeer slots -- we just 
         // subtract the number of connections we have from the desired number
