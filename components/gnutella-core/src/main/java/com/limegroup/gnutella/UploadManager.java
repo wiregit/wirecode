@@ -106,25 +106,27 @@ public class UploadManager implements BandwidthTracker {
     public static final int BROWSE_HOST_FILE_INDEX = -1;
 
 
-   //////////////////////// Main Public Interface /////////////////////////
-
-    /** 
-     * Initializes this manager. <b>This method must be called before any other
-     * methods are used.</b> 
-     *     @param callback the UI callback to notify of download changes
-     *     @param router the message router to use for sending push requests
-     *     @param acceptor used to get my IP address and port for pushes
-     */
-    public void initialize(ActivityCallback callback,
-                           MessageRouter router,
-                           Acceptor acceptor,
-                           FileManager fileManager) {
+	//////////////////////// Main Public Interface /////////////////////////
+	
+	/**
+	 * Constructs a new <tt>UploadManager</tt> instance, establishing its
+	 * invariants.
+	 *
+     * @param callback the UI callback to notify of download changes
+     * @param router the message router to use for sending push requests
+     * @param acceptor used to get my IP address and port for pushes	 
+	 * @param fileManager the file manager for accessing data about uploading
+	 *  files
+	 */
+	public UploadManager(ActivityCallback callback,
+						 MessageRouter router,
+						 Acceptor acceptor,
+						 FileManager fileManager) {
         _fileManager = fileManager;
         _callback = callback;
         _router = router;
         _acceptor = acceptor;
-
-    }
+	}
                 
 	/**
 	 * Accepts a new upload, creating a new <tt>HTTPUploader</tt>
