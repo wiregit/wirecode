@@ -102,14 +102,13 @@ log(
           (((baseWait * _sendWindow.getWindowSize()) / _skipLimit) * 2) / 4;
         if ( rtt != 0 && baseWait != 0 && 
              (windowDelay < rtt || rtt > maxRTT) ) {
-//if ( _sendWindow.getWindowStart() % 5 == 0 )
-log("RTT sL:"+_skipLimit + " w:"+ _sendWindow.getWindowStart()+
-" rtt:"+realRTT+ " base :"+baseWait+" uS:"+usedSpots+
-" lRTT:"+_sendWindow.lowRoundTripTime()+
-" sWait:"+sentWait+
-" mRTT:"+maxRTT+
-" wDelay:"+windowDelay+
-" sT:"+sleepTime);
+//log("RTT sL:"+_skipLimit + " w:"+ _sendWindow.getWindowStart()+
+//" rtt:"+realRTT+ " base :"+baseWait+" uS:"+usedSpots+
+//" lRTT:"+_sendWindow.lowRoundTripTime()+
+//" sWait:"+sentWait+
+//" mRTT:"+maxRTT+
+//" wDelay:"+windowDelay+
+//" sT:"+sleepTime);
             if ( realRTT > ((3*lowRTT)) || rtt > (3*lowRTT) ) {
                 _limitHit = true;
                 _skipLimit /= 2;
