@@ -3,7 +3,6 @@ package com.limegroup.gnutella;
 import com.limegroup.gnutella.util.*;
 import com.limegroup.gnutella.xml.*;
 import com.limegroup.gnutella.stubs.*;
-import com.limegroup.gnutella.security.*;
 import com.limegroup.gnutella.messages.*;
 import com.limegroup.gnutella.routing.*;
 import junit.framework.*;
