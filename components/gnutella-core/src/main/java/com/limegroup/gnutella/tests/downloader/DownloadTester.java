@@ -28,6 +28,7 @@ public class DownloadTester {
             file=new File("DownloadTester2834343.out");
             file.delete();
             SettingsManager.instance().setSaveDirectory(directory);
+            SettingsManager.instance().setConnectionSpeed(1000);
         } catch (IOException e) {
             System.err.println("Couldn't create temp file.");
             System.exit(1);
