@@ -27,7 +27,7 @@ public class ID3ReaderTest extends BaseTestCase {
 
     ////////////
     public static void globalSetUp() {
-        String dir = "com/limegroup/gnutella/mp3/";
+        String dir = "com/limegroup/gnutella/metadata/";
         TEST_FILE = CommonUtils.getResourceFile(dir+"ID3TestFile.mp3");
         assertTrue("file should exist", TEST_FILE.exists());
     }

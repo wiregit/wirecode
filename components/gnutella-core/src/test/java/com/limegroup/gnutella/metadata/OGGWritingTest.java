@@ -30,7 +30,7 @@ public class OGGWritingTest extends BaseTestCase {
     ////////////
 
     public void setUp() {
-        String dir = "com/limegroup/gnutella/mp3/";
+        String dir = "com/limegroup/gnutella/metadata/";
         File f = CommonUtils.getResourceFile(dir + "oggAll.ogg");
         assertTrue(f.exists());
         TEST_FILE = new File(TEST_NAME);

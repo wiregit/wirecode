@@ -16,7 +16,7 @@ public class MP3Test extends com.limegroup.gnutella.util.BaseTestCase {
 	
 	private static final int runs = 900;
 	
-	private static final String d = "com/limegroup/gnutella/mp3/";
+	private static final String d = "com/limegroup/gnutella/metadata/";
 	
 	private static final String file[] = new String[] {
 	d+"mpg1layIII_96k-RIFFWAV_441000hz_joint_Xing.wav",

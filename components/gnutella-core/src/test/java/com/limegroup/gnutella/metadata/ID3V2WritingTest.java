@@ -30,7 +30,7 @@ public class ID3V2WritingTest extends BaseTestCase {
     ////////////
 
     public void setUp() {
-        String dir = "com/limegroup/gnutella/mp3/";
+        String dir = "com/limegroup/gnutella/metadata/";
         File f = CommonUtils.getResourceFile(dir + "ID3EditorTestFile.mp3");
         assertTrue(f.exists());
         TEST_FILE = new File(TEST_NAME);

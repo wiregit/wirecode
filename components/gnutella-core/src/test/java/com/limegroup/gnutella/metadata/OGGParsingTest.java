@@ -14,7 +14,7 @@ import java.io.*;
 public class OGGParsingTest extends BaseTestCase {
 	
 	static String _path = "com"+File.separator+"limegroup"+
-					File.separator+"gnutella"+File.separator+"mp3"+File.separator;
+					File.separator+"gnutella"+File.separator+"metadata"+File.separator;
 	
 	static File _allFields = CommonUtils.getResourceFile(_path+"oggAll.ogg");
 	static File _someFields = CommonUtils.getResourceFile(_path+"oggSome.ogg");
