@@ -2338,6 +2338,13 @@ public class ManagedDownloader implements Downloader, Serializable {
 
         // go through the list of needed ranges and match each one
         // against the list of available ranges.
+        // We use an iterator for iterating over the list, despite
+        // the fact that we call addToNeeded (which adds an element
+        // to the iterator's list).  Normally, this is not allowed because
+        // the next iteration would throw a ConcurrentModificationException.
+        // However, once we reach the point where we remove the element (using
+        // the iterator's remove) and re-add elements back to the list,
+        // we are finished using the iterator (as evidenced by the two breaks).
         for (Iterator i = needed.getAllIntervals(); i.hasNext();) {
             // this is the interval we are going to match against
             // the available ranges now
@@ -2372,7 +2379,10 @@ public class ManagedDownloader implements Downloader, Serializable {
                 break;//found a match, exit loop
             } //end of inner
 
-            if (ret != null) //found a match, break
+            // We found a match, so exit.
+            // We MUST exit here instead of iterating,
+            // or the Iterator will throw a ConcurrentModificationException.
+            if (ret != null)
                 break;
 
         } //end of outer
