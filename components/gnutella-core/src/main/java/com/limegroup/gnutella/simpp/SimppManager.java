@@ -1,9 +1,11 @@
 package com.limegroup.gnutella.simpp;
 
 import java.io.*;
+import org.xml.sax.*;
 import com.limegroup.gnutella.util.*;
 import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.messages.vendor.*;
+import com.limegroup.gnutella.settings.*;
 
 /**
  * Used for managing signed messages published by LimeWire, and chaning settings
@@ -21,11 +23,12 @@ public class SimppManager {
     /** Cached Simpp bytes in case we need to sent it out on the wire */
     private byte[] _simppBytes;
 
+    private String _propsStream;
+
     private SimppManager() {
         boolean problem = false;
         RandomAccessFile raf = null;
         try {
-            SettablePropsHandler propsHandler = SettablePropsHandler.instance();
             File file = 
                 new File(CommonUtils.getUserSettingsDir(), "settableprops.xml");
             raf = new RandomAccessFile(file, "r");
@@ -39,25 +42,38 @@ public class SimppManager {
                 verified = false;
             }
             if(!verified) {
-                _latestVersion = propsHandler.useDefaultProps();
+                //TODO1: In this case what should the _latestVersion be set to
+                //the SimppSettingManager has not been initialized yet
+                //_latestVersion = propsHandler.useDefaultProps();
                 return;
             }
-            SimppParser parser = new SimppParser(verifier.getVerifiedData());
+            SimppParser parser = null;
+            try {
+                parser = new SimppParser(verifier.getVerifiedData());
+            } catch(SAXException sx) {
+                return;
+            } catch (IOException iox) {
+                return;
+            }
             if(parser.getVersion() < 0) {
-                latestVersion = propsHandler.useDefaultProps();
+                //TODO1: In this case what should the _latestVersion be set to
+                //the SimppSettingManager has not been initialized yet
+                //latestVersion = propsHandler.useDefaultProps();
                 return;
             }
-            _latestVersion = parser.getVersion();
+            this._latestVersion = parser.getVersion();
+            this._propsStream = parser.getPropsData();
             this._simppBytes = content;
-            String propsInXML = parser.getPropsData();
-            propsHandler.setProps(propsInXML);
         } catch (VerifyError ve) {
             problem = true;
         } catch (IOException iox) {
             problem = true;        
         } finally {
-            if(problem)
-                _latestVersion = propsHandler.useDefaultProps();
+            if(problem) {
+                //TODO1: In this case what should the _latestVersion be set to
+                //the SimppSettingManager has not been initialized yet
+                //_latestVersion = propsHandler.useDefaultProps();
+            }
             if(raf!=null) {
                 try {
                     raf.close();
@@ -83,6 +99,10 @@ public class SimppManager {
         return _simppBytes;
     }
 
+    public String getPropsString() {
+        return _propsStream;
+    }
+
     /**
      * Called when we receive a new SIMPPVendorMessage, 
      */
@@ -101,7 +121,14 @@ public class SimppManager {
                 }
                 if(!verified) 
                     return;
-                SimppParser parser=new SimppParser(verifier.getVerifiedData());
+                SimppParser parser=null;
+                try {
+                    parser = new SimppParser(verifier.getVerifiedData());
+                } catch(SAXException sx) {
+                    return;
+                } catch(IOException iox) {
+                    return;
+                }
                 int version = parser.getVersion();
                 if(version <= myVersion)
                     return;
@@ -109,10 +136,11 @@ public class SimppManager {
                 //1. Cache local values. 
                 SimppManager.this._latestVersion = version;
                 SimppManager.this._simppBytes = simppPayload;
+                SimppManager.this._propsStream = parser.getPropsData();
                 // 2. get the props we just read
                 String props = parser.getPropsData();
                 // 3. Update the props in "updatable props manager"
-                SettablePropsHandler.instance().setProps(props);
+                SimppSettingsManager.instance().updateSimppSettings(props,true);
                 // 4. Update the capabilities VM with the new version
                 CapabilitiesVM.updateSimppVersion(version);
                 // 5. Send the new CapabilityVM to all our connections. 

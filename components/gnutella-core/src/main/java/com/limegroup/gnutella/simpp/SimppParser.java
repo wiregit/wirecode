@@ -3,6 +3,7 @@ package com.limegroup.gnutella.simpp;
 import org.apache.xerces.parsers.*;
 import org.xml.sax.*;
 import com.limegroup.gnutella.xml.*;
+import com.limegroup.gnutella.*;
 import org.w3c.dom.*;
 import java.io.*;
 
@@ -11,23 +12,23 @@ public class SimppParser {
     private static DOMParser parser = new DOMParser();
     
     private static final String VERSION = "version";
+    
+    private static final String PROPS = "props";
 
     private int _version;
     private String _propsData;    
 
     //Format of dataBytes:
-    //<xml for version related info>|<xml for props>
-    public SimppParser(byte[] dataBytes) throws IOException {
-        //TODO1: Is using embedded XML a better way to go?
-        int sepIndex = SimppDataVerifier.findSeperator(dataBytes);
-        byte[] versionBytes = new byte[sepIndex];
-        System.arraycopy(dataBytes, 0, versionBytes, 0, sepIndex);
-        String tmp = new String(versionBytes, "UTF-8");
-        parseVersionInfo(tmp);
-        byte[] propsBytes = new byte[dataBytes.length-1-sepIndex];
-        System.arraycopy(dataBytes, sepIndex+1, propsBytes, 0, 
-                                                   dataBytes.length-1-sepIndex);
-        _propsData = new String(propsBytes, "UTF-8");
+    //<xml for version related info with one tag containing all the props data>
+    //TODO1: Change the way this is parsed as per the format described above. 
+    public SimppParser(byte[] dataBytes) throws SAXException, IOException {
+        String tmp = null;
+        try {
+            tmp = new String(dataBytes, "UTF-8");
+        } catch (UnsupportedEncodingException uex) {
+            ErrorService.error(uex);
+        }
+        parseInfo(tmp);
     }
     
     public int getVersion() {
@@ -40,7 +41,7 @@ public class SimppParser {
 
     ///////////////////////////private helpers////////////////////////
 
-    private void parseVersionInfo(String xmlStr) {
+    private void parseInfo(String xmlStr) throws SAXException, IOException {
         if(xmlStr == null || xmlStr.equals(""))
             throw new SAXException("null xml for version info");
         InputSource inputSource = new InputSource(new StringReader(xmlStr));
@@ -57,15 +58,19 @@ public class SimppParser {
         for(int i= 0; i< len; i++) {
             Node node = children.item(i);
             String nodeName = node.getNodeName().toLowerCase().trim();
+            String value = LimeXMLUtils.getText(node.getChildNodes());
             if(nodeName.equals(VERSION)) {
-                String ver = LimeXMLUtils.getText(node.getChildNodes());
+                String ver = value;
                 try {
                     _version = Integer.parseInt(ver);
                 } catch(NumberFormatException nfx) {
                     _version = -1;
                 }
             }
-        }
+            else if(nodeName.equals(PROPS)) {
+                _propsData = value;
+            }
+        }//end of for -- done all child nodes
     }
     
 }
