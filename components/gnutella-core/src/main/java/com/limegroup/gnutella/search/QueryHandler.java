@@ -26,6 +26,13 @@ public final class QueryHandler {
 	private final byte[] GUID;
 
 	/**
+	 * Constant for the number of hops the query has travelled -- 0 for
+	 * queries initiated by this host, 1 for queries initiated from
+	 * leaves.
+	 */
+	private final byte HOPS;
+
+	/**
 	 * Constamnt for the query string.
 	 */
 	private final String QUERY;
@@ -34,6 +41,8 @@ public final class QueryHandler {
 	 * Constant for the xml query string.
 	 */
 	private final String XML_QUERY;
+
+	private final byte[] PAYLOAD;
 
 	/**
 	 * Constant for the types of urns to request -- any type for these
@@ -46,6 +55,11 @@ public final class QueryHandler {
 	 * queries issued by this factory.
 	 */
 	private static final Set QUERY_URNS;
+
+	/**
+	 * Empty payload to avoid passing around nulls.
+	 */
+	private static final byte[] EMPTY_PAYLOAD = new byte[0];
 
 	/**
 	 * Constant handle to the <tt>MessageRouter</tt> instance.
@@ -85,11 +99,6 @@ public final class QueryHandler {
 	 */
 	private final Set QUERIED_REPLY_HANDLERS = new HashSet();
 
-	/**
-	 * Variable for the number of times this query has attempted to go out
-	 * but did not because it did not see any new connections to query down.
-	 */
-	//private int _timesNoNewQuerySent = 0;
 
 	private long _queryStartTime = 0;
 
@@ -106,10 +115,13 @@ public final class QueryHandler {
 	 * Private constructor to ensure that only this class creates new
 	 * <tt>QueryFactory</tt> instances.
 	 */
-	private QueryHandler(byte[] guid, String query, String xmlQuery) {
+	private QueryHandler(byte[] guid, String query, String xmlQuery, 
+						 byte hops, byte[] payload) {
 		GUID = guid;
 		QUERY = query;
 		XML_QUERY = xmlQuery;
+		HOPS = hops;
+		PAYLOAD = payload;
 	}
 
 	/**
@@ -123,7 +135,7 @@ public final class QueryHandler {
 	 */
 	public static QueryHandler createHandler(byte[] guid, String query, 
 											 String xmlQuery) {
-		return new QueryHandler(guid, query, xmlQuery);
+		return new QueryHandler(guid, query, xmlQuery, (byte)0, EMPTY_PAYLOAD);
 	}
 
 
@@ -134,9 +146,10 @@ public final class QueryHandler {
 	 * @param guid the <tt>QueryRequest</tt> instance containing data
 	 *  for this set of queries
 	 */
-	public static QueryHandler createHandler(QueryRequest query) {
+	public static QueryHandler createHandler(QueryRequest query) {		
 		return new QueryHandler(query.getGUID(), query.getQuery(), 
-								query.getRichQuery());
+								query.getRichQuery(), query.getHops(),
+								query.getPayload());
 	}
 
 	/**
@@ -152,9 +165,13 @@ public final class QueryHandler {
 	public QueryRequest createQuery(byte ttl) {
 		if(ttl < 1 || ttl > 6) 
 			throw new IllegalArgumentException("ttl too high: "+ttl);
-		return new QueryRequest(GUID, ttl, 0, QUERY, XML_QUERY, false, 
-								URN_TYPES, QUERY_URNS, null,
-								!RouterService.acceptedIncomingConnection());
+		if(HOPS == 0) {
+			return new QueryRequest(GUID, ttl, HOPS, QUERY, XML_QUERY, false, 
+									URN_TYPES, QUERY_URNS, null,
+									!RouterService.acceptedIncomingConnection());
+		} else {
+			return new QueryRequest(GUID, ttl, HOPS, PAYLOAD);
+		}
 	}
 
 	/**
@@ -268,6 +285,7 @@ public final class QueryHandler {
 		for(int i=0; i<3; i++) {
 			ManagedConnection mc = (ManagedConnection)connections.get(i);
 
+			System.out.println("QueryHandler::sendProbeQuery::to: "+mc+" "+query); 
 			MESSAGE_ROUTER.sendQueryRequest(query, mc, null);
 
 			// add the reply handler to the list of queried hosts
@@ -288,11 +306,10 @@ public final class QueryHandler {
 	private byte calculateNewTTL(int hostsToQueryPerConnection) {
 		// the limits below are based on experimental, not theoretical 
 		// observations of results on the network
-		if(hostsToQueryPerConnection < 5)     return 1;
+		if(hostsToQueryPerConnection < 30)    return 1;
 		if(hostsToQueryPerConnection < 100)   return 2;
-		if(hostsToQueryPerConnection < 300)   return 3;
-		if(hostsToQueryPerConnection < 700)   return 4;
-		else return 5;
+		if(hostsToQueryPerConnection < 1000)  return 3;
+		else return 4;
 	}
 
 	/**
