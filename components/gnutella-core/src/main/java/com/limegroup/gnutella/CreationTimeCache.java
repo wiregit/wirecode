@@ -36,11 +36,7 @@ public final class CreationTimeCache {
      * CreationTimeCache instance variable.  
      * LOCKING: obtain CreationTimeCache.class.
      */
-    private static CreationTimeCache instance;
-
-    /** Handy access to FileManager.
-     */
-    private static FileManager fileManager;
+    private static CreationTimeCache instance = new CreationTimeCache();
 
     /**
      * CreationTimeCache container.  LOCKING: obtain this.
@@ -53,11 +49,6 @@ public final class CreationTimeCache {
      * Creation Time (Long) -> Set of URNs
      */
     private final SortedMap TIME_TO_URNSET_MAP;
-
-    static {
-        fileManager = RouterService.getFileManager();
-        instance = new CreationTimeCache();
-    }
 
     /**
 	 * Returns the <tt>CreationTimeCache</tt> instance.
@@ -114,7 +105,8 @@ public final class CreationTimeCache {
             // check to see if file still exists
             // NOTE: technically a URN can map to multiple FDs, but I only want
             // to know about one.  getFileDescForUrn prefers FDs over iFDs.
-            FileDesc fd = fileManager.getFileDescForUrn(currURN);
+            FileDesc fd =
+                RouterService.getFileManager().getFileDescForUrn(currURN);
             if ((fd == null) || (fd.getFile() == null) || 
                 !fd.getFile().exists()) {
                 iter.remove();
@@ -220,7 +212,8 @@ public final class CreationTimeCache {
             Iterator innerIter = urns.iterator();
             while ((urnList.size() < max) && innerIter.hasNext()) {
                 URN currURN = (URN) innerIter.next();
-                FileDesc fd = fileManager.getFileDescForUrn(currURN);
+                FileDesc fd =
+                    RouterService.getFileManager().getFileDescForUrn(currURN);
                 // unfortunately fds can turn into ifds so ignore
                 if ((fd == null) || (fd instanceof IncompleteFileDesc)) {
                     if (toRemove == null) toRemove = new ArrayList();
@@ -321,8 +314,8 @@ public final class CreationTimeCache {
             URN urn = (URN) currEntry.getKey();
 
             // don't ever add IFDs
-            if (fileManager.getFileDescForUrn(urn) instanceof 
-                IncompleteFileDesc) continue;
+            if (RouterService.getFileManager().getFileDescForUrn(urn)
+                instanceof IncompleteFileDesc) continue;
 
             // put the urn in a set of urns that have that creation time....
             Set urnSet = (Set) TIME_TO_URNSET_MAP.get(cTime);
