@@ -720,22 +720,37 @@ public abstract class MessageRouter {
         //table has been received
         List list = _manager.getInitializedClientConnections2();
         for(int i=0; i<list.size(); i++) {
-            ManagedConnection c = (ManagedConnection)list.get(i);
-            if(c != handler) {
-                //TODO:
-                //because of some very obscure optimization rules, it's actually
-                //possible that qi could be non-null but not initialized.  Need
-                //to be more careful about locking here.
-                ManagedConnectionQueryInfo qi = c.getQueryRouteState();
-                if (qi==null || qi.lastReceived==null) 
-                    return;
-                else if (qi.lastReceived.contains(request)) {
-                    //A new client with routing entry, or one that hasn't started
-                    //sending the patch.
-                    sendQueryRequest(request, c, handler);
-                }
+            ManagedConnection mc = (ManagedConnection)list.get(i);
+            if(mc != handler) {
+				sendRoutedQueryToHost(request, mc, handler);
             }
         }
+	}
+
+	/**
+	 * Factored-out method that sends a query to a connection that supports
+	 * query routing.  The query is only forwarded if there's a hit in the
+	 * query routing entries.
+	 *
+	 * @param query the <tt>QueryRequest</tt> to potentially forward
+	 * @param mc the <tt>ManagedConnection</tt> to forward the query to
+	 * @param handler the <tt>ReplyHandler</tt> that will be entered into
+	 *  the routing tables to handle any replies
+	 */
+	private void sendRoutedQueryToHost(QueryRequest query, ManagedConnection mc,
+									   ReplyHandler handler) {
+		//TODO:
+		//because of some very obscure optimization rules, it's actually
+		//possible that qi could be non-null but not initialized.  Need
+		//to be more careful about locking here.
+		ManagedConnectionQueryInfo qi = mc.getQueryRouteState();
+		if (qi==null || qi.lastReceived==null) 
+			return;
+		else if (qi.lastReceived.contains(query)) {
+			//A new client with routing entry, or one that hasn't started
+			//sending the patch.
+			sendQueryRequest(query, mc, handler);
+		}
 	}
 
     /**
@@ -761,7 +776,7 @@ public abstract class MessageRouter {
      * as desired.  If you do, note that receivingConnection may be null (for
      * requests originating here).
      */
-    protected void broadcastQueryRequest(QueryRequest queryRequest,
+    protected void broadcastQueryRequest(QueryRequest query,
 										 ReplyHandler handler) {
 		// Note the use of initializedConnections only.
 		// Note that we have zero allocations here.
@@ -778,12 +793,22 @@ public abstract class MessageRouter {
 		} else {
 			limit = Math.min(5, list.size());
 		}
+
+		// are we sending it to the last hop??
+		boolean lastHop = query.getTTL()==1;
 		for(int i=0; i<limit; i++){
 			ManagedConnection mc = (ManagedConnection)list.get(i);
-			if (handler == FOR_ME_REPLY_HANDLER   //came from me
-				|| (mc != handler
-					&& !mc.isClientSupernodeConnection())) {
-				sendQueryRequest(queryRequest, mc, handler);
+			if (handler == FOR_ME_REPLY_HANDLER || 
+				(mc != handler && !mc.isClientSupernodeConnection())) {
+				
+				// if it's the last hop to an Ultrapeer that sends
+				// query route tables, route it.
+				if(lastHop &&
+				   mc.isUltrapeerQueryRoutingConnection()) {
+					sendRoutedQueryToHost(query, mc, handler);
+				} else {
+					sendQueryRequest(query, mc, handler);
+				}
 			}
 		}
 	}
