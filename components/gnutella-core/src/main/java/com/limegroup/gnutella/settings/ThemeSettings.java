@@ -25,33 +25,33 @@ public final class ThemeSettings extends AbstractSettings {
     public static final String EXTENSION = "lwtp";
     
     static final File THEME_DIR_FILE =
-    new File(CommonUtils.getUserSettingsDir(), "themes");
+		new File(CommonUtils.getUserSettingsDir(), "themes");
     
     /**
      * The default name of the theme file for all operating systems other than
      * OS X.
      */
     public static final String DEFAULT_THEME_NAME =
-    "default_theme."+EXTENSION;
+		"default_theme."+EXTENSION;
     
     /**
      * The default name of the theme file name for OS X.
      */
     public static final String DEFAULT_OSX_THEME_NAME =
-    "default_osx_theme."+EXTENSION;
+		"default_osx_theme."+EXTENSION;
     
     
     /**
      * The full path to the default theme file.
      */
     static final File DEFAULT_THEME_FILE =
-    new File(THEME_DIR_FILE, DEFAULT_THEME_NAME);
+		new File(THEME_DIR_FILE, DEFAULT_THEME_NAME);
     
     /**
      * The full path to the default theme file on OS X.
      */
     static final File DEFAULT_OSX_THEME_FILE =
-    new File(THEME_DIR_FILE, DEFAULT_OSX_THEME_NAME);
+		new File(THEME_DIR_FILE, DEFAULT_OSX_THEME_NAME);
     
     
     /**
@@ -121,32 +121,32 @@ public final class ThemeSettings extends AbstractSettings {
      * Setting for the default theme file to use for LimeWire display.
      */
     public static final FileSetting THEME_DEFAULT =
-    CFG_FACTORY.createFileSetting("THEME_DEFAULT", CommonUtils.isMacOSX() ?
-    DEFAULT_OSX_THEME_FILE :
-        DEFAULT_THEME_FILE);
-        
-        /**
-         * Setting for the default theme directory to use in LimeWire display.
-         */
-        public static final FileSetting THEME_DEFAULT_DIR =
+		CFG_FACTORY.createFileSetting("THEME_DEFAULT", CommonUtils.isMacOSX() ?
+									  DEFAULT_OSX_THEME_FILE :
+									  DEFAULT_THEME_FILE);
+	
+	/**
+	 * Setting for the default theme directory to use in LimeWire display.
+	 */
+	public static final FileSetting THEME_DEFAULT_DIR =
         CFG_FACTORY.createFileSetting("THEME_DEFAULT_DIR",
-        CommonUtils.isMacOSX() ?
-        new File(THEME_DIR_FILE,
-        "default_osx_theme") :
-            new File(THEME_DIR_FILE,
-            "default_theme"));
-            
-            /**
-             * Setting for the file name of the theme file.
-             */
-            public static final FileSetting THEME_FILE =
-            FACTORY.createFileSetting("THEME_FILE",
-            THEME_DEFAULT.getValue());
-            
-            /**
-             * Setting for the file name of the theme directory.
-             */
-            public static final FileSetting THEME_DIR =
-            CFG_FACTORY.createFileSetting("THEME_DIR",
-            THEME_DEFAULT_DIR.getValue());
+									  CommonUtils.isMacOSX() ?
+									  new File(THEME_DIR_FILE,
+											   "default_osx_theme") :
+									  new File(THEME_DIR_FILE,
+											   "default_theme"));
+	
+	/**
+	 * Setting for the file name of the theme file.
+	 */
+	public static final FileSetting THEME_FILE =
+		FACTORY.createFileSetting("THEME_FILE",
+								  THEME_DEFAULT.getValue());
+	
+	/**
+	 * Setting for the file name of the theme directory.
+	 */
+	public static final FileSetting THEME_DIR =
+		CFG_FACTORY.createFileSetting("THEME_DIR",
+									  THEME_DEFAULT_DIR.getValue());
 }
