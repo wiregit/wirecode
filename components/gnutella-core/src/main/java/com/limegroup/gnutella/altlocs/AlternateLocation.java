@@ -169,7 +169,7 @@ public final class AlternateLocation implements HTTPHeaderValue, Comparable {
 		if(!NetworkUtils.isValidPort(port))
 			throw new IOException("invalid port");
         if(NetworkUtils.isPrivateAddress(rfd.getHost()))
-            throw new IOException("invalid address");
+            throw new IOException("rfd invalid address");
 
 		URL url = new URL("http", rfd.getHost(), port,						  
 						  HTTPConstants.URI_RES_N2R + urn.httpStringValue());
@@ -190,6 +190,8 @@ public final class AlternateLocation implements HTTPHeaderValue, Comparable {
             String addr = NetworkUtils.ip2string(RouterService.getAddress());
             if(!NetworkUtils.isValidPort(port))
                 throw new IllegalArgumentException("invalid port: " + port);
+            if(!NetworkUtils.isValidAddress(addr))
+                throw new IllegalArgumentException("invalid addr: " + addr);
             if(NetworkUtils.isPrivateAddress(addr))
                 throw new IllegalArgumentException("invalid address: " + addr);
 			url = new URL("http", addr, port,
