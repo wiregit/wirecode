@@ -103,6 +103,9 @@ public final class AlternateLocation
 		if(url == null) {
 			throw new NullPointerException("cannot accept null URL");
 		}
+		if((url.getPort() & 0xFFFF0000) != 0) {
+			throw new IllegalArgumentException("invalid port: "+url.getPort());
+		}
 		// create a new URL instance from the data for the given url
 		// and the urn
 		URL tempUrl = new URL(url.getProtocol(), url.getHost(), url.getPort(),
