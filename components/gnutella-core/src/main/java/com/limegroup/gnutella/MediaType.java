@@ -61,7 +61,7 @@ public class MediaType {
 												   "rtf", "doc", "tex"});
 		MediaType programs=new MediaType("Programs",
 										 new String[] {"exe", "zip", "gz", "gzip",
-													   "hqx", "tar", "tgz", "z"
+													   "hqx", "tar", "tgz", "z",
 										               "sit", "hqx", "bin",
 										               "dmg"});
 		MediaType audio=new MediaType("Audio", 
