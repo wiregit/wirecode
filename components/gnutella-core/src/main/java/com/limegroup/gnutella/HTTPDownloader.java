@@ -280,7 +280,7 @@ public class HTTPDownloader implements Runnable {
         _stateString = null;
 
         SettingsManager set = SettingsManager.instance();
-        _downloadDir = set.getSaveDirectory();
+        _downloadDir = set.getIncompleteDirectory();
         String pathname = _downloadDir + _filename;
         File myFile = new File(pathname);
 
@@ -460,7 +460,7 @@ public class HTTPDownloader implements Runnable {
 
         /***********End of Double Check ***********/
 
-        if ((myTest.exists()) && (!_resume)) {
+        if (myTest.exists()) {
             // ask the user if the file should be overwritten
             if ( ! _callback.overwriteFile(_filename) ) {
                 _stateString = "File Already Exists";
@@ -495,7 +495,6 @@ public class HTTPDownloader implements Runnable {
                 c = _br.read(buf);
             }
             catch (Exception e) {
-                e.printStackTrace();
                 _state = ERROR;
                 return;
             }
@@ -524,9 +523,14 @@ public class HTTPDownloader implements Runnable {
             return;
         }
 
+        //Move from temporary directory to final directory.
         if ( _amountRead == _sizeOfFile ) {
             String pname = _downloadDir + _filename;
-            boolean ok=myFile.renameTo(new File(pname));
+            File target=new File(pname);
+            //If target doesn't exist, this will fail silently.  Otherwise,
+            //it's always safe to do this since we prompted the user above.
+            target.delete();
+            boolean ok=myFile.renameTo(target);
             if (! ok) {
                 //renameTo is not guaranteed to work, esp. when the
                 //file is being moved across file systems.  
@@ -541,6 +545,7 @@ public class HTTPDownloader implements Runnable {
         else
         {
             _state = ERROR;
+            _stateString = "Interrupted";
         }
     }
 
