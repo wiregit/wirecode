@@ -44,10 +44,10 @@ class LimeXMLSchemaFieldExtractor
     /**
      * The map from names to corresponding FieldTypeSet
      */
-    private static Map _nameFieldTypeSetMap = new HashMap();
+    private static Map _nameFieldTypeSetMap = null;
     
     /**
-     * A dummy nam eto be used when there's no name for a field
+     * A dummy name to be used when there's no name for a field
      */
     private static final String DUMMY = "DUMMY";
     
@@ -71,7 +71,7 @@ class LimeXMLSchemaFieldExtractor
      * The field names that are referenced/used from some other field
      * (ie which can not be root element)
      */
-    private static Set _referencedNames = new HashSet(); 
+    private static Set _referencedNames = null;
     
     //initialize the static variables
     static
@@ -119,10 +119,13 @@ class LimeXMLSchemaFieldExtractor
      * are in canonicalized form.
      * @see XMLStringUtils for more information on canonicalized form
      */
-    public static List getFields(Document document)
+    public synchronized static List getFields(Document document)
     {
         try
         {
+            //reInitialize fields
+            reInitializeMemberFields();
+            
             //traverse the document
             Element root = document.getDocumentElement();
             traverse(root);
@@ -145,6 +148,13 @@ class LimeXMLSchemaFieldExtractor
         }
     }
     
+    private static void reInitializeMemberFields()
+    {
+        _nameFieldTypeSetMap = new HashMap();
+        _uniqueCount = 1;
+        _lastUniqueComplexTypeName = "";
+        _referencedNames = new HashSet(); 
+    }
     
     private static void  fillWithFieldNames(List fieldNames,
         FieldTypeSet fieldTypeSet,
