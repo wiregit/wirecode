@@ -94,7 +94,7 @@ public class QueryReply extends Message implements Serializable{
               byte[] payload) {
         super(guid, Message.F_QUERY_REPLY, ttl, hops, payload.length);
         this.payload=payload;
-        repOk();
+        //repOk();
     }
 
     public void writePayload(OutputStream out) throws IOException {
