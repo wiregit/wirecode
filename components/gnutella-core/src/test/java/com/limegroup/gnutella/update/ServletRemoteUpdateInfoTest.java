@@ -84,4 +84,32 @@ public final class ServletRemoteUpdateInfoTest extends TestCase {
 			fail("unexpected exception: "+e);
 		}
 	}
+
+	/**
+	 * Tests that updates with the current most recent version give a 
+	 * no update available update.
+	 */
+	public void testThatCurrentVersionGivesNoUpdate() {
+		try {
+			for(int i=0; i<OPERATING_SYSTEMS.length; i++) {
+				ServletLocalUpdateInfo localInfo = new ServletLocalUpdateInfo();
+				localInfo.addKeyValuePair(localInfo.OS, OPERATING_SYSTEMS[i]);
+		   
+				localInfo.addKeyValuePair(localInfo.LIMEWIRE_VERSION, 
+				    ServletRemoteUpdateInfo.LIMEWIRE_VERSION_ON_SERVER);
+				ServletRemoteUpdateInfo srui = 
+					new ServletRemoteUpdateInfo(localInfo);
+				String urlString = srui.getURLEncodedString();
+				
+				ClientRemoteUpdateInfo crui = new ClientRemoteUpdateInfo();
+				crui.addRemoteInfo(urlString);
+				Updator updator = crui.getUpdator();
+				assertTrue("should be a web page updator: "+updator, 
+						   (updator instanceof NoUpdateUpdator));
+			}
+
+		} catch(Exception e) {
+			fail("unexpected exception: "+e);
+		}		
+	}
 }
