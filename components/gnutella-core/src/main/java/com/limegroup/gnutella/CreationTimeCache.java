@@ -40,18 +40,15 @@ public final class CreationTimeCache {
      * obtaining CreationTimeCache's monitor is sufficient -- and slightly
      * more convenient.
      */
-    private static final Map /* URN -> Creation Time (Long) */ TIME_MAP;
+    private final Map /* URN -> Creation Time (Long) */ TIME_MAP;
 
     /**
      * Alternate container.  LOCKING: obtain this.
      * Creation Time (Long) -> Set of URNs
      */
-    private static final SortedMap URN_MAP;
+    private final SortedMap URN_MAP;
 
     static {
-        TIME_MAP = createMap();
-        // use a custom comparator to sort the map in descending order....
-        URN_MAP = new TreeMap(new MyComparator());
         fileManager = RouterService.getFileManager();
         instance = new CreationTimeCache();
     }
@@ -67,8 +64,13 @@ public final class CreationTimeCache {
 
     /**
      * Create and initialize urn cache.
+     * You should never really call this - use instance - not private for
+     * testing.
      */
-    private CreationTimeCache() {
+    CreationTimeCache() {
+        TIME_MAP = createMap();
+        // use a custom comparator to sort the map in descending order....
+        URN_MAP = new TreeMap(new MyComparator());
 		removeOldEntries(TIME_MAP);
         constructURNMap();
 	}
@@ -137,6 +139,23 @@ public final class CreationTimeCache {
     }
 
         
+    /**
+     * Write cache so that we only have to calculate them once.
+     */
+    public synchronized void persistCache() {
+        //It's not ideal to hold a lock while writing to disk, but I doubt think
+        //it's a problem in practice.
+        try {
+            ObjectOutputStream oos = 
+			    new ObjectOutputStream(new FileOutputStream(CTIME_CACHE_FILE));
+            oos.writeObject(TIME_MAP);
+            oos.close();
+        } catch (Exception e) {
+            ErrorService.error(e);
+        }
+    }
+
+    
 	/**
 	 * Removes any stale entries from the map so that they will automatically
 	 * be replaced.
@@ -161,7 +180,7 @@ public final class CreationTimeCache {
     /**
      * Constructs the URN_MAP, which is based off the entries in the TIME_MAP.
      */
-    private static void constructURNMap() {
+    private void constructURNMap() {
         Set entries = TIME_MAP.entrySet();
         Iterator iter = entries.iterator();
         while (iter.hasNext()) {
@@ -185,7 +204,7 @@ public final class CreationTimeCache {
     /**
      * Loads values from cache file, if available
      */
-    private static Map createMap() {
+    private Map createMap() {
         ObjectInputStream ois = null;
 		try {
             ois = new ObjectInputStream(new FileInputStream(CTIME_CACHE_FILE));
@@ -213,23 +232,6 @@ public final class CreationTimeCache {
         }
 	}
 
-    /**
-     * Write cache so that we only have to calculate them once.
-     */
-    public synchronized void persistCache() {
-        //It's not ideal to hold a lock while writing to disk, but I doubt think
-        //it's a problem in practice.
-        try {
-            ObjectOutputStream oos = 
-			    new ObjectOutputStream(new FileOutputStream(CTIME_CACHE_FILE));
-            oos.writeObject(TIME_MAP);
-            oos.close();
-        } catch (Exception e) {
-            ErrorService.error(e);
-        }
-    }
-
-    
     private static final class MyComparator implements Comparator {
 
         // switches the usual meaning of compare....        
