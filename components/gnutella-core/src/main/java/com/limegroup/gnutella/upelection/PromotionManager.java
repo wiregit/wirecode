@@ -74,6 +74,7 @@ public class PromotionManager {
      * start the crawl in a separate thread.
      * 
      * TODO: decide what to do if a new request arrives while we're already promoting.
+     * At the moment we just drop it.
      */
     public void initiatePromotion(PromotionRequestVendorMessage msg) {
     	//set the promotion partner
@@ -85,7 +86,8 @@ public class PromotionManager {
     		if (_promotionPartner == null)
     			_promotionPartner = requestor; 
     		else
-    			_requestors.add(requestor);
+    			//_requestors.add(requestor);
+    			return; //just drop the promotion request for now.
     	}
     	
     	

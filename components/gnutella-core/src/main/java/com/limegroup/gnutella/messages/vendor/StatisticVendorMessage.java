@@ -208,7 +208,12 @@ public class StatisticVendorMessage extends VendorMessage {
             throw new IllegalArgumentException("unknown control: " + control);
         }
     }
- 
+    
+    /**
+     * Returns the payload of this message.  Note that if you requested UPelection
+     * stats you'll need to trim() the tokens to parse them to ints.
+     * @return the payload as a String
+     */
     public String getReportedStats() {
         return new String(getPayload());
     }

@@ -2734,7 +2734,6 @@ public abstract class MessageRouter {
 
     		}
     	}catch(IOException tooBad){
-    		tooBad.printStackTrace();
     		BestCandidates.purgeDead();
     	} //sending failed - not much we can do.  try to purge the new connection if its dead.
     }
