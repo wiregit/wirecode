@@ -747,18 +747,22 @@ public class HostCatcher implements HostListener {
     }
 
     /**
-     * Return the number of hosts, i.e.,
-     * getNumUltrapeerHosts()+getNumNormalHosts()+getNumPrivateHosts().  
+     * Accessor for the total number of hosts stored, including Ultrapeers and
+     * leaves.
+     * 
+     * @return the total number of hosts stored 
      */
     public int getNumHosts() {
-        return( ENDPOINT_QUEUE.size() );
+        return ENDPOINT_QUEUE.size()+FREE_LEAF_SLOTS_SET.size()+
+            FREE_ULTRAPEER_SLOTS_SET.size();
     }
 
     /**
      * Returns the number of marked ultrapeer hosts.
      */
     public int getNumUltrapeerHosts() {
-        return ENDPOINT_QUEUE.size(GOOD_PRIORITY);
+        return ENDPOINT_QUEUE.size(GOOD_PRIORITY)+FREE_LEAF_SLOTS_SET.size()+
+            FREE_ULTRAPEER_SLOTS_SET.size();
     }
 
     /**
@@ -785,8 +789,14 @@ public class HostCatcher implements HostListener {
      *  It's not guaranteed that these are reachable. This can be modified while
      *  iterating through the result, but the modifications will not be
      *  observed.  
+     * 
+     * @param n the number of hosts to return
+     * @return a <tt>Collection</tt> of the <tt>n</tt> best <tt>IpPort</tt> 
+     *  instances, or between 0 and <tt>n</tt> hosts if fewer than <tt>n</tt>
+     *  hosts are available
      */
     public synchronized Collection getUltrapeerHosts(int n) {
+        
         //Make n the # of hosts to return--never more than the # of ultrapeers.
         n=Math.min(n, ENDPOINT_QUEUE.size(GOOD_PRIORITY));
         //Copy n best hosts into temporary buffer.
