@@ -47,21 +47,6 @@ public final class NIOHeaderWriter implements HeaderWriter {
         CHANNEL = conn.getSocket().getChannel();        
     }
 
-    /**
-     * Writes any partially-written headers to the network.
-     *
-     * @throws IOException if there is an IO error writing to the channel
-     */
-    public boolean write() throws IOException {
-
-        // write anything left over in the buffer
-        if(_headerBuffer.hasRemaining()) {
-            CHANNEL.write(_headerBuffer);
-        }
-        
-        return !_headerBuffer.hasRemaining();
-    }
-
 
     /**
      * Writes the specified header to the network using non-blocking IO.  If 
@@ -122,12 +107,5 @@ public final class NIOHeaderWriter implements HeaderWriter {
             _headerBuffer = null;
             return true;
         }
-    }
-
-    /* (non-Javadoc)
-     * @see com.limegroup.gnutella.connection.HeaderWriter#hasBufferedData()
-     */
-    public boolean hasBufferedData() {
-        return _headerBuffer.hasRemaining();
     }
 }
