@@ -101,6 +101,11 @@ public class BrowseHostHandler {
      * @param proxies the <tt>Set</tt> of push proxies to try
      */
     public void browseHost(String host, int port, Set proxies) {
+        if(!NetworkUtils.isValidPort(port) || 
+                                         !NetworkUtils.isValidAddress(host)) {
+            failed();
+            return;
+        }
         setState(STARTED);
         // flow of operation:
         // 1. check if you need to push.
