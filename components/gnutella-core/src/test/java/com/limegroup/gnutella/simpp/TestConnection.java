@@ -35,9 +35,8 @@ public class TestConnection {
      * @param sendSimppData whether or not the TestConnection should send the
      * simpp-data when it receives a SimppRequestVM
      */
-    public TestConnection(int port, int simppNumber, boolean expectSimppReq,
-                          boolean sendSimppData) 
-                                                          throws IOException {
+    public TestConnection(int simppNumber, boolean expectSimppReq,
+                                     boolean sendSimppData) throws IOException {
         _simppData = readCorrectFile(simppNumber);        
         _simppMessageNumber = simppNumber;
         _expectSimppRequest = expectSimppReq;
@@ -109,27 +108,21 @@ public class TestConnection {
         CapabilitiesVM capVM = makeCapabilitiesVM();
         capVM.write(os);
         os.flush();
-        //now, lets see if we expect a request or not
+        //Read the first message of type SimppRequest
         Message message = null;
-        boolean done = false;
-        for(int i=0; i<5; i++) {//read 5 messages
-            try {
-                message = Message.read(is, Message.N_TCP);
-            } catch(BadPacketException bpx) {
-                Assert.that(false, "failed while receiving message from LW");
-            }
-            if(message instanceof SimppRequestVM) 
-                break;
+        try {
+            message = BaseTestCase.getFirstInstanceOfMessage(
+                                           _socket, SimppRequestVM.class, 2000);
+        } catch (BadPacketException bpx) {
+            Assert.that(false, "limewire sent message with BPX");
         }
         if(_expectSimppRequest)
-            Assert.that((message instanceof SimppRequestVM), 
-                                             "failed -- expected SimppRequest");
+            Assert.that(message != null, "should have gotten simpp message");
         else
-            Assert.that( !(message instanceof SimppRequestVM), 
-                         "failed -- we should not have received SimppRequest");
- 
-        //send back the simppdata if reqd.
-        if(_sendSimppData) {
+            Assert.that(message == null, "shouldn't have gotten simpp message");
+
+        //send back the simppdata if reqd. 
+        if(_expectSimppRequest && _sendSimppData) {//we dont want 
             Message simppVM = new SimppVM(_simppData);
             simppVM.write(os);
             os.flush();

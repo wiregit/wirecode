@@ -3,6 +3,7 @@ package com.limegroup.gnutella.util;
 import java.io.File;
 import java.io.IOException;
 import java.io.InterruptedIOException;
+import java.net.*;
 
 import junit.framework.Test;
 import junit.framework.TestCase;
@@ -589,13 +590,12 @@ public class BaseTestCase extends AssertComparisons implements ErrorCallback {
     }
     
     public static Message getFirstInstanceOfMessageType(Connection c,
-                                                        Class type) {
+                          Class type)  throws IOException, BadPacketException {
         return getFirstInstanceOfMessageType(c, type, TIMEOUT);
     }
 
     public static Message getFirstInstanceOfMessageType(Connection c,
-                                                        Class type,
-                                                        int timeout) {
+               Class type, int timeout) throws IOException, BadPacketException {
         for(int i = 0; i < 200; i++) {
             if(!c.isOpen()){
                 //System.out.println(c + " is not open");
@@ -614,18 +614,44 @@ public class BaseTestCase extends AssertComparisons implements ErrorCallback {
                 i = 0;
             } catch (InterruptedIOException ie) {
                 //ie.printStackTrace();
-                return null;
-            } catch (BadPacketException e) {
-               // e.printStackTrace();
-                // ignore...
-            } catch (IOException ioe) {
-                //ioe.printStackTrace();
-                // ignore....
-            }
+                return null;            
+            } 
         }
         throw new RuntimeException("No IIOE or Message after 100 iterations");
     }
     
+    /**
+     * @return the first message of type <pre>type</pre>.  Read messages within
+     * the time out, so it's possible to wait upto almost 2 * timeout for this
+     * method to return
+     */
+    public static Message getFirstInstanceOfMessage(Socket socket, Class type, 
+                           int timeout) throws IOException, BadPacketException {
+        int oldTimeout = socket.getSoTimeout();
+        try {
+        for(int i=0; i<200; i++) { 
+            if(socket.isClosed())
+                return null;
+            try {
+                socket.setSoTimeout(timeout);
+                Message m=Message.read(socket.getInputStream(), Message.N_TCP);
+                if(type.isInstance(m))
+                    return m;
+                else if(m == null) //interruptedIOException thrown
+                    return null;                    
+                i=0;
+            } catch(InterruptedIOException iiox) {
+                return null; 
+            } 
+        }
+        } finally { //before we return reset the so-timeout
+            socket.setSoTimeout(oldTimeout);
+        }
+        return null;
+    }
+    
+
+
     public static QueryRequest getFirstQueryRequest(Connection c) {
         return getFirstQueryRequest(c, TIMEOUT);
     }

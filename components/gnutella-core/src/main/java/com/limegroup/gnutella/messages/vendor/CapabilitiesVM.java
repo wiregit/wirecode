@@ -279,6 +279,10 @@ public final class CapabilitiesVM extends VendorMessage {
         super.recordDrop();
     }
 
+    public String toString() {
+        return "{CapabilitiesVM:"+super.toString()+"}";
+    }
+
 }
 
 

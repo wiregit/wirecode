@@ -14,6 +14,7 @@ import junit.framework.Test;
 
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.PingReply;
+import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.PingRequest;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryRequest;
@@ -53,7 +54,8 @@ public class ClientSideMixedOOBGuidanceTest extends ClientSideTestCase {
     /** @return The first QueyrRequest received from this connection.  If null
      *  is returned then it was never recieved (in a timely fashion).
      */
-    private static QueryStatusResponse getFirstQueryStatus(Connection c) {
+    private static QueryStatusResponse getFirstQueryStatus(Connection c) 
+                                       throws IOException, BadPacketException {
         return (QueryStatusResponse)
             getFirstInstanceOfMessageType(c, QueryStatusResponse.class, TIMEOUT);
     }
