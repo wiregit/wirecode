@@ -182,10 +182,32 @@ public class FileUtils
      * Touches a file, to ensure it exists.
      */
     public static void touch(File f) throws IOException {
+        if(f.exists())
+            return;
+        
         File parent = f.getParentFile();
         if(parent != null)
             parent.mkdirs();
-        f.createNewFile();
+
+        try {
+            f.createNewFile();
+        } catch(IOException failed) {
+            // Okay, createNewFile failed.  Let's try the old way.
+            FileOutputStream fos = null;
+            try {
+                fos = new FileOutputStream(f);
+            } catch(IOException ioe) {
+                if(CommonUtils.isJava14OrLater())
+                    ioe.initCause(failed);
+                throw ioe;
+            } finally {
+                if(fos != null) {
+                    try {
+                        fos.close();
+                    } catch(IOException ignored) {}
+                }
+            }
+        }
     }
     
     public static boolean forceRename(File a, File b) {
