@@ -62,6 +62,7 @@ public final class NIOHeaderReader implements HeaderReader {
      *  network, including a syntax error
      */    
     public HTTPHeader readHeader() throws IOException  {
+        _headersComplete = false;
         // if there are more headers to read in the buffer, keep reading
         if(_headerByteBuffer.position() != 0 && 
            _headerByteBuffer.hasRemaining())  {
