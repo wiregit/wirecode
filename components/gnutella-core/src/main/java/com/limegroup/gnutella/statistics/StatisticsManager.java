@@ -51,7 +51,9 @@ public final class StatisticsManager implements Runnable {
 	 * @param stat the <tt>Statistic</tt> to add
 	 */
 	void addBasicStatistic(Statistic stat) {
-		BASIC_STATS.add(stat);
+		synchronized(BASIC_STATS) {
+			BASIC_STATS.add(stat);
+		}
 	}
 
 	/**
@@ -61,7 +63,9 @@ public final class StatisticsManager implements Runnable {
 	 * @param stat the <tt>AdvancedStatistic</tt> to add
 	 */	 
 	void addAdvancedStatistic(Statistic stat) {
-		ADVANCED_STATS.add(stat);		
+		synchronized(ADVANCED_STATS) {
+			ADVANCED_STATS.add(stat);		
+		}
 	}
 
 	/**
@@ -90,18 +94,22 @@ public final class StatisticsManager implements Runnable {
 	 */
 	public void run() {
 		try {
-			Iterator iter = BASIC_STATS.iterator();
-			while(iter.hasNext()) {
-				Statistic stat = (Statistic)iter.next();
-				stat.storeCurrentStat();
+			synchronized(BASIC_STATS) {
+				Iterator iter = BASIC_STATS.iterator();
+				while(iter.hasNext()) {
+					Statistic stat = (Statistic)iter.next();
+					stat.storeCurrentStat();
+				}
 			}
 			if(_recordAdvancedStatistics) {
-				Iterator advancedIter = ADVANCED_STATS.iterator();
-				while(advancedIter.hasNext()) {
-					Statistic stat = 
-				        (Statistic)advancedIter.next();
-					stat.storeCurrentStat();
-				}			
+				synchronized(ADVANCED_STATS) {
+					Iterator advancedIter = ADVANCED_STATS.iterator();
+					while(advancedIter.hasNext()) {
+						Statistic stat = 
+							(Statistic)advancedIter.next();
+						stat.storeCurrentStat();
+					}			
+				}
 			}
 		} catch(Throwable t) {
 			RouterService.error(t);
