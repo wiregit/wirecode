@@ -33,13 +33,7 @@ public class RouterService
             FileManagerQueryRequestHandler.instance(),
             StandardQueryReplyHandler.instance(),
             FileManagerPushRequestHandler.instance());
-        //If we're using quick-connect by default, don't load gnutella.net file.
-        //(In this case, we'll call quick connect later.)
-        if (SettingsManager.instance().getUseQuickConnect())
-            catcher = new HostCatcher(callback);
-        else
-            catcher = new HostCatcher(callback,
-                SettingsManager.instance().getHostList());
+        catcher = new HostCatcher(callback);
 
         // Now, link all the pieces together, starting the various threads.
         catcher.initialize(acceptor, manager);
@@ -47,7 +41,8 @@ public class RouterService
         manager.initialize(router, catcher);
         acceptor.initialize(manager, router);
 
-        //Now if quick connecting, try hosts.
+        //Now if quick connecting, try hosts.  Otherwise, populate the
+        //HostCatcher with the list from the SettingsManager
         if (SettingsManager.instance().getUseQuickConnect()) {
             Thread t2=new Thread() {
                 public void run() {
@@ -56,6 +51,13 @@ public class RouterService
             };
             t2.setDaemon(true);
             t2.start();
+        } else {
+            try {
+                catcher.read(SettingsManager.instance().getHostList());
+            } catch (FileNotFoundException e) {
+                callback.error(ActivityCallback.ERROR_10);
+            } catch (IOException e) {
+            }
         }
     }
 
@@ -75,13 +77,7 @@ public class RouterService
             FileManagerQueryRequestHandler.instance(),
             StandardQueryReplyHandler.instance(),
             FileManagerPushRequestHandler.instance());
-        //If we're using quick-connect by default, don't load gnutella.net file.
-        //(In this case, we'll call quick connect later.)
-        if (SettingsManager.instance().getUseQuickConnect())
-            catcher = new HostCatcher(callback);
-        else
-            catcher = new HostCatcher(callback,
-                SettingsManager.instance().getHostList());
+        catcher = new HostCatcher(callback);
 
         // Now, link all the pieces together, starting the various threads.
         catcher.initialize(acceptor, manager);
@@ -89,7 +85,8 @@ public class RouterService
         manager.initialize(router, catcher);
         acceptor.initialize(manager, router);
 
-        //Now if quick connecting, try hosts.
+        //Now if quick connecting, try hosts.  Otherwise, populate the
+        //HostCatcher with the list from the SettingsManager
         if (SettingsManager.instance().getUseQuickConnect()) {
             Thread t2=new Thread() {
                 public void run() {
@@ -98,6 +95,13 @@ public class RouterService
             };
             t2.setDaemon(true);
             t2.start();
+        } else {
+            try {
+                catcher.read(SettingsManager.instance().getHostList());
+            } catch (FileNotFoundException e) {
+                callback.error(ActivityCallback.ERROR_10);
+            } catch (IOException e) {
+            }
         }
     }
 

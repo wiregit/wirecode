@@ -47,10 +47,6 @@ public class FileManagerPingRequestHandler
                           num_files,
                           kilobytes);
 
-        try
-        {
-            receivingConnection.send(pingReply);
-        }
-        catch(IOException e) {}
+        receivingConnection.send(pingReply);
     }
 }

@@ -113,6 +113,9 @@ public class ConnectionManager {
                 initializeExternallyGeneratedConnection(connection);
                 connection.loopForMessages();
             } catch(IOException e) {
+            } catch(Exception e) {
+                //Internal error!
+                _callback.error(ActivityCallback.ERROR_20, e);
             }
         }
         else {
@@ -440,6 +443,9 @@ public class ConnectionManager {
                     _connection);
                 _connection.loopForMessages();
             } catch(IOException e) {
+            } catch(Exception e) {
+                //Internal error!
+                _callback.error(ActivityCallback.ERROR_20, e);
             }
         }
     }
@@ -470,6 +476,9 @@ public class ConnectionManager {
                     _connection);
                 _connection.loopForMessages();
             } catch(IOException e) {
+            } catch(Exception e) {
+                //Internal error!
+                _callback.error(ActivityCallback.ERROR_20, e);
             }
         }
     }
@@ -540,6 +549,9 @@ public class ConnectionManager {
                     connection);
                 connection.loopForMessages();
             } catch(IOException e) {
+            } catch(Exception e) {
+                //Internal error!
+                _callback.error(ActivityCallback.ERROR_20, e);
             }
         }
     }

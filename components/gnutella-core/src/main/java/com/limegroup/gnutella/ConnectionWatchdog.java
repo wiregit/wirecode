@@ -27,7 +27,7 @@ public class ConnectionWatchdog implements Runnable {
         long sent;
 
         /** Takes a snapshot of the given connection. */
-        ConnectionState(Connection c) {
+        ConnectionState(ManagedConnection c) {
             this.sentDropped=c.getNumSentMessagesDropped();
             this.sent=c.getNumMessagesSent();
         }
@@ -66,7 +66,7 @@ public class ConnectionWatchdog implements Runnable {
             //structures could be used here.
             HashMap /* Connection -> ConnectionState */ snapshot=new HashMap();
             for (Iterator iter=manager.connections(); iter.hasNext(); ) {
-                Connection c=(Connection)iter.next();
+                ManagedConnection c=(ManagedConnection)iter.next();
                 snapshot.put(c, new ConnectionState(c));
             }
 

@@ -3,7 +3,6 @@ package com.limegroup.gnutella;
 import java.io.*;
 import java.net.*;
 import com.sun.java.util.collections.*;
-import com.limegroup.gnutella.util.Buffer;
 
 /**
  * A Gnutella connection. A connection is either INCOMING or OUTGOING.
@@ -88,29 +87,6 @@ public class Connection {
     private OutputStream _out;
     private boolean _outgoing;
 
-    /** The (approximate) max time a packet can be queued, in milliseconds. */
-    private static final int QUEUE_TIME=750;
-    /** The number of packets to present to the OS at a time.  This
-     *  should be roughly proportional to the OS's send buffer. */
-    private static final int BATCH_SIZE=50;
-    /** The size of the queue.  This must be larger than BATCH_SIZE.
-     *  Larger values tolerate temporary bursts of producer traffic
-     *  without traffic but may result in overall latency. */
-    private static final int QUEUE_SIZE=500;
-    /** A lock to protect the swapping of outputQueue and oldOutputQueue. */
-    private Object _outputQueueLock=new Object();
-    /** The producer's queue. */
-    private volatile Buffer _outputQueue=new Buffer(QUEUE_SIZE);
-    /** The consumer's queue. */
-    private volatile Buffer _oldOutputQueue=new Buffer(QUEUE_SIZE);
-    /** True iff the output thread should write the queue immediately.
-     *  Synchronized by _outputQueueLock. */
-    private boolean _flushImmediately=false;
-    /** A condition variable used to implement the flush() method.
-     *  Call notify when outputQueueLock and oldOutputQueueLock are
-     *  empty. */
-    private Object _flushLock=new Object();
-
     /**
      * Trigger an opening connection to close after it opens.  This
      * flag is set in shutdown() and then checked in initialize()
@@ -118,19 +94,6 @@ public class Connection {
      * asynchronously before initialize() completes.
      */
     private boolean _closed;
-
-    /**
-     * The number of packets I sent and received.  This includes bad
-     * packets.  These are synchronized by out and in, respectively.
-     *
-     * sentDropped is the number of packets I dropped because the
-     * output queue overflowed.  This happens when the remote host
-     * cannot receive packets as quickly as I am trying to send them.
-     * No synchronization is necessary.
-     */
-    private int _sent=0;
-    private int _sentDropped=0;
-    private int _received=0;
 
     /**
      * Creates an outgoing connection with the specified listener.
@@ -188,10 +151,6 @@ public class Connection {
             _socket.close();
             throw e;
         }
-
-         Thread t=new Thread(new OutputRunner());
-         t.setDaemon(true);
-         t.start();
     }
 
     /**
@@ -241,186 +200,70 @@ public class Connection {
         return _outgoing;
     }
 
-    private static boolean disposeable(Message m) {
-        return  ((m instanceof PingRequest) && (m.getHops()!=0))
-          || (m instanceof PingReply);
-    }
-
     /**
-     * Sends a message.
+     * Receives a message.  This method is NOT thread-safe.  Behavior is
+     * undefined if two threads are in a receive call at the same time for a
+     * given connection.
      *
-     * @requires this is fully constructed
-     * @modifies the network underlying this
-     * @effects send m on the network.  Throws IOException if problems
-     *   arise.  This is thread-safe and guaranteed not to block.
-     */
-    public void send(Message m) throws IOException {
-        if (_closed)
-            throw new IOException();
-
-        synchronized (_outputQueueLock) {
-            _sent++;
-            if (_outputQueue.isFull()) {
-                //Drop case. Instead of using a FIFO replacement scheme, we
-                //use the following:
-                //  1) Throw away m if it is (a) a ping request
-                //     whose hops count is not zero or (b) a pong.
-                //  2) If that doesn't work, throw away the oldest message
-                //     message meeting above criteria.
-                //  3) If that doesn't work, throw away the oldest message.
-                _sentDropped++;
-                if (disposeable(m))
-                    return;
-
-                //It's possible to optimize this by keeping track of the
-                //last value of i, but case (1) occurs more frequently.
-                int i;
-                for (i=_outputQueue.getSize()-1; i>=0; i--) {
-                    Message mi=(Message)_outputQueue.get(i);
-                    if (disposeable(mi))
-                        break;
-                }
-
-                if (i>=0)
-                    _outputQueue.set(i,m);
-                else
-                    _outputQueue.addFirst(m);
-            } else {
-                //Normal case.
-                _outputQueue.addFirst(m);
-                if (_outputQueue.getSize() >= BATCH_SIZE)
-                    _outputQueueLock.notify();
-            }
-        }
-    }
-
-    /**
-     * @requires no other threads are calling send() or flush()
-     * @effects block until all queued data is written.  Normally,
-     *  there is no need to call this method; the output buffers are
-     *  automatically flushed every few seconds (at most).  However, it
-     *  may be necessary to call this method in situations where high
-     *  latencies are not tolerable, e.g., in the network
-     *  discoverer.
-     */
-    public void flush() {
-        synchronized (_outputQueueLock) {
-            _flushImmediately=true;
-            _outputQueueLock.notify();
-        }
-        synchronized (_flushLock) {
-            while (! (_outputQueue.isEmpty() && _oldOutputQueue.isEmpty())) {
-                try {
-                    _flushLock.wait();
-                } catch (InterruptedException e) { }
-                try {
-                    //Flush is needed in case the wait() returns
-                    //prematurely.
-                    _out.flush();
-                } catch (IOException e) { /* throw to caller? */ }
-            }
-        }
-    }
-
-    /** Repeatedly sends all the queued data every few seconds. */
-    private class OutputRunner implements Runnable {
-        public void run() {
-            while (!_closed) {
-                //1. Wait until (1) the queue is full or (2) the
-                //maximum allowable send latency has passed (and the
-                //queue is not empty)...
-                synchronized (_outputQueueLock) {
-                    try {
-                        if (!_flushImmediately &&
-                                _outputQueue.getSize() < BATCH_SIZE)
-                            _outputQueueLock.wait(QUEUE_TIME);
-                    } catch (InterruptedException e) {
-                    }
-                    _flushImmediately=false;
-                    if (_outputQueue.isEmpty())
-                        continue;
-                    //...and swap _outputQueue and _oldOutputQueue.
-                    Buffer tmp=_outputQueue;
-                    _outputQueue=_oldOutputQueue;
-                    _outputQueue.clear();
-                    _oldOutputQueue=tmp;
-                }
-
-                //2. Now send all the data on the old queue.
-                //No need for any locks here since there is only one
-                //OutputRunner thread.
-                while (! _oldOutputQueue.isEmpty()) {
-                    Message m=(Message)_oldOutputQueue.removeLast();
-                    try {
-                        m.write(_out);
-                    } catch (IOException e) {
-                        //An IO error while sending will be detected next
-                        //time send() is called.
-                        close();
-                        break;
-                    }
-                }
-
-                //3. Flush.  IOException can also happen here.  Treat as above.
-                try {
-                    _out.flush();
-                } catch (IOException e) {
-                    close();
-                }
-                synchronized(_flushLock) {
-                    //note that oldOutputQueue.isEmpty()
-                    if (_outputQueue.isEmpty())
-                        _flushLock.notify();
-                }
-            }
-        }
-    }
-
-    /**
-     * Receives a message.
-     *
-     * @requires this is fully constructed
+     * @requires this is fully initialized
      * @effects exactly like Message.read(), but blocks until a
      *  message is available.  A half-completed message
      *  results in InterruptedIOException.
      */
     public Message receive() throws IOException, BadPacketException {
-        //Can't use same lock as send()!
-        synchronized(_in) {
-            Message m = null;
-            while (m == null) {
-                m=Message.read(_in);
-            }
-            _received++;
+        Message m = null;
+        while (m == null) {
+            m = Message.read(_in);
+        }
+        return m;
+    }
+
+    /**
+     * Receives a message with timeout.  This method is NOT thread-safe.
+     * Behavior is undefined if two threads are in a receive call at the same
+     * time for a given connection.
+     *
+     * @requires this is fully initialized
+     * @effects exactly like Message.read(), but throws InterruptedIOException
+     *  if timeout!=0 and no message is read after "timeout" milliseconds.  In
+     *  this case, you should terminate the connection, as half a message may
+     *  have been read.
+     */
+    public Message receive(int timeout)
+            throws IOException, BadPacketException, InterruptedIOException {
+        //temporarily change socket timeout.
+        int oldTimeout=_socket.getSoTimeout();
+        _socket.setSoTimeout(timeout);
+        try {
+            Message m=Message.read(_in);
+            if (m==null)
+                throw new InterruptedIOException();
             return m;
+        } finally {
+            _socket.setSoTimeout(oldTimeout);
         }
     }
 
     /**
-     * Receives a message with timeout.
+     * Sends a message.  The message may be buffered, so call flush() to
+     * guarantee that the message is sent synchronously.  This method is NOT
+     * thread-safe. Behavior is undefined if two threads are in a send call
+     * at the same time for a given connection.
      *
-     * @requires this is in the CONNECTED state
-     * @effects exactly like Message.read(), but throws InterruptedIOException if
-     *  timeout!=0 and no message is read after "timeout" milliseconds.  In this
-     *  case, you should terminate the connection, as half a message may have been
-     *  read.
+     * @requires this is fully initialized
+     * @modifies the network underlying this
+     * @effects send m on the network.  Throws IOException if problems
+     *   arise.
      */
-    public Message receive(int timeout)
-        throws IOException, BadPacketException, InterruptedIOException {
-        synchronized (_in) {
-            //temporarily change socket timeout.
-            int oldTimeout=_socket.getSoTimeout();
-            _socket.setSoTimeout(timeout);
-            try {
-                Message m=Message.read(_in);
-                if (m==null)
-                    throw new InterruptedIOException();
-                _received++;
-                return m;
-            } finally {
-                _socket.setSoTimeout(oldTimeout);
-            }
-        }
+    public void send(Message m) throws IOException {
+        m.write(_out);
+    }
+
+    /**
+     * Flushes any buffered messages sent through the send method.
+     */
+    public void flush() throws IOException {
+        _out.flush();
     }
 
     /** Returns the host set at construction */
@@ -465,21 +308,11 @@ public class Connection {
         return _socket.getLocalAddress();
     }
 
-    /** Returns the number of messages sent on this connection */
-    public int getNumMessagesSent() {
-        return _sent;
-    }
-
-    /** Returns the number of messages received on this connection */
-    public int getNumMessagesReceived() {
-        return _received;
-    }
-
-    /** Returns the number of messages I dropped while trying to send
-     *  on this connection.  This happens when the remote host cannot
-     *  keep up with me. */
-    public int getNumSentMessagesDropped() {
-        return _sentDropped;
+    /**
+     * @return true until close() is called on this Connection
+     */
+    public boolean isOpen() {
+        return !_closed;
     }
 
     /**

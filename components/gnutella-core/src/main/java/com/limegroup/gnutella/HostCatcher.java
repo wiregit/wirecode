@@ -43,31 +43,40 @@ public class HostCatcher {
     }
 
     /**
-     * Creates a host catcher whose maybe set contains the hosts
-     * in the given file.  (The likelys set is empty.)  If filename
-     * does not exist, then no error message is printed and this is
-     * initially empty.  The file is expected to contain a sequence of
+     * Links the HostCatcher up with the other back end pieces
+     */
+    public void initialize(Acceptor acceptor, ConnectionManager manager) {
+        this.acceptor = acceptor;
+        this.manager = manager;
+    }
+
+    /**
+     * Links the HostCatcher up with the other back end pieces, and, if quick
+     * connect is not specified in the SettingsManager, loads
+     * the hosts in the host list into the maybe set.  (The likelys set is
+     * empty.)  If filename does not exist, then no error message is printed and * this is initially empty.  The file is expected to contain a sequence of
      * lines in the format "<host>:port\n".  Lines not in this format
      * are silently ignored.
-     * Must call initialize before using.
      */
-    public HostCatcher(ActivityCallback callback, String filename) {
-        this.callback = callback;
+    public void initialize(Acceptor acceptor, ConnectionManager manager,
+                           String filename) {
+        this.acceptor = acceptor;
+        this.manager = manager;
+    }
 
+
+
+    /**
+     * Reads in endpoints from the given file
+     * @modifies this
+     * @effects read hosts from the given file.
+     */
+    public synchronized void read(String filename)
+            throws FileNotFoundException, IOException {
         BufferedReader in=null;
-        try {
-            in=new BufferedReader(new FileReader(filename));
-        } catch (FileNotFoundException e) {
-            callback.error(ActivityCallback.ERROR_10);
-            return;
-        }
+        in=new BufferedReader(new FileReader(filename));
         while (true) {
-            String line=null;
-            try {
-                line=in.readLine();
-            } catch (IOException e) {
-                return; //fatal
-            }
+            String line=in.readLine();
             if (line==null)   //nothing left to read?  Done.
                 break;
 
@@ -95,14 +104,6 @@ public class HostCatcher {
             set.add(e);
             }
         }
-    }
-
-    /**
-     * Links the HostCatcher up with the other back end pieces
-     */
-    public void initialize(Acceptor acceptor, ConnectionManager manager) {
-        this.acceptor = acceptor;
-        this.manager = manager;
     }
 
     /**
