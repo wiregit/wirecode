@@ -17,10 +17,10 @@ public final class AlternateLocationTest extends TestCase {
 
 
 	private static final String[] equalLocs = {
-		"http://200.30.1.02:6352/get/2/"+
-		    "lime%20capital%20management%2001.mpg",
-		"http://200.30.1.02:6352/get/2/"+
-		    "lime%20capital%20management%2001.mpg"
+		"http://200.30.1.02:6352" + HTTPConstants.URI_RES_N2R +
+		    "urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB",
+		"http://200.30.1.02:6352" + HTTPConstants.URI_RES_N2R +
+		    "urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB",
 	};
 
 	private static final String[] VALID_TIMESTAMPS = {
@@ -67,25 +67,79 @@ public final class AlternateLocationTest extends TestCase {
 	}
 
 	/**
-	 * Tests the constructor that takes a URL and a URN as arguments.
+	 * Tests the constructor that takes a URL as an argument to make sure it
+	 * succeeds when it should.
 	 */
-	public void testUrlUrnConstructor() {
+	public void testUrlUrnConstructorForSuccess() {
 		try {
 			for(int i=0; i<HugeTestUtils.URNS.length; i++) {
 				URN urn = URN.createSHA1Urn(HugeTestUtils.VALID_URN_STRINGS[i]);
-				URL url1 = new URL("http", HugeTestUtils.HOST_STRINGS[i], 6346, 
-								   HTTPConstants.URI_RES_N2R+
-								   HugeTestUtils.URNS[i].httpStringValue());
-				URL url2 = new URL("http", HugeTestUtils.HOST_STRINGS[i], 6346, "/test.htm");
-				AlternateLocation al1 = 
-				    AlternateLocation.createAlternateLocation(url1);
-				AlternateLocation al2 = 
-				    AlternateLocation.createAlternateLocation(url2);
+				URL url = new URL("http", HugeTestUtils.HOST_STRINGS[i], 6346, 
+								  HTTPConstants.URI_RES_N2R+
+								  HugeTestUtils.URNS[i].httpStringValue());
+				AlternateLocation al = 
+				    AlternateLocation.createAlternateLocation(url);
 			}
 		} catch(IOException e) {
 			// this also catches MalformedURLException
 			fail("AlternateLocation constructor should not have thrown an "+
 			"exception: "+e);
+		}
+	}
+
+	/**
+	 * Tests the constructor that takes a string as an argument to make sure it
+	 * succeeds when it should.
+	 */
+	public void testStringUrnConstructorForSuccess() {
+		try {
+			for(int i=0; i<HugeTestUtils.URNS.length; i++) {
+				URN urn = URN.createSHA1Urn(HugeTestUtils.VALID_URN_STRINGS[i]);
+				String url = "http://"+HugeTestUtils.HOST_STRINGS[i]+":6346"+ 
+					HTTPConstants.URI_RES_N2R+
+					HugeTestUtils.URNS[i].httpStringValue();
+				AlternateLocation al = 
+				    AlternateLocation.createAlternateLocation(url);
+			}
+		} catch(IOException e) {
+			// this also catches MalformedURLException
+			fail("AlternateLocation constructor should not have thrown an "+
+			"exception: "+e);
+		}
+	}
+
+	/**
+	 * Tests the constructor that takes a URL as an argument to make sure it fails when
+	 * there's no SHA1.
+	 */
+	public void testUrlUrnConstructorForFailure() {
+		try {
+			for(int i=0; i<HugeTestUtils.URNS.length; i++) {
+				URL url = new URL("http", HugeTestUtils.HOST_STRINGS[i], 6346, "/test.htm");
+				AlternateLocation al = 
+				    AlternateLocation.createAlternateLocation(url);
+				fail("AlternateLocation constructor should have thrown an exception");
+			}
+		} catch(IOException e) {
+			// this also catches MalformedURLException
+		}
+	}
+
+
+	/**
+	 * Tests the constructor that takes a URL as an argument to make sure it fails when
+	 * there's no SHA1.
+	 */
+	public void testStringUrnConstructorForFailure() {
+		try {
+			for(int i=0; i<HugeTestUtils.URNS.length; i++) {
+				String url = "http://" +HugeTestUtils.HOST_STRINGS[i]+":6346/test.htm";
+				AlternateLocation al = 
+				    AlternateLocation.createAlternateLocation(url);
+				fail("AlternateLocation constructor should have thrown an exception");
+			}
+		} catch(IOException e) {
+			// this also catches MalformedURLException
 		}
 	}
 

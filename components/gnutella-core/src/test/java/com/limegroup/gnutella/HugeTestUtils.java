@@ -112,35 +112,35 @@ public final class HugeTestUtils {
 	 * Alternate locations with timestamps.
 	 */
 	public static final String[] VALID_TIMESTAMPED_LOCS = {
-		"http://201.34.78.2:6352/get/2/"+
-		                     "lime%20capital%20management%2001.mpg "+
-		                     "2002-04-09T20:32:33Z",
-		"http://201.34.78.4:6352/get/2/"+
-		               "lime%20capital%20management%2002.mpg "+
-		               "2002-04-09T20:32:34Z",
-		"http://201.28.12.36:6352/get/2/"+
-		               "lime%20capital%20management%2001.mpg "+
-		               "2002-04-09T20:32:33Z",
-		"http://201.98.12.36:6342/get/2/"+
-		               "lime%20capital%20management%2001.mpg "+
-		               "2002-04-09T20:32:33Z",
-		"http://201.36.12.36:6351/get/2/"+
-		               "lime%20capital%20management%2001.mpg "+
-		               "2002-04-09T20:32:33Z",
-		"http://201.90.12.36:6362/get/2/"+
-		               "lime%20capital%20management%2001.mpg "+
-		               "2002-04-09T20:32:33Z",
-		"http://201.90.12.36:6352/get/2/"+
-		               "lime%20capital%20management%2001.mpg "+
-		               "\r\n2002-04-09T20:32:33Z",
-		"http://201.90.12.36:6382/get/2/"+
-		               "lime%20capital%20management%2001.mpg "+
-		               "  \n\r\n2002-04-09T20:32:33Z",
-		"http://201.90.12.36:6352/get/2/"+
-            "lime%20capital%20management%2001.mpg "+
+		"http://201.34.78.2:6352" + HTTPConstants.URI_RES_N2R +
+		    "urn:sha1:ULSTTIPQGSSZTS5FJUPAKUZWUGYQYPTE "+
+		    "2002-04-09T20:32:33Z",
+		"http://201.34.78.4:6352" + HTTPConstants.URI_RES_N2R +
+		    "urn:sha1:ULSTTIPQGSSZTS5FJUPAKUZWUGYQYPTE "+
+		    "2002-04-09T20:32:34Z",
+		"http://201.28.12.36:6352" + HTTPConstants.URI_RES_N2R +
+		    "urn:sha1:ULSTTIPQGSSZTS5FJUPAKUZWUGYQYPTE "+
+		    "2002-04-09T20:32:33Z",
+		"http://201.98.12.36:6342" + HTTPConstants.URI_RES_N2R +
+		    "urn:sha1:ULSTTIPQGSSZTS5FJUPAKUZWUGYQYPTE "+
+		    "2002-04-09T20:32:33Z",
+		"http://201.36.12.36:6351" + HTTPConstants.URI_RES_N2R +
+		    "urn:sha1:ULSTTIPQGSSZTS5FJUPAKUZWUGYQYPTE "+
+		    "2002-04-09T20:32:33Z",
+		"http://201.90.12.36:6362" + HTTPConstants.URI_RES_N2R +
+		    "urn:sha1:ULSTTIPQGSSZTS5FJUPAKUZWUGYQYPTE "+
+		    "2002-04-09T20:32:33Z",
+		"http://201.90.12.36:6352" + HTTPConstants.URI_RES_N2R +
+		    "urn:sha1:ULSTTIPQGSSZTS5FJUPAKUZWUGYQYPTE "+
+		    "\r\n2002-04-09T20:32:33Z",
+		"http://201.90.12.36:6382" + HTTPConstants.URI_RES_N2R +
+		    "urn:sha1:ULSTTIPQGSSZTS5FJUPAKUZWUGYQYPTE "+
+		    "  \n\r\n2002-04-09T20:32:33Z",
+		"http://201.90.12.36:6352" + HTTPConstants.URI_RES_N2R +
+            "urn:sha1:ULSTTIPQGSSZTS5FJUPAKUZWUGYQYPTE "+
             "  \n\r\n2002-04-09T20:32:33Z",
-		"http://201.90.12.36:6352/get/2/"+
-            "lime%20capital%20management%2001.mpg "+
+		"http://201.90.12.36:6352" + HTTPConstants.URI_RES_N2R +
+            "urn:sha1:ULSTTIPQGSSZTS5FJUPAKUZWUGYQYPTE "+
             "  \n\r\n2002-04-09T20:32:33Z"
 	};
 
@@ -148,55 +148,55 @@ public final class HugeTestUtils {
 	 * Alternate locations without timestamps.
 	 */
 	public static final String[] VALID_NONTIMESTAMPED_LOCS = {
-		"http://23.40.39.40:6352/get/2/"+
-		    "lime%20capital%20management%2001.mpg",
-		"http://221.20.12.36:6352/get/2/"+
-		    "lime%20capital%20management%2001.mpg",
-		"http://21.47.12.36:6352/get/2/"+
-		    "lime%20capital%20management%2001.mpg",
-		"http://201.40.201.35:6322/get/2/"+
-		    "lime%20capital%20management%2001.mpg",
-		"http://40.17.12.36:6332/get/2/"+
-		    "lime%20capital%20management%2001.mpg",
-		"http://12.24.40.67:6352/get/2/"+
-		    "lime%20capital%20management%2001.mpg",
-		"http://40.28.40.24:6352/get/2/"+
-		    "lime%20capital%20management%2001.mpg"
+		"http://23.40.39.40:6352" + HTTPConstants.URI_RES_N2R +
+		    "urn:sha1:ULSTTIPQGSSZTS5FJUPAKUZWUGYQYPTE",
+		"http://221.20.12.36:6352" + HTTPConstants.URI_RES_N2R +
+		    "urn:sha1:ULSTTIPQGSSZTS5FJUPAKUZWUGYQYPTE",
+		"http://21.47.12.36:6352" + HTTPConstants.URI_RES_N2R +
+		    "urn:sha1:ULSTTIPQGSSZTS5FJUPAKUZWUGYQYPTE",
+		"http://201.40.201.35:6322" + HTTPConstants.URI_RES_N2R +
+		    "urn:sha1:ULSTTIPQGSSZTS5FJUPAKUZWUGYQYPTE",
+		"http://40.17.12.36:6332" + HTTPConstants.URI_RES_N2R +
+		    "urn:sha1:ULSTTIPQGSSZTS5FJUPAKUZWUGYQYPTE",
+		"http://12.24.40.67:6352" + HTTPConstants.URI_RES_N2R +
+		    "urn:sha1:ULSTTIPQGSSZTS5FJUPAKUZWUGYQYPTE",
+		"http://40.28.40.24:6352" + HTTPConstants.URI_RES_N2R +
+		    "urn:sha1:ULSTTIPQGSSZTS5FJUPAKUZWUGYQYPTE"
 	};
 
 	/**
 	 * Alternate locations without timestamps that are not firewalled.
 	 */
 	public static final String[] NON_FIREWALLED_LOCS = {
-		"http://50.40.39.40:6352/get/2/"+
-		    "lime%20capital%20management%2001.mpg",
-		"http://51.20.12.36:6352/get/2/"+
-		    "lime%20capital%20management%2001.mpg",
-		"http://52.47.12.36:6352/get/2/"+
-		    "lime%20capital%20management%2001.mpg",
-		"http://53.40.201.35:6322/get/2/"+
-		    "lime%20capital%20management%2001.mpg",
-		"http://201.24.40.67:6352/get/2/"+
-		    "lime%20capital%20management%2001.mpg",
-		"http://201.28.40.24:6352/get/2/"+
-		    "lime%20capital%20management%2001.mpg"
+		"http://50.40.39.40:6352" + HTTPConstants.URI_RES_N2R +
+		    "urn:sha1:ULSTTIPQGSSZTS5FJUPAKUZWUGYQYPTE",
+		"http://51.20.12.36:6352" + HTTPConstants.URI_RES_N2R +
+		    "urn:sha1:ULSTTIPQGSSZTS5FJUPAKUZWUGYQYPTE",
+		"http://52.47.12.36:6352" + HTTPConstants.URI_RES_N2R +
+		    "urn:sha1:ULSTTIPQGSSZTS5FJUPAKUZWUGYQYPTE",
+		"http://53.40.201.35:6322" + HTTPConstants.URI_RES_N2R +
+		    "urn:sha1:ULSTTIPQGSSZTS5FJUPAKUZWUGYQYPTE",
+		"http://201.24.40.67:6352" + HTTPConstants.URI_RES_N2R +
+		    "urn:sha1:ULSTTIPQGSSZTS5FJUPAKUZWUGYQYPTE",
+		"http://201.28.40.24:6352" + HTTPConstants.URI_RES_N2R +
+		    "urn:sha1:ULSTTIPQGSSZTS5FJUPAKUZWUGYQYPTE",
 	};
 	
     public static final String[] FIREWALLED_LOCS = {
-		"http://192.168.39.40:6352/get/2/"+
-		    "lime%20capital%20management%2001.mpg",
-		"http://127.20.12.36:6352/get/2/"+
-		    "lime%20capital%20management%2001.mpg",
-		"http://10.47.12.36:6352/get/2/"+
-		    "lime%20capital%20management%2001.mpg",
-		"http://172.16.201.35:6322/get/2/"+
-		    "lime%20capital%20management%2001.mpg",
-		"http://172.17.12.36:6332/get/2/"+
-		    "lime%20capital%20management%2001.mpg",
-		"http://172.18.40.67:6352/get/2/"+
-		    "lime%20capital%20management%2001.mpg",
-		"http://172.31.40.24:6352/get/2/"+
-	    "lime%20capital%20management%2001.mpg"
+		"http://192.168.39.40:6352" + HTTPConstants.URI_RES_N2R +
+		    "urn:sha1:ULSTTIPQGSSZTS5FJUPAKUZWUGYQYPTE",
+		"http://127.20.12.36:6352" + HTTPConstants.URI_RES_N2R +
+		    "urn:sha1:ULSTTIPQGSSZTS5FJUPAKUZWUGYQYPTE",
+		"http://10.47.12.36:6352" + HTTPConstants.URI_RES_N2R +
+		    "urn:sha1:ULSTTIPQGSSZTS5FJUPAKUZWUGYQYPTE",
+		"http://172.16.201.35:6322" + HTTPConstants.URI_RES_N2R +
+		    "urn:sha1:ULSTTIPQGSSZTS5FJUPAKUZWUGYQYPTE",
+		"http://172.17.12.36:6332" + HTTPConstants.URI_RES_N2R +
+		    "urn:sha1:ULSTTIPQGSSZTS5FJUPAKUZWUGYQYPTE",
+		"http://172.18.40.67:6352" + HTTPConstants.URI_RES_N2R +
+		    "urn:sha1:ULSTTIPQGSSZTS5FJUPAKUZWUGYQYPTE",
+		"http://172.31.40.24:6352" + HTTPConstants.URI_RES_N2R +
+	        "urn:sha1:ULSTTIPQGSSZTS5FJUPAKUZWUGYQYPTE",
     };
 
 	/**
@@ -323,7 +323,7 @@ public final class HugeTestUtils {
 			try {
 				UNEQUAL_SHA1_LOCATIONS[i] = 
 					AlternateLocation.createAlternateLocation(UNEQUAL_URLS[i]);
-			} catch(MalformedURLException e) {
+			} catch(IOException e) {
 				// this should not happen
 				e.printStackTrace();
 			}
@@ -333,7 +333,7 @@ public final class HugeTestUtils {
 			try {
 				EQUAL_SHA1_LOCATIONS[i] = 
 					AlternateLocation.createAlternateLocation(EQUAL_URLS[0]);
-			} catch(MalformedURLException e) {
+			} catch(IOException e) {
 				// this should not happen
 				e.printStackTrace();
 			}
