@@ -216,6 +216,12 @@ public class ManagedDownloader implements Downloader, Serializable {
         return false;
     }
 
+    /* Adds the given location to this.  In typical use, rfd will be similar
+     * or same to some entry in this, but that is not required.
+     */
+    public void addDownload(RemoteFileDesc rfd) {
+    }
+
     /**
      * Accepts a push download.  If this chooses to download the given file
      * (with given index and clientGUID) from socket, returns true.  In this

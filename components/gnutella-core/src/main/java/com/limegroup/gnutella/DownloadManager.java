@@ -240,6 +240,13 @@ public class DownloadManager implements BandwidthTracker {
         return null;
     }
 
+
+    /* Adds the file named in qr to an existing downloader if appropriate.
+     */
+    public void handleQueryReply(QueryReply qr) {
+    }
+
+
     /**
      * Accepts the given socket for a push download to this host.
      * If the GIV is for a file that was never requested or has already
@@ -336,6 +343,13 @@ public class DownloadManager implements BandwidthTracker {
         if(active.isEmpty() && waiting.isEmpty())
             callback.downloadsComplete();
     }
+
+
+    /* Initiates a search for files similar to rfd.
+     */
+    public void sendQuery(RemoteFileDesc[] rfd) {
+    }
+
 
     /**
      * Sends a push request for the given file.  Returns false iff no push could
