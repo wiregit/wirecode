@@ -62,7 +62,7 @@ public class WriteRegulator {
         // Want to ideally achieve a steady state location in writing and 
         // reading window.  Don't want to get too far ahead or too far behind
         //
-        int sleepTime  = ((usedSpots+3) * baseWait);
+        int sleepTime  = ((usedSpots+1) * baseWait);
 
         // Ensure the sleep time is fairly distributed
         if ( sleepTime < windowSize ) {
