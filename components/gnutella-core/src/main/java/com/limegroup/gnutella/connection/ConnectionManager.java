@@ -222,10 +222,6 @@ public class ConnectionManager {
              
          try {   
 			 startConnection(connection);			 
-         } catch(IOException e) {
-             // we could not start the connection for some reason --
-             // this can easily happen, for example, if the connection
-             // just drops
          } catch(Throwable e) {
              //Internal error!
              ErrorService.error(e);
@@ -1529,7 +1525,6 @@ public class ConnectionManager {
 					initializeExternallyGeneratedConnection(_connection);
 				}
 				startConnection(_connection);
-            } catch(IOException e) {
             } catch(Throwable e) {
                 //Internal error!
                 ErrorService.error(e);
@@ -1549,7 +1544,7 @@ public class ConnectionManager {
 	 * @throws <tt>IOException</tt> if there is an excpetion while looping
 	 *  for messages
 	 */
-	private void startConnection(Connection conn) throws IOException {
+	private void startConnection(Connection conn) {
 	    Thread.currentThread().setName("MessageLoopingThread");
 
 		if(conn.isGUESSUltrapeer()) {
@@ -1557,8 +1552,12 @@ public class ConnectionManager {
 				conn.getListeningPort());
 		}
 
-		// this can throw IOException
-		conn.reader().startReading();
+        try {
+            // this can throw IOException
+            conn.reader().startReading();
+        } catch(IOException e) {
+            RouterService.removeConnection(conn);
+        }
 	}
     
     /**
@@ -1626,7 +1625,6 @@ public class ConnectionManager {
                 }
 
 				startConnection(connection);
-            } catch(IOException e) {
             } catch(Throwable e) {
                 //Internal error!
                 ErrorService.error(e);
