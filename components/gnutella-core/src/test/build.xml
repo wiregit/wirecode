@@ -84,13 +84,38 @@
      </clover-report>
   </target>
   
+  <target name="clover.history.point" depends="with.clover">
+    <clover-historypoint historyDir="${cloverdir}/history"/>
+  </target>
+  
+  <target name="clover.history.html" depends="with.clover">
+     <tstamp>
+       <format property="clover.time"
+               pattern="EEE, MMM d, yyyy hh:mm a"/>
+     </tstamp>
+    <clover-report>
+      <historical outfile="${cloverdir}/history/html"
+                  title="LimeWire - ${clover.time}"
+                  historyDir="${cloverdir}/history">
+        <format type="html"/>
+      </historical>
+    </clover-report>
+  </target>
+  
+  <target name="clover.prepare">
+    <mkdir dir="{cloverdir}"/>
+  </target>
+  
   <target name="clover.clean">
-    <delete dir="${cloverdir}"/>
+    <delete dir="${cloverdir}/html"/>
+    <delete dir="${cloverdir}/history/html"/>
   </target>
   
   <target name="clover.all" depends="clean, with.clover">
     <antcall target="test all" inheritRefs="true"/>
     <antcall target="clover.html" inheritRefs="true"/>
+    <antcall target="clover.history.point" inheritRefs="true"/>
+    <antcall target="clover.history.html" inheritRefs="true"/>
   </target>        
 
   <!-- Initialization stuff -->
@@ -121,7 +146,7 @@
     <mkdir dir="${builddir}"/>
     <mkdir dir="${reports}"/>
     <mkdir dir="${reports}/html"/>
-     <mkdir dir="${cloverdir}"/>    
+    <antcall target="clover.prepare"/>
   </target>
 
  <!-- builds all files, including tests, in the project to the specified directory-->
