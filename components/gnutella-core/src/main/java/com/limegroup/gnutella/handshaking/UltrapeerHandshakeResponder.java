@@ -68,6 +68,10 @@ public class UltrapeerHandshakeResponder
 		    ret.put(HeaderNames.CONTENT_ENCODING, HeaderNames.DEFLATE_VALUE);
 		}
 		    
+        // see if the node needs to be proxied
+        if(response.desiresProxyServices())
+            setupProxyServices(ret, response);
+        
         // accept the response
         return HandshakeResponse.createAcceptOutgoingResponse(ret);
 	}
@@ -107,11 +111,23 @@ public class UltrapeerHandshakeResponder
 		    ret.put(HeaderNames.CONTENT_ENCODING, HeaderNames.DEFLATE_VALUE);
 		}		
 		
+        // see if the node needs to be proxied
+        if(response.desiresProxyServices())
+            setupProxyServices(ret, response);
+        
         // accept the connection, and let the Ultrapeer know about Ultrapeers
         // that are as many hops away as possible, to avoid cycles.
         return HandshakeResponse.createAcceptIncomingResponse(ret);
 	}
 
+    private void setupProxyServices(Properties ret, HandshakeResponse response) {
+            // part 1 of the protocol
+            ret.put(HeaderNames.X_SERVENT_ID,
+                    ret.getProperty(HeaderNames.X_SERVENT_ID));
+            // part 2 - the proxy services
+            // push proxy
+            ret.put(HeaderNames.X_PROXY_SERVICE, HeaderNames.X_PUSH_PROXY);
+    }
 
 	/**
 	 * Returns whether or not the set of connection headers denotes that the

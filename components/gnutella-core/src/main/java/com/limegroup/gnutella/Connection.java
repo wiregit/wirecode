@@ -740,7 +740,17 @@ public class Connection {
                 continue;                  //ignore lines without ':'
             String key=line.substring(0, i);
             String value=line.substring(i+1).trim();
-            HEADERS_READ.put(key, value);
+            // because there can be multiple headers for proxy services, we need
+            // to build a set out of them
+            if (key.equals(HeaderNames.X_PROXY_SERVICE)) {
+                Set vals = (Set) HEADERS_READ.get(HeaderNames.X_PROXY_SERVICE);
+                if (vals == null)
+                    vals = new HashSet();
+                vals.add(value);
+                HEADERS_READ.put(key, vals);
+            }
+            else
+                HEADERS_READ.put(key, value);
         }
     }
 

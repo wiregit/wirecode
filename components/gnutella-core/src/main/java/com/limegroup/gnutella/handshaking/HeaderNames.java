@@ -81,6 +81,16 @@ public final class HeaderNames {
      */
     public static final String X_SERVENT_ID = "Servent-ID";
 
+    /**
+     * Header to offer the servent ID (client GUID) during Handshaking
+     */
+    public static final String X_PROXY_SERVICE = "X-Proxy-Service";
+
+    /**
+     * Header to offer the servent ID (client GUID) during Handshaking
+     */
+    public static final String X_PUSH_PROXY = "Type=Push; Ver=0.1";
+
 
     /**
      * Header for Content-Encoding. Useful because typing

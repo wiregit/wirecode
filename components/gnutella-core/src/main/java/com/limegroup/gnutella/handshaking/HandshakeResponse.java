@@ -170,7 +170,12 @@ public final class HandshakeResponse {
     /**
      * Constant for whether or not this connection wants to be proxied.
      */
-    private final boolean DESIRES_PROXY_SERVICES;
+    private final boolean PROXY_SERVICES_SUPPORTED;
+
+    /**
+     * Constant for whether or not this connection is PushProxying you.
+     */
+    private final boolean PUSH_PROXY_ENABLED;
 
     /**
      * Creates a HandshakeResponse which defaults the status code and status
@@ -192,7 +197,7 @@ public final class HandshakeResponse {
         STATUS_CODE = code;
         STATUS_MESSAGE = message;
         HEADERS = headers;
-        DEGREE = extractIntHeaderValue(HEADERS, HeaderNames.X_DEGREE, 6);         
+        DEGREE = extractIntHeaderValue(HEADERS, HeaderNames.X_DEGREE, 6);
         HIGH_DEGREE = getNumIntraUltrapeerConnections() >= 15;
         ULTRAPEER_QRP = 
             isVersionOrHigher(HEADERS, 
@@ -218,8 +223,20 @@ public final class HandshakeResponse {
         DEFLATE_ENCODED = isStringValue(HEADERS,
             HeaderNames.CONTENT_ENCODING, HeaderNames.DEFLATE_VALUE);
 
-        DESIRES_PROXY_SERVICES = 
+        PROXY_SERVICES_SUPPORTED = 
             (headers.getProperty(HeaderNames.X_SERVENT_ID) != null);
+
+        boolean pushFound = false;
+        if (PROXY_SERVICES_SUPPORTED) {
+            Set services = (Set) headers.get(HeaderNames.X_PROXY_SERVICE);
+            Iterator iter = services.iterator();
+            while (iter.hasNext()) {
+                String currService = (String) iter.next();
+                if (currService.indexOf("Push") != -1)
+                    pushFound = true;
+            }
+        }
+        PUSH_PROXY_ENABLED = pushFound;
     }
     
     /**
@@ -766,7 +783,17 @@ public final class HandshakeResponse {
      *  otherwise <tt>false</tt>
      */
     public boolean desiresProxyServices() {
-        return DESIRES_PROXY_SERVICES;
+        return LEAF && PROXY_SERVICES_SUPPORTED;
+    }
+
+    /**
+     * Accessor for whether or not this connection is Push Proxying you.
+     *
+     * @return <tt>true</tt> if this connection is push proxying you,
+     *  otherwise <tt>false</tt>
+     */
+    public boolean isPushProxy() {
+        return ULTRAPEER && PROXY_SERVICES_SUPPORTED && PUSH_PROXY_ENABLED;
     }
 
     /**
