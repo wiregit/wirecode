@@ -2,6 +2,7 @@ package com.limegroup.gnutella.downloader;
 
 import java.io.*;
 import com.limegroup.gnutella.*;
+import com.limegroup.gnutella.util.CommonUtils;
 import com.sun.java.util.collections.*;
 import com.limegroup.gnutella.util.FileComparator;
 
@@ -203,7 +204,7 @@ public class IncompleteFileManager implements Serializable {
                 //there's no need to look at BLOCKS as well...
                 for (int i=1 ; ; i++) {
                     file=new File(incDir, 
-                                  tempName(rfd.getFileName(),rfd.getSize(),i));
+                                  tempName(CommonUtils.convertFileName(rfd.getFileName()),rfd.getSize(),i));
                     if (! hashes.values().contains(file))
                         break;
                 }

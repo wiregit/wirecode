@@ -1331,7 +1331,7 @@ public class ManagedDownloader implements Downloader, Serializable {
         try {
             File downloadDir = SettingsManager.instance().getSaveDirectory();
             String filename=f.getName();
-            File completeFile = new File(downloadDir, filename);  
+            File completeFile = new File(downloadDir, CommonUtils.convertFileName(filename));  
             if ( completeFile.exists() ) 
                 retVal = true;
         }
@@ -2207,19 +2207,22 @@ public class ManagedDownloader implements Downloader, Serializable {
         //for picking the downloaded file name; see tryAllDownloads2.  See also
         //http://core.limewire.org/issues/show_bug.cgi?id=122.
         
+        String ret = null;
         //a) Return names of one of the active downloaders.
         if (dloaders.size()>0)
-            return ((HTTPDownloader)dloaders.get(0))
+            ret = ((HTTPDownloader)dloaders.get(0))
                       .getRemoteFileDesc().getFileName();
         //b) Return name of first element of current download bucket.
         else if (files!=null && files.size()>0)
-            return ((RemoteFileDesc)files.get(0)).getFileName();
+            ret = ((RemoteFileDesc)files.get(0)).getFileName();
         //c) Return name of some arbitrary RFD;
         else if (allFiles.length > 0)
-            return allFiles[0].getFileName();
+            ret = allFiles[0].getFileName();
         //d) Give up.  Note that subclass may take action.
         else
-            return UNKNOWN_FILENAME;  
+            ret = UNKNOWN_FILENAME;
+
+        return CommonUtils.convertFileName(ret);
     }
 
     public synchronized int getContentLength() {

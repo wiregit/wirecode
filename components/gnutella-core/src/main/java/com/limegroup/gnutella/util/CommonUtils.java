@@ -131,7 +131,17 @@ public final class CommonUtils {
 	 */
 	private static boolean _isSolaris = false;
 
-
+    /**
+     * Several arrays of illegal characters on various operating systems.
+     * Used by convertFileName
+     */
+    private static final char[] ILLEGAL_CHARS_ANY_OS = {
+		'/', '\n', '\r', '\t'
+	};
+    private static final char[] ILLEGAL_CHARS_UNIX = {'`'};
+    private static final char[] ILLEGAL_CHARS_WINDOWS = { 
+		'?', '*', '\\', '<', '>', '|', '\"' 
+	};
 	/**
 	 * Variable for whether or not the JVM is 1.1.8.
 	 */
@@ -1022,6 +1032,28 @@ public final class CommonUtils {
             return true; //0.0.0.0 - Gnutella (well BearShare really) convention
         else
             return false;        
+    }
+
+    /** 
+     * Replaces OS specific illegal characters from any filename with '_', 
+	 * including ( / \n \r \t ) on all operating systems, ( ? * \  < > | " ) 
+	 * on Windows, ( ` ) on unix.
+     *
+     * @param name the filename to check for illegal characters
+     * @return String containing the cleaned filename
+     */
+    public static String convertFileName(String name) {
+        for (int i = 0; i < ILLEGAL_CHARS_ANY_OS.length; i) 
+            name = name.replace(ILLEGAL_CHARS_ANY_OS[i], '_');
+		
+        if ( _isWindows ) {
+            for (int i = 0; i < ILLEGAL_CHARS_WINDOWS.length; i) 
+                name = name.replace(ILLEGAL_CHARS_WINDOWS[i], '_');
+        } else if ( _isLinux || _isSolaris ) {
+            for (int i = 0; i < ILLEGAL_CHARS_UNIX.length; i) 
+                name = name.replace(ILLEGAL_CHARS_UNIX[i], '_');
+        }
+        return name;
     }
 
     /*
