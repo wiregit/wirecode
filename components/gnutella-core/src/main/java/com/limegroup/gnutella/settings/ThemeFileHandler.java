@@ -62,8 +62,15 @@ public final class ThemeFileHandler {
   		        themeFile = ThemeSettings.THEME_FILE.getValue();
                 themeDir = ThemeSettings.extractThemeDir(themeFile);
             }   
-            // unpack the zip 
-            ThemeSettings.expandTheme(themeFile, themeDir, force || false);
+            // unpack the zip -- if an error occurred, revert to the default
+            // theme & unpack that if necessary.
+            if(!ThemeSettings.expandTheme(themeFile, themeDir, force)) {
+                ThemeSettings.THEME_FILE.revertToDefault();
+                themeFile = ThemeSettings.THEME_FILE.getValue();
+                themeDir = ThemeSettings.extractThemeDir(themeFile);
+                if(!themeDir.isDirectory())
+                    ThemeSettings.expandTheme(themeFile, themeDir, false);
+            }
         }
 
 		final File THEME_PROPS = new File(themeDir, "theme.txt");

@@ -3,6 +3,7 @@ package com.limegroup.gnutella.settings;
 import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.util.*;
 import java.util.*;
+import java.util.zip.ZipException;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipEntry;
 import java.io.*;
@@ -169,16 +170,22 @@ public final class ThemeSettings extends LimeProps {
      *  files in the destination folder when we expand the zip, regardless 
      *  of File/ZipEntry timestamp
      */
-    static void expandTheme(File themeFile, File themeDir, 
+    static boolean expandTheme(File themeFile, File themeDir, 
                             boolean overwrite) {
         themeDir.mkdirs();
         try {
             FileUtils.setWriteable(themeDir);
             Expand.expandFile(themeFile, themeDir, overwrite);
+        } catch(ZipException ze) {
+            // invalid theme, tell the user.
+            MessageService.showError("ERROR_APPLYING_INVALID_THEME_FILE");
+            return false;
         } catch(IOException e) {
             // this should never really happen, so report it
-            ErrorService.error(e);						
-        }        
+            ErrorService.error(e);
+            return false;
+        }
+        return true;
     }
 
     /**
