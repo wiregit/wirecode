@@ -411,6 +411,30 @@ public class HTTPUploader implements Runnable {
         }
     }
 
+	/**
+     *   Handle too many upload requests
+	 */
+    public static void doLimitReached(Socket s) {
+    	OutputStream ostream = null;
+        /* Sends a 503 Service Unavailable message */
+        try {
+            ostream = s.getOutputStream();
+            /* is this the right format? */
+            String str;
+            str = "HTTP 503 Service Unavailable \r\n";
+            ostream.write(str.getBytes());
+            str = "\r\n";     
+            ostream.write(str.getBytes());
+            ostream.flush();    
+        } catch (Exception e) {
+        }
+        try {
+            ostream.close();
+            s.close();
+        } catch (Exception e) {
+        }
+    }
+
 
     public void shutdown()
     {
