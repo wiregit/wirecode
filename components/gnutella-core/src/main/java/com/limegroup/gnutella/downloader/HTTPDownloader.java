@@ -266,7 +266,6 @@ public class HTTPDownloader implements BandwidthTracker {
 	public void connectTCP(int timeout) throws IOException {
         //Connect, if not already done.  Ignore 
         //The try-catch below is a work-around for JDK bug 4091706.
-        InputStream istream=null;
         try {            
             if (_socket==null) {
                 long curTime = System.currentTimeMillis();

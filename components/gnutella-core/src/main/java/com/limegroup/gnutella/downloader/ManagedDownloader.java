@@ -213,6 +213,11 @@ public class ManagedDownloader implements Downloader, Serializable {
     /** The number of bytes to overlap when swarming and resuming, used to help
      *  verify that different sources are serving the same content. */
     static final int OVERLAP_BYTES=10;
+    
+    /**
+     * The maximum amount of times we'll try to recover.
+     */
+    private static final int MAX_RECOVERY_ATTEMPTS = 5;
 
     /** The time to wait between requeries, in milliseconds.  This time can
      *  safely be quite small because it is overridden by the global limit in
@@ -1774,43 +1779,69 @@ public class ManagedDownloader implements Downloader, Serializable {
             hashTree = TigerTreeCache.instance().getHashTree(sha1);  
         }
         
-        //2. Do the download
+        URN fileHash;
         int status = -1;  //TODO: is this equal to COMPLETE etc?
-        try {
-            status=tryAllDownloads3();//Exception may be thrown here. 
-        } catch (InterruptedException e) { }
 
-        //Close the file controlled by commonOutFile.
-        commonOutFile.close();
+        // Continue doing the download until we've recovered all
+        // corrupt bytes.
+        for(int i = 0; ; i++) {
+            try {
+                //2. Do the download
+                status = tryAllDownloads3();//Exception may be thrown here.
+            } catch (InterruptedException e) { }
+    
+            //Close the file controlled by commonOutFile.
+            commonOutFile.close();
+            
+            // if the user hasn't answered our corrupt question yet, wait.
+            waitForCorruptResponse();
         
-        if(corruptState != NOT_CORRUPT_STATE) {//it is corrupt
-            synchronized(corruptStateLock) {
-                try{
-                    while(corruptState==CORRUPT_WAITING_STATE) {
-                        corruptStateLock.wait();
-                    }
-                } catch(InterruptedException ignored) {
-                    //interruped while waiting for user. do nothing
-                }
-            }
+            if (status == -1) //InterruptedException from tryAllDownloads3
+                throw new InterruptedException();
+            if (status != COMPLETE)
+                return status;
+
+            //3. Find out the hash of the file and verify that its the same
+            // as the hash of the bucket it was downloaded from.
+            //If the hash is different, we try to automatically recover if
+            //we have a HashTree.
+            fileHash = scanForCorruption(i);
             if (corruptState==CORRUPT_STOP_STATE) {
                 cleanupCorrupt(incompleteFile, completeFile.getName());
                 return CORRUPT_FILE;
-            } 
-            else if (corruptState==CORRUPT_CONTINUE_STATE) {
-                ;//do nothing. 
-                //Just fall through and and behave as normal complete
             }
+
+            //if we didn't identify any corrupted ranges, exit.
+            if(state != IDENTIFY_CORRUPTION)
+                break;                
         }
         
-        if (status==-1) //InterruptedException was thrown in tryAllDownloads3
-            throw new InterruptedException();
-        if (status!=COMPLETE)
-            return status;
+        // 4. Save the file to disk.
+        return saveFile(fileHash);
+    }
+    
+    /**
+     * Waits indefinitely for a response to the corrupt message prompt.
+     */
+    private void waitForCorruptResponse() {
+        if(corruptState != NOT_CORRUPT_STATE) {
+            synchronized(corruptStateLock) {
+                try {
+                    while(corruptState==CORRUPT_WAITING_STATE)
+                        corruptStateLock.wait();
+                } catch(InterruptedException ignored) {}
+            }
+        }
+    }        
+    
+    /**
+     * Scans the file for corruption, returning the hash of the file on disk.
+     */
+    private URN scanForCorruption(int iteration) {
+        // if we already were told to stop, then stop.
+        if (corruptState==CORRUPT_STOP_STATE)
+            return null;
         
-        //3. Find out the hash of the file and verify that its the same
-        // as the hash of the bucket it was downloaded from.
-        //If the hash is different, we should ask the user about corruption
         //if the user has not been asked before.               
         URN bucketHash = buckets.getURNForBucket(bucketNumber);
         URN fileHash=null;
@@ -1818,78 +1849,76 @@ public class ManagedDownloader implements Downloader, Serializable {
             // let the user know we're hashing the file
             setState(HASHING);
             fileHash = URN.createSHA1Urn(incompleteFile);
-        } catch(IOException ignored) {}
-        if(bucketHash!=null) { //if bucketHash==null, we cannot check
-            //if fileHash == null, it will be a mismatch
-            synchronized(corruptStateLock) {
-                if(!bucketHash.equals(fileHash)) {
-                    // immediately set as corrupt,
-                    // will change to non-corrupt later if user ignores
-                    setState(CORRUPT_FILE);
-                    promptAboutCorruptDownload();
-                    if(LOG.isWarnEnabled())
-                        LOG.warn("hash verification problem, fileHash="+
-                                       fileHash+", bucketHash="+bucketHash);
-                }
-                try {
-                    while(corruptState==CORRUPT_WAITING_STATE)
-                        corruptStateLock.wait();
-                } catch(InterruptedException ignored2) {
-                    //interrupted while waiting for user. do nothing.
-                }
-            }
-            if (corruptState==CORRUPT_STOP_STATE) {
-                cleanupCorrupt(incompleteFile, completeFile.getName());
-                return CORRUPT_FILE;
-            } else if (
-                (corruptState == CORRUPT_CONTINUE_STATE)
-                    && (hashTree != null)) {
-                // we can try to use the hashtree to identify corrupt ranges!
-                try {
-                    setState(IDENTIFY_CORRUPTION);
-                    if (LOG.isDebugEnabled())
-                        LOG.debug("identifying corruption...");
+        }
+        catch(IOException ignored) {}
+        catch(InterruptedException ignored) {}
+        
+        // If bucketHash is null, we can't check at all.
+        if(bucketHash == null)
+            return fileHash;
 
-                    commonOutFile.deleteCorruptedBlocks(hashTree, incompleteFile);
-                    // additional check for debugging!
-                    if (LOG.isDebugEnabled()) {
-                        int doneSize =
-                            (int) IncompleteFileManager.getCompletedSize(
-                                incompleteFile);
-                        Iterator freeBlocks =
-                            commonOutFile.getFreeBlocks(doneSize);
-                        if (!freeBlocks.hasNext())
-                            LOG.debug("bad SHA1 but good HASHTREE!");
-            } 
-                    corruptState = NOT_CORRUPT_STATE;
-                    return WAITING_FOR_RETRY;
-                } catch (IOException ioe) {
-                    if (LOG.isDebugEnabled())
-                        LOG.debug(ioe);
-        }
-            } else if (LOG.isDebugEnabled() && hashTree != null) {
-                // only for testing, skip otherwise
-                try {
-                    setState(IDENTIFY_CORRUPTION);
-                    LOG.debug("identifying corruption");
-                    commonOutFile.deleteCorruptedBlocks(hashTree, incompleteFile);
-                    corruptState = NOT_CORRUPT_STATE;
-                    int doneSize =
-                        (int) IncompleteFileManager.getCompletedSize(
-                            incompleteFile);
-                    Iterator freeBlocks = commonOutFile.getFreeBlocks(doneSize);
+        // If they're fine, everything's fine.            
+        if(bucketHash.equals(fileHash))
+            return fileHash;
         
-                    if (freeBlocks.hasNext())
-                        LOG.debug("file has good SHA1 but bad HASHTREE");
-                    else
-                        LOG.debug("SHA1 and HASHTREE good");
-                } catch (IOException ioe) {
-                    ErrorService.error(ioe);
-                    // couldn't hash file on disk. Give up.
+        if(LOG.isWarnEnabled())
+            LOG.warn("hash verification problem, fileHash="+
+                           fileHash+", bucketHash="+bucketHash);
+
+        //if fileHash == null, it will be a mismatch
+        synchronized(corruptStateLock) {
+            // immediately set as corrupt,
+            // will change to non-corrupt later if user ignores
+            setState(CORRUPT_FILE);
+            promptAboutCorruptDownload();
+            waitForCorruptResponse();
         }
+        
+        // If we wanted to stop, stop.
+        if (corruptState==CORRUPT_STOP_STATE)
+            return fileHash;
+            
+        // only try recovering MAX_RECOVERY_ATTEMPTS amount of times.
+        if(iteration == MAX_RECOVERY_ATTEMPTS) {
+            treeRecoveryFailed(bucketHash);
+        } else if (hashTree != null) {
+            // we can try to use the hashtree to identify corrupt ranges!
+            try {
+                setState(IDENTIFY_CORRUPTION);
+                LOG.debug("identifying corruption...");
+                int deleted = commonOutFile.deleteCorruptedBlocks(hashTree,
+                                                             incompleteFile);
+                if(LOG.isDebugEnabled())
+                    LOG.debug("deleted " + deleted + " blocks");
+                
+                corruptState = NOT_CORRUPT_STATE;
+                if(deleted == 0)
+                    treeRecoveryFailed(bucketHash);
+            } catch (IOException ioe) {
+                LOG.debug(ioe);
+                treeRecoveryFailed(bucketHash);
             }
         }
         
+        return fileHash;        
+    }
+    
+    /**
+     * Recovering from the TigerTree has failed, notify the user about
+     * corruption.
+     */
+    private void treeRecoveryFailed(URN hash) {
+        TigerTreeCache.instance().purgeTree(hash);
+        hashTree = null;
+        promptAboutCorruptDownload();
+        waitForCorruptResponse();
+        setState(RECOVERY_FAILED);
+    }
+    
+    /**
+     * Saves the file to disk.
+     */
+    private int saveFile(URN fileHash) {
         // let the user know we're saving the file...
         setState( SAVING );
         
@@ -1961,9 +1990,18 @@ public class ManagedDownloader implements Downloader, Serializable {
 		    fileManager.addFileIfShared(completeFile, getXMLDocuments());  
 
 		// Add the alternate locations to the newly saved local file
-		if(validAlts != null && 
-		   fileDesc!=null && 
-		   fileDesc.getSHA1Urn().equals(validAlts.getSHA1Urn())) {
+		if(validAlts != null && fileDesc != null)
+		    sendAlternateLocations(fileDesc);
+
+		return COMPLETE;
+    }
+    
+    /**
+     * Notifies hosts about alternate locations, if necessary.
+     */
+    private void sendAlternateLocations(FileDesc fileDesc) {
+        URN fileHash = fileDesc.getSHA1Urn();
+		if(fileHash.equals(validAlts.getSHA1Urn())) {
 		    LOG.trace("MANAGER: adding valid alts to FileDesc");
 			// making this call now is necessary to avoid writing the 
 			// same alternate locations back to the requester as they sent 
@@ -1990,7 +2028,6 @@ public class ManagedDownloader implements Downloader, Serializable {
                 headThread.start();
             }
         }
-        return COMPLETE;
     }
     
     /**
@@ -2064,74 +2101,39 @@ public class ManagedDownloader implements Downloader, Serializable {
     private int tryAllDownloads3() throws InterruptedException {
         LOG.trace("MANAGER: entered tryAllDownloads3");
         
-        //The parts of the file we still need to download.
-        //INVARIANT: all intervals are disjoint and non-empty
         int completedSize = -1;
         synchronized(this) {
-            {//all variables in this block have limited scope
-                Assert.that(incompleteFile != null);
-                synchronized (incompleteFileManager) {
-                    if( commonOutFile != null )
-                        commonOutFile.clearManagedDownloader();
-                    //get VerifyingFile
-                    commonOutFile=
-                    incompleteFileManager.getEntry(incompleteFile);
-                }
-                if(commonOutFile==null) {//no entry in incompleteFM
-                    LOG.trace("creating a verifying file");
-                    commonOutFile = new VerifyingFile(true, 
-                        (int)IncompleteFileManager.getCompletedSize(
-                            incompleteFile));
-                    try {
-                        //we must add an entry in IncompleteFileManager
-                        incompleteFileManager.
-                                   addEntry(incompleteFile,commonOutFile);
-                    } catch(IOException ioe) {
-                        ErrorService.error(ioe, "file: " + incompleteFile);
-                        return COULDNT_MOVE_TO_LIBRARY;
-                    }
-                    {//debugging block
-                      FileDesc fd = 
-                        fileManager.getFileDescForFile(incompleteFile);
-                      URN bHash = buckets.getURNForBucket(bucketNumber);
-                      if(bHash != null && fd != null &&
-                         !bHash.equals(fd.getSHA1Urn())) {
-                            File canon = null;
-                            Exception ioe = null;
-                            try {
-                                canon =
-                                    FileUtils.getCanonicalFile(incompleteFile);
-                            } catch(IOException e) {
-                                ioe = e;
-                            }
-                            Assert.silent(false, 
-                              "URNs in FM and IFM don't match.\n" +
-                              "Type: " + this.getClass().getName() + "\n" +
-                              "Bucket Hash: " + bHash + "\n" +
-                              "FD Hash    : " + fd.getSHA1Urn() + "\n" +
-                              "IncompleteFile: " + incompleteFile + "\n" +
-                              "FD.getFile    : " + fd.getFile() + "\n" +
-                              "Canonical     : " + canon + "\n" +
-                              "Error: " + 
-                          (ioe == null ? "(none)" : ioe.getMessage()) + "\n" +
-                             "IFM hashes: " + 
-                             incompleteFileManager.dumpHashes());
-                            //dont fail later
-                            fileManager.removeFileIfShared(incompleteFile);
-                      }
-                    }
-                }
-                //need to get the VerifyingFile ready to write
+            Assert.that(incompleteFile != null);
+            synchronized (incompleteFileManager) {
+                if( commonOutFile != null )
+                    commonOutFile.clearManagedDownloader();
+                //get VerifyingFile
+                commonOutFile= incompleteFileManager.getEntry(incompleteFile);
+            }
+            if(commonOutFile==null) {//no entry in incompleteFM
+                LOG.trace("creating a verifying file");
+                commonOutFile = new VerifyingFile(true, 
+                    (int)IncompleteFileManager.getCompletedSize(
+                        incompleteFile));
                 try {
-                    commonOutFile.open(incompleteFile,this);
-                } catch(IOException e) {
-                    if(!IOUtils.handleException(e, "DOWNLOAD"))
-                        ErrorService.error(e);
+                    //we must add an entry in IncompleteFileManager
+                    incompleteFileManager.
+                               addEntry(incompleteFile,commonOutFile);
+                } catch(IOException ioe) {
+                    ErrorService.error(ioe, "file: " + incompleteFile);
                     return COULDNT_MOVE_TO_LIBRARY;
                 }
-                completedSize =
-                   (int)IncompleteFileManager.getCompletedSize(incompleteFile);
             }
+            //need to get the VerifyingFile ready to write
+            try {
+                commonOutFile.open(incompleteFile,this);
+            } catch(IOException e) {
+                if(!IOUtils.handleException(e, "DOWNLOAD"))
+                    ErrorService.error(e);
+                return COULDNT_MOVE_TO_LIBRARY;
+            }
+            completedSize =
+               (int)IncompleteFileManager.getCompletedSize(incompleteFile);
         }
 
         //The current RFDs that are being connected to.
@@ -2139,49 +2141,49 @@ public class ManagedDownloader implements Downloader, Serializable {
         int size = -1;
         int connectTo = -1;
         int dloadsCount = -1;
-        Assert.that(threads.size()==0,
-                    "wrong threads size: " + threads.size());
+        //Assert.that(threads.size()==0,
+        //            "wrong threads size: " + threads.size());
 
         //While there is still an unfinished region of the file...
         while (true) {
-                    if (stopped) {
-                        LOG.warn("MANAGER: terminating because of stop");
-                        throw new InterruptedException();
-                    } 
+            if (stopped) {
+                LOG.warn("MANAGER: terminating because of stop");
+                throw new InterruptedException();
+            } 
                     
             if (dloaders.size()==0 && commonOutFile.isComplete()) {
-                        // Verify the commonOutFile is all done.
-                        int doneSize =
-                            (int)IncompleteFileManager.getCompletedSize(
-                                incompleteFile);
-                        Assert.that( completedSize == doneSize,
-                            "incomplete files (or size!) changed!");
+                // Verify the commonOutFile is all done.
+                int doneSize =
+                    (int)IncompleteFileManager.getCompletedSize(
+                        incompleteFile);
+                Assert.that( completedSize == doneSize,
+                    "incomplete files (or size!) changed!");
 
-                            //Finished. Interrupt all worker threads
-                            for(int i=threads.size();i>0;i--) {
-                                Thread t = (Thread)threads.get(i-1);
-                                t.interrupt();
-                            }
-                        
-                            LOG.trace("MANAGER: terminating because of completion");
-                            return COMPLETE;
-                        }
-                    
-                    if (threads.size() == 0) {                        
-                        //No downloaders worth living for.
-                        if ( files.size() > 0 && calculateWaitTime() > 0) {
-                            LOG.trace("MANAGER: terminating with busy");
-                            return WAITING_FOR_RETRY;
-                        } else if( files.size() == 0 ) {
-                            LOG.trace("MANAGER: terminating w/o hope");
-                            return GAVE_UP;
-                        }
-                        // else (files.size() > 0 && calculateWaitTime() == 0)
-                        // fallthrough ...
-                    }
-                    size = files.size();
-                    connectTo = getNumAllowedDownloads();
-                    dloadsCount = dloaders.size();
+                //Finished. Interrupt all worker threads
+                for(int i=threads.size();i>0;i--) {
+                    Thread t = (Thread)threads.get(i-1);
+                    t.interrupt();
+                }
+            
+                LOG.trace("MANAGER: terminating because of completion");
+                return COMPLETE;
+            }
+            
+            if (threads.size() == 0) {                        
+                //No downloaders worth living for.
+                if ( files.size() > 0 && calculateWaitTime() > 0) {
+                    LOG.trace("MANAGER: terminating with busy");
+                    return WAITING_FOR_RETRY;
+                } else if( files.size() == 0 ) {
+                    LOG.trace("MANAGER: terminating w/o hope");
+                    return GAVE_UP;
+                }
+                // else (files.size() > 0 && calculateWaitTime() == 0)
+                // fallthrough ...
+            }
+            size = files.size();
+            connectTo = getNumAllowedDownloads();
+            dloadsCount = dloaders.size();
         
             //OK. We are going to create a thread for each RFD. The policy for
             //the worker threads is to have one more thread than the max swarm
@@ -2314,7 +2316,7 @@ public class ManagedDownloader implements Downloader, Serializable {
                     status = dloader.requestHashTree();
                     if(status.isThexResponse()) {
                         HashTree temp = status.getHashTree();
-                        if (temp != null && temp.isBetterTree(hashTree)) {
+                        if (temp.isBetterTree(hashTree)) {
                             hashTree = temp;
                             // persist the hashTree in the TigerTreeCache
                             // because we won't save it in ManagedDownloader
@@ -2394,7 +2396,7 @@ public class ManagedDownloader implements Downloader, Serializable {
             }
         }
         
-        //came out of the while loop, http1.0 spawn a thread
+        //tell manager to iterate for more sources
         return true;
     }
     
@@ -3369,7 +3371,10 @@ public class ManagedDownloader implements Downloader, Serializable {
     }
 
     /**
-     * package access. Passes the call up to the activity callback
+     * Asks the user if we should continue or discard this download.
+     * Will only prompt if we have not received a HashTree that we
+     * can use to rebuild the download and we haven't already
+     * asked the user.
      */
     void promptAboutCorruptDownload() {
         synchronized(corruptStateLock) {
@@ -3377,8 +3382,10 @@ public class ManagedDownloader implements Downloader, Serializable {
             //as it is not going to generate the same SHA1 anymore.
             RouterService.getFileManager().removeFileIfShared(incompleteFile);
             
-            //For any other state we don't do anything
-            if(corruptState == NOT_CORRUPT_STATE) {
+            // Only notify about corruption if we haven't already
+            // AND if we don't have a THEX tree from which we can
+            // recover.
+            if(corruptState == NOT_CORRUPT_STATE && hashTree == null) {
                 corruptState = CORRUPT_WAITING_STATE;
                 //Note:We are going to inform the user. The GUI will notify us
                 //when the user has made a decision. Until then the corruptState
@@ -3391,13 +3398,23 @@ public class ManagedDownloader implements Downloader, Serializable {
         }
     }
 
+    /**
+     * Informs this downloader about how to handle corruption.
+     *
+     * If we received a HashTree while waiting for the response,
+     * we ignore the response and will recover automatically.
+     * Otherwise, we may continue the download or stop it immediately.
+     */
     public void discardCorruptDownload(boolean delete) {
+        if(hashTree != null)
+            corruptState = CORRUPT_CONTINUE_STATE;
+        
         if(delete) {
             corruptState = CORRUPT_STOP_STATE;
             stop();
-        }
-        else 
+        } else {
             corruptState = CORRUPT_CONTINUE_STATE;
+        }
         synchronized(corruptStateLock) {
             corruptStateLock.notify();
         }

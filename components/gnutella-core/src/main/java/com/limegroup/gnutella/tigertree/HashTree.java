@@ -419,10 +419,15 @@ public final class HashTree implements HTTPHeaderValue, Serializable {
             // node hashed, add the hash to our internal List.
             ret.add(tt.digest());
             // if read == -1 && offset != fileSize there is something wrong
-            if(!(read == -1) == (offset == fileSize))
-                Assert.that(false, "read: " + read + 
-                            ", offset: " + offset +
-                            ", fileSize: " + fileSize);
+            if(!(read == -1) == (offset == fileSize)) {
+                if(LOG.isWarnEnabled()) {
+                    LOG.warn("couldn't hash whole file. " +
+                             "read: " + read + 
+                           ", offset: " + offset +
+                           ", fileSize: " + fileSize);
+                }
+                throw new IOException("couldn't hash whole file.");
+            }
         }
         return ret;
     }

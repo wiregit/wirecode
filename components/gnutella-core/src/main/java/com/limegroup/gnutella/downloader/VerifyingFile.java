@@ -194,16 +194,31 @@ public class VerifyingFile {
         return ( writtenBlocks.getSize() + leasedBlocks.getSize() < completedSize); 
     }
     
-    synchronized void deleteCorruptedBlocks (HashTree tree, File file) throws IOException {
-        InputStream is = new FileInputStream(file);
+    /**
+     * Deletes any blocks that were corrupt.
+     *
+     * Returns the number of blocks deleted.
+     */
+    synchronized int deleteCorruptedBlocks (HashTree tree, File file)
+      throws IOException {
+        InputStream is = null;
+        int deleted = 0;
         try {
+            is = new BufferedInputStream(new FileInputStream(file));
             List corruptRanges = tree.getCorruptRanges(is);
-            for (Iterator iter = corruptRanges.iterator(); iter.hasNext(); )
+            for (Iterator iter = corruptRanges.iterator(); iter.hasNext(); ) {
+                deleted++;
                 writtenBlocks.delete((Interval)iter.next());
+            }
             isCorrupted = false;
         } finally {
-            is.close();
+            if(is != null) {
+                try {
+                    is.close();
+                } catch(IOException ignored) {}
+            }
         }
+        return deleted;
     }
         
     /**

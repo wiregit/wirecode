@@ -87,7 +87,7 @@ public final class TigerTreeCache implements Serializable {
     }
 
     /**
-     * Doesn't do any hashing!
+     * Retrieves the cached HashTree for this URN.
      * 
      * @param sha1
      *            the <tt>URN</tt> for which we want to obtain the HashTree
@@ -96,6 +96,13 @@ public final class TigerTreeCache implements Serializable {
     public synchronized HashTree getHashTree(URN sha1) {
         HashTree tree = (HashTree) TREE_MAP.get(sha1);
         return tree;
+    }
+    
+    /**
+     * Purges the HashTree for this URN.
+     */
+    public synchronized void purgeTree(URN sha1) {
+        TREE_MAP.remove(sha1);
     }
 
     /**

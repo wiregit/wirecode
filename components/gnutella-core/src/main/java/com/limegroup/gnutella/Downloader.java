@@ -31,6 +31,7 @@ public interface Downloader extends BandwidthTracker {
     public static final int WAITING_FOR_CONNECTIONS = 14;
     public static final int ITERATIVE_GUESSING = 15;
     public static final int IDENTIFY_CORRUPTION = 16;
+    public static final int RECOVERY_FAILED = 17;
 
     /**
      * Stops this.  If the download is already stopped, does nothing.
