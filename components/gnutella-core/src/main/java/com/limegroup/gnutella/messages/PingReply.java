@@ -119,16 +119,6 @@ public class PingReply extends Message implements Serializable, IpPort {
      * @param ttl the time to live for this message
      */
     public static PingReply create(byte[] guid, byte ttl) {
-        /*
-        return create(guid, ttl, RouterService.getPort(),
-                      RouterService.getAddress(),
-                      (long)RouterService.getNumSharedFiles(),
-                      (long)RouterService.getSharedFileSize()/1024,
-                      RouterService.isSupernode(),
-                      Statistics.instance().calculateDailyUptime(),
-                      UDPService.instance().isGUESSCapable());
-        */
-        
         return create(guid,
                       ttl,
                       RouterService.getPort(),
@@ -330,7 +320,25 @@ public class PingReply extends Message implements Serializable, IpPort {
     }
     
     /**
-     * create method with a specified locale
+     * creates a new PingReply with the specified locale
+     *
+     * @param guid the sixteen byte message GUID
+     * @param ttl the message TTL to use
+     * @param port my listening port.  MUST fit in two signed bytes,
+     *  i.e., 0 < port < 2^16.
+     * @param ip my listening IP address.  MUST be in dotted-quad big-endian,
+     *  format e.g. {18, 239, 0, 144}.
+     * @param files the number of files I'm sharing.  Must fit in 4 unsigned
+     *  bytes, i.e., 0 < files < 2^32.
+     * @param kbytes the total size of all files I'm sharing, in kilobytes.
+     *  Must fit in 4 unsigned bytes, i.e., 0 < files < 2^32.
+     * @param isUltrapeer true if this should be a marked ultrapeer pong,
+     *  which sets kbytes to the nearest power of 2 not less than 8.
+     * @param dailyUptime my average daily uptime, in seconds, e.g., 
+     *  3600 for one hour per day.  Negative values mean "don't know".
+     *  GGEP extension blocks are allocated if dailyUptime is non-negative.  
+     * @param isGuessCapable guess capable
+     * @param locale the locale 
      */
     public static PingReply
         create(byte[] guid, byte ttl,
@@ -682,7 +690,7 @@ public class PingReply extends Message implements Serializable, IpPort {
         }
     }
 
-    
+    /** creates a new GGEP with the parameters, including the locale */
     private static GGEP 
         newGGEPWithLocale(int dailyUptime, boolean isUltrapeer, 
                           boolean isGuessCapable, String locale) {

@@ -668,19 +668,6 @@ public class ConnectionManager {
 		// just return if it's not
 		if(!ConnectionSettings.PREFERENCING_ACTIVE.getValue()) return true;
 
-        //if locale pref on and doesn't match client locale
-        if(ConnectionSettings.USE_LOCALE_PREF.getValue()
-           && !checkLocale(hr.getLocalePref())) {
-            //if num connections haven't been met and there isn't room
-            //for extra connections
-            if(ULTRAPEER_CONNECTIONS <
-               (ConnectionSettings.NUM_LOCALE_PREF.getValue()
-                - _localeMatchingPeers)
-               + getNumInitializedConnections()) 
-                return false;
-        }
-		
-
         //Old versions of LimeWire used to prefer incoming connections over
         //outgoing.  The rationale was that a large number of hosts were
         //firewalled, so those who weren't had to make extra space for them.
@@ -767,11 +754,30 @@ public class ConnectionManager {
             
             int peers = getNumInitializedConnections();
             int nonLimeWirePeers = _nonLimeWirePeers;
-            
+            int locale_num = 0;
+
             if(!allowUltrapeer2UltrapeerConnection(hr)) {
                 return false;
             }
-            
+
+            if(ConnectionSettings.USE_LOCALE_PREF.getValue()) {
+                //if locale matches and we haven't satisfied the
+                //locale reservation then we force return a true
+                if(checkLocale(hr.getLocalePref()) &&
+                   _localeMatchingPeers 
+                   < ConnectionSettings.NUM_LOCALE_PREF.getValue()
+                   ) {
+                    return true;
+                }
+                
+                //this number will be used at the end to figure out
+                //if the connection should be allowed
+                locale_num = 
+                    ConnectionSettings.NUM_LOCALE_PREF.getValue()
+                    - _localeMatchingPeers;
+            }
+
+
             // Reserve RESERVED_NON_LIMEWIRE_PEERS slots
             // for non-limewire peers to ensure that the network
             // is well connected.
@@ -784,8 +790,10 @@ public class ConnectionManager {
             
             // Otherwise, allow only if we've left enough room for the quota'd
             // number of non-limewire peers.
-            return (peers + RESERVED_NON_LIMEWIRE_PEERS - nonLimeWirePeers)
+            return (peers + RESERVED_NON_LIMEWIRE_PEERS - nonLimeWirePeers 
+                    + locale_num)
                    < ULTRAPEER_CONNECTIONS;
+            
         }
 		return false;
     }
@@ -1347,10 +1355,13 @@ public class ConnectionManager {
      */
     private void adjustConnectionFetchers() {
         if(ConnectionSettings.USE_LOCALE_PREF.getValue()) {
+            //if it's a leaf and locale preferencing is true
+            //we will create a dedicated preference fetcher
+            //that tries to fetch a connection that matches the
+            //clients locale
             if(RouterService.isShieldedLeaf() 
                && _needPref 
                && _dedicatedPrefFetcher == null) {
-                //System.out.println("creating dedicated fetcher");
                 _dedicatedPrefFetcher = new ConnectionFetcher(true);
             }
         }
