@@ -89,7 +89,7 @@ public class LimeXMLSchema
             throw new IOException("" + e);
         }
         // Set an entity resolver to resolve the schema
-        //documentBuilder.setEntityResolver(new Resolver(schemaInputSource));
+        documentBuilder.setEntityResolver(new Resolver(schemaInputSource));
 
         // Parse the schema and create a  document
         Document document=null;  
