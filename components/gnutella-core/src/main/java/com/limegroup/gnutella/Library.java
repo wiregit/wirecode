@@ -72,8 +72,11 @@ public class Library {
 	if (os.indexOf("Windows") != -1) {
 	    try {
 		Runtime runtime = Runtime.getRuntime();
-		String str = "cmd /c " + "\""+f.toString()+"\"";
-		str = checkChars(str);
+		//String str = "cmd /c "+"\""+f.toString()+"\"";
+		String[] str = {"cmd /c \"", path, "\""};		
+		//String st = "cmd /c \""+ path + "\"";
+		//String [] str = {st};
+		//str = checkChars(str);
 		Process p1 = runtime.exec(str);
 	    }catch (Exception e) {
 		return false;
