@@ -152,6 +152,9 @@ public class ConnectionManager {
      *   and _initializedConnections is the empty set
      * INVARIANT: _initializedConnections is a subset of _connections
      * INVARIANT: _initializedClientConnections is a subset of _connections
+     * INVARIANT: _shieldedConnections is the number of connections
+     *   in _initializedConnections for which isClientSupernodeConnection()
+     *   is true.
      *
      * LOCKING: _connections, _initializedConnections and
      *   _initializedClientConnections MUST NOT BE MUTATED.  Instead they should
@@ -167,6 +170,7 @@ public class ConnectionManager {
         _initializedConnections = new ArrayList();
     private volatile List /* of ManagedConnection */ 
         _initializedClientConnections = new ArrayList();
+    private volatile int _shieldedConnections = 0;
 
     /**
      * For authenticating users
@@ -372,15 +376,16 @@ public class ConnectionManager {
      * generally the case.  
      */
     public boolean isLeaf() {
+        return _shieldedConnections != 0;
         //TODO2: should we make this faster by augmenting state?  We could
         //also return false if isSupernode().
-        List connections=getInitializedConnections();
-        for (int i=0; i<connections.size(); i++) {
-            ManagedConnection first=(ManagedConnection)connections.get(i);
-            if (first.isClientSupernodeConnection())
-                return true;
-        }
-        return false;
+//        List connections=getInitializedConnections();
+//        for (int i=0; i<connections.size(); i++) {
+//            ManagedConnection first=(ManagedConnection)connections.get(i);
+//            if (first.isClientSupernodeConnection())
+//                return true;
+//        }
+//        return false;
     }
     
     /**
@@ -897,7 +902,7 @@ public class ConnectionManager {
      * removed from the list of open connections during its initialization.
      * Should only be called from a thread that has this' monitor.
      */
-    private void connectionInitialized(ManagedConnection c) {
+    private boolean connectionInitialized(ManagedConnection c) {
         if(_connections.contains(c)) {
             //update the appropriate list of connections
             if(!c.isSupernodeClientConnection()){
@@ -906,6 +911,9 @@ public class ConnectionManager {
                 List newConnections=new ArrayList(_initializedConnections);
                 newConnections.add(c);
                 _initializedConnections=newConnections;
+                //maintain invariant
+                if(c.isClientSupernodeConnection())
+                    _shieldedConnections++;                
             }else{
                 //REPLACE _initializedClientConnections with the list
                 //_initializedClientConnections+[c]
@@ -915,7 +923,10 @@ public class ConnectionManager {
                 _initializedClientConnections=newConnections;
             }
             c.postInit();
+            return true;
         }
+        return false;
+        
     }
 
     /**
@@ -1006,6 +1017,9 @@ public class ConnectionManager {
                 newConnections.addAll(_initializedConnections);
                 newConnections.remove(c);
                 _initializedConnections=newConnections;
+                //maintain invariant
+                if(c.isClientSupernodeConnection())
+                    _shieldedConnections--;                
             }
         }else{
             //check in _initializedClientConnections
@@ -1167,10 +1181,7 @@ public class ConnectionManager {
             _initializingFetchedConnections.remove(mc);
             // If the connection was killed while initializing, we shouldn't
             // announce its initialization
-            if(_connections.contains(mc)) {
-                connectionInitialized(mc);
-                connectionOpen = true;
-            }
+            connectionOpen = connectionInitialized(mc);
         }
         if(connectionOpen) {
             RouterService.getCallback().connectionInitialized(mc);
@@ -1401,10 +1412,7 @@ public class ConnectionManager {
         synchronized(this) {
             // If the connection was killed while initializing, we shouldn't
             // announce its initialization
-            if(_connections.contains(c)) {
-                connectionInitialized(c);
-                connectionOpen = true;
-            }
+            connectionOpen = connectionInitialized(c);
         }
         if(connectionOpen) {
             RouterService.getCallback().connectionInitialized(c);

@@ -34,10 +34,25 @@ public class ConnectionManagerTest extends com.limegroup.gnutella.util.BaseTestC
     public static void main(String[] args) {
         junit.textui.TestRunner.run(suite());
     }
+    
+    public static void globalSetUp() throws Exception {
+        setSettings();
+        launchAllBackends();
+                
+        PrivilegedAccessor.setValue(ROUTER_SERVICE,"catcher",CATCHER);       
+
+        PrivilegedAccessor.setValue(ROUTER_SERVICE.getConnectionManager(),
+                                    "_catcher",CATCHER);
+                                    
+        ROUTER_SERVICE.start();
+        RouterService.clearHostCatcher();
+    }
 
     public void setUp() throws Exception {
-        if(ROUTER_SERVICE.isStarted()) return;
-        launchAllBackends();
+        setSettings();
+    }
+    
+    private static void setSettings() throws Exception {
         SettingsManager.instance().setPort(6346);
 		ConnectionSettings.KEEP_ALIVE.setValue(1);
 		ConnectionSettings.CONNECT_ON_STARTUP.setValue(false);
@@ -46,30 +61,6 @@ public class ConnectionManagerTest extends com.limegroup.gnutella.util.BaseTestC
 		ConnectionSettings.USE_GWEBCACHE.setValue(false);
         UltrapeerSettings.FORCE_ULTRAPEER_MODE.setValue(true);
         UltrapeerSettings.EVER_ULTRAPEER_CAPABLE.setValue(true);	
-
-
-        try {
-            PrivilegedAccessor.setValue(ROUTER_SERVICE,"catcher",CATCHER);
-        } catch(Exception e) {
-            fail("could not initialize test", e);
-        }
-
-        try {
-            PrivilegedAccessor.setValue(ROUTER_SERVICE.getConnectionManager(),
-                                        "_catcher",CATCHER);
-        } catch(Exception e) {
-            fail("could not initialize test", e);
-        }
-
-        ROUTER_SERVICE.start();
-        RouterService.clearHostCatcher();
-    }
-
-    private void failWithServerMessage(Exception e) {
-        fail("You must run this test with servers running --\n"+
-             "use the test6301 ant target to run LimeWire servers "+
-             "on ports 6300 and 6301.\n\n"+
-             "Type ant -D\"class=ConnectionManagerTest\" test6301\n\n", e);        
     }
 
     public void tearDown() {
@@ -81,6 +72,61 @@ public class ConnectionManagerTest extends com.limegroup.gnutella.util.BaseTestC
         CATCHER.endpoint = null;
         sleep();
     }
+    
+    public void testSupernodeStatus() throws Exception {
+        UltrapeerSettings.FORCE_ULTRAPEER_MODE.setValue(false);        
+        ConnectionManager mgr = RouterService.getConnectionManager();
+        
+        // test preconditions
+        assertEquals("should start as supernode", true, mgr.isSupernode());
+        assertEquals("should not be leaf", false, mgr.isLeaf());
+        
+        // construct peers
+        // u ==> i should be ultrapeer
+        // l ==> i should be leaf
+        ManagedConnection u1, l1, l2;
+        u1 = new SupernodeClient();
+        l1 = new ClientSupernode();
+        l2 = new ClientSupernode();
+        
+        // add a supernode => client connection
+        initializeStart(u1);
+        assertEquals("should still be supernode", true, mgr.isSupernode());
+        assertEquals("should still not be leaf", false, mgr.isLeaf());
+        initializeDone(u1);
+        assertEquals("should still be supernode", true, mgr.isSupernode());
+        assertEquals("should still not be leaf", false, mgr.isLeaf());
+        
+        // add a leaf -> supernode connection
+        initializeStart(l1);
+        assertEquals("should still be supernode", true, mgr.isSupernode());
+        assertEquals("should still not be leaf", false, mgr.isLeaf());
+        initializeDone(l1);
+        assertEquals("should not be supernode", false, mgr.isSupernode());
+        assertEquals("should be leaf", true, mgr.isLeaf());
+        mgr.remove(l1);
+        assertEquals("should be supernode", true, mgr.isSupernode());
+        assertEquals("should not be leaf", false, mgr.isLeaf());
+        
+        // test a strange condition
+        // (two leaves start, second finishes then removes,
+        //  third removes then finishes)
+        initializeStart(l1);
+        initializeStart(l2);
+        initializeDone(l2);
+        assertEquals("should not be supernode", false, mgr.isSupernode());
+        assertEquals("should be leaf", true, mgr.isLeaf());
+        mgr.remove(l2);
+        assertEquals("should be supernode", true, mgr.isSupernode());
+        assertEquals("should not be leaf", false, mgr.isLeaf());
+        mgr.remove(l1);
+        assertEquals("should be supernode", true, mgr.isSupernode());
+        assertEquals("should not be leaf", false, mgr.isLeaf());
+        initializeDone(l1);
+        assertEquals("should be supernode", true, mgr.isSupernode());
+        assertEquals("should not be leaf", false, mgr.isLeaf());
+    }   
+        
     
     /**
      * Tests to make sure that a connection does not succeed with an
@@ -165,6 +211,20 @@ public class ConnectionManagerTest extends com.limegroup.gnutella.util.BaseTestC
         return (Comparator)PrivilegedAccessor.invokeConstructor(
             mcc, null );
     }
+    
+    private void initializeStart(ManagedConnection c) throws Exception {
+        PrivilegedAccessor.invokeMethod( RouterService.getConnectionManager(),
+            "connectionInitializingIncoming",
+            new Object[] { c },
+            new Class[] { ManagedConnection.class} );
+    }
+    
+    private void initializeDone(ManagedConnection c) throws Exception {
+        PrivilegedAccessor.invokeMethod( RouterService.getConnectionManager(),
+            "connectionInitialized",
+            new Object[] { c },
+            new Class[] { ManagedConnection.class} );            
+    }
 
     /**
      * Test host catcher that allows us to return endpoints that we 
@@ -225,5 +285,32 @@ public class ConnectionManagerTest extends com.limegroup.gnutella.util.BaseTestC
         public int getNumMessagesReceived() {
             return received;
         }        
-    }    
+    }  
+    
+    private static class ClientSupernode extends TestManagedConnection {
+        
+        ClientSupernode() {
+            super(false, 0, 0);
+        }
+        
+        public boolean isClientSupernodeConnection() {
+            return true;
+        }
+        public boolean isSupernodeClientConnection() {
+            return false;
+        }
+    }
+    
+    private static class SupernodeClient extends TestManagedConnection {
+        SupernodeClient() {
+            super(false, 0, 0);
+        }
+        public boolean isClientSupernodeConnection() {
+            return false;
+        }
+        public boolean isSupernodeClientConnection() {
+            return true;
+        }
+    }
+          
 }
