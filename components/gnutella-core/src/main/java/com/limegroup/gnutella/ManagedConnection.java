@@ -407,9 +407,16 @@ public class ManagedConnection extends Connection
                         CapabilitiesVM.CAPABILITY_MIN_SELECTOR);
             else return false;
         }
-        else if(_lastQRPTableReceived == null) return false;
-        return _lastQRPTableReceived.contains(query);
+        return hitsQueryRouteTable(query);
     }
+    
+    /**
+     * Determines whether or not this query hits the QRT.
+     */
+    protected boolean hitsQueryRouteTable(QueryRequest query) {
+        if(_lastQRPTableReceived == null) return false;
+        return _lastQRPTableReceived.contains(query);
+	}
 
     /**
      * Accessor for the <tt>QueryRouteTable</tt> received along this 
@@ -422,7 +429,7 @@ public class ManagedConnection extends Connection
     public QueryRouteTable getQueryRouteTableReceived() {
         return _lastQRPTableReceived;
     }
-    
+
     /**
      * Accessor for the last QueryRouteTable's percent full.
      */
