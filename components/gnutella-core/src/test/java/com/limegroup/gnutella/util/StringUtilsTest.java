@@ -15,6 +15,20 @@ public class StringUtilsTest extends com.limegroup.gnutella.util.BaseTestCase {
         return buildTestSuite(StringUtilsTest.class);
     }  
 
+    /**
+     * Tests the method for getting the index of a substring from within 
+     * another string, ignoring case.
+     */
+    public void testIndexOfIgnoreCase() throws Exception {
+        int index = StringUtils.indexOfIgnoreCase("test", "t");
+        assertEquals("unexpected index", 0, index);
+        index = StringUtils.indexOfIgnoreCase("test", "p");
+        assertEquals("unexpected index", -1, index);
+        
+        index = StringUtils.indexOfIgnoreCase("test", "st");
+        assertEquals("unexpected index", 2, index);
+    }
+    
     public void testCase() {
         //Case methods.  Test all boundary conditions.
         //See ASCII table for further justification.
