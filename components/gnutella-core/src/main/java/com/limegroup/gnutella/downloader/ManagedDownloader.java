@@ -307,15 +307,16 @@ public class ManagedDownloader implements Downloader, Serializable {
     /** If in the wait state, the number of retries we're waiting for.
      *  Otherwise undefined. */
     private int retriesWaiting;
-    /** The name of the last file being attempted.  Needed only to support
-     *  launch(). */
-    private String currentFileName;
+    /** The current incomplete file that we're downloading, or the last
+     *  incomplete file if we're not currently downloading, or null if we
+     *  haven't started downloading.  Used for previewing purposes. */
+    private File incompleteFile;
+    /** The fully-qualified name of the downloaded file when this completes, or
+     *  null if we haven't started downloading. Used for previewing purposes. */
+    private File completeFile;
     /**
      * The position of the downloader in the uploadQueue */
     private String queuePosition;
-    /** The size of the last file being attempted.  Needed only to support
-     *  launch(). */
-    private int currentFileSize;
     /** The name of the last location we tried to connect to. (We may be
      *  downloading from multiple other locations. */
     private String currentLocation;
@@ -815,7 +816,7 @@ public class ManagedDownloader implements Downloader, Serializable {
 
     public File getDownloadFragment() {
         //We haven't started yet.
-        if (currentFileName==null)
+        if (incompleteFile==null)
             return null;
         
         //a) Special case for saved corrupt fragments.  We don't worry about
@@ -828,31 +829,22 @@ public class ManagedDownloader implements Downloader, Serializable {
         //exclusive file locks.  If the download hasn't started, the
         //incomplete file may not even exist--not a problem.
         else if (state!=COMPLETE) {
-            RemoteFileDesc rfd=buckets.getRemoteFileDescForBucket(bucketNumber);
-            File incomplete=incompleteFileManager.getFile(rfd);
-            File file=new File(incomplete.getParent(),
+            File file=new File(incompleteFile.getParent(),
                                IncompleteFileManager.PREVIEW_PREFIX
-                                   +incomplete.getName());
+                                   +incompleteFile.getName());
             //Get the size of the first block of the file.  (Remember
             //that swarmed downloads don't always write in order.)
             int size=amountForPreview();
             if (size<=0)
                 return null;
             //Copy first block, returning if nothing was copied.
-            if (CommonUtils.copy(incomplete, size, file)<=0) 
+            if (CommonUtils.copy(incompleteFile, size, file)<=0) 
                 return null;
             return file;
         }
         //b) Otherwise, choose completed file.
         else {
-            File saveDir = null;
-            try {
-                saveDir = SettingsManager.instance().getSaveDirectory();
-            } catch(java.io.FileNotFoundException fnfe) {
-                // simply return if we could not get the save directory.
-                return null;
-            }
-            return new File(saveDir,currentFileName);     
+            return completeFile;
         }
     }
 
@@ -924,11 +916,6 @@ public class ManagedDownloader implements Downloader, Serializable {
                         }
                         if (files.size() <= 0)
                             continue;
-                        synchronized (this) {
-                            RemoteFileDesc rfd=(RemoteFileDesc)files.get(0);
-                            currentFileName=rfd.getFileName();
-                            currentFileSize=rfd.getSize();
-                        }
                         int status=tryAllDownloads2();
                         if (status==COMPLETE) {
                             //Success!
@@ -1077,9 +1064,8 @@ public class ManagedDownloader implements Downloader, Serializable {
         }
         int fileSize=rfd.getSize(); 
         String filename=rfd.getFileName(); 
-        File incompleteFile=incompleteFileManager.getFile(rfd);
+        incompleteFile=incompleteFileManager.getFile(rfd);
         File sharedDir;
-        File completeFile;
         try {
             sharedDir=SettingsManager.instance().getSaveDirectory();
             completeFile=new File(sharedDir, filename);
