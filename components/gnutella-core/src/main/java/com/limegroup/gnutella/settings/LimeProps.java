@@ -1,6 +1,7 @@
 package com.limegroup.gnutella.settings;
 
 import com.limegroup.gnutella.Assert;
+import com.sun.java.util.collections.*;
 
 /**
  * Handler for all 'LimeWire.props' settings.  Classes such
@@ -28,4 +29,17 @@ public class LimeProps extends AbstractSettings {
      * Returns the only instance of this class.
      */
     public static LimeProps instance() { return INSTANCE; }
+
+    public Setting getSetting(String key) {
+        synchronized(FACTORY) {
+            Iterator iter = FACTORY.iterator();
+            while(iter.hasNext()) {
+                Setting currSetting = (Setting)iter.next();
+                if(currSetting.getKey().equals(key))
+                    return currSetting;
+            }
+        }
+        return null; //unable the find the setting we are looking for
+    }
+
 }
