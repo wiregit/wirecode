@@ -1273,8 +1273,14 @@ public class ConnectionManager {
             _catcher.expire();
         }
 
-        //Ensure outgoing connections is positive.
-		int outgoing = ConnectionSettings.NUM_CONNECTIONS.getValue();
+        //Ensure outgoing connections is positive, but take our status into
+        //account if possible.  Users who disable Ultrapeer mode should not seek
+        //the amount of connections that a Ultrapeer would.  If there is a
+        //possibility we may become a Ultrapeer though, go ahead and fetch
+        //a lot of connections.
+		int outgoing = (UltrapeerSettings.DISABLE_ULTRAPEER_MODE.getValue() ?
+                        PREFERRED_CONNECTIONS_FOR_LEAF :
+                        ConnectionSettings.NUM_CONNECTIONS.getValue());
         if (outgoing < 1) {
 			ConnectionSettings.NUM_CONNECTIONS.revertToDefault();
 			outgoing = ConnectionSettings.NUM_CONNECTIONS.getValue();
