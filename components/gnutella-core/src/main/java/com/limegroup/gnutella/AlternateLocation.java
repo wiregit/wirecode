@@ -184,14 +184,24 @@ public final class AlternateLocation
 	}
 
 	/**
-	 * Returns the <tt>URL</tt> instance for this alternate location.
+	 * Returns an instance of the <tt>URL</tt> instance for this 
+	 * alternate location.
 	 *
-	 * @return the <tt>URL</tt> instance for this alternate location, which
-	 *  is guaranteed to be non-null
+	 * @return a <tt>URL</tt> instance corresponding to the URL for this 
+	 *  alternate location, or <tt>null</tt> if an instance could not
+	 *  be created
 	 */
 	public URL getUrl() {
-		// this is fine because the URL class is immutable??
-		return URL;
+		try {
+			return new URL(this.URL.getProtocol(), 
+						   this.URL.getHost(), 
+						   this.URL.getPort(),
+						   this.URL.getFile());
+		} catch(MalformedURLException e) {
+			// this should never happen in practice, but retun null 
+			// nevertheless
+			return null;
+		}
 	}
 
 	/**
@@ -201,8 +211,8 @@ public final class AlternateLocation
 	 * this will return 0 (the oldest possible time).
 	 * 
 	 * @return a <tt>long</tt> representing the timestamp for this alternate 
-	 * location, or the number of milliseconds since January 1, 1970, 
-	 * 00:00:00 GMT
+	 *  location, or the number of milliseconds since January 1, 1970, 
+	 *  00:00:00 GMT
 	 */
 	public long getTimestamp() {
 		return TIME;
@@ -403,7 +413,7 @@ public final class AlternateLocation
 	public boolean equals(Object obj) {
 		if(obj == this) return true;
 		if(!(obj instanceof AlternateLocation)) return false;
-		AlternateLocation al = (AlternateLocation)obj;
+		AlternateLocation al = (AlternateLocation)obj;		
 		return ((al.TIME == this.TIME) && al.URL.equals(this.URL));
 	}
 
@@ -570,7 +580,7 @@ public final class AlternateLocation
 			System.out.println("ALL TESTS PASSED"); 
 		}
 	}
-	*/		
+	*/
 }
 
 
