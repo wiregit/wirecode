@@ -402,6 +402,15 @@ public class QueryRouteTableTest extends com.limegroup.gnutella.util.BaseTestCas
         assertTrue(getBitTable(qrt2).get(2));
         assertTrue(!getBitTable(qrt2).get(3));
         assertEquals(3, entries(qrt2));
+        
+        qrt=new QueryRouteTable(100);
+        qrt2=new QueryRouteTable(10);
+        getBitTable(qrt).set(11);
+        getBitTable(qrt).set(20);
+        qrt2.addAll(qrt);
+        assertTrue(getBitTable(qrt2).get(1));
+        assertTrue(getBitTable(qrt2).get(2));
+        assertEquals(2, entries(qrt2));        
     }
     
     public void testAddAllBlackBox() throws Exception {
@@ -427,69 +436,89 @@ public class QueryRouteTableTest extends com.limegroup.gnutella.util.BaseTestCas
             PatchTableMessage.COMPRESSOR_DEFLATE, (byte)8, new byte[10], 0, 10);
         try {
             qrt.patch(patch);
-            fail("bpe should have been thrown.");
+            fail("bpe should have been thrown - expecting sequence number 1");
+        } catch (BadPacketException e) {
+        }
+
+        qrt=new QueryRouteTable();  //b. sequence sizes don't match
+        reset=new ResetTableMessage(1024, (byte)2);
+        qrt.reset(reset);
+        patch=new PatchTableMessage((short)1, (short)3,
+            PatchTableMessage.COMPRESSOR_NONE, (byte)8, new byte[10], 0, 10);
+        qrt.patch(patch);
+        patch=new PatchTableMessage((short)2, (short)4,
+            PatchTableMessage.COMPRESSOR_NONE, (byte)8, new byte[10], 0, 10);
+        try {
+            qrt.patch(patch);
+            fail("bpe should have been thrown - seq size changed btw patches");
         } catch (BadPacketException e) { 
         }
 
-        qrt=new QueryRouteTable();  //b. message sizes don't match
+        qrt=new QueryRouteTable();  //c. missing sequence number 2
+        patch=new PatchTableMessage((short)1, (short)3,
+           PatchTableMessage.COMPRESSOR_NONE, (byte)8, new byte[10], 0, 10);
+        qrt.patch(patch);
+        patch=new PatchTableMessage((short)3, (short)3,
+            PatchTableMessage.COMPRESSOR_NONE, (byte)8, new byte[10], 0, 10);        
         try {
-            reset=new ResetTableMessage(1024, (byte)2);
-            qrt.reset(reset);
-            patch=new PatchTableMessage((short)1, (short)3,
-                PatchTableMessage.COMPRESSOR_NONE, (byte)8, new byte[10], 0, 10);
             qrt.patch(patch);
-        } catch (BadPacketException e) {
-            fail("bpe should have been thrown.");
-        }
-        try {
-            patch=new PatchTableMessage((short)2, (short)4,
-                PatchTableMessage.COMPRESSOR_NONE, (byte)8, new byte[10], 0, 10);
-            qrt.patch(patch);
-            fail("bpe should have been thrown.");
-        } catch (BadPacketException e) { 
-        }
-
-        qrt=new QueryRouteTable();  //c. message sequences don't match
-        try {
-            patch=new PatchTableMessage((short)1, (short)3,
-                PatchTableMessage.COMPRESSOR_NONE, (byte)8, new byte[10], 0, 10);
-            qrt.patch(patch);
-        } catch (BadPacketException e) {
-            fail("bpe should have been thrown.");
-        }
-        try {
-            patch=new PatchTableMessage((short)3, (short)3,
-                PatchTableMessage.COMPRESSOR_NONE, (byte)8, new byte[10], 0, 10);
-            qrt.patch(patch);
-            fail("bpe should have been thrown.");
+            fail("bpe should have been thrown - missing sequence 2");
         } catch (BadPacketException e) {
         }        
 
-        qrt=new QueryRouteTable();  //d. sequence interrupted by reset
+        qrt=new QueryRouteTable();  //d. sequence interrupted by reset (is ok)
         patch=new PatchTableMessage((short)1, (short)3,
             PatchTableMessage.COMPRESSOR_NONE, (byte)8, new byte[10], 0, 10);
         qrt.patch(patch);
         reset=new ResetTableMessage(1024, (byte)2);
         qrt.reset(reset);
-
         patch=new PatchTableMessage((short)1, (short)6,
             PatchTableMessage.COMPRESSOR_NONE, (byte)8, new byte[10], 0, 10);
         qrt.patch(patch);
 
-        qrt=new QueryRouteTable();  //e. Sequence too big
+        qrt=new QueryRouteTable();  //e. More sequences than seq size sent
         patch=new PatchTableMessage((short)1, (short)2,
             PatchTableMessage.COMPRESSOR_NONE, (byte)8, new byte[10], 0, 10);
         qrt.patch(patch);
         patch=new PatchTableMessage((short)2, (short)2,
             PatchTableMessage.COMPRESSOR_NONE, (byte)8, new byte[10], 0, 10);
         qrt.patch(patch);
-
+        patch=new PatchTableMessage((short)3, (short)2,
+            PatchTableMessage.COMPRESSOR_NONE, (byte)8, new byte[10], 0, 10);
         try {
-            patch=new PatchTableMessage((short)3, (short)2,
-                PatchTableMessage.COMPRESSOR_NONE, (byte)8, new byte[10], 0, 10);
             qrt.patch(patch);
-            fail("bpe should have been thrown.");
+            fail("bpe should have been thrown - seq size: 2, but 3 are sent");
         } catch (BadPacketException e) {
+        }
+        
+        qrt=new QueryRouteTable(); //f. Unknown compress value
+        patch=new PatchTableMessage((short)1, (short)2,
+            (byte)0x2, (byte)8, new byte[10], 0, 10);
+        try {
+            qrt.patch(patch);
+            fail("bpe should have been thrown -- unknown compressor");
+        } catch(BadPacketException e) {
+        }
+        
+        qrt=new QueryRouteTable(); //g. Unable to uncompress
+        patch=new PatchTableMessage((short)1, (short)2,
+            PatchTableMessage.COMPRESSOR_DEFLATE, (byte)8, new byte[10], 0, 10);
+        try {
+            qrt.patch(patch);
+            fail("bpe should have been thrown -- invalid compressed data");
+        } catch(BadPacketException e) {
+        }
+        
+        qrt=new QueryRouteTable(); //h. Sending more data than table can hold
+        reset=new ResetTableMessage(1024, (byte)2);
+        qrt.reset(reset);
+        patch=new PatchTableMessage((short)1, (short)6,
+            PatchTableMessage.COMPRESSOR_NONE, (byte)8, new byte[1025], 0, 1025);
+        try {
+            qrt.patch(patch);
+            fail("bpe should have been thrown - patched more than table size");
+        } catch(BadPacketException e) {
+            e.printStackTrace();
         }
     }
 }
