@@ -224,12 +224,14 @@ public class MetaFileManager extends FileManager {
                     String s = LimeXMLSchema.getDisplayString(schemas[i]);
                     if (s.equalsIgnoreCase("audio")){
                         //Map nameToFile = getAllMP3FilesRecursive();
-                        collection=new LimeXMLReplyCollection
-                        (schemas[i],mp3FileToHash,this);
+                        collection = 
+                        new LimeXMLReplyCollection(mp3FileToHash, schemas[i],
+                                                   this, true);
                     }
                     else
-                        collection = new LimeXMLReplyCollection
-                                       (nonMP3FileToHash,schemas[i],this);
+                        collection = 
+                        new LimeXMLReplyCollection(nonMP3FileToHash,schemas[i],
+                                                   this, false);
                     //Note: the collection may have size==0!
                     mapper.add(schemas[i],collection);
                 }                

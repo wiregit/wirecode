@@ -46,23 +46,62 @@ public class LimeXMLReplyCollection{
     public static final int HASH_FAILED  = 11;
 
 
-    /**
-     * Special audio constructor. The signature is the same as the other
-     * constructor, except the boolean. This is a hack. The order is different
-     * for non audio stuff. TODO2: This is BAD! Users may reverse the order
-     * by mistake and they would die.
-     */
-    public LimeXMLReplyCollection(String URI, Map fileToHash,FileManager fm ){
-        audio = true;
+    public LimeXMLReplyCollection(Map fileToHash, String URI, 
+                                  FileManager fm, boolean audio) {
         this.schemaURI = URI;
         this.metaFileManager = (MetaFileManager)fm;
-        MapSerializer ms = initialize(URI);//contains strings now 
+        this.audio = audio;
+
+        // construct a backing store object (for serialization)
+        MapSerializer ms = initialize(URI);
         Map hashToXMLStr;
-        //if the file is invalid....ms == null
-        if(ms==null)//create a dummy
-            hashToXMLStr= new HashMap();
+
+        //if File is invalid, ms== null
+        if (ms == null) // create a dummy
+            hashToXMLStr = new HashMap();
         else
             hashToXMLStr = ms.getMap();
+        
+        if (!this.audio) 
+            constructCollection(fileToHash, hashToXMLStr);        
+        else 
+            constructAudioCollection(fileToHash, hashToXMLStr);
+    }
+
+
+    /**
+     * Constructs the usual XML Collection.
+     */
+    private void constructCollection(Map fileToHash, Map hashToXMLStr) {
+        Iterator iter = null;
+        if ((hashToXMLStr != null) &&
+            (hashToXMLStr.keySet() != null))
+            iter = hashToXMLStr.keySet().iterator();
+        while((iter != null) && iter.hasNext()){
+            boolean valid = true;
+            String hash = (String)iter.next();
+            String xmlStr = (String)hashToXMLStr.get(hash);//cannot be null
+            LimeXMLDocument doc=null;
+            try{
+                doc = new LimeXMLDocument(xmlStr);
+            }catch(Exception e){
+                valid = false;
+            }
+            if(valid)
+                addReply(hash,doc);
+        }
+        if (fileToHash != null)
+            checkDocuments(fileToHash,false);
+    }
+
+
+
+
+    /**
+     * Handle creation of a Audio Collection.  Special because we need to read
+     * ID3s, etc.
+     */
+    private void constructAudioCollection(Map fileToHash, Map hashToXMLStr) {
         ID3Reader id3Reader = new ID3Reader();
         synchronized(fileToHash){
             Iterator iter = fileToHash.keySet().iterator();
@@ -75,10 +114,10 @@ public class LimeXMLReplyCollection{
                 if(fileXMLString==null || fileXMLString.equals(""))
                     solo = true;//rich data only from ID3
                 try{
-                    String XMLString = id3Reader.readDocument(file,solo);
+                    String xmlString = id3Reader.readDocument(file,solo);
                     if(!solo)
-                        XMLString = joinAudioXMLStrings(XMLString,fileXMLString);
-                    doc = new LimeXMLDocument(XMLString);
+                        xmlString =joinAudioXMLStrings(xmlString,fileXMLString);
+                    doc = new LimeXMLDocument(xmlString);
                 }catch(Exception e){
                     //System.out.println("Audio file "+file);
                     //e.printStackTrace();
@@ -108,6 +147,7 @@ public class LimeXMLReplyCollection{
         checkDocuments(fileToHash,audio);
     }
     
+
     /**
      * Gets a list of keywords from all the documents in this collection.
      * <p>
@@ -124,44 +164,6 @@ public class LimeXMLReplyCollection{
             }
         }
         return retList;
-    }
-
-
-    /**
-     * @param hashToFile contains all hashes for all the non-mp3 files found
-     * by the MetaFileManager
-     */
-    public LimeXMLReplyCollection(Map fileToHash, String URI, FileManager fm) {
-        audio = false;
-        this.schemaURI = URI;
-        this.metaFileManager = (MetaFileManager)fm;
-        MapSerializer ms = initialize(URI);
-        Map hashToXMLStr;
-        //if File is invalid, ms== null
-        if (ms==null)//create a dummy...
-            hashToXMLStr = new HashMap();
-        else
-            hashToXMLStr = ms.getMap();
-        
-        Iterator iter = null;
-        if ((hashToXMLStr != null) &&
-            (hashToXMLStr.keySet() != null))
-            iter = hashToXMLStr.keySet().iterator();
-        while((iter != null) && iter.hasNext()){
-            boolean valid = true;
-            String hash = (String)iter.next();
-            String xmlStr = (String)hashToXMLStr.get(hash);//cannot be null
-            LimeXMLDocument doc=null;
-            try{
-                doc = new LimeXMLDocument(xmlStr);
-            }catch(Exception e){
-                valid = false;
-            }
-            if(valid)
-                addReply(hash,doc);
-        }
-        if (fileToHash != null)
-            checkDocuments(fileToHash,false);
     }
 
     private void checkDocuments (Map fileToHash, boolean mp3){
