@@ -98,7 +98,7 @@ public class XMLParsingUtils {
         if(type.endsWith("y")) return type.substring(0,type.length()-1)+"ies";
         return type+"s";
     }
-//     public static void main(String[] args) throws Exception {
+//     public static void main(String[] args) throws Exception { //UNIT TEST
 //         //test parse
 //         String xml = "<?xml version=\"1.0\"?>"+
 //             "<audios xsi:noNamespaceSchemaLocation=\"http://www.limewire.com/schemas/audio.xsd\">"+
