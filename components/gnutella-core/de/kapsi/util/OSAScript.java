@@ -149,8 +149,9 @@ public class OSAScript implements Serializable {
     }
     
     /**
-     * Executes the script and returns the results or null. 
-     * The script will be compiled automatically if necessary.
+     * Executes the script and returns the results as byte-array.
+     * It is up to you to interpret the data (usually Strings). The
+     * script will be compiled automatically if necessary.
      */
     public AEDesc execute() throws OSAException {
     
@@ -162,8 +163,9 @@ public class OSAScript implements Serializable {
     }
     
     /**
-     * Executes a specific subroutine of the script and returns the results or null.
-     * The script will be compiled automatically if necessary.
+     * Executes a specific subroutine of the script and returns the results as byte-array.
+     * It is up to you to interpret the data (usually Strings). The script will be compiled 
+     * automatically if necessary.
      *
      * <p>The name of the subroutine must be written in lower case!</p>
      */
@@ -178,7 +180,8 @@ public class OSAScript implements Serializable {
     
     /**
      * Executes a specific subroutine of the script with optional parameters and returns the 
-     * results or null. The script will be compiled automatically if necessary.
+     * results as byte-array. It is up to you to interpret the data (usually Strings). The script 
+     * will be compiled automatically if necessary.
      *
      * <p>The name of the subroutine must be written in lower case!</p>
      */
