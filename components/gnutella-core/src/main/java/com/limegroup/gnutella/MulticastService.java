@@ -187,7 +187,7 @@ public final class MulticastService implements Runnable {
                 try {
                     // we do things the old way temporarily
                     InputStream in = new ByteArrayInputStream(data);
-                    Message message = Message.read(in);
+                    Message message = Message.read(in, Message.N_MULTICAST);
                     if(message == null) continue;
                     // need to set router because this might have started
                     // before RouterService was instantiated.

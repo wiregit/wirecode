@@ -97,7 +97,7 @@ public class QueryRequest extends Message implements Serializable{
         return new QueryRequest(newQueryGUID(true), DEFAULT_TTL, "\\", "", 
                                 UrnType.SHA1_SET, sha1Set, null,
                                 !RouterService.acceptedIncomingConnection(),
-								false);
+								Message.N_UNKNOWN);
 
 	}
 
@@ -118,7 +118,7 @@ public class QueryRequest extends Message implements Serializable{
         return new QueryRequest(newQueryGUID(false), DEFAULT_TTL, "\\", "", 
                                 UrnType.SHA1_SET, sha1Set, null,
                                 !RouterService.acceptedIncomingConnection(),
-								false);
+								Message.N_UNKNOWN);
 
 	}
 
@@ -146,7 +146,7 @@ public class QueryRequest extends Message implements Serializable{
         return new QueryRequest(newQueryGUID(true), ttl, "\\", "", 
                                 UrnType.SHA1_SET, sha1Set, null,
                                 !RouterService.acceptedIncomingConnection(),
-								false);
+								Message.N_UNKNOWN);
 	}
 	
 	/**
@@ -300,7 +300,7 @@ public class QueryRequest extends Message implements Serializable{
 								qr.getRequestedUrnTypes(),
 								qr.getQueryUrns(), qr.getQueryKey(),
 								qr.isFirewalledSource(),
-								qr.isMulticast());
+								qr.getNetwork());
 	}
 
     /**
@@ -330,7 +330,7 @@ public class QueryRequest extends Message implements Serializable{
         return new QueryRequest(newQueryGUID(false), (byte)1, query, "", 
                                 UrnType.ANY_TYPE_SET, EMPTY_SET, key,
                                 !RouterService.acceptedIncomingConnection(),
-								false);
+								Message.N_UNKNOWN);
     }
 
 
@@ -357,7 +357,7 @@ public class QueryRequest extends Message implements Serializable{
 								qr.getRichQuery(), 
 								qr.getRequestedUrnTypes(),
 								qr.getQueryUrns(), qr.getQueryKey(),
-								false, true);
+								false, Message.N_MULTICAST);
 	}
 
     /** 
@@ -374,7 +374,7 @@ public class QueryRequest extends Message implements Serializable{
         return new QueryRequest(qr.getGUID(), qr.getTTL(), 
                                 qr.getQuery(), qr.getRichQuery(), 
                                 qr.getRequestedUrnTypes(), qr.getQueryUrns(),
-                                key, qr.isFirewalledSource(), false);
+                                key, qr.isFirewalledSource(), Message.N_UNKNOWN);
 	}
 
 	/**
@@ -387,7 +387,7 @@ public class QueryRequest extends Message implements Serializable{
         return new QueryRequest(newQueryGUID(false), (byte)1, 
 								FileManager.INDEXING_QUERY, "", 
                                 UrnType.ANY_TYPE_SET, EMPTY_SET, null,
-                                false, false);
+                                false, Message.N_UNKNOWN);
 	}
 
 	/**
@@ -403,7 +403,7 @@ public class QueryRequest extends Message implements Serializable{
 		return new QueryRequest(newQueryGUID(false), ttl, 
 								query, "", 
                                 UrnType.ANY_TYPE_SET, EMPTY_SET, null,
-                                false, false);
+                                false, Message.N_UNKNOWN);
 	}
 
 
@@ -419,9 +419,9 @@ public class QueryRequest extends Message implements Serializable{
 	 * @return a new <tt>QueryRequest</tt> instance from the specified data
 	 */
 	public static QueryRequest 
-		createNetworkQuery(byte[] guid, byte ttl, byte hops, byte[] payload) 
+		createNetworkQuery(byte[] guid, byte ttl, byte hops, byte[] payload, int network) 
 	    throws BadPacketException {
-		return new QueryRequest(guid, ttl, hops, payload);
+		return new QueryRequest(guid, ttl, hops, payload, network);
 	}
 
     /**
@@ -461,7 +461,7 @@ public class QueryRequest extends Message implements Serializable{
      */
     private QueryRequest(byte[] guid, byte ttl, String query, String richQuery) {
         this(guid, ttl, query, richQuery, UrnType.ANY_TYPE_SET, EMPTY_SET, null,
-			 !RouterService.acceptedIncomingConnection(), false);
+			 !RouterService.acceptedIncomingConnection(), Message.N_UNKNOWN);
     }
 
     /**
@@ -481,28 +481,25 @@ public class QueryRequest extends Message implements Serializable{
 						 String query, String richQuery, 
 						 Set requestedUrnTypes, Set queryUrns,
 						 QueryKey queryKey, boolean isFirewalled, 
-						 boolean isMulticast) {
+						 int network) {
         // don't worry about getting the length right at first
-        super(guid, Message.F_QUERY, ttl, /* hops */ (byte)0, /* length */ 0);
+        super(guid, Message.F_QUERY, ttl, /* hops */ (byte)0, /* length */ 0, network);
 		if((query == null || query.length() == 0) &&
 		   (richQuery == null || richQuery.length() == 0) &&
 		   (queryUrns == null || queryUrns.size() == 0)) {
 			throw new IllegalArgumentException("cannot create empty query");
 		}		
 
+
             
 		// the new Min Speed format - looks reversed but
 		// it isn't because of ByteOrder.short2leb
 		int minSpeed = 0x00000080; 
 		// set the firewall bit if i'm firewalled
-		if (isFirewalled && !isMulticast)
+		if (isFirewalled && !isMulticast())
 			minSpeed |= 0x40;
 		// LimeWire's ALWAYS want rich results....
 		minSpeed |= 0x20;
-		
-		// set the multicast bit
-		if (isMulticast) 
-			minSpeed |= 0x10;
 
         MIN_SPEED = minSpeed;
 		if(query == null) {
@@ -590,7 +587,7 @@ public class QueryRequest extends Message implements Serializable{
 		}
 
 		PAYLOAD = baos.toByteArray();
-		updateLength(PAYLOAD.length); 
+		updateLength(PAYLOAD.length);
 
 		this.QUERY_URNS = Collections.unmodifiableSet(tempQueryUrns);
 		this.REQUESTED_URN_TYPES = Collections.unmodifiableSet(tempRequestedUrnTypes);
@@ -606,15 +603,16 @@ public class QueryRequest extends Message implements Serializable{
 	 * @param hops the hops of the query
 	 * @param payload the query payload, containing the query string and any
 	 *  extension strings
+	 * @param network the network that this query came from.
 	 * @throws <tt>BadPacketException</tt> if this is not a valid query
      */
-    private QueryRequest(byte[] guid, byte ttl, byte hops, byte[] payload) 
+    private QueryRequest(
+      byte[] guid, byte ttl, byte hops, byte[] payload, int network) 
 		throws BadPacketException {
-        super(guid, Message.F_QUERY, ttl, hops, payload.length);		
+        super(guid, Message.F_QUERY, ttl, hops, payload.length, network);
 		if(payload == null) {
 			throw new BadPacketException("no payload");
 		}
-
 		PAYLOAD=payload;
 		String tempQuery = "";
 		String tempRichQuery = "";
@@ -805,9 +803,11 @@ public class QueryRequest extends Message implements Serializable{
      * Returns true if the query source is a firewalled servent.
      */
     public boolean isFirewalledSource() {
-        if ((MIN_SPEED & 0x0080) > 0) {
-            if ((MIN_SPEED & 0x0040) > 0)
-                return true;
+        if ( !isMulticast() ) {
+            if ((MIN_SPEED & 0x0080) > 0) {
+                if ((MIN_SPEED & 0x0040) > 0)
+                    return true;
+            }
         }
         return false;
     }
@@ -823,22 +823,6 @@ public class QueryRequest extends Message implements Serializable{
         }
         return false;        
     }
-    
-	/**
-	 * Accessor for whether or not this query was sent via IP multicast,
-	 * and so is on the same subnet, and should follow different firewall 
-	 * rules.
-	 *
-	 * @return <tt>true</tt> if the query was sent via multicast,
-	 *  otherwise <tt>false</tt>
-	 */
-	public boolean isMulticast() {
-        if ((MIN_SPEED & 0x0080) > 0) {
-            if ((MIN_SPEED & 0x0010) > 0)
-                return true;
-        }
-        return false;		
-	}
 
 	/**
 	 * Accessor for whether or not this is a requery from a LimeWire.

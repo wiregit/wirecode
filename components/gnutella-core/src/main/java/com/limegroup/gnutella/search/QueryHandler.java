@@ -186,7 +186,8 @@ public final class QueryHandler {
 			try {
 				return QueryRequest.createNetworkQuery(QUERY.getGUID(), ttl, 
 													   QUERY.getHops(), 
-													   QUERY.getPayload());
+													   QUERY.getPayload(),
+													   QUERY.getNetwork());
 			} catch(BadPacketException e) {
 				// this should never happen, since the query was already 
 				// read from the network, so report an error

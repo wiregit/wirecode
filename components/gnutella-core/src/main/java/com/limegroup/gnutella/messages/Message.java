@@ -29,6 +29,11 @@ public abstract class Message
     public static final byte F_VENDOR_MESSAGE_STABLE=(byte)0x32;
 
     private final static boolean PARSE_GROUP_PINGS = false;
+    
+    public static final int N_UNKNOWN = -1;
+    public static final int N_TCP = 1;
+    public static final int N_UDP = 2;
+    public static final int N_MULTICAST = 3;
 
     /** Same as GUID.makeGUID.  This exists for backwards compatibility. */
     public static byte[] makeGuid() {
@@ -51,6 +56,10 @@ public abstract class Message
     private int priority=0;
     /** Time this was created.  Not written to network. */
     private final long creationTime=System.currentTimeMillis();
+    /**
+     * The network that this was received on or is going to be sent to.
+     */
+    private final int network;
 
 	/**
 	 * Constant byte buffer for storing the GUID for incoming messages --
@@ -93,7 +102,7 @@ public abstract class Message
      *  The GUID is set appropriately, and the number of hops is set to 0.
      */
     protected Message(byte func, byte ttl, int length) {
-        this(makeGuid(), func, ttl, (byte)0, length);
+        this(makeGuid(), func, ttl, (byte)0, length, N_UNKNOWN);
     }
 
     /**
@@ -102,11 +111,20 @@ public abstract class Message
      */
     protected Message(byte[] guid, byte func, byte ttl,
               byte hops, int length) {
+        this(guid, func, ttl, hops, length, N_UNKNOWN);
+    }
+
+    /**
+     * Same as above, but caller specifies the network.
+     * This is used when reading packets off network.
+     */
+    protected Message(byte[] guid, byte func, byte ttl,
+              byte hops, int length, int network) {
 		if(guid.length != 16) {
 			throw new IllegalArgumentException("invalid guid length: "+guid.length);
 		} 		
         this.guid=guid; this.func=func; this.ttl=ttl;
-        this.hops=hops; this.length=length;
+        this.hops=hops; this.length=length; this.network = network;
         //repOk();
     }
 	
@@ -125,9 +143,27 @@ public abstract class Message
      */
     public static Message read(InputStream in)
 		throws BadPacketException, IOException {
-        return Message.read(in, new byte[23]);
+        return Message.read(in, new byte[23], N_UNKNOWN);
     }
-
+    
+    /**
+     * @modifies in
+     * @effects reads a packet from the network and returns it as an
+     *  instance of a subclass of Message, unless one of the following happens:
+     *    <ul>
+     *    <li>No data is available: returns null
+     *    <li>A bad packet is read: BadPacketException.  The client should be
+     *      able to recover from this.
+     *    <li>A major problem occurs: IOException.  This includes reading packets
+     *      that are ridiculously long and half-completed messages. The client
+     *      is not expected to recover from this.
+     *    </ul>
+     */
+    public static Message read(InputStream in, int network)
+		throws BadPacketException, IOException {
+        return Message.read(in, new byte[23], network);
+    }    
+    
     /**
      * @requires buf.length==23
      * @effects exactly like Message.read(in), but buf is used as scratch for
@@ -136,6 +172,19 @@ public abstract class Message
      *  but the contents are not guaranteed to contain any useful data.  
      */
     public static Message read(InputStream in, byte[] buf)
+		throws BadPacketException, IOException {
+        return Message.read(in, buf, N_UNKNOWN);
+    }
+
+    /**
+     * @param network the network this was received from.
+     * @requires buf.length==23
+     * @effects exactly like Message.read(in), but buf is used as scratch for
+     *  reading the header.  This is an optimization that lets you avoid
+     *  repeatedly allocating 23-byte arrays.  buf may be used when this returns,
+     *  but the contents are not guaranteed to contain any useful data.  
+     */
+    public static Message read(InputStream in, byte[] buf, int network)
 		throws BadPacketException, IOException {
         //1. Read header bytes from network.  If we timeout before any
         //   data has been read, return null instead of throwing an
@@ -220,7 +269,8 @@ public abstract class Message
                 return new PingReply(guid,ttl,hops,payload);
             case F_QUERY:
                 if (length<3) break;
-				return QueryRequest.createNetworkQuery(guid, ttl, hops, payload);
+				return QueryRequest.createNetworkQuery(
+				    guid, ttl, hops, payload, network);
             case F_QUERY_REPLY:
                 if (length<26) break;
                 return new QueryReply(guid,ttl,hops,payload);
@@ -334,6 +384,25 @@ public abstract class Message
     }
 
     ////////////////////////////////////////////////////////////////////
+    public int getNetwork() {
+        return network;
+    }
+    
+    public boolean isMulticast() {
+        return network == N_MULTICAST;
+    }
+    
+    public boolean isUDP() {
+        return network == N_UDP;
+    }
+    
+    public boolean isTCP() {
+        return network == N_TCP;
+    }
+    
+    public boolean isUnknownNetwork() {
+        return network == N_UNKNOWN;
+    }
 
     public byte[] getGUID() {
         return guid;
