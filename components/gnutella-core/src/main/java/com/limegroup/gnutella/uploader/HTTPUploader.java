@@ -27,7 +27,7 @@ public class HTTPUploader implements Runnable {
     private ActivityCallback _callback;
     private Socket _socket;   
     private FileManager _fmanager;
-    private FileDesc _fdesc;
+    private FileDesc _fdesc;	
     private BufferedReader _fin;
     private String _host;
     
@@ -208,6 +208,9 @@ public class HTTPUploader implements Runnable {
     }
 
     public void run() {
+
+	System.out.println("In the upload run");
+	
 	_callback.addUpload(this);
 	doUpload();
 	_callback.removeUpload(this);

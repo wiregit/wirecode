@@ -15,6 +15,7 @@ import java.util.*;
 public class HTTPDownloader implements Runnable {
 
     private int BUFFSIZE = 1024;
+    private int MAX_BUFF = 64;
 
     private InputStream _istream;
     private BufferedReader _in;
@@ -165,6 +166,9 @@ public class HTTPDownloader implements Runnable {
     }
 
     public void run() {
+
+	System.out.println("run being called");
+
 	_callback.addDownload(this);
 	doDownload();
 	_callback.removeDownload(this);
@@ -172,6 +176,8 @@ public class HTTPDownloader implements Runnable {
 
     public void doDownload() {
 	
+
+
 	readHeader();
 
 	try {
@@ -191,23 +197,31 @@ public class HTTPDownloader implements Runnable {
 		
 		_bis = new BufferedInputStream(_istream);
 
+		byte[] buf;
+
 		while (true) {
 		    
 		    int buf_size = _bis.available();
 
-
-		    byte[] buf = new byte[buf_size];
-
-		    if (buf_size > 0) {
-			c = _bis.read(buf);
-			if (c == -1) 
-			    break;
-			bos.write(buf);
-			_amountRead+=c;
-			count++;
-		    }
+		    if (buf_size > MAX_BUFF)
+			buf = new byte[MAX_BUFF];
+		    else
+			buf = new byte[buf_size];
+		    
+		    c = _bis.read(buf);
+		    
+		    if (c == -1) 
+			break;
+		    bos.write(buf);
+		    _amountRead+=c;
+		    System.out.println("THe Amoutn read: " + _amountRead);
+		    count++;
+		    
 		    
 		}
+
+		System.out.println("THe FINAL amount read: " + _amountRead);
+		System.out.println("THe size of the file: " + _sizeOfFile);
 
 	    }
 	}
