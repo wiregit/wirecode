@@ -116,6 +116,11 @@ public class HTTPHeaderName {
 	public static final HTTPHeaderName THEX_URI =
 		new HTTPHeaderName("X-Thex-URI");
 
+    /**
+     * Constant header for the date.
+     */
+    public static final HTTPHeaderName DATE = new HTTPHeaderName("Date");
+
 	/**
 	 * Header for the available ranges of a file currently available,
 	 * as specified in the Partial File Sharing Protocol.  This takes the
