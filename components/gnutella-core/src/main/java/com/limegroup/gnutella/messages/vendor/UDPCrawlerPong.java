@@ -11,9 +11,13 @@ import com.limegroup.gnutella.connection.*;
 import com.limegroup.gnutella.messages.*;
 import com.limegroup.gnutella.settings.ApplicationSettings;
 
+
 import com.sun.java.util.collections.*;
 
 import java.net.*;
+import java.util.zip.GZIPInputStream;
+import java.util.zip.GZIPOutputStream;
+import java.io.*;
 
 public class UDPCrawlerPong extends VendorMessage {
 	
@@ -194,14 +198,28 @@ public class UDPCrawlerPong extends VendorMessage {
 			if (agents.length() > 0)
 				agents.deleteCharAt(agents.length()-1);
 			
+			//zip the string
+			ByteArrayOutputStream baos = new ByteArrayOutputStream();
+			try {
+				GZIPOutputStream zout = new GZIPOutputStream(baos);
+				byte [] length = new byte[2];
+				ByteOrder.short2leb((short)agents.length(),length,0);
+				zout.write(length);
+				zout.write(agents.toString().getBytes());
+				zout.flush();
+				zout.close();
+			}catch(IOException huh) {
+				ErrorService.error(huh);
+			}
+			
 			//put in the return payload.
-			byte [] versionsB = agents.toString().getBytes();
+			byte [] agentsB = baos.toByteArray();
 			byte [] resTemp = result;
-			result = new byte[result.length+versionsB.length+2];
+			result = new byte[result.length+agentsB.length+2];
 			
 			System.arraycopy(resTemp,0,result,0,resTemp.length);
-			ByteOrder.short2leb((short)versionsB.length,result,resTemp.length);
-			System.arraycopy(versionsB,0,result,resTemp.length+2,versionsB.length);
+			ByteOrder.short2leb((short)agentsB.length,result,resTemp.length);
+			System.arraycopy(agentsB,0,result,resTemp.length+2,agentsB.length);
 		}
 		return result;
 	}
@@ -349,7 +367,24 @@ public class UDPCrawlerPong extends VendorMessage {
 				throw new BadPacketException("payload is "+payload.length+
 						" but should have been at least "+
 						(agentsOffset+agentsSize+2));
-			_agents = new String(payload,agentsOffset+2,agentsSize);
+			
+			ByteArrayInputStream bais = 
+				new ByteArrayInputStream(payload,agentsOffset+2,agentsSize);
+			
+			try {
+				
+				GZIPInputStream gais = new GZIPInputStream(bais);
+				DataInputStream dais = new DataInputStream(gais);
+				byte [] length = new byte[2];
+				dais.readFully(length);
+				int len = ByteOrder.leb2short(length,0);
+				byte []agents = new byte[len];
+				dais.readFully(agents);
+				
+				_agents = new String(agents);
+			}catch(IOException impossible ) {
+				ErrorService.error(impossible);
+			}
 		}
 		
 		//Note: do the check whether we got as many results as requested elsewhere.
