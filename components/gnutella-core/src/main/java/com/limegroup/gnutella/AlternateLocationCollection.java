@@ -329,7 +329,13 @@ public final class AlternateLocationCollection
 	 */	
 	public String httpStringValue() {
         // TODO: Could this be a performance issue??
-		List list = new LinkedList(LOCATIONS);
+
+        List list = null;
+        synchronized(LOCATIONS) {
+			// Note that new ArrayList(List) internally iterates over List
+			// so you need to synchronize this call.
+            list = new LinkedList(LOCATIONS);
+        }
         list = list.subList(0, list.size() >= 10 ? 10 : list.size());
 
 		// we have our own copy, so we don't need to synchronize
