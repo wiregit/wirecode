@@ -483,93 +483,74 @@ public class ManagedDownloader implements Downloader, Serializable {
 
     /** 
      * Returns a new QueryRequest for requery purposes.  Subclasses may wish to
-     * override to modify add hashes, etc.  Note that the requery will not be
-     * sent if global limits are exceeded.
+     * override this to be more or less specific.  Note that the requery will
+     * not be sent if global limits are exceeded.<p>
+     *
+     * The default implementation includes all non-trivial keywords found in all
+     * RemoteFileDesc's in this, i.e., the INTERSECTION of all file names.  A
+     * keyword is "non-trivial" if it is not a number of a common English
+     * article (e.g., "the"), a number (e.g., "2"), or the file extension.  The
+     * query also includes all hashes for all RemoteFileDesc's, i.e., the UNION
+     * of all hashes.
+     *
      * @exception CantResumeException if this doesn't know what to search for 
      */
     protected synchronized QueryRequest newRequery() throws CantResumeException { 
         if (allFiles.length<0)                  //TODO: what filename?
             throw new CantResumeException("");  //      maybe another exception?
+        //TODO: add URNs according to spec
         return new QueryRequest(SettingsManager.instance().getTTL(),
                                 0,              //minimum speed
                                 extractQueryString(), 
                                 true);          //mark as requery
     }
 
-
-    private final String[] invalidWords = {"the", "an", "a"};
-    private final HashSet wordSet = new HashSet(Arrays.asList(invalidWords));
-
-
-    /** @return the intersection of all rfd filename keywords */
+    /** Returns the keywords for a requery, i.e., the keywords found in all
+     *  filenames.  REQUIRES: allFiles.length MUST be greater than 0. */
     private final String extractQueryString() {
-        // used for intersection
-        Map words = new HashMap();        
-        for (int i = 0; i < allFiles.length; i++) 
-            canonicalize(ripExtension(allFiles[i].getFileName()), words);
-        
-        // create the query string....
-        StringBuffer sb = new StringBuffer();
-        Iterator keys = words.keySet().iterator();
-        while (keys.hasNext()) {
-            String currKey = (String) keys.next();
-            Integer count = (Integer) words.get(currKey);
-            // if the string 'intersected', add it...
-            // TODO: this code doesn't do the right thing
-            if (count.intValue() == allFiles.length)
-                sb.append(currKey + " ");
+        //Intersect words(allFiles[i]), for all i.
+        Assert.that(allFiles.length>0, "Precondition violated");
+        Set intersection=keywords(allFiles[0].getFileName());
+        for (int i=1; i<allFiles.length; i++) {
+            intersection.retainAll(
+                keywords(allFiles[i].getFileName()));
         }
-        
+
+        //Put the keywords into a string.
+        StringBuffer sb = new StringBuffer();
+        for (Iterator keys=intersection.iterator(); keys.hasNext(); ) {
+            sb.append(keys.next());
+            if (keys.hasNext())
+                sb.append(" ");
+        }        
         return sb.toString();
     }
 
-    /** Canonicalizes a file name.  Adds all non-trivial keywords--i.e. not
-     *  articles or numbers--from FILENAME to MAP, along with counts.
-     *  @param map a map from keywords (String) to counts (Integer) */
-    private final void canonicalize(String fileName,
-                                    Map map) {
-        // separate by whitespace and _ 
+    /** Returns the canonicalized non-trivial search keywords in fileName. */
+    private static final Set keywords(String fileName) {
+        //Remove extension
+        fileName=ripExtension(fileName);
+        
+        //Separate by whitespace and _, etc.
+        Set ret=new HashSet();
         StringTokenizer st = new StringTokenizer(fileName, FileManager.DELIMETERS);
         while (st.hasMoreTokens()) {
-            final String currToken = st.nextToken().toLowerCase();
-            if (wordSet.contains(currToken))
-                continue;
-            try {
+            final String currToken = st.nextToken().toLowerCase();;
+            try {                
+                //Ignore if a number.
                 Double d = new Double(currToken);
                 continue;
-            }
-            catch (NumberFormatException ignored) {}
-            { // success
-                Integer occurrences = (Integer) map.get(currToken);
-                if (occurrences == null)
-                    occurrences = new Integer(1);
-                else
-                    occurrences = new Integer(occurrences.intValue()+1);
-                map.put(currToken, occurrences);
+            } catch (NumberFormatException normalWord) {
+                //Add non-numeric words that are not an (in)definite article.
+                if (! TRIVIAL_WORDS.contains(currToken))
+                    ret.add(currToken);
             }
         }
+        return ret;
     }
 
-    private final long SIXTY_KB = 60000;
-    private final boolean sizeClose(long one, long two) {
-        boolean retVal = false;
-		// if the sizes match exactly, we are good to go....
-		if (one == two)
-            retVal = true;
-        else {
-            //Similar file size (within 60k)?  This value was determined 
-            //empirically to optimize grouping aggressiveness with minimal 
-            //performance cost.
-            long sizeDiff = Math.abs(one - two);
-            if (sizeDiff <= SIXTY_KB) 
-                retVal = true;
-        }
-        return retVal;
-    }
-
-
-    // take the extension off the filename...
-    private String ripExtension(String fileName) {
+    /** Returns fileName without any file extension. */
+    private static String ripExtension(String fileName) {
         String retString = null;
         int extStart = fileName.lastIndexOf('.');
         if (extStart == -1)
@@ -579,31 +560,10 @@ public class ManagedDownloader implements Downloader, Serializable {
         return retString;
     }
 
-
-    private final boolean namesClose(final String one, 
-                                     final String two) {
-        boolean retVal = false;
-
-        // copied from TableLine...
-        //Filenames close?  This is the most expensive test, so it should go
-        //last.  Allow 10% edit difference in filenames or 6 characters,
-        //whichever is smaller.
-        int allowedDifferences=Math.round(Math.min(
-             0.10f*((float)(ripExtension(one)).length()),
-             0.10f*((float)(ripExtension(two)).length())));
-        allowedDifferences=Math.min(allowedDifferences, 6);
-
-        synchronized (matcher) {
-            retVal = matcher.matches(matcher.process(one),
-                                     matcher.process(two),
-                                     allowedDifferences);
-        }
-
-        debug("MD.namesClose(): one = " + one);
-        debug("MD.namesClose(): two = " + two);
-        debug("MD.namesClose(): retVal = " + retVal);
-            
-        return retVal;
+    private static final List TRIVIAL_WORDS=new ArrayList(3); {
+        TRIVIAL_WORDS.add("the");  //must be lower-case
+        TRIVIAL_WORDS.add("an");
+        TRIVIAL_WORDS.add("a");
     }
 
 
@@ -652,6 +612,48 @@ public class ManagedDownloader implements Downloader, Serializable {
         return false;
     }
 
+    private final long SIXTY_KB = 60000;
+    private final boolean sizeClose(long one, long two) {
+        boolean retVal = false;
+		// if the sizes match exactly, we are good to go....
+		if (one == two)
+            retVal = true;
+        else {
+            //Similar file size (within 60k)?  This value was determined 
+            //empirically to optimize grouping aggressiveness with minimal 
+            //performance cost.
+            long sizeDiff = Math.abs(one - two);
+            if (sizeDiff <= SIXTY_KB) 
+                retVal = true;
+        }
+        return retVal;
+    }
+
+    private final boolean namesClose(final String one, 
+                                     final String two) {
+        boolean retVal = false;
+
+        // copied from TableLine...
+        //Filenames close?  This is the most expensive test, so it should go
+        //last.  Allow 10% edit difference in filenames or 6 characters,
+        //whichever is smaller.
+        int allowedDifferences=Math.round(Math.min(
+             0.10f*((float)(ripExtension(one)).length()),
+             0.10f*((float)(ripExtension(two)).length())));
+        allowedDifferences=Math.min(allowedDifferences, 6);
+
+        synchronized (matcher) {
+            retVal = matcher.matches(matcher.process(one),
+                                     matcher.process(two),
+                                     allowedDifferences);
+        }
+
+        debug("MD.namesClose(): one = " + one);
+        debug("MD.namesClose(): two = " + two);
+        debug("MD.namesClose(): retVal = " + retVal);
+            
+        return retVal;
+    }
 
 
     /** 

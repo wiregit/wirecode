@@ -19,15 +19,15 @@ public class ManagedDownloaderTest extends TestCase {
 
     public void testNewRequery() {
         RemoteFileDesc[] rfds={
-            newRFD("Susheel_Daswani_Neil_Daswani"),
-            newRFD("Susheel Ruchika Mahesh Kyle Daswani"),
-            newRFD("Susheel" + FileManager.DELIMETERS + "Daswani"),
-            newRFD("Sumeet (Susheel) Anurag (Daswani)Chris")
+            newRFD("Susheel_Daswani_Neil_Daswani.txt"),
+            newRFD("Susheel Ruchika Mahesh Kyle Daswani.txt"),
+            newRFD("Susheel/cool\\Daswani.txt"),
+            newRFD("Sumeet (Susheel) Anurag (Daswani)Chris.txt")
         };
         TestManagedDownloader downloader=new TestManagedDownloader(rfds);
         try {
             QueryRequest qr=downloader.newRequery2();
-            assertEquals("daswani susheel ",  //"susheel daswani" also ok
+            assertEquals("daswani susheel",  //"susheel daswani" also ok
                          qr.getQuery());
         } catch (CantResumeException e) {
             fail("Couldn't make requery");
@@ -39,7 +39,7 @@ public class ManagedDownloaderTest extends TestCase {
         TestManagedDownloader downloader=new TestManagedDownloader(rfds);
         try {
             QueryRequest qr=downloader.newRequery2();
-            assertEquals("LimeWire again",
+            assertEquals("limewire again",
                          qr.getQuery());
         } catch (CantResumeException e) {
             fail("Couldn't make requery");
