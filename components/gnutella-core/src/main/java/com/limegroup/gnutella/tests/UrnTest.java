@@ -124,7 +124,8 @@ public final class UrnTest extends TestCase {
 			try {
 				urns[i] = URN.createSHA1Urn(VALID_URNS[i]);
 				assertNotNull("urn should not be null",urns[i]);
-				assertTrue("should be SHA1", urns[i].isSHA1());
+				assertTrue("should be SHA1: '"+urns[i]+"'\r\n"+
+						   urns[i].getUrnType(), urns[i].isSHA1());
 				assertTrue("urn should not have the empty string", 
 						   !urns[i].toString().equals(""));
 			} catch(IOException e) {
