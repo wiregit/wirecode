@@ -18,6 +18,13 @@ public class UDPHostRanker {
 
     private static final MessageRouter ROUTER = 
         RouterService.getMessageRouter();
+        
+    /**
+     * The time to wait before expiring a message listener.
+     *
+     * Non-final for testing.
+     */
+    public static int LISTEN_EXPIRE_TIME = 20 * 1000;
 
     /**
      * Ranks the specified <tt>Collection</tt> of hosts.
@@ -114,7 +121,7 @@ public class UDPHostRanker {
                 };
          
             // Purge after 20 seconds.
-            RouterService.schedule(udpMessagePurger, (long)(20*1000), 0);
+            RouterService.schedule(udpMessagePurger, LISTEN_EXPIRE_TIME, 0);
         }
     }
 }

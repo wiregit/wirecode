@@ -23,9 +23,7 @@ import com.limegroup.gnutella.util.IpPort;
 import com.limegroup.gnutella.util.PrivilegedAccessor;
 
 /**
- * Checks whether (multi)leaves avoid forwarding messages to ultrapeers, do
- * redirects properly, etc.  The test includes a leaf attached to 3 
- * Ultrapeers.
+ * Tests that UDP host ranker works.
  */
 public class UDPHostRankerTest extends ClientSideTestCase {
     protected static final int PORT=6669;
@@ -47,22 +45,26 @@ public class UDPHostRankerTest extends ClientSideTestCase {
 
     public void testRanker() throws Exception {
         DatagramSocket[] udps = new DatagramSocket[20];
-        for (int i = 0; i < udps.length; i++) udps[i] = new DatagramSocket();
+        for (int i = 0; i < udps.length; i++)   
+            udps[i] = new DatagramSocket();
         
         final List list = new ArrayList();
-        for (int i = 0; i < udps.length; i++) list.add(new IpPortImpl(udps[i]));
+        for (int i = 0; i < udps.length; i++)
+            list.add(new IpPortImpl(udps[i]));
 
         final MLImpl ml = new MLImpl();
 
         UDPHostRanker.rank(list, ml, null, null);
+        
+        Thread.sleep(500);
+        assertTrue(ml.registered);
 
         for (int i = 0; i < udps.length; i++) {
             DatagramPacket pack = new DatagramPacket(new byte[1000], 1000);
             udps[i].setSoTimeout(TIMEOUT);
             try {
                 udps[i].receive(pack);
-            }
-            catch (IOException bad) {
+            } catch (IOException bad) {
                fail("Did not get expected message, i = " + i, bad);
             }
             InputStream in = new ByteArrayInputStream(pack.getData());
@@ -86,43 +88,25 @@ public class UDPHostRankerTest extends ClientSideTestCase {
         (Map) PrivilegedAccessor.getValue(RouterService.getMessageRouter(),
                                           "_messageListeners");
         assertEquals(0, map.size());
-    }
-
-    
-    public void testTCPMessageListener() throws Exception {
-        // UDP was tested above, so just do a Q&D test for TCP stuff.
-        final GUID guid = new GUID(GUID.makeGuid());
-        final MLImpl ml = new MLImpl();
-
-        PingReply pong = PingReply.create(guid.bytes(), (byte) 2);
-
-        rs.getMessageRouter().registerMessageListener(guid.bytes(), ml);
-        Map map = 
-        (Map) PrivilegedAccessor.getValue(RouterService.getMessageRouter(),
-                                          "_messageListeners");
-        assertEquals(1, map.size());
-        assertEquals(0, ml.count);
-
-        // send off the pong for processing
-        testUP[0].send(pong);
-        testUP[0].flush();
-        Thread.sleep(2000);
-        
-        rs.getMessageRouter().unregisterMessageListener(guid.bytes(), ml);
-        assertEquals(0, map.size());
-        assertEquals(1, ml.count);
+        assertTrue(ml.unregistered);
     }
 
     //////////////////////////////////////////////////////////////////
     
     private class MLImpl implements MessageListener {
         public int count = 0;
+        public boolean registered = false;
+        public boolean unregistered = false;
         public void processMessage(Message m, ReplyHandler handler) {
             assertTrue(m instanceof PingReply);
             count++;
         }
-        public void registered(byte[] guid) {}
-        public void unregistered(byte[] guid) {}
+        public void registered(byte[] guid) {
+            registered = true;
+        }
+        public void unregistered(byte[] guid) {
+            unregistered = true;
+        }
     }
     
     private class IpPortImpl implements IpPort {

@@ -157,11 +157,20 @@ public class UDPHostCache {
                     return RouterService.isConnected();
                 }
             },
-            PingRequest.createUDPPing()
+            getPing()
         );
         return true;
     }
     
+    /**
+     * Returns a PingRequest to be used while fetching.
+     *
+     * Useful as a seperate method for tests to catch the Ping's GUID.
+     */
+    protected PingRequest getPing() {
+        return PingRequest.createUDPPing();
+    }
+
     /**
      * Removes a given hostcache from this.
      */
@@ -247,6 +256,8 @@ public class UDPHostCache {
             // allow only udp replies.
             if(handler instanceof UDPReplyHandler) {
                 hosts.remove(handler);
+                // OPTIMIZATION: if we've gotten succesful responses from
+                // each hosts, unregister ourselves early.
                 if(hosts.isEmpty())
                     RouterService.getMessageRouter().unregisterMessageListener(guid, this);
             }

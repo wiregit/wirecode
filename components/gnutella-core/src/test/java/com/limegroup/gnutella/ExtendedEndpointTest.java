@@ -106,7 +106,7 @@ public class ExtendedEndpointTest extends com.limegroup.gnutella.util.BaseTestCa
         //Window time is hard-coded below.
         assertEquals("127.0.0.1:6346,3492,1,100,86400113;113,"
                      + ApplicationSettings.DEFAULT_LOCALE.getValue() 
-                     + "\n",
+                     + ",\n",
                      out.toString());
     }
 
@@ -139,7 +139,7 @@ public class ExtendedEndpointTest extends com.limegroup.gnutella.util.BaseTestCa
         //Window time is hard-coded below.
         assertEquals("127.0.0.1:6346,,"+timeString+",,"
                      + "," + ApplicationSettings.DEFAULT_LOCALE.getValue()
-                     + "\n",
+                     + ",\n",
                      out.toString());
     }
 
@@ -173,6 +173,38 @@ public class ExtendedEndpointTest extends com.limegroup.gnutella.util.BaseTestCa
         assertTrue(!iter.hasNext());
         iter=e.getConnectionFailures();
         assertTrue(!iter.hasNext());
+    }
+    
+    public void testUDPHostCacheEndpoints() throws Exception {
+        ExtendedEndpoint e= ExtendedEndpoint.read("1.3.4.5:6348,,1097611864117,,,en,1");
+        assertTrue(e.isUDPHostCache());
+        assertEquals(1, e.getUDPHostCacheFailures());
+        e.recordUDPHostCacheFailure();
+        assertEquals(2, e.getUDPHostCacheFailures());
+        e.recordUDPHostCacheSuccess();
+        assertEquals(0, e.getUDPHostCacheFailures());
+        StringWriter writer = new StringWriter();
+        e.write(writer);
+        assertEquals("1.3.4.5:6348,,1097611864117,,,en,0\n", writer.toString());
+        e.recordUDPHostCacheFailure();
+        e.recordUDPHostCacheFailure();
+        e.recordUDPHostCacheFailure();
+        writer = new StringWriter();
+        e.write(writer);
+        assertEquals("1.3.4.5:6348,,1097611864117,,,en,3\n", writer.toString());
+        e.setUDPHostCache(false);
+        assertFalse(e.isUDPHostCache());
+        try {
+            e.recordUDPHostCacheFailure();
+            fail("recorded failure");
+        } catch(AssertFailure expected) {}
+        try {
+            e.recordUDPHostCacheSuccess();
+            fail("recorded success");
+        } catch(AssertFailure expected) {}
+        writer = new StringWriter();
+        e.write(writer);
+        assertEquals("1.3.4.5:6348,,1097611864117,,,en,\n", writer.toString());
     }
     
     /////////////////////////// Comparators //////////////////////////////

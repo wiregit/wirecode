@@ -230,7 +230,10 @@ public class ExtendedEndpoint extends Endpoint {
      * Sets if this a UDP host cache endpoint.
      */
     public ExtendedEndpoint setUDPHostCache(boolean cache) {
-        udpHostCacheFailures = 0;
+        if(cache == true)
+            udpHostCacheFailures = 0;
+        else
+            udpHostCacheFailures = -1;
         return this;
     }
 
