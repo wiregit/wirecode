@@ -260,6 +260,7 @@ public final class SettingsManager {
 	 * default shutdown operation is set.
 	 */ 
 	private final boolean DEFAULT_SHUTDOWN_AFTER_TRANSFERS = 
+        CommonUtils.isMacOSX() ? false :
 		!DEFAULT_MINIMIZE_TO_TRAY;       
 
 	/**
