@@ -1390,6 +1390,16 @@ public class ConnectionManager {
                && _needPref 
                && _dedicatedPrefFetcher == null) {
                 _dedicatedPrefFetcher = new ConnectionFetcher(true);
+                Runnable interrupted = new Runnable() {
+                        public void run() {
+                            if (_dedicatedPrefFetcher == null)
+                                return;
+                            _dedicatedPrefFetcher.interrupt();
+                            _dedicatedPrefFetcher = null;
+                        }
+                    };
+                // shut off this guy if he didn't have any luck
+                RouterService.schedule(interrupted, 15 * 1000, 0);
             }
         }
         //How many connections do we need?  To prefer ultrapeers, we try to
