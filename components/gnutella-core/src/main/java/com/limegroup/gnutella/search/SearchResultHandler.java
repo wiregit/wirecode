@@ -2,6 +2,7 @@ package com.limegroup.gnutella.search;
 
 import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.messages.*;
+import com.limegroup.gnutella.messages.vendor.*;
 import com.limegroup.gnutella.settings.SearchSettings;
 import com.limegroup.gnutella.util.*;
 import com.limegroup.gnutella.xml.*;
@@ -52,6 +53,12 @@ public final class SearchResultHandler {
 	 */
     private long lastTime;
 
+
+    /** Used to keep track of the number of non-filtered responses per GUID.
+     */
+    private final FixedsizePriorityQueue GUID_COUNTS = 
+        new FixedsizePriorityQueue(GuidCountComparator.instance(), 15);
+    
 
 	/**
 	 * Starts the thread that processes search results.
@@ -186,6 +193,7 @@ public final class SearchResultHandler {
         List allDocsArray = LimeXMLDocumentHelper.getDocuments(xmlCollectionString, 
 															   results.size());
         Iterator iter = results.iterator();
+        int numSentToBackEnd = 0;
         for(int currentResponse = 0; iter.hasNext(); currentResponse++) {
             Response response = (Response)iter.next();
             if (!RouterService.matchesType(data.getMessageGUID(), response))
@@ -214,14 +222,107 @@ public final class SearchResultHandler {
             RemoteFileDesc rfd = response.toRemoteFileDesc(data);
             Set alts = response.getLocations();
 			RouterService.getCallback().handleQueryResult(rfd, data, alts);
-
+            numSentToBackEnd++;
         } //end of response loop
-        return true;
+
+        // ok - some responses may have got through to the GUI, we should account
+        // for them....
+        accountAndUpdateDynamicQueriers(qr, numSentToBackEnd);
+
+        return (numSentToBackEnd > 0);
     }
+
+
+    private void accountAndUpdateDynamicQueriers(final QueryReply qr,
+                                                 final int numSentToBackEnd) {
+
+        debug("SRH.accountAndUpdateDynamicQueriers(): entered.");
+        // we should execute if results were consumed
+        // technically Ultrapeers don't use this info, but we are keeping it
+        // around for further use
+        if (numSentToBackEnd > 0) {
+            // get the correct GuidCount
+            Iterator iter = GUID_COUNTS.iterator();
+            GuidCount gc = null;
+            while (iter.hasNext() && (gc == null)) {
+                GuidCount currGC = (GuidCount) iter.next();
+                if (currGC.getGUID().equals(new GUID(qr.getGUID())))
+                    gc = currGC;
+            }
+            if (gc == null)
+                gc = new GuidCount(qr.getGUID());
+            else
+                GUID_COUNTS.remove(gc);
+
+            // update the object and remember it
+            debug("SRH.accountAndUpdateDynamicQueriers(): in(crement/sert)ing.");
+            gc.increment(numSentToBackEnd);
+            GUID_COUNTS.insert(gc);
+
+            // inform proxying Ultrapeers....
+            if (RouterService.isShieldedLeaf()) {
+                if (gc.getNumResults() > gc.getNextReportNum()) {
+                    debug("SRH.accountAndUpdateDynamicQueriers(): telling UPs.");
+                    gc.tallyReport();
+                    try {
+                        QueryStatusResponse stat = 
+                            new QueryStatusResponse(gc.getGUID(), 
+                                                    gc.getNumResults()/4);
+                        RouterService.getConnectionManager().updateQueryStatus(stat);
+                    }
+                    catch (BadPacketException terrible) {
+                        ErrorService.error(terrible);
+                    }
+                }
+
+            }
+        }
+        debug("SRH.accountAndUpdateDynamicQueriers(): returning.");
+    }
+
 
     private final boolean debugOn = false;
     private void debug(String out) {
         if (debugOn)
             System.out.println(out);
     }
+
+    
+    /** A container that simply pairs a GUID and an int.  The int should
+     *  represent the number of non-filtered results for the GUID.
+     */
+    private static class GuidCount {
+        private final int REPORT_INTERVAL = 5;
+
+        private final GUID _guid;
+        private int _numResults;
+        private int _nextReportNum = REPORT_INTERVAL;
+
+        public GuidCount(byte[] guid) {
+            _guid = new GUID(guid);
+            _numResults = 0;
+        }
+
+        public GUID getGUID() { return _guid; }
+        public int getNumResults() { return _numResults; }
+        public int getNextReportNum() { return _nextReportNum; }
+        public void tallyReport() { _nextReportNum += REPORT_INTERVAL; }
+
+        public void increment(int incr) { _numResults += incr; }
+    }
+
+
+    /** Simple interface implementer that adjudicates between GuidCounts.
+     */
+    private static class GuidCountComparator implements Comparator {
+        private static GuidCountComparator instance = new GuidCountComparator();
+
+        public static GuidCountComparator instance() { return instance; }
+        
+        public int compare(Object o1, Object o2) {
+            GuidCount gc1 = (GuidCount) o1, gc2 = (GuidCount) o2;
+            return (gc2.getNumResults() - gc1.getNumResults());
+        }
+    }
+
 }

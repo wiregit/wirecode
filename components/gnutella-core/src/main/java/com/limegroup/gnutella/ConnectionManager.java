@@ -8,6 +8,7 @@ import java.util.Properties;
 import java.util.StringTokenizer;
 
 import com.limegroup.gnutella.messages.*;
+import com.limegroup.gnutella.messages.vendor.*;
 import com.limegroup.gnutella.util.*;
 import com.limegroup.gnutella.security.Authenticator;
 import com.limegroup.gnutella.handshaking.*;
@@ -819,6 +820,25 @@ public class ConnectionManager {
         } 
 
         return DataUtils.EMPTY_SET;
+    }
+
+    /**
+     * Sends a QueryStatusResponse message to as many Ultrapeers as possible.
+     *
+     * @param 
+     */
+    public void updateQueryStatus(QueryStatusResponse stat) {
+        if (isShieldedLeaf()) {
+            // this should be fast since leaves don't maintain a lot of
+            // connections and the test for query status response is a cached
+            // value
+            Iterator ultrapeers = getInitializedConnections().iterator();
+            while (ultrapeers.hasNext()) {
+                ManagedConnection currMC = (ManagedConnection) ultrapeers.next();
+                if (currMC.remoteHostSupportsLeafGuidance() >= 0)
+                    currMC.send(stat);
+            }
+        } 
     }
 
     /**
