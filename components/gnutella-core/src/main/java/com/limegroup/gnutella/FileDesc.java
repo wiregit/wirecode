@@ -71,8 +71,9 @@ public final class FileDesc implements AlternateLocationCollector {
 										   "a null File");
 		}
 		if(index <0) {
-			throw new IndexOutOfBoundsException("negative values not permitted "+
-												"in FileDesc: "+index);
+			throw new IndexOutOfBoundsException("negative values not "+
+												"permitted in FileDesc: " +
+												index);
 		}
 		// make a defensive copy
 		FILE = new File(file.getAbsolutePath());
@@ -85,7 +86,7 @@ public final class FileDesc implements AlternateLocationCollector {
 		Set urns = UrnCache.instance().getUrns(FILE);
 		if(urns.size() == 0) {			
 			// expensive the first time a new file is added
-			URNS = Collections.unmodifiableSet(calculateUrns());
+			URNS = Collections.unmodifiableSet(calculateUrns(FILE));
 			UrnCache.instance().addUrns(FILE, URNS);
 		}
 		else {
@@ -121,107 +122,15 @@ public final class FileDesc implements AlternateLocationCollector {
 	}
 
 	/**
-	 * Returns the <tt>AlternateLocationCollection</tt> instance for this
-	 * <tt>FileDesc</tt>.  The collection could be empty or <tt>null</tt>.
+	 * Returns the last modification time for the file according to this
+	 * <tt>FileDesc</tt> instance.
 	 *
-	 * @return the <tt>AlternateLocationCollection</tt> for this 
-	 *  <tt>FileDesc</tt> instance, which can be empty, or <tt>null</tt>
-	 *  if it is not initialized
+	 * @return the modification time for the file
 	 */
-	public AlternateLocationCollection getAlternateLocationCollection() {
-		return _altLocs;
+	public long lastModified() {
+		return _modTime;
 	}
 
-	// implements AlternateLocationCollector interface
-	public void addAlternateLocation(AlternateLocation al) {
-		createAlternateLocations();
-		_altLocs.addAlternateLocation(al);
-	}
-
-	// implements AlternateLocationCollector interface
-	public void addAlternateLocationCollection(AlternateLocationCollection alc) {
-		createAlternateLocations();
-		_altLocs.addAlternateLocationCollection(alc);
-	}
-
-	// implements AlternateLocationCollector interface
-	public boolean hasAlternateLocations() {
-		if(_altLocs == null) return false;
-		return _altLocs.hasAlternateLocations();
-	}
-
-	/**
-	 * Constructs the alternate location collection instance if it's null.
-	 */
-	private void createAlternateLocations() {
-		if(_altLocs == null) _altLocs = new AlternateLocationCollection();		
-	}
-    
-    /**
-	 * Returns whether or not this <tt>FileDesc</tt> has an associated
-	 * SHA1 URN value.
-	 * 
-	 * @return <tt>true</tt> if this <tt>FileDesc</tt> has an 
-	 *  associated SHA1 value, <tt>false</tt> otherwise
-	 */
-    //public synchronized boolean hasSHA1Urn() {
-	//return (getSHA1Urn() != null);
-	//}
-	
-    
-    /**
-     * Adds any URNs that can be locally calculated; may take a while to 
-	 * complete on large files.<p>
-	 * 
-	 * This is a place where members of <tt>FileDesc</tt> are mutable,
-	 * namely the collection of <tt>URN</tt>s.
-     */
-    private Set calculateUrns() {
-		// update modTime
-		//_modTime = FILE.lastModified();
-		try {
-			Set set = new HashSet();
-			set.add(URNFactory.createSHA1Urn(FILE));
-			return set;
-		} catch(IOException e) {
-			// the urn just does not get added
-			return Collections.EMPTY_SET;
-		}				
-	}
-    
-    /**
-     * Determine whether or not the given <tt>URN</tt> instance is 
-	 * contained in this <tt>FileDesc</tt>.
-	 *
-	 * @param urn the <tt>URN</tt> instance to check for
-	 * @return <tt>true</tt> if the <tt>URN</tt> is a valid <tt>URN</tt>
-	 *  for this file, <tt>false</tt> otherwise
-     */
-    public boolean containsUrn(URN urn) {
-        // first check if modified since last hashing
-		
-		/// this is where we'll need to shift some work over to 
-		// FileManager
-//          if (FILE.lastModified()!=_modTime) {
-//              // recently modified; throw out SHA1 values
-//              Iterator iter = URNS.iterator();
-//              while(iter.hasNext()){
-//                  if (((URN)iter.next()).isSHA1()) {
-//                      iter.remove();
-//                  }
-//              }
-//          }
-        // now check if given urn matches
-        Iterator iter = URNS.iterator();
-        while(iter.hasNext()){
-            if (urn.equals((URN)iter.next())) {
-                return true;
-            }
-        }
-        // no match
-        return false;
-    }
-    
     /**
      * Return SHA1 <tt>URN</tt> instance, if available.
 	 *
@@ -262,6 +171,83 @@ public final class FileDesc implements AlternateLocationCollector {
 		return URNS;
 	}
 
+
+	/**
+	 * Returns the <tt>AlternateLocationCollection</tt> instance for this
+	 * <tt>FileDesc</tt>.  The collection could be empty or <tt>null</tt>.
+	 *
+	 * @return the <tt>AlternateLocationCollection</tt> for this 
+	 *  <tt>FileDesc</tt> instance, which can be empty, or <tt>null</tt>
+	 *  if it is not initialized
+	 */
+	public AlternateLocationCollection getAlternateLocationCollection() {
+		return _altLocs;
+	}
+
+	// implements AlternateLocationCollector interface
+	public void addAlternateLocation(AlternateLocation al) {
+		createAlternateLocations();
+		_altLocs.addAlternateLocation(al);
+	}
+
+	// implements AlternateLocationCollector interface
+	public void addAlternateLocationCollection(AlternateLocationCollection alc) {
+		createAlternateLocations();
+		_altLocs.addAlternateLocationCollection(alc);
+	}
+
+	// implements AlternateLocationCollector interface
+	public boolean hasAlternateLocations() {
+		if(_altLocs == null) return false;
+		return _altLocs.hasAlternateLocations();
+	}
+
+	/**
+	 * Constructs the alternate location collection instance if it's null.
+	 */
+	private void createAlternateLocations() {
+		if(_altLocs == null) _altLocs = new AlternateLocationCollection();		
+	}
+	
+    
+    /**
+     * Adds any URNs that can be locally calculated; may take a while to 
+	 * complete on large files.
+	 *
+	 * @param file the <tt>File</tt> instance to calculate URNs for
+	 * @return the new <tt>Set</tt> of calculated <tt>URN</tt> instances
+     */
+    private static Set calculateUrns(File file) {
+		try {
+			Set set = new HashSet();
+			set.add(URNFactory.createSHA1Urn(file));
+			return set;
+		} catch(IOException e) {
+			// the urn just does not get added
+			return Collections.EMPTY_SET;
+		}				
+	}
+    
+    /**
+     * Determine whether or not the given <tt>URN</tt> instance is 
+	 * contained in this <tt>FileDesc</tt>.
+	 *
+	 * @param urn the <tt>URN</tt> instance to check for
+	 * @return <tt>true</tt> if the <tt>URN</tt> is a valid <tt>URN</tt>
+	 *  for this file, <tt>false</tt> otherwise
+     */
+    public boolean containsUrn(URN urn) {
+        // now check if given urn matches
+        Iterator iter = URNS.iterator();
+        while(iter.hasNext()){
+            if (urn.equals((URN)iter.next())) {
+                return true;
+            }
+        }
+        // no match
+        return false;
+    }
+    
     /**
      * Opens an input stream to the <tt>File</tt> instance for this
 	 * <tt>FileDesc</tt>.
@@ -270,7 +256,7 @@ public final class FileDesc implements AlternateLocationCollector {
 	 * @throws <tt>FileNotFoundException</tt> if the file represented
 	 *  by the <tt>File</tt> instance could not be found
      */
-    public InputStream getInputStream() throws FileNotFoundException {
+    public InputStream createInputStream() throws FileNotFoundException {
 		return new FileInputStream(FILE);
     }
 }
