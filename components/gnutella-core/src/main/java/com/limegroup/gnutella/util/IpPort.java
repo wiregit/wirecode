@@ -51,9 +51,27 @@ public interface IpPort {
             IpPort ip1 = (IpPort)a;
             IpPort ip2 = (IpPort)b;
             int diff = ip1.getPort() - ip2.getPort();
-            if(diff == 0)
-                return ip1.getAddress().compareTo(ip2.getAddress());
-            else
+            if(diff == 0) {
+                byte[] neta = ip1.getInetAddress().getAddress();
+                byte[] netb = ip2.getInetAddress().getAddress();
+                if(neta[0] == netb[0]) {
+                    if(neta[1] == netb[1]) {
+                        if(neta[2] == netb[2]) {
+                            if(neta[3] == netb[3]) {
+                                return 0;
+                            } else {
+                                return neta[3] - netb[3];
+                            }
+                        } else {
+                            return neta[2] - netb[2];
+                        }
+                    } else {
+                        return neta[1] - netb[1];
+                    }
+                } else {
+                    return neta[0] - netb[0];
+                }
+            } else
                 return diff;
         }
     }    
