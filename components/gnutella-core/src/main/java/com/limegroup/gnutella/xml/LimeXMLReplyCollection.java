@@ -428,7 +428,7 @@ public class LimeXMLReplyCollection {
         // commit to disk...
         if (audio) {
             try {
-                mp3ToDisk(fd, f.getCanonicalPath(), replyDoc, checkBetter);
+                mediaFileToDisk(fd, f.getCanonicalPath(), replyDoc, checkBetter);
             } catch(IOException ignored) {}
         } else
             write();
@@ -620,9 +620,9 @@ public class LimeXMLReplyCollection {
     }
     
     /**
-     * Writes this mp3 file to disk, using the XML in the doc.
+     * Writes this media file to disk, using the XML in the doc.
      */
-    public int mp3ToDisk(FileDesc fd, String mp3FileName, LimeXMLDocument doc, 
+    public int mediaFileToDisk(FileDesc fd, String mp3FileName, LimeXMLDocument doc, 
                                                           boolean checkBetter) {
         boolean wrote=false;
         int mp3WriteState = -1;
@@ -632,7 +632,7 @@ public class LimeXMLReplyCollection {
 
         // see if you need to change a hash for a file due to a write...
         // if so, we need to commit the ID3 data to disk....
-        MetaDataEditor commitWith = ripMP3XML(mp3FileName, doc, checkBetter);
+        MetaDataEditor commitWith = getEditorIfNeeded(mp3FileName, doc, checkBetter);
         if (commitWith != null)  {// commit to disk.
             if(commitWith.getCorrectDocument() == null) 
                 mp3WriteState = commitID3Data(mp3FileName, commitWith);
@@ -665,12 +665,10 @@ public class LimeXMLReplyCollection {
      * @return An ID3Editor to use when committing or null if nothing 
      *  should be editted.
      */
-    private MetaDataEditor ripMP3XML(String mp3File, LimeXMLDocument doc, 
+    private MetaDataEditor getEditorIfNeeded(String mp3File, LimeXMLDocument doc, 
                                                         boolean checkBetter) {
-        if (!LimeXMLUtils.isMP3File(mp3File))
-            return null;
-
-        MetaDataEditor newValues = new MetaDataEditor();
+        
+        MetaDataEditor newValues = MetaDataEditor.getEditorForFile(mp3File);
         String newXML = null;
 
         try {
@@ -678,10 +676,10 @@ public class LimeXMLReplyCollection {
         } catch(SchemaNotFoundException snfe) {
             return null;
         }
-        newValues.removeID3Tags(newXML);
+        newValues.populateFromString(newXML);
         
         // Now see if the file already has the same info ...
-        MetaDataEditor existing = new MetaDataEditor();
+        MetaDataEditor existing = MetaDataEditor.getEditorForFile(mp3File);
         LimeXMLDocument existingDoc = null;
         try {
             existingDoc = MetaDataReader.readDocument(new File(mp3File));
@@ -694,7 +692,7 @@ public class LimeXMLReplyCollection {
         } catch(SchemaNotFoundException snfe) {
             return null;
         }
-        existing.removeID3Tags(existingXML);
+        existing.populateFromString(existingXML);
         
         
         if(!checkBetter) { //if we are not required to choose better tags
@@ -720,7 +718,7 @@ public class LimeXMLReplyCollection {
         else
             newValues.pickBetterFields(existing);        
             
-        // Commit using this ID3Editor ... 
+        // Commit using this Meta data editor ... 
         return newValues;
     }
 

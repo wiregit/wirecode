@@ -75,6 +75,7 @@ public abstract class MetaDataEditor {
      */
     public abstract int commitMetaData(String filename);
     
+    public abstract void populateFromString(String xmlString);
     
     public void setCorrectDocument(LimeXMLDocument document) {
         this.correctDocument = document;

@@ -509,7 +509,7 @@ public class MP3DataEditor extends AudioMetaDataEditor {
 	 * @return a parseable xml string which has the same attributes as the
 	 * xmlStr paramter minus the id3 tags.
 	 */
-	public String removeID3Tags(String xmlStr) {
+	public void populateFromString(String xmlStr) {
 	    //will be used to reconstruct xmlStr after ripping stuff from it
 	    int i, j;
 	    Object[] rippedStuff = null;
@@ -618,7 +618,7 @@ public class MP3DataEditor extends AudioMetaDataEditor {
 	
 	
 	
-	    return xmlStr;//this has been suitable modified
+	    //return xmlStr;//this has been suitable modified
 	}
 
 	
