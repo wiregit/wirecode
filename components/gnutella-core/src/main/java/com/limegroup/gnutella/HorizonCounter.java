@@ -53,7 +53,7 @@ public final class HorizonCounter {
     
     public synchronized void addPong(PingReply pong) {
         //Have we already seen a ping from this hosts?
-        Endpoint host=new Endpoint(pong.getIP(), pong.getPort());
+        Endpoint host=new Endpoint(pong.getAddress(), pong.getPort());
         if (_pongs.size()<MAX_PING_REPLIES && _pongs.add(host)) {
             //Nope.  Increment numbers. 
             _nextTotalHorizonFileSize += pong.getKbytes();
