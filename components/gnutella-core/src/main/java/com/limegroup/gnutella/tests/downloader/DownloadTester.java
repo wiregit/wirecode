@@ -437,14 +437,7 @@ public class DownloadTester {
 
     private static void testSimpleAlternateLocations() {  
         System.out.print("-Testing AlternateLocation write...");
-		com.sun.java.util.collections.Set set = 
-		  new com.sun.java.util.collections.HashSet();
-		try {
-		    set.add(URN.createSHA1Urn("urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB"));
-		} catch(Exception e) {
-		    System.err.println("SHA1 not created for :"+file);
-		}
-        RemoteFileDesc rfd1=newRFDWithURN(6346, 100, set);
+        RemoteFileDesc rfd1=newRFDWithURN(6346, 100, null);
         RemoteFileDesc[] rfds = {rfd1};
 
         testGeneric(rfds);
@@ -474,8 +467,8 @@ public class DownloadTester {
 
     private static void testTwoAlternateLocations() {  
         System.out.print("-Testing Two AlternateLocations...");
-        RemoteFileDesc rfd1=newRFD(6346, 100);
-        RemoteFileDesc rfd2=newRFD(6347, 100);
+        RemoteFileDesc rfd1=newRFDWithURN(6346, 100, null);
+        RemoteFileDesc rfd2=newRFDWithURN(6347, 100, null);
         RemoteFileDesc[] rfds = {rfd1,rfd2};
 
         testGeneric(rfds);
@@ -521,8 +514,8 @@ public class DownloadTester {
         final int FUDGE_FACTOR=RATE*1024;  
         uploader1.setRate(RATE);
         uploader2.setRate(RATE);
-        RemoteFileDesc rfd1=newRFD(6346, 100);
-        RemoteFileDesc rfd2=newRFD(6347, 100);
+        RemoteFileDesc rfd1=newRFDWithURN(6346, 100, null);
+        RemoteFileDesc rfd2=newRFDWithURN(6347, 100, null);
         RemoteFileDesc[] rfds = {rfd1};
 
         //Prebuild an uploader alts in lieu of rdf2
@@ -554,7 +547,7 @@ public class DownloadTester {
 
     private static void testWeirdAlternateLocations() {  
         System.out.print("-Testing AlternateLocation write...");
-        RemoteFileDesc rfd1=newRFD(6346, 100);
+        RemoteFileDesc rfd1=newRFDWithURN(6346, 100, null);
         RemoteFileDesc[] rfds = {rfd1};
 
 
@@ -615,10 +608,10 @@ public class DownloadTester {
         uploader1.stopAfter(STOP_AFTER);
         uploader2.setRate(RATE);
         uploader3.setRate(RATE);
-        RemoteFileDesc rfd1=newRFD(6346, 100);
-        RemoteFileDesc rfd2=newRFD(6347, 100);
-        RemoteFileDesc rfd3=newRFD(6348, 100);
-        RemoteFileDesc rfd4=newRFD(6349, 100);
+        RemoteFileDesc rfd1=newRFDWithURN(6346, 100, null);
+        RemoteFileDesc rfd2=newRFDWithURN(6347, 100, null);
+        RemoteFileDesc rfd3=newRFDWithURN(6348, 100, null);
+        RemoteFileDesc rfd4=newRFDWithURN(6349, 100, null);
         RemoteFileDesc[] rfds = {rfd1,rfd2,rfd3};
 
         //Prebuild an uploader alt in lieu of rdf4
@@ -745,7 +738,18 @@ public class DownloadTester {
     }
 
     private static RemoteFileDesc newRFDWithURN(int port, int speed, 
-		com.sun.java.util.collections.Set set) {
+	  String urn) {
+		com.sun.java.util.collections.Set set = 
+		  new com.sun.java.util.collections.HashSet();
+		try {
+			if (urn == null)
+		        set.add(URN.createSHA1Urn(
+				  "urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB"));
+			else
+		        set.add(URN.createSHA1Urn(urn));
+		} catch(Exception e) {
+		    System.err.println("SHA1 not created for :"+file);
+		}
         return new RemoteFileDesc("127.0.0.1", port,
                                   0, file.getName(),
                                   TestFile.length(), new byte[16],
