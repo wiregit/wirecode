@@ -140,6 +140,8 @@ public class IncompleteFileManager implements Serializable {
                 VerifyingFile vf = new VerifyingFile(true);
                 while(iter.hasNext()) {
                     Interval interval = (Interval)iter.next();
+                    //older intervals excuded the high'th byte
+                    interval.high = interval.high-1;
                     vf.addInterval(interval);
                 }
                 retMap.put(incompleteFile,vf);
