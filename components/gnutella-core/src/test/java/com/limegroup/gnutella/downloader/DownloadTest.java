@@ -954,6 +954,23 @@ public class DownloadTest extends com.limegroup.gnutella.util.BaseTestCase {
         assertEquals("u1 did too much work", 0, u1);
         assertLessThan("u2 did all the work", TestFile.length()+FUDGE_FACTOR, u2);
     }
+    
+    public void testPartialDownloads() throws IOException {
+        debug("-Testing partial downloads...");
+        uploader1.setPartial(true);
+        RemoteFileDesc rfd1 = newRFDWithURN(PORT_1, 100);
+        RemoteFileDesc[] rfds = {rfd1};
+        Downloader downloader = null;
+        try {
+            downloader = dm.download(rfds,false);
+        } catch (AlreadyDownloadingException adx) {
+            assertTrue("downloader already downloading??",false);
+        }
+        waitForBusy(downloader);
+        assertEquals("Downloader did not go to busy after getting ranges",
+                     Downloader.WAITING_FOR_RETRY, downloader.getState());
+    }
+
 
     /*
     private static void tGUI() {
@@ -1130,6 +1147,20 @@ public class DownloadTest extends com.limegroup.gnutella.util.BaseTestCase {
         else
             assertEquals("unexpected state", Downloader.COMPLETE, DOWNLOADER.getState());
     }        
+    
+    private static void waitForBusy(Downloader downloader) {
+        for(int i=0; i< 12; i++) { //wait 12 seconds
+            if(downloader.getState() == Downloader.WAITING_FOR_RETRY)
+                return;
+            try {
+                Thread.sleep(1000);// try again after a second
+            } catch(InterruptedException e) {
+                assertTrue("downloader unexpecteted interrupted",false);
+                return;
+            }
+        }
+        return;
+    }
     
     private static final class MyCallback extends ActivityCallbackStub {
         public void addDownload(Downloader d) {

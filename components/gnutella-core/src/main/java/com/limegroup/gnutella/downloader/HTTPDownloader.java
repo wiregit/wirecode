@@ -339,7 +339,6 @@ public class HTTPDownloader implements BandwidthTracker {
 		if(!CommonUtils.isJava118()) 
 			BandwidthStat.HTTP_HEADER_DOWNSTREAM_BANDWIDTH.addData(str.length());
         int code=parseHTTPCode(str, _rfd);	
-
         //Note: According to the specification there are 5 headers, LimeWire
         //ignores 2 of them - queue length, and maxUploadSlots.
         int[] refQueueInfo = {-1,-1,-1};
@@ -640,7 +639,8 @@ public class HTTPDownloader implements BandwidthTracker {
                                                    RemoteFileDesc rfd) 
         throws IOException {
         List availableRanges = new ArrayList();
-
+        
+        line = line.toLowerCase();
         // start parsing after the word "bytes"
         int start = line.indexOf("bytes") + 6;
         // if start == -1 the word bytes has not been found
@@ -661,8 +661,7 @@ public class HTTPDownloader implements BandwidthTracker {
                 // read number before dash
                 // bytes A-B, C-D
                 //       ^
-                int low = Integer.parseInt( line.substring(
-                    start, stop ) );
+                int low = Integer.parseInt(line.substring(start, stop).trim());
                 
                 // now moving the start index to the 
                 // character after the dash:
@@ -680,8 +679,7 @@ public class HTTPDownloader implements BandwidthTracker {
                 // read number after dash
                 // bytes A-B, C-D
                 //         ^
-                int high = Integer.parseInt( line.substring(
-                    start, stop) );
+                int high = Integer.parseInt(line.substring(start, stop).trim());
                 
                 // this interval should be inclusive at both ends
                 interval = new Interval( low, high );

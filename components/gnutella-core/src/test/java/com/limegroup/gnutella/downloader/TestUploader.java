@@ -49,6 +49,7 @@ public class TestUploader {
     private long maxPollTime = -1;
     private final int MIN_POLL = 45000;
     private final int MAX_POLL = 120000;
+    private int partial = 0;
 
     /**
      * <tt>IPFilter</tt> for only allowing local connections.
@@ -114,6 +115,7 @@ public class TestUploader {
         sendCorrupt = false;
         busy = false;
         queue = false;
+        partial = 0;
         minPollTime = -1;
         maxPollTime = -1;
     }
@@ -137,6 +139,13 @@ public class TestUploader {
 
     public void setQueue(boolean q) { 
         this.queue = q;
+    }
+
+    public void setPartial(boolean part) {
+        if(part)
+            this.partial = 1;
+        else
+            this.partial = 0;//reset
     }
 
     /** Sets whether this should send bad data. */
@@ -322,7 +331,7 @@ public class TestUploader {
                         (t0-maxPollTime) +" mS");        
         
 		String str =
-            busy | queue ?
+            busy | queue | partial==1 ?
             "HTTP/1.1 503 Service Unavailable\r\n" :
             "HTTP/1.1 200 OK \r\n";
 		out.write(str.getBytes());
@@ -342,7 +351,34 @@ public class TestUploader {
             maxPollTime = t+MAX_POLL;
             return;
         }
-
+        if (partial==1) {
+            DownloadTest.debug("UPLOAD PARTIAL SHARING");
+            //try ranges with spaces between and no spaces between
+            String s = 
+            "X-Available-Ranges: ByTes 50000-400000, 500000-600000,800000-900000\r\n";
+            out.write(s.getBytes());
+            s="\r\n";
+            out.write(s.getBytes());
+            out.flush();
+            partial++; //partial is now 2   
+            return;
+        }
+        else if(partial==2) {
+            String s = 
+            "X-Available-Ranges: bytes 50000-900000\r\n";
+            out.write(s.getBytes());
+            out.flush();
+            partial++;
+            //don't return..we want to upload a partial range
+        }
+        else if(partial>=3) {
+            String s = 
+            "X-Available-Ranges: bytes 50000-150000\r\n";
+            out.write(s.getBytes());
+            out.flush();
+            //don't return..we want to upload a partial range
+            partial++;
+        }
 		str = "Content-Length:"+ (stop - start) + "\r\n";
 		out.write(str.getBytes());	   
 		if (start != 0) {
@@ -470,6 +506,18 @@ public class TestUploader {
                     throw new IOException();
                 }
         }
+        //check that the downloader made a correct range request if we are
+        //partial and this is the second iteration. 
+        if(partial==3) {//check this before checking partial2 -- we set it there
+            Assert.that(start==150000,
+                        "downloader picked incorrect start range in iteration");
+            Assert.that(stop==250010,
+                        "downloader pick incorrect stop range in iteration");
+        }
+        if(partial==2) {
+            Assert.that(start==50000,"invalid start range");
+            Assert.that(stop==150010,"invalid stop range was:"+stop);
+        }                
         return new IntPair(start, stop);
     }
 	/**
