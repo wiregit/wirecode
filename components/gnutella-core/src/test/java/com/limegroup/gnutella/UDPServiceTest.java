@@ -15,7 +15,7 @@ public class UDPServiceTest extends TestCase {
 
 	private final ActivityCallback CALLBACK = new ActivityCallbackTest();
 	private final Backend BACKEND = 
-		Backend.createBackend(CALLBACK);
+		Backend.createBackend(CALLBACK, 40*1000);
 
 	private final RouterService ROUTER_SERVICE = BACKEND.getRouterService();
 	
@@ -50,9 +50,6 @@ public class UDPServiceTest extends TestCase {
 	public void testQueryRequests() {
 		FileManager fm = ROUTER_SERVICE.getFileManager();
 		File[] sharedDirs = SettingsManager.instance().getDirectories();
-		for(int i=0; i<sharedDirs.length; i++) {
-			System.out.println("shared dir: "+sharedDirs[i]); 
-		}
 		FileDesc[] fds = fm.getSharedFileDescriptors(sharedDirs[0]);
 
 
