@@ -22,13 +22,13 @@ import java.io.*;
  * </pre>
  */
 public class MiniAcceptor implements Runnable {
-    Object lock=new Object();
-    Connection c=null;
-    boolean done=false;
-    int port;
-    IOException error=null;
+    private Object lock=new Object();
+    private Connection c=null;
+    private boolean done=false;
+    private int port;
+    private IOException error=null;
 
-    HandshakeResponder properties;
+    private HandshakeResponder properties;
         
     /** Starts the listen socket on port 6346 without blocking. */
     public MiniAcceptor(HandshakeResponder properties) {
