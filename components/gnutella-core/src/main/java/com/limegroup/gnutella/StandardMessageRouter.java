@@ -203,21 +203,4 @@ public class StandardMessageRouter extends MessageRouter {
             // if there is an error, do nothing..
         }
     }
-
-    /** @see MessageRouter.addQueryRoutingEntries */
-    protected void addQueryRoutingEntries(QueryRouteTable qrt) {
-        Iterator words = _fileManager.getKeyWords().iterator();
-        while(words.hasNext())
-            qrt.add((String)words.next());
-        // get 'indivisible' words and handle appropriately - you don't want the
-        // qrt to divide these guys up....
-        Iterator indivisibleWords = _fileManager.getIndivisibleKeyWords().iterator();
-        while (indivisibleWords.hasNext()) 
-            qrt.addIndivisible((String) indivisibleWords.next());
-        /*
-          File[] files = _fileManager.getSharedFiles(null);
-          for (int i=0; i<files.length; i++)
-            qrt.add(files[i].getAbsolutePath());
-        */
-    }
 }

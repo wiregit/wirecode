@@ -113,6 +113,11 @@ public abstract class MessageRouter {
 	 * display.
 	 */
 	private ActivityCallback _callback;
+
+	/**
+	 * Handle to the <tt>FileManager</tt> instance.
+	 */
+	private FileManager _fileManager;
 	
 	/**
 	 * Constant for whether or not to record stats.
@@ -141,6 +146,7 @@ public abstract class MessageRouter {
     public void initialize() {
         _manager = RouterService.getConnectionManager();
 		_callback = RouterService.getCallback();
+		_fileManager = RouterService.getFileManager();
 		DYNAMIC_QUERIER.start();
     }
 
@@ -1307,5 +1313,19 @@ public abstract class MessageRouter {
      * Adds all query routing tables for this' files to qrt.
      *     @modifies qrt
      */
-    protected abstract void addQueryRoutingEntries(QueryRouteTable qrt);
+    protected void addQueryRoutingEntries(QueryRouteTable qrt) {
+        Iterator words = _fileManager.getKeyWords().iterator();
+        while(words.hasNext())
+            qrt.add((String)words.next());
+        // get 'indivisible' words and handle appropriately - you don't want the
+        // qrt to divide these guys up....
+        Iterator indivisibleWords = _fileManager.getIndivisibleKeyWords().iterator();
+        while (indivisibleWords.hasNext()) 
+            qrt.addIndivisible((String) indivisibleWords.next());
+        /*
+          File[] files = _fileManager.getSharedFiles(null);
+          for (int i=0; i<files.length; i++)
+            qrt.add(files[i].getAbsolutePath());
+        */
+    }
 }
