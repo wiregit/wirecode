@@ -13,7 +13,7 @@ import java.util.List;
  * @author Sumeet Thadani
  */
 
-class SchemaReplyCollectionMapper{
+public class SchemaReplyCollectionMapper{
     
     private HashMap mapper;
     static SchemaReplyCollectionMapper instance;

@@ -19,7 +19,7 @@ import java.util.StringTokenizer;
  * @author Sumeet Thadani
  */
 
-class LimeXMLReplyCollection{
+public class LimeXMLReplyCollection{
     
     private String schemaURI;
     //a list of reply docs in the client machine that correspond to the Schema
