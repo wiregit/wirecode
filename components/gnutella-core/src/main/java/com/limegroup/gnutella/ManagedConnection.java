@@ -931,7 +931,7 @@ public class ManagedConnection
             hostString.append(endpoint.getPort());
         }
         //set the property
-        properties.setProperty(ConnectionHandshakeHeaders.X_TRY, 
+        properties.put(ConnectionHandshakeHeaders.X_TRY, 
             hostString.toString());
 
         //Also add neighbouring supernodes
@@ -962,7 +962,7 @@ public class ManagedConnection
             hostString.append(endpoint.getPort());
         }
         //set the property
-        properties.setProperty(ConnectionHandshakeHeaders.X_TRY_SUPERNODES
+        properties.put(ConnectionHandshakeHeaders.X_TRY_SUPERNODES
             , hostString.toString());
     }
     
@@ -972,7 +972,7 @@ public class ManagedConnection
         LazyProperties(MessageRouter router) {
             this.router=router;
             if (router!=null) {
-                setProperty(ConnectionHandshakeHeaders.X_MY_ADDRESS, "");  
+                put(ConnectionHandshakeHeaders.X_MY_ADDRESS, "");  
                 //just temporary!
             }
         }
@@ -1004,9 +1004,9 @@ public class ManagedConnection
     /** Sets the common properties in props, like Query-Routing and
      *  User-Agent. Typically this method is only called once per connection. */
     private static void addCommonProperties(Properties props) {
-        props.setProperty(ConnectionHandshakeHeaders.X_QUERY_ROUTING,
+        props.put(ConnectionHandshakeHeaders.X_QUERY_ROUTING,
                           "0.1");
-        props.setProperty(ConnectionHandshakeHeaders.USER_AGENT,
+        props.put(ConnectionHandshakeHeaders.USER_AGENT,
                           CommonUtils.getVendor());                
     }
 
@@ -1018,7 +1018,7 @@ public class ManagedConnection
         public SupernodeProperties(MessageRouter router){
             super(router);
             //set supernode property
-            setProperty(ConnectionHandshakeHeaders.X_SUPERNODE, "True");
+            put(ConnectionHandshakeHeaders.X_SUPERNODE, "True");
             addCommonProperties(this);
         }
     }
@@ -1031,7 +1031,7 @@ public class ManagedConnection
         public ClientProperties(MessageRouter router){
             super(router);
             //set supernode property
-            setProperty(ConnectionHandshakeHeaders.X_SUPERNODE, "False");
+            put(ConnectionHandshakeHeaders.X_SUPERNODE, "False");
             addCommonProperties(this);
         }
     }
@@ -1054,15 +1054,15 @@ public class ManagedConnection
             
             if(!outgoing) {
                 //Incoming connection....
-                ret.setProperty(ConnectionHandshakeHeaders.X_SUPERNODE, "True");
+                ret.put(ConnectionHandshakeHeaders.X_SUPERNODE, "True");
                 addCommonProperties(ret);
                 
                 //guide the incoming connection to be a supernode/clientnode
-                ret.setProperty(ConnectionHandshakeHeaders.X_SUPERNODE_NEEDED,
+                ret.put(ConnectionHandshakeHeaders.X_SUPERNODE_NEEDED,
                     (new Boolean(_manager.supernodeNeeded())).toString());
                 
                 //give own IP address
-                ret.setProperty(ConnectionHandshakeHeaders.X_MY_ADDRESS,
+                ret.put(ConnectionHandshakeHeaders.X_MY_ADDRESS,
                     _manager.getSelfAddress().getHostname() + ":"
                     + _manager.getSelfAddress().getPort());
                     
@@ -1077,7 +1077,7 @@ public class ManagedConnection
                        && !Boolean.valueOf(neededS).booleanValue()
                        && _manager.allowClientMode()) {
                     //Fine, we'll become a leaf.
-                    ret.setProperty(ConnectionHandshakeHeaders.X_SUPERNODE, 
+                    ret.put(ConnectionHandshakeHeaders.X_SUPERNODE, 
                                     "False");
                 }
             }
@@ -1103,7 +1103,7 @@ public class ManagedConnection
                 return new HandshakeResponse(new Properties());
             } else {
                 Properties props=new Properties();
-                props.setProperty(ConnectionHandshakeHeaders.X_SUPERNODE, 
+                props.put(ConnectionHandshakeHeaders.X_SUPERNODE, 
                                   "False");
                 addCommonProperties(props);                
                 addHostAddresses(props, _manager);

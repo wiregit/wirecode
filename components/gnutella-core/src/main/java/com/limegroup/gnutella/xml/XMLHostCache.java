@@ -62,7 +62,7 @@ public class XMLHostCache {
         String displayString = LimeXMLSchema.getDisplayString(schemaURI);
         if (displayString != null) {
             // get the values and make a string[] out of them....
-            _props.setProperty(displayString, hosts);
+            _props.put(displayString, hosts);
             success = true;
         }
         return success;
@@ -114,7 +114,7 @@ public class XMLHostCache {
         try {
             if (setHostsForSchema(schemaURI, hosts)) {
                 OutputStream os = new FileOutputStream(_dbFile);
-                _props.store(os,null);
+                _props.save(os,null);
             }
         }
         catch (Exception ignored) {
