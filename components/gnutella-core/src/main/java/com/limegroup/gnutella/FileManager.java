@@ -38,9 +38,19 @@ public class FileManager {
      * contains i. */
     private Trie /* String -> IntSet  */ _index;
 
-    private String[] _extensions;
-    private Set _sharedDirectories;
+    /** The set of extensions to share, sorted by StringComparator. 
+     *  INVARIANT: all extensions are lower case. */
+    private Set /* of String */ _extensions;
+    /** The set of all directories to share, sorted by StringComparator. */
+    private Set /* of String */ _sharedDirectories;
 
+    /** The thread responsisble for adding contents of _sharedDirectories to
+     *  this, or null if no load has yet been triggered.  This is necessary
+     *  because indexing files can be slow.  Interrupt this thread to stop the
+     *  loading; it will periodically check its interrupted status. */
+    private Thread _loadThread;
+
+    /** The single instance of FileManager.  (Singleton pattern.) */
     private static FileManager _instance = new FileManager();
 
     /** Characters used to tokenize queries and file names. */
@@ -72,29 +82,23 @@ public class FileManager {
         _numFiles = 0;
         _files = new ArrayList();
         _index = new Trie(true);  //ignore case
-        _extensions = new String[0];
-        _sharedDirectories = new HashSet();
-
-        // Launch a thread to asynchronously scan directories to load files
-        Thread loadSettingsThread =
-            new Thread()
-            {
-                public void run()
-                {
-                    loadSettings();
-                }
-            };
-        // Not a daemon thread -- terminating early is fine
-        loadSettingsThread.start();
+        _extensions = new TreeSet(new StringComparator());
+        _sharedDirectories = new TreeSet(new StringComparator());
     }
 
+    
+    /** Returns the single instance of the FileManager.  The FileManager
+     *  has no files until loadSettings() is called.  */
     public static FileManager instance() {
         return _instance;
     }
 
     /** Returns the size of all files, in <b>bytes</b>. */
     public int getSize() {return _size;}
+
+    /** Returns the number of files. */
     public int getNumFiles() {return _numFiles;}
+
 
     /**
      * Returns the file descriptor with the given index.  Throws
@@ -115,6 +119,275 @@ public class FileManager {
 
 
     /**
+     * Ensures this contains exactly the files specified by the
+     * EXTENSIONS_TO_SEARCH_FOR and DIRECTORIES_TO_SEARCH_FOR_FILES properties.
+     * That is, clears this and loads all files with the given extensions in the
+     * given directories <i>and their children</i>.  Note that some files in
+     * this before the call will not be in this after the call, or they may have
+     * a different index.  If DIRECTORIES_TO_SEARCH_FOR_FILES contains duplicate
+     * directories, the duplicates will be ignored.  If it contains files, they
+     * will be ignored.<p>
+     *
+     * This method is thread-safe but non-blocking.  When the method returns,
+     * the directory and extension settings used by addFileIfShared() are
+     * initialized.  However, files will actually be indexed asynchronously in
+     * another thread.  This is useful because indexing may take up to 30
+     * seconds or so if sharing many files.  If loadSettings is subsequently
+     * called before the indexing is complete, the original settings are
+     * discarded, and loading starts over immediately.
+     *
+     * @modifies this 
+     */
+    public synchronized void loadSettings() {
+        // If settings are already being loaded, interrupt and wait for them to
+        // complete.  TODO: the call to join would block if the call to
+        // File.list called by listFiles called by addDirectory blocks.  If this
+        // is the case, we need to spawn a thread before join'ing.
+        if (_loadThread!=null) {
+            _loadThread.interrupt();
+            try {
+                _loadThread.join();
+            } catch (InterruptedException e) {
+                return;
+            }
+        }
+
+        // Reset the file list info
+        _size = 0;
+        _numFiles = 0;
+        _files=new ArrayList();
+        _index=new Trie(true); //maintain invariant
+        _extensions = new TreeSet(new StringComparator());
+        _sharedDirectories = new TreeSet(new StringComparator());
+        
+        // Load the extensions.
+        String[] extensions = HTTPUtil.stringSplit(
+            SettingsManager.instance().getExtensions().trim(),
+            ';');
+        for (int i=0; i<extensions.length; i++)
+            _extensions.add(extensions[i].toLowerCase());
+            
+        // Load the directories.
+        String[] directories = HTTPUtil.stringSplit(
+            SettingsManager.instance().getDirectories().trim(),
+            ';');
+        for (int i=0; i<directories.length; i++) {
+            File f = new File(directories[i]);
+            if (! f.isDirectory())           //skip if not directory
+                continue;
+            try {                            //canonicalize to avoid duplicates
+                String path = f.getCanonicalPath();
+                _sharedDirectories.add(path);
+            }
+            catch (IOException e) {
+                continue;
+            }
+        }            
+
+        // Now actually load the files in the directories asynchronously.
+        // Note that the runner thread only obtain this' monitor when 
+        // adding individual files.
+        _loadThread = new Thread("FileManager.loadSettings") {
+            public void run() {
+                // Add each directory as long as we're not interrupted.
+                Iterator iter=_sharedDirectories.iterator();
+                while (iter.hasNext() && !_loadThread.isInterrupted())
+                    addDirectory((String)iter.next());      
+
+                // Compact the index once.  As an optimization, we skip this if
+                // loadSettings has subsequently been called.
+                if (! _loadThread.isInterrupted()) {
+                    synchronized (FileManager.this) {
+                        _index.trim(new Function() {
+                            public Object apply(Object intSet) {
+                                ((IntSet)intSet).trim();
+                                return intSet;
+                            }
+                        });
+                    }
+                }
+            }
+        };
+        _loadThread.start();
+    }
+
+
+    /**
+     * @requires dir_name is part of DIRECTORIES_TO_SEARCH_FOR_FILES or 
+     *  one of its children.
+     * @modifies this
+     * @effects adds the all the files with shared extensions
+     *  in the given directory and its recursive children.
+     *  If dir_name is actually a file, it will be added if it has
+     *  a shared extension.  Entries in this before the call are unmodified.
+     *     This method is thread-safe.  It acquires locks on a per-file basis.
+     *  If the _loadThread is interrupted while adding the contents of the
+     *  directory, it returns immediately.
+     */
+    private void addDirectory(String dir_name) {
+        File myFile = new File(dir_name);
+        if (!myFile.exists())
+            return;
+        File[] file_list = listFiles(myFile);   /* the files in a specified */
+        int n = file_list.length;               /* directory */
+        
+        // go through file_list
+        // get file name
+        // see if it contains extention.
+        // if yes, add to new list...
+        for (int i=0; i<n && !_loadThread.isInterrupted(); i++) {
+            if (file_list[i].isDirectory())     /* the recursive call */
+                addDirectory(file_list[i].getAbsolutePath());
+            else                                /* add the file with the */
+                addFile(file_list[i].getAbsolutePath());  /* addFile method */
+        }
+    }
+
+
+    /**
+     * @modifies this
+     * @effects adds the given file to this, if it exists
+     *  and if it is shared.
+     *  <b>WARNING: this is a potential security hazard.</b>
+     */
+    public synchronized void addFileIfShared(String path) {
+
+        Assert.that(_sharedDirectories != null);
+
+        File f = new File(path);
+
+        String parent = f.getParent();
+
+        File dir = new File(parent);
+
+        if (dir == null)
+            return;
+
+        String p;
+
+        try {
+            p = dir.getCanonicalPath();
+        } catch (IOException e) {
+            return;
+        }
+        if (!_sharedDirectories.contains(p))
+            return;
+
+        addFile(path);
+    }
+
+
+    /**
+     * @modifies this
+     * @effects adds the given file to this, if it exists
+     *  and is of the proper extension.  <b>WARNING: this is a
+     *  potential security hazard; caller must ensure the file
+     *  is in the shared directory.</b>
+     */
+    private synchronized void addFile(String path) {
+        File myFile = new File(path);
+
+        if (!myFile.exists())
+            return;
+
+        String name = myFile.getName();     /* the name of the file */
+        if (hasExtension(name)) {
+            int n = (int)myFile.length();       /* the list, and increments */
+            _size += n;                         /* the appropriate info */
+            _files.add(new FileDesc(_files.size(), name, path,  n));
+            _numFiles++;
+
+            //For each keyword...
+            int j=_files.size()-1;
+            String[] keywords=StringUtils.split(path, DELIMETERS);
+            for (int i=0; i<keywords.length; i++) {
+                String keyword=keywords[i];
+                //Ensure there _index has a set of indices associated with
+                //keyword.
+                IntSet indices=(IntSet)_index.get(keyword);
+                if (indices==null) {
+                    indices=new IntSet();
+                    _index.add(keyword, indices);
+                }
+                //Add j to the set.
+                indices.add(j);
+            }
+        }
+    }
+
+
+    /**
+     * @modifies this
+     * @effects ensures the given file is not shared.  Returns
+     *  true iff the file was previously shared.  In this case,
+     *  the file's index will not be assigned to any other files.
+     *  Note that the file is not actually removed from disk.
+     */
+    public synchronized boolean removeFileIfShared(File file) {
+        //Look for a file matching <file>...
+        for (int i=0; i<_files.size(); i++) {
+            FileDesc fd=(FileDesc)_files.get(i);
+            if (fd==null)
+                continue;
+            File candidate=new File(fd._path);
+
+            //Aha, it's shared. Unshare it by nulling it out.
+            if (file.equals(candidate)) {
+                _files.set(i,null);
+                _numFiles--;
+                _size-=fd._size;
+
+                //Remove references to this from index.
+                String[] keywords=StringUtils.split(fd._path,
+                                                    DELIMETERS);
+                for (int j=0; j<keywords.length; j++) {
+                    String keyword=keywords[j];
+                    IntSet indices=(IntSet)_index.get(keyword);
+                    if (indices!=null) {
+                        indices.remove(i);
+                        //TODO2: prune tree if possible.  call
+                        //_index.remove(keyword) if indices.size()==0.
+                    }
+                }
+                return true;  //No more files in list will match this.
+            }
+        }
+        return false;
+    }
+
+
+    /** Returns true if filename has a shared extension.  Case is ignored. */
+    private boolean hasExtension(String filename) {
+        int begin = filename.lastIndexOf(".");
+
+        if (begin == -1)
+            return false;
+
+        String ext = filename.substring(begin + 1).toLowerCase();
+        return _extensions.contains(ext);
+    }
+
+
+    /**
+     *  Build the equivalent of the File.listFiles() utility in jdk1.2.2
+     */
+    private File[] listFiles(File dir)
+    {
+        String [] fnames   = dir.list();
+        File   [] theFiles = new File[fnames.length];
+
+        for ( int i = 0; i < fnames.length; i++ )
+        {
+            theFiles[i] = new File(dir, fnames[i]);
+        }
+
+        return theFiles;
+    }
+
+
+    ////////////////////////////////// Queries ///////////////////////////////
+
+    /**
      * Returns an array of all responses matching the given request, or null if
      * there are no responses.<p>
      *
@@ -124,7 +397,7 @@ public class FileManager {
     public synchronized Response[] query(QueryRequest request) {
         String str = request.getQuery();
 
-        //Special case: return everything for Clip2 indexing query (" ") and
+        //Special case: return everything for Clip2 indexing query ("    ") and
         //browse queries ("*.*").  If these messages had initial TTLs too high,
         //StandardMessageRouter will clip the number of results sent on the
         //network.  Note that some initial TTLs are filterd by GreedyQuery
@@ -170,265 +443,6 @@ public class FileManager {
         return response;
     }
 
-    private boolean hasExtension(String filename) {
-        int begin = filename.lastIndexOf(".");
-
-        if (begin == -1)
-            return false;
-
-        String ext = filename.substring(begin + 1);
-
-        int length = _extensions.length;
-        for (int i = 0; i < length; i++) {
-            if (ext.equalsIgnoreCase(_extensions[i])) {
-                return true;
-            }
-        }
-        return false;
-
-    }
-
-    /**
-     * @modifies this
-     * @effects adds the given file to this, if it exists
-     *  and is of the proper extension.  <b>WARNING: this is a
-     *  potential security hazard; caller must ensure the file
-     *  is in the shared directory.</b>
-     * This method should only be called from threads that hold this' monitor
-     */
-    private void addFile(String path) {
-        File myFile = new File(path);
-
-        if (!myFile.exists())
-            return;
-
-        String name = myFile.getName();     /* the name of the file */
-        if (hasExtension(name)) {
-            int n = (int)myFile.length();       /* the list, and increments */
-            _size += n;                         /* the appropriate info */
-            _files.add(new FileDesc(_files.size(), name, path,  n));
-            _numFiles++;
-
-            //For each keyword...
-            int j=_files.size()-1;
-            String[] keywords=StringUtils.split(path, DELIMETERS);
-            for (int i=0; i<keywords.length; i++) {
-                String keyword=keywords[i];
-                //Ensure there _index has a set of indices associated with
-                //keyword.
-                IntSet indices=(IntSet)_index.get(keyword);
-                if (indices==null) {
-                    indices=new IntSet();
-                    _index.add(keyword, indices);
-                }
-                //Add j to the set.
-                indices.add(j);
-            }
-        }
-    }
-
-    /**
-     * @modifies this
-     * @effects adds the given file to this, if it exists
-     *  and if it is shared.
-     *  <b>WARNING: this is a potential security hazard.</b>
-     */
-    public synchronized void addFileIfShared(String path) {
-
-        Assert.that(_sharedDirectories != null);
-
-        File f = new File(path);
-
-        String parent = f.getParent();
-
-        File dir = new File(parent);
-
-        if (dir == null)
-            return;
-
-        String p;
-
-        try {
-            p = dir.getCanonicalPath();
-        } catch (IOException e) {
-            return;
-        }
-        if (!_sharedDirectories.contains(p))
-            return;
-
-        addFile(path);
-
-
-    }
-
-    /**
-     * @modifies this
-     * @effects ensures the given file is not shared.  Returns
-     *  true iff the file was previously shared.  In this case,
-     *  the file's index will not be assigned to any other files.
-     *  Note that the file is not actually removed from disk.
-     */
-    public synchronized boolean removeFileIfShared(File file) {
-        //Look for a file matching <file>...
-        for (int i=0; i<_files.size(); i++) {
-            FileDesc fd=(FileDesc)_files.get(i);
-            if (fd==null)
-                continue;
-            File candidate=new File(fd._path);
-
-            //Aha, it's shared. Unshare it by nulling it out.
-            if (file.equals(candidate)) {
-                _files.set(i,null);
-                _numFiles--;
-                _size-=fd._size;
-
-                //Remove references to this from index.
-                String[] keywords=StringUtils.split(fd._path,
-                                                    DELIMETERS);
-                for (int j=0; j<keywords.length; j++) {
-                    String keyword=keywords[j];
-                    IntSet indices=(IntSet)_index.get(keyword);
-                    if (indices!=null) {
-                        indices.remove(i);
-                        //TODO2: prune tree if possible.  call
-                        //_index.remove(keyword) if indices.size()==0.
-                    }
-                }
-                return true;  //No more files in list will match this.
-            }
-        }
-        return false;
-    }
-
-    /**
-     * Loads the extensions and directories settings and rebuilds the file
-     * index.
-     *
-     * @modifies this
-     * @effects ensures that this contains exactly the files recursively given
-     *  directories and all their recursive subdirectories.  If dir_names
-     *  contains duplicate directories, the duplicates will be ignored.  If
-     *  the directories list contains files, they will be ignored. Note that
-     *  some files in this before the call will not be in this after the call,
-     *  or they may have a different index.
-     * <b>WARNING: this is a potential security hazard.</b>
-     * WARNING: This call could run for a long time. Only threads that
-     * are prepared for that possibility should invoke it.  See the
-     * FileManager constructor for an example.
-     */
-    public synchronized void loadSettings() {
-        // Reset the file list info
-        _size = 0;
-        _numFiles = 0;
-        _files=new ArrayList();
-        _index=new Trie(true); //maintain invariant
-        _sharedDirectories = new HashSet();
-
-        // Load the settings info
-        String dir_names = SettingsManager.instance().getDirectories();
-        dir_names.trim();
-        String[] names = HTTPUtil.stringSplit(dir_names, ';');
-        _extensions =  HTTPUtil.stringSplit(
-            SettingsManager.instance().getExtensions(), ';');
-
-
-        // need to see if there are duplicated directories...
-        int size = names.length;
-
-        File f;  // temporary file for testing existence
-        String p;  // for the canonical path of a file
-        String name;  //the semi colon deliminated string
-
-        for (int i = 0; i < size; i++) {
-
-            name = names[i];
-
-            f = new File(name);
-
-            if (!f.isDirectory())
-                continue;
-            try {
-                p = f.getCanonicalPath();
-            }
-            catch (Exception e) {
-                continue;
-            }
-            _sharedDirectories.add(p);
-        }
-
-        int hashsize = _sharedDirectories.size();
-
-        String[] dirs = new String[hashsize];
-
-        int j=0;
-
-        for(Iterator iter = _sharedDirectories.iterator(); iter.hasNext() ;) {
-            dirs[j++] = (String)iter.next();
-        }
-
-        for (int i=0; i < hashsize; i++) {
-            addDirectory(dirs[i]);
-        }        
-
-//          System.out.println("Index loaded.");
-//          System.out.println(_index.toString());   
-    }
-
-    /**
-     *  Build the equivalent of the File.listFiles() utility in jdk1.2.2
-     */
-    private File[] listFiles(File dir)
-    {
-        String [] fnames   = dir.list();
-        File   [] theFiles = new File[fnames.length];
-
-        for ( int i = 0; i < fnames.length; i++ )
-        {
-            theFiles[i] = new File(dir, fnames[i]);
-        }
-
-        return theFiles;
-    }
-
-    /**
-     * @modifies this
-     * @effects adds the all the files with shared extensions
-     *  in the given directory and its recursive children.
-     *  If dir_name is actually a file, it will be added if it has
-     *  a shared extension.  Entries in this before the call are unmodified.
-     */
-    public synchronized void addDirectory(String dir_name) {
-        File myFile = new File(dir_name);
-        if (!myFile.exists())
-            return;
-        File[] file_list = listFiles(myFile);   /* the files in a specified */
-        int n = file_list.length;               /* directory */
-
-        // go through file_list
-        // get file name
-        // se if it contains extention.
-        // if yes, add to new list...
-
-
-        for (int i=0; i < n; i++) {
-
-            if (file_list[i].isDirectory())     /* the recursive call */
-                addDirectory(file_list[i].getAbsolutePath());
-            else                                /* add the file with the */
-                addFile(file_list[i].getAbsolutePath());  /* addFile method */
-        }
-
-        //Compact the index.  Ideally this should be called just once on startup, not
-        //once for each directory.
-        _index.trim(new Function() {
-            public Object apply(Object intSet) {
-                ((IntSet)intSet).trim();
-                return intSet;
-            }
-        });
-    }
-
-    ////////////////////////////////// Queries ///////////////////////////////
 
     /**
      * Returns a set of indices of files matching q, or null if there are no
@@ -494,6 +508,9 @@ public class FileManager {
         else 
             return ret;
     }
+
+
+    ///////////////////////////////////// Testing //////////////////////////////
 
     /** Checks this' rep. invariants.  VERY expensive. */
     /*
