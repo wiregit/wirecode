@@ -4,9 +4,9 @@ import java.io.ByteArrayOutputStream;
 import java.io.OutputStream;
 import java.io.StringWriter;
 
-import com.limegroup.gnutella.util.BaseTestCase;
+import junit.framework.Test;
 
-import junit.framework.*;
+import com.limegroup.gnutella.util.BaseTestCase;
 
 /**
  * Tests the HTTPUtils class.

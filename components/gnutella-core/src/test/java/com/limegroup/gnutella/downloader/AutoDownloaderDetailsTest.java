@@ -1,8 +1,16 @@
 package com.limegroup.gnutella.downloader;
 
-import com.limegroup.gnutella.*;
-import java.io.*;
-import junit.framework.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+
+import junit.framework.Test;
+
+import com.limegroup.gnutella.GUID;
+import com.limegroup.gnutella.MediaType;
+import com.limegroup.gnutella.RemoteFileDesc;
 
 public class AutoDownloaderDetailsTest extends com.limegroup.gnutella.util.BaseTestCase {
 

@@ -1,17 +1,37 @@
 package com.limegroup.gnutella;
 
-import com.limegroup.gnutella.messages.*;
-import com.limegroup.gnutella.settings.*;
-import com.limegroup.gnutella.handshaking.*;
-import com.limegroup.gnutella.stubs.*;
-import com.limegroup.gnutella.util.*;
-
-import junit.framework.*;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InterruptedIOException;
+import java.net.ServerSocket;
+import java.net.Socket;
 import java.util.Properties;
 import java.util.StringTokenizer;
-import com.sun.java.util.collections.*;
-import java.io.*;
-import java.net.*;
+
+import junit.framework.Test;
+
+import com.limegroup.gnutella.handshaking.HandshakeResponder;
+import com.limegroup.gnutella.handshaking.HandshakeResponse;
+import com.limegroup.gnutella.handshaking.HeaderNames;
+import com.limegroup.gnutella.handshaking.UltrapeerHeaders;
+import com.limegroup.gnutella.messages.BadPacketException;
+import com.limegroup.gnutella.messages.Message;
+import com.limegroup.gnutella.messages.PingReply;
+import com.limegroup.gnutella.messages.PingRequest;
+import com.limegroup.gnutella.messages.QueryReply;
+import com.limegroup.gnutella.messages.QueryRequest;
+import com.limegroup.gnutella.settings.ConnectionSettings;
+import com.limegroup.gnutella.settings.SharingSettings;
+import com.limegroup.gnutella.settings.UltrapeerSettings;
+import com.limegroup.gnutella.stubs.ActivityCallbackStub;
+import com.limegroup.gnutella.util.BaseTestCase;
+import com.limegroup.gnutella.util.CommonUtils;
+import com.limegroup.gnutella.util.EmptyResponder;
+import com.limegroup.gnutella.util.PrivilegedAccessor;
+import com.sun.java.util.collections.HashSet;
+import com.sun.java.util.collections.Iterator;
+import com.sun.java.util.collections.Set;
 
 /**
  * Checks whether (multi)leaves avoid forwarding messages to ultrapeers, do

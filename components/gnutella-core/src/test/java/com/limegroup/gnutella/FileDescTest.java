@@ -1,13 +1,18 @@
 package com.limegroup.gnutella;
 
-import com.limegroup.gnutella.util.*;
-import com.limegroup.gnutella.altlocs.*;
-import com.limegroup.gnutella.http.*;
-import com.sun.java.util.collections.*;
-import junit.framework.*;
-import junit.extensions.*;
-import java.io.*;
-import java.net.*;
+import java.io.File;
+import java.io.IOException;
+import java.net.URL;
+
+import junit.framework.Test;
+
+import com.limegroup.gnutella.altlocs.AlternateLocation;
+import com.limegroup.gnutella.http.HTTPConstants;
+import com.limegroup.gnutella.util.CommonUtils;
+import com.sun.java.util.collections.HashSet;
+import com.sun.java.util.collections.LinkedList;
+import com.sun.java.util.collections.List;
+import com.sun.java.util.collections.Set;
 
 /**
  * Test the public methods of the <tt>FileDesc</tt> class.

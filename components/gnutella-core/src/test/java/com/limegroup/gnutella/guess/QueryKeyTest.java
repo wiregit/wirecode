@@ -1,11 +1,14 @@
 package com.limegroup.gnutella.guess;
 
-import junit.framework.*;
-import java.util.*;
-import java.net.*;
-import java.io.*;
-import com.limegroup.gnutella.util.*;
-import com.limegroup.gnutella.messages.*;
+import java.io.ByteArrayOutputStream;
+import java.net.InetAddress;
+import java.util.Arrays;
+import java.util.Random;
+
+import junit.framework.Test;
+
+import com.limegroup.gnutella.messages.GGEP;
+import com.limegroup.gnutella.util.PrivilegedAccessor;
 
 public class QueryKeyTest extends com.limegroup.gnutella.util.BaseTestCase {
     public QueryKeyTest(String name) {

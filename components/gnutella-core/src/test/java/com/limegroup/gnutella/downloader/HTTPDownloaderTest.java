@@ -1,11 +1,11 @@
 package com.limegroup.gnutella.downloader;
 
-import com.limegroup.gnutella.util.PrivilegedAccessor;
-import com.limegroup.gnutella.http.*;
-import com.limegroup.gnutella.ByteReader;
-import java.io.*;
+import java.io.IOException;
 
-import junit.framework.*;
+import junit.framework.Test;
+
+import com.limegroup.gnutella.ByteReader;
+import com.limegroup.gnutella.util.PrivilegedAccessor;
 
 public class HTTPDownloaderTest extends com.limegroup.gnutella.util.BaseTestCase {
 

@@ -1,13 +1,32 @@
 package com.limegroup.gnutella.util;
 
-import junit.framework.*;
+import java.io.File;
+import java.io.IOException;
+import java.io.InterruptedIOException;
 
-import java.io.*;
+import junit.framework.Test;
+import junit.framework.TestCase;
+import junit.framework.TestResult;
+import junit.framework.TestSuite;
 
-import com.limegroup.gnutella.settings.*;
-import com.limegroup.gnutella.*;
-import com.limegroup.gnutella.messages.*;
-import com.limegroup.gnutella.routing.*;
+import com.limegroup.gnutella.Backend;
+import com.limegroup.gnutella.Connection;
+import com.limegroup.gnutella.ErrorCallback;
+import com.limegroup.gnutella.ErrorService;
+import com.limegroup.gnutella.GUID;
+import com.limegroup.gnutella.messages.BadPacketException;
+import com.limegroup.gnutella.messages.Message;
+import com.limegroup.gnutella.messages.PingReply;
+import com.limegroup.gnutella.messages.PingRequest;
+import com.limegroup.gnutella.messages.QueryReply;
+import com.limegroup.gnutella.messages.QueryRequest;
+import com.limegroup.gnutella.routing.RouteTableMessage;
+import com.limegroup.gnutella.settings.ConnectionSettings;
+import com.limegroup.gnutella.settings.FilterSettings;
+import com.limegroup.gnutella.settings.SearchSettings;
+import com.limegroup.gnutella.settings.SettingsHandler;
+import com.limegroup.gnutella.settings.SharingSettings;
+import com.limegroup.gnutella.settings.UltrapeerSettings;
 
 public class BaseTestCase extends AssertComparisons implements ErrorCallback {
     

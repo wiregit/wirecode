@@ -1,15 +1,31 @@
 package com.limegroup.gnutella;
 
-import junit.framework.*;
-import java.net.*;
-import java.io.*;
-import com.sun.java.util.collections.*;
-import com.limegroup.gnutella.handshaking.*;
-import com.limegroup.gnutella.routing.*;
-import com.limegroup.gnutella.messages.*;
-import com.limegroup.gnutella.settings.*;
-import com.limegroup.gnutella.messages.vendor.*;
-import com.limegroup.gnutella.util.*;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InterruptedIOException;
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
+import java.net.ServerSocket;
+
+import junit.framework.Test;
+
+import com.limegroup.gnutella.handshaking.LeafHeaders;
+import com.limegroup.gnutella.messages.BadPacketException;
+import com.limegroup.gnutella.messages.Message;
+import com.limegroup.gnutella.messages.PingRequest;
+import com.limegroup.gnutella.messages.QueryRequest;
+import com.limegroup.gnutella.messages.vendor.HopsFlowVendorMessage;
+import com.limegroup.gnutella.messages.vendor.MessagesSupportedVendorMessage;
+import com.limegroup.gnutella.messages.vendor.TCPConnectBackVendorMessage;
+import com.limegroup.gnutella.messages.vendor.UDPConnectBackVendorMessage;
+import com.limegroup.gnutella.messages.vendor.VendorMessage;
+import com.limegroup.gnutella.routing.QueryRouteTable;
+import com.limegroup.gnutella.routing.RouteTableMessage;
+import com.limegroup.gnutella.settings.ConnectionSettings;
+import com.limegroup.gnutella.util.BaseTestCase;
+import com.limegroup.gnutella.util.EmptyResponder;
+import com.sun.java.util.collections.Arrays;
+import com.sun.java.util.collections.Iterator;
 
 
 public class VendorMessageSupportTest extends BaseTestCase {

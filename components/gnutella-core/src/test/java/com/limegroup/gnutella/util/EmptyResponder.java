@@ -1,8 +1,10 @@
 package com.limegroup.gnutella.util;
 
-import com.limegroup.gnutella.handshaking.*;
-import java.io.*;
-import java.util.*;
+import java.io.IOException;
+import java.util.Properties;
+
+import com.limegroup.gnutella.handshaking.HandshakeResponder;
+import com.limegroup.gnutella.handshaking.HandshakeResponse;
 
 public final class EmptyResponder implements HandshakeResponder {
     public HandshakeResponse respond(HandshakeResponse response, 

@@ -1,14 +1,19 @@
 package com.limegroup.gnutella;
 
-import com.limegroup.gnutella.*; 
-import com.limegroup.gnutella.altlocs.*;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.OutputStream;
+
+import junit.framework.Test;
+
+import com.limegroup.gnutella.altlocs.AlternateLocation;
+import com.limegroup.gnutella.altlocs.AlternateLocationCollection;
 import com.limegroup.gnutella.messages.GGEP;
-import com.limegroup.gnutella.xml.*; 
-import com.limegroup.gnutella.util.*;
-import com.sun.java.util.collections.*;
-import java.io.*;
-import junit.framework.*;
-import junit.extensions.*;
+import com.limegroup.gnutella.util.PrivilegedAccessor;
+import com.limegroup.gnutella.xml.LimeXMLDocument;
+import com.limegroup.gnutella.xml.LimeXMLSchemaRepository;
+import com.sun.java.util.collections.HashSet;
+import com.sun.java.util.collections.Set;
 
 /**
  * This class tests the Response class.

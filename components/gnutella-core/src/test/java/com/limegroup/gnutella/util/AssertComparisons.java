@@ -1,6 +1,6 @@
 package com.limegroup.gnutella.util;
 
-import junit.framework.*;
+import junit.framework.TestCase;
     
 /**
  * A set of assert comparisons to check greater than / less than

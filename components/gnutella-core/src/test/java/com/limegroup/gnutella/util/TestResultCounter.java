@@ -1,6 +1,6 @@
 package com.limegroup.gnutella.util;
 
-import com.limegroup.gnutella.search.*;
+import com.limegroup.gnutella.search.ResultCounter;
 
 /**
  * Helper result counter that we can use to artificially simulate 

@@ -1,16 +1,33 @@
 package com.limegroup.gnutella;
 
-import junit.framework.*;
-import java.io.*;
-import java.net.*;
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InterruptedIOException;
+import java.io.OutputStream;
 import java.util.Properties;
-import com.limegroup.gnutella.handshaking.*;
-import com.limegroup.gnutella.routing.*;
-import com.limegroup.gnutella.messages.*;
-import com.limegroup.gnutella.stubs.*;
-import com.limegroup.gnutella.settings.*;
-import com.limegroup.gnutella.util.*;
-import com.sun.java.util.collections.*;
+
+import junit.framework.Test;
+
+import com.limegroup.gnutella.handshaking.AuthenticationHandshakeResponder;
+import com.limegroup.gnutella.handshaking.HandshakeResponse;
+import com.limegroup.gnutella.messages.BadPacketException;
+import com.limegroup.gnutella.messages.Message;
+import com.limegroup.gnutella.messages.PingReply;
+import com.limegroup.gnutella.messages.PingRequest;
+import com.limegroup.gnutella.messages.PushRequest;
+import com.limegroup.gnutella.messages.QueryReply;
+import com.limegroup.gnutella.messages.QueryRequest;
+import com.limegroup.gnutella.routing.PatchTableMessage;
+import com.limegroup.gnutella.routing.ResetTableMessage;
+import com.limegroup.gnutella.settings.ConnectionSettings;
+import com.limegroup.gnutella.stubs.ActivityCallbackStub;
+import com.limegroup.gnutella.util.BaseTestCase;
+import com.limegroup.gnutella.util.CompressingOutputStream;
+import com.limegroup.gnutella.util.PrivilegedAccessor;
+import com.limegroup.gnutella.util.ThrottledOutputStream;
+import com.limegroup.gnutella.util.UncompressingInputStream;
 
 /**
  * This class tests <tt>ManagedConnection</tt>'s ability to buffer messages 

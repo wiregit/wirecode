@@ -1,9 +1,9 @@
 package com.limegroup.gnutella.messages.vendor;
 
-import junit.framework.*;
-import java.io.*;
+import junit.framework.Test;
+
 import com.limegroup.gnutella.GUID;
-import com.limegroup.gnutella.messages.*;
+import com.limegroup.gnutella.messages.BadPacketException;
 
 /** Tests TCP/UDP ConnectBackVendorMessage
  */

@@ -1,12 +1,23 @@
 package com.limegroup.gnutella.guess;
 
-import junit.framework.*;
-import java.net.*;
-import java.io.*;
-import java.util.*;
-import com.limegroup.gnutella.messages.*;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
+import java.net.InetAddress;
+import java.util.Arrays;
+import java.util.Random;
+
+import junit.framework.Test;
+
+import com.limegroup.gnutella.Backend;
+import com.limegroup.gnutella.messages.Message;
+import com.limegroup.gnutella.messages.PingReply;
+import com.limegroup.gnutella.messages.PingRequest;
+import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.util.BaseTestCase;
-import com.limegroup.gnutella.*;
 
 /** Tests the Server Side of GUESS....
  */ 

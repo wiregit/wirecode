@@ -1,9 +1,11 @@
 package com.limegroup.gnutella;
 
-import junit.framework.*;
+import java.io.InputStream;
+import java.io.StringBufferInputStream;
+
+import junit.framework.Test;
+
 import com.limegroup.gnutella.util.BaseTestCase;
-import com.sun.java.util.collections.*;
-import java.io.*;
 
 /**
  * Unit tests for ByteReader

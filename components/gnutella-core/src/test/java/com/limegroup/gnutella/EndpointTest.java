@@ -1,6 +1,6 @@
 package com.limegroup.gnutella;
 
-import junit.framework.*;
+import junit.framework.Test;
 
 public class EndpointTest extends com.limegroup.gnutella.util.BaseTestCase {
     public EndpointTest(String name) {

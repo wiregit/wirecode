@@ -1,11 +1,15 @@
 package com.limegroup.gnutella.util;
 
-import com.limegroup.gnutella.messages.*;
-import com.limegroup.gnutella.routing.*;
-import com.limegroup.gnutella.security.*;
+import com.limegroup.gnutella.Connection;
+import com.limegroup.gnutella.ConnectionManager;
+import com.limegroup.gnutella.messages.QueryRequest;
+import com.limegroup.gnutella.routing.QueryRouteTable;
+import com.limegroup.gnutella.security.DummyAuthenticator;
 import com.limegroup.gnutella.settings.UltrapeerSettings;
-import com.limegroup.gnutella.*;
-import com.sun.java.util.collections.*;
+import com.sun.java.util.collections.Collection;
+import com.sun.java.util.collections.Iterator;
+import com.sun.java.util.collections.LinkedList;
+import com.sun.java.util.collections.List;
 
 /**
  * Helper class that supplies the list of connections for searching.

@@ -1,6 +1,7 @@
 package com.limegroup.gnutella;
 
-import junit.framework.*;
+import junit.framework.Test;
+
 import com.limegroup.gnutella.settings.ApplicationSettings;
 
 public class StatisticsTest extends com.limegroup.gnutella.util.BaseTestCase { 

@@ -1,11 +1,18 @@
 package com.limegroup.gnutella.search;
 
-import com.limegroup.gnutella.*;
-import com.limegroup.gnutella.util.*;
-import com.limegroup.gnutella.stubs.*;
-import com.limegroup.gnutella.messages.*;
-import com.sun.java.util.collections.*;
-import junit.framework.*;
+import junit.framework.Test;
+
+import com.limegroup.gnutella.ReplyHandler;
+import com.limegroup.gnutella.RouterService;
+import com.limegroup.gnutella.messages.QueryRequest;
+import com.limegroup.gnutella.stubs.ActivityCallbackStub;
+import com.limegroup.gnutella.stubs.ReplyHandlerStub;
+import com.limegroup.gnutella.util.BaseTestCase;
+import com.limegroup.gnutella.util.PrivilegedAccessor;
+import com.limegroup.gnutella.util.TestResultCounter;
+import com.sun.java.util.collections.Iterator;
+import com.sun.java.util.collections.Map;
+import com.sun.java.util.collections.Set;
 
 /**
  * This class tests the dispatching of dynamic queries for ourselves 

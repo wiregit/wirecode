@@ -1,10 +1,14 @@
 package com.limegroup.gnutella;
 
-import com.limegroup.gnutella.messages.*;
-import com.limegroup.gnutella.util.*;
-import com.limegroup.gnutella.stubs.*;
-import com.limegroup.gnutella.security.*;
-import junit.framework.*;
+import junit.framework.Test;
+
+import com.limegroup.gnutella.messages.PingRequest;
+import com.limegroup.gnutella.security.ServerAuthenticator;
+import com.limegroup.gnutella.stubs.MessageRouterStub;
+import com.limegroup.gnutella.util.BaseTestCase;
+import com.limegroup.gnutella.util.LeafConnectionManager;
+import com.limegroup.gnutella.util.PrivilegedAccessor;
+import com.limegroup.gnutella.util.UltrapeerConnectionManager;
 
 /**
  * Tests the <tt>Pinger</tt> class that periodically sends pings to gather new

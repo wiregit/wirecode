@@ -1,11 +1,11 @@
 package com.limegroup.gnutella;
 
-import com.limegroup.gnutella.*;
-import com.limegroup.gnutella.settings.*;
-import com.limegroup.gnutella.handshaking.*;
-import java.net.*;
-import java.io.*;
-import java.util.*;
+import java.io.IOException;
+import java.net.ServerSocket;
+import java.net.Socket;
+
+import com.limegroup.gnutella.handshaking.HandshakeResponder;
+import com.limegroup.gnutella.handshaking.UltrapeerHandshakeResponder;
 
 /**
  * A handy class for creating incoming connections for in-process tests.  

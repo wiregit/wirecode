@@ -1,12 +1,27 @@
 package com.limegroup.gnutella;
 
-import junit.framework.*;
-import java.net.*;
-import java.io.*;
-import java.util.*;
-import com.limegroup.gnutella.messages.*;
-import com.limegroup.gnutella.guess.*;
-import com.limegroup.gnutella.stubs.*;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InterruptedIOException;
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
+import java.net.InetAddress;
+import java.net.SocketException;
+import java.util.Random;
+import java.util.Vector;
+
+import junit.framework.Test;
+
+import com.limegroup.gnutella.guess.QueryKey;
+import com.limegroup.gnutella.messages.BadPacketException;
+import com.limegroup.gnutella.messages.Message;
+import com.limegroup.gnutella.messages.PingReply;
+import com.limegroup.gnutella.messages.PingRequest;
+import com.limegroup.gnutella.messages.QueryReply;
+import com.limegroup.gnutella.messages.QueryRequest;
+import com.limegroup.gnutella.stubs.ActivityCallbackStub;
+import com.limegroup.gnutella.stubs.MessageRouterStub;
 
 public class QueryUnicasterTest extends com.limegroup.gnutella.util.BaseTestCase {
 

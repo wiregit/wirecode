@@ -1,12 +1,19 @@
 package com.limegroup.gnutella.stubs;
 
-import com.limegroup.gnutella.*;
-import com.limegroup.gnutella.messages.*;
-import com.limegroup.gnutella.search.*;
-import com.limegroup.gnutella.chat.*;
-import com.limegroup.gnutella.security.*;
-import java.io.*;
-import com.sun.java.util.collections.*;
+import java.io.File;
+
+import com.limegroup.gnutella.ActivityCallback;
+import com.limegroup.gnutella.Connection;
+import com.limegroup.gnutella.Downloader;
+import com.limegroup.gnutella.Endpoint;
+import com.limegroup.gnutella.FileDesc;
+import com.limegroup.gnutella.GUID;
+import com.limegroup.gnutella.RemoteFileDesc;
+import com.limegroup.gnutella.Uploader;
+import com.limegroup.gnutella.chat.Chatter;
+import com.limegroup.gnutella.search.HostData;
+import com.limegroup.gnutella.security.User;
+import com.sun.java.util.collections.Set;
 
 /**
  * A stub for ActivityCallback.  Does nothing.

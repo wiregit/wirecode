@@ -1,15 +1,26 @@
 package com.limegroup.gnutella;
 
-import com.limegroup.gnutella.messages.*;
-import com.limegroup.gnutella.settings.*;
-import com.limegroup.gnutella.stubs.*;
-import com.limegroup.gnutella.util.*;
-import com.limegroup.gnutella.handshaking.*;
-import com.limegroup.gnutella.routing.*;
+import java.io.File;
 
-import junit.framework.*;
-import com.sun.java.util.collections.*;
-import java.io.*;
+import junit.framework.Test;
+
+import com.limegroup.gnutella.handshaking.LeafHeaders;
+import com.limegroup.gnutella.handshaking.UltrapeerHeaders;
+import com.limegroup.gnutella.messages.Message;
+import com.limegroup.gnutella.messages.PingReply;
+import com.limegroup.gnutella.messages.PingRequest;
+import com.limegroup.gnutella.routing.QueryRouteTable;
+import com.limegroup.gnutella.routing.RouteTableMessage;
+import com.limegroup.gnutella.settings.ConnectionSettings;
+import com.limegroup.gnutella.settings.FilterSettings;
+import com.limegroup.gnutella.settings.PingPongSettings;
+import com.limegroup.gnutella.settings.SharingSettings;
+import com.limegroup.gnutella.settings.UltrapeerSettings;
+import com.limegroup.gnutella.stubs.ActivityCallbackStub;
+import com.limegroup.gnutella.util.BaseTestCase;
+import com.limegroup.gnutella.util.EmptyResponder;
+import com.sun.java.util.collections.Iterator;
+import com.sun.java.util.collections.List;
 
 /**
  * This test makes sure that pong caching is working correctly between

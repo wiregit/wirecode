@@ -1,13 +1,19 @@
 package com.limegroup.gnutella.routing;
 
 
-import java.io.*;
-import java.util.zip.*;
-import com.sun.java.util.collections.*;
-import com.limegroup.gnutella.*;
-import com.limegroup.gnutella.messages.*;
-import com.limegroup.gnutella.util.*;
-import junit.framework.*;
+import java.io.ByteArrayOutputStream;
+import java.util.zip.Inflater;
+
+import junit.framework.Test;
+
+import com.limegroup.gnutella.HugeTestUtils;
+import com.limegroup.gnutella.messages.BadPacketException;
+import com.limegroup.gnutella.messages.QueryRequest;
+import com.limegroup.gnutella.util.BitSet;
+import com.limegroup.gnutella.util.PrivilegedAccessor;
+import com.sun.java.util.collections.Arrays;
+import com.sun.java.util.collections.Iterator;
+import com.sun.java.util.collections.Random;
 
 public class QueryRouteTableTest extends com.limegroup.gnutella.util.BaseTestCase {
     public QueryRouteTableTest(String name) {

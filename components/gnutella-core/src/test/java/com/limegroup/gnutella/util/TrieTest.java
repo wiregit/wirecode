@@ -1,9 +1,11 @@
 package com.limegroup.gnutella.util;
 
-import junit.framework.*;
-import com.sun.java.util.collections.*;
 import java.util.Locale;
-import java.lang.reflect.*;
+
+import junit.framework.Test;
+
+import com.sun.java.util.collections.Iterator;
+import com.sun.java.util.collections.NoSuchElementException;
 
 /**
  * Tests Trie.

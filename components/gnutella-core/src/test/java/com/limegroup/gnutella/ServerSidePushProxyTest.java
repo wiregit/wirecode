@@ -1,21 +1,39 @@
 package com.limegroup.gnutella;
 
-import com.limegroup.gnutella.*;
-import com.limegroup.gnutella.messages.*;
-import com.limegroup.gnutella.messages.vendor.*;
-import com.limegroup.gnutella.settings.*;
-import com.limegroup.gnutella.stubs.*;
-import com.limegroup.gnutella.util.*;
-import com.limegroup.gnutella.handshaking.*;
-import com.limegroup.gnutella.security.*;
-import com.limegroup.gnutella.routing.*;
-import com.bitzi.util.*;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.InputStreamReader;
+import java.io.InterruptedIOException;
+import java.io.OutputStreamWriter;
+import java.net.DatagramSocket;
+import java.net.Socket;
 
-import junit.framework.*;
-import java.util.Properties;
-import com.sun.java.util.collections.*;
-import java.io.*;
-import java.net.*;
+import junit.framework.Test;
+
+import com.bitzi.util.Base32;
+import com.limegroup.gnutella.handshaking.LeafHeaders;
+import com.limegroup.gnutella.handshaking.UltrapeerHeaders;
+import com.limegroup.gnutella.messages.Message;
+import com.limegroup.gnutella.messages.PushRequest;
+import com.limegroup.gnutella.messages.vendor.MessagesSupportedVendorMessage;
+import com.limegroup.gnutella.messages.vendor.PushProxyAcknowledgement;
+import com.limegroup.gnutella.messages.vendor.PushProxyRequest;
+import com.limegroup.gnutella.routing.QueryRouteTable;
+import com.limegroup.gnutella.routing.RouteTableMessage;
+import com.limegroup.gnutella.settings.ConnectionSettings;
+import com.limegroup.gnutella.settings.FilterSettings;
+import com.limegroup.gnutella.settings.SharingSettings;
+import com.limegroup.gnutella.settings.UltrapeerSettings;
+import com.limegroup.gnutella.stubs.ActivityCallbackStub;
+import com.limegroup.gnutella.util.BaseTestCase;
+import com.limegroup.gnutella.util.CommonUtils;
+import com.limegroup.gnutella.util.EmptyResponder;
+import com.limegroup.gnutella.util.NetworkUtils;
+import com.sun.java.util.collections.Arrays;
+import com.sun.java.util.collections.HashMap;
+import com.sun.java.util.collections.Iterator;
+import com.sun.java.util.collections.Map;
 
 /**
  *  Tests that an Ultrapeer correctly handles all aspects of PushProxy.  For

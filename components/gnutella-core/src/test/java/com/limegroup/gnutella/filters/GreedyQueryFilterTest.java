@@ -1,12 +1,12 @@
 package com.limegroup.gnutella.filters;
 
-import junit.framework.*;
-import com.limegroup.gnutella.util.PrivilegedAccessor;
-import com.limegroup.gnutella.util.BaseTestCase;
-import com.sun.java.util.collections.*;
+import junit.framework.Test;
 
-import com.limegroup.gnutella.messages.*;
 import com.limegroup.gnutella.GUID;
+import com.limegroup.gnutella.messages.Message;
+import com.limegroup.gnutella.messages.PingRequest;
+import com.limegroup.gnutella.messages.QueryRequest;
+import com.limegroup.gnutella.util.BaseTestCase;
 
 /**
  * Unit tests for GreedyQueryFilter

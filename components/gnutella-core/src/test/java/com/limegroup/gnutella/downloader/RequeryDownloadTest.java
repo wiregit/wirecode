@@ -1,15 +1,37 @@
 package com.limegroup.gnutella.downloader;
 
-import com.sun.java.util.collections.*;
-import java.io.*;
-import com.limegroup.gnutella.*;
-import com.limegroup.gnutella.messages.*;
-import com.limegroup.gnutella.settings.*;
-import com.limegroup.gnutella.downloader.*;
-import com.limegroup.gnutella.stubs.*;
-import com.limegroup.gnutella.xml.LimeXMLDocument;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectOutputStream;
+import java.io.OutputStream;
+
+import junit.framework.Test;
+
+import com.limegroup.gnutella.DownloadManager;
+import com.limegroup.gnutella.Downloader;
+import com.limegroup.gnutella.ForMeReplyHandler;
+import com.limegroup.gnutella.GUID;
+import com.limegroup.gnutella.ManagedConnection;
+import com.limegroup.gnutella.RemoteFileDesc;
+import com.limegroup.gnutella.ReplyHandler;
+import com.limegroup.gnutella.Response;
+import com.limegroup.gnutella.RouteTable;
+import com.limegroup.gnutella.RouterService;
+import com.limegroup.gnutella.URN;
+import com.limegroup.gnutella.messages.QueryReply;
+import com.limegroup.gnutella.messages.QueryRequest;
+import com.limegroup.gnutella.settings.ConnectionSettings;
+import com.limegroup.gnutella.stubs.ActivityCallbackStub;
+import com.limegroup.gnutella.stubs.ConnectionManagerStub;
+import com.limegroup.gnutella.stubs.MessageRouterStub;
 import com.limegroup.gnutella.util.PrivilegedAccessor;
-import junit.framework.*;
+import com.limegroup.gnutella.xml.LimeXMLDocument;
+import com.sun.java.util.collections.ArrayList;
+import com.sun.java.util.collections.HashSet;
+import com.sun.java.util.collections.LinkedList;
+import com.sun.java.util.collections.List;
+import com.sun.java.util.collections.Set;
 
 /**
  * This test makes sure that LimeWire does the following things:

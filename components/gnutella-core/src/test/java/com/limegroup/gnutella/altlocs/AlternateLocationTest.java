@@ -1,16 +1,20 @@
 package com.limegroup.gnutella.altlocs;
 
-import com.sun.java.util.collections.*;
-import com.limegroup.gnutella.*;
-import com.limegroup.gnutella.*;
-import com.limegroup.gnutella.settings.*;
-import com.limegroup.gnutella.http.*;
-import com.limegroup.gnutella.util.CommonUtils;
-import junit.framework.*;
-import junit.extensions.*;
-import java.io.*;
-import java.util.Date;
-import java.net.*;
+import java.io.IOException;
+import java.net.URL;
+
+import junit.framework.Test;
+
+import com.limegroup.gnutella.Endpoint;
+import com.limegroup.gnutella.GUID;
+import com.limegroup.gnutella.HugeTestUtils;
+import com.limegroup.gnutella.RemoteFileDesc;
+import com.limegroup.gnutella.URN;
+import com.limegroup.gnutella.http.HTTPConstants;
+import com.limegroup.gnutella.settings.ConnectionSettings;
+import com.sun.java.util.collections.Iterator;
+import com.sun.java.util.collections.Map;
+import com.sun.java.util.collections.TreeMap;
 
 /**
  * This class tests the methods of the <tt>AlternateLocation</tt> class.

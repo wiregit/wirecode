@@ -1,12 +1,18 @@
 package com.limegroup.gnutella.util;
 
-import junit.framework.*;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 
-import java.lang.reflect.*;
+import junit.framework.AssertionFailedError;
+import junit.framework.Test;
+import junit.framework.TestCase;
+import junit.framework.TestResult;
+import junit.framework.TestSuite;
 
+import com.limegroup.gnutella.Backend;
 import com.limegroup.gnutella.ErrorCallback;
 import com.limegroup.gnutella.ErrorService;
-import com.limegroup.gnutella.Backend;
 
 /**
  * A modified TestSuite that allows the backends

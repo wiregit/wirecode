@@ -1,10 +1,11 @@
 package com.limegroup.gnutella.gui;
 
-import junit.framework.*;
-import com.limegroup.gnutella.util.BaseTestCase;
-import com.limegroup.gnutella.settings.ApplicationSettings;
-import com.limegroup.gnutella.util.PrivilegedAccessor;
+import junit.framework.Test;
+
 import com.limegroup.gnutella.gui.search.DisplayManager;
+import com.limegroup.gnutella.settings.ApplicationSettings;
+import com.limegroup.gnutella.util.BaseTestCase;
+import com.limegroup.gnutella.util.PrivilegedAccessor;
 
 
 //this is in the com.limegroup.gnutella.gui.search but this calss

@@ -1,13 +1,20 @@
 package com.limegroup.gnutella.bootstrap;
 
-import com.limegroup.gnutella.ErrorService;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.net.InetSocketAddress;
+import java.net.ServerSocket;
+import java.net.Socket;
 
-import java.io.*;
-import java.net.*;
-import com.sun.java.util.collections.*;
-
-import org.apache.commons.logging.LogFactory;
 import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
+import com.limegroup.gnutella.ErrorService;
+import com.sun.java.util.collections.Iterator;
+import com.sun.java.util.collections.LinkedList;
+import com.sun.java.util.collections.List;
 
 /**
  * Simulates a GWebCache HTTP server.  Listens on a port, accepts a single

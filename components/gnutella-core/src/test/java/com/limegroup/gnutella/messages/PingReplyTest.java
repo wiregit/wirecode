@@ -1,12 +1,19 @@
 package com.limegroup.gnutella.messages;
 
-import junit.framework.*;
-import com.limegroup.gnutella.*;
-import com.limegroup.gnutella.guess.*;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+
+import junit.framework.Test;
+
+import com.limegroup.gnutella.ConnectionManager;
+import com.limegroup.gnutella.GUID;
+import com.limegroup.gnutella.RouterService;
+import com.limegroup.gnutella.guess.QueryKey;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.util.PrivilegedAccessor;
-import com.sun.java.util.collections.*;
-import java.io.*;
+import com.sun.java.util.collections.Arrays;
+import com.sun.java.util.collections.Random;
 
 public class PingReplyTest extends com.limegroup.gnutella.util.BaseTestCase {
     

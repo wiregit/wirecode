@@ -1,9 +1,6 @@
 package com.limegroup.gnutella.util;
 
-import junit.framework.*;
-import com.limegroup.gnutella.util.PrivilegedAccessor;
-import com.limegroup.gnutella.util.BaseTestCase;
-import com.sun.java.util.collections.*;
+import junit.framework.Test;
 
 /**
  * Unit tests for ApproximateMatcher

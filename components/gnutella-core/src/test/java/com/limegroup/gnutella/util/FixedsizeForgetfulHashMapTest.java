@@ -1,9 +1,10 @@
 package com.limegroup.gnutella.util;
 
-import junit.framework.*;
-import com.limegroup.gnutella.util.PrivilegedAccessor;
-import com.limegroup.gnutella.util.BaseTestCase;
-import com.sun.java.util.collections.*;
+import junit.framework.Test;
+
+import com.sun.java.util.collections.HashMap;
+import com.sun.java.util.collections.Iterator;
+import com.sun.java.util.collections.Map;
 
 /**
  * Unit tests for FixedsizeForgetfulHashMap

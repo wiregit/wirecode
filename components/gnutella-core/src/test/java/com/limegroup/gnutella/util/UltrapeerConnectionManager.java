@@ -1,7 +1,7 @@
 package com.limegroup.gnutella.util;
 
-import com.limegroup.gnutella.*;
-import com.limegroup.gnutella.security.*;
+import com.limegroup.gnutella.ConnectionManager;
+import com.limegroup.gnutella.security.Authenticator;
 
 /**
  * Helper class that always says it is an Ultrapeer.

@@ -1,14 +1,33 @@
 package com.limegroup.gnutella.downloader;
 
-import junit.framework.*;
-import com.limegroup.gnutella.*;
-import com.limegroup.gnutella.messages.*;
-import com.limegroup.gnutella.stubs.*;
-import com.limegroup.gnutella.util.*;
-import com.limegroup.gnutella.settings.*;
-import com.sun.java.util.collections.*;
-import java.io.*;
-import java.lang.reflect.*;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.lang.reflect.Method;
+
+import junit.framework.Test;
+
+import com.limegroup.gnutella.ActivityCallback;
+import com.limegroup.gnutella.DownloadManager;
+import com.limegroup.gnutella.Downloader;
+import com.limegroup.gnutella.FileManager;
+import com.limegroup.gnutella.GUID;
+import com.limegroup.gnutella.RemoteFileDesc;
+import com.limegroup.gnutella.SpeedConstants;
+import com.limegroup.gnutella.URN;
+import com.limegroup.gnutella.messages.QueryRequest;
+import com.limegroup.gnutella.settings.ConnectionSettings;
+import com.limegroup.gnutella.stubs.ActivityCallbackStub;
+import com.limegroup.gnutella.stubs.DownloadManagerStub;
+import com.limegroup.gnutella.stubs.FileManagerStub;
+import com.limegroup.gnutella.util.PrivilegedAccessor;
+import com.sun.java.util.collections.HashSet;
+import com.sun.java.util.collections.LinkedList;
+import com.sun.java.util.collections.List;
+import com.sun.java.util.collections.Set;
 
 public class ManagedDownloaderTest extends com.limegroup.gnutella.util.BaseTestCase {
     final static int PORT=6666;

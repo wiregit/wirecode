@@ -1,11 +1,14 @@
 package com.limegroup.gnutella;
 
-import com.limegroup.gnutella.*; 
-import com.limegroup.gnutella.util.*;
-import com.sun.java.util.collections.*;
-import java.io.*;
-import junit.framework.*;
-import junit.extensions.*;
+import java.io.File;
+import java.io.FileFilter;
+
+import junit.framework.Test;
+
+import com.limegroup.gnutella.util.CommonUtils;
+import com.sun.java.util.collections.Collections;
+import com.sun.java.util.collections.HashSet;
+import com.sun.java.util.collections.Set;
 
 /**
  * Tests the public methods of the UrnCache class.

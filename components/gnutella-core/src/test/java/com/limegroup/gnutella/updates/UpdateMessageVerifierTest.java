@@ -1,13 +1,13 @@
 package com.limegroup.gnutella.updates;
 
-import junit.framework.*;
-import com.limegroup.gnutella.util.PrivilegedAccessor;
-import com.limegroup.gnutella.util.BaseTestCase;
-import com.sun.java.util.collections.*;
+import java.io.File;
+import java.io.RandomAccessFile;
 
+import junit.framework.Test;
+
+import com.limegroup.gnutella.util.BaseTestCase;
 import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.Expand;
-import java.io.*;
 
 /**
  * Unit tests for UpdateMessageVerifier

@@ -1,12 +1,27 @@
 package com.limegroup.gnutella;
 
-import com.limegroup.gnutella.messages.*; 
-import com.limegroup.gnutella.guess.*; 
-import com.limegroup.gnutella.util.*;
-import com.limegroup.gnutella.settings.*;
-import java.net.*;
-import java.io.*;
-import java.util.*;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InterruptedIOException;
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
+import java.net.InetAddress;
+import java.net.ServerSocket;
+import java.net.Socket;
+import java.net.SocketException;
+import java.util.Random;
+
+import com.limegroup.gnutella.guess.QueryKey;
+import com.limegroup.gnutella.messages.BadPacketException;
+import com.limegroup.gnutella.messages.Message;
+import com.limegroup.gnutella.messages.PingReply;
+import com.limegroup.gnutella.messages.PingRequest;
+import com.limegroup.gnutella.messages.QueryReply;
+import com.limegroup.gnutella.messages.QueryRequest;
+import com.limegroup.gnutella.settings.ConnectionSettings;
+import com.limegroup.gnutella.util.IOUtils;
 
 /** Simulates a 'network' of unicast enabled clients.  The clients don't search,
  *  but they always respond to queries.

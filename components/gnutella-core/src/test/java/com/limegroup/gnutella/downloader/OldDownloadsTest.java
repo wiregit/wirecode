@@ -1,17 +1,19 @@
 package com.limegroup.gnutella.downloader;
 
-import java.io.*;
-import com.limegroup.gnutella.*;
-import com.limegroup.gnutella.settings.*;
-import com.limegroup.gnutella.downloader.*;
-import com.limegroup.gnutella.util.*;
-import com.limegroup.gnutella.stubs.*;
-import com.sun.java.util.collections.*;
-import junit.framework.*;
-import com.limegroup.gnutella.settings.*;
+import junit.framework.Test;
 
-import org.apache.commons.logging.LogFactory;
 import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
+import com.limegroup.gnutella.DownloadManager;
+import com.limegroup.gnutella.Downloader;
+import com.limegroup.gnutella.RouterService;
+import com.limegroup.gnutella.settings.ConnectionSettings;
+import com.limegroup.gnutella.settings.DownloadSettings;
+import com.limegroup.gnutella.stubs.ActivityCallbackStub;
+import com.limegroup.gnutella.util.CommonUtils;
+import com.sun.java.util.collections.LinkedList;
+import com.sun.java.util.collections.List;
 
 /**
  * Tests backwards compatibility with old downloads.dat files.

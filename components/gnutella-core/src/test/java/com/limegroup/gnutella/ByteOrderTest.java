@@ -1,8 +1,9 @@
 package com.limegroup.gnutella;
 
-import junit.framework.*;
+import junit.framework.Test;
+
 import com.limegroup.gnutella.util.BaseTestCase;
-import com.sun.java.util.collections.*;
+import com.sun.java.util.collections.Arrays;
 
 /**
  * Unit tests for ByteOrder

@@ -1,9 +1,11 @@
 package com.limegroup.gnutella.util;
 
-import junit.framework.*;
-import com.sun.java.util.collections.*;
-import com.limegroup.gnutella.ByteOrder;
 import java.io.IOException;
+
+import junit.framework.Test;
+
+import com.limegroup.gnutella.ByteOrder;
+import com.sun.java.util.collections.Arrays;
 
 /**
  * Tests COBSUtil

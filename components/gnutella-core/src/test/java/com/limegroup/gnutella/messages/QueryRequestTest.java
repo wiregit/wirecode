@@ -1,15 +1,25 @@
 package com.limegroup.gnutella.messages;
 
-import com.limegroup.gnutella.*;
-import com.limegroup.gnutella.util.*;
-import com.limegroup.gnutella.guess.*; 
-import com.limegroup.gnutella.settings.*; 
-import com.sun.java.util.collections.*;
-import java.io.*;
-import java.util.StringTokenizer;
-import junit.framework.*;
-import junit.extensions.*;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.net.InetAddress;
+
+import junit.framework.Test;
+
+import com.limegroup.gnutella.GUID;
+import com.limegroup.gnutella.HugeTestUtils;
+import com.limegroup.gnutella.URN;
+import com.limegroup.gnutella.UrnType;
+import com.limegroup.gnutella.guess.QueryKey;
+import com.limegroup.gnutella.settings.SearchSettings;
+import com.limegroup.gnutella.util.BaseTestCase;
+import com.sun.java.util.collections.Collection;
+import com.sun.java.util.collections.Collections;
+import com.sun.java.util.collections.HashSet;
+import com.sun.java.util.collections.Iterator;
+import com.sun.java.util.collections.Random;
+import com.sun.java.util.collections.Set;
 
 /**
  * This class tests the QueryRequest class with HUGE v0.94 extensions.

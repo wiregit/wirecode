@@ -1,7 +1,8 @@
 package com.limegroup.gnutella;
 
-import com.limegroup.gnutella.stubs.*;
-import com.limegroup.gnutella.util.*;
+import com.limegroup.gnutella.stubs.ConnectionManagerStub;
+import com.limegroup.gnutella.stubs.MessageRouterStub;
+import com.limegroup.gnutella.util.PrivilegedAccessor;
 
 /** 
  * A stubbed-out ManagedConnection that does nothing.  Useful for testing, since

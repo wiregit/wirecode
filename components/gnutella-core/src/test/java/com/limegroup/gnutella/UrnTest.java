@@ -1,10 +1,11 @@
 package com.limegroup.gnutella;
 
-import com.limegroup.gnutella.*;
+import java.io.File;
+import java.io.IOException;
+
+import junit.framework.Test;
+
 import com.limegroup.gnutella.util.CommonUtils;
-import junit.framework.*;
-import junit.extensions.*;
-import java.io.*;
 
 /**
  * This class handles testing all methods of the urn class.  This test

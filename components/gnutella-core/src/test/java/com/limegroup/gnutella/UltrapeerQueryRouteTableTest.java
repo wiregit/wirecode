@@ -1,6 +1,7 @@
 package com.limegroup.gnutella;
 
 import junit.framework.Test;
+
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.search.HostData;
 import com.limegroup.gnutella.settings.ConnectionSettings;

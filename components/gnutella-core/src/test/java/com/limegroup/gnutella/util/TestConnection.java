@@ -1,8 +1,12 @@
 package com.limegroup.gnutella.util;
 
-import com.limegroup.gnutella.messages.*;
-import com.limegroup.gnutella.routing.*;
-import com.limegroup.gnutella.*;
+import com.limegroup.gnutella.ManagedConnection;
+import com.limegroup.gnutella.messages.BadPacketException;
+import com.limegroup.gnutella.messages.Message;
+import com.limegroup.gnutella.messages.QueryRequest;
+import com.limegroup.gnutella.routing.PatchTableMessage;
+import com.limegroup.gnutella.routing.QueryRouteTable;
+import com.limegroup.gnutella.routing.ResetTableMessage;
 
 /**
  * Helper class that overrides getNumIntraUltrapeerConnections for

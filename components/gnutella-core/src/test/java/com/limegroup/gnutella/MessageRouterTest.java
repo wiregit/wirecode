@@ -1,9 +1,9 @@
 package com.limegroup.gnutella;
 
 import java.lang.reflect.Method;
+import java.net.InetAddress;
 
 import junit.framework.Test;
-import java.net.InetAddress;
 
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.routing.QueryRouteTable;

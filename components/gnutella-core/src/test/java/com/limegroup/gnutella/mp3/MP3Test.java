@@ -1,10 +1,9 @@
 package com.limegroup.gnutella.mp3;
 
 
-import junit.framework.*;
-import com.limegroup.gnutella.mp3.*;
+import junit.framework.Test;
+
 import com.limegroup.gnutella.util.CommonUtils;
-import com.sun.java.util.collections.*;
 /**
  * Test MP3Info class
  *

@@ -1,9 +1,14 @@
 package com.limegroup.gnutella.stubs;
 
-import com.limegroup.gnutella.*;
-import com.limegroup.gnutella.messages.*;
-import com.sun.java.util.collections.*;
-import java.net.*;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+
+import com.limegroup.gnutella.ReplyHandler;
+import com.limegroup.gnutella.messages.Message;
+import com.limegroup.gnutella.messages.PingReply;
+import com.limegroup.gnutella.messages.PushRequest;
+import com.limegroup.gnutella.messages.QueryReply;
+import com.sun.java.util.collections.Set;
 
 /**
  * Stub for the <tt>ReplyHandler</tt> interface.

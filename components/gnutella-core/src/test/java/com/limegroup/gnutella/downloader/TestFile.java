@@ -1,7 +1,11 @@
 package com.limegroup.gnutella.downloader;
 
-import com.limegroup.gnutella.*;
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
+import java.io.RandomAccessFile;
+
+import com.limegroup.gnutella.ErrorService;
+import com.limegroup.gnutella.URN;
 
 public class TestFile {
     private static final int A_INT=0x4F1BBCDC;

@@ -1,9 +1,11 @@
 package com.limegroup.gnutella.messages;
 
-import junit.framework.*;
-import com.limegroup.gnutella.*;
-import com.sun.java.util.collections.*;
-import java.io.*;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+
+import junit.framework.Test;
+
+import com.sun.java.util.collections.Arrays;
 
 public class PushRequestTest extends com.limegroup.gnutella.util.BaseTestCase {
     public PushRequestTest(String name) {

@@ -1,9 +1,16 @@
 package com.limegroup.gnutella.downloader;
 
-import junit.framework.*;
-import com.limegroup.gnutella.*;
-import com.sun.java.util.collections.*;
 import java.io.IOException;
+
+import junit.framework.Test;
+
+import com.limegroup.gnutella.RemoteFileDesc;
+import com.limegroup.gnutella.SpeedConstants;
+import com.limegroup.gnutella.URN;
+import com.sun.java.util.collections.HashSet;
+import com.sun.java.util.collections.Iterator;
+import com.sun.java.util.collections.List;
+import com.sun.java.util.collections.Set;
 
 public class RemoteFileDescGrouperTest extends com.limegroup.gnutella.util.BaseTestCase {
 

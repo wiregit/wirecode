@@ -1,7 +1,8 @@
 package com.limegroup.gnutella.stubs;
 
-import com.limegroup.gnutella.*;
-import com.limegroup.gnutella.handshaking.*;
+import com.limegroup.gnutella.ConnectionManager;
+import com.limegroup.gnutella.ManagedConnection;
+import com.limegroup.gnutella.handshaking.HandshakeResponse;
 
 /** A (incomplete!) stub for ConnectionManager. */
 public class ConnectionManagerStub extends ConnectionManager {

@@ -1,8 +1,10 @@
 package com.limegroup.gnutella;
 
+import java.util.Arrays;
+
+import junit.framework.Test;
+
 import com.bitzi.util.Base32;
-import junit.framework.*;
-import java.util.*;
 
 /**
  * Unit tests for Base32 class.

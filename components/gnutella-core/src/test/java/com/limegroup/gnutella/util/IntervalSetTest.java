@@ -1,11 +1,10 @@
 package com.limegroup.gnutella.util;
 
-import junit.framework.*;
-import com.limegroup.gnutella.util.PrivilegedAccessor;
-import com.limegroup.gnutella.util.BaseTestCase;
-import com.sun.java.util.collections.*;
+import junit.framework.Test;
 
 import com.limegroup.gnutella.downloader.Interval;
+import com.sun.java.util.collections.Iterator;
+import com.sun.java.util.collections.List;
 
 /**
  * Unit tests for IntervalSet

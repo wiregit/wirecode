@@ -1,15 +1,28 @@
 package com.limegroup.gnutella;
 
-import junit.framework.*;
-import com.limegroup.gnutella.messages.*;
-import com.limegroup.gnutella.handshaking.*;
-import com.limegroup.gnutella.util.*;
-import com.limegroup.gnutella.settings.*;
-import com.limegroup.gnutella.stubs.*;
-import com.limegroup.gnutella.xml.*;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.OutputStreamWriter;
 
-import java.io.*;
-import com.sun.java.util.collections.*;
+import junit.framework.Test;
+
+import com.limegroup.gnutella.handshaking.UltrapeerHeaders;
+import com.limegroup.gnutella.messages.QueryReply;
+import com.limegroup.gnutella.messages.QueryRequest;
+import com.limegroup.gnutella.settings.ConnectionSettings;
+import com.limegroup.gnutella.settings.PingPongSettings;
+import com.limegroup.gnutella.settings.SearchSettings;
+import com.limegroup.gnutella.settings.UltrapeerSettings;
+import com.limegroup.gnutella.stubs.ActivityCallbackStub;
+import com.limegroup.gnutella.util.CommonUtils;
+import com.limegroup.gnutella.util.EmptyResponder;
+import com.limegroup.gnutella.xml.LimeXMLDocument;
+import com.limegroup.gnutella.xml.LimeXMLReplyCollection;
+import com.limegroup.gnutella.xml.SchemaReplyCollectionMapper;
+import com.sun.java.util.collections.ArrayList;
+import com.sun.java.util.collections.Iterator;
+import com.sun.java.util.collections.List;
 
 public class I18NSendReceiveTest 
     extends com.limegroup.gnutella.util.BaseTestCase {

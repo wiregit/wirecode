@@ -1,21 +1,22 @@
 
 package com.limegroup.gnutella.xml;
 
-import com.limegroup.gnutella.FileDesc;
-import com.limegroup.gnutella.stubs.ActivityCallbackStub;
-import com.limegroup.gnutella.util.FileUtils;
-import com.limegroup.gnutella.util.PrivilegedAccessor;
-import com.limegroup.gnutella.RouterService;
-import com.limegroup.gnutella.settings.*;
-import com.limegroup.gnutella.routing.QueryRouteTable;
-import com.limegroup.gnutella.util.I18NConvert;
-import com.limegroup.gnutella.messages.QueryRequest;
-import com.limegroup.gnutella.Response;
-import com.sun.java.util.collections.*;
+import java.io.File;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 
-import java.io.*;
-import java.net.*;
-import junit.framework.*;
+import junit.framework.Test;
+
+import com.limegroup.gnutella.Response;
+import com.limegroup.gnutella.RouterService;
+import com.limegroup.gnutella.messages.QueryRequest;
+import com.limegroup.gnutella.routing.QueryRouteTable;
+import com.limegroup.gnutella.settings.ConnectionSettings;
+import com.limegroup.gnutella.settings.SharingSettings;
+import com.limegroup.gnutella.util.I18NConvert;
+import com.limegroup.gnutella.util.PrivilegedAccessor;
+import com.sun.java.util.collections.ArrayList;
+import com.sun.java.util.collections.List;
 
 /**
  * Tests the MetaFileManager.  Subclass FileManagerTest so that

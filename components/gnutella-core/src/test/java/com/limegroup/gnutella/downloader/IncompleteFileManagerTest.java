@@ -1,13 +1,27 @@
 package com.limegroup.gnutella.downloader;
 
-import com.limegroup.gnutella.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+
+import junit.framework.Test;
+
+import com.limegroup.gnutella.FileDesc;
+import com.limegroup.gnutella.FileManager;
+import com.limegroup.gnutella.IncompleteFileDesc;
+import com.limegroup.gnutella.RemoteFileDesc;
+import com.limegroup.gnutella.RouterService;
+import com.limegroup.gnutella.URN;
+import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.PrivilegedAccessor;
-import com.sun.java.util.collections.*;
-import junit.framework.*;
-import java.io.*;
-import com.limegroup.gnutella.settings.*;
+import com.sun.java.util.collections.HashSet;
+import com.sun.java.util.collections.Iterator;
+import com.sun.java.util.collections.Set;
 
 public class IncompleteFileManagerTest extends com.limegroup.gnutella.util.BaseTestCase {
     private IncompleteFileManager ifm;

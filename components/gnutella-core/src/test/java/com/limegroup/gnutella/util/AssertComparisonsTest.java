@@ -1,6 +1,7 @@
 package com.limegroup.gnutella.util;
 
-import junit.framework.*;
+import junit.framework.AssertionFailedError;
+import junit.framework.Test;
 
 /**
  * Test that comparisons are correct.

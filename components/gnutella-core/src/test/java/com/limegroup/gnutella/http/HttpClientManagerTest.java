@@ -1,12 +1,14 @@
 package com.limegroup.gnutella.http;
 
-import com.limegroup.gnutella.*;
-import com.limegroup.gnutella.bootstrap.*;
-import com.limegroup.gnutella.util.*;
-import java.io.*;
-import org.apache.commons.httpclient.*;
-import org.apache.commons.httpclient.methods.*;
-import junit.framework.*;
+import junit.framework.Test;
+
+import org.apache.commons.httpclient.HttpClient;
+import org.apache.commons.httpclient.HttpException;
+import org.apache.commons.httpclient.HttpMethod;
+import org.apache.commons.httpclient.methods.GetMethod;
+
+import com.limegroup.gnutella.bootstrap.TestBootstrapServer;
+import com.limegroup.gnutella.util.BaseTestCase;
 
 /**
  * Tests various things of HttpClient / HttpClientManager.

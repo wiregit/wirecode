@@ -1,20 +1,32 @@
 package com.limegroup.gnutella.downloader;
 
-import java.net.*;
-import java.io.*;
+import java.io.BufferedOutputStream;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
+import java.net.ServerSocket;
+import java.net.Socket;
 import java.util.StringTokenizer;
-import com.sun.java.util.collections.*;
-import com.limegroup.gnutella.util.*;
-import com.limegroup.gnutella.altlocs.*;
-import com.limegroup.gnutella.filters.*;
-import com.limegroup.gnutella.*;
-import com.limegroup.gnutella.uploader.HTTPUploader;
-import com.limegroup.gnutella.http.*;
-import com.limegroup.gnutella.util.*;
-import com.limegroup.gnutella.settings.*;
 
-import org.apache.commons.logging.LogFactory;
 import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
+import com.limegroup.gnutella.Assert;
+import com.limegroup.gnutella.ErrorService;
+import com.limegroup.gnutella.URN;
+import com.limegroup.gnutella.altlocs.AlternateLocation;
+import com.limegroup.gnutella.altlocs.AlternateLocationCollection;
+import com.limegroup.gnutella.filters.IPFilter;
+import com.limegroup.gnutella.http.HTTPHeaderName;
+import com.limegroup.gnutella.http.HTTPUtils;
+import com.limegroup.gnutella.settings.FilterSettings;
+import com.limegroup.gnutella.util.BandwidthThrottle;
+import com.limegroup.gnutella.util.IntPair;
+import com.limegroup.gnutella.util.ThrottledOutputStream;
+import com.sun.java.util.collections.Iterator;
 
 public class TestUploader {    
     

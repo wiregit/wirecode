@@ -1,14 +1,25 @@
 package com.limegroup.gnutella;
 
-import junit.framework.*;
-import com.limegroup.gnutella.stubs.*;
-import com.limegroup.gnutella.util.*;
-import com.limegroup.gnutella.downloader.*;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.net.Socket;
+
+import junit.framework.Test;
+
+import com.limegroup.gnutella.downloader.HTTPDownloader;
+import com.limegroup.gnutella.downloader.QueuedException;
+import com.limegroup.gnutella.downloader.TryAgainLaterException;
+import com.limegroup.gnutella.http.HTTPRequestMethod;
+import com.limegroup.gnutella.settings.UploadSettings;
+import com.limegroup.gnutella.stubs.ActivityCallbackStub;
+import com.limegroup.gnutella.stubs.FileManagerStub;
 import com.limegroup.gnutella.uploader.StalledUploadWatchdog;
-import com.limegroup.gnutella.http.*;
-import com.limegroup.gnutella.settings.*;
-import java.io.*;
-import java.net.*;
+import com.limegroup.gnutella.util.CommonUtils;
+import com.limegroup.gnutella.util.PipedSocketFactory;
+import com.limegroup.gnutella.util.PrivilegedAccessor;
 
 public class UploaderTest extends com.limegroup.gnutella.util.BaseTestCase {
 

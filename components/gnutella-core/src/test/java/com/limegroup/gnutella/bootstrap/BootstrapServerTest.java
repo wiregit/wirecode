@@ -1,9 +1,8 @@
 package com.limegroup.gnutella.bootstrap;
 
-import junit.framework.*;
-import com.sun.java.util.collections.*;
-import java.net.*;
 import java.text.ParseException;
+
+import junit.framework.Test;
 
 /**
  * Unit tests for BootstrapServerTest.

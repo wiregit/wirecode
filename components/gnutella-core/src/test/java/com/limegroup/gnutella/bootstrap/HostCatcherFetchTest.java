@@ -1,11 +1,14 @@
 package com.limegroup.gnutella.bootstrap;
 
-import junit.framework.*;
-import com.limegroup.gnutella.*;
-import com.limegroup.gnutella.stubs.*;
+import junit.framework.Test;
+
+import com.limegroup.gnutella.Endpoint;
+import com.limegroup.gnutella.HostCatcher;
+import com.limegroup.gnutella.RouterService;
+import com.limegroup.gnutella.settings.FilterSettings;
+import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.util.BaseTestCase;
 import com.limegroup.gnutella.util.PrivilegedAccessor;
-import com.limegroup.gnutella.settings.*;
 
 /**
  * Unit tests for the HostCatcher/BootstrapServerManager interface.

@@ -1,12 +1,20 @@
 package com.limegroup.gnutella.xml;
 
-import java.io.*;
-import com.sun.java.util.collections.*;
-import com.limegroup.gnutella.URN;
+import java.io.File;
+import java.io.IOException;
+
+import junit.framework.Test;
+
 import com.limegroup.gnutella.FileDesc;
-import com.limegroup.gnutella.util.*;
-import com.limegroup.gnutella.mp3.*;
-import junit.framework.*;
+import com.limegroup.gnutella.URN;
+import com.limegroup.gnutella.mp3.ID3Reader;
+import com.limegroup.gnutella.util.CommonUtils;
+import com.limegroup.gnutella.util.Expand;
+import com.limegroup.gnutella.util.NameValue;
+import com.sun.java.util.collections.ArrayList;
+import com.sun.java.util.collections.HashMap;
+import com.sun.java.util.collections.List;
+import com.sun.java.util.collections.Set;
 
 /** Unit test for LimeXMLReplyCollection.
  * Should run in the tests/xml directory (ie where this file is located).

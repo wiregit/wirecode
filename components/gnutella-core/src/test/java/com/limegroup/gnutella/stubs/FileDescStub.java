@@ -1,8 +1,13 @@
 package com.limegroup.gnutella.stubs;
 
-import com.limegroup.gnutella.*;
-import com.sun.java.util.collections.*;
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+
+import com.limegroup.gnutella.FileDesc;
+import com.limegroup.gnutella.URN;
+import com.sun.java.util.collections.HashSet;
+import com.sun.java.util.collections.Set;
 
 public class FileDescStub extends FileDesc {
     private static Set set ;

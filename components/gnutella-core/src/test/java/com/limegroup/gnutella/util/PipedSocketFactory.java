@@ -1,7 +1,13 @@
 package com.limegroup.gnutella.util;
 
-import java.io.*;
-import java.net.*;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.PipedInputStream;
+import java.io.PipedOutputStream;
+import java.net.InetAddress;
+import java.net.Socket;
+import java.net.UnknownHostException;
 
 /** 
  * Returns two sockets A and B, so that the input of A is connected to 

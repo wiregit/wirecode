@@ -1,10 +1,11 @@
 package com.limegroup.gnutella;
 
-import com.limegroup.gnutella.util.*;
-import com.limegroup.gnutella.stubs.*;
-import com.limegroup.gnutella.messages.*;
-import com.sun.java.util.collections.*;
-import junit.framework.*;
+import junit.framework.Test;
+
+import com.limegroup.gnutella.stubs.ReplyHandlerStub;
+import com.limegroup.gnutella.util.BaseTestCase;
+import com.limegroup.gnutella.util.PrivilegedAccessor;
+import com.sun.java.util.collections.Map;
 
 /**
  * Test the public methods of the <tt>FileDesc</tt> class.

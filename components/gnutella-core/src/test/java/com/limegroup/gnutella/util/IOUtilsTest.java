@@ -1,8 +1,9 @@
 package com.limegroup.gnutella.util;
 
-import junit.framework.*;
-import junit.extensions.*;
-import java.io.*;
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
+
+import junit.framework.Test;
 
 public final class IOUtilsTest extends com.limegroup.gnutella.util.BaseTestCase {
 

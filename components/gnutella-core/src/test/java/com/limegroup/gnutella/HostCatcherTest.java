@@ -1,12 +1,18 @@
 package com.limegroup.gnutella;
 
-import junit.framework.*;
-import java.io.*;
-import com.sun.java.util.collections.*;
-import com.limegroup.gnutella.messages.*;
-import com.limegroup.gnutella.util.*;
+import java.io.File;
+import java.io.FileWriter;
+
+import junit.framework.Test;
+
+import com.limegroup.gnutella.messages.PingReply;
+import com.limegroup.gnutella.settings.FilterSettings;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
-import com.limegroup.gnutella.settings.*;
+import com.limegroup.gnutella.util.CommonUtils;
+import com.limegroup.gnutella.util.FixedsizePriorityQueue;
+import com.limegroup.gnutella.util.PrivilegedAccessor;
+import com.sun.java.util.collections.Iterator;
+import com.sun.java.util.collections.Set;
 
 public class HostCatcherTest extends com.limegroup.gnutella.util.BaseTestCase {  
     private HostCatcher hc;

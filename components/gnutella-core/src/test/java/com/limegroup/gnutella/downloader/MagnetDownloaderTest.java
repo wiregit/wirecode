@@ -1,11 +1,6 @@
 package com.limegroup.gnutella.downloader;
 
-import java.lang.reflect.Method;
-
-import com.limegroup.gnutella.HugeTestUtils;
-import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.util.BaseTestCase;
-import com.limegroup.gnutella.util.PrivilegedAccessor;
 
 /**
  * Tests the magnet downloader class.

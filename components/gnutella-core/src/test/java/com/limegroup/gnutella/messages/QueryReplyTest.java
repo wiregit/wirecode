@@ -1,15 +1,34 @@
 package com.limegroup.gnutella.messages;
 
-import com.limegroup.gnutella.*; 
-import com.limegroup.gnutella.util.*;
-import com.limegroup.gnutella.stubs.*;
-import com.limegroup.gnutella.settings.*;
-import com.limegroup.gnutella.altlocs.*;
-import com.sun.java.util.collections.*;
-import java.io.*;
-import java.net.*;
-import junit.framework.*;
-import junit.extensions.*;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileFilter;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+
+import junit.framework.Test;
+
+import com.limegroup.gnutella.ByteOrder;
+import com.limegroup.gnutella.FileDesc;
+import com.limegroup.gnutella.FileManager;
+import com.limegroup.gnutella.GUID;
+import com.limegroup.gnutella.PushProxyInterface;
+import com.limegroup.gnutella.Response;
+import com.limegroup.gnutella.RouterService;
+import com.limegroup.gnutella.altlocs.AlternateLocation;
+import com.limegroup.gnutella.settings.ConnectionSettings;
+import com.limegroup.gnutella.settings.SharingSettings;
+import com.limegroup.gnutella.stubs.ActivityCallbackStub;
+import com.limegroup.gnutella.stubs.SimpleFileManager;
+import com.limegroup.gnutella.util.CommonUtils;
+import com.limegroup.gnutella.util.PrivilegedAccessor;
+import com.sun.java.util.collections.Arrays;
+import com.sun.java.util.collections.HashSet;
+import com.sun.java.util.collections.Iterator;
+import com.sun.java.util.collections.List;
+import com.sun.java.util.collections.Random;
+import com.sun.java.util.collections.Set;
 
 /**
  * This class tests the QueryReply class.

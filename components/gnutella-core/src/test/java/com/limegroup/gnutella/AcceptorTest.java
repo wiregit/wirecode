@@ -1,9 +1,12 @@
 package com.limegroup.gnutella;
 
-import com.limegroup.gnutella.stubs.*;
-import junit.framework.*;
 import java.io.IOException;
-import java.net.*;
+import java.net.DatagramSocket;
+import java.net.ServerSocket;
+
+import junit.framework.Test;
+
+import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 
 public class AcceptorTest extends com.limegroup.gnutella.util.BaseTestCase {
     

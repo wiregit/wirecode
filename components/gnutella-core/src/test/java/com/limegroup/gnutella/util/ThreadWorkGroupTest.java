@@ -1,8 +1,8 @@
 package com.limegroup.gnutella.util;
 
-import junit.framework.*;
-import java.util.*;
-import com.limegroup.gnutella.util.BaseTestCase;
+import java.util.Random;
+
+import junit.framework.Test;
 
 public class ThreadWorkGroupTest extends BaseTestCase {
     

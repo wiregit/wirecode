@@ -1,10 +1,14 @@
 package com.limegroup.gnutella.messages.vendor;
 
-import junit.framework.*;
-import java.io.*;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+
+import junit.framework.Test;
+
 import com.limegroup.gnutella.ByteOrder;
 import com.limegroup.gnutella.GUID;
-import com.limegroup.gnutella.messages.*;
+import com.limegroup.gnutella.messages.BadPacketException;
+import com.limegroup.gnutella.messages.Message;
 
 /** Tests the important MessagesSupportedVendorMessage.
  */

@@ -1,7 +1,10 @@
 package com.limegroup.gnutella.util;
 
-import junit.framework.*;
-import com.sun.java.util.collections.*;
+import junit.framework.Test;
+
+import com.sun.java.util.collections.ConcurrentModificationException;
+import com.sun.java.util.collections.Iterator;
+import com.sun.java.util.collections.NoSuchElementException;
 
 public class BufferTest extends com.limegroup.gnutella.util.BaseTestCase {
     public BufferTest(String name) {

@@ -1,14 +1,20 @@
 package com.limegroup.gnutella.stubs;
 
-import com.sun.java.util.collections.*;
-import java.io.*;
-import java.net.*;
-import java.util.StringTokenizer;
+import java.io.File;
+import java.net.Socket;
 
-import com.limegroup.gnutella.*;
-import com.limegroup.gnutella.messages.*;
-import com.limegroup.gnutella.downloader.*;
-import com.limegroup.gnutella.util.URLDecoder;
+import com.limegroup.gnutella.Acceptor;
+import com.limegroup.gnutella.ActivityCallback;
+import com.limegroup.gnutella.DownloadManager;
+import com.limegroup.gnutella.FileManager;
+import com.limegroup.gnutella.GUID;
+import com.limegroup.gnutella.MessageRouter;
+import com.limegroup.gnutella.RemoteFileDesc;
+import com.limegroup.gnutella.RouterService;
+import com.limegroup.gnutella.downloader.IncompleteFileManager;
+import com.limegroup.gnutella.downloader.ManagedDownloader;
+import com.limegroup.gnutella.messages.QueryReply;
+import com.limegroup.gnutella.messages.QueryRequest;
 
 
 public class DownloadManagerStub extends DownloadManager {

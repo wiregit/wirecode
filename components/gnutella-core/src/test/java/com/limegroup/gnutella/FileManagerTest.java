@@ -1,21 +1,28 @@
 package com.limegroup.gnutella;
 
-import com.limegroup.gnutella.stubs.ActivityCallbackStub;
-import com.limegroup.gnutella.util.FileUtils;
-import com.limegroup.gnutella.util.PrivilegedAccessor;
-import com.limegroup.gnutella.util.I18NConvert;
-import junit.framework.*;
+import java.io.File;
+import java.io.FileFilter;
+import java.io.FileOutputStream;
+import java.io.OutputStream;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 
-import com.limegroup.gnutella.settings.*;
+import junit.framework.Test;
+
 import com.limegroup.gnutella.altlocs.AlternateLocation;
-import com.limegroup.gnutella.messages.QueryRequest;
-import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.downloader.VerifyingFile;
-import com.limegroup.gnutella.stubs.SimpleFileManager;
+import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.routing.QueryRouteTable;
-import com.sun.java.util.collections.*;
-import java.io.*;
-import java.net.*;
+import com.limegroup.gnutella.settings.ConnectionSettings;
+import com.limegroup.gnutella.settings.SharingSettings;
+import com.limegroup.gnutella.stubs.ActivityCallbackStub;
+import com.limegroup.gnutella.stubs.SimpleFileManager;
+import com.limegroup.gnutella.util.CommonUtils;
+import com.limegroup.gnutella.util.FileUtils;
+import com.limegroup.gnutella.util.I18NConvert;
+import com.limegroup.gnutella.util.PrivilegedAccessor;
+import com.sun.java.util.collections.HashSet;
+import com.sun.java.util.collections.Set;
 
 public class FileManagerTest extends com.limegroup.gnutella.util.BaseTestCase {
 

@@ -1,11 +1,15 @@
 package com.limegroup.gnutella.filters;
 
-import junit.framework.*;
-import com.limegroup.gnutella.util.PrivilegedAccessor;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+
+import junit.framework.Test;
+
+import com.limegroup.gnutella.GUID;
+import com.limegroup.gnutella.Response;
+import com.limegroup.gnutella.messages.Message;
+import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.util.BaseTestCase;
-import com.limegroup.gnutella.messages.*;
-import com.limegroup.gnutella.*;
-import java.io.*;
 
 /**
  * Unit tests for SpamReplyFilter

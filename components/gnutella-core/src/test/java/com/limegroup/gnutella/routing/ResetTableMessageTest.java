@@ -1,12 +1,13 @@
 package com.limegroup.gnutella.routing;
 
-import junit.framework.*;
-import com.limegroup.gnutella.util.PrivilegedAccessor;
-import com.limegroup.gnutella.util.BaseTestCase;
-import com.sun.java.util.collections.*;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
 
-import com.limegroup.gnutella.messages.*;
-import java.io.*;
+import junit.framework.Test;
+
+import com.limegroup.gnutella.messages.Message;
+import com.limegroup.gnutella.util.BaseTestCase;
 
 /**
  * Unit tests for ResetTableMessage

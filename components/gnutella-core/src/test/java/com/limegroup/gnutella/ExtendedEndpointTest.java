@@ -1,9 +1,11 @@
 package com.limegroup.gnutella;
 
-import junit.framework.*;
-import java.io.*;
-import java.text.ParseException;
-import com.sun.java.util.collections.*;
+import java.io.StringWriter;
+
+import junit.framework.Test;
+
+import com.sun.java.util.collections.Comparator;
+import com.sun.java.util.collections.Iterator;
 
 /**
  * Unit tests for ExtendedEndpoint.

@@ -1,14 +1,11 @@
 package com.limegroup.gnutella;
 
-import com.sun.java.util.collections.*;
-import com.limegroup.gnutella.*;
-import com.limegroup.gnutella.http.*;
-import com.limegroup.gnutella.util.CommonUtils;
-import junit.framework.*;
-import junit.extensions.*;
-import java.io.*;
-import java.util.Date;
-import java.net.*;
+import java.net.URL;
+
+import junit.framework.Test;
+
+import com.sun.java.util.collections.HashSet;
+import com.sun.java.util.collections.Set;
 
 /**
  * This class tests the methods of the <tt>RemoteFileDesc</tt> class.

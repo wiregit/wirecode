@@ -1,17 +1,21 @@
 package com.limegroup.gnutella.search;
 
-import com.limegroup.gnutella.util.*;
-import com.limegroup.gnutella.stubs.*;
-import com.limegroup.gnutella.xml.*;
-import com.limegroup.gnutella.search.*;
-import com.limegroup.gnutella.messages.*;
-import com.limegroup.gnutella.security.*;
-import com.limegroup.gnutella.*;
-import java.util.Properties;
-import java.util.StringTokenizer;
-import com.sun.java.util.collections.*;
-import java.lang.reflect.*;
-import junit.framework.*;
+import java.lang.reflect.Method;
+
+import junit.framework.Test;
+
+import com.limegroup.gnutella.RouterService;
+import com.limegroup.gnutella.messages.QueryRequest;
+import com.limegroup.gnutella.stubs.ActivityCallbackStub;
+import com.limegroup.gnutella.util.BaseTestCase;
+import com.limegroup.gnutella.util.NewConnection;
+import com.limegroup.gnutella.util.OldConnection;
+import com.limegroup.gnutella.util.PrivilegedAccessor;
+import com.limegroup.gnutella.util.TestConnection;
+import com.limegroup.gnutella.util.TestResultCounter;
+import com.sun.java.util.collections.Iterator;
+import com.sun.java.util.collections.LinkedList;
+import com.sun.java.util.collections.List;
 
 
 /**

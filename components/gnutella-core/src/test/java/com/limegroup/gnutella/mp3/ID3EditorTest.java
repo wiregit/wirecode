@@ -1,9 +1,9 @@
 package com.limegroup.gnutella.mp3;
 
-import junit.framework.*;
-import com.limegroup.gnutella.util.PrivilegedAccessor;
+import junit.framework.Test;
+
 import com.limegroup.gnutella.util.BaseTestCase;
-import com.sun.java.util.collections.*;
+import com.limegroup.gnutella.util.PrivilegedAccessor;
 
 /**
  * Unit tests for ID3Editor

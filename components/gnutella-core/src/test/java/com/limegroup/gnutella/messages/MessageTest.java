@@ -1,9 +1,10 @@
 package com.limegroup.gnutella.messages;
 
-import junit.framework.*;
-import com.limegroup.gnutella.*;
-import com.sun.java.util.collections.*;
-import java.io.*;
+import java.io.ByteArrayInputStream;
+
+import junit.framework.Test;
+
+import com.limegroup.gnutella.GUID;
 
 public class MessageTest extends com.limegroup.gnutella.util.BaseTestCase {
     
