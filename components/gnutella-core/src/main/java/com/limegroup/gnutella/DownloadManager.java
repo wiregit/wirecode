@@ -318,15 +318,22 @@ public class DownloadManager implements BandwidthTracker {
                     toGet[0] = (RemoteFileDesc) toDL.get(i);
                     try {
                         getFiles(toGet, false);
+                        add.commitDownload(toGet[0]);
                     }
                     catch (AlreadyDownloadingException ade) {
                         // not too much of a surprise, defn. possible...
+                        debug(ade);
+                        add.removeDownload(toGet[0]);
                     }
                     catch (FileExistsException fee) {
                         // yeah, don't dl a file if the user has it already...
+                        debug(fee);
+                        add.removeDownload(toGet[0]);
                     }
                     catch (java.io.FileNotFoundException fnfe) {
                         // i guess the RFD expired....
+                        debug(fnfe);
+                        add.removeDownload(toGet[0]);
                     }
                 }
             }

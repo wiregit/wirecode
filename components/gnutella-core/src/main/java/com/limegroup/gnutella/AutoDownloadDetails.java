@@ -28,7 +28,7 @@ class AutoDownloadDetails {
     /** the precision that the matcher uses for comparing candidates to RFDs
      *  that have already been accepted for download....
      */
-    private float MATCH_PRECISION_DL = 0.35f;
+    private float MATCH_PRECISION_DL = 0.45f;
 
     static {
         matcher.setIgnoreCase(true);
@@ -40,6 +40,9 @@ class AutoDownloadDetails {
     // don't auto dl any more than this number of files....
     public static final int MAX_DOWNLOADS = 5;
     
+    // keeps track of committed downloads....
+    private int committedDLs = 0;
+
     /**
      * @param inQuery the standard query string associated with this query.
      * @param inRichQuery the rich query associated with this string.
@@ -76,17 +79,30 @@ class AutoDownloadDetails {
         
         // if this hasn't become expired....
         if (!expired()) {
+            final String inputFileName = toAdd.getFileName();
+
+            // make sure the file ext is legit....
+            if ((type != null) && !(type.matches(inputFileName))) {
+                retVal = false;
+                debug("ADD.addDownload(): file " +
+                      inputFileName + " isn't the right type.");
+            }
+
 
             // see if it compares to any other file already being DLed....
-            if (dlList.size() > 0) {
-                final String inputFileName = toAdd.getFileName();
+            if (retVal && (dlList.size() > 0)) {
                 for (int i = 0; i < dlList.size(); i++) {
                     RemoteFileDesc currRFD = (RemoteFileDesc) dlList.get(i);
                     String currFileName = currRFD.getFileName();
+                    boolean doesMatch = false;
                     synchronized (matcher) {
-                        if (matcher.matches(inputFileName, currFileName,
-                                            MATCH_PRECISION_DL))
-                            retVal = false;
+                        doesMatch = matcher.matches(inputFileName, currFileName,
+                                                    MATCH_PRECISION_DL);
+                    }
+                    if (doesMatch) {
+                        retVal = false;
+                        debug("ADD.addDownload(): conflict for file " +
+                              inputFileName + " and " + currFileName);
                     }
                     // oops, we have already accepted that file for DL, don't
                     // add it and break out of this costly loop....
@@ -103,15 +119,43 @@ class AutoDownloadDetails {
         
         return retVal;
     }
-    
+
+    /** Removes the input RFD from the list.  Use this if the DL failed and
+     *  you want to back it out....
+     */
+    public synchronized void removeDownload(RemoteFileDesc toRemove) {
+        dlList.remove(toRemove);
+    }
+
+    /** Call this when the DL was 'successful'.
+     */
+    public synchronized void commitDownload(RemoteFileDesc toCommit) {
+        if (dlList.contains(toCommit))
+            committedDLs++;
+    }
+
     /** @return true when the AutoDownload process is complete.
      */
     public boolean expired() {
         boolean retVal = false;
-        if (dlList.size() >= MAX_DOWNLOADS)
+        if (committedDLs >= MAX_DOWNLOADS)
             retVal = true;
         return retVal;
     }
+
+
+    private static final boolean debugOn = false;
+    private static void debug(String out) {
+        if (debugOn)
+            System.out.println(out);
+    }
+    private static void debug(Exception e) {
+        if (debugOn)
+            e.printStackTrace();
+    }
+
+    
+
     
     
 }
