@@ -19,7 +19,8 @@ import java.net.*;
  *   <li>Try normal downloads from all locations that are not private and
  *       do not have the push flag set.  Try these one at a time, from
  *       fastest to slowest.  If disconnected during a download, resume
- *       immediately, though not more than 3 times.
+ *       immediately from host with smallest estimated download time.
+ *       Repeat until only busy hosts remain.
  *   <li>Send push requests to any N hosts that we weren't reached above,
  *       in parallel.  N is currently 6, but typically fewer pushes are
  *       typically sent.  If N is small, this could be prioritized too.
@@ -34,30 +35,27 @@ import java.net.*;
  * signal from a host.
  */
 public class ManagedDownloader implements Downloader {
-    /*******************************************************************
+    /*********************************************************************
      *                     General Implementation Notes
      *
      * The policy above is implemented with the following call graph:
      *                    ManagedDownloadRunner.run()
-     *                   /            |             \
+     *                               |
+     *                       __ tryAllDownloads __
+     *                      /         |           \   
      *     tryNormalDownloads      sendPushes      waitForPushDownloads
      *       /           \
      *   removeBest   downloadWithResume
      *
-     * LOCKING: obtain this's monitor before modifying any of these.
-     *******************************************************************/
+     * LOCKING: obtain this's monitor before modifying any of the following.
+     ***********************************************************************/
 
     /** This' manager for callbacks and queueing. */
     private DownloadManager manager;
     /** The repository of incomplete files. */
     private IncompleteFileManager incompleteFileManager=new IncompleteFileManager();
-    /** The files to get, each represented by a RemoteFileDesc.
-     *  INVARIANT: files is sorted by priority.
-     *  LOCKING: obtain this' monitor */
-    private List /* RemoteFileDesc */ files;
-    /** The files to get by pushes, each represented by a RFDPushPair.
-     *  These are not sorted.  They contain former members of files. */
-    private List /* of RFDPushPair */ pushFiles;
+    /** The complete list of files passed to the constructor. */
+    private RemoteFileDesc[] allFiles;
 
     ///////////////////////// Policy Controls ///////////////////////////
     /** The number of tries to make */
@@ -89,6 +87,13 @@ public class ManagedDownloader implements Downloader {
 
 
     ////////////////////////// Core Variables /////////////////////////////
+    /** The files to get, each represented by a RemoteFileDesc.
+     *  INVARIANT: files is sorted by priority.
+     *  LOCKING: obtain this' monitor */
+    private List /* RemoteFileDesc */ files;
+    /** The files to get by pushes, each represented by a RFDPushPair.
+     *  These are not sorted.  They contain former members of files. */
+    private List /* of RFDPushPair */ pushFiles;
     /** If started, the thread trying to do the downloads.  Otherwise null. */
     private Thread dloaderThread=null;
     /** The connection we're using for the current attempt, or last attempt if
@@ -129,15 +134,24 @@ public class ManagedDownloader implements Downloader {
      */
     public ManagedDownloader(DownloadManager manager, RemoteFileDesc[] files) {
         this.manager=manager;
+        this.allFiles=files;
+        initialize();
+    }
 
+    /** 
+     * (Re)initializes and (re)starts this.  
+     *     @requires this is uninitialized or stopped.
+     *     @modifies files, pushFiles, dloaderThread, state, stopped
+     */
+    private void initialize() {
         //Sort files by size and store in this.files and this.pushFiles.  Note
         //that Arrays.sort(..)  sorts in ASCENDING order, so we iterate through
         //the array backwards.
-        Arrays.sort(files, new RemoteFileDesc.RemoteFileDescComparator());
+        Arrays.sort(allFiles, new RemoteFileDesc.RemoteFileDescComparator());
         this.files=new LinkedList();
         this.pushFiles=new LinkedList();
-        for (int i=files.length-1; i>=0; i--) {
-            RemoteFileDesc rfd=files[i];
+        for (int i=allFiles.length-1; i>=0; i--) {
+            RemoteFileDesc rfd=allFiles[i];
             //As an optimization, we can skip normal download attempts
             //from private IP addresses.  If the host is on the same
             //private network as us, a push download should work anyway.
@@ -146,13 +160,14 @@ public class ManagedDownloader implements Downloader {
             if (isPrivate(rfd))
                 this.pushFiles.add(new RFDPushPair(rfd));
             else                
-                this.files.add(files[i]);
+                this.files.add(rfd);
         }
 
+        stopped=false;
         setState(QUEUED);
         this.dloaderThread=new Thread(new ManagedDownloadRunner());
         dloaderThread.setDaemon(true);
-        dloaderThread.start();
+        dloaderThread.start();       
     }
 
     /**
@@ -195,6 +210,8 @@ public class ManagedDownloader implements Downloader {
             file, socket, index, clientGUID,
             incompleteFileManager.getFile(file, index, clientGUID));
         synchronized (this) {
+            //If stopped or stopping, don't add this or it may not be cleaned
+            //up.
             if (stopped) {
                 downloader.stop();
                 return false;
@@ -223,70 +240,67 @@ public class ManagedDownloader implements Downloader {
             dloaderThread.interrupt();
     }
 
+    public synchronized void resume() {
+        //It's not strictly necessary to check all these states, but it can't
+        //hurt.
+        if (! (state==WAITING_FOR_RETRY || state==GAVE_UP))
+            return;
+
+        if (stopped) {
+            //This stopped because all hosts were tried.  (Note that this
+            //couldn't have been user aborted.)  Therefore no threads are
+            //running in this and it may be safely resumed.
+            initialize();
+        } else {
+            //The current download is only affected if waiting to retry--which
+            //is exactly what we want.
+            if (dloaderThread!=null)
+                dloaderThread.interrupt();
+        }
+    }
+
     /** Actually does the download. */
     private class ManagedDownloadRunner implements Runnable {
         public void run() {
-            //Many policies are possible.  This is just one. The great
-            //simplification is that incoming push downloads are only accepted
-            //while waiting to retry.  Otherwise they are queued and handled
-            //later.
             try {
-                boolean success;
+                //Until there are no more downloads left to try...
                 for (int i=0; i<TRIES && !stopped; i++) {
                     synchronized (ManagedDownloader.this) {
                         ManagedDownloader.this.tries=i;
                     }
 
-                    //Nothing left to do?
-                    if (files.size()==0 && pushFiles.size()==0)
-                        break;
-
-                    //1. TRY ALL NORMAL DOWNLOADS FIRST.  Note that this
-                    //modifies files and pushFiles.  Exit if success.
-                    success=tryNormalDownloads();
-                    if (success) {
-                        manager.remove(ManagedDownloader.this, true);
-                        return;
-                    }
-
-                    //Nothing left to do?  This happens when tryNormalDownloads
-                    //removes element from files without adding it to pushFiles.
-                    if (files.size()==0 && pushFiles.size()==0)
-                        break;
-
-                    //2. SEND PUSHES FOR THOSE HOSTS THAT WE COULDN'T CONNECT TO.
-                    sendPushes();
-
-                    //3. WAIT A WHILE BEFORE RETRYING.  ACCEPT ANY PUSHES.
-                    success=waitForPushDownloads();
-                    if (success) {
-                        manager.remove(ManagedDownloader.this, true);
-                        return;
-                    }
-
-                    //Increment push attempts and purge ones that have been
-                    //attempted too much.  This used to be done during
-                    //sendPushes, but it made the getPushesWaiting method harder
-                    //to implement.
-                    synchronized (ManagedDownloader.this) {
-                        for (Iterator iter=pushFiles.iterator();
-                                iter.hasNext(); ) {
-                            RFDPushPair pair=(RFDPushPair)iter.next();
-                            pair.pushAttempts++;
-                            if (pair.pushAttempts>=PUSH_TRIES)
-                                iter.remove();   //can't call pushFiles.remove(..)
+                    try {
+                        int success=tryAllDownloads();
+                        if (success==1) {
+                            //a) Success!
+                            manager.remove(ManagedDownloader.this, true);
+                            return;
+                        } else if (success==-1) {
+                            //b) No more files to try
+                            break;
+                        } else {
+                            //c) No success, but try again
+                        }
+                    } catch (InterruptedException e) {
+                        if (stopped) {
+                            //d) Aborted by user
+                            break;
+                        } else {
+                            //e) Manually restarted (resumed) by user
                         }
                     }
                 }
-                //We've failed.  Notify my manager.
-                setState(GAVE_UP);
-                manager.remove(ManagedDownloader.this, false);
-            } catch (InterruptedException e) {
-                //We've been stopped.  Remove this self from active queue or
-                //waiting set.
-                setState(ABORTED);
-                manager.remove(ManagedDownloader.this, false);
-                return;
+
+                if (stopped) {
+                    //We've been aborted.  Remove this self from active queue or
+                    //waiting set.
+                    setState(ABORTED);
+                    manager.remove(ManagedDownloader.this, false);
+                } else {                  
+                    //Gave up.  No more files or exceeded tries.
+                    setState(GAVE_UP);
+                    manager.remove(ManagedDownloader.this, false);
+                }
             } finally {
                 //Clean up any queued push downloads.  Also clean up dloader if
                 //still existing.  This isn't needed if an IOException thrown by
@@ -301,6 +315,62 @@ public class ManagedDownloader implements Downloader {
                 }
             }
         }
+
+
+        /**
+         * Tries one round of downloads from all locations.  Returns 1 if a file
+         * was successfully downloaded.  Returns 0 if no file was downloaded,
+         * but it makes sense to try again later, either because there are busy
+         * hosts or more pushes to send.  Returns -1 if there are no more
+         * locations to try.  Throws InterruptedException if the user resume()'s
+         * or stop()'s this.<p>
+         *
+         * Many policies are possible.  The current one is to first try to
+         * download from all non-private locations, resuming as necessary until
+         * only busy hosts remain.  Then send a round of pushes and waits for
+         * results.  (This also serves as retries.)  
+         */
+        private int tryAllDownloads() throws InterruptedException {
+            //Nothing left to do?
+            if (files.size()==0 && pushFiles.size()==0)
+                return -1;
+
+            //1. TRY ALL NORMAL DOWNLOADS FIRST.  Note that this
+            //modifies files and pushFiles.  Exit if success.
+            boolean success=tryNormalDownloads();
+            if (success)
+                return 1;
+            
+            //Nothing left to do?  This happens when tryNormalDownloads
+            //removes element from files without adding it to pushFiles.
+            if (files.size()==0 && pushFiles.size()==0)
+                return -1;
+
+            //2. SEND PUSHES FOR THOSE HOSTS THAT WE COULDN'T CONNECT TO.
+            sendPushes();
+
+            //3. WAIT A WHILE BEFORE RETRYING.  ACCEPT ANY PUSHES.
+            success=waitForPushDownloads();
+            if (success) 
+                return 1;
+
+            //Increment push attempts and purge ones that have been
+            //attempted too much.  This used to be done during
+            //sendPushes, but it made the getPushesWaiting method harder
+            //to implement.
+            synchronized (ManagedDownloader.this) {
+                for (Iterator iter=pushFiles.iterator();
+                     iter.hasNext(); ) {
+                    RFDPushPair pair=(RFDPushPair)iter.next();
+                    pair.pushAttempts++;
+                    if (pair.pushAttempts>=PUSH_TRIES)
+                        iter.remove();   //can't call pushFiles.remove(..)
+                }
+            }
+
+            return 0;
+        }
+
 
         /** Tries download from all locations.  Blocks waiting for a download
          *  slot first.  Returns true iff a location succeeded.  Throws
@@ -454,7 +524,7 @@ public class ManagedDownloader implements Downloader {
         /** Waits at least WAIT_TIME milliseconds.  If any push downloads come in,
          * handle them, acquiring a download slot first.  Return true if one of
          * these downloads is successful.  Throws InterruptedException if a call
-         * to stop() is detected. */
+         * to stop() or resume() is detected. */
         private boolean waitForPushDownloads()
                  throws InterruptedException {
             Date start=new Date();

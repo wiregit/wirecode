@@ -16,18 +16,18 @@ public interface Downloader {
     public static final int ABORTED           = 5;
     public static final int GAVE_UP           = 6;
 
-//      /**
-//       * Attempts to restart this.  If the download is already in progress, does
-//       * nothing.  Non-blocking.
-//       *     @modifies this
-//       */     
-//      public void resume();
-
     /**
      * Stops this.  If the download is already stopped, does nothing.
      *     @modifies this
      */
     public void stop();
+
+    /**
+     * Resumes this.  If the download is GAVE_UP, tries all locations again.  If
+     * WAITING_FOR_RETRY, forces the retry immediately.  Otherwise does nothing.  
+     *     @modifies this
+     */
+    public void resume();
 
     /**
      * Returns the state of this: one of QUEUED, CONNECTING, DOWNLOADING,
