@@ -21,6 +21,10 @@ import com.sun.java.util.collections.*;
 public class SmartDownloader extends HTTPDownloader {
 
 	private RemoteFileDesc[] _remoteFiles;  // the array of connectionss
+	private boolean _keepTrying;  // will be used to no longer continue 
+	                              // trying other hosts 
+
+
 
 	public SmartDownloader(MessageRouter router,  RemoteFileDesc[] files,
 						   Acceptor acceptor, ActivityCallback callback) {
@@ -37,6 +41,7 @@ public class SmartDownloader extends HTTPDownloader {
 		_downloadDir = "";
 		_stateString = "";
 		_smartDownload = true;
+		_keepTrying = true;
 	}
 
 	public void run() {
@@ -66,7 +71,7 @@ public class SmartDownloader extends HTTPDownloader {
 		
 		int counter = 0;
 
-		while (counter < numFiles) {
+		while( (counter < numFiles) && (_keepTrying) ) {
 
 			/* get each possible file and host */
 			file = _remoteFiles[counter];
@@ -111,6 +116,17 @@ public class SmartDownloader extends HTTPDownloader {
 			
 		
 		
+	}
+
+	/**
+	 * This method overwrites the super class's shutdown
+	 * method.  The sole addition is of the _keepTrying
+	 * variable, that will break  us out of the while loop
+	 * in the tryHost method
+	 */
+	public void shutdown() {
+		super.shutdown();
+		_keepTrying = false;
 	}
 
 }
