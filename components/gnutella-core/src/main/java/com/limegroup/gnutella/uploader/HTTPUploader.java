@@ -235,7 +235,7 @@ public class HTTPUploader implements Uploader {
 		}
 		try {
 			readHeader();
-			_state.doUpload(this);
+			_state.doUpload(this);		   
 		} catch (FreeloaderUploadingException e) { 
 			setState(FREELOADER);
 			try {
@@ -244,6 +244,10 @@ public class HTTPUploader implements Uploader {
 		} catch (IOException e) {
 			setState(INTERRUPTED);
 		}
+		// this is necessary to avoid writing the same alternate
+		// locations back to the requester as they sent in their
+		// original headers
+		_fileDesc.commitTemporaryAlternateLocations();
 	}
 
     /**
@@ -624,7 +628,7 @@ public class HTTPUploader implements Uploader {
 			// just return without adding it.
 			return;
 		}
-		FILE_DESC.addAlternateLocation(al);
+		FILE_DESC.addTemporaryAlternateLocation(al);
 	}
 
 	/**
