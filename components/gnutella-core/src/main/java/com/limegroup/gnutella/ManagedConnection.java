@@ -635,34 +635,34 @@ public class ManagedConnection extends Connection
         //thread in this case?
 
         try {
-        //The first message we get from the remote host should be its initial
-        //ping.  However, some clients may start forwarding packets on the
-        //connection before they send the ping.  Hence the following loop.  The
-        //limit of 10 iterations guarantees that this method will not run for
-        //more than TIMEOUT*10=80 seconds.  Thankfully this happens rarely.
-        for (int i=0; i<10; i++) {
-            Message m=null;
-            try {                
-                m=super.receive(REJECT_TIMEOUT);
-                if (m==null)
-                    return; //Timeout has occured and we havent received the ping,
-                            //so just return
-            }// end of try for BadPacketEception from socket
-            catch (BadPacketException e) {
-                return; //Its a bad packet, just return
-            }
-            if((m instanceof PingRequest) && (m.getHops()==0)) {
-                // this is the only kind of message we will deal with
-                // in Reject Connection
-                // If any other kind of message comes in we drop
-              
-                //SPECIAL CASE: for crawler ping
-                if(m.getTTL() == 2) {
-                    handleCrawlerPing((PingRequest)m);
-                    return;
-                }
-            }// end of (if m is PingRequest)
-        } // End of while(true)
+			//The first message we get from the remote host should be its initial
+			//ping.  However, some clients may start forwarding packets on the
+			//connection before they send the ping.  Hence the following loop.  The
+			//limit of 10 iterations guarantees that this method will not run for
+			//more than TIMEOUT*10=80 seconds.  Thankfully this happens rarely.
+			for (int i=0; i<10; i++) {
+				Message m=null;
+				try {                
+					m=super.receive(REJECT_TIMEOUT);
+					if (m==null)
+						return; //Timeout has occured and we havent received the ping,
+					//so just return
+				}// end of try for BadPacketEception from socket
+				catch (BadPacketException e) {
+					return; //Its a bad packet, just return
+				}
+				if((m instanceof PingRequest) && (m.getHops()==0)) {
+					// this is the only kind of message we will deal with
+					// in Reject Connection
+					// If any other kind of message comes in we drop
+					
+					//SPECIAL CASE: for crawler ping
+					if(m.getTTL() == 2) {
+						handleCrawlerPing((PingRequest)m);
+						return;
+					}
+				}// end of (if m is PingRequest)
+			} // End of while(true)
         } catch (IOException e) {
         } finally {
             close();
