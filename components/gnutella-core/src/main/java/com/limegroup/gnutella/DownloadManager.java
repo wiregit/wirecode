@@ -91,10 +91,8 @@ public class DownloadManager implements BandwidthTracker {
     /**
      * Performs the slow, low-priority initialization tasks: reading in
      * snapshots and scheduling snapshot checkpointing.
-     *     @param backend provides the schedule(..) method for checkpointing 
-     *      downloads.dat
      */
-    public void postGuiInit(RouterService backend) {
+    public void postGuiInit() {
         readSnapshot(SettingsManager.instance().getDownloadSnapshotFile());
         Runnable checkpointer=new Runnable() {
             public void run() {
@@ -102,9 +100,9 @@ public class DownloadManager implements BandwidthTracker {
                     writeSnapshot();
             }
         };
-        backend.schedule(checkpointer, 
-                         SNAPSHOT_CHECKPOINT_TIME, 
-                         SNAPSHOT_CHECKPOINT_TIME);
+        RouterService.instance().schedule(checkpointer, 
+										  SNAPSHOT_CHECKPOINT_TIME, 
+										  SNAPSHOT_CHECKPOINT_TIME);
     }
 
     public synchronized int downloadsInProgress() {
