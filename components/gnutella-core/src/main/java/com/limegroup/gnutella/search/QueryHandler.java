@@ -215,14 +215,14 @@ public final class QueryHandler {
 		long sysTime = System.currentTimeMillis();
 		if(sysTime < _nextQueryTime) return;
 
+		List list = CONNECTION_MANAGER.getInitializedConnections2();
+		int length = list.size();
 		if(_queryStartTime == 0) {
 			_queryStartTime = sysTime;
 			sendProbeQuery();
 			return;
 		}
 
-		List list = CONNECTION_MANAGER.getInitializedConnections2();
-		int length = list.size();
 		for(int i=0; i<length; i++) {
 			ManagedConnection mc = (ManagedConnection)list.get(i);			
 			
@@ -277,12 +277,12 @@ public final class QueryHandler {
 	 */
 	private void sendProbeQuery() {
 		System.out.println("QueryHandler::sendProbeQuery"); 
-		List connections = CONNECTION_MANAGER.getInitializedConnections();
+		List connections = CONNECTION_MANAGER.getInitializedConnections2();
 
 		byte ttl = 2;
 		QueryRequest query = createQuery(ttl);
-		int length = connections.size();
-		for(int i=0; i<3; i++) {
+        int limit = Math.min(3, connections.size());
+		for(int i=0; i<limit; i++) {
 			ManagedConnection mc = (ManagedConnection)connections.get(i);
 
 			System.out.println("QueryHandler::sendProbeQuery::to: "+mc+" "+query); 
