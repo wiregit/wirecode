@@ -306,7 +306,9 @@ public final class SearchResultHandler {
         public GUID getGUID() { return _guid; }
         public int getNumResults() { return _numResults; }
         public int getNextReportNum() { return _nextReportNum; }
-        public void tallyReport() { _nextReportNum += REPORT_INTERVAL; }
+        public void tallyReport() { 
+            _nextReportNum = _numResults + REPORT_INTERVAL; 
+        }
 
         public void increment(int incr) { _numResults += incr; }
     }
