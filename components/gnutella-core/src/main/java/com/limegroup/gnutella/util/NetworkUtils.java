@@ -206,7 +206,7 @@ public final class NetworkUtils {
      *
      * @param socket the socket to close
      */
-    public static final void closeSocket(Socket socket) {
+    public static final void close(Socket socket) {
         if(socket == null) return;
         // This is necessary to work around the 1.4 bug where calling 
         // close on a socket does not send a FIN to indicate the 
