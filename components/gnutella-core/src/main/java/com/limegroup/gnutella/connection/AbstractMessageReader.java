@@ -1,10 +1,10 @@
 package com.limegroup.gnutella.connection;
 
-
-import com.limegroup.gnutella.Assert;
+import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.messages.*;
 import com.limegroup.gnutella.messages.vendor.*;
 import com.limegroup.gnutella.routing.*;
+import com.limegroup.gnutella.statistics.*;
 import com.limegroup.gnutella.statistics.ReceivedErrorStat;
 import com.limegroup.gnutella.util.CommonUtils;
 
@@ -48,6 +48,22 @@ public abstract class AbstractMessageReader implements MessageReader {
      * Constant for whether or not to record stats.
      */
     protected static final boolean RECORD_STATS = !CommonUtils.isJava118();
+
+    /**
+     * Constant for the <tt>Connection</tt> instance that this reader
+     * reads for.
+     */
+    protected final Connection CONNECTION;
+
+    /**
+     * Protected constructor that sets the connection this reader is 
+     * associated with.
+     *
+     * @param conn the <tt>Connection</tt> this reader will read for
+     */
+    protected AbstractMessageReader(Connection conn) {
+        CONNECTION = conn;
+    }
 
     /**
      * Utility method for checking the fields in incoming messages for validity.
@@ -162,4 +178,29 @@ public abstract class AbstractMessageReader implements MessageReader {
         throw new BadPacketException("Unrecognized function code: "+func);
     }
 
+    /**
+     * Routes messages read from the wire for both blocking and non-blocking
+     * TCP traffic.
+     *
+     * @param msg the <tt>Message</tt> instance read from the network
+     */
+    public void routeMessage(Message msg) {
+        if(msg == null) {
+            throw new NullPointerException("message is null");
+        }
+        CONNECTION.stats().addReceived();
+        
+        // Run through the route spam filter and drop accordingly.
+        if (CONNECTION.isSpam(msg)) {
+            if(!CommonUtils.isJava118()) {
+                ReceivedMessageStatHandler.TCP_FILTERED_MESSAGES.
+                    addMessage(msg);
+            }
+            CONNECTION.stats().countDroppedMessage();
+        } else {
+        
+            // call MessageRouter to handle and process the message
+            RouterService.getMessageRouter().handleMessage(msg, CONNECTION);
+        }
+    }
 }
