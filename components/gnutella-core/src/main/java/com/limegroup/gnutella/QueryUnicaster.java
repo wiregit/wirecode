@@ -193,8 +193,10 @@ public final class QueryUnicaster {
 
 
     /** @return true if the query was added (maybe false if it existed).
+     *  @param query The Query to add, to start unicasting.
+     *  @param reference The originating connection.  OK if NULL.
      */
-    public boolean addQuery(QueryRequest query) {
+    public boolean addQuery(QueryRequest query, ReplyHandler reference) {
         debug("QueryUnicaster.addQuery(): entered.");
         boolean retBool = false;
         GUID guid = new GUID(query.getGUID());

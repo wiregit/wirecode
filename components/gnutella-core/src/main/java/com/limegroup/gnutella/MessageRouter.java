@@ -407,8 +407,9 @@ public abstract class MessageRouter
 		// if it's a request from a leaf, send it out via GUESS --
 		// otherwise, broadcast it if it still has TTL
 		if(handler.isSupernodeClientConnection()) {
-			unicastQueryRequest(request);
-		} else if(request.getTTL() > 0) {
+			unicastQueryRequest(request, handler);
+		} 
+        else if(request.getTTL() > 0) {
 			broadcastQueryRequest(request, handler);
 		}
 			
@@ -458,7 +459,7 @@ public abstract class MessageRouter
     {
         _queryRouteTable.routeReply(request.getGUID(), _forMeReplyHandler);
         if (RouterService.isGUESSCapable()) {
-            unicastQueryRequest(request);
+            unicastQueryRequest(request, null);
 		} else {
             broadcastQueryRequest(request, null);
 		}
@@ -535,11 +536,12 @@ public abstract class MessageRouter
      * Adds the QueryRequest to the unicaster module.  Not much work done here,
      * see QueryUnicaster for more details.
      */
-    protected synchronized void unicastQueryRequest(final QueryRequest query) {
+    protected synchronized void unicastQueryRequest(QueryRequest query,
+                                                    ReplyHandler conn) {
 		// set the TTL on outgoing udp queries to 1
 		query.setTTL((byte)1);
 				
-		UNICASTER.addQuery(query);
+		UNICASTER.addQuery(query, conn);
 	}
 
 
