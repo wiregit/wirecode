@@ -219,7 +219,7 @@ public class UploadManager implements BandwidthTracker {
         // handles it internally.  is this the correct
         // way to handle it?
         startTime=System.currentTimeMillis();
-        uploader.startUpload();
+        uploader.start();
         // check the state of the upload once the
         // start method has finished.  if it is complete...
         if (uploader.getState() == Uploader.COMPLETE)
