@@ -6,6 +6,7 @@ import com.limegroup.gnutella.ErrorService;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.statistics.*;
 import com.sun.java.util.collections.*;
+import com.limegroup.gnutella.simpp.*;
 
 /** 
  * The message that lets other know what capabilities you support.  Everytime 
@@ -14,21 +15,38 @@ import com.sun.java.util.collections.*;
  */
 public final class CapabilitiesVM extends VendorMessage {
 
-    /** Bytes for 'WHAT'.
+    /** Bytes for Feature search the first flavor of which is called 'WHAT'
      */
-    private static final byte[] CAPABILITY_BYTES = {(byte)87, (byte)72,
+    private static final byte[] FEATURE_SEARCH_BYTES = {(byte)87, (byte)72,
                                                       (byte)65, (byte)84};
     /**
      *  This value can change - it is the version number of the highest 
-     *  Capability (currently 'What Is New?') query we support.
+     *  Feature Search Capability -- for now 1 for What is new
      */
-    public static final int CAPABILITY_MAX_SELECTOR = 1;
-    
+    public static final int FEATURE_SEARCH_MAX_SELECTOR = 1;
+
+    /**
+     *  The selector currently 'What Is New?' query we support. This will NEVER
+     *  change
+     */
+    public static final int WHAT_FEATURE_SEARCH_SELECTOR = 1;
+
     /**
      * This value will NEVER change - this is the version number of the first
-     * Capability query.
+     * Feature query.
      */
-    public  static final int CAPABILITY_MIN_SELECTOR = 1;
+    public  static final int FEATURE_SEARCH_MIN_SELECTOR = 1;
+
+    /**
+     * Bytes for the SIMPP capability 'SIMP'
+     */
+    private static final byte[] SIMPP_CAPABILITY_BYTES = {(byte)83, (byte) 73,
+                                                          (byte)77, (byte)80};
+
+    /**
+     * The version of the latest simpp version this node knows about. 
+     */
+    private int _simppVersion;
 
     public static final int VERSION = 0;
 
@@ -64,6 +82,7 @@ public final class CapabilitiesVM extends VendorMessage {
      */
     private CapabilitiesVM() {
         super(F_NULL_VENDOR_ID, F_CAPABILITIES, VERSION, derivePayload());
+        _simppVersion = SimppManager.instance().getVersion();
         addSupportedMessages(_capabilitiesSupported);
     }
 
@@ -96,8 +115,10 @@ public final class CapabilitiesVM extends VendorMessage {
      */
     private static void addSupportedMessages(Set hashSet) {
         SupportedMessageBlock smp = null;
-        smp = new SupportedMessageBlock(CAPABILITY_BYTES, 
-                                        CAPABILITY_MAX_SELECTOR);
+        smp = new SupportedMessageBlock(FEATURE_SEARCH_BYTES, 
+                                        WHAT_FEATURE_SEARCH_SELECTOR);
+        hashSet.add(smp);
+        smp=new SupportedMessageBlock(SIMPP_CAPABILITIES_BYTES, _simppVersion);
         hashSet.add(smp);
     }
 
@@ -133,8 +154,8 @@ public final class CapabilitiesVM extends VendorMessage {
      *  number gives some indication about what exactly is a supported.  if no
      *  support, returns -1.
      */
-    public int supportsCapabilityQueries() {
-        return supportsCapability(CAPABILITY_BYTES);
+    public int supportsFeatureQueries() {
+        return supportsCapability(FEATURE_SEARCH_BYTES);
     }
     
 
