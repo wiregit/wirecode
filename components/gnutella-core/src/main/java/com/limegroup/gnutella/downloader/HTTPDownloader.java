@@ -244,6 +244,9 @@ public class HTTPDownloader implements Runnable {
         }
         catch (IOException e) {
 
+			//  There appears to be a delay in going to Push here so preset it
+            _state    = REQUESTING;
+
             // Handle immediate error cases
             String str=conn.getHeaderField(0);
             if ( str != null && str.indexOf(" 404 ") > 0 )
@@ -410,6 +413,10 @@ public class HTTPDownloader implements Runnable {
     }
 
     public void doDownload() {
+
+        if ( _wasShutdown )
+            return;
+
         readHeader();
         if ( _state == ERROR )
             return;
@@ -553,7 +560,8 @@ public class HTTPDownloader implements Runnable {
                 break;
 
             // Handle a 503 error from Gnotella
-            if ( lineNumber == 0 && str.equals("3") )
+            if ( lineNumber == 0 && 
+			 (str.equals("3") || str.startsWith("3 Upload limit reached")) )
             {
                 _stateString = "Try Again Later";
                 _state = ERROR;
@@ -582,8 +590,6 @@ public class HTTPDownloader implements Runnable {
             }
 
             if (str.toUpperCase().indexOf("CONTENT-RANGE:") != -1) {
-    //          System.out.println("Content-range line:");
-    //          System.out.println(str);
                 _resume = true;
                 foundLength = true;
             }
