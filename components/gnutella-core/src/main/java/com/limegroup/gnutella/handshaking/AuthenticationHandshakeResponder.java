@@ -274,7 +274,9 @@ public abstract class AuthenticationHandshakeResponder
         StringBuffer hostString = new StringBuffer();
         boolean isFirstHost = true;
         //get the connected supernodes and pass them
-        for(Iterator iter = manager.getNormalHosts(10);iter.hasNext();){
+        for(Iterator iter = 
+				RouterService.getHostCatcher().getNormalHosts(10);
+			iter.hasNext();) {
             //get the next endpoint
             Endpoint endpoint =(Endpoint)iter.next();
             //if the first endpoint that we are adding
