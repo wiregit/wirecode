@@ -66,7 +66,10 @@ public abstract class SpamFilter {
         Vector /* of SpamFilter */ buf=new Vector();
 
         //1. Eliminate old LimeWire requeries.
-        buf.add(new RequeryFilter());
+        buf.add(new RequeryFilter());        
+
+        //1b. Eliminate runaway Qtrax queries.
+        buf.add(new GUIDFilter());
 
         //2. Duplicate-based techniques.
         if (settings.getFilterDuplicates())

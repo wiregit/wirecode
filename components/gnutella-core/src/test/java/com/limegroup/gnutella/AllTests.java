@@ -11,6 +11,7 @@ public class AllTests {
         TestSuite suite=new TestSuite("All LimeWire tests");
         suite.addTest(com.limegroup.gnutella.messages.AllTests.suite());
         suite.addTest(com.limegroup.gnutella.util.AllTests.suite());
+        suite.addTest(com.limegroup.gnutella.filters.AllTests.suite());
         suite.addTest(ExtendedEndpointTest.suite());
         suite.addTest(HostCatcherTest.suite());
         suite.addTest(FileManagerTest.suite());
