@@ -136,7 +136,7 @@ public class DuplicateFilterTest extends BaseTestCase {
             "<audios xsi:noNamespaceSchemaLocation=" +
             "\"http://www.limewire.com/schemas/audio.xsd\">" +
             "<audio title=\"sam\" artist=\"sam's choir\"></audio></audios>");        
-        //same XML, not allowed.
+        //same XML and plain-text, not allowed.
         assertTrue(!filter.allow(qr));
     }
     
