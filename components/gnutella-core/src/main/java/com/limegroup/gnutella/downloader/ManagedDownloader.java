@@ -236,6 +236,8 @@ public class ManagedDownloader implements Downloader, Serializable {
     /** List of RemoteFileDesc to which we actively connect and request parts
      * of the file.*/
     private List /*of RemoteFileDesc */ files;
+	
+	private AlternateLocationCollection totalAlternateLocations; //AAAAA
     
     ////////////////datastructures used only for pushes//////////////
     /** MiniRemoteFileDesc -> Object. 
@@ -921,6 +923,30 @@ public class ManagedDownloader implements Downloader, Serializable {
             return COULDNT_MOVE_TO_LIBRARY;
         }           
 
+//AAAAA
+		// Prepare a fresh set of alternate locations for these file
+		totalAlternateLocations = new AlternateLocationCollection(); 
+		RemoteFileDesc tempRFD;
+		String rfdStr;
+		URL    rfdURL;
+        synchronized (this) {
+            for (Iterator iter=files.iterator(); iter.hasNext(); ) {
+                tempRFD = (RemoteFileDesc)iter.next();
+				rfdStr = "http://"+tempRFD.getHost()+":"+
+				  tempRFD.getPort()+"/get/"+String.valueOf(tempRFD.getIndex())+
+				  "/"+tempRFD.getFileName();
+				try {
+					rfdURL = new URL(rfdStr);
+				    totalAlternateLocations.addAlternateLocation(
+				      new AlternateLocation(rfdURL) );
+				} catch( IOException e ) {
+                    ManagedDownloader.this.manager.internalError(e);
+                }  
+			}
+        }
+//AAAAA
+        
+
         //2. Do the download
         int status = -1;  //TODO: is this equal to COMPLETE etc?
         try {
@@ -968,6 +994,20 @@ public class ManagedDownloader implements Downloader, Serializable {
         if (fileExists(completeFile))
             fileManager.removeFileIfShared(completeFile);
         fileManager.addFileIfShared(completeFile, getXMLDocuments());  
+
+//AAAAA
+		
+		if(totalAlternateLocations != null) {
+			FileDesc fileDesc = 
+              fileManager.getFileDescMatching(completeFile.toString(),
+				(int)completeFile.length());  
+			// making this call now is necessary to avoid writing the 
+			// same alternate locations back to the requester as they sent 
+			// in their original headers
+			if (fileDesc != null)
+			   fileDesc.addAlternateLocationCollection(totalAlternateLocations);
+		}
+//AAAAA
         return COMPLETE;
     }   
 
@@ -1050,7 +1090,7 @@ public class ManagedDownloader implements Downloader, Serializable {
         busy=new LinkedList();
         int size = -1;
         int connectTo = -1;
-        
+
         //While there is still an unfinished region of the file...
         while (true) {
             synchronized (stealLock) {//Must obtain stealLock before this
@@ -1198,8 +1238,9 @@ public class ManagedDownloader implements Downloader, Serializable {
               +rfd.getHost()+":"+rfd.getPort());
 
         if(!needsPush) {
-            //Establish normal downloader.
-            ret=new HTTPDownloader(rfd, incompleteFile);
+            //Establish normal downloader.              
+            ret=new HTTPDownloader(rfd, incompleteFile, 
+			  totalAlternateLocations); //AAAAA
             //System.out.println("MANAGER: trying connect to "+rfd);
             try {
                 ret.connectTCP(NORMAL_CONNECT_TIME);
@@ -1239,7 +1280,8 @@ public class ManagedDownloader implements Downloader, Serializable {
             return null; 
         
         miniRFDToLock.remove(mrfd);//we are not going to use it after this
-        ret = new HTTPDownloader(pushSocket, rfd, incompleteFile);
+        ret = new HTTPDownloader(pushSocket, rfd, incompleteFile,
+		  totalAlternateLocations);  //AAAAA
         try {
             //This should never really throw an exception since are only
             //initializing the byteReader with this call.
@@ -1320,10 +1362,32 @@ public class ManagedDownloader implements Downloader, Serializable {
                 dloaders.add(dloader);
                 chatList.addHost(dloader);
                 browseList.addHost(dloader);
+				addAlternateLocations(dloader.getAlternateLocations());//AAAAA
             }
             return true;
         }
     }
+
+//AAAAA
+	private void addAlternateLocations(AlternateLocationCollection alts) {  
+		if (alts == null || !alts.hasAlternateLocations()  )
+			return;
+
+		synchronized(totalAlternateLocations) {
+			totalAlternateLocations.addAlternateLocationCollection(alts);
+		}
+		/*
+		AlternateLocation tempAlt;
+		synchronized(totalAlternateLocations) {
+			for (Iterator iter=alts.iterator(); iter.hasNext(); ) {
+				tempAlt = (AlternateLocation)iter.next();
+				if ( !totalAlternateLocations.contains(tempAlt) )
+					totalAlternateLocations.add(tempAlt);
+			}
+		}
+		*/
+	}
+//AAAAA
 
     /**
      * Assigns a white part of the file to a HTTPDownloader and returns it.

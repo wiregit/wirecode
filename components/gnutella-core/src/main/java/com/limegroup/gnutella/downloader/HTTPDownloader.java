@@ -10,6 +10,7 @@ import java.io.*;
 import java.net.*;
 import com.limegroup.gnutella.util.CommonUtils;
 import java.util.StringTokenizer;
+import com.sun.java.util.collections.*;
 
 /**
  * Downloads a file over an HTTP connection.  This class is as simple as
@@ -53,6 +54,9 @@ public class HTTPDownloader implements BandwidthTracker {
 	private Socket _socket;  //initialized in HTTPDownloader(Socket) or connect
     private File _incompleteFile;
 
+	private AlternateLocationCollection _alternateLocationsReceived;//AAAAAAA
+	private AlternateLocationCollection _alternateLocationsToSend; //AAAAAAA
+
 	private int _port;
 	private String _host;
 	
@@ -75,9 +79,9 @@ public class HTTPDownloader implements BandwidthTracker {
      *  the file
      * @param stop the last byte to read+1
      */
-	public HTTPDownloader(RemoteFileDesc rfd, File incompleteFile) {
+	public HTTPDownloader(RemoteFileDesc rfd, File incompleteFile, AlternateLocationCollection alts) {
         //Dirty secret: this is implemented with the push constructor!
-        this(null, rfd, incompleteFile);
+        this(null, rfd, incompleteFile, alts);
         _isPush=false;
 	}	
 
@@ -94,7 +98,7 @@ public class HTTPDownloader implements BandwidthTracker {
      *  not exist.
      */
 	public HTTPDownloader(Socket socket, RemoteFileDesc rfd, 
-                          File incompleteFile) {
+      File incompleteFile, AlternateLocationCollection alts) {
         _isPush=true;
         _rfd=rfd;
         _socket=socket;
@@ -108,9 +112,16 @@ public class HTTPDownloader implements BandwidthTracker {
 		_chatEnabled = rfd.chatEnabled();
         _browseEnabled = rfd.browseHostEnabled();
 
+		_alternateLocationsToSend   = alts; //AAAAAAA
+		_alternateLocationsReceived = new AlternateLocationCollection(); 
+        //AAAAA
+
 		_amountRead = 0;
     }
 
+	public AlternateLocationCollection getAlternateLocations() { //AAAAAAA
+	    return _alternateLocationsReceived;
+    }
 
     ///////////////////////////////// Connection /////////////////////////////
 
@@ -170,6 +181,24 @@ public class HTTPDownloader implements BandwidthTracker {
         String startRange = java.lang.String.valueOf(_initialReadingPoint);
         out.write("GET /get/"+_index+"/"+_filename+" HTTP/1.0\r\n");
         out.write("User-Agent: "+CommonUtils.getHttpServer()+"\r\n");
+
+//AAAAA
+		AlternateLocationCollection alts = new AlternateLocationCollection();
+
+		synchronized(_alternateLocationsToSend) {
+		    alts.addAlternateLocationCollection(_alternateLocationsToSend);
+		}
+		//HTTPUtils.writeHeader(HTTPHeaderName.CONTENT_URN, 
+							  //_fileDesc.getSHA1Urn(),
+							  //out);
+		if(alts.size() > 0) {
+			HTTPUtils.writeHeader(HTTPHeaderName.ALT_LOCATION, alts, out);
+//System.out.println("Downloader Send ("+_host+":"+_port+"):");
+//System.out.println(alts);
+//System.out.println("------");
+		}
+//AAAAA
+
         out.write("Range: bytes=" + startRange + "-\r\n");
         SettingsManager sm=SettingsManager.instance();
 		if (sm.getChatEnabled() ) {
@@ -248,9 +277,49 @@ public class HTTPDownloader implements BandwidthTracker {
                     throw new IOException(
                         "Unexpected start offset; too dumb to recover");
             }
+//AAAAA
+			else if(HTTPHeaderName.ALT_LOCATION.matchesStartOfString(str)) {
+				readAlternateLocations(str, _alternateLocationsReceived);
+System.out.println("Downloader Receive ("+_host+":"+_port+"):");
+System.out.println(_alternateLocationsReceived);
+			}
+//AAAAA
         }
         
     }
+
+	/**
+	 * Reads alternate location header.  The header can contain only one
+	 * alternate location, or it can contain many in the same header.
+	 * This method adds them all to the <tt>FileDesc</tt> for this
+	 * uploader.  This will not allow more than 20 alternate locations
+	 * for a single file.
+	 *
+	 * @param altHeader the full alternate locations header
+	 * @param alc the <tt>AlternateLocationCollector</tt> that read alternate
+	 *  locations should be added to
+	 */
+	private static void readAlternateLocations(final String altHeader,
+											   final AlternateLocationCollector alc) {
+		int colonIndex = altHeader.indexOf(":");
+		if(colonIndex == -1) {
+			return;
+		}
+		final String alternateLocations = 
+		    altHeader.substring(colonIndex+1).trim();
+		StringTokenizer st = new StringTokenizer(alternateLocations, ",");
+
+		while(st.hasMoreTokens()) {
+			try {
+				AlternateLocation al = new AlternateLocation(st.nextToken().trim());
+				alc.addAlternateLocation(al);
+			} catch(IOException e) {
+				e.printStackTrace();
+				// just return without adding it.
+				continue;
+			}
+		}
+	}
 
     /**
      * Returns the HTTP response code from the given string, throwing

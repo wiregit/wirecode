@@ -565,6 +565,10 @@ public class HTTPUploader implements Uploader {
 					_alternateLocationCollection = new AlternateLocationCollection();
 				}
 				HTTPUploader.readAlternateLocations(str, _alternateLocationCollection);
+//AAAAA
+//System.out.println("Uploader Receive ("+_hostName+":"+_port+"):");
+//System.out.println(_alternateLocationCollection);
+//AAAAA
 			}
             //check the "accept:" header
             if (indexOfIgnoreCase(str, "accept:") != -1) {

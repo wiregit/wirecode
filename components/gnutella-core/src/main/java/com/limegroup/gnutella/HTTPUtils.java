@@ -38,7 +38,46 @@ public final class HTTPUtils {
 	public static void writeHeader(HTTPHeaderName name, HTTPHeaderValue value, 
 								   OutputStream os) 
 		throws IOException {
-		if((name == null) || (value == null) || (os == null)) {
+		if(os == null) {
+			throw new NullPointerException("null value in writing http header");
+		}
+		os.write(createHeader(name, value).getBytes());
+	}
+
+//AAAAA
+	/**
+	 * Writes an single http header to the specified 
+	 * <tt>OutputStream</tt> instance, with the specified header name 
+	 * and the specified header value.
+	 *
+	 * @param name the <tt>HTTPHeaderName</tt> instance containing the
+	 *  header name to write to the stream
+	 * @param name the <tt>HTTPHeaderValue</tt> instance containing the
+	 *  header value to write to the stream
+	 * @param out the <tt>Writer</tt> instance to write to
+	 */
+	public static void writeHeader(HTTPHeaderName name, HTTPHeaderValue value, 
+								   Writer out) 
+		throws IOException {
+		if(out == null) {
+			throw new NullPointerException("null value in writing http header");
+		}
+		out.write(createHeader(name, value));
+	}
+//AAAAA
+
+	/**
+	 * Create a single http header String with the specified header name 
+	 * and the specified header value.
+	 *
+	 * @param name the <tt>HTTPHeaderName</tt> instance containing the
+	 *  header name 
+	 * @param name the <tt>HTTPHeaderValue</tt> instance containing the
+	 *  header value 
+	 */
+	private static String createHeader(HTTPHeaderName name, 
+	  HTTPHeaderValue value) throws IOException {
+		if((name == null) || (value == null)) {
 			throw new NullPointerException("null value in writing http header");
 		}
 		String nameStr  = name.httpStringValue();
@@ -51,7 +90,7 @@ public final class HTTPUtils {
 		sb.append(COLON_SPACE);
 		sb.append(valueStr);
 		sb.append(CRLF);
-		os.write(sb.toString().getBytes());
+		return sb.toString();
 	}
 
 	/**

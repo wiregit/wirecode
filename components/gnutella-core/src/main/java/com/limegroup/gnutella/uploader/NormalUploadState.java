@@ -231,6 +231,11 @@ public class NormalUploadState implements UploadState {
 				HTTPUtils.writeHeader(HTTPHeaderName.ALT_LOCATION,
 									  _fileDesc.getAlternateLocationCollection(),
 									  _ostream);
+//AAAAA
+//System.out.println("Uploader Send (??):");
+//System.out.println(_fileDesc.getAlternateLocationCollection());
+//System.out.println("-------");
+//AAAAA
 			}
 		}
 		
