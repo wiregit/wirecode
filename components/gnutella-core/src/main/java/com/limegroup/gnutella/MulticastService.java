@@ -186,7 +186,6 @@ public final class MulticastService implements Runnable {
                 // process packet....
                 // *----------------------------
                 byte[] data = datagram.getData();
-                int length = datagram.getLength();
                 try {
                     // we do things the old way temporarily
                     InputStream in = new ByteArrayInputStream(data);
@@ -240,10 +239,4 @@ public final class MulticastService implements Runnable {
 	public String toString() {
 		return "MulticastService\r\nsocket: "+_socket;
 	}
-	
-    private static final boolean debug = false;
-    private static void debug(String out) {
-        if (debug)
-            System.out.println(out);
-    }	
 }
