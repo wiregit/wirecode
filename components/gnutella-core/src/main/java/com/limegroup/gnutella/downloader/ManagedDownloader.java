@@ -1308,11 +1308,7 @@ public class ManagedDownloader implements Downloader, Serializable {
         File saveDir;
         String fileName = getFileName();
         try {
-            // if we're downloading a theme file, save in the theme dir.
-            if( fileName.toLowerCase().endsWith("." + ThemeSettings.EXTENSION))
-                saveDir = ThemeSettings.THEME_DIR_FILE;
-            else 
-                saveDir = SharingSettings.getSaveDirectory();
+            saveDir = SharingSettings.getSaveDirectory();
             completeFile=new File(saveDir, fileName);
             String savePath = saveDir.getCanonicalPath();		
             String completeFileParentPath = 

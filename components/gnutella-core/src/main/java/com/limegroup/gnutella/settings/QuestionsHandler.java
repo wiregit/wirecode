@@ -79,4 +79,11 @@ public class QuestionsHandler extends AbstractSettings {
      */
     public static final IntSetting PROMPT_FOR_EXE =
         FACTORY.createIntSetting("PROMPT_FOR_EXE", 0);
+        
+    /**
+     * Settings for whether or not to apply a new theme after
+     * downloading it
+     */
+    public static final IntSetting THEME_DOWNLOADED =
+        FACTORY.createIntSetting("THEME_DOWNLOADED", 0);
 }
