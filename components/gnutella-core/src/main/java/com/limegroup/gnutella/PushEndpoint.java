@@ -297,16 +297,17 @@ public class PushEndpoint implements HTTPHeaderValue{
 	 * @return a view of the current set of proxies.
 	 */
 	public Set getProxies() {
-	    if (_proxies!=null)
-	        return _proxies;
-	    
+
+	    synchronized(this) {
+	    	if (_proxies!=null)
+	        	return _proxies;
+	    }
+
 	    GuidSetWrapper current = (GuidSetWrapper)GUID_PROXY_MAP.get(_guid);
-	    Set proxies = _proxies;
-	    if(current != null)
-	        proxies = current.getProxies();
-	    
-	    Assert.that(proxies != null);	    
-		return proxies;
+
+	    Assert.that(current != null);	    
+
+	    return current.getProxies();
 	}
 	
 	/**
@@ -429,7 +430,7 @@ public class PushEndpoint implements HTTPHeaderValue{
 	 * that GUID_PROXY_MAP has a reference to all live PE GUIDs and
 	 * all live PE's reference the same GUID object as in GUID_PROXY_MAP.
 	 */
-	public void updateProxies(boolean good) {
+	public synchronized void updateProxies(boolean good) {
 	    GuidSetWrapper existing;
 	    GUID guidRef = null;
 
@@ -471,7 +472,7 @@ public class PushEndpoint implements HTTPHeaderValue{
 	/**
 	 * establishes a reference to a copy of the global set of proxies
 	 */
-	public void cacheProxies() {
+	public synchronized void cacheProxies() {
 	    _proxies = getProxies();
 	}
 	

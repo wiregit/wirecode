@@ -1519,8 +1519,10 @@ public class ManagedDownloader implements Downloader, Serializable {
         if (forFD instanceof PushAltLoc) {
             PushAltLoc ploc = (PushAltLoc)loc;
             ploc.getPushAddress().cacheProxies();
-            if (!good)
-                ploc.updateProxies(false);
+            if (!good) {
+                PushAltLoc pFD = (PushAltLoc)forFD;
+                pFD.updateProxies(false);
+	    }
         }
         
         for(Iterator iter=dloaders.iterator(); iter.hasNext();) {
