@@ -32,12 +32,24 @@ public final class ThemeFileHandler {
 	 * Reloads the file from disk to read values from.
 	 */
 	public static void reload() {
-  		File themeFile = ThemeSettings.THEME_FILE.getValue();            
+  		File themeFile = ThemeSettings.THEME_FILE.getValue();
+  		if( !ThemeSettings.isThemeFile(themeFile) )
+  		    ThemeSettings.THEME_FILE.revertToDefault();
+  		themeFile = ThemeSettings.THEME_FILE.getValue();
         File themeDir = ThemeSettings.extractThemeDir(themeFile);
         
         // if the theme hasn't already been expanded, then it's 
         // probably a new theme, so expand it
         if(!themeDir.isDirectory()) {
+            // if the theme file didn't exist, revert to default.
+            // this is done here instead of above because
+            // it doesn't matter if the file doesn't exist
+            // if we've already expanded it once in the past.
+            if( !themeFile.exists() ) {
+                ThemeSettings.THEME_FILE.revertToDefault();
+  		        themeFile = ThemeSettings.THEME_FILE.getValue();
+                themeDir = ThemeSettings.extractThemeDir(themeFile);
+            }   
             // unpack the zip 
             ThemeSettings.expandTheme(themeFile, themeDir, false);
         }

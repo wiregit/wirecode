@@ -173,6 +173,13 @@ public final class ThemeSettings extends LimeProps {
     }
     
     /**
+     * Determines whether or not the specified file is a theme file.
+     */
+    static boolean isThemeFile(File f) {
+        return f.getName().toLowerCase().endsWith("." + EXTENSION);
+    }
+    
+    /**
      * Determines whether or not the current theme file is the default theme
      * file.
      *
