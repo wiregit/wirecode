@@ -8,6 +8,7 @@
 <property name="uploader" value="com/limegroup/gnutella/uploader"/>
 <property name="util" value="com/limegroup/gnutella/util"/>
 <property name="xml" value="com/limegroup/gnutella/xml"/>
+<property name="chat" value="com/limegroup/gnutella/chat"/>
 <property name="gnutella" value="com/limegroup/gnutella"/>
 
 
@@ -35,7 +36,7 @@
 <target name="core" depends="init">
 	<javac debug="${DEBUG}" optimize="${OPTIMIZE}"
 		srcdir="${basedir}" destdir="${basedir}"
-		includes="${downloader}/**,${filters}/**,${uploader}/**,${util}/**,${gnutella}/*"
+		includes="${downloader}/**,${filters}/**,${uploader}/**,${util}/**,${gnutella}/*,${xml}/**,${chat}/**"
 	/>
 </target>
 
