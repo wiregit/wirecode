@@ -1461,7 +1461,7 @@ public class RouterService {
     /**
      * Notifies components that this' IP address has changed.
      */
-    public static boolean addressChanged() {System.out.println("changed address");
+    public static boolean addressChanged() {
         // Only continue if the current address/port is valid & not private.
         byte addr[] = getAddress();
         int port = getPort();

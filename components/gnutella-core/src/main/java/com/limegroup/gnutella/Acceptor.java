@@ -249,7 +249,8 @@ public class Acceptor implements Runnable {
         		    ConnectionSettings.FORCE_IP_ADDRESS.setValue(true);
         	        ConnectionSettings.FORCED_PORT.setValue(mappedPort);
         	        ConnectionSettings.UPNP_IN_USE.setValue(true);
-        	        RouterService.addressChanged();
+        	        if (mappedPort != _port)
+        	            RouterService.addressChanged();
         		
         		    // we could get our external address from the NAT but its too slow
         		    // so we clear the last connect back times.
