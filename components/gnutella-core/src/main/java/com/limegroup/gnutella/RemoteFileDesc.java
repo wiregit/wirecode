@@ -86,11 +86,10 @@ public class RemoteFileDesc implements Serializable {
 			System.arraycopy(xmlDocs, 0, _xmlDocs, 0, xmlDocs.length);
 		}
 		if(urns == null) {
-			_urns = null;
+			_urns = Collections.EMPTY_SET;
 		}
 		else {
-			// make a defensive copy
-			_urns = new HashSet(urns);
+			_urns = Collections.unmodifiableSet(urns);
 		}
 	}
 
