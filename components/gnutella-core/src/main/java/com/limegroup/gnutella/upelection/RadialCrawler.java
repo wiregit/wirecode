@@ -53,28 +53,28 @@ public class RadialCrawler implements AsyncCrawler, BlacklistCrawler {
 	private int _desiredResults = (int)(Crawler.DEFAULT_RESULTS * 1.5);
 	
 	/**
-	 * the blacklisted nodes.
+	 * the blacklisted nodes.  Synced because the user may add more nodes on-the-fly
 	 */
 	private Set _blackList = Collections.synchronizedSet(new HashSet());
 	
 	/**
 	 * the results of the crawl.
 	 */
-	private Set _results = Collections.synchronizedSet(new HashSet());
+	private Set _results = new HashSet();
 	
 	/**
 	 * a second list of currently active guids.  Necessary for the stopCrawl().
 	 */
-	private Collection _registeredGuids = Collections.synchronizedList(new LinkedList());
+	private Collection _registeredGuids = new LinkedList();
 	
 	/**
 	 * this worker class listens for the udp pong containing the results
 	 * of a specific UDP ping.  It updates the _blacklist set with the nodes which
-	 * have already been crawled, and then in a separate thread it schedules more pings
+	 * have already been crawled, and then it schedules more pings
 	 * and registers other instances of itself to handle them.
 	 * 
 	 */
-	private class CrawlerWorker extends Thread implements MessageListener {
+	private class CrawlerWorker implements MessageListener {
 		
 		/**
 		 * the udp pong containing the list of ultrapeers
@@ -118,15 +118,8 @@ public class RadialCrawler implements AsyncCrawler, BlacklistCrawler {
 			if (! (m instanceof UPListVendorMessage)) 
 				throw new Error("peer responded with the wrong kind of message"); //TODO: decide what to do in this case
 			
-			//store a ref to the message and continue the processing on a separate thread.
 			_uplvm = (UPListVendorMessage)m;
-			setDaemon(true);
-			start();
-		}
 		
-		public void run() {
-			//now that we are on our own thread, take our time and work with the
-			//synchronized lists
 			//first thing to do is remove ourselves from our own list of GUIDs
 			_registeredGuids.remove(new GUID(_uplvm.getGUID()));
 			
