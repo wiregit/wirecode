@@ -13,8 +13,14 @@ public final class WindowsLauncher {
 	 * @param file the path of the file to launch
 	 * 
 	 * @return an int for the exit code of the native method
+	 * @throws <tt>NullPointerException</tt> if the <tt>file</tt> argument
+	 *  is <tt>null</tt>
 	 */
 	public int launchFile(String file) {
+		// don't want to pass null values to the native code
+		if(file == null) {
+			throw new NullPointerException("cannot accept null url values");
+		}
 		int launchCode = -1;
 		try {
 			launchCode = nativeLaunchFile(file);
@@ -30,8 +36,14 @@ public final class WindowsLauncher {
 	 *
 	 * @param url the url to open
 	 * @return the return code of the native call
+	 * @throws <tt>NullPointerException</tt> if the <tt>url</tt> argument
+	 *  is <tt>null</tt>
 	 */
 	public int openURL(final String url) {
+		// don't want to pass null values to the native code
+		if(url == null) {
+			throw new NullPointerException("cannot accept null url values");
+		}
 		int openCode = -1;
 		try {
 			openCode = nativeOpenURL(url);
