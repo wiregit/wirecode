@@ -184,35 +184,15 @@ public final class HandshakeResponse {
          LEAF = isFalseValue(HEADERS, HeaderNames.X_ULTRAPEER);
      }
    
-
+    /**
+     * Creates an empty response with no headers.  This is useful, for 
+     * example, during connection handshaking when we haven't yet read
+     * any headers.
+     *
+     * @return a new, empty <tt>HandshakeResponse</tt> instance
+     */
     public static HandshakeResponse createEmptyResponse() {
         return new HandshakeResponse(new Properties());
-    }
-
-    /**
-     * Utility method to extract the connection code from the connect string,
-     * such as "200" in a "200 OK" message.
-     *
-     * @param line the full connection string, such as "200 OK."
-     * @return the status code for the connection string
-     */
-    private static int extractCode(String line) {
-        //get the status code and message out of the status line
-        int statusMessageIndex = line.indexOf(" ");
-        return Integer.parseInt(line.substring(0, statusMessageIndex).trim());
-    }
-
-    /**
-     * Utility method to extract the connection message from the connect string,
-     * such as "OK" in a "200 OK" message.
-     *
-     * @param line the full connection string, such as "200 OK."
-     * @return the status message for the connection string
-     */
-    private static String extractMessage(String line) {
-        //get the status code and message out of the status line
-        int statusMessageIndex = line.indexOf(" ");
-        return line.substring(statusMessageIndex).trim();
     }
 
     /**
@@ -223,7 +203,7 @@ public final class HandshakeResponse {
      *  sent by the other host
      */
     public static HandshakeResponse 
-        createServerResponse(Properties headers) throws IOException {
+        createResponse(Properties headers) throws IOException {
         return new HandshakeResponse(headers);
     }
 
@@ -235,7 +215,7 @@ public final class HandshakeResponse {
      *  sent by the other host
      */
     public static HandshakeResponse 
-        createServerResponse(String line, Properties headers) throws IOException {
+        createResponse(String line, Properties headers) throws IOException {
         int code;
         String message;
         try {
@@ -303,6 +283,32 @@ public final class HandshakeResponse {
                                      headers);        
     }
 
+
+    /**
+     * Utility method to extract the connection code from the connect string,
+     * such as "200" in a "200 OK" message.
+     *
+     * @param line the full connection string, such as "200 OK."
+     * @return the status code for the connection string
+     */
+    private static int extractCode(String line) {
+        //get the status code and message out of the status line
+        int statusMessageIndex = line.indexOf(" ");
+        return Integer.parseInt(line.substring(0, statusMessageIndex).trim());
+    }
+
+    /**
+     * Utility method to extract the connection message from the connect string,
+     * such as "OK" in a "200 OK" message.
+     *
+     * @param line the full connection string, such as "200 OK."
+     * @return the status message for the connection string
+     */
+    private static String extractMessage(String line) {
+        //get the status code and message out of the status line
+        int statusMessageIndex = line.indexOf(" ");
+        return line.substring(statusMessageIndex).trim();
+    }
 
     /**
      * Adds the addresses of connected Ultrapeers for X-Try-Ultrapeer
