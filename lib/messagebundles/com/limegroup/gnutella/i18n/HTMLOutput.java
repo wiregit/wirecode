@@ -289,7 +289,6 @@ class HTMLOutput {
      */
     private void buildAfterStatus(StringBuffer newpage) {
         newpage.append(
-"     <br />\n" +
 "     <b><big>General Considerations for Translators</big></b><br />\n" +
 "     <br />\n" +
 "     Do not start with the existing message bundle installed with your current\n" +
