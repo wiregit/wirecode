@@ -1020,51 +1020,52 @@ public class ConnectionManager {
     
     /**
      * Updates the addresses in the hostCache by parsing the passed string
+     * @param headers The connection headers received
+     * @param connection The connection on which we received the headers
+     */
+    private void updateHostCache(Properties headers, ManagedConnection
+        connection){
+        //add the addresses received
+        updateHostCache(headers.getProperty(
+                ConnectionHandshakeHeaders.X_TRY),
+                connection, false);
+        
+        //get the supernodes, and add those to the host cache
+        updateHostCache(headers.getProperty(
+                ConnectionHandshakeHeaders.X_TRY_SUPERNODES),
+                connection, true);
+    }
+    
+    /**
+     * Updates the addresses in the hostCache by parsing the passed string
      * @param hostAddresses The string representing the addressess to be 
      * added. It should be in the form:
      * <p> IP Address:Port [,IPAddress:Port]* 
      * <p> e.g. 123.4.5.67:6346, 234.5.6.78:6347 
      * @param connection The connection on which we received the addresses
+     * @param goodPriority Flag that specifies if the addresses have to be
+     * given high priority
      */
-    private void updateHostCache(Properties headers, ManagedConnection
-        connection){
-            String hostAddresses 
-                = headers.getProperty(ConnectionHandshakeHeaders.X_TRY);
+    private void updateHostCache(String hostAddresses, ManagedConnection
+        connection, boolean goodPriority){
         //check for null param
-         if(hostAddresses != null)
-         {
-            //tokenize to retrieve individual addresses
-            StringTokenizer st = new StringTokenizer(hostAddresses,
-                Constants.HTTP_ENTRY_SEPARATOR);
-            //iterate over the tokens
-            while(st.hasMoreTokens()){
-                //get an address
-                String address = ((String)st.nextToken()).trim();
-                //add it to the catcher
-                _catcher.add(new Endpoint(address), connection);
-            }
-         }
-        
-        //get the supernodes, and add those to the host cache
-        hostAddresses 
-                = headers.getProperty(
-                    ConnectionHandshakeHeaders.X_TRY_SUPERNODES);
-        //check for null param
-         if(hostAddresses != null)
-         {
-            //tokenize to retrieve individual addresses
-            StringTokenizer st = new StringTokenizer(hostAddresses,
-                Constants.HTTP_ENTRY_SEPARATOR);
-            //iterate over the tokens
-            while(st.hasMoreTokens()){
-                //get an address
-                String address = ((String)st.nextToken()).trim();
-                Endpoint e = new Endpoint(address);
+         if(hostAddresses == null)
+             return;
+         
+        //tokenize to retrieve individual addresses
+        StringTokenizer st = new StringTokenizer(hostAddresses,
+            Constants.HTTP_ENTRY_SEPARATOR);
+        //iterate over the tokens
+        while(st.hasMoreTokens()){
+            //get an address
+            String address = ((String)st.nextToken()).trim();
+            Endpoint e = new Endpoint(address);
+            //set the good priority, if specified
+            if(goodPriority)
                 e.setWeight(HostCatcher.GOOD_PRIORITY);
-                //add it to the catcher
-                _catcher.add(e, connection);
-            }
-         }
+            //add it to the catcher
+            _catcher.add(e, connection);
+        }
     }
     
     /**
