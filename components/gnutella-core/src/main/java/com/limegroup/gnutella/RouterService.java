@@ -423,7 +423,7 @@ public class RouterService {
     /**
      * Closes and removes the given connection.
      */
-    public static void removeConnection(ManagedConnection c) {
+    public static void removeConnection(Connection c) {
         manager.remove(c);
     }
 

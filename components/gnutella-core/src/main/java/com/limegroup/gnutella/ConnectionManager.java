@@ -236,12 +236,12 @@ public class ConnectionManager {
      * removing this connection from routing tables and modifying active 
      * connection fetchers accordingly.
      *
-     * @param mc the <tt>ManagedConnection</tt> instance to remove
+     * @param mc the <tt>Connection</tt> instance to remove
      */
-    public synchronized void remove(ManagedConnection mc) {
+    public synchronized void remove(Connection conn) {
 		// removal may be disabled for tests
 		if(!ConnectionSettings.REMOVE_ENABLED.getValue()) return;        
-        removeInternal(mc);
+        removeInternal(conn);
 
         adjustConnectionFetchers();
     }
@@ -1027,7 +1027,7 @@ public class ConnectionManager {
      * is already held.  This version does not kick off ConnectionFetchers;
      * only the externally exposed version of remove does that.
      */
-    private void removeInternal(ManagedConnection c) {
+    private void removeInternal(Connection c) {
         // 1a) Remove from the initialized connections list and clean up the
         // stuff associated with initialized connections.  For efficiency 
         // reasons, this must be done before (2) so packets are not forwarded
