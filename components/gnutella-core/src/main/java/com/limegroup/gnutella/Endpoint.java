@@ -60,6 +60,36 @@ public class Endpoint implements Cloneable, Serializable, Comparable{
 	return 0;		
     }
 
+    /** 
+     * Extracts a hostname and port from a string:
+     * <ul>
+     * <li>If hostAndPort is of the format "host:port", returns new
+     *   Endpoint(host, port).
+     * <li>If hostAndPort contains no ":" or a ":" at the end of the string,
+     *   returns new Endpoint(hostAndPort, 6346).
+     * <li>Otherwise throws IllegalArgumentException.
+     * </ul>
+     */
+    public Endpoint(String hostAndPort) throws IllegalArgumentException {
+	final int DEFAULT=6346;
+	int j=hostAndPort.indexOf(":");
+	if (j<0) {
+	    this.hostname=hostAndPort;
+	    this.port=DEFAULT;
+	} else if (j==0) {
+	    throw new IllegalArgumentException();
+	} else if (j==(hostAndPort.length()-1)) {
+	    this.hostname=hostAndPort.substring(0,j);
+	    this.port=DEFAULT;
+	} else {
+	    this.hostname=hostAndPort.substring(0,j);
+	    try {
+		this.port=Integer.parseInt(hostAndPort.substring(j+1));
+	    } catch (NumberFormatException e) {
+		throw new IllegalArgumentException();
+	    }
+	}	
+    }
     
     public Endpoint(String hostname, int port) {
 	this.hostname=hostname;
@@ -153,16 +183,49 @@ public class Endpoint implements Cloneable, Serializable, Comparable{
 	return retBytes;
     }
     
-    /*
-     * // Unit tester
-     *public static void main(String args[]){
-     *  Endpoint e = new Endpoint(args[0], 8001);
-     *	byte[] b = e.getHostBytes();
-     *	byte[] b1 = {(byte)255,(byte)255,(byte)255,(byte)255}; // fence post
-     *	byte[] b2 = {(byte)127,(byte)0,(byte)0,(byte)1}; // normal case
-     *	System.out.println("Sumeet: testing 255 case " + Arrays.equals(b,b1) );
-     *	System.out.println("Sumeet: testing normal case " + Arrays.equals(b,b2) );
-    } 
-    */
+    
+//       // Unit tester
+//       public static void main(String args[]){
+//  //         Endpoint e = new Endpoint(args[0], 8001);
+//  //       	byte[] b = e.getHostBytes();
+//  //       	byte[] b1 = {(byte)255,(byte)255,(byte)255,(byte)255}; // fence post
+//  //       	byte[] b2 = {(byte)127,(byte)0,(byte)0,(byte)1}; // normal case
+//  //       	System.out.println("Sumeet: testing 255 case " + Arrays.equals(b,b1) );
+//  //       	System.out.println("Sumeet: testing normal case " + Arrays.equals(b,b2) );
+//  	Endpoint e;
+//  	try {
+//  	    e=new Endpoint(":6347");
+//  	    Assert.that(false);
+//  	} catch (IllegalArgumentException exc) {
+//  	    Assert.that(true);
+//  	}
+//  	try {
+//  	    e=new Endpoint("abc:cas");
+//  	    Assert.that(false);
+//  	} catch (IllegalArgumentException exc) {
+//  	    Assert.that(true);
+//  	}
+//  	try {
+//  	    e=new Endpoint("abc");
+//  	    Assert.that(e.getHostname().equals("abc"));
+//  	    Assert.that(e.getPort()==6346);
+//  	} catch (IllegalArgumentException exc) {
+//  	    Assert.that(false);
+//  	}
+//  	try {
+//  	    e=new Endpoint("abc:");
+//  	    Assert.that(e.getHostname().equals("abc"));
+//  	    Assert.that(e.getPort()==6346);
+//  	} catch (IllegalArgumentException exc) {
+//  	    Assert.that(false);	    
+//  	}
+//  	try {
+//  	    e=new Endpoint("abc:7");
+//  	    Assert.that(e.getHostname().equals("abc"));
+//  	    Assert.that(e.getPort()==7);
+//  	} catch (IllegalArgumentException exc) {
+//  	    Assert.that(false);	    
+//  	}	
+//      } 
 }
 
