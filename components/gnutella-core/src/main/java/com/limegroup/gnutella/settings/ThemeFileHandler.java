@@ -367,14 +367,14 @@ public final class ThemeFileHandler {
      */
     public static final ColorSetting FILTER_TITLE_TOP_COLOR =
         FACTORY.createColorSetting("SEARCH_FILTER_TITLE_TOP_COLOR",
-                                  new Color(0xFF, 0xCC, 0));
+                            TABLE_HEADER_BACKGROUND_COLOR.getValue());
 
     /**
      * Setting for the filter title color.
      */
     public static final ColorSetting FILTER_TITLE_COLOR =
         FACTORY.createColorSetting("SEARCH_FILTER_TITLE_COLOR",
-                                   new Color(0xFF, 0xCC, 0));
+                            TABLE_HEADER_BACKGROUND_COLOR.getValue());
                                    
     /**
      * Setting for the background grid color.
