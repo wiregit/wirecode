@@ -146,6 +146,11 @@ public final class RouterService {
 		SettingsManager.instance();
 
 	/**
+	 * Long for the last time this host originated a query.
+	 */
+	private static long _lastQueryTime = 0L;
+
+	/**
 	 * Creates a new <tt>RouterService</tt> instance.  This fully constructs 
 	 * the backend.
 	 *
@@ -748,6 +753,15 @@ public final class RouterService {
 		query(guid, query, "", minSpeed, type);
 	}
 
+    /** 
+     * Searches the network for files with the given query string and 
+     * minimum speed, i.e., same as query(guid, query, minSpeed, null). 
+     *
+     * @see query(byte[], String, int, MediaType)
+     */
+    public static void query(byte[] guid, String query, int minSpeed) {
+        query(guid, query, minSpeed, null);
+    }
 
 	/**
 	 * Searches the network for files with the given metadata.
@@ -763,6 +777,7 @@ public final class RouterService {
 							 final MediaType type) {
 
 		try {
+			_lastQueryTime = System.currentTimeMillis();
 			// per HUGE v0.94, ask for URNs on responses
 			Set urnTypes = new HashSet();
 			urnTypes.add(UrnType.ANY_TYPE);
@@ -783,16 +798,15 @@ public final class RouterService {
 	}
 
 
-    /** 
-     * Searches the network for files with the given query string and 
-     * minimum speed, i.e., same as query(guid, query, minSpeed, null). 
-     *
-     * @see query(byte[], String, int, MediaType)
-     */
-    public static void query(byte[] guid, String query, int minSpeed) {
-        query(guid, query, minSpeed, null);
-    }
-
+	/**
+	 * Accessor for the last time a query was originated from this host.
+	 *
+	 * @return a <tt>long</tt> representing the number of milliseconds since
+	 *  January 1, 1970, that the last query originated from this host
+	 */
+	public static long getLastQueryTime() {
+		return _lastQueryTime;
+	}
 
     /** Will make all attempts to stop a query from executing.  Really only 
      *  applicable to GUESS queries...
