@@ -667,6 +667,10 @@ public abstract class FileManager {
             return new LinkedList();  //doesn't exist?
         }
         
+        // don't share the incomplete directory ... 
+        if (directory.equals(SharingSettings.INCOMPLETE_DIRECTORY.getValue()))
+            return new LinkedList();
+        
         //STEP 1:
         // Scan subdirectory for the amount of shared files.
         File[] dir_list = FileUtils.listFiles(directory, DIRECTORY_FILTER);

@@ -3,6 +3,7 @@ package com.limegroup.gnutella.settings;
 
 import java.io.*;
 import com.limegroup.gnutella.util.CommonUtils;
+import com.limegroup.gnutella.util.FileUtils;
 import com.sun.java.util.collections.*;
 
 /**
@@ -96,10 +97,26 @@ public class SharingSettings extends LimeProps {
 			throw new IOException();
 		}
 		
+		// Canonicalize the files ... 
+		try {
+		    saveDir = FileUtils.getCanonicalFile(saveDir);
+		} catch(IOException ignored) {}
+		try {
+		    incDir = FileUtils.getCanonicalFile(incDir);
+		} catch(IOException ignored) {}
+		File snapFile = new File(incDir, "downloads.dat");
+		try {
+		    snapFile = FileUtils.getCanonicalFile(snapFile);
+		} catch(IOException ignored) {}
+		File snapBackup = new File(incDir, "downloads.bak");
+		try {
+		    snapBackup = FileUtils.getCanonicalFile(snapBackup);
+		} catch(IOException ignored) {}
+		
         DIRECTORY_FOR_SAVING_FILES.setValue(saveDir);
         INCOMPLETE_DIRECTORY.setValue(incDir);
-        DOWNLOAD_SNAPSHOT_FILE.setValue(new File(incDir, "downloads.dat"));
-        DOWNLOAD_SNAPSHOT_BACKUP_FILE.setValue(new File(incDir, "downloads.bak"));
+        DOWNLOAD_SNAPSHOT_FILE.setValue(snapFile);
+        DOWNLOAD_SNAPSHOT_BACKUP_FILE.setValue(snapBackup);
     }
     
     /**
