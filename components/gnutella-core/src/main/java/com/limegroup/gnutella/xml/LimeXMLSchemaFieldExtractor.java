@@ -125,6 +125,13 @@ class LimeXMLSchemaFieldExtractor
             
             //now get the root element below <xsd:schema>
             String rootElementName = getRootElementName();
+            
+            Set fieldNames = new HashSet(); 
+            fillWithFieldNames(fieldNames, 
+                (FieldTypeSet)_nameFieldTypeSetMap.get(rootElementName),
+                rootElementName);
+            
+            System.out.println("fieldNames = " + fieldNames);
         }
         catch(NullPointerException npe)
         {
@@ -137,6 +144,60 @@ class LimeXMLSchemaFieldExtractor
         return null;
     }
     
+    
+    private static void  fillWithFieldNames(Set fieldNames,
+        FieldTypeSet fieldTypeSet,
+        final String prefix)
+    {
+        
+        //get the iterator over the elements in the fieldtypeSet
+        Iterator iterator = fieldTypeSet.iterator();
+
+        while(iterator.hasNext())
+        {
+            FieldTypePair fieldTypePair = (FieldTypePair)iterator.next();
+            //get the field type set corresponding to this field pair's type
+            FieldTypeSet newFieldTypeSet 
+                = (FieldTypeSet)_nameFieldTypeSetMap.get(
+                fieldTypePair.getType());
+            String field = fieldTypePair.getField();
+            if(newFieldTypeSet == null)
+            {
+                if(!isDummy(field))
+                {
+                    fieldNames.add(prefix 
+                        + XMLStringUtils.DELIMITER + field);
+                }
+                else
+                {
+                    fieldNames.add(prefix);
+                }
+            }
+            else
+            {
+                if(!isDummy(field))
+                {
+                    fillWithFieldNames(fieldNames,newFieldTypeSet,
+                        prefix + XMLStringUtils.DELIMITER
+                        + field);
+                }
+                else
+                {
+                    fillWithFieldNames(fieldNames,newFieldTypeSet,prefix);
+                }
+            }
+        }
+    }
+    
+    private static boolean isDummy(String field)
+    {
+        if(field.trim().equals(DUMMY))
+            return true;
+    
+        return false;
+    }
+    
+    
     /**
      * Returns the root element below <xsd:schema>
      */
@@ -144,7 +205,7 @@ class LimeXMLSchemaFieldExtractor
     {
         //get the set of keys in _nameFieldTypeSetMap
         //one of this is the root element
-        Set possibleRoots = _nameFieldTypeSetMap.keySet();
+        Set possibleRoots = ((HashMap)((HashMap)_nameFieldTypeSetMap).clone()).keySet();
         
         //Iterate over set of _referencedNames
         //and remove those from possibleRoots
@@ -154,9 +215,6 @@ class LimeXMLSchemaFieldExtractor
             //remove from set of possibleRoots
             possibleRoots.remove(iterator.next());
         }
-        
-        System.out.println("possible Roots: " + possibleRoots);
-        
         
         //return the first element in the set
         Iterator possibleRootsIterator = possibleRoots.iterator();
@@ -192,7 +250,6 @@ class LimeXMLSchemaFieldExtractor
         }
         else if(isComplexTypeTag(name))
         {
-            System.out.println("processing complexType");
             processComplexTypeTag(n);
         }
         else
@@ -364,7 +421,9 @@ class LimeXMLSchemaFieldExtractor
         }
        
         //get field and type names
-        String name = nameAttribute.getNodeValue();
+        //append DELIMITER after name of the attribute (as per convention
+        //@see XMLStringUtils
+        String name = nameAttribute.getNodeValue() + XMLStringUtils.DELIMITER;
         String typeName = typeAttribute.getNodeValue();
        
         //add mapping to fieldTypeMap
@@ -501,6 +560,14 @@ private static class FieldTypeSet
         _elements.add(fieldTypePair);
     }
 
+    /**
+     * Returns an iterator over the elements
+     */
+    public Iterator iterator()
+    {
+       return _elements.iterator(); 
+    }
+    
     /**
      * Return string representation of all the elements
      */
