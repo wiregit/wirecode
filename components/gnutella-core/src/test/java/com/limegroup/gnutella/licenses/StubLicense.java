@@ -21,15 +21,22 @@ class StubLicense extends CCLicense {
     
     private final String page;
     
-    StubLicense(String license, String page) {
-        super(license, getURI(license));
-        this.page = page;
-    }
+    private final String details;
     
     StubLicense(String page) {
         this("license text", page);
     }
+
+    StubLicense(String license, String page) {
+        this(license, page, null);
+    }
     
+    StubLicense(String license, String page, String details) {
+        super(license, getURI(license));
+        this.page = page;
+        this.details = details;
+    }
+   
     private static URI getURI(String license) {
         URI uri = LicenseFactory.getLicenseURI(license);
         if(uri == null)
@@ -42,7 +49,7 @@ class StubLicense extends CCLicense {
         if(url.equals(getLicenseURI().toString()))
             return page;
         else
-            return null;
+            return details;
     }
     
     public void verify(VerificationListener listener) {
@@ -57,15 +64,17 @@ class StubLicense extends CCLicense {
         }
     }
     
-    private static class Listener implements VerificationListener {
+    public static class Listener implements VerificationListener {
         private VerificationListener vl;
+        
+        Listener() { this(null); }
         
         Listener(VerificationListener vl) {
             this.vl = vl;
         }
         
         public void licenseVerified(License l) {
-            if(vl != null)
+            if(vl != null && l != this)
                 vl.licenseVerified(l);
 
             synchronized(this) {

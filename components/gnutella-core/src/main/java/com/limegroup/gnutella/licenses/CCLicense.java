@@ -577,11 +577,15 @@ class CCLicense implements License, Serializable, Cloneable {
                         LOG.debug("Using cached details for url: " + url);
                     body = (String)details;
                 } else {
-                    body = getBody(url);
+                    body = locateRDF(getBody(url));
                     if(body != null)
                         LicenseCache.instance().addDetails(url, body);
+                    else
+                        LOG.debug("Couldn't retrieve license details from url: " + url);
                 }
                 
+                // verification MUST NOT alter allWorks,
+                // otherwise a ConcurrentMod will happen
                 if(body != null)
                     doVerification(body, false);
              }
