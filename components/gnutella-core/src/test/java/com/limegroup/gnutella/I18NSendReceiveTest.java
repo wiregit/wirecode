@@ -173,7 +173,7 @@ public class I18NSendReceiveTest
         File f = new File("com/limegroup/gnutella/" + name);
         assertTrue("file: " + name + " doesn't exist", f.exists());
         f = f.getCanonicalFile(); // necessary to get the name as it is on disk
-        list.add(f.getName());
+        list.add(I18NConvert.instance().compose(f.getName()));
     }
 
     /**
@@ -205,9 +205,8 @@ public class I18NSendReceiveTest
                      rp.getResultCount());
         for(Iterator iter = rp.getResults(); iter.hasNext(); ) {
             Response res = (Response)iter.next();
-            assertTrue("QueryReply : " + res.getName() + " not expected",
-                       expectedReply.remove(res.getName()));
-            //System.out.println(new String(rp.getXMLBytes(), "UTF-8"));
+			assertTrue("got qr: " + res.getName() + ", expected something in : " + expectedReply,
+						expectedReply.remove(res.getName()));
         }
 
         expectedReply.clear();
