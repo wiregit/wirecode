@@ -29,7 +29,8 @@ import java.util.Date;
  * Within any given bucket, hosts are prioritized by hops distance, with farther
  * pongs receiving higher priority.  Hosts with unknown hops values, e.g., from 
  * gnutella.net or X-Try/X-Try-Ultrapeer headers, are given a hops value of
- * (the lowest priority).
+ * (the lowest priority).  Then, within any hops level, recent hosts are prioritized
+ * before older hosts.
  *
  * The HostCatcher may initiate outgoing "router" connections.  This behavior is
  * confusing and will likely be refactored in the future.  
@@ -815,16 +816,18 @@ public class HostCatcher {
  */
 class BucketQueueArray {
     /** One heap for each type.  Then each heap is sorted by weight, which is
-     *  equal to hops. */
+     *  equal to hops.  Hence BUCKETS is equal to the maximum TTL+1. */
     private BucketQueue[] heaps;
-    final int BUCKETS=8;
-    final int[] CAPACITIES={10, 10, 10, 20, 20, 30, 40, 50};
+    int BUCKETS=8;
 
     BucketQueueArray() {
         heaps=new BucketQueue[3];
-        heaps[HostCatcher.BAD_PRIORITY]=new BucketQueue(CAPACITIES); 
-        heaps[HostCatcher.NORMAL_PRIORITY]=new BucketQueue(CAPACITIES);
-        heaps[HostCatcher.GOOD_PRIORITY]=new BucketQueue(CAPACITIES); 
+        heaps[HostCatcher.BAD_PRIORITY]=
+            new BucketQueue(BUCKETS, HostCatcher.GOOD_SIZE); 
+        heaps[HostCatcher.NORMAL_PRIORITY]=
+            new BucketQueue(BUCKETS,HostCatcher.NORMAL_SIZE);
+        heaps[HostCatcher.GOOD_PRIORITY]=
+            new BucketQueue(BUCKETS, HostCatcher.BAD_SIZE); 
     }
 
     /**
@@ -920,24 +923,17 @@ class BucketQueueArray {
             buf.add(iter.next());
         return buf.iterator();        
     }
-
-//     /**
-//      * Returns an iterator of the given number of hosts starting with the given type.
-//      * Clone the elements while working, so modifying the iterator does * not
-//      * affect this and vice versa.
-//      *
-//      * @param type one of GOOD_PRIORITY, NORMAL_PRIORITY, or BAD_PRIORITY
-//      * @param n an upper bound on the number of element to return
-//      */
-//     public Iterator iterator(int type1, type2, int n) {
-//         BinaryHeap heap=heaps[type];
-//         n=Math.min(heap.size(), n);
-//         List buf=new ArrayList(n);
-
-//         Iterator iter=heap.iterator();
-//         for (int i=0; i<n; i++) 
-//             buf.add(iter.next());
-//         return buf.iterator();        
+    
+//     private void dump() {
+//         System.out.print("HC:");
+//         for (int i=0; i<BUCKETS; i++) {
+//             System.out.print(" "+heaps[HostCatcher.NORMAL_PRIORITY].size(i));
+//         }
+//         System.out.print(" | ");
+//         for (int i=0; i<BUCKETS; i++) {
+//             System.out.print(" "+heaps[HostCatcher.GOOD_PRIORITY].size(i));
+//         }
+//         System.out.println();
 //     }
 
     public String toString() {
