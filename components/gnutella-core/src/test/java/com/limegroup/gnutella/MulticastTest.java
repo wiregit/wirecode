@@ -41,11 +41,13 @@ public class MulticastTest extends BaseTestCase {
 		junit.textui.TestRunner.run(suite());
 	}
     
-    private static void setSettings() {
+    private static void setSettings() throws Exception {
         SettingsManager settings=SettingsManager.instance();
         settings.setBannedIps(new String[] {"*.*.*.*"});
+        // Set the local host to not be banned so pushes can go through
+        String ip = InetAddress.getLocalHost().getHostAddress();
         // TODO: make this work for people not in 10.254.x.x
-        settings.setAllowedIps(new String[] {"10.254.*.*"});
+        settings.setAllowedIps(new String[] {ip});
         settings.setPort(PORT);
         settings.setExtensions("mp3;");
         File mp3 = CommonUtils.getResourceFile(MP3_NAME);
@@ -235,6 +237,7 @@ public class MulticastTest extends BaseTestCase {
      * and will upload regardless of the slots left.
      */
     public void testPushesHaveUploadPriority() throws Exception {
+        // Make it so a normal upload request would fail.
         UploadSettings.UPLOADS_PER_PERSON.setValue(0);        
     
         // first go through some boring stuff to get a correct QueryReply
