@@ -454,7 +454,7 @@ public class VendorMessageTest extends com.limegroup.gnutella.util.BaseTestCase 
     	assertFalse(ping.requestsRanges());
     	assertFalse(ping.requestsPushLocs());
     	
-   		ping = new HeadPing(urn, 0xFF & ~HeadPing.PUSH_PING);
+   		ping = new HeadPing(urn, 0xFF & ~HeadPing.GGEP_PING);
     	assertTrue(ping.requestsPushLocs());
     	assertTrue(ping.requestsAltlocs());
     	assertTrue(ping.requestsRanges());
@@ -479,15 +479,6 @@ public class VendorMessageTest extends com.limegroup.gnutella.util.BaseTestCase 
     	ping2 = (HeadPing) Message.read(bais);
     	
     	assertEquals(g,ping2.getClientGuid());
-    	
-    	//now create a ping which carries a client guid but does not have the flag
-    	ping = new HeadPing(urn, g, 0xFF & ~HeadPing.PUSH_PING);
-    	baos = new ByteArrayOutputStream();
-    	ping.write(baos);
-    	bais = new ByteArrayInputStream(baos.toByteArray());
-    	ping2 = (HeadPing) Message.read(bais);
-    	
-    	assertNull(ping2.getClientGuid());
     	
     	//pings which have the flag but no guid fail.
     	ping = new HeadPing(urn, 0xFF);

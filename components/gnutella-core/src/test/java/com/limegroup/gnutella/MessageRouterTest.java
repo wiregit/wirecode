@@ -660,7 +660,6 @@ public final class MessageRouterTest extends BaseTestCase {
     	assertEquals(pingee._lastSent.getGUID(),ping.getGUID());
     	assertTrue(pingee._lastSent instanceof HeadPing);
     	HeadPing ping2 = (HeadPing) pingee._lastSent;
-    	assertNull(ping2.getClientGuid());
     	
     	// we should have an entry in the routing table
     	RouteTable headRt =(RouteTable) PrivilegedAccessor.getValue(ROUTER,"_headPongRouteTable");

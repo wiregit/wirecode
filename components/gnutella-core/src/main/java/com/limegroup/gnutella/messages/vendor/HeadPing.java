@@ -1,10 +1,16 @@
 package com.limegroup.gnutella.messages.vendor;
 
+import java.io.ByteArrayOutputStream;
+import java.io.DataOutputStream;
 import java.io.IOException;
 
+import com.limegroup.gnutella.ErrorService;
 import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.URN;
+import com.limegroup.gnutella.messages.BadGGEPBlockException;
+import com.limegroup.gnutella.messages.BadGGEPPropertyException;
 import com.limegroup.gnutella.messages.BadPacketException;
+import com.limegroup.gnutella.messages.GGEP;
 
 /**
  * An UDP equivalent of the HEAD request method with a twist.
@@ -38,7 +44,14 @@ public class HeadPing extends VendorMessage {
 	public static final int ALT_LOCS = 0x2;
 	public static final int PUSH_ALTLOCS=0x4;
 	public static final int FWT_PUSH_ALTLOCS=0x8;
-	public static final int PUSH_PING=0x10;
+	public static final int GGEP_PING=0x10;
+	
+	
+	/** 
+	 * a ggep field name containing the client guid of the node we would like
+	 * this ping routed to.
+	 */
+	private static final String GGEP_PUSH = "PUSH";
 
 	
 	/**
@@ -51,13 +64,14 @@ public class HeadPing extends VendorMessage {
 	
 	/** The format of the response that we desire */
 	private final byte _features;
-	
+
+	/** The GGEP fields in this pong, if any */
+	private GGEP _ggep;
 	/** 
 	 * The client GUID of the host we wish this ping routed to.
 	 * null if pinging directly.
 	 */ 
 	private final GUID _clientGUID;
-	
 	
 	/**
 	 * creates a message object with data from the network.
@@ -68,7 +82,7 @@ public class HeadPing extends VendorMessage {
 		super(guid, ttl, hops, F_LIME_VENDOR_ID, F_UDP_HEAD_PING, version, payload);
 		
 		//see if the payload is valid
-		if (getVersion() == VERSION && (payload == null || payload.length < 41))
+		if (getVersion() == VERSION && (payload == null || payload.length < 42))
 			throw new BadPacketException();
 		
 		_features = (byte) (payload [0] & FEATURE_MASK);
@@ -89,19 +103,28 @@ public class HeadPing extends VendorMessage {
 			_urn = urn;
 		}
 		
-		// parse the client guid if any
-		GUID g;
-		if ((_features & PUSH_PING) == PUSH_PING) {
-			if (payload.length < 57)
-				throw new BadPacketException();
-			
-            byte [] guidBytes = new byte[16]; 
-            System.arraycopy(payload,42,guidBytes,0,16); 
-            g = new GUID(guidBytes); 
-        } 
-        else g=null;
+		// parse the GGEP if any
+		GGEP g = null;
+		if ((_features  & GGEP_PING) == GGEP_PING) {
+			if (payload.length < 43)
+				throw new BadPacketException("no ggep was found.");
+			try {
+				g = new GGEP(payload, 42, null);
+			} catch (BadGGEPBlockException bpx) {
+				throw new BadPacketException("invalid ggep block");
+			}
+		}
+		_ggep = g;
 		
-		_clientGUID=g;
+		// extract the client guid if any
+		GUID clientGuid = null;
+		if (_ggep != null) {
+			try {
+				clientGuid = new GUID(_ggep.getBytes(GGEP_PUSH));
+			} catch (BadGGEPPropertyException noGuid) {}
+        } 
+		
+		_clientGUID=clientGuid;
 		
 	}
 	
@@ -138,43 +161,29 @@ public class HeadPing extends VendorMessage {
 
 		features = features & FEATURE_MASK;
 
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		DataOutputStream daos = new DataOutputStream(baos);
+		
 		String urnStr = urn.httpStringValue();
-		int urnlen = urnStr.getBytes().length;
-
-		int totalLen = urnlen+1;
 		
-		if (clientGUID != null)
-			totalLen += clientGUID.bytes().length;
+		GGEP ggep = null;
+		if (clientGUID != null) {
+			features |= GGEP_PING; // make sure we indicate we'll have ggep.
+			ggep = new GGEP(true);
+			ggep.put(GGEP_PUSH,clientGUID.bytes());
+		}
 		
-		byte []ret = new byte[totalLen];
+		try {
+			daos.writeByte(features);
+			daos.writeBytes(urnStr);
+			if ( ggep != null) 
+				ggep.write(daos);
+		}catch (IOException huh) {
+			ErrorService.error(huh);
+		}
 		
-		ret[0]=(byte)features;
-		
-		System.arraycopy(urnStr.getBytes(),0,ret,1,urnlen);
-		
-		if (clientGUID!=null) 
-            System.arraycopy(clientGUID.bytes(),0,ret,urnlen+1,16);
-
-		return ret;
+		return baos.toByteArray();
 	}
-	
-	/** 
-     * creates a ping that should be forwarded to a shielded leaf. 
-     * both messages have the same guid. 
-     *  
-     * @param original the original ping received from the pinger 
-     * @return the new ping, with stripped clientGuid and updated features. 
-     */ 
-    public static HeadPing createForwardPing(HeadPing original) { 
-         
-        HeadPing ret =  
-            new HeadPing(original.getUrn(), 
-                    original.getFeatures() & ~PUSH_PING); 
-         
-        ret.setGUID(new GUID(original.getGUID())); 
-         
-        return ret; 
-    } 
 	
 	/**
 	 * 
