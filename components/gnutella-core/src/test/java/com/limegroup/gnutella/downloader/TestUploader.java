@@ -253,7 +253,7 @@ public class TestUploader {
                         (t0-maxPollTime) +" mS");        
         
 		String str=
-        busy|queue?"HTTP 503 Service Unavailable\r\n":"HTTP 200 OK \r\n";
+        busy|queue?"HTTP/1.1 503 Service Unavailable\r\n":"HTTP/1.1 200 OK \r\n";
 		out.write(str.getBytes());
         if (busy) {
             String s = "\r\n"; 
