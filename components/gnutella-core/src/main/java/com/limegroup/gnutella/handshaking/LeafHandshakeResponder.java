@@ -64,9 +64,6 @@ public final class LeafHandshakeResponder
         if( RECORD_STATS )
             HandshakingStat.LEAF_OUTGOING_ACCEPT.incrementStat();
         
-        // let the Ultrapeer know of any high-hops Ultrapeers
-        // we're aware of
-        // TODO:: add high hops in the response -- we don't do that now
         return HandshakeResponse.createAcceptOutgoingResponse(ret);
     }
 
