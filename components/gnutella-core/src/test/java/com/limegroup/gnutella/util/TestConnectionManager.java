@@ -179,7 +179,8 @@ public final class TestConnectionManager extends ConnectionManager {
             if(useVaried && i >= (NUM_LEAF_CONNECTIONS/2)) {
                 conn = LeafConnection.createAltLeafConnection();
             } else {
-                conn = LeafConnection.createWithKeywords(new String[]{LEAF_KEYWORDS[i]});
+                conn = LeafConnection.createWithKeywords(
+                    new String[]{LEAF_KEYWORDS[i]});
             }
             LEAF_CONNECTIONS.add(conn);
         }
