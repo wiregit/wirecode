@@ -5,6 +5,7 @@ import com.limegroup.gnutella.util.*;
 import com.sun.java.util.collections.*;
 import com.limegroup.gnutella.xml.*;
 import com.limegroup.gnutella.messages.*;
+import com.limegroup.gnutella.settings.*;
 import java.net.*;
 
 /**
@@ -147,8 +148,9 @@ public final class SearchResultHandler {
             if(data.isFirewalled() && 
                !NetworkUtils.isVeryCloseIP(qr.getIPBytes()) &&               
                (!RouterService.acceptedIncomingConnection() ||
-                NetworkUtils.isPrivateAddress(RouterService.getAddress())
-               ) ) {
+                NetworkUtils.isPrivateAddress(RouterService.getAddress())) &&
+                ConnectionSettings.LOCAL_IS_PRIVATE.getValue()
+               )  {
                 return false;
             }
         }
