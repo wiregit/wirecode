@@ -85,6 +85,11 @@ public final class UDPService implements Runnable {
      */
     private final GUID CONNECT_BACK_GUID = new GUID(GUID.makeGuid());
 
+    /**
+     * The GUID that we send for Pings, useful to test solicited support.
+     */
+    private final GUID SOLICITED_PING_GUID = new GUID(GUID.makeGuid());
+
 	/**
 	 * Instance accessor.
 	 */
@@ -115,6 +120,12 @@ public final class UDPService implements Runnable {
      */
     public GUID getConnectBackGUID() {
         return CONNECT_BACK_GUID;
+    }
+
+    /** @return The GUID to send for Solicited Ping attempts....
+     */
+    public GUID getSolicitedGUID() {
+        return SOLICITED_PING_GUID;
     }
 
     /** 
@@ -216,8 +227,11 @@ public final class UDPService implements Runnable {
                             if (CONNECT_BACK_GUID.equals(guidReceived))
                                 _acceptedUnsolicitedIncoming = true;
                         }
-                        else
-                            _acceptedSolicitedIncoming = true;
+                        else if (message instanceof PingReply) {
+                            GUID guidReceived = new GUID(message.getGUID());
+                            if (SOLICITED_PING_GUID.equals(guidReceived))
+                                _acceptedSolicitedIncoming = true;
+                        }
                     }
                     router.handleUDPMessage(message, datagram);
                 }
