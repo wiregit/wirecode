@@ -136,14 +136,24 @@ public class GUID implements  com.sun.java.util.collections.Comparable {
      */
     public static byte[] makeAddressEncodedGuid(byte[] ip, int port) 
         throws IllegalArgumentException {
+        return addressEncodeGuid(makeGuid(), ip, port);
+    }
+
+    /** Modifies the input guid by address encoding it with the ip and port.
+     *  @exception IllegalArgumentException thrown if ip.length != 4 or if the
+     *  port is not a valid value or if the size of the input guid is not 16.
+     *  @returns the input guid, now modified as appropriate.  note that since
+     *  you have a handle to the original bytes you don't need the return value.
+     */
+    public static byte[] addressEncodeGuid(byte[] ret, byte[] ip, int port) 
+        throws IllegalArgumentException {
         
+        if (ret.length != SZ)
+            throw new IllegalArgumentException("Input byte array wrong length.");
         if (!NetworkUtils.isValidAddress(ip))
             throw new IllegalArgumentException("IP is invalid!");
         if (!NetworkUtils.isValidPort(port))
             throw new IllegalArgumentException("Port is invalid: " + port);
-
-
-        byte[] ret = makeGuid();
 
         // put the IP in there....
         for (int i = 0; i < 4; i++)
@@ -449,6 +459,54 @@ public class GUID implements  com.sun.java.util.collections.Comparable {
             throw new IllegalArgumentException();
         }
     }
+
+    /** Simply couples a GUID with a timestamp.  Needed for expiration of
+     *  QueryReplies waiting for out-of-band delivery, expiration of proxied
+     *  GUIDs, etc.
+     */
+    public static class TimedGUID {
+        private final long MAX_LIFE;
+        private final GUID _guid;
+        public GUID getGUID() { return _guid; }
+        private final long _creationTime;
+
+        /**
+         * @param guid The GUID to 'time'.
+         * @param maxLife The max lifetime of this GUID.
+         */
+        public TimedGUID(GUID guid, long maxLife) {
+            _guid = guid;
+            MAX_LIFE = maxLife;
+            _creationTime = System.currentTimeMillis();
+        }
+
+        /** @return true if other is a GUID that is the same as the GUID
+         *  in this bundle.
+         */
+        public boolean equals(Object other) {
+            if (other == this) return true;
+            if (other instanceof TimedGUID) 
+                return _guid.equals(((TimedGUID) other)._guid);
+            return false;
+        }
+
+        /** Since guids will be all we have when we do a lookup in a hashtable,
+         *  we want the hash code to be the same as the GUID. 
+         */
+        public int hashCode() {
+            return _guid.hashCode();
+        }
+
+        /** @return true if this bundle is greater than MAX_LIFE seconds old.
+         */
+        public boolean shouldExpire() {
+            long currTime = System.currentTimeMillis();
+            if (currTime - _creationTime >= MAX_LIFE)
+                return true;
+            return false;
+        }
+    }
+
 
     //Unit test: in the tests project.
 }

@@ -66,6 +66,11 @@ public class QueryRequest extends Message implements Serializable{
      */
     private int _capabilitySelector = 0;
 
+    /**
+     * Whether or not the GGEP header for Do Not Proxy was found.
+     */
+    private boolean _doNotProxy = false;
+
     // HUGE v0.93 fields
     /** 
 	 * The types of requested URNs.
@@ -142,7 +147,7 @@ public class QueryRequest extends Message implements Serializable{
         return new QueryRequest(newQueryGUID(true), DEFAULT_TTL, DEFAULT_URN_QUERY, "", 
                                 UrnType.SHA1_SET, sha1Set, null,
                                 !RouterService.acceptedIncomingConnection(),
-								Message.N_UNKNOWN, false, 0);
+								Message.N_UNKNOWN, false, 0, false);
 
 	}
 
@@ -163,7 +168,7 @@ public class QueryRequest extends Message implements Serializable{
         return new QueryRequest(newQueryGUID(false), DEFAULT_TTL, DEFAULT_URN_QUERY, "", 
                                 UrnType.SHA1_SET, sha1Set, null,
                                 !RouterService.acceptedIncomingConnection(),
-								Message.N_UNKNOWN, false, 0);
+								Message.N_UNKNOWN, false, 0, false);
 
 	}
 	/**
@@ -190,7 +195,7 @@ public class QueryRequest extends Message implements Serializable{
         return new QueryRequest(newQueryGUID(true), DEFAULT_TTL, filename, "", 
                                 UrnType.SHA1_SET, sha1Set, null,
                                 !RouterService.acceptedIncomingConnection(),
-								Message.N_UNKNOWN, false, 0);
+								Message.N_UNKNOWN, false, 0, false);
 
 	}
 
@@ -218,7 +223,7 @@ public class QueryRequest extends Message implements Serializable{
         return new QueryRequest(newQueryGUID(false), DEFAULT_TTL, filename, "", 
                                 UrnType.SHA1_SET, sha1Set, null,
                                 !RouterService.acceptedIncomingConnection(),
-								Message.N_UNKNOWN, false, 0);
+								Message.N_UNKNOWN, false, 0, false);
 
 	}
 
@@ -246,7 +251,7 @@ public class QueryRequest extends Message implements Serializable{
         return new QueryRequest(newQueryGUID(true), ttl, DEFAULT_URN_QUERY, "", 
                                 UrnType.SHA1_SET, sha1Set, null,
                                 !RouterService.acceptedIncomingConnection(),
-								Message.N_UNKNOWN, false, 0);
+								Message.N_UNKNOWN, false, 0, false);
 	}
 	
 	/**
@@ -266,7 +271,7 @@ public class QueryRequest extends Message implements Serializable{
                                 DEFAULT_URN_QUERY, "",
 	                            urnTypeSet, urnSet, null,
 	                            !RouterService.acceptedIncomingConnection(),
-	                            Message.N_UNKNOWN, false, 0);
+	                            Message.N_UNKNOWN, false, 0, false);
     }
 	    
 	
@@ -374,7 +379,7 @@ public class QueryRequest extends Message implements Serializable{
                                 "", null, null, null,
                                 !RouterService.acceptedIncomingConnection(),
                                 Message.N_UNKNOWN, false, 
-                                WHAT_IS_NEW_GGEP_VALUE);
+                                WHAT_IS_NEW_GGEP_VALUE, false);
     }
    
 
@@ -388,7 +393,8 @@ public class QueryRequest extends Message implements Serializable{
         return new QueryRequest(guid, ttl, WHAT_IS_NEW_QUERY_STRING,
                                 "", null, null, null,
                                 !RouterService.acceptedIncomingConnection(),
-                                Message.N_UNKNOWN, true, WHAT_IS_NEW_GGEP_VALUE);
+                                Message.N_UNKNOWN, true, WHAT_IS_NEW_GGEP_VALUE,
+                                false);
     }
    
 
@@ -501,7 +507,25 @@ public class QueryRequest extends Message implements Serializable{
 								qr.getQueryUrns(), qr.getQueryKey(),
 								qr.isFirewalledSource(),
 								qr.getNetwork(), qr.desiresOutOfBandReplies(),
-                                qr.getCapabilitySelector());
+                                qr.getCapabilitySelector(), qr.doNotProxy());
+	}
+
+	/**
+	 * Creates a new OOBquery from the existing query with the specified guid
+     * (which should be address encoded).
+	 *
+	 * @param qr the <tt>QueryRequest</tt> to copy
+	 * @return a new <tt>QueryRequest</tt> with the specified guid that is now
+     * OOB marked.
+	 */
+	public static QueryRequest createProxyQuery(QueryRequest qr, byte[] guid) {
+		return new QueryRequest(guid, qr.getTTL(), qr.getQuery(),
+								qr.getRichQueryString(), 
+								qr.getRequestedUrnTypes(),
+								qr.getQueryUrns(), qr.getQueryKey(),
+								qr.isFirewalledSource(),
+								qr.getNetwork(), true,
+                                qr.getCapabilitySelector(), qr.doNotProxy());
 	}
 
 	/**
@@ -517,7 +541,8 @@ public class QueryRequest extends Message implements Serializable{
 								qr.getQueryUrns(), qr.getQueryKey(),
 								qr.isFirewalledSource(),
 								qr.getNetwork(), false, 
-                                qr.getCapabilitySelector());
+                                qr.getCapabilitySelector(),
+                                qr.doNotProxy());
 	}
 
     /**
@@ -547,7 +572,7 @@ public class QueryRequest extends Message implements Serializable{
         return new QueryRequest(newQueryGUID(false), (byte)1, query, "", 
                                 UrnType.ANY_TYPE_SET, EMPTY_SET, key,
                                 !RouterService.acceptedIncomingConnection(),
-								Message.N_UNKNOWN, false, 0);
+								Message.N_UNKNOWN, false, 0, false);
     }
 
 
@@ -577,7 +602,7 @@ public class QueryRequest extends Message implements Serializable{
         return new QueryRequest(newQueryGUID(false), (byte) 1, DEFAULT_URN_QUERY,
                                 "", UrnType.SHA1_SET, sha1Set, key,
                                 !RouterService.acceptedIncomingConnection(),
-								Message.N_UNKNOWN, false, 0);
+								Message.N_UNKNOWN, false, 0, false);
     }
 
 
@@ -606,7 +631,7 @@ public class QueryRequest extends Message implements Serializable{
                              qr.getRichQueryString(),  qr.getRequestedUrnTypes(),
                              qr.getQueryUrns(), qr.getQueryKey(), false, 
                              Message.N_MULTICAST, false, 
-                             qr.getCapabilitySelector());
+                             qr.getCapabilitySelector(), false);
         mQr.setHops(qr.getHops());
         return mQr;
 	}
@@ -627,7 +652,7 @@ public class QueryRequest extends Message implements Serializable{
                                 qr.getRequestedUrnTypes(), qr.getQueryUrns(),
                                 key, qr.isFirewalledSource(), Message.N_UNKNOWN,
                                 qr.desiresOutOfBandReplies(),
-                                qr.getCapabilitySelector());
+                                qr.getCapabilitySelector(), false);
 	}
 
 	/**
@@ -640,7 +665,7 @@ public class QueryRequest extends Message implements Serializable{
         return new QueryRequest(newQueryGUID(false), (byte)1, 
 								FileManager.INDEXING_QUERY, "", 
                                 UrnType.ANY_TYPE_SET, EMPTY_SET, null,
-                                false, Message.N_UNKNOWN, false, 0);
+                                false, Message.N_UNKNOWN, false, 0, false);
 	}
 
 	/**
@@ -656,7 +681,7 @@ public class QueryRequest extends Message implements Serializable{
 		return new QueryRequest(newQueryGUID(false), ttl, 
 								query, "", 
                                 UrnType.ANY_TYPE_SET, EMPTY_SET, null,
-                                false, Message.N_UNKNOWN, false, 0);
+                                false, Message.N_UNKNOWN, false, 0, false);
 	}
 
 
@@ -715,7 +740,7 @@ public class QueryRequest extends Message implements Serializable{
     private QueryRequest(byte[] guid, byte ttl, String query, String richQuery) {
         this(guid, ttl, query, richQuery, UrnType.ANY_TYPE_SET, EMPTY_SET, null,
 			 !RouterService.acceptedIncomingConnection(), Message.N_UNKNOWN,
-             false, 0);
+             false, 0, false);
     }
 
     /**
@@ -730,7 +755,7 @@ public class QueryRequest extends Message implements Serializable{
                          boolean canReceiveOutOfBandReplies) {
         this(guid, ttl, query, richQuery, UrnType.ANY_TYPE_SET, EMPTY_SET, null,
 			 !RouterService.acceptedIncomingConnection(), Message.N_UNKNOWN, 
-             canReceiveOutOfBandReplies, 0);
+             canReceiveOutOfBandReplies, 0, false);
     }
 
     /**
@@ -755,6 +780,34 @@ public class QueryRequest extends Message implements Serializable{
                         QueryKey queryKey, boolean isFirewalled, 
                         int network, boolean canReceiveOutOfBandReplies,
                         int capabilitySelector) {
+        // calls me with the doNotProxy flag set to false
+        this(guid, ttl, query, richQuery, requestedUrnTypes, queryUrns,
+             queryKey, isFirewalled, network, canReceiveOutOfBandReplies,
+             capabilitySelector, false);
+    }
+
+    /**
+     * Builds a new query from scratch but you can flag it as a Requery, if 
+     * needed.  If you need to make a query that accepts out-of-band results, 
+     * be sure to set the guid correctly (see GUID.makeAddressEncodedGUI) and 
+     * set canReceiveOutOfBandReplies .
+     *
+     * @requires 0<=minSpeed<2^16 (i.e., can fit in 2 unsigned bytes)
+     * @param requestedUrnTypes <tt>Set</tt> of <tt>UrnType</tt> instances
+     *  requested for this query, which may be empty or null if no types were
+     *  requested
+	 * @param queryUrns <tt>Set</tt> of <tt>URN</tt> instances requested for 
+     *  this query, which may be empty or null if no URNs were requested
+	 * @throws <tt>IllegalArgumentException</tt> if the query string, the xml
+	 *  query string, and the urns are all empty, or if the capability selector
+     *  is bad
+     */
+    public QueryRequest(byte[] guid, byte ttl,  
+                        String query, String richQuery, 
+                        Set requestedUrnTypes, Set queryUrns,
+                        QueryKey queryKey, boolean isFirewalled, 
+                        int network, boolean canReceiveOutOfBandReplies,
+                        int capabilitySelector, boolean doNotProxy) {
         // don't worry about getting the length right at first
         super(guid, Message.F_QUERY, ttl, /* hops */ (byte)0, /* length */ 0, network);
 		if((query == null || query.length() == 0) &&
@@ -817,6 +870,7 @@ public class QueryRequest extends Message implements Serializable{
 		}
 
         this.QUERY_KEY = queryKey;
+        this._doNotProxy = doNotProxy;
 		
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
         try {
@@ -872,8 +926,13 @@ public class QueryRequest extends Message implements Serializable{
             if (_capabilitySelector > 0)
                 ggepBlock.put(GGEP.GGEP_HEADER_WHAT_IS, _capabilitySelector);
 
+            // add a GGEP-block if we shouldn't proxy
+            if (doNotProxy)
+                ggepBlock.put(GGEP.GGEP_HEADER_NO_PROXY);
+            
             // if there are GGEP headers, write them out...
-            if ((this.QUERY_KEY != null) || (_capabilitySelector > 0)) {
+            if ((this.QUERY_KEY != null) || (_capabilitySelector > 0) ||
+                _doNotProxy) {
                 ByteArrayOutputStream ggepBytes = new ByteArrayOutputStream();
                 ggepBlock.write(ggepBytes);
                 // write out GGEP
@@ -958,6 +1017,8 @@ public class QueryRequest extends Message implements Serializable{
                         if (ggep.hasKey(GGEP.GGEP_HEADER_WHAT_IS))
                             _capabilitySelector = 
                                 ggep.getInt(GGEP.GGEP_HEADER_WHAT_IS);
+                        if (ggep.hasKey(GGEP.GGEP_HEADER_NO_PROXY))
+                            _doNotProxy = true;
                     }
                     catch (BadGGEPBlockException ignored) {}
                     catch (BadGGEPPropertyException ignored) {}
@@ -1215,6 +1276,14 @@ public class QueryRequest extends Message implements Serializable{
                 return true;
         }
         return false;
+    }
+
+
+    /**
+     * Returns true if the query source does not want you to proxy for it.
+     */
+    public boolean doNotProxy() {
+        return _doNotProxy;
     }
 
 

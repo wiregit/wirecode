@@ -277,6 +277,19 @@ public class ManagedConnection extends Connection
     private QueryRouteTable _lastQRPTableSent;
     
     /**
+     * Holds the mappings of GUIDs that are being proxied.
+     * We want to construct this lazily....
+     * GUID.TimedGUID -> GUID
+     * OOB Proxy GUID - > Original GUID
+     */
+    private Map _guidMap = null;
+
+    /**
+     * The max lifetime of the GUID (10 minutes).
+     */
+    private static long TIMED_GUID_LIFETIME = 10 * 60 * 1000;
+
+    /**
      * Whether or not horizon counting is enabled from this connection.
      */
     private boolean _horizonEnabled = true;
@@ -788,7 +801,10 @@ public class ManagedConnection extends Connection
         synchronized (_outputQueueLock) {
             super.close();
             _outputQueueLock.notify();
-        }        
+        }
+        // release pointer to our _guidMap so it can be gc()'ed
+        if (_guidMap != null)
+            GuidMapExpirer.removeMap(_guidMap);
     }
 
     //////////////////////////////////////////////////////////////////////////
@@ -946,6 +962,7 @@ public class ManagedConnection extends Connection
      */
     void loopForMessages() throws IOException {
 		MessageRouter router = RouterService.getMessageRouter();
+        final boolean isSupernodeClientConnection=isSupernodeClientConnection();
         while (true) {
             Message m=null;
             try {
@@ -968,11 +985,97 @@ public class ManagedConnection extends Connection
                 continue;
             }
 
+            //special handling for proxying - note that for
+            //non-SupernodeClientConnections a good compiler will ignore this
+            //code
+            if (isSupernodeClientConnection && 
+                (m instanceof QueryRequest)) m = tryToProxy((QueryRequest) m);
+            if (isSupernodeClientConnection &&
+                (m instanceof QueryStatusResponse)) 
+                m = morphToStopQuery((QueryStatusResponse) m);
             //call MessageRouter to handle and process the message
             router.handleMessage(m, this);            
         }
     }
     
+    private QueryRequest tryToProxy(QueryRequest query) {
+        // we must have the following qualifications:
+        // 1) Leaf must be sending SuperNode a query (checked in loopForMessages)
+        // 2) Leaf must support Leaf Guidance
+        // 3) Query must not be OOB.
+        // 3.5) The query originator should not disallow proxying.
+        // 4) We must be able to OOB and have great success rate.
+        if (remoteHostSupportsLeafGuidance() < 1) return query;
+        if (query.desiresOutOfBandReplies()) return query;
+        if (query.doNotProxy()) return query;
+        if (!RouterService.isOOBCapable() || 
+            !OutOfBandThroughputStat.isSuccessRateGreat() ||
+            !OutOfBandThroughputStat.isOOBEffectiveForProxy()) return query;
+
+        // everything is a go - we need to do the following:
+        // 1) mutate the GUID of the query - you should maintain every param of
+        // the query except the new GUID and the OOB minspeed flag
+        // 2) set up mappings between the old guid and the new guid.
+        // after that, everything is set.  all you need to do is map the guids
+        // of the replies back to the original guid.  also, see if a you get a
+        // QueryStatusResponse message and morph it...
+        // THIS IS SOME MAJOR HOKERY-POKERY!!!
+        
+        // 1) mutate the GUID of the query
+        byte[] origGUID = query.getGUID();
+        byte[] oobGUID = new byte[origGUID.length];
+        System.arraycopy(origGUID, 0, oobGUID, 0, origGUID.length);
+        GUID.addressEncodeGuid(oobGUID, RouterService.getAddress(),
+                               RouterService.getPort());
+
+        query = QueryRequest.createProxyQuery(query, oobGUID);
+
+        // 2) set up mappings between the guids
+        if (_guidMap == null) {
+            _guidMap = new Hashtable();
+            GuidMapExpirer.addMapToExpire(_guidMap);
+        }
+        GUID.TimedGUID tGuid = new GUID.TimedGUID(new GUID(oobGUID),
+                                                  TIMED_GUID_LIFETIME);
+        _guidMap.put(tGuid, new GUID(origGUID));
+
+        OutOfBandThroughputStat.OOB_QUERIES_SENT.incrementStat();
+        return query;
+    }
+
+    private QueryStatusResponse morphToStopQuery(QueryStatusResponse resp) {
+        // if the _guidMap is null, we aren't proxying anything....
+        if (_guidMap == null) return resp;
+
+        // if we are proxying this query, we should modify the GUID so as
+        // to shut off the correct query
+        final GUID origGUID = resp.getQueryGUID();
+        GUID oobGUID = null;
+        synchronized (_guidMap) {
+            Iterator entrySetIter = _guidMap.entrySet().iterator();
+            while (entrySetIter.hasNext()) {
+                Map.Entry entry = (Map.Entry) entrySetIter.next();
+                if (origGUID.equals(entry.getValue())) {
+                    oobGUID = ((GUID.TimedGUID)entry.getKey()).getGUID();
+                    break;
+                }
+            }
+        }
+
+        // if we had a match, then just construct a new one....
+        if (oobGUID != null) {
+            try {
+                return new QueryStatusResponse(oobGUID, resp.getNumResults());
+            }
+            catch (BadPacketException bpe) {
+                ErrorService.error(bpe);
+                return resp;
+            }
+        }
+        else return resp;
+    }
+    
+
     /**
      * Utility method for checking whether or not this message is considered
      * spam.
@@ -1103,6 +1206,21 @@ public class ManagedConnection extends Connection
      */
     public void handleQueryReply(QueryReply queryReply,
                                  ReplyHandler receivingConnection) {
+        if (_guidMap != null) {
+        // ---------------------
+        // If we are proxying for a query, map back the guid of the reply
+        GUID.TimedGUID tGuid = new GUID.TimedGUID(new GUID(queryReply.getGUID()),
+                                                  TIMED_GUID_LIFETIME);
+        GUID origGUID = (GUID) _guidMap.get(tGuid);
+        if (origGUID != null) { 
+            byte prevHops = queryReply.getHops();
+            queryReply = new QueryReply(origGUID.bytes(), queryReply);
+            queryReply.setTTL((byte)2); // we ttl 1 more than necessary
+            queryReply.setHops(prevHops);
+        }
+        // ---------------------
+        }
+        
         send(queryReply);
     }
 
@@ -1471,4 +1589,47 @@ public class ManagedConnection extends Connection
 	public Object getQRPLock() {
 		return QRP_LOCK;
 	}
+
+    /** Class-wide expiration mechanism for all ManagedConnections.
+     *  Only expires on-demand.
+     */
+    private static class GuidMapExpirer implements Runnable {
+        
+        private static List toExpire = new LinkedList();
+        private static boolean scheduled = false;
+
+        public GuidMapExpirer() {};
+
+        public static synchronized void addMapToExpire(Map expiree) {
+            // schedule it on demand
+            if (!scheduled) {
+                RouterService.schedule(new GuidMapExpirer(), 0,
+                                       TIMED_GUID_LIFETIME);
+                scheduled = true;
+            }
+            toExpire.add(expiree);
+        }
+
+        public static synchronized void removeMap(Map expiree) {
+            toExpire.remove(expiree);
+        }
+
+        public void run() {
+            synchronized (this) {
+                // iterator through all the maps....
+                Iterator iter = toExpire.iterator();
+                while (iter.hasNext()) {
+                    Map currMap = (Map) iter.next();
+                    synchronized (currMap) {
+                        Iterator keyIter = currMap.keySet().iterator();
+                        // and expire as many entries as possible....
+                        while (keyIter.hasNext()) 
+                            if (((GUID.TimedGUID) keyIter.next()).shouldExpire())
+                                keyIter.remove();
+                    }
+                }
+            }
+        }
+    }
+
 }

@@ -14,6 +14,7 @@ public class OutOfBandThroughputStat extends BasicStatistic {
 
     public static final int MIN_SAMPLE_SIZE = 275;
     public static final int MIN_SUCCESS_RATE = 60;
+    public static final int PROXY_SUCCESS_RATE = 80;
 
 	/**
 	 * Constructs a new <tt>MessageStat</tt> instance. 
@@ -45,6 +46,12 @@ public class OutOfBandThroughputStat extends BasicStatistic {
 	    new OutOfBandThroughputStat();
 
     /**
+     * <tt>Statistic</tt> for the number of OOB queries sent by this node.
+     */
+    public static final Statistic OOB_QUERIES_SENT =
+        new OutOfBandThroughputStat();
+
+    /**
      * @return a double from 0 to 100 that signifies the OOB success percentage.
      */
     public static double getSuccessRate() {
@@ -61,6 +68,38 @@ public class OutOfBandThroughputStat extends BasicStatistic {
         if (RESPONSES_REQUESTED.getTotal() < MIN_SAMPLE_SIZE)
             return true;
         return (getSuccessRate() > MIN_SUCCESS_RATE);
+    }
+
+    /**
+     * @return whether or not the success rate is good enough for proxying.
+     */
+    public static boolean isSuccessRateGreat() {
+        // we want a large enough sample space.....
+        if (RESPONSES_REQUESTED.getTotal() < MIN_SAMPLE_SIZE)
+            return true;
+        return (getSuccessRate() > PROXY_SUCCESS_RATE);
+    }
+
+    /**
+     * @return A boolean if OOB queries have seemed ineffective, i.e. we've
+     * sent several but not received ANY results.  Note that this is pessimistic
+     * and may shut off OOB even if it is working (i.e. if we've only done rare
+     * queries).
+     */
+    public static boolean isOOBEffectiveForProxy() {
+        return !((OOB_QUERIES_SENT.getTotal() > 40) &&
+                 (RESPONSES_REQUESTED.getTotal() == 0));
+    }
+
+    /**
+     * @return A boolean if OOB queries have seemed ineffective, i.e. we've
+     * sent several but not received ANY results.  Note that this is pessimistic
+     * and may shut off OOB even if it is working (i.e. if we've only done rare
+     * queries).
+     */
+    public static boolean isOOBEffectiveForMe() {
+        return !((OOB_QUERIES_SENT.getTotal() > 20) &&
+                 (RESPONSES_REQUESTED.getTotal() == 0));
     }
 
 }
