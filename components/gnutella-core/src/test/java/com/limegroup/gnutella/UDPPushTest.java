@@ -29,7 +29,7 @@ public class UDPPushTest extends BaseTestCase {
 	
 	
 	
-	static RemoteFileDesc rfd1, rfd2;
+	static RemoteFileDesc rfd1, rfd2,rfdAlt;
 	
 	/**
 	 * the socket that will supposedly be the push download
@@ -101,6 +101,15 @@ public class UDPPushTest extends BaseTestCase {
 				"LIME",now,
 				proxies,now);
 		
+		rfdAlt = new RemoteFileDesc(
+				"127.0.0.1",20000,30l,"file1",
+				100,guid,SpeedConstants.CABLE_SPEED_INT,
+				false,1,false,
+				doc,urns,
+				false,true,
+				"ALT",now,
+				proxies,now);
+		
 		Acceptor acc = RouterService.getAcceptor();
 		try{
 			PrivilegedAccessor.setValue(acc,"_acceptedIncoming",new Boolean(true));
@@ -139,6 +148,39 @@ public class UDPPushTest extends BaseTestCase {
 		Socket s = serversocket.accept();
 		assertTrue(s.isConnected());s.close();
 
+		
+	}
+	
+	/**
+	 * tests the scenario where an udp push is sent, no
+	 * connection is received but since we're trying to contact
+	 * an altloc no failover tcp push is sent.
+	 */
+	public void testUDPPushFailoverAlt() throws Exception {
+		
+		
+		requestPush(rfdAlt);
+		
+		try {
+			serversocket.accept();
+			fail("tcp attempt was made");
+		}catch(IOException expected){}
+		
+		DatagramPacket push = new DatagramPacket(new byte[1000],1000);
+		udpsocket.receive(push);
+		
+		ByteArrayInputStream bais = new ByteArrayInputStream(push.getData());
+		PushRequest pr = (PushRequest)Message.read(bais);
+		assertEquals(rfd1.getIndex(),pr.getIndex());
+		
+		Thread.sleep(5200);
+		
+		try {
+			Socket s =serversocket.accept();
+			s.close();
+			fail("tcp attempt was made");
+		}catch(IOException expected){}
+		Thread.sleep(3000);
 		
 	}
 	

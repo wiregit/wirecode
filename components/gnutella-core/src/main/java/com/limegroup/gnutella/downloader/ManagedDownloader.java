@@ -250,6 +250,9 @@ public class ManagedDownloader implements Downloader, Serializable {
     /** The time to wait trying to establish each push connection, in
      *  milliseconds.  This needs to be larger than the normal time. */
     private static final int PUSH_CONNECT_TIME=20000;  //20 seconds
+    /** The time to wait trying to establish a push connection
+     * if only a UDP push has been sent (as is in the case of altlocs) */
+    private static final int UDP_PUSH_CONNECT_TIME=6000; //6 seconds
     /** The smallest interval that can be split for parallel download */
     private static final int MIN_SPLIT_SIZE=100000;      //100 KB        
     /** The interval size for downloaders with persistenace support  */
@@ -1535,7 +1538,6 @@ public class ManagedDownloader implements Downloader, Serializable {
      * file.
      */
     private synchronized void informMesh(RemoteFileDesc rfd, boolean good) {
-        
         IncompleteFileDesc ifd = null;
         //TODO3: Until IncompleteFileDesc and ManagedDownloader share a copy
         // of the AlternateLocationCollection, they must use seperate
@@ -2817,7 +2819,9 @@ public class ManagedDownloader implements Downloader, Serializable {
             //Language Specifications.)  Look at acceptDownload for
             //details.
             try {
-                threadLock.wait(PUSH_CONNECT_TIME);  
+                threadLock.wait(rfd.isFromAlternateLocation()? 
+                        UDP_PUSH_CONNECT_TIME: 
+                            PUSH_CONNECT_TIME);  
             } catch(InterruptedException e) {
                 DownloadStat.PUSH_FAILURE_INTERRUPTED.incrementStat();
                 throw new IOException("push interupted.");
