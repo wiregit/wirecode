@@ -383,12 +383,23 @@ public class FixedsizeForgetfulHashMap implements Map
         public boolean hasNext() {
             return real.hasNext();
         }
+        /** Same as Iterator.remove().  That means that calling remove()
+         *  multiple times may have undefined results! */
         public void remove() {
             if (lastYielded==null)
                 return;
+            //Cleanup entry in removeList.  Note that we cannot simply call
+            //FixedsizeForgetfulHashMap.this.remove(lastYielded) since that may
+            //affect the underlying map--while iterating through it.
+            ValueElement ve = (ValueElement)map.get(lastYielded);
+            if (ve != null)  //not strictly needed by specification of remove.
+            {
+                currentSize--;
+                removeList.remove(ve.getListElement());      
+            }
+            //Cleanup entry in underlying map.  This MUST be done through
+            //the iterator only, to prevent inconsistent state.
             real.remove();
-            //Cleanup entry in removeList.  That's the whole point of this mess!
-            FixedsizeForgetfulHashMap.this.remove(lastYielded); 
         }
     }
 
@@ -503,35 +514,48 @@ public class FixedsizeForgetfulHashMap implements Map
 
         //4. keySet().iterator() methods.  (Other methods are incomplete.)
         Iterator iter=null;
-        rt=new FixedsizeForgetfulHashMap(3);
+        rt=new FixedsizeForgetfulHashMap(4);
         rt.put(g1, c1);
-        rt.put(g2, c2);
+        rt.put(g2, c5);
+        rt.put(g2, c2);             //remap c2
         rt.put(g3, c3);
+        rt.put(g4, c4);
         iter=rt.keySet().iterator();
         Assert.that(iter.hasNext());
         Object a1=iter.next();
-        Assert.that(a1==g1 || a1==g2 || a1==g3);
+        Assert.that(a1==g1 || a1==g2 || a1==g3 || a1==g4);
         Assert.that(iter.hasNext());
         Object a2=iter.next();
+        Assert.that(rt.size()==4);
         iter.remove();               //remove a2
-        Assert.that(a2==g1 || a2==g2 || a2==g3);
+        Assert.that(rt.size()==3);
+        Assert.that(a2==g1 || a2==g2 || a2==g3 || a2==g4);
         Assert.that(a1!=a2);
         Assert.that(iter.hasNext());
         Object a3=iter.next();
-        Assert.that(a3==g1 || a3==g2 || a3==g3);
+        Assert.that(rt.size()==3);
+        iter.remove();               //remove a3
+        Assert.that(rt.size()==2);
+        Assert.that(a3==g1 || a3==g2 || a3==g3 || a3==g4);
         Assert.that(a3!=a2);
         Assert.that(a3!=a1);
+        Object a4=iter.next();
+        Assert.that(a4==g1 || a4==g2 || a4==g3 || a4==g4);
+        Assert.that(a4!=a3);
+        Assert.that(a4!=a2);
+        Assert.that(a4!=a1);
         Assert.that(! iter.hasNext());
         
         iter=rt.keySet().iterator();
         Assert.that(rt.containsKey(a1));
         Assert.that(! rt.containsKey(a2));
-        Assert.that(rt.containsKey(a3));
-        Object a4=iter.next();
-        Assert.that(a4==a1 || a4==a3);  //NOT a2
-        Object a5=iter.next();
-        Assert.that(a5==a1 || a5==a3);  //NOT a2
-        Assert.that(a5!=a4);
+        Assert.that(! rt.containsKey(a3));
+        Assert.that(rt.containsKey(a4));
+        Object b1=iter.next();
+        Assert.that(b1==a1 || b1==a4);  //NOT a2, a3
+        Object b2=iter.next();
+        Assert.that(b1==a1 || b1==a4);  //NOT a2, a3
+        Assert.that(b1!=b2);
         Assert.that(! iter.hasNext());
     }
     */
