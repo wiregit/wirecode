@@ -27,7 +27,7 @@ public class SettingsManager implements SettingsInterface {
 
     private boolean checkAgain_;
 
-    /** Variablesg for the various settings */
+    /** Variables for the various settings */
 	private boolean  allowBroswer_;
     private byte     ttl_;
     private byte     softmaxttl_;
@@ -685,6 +685,11 @@ public class SettingsManager implements SettingsInterface {
 
     /** returns the string of file extensions*/
     public String getExtensions(){return extensions_;}
+
+    /** returns the string of default file extensions to share.*/
+    public String getDefaultExtensions() {
+		return SettingsInterface.DEFAULT_EXTENSIONS;
+	}
 
     public String[] getBannedIps(){return bannedIps_;}
     public String[] getBannedWords(){return bannedWords_;}
