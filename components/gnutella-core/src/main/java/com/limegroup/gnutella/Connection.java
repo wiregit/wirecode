@@ -97,14 +97,14 @@ public class Connection implements Runnable {
     protected boolean incoming;
 
     /** The (approximate) max time a packet can be queued, in milliseconds. */
-    private static final int QUEUE_TIME=1000;
+    private static final int QUEUE_TIME=750;
     /** The number of packets to present to the OS at a time.  This
      *  should be roughly proportional to the OS's send buffer. */
-    private static final int BATCH_SIZE=20;
+    private static final int BATCH_SIZE=50;
     /** The size of the queue.  This must be larger than BATCH_SIZE.
      *  Larger values tolerate temporary bursts of producer traffic
      *  without traffic but may result in overall latency. */
-    private static final int QUEUE_SIZE=100;
+    private static final int QUEUE_SIZE=500;
     /** A lock to protect the swapping of outputQueue and oldOutputQueue. */
     private Object outputQueueLock=new Object();
     /** The producer's queue. */
