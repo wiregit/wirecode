@@ -63,6 +63,16 @@
 	</delete>
 </target>
 
+<!-- Creates a jar file from core code -->
+<target name="jar" depends="clean, core">
+	<delete file="lib/core.jar"/>
+	<jar destfile="lib/core.jar" 
+		 basedir="." 
+		 excludes="**/*.java **/*.xml **/*.txt **/*.sh **/*.bat 
+		 		   **/*.html **/*.jar compile run query_keys">
+	</jar>
+</target>
+
 </project>
 
 
