@@ -84,8 +84,8 @@ public class ManagedConnectionBufferTest extends BaseTestCase {
         assertEquals("bytes sent differs from total length",
 					 out.getBytesSent(), pr.getTotalLength());
         assertLessThan("Unreasonably long send time", 500, elapsed);
-        assertEquals("hopped something other than 0", pr.getHops(), 0);
-        assertEquals("unexpected ttl", pr.getTTL(), 4);
+        assertEquals("hopped something other than 0", 0, pr.getHops());
+        assertEquals("unexpected ttl", 4, pr.getTTL());
     }
 
     public void testReorderBuffer() 
