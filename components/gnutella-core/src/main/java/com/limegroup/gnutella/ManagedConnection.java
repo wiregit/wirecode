@@ -75,7 +75,8 @@ public class ManagedConnection
     private static final int PRIORITY_QUERY=3;
     private static final int PRIORITY_PING_REPLY=4;
     private static final int PRIORITY_PING=5;
-    private static final int PRIORITY_OTHER=6;   //lowest priority, QRP included
+    //lowest priority, QRP included.  NOT reordered.
+    private static final int PRIORITY_OTHER=6;   
 
     /** A lock to protect the swapping of outputQueue and oldOutputQueue. */
     private Object _outputQueueLock=new Object();
@@ -437,7 +438,10 @@ public class ManagedConnection
                         synchronized (_outputQueueLock) {
                             if (_outputQueue[i].isEmpty())
                                 continue;
-                            m=(Message)_outputQueue[i].removeLast(); //LIFO!
+                            if (i!=PRIORITY_OTHER)
+                                m=(Message)_outputQueue[i].removeLast(); //LIFO
+                            else
+                                m=(Message)_outputQueue[i].removeFirst(); //FIFO
                         }
                         ManagedConnection.super.send(m);
                         _bytesSent+=m.getTotalLength();
@@ -1238,10 +1242,17 @@ public class ManagedConnection
         m=new PingReply(new byte[16], (byte)5, 6341, new byte[4], 0, 0);
         m.hop();
         out.send(m);
+        out.send(new ResetTableMessage(1024, (byte)2));
         out.send(new PingReply(new byte[16], (byte)5, 6342, new byte[4], 0, 0));
         out.send(new QueryReply(new byte[16], (byte)5, 6342, new byte[4], 0, 
                                 new Response[0], new byte[16]));
+        out.send(new PatchTableMessage((short)1, (short)2, 
+                                       PatchTableMessage.COMPRESSOR_NONE,
+                                       (byte)8, new byte[10], 0, 5));
         out.send(new PingRequest((byte)5));
+        out.send(new PatchTableMessage((short)2, (short)2, 
+                                       PatchTableMessage.COMPRESSOR_NONE,
+                                       (byte)8, new byte[10], 5, 9));
                
         //2. Now we let the messages pass through, as if the receiver's window
         //became non-zero.  Buffers look this before emptying:
@@ -1251,7 +1262,7 @@ public class ManagedConnection
         //  QUERY: "test"
         //  PING_REPLY: x/6341
         //  PING: x
-        //  OTHER:
+        //  OTHER: reset patch1 patch2
         Assert.that(out._outputRunnerThread==null);
         //out.dumpQueueStats();
         out.startOutputRunner();
@@ -1279,6 +1290,11 @@ public class ManagedConnection
         Assert.that(m instanceof PingRequest);
         Assert.that(m.getHops()>0);
 
+        m=in.receive(); //QRP reset
+        Assert.that(m instanceof ResetTableMessage);
+
+        
+
         m=in.receive(); //watchdog pong/6342
         Assert.that(m instanceof PingReply);
         Assert.that(((PingReply)m).getPort()==6342);
@@ -1287,6 +1303,16 @@ public class ManagedConnection
         m=in.receive(); //reply/6341
         Assert.that(m instanceof QueryReply);
         Assert.that(((QueryReply)m).getPort()==6341);
+
+        m=in.receive(); //QRP patch1
+        Assert.that(m instanceof PatchTableMessage);
+        Assert.that(((PatchTableMessage)m).getSequenceNumber()==1);
+
+
+        m=in.receive(); //QRP patch2
+        Assert.that(m instanceof PatchTableMessage);
+        Assert.that(((PatchTableMessage)m).getSequenceNumber()==2);
+
     }
 
     private static void testDropBuffer(ManagedConnection out, Connection in) 
