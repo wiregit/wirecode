@@ -545,6 +545,14 @@ public class HTTPDownloader implements Runnable {
                 break;
             }
 
+			// just a safety check.  hopefully this wouldn't
+			// happen, but if it does, need a way to exit 
+			// gracefully...
+			if (_amountRead > _sizeOfFile) {
+                _state = ERROR;
+                break;
+            }
+
             try {
                 c = _br.read(buf);
             }
