@@ -903,7 +903,8 @@ public final class HTTPUploader implements Uploader {
                 // sequences that may be used if the sender is using
                 // continuations.
                 AlternateLocation al = 
-                AlternateLocation.create(st.nextToken().trim());
+                AlternateLocation.create(st.nextToken().trim(),
+                                         _fileDesc.getSHA1Urn());
                 
                 URN sha1 = al.getSHA1Urn();
                 if(sha1.equals(alc.getSHA1Urn())) {

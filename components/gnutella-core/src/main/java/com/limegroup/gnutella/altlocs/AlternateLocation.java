@@ -1,6 +1,7 @@
 package com.limegroup.gnutella.altlocs;
 
 import com.limegroup.gnutella.*;
+import com.limegroup.gnutella.filters.IP;
 import com.limegroup.gnutella.http.*;
 import com.limegroup.gnutella.util.*;
 import java.net.*;
@@ -90,6 +91,39 @@ public final class AlternateLocation implements HTTPHeaderValue, Comparable {
 		URN sha1 = URN.createSHA1UrnFromURL(url);
 		return new AlternateLocation(url, sha1);
 	}
+	
+	/**
+	 * Constructs a new <tt>AlternateLocation</tt> instance based on the
+	 * specified string argument and URN.
+	 *
+	 * @param location a string containing one of the following:
+	 *  "http://my.address.com:port#/uri-res/N2R?urn:sha:SHA1LETTERS"
+	 *  "1.2.3.4[:6346]"
+	 * If the first is given, then the SHA1 in the string MUST match
+	 * the SHA1 given.
+	 *
+	 * @throws <tt>IOException</tt> if there is any problem constructing
+	 *  the new instance.
+	 */
+	public static AlternateLocation create(final String location,
+	                                       final URN urn) throws IOException {
+        if(location == null || location.equals(""))
+            throw new IOException("null or empty location");
+        if(urn == null)
+            throw new IOException("null URN.");
+         
+        // Case 1.   
+        if(location.toLowerCase().startsWith("http")) {
+            AlternateLocation al = create(location);
+            if(!al.SHA1_URN.equals(urn))
+                throw new IOException("mismatched URN");
+            return al;
+        }
+        
+        // Case 2.
+		URL url = AlternateLocation.createUrlFromMini(location, urn);
+		return new AlternateLocation(url, urn);
+    }
 
 	/**
 	 * Creates a new <tt>AlternateLocation</tt> instance for the given 
@@ -318,47 +352,66 @@ public final class AlternateLocation implements HTTPHeaderValue, Comparable {
 	private static URL createUrl(final String locationHeader) 
 		throws IOException {
 		String test = locationHeader.toLowerCase();
+		
+		//Doesn't start with http? Bad.
+		if(!test.startsWith("http"))
+		    throw new IOException("invalid location: " + locationHeader);
+		
+		//Had multiple http's in it? Bad.
+		if(test.lastIndexOf("http://") > 4) 
+            throw new IOException("invalid location: " + locationHeader);
+            
+        String urlStr = AlternateLocation.removeTimestamp(locationHeader);
+        URL url = new URL(urlStr);
+        String host = url.getHost();
+        int    port = url.getPort();
+        
+        // Invalid host? Bad.
+        if(host == null || host.equals(""))
+            throw new IOException("invalid location: " + locationHeader);        
+        // If no port, fake it at 80.
+        if(url.getPort()==-1)
+            url = new URL("http",url.getHost(),80,url.getFile());
 
-		if(test.startsWith("http")) {
-            String urlStr = AlternateLocation.removeTimestamp(locationHeader);
-            URL url = new URL(urlStr);
-            String host = url.getHost();
-            int    port = url.getPort();
-            if(host == null || host.equals("")) {
-                throw new IOException("invalid host in alternate location: "+
-                                      "host: "+host+"header: "+locationHeader);
-            }
-			// Handle bad merged alternate locations minus the spaces
-			if(test.lastIndexOf("http://") > 4) {
-                throw new IOException("messy alternate location: "+
-                                      locationHeader);
-			}
-			// Handle bad ports in alternate locations 
-			if((port & 0xFFFF0000) != 0) {
-				throw new IOException("invalid port in alternate location: "+
-									  "port: "+port+"header: "+locationHeader);
-			}
-
-            // check for private addresses if it appears to be in dotted quad 
-            // format..
-            if(Character.isDigit(host.charAt(0))) {
-                InetAddress address = InetAddress.getByName(host);
-                if(NetworkUtils.isPrivateAddress(address.getAddress())) {
-                    throw new IOException("cannot include private address in "+
-                                          "alt loc: "+host);
-                } 
-            }
-            if(url.getPort()==-1)
-                url = new URL("http",url.getHost(),80,url.getFile());
-			return url;
-		} else {
-			// we could not understand the beginning of the alternate location
-			// line
-			throw new IOException("invalid start for alternate location: "+
-								  locationHeader);
-		}
+		return url;
 	}
-
+	
+	/**
+	 * Creates a new <tt>URL</tt> based on the IP and port in the location
+	 * The location MUST be a dotted IP address.
+	 */
+	private static URL createUrlFromMini(final String location, URN urn)
+	  throws IOException {
+	    int port = location.indexOf(':');
+	    final String loc =
+	        (port == -1 ? location : location.substring(0, port));
+        //Use the IP class as a quick test to make sure it was a valid location
+        try {
+            new IP(loc);
+        } catch(IllegalArgumentException iae) {
+            throw new IOException("invalid location: " + location);
+        }
+        
+        //But, IP still could have passed if it thought there was a submask
+        if( loc.indexOf('/') != -1 )
+            throw new IOException("invalid location: " + location);
+        
+        if( port == -1 )
+            port = 6346; // default port if not included.
+        else {
+            // Not enough room for a port.
+            if(location.length() < port+1)
+                throw new IOException("invalid location: " + location);
+            try {
+                port = Short.parseShort(location.substring(port+1));
+            } catch(NumberFormatException nfe) {
+                throw new IOException("invalid location: " + location);
+            }
+        }
+	    
+	    return new URL("http", loc, port,
+	                HTTPConstants.URI_RES_N2R + urn.httpStringValue());
+    }
 
 	/**
 	 * Removes the timestamp from an alternate location header.  This will
