@@ -291,20 +291,21 @@ public class GGEPTest extends com.limegroup.gnutella.util.BaseTestCase {
         
         int offsets[] = new int[1];
         byte[] bytes = out.toByteArray();
-        GGEP ggep = new GGEP(bytes, 0, offsets);
+        GGEP[] ggeps = GGEP.read(bytes, 0, offsets);
         assertEquals(bytes.length, offsets[0]);
-        assertEquals(3, ggep.getHeaders().size());
-        assertEquals("begin", ggep.getString("1"));
-        assertEquals(new String(middleValue), ggep.getString("2"));
-        assertEquals("end", ggep.getString("3"));
+        assertEquals(1, ggeps.length);
+        assertEquals(3, ggeps[0].getHeaders().size());
+        assertEquals("begin", ggeps[0].getString("1"));
+        assertEquals(new String(middleValue), ggeps[0].getString("2"));
+        assertEquals("end", ggeps[0].getString("3"));
         
         // Make sure that also write the data as compressed, if it was read that way.
         ByteArrayOutputStream toWrite = new ByteArrayOutputStream();
-        ggep.write(toWrite);
+        ggeps[0].write(toWrite);
         assertEquals(bytes, toWrite.toByteArray());
     }
 
-    public void testBasicConstruction() throws Exception {
+    public void testStaticReadMethod() throws Exception {
         byte[] bytes = new byte[24];
         bytes[0] = GGEP.GGEP_PREFIX_MAGIC_NUMBER;
         bytes[1] = (byte)0x05;
@@ -329,8 +330,9 @@ public class GGEPTest extends com.limegroup.gnutella.util.BaseTestCase {
         bytes[20] = (byte)'W';
         bytes[21] = (byte)'A';
         bytes[22] = (byte)'N';
-        bytes[23] = (byte)'I';
-        GGEP ggep = new GGEP(bytes, 0);
+        bytes[23] = (byte)'I';        
+        GGEP[] temp = GGEP.read(bytes,0);
+        assertEquals(1, temp.length);
                           
         bytes = new byte[32];
         bytes[0] = GGEP.GGEP_PREFIX_MAGIC_NUMBER;
@@ -364,45 +366,90 @@ public class GGEPTest extends com.limegroup.gnutella.util.BaseTestCase {
         bytes[28] = (byte)'W';
         bytes[29] = (byte)'A';
         bytes[30] = (byte)'N';
-        bytes[31] = (byte)'I';
-        ggep = new GGEP(bytes, 0);
-        assertEquals(1, ggep.getHeaders().size());
-        assertTrue(ggep.hasKey("BHOST"));
-        ggep = new GGEP(bytes, 8);
-        assertEquals(2, ggep.getHeaders().size());
-        assertTrue(ggep.hasKey("BHOST"));
-        assertTrue(ggep.hasKey("SUSHEEL"));
-        assertEquals("DASWANI", ggep.getString("SUSHEEL"));
+        bytes[31] = (byte)'I';        
+        temp = GGEP.read(bytes,0);
+        assertEquals(2, temp.length);
+        assertEquals(1, temp[0].getHeaders().size());
+        assertEquals(2, temp[1].getHeaders().size());
 
-        bytes = new byte[24];
-        bytes[0] = (byte)GGEP.GGEP_PREFIX_MAGIC_NUMBER;
-        bytes[1] = (byte)0x15;
+        bytes = new byte[32];
+        bytes[0] = GGEP.GGEP_PREFIX_MAGIC_NUMBER;
+        bytes[1] = (byte)0x85;
         bytes[2] = (byte)'B';
         bytes[3] = (byte)'H';
         bytes[4] = (byte)'O';
         bytes[5] = (byte)'S';
         bytes[6] = (byte)'T';
         bytes[7] = (byte)0x40;
-        bytes[8] = (byte)0x87;
-        bytes[9] = (byte)'S';
-        bytes[10] = (byte)'U';
-        bytes[11] = (byte)'S';
-        bytes[12] = (byte)'H';
-        bytes[13] = (byte)'E';
-        bytes[14] = (byte)'E';
-        bytes[15] = (byte)'L';
-        bytes[16] = (byte)0x47;
-        bytes[17] = (byte)'D';
-        bytes[18] = (byte)'A';
+        bytes[8] = (byte)GGEP.GGEP_PREFIX_MAGIC_NUMBER;
+        bytes[9] = (byte)0x15;
+        bytes[10] = (byte)'B';
+        bytes[11] = (byte)'H';
+        bytes[12] = (byte)'O';
+        bytes[13] = (byte)'S';
+        bytes[14] = (byte)'T';
+        bytes[15] = (byte)0x40;
+        bytes[16] = (byte)0x87;
+        bytes[17] = (byte)'S';
+        bytes[18] = (byte)'U';
         bytes[19] = (byte)'S';
-        bytes[20] = (byte)'W';
-        bytes[21] = (byte)'A';
-        bytes[22] = (byte)'N';
-        bytes[23] = (byte)'I';
+        bytes[20] = (byte)'H';
+        bytes[21] = (byte)'E';
+        bytes[22] = (byte)'E';
+        bytes[23] = (byte)'L';
+        bytes[24] = (byte)0x47;
+        bytes[25] = (byte)'D';
+        bytes[26] = (byte)'A';
+        bytes[27] = (byte)'S';
+        bytes[28] = (byte)'W';
+        bytes[29] = (byte)'A';
+        bytes[30] = (byte)'N';
+        bytes[31] = (byte)'I';
         try {
-            ggep = new GGEP(bytes, 0);
-            fail("should have constructed");
-        } catch (BadGGEPBlockException expected) {}
+            temp = GGEP.read(bytes,0);
+            assertTrue(false);
+        }
+        catch (BadGGEPBlockException expected) {}
+
+        bytes = new byte[32];
+        bytes[0] = (byte)0x0;
+        bytes[1] = (byte)0x85;
+        bytes[2] = (byte)'B';
+        bytes[3] = (byte)'H';
+        bytes[4] = (byte)'O';
+        bytes[5] = (byte)'S';
+        bytes[6] = (byte)'T';
+        bytes[7] = (byte)0x40;
+        bytes[8] = (byte)GGEP.GGEP_PREFIX_MAGIC_NUMBER;
+        bytes[9] = (byte)0x15;
+        bytes[10] = (byte)'B';
+        bytes[11] = (byte)'H';
+        bytes[12] = (byte)'O';
+        bytes[13] = (byte)'S';
+        bytes[14] = (byte)'T';
+        bytes[15] = (byte)0x40;
+        bytes[16] = (byte)0x87;
+        bytes[17] = (byte)'S';
+        bytes[18] = (byte)'U';
+        bytes[19] = (byte)'S';
+        bytes[20] = (byte)'H';
+        bytes[21] = (byte)'E';
+        bytes[22] = (byte)'E';
+        bytes[23] = (byte)'L';
+        bytes[24] = (byte)0x47;
+        bytes[25] = (byte)'D';
+        bytes[26] = (byte)'A';
+        bytes[27] = (byte)'S';
+        bytes[28] = (byte)'W';
+        bytes[29] = (byte)'A';
+        bytes[30] = (byte)'N';
+        bytes[31] = (byte)'I';
+        try {
+            temp = GGEP.read(bytes,0);
+            assertTrue(false);
+        }
+        catch (BadGGEPBlockException expected) {}
+
     }
 
 

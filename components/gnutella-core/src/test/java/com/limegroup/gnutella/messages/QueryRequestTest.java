@@ -32,7 +32,7 @@ public final class QueryRequestTest extends BaseTestCase {
            "<?xml version=\"1.0\"?>" +
             "<audios xsi:noNamespaceSchemaLocation=" +
             "\"http://www.limewire.com/schemas/audio.xsd\">" +
-            "<audio title=\"xml\" artist=\"bloat\"/></audios>";
+            "<audio title=\"xml\" artist=\"bloat\"></audio></audios>";
 	
 	/**
 	 * Constructs a new test instance for query requests.

@@ -12,8 +12,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.Random;
-import java.util.Timer;
-import java.util.TimerTask;
 
 import com.limegroup.gnutella.ErrorCallback;
 import com.limegroup.gnutella.ErrorService;
@@ -124,28 +122,30 @@ public final class UDPServiceStub extends UDPService {
 			for (Iterator iter = RECEIVER_LIST.iterator();iter.hasNext();) {
 			    Receiver rec = (Receiver)iter.next();
 			    iter.remove();
-			    rec.stop();
+			    rec.interrupt();
 			}
 		}
 	}
 
-    private class Receiver {
+    private class Receiver extends ManagedThread {
+        private final ArrayList _messages;
         private final int       _toPort;
         private final int       _fromPort;
         private final int       _delay;
         private final int       _pctFlaky;
 		private MessageRouter   _router;
         private Random          _random;
-        private Timer 			_timer;
         
         Receiver(int toPort, int fromPort, int delay, int pctFlaky) {
+            _messages = new ArrayList();
             _toPort   = toPort;
             _fromPort = fromPort;
             _delay    = delay;
             _pctFlaky = pctFlaky;
 			_router   = RouterService.getMessageRouter();
             _random   = new Random();
-            _timer    = new Timer(true);
+        	setDaemon(true);
+			start();
         }
 
 		public int getPort() {
@@ -153,18 +153,69 @@ public final class UDPServiceStub extends UDPService {
 		}
 
         public void add(DatagramPacket dp) {
-        	// drop message if flaky
-        	int num = _random.nextInt(100);
-        	if (num < _pctFlaky)
-        		return;
-        	
-			_timer.schedule(new MessageWrapper(dp, _delay, this),_delay);
+			synchronized(_messages) {
+				_messages.add(new MessageWrapper(dp, _delay));
+				Collections.sort(_messages);
+				_messages.notify();
+			}
 		}
         
-        public void stop() {
-        	_timer.cancel();
+        public void managedRun() {
+            // forward on message when the time is right
+            // ------
+            MessageWrapper msg      = null;
+			long           time;
+			long 		   waitTime;
+
+            while (true) {
+				// Add some delay to the loop
+				try { Thread.sleep( 1 ); 
+				} catch(InterruptedException e) {return;}
+
+				time = System.currentTimeMillis();
+			    synchronized(_messages) {
+                    msg = null;
+					while (_messages.size() > 0) {
+						msg = (MessageWrapper) _messages.get(0);	
+
+                        // Drop message if in flaky range
+                        int num = _random.nextInt(100);
+                        if (num < _pctFlaky) {
+                            msg = null;  
+                            _messages.remove(0);
+                            continue;
+                        } else {
+                            break;
+                        }
+                    }
+					if (msg != null ) {
+						waitTime = msg._scheduledTime - time;
+					} else {
+						waitTime = LONG_TIME;
+					}
+
+					// wait for the scheduledTime or for earlier msgs
+					if ( waitTime > 0 ) {
+						try {
+							_messages.wait( LONG_TIME );
+               			} catch(InterruptedException e) {return;}
+						continue;
+					}
+				}
+
+				if (msg == null) 
+					continue;
+
+				// Message time has been reached so process it
+				receive(msg);
+
+			    synchronized(_messages) {
+					_messages.remove(0);
+				}
+            }
         }
-        private void receive(MessageWrapper msg) {
+
+		private void receive(MessageWrapper msg) {
         	DatagramPacket datagram = msg._dp;
 			// swap the port to the sender from the receiver
 			datagram.setPort(_fromPort);
@@ -193,17 +244,15 @@ public final class UDPServiceStub extends UDPService {
 		}
     }	
 
-    private class MessageWrapper extends TimerTask {
+    private class MessageWrapper implements Comparable {
         public final DatagramPacket _dp;
         public final long           _scheduledTime;
         public final int            _delay;
-        private final Receiver 		_receiver;
         
-        MessageWrapper(DatagramPacket dp, int delay, Receiver receiver) {
+        MessageWrapper(DatagramPacket dp, int delay) {
             _dp            = dp;
             _scheduledTime = System.currentTimeMillis() + (long) delay;
             _delay         = delay;
-            _receiver      = receiver;
         }
 
 		public int compareTo(Object o) {
@@ -220,10 +269,6 @@ public final class UDPServiceStub extends UDPService {
                 return _dp.toString();
             else
                 return "null";
-        }
-        
-        public void run() {
-        	_receiver.receive(this);
         }
     }	
 
