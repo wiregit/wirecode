@@ -35,11 +35,12 @@ public class ID3ReaderTest extends BaseTestCase {
      * Tests that the ID3v2 tags are read correctly
      */
     public void testID3v2Tags() throws Exception {
-        ID3Reader.ID3Data data = null;
+        //ID3Reader.ID3Data data = null;
         
-        data = (ID3Reader.ID3Data)PrivilegedAccessor.invokeMethod(
-               ID3Reader.class, "parseID3v2Data", new Object[] { TEST_FILE });
-               
+        //data = (ID3Reader.ID3Data)PrivilegedAccessor.invokeMethod(
+          //     ID3Reader.class, "parseID3v2Data", new Object[] { TEST_FILE });
+
+    	MP3MetaData data = new OnlyID3v2MetaData(TEST_FILE);
         assertFalse(data.toString(), data.isComplete());
         assertEquals("Incorrect title", "Title 2", data.getTitle());
         assertEquals("Incorrect artist", null, data.getArtist());
@@ -56,11 +57,12 @@ public class ID3ReaderTest extends BaseTestCase {
      * value
      */
     public void testOverAllReading() throws Exception {
-        ID3Reader.ID3Data data = null;
+        //ID3Reader.ID3Data data = null;
         
-        data = (ID3Reader.ID3Data)PrivilegedAccessor.invokeMethod(
-               ID3Reader.class, "parseFile", new Object[] { TEST_FILE });
+        //data = (ID3Reader.ID3Data)PrivilegedAccessor.invokeMethod(
+          //     ID3Reader.class, "parseFile", new Object[] { TEST_FILE });
 
+        MP3MetaData data = (MP3MetaData) MetaData.parse(TEST_FILE);
         //Test if the values are as expected
         assertFalse("Incorrent size of array", data.isComplete());
         assertEquals("bad title", "Title 2", data.getTitle());
@@ -72,4 +74,20 @@ public class ID3ReaderTest extends BaseTestCase {
         assertEquals("bad genre", "Acid", data.getGenre());
     }
     
+    class OnlyID3v2MetaData extends MP3MetaData {
+    	public OnlyID3v2MetaData(File f) throws IOException{
+    		super(f);
+    	}
+    	
+    	protected void parseFile(File f) throws IOException{
+    		try {
+    			PrivilegedAccessor.invokeMethod(this,"parseID3v2Data", new Object[]{f});
+    		}catch(Exception ex){
+    			//have to cast because privileged accessor does not declare IOX
+    			if (ex instanceof IOException)
+    				throw (IOException)ex;  
+    			ex.printStackTrace();
+    		}
+    	}
+    }
 }

@@ -62,12 +62,12 @@ public class ID3V2WritingTest extends BaseTestCase {
         assertEquals(data.toString(), "Acid", data.getGenre());
         
         //2. Write new data into the file 
-        ID3Editor editor = new ID3Editor();
+        MP3DataEditor editor = new MP3DataEditor();
         PrivilegedAccessor.setValue(editor, "title_", "New Title");
         PrivilegedAccessor.setValue(editor, "artist_", "new Artist");
         PrivilegedAccessor.setValue(editor, "genre_", "Classic Rock");
         
-        int retVal = editor.writeID3DataToDisk(TEST_FILE.getAbsolutePath());
+        int retVal = editor.commitMetaData(TEST_FILE.getAbsolutePath());
         
         //3. Test if the data was written correctly
         data = (ID3Reader.ID3Data)PrivilegedAccessor.invokeMethod(
@@ -82,13 +82,13 @@ public class ID3V2WritingTest extends BaseTestCase {
         assertLessThan("Incorrect track", 0, data.getTrack());
         assertNull("Incorrect comment", data.getComment());
 
-        ID3Editor editor2 = new ID3Editor();
+        MP3DataEditor editor2 = new MP3DataEditor();
         PrivilegedAccessor.setValue(editor2, "title_", "Title 2");
         PrivilegedAccessor.setValue(editor2, "year_", "2002");
         PrivilegedAccessor.setValue(editor2, "track_", "12");
         PrivilegedAccessor.setValue(editor2, "comment_", "Comment 2");
         PrivilegedAccessor.setValue(editor2, "genre_", "Acid");
-        editor2.writeID3DataToDisk(TEST_FILE.getAbsolutePath());
+        editor2.commitMetaData(TEST_FILE.getAbsolutePath());
     }
     
 }
