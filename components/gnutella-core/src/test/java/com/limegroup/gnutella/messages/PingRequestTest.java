@@ -206,5 +206,7 @@ public class PingRequestTest extends com.limegroup.gnutella.util.BaseTestCase {
         assertTrue(fromNet.requestsIP());
         assertEquals("zz",fromNet.getLocale());
         
+        // and make sure the ping marks itself as supporting cached pongs
+        assertTrue(fromNet.supportsCachedPongs());
     }
 }

@@ -5,6 +5,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Random;
 
 import junit.framework.Test;
@@ -16,6 +17,7 @@ import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.guess.QueryKey;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.util.PrivilegedAccessor;
+import com.limegroup.gnutella.util.IpPort;
 
 public class PingReplyTest extends com.limegroup.gnutella.util.BaseTestCase {
     
@@ -609,6 +611,141 @@ public class PingReplyTest extends com.limegroup.gnutella.util.BaseTestCase {
         assertNull(fromNet.getMyInetAddress());
         assertEquals(0,fromNet.getMyPort());
     }
+    
+    
+    public void testUDPHostCacheExtension() throws Exception {
+        GGEP ggep = new GGEP(true);
+        ggep.put(GGEP.GGEP_HEADER_UDP_HOST_CACHE);
+        PingReply pr = PingReply.create(GUID.makeGuid(), (byte)1, 1,
+                    new byte[] { 1, 1, 1, 1 },
+                    (long)0, (long)0, false, ggep);
+        assertTrue(pr.isUDPHostCache());
+        
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        pr.write(out);
+        byte[] b = out.toByteArray();
+        
+        PingReply read = (PingReply)Message.read(new ByteArrayInputStream(b));
+        assertTrue(read.isUDPHostCache());
+    }
+    
+    public void testPackedIPsInPong() throws Exception {
+        GGEP ggep = new GGEP(true);
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        out.write(new byte[] { 1, 1, 1, 1, 1, 0 } );
+        out.write(new byte[] { 1, 2, 3, 4, 2, 0 } );
+        out.write(new byte[] { 3, 4, 2, 3, 3, 0 } );
+        out.write(new byte[] { (byte)0xFE, 0, 0, 3, 4, 0 } );
+        ggep.put(GGEP.GGEP_HEADER_PACKED_IPPORTS, out.toByteArray());
+        PingReply pr = PingReply.create(
+            GUID.makeGuid(), (byte)1, 1, new byte[] { 1, 1, 1, 1 },
+            0, 0, false, ggep);
+
+        List l = pr.getPackedIPPorts();
+        assertEquals(4, l.size());
+        IpPort ipp = (IpPort)l.get(0);
+        assertEquals("1.1.1.1", ipp.getAddress());
+        assertEquals(1, ipp.getPort());
+        ipp = (IpPort)l.get(1);
+        assertEquals("1.2.3.4", ipp.getAddress());
+        assertEquals(2, ipp.getPort());
+        ipp = (IpPort)l.get(2);
+        assertEquals("3.4.2.3", ipp.getAddress());
+        assertEquals(3, ipp.getPort());
+        ipp = (IpPort)l.get(3);
+        assertEquals("254.0.0.3", ipp.getAddress());
+        assertEquals(4, ipp.getPort());
+        
+        // Try with invalid list of IPs (invalid by not being multiple of 6)
+        ggep = new GGEP(true);
+        out = new ByteArrayOutputStream();
+        out.write(new byte[] { 1, 1, 1, 1, 1, 0 } );
+        out.write(new byte[] { 1, 2, 3, 4, 2, 0 } );
+        out.write(new byte[] { 3, 4, 2, 3, /* no port */ } );
+        ggep.put(GGEP.GGEP_HEADER_PACKED_IPPORTS, out.toByteArray());
+        pr = PingReply.create(
+            GUID.makeGuid(), (byte)1, 1, new byte[] { 1, 1, 1, 1 },
+            0, 0, false, ggep);
+        l = pr.getPackedIPPorts();
+        assertTrue(l.isEmpty());
+        
+        // Try with invalid IPs (invalid by invalid IP addr)
+        ggep = new GGEP(true);
+        out = new ByteArrayOutputStream();
+        out.write(new byte[] { 0, 0, 0, 0, 1, 0 } );
+        out.write(new byte[] { 1, 2, 3, 4, 2, 0 } );
+        out.write(new byte[] { 3, 4, 2, 3, 3, 0 } );
+        ggep.put(GGEP.GGEP_HEADER_PACKED_IPPORTS, out.toByteArray());
+        pr = PingReply.create(
+            GUID.makeGuid(), (byte)1, 1, new byte[] { 1, 1, 1, 1 },
+            0, 0, false, ggep);
+        l = pr.getPackedIPPorts();
+        assertTrue(l.isEmpty());
+        
+        // Try with invalid IPs (invalid by invalid port)
+        ggep = new GGEP(true);
+        out = new ByteArrayOutputStream();
+        out.write(new byte[] { 1, 1, 1, 1, 0, 0 } );
+        out.write(new byte[] { 1, 2, 3, 4, 2, 0 } );
+        out.write(new byte[] { 3, 4, 2, 3, 3, 0 } );
+        ggep.put(GGEP.GGEP_HEADER_PACKED_IPPORTS, out.toByteArray());
+        pr = PingReply.create(
+            GUID.makeGuid(), (byte)1, 1, new byte[] { 1, 1, 1, 1 },
+            0, 0, false, ggep);
+        l = pr.getPackedIPPorts();
+        assertTrue(l.isEmpty());
+        
+        // Make sure the extension works with other GGEP flags (like UDP Host Cache)
+        ggep = new GGEP(true);
+        out = new ByteArrayOutputStream();
+        out.write(new byte[] { 1, 1, 1, 1, 1, 0 } );
+        out.write(new byte[] { 1, 2, 3, 4, 2, 0 } );
+        out.write(new byte[] { 3, 4, 2, 3, 3, 0 } );
+        out.write(new byte[] { (byte)0xFE, 0, 0, 3, 4, 0 } );
+        ggep.put(GGEP.GGEP_HEADER_PACKED_IPPORTS, out.toByteArray());
+        ggep.put(GGEP.GGEP_HEADER_UDP_HOST_CACHE);
+        pr = PingReply.create(
+            GUID.makeGuid(), (byte)1, 1, new byte[] { 1, 1, 1, 1 },
+            0, 0, false, ggep);
+        assertTrue(pr.isUDPHostCache());
+        l = pr.getPackedIPPorts();
+        assertEquals(4, l.size());
+        ipp = (IpPort)l.get(0);
+        assertEquals("1.1.1.1", ipp.getAddress());
+        assertEquals(1, ipp.getPort());
+        ipp = (IpPort)l.get(1);
+        assertEquals("1.2.3.4", ipp.getAddress());
+        assertEquals(2, ipp.getPort());
+        ipp = (IpPort)l.get(2);
+        assertEquals("3.4.2.3", ipp.getAddress());
+        assertEquals(3, ipp.getPort());
+        ipp = (IpPort)l.get(3);
+        assertEquals("254.0.0.3", ipp.getAddress());
+        assertEquals(4, ipp.getPort());        
+        
+        // and make sure we can read from network data.
+        out = new ByteArrayOutputStream();
+        pr.write(out);
+        
+        pr = (PingReply)Message.read(new ByteArrayInputStream(out.toByteArray()));
+        assertTrue(pr.isUDPHostCache());
+        l = pr.getPackedIPPorts();
+        assertEquals(4, l.size());
+        ipp = (IpPort)l.get(0);
+        assertEquals("1.1.1.1", ipp.getAddress());
+        assertEquals(1, ipp.getPort());
+        ipp = (IpPort)l.get(1);
+        assertEquals("1.2.3.4", ipp.getAddress());
+        assertEquals(2, ipp.getPort());
+        ipp = (IpPort)l.get(2);
+        assertEquals("3.4.2.3", ipp.getAddress());
+        assertEquals(3, ipp.getPort());
+        ipp = (IpPort)l.get(3);
+        assertEquals("254.0.0.3", ipp.getAddress());
+        assertEquals(4, ipp.getPort());        
+    }  
+        
+        
     
     private final void addIP(byte[] payload) {
         // fill up the ip so its not blank.

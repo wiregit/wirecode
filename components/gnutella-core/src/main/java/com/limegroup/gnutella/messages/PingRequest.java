@@ -239,6 +239,24 @@ public class PingRequest extends Message {
     }
     
     /**
+     * Determines if this PingRequest has the 'supports cached pongs'
+     * marking.
+     */
+    public boolean supportsCachedPongs() {
+        if(payload != null) {
+            try {
+                if(_ggeps == null)
+                    _ggeps = GGEP.read(payload, 0);
+                for(int i = 0; i < _ggeps.length; i++) {
+                    if(_ggeps[i].hasKey(GGEP.GGEP_HEADER_SUPPORT_CACHE_PONGS))
+                        return true;
+                }
+            } catch(BadGGEPBlockException ignored) {}
+        }
+        return false;
+    }
+    
+    /**
      * @return whether this ping wants a reply carrying IP:Port info.
      */
     public boolean requestsIP() {
