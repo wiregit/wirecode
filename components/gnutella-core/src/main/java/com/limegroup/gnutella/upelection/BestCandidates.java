@@ -42,7 +42,7 @@ public class BestCandidates {
 	 * @return the absolutely best candidate at all hops
 	 */
 	public static Candidate getBest() {
-		SortedSet s = new TreeSet(ExtendedEndpoint.priorityComparator());
+		SortedSet s = new TreeSet(Candidate.priorityComparator());
 		synchronized(instance) {
 			s.addAll(Arrays.asList(instance._best));
 		}
@@ -56,7 +56,7 @@ public class BestCandidates {
 	 * node.  Null values means we don't have values for that ttl.
 	 */
 	public static void update(Candidate [] newCandidates) {
-		Comparator comp = ExtendedEndpoint.priorityComparator();
+		Comparator comp = Candidate.priorityComparator();
 		
 		//if the other guy doesn't have a beast leaf, he shouldn't
 		//have sent this message in the first place.  discard, regardless

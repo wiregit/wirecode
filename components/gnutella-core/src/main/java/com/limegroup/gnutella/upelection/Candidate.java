@@ -158,6 +158,13 @@ public class Candidate implements Comparable{
 	 */
 	static class CandidatePriorityComparator implements Comparator {
         public int compare(Object extEndpoint1, Object extEndpoint2) {
+        	
+        	//afaics the contract doesn't provide for null elements. 
+        	//however they are necessary in this case.
+        	if (extEndpoint1 == null && extEndpoint2 == null) return 0;
+        	if (extEndpoint1 == null && extEndpoint2 != null) return -1;
+        	if (extEndpoint1 != null && extEndpoint2 == null) return 1;
+        	
             Candidate a=(Candidate)extEndpoint1;
             Candidate b=(Candidate)extEndpoint2;
             int ret=a.connectScore()-b.connectScore();
