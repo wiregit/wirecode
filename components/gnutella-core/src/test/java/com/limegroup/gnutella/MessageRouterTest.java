@@ -55,6 +55,64 @@ public final class MessageRouterTest extends BaseTestCase {
     //}
 
     /**
+     * Tests the method for creating <tt>QueryReply</tt> instances from
+     * <tt>Response</tt> arrays.
+     */
+    public void testResponsesToQueryReplies() throws Exception {
+        Class[] paramTypes = new Class[] {
+            Response[].class, 
+            QueryRequest.class,
+            Integer.TYPE,
+        };
+
+		Method m = 
+            PrivilegedAccessor.getMethod(ROUTER, 
+                                         "responsesToQueryReplies",
+                                         paramTypes);
+        Response[] res = new Response[20];
+        Arrays.fill(res, new Response((long)0, (long)10, "test"));
+        QueryRequest query = QueryRequest.createQuery("test");
+        Object[] params = new Object[] {
+            res,
+            query,
+            new Integer(10),
+        };
+
+        Iterator iter = (Iterator)m.invoke(ROUTER, params);
+        int size = 0;
+        while(iter.hasNext()) {
+            iter.next();
+            size++;
+        }
+
+        assertEquals("responses should have been put in 2 hits", 2, size);
+        
+        // make sure the query has high hops to test the threshold
+        query.hop();
+        query.hop();
+        query.hop();
+
+        iter = (Iterator)m.invoke(ROUTER, params);
+        size = 0;
+        while(iter.hasNext()) {
+            iter.next();
+            size++;
+        }
+
+        assertEquals("responses should have been put in 1 hits", 1, size);
+
+        params[2] = new Integer(1);
+        iter = (Iterator)m.invoke(ROUTER, params);
+        size = 0;
+        while(iter.hasNext()) {
+            iter.next();
+            size++;
+        }
+
+        assertEquals("responses should have been put in 20 hits", 20, size);
+    }
+
+    /**
      * Test to make sure that the query route tables are forwarded correctly
      * between Ultrapeers.
      */
@@ -429,4 +487,8 @@ public final class MessageRouterTest extends BaseTestCase {
             return KEYWORDS;
         }
     }
+
+    //private static final class TestUploadManager extends UploadManager {
+        
+    //}
 }
