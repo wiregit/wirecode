@@ -162,7 +162,7 @@ public class IntervalSet {
         Interval interval=null;
         for (Iterator iter=intervals.iterator(); iter.hasNext(); ) {
             interval=(Interval)iter.next();
-            if (low<interval.low)      //needed for first interval
+            if (interval.low!=0 && low<interval.low)//needed for first interval
                 buf.add(new Interval(low+1, interval.low-1));
             low=interval.high;
         }
@@ -456,6 +456,14 @@ public class IntervalSet {
         interval = (Interval)iter.next();
         Assert.that(interval.low==82,"getNeededInterval broken");
         Assert.that(interval.high==99,"getNeededInterval broken");
+        iSet.clear();
+        iSet.add(new Interval(0,5));
+        iSet.add(new Interval(6,10));
+        iter = iSet.getNeededIntervals(20);
+        interval = (Interval)iter.next();
+        Assert.that(interval.low==11);
+        Assert.that(interval.high==19);
+        Assert.that(!iter.hasNext());
     }
     ////////////method used only for tesing purposes////////////////
     public int numIntervals() {
