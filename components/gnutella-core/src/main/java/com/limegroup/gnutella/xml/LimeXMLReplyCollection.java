@@ -86,20 +86,20 @@ public class LimeXMLReplyCollection{
             // at this point, xml can be either 1. a LimeXMLDoc, 2. a string 
             // (a xml string), or 3. null
             LimeXMLDocument doc=null;
-            try {
-                if ((xml != null) && xml instanceof LimeXMLDocument)  {// NEW
-                    // easy, the whole serialized doc was on disk, just reuse it
-                    doc = (LimeXMLDocument) xml; //done!
-                }
-                else { // OLD
-                    String xmlStr = (String) xml; //xml could be null.
-                    // old style may exist or there may be no xml associated
-                    // with this file yet.....
-                    if (audio && LimeXMLUtils.isMP3File(file)) {
-                        // first try to get the id3 out of it.  if this file has
-                        // no id3 tag, just construct the doc out of the xml 
-                        // string....
-                        boolean onlyID3=((xmlStr == null) || xmlStr.equals(""));
+            if ((xml != null) && xml instanceof LimeXMLDocument)  {// NEW
+                // easy, the whole serialized doc was on disk, just reuse it
+                doc = (LimeXMLDocument) xml; //done!
+            }
+            else { // OLD
+                String xmlStr = (String) xml; //xml could be null.
+                // old style may exist or there may be no xml associated
+                // with this file yet.....
+                if (audio && LimeXMLUtils.isMP3File(file)) {
+                    // first try to get the id3 out of it.  if this file has
+                    // no id3 tag, just construct the doc out of the xml 
+                    // string....
+                    boolean onlyID3=((xmlStr == null) || xmlStr.equals(""));
+                    try {
                         if(!onlyID3) {  //non-id3 values with mp3 file
                             String id3XML=id3Reader.readDocument(file,onlyID3);
                             String joinedXML = 
@@ -109,15 +109,24 @@ public class LimeXMLReplyCollection{
                         else // only id3 data with mp3 files
                             doc = id3Reader.readDocument(file);
                     }
-                    else { // !audio || (audio && !mp3)
-                        doc = new LimeXMLDocument(xmlStr);
-                    }
+                    catch (SAXException ignored1) { continue; }
+                    catch (IOException ignored2) { continue; }
+                    catch (SchemaNotFoundException ignored3) { continue; }
                 }
-                addReply(hash, doc);
+                else { // !audio || (audio && !mp3)
+                    try {
+                        if ((xmlStr != null) && (!xmlStr.equals(""))) 
+                            doc = new LimeXMLDocument(xmlStr);
+                        else
+                            continue;
+                    }
+                    catch (SAXException ignored1) { continue; }
+                    catch (IOException ignored2) { continue; }
+                    catch (SchemaNotFoundException ignored3) { continue; }
+                }
             }
-            catch (SAXException ignored1) {}
-            catch (IOException ignored2) {}
-            catch (SchemaNotFoundException ignored3) {}
+            // if i've gotten this far, the doc is non-null and should be added.
+            addReply(hash, doc);
         }
         
         if (hashSet != null)
