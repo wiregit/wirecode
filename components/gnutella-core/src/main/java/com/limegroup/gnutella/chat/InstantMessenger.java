@@ -51,9 +51,9 @@ public class InstantMessenger implements Chatter {
 		OutputStream os = _socket.getOutputStream();
 		OutputStreamWriter osw = new OutputStreamWriter(os);
 		_out=new BufferedWriter(osw);
-        _out.write("CHAT lscp 0.1");
-        _out.write("User-Agent: "+CommonUtils.getVendor()+"\r\n");
-        _out.write("\r\n");
+        _out.write("CHAT lscp 0.1 \n\n");
+        _out.write("User-Agent: "+CommonUtils.getVendor()+"\n\n");
+        _out.write("\n\n");
 		_out.flush();
 		InputStream istream = _socket.getInputStream();
 		_reader = new ByteReader(istream);
@@ -102,7 +102,7 @@ public class InstantMessenger implements Chatter {
 		return _port;
 	}
 
-	public String getMessage() {
+	public synchronized String getMessage() {
 		String str = _message;
 		_message = "";
 		return str;
@@ -118,7 +118,9 @@ public class InstantMessenger implements Chatter {
 	public void readHeader() {
 		try {
 			for (int i =0; i < 6; i++) { 
-				_reader.readLine();
+				String str = _reader.readLine();
+				if ((str == null) || (str == ""))
+					return;
 			}
 		} catch (IOException e) {
 			return;
@@ -149,10 +151,13 @@ public class InstantMessenger implements Chatter {
 					// reached. then alert the gui to 
 					// write to the screen.
 					str = _reader.readLine();
-					if ( str != null ) {
-						_message += str;
-						_activityCallback.recieveMessage(_chatter);
-					} 
+					// synchronized(InstantMessenger.this) {
+					if( ( str == null ) || (str == "") )
+						throw new IOException();
+					_message += str;
+					_activityCallback.recieveMessage(_chatter);
+						// } 
+					
 				} catch (IOException e) {
 					// if an exception was thrown, then 
 					// the socket was closed, and the chat

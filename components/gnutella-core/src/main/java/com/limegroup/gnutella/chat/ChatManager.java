@@ -17,8 +17,12 @@ public class ChatManager {
 
 	// Attributes
 	private static ChatManager _chatManager = new ChatManager();
-	private List _chatsInProgress = new LinkedList();
-	private List _blockedHosts = new LinkedList();
+	/* a list of InstantMessenger objects */
+	private List _chatsInProgress 
+		= Collections.synchronizedList(new LinkedList());
+	/* a list of strings that are the hosts that are blocked */
+	private List _blockedHosts 
+		= Collections.synchronizedList(new LinkedList());
 	private ActivityCallback _activityCallback;
 
 	// Operations
@@ -37,17 +41,26 @@ public class ChatManager {
 	public void accept(Socket socket) {
 		// the Acceptor class recieved a message already, 
 		// and asks the ChatManager to create an InstantMessager
-
 		boolean allowChats = SettingsManager.instance().getChatEnabled();
 
 		// see if chatting is turned off
-		if (! allowChats)
+		if (! allowChats) {
+			try {
+				socket.close();
+			} catch (IOException e) {
+			}
 			return;
+		}
 
 		// do a check to see it the host has been blocked
 		String host = socket.getInetAddress().getHostAddress();
-		if ( _blockedHosts.contains(host) )
-			return;
+		if ( _blockedHosts.contains(host) ) {
+  			try {
+  				socket.close();
+  			} catch (IOException e) {
+  			}
+  			return;
+  		}
 
 		try {
 			InstantMessenger im = new InstantMessenger(socket, this, 
@@ -57,14 +70,18 @@ public class ChatManager {
 			_activityCallback.acceptChat(im);
 			im.start();
 		} catch (IOException e) {
+			try {
+				socket.close();
+			} catch (IOException ee) {
+			}
 		} // catch (ConnectException ce) {
-
+		
 		// }
 
 	}
 
 	/** request a chat connection from the host specified */
-	public InstantMessenger request(String host, int port) {
+	public Chatter request(String host, int port) {
 		InstantMessenger im = null;
 		try {
 			im = new InstantMessenger(host, port, this, 
@@ -87,8 +104,10 @@ public class ChatManager {
 
 	/** blocks incoming connections from a particular ip address  */
 	public void blockHost(String host) {
-		if ( ! _blockedHosts.contains(host) )	
-			_blockedHosts.add(host);
+		synchronized (this) {
+			if ( ! _blockedHosts.contains(host) )	
+				_blockedHosts.add(host);
+		}
 	}
 	
 	public void unblockHost(String host) {
