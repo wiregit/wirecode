@@ -1,0 +1,22 @@
+This document is a listing of what needs to get done for the GUESS
+implementation to be functional and ready for release:
+
+--------------------------------------------------------------------------------
+Date Posted: 9/27/02
+Date Resolved: 
+
+1) Decide on a rate of querying for the QueryUnicaster.  This may change
+   the implementation drastically.
+
+Current Status: The QueryUnicaster sleeps for 1/10th a second before
+sending out queries.
+
+********************************************************************************
+
+
+--------------------------------------------------------------------------------
+Date Posted: 
+Date Resolved: 
+
+********************************************************************************
+
