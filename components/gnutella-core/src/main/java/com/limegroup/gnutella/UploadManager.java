@@ -1,6 +1,7 @@
 package com.limegroup.gnutella;
 
 import com.limegroup.gnutella.uploader.*;
+import com.limegroup.gnutella.http.*;
 import com.limegroup.gnutella.util.Buffer;
 import java.net.*;
 import java.io.*;
@@ -130,7 +131,7 @@ public class UploadManager implements BandwidthTracker {
 	 *
 	 * @param socket the <tt>Socket</tt> that will be used for the new upload
 	 */
-    public void acceptUpload(Socket socket) {
+    public void acceptUpload(HTTPRequestMethod method, Socket socket) {
 		try {
             //increment the download count
             
@@ -145,8 +146,8 @@ public class UploadManager implements BandwidthTracker {
 				}
 
                 //create an uploader
-                HTTPUploader uploader = new HTTPUploader(line._fileName, socket,
-                    line._index, this, _fileManager, _router);
+                HTTPUploader uploader = new HTTPUploader(method, line._fileName, 
+                    socket, line._index, this, _fileManager, _router);
 
                 //do the upload
                 doSingleUpload(uploader, 
@@ -216,7 +217,7 @@ public class UploadManager implements BandwidthTracker {
         // handles it internally.  is this the correct
         // way to handle it?
         startTime=System.currentTimeMillis();
-        uploader.start();
+        uploader.writeResponse();
         // check the state of the upload once the
         // start method has finished.  if it is complete...
         if (uploader.getState() == Uploader.COMPLETE)
@@ -300,7 +301,7 @@ public class UploadManager implements BandwidthTracker {
                     //create the socket and send the GIV message
                     Socket s = GIVuploader.connect();
                     //delegate to the normal upload
-                    acceptUpload(s);
+                    acceptUpload(HTTPRequestMethod.GET, s);
                     //Note: we do not do any book-keeping - like incrementing
                     //_activeUploads. Because that is taken care off in 
                     //acceptUpload.
