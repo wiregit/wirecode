@@ -400,8 +400,7 @@ public class ManagedDownloader implements Downloader, Serializable {
 	 *  platforms
      * @param files the list of files to get.  This stops after ANY of the
      *  files is downloaded.
-     * @param incompleteFileManager the repository of incomplete files for
-     *  resuming
+     * @param ifc the repository of incomplete files for resuming
      */
     public ManagedDownloader(String name, RemoteFileDesc[] files,
                              IncompleteFileManager ifc) {
@@ -2063,7 +2062,7 @@ public class ManagedDownloader implements Downloader, Serializable {
      *  isn't strictly needed.
      * @return the best file/endpoint location 
      */
-    private synchronized RemoteFileDesc removeBest(List filesLeft) {
+    private static RemoteFileDesc removeBest(List filesLeft) {
         //Lock is needed here because filesLeft can be modified by
         //tryOneDownload in worker thread.
         Iterator iter=filesLeft.iterator();
@@ -2460,119 +2459,4 @@ public class ManagedDownloader implements Downloader, Serializable {
         if (debugOn)
             e.printStackTrace();
     }
-
-    /**
-     * Package access Unit tests called from ManagedDownloaderTest. The method 
-     * is never executed in LimeWire, but the tests are run everyday as part 
-     * of JUnit. We had to have the method here because it accesses private
-     * variables.
-     */
-	/*
-    static void unitTest() {
-        //Test removeBest
-        Set urns1=new TreeSet();
-        Set urns2=new TreeSet();
-        try {
-            urns1.add(URN.createSHA1Urn(
-                         "urn:sha1:GLSTHIPQGSSZTS5FJUPAKPZWUGYQYPFB"));
-            urns2.add(URN.createSHA1Urn(
-                         "urn:sha1:GLSTHIPQGSSZTS5FJUPAKPZWUGYQYPFB"));
-        } catch (IOException e) { 
-            Assert.that(false, "Couldn't make urn");
-        }
-
-        RemoteFileDesc rf1=new RemoteFileDesc("1.2.3.4", 6346, 0, 
-                                              "some file.txt", 1010, 
-                                              new byte[16], 
-                                              SpeedConstants.T1_SPEED_INT, 
-                                              false, 3, false, null, null);
-        RemoteFileDesc rf4=new RemoteFileDesc("1.2.3.6", 6346, 0, 
-                                              "some file.txt", 1010, 
-                                              new byte[16], 
-                                              SpeedConstants.T3_SPEED_INT, 
-                                              false, 0, false, null, null);
-        RemoteFileDesc rf5=new RemoteFileDesc("1.2.3.6", 6346, 0, 
-                                              "some file.txt", 1010, 
-                                              new byte[16], 
-                                              SpeedConstants.T3_SPEED_INT+1, 
-                                              false, 0, false, null, null);
-        RemoteFileDesc rf6=new RemoteFileDesc("1.2.3.7", 6346, 0,
-                                              "some file.txt", 1010,
-                                              new byte[16],
-                                              SpeedConstants.MODEM_SPEED_INT,
-                                              false, 0, false, null, urns1);
-        RemoteFileDesc rf7=new RemoteFileDesc("1.2.3.7", 6346, 0,
-                                              "some file.txt", 1010,
-                                              new byte[16],
-                                              SpeedConstants.MODEM_SPEED_INT+1,
-                                              false, 0, false, null, urns2);
-
-        List list=new LinkedList();
-        list.add(rf4);
-        list.add(rf6);
-        list.add(rf1);
-        list.add(rf5);
-        list.add(rf7);
-        ManagedDownloader stub=new ManagedDownloader();
-        Assert.that(stub.removeBest(list)==rf7);  //hashes over all
-        Assert.that(stub.removeBest(list)==rf6);  
-        Assert.that(stub.removeBest(list)==rf1);  //quality over speed
-        Assert.that(list.size()==2);
-        Assert.that(list.contains(rf4));
-        Assert.that(list.contains(rf5));
-        Assert.that(stub.removeBest(list)==rf5);  //speed is least important
-        Assert.that(list.size()==1);
-        Assert.that(list.contains(rf4));
-        Assert.that(stub.removeBest(list)==rf4);  
-        Assert.that(list.size()==0);
-
-	*/
-        //Test serialization
-//          ManagedDownloader downloader=new ManagedDownloader();//test constructor
-//          downloader.allFiles=new RemoteFileDesc[1];
-//          downloader.allFiles[0]=new RemoteFileDesc("127.0.0.1", 6346, 0l, 
-//                                                    "test.txt", 10,
-//                                                    new byte[16], 56, true, 2,
-//                                                    false, null, null);
-//          downloader.incompleteFileManager=new IncompleteFileManager();
-//          downloader.incompleteFileManager.addBlock(new File("T-10-test.txt"), 
-//                                                    10, 20);
-//          try {
-//              File tmp=File.createTempFile("ManagedDownloader_test", "dat");
-//              ObjectOutputStream out=new 
-//                                 ObjectOutputStream(new FileOutputStream(tmp));
-//              out.writeObject(downloader);
-//              out.close();
-//              ObjectInputStream in=
-//                                 new ObjectInputStream(new FileInputStream(tmp));
-//              ManagedDownloader downloader2=(ManagedDownloader)in.readObject();
-//              in.close();
-//              Assert.that(downloader.allFiles.length==1);   //weak test
-//              tmp.delete();
-//          } catch (IOException e) {
-//              e.printStackTrace();
-//              Assert.that(false, "Unexpected IO problem.");
-//          } catch (ClassNotFoundException e) {
-//              e.printStackTrace();
-//              Assert.that(false, "Unexpected class cast problem.");
-//          }
-    //}
-    
-    /** Stub constructor for above test. */
-//     private ManagedDownloader() {
-//     }
-
-    /** Stub constructor for testing only.  Does not actually start downloads. */
-//     protected ManagedDownloader(RemoteFileDesc[] allFiles) {
-//         this.allFiles=allFiles;
-//     }
-   
-
-    //More tests:
-    //-test/com/limegroup/gnutella/downloader/ManagedDownloaderTest.java
-    // (simply calls above unit test)
-    //-test/com/limegroup/gnutella/downloader/DownloadTest.java
-    // (tests swarming)
-    //-test/com/limegroup/gnutella/downloader/RequeryDownloadTest.java
-    // (tests allowAddition/addDownload)
 }
