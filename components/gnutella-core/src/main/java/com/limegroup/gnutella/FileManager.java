@@ -22,7 +22,7 @@ public class FileManager {
 
     /** the total size of all files, in bytes.
      *  INVARIANT: _size=sum of all size of the elements of _files */
-    private int _size;
+    private long _size;
     /** the total number of files.  INVARIANT: _numFiles==number of
      *  elements of _files that are not null. */
     private int _numFiles;
@@ -116,8 +116,10 @@ public class FileManager {
         loadSettings();
     }
     
-    /** Returns the size of all files, in <b>bytes</b>. */
-    public int getSize() {return _size;}
+    /** Returns the size of all files, in <b>bytes</b>.  Note that the largest
+     *  value that can be returned is Integer.MAX_VALUE, i.e., ~2GB.  If more
+     *  bytes are being shared, returns this value. */
+    public int getSize() {return ByteOrder.long2int(_size);}
 
     /** Returns the number of files. */
     public int getNumFiles() {return _numFiles;}
@@ -360,18 +362,20 @@ public class FileManager {
     /**
      * @requires the given file exists and is in a shared directory
      * @modifies this
-     * @effects adds the given file to this if it is of the proper 
-     *  extension.  Returns true iff the file was actually added.
-     *  <b>WARNING: this is a potential security hazard; caller must
-     *  ensure the file is in the shared directory.</b>
+     * @effects adds the given file to this if it is of the proper extension and
+     *  not too big (>~2GB).  Returns true iff the file was actually added.
+     *  <b>WARNING: this is a potential security hazard; caller must ensure the
+     *  file is in the shared directory.</b> 
      */
     private synchronized boolean addFile(File file) {
         String path = file.getAbsolutePath();   //TODO: right method?
         String name = file.getName();    
         if (hasExtension(name)) {
-            int n = (int)file.length();  
+            long n = file.length();  
+            if (n > Integer.MAX_VALUE)
+                return false;
             _size += n;                    
-            _files.add(new FileDesc(_files.size(), name, path,  n));
+            _files.add(new FileDesc(_files.size(), name, path,  (int)n));
             _numFiles++;
             int j=_files.size()-1;              //this' index
 
@@ -851,6 +855,21 @@ public class FileManager {
             files=fman.getSharedFiles(directory);
             Assert.that(files.length==1);
             Assert.that(files[0].equals(f3));
+
+            //Try to add a huge file.  (It will be ignored.)
+            File f4=new HugeFakeFile(directory, "big.XYZ", Integer.MAX_VALUE+1l);
+            Assert.that(fman.addFile(f4)==false);
+            Assert.that(fman.getNumFiles()==1);
+            Assert.that(fman.getSize()==11);
+            //Test getSize().  Note that we have to use addFile instead of
+            //addFileIfShared since the file doesn't exist.
+            f4=new HugeFakeFile(directory, "big.XYZ", Integer.MAX_VALUE-1);
+            File f5=new HugeFakeFile(directory, "big2.XYZ",
+                                     Integer.MAX_VALUE-1);
+            Assert.that(fman.addFile(f4)==true);
+            Assert.that(fman.addFile(f5)==true);
+            Assert.that(fman.getNumFiles()==3);
+            Assert.that(fman.getSize()==Integer.MAX_VALUE);
         } finally {
             if (f1!=null) f1.delete();
             if (f2!=null) f2.delete();
@@ -872,6 +891,19 @@ public class FileManager {
             e.printStackTrace();
             System.exit(1);
             return null; //never executed
+        }
+    }
+
+    private static class HugeFakeFile extends File {
+        long length;
+
+        public HugeFakeFile(File directory, String name, long length) {
+            super(directory, name);
+            this.length=length;
+        }
+
+        public long length() {
+            return length;
         }
     }
     */
