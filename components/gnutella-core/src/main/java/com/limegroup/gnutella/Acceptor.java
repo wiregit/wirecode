@@ -480,6 +480,16 @@ public class Acceptor implements Runnable {
 	}
 	
 	/**
+	 * Sets the new incoming status.
+	 * Returns whether or not the status changed.
+	 */
+	private boolean setIncoming(boolean status) {
+	    boolean old = _acceptedIncoming;
+	    _acceptedIncoming = status;
+	    return old != status;
+	}
+	
+	/**
 	 * Updates the firewalled status with info from this socket.
 	 */
 	private void checkFirewall(Socket socket) {
@@ -487,13 +497,16 @@ public class Acceptor implements Runnable {
         // that we've accepted incoming if it's definitely
         // not from our local subnet and we aren't connected to
         // the host already.
+        boolean changed = false;
         if(isOutsideConnection(socket.getInetAddress())) {
             synchronized (Acceptor.class) {
-                _acceptedIncoming = true;
+                changed = setIncoming(true);
                 ConnectionSettings.EVER_ACCEPTED_INCOMING.setValue(true);
                 _lastIncomingTime = System.currentTimeMillis();
             }
         }
+        if(changed)
+            RouterService.incomingStatusChanged();
     }
 
 
@@ -774,11 +787,14 @@ public class Acceptor implements Runnable {
                     _lastConnectBackTime = System.currentTimeMillis();
                     Runnable resetter = new Runnable() {
                         public void run() {
+                            boolean changed = false;
                             synchronized (Acceptor.class) {
                                 if (_lastIncomingTime < currTime) {
-                                    _acceptedIncoming = false;
+                                    changed = setIncoming(false);
                                 }
                             }
+                            if(changed)
+                                RouterService.incomingStatusChanged();
                         }
                     };
                     RouterService.schedule(resetter, 

@@ -1501,6 +1501,9 @@ public class RouterService {
      * Notifies components that this' IP address has changed.
      */
     public static boolean addressChanged() {
+        if(callback != null)
+            callback.addressStateChanged();        
+        
         // Only continue if the current address/port is valid & not private.
         byte addr[] = getAddress();
         int port = getPort();
@@ -1511,9 +1514,7 @@ public class RouterService {
         if(!NetworkUtils.isValidPort(port))
             return false;
 
-        FileDesc[] fds = fileManager.getAllSharedFileDescriptors();
-        for(int i = 0; i < fds.length; i++)
-            fds[i].addUrnsForSelf();
+        updateAlterntateLocations();
 
         // reset the last connect back time so the next time the TCP/UDP
         // validators run they try to connect back.
@@ -1540,6 +1541,36 @@ public class RouterService {
         	}
         }
         return true;
+    }
+    
+    /**
+     * Notification that we've either just set or unset acceptedIncoming.
+     */
+    public static boolean incomingStatusChanged() {
+        if(callback != null)
+            callback.addressStateChanged();
+            
+        // Only continue if the current address/port is valid & not private.
+        byte addr[] = getAddress();
+        int port = getPort();
+        if(!NetworkUtils.isValidAddress(addr))
+            return false;
+        if(NetworkUtils.isPrivateAddress(addr))
+            return false;            
+        if(!NetworkUtils.isValidPort(port))
+            return false;
+            
+        updateAlterntateLocations();
+        return true;
+    }
+    
+    /**
+     * Updates all alternate locations.
+     */
+    private static void updateAlterntateLocations() {
+        FileDesc[] fds = fileManager.getAllSharedFileDescriptors();
+        for(int i = 0; i < fds.length; i++)
+            fds[i].addUrnsForSelf();
     }
     
     /**

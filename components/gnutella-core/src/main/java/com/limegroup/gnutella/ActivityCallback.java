@@ -23,6 +23,13 @@ import com.limegroup.gnutella.security.User;
  */
 public interface ActivityCallback
 {
+    
+    /**
+     * The address of the program has changed or we've
+     * just accepted our first incoming connection.
+     */
+    public void addressStateChanged();
+    
     /**
      *  Add a new unitialized connection.
      */
