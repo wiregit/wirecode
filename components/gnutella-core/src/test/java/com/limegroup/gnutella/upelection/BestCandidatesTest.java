@@ -213,5 +213,36 @@ public class BestCandidatesTest extends BaseTestCase {
 	}
 	
 	
+	/**
+	 * tests the scenario where a host changes his mind about his best candidate with
+	 * a worse candidate.  It can happen if the current best candidate goes offline.
+	 */
+	public void testChangedMind() throws Exception {
+		setUp();
+		
+		//give myself a bad candidate
+		BestCandidates.update(badCandidate);
+		
+		//advertise candidate at ttl 1 from advertiser1
+		goodCandidate.setAdvertiser(advertiser1);
+		
+		Candidate [] update = new Candidate[2];
+		update[0] = goodCandidate;
+		
+		BestCandidates.update(update);
+		
+		assertEquals(goodCandidate.getInetAddress(),BestCandidates.getBest().getInetAddress());
+		
+		//now the same advertiser changes his mind about his best candidate
+		mediocreCandidate.setAdvertiser(advertiser1);
+		
+		update[0]=mediocreCandidate;
+		
+		BestCandidates.update(update);
+		
+		//the new best candidate should be mediocreCandidate.
+		assertEquals(mediocreCandidate.getInetAddress(),BestCandidates.getBest().getInetAddress());
+	}
+	
 	
 }
