@@ -513,7 +513,7 @@ public class QueryReply extends Message implements Serializable{
             ByteArrayInputStream bais = new ByteArrayInputStream(payload,i,payload.length-i);
             //For each record...
             for ( ; left > 0; left--) {
-                Response r = Response.readFromStream(bais);
+                Response r = Response.createFromStream(bais);
                 responses[responses.length-left] = r;
                 i+=r.getLength();
             }
