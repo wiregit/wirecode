@@ -42,7 +42,9 @@ public interface Downloader {
     public int getRemainingStateTime();
 
     /** 
-     * Returns the name of the file this is downloading.
+     * Returns the name of the current or last file this is downloading, or null
+     * in the rare case that this has no more files to download.  (This might
+     * happen if this has been stopped.)
      */
     public String getFileName();
 
