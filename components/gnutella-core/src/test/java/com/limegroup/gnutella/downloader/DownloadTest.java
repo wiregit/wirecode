@@ -41,6 +41,10 @@ public class DownloadTest extends TestCase {
         return new TestSuite(DownloadTest.class);
     }
 
+    public static void main(String[] args) {
+        junit.textui.TestRunner.run(suite());
+    }
+
     public void tearDown() {
         //1. Kill all the upload threads.
         uploader1.stopThread();
