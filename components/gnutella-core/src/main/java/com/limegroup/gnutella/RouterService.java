@@ -259,7 +259,7 @@ public class RouterService {
   	/**
   	 * Performs startup tasks that should happen while the GUI loads
   	 */
-  	public void asyncGuiInit() {
+  	public static void asyncGuiInit() {
   		
   		synchronized(RouterService.class) {
   			if (_started > 0) // already did this?
@@ -278,7 +278,7 @@ public class RouterService {
   	 * performs the tasks usually run while the gui is initializing synchronously
   	 * to be used for tests and when running only the core
   	 */
-  	public void preGuiInit() {
+  	public static void preGuiInit() {
   		
   		synchronized(RouterService.class) {
   			if (_started > 0) // already did this?

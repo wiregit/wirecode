@@ -92,6 +92,9 @@ public class UPnPManager extends ControlPoint implements DeviceChangeListener {
 	private static final String UDP_PREFIX = "LimeUDP";
 	private String _guidSuffix;
 	
+	/** amount of time to wait while looking for a NAT device. */
+    private static final int WAIT_TIME = 3 * 1000; // 3 seconds
+	
 	private static final UPnPManager INSTANCE = new UPnPManager();
 
 	public static UPnPManager instance() {
@@ -114,14 +117,19 @@ public class UPnPManager extends ControlPoint implements DeviceChangeListener {
 	
 	private UPnPManager() {
 	    super();
+	    
+        addDeviceChangeListener(this);
+    }
+    
+    public synchronized boolean start() {
 	    LOG.debug("Starting UPnP Manager.");
-	    try{
-		
-	        addDeviceChangeListener(this);
-	        start();
-	    }catch(Exception bad) {
+	    
+	    try {
+	        return super.start();
+	    } catch(Exception bad) {
 	        ConnectionSettings.DISABLE_UPNP.setValue(true);
 	        ErrorService.error(bad);
+	        return false;
 	    }
 	}
 	
@@ -168,6 +176,21 @@ public class UPnPManager extends ControlPoint implements DeviceChangeListener {
 	}
 	
 	/**
+	 * Waits for a small amount of time before the device is discovered.
+	 */
+	public synchronized void waitForDevice() {
+	    // already have it.
+	    if(isNATPresent())
+	        return;
+	        
+        // otherwise, wait till we grab it.
+        try {
+            wait(WAIT_TIME);
+        } catch(InterruptedException ie) {}
+        
+    }
+	
+	/**
 	 * this method will be called when we discover a UPnP device.
 	 */
 	public synchronized void deviceAdded(Device dev) {
@@ -198,6 +221,7 @@ public class UPnPManager extends ControlPoint implements DeviceChangeListener {
 		} else {
 		    if(LOG.isDebugEnabled())
 		        LOG.debug("Found service, router: " + _router.getFriendlyName() + ", service: " + _service);
+            notify();
 			stop();
 		}
 	}

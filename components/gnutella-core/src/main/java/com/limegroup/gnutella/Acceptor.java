@@ -183,12 +183,10 @@ public class Acceptor implements Runnable {
         // onward.
         //1. Try suggested port.
 		int oldPort = tempPort;
-        Exception socketError = null;
         try {
 			setListeningPort(tempPort);
 			_port = tempPort;
         } catch (IOException e) {
-            socketError = e;
             // 2. Try 20 different ports. The first 10 tries increment
             // sequentially from 6346. The next 10 tries are random ports between
             // 2000 and 52000
@@ -213,7 +211,6 @@ public class Acceptor implements Runnable {
 					_port = tempPort;
                     break;
                 } catch (IOException e2) { 
-                    socketError = e2;
                 }
             }
 
@@ -223,8 +220,7 @@ public class Acceptor implements Runnable {
             }
         }
         
-
-        if (_port!=oldPort) {
+        if (_port != oldPort) {
             ConnectionSettings.PORT.setValue(_port);
             SettingsHandler.save();
             RouterService.addressChanged();
@@ -233,6 +229,9 @@ public class Acceptor implements Runnable {
         // if we created a socket and have a NAT, and the user is not 
         // explicitly forcing a port, create the mappings 
         if (_socket != null && UPNP_MANAGER != null) {
+            // wait a bit for the device.
+            UPNP_MANAGER.waitForDevice();
+            
         	// if we haven't discovered the router by now, its not there
         	UPNP_MANAGER.stop();
         	
@@ -269,8 +268,6 @@ public class Acceptor implements Runnable {
 			    }			        
         	}
         }
-        
-        socketError = null;
 	}
 	
     /**
