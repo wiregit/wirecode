@@ -120,7 +120,6 @@ public class ConnectionManager {
     private ActivityCallback _callback;
 	private SettingsManager _settings;
 	private ConnectionWatchdog _watchdog;
-	private Runnable _ultraFastCheck;
 
     /**
      * For authenticating users
@@ -862,34 +861,13 @@ public class ConnectionManager {
                                           c.getPort()));
             _endpoints=newEndpoints;
         }
-
-		// Check for satisfied ultra-fast connection threshold
-		if ( _ultraFastCheck != null )
-			_ultraFastCheck.run();
     }
-
-	/**
-	 *  Activate the ultraFast runnable for returning keepAlive value to normal.
-	 */
-	public void activateUltraFastConnectShutdown() {
-		_ultraFastCheck = new AllowUltraFastConnect();
-	}
-
-	/**
-	 *  Deactivate the ultraFast runnable returning keepAlive value to normal.
-	 */
-	public void deactivateUltraFastConnectShutdown() {
-		_ultraFastCheck = null;
-	}
 
     /**
      * Disconnects from the network.  Closes all connections and sets
      * the number of connections to zero.
      */
     public synchronized void disconnect() {
-		// Deactivate checking for Ultra Fast Shutdown
-		deactivateUltraFastConnectShutdown(); 
-
         SettingsManager settings=SettingsManager.instance();
         int oldKeepAlive=settings.getKeepAlive();
 
@@ -959,12 +937,6 @@ public class ConnectionManager {
             settings.setKeepAlive(outgoing);
         }
         //Actually notify the backend.
-
-		//  Adjust up keepAlive for initial ultrafast connect
-		if ( outgoing < 10 ) {
-			outgoing = 10;
-			activateUltraFastConnectShutdown();
-		}
         setKeepAlive(outgoing);
 
         //int incoming=settings.getKeepAlive();
@@ -1003,34 +975,6 @@ public class ConnectionManager {
             connection.flush();
         } catch (IOException e) { /* close it later */ }
     }
-
-
-    /**
-     * This Runnable resets the KeepAlive to the appropriate value
-	 * if there are an acceptible number of stable connections
-     */
-    private class AllowUltraFastConnect implements Runnable {
-		
-		public void run() {
-            SettingsManager settings=SettingsManager.instance();
-        	int outgoing=settings.getKeepAlive();
-			int desired = Math.min(outgoing, 3);
-
-			// Determine if we have 3/desired stable connections
-            Iterator iter=getConnections().iterator();
-            for ( ; iter.hasNext(); ) {
-                ManagedConnection c=(ManagedConnection)iter.next();
-				// Stable connections are measured by having 4 incoming msgs
-			    if ( c.getNumMessagesReceived() >= 4 )
-				    desired--;
-            }
-			if ( desired <= 0 ) {
-        	    setKeepAlive(outgoing);
-				// Deactivate extra ConnectionWatchdog Process
-		        deactivateUltraFastConnectShutdown(); 
-			}
-		}
-	}
 
     /**
      * An unsynchronized version of remove, meant to be used when the monitor
@@ -1121,16 +1065,22 @@ public class ConnectionManager {
      * Only call this method when the monitor is held.
      */
     private void adjustConnectionFetchers() {
-        //Try to achieve KEEP_ALIVE ultrapeer connections.  Conservatively
-        //assume that all connections being fetched right now will become
-        //ultrapeers.  To prevent fragmentation with clients that don't support
-        //ultrapeers, we'll give the first DESIRED_OLD_CONNECTIONS ultrapeers
-        //protected status.  See hasAvailableIncoming(boolean, boolean) and
-        //killExcessConnections().
+        //How many connections do we need?  To prefer ultrapeers, we try to
+        //achieve KEEP_ALIVE ultrapeer connections.  But to prevent
+        //fragmentation with clients that don't support ultrapeers, we'll give
+        //the first DESIRED_OLD_CONNECTIONS ultrapeers protected status.  See
+        //hasAvailableIncoming(boolean, boolean) and killExcessConnections().
         int goodConnections=ultrapeerConnections()
-                         +_initializingFetchedConnections.size()
                          +Math.min(oldConnections(), DESIRED_OLD_CONNECTIONS);
-        int need = _keepAlive - goodConnections - _fetchers.size();
+        int neededConnections=_keepAlive - goodConnections;
+        //Now how many fetchers do we need?  To increase parallelism, we
+        //allocate 4 fetchers per connection, but no more than 10 fetchers.
+        //(Too much parallelism increases chance of simultaneous connects,
+        //resulting in too many connections.)  Note that we assume that all
+        //connections being fetched right now will become ultrapeers.
+        int need = Math.min(10,4*neededConnections) 
+                 - _fetchers.size()
+                 - _initializingFetchedConnections.size();
 
         // Start connection fetchers as necessary
         while(need > 0) {
@@ -1237,16 +1187,18 @@ public class ConnectionManager {
         ManagedConnection supernodeConnection)
     {
         //How many leaf connections should we have?  There's a tension between
-        //doing what LimeWire thinks is best and what the user wants.  Here's
-        //how we compromise.  If we're quick-connecting automatically (on
-        //startup, from file menu, or after loosing all shielded connections),
-        //set KEEP_ALIVE to LimeWire's preferred value.  (Note that this is not
-        //stored in limewire.props.)  Otherwise, we use the user's desired
-        //value.  In either case, make sure the ultra-fast connect logic is
-        //disabled, since it tries to get KEEP_ALIVE connections.
-        boolean wasQuickConnecting=(_ultraFastCheck!=null) && _keepAlive>0;
-  		deactivateUltraFastConnectShutdown(); 
-        if (wasQuickConnecting)
+        //doing what LimeWire thinks is best and what the user wants.  Ideally
+        //we would set the KEEP_ALIVE iff the user hasn't recently manually
+        //adjusted it.  Because this is a pain to implement, we use a hack; only
+        //adjust the KEEP_ALIVE if there is only one shielded leaf-ultrapeer
+        //connection.  Typically this will happen just once, when we enter leaf
+        //mode.  Note that we actually call ultrapeerConnections() instead of a
+        //"clientSupernodeConnections()" method; if this method is called and
+        //ultrapeerConnections()==1, there is exactly one client-supernode
+        //connection.
+        boolean firstShieldedConnection=(ultrapeerConnections()==1) 
+                                       && _keepAlive>0;
+        if (firstShieldedConnection)
             setKeepAlive(PREFERRED_CONNECTIONS_FOR_LEAF);    
 
         //This is totally disabled now that leaves can have multiple connections.
