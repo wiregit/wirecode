@@ -1103,7 +1103,7 @@ public class UDPConnectionProcessor {
             } else if (msg instanceof KeepAliveMessage) {
                 // Extend the msgs sequenceNumber to 8 bytes based on past state
                 msg.extendSequenceNumber(
-                  _extender.extendSequenceNumber(
+                  _localExtender.extendSequenceNumber(
                     msg.getSequenceNumber()) );
 
                 KeepAliveMessage kmsg   = (KeepAliveMessage) msg;
@@ -1111,7 +1111,7 @@ public class UDPConnectionProcessor {
                 // Extend the windowStart to 8 bytes the same 
                 // as the sequenceNumber
                 kmsg.extendWindowStart(
-                  _extender.extendSequenceNumber(kmsg.getWindowStart()) );
+                  _localExtender.extendSequenceNumber(kmsg.getWindowStart()) );
 
                 long             seqNo  = kmsg.getSequenceNumber();
                 long             wStart = kmsg.getWindowStart(); 
