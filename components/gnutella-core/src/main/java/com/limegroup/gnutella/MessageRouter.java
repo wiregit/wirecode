@@ -1496,7 +1496,7 @@ public abstract class MessageRouter {
      * limit, we simply drop the reply.
      *
      * Reason 2) The reply contained the "MCAST" header, but was not meant
-     * for me, and a TTL+Hops > 1.  This is necessary because we now forward
+     * for.  This is necessary because we now forward
      * QueryRequests to the local subnet, and pass on replies.  Newer LimeWires
      * (3.0+) will correctly not set the MCAST GGEP header for multicasted
      * query requests that have been forwarded from the network.  Older
@@ -1524,14 +1524,10 @@ public abstract class MessageRouter {
         // Reason 4 -- drop if TTL is 0.
         if( ttl == 0 ) return true;
         
-        // Reason 2 -- reply to multicast query with an incorrect ttl/hops
+        // Reason 2 -- reply to multicast query that wasn't meant for me.
         try {
-            if( qr.isReplyToMulticastQuery() && (ttl + hops) > 1)
+            if( qr.isReplyToMulticastQuery() )
                 return true;
-            // Do not drop, ever, if this is a valid response to a 
-            // multicast query.
-            else if ( qr.isReplyToMulticastQuery() )
-                return false;
         } catch(BadPacketException bpe) {
             // Bad packet, drop.
             return true;
