@@ -296,6 +296,14 @@ public final class AlternateLocation implements HTTPHeaderValue, Comparable {
     public synchronized int getCount() { return _count; }
     
     /**
+     * 
+     * @return the PushAddress.  if it is null, the altloc is not firewalled.
+     */
+    public PushEndpoint getPushAddress() {
+    	return _pushAddress;
+    }
+    
+    /**
      * package access, accessor to the value of _demoted
      */ 
     public synchronized boolean getDemoted() { return _demoted; }
@@ -350,7 +358,12 @@ public final class AlternateLocation implements HTTPHeaderValue, Comparable {
     public synchronized AlternateLocation createClone() {
         AlternateLocation ret = null;
         try {
-            ret = new AlternateLocation(this.URL, this.SHA1_URN);
+        	if (URL!=null)
+        		ret = new AlternateLocation(this.URL, this.SHA1_URN);
+        	else if (_pushAddress !=null)
+        		ret = new AlternateLocation(_pushAddress,SHA1_URN);
+        	else
+        		throw new Error("an altloc had neither URL nor PE - bad.");
         } catch(IOException ioe) {
             ErrorService.error(ioe);
             return null;
@@ -575,7 +588,12 @@ public final class AlternateLocation implements HTTPHeaderValue, Comparable {
 	 * @return the string representation of this alternate location
 	 */
 	public String toString() {
-        return this.URL.toExternalForm()+","+_count+","+_demoted;
+		if (URL!=null)
+			return this.URL.toExternalForm()+","+_count+","+_demoted;
+		else if (_pushAddress != null)
+			return _pushAddress+","+_count+","+_demoted;
+		else
+			throw new Error("an altloc had neither URL nor PE - bad.");
 	}
 
 }

@@ -30,6 +30,11 @@ public class PushEndpoint {
 	private final byte [] _clientGUID;
 	
 	/**
+	 * the GUID as GUID object - cached to avoid recreating
+	 */
+	private final GUID _guid;
+	
+	/**
 	 * set of <tt>PushProxyInterface</tt> objects.
 	 */
 	private final Set _proxies;
@@ -53,6 +58,7 @@ public class PushEndpoint {
 	public PushEndpoint(byte [] guid, Set proxies) {
 		
 		_clientGUID=guid;
+		_guid = new GUID(guid);
 		
 		if (proxies!=null)
 			_proxies = Collections.unmodifiableSet(proxies);
@@ -63,7 +69,7 @@ public class PushEndpoint {
 		
 		//also calculate the hashcode in the constructor
 		
-		int hashcode = _clientGUID.hashCode() *15;
+		int hashcode = _guid.hashCode();
 		
 		for (Iterator iter = _proxies.iterator();iter.hasNext();) {
 			QueryReply.PushProxyContainer cur = 
@@ -184,5 +190,15 @@ public class PushEndpoint {
 			return false;
 		
 		return hashCode() == other.hashCode();
+	}
+	
+	public String toString() {
+		String ret = "PE [GUID:"+_guid+", proxies:{ "; 
+		for (Iterator iter = _proxies.iterator();iter.hasNext();) {
+			PushProxyInterface ppi = (PushProxyInterface)iter.next();
+			ret = ret+ppi.getPushProxyAddress()+":"+ppi.getPushProxyPort()+" ";
+		}
+		ret = ret+ "}]";
+		return ret;
 	}
 }

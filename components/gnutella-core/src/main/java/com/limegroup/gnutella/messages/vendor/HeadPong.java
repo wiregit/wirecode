@@ -177,15 +177,6 @@ public class HeadPong extends VendorMessage {
 				_ranges = IntervalSet.parseBytes(ranges);
 			}
 		
-		//parse any included altlocs
-		if ((_features & HeadPing.ALT_LOCS) == HeadPing.ALT_LOCS) {
-			int size = dais.readShort();
-			byte [] altlocs = new byte[size];
-			dais.readFully(altlocs);
-			_altLocs = new HashSet();
-			_altLocs.addAll(NetworkUtils.unpackIps(altlocs));
-		}
-		
 		//parse any included firewalled altlocs
 		if ((_features & HeadPing.PUSH_ALTLOCS) == HeadPing.PUSH_ALTLOCS) {
 			int size = dais.readShort();
@@ -193,6 +184,15 @@ public class HeadPong extends VendorMessage {
 			dais.readFully(altlocs);
 			_pushLocs = new HashSet();
 			_pushLocs.addAll(NetworkUtils.unpackPushEPs(altlocs));
+		}
+			
+		//parse any included altlocs
+		if ((_features & HeadPing.ALT_LOCS) == HeadPing.ALT_LOCS) {
+			int size = dais.readShort();
+			byte [] altlocs = new byte[size];
+			dais.readFully(altlocs);
+			_altLocs = new HashSet();
+			_altLocs.addAll(NetworkUtils.unpackIps(altlocs));
 		}
 		
 		}catch(IOException oops) {
@@ -229,6 +229,7 @@ public class HeadPong extends VendorMessage {
 		FileDesc desc = _fileManager.getFileDescForUrn(urn);
 		
 		boolean didNotSendAltLocs=false;
+		boolean didNotSendPushAltLocs = false;
 		boolean didNotSendRanges = false;
 		
 		try{
@@ -282,7 +283,7 @@ public class HeadPong extends VendorMessage {
 			byte [] ranges =ifd.getRangesAsByte();
 			
 			//write the ranges only if they will fit in the packet
-			if (caos.getAmountWritten() + ranges.length <= PACKET_SIZE) {
+			if (caos.getAmountWritten()+2 + ranges.length <= PACKET_SIZE) {
 				daos.writeShort((short)ranges.length);
 				caos.write(ranges);
 			} 
@@ -299,12 +300,30 @@ public class HeadPong extends VendorMessage {
 		//if we have any altlocs and enough room in the packet, add them.
 		AlternateLocationCollection altlocs = desc.getAlternateLocationCollection();
 		
-		
+		if (altlocs !=null && altlocs.hasAlternateLocations() &&
+			ping.requestsPushLocs()) {
+				
+				//push altlocs are bigger than normal altlocs, however we 
+				//don't know by how much.  The size can be between
+				//23 and 41 bytes.  We assume its 41.
+				int available = (PACKET_SIZE - (caos.getAmountWritten()+2)) / 41;
+				
+				byte [] altbytes = altlocs.toBytesPush(available);
+				
+				if (altbytes ==null){
+					//altlocs will not fit or none available - say we didn't send them
+					didNotSendPushAltLocs=true;
+				} else { 
+					daos.writeShort((short)altbytes.length);
+					caos.write(altbytes);
+				}
+				
+			}
 		
 		if (altlocs!= null && altlocs.hasAlternateLocations() &&
 				ping.requestsAltlocs()) {
 			
-			int toPack = (PACKET_SIZE - (caos.getAmountWritten()+1) ) /6;
+			int toPack = (PACKET_SIZE - (caos.getAmountWritten()+2) ) /6;
 			
 			byte [] altbytes = altlocs.toBytes(toPack);
 			
@@ -332,6 +351,8 @@ public class HeadPong extends VendorMessage {
 			ret[0] = (byte) (ret[0] & ~HeadPing.INTERVALS);
 		if (didNotSendAltLocs)
 			ret[0] = (byte) (ret[0] & ~HeadPing.ALT_LOCS);
+		if (didNotSendPushAltLocs)
+			ret[0] = (byte) (ret[0] & ~HeadPing.PUSH_ALTLOCS);
 		
 		return ret;
 	}
