@@ -637,7 +637,7 @@ public class ManagedDownloader implements Downloader, Serializable {
     }
 
 
-    ///////////////////////////// Core Downloading Logic ///////////////////////
+    //////////////////////////// Core Downloading Logic /////////////////////
 
     /** 
      * Actually does the download, finding duplicate files, trying all
@@ -996,7 +996,7 @@ public class ManagedDownloader implements Downloader, Serializable {
                 Thread connectCreator = new Thread() {
                     public void run() {
                         try {
-                            connectAndStartDownload(rfd);
+                            connectAndDownload(rfd);
                             //System.out.println("Sumeet: end of run");
                         } catch (Exception e) {
                             //This is a "firewall" for reporting unhandled
@@ -1022,7 +1022,7 @@ public class ManagedDownloader implements Downloader, Serializable {
         }//end of while
     }
     
-    private void connectAndStartDownload(RemoteFileDesc rfd) {
+    private void connectAndDownload(RemoteFileDesc rfd) {
         //this make throw an exception if we were not able to establish a 
         //direct connection and push was unsuccessful too
         HTTPDownloader dloader = null;
@@ -1035,31 +1035,31 @@ public class ManagedDownloader implements Downloader, Serializable {
             return;
         }
         try {
-            assignDownload(dloader);      
+            assignAndRequest(dloader);      
         } catch(TryAgainLaterException tale) {
-            debug("connectAndStartDownload: TALException thrown ");
-            resetNeeded(dloader);
+            debug("connectAndDownload: TALException thrown ");
+            updateNeeded(dloader);
             busy.add(rfd);//we can try this rfd again later
             return;
         } catch (InterruptedException ie) {
-            debug("connectAndStartDownload: InterruptdException thrown ");
-            resetNeeded(dloader);
+            debug("connectAndDownload: InterruptdException thrown ");
+            updateNeeded(dloader);
             files.add(rfd);//we can try this rfd again later
             return;
         } catch (NoSuchElementException nsex) {
             //System.out.println("Sumeet: files size "+files.size());
             ;//ignored...we have already handled it all
         } catch (Exception e) {
-            debug ("connectAndStartDownload : other exception thrown");
+            debug ("connectAndDownload : other exception thrown");
             //IOException, FileNotFound, NotSharing
             //InterruptedException, NoSuchElementException 
             //Don't care about this rfd...lose it.
-            resetNeeded(dloader);
+            updateNeeded(dloader);
             return;
         }
     }
     
-    private synchronized void resetNeeded(HTTPDownloader dloader) {
+    private synchronized void updateNeeded(HTTPDownloader dloader) {
         debug ("downloader failed. adding to white..."+
                "Downloader: initial, read, toRead :"+
                dloader+", "+
@@ -1099,7 +1099,7 @@ public class ManagedDownloader implements Downloader, Serializable {
      * @exception InterruptedException this thread was interrupted while
      *  waiting to send/receive HTTP headers.
      */
-    private void assignDownload(HTTPDownloader dloader) throws 
+    private void assignAndRequest(HTTPDownloader dloader) throws 
     InterruptedException, IOException, TryAgainLaterException, 
     FileNotFoundException, NotSharingException , NoSuchElementException {
         
@@ -1331,7 +1331,7 @@ public class ManagedDownloader implements Downloader, Serializable {
             stop();
         } finally {       
             if (problem)
-                resetNeeded(downloader);
+                updateNeeded(downloader);
             int stop=downloader.getInitialReadingPoint()
                         +downloader.getAmountRead();
             debug("    WORKER: terminating from "+downloader+" at "+stop);
