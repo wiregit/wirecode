@@ -9,10 +9,10 @@ import junit.framework.Test;
 import com.limegroup.gnutella.altlocs.AlternateLocation;
 import com.limegroup.gnutella.http.HTTPConstants;
 import com.limegroup.gnutella.util.CommonUtils;
-import com.sun.java.util.collections.HashSet;
-import com.sun.java.util.collections.LinkedList;
-import com.sun.java.util.collections.List;
-import com.sun.java.util.collections.Set;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Set;
 
 /**
  * Test the public methods of the <tt>FileDesc</tt> class.

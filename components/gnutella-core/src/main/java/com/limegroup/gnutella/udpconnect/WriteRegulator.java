@@ -1,6 +1,6 @@
 package com.limegroup.gnutella.udpconnect;
 
-import com.sun.java.util.collections.*;
+import java.util.*;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;

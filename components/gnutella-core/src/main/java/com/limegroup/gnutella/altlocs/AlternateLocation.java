@@ -7,9 +7,9 @@ import com.limegroup.gnutella.util.*;
 import java.net.*;
 import java.util.StringTokenizer;
 import java.io.*;
-import com.sun.java.util.collections.Set;
-import com.sun.java.util.collections.HashSet;
-import com.sun.java.util.collections.Comparable;
+import java.util.Set;
+import java.util.HashSet;
+
 
 /**
  * This class encapsulates the data for an alternate resource location, as 

@@ -7,7 +7,7 @@ import com.limegroup.gnutella.util.IpPort;
 import com.limegroup.gnutella.settings.ApplicationSettings;
 
 import java.util.Properties;
-import com.sun.java.util.collections.*;
+import java.util.*;
 
 import java.io.*;
 import java.util.StringTokenizer;

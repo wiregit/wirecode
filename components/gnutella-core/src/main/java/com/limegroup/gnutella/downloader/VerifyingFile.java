@@ -1,6 +1,6 @@
 package com.limegroup.gnutella.downloader;
 
-import com.sun.java.util.collections.*;
+import java.util.*;
 import java.io.*;
 import com.limegroup.gnutella.util.*;
 import com.limegroup.gnutella.tigertree.HashTree;

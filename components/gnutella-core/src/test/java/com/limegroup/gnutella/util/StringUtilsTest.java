@@ -2,13 +2,13 @@ package com.limegroup.gnutella.util;
 
 import junit.framework.Test;
 
-import com.sun.java.util.collections.Iterator;
-import com.sun.java.util.collections.List;
-import com.sun.java.util.collections.LinkedList;
-import com.sun.java.util.collections.Collection;
-import com.sun.java.util.collections.Set;
-import com.sun.java.util.collections.HashSet;
-import com.sun.java.util.collections.Arrays;
+import java.util.Iterator;
+import java.util.List;
+import java.util.LinkedList;
+import java.util.Collection;
+import java.util.Set;
+import java.util.HashSet;
+import java.util.Arrays;
 
 /**
  * Tests StringUtils.

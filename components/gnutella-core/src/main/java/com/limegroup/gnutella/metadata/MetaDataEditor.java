@@ -3,7 +3,7 @@ package com.limegroup.gnutella.metadata;
 import org.apache.commons.logging.*;
 
 
-import com.sun.java.util.collections.*;
+import java.util.*;
 import com.limegroup.gnutella.xml.*;
 
 

@@ -2,7 +2,7 @@ package com.limegroup.gnutella.downloader;
 
 import java.io.Serializable;
 
-import com.sun.java.util.collections.Comparable;
+
 
 import com.limegroup.gnutella.Assert;
 import com.limegroup.gnutella.ByteOrder;;

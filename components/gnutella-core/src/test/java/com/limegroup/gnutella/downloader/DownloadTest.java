@@ -36,10 +36,11 @@ import com.limegroup.gnutella.util.DataUtils;
 import com.limegroup.gnutella.util.PrivilegedAccessor;
 import com.limegroup.gnutella.tigertree.TigerTreeCache;
 import com.limegroup.gnutella.tigertree.HashTree;
-import com.sun.java.util.collections.Iterator;
-import com.sun.java.util.collections.LinkedList;
-import com.sun.java.util.collections.List;
-import com.sun.java.util.collections.Set;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Set;
+import java.util.HashSet;
 
 /**
  * Comprehensive test of downloads -- one of the most important tests in
@@ -2010,8 +2011,7 @@ public class DownloadTest extends BaseTestCase {
 
     private static RemoteFileDesc newRFDWithURN(int port, int speed, 
                                                 String urn) {
-        com.sun.java.util.collections.Set set = 
-			new com.sun.java.util.collections.HashSet();
+        Set set = new HashSet();
         try {
             // for convenience, don't require that they pass the urn.
             // assume a null one is the TestFile's hash.

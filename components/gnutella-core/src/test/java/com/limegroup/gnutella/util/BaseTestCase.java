@@ -31,8 +31,8 @@ import com.limegroup.gnutella.settings.UltrapeerSettings;
 import com.limegroup.gnutella.util.SystemUtils;
 
 import java.util.StringTokenizer;
-import com.sun.java.util.collections.List;
-import com.sun.java.util.collections.LinkedList;
+import java.util.List;
+import java.util.LinkedList;
 
 public class BaseTestCase extends AssertComparisons implements ErrorCallback {
     

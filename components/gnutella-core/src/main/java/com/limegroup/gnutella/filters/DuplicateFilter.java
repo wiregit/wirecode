@@ -4,7 +4,7 @@ import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.messages.*;
 import com.limegroup.gnutella.util.Buffer;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
-import com.sun.java.util.collections.*;
+import java.util.*;
 
 /**
  * A spam filter that tries to eliminate duplicate packets from

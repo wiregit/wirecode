@@ -2,7 +2,7 @@ package com.limegroup.gnutella;
 
 import java.net.*;
 import java.io.*;
-import com.sun.java.util.collections.*;
+import java.util.*;
 
 import java.util.Properties;
 import java.util.StringTokenizer;

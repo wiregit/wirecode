@@ -1,6 +1,6 @@
 package com.limegroup.gnutella.util;
 
-import com.sun.java.util.collections.*;
+import java.util.*;
 
 /**
  * This is a Set forgetting entries after a certain amount of time and it never
@@ -57,7 +57,7 @@ public class FixedSizeExpiringSet implements Set, Collection {
     /*
      * (non-Javadoc)
      * 
-     * @see com.sun.java.util.collections.Collection#size()
+     * @see java.util.Collection#size()
      */
     public int size() {
         expire(false);
@@ -67,7 +67,7 @@ public class FixedSizeExpiringSet implements Set, Collection {
     /*
      * (non-Javadoc)
      * 
-     * @see com.sun.java.util.collections.Collection#isEmpty()
+     * @see java.util.Collection#isEmpty()
      */
     public boolean isEmpty() {
         return _map.isEmpty();
@@ -76,7 +76,7 @@ public class FixedSizeExpiringSet implements Set, Collection {
     /*
      * (non-Javadoc)
      * 
-     * @see com.sun.java.util.collections.Collection#contains(java.lang.Object)
+     * @see java.util.Collection#contains(java.lang.Object)
      */
     public boolean contains(Object arg0) {
         Long time = (Long) _map.get(arg0);
@@ -92,7 +92,7 @@ public class FixedSizeExpiringSet implements Set, Collection {
     /*
      * (non-Javadoc)
      * 
-     * @see com.sun.java.util.collections.Collection#iterator()
+     * @see java.util.Collection#iterator()
      */
     public Iterator iterator() {
         expire(false);
@@ -102,7 +102,7 @@ public class FixedSizeExpiringSet implements Set, Collection {
     /*
      * (non-Javadoc)
      * 
-     * @see com.sun.java.util.collections.Collection#toArray()
+     * @see java.util.Collection#toArray()
      */
     public Object[] toArray() {
         expire(false);
@@ -112,7 +112,7 @@ public class FixedSizeExpiringSet implements Set, Collection {
     /*
      * (non-Javadoc)
      * 
-     * @see com.sun.java.util.collections.Collection#toArray(java.lang.Object[])
+     * @see java.util.Collection#toArray(java.lang.Object[])
      */
     public Object[] toArray(Object[] arg0) {
         expire(false);
@@ -122,7 +122,7 @@ public class FixedSizeExpiringSet implements Set, Collection {
     /*
      * (non-Javadoc)
      * 
-     * @see com.sun.java.util.collections.Collection#add(java.lang.Object)
+     * @see java.util.Collection#add(java.lang.Object)
      */
     public boolean add(Object arg0) {
         if (arg0 == null)
@@ -139,7 +139,7 @@ public class FixedSizeExpiringSet implements Set, Collection {
     /*
      * (non-Javadoc)
      * 
-     * @see com.sun.java.util.collections.Collection#remove(java.lang.Object)
+     * @see java.util.Collection#remove(java.lang.Object)
      */
     public boolean remove(Object arg0) {
         if (_map.remove(arg0) != null)
@@ -150,8 +150,8 @@ public class FixedSizeExpiringSet implements Set, Collection {
     /**
      * (non-Javadoc)
      * 
-     * @see com.sun.java.util.collections.Collection#containsAll
-     * (com.sun.java.util.collections.Collection)
+     * @see java.util.Collection#containsAll
+     * (java.util.Collection)
      */
     public boolean containsAll(Collection arg0) {
         return _map.keySet().containsAll(arg0);
@@ -162,8 +162,8 @@ public class FixedSizeExpiringSet implements Set, Collection {
      * collection is bigger than _maxSize only the first _maxSize elements are
      * added.
      * 
-     * @see com.sun.java.util.collections.Collection#addAll
-     * (com.sun.java.util.collections.Collection) */
+     * @see java.util.Collection#addAll
+     * (java.util.Collection) */
     public boolean addAll(Collection coll) {
         if (coll.isEmpty())
             return false;
@@ -174,8 +174,8 @@ public class FixedSizeExpiringSet implements Set, Collection {
     }
 
     /**
-     * @see com.sun.java.util.collections.Collection#retainAll
-     * (com.sun.java.util.collections.Collection)
+     * @see java.util.Collection#retainAll
+     * (java.util.Collection)
      */
     public boolean retainAll(Collection arg0) {
         Map map = new HashMap();
@@ -195,8 +195,8 @@ public class FixedSizeExpiringSet implements Set, Collection {
     /*
      * (non-Javadoc)
      * 
-     * @see com.sun.java.util.collections.Collection#removeAll
-     * (com.sun.java.util.collections.Collection) 
+     * @see java.util.Collection#removeAll
+     * (java.util.Collection) 
      */
     public boolean removeAll(Collection arg0) {
         if (arg0.isEmpty())
@@ -210,7 +210,7 @@ public class FixedSizeExpiringSet implements Set, Collection {
     /*
      * (non-Javadoc)
      * 
-     * @see com.sun.java.util.collections.Collection#clear()
+     * @see java.util.Collection#clear()
      */
     public void clear() {
         _map.clear();

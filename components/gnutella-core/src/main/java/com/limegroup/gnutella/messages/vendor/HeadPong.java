@@ -8,7 +8,7 @@ import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.settings.UploadSettings;
 import com.limegroup.gnutella.util.*;
 
-import com.sun.java.util.collections.*;
+import java.util.*;
 
 /**
  * a response to an HeadPing.  It is a trimmed down version of the standard HEAD response,

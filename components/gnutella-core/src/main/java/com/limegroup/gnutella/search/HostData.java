@@ -3,7 +3,7 @@ package com.limegroup.gnutella.search;
 import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.messages.*;
 import com.limegroup.gnutella.util.*;
-import com.sun.java.util.collections.*;
+import java.util.*;
 
 /**
  * This class contains data about a host that has returned a query hit,

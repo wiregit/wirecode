@@ -1,6 +1,6 @@
 package com.limegroup.gnutella.chat;
 
-import com.sun.java.util.collections.*;
+import java.util.*;
 import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.settings.*;
 import com.limegroup.gnutella.util.Comparators;

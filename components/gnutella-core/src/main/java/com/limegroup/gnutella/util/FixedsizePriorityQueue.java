@@ -1,6 +1,6 @@
 package com.limegroup.gnutella.util;
 
-import com.sun.java.util.collections.*;
+import java.util.*;
 import com.limegroup.gnutella.Assert;
 
 /**
@@ -47,7 +47,7 @@ public class FixedsizePriorityQueue {
      * is necessary to allow multiple nodes with same priority.  See
      * http://developer.java.sun.com/developer/bugParade/bugs/4229181.html
      */
-    private class Node implements com.sun.java.util.collections.Comparable {
+    private class Node implements Comparable {
         /** The underlying data. */
         private Object data;     
         /** Used to guarantee two nodes are never equal. */

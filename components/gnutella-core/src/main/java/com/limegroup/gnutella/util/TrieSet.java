@@ -2,7 +2,7 @@ package com.limegroup.gnutella.util;
 
 import com.limegroup.gnutella.util.Trie;
 
-import com.sun.java.util.collections.Iterator;
+import java.util.Iterator;
 
 /**
  * A TrieSet.  A set-like interface designed specifically for Strings.

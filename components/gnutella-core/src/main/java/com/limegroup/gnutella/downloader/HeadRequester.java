@@ -5,7 +5,7 @@ import com.limegroup.gnutella.messages.*;
 import com.limegroup.gnutella.altlocs.*;
 import com.limegroup.gnutella.http.*;
 import com.limegroup.gnutella.util.CommonUtils;
-import com.sun.java.util.collections.*;
+import java.util.*;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpMethod;
 import org.apache.commons.httpclient.Header;

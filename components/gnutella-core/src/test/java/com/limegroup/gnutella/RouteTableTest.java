@@ -5,7 +5,7 @@ import junit.framework.Test;
 import com.limegroup.gnutella.stubs.ReplyHandlerStub;
 import com.limegroup.gnutella.util.BaseTestCase;
 import com.limegroup.gnutella.util.PrivilegedAccessor;
-import com.sun.java.util.collections.Map;
+import java.util.Map;
 
 /**
  * Test the public methods of the <tt>FileDesc</tt> class.

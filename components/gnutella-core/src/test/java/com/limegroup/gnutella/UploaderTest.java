@@ -8,7 +8,7 @@ import java.io.OutputStreamWriter;
 import java.net.Socket;
 import java.io.InputStream;
 
-import com.sun.java.util.collections.*;
+import java.util.*;
 
 import junit.framework.Test;
 

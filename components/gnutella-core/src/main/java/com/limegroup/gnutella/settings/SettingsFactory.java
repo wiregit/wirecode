@@ -5,7 +5,7 @@ import com.limegroup.gnutella.util.*;
 import java.util.Properties;
 import java.io.*;
 import java.awt.*;
-import com.sun.java.util.collections.*;
+import java.util.*;
 
 /**
  * Class for handling all LimeWire settings that are stored to disk.  To

@@ -6,9 +6,9 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 
-import com.sun.java.util.collections.List;
-import com.sun.java.util.collections.Iterator;
-import com.sun.java.util.collections.LinkedList;
+import java.util.List;
+import java.util.Iterator;
+import java.util.LinkedList;
 
 /**
  * a.k.a. The "ObjectMolester"

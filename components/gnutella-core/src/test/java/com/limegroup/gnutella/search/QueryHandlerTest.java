@@ -18,10 +18,10 @@ import com.limegroup.gnutella.util.TestConnection;
 import com.limegroup.gnutella.util.TestConnectionManager;
 import com.limegroup.gnutella.util.TestResultCounter;
 import com.limegroup.gnutella.util.UltrapeerConnection;
-import com.sun.java.util.collections.ArrayList;
-import com.sun.java.util.collections.Iterator;
-import com.sun.java.util.collections.LinkedList;
-import com.sun.java.util.collections.List;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 
 
 /**

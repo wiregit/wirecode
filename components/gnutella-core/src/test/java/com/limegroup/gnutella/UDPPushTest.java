@@ -10,7 +10,7 @@ import com.limegroup.gnutella.messages.*;
 
 import junit.framework.Test;
 
-import com.sun.java.util.collections.*;
+import java.util.*;
 import java.net.*;
 import java.io.*;
 

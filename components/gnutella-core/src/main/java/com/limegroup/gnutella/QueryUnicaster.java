@@ -5,7 +5,7 @@ import com.limegroup.gnutella.guess.*;
 import com.limegroup.gnutella.statistics.*;
 import com.limegroup.gnutella.settings.*;
 import com.limegroup.gnutella.util.*;
-import com.sun.java.util.collections.*;
+import java.util.*;
 import java.net.*;
 
 /** 

@@ -4,7 +4,7 @@ import com.limegroup.gnutella.util.NetworkUtils;
 import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.ManagedThread;
 import com.limegroup.gnutella.messages.*;
-import com.sun.java.util.collections.*;
+import java.util.*;
 
 import java.net.*;
 import java.io.*;

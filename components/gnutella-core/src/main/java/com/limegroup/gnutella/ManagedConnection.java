@@ -8,7 +8,7 @@ import com.limegroup.gnutella.settings.*;
 import com.limegroup.gnutella.messages.vendor.*;
 import com.limegroup.gnutella.util.*;
 import com.limegroup.gnutella.security.*;
-import com.sun.java.util.collections.*;
+import java.util.*;
 import java.util.Properties;
 import com.limegroup.gnutella.routing.*;
 import com.limegroup.gnutella.filters.*;

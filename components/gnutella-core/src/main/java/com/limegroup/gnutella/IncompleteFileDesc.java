@@ -4,7 +4,7 @@ import com.limegroup.gnutella.downloader.ManagedDownloader;
 import com.limegroup.gnutella.downloader.VerifyingFile;
 import com.limegroup.gnutella.downloader.Interval;
 import com.limegroup.gnutella.tigertree.HashTree;
-import com.sun.java.util.collections.*;
+import java.util.*;
 import java.io.*;
 import com.limegroup.gnutella.http.*;
 import com.limegroup.gnutella.altlocs.*;

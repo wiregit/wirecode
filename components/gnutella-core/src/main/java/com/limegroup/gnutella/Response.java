@@ -23,7 +23,7 @@ import java.net.UnknownHostException;
 import java.util.StringTokenizer;
 
 import org.xml.sax.SAXException;
-import com.sun.java.util.collections.*;
+import java.util.*;
 
 
 /**

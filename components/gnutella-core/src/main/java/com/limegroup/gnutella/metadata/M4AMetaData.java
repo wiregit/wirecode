@@ -5,7 +5,7 @@ import java.io.*;
 
 import com.limegroup.gnutella.util.*;
 import com.limegroup.gnutella.ByteOrder;
-import com.sun.java.util.collections.*;
+import java.util.*;
 
 /**
  * Limited metadata parsing of m4a files.  This is based on code published

@@ -1,8 +1,8 @@
 package com.limegroup.gnutella.util;
 
-import com.sun.java.util.collections.Iterator;
-import com.sun.java.util.collections.Map;
-import com.sun.java.util.collections.TreeMap;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.TreeMap;
 
 /**
  * Test for the <tt>Comparators</tt> class that provides access to 

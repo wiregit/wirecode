@@ -38,8 +38,8 @@ import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.PrivilegedAccessor;
 import com.limegroup.gnutella.util.Sockets;
-import com.sun.java.util.collections.Iterator;
-import com.sun.java.util.collections.Set;
+import java.util.Iterator;
+import java.util.Set;
 
 /**
  * Checks whether a leaf node handles GUESS queries correctly.  Tests the

@@ -16,9 +16,9 @@ import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.uploader.*;
 import com.limegroup.gnutella.html.FileListHTMLPage;
-import com.sun.java.util.collections.Arrays;
-import com.sun.java.util.collections.HashSet;
-import com.sun.java.util.collections.Set;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Checks whether (multi)leaves avoid forwarding messages to ultrapeers, do

@@ -2,7 +2,7 @@ package com.limegroup.gnutella;
 
 import java.io.*;
 import com.limegroup.gnutella.util.*;
-import com.sun.java.util.collections.*;
+import java.util.*;
 
 /**
  * A helper class for implementing the BandwidthTracker interface.  For

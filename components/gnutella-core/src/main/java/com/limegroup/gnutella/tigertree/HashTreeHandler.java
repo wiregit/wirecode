@@ -19,11 +19,11 @@ import com.bitzi.util.Base32;
 import com.limegroup.gnutella.Assert;
 import com.limegroup.gnutella.dime.*;
 import com.limegroup.gnutella.util.UUID;
-import com.sun.java.util.collections.ArrayList;
-import com.sun.java.util.collections.Iterator;
-import com.sun.java.util.collections.List;
-import com.sun.java.util.collections.Arrays;
-import com.sun.java.util.collections.Collections;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Arrays;
+import java.util.Collections;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;

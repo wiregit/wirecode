@@ -5,7 +5,8 @@ import com.limegroup.gnutella.metadata.*;
 import com.limegroup.gnutella.util.Trie;
 import com.limegroup.gnutella.util.DataUtils;
 import com.limegroup.gnutella.util.I18NConvert;
-import com.sun.java.util.collections.*;
+import com.limegroup.gnutella.util.ConverterObjectInputStream;
+import java.util.*;
 import java.io.*;
 import org.xml.sax.*;
 
@@ -754,12 +755,12 @@ public class LimeXMLReplyCollection {
 
 
         private void deserializeFromFile() throws IOException {
-            FileInputStream istream = null;
-            ObjectInputStream objStream = null;
+            ObjectInputStream is = null;
             try {
-                istream = new FileInputStream(_backingStoreFile);
-                objStream = new ObjectInputStream(istream);
-                _hashMap = (Map) objStream.readObject();
+                is = new ConverterObjectInputStream(
+                        new BufferedInputStream(
+                            new FileInputStream(_backingStoreFile)));
+                _hashMap = (Map)is.readObject();
                 if(LOG.isDebugEnabled()) {
                   for(Iterator it = _hashMap.entrySet().iterator();
                       it.hasNext();) {
@@ -782,9 +783,9 @@ public class LimeXMLReplyCollection {
             } catch(SecurityException e) {
                 throw new IOException();
             }  finally {
-                if( istream != null ) {
+                if( is != null ) {
                     try {
-                        istream.close();
+                        is.close();
                     } catch(IOException ignored) {}
                 }
             }

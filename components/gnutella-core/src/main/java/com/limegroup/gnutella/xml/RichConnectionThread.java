@@ -4,7 +4,7 @@ import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.messages.*;
 import com.limegroup.gnutella.search.*;
 import java.util.*;
-import com.sun.java.util.collections.Arrays;
+import java.util.Arrays;
 import java.io.*;
 import com.limegroup.gnutella.util.ManagedThread;
 

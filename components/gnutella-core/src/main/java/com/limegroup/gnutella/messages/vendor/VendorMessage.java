@@ -1,7 +1,7 @@
 package com.limegroup.gnutella.messages.vendor;
 
 import java.io.*;
-import com.sun.java.util.collections.*;
+import java.util.*;
 import com.limegroup.gnutella.Assert;
 import com.limegroup.gnutella.ByteOrder;
 import com.limegroup.gnutella.messages.Message;

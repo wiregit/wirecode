@@ -3,7 +3,7 @@ package com.limegroup.gnutella.uploader;
 import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.settings.*;
 import com.limegroup.gnutella.http.*;
-import com.sun.java.util.collections.*;
+import java.util.*;
 import java.io.*;
 
 import org.apache.commons.logging.Log;

@@ -1,7 +1,7 @@
 package com.limegroup.gnutella.util;
 
 import com.limegroup.gnutella.Assert;
-import com.sun.java.util.collections.*;
+import java.util.*;
 
 /** 
  * A very simple fixed-size double-ended queue, i.e., a circular buffer.
@@ -357,7 +357,7 @@ public final class IntBuffer implements Cloneable {
         }
 
 		public Object next() throws NoSuchElementException {
-			throw new com.sun.java.util.collections.UnsupportedOperationException();
+			throw new UnsupportedOperationException();
 		}
 
         public int nextInt() throws NoSuchElementException {

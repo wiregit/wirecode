@@ -7,7 +7,7 @@ import junit.framework.Test;
 import com.limegroup.gnutella.util.BaseTestCase;
 import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.Expand;
-import com.sun.java.util.collections.Iterator;
+import java.util.Iterator;
 
 
 /**

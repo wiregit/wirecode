@@ -1,6 +1,6 @@
 package com.limegroup.gnutella.guess;
 
-import com.sun.java.util.collections.*;
+import java.util.*;
 import java.io.*;
 import org.logi.crypto.keys.DESKey;
 import com.limegroup.gnutella.ByteOrder;

@@ -4,8 +4,8 @@ import java.net.InetAddress;
 
 import junit.framework.Test;
 
-import com.sun.java.util.collections.Arrays;
-import com.sun.java.util.collections.Hashtable;
+import java.util.Arrays;
+import java.util.Hashtable;
 
 /**
  * Unit tests for GUID.

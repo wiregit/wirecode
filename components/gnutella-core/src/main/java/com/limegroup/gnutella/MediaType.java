@@ -4,13 +4,13 @@ import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.util.Comparators;
 import com.limegroup.gnutella.util.DataUtils;
 
-import com.sun.java.util.collections.Iterator;
-import com.sun.java.util.collections.List;
-import com.sun.java.util.collections.LinkedList;
-import com.sun.java.util.collections.Set;
-import com.sun.java.util.collections.HashSet;
-import com.sun.java.util.collections.TreeSet;
-import com.sun.java.util.collections.Arrays;
+import java.util.Iterator;
+import java.util.List;
+import java.util.LinkedList;
+import java.util.Set;
+import java.util.HashSet;
+import java.util.TreeSet;
+import java.util.Arrays;
 
 import java.io.Serializable;
 

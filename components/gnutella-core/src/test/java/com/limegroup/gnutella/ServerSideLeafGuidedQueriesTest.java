@@ -20,8 +20,8 @@ import com.limegroup.gnutella.settings.UltrapeerSettings;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.util.BaseTestCase;
 import com.limegroup.gnutella.util.EmptyResponder;
-import com.sun.java.util.collections.Iterator;
-import com.sun.java.util.collections.Random;
+import java.util.Iterator;
+import java.util.Random;
 
 /**
  *  Tests that an Ultrapeer correctly handle Probe queries.  Essentially tests

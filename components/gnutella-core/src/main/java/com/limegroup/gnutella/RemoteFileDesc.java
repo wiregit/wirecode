@@ -1,7 +1,7 @@
 package com.limegroup.gnutella;
 
 import java.io.*;
-import com.sun.java.util.collections.*;
+import java.util.*;
 import com.limegroup.gnutella.altlocs.AlternateLocation;
 import com.limegroup.gnutella.xml.*;
 import com.limegroup.gnutella.http.*;

@@ -1,7 +1,7 @@
 package com.limegroup.gnutella;
 
 import java.io.*;
-import com.sun.java.util.collections.*;
+import java.util.*;
 import com.limegroup.gnutella.util.*;
 import com.limegroup.gnutella.settings.ApplicationSettings;
 import java.text.ParseException;
@@ -27,11 +27,8 @@ import java.text.ParseException;
  * This "poor man's serialization" is used to help HostCatcher implement the
  * reading and writing of gnutella.net files.<p>
  *
- * ExtendedEndpoint does not override the compareTo method for two reasons:
- * <ul>
- * <li>It creates confusion between java.lang.Comparable and
- *     com.sun.java.util.collections.Comparable 
- * <li>It creates confusion between compareTo and equals.
+ * ExtendedEndpoint does not override the compareTo method because
+ * it creates confusion between compareTo and equals.
  * </ul> 
  * For comparing by priority, users should use the return value of 
  * priorityComparator()

@@ -9,7 +9,7 @@ import com.limegroup.gnutella.guess.*;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 import com.limegroup.gnutella.xml.SchemaNotFoundException;
 import java.io.*;
-import com.sun.java.util.collections.*;
+import java.util.*;
 import org.xml.sax.SAXException;
 
 /**

@@ -1,6 +1,6 @@
 package com.limegroup.gnutella.http;
 
-import com.sun.java.util.collections.*;
+import java.util.*;
 
 public class HTTPHeaderValueCollection implements HTTPHeaderValue {
     

@@ -11,8 +11,8 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.Socket;
-import com.sun.java.util.collections.List;
-import com.sun.java.util.collections.Iterator;
+import java.util.List;
+import java.util.Iterator;
 
 import junit.framework.Test;
 
@@ -35,9 +35,9 @@ import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.PrivilegedAccessor;
 import com.limegroup.gnutella.util.Sockets;
-import com.sun.java.util.collections.HashSet;
-import com.sun.java.util.collections.Map;
-import com.sun.java.util.collections.Set;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Checks whether Meta-Queries are correctly answered, etc.

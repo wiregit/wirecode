@@ -1,13 +1,15 @@
 package com.limegroup.gnutella.util;
 
+import java.io.BufferedInputStream;
 import java.io.ObjectInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import com.limegroup.gnutella.ErrorService;
+import com.limegroup.gnutella.util.ConverterObjectInputStream;
 import com.ibm.icu.text.Normalizer;
 
-import com.sun.java.util.collections.Map;
-import com.sun.java.util.collections.HashMap;
+import java.util.Map;
+import java.util.HashMap;
 
 final class I18NConvertICU extends AbstractI18NConverter {
 
@@ -34,18 +36,20 @@ final class I18NConvertICU extends AbstractI18NConverter {
 
         InputStream fi = CommonUtils.getResourceStream("excluded.dat");
         //read in the explusion bitset
-        ObjectInputStream ois = 
-            new ObjectInputStream(fi);
+        ObjectInputStream ois = new ObjectInputStream(new BufferedInputStream(fi));
         bs = (java.util.BitSet)ois.readObject();
+        ois.close();
         
         fi = CommonUtils.getResourceStream("caseMap.dat");
         //read in the case map
-        ois = new ObjectInputStream(fi);
+        ois = new ConverterObjectInputStream(new BufferedInputStream(fi));
         hm = (HashMap)ois.readObject();
+        ois.close();
         
         fi = CommonUtils.getResourceStream("replaceSpace.dat");
-        ois = new  ObjectInputStream(fi);
+        ois = new ObjectInputStream(new BufferedInputStream(fi));
         bs2 = (java.util.BitSet)ois.readObject();
+        ois.close();
 
     	_excluded = bs;
     	_cMap = hm;

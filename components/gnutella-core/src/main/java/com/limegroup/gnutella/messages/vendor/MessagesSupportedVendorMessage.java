@@ -4,7 +4,7 @@ import java.io.*;
 import com.limegroup.gnutella.ByteOrder;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.statistics.*;
-import com.sun.java.util.collections.*;
+import java.util.*;
 import com.limegroup.gnutella.ErrorService;
 
 /** The message that lets other know what messages you support.  Everytime you

@@ -4,10 +4,10 @@ import java.io.*;
 import java.util.*;
 import com.limegroup.gnutella.util.StringUtils;
 
-import com.sun.java.util.collections.Map;
-import com.sun.java.util.collections.HashMap;
-import com.sun.java.util.collections.TreeMap;
-import com.sun.java.util.collections.Iterator;
+import java.util.Map;
+import java.util.HashMap;
+import java.util.TreeMap;
+import java.util.Iterator;
 
 
 /**

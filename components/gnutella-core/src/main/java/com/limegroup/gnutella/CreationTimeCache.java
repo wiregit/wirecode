@@ -1,7 +1,7 @@
 package com.limegroup.gnutella;
 
 import java.io.*;
-import com.sun.java.util.collections.*;
+import java.util.*;
 import com.limegroup.gnutella.util.*;
 import com.limegroup.gnutella.messages.QueryRequest;
 
@@ -365,7 +365,8 @@ public final class CreationTimeCache {
     private Map createMap() {
         ObjectInputStream ois = null;
 		try {
-            ois = new ObjectInputStream(new FileInputStream(CTIME_CACHE_FILE));
+            ois = new ConverterObjectInputStream(new BufferedInputStream(
+                            new FileInputStream(CTIME_CACHE_FILE)));
 			return (Map)ois.readObject();
 		} catch(FileNotFoundException e) {
 			return new HashMap();

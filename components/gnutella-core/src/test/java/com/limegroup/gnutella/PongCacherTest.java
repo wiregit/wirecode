@@ -12,9 +12,9 @@ import com.limegroup.gnutella.util.MessageTestUtils;
 import com.limegroup.gnutella.util.PrivilegedAccessor;
 import com.limegroup.gnutella.util.UltrapeerConnectionManager;
 import com.limegroup.gnutella.settings.ApplicationSettings;
-import com.sun.java.util.collections.Iterator;
-import com.sun.java.util.collections.List;
-import com.sun.java.util.collections.Map;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Tests the <tt>PongCacher</tt> class that maintains a cache of the best most

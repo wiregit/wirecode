@@ -10,7 +10,7 @@ import com.limegroup.gnutella.settings.ChatSettings;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.statistics.RoutedQueryStat;
 import com.limegroup.gnutella.statistics.ReceivedMessageStat;
-import com.sun.java.util.collections.*;
+import java.util.*;
 
 /**
  * This class is the message routing implementation for TCP messages.

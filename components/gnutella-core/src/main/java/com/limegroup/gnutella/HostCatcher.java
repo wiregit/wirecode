@@ -4,7 +4,7 @@ import com.limegroup.gnutella.messages.*;
 import com.limegroup.gnutella.util.*;
 import com.limegroup.gnutella.bootstrap.*;
 import com.limegroup.gnutella.settings.ApplicationSettings;
-import com.sun.java.util.collections.*;
+import java.util.*;
 
 import java.net.UnknownHostException; 
 import java.io.*;

@@ -5,7 +5,7 @@ import java.lang.ref.WeakReference;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.sun.java.util.collections.Comparable;
+
 
 /**
  * A timed task to be repeated and rescheduled as needed.

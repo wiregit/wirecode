@@ -1,6 +1,6 @@
 package com.limegroup.gnutella.xml;
 
-import com.sun.java.util.collections.*;
+import java.util.*;
 
 /**
  * Converts XML Schema types of Java types. Contains a hashMap of

@@ -8,7 +8,7 @@ import java.net.*;
 import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.stubs.*;
 
-import com.sun.java.util.collections.Iterator;
+import java.util.Iterator;
 
 /**
  * Unit tests for UpdateMessageVerifier

@@ -1,10 +1,10 @@
 package com.limegroup.gnutella.util;
 
 import junit.framework.TestCase;
-import com.sun.java.util.collections.Collection;
-import com.sun.java.util.collections.Arrays;
-import com.sun.java.util.collections.List;
-import com.sun.java.util.collections.LinkedList;
+import java.util.Collection;
+import java.util.Arrays;
+import java.util.List;
+import java.util.LinkedList;
     
 /**
  * A set of assert comparisons to check greater than / less than
@@ -829,7 +829,7 @@ public class AssertComparisons extends TestCase {
     /**
      * Assert that an object actual is either less than, greater than,
      * less than or equal to, or greater than or equals to object expected.
-     * Checks java.lang.Comparable & com.sun.java.util.collections.Comparable
+     * Checks java.lang.Comparable.
      * If neither 'expected' or 'actual' implement either interface, an
      * AssertionFailedError is thrown.
      * If both 'expected' and 'actual' are null, an AssertionFailedError is thrown.
@@ -842,12 +842,6 @@ public class AssertComparisons extends TestCase {
             ret = ((java.lang.Comparable)expected).compareTo(actual);
         } else if (actual instanceof java.lang.Comparable) {
             ret = -1 * ((java.lang.Comparable)actual).compareTo(expected);
-        } else if (expected instanceof com.sun.java.util.collections.Comparable) {
-            ret =
-                ((com.sun.java.util.collections.Comparable)expected).compareTo(actual);
-        } else if (actual instanceof com.sun.java.util.collections.Comparable) {
-            ret = -1 *
-                ((com.sun.java.util.collections.Comparable)actual).compareTo(expected);
         } else { //neither implement either interface.
             fail("Neither " + expected + " nor " + actual + 
                  "implement expected Comparable interface.");

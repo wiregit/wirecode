@@ -6,7 +6,7 @@
 
 package com.limegroup.gnutella.xml;
 import java.io.*;
-import com.sun.java.util.collections.*;
+import java.util.*;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import org.w3c.dom.Document;

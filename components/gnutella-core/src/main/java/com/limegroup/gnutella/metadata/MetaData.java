@@ -2,7 +2,7 @@
 package com.limegroup.gnutella.metadata;
 
 import com.limegroup.gnutella.xml.LimeXMLUtils;
-import com.sun.java.util.collections.List;
+import java.util.List;
 import java.io.*;
 
 /**

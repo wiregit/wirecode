@@ -15,8 +15,8 @@ import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.util.I18NConvert;
 import com.limegroup.gnutella.util.PrivilegedAccessor;
-import com.sun.java.util.collections.ArrayList;
-import com.sun.java.util.collections.List;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Tests the MetaFileManager.  Subclass FileManagerTest so that

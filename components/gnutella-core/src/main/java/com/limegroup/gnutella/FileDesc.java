@@ -2,7 +2,7 @@ package com.limegroup.gnutella;
 
 import java.io.*;
 import com.limegroup.gnutella.altlocs.*;
-import com.sun.java.util.collections.*;
+import java.util.*;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 import com.limegroup.gnutella.tigertree.HashTree;
 import com.limegroup.gnutella.tigertree.TigerTreeCache;

@@ -5,7 +5,7 @@ import java.io.IOException;
 import junit.framework.Test;
 
 import com.limegroup.gnutella.ByteOrder;
-import com.sun.java.util.collections.Arrays;
+import java.util.Arrays;
 
 /**
  * Tests COBSUtil

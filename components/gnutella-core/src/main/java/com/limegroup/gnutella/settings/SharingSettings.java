@@ -4,7 +4,7 @@ package com.limegroup.gnutella.settings;
 import java.io.*;
 import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.FileUtils;
-import com.sun.java.util.collections.*;
+import java.util.*;
 
 /**
  * Settings for sharing

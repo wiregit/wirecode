@@ -8,7 +8,7 @@ import com.limegroup.gnutella.statistics.UploadStat;
 import com.bitzi.util.Base32;
 import java.net.*;
 import java.io.*;
-import com.sun.java.util.collections.*;
+import java.util.*;
 import com.limegroup.gnutella.util.URLDecoder;
 import com.limegroup.gnutella.util.IOUtils;
 import java.util.StringTokenizer;

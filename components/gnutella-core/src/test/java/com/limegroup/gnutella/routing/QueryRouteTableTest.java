@@ -11,9 +11,9 @@ import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.util.BitSet;
 import com.limegroup.gnutella.util.PrivilegedAccessor;
-import com.sun.java.util.collections.Arrays;
-import com.sun.java.util.collections.Iterator;
-import com.sun.java.util.collections.Random;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.Random;
 
 public class QueryRouteTableTest extends com.limegroup.gnutella.util.BaseTestCase {
     public QueryRouteTableTest(String name) {

@@ -3,7 +3,7 @@ package com.limegroup.gnutella.bootstrap;
 import java.io.*;
 import java.net.*;
 import java.text.ParseException;
-import com.sun.java.util.collections.*;
+import java.util.*;
 import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.util.*;
 import com.limegroup.gnutella.settings.*;

@@ -27,7 +27,7 @@ import com.limegroup.gnutella.util.BandwidthThrottle;
 import com.limegroup.gnutella.util.IntPair;
 import com.limegroup.gnutella.util.ThrottledOutputStream;
 import com.limegroup.gnutella.util.AssertComparisons;
-import com.sun.java.util.collections.Iterator;
+import java.util.Iterator;
 
 public class TestUploader extends AssertComparisons {    
     

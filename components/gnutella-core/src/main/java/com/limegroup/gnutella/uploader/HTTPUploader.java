@@ -3,7 +3,7 @@ package com.limegroup.gnutella.uploader;
 import java.io.*;
 import java.net.*;
 import java.util.StringTokenizer;
-import com.sun.java.util.collections.*;
+import java.util.*;
 import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.http.*;
 import com.limegroup.gnutella.statistics.*;
