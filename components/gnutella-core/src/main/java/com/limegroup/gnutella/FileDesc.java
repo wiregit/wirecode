@@ -1,10 +1,3 @@
-/**
- * This class is a wrapper for file information.
- *
- * Modified by Sumeet Thadani (5/21): No need to store meta-data here
- * Modified by Gordon Mohr (2002/02/19): Added URN storage, calculation, caching
- */
-
 package com.limegroup.gnutella;
 
 import com.bitzi.util.*;
@@ -13,15 +6,47 @@ import java.io.*;
 import java.security.*;
 import java.util.Enumeration;
 
+/**
+ * This class contains data frr an individual shared file.  It also provides
+ * various utility methods for checking against the encapsulated data.
+ */
 public final class FileDesc {
     
-	private final File _file;
+	/**
+	 * Constant for the index of this <tt>FileDesc</tt> instance in the 
+	 * shared file data structure.
+	 */
     public final int _index;
+
+	/**
+	 * The absolute path for the file.
+	 */
     public final String _path;
+
+	/**
+	 * The name of the file, as returned by File.getName().
+	 */
     public final String _name;
+
+	/**
+	 * The size of the file, casted to an <tt>int</tt>.
+	 */
     public final int _size;
+
+	/**
+	 * The modification time of the file, which can be updated.
+	 */
     public long _modTime;
-    public HashSet /* of URNS */ _urns; // one or more "urn:" names for this file
+
+	/**
+	 * Constant <tt>HashSet</tt> of <tt>URN</tt> instances for the file.
+	 */
+    private final HashSet /* of URNS */ URNS; 
+
+	/**
+	 * Constant for the <tt>File</tt> instance.
+	 */
+	private final File FILE;
 		
     /**
 	 * Constructs a new <tt>FileDesc</tt> instance from the specified 
@@ -31,32 +56,22 @@ public final class FileDesc {
 	 *  <tt>FileDesc</tt>
 	 * @param urns the <tt>HashSet</tt> of URNs for this <tt>FileDesc</tt>
      */
-    public FileDesc(File file, int index, HashSet urns) {
-		
-		_file = file;
+    public FileDesc(File file, int index, HashSet urns) {		
+		// make a defensive copy
+		FILE = new File(file.getAbsolutePath());
         _index = index;
-        _name = file.getName();
-        _path = file.getAbsolutePath(); //TODO: right method?
-        _size = (int)file.length();
-        _modTime = file.lastModified();
-        _urns = urns;
+        _name = FILE.getName();
+        _path = FILE.getAbsolutePath(); //TODO: right method?
+        _size = (int)FILE.length();
+        _modTime = FILE.lastModified();
+
+		// defensively copy the urn HashSet
+        URNS = new HashSet(urns);
         //if(this.shouldCalculateUrns()) {
 		//this.calculateUrns();
 		//}
     }
 
-    public void print() {
-        System.out.println("Name: " + _name);
-        System.out.println("Index: " + _index);
-        System.out.println("Size: " + _size);
-        System.out.println("Path: " + _path);
-        System.out.println("URNs: " + _urns);
-        System.out.println(" ");
-    }
-    
-    //
-    // Query handling
-    
 	/**
 	 * Returns a new <tt>Response</tt> instance for the data in this
 	 * <tt>FileDesc</tt> for the given <tt>QueryRequest</tt>.
@@ -67,11 +82,9 @@ public final class FileDesc {
 	 *  and the given <tt>QueryRequest</tt>
 	 */
     public Response responseFor(QueryRequest qr) {
-        Response response = new Response(_index,_size,_name);
-        if(_urns==null) return response;
-        
+        Response response = new Response(_index,_size,_name);        
         /** Popular approach: return all URNs **/
-        Iterator allUrns = _urns.iterator();
+        Iterator allUrns = URNS.iterator();
         while(allUrns.hasNext()) {
             response.addUrn(((URN)allUrns.next()));
         }
@@ -83,7 +96,7 @@ public final class FileDesc {
         if(qr.getRequestedUrnTypes()==null) return r;
         Iterator outer = qr.getRequestedUrnTypes().iterator();
         while (outer.hasNext()) {
-            Iterator inner = _urns.iterator();
+            Iterator inner = URNS.iterator();
             String req = (String)outer.next();
             while(inner.hasNext()) {
                 String urn = (String)inner.next();
@@ -106,8 +119,7 @@ public final class FileDesc {
      * would calling the calculation method add useful URNs?
      */
     public boolean shouldCalculateUrns() {
-        if (_urns==null) return true; 
-        Iterator iter = _urns.iterator();
+        Iterator iter = URNS.iterator();
         while(iter.hasNext()) {
             if(((URN)iter.next()).isSHA1()) {
                 return false; // we already have all the values we can calculate
@@ -117,30 +129,34 @@ public final class FileDesc {
     }
     
     /**
-     * adds any URNs that can be locally calculated; may take a while to 
+     * Adds any URNs that can be locally calculated; may take a while to 
 	 * complete on large files.
      */
     public void calculateUrns() {
 		// update modTime
-		_modTime = _file.lastModified();
+		_modTime = FILE.lastModified();
 		URN urn =  null;
 		try {
-			urn = URNFactory.createSHA1URN(_file);
+			urn = URNFactory.createSHA1URN(FILE);
 		} catch(IOException e) {
 			return;
 		}		
-		if(_urns==null) _urns = new HashSet();		
-		_urns.add(urn);
+		URNS.add(urn);
 	}
     
     /**
-     * Verify that given URN applies to file
+     * Verify that given <tt>URN</tt> instance is a URN for this
+	 * <tt>FileDesc</tt>.
+	 *
+	 * @param urn the <tt>URN</tt> instance to check for
+	 * @return <tt>true</tt> if the <tt>URN</tt> is a valid <tt>URN</tt>
+	 *  for this file, <tt>false</tt> otherwise
      */
     public boolean satisfiesUrn(URN urn) {
         // first check if modified since last hashing
-        if (_file.lastModified()!=_modTime) {
+        if (FILE.lastModified()!=_modTime) {
             // recently modified; throw out SHA1 values
-            Iterator iter = _urns.iterator();
+            Iterator iter = URNS.iterator();
             while(iter.hasNext()){
                 if (((URN)iter.next()).isSHA1()) {
                     iter.remove();
@@ -148,7 +164,7 @@ public final class FileDesc {
             }
         }
         // now check if given urn matches
-        Iterator iter = _urns.iterator();
+        Iterator iter = URNS.iterator();
         while(iter.hasNext()){
             if (urn.equals((URN)iter.next())) {
                 return true;
@@ -159,11 +175,13 @@ public final class FileDesc {
     }
     
     /**
-     * Return SHA1 URN, if available
+     * Return SHA1 <tt>URN</tt> instance, if available.
+	 *
+	 * @return the SHA1 <tt>URN</tt> instance if there is one, <tt>null</tt>
+	 *  otherwise
      */
     public URN getSHA1URN() {
-        if (_urns==null) return null;
-        Iterator iter = _urns.iterator(); 
+        Iterator iter = URNS.iterator(); 
         while(iter.hasNext()) {
             URN urn = (URN)iter.next();
             if(urn.isSHA1()) {
@@ -179,7 +197,17 @@ public final class FileDesc {
 	 * @return the <tt>File</tt> instance for this <tt>FileDesc</tt>
 	 */
 	public File getFile() {
-		return _file;
+		return FILE;
+	}
+
+	/**
+	 * Accessor for the <tt>HashSet</tt> of <tt>URN</tt> instances.
+	 *
+	 * @return the <tt>HashSet</tt> of <tt>URN</tt> instances, guaranteed
+	 *  to be non-null
+	 */
+	public HashSet getUrns() {
+		return URNS;
 	}
 
     /**
@@ -191,8 +219,18 @@ public final class FileDesc {
 	 *  by the <tt>File</tt> instance could not be found
      */
     public InputStream getInputStream() throws FileNotFoundException {
-		return new FileInputStream(_file);
+		return new FileInputStream(FILE);
     }
+
+    public void print() {
+        System.out.println("Name: " + _name);
+        System.out.println("Index: " + _index);
+        System.out.println("Size: " + _size);
+        System.out.println("Path: " + _path);
+        System.out.println("URNs: " + URNS);
+        System.out.println(" ");
+    }
+
 }
 
 
