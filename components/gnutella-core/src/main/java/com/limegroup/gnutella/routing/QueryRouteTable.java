@@ -23,39 +23,35 @@ public class QueryRouteTable {
     /** The suggested default max table TTL. */
     public static final int DEFAULT_TABLE_TTL=5;
 
-    //TODO: formalize specifications.  Write rep invariant.  Specify add*
-    //methods to allow adding of random keywords because of collisions.
-
-    //TODO: having an array of numbers would probably be better representation
-    //It would require slightly more space but would make implementation easier.
-    //But does this suggest a new message?
-
     /** 
-     * The bitmaps for each TTL.  We use a dense representation since space
-     * isn't really an issue.  INVARIANT: for i<j, tables[i] is a subset of
-     * tables[j].  (This means we only have to check one table for any TTL.)  
+     * The table of keywords and their associated TTLs.  Each value table[i] is
+     * the minimum number of hops <i>minus one</i> to a file that matches a
+     * keyword with hash i.  (Note that this corresponds to the minimum TTL for
+     * a matching query.)  If table[i]>ttl, no file in the horizon matches a
+     * keyword with hash i.  
+     *
+     * In other words, [0, 0, ... ] represents a completely full table, while
+     * [maxTTL+1, maxTTL+1, ...] represents an empty table.
      */
-    private BitSet[] tables;
+    private byte[] table;
     /**
-     * The length of each table.  This is needed because BitSet.length() doesn't
-     * exist in Java 1.1.8.
-     * INVARIANT: for all i, tables[i].length()==tableLength (Java 1.3)
-     *                       tables[i].size()>=tableLength (Java 1.1.8+) 
+     * The range (measured in hops) of files tracked by this.
      */
-    private int tableLength;
+    private byte maxTTL;
 
 
     /** 
-     * Creates a new QueryRouteTable that has space for initialSize keywords
-     * with TTL up to ttl.   
+     * If ttl>=127, throws IllegalArgumentException.  Otherwise creates a new
+     * QueryRouteTable that has space for initialSize keywords with TTL up to
+     * ttl, inclusive.
      */
-    public QueryRouteTable(int ttl, int initialSize) {
-        this.tables=new BitSet[ttl];
-        this.tableLength=initialSize;
-        for (int i=0; i<tables.length; i++) {
-            this.tables[i]=new BitSet(initialSize);
-        }
-        repOk();
+    public QueryRouteTable(byte ttl, int initialSize) {
+        if (ttl>=127)
+            throw new IllegalArgumentException();
+        table=new byte[initialSize];
+        for (int i=0; i<table.length; i++)
+            table[i]=(byte)(ttl+1);
+        maxTTL=ttl;
     }
 
     /**
@@ -65,15 +61,13 @@ public class QueryRouteTable {
      * been decremented, and hence is potentially 0.
      */
     public boolean contains(QueryRequest qr) {
-        //TODO: overload with contains(String query, int ttl)?
-        //Check that all hashed keywords are in table[TTL].
+        //Check that all hashed keywords are reachable with given TTL.
         String[] keywords=HashFunction.keywords(qr.getQuery());
-        int ttl=Math.min(qr.getTTL(), tables.length-1);        
-        BitSet table=tables[ttl];
+        int ttl=qr.getTTL();
         for (int i=0; i<keywords.length; i++) {
             String keyword=keywords[i];
-            int hash=HashFunction.hash(keyword, tableLength);
-            if (! table.get(hash))
+            int hash=HashFunction.hash(keyword, table.length);
+            if (table[hash]>ttl)
                 return false;
         }
         return true;
@@ -84,7 +78,6 @@ public class QueryRouteTable {
      */
     public void add(String filename) {
         add(filename, 0);
-        repOk();
     }
 
     /**
@@ -95,31 +88,25 @@ public class QueryRouteTable {
         String[] keywords=HashFunction.keywords(filename);
         for (int i=0; i<keywords.length; i++) {
             //See contains(..) for a discussion on TTLs and decrementing.
-            for (int t=ttl; t<tables.length; t++) {
+            for (int t=ttl; t<table.length; t++) {
                 String keyword=keywords[i];
-                int hash=HashFunction.hash(keyword, tableLength);
-                tables[t].set(hash);
+                int hash=HashFunction.hash(keyword, table.length);
+                table[hash]=(byte)Math.min(ttl, table[hash]);
             }
         }
-        repOk();
     }
 
     /**
      * For all <keyword_i, ttl_i> in m, adds <keyword_i, (ttl_i)+1> to this.
-     * (This is useful for union lots of route tables for propoagation.)
-     *
-     * TODO: what if these have different TTLs.  Should probably expand this
-     * as necessary, but that's pain.
+     * (This is useful for unioning lots of route tables for propoagation.)
      *
      *    @modifies this
      */
     public void addAll(QueryRouteTable qrt) {
-        //qrt     1   2   3   4  
-        //this    0   1   2   3   4   4
-        for (int ttl=1; ttl<tables.length; ttl++) {
-            tables[ttl].or(qrt.tables[Math.min(ttl-1, qrt.tables.length-1)]);
-        }
-        repOk();
+        Assert.that(this.table.length==qrt.table.length,
+                    "TODO2: table scaling not implemented.");
+        for (int i=0; i<table.length; i++) 
+            table[i]=(byte)Math.min(table[i], qrt.table[i]+1);
     }
 
     /*
@@ -142,42 +129,30 @@ public class QueryRouteTable {
     }
 
     private void handleTableMessage(SetDenseTableMessage m) {
-        //For each bit i set in m, set the corresponding bit of
-        //tables[m.getTTL...]
         for (int i=m.getStartOffset(); i<=m.getStopOffset(); i++) {
-            for (int ttl=m.getTableTTL(); ttl<tables.length; ttl++) {
-                try {
-                    if (m.get(i))
-                        tables[ttl].set(i);
-                    else
-                        tables[ttl].clear(i);  //TODO: check protocol spec
-                } catch (IndexOutOfBoundsException e) {
-                    //The RESET message preceding this lied about the table
-                    //size.  Action could be take here to optimize.
-                }
+            try {
+                table[i]=m.getTableTTL();
+            } catch (IndexOutOfBoundsException e) {
+                //The RESET message preceding this lied about the table
+                //size.  Action could be take here to optimize.
             }
         }
-        repOk();
     }
 
     private void handleTableMessage(SparseTableMessage m) {
-        //For each block set in m, set the corresponding bit of
-        //tables[m.getTTL...]
-        for (int i=0; i<m.getSize(); i++) {
-            int block=m.getBlock(i);
-            for (int ttl=m.getTableTTL(); ttl<tables.length; ttl++) {
-                try {
-                    if (m.isAdd())
-                        tables[ttl].set(block);
-                    else
-                        tables[ttl].clear(block);
-                } catch (IndexOutOfBoundsException e) {
-                    //The RESET message preceding this lied about the table
-                    //size.  Action could be take here to optimize.
-                }
+        for (int j=0; j<m.getSize(); j++) {
+            int i=m.getBlock(j);
+            int ttl=m.getTableTTL();
+            try {
+                if (m.isAdd())
+                    table[i]=(byte)ttl;
+                else
+                    table[i]=(byte)(ttl+1); //TODO: not maxTTL, right?
+            } catch (IndexOutOfBoundsException e) {
+                //The RESET message preceding this lied about the table
+                //size.  Action could be take here to optimize.
             }
         }
-        repOk();
     }
 
 
@@ -196,76 +171,77 @@ public class QueryRouteTable {
     public Iterator /* of RouteTableMessage */ encode(QueryRouteTable prev) {
         //TODO1: this is not an optimal encoding.  Optimize.
         //TODO: this may get complicated.  Should we put it in another class?
-        List messages=new ArrayList(tables.length);
+        List messages=new ArrayList(maxTTL);
         if (prev==null) 
             messages.add(new ResetTableMessage((byte)1,
-                                               (byte)0, tableLength));
+                                               (byte)0, table.length));
         
-//          //Dense encoding
-//          for (int i=0; i<tables.length; i++) {
-//              buf.add(new SetDenseTableMessage((byte)1, (byte)i, 
-//                                               tables[i], 0, tableLength-1));
-//          }
-
-        //"Differential" sparse encoding: for each TTL...
-        for (int ttl=0; ttl<tables.length; ttl++) {
-            //Find indices that need adding and removing for this TTL.
-            List /* of Integer */ addBlocks=new ArrayList();
-            List /* of Integer */ removeBlocks=new ArrayList();
-            //For each bit i of the table...
-            for (int i=0; i<tableLength; i++) {
-                //If bit is set, wasn't set in previous message, and wasn't set
-                //with a lower TTL, send ADD message.  (TODO: document with
-                //picture from notes file.)
-                if (tables[ttl].get(i)) {
-                    if ((ttl==0 || !tables[ttl-1].get(i))
-                            && (prev==null || !prev.tables[ttl].get(i)))
-                        addBlocks.add(new Integer(i));
-                    else if ((ttl==0 || !tables[ttl-1].get(i))
-                            && (prev==null || ttl==0 || prev.tables[ttl-1].get(i)))
-                        addBlocks.add(new Integer(i));
-                }
-                //If bit isn't set but was set in previous tables, send REMOVE
-                //message.
-                else {
-                    if (prev!=null && prev.tables[ttl].get(i))
-                        if (ttl==0 || !prev.tables[ttl-1].get(i))  
-                            removeBlocks.add(new Integer(i));
-                }                
+        //Dense encoding: reeeally stupid!
+        for (int ttl=0; ttl<maxTTL; ttl++) {  //Off by 1?
+            BitSet bits=new BitSet(table.length);            
+            for (int i=0; i<table.length; i++) {
+                if (table[i]<=ttl)            //Off by 1?
+                    bits.set(i);
             }
+            messages.add(new SetDenseTableMessage((byte)1, (byte)ttl, 
+                                                  bits, 0, table.length));
+        }
 
-            //Add ADD/REMOVE_SPARSE_BLOCK_VARIANT messages, as needed
-            if (addBlocks.size()>0)
-                messages.add(SparseTableMessage.create((byte)ttl, //Table TTL
-                                                       true,
-                                                       addBlocks));
-            if (removeBlocks.size()>0)
-                messages.add(SparseTableMessage.create((byte)ttl, //Table TTL
-                                                       false,
-                                                       removeBlocks));
-        }                                            
+//          //"Differential" sparse encoding: for each TTL...
+//          for (int ttl=0; ttl<tables.length; ttl++) {
+//              //Find indices that need adding and removing for this TTL.
+//              List /* of Integer */ addBlocks=new ArrayList();
+//              List /* of Integer */ removeBlocks=new ArrayList();
+//              //For each bit i of the table...
+//              for (int i=0; i<tableLength; i++) {
+//                  //If bit is set, wasn't set in previous message, and wasn't set
+//                  //with a lower TTL, send ADD message.  (TODO: document with
+//                  //picture from notes file.)
+//                  if (tables[ttl].get(i)) {
+//                      if ((ttl==0 || !tables[ttl-1].get(i))
+//                              && (prev==null || !prev.tables[ttl].get(i)))
+//                          addBlocks.add(new Integer(i));
+//                      else if ((ttl==0 || !tables[ttl-1].get(i))
+//                              && (prev==null || ttl==0 || prev.tables[ttl-1].get(i)))
+//                          addBlocks.add(new Integer(i));
+//                  }
+//                  //If bit isn't set but was set in previous tables, send REMOVE
+//                  //message.
+//                  else {
+//                      if (prev!=null && prev.tables[ttl].get(i))
+//                          if (ttl==0 || !prev.tables[ttl-1].get(i))  
+//                              removeBlocks.add(new Integer(i));
+//                  }                
+//              }
+
+//              //Add ADD/REMOVE_SPARSE_BLOCK_VARIANT messages, as needed
+//              if (addBlocks.size()>0)
+//                  messages.add(SparseTableMessage.create((byte)ttl, //Table TTL
+//                                                         true,
+//                                                         addBlocks));
+//              if (removeBlocks.size()>0)
+//                  messages.add(SparseTableMessage.create((byte)ttl, //Table TTL
+//                                                         false,
+//                                                         removeBlocks));
+//          }                                            
 
         return messages.iterator();
     }
-
-
-    
-
 
     ////////////////////////////////////////////////////////////////////////////
 
     /** True if o is a QueryRouteTable with the same entries of this. */
     public boolean equals(Object o) {
-        //TODO: two qrt's can be equal even if they have different TTL ranges.
         if (! (o instanceof QueryRouteTable))
             return false;
 
+        //TODO: two qrt's can be equal even if they have different TTL ranges.
         QueryRouteTable other=(QueryRouteTable)o;
-        if (this.tables.length!=other.tables.length)
+        if (this.table.length!=other.table.length)
             return false;
 
-        for (int i=0; i<this.tables.length; i++) {
-            if (! this.tables[i].equals(other.tables[i]))
+        for (int i=0; i<this.table.length; i++) {
+            if (this.table[i]!=other.table[i])
                 return false;
         }
         return true;
@@ -274,36 +250,23 @@ public class QueryRouteTable {
     public String toString() {
         StringBuffer buf=new StringBuffer();
         buf.append("{");
-        for (int ttl=0; ttl<tables.length; ttl++) {
-            for (int i=0; i<tableLength; i++) {
-                if (tables[ttl].get(i)) {
-                    if (ttl==0 || !tables[ttl-1].get(i))
-                        buf.append(i+"/"+ttl+", ");
-                }
-            }
+        for (int i=0; i<table.length; i++) {
+            if (table[i]<=maxTTL)
+                buf.append(i+"/"+table[i]+", ");
         }
         buf.append("}");
         return buf.toString();
     }
 
-    /** Checks internal consistency. */
-    private void repOk() {
-        for (int ttl=1; ttl<tables.length; ttl++) {
-            BitSet smaller=tables[ttl-1];
-            BitSet larger=tables[ttl];
-            for (int i=0; i<tableLength; i++) {
-                if (smaller.get(i))
-                    Assert.that(larger.get(i),
-                        "Bit "+i+" is set in table of TTL "+(ttl-1)
-                       +" but not in "+ttl+", breaking superset invariant");
-            }
-        }
+    private static final byte min(byte a, byte b) {
+        return a<=b ? a : b;
     }
+
 
     /** Unit test */
     public static void main(String args[]) {
         //1. Keyword tests (add, contains)
-        QueryRouteTable qrt=new QueryRouteTable(7, 1000);
+        QueryRouteTable qrt=new QueryRouteTable((byte)7, 1000);
         QueryRequest qrA=new QueryRequest((byte)1, 0, "good");
         QueryRequest qrB=new QueryRequest((byte)1, 0, "book good");
         QueryRequest qrC=new QueryRequest((byte)1, 0, "book bad");
@@ -325,9 +288,9 @@ public class QueryRouteTable {
         SetDenseTableMessage update=
             new SetDenseTableMessage((byte)1, (byte)3, dummy, 0, 99);
         qrt.update(update);                 //{good/3, book/3}
-        Assert.that(! qrt.tables[2].equals(dummy));   //looking at rep
-        Assert.that(qrt.tables[3].equals(dummy));
-        Assert.that(qrt.tables[4].equals(dummy));
+//          Assert.that(! qrt.tables[2].equals(dummy));   //looking at rep
+//          Assert.that(qrt.tables[3].equals(dummy));
+//          Assert.that(qrt.tables[4].equals(dummy));
         //    test contains
         QueryRequest qrD0=new QueryRequest((byte)2, 0, "good");
         QueryRequest qrD=new QueryRequest((byte)3, 0, "good");
@@ -340,7 +303,7 @@ public class QueryRouteTable {
 
         //3. addAll tests
         QueryRequest qrF=new QueryRequest((byte)4, 0, "bad");
-        QueryRouteTable qrt2=new QueryRouteTable(7, size);
+        QueryRouteTable qrt2=new QueryRouteTable((byte)7, size);
         Assert.that(! qrt2.contains(qrF));
         qrt2.add("bad");                   //{bad/0}
         Assert.that(qrt2.contains(qrF));
@@ -352,7 +315,7 @@ public class QueryRouteTable {
         Assert.that(qrt2.contains(qrE));   
 
         //4. Simple encode test.
-        QueryRouteTable qrt3=new QueryRouteTable(7, size);
+        QueryRouteTable qrt3=new QueryRouteTable((byte)7, size);
         Assert.that(! qrt3.equals(qrt2));
         for (Iterator iter=qrt2.encode(null); iter.hasNext(); ) {
             RouteTableMessage m=(RouteTableMessage)iter.next();
@@ -360,40 +323,40 @@ public class QueryRouteTable {
         }        
         Assert.that(qrt3.equals(qrt2), "Got "+qrt3+" not "+qrt2);
 
-        //5. Glass-box encode test.
-        //   qrt:  {a/0, x/1, c/3, d/4}
-        //   qrt2: {a/0, b/1, c/2, d/5}
-        //   ===>  ADD(b, 1), REMOVE(x, 1), ADD(c, 2), REMOVE(d, 4), ADD(d, 5)
-        qrt=new QueryRouteTable(7, 1024);
-        qrt.add("a", 0);
-        qrt.add("x", 1);
-        qrt.add("c", 3);
-        qrt.add("d", 4);
-        qrt2=new QueryRouteTable(7, 1024);
-        qrt2.add("a", 0);
-        qrt2.add("b", 1);
-        qrt2.add("c", 2);
-        qrt2.add("d", 5);
-        Iterator iter=qrt2.encode(qrt);
-        checkNext(iter, true,  1, "b");
-        checkNext(iter, false, 1, "x");
-        checkNext(iter, true,  2, "c");
-        checkNext(iter, false, 4, "d");
-        checkNext(iter, true,  5, "d");
+//          //5. Glass-box encode test.
+//          //   qrt:  {a/0, x/1, c/3, d/4}
+//          //   qrt2: {a/0, b/1, c/2, d/5}
+//          //   ===>  ADD(b, 1), REMOVE(x, 1), ADD(c, 2), REMOVE(d, 4), ADD(d, 5)
+//          qrt=new QueryRouteTable((byte)7, 1024);
+//          qrt.add("a", 0);
+//          qrt.add("x", 1);
+//          qrt.add("c", 3);
+//          qrt.add("d", 4);
+//          qrt2=new QueryRouteTable((byte)7, 1024);
+//          qrt2.add("a", 0);
+//          qrt2.add("b", 1);
+//          qrt2.add("c", 2);
+//          qrt2.add("d", 5);
+//          Iterator iter=qrt2.encode(qrt);
+//          checkNext(iter, true,  1, "b");
+//          checkNext(iter, false, 1, "x");
+//          checkNext(iter, true,  2, "c");
+//          checkNext(iter, false, 4, "d");
+//          checkNext(iter, true,  5, "d");
     }
 
-    private static void checkNext(Iterator iter,
-                           boolean isAdd, int tableTTL, String value) {
-        SparseTableMessage s=(SparseTableMessage)iter.next();
-        System.out.println("Got "+s);
-        Assert.that(s.getTableTTL()==tableTTL,
-                    "Unexpected table TTL: "+s.getTableTTL()); 
-        Assert.that(s.getSize()==1,
-                    "Unexpected table size: "+s.getSize());
-        Assert.that(s.isAdd()==isAdd,
-                    "Unexpected variant: "+s.isAdd());
-        Assert.that(s.getBlock(0)==HashFunction.hash(value, 1024),
-                    "Unexpected block: "+s.getBlock(0));
+//      private static void checkNext(Iterator iter,
+//                             boolean isAdd, int tableTTL, String value) {
+//          SparseTableMessage s=(SparseTableMessage)iter.next();
+//          System.out.println("Got "+s);
+//          Assert.that(s.getTableTTL()==tableTTL,
+//                      "Unexpected table TTL: "+s.getTableTTL()); 
+//          Assert.that(s.getSize()==1,
+//                      "Unexpected table size: "+s.getSize());
+//          Assert.that(s.isAdd()==isAdd,
+//                      "Unexpected variant: "+s.isAdd());
+//          Assert.that(s.getBlock(0)==HashFunction.hash(value, 1024),
+//                      "Unexpected block: "+s.getBlock(0));
         
-    }
+//      }
 }
