@@ -6,8 +6,8 @@
 <?rfc toc="yes"?>
 <rfc docname="gnutella-unicast-search-01">
   <front>
-    <title>
-	  Gnutella UltraPeer Crawling v0.01
+    <title abbrev="GUESS">
+	  Gnutella UltraPeer Extension for Scalable Searches (GUESS) v0.01
 	</title>
     <author initials="S.D" surname="Daswani" fullname="Susheel Daswani">
 	  <organization>LimeWire LLC</organization>
@@ -36,10 +36,10 @@
 	<keyword>LimeWire</keyword>	
     <abstract>
 	  <t>
-	    This RFC outlines a technique for performing iterative unicast 
+	    "GUESS" is a technique for performing iterative unicast 
 		searches of UltraPeers on the Gnutella network, or "UltraPeer 
 		crawling."  Shifting from the current broadcast search model 
-		to this system of unicast searches can dramatically reduce the 
+		to this system can dramatically reduce the 
 		overall network bandwidth, CPU, and memory required to support 
 		the Gnutella search architecture while providing comparable 
 		search results to the old broadcast model.  For rare files, the 
@@ -177,9 +177,10 @@
 		to leaves.  From the leaf perspective, the search system has
 		not changed at all.  This simplifies the design and allows 
 		any leaves not implementing this proposal to benefit from it
-		nevertheless.  From the UltraPeer perspective, it is simply 
-		a switch to sending out all queries with TTL=1 while querying
-		a much larger set of UltraPeers directly over UDP.
+		nevertheless.  From the UltraPeer perspective, implementing this
+		proposal means on a high level simply means sending out all 
+		queries with TTL=1 while querying a much larger set of UltraPeers 
+		directly over UDP.
 
 		<vspace/>
 		<vspace/>
@@ -341,48 +342,73 @@
 	    <t>
 		  For this scheme to work, all UltraPeers must have the
 		  ability to discover other UltraPeers that accept incoming
-		  messages over UDP.  UltraPeers 
-		  supporting this proposal MUST advertise this fact
-		  using a <xref target="ggep_pongs">GGEP extension</xref> 
-		  in pongs.  UltraPeers also MUST ensure that they always
-		  have a full cache of other UltraPeers to query.  
+		  messages over UDP.  In fact, UltraPeer discovery may be one
+		  of the most challenging components of this proposal, as
+		  UltraPeers do not simply have to discover other UltraPeers -- 
+		  they have to discover LOTS of them.  As we will see, the 
+		  scheme has UltraPeer discovery built in to some degree. 
+		  UltraPeers supporting this proposal MUST advertise this fact
+		  using a <xref target="ggep_pongs">GGEP extension</xref> in
+		  pongs.  there are three techniques for discovering these
+		  marked pongs on the network:
+		    <list style="numbers">
+			  <t>
+			    Through standard Gnutella broadcast pings and pong caching.
+			  </t>			    
+			  <t>
+                Through specialized pings sent over UDP.
+			  </t>
+			  <t>
+			    Through the storing of the IP and port of the many queries
+				and pings passing through UltraPeers over UDP.
+			  </t>
+			</list>
+
+		  The last technique is perhaps the most intriguing.  Each UltraPeer
+		  crawl may send out queries to 10,000 other nodes.  As a result,
+		  UltraPeers will naturally receive large numbers of queries over UDP
+		  from other UltraPeers that must be supporting this proposal.  They
+		  can simply treat these queries as pongs, and add those UltraPeers 
+		  to their cache.  This is made possible because the host sending the
+		  query has to be listening on the same port stored in the
+		  datagram.  The same is true for any pings received over UDP.  
+		  This built-in distribution of host information can
+		  dramatically reduce the need for any pings and pongs at 
+		  all -- so much so that UltraPeers MUST store the IP and port 
+		  from all UDP queries they receive.
+		  
+		  <vspace/>
+		  <vspace/>
+		  The other specialized technique for UltraPeer discoverty is the
+		  use of the normal Gnutella ping, only over UDP.  When UltraPeers
+		  receive pings over UDP, they should take special action.  Instead 
+		  of returning the normal pongs, UltraPeers are REQUIRED to send 
+		  pongs from other UltraPeers with 
+		  the <xref target="ggep_pongs">GGEP extension</xref> marking 
+		  support for GUESS.  They SHOULD send some moderate number of these
+		  UltraPeer pongs, somewhere in the range of about 5-20.  Given
+		  that GUESS UltraPeer discovery is one of the more difficult 
+		  aspects of the proposal, the optimal number of pongs to send 
+		  should be determined by experimentation.  UltraPeers MUST NOT
+		  include a pong for themselves in the returned set, as the
+		  pinging UltraPeer already knows about the UltraPeers it pings.
+		  This technique allows nodes to discover UltraPeers outside the
+		  network horizon of normal broadcast pings.
+
+		  <vspace/>
+		  <vspace/>
+		  Using these techniques, UltraPeers also MUST maintain
+		  a full cache of other UltraPeers to query.  
 		  Because leaves always query the network via their
 		  UltraPeer, leaves do not have to maintain a set of
 		  UltraPeers to query -- this is the UltraPeer's 
 		  responsibility.		  
 		  <vspace/>
 		  <vspace/>
-		  If an UltraPeer's cache of other UltraPeers drops
-		  below a certain threshold, for example 1000, the
-		  UltraPeer MUST take steps to refresh its cache.  To
-		  do this, UltraPeers send pings over UDP to the UltraPeers
-		  in their search cache.  This provides access to pongs
-		  that may not be within the horizon of the normal ping
-		  broadcast.  When UltraPeers receive these pings
-		  over UDP with pongs, they SHOULD handle them 
-		  differently from normal pings.  Instead of responding,
-		  with their normal pong, the UltraPeer SHOULD respond
-		  with pongs that it has cached for other hosts 
-		  supporting this proposal. So, these pongs SHOULD
-		  have 
-		  the <xref target="ggep_pongs">GGEP extension</xref>
-		  specifying support for this proposal, including the 
-		  version they support.  UltraPeers
-		  SHOULD NOT include a pong for themselves, as 
-		  presumably the requester already knows about them --
-		  otherwise it would not have sent the ping.
-
-		  <vspace/>
-		  <vspace/>
-		  Seeing as this requires specialized handling for these
-		  specific pings, hosts MAY choose instead to send the
-		  normal broadcast pings over these UDP connections.
-		  If developers choose to do this, they MUST
-		  limit the TTL to 4 or below.  In this case, this 
-		  implementation should only be seen as a temporary solution,
-		  with developers ultimately moving towards the 
-		  first scheme, as these broadcasts will generate 
-		  considerably more traffic.
+		  If an UltraPeer's cache of other GUESS-supporting UltraPeers 
+		  drops below a certain threshold, for example 5,000, the
+		  UltraPeer MUST use these techniques to refresh its 
+		  UltraPeer cache.
 		  
 		  <vspace/>
 		  <vspace/>
@@ -403,9 +429,15 @@
 		  proposal would use a new, transient connection also over TCP.  
 		  Opening and closing TCP connections incurs significant CPU 
 		  and memory costs, however, potentially making the proposed
-		  change unworkable.  As others have noted, however, the 
-		  reliability of TCP is not a requirement for Gnutella 
-		  queries and replies.  If a message is lost, who cares?  
+		  change unworkable.  Moreover, Windows 95/98/Me limit TCP
+		  connections to 100.  While this setting can be changed in the
+		  registry, these systems were clearly not designed to handle 
+		  this number of simultaneous connections.  TCP also uses 
+		  significantly more bandwidth and increases delay. 
+		  As others have noted, however, the 
+		  reliability of TCP is not a requirement for Gnutella queries
+		  and hits.<xref target="refs.agthorr"/>  If a 
+		  message is lost, who cares?  
 		  In fact, these queries and their associated replies can 
 		  easily be sent over UDP.  In many ways, UDP is the more 
 		  appropriate transport layer protocol -- we're sending messages 
@@ -473,7 +505,9 @@
 			of 512 is very conservative, and limiting datagrams 
 			to 1,500 bytes or less should avoid fragmentation on
 			the vast majority of 
-			routers.<xref target="RFC1191"/>
+			routers.<xref target="RFC1191"/>  This is because 
+			1,500 bytes is the MTU for Ethernet links, which most
+			TCP/IP stacks take into account.
 			
 			<vspace/>
 			<vspace/>	
@@ -495,7 +529,12 @@
 			is that UDP does not provide congestion control.
 			Given that this query scheme dramatically reduces
 			overall message traffic, congestion may not be a 
-			concern.  If congestion does prove to cause a 
+			concern.  Particularly because clients will no longer receive
+			the floods of query hits currently associated with 
+			queries for popular content (probably the most severe 
+			case of congestion on the current network), packet loss
+			rates under this scheme should be significantly lower. 
+			If congestion does prove to cause a 
 			high degree of packet loss, however, clients
 			may be forced to implement congestion control
 			at the application layer.  The architecture for
@@ -793,8 +832,10 @@
 	  <t>
 	    The authors would like to thank Christopher Rohrs and the rest of the 
 		LimeWire team.  In addition, we would like to thank Gordon Mohr of Bitzi,
-		Inc., all participants in the Gnutella Developer Forum (GDF), and all 
-		members of the LimeWire open source initiative.
+		Inc., Jakob Eriksson, Ph.D. student at the Computer Science department at
+		the University of California, Riverside, all participants in the 
+		Gnutella Developer Forum (GDF), and all members of the LimeWire open 
+		source initiative.
 	  </t>
 	</section>
   </back>
