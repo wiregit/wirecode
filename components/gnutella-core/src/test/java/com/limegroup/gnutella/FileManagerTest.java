@@ -172,10 +172,15 @@ public class FileManagerTest extends com.limegroup.gnutella.util.BaseTestCase {
             1, responses[1].getIndex());
         fman.get(0);
         fman.get(2);
+        assertNull("should be null (unshared)", fman.get(1));
         try {
-            fman.get(1);
+            fman.get(3);
             fail("should not have gotten anything");
         } catch (IndexOutOfBoundsException e) { }
+        
+        assertFalse("should not be valid", fman.isValidIndex(3));
+        assertTrue("should be valid", fman.isValidIndex(0));
+        assertTrue("should be valid (was at one time)", fman.isValidIndex(1));
 
         responses=fman.query(QueryRequest.createQuery("*unit*", (byte)3));
         assertEquals("unexpected responses length", 2, responses.length);
