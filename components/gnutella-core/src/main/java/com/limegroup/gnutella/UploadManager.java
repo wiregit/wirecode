@@ -452,7 +452,7 @@ public final class UploadManager implements BandwidthTracker {
 		return (! testTotalUploadLimit());
 	}
 
-	public int uploadsInProgress() {
+	public synchronized int uploadsInProgress() {
 		return _activeUploadList.size();
 	}
 
