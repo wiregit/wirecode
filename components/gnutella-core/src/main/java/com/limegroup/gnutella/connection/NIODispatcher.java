@@ -273,11 +273,11 @@ public final class NIODispatcher implements Runnable {
 			if(key.isWritable()) {
 				Connection conn = (Connection)key.attachment();
 				try {
-                    if(conn.writer().write()) {
+                    if(conn.write()) {
                         // if the message was successfully written, switch it 
                         // back to only being registered for read events
                         register(conn, SelectionKey.OP_READ);
-                        conn.writer().setRegistered(false);
+                        conn.setWriteRegistered(false);
                     } 
                 } catch (IOException e) {
                     RouterService.removeConnection(conn);
