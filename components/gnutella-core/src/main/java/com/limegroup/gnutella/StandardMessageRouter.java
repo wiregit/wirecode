@@ -193,14 +193,13 @@ public class StandardMessageRouter extends MessageRouter {
             }
         }
 
-        return sendResponses(responses, queryRequest, clientGUID);
+        return sendResponses(responses, queryRequest);
         
     }
 
     //This method needs to be public because the Peer-Server code uses it.
     public boolean sendResponses(Response[] responses, 
-                               QueryRequest query,
-                               byte[] clientGUID) {
+                               QueryRequest query) {
         // if either there are no responses or, the
         // response array came back null for some reason,
         // exit this method
@@ -272,7 +271,7 @@ public class StandardMessageRouter extends MessageRouter {
         try {
             while(iterator.hasNext()) {
                 QueryReply queryReply = (QueryReply)iterator.next();
-                sendQueryReply(query, queryReply);
+                sendQueryReply(queryReply);
             }
         } 
         catch (IOException e) {
