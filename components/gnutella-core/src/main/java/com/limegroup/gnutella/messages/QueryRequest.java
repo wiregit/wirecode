@@ -404,6 +404,28 @@ public class QueryRequest extends Message implements Serializable{
     public QueryRequest(byte[] guid, byte ttl, int minSpeed, 
                         String query, String richQuery, boolean isRequery,
                         Set requestedUrnTypes, Set queryUrns,
+                        QueryKey queryKey, boolean isFirewalled) { 
+		this(guid, ttl, minSpeed, query, richQuery, isRequery,
+			 requestedUrnTypes, queryUrns, queryKey, isFirewalled,
+			 false);
+	}
+
+    /**
+     * Builds a new query from scratch but you can flag it as a Requery, if 
+     * needed.
+     *
+     * @requires 0<=minSpeed<2^16 (i.e., can fit in 2 unsigned bytes)
+     * @param requestedUrnTypes <tt>Set</tt> of <tt>UrnType</tt> instances
+     *  requested for this query, which may be empty or null if no types were
+     *  requested
+	 * @param queryUrns <tt>Set</tt> of <tt>URN</tt> instances requested for 
+     *  this query, which may be empty or null if no URNs were requested
+	 * @throws <tt>IllegalArgumentException</tt> if the query string, the xml
+	 *  query string, and the urns are all empty
+     */
+    public QueryRequest(byte[] guid, byte ttl, int minSpeed, 
+                        String query, String richQuery, boolean isRequery,
+                        Set requestedUrnTypes, Set queryUrns,
                         QueryKey queryKey, boolean isFirewalled, 
 						boolean multicast) {
         // don't worry about getting the length right at first
