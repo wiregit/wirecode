@@ -126,6 +126,31 @@ public synchronized boolean incrementWeight(Object key)
 }
 
 /**
+* Removes the mapping for this key from this map if present.
+* @param key The key whose mapping to be removed
+* @return previous value associated with specified key, 
+* or null if there was no mapping for key.
+*/
+public synchronized Weighable reomve(Object key)
+{
+    //remove the entry and store the value the removed key mapped to
+    Weighable value = (Weighable)hashMap.remove(key);
+    
+    if(value != null)
+    {
+        //adjust sum of weights
+        sumOfWeights -= value.getWeight();
+        
+        //adjust num of entries
+        numOfEntries--;
+    }
+    
+    //return the value corresponding to the removed key
+    return value;
+}
+
+
+/**
 * stores the given key-value. It might remove some other entry from the
 * underlying data structure to make space for that. 
 * @param key The key for the mapping
@@ -133,8 +158,10 @@ public synchronized boolean incrementWeight(Object key)
 * @return The entry(key) removed to make space for this new key, null
 * otherwise
 */
-public synchronized void add(Object key, Weighable value)
+public synchronized Object add(Object key, Weighable value)
 {
+    Object entryRemoved = null;
+    
     //insert it into the hashMap
     Weighable oldValue = (Weighable)hashMap.put(key, value);
     
@@ -152,7 +179,7 @@ public synchronized void add(Object key, Weighable value)
         {
             //remove some less weighted entry
             //it also adjustes sumOfWeights as well as numEntries
-            removeSomeLessWeightedEntry();
+            entryRemoved = removeSomeLessWeightedEntry();
         }
     }
     else //we didnt add anything new, but updated the old mapping
@@ -162,13 +189,17 @@ public synchronized void add(Object key, Weighable value)
         
         //no need to update the numOfEntries as we didnt add anything new
     }
+    
+    //return the removed entry
+    return entryRemoved;
+    
 }
 
 /**
 * It removes a low weigt entry
 * @modifies sumOfWeights, numOfEntries
 */ 
-private void removeSomeLessWeightedEntry()
+private Object removeSomeLessWeightedEntry()
 {
     //see if there's anything in the probable list that we can remove
     if(probableRemovableEntries.size() <= 0)
@@ -192,6 +223,9 @@ private void removeSomeLessWeightedEntry()
 
     //update sum of weights
     sumOfWeights = sumOfWeights - removedValue.getWeight();
+    
+    //return the removed entry
+    return entryRemoved;
 }
 
 
