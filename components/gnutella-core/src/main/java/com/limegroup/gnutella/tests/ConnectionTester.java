@@ -48,7 +48,7 @@ public ConnectionTester(String host,int port,int numThreads)
 
 private static void syntaxError() 
 {
-    System.err.println("Syntax: java com.limegroup.gnutella.tests.Server "
+    System.err.println("Syntax: java com.limegroup.gnutella.tests.ConnectionTester "
                        +"<host> <port> <connections>");
     System.exit(1);
 }
@@ -140,7 +140,7 @@ public void run()
         }
 
 
-         //Now write replies as fast as possible from each of the request.
+        //Now write replies as fast as possible from each of the request.
         Response[] responses={new Response(0, 20, "file.mp3" + random.nextInt(2000))};
 
         byte[] clientGUID=new byte[16]; //different for each response

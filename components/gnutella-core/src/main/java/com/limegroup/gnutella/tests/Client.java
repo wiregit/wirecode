@@ -202,15 +202,18 @@ public void run()
         //just keep on receiving the packets as fast as we can, without checking
         //what they mean
         //mesaure the time
-        long startTime = new Date().getTime();
-        for(int i=0; i < NUM_MESSAGES ; i++) 
+        while(true)
         {
-                Message m = c.receive();
-                //System.out.println("received" + m); 
+            long startTime = new Date().getTime();
+            for(int i=0; i < NUM_MESSAGES ; i++) 
+            {
+                    Message m = c.receive();
+                    //System.out.println("received" + m); 
+            }
+            long endTime = new Date().getTime();
+
+            reportTime(endTime - startTime);
         }
-        long endTime = new Date().getTime();
-        
-        reportTime(endTime - startTime);
     }
     catch (IOException e) 
     {
