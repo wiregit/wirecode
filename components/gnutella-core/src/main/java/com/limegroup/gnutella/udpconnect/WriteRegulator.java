@@ -184,7 +184,6 @@ public class WriteRegulator {
                   " wDelay:"+windowDelay+
                   " sT:"+sleepTime);
 
-			gettingSlow = 50;
 
             // If we are starting to affect the RTT, 
             // then ratchet down the accelorator
@@ -205,6 +204,8 @@ public class WriteRegulator {
             // If we are majorly affecting the RTT, then slow down right now
             if ( rtt > maxRTT || realRTT > maxRTT ) {
 				minTime = lowRTT / 4;
+				gettingSlow = 50;
+            	_skipLimit--;
                 //sleepTime = (16*rtt) / 7;
                 if(LOG.isDebugEnabled())  
                     LOG.debug(
