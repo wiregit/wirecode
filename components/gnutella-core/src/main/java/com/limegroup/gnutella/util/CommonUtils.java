@@ -140,6 +140,13 @@ public final class CommonUtils {
 	private static boolean _isSolaris = false;
 
     /**
+     * Variable for whether or not we're on OS/2.
+     */
+    private static boolean _isOS2 = false;
+     
+
+
+    /**
      * Several arrays of illegal characters on various operating systems.
      * Used by convertFileName
      */
@@ -213,6 +220,7 @@ public final class CommonUtils {
 		if(_isWindows) _supportsTray=true;
 		_isSolaris = os.indexOf("solaris") != -1;
 		_isLinux   = os.indexOf("linux")   != -1;
+        _isOS2     = os.indexOf("os/2")    != -1; 
 		if(os.startsWith("mac os")) {
 			if(os.endsWith("x")) {
 				_isMacOSX = true;
@@ -489,6 +497,16 @@ public final class CommonUtils {
 		return _isMacClassic;
 	}
 
+    /**
+     * Returns whether or not the os is OS/2.
+     *
+     * @return <tt>true</tt> if the application is running on OS/2,
+     *         <tt>false</tt> otherwise
+     */
+    public static boolean isOS2() {
+        return _isOS2;
+    }
+     
 	/** 
 	 * Returns whether or not the os is Mac OSX.
 	 *

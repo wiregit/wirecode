@@ -180,6 +180,8 @@ public class FileUtils
             SystemUtils.setWriteable(fName);
         else if ( CommonUtils.isMacClassic() )
             cmds = null; // TODO: fill in.
+        else if ( CommonUtils.isOS2() )
+            cmds = null; // Find the right command for OS/2 and fill in
         else {
             if(f.isDirectory())
                 cmds = new String[] { "chmod", "u+w+x", fName };
