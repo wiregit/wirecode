@@ -79,6 +79,11 @@ public class IPTest extends com.limegroup.gnutella.util.BaseTestCase {
         assertEquals(a.hashCode(),f.hashCode());
         assertEquals(d,e);
         assertEquals(f,e);
+        
+        try {
+            new IP("this should fail.");
+            fail("illegal argument expected.");
+        } catch(IllegalArgumentException ignored) {}
     }
 
 

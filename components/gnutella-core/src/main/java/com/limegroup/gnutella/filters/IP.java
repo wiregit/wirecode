@@ -108,7 +108,7 @@ class IP {
                 // convert wildcard.
                 if( c == '*' ) {
                     c = '0';
-                } else if( c < '0' && c > '9' ) {
+                } else if( c < '0' || c > '9' ) {
                     throw new IllegalArgumentException(MSG + ip_str);
                 }
 
