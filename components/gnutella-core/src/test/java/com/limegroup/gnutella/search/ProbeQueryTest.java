@@ -136,4 +136,82 @@ public final class ProbeQueryTest extends BaseTestCase {
         assertTrue("should not be any ttl=2 queries", queryLists[1].isEmpty());
         assertEquals("should not be only 1 ttl=1 query", queryLists[0].size(), 1);
     }
+
+    /**
+     * Tests the <tt>QueryHandler</tt> utility method that takes
+     * two lists and puts the desired number of elements in a
+     * third list, prioritizing elements from one list over the
+     * other.
+     */
+    public void testAddToList() throws Exception {
+        Class[] paramTypes = 
+            new Class[]{List.class, List.class, List.class, Integer.TYPE};
+		Method m = 
+            PrivilegedAccessor.getMethod(ProbeQuery.class, 
+                                         "addToList",
+                                         paramTypes);                
+
+        List listToAddTo = new LinkedList();
+        List list1 = new LinkedList();
+        List list2 = new LinkedList();
+        Integer numElements = new Integer(3);
+
+        Object[] params = 
+            new Object[] {listToAddTo, list1, list2, numElements};
+        
+        Integer one   = new Integer(1);
+        Integer two   = new Integer(2);
+        Integer three = new Integer(3);
+        Integer four  = new Integer(4);
+        Integer five  = new Integer(5);
+        Integer six   = new Integer(6);
+        Integer seven = new Integer(7);
+
+        List testList = new LinkedList();
+        testList.add(one);
+        testList.add(two);
+        testList.add(three);        
+
+        list1.add(one);
+        list1.add(two);
+        list1.add(three);
+
+        m.invoke(null, params);
+        assertEquals("lists should be equal", testList, listToAddTo);
+
+        list1.clear();
+        list2.clear();
+        listToAddTo.clear();
+
+        
+        list2.add(one);
+        list2.add(two);
+        list2.add(three);
+
+        m.invoke(null, params);
+        assertEquals("lists should be equal", testList, listToAddTo);
+
+        list1.clear();
+        list2.clear();
+        listToAddTo.clear();
+        
+        list1.add(one);
+        list2.add(two);
+        list2.add(three);
+
+        m.invoke(null, params);
+        assertEquals("lists should be equal", testList, listToAddTo);
+
+        list1.clear();
+        list2.clear();
+        listToAddTo.clear();
+        
+        list1.add(one);
+        list1.add(two);
+        list2.add(three);
+        list2.add(four);
+
+        m.invoke(null, params);
+        assertEquals("lists should be equal", testList, listToAddTo);
+    }
 }
