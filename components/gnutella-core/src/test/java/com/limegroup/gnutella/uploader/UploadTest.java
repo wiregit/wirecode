@@ -271,6 +271,61 @@ public class UploadTest extends BaseTestCase {
         passed = downloadPush1(fileName, null, alphabet);
         assertTrue("Push download with HTTP1.1",passed);
     }
+    
+    /**
+     * tests the scenario where we receive the same push request message
+     * more than once
+     */
+    public void testDuplicatePushes() throws Exception {
+        
+        Connection c = createConnection();
+        c.initialize();
+        QueryRequest query=QueryRequest.createQuery("txt", (byte)3);
+        c.send(query);
+        c.flush();
+        QueryReply reply=null;
+        for(int i = 0; i < 10; i++) {
+            Message m=c.receive(2000);
+            if (m instanceof QueryReply) {
+                reply=(QueryReply)m;
+                break;
+            } 
+        }
+        
+        if(reply == null)
+            throw new IOException("didn't get query reply in time");
+        
+        PushRequest push =
+            new PushRequest(GUID.makeGuid(),
+                    (byte)3,
+                    reply.getClientGUID(),
+                    0,
+                    new byte[] {(byte)127, (byte)0, (byte)0, (byte)1},
+                    callbackPort);
+        
+        //Create listening socket, then send the push a few times
+        ServerSocket ss=new ServerSocket(callbackPort);
+        c.send(push);
+        c.send(push); 
+        c.send(push);
+        c.flush();
+        ss.setSoTimeout(2000);
+        c.close();
+        Socket s = ss.accept();
+        
+        try {
+            s = ss.accept();
+            fail("node replied to duplicate push request");
+        }catch(IOException expected){}
+        
+        try {
+            s = ss.accept();
+            fail("node replied to duplicate push request");
+        }catch(IOException expected){}
+        
+        ss.close();
+        
+    }
      
 
     public void testHTTP11PushEncodedFile() throws Exception {
@@ -1686,7 +1741,7 @@ public class UploadTest extends BaseTestCase {
         ss.close();
         return s;
     }
-
+    
     /** 
      * Does an arbitrary push download. 
      * @param request an HTTP request such as "GET" or "HEAD

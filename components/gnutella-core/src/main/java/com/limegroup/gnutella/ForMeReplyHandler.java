@@ -44,6 +44,9 @@ public final class ForMeReplyHandler implements ReplyHandler {
     private final Map /* String -> IntWrapper */ PUSH_REQUESTS = 
         Collections.synchronizedMap(new FixedsizeForgetfulHashMap(200));
 
+    private final Map /* GUID -> GUID */ GUID_REQUESTS = 
+        Collections.synchronizedMap(new FixedsizeForgetfulHashMap(200));
+
 	/**
 	 * Instance following singleton.
 	 */
@@ -207,7 +210,12 @@ public final class ForMeReplyHandler implements ReplyHandler {
             
         byte[] ip = pushRequest.getIP();
         String h = NetworkUtils.ip2string(ip);
-        
+
+        // check whether we serviced this push request already
+	GUID guid = new GUID(pushRequest.getGUID());
+	if (GUID_REQUESTS.put(guid,guid) != null)
+		return;
+
        // make sure the guy isn't hammering us
         IntWrapper i = (IntWrapper)PUSH_REQUESTS.get(h);
         if(i == null) {
