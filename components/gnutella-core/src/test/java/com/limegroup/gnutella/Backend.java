@@ -17,8 +17,7 @@ import java.util.*;
  */
 public final class Backend {
 
-	//private final ActivityCallback CALLBACK = new ActivityCallbackStub();
-	private static Backend _instance;// = new Backend(CALLBACK);
+	private static Backend _instance;
 	private final RouterService ROUTER_SERVICE;
 
 	private final File TEMP_DIR = new File("temp");
@@ -60,8 +59,9 @@ public final class Backend {
 		}
 
 
-		SettingsManager.instance().setDirectories(new File[] {TEMP_DIR});
-		SettingsManager.instance().setExtensions("java");
+		settings.setDirectories(new File[] {TEMP_DIR});
+		settings.setExtensions("java");
+		settings.setGuessEnabled(true);		
 
 		ROUTER_SERVICE = new RouterService(callback);
         ROUTER_SERVICE.start();
@@ -72,11 +72,17 @@ public final class Backend {
 		}
 		TIMER.schedule(new TimerTask() {
 			public void run() {
-				shutdown();
+				shutdown("AUTOMATED");
 			}
-		}, 40*1000);
+		}, 100*1000);
 	}
 
+	/**
+	 * Accessor for the <tt>RouterService</tt> instance for this 
+	 * <tt>Backend</tt>.
+	 *
+	 * @return the <tt>RouterService</tt> instance for this <tt>Backend</tt>
+	 */
 	public RouterService getRouterService() {
 		return ROUTER_SERVICE;
 	}
@@ -84,8 +90,9 @@ public final class Backend {
 	/**
 	 * Notifies <tt>RouterService</tt> that the backend should be shut down.
 	 */
-	public void shutdown() {
-		System.out.println("BACKEND SHUTDOWN"); 
+	public void shutdown(String msg) {
+		System.out.println("BACKEND SHUTDOWN: "+msg); 
+		SettingsManager.instance().setPort(6346);
 		ROUTER_SERVICE.shutdown();	
 		System.exit(0);
 	}
