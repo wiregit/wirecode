@@ -246,6 +246,16 @@ public class ManagedDownloader implements Downloader, Serializable {
     private RemoteFileDescGrouper buckets;
     
     /**
+     * The current RFDs that this ManagedDownloader is connecting to.
+     * This is necessary to store so that when an RFD is removed from files,
+     * we can check in this datastructure to ensure that an RFD is not
+     * connected to twice.
+     *
+     * Initialized in tryAllDownloads3.
+     */
+    private List currentRFDs;
+    
+    /**
      * The index of the bucket we are trying to download from. We use it
      * to find the hash of the bucket we are downloading from - so that 
      * we can verify that we downloaded the correct file, once the download is
@@ -946,10 +956,9 @@ public class ManagedDownloader implements Downloader, Serializable {
         }
         
         boolean added = false;
-        //Add to buckets (will be seen because buckets exposes representation).
-        //If not already in busy.      
-        if (buckets != null &&
-            (busy==null || (busy != null && !busy.contains(rfd)))) {
+        //Add to buckets (will be seen because buckets exposes representation)
+        //if we don't already contain this RFD.
+        if (shouldAllowRFD(rfd)) {
             // We must always check to see if this RFD was already added to
             // the buckets now that we add downloads before adding to alt locs.
             // (Previously altloccollection filtered out already-seen ones)
@@ -983,7 +992,16 @@ public class ManagedDownloader implements Downloader, Serializable {
         
         return true;
     }
-
+    
+    private synchronized boolean shouldAllowRFD(RemoteFileDesc rfd) {
+        if( buckets == null)
+            return false;
+        if( busy != null && busy.contains(rfd))
+            return false;
+        if( currentRFDs != null && currentRFDs.contains(rfd))
+            return false;
+        return true;
+    }
 
     ///////////////////////////////////////////////////////////////////////////
 
@@ -1820,6 +1838,8 @@ public class ManagedDownloader implements Downloader, Serializable {
 
         //The locations that were busy, for trying later.
         busy=new LinkedList();
+        //The current RFDs that are being connected to.
+        currentRFDs = new LinkedList();
         int size = -1;
         int connectTo = -1;
         int dloadsCount = -1;
@@ -1896,7 +1916,11 @@ public class ManagedDownloader implements Downloader, Serializable {
             //remote queue.
             for(int i=0; i< (connectTo+1) && i<size && 
                               dloadsCount < getSwarmCapacity(); i++) {
-                final RemoteFileDesc rfd = removeBest(files);
+                final RemoteFileDesc rfd;
+                synchronized(this) {
+                    rfd = removeBest(files);
+                    currentRFDs.add(rfd);
+                }
                 Thread connectCreator = new Thread("DownloadWorker") {
                     public void run() {
                         boolean iterate = false;
@@ -1916,7 +1940,8 @@ public class ManagedDownloader implements Downloader, Serializable {
                                 ErrorService.error(e);
                             }
                         } finally {
-                            synchronized (ManagedDownloader.this) { 
+                            synchronized (ManagedDownloader.this) {
+                                currentRFDs.remove(rfd);
                                 threads.remove(this); 
                                 if(iterate) 
                                     ManagedDownloader.this.notifyAll();
