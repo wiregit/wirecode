@@ -274,8 +274,8 @@ public final class SettingsManager {
 	
 	private final boolean DEFAULT_CHAT_ENABLED        = true;
     private final boolean DEFAULT_PLAYER_ENABLED      = true;
-	private final String DEFAULT_LANGUAGE             = "en";
-	private final String DEFAULT_COUNTRY              = "US";
+	private final String DEFAULT_LANGUAGE             = "";
+	private final String DEFAULT_COUNTRY              = "";
 	
     private final boolean DEFAULT_MONITOR_VIEW_ENABLED = true;
     private final boolean DEFAULT_CONNECTION_VIEW_ENABLED = false;
