@@ -42,14 +42,14 @@ public class UpdateMessageVerifier {
         byte b;
         int i;
         int j;
-        for(i=0, b=-1; b!=0; i++)
+        for(i=0, b=-1; b!=124; i++)
             b = data[i];
         i--;
-        //now i is at the first null
-        for(j=i+1, b=-1; b!=0; j++)
+        //now i is at the first | delimiter
+        for(j=i+1, b=-1; b!=124; j++)
             b = data[j];
         j--;
-        //now j is at the second null
+        //now j is at the second | delimiter
         byte[] temp = new byte[i];
         System.arraycopy(data,0,temp,0,i);
         String base32 = new String(temp);
