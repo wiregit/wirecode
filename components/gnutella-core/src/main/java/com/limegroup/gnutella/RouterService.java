@@ -86,8 +86,7 @@ public final class RouterService {
 	/**
 	 * <tt>UploadManager</tt> for handling HTTP uploading.
 	 */
-    private static final UploadManager uploadManager = 
-		new UploadManager(fileManager);
+    private static final UploadManager uploadManager = new UploadManager();
 
 	
     private static final ResponseVerifier verifier = new ResponseVerifier();
