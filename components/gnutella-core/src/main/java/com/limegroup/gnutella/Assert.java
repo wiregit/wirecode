@@ -1,7 +1,7 @@
 package com.limegroup.gnutella;
 
 /**
- * Assertion checking.
+ * Assertion checking. 
  */
 public class Assert {
     public static void that(boolean ok, String msg) {
