@@ -412,12 +412,18 @@ public abstract class MessageRouter {
                             (StatisticVendorMessage)msg, receivingConnection);
         }
         else if (msg instanceof BestCandidatesVendorMessage) {
-        	//TODO: add statistics recording code
+        	if(RECORD_STATS)
+        		ReceivedMessageStatHandler.BEST_CANDIDATES.addMessage(msg);
         	handleBestCandidatesMessage(
         					(BestCandidatesVendorMessage)msg, receivingConnection);
         }
         else if (msg instanceof PromotionRequestVendorMessage) {
-        	//TODO: add statistics recording code
+        	if(RECORD_STATS)
+        		if( msg.getHops() == 0) 
+        			ReceivedMessageStatHandler.PROMOTION_REQUEST_TTL0.addMessage(msg);
+        		else if (msg.getHops() ==1 )
+        			ReceivedMessageStatHandler.PROMOTION_REQUEST_TTL1.addMessage(msg);
+        		
         	handlePromotionRequestVM(
         					(PromotionRequestVendorMessage)msg,receivingConnection);
         }
@@ -522,7 +528,7 @@ public abstract class MessageRouter {
         } 
         else if(msg instanceof GiveUPVendorMessage) {
         	if(RECORD_STATS)
-        		;
+        		ReceivedMessageStatHandler.UDP_CRAWLER_PING.addMessage(msg);
         	handleGiveUPVendorMessage((GiveUPVendorMessage)msg, handler);
         }
         else if(msg instanceof UPListVendorMessage) {

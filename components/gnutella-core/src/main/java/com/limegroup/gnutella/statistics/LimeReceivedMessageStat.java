@@ -323,5 +323,33 @@ public class LimeReceivedMessageStat extends AdvancedStatistic {
 	 */
 	public static final Statistic UDP_LIME_ACK = 
 	    new UDPReceivedMessageStat();
+	
+	/**
+	 * <tt>Statistic</tt> for Gnutella BestCandidates VM received over 
+	 * TCP.
+	 */
+	public static final Statistic BEST_CANDIDATES =
+		new TCPReceivedMessageStat();
+	
+	/**
+	 * <tt>Statistic</tt> for Gnutella Crawler ping VM received over 
+	 * UDP.
+	 */
+	public static final Statistic UDP_CRAWLER_PING = 
+		new UDPReceivedMessageStat();
+	
+	/**
+	 * <tt>Statistic</tt> for Gnutella Promotion Request VM received over 
+	 * TCP at ttl 0.
+	 */
+	public static final Statistic PROMOTION_REQUEST_TTL0 =
+		new TCPReceivedMessageStat();
+	
+	/**
+	 * <tt>Statistic</tt> for Gnutella Promotion Request VM received over 
+	 * TCP at ttl 1.
+	 */
+	public static final Statistic PROMOTION_REQUEST_TTL1 =
+		new TCPReceivedMessageStat();
 
 }

@@ -340,7 +340,31 @@ public final class ReceivedMessageStatHandler extends AbstractMessageStatHandler
                                        "RECEIVED_UDP_REPLY_NUMBER");
 
 
+	public static final ReceivedMessageStatHandler BEST_CANDIDATES = 
+	    new ReceivedMessageStatHandler(ReceivedMessageStat.BEST_CANDIDATES,
+                                       ReceivedMessageStatBytes.BEST_CANDIDATES,
+                                       LimeReceivedMessageStat.BEST_CANDIDATES,
+                                       LimeReceivedMessageStatBytes.BEST_CANDIDATES,
+                                       "RECEIVED_TCP_BEST_CANDIDATES");
 	
+	public static final ReceivedMessageStatHandler  UDP_CRAWLER_PING = 
+	    new ReceivedMessageStatHandler(ReceivedMessageStat.UDP_CRAWLER_PING,
+                                       ReceivedMessageStatBytes.UDP_CRAWLER_PING,
+                                       LimeReceivedMessageStat.UDP_CRAWLER_PING,
+                                       LimeReceivedMessageStatBytes.UDP_CRAWLER_PING,
+                                       "RECEIVED_UDP_CRAWLER_PING");
 
-
+	public static final ReceivedMessageStatHandler PROMOTION_REQUEST_TTL0 = 
+	    new ReceivedMessageStatHandler(ReceivedMessageStat.PROMOTION_REQUEST_TTL0,
+                                       ReceivedMessageStatBytes.PROMOTION_REQUEST_TTL0,
+                                       LimeReceivedMessageStat.PROMOTION_REQUEST_TTL0,
+                                       LimeReceivedMessageStatBytes.PROMOTION_REQUEST_TTL0,
+                                       "RECEIVED_TCP_PROMOTION_REQUEST_TTL0");
+	
+	public static final ReceivedMessageStatHandler PROMOTION_REQUEST_TTL1 = 
+	    new ReceivedMessageStatHandler(ReceivedMessageStat.PROMOTION_REQUEST_TTL1,
+                                       ReceivedMessageStatBytes.PROMOTION_REQUEST_TTL1,
+                                       LimeReceivedMessageStat.PROMOTION_REQUEST_TTL1,
+                                       LimeReceivedMessageStatBytes.PROMOTION_REQUEST_TTL1,
+                                       "RECEIVED_TCP_PROMOTION_REQUEST_TTL1");
 }
