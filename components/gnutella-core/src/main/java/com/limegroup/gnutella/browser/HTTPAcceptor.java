@@ -195,7 +195,7 @@ public class HTTPAcceptor implements Runnable {
             super("ConnectionDispatchRunner");
             _socket=socket;
             setDaemon(true);
-            start();
+            this.start();
         }
 
         public void run() {
