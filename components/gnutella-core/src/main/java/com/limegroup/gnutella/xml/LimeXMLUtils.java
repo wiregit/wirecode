@@ -17,6 +17,7 @@ import org.w3c.dom.NamedNodeMap;
 import org.xml.sax.SAXException;
 import javax.xml.parsers.ParserConfigurationException;
 import com.limegroup.gnutella.Response;
+import com.limegroup.gnutella.util.NameValue;
 
 import org.xml.sax.InputSource;
 
@@ -241,6 +242,61 @@ public class LimeXMLUtils
         LimeXMLDocument aggregateXMLDocument)
     {
         return null;
+    }
+    
+    /**
+     * Compares the queryDoc with the replyDoc and finds out if the
+     * replyDoc is a match for the queryDoc
+     * @param queryDoc The query Document
+     * @param replyDoc potential reply Document
+     * @return true if the replyDoc is a match for the queryDoc, false
+     * otherwise
+     */
+    public static boolean match(LimeXMLDocument replyDoc, 
+        LimeXMLDocument queryDoc){
+        if(replyDoc==null)
+            return false;
+        //First find the names of all the fields in the query
+        List queryNameValues = queryDoc.getNameValueList();
+        int size = queryNameValues.size();
+        List fieldNames = new ArrayList(size);
+        for(int i=0; i<size; i++){
+            NameValue nameValue = (NameValue)queryNameValues.get(i);
+            String fieldName = nameValue.getName();
+            fieldNames.add(fieldName);
+        }
+        //compare these fields with the current reply document
+        //List currDocNameValues = replyDoc.getNameValueList();
+        int matchCount=0;//number of matches
+        int nullCount=0;//num of fields which are in query but null in ReplyDoc
+        for(int j=0; j< size; j++){
+            String currFieldName = (String)fieldNames.get(j);
+            String queryValue = queryDoc.getValue(currFieldName);
+            String replyDocValue = replyDoc.getValue(currFieldName);
+            if(replyDocValue == null)
+                nullCount++;
+            else if(replyDocValue.equalsIgnoreCase(queryValue))
+                matchCount++;
+        }
+        //The metric of a correct match is that whatever fields are specified
+        //in the query must have perfect match with the fields in the reply
+        //unless the reply has a null for that feild, in which case we are OK 
+        // with letting it slide. But if there is even one mismatch
+        // we are going to return false.
+        //We make an exception for queries of size i field. Here 
+        // there must be a 100% match
+        if(size > 1){
+            if( ( (nullCount+matchCount)/size ) < 1)
+                return false;
+            return true;
+        }
+        else if (size == 1){
+            if(matchCount/size <1)
+                return false;
+            return true;
+        }
+        //this should never happen - size >0
+        return false;
     }
     
 }
