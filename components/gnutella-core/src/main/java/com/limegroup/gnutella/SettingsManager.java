@@ -1445,8 +1445,8 @@ public class SettingsManager implements SettingsInterface
 		if(write_) {
 			Thread fileManagerThread = new Thread() {
 				public void run() {
-					FileManager.getFileManager().reset();
-					FileManager.getFileManager().addDirectories(directories_);  
+                    //Note that this 
+					FileManager.getFileManager().setDirectories(directories_);  
 				}
 			};
 			fileManagerThread.setDaemon(true);
