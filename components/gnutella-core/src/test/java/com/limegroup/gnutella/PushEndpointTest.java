@@ -3,7 +3,8 @@ package com.limegroup.gnutella;
 
 import junit.framework.Test;
 
-import com.limegroup.gnutella.util.BaseTestCase;
+import com.limegroup.gnutella.stubs.MessageRouterStub;
+import com.limegroup.gnutella.util.*;
 import com.limegroup.gnutella.messages.*;
 import com.sun.java.util.collections.*;
 
@@ -19,6 +20,7 @@ public class PushEndpointTest extends BaseTestCase {
     public static Test suite() {
         return buildTestSuite(PushEndpointTest.class);
     }
+    
     
     public void testConstructors() throws Exception {
     	GUID guid1 = new GUID(GUID.makeGuid());
@@ -162,7 +164,7 @@ public class PushEndpointTest extends BaseTestCase {
     	//now an endpoint with the fwt header moved elsewhere
     	
     	unknown = new PushEndpoint(
-    		"2A8CA57F43E6E0B7FF823F0CC7880500;1.2.3.5:1235;fwawt/1.3;1.2.3.6:1235");
+    		"2A8CA57F43E6E0B7FF823F0CC7880500;1.2.3.5:1235;fwt/1.3;1.2.3.6:1235");
     	assertEquals(2,unknown.getProxies().size());
     	assertEquals(1,unknown.supportsFWTVersion());
     	

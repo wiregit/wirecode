@@ -369,7 +369,6 @@ public final class AlternateLocationTest extends com.limegroup.gnutella.util.Bas
         		clientGUID.bytes(),pal.getPushAddress().getClientGUID()));
         assertEquals(2,pal.getPushAddress().getProxies().size());
         
-        assertEquals(httpString,pal.httpStringValue());
         
         //try some valid push proxies, some invalid ones
         pal = (PushAltLoc) AlternateLocation.create(httpString+";0.1.2.3:100000;1.2.3.6:17",urn);
@@ -378,7 +377,11 @@ public final class AlternateLocationTest extends com.limegroup.gnutella.util.Bas
         		clientGUID.bytes(),pal.getPushAddress().getClientGUID()));
         assertEquals(3,pal.getPushAddress().getProxies().size());
         
-        
+        //HashSets do not guarantee order so the resulting http string 
+        //may contain the proxies in different order
+        assertNotEquals(-1,pal.httpStringValue().indexOf(clientGUID.toHexString()));
+        assertNotEquals(-1,pal.httpStringValue().indexOf("1.2.3.4:15"));
+        assertNotEquals(-1,pal.httpStringValue().indexOf("1.2.3.5:16"));
         
         //try some valid push proxies and an empty one
         pal = (PushAltLoc) AlternateLocation.create(httpString+";;1.2.3.6:17",urn);
