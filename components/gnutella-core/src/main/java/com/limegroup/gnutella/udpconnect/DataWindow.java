@@ -310,6 +310,29 @@ public class DataWindow
 	}
 
     /** 
+     *  Record an ack if not yet present for blocks up to the receiving 
+	 *  windowStart sent from the receiving connection.
+     */
+	public void pseudoAckToReceiverWindow(int wStart) {
+
+		// If the windowStart is old, just ignore it
+		if ( wStart <= windowStart )
+			return;
+
+		DataRecord drec;
+		for (int i = windowStart; i < wStart; i++) {
+			drec = getBlock(i);
+			if ( drec != null && drec.acks == 0) {
+				// Presumably the ack got lost or is still incoming so ack it
+				drec.acks++;
+				// Create a fake ackTime since we don't know when it should be
+				drec.ackTime = drec.sentTime + (int)rto;
+System.out.println("Successful pseudoAck of: "+i);
+			}
+		}
+	}
+
+    /** 
      *  Get the oldest unacked block.
      */
     public DataRecord getOldestUnackedBlock() {

@@ -828,6 +828,9 @@ log2("handleMessage :"+msg+" t:"+_lastReceivedTime);
             } else {
             	// Record the ack
 				_sendWindow.ackBlock(seqNo);
+
+				// Ensure that all messages up to sent windowStart are acked
+				_sendWindow.pseudoAckToReceiverWindow(amsg.getWindowStart());
 				
 				// Clear out the acked blocks at window start
 				_sendWindow.clearLowAckedBlocks();	
@@ -870,6 +873,10 @@ log2("Received duplicate block num: "+ dmsg.getSequenceNumber());
             int              wStart = kmsg.getWindowStart(); 
     		int              priorR = _receiverWindowSpace;
     		_receiverWindowSpace    = kmsg.getWindowSpace();
+
+			// Ensure that all messages up to sent windowStart are acked
+			_sendWindow.pseudoAckToReceiverWindow(wStart);
+				
 
 			// Reactivate writing if required
 			if ( priorR == 0 && _receiverWindowSpace > 0 )
