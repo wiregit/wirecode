@@ -78,6 +78,8 @@ class RouteTable {
     public synchronized boolean tryToRouteReply(byte[] guid,
                                                 ReplyHandler replyHandler) {
         Assert.that(replyHandler != null);
+        Assert.that(guid!=null, "Null GUID in tryToRouteReply");
+
         if (! replyHandler.isOpen())
             return false;
 
@@ -116,8 +118,12 @@ class RouteTable {
             Object key=iter.next();
             Assert.that(key!=null, "Null key in removeReplyHandler");
             Object value=_map.get(key);
-            Assert.that(value!=null, "Null value in removeReplyHandler");
-            if (value.equals(replyHandler))
+            //Work-around for bug X92.  'value' SHOULD never be null.  We used
+            //to check this with the following:
+            //   Assert.that(value!=null, "Null value in removeReplyHandler");
+            //Unfortunately, this exception kept triggering, and we are absolutely
+            //stumped why this is.  So we explicitly check value from now on.
+            if (value!=null && value.equals(replyHandler))
                 iter.remove();
         }
     }
