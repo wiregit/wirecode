@@ -340,8 +340,6 @@ public class Acceptor extends Thread {
                     SettingsManager.instance().getConnectString().equals(
                          SettingsInterface.DEFAULT_CONNECT_STRING);
 
-				System.out.println("The Word is: " + word);
-
                 if (word.equals(SettingsManager.instance().
                         getConnectStringFirstWord())) {
                     _connectionManager.acceptConnection(_socket);
@@ -360,7 +358,6 @@ public class Acceptor extends Thread {
                     _downloadManager.acceptDownload(_socket);
                 }
 				else if (word.equals("CHAT")) {
-					System.out.println("Recieved Chat!!!");
 					ChatManager.instance().accept(_socket);
 				}
                 //4. Unknown protocol

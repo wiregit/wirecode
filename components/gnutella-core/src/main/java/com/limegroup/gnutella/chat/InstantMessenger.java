@@ -18,13 +18,16 @@ public class InstantMessenger extends Chat {
 	private Socket _socket;
 	private ChatLineReader _reader;
 	private BufferedWriter _out;
+	private String _host;
+	private int _port;
 
 	/** constructor for an incoming chat request */
 	public InstantMessenger(Socket socket, ChatManager manager, 
 							ActivityCallback callback) throws IOException {
-		System.out.println("InstantMessenger socket ");
 		_manager = manager;
 		_socket = socket;
+		_port = socket.getPort();
+		_host = _socket.getInetAddress().getHostAddress();
 		_activityCallback = callback;
 		OutputStream os = _socket.getOutputStream();
 		OutputStreamWriter osw = new OutputStreamWriter(os);
@@ -36,10 +39,11 @@ public class InstantMessenger extends Chat {
 	/** constructor for an outgoing chat request */
 	public InstantMessenger(String host, int port, ChatManager manager,
 							ActivityCallback callback) throws IOException {
-		System.out.println("InstantMessenger host port ");
+		_host = host;
+		_port = port;
 		_manager = manager;
 		_activityCallback = callback;
-		_socket =  new Socket(host, port);
+		_socket =  new Socket(_host, _port);
 		OutputStream os = _socket.getOutputStream();
 		OutputStreamWriter osw = new OutputStreamWriter(os);
 		_out=new BufferedWriter(osw);
@@ -74,6 +78,19 @@ public class InstantMessenger extends Chat {
 			// e.printStackTrace();
 		}
 	}
+
+	/** returns the host name to which the 
+		socket is connected */
+	public String getHost() {
+		return _host;
+	}
+
+	/** returns the port to which the socket is
+		connected */
+	public int getPort() {
+		return _port;
+	}
+
 
 	/**
 	 * a private class that handles the thread for reading
