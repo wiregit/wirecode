@@ -65,33 +65,33 @@ public final class ServerSideGiveStatsVMTest extends BaseTestCase {
     /**
      * Leaf connection to the Ultrapeer.
      */
-    private static Connection LEAF_1;
+    private static CountingConnection LEAF_1;
 
     /**
      * Leaf connection to the Ultrapeer.
      */
-    private static Connection LEAF_2;
+    private static CountingConnection LEAF_2;
 
     /**
      * Leaf connection to the Ultrapeer.
      */
-    private static Connection LEAF_3;
+    private static CountingConnection LEAF_3;
 
     /**
      * Leaf connection to the Ultrapeer.
      */
-    private static Connection LEAF_4;
+    private static CountingConnection LEAF_4;
 
 
     /**
      * Leaf connection to the Ultrapeer.
      */
-    private static Connection TCP_TEST_LEAF;
+    private static CountingConnection TCP_TEST_LEAF;
 
     /**
      * Ultrapeer connection.
      */
-    private static Connection ULTRAPEER_1;
+    private static CountingConnection ULTRAPEER_1;
 
     /**
      * Ultrapeer 1 UDP connection.
@@ -99,9 +99,9 @@ public final class ServerSideGiveStatsVMTest extends BaseTestCase {
     private static DatagramSocket UDP_ACCESS;
 
     /**
-	 * Second Ultrapeer connection
+	 * Second Ultrapeer ConnectionStub
      */
-    private static Connection ULTRAPEER_2;
+    private static CountingConnection ULTRAPEER_2;
 
 
     /**
@@ -156,38 +156,36 @@ public final class ServerSideGiveStatsVMTest extends BaseTestCase {
 	
 	private static void buildConnections() throws Exception {
 	    LEAF_1 =
-			new Connection("localhost", PORT, new LeafHeaders("localhost"),
-                                                          new EmptyResponder());
+			new CountingConnection("localhost", PORT, 
+                            new LeafHeaders("localhost"),new EmptyResponder());
 
 	    LEAF_2 =
-			new Connection("localhost", PORT, new LeafHeaders("localhost"),
-						                                  new EmptyResponder());
+			new CountingConnection("localhost", PORT, 
+                            new LeafHeaders("localhost"), new EmptyResponder());
 
 	    LEAF_3 =
-			new Connection("localhost", PORT, new LeafHeaders("localhost"),
-                                                         new EmptyResponder());
+			new CountingConnection("localhost", PORT, 
+                           new LeafHeaders("localhost"), new EmptyResponder());
 
 	    LEAF_4 =
-			new Connection("localhost", PORT, new LeafHeaders("localhost"),
-                                                        new EmptyResponder() );
+			new CountingConnection("localhost", PORT, 
+                           new LeafHeaders("localhost"), new EmptyResponder());
 
 	    TCP_TEST_LEAF =
-			new Connection("localhost", PORT, new LeafHeaders("localhost"),
-						                                 new EmptyResponder() );
+			new CountingConnection("localhost", PORT, 
+                           new LeafHeaders("localhost"), new EmptyResponder());
         
         ULTRAPEER_1 = 
-			new Connection("localhost", PORT,
+			new CountingConnection("localhost", PORT,
 						   new UltrapeerHeaders("localhost"),
-						   new EmptyResponder()
-						   );
+						   new EmptyResponder() );
 
         UDP_ACCESS = new DatagramSocket();
 
         ULTRAPEER_2 = 
-			new Connection("localhost", PORT,
+			new CountingConnection("localhost", PORT,
 						   new UltrapeerHeaders("localhost"),
-						   new EmptyResponder()
-						   );
+						   new EmptyResponder() );
     }
 
     public static void setSettings() {
@@ -253,6 +251,51 @@ public final class ServerSideGiveStatsVMTest extends BaseTestCase {
 		try {Thread.sleep(300);}catch(InterruptedException e) {}
 	}
 
+    private static void readAllFully() throws IOException, BadPacketException {
+       while(true) {
+            try {
+                LEAF_1.receive(300);
+            } catch (InterruptedIOException e) {
+                break;
+            }
+        }
+        while(true) {
+            try {
+                LEAF_2.receive(300);
+            } catch (InterruptedIOException e) {
+                break;
+            }
+        }
+        while(true) {
+            try {
+                LEAF_3.receive(300);
+            } catch (InterruptedIOException e) {
+                break;
+            }
+        }
+        while(true) {
+            try {
+                LEAF_4.receive(300);
+            } catch (InterruptedIOException e) {
+                break;
+            }
+        }
+        while(true) {
+            try {
+                ULTRAPEER_1.receive(300);
+            } catch (InterruptedIOException e) {
+                break;
+            }
+        }
+        while(true) {
+            try {
+                ULTRAPEER_2.receive(300);
+            } catch (InterruptedIOException e) {
+                break;
+            }
+        }        
+    }
+    
 	/**
 	 * Drains all messages 
 	 */
@@ -558,6 +601,8 @@ public final class ServerSideGiveStatsVMTest extends BaseTestCase {
              LEAF_1.getListeningPort(),ipBytes,0l, resps,l1GUID.bytes(), false);
         ULTRAPEER_1.send(reply1);
         ULTRAPEER_1.flush();
+        
+        readAllFully();
 
         //Leaf 1 final score incoming queries = 2, query replies = 2
         //Leaf 2 final score incoming queries = 2, query replies = 1
@@ -570,7 +615,8 @@ public final class ServerSideGiveStatsVMTest extends BaseTestCase {
         //what the response is
     }
      
-    public void testTCPGiveStatsVM() throws Exception {
+    public void testTCPGiveStatsVM() throws Exception {        
+        
         GiveStatsVendorMessage statsVM = new GiveStatsVendorMessage(
                              GiveStatsVendorMessage.PER_CONNECTION_STATS, 
                              GiveStatsVendorMessage.GNUTELLA_INCOMING_TRAFFIC, 
@@ -579,6 +625,18 @@ public final class ServerSideGiveStatsVMTest extends BaseTestCase {
         TCP_TEST_LEAF.flush();        
         
         StatisticVendorMessage statsAck = 
+        (StatisticVendorMessage)getFirstInstanceOfMessageType(TCP_TEST_LEAF,
+                                                               Class.forName(
+            "com.limegroup.gnutella.messages.vendor.StatisticVendorMessage"));
+
+       GiveStatsVendorMessage statsVM2 = new GiveStatsVendorMessage(
+                             GiveStatsVendorMessage.PER_CONNECTION_STATS,
+                             GiveStatsVendorMessage.GNUTELLA_OUTGOING_TRAFFIC,
+                             Message.N_TCP);
+        TCP_TEST_LEAF.send(statsVM2);
+        TCP_TEST_LEAF.flush();
+
+        StatisticVendorMessage statsAck2 = 
         (StatisticVendorMessage)getFirstInstanceOfMessageType(TCP_TEST_LEAF,
                                                                Class.forName(
             "com.limegroup.gnutella.messages.vendor.StatisticVendorMessage"));
@@ -594,74 +652,70 @@ public final class ServerSideGiveStatsVMTest extends BaseTestCase {
         token = tok.nextToken(); // UP2 sent -- should be 0
         //System.out.println("****Sumeet***:"+token);
 
-        int val = Integer.parseInt(token.trim());//(Integer.valueOf(token)).intValue();
+        int val = Integer.parseInt(token.trim());
 
-        assertEquals("UP2 sent no messages", 0, val);
+        assertEquals("UP2 sent mismatch", ULTRAPEER_2.outgoingCount, val);
         tok.nextToken();//ignore
         token = tok.nextToken(); //UP1 sent -- should be 3
-        assertEquals("UP2 dropped 0 messages",0,Integer.parseInt(token.trim()));
+        assertEquals("UP2 dropped mismatched",0,Integer.parseInt(token.trim()));
 
         tok.nextToken();//ignore
         tok.nextToken();//ignore
         token = tok.nextToken();
-        assertEquals("UP1 sent 3 messages", 3, Integer.parseInt(token.trim()));
+        assertEquals("UP1 sent mismatch", ULTRAPEER_1.outgoingCount , 
+                                                Integer.parseInt(token.trim()));
         tok.nextToken(); //ignore
         token = tok.nextToken();
-        assertEquals("UP1 dropped 1 sent message", 1, Integer.parseInt(
-                                                                token.trim()));
+        //TODO2: I am not sure why one message is being dropped, but this is the
+        //statistic being returned consistently, For now we will leave it here
+        //to make the test pass but at some point, we should investigate why
+        //this is happening.
+        assertEquals("UP1 dropped mismatch", 1, Integer.parseInt(token.trim()));
 
         tok.nextToken();//ignore
         tok.nextToken();//ignore
         token = tok.nextToken();
-        assertEquals("Leaf_1 sent 4 messages",4,Integer.parseInt(token.trim()));
+        assertEquals("Leaf_1 sent mismatch", LEAF_1.outgoingCount ,
+                                               Integer.parseInt(token.trim()));
         tok.nextToken(); //ignore
         token = tok.nextToken();
-        assertEquals("Leaf_1 dropped no message", 0, Integer.parseInt(
+        assertEquals("Leaf_1 dropped mismatch", 0, Integer.parseInt(
                                                                  token.trim()));
 
         tok.nextToken();//ignore
         tok.nextToken();//ignore
         token = tok.nextToken();
-        assertEquals("Leaf_2 sent 3 messages",3,Integer.parseInt(token.trim()));
+        assertEquals("Leaf_2 sent mismatch", LEAF_2.outgoingCount,
+                                                Integer.parseInt(token.trim()));
         tok.nextToken(); //ignore
         token = tok.nextToken();
-        assertEquals("Lead_2 dropped no message",0,Integer.parseInt(
+        assertEquals("Lead_2 dropped mismatch",0,Integer.parseInt(
                                                                  token.trim()));
 
         tok.nextToken();//ignore
         tok.nextToken();//ignore
         token = tok.nextToken();
-        assertEquals("Leaf_3 sent 3 messages",3,Integer.parseInt(token.trim()));
+        assertEquals("Leaf_3 sent mismatch", LEAF_3.outgoingCount,
+                                                Integer.parseInt(token.trim()));
         tok.nextToken(); //ignore
         token = tok.nextToken();
-        assertEquals("Lead_3 dropped no message",0,Integer.parseInt(
-                                                                token.trim()));
+        assertEquals("Lead_3 drop mismatch",0,Integer.parseInt(token.trim()));
 
         tok.nextToken();//ignore
         tok.nextToken();//ignore
         token = tok.nextToken();
-        assertEquals("Leaf_4 sent no messages", 0, Integer.parseInt(
-                                                                 token.trim()));
+        assertEquals("Leaf_4 sent mismatch", LEAF_4.outgoingCount, 
+                                              Integer.parseInt(token.trim()));
         tok.nextToken(); //ignore
         token = tok.nextToken();
-        assertEquals("Lead_4 dropped no message", 0, Integer.parseInt(
+        assertEquals("Lead_4 dropped mismatch", 0, Integer.parseInt(
                                                                 token.trim()));
 
-
-
-        GiveStatsVendorMessage statsVM2 = new GiveStatsVendorMessage(
-                             GiveStatsVendorMessage.PER_CONNECTION_STATS,
-                             GiveStatsVendorMessage.GNUTELLA_OUTGOING_TRAFFIC,
-                             Message.N_TCP);
-        TCP_TEST_LEAF.send(statsVM2);
-        TCP_TEST_LEAF.flush();
-
-        statsAck = 
-        (StatisticVendorMessage)getFirstInstanceOfMessageType(TCP_TEST_LEAF,
-                                                               Class.forName(
-            "com.limegroup.gnutella.messages.vendor.StatisticVendorMessage"));
+        ////////////////////////
         
-        returnedStats = new String(statsAck.getPayload());
+        returnedStats = new String(statsAck2.getPayload());
+
+        //System.out.println(returnedStats);       
 
         tok = new StringTokenizer(returnedStats,":|");
         
@@ -672,61 +726,59 @@ public final class ServerSideGiveStatsVMTest extends BaseTestCase {
 
         val = Integer.parseInt(token.trim());
 
-        assertEquals("UP2 received 14 messages", 14, val);
+        assertEquals("UP2 received mismatch", ULTRAPEER_2.incomingCount, val);
         tok.nextToken();//ignore
         token = tok.nextToken(); //UP1 received -- should be 14
-        assertEquals("UP2 dropped 0 sent messages",0,Integer.parseInt(token.trim()));
+        assertEquals("UP2 dropped mismatch",0,Integer.parseInt(token.trim()));
 
         tok.nextToken();//ignore
         tok.nextToken();//ignore
         token = tok.nextToken();
-        assertEquals("UP1 received 15 messages", 15, Integer.parseInt(token.trim()));
+        assertEquals("UP1 received mismatch", ULTRAPEER_1.incomingCount, 
+                                                Integer.parseInt(token.trim()));
         tok.nextToken(); //ignore
         token = tok.nextToken();
-        assertEquals("UP1 dropped 0 sent message", 0, Integer.parseInt(
+        assertEquals("UP1 dropped mismatch", 0, Integer.parseInt(
                                                                 token.trim()));
 
         tok.nextToken();//ignore
         tok.nextToken();//ignore
         token = tok.nextToken();
-        assertEquals("Leaf_1 received 3 messages", 3, Integer.parseInt(token.trim()));
+        assertEquals("Leaf_1 received mismacth", LEAF_1.incomingCount, 
+                                                Integer.parseInt(token.trim()));
         tok.nextToken(); //ignore
         token = tok.nextToken();
-        assertEquals("Leaf_1 dropped no message", 0, Integer.parseInt(
+        assertEquals("Leaf_1 dropped mismatch", 0, Integer.parseInt(
                                                                  token.trim()));
 
         tok.nextToken();//ignore
         tok.nextToken();//ignore
         token = tok.nextToken();
-        assertEquals("Leaf_2 received 3 messages",3,Integer.parseInt(token.trim()));
+        assertEquals("Leaf_2 received mismatch",LEAF_2.incomingCount,
+                                               Integer.parseInt(token.trim()));
         tok.nextToken(); //ignore
         token = tok.nextToken();
-        assertEquals("Lead_2 dropped no message",0,Integer.parseInt(
-                                                                 token.trim()));
+        assertEquals("Lead_2 drop mismatch",0,Integer.parseInt(token.trim()));
 
         tok.nextToken();//ignore
         tok.nextToken();//ignore
         token = tok.nextToken();
-        assertEquals("Leaf_3 received 2 messages",2,Integer.parseInt(token.trim()));
+        assertEquals("Leaf_3 received mismatch",LEAF_3.incomingCount,
+                                               Integer.parseInt(token.trim()));
         tok.nextToken(); //ignore
         token = tok.nextToken();
-        assertEquals("Lead_3 dropped no message",0,Integer.parseInt(
+        assertEquals("Lead_3 dropped mismatch",0,Integer.parseInt(
                                                                 token.trim()));
 
         tok.nextToken();//ignore
         tok.nextToken();//ignore
         token = tok.nextToken();
-        assertEquals("Leaf_4 received 1 message", 1, Integer.parseInt(
-                                                                 token.trim()));
+        assertEquals("Leaf_4 received mismatch", LEAF_4.incomingCount, 
+                                                Integer.parseInt(token.trim()));
         tok.nextToken(); //ignore
         token = tok.nextToken();
-        assertEquals("Lead_4 dropped no message", 0, Integer.parseInt(
+        assertEquals("Lead_4 dropped mismatch", 0, Integer.parseInt(
                                                                 token.trim()));
-
-
-        //TODO:1 make sure this is what is expected. 
-        //System.out.println(returnedStats);       
-
     }
 
    
@@ -743,6 +795,4 @@ public final class ServerSideGiveStatsVMTest extends BaseTestCase {
     //Now let's create some queries and send them out to the central UP
     //which will forard to the appropriate leaves as per qrp.
     
-
-
 }
