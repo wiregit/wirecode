@@ -29,25 +29,25 @@ public final class SupernodeAssigner {
 	 * Constant for the minimum number of upstream kbytes per second that 
 	 * a node must be able to transfer in order to qualify as a supernode.
 	 */
-	private final int MINIMUM_REQUIRED_UPSTREAM_KBYTES_PER_SECOND = 10;
+	private final int MINIMUM_REQUIRED_UPSTREAM_KBYTES_PER_SECOND = 15;
 
 	/**
 	 * Constant for the minimum number of downlstream kbytes per second that 
 	 * a node must be able to transfer in order to qualify as a supernode.
 	 */
-	private final int MINIMUM_REQUIRED_DOWNSTREAM_KBYTES_PER_SECOND = 15;
+	private final int MINIMUM_REQUIRED_DOWNSTREAM_KBYTES_PER_SECOND = 20;
 
 	/**
 	 * Constant for the minimum average uptime in seconds that a node must 
 	 * have to qualify for supernode status.
 	 */
-	private final int MINIMUM_AVERAGE_UPTIME = 30 * 60; //1/2 hr
+	private final int MINIMUM_AVERAGE_UPTIME = 60 * 60; //1 hr
 
 	/**
 	 * Constant for the minimum current uptime in seconds that a node must 
 	 * have to qualify for supernode status.
 	 */
-	private final int MINIMUM_CURRENT_UPTIME = 30 * 60; //1/2 hr
+	private final int MINIMUM_CURRENT_UPTIME = 120 * 60; //2 hr
 
 	/**
 	 * Constant value for whether or not the operating system qualifies
