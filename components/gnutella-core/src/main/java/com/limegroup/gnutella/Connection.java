@@ -1413,6 +1413,15 @@ public class Connection implements IpPort {
         return -1;
     }
     
+    /** @return -1 if UDP crawling is supported, else the version number 
+     *  supported.
+     */
+    public int remoteHostSupportsUDPCrawling() {
+    	if (_messagesSupported != null)
+    		return _messagesSupported.supportsUDPCrawling();
+    	return -1;
+    }
+    
     /** @return -1 if the message isn't supported, else the version number 
      *  supported.
      */

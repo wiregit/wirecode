@@ -59,12 +59,11 @@ public class UDPCrawlerPong extends VendorMessage {
 		
 		while(iter.hasNext()) {
 			Connection c = (Connection)iter.next();
-			if (newOnly && 
-					c.supportsVendorMessage
-					(VendorMessage.F_LIME_VENDOR_ID, VendorMessage.F_ULTRAPEER_LIST) != -1)
-				endpointsUP.add(c);
-			else 
-				if (c.isGoodUltrapeer()) 
+			if (newOnly) {  
+				if (c.remoteHostSupportsUDPCrawling() >= 1)
+					endpointsUP.add(c);
+			}else 
+			if (c.isGoodUltrapeer()) 
 				endpointsUP.add(c);
 		}
 		

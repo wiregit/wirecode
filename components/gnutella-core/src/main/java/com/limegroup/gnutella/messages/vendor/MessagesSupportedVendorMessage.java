@@ -212,6 +212,14 @@ public final class MessagesSupportedVendorMessage extends VendorMessage {
     public int supportsLeafGuidance() {
         return supportsMessage(F_BEAR_VENDOR_ID, F_LIME_ACK);
     }
+    
+    /**
+     * @return -1 if the remote host does not support UDP crawling,
+     * else it returns the version.
+     */
+    public int supportsUDPCrawling() {
+    	return supportsMessage(F_LIME_VENDOR_ID, F_ULTRAPEER_LIST);
+    }
 
     // override super
     public boolean equals(Object other) {
