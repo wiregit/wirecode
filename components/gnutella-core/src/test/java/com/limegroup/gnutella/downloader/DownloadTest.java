@@ -1,24 +1,37 @@
 package com.limegroup.gnutella.downloader;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.io.RandomAccessFile;
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
 import java.net.InetAddress;
+import java.net.Socket;
+import java.net.SocketException;
 import java.net.URL;
+import java.net.UnknownHostException;
 
 import junit.framework.Test;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import sun.awt.image.ByteArrayImageSource;
+
+import com.limegroup.gnutella.Acceptor;
 import com.limegroup.gnutella.DownloadManager;
 import com.limegroup.gnutella.Downloader;
 import com.limegroup.gnutella.ErrorService;
 import com.limegroup.gnutella.FileDesc;
 import com.limegroup.gnutella.FileManager;
+import com.limegroup.gnutella.GUID;
 import com.limegroup.gnutella.HugeTestUtils;
 import com.limegroup.gnutella.IncompleteFileDesc;
+import com.limegroup.gnutella.ManagedConnectionStub;
+import com.limegroup.gnutella.PushEndpoint;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.SpeedConstants;
@@ -26,14 +39,22 @@ import com.limegroup.gnutella.SupernodeAssigner;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.altlocs.AlternateLocation;
 import com.limegroup.gnutella.altlocs.AlternateLocationCollection;
+import com.limegroup.gnutella.altlocs.DirectAltLoc;
+import com.limegroup.gnutella.altlocs.PushAltLoc;
+import com.limegroup.gnutella.messages.BadPacketException;
+import com.limegroup.gnutella.messages.Message;
+import com.limegroup.gnutella.messages.PushRequest;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.DownloadSettings;
 import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
+import com.limegroup.gnutella.stubs.ConnectionManagerStub;
+import com.limegroup.gnutella.udpconnect.UDPConnection;
 import com.limegroup.gnutella.util.BaseTestCase;
 import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.DataUtils;
 import com.limegroup.gnutella.util.PrivilegedAccessor;
+import com.limegroup.gnutella.util.Sockets;
 import com.limegroup.gnutella.tigertree.TigerTreeCache;
 import com.limegroup.gnutella.tigertree.HashTree;
 import java.util.Iterator;
@@ -42,6 +63,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.HashSet;
 import java.util.Collections;
+import java.util.Map;
 
 /**
  * Comprehensive test of downloads -- one of the most important tests in
@@ -76,6 +98,17 @@ public class DownloadTest extends BaseTestCase {
      * Port for the fifth uploader.
      */
     private static final int PORT_5 = 6324;
+    
+    
+    /**
+     * ports for the various push proxies
+     */
+    private static final int PPORT_1 = 10001;
+    private static final int PPORT_2 = 10002;
+    private static final int PPORT_3 = 10003;
+    
+    private static final GUID guid = new GUID(GUID.makeGuid());
+        
 
     private static final String filePath =
         "com/limegroup/gnutella/downloader/DownloadTestData/";
@@ -109,8 +142,24 @@ public class DownloadTest extends BaseTestCase {
 		RouterService rs = new RouterService(callback);
         dm = rs.getDownloadManager();
         dm.initialize();
-        dm.scheduleWaitingPump();
+
+        ConnectionSettings.EVER_ACCEPTED_INCOMING.setValue(true);
+        
+        PrivilegedAccessor.setValue(RouterService.getAcceptor(),
+                "_acceptedIncoming",new Boolean(true));
+        assertTrue(RouterService.acceptedIncomingConnection());
+        
+        ConnectionManagerStub cmStub = new ConnectionManagerStub() {
+            public boolean isConnected() {
+                return true;
+            }
+        };
+        
+        PrivilegedAccessor.setValue(RouterService.class,"manager",cmStub);
+        
         RouterService.getAcceptor().setAddress(InetAddress.getLocalHost());
+        
+        assertTrue(RouterService.isConnected());
         
         //SimpleTimer timer = new SimpleTimer(true);
         Runnable click = new Runnable() {
@@ -119,6 +168,7 @@ public class DownloadTest extends BaseTestCase {
             }
         };
         RouterService.schedule(click,0,SupernodeAssigner.TIMER_DELAY);
+        rs.start();
     } 
     
     public DownloadTest(String name) {
@@ -169,7 +219,7 @@ public class DownloadTest extends BaseTestCase {
     }    
 
     public void tearDown() {
-        
+
         uploader1.reset();
         uploader2.reset();
         uploader3.reset();
@@ -183,6 +233,13 @@ public class DownloadTest extends BaseTestCase {
         uploader5.stopThread();
 
         deleteAllFiles();
+        
+        try {
+            Map m = (Map)PrivilegedAccessor.getValue(PushEndpoint.class,"GUID_PROXY_MAP");
+            m.clear();
+        }catch(Exception e){
+            ErrorService.error(e);
+        }
     }
     
     private static void deleteAllFiles() {
@@ -259,11 +316,38 @@ public class DownloadTest extends BaseTestCase {
     /**
      * Tests a basic download that does not swarm.
      */
-    public void testSimpleDownload() throws Exception {
+    public void testSimpleDownload10() throws Exception {
         LOG.debug("-Testing non-swarmed download...");
         
         RemoteFileDesc rfd=newRFD(PORT_1, 100);
         RemoteFileDesc[] rfds = {rfd};
+        tGeneric(rfds);
+    }
+    
+    public void testSimpleDownload11() throws Exception {
+        LOG.debug("-Testing non-swarmed download...");
+        
+        RemoteFileDesc rfd=newRFDWithURN(PORT_1, 100);
+        RemoteFileDesc[] rfds = {rfd};
+        tGeneric(rfds);
+    }
+    
+    public void testSimplePushDownload() throws Exception {
+        LOG.debug("-Testing non-swarmed push download");
+        
+        AlternateLocation pushLoc = AlternateLocation.create(
+                guid.toHexString()+";127.0.0.1:"+PPORT_1,TestFile.hash());
+       ((PushAltLoc)pushLoc).updateProxies(true);
+
+        RemoteFileDesc rfd = newRFDPush(PPORT_1,1);
+        
+        assertTrue(rfd.needsPush());
+        
+        RemoteFileDesc [] rfds = {rfd};
+        TestUploader uploader = new TestUploader("push uploader");
+        PushAcceptor p = new PushAcceptor(PPORT_1,RouterService.getPort(),
+                savedFile.getName(),uploader,guid);
+        
         tGeneric(rfds);
     }
     
@@ -279,8 +363,8 @@ public class DownloadTest extends BaseTestCase {
         final int FUDGE_FACTOR=RATE*1024;  
         uploader1.setRate(RATE);
         uploader2.setRate(RATE);
-        RemoteFileDesc rfd1=newRFD(PORT_1, 100);
-        RemoteFileDesc rfd2=newRFD(PORT_2, 100);
+        RemoteFileDesc rfd1=newRFDWithURN(PORT_1, 100);
+        RemoteFileDesc rfd2=newRFDWithURN(PORT_2, 100);
         RemoteFileDesc[] rfds = {rfd1,rfd2};
         
         tGeneric(rfds);
@@ -298,6 +382,31 @@ public class DownloadTest extends BaseTestCase {
         assertLessThan("u2 did all the work", TestFile.length()/2+FUDGE_FACTOR, u2);
     }
 
+    public void testSimpleSwarmPush() throws Exception {
+        LOG.debug("-Testing swarming from two sources, one push...");  
+        
+        RemoteFileDesc rfd1=newRFDWithURN(PORT_1, 100);
+        AlternateLocation pushLoc = AlternateLocation.create(
+                guid.toHexString()+";127.0.0.1:"+PPORT_2,TestFile.hash());
+       ((PushAltLoc)pushLoc).updateProxies(true);
+        RemoteFileDesc rfd2 = pushLoc.createRemoteFileDesc(TestFile.length());
+        
+        uploader1.setRate(500);
+        TestUploader uploader = new TestUploader("push uploader");
+        final int FUDGE_FACTOR=500*1024;
+        
+        RemoteFileDesc[] rfds = {rfd1,rfd2};
+        
+        PushAcceptor pa = 
+            new PushAcceptor(PPORT_2,RouterService.getPort(),savedFile.getName(),uploader,guid);
+        
+        tGeneric(rfds);
+        
+        assertLessThan("u1 did all the work", TestFile.length()/2+FUDGE_FACTOR, 
+                uploader1.amountUploaded());
+        
+        assertGreaterThan("pusher did all the work ",0,uploader1.amountUploaded());
+    }
 
     public void testUnbalancedSwarm() throws Exception  {
         LOG.debug("-Testing swarming from two unbalanced sources...");
@@ -306,15 +415,13 @@ public class DownloadTest extends BaseTestCase {
         final int FUDGE_FACTOR=RATE*1024;  
         uploader1.setRate(RATE);
         uploader2.setRate(RATE/10);
-        RemoteFileDesc rfd1=newRFD(PORT_1, 100);
-        RemoteFileDesc rfd2=newRFD(PORT_2, 100);
+        RemoteFileDesc rfd1=newRFDWithURN(PORT_1, 100);
+        RemoteFileDesc rfd2=newRFDWithURN(PORT_2, 100);
         RemoteFileDesc[] rfds = {rfd1,rfd2};
 
         tGeneric(rfds);
 
-        //Make sure there weren't too many overlapping regions.  uploader1
-        //should transfer 2/3 of the file and uploader2 should transfer 1/3 of
-        //the file.
+        //Make sure there weren't too many overlapping regions.
         int u1 = uploader1.amountUploaded();
         int u2 = uploader2.amountUploaded();
         //Note: The amount downloaded from each uploader will not 
@@ -337,8 +444,8 @@ public class DownloadTest extends BaseTestCase {
         uploader1.setRate(RATE);
         uploader2.setRate(RATE);
         uploader2.stopAfter(STOP_AFTER);
-        RemoteFileDesc rfd1=newRFD(PORT_1, 100);
-        RemoteFileDesc rfd2=newRFD(PORT_2, 100);
+        RemoteFileDesc rfd1=newRFDWithURN(PORT_1, 100);
+        RemoteFileDesc rfd2=newRFDWithURN(PORT_2, 100);
 
         // Download first from rfd2 so we get its stall
         // and then add in rfd1.
@@ -357,39 +464,40 @@ public class DownloadTest extends BaseTestCase {
         assertLessThan("u1 did all the work", TestFile.length()-STOP_AFTER+FUDGE_FACTOR, u1);
         assertEquals("u2 did all the work", STOP_AFTER, u2);
     }
-
-
-    public void testStealerInterrupted() throws Exception {
-        LOG.debug("-Testing unequal swarming with stealer dying...");
+    
+    /**
+     * tests a swarm from a 1.0 and 1.1 source - designed to test stealing.
+     */
+    public void testSwarmWithTheft() throws Exception {
+        LOG.debug("-Testing swarming from two sources, one 1.0 and one 1.1");
         
+        //Throttle rate at 10KB/s to give opportunities for swarming.
         final int RATE=500;
-        //second half of file + 1/8 of the file
-        final int STOP_AFTER = 5*TestFile.length()/8;
+        //The first uploader got a range of 0-100%.  After the download receives
+        //50%, it will close the socket.  But the uploader will send some data
+        //between the time it sent byte 50% and the time it receives the FIN
+        //segment from the downloader.  Half a second latency is tolerable.  
         final int FUDGE_FACTOR=RATE*1024;  
-        uploader1.setRate(RATE/10);
+        uploader1.setRate(RATE);
         uploader2.setRate(RATE);
-        uploader2.stopAfter(STOP_AFTER);
         RemoteFileDesc rfd1=newRFD(PORT_1, 100);
-        RemoteFileDesc rfd2=newRFD(PORT_2, 100);
+        RemoteFileDesc rfd2=newRFDWithURN(PORT_2, 100);
         RemoteFileDesc[] rfds = {rfd1,rfd2};
-
+        
         tGeneric(rfds);
-
+        
         //Make sure there weren't too many overlapping regions.
         int u1 = uploader1.amountUploaded();
         int u2 = uploader2.amountUploaded();
         LOG.debug("\tu1: "+u1+"\n");
         LOG.debug("\tu2: "+u2+"\n");
         LOG.debug("\tTotal: "+(u1+u2)+"\n");
-
+        
         //Note: The amount downloaded from each uploader will not 
         //be equal, because the uploaders are stated at different times.
-        assertLessThan("u1 did all the work",
-                    TestFile.length()-STOP_AFTER+2*FUDGE_FACTOR, u1);
-        assertEquals("u2 did all the work", STOP_AFTER, u2);
+        assertLessThan("u1 did all the work", TestFile.length()/2+FUDGE_FACTOR, u1);
+        assertLessThan("u2 did all the work", TestFile.length()/2+FUDGE_FACTOR, u2);
     }
-
-
 
     public void testAddDownload() throws Exception {
         LOG.debug("-Testing addDownload (increases swarming)...");
@@ -398,8 +506,8 @@ public class DownloadTest extends BaseTestCase {
         final int FUDGE_FACTOR=RATE*1024;  
         uploader1.setRate(RATE);
         uploader2.setRate(RATE);
-        RemoteFileDesc rfd1=newRFD(PORT_1, 100);
-        RemoteFileDesc rfd2=newRFD(PORT_2, 100);
+        RemoteFileDesc rfd1=newRFDWithURN(PORT_1, 100);
+        RemoteFileDesc rfd2=newRFDWithURN(PORT_2, 100);
 
         Downloader download=null;
 
@@ -434,8 +542,8 @@ public class DownloadTest extends BaseTestCase {
         final int RATE=500;
         uploader1.setRate(0.1f);//stalling uploader
         uploader2.setRate(RATE);
-        RemoteFileDesc rfd1=newRFD(PORT_1, 100);
-        RemoteFileDesc rfd2=newRFD(PORT_2, 100);
+        RemoteFileDesc rfd1=newRFDWithURN(PORT_1, 100);
+        RemoteFileDesc rfd2=newRFDWithURN(PORT_2, 100);
         RemoteFileDesc[] rfds = {rfd1,rfd2};
 
         tGeneric(rfds);
@@ -545,7 +653,7 @@ public class DownloadTest extends BaseTestCase {
         uploader5.setRate(RATE*2); // control, to finish the test.
         
         // Muck around with the chunk sizes the uploaders will return
-        uploader1.setLowChunkOffset(50); // add 10 to'm
+        uploader1.setLowChunkOffset(50); // add 50 to'm
         uploader2.setLowChunkOffset(-10); // subtract 10, should always fail
         uploader3.setHighChunkOffset(-50); // subtract 50 to'm
         uploader4.setHighChunkOffset(50); // add 50, should always fail
@@ -555,13 +663,22 @@ public class DownloadTest extends BaseTestCase {
         RemoteFileDesc rfd3 = newRFDWithURN(PORT_3, 100);
         RemoteFileDesc rfd4 = newRFDWithURN(PORT_4, 100);
         RemoteFileDesc rfd5 = newRFDWithURN(PORT_5, 100);
+        
         RemoteFileDesc[] rfds = { rfd1, rfd3, rfd4 };
+        ManagedDownloader md = (ManagedDownloader)
+        	RouterService.download(rfds,true,null);
         // u2 cannot be used first 'cause it may just work (if it responds
         // to a request of range 0, it'll return starting at range 0,
         // which is allowed)
-        RemoteFileDesc[] later = { rfd5, rfd2 }; // u2 cannot be used fi
-
-        tGeneric(rfds, later);
+        // so it is added last
+        
+        Thread.sleep(100);
+        md.addDownloadForced(rfd5,true);
+        Thread.sleep(100);
+        md.addDownloadForced(rfd2,true);
+        
+        waitForComplete(false);
+        
         
         int u1 = uploader1.amountUploaded();
         int u2 = uploader2.amountUploaded();
@@ -888,7 +1005,7 @@ public class DownloadTest extends BaseTestCase {
 
         //Prepare to check the alternate locations
         AlternateLocationCollection alt1 = uploader1.getAlternateLocations();
-        AlternateLocation dAlt = AlternateLocation.create(rfd1.getUrl());
+        AlternateLocation dAlt = AlternateLocation.create(rfd1);
            
         URN sha1 = rfd1.getSHA1Urn();
         URN uSHA1 = uploader1.getReportedSHA1();
@@ -925,8 +1042,8 @@ public class DownloadTest extends BaseTestCase {
         AlternateLocationCollection alt1 = uploader1.getAlternateLocations();
         AlternateLocationCollection alt2 = uploader2.getAlternateLocations();
 
-        AlternateLocation al1 = AlternateLocation.create(rfd1.getUrl());
-        AlternateLocation al2 = AlternateLocation.create(rfd2.getUrl());
+        AlternateLocation al1 = AlternateLocation.create(rfd1);
+        AlternateLocation al2 = AlternateLocation.create(rfd2);
         
         assertTrue("uploader didn't recieve alt", alt1.hasAlternateLocations());
         assertTrue("uploader didn't recieve alt", alt2.hasAlternateLocations());
@@ -960,9 +1077,9 @@ public class DownloadTest extends BaseTestCase {
         AlternateLocationCollection ualt = 
 			AlternateLocationCollection.create(rfd2.getSHA1Urn());
 
-        URL url2 = rfd2.getUrl();
+        
         AlternateLocation al2 =
-			AlternateLocation.create(url2);
+			AlternateLocation.create(rfd2);
         ualt.add(al2);
 
         uploader1.setAlternateLocations(ualt);
@@ -980,6 +1097,288 @@ public class DownloadTest extends BaseTestCase {
         //be equal, because the uploaders are stated at different times.
         assertLessThan("u1 did all the work", TestFile.length()/2+FUDGE_FACTOR, u1);
         assertLessThan("u2 did all the work", TestFile.length()/2+FUDGE_FACTOR, u2);
+    }
+    /**
+     * tests that an uploader will pass a push loc which will be included in the swarm
+     */
+    public void testUploaderPassesPushLoc() throws Exception {
+        LOG.debug("-Testing swarming from two sources one based on a push alt...");
+        final int RATE=500;
+        final int FUDGE_FACTOR=RATE*1024;
+        uploader1.setRate(RATE);
+        uploader1.stopAfter(800000);
+        
+        TestUploader pusher = new TestUploader("push uploader");
+        pusher.setRate(RATE);
+        
+        AlternateLocation pushLoc = AlternateLocation.create(
+                guid.toHexString()+";127.0.0.1:"+PPORT_1,TestFile.hash());
+        ((PushAltLoc)pushLoc).updateProxies(true);
+        
+        AlternateLocationCollection alCol=AlternateLocationCollection.create(TestFile.hash());
+        alCol.add(pushLoc);
+        
+        uploader1.setAlternateLocations(alCol);
+        
+        RemoteFileDesc rfd = newRFDWithURN(PORT_1,100,TestFile.hash().toString());
+        
+        RemoteFileDesc []rfds = {rfd};
+        
+        PushAcceptor pa = new PushAcceptor(PPORT_1,RouterService.getPort(),
+                savedFile.getName(),pusher,guid);
+        
+        tGeneric(rfds);
+        
+        assertGreaterThan("u1 didn't do enough work ",100*1024,uploader1.amountUploaded());
+        assertGreaterThan("pusher didn't do enough work ",100*1024,pusher.amountUploaded());
+    }
+    
+    /**
+     * tests that a push uploader passes push loc and the new push loc receives
+     * the first uploader as an altloc.
+     */
+    public void testPushUploaderPassesPushLoc() throws Exception {
+        
+        final int RATE=500;
+        
+        TestUploader first = new TestUploader("first pusher");
+        first.setRate(RATE/2);
+        first.stopAfter(700000);
+        
+        TestUploader second = new TestUploader("second pusher");
+        second.setRate(RATE);
+        second.stopAfter(500000);
+        second.setInterestedInFalts(true);
+        
+        GUID guid2 = new GUID(GUID.makeGuid());
+        
+        AlternateLocation firstLoc = AlternateLocation.create(
+                guid.toHexString()+";127.0.0.1:"+PPORT_1,TestFile.hash());
+        ((PushAltLoc)firstLoc).updateProxies(true);
+        
+        AlternateLocation pushLoc = AlternateLocation.create(
+                guid2.toHexString()+";127.0.0.1:"+PPORT_2,TestFile.hash());
+        ((PushAltLoc)pushLoc).updateProxies(true);
+        
+        AlternateLocationCollection alCol=AlternateLocationCollection.create(TestFile.hash());
+        alCol.add(pushLoc);
+        
+        first.setAlternateLocations(alCol);
+        
+        PushAcceptor pa = new PushAcceptor(PPORT_1,RouterService.getPort(),
+                savedFile.getName(),first,guid);
+        
+        PushAcceptor pa2 = new PushAcceptor(PPORT_2,RouterService.getPort(),
+                savedFile.getName(),second,guid2);
+        
+        RemoteFileDesc []rfd ={newRFDPush(PPORT_1,2)};
+        
+        tGeneric(rfd);
+        
+        
+        assertGreaterThan("first pusher did no work",100000,first.amountUploaded());
+        assertGreaterThan("second pusher did no work",100000,second.amountUploaded());
+        
+        assertEquals(1,second.getAlternateLocations().getAltLocsSize());
+        
+        assertTrue("interested uploader didn't get first loc",
+                second.getAlternateLocations().contains(firstLoc));
+        
+        
+    }
+    
+    /**
+     * tests that a download from a push location becomes an alternate location.
+     * 
+     * It creates a push uploader from which we must create a PushLoc.  
+     * After a while, two open uploaders join the swarm  -one which is interested 
+     * in receiving push locs and one which isn't.  The interested one should
+     * receive the push loc, the other one should not.
+     */
+    public void testPusherBecomesPushLocAndSentToInterested() throws Exception {
+        LOG.debug("-Testing push download creating a push location...");
+        final int RATE=200;
+        final int FUDGE_FACTOR=RATE*1536;
+        uploader1.setRate(RATE);
+        uploader1.setInterestedInFalts(true);
+        uploader1.stopAfter(600000);
+        uploader2.setRate(RATE);
+        uploader2.setInterestedInFalts(false);
+        uploader2.stopAfter(300000);
+        
+        TestUploader pusher = new TestUploader("push uploader");
+        pusher.setRate(RATE);
+        pusher.stopAfter(200000);
+        
+        
+        AlternateLocation pushLoc = AlternateLocation.create(
+                guid.toHexString()+";127.0.0.1:"+PPORT_1,TestFile.hash());
+        ((PushAltLoc)pushLoc).updateProxies(true);
+        
+        RemoteFileDesc pushRFD = newRFDPush(PPORT_1,2);
+        
+        assertFalse(pushRFD.supportsFWTransfer());
+        assertTrue(pushRFD.needsPush());
+
+        
+
+        
+        RemoteFileDesc openRFD1 = newRFDWithURN(PORT_1,100,TestFile.hash().toString());
+        RemoteFileDesc openRFD2 = newRFDWithURN(PORT_2,100,TestFile.hash().toString());
+        
+        RemoteFileDesc []now={pushRFD};
+        RemoteFileDesc []later={openRFD1,openRFD2};
+        
+        PushAcceptor pa = new PushAcceptor(PPORT_1,RouterService.getPort(),
+                savedFile.getName(),pusher,guid);
+
+        
+        tGeneric(now,later);
+        
+
+        assertGreaterThan("u1 did no work",100*1024,uploader1.amountUploaded());
+
+        assertGreaterThan("u2 did no work",100*1024,uploader2.amountUploaded());
+        assertLessThan("u2 did too much work",550*1024,uploader2.amountUploaded());
+
+        assertGreaterThan("pusher did no work",100*1024,pusher.amountUploaded());
+        
+        
+        AlternateLocationCollection alc = uploader1.getAlternateLocations();
+        assertTrue("interested uploader did not get pushloc",alc.contains(pushLoc));
+        
+        
+        alc=uploader2.getAlternateLocations();
+        assertFalse("not interested uploader got pushloc",alc.contains(pushLoc));
+        
+        
+        alc=pusher.getAlternateLocations();
+        assertFalse("not interested uploader got pushloc",alc.contains(pushLoc));
+        
+
+    }
+    
+    /**
+     * tests that a pushloc which we thought did not support FWT 
+     * but actually does updates its status through the headers,
+     * as well as that the set of push proxies is getting updated.
+     */
+    public void testPushLocUpdatesStatus() throws Exception {
+        
+        final int RATE=100;
+        
+        
+        uploader1.setRate(RATE);
+        uploader1.stopAfter(900000);
+        uploader1.setInterestedInFalts(true);
+        
+        TestUploader pusher2 = new TestUploader("firewalled pusher");
+        pusher2.setRate(RATE);
+        pusher2.stopAfter(200000);
+        pusher2.setFirewalled(true);
+        pusher2.setProxiesString("1.2.3.4:5,6.7.8.9:10");
+        pusher2.setInterestedInFalts(true);
+        
+        // create a set of the expected proxies and keep a ref to it
+        PushEndpoint pe = new PushEndpoint(guid.toHexString()+";1.2.3.4:5;6.7.8.9:10");
+        
+        Set expectedProxies = new HashSet(pe.getProxies());
+        
+        PushAltLoc pushLocFWT = (PushAltLoc)AlternateLocation.create(
+                guid.toHexString()+";127.0.0.1:"+PPORT_2,TestFile.hash());
+        pushLocFWT.updateProxies(true);
+        
+        assertEquals(1,pushLocFWT.getPushAddress().getProxies().size());
+        
+        RemoteFileDesc openRFD = newRFDWithURN(PORT_1,100);
+        
+        RemoteFileDesc pushRFD2 = newRFDPush(PPORT_2,3);
+        assertFalse(pushRFD2.supportsFWTransfer());
+        assertTrue(pushRFD2.needsPush());
+        
+        PushAcceptor pa2 = new PushAcceptor(PPORT_2,RouterService.getPort(),
+                savedFile.getName(),pusher2,guid);
+        
+        RemoteFileDesc [] now = {pushRFD2};
+        RemoteFileDesc [] later = {openRFD};
+        
+        tGeneric(now,later);
+        
+        AlternateLocationCollection alc = uploader1.getAlternateLocations();
+        assertEquals(1,alc.getAltLocsSize());
+        
+        PushAltLoc pushLoc = (PushAltLoc)alc.iterator().next();
+        
+        assertEquals(UDPConnection.VERSION,pushLoc.supportsFWTVersion());
+        
+        RemoteFileDesc readRFD = pushLoc.createRemoteFileDesc(1);
+        assertTrue(readRFD.supportsFWTransfer());
+        
+        assertEquals(expectedProxies.size(),readRFD.getPushProxies().size());
+        
+        expectedProxies.retainAll(readRFD.getPushProxies());
+        
+        assertEquals(expectedProxies.size(),readRFD.getPushProxies().size());
+        
+    }
+    
+    /**
+     * tests that bad push locs get removed
+     */
+    public void testBadPushLocGetsDemotedNotAdvertised() throws Exception {
+        
+        // this test needs to go slowly so that the push attempt may time out
+        final int RATE=15;
+        
+        uploader1.setInterestedInFalts(true);
+        uploader2.setInterestedInFalts(true);
+        uploader1.setRate(RATE);
+        uploader2.setRate(RATE);
+        uploader1.stopAfter(550000);
+        uploader2.stopAfter(550000);
+        
+        AlternateLocation badPushLoc=AlternateLocation.create(
+                guid.toHexString()+";1.2.3.4:5",TestFile.hash());
+        ((PushAltLoc)badPushLoc).updateProxies(true);
+        
+        AlternateLocationCollection alc = 
+            AlternateLocationCollection.create(TestFile.hash());
+        
+        alc.add(badPushLoc);
+        
+        uploader1.setAlternateLocations(alc);
+        
+        //add the push loc directly to the _incomming collection,
+        //otherwise it doesn't get demoted
+        PrivilegedAccessor.setValue(uploader1,"incomingAltLocs",alc);
+        
+        RemoteFileDesc rfd1 = newRFDWithURN(PORT_1,100);
+        RemoteFileDesc rfd2 = newRFDWithURN(PORT_2,100);
+        
+        RemoteFileDesc [] rfds = {rfd1,rfd2};
+        
+        tGeneric(rfds);
+        
+        assertGreaterThan("u1 did no work",100*1024,uploader1.amountUploaded());
+        assertGreaterThan("u2 did no work",100*1024,uploader2.amountUploaded());
+        
+        assertFalse("bad pushloc got advertised",
+                uploader2.getAlternateLocations().contains(badPushLoc));
+        
+        AlternateLocationCollection newAlc = uploader1.getAlternateLocations();
+        assertEquals(2,newAlc.getAltLocsSize());
+        
+        Iterator it = newAlc.iterator();
+        AlternateLocation current = (AlternateLocation) it.next();
+        
+        if(! (current instanceof PushAltLoc))
+            current = (AlternateLocation)it.next();
+        
+        assertTrue(current instanceof PushAltLoc);
+        PushAltLoc pcurrent = (PushAltLoc)current;
+        assertTrue(pcurrent.getPushAddress().getProxies().isEmpty());
+        assertTrue(pcurrent.isDemoted());
+        
     }
     
     public void testAlternateLocationsAreRemoved() throws Exception {  
@@ -1008,11 +1407,10 @@ public class DownloadTest extends BaseTestCase {
         AlternateLocationCollection ualt = 
                          AlternateLocationCollection.create(rfd2.getSHA1Urn());
 
-        URL url2 = rfd2.getUrl();
-        URL url3 = rfd3.getUrl();        
+
         AlternateLocation al1 =	AlternateLocation.create(rfd1);
-        AlternateLocation al2 =	AlternateLocation.create(url2);
-        AlternateLocation al3 =	AlternateLocation.create(url3);
+        AlternateLocation al2 =	AlternateLocation.create(rfd2);
+        AlternateLocation al3 =	AlternateLocation.create(rfd3);
         ualt.add(al2);
         ualt.add(al3);
 
@@ -1038,7 +1436,7 @@ public class DownloadTest extends BaseTestCase {
         while(iter.hasNext()) {
             AlternateLocation loc = (AlternateLocation)iter.next();
             if(loc.equals(al2))
-                assertTrue("failed loc not demoted",loc.getDemoted());
+                assertTrue("failed loc not demoted",loc.isDemoted());
         }
         //uploader 2 dies after it uploades 1 bytes less than a chunk, so it
         //does only one round of http handshakes. so it never receives alternate
@@ -1051,7 +1449,7 @@ public class DownloadTest extends BaseTestCase {
         while(iter.hasNext()) {
             AlternateLocation loc = (AlternateLocation)iter.next();
             if(loc.equals(al2))
-                assertTrue("failed loc not demoted",loc.getDemoted());
+                assertTrue("failed loc not demoted",loc.isDemoted());
         }
         //Test Downloader has correct alts: the downloader should have
         //2 or 3. If two they should be u1 and u3. If 3 u2 should be demoted 
@@ -1063,7 +1461,7 @@ public class DownloadTest extends BaseTestCase {
         while(iter.hasNext()) {
             AlternateLocation loc = (AlternateLocation)iter.next();
             if(loc.equals(al2))
-                assertTrue("failed loc not demoted",loc.getDemoted());
+                assertTrue("failed loc not demoted",loc.isDemoted());
         }
     }    
 
@@ -1084,7 +1482,7 @@ public class DownloadTest extends BaseTestCase {
         ualt.add(HugeTestUtils.EQUAL_SHA1_LOCATIONS[2]);
         ualt.add(HugeTestUtils.EQUAL_SHA1_LOCATIONS[3]);
         uploader1.setAlternateLocations(ualt);
-        
+
         tGeneric(rfds);
         
         //Check to check the alternate locations
@@ -1582,7 +1980,7 @@ public class DownloadTest extends BaseTestCase {
         uploader2.setRate(RATE);
         RemoteFileDesc rfd1=newRFDWithURN(PORT_1, 100);
         RemoteFileDesc rfd2=newRFDWithURN(PORT_2, 100);
-        RemoteFileDesc[] rfds = {rfd1, rfd2};//one good and one queued
+        RemoteFileDesc[] rfds = {rfd1, rfd2};
         
         RemoteFileDesc rfd3 = newRFDWithURN(PORT_3, 100);
         
@@ -1598,7 +1996,7 @@ public class DownloadTest extends BaseTestCase {
         downloader.addDownload(rfd3, true);
         Thread.sleep(1000);
         
-        //make sure we killed the queued
+        //make sure we did not kill anybody
         swarm = downloader.getNumDownloaders();
         queued = downloader.getQueuedHostCount();
         assertEquals("incorrect swarming",2,swarm);
@@ -1613,8 +2011,12 @@ public class DownloadTest extends BaseTestCase {
         int u2 = uploader2.amountUploaded();
         int u3 = uploader3.amountUploaded();
 
-        assertLessThan("u1 did too much", TestFile.length()/2+FUDGE_FACTOR, u1);
-        assertLessThan("u2 did too much", TestFile.length()/2+FUDGE_FACTOR, u2);
+        // we only care that the 3rd downloader doesn't download anything -
+        // how the other two downloaders split the file between themselves 
+        // doesn't matter.
+        assertGreaterThan("u1 did not do any work",0,u1);
+        assertGreaterThan("u2 did not do any work",0,u2);
+        assertGreaterThanOrEquals("u3 did some work",TestFile.length(),u1+u2);
         assertEquals("u3 replaced a good downloader",0,u3);
 
         ConnectionSettings.CONNECTION_SPEED.setValue(capacity);      
@@ -1639,21 +2041,23 @@ public class DownloadTest extends BaseTestCase {
         uploader2.unqueue = false; //never unqueue this uploader.
         RemoteFileDesc rfd1=newRFDWithURN(PORT_1, 100);
         RemoteFileDesc rfd2=newRFDWithURN(PORT_2, 100);
-        RemoteFileDesc[] rfds = {rfd1, rfd2};//one good and one queued
+        RemoteFileDesc[] rfds = {rfd1};//one good and one queued
         
         RemoteFileDesc rfd3 = newRFDWithURN(PORT_3, 100);
         
         ManagedDownloader downloader = null;
         
         downloader=(ManagedDownloader)RouterService.download(rfds, false, null);
-        Thread.sleep(1000);
+        Thread.sleep(100);
+        downloader.addDownload(rfd2,false);
+        Thread.sleep(2000);
         int swarm = downloader.getNumDownloaders();
         int queued = downloader.getQueuedHostCount();
         assertEquals("incorrect swarming",2,swarm);
         assertEquals("uploader 2 not queued ",1, queued);
 
         downloader.addDownload(rfd3, true);
-        Thread.sleep(1000);
+        Thread.sleep(2000);
         
         //make sure we killed the queued
         swarm = downloader.getNumDownloaders();
@@ -1729,7 +2133,7 @@ public class DownloadTest extends BaseTestCase {
 
         //now try adding uploader 3 which is worse, nothing should change
         downloader.addDownload(rfd3,true);
-        Thread.sleep(1000);
+        Thread.sleep(2000);
         swarm = downloader.getNumDownloaders();
         queued = downloader.getQueuedHostCount();
         qPos = Integer.parseInt
@@ -1741,7 +2145,7 @@ public class DownloadTest extends BaseTestCase {
 
         //now try adding uploader 4 which is better, we should drop uploader2
         downloader.addDownload(rfd4,true);
-        Thread.sleep(1000);
+        Thread.sleep(2000);
         swarm = downloader.getNumDownloaders();
         queued = downloader.getQueuedHostCount();
         qPos = Integer.parseInt
@@ -2029,9 +2433,23 @@ public class DownloadTest extends BaseTestCase {
                                   speed, false, 4, false, null, set,
                                   false, false,"",0,null, -1);
     }
+    
+    private static RemoteFileDesc newRFDPush(int port,int suffix) throws Exception{
+        PushAltLoc al = (PushAltLoc)AlternateLocation.create(
+                guid.toHexString()+";127.0.0.1:"+port,TestFile.hash());
+        al.updateProxies(true);
+        
+        Set urns = new HashSet();
+        urns.add(TestFile.hash());
+        
+        return new RemoteFileDesc("127.0.0."+suffix, 6346, 0, savedFile.getName(),
+                TestFile.length(),100,false,1,false, 
+                null,urns,false,
+                true,"ALT",0,0,al.getPushAddress());
+    }
 
     /** Returns true if the complete file exists and is complete */
-    private static boolean isComplete() {
+    private static boolean isComplete() {LOG.debug("file is "+savedFile.getPath());
         if ( savedFile.length() < TestFile.length() ) {
             LOG.debug("File too small by: " + (TestFile.length() - savedFile.length()) );
             return false;
@@ -2069,8 +2487,11 @@ public class DownloadTest extends BaseTestCase {
         synchronized(COMPLETE_LOCK) {
             try {
                 REMOVED = false;
+                LOG.debug("starting wait");
                 COMPLETE_LOCK.wait(DOWNLOAD_WAIT_TIME);
+                LOG.debug("finished waiting");
             } catch (InterruptedException e) {
+                LOG.debug("interrupted",e);
                 //good.
             }
         }
@@ -2110,6 +2531,69 @@ public class DownloadTest extends BaseTestCase {
                 REMOVED = true;
                 COMPLETE_LOCK.notify();
             }
+        }
+    }
+    
+    private static class PushAcceptor extends Thread{
+        private final int _portC;
+        private DatagramSocket sock;
+        private final String _fileName;
+        private final TestUploader _uploader;
+        private final GUID _g;
+        public boolean sentGIV;
+        
+        public PushAcceptor(int portL,int portC,String filename,TestUploader uploader,GUID g) {
+            super("push acceptor "+portL+"->"+portC);
+            
+            _portC=portC;
+            _fileName=filename;
+            _uploader=uploader;
+            _g=g;
+            try {
+                sock = new DatagramSocket(portL);
+                //sock.connect(InetAddress.getLocalHost(),portC);
+                sock.setSoTimeout(15000);
+            }catch(IOException bad) {
+                ErrorService.error(bad);
+            }
+            start();
+        }
+        
+        public void run() {
+            DatagramPacket p = new DatagramPacket(new byte[1024],1024);
+            Message m = null;
+            try {
+                LOG.debug("listening for push request on "+sock.getLocalPort());
+                sock.receive(p);
+                ByteArrayInputStream bais = new ByteArrayInputStream(p.getData());            
+                m = Message.read(bais);
+                
+                assertTrue(m instanceof PushRequest);
+                
+                LOG.debug("received a push request");
+                
+                Socket s = Sockets.connect("127.0.0.1",_portC,500);
+                
+                OutputStream os = s.getOutputStream();
+                
+                String GIV = "GIV 0:"+_g.toHexString()+"/"+_fileName+"\n\n";
+                os.write(GIV.getBytes());
+                
+                os.flush();
+                
+                LOG.debug("wrote GIV");
+                sentGIV=true;
+                _uploader.setSocket(s);
+                
+            }catch(BadPacketException bad) {
+                ErrorService.error(bad);
+            }catch(IOException bad) {
+                ErrorService.error(bad);
+            }finally {
+                sock.close();
+            }
+            
+
         }
     }
 }

@@ -7,6 +7,7 @@ import java.net.URL;
 import junit.framework.Test;
 
 import com.limegroup.gnutella.altlocs.AlternateLocation;
+import com.limegroup.gnutella.altlocs.PushAltLoc;
 import com.limegroup.gnutella.http.HTTPConstants;
 import com.limegroup.gnutella.util.CommonUtils;
 import java.util.HashSet;
@@ -125,7 +126,7 @@ public final class FileDescTest extends com.limegroup.gnutella.util.BaseTestCase
 		URL sha1Url = new URL("http", "60.23.35.10", 6346, 
 							  "/uri-res/N2R?"+sha1.httpStringValue());
 		AlternateLocation loc =  
-			AlternateLocation.create(sha1Url);
+			HugeTestUtils.create(sha1Url);
 		fd.add(loc);
 	}
 
@@ -143,13 +144,56 @@ public final class FileDescTest extends com.limegroup.gnutella.util.BaseTestCase
 								  HTTPConstants.URI_RES_N2R+
 								  HugeTestUtils.URNS[0]);
 			AlternateLocation loc =  
-				AlternateLocation.create(sha1Url);
+				HugeTestUtils.create(sha1Url);
 			assertNotNull("should not be null", loc.getSHA1Urn());
 			fd.add(loc);
 			fail("should not have accepted location: "+loc+"when our sha1 is: "+sha1);
 		} catch(IllegalArgumentException e) {
 		} catch(IOException e) {
         }
+	}
+	
+	/**
+	 * tests whether FileDesc properly stores direct and push alternate locations.
+	 */
+	public void testAltLocSeparation () throws Exception {
+		File file = CommonUtils.getResourceFile("build.xml");
+
+		Set urns = FileDesc.calculateAndCacheURN(file);
+		FileDesc fd = new FileDesc(file, urns, 0);
+		URN sha1 = fd.getSHA1Urn();
+		GUID clientGUID1 = new GUID(GUID.makeGuid());
+		GUID clientGUID2 = new GUID(GUID.makeGuid());
+
+		//create some direct altlocs
+		AlternateLocation d1 = AlternateLocation.create("1.1.1.1:1",sha1);
+		AlternateLocation d2 = AlternateLocation.create("2.2.2.2:2",sha1);
+		
+		//and some push ones.
+		AlternateLocation p1 = 
+			AlternateLocation.create(clientGUID1.toHexString()+";1.1.1.1:1",sha1);
+	    ((PushAltLoc)p1).updateProxies(true);
+		AlternateLocation p2 = 
+			AlternateLocation.create(clientGUID2.toHexString()+";2.2.2.2:2",sha1);
+        ((PushAltLoc)p2).updateProxies(true);
+		
+		assertEquals(0,fd.getAltLocsSize());
+		
+		//add one of each type
+		fd.add(d1);
+		fd.add(p1);
+		
+		assertEquals(2,fd.getAltLocsSize());
+		assertEquals(1,fd.getPushAlternateLocationCollection().getAltLocsSize());
+		assertEquals(1,fd.getAlternateLocationCollection().getAltLocsSize());
+		
+		//add one, remove one
+		fd.add(d2);
+		fd.remove(p1);fd.remove(p1);
+		
+		assertEquals(2,fd.getAltLocsSize());
+		assertEquals(0,fd.getPushAlternateLocationCollection().getAltLocsSize());
+		assertEquals(2,fd.getAlternateLocationCollection().getAltLocsSize());
 	}
 
 	/**

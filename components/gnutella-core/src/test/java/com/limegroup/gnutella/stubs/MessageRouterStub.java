@@ -8,11 +8,14 @@ import com.limegroup.gnutella.Response;
 import com.limegroup.gnutella.messages.PingRequest;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.routing.QueryRouteTable;
+import com.limegroup.gnutella.GUID;
 import java.util.LinkedList;
 import java.util.List;
 
 /** A stub for MessageRouter that does nothing. */
 public class MessageRouterStub extends MessageRouter {
+    
+    private static final byte [] MYGUID = GUID.makeGuid();
 
     protected boolean respondToQueryRequest(QueryRequest queryRequest,
                                             byte[] clientGUID,
@@ -41,5 +44,13 @@ public class MessageRouterStub extends MessageRouter {
                                     boolean isFromMcast,
                                     boolean shouldMarkForFWTransfer) {
         return new LinkedList();
+    }
+    
+    /**
+     * the proper constructor may not initialize our guid, 
+     * so we create a fake one
+     */
+    public byte []getOurGUID() {
+        return MYGUID;
     }
 }

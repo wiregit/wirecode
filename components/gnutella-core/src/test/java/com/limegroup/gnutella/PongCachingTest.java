@@ -20,6 +20,7 @@ import com.limegroup.gnutella.settings.ApplicationSettings;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.util.BaseTestCase;
 import com.limegroup.gnutella.util.EmptyResponder;
+import com.limegroup.gnutella.util.PrivilegedAccessor;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ArrayList;

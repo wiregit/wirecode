@@ -301,6 +301,25 @@ public final class NetworkUtils {
     	
     	return ret;
     }
+
+    /**
+     * 
+     * @return a collection of <tt>PushEndpoint</tt> objects
+     * @throws BadPacketException if parsing failed.
+     */
+    public static Collection unpackPushEPs(byte [] data) 
+    	throws BadPacketException {
+    	List ret = new Vector();
+    	
+    	int i=0;
+    	while (i < data.length ) {
+    		PushEndpoint current = PushEndpoint.fromBytes(data,i);
+    		i+=PushEndpoint.getSizeBytes(current.getProxies());
+    		ret.add(current);
+    	}
+    	
+    	return ret;
+    }
 }
 
 

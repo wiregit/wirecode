@@ -2,7 +2,7 @@
  * (PD) 2003 The Bitzi Corporation Please see http://bitzi.com/publicdomain for
  * more info.
  * 
- * $Id: TigerTree.java,v 1.2 2004-08-23 17:38:29 sberlin Exp $
+ * $Id: TigerTree.java,v 1.3 2004-10-12 20:19:37 zlatinb Exp $
  */
 package com.limegroup.gnutella.security;
 

@@ -241,7 +241,7 @@ public class UploadManager implements BandwidthTracker {
                 HttpRequestLine line = parseHttpRequest(socket, iStream);
                 if (LOG.isTraceEnabled())
                     LOG.trace("line = " + line);
-
+                
                 if(LOG.isDebugEnabled())
                     LOG.debug(uploader + " successfully parsed request");
                 
@@ -260,7 +260,7 @@ public class UploadManager implements BandwidthTracker {
                 // and then create a new one.
                 if(startedNewFile) {
                     if(LOG.isDebugEnabled())
-                        LOG.debug(uploader + " starting new file");
+                        LOG.debug(uploader + " starting new file "+line._fileName+" index "+line._index);
                     if (uploader != null) {
                         // Because queueing is per-socket (and not per file),
                         // we do not want to reset the queue status if they're
@@ -571,7 +571,7 @@ public class UploadManager implements BandwidthTracker {
                 uploader.setFileDesc(fd);
             } catch(IOException ioe) {
                 if(LOG.isDebugEnabled())
-                    LOG.debug(uploader + " could not create file stream");
+                    LOG.debug(uploader + " could not create file stream "+ioe);
                 uploader.setState(Uploader.FILE_NOT_FOUND);
                 return;
             }

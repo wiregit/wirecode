@@ -165,7 +165,24 @@ public class DownloadStat extends AdvancedStatistic {
      * network which actually worked
      */
     public static final Statistic ALTERNATE_WORKED = new DownloadStat();
-        
+    
+    /**
+     * Statistic for the number of firewalled alternate locations that we have 
+     * succesfully read from the network which we will possibly use for this download.
+     */
+    public static final Statistic PUSH_ALTERNATE_COLLECTED = new DownloadStat();
+    
+    /**
+     * Statistic for the number of firewalled alternate locations that did not work.
+     */
+    public static final Statistic PUSH_ALTERNATE_NOT_ADDED = new DownloadStat();
+    
+    /**
+     * Statistic for the number of firewalled Alternate Locations that we got off the 
+     * network which actually worked
+     */
+    public static final Statistic PUSH_ALTERNATE_WORKED = new DownloadStat();
+    
     /**
      * Statistic for the number of succesfully downloaded HTTP1.1 chunks.
      */

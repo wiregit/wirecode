@@ -10,26 +10,14 @@ import java.lang.reflect.Method;
 
 import junit.framework.Test;
 
-import com.limegroup.gnutella.MessageRouter;
-import com.limegroup.gnutella.ActivityCallback;
-import com.limegroup.gnutella.DownloadManager;
-import com.limegroup.gnutella.Downloader;
-import com.limegroup.gnutella.FileManager;
-import com.limegroup.gnutella.GUID;
-import com.limegroup.gnutella.RemoteFileDesc;
-import com.limegroup.gnutella.SpeedConstants;
-import com.limegroup.gnutella.URN;
+import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.settings.ConnectionSettings;
-import com.limegroup.gnutella.stubs.ActivityCallbackStub;
-import com.limegroup.gnutella.stubs.DownloadManagerStub;
-import com.limegroup.gnutella.stubs.FileManagerStub;
-import com.limegroup.gnutella.stubs.MessageRouterStub;
+import com.limegroup.gnutella.stubs.*;
+import com.limegroup.gnutella.altlocs.*;
+import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.util.PrivilegedAccessor;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 public class ManagedDownloaderTest extends com.limegroup.gnutella.util.BaseTestCase {
     final static int PORT=6666;
@@ -50,7 +38,20 @@ public class ManagedDownloaderTest extends com.limegroup.gnutella.util.BaseTestC
         return buildTestSuite(ManagedDownloaderTest.class);
     }
     
+    public static void globalSetUp() throws Exception{
+        ConnectionManagerStub cmStub = new ConnectionManagerStub() {
+            public boolean isConnected() {
+                return true;
+            }
+        };
+        
+        PrivilegedAccessor.setValue(RouterService.class,"manager",cmStub);
+        
+        assertTrue(RouterService.isConnected());
+    }
+    
     public void setUp() {
+        ConnectionSettings.EVER_ACCEPTED_INCOMING.setValue(true);
         ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
         manager = new DownloadManagerStub();
         fileman = new FileManagerStub();
@@ -59,6 +60,117 @@ public class ManagedDownloaderTest extends com.limegroup.gnutella.util.BaseTestC
         manager.initialize(callback, router, fileman);
     }
 
+    
+    /**
+     * tests if firewalled altlocs are added to the file descriptor
+     * but not sent to uploaders.
+     */
+    public void testFirewalledLocs() throws Exception {
+    	
+        PrivilegedAccessor.setValue(RouterService.getAcceptor(),
+                "_acceptedIncoming",new Boolean(true));
+        assertTrue(RouterService.acceptedIncomingConnection());
+        
+    	//first make sure we are sharing an incomplete file
+    	
+    	URN partialURN = 
+    		URN.createSHA1Urn("urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFE");
+    	
+    	AlternateLocationCollection 
+			col = AlternateLocationCollection.create(partialURN);
+    	
+    	IncompleteFileDescStub partialDesc = 
+    		new IncompleteFileDescStub("incomplete",partialURN,3);
+    	
+    	partialDesc.setAlternateLocationCollection(col);
+    	
+    	Map urnMap = new HashMap(); urnMap.put(partialURN,partialDesc);
+    	List descList = new LinkedList();descList.add(partialDesc);
+    	File f = new File("incomplete");
+    	Map fileMap = new HashMap();fileMap.put(f,partialDesc);
+    	
+    	FileManagerStub newFMStub = new FileManagerStub(urnMap,descList);
+    	newFMStub.setFiles(fileMap);
+    	
+    	PrivilegedAccessor.setValue(RouterService.class,"fileManager",newFMStub);
+    	
+    	// then create an rfd from a firewalled host
+    	RemoteFileDesc rfd = 
+    		newPushRFD("incomplete","urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFE",GUID.makeGuid());
+    	
+    	//test that currently we have no altlocs for the incomplete file
+    	
+    	FileDesc test = RouterService.getFileManager().getFileDescForUrn(partialURN);
+    	
+    	assertEquals(0,test.getAlternateLocationCollection().getAltLocsSize());
+    	
+    	//add one fake downloader to the downloader list
+    	Endpoint e = new Endpoint("1.2.3.5",12345);
+    	RemoteFileDesc other = new RemoteFileDesc(newRFD("incomplete"),e);
+    	AltlocDownloaderStub fakeDownloader = new AltlocDownloaderStub(other);
+    	
+    	List l = new LinkedList();l.add(fakeDownloader);
+    	
+    	TestManagedDownloader md = new TestManagedDownloader(new RemoteFileDesc[]{rfd});
+    	md.initialize(manager,newFMStub,callback);
+    	md.setDloaders(l);
+    	md.setSHA1(partialURN);
+    	md.setFM(newFMStub);
+    	md.setIncompleteFile(f);
+    	
+    	
+    	//and see if it behaves correctly
+    	PrivilegedAccessor.invokeMethod(
+    			(ManagedDownloader)md,"informMesh",new Object[]{rfd,new Boolean(true)},
+				new Class[]{RemoteFileDesc.class,boolean.class});
+    	
+    	//make sure the downloader did not get notified
+    	assertFalse(fakeDownloader._addedFailed);
+    	assertFalse(fakeDownloader._addedSuccessfull);
+    	
+    	//the altloc should have been added to the file descriptor
+    	test = RouterService.getFileManager().getFileDescForUrn(partialURN);
+    	assertEquals(1,test.getAlternateLocationCollection().getAltLocsSize());
+    	
+    	//now repeat the test, pretending the uploader wants push altlocs
+    	fakeDownloader.setWantsFalts(true);
+    	
+    	//and see if it behaves correctly
+    	PrivilegedAccessor.invokeMethod(
+    			(ManagedDownloader)md,"informMesh",new Object[]{rfd,new Boolean(true)},
+				new Class[]{RemoteFileDesc.class,boolean.class});
+    	
+    	//make sure the downloader did get notified
+    	assertFalse(fakeDownloader._addedFailed);
+    	assertTrue(fakeDownloader._addedSuccessfull);
+    	
+    	//make sure the file was added to the file descriptor
+    	test = RouterService.getFileManager().getFileDescForUrn(partialURN);
+    	assertEquals(1,test.getAlternateLocationCollection().getAltLocsSize());
+    	
+    	//rince and repeat, saying this was a bad altloc. 
+    	//it should be sent to the other downloaders. 
+    	fakeDownloader._addedSuccessfull=false;
+    	
+    	PrivilegedAccessor.invokeMethod(
+    			(ManagedDownloader)md,"informMesh",new Object[]{rfd,new Boolean(false)},
+				new Class[]{RemoteFileDesc.class,boolean.class});
+    	
+    	//make sure the downloader did get notified
+    	assertTrue(fakeDownloader._addedFailed);
+    	assertFalse(fakeDownloader._addedSuccessfull);
+    	
+    	//make sure the altloc is demoted now
+    	test = RouterService.getFileManager().getFileDescForUrn(partialURN);
+    	AlternateLocationCollection col2 = test.getAlternateLocationCollection();
+    	assertEquals(0,col2.getAltLocsSize());
+    	
+    	PrivilegedAccessor.setValue(RouterService.getAcceptor(),
+                "_acceptedIncoming",new Boolean(false));
+        assertFalse(RouterService.acceptedIncomingConnection());
+    	
+    }
+    
     public void testLegacy() throws Exception {
         //Test removeBest
         Set urns1 = new HashSet();
@@ -172,7 +284,8 @@ public class ManagedDownloaderTest extends com.limegroup.gnutella.util.BaseTestC
                    qr.getQuery().equals("daswani susheel neil") ||
                    qr.getQuery().equals("susheel neil daswani") ||
                    qr.getQuery().equals("susheel daswani neil"));
-        assertEquals(224, qr.getMinSpeed());
+        // minspeed mask | firewalled | xml | firewall transfer = 226
+        assertEquals(226, qr.getMinSpeed());
         // the guid should be a lime guid but not a lime requery guid
         assertTrue((GUID.isLimeGUID(qr.getGUID())) && 
                    !(GUID.isLimeRequeryGUID(qr.getGUID())));
@@ -283,6 +396,8 @@ public class ManagedDownloaderTest extends com.limegroup.gnutella.util.BaseTestC
         }
     }
 
+
+    
     private static RemoteFileDesc newRFD(String name) {
         return newRFD(name, null);
     }
@@ -313,6 +428,21 @@ public class ManagedDownloaderTest extends com.limegroup.gnutella.util.BaseTestC
         }
     }
 
+    
+    private static RemoteFileDesc newPushRFD(String name,String hash,byte [] guid) 
+    	throws Exception {
+    	
+		QueryReply.PushProxyContainer ppi = 
+			new QueryReply.PushProxyContainer("1.2.3.10",2000);
+		
+		Set ppis = new HashSet();ppis.add(ppi);
+		
+    	PushEndpoint pe = new PushEndpoint(guid,ppis);
+    	pe.updateProxies(true);
+    	
+    	return new RemoteFileDesc(newRFD(name,hash),pe);
+	}
+    
     /** Provides access to protected methods. */
     private static class TestManagedDownloader extends ManagedDownloader {
         public TestManagedDownloader(RemoteFileDesc[] files) {
@@ -322,5 +452,58 @@ public class ManagedDownloaderTest extends com.limegroup.gnutella.util.BaseTestC
         public QueryRequest newRequery2() throws CantResumeException {
             return super.newRequery(2);
         }
+        
+        /**
+         * allows overriding of the list of current downloaders
+         */
+        public void setDloaders(List l) {
+        	try {
+        		PrivilegedAccessor.setValue(this,"dloaders",l);
+        	}catch(Exception e) {
+        		ErrorService.error(e);
+        	}
+        }
+        
+        public void setSHA1(URN sha1) throws Exception{
+        	PrivilegedAccessor.setValue(this,"downloadSHA1",sha1);
+        }
+        
+        public void setFM(FileManager fm) throws Exception{
+        	PrivilegedAccessor.setValue(this,"fileManager",fm);
+        }
+        
+        public void setIncompleteFile(File f) throws Exception {
+        	PrivilegedAccessor.setValue(this,"incompleteFile",f);
+        }
+    }
+    
+    static class AltlocDownloaderStub extends HTTPDownloaderStub {
+    	
+    	boolean _stubFalts;
+    	
+    	RemoteFileDesc rfd;
+    	public AltlocDownloaderStub(RemoteFileDesc fd){
+    		super(fd,null);
+    		rfd =fd;
+    	}
+    	public boolean _addedFailed,_addedSuccessfull;
+   		public void addFailedAltLoc(AlternateLocation loc) {
+   			_addedFailed = true;
+		}
+		public void addSuccessfulAltLoc(AlternateLocation loc) {
+			_addedSuccessfull=true;
+		}
+		
+		public RemoteFileDesc getRemoteFileDesc() {
+			return rfd;
+		}
+		
+		public void setWantsFalts(boolean doesIt) {
+			_stubFalts=doesIt;
+		}
+		
+		public boolean wantsFalts(){
+			return _stubFalts;
+		}
     }
 }

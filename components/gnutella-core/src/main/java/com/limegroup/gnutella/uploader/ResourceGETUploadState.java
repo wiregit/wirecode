@@ -11,22 +11,22 @@ import com.limegroup.gnutella.util.CommonUtils;
 /**
  * An implementaiton of the UploadState interface where you just give out a gif.
  */
-public final class ResourceGETUploadState implements HTTPMessage {
+public final class ResourceGETUploadState extends UploadState {
 
     public final String NOT_FOUND = "HTTP/1.1 404 Not Found";
     public final String INT_ERROR = "HTTP/1.1 500 Internal Error";
 
     private byte[] _resourceBytes = new byte[0];
-    private final HTTPUploader _uploader;
+    
 
     public ResourceGETUploadState(HTTPUploader uploader) {
-		this._uploader = uploader;
+		super(uploader);
     }
 
      
 	public void writeMessageHeaders(OutputStream ostream) throws IOException {
 
-        String resource = _uploader.getFileName();
+        String resource = UPLOADER.getFileName();
 
         boolean noResource = false;
         try {
@@ -68,7 +68,7 @@ public final class ResourceGETUploadState implements HTTPMessage {
 
 	public void writeMessageBody(OutputStream ostream) throws IOException {
         ostream.write(_resourceBytes);
-        _uploader.setAmountUploaded(_resourceBytes.length);
+        UPLOADER.setAmountUploaded(_resourceBytes.length);
 	}
 	
 	public boolean getCloseConnection() {

@@ -15,7 +15,14 @@ public class SharingSettings extends LimeProps {
     
     public static final File DEFAULT_SAVE_DIR =
         new File(CommonUtils.getUserHomeDir(), "Shared");
-    
+
+    /**
+     * Whether or not we're going to add an alternate for ourselves
+     * to our shared files.  Primarily set to false for testing.
+     */
+    public static final BooleanSetting ADD_ALTERNATE_FOR_SELF =
+        FACTORY.createBooleanSetting("ADD_ALTERNATE_FOR_SELF", true);
+
     /**
      * The directory for saving files.
      */

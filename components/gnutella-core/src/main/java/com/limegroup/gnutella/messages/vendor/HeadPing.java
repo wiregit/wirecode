@@ -9,24 +9,45 @@ import java.io.UnsupportedEncodingException;
 /**
  * An UDP equivalent of the HEAD request method with a twist.
  * 
- * The host sending the ping can request that the pong be sent
- * somewhere else.  This is useful if we want to enable nodes in the
- * download mesh tell firewalled notes to punch holes to other nodes.
+ * Eventually, it will be routed like a push request 
+ * to firewalled alternate locations.
  * 
- * In order to prevent easy ddosing, if the ping is intended to go 
- * to a different host it will contain only the minimal information.
+ * As long as the pinging host can receive solicited udp 
+ * it can be firewalled as well.
+ * 
+ * Illustration of NodeA pinging firewalled host NodeB:
+ * 
+ * 
+ * NodeB --------(PUSH_PING,udp)-------->Push
+ *    <-------------------(udp)--------- Proxy
+ *                                       /|\  | (tcp)
+ *                                        |   |
+ *                                        |  \|/
+ *                                        NodeB
  * 
  */
 
 public class HeadPing extends VendorMessage {
 	public static final int VERSION = 1;
 	
+	/**
+	 * requsted content of the pong
+	 */
 	public static final int PLAIN = 0x0;
 	public static final int INTERVALS = 0x1;
 	public static final int ALT_LOCS = 0x2;
+	public static final int PUSH_ALTLOCS=0x4;
+	public static final int FWT_PUSH_ALTLOCS=0x8;
+
+	
+
 	
 	
-	public static final int FEATURE_MASK=0x3;
+	/**
+	 * the feature mask.
+	 */
+	public static final int FEATURE_MASK=0xF;
+
 	
 	private final URN _urn;
 	
@@ -72,13 +93,18 @@ public class HeadPing extends VendorMessage {
 	 * @param sha1 the urn to get information about.
 	 * @param features which features to include in the response
 	 */
-	public HeadPing(URN urn, int features) {
-		 super(F_LIME_VENDOR_ID, F_UDP_HEAD_PING, VERSION,
-		 		derivePayload(urn, features,null));
-		 _urn = urn;
-		 _features = (byte) (features & FEATURE_MASK);
+
+	public HeadPing(URN sha1, int features) {
+		super(F_LIME_VENDOR_ID, F_UDP_HEAD_PING, VERSION,
+		 		derivePayload(sha1, features));
+		
+		_features = (byte)(features & FEATURE_MASK);
+		
+		_urn = sha1;
+
 	}
 	
+
 	
 	/**
 	 * creates a plain udp head request
@@ -87,17 +113,28 @@ public class HeadPing extends VendorMessage {
 		this(urn, PLAIN);
 	}
 	
-	private static byte [] derivePayload(URN urn, int features, IpPort address) {
+
+	
+	private static byte [] derivePayload(URN urn, int features) {
+		 
+		
 
 		features = features & FEATURE_MASK;
 		
+
 		String urnStr = urn.httpStringValue();
 		int urnlen = urnStr.getBytes().length;
-		byte [] ret = new byte[urnlen+ 1];
+
+		int totalLen = urnlen+1;
+		
+		byte []ret = new byte[totalLen];
+		
+
 		ret[0]=(byte)features;
+		
 		System.arraycopy(urnStr.getBytes(),0,ret,1,urnlen);
 		
-		
+
 		return ret;
 	}
 	
@@ -117,8 +154,17 @@ public class HeadPing extends VendorMessage {
 		return (_features & ALT_LOCS) == ALT_LOCS;
 	}
 	
+	public boolean requestsPushLocs() {
+		return (_features & PUSH_ALTLOCS) == PUSH_ALTLOCS;
+	}
+	
+	public boolean requestsFWTPushLocs() {
+		return (_features & FWT_PUSH_ALTLOCS) == FWT_PUSH_ALTLOCS;
+	}
+	
 	public byte getFeatures() {
 		return _features;
 	}
 	
+
 }

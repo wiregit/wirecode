@@ -204,17 +204,7 @@ public abstract class MessageRouter {
      * Creates a MessageRouter.  Must call initialize before using.
      */
     protected MessageRouter() {
-        try {
-            _clientGUID = new GUID(GUID.fromHexString(
-                ApplicationSettings.CLIENT_ID.getValue())).bytes();
-        }
-        catch (IllegalArgumentException e) {
-            //This should never happen! But if it does, we can recover.
-            _clientGUID = Message.makeGuid();
-            // And store the next ID in our settings
-            ApplicationSettings.CLIENT_ID.setValue(
-                new GUID(_clientGUID).toHexString() );
-        }
+        _clientGUID=RouterService.getMyGUID();
     }
 
     /**
@@ -2567,7 +2557,7 @@ public abstract class MessageRouter {
     	if (!_promotionManager.allowUDPPing(handler))
     		return; 
     	UDPCrawlerPong newMsg = new UDPCrawlerPong(msg);
-    	handler.handleUDPCrawlerPong(newMsg);
+    	handler.reply(newMsg);
     }
     
     /**
@@ -2575,37 +2565,30 @@ public abstract class MessageRouter {
      * unless the same person has pinged us too recently.
      */
     private void handleHeadPing(HeadPing ping, DatagramPacket datagram) {
-    	
-
     	InetAddress host = datagram.getAddress();
     	int port = datagram.getPort();
-    	FileManager fmanager = RouterService.getFileManager();
-    	UploadManager umanager = RouterService.getUploadManager();
-    	UDPService uservice = UDPService.instance();
     	if (_udpHeadRequests.add(host)) {
-    		
     		HeadPong pong = new HeadPong(ping);
-    		uservice.send(pong, host, port);
-    		
+    		UDPService.instance().send(pong, host, port);
     	}
     }
     
+        
     /**
      * replies to a head ping that came through tcp
      * unless the same person has pinged us too recently.
+     * 
+     * Note: if I'm a leaf, I can only receive these pings
+     * from my Ultrapeer(s). In this case, the time limit is ignored.
+     * 
      */
     private void handleHeadPing(HeadPing ping, ManagedConnection conn) {
-    	
-    	FileManager fmanager = RouterService.getFileManager();
-    	UploadManager umanager = RouterService.getUploadManager();
-    	UDPService uservice = UDPService.instance();
-    	
-    	if (_udpHeadRequests.add(conn.getInetAddress())) {
+        if (_udpHeadRequests.add(conn.getInetAddress())){
     		HeadPong pong = new HeadPong(ping);
     		conn.send(pong);
     	}
-    	
     }
+    
     
     private static class QueryResponseBundle {
         public final QueryRequest _query;

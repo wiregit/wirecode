@@ -11,15 +11,18 @@ import junit.framework.Test;
 
 import com.bitzi.util.Base32;
 import com.limegroup.gnutella.Connection;
+import com.limegroup.gnutella.ConnectionManager;
 import com.limegroup.gnutella.FileDesc;
 import com.limegroup.gnutella.FileManager;
 import com.limegroup.gnutella.GUID;
+import com.limegroup.gnutella.PushEndpoint;
 import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.UploadManager;
 import com.limegroup.gnutella.CreationTimeCache;
 import com.limegroup.gnutella.altlocs.AlternateLocation;
 import com.limegroup.gnutella.altlocs.AlternateLocationCollection;
+import com.limegroup.gnutella.altlocs.PushAltLoc;
 import com.limegroup.gnutella.dime.DIMEParser;
 import com.limegroup.gnutella.dime.DIMERecord;
 import com.limegroup.gnutella.downloader.Interval;
@@ -27,6 +30,10 @@ import com.limegroup.gnutella.downloader.VerifyingFile;
 import com.limegroup.gnutella.handshaking.HandshakeResponder;
 import com.limegroup.gnutella.handshaking.HandshakeResponse;
 import com.limegroup.gnutella.handshaking.HeaderNames;
+import com.limegroup.gnutella.http.HTTPRequestMethod;
+import com.limegroup.gnutella.http.HTTPHeaderName;
+import com.limegroup.gnutella.http.ConstantHTTPHeaderValue;
+import com.limegroup.gnutella.http.HTTPConstants;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.PushRequest;
@@ -39,6 +46,7 @@ import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.settings.UltrapeerSettings;
 import com.limegroup.gnutella.settings.UploadSettings;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
+import com.limegroup.gnutella.stubs.ConnectionManagerStub;
 import com.limegroup.gnutella.tigertree.HashTree;
 import com.limegroup.gnutella.util.BaseTestCase;
 import com.limegroup.gnutella.util.CommonUtils;
@@ -50,6 +58,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import java.util.Map;
+import java.util.Collections;
 
 /**
  * Test that a client uploads a file correctly.  Depends on a file
@@ -80,6 +89,10 @@ public class UploadTest extends BaseTestCase {
     private FileDesc FD;    
     /** The root32 of the shared file. */
     private String ROOT32;
+    /**
+     * Features for push loc testing.
+     */
+	private static String FALTFeatures, FWALTFeatures;    
 
     private static final RouterService ROUTER_SERVICE =
         new RouterService(new FManCallback());
@@ -121,6 +134,7 @@ public class UploadTest extends BaseTestCase {
     }
 
 	protected void setUp() throws Exception {
+	    SharingSettings.ADD_ALTERNATE_FOR_SELF.setValue(false);
 		FilterSettings.BLACK_LISTED_IP_ADDRESSES.setValue(
 		    new String[] {"*.*.*.*"});
         FilterSettings.WHITE_LISTED_IP_ADDRESSES.setValue(
@@ -185,6 +199,18 @@ public class UploadTest extends BaseTestCase {
             alc.remove(al); // demote
             alc.remove(al); // remove
         }
+        alts.clear();
+        alc = FD.getPushAlternateLocationCollection();
+        for(Iterator i = alc.iterator(); i.hasNext(); )
+            alts.add((AlternateLocation)i.next());
+        for(Iterator i = alts.iterator(); i.hasNext(); ) {
+            PushAltLoc al = (PushAltLoc)i.next();
+            PushEndpoint pe = al.getPushAddress();
+            PushEndpoint.overwriteProxies(pe.getClientGUID(), Collections.EMPTY_SET);
+            alc.remove(al); // remove
+        }
+        
+        assertEquals(0, FD.getAltLocsSize());
 
         try {Thread.sleep(300); } catch (InterruptedException e) { }
 		
@@ -196,6 +222,11 @@ public class UploadTest extends BaseTestCase {
         // clear the cache history so no banning occurs.
         Map requests = (Map)PrivilegedAccessor.getValue(upMan, "REQUESTS");
         requests.clear();
+        
+		FALTFeatures= HTTPHeaderName.FEATURES+
+			": "+ConstantHTTPHeaderValue.PUSH_LOCS_FEATURE.httpStringValue();
+		FWALTFeatures= HTTPHeaderName.FEATURES+
+			": "+ConstantHTTPHeaderValue.FWT_PUSH_LOCS_FEATURE.httpStringValue();        
 	}
 
     //public void testAll() {
@@ -423,6 +454,159 @@ public class UploadTest extends BaseTestCase {
         tPersistentURIRequests();
     }
     
+    public void testFALTNotRequested() throws Exception {
+		URN sha1 = URN.createSHA1Urn(hash);
+		GUID clientGUID = new GUID(GUID.makeGuid());
+		GUID clientGUID2 = new GUID(GUID.makeGuid());
+		
+		AlternateLocation direct = AlternateLocation.create("1.2.3.4:5",sha1);
+		AlternateLocation push = AlternateLocation.create(
+				clientGUID.toHexString()+";1.2.3.4:5",sha1);
+        ((PushAltLoc)push).updateProxies(true);
+		PushAltLoc pushFwt = (PushAltLoc) 
+			AlternateLocation.create(
+		        clientGUID2.toHexString()+";fwt/1.0;1.2.3.4:6",sha1);
+        pushFwt.updateProxies(true);
+		
+		
+		FD.add(direct);
+		FD.add(push);
+		FD.add(pushFwt);
+		
+		assertEquals(0,((PushAltLoc)push).supportsFWTVersion());
+		assertEquals(1,pushFwt.supportsFWTVersion());
+		assertEquals(3,FD.getAltLocsSize());        
+        
+        boolean passed = download(fileName, 
+                                  "X-Alt:",
+                                  "abcdefghijklmnopqrstuvwxyz",
+            new Applyable() {
+                public void apply(String line) throws Exception {
+                    if(line.toLowerCase().startsWith("x-falt:"))
+                        fail("had line: " + line);
+                    else if(!line.startsWith("HTTP")) // check only the first time.
+                        return;
+                    UploadManager umanager = RouterService.getUploadManager();
+		            assertEquals(1,umanager.uploadsInProgress());
+		            List l = (List) PrivilegedAccessor.getValue(umanager,"_activeUploadList");
+		            HTTPUploader u = (HTTPUploader)l.get(0);
+		            assertFalse(u.wantsFAlts());
+		            assertEquals(0,u.wantsFWTAlts());
+                }
+            }
+        );
+        assertTrue(passed);
+    }
+    
+    public void testFALTWhenRequested() throws Exception {
+		URN sha1 = URN.createSHA1Urn(hash);
+		GUID clientGUID = new GUID(GUID.makeGuid());
+		GUID clientGUID2 = new GUID(GUID.makeGuid());
+		
+		AlternateLocation direct = AlternateLocation.create("1.2.3.4:5",sha1);
+		final AlternateLocation push = AlternateLocation.create(
+				clientGUID.toHexString()+";1.2.3.4:5",sha1);
+        ((PushAltLoc)push).updateProxies(true);
+		final PushAltLoc pushFwt = (PushAltLoc) 
+			AlternateLocation.create(
+		        clientGUID2.toHexString()+";fwt/1.0;1.2.3.4:6",sha1);
+        pushFwt.updateProxies(true);
+		
+		
+		FD.add(direct);
+		FD.add(push);
+		FD.add(pushFwt);
+		
+		assertEquals(0,((PushAltLoc)push).supportsFWTVersion());
+		assertEquals(1,pushFwt.supportsFWTVersion());
+		assertEquals(3,FD.getAltLocsSize());                
+        
+        boolean passed = download(fileName,
+                                  FALTFeatures,
+                                  "abcdefghijklmnopqrstuvwxyz",
+                                  "X-FAlt: " + push.httpStringValue() + ", " + pushFwt.httpStringValue(),
+            new Applyable() {
+                public void apply(String line) throws Exception {
+                    if(!line.startsWith("HTTP")) // check only the first time
+                        return;
+	                UploadManager umanager = RouterService.getUploadManager();
+	                assertEquals(1,umanager.uploadsInProgress());
+		            List l = (List) PrivilegedAccessor.getValue(umanager,"_activeUploadList");
+		            HTTPUploader u = (HTTPUploader)l.get(0);
+		            assertTrue(u.wantsFAlts());
+ 		            assertEquals(0,u.wantsFWTAlts());        
+                }
+            }
+       );
+       assertTrue(passed);
+    }
+    
+    public void testFWALTWhenRequested() throws Exception {
+		URN sha1 = URN.createSHA1Urn(hash);
+		GUID clientGUID = new GUID(GUID.makeGuid());
+		GUID clientGUID2 = new GUID(GUID.makeGuid());
+		
+		AlternateLocation direct = AlternateLocation.create("1.2.3.4:5",sha1);
+		final AlternateLocation push = AlternateLocation.create(
+				clientGUID.toHexString()+";1.2.3.4:5",sha1);
+        ((PushAltLoc)push).updateProxies(true);
+		final PushAltLoc pushFwt = (PushAltLoc) 
+			AlternateLocation.create(
+		        clientGUID2.toHexString()+";fwt/1.0;1.2.3.4:6",sha1);
+        pushFwt.updateProxies(true);
+		
+		
+		FD.add(direct);
+		FD.add(push);
+		FD.add(pushFwt);
+		
+		assertEquals(0,((PushAltLoc)push).supportsFWTVersion());
+		assertEquals(1,pushFwt.supportsFWTVersion());
+		assertEquals(3,FD.getAltLocsSize());             
+        
+        boolean passed = download(fileName,
+                                  FWALTFeatures,
+                                  "abcdefghijklmnopqrstuvwxyz",
+                                  "X-FAlt: " + pushFwt.httpStringValue(),
+            new Applyable() {
+                public void apply(String line) throws Exception {
+                    if(!line.startsWith("HTTP")) // check only the first time.
+                        return;
+                    UploadManager umanager = RouterService.getUploadManager();
+                    assertEquals(1,umanager.uploadsInProgress());
+                    List l = (List) PrivilegedAccessor.getValue(umanager,"_activeUploadList");
+                    HTTPUploader u = (HTTPUploader)l.get(0);
+                    assertTrue(u.wantsFAlts());
+                    assertEquals((int)HTTPConstants.FWT_TRANSFER_VERSION,u.wantsFWTAlts());
+                }
+            }
+       );
+       assertTrue(passed);
+    }
+    
+    public void testUploaderStoresAllAlts() throws Exception {
+        URN sha1 = URN.createSHA1Urn(hash);
+		GUID clientGUID = new GUID(GUID.makeGuid());
+		
+		AlternateLocation direct = AlternateLocation.create("1.2.3.4:5",sha1);
+		AlternateLocation push = AlternateLocation.create(
+				clientGUID.toHexString()+";1.2.3.4:5",sha1);
+        ((PushAltLoc)push).updateProxies(true);
+        assertEquals(0, FD.getAltLocsSize());
+        boolean passed = download(fileName,
+                          "X-Alt: " + direct.httpStringValue() + "\r\n" + 
+                          "X-FAlt: " + push.httpStringValue(),
+                          "abcdefghijklmnopqrstuvwxyz"
+                         );
+        assertTrue(passed);
+		assertEquals(2,FD.getAltLocsSize());
+		assertEquals(1,FD.getPushAlternateLocationCollection().getAltLocsSize());
+		assertEquals(1,FD.getAlternateLocationCollection().getAltLocsSize());
+		
+		assertTrue(FD.getPushAlternateLocationCollection().contains(push));
+		assertTrue(FD.getAlternateLocationCollection().contains(direct));
+    }
+    
     // Tests for alternate locations
     public void testAlternateLocationAddAndRemove() throws Exception {
         // Add a simple marker alt so we know it only contains that
@@ -640,8 +824,7 @@ public class UploadTest extends BaseTestCase {
         //Demote.
         passed = download("/uri-res/N2R?" + hash,
                           "X-NAlt: 1.2.3.1:1, " + send2 + ", " + send3,
-                          "abcdefghijklmnopqrstuvwxyz",
-                          null);
+                          "abcdefghijklmnopqrstuvwxyz");
         assertTrue("alt failed", passed);
         // Should still have it.
         assertEquals("wrong # locs", 4, FD.getAltLocsSize());
@@ -649,13 +832,64 @@ public class UploadTest extends BaseTestCase {
         //Remove
         passed = download("/uri-res/N2R?" + hash,
                           "X-NAlt: " + send1 + ", 1.2.3.2:2, " + send3,
-                          "abcdefghijklmnopqrstuvwxyz",
-                          null);
+                          "abcdefghijklmnopqrstuvwxyz");
         assertTrue("alt failed", passed);
         // Now is removed.
         assertEquals("wrong # locs", 1, FD.getAltLocsSize());
         assertEquals(al, alc.iterator().next());
     }        
+    
+    /**
+     * tests that when reading the NFAlt header we only remove proxies
+     */
+    public void testRemovingNFAlt() throws Exception {
+        
+        boolean passed;
+        GUID g = new GUID(GUID.makeGuid());
+        AlternateLocationCollection alc = FD.getAlternateLocationCollection();
+        alc.clear();
+        
+        assertEquals(0,FD.getAltLocsSize());
+        URN urn = URN.createSHA1Urn(hash);
+        
+        PushAltLoc abc = (PushAltLoc)AlternateLocation.create(
+                g.toHexString()+";1.1.1.1:1;2.2.2.2:2;3.3.3.3:3",
+                urn);
+        String abcHttp = abc.httpStringValue();
+        
+        PushAltLoc bcd=(PushAltLoc)AlternateLocation.create(
+                g.toHexString()+";2.2.2.2:2;3.3.3.3:3;4.4.4.4:4",
+                urn);
+        bcd.updateProxies(true);
+        
+        String bcdHttp = bcd.httpStringValue();
+        
+        FD.add(bcd);
+        assertEquals(1,FD.getAltLocsSize());
+        
+        
+        passed=download("/uri-res/N2R?" + hash,
+                "X-NFAlt: " + abcHttp,
+                "abcdefghijklmnopqrstuvwxyz");
+        assertTrue("alt failed", passed);
+        
+        //two of the proxies of bcd should be gone
+        assertEquals("wrong # locs", 1, FD.getAltLocsSize());
+        assertEquals("wrong # proxies",1,bcd.getPushAddress().getProxies().size());
+        
+        
+        //now repeat, sending all three original proxies of bce as NFAlts
+        Thread.sleep(1000);
+        passed=download("/uri-res/N2R?" + hash,
+                "X-NFAlt: " + bcdHttp,
+                "abcdefghijklmnopqrstuvwxyz");
+        assertTrue("alt failed", passed);
+        
+        // all proxies should be gone, and bcd should be removed from 
+        // the filedesc
+        assertEquals("wrong # locs", 0, FD.getAltLocsSize());
+        assertEquals("wrong # proxies",0,bcd.getPushAddress().getProxies().size());
+    }
     
     // unfortunately we can't test with private addresses
     // because all these connections require that local_is_private
@@ -1114,11 +1348,106 @@ public class UploadTest extends BaseTestCase {
     public void testFeatureHeader() throws Exception {
         ChatSettings.CHAT_ENABLED.setValue(true);
         assertTrue(download(fileName, null, "abcdefghijklmnopqrstuvwxyz",
-                   "X-Features: browse/1.0, chat/0.1"));
+                   "X-Features: fwalt/0.1, browse/1.0, chat/0.1"));
                    
         ChatSettings.CHAT_ENABLED.setValue(false);
         assertTrue(download(fileName, null, "abcdefghijklmnopqrstuvwxyz",
-                   "X-Features: browse/1.0"));
+                   "X-Features: fwalt/0.1, browse/1.0"));
+    }
+    
+    /**
+     * tests that the node sends a proper proxies header
+     */
+    public void testProxiesHeaderNotSent() throws Exception {
+        
+        // try when we are not firewalled
+        PrivilegedAccessor.setValue(
+                RouterService.getAcceptor(),
+                "_acceptedIncoming",
+                new Boolean(true));
+        
+        assertTrue(RouterService.acceptedIncomingConnection());
+        
+        Socket s = new Socket("localhost", PORT);
+        BufferedReader in = new BufferedReader(new InputStreamReader(
+            s.getInputStream()));
+        BufferedWriter out = new BufferedWriter(new OutputStreamWriter(
+            s.getOutputStream()));
+        
+        assertFalse(
+                containsHeader("GET",fileName,null,out,in,"X-Push-Proxy: 1.2.3.4:5"));
+        
+        try{in.close();}catch(IOException ignored){}
+        try{out.close();}catch(IOException ignored){}
+        
+        Thread.sleep(1000);
+        
+        // now try with an empty set of proxies
+        s = getSocketFromPush();
+        in = new BufferedReader(new InputStreamReader(
+            s.getInputStream()));
+        out = new BufferedWriter(new OutputStreamWriter(
+            s.getOutputStream()));
+        
+        in.readLine(); //skip GIV
+		in.readLine(); //skip blank line
+		
+		PrivilegedAccessor.setValue(
+                RouterService.getAcceptor(),
+                "_acceptedIncoming",
+                new Boolean(false));
+        assertFalse(RouterService.acceptedIncomingConnection());
+		
+        assertFalse(
+                containsHeader("GET",fileName,null,out,in,"X-Push-Proxy: 1.2.3.4:5"));
+        
+        try{in.close();}catch(IOException ignored){}
+        try{out.close();}catch(IOException ignored){}
+    }
+    
+    public void testProxiesHeaderSent() throws Exception{
+        
+        Socket s = getSocketFromPush();
+        BufferedReader in = new BufferedReader(new InputStreamReader(
+            s.getInputStream()));
+        Writer out = new BufferedWriter(new OutputStreamWriter(
+            s.getOutputStream()));
+        
+        in.readLine(); //skip GIV
+		in.readLine(); //skip blank line
+		
+        // now try with some proxies
+        ConnectionManager original = RouterService.getConnectionManager();
+        
+        final Set proxies = new HashSet();
+        QueryReply.PushProxyContainer ppi = 
+            new QueryReply.PushProxyContainer("1.2.3.4",5);
+        proxies.add(ppi);
+        
+        ConnectionManagerStub cmStub = new ConnectionManagerStub() {
+            public Set getPushProxies() {
+                return proxies;
+            }
+        };
+        
+        PrivilegedAccessor.setValue(RouterService.class,"manager",cmStub);
+        
+        
+		
+		PrivilegedAccessor.setValue(
+                RouterService.getAcceptor(),
+                "_acceptedIncoming",
+                new Boolean(false));
+        assertFalse(RouterService.acceptedIncomingConnection());
+		
+        assertTrue(
+                containsHeader("GET",fileName,null,out,in,"X-Push-Proxy: 1.2.3.4:5"));
+        
+        try{in.close();}catch(IOException ignored){}
+        try{out.close();}catch(IOException ignored){}
+        
+        PrivilegedAccessor.setValue(RouterService.class,"manager",original);
+                
     }
     
     //////////  test thex works /////////////
@@ -1230,7 +1559,12 @@ public class UploadTest extends BaseTestCase {
 
     private static boolean download(String file,String header,String expResp) 
             throws IOException {
-        return download(file, header, expResp, null);
+        return download(file, header, expResp, null, null);
+    }
+    
+    private static boolean download(String file, String header, String expResp, Applyable f) 
+            throws IOException {
+        return download(file, header, expResp, null, f);
     }
     
     private static byte[] getDownloadBytes(String file, String header,
@@ -1243,7 +1577,7 @@ public class UploadTest extends BaseTestCase {
 
         String req = makeRequest(file);
         byte[] ret = getBytes("GET", req, header,
-                             out, in, expheader, false);
+                             out, in, expheader, false, true);
         in.close();
         out.close();
         s.close();
@@ -1253,6 +1587,13 @@ public class UploadTest extends BaseTestCase {
     private static boolean download(String file,String header,
                                     String expResp, String expHeader)
         throws IOException {
+            return download(file, header, expResp, expHeader, null);
+    }
+    
+    private static boolean download(String file, String header,
+                                    String expResp, String expHeader, Applyable f) 
+        throws IOException {
+            
         //Unfortunately we can't use URLConnection because we need to test
         //malformed and slightly malformed headers
         
@@ -1263,7 +1604,7 @@ public class UploadTest extends BaseTestCase {
         BufferedWriter out = new BufferedWriter(new OutputStreamWriter(
             s.getOutputStream()));
 
-        String ret=downloadInternal(file, header, out, in, expHeader);
+        String ret=downloadInternal(file, header, out, in, expHeader, f);
         in.close();
         out.close();
         s.close();
@@ -1388,7 +1729,7 @@ public class UploadTest extends BaseTestCase {
                                            BufferedWriter out,
                                            BufferedReader in) 
     throws IOException {
-        return downloadInternal(file, header, out, in, null);
+        return downloadInternal(file, header, out, in, null, null);
     }
     
     /**
@@ -1410,10 +1751,12 @@ public class UploadTest extends BaseTestCase {
                                             BufferedWriter out,
                                             BufferedReader in,
                                             String requiredHeader,
-                                            boolean http11)
+                                            boolean http11,
+                                            boolean require11Response,
+                                            Applyable f)
       throws IOException {
         return new String(
-          request(requestMethod, file, header, out, in, requiredHeader, http11)
+          request(requestMethod, file, header, out, in, requiredHeader, http11, require11Response, f)
         );
     }
     
@@ -1423,12 +1766,13 @@ public class UploadTest extends BaseTestCase {
                                  OutputStream out,
                                  InputStream in,
                                  String requiredHeader,
-                                 boolean http11)
+                                 boolean http11,
+                                 boolean require11Response)
      throws IOException {
         int length = readToContent(requestMethod, file, header,
                         new OutputStreamWriter(out),
                         new InputStreamReader(in),
-                        requiredHeader, http11);
+                        requiredHeader, http11, require11Response, null);
 		ByteArrayOutputStream bytes = new ByteArrayOutputStream();
         
         //3. Read content.  Obviously this is designed for small files.
@@ -1449,11 +1793,13 @@ public class UploadTest extends BaseTestCase {
                                             BufferedWriter out,
                                             BufferedReader in,
                                             String requiredHeader,
-                                            boolean http11)
+                                            boolean http11,
+                                            boolean require11Response,
+                                            Applyable f)
      throws IOException {
         
         int length = readToContent(requestMethod, file, header, 
-                                    out, in, requiredHeader, http11);
+                                    out, in, requiredHeader, http11, require11Response, f);
 		
 		ByteArrayOutputStream bytes = new ByteArrayOutputStream();
         
@@ -1474,7 +1820,9 @@ public class UploadTest extends BaseTestCase {
                                             Writer out,
                                             Reader in,
                                             String requiredHeader,
-                                            boolean http11)
+                                            boolean http11,
+                                            boolean require11Response,
+                                            Applyable f)
      throws IOException {        
         // send request
         out.write( requestMethod + " " + file + " " + 
@@ -1493,18 +1841,32 @@ public class UploadTest extends BaseTestCase {
         
         if( requiredHeader != null )
             expectedHeader = new Header(requiredHeader);
-            
+
+        boolean firstLine = true;
         while (true) { 
             String line = readLine(in);
+            if(require11Response && firstLine && (line == null || !line.startsWith("HTTP/1.1")))
+                fail("bad first response line: " + line);
+            firstLine = false;
+            
             if( line == null)
                 throw new InterruptedIOException("connection closed");
-            //System.out.println("<< " + line);
                 
             if (line.equals(""))
                 break;
+
+            if(f != null) {
+                try {
+                    f.apply(line);
+                } catch(Exception e) {
+                    fail(e);
+                    return -1;
+                }
+            }
+                            
             if (requiredHeader != null) {
                 Header found = new Header(line);
-                if( found.equals(expectedHeader) ) {
+                if( found.equals(expectedHeader)) {
                     foundHeader = true;
                 }
             }
@@ -1517,7 +1879,53 @@ public class UploadTest extends BaseTestCase {
 			assertTrue("Didn't find header: " + requiredHeader, foundHeader);
 		}
 		return length;
-    }        
+    }
+    
+    private static boolean containsHeader(String requestMethod,
+                                            String file,
+                                            String header,
+                                            Writer out,
+                                            Reader in,
+                                            String requiredHeader)
+    	throws IOException {
+        // send request
+        out.write( requestMethod + " " + makeRequest(file) + " " + 
+            "HTTP/1.1\r\n");
+        if (header != null)
+            out.write(header + "\r\n");
+        out.write("Connection: Keep-Alive\r\n");            
+        out.write("\r\n");
+        out.flush();
+
+        //2. Read response code and headers, remember the content-length.
+        boolean foundHeader = false;
+        Header expectedHeader = null;
+        
+        if( requiredHeader != null )
+            expectedHeader = new Header(requiredHeader);
+            
+        while (true) { 
+            String line = readLine(in);
+            if( line == null)
+                throw new InterruptedIOException("connection closed");
+            //System.out.println("<< " + line);
+                
+            if (line.equals(""))
+                break;
+            if (requiredHeader != null) {
+                Header found = new Header(line);
+                if( found.title.equals(expectedHeader.title)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+        
+    }
+    
+    private static interface Applyable {
+        public void apply(String line) throws Exception;
+    }
     
     private static class Header {
         final String title;
@@ -1597,7 +2005,7 @@ public class UploadTest extends BaseTestCase {
                                            String requiredHeader) 
             throws IOException {
         return downloadInternal("GET", makeRequest(file), header,
-                                    out, in, requiredHeader, true);
+                                    out, in, requiredHeader, true, true, null);
 	}
     
     /** 
@@ -1609,10 +2017,11 @@ public class UploadTest extends BaseTestCase {
                                            String header,
                                            BufferedWriter out,
                                            BufferedReader in,
-                                           String requiredHeader) 
+                                           String requiredHeader,
+                                           Applyable f) 
             throws IOException {
         return downloadInternal("GET", makeRequest(file), header,
-                                    out, in, requiredHeader, false);
+                                    out, in, requiredHeader, false, true, f);
 	}
 
     /** 
@@ -1638,6 +2047,10 @@ public class UploadTest extends BaseTestCase {
         
         
         //2. Read (and ignore!) response code and headers.  TODO: verify.
+        String firstLine = in.readLine();
+        if(firstLine == null || !firstLine.startsWith("HTTP/1.1"))
+            fail("bad first response line: " + firstLine);
+                    
         while(!in.readLine().equals("")){ }
         //3. Read content.  Obviously this is designed for small files.
         StringBuffer buf=new StringBuffer();
@@ -1677,6 +2090,10 @@ public class UploadTest extends BaseTestCase {
         int expectedSize = expResp.length();
         
         //read...ignore response headers
+        String firstLine = in.readLine();
+        if(firstLine == null || !firstLine.startsWith("HTTP/1.1"))
+            fail("bad first response line: " + firstLine);
+        
         while(!in.readLine().equals("")){ }
         //read first response
         StringBuffer buf=new StringBuffer();        
@@ -1731,6 +2148,10 @@ public class UploadTest extends BaseTestCase {
         int expectedSize = expResp.length();
         
         //read...ignore response headers
+        String firstLine = in.readLine();
+        if(firstLine == null || !firstLine.startsWith("HTTP/1.1"))
+            fail("bad first response line: " + firstLine);
+            
         while(!in.readLine().equals("")){ }
         //read first response
         StringBuffer buf=new StringBuffer();        
@@ -1740,7 +2161,12 @@ public class UploadTest extends BaseTestCase {
         }
         ret = buf.toString().equals(expResp);
         buf = new StringBuffer();
+        
         //ingore second header
+        firstLine = in.readLine();
+        if(firstLine == null || !firstLine.startsWith("HTTP/1.1"))
+            fail("bad first response line: " + firstLine);
+        
         while(!in.readLine().equals("")){ }
         //read Second response
         for(int i=0; i<expectedSize; i++){
@@ -1824,17 +2250,17 @@ public class UploadTest extends BaseTestCase {
                                                           s.getOutputStream()));
             //2. Send GET request in URI form
             downloadInternal("GET", file, sendHeader, out, in, 
-                             requiredHeader, http11);
+                             requiredHeader, http11, true, null);
             
             //3. If the connection should remain open, make sure we
             //   can request again.
             if( repeat ) {
                 downloadInternal("GET", file, sendHeader, out, in,
-                                 requiredHeader, http11);
+                                 requiredHeader, http11, true, null);
             } else {
                 try {
                     downloadInternal("GET", file, sendHeader, out, in,
-                                     requiredHeader, http11);
+                                     requiredHeader, http11, false, null);
                     fail("Connection should be closed");
                 } catch(InterruptedIOException good) {
                     // good.

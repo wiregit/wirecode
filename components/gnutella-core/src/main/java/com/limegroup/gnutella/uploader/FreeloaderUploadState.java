@@ -15,7 +15,8 @@ import com.limegroup.gnutella.util.CommonUtils;
  * to them with more information on Gnutella and with more information on 
  * obtaining a client.
  */
-public class FreeloaderUploadState implements HTTPMessage {
+public class FreeloaderUploadState extends UploadState {
+	
 
     public static final String RESPONSE_PAGE =
 		"<html>\r\n"+

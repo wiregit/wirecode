@@ -125,7 +125,7 @@ public class ResumeDownloaderTest extends com.limegroup.gnutella.util.BaseTestCa
 
         //Check same state as before serialization.
         try { Thread.sleep(200); } catch (InterruptedException e) { }
-        assertEquals(Downloader.WAITING_FOR_RESULTS, downloader.getState());
+        assertEquals(Downloader.WAITING_FOR_USER, downloader.getState());
         assertEquals(amountDownloaded, downloader.getAmountRead());
         downloader.stop();
     }

@@ -2,6 +2,7 @@ package com.limegroup.gnutella;
 
 import com.limegroup.gnutella.altlocs.AlternateLocation;
 import com.limegroup.gnutella.altlocs.AlternateLocationCollection;
+import com.limegroup.gnutella.altlocs.DirectAltLoc;
 import com.limegroup.gnutella.filters.IPFilter;
 import com.limegroup.gnutella.messages.GGEP;
 import com.limegroup.gnutella.messages.HUGEExtension;
@@ -508,8 +509,8 @@ public class Response {
     }
     
     /**
-     * Utility method for converting an AlternateLocationCollection to a
-     * smaller set of endpoints.
+     * Utility method for converting the non-firewalled elements of an
+     * AlternateLocationCollection to a smaller set of endpoints.
      */
     private static Set getAsEndpoints(AlternateLocationCollection col) {
         if( col == null || col.getAltLocsSize() == 0)
@@ -520,7 +521,10 @@ public class Response {
             int i = 0;
             for(Iterator iter = col.iterator();
               iter.hasNext() && i < MAX_LOCATIONS;) {
-                AlternateLocation al = (AlternateLocation)iter.next();
+            	Object o = iter.next();
+            	if (!(o instanceof DirectAltLoc))
+            		continue;
+                DirectAltLoc al = (DirectAltLoc)o;
                 Endpoint host = al.getHost();
                 if( !NetworkUtils.isMe(host.getAddress(), host.getPort()) ) {
                     if (endpoints == null)
@@ -802,7 +806,7 @@ public class Response {
                  System.currentTimeMillis(),
                  data.getPushProxies(),
                  getCreateTime(),
-                 data.supportsFWTransfer()
+                 data.getFWTVersionSupported()
                 );
             cachedRFD = rfd;
             return rfd;
