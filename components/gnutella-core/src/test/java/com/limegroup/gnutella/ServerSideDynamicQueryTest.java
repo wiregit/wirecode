@@ -247,6 +247,84 @@ public final class ServerSideDynamicQueryTest extends BaseTestCase {
         }
     }
 
+    /** @return <tt>true<tt> if no messages (besides expected ones, such as 
+     *  QRP stuff) were recieved.
+     */
+    private static boolean noUnexpectedMessages(Connection c) {
+        while (true) {
+            try {
+                Message m=c.receive(TIMEOUT);
+                if (m instanceof RouteTableMessage)
+                    ;
+                else // we should never get any other sort of message...
+                    return false;
+            }
+            catch (InterruptedIOException ie) {
+                return true;
+            }
+            catch (BadPacketException e) {
+                // ignore....
+            }
+            catch (IOException ioe) {
+                // ignore....
+            }
+        }
+    }
+
+
+    /** @return The first QueyrRequest received from this connection.  If null
+     *  is returned then it was never recieved (in a timely fashion).
+     */
+    private static QueryRequest getFirstQueryRequest(Connection c) {
+        while (true) {
+            try {
+                Message m=c.receive(TIMEOUT);
+                if (m instanceof RouteTableMessage)
+                    ;
+                else if (m instanceof QueryRequest) 
+                    return (QueryRequest)m;
+                else
+                    return null;  // this is usually an error....
+            }
+            catch (InterruptedIOException ie) {
+                return null;
+            }
+            catch (BadPacketException e) {
+                // ignore....
+            }
+            catch (IOException ioe) {
+                // ignore....
+            }
+        }
+    }
+
+
+    /** @return The first QueyrReply received from this connection.  If null
+     *  is returned then it was never recieved (in a timely fashion).
+     */
+    private static QueryReply getFirstQueryReply(Connection c) {
+        while (true) {
+            try {
+                Message m=c.receive(TIMEOUT);
+                if (m instanceof RouteTableMessage)
+                    ;
+                else if (m instanceof QueryReply) 
+                    return (QueryReply)m;
+                else
+                    return null;  // this is usually an error....
+            }
+            catch (InterruptedIOException ie) {
+                return null;
+            }
+            catch (BadPacketException e) {
+                // ignore....
+            }
+            catch (IOException ioe) {
+                // ignore....
+            }
+        }
+    }
+
 
 	/**
 	 * Asserts that the given message is a query, printing out the 
@@ -280,11 +358,7 @@ public final class ServerSideDynamicQueryTest extends BaseTestCase {
         assertTrue(Arrays.equals(request.getGUID(), reqRecvd.getGUID()));
 
         // should NOT be forwarded to other Ultrapeer
-        try {
-            ULTRAPEER_1.receive(TIMEOUT);
-            assertTrue(false);
-        }
-        catch (InterruptedIOException expected) {}
+        assertTrue(noUnexpectedMessages(ULTRAPEER_1));
 
         // make sure probes are routed back correctly....
 		Response response1=new Response(0L, 0L, "berkeley rocks");
@@ -299,7 +373,8 @@ public final class ServerSideDynamicQueryTest extends BaseTestCase {
         drain(ULTRAPEER_2);
 		LEAF.send(reply1);
 		LEAF.flush();
-		QueryReply qRep = (QueryReply) ULTRAPEER_2.receive(TIMEOUT);
+		QueryReply qRep = getFirstQueryReply(ULTRAPEER_2);
+        assertTrue(qRep!=null);
         assertEquals(new GUID(guid1), new GUID(qRep.getClientGUID()));
 
         Thread.sleep(2*1000);
@@ -309,13 +384,16 @@ public final class ServerSideDynamicQueryTest extends BaseTestCase {
         ULTRAPEER_2.send(request);
         ULTRAPEER_2.flush();
 
+        // leaves don't get any unexpected messages, no use using
+        // noUnenexpectedMessages
         try {
             LEAF.receive(TIMEOUT);
             assertTrue(false);
         }
         catch (InterruptedIOException expected) {}
 
-        reqRecvd = (QueryRequest) ULTRAPEER_1.receive(TIMEOUT);
+        reqRecvd = getFirstQueryRequest(ULTRAPEER_1);
+        assertTrue(reqRecvd!=null);
         assertTrue(reqRecvd.getQuery().equals("berkeley"));
         assertTrue(Arrays.equals(request.getGUID(), reqRecvd.getGUID()));
         assertEquals(reqRecvd.getHops(), (byte) 1);
@@ -338,11 +416,7 @@ public final class ServerSideDynamicQueryTest extends BaseTestCase {
         assertTrue(Arrays.equals(request.getGUID(), reqRecvd.getGUID()));
 
         // should NOT be forwarded to other Ultrapeer
-        try {
-            ULTRAPEER_1.receive(TIMEOUT);
-            assertTrue(false);
-        }
-        catch (InterruptedIOException expected) {}
+        assertTrue(noUnexpectedMessages(ULTRAPEER_1));
 
         // make sure probes are routed back correctly....
 		Response response1=new Response(0L, 0L, "berkeley rocks");
@@ -357,7 +431,8 @@ public final class ServerSideDynamicQueryTest extends BaseTestCase {
         drain(ULTRAPEER_2);
 		LEAF.send(reply1);
 		LEAF.flush();
-		QueryReply qRep = (QueryReply) ULTRAPEER_2.receive(TIMEOUT);
+		QueryReply qRep = getFirstQueryReply(ULTRAPEER_2);
+        assertTrue(qRep!=null);
         assertEquals(new GUID(guid1), new GUID(qRep.getClientGUID()));
 
         Thread.sleep(2*1000);
@@ -367,13 +442,16 @@ public final class ServerSideDynamicQueryTest extends BaseTestCase {
         ULTRAPEER_2.send(request);
         ULTRAPEER_2.flush();
 
+        // leaves don't get any unexpected messages, no use using
+        // noUnenexpectedMessages
         try {
             LEAF.receive(TIMEOUT);
             assertTrue(false);
         }
         catch (InterruptedIOException expected) {}
 
-        reqRecvd = (QueryRequest) ULTRAPEER_1.receive(TIMEOUT);
+        reqRecvd = getFirstQueryRequest(ULTRAPEER_1);
+        assertTrue(reqRecvd!=null);
         assertTrue(reqRecvd.getQuery().equals("berkeley"));
         assertTrue(Arrays.equals(request.getGUID(), reqRecvd.getGUID()));
         assertEquals(reqRecvd.getHops(), (byte) 2);
@@ -394,11 +472,7 @@ public final class ServerSideDynamicQueryTest extends BaseTestCase {
         assertTrue(Arrays.equals(request.getGUID(), reqRecvd.getGUID()));
 
         // should NOT be forwarded to other Ultrapeer
-        try {
-            ULTRAPEER_1.receive(TIMEOUT);
-            assertTrue(false);
-        }
-        catch (InterruptedIOException expected) {}
+        assertTrue(noUnexpectedMessages(ULTRAPEER_1));
 
         Thread.sleep(2*1000);
 
@@ -407,18 +481,15 @@ public final class ServerSideDynamicQueryTest extends BaseTestCase {
         ULTRAPEER_2.flush();
 
         // should NOT be forwarded to leaf again....
+        // leaves don't get any unexpected messages, no use using
+        // noUnenexpectedMessages
         try {
             reqRecvd = (QueryRequest) LEAF.receive(TIMEOUT);
         }
         catch (InterruptedIOException expected) {}
 
         // should NOT be forwarded to other Ultrapeer....
-        try {
-            ULTRAPEER_1.receive(TIMEOUT);
-            assertTrue(false);
-        }
-        catch (InterruptedIOException expected) {}
-
+        assertTrue(noUnexpectedMessages(ULTRAPEER_1));
     }
     
     // makes sure a probe can't be extended twice....
@@ -436,11 +507,7 @@ public final class ServerSideDynamicQueryTest extends BaseTestCase {
         assertTrue(Arrays.equals(request.getGUID(), reqRecvd.getGUID()));
 
         // should NOT be forwarded to other Ultrapeer
-        try {
-            ULTRAPEER_1.receive(TIMEOUT);
-            assertTrue(false);
-        }
-        catch (InterruptedIOException expected) {}
+        assertTrue(noUnexpectedMessages(ULTRAPEER_1));
 
         Thread.sleep(2*1000);
 
@@ -449,13 +516,16 @@ public final class ServerSideDynamicQueryTest extends BaseTestCase {
         ULTRAPEER_2.send(request);
         ULTRAPEER_2.flush();
 
+        // leaves don't get any unexpected messages, no use using
+        // noUnenexpectedMessages
         try {
             LEAF.receive(TIMEOUT);
             assertTrue(false);
         }
         catch (InterruptedIOException expected) {}
 
-        reqRecvd = (QueryRequest) ULTRAPEER_1.receive(TIMEOUT);
+        reqRecvd = getFirstQueryRequest(ULTRAPEER_1);
+        assertTrue(reqRecvd!=null);
         assertTrue(reqRecvd.getQuery().equals("berkeley"));
         assertTrue(Arrays.equals(request.getGUID(), reqRecvd.getGUID()));
         assertEquals(reqRecvd.getHops(), (byte) 1);
@@ -468,18 +538,15 @@ public final class ServerSideDynamicQueryTest extends BaseTestCase {
         ULTRAPEER_2.flush();
 
         // should NOT be forwarded to leaf again....
+        // leaves don't get any unexpected messages, no use using
+        // noUnenexpectedMessages
         try {
             reqRecvd = (QueryRequest) LEAF.receive(TIMEOUT);
         }
         catch (InterruptedIOException expected) {}
 
         // should NOT be forwarded to other Ultrapeer....
-        try {
-            ULTRAPEER_1.receive(TIMEOUT);
-            assertTrue(false);
-        }
-        catch (InterruptedIOException expected) {}
-
+        assertTrue(noUnexpectedMessages(ULTRAPEER_1));
     }
 
     // tries to extend queries with original TTL > 1, should fail...
@@ -498,7 +565,8 @@ public final class ServerSideDynamicQueryTest extends BaseTestCase {
             assertTrue(Arrays.equals(request.getGUID(), reqRecvd.getGUID()));
 
             // should be forwarded to other Ultrapeer
-            reqRecvd = (QueryRequest) ULTRAPEER_1.receive(TIMEOUT);
+            reqRecvd = getFirstQueryRequest(ULTRAPEER_1);
+            assertTrue(reqRecvd!=null);
             assertTrue(reqRecvd.getQuery().equals("berkeley"));
             assertTrue(Arrays.equals(request.getGUID(), reqRecvd.getGUID()));
             assertEquals(reqRecvd.getHops(), (byte) 1);
@@ -511,17 +579,15 @@ public final class ServerSideDynamicQueryTest extends BaseTestCase {
             ULTRAPEER_2.flush();
 
             // should be counted as a duplicate and not forwarded anywhere...
+            // leaves don't get any unexpected messages, no use using
+            // noUnenexpectedMessages
             try {
                 LEAF.receive(TIMEOUT);
                 assertTrue(false);
             }
             catch (InterruptedIOException expected) {}
 
-            try {
-                ULTRAPEER_1.receive(TIMEOUT);
-                assertTrue(false);
-            }
-            catch (InterruptedIOException expected) {}
+            assertTrue(noUnexpectedMessages(ULTRAPEER_1));
         }
     }
 
