@@ -110,6 +110,22 @@ public class ManagedDownloader implements Downloader, Serializable {
      * hold lock while performing blocking IO operations.
      ***********************************************************************/
 
+    //We need to split locks because we wanted to ensureatomicity of 
+    //assignAndRequest but did not want to synchronize assignAndRequest on this
+    // since that freezes the GUI as it calls getAmountRead() frequently 
+    //(which also hold this' monitor
+    //
+    // Now assignAndRequest is synchronized on stealLock, and within it we
+    //acquire this' monitor when we are modifying shared datastructures that 
+    //this' monitor is protecting. This chage will not freeze the GUI, since 
+    //we hold this' monitor for a very short time while we are updating the  
+    //shared datastructures, also atomicity is guaranteed since we are still 
+    //synchronized. 
+    //
+    //Futhrer there will be no deadlocks. We acquire this' monitor only after 
+    //we acquire stealLock's monitor. We never hold this' monitor while we 
+    //are waiting for stealLock.
+
     private Object stealLock = new Object();
 
     /** This' manager for callbacks and queueing. */
@@ -967,6 +983,7 @@ public class ManagedDownloader implements Downloader, Serializable {
         //The locations that were busy, for trying later.
         busy=new LinkedList();
         int size = -1;
+        int connectTo = -1;
         
         //While there is still an unfinished region of the file...
         while (true) {
@@ -987,13 +1004,13 @@ public class ManagedDownloader implements Downloader, Serializable {
                         return GAVE_UP;
                     }
                 }
-                size = files.size();//capture the size (in synched block)
+                size = files.size();
+                connectTo = getNumAllowedDownloads();
             }
+
+        
             //OK. We are going to create a thread for each RFD, 
-            //TODO2:Note:for now we connect to all the hosts we can. But later 
-            // we should try to connect to about twice (I am guessing) 
-            //as many as we are allowed to swarm from. 
-            for(int i=0; i<size; i++) {
+            for(int i=0; i<=connectTo && i<size; i++) {
                 final RemoteFileDesc rfd = removeBest(files);
                 Thread connectCreator = new Thread() {
                     public void run() {
@@ -1380,21 +1397,25 @@ public class ManagedDownloader implements Downloader, Serializable {
         }
     }
 
-//      /** Returns true if another downloader is allowed. */
-//      private synchronized boolean allowAnotherDownload() {
-//          //TODO1: this should really be done dynamically by observing capacity
-//          //and load, but that's hard to do.
-//          int downloads=dloaders.size();
-//          int capacity=SettingsManager.instance().getConnectionSpeed();
-//          if (capacity<=SpeedConstants.MODEM_SPEED_INT)
-//              //Modems can't swarm.
-//              return downloads<1;
-//          else if (capacity<=SpeedConstants.T1_SPEED_INT)
-//              //DSL, Cable, and "T1" can swarm from up to 4 locations.
-//              return downloads<4;
-//          else 
-//              return downloads<6;
-//    }
+    /** 
+     * Returns the number of connections we should try depending on our speed,
+     * and how many downloaders we have active now.
+     */
+    private synchronized int getNumAllowedDownloads() {
+        //TODO1: this should really be done dynamically by observing capacity
+        //and load, but that's hard to do.
+        int downloads=dloaders.size();
+        int capacity=SettingsManager.instance().getConnectionSpeed();
+        if (capacity<=SpeedConstants.MODEM_SPEED_INT)
+            //Modems get 2 hosts at most...be safe and return positives
+            return Math.max(2-downloads,0);
+        else if (capacity<=SpeedConstants.T1_SPEED_INT)
+            //DSL, Cable, and "T1" can swarm from up to 6 locations.
+            return Math.max(6-downloads,0);
+        else 
+            //Wow you are fast, try 8
+            return Math.max(8-downloads,0);
+  }
 
     /** 
      * Removes and returns the RemoteFileDesc with the highest quality in
