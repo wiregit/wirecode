@@ -95,7 +95,7 @@ public class URLOpener {
                     }
                 }
             } catch(Throwable t) {
-                RouterService.error(t);
+                ErrorService.error(t);
             }
         }
     }

@@ -15,7 +15,7 @@ import com.limegroup.gnutella.util.URLDecoder;
  * Listens on an HTTP port, accepts incoming connections, and dispatches 
  * threads to handle requests.  This allows simple HTTP requests.
  */
-public class HTTPAcceptor extends Thread {
+public class HTTPAcceptor implements Runnable {
 	/** Magnet request for a default action on parameters */
     private static final String MAGNET_DEFAULT = "magnet10/default.js?";
 	/** Magnet request for a paused response */
@@ -37,7 +37,6 @@ public class HTTPAcceptor extends Thread {
     private volatile ServerSocket _socket=null;
     private int 	 			  _port=45100;
     private Object                _socketLock=new Object();
-    private ActivityCallback 	  _callback;
 
 	/** Try to supress duplicate requests from some browsers */
 	private static String         _lastRequest     = null;
@@ -45,27 +44,13 @@ public class HTTPAcceptor extends Thread {
 
 
     /**
-     * Creates an acceptor that tries to listen to incoming connections
-     * on the given port.  If this is a bad port, the port will be
-     * changed when run is called and SettingsManager will be updated.
-     * If that fails, ActivityCallback.error will be called.  A port
-     * of 0 means do not accept incoming connections.
-     */
-    public HTTPAcceptor(ActivityCallback callback) {
-        _callback = callback;
-        setDaemon(true);
-        start();
-    }
-
-    /**
      * Links the HostCatcher up with the other back end pieces and launches
      * the port monitoring thread
      */
-    public void initialize( ) {
-        //_connectionManager = connectionManager;
-        //_router = router;
-        //_downloadManager = downloadManager;
-        //_uploadManager = uploadManager;
+    public void start() {
+		Thread httpAcceptorThread = new Thread(this, "HTTPAcceptor");
+        httpAcceptorThread.setDaemon(true);
+        httpAcceptorThread.start();
     }
 
     /**
@@ -151,8 +136,7 @@ public class HTTPAcceptor extends Thread {
             }
 
             // If we still don't have a socket, there's an error
-            if(_socket == null)
-                _callback.error(ActivityCallback.PORT_ERROR);
+			ErrorService.error(e);
         }
 
         while (true) {
@@ -187,11 +171,11 @@ public class HTTPAcceptor extends Thread {
                 new ConnectionDispatchRunner(client);
 
             } catch (SecurityException e) {
-                _callback.error(ActivityCallback.SOCKET_ERROR);
+				ErrorService.error(e);
                 return;
             } catch (Exception e) {
                 //Internal error!
-                _callback.error(ActivityCallback.INTERNAL_ERROR, e);
+				ErrorService.error(e);
             }
         }
     }
@@ -245,7 +229,7 @@ public class HTTPAcceptor extends Thread {
                 //handshake failed: try to close connection.
                 try { _socket.close(); } catch (IOException e2) { }
             } catch(Exception e) {
-				_callback.error(ActivityCallback.INTERNAL_ERROR, e);
+				ErrorService.error(e);
 			}
         }
     }

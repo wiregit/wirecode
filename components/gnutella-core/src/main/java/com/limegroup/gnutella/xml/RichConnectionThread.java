@@ -70,7 +70,7 @@ public final class RichConnectionThread extends Thread{
 				}
             }
         } catch(Throwable t) {
-            RouterService.error(t);
+            ErrorService.error(t);
         }
 		*/
     }

@@ -476,8 +476,7 @@ public class ManagedDownloader implements Downloader, Serializable {
                     //don't really try to recover at this point, but we do
                     //attempt to display the error in the GUI for debugging
                     //purposes.
-                    e.printStackTrace();
-                    ManagedDownloader.this.manager.internalError(e);
+                    ErrorService.error(e);
                 }
             }
         };
@@ -994,7 +993,7 @@ public class ManagedDownloader implements Downloader, Serializable {
                     //check that each waitForSlot is paired with yieldSlot,
                     //unless we're aborting
                     if (!stopped)
-                        ManagedDownloader.this.manager.internalError(e);
+                        ErrorService.error(e);
                 }
                 manager.yieldSlot(this);
                 if (stopped) {
@@ -1481,7 +1480,7 @@ public class ManagedDownloader implements Downloader, Serializable {
                             //errors.  We don't really try to recover at this
                             //point, but we do attempt to display the error in
                             //the GUI for debugging purposes.
-                            ManagedDownloader.this.manager.internalError(e);
+                            ErrorService.error(e);
                         } finally {
                             synchronized (ManagedDownloader.this) { 
                                 threads.remove(this); 

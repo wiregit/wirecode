@@ -174,7 +174,7 @@ public class StatisticsRecorder
             }
             catch(Throwable t)
             {
-                RouterService.error(t);
+                ErrorService.error(t);
             }
 
         }

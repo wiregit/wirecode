@@ -107,7 +107,7 @@ public class DownloadManager implements BandwidthTracker {
                     if (downloadsInProgress()>0) //optimization
                         writeSnapshot();
                 } catch(Throwable t) {
-                    RouterService.error(t);
+                    ErrorService.error(t);
                 }
             }
         };
@@ -811,12 +811,6 @@ public class DownloadManager implements BandwidthTracker {
         return averageBandwidth;
 	}		
     
-    /** Notifies the GUI of the uncaught exception e.  For use only by download
-     *  runner threads. */
-    public void internalError(Throwable e) { 
-        callback.error(ActivityCallback.ASSERT_ERROR, e);
-    }
-
     private final boolean debugOn = false;
     private final void debug(String out) {
         if (debugOn)

@@ -3,7 +3,7 @@ package com.limegroup.gnutella.util;
 import com.limegroup.gnutella.Assert;
 import com.limegroup.gnutella.ByteOrder;
 import com.limegroup.gnutella.ActivityCallback;
-import com.limegroup.gnutella.RouterService;
+import com.limegroup.gnutella.ErrorService;
 import com.sun.java.util.collections.Comparable;
 import com.sun.java.util.collections.ArrayList;
 
@@ -32,8 +32,6 @@ public class SimpleTimer {
     private TimerRunnerThread _runner;
     /** True if this is cancelled. */
     private volatile boolean _isCancelled=false;
-    /** If non-null, used for internal errors. */
-    private ActivityCallback _callback;
 
     /**
      * Creates a new active SimpleTimer.
@@ -74,10 +72,8 @@ public class SimpleTimer {
 
         long now=System.currentTimeMillis();
 
-		ActivityCallback callback = RouterService.getCallback();
         SimpleTimerTask ttask=new SimpleTimerTask(task,
-                                                  period, now+delay, 
-                                                  callback);
+                                                  period, now+delay);
         synchronized(_queue) {
             Object discarded=_queue.insert(ttask);
             Assert.that(discarded==null, "heap didn't resize");
@@ -123,7 +119,7 @@ public class SimpleTimer {
                     }
                 }
             } catch(Throwable t) {
-                RouterService.error(t);
+                ErrorService.error(t);
             }
         }
 
@@ -179,16 +175,12 @@ class SimpleTimerTask implements Comparable {
     private final long _period;
     /** The system time this should next be executed, in milliseconds. */
     private long _nextTime;
-    /** @see SimpleTimer._callback. */
-    private ActivityCallback _callback;
 
     SimpleTimerTask(Runnable task, 
-                    long period, long nextTime, 
-                    ActivityCallback callback) {
+                    long period, long nextTime) {
         this._task=task;
         this._period=period;
         this._nextTime=nextTime;
-        this._callback=callback;
     }
 
     /**
@@ -207,8 +199,7 @@ class SimpleTimerTask implements Comparable {
         try {
             _task.run();
         } catch (Exception e) {
-            if (_callback!=null)
-                _callback.error(e);
+			ErrorService.error(e);
         }
         _nextTime=System.currentTimeMillis()+_period;
     }

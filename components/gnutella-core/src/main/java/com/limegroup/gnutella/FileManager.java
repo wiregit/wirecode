@@ -423,7 +423,7 @@ public class FileManager {
 					try {
 						loadSettingsBlocking(notifyOnClearFinal);
 					} catch(Throwable t) {
-						_callback.error(t);
+						ErrorService.error(t);
 					}
                 }
             };

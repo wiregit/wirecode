@@ -46,7 +46,7 @@ public final class ThemeFileHandler {
                 Expand.expandFile(themeFile, themeDir);
             } catch(IOException e) {
 				// this should never really happen, so report it
-				RouterService.error(e);						
+				ErrorService.error(e);						
             }
 		} 
 		handleFactory(THEME_PROPS);		

@@ -11,7 +11,7 @@ import com.limegroup.gnutella.search.*;
 /**
  * The command-line UI for the Gnutella servent.
  */
-public class Main implements ActivityCallback {
+public class Main implements ActivityCallback, ErrorCallback {
     public static void main(String args[]) {
 		ActivityCallback callback = new Main();
 		//RouterService.setCallback(callback);
@@ -168,8 +168,8 @@ public class Main implements ActivityCallback {
     }
 
 
-    public void error(int message) {
-		error(message, null);
+	public void error(int errorCode) {
+		error(errorCode, null);
     }
 
 	/**

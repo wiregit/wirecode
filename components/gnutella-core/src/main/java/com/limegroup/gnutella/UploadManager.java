@@ -406,7 +406,7 @@ public final class UploadManager implements BandwidthTracker {
                         insertFailedPush(host, index);  
                     }
                 } catch(Throwable e) {
-					RouterService.error(e);
+					ErrorService.error(e);
 				}
                 finally {
                     //close the socket

@@ -175,7 +175,7 @@ public class ConnectionWatchdog implements Runnable {
                 }
             }
         } catch (Throwable t) {
-            RouterService.error(t);
+            ErrorService.error(t);
         }
     }
 

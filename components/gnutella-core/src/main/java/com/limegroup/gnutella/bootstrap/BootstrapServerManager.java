@@ -283,7 +283,7 @@ public class BootstrapServerManager {
                     requestBlocking(request);
                 } catch (Throwable e) {
                     //Internal error!  Display to GUI for debugging.
-                    RouterService.getCallback().error(e);
+                    ErrorService.error(e);
                 } finally {
                     request.done();
                 }

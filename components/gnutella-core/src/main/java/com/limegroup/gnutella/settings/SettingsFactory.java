@@ -22,9 +22,9 @@ public final class SettingsFactory {
     /** 
 	 * <tt>File</tt> object from which settings are loaded and saved 
 	 */    
-    private File SETTINGS_FILE;
+    private final File SETTINGS_FILE;
     
-    private String HEADING;
+    private final String HEADING;
 
     /**
      * <tt>Properties</tt> instance for the defualt values.
@@ -49,7 +49,7 @@ public final class SettingsFactory {
 	 * @param settingsFile the file to read from and to write to
 	 */
 	SettingsFactory(File settingsFile) {
-        this(settingsFile, null);
+        this(settingsFile, "");
     }
     
 	/**
@@ -79,8 +79,8 @@ public final class SettingsFactory {
 		if(!SETTINGS_FILE.isFile()) return;
         try {
             PROPS.load(new FileInputStream(SETTINGS_FILE));
-        } catch(IOException ex) {
-			RouterService.getCallback().error(ActivityCallback.INTERNAL_ERROR, ex);
+        } catch(IOException e) {
+			ErrorService.error(e);
             // the default properties will be used -- this is fine and expected
         }		
         
@@ -98,8 +98,8 @@ public final class SettingsFactory {
     public void save() {
         try {
             PROPS.store(new FileOutputStream(SETTINGS_FILE), HEADING);
-        } catch (IOException ex) {
-			RouterService.getCallback().error(ActivityCallback.INTERNAL_ERROR, ex);
+        } catch (IOException e) {
+			ErrorService.error(e);
         }
     }
     

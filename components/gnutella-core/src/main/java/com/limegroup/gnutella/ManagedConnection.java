@@ -475,7 +475,7 @@ public class ManagedConnection
                     repOk();
                 }
             } catch(Throwable t) {
-                RouterService.error(t);
+                ErrorService.error(t);
             }
         }
 

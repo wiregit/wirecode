@@ -150,31 +150,6 @@ public interface ActivityCallback
      */  
     public void uploadsComplete();
 
-    /**
-     * An error has occured.
-     * 
-     * @param errorCode  the error message to diaplay.  MUST be one
-     *  of PORT_ERROR, SOCKET_ERROR, ASSERT_ERROR, or INTERNAL_ERROR.
-     */
-    public void error(int errorCode);
-
-    /**
-	 * An internal error has occured.
-	 *
-     * @param errorCode  the error message to diaplay.  MUST be one
-     *  of PORT_ERROR, SOCKET_ERROR, ASSERT_ERROR, or INTERNAL_ERROR.
-	 * @param t          The <code>Throwable</code> instance containing the
-	 *                   stack trace to display
-     */
-    public void error(int errorCode, Throwable t);
-
-    /**
-	 * Displays an error stack trace to the user with a generic message.
-	 *
-	 * @param t  The <code>Throwable</code> instance containing the
-	 *           stack trace to display
-     */
-    public void error(Throwable t);
 
     //authentication callbacks
     /**
@@ -206,19 +181,4 @@ public interface ActivityCallback
 
 
     public String getHostValue(String key);
-
-    /** Could not establish a listening port. */
-	public static final int PORT_ERROR = 10;
-
-    /** Security error accepting incoming connection.  (Should never happen.) */
-	public static final int SOCKET_ERROR = 11;
-
-    /** Internal error. */
-	public static final int INTERNAL_ERROR = 12;
-
-    /** 
-	 * Internal error caused by an assertion failure.
-	 */
-	public static final int ASSERT_ERROR = 13;
-
 }

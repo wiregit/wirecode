@@ -130,7 +130,7 @@ final class HeadRequester implements Runnable {
                 }
             }
         } catch(Exception e) {
-            RouterService.getCallback().error(e);
+            ErrorService.error(e);
         }
 	}
 }

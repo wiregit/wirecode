@@ -209,7 +209,7 @@ public class Sockets {
 						}
 					}
 				} catch(Throwable t) {
-					RouterService.error(t);
+					ErrorService.error(t);
 				}
 			}
 		}

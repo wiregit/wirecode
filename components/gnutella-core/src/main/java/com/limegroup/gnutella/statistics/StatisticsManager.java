@@ -112,7 +112,7 @@ public final class StatisticsManager implements Runnable {
 				}
 			}
 		} catch(Throwable t) {
-			RouterService.error(t);
+			ErrorService.error(t);
 		}
 	}
 

@@ -187,7 +187,6 @@ public final class RouterService {
 		router.initialize();
 		manager.initialize();	   
 		downloader.initialize(); 
-	    new HTTPAcceptor(callback);	
 		SupernodeAssigner sa = new SupernodeAssigner(uploadManager, 
 													 downloader, 
 													 manager);
@@ -222,6 +221,7 @@ public final class RouterService {
         updater.postGuiInit(callback);
 		RESULT_HANDLER.start();
 		QueryUnicaster.instance().start();
+	    new HTTPAcceptor().start();	
 	}
 
     /**
@@ -489,7 +489,7 @@ public final class RouterService {
             //persist urn cache
             UrnCache.instance().persistCache();
         } catch(Throwable t) {
-            RouterService.error(t);
+            ErrorService.error(t);
         }
     }
 
@@ -780,7 +780,7 @@ public final class RouterService {
 				router.sendDynamicQuery(QueryHandler.createHandler(qr));
 			}
 		} catch(Throwable t) {
-			RouterService.error(t);
+			ErrorService.error(t);
 		}
 	}
 
@@ -1133,41 +1133,6 @@ public final class RouterService {
      */    
 	public static int getPort() {
 		return acceptor.getPort();
-	}
-
-	/**
-	 * Notify the callback that an error of the specified error code has
-	 * occurred.
-	 *
-	 * @param errorCode the code for the error
-	 */
-	public static void error(int errorCode) { 
-		callback.error(errorCode);
-	}
-
-	/**
-	 * Notify the callback that an error has occurred with the given 
-	 * <tt>Throwable</tt>.
-	 *
-	 * @param trace the <tt>Throwable</tt> instance containing the stack
-	 *  trace of the error
-	 */
-	public static void error(Throwable trace) {
-		trace.printStackTrace();
-		callback.error(trace);
-	}
-
-	/**
-	 * Notify the callback that an error of the specified error code has
-	 * occurred with the given <tt>Throwable</tt>.
-	 *
-	 * @param errorCode the code for the error
-	 * @param trace the <tt>Throwable</tt> instance containing the stack
-	 *  trace of the error
-	 */
-	public static void error(int errorCode, Throwable trace) {
-		trace.printStackTrace();
-		callback.error(errorCode, trace);
 	}
 
 	/**

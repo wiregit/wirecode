@@ -23,43 +23,43 @@ public final class SupernodeAssigner {
 	 * Constant handle to the <tt>SettingsManager</tt> for accessing
 	 * various properties.
 	 */
-	private final SettingsManager SETTINGS = SettingsManager.instance();
+	private static final SettingsManager SETTINGS = SettingsManager.instance();
 
 	/**
 	 * Constant for the minimum number of upstream kbytes per second that 
 	 * a node must be able to transfer in order to qualify as a supernode.
 	 */
-	private final int MINIMUM_REQUIRED_UPSTREAM_KBYTES_PER_SECOND = 15;
+	private static final int MINIMUM_REQUIRED_UPSTREAM_KBYTES_PER_SECOND = 15;
 
 	/**
 	 * Constant for the minimum number of downlstream kbytes per second that 
 	 * a node must be able to transfer in order to qualify as a supernode.
 	 */
-	private final int MINIMUM_REQUIRED_DOWNSTREAM_KBYTES_PER_SECOND = 20;
+	private static final int MINIMUM_REQUIRED_DOWNSTREAM_KBYTES_PER_SECOND = 20;
 
 	/**
 	 * Constant for the minimum average uptime in seconds that a node must 
 	 * have to qualify for supernode status.
 	 */
-	private final int MINIMUM_AVERAGE_UPTIME = 60 * 60; //1 hr
+	private static final int MINIMUM_AVERAGE_UPTIME = 60 * 60; //1 hr
 
 	/**
 	 * Constant for the minimum current uptime in seconds that a node must 
 	 * have to qualify for supernode status.
 	 */
-	private final int MINIMUM_CURRENT_UPTIME = 120 * 60; //2 hr
+	private static final int MINIMUM_CURRENT_UPTIME = 120 * 60; //2 hr
 
 	/**
 	 * Constant for the minimum current uptime in seconds that a node must 
 	 * have for us to attempt to switch them from a leaf to an Ultrapeer
 	 */
-	private final int MINIMUM_CURRENT_UPTIME_FORCE = 150 * 60; //2.5 hr
+	private static final int MINIMUM_CURRENT_UPTIME_FORCE = 150 * 60; //2.5 hr
 
 	/**
 	 * Constant value for whether or not the operating system qualifies
 	 * this node for Ultrapeer status.
 	 */
-	private boolean SUPERNODE_OS = CommonUtils.isSupernodeOS();
+	private static final boolean SUPERNODE_OS = CommonUtils.isSupernodeOS();
 	
 	/**
 	 * Constant for the number of milliseconds between the timer's calls
@@ -71,49 +71,49 @@ public final class SupernodeAssigner {
 	 * Constant for the number of seconds between the timer's calls
 	 * to its <tt>Runnable</tt>s.
 	 */
-	private final int TIMER_DELAY_IN_SECONDS = TIMER_DELAY/1000;
+	private static final int TIMER_DELAY_IN_SECONDS = TIMER_DELAY/1000;
 
     /**
 	 * A <tt>BandwidthTracker</tt> instance for keeping track of the 
 	 * upload bandwidth used for file uploads.
 	 */
-	private BandwidthTracker _uploadTracker;
+	private static BandwidthTracker _uploadTracker;
 
     /**
 	 * A <tt>BandwidthTracker</tt> instance for keeping track of the 
 	 * download bandwidth used for file downloads.
 	 */
-	private BandwidthTracker _downloadTracker;
+	private static BandwidthTracker _downloadTracker;
     
     /**
      * A reference to the Connection Manager
      */
-    private ConnectionManager _manager;
+    private static ConnectionManager _manager;
 
 	/**
 	 * Variable for the current uptime of this node.
 	 */
-	private long _currentUptime = 0;
+	private static long _currentUptime = 0;
 
 	/**
 	 * Variable for the maximum number of bytes per second transferred 
 	 * downstream over the history of the application.
 	 */
-	private int _maxUpstreamBytesPerSec =
+	private static int _maxUpstreamBytesPerSec =
         SETTINGS.getMaxUpstreamBytesPerSec();
 
 	/**
 	 * Variable for the maximum number of bytes per second transferred 
 	 * upstream over the history of the application.
 	 */
-	private int _maxDownstreamBytesPerSec = 
+	private static int _maxDownstreamBytesPerSec = 
         SETTINGS.getMaxDownstreamBytesPerSec();
     
     /**
      * True, if the last time we evaluated the node for supernode capability, 
      * it came out as supernode capable. False, otherwise
      */
-    private volatile boolean _wasSupernodeCapable;
+    private static volatile boolean _wasSupernodeCapable;
 
 	/**
 	 * Variable for whether or not this node has such good values that it is too
@@ -124,18 +124,18 @@ public final class SupernodeAssigner {
 	/**
 	 * Variable for the last time we attempted to become an Ultrapeer.
 	 */
-	private long _lastAttempt = 0L;
+	private static long _lastAttempt = 0L;
 
 	/**
 	 * Number of times we've tried to become an Ultrapeer.
 	 */
-	private int _ultrapeerTries = 0;
+	private static int _ultrapeerTries = 0;
 
 	/**
 	 * Constant for the amount of time to wait between attempts to become an 
 	 * Ultrapeer.
 	 */
-	private int RETRY_TIME = 90*60*1000; // 90 minutes
+	private static final int RETRY_TIME = 90*60*1000; // 90 minutes
 
     /** 
 	 * Creates a new <tt>SupernodeAssigner</tt>. 
@@ -166,7 +166,7 @@ public final class SupernodeAssigner {
                 try {
                     collectBandwidthData();
                 } catch(Throwable t) {
-                    RouterService.error(t);
+                    ErrorService.error(t);
                 }
             }
         };            
@@ -181,7 +181,7 @@ public final class SupernodeAssigner {
      * are not met.  If the user has disabled supernode support, 
      * sets EVER_SUPERNODE_CAPABLE to false.
 	 */
-	private void setSupernodeCapable() {
+	private static void setSupernodeCapable() {
         if (UltrapeerSettings.DISABLE_ULTRAPEER_MODE.getValue()) {
 			UltrapeerSettings.EVER_ULTRAPEER_CAPABLE.setValue(false);
             return;
@@ -265,7 +265,7 @@ public final class SupernodeAssigner {
 	 * @return <tt>true</tt> if we should try again to become an Ultrapeer,
 	 *  otherwise <tt>false</tt>
 	 */
-	private boolean shouldTryToBecomeAnUltrapeer(long curTime) {
+	private static boolean shouldTryToBecomeAnUltrapeer(long curTime) {
 		if(curTime - _lastAttempt < RETRY_TIME) {
 			return false;
 		}
@@ -288,7 +288,7 @@ public final class SupernodeAssigner {
 	 * Collects data on the bandwidth that has been used for file uploads
 	 * and downloads.
 	 */
-	private void collectBandwidthData() {
+	private static void collectBandwidthData() {
 		_currentUptime += TIMER_DELAY_IN_SECONDS;
         _uploadTracker.measureBandwidth();
         _downloadTracker.measureBandwidth();

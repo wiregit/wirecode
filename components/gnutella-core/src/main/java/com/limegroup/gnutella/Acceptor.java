@@ -237,7 +237,6 @@ public class Acceptor extends Thread {
     public void run() {
 		SettingsManager settings = SettingsManager.instance();
 		int tempPort = settings.getPort();
-		ActivityCallback callback = RouterService.getCallback();
 
         //0. Get local address.  This must be done here because it can
         //   block under certain conditions.
@@ -273,7 +272,7 @@ public class Acceptor extends Thread {
 
             // If we still don't have a socket, there's an error
             if(_socket == null) {
-                callback.error(socketError);
+                ErrorService.error(socketError);
             }
         }
         socketError = null;
@@ -331,11 +330,9 @@ public class Acceptor extends Thread {
 				dispatchThread.start();
 
             } catch (SecurityException e) {
-                callback.error(ActivityCallback.SOCKET_ERROR);
-                return;
+                ErrorService.error(e);
             } catch (Throwable e) {
-                //Internal error!
-                callback.error(ActivityCallback.INTERNAL_ERROR, e);
+                ErrorService.error(e);
             }
         }
     }
@@ -370,7 +367,6 @@ public class Acceptor extends Thread {
          * as Gnutella, HTTP, or MAGNET.
          */
         public void run() {
-			ActivityCallback callback = RouterService.getCallback();
 			ConnectionManager cm      = RouterService.getConnectionManager();
 			UploadManager um          = RouterService.getUploadManager();
 			DownloadManager dm        = RouterService.getDownloadManager();
@@ -448,8 +444,7 @@ public class Acceptor extends Thread {
                 //handshake failed: try to close connection.
                 try { _socket.close(); } catch (IOException e2) { }
             } catch(Throwable e) {
-                e.printStackTrace();
-				callback.error(ActivityCallback.INTERNAL_ERROR, e);
+				ErrorService.error(e);
 			}
         }
     }

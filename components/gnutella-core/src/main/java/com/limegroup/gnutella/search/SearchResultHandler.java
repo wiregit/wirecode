@@ -113,7 +113,7 @@ public final class SearchResultHandler {
 						lastTime=System.currentTimeMillis();
 				}
 			} catch(Throwable t) {
-				RouterService.error(t);
+				ErrorService.error(t);
 			}
 		}
 	}

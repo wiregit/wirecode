@@ -10,10 +10,7 @@ public class Assert {
             System.err.println("Assertion failed: "+msg);
             Thread.dumpStack();
 			RuntimeException re = new AssertFailure(msg);
-			ActivityCallback callback = RouterService.getCallback();
-			if(callback != null) {
-				callback.error(ActivityCallback.ASSERT_ERROR, re);
-			}
+			ErrorService.error(re);
 			throw re;
         }
     }

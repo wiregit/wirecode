@@ -261,7 +261,7 @@ public class ConnectionManager {
          } catch(IOException e) {
          } catch(Exception e) {
              //Internal error!
-             RouterService.error(ActivityCallback.INTERNAL_ERROR, e);
+             ErrorService.error(e);
          } finally {
             //if we were leaf to a supernode, reconnect to network 
             if (connection.isClientSupernodeConnection())
@@ -1449,7 +1449,7 @@ public class ConnectionManager {
             } catch(IOException e) {
             } catch(Throwable e) {
                 //Internal error!
-                RouterService.error(ActivityCallback.INTERNAL_ERROR, e);
+                ErrorService.error(e);
             }
             finally{
                 if (_connection.isClientSupernodeConnection())
@@ -1563,7 +1563,7 @@ public class ConnectionManager {
             } catch(IOException e) {
             } catch(Throwable e) {
                 //Internal error!
-                RouterService.error(ActivityCallback.INTERNAL_ERROR, e);
+                ErrorService.error(e);
             }
             finally{
                 if (connection.isClientSupernodeConnection())

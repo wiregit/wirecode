@@ -193,7 +193,7 @@ public final class UDPService implements Runnable {
                 // ----------------------------*
             }
         } catch(Throwable t) {
-            RouterService.error(t);
+            ErrorService.error(t);
         }
 	}
 

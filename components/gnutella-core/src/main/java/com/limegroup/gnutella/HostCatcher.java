@@ -164,7 +164,7 @@ public class HostCatcher {
 							}
                         }
                 } catch(Throwable t) {
-                    RouterService.error(t);
+                    ErrorService.error(t);
                 }
             }
         };

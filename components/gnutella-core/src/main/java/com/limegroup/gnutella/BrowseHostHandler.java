@@ -327,7 +327,7 @@ public class BrowseHostHandler {
                         _pushedHosts.remove(keys.next());
                 }
             } catch(Throwable t) {
-                RouterService.error(t);
+                ErrorService.error(t);
             }
         }
     }
