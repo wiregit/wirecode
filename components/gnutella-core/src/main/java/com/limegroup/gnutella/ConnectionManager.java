@@ -326,7 +326,7 @@ public class ConnectionManager {
         //also return false if isSupernode().
         List connections=getInitializedConnections();
         for (int i=0; i<connections.size(); i++) {
-            ManagedConnection first=(ManagedConnection)connections.get(0);
+            ManagedConnection first=(ManagedConnection)connections.get(i);
             if (first.isClientSupernodeConnection())
                 return true;
         }
