@@ -61,7 +61,14 @@ public class CommonUtilsTest extends TestCase {
 		newResourceFile.deleteOnExit();
 		String fileName = "com/sun/java/util/collections/Comparable.class";
 		try {
-			JarFile collections = new JarFile(new File("lib", "collections.jar"));
+			File collectionsFile = new File("lib", "collections.jar");
+			if(!collectionsFile.isFile()) {
+				collectionsFile = new File("../lib", "collections.jar");
+			}
+			if(!collectionsFile.isFile()) {
+				fail("collections.jar not located");
+			}
+			JarFile collections = new JarFile(collectionsFile);//new File("lib", "collections.jar"));
 			JarEntry entry = collections.getJarEntry(fileName);
 			long entrySize = entry.getCompressedSize();
 			CommonUtils.copyResourceFile(fileName, newResourceFile, false);
