@@ -16,8 +16,8 @@
 
 
 <!-- constants -->
-<property name="DEBUG" value="yes"/>  
-<property name="OPTIMIZE" value="no"/>  
+<property name="DEBUG" value="no"/>  
+<property name="OPTIMIZE" value="yes"/>  
 
 
 <!-- Initialization stuff -->

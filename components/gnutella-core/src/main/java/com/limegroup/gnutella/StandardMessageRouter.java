@@ -50,7 +50,14 @@ public class StandardMessageRouter
             && !_manager.hasAnyAvailableIncoming())
             return;
 
-        //for crawler pings we shouldn't send the pong with hops+1 as TTL.
+        //SPECIAL CASE: for Crawle ping
+        if(hops ==0 && ttl==2) {
+            handleCrawlerPing(pingRequest);
+            return;
+        }
+        
+        
+        //handle normal ping
         int newTTL = hops+1;
         if ( (hops+ttl) <=2)
             newTTL = 1;
@@ -75,6 +82,68 @@ public class StandardMessageRouter
         catch(IOException e) {}
     }
 
+    /**
+     * Handles the crawler ping of Hops=0 & TTL=2, by sending pongs 
+     * corresponding to all its neighbors
+     * @param m The ping request received
+     * @exception In case any I/O error occurs while writing Pongs over the
+     * connection
+     */
+    private void handleCrawlerPing(PingRequest m) {
+        //send the pongs for the Ultrapeer & 0.4 connections
+        List /*<ManagedConnection>*/ nonLeafConnections 
+            = _manager.getInitializedConnections2();
+        sendNeighborPongs(m, nonLeafConnections);
+        
+        //send the pongs for leaves
+        List /*<ManagedConnection>*/ leafConnections 
+            = _manager.getInitializedClientConnections2();
+        sendNeighborPongs(m, leafConnections);
+        
+        //Note that sending its own pong is not necessary, as the crawler has
+        //already connected to this node, and is not sent therefore. 
+        //May be sent for completeness though
+    }
+    
+    /**
+     * Sends the pongs corresponding to the list of connections passed.
+     * This prevents calling RouteTable.removeReplyHandler when 
+     * the connection is closed.
+     * @param m Th epingrequest received that needs Pongs
+     * @param neigbors List (of ManagedConnection) of  neighboring connections
+     * @exception In case any I/O error occurs while writing Pongs over the
+     * connection
+     */
+    private void sendNeighborPongs(PingRequest m, List neighbors) {
+        for(Iterator iterator = neighbors.iterator();
+            iterator.hasNext();) {
+            //get the next connection
+            ManagedConnection connection = (ManagedConnection)iterator.next();
+            
+            //create the pong for this connection
+            //mark the pong if supernode
+            PingReply pr;
+            if(connection.isSupernodeConnection()) {
+                pr = new PingReply(m.getGUID(),(byte)2,
+                connection.getOrigPort(),
+                connection.getInetAddress().getAddress(), 0, 0, true);  
+            } else {
+                pr = new PingReply(m.getGUID(),(byte)2,
+                connection.getOrigPort(),
+                connection.getInetAddress().getAddress(), 0, 0); 
+            }
+            
+            //hop the message, as it is ideally coming from the connected host
+            pr.hop();
+            
+            try
+            {
+                sendPingReply(pr);
+            }
+            catch(IOException e) {}
+        }
+    }
+    
     protected void handlePingReply(PingReply pingReply,
                                 ManagedConnection receivingConnection)
     {

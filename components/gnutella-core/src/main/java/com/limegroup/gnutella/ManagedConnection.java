@@ -527,6 +527,13 @@ public class ManagedConnection
                 // this is the only kind of message we will deal with
                 // in Reject Connection
                 // If any other kind of message comes in we drop
+               
+                //SPECIAL CASE: for Crawle ping
+                if(m.getTTL() == 2) {
+                    handleCrawlerPing((PingRequest)m);
+                    return;
+                }
+                
                 Iterator iter = catcher.getBestHosts(10);
                  // we are going to send rejected host the top ten
                  // connections
@@ -551,6 +558,76 @@ public class ManagedConnection
         }
     }
 
+    /**
+     * Handles the crawler ping of Hops=0 & TTL=2, by sending pongs 
+     * corresponding to all its neighbors
+     * @param m The ping request received
+     * @exception In case any I/O error occurs while writing Pongs over the
+     * connection
+     */
+    private void handleCrawlerPing(PingRequest m) throws IOException {
+        //IMPORTANT: note that we do not use this' send or receive methods.
+        //This is an important optimization to prevent calling
+        //RouteTable.removeReplyHandler when the connection is closed.
+        //Unfortunately it still can be triggered by the
+        //OutputRunnerThread. TODO: can we avoid creating the OutputRunner
+        //thread in this case?
+
+        //send the pongs for the Ultrapeer & 0.4 connections
+        List /*<ManagedConnection>*/ nonLeafConnections 
+            = _manager.getInitializedConnections2();
+        supersendNeighborPongs(m, nonLeafConnections);
+        
+        //send the pongs for leaves
+        List /*<ManagedConnection>*/ leafConnections 
+            = _manager.getInitializedClientConnections2();
+        supersendNeighborPongs(m, leafConnections);
+        
+        //Note that sending its own pong is not necessary, as the crawler has
+        //already connected to this node, and is not sent therefore. 
+        //May be sent for completeness though
+    }
+    
+    /**
+     * Uses the super class's send message to send the pongs corresponding 
+     * to the list of connections passed.
+     * This prevents calling RouteTable.removeReplyHandler when 
+     * the connection is closed.
+     * @param m Th epingrequest received that needs Pongs
+     * @param neigbors List (of ManagedConnection) of  neighboring connections
+     * @exception In case any I/O error occurs while writing Pongs over the
+     * connection
+     */
+    private void supersendNeighborPongs(PingRequest m, List neighbors) 
+        throws IOException {
+        for(Iterator iterator = neighbors.iterator();
+            iterator.hasNext();) {
+            //get the next connection
+            ManagedConnection connection = (ManagedConnection)iterator.next();
+            
+            //create the pong for this connection
+            //mark the pong if supernode
+            PingReply pr;
+            if(connection.isSupernodeConnection()) {
+                pr = new PingReply(m.getGUID(),(byte)2,
+                connection.getOrigPort(),
+                connection.getInetAddress().getAddress(), 0, 0, true);  
+            } else {
+                pr = new PingReply(m.getGUID(),(byte)2,
+                connection.getOrigPort(),
+                connection.getInetAddress().getAddress(), 0, 0); 
+            }
+            
+            //hop the message, as it is ideally coming from the connected host
+            pr.hop();
+            
+            //send the message
+            super.send(pr);
+        }
+        
+        super.flush();
+    }
+    
     /**
      * Handles core Gnutella request/reply protocol.  This call
      * will run until the connection is closed.  Note that this is called
