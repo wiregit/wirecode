@@ -320,8 +320,8 @@ public class StandardMessageRouter extends MessageRouter {
         try {
             xmlBytes = xmlCollectionString.getBytes("UTF-8");
         } catch(UnsupportedEncodingException ueex) {//no support for utf-8??
-            xmlCollectionString = "";
-            xmlBytes = xmlCollectionString.getBytes();
+            //all implementations of java must support utf8 encoding
+            ErrorService.error(ueex);
         }
         
         // get the *latest* push proxies if we have not accepted an incoming
@@ -346,7 +346,10 @@ public class StandardMessageRouter extends MessageRouter {
                 try {
                     currXMLBytes = currXML.getBytes("UTF-8");
                 } catch(UnsupportedEncodingException ueex) {
-                    currXMLBytes = "".getBytes();
+                    //all implementations of java must support utf8 encoding
+                    //so if we get here there was something really wrong
+                    ErrorService.error(ueex);
+                    //currXMLBytes = "".getBytes();
                 }
                 if ((currXMLBytes.length > QueryReply.XML_MAX_SIZE) &&
                                                         (currResps.length > 1)) 

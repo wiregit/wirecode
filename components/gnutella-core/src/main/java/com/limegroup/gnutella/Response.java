@@ -251,7 +251,9 @@ public class Response {
             temp = this.name.getBytes("UTF-8");
         }
         catch(UnsupportedEncodingException namex) {
-            temp = this.name.getBytes();
+            //b/c this should never happen, we will show and error
+            //if it ever does for some reason.
+            ErrorService.error(namex);
         }
         
         this.nameBytes = temp;
@@ -284,7 +286,9 @@ public class Response {
         try { //It's possible to get metadata between the null from others
             this.metaBytes = this.metadata.getBytes("UTF-8");
         } catch(UnsupportedEncodingException ueex) {
-            this.metaBytes = this.metadata.getBytes();
+            //b/c this should never happen, we will show and error
+            //if it ever does for some reason.
+            ErrorService.error(ueex);
         }
 		
 		// we don't generate this from the metadata string in the case where the
@@ -659,7 +663,9 @@ public class Response {
             metaBytes = metadata.getBytes("UTF-8");
         }
         catch(UnsupportedEncodingException uee) {
-            metaBytes = metadata.getBytes();
+            //b/c this should never happen, we will show and error
+            //if it ever does for some reason.
+            ErrorService.error(use);
         }
 	}
 	

@@ -259,7 +259,13 @@ public final class SearchResultHandler {
                 byte[] xmlUncompressed = LimeXMLUtils.uncompress(xmlCompressed);
                 xmlCollectionString = new String(xmlUncompressed,"UTF-8");
             }
-        } catch (IOException ignored) {}
+        }
+        catch (UnsupportedEncodingException use) {
+            //b/c this should never happen, we will show and error
+            //if it ever does for some reason.
+            ErrorService.error(use);
+        }
+        catch (IOException ignored) {}
 
         debug("xmlCollectionString = " + xmlCollectionString);
         List allDocsArray = LimeXMLDocumentHelper.getDocuments(xmlCollectionString, 
