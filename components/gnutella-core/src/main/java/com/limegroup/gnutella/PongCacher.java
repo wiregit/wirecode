@@ -71,6 +71,7 @@ public final class PongCacher {
             
             if(!ApplicationSettings.DEFAULT_LOCALE.getValue().equals(loc)
                && pongs.size() < NUM_HOPS) {
+
                 removeList = 
                     addBestPongs(ApplicationSettings.DEFAULT_LOCALE.getValue(),
                                  pongs,

@@ -1859,8 +1859,8 @@ public class ConnectionManager {
                 do {
                     endpoint = _catcher.getAnEndpoint();
                 } while ( !IPFilter.instance().allow(endpoint.getAddress()) || 
-                          isConnectedTo(endpoint.getAddress()) );                      
-    
+                          isConnectedTo(endpoint.getAddress()) );              
+                
                 Assert.that(endpoint != null);
                 _connectionAttempts++;
                 ManagedConnection connection = new ManagedConnection(

@@ -279,6 +279,13 @@ public final class ForMeReplyHandler implements ReplyHandler {
     public boolean isStable() {
         return true;
     }
+
+    /**
+     */
+    public String getLocalePref() {
+        return ApplicationSettings.LANGUAGE.getValue();
+    }
+
 }
 
 

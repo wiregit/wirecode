@@ -108,7 +108,7 @@ public class PingReply extends Message implements Serializable, IpPort {
     /**
      * Constant for the locale
      */
-    private static String CLIENT_LOCALE;
+    private String CLIENT_LOCALE;
 
 
     /**
@@ -470,7 +470,7 @@ public class PingReply extends Message implements Serializable, IpPort {
 
             if(ggep.hasKey(GGEP.GGEP_HEADER_CLIENT_LOCALE)) {
                 try {
-                    CLIENT_LOCALE =
+                    String clocale =
                         ggep.getString(GGEP.GGEP_HEADER_CLIENT_LOCALE);
                 }
                 catch(BadGGEPPropertyException e) {

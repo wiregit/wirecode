@@ -154,6 +154,10 @@ public interface ReplyHandler {
     boolean isStable();
 
     /**
+     */
+    public String getLocalePref();
+
+    /**
      * Handles StatisticVendorMessage using this ReplyHandler
      */ 
     public void handleStatisticVM(StatisticVendorMessage m) throws IOException;
