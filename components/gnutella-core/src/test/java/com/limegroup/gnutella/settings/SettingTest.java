@@ -179,8 +179,8 @@ public class SettingTest extends BaseTestCase {
                    Arrays.equals(testFileArray, 
                                  settings.FILE_ARRAY_SETTING.getValue()));
                                  
-        assertEquals("Expiring Int default", 0xFFFF, settings.EXPIRABLE_INT_SETTING.getValue());
-        assertEquals("Expiring Boolean default", true, settings.EXPIRABLE_BOOLEAN_SETTING.getValue());
+        assertEquals("Expiring Int set", 0xFFFF, settings.EXPIRABLE_INT_SETTING.getValue());
+        assertEquals("Expiring Boolean set", true, settings.EXPIRABLE_BOOLEAN_SETTING.getValue());
                                  
         // Write property to file and confirm that everything reloads properly 
         settings.FACTORY.save();
@@ -204,8 +204,8 @@ public class SettingTest extends BaseTestCase {
                    Arrays.equals(testFileArray, 
                                  settings.FILE_ARRAY_SETTING.getValue()));
         
-        assertEquals("Expiring Int default", 0xFFFF, settings.EXPIRABLE_INT_SETTING.getValue());
-        assertEquals("Expiring Boolean default", true, settings.EXPIRABLE_BOOLEAN_SETTING.getValue());
+        assertEquals("Expiring Int set", 0xFFFF, settings.EXPIRABLE_INT_SETTING.getValue());
+        assertEquals("Expiring Boolean set", true, settings.EXPIRABLE_BOOLEAN_SETTING.getValue());
                                  
         // Confirm that the backup object still has its default settings 
         assertEquals("Bool default", true, settings2.BOOL_SETTING.getValue());
@@ -249,8 +249,8 @@ public class SettingTest extends BaseTestCase {
                    Arrays.equals(testFileArray, 
                                  settings2.FILE_ARRAY_SETTING.getValue()));
                                  
-        assertEquals("Expiring Int default", 0xFFFF, settings2.EXPIRABLE_INT_SETTING.getValue());
-        assertEquals("Expiring Boolean default", true, settings2.EXPIRABLE_BOOLEAN_SETTING.getValue());
+        assertEquals("Expiring Int set", 0xFFFF, settings2.EXPIRABLE_INT_SETTING.getValue());
+        assertEquals("Expiring Boolean set", true, settings2.EXPIRABLE_BOOLEAN_SETTING.getValue());
         
         settings2.FACTORY.save();
         
