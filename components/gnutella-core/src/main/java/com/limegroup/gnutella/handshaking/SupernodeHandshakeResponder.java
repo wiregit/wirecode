@@ -68,8 +68,18 @@ public class SupernodeHandshakeResponder
             }
         } else
         {
-            //Outgoing connection.  Did the server request we become a leaf?
+            //Outgoing connection.  If the other guy is ultrapeer unaware and I
+            //already have enough old-fashioned connections, reject it.
             Properties ret=new Properties();
+            if (response.getHeaders().getProperty(
+                        ConnectionHandshakeHeaders.X_SUPERNODE)==null
+                    && !_manager.hasAvailableIncoming(false, false)) {
+                return new HandshakeResponse(
+                    HandshakeResponse.SLOTS_FULL,
+                    HandshakeResponse.SLOTS_FULL_MESSAGE,
+                    ret);
+            }
+            //Did the server request we become a leaf?
             String neededS=response.getHeaders().
             getProperty(ConnectionHandshakeHeaders.X_SUPERNODE_NEEDED);
             if (neededS!=null

@@ -271,7 +271,6 @@ public class ConnectionManager {
                 ensureConnectionsForSupernode();
              
              sendInitialPingRequest(connection);
-             killExcessConnections();  //see hasAvailableIncoming()
              connection.loopForMessages();
          } catch(IOException e) {
          } catch(Exception e) {
@@ -284,44 +283,6 @@ public class ConnectionManager {
             //if we were leaf to a supernode, reconnect to network 
             if (connection.isClientSupernodeConnection())
                 lostShieldedClientSupernodeConnection();
-         }
-     }
-
-     /**
-      * Kills any old-style connections that are no longer needed.
-      * @see hasAvailableIncoming
-      */
-     private void killExcessConnections() {
-         //Kill extra 0.4 connections using the following heuristics, in order:
-         //1. Prefer incoming connections before outgoing.  It's necessary for
-         //   old clients to prefer incoming because many hosts are firewalled.
-         //   Modern LimeWires don't have this problem because firewalled hosts
-         //   become leaf nodes.
-         //2. Prefer connections that have processed large numbers of
-         //   messages.  Presumably connections that have sent fewer messages 
-         //   are either less well connected or have been up shorter.  In the
-         //   latter case, we assume the less the connection has been alive,
-         //   the less its expected lifetime.
-
-         //Find all potential candidates.
-         List /* of ManagedConnection */ candidates=new ArrayList();
-         for (Iterator iter=getInitializedConnections().iterator(); 
-                 iter.hasNext(); ) {
-             ManagedConnection c=(ManagedConnection)iter.next();
-             if (c.getProperty(ConnectionHandshakeHeaders.X_SUPERNODE)==null)
-                 //old-fashioned
-                 candidates.add(c);
-         }
-
-         //Sort in order of increasing fitness, outgoing first.
-         Collections.sort(candidates, new ManagedConnectionComparator());
-
-         //Third, kill off worst excess candidates, usually just one.
-         int excess=getNumInitializedConnections() - _keepAlive;   
-         for (Iterator iter=candidates.iterator(); excess>0 && iter.hasNext(); ) {
-             ManagedConnection c=(ManagedConnection)iter.next();
-             remove(c);
-             excess--;
          }
      }
 
@@ -612,7 +573,7 @@ public class ConnectionManager {
         //One caveat: in order to prevent fragmentation of ultrapeers and old
         //clients, we give the best DESIRED_OLD_CONNECTIONS old connections
         //immunity from this kill logic.  Effectively these connections are
-        //treated like ultrapeers.
+        //treated like ultrapeers.  TODO: update
 
         SettingsManager settings=SettingsManager.instance();
         //Don't allow anything if disconnected or shielded leaf.  This rule is
@@ -623,24 +584,24 @@ public class ConnectionManager {
             //TODO3: not necessarily true since 2.1, but we want to fetch ultrapeers
             return false;  
 
-        else if (isLeaf) {
+        else if (isLeaf && isUltrapeerAware) {
             //1. Leaf. As the spec. says, this assumes we are an ultrapeer.
             int shieldedMax=
                 SettingsManager.instance().getMaxShieldedClientConnections();
             return _incomingClientConnections < shieldedMax;
         } else if (isUltrapeerAware) {
-            //2. Ultrapeer.  Allow even if that brings the number of connections
-            //over the desired amount; we'll kill off some old connections to
-            //make up.  The first K old-style connections are given same status
-            //as ultrapeers.  TODO3: no need to loop through all old connections
-            //if we're just going to take the min.
-            int preferred=ultrapeerConnections()
-                         +Math.min(oldConnections(), DESIRED_OLD_CONNECTIONS);
-            return preferred < _keepAlive;
-        } else {
-            //3. Old-style, e.g., "0.4" connections.  Note there is no longer
-            //preferencing to incoming connections.
+            //2. Ultrapeer.  In the old days, we used to kill off old
+            //connections for ultrapeers.  Now we simply don't allow extra old
+            //connections in, if we have ultrapeers.  So there's nothing fancy
+            //here.
             return getNumInitializedConnections() < _keepAlive;
+        } else {
+            //3. Old-style, e.g., "0.4" connections.  Only allow if there are
+            //free slots and there aren't too many old-fashioned connections.
+            //Note there is no longer preferencing to incoming connections.
+            //TODO: conjunct "HostCatcher.hasUltrapeerPongs" with second clause.
+            return (getNumInitializedConnections() < _keepAlive)
+                && (oldConnections() < DESIRED_OLD_CONNECTIONS);  
         }
     }
         
@@ -1062,8 +1023,7 @@ public class ConnectionManager {
         //fragmentation with clients that don't support ultrapeers, we'll give
         //the first DESIRED_OLD_CONNECTIONS ultrapeers protected status.  See
         //hasAvailableIncoming(boolean, boolean) and killExcessConnections().
-        int goodConnections=ultrapeerConnections()
-                         +Math.min(oldConnections(), DESIRED_OLD_CONNECTIONS);
+        int goodConnections=getNumInitializedConnections();
         int neededConnections=_keepAlive - goodConnections;
         //Now how many fetchers do we need?  To increase parallelism, we
         //allocate 4 fetchers per connection, but no more than 10 fetchers.
@@ -1612,7 +1572,6 @@ public class ConnectionManager {
 
             try {
                 initializeFetchedConnection(connection, this);
-                killExcessConnections();
                 sendInitialPingRequest(connection);
                 connection.loopForMessages();
             } catch(IOException e) {

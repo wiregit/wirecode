@@ -16,9 +16,12 @@ import java.io.*;
 /**
  * Test the following properties of ultrapeers:
  *
- * -0.4/leaf/ultrapeer connections eventually rejected 
- *  (through 503 or old way.  Do we insist that leaves are given 503?)
- * -pongs given out if slots for any type of connection
+ * <ul>
+ * <li>0.4/leaf/ultrapeer connections eventually rejected 
+ *  through 503 or old way.
+ * <li>pongs given out if slots for any type of connection
+ * <li>ultrapeers are preferenced properly (including when fetching)
+ * </ul>
  */
 public class AcceptLimitTest {
     public static boolean DEBUG=false;
@@ -47,6 +50,7 @@ public class AcceptLimitTest {
         //Bring up application.
         SettingsManager settings=SettingsManager.instance();
         settings.setPort(6346);
+        settings.setUseQuickConnect(false);
         settings.setQuickConnectHosts(new String[0]);
         settings.setConnectOnStartup(false);
         settings.setEverSupernodeCapable(true);
@@ -54,8 +58,9 @@ public class AcceptLimitTest {
         settings.setMaxShieldedClientConnections(LEAF_CONNECTIONS);
         ActivityCallback callback=new ActivityCallbackStub();
         FileManager files=new FileManagerStub();
+        TestMessageRouter router=new TestMessageRouter(callback, files);
         RouterService rs=new RouterService(callback,
-                                           new MetaEnabledMessageRouter(callback, files),
+                                           router,
                                            files,
                                            new DummyAuthenticator());
         rs.initialize();
@@ -63,22 +68,89 @@ public class AcceptLimitTest {
         try {
             rs.setKeepAlive(6);
         } catch (BadConnectionSettingException e) { Assert.that(false); }
-        Connection c=null;        
-
-        System.out.println("\nTest group I:");
-        c=testLimit(host, port, LEAF, LEAF_CONNECTIONS, REJECT_503);        
-        testPong(c, true);        
-        testLimit(host, port, OLD_06, KEEP_ALIVE, REJECT_503);        
-        testPong(c, true);
-        //Note limited ultrapeer preferencing
-        testLimit(host, port, ULTRAPEER, 
-                  KEEP_ALIVE-ConnectionManager.DESIRED_OLD_CONNECTIONS, REJECT_503);       
-        testPong(c, false);
         
+        testFetch(rs, router);
         cleanup(rs);
+        testAcceptI(host, port);
+        cleanup(rs);
+        testAcceptII(host, port);
+    }
 
-        System.out.println("\nTest group II:");
-        c=testLimit(host, port, ULTRAPEER, KEEP_ALIVE, REJECT_SILENT); //ignores guidance
+    private static void testFetch(RouterService rs, TestMessageRouter router) {
+        System.out.println("\nTesting fetching (may fail from race conditions):");
+        try {
+            MiniAcceptor acceptor=null;
+            Connection in=null;
+            final byte[] LOCALHOST={(byte)127, (byte)0, (byte)0, (byte)1};
+            rs.setKeepAlive(0);
+            
+            //Fetch an 0.6 connection.  Note there is a race condition here: 
+            //we must start listening on the socket before the fetcher starts fetcheing
+            System.out.println("-Testing that first fetched 0.6 is accepted");
+            acceptor=new MiniAcceptor(new EmptyResponder(), 6347);
+            router.addHost(LOCALHOST, 6347);
+            rs.setKeepAlive(1);
+            in=acceptor.accept();
+            Assert.that(in!=null);
+            Assert.that(acceptor.getError()==null);
+
+            //Fetch another 0.6
+            System.out.println("-Testing that second fetched 0.6 is accepted");
+            acceptor=new MiniAcceptor(new EmptyResponder(), 6348);
+            router.addHost(LOCALHOST, 6348);
+            rs.setKeepAlive(2);
+            in=acceptor.accept();
+            Assert.that(in!=null);
+            Assert.that(acceptor.getError()==null);
+
+            //Fetch a third...should be rejected!
+            System.out.println("-Testing that third 0.6 is rejected");
+            acceptor=new MiniAcceptor(new EmptyResponder(), 6349);
+            router.addHost(LOCALHOST, 6349);
+            Thread.yield();
+            rs.setKeepAlive(3);
+            in=acceptor.accept();
+            Assert.that(in==null);
+            IOException e=acceptor.getError();
+            Assert.that(e instanceof NoGnutellaOkException);
+            Assert.that(((NoGnutellaOkException)e).getCode()==503);
+
+            //Fetch a fourth ultrapeer.  Should be allowed
+            System.out.println("-Testing that fourth ultrapeer allowed");
+            acceptor=new MiniAcceptor(new UltrapeerResponder(), 6350);
+            router.addHost(LOCALHOST, 6350);
+            Thread.yield();
+            rs.setKeepAlive(3);
+            in=acceptor.accept();
+            Assert.that(in!=null);
+            Assert.that(acceptor.getError()==null);
+
+            rs.disconnect();
+            rs.clearHostCatcher();
+            rs.setKeepAlive(SettingsManager.instance().getKeepAlive());
+        } catch (BadConnectionSettingException e) {
+            Assert.that(false);
+        }
+    }
+
+    private static void testAcceptI(String host, int port) {
+        System.out.println("\nTesting accept I:");
+        Connection c=testLimit(host, port, LEAF, LEAF_CONNECTIONS, REJECT_503);        
+        testPong(c, true);        
+        testLimit(host, port, OLD_06, 
+                  ConnectionManager.DESIRED_OLD_CONNECTIONS, 
+                  REJECT_503);  //save slots for ultrapers
+        testPong(c, true);
+        testLimit(host, port, ULTRAPEER, 
+                  KEEP_ALIVE-ConnectionManager.DESIRED_OLD_CONNECTIONS, 
+                  REJECT_503);       
+        testPong(c, false);
+    }        
+
+    private static void testAcceptII(String host, int port) {
+        System.out.println("\nTesting accept II:");
+        //ignores guidance
+        Connection c=testLimit(host, port, ULTRAPEER, KEEP_ALIVE, REJECT_SILENT); 
         testPong(c, true);
         testLimit(host, port, OLD_06, 0, REJECT_503);  
         testPong(c, true);
@@ -259,6 +331,12 @@ class UltrapeerProperties extends Properties {
     }
 }
 
+class UltrapeerResponder implements HandshakeResponder {
+    public HandshakeResponse respond(HandshakeResponse response, 
+            boolean outgoing) throws IOException {
+        return new HandshakeResponse(new UltrapeerProperties());
+    }
+}
 
 class EmptyResponder implements HandshakeResponder {
     public HandshakeResponse respond(HandshakeResponse response, 
@@ -289,5 +367,23 @@ class DebugActivityCallback extends ActivityCallbackStub {
                 ultrapeer="leaf";
         }
         return "["+c.getInetAddress()+", "+ultrapeer+"]";
+    }
+}
+
+/**
+ * Provides HostCatcher access.
+ */ 
+class TestMessageRouter extends MetaEnabledMessageRouter {
+    public TestMessageRouter(ActivityCallback callback, FileManager files) {
+        super(callback, files);
+    }
+
+    public void addHost(byte[] host, int port) {
+        //fake up a pong
+        //PingReply pong=new PingReply(new byte[16], (byte)5,
+        //                             port, host,
+        //                             0l, 0l);                                     
+        Endpoint e=new Endpoint(host, port);
+        this._catcher.add(e, false);
     }
 }
