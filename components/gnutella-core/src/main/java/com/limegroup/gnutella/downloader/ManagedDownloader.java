@@ -3030,8 +3030,15 @@ public class ManagedDownloader implements Downloader, Serializable {
             }                
         }
         if (biggest==null) {//Not using downloader...but RFD maybe useful
+
+	    // Note: there is a rare scenario where if there are no
+	    // active downloaders but there are some connecting ones
+	    // who have already leased the entire file we will lose
+	    // this downloader.  
+	    // How much is this an issue with 99.9% of the network http1.1?
             throw new NoSuchElementException();
         }
+
         //Note that getAmountToRead() and getInitialReadingPoint() are
         //constant.  getAmountRead() is not, so we "capture" it into a
         //variable.
