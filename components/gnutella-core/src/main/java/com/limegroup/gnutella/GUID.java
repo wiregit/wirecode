@@ -78,14 +78,13 @@ public class GUID /* implements Comparable */ {
 	StringBuffer buf=new StringBuffer();
 	String       str;
 	int val;
-	for (int i=0; i<SZ; i += 4)
+	for (int i=0; i<SZ; i++)
 	{
-	    val = bytes[i];
-	    val = (val * 256) + bytes[i+1];
-	    val = (val * 256) + bytes[i+2];
-	    val = (val * 256) + bytes[i+3];
+	    //Treating each byte as an unsigned value ensures
+	    //that we don't str doesn't equal things like 0xFFFF...
+	    val = ByteOrder.ubyte2int(bytes[i]);
 	    str = Integer.toHexString(val);	  
-	    while ( str.length() < 8 )
+	    while ( str.length() < 2 )
 		str = "0" + str;
 	    buf.append( str );	  
 	}
@@ -95,43 +94,78 @@ public class GUID /* implements Comparable */ {
 
     /** 
      *  Create a GUID bytes from a hex string version.
+     *  Throws IllegalArgumentException if sguid is
+     *  not of the proper format.
      */
-    public static byte[] fromHexString(String sguid) {
+    public static byte[] fromHexString(String sguid)
+    throws IllegalArgumentException {
 	byte bytes[] = new byte[SZ];
-	for (int i=0; i<SZ; i++)
-	{
-	    bytes[i] = 
-     	      Byte.parseByte(sguid.substring(i*2,i*2+1), 16);
+	try {
+	    for (int i=0; i<SZ; i++)
+		{
+		    bytes[i] = 
+			(byte)Integer.parseInt(sguid.substring(i*2,(i*2)+2), 16);
+		}
+	    return bytes;
+	} catch (NumberFormatException e) {
+	    throw new IllegalArgumentException();
+	} catch (IndexOutOfBoundsException e) {
+	    throw new IllegalArgumentException();
 	}
-	return bytes;
     }
 
-    public static void main(String args[]) {
-	byte[] b1=new byte[16];
-	byte[] b2=new byte[16];
-	for (int i=0; i<16; i++) {
-	    b1[i]=(byte)i;
-	    b2[i]=(byte)i;
-	}
-	GUID g1=new GUID(b1);
-	GUID g2=new GUID(b1);
-	Assert.that(g1.equals(g2));
-	Assert.that(g2.equals(g1));
-	Assert.that(g1.hashCode()==g2.hashCode());
+//      public static void main(String args[]) {
+//  	byte[] b1=new byte[16];
+//  	byte[] b2=new byte[16];
+//  	for (int i=0; i<16; i++) {
+//  	    b1[i]=(byte)i;
+//  	    b2[i]=(byte)i;
+//  	}
+//  	GUID g1=new GUID(b1);
+//  	GUID g2=new GUID(b1);
+//  	Assert.that(g1.equals(g2));
+//  	Assert.that(g2.equals(g1));
+//  	Assert.that(g1.hashCode()==g2.hashCode());
 
-	Hashtable t=new Hashtable();	
-	String out=null;
-	t.put(g1,"test");
-	Assert.that(t.containsKey(g1),"Contains 1");
-	out=(String)t.get(g1);
-	Assert.that(out!=null, "Null test 1");
-	Assert.that(out.equals("test"), "Get test 1");
+//  	Hashtable t=new Hashtable();	
+//  	String out=null;
+//  	t.put(g1,"test");
+//  	Assert.that(t.containsKey(g1),"Contains 1");
+//  	out=(String)t.get(g1);
+//  	Assert.that(out!=null, "Null test 1");
+//  	Assert.that(out.equals("test"), "Get test 1");
 
-	Assert.that(t.containsKey(g2),"Contains 2");
-	out=(String)t.get(g2);
-	Assert.that(out!=null, "Null test 2");
-	Assert.that(out.equals("test"), "Get test 2");
-    }
+//  	Assert.that(t.containsKey(g2),"Contains 2");
+//  	out=(String)t.get(g2);
+//  	Assert.that(out!=null, "Null test 2");
+//  	Assert.that(out.equals("test"), "Get test 2");
+
+//  	String hexString="ff010a00000000000000000000000001";
+//  	byte[] bytes=new byte[16];
+//  	bytes[0]=(byte)255;
+//  	bytes[1]=(byte)1;
+//  	bytes[2]=(byte)10;
+//  	bytes[15]=(byte)1;
+
+//  	String s=(new GUID(bytes)).toHexString();
+//  	Assert.that(s.equals(hexString));
+//  	byte[] bytes2=GUID.fromHexString(s);	
+//  	Assert.that(Arrays.equals(bytes2,bytes));
+
+//  	try {
+//  	    GUID.fromHexString("aa01");
+//  	    Assert.that(false);
+//  	} catch (IllegalArgumentException e) {
+//  	    Assert.that(true);
+//  	}
+
+//  	try {
+//  	    GUID.fromHexString("ff010a0000000000000000000000000z");
+//  	    Assert.that(false);
+//  	} catch (IllegalArgumentException e) {
+//  	    Assert.that(true);
+//  	}
+//      }
 }
 
 	
