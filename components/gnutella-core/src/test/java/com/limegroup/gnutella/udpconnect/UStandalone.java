@@ -27,6 +27,7 @@ import com.limegroup.gnutella.chat.Chatter;
 import com.limegroup.gnutella.search.HostData;
 import com.limegroup.gnutella.security.User;
 import com.limegroup.gnutella.util.ManagedThread;
+import com.limegroup.gnutella.version.UpdateInformation;
 
 /**
  * A standalone program for testing UDPConnections across machines.
@@ -491,10 +492,7 @@ public class UStandalone implements ActivityCallback, ErrorCallback {
 
 	public void setAnnotateEnabled(boolean enabled) {}
 
-    public void notifyUserAboutUpdate(String message,boolean isPro,boolean loc){
-    }
-
-    public void indicateNewVersion() {}
+    public void updateAvailable(UpdateInformation uc) {}
 
     public boolean isQueryAlive(GUID guid) {
         return false;
