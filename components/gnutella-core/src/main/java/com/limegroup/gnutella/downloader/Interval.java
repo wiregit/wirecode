@@ -18,7 +18,8 @@ public class Interval implements Serializable, Comparable {
     /** @requires low<=high */
     public Interval(int low, int high) {
         if(high < low)
-            throw new IllegalArgumentException("high, low"+high+", "+low);
+            throw new IllegalArgumentException("low: " + low +
+                                            ", high: " + high);
         this.low=low;
         this.high=high;
     }

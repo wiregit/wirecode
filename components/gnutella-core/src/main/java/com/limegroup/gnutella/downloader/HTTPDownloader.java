@@ -279,8 +279,20 @@ public class HTTPDownloader implements BandwidthTracker {
         _byteReader = new ByteReader(istream);
     }
     
-    /** Sends a GET request using an already open socket, and reads all 
-     * headers. 
+    /** 
+     * Sends a GET request using an already open socket, and reads all 
+     * headers.  The actual ranges downloaded MAY NOT be the same
+     * as the 'start' and 'stop' parameters, as HTTP allows the server
+     * to respond with any satisfiable subrange of the request.
+     *
+     * Users of this class should examine getInitialReadingPoint()
+     * and getAmountToRead() to determine what the effective start & stop
+     * ranges are, and update external datastructures appropriately.
+     *  int newStart = dloader.getInitialReadingPoint();
+     *  int newStop = (dloader.getAmountToRead() - 1) + newStart; // INCLUSIVE
+     * or
+     *  int newStop = dloader.getAmountToRead() + newStart; // EXCLUSIVE
+     *
      * <p>
      * @param start The byte at which the HTTPDownloader should begin
      * @param stop the index just past the last byte to read;
@@ -417,16 +429,24 @@ public class HTTPDownloader implements BandwidthTracker {
             //from handling premature connection termination.  Look at LimeWire
             //1.8 and earlier for parsing code.
 			
-            //For "Content-range" headers, we only look at the start of the
-            //range, terminating the download if it's not what we expected.  We
-            //ignore the ending value and length for the same reasons as
-            //Content-length.  TODO3: it's possible to recover from a starting
-            //range that's too small, though this will rarely come up.
+            //For "Content-Range" headers, we store what the remote side is
+            //going to give us.  Users should examine the interval and
+            //update external structures appropriately.
             if (str.toUpperCase().startsWith("CONTENT-RANGE:")) {
-				int startOffset=parseContentRangeStart(str);
-                if (startOffset!=_initialReadingPoint)
+                Interval responseRange = parseContentRange(str);
+                int low = responseRange.low;
+                int high = responseRange.high + 1;
+                // Make sure that the range they gave us is a subrange
+                // of what we wanted in the first place.
+                if(low < _initialReadingPoint ||
+                   high > _initialReadingPoint + _amountToRead)
                     throw new ProblemReadingHeaderException(
-                        "Unexpected start offset; too dumb to recover");
+                        "invalid subrange given.  wanted low: " + 
+                        _initialReadingPoint + ", high: " + 
+                        (_initialReadingPoint + _amountToRead - 1) +
+                        "... given low: " + low + ", high: " + high);                
+                _initialReadingPoint = low;
+                _amountToRead = high - low;
             }
 
             // TODO: we should read the X-Gnutella-Content-URN header here
@@ -662,11 +682,14 @@ public class HTTPDownloader implements BandwidthTracker {
         } //end of while - done parsing this line.
     }
 
-    /** 
-     * Returns the start byte offset in the given "Content-range" header,
-     * throwing an exception if it couldn't be parsed.  Does not strictly
-     * enforce HTTP; allows minor errors like replacing the space after "bytes"
-     * with an equals.  Also tries to interpret malformed LimeWire 0.5 headers.
+    /**
+     * Returns the interval of the responding content range.
+     * If the full content range (start & stop interval) is not given,
+     * we assume it to be the interval that we requested.
+     *
+     * Does not strictly enforce HTTP; allows minor errors like replacing the
+     * space after "bytes" with an equals.  Also tries to interpret malformed 
+     * LimeWire 0.5 headers.
      *
      * @param str a Content-range header line, e.g.,
      *      "Content-range: bytes 0-9/10" or
@@ -679,7 +702,7 @@ public class HTTPDownloader implements BandwidthTracker {
      * @exception ProblemReadingHeaderException some problem
      *  extracting the start offset.  
      */
-    private static int parseContentRangeStart(String str) throws IOException {
+    private Interval parseContentRange(String str) throws IOException {
         int numBeforeDash;
         int numBeforeSlash;
         int numAfterSlash;
@@ -690,15 +713,34 @@ public class HTTPDownloader implements BandwidthTracker {
             int start=str.indexOf("bytes")+6;  //skip "bytes " or "bytes="
             int slash=str.indexOf('/');
             
-            if (str.substring(start, slash).equals("*"))
-                return 0;                      //"bytes */*" or "bytes */10"
+            //"bytes */*" or "bytes */10"
+            // We don't know what we're getting, but it'll start at 0.
+            // Assume that we're going to get until the part we requested.
+            // If we read more, good.  If we read less, it'll work out just
+            // fine.
+            if (str.substring(start, slash).equals("*")) {
+                if(LOG.isDebugEnabled())
+                    LOG.debug("Content-Range like */?, " + str);
+                return new Interval(0,
+                                    _amountToRead + 1 - _initialReadingPoint);
+            }
 
             int dash=str.lastIndexOf("-");     //skip past "Content-range"
             numBeforeDash=Integer.parseInt(str.substring(start, dash));
             numBeforeSlash=Integer.parseInt(str.substring(dash+1, slash));
 
-            if (str.substring(slash+1).equals("*"))
-                return numBeforeDash; //bytes 0-9/*
+            if(numBeforeSlash < numBeforeDash)
+                throw new ProblemReadingHeaderException(
+                    "invalid range, high (" + numBeforeSlash +
+                    ") less than low (" + numBeforeDash + ")");
+
+            //"bytes 0-9/*"
+            if (str.substring(slash+1).equals("*")) {
+                if(LOG.isDebugEnabled())
+                    LOG.debug("Content-Range like #-#/*, " + str);
+
+                return new Interval(numBeforeDash, numBeforeSlash);
+            }
 
             numAfterSlash=Integer.parseInt(str.substring(slash+1));
         } catch (IndexOutOfBoundsException e) {
@@ -719,8 +761,10 @@ public class HTTPDownloader implements BandwidthTracker {
             numBeforeDash--;
             numBeforeSlash--;
         }
-
-        return numBeforeDash;
+        
+        if(LOG.isDebugEnabled())
+            LOG.debug("Content-Range like #-#/#, " + str);
+        return new Interval(numBeforeDash, numBeforeSlash);
     }
 
     /**

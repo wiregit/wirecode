@@ -801,7 +801,7 @@ public class ManagedDownloader implements Downloader, Serializable {
                     numWritten += currKey.length() + (numWritten == 0 ? 0 : 1);
                 }
             }
-        
+
             retString = sb.toString();
 
             //one small problem - if every keyword in the filename is
@@ -2852,14 +2852,32 @@ public class ManagedDownloader implements Downloader, Serializable {
         
         //Intervals from the needed set are INCLUSIVE on the high end, but
         //intervals passed to HTTPDownloader are EXCLUSIVE.  Hence the +1 in the
-        //code below.  Note connectHTTP can throw several exceptions.  Also, the
-        //call to stopAt does not appear necessary, but we're leaving it in just
-        //in case.
-        dloader.connectHTTP(getOverlapOffset(interval.low), interval.high+1,
-                            true);
-        dloader.stopAt(interval.high+1);
+        //code below.  Note connectHTTP can throw several exceptions.
+        int low = interval.low;
+        int high = interval.high; // INCLUSIVE
+        dloader.connectHTTP(getOverlapOffset(low), high + 1, true);
+        //The dloader may have told us that we're going to read less data than
+        //we expect to read.  We must return the now-needed-again intervals
+        //back to needed -- note the confusion caused by downloading overlap
+        //regions.  We only want to add back to needed if the reported subrange
+        //was different, and was HIGHER than the low point.        
+        int newLow = dloader.getInitialReadingPoint();
+        int newHigh = (dloader.getAmountToRead() - 1) + newLow; // INCLUSIVE
+        if(newLow > low) {
+            if(LOG.isDebugEnabled())
+                LOG.debug("WORKER: Host gave subrange, different low.  Was: " +
+                          low + ", is now: " + newLow);
+            addToNeeded(new Interval(low, newLow-1));
+        } if(newHigh < high) {
+            if(LOG.isDebugEnabled())
+                LOG.debug("WORKER: Host gave subrange, different high.  Was: " +
+                          high + ", is now: " + newHigh);
+            addToNeeded(new Interval(newHigh+1, high));
+        }
+        
         if(LOG.isDebugEnabled())
-            LOG.debug("WORKER: picking white "+interval+" to "+dloader);
+            LOG.debug("WORKER: assigning white " + newLow + "-" + newHigh +
+                      " to " + dloader);
     }
 
     /**
@@ -2939,14 +2957,25 @@ public class ManagedDownloader implements Downloader, Serializable {
                (bandwidthStealer > MIN_ACCEPTABLE_SPEED &&
                 bandwidthStealer > bandwidthVictim)) {
                 //replace (bad boy) biggest if possible
-                int start=
-                biggest.getInitialReadingPoint()+amountRead;
-                int stop=
-                biggest.getInitialReadingPoint()+biggest.getAmountToRead();
+                int start = biggest.getInitialReadingPoint() + amountRead;
+                int stop = biggest.getInitialReadingPoint() + 
+                           biggest.getAmountToRead();
                 //Note: we are not interested in being queued at this point this
                 //line could throw a bunch of exceptions (not queuedException)
                 dloader.connectHTTP(getOverlapOffset(start), stop, false);
-                dloader.stopAt(stop);
+                int newLow = dloader.getInitialReadingPoint();
+                int newHigh = dloader.getAmountToRead() + newLow; // EXCLUSIVE
+                // If the stealer isn't going to give us everything we need,
+                // there's no point in stealing, so throw an exception and
+                // don't steal.
+                if( newLow > start || newHigh < stop ) {
+                    if(LOG.isDebugEnabled())
+                        LOG.debug("WORKER: not stealing because stealer " +
+                                  "gave a subrange.  Expected low: " + start +
+                                  ", high: " + stop + ".  Was low: " + newLow +
+                                  ", high: " + newHigh);
+                    throw new IOException("bad stealer.");
+                }
                 if(LOG.isDebugEnabled())
                     LOG.debug("WORKER: picking stolen grey "
                       +start+"-"+stop+" from "+biggest+" to "+dloader);
@@ -2959,20 +2988,28 @@ public class ManagedDownloader implements Downloader, Serializable {
         }
         else { //There is a big enough chunk to split...split it
             int start;
-            if(http11) //steal CHUNK_SIZE bytes from the end
-                start = biggest.getInitialReadingPoint()+
-                        biggest.getAmountToRead()-CHUNK_SIZE +1;
-            else 
-                start=biggest.getInitialReadingPoint()+amountRead+left/2;
-            int stop=
-            biggest.getInitialReadingPoint()+biggest.getAmountToRead();
+            if(http11) { //steal CHUNK_SIZE bytes from the end
+                start = biggest.getInitialReadingPoint() +
+                        biggest.getAmountToRead() - CHUNK_SIZE + 1;
+            } else {
+                start= biggest.getInitialReadingPoint() + amountRead + left/2;
+            }
+            int stop = biggest.getInitialReadingPoint() + 
+                       biggest.getAmountToRead();
             //this line could throw a bunch of exceptions
-            dloader.connectHTTP(getOverlapOffset(start), stop,true);
-            dloader.stopAt(stop);
-            biggest.stopAt(start);//we know that biggest must be http1.0
+            dloader.connectHTTP(getOverlapOffset(start), stop, true);
+            int newLow = dloader.getInitialReadingPoint();
+            int newHigh = dloader.getAmountToRead() + newLow; // EXCLUSIVE
             if(LOG.isDebugEnabled())
                 LOG.debug("WORKER: assigning split grey "
-                  +start+"-"+stop+" from "+biggest+" to "+dloader);
+                  +newLow+"-"+newHigh+" from "+biggest+" to "+dloader);
+            // Refocus the start with this new data, if the downloader
+            // actually gave us a higher low value.  This is so we
+            // don't tell the currently downloading guy to stop downloading
+            // data we aren't going to get.
+            if(newLow > start)
+                start = newLow;
+            biggest.stopAt(start);//we know that biggest must be http1.0
         }
     }
 

@@ -80,6 +80,21 @@ public class TestUploader {
     boolean killedByDownloader = false;
     
     /**
+     * The offset for the low chunk.
+     */
+    private int lowChunkOffset = 0;
+    
+    /**
+     * The offset for the high chunk.
+     */
+    private int highChunkOffset = 0;
+        
+    /**
+     * The number of requests this uploader has received.
+     */
+    private int requestsReceived = 0;
+    
+    /**
      * The sum of the number of bytes we need to upload across all requests.  If
      * this value is less than totalUploaded and the uploader encountered an
      * IOException in handle request it means the downloader killed the
@@ -165,6 +180,10 @@ public class TestUploader {
         queuePos=1;
         killedByDownloader = false;
         totalAmountToUpload = 0;
+        requestsReceived = 0;
+        connects = 0;
+        lowChunkOffset = 0;
+        highChunkOffset = 0;
     }
 
     public int amountUploaded() {
@@ -238,6 +257,20 @@ public class TestUploader {
         storedAltLocs = alts;
     }
     
+    /**
+     * Sets the offset for the low chunk.
+     */
+    public void setLowChunkOffset(int offset) {
+        lowChunkOffset = offset;
+    }
+    
+    /**
+     * Sets the offset for the high chunk.
+     */
+    public void setHighChunkOffset(int offset) {
+        highChunkOffset = offset;
+    }
+    
     /** 
      * Get the alternate locations that this uploader has read from headers
      */
@@ -256,6 +289,13 @@ public class TestUploader {
     public int getConnections() {
         return connects;
     }
+    
+    /**
+     * Returns the number of requests this received.
+     */
+    public int getRequestsReceived() {
+        return requestsReceived;
+    }
         
     /** Returns the last request sent or null if none. 
      *  @return a request like "GET /get/0/file.txt HTTP/1.1" */
@@ -271,6 +311,7 @@ public class TestUploader {
         while(true) {
             try {
                 socket = server.accept();
+                connects++;
 
                 // make sure it's from us
 				InetAddress address = socket.getInetAddress();
@@ -280,7 +321,6 @@ public class TestUploader {
                     continue;
                 }
                 LOG.debug("Uploader accepted connection");
-                connects++;
                 //spawn thread to handle request
                 final Socket mySocket = socket;
                 Thread runner=new Thread() {
@@ -290,8 +330,8 @@ public class TestUploader {
                                 handleRequest(mySocket);
                                 if (queue) { 
                                     mySocket.setSoTimeout(MAX_POLL);
-                                    if(unqueue) 
-                                        queue = false;//second time give slot
+                                    if(unqueue) // second time give slot
+                                        queue = false;
                                     handleRequest(mySocket);
                                 }
                                 mySocket.setSoTimeout(8000);
@@ -348,6 +388,9 @@ public class TestUploader {
         while (true) {
             String line=input.readLine();
             if (firstLine) {
+                if(line != null && !line.equals("")) {
+                    requestsReceived++;
+                }
                 request=line;
                 firstLine=false;
             }
@@ -374,8 +417,10 @@ public class TestUploader {
                 } catch (Exception e) { 
                     Assert.that(false, "Bad Range request: \""+line+"\"");
                 }
-                start=p.a;
-                stop=p.b;;
+                start=p.a + lowChunkOffset;
+                if(start < 0) start = 0;
+                stop=p.b + highChunkOffset;
+                if(stop > TestFile.length()) stop = TestFile.length();
             }
             
             i = line.indexOf("GET");
@@ -470,7 +515,7 @@ public class TestUploader {
         }
 		str = "Content-Length:"+ (stop - start) + "\r\n";
 		out.write(str.getBytes());	   
-		if (start != 0) {
+		if (start != 0 || (stop - start != TestFile.length())) {
             //Note that HTTP stop values are INCLUSIVE.  Our internal values
             //are EXCLUSIVE.  Hence the -1.
 			str = "Content-range: bytes " + start  +
@@ -496,8 +541,7 @@ public class TestUploader {
             return;
         }
         
-        //Write data at throttled rate.  See NormalUploadState.  TODO: use
-        //ThrottledOutputStream
+        //Write data.
         for (int i=start; i<stop; ) {
             //1 second write cycle
             if (stopAfter > -1 && totalUploaded == stopAfter) {

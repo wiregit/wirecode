@@ -88,6 +88,7 @@ public class DownloadTest extends BaseTestCase {
     private static TestUploader uploader2;
     private static TestUploader uploader3;
     private static TestUploader uploader4;
+    private static TestUploader uploader5;
 	private static DownloadManager dm;// = new DownloadManager();
 	private static final ActivityCallbackStub callback = new MyCallback();
 	private static ManagedDownloader DOWNLOADER = null;
@@ -134,6 +135,7 @@ public class DownloadTest extends BaseTestCase {
         uploader2=new TestUploader("PORT_2", PORT_2);
         uploader3=new TestUploader("PORT_3", PORT_3);
         uploader4=new TestUploader("PORT_4", PORT_4);
+        uploader5=new TestUploader("PORT_5", PORT_5);
         
         deleteAllFiles();
         
@@ -160,11 +162,13 @@ public class DownloadTest extends BaseTestCase {
         uploader2.reset();
         uploader3.reset();
         uploader4.reset();
+        uploader5.reset();
         
         uploader1.stopThread();
         uploader2.stopThread();
         uploader3.stopThread();
         uploader4.stopThread();
+        uploader5.stopThread();
 
         deleteAllFiles();
     }
@@ -323,7 +327,6 @@ public class DownloadTest extends BaseTestCase {
         uploader2.stopAfter(STOP_AFTER);
         RemoteFileDesc rfd1=newRFD(PORT_1, 100);
         RemoteFileDesc rfd2=newRFD(PORT_2, 100);
-        RemoteFileDesc[] rfds = {rfd1,rfd2};
 
         // Download first from rfd2 so we get its stall
         // and then add in rfd1.
@@ -464,7 +467,75 @@ public class DownloadTest extends BaseTestCase {
         assertEquals("extra connection attempts", 1, c2);
         assertTrue("slower uploader not replaced",uploader1.killedByDownloader);
         assertFalse("faster uploader killed",uploader2.killedByDownloader);
-    }   
+    }
+    
+    public void testUploaderWierdChunkSizes() throws Exception {
+        LOG.debug("-Testing that a download can handle an uploader who is" +
+                  " responding, but is not sending the ranges we requested");
+                  
+        final int RATE = 25;
+        uploader1.setRate(RATE);
+        uploader2.setRate(RATE);
+        uploader3.setRate(RATE);
+        uploader4.setRate(RATE);
+        uploader5.setRate(RATE); // control, to finish the test.
+        
+        // Muck around with the chunk sizes the uploaders will return
+        uploader1.setLowChunkOffset(50); // add 10 to'm
+        uploader2.setLowChunkOffset(-10); // subtract 10, should always fail
+        uploader3.setHighChunkOffset(-50); // subtract 50 to'm
+        uploader4.setHighChunkOffset(50); // add 50, should always fail
+        
+        RemoteFileDesc rfd1 = newRFDWithURN(PORT_1, 100);
+        RemoteFileDesc rfd2 = newRFDWithURN(PORT_2, 100);
+        RemoteFileDesc rfd3 = newRFDWithURN(PORT_3, 100);
+        RemoteFileDesc rfd4 = newRFDWithURN(PORT_4, 100);
+        RemoteFileDesc rfd5 = newRFDWithURN(PORT_5, 100);
+        RemoteFileDesc[] rfds = { rfd1, rfd3, rfd4 };
+        // u2 cannot be used first 'cause it may just work (if it responds
+        // to a request of range 0, it'll return starting at range 0,
+        // which is allowed)
+        RemoteFileDesc[] later = { rfd2, rfd5 }; // u2 cannot be used fi
+
+        tGeneric(rfds, later);
+        
+        int u1 = uploader1.amountUploaded();
+        int u2 = uploader2.amountUploaded();
+        int u3 = uploader3.amountUploaded();
+        int u4 = uploader4.amountUploaded();
+        int u5 = uploader5.amountUploaded();        
+        // Note that checking for greater than or equal to
+        // 0 won't work, because uploaders will send until
+        // the buffer is full (and will later see the IOException)
+        // so we check an arbitrarily small value of 10,000.
+        assertGreaterThan("u1 not used", 10000, u1);
+        assertLessThan("u2 used", 10000, u2);
+        assertGreaterThan("u3 not used", 10000, u3);
+        assertLessThan("u4 used", 10000, u4);
+        assertGreaterThan("u5 not used", 10000, u5);
+        
+        int c1 = uploader1.getConnections();
+        int c2 = uploader2.getConnections();
+        int c3 = uploader3.getConnections();
+        int c4 = uploader4.getConnections();
+        int c5 = uploader5.getConnections();
+        assertEquals("u1 extra connection attempts", 1, c1);
+        assertEquals("u2 extra connection attempts", 1, c2);
+        assertEquals("u3 extra connection attempts", 1, c3);
+        assertEquals("u4 extra connection attempts", 1, c4);
+        assertEquals("u5 extra connection attempts", 1, c5);
+        
+        int r1 = uploader1.getRequestsReceived();
+        int r2 = uploader2.getRequestsReceived();
+        int r3 = uploader3.getRequestsReceived();
+        int r4 = uploader4.getRequestsReceived();
+        int r5 = uploader5.getRequestsReceived();
+        assertGreaterThan("u1 invalid request attempts", 1, r1);
+        assertEquals("u2 invalid request attempts", 1, r2);
+        assertGreaterThan("u3 invalid request attempts", 1, r3);
+        assertEquals("u4 invalid request attempts", 1, r4);
+        assertGreaterThan("u5 invalid request attempts", 1, r5);
+    }
     
     public void testOverlapCheckGreyNoStopOnCorrupt() throws Exception {
         tOverlapCheckGrey(false);
