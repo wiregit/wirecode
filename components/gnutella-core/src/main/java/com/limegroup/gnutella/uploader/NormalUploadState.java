@@ -6,6 +6,7 @@ import com.sun.java.util.collections.*;
 import java.io.*;
 import java.util.Date;
 import com.limegroup.gnutella.util.CommonUtils;
+import com.limegroup.gnutella.util.BandwidthThrottle;
 
 /**
  * An implementation of the UploadState interface for a normal upload situation,
@@ -17,7 +18,7 @@ public final class NormalUploadState implements HTTPMessage {
      *  uploads.  This should be short enough to not be noticeable in the GUI,
      *  but long enough so that waits are not called so often as to be
      *  inefficient. */
-    public static final int CYCLE_TIME=1000;
+    private static final int BLOCK_SIZE=1024;
 	private final HTTPUploader _uploader;
 	private final int _index;
 	private final String _fileName;
@@ -29,6 +30,7 @@ public final class NormalUploadState implements HTTPMessage {
     /** @see HTTPUploader#getUploadEnd */
     private int _uploadEnd;
     private int _amountRequested;
+    private static BandwidthThrottle _throttle = null;
 
 	/**
 	 * <tt>FileDesc</tt> instance for the file being uploaded.
@@ -57,8 +59,10 @@ public final class NormalUploadState implements HTTPMessage {
 		_fileDesc = _uploader.getFileDesc();
 		_index = _uploader.getIndex();	
 		_fileName = _uploader.getFileName();
-		_fileSize = _uploader.getFileSize();   
-	}
+		_fileSize = _uploader.getFileSize();
+        if (_throttle == null)
+            _throttle = new BandwidthThrottle(getUploadSpeed());
+ 	}
     
 	public void writeMessageHeaders(OutputStream ostream) throws IOException {
 		try {
@@ -130,23 +134,15 @@ public final class NormalUploadState implements HTTPMessage {
         try {            
 			_uploader.setState(Uploader.UPLOADING);
             // write the file to the socket 
-            int c = -1;
-            byte[] buf = new byte[1024];
+            //int c = -1;
+            //byte[] buf = new byte[1024];
 
             long a = _fis.skip(_uploadBegin);
             //_amountRead+=a;
             //_uploader.setAmountUploaded(_amountRead);
 
-            SettingsManager manager=SettingsManager.instance();
-            int speed=manager.getUploadSpeed();
-            if (speed==100) {
-                //Special case: upload as fast as possible
-                uploadUnthrottled(ostream);
-            } else {
-                //Normal case: throttle uploads. Similar to above but we
-                //sleep after sending data.
-                uploadThrottled(ostream);
-            }
+            //SettingsManager manager=SettingsManager.instance();
+            upload(ostream);
         } catch(IOException e) {
 			// TODO: set to a state other than UPLOADING????
             //set the connection to be closed, in case of IO exception
@@ -158,17 +154,20 @@ public final class NormalUploadState implements HTTPMessage {
 	}
 
     /**
-     * Uploads the file at maximum rate possible
+     * Upload the file, throttling the upload by making use of the
+     * BandwidthThrottle class
      * @exception IOException If there is any I/O problem while uploading file
      */
-    private void uploadUnthrottled(OutputStream ostream) throws IOException {
-        int c = -1;
-        byte[] buf = new byte[1024];
-        
+    private void upload(OutputStream ostream) throws IOException {        
         while (true) {
+            _throttle.setRate(getUploadSpeed());
+
+            int c = -1;
+            byte[] buf = new byte[_throttle.request(BLOCK_SIZE)];
+            int burstSent=0;            
             c = _fis.read(buf);
             if (c == -1)
-                break;
+                return;
             //dont upload more than asked
             if( c > (_amountRequested - _amountRead))
                 c = _amountRequested - _amountRead;
@@ -176,67 +175,14 @@ public final class NormalUploadState implements HTTPMessage {
                 ostream.write(buf, 0, c);
             } catch (java.net.SocketException e) {
                 throw new IOException();
-            }
-			
+            }			
             _amountRead += c;
             _uploader.setAmountUploaded(_amountRead);
-
-            //finish uploading if the desired amount has been uploaded
+            burstSent += c;           
+            //finish uploading if the desired amount 
+            //has been uploaded
             if(_amountRead >= _amountRequested)
-                break;
-        }
-    }
-	
-    
-    /**
-     * Throttles the uploads by sleeping periodically
-     * @exception IOException If there is any I/O problem while uploading file
-     */
-    private void uploadThrottled(OutputStream ostream) throws IOException {
-        while (true) {
-			int max = RouterService.getUploadManager().calculateBandwidth();
-            int burstSize=max*CYCLE_TIME;
-
-            int c = -1;
-            byte[] buf = new byte[1024];
-            int burstSent=0;
-            // Date start=new Date();
-            long start = System.currentTimeMillis();
-            while (burstSent<burstSize) {
-                c = _fis.read(buf);
-                if (c == -1)
-                    return;
-                //dont upload more than asked
-                if( c > (_amountRequested - _amountRead))
-                    c = _amountRequested - _amountRead;
-                try {
-                    ostream.write(buf, 0, c);
-                } catch (java.net.SocketException e) {
-                    throw new IOException();
-                }
-                _amountRead += c;
-                _uploader.setAmountUploaded(_amountRead);
-                burstSent += c;
-                //finish uploading if the desired amount 
-                //has been uploaded
-                if(_amountRead >= _amountRequested)
-                    return;
-            }
-            
-            // Date stop=new Date();
-            long stop = System.currentTimeMillis();
-
-            //3.  Pause as needed so as not to exceed maxBandwidth.
-            // int elapsed=(int)(stop.getTime()-start.getTime());
-            int elapsed=(int)(stop-start);
-            int sleepTime=CYCLE_TIME-elapsed;
-            if (sleepTime>0) {
-                try {
-                    Thread.currentThread().sleep(sleepTime);
-                } catch (InterruptedException e) { 
-                    throw new IOException();
-                }
-            }
+                return;
         }
     }
     
@@ -254,6 +200,26 @@ public final class NormalUploadState implements HTTPMessage {
     public boolean getCloseConnection() {
         return _closeConnection;
     }
+    
+    
+    /**
+     * @return the bandwidth for uploads in bytes per second
+     */
+    public float getUploadSpeed() {
+	    // if the user chose not to limit his uploads
+	    // by setting the upload speed to unlimited
+	    // set the upload speed to 3.4E38 bytes per second.
+	    // This is de facto not limiting the uploads
+	    int uSpeed = SettingsManager.instance().getUploadSpeed();
+	    float ret = ( uSpeed == 100 ) ? Float.MAX_VALUE : 
+	        // connection speed is in kbits per second
+	        SettingsManager.instance().getConnectionSpeed() / 8.f 
+	        // upload speed is in percent
+	        * uSpeed / 100.f
+	        // wee need bytes per second
+	        * 1024;
+	    return ret;
+    }    
 
 
 	// overrides Object.toString
