@@ -10,6 +10,7 @@ public class AllTests {
         TestSuite suite=new TestSuite("util tests");
         suite.addTest(FixedsizePriorityQueueTest.suite());
         suite.addTest(StringUtilsTest.suite());
+        suite.addTest(BandwidthThrottleTest.suite());
         return suite;
     }
 

@@ -1,4 +1,4 @@
-package com.limegroup.gnutella.tests;
+package com.limegroup.gnutella.util;
 
 import com.limegroup.gnutella.util.*;
 import junit.framework.*;
@@ -29,6 +29,10 @@ public class BandwidthThrottleTest extends TestCase {
     PipedInputStream pin;
     OutputStream out;
     
+    public static Test suite() {
+        return new TestSuite(BandwidthThrottleTest.class);
+    }  
+
     protected void setUp() {
         throttle=new BandwidthThrottle(0);  //Each test sets rate
         random=new Random();
