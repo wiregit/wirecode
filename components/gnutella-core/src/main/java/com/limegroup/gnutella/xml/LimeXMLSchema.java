@@ -189,13 +189,6 @@ public class LimeXMLSchema {
         }
         
     }
-    
-    /** Returns whether or not this is the audio schema....
-     */
-    public boolean isAudioSchema() {
-        return getSchemaURI().equals("http://www.limewire.com/schemas/audio.xsd");
-    }
-
 
     /**
      * Returns the unique identifier which identifies this particular schema

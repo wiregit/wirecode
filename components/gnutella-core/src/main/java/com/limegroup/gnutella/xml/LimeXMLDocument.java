@@ -625,10 +625,7 @@ public class LimeXMLDocument implements Serializable {
             return null;
             
         // insert quotes around field name if it has a space.
-        String sub = full.substring(length, idx2);
-        if(sub.indexOf(" ") != -1)
-            sub = "\"" + sub + "\"";
-        return sub;
+        return full.substring(length, idx2);
     }
 }
 

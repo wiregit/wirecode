@@ -288,7 +288,7 @@ public class QueryRouteTable {
         iter=richQuery.getKeyWordsIndivisible().iterator();
         while(iter.hasNext()) {
             hash = HashFunction.hash((String)iter.next(), bits);
-            if (contains(hash))//don't know the URI? can't answer query
+            if (contains(hash))
                 matchCount++;
             wordCount++;
         }
