@@ -53,8 +53,6 @@ public class Response {
         this.size=size;
         this.name=name;
         this.nameBytes=name.getBytes();
-		metadata="";
-        this.metaBytes=metadata.getBytes();
     }
 
 
@@ -137,10 +135,6 @@ public class Response {
                  "<audio title=\""+name+"\" bitrate=\""+bitrate+
                  "\" seconds=\""+length+"\">"+
                  "</audio></audios>";
-            this.metaBytes=metadata.getBytes();
-        }
-        else{
-            this.metadata="";
             this.metaBytes=metadata.getBytes();
         }
     }
