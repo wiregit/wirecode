@@ -51,19 +51,18 @@ public class UltrapeerHandshakeResponder
 		//"second chance" like in the reject(..) method.
 
 		if(!_manager.allowConnection(response)) {			
-            return HandshakeResponse.createRejectResponse(new Properties());
+            return HandshakeResponse.createRejectOutgoingResponse(new Properties());
 		}
 
 		Properties ret = new Properties();
-        if(!response.ultrapeerNeeded() &&
+        if(response.hasLeafGuidance() &&
            isNotBearshare(response) &&
            _manager.allowLeafDemotion()) {
 			//Fine, we'll become a leaf.
 			ret.put(HeaderNames.X_ULTRAPEER, "False");
 		}
-        
         // accept the response
-        return HandshakeResponse.createAcceptResponse(ret);
+        return HandshakeResponse.createAcceptOutgoingResponse(ret);
 	}
 
 	/**
@@ -73,7 +72,7 @@ public class UltrapeerHandshakeResponder
 	 */
 	private HandshakeResponse respondToIncoming(HandshakeResponse response) {
 		//Incoming connection....
-		Properties ret=new UltrapeerHeaders(getRemoteIP());
+		Properties ret = new UltrapeerHeaders(getRemoteIP());
 		
 		//guide the incoming connection to be a ultrapeer/clientnode
 		ret.put(HeaderNames.X_ULTRAPEER_NEEDED,
@@ -92,12 +91,12 @@ public class UltrapeerHandshakeResponder
 		if (reject(response)) {
             // reject the connection, and let the other node know about 
             // any Ultrapeers we're connected to
-            return HandshakeResponse.createRejectResponse(ret);
+            return HandshakeResponse.createRejectIncomingResponse(ret);
 		}
 		
         // accept the connection, and let the Ultrapeer know about Ultrapeers
         // that are as many hops away as possible, to avoid cycles.
-        return HandshakeResponse.createAcceptResponse(ret);
+        return HandshakeResponse.createAcceptIncomingResponse(ret);
 	}
 
 
