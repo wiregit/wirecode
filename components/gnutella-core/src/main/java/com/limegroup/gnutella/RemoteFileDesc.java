@@ -10,37 +10,7 @@ import com.sun.java.util.collections.Arrays;
  * RemoteFileDesc is similar to a URL, but it contains Gnutella-
  * specific data as well, such as the server's 16-byte GUID.
  */
-public class RemoteFileDesc implements Comparable, Serializable {
-
-	/**
-	 * RemoteFileDesc's have a priority associated with 
-	 * them that will determine the order in which they 
-	 * will be downloaded in the SmartDownloader.  
-	 *
-	 * There are some rules to the priority that i will 
-	 * outline here:
-	 *
-	 * 1) A non-private file will always be attempted
-	 *    before a private file.
-	 * 2) A faster connection will be attempted before 
-	 *    a slower connection.
-	 * 3) No file will be attempted more than the 
-	 *    MAX_NUMBER_ATTEMPTS.
-	 *
-	 */
-
-	/* speed priorities */
-	private final int PRIVATE_MODEM_PRIORITY       = 10;
-	private final int PRIVATE_CABLE_PRIORITY       = 8;
-	private final int PRIVATE_T1_PRIORITY          = 7;
-	private final int PRIVATE_T3_PRIORITY          = 6;
-
-	private final int PUBLIC_MODEM_PRIORITY        = 5;
-	private final int PUBLIC_CABLE_PRIORITY        = 3;
-	private final int PUBLIC_T1_PRIORITY           = 2;
-	private final int PUBLIC_T3_PRIORITY           = 1;
-
-	/* how many times a download will be attempted */
+public class RemoteFileDesc implements Serializable {
 
 	private String _host;
 	private int _port;
@@ -49,11 +19,6 @@ public class RemoteFileDesc implements Comparable, Serializable {
 	private byte[] _clientGUID;
 	private int _speed;
 	private int _size;
-
-	private int _priority;  
-	private int _speed_priority;  
-	private int _numAttempts;  
-
 	private boolean _chatEnabled;
 
 	/** 
@@ -66,9 +31,7 @@ public class RemoteFileDesc implements Comparable, Serializable {
 	 */
 	public RemoteFileDesc(String host, int port, int index, String filename,
 						  int size, byte[] clientGUID, int speed, 
-						  boolean chat) {
-		
-		_numAttempts = 0;
+						  boolean chat) {	   
 		_speed = speed;
 		_host = host;
 		_port = port;
@@ -77,41 +40,7 @@ public class RemoteFileDesc implements Comparable, Serializable {
 		_size = size;
 		_clientGUID = clientGUID;
 		_chatEnabled = chat;
-		calculateSpeedPriority();
-		calculatePriority();
 	}
-
-	public void print() {
-		//  System.out.println(_filename);
-//  		System.out.println("    _priority:    " + _priority);
-//  		System.out.println("    _numAttempts: " + _numAttempts);
-//  		System.out.println("    _speed      : " + _speed);
-
-	}
-
-	public int compareTo(Object obj2) {
-
-		RemoteFileDesc rdf2;
-		try {
-			rdf2 = (RemoteFileDesc)obj2;
-		}
-		catch (ClassCastException e) {
-			// System.out.println("Class cast exception");
-			return 0;  // probably want to go ahead and throw this?
-		}
-
-		if ( calculatePriority() > rdf2.calculatePriority() ) {
-			return -1;
-		}
-		else if ( calculatePriority() < rdf2.calculatePriority() ) {
-			return 1;
-		}
-
-		return 0;  // they are the same
-
-	}
-
-
 
 	/* Accessor Methods */
 	public String getHost() {return _host;}
@@ -120,22 +49,7 @@ public class RemoteFileDesc implements Comparable, Serializable {
 	public int getSize() {return _size;}
 	public String getFileName() {return _filename;}
 	public byte[] getClientGUID() {return _clientGUID;}
-	public int getSpeed() {return _speed;}
-
-	public int getPriority() {return _priority;}
-
-	public void setHost(String h) {_host = h;}
-	public void setPost(int p) {_port = p;}
-	public void setIndex(int i) {_index = i;}
-	public void setSize(int s) {_size = s;}
-	public void setFileName(String name) {_filename = name;}
-	public void setClientGUID(byte[] b) {_clientGUID = b;}
-	public void setSpeed(int s) {_speed = s;}
-
-	public int getNumAttempts() {return _numAttempts;}
-	public void setNumAttempts(int n) {_numAttempts = n;}
-	public void incrementNumAttempts() {_numAttempts++;}
-	
+	public int getSpeed() {return _speed;}	
 	public boolean chatEnabled() {return _chatEnabled;}
 
 	public boolean isPrivate() {
@@ -145,60 +59,6 @@ public class RemoteFileDesc implements Comparable, Serializable {
 		return e.isPrivateAddress();
 	}
 
-	public int calculatePriority() {
-		_priority = _speed_priority + (_numAttempts * 10) ;
-		return _priority;
-	}
-
-	public int calculateSpeedPriority() {
-
-		if (isPrivate()) {
-			if (_speed <= SpeedConstants.MODEM_SPEED_INT) {
-				_speed_priority = PRIVATE_MODEM_PRIORITY;
-			}
-			else if (_speed <= SpeedConstants.CABLE_SPEED_INT) {
-				_speed_priority = PRIVATE_CABLE_PRIORITY;
-			}
-			else if (_speed <= SpeedConstants.T1_SPEED_INT) {
-				_speed_priority = PRIVATE_T1_PRIORITY;
-			}
-			else if (_speed <= SpeedConstants.T3_SPEED_INT) {
-				_speed_priority = PRIVATE_T3_PRIORITY;
-			}
-		}
-		
-		else {
-			if (_speed <= SpeedConstants.MODEM_SPEED_INT) {
-				_speed_priority = PUBLIC_MODEM_PRIORITY;
-			}
-			else if (_speed <= SpeedConstants.CABLE_SPEED_INT) {
-				_speed_priority = PUBLIC_CABLE_PRIORITY;
-			}
-			else if (_speed <= SpeedConstants.T1_SPEED_INT) {
-				_speed_priority = PUBLIC_T1_PRIORITY;
-			}
-			else if (_speed <= SpeedConstants.T3_SPEED_INT) {
-				_speed_priority = PUBLIC_T3_PRIORITY;
-			}
-		}
-		
-		return _speed_priority;
-	}
-	
-	public static class RemoteFileDescComparator 
-		implements Comparator {
-
-        /**
-         * Primary key: connection speed
-         * (Private/public addresses are dealt with through other means.)
-         */
-		public int compare(Object obj1, Object obj2) {
-
-			RemoteFileDesc rdf1=(RemoteFileDesc)obj1;;
-			RemoteFileDesc rdf2=(RemoteFileDesc)obj2;;
-            return rdf1.getSpeed()-rdf2.getSpeed();
-		}
-	}
 
 	/** Returns true iff o is a RemoteFileDesc with the same value as this.
      *  Priority and number of attempts is ignored in doing the comparison! */
