@@ -428,19 +428,19 @@ public class LimeXMLProperties
      */
     private static String getPath()
     {
-//        //a hack. I guess, adam will provide some way so that installation
-//        //directory can be accesed in some other way than user.dir
-//        String limeHome = System.getProperty("LIME_HOME"); 
-//        if(limeHome == null || limeHome.trim().equals(""))
-//        {
-//            return SettingsManager.instance().getPath() + 
-//                                                    "lib" + File.separator;
-//        }
-//        else
-//        {
-//            return limeHome + "lib" + File.separator;
-//        }
-        return "e:/work/lib/";
+        //a hack. I guess, adam will provide some way so that installation
+        //directory can be accesed in some other way than user.dir
+        String limeHome = System.getProperty("LIME_HOME"); 
+        if(limeHome == null || limeHome.trim().equals(""))
+        {
+            return SettingsManager.instance().getPath() + 
+                                                    "lib" + File.separator;
+        }
+        else
+        {
+            return limeHome + "lib" + File.separator;
+        }
+//        return "e:/work/lib/";
     }    
     
 }//end of class
