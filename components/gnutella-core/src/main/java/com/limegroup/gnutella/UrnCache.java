@@ -115,10 +115,12 @@ public final class UrnCache {
 		} catch(Exception e) {
 			return new HashMap();
 		} finally {
-            try {
-                ois.close();
-            } catch(IOException e) {
-                // all we can do is try to close it
+            if(ois != null) {
+                try {
+                    ois.close();
+                } catch(IOException e) {
+                    // all we can do is try to close it
+                }
             }
         }
 	}
