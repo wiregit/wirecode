@@ -47,4 +47,8 @@ Date Resolved:
 The UDPService should not assume guess capability if it got a UDP packet
 from a *private* address.
 
+Notes:
+This should be the last thing we do.  We need to accept private addresses
+wholeheartheadly while testing.
+
 ********************************************************************************
