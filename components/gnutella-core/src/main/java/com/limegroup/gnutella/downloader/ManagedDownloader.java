@@ -43,7 +43,7 @@ public class ManagedDownloader implements Downloader, Serializable {
     /** The max number of push tries to make, per host. */
     private static final int PUSH_TRIES=2;
     /** The time to wait trying to establish each connection, in milliseconds.*/
-    private static final int CONNECT_TIME=8000;  //8 seconds
+    private static final int CONNECT_TIME=4000;  //8 seconds
     /** The maximum time, in SECONDS, allowed between a push request and an
      *  incoming push connection. */
     private static final int PUSH_INVALIDATE_TIME=5*60;  //5 minutes
@@ -117,8 +117,9 @@ public class ManagedDownloader implements Downloader, Serializable {
     /** The size of the last file being attempted.  Needed only to support
      *  launch(). */
     private int currentFileSize;
-
-
+    /** The name of the last location we tried to connect to. (We may be
+     *  downloading from multiple other locations. */
+    private String currentLocation;
 
     /**
      * Creates a new ManagedDownload to download the given files.  The download
@@ -497,7 +498,6 @@ public class ManagedDownloader implements Downloader, Serializable {
     /** Like tryDownloads2, but does not deal with the library. */
     private int tryAllDownloads3(final List /* of RemoteFileDesc */ files) 
             throws InterruptedException {
-        setState(CONNECTING);
         //The parts of the file we still need to download.
         //INVARIANT: all intervals are disjoint and non-empty
         List /* of Interval */ needed=new ArrayList(); {
@@ -703,6 +703,14 @@ public class ManagedDownloader implements Downloader, Serializable {
             RemoteFileDesc rfd=removeBest(files);      
             File incompleteFile=incompleteFileManager.getFile(rfd);
             HTTPDownloader ret;
+            synchronized (this) {
+                currentLocation=rfd.getHost();
+                //If we're just increasing parallelism, stay in DOWNLOADING
+                //state.  Otherwise the following call is needed to restart
+                //the timer.
+                if (dloaders.size()==0)
+                    setState(CONNECTING);
+            }
             if (needsPush(rfd)) {
                 //System.out.println("MANAGER: trying push to "+rfd);
                 //Send push message, wait for response with timeout.
@@ -1004,23 +1012,29 @@ public class ManagedDownloader implements Downloader, Serializable {
             return sum;
         }
     }
-        
-    public synchronized String getHost() {
-        //TODO: this is fine for the GUI, but not fine for chats!
-        return dloaders.size()+" locations";
+     
+    public String getAddress() {
+        return currentLocation;
+    }
+                                 
+    public synchronized Iterator /* of Endpoint */ getHosts() {
+        return getHosts(false);
+    }
+   
+    public synchronized Iterator /* of Endpoint */ getChattableHosts() {
+        return getHosts(true);
     }
 
-	public synchronized int getPort() {
-        //TODO: this is fine for the GUI, but not fine for chats!
-//  		if (dloader != null)
-//  			return dloader.getPort();
-//  		else
-			return 0;
-	}
-
-    public synchronized int getPushesWaiting() {
-        //This doesn't have any meaning any more.  TODO: strip from Downloader.
-        return 0;
+    private final Iterator getHosts(boolean chattableOnly) {
+        List /* of Endpoint */ buf=new LinkedList();
+        for (Iterator iter=dloaders.iterator(); iter.hasNext(); ) {
+            HTTPDownloader dloader=(HTTPDownloader)iter.next();            
+            if (chattableOnly ? dloader.chatEnabled() : true) {                
+                buf.add(new Endpoint(dloader.getInetAddress().getHostAddress(),
+                                     dloader.getPort()));
+            }
+        }
+        return buf.iterator();
     }
 
     public synchronized int getRetriesWaiting() {

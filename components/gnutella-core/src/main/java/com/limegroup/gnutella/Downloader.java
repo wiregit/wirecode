@@ -2,6 +2,7 @@ package com.limegroup.gnutella;
 
 import com.limegroup.gnutella.downloader.AlreadyDownloadingException;
 import java.net.InetAddress;
+import com.sun.java.util.collections.Iterator;
 
 /**
  * The downloader interface.  The UI maintains a list of Downloader's and uses
@@ -71,33 +72,29 @@ public interface Downloader {
      * Returns the amount read by this so far, in bytes.
      */
     public int getAmountRead();
-
-    /**
-     * Returns the address of the downloader, or null if this is not currently
-     * connected. 
-     */
-    public String getHost();
-	/**
-     * Returns the port of the downloader, or null if this is not currently
-     * connected. 
-     */
-    public int getPort();
-
-	/**
-	 * returns true if that chat is enambled
-	 */
-	public boolean chatEnabled();
-
-    /**
-     * Returns the number of pushes results this is waiting for. 
-     *     @requires this in the WAITING_FOR_RETRY state
-     */
-    public int getPushesWaiting();
-
+  
     /**
      * Returns the number of retries this is waiting for. 
-     *     @requires this in the WAITING_FOR_RETRY state
+     * Result meaningful on in WAIT_FOR_RETRY state.
      */
-    public int getRetriesWaiting();
+     public int getRetriesWaiting();
+    
+    /**
+     * Returns the last address that this tried to connect to, or null if it
+     * hasn't tried any.  Useful primarily for CONNECTING.  
+     */
+    public String getAddress();
+    
+    /**
+     * Returns the locations from which this is currently downloading, as an
+     * iterator of Endpoint.  If this is swarming, may return multiple
+     * addresses.  Result meaningful only in the DOWNLOADING state.
+     */
+    public Iterator /* of Endpoint */ getHosts();
 
+    /**
+     * Returns the subset of getHosts that supports chat, if any. 
+     * Result meaningful only in the DOWNLOADING state.
+     */
+    public Iterator /* of Endpoint */ getChattableHosts();
 }
