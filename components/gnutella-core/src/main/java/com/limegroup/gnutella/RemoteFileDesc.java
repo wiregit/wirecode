@@ -92,7 +92,7 @@ public class RemoteFileDesc implements Serializable {
      * The list of available ranges.
      * This is NOT SERIALIZED.
      */
-    private transient List _availableRanges = null;
+    private transient IntervalSet _availableRanges = null;
     
     /**
      * The number of times this download has failed while attempting
@@ -272,14 +272,14 @@ public class RemoteFileDesc implements Serializable {
     /**
      * Accessor for the available ranges.
      */
-    public List getAvailableRanges() {
-        return _availableRanges;
+    public IntervalSet getAvailableRanges() {
+        return (IntervalSet)_availableRanges.clone();
     }
 
     /**
      * Mutator for the available ranges.
      */
-    public void setAvailableRanges(List availableRanges) {
+    public void setAvailableRanges(IntervalSet availableRanges) {
         this._availableRanges = availableRanges;
     }
     

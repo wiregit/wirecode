@@ -1010,7 +1010,7 @@ public class HTTPDownloader implements BandwidthTracker {
     private static void parseAvailableRangesHeader(String line, 
                                                    RemoteFileDesc rfd) 
         throws IOException {
-        List availableRanges = new ArrayList();
+        IntervalSet availableRanges = new IntervalSet();
         
         line = line.toLowerCase();
         // start parsing after the word "bytes"

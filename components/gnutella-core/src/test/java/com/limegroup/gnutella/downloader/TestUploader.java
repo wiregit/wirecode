@@ -825,9 +825,9 @@ public class TestUploader extends AssertComparisons {
         //partial and this is the second iteration. 
         if(partial==3) {//check this before checking partial2 -- we set it there
             assertEquals("downloader picked incorrect start range in iteration",
-                         150000, start);
+                         150010, start);
             assertEquals("downloader pick incorrect stop range in iteration",
-                         250010, stop);
+                         250020, stop);
         }
         if(partial==2) {
             assertEquals("invalid start range", 50000, start);
