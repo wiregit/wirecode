@@ -162,16 +162,19 @@ public class QueryRouteTableTest extends TestCase {
 
         //1. Simple keyword tests (add, contains)
         //we have moved to 1-bit entry per hash, so either absent or present....
-        assertTrue(! qrt.contains(new QueryRequest((byte)4, 0, "garbage")));
-        assertTrue(qrt.contains(new QueryRequest((byte)2, 0, "bad")));
-        assertTrue(qrt.contains(new QueryRequest((byte)3, 0, "bad")));
-        assertTrue(qrt.contains(new QueryRequest((byte)4, 0, "bad")));
-        assertTrue(qrt.contains(new QueryRequest((byte)2, 0, "good bad")));
-        assertTrue(! qrt.contains(new QueryRequest((byte)3, 0, "good bd")));
+        assertTrue(! qrt.contains(new QueryRequest((byte)4, 0, "garbage",
+                                                   false)));
+        assertTrue(qrt.contains(new QueryRequest((byte)2, 0, "bad", false)));
+        assertTrue(qrt.contains(new QueryRequest((byte)3, 0, "bad", false)));
+        assertTrue(qrt.contains(new QueryRequest((byte)4, 0, "bad", false)));
+        assertTrue(qrt.contains(new QueryRequest((byte)2, 0, "good bad", 
+                                                 false)));
+        assertTrue(! qrt.contains(new QueryRequest((byte)3, 0, "good bd", 
+                                                   false)));
         assertTrue(qrt.contains(new QueryRequest((byte)3, 0, 
-                                                  "good bad book")));
+                                                  "good bad book", false)));
         assertTrue(! qrt.contains(new QueryRequest((byte)3, 0, 
-                                                    "good bad bok")));
+                                                    "good bad bok", false)));
 
         //2. addAll tests
         QueryRouteTable qrt2=new QueryRouteTable(1000);
@@ -322,12 +325,12 @@ public class QueryRouteTableTest extends TestCase {
         qrt.add("bad");   //{good/1, book/1, bad/3}
         qrt2=new QueryRouteTable(512);
         qrt2.addAll(qrt);
-        assertTrue(qrt2.contains(new QueryRequest((byte)4, 0, "bad")));
-        assertTrue(qrt2.contains(new QueryRequest((byte)4, 0, "good")));
+        assertTrue(qrt2.contains(new QueryRequest((byte)4, 0, "bad", false)));
+        assertTrue(qrt2.contains(new QueryRequest((byte)4, 0, "good", false)));
         qrt2=new QueryRouteTable(32);
         qrt2.addAll(qrt);
-        assertTrue(qrt2.contains(new QueryRequest((byte)4, 0, "bad")));
-        assertTrue(qrt2.contains(new QueryRequest((byte)4, 0, "good")));
+        assertTrue(qrt2.contains(new QueryRequest((byte)4, 0, "bad", false)));
+        assertTrue(qrt2.contains(new QueryRequest((byte)4, 0, "good", false)));
 
         //6. Test sequence numbers.
         qrt=new QueryRouteTable();   //a. wrong sequence after reset

@@ -123,7 +123,7 @@ public class UltrapeerRoutingTest extends TestCase {
         drain(ultrapeer);
 
         //1. Check that query broadcasted to old and ultrapeer
-        QueryRequest qr=new QueryRequest((byte)7, 0, "crap");
+        QueryRequest qr=new QueryRequest((byte)7, 0, "crap", false);
         leaf.send(qr);
         leaf.flush();
         
@@ -252,7 +252,8 @@ public class UltrapeerRoutingTest extends TestCase {
         GUID guid = new GUID(GUID.makeGuid());
         QueryRequest qr = new QueryRequest(guid.bytes(),
                                            (byte)7, 0, "", "", false,
-                                           currUrnTypeSet, currUrnSet);
+                                           currUrnTypeSet, currUrnSet,
+                                           false);
         
         // send the QR - FROM sndr
         sndr.send(qr);
@@ -279,7 +280,7 @@ public class UltrapeerRoutingTest extends TestCase {
         drain(ultrapeer);
         drain(leaf);
 
-        QueryRequest qr=new QueryRequest((byte)7, 0, "crap");
+        QueryRequest qr=new QueryRequest((byte)7, 0, "crap", false);
         old.send(qr);
         old.flush();
               
@@ -299,7 +300,7 @@ public class UltrapeerRoutingTest extends TestCase {
         drain(ultrapeer);
         drain(leaf);
 
-        QueryRequest qr=new QueryRequest((byte)7, 0, "test");
+        QueryRequest qr=new QueryRequest((byte)7, 0, "test", false);
         old.send(qr);
         old.flush();
               
@@ -323,7 +324,7 @@ public class UltrapeerRoutingTest extends TestCase {
         drain(leaf);
         drain(old);
 
-        QueryRequest qr=new QueryRequest((byte)7, 0, "susheel test");
+        QueryRequest qr=new QueryRequest((byte)7, 0, "susheel test", false);
         ultrapeer.send(qr);
         ultrapeer.flush();
               
@@ -553,7 +554,7 @@ public class UltrapeerRoutingTest extends TestCase {
         drain(ultrapeer);
 
         //Send query request from leaf, received by ultrapeer (and old)
-        QueryRequest qr=new QueryRequest((byte)7, 0, "crap");
+        QueryRequest qr=new QueryRequest((byte)7, 0, "crap", false);
         leaf.send(qr);
         leaf.flush();
         

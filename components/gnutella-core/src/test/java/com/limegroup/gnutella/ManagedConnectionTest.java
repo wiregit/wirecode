@@ -106,7 +106,7 @@ public class ManagedConnectionTest extends TestCase {
         //later, we simulate a stall in the network.
         out.stopOutputRunner();
         Message m=null;
-        out.send(new QueryRequest((byte)5, 0, "test"));
+        out.send(new QueryRequest((byte)5, 0, "test", false));
         m=new PingRequest((byte)5);
         m.hop();
         out.send(m);
@@ -143,8 +143,8 @@ public class ManagedConnectionTest extends TestCase {
         out.send(new PatchTableMessage((short)2, (short)2, 
                                        PatchTableMessage.COMPRESSOR_NONE,
                                        (byte)8, new byte[10], 5, 9));
-        out.send(new QueryRequest((byte)5, 0, "test2"));
-        m=new QueryRequest((byte)5, 0, "test far");
+        out.send(new QueryRequest((byte)5, 0, "test2", false));
+        m=new QueryRequest((byte)5, 0, "test far", false);
         m.hop();
         out.send(m);
                
@@ -241,9 +241,9 @@ public class ManagedConnectionTest extends TestCase {
         
         //Drop one message
         out.stopOutputRunner();        
-        out.send(new QueryRequest((byte)3, 0, "0"));   
+        out.send(new QueryRequest((byte)3, 0, "0", false));   
         sleep(1200);
-        out.send(new QueryRequest((byte)3, 0, "1200"));        
+        out.send(new QueryRequest((byte)3, 0, "1200", false));        
         out.startOutputRunner();
         Message m=(QueryRequest)in.receive(500);
         Assert.that(m instanceof QueryRequest);
@@ -257,15 +257,15 @@ public class ManagedConnectionTest extends TestCase {
 
         //Drop many messages
         out.stopOutputRunner();        
-        out.send(new QueryRequest((byte)3, 0, "0"));   
+        out.send(new QueryRequest((byte)3, 0, "0", false));   
         sleep(300);
-        out.send(new QueryRequest((byte)3, 0, "300"));        
+        out.send(new QueryRequest((byte)3, 0, "300", false));        
         sleep(300);
-        out.send(new QueryRequest((byte)3, 0, "600"));        
+        out.send(new QueryRequest((byte)3, 0, "600", false));        
         sleep(500);
-        out.send(new QueryRequest((byte)3, 0, "1100"));
+        out.send(new QueryRequest((byte)3, 0, "1100", false));
         sleep(900);
-        out.send(new QueryRequest((byte)3, 0, "2000"));
+        out.send(new QueryRequest((byte)3, 0, "2000", false));
         out.startOutputRunner();
         m=in.receive(500);
         Assert.that(m instanceof QueryRequest);
@@ -290,14 +290,14 @@ public class ManagedConnectionTest extends TestCase {
         // head...tail
         out.stopOutputRunner(); 
         out.send(hopped(new PingRequest((byte)4)));
-        out.send(new QueryRequest((byte)3, 0, "a"));
+        out.send(new QueryRequest((byte)3, 0, "a", false));
         out.startOutputRunner();
         Assert.that(in.receive() instanceof QueryRequest);
         Assert.that(in.receive() instanceof PingRequest);
 
         //tail...<wrap>...head
         out.stopOutputRunner(); 
-        out.send(new QueryRequest((byte)3, 0, "a"));
+        out.send(new QueryRequest((byte)3, 0, "a", false));
         out.send(hopped(new PingRequest((byte)5)));
         out.startOutputRunner();
         Assert.that(in.receive() instanceof PingRequest);
@@ -316,7 +316,7 @@ public class ManagedConnectionTest extends TestCase {
         out.send(new QueryReply(new byte[16], (byte)5, 6341, new byte[4], 0, 
                                 new Response[0], new byte[16]));
         out.send(new ResetTableMessage(1024, (byte)2));
-        out.send(new QueryRequest((byte)3, 0, "a"));
+        out.send(new QueryRequest((byte)3, 0, "a", false));
         out.startOutputRunner();
         m=in.receive();
         Assert.that(m instanceof QueryRequest, "Got: "+m);
@@ -345,7 +345,7 @@ public class ManagedConnectionTest extends TestCase {
         int initialDropped=out.getNumSentMessagesDropped();
         for (int i=0; i<total; i++) {
             out.send(new QueryRequest((byte)4, i, 
-                                      "Some reaaaaaalllllly big query"));
+                                      "Some reaaaaaalllllly big query", false));
         }
         int dropped=out.getNumSentMessagesDropped()-initialDropped;
         //System.out.println("Dropped messages: "+dropped);

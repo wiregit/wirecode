@@ -115,7 +115,7 @@ public class UDPServiceTest extends TestCase {
 		for(int i=0; i<fds.length; i++) {
 			String curName = fds[i].getName(); 
 			QueryRequest qr = new QueryRequest((byte)1, (byte)0, 
-											   curName); 
+											   curName, false); 
 			PingRequest ping = new PingRequest((byte)1);
 			ByteArrayOutputStream baos = new ByteArrayOutputStream();
 			try {

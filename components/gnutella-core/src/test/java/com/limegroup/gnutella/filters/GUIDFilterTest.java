@@ -33,7 +33,8 @@ public class GUIDFilterTest extends TestCase {
         guid[2]=(byte)0x42;
         guid[3]=(byte)0x62;
         guid[4]=(byte)0x5A;
-        QueryRequest query=new QueryRequest(guid, (byte)3, 0, "test query");
+        QueryRequest query=new QueryRequest(guid, (byte)3, 0, "test query",
+                                            false);
         assertTrue(! filter.allow(query));
     }
 
@@ -43,7 +44,8 @@ public class GUIDFilterTest extends TestCase {
         guid[2]=(byte)0x42;
         guid[3]=(byte)0x62;
         guid[4]=(byte)0x5B;
-        QueryRequest query=new QueryRequest(guid, (byte)3, 0, "test query");
+        QueryRequest query=new QueryRequest(guid, (byte)3, 0, "test query", 
+                                            false);
         assertTrue(filter.allow(query));
     }
 
@@ -53,7 +55,8 @@ public class GUIDFilterTest extends TestCase {
         guid[2]=(byte)0x42;
         guid[3]=(byte)0x62;
         guid[4]=(byte)0x5A;
-        QueryRequest query=new QueryRequest(guid, (byte)3, 0, "test query");
+        QueryRequest query=new QueryRequest(guid, (byte)3, 0, "test query",
+                                            false);
         assertTrue(filter.allow(query));
     }
 }

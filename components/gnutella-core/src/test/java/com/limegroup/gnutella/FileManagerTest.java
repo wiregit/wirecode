@@ -70,11 +70,12 @@ public class FileManagerTest extends TestCase {
 
             assertEquals("The number of shared files should be 1", 1, fman.getNumFiles());
             assertTrue(fman.getSize()+"", fman.getSize()==1);
-            Response[] responses=fman.query(new QueryRequest((byte)3,0,"unit"));
+            Response[] responses=fman.query(new QueryRequest((byte)3,0,"unit",
+                                                             false));
             assertEquals("there should only be one response", 1, responses.length);
             assertTrue("should have not been able to remove file", 
 					   !fman.removeFileIfShared(f3));
-            responses=fman.query(new QueryRequest((byte)3,0,"unit"));
+            responses=fman.query(new QueryRequest((byte)3,0,"unit", false));
             assertEquals("there should only be one response", 1, responses.length);
             //assertTrue(responses.length==1);
             assertTrue(fman.getSize()==1);
@@ -91,7 +92,7 @@ public class FileManagerTest extends TestCase {
             assertTrue(fman.addFileIfShared(f2)==true);
             assertTrue(fman.getNumFiles()+"", fman.getNumFiles()==2);
             assertTrue(fman.getSize()+"", fman.getSize()==4);
-            responses=fman.query(new QueryRequest((byte)3,0,"unit"));
+            responses=fman.query(new QueryRequest((byte)3,0,"unit", false));
             assertTrue(responses[0].getIndex()!=responses[1].getIndex());
             for (int i=0; i<responses.length; i++) {
                 assertTrue(responses[i].getIndex()==0
@@ -107,7 +108,7 @@ public class FileManagerTest extends TestCase {
             assertTrue(fman.removeFileIfShared(f2)==true);
             assertTrue(fman.getSize()==1);
             assertTrue(fman.getNumFiles()==1);
-            responses=fman.query(new QueryRequest((byte)3,0,"unit"));
+            responses=fman.query(new QueryRequest((byte)3,0,"unit", false));
             assertTrue(responses.length==1);
             files=fman.getSharedFiles(directory);
             assertTrue(files.length==1);
@@ -117,7 +118,7 @@ public class FileManagerTest extends TestCase {
             assertTrue(fman.addFileIfShared(f3)==true);
             assertTrue("size of files: "+fman.getSize(), fman.getSize()==12);
             assertTrue("# files: "+fman.getNumFiles(), fman.getNumFiles()==2);
-            responses=fman.query(new QueryRequest((byte)3,0,"unit"));
+            responses=fman.query(new QueryRequest((byte)3,0,"unit", false));
             assertTrue("response: "+responses.length, responses.length==2);
             assertTrue(responses[0].getIndex()!=1);
             assertTrue(responses[1].getIndex()!=1);
@@ -128,7 +129,7 @@ public class FileManagerTest extends TestCase {
                 assertTrue(false);
             } catch (IndexOutOfBoundsException e) { }
 
-            responses=fman.query(new QueryRequest((byte)3,0,"*unit*"));
+            responses=fman.query(new QueryRequest((byte)3,0,"*unit*", false));
             assertTrue("response: "+responses.length, responses.length==2);
 
             files=fman.getSharedFiles(directory);
@@ -167,7 +168,8 @@ public class FileManagerTest extends TestCase {
             assertTrue(fman.addFileIfShared(f6)==true);
             assertTrue(fman.getNumFiles()==3);
             assertTrue(fman.getSize()==Integer.MAX_VALUE);
-            responses=fman.query(new QueryRequest((byte)3, (byte)0, "*.*"));
+            responses=fman.query(new QueryRequest((byte)3, (byte)0, "*.*", 
+                                                  false));
             assertTrue(responses.length==3);
             assertTrue(responses[0].getName().equals(f3.getName()));
             assertTrue(responses[1].getName().equals(f5.getName()));
