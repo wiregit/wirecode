@@ -74,15 +74,15 @@ public final class MP3Info {
 
         pos += 4; //increment the filePointer beyond the header bytes
         
-        if( _header.getVersionIndex()==3 ) {  // mpeg version 1
+        if ( _header.getVersionIndex()==3 ) {  // mpeg version 1
             
             if( _header.getModeIndex()==3 ) pos += 17; // Single Channel
-            else                           pos += 32;
+            else                            pos += 32;
             
         } else {                             // mpeg version 2 or 2.5
             
             if( _header.getModeIndex()==3 ) pos +=  9; // Single Channel
-            else                           pos += 17;
+            else                            pos += 17;
             
         }
         debug("MP3Info(): in attempt to find Variable bit rate, position = " + 
@@ -105,7 +105,8 @@ public final class MP3Info {
         int retInt = 0;
 
         if (_isVariableBitRate) {
-            // get average frame size by deviding fileSize by the number of frames
+            // get average frame size by deviding fileSize 
+            // by the number of frames
             double medFrameSize = 
             (double) _fileSize / (double) getNumberOfFrames();
 
@@ -115,17 +116,19 @@ public final class MP3Info {
             /* Now using the formula for FrameSizes which looks different,
                depending on which mpeg version we're using, for mpeg v1:
                
-               FrameSize = 12 * BitRate / SampleRate + Padding (if there is padding)
+               FrameSize = 12 * BitRate / SampleRate + Padding (if there is 
+               padding)
                
                for mpeg v2 the same thing is:
                
-               FrameSize = 144 * BitRate / SampleRate + Padding (if there is padding)
+               FrameSize = 144 * BitRate / SampleRate + Padding (if there is 
+               padding)
                
-               remember that bitrate is in kbps and sample rate in Hz, so we need to
-               multiply our BitRate with 1000.
+               remember that bitrate is in kbps and sample rate in Hz, so we 
+               need to multiply our BitRate with 1000.
                
-               For our purpose, just getting the average frame size, will make the
-               padding obsolete, so our formula looks like:
+               For our purpose, just getting the average frame size, will 
+               make the padding obsolete, so our formula looks like:
                
                FrameSize = (mpeg1?12:144) * 1000 * BitRate / SampleRate;
             */
@@ -144,9 +147,10 @@ public final class MP3Info {
             retInt = (int)tempVal;
         }
 
-        /* If the computed bit rate (above) is nonsensical, just get the bit rate from
-           the header.  We aren't convinced how useful Variable Bit Rate is yet.
-        */
+        /* If the computed bit rate (above) is nonsensical, just get the 
+         * bit rate from the header.  We aren't convinced how useful 
+         * Variable Bit Rate is yet.
+         */
         if (retInt < 1)
             retInt = _header.getBitRate();
 
@@ -164,28 +168,27 @@ public final class MP3Info {
             /* Now using the formula for FrameSizes which looks different,
                depending on which mpeg version we're using, for layer 1:
                
-               FrameSize = 12 * BitRate / SampleRate + Padding (if there is padding)
+               FrameSize = 12 * BitRate / SampleRate + Padding (if there 
+               is padding) for layer 2 & 3 the same thing is:
                
-               for layer 2 & 3 the same thing is:
+               FrameSize = 144 * BitRate / SampleRate + Padding (if there 
+               is padding) remember that bitrate is in kbps and sample rate 
+               in Hz, so we need to multiply our BitRate with 1000.
                
-               FrameSize = 144 * BitRate / SampleRate + Padding (if there is padding)
-               
-               remember that bitrate is in kbps and sample rate in Hz, so we need to
-               multiply our BitRate with 1000.
-               
-               For our purpose, just getting the average frame size, will make the
-               padding obsolete, so our formula looks like:
+               For our purpose, just getting the average frame size, will 
+               make the padding obsolete, so our formula looks like:
                
                FrameSize = (layer1?12:144) * 1000 * BitRate / SampleRate;
             */
             
-            double medFrameSize = (double)( 
-                                           ( (_header.getLayerIndex()==3) ? 12 : 144 ) *
-                                           (
-                                            (1000.0 * (double)_header.getBitRate() ) /
-                                            (double)_header.getFrequency()
-                                            )
-                                           );
+            double medFrameSize = 
+            (double)( 
+                     ( (_header.getLayerIndex()==3) ? 12 : 144 ) *
+                     (
+                      (1000.0 * (double)_header.getBitRate() ) /
+                      (double)_header.getFrequency()
+                      )
+                     );
             
             return (int)( ((double)_fileSize)/medFrameSize );
             
@@ -323,7 +326,8 @@ public final class MP3Info {
             
             // the frequency is not only dependent of the bitrate index,
             // the bitrate also varies with the MPEG version
-            debug("MP3Header.getFrequency():" + table[getVersionIndex()][getFrequencyIndex()]);
+            debug("MP3Header.getFrequency():" + 
+                  table[getVersionIndex()][getFrequencyIndex()]);
             return table[getVersionIndex()][getFrequencyIndex()];            
         }
 
@@ -358,7 +362,7 @@ public final class MP3Info {
         }
 
         
-        public int getFrameSync()     { return (int)((getHeader()>>21) & 2047); };
+        public int getFrameSync()     { return (int)((getHeader()>>21) & 2047);};
         public int getVersionIndex()  { return (int)((getHeader()>>19) & 3);  };
         public int getLayerIndex()    { return (int)((getHeader()>>17) & 3);  };
         public int getProtectionBit() { return (int)((getHeader()>>16) & 1);  };
@@ -376,25 +380,34 @@ public final class MP3Info {
         
         /** @return The bitrate in between 8 - 448 Kb/s .
          *  @exception Exception Thrown when bitrate determination fails.
-         *  @param file The Name of the mp3 file (implicit) you want the bitrate of.
+         *  @param file The Name of the mp3 file (implicit) you want the 
+         *  bitrate of.
          */
         public int getBitRate() {
             
             int retInt = 0;
             
             int table[][][] = {
-                {         //MPEG 2 & 2.5
-                    {0,  8, 16, 24, 32, 40, 48, 56, 64, 80, 96,112,128,144,160,0}, //Layer III
-                    {0,  8, 16, 24, 32, 40, 48, 56, 64, 80, 96,112,128,144,160,0}, //Layer II
-                    {0, 32, 48, 56, 64, 80, 96,112,128,144,160,176,192,224,256,0}  //Layer I
-                },{       //MPEG 1
-                    {0, 32, 40, 48, 56, 64, 80, 96,112,128,160,192,224,256,320,0}, //Layer III
-                    {0, 32, 48, 56, 64, 80, 96,112,128,160,192,224,256,320,384,0}, //Layer II
-                    {0, 32, 64, 96,128,160,192,224,256,288,320,352,384,416,448,0}  //Layer I
-            }
+                {       //MPEG 2 & 2.5
+                    //Layer 3
+                    {0,8,16,24,32,40,48,56,64,80,96,112,128,144,160,0},
+                    //Layer 2
+                    {0,8,16,24,32,40,48,56,64,80,96,112,128,144,160,0},
+                    //Layer I
+                    {0,32,48,56,64,80,96,112,128,144,160,176,192,224,256,0}
+                },
+                {       //MPEG 1
+                    //Layer III
+                    {0,32,40,48,56,64,80,96,112,128,160,192,224,256,320,0},
+                    //Layer II
+                    {0,32,48,56,64,80,96,112,128,160,192,224,256,320,384,0},
+                    //Layer I
+                    {0,32,64,96,128,160,192,224,256,288,320,352,384,416,448,0}
+                }
             };
         
-            retInt = table[(getVersionIndex() & 1)][(getLayerIndex() -1)][getBitrateIndex()];
+            retInt = 
+            table[(getVersionIndex()&1)][(getLayerIndex()-1)][getBitrateIndex()];
             
             return retInt;
         }
