@@ -50,10 +50,29 @@ public abstract class AbstractStatHandler {
 		StatisticsManager.instance();
 
 
+	/**
+	 * Stub class for the bandwidth data-gatherer.  This turns off the
+	 * bandwidth data gathering, particularly for cases where leaving it
+	 * on would result in an overcount (counting the same bytes multiple
+	 * times).
+	 */
 	private static final Statistic BANDWIDTH_BYTE_STAT_STUB =
 		new AdvancedStatistic() {
 			public void addData() {}
 		};
+
+	/**
+	 * No argument constructor simply creates new stats classes for all
+	 * required fields.  For the bandwidth stat, it uses the stub that
+	 * does not record bandwidth data.
+	 */
+	protected AbstractStatHandler(String fileName) {
+		NUMBER_STAT      = new AdvancedStatistic(fileName);	
+		BYTE_STAT        = new AdvancedKilobytesStatistic(fileName);		
+		LIME_NUMBER_STAT = new AdvancedStatistic(fileName);		
+		LIME_BYTE_STAT   = new AdvancedKilobytesStatistic(fileName);	
+		BANDWIDTH_BYTE_STAT = BANDWIDTH_BYTE_STAT_STUB;	
+	}
 
 	/**
 	 * Creates a new <tt>ReceivedMessageStatHandler</tt> instance.  
