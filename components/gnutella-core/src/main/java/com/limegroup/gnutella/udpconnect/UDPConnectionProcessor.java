@@ -845,6 +845,7 @@ public class UDPConnectionProcessor {
                         LOG.debug("Soft resending message:"+
                           drec.msg.getSequenceNumber());
                     safeSend(drec.msg);
+                    _writeRegulator.addMessageFailure();
                     currTime      = _lastSendTime;
                     drec.sentTime = currTime;
                     drec.sends++;
@@ -978,6 +979,7 @@ public class UDPConnectionProcessor {
                 } else {
                     // Record the ack
                     _sendWindow.ackBlock(seqNo);
+                    _writeRegulator.addMessageSuccess();
 
                     // Ensure that all messages up to sent windowStart are acked
                     _sendWindow.pseudoAckToReceiverWindow(amsg.getWindowStart());
