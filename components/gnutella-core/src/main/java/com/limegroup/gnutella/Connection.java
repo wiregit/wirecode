@@ -505,6 +505,23 @@ public class Connection implements Runnable {
 			//TODO1: Rob makes HHTTP connection
 			System.out.println("Establishing HTTP");
 			
+			String host = new String(req.getIP());
+			int port = req.getPort();
+			
+			FileManager fmanager = FileManager.getFileManager();
+			int index = (int)req.getIndex();
+
+			System.out.println("THe index is " + index); 
+
+			FileDesc desc = (FileDesc)fmanager._files.get(index);
+			System.out.println("THe size is " + fmanager._files.size()); 
+
+			String file = desc._name;
+			
+			HTTPUploader up = new 
+			    HTTPUploader("http", host, port, file, manager);
+
+			up.run();
 
 		    }
 		    else{// the message has arrived in error

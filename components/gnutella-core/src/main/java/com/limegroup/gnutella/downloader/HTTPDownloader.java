@@ -71,14 +71,14 @@ public class HTTPDownloader implements Runnable {
 	}
 	catch (java.net.MalformedURLException e) {
 	    System.out.println("Catching Malformed URL Exception");
-	    sendPushRequest(host, port, index, guid);
+	    sendPushRequest(host, index, port, guid);
 	    _callback.error(ActivityCallback.ERROR_5);
 	    return;
 	}
 	catch (IOException e) {
 
 	    System.out.println("Catching IO Exception");
-	    sendPushRequest(host, port, index, guid);
+	    sendPushRequest(host, index, port, guid);
 	    _callback.error(ActivityCallback.ERROR_6);
 
 	    return;
@@ -89,7 +89,7 @@ public class HTTPDownloader implements Runnable {
 	    _in = new BufferedReader(isr);
 	}
 	catch (IOException e) {
-	    sendPushRequest(host, port, index, guid);
+	    sendPushRequest(host, index, port, guid);
 	    // _callback.error(ActivityCallback.ERROR_4);
 	    return;
 
@@ -135,7 +135,7 @@ public class HTTPDownloader implements Runnable {
 	    System.out.println("Sending push Request");
 	    _manager.sendToAll(push);
 	}
-	catch (IOException e) {
+	catch (Exception e) {
 	    _callback.error(ActivityCallback.ERROR_7);
 	    return;
 	}

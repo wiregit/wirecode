@@ -27,7 +27,8 @@ public class HTTPUploader implements Runnable {
     private FileManager _fmanager;
     private FileDesc _fdesc;
     private BufferedReader _fin;
-
+    private String _host;
+    
     public HTTPUploader(Socket s, String file, 
 			int index, ConnectionManager m) {
 
@@ -42,6 +43,7 @@ public class HTTPUploader implements Runnable {
 	_fmanager = FileManager.getFileManager();
 	_fdesc = null;
 	
+
 	try {	                         /* look for the file */
 	    System.out.println("THe # of files " + _fmanager._files.size());
 	    _fdesc = (FileDesc)_fmanager._files.get(_index);
@@ -91,6 +93,7 @@ public class HTTPUploader implements Runnable {
     public HTTPUploader(String protocal, String host, 
 			  int port, String file, ConnectionManager m ) {
 
+	_host = host;
 	_filename = file;
 	_amountRead = 0;
 	_manager = m;
@@ -106,11 +109,16 @@ public class HTTPUploader implements Runnable {
 	    doNoSuchFile();              /* send an HTTP error */
 	    return;
 	}
+
+	System.out.println("The name: " + _fdesc._name);
+	System.out.println("THe _filename: " + _filename.trim());
+
+
 	/* check to see if the index */
 	if (! _fdesc._name.equals(_filename.trim())) { /* matches the name */
 	    System.out.println("The Error is here: index != filename");
-	    doNoSuchFile();
-  	    return;
+	    // doNoSuchFile();
+  	    // return;
   	}
 	
 	_sizeOfFile = _fdesc._size;
@@ -171,7 +179,17 @@ public class HTTPUploader implements Runnable {
     }
 
     public InetAddress getInetAddress() {
-	return _socket.getInetAddress();
+	if (_socket != null) 
+	    return _socket.getInetAddress();
+	else {
+	    try {
+		return InetAddress.getByName(_host);
+	    }
+	    catch (Exception e) {
+		System.out.println("The get by name didn't work");
+	    }
+	}
+	return null;
     }   
 
     public void writeHeader() {
