@@ -3,6 +3,7 @@ package com.limegroup.gnutella;
 import junit.framework.*;
 import java.io.*;
 import java.util.Properties;
+import java.net.*;
 import com.limegroup.gnutella.handshaking.*;
 import com.limegroup.gnutella.routing.*;
 import com.limegroup.gnutella.messages.*;
@@ -55,7 +56,7 @@ public class ManagedConnectionTest extends TestCase {
             com.limegroup.gnutella.MiniAcceptor acceptor=
                 new com.limegroup.gnutella.MiniAcceptor(null, PORT);
             ManagedConnection.QUEUE_TIME=1000;
-            ManagedConnection out=newConnection("localhost", PORT);
+            ManagedConnection out=newConnection(InetAddress.getLocalHost(), PORT);
             out.initialize();
             Connection in=acceptor.accept();      
             testSendFlush(out, in);
@@ -382,7 +383,7 @@ public class ManagedConnectionTest extends TestCase {
 
             //1. Locally closed
             acceptor=new com.limegroup.gnutella.MiniAcceptor(null, PORT);
-            out=newConnection("localhost", PORT, manager);
+            out=newConnection(InetAddress.getLocalHost(), PORT, manager);
             out.initialize();            
             in=acceptor.accept(); 
             Assert.that(out.isOpen());
@@ -396,7 +397,7 @@ public class ManagedConnectionTest extends TestCase {
 
             //2. Remote close: discovered on read
             acceptor=new com.limegroup.gnutella.MiniAcceptor(null, PORT);
-            out=newConnection("localhost", PORT, manager);
+            out=newConnection(InetAddress.getLocalHost(), PORT, manager);
             out.initialize();            
             in=acceptor.accept(); 
             Assert.that(out.isOpen());
@@ -416,7 +417,7 @@ public class ManagedConnectionTest extends TestCase {
             //semantics, we need TWO writes to discover this.  (See unit tests
             //for Connection.)
             acceptor=new com.limegroup.gnutella.MiniAcceptor(null, PORT);
-            out=newConnection("localhost", PORT, manager);
+            out=newConnection(InetAddress.getLocalHost(), PORT, manager);
             out.initialize();            
             in=acceptor.accept(); 
             Assert.that(out.isOpen());
@@ -437,65 +438,70 @@ public class ManagedConnectionTest extends TestCase {
  
 
     public void testHorizonStatistics() {
-        ManagedConnection mc=newConnection();
-        //For testing.  You may need to ensure that HORIZON_UPDATE_TIME is
-        //non-final to compile.
-        mc.HORIZON_UPDATE_TIME=1*200;   
-        PingReply pr1=new PingReply(
-            GUID.makeGuid(), (byte)3, 6346,
-            new byte[] {(byte)127, (byte)0, (byte)0, (byte)1},
-            1, 10);
-        PingReply pr2=new PingReply(
-            GUID.makeGuid(), (byte)3, 6347,
-            new byte[] {(byte)127, (byte)0, (byte)0, (byte)1},
-            2, 20);
-        PingReply pr3=new PingReply(
-            GUID.makeGuid(), (byte)3, 6346,
-            new byte[] {(byte)127, (byte)0, (byte)0, (byte)2},
-            3, 30);
+		try {
+			ManagedConnection mc = newConnection();
+			//For testing.  You may need to ensure that HORIZON_UPDATE_TIME is
+			//non-final to compile.
+			mc.HORIZON_UPDATE_TIME=1*200;   
+			PingReply pr1 = 
+				new PingReply(GUID.makeGuid(), (byte)3, 6346,
+							  new byte[] {(byte)127, (byte)0, (byte)0, (byte)1},
+							  1, 10);
+			PingReply pr2 =
+				new PingReply(GUID.makeGuid(), (byte)3, 6347,
+							  new byte[] {(byte)127, (byte)0, (byte)0, (byte)1},
+							  2, 20);
+			PingReply pr3 = 
+				new PingReply(GUID.makeGuid(), (byte)3, 6346,
+							  new byte[] {(byte)127, (byte)0, (byte)0, (byte)2},
+							  3, 30);
 
-        Assert.that(mc.getNumFiles()==0);
-        Assert.that(mc.getNumHosts()==0);
-        Assert.that(mc.getTotalFileSize()==0);
-
-        mc.updateHorizonStats(pr1);
-        mc.updateHorizonStats(pr1);  //check duplicates
-        Assert.that(mc.getNumFiles()==1);
-        Assert.that(mc.getNumHosts()==1);
-        Assert.that(mc.getTotalFileSize()==10);
-
-        try { Thread.sleep(ManagedConnection.HORIZON_UPDATE_TIME*2); } 
-        catch (InterruptedException e) { }
+			Assert.that(mc.getNumFiles()==0);
+			Assert.that(mc.getNumHosts()==0);
+			Assert.that(mc.getTotalFileSize()==0);
+			
+			mc.updateHorizonStats(pr1);
+			mc.updateHorizonStats(pr1);  //check duplicates
+			Assert.that(mc.getNumFiles()==1);
+			Assert.that(mc.getNumHosts()==1);
+			Assert.that(mc.getTotalFileSize()==10);
+			
+			try { Thread.sleep(ManagedConnection.HORIZON_UPDATE_TIME*2); } 
+			catch (InterruptedException e) { }
             
-        mc.refreshHorizonStats();    
-        mc.updateHorizonStats(pr1);  //should be ignored for now
-        mc.updateHorizonStats(pr2);
-        mc.updateHorizonStats(pr3);
-        Assert.that(mc.getNumFiles()==1);
-        Assert.that(mc.getNumHosts()==1);
-        Assert.that(mc.getTotalFileSize()==10);
-        mc.refreshHorizonStats();    //should be ignored
-        Assert.that(mc.getNumFiles()==1);
-        Assert.that(mc.getNumHosts()==1);
-        Assert.that(mc.getTotalFileSize()==10);
-
-        try { Thread.sleep(ManagedConnection.HORIZON_UPDATE_TIME*2); } 
-        catch (InterruptedException e) { }            
-
-        mc.refreshHorizonStats();    //update stats
-        Assert.that(mc.getNumFiles()==(1+2+3));
-        Assert.that(mc.getNumHosts()==3);
-        Assert.that(mc.getTotalFileSize()==(10+20+30));
-
-        try { Thread.sleep(ManagedConnection.HORIZON_UPDATE_TIME*2); } 
-        catch (InterruptedException e) { }       
-
-        mc.refreshHorizonStats();
-        Assert.that(mc.getNumFiles()==0);
-        Assert.that(mc.getNumHosts()==0);
-        Assert.that(mc.getTotalFileSize()==0);                
+			mc.refreshHorizonStats();    
+			mc.updateHorizonStats(pr1);  //should be ignored for now
+			mc.updateHorizonStats(pr2);
+			mc.updateHorizonStats(pr3);
+			Assert.that(mc.getNumFiles()==1);
+			Assert.that(mc.getNumHosts()==1);
+			Assert.that(mc.getTotalFileSize()==10);
+			mc.refreshHorizonStats();    //should be ignored
+			Assert.that(mc.getNumFiles()==1);
+			Assert.that(mc.getNumHosts()==1);
+			Assert.that(mc.getTotalFileSize()==10);
+			
+			try { Thread.sleep(ManagedConnection.HORIZON_UPDATE_TIME*2); } 
+			catch (InterruptedException e) { }            
+			
+			mc.refreshHorizonStats();    //update stats
+			Assert.that(mc.getNumFiles()==(1+2+3));
+			Assert.that(mc.getNumHosts()==3);
+			Assert.that(mc.getTotalFileSize()==(10+20+30));
+			
+			try { Thread.sleep(ManagedConnection.HORIZON_UPDATE_TIME*2); } 
+			catch (InterruptedException e) { }       
+			
+			mc.refreshHorizonStats();
+			Assert.that(mc.getNumFiles()==0);
+			Assert.that(mc.getNumHosts()==0);
+			Assert.that(mc.getTotalFileSize()==0);                
+		} catch(UnknownHostException e) {
+			fail("unexpected exception: "+e);
+		}
     }
     
+	/*
     public void testIsRouter() {
         Assert.that(! ManagedConnection.isRouter("127.0.0.1"));
         Assert.that(! ManagedConnection.isRouter("18.239.0.1"));
@@ -514,14 +520,17 @@ public class ManagedConnectionTest extends TestCase {
         Assert.that(ManagedConnection.translateHost("router4.limewire.com").
             equals("router4.limewire.com"));
      }
+	*/
 
     public void testForwardsGGEP() {
         int TIMEOUT=1000;
         MiniAcceptor acceptor=new MiniAcceptor(new GGEPResponder(), PORT);
-        ManagedConnection out=new ManagedConnection("localhost", PORT,
-                                                   new MessageRouterStub(),
-                                                   new ConnectionManagerStub());
         try {
+			ManagedConnection out=
+				new ManagedConnection(InetAddress.getLocalHost(), 
+									  PORT,
+									  new MessageRouterStub(),
+									  new ConnectionManagerStub());
             out.initialize();
             Connection in=acceptor.accept();
             assertTrue(out.supportsGGEP());
@@ -548,10 +557,11 @@ public class ManagedConnectionTest extends TestCase {
    public void testStripsGGEP() {
         int TIMEOUT=1000;
         MiniAcceptor acceptor=new MiniAcceptor(new EmptyResponder(), PORT);
-        ManagedConnection out=new ManagedConnection("localhost", PORT,
-                                                   new MessageRouterStub(),
-                                                   new ConnectionManagerStub());
         try {
+			ManagedConnection out = 
+				new ManagedConnection(InetAddress.getLocalHost(), PORT,
+									  new MessageRouterStub(),
+									  new ConnectionManagerStub());
             out.initialize();
             Connection in=acceptor.accept();
             assertTrue(! out.supportsGGEP());
@@ -578,10 +588,11 @@ public class ManagedConnectionTest extends TestCase {
         int TIMEOUT=1000;
         MiniAcceptor acceptor=new MiniAcceptor(new EmptyResponder(), PORT);
         //Router connection
-        ManagedConnection out=new ManagedConnection("localhost", PORT,
-                                                   new MessageRouterStub(),
-                                                   new ConnectionManagerStub());
         try {
+			ManagedConnection out = 
+				new ManagedConnection(InetAddress.getLocalHost(), PORT,
+									  new MessageRouterStub(),
+									  new ConnectionManagerStub());
             out.initialize();
             Connection in=acceptor.accept();
             assertTrue(! out.supportsGGEP());
@@ -623,16 +634,16 @@ public class ManagedConnectionTest extends TestCase {
         }
     }
 
-    private static ManagedConnection newConnection() {
-        return newConnection("", 0);
+    private static ManagedConnection newConnection() throws UnknownHostException {
+		return newConnection(InetAddress.getLocalHost(), 0);
     }
 
-    private static ManagedConnection newConnection(String host, int port) {
+    private static ManagedConnection newConnection(InetAddress host, int port) {
         return new ManagedConnection(host, port, new MessageRouterStub(),
-                                     new ConnectionManagerStub());
+									 new ConnectionManagerStub());
     }
 
-    private static ManagedConnection newConnection(String host, int port,
+    private static ManagedConnection newConnection(InetAddress host, int port,
                                                    ConnectionManager cm) {
         return new ManagedConnection(host, port, new MessageRouterStub(), cm);
     }

@@ -55,9 +55,14 @@ public class Sockets {
      * @exception IOException the connections couldn't be made in the 
      *  requested time
      */
-    public static Socket connect(String host, int port, 
+//     public static Socket connect(String host, int port, 
+//                                  int timeout, boolean emulate) 
+//                                  throws IOException {
+    public static Socket connect(InetAddress host, int port, 
                                  int timeout, boolean emulate) 
                                  throws IOException {
+
+		System.out.println("Sockets::connect: "+host); 
         if (CommonUtils.isJava14OrLater()) {
             //a) Non-blocking IO using Java 1.4. Conceptually, this code
             //   does the following:
@@ -69,17 +74,21 @@ public class Sockets {
             //   of Java.  Worse, it may cause runtime errors if class loading
             //   is not done lazily.  (See chapter 12.3.4 of the Java Language
             //   Specification.)  So we use reflection.
+			// TODO:: Shouldn't we store these classes instead of loading them
+			//        each time??  We also don't need to use reflection to 
+			//        load the Socket class
             try {
                 Class inetSocketAddress=
                     Class.forName("java.net.InetSocketAddress");
                 Constructor inetSocketAddressCtor=
                     inetSocketAddress.getConstructor(
-                        new Class[] { String.class, Integer.TYPE });
+                        new Class[] { InetAddress.class, Integer.TYPE });
                 Object addr=inetSocketAddressCtor.newInstance(
                     new Object[] { host, new Integer(port) });
 
                 Class socket=Class.forName("java.net.Socket");
                 Object ret=socket.newInstance();
+				//Socket socket = new Socket();
 
                 Class socketAddress=Class.forName("java.net.SocketAddress");
                 Method connect=socket.getMethod("connect", 
@@ -88,11 +97,13 @@ public class Sockets {
                     new Object[] { addr, new Integer(timeout) });
 
                 return (Socket)ret;
-            } catch (InvocationTargetException ioException) {
+            } catch (InvocationTargetException e) {
+				e.printStackTrace();
                 //ioException.getTargetException() should be an instance of
                 //IOexception, but this is safer.
                 throw new IOException(); 
-            } catch (Exception ignored) {
+            } catch (Exception e) {
+				e.printStackTrace();
                 //I don't like generic "catch Exception"'s, but I think it's
                 //clearer than listing the zillion cases from above.  This
                 //should never happen, but we can go on to the emulation step
@@ -132,7 +143,7 @@ public class Sockets {
  * called once.
  */
 class SocketOpener {
-    private String host;
+    private InetAddress host;
     private int port;
     /** The established socket, or null if not established OR couldn't be
      *  established.. Notify this when socket becomes non-null. */
@@ -141,7 +152,7 @@ class SocketOpener {
      *  is established. */
     private boolean timedOut=false;
 
-    public SocketOpener(String host, int port) {
+    public SocketOpener(InetAddress host, int port) {
         this.host=host;
         this.port=port;
     }
@@ -190,7 +201,9 @@ class SocketOpener {
                 Socket sock=null;
                 try {
                     sock=new Socket(host, port);
-                } catch (IOException e) { }                
+                } catch (IOException e) { 
+					e.printStackTrace();
+				}                
                 
                 synchronized (SocketOpener.this) {
                     if (timedOut && sock!=null)

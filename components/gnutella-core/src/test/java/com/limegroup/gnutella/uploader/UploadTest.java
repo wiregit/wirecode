@@ -14,7 +14,7 @@ import com.limegroup.gnutella.stubs.*;
  * containing the lowercase characters a-z.
  */
 public class UploadTest extends TestCase {
-    private static String address;
+    private static InetAddress _address;
     private static int port;
     /** The file name, plain and encoded. */
     private static String file="alphabet test file#2.txt";
@@ -47,7 +47,7 @@ public class UploadTest extends TestCase {
 
 	protected void setUp() {
 		try {
-  			address = InetAddress.getLocalHost().getHostAddress();
+  			_address = InetAddress.getLocalHost();
   		} catch(UnknownHostException e) {
   			assertTrue("unexpected exception: "+e, false);
   		}
@@ -245,7 +245,7 @@ public class UploadTest extends TestCase {
 
         //1. Write request
         boolean ret = true;
-        Socket s = new Socket(address, port);
+        Socket s = new Socket(_address, port);
         BufferedReader in = new BufferedReader(new InputStreamReader(
             s.getInputStream()));
         BufferedWriter out = new BufferedWriter(new OutputStreamWriter(
@@ -277,7 +277,7 @@ public class UploadTest extends TestCase {
         //malformed and slightly malformed headers
         
         //1. Write request
-        Socket s = new Socket(address, port);
+        Socket s = new Socket(_address, port);
         BufferedReader in = new BufferedReader(new InputStreamReader(
             s.getInputStream()));
         BufferedWriter out = new BufferedWriter(new OutputStreamWriter(
@@ -308,7 +308,7 @@ public class UploadTest extends TestCase {
 										 String expResp) 
 		throws IOException, BadPacketException {
         //Establish push route
-        Connection c=new Connection(address, port);
+        Connection c=new Connection(_address, port);
         c.initialize();
         QueryRequest query=new QueryRequest((byte)5, 0, "txt");
         c.send(query);
@@ -367,7 +367,7 @@ public class UploadTest extends TestCase {
 										String expResp) 
             throws IOException, BadPacketException {
         //Establish push route
-        Connection c=new Connection(address, port);
+        Connection c=new Connection(_address, port);
         c.initialize();
         QueryRequest query=new QueryRequest((byte)5, 0, "txt");
         c.send(query);
@@ -536,7 +536,7 @@ public class UploadTest extends TestCase {
                                                   String expResp) 
         throws IOException {
         boolean ret = true;
-        Socket s = new Socket(address,port);
+        Socket s = new Socket(_address,port);
         BufferedReader in = new BufferedReader(new InputStreamReader
                                                (s.getInputStream()));
         BufferedWriter out = new BufferedWriter(new OutputStreamWriter
@@ -585,7 +585,7 @@ public class UploadTest extends TestCase {
         throws IOException , BadPacketException {
         boolean ret = true;
         //Establish push route
-        Connection c=new Connection(address, port);
+        Connection c=new Connection(_address, port);
         c.initialize();
         QueryRequest query=new QueryRequest((byte)5, 0, "txt");
         c.send(query);
@@ -661,7 +661,7 @@ public class UploadTest extends TestCase {
         Socket s = null;
         try {
             //1. Establish connection.
-            s = new Socket(address, port);
+            s = new Socket(_address, port);
             BufferedReader in = new BufferedReader(new InputStreamReader(
                                                           s.getInputStream()));
             BufferedWriter out = new BufferedWriter(new OutputStreamWriter(
@@ -688,7 +688,7 @@ public class UploadTest extends TestCase {
         Socket s = null;
         try {
             //1. Establish connection.
-            s = new Socket(address, port);
+            s = new Socket(_address, port);
             BufferedReader in = new BufferedReader(new InputStreamReader(
                                                           s.getInputStream()));
             BufferedWriter out = new BufferedWriter(new OutputStreamWriter(

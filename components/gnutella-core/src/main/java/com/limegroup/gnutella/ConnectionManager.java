@@ -166,10 +166,10 @@ public class ConnectionManager {
      * a new thread to do the message loop.
      */
     public ManagedConnection createConnectionBlocking(
-            String hostname, int portnum) throws IOException {
+            InetAddress hostname, int portnum) throws IOException {
 
-        ManagedConnection c = new ManagedConnection(hostname, portnum, _router,
-                                                    this);
+        ManagedConnection c = 
+			new ManagedConnection(hostname, portnum, _router, this);
 
         // Initialize synchronously
         initializeExternallyGeneratedConnection(c);
@@ -184,12 +184,12 @@ public class ConnectionManager {
      * on a new thread.
      */
     public void createConnectionAsynchronously(
-            String hostname, int portnum) {
+            InetAddress hostname, int portnum) {
 
         // Initialize and loop for messages on another thread.
         new OutgoingConnectionThread(
-                new ManagedConnection(hostname, portnum, _router, this),
-                true);
+		    new ManagedConnection(hostname, portnum, _router, this),
+			true);
     }
 
 
@@ -841,7 +841,7 @@ public class ConnectionManager {
             remove(c);
             //add the endpoint to hostcatcher
             if (c.isSupernodeConnection()) {
-                _catcher.add(new Endpoint(c.getInetAddress().getHostAddress(),
+                _catcher.add(new Endpoint(c.getInetAddress().getAddress(),
                     c.getPort()), true);
             }   
         }
@@ -903,10 +903,10 @@ public class ConnectionManager {
     private void sendInitialPingRequest(ManagedConnection connection) {
         PingRequest pr;
         //Bootstrap server: send group ping.
-        if (connection.isRouterConnection()) {
-            String group = "none:"+_settings.getConnectionSpeed();
-            pr = _router.createGroupPingRequest(group);                 //a
-        }
+        //if (connection.isRouterConnection()) {
+		//  String group = "none:"+_settings.getConnectionSpeed();
+		//  pr = _router.createGroupPingRequest(group);                 //a
+        //}
         //We need to compare how many connections we have to the keep alive to
         //determine whether to send a broadcast ping or a handshake ping, 
         //initially.  However, in this case, we can't check the number of 
@@ -914,7 +914,7 @@ public class ConnectionManager {
         //send a handshake ping, since we're always adjusting the connection 
         //fetchers to have the difference between keep alive and num of
         //connections.
-        else if (getNumInitializedConnections() >= _keepAlive)
+        if (getNumInitializedConnections() >= _keepAlive)
             pr = new PingRequest((byte)1);                              //b
         else
             pr = new PingRequest(SettingsManager.instance().getTTL());  //c
@@ -1082,9 +1082,6 @@ public class ConnectionManager {
             // the need for connections; we've just replaced a ConnectionFetcher
             // with a Connection.
         }
-		if(!CommonUtils.isJava118()) {
-			ConnectionStat.OUTGOING_CONNECTION_ATTEMPTS.incrementStat();
-		}
         RouterService.getCallback().connectionInitializing(c);
 
         try {
@@ -1554,17 +1551,17 @@ public class ConnectionManager {
             } while (isConnected(endpoint));
 
             Assert.that(endpoint != null);
-
-            ManagedConnection connection = new ManagedConnection(
-                endpoint.getHostname(), endpoint.getPort(), _router,
-                ConnectionManager.this);
-
+			ManagedConnection connection = null;			
             try {
                 //Try to connect, recording success or failure so HostCatcher
                 //can update connection history.  Note that we declare 
                 //success if we were able to establish the TCP connection
                 //but couldn't handshake (NoGnutellaOkException).
                 try {
+					connection = 
+						new ManagedConnection(InetAddress.getByName(endpoint.getHostname()), 
+											  endpoint.getPort(),
+											  _router, ConnectionManager.this);
                     initializeFetchedConnection(connection, this);
                     _catcher.doneWithConnect(endpoint, true);
                 } catch (NoGnutellaOkException e) {
@@ -1574,7 +1571,8 @@ public class ConnectionManager {
                     _catcher.doneWithConnect(endpoint, false);
                     throw e;
                 }
-
+				
+				// connection cannot be null by this point
 				startConnection(connection);
             } catch(IOException e) {
             } catch(Throwable e) {

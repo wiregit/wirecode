@@ -53,7 +53,7 @@ com.sun.java.util.collections.Comparable
      * The weight is used in ranking the endpoints
      */
     private transient int weight = 0;
-    
+
     /**
      * Sets the connectivity of the node
      * @param connectivity the connectivity to be set

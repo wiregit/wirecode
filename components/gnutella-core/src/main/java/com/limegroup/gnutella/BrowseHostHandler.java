@@ -81,7 +81,8 @@ public class BrowseHostHandler {
         case 0: // false
             try {
                 // simply try connecting and getting results....
-                Socket socket = Sockets.connect(host, port, 0, true);
+				InetAddress address = InetAddress.getByName(host);
+                Socket socket = Sockets.connect(address, port, 0, true);
                 browseExchange(socket);
             }
             catch (IOException ioe) {
@@ -96,11 +97,11 @@ public class BrowseHostHandler {
                 _callback.browseHostFailed(_guid);
             } else {
                 PushRequest pr = new PushRequest(GUID.makeGuid(),
-                                             SettingsManager.instance().getTTL(),
-                                             _serventID.bytes(), 
-                                             SPECIAL_INDEX,
-                                             _acceptor.getAddress(),
-                                             _acceptor.getPort());
+												 SettingsManager.instance().getTTL(),
+												 _serventID.bytes(), 
+												 SPECIAL_INDEX,
+												 _acceptor.getAddress(),
+												 _acceptor.getPort());
                 // register with the map so i get notified about a response to my
                 // Push.
                 synchronized (_pushedHosts) {
@@ -139,7 +140,7 @@ public class BrowseHostHandler {
         str = "Host: " + Message.ip2string(_acceptor.getAddress()) + 
               ":" + _acceptor.getPort() + LF;
         oStream.write(str.getBytes());
-        str = "User-Agent: " + CommonUtils.getVendor() + LF;
+        str = "User-Agent: " + CommonUtils.getHttpServer() + LF;
         oStream.write(str.getBytes());
         str = "Accept: " + Constants.QUERYREPLY_MIME_TYPE + LF;
         oStream.write(str.getBytes());

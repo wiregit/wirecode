@@ -4,19 +4,20 @@ import com.limegroup.gnutella.*;
 import java.util.*;
 import com.sun.java.util.collections.Arrays;
 import java.io.*;
+import java.net.*;
 
 /**
  * Opens a special connection with a known server of the metadata
  * and send it the special query
  * @author  Sumeet Thadani (11/16/01)
  */
-public class RichConnectionThread extends Thread{
-    private String ipAddress;
+public class RichConnectionThread extends Thread {
+    private final InetAddress ipAddress;
     private QueryRequest query;
     private ActivityCallback callback;
     //constructor
-    public RichConnectionThread(String ip, QueryRequest qr, 
-                                                    ActivityCallback callback){
+    public RichConnectionThread(InetAddress ip, QueryRequest qr, 
+								ActivityCallback callback){
         this.ipAddress = ip;
         this.query = qr;
         this.callback = callback;

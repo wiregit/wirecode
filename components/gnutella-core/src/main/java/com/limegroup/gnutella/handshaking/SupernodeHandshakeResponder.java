@@ -21,11 +21,11 @@ public class SupernodeHandshakeResponder
      * address at runtime.
      * @param host The host with whom we are handshaking
      */
-    public SupernodeHandshakeResponder(ConnectionManager manager, 
+    public SupernodeHandshakeResponder( 
 		String host)
     {
-        super(manager, host);
-        this._manager = manager;
+        super(RouterService.getConnectionManager(), host);
+        this._manager = RouterService.getConnectionManager();
     }
     
     //inherit doc comment

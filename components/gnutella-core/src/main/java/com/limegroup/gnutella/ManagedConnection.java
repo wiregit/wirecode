@@ -227,12 +227,6 @@ public class ManagedConnection
     private BandwidthTrackerImpl _downBandwidthTracker=
         new BandwidthTrackerImpl();
 
-    /** 
-     * True if this connected to a router (e.g. future router.limewire.com) or
-     * pong-cache server (e.g. gnutellahosts.com).  This may be replaced
-     * with a more general priority-based scheme later.
-     */
-    private boolean _isRouter=false;
     /** True iff this should not be policed by the ConnectionWatchdog, e.g.,
      *  because this is a connection to a Clip2 reflector. */
     private boolean _isKillable=true;
@@ -266,12 +260,12 @@ public class ManagedConnection
      * @param router where to report messages
      * @param where to report my death.  Also used for reject connections.
      */
-    ManagedConnection(String host,
-                      int port,
-                      MessageRouter router,
-                      ConnectionManager manager) {
-        this(translateHost(host), port, router, manager, isRouter(host));
-    }
+    //ManagedConnection(InetAddress host,
+	//                int port,
+	//                MessageRouter router,
+	//                ConnectionManager manager) {
+	//  this(host, port, router, manager, isRouter(host.getHostAddress()));
+    //}
 
     /**
      * Creates an outgoing connection.  The connection is considered a special
@@ -279,33 +273,28 @@ public class ManagedConnection
      * already be translated.  This constructor exists only for the convenience
      * of implementation.
      */
-    private ManagedConnection(String host,
-                              int port,
-                              MessageRouter router,
-                              ConnectionManager manager,
-                              boolean isRouter) {
+    ManagedConnection(InetAddress host,
+					  int port,
+					  MessageRouter router,
+					  ConnectionManager manager) {
+
         //If a router connection, connect as 0.4 by setting responders to null.
         //(Yes, it's a hack, but this is how Connection(String,int) is
         //implemented.)  Otherwise connect at 0.6 with re-negotiation, setting
         //the headers according to whether we're supernode capable.
         super(host, port, 
-              isRouter ? 
-                  null :
-                  (manager.isSupernode() ? 
-                      (Properties)(new SupernodeProperties(host)) : 
-                      (Properties)(new ClientProperties(host))),
-              isRouter ? 
-                  null : 
-                  (manager.isSupernode() ?
-                      (HandshakeResponder)
-                      (new SupernodeHandshakeResponder(manager, host)) :
-                      (HandshakeResponder)
-                      (new ClientHandshakeResponder(manager, host))),
-              !isRouter);
+			  (RouterService.isSupernode() ? 
+			   (Properties)(new SupernodeProperties(host.getHostAddress())) : 
+			   (Properties)(new ClientProperties(host.getHostAddress()))),
+			  (RouterService.isSupernode() ?
+			   (HandshakeResponder)
+			   (new SupernodeHandshakeResponder(host.getHostAddress())) :
+			   (HandshakeResponder)
+			   (new ClientHandshakeResponder(host.getHostAddress())))
+              );
         
-        _router = router;
-        _manager = manager;
-        _isRouter = isRouter;
+        _router  = router; //RouterService.getMessageRouter();
+        _manager = manager;//RouterService.getConnectionManager();
     }
 
     /**
@@ -317,25 +306,23 @@ public class ManagedConnection
      *  Gnutella handshake.
      */
     ManagedConnection(Socket socket,
-                      MessageRouter router,
-                      ConnectionManager manager) {
+					  MessageRouter router,
+					  ConnectionManager manager) {
         super(socket, 
-            manager.isSupernode() ? 
-            (HandshakeResponder)(new SupernodeHandshakeResponder(manager,
-                socket.getInetAddress().getHostAddress())) : 
-            (HandshakeResponder)(new ClientHandshakeResponder(manager,
-                socket.getInetAddress().getHostAddress())));
-        _router = router;
-        _manager = manager;
+			  RouterService.isSupernode() ? 
+			  (HandshakeResponder)(new SupernodeHandshakeResponder(
+			      socket.getInetAddress().getHostAddress())) : 
+			  (HandshakeResponder)(new ClientHandshakeResponder(
+                  socket.getInetAddress().getHostAddress())));
+
+        _router  = router;//RouterService.getMessageRouter();
+        _manager = manager;//RouterService.getConnectionManager();
     }
 
     public void initialize()
             throws IOException, NoGnutellaOkException, BadHandshakeException {
         //Establish the socket (if needed), handshake.
-        if (_isRouter)
-            super.initialize();   //no timeout for bootstrap server
-        else
-            super.initialize(CONNECT_TIMEOUT);
+		super.initialize(CONNECT_TIMEOUT);
 
         //Instantiate queues.  TODO: for ultrapeer->leaf connections, we can
         //save a fair bit of memory by not using buffering at all.  But this
@@ -1150,9 +1137,9 @@ public class ManagedConnection
 
     /** Returns true if this is as a special "router" connection, e.g. to
      *  router.limewire.com.  */
-    public boolean isRouterConnection() {
-        return this._isRouter;
-    }
+    //public boolean isRouterConnection() {
+	//  return this._isRouter;
+    //}
 
     /** Returns true iff this connection wrote "Supernode: false".
      *  This does NOT necessarily mean the connection is shielded. */
@@ -1352,14 +1339,6 @@ public class ManagedConnection
         this.queryInfo=qi;
     } 
 
-    /** Maps router.limewire.com to router4.limewire.com. 
-     *  Package-access for testing purposes only. */
-    static String translateHost(String hostname) {
-        if (hostname.equals(SettingsManager.DEFAULT_LIMEWIRE_ROUTER))
-            return SettingsManager.DEDICATED_LIMEWIRE_ROUTER;
-        else
-            return hostname;
-    }
 
     /** Returns true iff hostname is any of the routerX.limewire.com's (possibly
      *  in dotted-quad form). */

@@ -5,6 +5,7 @@ import com.sun.java.util.collections.*;
 import com.limegroup.gnutella.chat.*;
 import com.limegroup.gnutella.security.DummyAuthenticator;
 import com.limegroup.gnutella.security.User;
+import java.net.*;
 
 /**
  * The command-line UI for the Gnutella servent.
@@ -77,12 +78,12 @@ public class Main implements ActivityCallback {
 						int port=6346;
 						if (commands.length>=3)
 							port=Integer.parseInt(commands[2]);
-						service.connectToHostBlocking(commands[1], port);
+						service.connectToHostBlocking(InetAddress.getByName(commands[1]), port);
 					} catch (IOException e) {
 						System.out.println("Couldn't establish connection.");
 					} catch (NumberFormatException e) {
 						System.out.println("Please specify a valid port.");
-					}
+					} 
 				} else if (commands.length>=2 && commands[0].equals("query")) {
 					//Get query string from command (possibly multiple words)
 					int i=command.indexOf(' ');
@@ -110,7 +111,7 @@ public class Main implements ActivityCallback {
     /////////////////////////// ActivityCallback methods //////////////////////
 
     public void connectionInitializing(Connection c) {
-		String host = c.getOrigHost();
+		InetAddress host = c.getOrigHost();
 		int    port = c.getOrigPort();
 		String direction=null;
 		String direction2=null;
@@ -126,13 +127,13 @@ public class Main implements ActivityCallback {
     }
 
     public void connectionInitialized(Connection c) {
-		String host = c.getOrigHost();
+		InetAddress host = c.getOrigHost();
 		int    port = c.getOrigPort();
 		;//System.out.println("Connected to "+host+":"+port+".");
     }
 
     public void connectionClosed(Connection c) {
-		String host = c.getOrigHost();
+		InetAddress host = c.getOrigHost();
 		int    port = c.getOrigPort();
 		//System.out.println("Connection to "+host+":"+port+" closed.");
     }

@@ -6,7 +6,8 @@ import com.sun.java.util.collections.*;
 import java.util.Properties;
 import java.util.Enumeration;
 import com.limegroup.gnutella.handshaking.*;
-import com.limegroup.gnutella.util.Sockets;
+import com.limegroup.gnutella.util.*;
+import com.limegroup.gnutella.statistics.*;
 
 /**
  * A Gnutella messaging connection.  Provides handshaking functionality and
@@ -40,7 +41,7 @@ public class Connection {
      * synchronization reasons, it is important that this only be modified by
      * the send(m) and receive() methods.
      */
-    private String _host;
+    private final InetAddress HOST;
     private int _port;
     private Socket _socket;
     private InputStream _in;
@@ -75,7 +76,6 @@ public class Connection {
     /** True iff this should try to reconnect at a lower protocol level on
      *  outgoing connections. */    
     
-    private boolean _negotiate=false;
     public static final String GNUTELLA_CONNECT_04="GNUTELLA CONNECT/0.4";
     public static final String GNUTELLA_OK_04="GNUTELLA OK";
     public static final String GNUTELLA_CONNECT_06="GNUTELLA CONNECT/0.6";
@@ -112,8 +112,8 @@ public class Connection {
      * @param host the name of the host to connect to
      * @param port the port of the remote host 
      */
-    public Connection(String host, int port) {
-        this(host, port, null, null, false);
+    public Connection(InetAddress host, int port) {
+        this(host, port, null, null);
     }
 
 
@@ -135,17 +135,17 @@ public class Connection {
      * @param negotiate if true and if the first connection attempt fails, try
      *  to reconnect at the Gnutella 0.4 level with no headers 
      */
-    public Connection(String host, int port,
+    public Connection(InetAddress host, int port,
                       Properties properties1,
-                      HandshakeResponder properties2,
-                      boolean negotiate) {
-        _host = host;
+                      HandshakeResponder properties2) {
+		HOST = host;//InetAddress.getByName(host);
+        //_host = host;
         _port = port;
         _outgoing = true;
-        _negotiate = negotiate;
         _propertiesWrittenP=properties1;
         _propertiesWrittenR=properties2;            
     }
+
     
     /**
      * Creates an uninitialized incoming Gnutella 0.6/0.4 connection with no
@@ -174,7 +174,7 @@ public class Connection {
         //Get the address in dotted-quad format.  It's important not to do a
         //reverse DNS lookup here, as that can block.  And on the Mac, it blocks
         //your entire system!
-        _host = socket.getInetAddress().getHostAddress();
+        HOST = socket.getInetAddress();//.getHostAddress();
         _port = socket.getPort();
         _socket = socket;
         _outgoing = false;
@@ -218,10 +218,9 @@ public class Connection {
         } catch (BadHandshakeException e) {
             //If an outgoing attempt at Gnutella 0.6 failed, and the user
             //has requested we try lower protocol versions, try again.
-            if (_negotiate 
-                    && isOutgoing() 
-                    && _propertiesWrittenP!=null
-                    && _propertiesWrittenR!=null) {
+            if (isOutgoing() 
+				&& _propertiesWrittenP!=null
+				&& _propertiesWrittenR!=null) {
                 //reset the flags
                 _propertiesRead = null;
                 _propertiesWrittenP=null;
@@ -249,8 +248,13 @@ public class Connection {
         SettingsManager settingsManager = SettingsManager.instance();
         String expectString;
  
-        if(isOutgoing())
-            _socket=Sockets.connect(_host, _port, timeout, true);
+        if(isOutgoing()) {
+            _socket=Sockets.connect(HOST, _port, timeout, true);
+			if(!CommonUtils.isJava118()) {
+				ConnectionStat.OUTGOING_CONNECTION_ATTEMPTS.incrementStat();
+			}
+		}
+
 
         // Check to see if close() was called while the socket was initializing
         if (_closed) {
@@ -358,6 +362,8 @@ public class Connection {
                 connectLine.substring(GNUTELLA_06.length()).trim(), 
                 _propertiesRead);
             int theirCode=theirResponse.getStatusCode();
+			System.out.println("STATUS CODE: "+theirResponse); 
+
             if (theirCode!=HandshakeResponse.OK 
                     &&  theirCode!=HandshakeResponse.UNAUTHORIZED_CODE)
                 throw new NoGnutellaOkException(false, 
@@ -754,8 +760,8 @@ public class Connection {
     }
 
     /** Returns the host set at construction */
-    public String getOrigHost() {
-        return _host;
+    public InetAddress getOrigHost() {
+        return HOST;
     }
 
     /** Returns the port set at construction */
@@ -768,7 +774,7 @@ public class Connection {
      * got from socket
      */
     void setOrigPort(int port){
-        this._port = port;
+		this._port = port;
     }
 
     /**
@@ -876,7 +882,7 @@ public class Connection {
     }
 
     public String toString() {
-        return "host=" + _host  + " port=" + _port; 
+        return "host=" + HOST  + " port=" + _port; 
     }
     
     

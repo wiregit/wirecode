@@ -20,8 +20,8 @@ public class BadHandshakeException extends IOException
     public void printStackTrace()
     {
         super.printStackTrace();
-        System.err.println("Parent Cause:");
-        _originalCause.printStackTrace();
+        System.err.println("Parent Cause: "+_originalCause.getMessage());
+        _originalCause.printStackTrace();		
     }
     
 }

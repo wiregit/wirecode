@@ -10,6 +10,7 @@ import junit.framework.*;
 import java.util.Properties;
 import com.sun.java.util.collections.*;
 import java.io.*;
+import java.net.*;
 
 /**
  * The most important end-to-end message routing test.  Checks whether
@@ -23,6 +24,8 @@ public class UltrapeerRoutingTest extends TestCase {
     static Connection ultrapeer;
     static Connection old;
 
+	private static InetAddress LOCAL_HOST;
+
     public UltrapeerRoutingTest(String name) {
         super(name);
     }
@@ -31,6 +34,14 @@ public class UltrapeerRoutingTest extends TestCase {
         return new TestSuite(UltrapeerRoutingTest.class);
     }    
    
+
+	protected void setUp() {
+		try {
+			LOCAL_HOST = InetAddress.getLocalHost();
+		} catch(Throwable t) {
+			fail("unexpected exception: "+t);
+		}
+	}
 
     public void testLegacy() {
         //Setup LimeWire backend.  For testing other vendors, you can skip all
@@ -42,7 +53,7 @@ public class UltrapeerRoutingTest extends TestCase {
         //pongs for testing.  TODO: it would be nice to have a way to prevent
         //BootstrapServerManager from adding defaults and connecting.
         settings.setBannedIps(new String[] {"*.*.*.*"});
-        settings.setAllowedIps(new String[] {"127.*.*.*", "18.239.0.*"});
+        settings.setAllowedIps(new String[] {"127.*.*.*", "18.239.0.*", "10.254.0.*"});
         settings.setPort(PORT);
         settings.setDirectories(new File[0]);
         settings.setConnectOnStartup(false);
@@ -51,15 +62,12 @@ public class UltrapeerRoutingTest extends TestCase {
         settings.setForceSupernodeMode(true);
         settings.setMaxShieldedClientConnections(10);
         settings.setKeepAlive(6);
-        ActivityCallback callback=new ActivityCallbackStub();
-        FileManager files=new FileManagerStub();
-        MessageRouter router=new MessageRouterStub();
-        RouterService rs=new RouterService(callback);
+        RouterService rs=new RouterService(new ActivityCallbackStub());
         assertTrue("Bad port: "+settings.getPort(), settings.getPort()==PORT);
         rs.start();
         rs.clearHostCatcher();
-        rs.connect();
-        assertEquals(PORT, settings.getPort());
+        //rs.connect();
+        assertEquals("ports should be equal",PORT, settings.getPort());
 
         //Start actual tests.
         try {
@@ -74,12 +82,12 @@ public class UltrapeerRoutingTest extends TestCase {
             doNullQueryURNRequest();
             doDropAndDuplicate();   //must be last; closes old
             shutdown();
-        } catch (IOException e) { 
-            System.err.println("Mysterious IOException:");
-            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace(); 
+			fail("unexpected exception: "+e);
         } catch (BadPacketException e) { 
-            System.err.println("Mysterious bad packet:");
             e.printStackTrace();
+			fail("unexpected exception: "+e);
         }
         
         //System.out.println("Done");
@@ -87,21 +95,19 @@ public class UltrapeerRoutingTest extends TestCase {
 
     private static void connect() throws IOException {
         //1. unrouted 0.4 connection
-        old=new Connection("localhost", PORT);
+        old=new Connection(LOCAL_HOST, PORT);
         old.initialize();
 
         //2. unrouted ultrapeer connection
-        ultrapeer=new Connection("localhost", PORT, 
-                                            new UltrapeerProperties(),
-                                            new EmptyResponder(),
-                                            false);
+        ultrapeer=new Connection(LOCAL_HOST, PORT, 
+								 new UltrapeerProperties(),
+								 new EmptyResponder());
         ultrapeer.initialize();
         
         //3. routed leaf, with route table for "test"
-        leaf=new Connection("localhost", PORT, 
-                                       new LeafProperties(),
-                                       new EmptyResponder(),
-                                       false);
+        leaf=new Connection(LOCAL_HOST, PORT, 
+							new LeafProperties(),
+							new EmptyResponder());
         leaf.initialize();
         QueryRouteTable qrt=new QueryRouteTable();
         qrt.add("test");

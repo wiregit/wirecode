@@ -53,10 +53,12 @@ public class UDPServiceTest extends TestCase {
 		FileDesc[] fds = fm.getSharedFileDescriptors(sharedDirs[0]);
 
 
-		byte[] ipBytes = ROUTER_SERVICE.getAddress();
-		String address = Message.ip2string(ipBytes);
+		//byte[] ipBytes = ROUTER_SERVICE.getAddress();
+		//String address = Message.ip2string(ipBytes);
 		try {
-			ROUTER_SERVICE.connectToHostBlocking(address, 6346);
+			byte[] ipBytes = ROUTER_SERVICE.getAddress();
+			InetAddress hostAddress = InetAddress.getByAddress(ipBytes);
+			ROUTER_SERVICE.connectToHostBlocking(hostAddress, 6346);
 			Thread.sleep(1000);
 		} catch(IOException e) {
 			fail("unexpected exception: "+e);

@@ -6,6 +6,7 @@ import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.downloader.*;
 import com.limegroup.gnutella.stubs.*;
 import junit.framework.*;
+import java.net.*;
 
 /**
  * Tests that LimeWire queries by hash properly and starts resuming when
@@ -218,22 +219,27 @@ public class RequeryDownloadTest extends TestCase {
             false, false, //needs push, is busy
             true, false,  //finished upload, measured speed
             false);       //supports chat
-        ManagedConnection stubConnection=new ManagedConnectionStub();
-        router.handleQueryReply(reply, stubConnection);
 
-        //Make sure the downloader does the right thing with the response.
-        try { Thread.sleep(1000); } catch (InterruptedException e) { }
-        if (shouldDownload) {
-            //a) Match: wait for download to start, then complete.
-            while (downloader.getState()!=Downloader.COMPLETE) {            
-                assertEquals(Downloader.DOWNLOADING, downloader.getState());
-                try { Thread.sleep(200); } catch (InterruptedException e) { }
-            }
-        } else {
-            //b) No match: keep waiting for results
-            assertEquals(Downloader.WAITING_FOR_RESULTS, downloader.getState());
-            downloader.stop();
-        }
+		try {
+			ManagedConnection stubConnection=new ManagedConnectionStub();
+			router.handleQueryReply(reply, stubConnection);
+			
+			//Make sure the downloader does the right thing with the response.
+			try { Thread.sleep(1000); } catch (InterruptedException e) { }
+			if (shouldDownload) {
+				//a) Match: wait for download to start, then complete.
+				while (downloader.getState()!=Downloader.COMPLETE) {            
+					assertEquals(Downloader.DOWNLOADING, downloader.getState());
+					try { Thread.sleep(200); } catch (InterruptedException e) { }
+				}
+			} else {
+				//b) No match: keep waiting for results
+				assertEquals(Downloader.WAITING_FOR_RESULTS, downloader.getState());
+				downloader.stop();
+			}
+		} catch(UnknownHostException e) {
+			fail("unexpected exception: "+e);
+		}
     }    
 
     
@@ -285,32 +291,36 @@ public class RequeryDownloadTest extends TestCase {
             false, false, //needs push, is busy
             true, false,  //finished upload, measured speed
             false);       //supports chat
-        ManagedConnection stubConnection=new ManagedConnectionStub();
-        router.handleQueryReply(reply, stubConnection);
-        try { Thread.sleep(400); } catch (InterruptedException e) { }
-        assertEquals(Downloader.WAITING_FOR_RESULTS, downloader.getState());
-
-        //Send a good response to the query.
-        response=new Response(0l,   //index
-                              TestFile.length(),
-                              "some file name.txt",
-                              null,  //metadata
-                              null,  //URNs
-                              null); //metadata
-        reply=new QueryReply(qr.getGUID(), 
-            (byte)6, 6666, ip, 0l, 
-            new Response[] { response }, new byte[16],
-            false, false, //needs push, is busy
-            true, false,  //finished upload, measured speed
-            false);       //supports chat
-        router.handleQueryReply(reply, stubConnection);
-
-        //Make sure the downloader does the right thing with the response.
-        try { Thread.sleep(500); } catch (InterruptedException e) { }
-        while (downloader.getState()!=Downloader.COMPLETE) {            
-            assertEquals(Downloader.DOWNLOADING, downloader.getState());
-            try { Thread.sleep(200); } catch (InterruptedException e) { }
-        }
+		try {
+			ManagedConnection stubConnection=new ManagedConnectionStub();
+			router.handleQueryReply(reply, stubConnection);
+			try { Thread.sleep(400); } catch (InterruptedException e) { }
+			assertEquals(Downloader.WAITING_FOR_RESULTS, downloader.getState());
+			
+			//Send a good response to the query.
+			response=new Response(0l,   //index
+								  TestFile.length(),
+								  "some file name.txt",
+								  null,  //metadata
+								  null,  //URNs
+								  null); //metadata
+			reply=new QueryReply(qr.getGUID(), 
+								 (byte)6, 6666, ip, 0l, 
+								 new Response[] { response }, new byte[16],
+								 false, false, //needs push, is busy
+								 true, false,  //finished upload, measured speed
+								 false);       //supports chat
+			router.handleQueryReply(reply, stubConnection);
+			
+			//Make sure the downloader does the right thing with the response.
+			try { Thread.sleep(500); } catch (InterruptedException e) { }
+			while (downloader.getState()!=Downloader.COMPLETE) {            
+				assertEquals(Downloader.DOWNLOADING, downloader.getState());
+				try { Thread.sleep(200); } catch (InterruptedException e) { }
+			}
+		} catch(UnknownHostException e) {
+			fail("unexpected exception: "+e);
+		}
     }
     
     /** Tests that requeries are sent fairly and at appropriate rate. */

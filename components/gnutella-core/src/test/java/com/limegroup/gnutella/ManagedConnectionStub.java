@@ -1,6 +1,7 @@
 package com.limegroup.gnutella;
 
 import com.limegroup.gnutella.stubs.*;
+import java.net.*;
 
 /** 
  * A stubbed-out ManagedConnection that does nothing.  Useful for testing, since
@@ -9,8 +10,8 @@ import com.limegroup.gnutella.stubs.*;
  * requires package-access to ManagedConnection.
  */
 public class ManagedConnectionStub extends ManagedConnection {
-    public ManagedConnectionStub() {
-        super("1.2.3.4", 6346, 
+    public ManagedConnectionStub() throws UnknownHostException {
+        super(InetAddress.getByName("1.2.3.4"), 6346, 
               new MessageRouterStub(), 
               new ConnectionManagerStub());
     }

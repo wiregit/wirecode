@@ -308,7 +308,8 @@ public final class RouterService {
      * @return a connection to the request host
      * @exception IOException the connection failed
      */
-    public static ManagedConnection connectToHostBlocking(String hostname, int portnum)
+    public static ManagedConnection connectToHostBlocking(InetAddress hostname, 
+														  int portnum)
 		throws IOException {
         return manager.createConnectionBlocking(hostname, portnum);
     }
@@ -318,27 +319,23 @@ public final class RouterService {
      * Returns immediately without blocking.  If hostname would connect
      * us to ourselves, returns immediately.
      */
-    public static void connectToHostAsynchronously(String hostname, int portnum) {
+    public static void connectToHostAsynchronously(InetAddress hostname, 
+												   int portnum) {
         //Don't allow connections to yourself.  We have to special
         //case connections to "localhost" or "127.0.0.1" since
         //they are aliases for this machine.
 		
-        byte[] cIP = null;
-        try {
-            cIP=InetAddress.getByName(hostname).getAddress();
-        } catch(UnknownHostException e) {
-            return;
-        }
+        byte[] cIP = hostname.getAddress();
         if ((cIP[0] == 127) && (portnum==acceptor.getPort())) {
 			return;
         } else {
-            byte[] managerIP=acceptor.getAddress();
+            byte[] managerIP = acceptor.getAddress();
             if (Arrays.equals(cIP, managerIP)
                 && portnum==acceptor.getPort())
                 return;
         }
 
-        if (!acceptor.isBannedIP(hostname)) {
+        if (!acceptor.isBannedIP(hostname.getHostAddress())) {
             manager.createConnectionAsynchronously(hostname, portnum);
 		}
     }
@@ -961,7 +958,7 @@ public final class RouterService {
      * case I need to push....
 	 */
 	public static void doBrowseHost(String host, int port, 
-                             GUID guid, GUID serventID) {
+									GUID guid, GUID serventID) {
         BrowseHostHandler handler = new BrowseHostHandler(callback, router,
                                                           acceptor, guid,
                                                           serventID);

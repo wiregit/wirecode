@@ -90,25 +90,25 @@ public class LeafRoutingTest extends TestCase {
          //created, the test will fail.
 
          //System.out.println("Please establish a connection to localhost:6350\n");
-         rs.connectToHostAsynchronously("127.0.0.1", 6350);
+         rs.connectToHostAsynchronously(InetAddress.getLocalHost(), 6350);
          ultrapeer1=new Connection(accept(6350), new UltrapeerResponder());
          ultrapeer1.initialize();
          replyToPing(ultrapeer1, true);
 
          //System.out.println("Please establish a connection to localhost:6351\n");
-         rs.connectToHostAsynchronously("127.0.0.1", 6351);
+         rs.connectToHostAsynchronously(InetAddress.getLocalHost(), 6351);
          ultrapeer2=new Connection(accept(6351), new UltrapeerResponder());
          ultrapeer2.initialize();
          replyToPing(ultrapeer2, true);
 
          //System.out.println("Please establish a connection to localhost:6352\n");
-         rs.connectToHostAsynchronously("127.0.0.1", 6352);
+         rs.connectToHostAsynchronously(InetAddress.getLocalHost(), 6352);
          old1=new Connection(accept(6352), new OldResponder());
          old1.initialize();
          replyToPing(old1, false);
 
          //System.out.println("Please establish a connection to localhost:6353\n");
-         rs.connectToHostAsynchronously("127.0.0.1", 6353);
+         rs.connectToHostAsynchronously(InetAddress.getLocalHost(), 6353);
          old2=new Connection(accept(6353), new OldResponder());
          old2.initialize();
          replyToPing(old2, false);
@@ -206,11 +206,11 @@ public class LeafRoutingTest extends TestCase {
 
     private static void doRedirect() {
         //System.out.println("-Test X-Try/X-Try-Ultrapeer headers");
-        Connection c=new Connection("127.0.0.1", PORT,
-                                    new Properties(),
-                                    new OldResponder(),
-                                    false);
+		Connection c = null;
         try {
+			c=new Connection(InetAddress.getLocalHost(), PORT,
+							 new Properties(),
+							 new OldResponder());
             c.initialize();
             assertTrue("Handshake succeeded!", false);
         } catch (IOException e) {

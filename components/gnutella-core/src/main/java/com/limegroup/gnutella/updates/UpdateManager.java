@@ -102,11 +102,11 @@ public class UpdateManager {
                 final String UPDATE = "/update.xml";
                 //if we get host or port incorrectly, we will not be able to 
                 //establish a connection and just return, its fail safe. 
-                String ip = c.getOrigHost();
+                InetAddress ip = c.getOrigHost();
                 int port = c.getOrigPort();
                 byte[] data = null;
                 try {
-                    URL url = new URL("HTTP",ip,port,UPDATE);
+                    URL url = new URL("HTTP",ip.getHostAddress(),port,UPDATE);
                     HttpURLConnection connection=(HttpURLConnection)
                                                       url.openConnection();
                     connection.setUseCaches(false);
