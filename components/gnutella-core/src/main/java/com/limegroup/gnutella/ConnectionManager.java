@@ -62,7 +62,7 @@ public class ConnectionManager {
 
         // Start a thread to police connections.
         // Perhaps this should use a low priority?
-        Thread watchdog=new Thread(new ConnectionWatchdog(this));
+        Thread watchdog=new Thread(new ConnectionWatchdog(this, _router));
         watchdog.setDaemon(true);
         watchdog.start();
 
