@@ -1681,13 +1681,12 @@ public class Connection {
 		if(o == this) return true;
 		if(!(o instanceof Connection)) return false;
 		Connection otherConnection = (Connection)o;
-		return _host.equals(otherConnection._host) && 
-			_port == otherConnection._port; 
+		return _host.equals(otherConnection._host); 
 	}
 	
 	// overridden so that equal ip/port pairs are equal
 	public int hashCode() {
-		return 17 * _host.hashCode() * _port;
+		return 17 * _host.hashCode();
 	}
     
     
