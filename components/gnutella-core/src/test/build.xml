@@ -88,7 +88,7 @@
     <antcall target="test all" inheritRefs="true"/>
     <antcall target="clover.html" inheritRefs="true"/>
     <antcall target="clover.history.point" inheritRefs="true"/>
-   <!-- <antcall target="clover.history.html" inheritRefs="true"/> -->
+    <antcall target="clover.history.html" inheritRefs="true"/>
   </target>        
 
   <!-- Initialization stuff -->
