@@ -464,7 +464,8 @@ public class ServerSideWhatIsNewTest
         FileManager fm = rs.getFileManager();
         CreationTimeCache ctCache = CreationTimeCache.instance();
         URN tempFile1URN = fm.getURNForFile(tempFile1);
-        Long cTime = ctCache.getCreationTime(tempFile1URN);
+        URN tempFile2URN = fm.getURNForFile(tempFile2);
+        Long cTime = ctCache.getCreationTime(tempFile2URN);
 
         FileWriter writer = null;
         {
