@@ -22,7 +22,7 @@ import java.io.*;
  * query regarding that keyword will return true.  This is because this general
  * idea of QRTs is only used in a specialized way in LW - namely, UPs use it for
  * their leaves ONLY, so the depth is always 1.  If you looking for a keyword
- * and it is in the table, a leaft MAY have it, so return true.  This only
+ * and it is in the table, a leaf MAY have it, so return true.  This only
  * needed a one line change.
  *
  * <b>This class is NOT synchronized.</b>
@@ -284,8 +284,13 @@ public class QueryRouteTable {
         return true;
     }
 
+    public int hashCode() {
+        return bitTable.hashCode() * 17;
+    }
+
+
     public String toString() {
-        return bitTable.toString();
+        return "QueryRouteTable : " + bitTable.toString();
     }
 
 
@@ -524,7 +529,7 @@ public class QueryRouteTable {
      *  Note that unhalve(halve(array))=array if all elements of array fit can 
      *  fit in four signed bytes.
      *      @requires array.length is a multiple of two */
-    private static byte[] halve(byte[] array) {
+    static byte[] halve(byte[] array) {
         byte[] ret=new byte[array.length/2];
         for (int i=0; i<ret.length; i++)
             ret[i]=(byte)((array[2*i]<<4) | (array[2*i+1]&0xF));
@@ -534,7 +539,7 @@ public class QueryRouteTable {
     /** Returns an array of R of length array.length*2, where R[i] is the the
      *  sign-extended high nibble of floor(i/2) if i even, or the sign-extended
      *  low nibble of floor(i/2) if i odd. */        
-    private static byte[] unhalve(byte[] array) {
+    static byte[] unhalve(byte[] array) {
         byte[] ret=new byte[array.length*2];
         for (int i=0; i<array.length; i++) {
             ret[2*i]=(byte)(array[i]>>4);     //sign extension
@@ -545,7 +550,7 @@ public class QueryRouteTable {
     
     /** Sign-extends the low nibble of b, i.e., 
      *  returns (from MSB to LSB) b[3]b[3]b[3]b[3]b[3]b[2]b[1]b[0]. */
-    private static byte extendNibble(byte b) {
+    static byte extendNibble(byte b) {
         if ((b&0x8)!=0)   //negative nibble; sign-extend.
             return (byte)(0xF0 | b);
         else
@@ -553,316 +558,4 @@ public class QueryRouteTable {
     }
 
 
-    ////////////////////////////// Unit Tests ////////////////////////////////
-    
-    /** Unit test */
-    /*
-    public static void main(String args[]) {
-        //TODO: test handle bad packets (sequences, etc)
-
-        //-1. Just for sanity's sake....
-        Assert.that(KEYWORD_PRESENT == (byte)-6);
-        Assert.that(KEYWORD_ABSENT  == (byte)6);
-
-        //0. compress/uncompress.  First we make a huge array with lots of
-        //random bytes but also long strings of zeroes.  This means that
-        //compression will work, but not too well.  Then we take the compressed
-        //value and dice it up randomly.  It's critical to make sure that
-        //decompress works incrementally without blocking.
-        QueryRouteTable dummy=new QueryRouteTable();
-        dummy.uncompressor=new Inflater();
-        byte[] data=new byte[10000];
-        Random rand=new Random();
-        rand.nextBytes(data);
-        for (int i=100; i<7000; i++) {
-            data[i]=(byte)0;
-        }
-        byte[] dataCompressed=dummy.compress(data);
-        Assert.that(dataCompressed.length<data.length);
-        
-        try {
-            ByteArrayOutputStream baos=new ByteArrayOutputStream();
-            for (int i=0; i<dataCompressed.length; ) {
-                int length=Math.min(rand.nextInt(100), dataCompressed.length-i);
-                byte[] chunk=new byte[length];
-                System.arraycopy(dataCompressed, i, chunk, 0, length);
-                byte[] chunkRead=dummy.uncompress(chunk);
-                baos.write(chunkRead);
-                i+=length;
-            }
-            baos.flush();
-            Assert.that(Arrays.equals(data, baos.toByteArray()),
-                        "Compress/uncompress loop failed");
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        //0.1. halve/unhalve
-        Assert.that(extendNibble((byte)0x03)==0x03);
-        Assert.that(extendNibble((byte)0x09)==(byte)0xF9);
-        byte[] big={(byte)1, (byte)7, (byte)-1, (byte)-8};
-        byte[] small={(byte)0x17, (byte)0xF8};
-        Assert.that(Arrays.equals(halve(big), small));
-        Assert.that(Arrays.equals(unhalve(small), big));
-
-        QueryRouteTable qrt=new QueryRouteTable(1000);
-        qrt.add("good book");
-        Assert.that(qrt.entries()==2);
-        qrt.add("bad");   //{good, book, bad}
-        Assert.that(qrt.entries()==3);
-        qrt.add("bad");   //{good, book, bad}
-        Assert.that(qrt.entries()==3);
-
-        //1. Simple keyword tests (add, contains)
-        //we have moved to 1-bit entry per hash, so either absent or present....
-        Assert.that(! qrt.contains(new QueryRequest((byte)4, 0, "garbage")));
-        Assert.that(qrt.contains(new QueryRequest((byte)2, 0, "bad")));
-        Assert.that(qrt.contains(new QueryRequest((byte)3, 0, "bad")));
-        Assert.that(qrt.contains(new QueryRequest((byte)4, 0, "bad")));
-        Assert.that(qrt.contains(new QueryRequest((byte)2, 0, "good bad")));
-        Assert.that(! qrt.contains(new QueryRequest((byte)3, 0, "good bd")));
-        Assert.that(qrt.contains(new QueryRequest((byte)3, 0, 
-                                                  "good bad book")));
-        Assert.that(! qrt.contains(new QueryRequest((byte)3, 0, 
-                                                    "good bad bok")));
-
-        //2. addAll tests
-        QueryRouteTable qrt2=new QueryRouteTable(1000);
-        Assert.that(qrt2.entries()==0);
-        qrt2.add("new");
-        qrt2.add("book");
-        qrt2.addAll(qrt);     //{book, good, new, bad}
-        QueryRouteTable qrt3=new QueryRouteTable(1000);
-        Assert.that(qrt2.entries()==4);
-        qrt3.add("book");
-        qrt3.add("good");
-        qrt3.add("new");
-        qrt3.add("bad");
-        Assert.that(qrt2.equals(qrt3));
-        Assert.that(qrt3.equals(qrt2));
-
-        //3. encode-decode test--with compression
-        //qrt={good, book, bad}
-        qrt2=new QueryRouteTable(1000);
-        for (Iterator iter=qrt.encode(null); iter.hasNext(); ) {
-            RouteTableMessage m=(RouteTableMessage)iter.next();
-            try { 
-                qrt2.update(m); 
-            } catch (BadPacketException e) {
-            }
-            if (m instanceof PatchTableMessage)
-                Assert.that(((PatchTableMessage)m).getCompressor()
-                    ==PatchTableMessage.COMPRESSOR_DEFLATE);
-        }
-        Assert.that(qrt2.equals(qrt), "Got \n    "+qrt2+"\nexpected\n    "+qrt);
-
-        qrt.add("bad");
-        qrt.add("other"); //qrt={good, book, bad, other}
-        Assert.that(! qrt2.equals(qrt));
-        for (Iterator iter=qrt.encode(qrt2); iter.hasNext(); ) {
-            RouteTableMessage m=(RouteTableMessage)iter.next();
-            try { 
-                qrt2.update(m); 
-            } catch (BadPacketException e) {
-            }
-            if (m instanceof PatchTableMessage)
-                Assert.that(((PatchTableMessage)m).getCompressor()
-                    ==PatchTableMessage.COMPRESSOR_DEFLATE);
-        }
-        Assert.that(qrt2.equals(qrt));
-        Assert.that(qrt.entries()==qrt2.entries());
-
-        Iterator iter=qrt2.encode(qrt);
-        Assert.that(! iter.hasNext());                     //test optimization
-
-        iter=(new QueryRouteTable(1000).encode(null));  //blank table
-        Assert.that(iter.next() instanceof ResetTableMessage);
-        Assert.that(! iter.hasNext());
-        
-        //4. encode-decode test--without compression.  (We know compression
-        //won't work because the table is very small and filled with random 
-        //bytes.)
-        qrt=new QueryRouteTable(10);
-        rand=new Random();
-        for (int i=0; i<qrt.bitTableLength; i++) 
-            if (rand.nextBoolean())
-                qrt.bitTable.set(i);
-        qrt.bitTable.set(0);
-        qrt2=new QueryRouteTable(10);
-        Assert.that(! qrt2.equals(qrt));
-
-        for (iter=qrt.encode(qrt2); iter.hasNext(); ) {
-            RouteTableMessage m=(RouteTableMessage)iter.next();
-            try { 
-                qrt2.update(m); 
-            } catch (BadPacketException e) {
-            }
-            if (m instanceof PatchTableMessage)
-                Assert.that(((PatchTableMessage)m).getCompressor()
-                    ==PatchTableMessage.COMPRESSOR_NONE);
-        }
-        Assert.that(qrt2.equals(qrt));
-
-        //4b. Encode/decode tests with multiple patched messages.
-        qrt=new QueryRouteTable(5000);
-        rand=new Random();
-        for (int i=0; i<qrt.bitTableLength; i++)
-            if (rand.nextBoolean())
-                qrt.bitTable.set(i);
-        qrt2=new QueryRouteTable(5000);
-        Assert.that(! qrt2.equals(qrt));
-
-        for (iter=qrt.encode(qrt2); iter.hasNext(); ) {
-            RouteTableMessage m=(RouteTableMessage)iter.next();
-            try { 
-                qrt2.update(m); 
-            } catch (BadPacketException e) {
-            }
-        }
-        Assert.that(qrt2.equals(qrt));
-
-        //5. Interpolation/extrapolation glass-box tests.  Remember that +1 is
-        //added to everything!
-        qrt=new QueryRouteTable(4);  // 1 4 5 X ==> 2 6
-        qrt2=new QueryRouteTable(2);
-        qrt.bitTable.set(0);
-        qrt.bitTable.set(1);
-        qrt.bitTable.set(2);
-        qrt.bitTable.clear(3);
-        qrt2.addAll(qrt);
-        Assert.that(qrt2.bitTable.get(0));
-        Assert.that(qrt2.bitTable.get(1));
-
-        //This also tests tables with different TTL problem.  (The 6 is qrt
-        //is interepreted as infinity in qrt2, not a 7.)
-        qrt=new QueryRouteTable(2);  // 1 X ==> 2 2 X X
-        qrt2=new QueryRouteTable(4);
-        qrt.bitTable.set(0);
-        qrt.bitTable.clear(1);
-        qrt2.addAll(qrt);
-        Assert.that(qrt2.bitTable.get(0));
-        Assert.that(qrt2.bitTable.get(1));
-        Assert.that(!qrt2.bitTable.get(2));
-        Assert.that(!qrt2.bitTable.get(3));
-
-        qrt=new QueryRouteTable(4);  // 1 2 4 X ==> 2 3 5
-        qrt2=new QueryRouteTable(3);
-        qrt.bitTable.set(0);
-        qrt.bitTable.set(1);
-        qrt.bitTable.set(2);
-        qrt.bitTable.clear(3);
-        qrt2.addAll(qrt);
-        Assert.that(qrt2.bitTable.get(0));
-        Assert.that(qrt2.bitTable.get(1));
-        Assert.that(qrt2.bitTable.get(2));
-        Assert.that(qrt2.entries()==3);
-
-        qrt=new QueryRouteTable(3);  // 1 4 X ==> 2 2 5 X
-        qrt2=new QueryRouteTable(4);
-        qrt.bitTable.set(0);
-        qrt.bitTable.set(1);
-        qrt.bitTable.clear(2);
-        qrt2.addAll(qrt);
-        Assert.that(qrt2.bitTable.get(0));
-        Assert.that(qrt2.bitTable.get(1));
-        Assert.that(qrt2.bitTable.get(2));
-        Assert.that(!qrt2.bitTable.get(3));
-        Assert.that(qrt2.entries()==3);
-
-        //5b. Black-box test for addAll.
-        qrt=new QueryRouteTable(128);
-        qrt.add("good book");
-        qrt.add("bad");   //{good/1, book/1, bad/3}
-        qrt2=new QueryRouteTable(512);
-        qrt2.addAll(qrt);
-        Assert.that(qrt2.contains(new QueryRequest((byte)4, 0, "bad")));
-        Assert.that(qrt2.contains(new QueryRequest((byte)4, 0, "good")));
-        qrt2=new QueryRouteTable(32);
-        qrt2.addAll(qrt);
-        Assert.that(qrt2.contains(new QueryRequest((byte)4, 0, "bad")));
-        Assert.that(qrt2.contains(new QueryRequest((byte)4, 0, "good")));
-
-        //6. Test sequence numbers.
-        qrt=new QueryRouteTable();   //a. wrong sequence after reset
-        ResetTableMessage reset=null;
-        PatchTableMessage patch=new PatchTableMessage((short)2, (short)2,
-            PatchTableMessage.COMPRESSOR_DEFLATE, (byte)8, new byte[10], 0, 10);
-        try {
-            qrt.update(patch);
-            Assert.that(false);
-        } catch (BadPacketException e) { 
-        }
-
-        qrt=new QueryRouteTable();  //b. message sizes don't match
-        try {
-            reset=new ResetTableMessage(1024, (byte)2);
-            qrt.update(reset);
-            patch=new PatchTableMessage((short)1, (short)3,
-                PatchTableMessage.COMPRESSOR_NONE, (byte)8, new byte[10], 0, 10);
-            qrt.update(patch);
-        } catch (BadPacketException e) {
-            Assert.that(false);
-        }
-        try {
-            patch=new PatchTableMessage((short)2, (short)4,
-                PatchTableMessage.COMPRESSOR_NONE, (byte)8, new byte[10], 0, 10);
-            qrt.update(patch);
-            Assert.that(false);
-        } catch (BadPacketException e) { 
-        }
-
-        qrt=new QueryRouteTable();  //c. message sequences don't match
-        try {
-            patch=new PatchTableMessage((short)1, (short)3,
-                PatchTableMessage.COMPRESSOR_NONE, (byte)8, new byte[10], 0, 10);
-            qrt.update(patch);
-        } catch (BadPacketException e) {
-            Assert.that(false);
-        }
-        try {
-            patch=new PatchTableMessage((short)3, (short)3,
-                PatchTableMessage.COMPRESSOR_NONE, (byte)8, new byte[10], 0, 10);
-            qrt.update(patch);
-            Assert.that(false);
-        } catch (BadPacketException e) {
-        }        
-
-        qrt=new QueryRouteTable();  //d. sequence interrupted by reset
-        try {
-            patch=new PatchTableMessage((short)1, (short)3,
-                PatchTableMessage.COMPRESSOR_NONE, (byte)8, new byte[10], 0, 10);
-            qrt.update(patch);
-            reset=new ResetTableMessage(1024, (byte)2);
-            qrt.update(reset);
-        } catch (BadPacketException e) {
-            Assert.that(false);
-        }
-        try {
-            patch=new PatchTableMessage((short)1, (short)6,
-                PatchTableMessage.COMPRESSOR_NONE, (byte)8, new byte[10], 0, 10);
-            qrt.update(patch);
-        } catch (BadPacketException e) {
-            Assert.that(false);
-        }
-
-        qrt=new QueryRouteTable();  //e. Sequence too big
-        try {
-            patch=new PatchTableMessage((short)1, (short)2,
-                PatchTableMessage.COMPRESSOR_NONE, (byte)8, new byte[10], 0, 10);
-            qrt.update(patch);
-            patch=new PatchTableMessage((short)2, (short)2,
-                PatchTableMessage.COMPRESSOR_NONE, (byte)8, new byte[10], 0, 10);
-            qrt.update(patch);
-        } catch (BadPacketException e) {
-            Assert.that(false);
-        }
-        try {
-            patch=new PatchTableMessage((short)3, (short)2,
-                PatchTableMessage.COMPRESSOR_NONE, (byte)8, new byte[10], 0, 10);
-            qrt.update(patch);
-            Assert.that(false);
-        } catch (BadPacketException e) {
-        }
-    }
-    */
 }
