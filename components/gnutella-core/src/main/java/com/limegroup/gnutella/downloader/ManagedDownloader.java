@@ -1701,14 +1701,14 @@ public class ManagedDownloader implements Downloader, Serializable {
             dloader = establishConnection(rfd);
     
             if(dloader == null)//any exceptions in the method internally?
-                return true;//no work was done, we should try to get another thread
+                return true;//no work was done, try to get another thread
     
             http11 = true;//must enter the loop
     
             while(http11) {
-                //Step 2. OK. Wr have established TCP Connection. This downloader
-                //should choose a part of the file to download and send the
-                //appropriate HTTP hearders
+                //Step 2. OK. Wr have established TCP Connection. This 
+                //downloader should choose a part of the file to download
+                //and send the appropriate HTTP hearders
                 //Note: 0=disconnected,1=tcp-connected,2=http-connected
                 boolean wasQueued = false;
                 int connected;
@@ -1716,7 +1716,9 @@ public class ManagedDownloader implements Downloader, Serializable {
                 while(true) { //while queued, connect and sleep if we queued
                     int[] a = {-1};//reset the sleep value
                     connected = assignAndRequest(dloader,a);
-                    if(connected == 4) //an uploader we want to stay connected with
+                    
+                    //an uploader we want to stay connected with
+                    if(connected == 4)
                         continue; // and has partial ranges
                     if(connected!=1)
                         break;
@@ -1728,13 +1730,14 @@ public class ManagedDownloader implements Downloader, Serializable {
                         if(a[0] > 0)
                             Thread.sleep(a[0]);//value from QueuedException
                     } catch (InterruptedException ix) {
-                        debug("worker: interrupted while asleep in queue"+dloader);
+                        debug("worker: interrupted while asleep in queue" +
+                              dloader);
                         synchronized(this) {
                             queuedCount--;
                         }
                         dloader.stop();//close connection
-                        // notifying will make no diff, coz the next iteration will 
-                        //throw interrupted exception.
+                        // notifying will make no diff, coz the next iteration
+                        // will throw interrupted exception.
                         return true;
                     }
                 }
@@ -1751,12 +1754,13 @@ public class ManagedDownloader implements Downloader, Serializable {
                     return true;
                 }
                 else if(connected==3) { // Nothing more to download
-                    dloader.stop(); // close the connection since we're finished.
+                    // close the connection since we're finished.                    
+                    dloader.stop();
                     return false;
                 }
                 
-                //Step 3. OK, we have successfully connected, start saving the file
-                //to disk
+                //Step 3. OK, we have successfully connected, start saving the
+                // file to disk
                 doDownload(dloader);
             } // end of while(http11)
         // re-establish if we thought it was 1.0 but was actually 1.1            
