@@ -53,7 +53,6 @@ public class InstantMessenger extends Chat {
 
 	/** starts the chatting */
 	public void start() {
-		System.out.println("starting..");
 		MessageReader messageReader = new MessageReader();
 		Thread upThread = new Thread(messageReader);
 		upThread.setDaemon(true);
@@ -69,14 +68,11 @@ public class InstantMessenger extends Chat {
 	/** send a message accross the socket to the other host */
 	public void send(String message) {
 		try {
-			_out.write(message);
+			_out.write(message+"\r");
+			_out.flush();
 		} catch (IOException e) {
+			// e.printStackTrace();
 		}
-	}
-
-	/** read a message off of the socket */
-	public String getMessage() {
-		return "";
 	}
 
 	/**
@@ -89,10 +85,7 @@ public class InstantMessenger extends Chat {
 	private class MessageReader implements Runnable {
 
 		public void run() {
-			System.out.println("reading..");
 			while (true){
-				// System.out.println("reading..");
-
 				String str;
 				try {
 					// read into a buffer off of the socket
@@ -101,8 +94,7 @@ public class InstantMessenger extends Chat {
 					// write to the screen.
 					str = _reader.readLine();
 					if ( str != null )
-						System.out.println("'" + str + "'");
-						// _activityCallback.recieveMessage(str);
+						_activityCallback.recieveMessage(str);
 				} catch (IOException e) {
 					// if an exception was thrown, then 
 					// the socket was closed, and the chat
@@ -112,7 +104,6 @@ public class InstantMessenger extends Chat {
 				}
 
 			}
-			System.out.println("done reading..");
 		}
 		
 	}
