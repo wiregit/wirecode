@@ -959,8 +959,11 @@ public class UDPConnectionProcessor {
 
                 // Reactivate writing if required
                 if ( (priorR == 0 || _waitingForDataSpace) && 
-                     _receiverWindowSpace > 0 )
+                     _receiverWindowSpace > 0 ) {
+                    if(LOG.isDebugEnabled())  
+                        LOG.debug(" -- ACK wakeup");
                     writeSpaceActivation();
+                }
 
 
                 // If they are Acking our SYN message, advance the state
@@ -1056,8 +1059,11 @@ public class UDPConnectionProcessor {
                     
                     // Reactivate writing if required
                     if ( (priorR == 0 || _waitingForDataSpace) && 
-                         _receiverWindowSpace > 0 )
+                         _receiverWindowSpace > 0 ) {
+                        if(LOG.isDebugEnabled())  
+                            LOG.debug(" -- KA wakeup");
                         writeSpaceActivation();
+                    }
                 }
 
             } else if (msg instanceof FinMessage) {
