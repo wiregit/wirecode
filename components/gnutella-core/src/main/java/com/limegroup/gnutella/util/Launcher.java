@@ -415,17 +415,16 @@ public class Launcher {
 	/** This sets up the file name for nt to escape
 	 *  special characters. */
     private static String checkChars(String str) {
-		//System.out.println("Launcher::checkChars::path:"+str);
-        String escapeChars = "&()|<>^ !";
+        String escapeChars = "&()|<>^ ,";
         char[] chars = str.toCharArray();
         int length = chars.length;
         char[] new_chars = new char[length*3];
         int index = 0;
         for (int i=0; i < length; i++) {
             if (escapeChars.indexOf(chars[i]) != -1 ) {
-                new_chars[index++] = '"';
+                new_chars[index++] = '^';
                 new_chars[index++] = chars[i];
-                new_chars[index++] = '"';
+                //new_chars[index++] = '"';
             }
             else 
                 new_chars[index++] = chars[i];
