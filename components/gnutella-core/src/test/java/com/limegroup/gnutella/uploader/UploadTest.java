@@ -1111,13 +1111,11 @@ public class UploadTest extends BaseTestCase {
         assertTrue(download("/uri-res/N2R?urn:bitprint:" +
             baseHash + "." + ROOT32, null,
              "abcdefghijklmnopqrstuvwxyz"));
-             
-        // we check for valid bitprint length.             
-        assertFalse(download("/uri-res/N2R?urn:bitprint:" +
-            baseHash + "." + "asdoihffd", null,
-             "abcdefghijklmnopqrstuvwxyz",
-             "HTTP/1.1 400 Malformed Request"
-             ));  
+
+        // we check for a valid bitprint length.
+        tFailureHeaderRequired("/uri-res/N2R?urn:bitprint:" +
+            baseHash + "." + "asdoihffd", null, true, false,
+                "HTTP/1.1 400 Malformed Request");
              
         // but not for the valid base32 root -- in the future we may
         // and this test will break
@@ -1126,10 +1124,17 @@ public class UploadTest extends BaseTestCase {
              "abcdefghijklmnopqrstuvwxyz"));
              
         // make sure "bitprint:" is required for bitprint uploading.
-        assertFalse(download("/uri-res/N2R?urn:sha1:" +
-            baseHash + "." + ROOT32, 
-            null, "abcdefghijklmnopqrstuvwxyz",
-            "HTTP/1.1 400 Malformed Request"));
+        tFailureHeaderRequired("/uri-res/N2R?urn:sha1:" +
+            baseHash + "." + ROOT32, null, true, false,
+                "HTTP/1.1 400 Malformed Request");
+    }
+    
+    public void testBadGetTreeRequest() throws Exception {
+        tFailureHeaderRequired("/uri-res/N2X?" + badHash, null, true, true,
+                "HTTP/1.1 404 Not Found");
+                
+        tFailureHeaderRequired("/uri-res/N2X?" + "no hash", null, true, false,
+                "HTTP/1.1 400 Malformed Request");
     }
     
     public void testGetTree() throws Exception {
