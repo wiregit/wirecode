@@ -186,7 +186,7 @@ public final class RouteTable {
      *  @param ttl should be greater than 0.
      *  @exception IllegalArgumentException thrown if !(ttl > 0)
      */
-    public void setTTL(byte[] guid, byte ttl) {
+    public synchronized void setTTL(byte[] guid, byte ttl) {
         if (!(ttl > 0))
             throw new IllegalArgumentException("Input TTL too small: " + ttl);
 
@@ -205,7 +205,7 @@ public final class RouteTable {
      *  ttl of a message (guid).  If it returns 0, then it was never set.
      *  @return 0 if the guid was never remembered, >0 if so.
      */
-    public byte getTTL(byte[] guid) {
+    public synchronized byte getTTL(byte[] guid) {
         //Look up guid in _newMap. If not there, check _oldMap. 
         RouteTableEntry entry=(RouteTableEntry)_newMap.get(guid);
         if (entry==null)

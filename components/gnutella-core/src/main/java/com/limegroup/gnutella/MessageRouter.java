@@ -83,10 +83,11 @@ public abstract class MessageRouter {
     private RouteTable _pingRouteTable = new RouteTable(2*60, 
 														MAX_ROUTE_TABLE_SIZE);
     /**
-     * Maps QueryRequest GUIDs to QueryReplyHandlers.  Stores 5-10 minutes,
-     * typically around 13000 entries, but never more than 100,000 entries.
+     * Maps QueryRequest GUIDs to QueryReplyHandlers.  Stores 10 minutes,
+     * typically around 26000 entries, but never more than 100,000 entries.
+     * We extended this from 5 minutes after probe queries were introduced.
      */
-    private RouteTable _queryRouteTable = new RouteTable(5*60,
+    private RouteTable _queryRouteTable = new RouteTable(10*60,
 														 MAX_ROUTE_TABLE_SIZE);
     /**
      * Maps QueryReply client GUIDs to PushRequestHandlers.  Stores 7-14
@@ -428,26 +429,81 @@ public abstract class MessageRouter {
      */
     final void handleQueryRequestPossibleDuplicate(
         QueryRequest request, ManagedConnection receivingConnection) {
-		//System.out.println("MessageRouter::handleQueryRequestPossibleDuplicate: "+request); 
+
+        // With the new handling of probe queries (TTL 1, Hops 0), we have a few
+        // new options:
+        // 1) If we have a probe query....
+        //  a) If you have never seen it before, put it in the route table and
+        //  set the ttl appropriately
+        //  b) If you have seen it before, then just count it as a duplicate
+        // 2) If it isn't a probe query....
+        //  a) Is it an extension of a probe?  If so re-adjust the TTL.
+        //  b) Is it a 'normal' query (no probe extension or already extended)?
+        //  Then check if it is a duplicate:
+        //    1) If it a duplicate, just count it as one
+        //    2) If it isn't, put it in the route table but no need to setTTL
+
+        // we msg.hop() before we get here....
+        final boolean isProbeQuery = 
+            ((request.getTTL() == 0) && (request.getHops() == 1));
+
 		ResultCounter counter = 
 			_queryRouteTable.tryToRouteReply(request.getGUID(), 
 											 receivingConnection);
-		if(counter != null) {
-			//Hack! If this is the indexing query from a Clip2 reflector, mark the
-			//connection as unkillable so the ConnectionWatchdog will not police it
-			//any more.
+
+		if(counter != null) {  // query is new (probe or normal)
+
+			//Hack! If this is the indexing query from a Clip2 reflector, mark 
+            //the connection as unkillable so the ConnectionWatchdog will not 
+            //police it any more.
+            //TODO: get rid of this at some point, doesn't seem to be valid
+            //anymore.
  			if ((receivingConnection.getNumMessagesReceived()<=2)
                  && (request.getHops()<=1)  //actually ==1 will do
                  && (request.getQuery().equals(FileManager.INDEXING_QUERY))) {
  				receivingConnection.setKillable(false);
  			}
-            handleQueryRequest(request, receivingConnection, counter);
-		} else {
-			if(RECORD_STATS)
-				ReceivedMessageStatHandler.TCP_DUPLICATE_QUERIES.addMessage(request);
+
+            // 1a: set the TTL of the query so it can be potentially extended  
+            if (isProbeQuery) 
+                _queryRouteTable.setTTL(request.getGUID(), (byte)1);
+
+            // 1a and 2b2
+            // if a new probe or a new request, do everything (so input true
+            // below)
+            handleQueryRequest(request, receivingConnection, counter, true);
 		}
+        // if (counter == null) the query has been seen before, few subcases... 
+        else if ((counter == null) && !isProbeQuery) {// probe extension?
+
+            // only allow extension of TTL 1's, not in general.
+            if ((request.getTTL() > 0) && 
+                _queryRouteTable.getTTL(request.getGUID()) == 1) {
+
+                // TODO: small problem here - two threads may serially call
+                // getTTL and think they need to set, so RouteTable should 
+                // provide a getAndSetTTL method
+                // 2a
+                _queryRouteTable.setTTL(request.getGUID(),
+                                        (byte)(request.getTTL()+1));
+                // rebroadcast out but don't locally evaluate....
+                handleQueryRequest(request, receivingConnection, counter, 
+                                   false);
+            }
+            else  // 2b1: not a correct extension, so call it a duplicate....
+                tallyDupQuery(request);
+        }
+        else if ((counter == null) && isProbeQuery) // 1b: duplicate probe
+            tallyDupQuery(request);
+        else // 2b1: duplicate normal query
+            tallyDupQuery(request);
     }
 	
+    private void tallyDupQuery(QueryRequest request) {
+        if(RECORD_STATS)
+            ReceivedMessageStatHandler.TCP_DUPLICATE_QUERIES.addMessage(request);
+    }
+
 	/**
 	 * Special handler for UDP queries.  Checks the routing table to see if
 	 * the request has already been seen, handling it if not.
@@ -458,12 +514,11 @@ public abstract class MessageRouter {
 	 */
 	final boolean handleUDPQueryRequestPossibleDuplicate(QueryRequest request,
 													  ReplyHandler handler)  {
-		//System.out.println("MessageRouter::handleUDPQueryRequestPossibleDuplicate"); 
 		ResultCounter counter = 
 			_queryRouteTable.tryToRouteReply(request.getGUID(), 
 											 handler);
 		if(counter != null) {
-            handleQueryRequest(request, handler, counter);
+            handleQueryRequest(request, handler, counter, true);
             return true;
 		}
 		return false;
@@ -593,11 +648,14 @@ public abstract class MessageRouter {
      *      handling framework and just customize request routing.
      *   3. Implement respondToQueryRequest.  This allows you to use the default
      *      handling framework and just customize responses.
+     *
+     * @param locallyEvaluate false if you don't want to send the query to
+     * leaves and yourself, true otherwise....
      */
     protected void handleQueryRequest(QueryRequest request,
 									  ReplyHandler handler, 
-									  ResultCounter counter) {
-		//System.out.println("MessageRouter::handleQueryRequest"); 
+									  ResultCounter counter,
+                                      boolean locallyEvaluate) {
         // Apply the personal filter to decide whether the callback
         // should be informed of the query
         if (!handler.isPersonalSpam(request)) {
@@ -627,16 +685,17 @@ public abstract class MessageRouter {
 			broadcastQueryRequest(request, handler);
 		}
 			
-		// always forward any queries to leaves -- this only does
-		// anything when this node's an Ultrapeer
-		forwardQueryRequestToLeaves(request, handler);
-		
-        // if I'm not firewalled and the source isn't firewalled THEN reply....
-		//System.out.println("MessageRouter::about to respond to request"); 
-        if (request.isFirewalledSource() &&
-            !RouterService.acceptedIncomingConnection())
-            return;
-        respondToQueryRequest(request, _clientGUID);
+        if (locallyEvaluate) {
+            // always forward any queries to leaves -- this only does
+            // anything when this node's an Ultrapeer
+            forwardQueryRequestToLeaves(request, handler);
+            
+            // if I'm not firewalled AND the source isn't firewalled reply ....
+            if (request.isFirewalledSource() &&
+                !RouterService.acceptedIncomingConnection())
+                return;
+            respondToQueryRequest(request, _clientGUID);
+        }
     }
 
     /**
@@ -872,7 +931,6 @@ public abstract class MessageRouter {
 		if (qi==null || qi.lastReceived==null) 
 			return false;
 		else if (qi.lastReceived.contains(query)) {
-			//System.out.println("MessageRouter::sendRoutedQueryToHost::sending query"); 
 			//A new client with routing entry, or one that hasn't started
 			//sending the patch.
 			sendQueryRequest(query, mc, handler);
