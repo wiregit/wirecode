@@ -189,7 +189,7 @@ public class RequeryDownloadTest extends com.limegroup.gnutella.util.BaseTestCas
         //TODO: try resume without URN
         assertEquals("unexpected router.broadcasts size", 1, router.broadcasts.size());
         Object m=router.broadcasts.get(0);
-        assertTrue("m should be a query request", m instanceof QueryRequest);
+        assertInstanceof("m should be a query request", QueryRequest.class, m);
         QueryRequest qr=(QueryRequest)m;
         // First query is not a requery
         //assertTrue(GUID.isLimeRequeryGUID(qr.getGUID()));
@@ -269,7 +269,7 @@ public class RequeryDownloadTest extends com.limegroup.gnutella.util.BaseTestCas
         Thread.sleep(6*1000);
         assertEquals("unexpected router.broadcasts size", 1, router.broadcasts.size());
         Object m=router.broadcasts.get(0);
-        assertTrue("m not a queryrequest", m instanceof QueryRequest);
+        assertInstanceof("m not a queryrequest", QueryRequest.class, m);
         QueryRequest qr=(QueryRequest)m;
 		// First query is not counted as requery
         //assertTrue(GUID.isLimeRequeryGUID(qr.getGUID()));
@@ -352,8 +352,8 @@ public class RequeryDownloadTest extends com.limegroup.gnutella.util.BaseTestCas
         Thread.sleep(8000);
 		downloader1.stop();
 		downloader2.stop();
-        assertTrue("unexpected # of broadcasts: " + broadcasts.size(),
-            broadcasts.size()>=7 && broadcasts.size()<=9);    //should be 8, plus fudge factor
+        assertEquals("unexpected # of broadcasts: ", 
+            8, broadcasts.size(), 1); //should be 8, plus fudge factor
         //Are they balanced?  Check for approximate fairness.
         int xCount=0;
         int yCount=0;
@@ -369,7 +369,7 @@ public class RequeryDownloadTest extends com.limegroup.gnutella.util.BaseTestCas
 		// This test is looser than it use to be.  There is no delay on the 
 		// first requery now so it is possible that xxxxx can get 2 extra 
 		// queries in before yyyyy does.
-        assertTrue("Unbalanced x/y count: "+xCount+"/"+yCount, 
-                   Math.abs(xCount-yCount)<=2);
+        assertLessThanOrEquals("Unbalanced x/y count: "+xCount+"/"+yCount, 
+                   2, Math.abs(xCount-yCount));
     }
 }

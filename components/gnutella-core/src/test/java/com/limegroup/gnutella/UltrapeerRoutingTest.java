@@ -372,7 +372,7 @@ public final class UltrapeerRoutingTest extends BaseTestCase {
 		
 		m = LEAF.receive(TIMEOUT);
 	   
-		assertTrue("message not a QueryReply", m instanceof QueryReply);
+		assertInstanceof("message not a QueryReply", QueryReply.class, m);
 		replyRead = (QueryReply)m;
 		assertTrue("guids should be equal", 
 				   Arrays.equals(guid2, replyRead.getClientGUID()));
@@ -388,7 +388,7 @@ public final class UltrapeerRoutingTest extends BaseTestCase {
 		LEAF.send(push1);
 		LEAF.flush();
 		m = ULTRAPEER_2.receive(TIMEOUT);
-		assertTrue("message not a PushRequest", m instanceof PushRequest);
+		assertInstanceof("message not a PushRequest", PushRequest.class, m);
 		PushRequest pushRead = (PushRequest)m;
 		assertEquals("unexpected push index", 0, pushRead.getIndex());
 		assertTrue("should not have drained ULTRAPEER_1 successfully", 
@@ -402,7 +402,7 @@ public final class UltrapeerRoutingTest extends BaseTestCase {
 		LEAF.send(push2);
 		LEAF.flush();
 		m = ULTRAPEER_1.receive(TIMEOUT);
-		assertTrue("message not a PushRequest", m instanceof PushRequest);
+		assertInstanceof("message not a PushRequest", PushRequest.class, m);
 		pushRead=(PushRequest)m;
 		assertEquals("unexpected push index", 1,pushRead.getIndex());
 		assertTrue("should not have drained ultrapeer successfully", 
@@ -415,7 +415,7 @@ public final class UltrapeerRoutingTest extends BaseTestCase {
 		ULTRAPEER_1.flush();
 
 		m = LEAF.receive(TIMEOUT);
-		assertTrue("message not a QueryReply", m instanceof QueryReply);
+		assertInstanceof("message not a QueryReply", QueryReply.class, m);
 		replyRead = (QueryReply)m; 
 		assertTrue("unexpected GUID", 
 				   Arrays.equals(guid1, replyRead.getClientGUID()));
@@ -425,7 +425,7 @@ public final class UltrapeerRoutingTest extends BaseTestCase {
 		LEAF.flush();
 
 		m = ULTRAPEER_1.receive(TIMEOUT);
-		assertTrue("message not a PushRequest", m instanceof PushRequest);
+		assertInstanceof("message not a PushRequest", PushRequest.class, m);
 		pushRead = (PushRequest)m;
 		assertEquals("unexpected push index", 3, pushRead.getIndex());
 		assertTrue("should not have drained ultrapeer successfully", 
@@ -443,7 +443,7 @@ public final class UltrapeerRoutingTest extends BaseTestCase {
         ULTRAPEER_2.flush();
               
         Message m = ULTRAPEER_1.receive(TIMEOUT);
-		assertTrue("expected a query request", m instanceof QueryRequest);
+		assertInstanceof("expected a query request", QueryRequest.class, m);
         assertEquals("unexpected query", "crap", ((QueryRequest)m).getQuery());
         assertEquals("unexpected hops", (byte)1, m.getHops()); 
         assertEquals("unexpected TTL", (byte)(SOFT_MAX-1), m.getTTL());
@@ -462,13 +462,13 @@ public final class UltrapeerRoutingTest extends BaseTestCase {
         ULTRAPEER_2.flush();
               
         Message m = ULTRAPEER_1.receive(TIMEOUT);
-		assertTrue("expected a query request", m instanceof QueryRequest);
+		assertInstanceof("expected a query request", QueryRequest.class, m);
         assertEquals("unexpected query", "test", ((QueryRequest)m).getQuery());
         assertEquals("unexpected hops", (byte)1, m.getHops()); 
         assertEquals("unexpected TTL", (byte)(SOFT_MAX-1), m.getTTL());
 
         m = LEAF.receive(TIMEOUT);
-		assertTrue("expected a query request", m instanceof QueryRequest);
+		assertInstanceof("expected a query request", QueryRequest.class, m);
         assertEquals("unexpected query", "test", ((QueryRequest)m).getQuery());
         assertEquals("unexpected hops", (byte)1, m.getHops()); 
         assertEquals("unexpected TTL", (byte)(SOFT_MAX-1), m.getTTL());
@@ -485,13 +485,13 @@ public final class UltrapeerRoutingTest extends BaseTestCase {
         ULTRAPEER_1.flush();
               
         Message m=ULTRAPEER_2.receive(TIMEOUT);
-		assertTrue("expected a query request", m instanceof QueryRequest);
+		assertInstanceof("expected a query request", QueryRequest.class, m);
         assertEquals("susheel test", ((QueryRequest)m).getQuery());
         assertEquals("unexpected hops", (byte)1, m.getHops()); 
         assertEquals("unexpected TTL", (byte)(SOFT_MAX-1), m.getTTL());
 
         m=LEAF.receive(TIMEOUT);
-		assertTrue("expected a query request", m instanceof QueryRequest);
+		assertInstanceof("expected a query request", QueryRequest.class, m);
 		assertEquals("unexpected query string", "susheel test", 
 					 ((QueryRequest)m).getQuery());
         assertEquals("unexpected hops", (byte)1, m.getHops()); 
@@ -509,7 +509,7 @@ public final class UltrapeerRoutingTest extends BaseTestCase {
         ULTRAPEER_1.flush();
               
         m=ULTRAPEER_2.receive(TIMEOUT);
-        assertTrue("message should be a ping request", m instanceof PingRequest);
+        assertInstanceof("message should be a ping request", PingRequest.class, m);
         assertEquals("unexpected hops", (byte)1, m.getHops()); 
 		assertEquals("unexpected TTL", (byte)(SOFT_MAX-1), m.getTTL());
 
@@ -571,8 +571,8 @@ public final class UltrapeerRoutingTest extends BaseTestCase {
 
         String out = new String(b,23,b.length-23);
 
-        assertTrue("wrong payload in ULTRAPEER_2 client "+out,
-                   out.equals("ABCDEFGHIJKLMNOP"));
+        assertEquals("wrong payload in ULTRAPEER_2 client",
+            "ABCDEFGHIJKLMNOP", out);
         
         //1c. Make sure ULTRAPEER_2 also gets it with payload, as ULTRAPEER_2 is now also
 		// an ultrapeer
@@ -632,13 +632,13 @@ public final class UltrapeerRoutingTest extends BaseTestCase {
                 break;
             }
         }
-        assertTrue("Pong wasn't routed", ourPong != null);
+        assertNotNull("Pong wasn't routed", ourPong);
         //Lets check that the pong came back in good shape
-        assertTrue("wrong port", ourPong.getPort() == 15);
+        assertEquals("wrong port", 15, ourPong.getPort());
         String ip = ourPong.getIP();
-        assertTrue("wrong IP", ip.equals("16.16.16.16"));
-        assertTrue("wrong files", ourPong.getFiles() == 15);
-        assertTrue("Wrong share size", ourPong.getKbytes() == 15);
+        assertEquals("wrong IP", "16.16.16.16", ip);
+        assertEquals("wrong files", 15, ourPong.getFiles());
+        assertEquals("Wrong share size", 15, ourPong.getKbytes());
         stream = new ByteArrayOutputStream();
         try{
             ourPong.write(stream);
@@ -651,7 +651,7 @@ public final class UltrapeerRoutingTest extends BaseTestCase {
         big[1] = op[op.length-1];
         out = "";//reset
         out = new String(big);
-        assertTrue("Big part of pong lost", out.equals("AB"));
+        assertEquals("Big part of pong lost", "AB", out);
         //System.out.println("Passed");
     }
 
@@ -688,7 +688,7 @@ public final class UltrapeerRoutingTest extends BaseTestCase {
         ULTRAPEER_1.flush();
               
         m=LEAF.receive(TIMEOUT);
-        assertTrue("expected a pong", m instanceof PingReply);
+        assertInstanceof("expected a pong", PingReply.class, m);
         assertEquals("unexpected port", 7399, ((PingReply)m).getPort());        
 
 		assertTrue("should not have drained ultrapeer successfully", 
@@ -708,7 +708,7 @@ public final class UltrapeerRoutingTest extends BaseTestCase {
         LEAF.flush();
         
         Message m=ULTRAPEER_1.receive(TIMEOUT);
-        assertTrue("expected a QueryRequest", m instanceof QueryRequest);
+        assertInstanceof("expected a QueryRequest", QueryRequest.class, m);
         assertEquals("unexpected query", "crap", ((QueryRequest)m).getQuery());
         assertEquals("unexpected hops", (byte)1, m.getHops()); 
 
@@ -761,28 +761,10 @@ public final class UltrapeerRoutingTest extends BaseTestCase {
 		if(m instanceof QueryRequest) return;
 
 		System.out.println(m); 
-		assertTrue("message not a QueryRequest", m instanceof QueryRequest);			
+		assertInstanceof("message not a QueryRequest",
+		    QueryRequest.class, m);
 	}
 }
-
-class LeafProperties extends Properties {
-    public LeafProperties() {
-        put(ConnectionHandshakeHeaders.USER_AGENT, CommonUtils.getHttpServer());
-        put(ConnectionHandshakeHeaders.X_QUERY_ROUTING, "0.1");
-        put(ConnectionHandshakeHeaders.X_SUPERNODE, "False");
-        put(ConnectionHandshakeHeaders.GGEP, "0.5");
-    }
-}
-
-class UltrapeerProperties extends Properties {
-    public UltrapeerProperties() {
-        put(ConnectionHandshakeHeaders.USER_AGENT, CommonUtils.getHttpServer());
-        put(ConnectionHandshakeHeaders.X_QUERY_ROUTING, "0.1");
-        put(ConnectionHandshakeHeaders.X_SUPERNODE, "true");
-        put(ConnectionHandshakeHeaders.GGEP, "1.0");  //just for fun
-    }
-}
-
 
 class EmptyResponder implements HandshakeResponder {
     public HandshakeResponse respond(HandshakeResponse response, 

@@ -31,10 +31,13 @@ public class ManagedConnectionTest extends com.limegroup.gnutella.util.BaseTestC
     public static void main(String argv[]) {
         junit.textui.TestRunner.run(suite());
     }
+    
+    public static void globalSetUp() throws Exception {
+        launchBackend();
+    }
 
     public void setUp() throws Exception {
         if(ROUTER_SERVICE.isStarted()) return;
-        launchBackend();
         sleep(4000);
         //SettingsManager.instance().setPort(6444);
         setStandardSettings();
@@ -82,7 +85,7 @@ public class ManagedConnectionTest extends com.limegroup.gnutella.util.BaseTestC
 		out.send(new PingRequest((byte)3));
 		
 		Message m = out.receive();
-		assertTrue("should be a pong", m instanceof PingReply);
+		assertInstanceof("should be a pong", PingReply.class, m);
 		PingReply pr = (PingReply)m;
 
         assertTrue("pong should have GGEP", pr.hasGGEPExtension());
@@ -125,15 +128,15 @@ public class ManagedConnectionTest extends com.limegroup.gnutella.util.BaseTestC
             new byte[] {(byte)127, (byte)0, (byte)0, (byte)2},
             3, 30);
 
-        assertEquals("unexpected number of files", mc.getNumFiles(), 0);
-        assertEquals("unexpected number of hosts", mc.getNumHosts(), 0);
-        assertEquals("unexted total file size", mc.getTotalFileSize(), 0);
+        assertEquals("unexpected number of files", 0, mc.getNumFiles());
+        assertEquals("unexpected number of hosts", 0, mc.getNumHosts());
+        assertEquals("unexted total file size", 0, mc.getTotalFileSize());
 
         mc.updateHorizonStats(pr1);
         mc.updateHorizonStats(pr1);  //check duplicates
-        assertEquals("unexpected number of files", mc.getNumFiles(), 1);
-        assertEquals("unexpected number of hosts", mc.getNumHosts(), 1);
-        assertEquals("unexpected total filesize", mc.getTotalFileSize(), 10);
+        assertEquals("unexpected number of files", 1, mc.getNumFiles());
+        assertEquals("unexpected number of hosts", 1, mc.getNumHosts());
+        assertEquals("unexpected total filesize", 10, mc.getTotalFileSize());
 
         try { Thread.sleep(ManagedConnection.HORIZON_UPDATE_TIME*2); } 
         catch (InterruptedException e) { }
@@ -142,21 +145,21 @@ public class ManagedConnectionTest extends com.limegroup.gnutella.util.BaseTestC
         mc.updateHorizonStats(pr1);  //should be ignored for now
         mc.updateHorizonStats(pr2);
         mc.updateHorizonStats(pr3);
-        assertEquals("unexpected number of files", mc.getNumFiles(), 1);
-        assertEquals("unexpected number of hosts", mc.getNumHosts(), 1);
-        assertEquals("unexpected total filesize", mc.getTotalFileSize(), 10);
+        assertEquals("unexpected number of files", 1, mc.getNumFiles());
+        assertEquals("unexpected number of hosts", 1, mc.getNumHosts());
+        assertEquals("unexpected total filesize", 10, mc.getTotalFileSize());
         mc.refreshHorizonStats();    //should be ignored
-        assertEquals("unexpected number of files", mc.getNumFiles(), 1);
-        assertEquals("unexpected number of hosts", mc.getNumHosts(), 1);
-        assertEquals("unexpected total filesize", mc.getTotalFileSize(), 10);
+        assertEquals("unexpected number of files", 1, mc.getNumFiles());
+        assertEquals("unexpected number of hosts", 1, mc.getNumHosts());
+        assertEquals("unexpected total filesize", 10, mc.getTotalFileSize());
 
         try { Thread.sleep(ManagedConnection.HORIZON_UPDATE_TIME*2); } 
         catch (InterruptedException e) { }            
 
         mc.refreshHorizonStats();    //update stats
-        assertEquals("unexedted number of files", mc.getNumFiles(), (1+2+3));
-        assertEquals("unexpected number of hosts", mc.getNumHosts(), 3);
-        assertEquals("unexpedted total filesize", mc.getTotalFileSize(), (10+20+30));
+        assertEquals("unexedted number of files", 1+2+3, mc.getNumFiles());
+        assertEquals("unexpected number of hosts", 3, mc.getNumHosts());
+        assertEquals("unexpedted total filesize", 10+20+30, mc.getTotalFileSize());
 
         try { Thread.sleep(ManagedConnection.HORIZON_UPDATE_TIME*2); } 
         catch (InterruptedException e) { }       
@@ -193,7 +196,7 @@ public class ManagedConnectionTest extends com.limegroup.gnutella.util.BaseTestC
 		out.send(new PingRequest((byte)2));
 		
 		Message m = out.receive();
-		assertTrue("should be a pong", m instanceof PingReply);
+		assertInstanceof("should be a pong", PingReply.class, m);
 		PingReply pr = (PingReply)m;
         //try {
         pr.getDailyUptime();

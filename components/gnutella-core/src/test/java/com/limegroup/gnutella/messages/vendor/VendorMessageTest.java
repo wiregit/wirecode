@@ -65,7 +65,7 @@ public class VendorMessageTest extends com.limegroup.gnutella.util.BaseTestCase 
         ByteArrayInputStream bais = 
             new ByteArrayInputStream(baos.toByteArray());
         VendorMessage vmRead = (VendorMessage) Message.read(bais);
-        assertTrue(vm.equals(vmRead));
+        assertEquals(vm, vmRead);
 
         // test other constructor....
         vm = new HopsFlowVendorMessage((byte)6);
@@ -73,7 +73,7 @@ public class VendorMessageTest extends com.limegroup.gnutella.util.BaseTestCase 
         vm.write(baos);
         bais = new ByteArrayInputStream(baos.toByteArray());
         vmRead = (VendorMessage) Message.read(bais);
-        assertTrue(vm.equals(vmRead));
+        assertEquals(vm,vmRead);
     }
 
 
@@ -85,13 +85,13 @@ public class VendorMessageTest extends com.limegroup.gnutella.util.BaseTestCase 
         VM vm5 = new VM("LIME".getBytes(), 2, 1, new byte[0]);
         VM vm6 = new VM("LIME".getBytes(), 1, 2, new byte[0]);
         VM vm7 = new VM("LIME".getBytes(), 1, 1, new byte[1]);
-        assertTrue(vm1.equals(vm2));
-        assertTrue(!vm1.equals(vm3));
-        assertTrue(!vm1.equals(vm4));
-        assertTrue(!vm1.equals(vm5));
-        assertTrue(!vm1.equals(vm7));
+        assertEquals(vm1,vm2);
+        assertNotEquals(vm1,(vm3));
+        assertNotEquals(vm1,(vm4));
+        assertNotEquals(vm1,(vm5));
+        assertNotEquals(vm1,(vm7));
         // versions don't effect equality....
-        assertTrue(vm1.equals(vm6));
+        assertEquals(vm1,(vm6));
     }
 
 
@@ -102,8 +102,8 @@ public class VendorMessageTest extends com.limegroup.gnutella.util.BaseTestCase 
         new TCPConnectBackVendorMessage(1000);
         TCPConnectBackVendorMessage vmp3 = 
         new TCPConnectBackVendorMessage(1001);
-        assertTrue(vmp1.hashCode() == vmp2.hashCode());
-        assertTrue(vmp3.hashCode() != vmp2.hashCode());
+        assertEquals(vmp1.hashCode() , vmp2.hashCode());
+        assertNotEquals(vmp3.hashCode() , vmp2.hashCode());
     }
 
 
@@ -130,16 +130,16 @@ public class VendorMessageTest extends com.limegroup.gnutella.util.BaseTestCase 
             new ByteArrayInputStream(baos.toByteArray());
         
         VendorMessage vm = (VendorMessage) Message.read(bais);
-        assertTrue(vm.equals(tcp));
+        assertEquals(vm,(tcp));
 
         vm = (VendorMessage) Message.read(bais);
-        assertTrue(vm.equals(udp));
+        assertEquals(vm,(udp));
 
         vm = (VendorMessage) Message.read(bais);
-        assertTrue(vm.equals(ms));
+        assertEquals(vm,(ms));
         
         vm = (VendorMessage) Message.read(bais);
-        assertTrue(vm.equals(hops));
+        assertEquals(vm,(hops));
     }
 
 

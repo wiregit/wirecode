@@ -52,13 +52,13 @@ public class Random12Test extends com.limegroup.gnutella.util.BaseTestCase {
 
         for (int trials=0; trials<n*10; trials++) {
             int i=rand.nextInt(n);
-            assertTrue(i>=0);
-            assertTrue(i<n);
+            assertGreaterThanOrEquals(0,i);
+            assertLessThan(n, i);
             values[i]++;
         }
 
         for (int i=0; i<n; i++) {
-            assertTrue(values[i]>0);
+            assertGreaterThan(0, values[i]);
         }
     }
 }

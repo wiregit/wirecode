@@ -41,7 +41,7 @@ public class UtilitiesTest extends com.limegroup.gnutella.util.BaseTestCase {
 
     public void testLog2() {
         for (int i=0; i<31; i++) {
-            assertTrue(Utilities.log2(1<<i)==i);
+            assertEquals(i, Utilities.log2(1<<i));
         }
     }     
 }

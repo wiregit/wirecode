@@ -18,8 +18,8 @@ public class BufferTest extends com.limegroup.gnutella.util.BaseTestCase {
         Buffer buf=new Buffer(4);
         Iterator iter=null;
 
-        assertTrue(buf.getCapacity()==4);
-        assertTrue(buf.getSize()==0);
+        assertEquals(4, buf.getCapacity());
+        assertEquals(0, buf.getSize());
         iter=buf.iterator();
         assertTrue(!iter.hasNext());
         try {
@@ -30,78 +30,76 @@ public class BufferTest extends com.limegroup.gnutella.util.BaseTestCase {
         }
 
         buf.add("test");
-        assertTrue(buf.getSize()==1);
+        assertEquals(1, buf.getSize());
         iter=buf.iterator();
         assertTrue(iter.hasNext());
-        assertTrue(iter.next().equals("test"));
+        assertEquals("test", iter.next());
         assertTrue(!iter.hasNext());
         try {
             iter.next();
             assertTrue(false);
-        } catch (NoSuchElementException e) {
-            assertTrue(true);
-        }
+        } catch (NoSuchElementException e) {}
 
         buf.add("test2");
-        assertTrue(buf.getSize()==2);
+        assertEquals(2,buf.getSize());
         buf.add("test3");
-        assertTrue(buf.getSize()==3);
+        assertEquals(3,buf.getSize());
         iter=buf.iterator();
         assertTrue(iter.hasNext());
-        assertTrue(iter.next().equals("test3"));
+        assertEquals("test3",iter.next());
         assertTrue(iter.hasNext());
-        assertTrue(iter.next().equals("test2"));
+        assertEquals("test2", iter.next());
         assertTrue(iter.hasNext());
-        assertTrue(iter.next().equals("test"));
+        assertEquals("test", iter.next());
         assertTrue(!iter.hasNext());
 
         buf.add("test4");
-        assertTrue(buf.getSize()==4);
+        assertEquals(4,buf.getSize());
         buf.add("test5");
-        assertTrue(buf.getSize()==4);
+        assertEquals(4,buf.getSize());
         iter=buf.iterator();
         assertTrue(iter.hasNext());
-        assertTrue(iter.next().equals("test5"));
+        assertEquals("test5", iter.next());
         assertTrue(iter.hasNext());
-        assertTrue(iter.next().equals("test4"));
+        assertEquals("test4", iter.next());
         assertTrue(iter.hasNext());
-        assertTrue(iter.next().equals("test3"));
+        assertEquals("test3", iter.next());
         assertTrue(iter.hasNext());
-        assertTrue(iter.next().equals("test2"));
+        assertEquals("test2",iter.next());
         assertTrue(!iter.hasNext());	    
 
         buf.add("test6");
-        assertTrue(buf.getSize()==4);
+        assertEquals(4,buf.getSize());
 
         //2.  Tests of new methods.  These are definitely not sufficient.
         buf=new Buffer(4);
-        assertTrue(buf.getSize()==0);
-        assertTrue(buf.addLast("a")==null);
-        assertTrue(buf.getSize()==1);
-        assertTrue(buf.addLast("b")==null);
-        assertTrue(buf.getSize()==2);
-        assertTrue(buf.addLast("c")==null);
-        assertTrue(buf.getSize()==3);
-        assertTrue(buf.addLast("d")==null);
-        assertTrue(buf.getSize()==4);
-        assertTrue(buf.first().equals("a"));
-        assertTrue(buf.removeFirst().equals("a"));
-        assertTrue(buf.getSize()==3);
-        assertTrue(buf.first().equals("b"));
-        assertTrue(buf.removeFirst().equals("b"));
-        assertTrue(buf.getSize()==2);
-        assertTrue(buf.addFirst("b")==null);
-        assertTrue(buf.getSize()==3);
-        assertTrue(buf.addFirst("a")==null);
-        assertTrue(buf.getSize()==4);
+        assertEquals(0,buf.getSize());
+        assertNull(buf.addLast("a"));
+        assertEquals(1,buf.getSize());
+        assertNull(buf.addLast("b"));
+        assertEquals(2,buf.getSize());
+        assertNull(buf.addLast("c"));
+        assertEquals(3,buf.getSize());
+        assertNull(buf.addLast("d"));
+        assertEquals(4,buf.getSize());
+        assertEquals("a", buf.first());
+        assertEquals("a", buf.removeFirst());
+        assertEquals(3,buf.getSize());
+        assertEquals("b",buf.first());
+        assertEquals("b", buf.removeFirst());
+        assertEquals(2,buf.getSize());
+        assertNull(buf.addFirst("b"));
+        assertEquals(3,buf.getSize());
+        assertNull(buf.addFirst("a"));
+        assertEquals(4,buf.getSize());
         //buf=[a b c d]
 
-        assertTrue(buf.addLast("e").equals("a"));
+        assertEquals("a", buf.addLast("e"));
         //buf=[b c d e]
-        assertTrue(buf.last().equals("e"));
-        assertTrue(buf.first().equals("b"));
-        assertTrue(buf.removeLast().equals("e"));
-        assertTrue(buf.removeLast().equals("d"));		
+        assertEquals("e",buf.last());
+        assertEquals("b",buf.first());
+        assertEquals("e", buf.removeLast());
+        assertEquals("d",buf.removeLast());		
 
         buf=new Buffer(4);
         iter=buf.iterator();
@@ -117,7 +115,7 @@ public class BufferTest extends com.limegroup.gnutella.util.BaseTestCase {
         buf.addFirst("a");
         buf.addLast("b");
         buf.clear();
-        assertTrue(buf.getSize()==0);
+        assertEquals(0,buf.getSize());
         iter=buf.iterator();
         assertTrue(! iter.hasNext());
 
@@ -138,11 +136,11 @@ public class BufferTest extends com.limegroup.gnutella.util.BaseTestCase {
         buf.addLast("b");
         buf.addLast("c");
         buf.addLast("d");  //clobbers a!
-        assertTrue(buf.get(0).equals("b"));
-        assertTrue(buf.get(1).equals("c"));
-        assertTrue(buf.get(2).equals("d"));
+        assertEquals("b", buf.get(0));
+        assertEquals("c", buf.get(1));
+        assertEquals("d", buf.get(2));
         buf.set(2,"bb");
-        assertTrue(buf.get(2).equals("bb"));        
+        assertEquals("bb", buf.get(2));
 
         //4. Tests of remove and removeAll methods.
         buf=new Buffer(4);
@@ -154,11 +152,11 @@ public class BufferTest extends com.limegroup.gnutella.util.BaseTestCase {
             buf.remove(-1);
             assertTrue(false);
         } catch (IndexOutOfBoundsException e) { }
-        assertTrue(("a").equals(buf.remove(0)));
-        assertTrue(buf.size()==3);
-        assertTrue(buf.get(0).equals("b"));
-        assertTrue(buf.get(1).equals("c"));
-        assertTrue(buf.get(2).equals("d")); 
+        assertEquals("a",(buf.remove(0)));
+        assertEquals(3,buf.size());
+        assertEquals("b",buf.get(0));
+        assertEquals("c", buf.get(1));
+        assertEquals("d", buf.get(2)); 
 
         buf=new Buffer(4);
         buf.addLast("x");
@@ -171,11 +169,11 @@ public class BufferTest extends com.limegroup.gnutella.util.BaseTestCase {
             buf.remove(5);
             assertTrue(false);
         } catch (IndexOutOfBoundsException e) { }
-        assertTrue(("a").equals(buf.remove(0)));
-        assertTrue(buf.size()==3);
-        assertTrue(buf.get(0).equals("b"));
-        assertTrue(buf.get(1).equals("c"));
-        assertTrue(buf.get(2).equals("d"));  
+        assertEquals("a",(buf.remove(0)));
+        assertEquals(3,buf.size());
+        assertEquals("b", buf.get(0));
+        assertEquals("c", buf.get(1));
+        assertEquals("d", buf.get(2));  
 
         buf=new Buffer(4);
         buf.addLast("a");
@@ -186,11 +184,11 @@ public class BufferTest extends com.limegroup.gnutella.util.BaseTestCase {
             buf.remove(5);
             assertTrue(false);
         } catch (IndexOutOfBoundsException e) { }
-        assertTrue(("d").equals(buf.remove(3)));
-        assertTrue(buf.size()==3);
-        assertTrue(buf.get(0).equals("a"));
-        assertTrue(buf.get(1).equals("b"));
-        assertTrue(buf.get(2).equals("c"));  
+        assertEquals("d",buf.remove(3));
+        assertEquals(3,buf.size());
+        assertEquals("a", buf.get(0));
+        assertEquals("b", buf.get(1));
+        assertEquals("c", buf.get(2));  
 
         buf=new Buffer(4);
         buf.addLast("a");
@@ -201,48 +199,48 @@ public class BufferTest extends com.limegroup.gnutella.util.BaseTestCase {
             buf.remove(5);
             assertTrue(false);
         } catch (IndexOutOfBoundsException e) { }
-        assertTrue(("b").equals(buf.remove(1)));
-        assertTrue(buf.size()==3);
-        assertTrue(buf.get(0).equals("a"));
-        assertTrue(buf.get(1).equals("c"));
-        assertTrue(buf.get(2).equals("d")); 
+        assertEquals("b",buf.remove(1));
+        assertEquals(3,buf.size());
+        assertEquals("a",buf.get(0));
+        assertEquals("c", buf.get(1));
+        assertEquals("d", buf.get(2)); 
 
         buf=new Buffer(4);
         buf.addLast("b");
         buf.addLast("b");
         buf.addLast("c");
         buf.addLast("d");
-        assertTrue(buf.remove("d")==true);
-        assertTrue(buf.remove("b")==true);
-        assertTrue(buf.size()==2);
-        assertTrue(buf.get(0).equals("b"));
-        assertTrue(buf.get(1).equals("c"));
+        assertTrue(buf.remove("d"));
+        assertTrue(buf.remove("b"));
+        assertEquals(2,buf.size());
+        assertEquals("b", buf.get(0));
+        assertEquals("c", buf.get(1));
 
         buf=new Buffer(4);
         buf.addLast("b");
         buf.addLast("b");
         buf.addLast("c");
         buf.addLast("b");
-        assertTrue(buf.removeAll("b")==true);
-        assertTrue(buf.size()==1);
-        assertTrue(buf.get(0).equals("c"));
+        assertTrue(buf.removeAll("b"));
+        assertEquals(1,buf.size());
+        assertEquals("c",buf.get(0));
 
         //5. Test clone() method.
         buf=new Buffer(2);
         buf.addLast("a");
         buf.addLast("b");
         Buffer buf2=new Buffer(buf);
-        assertTrue(buf2.size()==buf.size());
-        assertTrue(buf2.getCapacity()==buf.getCapacity());
-        assertTrue(buf2.first().equals(buf.first()));
-        assertTrue(buf2.last().equals(buf.last()));
+        assertEquals(buf2.size(),buf.size());
+        assertEquals(buf2.getCapacity(),buf.getCapacity());
+        assertEquals(buf2.first(),buf.first());
+        assertEquals(buf2.last(),buf.last());
         
-        assertTrue(buf.removeFirst()!=null); //buf2 unmodified
-        assertTrue(buf.size()==1);
-        assertTrue(buf2.size()==2);
-        assertTrue(buf.first().equals("b"));
-        assertTrue(buf2.first().equals("a"));
-        assertTrue(buf2.last().equals("b"));
+        assertNotNull(buf.removeFirst()); //buf2 unmodified
+        assertEquals(1,buf.size());
+        assertEquals(2,buf2.size());
+        assertEquals("b",buf.first());
+        assertEquals("a",buf2.first());
+        assertEquals("b",buf2.last());
     }
 
 

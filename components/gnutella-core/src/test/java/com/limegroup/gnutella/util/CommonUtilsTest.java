@@ -20,33 +20,32 @@ public class CommonUtilsTest extends com.limegroup.gnutella.util.BaseTestCase {
 
     public void testMajorRevisionMethod() {
         int majorVersion = CommonUtils.getMajorVersionNumber();
-        assertTrue(majorVersion==2);
+        assertEquals(2,majorVersion);
         majorVersion = CommonUtils.getMajorVersionNumberInternal("3.7.7");
-        assertTrue(majorVersion==3);
+        assertEquals(3,majorVersion);
         majorVersion = CommonUtils.getMajorVersionNumberInternal("14.7.7");
-        assertTrue("14, instead majorVersion = " + majorVersion, 
-                   majorVersion==14);
+        assertEquals(14,majorVersion);
         majorVersion = CommonUtils.getMajorVersionNumberInternal("13.34.7");
-        assertTrue(majorVersion==13);        
+        assertEquals(13,majorVersion);
         majorVersion = CommonUtils.getMajorVersionNumberInternal(".34.7");
-        assertTrue(majorVersion==2);        
+        assertEquals(2,majorVersion);
         majorVersion = CommonUtils.getMajorVersionNumberInternal("2.7.13");
         assertEquals("unexpected major version number",2, majorVersion); 
     }
 
     public void testMinorRevisionMethod() {
         int minorVersion = CommonUtils.getMinorVersionNumber();
-        assertTrue(minorVersion==7);
+        assertEquals(7,minorVersion);
         minorVersion = CommonUtils.getMinorVersionNumberInternal("3.8.7");
-        assertTrue(minorVersion==8);
+        assertEquals(8,minorVersion);
         minorVersion = CommonUtils.getMinorVersionNumberInternal("14.13.7");
-        assertTrue(minorVersion==13);
+        assertEquals(13,minorVersion);
         minorVersion = CommonUtils.getMinorVersionNumberInternal("2.34.7");
-        assertTrue(minorVersion==34);        
+        assertEquals(34,minorVersion);        
         minorVersion = CommonUtils.getMinorVersionNumberInternal("..7");
-        assertTrue(minorVersion==7);        
+        assertEquals(7,minorVersion);        
         minorVersion = CommonUtils.getMinorVersionNumberInternal("2..7");
-        assertTrue(minorVersion==7);    
+        assertEquals(7,minorVersion);    
 
         minorVersion = CommonUtils.getMinorVersionNumberInternal("2.7.13");
         assertEquals("unexpected minor version number",7, minorVersion); 

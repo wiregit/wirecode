@@ -38,7 +38,7 @@ public class RequeryDownloaderTest extends com.limegroup.gnutella.util.BaseTestC
         ObjectInputStream in=new ObjectInputStream(new FileInputStream(tmp));
         RequeryDownloader downloader2=(RequeryDownloader)in.readObject();
         in.close();
-        assertTrue(downloader.hasFile()==downloader2.hasFile());//weak test
+        assertEquals(downloader.hasFile(), downloader2.hasFile());//weak test
         tmp.delete();
     }
 }

@@ -69,7 +69,7 @@ public class CollectionTest extends com.limegroup.gnutella.util.BaseTestCase {
         LimeXMLReplyCollection collection = 
         new LimeXMLReplyCollection(files, schemaURI, mfm, audio);
         assertEquals("LimeXMLCollection count wrong!",
-                          collection.getCount(), 2);
+                         2, collection.getCount());
 
         // test assocation
         LimeXMLDocument doc = null;
@@ -83,7 +83,7 @@ public class CollectionTest extends com.limegroup.gnutella.util.BaseTestCase {
         // test keyword generation
         List keywords = collection.getKeyWords();
         assertEquals("Wrong keyword count!",
-                          keywords.size(), 6);
+                         6, keywords.size());
         assertTrue("Correct keywords not in map!", 
                           (keywords.contains("othertfield") && 
                            keywords.contains("otherafield")  &&
@@ -102,7 +102,7 @@ public class CollectionTest extends com.limegroup.gnutella.util.BaseTestCase {
         LimeXMLReplyCollection collection = 
         new LimeXMLReplyCollection(files, schemaURIVideo, mfm, !audio);
         assertEquals("LimeXMLCollection count wrong!",
-                          collection.getCount(), 0);
+                         0, collection.getCount());
 
         // test assocation
         LimeXMLDocument doc = null;
@@ -116,7 +116,7 @@ public class CollectionTest extends com.limegroup.gnutella.util.BaseTestCase {
         // test keyword generation
         List keywords = collection.getKeyWords();
         assertEquals("Wrong keyword count!",
-                          keywords.size(), 0);
+                        0,  keywords.size());
     }
 
 
@@ -143,7 +143,7 @@ public class CollectionTest extends com.limegroup.gnutella.util.BaseTestCase {
         searchDoc = new LimeXMLDocument(nameVals, schemaURI);
         results = collection.getMatchingReplies(searchDoc);
         assertEquals("Not the correct amount of results",
-                          results.size(), 1);
+                         1, results.size());
 
         // has two matching, one null
         nameVals.clear();
@@ -162,7 +162,7 @@ public class CollectionTest extends com.limegroup.gnutella.util.BaseTestCase {
         searchDoc = new LimeXMLDocument(nameVals, schemaURI);
         results = collection.getMatchingReplies(searchDoc);
         assertEquals("Not the correct amount of results", 
-                          results.size(), 1);        
+                          1, results.size());
 
         // has one off by one....
         nameVals.clear();
@@ -171,7 +171,7 @@ public class CollectionTest extends com.limegroup.gnutella.util.BaseTestCase {
         searchDoc = new LimeXMLDocument(nameVals, schemaURI);
         results = collection.getMatchingReplies(searchDoc);
         assertEquals("Not the correct amount of results",
-                          results.size(), 0);        
+                          0, results.size());
 
         // has all nulls, this was a terrible bug in previous versions...
         nameVals.clear();
@@ -180,7 +180,7 @@ public class CollectionTest extends com.limegroup.gnutella.util.BaseTestCase {
         searchDoc = new LimeXMLDocument(nameVals, schemaURI);
         results = collection.getMatchingReplies(searchDoc);
         assertEquals("Not the correct amount of results",
-                          results.size(), 0);        
+                        0, results.size());
 
         // has all nulls, this was a terrible bug in previous versions...
         nameVals.clear();
@@ -188,7 +188,7 @@ public class CollectionTest extends com.limegroup.gnutella.util.BaseTestCase {
         searchDoc = new LimeXMLDocument(nameVals, schemaURI);
         results = collection.getMatchingReplies(searchDoc);
         assertEquals("Not the correct amount of results",
-                          results.size(),  0);        
+                         0,  results.size());
 
     }
 
@@ -204,9 +204,9 @@ public class CollectionTest extends com.limegroup.gnutella.util.BaseTestCase {
 
         // test it got the count right....        
         assertEquals("LimeXMLCollection count wrong!",
-                          audioCollection.getCount(), 2);
+                         2, audioCollection.getCount());
         assertEquals("LimeXMLCollection count wrong!",
-                          videoCollection.getCount(), 2);
+                          2, videoCollection.getCount());
 
         // test assocation
         LimeXMLDocument doc = null;
@@ -227,7 +227,7 @@ public class CollectionTest extends com.limegroup.gnutella.util.BaseTestCase {
         // test keyword generation
         List keywords = audioCollection.getKeyWords();
         assertEquals("Wrong keyword count!",
-                          keywords.size(), 6);
+                         6, keywords.size());
         assertTrue("Correct keywords not in map!", 
                           (keywords.contains("othertfield") && 
                            keywords.contains("otherafield")  &&
@@ -238,7 +238,7 @@ public class CollectionTest extends com.limegroup.gnutella.util.BaseTestCase {
                           );
         keywords = videoCollection.getKeyWords();
         assertEquals("Wrong keyword count!",
-                          keywords.size(), 4);
+                         4, keywords.size());
         assertTrue("Correct keywords not in map!", 
                           (keywords.contains("null") && 
                            keywords.contains("file")  &&

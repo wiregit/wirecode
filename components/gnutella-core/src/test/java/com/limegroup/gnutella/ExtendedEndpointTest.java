@@ -197,8 +197,10 @@ public class ExtendedEndpointTest extends com.limegroup.gnutella.util.BaseTestCa
         ExtendedEndpoint good=new TestExtendedEndpoint("18.39.0.147",6347,100);
         good.recordConnectionSuccess();
 
-        assertTrue(comparator.compare(bad, good)<0);
-        assertTrue(comparator.compare(good, bad)>0);   
+        assertLessThan("bad not less than good",
+            0, comparator.compare(bad, good));
+        assertGreaterThan("good not greater than bad",
+            0, comparator.compare(good, bad));   
     }
     
     public void testComparatorConnectOneFailure() {
@@ -209,8 +211,10 @@ public class ExtendedEndpointTest extends com.limegroup.gnutella.util.BaseTestCa
         //Good failed at time=0 but succeeded at time=1.  (Uptime doesn't matter)
         ExtendedEndpoint good=new TestExtendedEndpoint("18.39.0.147",6347,1000);
 
-        assertTrue(comparator.compare(bad, good)<0);
-        assertTrue(comparator.compare(good, bad)>0);   
+        assertLessThan("bad not less than good",
+            0, comparator.compare(bad, good));
+        assertGreaterThan("good not greater than bad",
+            0, comparator.compare(good, bad));   
     }
 
     public void testComparatorUptimeEq() {
@@ -223,8 +227,10 @@ public class ExtendedEndpointTest extends com.limegroup.gnutella.util.BaseTestCa
     public void testComparatorUptimeNeq() {
         ExtendedEndpoint bad=new ExtendedEndpoint("18.239.0.146", 6346, 999);
         ExtendedEndpoint good=new ExtendedEndpoint("18.239.0.147", 6347, 1000);
-        assertTrue(comparator.compare(bad, good)<0);
-        assertTrue(comparator.compare(good, bad)>0); 
+        assertLessThan("bad not less than good",
+            0, comparator.compare(bad, good));
+        assertGreaterThan("good not greater than bad",
+            0, comparator.compare(good, bad)); 
     }
 
 }

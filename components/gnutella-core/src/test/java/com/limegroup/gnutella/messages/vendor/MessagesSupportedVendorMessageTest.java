@@ -26,12 +26,12 @@ public class MessagesSupportedVendorMessageTest extends com.limegroup.gnutella.u
     public void testStaticConstructor() throws Exception {
         MessagesSupportedVendorMessage vmp = 
             MessagesSupportedVendorMessage.instance();
-        assertTrue(vmp.supportsTCPConnectBack() > 0);
-        assertTrue(vmp.supportsUDPConnectBack() > 0);
-        assertTrue(vmp.supportsHopsFlow() > 0);
-        assertTrue(vmp.supportsMessage("BEAR".getBytes(),7) > 0);
-        assertTrue(vmp.supportsMessage("BEAR".getBytes(),4) > 0);
-        assertTrue(vmp.supportsMessage("GTKG".getBytes(),7) > 0);
+        assertGreaterThan(0, vmp.supportsTCPConnectBack());
+        assertGreaterThan(0, vmp.supportsUDPConnectBack());
+        assertGreaterThan(0, vmp.supportsHopsFlow());
+        assertGreaterThan(0, vmp.supportsMessage("BEAR".getBytes(),7));
+        assertGreaterThan(0, vmp.supportsMessage("BEAR".getBytes(),4));
+        assertGreaterThan(0, vmp.supportsMessage("GTKG".getBytes(),7));
                                              
     
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -40,13 +40,13 @@ public class MessagesSupportedVendorMessageTest extends com.limegroup.gnutella.u
             new ByteArrayInputStream(baos.toByteArray());
         MessagesSupportedVendorMessage vmpRead = 
             (MessagesSupportedVendorMessage) Message.read(bais);
-        assertTrue(vmp.equals(vmpRead));
-        assertTrue(vmpRead.supportsTCPConnectBack() > 0);
-        assertTrue(vmpRead.supportsUDPConnectBack() > 0);
-        assertTrue(vmpRead.supportsHopsFlow() > 0);
-        assertTrue(vmp.supportsMessage("BEAR".getBytes(),7) > 0);
-        assertTrue(vmp.supportsMessage("BEAR".getBytes(),4) > 0);
-        assertTrue(vmp.supportsMessage("GTKG".getBytes(),7) > 0);
+        assertEquals(vmp, vmpRead);
+        assertGreaterThan(0, vmpRead.supportsTCPConnectBack());
+        assertGreaterThan(0, vmpRead.supportsUDPConnectBack());
+        assertGreaterThan(0, vmpRead.supportsHopsFlow());
+        assertGreaterThan(0, vmp.supportsMessage("BEAR".getBytes(),7));
+        assertGreaterThan(0, vmp.supportsMessage("BEAR".getBytes(),4));
+        assertGreaterThan(0, vmp.supportsMessage("GTKG".getBytes(),7));
     }
 
     public void testNetworkConstructor() throws Exception {
@@ -78,12 +78,12 @@ public class MessagesSupportedVendorMessageTest extends com.limegroup.gnutella.u
         MessagesSupportedVendorMessage vmp = 
            (MessagesSupportedVendorMessage) Message.read(bais);
         // make sure it supports everything we expect....
-        assertTrue(vmp.supportsMessage("SUSH".getBytes(), 10) == 10);
-        assertTrue(vmp.supportsMessage("NEIL".getBytes(), 5) == 5);
-        assertTrue(vmp.supportsMessage("DAWG".getBytes(), 3) == 3);
-        assertTrue(vmp.supportsTCPConnectBack() == -1);
-        assertTrue(vmp.supportsUDPConnectBack() == -1);
-        assertTrue(vmp.supportsHopsFlow() == -1);
+        assertEquals(10, vmp.supportsMessage("SUSH".getBytes(), 10));
+        assertEquals(5, vmp.supportsMessage("NEIL".getBytes(), 5));
+        assertEquals(3, vmp.supportsMessage("DAWG".getBytes(), 3));
+        assertEquals(-1, vmp.supportsTCPConnectBack());
+        assertEquals(-1, vmp.supportsUDPConnectBack());
+        assertEquals(-1, vmp.supportsHopsFlow());
 
         // now creat another one, mix up the blocks that are supported, and
         // make sure they are equal....
@@ -97,7 +97,7 @@ public class MessagesSupportedVendorMessageTest extends com.limegroup.gnutella.u
             new MessagesSupportedVendorMessage(guid, ttl, hops, 0,
                                                baos.toByteArray());
 
-        assertTrue(vmp.equals(vmpOther));
+        assertEquals(vmp, vmpOther);
 
     }
 
@@ -160,7 +160,7 @@ public class MessagesSupportedVendorMessageTest extends com.limegroup.gnutella.u
         MessagesSupportedVendorMessage vmpOneOther = 
             new MessagesSupportedVendorMessage(guid, ttl, hops, 0, 
                                                baos.toByteArray());
-        assertTrue(!vmpOther.equals(vmpOneOther));
+        assertNotEquals(vmpOther,vmpOneOther);
 
     }
 

@@ -78,11 +78,11 @@ public class RemoteFileDescGrouperTest extends com.limegroup.gnutella.util.BaseT
         grouper=new RemoteFileDescGrouper(allFiles, ifm);
         iter=grouper.buckets();
         list=(List)iter.next();
-        assertTrue(list.size()==2);
+        assertEquals(2, list.size());
         assertTrue(list.contains(rf1));
         assertTrue(list.contains(rf2));
         list=(List)iter.next();
-        assertTrue(list.size()==2);
+        assertEquals(2, list.size());
         assertTrue(list.contains(rf3));
         assertTrue(list.contains(rf4));
         assertTrue(! iter.hasNext());
@@ -93,9 +93,9 @@ public class RemoteFileDescGrouperTest extends com.limegroup.gnutella.util.BaseT
         allFiles=new RemoteFileDesc[] {rf3};
         grouper=new RemoteFileDescGrouper(allFiles, ifm);
         iter=grouper.buckets();
-        assertTrue(grouper.add(rf4)==true);
+        assertTrue(grouper.add(rf4));
         list=(List)iter.next();
-        assertTrue(list.size()==2);
+        assertEquals(2, list.size());
         assertTrue(list.contains(rf3));
         assertTrue(list.contains(rf4));
         
@@ -105,11 +105,11 @@ public class RemoteFileDescGrouperTest extends com.limegroup.gnutella.util.BaseT
         grouper=new RemoteFileDescGrouper(allFiles, ifm);
         iter=grouper.buckets();
         list=(List)iter.next();
-        assertTrue(list.size()==1);
+        assertEquals(1, list.size());
         assertTrue(list.contains(rf3));
-        assertTrue(grouper.add(rf1)==false);
+        assertTrue(!grouper.add(rf1));
         list=(List)iter.next();
-        assertTrue(list.size()==1);
+        assertEquals(1, list.size());
         assertTrue(list.contains(rf1));
 
         //Large part written on disk
@@ -120,11 +120,11 @@ public class RemoteFileDescGrouperTest extends com.limegroup.gnutella.util.BaseT
         grouper=new RemoteFileDescGrouper(allFiles, ifm);
         iter=grouper.buckets();
         list=(List)iter.next();
-        assertTrue(list.size()==2);
+        assertEquals(2, list.size());
         assertTrue(list.contains(rf3));
         assertTrue(list.contains(rf4));
         list=(List)iter.next();
-        assertTrue(list.size()==2);
+        assertEquals(2, list.size());
         assertTrue(list.contains(rf1));
         assertTrue(list.contains(rf2));
         assertTrue(! iter.hasNext());
@@ -134,12 +134,12 @@ public class RemoteFileDescGrouperTest extends com.limegroup.gnutella.util.BaseT
         grouper=new RemoteFileDescGrouper(allFiles, ifm);
         iter=grouper.buckets();
         list=(List)iter.next();
-        assertTrue(list.size()==1);
+        assertEquals(1, list.size());
         assertTrue(list.contains(rf3));
         list.remove(rf3);
-        assertTrue(list.size()==0);
+        assertEquals(0, list.size());
         assertTrue(grouper.add(rf4));
-        assertTrue(list.size()==1);
+        assertEquals(1, list.size());
         assertTrue(list.contains(rf4));
     }
 

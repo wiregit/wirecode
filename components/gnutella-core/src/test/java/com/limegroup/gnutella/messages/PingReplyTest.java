@@ -21,15 +21,15 @@ public class PingReplyTest extends com.limegroup.gnutella.util.BaseTestCase {
         byte[] ip={(byte)0xFF, (byte)0x00, (byte)0x00, (byte)0x1};
         PingReply pr=new PingReply(new byte[16], (byte)0,
                                    u2, ip, u4, u4);
-        assertTrue(pr.getPort()==u2);
-        assertTrue(pr.getFiles()==u4);
+        assertEquals(u2, pr.getPort());
+        assertEquals(u4, pr.getFiles());
         long kbytes=pr.getKbytes();
-        assertTrue(Long.toHexString(kbytes), kbytes==u4);
+        assertEquals(Long.toHexString(kbytes), u4, kbytes);
         String ip2=pr.getIP();
-        assertTrue(ip2, ip2.equals("255.0.0.1"));
+        assertEquals("255.0.0.1", ip2);
         //assertTrue(pr.ip!=null);  //Looking at private data
         ip2=pr.getIP();
-        assertTrue(ip2, ip2.equals("255.0.0.1"));
+        assertEquals("255.0.0.1", ip2);
         assertTrue(! pr.isMarked());
     }      
       
@@ -49,7 +49,7 @@ public class PingReplyTest extends com.limegroup.gnutella.util.BaseTestCase {
         pr=new PingReply(new byte[16], (byte)2, 6346, new byte[4],
                          5, 2348, false);        
         assertTrue(! pr.isMarked());
-        assertTrue(pr.getKbytes()==2348);
+        assertEquals(2348, pr.getKbytes());
         // all pongs should have a GGEP extension now....
         assertTrue("pong should have GGEP ext", pr.hasGGEPExtension());
         pr=new PingReply(new byte[16], (byte)2, 6346, new byte[4],
@@ -120,9 +120,9 @@ public class PingReplyTest extends com.limegroup.gnutella.util.BaseTestCase {
         //Start testing
         assertEquals("wrong port", 15, pr.getPort());
         String ip = pr.getIP();
-        assertTrue("wrong IP", ip.equals("16.16.16.16"));
-        assertTrue("wrong files", pr.getFiles() == 15);
-        assertTrue("Wrong share size", pr.getKbytes() == 15);
+        assertEquals("wrong IP", "16.16.16.16", ip);
+        assertEquals("wrong files", 15, pr.getFiles());
+        assertEquals("Wrong share size", 15, pr.getKbytes());
         ByteArrayOutputStream stream = new ByteArrayOutputStream();
         pr.write(stream);
         byte[] op = stream.toByteArray();
@@ -130,7 +130,7 @@ public class PingReplyTest extends com.limegroup.gnutella.util.BaseTestCase {
         big[0] = op[op.length-2];
         big[1] = op[op.length-1];
         String out = new String(big);
-        assertTrue("Big part of pong lost", out.equals("AB"));
+        assertEquals("Big part of pong lost", "AB", out);
         //come this far means its OK
     }
 

@@ -140,16 +140,16 @@ public final class UrnTest extends com.limegroup.gnutella.util.BaseTestCase {
 			assertNotNull("urn should not be null",urns[i]);
 			assertTrue("should be SHA1: '"+urns[i]+"'\r\n"+
 					   urns[i].getUrnType(), urns[i].isSHA1());
-			assertTrue("urn should not have the empty string", 
-					   !urns[i].toString().equals(""));
+			assertNotEquals("urn should not have the empty string", 
+					   "", urns[i].toString());
 
 		}
 		sha1Urns = new URN[VALID_SHA1_URNS.length];
 		for(int i=0; i<sha1Urns.length; i++) {
 			sha1Urns[i] = URN.createSHA1Urn(VALID_SHA1_URNS[i]);
 			assertNotNull("urn should not be null",sha1Urns[i]);
-			assertTrue("urn should not have the empty string", 
-					   !sha1Urns[i].toString().equals(""));
+			assertNotEquals("urn should not have the empty string", 
+					   "", sha1Urns[i].toString());
 		}
 		for(int i=0; i<VALID_URN_HTTP_STRINGS.length; i++) {
 			try {
@@ -181,7 +181,7 @@ public final class UrnTest extends com.limegroup.gnutella.util.BaseTestCase {
 				   _testDir.isDirectory());
 		File[] files = _testDir.listFiles();
 		assertNotNull("test directory should contain files", files);
-		assertTrue("should have more than 10 files: "+_testDir, files.length > 10);
+		assertGreaterThan("should have more than 10 files: "+_testDir, 10, files.length);
 	}
 
 
@@ -314,7 +314,7 @@ public final class UrnTest extends com.limegroup.gnutella.util.BaseTestCase {
 			int curCode = hashCodes[i];
 			for(int j=0; j<hashCodes.length; j++) {
 				if(i == j) continue;
-				assertTrue("hashes of two different URNs should not be equal", curCode != hashCodes[j]);
+				assertNotEquals("hashes of two different URNs should not be equal", curCode, hashCodes[j]);
 			}
 		}
 	}
@@ -334,10 +334,9 @@ public final class UrnTest extends com.limegroup.gnutella.util.BaseTestCase {
 					continue;
 				}
 				else {
-					assertTrue("urns are unexpectedly equal: curUrn: "+curUrn+"\r\n"+
-							   "                            urns[j]: "+urns[j]+"\r\n"+
+					assertNotEquals("urns are unexpectedly equal" +
 							   "i: "+i+" j: "+j, 
-							   !curUrn.equals(urns[j]));
+							   curUrn, urns[j]);
 				}
 				assertNotNull("urn is unexpectedly null", urns[j]);
 			}

@@ -69,7 +69,7 @@ public class PingRequestTest extends com.limegroup.gnutella.util.BaseTestCase {
         for (int i = 0; i < ggepBytes.length; i++)
             buffer[currByte++] = ggepBytes[i];
         buffer[currByte++] = 0; // trailing 0
-        assertTrue(currByte >= buffer.length);
+        assertGreaterThanOrEquals(buffer.length, currByte);
 
         //OK, ggep ping ready
         ByteArrayInputStream stream = new ByteArrayInputStream(buffer);
@@ -122,22 +122,22 @@ public class PingRequestTest extends com.limegroup.gnutella.util.BaseTestCase {
         ByteArrayOutputStream outBuffer = new ByteArrayOutputStream();
         pr.write(outBuffer);
         String out = outBuffer.toString().substring(23);
-        assertTrue("Wrong payload "+out, out.equals("ABCDEFGHIJKLMNOP"));
+        assertEquals("Wrong payload", "ABCDEFGHIJKLMNOP", out);
       
         //Test the new constructor for big pings read from the network
       
         PingRequest bigPing = new PingRequest(GUID.makeGuid(),(byte)7,
                                               (byte)0,payload);
-        assertTrue(bigPing.getHops() == 0);
-        assertTrue(bigPing.getTTL() == 7);
-        assertTrue("bad length "+bigPing.getLength(), bigPing.getLength()==16);
+        assertEquals(0, bigPing.getHops());
+        assertEquals(7, bigPing.getTTL());
+        assertEquals("bad length", 16, bigPing.getLength());
         //Came this far means its all OK
     }
 
     public void testStripNoPayload() {
         byte[] guid=new byte[16];  guid[0]=(byte)0xFF;        
         PingRequest pr=new PingRequest(guid, (byte)3, (byte)4);
-        assertTrue(pr.stripExtendedPayload()==pr);
+        assertEquals(pr, pr.stripExtendedPayload());
     }
 
 
@@ -146,14 +146,14 @@ public class PingRequestTest extends com.limegroup.gnutella.util.BaseTestCase {
         byte[] payload=new byte[20]; payload[3]=(byte)0xBC;
         PingRequest pr=new PingRequest(guid, (byte)3, (byte)4, payload);
         PingRequest pr2=(PingRequest)pr.stripExtendedPayload();
-        assertTrue(pr.getHops()==pr2.getHops());
-        assertTrue(pr.getTTL()==pr2.getTTL());
+        assertEquals(pr.getHops(), pr2.getHops());
+        assertEquals(pr.getTTL(), pr2.getTTL());
         assertTrue(Arrays.equals(pr.getGUID(), pr2.getGUID()));
         
-        assertTrue(pr2.getTotalLength()==23);
+        assertEquals(pr2.getTotalLength(),23);
         ByteArrayOutputStream out=new ByteArrayOutputStream();
         pr2.write(out);
-        assertTrue(out.toByteArray().length==23);
+        assertEquals(out.toByteArray().length, 23);
         
     }
 }

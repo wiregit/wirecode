@@ -91,7 +91,9 @@ public final class RemoteFileDescTest extends com.limegroup.gnutella.util.BaseTe
 		String colonPort = ":"+rfd.getPort();
 		assertTrue("unexpected beginning of url", 
 				   urlString.startsWith("http://"+host+colonPort));
-		assertEquals("unexpected double slash", urlString.indexOf(colonPort+"//"), -1);
-		assertTrue("unexpected double slash", urlString.indexOf(":3000/") != -1);		
+		assertEquals("unexpected double slash",
+		    urlString.indexOf(colonPort+"//"), -1);
+		assertNotEquals("unexpected double slash",
+		    -1, urlString.indexOf(":3000/"));
 	}
 }

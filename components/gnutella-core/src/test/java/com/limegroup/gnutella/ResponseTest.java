@@ -39,7 +39,7 @@ public final class ResponseTest extends com.limegroup.gnutella.util.BaseTestCase
 	public void testLegacyResponseUnitTest() throws Exception {
         Response r = new Response(3,4096,"A.mp3");
         int nameSize = r.getNameBytesSize();
-		assertEquals(nameSize, 5);
+		assertEquals(5, nameSize);
         byte[] nameBytes = r.getNameBytes();
 		assertEquals(65, nameBytes[0]);
 		byte[] metaBytes = r.getMetaBytes();

@@ -43,8 +43,8 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.BaseTestCa
 		QueryReply qr=new QueryReply(guid, (byte)5,
 									 0xF3F1, ip, 1, responses,
 									 guid, false);
-		assertEquals(qr.getSpeed(), 1);
-		assertEquals(Integer.toHexString(qr.getPort()), qr.getPort(), 0xF3F1);
+		assertEquals(1, qr.getSpeed());
+		assertEquals(Integer.toHexString(qr.getPort()), 0xF3F1, qr.getPort());
 
         assertEquals(qr.getResults().hasNext(), false);
 
@@ -54,17 +54,17 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.BaseTestCa
 		qr=new QueryReply(guid, (byte)5,
 						  0xFFFF, ip, u4, responses,
 						  guid, false);
-		assertEquals(qr.getIP(), "255.0.0.1");
-		assertEquals(qr.getPort(), 0xFFFF);
-		assertEquals(qr.getSpeed(), u4);
-		assertEquals(Arrays.equals(qr.getClientGUID(),guid), true);
+		assertEquals("255.0.0.1",qr.getIP());
+		assertEquals(0xFFFF, qr.getPort());
+		assertEquals(u4, qr.getSpeed());
+		assertTrue(Arrays.equals(qr.getClientGUID(),guid));
 
 		Iterator iter=qr.getResults();
 		Response r1=(Response)iter.next();
 		assertEquals(r1, responses[0]);
 		Response r2=(Response)iter.next();
 		assertEquals(r2, responses[1]);
-		assertEquals(iter.hasNext(), false);
+		assertFalse(iter.hasNext());
 
 		
 		////////////////////  Contruct from Raw Bytes /////////////
@@ -80,8 +80,8 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.BaseTestCa
 
 		iter=qr.getResults();
 		Response response=(Response)iter.next();
-		assertEquals("'"+response.getName()+"'", response.getName(), "A");
-		assertEquals(iter.hasNext(), false);
+		assertEquals("A", response.getName());
+		assertFalse(iter.hasNext());
 
 		try {
 			qr.getVendor();    //undefined => exception
@@ -135,13 +135,13 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.BaseTestCa
         try {
             iter=qr.getResults();
             Response r = (Response)iter.next();
-            assertEquals("sumeet test a", r.getNameBytesSize(), 1);
-            assertEquals("sumeet test b", r.getMetaBytesSize(), 0);
+            assertEquals("sumeet test a", 1, r.getNameBytesSize());
+            assertEquals("sumeet test b", 0, r.getMetaBytesSize());
             byte[] name = r.getNameBytes();
-            assertEquals("sumeet test c", name[0], 'A');
-            assertEquals("Sumeet test1", r.getName(), "A");
-            assertEquals("SUSH is not " + (new String(qr.getXMLBytes())), 
-						 (new String(qr.getXMLBytes())), "SUSH");
+            assertEquals("sumeet test c", 'A', name[0]);
+            assertEquals("Sumeet test1", "A",  r.getName());
+            assertEquals("unexpected xml bytes",
+						 "SUSH", (new String(qr.getXMLBytes())));
         }catch(BadPacketException e){
             fail("metaResponse not created well!", e);
         }
@@ -165,7 +165,7 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.BaseTestCa
         assertEquals(vendor, "LIME", vendor);
         vendor=qr.getVendor();
         assertEquals(vendor, "LIME", vendor);
-        assertEquals(qr.getNeedsPush(), true);
+        assertTrue(qr.getNeedsPush());
         
         //Normal case: basic metainfo with extra vendor data
         payload=new byte[11+11+(4+1+4+20000)+16];
@@ -188,7 +188,7 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.BaseTestCa
         assertEquals(vendor, "LLME", vendor);
         vendor=qr.getVendor();
         assertEquals(vendor, "LLME", vendor);
-        assertEquals(qr.getNeedsPush(), false);
+        assertFalse(qr.getNeedsPush());
 
         try {
             qr.getSupportsChat();
@@ -253,7 +253,7 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.BaseTestCa
 		qr=new QueryReply(new byte[16], (byte)5, (byte)0, payload);
 						  
         vendor=qr.getVendor();
-        assertEquals("Vendor should have been LIME", vendor, "LIME");
+        assertEquals("unexpected vendor", "LIME", vendor);
         
         assertTrue(!qr.getNeedsPush());
         try {
@@ -289,15 +289,15 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.BaseTestCa
 							  
         vendor=qr.getVendor();
         assertEquals(vendor, "LIME", vendor);
-        assertEquals(qr.getNeedsPush(), true);
-        assertEquals(qr.getNeedsPush(), true);
-        assertEquals(qr.getIsBusy(), true);
-        assertEquals(qr.getIsBusy(), true);
-        assertEquals(qr.getIsMeasuredSpeed(), true);
-        assertEquals(qr.getIsMeasuredSpeed(), true);
-        assertEquals(qr.getHadSuccessfulUpload(), true);
-        assertEquals(qr.getHadSuccessfulUpload(), true);
-        assertEquals(qr.getSupportsChat(), true);
+        assertTrue(qr.getNeedsPush());
+        assertTrue(qr.getNeedsPush());
+        assertTrue(qr.getIsBusy());
+        assertTrue(qr.getIsBusy());
+        assertTrue(qr.getIsMeasuredSpeed());
+        assertTrue(qr.getIsMeasuredSpeed());
+        assertTrue(qr.getHadSuccessfulUpload());
+        assertTrue(qr.getHadSuccessfulUpload());
+        assertTrue(qr.getSupportsChat());
           
         //Normal case: busy and push bits defined and unset
         payload=new byte[11+11+(4+1+4+1)+16];
@@ -316,10 +316,10 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.BaseTestCa
 
         vendor=qr.getVendor();
         assertEquals(vendor, "LIME", vendor);
-        assertEquals(qr.getNeedsPush(), false);
-        assertEquals(qr.getIsBusy(), false);
-        assertEquals(qr.getIsMeasuredSpeed(), false);
-        assertEquals(qr.getHadSuccessfulUpload(), false);
+        assertFalse(qr.getNeedsPush());
+        assertFalse(qr.getIsBusy());
+        assertFalse(qr.getIsMeasuredSpeed());
+        assertFalse(qr.getHadSuccessfulUpload());
 
         try {
             qr.getSupportsChat();
@@ -334,9 +334,9 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.BaseTestCa
                           0xFFFF, ip, u4, responses,
                           guid,
                           false, true, true, false, true, false);
-        assertEquals(qr.getIP(), "255.0.0.1");
-        assertEquals(qr.getPort(), 0xFFFF);
-        assertEquals(qr.getSpeed(), u4);
+        assertEquals("255.0.0.1", qr.getIP());
+        assertEquals(0xFFFF, qr.getPort());
+        assertEquals(u4, qr.getSpeed());
         assertTrue(Arrays.equals(qr.getClientGUID(),guid));
 
         iter=qr.getResults();
@@ -344,13 +344,13 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.BaseTestCa
         assertEquals(r1, responses[0]);
         r2=(Response)iter.next();
         assertEquals(r2, responses[1]);
-        assertEquals(iter.hasNext(), false);
-        assertEquals(qr.getVendor(), "LIME");
-        assertEquals(qr.getNeedsPush(), false);
-        assertEquals(qr.getIsBusy(), true);
-        assertEquals(qr.getHadSuccessfulUpload(), true);
-        assertEquals(qr.getIsMeasuredSpeed(), false);
-        assertEquals(qr.getSupportsChat(), true);
+        assertFalse(iter.hasNext());
+        assertEquals("LIME", qr.getVendor());
+        assertFalse(qr.getNeedsPush());
+        assertTrue(qr.getIsBusy());
+        assertTrue(qr.getHadSuccessfulUpload());
+        assertFalse(qr.getIsMeasuredSpeed());
+        assertTrue(qr.getSupportsChat());
         assertTrue(qr.getSupportsBrowseHost());
         assertTrue(!qr.isReplyToMulticastQuery());
 
@@ -363,12 +363,12 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.BaseTestCa
                           guid,
                           true, false, false, true, false, false);
 
-        assertEquals(qr.getVendor(), "LIME");
-        assertEquals(qr.getNeedsPush(), true);
-        assertEquals(qr.getIsBusy(), false);
-        assertEquals(qr.getHadSuccessfulUpload(), false);
-        assertEquals(qr.getIsMeasuredSpeed(), true);
-        assertEquals(qr.getSupportsChat(), false);
+        assertEquals("LIME", qr.getVendor());
+        assertTrue(qr.getNeedsPush());
+        assertFalse(qr.getIsBusy());
+        assertFalse(qr.getHadSuccessfulUpload());
+        assertTrue(qr.getIsMeasuredSpeed());
+        assertFalse(qr.getSupportsChat());
         assertTrue(qr.getSupportsBrowseHost());
         assertTrue(!qr.isReplyToMulticastQuery());
 
@@ -380,18 +380,18 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.BaseTestCa
         int ggepLen = _ggepUtil.getQRGGEP(true, false).length;
         //Length includes header, query hit header and footer, responses, and
         //QHD (public and private)
-        assertEquals(bytes.length,(23+11+16)+(8+10+2)+(8+14+2)+(4+1+QueryReply.COMMON_PAYLOAD_LEN+1+1)+ggepLen);
-        assertEquals(bytes[bytes.length-16-6-ggepLen],0x3d); //11101
-        assertEquals(bytes[bytes.length-16-5-ggepLen],0x31); //10001
+        assertEquals((23+11+16)+(8+10+2)+(8+14+2)+(4+1+QueryReply.COMMON_PAYLOAD_LEN+1+1)+ggepLen, bytes.length);
+        assertEquals(0x3d, bytes[bytes.length-16-6-ggepLen]); //11101
+        assertEquals(0x31, bytes[bytes.length-16-5-ggepLen]); //10001
 
         // check read back....
         qr=(QueryReply)Message.read(new ByteArrayInputStream(bytes));
-        assertEquals(qr.getVendor(), "LIME");
-        assertEquals(qr.getNeedsPush(), true);
-        assertEquals(qr.getIsBusy(), false);
-        assertEquals(qr.getHadSuccessfulUpload(), false);
-        assertEquals(qr.getIsMeasuredSpeed(), true);
-        assertEquals(qr.getSupportsChat(), false);
+        assertEquals("LIME", qr.getVendor());
+        assertTrue(qr.getNeedsPush());
+        assertFalse(qr.getIsBusy());
+        assertFalse(qr.getHadSuccessfulUpload());
+        assertTrue(qr.getIsMeasuredSpeed());
+        assertFalse(qr.getSupportsChat());
         assertTrue(qr.getSupportsBrowseHost());
         assertTrue(!qr.isReplyToMulticastQuery());
 
@@ -404,12 +404,12 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.BaseTestCa
                           guid,
                           true, false, false, true, false, true);
 
-        assertEquals(qr.getVendor(), "LIME");
-        assertEquals(qr.getNeedsPush(), true);
-        assertEquals(qr.getIsBusy(), false);
-        assertEquals(qr.getHadSuccessfulUpload(), false);
-        assertEquals(qr.getIsMeasuredSpeed(), true);
-        assertEquals(qr.getSupportsChat(), false);
+        assertEquals("LIME", qr.getVendor());
+        assertTrue(qr.getNeedsPush());
+        assertFalse(qr.getIsBusy());
+        assertFalse(qr.getHadSuccessfulUpload());
+        assertTrue(qr.getIsMeasuredSpeed());
+        assertFalse(qr.getSupportsChat());
         assertTrue(qr.getSupportsBrowseHost());
         assertTrue(qr.isReplyToMulticastQuery());
 
@@ -427,12 +427,12 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.BaseTestCa
 
         // check read back....
         qr=(QueryReply)Message.read(new ByteArrayInputStream(bytes));
-        assertEquals(qr.getVendor(), "LIME");
-        assertEquals(qr.getNeedsPush(), true);
-        assertEquals(qr.getIsBusy(), false);
-        assertEquals(qr.getHadSuccessfulUpload(), false);
-        assertEquals(qr.getIsMeasuredSpeed(), true);
-        assertEquals(qr.getSupportsChat(), false);
+        assertEquals("LIME", qr.getVendor());
+        assertTrue(qr.getNeedsPush());
+        assertFalse(qr.getIsBusy());
+        assertFalse(qr.getHadSuccessfulUpload());
+        assertTrue(qr.getIsMeasuredSpeed());
+        assertFalse(qr.getSupportsChat());
         assertTrue(qr.getSupportsBrowseHost());
         assertTrue(qr.isReplyToMulticastQuery());
 
@@ -514,19 +514,19 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.BaseTestCa
 
         // test just BH GGEP....
         testGGEP = new GGEP(_ggepUtil.getQRGGEP(true, false), 0, null);
-        assertTrue(testGGEP.getHeaders().size() == 1);
+        assertEquals(1, testGGEP.getHeaders().size());
         assertTrue(testGGEP.hasKey(GGEP.GGEP_HEADER_BROWSE_HOST));
         assertTrue(!testGGEP.hasKey(GGEP.GGEP_HEADER_MULTICAST_RESPONSE));
 
         // test just multicast GGEP....
         testGGEP = new GGEP(_ggepUtil.getQRGGEP(false, true), 0, null);
-        assertTrue(testGGEP.getHeaders().size() == 1);
+        assertEquals(1, testGGEP.getHeaders().size());
         assertTrue(!testGGEP.hasKey(GGEP.GGEP_HEADER_BROWSE_HOST));
         assertTrue(testGGEP.hasKey(GGEP.GGEP_HEADER_MULTICAST_RESPONSE));
 
         // test combo GGEP....
         testGGEP = new GGEP(_ggepUtil.getQRGGEP(true, true), 0, null);
-        assertTrue(testGGEP.getHeaders().size() == 2);
+        assertEquals(2, testGGEP.getHeaders().size());
         assertTrue(testGGEP.hasKey(GGEP.GGEP_HEADER_BROWSE_HOST));
         assertTrue(testGGEP.hasKey(GGEP.GGEP_HEADER_MULTICAST_RESPONSE));
 

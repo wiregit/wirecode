@@ -323,9 +323,8 @@ public final class QueryRequestTest extends BaseTestCase {
 							 "set 2: "+print(queryUrnTypes), 
 							 curUrnTypeSet,
 							 queryUrnTypes);
-                assertTrue("query keys should be equal\nqk = " + qk + 
-                           "\nqr = " + qr.getQueryKey(),
-                           qk.equals(qr.getQueryKey()));
+                assertEquals("query keys should be equal",
+                           qk, qr.getQueryKey());
 			}		   
 		} catch(IOException e) {
 			fail("unexpected exception: "+e);

@@ -58,13 +58,13 @@ public class HostCatcherFetchTest extends com.limegroup.gnutella.util.BaseTestCa
         responder.start();
 
         //Now make sure that exactly one fetch was issued.
-        assertTrue("getAnEndpoint didn't return anything.", hc.getAnEndpoint()!=null);
+        assertNotNull("getAnEndpoint didn't return anything.", hc.getAnEndpoint());
         assertEquals("first look at hostfiles", 1, gWebCache.hostfiles);
         
         // now add something to the hostCatcher and make sure
         // it uses that instead of hitting the gWebCache for more.
         hc.add( new Endpoint("1.1.1.2", 6346), false);
-        assertTrue("getAnEndpoint didn't return anything.", hc.getAnEndpoint()!=null);
+        assertNotNull("getAnEndpoint didn't return anything.", hc.getAnEndpoint());
         assertEquals("second look at hostfiles", 1, gWebCache.hostfiles);
         
         //and now that hostcatcher is empty, it should hit it again.
@@ -75,7 +75,7 @@ public class HostCatcherFetchTest extends com.limegroup.gnutella.util.BaseTestCa
             }
         };
         responder.start();
-        assertTrue("getAnEndpoint didn't return anything.", hc.getAnEndpoint()!=null);
+        assertNotNull("getAnEndpoint didn't return anything.", hc.getAnEndpoint());
         assertEquals("third look at hostfiles", 2, gWebCache.hostfiles);
     }
 
@@ -89,24 +89,24 @@ public class HostCatcherFetchTest extends com.limegroup.gnutella.util.BaseTestCa
         //The first few calls (all those before GWEBCACHE_DELAY)
         //will be forced to use the stale pongs...
         //because it is bad to always hammer gWebCache's on startup
-        assertTrue(hc.getAnEndpoint()!=null);
-        assertTrue(hc.getAnEndpoint()!=null);
+        assertNotNull(hc.getAnEndpoint());
+        assertNotNull(hc.getAnEndpoint());
         assertEquals(0, gWebCache.hostfiles);
 
         //But after a few seconds, we allow another fetch because there are
         //no good pongs.
         final int FUDGE_FACTOR=200;
         sleep(HostCatcher.GWEBCACHE_DELAY+FUDGE_FACTOR);
-        assertTrue(hc.getAnEndpoint()!=null);
+        assertNotNull(hc.getAnEndpoint());
         assertEquals(1, gWebCache.hostfiles);
-        assertTrue(hc.getAnEndpoint()!=null);
+        assertNotNull(hc.getAnEndpoint());
         assertEquals(1, gWebCache.hostfiles);
     
         //Same after another few seconds.
         sleep(HostCatcher.GWEBCACHE_DELAY+FUDGE_FACTOR);
-        assertTrue(hc.getAnEndpoint()!=null);
+        assertNotNull(hc.getAnEndpoint());
         assertEquals(2, gWebCache.hostfiles);
-        assertTrue(hc.getAnEndpoint()!=null);
+        assertNotNull(hc.getAnEndpoint());
         assertEquals(2, gWebCache.hostfiles);
     }
 

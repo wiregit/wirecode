@@ -27,16 +27,16 @@ public class EndpointTest extends com.limegroup.gnutella.util.BaseTestCase {
         }
 
         e=new Endpoint("abc");
-        assertTrue(e.getHostname().equals("abc"));
-        assertTrue(e.getPort()==6346);
+        assertEquals("unexpected hostname", "abc", e.getHostname());
+        assertEquals("unexpected port", 6346, e.getPort());
 
         e=new Endpoint("abc:");
-        assertTrue(e.getHostname().equals("abc"));
-        assertTrue(e.getPort()==6346);
+        assertEquals("unexpected hostname", "abc", e.getHostname());
+        assertEquals("unexpected port", 6346, e.getPort());
 
         e=new Endpoint("abc:7");
-        assertTrue(e.getHostname().equals("abc"));
-        assertTrue(e.getPort()==7);
+        assertEquals("unexpected hostname", "abc", e.getHostname());
+        assertEquals("unexpected port", 7, e.getPort());
 
         ////////////////////////// Private IP and Subnet Tests ////////////////
         //These tests are incomplete since the methods are somewhat trivial.

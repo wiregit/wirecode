@@ -311,7 +311,7 @@ public final class AlternateLocationTest extends com.limegroup.gnutella.util.Bas
 				AlternateLocation newLoc = 
 				    AlternateLocation.createAlternateLocation(equalLocs[j]);
 				int z = curLoc.compareTo(newLoc);
-				assertEquals("locations should be equal", z, 0);
+				assertEquals("locations should be equal", 0, z);
 			}
 		}
 
@@ -330,7 +330,7 @@ public final class AlternateLocationTest extends com.limegroup.gnutella.util.Bas
 			AlternateLocation curLoc1 = 
 		        AlternateLocation.createAlternateLocation(loc1);
 			int z = curLoc0.compareTo(curLoc1);
-			assertTrue("locations should compare to different values", z!=0);
+			assertNotEquals("locations should compare to different values", 0, z);
 		}
 	}
 
@@ -360,11 +360,8 @@ public final class AlternateLocationTest extends com.limegroup.gnutella.util.Bas
 				AlternateLocation curLoc1 = 
 		            AlternateLocation.createAlternateLocation(loc1);
 				int z = curLoc0.compareTo(curLoc1);
-				assertTrue("locations should compare to different values:\r\n"+
-						   curLoc0 + "\r\n" + curLoc1+"\r\n"+
-						   loc0+ "\r\n"+
-						   loc1+ "\r\n", 
-						   z!=0);
+				assertNotEquals("locations should compare to different values:\r\n"+
+						   curLoc0 + "\r\n" + curLoc1+"\r\n", 0, z);
 			}
 		}
 	}

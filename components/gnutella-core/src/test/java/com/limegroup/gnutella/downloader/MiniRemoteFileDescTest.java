@@ -25,11 +25,12 @@ public class MiniRemoteFileDescTest extends com.limegroup.gnutella.util.BaseTest
         assertTrue("hashcode broken",m2.hashCode()== m3.hashCode());
         assertTrue("hashcode broken",m1.hashCode()!= m3.hashCode());
         m3 = new MiniRemoteFileDesc("a.txt",12,guid1);
-        assertTrue("equals method broken",m1.equals(m3));
+        assertEquals("equals method broken",m1, m3);
+        assertEquals("equals method broken", m3, m1);
         HashMap map = new HashMap();
         Object o = new Object();
         map.put(m1,o);
         Object o1 = map.get(m3);
-        assertTrue("equals or hashcode broken",o1==o);
+        assertSame("equals or hashcode broken",o1,o);
     }
 }

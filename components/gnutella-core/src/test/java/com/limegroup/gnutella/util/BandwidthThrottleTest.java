@@ -61,8 +61,8 @@ public class BandwidthThrottleTest extends com.limegroup.gnutella.util.BaseTestC
             int bytesToSend=random.nextInt(15);     //more or less than N
             bytesSent+=throttle.request(bytesToSend);
         }
-        assertTrue("Wrong number of bytes: "+bytesSent,
-                   Math.abs(bytesSent-BYTES)<FUDGE_FACTOR*BYTES);
+        assertLessThan("Wrong number of bytes: "+bytesSent,
+                   FUDGE_FACTOR*BYTES, Math.abs(bytesSent-BYTES));
     }
 
     public void testThrottledOutputStreamByte() throws Exception {
@@ -76,8 +76,8 @@ public class BandwidthThrottleTest extends com.limegroup.gnutella.util.BaseTestC
             assertTrue("Bad byte", (byte)pin.read()==b);
             bytesSent++;
         }
-        assertTrue("Wrong number of bytes: "+bytesSent,
-                   Math.abs(bytesSent-BYTES)<FUDGE_FACTOR*BYTES);
+        assertLessThan("Wrong number of bytes: "+bytesSent,
+                   FUDGE_FACTOR*BYTES, Math.abs(bytesSent-BYTES));
     }
     
     public void testThrottledOutputStreamBytes() throws Exception  {
@@ -94,8 +94,8 @@ public class BandwidthThrottleTest extends com.limegroup.gnutella.util.BaseTestC
                 assertTrue("Bad byte", (byte)pin.read()==buf[i]);
             bytesSent+=n;
         }
-        assertTrue("Wrong number of bytes: "+bytesSent,
-                   Math.abs(bytesSent-BYTES)<FUDGE_FACTOR*BYTES);
+        assertLessThan("Wrong number of bytes: "+bytesSent,
+                   FUDGE_FACTOR*BYTES, Math.abs(bytesSent-BYTES));
     }
     
     public void testThrottledOutputStreamBytes2() throws Exception {
@@ -111,8 +111,8 @@ public class BandwidthThrottleTest extends com.limegroup.gnutella.util.BaseTestC
                 assertTrue("Bad byte", (byte)pin.read()==buf[i]);
             bytesSent+=buf.length;
         }
-        assertTrue("Wrong number of bytes: "+bytesSent,
-                   Math.abs(bytesSent-BYTES)<FUDGE_FACTOR*BYTES); 
+        assertLessThan("Wrong number of bytes: "+bytesSent,
+                   FUDGE_FACTOR*BYTES, Math.abs(bytesSent-BYTES)); 
     }
 
     //TODO: test fairness when sharing one throttle among multiple streams

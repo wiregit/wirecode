@@ -25,17 +25,17 @@ public class PushRequestTest extends com.limegroup.gnutella.util.BaseTestCase {
         PushRequest pr=new PushRequest(guid, (byte)0,
                                        clientGUID, index, ip, port);
         assertTrue(Arrays.equals(pr.getClientGUID(), clientGUID));
-        assertTrue(pr.getIndex()==index);
+        assertEquals(index, pr.getIndex());
         assertTrue(Arrays.equals(pr.getIP(), ip));
-        assertTrue(pr.getPort()==port);
+        assertEquals(port, pr.getPort());
 
         //Test some maximum values
         long u4=0x00000000FFFFFFFFl;
         int u2=0x0000FFFF;
         pr=new PushRequest(guid, (byte)0,
                            clientGUID, u4, ip, u2);
-        assertTrue(pr.getIndex()==u4);
-        assertTrue(pr.getPort()==u2);
+        assertEquals(u4, pr.getIndex());
+        assertEquals(u2, pr.getPort());
     }
 
     public void testBigPush() throws Exception {        

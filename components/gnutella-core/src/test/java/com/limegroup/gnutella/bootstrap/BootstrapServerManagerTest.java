@@ -82,10 +82,10 @@ public class BootstrapServerManagerTest extends com.limegroup.gnutella.util.Base
 
         //Check that backend sent right requests.  Only the second host should
         //have been contacted.
-        assertEquals(null, s3.getRequest());   //wasn't reachable
+        assertNull(s3.getRequest());   //wasn't reachable
         assertEquals("GET "+DIRECTORY+"?"+COMMON_PARAMS+"&hostfile=1 HTTP/1.1", 
                      s2.getRequest());
-        assertEquals(null, s1.getRequest());   //wasn't contacted
+        assertNull( s1.getRequest());   //wasn't contacted
         //...and got right results.
         for (int i=0; i<RESPONSES_PER_SERVER; i++) 
             assertEquals(new Endpoint("1.2.3."+i+":6346"),
@@ -227,8 +227,8 @@ public class BootstrapServerManagerTest extends com.limegroup.gnutella.util.Base
         assertEquals("GET "+DIRECTORY+"?"+COMMON_PARAMS
                            +"&ip=18.239.0.144:6347 HTTP/1.1", 
                      s3.getRequest());
-        assertEquals(null, s2.getRequest());
-        assertEquals(null, s1.getRequest());
+        assertNull(s2.getRequest());
+        assertNull(s1.getRequest());
     }
 
     public void testSendUpdatesAsyncURL() {
@@ -244,7 +244,7 @@ public class BootstrapServerManagerTest extends com.limegroup.gnutella.util.Base
                      +"http%3A%2F%2F127.0.0.1%3A6702%2Fpath%2Fto%2Fscript.php"
                      +" HTTP/1.1", 
                      s2.getRequest());
-        assertEquals(null, s1.getRequest());
+        assertNull(s1.getRequest());
     }
 
     public void testSendUpdatesAsyncNoOK() {
@@ -262,7 +262,7 @@ public class BootstrapServerManagerTest extends com.limegroup.gnutella.util.Base
                      +"http%3A%2F%2F127.0.0.1%3A6702%2Fpath%2Fto%2Fscript.php"
                      +" HTTP/1.1", 
                      s2.getRequest());
-        assertEquals(null, s1.getRequest());
+        assertNull(s1.getRequest());
     }
 
     public void testGiveUp() {    
@@ -323,7 +323,7 @@ public class BootstrapServerManagerTest extends com.limegroup.gnutella.util.Base
                  iter.next()) { 
             count++; 
         }        
-        assertTrue(count>100);
+        assertGreaterThan(100, count);
 
         //Make sure this actually got some endpoints.  Note: this requires a
         //network connection, as it actually uses GWebCache.
@@ -336,10 +336,10 @@ public class BootstrapServerManagerTest extends com.limegroup.gnutella.util.Base
         s3.setResponseData("You have been redirected.");
         bman.fetchEndpointsAsync();
         sleep();
-        assertTrue(s3.getRequest()!=null);  //original location
-        assertTrue(s1.getRequest()!=null);  //was redirected here
-        assertTrue(s2.getRequest()==null);  //didn't go here
-        assertTrue(catcher.list.size()==RESPONSES_PER_SERVER);
+        assertNotNull(s3.getRequest());  //original location
+        assertNotNull(s1.getRequest());  //was redirected here
+        assertNull(s2.getRequest());  //didn't go here
+        assertEquals(RESPONSES_PER_SERVER, catcher.list.size());
     }
 
     private void sleep() {

@@ -23,28 +23,28 @@ public class MessageTest extends com.limegroup.gnutella.util.BaseTestCase {
         buf[4]=(byte)168;
         buf[5]=(byte)0;
         buf[6]=(byte)1;       
-        assertTrue(Message.ip2string(buf, 3).equals("192.168.0.1"));
+        assertEquals("192.168.0.1", Message.ip2string(buf, 3));
         
         buf=new byte[4];
         buf[0]=(byte)0;
         buf[1]=(byte)1;
         buf[2]=(byte)2;
         buf[3]=(byte)3;
-        assertTrue(Message.ip2string(buf).equals("0.1.2.3"));
+        assertEquals("0.1.2.3", Message.ip2string(buf));
 
         buf=new byte[4];
         buf[0]=(byte)252;
         buf[1]=(byte)253;
         buf[2]=(byte)254;
         buf[3]=(byte)255;
-        assertTrue(Message.ip2string(buf).equals("252.253.254.255"));
+        assertEquals("252.253.254.255",Message.ip2string(buf));
 
         Message m1=new PingRequest((byte)3);
         Message m2=new PingRequest((byte)3);
         m2.setPriority(5);
-        assertTrue(m1.compareTo(m2)>0);
-        assertTrue(m2.compareTo(m1)<0);
-        assertTrue(m2.compareTo(m2)==0);
+        assertGreaterThan(0, m1.compareTo(m2));
+        assertLessThan(0, m2.compareTo(m1));
+        assertEquals(0, m2.compareTo(m2));
         //Test for null payload with Ping
         
         byte[] bytes = new byte[23];

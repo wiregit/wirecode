@@ -475,7 +475,7 @@ public class UploadTest extends com.limegroup.gnutella.util.BaseTestCase {
         //Download from the (incoming) TCP connection.
         String retStr=downloadInternal(file, header, out, in);
 		assertNotNull("string returned from download should not be null", retStr);
-		assertTrue("should not have received the empty string", !retStr.equals(""));
+		assertNotEquals("should not have received the empty string", "", retStr);
 		
         //Cleanup
         c.close();

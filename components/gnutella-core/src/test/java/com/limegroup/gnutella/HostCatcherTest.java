@@ -65,10 +65,10 @@ public class HostCatcherTest extends com.limegroup.gnutella.util.BaseTestCase {
     public void testEndpointPriorities() {
         Endpoint e1=new ExtendedEndpoint("18.239.0.146", 6346);
         Endpoint e2=new ExtendedEndpoint("18.239.0.147", 6347);
-        assertTrue(! e1.equals(e2));
-        assertTrue(! e2.equals(e1));
-        assertTrue(e1.compareTo(e2)==0);
-        assertTrue(e2.compareTo(e1)==0);
+        assertNotEquals("e1 vs e2", e1, e2);
+        assertNotEquals("e2 vs e1", e2, e1);
+        assertEquals("compareTo on e1", 0, e1.compareTo(e2));
+        assertEquals("compareTo on e2", 0, e2.compareTo(e1));
         
         FixedsizePriorityQueue queue=new FixedsizePriorityQueue(
             ExtendedEndpoint.priorityComparator(),
@@ -158,36 +158,45 @@ public class HostCatcherTest extends com.limegroup.gnutella.util.BaseTestCase {
         iter=hc.getUltrapeerHosts(10);
         assertTrue(! iter.hasNext());
 
-        assertTrue(hc.getNumUltrapeerHosts()==0);
+        assertEquals("unexpected number of ultrapeer hosts", 
+            0, hc.getNumUltrapeerHosts());
         hc.add(new Endpoint("18.239.0.1", 6346), true);
-        assertTrue(hc.getNumUltrapeerHosts()==1);
+        assertEquals("unexpected number of ultrapeer hosts",
+            1, hc.getNumUltrapeerHosts());
         hc.add(new Endpoint("18.239.0.2", 6346), true);
         hc.add(new Endpoint("128.103.60.1", 6346), false);
         hc.add(new Endpoint("128.103.60.2", 6346), false);
-        assertTrue(hc.getNumUltrapeerHosts()==2);
+        assertEquals("unexpected number of ultrapeer hosts",
+            2, hc.getNumUltrapeerHosts());
 
         iter=hc.getUltrapeerHosts(100);
         assertTrue(iter.hasNext());
-        assertTrue(iter.next().equals(new Endpoint("18.239.0.2", 6346)));
+        assertEquals("unexpected host",
+            new Endpoint("18.239.0.2", 6346), iter.next());
         assertTrue(iter.hasNext());
-        assertTrue(iter.next().equals(new Endpoint("18.239.0.1", 6346)));
+        assertEquals("unexpected host",
+            new Endpoint("18.239.0.1", 6346), iter.next());
         assertTrue(! iter.hasNext());
 
         iter=hc.getUltrapeerHosts(1);
         assertTrue(iter.hasNext());
-        assertTrue(iter.next().equals(new Endpoint("18.239.0.2", 6346)));
+        assertEquals("unexpected host",
+            new Endpoint("18.239.0.2", 6346), iter.next());
         assertTrue(! iter.hasNext());
 
         iter=hc.getNormalHosts(100);
         assertTrue(iter.hasNext());
-        assertTrue(iter.next().equals(new Endpoint("128.103.60.2", 6346)));
+        assertEquals("unexpected host",
+            new Endpoint("128.103.60.2", 6346), iter.next());
         assertTrue(iter.hasNext());
-        assertTrue(iter.next().equals(new Endpoint("128.103.60.1", 6346)));
+        assertEquals("unexpected host",
+            new Endpoint("128.103.60.1", 6346), iter.next());
         assertTrue(! iter.hasNext());
 
         iter=hc.getNormalHosts(1);
         assertTrue(iter.hasNext());
-        assertTrue(iter.next().equals(new Endpoint("128.103.60.2", 6346)));
+        assertEquals("unexpected host",
+            new Endpoint("128.103.60.2", 6346), iter.next());
         assertTrue(! iter.hasNext());
     }
 
@@ -269,7 +278,7 @@ public class HostCatcherTest extends com.limegroup.gnutella.util.BaseTestCase {
         assertEquals(new Endpoint("18.239.0.142", 0),
                      hc.getAnEndpoint());
         for (int i=N; i>1; i--) {
-            assertTrue("No more hosts after "+i, hc.getNumHosts()>0);
+            assertGreaterThan("No more hosts after "+i, 0, hc.getNumHosts());
             assertEquals(new Endpoint("18.239.0.142", i),
                          hc.getAnEndpoint());
         }
@@ -335,12 +344,13 @@ public class HostCatcherTest extends com.limegroup.gnutella.util.BaseTestCase {
         //2. Read and verify
         setUp();
         hc.read(tmp);
-        assertTrue(hc.getAnEndpoint().equals( 
-            new Endpoint("18.239.0.142", 6342)));
-        assertTrue(hc.getAnEndpoint().equals( 
-            new Endpoint("18.239.0.141", 6346)));
-        assertTrue(hc.getNumHosts()==0);
-        assertTrue(hc.getNumUltrapeerHosts()==0);
+        assertEquals("unexpected host",
+            new Endpoint("18.239.0.142", 6342), hc.getAnEndpoint());
+        assertEquals("unexpected host",
+            new Endpoint("18.239.0.141", 6346), hc.getAnEndpoint());
+        assertEquals("unexpected number of hosts", 0, hc.getNumHosts());
+        assertEquals("unexpected number of ultrapeers",
+            0, hc.getNumUltrapeerHosts());
 
         //Clean up
         tmp.delete();

@@ -18,52 +18,52 @@ public class StringUtilsTest extends com.limegroup.gnutella.util.BaseTestCase {
     public void testCase() {
         //Case methods.  Test all boundary conditions.
         //See ASCII table for further justification.
-        assertTrue(StringUtils.toOtherCase('\0')=='\0');
-        assertTrue(StringUtils.toOtherCase('0')=='0');
-        assertTrue(StringUtils.toOtherCase('@')=='@');
-        assertTrue(StringUtils.toOtherCase('A')=='a');
-        assertTrue(StringUtils.toOtherCase('H')=='h');
-        assertTrue(StringUtils.toOtherCase('Z')=='z');
-        assertTrue(StringUtils.toOtherCase('[')=='[');
-        assertTrue(StringUtils.toOtherCase('`')=='`');
-        assertTrue(StringUtils.toOtherCase('a')=='A');
-        assertTrue(StringUtils.toOtherCase('h')=='H');
-        assertTrue(StringUtils.toOtherCase('z')=='Z');
-        assertTrue(StringUtils.toOtherCase('{')=='{');        
+        assertEquals('\0', StringUtils.toOtherCase('\0'));
+        assertEquals('0',StringUtils.toOtherCase('0'));
+        assertEquals('@',StringUtils.toOtherCase('@'));
+        assertEquals('a',StringUtils.toOtherCase('A'));
+        assertEquals('h',StringUtils.toOtherCase('H'));
+        assertEquals('z',StringUtils.toOtherCase('Z'));
+        assertEquals('[',StringUtils.toOtherCase('['));
+        assertEquals('`',StringUtils.toOtherCase('`'));
+        assertEquals('A',StringUtils.toOtherCase('a'));
+        assertEquals('H',StringUtils.toOtherCase('h'));
+        assertEquals('Z',StringUtils.toOtherCase('z'));
+        assertEquals('{',StringUtils.toOtherCase('{'));
     }
 
     public void testContains1() {
         //Wildcards
-        assertTrue(StringUtils.contains("", "") == true);
-        assertTrue(StringUtils.contains("abc", "") == true);
-        assertTrue(StringUtils.contains("abc", "b") == true);
-        assertTrue(StringUtils.contains("abc", "d") == false);
-        assertTrue(StringUtils.contains("abcd", "a*d") == true);
-        assertTrue(StringUtils.contains("abcd", "*a**d*") == true);
-        assertTrue(StringUtils.contains("abcd", "d*a") == false);
-        assertTrue(StringUtils.contains("abcd", "*.*") == false);
-        assertTrue(StringUtils.contains("abc.d", "*.*") == true);
-        assertTrue(StringUtils.contains("abc.", "*.*") == true);
+        assertTrue(StringUtils.contains("", "") );
+        assertTrue(StringUtils.contains("abc", "") );
+        assertTrue(StringUtils.contains("abc", "b") );
+        assertFalse(StringUtils.contains("abc", "d") );
+        assertTrue(StringUtils.contains("abcd", "a*d"));
+        assertTrue(StringUtils.contains("abcd", "*a**d*") );
+        assertFalse(StringUtils.contains("abcd", "d*a") );
+        assertFalse(StringUtils.contains("abcd", "*.*") );
+        assertTrue(StringUtils.contains("abc.d", "*.*") );
+        assertTrue(StringUtils.contains("abc.", "*.*") );
     }
 
     public void testContains2() {
         //Spaces and wildcards
-        assertTrue(StringUtils.contains("abcd", "x") == false);
-        assertTrue(StringUtils.contains("abcd", "a b") == true);
-        assertTrue(StringUtils.contains("abcd", "a x") == false);
-        assertTrue(StringUtils.contains("abcd", "a c") == true);
-        assertTrue(StringUtils.contains("abcd", "a+c") == true);
-        assertTrue(StringUtils.contains("abcd", "d a") == true);
-        assertTrue(StringUtils.contains("abcd", "a d+c") == true);
-        assertTrue(StringUtils.contains("abcd", "a dc") == false);
-        assertTrue(StringUtils.contains("abcd", "a b*c") == true);
-        assertTrue(StringUtils.contains("abcd", "a c*b") == false);
-        assertTrue(StringUtils.contains("abcd", " ab+") == true);
-        assertTrue(StringUtils.contains("abcd", "+x+") == false);
-        assertTrue(StringUtils.contains("abcde", "ab bcd") == true);
-        assertTrue(StringUtils.contains("abcde", "ab bd") == false);
+        assertFalse(StringUtils.contains("abcd", "x") );
+        assertTrue(StringUtils.contains("abcd", "a b"));
+        assertFalse(StringUtils.contains("abcd", "a x") );
+        assertTrue(StringUtils.contains("abcd", "a c") );
+        assertTrue(StringUtils.contains("abcd", "a+c") );
+        assertTrue(StringUtils.contains("abcd", "d a"));
+        assertTrue(StringUtils.contains("abcd", "a d+c") );
+        assertFalse(StringUtils.contains("abcd", "a dc") );
+        assertTrue(StringUtils.contains("abcd", "a b*c") );
+        assertFalse(StringUtils.contains("abcd", "a c*b") );
+        assertTrue(StringUtils.contains("abcd", " ab+") );
+        assertFalse(StringUtils.contains("abcd", "+x+") );
+        assertTrue(StringUtils.contains("abcde", "ab bcd") );
+        assertFalse(StringUtils.contains("abcde", "ab bd") );
         assertTrue(StringUtils.contains("abcdefghj",
-                                         "+*+*ab*d+def*g c ") == true);  
+                                         "+*+*ab*d+def*g c ") );  
     }
 
     public void testContainsCase() {

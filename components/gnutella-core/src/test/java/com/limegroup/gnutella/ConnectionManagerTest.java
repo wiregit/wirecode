@@ -90,7 +90,7 @@ public class ConnectionManagerTest extends com.limegroup.gnutella.util.BaseTestC
         RouterService.connect();
         sleep(10000);
         assertEquals("unexpected successful connect", 0, CATCHER.connectSuccess);
-        assertTrue("should have received failures", CATCHER.connectFailures > 0);
+        assertGreaterThan("should have received failures", 0, CATCHER.connectFailures);
     }
 
     /**
@@ -102,7 +102,7 @@ public class ConnectionManagerTest extends com.limegroup.gnutella.util.BaseTestC
         RouterService.connect();
         sleep();
         assertEquals("unexpected successful connect", 0, CATCHER.connectSuccess);
-        assertTrue("should have received failures", CATCHER.connectFailures > 0);
+        assertGreaterThan("should have received failures", 0, CATCHER.connectFailures);
         //assertEquals("should have received failure", 1, CATCHER.connectFailures);
     }
 

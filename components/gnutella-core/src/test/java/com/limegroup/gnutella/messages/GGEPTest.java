@@ -30,8 +30,8 @@ public class GGEPTest extends com.limegroup.gnutella.util.BaseTestCase {
             assertTrue(two.hasKey("Susheel"));
             byte[] shouldBeNulls = two.getBytes("Susheel");
             assertTrue(Arrays.equals(nulls, shouldBeNulls));
-            assertTrue(someNulls.equals(two.getString("Daswani")));
-            assertTrue(10 == two.getInt("Number"));
+            assertEquals(someNulls, two.getString("Daswani"));
+            assertEquals(10, two.getInt("Number"));
         }
         catch (IllegalArgumentException illegal) {
             fail("The .put method failed!! ", illegal);
@@ -45,10 +45,10 @@ public class GGEPTest extends com.limegroup.gnutella.util.BaseTestCase {
             temp.put("C", (String)null);
             temp.put(GGEP.GGEP_HEADER_BROWSE_HOST, "");
             assertTrue(temp.hasKey("A"));
-            assertTrue(temp.getString("A").equals("B"));
+            assertEquals("B", temp.getString("A"));
             assertTrue(temp.hasKey("C"));
             assertTrue(temp.hasKey(GGEP.GGEP_HEADER_BROWSE_HOST));
-            assertTrue(temp.getString(GGEP.GGEP_HEADER_BROWSE_HOST).equals(""));
+            assertEquals("", temp.getString(GGEP.GGEP_HEADER_BROWSE_HOST));
         } catch (BadGGEPPropertyException failed) {
             fail("Couldn't get property", failed);
         }
@@ -71,7 +71,7 @@ public class GGEPTest extends com.limegroup.gnutella.util.BaseTestCase {
             GGEP temp = new GGEP(true);
             temp.put("A", 527);
             assertTrue(temp.hasKey("A"));
-            assertTrue(temp.getInt("A")==527);
+            assertEquals(527, temp.getInt("A"));
             assertTrue(Arrays.equals(temp.getBytes("A"),
                                      new byte[] { (byte)0x0F, (byte)0x02 }));
         } catch (BadGGEPPropertyException failed) {

@@ -55,8 +55,8 @@ public class BootstrapServerTest extends com.limegroup.gnutella.util.BaseTestCas
         try {
             BootstrapServer e1=new BootstrapServer("http://server.com/dir/script.php");
             BootstrapServer e2=new BootstrapServer("http://server.com/dir/script.php");
-            assertTrue(e1.equals(e2));
-            assertTrue(e2.equals(e1));
+            assertEquals(e1, e2);
+            assertEquals(e2, e1);
         } catch (ParseException pass) { }
     }
 }

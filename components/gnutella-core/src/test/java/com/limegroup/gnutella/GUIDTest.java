@@ -39,22 +39,23 @@ public class GUIDTest extends com.limegroup.gnutella.util.BaseTestCase {
         }
         g1=new GUID(b1);
         g2=new GUID(b1);
-        assertTrue(g1.equals(g2));
-        assertTrue(g2.equals(g1));
-        assertTrue(g1.hashCode()==g2.hashCode());
+        assertEquals("guids should be equal", g1, g2);
+        assertEquals("guids should be equal", g2, g1);
+        assertEquals("guid hashcodes should be equal",
+            g1.hashCode(), g2.hashCode());
     
         Hashtable t=new Hashtable();
         String out=null;
         t.put(g1,"test");
         assertTrue("Contains 1", t.containsKey(g1));
         out=(String)t.get(g1);
-        assertTrue("Null test 1", out!=null);
-        assertTrue("Get test 1", out.equals("test"));
+        assertNotNull("1: shouldn't be null", out);
+        assertEquals("1: unexpected out value", "test", out);
 
         assertTrue("Contains 2", t.containsKey(g2));
         out=(String)t.get(g2);
-        assertTrue("Null test 2", out!=null);
-        assertTrue("Get test 2", out.equals("test"));
+        assertNotNull("2: shouldn't be null", out);
+        assertEquals("2: unexpected out value", "test", out);
     }
 
     public void testHexStrings()  {
@@ -66,7 +67,7 @@ public class GUIDTest extends com.limegroup.gnutella.util.BaseTestCase {
         bytes[15]=(byte)1;
 
         String s=(new GUID(bytes)).toHexString();
-        assertTrue(s.equals(hexString));
+        assertEquals("unexpected hex string", hexString, s);
         byte[] bytes2=GUID.fromHexString(s);
         assertTrue(Arrays.equals(bytes2,bytes));
 
@@ -87,8 +88,8 @@ public class GUIDTest extends com.limegroup.gnutella.util.BaseTestCase {
         //Try new GUID generator.
         for (int i=0; i<50; i++) {
             bytes=GUID.makeGuid();     g1=new GUID(bytes);
-            assertTrue(bytes[8]==(byte)0xFF);
-            assertTrue(bytes[15]==(byte)0x00);
+            assertEquals("unexpected 8th byte", (byte)0xFF, bytes[8]);
+            assertEquals("unexpected 15th byte", (byte)0x00, bytes[15]);
             assertTrue(g1.isNewGUID());
             assertTrue(g1.isLimeGUID());
             assertTrue(! g1.isWindowsGUID());
@@ -128,9 +129,12 @@ public class GUIDTest extends com.limegroup.gnutella.util.BaseTestCase {
         short s1=ByteOrder.leb2short(bytes, 4);
         short s2=ByteOrder.leb2short(bytes, 6);
         short tag=GUID.tag(s1, s2);
-        assertTrue(Integer.toHexString(s1), s1==(short)0x0102);
-        assertTrue(Integer.toHexString(s2), s2==(short)0x0500);
-        assertTrue(Integer.toHexString(tag), tag==(short)0x0517);
+        assertEquals("unexpected s1: " + Integer.toHexString(s1),
+            (short)0x0102, s1);
+        assertEquals("unexpected s2: " +Integer.toHexString(s2),
+            (short)0x0500, s2);
+        assertEquals("unexpected tag: " + Integer.toHexString(tag),
+            (short)0x0517, tag);
         assertTrue(g1.isLimeGUID());
         //System.out.println(g1);
     }
@@ -149,9 +153,12 @@ public class GUIDTest extends com.limegroup.gnutella.util.BaseTestCase {
         s1=ByteOrder.leb2short(bytes, 0);
         s2=ByteOrder.leb2short(bytes, 9);
         tag=GUID.tag(s1,s2);
-        assertTrue(Integer.toHexString(s1), s1==(short)0x0102);
-        assertTrue(Integer.toHexString(s2), s2==(short)0x0517);
-        assertTrue(Integer.toHexString(tag), tag==(short)0x052E);
+        assertEquals("unexpected s1: " + Integer.toHexString(s1),
+            (short)0x0102, s1);
+        assertEquals("unexpected s2: " + Integer.toHexString(s2),
+            (short)0x0517, s2);
+        assertEquals("unexpected tag: " + Integer.toHexString(tag),
+            (short)0x052E, tag);
         g1 = new GUID(bytes);
         assertTrue(g1.isLimeRequeryGUID());
         assertTrue(g1.isLimeRequeryGUID(0));
@@ -173,9 +180,12 @@ public class GUIDTest extends com.limegroup.gnutella.util.BaseTestCase {
         s1=ByteOrder.leb2short(bytes, 0);
         s2=ByteOrder.leb2short(bytes, 2);
         tag=GUID.tag(s1,s2);
-        assertTrue(Integer.toHexString(s1), s1==(short)0x0102);
-        assertTrue(Integer.toHexString(s2), s2==(short)0x0517);
-        assertTrue(Integer.toHexString(tag), tag==(short)0x052E);
+        assertEquals("unexpected s1: " + Integer.toHexString(s1),
+            (short)0x0102, s1);
+        assertEquals("unexpected s2: " + Integer.toHexString(s2),
+            (short)0x0517, s2);
+        assertEquals("unexpected tag: " + Integer.toHexString(tag),
+            (short)0x052E, tag);
         g1 = new GUID(bytes);
         assertTrue(g1.isLimeRequeryGUID());
         assertTrue(g1.isLimeRequeryGUID(1));
@@ -197,9 +207,12 @@ public class GUIDTest extends com.limegroup.gnutella.util.BaseTestCase {
         s1=ByteOrder.leb2short(bytes, 0);
         s2=ByteOrder.leb2short(bytes, 11);
         tag=GUID.tag(s1,s2);
-        assertTrue(Integer.toHexString(s1), s1==(short)0x0102);
-        assertTrue(Integer.toHexString(s2), s2==(short)0x0517);
-        assertTrue(Integer.toHexString(tag), tag==(short)0x052E);
+        assertEquals("unexpected s1: " + Integer.toHexString(s1),
+            (short)0x0102, s1);
+        assertEquals("unexpected s2: " + Integer.toHexString(s2),
+            (short)0x0517, s2);
+        assertEquals("unexpected tag: " + Integer.toHexString(tag),
+            (short)0x052E, tag);
         g1 = new GUID(bytes);
         assertTrue(g1.isLimeRequeryGUID());
         assertTrue(! g1.isLimeRequeryGUID(0));
@@ -226,20 +239,26 @@ public class GUIDTest extends com.limegroup.gnutella.util.BaseTestCase {
         System.arraycopy(b1,0,b2,0,16);
         g1=new GUID(b1);
         g2=new GUID(b2);
-        assertTrue(g1.compareTo(g2)==0);
-        assertTrue(g2.compareTo(g1)==0);
-        assertTrue(g1.hashCode()==g2.hashCode());
+        assertEquals("g1 should compare to same as g2", 0, g1.compareTo(g2));
+        assertEquals("g2 should compare to same as g1", 0, g2.compareTo(g1));
+        assertEquals("hashcodes should be same", g1.hashCode(), g2.hashCode());
         //System.out.println("Hash: "+Integer.toHexString(g1.hashCode()));
 
         b2[7]+=1;
         g2=new GUID(b2);
-        assertTrue(g1.compareTo(g2)<0);  //TODO: this occasionally fails. Why?
-        assertTrue((new GUID.GUIDComparator()).compare(g1, g2) < 0);
-        assertTrue((new GUID.GUIDComparator()).compare(g2, g1) > 0);
-        assertTrue((new GUID.GUIDByteComparator()).compare(b1, b2) < 0);
-        assertTrue((new GUID.GUIDByteComparator()).compare(b2, b1) > 0);
-        assertTrue(g2.compareTo(g1)>0);
-        assertTrue(g1.hashCode()!=g2.hashCode());  //not strictly REQUIRED
+        assertLessThan("g1 vs g2",
+            0, g1.compareTo(g2));  //TODO: this occasionally fails. Why?
+        assertLessThan("g1 vs g2",
+            0, (new GUID.GUIDComparator()).compare(g1, g2));
+        assertGreaterThan("g2 vs g1", 
+            0, (new GUID.GUIDComparator()).compare(g2, g1));
+        assertLessThan("b1 vs b2", 
+            0, (new GUID.GUIDByteComparator()).compare(b1, b2));
+        assertGreaterThan("b2 vs b1",
+            0, (new GUID.GUIDByteComparator()).compare(b2, b1));
+        assertGreaterThan("g2 vs g1", 0, g2.compareTo(g1));
+        assertNotEquals("hash codes shouldn't be same",
+            g1.hashCode(), g2.hashCode());  //not strictly REQUIRED
         //System.out.println("Hash: "+Integer.toHexString(g2.hashCode()));
     }
 }

@@ -31,13 +31,13 @@ public class COBSUtilTest extends com.limegroup.gnutella.util.BaseTestCase {
         for (int i = 0; i < bytes.length; i++)
             bytes[i] = 0;
         byte[] after = COBSUtil.cobsEncode(bytes);
-        assertTrue(bytes.length == (after.length-1));
+        assertEquals(bytes.length , (after.length-1));
         for (int i = 0; i < after.length; i++)
-            assertTrue(after[i] == 0x01);
+            assertEquals(0x01, after[i]);
         byte[] decoded = COBSUtil.cobsDecode(after);
         for (int i = 0; i < bytes.length; i++)
-            assertTrue(bytes[i] == decoded[i]);
-        assertTrue(decoded[bytes.length] == 0);
+            assertEquals(bytes[i], decoded[i]);
+        assertEquals(0,decoded[bytes.length]);
 
 
         // test all 1s....
@@ -56,9 +56,9 @@ public class COBSUtilTest extends com.limegroup.gnutella.util.BaseTestCase {
                    );
         decoded = COBSUtil.cobsDecode(after);
         for (int i = 0; i < bytes.length; i++)
-            assertTrue("num = " + num + ", i = " + i, 
-                       bytes[i] == decoded[i]);
-        assertTrue(decoded[bytes.length] == 0);
+            assertEquals("num = " + num + ", i = " + i, 
+                       bytes[i], decoded[i]);
+        assertEquals(0,decoded[bytes.length]);
         
         // ----------------------------------
         // build up 'induction' case for 0(1..).  we can trust 'induction' due
@@ -74,22 +74,22 @@ public class COBSUtilTest extends com.limegroup.gnutella.util.BaseTestCase {
                 else
                     bytes[i] = 1;
             after = COBSUtil.cobsEncode(bytes);
-            assertTrue(bytes.length == (after.length-1));
+            assertEquals(bytes.length,(after.length-1));
             for (int i = 0; i < after.length; i++) {
                 debug("COBSUtilTest.encode(): i = " + i);
                 if (i == 0)
-                    assertTrue(after[0] == 1);
+                    assertEquals(1,after[0]);
                 else if ((i == 1) ||
                          ((((i-1) % j) == 0) && (num > i))
                          )
-                    assertTrue(ByteOrder.ubyte2int(after[i]) > 1);
+                    assertGreaterThan(1, ByteOrder.ubyte2int(after[i]));
                 else
-                    assertTrue(after[i] == 1);
+                    assertEquals(1, after[i]);
             }
             decoded = COBSUtil.cobsDecode(after);
             for (int i = 0; i < bytes.length; i++)
-                assertTrue(bytes[i] == decoded[i]);
-            assertTrue(decoded[bytes.length] == 0);            
+                assertEquals(bytes[i], decoded[i]);
+            assertEquals(0,decoded[bytes.length]);
         }
         // ----------------------------------
 
@@ -105,18 +105,18 @@ public class COBSUtilTest extends com.limegroup.gnutella.util.BaseTestCase {
                 else
                     bytes[i] = 0;
             after = COBSUtil.cobsEncode(bytes);
-            assertTrue(bytes.length == (after.length - 1));
+            assertEquals(bytes.length ,(after.length - 1));
             for (int i = 0; i < bytes.length; i++)
                 if ((i == 0) ||
                     (i % j == 0)
                     )
-                    assertTrue(ByteOrder.ubyte2int(after[i]) > 1);
+                    assertGreaterThan(1, ByteOrder.ubyte2int(after[i]));
                 else
-                    assertTrue(after[i] == 1);
+                    assertEquals(1, after[i]);
             decoded = COBSUtil.cobsDecode(after);
             for (int i = 0; i < bytes.length; i++)
-                assertTrue(bytes[i] == decoded[i]);
-            assertTrue(decoded[bytes.length] == 0);
+                assertEquals(bytes[i] , decoded[i]);
+            assertEquals(decoded[bytes.length] , 0);
         }
         // ----------------------------------
     }
@@ -134,7 +134,7 @@ public class COBSUtilTest extends com.limegroup.gnutella.util.BaseTestCase {
         // so no need for much testing...
         byte[] bytes = (new String("Sush Is Cool!")).getBytes();
         byte[] after = COBSUtil.cobsDecode(COBSUtil.cobsEncode(bytes));
-        assertTrue(bytes.length == (after.length - 1));
+        assertEquals(bytes.length , (after.length - 1));
         byte[] afterTrimmed = (new String(after)).trim().getBytes();
         assertTrue(Arrays.equals(bytes, afterTrimmed));
     }

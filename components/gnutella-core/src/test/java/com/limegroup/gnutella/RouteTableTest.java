@@ -39,127 +39,127 @@ public final class RouteTableTest extends BaseTestCase {
         rt.routeReply(g1, c1);
         rt.routeReply(g2, c2);                    //old, new:
         rt.routeReply(g3, c3);                    //{}, {g1, g2, g3}
-        assertTrue(rt.getReplyHandler(g1)==c1);
-        assertTrue(rt.getReplyHandler(g2)==c2);
-        assertTrue(rt.getReplyHandler(g3, 0, (short) 0).getReplyHandler()==c3);
-        assertTrue(rt.getReplyHandler(g4, 0, (short) 0)==null);
+        assertSame(c1, rt.getReplyHandler(g1));
+        assertSame(c2, rt.getReplyHandler(g2));
+        assertSame(c3, rt.getReplyHandler(g3, 0, (short) 0).getReplyHandler());
+        assertNull(rt.getReplyHandler(g4, 0, (short) 0));
         try { Thread.sleep(MSECS); } catch (InterruptedException e) { }
-        assertTrue(rt.tryToRouteReply(g4, c4)!=null);  //{g1, g2, g3}, {g4}
-        assertTrue(rt.getReplyHandler(g1)==c1);
+        assertNotNull(rt.tryToRouteReply(g4, c4));  //{g1, g2, g3}, {g4}
+        assertSame(c1, rt.getReplyHandler(g1));
         rt.routeReply(g1, c1);                    //{g2, g3}, {g1, g4}
-        assertTrue(rt.getReplyHandler(g1)==c1);
-        assertTrue(rt.getReplyHandler(g2, 0, (short) 0).getReplyHandler()==c2);
-        assertTrue(rt.getReplyHandler(g3)==c3);
-        assertTrue(rt.getReplyHandler(g4)==c4);
+        assertSame(c1, rt.getReplyHandler(g1));
+        assertSame(c2, rt.getReplyHandler(g2, 0, (short) 0).getReplyHandler());
+        assertSame(c3, rt.getReplyHandler(g3));
+        assertSame(c4, rt.getReplyHandler(g4));
         try { Thread.sleep(MSECS); } catch (InterruptedException e) { }
         rt.routeReply(g2, c3);                     //{g1, g4}, {g2}
         debug(rt.toString());
-        assertTrue(rt.getReplyHandler(g1)==c1);
-        assertTrue(rt.getReplyHandler(g2)==c3);
-        assertTrue(rt.getReplyHandler(g3)==null);
-        assertTrue(rt.getReplyHandler(g4)==c4);
+        assertSame(c1, rt.getReplyHandler(g1));
+        assertSame(c3, rt.getReplyHandler(g2));
+        assertNull(rt.getReplyHandler(g3));
+        assertSame(c4, rt.getReplyHandler(g4));
         try { Thread.sleep(MSECS); } catch (InterruptedException e) { }
-        assertTrue(rt.tryToRouteReply(g2, c2)==null);  //{g2}, {}}
-        assertTrue(rt.getReplyHandler(g1)==null);
-        assertTrue(rt.getReplyHandler(g2)==c3);
-        assertTrue(rt.getReplyHandler(g3)==null);
-        assertTrue(rt.getReplyHandler(g4)==null);
+        assertNull(rt.tryToRouteReply(g2, c2));  //{g2}, {}}
+        assertNull(rt.getReplyHandler(g1));
+        assertSame(c3, rt.getReplyHandler(g2));
+        assertNull(rt.getReplyHandler(g3));
+        assertNull(rt.getReplyHandler(g4));
         rt.routeReply(g2, c2);                      //{}, {g2}
-        assertTrue(rt.getReplyHandler(g1)==null);
-        assertTrue(rt.getReplyHandler(g2)==c2);
-        assertTrue(rt.getReplyHandler(g3)==null);
-        assertTrue(rt.getReplyHandler(g4)==null);
+        assertNull(rt.getReplyHandler(g1));
+        assertSame(c2, rt.getReplyHandler(g2));
+        assertNull(rt.getReplyHandler(g3));
+        assertNull(rt.getReplyHandler(g4));
 
         //1.5 Test space replacment (hard upper bounds)
         rt=new RouteTable(Integer.MAX_VALUE, 1);
         rt.routeReply(g1, c1);
         rt.routeReply(g2, c2);                      //{g1}, {g2}
-        assertTrue(rt.getReplyHandler(g1)==c1);
-        assertTrue(rt.getReplyHandler(g2)==c2);
+        assertSame(c1, rt.getReplyHandler(g1));
+        assertSame(c2, rt.getReplyHandler(g2));
         rt.routeReply(g3, c3);                      //{g3}, {g2}
-        assertTrue(rt.getReplyHandler(g1)==null);
-        assertTrue(rt.getReplyHandler(g2)==c2);
-        assertTrue(rt.getReplyHandler(g3)==c3);
+        assertNull(rt.getReplyHandler(g1));
+        assertSame(c2, rt.getReplyHandler(g2));
+        assertSame(c3, rt.getReplyHandler(g3));
         rt.routeReply(g4, c4);
-        assertTrue(rt.getReplyHandler(g1)==null);
-        assertTrue(rt.getReplyHandler(g2)==null);
-        assertTrue(rt.getReplyHandler(g3)==c3);
-        assertTrue(rt.getReplyHandler(g4)==c4);
+        assertNull(rt.getReplyHandler(g1));
+        assertNull(rt.getReplyHandler(g2));
+        assertSame(c3, rt.getReplyHandler(g3));
+        assertSame(c4, rt.getReplyHandler(g4));
 
         //2. Test routing/re-routing abilities...with glass box tests.
         rt=new RouteTable(1000, Integer.MAX_VALUE);
         //test wrap-around
         PrivilegedAccessor.setValue(rt, "_nextID", 
                                     new Integer(Integer.MAX_VALUE));  
-        assertTrue(rt.tryToRouteReply(g1, c1)!=null);         //g1->c1
-        assertTrue(rt.tryToRouteReply(g1, c2)==null);
-        assertTrue(rt.getReplyHandler(g1)==c1);
+        assertNotNull(rt.tryToRouteReply(g1, c1));         //g1->c1
+        assertNull(rt.tryToRouteReply(g1, c2));
+        assertSame(c1, rt.getReplyHandler(g1));
 
-        assertTrue(rt.tryToRouteReply(g2, c2)!=null);         //g2->c2
-        assertTrue(rt.getReplyHandler(g2)==c2);
+        assertNotNull(rt.tryToRouteReply(g2, c2));         //g2->c2
+        assertSame(c2, rt.getReplyHandler(g2));
         rt.routeReply(g2, c3);                           //g2->c3
-        assertTrue(rt.getReplyHandler(g1)==c1);
-        assertTrue(rt.getReplyHandler(g2)==c3);
+        assertSame(c1, rt.getReplyHandler(g1));
+        assertSame(c3, rt.getReplyHandler(g2));
 
         rt.removeReplyHandler(c1);                       //g1->null
         rt.removeReplyHandler(c3);                       //g2->null
-        assertTrue(rt.getReplyHandler(g1, 0, (short) 0)==null);
-        assertTrue(rt.getReplyHandler(g2)==null);
-        assertTrue(rt.tryToRouteReply(g1, c1)==null);   
-        assertTrue(rt.tryToRouteReply(g2, c3)==null);
-        assertTrue(rt.getReplyHandler(g1)==null);
-        assertTrue(rt.getReplyHandler(g2)==null);
-        assertTrue((getMap(rt, "_handlerMap")).size()==1);           //g2 only
-        assertTrue((getMap(rt, "_idMap")).size()==1);
+        assertNull(rt.getReplyHandler(g1, 0, (short) 0));
+        assertNull(rt.getReplyHandler(g2));
+        assertNull(rt.tryToRouteReply(g1, c1));   
+        assertNull(rt.tryToRouteReply(g2, c3));
+        assertNull(rt.getReplyHandler(g1));
+        assertNull(rt.getReplyHandler(g2));
+        assertEquals(1, (getMap(rt, "_handlerMap")).size());           //g2 only
+        assertEquals(1, (getMap(rt, "_idMap")).size());
 
         //Test that _idMap/_handlerMap don't grow without bound.
         rt=new RouteTable(1000, Integer.MAX_VALUE);
-        assertTrue(rt.tryToRouteReply(g1, c1)!=null);
-        assertTrue(rt.tryToRouteReply(g2, c1)!=null);
-        assertTrue(rt.tryToRouteReply(g3, c1)!=null);
-        assertTrue(rt.tryToRouteReply(g4, c1)!=null);
-        assertTrue(rt.tryToRouteReply(g4, c1)==null);
-        assertTrue(rt.getReplyHandler(g1)==c1);
-        assertTrue(rt.getReplyHandler(g2)==c1);
-        assertTrue(rt.getReplyHandler(g3)==c1);
-        assertTrue(rt.getReplyHandler(g4)==c1);
-        assertTrue((getMap(rt, "_handlerMap")).size()==1);
-        assertTrue((getMap(rt, "_idMap")).size()==1);
+        assertNotNull(rt.tryToRouteReply(g1, c1));
+        assertNotNull(rt.tryToRouteReply(g2, c1));
+        assertNotNull(rt.tryToRouteReply(g3, c1));
+        assertNotNull(rt.tryToRouteReply(g4, c1));
+        assertNull(rt.tryToRouteReply(g4, c1));
+        assertSame(c1, rt.getReplyHandler(g1));
+        assertSame(c1, rt.getReplyHandler(g2));
+        assertSame(c1, rt.getReplyHandler(g3));
+        assertSame(c1, rt.getReplyHandler(g4));
+        assertEquals(1, (getMap(rt, "_handlerMap")).size());
+        assertEquals(1, (getMap(rt, "_idMap")).size());
 
 
         //3. Test reply counting logic.
         RouteTable.ReplyRoutePair rrp=null;
         rt=new RouteTable(MSECS/1000, Integer.MAX_VALUE);
-        assertTrue(rt.tryToRouteReply(g1, c1)!=null);  //g1 -> <c1, 0>
+        assertNotNull(rt.tryToRouteReply(g1, c1));  //g1 -> <c1, 0>
         rrp=rt.getReplyHandler(g1, 5, (short) 0);            //g1 -> <c1, 0+5>
-        assertTrue(rrp.getReplyHandler()==c1);
-        assertTrue(rrp.getBytesRouted()==0);
+        assertSame(c1, rrp.getReplyHandler());
+        assertEquals(0, rrp.getBytesRouted());
         rrp=rt.getReplyHandler(g1, 1, (short) 0);            //g1 -> <c1, 5+1>
-        assertTrue(rrp.getReplyHandler()==c1);
-        assertTrue(rrp.getBytesRouted()==5);
+        assertSame(c1, rrp.getReplyHandler());
+        assertEquals(5, rrp.getBytesRouted());
         rt.routeReply(g1, c2);                    //g1 -> <c2, 6>
         rrp=rt.getReplyHandler(g1, 2, (short) 0);            //g1 -> <c2, 6+2>
-        assertTrue(rrp.getReplyHandler()==c2);
-        assertTrue("Reply bytes: "+rrp.getBytesRouted(), 
-                   rrp.getBytesRouted()==6);
+        assertSame(c2, rrp.getReplyHandler());
+        assertEquals("Reply bytes", 6, 
+                   rrp.getBytesRouted());
                    
-        assertTrue((getMap(rt, "_newMap")).size()==1);
-        assertTrue((getMap(rt, "_oldMap")).size()==0);
+        assertEquals(1, (getMap(rt, "_newMap")).size());
+        assertEquals(0, (getMap(rt, "_oldMap")).size());
         try { Thread.sleep(MSECS); } catch (InterruptedException e) { }
         PrivilegedAccessor.invokeMethod(rt, "purge", null);
-        assertTrue((getMap(rt, "_newMap")).size()==0);
-        assertTrue((getMap(rt, "_oldMap")).size()==1);
+        assertEquals(0, (getMap(rt, "_newMap")).size());
+        assertEquals(1, (getMap(rt, "_oldMap")).size());
         rrp=rt.getReplyHandler(g1, 3, (short) 0);            //g1 -> <c2, 8+3>
-        assertTrue(rrp.getReplyHandler()==c2);
-        assertTrue(rrp.getBytesRouted()==8);
+        assertSame(c2, rrp.getReplyHandler());
+        assertEquals(8, rrp.getBytesRouted());
         rt.routeReply(g1, c3);                    //g1 -> <c3, 11>
-        assertTrue((getMap(rt, "_newMap")).size()==1);
-        assertTrue((getMap(rt, "_oldMap")).size()==0);
+        assertEquals(1, (getMap(rt, "_newMap")).size());
+        assertEquals(0, (getMap(rt, "_oldMap")).size());
         rrp=rt.getReplyHandler(g1, 10, (short) 0);            //g1 -> <c3, 11+10>
-        assertTrue(rrp.getReplyHandler()==c3);
-        assertTrue(rrp.getBytesRouted()==11);
+        assertSame(c3, rrp.getReplyHandler());
+        assertEquals(11, rrp.getBytesRouted());
         rt.removeReplyHandler(c3);
-        assertTrue(rt.getReplyHandler(g1,0, (short) 0)==null);                    
+        assertNull(rt.getReplyHandler(g1,0, (short) 0));                    
     }
 
     

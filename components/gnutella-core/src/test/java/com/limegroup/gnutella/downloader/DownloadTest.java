@@ -263,8 +263,8 @@ public class DownloadTest extends com.limegroup.gnutella.util.BaseTestCase {
         
         //Note: The amount downloaded from each uploader will not 
         //be equal, because the uploaders are stated at different times.
-        assertTrue("u1 did all the work", u1<TestFile.length()/2+FUDGE_FACTOR);
-        assertTrue("u2 did all the work", u2<TestFile.length()/2+FUDGE_FACTOR);
+        assertLessThan("u1 did all the work", TestFile.length()/2+FUDGE_FACTOR, u1);
+        assertLessThan("u2 did all the work", TestFile.length()/2+FUDGE_FACTOR, u2);
     }
 
 
@@ -293,8 +293,8 @@ public class DownloadTest extends com.limegroup.gnutella.util.BaseTestCase {
         debug("\tu2: "+u2+"\n");
         debug("\tTotal: "+(u1+u2)+"\n");
 
-        assertTrue("u1 did all the work", u1<9*TestFile.length()/10+FUDGE_FACTOR*10);
-        assertTrue("u2 did all the work", u2<TestFile.length()/10+FUDGE_FACTOR);
+        assertLessThan("u1 did all the work", 9*TestFile.length()/10+FUDGE_FACTOR*10, u1);
+        assertLessThan("u2 did all the work", TestFile.length()/10+FUDGE_FACTOR, u2);
     }
 
 
@@ -323,7 +323,7 @@ public class DownloadTest extends com.limegroup.gnutella.util.BaseTestCase {
 
         //Note: The amount downloaded from each uploader will not 
         //be equal, because the uploaders are stated at different times.
-        assertTrue("u1 did all the work", u1<TestFile.length()-STOP_AFTER+FUDGE_FACTOR);
+        assertLessThan("u1 did all the work", TestFile.length()-STOP_AFTER+FUDGE_FACTOR, u1);
         assertEquals("u2 did all the work", STOP_AFTER, u2);
     }
 
@@ -354,9 +354,9 @@ public class DownloadTest extends com.limegroup.gnutella.util.BaseTestCase {
 
         //Note: The amount downloaded from each uploader will not 
         //be equal, because the uploaders are stated at different times.
-        assertTrue("u1 did all the work",
-                    u1<TestFile.length()-STOP_AFTER+2*FUDGE_FACTOR);
-        assertTrue("u2 did all the work", u2==STOP_AFTER);
+        assertLessThan("u1 did all the work",
+                    TestFile.length()-STOP_AFTER+2*FUDGE_FACTOR, u1);
+        assertEquals("u2 did all the work", STOP_AFTER, u2);
     }
 
 
@@ -394,8 +394,8 @@ public class DownloadTest extends com.limegroup.gnutella.util.BaseTestCase {
         debug("\tu2: "+u2+"\n");
         debug("\tTotal: "+(u1+u2)+"\n");
 
-        assertTrue("u1 did all the work", u1<(TestFile.length()/2+FUDGE_FACTOR));
-        assertTrue("u2 did all the work", u2<(TestFile.length()/2+FUDGE_FACTOR));
+        assertLessThan("u1 did all the work", (TestFile.length()/2+FUDGE_FACTOR), u1);
+        assertLessThan("u2 did all the work", (TestFile.length()/2+FUDGE_FACTOR), u2);
     }
 
     public void testStallingUploaderReplaced() throws Exception  {
@@ -543,12 +543,12 @@ public class DownloadTest extends com.limegroup.gnutella.util.BaseTestCase {
 
         URN sha1 = rfd1.getSHA1Urn();
         URN uSHA1 = uploader1.getReportedSHA1();
-        boolean sha1Matches = 
-        (sha1 != null && uSHA1 != null && sha1.equals(uSHA1));
         
         assertTrue("uploader didn't recieve alt", alt1.hasAlternateLocations());
         assertTrue("uploader got wrong alt", !adiff.hasAlternateLocations());
-        assertTrue("SHA1 test failed", sha1Matches);
+        assertNotNull("rfd1 sha1", sha1);
+        assertNotNull("uploader1 sha1", uSHA1);
+        assertEquals("SHA1 test failed", sha1, uSHA1);
     }
 
     public void testTwoAlternateLocations() throws Exception {  
@@ -629,8 +629,8 @@ public class DownloadTest extends com.limegroup.gnutella.util.BaseTestCase {
 
         //Note: The amount downloaded from each uploader will not 
         //be equal, because the uploaders are stated at different times.
-        assertTrue("u1 did all the work", u1<TestFile.length()/2+FUDGE_FACTOR);
-        assertTrue("u2 did all the work", u2<TestFile.length()/2+FUDGE_FACTOR);
+        assertLessThan("u1 did all the work", TestFile.length()/2+FUDGE_FACTOR, u1);
+        assertLessThan("u2 did all the work", TestFile.length()/2+FUDGE_FACTOR, u2);
     }
 
     public void testWeirdAlternateLocations() throws Exception {  
@@ -732,8 +732,8 @@ public class DownloadTest extends com.limegroup.gnutella.util.BaseTestCase {
         //be equal, because the uploaders are started at different times.
 
         assertEquals("u1 did too much work", STOP_AFTER, u1);
-        assertTrue("u2 did no work", u2>0);
-        assertTrue("u3 did no work", u3>0);
+        assertGreaterThan("u2 did no work", 0, u2);
+        assertGreaterThan("u3 did no work", 0, u3);
         assertEquals("u4 was used", 0, u4);
         SettingsManager.instance().setConnectionSpeed(capacity);
     }
@@ -860,7 +860,7 @@ public class DownloadTest extends com.limegroup.gnutella.util.BaseTestCase {
         //Note: The amount downloaded from each uploader will not 
         //be equal, because the uploaders are stated at different times.
         assertEquals("u1 did too much work", 0, u1);
-        assertTrue("u2 did all the work", u2<TestFile.length()+FUDGE_FACTOR);
+        assertLessThan("u2 did all the work", TestFile.length()+FUDGE_FACTOR, u2);
     }
 
     /*

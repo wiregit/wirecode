@@ -54,27 +54,27 @@ public class IPTest extends com.limegroup.gnutella.util.BaseTestCase {
         assertTrue(! a.contains(c));
         assertTrue(! c.contains(a));
 
-        assertTrue(! a.equals(c));
-        assertTrue(! a.equals(b));
-        assertTrue(! b.equals(a));
-        assertTrue(! b.equals(c));
-        assertTrue(a.equals(a));
-        assertTrue(b.equals(b));
-        assertTrue(! a.equals("asdf"));
+        assertNotEquals(a,c);
+        assertNotEquals(a,b);
+        assertNotEquals(b,a);
+        assertNotEquals(b,c);
+        assertEquals(a, a);
+        assertEquals(b,b);
+        assertNotEquals("asdf", a);
         IP d=new IP("1.1.1.0/255.255.255.0");
         IP e=new IP("1.1.1.0/24");
         IP f=new IP("1.1.1/24");
-        assertTrue(a.equals(d));
-        assertTrue(d.equals(a));
-        assertTrue(a.hashCode()==d.hashCode());
-        assertTrue(a.equals(e));
-        assertTrue(e.equals(a));
-        assertTrue(a.hashCode()==e.hashCode());
-        assertTrue(a.equals(f));
-        assertTrue(f.equals(a));
-        assertTrue(a.hashCode()==f.hashCode());
-        assertTrue(d.equals(e));
-        assertTrue(f.equals(e));
+        assertEquals(a,d);
+        assertEquals(d,a);
+        assertEquals(a.hashCode(),d.hashCode());
+        assertEquals(a,e);
+        assertEquals(e,a);
+        assertEquals(a.hashCode(),e.hashCode());
+        assertEquals(a,f);
+        assertEquals(f,a);
+        assertEquals(a.hashCode(),f.hashCode());
+        assertEquals(d,e);
+        assertEquals(f,e);
     }
 
 

@@ -74,10 +74,10 @@ public final class UrnHttpRequestTest extends com.limegroup.gnutella.util.BaseTe
 			// sleep to let the file manager initialize
 			Thread.sleep(4000);
 		} catch(InterruptedException e) {
-			assertTrue("thread should not have been interrupted: "+e, false);
+			fail("thread should not have been interrupted", e);
 		}
-		assertTrue("FileManager should have loaded files", 
-				   4 < RouterService.getFileManager().getNumFiles());
+		assertGreaterThan("FileManager should have loaded files", 
+				   4, RouterService.getFileManager().getNumFiles());
 
 	}
 

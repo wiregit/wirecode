@@ -29,10 +29,11 @@ public class LeafRoutingTest extends com.limegroup.gnutella.util.BaseTestCase {
     private static final byte[] oldIP=
         new byte[] {(byte)111, (byte)22, (byte)33, (byte)44};
 
-    private Connection ultrapeer1;
-    private Connection ultrapeer2;
-    private Connection old1;
-    private Connection old2;
+    private static Connection ultrapeer1;
+    private static Connection ultrapeer2;
+    private static Connection old1;
+    private static Connection old2;
+    private static RouterService rs;
 
     public LeafRoutingTest(String name) {
         super(name);
@@ -45,9 +46,8 @@ public class LeafRoutingTest extends com.limegroup.gnutella.util.BaseTestCase {
     public static void main(String[] args) {
         junit.textui.TestRunner.run(suite());
     }
-
-
-    public void testLegacy() throws Exception {
+    
+    private static void doSettings() {
         //Setup LimeWire backend.  For testing other vendors, you can skip all
         //this and manually configure a client in leaf mode to listen on port
         //6669, with no slots and no connections.  But you need to re-enable
@@ -61,29 +61,32 @@ public class LeafRoutingTest extends com.limegroup.gnutella.util.BaseTestCase {
 		UltrapeerSettings.FORCE_ULTRAPEER_MODE.setValue(false);
 		ConnectionSettings.KEEP_ALIVE.setValue(0);
 		ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
+    }        
+    
+    public static void globalSetUp() throws Exception {
+        doSettings();
 
+        SettingsManager settings=SettingsManager.instance();
         ActivityCallback callback=new ActivityCallbackStub();
-        //FileManager files=new FileManagerStub();
-        //MessageRouter router=new MessageRouterStub();
-        RouterService rs=new RouterService(callback);
+        rs=new RouterService(callback);
         assertEquals("unexpected port", PORT, settings.getPort());
         rs.start();
         rs.clearHostCatcher();
         assertEquals("unexpected port", PORT, settings.getPort());
-
-        //Run tests
         connect(rs);
-        doRedirect();
-        doLeafBroadcast(rs);
-        doBroadcastFromUltrapeer();
-        doConnectionToOldDisallowed();
-        //doNoBroadcastFromOld();
+    }        
+    
+    public void setUp() throws Exception  {
+        doSettings();
+    }
+    
+    public static void globalTearDown() throws Exception {
         shutdown();
-     }
+    }
 
      ////////////////////////// Initialization ////////////////////////
 
-     private void connect(RouterService rs) 
+     private static void connect(RouterService rs) 
      throws IOException, BadPacketException {
          debug("-Establish connections");
          //Ugh, there is a race condition here from the old days when this was
@@ -97,7 +100,7 @@ public class LeafRoutingTest extends com.limegroup.gnutella.util.BaseTestCase {
          old2 = connect(rs, 6353, true);
      }
      
-     private Connection connect(RouterService rs, int port, boolean ultrapeer) 
+     private static Connection connect(RouterService rs, int port, boolean ultrapeer) 
      throws IOException, BadPacketException {
          ServerSocket ss=new ServerSocket(port);
          rs.connectToHostAsynchronously("127.0.0.1", port);
@@ -162,7 +165,7 @@ public class LeafRoutingTest extends com.limegroup.gnutella.util.BaseTestCase {
 
      ///////////////////////// Actual Tests ////////////////////////////
 
-    private void doLeafBroadcast(RouterService rs) 
+    public void testLeafBroadcast() 
             throws IOException, BadPacketException {
         debug("-Leaf Broadcast test");        
         byte[] guid=rs.newQueryGUID();
@@ -206,7 +209,7 @@ public class LeafRoutingTest extends com.limegroup.gnutella.util.BaseTestCase {
      * Tests that the X-Try and X-Try-Ultrapeer headers are correctly
      * being transferred in connection headers.
      */
-    private void doRedirect() {
+    public void testRedirect() {
         debug("-Test X-Try/X-Try-Ultrapeer headers");
         Connection c=new Connection("127.0.0.1", PORT,
                                     new Properties(),
@@ -255,8 +258,8 @@ public class LeafRoutingTest extends com.limegroup.gnutella.util.BaseTestCase {
     }
 
 
-    private void doBroadcastFromUltrapeer() throws IOException {
 		/*
+    private void doBroadcastFromUltrapeer() throws IOException {
         debug("-Test query from ultrapeer not broadcasted");
         drain(ultrapeer2);
         drain(old1);
@@ -268,9 +271,9 @@ public class LeafRoutingTest extends com.limegroup.gnutella.util.BaseTestCase {
         ultrapeer1.flush();
 
         assertTrue("drain should have returned false", !drain(ultrapeer2));
-		*/
         //We don't care whether this is forwarded to the old connections
     }
+		*/
 
     /*
     private static void doNoBroadcastFromOld() 
@@ -297,7 +300,7 @@ public class LeafRoutingTest extends com.limegroup.gnutella.util.BaseTestCase {
     /**
      * Tests to make sure that connections to old hosts are not allowed
      */
-    private void doConnectionToOldDisallowed() {
+    public void testConnectionToOldDisallowed() {
         Connection c=new Connection("127.0.0.1", PORT,
                                     new Properties(),
                                     new OldResponder()
@@ -348,7 +351,7 @@ public class LeafRoutingTest extends com.limegroup.gnutella.util.BaseTestCase {
         }
     }
 
-    private void shutdown() throws IOException {
+    private static void shutdown() throws IOException {
         //System.out.println("\nShutting down.");
         debug("-Shutting down");
         try {
@@ -367,7 +370,7 @@ public class LeafRoutingTest extends com.limegroup.gnutella.util.BaseTestCase {
             System.out.println(message);
     }
 
-    class UltrapeerResponder implements HandshakeResponder {
+    private static class UltrapeerResponder implements HandshakeResponder {
         public HandshakeResponse respond(HandshakeResponse response, 
                 boolean outgoing) throws IOException {
             Properties props=new Properties();
@@ -380,7 +383,7 @@ public class LeafRoutingTest extends com.limegroup.gnutella.util.BaseTestCase {
     }
 
 
-    class OldResponder implements HandshakeResponder {
+    private static class OldResponder implements HandshakeResponder {
         public HandshakeResponse respond(HandshakeResponse response, 
                 boolean outgoing) throws IOException {
             Properties props=new Properties();

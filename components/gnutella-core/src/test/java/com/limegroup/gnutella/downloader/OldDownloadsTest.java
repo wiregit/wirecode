@@ -47,12 +47,12 @@ public class OldDownloadsTest extends com.limegroup.gnutella.util.BaseTestCase {
         assertTrue("unable to read snapshot!",
             dm.readSnapshot(CommonUtils.getResourceFile(filePath + file)));
         assertEquals("unexpected amount of downloaders added to gui",
-             callback.downloaders.size(), 1);
+             1, callback.downloaders.size());
         ManagedDownloader md=(ManagedDownloader)callback.downloaders.get(0);
         assertEquals("unexpected filename",
-             md.getFileName(), "Test1.mp3");
+             "Test1.mp3", md.getFileName());
         assertEquals("unexpected content length!",
-             md.getContentLength(), 1922612);
+             1922612, md.getContentLength());
     }
     
     /**

@@ -103,10 +103,8 @@ public class FileManagerTest extends com.limegroup.gnutella.util.BaseTestCase {
         assertEquals("unexpected number of files", 2, fman.getNumFiles());
         assertEquals("unexpected fman size", 4, fman.getSize());
         responses=fman.query(QueryRequest.createQuery("unit", (byte)3));
-        assertTrue("responses gave same index " +
-             "[0:" + responses[0].getIndex() + "], " +
-             "[1:" + responses[1].getIndex() + "]",
-             responses[0].getIndex()!=responses[1].getIndex());
+        assertNotEquals("responses gave same index",
+            responses[0].getIndex(), responses[1].getIndex() );
         for (int i=0; i<responses.length; i++) {
             assertTrue("responses should be expected indexes", 
                 responses[i].getIndex()==0 || responses[i].getIndex()==1);
@@ -151,8 +149,10 @@ public class FileManagerTest extends com.limegroup.gnutella.util.BaseTestCase {
         assertEquals("unexpedted number of files", 2, fman.getNumFiles());
         responses=fman.query(QueryRequest.createQuery("unit", (byte)3));
         assertEquals("unexpected response length", 2, responses.length);
-        assertTrue("response[0] index should not be 1", responses[0].getIndex()!=1);
-        assertTrue("response[1] index should not be 1", responses[1].getIndex()!=1);
+        assertNotEquals("unexpected response[0] index",
+            1, responses[0].getIndex());
+        assertNotEquals("unexpected response[1] index",
+            1, responses[1].getIndex());
         fman.get(0);
         fman.get(2);
         try {
