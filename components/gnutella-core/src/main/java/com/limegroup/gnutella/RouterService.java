@@ -404,7 +404,7 @@ public class RouterService
      * known host added to the catcher.
      */
     public void setAlwaysNotifyKnownHost(boolean notify) {
-        catcher.setAlwaysNotifyKnownHost(true);
+        catcher.setAlwaysNotifyKnownHost(notify);
     }
 
     /** 
