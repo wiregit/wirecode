@@ -588,10 +588,18 @@ public class LimeXMLDocument implements Serializable {
 	public int hashCode() {
 		if(hashCode == 0) {
 			int result = 17;
-			result = 37*result + fieldToValue.hashCode();
-			result = 37*result + schemaUri.hashCode();
-			result = 37*result + identifier.hashCode();
-			result = 37*result + action.hashCode();
+			if(fieldToValue != null) {
+				result = 37*result + fieldToValue.hashCode();
+			}
+			if(schemaUri != null) {
+				result = 37*result + schemaUri.hashCode();
+			}
+			if(identifier != null) {
+				result = 37*result + identifier.hashCode();
+			}
+			if(action != null) {
+				result = 37*result + action.hashCode();
+			}
 			hashCode = result;
 		} 
 		return hashCode;
