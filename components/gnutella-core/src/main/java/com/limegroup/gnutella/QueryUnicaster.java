@@ -69,9 +69,11 @@ public final class QueryUnicaster {
 	 */
 	private int _testUDPPingsSent = 0;
 
+    static {
+        _instance = new QueryUnicaster();
+    }
+
     public static QueryUnicaster instance() {
-        if (_instance == null)
-            _instance = new QueryUnicaster();
         return _instance;
     }
 
@@ -254,6 +256,7 @@ public final class QueryUnicaster {
     /** Just feed me ExtendedEndpoints - I'll check if I could use them or not.
      */
     public void addUnicastEndpoint(InetAddress address, int port) {
+        if (!SettingsManager.instance().getGuessEnabled()) return;
         if (notMe(address, port)) {
             synchronized (_queryHosts) {
                 debug("QueryUnicaster.addUnicastEndpoint(): obtained lock.");
