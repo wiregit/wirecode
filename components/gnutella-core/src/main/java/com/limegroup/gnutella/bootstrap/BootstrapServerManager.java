@@ -13,6 +13,11 @@ import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpMethod;
 import org.apache.commons.httpclient.methods.GetMethod;
 
+
+import org.apache.commons.logging.LogFactory;
+import org.apache.commons.logging.Log;
+
+
 /**
  * A list of GWebCache servers.  Provides methods to fetch address addresses
  * from these servers, find the addresses of more such servers, and update the
@@ -22,6 +27,9 @@ import org.apache.commons.httpclient.methods.GetMethod;
  * http://zero-g.net/gwebcache/specs.html
  */
 public class BootstrapServerManager {
+    
+    private static final Log LOG =
+        LogFactory.getLog(BootstrapServerManager.class);
 
     /** The minimum number of endpoints/urls to fetch at a time. */
     private static final int ENDPOINTS_TO_ADD=10;
@@ -335,13 +343,19 @@ public class BootstrapServerManager {
         get.addRequestHeader("User-Agent", CommonUtils.getHttpServer());
         get.addRequestHeader(HTTPHeaderName.CONNECTION.httpStringValue(),
                              "close");
-        get.setFollowRedirects(false);
+        get.setFollowRedirects(true);
         HttpClient client = HttpClientManager.getNewClient();
         try {
-            client.executeMethod(get);
+            HttpClientManager.executeMethodRedirecting(client, get);
             in = new BufferedReader(
                     new InputStreamReader(
                         get.getResponseBodyAsStream()));
+                        
+            if(get.getStatusCode() < 200 || get.getStatusCode() >= 300) {
+                if(LOG.isWarnEnabled())
+                    LOG.warn("Invalid status code: " + get.getStatusCode());
+                throw new IOException("no 200 ok.");
+            }
 
             //For each line of data (excludes HTTP headers)...
             boolean firstLine = true;
@@ -350,6 +364,9 @@ public class BootstrapServerManager {
                 String line = in.readLine();
                 if (line == null)
                     break;
+                    
+                if(LOG.isTraceEnabled())
+                    LOG.trace("<< " + line);
 
                 if (firstLine && StringUtils.startsWithIgnoreCase(line,"ERROR")){
                     request.handleError(server);
@@ -366,6 +383,7 @@ public class BootstrapServerManager {
             if (!errors)
                 _lastConnectable = server;
         } catch (IOException ioe) {
+            LOG.warn("Exception while handling server", ioe);
             request.handleError(server);
         } finally {
             //Close the connection.
