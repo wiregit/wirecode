@@ -42,6 +42,16 @@ public class PingReply extends Message implements Serializable, IpPort {
      * Constant for the port number of this pong.
      */
     private final int PORT;
+    
+    /**
+     * The address this pong claims to be my external address
+     */
+    private final InetAddress _myIP;
+    
+    /**
+     * The port this pong claims to be my external port
+     */
+    private final int _myPort;
 
     /**
      * Constant for the number of shared files reported in the pong.
@@ -506,7 +516,8 @@ public class PingReply extends Message implements Serializable, IpPort {
             ReceivedErrorStat.PING_REPLY_INVALID_ADDRESS.incrementStat();
             throw new BadPacketException("invalid address: " + ipString);
         }
-        InetAddress ip;
+        InetAddress ip,myIp;
+        int myPort;
         try {
             ip = InetAddress.getByName(NetworkUtils.ip2string(payload, 2));
         } catch (UnknownHostException e) {
@@ -540,6 +551,31 @@ public class PingReply extends Message implements Serializable, IpPort {
                     throw new BadPacketException("GGEP error : creating from"
                                                  + " network : client locale");
                 }
+            }
+            
+            if (ggep.hasKey(GGEP.GGEP_HEADER_IPPORT)) {
+                byte []data=null;
+                try{
+                    data = 
+                        ggep.getBytes(GGEP.GGEP_HEADER_IPPORT);
+                }catch(BadGGEPPropertyException bad) {
+                    throw new BadPacketException(bad.getMessage());
+                }
+                
+                if (data==null || data.length!=6) 
+                    throw new BadPacketException("Pong had IPPORT header but bad data");
+                
+                byte [] myip = new byte[4];
+                System.arraycopy(data,0,ip,0,4);
+                
+                try{
+                    myIp = InetAddress.getByAddress(myip);
+                }catch(UnknownHostException bad) {
+                    throw new BadPacketException(bad.getMessage());
+                }
+                
+                myPort = ByteOrder.leb2short(data,4);
+                
             }
         }
 
@@ -579,7 +615,9 @@ public class PingReply extends Message implements Serializable, IpPort {
         String locale /** def. val from settings? */
             = ApplicationSettings.DEFAULT_LOCALE.getValue(); 
         int slots = -1; //-1 didn't get it.
-
+        InetAddress myIP=null;
+        int myPort=0;
+        
         // TODO: the exceptions thrown here are messy
         if(ggep != null) {
             if(ggep.hasKey(GGEP.GGEP_HEADER_DAILY_AVERAGE_UPTIME)) {
@@ -658,8 +696,36 @@ public class PingReply extends Message implements Serializable, IpPort {
                     //ignore. we won't assign it.
                 }
             }
+            
+            if (ggep.hasKey(GGEP.GGEP_HEADER_IPPORT)) {
+                byte []data=null;
+                try{
+                    data = 
+                        ggep.getBytes(GGEP.GGEP_HEADER_IPPORT);
+                }catch(BadGGEPPropertyException bad) {
+                    Assert.that(false,"creating a PingReply with invalid GGEP field");
+                    //this should have been checked earlier
+                }
+                
+                
+                byte [] myip = new byte[4];
+                System.arraycopy(data,0,ip,0,4);
+                
+                
+                try{
+                    myIP = InetAddress.getByAddress(myip);
+                    myPort = ByteOrder.leb2short(data,4);
+                }catch(UnknownHostException bad) {
+                    //keep the ip address null and the port 0
+                }
+                
+
+                
+            }
 
         }
+        _myIP=myIP;
+        _myPort=myPort;
 
         HAS_GGEP_EXTENSION = ggep != null;
         DAILY_UPTIME = dailyUptime;
@@ -1134,6 +1200,13 @@ public class PingReply extends Message implements Serializable, IpPort {
         return IP;
     }
 
+    public InetAddress getMyInetAddress() {
+        return _myIP;
+    }
+    
+    public int getMyPort() {
+        return _myPort;
+    }
     
     /**
      * access the client_locale
