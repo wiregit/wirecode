@@ -204,9 +204,9 @@ public class QueryRouteTable {
     private void addBTInternal(String filename) {
         String[] words=HashFunction.keywords(filename);
         String[] keywords=HashFunction.getPrefixes(words);
+		byte log2 = Utilities.log2(bitTableLength);
         for (int i=0; i<keywords.length; i++) {
-            int hash=HashFunction.hash(keywords[i], 
-                                       Utilities.log2(bitTableLength));
+            int hash=HashFunction.hash(keywords[i], log2);
             if (!bitTable.get(hash)) {
                 bitEntries++; //added new entry
                 bitTable.set(hash);
