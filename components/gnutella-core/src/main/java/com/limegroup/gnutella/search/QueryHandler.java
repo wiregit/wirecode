@@ -122,6 +122,33 @@ public final class QueryHandler {
      */
     private boolean _probeCompleted = false;
 
+    /**
+     * Boolean for whether or not the query has been forwarded to leaves of 
+     * this ultrapeer.
+     */
+    private boolean _forwardedToLeaves = false;
+
+    /**
+     * Constant TTL 1 query for this dynamic query;
+     */
+    private final QueryRequest TTL_1_QUERY;
+
+    /**
+     * Constant TTL 2 query for this dynamic query;
+     */
+    private final QueryRequest TTL_2_QUERY;
+
+    /**
+     * Constant TTL 3 query for this dynamic query;
+     */
+    private final QueryRequest TTL_3_QUERY;
+
+    /**
+     * Array of connections to query for the "probe" query.  The probe
+     * determines more accurately how widely distributed the desired
+     * content is.
+     */
+    private final List[] PROBE_LISTS;
 
 	/**
 	 * Private constructor to ensure that only this class creates new
@@ -148,6 +175,12 @@ public final class QueryHandler {
 
 		REPLY_HANDLER = handler;
         RESULT_COUNTER = counter;
+        TTL_1_QUERY = createQuery(QUERY, (byte)1);
+        TTL_2_QUERY = createQuery(QUERY, (byte)2);
+        TTL_3_QUERY = createQuery(QUERY, (byte)3);
+        PROBE_LISTS = 
+            createProbeLists(_connectionManager.getInitializedConnections2(),
+                             TTL_1_QUERY);
 	}
 
 
@@ -253,6 +286,15 @@ public final class QueryHandler {
 			_queryStartTime = _curTime;
         }
             
+        if(!_forwardedToLeaves) {
+            RouterService.getMessageRouter().forwardQueryRequestToLeaves(TTL_1_QUERY, 
+                                                                         handler.REPLY_HANDLER); 
+            _theoreticalHostsQueried += 25;
+            _forwardedToLeaves = true;
+            _nextQueryTime = System.currentTimeMillis() + 600;
+            return;
+        }
+
         if(!_probeCompleted) {
             _theoreticalHostsQueried += 
                 sendProbeQuery(this, 
@@ -314,7 +356,7 @@ public final class QueryHandler {
 			
 			int resultsNeeded = handler.RESULTS - results;
 			
-			int hostsToQuery = 80000;
+			int hostsToQuery = 20000;
 			if(resultsPerHost != 0) {
 				hostsToQuery = (int)((double)resultsNeeded/resultsPerHost);
 			}
@@ -331,18 +373,14 @@ public final class QueryHandler {
 			QueryRequest query = createQuery(handler.QUERY, ttl);
 
  
-			// send out the query on the network
-            sendQueryToHost(query, mc, handler);
-
-			//RouterService.getMessageRouter().sendQueryRequest(query, mc, 
-            //                                                 handler.REPLY_HANDLER);
-
-			// add the reply handler to the list of queried hosts
-			//handler.QUERIED_HANDLERS.add(mc);
-            newHosts = calculateNewHosts(mc, ttl);
-            break;
+			// send out the query on the network, returning the number of new
+            // hosts theoretically reached
+            return sendQueryToHost(query, mc, handler, ttl);
 		}
-        return newHosts;
+
+        // if we get here, the query didn't go out, and no new hosts were 
+        // theoretically hit
+        return 0;
 	}
     
 
@@ -505,22 +543,10 @@ public final class QueryHandler {
     private static List[] 
         createAggressiveProbe(List oldConnections, List missConnections,
                               List hitConnections, List[] returnLists) {
-
-        if(oldConnections.size() < 3) {
-            returnLists[1].addAll(oldConnections);            
-            int listSize = returnLists[0].size() + returnLists[1].size();
-
-            // if we still don't have enough connections, take some from
-            // the miss list
-            if(listSize < 3) {
-                int maxIndex = Math.min((3 - listSize), missConnections.size());
-                if(!missConnections.isEmpty()) {
-                    returnLists[1].add(missConnections.subList(0, maxIndex));
-                }
-            }
-        } else {
-            returnLists[1].addAll(oldConnections.subList(0, 4));            
-        }
+        
+        // add as many connections as possible from first the old connections
+        // list, then the connections that did not have hits
+        addToList(returnLists[1], oldConnections, missConnections);
 
         // add any hits there are to the TTL=1 list
         int maxIndex = Math.min(4, hitConnections.size());
@@ -541,11 +567,11 @@ public final class QueryHandler {
         // send a TTL=1 query to hosts that have matches in their
         // QRP tables, running one at a time with pauses.
         
-        QueryRequest query = createQuery(handler.QUERY, (byte)1);
+        //QueryRequest query = createQuery(handler.QUERY, (byte)1);
+        //RouterService.getMessageRouter().forwardQueryRequestToLeaves(query, handler.REPLY_HANDLER);
 
-        RouterService.getMessageRouter().forwardQueryRequestToLeaves(query, handler.REPLY_HANDLER);
 
-        List[] probeLists = createProbeLists(list, query);
+        //List[] probeLists = createProbeLists(list, query);
         List probeList = probeLists[0];
         Iterator iter = list.iterator();
         int connectionsUsed = 0;
@@ -570,7 +596,7 @@ public final class QueryHandler {
             // until we know it has a QRP table
             qrConnections++;
             if(qi.lastReceived.contains(query)) {
-                sendQueryToHost(query, mc, handler);
+                sendQueryToHost(query, mc, handler, (byte)2);
                 qrConnectionsUsed++;
             }
         }
@@ -591,10 +617,7 @@ public final class QueryHandler {
                 continue;
             }
 
-            sendQueryToHost(query, mc, handler);
-
-			newHosts += calculateNewHosts(mc, PROBE_TTL);
-
+            newHosts += sendQueryToHost(query, mc, handler);
             hostsQueried++;
             i++;
 		}
@@ -610,14 +633,21 @@ public final class QueryHandler {
      * @param query the <tt>QueryRequest</tt> to send
      * @param mc the <tt>ManagedConnection</tt> to send the query to
      * @param handler the <tt>QueryHandler</tt> 
+     * @param ttl the time to live for the query
+     * @return the number of new hosts theoretically hit by this query
      */
-    private static void sendQueryToHost(QueryRequest query, ManagedConnection mc, 
-                                        QueryHandler handler) {
+    private static int sendQueryToHost(QueryRequest query, ManagedConnection mc, 
+                                       QueryHandler handler, byte ttl) {
         RouterService.getMessageRouter().sendQueryRequest(query, mc, 
                                                           handler.REPLY_HANDLER);
         
-        // add the reply handler to the list of queried hosts
-        handler.QUERIED_HANDLERS.add(mc);
+        // add the reply handler to the list of queried hosts if it's not
+        // a TTL=1 query or the connection does not support probe queries
+        if(ttl != 1 || !mc.supportsProbeQueries()) {
+            handler.QUERIED_HANDLERS.add(mc);
+        }
+
+        return calculateNewHosts(mc, ttl);
     }
 
 	/**
