@@ -12,6 +12,12 @@ import com.limegroup.gnutella.settings.*;
 import com.limegroup.gnutella.util.*;
 import com.sun.java.util.collections.*;
 
+/**
+ * This class tests <tt>ManagedConnection</tt>'s ability to buffer messages 
+ * before sending them.  Normally, buffering occurs when we cannot send
+ * messages as fast as they are arriving.  The test artificially creates
+ * this situation.
+ */
 public class ManagedConnectionBufferTest extends BaseTestCase {
 	
     public static final int PORT=6666;
@@ -31,31 +37,23 @@ public class ManagedConnectionBufferTest extends BaseTestCase {
     }
 
 	public void setUp() throws Exception {
-		//setStandardSettings();
+		setStandardSettings();
 		
-		//ConnectionSettings.KEEP_ALIVE.setValue(2);
-		//ConnectionSettings.WATCHDOG_ACTIVE.setValue(true);
-        ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
+		ConnectionSettings.KEEP_ALIVE.setValue(2);
+		ConnectionSettings.WATCHDOG_ACTIVE.setValue(true);
+		ConnectionSettings.PREFERENCING_ACTIVE.setValue(false);
+
+		ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
 		ConnectionSettings.CONNECT_ON_STARTUP.setValue(false);
 
-        // required because ManagedConnection delegates
-        // to RouterService to get the MessageRouter
+		// disable connection removal
+		ConnectionSettings.REMOVE_ENABLED.setValue(false);
+
         RouterService rs = 
-			new RouterService(new ActivityCallbackStub(), 
-							  new MessageRouterStub());
-
-		//rs.start();
-		//rs.connect();
-        PrivilegedAccessor.setValue(RouterService.class, "manager", new ConnectionManagerStub());
-
-
+			new RouterService(new ActivityCallbackStub());
 
 		MiniAcceptor acceptor = 
 			new MiniAcceptor(new DummyResponder("localhost"), PORT);
-
-		//MiniAcceptor acceptor = 
-		//new MiniAcceptor(new HandshakeResponse(new Properties()), PORT);
-
 
 		ManagedConnection.QUEUE_TIME=1000;
 		out = new ManagedConnection("localhost", PORT);
