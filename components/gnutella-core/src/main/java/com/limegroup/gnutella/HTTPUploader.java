@@ -1,25 +1,20 @@
 package com.limegroup.gnutella;
 
-import java.io.*;
-import java.net.*;
-import com.sun.java.util.collections.*;
-
-
 /**
  * auth: rsoule
  * file: HTTPUploader.java
- * desc: This is the abstract super class from which both
- * the NormalUploader and the ErrorDownloader will
- * inherit.  It will also implement the Uploader 
- * interface, which will be used to interact with 
- * the gui.
+ * desc: Read data from disk and write to the net.
  *
  */
 //2345678|012345678|012345678|012345678|012345678|012345678|012345678|012345678|
-public abstract class HTTPUploader implements Uploader {
-                    
-	protected int BUFFSIZE = 1024;
-	
+
+import java.io.*;
+import java.net.*;
+import java.util.Date;
+import com.sun.java.util.collections.*;
+
+public class HTTPUploader implements Uploader {
+
 	protected OutputStream _ostream;
 	protected FileInputStream _fis;
 	protected Socket _socket;
@@ -30,8 +25,14 @@ public abstract class HTTPUploader implements Uploader {
 	protected int _index;
 	protected String _filename;
 	protected String _hostName;
-	protected int _state;
-	
+	protected String _guid;
+	protected int _port;
+	protected int _stateNum = NOT_CONNECTED;
+
+	private UploadState _state;
+
+
+
 	/****************** Constructors ***********************/
 	/**
 	 * There are two constructors that are necessary.  The 
@@ -50,34 +51,37 @@ public abstract class HTTPUploader implements Uploader {
 	 */
 
 	// Regular upload
-	public HTTPUploader(String file, Socket s, int index)
-		throws IOException {
-		if (_socket == null)
-			throw new IOException("Socket is null");
+	public HTTPUploader(String file, Socket s, int index) {
 		_socket = s;
 		_hostName = _socket.getInetAddress().getHostAddress();
-		_hostName = 
 		_filename = file;
 		_index = index;
 		_amountRead = 0;
+		FileDesc desc = FileManager.instance().get(_index);
+		_fileSize = desc._size;
+		setState(CONNECTED);
 	}
 		
 	// Push requested Upload
 	public HTTPUploader(String file, String host, int port, int index,
-						String guid) throws IOException {
-		
-		// NOTE: Do we know the name of the file?  Can this be
-		// passed here? Or do we just know the index?
-		_socket = new Socket(host, port);
+						String guid) {
 		_filename = file;
 		_index = index;
 		_uploadBegin = 0;
 		_amountRead = 0;
 		_hostName = host;
+		_guid = guid;
+		_port = port;
+		FileDesc desc = FileManager.instance().get(_index);
+		_fileSize = desc._size;
+		setState(CONNECTED);
+	}
 
-		// try to create the socket.
+	// This method must be called in the case of a push.
+	public void connect() throws IOException {
+	// try to create the socket.
 		try {
-			_socket = new Socket(host, port);
+			_socket = new Socket(_hostName, _port);
 		} catch (SecurityException e) {
 			throw new IOException();
 		}
@@ -88,7 +92,7 @@ public abstract class HTTPUploader implements Uploader {
 			Assert.that(_filename != null);  
 			// write out the giv
 			String giv; 
-			giv = "GIV " + _index + ":" + guid + "/" + _filename + "\n\n";
+			giv = "GIV " + _index + ":" + _guid + "/" + _filename + "\n\n";
 			_ostream.write(giv.getBytes());
 			_ostream.flush();
 			
@@ -141,49 +145,162 @@ public abstract class HTTPUploader implements Uploader {
         }
 	}
 
-	/**
-	 * Start the upload
-	 */
-	public void start() throws IOException {}
-	
-	/**
-	 * Stops this upload.  If the download is already 
-	 * stopped, it does nothing.
-	 */ 
-	public void stop() {}
+    
+	public void start() {
+		try {
+			readHeader();
+		} catch (FreeloaderUploadingException e) {
+			setState(FREELOADER);
+		} catch (IOException e) {
+			// need to handle the error
+		}
+		try {
+			_state.doUpload(this);
+		} catch (IOException e) {
+		}
+		stop();
+		
+	}
+
+	public void stop() {
+		try {
+			if (_ostream != null)
+				_ostream.close();
+		} catch (IOException e) {}
+		try {
+			if (_fis != null)
+				_fis.close();
+		} catch (IOException e) {}
+		try {
+			if (_socket != null) 
+				_socket.close();
+		} catch (IOException e) {}
+	}
 
 	/**
-	 * returns the name of the file being uploaded.
+	 * This method changes the appropriate state class based on
+	 * the integer representing the state.  I'm not sure if this
+	 * is a good idea, since it results in a case statement, that
+	 * i was trying to avoid with 
 	 */
-	public String getFileName() {return _filename;}
+	public void setState(int state) {
+		_stateNum = state;
+		switch (state) {
+		case CONNECTED:
+			_state = new NormalUploadState();
+			break;
+		case LIMIT_REACHED:
+			_state = new LimitReachedUploadState();
+			break;
+		case PUSH_FAILED:
+			_state = new PushFailedUploadState();
+			break;
+		case FREELOADER:     
+			_state = new FreeloaderUploadState();
+			break;
+		case NOT_CONNECTED:
+			break;
+		case COMPLETE:
+			break;
+		}
+	}
 	
-	/**
-	 * returns the length of the file being uploaded.
-	 */ 
-	 public int getFileSize() {return _fileSize;}
 
-	/**
-	 * returns the index of the file being uploaded.
-	 */ 
+	/****************** accessor methods *****************/
+
+
+	public OutputStream getOutputStream() {return _ostream;}
 	public int getIndex() {return _index;}
-
-	/**
-	 * returns the amount that of data that has been uploaded.
-	 * this method was previously called "amountRead", but the
-	 * name was changed to make more sense.
-	 */ 
+	public String getFileName() {return _filename;}
+	public int getFileSize() {return _fileSize;}
+	public FileInputStream getFileInputStream() {return _fis;}
 	public int amountUploaded() {return _amountRead;}
-
-	/**
-	 * returns the string representation of the IP Address
-	 * of the host being uploaded to.
-	 */
+	public void setAmountUploaded(int amount) {_amountRead = amount;}
+	public int getUploadBegin() {return _uploadBegin;}
+	public int getState() {return _stateNum;}
 	public String getHost() {return _hostName;}
-	
-	/**
-	 * returns an integer value that represents a state, such
-	 * as CONNECTING, or ERROR.
-	 */ 
-	// public int getState() {return _state;}
+
+	/****************** private methods *******************/
+
+
+	private void readHeader() throws IOException {
+        String str = " ";
+        _uploadBegin = 0;
+        _uploadEnd = 0;
+		String userAgent;
+		
+		InputStream istream = _socket.getInputStream();
+		ByteReader br = new ByteReader(istream);
+        
+		while (true) {
+			// read the line in from the socket.
+            str = br.readLine();
+			// break out of the loop if it is null or blank
+            if ( (str==null) || (str.equals("")) )
+                break;
+			// Look for the Range: header
+			// it will be in one of three forms.  either
+			// ' - n ', ' m - n', or ' 0 - '
+            if (str.indexOf("Range: bytes=") != -1) {
+                String sub = str.substring(13);
+				// remove the white space
+                sub = sub.trim();   
+                char c;
+				// get the first character
+                c = sub.charAt(0);
+				// - n  
+                if (c == '-') {  
+                    String second = sub.substring(1);
+                    second = second.trim();
+                    _uploadEnd = java.lang.Integer.parseInt(second);
+                }
+                else {                
+					// m - n or 0 -
+                    int dash = sub.indexOf("-");
+                    String first = sub.substring(0, dash);
+                    first = first.trim();
+                    _uploadBegin = java.lang.Integer.parseInt(first);
+                    String second = sub.substring(dash+1);
+                    second = second.trim();
+                    if (!second.equals("")) 
+                        _uploadEnd = java.lang.Integer.parseInt(second);
+                    
+                }
+            }
+
+			// check the User-Agent field of the header information
+			if (str.indexOf("User-Agent:") != -1) {
+				// check for netscape, internet explorer,
+				// or other free riding downoaders
+				if (SettingsManager.instance().getAllowBrowser() == false) {
+					// if we are not supposed to read from them
+					// throw an exception
+					if( (str.indexOf("Mozilla") != -1) ||
+						(str.indexOf("DA") != -1) ||
+						(str.indexOf("Download") != -1) ||
+						(str.indexOf("FlashGet") != -1) ||
+						(str.indexOf("GetRight") != -1) ||
+						(str.indexOf("Go!Zilla") != -1) ||
+						(str.indexOf("Inet") != -1) ||
+						(str.indexOf("MIIxpc") != -1) ||
+						(str.indexOf("MSProxy") != -1) ||
+						(str.indexOf("Mass") != -1) ||
+						(str.indexOf("MyGetRight") != -1) ||
+						(str.indexOf("NetAnts") != -1) ||
+						(str.indexOf("NetZip") != -1) ||
+						(str.indexOf("RealDownload") != -1) ||
+						(str.indexOf("SmartDownload") != -1) ||
+						(str.indexOf("Teleport") != -1) ||
+						(str.indexOf("WebDownloader") != -1) ) {
+						throw new FreeloaderUploadingException();
+					}
+				}
+				userAgent = str.substring(11).trim();
+			}
+		}
+
+		if (_uploadEnd == 0)
+			_uploadEnd = _fileSize;
+	}
 
 }
