@@ -305,8 +305,10 @@ public final class UploadManager implements BandwidthTracker {
             // if there was a spurious IOException and we hadn't already
             // changed the state to complete (meaning we never completed
             // sending the response), then it is interrupted.
-            if( uploader.getState() != Uploader.COMPLETE )
-                uploader.setState(Uploader.INTERRUPTED);
+            if( uploader != null ) {
+            	if( uploader.getState() != Uploader.COMPLETE )
+                	uploader.setState(Uploader.INTERRUPTED);
+            }
         } finally {
             if( uploader != null )
                 assertAsFinished( uploader.getState() );
