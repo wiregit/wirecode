@@ -7,6 +7,9 @@ import com.sun.java.util.collections.*;
  * holds more entries than specified in the constructor.
  * 
  * @author Gregorio Roper
+ * 
+ * Note: do not use this class for time-sensitive operations.
+ * if you do, wait at least 10-20ms before each operation. --zab
  */
 public class FixedSizeExpiringSet implements Set, Collection {
     /*
