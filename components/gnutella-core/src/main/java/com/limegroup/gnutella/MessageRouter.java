@@ -764,11 +764,11 @@ public abstract class MessageRouter {
                 Response[] desired = new Response[ack.getNumResults()];
                 for (int i = 0; i < desired.length; i++)
                     desired[i] = bundle._responses[i];
-                iterator = responsesToQueryReplies(desired, bundle._query);
+                iterator = responsesToQueryReplies(desired, bundle._query, 1);
             }
             else 
                 iterator = responsesToQueryReplies(bundle._responses, 
-                                                   bundle._query);
+                                                   bundle._query, 1);
 
             //send the query replies
             while(iterator.hasNext()) {
@@ -1561,6 +1561,26 @@ public abstract class MessageRouter {
      */
     public Iterator responsesToQueryReplies(Response[] responses,
                                             QueryRequest queryRequest) {
+        return responsesToQueryReplies(responses, queryRequest, 10);
+    }
+
+
+    /**
+     * Converts the passed responses to QueryReplies. Each QueryReply can
+     * accomodate atmost 255 responses. Not all the responses may get included
+     * in QueryReplies in case the query request came from a far away host.
+     * <p>
+     * NOTE: This method doesnt have any side effect, 
+     * and does not modify the state of this object
+     * @param responses The responses to be converted
+     * @param queryRequest The query request corresponding to which we are
+     * generating query replies.
+     * @param REPLY_LIMIT the maximum number of responses to have in each reply.
+     * @return Iterator (on QueryReply) over the Query Replies
+     */
+    public Iterator responsesToQueryReplies(Response[] responses,
+                                            QueryRequest queryRequest,
+                                            final int REPLY_LIMIT) {
         //List to store Query Replies
         List /*<QueryReply>*/ queryReplies = new LinkedList();
         
@@ -1585,7 +1605,6 @@ public abstract class MessageRouter {
 
         int numHops = queryRequest.getHops();
 
-		final int REPLY_LIMIT = 10;
         while (numResponses > 0) {
             int arraySize;
             // if there are more than 255 responses,
