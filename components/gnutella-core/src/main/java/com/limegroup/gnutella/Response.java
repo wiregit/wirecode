@@ -846,7 +846,8 @@ public class Response {
              data.isFirewalled(), 
              data.getVendorCode(),
              System.currentTimeMillis(),
-             data.getPushProxies()
+             data.getPushProxies(),
+             data.supportsFWTransfer()
             );
     }
 
