@@ -28,7 +28,7 @@ class AutoDownloadDetails {
     /** the precision that the matcher uses for comparing candidates to RFDs
      *  that have already been accepted for download....
      */
-    private float MATCH_PRECISION_DL = 0.45f;
+    private float MATCH_PRECISION_DL = .30f;
 
     static {
         matcher.setIgnoreCase(true);
@@ -91,15 +91,23 @@ class AutoDownloadDetails {
 
             // see if it compares to any other file already being DLed....
             if (retVal && (dlList.size() > 0)) {
+                String processedFileName;
+                synchronized (matcher) {
+                    processedFileName = matcher.process(inputFileName);
+                }
                 for (int i = 0; i < dlList.size(); i++) {
                     RemoteFileDesc currRFD = (RemoteFileDesc) dlList.get(i);
                     String currFileName = currRFD.getFileName();
-                    boolean doesMatch = false;
+                    String currProcessedFileName;
+                    int diffs = 0;
                     synchronized (matcher) {
-                        doesMatch = matcher.matches(inputFileName, currFileName,
-                                                    MATCH_PRECISION_DL);
+                        currProcessedFileName = matcher.process(currFileName);
+                        diffs = matcher.match(processedFileName,
+                                              currProcessedFileName);
                     }
-                    if (doesMatch) {
+                    int smaller = Math.min(processedFileName.length(),
+                                           currProcessedFileName.length());
+                    if (((float)diffs)/((float)smaller) < MATCH_PRECISION_DL) {
                         retVal = false;
                         debug("ADD.addDownload(): conflict for file " +
                               inputFileName + " and " + currFileName);
@@ -154,9 +162,46 @@ class AutoDownloadDetails {
             e.printStackTrace();
     }
 
-    
+    /*
+    public static void main(String argv[]) {
+        AutoDownloadDetails add = 
+        new AutoDownloadDetails("morrissey", null,
+                                MediaType.getAudioMediaType());
+        String[] files = {"morrissey - suedehead.mp3",
+                          "morriseey - sueadhea d.mp3",
+                          "morrissey - billy budd.mp3",
+                          "morrissey - tomorrow.asf",
+                          "morrissey - boxers.mp3",
+                          "morrissey - tomorrow.mp3",
+                          "morrissey - hold on to your friends.mp3",
+                          "morrissey - budd billy.mp3"};
 
-    
+        RemoteFileDesc[] rfds = new RemoteFileDesc[files.length];
+        for (int i = 0; i < rfds.length; i++)
+            rfds[i] = new RemoteFileDesc("0.0.0.0", 6346, i, files[i],
+                                         i, GUID.makeGuid(),
+                                         3, false, 3);
+        
+        Assert.that(add.addDownload(rfds[0]));
+        add.commitDownload(rfds[0]);
+        Assert.that(!add.addDownload(rfds[1]));
+        Assert.that(add.addDownload(rfds[2]));
+        add.commitDownload(rfds[2]);
+        Assert.that(!add.addDownload(rfds[3]));
+        Assert.that(add.addDownload(rfds[4]));
+        add.commitDownload(rfds[4]);
+        Assert.that(add.addDownload(rfds[5]));
+        add.commitDownload(rfds[5]);
+        Assert.that(add.addDownload(rfds[6]));
+        add.removeDownload(rfds[6]);
+        Assert.that(add.addDownload(rfds[6]));        
+        add.commitDownload(rfds[6]);
+        Assert.that(!add.addDownload(rfds[7]));
+
+        // seems like we've committed MAX_DOWNLOADS, should be expired...
+        Assert.that(add.expired());
+    }
+    */    
     
 }
 
