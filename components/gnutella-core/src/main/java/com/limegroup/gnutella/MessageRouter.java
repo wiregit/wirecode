@@ -296,8 +296,6 @@ public abstract class MessageRouter
     protected void handlePingRequest(PingRequest pingRequest,
                                      ReplyHandler receivingConnection)
     {
-        //_numPingRequests++;
-
         if(pingRequest.getTTL() > 0)
             broadcastPingRequest(pingRequest, receivingConnection,
                                  _manager);
@@ -324,7 +322,6 @@ public abstract class MessageRouter
     protected void handleUDPPingRequest(PingRequest pingRequest,
 										ReplyHandler handler)
     {
-        //_numPingRequests++;
         respondToUDPPingRequest(pingRequest);
     }
     
@@ -338,13 +335,14 @@ public abstract class MessageRouter
            (!reply.getIP().equals(address.getHostAddress()))) 
             UNICASTER.addUnicastEndpoint(address, port);
 
+		// TODO: are we sure we want to do this?
         // notify neighbors of new unicast endpoint...
         Iterator guessUltrapeers = 
         _manager.getConnectedGUESSUltrapeers().iterator();
         while (guessUltrapeers.hasNext()) {
             ManagedConnection currMC = 
             (ManagedConnection) guessUltrapeers.next();
-            currMC.send(reply);
+			currMC.handlePingReply(reply, handler);
         }
         
         // normal pong processing...
@@ -370,15 +368,16 @@ public abstract class MessageRouter
     protected void handleQueryRequest(QueryRequest request,
 									  ReplyHandler handler)
     {
-        //_numQueryRequests++;
-
 		// if it's a request from a leaf and we GUESS, send it out via GUESS --
 		// otherwise, broadcast it if it still has TTL
 		if(handler.isSupernodeClientConnection() && 
            RouterService.isGUESSCapable()) 
 			unicastQueryRequest(request, handler);
-        else if(request.getTTL() > 0)
+        else if(request.getTTL() > 0) {
+			// send the request to intra-Ultrapeer connections -- this does
+			// not send the request to leaves
 			broadcastQueryRequest(request, handler);
+		}
 			
 		// always forward any queries to leaves -- this only does
 		// anything when this node's an Ultrapeer
@@ -461,6 +460,7 @@ public abstract class MessageRouter
             if (   receivingConnection==null   //came from me
                 || (c!=receivingConnection
                      && !c.isClientSupernodeConnection())) {
+				SentMessageStat.TCP_PING_REQUESTS.incrementStat();
                 c.send(pingRequest);
             }
         }
@@ -636,21 +636,21 @@ public abstract class MessageRouter
      * Override as desired, but you probably want to call super.handlePingReply
      * if you do.
      */
-    protected void handlePingReply(PingReply pingReply,
+    protected void handlePingReply(PingReply reply,
                                    ReplyHandler handler)
     {
         //update hostcatcher (even if the reply isn't for me)
         boolean newAddress = 
-		    RouterService.getHostCatcher().add(pingReply, handler);
+		    RouterService.getHostCatcher().add(reply, handler);
 
         //First route to originator in usual manner.
         ReplyHandler replyHandler =
-            _pingRouteTable.getReplyHandler(pingReply.getGUID());
+            _pingRouteTable.getReplyHandler(reply.getGUID());
 
         if(replyHandler != null)
         {
             //_numPingReplies++;
-            replyHandler.handlePingReply(pingReply, handler);
+            replyHandler.handlePingReply(reply, handler);
         }
         else
         {
@@ -661,7 +661,7 @@ public abstract class MessageRouter
 
 		boolean supportsUnicast = false;
 		try {
-			supportsUnicast = pingReply.supportsUnicast();
+			supportsUnicast = reply.supportsUnicast();
 		} catch(BadPacketException e) {
 		}
 
@@ -671,14 +671,15 @@ public abstract class MessageRouter
         //pong as they have no routing entry.  Note that if Ultrapeers are very
         //prevalent, this may consume too much bandwidth.
 		//Also forward any GUESS pongs to all leaves.
-        if ((newAddress && pingReply.isMarked()) || supportsUnicast) 
+        if ((newAddress && reply.isMarked()) || supportsUnicast) 
         {
             List list=_manager.getInitializedClientConnections2();
             for (int i=0; i<list.size(); i++) 
             {
                 ManagedConnection c = (ManagedConnection)list.get(i);
-                if (c!=handler && c!=replyHandler)
-                    c.send(pingReply);        
+                if (c!=handler && c!=replyHandler) {
+					c.handlePingReply(reply, handler);
+				}
             }
         }
     }
@@ -914,6 +915,7 @@ public abstract class MessageRouter
                 //TODO2: use incremental and interleaved update
                 for (Iterator iter=table.encode(qi.lastSent); iter.hasNext(); ) {  
                     RouteTableMessage m=(RouteTableMessage)iter.next();
+					SentMessageStat.TCP_ROUTE_TABLE_MESSAGES.incrementStat();
                     c.send(m);
                 }
                 qi.lastSent=table;
@@ -934,17 +936,6 @@ public abstract class MessageRouter
         
         //Add my files...
         addQueryRoutingEntries(ret);
-
-//        //...and those of all neighbors except c.  Use higher TTLs on these.
-//        List list=_manager.getInitializedConnections();
-//        for(int i=0; i<list.size(); i++) { 
-//            ReplyHandler c2=(ReplyHandler)list.get(i);
-//            if (c2==c)
-//                continue;
-//            ReplyHandlerQueryInfo qi=c2.getQueryRouteState();
-//            if (qi!=null && qi.lastReceived!=null)
-//                ret.addAll(qi.lastReceived);
-//        }
         return ret;
     }
 
