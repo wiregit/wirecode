@@ -27,15 +27,15 @@ public class QueryUnicasterTest extends com.limegroup.gnutella.util.BaseTestCase
     
     private static boolean anError = false;
 
-    static {
+//      static {
         
-        try {
-    		Backend backend = Backend.createBackend(40*1000);
-            backend.start();
-        } catch (Throwable t) {
-            anError = true;
-        }
-    }
+//          try {
+//      		Backend backend = Backend.createBackend(40*1000);
+//              backend.start();
+//          } catch (Throwable t) {
+//              anError = true;
+//          }
+//      }
 
 
     // produces should add(), consumers should firstElement()
@@ -49,7 +49,8 @@ public class QueryUnicasterTest extends com.limegroup.gnutella.util.BaseTestCase
         return new TestSuite(QueryUnicasterTest.class);
     }
     
-    public void setUp() {
+    public void setUp() throws Exception {
+        launchBackend();
         if ( anError ) fail( "error during Backend creation" );
     }
 
