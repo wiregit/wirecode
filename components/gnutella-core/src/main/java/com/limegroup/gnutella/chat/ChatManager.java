@@ -11,7 +11,6 @@ import java.net.*;
 import java.io.*;
 import com.sun.java.util.collections.*;
 import com.limegroup.gnutella.gui.*;
-import com.limegroup.gnutella.chat.gui.*;
 
 import java.awt.Container;
 
@@ -52,27 +51,23 @@ public class ChatManager {
 		} catch (IOException e) {
 			// unable to recieve connection.
 		}
-		
-		com.limegroup.gnutella.gui.MainFrame mf =
-		com.limegroup.gnutella.gui.MainFrame.instance();
-		ChatView view = new ChatView(mf);
-		Container contentPane = mf.getContentPane();
-		contentPane.add(view);
-		view.setVisible(true);
-		// contentPane.repaint();
-		// mf.setVisible(true);
+		System.out.println("Accepted the socket");
 
 	}
 
-	public void requestIM(String host, int port) {
+	/**
+	 * WATCH OUT RETURNS NULL SOMETIMES
+	 */
+	public Chatter requestIM(String host, int port) {
+		InstantMessage im;
 		try {
-			InstantMessage im = new InstantMessage(host, port);
+			im = new InstantMessage(host, port);
 		} catch (IOException e) {
 			e.printStackTrace();
 			System.out.println("can't request IM");
-			return;
+			return null;
 		}
-
+		return im;
 
 	}
 

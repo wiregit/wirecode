@@ -1,6 +1,7 @@
 package com.limegroup.gnutella;
 
 import java.io.File;
+import com.limegroup.gnutella.chat.*;
 
 /**
  *  Interface for connection events to be fed from the router into the
@@ -46,6 +47,12 @@ public interface ActivityCallback
     public void addUpload(Uploader u);
 
     public void removeUpload(Uploader u);    
+
+	/** handle adding a chat, and messages to the chats */
+	public Chatter acceptChat();
+	
+	public Chatter recieveMessage();
+
 
     /**
      * Notifies the GUI that the given directory has been shared.  This method

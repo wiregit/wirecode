@@ -2,6 +2,7 @@ package com.limegroup.gnutella;
 
 import java.io.*;
 import com.sun.java.util.collections.*;
+import com.limegroup.gnutella.chat.*;
 
 /**
  * The command-line UI for the Gnutella servent.
@@ -209,5 +210,9 @@ public class Main implements ActivityCallback {
 
 	public void clearSharedFiles() {}
 
+	public Chatter acceptChat() {return null;}
+
+	public Chatter recieveMessage() {return null;}
+	
 }
 
