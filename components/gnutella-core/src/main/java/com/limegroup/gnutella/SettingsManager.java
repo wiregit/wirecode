@@ -249,7 +249,7 @@ public class SettingsManager implements SettingsInterface
     public int getMaxLength(){return maxLength_;}
 
     /** returns the timeout value*/
-    public int getTimeOut(){return timeout_;}
+    public int getTimeout(){return timeout_;}
 
     /** returns a string specifying the full
      *  pathname of the file listing the hosts */

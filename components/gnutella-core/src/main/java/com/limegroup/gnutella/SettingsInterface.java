@@ -20,7 +20,7 @@ public interface SettingsInterface
     public byte       getTTL();
     public byte       getMaxTTL();
     public int        getMaxLength();
-    public int        getTimeOut();
+    public int        getTimeout();
     public String     getHostList();
     public int        getKeepAlive();
     public int        getPort();
