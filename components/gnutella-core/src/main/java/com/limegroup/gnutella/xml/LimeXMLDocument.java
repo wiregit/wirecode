@@ -198,7 +198,9 @@ public class LimeXMLDocument implements Serializable {
                             IOException, SAXException {
         
         XMLParsingUtils.Result result = XMLParsingUtils.parse(doc);
-        fieldToValue = (TreeMap)result.canonicalAttributeMaps.iterator().next();
+        Iterator i = result.canonicalAttributeMaps.iterator();
+        if(!i.hasNext()) throw new IOException("No element present");
+        fieldToValue = (TreeMap)i.next();
         schemaUri = result.schemaURI;
     }
 
