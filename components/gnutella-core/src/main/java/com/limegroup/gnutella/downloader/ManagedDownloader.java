@@ -129,6 +129,12 @@ public class ManagedDownloader implements Downloader, Serializable {
     /** The number of tries we've made.  0 means on the first try. */
     private int tries;
 
+	/**
+	 * Stores the number of bytes read the last time there was a reading
+	 * taken.
+	 */
+	private int _oldAmountRead = 0;
+
     private FileManager fileManager;
 
 
@@ -844,7 +850,20 @@ public class ManagedDownloader implements Downloader, Serializable {
         return retArray;
     }
 
-
+	/**
+	 * Implements the <tt>BandwidthTracker</tt> interface.
+	 * Returns the number of bytes read since the last time this method
+	 * was called.
+	 *
+	 * @return the number of new bytes read since the last time this method
+	 *         was called
+	 */
+	public synchronized int getNewBytesTransferred() {
+  		int newAmountRead = getAmountRead();
+  		int newBytesTransferred = newAmountRead - _oldAmountRead;
+  		_oldAmountRead = newAmountRead;
+  		return newBytesTransferred;
+	}
 }
 
 /** A RemoteFileDesc and the number of times we've tries to push it. */
