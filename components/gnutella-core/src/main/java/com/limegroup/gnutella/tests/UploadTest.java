@@ -5,6 +5,9 @@ import junit.extensions.*;
 import java.io.*;
 import java.net.*;
 import com.limegroup.gnutella.*;
+import com.limegroup.gnutella.security.*;
+import com.limegroup.gnutella.xml.*;
+import com.limegroup.gnutella.tests.stubs.*;
 
 /**
  * Test that a client uploads a file correctly.  Depends on a file
@@ -44,8 +47,32 @@ public class UploadTest extends TestCase {
   		} catch(UnknownHostException e) {
   			assertTrue("unexpected exception: "+e, false);
   		}
-		//address = "10.254.0.22";
 		port = 6346;
+		File testDir = new File("com/limegroup/gnutella/tests");
+		if(!testDir.isDirectory()) {
+			testDir = new File("core/com/limegroup/gnutella/tests");
+		}
+		assertTrue("shared directory could not be found", testDir.isDirectory());
+		assertTrue("test file should be in shared directory", 
+				   new File(testDir, file).isFile());
+		SettingsManager.instance().setPort(port);
+		SettingsManager.instance().setDirectories(new File[] {testDir});
+		SettingsManager.instance().setExtensions("txt");
+		SettingsManager.instance().setKeepAlive(1);
+		SettingsManager.instance().setMaxUploads(10);
+		SettingsManager.instance().setUploadsPerPerson(10);
+		SettingsManager.instance().setConnectOnStartup(true);
+		SettingsManager.instance().setQuickConnectHosts(new String[0]);
+		SettingsManager.instance().writeProperties();
+		
+		ActivityCallback callback = new ActivityCallbackStub();
+		FileManager fm = new MetaFileManager();
+		fm.initialize(callback);		
+		MessageRouter mr = new StandardMessageRouter(callback, fm);
+		RouterService router = new RouterService(callback, mr, fm, 
+												 new ServerAuthenticator());
+		router.initialize();
+
         System.out.println(
             "Please make sure your client is listening on port "+port+"\n"
             +"of "+address+" and is sharing "+file+" in slot "+index+",\n"
