@@ -1,9 +1,9 @@
 package com.limegroup.gnutella.xml;
 
 import com.limegroup.gnutella.util.NameValue;
+import com.limegroup.gnutella.mp3.*;
 import java.io.*;
 import java.util.*;
-
 
 /**
  *  Stores a schema and a list of Replies corresponding to the 

@@ -1,4 +1,4 @@
-package com.limegroup.gnutella.xml;
+package com.limegroup.gnutella.mp3;
 
 import java.io.*;
 import com.limegroup.gnutella.ByteOrder;
@@ -10,7 +10,7 @@ import com.limegroup.gnutella.xml.*;
  *
  * @author Sumeet Thadani
  */
-final class ID3Reader {
+public final class ID3Reader {
     private static final String schemaURI = 
          "http://www.limewire.com/schemas/audio.xsd";
 

@@ -1,4 +1,4 @@
-package com.limegroup.gnutella.xml;
+package com.limegroup.gnutella.mp3;
 
 import java.io.*;
 import java.util.*;
