@@ -12,6 +12,9 @@ import java.util.Properties;
 
 
 public class CommonUtils {
+
+	// constant for the current version of LimeWire
+	private static final String LIMEWIRE_VERSION = "1.4";
 	
 	// variable for the system properties
 	private static Properties _props;
@@ -60,6 +63,13 @@ public class CommonUtils {
 				_isMacClassic = true;
 			}			
 		}
+	}
+
+	/**
+	 * returns the current version of LimeWire.
+	 */
+	public static String getCurrentLimeWireVersion() {
+		return LIMEWIRE_VERSION;
 	}
 
 	/**
