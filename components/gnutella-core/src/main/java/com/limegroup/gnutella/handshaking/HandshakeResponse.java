@@ -248,7 +248,7 @@ public class HandshakeResponse {
 
 	// implements ReplyHandler interface -- inherit doc comment
 	public boolean isHighDegreeConnection() {
-		return getNumIntraUltrapeerConnections() > 15;
+		return getNumIntraUltrapeerConnections() >= 15;
 	}
 
 	/**
