@@ -350,6 +350,8 @@ public class UDPService implements Runnable {
                 if(isValidForIncoming(SOLICITED_PING_GUID, guid,
                                       datagram))
                     _acceptedSolicitedIncoming = true;
+                else 
+                    return;
                 
                 PingReply r = (PingReply)message;
                 if (r.getMyInetAddress() != null) {

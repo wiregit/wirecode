@@ -378,6 +378,26 @@ public class FWTDetectionTest extends BaseTestCase {
         
     }
     
+    /**
+     * tests the scenario where a (malicious) pong does not affect our
+     * status
+     */
+    public void testMaliciousPongDoesNotDisable() throws Exception {
+        RouterService.getAcceptor().setExternalAddress(InetAddress.getLocalHost());
+        cmStub.setConnected(true);
+        assertTrue(UDPService.instance().canDoFWT());
+        writeToGnet("127.0.0.1:"+REMOTE_PORT1+"\n"+"127.0.0.1:"+REMOTE_PORT2+"\n");
+        cmStub.setConnected(false);
+        connectAsync();
+        ponger1.listen();
+        Endpoint badAddress = new Endpoint("1.2.3.4",RouterService.getPort());
+        PingReply badGuid = PingReply.create(GUID.makeGuid(),(byte)1,badAddress);
+        ponger1.replyPong(badGuid);
+        Thread.sleep(1000);
+        cmStub.setConnected(true);
+        assertTrue(UDPService.instance().canDoFWT());
+    }
+    
     public void testServerResponse() throws Exception {
         cmStub.setConnected(true);
         DatagramSocket sock = new DatagramSocket(20000);
@@ -494,13 +514,18 @@ public class FWTDetectionTest extends BaseTestCase {
                 toSend = PingReply.create(_solGUID.bytes(),(byte)1);
             else
                 toSend = PingReply.create(_solGUID.bytes(),(byte)1,reply);
+         
+            replyPong(toSend);
             
+            
+        }
+        
+        public void replyPong(PingReply reply) throws Exception{
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            toSend.write(baos);
+            reply.write(baos);
             byte []data = baos.toByteArray();
             DatagramPacket pack = new DatagramPacket(data,data.length,_lastAddress);
             _sock.send(pack);
-            
         }
         
         public void drain()  {
