@@ -1,5 +1,5 @@
 ﻿################################################################################
-# Messages Bundle for LimeWire 3.9.3
+# Messages Bundle for LimeWire 3.9.4
 # Default locale for: Arabic - Egypt, Middle-East
 # Thanks to Marwa El-Dawy.
 ################################################################################
@@ -58,6 +58,8 @@ OPTIONS_BUTTONS_CANCEL_TIP=تجاهل التغييرات واغلق النافذ
 OPTIONS_BUTTONS_APPLY_LABEL=إضافة
 OPTIONS_BUTTONS_APPLY_TIP=إضافة التغييرات.
 OPTIONS_RESTART_REQUIRED=واحدة أو أكثر من الخيارات سيظهر تأثيرها بعد إعادة تشغيل LimeWire.
+#??? OPTIONS_BUTTON_REVERT_TO_DEFAULT=Restore defaults
+#??? OPTIONS_BUTTON_REVERT_TO_DEFAULT_TIP=Revert all settings to the factory defaults.
 
 ################################################################################
 # Key/value pairs for general terms, such as "yes" and "no"
@@ -70,7 +72,7 @@ NO=لا
 ################################################################################
 GENERAL_AVERAGE_BANDWIDTH=متوسط سرعة النقل
 GENERAL_ALTERNATE_LOCATIONS=المواقع البديلة
-#??? GENERAL_INVALID_ALTERNATE_LOCATIONS=Invalid alternate locations
+GENERAL_INVALID_ALTERNATE_LOCATIONS=مواقع أخرى غير صالحة
 GENERAL_STARTED_ON=بدأ في
 GENERAL_FINISHED_ON=انتهى في
 GENERAL_TIME_SPENT=الوقت المستغرق
@@ -95,7 +97,7 @@ APP_TITLE=LimeWire: يمكنك من مشاركة المعلومات
 ABOUT_TITLE=حول LimeWire
 ABOUT_LABEL_START=مستخدم LimeWire
 ABOUT_LABEL_ADDRESS=http://www.limewire.com
-ABOUT_LABEL_END=جميع الحقوق محفوظة (c)2000-2003 Lime Wire LLC
+ABOUT_LABEL_END=جميع الحقوق محفوظة (c)2000-2004 Lime Wire LLC
 ABOUT_LABEL_TITLE=حول LimeWire
 ABOUT_CREDITS_LABEL=نقاط.
 ABOUT_CREDITS_TIP=عرض معلومات حول LimeWire.
@@ -118,6 +120,18 @@ TOTD_SHOW_AT_STARTUP=إظهار التلميح عند البداية
 TOTD_NEXT=التلميح التالي >>
 TOTD_PREVIOUS=<< التلميح السابق
 TOTD_CLOSE=إغلاق
+
+###################################################################
+# Key/value pairs for the Getting Started image
+###################################################################
+#??? GETTING_STARTED_TITLE=Getting started
+#??? GETTING_STARTED_CONTENTS=To start using LimeWire, find the text field on the left, type in what you are looking for and click the "بحث" button. If you are looking for only one type of content (music, video, etc...), you can narrow you search results by using the buttons above the text field.
+
+###################################################################
+# Key/value pairs for the Going Pro image.
+###################################################################
+#??? GOING_PRO_TITLE=The most advanced file sharing program on the planet!
+#??? GOING_PRO_DESCRIPTION=Better search results\nTurbo charged download speeds\nConnections to more sources\nPersonalized tech support\nSix months of free updates
 
 ###################################################################
 # Key/value pairs for the Windows system tray
@@ -240,6 +254,15 @@ MENU_VIEW_THEMES_USE_DEFAULT_ACCESSIBLE=استخدم السمة التلقائي
 MENU_VIEW_LANGS_TITLE=(H) تغيير اللغة
 MENU_VIEW_LANGS_TITLE_MNEMONIC=H
 MENU_VIEW_LANGS_RESTART_REQUIRED=يجب إعادة تشغيل LimeWire لكي يظهر تأثير اللغة الجديدة.
+MENU_VIEW_SEARCH_TITLE=(S) بحث
+#??? MENU_VIEW_SEARCH_TITLE_MNEMONIC=S
+#??? MENU_VIEW_SEARCH_ACCESSIBLE=Search Tab Options
+#??? MENU_VIEW_SEARCH_FILTERS=Result Filters
+#??? MENU_VIEW_SEARCH_FILTERS_MNEMONIC=F
+#??? MENU_VIEW_SEARCH_FILTERS_ACCESSIBLE=Show Search Result Filters
+MENU_VIEW_SEARCH_MAGNETMIX=MagnetMix
+MENU_VIEW_SEARCH_MAGNETMIX_MNEMONIC=M
+#??? MENU_VIEW_SEARCH_MAGNETMIX_ACCESSIBLE=Show Magnetmix Button
 
 MENU_RESOURCES_TITLE=(R) الموارد
 MENU_RESOURCES_TITLE_MNEMONIC=R
@@ -289,14 +312,14 @@ MENU_HELP_ERROR_ACCESSIBLE=تخليق خطأ منبثق للاختبار.
 ################################################################################
 # Keys/value pairs for general tables info
 ################################################################################
-#??? TABLES_USE_ROWSTRIPE=Stripe rows
+TABLES_USE_ROWSTRIPE=صفوف متباينة الألوان
 TABLES_REAL_TIME_SORTING=ترتيب تلقائي
 TABLES_DISPLAY_TOOLTIPS=عرض تلميح الأدوات.
 
 ################################################################################
-# Keys/value pairs for SearchView stuff....
+# Keys/value pairs for SearchView stuff...
 ################################################################################
-#??? SEARCH_NOT_CONNECTED=You are not connected to the network. To connect, select "Connect" from the "File" menu.
+SEARCH_NOT_CONNECTED=أنت غير متصل باشبكة. للاتصال اختر "اتصال" من قائمة "ملف".
 SEARCH_DOWNLOAD_BUTTON_LABEL=تنزيل
 SEARCH_DOWNLOAD_BUTTON_TIP=. تنزيل جميع الملفات المختارة.
 SEARCH_WISHLIST_BUTTON_LABEL=أضف إلى قائمة الأمنيات
@@ -309,7 +332,7 @@ SEARCH_BUY_CD_LABEL=شراء...
 SEARCH_BUY_CD_TIP=شراء المنتج الحالي.
 SEARCH_SEARCH_BUTTON_LABEL=بحث
 SEARCH_SEARCH_BUTTON_TIP=بحث على الشبكة عن هذه الكلمات.
-SEARCH_STOP_BUTTON_LABEL=قف
+SEARCH_STOP_BUTTON_LABEL=إيقاف
 SEARCH_STOP_BUTTON_TIP=إيقاف تجميع نتائج البحث لعلامة التبويب المختارة.
 SEARCH_PUBLIC_KILL_STRING=إغلاق البحث
 SEARCH_PUBLIC_LAUNCH_STRING=Launch action
@@ -331,10 +354,15 @@ SEARCH_DEFAULT_FIELD_TITLE=اسم الملف
 SEARCH_MULTIPLE_HOSTS=متعدد
 AUTO_DL_CHECKBOX_STRING=تنزيل تلقائي
 AUTO_DL_CHECKBOX_TOOLTIP=سيقوم LimeWire بتنزيل الملفات لك.
-#??? SEARCH_TYPE_KEYWORD=Keyword
-#??? SEARCH_TYPE_WHATSNEW=Community
-#??? SEARCH_WHATS_NEW_DESCRIPTION=Don't know what to look for? A Community search will search for files that have been recently added to the network.
+SEARCH_TYPE_KEYWORD=كلمة مفتاحية
+SEARCH_TYPE_WHATSNEW=مجتمع
+SEARCH_WHATS_NEW_DESCRIPTION=لا تعرف عن ماذا تبحث؟ بحث المجتمع سيبحث في الملفات التي تم إضافتها مؤخرا للشبكة.
+SEARCH_WHATS_NEW_SMALL=جديد
+#??? SEARCH_CURRENT_SEARCH=Current search:
 #??? SEARCH_WHATS_NEW_SMALL=New
+#??? SEARCH_SELECT_TYPE=Select type:
+#??? SEARCH_FILTER_RESULTS=Filter results:
+#??? SEARCH_BACK_TO_SEARCH=Back to search
 
 #Media Types
 MEDIA_ANY_TYPE=كافة الأنواع
@@ -356,10 +384,10 @@ RESULT_PANEL_COUNT=#
 RESULT_PANEL_VENDOR=البائع
 
 #Filter labels.
-#??? SEARCH_FILTER_ALL=All
-#??? SEARCH_FILTER_OPTION=Option
-#??? SEARCH_FILTER_OPTIONS=Options
-#??? SEARCH_FILTER_MEDIA=Media
+SEARCH_FILTER_ALL=الجميع
+SEARCH_FILTER_OPTION=خيار
+SEARCH_FILTER_OPTIONS=خيارات
+SEARCH_FILTER_MEDIA=الوسائط
 
 DOWNLOAD_KILL_BUTTON_LABEL=إنهاء التنزيل
 DOWNLOAD_KILL_BUTTON_TIP=أوقف تنزيل الملفات المختارة.
@@ -427,8 +455,8 @@ STATISTICS_CONNECTION_GOOD=جيد
 STATISTICS_CONNECTION_GOOD_TIP=لا تمتلك أفضل اتصال بالشبكة، ولكن لديك اتصال جيد جدا.
 STATISTICS_CONNECTION_EXCELLENT=ممتاز
 STATISTICS_CONNECTION_EXCELLENT_TIP=لديك اتصالا قويا بالشبكة.
-#??? STATISTICS_CONNECTION_TURBO_CHARGED=TurboCharged
-#??? STATISTICS_CONNECTION_TURBO_CHARGED_TIP_FREE=You can experience TurboCharged connections all the time with LimeWire Pro.
+STATISTICS_CONNECTION_TURBO_CHARGED=سريع مطور
+STATISTICS_CONNECTION_TURBO_CHARGED_TIP_FREE=يمكنك تجربة الاتصالات السريعة المطورة مع LimeWire Pro.
 STATISTICS_CONNECTION_TURBO_CHARGED_TIP_PRO=لديك اتصالا قويا للغاية بالشبكة.
 STATISTICS_CONNECTION_QUALITY=الجودة:
 
@@ -455,18 +483,20 @@ DOWNLOAD_STATUS_CONNECTING=اتصال...
 DOWNLOAD_STATUS_WAITING=انتظار-المضيفون مشغولون
 DOWNLOAD_STATUS_COMPLETE=مكتمل
 DOWNLOAD_STATUS_ABORTED=خروج
-#??? DOWNLOAD_STATUS_FAILED=Awaiting sources
+DOWNLOAD_STATUS_FAILED=في الانتظار
 DOWNLOAD_STATUS_DOWNLOADING=جاري التنزيل من
 DOWNLOAD_STATUS_LIBRARY_MOVE_FAILED=لا يمكن النقل إلى المكتبة
 DOWNLOAD_STATUS_CORRUPT_FILE=الملف غير صالح
+#??? DOWNLOAD_STATUS_IDENTIFY_CORRUPTION=Recovering corrupted file
+#??? DOWNLOAD_STATUS_RECOVERY_FAILED=Recovery failed
 DOWNLOAD_STATUS_REQUERYING=استعلام الشبكة
 DOWNLOAD_STATUS_WAITING_FOR_REQUERY_START=انتظار
 DOWNLOAD_STATUS_WAITING_FOR_REQUERY_END=ث للمصادر
 DOWNLOAD_STATUS_WAITING_FOR_USER=أحتاج إلى مزيد من المصادر
 DOWNLOAD_STATUS_WAITING_FOR_CONN=انتظار اتصالات مستقرة
 DOWNLOAD_HOSTS_LABEL=المضيفون
-#??? DOWNLOAD_HOST_LABEL=host
-#??? DOWNLOAD_STATUS_REMOTE_QUEUED=Waiting in line, position
+DOWNLOAD_HOST_LABEL=المضيف
+DOWNLOAD_STATUS_REMOTE_QUEUED=في قائمة الانتظار، عند 
 DOWNLOAD_STATUS_HASHING=تتم الآن مراجعة محتويات الملف...
 DOWNLOAD_STATUS_SAVING=يتم الآن حفظ الملف...
 DOWNLOAD_AWAITING_SOURCES=قد يحتاج LimeWire إلى إجراء بحث متقدم...
@@ -474,11 +504,11 @@ DOWNLOAD_APPLY_NEW_THEME_START=لقد قمت بتنزيل سمة جديدة با
 DOWNLOAD_APPLY_NEW_THEME_END=". هل ترغب في استخدام هذه السمة الجديدة.
 DOWNLOAD_POSSIBLE_HOSTS=المضيفون الممكنون
 DOWNLOAD_BUSY_HOSTS=مضيفون مشغولون
-#??? DOWNLOAD_QUEUED_HOSTS=Remotely queued
+DOWNLOAD_QUEUED_HOSTS=موضوع في قائمة الانتظار
 DOWNLOAD_SEARCHING=يتم الآن تحديد مواقع المصادر...
 DOWNLOAD_COULD_NOT_READ_SNAPSHOT=معذرة، ولكن LimeWire لا يستطيع إعادة تشغيل ملفات التنزيل القديمة الخاصة بك.
-#??? DOWNLOAD_MAGNET_DIALOG=Would you like to download
-#??? DOWNLOAD_FROM=from
+DOWNLOAD_MAGNET_DIALOG=هل ترغب في التنزيل
+DOWNLOAD_FROM=من
 
 ###################################################################
 # Key/value pairs for UploadView
@@ -505,11 +535,12 @@ UPLOAD_TABLE_STRING_UPLOADING=جاري التحميل
 UPLOAD_TABLE_STRING_LIMITREACHED=تم الوصول للحد المسموح به للتحميل
 #??? UPLOAD_TABLE_STRING_FREELOADER=Freeloader uploading
 UPLOAD_TABLE_STRING_PUSHFAILED=لا يمكن الاتصال
-#??? UPLOAD_TABLE_STRING_INTERRUPTED=Transfer interrupted
+UPLOAD_TABLE_STRING_INTERRUPTED=انقطع التحويل.
 UPLOAD_TABLE_STRING_UNAVAILABLE_RANGE=المدى غير متاح
 UPLOAD_TABLE_STRING_MALFORMED_REQUEST=طلب غير صحيح
 UPLOAD_TABLE_STRING_COMPLETE=مكتمل
 #??? UPLOAD_TABLE_STRING_BANNED_GREEDY=Banned greedy servent
+#??? UPLOAD_TABLE_STRING_HASH_TREE=Uploading Hash tree
 UPLOAD_TABLE_STRING_FNF=الملف غير موجود
 UPLOAD_TABLE_STRING_QUEUED=في قائمة الانتظار عند
 UPLOAD_STRING_KBPSEC=ك.ب/ث
@@ -554,11 +585,12 @@ CV_BUTTON_REMOVE=إزالة
 CV_BUTTON_TOOLTIP_REMOVE=إزالة الاتصالات المختارة
 CV_BUTTON_ADD=إضافة
 CV_BUTTON_TOOLTIP_ADD=إنشاء اتصال خارجي جديد
-#??? CV_LABEL_KEEP_BEGIN=Keep approximately
-#??? CV_LABEL_KEEP_END=connections up.
+CV_LABEL_KEEP_BEGIN=احتفظ تقريبا ب 
+CV_LABEL_KEEP_END=اتصالات مفتوحة.
 CV_TABLE_STRING_CONNECTING=جاري الاتصال...
 CV_TABLE_STRING_LEAF=طرف
 CV_TABLE_STRING_ULTRAPEER=ند فائق
+#??? CV_TABLE_STRING_PEER=Peer
 CV_TABLE_STRING_STANDARD=0.6
 CV_TABLE_STRING_INCOMING=الوارد
 CV_TABLE_STRING_OUTGOING=الصادر
@@ -619,11 +651,11 @@ SETUP_WELCOME_TITLE=مرحبا
 SETUP_WELCOME_LABEL=مرحبا بك في معالج تثبيت LimeWire. سيقوم المعالج بإرشادك من خلال سلسلة من الخطوات لكي يعمل LimeWire بشكل صحيح.
 SETUP_WELCOME_PARTIAL_LABEL=مرحبا بك في معالج تثبيت LimeWire. قام LimeWire مؤخرا بإضافة خدمات جديدة تتطلب بعض الإجراءات. سيساعدك LimeWire من خلال سلسلة من الخطوات لتثبيت الخدمات الجديدة
 SETUP_SAVE_TITLE=حفظ المجلد
-SETUP_SAVE_LABEL=من فضلك اختر المجلد الذي ترغب في وضع الملفات التي تقوم بتنزيلها فيه. سيتم مشاركة هذا المجلد تلقائيا مع مستخدمي شبكة gnutella..
+SETUP_SAVE_LABEL=من فضلك اختر المجلد الذي ترغب في وضع الملفات التي تقوم بتنزيلها فيه. سيتم مشاركة هذا المجلد تلقائيا مع مستخدمي شبكة Gnutella.
 SETUP_SPEED_TITLE=سرعة الاتصال
 SETUP_SPEED_LABEL=من فضلك اختر سرعة اتصالك بالإنترنت. تحديد هذه السرعة هام لتحسين مستوى أداء الشبكة. إذا لم تكن متأكدا من نوع اتصالك بالإنترنت، أو لديك اتصال غير مدرج هنا، اختر ما تجده أكثر ملاءمة لك.
 SETUP_STARTUP_TITLE=بداية تشغيل النظام
-SETUP_STARTUP_LABEL=سيساعد ذلك LimeWire في العمل بشكل أفضل حين تستخدمه بعد ذلك.هل ترغب في أن يعمل LimeWire بمجرد بدء نظام التشغيل..
+SETUP_STARTUP_LABEL=سيساعد ذلك LimeWire في العمل بشكل أفضل حين تستخدمه بعد ذلك.هل ترغب في أن يعمل LimeWire بمجرد بدء نظام التشغيل.
 SETUP_STARTUP_CHECKBOX=بداية تلقائية
 SETUP_SCAN_TITLE=بحث عن الملفات
 SETUP_SCAN_LABEL=هل ترغب في أن يقوم LimeWire سريعا بالبحث عن ملفات الوسائط الأخرى على قرصك الصلب؟ستتاح لك فرصة تحديد المجلدات التي ترغب في مشاركتها عقب الانتهاء من الفحص.
@@ -661,7 +693,7 @@ INIT_SAVE_DEFAULT_BUTTON_TIP=استخدم المجلد الافتراضي
 # Key/Value pairs for the pro window on startup
 ################################################################################
 PRO_TITLE=تحديث إلى PRO
-#??? PRO_LABEL_THANKS=For TURBOcharged downloads, get LimeWire PRO. We guarantee that you will love the improved performance of PRO. Thank you for helping keep the Internet open by running LimeWire.
+PRO_LABEL_THANKS=لتنزيلات سريعة وأفضل، احصل على LimeWire PRO. نحن نضمن لك الأداء الأفضل مع PRO. شكرا لك لإبقائك على فتح الإنترنت باستخدام LimeWire.
 
 PRO_LABEL_QUESTION=هل ترغب في التحديث إلى LimeWire PRO?
 GO_PRO_TIP=احصل على LimeWire PRO الآن.
@@ -757,16 +789,16 @@ SPLASH_STATUS_MESSAGE_SERVICE=يتم الآن تحميل الرسائل...
 # Key/value pairs for the message displayed to prompt users to
 # support LimeWire through contributions.
 ##################################################################
-#??? SUPPORT_LIMEWIRE_01=For TURBO-charged searches, get LimeWire Pro.
+SUPPORT_LIMEWIRE_01=لبحث سريع متطور، احصل على LimeWire Pro.
 SUPPORT_LIMEWIRE_02=انقر هنا لتطوير شبكات الند للند المفتوحة الخاصة ب LimeWire.
 SUPPORT_LIMEWIRE_03=اشتر LimeWire Pro لتساعدنا على الإسراع من التنزيلات.
-#??? SUPPORT_LIMEWIRE_04=For TURBO-charged downloads, get LimeWire Pro.
+SUPPORT_LIMEWIRE_04=لتنزيلات سريعة مطورة، احصل على LimeWire Pro.
 SUPPORT_LIMEWIRE_05=دعم الشبكات المفتوحة.
 SUPPORT_LIMEWIRE_06=انقر هنا لتدعيم البرامج ذات المصدر المفتوح والبروتوكولات المفتوحة.
-#??? SUPPORT_LIMEWIRE_07=For TURBO-charged performance, get LimeWire Pro.
+SUPPORT_LIMEWIRE_07=لأداء سريع متطور، احصل على LimeWire Pro.
 SUPPORT_LIMEWIRE_08=حافظ على بقاء الإنترنت مفتوحة. احصل على Pro.
 SUPPORT_LIMEWIRE_09=تطوير LimeWire يتكلف الكثير من المال. احصل على Pro.
-#??? SUPPORT_LIMEWIRE_11=Help support sharing of independent media content.
+SUPPORT_LIMEWIRE_11=ساعد على دعم مشاركة محتويات الوسائط المستقلة
 
 ################################################################################
 # Key/value pairs for the update package, displayed when there is an
@@ -778,7 +810,7 @@ UPDATE_MESSAGE_SMALL=يوجد نسخة أحدث. هل ترغب في التحدي
 UPDATE_SUCCEEDED_MESSAGE=تم إتمام تحديث LimeWire بنجاح. من فضلك قم بإعادة تشغيل LimeWire لتستخدم النسخة الجديدة.
 UPDATE_WEB_PAGE_ERROR_MESSAGE=حدث خطأ أثناء فتح صفحة LimeWire على الويب لإجراء التحديث. لإكمال التحديث ادخل على: http://www.limewire.com.
 UPDATE_ERROR_MESSAGE_START=صادف تحديث LimeWire الخطأ التالي:
-UPDATE_ERROR_MESSAGE_END=من فضلك قم بإرسال تقرير بالخطأ إلى :"support@limewire.org" . يمكنك تنزيل النسخة الحديثة من LimeWire من www.limewire.org.
+UPDATE_ERROR_MESSAGE_END=من فضلك قم بإرسال تقرير بالخطأ إلى: "support@limewire.org". يمكنك تنزيل النسخة الحديثة من LimeWire من www.limewire.org.
 UPDATE_ERROR_ACCESSING_FILE=خطأ في الوصول للملفات الضرورية على الملقم.
 UPDATE_ERROR_COMMUNICATING_WITH_SERVER=خطأ في الاتصال بالملقم.
 UPDATE_ERROR_LAX_FILE_NOT_FOUND=خطأ في تحديد ملف الإجراءات الخاص بك.
@@ -837,8 +869,8 @@ NO_INTERNET_RETRYING=يبدو أن جهازك غير متصل بالإنترنت
 # Key/value pair for the message shown when LimeWire is trying to connect
 # to too many GWebCaches for various reasons.
 ################################################################################
-#??? GWEBCACHE_FETCHED_TOO_MANY=LimeWire is unable to connect to hosts on the Gnutella network. This is most often due to firewalls or content-filtering software blocking access to Gnutella (port 6346). Please review your firewall's options to allow LimeWire to access the Gnutella network or speak to your system administrator or ISP to determine if Gnutella traffic is being filtered.
-#??? GWEBCACHE_NO_CACHES_LEFT=LimeWire is unable to connect to hosts on the Gnutella network. This is most often due to firewalls or content-filtering software blocking access to Gnutella (port 6346). Please review your firewall's options to allow LimeWire to access the Gnutella network or speak to your system administrator or ISP to determine if Gnutella traffic is being filtered.
+GWEBCACHE_FETCHED_TOO_MANY=LimeWire غير قادر على الاتصال بالمضيفين على شبكة Gnutella.وقد تم هذا غالبا نتيجة استخدام برامج الحوائط النارية أو برامج تنقية المحتويات أو منع الوصول لشبكة Gnutella (منفذ 6346). من فضلك راجع خيارات الحائط الناري الخاص بك لكي تسمح ل LimeWire بالوصول لشبكة Gnutella أو اتصل بمسئول الشبكة أو مزود خدمة الإنترنت لمعرفة ما إذا كان يتم منع الاتصال بشبكة Gnutella.
+GWEBCACHE_NO_CACHES_LEFT=LimeWire غير قادر على الاتصال بالمضيفين على شبكة Gnutella.وقد تم هذا غالبا نتيجة استخدام برامج الحوائط النارية أو برامج تنقية المحتويات أو منع الوصول لشبكة Gnutella (منفذ 6346). من فضلك راجع خيارات الحائط الناري الخاص بك لكي تسمح ل LimeWire بالوصول لشبكة Gnutella أو اتصل بمسئول الشبكة أو مزود خدمة الإنترنت لمعرفة ما إذا كان يتم منع الاتصال بشبكة Gnutella.
 
 ################################################################################
 # Key/Value pairs for friendly error messages.
@@ -848,38 +880,38 @@ NO_INTERNET_RETRYING=يبدو أن جهازك غير متصل بالإنترنت
 ERROR_DISK_FULL_DOWNLOAD=لا يتمكن LimeWire من تنزيل الملف المختار نظرا لامتلاء القرص الصلب. لتنزيل المزيد من الملفات، يجب عليك تحرير مساحة على قرصك الصلب.
 ERROR_DISK_FULL_GENERIC=لم يتمكن LimeWire من كتابة ملف ضروري نظرا لامتلاء القرص الصلب. لتستكمل استخدام LimeWire لا بد من تحرير مساحة على قرصك الصلب.
 ERROR_LOCKED_BY_PROCESS_DOWNLOAD=LimeWire غير قادر على تنزيل الملف المختار لأن ثمة برنامج آخر يستخدم نفس الملف. أغلق البرنامج الآخر وحاول إعادة التنزيل.
-#??? ERROR_LOCKED_BY_PROCESS_GENERIC=LimeWire was unable to open a necessary file because another program has locked the file. LimeWire may act unexpectedly until this file is released.
-#??? ERROR_ACCESS_DENIED_DOWNLOAD=LimeWire was unable to create or continue writing an incomplete file for the selected download because you do not have permission to write files to the incomplete directory. To continue using LimeWire, please choose a different Save Directory.
-#??? ERROR_ACCESS_DENIED_GENERIC=LimeWire was unable to write a necessary file because you do not have the necessary permissions. Your preferences may not be maintained the next time you start LimeWire.
+ERROR_LOCKED_BY_PROCESS_GENERIC=لم يتمكن LimeWire من فتح أحد الملفات الضرورية لأن برنامجا آخر يستخدم هذا الملف. قد يؤدي ذلك إلى عمل LimeWire بطريقة غير صحيحة إلى أن يتمكن من فتح هذا الملف.
+ERROR_ACCESS_DENIED_DOWNLOAD=لم يكن LimeWire قادرا على إنشاء أو استكمال كتابة ملف غير كامل للملف المراد تنزيله وذلك لأنك لا تمتلك صلاحية كتابة الملفات في مجلد الملفات الغير تامة. لكي تستكمل استخدام LimeWire اختر مجلدا آخرا للحفظ.
+ERROR_ACCESS_DENIED_GENERIC=لم يتمكن LimeWire من كتابة أحد الملفات الضرورية نتيجة عدم امتلاكك الصلاحيات الضرورية لذلك. قد لا يتم حفظ التفضيلات في المرة القادمة التي تقوم فيها بتشغيل LimeWire.
 
 
 ################################################################################
 # Key/Value pairs for internal error messages
 ################################################################################
 ERROR_INTERNAL_TITLE=خطأ داخلي
-#??? ERROR_INTERNAL_SERVLET=LimeWire has encountered an internal error. It is possible for LimeWire to recover and continue running normally. To aid with debugging, please click 'Send' to notify LimeWire about the problem. If desired, you can click 'Review' to look at the information that will be sent. Thank you.
+ERROR_INTERNAL_SERVLET=صادف LimeWire خطأ داخليا. من الممكن أن يقوم LimeWire بإصلاح الخطأ واستكمال العمل بشكل طبيعي. لكي تساعد في تصليح الأخطاء، من فضلك اضغط على "إرسال" لإعلام LimeWire بالمشكلة.كما يمكنك أن تضغط على "تقرير" لقراءة المعلومات التي سيتم إرسالها ، ‘ن كنت ترغب في ذلك. شكرا لك.
 ERROR_INTERNAL_SEND=إرسال
-#??? ERROR_INTERNAL_REVIEW=Review
-#??? ERROR_INTERNAL_DISCARD=Discard
+ERROR_INTERNAL_REVIEW=تقرير
+ERROR_INTERNAL_DISCARD=تجاهل
 ERROR_INTERNAL_COPY=نسخ التقرير
 ERROR_INTERNAL_OK=موافق
 ERROR_INTERNAL_ALWAYS_SEND=دائما أرسل في الحال
-#??? ERROR_INTERNAL_ALWAYS_REVIEW=Always ask for review
-#??? ERROR_INTERNAL_ALWAYS_DISCARD=Always discard bugs
-ERROR_INTERNAL_SERVLET_FAILED=لم يتمكن LimeWire من الاتصال بملقم الخطأ وذلك بهدف إرسال تقرير الخطأ المبين بأسفل.لتساعد في إصلاح الأخطاء، قم بنسخ النص التالي وأرسله إلى bugs@limiWire.com . شكرا
+ERROR_INTERNAL_ALWAYS_REVIEW=السؤال دائما عن التقرير
+ERROR_INTERNAL_ALWAYS_DISCARD=تجاهل الأخطاء دائما
+ERROR_INTERNAL_SERVLET_FAILED=لم يتمكن LimeWire من الاتصال بملقم الخطأ وذلك بهدف إرسال تقرير الخطأ المبين بأسفل.لتساعد في إصلاح الأخطاء، قم بنسخ النص التالي وأرسله إلى bugs@limiWire.com. شكرا
 
 ################################################################################
 # Key/Value pairs for error messages
 ################################################################################
 ERROR_PORT_UNAVAILABLE=المنفذ غير متاح. من فضلك اختر منفذ آخر.
-#??? ERROR_KEEP_ALIVE=LimeWire does not allow you to maintain this many connections, as it creates excess traffic that clogs the network.
+ERROR_KEEP_ALIVE=لا يسمح LimeWire بتدعيم هذا العدد من الاتصالات، لأن ذلك يعمل على تقليل كفاءة الشبكة.
 ERROR_TOO_LOW_FOR_ULTRAPEER=الأنداد الفائقون ذووا النقط الطرفية يحتاجون على الأقل إلى ست اتصالات.
 ERROR_TOO_HIGH_FOR_LEAF=الأطراف تحتاج إلى اتصال واحد، حيث أنها متصلة بند فائق.
 ERROR_PORT=لم يتم إيجاد منفذ لاستخدامه في الاتصالات الواردة.\n من فضلك اختر منفذا آخر من نافذة الإجراء.
-#??? ERROR_INCOMING_CONNECTIONS=Could not listen to socket for incoming connections; aborting.
+ERROR_INCOMING_CONNECTIONS=لا يمكن الاتصال على مأخذ توصيل الاتصالات الواردة. تم الخروج.
 ERROR_THREE_CHARACTER_SEARCH=لا بد أن تحتوي جملة البحث على ثلاث أحرف على الأقل لتجنب حدوث اختناقات في الشبكة.
 ERROR_NETWORK_FLOODING=هذا البحث قد يقوم بإرجاع العديد من النتائج ويبطئ الشبكة. هل ترغب في الاستكمال؟
-ERROR_BROWSE_FAILED=لا يمكن تصفح ملفات المضيف المطلوب. يبدو أن هذا الجهاز لا يقبل المزيد من الاتصالات..
+ERROR_BROWSE_FAILED=لا يمكن تصفح ملفات المضيف المطلوب. يبدو أن هذا الجهاز لا يقبل المزيد من الاتصالات.
 ERROR_INVALID_SAVE_DIRECTORY=المجلد غير صالح لحفظ الملفات. من فضلك اختر مجلدا آخر أو استخدم المجلد الافتراضي.
 ERROR_INVALID_SAVE_DIRECTORY_WINDOW=مجلد الحفظ لديك غير صالح. ربما تم إلغاؤه، أو أنه غير مسموح بالكتابة فيه، أو أن هناك مشكلة أخرى. من فضلك اختر مجلدا آخر.
 ERROR_INVALID_SAVE_DIRECTORY_SELECTION=مجلد الحفظ المختار غير صالح. ربما غير مسموح لك بالكتابة للمجلد المختار.سيعود LimeWire للمجلد الذي سبق اختياره.
@@ -892,13 +924,15 @@ ERROR_ALREADY_DOWNLOADING=أنت بالفعل تقوم بالتنزيل
 ERROR_ALREADY_EXISTS=لقد قمت بالفعل بالتنزيل
 ERROR_CANT_RESUME_START=لا يبدو الملف ناقصا ولا يمكن إكمال تنزيله
 ERROR_CANT_RESUME_END=الملف.
-#??? ERROR_LOCATING_BROWSER_THEMES=LimeWire could not locate your browser. The LimeWire themes address is:\n"http://www.limewire.com/skins".
-#??? ERROR_LOCATING_BROWSER_SUPPORT=LimeWire could not locate your browser. The LimeWire support address is:\n"http://www.limewire.com/support".
-#??? ERROR_LOCATING_BROWSER_FAQ=LimeWire could not locate your browser. The LimeWire FAQ address is:\n"http://www.limewire.com/support/faq.htm".
-#??? ERROR_LOCATING_BROWSER_FORUM=LimeWire could not locate your browser. The LimeWire forum address is:\n"http://www.limewire.com/forum.htm".
-#??? ERROR_LOCATING_BROWSER_FRIEND=LimeWire could not locate your browser. The LimeWire "Tell a friend" form address is:\n"http://www.limewire.com/index.jsp/tell_friend".
-#??? ERROR_LOCATING_BROWSER_GENERAL=LimeWire could not locate your default browser.
-#??? ERROR_ACCESSING_SAVE_DIRECTORY=Could not access the save directory. Please select a new save directory in the Options menu and try again.
+#??? ERROR_CANT_RESUME_START=The file
+#??? ERROR_CANT_RESUME_END=is not a valid incomplete file and cannot be resumed.
+ERROR_LOCATING_BROWSER_THEMES=لم يتمكن LimeWire من تحديد المتصفح الخاص بك. عنوان سمات LimeWire هو:\n"http://www.limewire.com/skins".
+ERROR_LOCATING_BROWSER_SUPPORT=لم يتمكن LimeWire من تحديد المتصفح الخاص بك. عنوان دعم LimeWire هو:\n"http://www.limewire.com/support".
+ERROR_LOCATING_BROWSER_FAQ=لم يتمكن LimeWire من تحديد المتصفح الخاص بك. عنوان LimeWire FAQ هو:\n"http://www.limewire.com/support/faq.htm".
+ERROR_LOCATING_BROWSER_FORUM=لم يتمكن LimeWire من تحديد المتصفح الخاص بك. عنوان ساحة حوار LimeWire هو:\n"http://www.limewire.com/forum.htm".
+ERROR_LOCATING_BROWSER_FRIEND=لم يتمكن LimeWire من تحديد المتصفح الخاص بك. عنوان نموذج "أخبر صديقا" عن LimeWire هو:\n"http://www.limewire.com/index.jsp/tell_friend".
+ERROR_LOCATING_BROWSER_GENERAL=لم يتمكن LimeWire من تحديد المتصفح التلقائي الخاص بك.
+ERROR_ACCESSING_SAVE_DIRECTORY=لم يتم الوصول لمجلد الحفظ. من فضلك اختر مجلدا جديدا للحفظ من قائمة خيارات وحاول مرة أخرى.
 ERROR_DEL_META_USER=لا يمكن إزالة المعلومات الغير محفوظة.
 ERROR_DEL_META_SYSTEM=لا يمكن إزالة البيانات
 ERROR_SAVE_META_DOC=حدث خطأ داخلي في المستند. لا يمكن حفظ البيانات
@@ -907,13 +941,13 @@ ERROR_SAVE_META_FILE=الملف غير موجود أو تالف. لا يمكن �
 ERROR_SAVE_META_RW=حدث خطأ في الكتابة أو القراءة. لا يمكن حفظ البيانات
 ERROR_SAVE_META_ID3=الملف تالف. لا يمكن حفظ البيانات
 ERROR_SAVE_META_DISK=حدث خطأ داخلي. لا يمكن حفظ البيانات
-#??? ERROR_SAVE_META_BAD=Incorrect format entered. Changes will not be saved.
+ERROR_SAVE_META_BAD=تم إدخال هيئة غير مضبوطة. لن يتم حفظ التغييرات.
 ERROR_REMOVE_LAST_COL=لا يمكنك عدم تفعيل جميع الأعمدة.
 ERROR_BROWSE_HOST_FAILED_BEGIN_KEY=لا يمكن استعراض المضيف
 ERROR_BROWSE_HOST_FAILED_END_KEY=.
 ERROR_INVALID_THEME_FILE=السمة التي قمت باختيارها غير موجودة أو غير صالحة. من فضلك قم باختيار ملف آخر أو استخدم السمة الافتراضية.
-#??? ERROR_BAD_MAGNET_LINK=Could not process bad MAGNET link
-#??? ERROR_INVALID_URLS_IN_MAGNET=One or more URLs in the MAGNET link were invalid. Your file may not download correctly.
+ERROR_BAD_MAGNET_LINK=لا يمكن تشغيل وصلة MAGNET.
+ERROR_INVALID_URLS_IN_MAGNET=واحدة أو أكثر من وصلات MAGNET غير صالحة. قد لا يتم تنزيل الملف بصورة صحيحة.
 #??? ERROR_ITUNES_SCRIPT=LimeWire was unable to load the iTunes integration script and has turned off iTunes integration. To re-enable iTunes integration, go to LimeWire -> Preferences, choose iTunes, and check the box to enable iTunes integration.
 #??? ERROR_ITUNES_LINK=LimeWire was unable to load the necessary components for iTunes and has turned off iTunes integration. To re-enable iTunes integration, go to LimeWire -> Preferences, choose iTunes, and check the box to enable iTunes integration.
 #??? ERROR_ITUNES_INTEGRATION=An error has occurred with LimeWire's iTunes integration. To prevent further errors, LimeWire has turned off iTunes integration. To re-enable iTunes integration, go to LimeWire -> Preferences, choose iTunes, and check the box to enable iTunes integration.
@@ -930,16 +964,16 @@ OPTIONS_SPEED_MAIN_TITLE=السرعة
 OPTIONS_DOWNLOAD_MAIN_TITLE=تنزيلات
 OPTIONS_UPLOAD_MAIN_TITLE=تحميلات
 OPTIONS_UPLOAD_BASIC_MAIN_TITLE=أساسي
-#??? OPTIONS_UPLOAD_SLOTS_MAIN_TITLE=Slots
+OPTIONS_UPLOAD_SLOTS_MAIN_TITLE=الشرائح
 OPTIONS_CONNECTIONS_MAIN_TITLE=اتصالات
 OPTIONS_SHUTDOWN_MAIN_TITLE=إيقاف التشغيل
 OPTIONS_CHAT_MAIN_TITLE=دردشة
 OPTIONS_PLAYER_MAIN_TITLE=المشغل
-#??? OPTIONS_ITUNES_MAIN_TITLE=iTunes
-#??? OPTIONS_APPS_MAIN_TITLE=Helper apps
+OPTIONS_ITUNES_MAIN_TITLE=iTunes
+OPTIONS_APPS_MAIN_TITLE=التطبيقات المساعدة
 OPTIONS_BUGS_MAIN_TITLE=تقارير الخطأ
 OPTIONS_GUI_MAIN_TITLE=عرض
-#??? OPTIONS_POPUPS_MAIN_TITLE=Popups
+OPTIONS_POPUPS_MAIN_TITLE=النوافذ المنبثقة
 OPTIONS_AUTOCOMPLETE_MAIN_TITLE=إكمال النص تلقائيا
 OPTIONS_THEME_MAIN_TITLE=سمة
 OPTIONS_SKIN_MAIN_TITLE=سطح
@@ -947,8 +981,8 @@ OPTIONS_SEARCH_MAIN_TITLE=بحث
 OPTIONS_SEARCH_LIMIT_MAIN_TITLE=الحد
 OPTIONS_SEARCH_QUALITY_MAIN_TITLE=الجودة
 OPTIONS_SEARCH_SPEED_MAIN_TITLE=السرعة
-#??? OPTIONS_FILTERS_MAIN_TITLE=Filters
-#??? OPTIONS_RESULTS_MAIN_TITLE=Keywords
+OPTIONS_FILTERS_MAIN_TITLE=التنقية
+OPTIONS_RESULTS_MAIN_TITLE=الكلمات المفتاحية
 OPTIONS_MESSAGES_MAIN_TITLE=المضيفون
 OPTIONS_ADVANCED_MAIN_TITLE=متقدم
 OPTIONS_COMPRESSION_MAIN_TITLE=الضغط
@@ -957,14 +991,15 @@ OPTIONS_PORT_MAIN_TITLE=المنفذ
 OPTIONS_FIREWALL_MAIN_TITLE=الحوائط النارية
 OPTIONS_PRIVATE_NET_MAIN_TITLE=شبكة خاصة
 OPTIONS_STARTUP_MAIN_TITLE=بداية تشغيل النظام
-#??? OPTIONS_PROXY_MAIN_TITLE=Proxy
+OPTIONS_PROXY_MAIN_TITLE=الوكيل
+#??? OPTIONS_CONNECT_PREF_MAIN_TITLE=Locale preferencing
 
 ################################################################################
 # Key/value pairs for the localization options window item
 # in the options window
 ################################################################################
 #??? OPTIONS_LOCALIZE_TITLE=International localization
-#??? OPTIONS_LOCALIZE_LABEL=You can customize LimeWire so that its displays your own language and its usage in your country. The country or territory specified can also be used to locate you on the worldwide network.
+#??? OPTIONS_LOCALIZE_LABEL=You can customize LimeWire so that it displays your own language and its usage in your country. The country or territory specified can also be used to locate you on the worldwide network.
 OPTIONS_LOCALIZE_LANGUAGE_BOX_LABEL=اللغة
 OPTIONS_LOCALIZE_COUNTRY_BOX_LABEL=البلد
 
@@ -988,7 +1023,7 @@ OPTIONS_PURGE_INCOMPLETE_TIME_NUMBER_LABEL=عدد الأيام لحفظ المل
 # in the options window
 ################################################################################
 OPTIONS_SHARED_DIRS_TITLE=المجلدات المشارَكة
-OPTIONS_SHARED_DIRS_LABEL=يمكنك غختيار مجلدات لمشاركة الملفات . المجلدات الموجودة في هذه الملفات يتم عرضها في المكتبة.
+OPTIONS_SHARED_DIRS_LABEL=يمكنك غختيار مجلدات لمشاركة الملفات. المجلدات الموجودة في هذه الملفات يتم عرضها في المكتبة.
 OPTIONS_SHARED_DIRS_BOX_LABEL=المجلدات
 OPTIONS_SHARED_DIRS_BUTTON_LABEL=إضافة مجلد...
 OPTIONS_SHARED_DIRS_BUTTON_TIP=مشاركة المجلد.
@@ -1054,7 +1089,7 @@ OPTIONS_UPLOAD_CLEAR_CHECK_BOX_LABEL=مسح تلقائي للملفات التي
 # to uploads in the options window
 ################################################################################
 OPTIONS_UPLOAD_BANDWIDTH_TITLE=سرعة التحميل
-#??? OPTIONS_UPLOAD_BANDWIDTH_LABEL=You can set the percentage of your bandwidth devoted to uploads. To turn off uploads, reduce your upload slots to zero.
+OPTIONS_UPLOAD_BANDWIDTH_LABEL=يمكنك تحديد نسبة من سرعة النقل لتستخدم في التحميل. إذا كنت لا ترغب في التحميل، ضع قيمة شرائح التحميل بصفر.
 OPTIONS_UPLOAD_BANDWIDTH_SLIDER_MAX_LABEL=غير محدد
 OPTIONS_UPLOAD_BANDWIDTH_SLIDER_LABEL_LABEL=سرعة التحميل:
 
@@ -1069,16 +1104,16 @@ OPTIONS_UPLOAD_ALLOW_PARTIAL_SHARING_CHECK_BOX_LABEL=السماح بالمشار
 ################################################################################
 # Key/Value pairs for the options for the hard maximum number of uploads
 ################################################################################
-#??? OPTIONS_UPLOAD_MAX_TITLE=Max upload slots
-OPTIONS_UPLOAD_MAX_LABEL=عدم السماح أبدا بهذا العدد من التحميلات. سيتم الوصول إلى هذه القيمة فقط إذا كان لديك سرعة نقل كافية..
-#??? OPTIONS_UPLOAD_MAX_NUMBER_LABEL=Max upload slots:
+OPTIONS_UPLOAD_MAX_TITLE=الحد الأقصى لشرائح التحميل
+OPTIONS_UPLOAD_MAX_LABEL=عدم السماح أبدا بهذا العدد من التحميلات. سيتم الوصول إلى هذه القيمة فقط إذا كان لديك سرعة نقل كافية.
+OPTIONS_UPLOAD_MAX_NUMBER_LABEL=الحد الأقصى لشرائح التحميل:
 
 ################################################################################
 # Key/Value pairs for the options for the soft maximum number of uploads
 ################################################################################
-#??? OPTIONS_UPLOAD_SOFT_MAX_TITLE=Start upload slots
-#??? OPTIONS_UPLOAD_SOFT_MAX_LABEL=Always allow at least this many uploads. Once this limit is reached, allow more uploads only if bandwidth is available. Setting this value too low may prevent you from reaching your upload capacity, hurting other users.
-#??? OPTIONS_UPLOAD_SOFT_MAX_NUMBER_LABEL=Start upload slots:
+OPTIONS_UPLOAD_SOFT_MAX_TITLE=بداية شرائح التحميل
+OPTIONS_UPLOAD_SOFT_MAX_LABEL=دائما السماح لهذا العدد من التحميلات على الأقل. عندما يتم استيفاء هذا العدد، يمكن السماح للمزيد من التحميلات فقط إذا كان لا يزال هناك سرعة نقل متاحة. تحديد هذا العدد ليكون قليلا جدا سيحد من وصولك لحد التحميل، وسيضايق المستخدمين الآخرين.
+OPTIONS_UPLOAD_SOFT_MAX_NUMBER_LABEL=بداية شرائح التحميل:
 
 ################################################################################
 # Key/Value pairs for the options for the number of uploads per persons
@@ -1101,7 +1136,7 @@ OPTIONS_SHUTDOWN_TITLE=خيارات إيقاف التشغيل
 OPTIONS_SHUTDOWN_LABEL=يمكنك اختيار طريقة إيقاف التشغيل التلقائية.
 OPTIONS_SHUTDOWN_IMMEDIATELY_LABEL=إيقاف التشغيل في الحال
 OPTIONS_SHUTDOWN_AFTER_TRANSFERS_LABEL=إيقاف التشغيل بعد الانتهاء من التحويلات
-#??? OPTIONS_SHUTDOWN_TO_TRAY_LABEL=Minimize to system tray
+OPTIONS_SHUTDOWN_TO_TRAY_LABEL=تصغير لمنطقة الإعلام
 
 ################################################################################
 # Key/Value pairs for the chat options in the options window
@@ -1115,14 +1150,14 @@ OPTIONS_CHAT_ACTIVE_LABEL=يمكنك تمكين أو إيقاف تشغيل ال�
 ################################################################################
 OPTIONS_PLAYER_ACTIVE_CHECK_BOX_LABEL=استخدم مشغل LimeWire لملفات MP3.
 OPTIONS_PLAYER_PREFERENCE_TITLE=خيارات المشغل
-#??? OPTIONS_PLAYER_PREFERENCE_LABEL=You can use the internal player or your system default. A restart is required to enable/disable the player controls.
+OPTIONS_PLAYER_PREFERENCE_LABEL=يمكنك استخدام المشغل الداخلي أو المشغل الافتراضي للنظام. لتفعيل/عدم تفعيل تحكمات المشغل لا بد من إعادة التشغيل.
 
 ################################################################################
 # Key/Value pairs for the iTunes options in the options window
 ################################################################################
-#??? OPTIONS_ITUNES_SUPPORT_ACTIVE_CHECK_BOX_LABEL=Enable iTunes support:
-#??? OPTIONS_ITUNES_PREFERENCE_TITLE=iTunes options
-#??? OPTIONS_ITUNES_PREFERENCE_LABEL=You can enable iTunes support.
+OPTIONS_ITUNES_SUPPORT_ACTIVE_CHECK_BOX_LABEL=تفعيل دعم iTunes:
+OPTIONS_ITUNES_PREFERENCE_TITLE=خيارات iTunes
+OPTIONS_ITUNES_PREFERENCE_LABEL=يمكنك تفعيل دعم iTunes (Mac OS X only).
 
 ################################################################################
 # Key/Value pairs for url handler options
@@ -1152,7 +1187,7 @@ OPTIONS_BUGS_VIEW_EXAMPLE=عرض مثال
 ################################################################################
 OPTIONS_DO_NOT_ASK_AGAIN=عدم عرض هذه الرسالة مرة أخرى
 OPTIONS_ALWAYS_USE_ANSWER=استخدم نفس الإجابة دائما
-#??? OPTIONS_POPUPS_TITLE=Popups
+OPTIONS_POPUPS_TITLE=النوافذ المنبثقة
 OPTIONS_POPUPS_LABEL=إعادة عرض الرسائل التي اخترت لها "عدم عرض هذه الرسالة مرة أخرى" أو "استخدم نفس الإجابة دائما".
 OPTIONS_POPUPS_DISPLAY_CHECK_BOX_LABEL=استعادة الافتراضيات
 
@@ -1222,7 +1257,7 @@ OPTIONS_SEARCH_MAX_NUMBER_LABEL=أقصى عدد من البحث:
 # Key/Value pairs for search quality options in the options window
 ################################################################################
 OPTIONS_SEARCH_QUALITY_TITLE=جودة نتيجة البحث
-#??? OPTIONS_SEARCH_QUALITY_LABEL=You can select the "quality" of search results to display. Four star results indicate that the host returning the result is not firewalled and has free upload slots.
+OPTIONS_SEARCH_QUALITY_LABEL= يمكنك اختيار "جودة" نتائج البحث التي يتم عرضها. نتائج الأربع نجومتعني أن المضيف الذي أعاد النتيجة يمكنه التحميل، وليس لديه حائط ناري.
 OPTIONS_SEARCH_QUALITY_FOUR_STAR_LABEL=إظهار نتائج الأربع نجوم فقط.
 OPTIONS_SEARCH_QUALITY_THREE_AND_FOUR_STAR_LABEL=إظهار نتائج الثلاث او الأربع نجوم فقط.
 OPTIONS_SEARCH_QUALITY_TWO_THREE_AND_FOUR_STAR_LABEL=ظهار نتائج النجمتين، الثلاث او الأربع نجوم فقط.
@@ -1242,15 +1277,15 @@ OPTIONS_SEARCH_SPEED_ALL_LABEL=إظهار جميع السرعات
 # Key/Value pairs for result filtering options
 # in the options window
 ################################################################################
-#??? OPTIONS_IGNORE_RESULTS_TITLE=Filter results
-#??? OPTIONS_IGNORE_RESULTS_LABEL=You can filter out search results containing specific words.
+OPTIONS_IGNORE_RESULTS_TITLE=تنقية النتائج
+OPTIONS_IGNORE_RESULTS_LABEL=يمكنك تنقية نتائج البحث التي تحوي كلمات معينة
 
 ################################################################################
 # Key/Value pairs for general result type filtering options
 # in the options window
 ################################################################################
-#??? OPTIONS_IGNORE_RESULT_TYPES_TITLE=Filter result types
-#??? OPTIONS_IGNORE_RESULT_TYPES_LABEL=You can specify general types of search results to filter.
+OPTIONS_IGNORE_RESULT_TYPES_TITLE=تنقية أنواع النتائج
+OPTIONS_IGNORE_RESULT_TYPES_LABEL=يمكنك تحديد أنواع عامة من نتائج البحث ليتم تنقيتها.
 #??? OPTIONS_IGNORE_RESULT_TYPES_ADULT_BOX_LABEL=Ignore adult content
 OPTIONS_IGNORE_RESULT_TYPES_HTML_BOX_LABEL=تجاهل ملفات .htm/.html
 OPTIONS_IGNORE_RESULT_TYPES_VBS_BOX_LABEL=تجاهل ملفات .vbs
@@ -1258,9 +1293,9 @@ OPTIONS_IGNORE_RESULT_TYPES_VBS_BOX_LABEL=تجاهل ملفات .vbs
 ################################################################################
 # Key/Value pairs for message filtering options in the options window
 ################################################################################
-#??? OPTIONS_IGNORE_MESSAGES_TITLE=Filter hosts
-#??? OPTIONS_IGNORE_MESSAGES_LABEL=You can disallow messages from specific hosts by adding their IP addresses (e.g. "192.168.0.1", "192.*.*.*", "192.168.12.16/255.255.255.240" or "192.168.12.16/28") to the banned list.
-#??? OPTIONS_ALLOW_MESSAGES_TITLE=Allow hosts
+OPTIONS_IGNORE_MESSAGES_TITLE=تنقية المضيفين
+OPTIONS_IGNORE_MESSAGES_LABEL=يمكنك عدم السماح للرسائل الواردة من مضيفين معينيين بإضافة عناوين IP الخاصة بهم(مثال ("192.168.0.1", "192.*.*.*", "192.168.12.16/255.255.255.240" or "192.168.12.16/28" إلى قائمة الممنوعين.
+OPTIONS_ALLOW_MESSAGES_TITLE=السماح للمضيفين
 #??? OPTIONS_ALLOW_MESSAGES_LABEL=You can allow messages from specific hosts by adding their IP addresses (e.g. "192.168.0.1", "192.*.*.*", "192.168.12.16/255.255.255.240" or "192.168.12.16/28") to the allow list. This list is only needed to override the banned list.
 
 ################################################################################
@@ -1281,6 +1316,15 @@ OPTIONS_CONNECT_PREF_LABEL=يمكنك تحديد من يستطيعون الات�
 #??? OPTIONS_CONNECT_PREF_SLIDER_LABEL=Allow freeloaders:
 OPTIONS_CONNECT_PREF_SLIDER_MIN_LABEL=نادرا
 OPTIONS_CONNECT_PREF_SLIDER_MAX_LABEL=دائما
+
+################################################################################
+# Key/Value pairs for the options for setting connection preferences
+# in the advanced panel of the options window
+################################################################################
+#??? OPTIONS_CONNECT_LOCALE_PREF_TITLE=Locale preferencing
+#??? OPTIONS_CONNECT_LOCALE_PREF_LABEL=You can choose to preference connections that are advertising the same locale as you are. Choosing a large number of connection to preference may cause your client to take a long time to connect to the network.
+#??? OPTIONS_CONNECT_LOCALE_PREF_DISPLAY_CHECK_BOX_LABEL=Turn preferencing on:
+#??? OPTIONS_CONNECT_LOCALE_PREF_NUM_LABEL=Number of connections to preference
 
 ################################################################################
 # Key/Value pairs for the options for setting the listening port
@@ -1329,28 +1373,28 @@ OPTIONS_STARTUP_CHECK_BOX_LABEL=العمل مع بداية تشغيل النظا
 ################################################################################
 # Key/Value pairs for browse for the proxy options pane
 ################################################################################
-#??? OPTIONS_PROXY_TITLE=Proxy
-#??? OPTIONS_PROXY_LABEL=Configure proxy options for LimeWire.
-#??? OPTIONS_PROXY_NO_PROXY_BUTTON_LABEL=No proxy
-#??? OPTIONS_PROXY_SOCKS4_BUTTON_LABEL=Socks v4
-#??? OPTIONS_PROXY_SOCKS5_BUTTON_LABEL=Socks v5
-#??? OPTIONS_PROXY_HTTP_BUTTON_LABEL=HTTP
-#??? OPTIONS_PROXY_HOST_LABEL=Proxy
-#??? OPTIONS_PROXY_PORT_LABEL=Port
-#??? OPTIONS_PROXY_LOGIN_TITLE=Login details
-#??? OPTIONS_PROXY_LOGIN_LABEL=Configure username and password to be used for the proxy
-#??? OPTIONS_PROXY_LOGIN_AUTHENTICATE_LABEL=Enable authentication. (Does not work for HTTP Proxies) 
-#??? OPTIONS_PROXY_LOGIN_USERNAME_LABEL=Username
-#??? OPTIONS_PROXY_LOGIN_PASSWORD_LABEL=Password
+OPTIONS_PROXY_TITLE=الوكيل
+OPTIONS_PROXY_LABEL=ضبط خيارات الوكيل ل LimeWire.
+OPTIONS_PROXY_NO_PROXY_BUTTON_LABEL=لا يوجد وكيل
+OPTIONS_PROXY_SOCKS4_BUTTON_LABEL=Socks v4
+OPTIONS_PROXY_SOCKS5_BUTTON_LABEL=Socks v5
+OPTIONS_PROXY_HTTP_BUTTON_LABEL=HTTP
+OPTIONS_PROXY_HOST_LABEL=الوكيل
+OPTIONS_PROXY_PORT_LABEL=المنفذ
+OPTIONS_PROXY_LOGIN_TITLE=بيانات الدخول
+OPTIONS_PROXY_LOGIN_LABEL=ضبط اسم المستخدم وكلمة المرور ليتم استخدامها مع الوكيل.
+OPTIONS_PROXY_LOGIN_AUTHENTICATE_LABEL=تفعيل التوثيق. (لا يعمل مع وكلاء HTTP)
+OPTIONS_PROXY_LOGIN_USERNAME_LABEL=اسم المستخدم
+OPTIONS_PROXY_LOGIN_PASSWORD_LABEL=كلمة السر
 
 ################################################################################
 # Key/value pairs for top-level stats panels
 ################################################################################
 STATS_BANDWIDTH_PANE_TITLE=سرعة النقل
-#??? STATS_BANDWIDTH_PANE_LABEL=Bandwidth statistics include complete information on all bandwidth sent upstream and downstream. Click on one of the categories to see the desired statistics.
+STATS_BANDWIDTH_PANE_LABEL=إحصائيات سرعة النقل تتضمن معلومات كاملة حول جميع سرعات النقل للبيانات الصادرة والواردة. انقر فوق أحد الفئات لترى الإحصائيات المطلوبة.
 
 STATS_NET_PANE_TITLE=الشبكة
-#??? STATS_NET_PANE_LABEL=Statistics on the current state of the network. These statistics are quite inaccurate due to the dynamic, distributed nature of Gnutella and should not be taken too literally. They can, however, give you a general idea regarding the current state of your connection.
+STATS_NET_PANE_LABEL=إحصائيات الحالة الحالية للشبكة. هذه الإحصائيات ليست دقيقة بدرجة كافية نتيجة طبيعة LimeWire الديناميكية الموزعة.على الرغم من ذلك يمكن أن تعطيك فكرة عامة عن الحالة الحالية لاتصالك.
 
 STATS_ADVANCED_PANE_TITLE=متقدم
 #??? STATS_ADVANCED_PANE_LABEL=Advanced statistics include detailed information for Gnutella messages and HTTP traffic. This information can be useful for advanced users as well as for researchers working on the Gnutella network. For example, researchers can choose to write any statistic to a file. This file will be named automatically and will be saved in the working directory. Data will be reported in comma-delimited format, easily viewable in any spreadsheet program. Advanced statistics are not displayed by default and are not recommended for most users.
@@ -1374,11 +1418,11 @@ STATS_FILE_SIZE=الحجم الكلي للملف بالميجا بايت
 
 STATS_NETWORK_TITLE=شبكة
 STATS_TOTAL_MESSAGES=العدد الكلي للرسائل
-#??? STATS_LOCAL_SEARCHES=Local searches
+STATS_LOCAL_SEARCHES=بحث محلي
 STATS_ROUTING_ERRORS=أخطاء تحديد المسار
-#??? STATS_DROPPED_MESSAGES=Dropped messages
-#??? STATS_DOWNLOAD_COUNT=Download count
-#??? STATS_UPLOAD_COUNT=Upload count
+STATS_DROPPED_MESSAGES=تم إسقاط الرسائل
+STATS_DOWNLOAD_COUNT=عدد التنزيلات
+STATS_UPLOAD_COUNT=عدد التحميلات
 
 STATS_BUTTON_LABEL=تحديث
 
@@ -1455,7 +1499,7 @@ STATS_TOTAL_RECEIVED_BYTES_UDP_MESSAGES_TITLE=UDP
 STATS_TOTAL_RECEIVED_BYTES_UDP_MESSAGES_LABEL=عدد الكيلو بايتات الكلي لرسائل Gnutella المرسلة عبر UDP حسب نوع الرسالة.
 STATS_TOTAL_RECEIVED_BYTES_MULTICAST_MESSAGES_TITLE=Multicast
 STATS_TOTAL_RECEIVED_BYTES_MULTICAST_MESSAGES_LABEL=عدد الكيلو بايتات الكلي لرسائل Gnutella المرسلة عبر Multicast حسب نوع الرسالة.
-STATS_RECEIVED_BYTES_ALL_TITLE=TCP, UDP or Multicast
+STATS_RECEIVED_BYTES_ALL_TITLE=TCP, UDP أو Multicast
 STATS_RECEIVED_BYTES_ALL_LABEL=عدد الكيلو بايتات الكلي لرسائل Gnutella المرسلة عبر TCP أو UDP أو Multicast.
 STATS_DUPLICATE_RECEIVED_BYTES_TCP_QUERIES_TITLE=TCP مكرر
 STATS_DUPLICATE_RECEIVED_BYTES_TCP_QUERIES_LABEL=عدد الكيلوبايتات الكلي في الاستعلامات المكررة والتي تم استقبالها عبر TCP مقارنة بالعدد الكلي للاستعلامات.
@@ -1577,15 +1621,15 @@ STATS_QRP_LEAF_ROUTED_QUERIES_DROP=لم يتم الإرسال
 STATS_QRP_LEAF_ROUTED_QUERIES_RECEIVED_TITLE=استقبال
 STATS_QRP_LEAF_ROUTED_QUERIES_RECEIVED_LABEL=جميع الاستعلامات التي تم استقبالها من الاتصالات محددة المسار.
 STATS_QRP_LEAF_ROUTED_QUERIES_HIT=نتيجة الاستعلام
-#??? STATS_QRP_LEAF_ROUTED_QUERIES_MISS=False positive
+STATS_QRP_LEAF_ROUTED_QUERIES_MISS=نتائج تقريبية
 
 ################################################################################
 # Key/value pairs for advanced Gnutella message statistics -- errors messages
 ################################################################################
 ERROR_MESSAGES=أخطاء
 
-#??? STATS_ERROR_GENERIC_TITLE=Generic errors
-#??? STATS_ERROR_GENERIC_LABEL=Generic errors while reading messages.
+STATS_ERROR_GENERIC_TITLE=أخطاء متنوعة
+STATS_ERROR_GENERIC_LABEL=حدثت مجموعة من الأخطاء المتنوعة أتناء قراءة الرسائل.
 STATS_ERROR_QUERIES_TITLE=استعلامات
 STATS_ERROR_QUERIES_LABEL=أخطاء أثناء قراءة رسائل الاستعلام.
 STATS_ERROR_QUERY_REPLIES_TITLE=ردود الاستعلام
@@ -1624,7 +1668,7 @@ STATS_TOTAL_SENT_UDP_MESSAGES_LABEL=جميع رسائل Gnutella المرسلة 
 STATS_TOTAL_SENT_MULTICAST_MESSAGES_TITLE=Multicast
 STATS_TOTAL_SENT_MULTICAST_MESSAGES_LABEL=جميع رسائل Gnutella المرسلة عبر Multicast حسب نوع الرسالة.
 STATS_SENT_ALL_TITLE=TCP, UDP أو Multicast
-STATS_SENT_ALL_LABEL=العدد الكلي لرسائل Gnutella المرسلة عبر TCP أو UDP أو Multicast.
+STATS_SENT_ALL_LABEL=العدد الكلي لرسائل Gnutella المرسلة عبر TCP, UDP أو Multicast.
 
 # number of kilobytes
 STATS_TOTAL_SENT_BYTES_MESSAGES_TITLE=العدد الكلي
@@ -1636,7 +1680,7 @@ STATS_TOTAL_SENT_BYTES_UDP_MESSAGES_LABEL=عدد الكيلو بايتات ال�
 STATS_TOTAL_SENT_BYTES_MULTICAST_MESSAGES_TITLE=Multicast
 STATS_TOTAL_SENT_BYTES_MULTICAST_MESSAGES_LABEL=عدد الكيلو بايتات الكلي لرسائل Gnutella المرسلة عبر Multicast حسب نوع الرسالة.
 STATS_SENT_BYTES_ALL_TITLE=TCP, UDP أو Multicast
-STATS_SENT_BYTES_ALL_LABEL=عدد الكيلو بايتات الكلي لرسائل Gnutella المرسلة عبر TCP أو UDP أو Multicast.
+STATS_SENT_BYTES_ALL_LABEL=عدد الكيلو بايتات الكلي لرسائل Gnutella المرسلة عبر TCP, UDP أو Multicast.
 
 # number of messages sent for LimeWire-specific stats -- TCP
 STATS_LIME_SENT_TCP_MESSAGES_TITLE=العدد الكلي
@@ -1676,7 +1720,7 @@ STATS_LIME_SENT_MULTICAST_QUERIES_LABEL=استعلامات Multicast المرس�
 STATS_LIME_SENT_MULTICAST_QUERY_REPLIES_TITLE=نتائج الاستعلام
 STATS_LIME_SENT_MULTICAST_QUERY_REPLIES_LABEL=نتائج استعلام Multicast المرسلة من جميع مستخدمي Gnutella مقارنة بمستخدمي LimeWire الآخرين.
 STATS_LIME_SENT_MULTICAST_PUSH_REQUESTS_TITLE=دفعات
-#??? STATS_LIME_SENT_MULTICAST_PUSH_REQUESTS_LABEL= دفعات Multicast المرسلة من جميع مستخدمي Gnutella مقارنة بمستخدمي LimeWire الآخرين.
+STATS_LIME_SENT_MULTICAST_PUSH_REQUESTS_LABEL= دفعات Multicast المرسلة من جميع مستخدمي Gnutella مقارنة بمستخدمي LimeWire الآخرين.
 
 # number of kilobytes sent for LimeWire-specific stats -- TCP
 STATS_LIME_SENT_BYTES_TCP_MESSAGES_TITLE=العدد الكلي
@@ -1695,7 +1739,7 @@ STATS_LIME_SENT_BYTES_TCP_PUSH_REQUESTS_LABEL=دفعات TCPالمرسلة من 
 STATS_LIME_SENT_BYTES_UDP_MESSAGES_TITLE=العدد الكلي
 STATS_LIME_SENT_BYTES_UDP_MESSAGES_LABEL=عدد الكيلو بايتات الكلية التي تم إرسالها بالنيابة عن مستخدمي LimeWire الآخرين.
 STATS_LIME_SENT_BYTES_UDP_PING_REQUESTS_TITLE=Pings
-STATS_LIME_SENT_BYTES_UDP_PING_REQUESTS_LABEL=كيلوبايتات ال UDP Pingsالمرسلة من جميع مستخدمي Gnutella مقارنة بمستخدمي LimeWire الآخرين.
+STATS_LIME_SENT_BYTES_UDP_PING_REQUESTS_LABEL=كيلوبايتات ال UDP Pings المرسلة من جميع مستخدمي Gnutella مقارنة بمستخدمي LimeWire الآخرين.
 STATS_LIME_SENT_BYTES_UDP_PING_REPLIES_TITLE=Pongs
 STATS_LIME_SENT_BYTES_UDP_PING_REPLIES_LABEL=كيلوبايتات ال UDP Pongs المرسلة من جميع مستخدمي Gnutella مقارنة بمستخدمي LimeWire الآخرين.
 STATS_LIME_SENT_BYTES_UDP_QUERIES_TITLE=استعلامات
@@ -1728,7 +1772,7 @@ STATS_SENT_ULTRAPEER_ROUTED_QUERIES_DROP_LABEL=
 STATS_SENT_LEAF_ROUTED_QUERIES_SEND_TITLE=تم الإرسال
 STATS_SENT_LEAF_ROUTED_QUERIES_SEND_LABEL=جميع الاستعلامات التي تم تسييرها للطرفيات، باستخدام جداول تحديد مسار الاستعلام
 STATS_SENT_LEAF_ROUTED_QUERIES_DROP_TITLE=لم يتم الإرسال
-#??? STATS_SENT_LEAF_ROUTED_QUERIES_DROP_LABEL=
+STATS_SENT_LEAF_ROUTED_QUERIES_DROP_LABEL=
 
 ################################################################################
 # Key/value pairs for advanced Gnutella message statistics -- handshaking
@@ -1757,11 +1801,11 @@ STATS_COMPRESSABLE_DOWNSTREAM_LABEL=إحصائيات تسيير البيانات
 ################################################################################
 # Key/value pairs for advanced Gnutella message statistics -- flow control
 ################################################################################
-#??? FLOW_CONTROLLED_MESSAGES=Flow control
+FLOW_CONTROLLED_MESSAGES=معدل التدفق
 STATS_FLOW_CONTROL_TITLE=العدد
-#??? STATS_FLOW_CONTROL_LABEL=Statistics for flow controlled messages.
+STATS_FLOW_CONTROL_LABEL=إحصائيات معدل تدفق الرسائل.
 STATS_FLOW_CONTROL_BYTES_TITLE=كيلو بايت
-#??? STATS_FLOW_CONTROL_BYTES_LABEL=Statistics for flow controlled messages in kilobytes.
+STATS_FLOW_CONTROL_BYTES_LABEL=إحصائيات معدل تدفق الرسائل بالكيلو بايت.
 
 ################################################################################
 # Key/value pairs for advanced Gnutella message statistics -- route error stats
@@ -1785,7 +1829,7 @@ STATS_TOTAL_CONNECTION_ATTEMPTS_LABEL=الععد الكلي لمحاولات ا�
 # Key/value pairs for advanced HTTP statistics
 ################################################################################
 STATS_TOTAL_HTTP_REQUESTS_TITLE=الطلبات الواردة
-STATS_TOTAL_HTTP_REQUESTS_LABEL=العدد الكلي للطلبات الواردة التي تم استقبالها. يتضمن ذلك جميع محاولات الاتصال (GET, HEAD, GIV, CHAT, GNUTELLA, MAGNET,...إلخ)
+STATS_TOTAL_HTTP_REQUESTS_LABEL=العدد الكلي للطلبات الواردة التي تم استقبالها. يتضمن ذلك جميع محاولات الاتصال (GET, HEAD, GIV, CHAT, GNUTELLA, MAGNET, ...إلخ)
 
 ################################################################################
 # Key/value pairs for advanced Download statistics
@@ -1794,13 +1838,13 @@ DOWNLOAD_STATISTICS=التنزيلات
 STATS_DOWNLOAD_CONNECTIONS_TITLE=اتصالات
 STATS_DOWNLOAD_CONNECTIONS_LABEL=العدد الكلي لمحاولات التنزيل الصادرة. يتضمن ذلك الاتصالات المباشرة وطلبات الدفع.
 STATS_DOWNLOAD_RESPONSES_TITLE=ردود
-#??? STATS_DOWNLOAD_RESPONSES_LABEL=Total responses received from downloaders over time. This includes Busy, File Not Found, Not Sharing, Queued, misc. IO errors, and OK responses.
+STATS_DOWNLOAD_RESPONSES_LABEL=العدد الكلي للردود التي تم استقبالها من القائمين على التنزيل. يتضمن ذلك مشغول، الملف غير موجود، غير مشارك، في قائمة الانتظار، رسائل أخطاء الإدخال والإخراج المتنوعة وردود الموافقة.
 STATS_DOWNLOAD_ALTERNATE_TITLE=المواقع البديلة
-#??? STATS_DOWNLOAD_ALTERNATE_LABEL=Total alternate locations received and removed over time. This includes locations that we actively attempt to connect to, locations that we will ignore, locations that couldn't be removed, and locations that we removed permanently from attempting to connect to.
+STATS_DOWNLOAD_ALTERNATE_LABEL=العدد الكلي للمواقع المختلفة التي تم استقبالها وإزالتها خلال الوقت. يتضمن ذلك المواقع التي تتم محاولة الاتصال بها، المواقع التي تم سيتم تجاهلها، المواقع التي لم يتم التمكن من إزالتها والمواقع التي تم إزالتها مؤقتا من محاولة الاتصال بها.
 STATS_DOWNLOAD_TRANFERS_TITLE=تحويلات
-#??? STATS_DOWNLOAD_TRANFERS_LABEL=Total transfers over time. This includes both HTTP1.1 and HTTP1.0 transfers. For HTTP1.1, values are per chunk.
+STATS_DOWNLOAD_TRANFERS_LABEL=عدد التحويلات الكلية. يتضمن ذلك كل من تحويلات HTTP/1.1 و HTTP/1.0. بالنسبة لـ HTTP/1.1 القيم لكل وحدة.
 STATS_DOWNLOAD_TCP_CONNECT_TIME_TITLE=وقت اتصال TCP
-#??? STATS_DOWNLOAD_TCP_CONNECT_TIME_LABEL=Records the time in milliseconds to establish TCP connections for downloads. This can vary, for example, when servers are experiencing high loads.
+STATS_DOWNLOAD_TCP_CONNECT_TIME_LABEL=يسجل الوقت بالمللي ثانية لإنشاء اتصال TCP للتنزيلات. يمكن أن يتغير ذلك، على سبيل المثال، عندما يتعرض الملقم لما يفوق تحمله.
 
 ################################################################################
 # Key/value pairs for advanced Upload statistics
@@ -1880,7 +1924,7 @@ RECEIVED_ALL_TCP_MESSAGES_BYTES=TCP رسائل
 RECEIVED_ALL_UDP_MESSAGES_BYTES=UDP رسائل
 RECEIVED_ALL_MULTICAST_MESSAGES_BYTES=Multicast رسائل
 # Advanced Gnutella Received Kilobytes Duplicate queries
-RECEIVED_TCP_DUPLICATE_QUERIES_BYTES=TCPمكرر
+RECEIVED_TCP_DUPLICATE_QUERIES_BYTES=TCP مكرر
 RECEIVED_MULTICAST_DUPLICATE_QUERIES_BYTES=Multicast مكرر
 
 # Advanced Gnutella Sent Messages Total
@@ -1902,12 +1946,12 @@ SENT_ALL_MULTICAST_MESSAGES_BYTES=Multicast رسائل
 # Generic Errors
 ERROR_ALL_RECEIVED=جميع الأخطاء
 ERROR_CONNECTION_CLOSED=تم قطع الاتصال
-#??? ERROR_INVALID_LENGTH=Invalid payload length
+ERROR_INVALID_LENGTH=طول الحمولة غير صحيح
 ERROR_INVALID_HOPS=قفزات غير صالحة
 ERROR_INVALID_TTL=زمن الرحيل غير صالح
-#??? ERROR_HOPS_EXCEED_SOFT_MAX=Hops > soft max
-#??? ERROR_HOPS_AND_TTL_OVER_HARD_MAX=(hops + TTL) > hard max
-#??? ERROR_INVALID_CODE=Invalid message code
+ERROR_HOPS_EXCEED_SOFT_MAX=القفزات > الحد الأدنى
+ERROR_HOPS_AND_TTL_OVER_HARD_MAX=(القفزات + زمن الرحيل TTL) > الحد الأقصى
+ERROR_INVALID_CODE=كود رسالة غير صحيح
 ERROR_ALL_QUERY_ERRORS=جميع أخطاء الاستعلام
 ERROR_QUERY_URN=طلب URN
 ERROR_QUERY_TOO_LARGE=استعلام كبير جدا
@@ -1918,21 +1962,21 @@ ERROR_ALL_QUERY_REPLY_ERRORS=جميع أخطاء رد الاستعلام
 ERROR_REPLY_INVALID_PORT=منفذ الرد غير صالح
 ERROR_REPLY_INVALID_ADDRESS=عنوان الرد غير صالح
 ERROR_REPLY_INVALID_SPEED=سرعة الرد غير صالحة
-ERROR_ALL_PING_REPLY_ERRORS=جميع أخطاء رد الping
-#??? ERROR_PING_REPLY_INVALID_PAYLOAD=Invalid ping reply payload
-ERROR_PING_REPLY_INVALID_PORT=منفذ رد الping غير صالح
-ERROR_PING_REPLY_INVALID_ADDRESS=عنوان رد الping غير صالح
-#??? ERROR_PING_REPLY_INVALID_GGEP=Invalid GGEP block
+ERROR_ALL_PING_REPLY_ERRORS=جميع أخطاء رد ال Ping
+ERROR_PING_REPLY_INVALID_PAYLOAD=حمولة رد Ping غير صالحة
+ERROR_PING_REPLY_INVALID_PORT=منفذ رد ال Ping غير صالح
+ERROR_PING_REPLY_INVALID_ADDRESS=عنوان رد ال Ping غير صالح
+ERROR_PING_REPLY_INVALID_GGEP=وحدة GGEP غير صحيحة
 ERROR_PING_REPLY_INVALID_VENDOR=طول الموزع غير صحيح
 ERROR_ALL_PUSH_ERRORS=جميع أخطاء الدفع
 ERROR_PUSH_INVALID_PORT=منفذ الدفع غير صالح
 ERROR_PUSH_INVALID_ADDRESS=عنوان الدفع غير صالح
-#??? ERROR_PUSH_INVALID_PAYLOAD=Invalid push payload
+ERROR_PUSH_INVALID_PAYLOAD=حمولة دفع غير صالحة
 ERROR_ALL_VENDOR_ERRORS=جميع أخطاء رسالة الموزع
 ERROR_VENDOR_INVALID_ID=مميز غير صالح
-#??? ERROR_VENDOR_INVALID_SELECTOR=Invalid selector
+ERROR_VENDOR_INVALID_SELECTOR=مخير غير صحيح
 ERROR_VENDOR_INVALID_VERSION=إصدارة غير صالحة
-#??? ERROR_VENDOR_INVALID_PAYLOAD=Invalid payload
+ERROR_VENDOR_INVALID_PAYLOAD=حمولة غير صالحة
 ERROR_VENDOR_UNRECOGNIZED=رسالة موزع غير متعارف عليها
 
 ###############################################################################
@@ -1946,7 +1990,7 @@ GENERAL_QUERY_REPLY_LABEL=نتائج الاستعلام
 GENERAL_PUSH_REQUEST_LABEL=الدفعات
 GENERAL_ROUTE_TABLE_LABEL=إعادة جدول المسار للوضع الابتدائي
 GENERAL_RESET_ROUTE_TABLE_LABEL=إعادة جدول المسار للوضع الابتدائي
-#??? GENERAL_PATCH_ROUTE_TABLE_LABEL=Route table patch
+GENERAL_PATCH_ROUTE_TABLE_LABEL=جزء من جدول تحديد المسار
 
 # Hops labels
 HOPS1=قفزات 1
@@ -1973,18 +2017,18 @@ TTL9=TTL 9
 
 # Advanced Gnutella Routing errors
 ALL_ROUTE_ERRORS=أخطاء في تحديد المسار
-PING_REPLY_ROUTE_ERRORS=أخطاء ال pong
+PING_REPLY_ROUTE_ERRORS=أخطاء ال Pong
 QUERY_REPLY_ROUTE_ERRORS=أخطاء الرد
 PUSH_REQUEST_ROUTE_ERRORS=أخطاء الدفع
 
 # Advanced Gnutella Routing errors Query replies
-#??? HARD_LIMIT_QUERY_REPLY_ROUTE_ERRORS=Hard limit
-#??? HARD_LIMIT_QR_TTL_0=Hard Limit (TTL 0)
-#??? HARD_LIMIT_QR_TTL_1=Hard Limit (TTL 1)
-#??? HARD_LIMIT_QR_TTL_2=Hard Limit (TTL 2)
-#??? HARD_LIMIT_QR_TTL_3=Hard Limit (TTL 3)
-#??? HARD_LIMIT_QR_TTL_4=Hard Limit (TTL 4)
-#??? HARD_LIMIT_QR_TTL_5=Hard Limit (TTL 5 or above)
+HARD_LIMIT_QUERY_REPLY_ROUTE_ERRORS=الحد الأقصى
+HARD_LIMIT_QR_TTL_0=الحد الأقصى (TTL 0)
+HARD_LIMIT_QR_TTL_1=الحد الأقصى (TTL 1)
+HARD_LIMIT_QR_TTL_2=الحد الأقصى (TTL 2)
+HARD_LIMIT_QR_TTL_3=الحد الأقصى (TTL 3)
+HARD_LIMIT_QR_TTL_4=الحد الأقصى (TTL 4)
+HARD_LIMIT_QR_TTL_5=الحد الأقصى (TTL 5+)
 NO_ROUTE_QUERY_REPLY_ROUTE_ERRORS=لا يوجد مسار
 
 # Advanced Gnutella Filtered messages
@@ -2003,7 +2047,7 @@ ALL_HTTP_GIV_REQUESTS=طلبات الدفع
 ALL_HTTP_GNUTELLA_REQUESTS=طلبات Gnutella
 ALL_HTTP_GNUTELLA_LIMEWIRE_REQUESTS=طلبات Gnutella (LimeWire)
 ALL_HTTP_CHAT_REQUESTS=طلبات دردشة
-#??? ALL_HTTP_MAGNET_REQUESTS=Magnet requests
+ALL_HTTP_MAGNET_REQUESTS=Magnet طلبات
 ALL_HTTP_UNKNOWN_REQUESTS=طلبات غير معلومة
 ALL_HTTP_BANNED_REQUESTS=مضيفون ممنوعون
 ALL_HTTP_CLOSED_REQUESTS=أغلق في الحال
@@ -2016,34 +2060,35 @@ DOWNLOAD_NOT_SHARING=ملفات غير مشاركة
 DOWNLOAD_QUEUED=في قائمة الانتظار
 DOWNLOAD_RANGE_UNAVAILABLE=المدى غير متاح
 DOWNLOAD_PROBLEM_READING_HEADER=مشكلة في قراءة الترويسة
-#??? DOWNLOAD_UNKNOWN_CODE=Unknown response code
-#??? DOWNLOAD_CONTENT_URN_MISMATCH=Content URN mismatch
+DOWNLOAD_UNKNOWN_CODE=كود رد غير معروف
+DOWNLOAD_CONTENT_URN_MISMATCH=محتويات URN غير متوافقة
 DOWNLOAD_NO_SUCH_RANGE=قيم المدى غير متوافقة
-DOWNLOAD_ERROR=خطأ (داخلي خارجي)
+DOWNLOAD_ERROR=خطأ (إدخال إخراج)
 DOWNLOAD_ALTERNATE_COLLECTED=تم التجميع
 DOWNLOAD_ALTERNATE_NOT_ADDED=فشل
 DOWNLOAD_ALTERNATE_WORKED=تم بنجاح
-DOWNLOAD_SUCCESFULL_HTTP11=نجاح HTTP 1.1
-DOWNLOAD_SUCCESFULL_HTTP10=نجاح HTTP 1.0
-DOWNLOAD_FAILED_HTTP11=فشل HTTP 1.1
-DOWNLOAD_FAILED_HTTP10=فشل HTTP 1.0
+DOWNLOAD_SUCCESFULL_HTTP11=نجاح HTTP/1.1
+DOWNLOAD_SUCCESFULL_HTTP10=نجاح HTTP/1.0
+DOWNLOAD_FAILED_HTTP11=فشل HTTP/1.1
+DOWNLOAD_FAILED_HTTP10=فشل HTTP/1.0
 DOWNLOAD_RETRIED_SUCCESS=نجاح إعادة المحاولة
 DOWNLOAD_CONNECTION_ATTEMPTS=محاولات
 DOWNLOAD_CONNECT_DIRECT_SUCCESS=اتصال مباشر ناجح
 DOWNLOAD_CONNECT_DIRECT_FAILURES=فشل الاتصال المباشر
 DOWNLOAD_CONNECT_PUSH_SUCCESS=اتصال دفع ناجح
-#??? DOWNLOAD_PUSH_FAILURE_INTERRUPTED=Failed push (interrupted)
+DOWNLOAD_PUSH_FAILURE_INTERRUPTED=فشل الدفع (انقطع)
 DOWNLOAD_PUSH_FAILURE_NO_ROUTE=فشل الدفع (لا يوجد مسار)
-#??? DOWNLOAD_PUSH_FAILURE_NO_RESPONSE=Failed push (no GIV received)
+DOWNLOAD_PUSH_FAILURE_NO_RESPONSE=فشل الدفع ( لم يتم استقبال GIV)
 DOWNLOAD_PUSH_FAILURE_LOST=فشل الدفع (اتصال مفقود)
 DOWNLOAD_TCP_CONNECT_TIME=وقت اتصال TCP
 
 # Advanced Upload statistics
-#??? UPLOAD_STAT_PUSH_PROXY_SUCCESS=Successful push proxy
-#??? UPLOAD_STAT_PUSH_PROXY_BAD=Malformed push proxy
-#??? UPLOAD_STAT_PUSH_PROXY_FAILED=Failed push proxy
+#??? UPLOAD_STAT_THEX=THEX request
+UPLOAD_STAT_PUSH_PROXY_SUCCESS=نجاح دفع الوكيل
+UPLOAD_STAT_PUSH_PROXY_BAD=دفع الوكيل غير صالح
+UPLOAD_STAT_PUSH_PROXY_FAILED=فشل دفع الوكيل
 UPLOAD_STAT_BROWSE_HOST=استعراض المضيف
-#??? UPLOAD_STAT_PUSH_PROXY=Push proxy
+UPLOAD_STAT_PUSH_PROXY=دفع الوكيل
 UPLOAD_STAT_UPDATE_FILE=تحديث الملف
 UPLOAD_STAT_TRADITIONAL_GET=تقليدي GET
 UPLOAD_STAT_UNKNOWN_URN_GET=غير معروف URN GET
@@ -2051,7 +2096,7 @@ UPLOAD_STAT_URN_GET=URN GET
 UPLOAD_STAT_MALFORMED_REQUEST=طلب غير صحيح
 UPLOAD_STAT_LIMIT_REACHED=تم الوصول للحد المسموح
 #??? UPLOAD_STAT_LIMIT_REACHED_GREEDY=Greedy Request
-#??? UPLOAD_STAT_BANNED=Banned Client
+UPLOAD_STAT_BANNED=مستخدم ممنوع
 UPLOAD_STAT_UNAVAILABLE_RANGE=المدى غير متاح
 UPLOAD_STAT_FILE_NOT_FOUND=الملف غير موجود
 #??? UPLOAD_STAT_FREELOADER=Freeloader
@@ -2066,8 +2111,8 @@ UPLOAD_STAT_PUSHED_UNKNOWN=دفع غير معلوم
 UPLOAD_STAT_PUSH_FAILED=فشل الدفع
 UPLOAD_STAT_ATTEMPTED=محاولات
 UPLOAD_STAT_COMPLETED=الردود التامة
-#??? UPLOAD_STAT_INTERRUPTED=Interrupted
-#??? UPLOAD_STAT_STALLED=Stalled
+UPLOAD_STAT_INTERRUPTED=انقطع
+UPLOAD_STAT_STALLED=توقف
 UPLOAD_STAT_COMPLETED_FILE=الملفات التي تم تحويلها
 
 # Advanced Handshaking statistics
@@ -2076,16 +2121,16 @@ LEAF_OUTGOING_REJECT_OLD_UP=رفض صادر.(ند فائق قديم)
 LEAF_OUTGOING_ACCEPT=قبول صادر
 LEAF_INCOMING_REJECT=رفض
 LEAF_INCOMING_ACCEPT=قبول
-#??? UP_OUTGOING_REJECT_FULL=Out rej. (full)
-#??? UP_OUTGOING_GUIDANCE_FOLLOWED=Out acc. (followed guidance)
-#??? UP_OUTGOING_GUIDANCE_IGNORED=Out acc. (ignored guidance)
-#??? UP_OUTGOING_ACCEPT=Out acc. (no guidance)
-#??? INCOMING_CRAWLER=In Crawler
+UP_OUTGOING_REJECT_FULL=رفض صادر (ممتلئ)
+UP_OUTGOING_GUIDANCE_FOLLOWED=قبول صادر (تم تتبع التوجيه)
+UP_OUTGOING_GUIDANCE_IGNORED=قبول صادر (تم تجاهل التوجيه)
+UP_OUTGOING_ACCEPT=قبول صادر (لا يوجد توجيه)
+INCOMING_CRAWLER=الزاحف الوارد
 UP_INCOMING_REJECT_LEAF=رفض. (طرف)
 UP_INCOMING_ACCEPT_LEAF=قبول. (طرف)
-UP_INCOMING_GUIDED=قبول. (مؤدي إلى طرف)
+UP_INCOMING_GUIDED=قبول. (موجه إلى طرف)
 UP_INCOMING_ACCEPT_UP=قبول. (ند فائق)
-#??? UP_INCOMING_REJECT_NO_ROOM_LEAF=In rej. (all slots taken)
+UP_INCOMING_REJECT_NO_ROOM_LEAF=رفض وارد (تم أخذ جميع الشرائح)
 UP_INCOMING_REJECT_NO_ROOM_UP=رفض. (تحتاج الشبكة إلى ند فائق)
 OUTGOING_BAD_CONNECT=اتصال سئ
 OUTGOING_SERVER_REJECT=ملقم مرفوض
@@ -2099,7 +2144,7 @@ INCOMING_CLIENT_REJECT=مستخدم مرفوض
 INCOMING_CLIENT_UNKNOWN=مستخدم غير معروف
 SUCCESSFUL_INCOMING=نجاح
 INCOMING_NO_CONCLUSION=لا يوجد استنتاج
-#??? CRAWLER_CONNECTION=Crawler
+CRAWLER_CONNECTION=الزاحف
 OUTGOING_LIMEWIRE_ULTRAPEER_REJECT=أنداد LimeWire الفائقون
 OUTGOING_LIMEWIRE_LEAF_REJECT=LimeWire طرفيات
 OUTGOING_OTHER_ULTRAPEER_REJECT=الأنداد الفائقون الآخرون
