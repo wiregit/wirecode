@@ -127,16 +127,21 @@ public class IncompleteFileDesc extends FileDesc implements HTTPHeaderValue {
     public String getAvailableRanges() {
         StringBuffer ret = new StringBuffer("bytes");
         boolean added = false;
-        for (Iterator iter = _verifyingFile.getBlocks(); iter.hasNext(); ) {
-            Interval interval = (Interval) iter.next();
-	        // don't offer ranges that are smaller than MIN_CHUNK_SIZE
-	        // ( we add one because HTTP values are exclusive )
-	        if (interval.high - interval.low + 1 < MIN_CHUNK_SIZE)
-		        continue;
-
-            added = true;
-            // ( we subtract one because HTTP value as exclusive )
-            ret.append(" " + interval.low + "-" + (interval.high -1) + ",");
+        // This must be synchronized so that downloaders writing
+        // to the verifying file do not cause concurrent mod
+        // exceptions.
+        synchronized(_verifyingFile) {
+            for (Iterator iter = _verifyingFile.getBlocks(); iter.hasNext(); ) {
+                Interval interval = (Interval) iter.next();
+    	        // don't offer ranges that are smaller than MIN_CHUNK_SIZE
+    	        // ( we add one because HTTP values are exclusive )
+    	        if (interval.high - interval.low + 1 < MIN_CHUNK_SIZE)
+    		        continue;
+    
+                added = true;
+                // ( we subtract one because HTTP value as exclusive )
+                ret.append(" " + interval.low + "-" + (interval.high -1) + ",");
+            }
         }
         // truncate off the last ',' if atleast one was added.
         // it is necessary to do this (instead of checking hasNext when
@@ -153,10 +158,15 @@ public class IncompleteFileDesc extends FileDesc implements HTTPHeaderValue {
      * incomplete file.
      */
     public boolean isRangeSatisfiable(int low, int high) {
-        for (Iterator iter = _verifyingFile.getBlocks(); iter.hasNext(); ) {
-            Interval interval = (Interval) iter.next();
-            if (low >= interval.low && high <= interval.high)
-                return true;
+        // This must be synchronized so that downloaders writing
+        // to the verifying file do not cause concurrent mod
+        // exceptions.
+        synchronized(_verifyingFile) {
+            for (Iterator iter = _verifyingFile.getBlocks(); iter.hasNext(); ) {
+                Interval interval = (Interval) iter.next();
+                if (low >= interval.low && high <= interval.high)
+                    return true;
+            }
         }
         return false;
     }
