@@ -230,7 +230,7 @@ public class LimeXMLReplyCollection {
         // old style may exist or there may be no xml associated
         // with this file yet.....
     	
-        if (LimeXMLUtils.isSupportedFormat(file)) {
+        if (audio && LimeXMLUtils.isSupportedFormat(file)) { //the audio flag needs to stay for now
         	
             // first try to get the metadata out of it.  if this file has
             // no metadata, just construct the doc out of the xml 
