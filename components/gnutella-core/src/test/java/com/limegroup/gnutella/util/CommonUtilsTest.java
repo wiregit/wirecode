@@ -200,9 +200,23 @@ public class CommonUtilsTest extends com.limegroup.gnutella.util.BaseTestCase {
 			"JFDHCIOSHCIOSJCIODJSKJFDSJFKSLDHFUIOSHFUDSBUBBUIBCUDISLBCLSDBFKSCLJ"+
 			"JFDHCIOSHCIOSJCIODJSKJFDSJFKSLDHFUIOSHFUDSBUBBUIBCUDISLBCLSDBFKSCLJ"+
 			"JFDHCIOSHCIOSJCIODJSKJFDSJFKSLDHFUIOSHFUDSBUBBUIBCUDISLBCLSDBFKSCLJ";
-		assertTrue("string should be longer", 300 < testStr.length());
+		assertGreaterThan("string should be longer", 300, testStr.length());
 		testStr = CommonUtils.convertFileName(testStr);
 		assertEquals("unexpected string length", 180, testStr.length());
+		
+		// test conversion with an extension.
+		StringBuffer twoHundred = new StringBuffer(200);
+		for(int i = 0; i < 200; i++) twoHundred.append("a");
+		String withExt = twoHundred + ".zip";
+		String withBigExt = twoHundred.substring(0, 170) + ".ziiiiiiiiiiiiiip";
+		String testOne = CommonUtils.convertFileName(withExt);
+		String testTwo = CommonUtils.convertFileName(withBigExt);
+		String expectedOne = twoHundred.substring(0, 176) + ".zip";
+		String expectedTwo = twoHundred.substring(0, 163) + ".ziiiiiiiii";
+		assertEquals("unexpected length1", expectedOne.length(), testOne.length());
+		assertEquals("unexpected conversion1", expectedOne, testOne);
+		assertEquals("unexpected length2", expectedTwo.length(), testTwo.length());		
+		assertEquals("unexpected conversion2", expectedTwo, testTwo);
 	}
 
 	/**

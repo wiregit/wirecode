@@ -1032,8 +1032,19 @@ public final class CommonUtils {
 		
 		// if the name is too long, reduce it.  We don't go all the way
 		// up to 256 because we don't know how long the directory name is
+		// We want to keep the extension, though.
 		if(name.length() > 180) {
-			name = name.substring(0, 180);
+		    int extStart = name.lastIndexOf('.');
+		    if ( extStart == -1) { // no extension, wierd, but possible
+		        name = name.substring(0, 180);
+		    } else {
+		        // if extension is greater than 11, we concat it.
+		        // ( 11 = '.' + 10 extension characters )
+		        int extLength = name.length() - extStart;		        
+		        int extEnd = extLength > 11 ? extStart + 11 : name.length();
+			    name = name.substring(0, 180 - extLength) +
+			           name.substring(extStart, extEnd);
+            }          
 		}
         for (int i = 0; i < ILLEGAL_CHARS_ANY_OS.length; i++) 
             name = name.replace(ILLEGAL_CHARS_ANY_OS[i], '_');
