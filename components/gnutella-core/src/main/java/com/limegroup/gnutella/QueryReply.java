@@ -1018,6 +1018,7 @@ public class QueryReply extends Message implements Serializable{
             return REMOTELY_FIREWALLED_BUSY_UNKNOWN;
 		} else { 
 			// this should never happen
+			Thread.dumpStack();
 			return 1;
 		}
 	}
