@@ -1,6 +1,7 @@
 package com.limegroup.gnutella.messages;
 
 import junit.framework.*;
+import java.io.*;
 
 public class VendorMessageTest extends TestCase {
     public VendorMessageTest(String name) {
@@ -50,6 +51,25 @@ public class VendorMessageTest extends TestCase {
         catch (NullPointerException expected) {
         }
         catch (IllegalArgumentException why) {
+            assertTrue(false);
+        }
+    }
+
+    
+    public void testWriteAndRead() {
+        try {
+            VendorMessage vm = new VendorMessage("LIME".getBytes(),
+                                                 0x31, 1, new byte[0]);
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            vm.write(baos);
+            assertTrue(vm.getVendorID().equals("LIME"));
+            ByteArrayInputStream bais = 
+                new ByteArrayInputStream(baos.toByteArray());
+            VendorMessage vmRead = (VendorMessage) Message.read(bais);
+            assertTrue(vm.getVendorID().equals(vmRead.getVendorID()));
+        }
+        catch (Exception crap) {
+            crap.printStackTrace();
             assertTrue(false);
         }
     }
