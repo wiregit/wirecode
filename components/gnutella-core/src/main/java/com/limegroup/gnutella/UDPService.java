@@ -318,7 +318,6 @@ public class UDPService implements Runnable {
                                 synchronized(this){ 
                                     _lastReportedIP=r.getMyInetAddress().getAddress();
                                 
-                                
                                     if (_lastReportedPort!=r.getMyPort()) {
                                         _portStable=false;
                                         _lastReportedPort=r.getMyPort();
@@ -635,19 +634,30 @@ public class UDPService implements Runnable {
 	/**
 	 * 
 	 * @return whether this node can do Firewall-to-firewall transfers.
-	 * The criteria for this are:
+	 * If we are not connected, see if we ever disabled fwt in the past.
+	 * If we are, the criteria are:
 	 *   - we can accept solicited udp
 	 *   - our port does not change and is the same as our tcp port
 	 *   - our ip address is the same as our address as seen from tcp 
 	 *   connections.
 	 */
-	public synchronized boolean canDoFWT(){
-	            	
-	    return canReceiveSolicited() && 
-	    	_portStable &&
-	    	_lastReportedPort==RouterService.getPort() &&
-		_lastReportedIP!=null &&
-	    	Arrays.equals(_lastReportedIP,RouterService.getExternalAddress());
+	public boolean canDoFWT(){
+	    if (!RouterService.isConnected())
+	        return !ConnectionSettings.EVER_DISABLED_FWT.getValue();
+	    
+	    boolean ret = true;
+	    synchronized(this) {     	
+	        ret= canReceiveSolicited() && 
+	    		_portStable &&
+	    		_lastReportedPort==RouterService.getPort() &&
+	    		_lastReportedIP!=null &&
+	    		Arrays.equals(_lastReportedIP,RouterService.getExternalAddress());
+	    }
+	    
+	    if (!ret)
+	        ConnectionSettings.EVER_DISABLED_FWT.setValue(true);
+	    
+	    return ret;
 	}
 
 	/**
