@@ -211,9 +211,9 @@ public class HTTPDownloader {
 			throw new com.limegroup.gnutella.downloader.FileNotFoundException();
         else if ( str.indexOf("410") > 0 )
             throw new com.limegroup.gnutella.downloader.NotSharingException();
-		else if ( (str.indexOf("HTTP") < 0 ) && (str.indexOf("OK") < 0 ) )
+		else if ( (str.indexOf("HTTP") < 0 ) || (str.indexOf("OK") < 0 ) )
 			throw new NoHTTPOKException();
-
+	
 		while (true) {
 			if (str.toUpperCase().indexOf("CONTENT-LENGTH:") != -1)  {
 
