@@ -8,6 +8,8 @@ import java.io.*;
  */
 class LanguageUpdater {
     
+    private static final String MARKER = "# TRANSLATIONS START BELOW.";
+    
     private final File lib;
     private final Map langs;
     private final List englishList;
@@ -62,12 +64,12 @@ class LanguageUpdater {
                 System.out.println("...changes.");
                 f.delete();
                 temp.renameTo(f);
-                if(info.isUTF8())
-                    native2ascii(info);
             } else {
                 System.out.println("...no changes!");
                 temp.delete();
             }
+            if(info.isUTF8())
+                native2ascii(info);
         } catch(IOException ioe) {
             System.out.println("...error! (" + ioe.getMessage() + ")");
         }
@@ -150,27 +152,34 @@ class LanguageUpdater {
                                 );
                                 
         Properties props = info.getProperties();
+        boolean reachedTranslations = false;
         for(Iterator i = englishList.iterator(); i.hasNext(); ) {
             Line line = (Line)i.next();
+            if(MARKER.equals(line.getLine()))
+                reachedTranslations = true;
+                
             if(line.isComment()) {
                 writer.write(line.getLine());
             } else {
                 String key = line.getKey();
                 String value = props.getProperty(key);
+                // always write the English version, so translators
+                // have a reference point for possibly needing to update
+                // an older translation.
+                if(reachedTranslations) {
+                    writer.write("#### ");
+                    writer.write(key);
+                    writer.write("=");
+                    writer.write(escape(line.getValue()));
+                    writer.write("\n");
+                }
+                
                 if(value != null) {
-                    // NOTE: To make for easier translations,
-                    // we could also provide the English variation
-                    // here, as:
-                    //   writer.write("###");
-                    //   writer.write(key);
-                    //   writer.write("=");
-                    //   writer.write(escape(line.getValue());
-                    //   writer.write("\n");
                     writer.write(key);
                     writer.write("=");
                     writer.write(escape(value));
                 } else {
-                    writer.write("#??? ");
+                    writer.write("#? ");
                     writer.write(key);
                     writer.write("=");
                     writer.write(escape(line.getValue()));

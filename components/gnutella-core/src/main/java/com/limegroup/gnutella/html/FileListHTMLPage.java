@@ -21,7 +21,7 @@ public class FileListHTMLPage {
         "<html>\r\n<head>\r\n<title>" + 
         MessageResourceService.getHTMLPageTitle() + 
         "</title>\r\n<style type=\"text/css\"><!--\r\np {\r\nfont-family: Verdana, Arial, Helvetica, sans-serif;\r\nfont-size: 10px;\r\ncolor: #666666;\r\nfont-weight: bold;\r\n}\r\n-->\r\n</style>\r\n</head>\r\n<body link=\"#000000\" vlink=\"#000000\" alink=\"#339900\" marginwidth=\"0\"\r\nmarginheight=\"0\" leftmargin=\"0\" topmargin=\"0\">\r\n<br>\r\n<br>\r\n<p align=\"center\"><img src=\""+UploadManager.RESOURCE_GET+"com/limegroup/gnutella/html/file_view_logo.gif\" alt=\"\"></p>\r\n<p align=\"center\">" + 
-        MessageResourceService.getHTMLPageListingHeader();
+        MessageResourceService.getHTMLPageListingHeader() + " ";
 
     public static final String htmlMiddle = 
         "<br>\r\n</p>\r\n<p align=\"center\">\r\n";
