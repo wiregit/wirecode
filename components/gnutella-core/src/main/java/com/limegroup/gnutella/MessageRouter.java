@@ -435,12 +435,11 @@ public abstract class MessageRouter {
 			// send the request to intra-Ultrapeer connections -- this does
 			// not send the request to leaves
 			broadcastQueryRequest(request, handler);
-			forwardQueryRequestToLeaves(request, handler);
 		}
 			
 		// always forward any queries to leaves -- this only does
 		// anything when this node's an Ultrapeer
-		//forwardQueryRequestToLeaves(request, handler);
+		forwardQueryRequestToLeaves(request, handler);
         respondToQueryRequest(request, _clientGUID);
     }
 
@@ -452,7 +451,7 @@ public abstract class MessageRouter {
                                 ManagedConnection connection)
     {
         _pingRouteTable.routeReply(request.getGUID(), _forMeReplyHandler);
-		SentMessageStatHandler.TCP_PING_REQUESTS.addMessage(request);
+		//SentMessageStatHandler.TCP_PING_REQUESTS.addMessage(request);
         connection.send(request);
     }
 
@@ -464,7 +463,7 @@ public abstract class MessageRouter {
                                  ManagedConnection connection)
     {
         _queryRouteTable.routeReply(request.getGUID(), _forMeReplyHandler);
-		SentMessageStatHandler.TCP_QUERY_REQUESTS.addMessage(request);
+		//SentMessageStatHandler.TCP_QUERY_REQUESTS.addMessage(request);
         connection.send(request);
     }
 
@@ -519,7 +518,7 @@ public abstract class MessageRouter {
             if (   receivingConnection==null   //came from me
                 || (c!=receivingConnection
                      && !c.isClientSupernodeConnection())) {
-				SentMessageStatHandler.TCP_PING_REQUESTS.addMessage(request);
+				//SentMessageStatHandler.TCP_PING_REQUESTS.addMessage(request);
                 c.send(request);
             }
         }
@@ -632,7 +631,7 @@ public abstract class MessageRouter {
             containsDefaultUnauthenticatedDomainOnly(sendConnection.getDomains())
             || Utilities.hasIntersection(handler.getDomains(), 
 										 sendConnection.getDomains()))) {
-			SentMessageStatHandler.TCP_QUERY_REQUESTS.addMessage(request);
+			//SentMessageStatHandler.TCP_QUERY_REQUESTS.addMessage(request);
             sendConnection.send(request);
 		}		
     }
@@ -1008,7 +1007,7 @@ public abstract class MessageRouter {
                 //TODO2: use incremental and interleaved update
                 for (Iterator iter=table.encode(qi.lastSent); iter.hasNext(); ) {  
                     RouteTableMessage m=(RouteTableMessage)iter.next();
-					SentMessageStatHandler.TCP_ROUTE_TABLE_MESSAGES.addMessage(m);
+					//SentMessageStatHandler.TCP_ROUTE_TABLE_MESSAGES.addMessage(m);
                     c.send(m);
                 }
                 qi.lastSent=table;
