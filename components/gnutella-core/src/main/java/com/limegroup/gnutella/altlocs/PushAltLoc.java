@@ -63,7 +63,7 @@ public class PushAltLoc extends AlternateLocation {
 		RemoteFileDesc	ret = new RemoteFileDesc(
 		        	_pushAddress.getAddress(),_pushAddress.getPort(),0,
 		        	HTTPConstants.URI_RES_N2R+SHA1_URN,size,
-					2000, true, quality, false, null,
+					1000, true, quality, false, null,
 					urnSet,false, true,ALT_VENDOR,System.currentTimeMillis(),
 					-1,_pushAddress);
 
