@@ -231,7 +231,7 @@ final class QueryPair {
         return (this.hops==other.hops) && 
                this.URNs.equals(other.URNs) &&
                this.query.equals(other.query) &&
-               xml == null ? other.xml == null : xml.equals(other.xml);
+               (xml == null ? other.xml == null : xml.equals(other.xml));
     }                
 
     public int hashCode() {
