@@ -31,7 +31,7 @@ public class HttpClientManager {
     
     /**
      * The amount of time to wait while trying to connect to a specified
-     * host.  If we exceed this value, an IOException is thrown
+     * host via TCP.  If we exceed this value, an IOException is thrown
      * while trying to connect.
      */
     private static final int CONNECTION_TIMEOUT = 3000;

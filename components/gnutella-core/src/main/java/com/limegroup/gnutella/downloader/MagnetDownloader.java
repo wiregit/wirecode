@@ -10,6 +10,7 @@ import com.sun.java.util.collections.*;
 import org.apache.commons.httpclient.HttpMethod;
 import org.apache.commons.httpclient.methods.HeadMethod;
 import org.apache.commons.httpclient.HttpClient;
+import org.apache.commons.httpclient.HttpStatus;
 
 /**
  * A ManagedDownloader for MAGNET URIs.  Unlike a ManagedDownloader, a
@@ -197,7 +198,7 @@ public class MagnetDownloader extends ManagedDownloader implements Serializable 
             //Extract Content-length, but only if the response was 200 OK.
             //Generally speaking any 2xx response is ok, but in this situation
             //we expect only 200.
-            if (head.getStatusCode() != HttpURLConnection.HTTP_OK)
+            if (head.getStatusCode() != HttpStatus.SC_OK)
                 throw new IOException("No 200 OK");
             
             int length = head.getResponseContentLength();
