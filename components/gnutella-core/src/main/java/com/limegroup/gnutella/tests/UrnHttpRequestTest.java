@@ -105,7 +105,8 @@ public final class UrnHttpRequestTest extends TestCase {
 				Socket sock = new TestSocket(new ByteArrayInputStream(baos.toByteArray()));
 				_uploadManager.acceptUpload(sock);
 				String reply = sock.getOutputStream().toString();
-				StringTokenizer st = new StringTokenizer("\r\n");
+				StringTokenizer st = new StringTokenizer(reply, "\r\n");
+				boolean contentUrnHeaderPresent = false;
 				while(st.hasMoreTokens()) {
 					String curString = st.nextToken();
 					if(HTTPHeaderName.ALT_LOCATION.matchesStartOfString(curString)) {
@@ -119,16 +120,21 @@ public final class UrnHttpRequestTest extends TestCase {
 						}
 						assertEquals(HTTPHeaderName.CONTENT_URN.toString()+"s should be equal",
 									 fd.getSHA1Urn(), curUrn);
+						contentUrnHeaderPresent = true;
 					} else if(HTTPHeaderName.CONTENT_RANGE.matchesStartOfString(curString)) {
 						continue;
 					} else if(HTTPHeaderName.CONTENT_TYPE.matchesStartOfString(curString)) {
+						continue;
+					} else if(HTTPHeaderName.CONTENT_LENGTH.matchesStartOfString(curString)) { 
 						String value = HTTPUtils.extractHeaderValue(curString);
 						assertEquals("sizes should match", (int)fd.getSize(), 
-									 Integer.parseInt(value));
+									 Integer.parseInt(value));						
 					} else if(HTTPHeaderName.SERVER.matchesStartOfString(curString)) {
 						continue;
-					}
+					}					
 				}
+				assertTrue("content URN header should always be reported: "+fd,
+						   contentUrnHeaderPresent);
 			} catch (IOException e) {
 				assertTrue("unexpeced exception: "+e, false);
 			}
