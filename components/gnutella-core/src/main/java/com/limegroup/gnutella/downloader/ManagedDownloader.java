@@ -1279,8 +1279,21 @@ public class ManagedDownloader implements Downloader, Serializable {
         //HTTP hearders
         //Note: 0=disconnected,1=tcp-connected, 2=http-connected
         int connected = 1;
-        while(connected==1) { //while queued, connect and sleep if we queued
-            connected = assignAndRequest(dloader);
+        int[] a = new int[1];//for pass by reference
+        while(true) { //while queued, connect and sleep if we queued
+            a[0]= -1;//reset the sleep value
+            connected = assignAndRequest(dloader,a);
+            if(connected==1) {
+                try {
+                    if(a[0] > 0)
+                        Thread.sleep(a[0]);//value from QueuedException
+                } catch (InterruptedException ix) {
+                    debug("worker: interrupted while asleep in queue"+dloader);
+                    return;//close connection
+                }
+            }
+            else//not queued
+                break;
         }
         //Now, connected is either 0 or 2
         Assert.that(connected==0 || connected==2,
@@ -1407,7 +1420,7 @@ public class ManagedDownloader implements Downloader, Serializable {
      * otherwise if queued return 1
      * otherwise if connected successfully return 2
      */
-    private int assignAndRequest(HTTPDownloader dloader) {
+    private int assignAndRequest(HTTPDownloader dloader,int[] referenceArray)  {
         synchronized(stealLock) {
             boolean updateNeeded = true;
             try {
@@ -1443,12 +1456,8 @@ public class ManagedDownloader implements Downloader, Serializable {
                 return 0;//discard the rfd of dloader
             } catch (QueuedException qx) { 
                 debug("queuedEx thrown in AssignAndRequest sleeping.."+dloader);
-                try { //The extra time to sleep can be tuned. Now it's 1 sec
-                    Thread.sleep(qx.getMinPollTime()*/*S->ms*/1000+1000);
-                } catch (InterruptedException ix) {
-                    //System.out.println("interrupted");
-                    return 0;//close connection
-                }
+                //The extra time to sleep can be tuned. For now it's 1 S.
+                referenceArray[0] = qx.getMinPollTime()*/*S->mS*/1000+1000;
                 return 1;
             } catch (IOException iox) {
                 debug(iox);
