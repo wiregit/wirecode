@@ -3,6 +3,7 @@ package com.limegroup.gnutella;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.util.FileUtils;
 import com.limegroup.gnutella.util.PrivilegedAccessor;
+import com.limegroup.gnutella.util.I18NConvert;
 import junit.framework.*;
 
 import com.limegroup.gnutella.settings.*;
@@ -483,7 +484,7 @@ public class FileManagerTest extends com.limegroup.gnutella.util.BaseTestCase {
 			FileDesc fd = fman.get(i);
 			Response testResponse = new Response(fd);
 			URN urn = fd.getSHA1Urn();
-			QueryRequest qr = QueryRequest.createQuery(fd.getName());
+			QueryRequest qr = QueryRequest.createQuery(I18NConvert.instance().getNorm(fd.getName()));
 			Response[] hits = fman.query(qr);
 			assertNotNull("didn't get a response for query " + qr, hits);
 			// we can only do this test on 'unique' names, so if we get more than
@@ -510,7 +511,7 @@ public class FileManagerTest extends com.limegroup.gnutella.util.BaseTestCase {
 		for(int i = 0; i < fman.getNumFiles(); i++) {
 			FileDesc fd = fman.get(i);
 			Response testResponse = new Response(fd);
-			QueryRequest qr = QueryRequest.createQuery(fd.getName());
+			QueryRequest qr = QueryRequest.createQuery(I18NConvert.instance().getNorm(fd.getName()));
 			Response[] hits = fman.query(qr);
 			assertNotNull("didn't get a response for query " + qr, hits);
 			// we can only do this test on 'unique' names, so if we get more than

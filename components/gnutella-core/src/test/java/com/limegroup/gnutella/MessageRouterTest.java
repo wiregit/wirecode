@@ -515,5 +515,14 @@ public final class MessageRouterTest extends BaseTestCase {
         public List getKeyWords() {
             return KEYWORDS;
         }
+
+        //added due to changes in FileManager
+        protected void buildQRT() {
+            super.buildQRT();
+            Iterator iter = getKeyWords().iterator();
+            while(iter.hasNext()) {
+                _queryRouteTable.add((String)iter.next());
+            }
+        }
     }
 }
