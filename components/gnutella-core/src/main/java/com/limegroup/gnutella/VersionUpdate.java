@@ -262,6 +262,10 @@ public class VersionUpdate
 		newFileBuf.append(".jar");	   
 		String newFileName = newFileBuf.toString();
 		String fullPath = _currentDirectory + newFileName;	
+		File jarFile = new File(fullPath);
+		if(jarFile.exists()) {
+			jarFile.delete();
+		}
 		try {
 			// open the http connection, and grab 
 			// the file with the version number in it.
