@@ -58,64 +58,10 @@ import org.apache.commons.logging.Log;
  * ConnectionManager has methods to get up and downstream bandwidth, but it 
  * doesn't quite fit the BandwidthTracker interface.
  */
-public class ConnectionManager implements InternetObserver,
-                                          FetchObserver, 
-                                          HostObserver {
-    
-    /**
-     * Timestamp for the last time the user selected to disconnect.
-     */
-    private volatile long _disconnectTime = 0;
-
-    /**
-     * Timestamp for the time we began automatically connecting.  We stop 
-     * trying to automatically connect if the user has disconnected since that
-     * time.
-     */
-    private volatile long _automaticConnectTime = 0;
-    
-    /**
-     * Flag for whether or not we have a basic internet connection.
-     */
-    private volatile boolean _hasInternetConnection = false;
-    
-    /**
-     * Flag for whether or not GWebCache's have been contacted & finished.
-     */
-    private volatile boolean _gwebCachesFinished = false;
-    
-    /**
-     * Flag for whether or not we've notified the user about them being
-     * firewalled.
-     */
-    private volatile boolean _notifiedAboutFirewall = false;
-
-    /**
-     * Flag for whether or not the auto-connection process is in effect.
-     */
-    private volatile boolean _automaticallyConnecting;
-    
-    /**
-     * Timestamp of our last successful connection.
-     */
-    private volatile long _lastSuccessfulConnect = 0;
-    
-    /**
-     * Timestamp of the last time we checked to verify that the user has a live
-     * Internet connection.
-     */
-    private volatile long _lastConnectionCheck = 0;
-   
-
-    /**
-     * Counter for the number of connection attempts we've made.
-     */
-    private volatile static int _connectionAttempts;
-    
-
+public class ConnectionManager {
     private static final Log LOG = LogFactory.getLog(ConnectionManager.class);
-
-	/**
+    
+    /**
 	 * The number of Ultrapeer connections to ideally maintain as an Ultrapeer.
 	 */
 	public static final int ULTRAPEER_CONNECTIONS =
@@ -146,6 +92,11 @@ public class ConnectionManager implements InternetObserver,
      * This is done to ensure that the network is not solely LimeWire centric.
      */
     public static final int RESERVED_NON_LIMEWIRE_PEERS = 3;
+    
+    /**
+     * The monitor that periodically checks the status of your connection.
+     */
+    private ConnectionMonitor _monitor;
 
     /**
      * Reference to the <tt>HostCatcher</tt> for retrieving host data as well 
@@ -254,8 +205,12 @@ public class ConnectionManager implements InternetObserver,
      */
     public void initialize() {
         _catcher = RouterService.getHostCatcher();
-        _catcher.setHostObserver(this);
-        BootstrapServerManager.instance().setEndpointFetchObserver(this);
+        _monitor = new ConnectionMonitor();
+        _catcher.setHostObserver(_monitor);
+        BootstrapServerManager.instance().setFetchObserver(_monitor);
+        
+        // Scan the connections every 2 minutes, starting in 2 seconds.
+        RouterService.schedule(_monitor, 10*1000, 2 * 60 * 1000);
     }
 
 
@@ -1119,7 +1074,7 @@ public class ConnectionManager implements InternetObserver,
      * the number of connections to zero.
      */
     public synchronized void disconnect() {
-        _disconnectTime = System.currentTimeMillis();
+        _monitor.disconnect();
         //1. Prevent any new threads from starting.  Note that this does not
         //   affect the permanent settings.  We have to use setKeepAliveNow
         //   to ignore the fact that we have a client-ultrapeer connection.
@@ -1141,11 +1096,7 @@ public class ConnectionManager implements InternetObserver,
      * Connects to the network.  Ensures the number of messaging connections
      * (keep-alive) is non-zero and recontacts the pong server as needed.  
      */
-    public synchronized void connect() {
-        
-        // Reset the disconnect time to be a long time ago.
-        _disconnectTime = 0;
-        
+    public synchronized void connect() {        
         // Ignore this call if we're already connected.
         if(isConnected()) {
             return;
@@ -1154,13 +1105,7 @@ public class ConnectionManager implements InternetObserver,
         // Read hosts from disk again if we're running out.
         recoverHosts();
         
-        _connectionAttempts = 0;
-        _lastConnectionCheck = 0;
-        _lastSuccessfulConnect = 0;
-        _hasInternetConnection = false;
-        _gwebCachesFinished = false;
-        _notifiedAboutFirewall = false;
-        
+        _monitor.connect();
 
         //Tell the HostCatcher to retrieve more bootstrap servers
         //if necessary. (Only fetch if we haven't received a reply
@@ -1804,42 +1749,24 @@ public class ConnectionManager implements InternetObserver,
                           isConnectedTo(endpoint.getAddress()) );                      
     
                 Assert.that(endpoint != null);
-                _connectionAttempts++;
                 ManagedConnection connection = new ManagedConnection(
                     endpoint.getAddress(), endpoint.getPort());
-
-                // If we've been trying to connect for awhile, check to make 
-                // sure the user's internet connection is live.  We only do 
-                // this if we're not already connected, have not made any 
-                // successful connections recently, and have not checked the
-                // user's connection in the last little while or have very
-                // few hosts left to try.
-                long curTime = System.currentTimeMillis();
-                if(!isConnected() &&
-                   _connectionAttempts > 40 && 
-                   ((curTime-_lastSuccessfulConnect)>4000) &&
-                   ((curTime-_lastConnectionCheck)>60*60*1000)) {
-                    _connectionAttempts = 0;
-                    _lastConnectionCheck = curTime;
-                    LOG.debug("checking for live connection");
-                    ConnectionChecker.checkForLiveConnection(
-                        ConnectionManager.this);
-                }
-                
+                    
                 //Try to connect, recording success or failure so HostCatcher
                 //can update connection history.  Note that we declare 
                 //success if we were able to establish the TCP connection
                 //but couldn't handshake (NoGnutellaOkException).
                 try {
                     initializeFetchedConnection(connection, this);
-                    _lastSuccessfulConnect = System.currentTimeMillis();
+                    _monitor.success();
                     _catcher.doneWithConnect(endpoint, true);
                 } catch (NoGnutellaOkException e) {
-                    _lastSuccessfulConnect = System.currentTimeMillis();
+                    _monitor.success();
                     _catcher.doneWithConnect(endpoint, true);
                     _catcher.putHostOnProbation(endpoint);
                     throw e;                    
                 } catch (IOException e) {
+                    _monitor.failure();
                     _catcher.doneWithConnect(endpoint, false);
                     _catcher.expireHost(endpoint);
                     throw e;
@@ -1862,126 +1789,7 @@ public class ConnectionManager implements InternetObserver,
             return "ConnectionFetcher";
         }
 	}
-	
-	/**
-	 * Notification that all possible hosts have been used.
-	 *
-	 * If the gwebCaches have been contacted, we aren't connected
-	 * and the internet is alive, then we inform the user that
-	 * a firewall may be blocking them.
-	 */
-	public void noHostsToUse() {
-	    if(LOG.isDebugEnabled())
-	        LOG.debug("No more hosts to use." + 
-	                "  GWebCache's Used: " + _gwebCachesFinished +
-	                ", Has Internet: " + _hasInternetConnection +
-	                ", Is Connected: " + isConnected() +
-	                ", Notified About Firewall: " + _notifiedAboutFirewall);
-        
-        if(!_notifiedAboutFirewall && _gwebCachesFinished && !isConnected() &&
-           _hasInternetConnection && _lastSuccessfulConnect == 0) {
-            _notifiedAboutFirewall = true;
-	        // Notify the user that they are able to contact websites,
-	        // but unable to contact to connect to the Gnutella network.
-	        MessageService.showError("NO_GNUTELLA_INTERNET");
-        }
-    }
-	
-	/**
-	 * Notification that we have finished contacting GWebCaches.
-	 *
-	 * If some endpoints were added, we wait until later to notify that
-	 * the user may not have a connection.  However, if no responses were found
-	 * then we immediately tell the user (as HostCatcher will not have any
-	 * hosts to tell us about).
-	 *
-	 * Used so we can correctly notify users that we can't make an
-	 * internet connection later on.
-	 */
-    public void endpointFetchFinished(int numAdded) {
-        if(LOG.isDebugEnabled())
-            LOG.debug("Fetch Finished, num added: " + numAdded);
-        _gwebCachesFinished = true;
-        
-        // If no hosts were added, we have to tell ourselves that no hosts
-        // are available.
-        if(numAdded == 0) {
-            noHostsToUse();
-        }            
-    }        
 
-    /**
-     * Notification that the user does not have a live connection to the
-     * Internet to the best of our determination.
-     *
-     * In this case, we notify the user with a message and maintain any 
-     * Gnutella hosts we have already tried instead of discarding them.
-     */
-    public void setInternetStatus(boolean up) {
-        if(LOG.isDebugEnabled())
-            LOG.debug("setInternetStatus called with: " + up);
-        
-        _hasInternetConnection = up;
-        
-        // If the internet can be accessed, we don't need to do anything else
-        // just yet...
-        if(up)
-            return;
-        
-        if(_automaticallyConnecting) {
-            // We've already notified the user about their connection and we're
-            // alread retrying automatically, so just return.    
-            return;  
-        }
-        
-        // If the user has used the computer in the last 30 seconds, notify 
-        // them to reconnect.  Otherwise, there may have been a temporary 
-        // hiccup in the network connection, and we'll keep automatically 
-        // trying to recover the connection.
-        if(SystemUtils.supportsIdleTime() &&
-           SystemUtils.getIdleTime() < 30*1000 &&
-           !QuestionsHandler.NO_INTERNET.getValue()) {
-            // Notify the user that they have no internet connection.
-            MessageService.showError("NO_INTERNET", 
-                QuestionsHandler.NO_INTERNET);
-        } else {
-            // Notify the user that they have no internet connection and that
-            // we will automatically retry
-            MessageService.showError("NO_INTERNET_RETRYING",
-                QuestionsHandler.NO_INTERNET_RETRYING);
-            
-            // Kill all of the ConnectionFetchers.
-            disconnect();
-            
-            // Try to reconnect in 10 seconds, and then every minute after
-            // that.
-            RouterService.schedule(new Runnable() {
-                public void run() {
-                    // If the last time the user disconnected is more recent
-                    // than when we started automatically connecting, just 
-                    // return without trying to connect.  Note that the 
-                    // disconnect time is reset if the user selects to connect.
-                    if(_automaticConnectTime < _disconnectTime) {
-                        return;
-                    }
-                    
-                    if(!RouterService.isConnected()) {
-                        recoverHosts();
-                        
-                        // Try to re-connect.  Note this call resets the time
-                        // for our last check for a live connection, so we may
-                        // hit web servers again to check for a live connection.
-                        connect();
-                    }
-                }
-            }, 10*1000, 2*60*1000);   
-            _automaticConnectTime = System.currentTimeMillis();
-            _automaticallyConnecting = true;         
-        }
-        
-        recoverHosts();
-    }
-    
     /**
      * Utility method that tells the host catcher to recover hosts from disk
      * if it doesn't have enough hosts.
@@ -1994,4 +1802,258 @@ public class ConnectionManager implements InternetObserver,
             _catcher.recoverHosts();
         }
     }
+    
+    /**
+     * Monitors the status of your connection.
+     *
+     * This will trigger informational messages that either inform the user
+     * that the internet cannot be accessed or the internet can, but Gnutella
+     * can't, etc...
+     */
+    private class ConnectionMonitor implements InternetObserver,
+                                               FetchObserver, 
+                                               HostObserver,
+                                               Runnable {
+        private static final int UNKNOWN = -1;
+        private static final int NO = 0;
+        private static final int YES = 1;                                                
+                                                
+        /**
+         * Whether or not the user wants to remain disconnected.
+         */
+        private volatile boolean _disconnected = true;
+      
+        /**
+         * Flag for whether or not we have a basic internet connection.
+         */
+        private volatile int _hasInternetConnection = UNKNOWN;
+        
+        /**
+         * Flag for whether or not GWebCache's have been contacted & finished.
+         */
+        private volatile boolean _gwebCachesFinished = false;
+        
+        /**
+         * Flag for whether or not we've run out of hosts recently.
+         */
+        private volatile boolean _noMoreHostsToUse = false;
+        
+        /**
+         * Flag for whether or not we've notified the user about them being
+         * firewalled.
+         */
+        private volatile boolean _notifiedAboutFirewall = false;
+    
+        /**
+         * Flag for whether or not the auto-connection process is in effect.
+         */
+        private volatile boolean _automaticallyConnecting;
+        
+        /**
+         * Timestamp of our last successful connection.
+         */
+        private volatile long _lastSuccessfulConnect = 0;
+        
+        /**
+         * Timestamp of the last time we checked to verify that the user has a live
+         * Internet connection.
+         */
+        private volatile long _lastConnectionCheck = 0;
+        
+        /**
+         * The number of connections we've attempted to connect to.
+         */
+        private volatile long _connectionAttempts = 0;                                        
+                                                
+        /**
+         * Informs the monitor that we're disconnected.
+         */
+        void disconnect() {
+            _disconnected = true;
+        }
+        
+        /**
+         * Informs the monitor that we're connecting/connected.
+         */
+        void connect() {
+            _disconnected = false;
+            _hasInternetConnection = UNKNOWN;
+            _gwebCachesFinished = false;
+            _notifiedAboutFirewall = false;
+            _automaticallyConnecting = false;
+            _lastSuccessfulConnect = 0;
+            _lastConnectionCheck = 0;
+            _connectionAttempts = 0;
+        }
+        
+        /**
+         * Notification of a succesful connection.
+         */
+        void success() {
+            _connectionAttempts++;
+            _lastSuccessfulConnect = System.currentTimeMillis();
+        }
+        
+        /**
+         * Notification of a failed connection.
+         */
+        void failure() {
+            _connectionAttempts++;
+            // If we've been failing a lot, autoanalyze & run.
+            if(_connectionAttempts >= 40)
+                informUser();
+        }
+        
+        /**
+         * Analyzes the status of the connection.  If we are trying to 
+         * connect but have been unable to make a connection, then spawns
+         * a ConnectionChecker to determine if we can reach the internet
+         * at all.
+         */
+        private synchronized void analyzeConnection() {
+            // if the user doesn't want to connect, or we are already connected
+            // then do nothing.
+            if(_disconnected || isConnected())
+                return;
+                
+            long curTime = System.currentTimeMillis();
+
+            // If we've connected recently or checked the internet recently,
+            // then do nothing.
+            if( (curTime - _lastSuccessfulConnect) < (4*1000) ||
+                (curTime - _lastConnectionCheck) < (60*60*1000))
+                return;
+                
+            _lastConnectionCheck = curTime;
+            LOG.debug("Checking for live connection.");
+            ConnectionChecker.checkForLiveConnection(this);
+        }
+        
+    	/**
+    	 * Notification that all possible hosts have been used.
+    	 */
+    	public void noHostsToUse() {
+    	    LOG.debug("No more hosts to use.");
+    	    _noMoreHostsToUse = true;
+    	    informUser();
+    	}
+    	
+    	/**
+    	 * Notification that we have finished contacting GWebCaches.
+    	 */
+        public void endpointFetchFinished(int numAdded) {
+            if(LOG.isDebugEnabled())
+                LOG.debug("Fetch Finished, num added: " + numAdded);
+            _gwebCachesFinished = true;
+            informUser();
+        }        
+
+        /**
+         * Notification that the user does not have a live connection to the
+         * Internet to the best of our determination.
+         */
+        public void setInternetStatus(boolean up) {
+            if(LOG.isDebugEnabled())
+                LOG.debug("setInternetStatus called with: " + up);
+            
+            _hasInternetConnection = up ? YES : NO;
+            informUser();
+        }
+        
+        /**
+         * Determines whether or not to display messages about the user's
+         * internet connection status.
+         */
+        private synchronized void informUser() {
+            // If we've had a successful connection or we aren't trying to
+            // connect, everything's cool.
+           if(_disconnected || _lastSuccessfulConnect > 0)
+                return;
+                
+            // If we haven't checked the internet connection, wait till we do.
+            if(_hasInternetConnection == UNKNOWN) {
+                analyzeConnection();
+                return;
+            }
+                
+            // At this point, we know we're trying to connect, have checked
+            // the internet's status, and we haven't been able to connect to
+            // anybody.
+            
+            // If the internet's down, then we probably can't connect to
+            // anything at all.
+            if(_hasInternetConnection == NO)
+                noInternetAtAll();
+            // Otherwise, we might just have Gnutella firewalled.
+            else
+                noGnutella();
+        }
+        
+        /**
+         * Informs the user that their internet might work, but Gnutella
+         * doesn't.
+         */
+        private void noGnutella() {
+    	    if(LOG.isDebugEnabled())
+    	        LOG.debug("No Gnutella Connection." +
+    	                "  GWebCache's Used: " + _gwebCachesFinished +
+    	                ", Has Internet: " + _hasInternetConnection +
+    	                ", Is Connected: " + isConnected() +
+    	                ", Notified About Firewall: " + _notifiedAboutFirewall);
+    	                
+            if(!_notifiedAboutFirewall &&
+               _gwebCachesFinished &&
+               _hasInternetConnection == YES &&
+               _noMoreHostsToUse) {
+                _notifiedAboutFirewall = true;
+    	        // Notify the user that they are able to contact websites,
+    	        // but unable to contact to connect to the Gnutella network.
+    	        MessageService.showError("NO_GNUTELLA_INTERNET");
+            }
+        }
+        
+        /**
+         * Informs the user that we have no internet or just connects
+         * automatically.
+         */
+        private void noInternetAtAll() {
+            LOG.debug("No internet at all.");
+            
+            if(_automaticallyConnecting) {
+                // We've already notified the user about their connection and 
+                // we're alread retrying automatically, so just return.    
+                return;  
+            }
+            
+            // If the user has used the computer in the last 30 seconds, notify 
+            // them to reconnect.  Otherwise, there may have been a temporary 
+            // hiccup in the network connection, and we'll keep automatically 
+            // trying to recover the connection.
+            if(SystemUtils.supportsIdleTime() &&
+               SystemUtils.getIdleTime() < 30*1000 &&
+               !QuestionsHandler.NO_INTERNET.getValue()) {
+                // Notify the user that they have no internet connection.
+                MessageService.showError("NO_INTERNET", 
+                    QuestionsHandler.NO_INTERNET);
+            } else {
+                // Notify the user that they have no internet connection and that
+                // we will automatically retry
+                MessageService.showError("NO_INTERNET_RETRYING",
+                    QuestionsHandler.NO_INTERNET_RETRYING);
+                
+                // Kill all of the ConnectionFetchers.
+                disconnect();
+                
+                // Try to re-connect.  Note this call resets the time
+                // for our last check for a live connection, so we may
+                // hit web servers again to check for a live connection.
+                connect();
+                _automaticallyConnecting = true;         
+            }
+        }
+        
+        public void run() {
+            informUser();
+        }
+    }   
 }
