@@ -66,6 +66,9 @@ public class HTTPUploader implements Runnable {
     	}
 	
 	_sizeOfFile = _fdesc._size;
+
+	if (_sizeOfFile == 0) 
+	    return;
 	
 	try {
 	    _ostream = _socket.getOutputStream();
@@ -113,12 +116,15 @@ public class HTTPUploader implements Runnable {
 	}
 
 	/* check to see if the index */
-	if (! _fdesc._name.equals(_filename.trim())) { /* matches the name */
+	if (! (_fdesc._name.trim()).equals(_filename.trim())) { /* matches the name */
 	    doNoSuchFile();
 	    return;
   	}
 	
 	_sizeOfFile = _fdesc._size;
+
+	if (_sizeOfFile == 0)
+	    return;
 
 	try {
 	    File myFile = new File(_fdesc._path);  /* _path is the full name */
