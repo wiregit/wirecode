@@ -42,9 +42,7 @@ public class ResetTableMessage extends RouteTableMessage {
         ByteOrder.int2leb(tableSize, buf, 0);
         buf[4]=infinity;
         out.write(buf);   
-		if(RECORD_STATS) {
-			SentMessageStatHandler.TCP_RESET_ROUTE_TABLE_MESSAGES.addMessage(this);
-		} 
+		SentMessageStatHandler.TCP_RESET_ROUTE_TABLE_MESSAGES.addMessage(this);
     }
 
     
@@ -87,9 +85,7 @@ public class ResetTableMessage extends RouteTableMessage {
 
 	// inherit doc comment
   	public void recordDrop() {
-  		if(RECORD_STATS) {
-  			DroppedSentMessageStatHandler.TCP_RESET_ROUTE_TABLE_MESSAGES.addMessage(this);	   
-  		}
+  		DroppedSentMessageStatHandler.TCP_RESET_ROUTE_TABLE_MESSAGES.addMessage(this);
   	}
 
     public String toString() {

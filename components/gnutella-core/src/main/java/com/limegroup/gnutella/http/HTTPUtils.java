@@ -64,8 +64,7 @@ public final class HTTPUtils {
 		}
 		String header = createHeader(name, value);
 		os.write(header.getBytes());
-		if(!CommonUtils.isJava118()) 
-			BandwidthStat.HTTP_HEADER_UPSTREAM_BANDWIDTH.addData(header.length());
+		BandwidthStat.HTTP_HEADER_UPSTREAM_BANDWIDTH.addData(header.length());
 	}
 
 	/**
@@ -93,8 +92,7 @@ public final class HTTPUtils {
 		}
 		String header = createHeader(name, value);
 		out.write(header);
-		if(!CommonUtils.isJava118()) 
-			BandwidthStat.HTTP_HEADER_UPSTREAM_BANDWIDTH.addData(header.length());
+		BandwidthStat.HTTP_HEADER_UPSTREAM_BANDWIDTH.addData(header.length());
 	}
 	
 
@@ -123,8 +121,7 @@ public final class HTTPUtils {
 		}
 		String header = createHeader(name, value.httpStringValue());
 		os.write(header.getBytes());
-		if(!CommonUtils.isJava118()) 
-			BandwidthStat.HTTP_HEADER_UPSTREAM_BANDWIDTH.addData(header.length());
+		BandwidthStat.HTTP_HEADER_UPSTREAM_BANDWIDTH.addData(header.length());
 	}
 
 	/**
@@ -152,8 +149,7 @@ public final class HTTPUtils {
 		}
 		String header = createHeader(name, value.httpStringValue());
 		out.write(header);
-		if(!CommonUtils.isJava118()) 
-			BandwidthStat.HTTP_HEADER_UPSTREAM_BANDWIDTH.addData(header.length());
+		BandwidthStat.HTTP_HEADER_UPSTREAM_BANDWIDTH.addData(header.length());
 	}
 
 	/**

@@ -470,20 +470,17 @@ public class PingReply extends Message implements Serializable, IpPort {
             throw new NullPointerException("null payload");
         }
         if (payload.length < STANDARD_PAYLOAD_SIZE) {
-            if( RECORD_STATS )
-                ReceivedErrorStat.PING_REPLY_INVALID_PAYLOAD.incrementStat();
+            ReceivedErrorStat.PING_REPLY_INVALID_PAYLOAD.incrementStat();
             throw new BadPacketException("invalid payload length");   
         }
         int port = ByteOrder.ubytes2int(ByteOrder.leb2short(payload,0));
  		if(!NetworkUtils.isValidPort(port)) {
- 		    if( RECORD_STATS )
-                ReceivedErrorStat.PING_REPLY_INVALID_PORT.incrementStat();
+ 		    ReceivedErrorStat.PING_REPLY_INVALID_PORT.incrementStat();
 			throw new BadPacketException("invalid port: "+port); 
         }
         String ipString = NetworkUtils.ip2string(payload, 2);
         if(!NetworkUtils.isValidAddress(ipString)) {
-            if( RECORD_STATS )
-                ReceivedErrorStat.PING_REPLY_INVALID_ADDRESS.incrementStat();
+            ReceivedErrorStat.PING_REPLY_INVALID_ADDRESS.incrementStat();
             throw new BadPacketException("invalid address: " + ipString);
         }
         InetAddress ip;
@@ -499,13 +496,11 @@ public class PingReply extends Message implements Serializable, IpPort {
             try {
                 vendorBytes = ggep.getBytes(GGEP.GGEP_HEADER_VENDOR_INFO);
             } catch (BadGGEPPropertyException e) {
-                if( RECORD_STATS )
-                    ReceivedErrorStat.PING_REPLY_INVALID_GGEP.incrementStat();
+                ReceivedErrorStat.PING_REPLY_INVALID_GGEP.incrementStat();
                 throw new BadPacketException("bad GGEP: "+vendorBytes);
             }
             if(vendorBytes.length < 4) {
-                if( RECORD_STATS )
-                   ReceivedErrorStat.PING_REPLY_INVALID_VENDOR.incrementStat();
+                ReceivedErrorStat.PING_REPLY_INVALID_VENDOR.incrementStat();
                 throw new BadPacketException("invalid vendor length: "+
                                              vendorBytes.length);
             }
@@ -516,9 +511,7 @@ public class PingReply extends Message implements Serializable, IpPort {
                         ggep.getBytes(GGEP.GGEP_HEADER_CLIENT_LOCALE);
                 }
                 catch(BadGGEPPropertyException e) {
-                    if(RECORD_STATS)
-                        ReceivedErrorStat.PING_REPLY_INVALID_GGEP
-                            .incrementStat();
+                    ReceivedErrorStat.PING_REPLY_INVALID_GGEP.incrementStat();
                     throw new BadPacketException("GGEP error : creating from"
                                                  + " network : client locale");
                 }
@@ -819,9 +812,7 @@ public class PingReply extends Message implements Serializable, IpPort {
 
     protected void writePayload(OutputStream out) throws IOException {
         out.write(PAYLOAD);
-		if(RECORD_STATS) {
-			SentMessageStatHandler.TCP_PING_REPLIES.addMessage(this);
-		}
+		SentMessageStatHandler.TCP_PING_REPLIES.addMessage(this);
     }
 
     /**
@@ -1005,9 +996,7 @@ public class PingReply extends Message implements Serializable, IpPort {
 
 	// inherit doc comment
 	public void recordDrop() {
-		if(RECORD_STATS) {
-			DroppedSentMessageStatHandler.TCP_PING_REPLIES.addMessage(this);
-		}
+		DroppedSentMessageStatHandler.TCP_PING_REPLIES.addMessage(this);
 	}
 
     /** Marks the given kbytes field */

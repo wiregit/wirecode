@@ -100,8 +100,6 @@ public final class TCPConnectBackRedirect extends VendorMessage {
      */
     protected void writePayload(OutputStream out) throws IOException {
         super.writePayload(out);
-        if (RECORD_STATS)
-            ;
     }
 
     /** Overridden purely for stats handling.

@@ -79,9 +79,6 @@ public class UpdateMessageVerifierTest extends BaseTestCase {
     
     
     protected void setUp() throws Exception {
-    	PrivilegedAccessor.setValue(CommonUtils.class, 
-                "_isJava118", Boolean.FALSE);
-    	
     	File pub = CommonUtils.getResourceFile(testXMLPath+"public.key");
         File pub2 = new File(_settingsDir, "public.key");
         CommonUtils.copy(pub, pub2);

@@ -89,11 +89,6 @@ public final class QueryUnicaster {
 	private int _testUDPPingsSent = 0;
 
 	/**
-	 * Constant for whether or not to record stats.
-	 */
-	private final boolean RECORD_STATS = !CommonUtils.isJava118();
-
-	/**
 	 * Records whether or not someone has called init on me....
 	 */
 	private boolean _initialized = false;
@@ -216,8 +211,7 @@ public final class QueryUnicaster {
                     // send a QueryKey Request
                     PingRequest pr = PingRequest.createQueryKeyRequest();
                     udpService.send(pr,toQuery.getAddress(), toQuery.getPort());
-                    if(RECORD_STATS)
-                        SentMessageStatHandler.UDP_PING_REQUESTS.addMessage(pr);
+                    SentMessageStatHandler.UDP_PING_REQUESTS.addMessage(pr);
                     // DO NOT RE-ADD ENDPOINT - we'll do that if we get a
                     // QueryKey Reply!!
                     continue; // try another up above....
@@ -247,9 +241,7 @@ public final class QueryUnicaster {
                             udpService.send(qrToSend, 
                                             ip, toQuery.getPort());
 							currentHostUsed = true;
-							if(RECORD_STATS)
-								SentMessageStatHandler.UDP_QUERY_REQUESTS.
-									addMessage(qrToSend);
+							SentMessageStatHandler.UDP_QUERY_REQUESTS.addMessage(qrToSend);
 							currQB._hostsQueried.add(toQuery);
                         }
                     }
@@ -374,8 +366,7 @@ public final class QueryUnicaster {
                                 (byte)1, (byte)0);
                 UDPService.instance().send(pr, endpoint.getAddress(), 
                                            endpoint.getPort());
-				if(RECORD_STATS) 
-					SentMessageStatHandler.UDP_PING_REQUESTS.addMessage(pr);
+				SentMessageStatHandler.UDP_PING_REQUESTS.addMessage(pr);
 				_testUDPPingsSent++;
 			}
 			debug("QueryUnicaster.addUnicastEndpoint(): released lock.");
@@ -502,8 +493,7 @@ public final class QueryUnicaster {
                     InetAddress ip = toReturn.getAddress();
                     UDPService.instance().send(pr, ip, toReturn.getPort());
                     _pingList.add(toReturn);
-					if(RECORD_STATS) 
-						SentMessageStatHandler.UDP_PING_REQUESTS.addMessage(pr);
+					SentMessageStatHandler.UDP_PING_REQUESTS.addMessage(pr);
                 }
             }
             return toReturn;

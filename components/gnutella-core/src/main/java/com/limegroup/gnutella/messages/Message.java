@@ -68,12 +68,6 @@ public abstract class Message
      * The network that this was received on or is going to be sent to.
      */
     private final int network;
-
-
-	/**
-	 * Constant for whether or not to record stats.
-	 */
-	protected static final boolean RECORD_STATS = !CommonUtils.isJava118();
    
     /** Rep. invariant */
     protected void repOk() {
@@ -220,7 +214,6 @@ public abstract class Message
                 else throw e;
             }
             if (got==-1) {
-                if( RECORD_STATS )
                 ReceivedErrorStat.CONNECTION_CLOSED.incrementStat();
                 throw new IOException("Connection closed.");
             }
@@ -236,8 +229,7 @@ public abstract class Message
         //    than 2^31 bytes, throw an irrecoverable exception to
         //    cause this connection to be closed.
         if (length<0 || length > MessageSettings.MAX_LENGTH.getValue()) {
-            if( RECORD_STATS )
-                ReceivedErrorStat.INVALID_LENGTH.incrementStat();
+            ReceivedErrorStat.INVALID_LENGTH.incrementStat();
             throw new IOException("Unreasonable message length: "+length);
         }
 
@@ -249,8 +241,7 @@ public abstract class Message
             for (int i=0; i<length; ) {
                 int got=in.read(payload, i, length-i);
                 if (got==-1) {
-                    if( RECORD_STATS )
-                        ReceivedErrorStat.CONNECTION_CLOSED.incrementStat();
+                    ReceivedErrorStat.CONNECTION_CLOSED.incrementStat();
                     throw new IOException("Connection closed.");
                 }
                 i+=got;
@@ -264,23 +255,19 @@ public abstract class Message
         //   high bit is set to 0.
         byte hardMax = (byte)14;
         if (hops<0) {
-            if( RECORD_STATS )
-                ReceivedErrorStat.INVALID_HOPS.incrementStat();
+            ReceivedErrorStat.INVALID_HOPS.incrementStat();
             throw new BadPacketException("Negative (or very large) hops");
         } else if (ttl<0) {
-            if( RECORD_STATS )
-                ReceivedErrorStat.INVALID_TTL.incrementStat();
+            ReceivedErrorStat.INVALID_TTL.incrementStat();
             throw new BadPacketException("Negative (or very large) TTL");
         } else if ((hops > softMax) && 
                  (func != F_QUERY_REPLY) &&
                  (func != F_PING_REPLY)) {
-            if( RECORD_STATS )
-                ReceivedErrorStat.HOPS_EXCEED_SOFT_MAX.incrementStat();
+            ReceivedErrorStat.HOPS_EXCEED_SOFT_MAX.incrementStat();
             throw BadPacketException.HOPS_EXCEED_SOFT_MAX;
         }
         else if (ttl+hops > hardMax) {
-            if( RECORD_STATS )
-                ReceivedErrorStat.HOPS_AND_TTL_OVER_HARD_MAX.incrementStat();
+            ReceivedErrorStat.HOPS_AND_TTL_OVER_HARD_MAX.incrementStat();
             throw new BadPacketException("TTL+hops exceeds hard max; probably spam");
         } else if ((ttl+hops > softMax) && 
                  (func != F_QUERY_REPLY) &&
@@ -338,8 +325,7 @@ public abstract class Message
                                                          payload, network);
         }
         
-        if( RECORD_STATS )
-                ReceivedErrorStat.INVALID_CODE.incrementStat();
+        ReceivedErrorStat.INVALID_CODE.incrementStat();
         throw new BadPacketException("Unrecognized function code: "+func);
     }
 

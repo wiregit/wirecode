@@ -46,15 +46,13 @@ public final class LeafHandshakeResponder
 
         // leaves should never accept connections to other leaves
         if(response.isLeaf()) {
-            if( RECORD_STATS )
-                HandshakingStat.LEAF_OUTGOING_REJECT_LEAF.incrementStat();
+            HandshakingStat.LEAF_OUTGOING_REJECT_LEAF.incrementStat();
             return HandshakeResponse.createLeafRejectOutgoingResponse();
         }
 
         //check if this is a preferenced connection
         if(_pref) {
             /* TODO: ADD STAT
-              if(RECORD_STATS)
               HandshakingStat.LEAF_OUTGOING_REJECT_LOCALE.incrementStat();
             */
             if(!ApplicationSettings.LANGUAGE.getValue()
@@ -64,8 +62,7 @@ public final class LeafHandshakeResponder
         }
         
         if(!response.isGoodUltrapeer()) {
-            if( RECORD_STATS )
-                HandshakingStat.LEAF_OUTGOING_REJECT_OLD_UP.incrementStat();
+            HandshakingStat.LEAF_OUTGOING_REJECT_OLD_UP.incrementStat();
             return HandshakeResponse.createLeafRejectOutgoingResponse();
         }
         
@@ -76,8 +73,7 @@ public final class LeafHandshakeResponder
 		    ret.put(HeaderNames.CONTENT_ENCODING, HeaderNames.DEFLATE_VALUE);
 		}
         
-        if( RECORD_STATS )
-            HandshakingStat.LEAF_OUTGOING_ACCEPT.incrementStat();
+        HandshakingStat.LEAF_OUTGOING_ACCEPT.incrementStat();
         
         return HandshakeResponse.createAcceptOutgoingResponse(ret);
     }
@@ -94,8 +90,7 @@ public final class LeafHandshakeResponder
         
         //If we already have enough ultrapeers, reject.
         if(!_manager.allowConnection(hr)) {
-            if( RECORD_STATS )
-                HandshakingStat.LEAF_INCOMING_REJECT.incrementStat();
+            HandshakingStat.LEAF_INCOMING_REJECT.incrementStat();
             return HandshakeResponse.createLeafRejectIncomingResponse(hr);
         } 
 
@@ -104,8 +99,7 @@ public final class LeafHandshakeResponder
 		    ret.put(HeaderNames.CONTENT_ENCODING, HeaderNames.DEFLATE_VALUE);
 		}         
 
-        if( RECORD_STATS )
-            HandshakingStat.LEAF_INCOMING_ACCEPT.incrementStat();
+        HandshakingStat.LEAF_INCOMING_ACCEPT.incrementStat();
 
         //b) We're not a leaf yet, so accept the incoming connection
         return HandshakeResponse.createAcceptIncomingResponse(hr, ret);

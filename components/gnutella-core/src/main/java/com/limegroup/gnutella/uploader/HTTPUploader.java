@@ -110,11 +110,6 @@ public final class HTTPUploader implements Uploader {
 	 * The <tt>HTTPRequestMethod</tt> to use for the upload.
 	 */
 	private HTTPRequestMethod _method;
-	
-	/**
-	 * Whether or not to record stats.
-	 */
-	private static final boolean RECORD_STATS = !CommonUtils.isJava118();
 
 	/**
 	 * Consructor for a "normal" non-push upload.  Note that this can
@@ -386,9 +381,8 @@ public final class HTTPUploader implements Uploader {
 	 */
 	void setAmountUploaded(int amount) {
 		int newData = amount - _amountRead;
-		if(RECORD_STATS && newData > 0) {
+		if(newData > 0)
             BandwidthStat.HTTP_BODY_UPSTREAM_BANDWIDTH.addData(newData);
-		}
 		_amountRead = amount;
 	}
     
@@ -599,9 +593,7 @@ public final class HTTPUploader implements Uploader {
                 if ( (str==null) || (str.equals("")) ) 
                     break;
 
-                if(RECORD_STATS) 
-					BandwidthStat.
-                        HTTP_HEADER_DOWNSTREAM_BANDWIDTH.addData(str.length());
+                BandwidthStat.HTTP_HEADER_DOWNSTREAM_BANDWIDTH.addData(str.length());
                 debug("HTTPUploader.readHeader(): str = " +  str);
                 
         		// break out of the loop if it is null or blank

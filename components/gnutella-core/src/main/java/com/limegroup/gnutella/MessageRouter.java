@@ -156,11 +156,6 @@ public abstract class MessageRouter {
 	 * Handle to the <tt>FileManager</tt> instance.
 	 */
 	private static FileManager _fileManager;
-	
-	/**
-	 * Constant for whether or not to record stats.
-	 */
-	private static final boolean RECORD_STATS = !CommonUtils.isJava118();
 
 	/**
 	 * A handle to the thread that deals with QRP Propagation
@@ -317,109 +312,83 @@ public abstract class MessageRouter {
         msg.hop();
 	   
         if(msg instanceof PingRequest) {
-			if(RECORD_STATS)
-				ReceivedMessageStatHandler.TCP_PING_REQUESTS.addMessage(msg);
+            ReceivedMessageStatHandler.TCP_PING_REQUESTS.addMessage(msg);
             handlePingRequestPossibleDuplicate((PingRequest)msg, 
 											   receivingConnection);
 		} else if (msg instanceof PingReply) {
-			if(RECORD_STATS)
-				ReceivedMessageStatHandler.TCP_PING_REPLIES.addMessage(msg);
+			ReceivedMessageStatHandler.TCP_PING_REPLIES.addMessage(msg);
             handlePingReply((PingReply)msg, receivingConnection);
 		} else if (msg instanceof QueryRequest) {
-			if(RECORD_STATS)
-				ReceivedMessageStatHandler.TCP_QUERY_REQUESTS.addMessage(msg);
+			ReceivedMessageStatHandler.TCP_QUERY_REQUESTS.addMessage(msg);
             handleQueryRequestPossibleDuplicate(
                 (QueryRequest)msg, receivingConnection);
 		} else if (msg instanceof QueryReply) {
-			if(RECORD_STATS)
-				ReceivedMessageStatHandler.TCP_QUERY_REPLIES.addMessage(msg);
+			ReceivedMessageStatHandler.TCP_QUERY_REPLIES.addMessage(msg);
             // if someone sent a TCP QueryReply with the MCAST header,
             // that's bad, so ignore it.
             QueryReply qmsg = (QueryReply)msg;
             handleQueryReply(qmsg, receivingConnection);            
 		} else if (msg instanceof PushRequest) {
-			if(RECORD_STATS)
-				ReceivedMessageStatHandler.TCP_PUSH_REQUESTS.addMessage(msg);
+			ReceivedMessageStatHandler.TCP_PUSH_REQUESTS.addMessage(msg);
             handlePushRequest((PushRequest)msg, receivingConnection);
 		} else if (msg instanceof ResetTableMessage) {
-			if(RECORD_STATS)
-				ReceivedMessageStatHandler.TCP_RESET_ROUTE_TABLE_MESSAGES.addMessage(msg);
+			ReceivedMessageStatHandler.TCP_RESET_ROUTE_TABLE_MESSAGES.addMessage(msg);
             handleResetTableMessage((ResetTableMessage)msg,
                                     receivingConnection);
 		} else if (msg instanceof PatchTableMessage) {
-			if(RECORD_STATS)
-				ReceivedMessageStatHandler.TCP_PATCH_ROUTE_TABLE_MESSAGES.addMessage(msg);
+			ReceivedMessageStatHandler.TCP_PATCH_ROUTE_TABLE_MESSAGES.addMessage(msg);
             handlePatchTableMessage((PatchTableMessage)msg,
                                     receivingConnection);            
         }
         else if (msg instanceof MessagesSupportedVendorMessage) {
-			if(RECORD_STATS)
-				ReceivedMessageStatHandler.TCP_MESSAGES_SUPPORTED.addMessage(msg);
+			ReceivedMessageStatHandler.TCP_MESSAGES_SUPPORTED.addMessage(msg);
             receivingConnection.handleVendorMessage((VendorMessage) msg);
         }
         else if (msg instanceof CapabilitiesVM) {
-			if(RECORD_STATS)
-                ;
             receivingConnection.handleVendorMessage((VendorMessage) msg);
         }
         else if (msg instanceof HopsFlowVendorMessage) {
-			if(RECORD_STATS)
-				ReceivedMessageStatHandler.TCP_HOPS_FLOW.addMessage(msg);
+            ReceivedMessageStatHandler.TCP_HOPS_FLOW.addMessage(msg);
             receivingConnection.handleVendorMessage((VendorMessage) msg);
         }
         else if (msg instanceof TCPConnectBackVendorMessage) {
-			if(RECORD_STATS)
-				ReceivedMessageStatHandler.TCP_TCP_CONNECTBACK.addMessage(msg);
+            ReceivedMessageStatHandler.TCP_TCP_CONNECTBACK.addMessage(msg);
             handleTCPConnectBackRequest((TCPConnectBackVendorMessage) msg,
                                         receivingConnection);
         }
         else if (msg instanceof UDPConnectBackVendorMessage) {
-			if(RECORD_STATS)
-				ReceivedMessageStatHandler.TCP_UDP_CONNECTBACK.addMessage(msg);
+			ReceivedMessageStatHandler.TCP_UDP_CONNECTBACK.addMessage(msg);
             handleUDPConnectBackRequest((UDPConnectBackVendorMessage) msg,
                                         receivingConnection);
         }
         else if (msg instanceof TCPConnectBackRedirect) {
-			if(RECORD_STATS)
-                ;
             handleTCPConnectBackRedirect((TCPConnectBackRedirect) msg,
                                          receivingConnection);
         }
         else if (msg instanceof UDPConnectBackRedirect) {
-			if(RECORD_STATS)
-                ;
             handleUDPConnectBackRedirect((UDPConnectBackRedirect) msg,
                                          receivingConnection);
         }
         else if (msg instanceof PushProxyRequest) {
-			if(RECORD_STATS)
-                ;
             handlePushProxyRequest((PushProxyRequest) msg, receivingConnection);
         }
         else if (msg instanceof PushProxyAcknowledgement) {
-			if(RECORD_STATS)
-                ;
             receivingConnection.handleVendorMessage((VendorMessage) msg);
         }
         else if (msg instanceof QueryStatusResponse) {
-			if(RECORD_STATS)
-                ;
             handleQueryStatus((QueryStatusResponse) msg, receivingConnection);
         }
         else if (msg instanceof GiveStatsVendorMessage) {
-            if(RECORD_STATS)
-                ; //TODO: add the statistics recording code
+            //TODO: add the statistics recording code
             handleGiveStats((GiveStatsVendorMessage)msg, receivingConnection);
         }
         else if(msg instanceof StatisticVendorMessage) {
-            if(RECORD_STATS) 
-                ;//TODO: add the statistics recording code
+            //TODO: add the statistics recording code
             handleStatisticsMessage(
                             (StatisticVendorMessage)msg, receivingConnection);
         }
         else if (msg instanceof HeadPing) {
-        	if(RECORD_STATS)
-        		;//TODO: add the statistics recording code
+        	//TODO: add the statistics recording code
         	handleHeadPing((HeadPing)msg, receivingConnection);
         }
         
@@ -469,67 +438,52 @@ public abstract class MessageRouter {
                     ReceivedMessageStatHandler.UDP_DUPLICATE_QUERIES.addMessage(msg);
                 }  
             }
-            if(RECORD_STATS)
-                ReceivedMessageStatHandler.UDP_QUERY_REQUESTS.addMessage(msg);
+            ReceivedMessageStatHandler.UDP_QUERY_REQUESTS.addMessage(msg);
 		} else if (msg instanceof QueryReply) {
             QueryReply qr = (QueryReply) msg;
-			if(RECORD_STATS) {
-				ReceivedMessageStatHandler.UDP_QUERY_REPLIES.addMessage(msg);
-                int numResps = qr.getResultCount();
-                try {
-                    // only account for OOB stuff if this was response to a 
-                    // OOB query, multicast stuff is sent over UDP too....
-                    if (!qr.isReplyToMulticastQuery())
-                        OutOfBandThroughputStat.RESPONSES_RECEIVED.addData(numResps);
-                }
-                catch (BadPacketException bpe) {
-                    return;
-                }
+			ReceivedMessageStatHandler.UDP_QUERY_REPLIES.addMessage(msg);
+            int numResps = qr.getResultCount();
+            try {
+                // only account for OOB stuff if this was response to a 
+                // OOB query, multicast stuff is sent over UDP too....
+                if (!qr.isReplyToMulticastQuery())
+                    OutOfBandThroughputStat.RESPONSES_RECEIVED.addData(numResps);
+            }
+            catch (BadPacketException bpe) {
+                return;
             }
 			
             handleQueryReply(qr, handler);
             
 		} else if(msg instanceof PingRequest) {
-			if(RECORD_STATS)
-				ReceivedMessageStatHandler.UDP_PING_REQUESTS.addMessage(msg);
+			ReceivedMessageStatHandler.UDP_PING_REQUESTS.addMessage(msg);
 			handleUDPPingRequestPossibleDuplicate((PingRequest)msg, 
 												  handler, datagram);
 		} else if(msg instanceof PingReply) {
-			if(RECORD_STATS)
-				ReceivedMessageStatHandler.UDP_PING_REPLIES.addMessage(msg);
+			ReceivedMessageStatHandler.UDP_PING_REPLIES.addMessage(msg);
             handleUDPPingReply((PingReply)msg, handler, address, port);
 		} else if(msg instanceof PushRequest) {
-			if(RECORD_STATS)
-				ReceivedMessageStatHandler.UDP_PUSH_REQUESTS.addMessage(msg);
+			ReceivedMessageStatHandler.UDP_PUSH_REQUESTS.addMessage(msg);
 			handlePushRequest((PushRequest)msg, handler);
 		} else if(msg instanceof LimeACKVendorMessage) {
-			if(RECORD_STATS)
-				ReceivedMessageStatHandler.UDP_LIME_ACK.addMessage(msg);
+			ReceivedMessageStatHandler.UDP_LIME_ACK.addMessage(msg);
             handleLimeACKMessage((LimeACKVendorMessage)msg, datagram);
         }
         else if(msg instanceof ReplyNumberVendorMessage) {
-			if(RECORD_STATS)
-                ;
             handleReplyNumberMessage((ReplyNumberVendorMessage) msg, datagram);
         }
         else if(msg instanceof GiveStatsVendorMessage) {
-            if(RECORD_STATS)
-                ;
             handleGiveStats((GiveStatsVendorMessage) msg, handler);
         }
         else if(msg instanceof StatisticVendorMessage) {
-            if(RECORD_STATS)
-                ;
             handleStatisticsMessage((StatisticVendorMessage)msg, handler);
         }
         else if(msg instanceof UDPCrawlerPing) {
-        	if(RECORD_STATS)
-        		;//TODO: add the statistics recording code
+        	//TODO: add the statistics recording code
         	handleUDPCrawlerPing((UDPCrawlerPing)msg, handler);
         }
         else if (msg instanceof HeadPing) {
-        	if(RECORD_STATS)
-        		;//TODO: add the statistics recording code
+        	//TODO: add the statistics recording code
         	handleHeadPing((HeadPing)msg, datagram);
         }
         notifyMessageListener(msg);
@@ -575,24 +529,19 @@ public abstract class MessageRouter {
               (QueryRequest)msg, handler) ) {
                 ReceivedMessageStatHandler.MULTICAST_DUPLICATE_QUERIES.addMessage(msg);
             }
-            if(RECORD_STATS)
-                ReceivedMessageStatHandler.MULTICAST_QUERY_REQUESTS.addMessage(msg);
+            ReceivedMessageStatHandler.MULTICAST_QUERY_REQUESTS.addMessage(msg);
 	//	} else if (msg instanceof QueryReply) {			
-	//		if(RECORD_STATS)
-	//			ReceivedMessageStatHandler.UDP_QUERY_REPLIES.addMessage(msg);
+	//		  ReceivedMessageStatHandler.UDP_QUERY_REPLIES.addMessage(msg);
     //        handleQueryReply((QueryReply)msg, handler);
 		} else if(msg instanceof PingRequest) {
-			if(RECORD_STATS)
-				ReceivedMessageStatHandler.MULTICAST_PING_REQUESTS.addMessage(msg);
+			ReceivedMessageStatHandler.MULTICAST_PING_REQUESTS.addMessage(msg);
 			handleUDPPingRequestPossibleDuplicate((PingRequest)msg, 
 												  handler, datagram);
 	//	} else if(msg instanceof PingReply) {
-	//		if(RECORD_STATS)
-	//			ReceivedMessageStatHandler.UDP_PING_REPLIES.addMessage(msg);
+	//	      ReceivedMessageStatHandler.UDP_PING_REPLIES.addMessage(msg);
     //        handleUDPPingReply((PingReply)msg, handler, address, port);
 		} else if(msg instanceof PushRequest) {
-			if(RECORD_STATS)
-				ReceivedMessageStatHandler.MULTICAST_PUSH_REQUESTS.addMessage(msg);
+            ReceivedMessageStatHandler.MULTICAST_PUSH_REQUESTS.addMessage(msg);
 			handlePushRequest((PushRequest)msg, handler);
 		}
         notifyMessageListener(msg);
@@ -635,8 +584,7 @@ public abstract class MessageRouter {
 
         UDPService.instance().send(reply, datagram.getAddress(), 
                                    datagram.getPort());
-		if(RECORD_STATS)
-			SentMessageStatHandler.UDP_PING_REPLIES.addMessage(reply);
+		SentMessageStatHandler.UDP_PING_REPLIES.addMessage(reply);
 	}
 
 	/**
@@ -755,8 +703,7 @@ public abstract class MessageRouter {
     }
 
     private void tallyDupQuery(QueryRequest request) {
-        if(RECORD_STATS)
-            ReceivedMessageStatHandler.TCP_DUPLICATE_QUERIES.addMessage(request);
+        ReceivedMessageStatHandler.TCP_DUPLICATE_QUERIES.addMessage(request);
     }
 
 	/**
@@ -1025,8 +972,7 @@ public abstract class MessageRouter {
         // targeted GUESS query, as long as the other end said they can receive
         // unsolicited.
         if ((numResults<0) || (numResults>QueryHandler.ULTRAPEER_RESULTS)) {
-            if (RECORD_STATS)
-                OutOfBandThroughputStat.RESPONSES_BYPASSED.addData(reply.getNumResults());
+            OutOfBandThroughputStat.RESPONSES_BYPASSED.addData(reply.getNumResults());
 
             //if the reply cannot receive unsolicited udp, there is no point storing it.
             if (!reply.canReceiveUnsolicited())
@@ -1060,8 +1006,7 @@ public abstract class MessageRouter {
             new LimeACKVendorMessage(qGUID, reply.getNumResults());
         UDPService.instance().send(ack, datagram.getAddress(),
                                    datagram.getPort());
-        if (RECORD_STATS)
-            OutOfBandThroughputStat.RESPONSES_REQUESTED.addData(reply.getNumResults());
+        OutOfBandThroughputStat.RESPONSES_REQUESTED.addData(reply.getNumResults());
     }
 
 
@@ -1543,8 +1488,7 @@ public abstract class MessageRouter {
 		// set the TTL on outgoing udp queries to 1
 		query.setTTL((byte)1);
 		// record the stat
-		if (RECORD_STATS)
-		    SentMessageStatHandler.MULTICAST_QUERY_REQUESTS.addMessage(query);
+		SentMessageStatHandler.MULTICAST_QUERY_REQUESTS.addMessage(query);
 				
 		MulticastService.instance().send(query);
 	}	
@@ -1656,11 +1600,10 @@ public abstract class MessageRouter {
         if(lastHop &&
            ultrapeer.isUltrapeerQueryRoutingConnection()) {
             boolean sent = sendRoutedQueryToHost(query, ultrapeer, handler);
-            if(sent && RECORD_STATS) {
+            if(sent)
                 RoutedQueryStat.ULTRAPEER_SEND.incrementStat();
-            } else if(RECORD_STATS) {
+            else
                 RoutedQueryStat.ULTRAPEER_DROP.incrementStat();
-            }
         } else {
             // otherwise, just send it out
             sendQueryRequest(query, ultrapeer, handler);
@@ -1840,8 +1783,7 @@ public abstract class MessageRouter {
             replyHandler.handlePingReply(reply, handler);
         }
         else {
-            if(RECORD_STATS) 
-                RouteErrorStat.PING_REPLY_ROUTE_ERRORS.incrementStat();
+            RouteErrorStat.PING_REPLY_ROUTE_ERRORS.incrementStat();
             handler.countDroppedMessage();
         }
 		boolean supportsUnicast = reply.supportsUnicast();
@@ -1912,20 +1854,17 @@ public abstract class MessageRouter {
                 UNICASTER.handleQueryReply(queryReply);
 
             } else {
-				if(RECORD_STATS) {
-					RouteErrorStat.HARD_LIMIT_QUERY_REPLY_ROUTE_ERRORS.incrementStat();
-                    final byte ttl = queryReply.getTTL();
-                    if (ttl < RouteErrorStat.HARD_LIMIT_QUERY_REPLY_TTL.length)
-					RouteErrorStat.HARD_LIMIT_QUERY_REPLY_TTL[ttl].incrementStat();
-                    else
-					RouteErrorStat.HARD_LIMIT_QUERY_REPLY_TTL[RouteErrorStat.HARD_LIMIT_QUERY_REPLY_TTL.length-1].incrementStat();
-                }                    
+				RouteErrorStat.HARD_LIMIT_QUERY_REPLY_ROUTE_ERRORS.incrementStat();
+                final byte ttl = queryReply.getTTL();
+                if (ttl < RouteErrorStat.HARD_LIMIT_QUERY_REPLY_TTL.length)
+				    RouteErrorStat.HARD_LIMIT_QUERY_REPLY_TTL[ttl].incrementStat();
+                else
+				    RouteErrorStat.HARD_LIMIT_QUERY_REPLY_TTL[RouteErrorStat.HARD_LIMIT_QUERY_REPLY_TTL.length-1].incrementStat();
                 handler.countDroppedMessage();
             }
         }
         else {
-			if(RECORD_STATS) 
-				RouteErrorStat.NO_ROUTE_QUERY_REPLY_ROUTE_ERRORS.incrementStat();
+			RouteErrorStat.NO_ROUTE_QUERY_REPLY_ROUTE_ERRORS.incrementStat();
             handler.countDroppedMessage();
         }
     }
@@ -2053,8 +1992,7 @@ public abstract class MessageRouter {
             replyHandler.handlePushRequest(request, handler);
         }
         else {
-			if(RECORD_STATS) 
-				RouteErrorStat.PUSH_REQUEST_ROUTE_ERRORS.incrementStat();
+			RouteErrorStat.PUSH_REQUEST_ROUTE_ERRORS.incrementStat();
             handler.countDroppedMessage();
         }
     }

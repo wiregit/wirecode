@@ -1269,26 +1269,22 @@ public class QueryRequest extends Message implements Serializable{
 		if(QUERY.length() == 0 &&
 		   tempRichQuery.length() == 0 &&
 		   QUERY_URNS.size() == 0) {
-		    if( RECORD_STATS )
-		        ReceivedErrorStat.QUERY_EMPTY.incrementStat();
+		    ReceivedErrorStat.QUERY_EMPTY.incrementStat();
 			throw new BadPacketException("empty query");
 		}       
         if(QUERY.length() > MAX_QUERY_LENGTH) {
-            if( RECORD_STATS )
-                ReceivedErrorStat.QUERY_TOO_LARGE.incrementStat();
+            ReceivedErrorStat.QUERY_TOO_LARGE.incrementStat();
             throw BadPacketException.QUERY_TOO_BIG;
         }        
 
         if(tempRichQuery.length() > MAX_XML_QUERY_LENGTH) {
-            if( RECORD_STATS )
-                ReceivedErrorStat.QUERY_XML_TOO_LARGE.incrementStat();
+            ReceivedErrorStat.QUERY_XML_TOO_LARGE.incrementStat();
             throw BadPacketException.XML_QUERY_TOO_BIG;
         }
 
         if(!(QUERY_URNS.size() > 0 && QUERY.equals(DEFAULT_URN_QUERY))
            && hasIllegalChars(QUERY)) {
-            if( RECORD_STATS )
-                ReceivedErrorStat.QUERY_ILLEGAL_CHARS.incrementStat();
+            ReceivedErrorStat.QUERY_ILLEGAL_CHARS.incrementStat();
             throw BadPacketException.ILLEGAL_CHAR_IN_QUERY;
         }
     }
@@ -1318,9 +1314,7 @@ public class QueryRequest extends Message implements Serializable{
 
     protected void writePayload(OutputStream out) throws IOException {
         out.write(PAYLOAD);
-		if(RECORD_STATS) {
-			SentMessageStatHandler.TCP_QUERY_REQUESTS.addMessage(this);
-		}
+		SentMessageStatHandler.TCP_QUERY_REQUESTS.addMessage(this);
     }
 
     /**
@@ -1576,9 +1570,7 @@ public class QueryRequest extends Message implements Serializable{
 
 	// inherit doc comment
 	public void recordDrop() {
-		if(RECORD_STATS) {
-			DroppedSentMessageStatHandler.TCP_QUERY_REQUESTS.addMessage(this);
-		}
+		DroppedSentMessageStatHandler.TCP_QUERY_REQUESTS.addMessage(this);
 	}
 
     /** Returns this, because it's always safe to send big queries. */

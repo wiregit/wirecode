@@ -977,10 +977,7 @@ public class ManagedConnection extends Connection
 
             // Run through the route spam filter and drop accordingly.
             if (isSpam(m)) {
-				if(!CommonUtils.isJava118()) {
-					ReceivedMessageStatHandler.TCP_FILTERED_MESSAGES.
-                        addMessage(m);
-				}
+				ReceivedMessageStatHandler.TCP_FILTERED_MESSAGES.addMessage(m);
                 addReceivedDropped();
                 continue;
             }

@@ -28,9 +28,6 @@ public abstract class AuthenticationHandshakeResponder
      */
     private final Cookies COOKIES = Cookies.instance();
     
-    protected static final boolean RECORD_STATS =
-        !CommonUtils.isJava118();
-    
     /**
      * Constant handle to the <tt>SettingsManager</tt> for accessing
      * various properties.

@@ -16,9 +16,6 @@ import com.sun.java.util.collections.*;
  * This class is the message routing implementation for TCP messages.
  */
 public class StandardMessageRouter extends MessageRouter {
-    
-    private final boolean RECORD_STATS = !CommonUtils.isJava118();
-
     /**
      * Responds to a Gnutella ping with cached pongs.  This does special 
      * handling for both "heartbeat" pings that were sent to ensure that
@@ -172,7 +169,7 @@ public class StandardMessageRouter extends MessageRouter {
             (queryRequest.getCapabilitySelector() > 
              CapabilitiesVM.CAPABILITY_MAX_SELECTOR)) return false;
 
-        if (RECORD_STATS && queryRequest.isWhatIsNewRequest())
+        if (queryRequest.isWhatIsNewRequest())
             ReceivedMessageStat.WHAT_IS_NEW_QUERY_MESSAGES.incrementStat();
     
         // Only send results if we're not busy.  Note that this ignores
@@ -196,12 +193,10 @@ public class StandardMessageRouter extends MessageRouter {
             RouterService.getFileManager().query(queryRequest);
         
         if( RouterService.isShieldedLeaf() && queryRequest.isTCP() ) {
-            if( RECORD_STATS ) {
-                if( responses != null && responses.length > 0 )
-                    RoutedQueryStat.LEAF_HIT.incrementStat();
-                else
-                    RoutedQueryStat.LEAF_FALSE_POSITIVE.incrementStat();
-            }
+            if( responses != null && responses.length > 0 )
+                RoutedQueryStat.LEAF_HIT.incrementStat();
+            else
+                RoutedQueryStat.LEAF_FALSE_POSITIVE.incrementStat();
         }
 
         return sendResponses(responses, queryRequest, handler);

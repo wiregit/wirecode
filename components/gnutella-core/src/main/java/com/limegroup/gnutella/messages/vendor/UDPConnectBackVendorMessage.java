@@ -116,8 +116,7 @@ public final class UDPConnectBackVendorMessage extends VendorMessage {
      */
     protected void writePayload(OutputStream out) throws IOException {
         super.writePayload(out);
-        if (RECORD_STATS)
-            SentMessageStatHandler.TCP_UDP_CONNECTBACK.addMessage(this);
+        SentMessageStatHandler.TCP_UDP_CONNECTBACK.addMessage(this);
     }
 
     /** Overridden purely for stats handling.

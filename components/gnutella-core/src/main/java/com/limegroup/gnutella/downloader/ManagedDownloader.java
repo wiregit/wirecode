@@ -519,11 +519,6 @@ public class ManagedDownloader implements Downloader, Serializable {
     private float averageBandwidth = 0f;
 
     /**
-     * Whether or not to record stats.
-     */
-    static final boolean RECORD_STATS = !CommonUtils.isJava118();
-
-    /**
      * The GUID of the original query.  may be null.
      */
     private final GUID originalQueryGUID;
@@ -1488,14 +1483,14 @@ public class ManagedDownloader implements Downloader, Serializable {
                 //spurious count increments in the local
                 //AlternateLocationCollections
                 if(!validAlts.contains(loc)) {
-                    if( RECORD_STATS && rfd.isFromAlternateLocation() )
+                    if(rfd.isFromAlternateLocation() )
                         DownloadStat.ALTERNATE_WORKED.incrementStat(); 
                     validAlts.add(loc);
                     if( ifd != null )
                         ifd.addVerified(forFD);
                 }
             }  else {
-                    if( RECORD_STATS && rfd.isFromAlternateLocation() )
+                    if(rfd.isFromAlternateLocation() )
                         DownloadStat.ALTERNATE_NOT_ADDED.incrementStat();
                     validAlts.remove(loc);
                     if( ifd != null )
@@ -2561,8 +2556,7 @@ public class ManagedDownloader implements Downloader, Serializable {
             LOG.debug("WORKER: attempting connect to "
               + rfd.getHost() + ":" + rfd.getPort());        
         
-        if(RECORD_STATS)
-            DownloadStat.CONNECTION_ATTEMPTS.incrementStat();
+        DownloadStat.CONNECTION_ATTEMPTS.incrementStat();
 
         // for multicast replies, try pushes first
         // and then try direct connects.
@@ -2623,11 +2617,9 @@ public class ManagedDownloader implements Downloader, Serializable {
         // (and the subclassed CantConnectException)
         try {
         ret.connectTCP(NORMAL_CONNECT_TIME);
-            if(RECORD_STATS)
-                DownloadStat.CONNECT_DIRECT_SUCCESS.incrementStat();
+            DownloadStat.CONNECT_DIRECT_SUCCESS.incrementStat();
         } catch(IOException iox) {
-            if(RECORD_STATS)
-                DownloadStat.CONNECT_DIRECT_FAILURES.incrementStat();
+            DownloadStat.CONNECT_DIRECT_FAILURES.incrementStat();
             throw iox;
         }
         return ret;
@@ -2662,8 +2654,7 @@ public class ManagedDownloader implements Downloader, Serializable {
             try {
                 threadLock.wait(PUSH_CONNECT_TIME);  
             } catch(InterruptedException e) {
-                if(RECORD_STATS)
-                    DownloadStat.PUSH_FAILURE_INTERRUPTED.incrementStat();
+                DownloadStat.PUSH_FAILURE_INTERRUPTED.incrementStat();
                 throw new IOException("push interupted.");
             }
             
@@ -2684,11 +2675,9 @@ public class ManagedDownloader implements Downloader, Serializable {
         //So this connectTCP *CAN* throw IOX.
         try {
             ret.connectTCP(0);//just initializes the byteReader in this case
-            if(RECORD_STATS)
-                DownloadStat.CONNECT_PUSH_SUCCESS.incrementStat();
+            DownloadStat.CONNECT_PUSH_SUCCESS.incrementStat();
         } catch(IOException iox) {
-            if(RECORD_STATS)
-                DownloadStat.PUSH_FAILURE_LOST.incrementStat();
+            DownloadStat.PUSH_FAILURE_LOST.incrementStat();
             throw iox;
         }
         return ret;
@@ -2714,8 +2703,7 @@ public class ManagedDownloader implements Downloader, Serializable {
                 assignGrey(dloader,http11); 
             }
         } catch(NoSuchElementException nsex) {
-            if(RECORD_STATS)
-                DownloadStat.NSE_EXCEPTION.incrementStat();
+            DownloadStat.NSE_EXCEPTION.incrementStat();
             if(LOG.isDebugEnabled())            
                 LOG.debug("nsex thrown in assingAndRequest "+dloader,nsex);
             synchronized(this) {
@@ -2725,8 +2713,7 @@ public class ManagedDownloader implements Downloader, Serializable {
             }
             return ConnectionStatus.getNoData();
         } catch (NoSuchRangeException nsrx) { 
-            if(RECORD_STATS)
-                DownloadStat.NSR_EXCEPTION.incrementStat();
+            DownloadStat.NSR_EXCEPTION.incrementStat();
             if(LOG.isDebugEnabled())
                 LOG.debug("nsrx thrown in assignAndRequest "+dloader,nsrx);
             synchronized(this) {
@@ -2741,8 +2728,7 @@ public class ManagedDownloader implements Downloader, Serializable {
             rfd.resetFailedCount();                
             return ConnectionStatus.getNoFile();
         } catch(TryAgainLaterException talx) {
-            if(RECORD_STATS)
-                DownloadStat.TAL_EXCEPTION.incrementStat();
+            DownloadStat.TAL_EXCEPTION.incrementStat();
             if(LOG.isDebugEnabled())
                 LOG.debug("talx thrown in assignAndRequest "+dloader,talx);
                 
@@ -2764,8 +2750,7 @@ public class ManagedDownloader implements Downloader, Serializable {
             rfd.resetFailedCount();                
             return ConnectionStatus.getNoFile();
         } catch(RangeNotAvailableException rnae) {
-            if(RECORD_STATS)
-                DownloadStat.RNA_EXCEPTION.incrementStat();
+            DownloadStat.RNA_EXCEPTION.incrementStat();
             if(LOG.isDebugEnabled())
                 LOG.debug("rnae thrown in assignAndRequest "+dloader,rnae);
             rfd.resetFailedCount();                
@@ -2773,22 +2758,19 @@ public class ManagedDownloader implements Downloader, Serializable {
             //no need to add to files or busy we keep iterating
             return ConnectionStatus.getPartialData();
         } catch (FileNotFoundException fnfx) {
-            if(RECORD_STATS)
-                DownloadStat.FNF_EXCEPTION.incrementStat();
+            DownloadStat.FNF_EXCEPTION.incrementStat();
             if(LOG.isDebugEnabled())
                 LOG.debug("fnfx thrown in assignAndRequest"+dloader, fnfx);
             informMesh(rfd, false);
             return ConnectionStatus.getNoFile();
         } catch (NotSharingException nsx) {
-            if(RECORD_STATS)
-                DownloadStat.NS_EXCEPTION.incrementStat();
+            DownloadStat.NS_EXCEPTION.incrementStat();
             if(LOG.isDebugEnabled())
                 LOG.debug("nsx thrown in assignAndRequest "+dloader, nsx);
             informMesh(rfd, false);
             return ConnectionStatus.getNoFile();
         } catch (QueuedException qx) { 
-            if(RECORD_STATS)
-                DownloadStat.Q_EXCEPTION.incrementStat();
+            DownloadStat.Q_EXCEPTION.incrementStat();
             if(LOG.isDebugEnabled())
                 LOG.debug("qx thrown in assignAndRequest "+dloader, qx);
             synchronized(this) {
@@ -2807,15 +2789,13 @@ public class ManagedDownloader implements Downloader, Serializable {
             return ConnectionStatus.getQueued(qx.getQueuePosition(),
                                               qx.getMinPollTime());
         } catch(ProblemReadingHeaderException prhe) {
-            if(RECORD_STATS)
-                DownloadStat.PRH_EXCEPTION.incrementStat();
+            DownloadStat.PRH_EXCEPTION.incrementStat();
             if(LOG.isDebugEnabled())
                 LOG.debug("prhe thrown in assignAndRequest "+dloader,prhe);
             informMesh(rfd, false);
             return ConnectionStatus.getNoFile();
         } catch(UnknownCodeException uce) {
-            if(RECORD_STATS)
-                DownloadStat.UNKNOWN_CODE_EXCEPTION.incrementStat();
+            DownloadStat.UNKNOWN_CODE_EXCEPTION.incrementStat();
             if(LOG.isDebugEnabled())
                 LOG.debug("uce (" + uce.getCode() +
                           ") thrown in assignAndRequest " +
@@ -2823,14 +2803,12 @@ public class ManagedDownloader implements Downloader, Serializable {
             informMesh(rfd, false);
             return ConnectionStatus.getNoFile();
         } catch (ContentUrnMismatchException cume) {
-        	if(RECORD_STATS)
-        		DownloadStat.CONTENT_URN_MISMATCH_EXCEPTION.incrementStat();
+        	DownloadStat.CONTENT_URN_MISMATCH_EXCEPTION.incrementStat();
         	if(LOG.isDebugEnabled())
         		LOG.debug("cume thrown in assignAndRequest " + dloader, cume);
 			return ConnectionStatus.getNoFile();
         } catch (IOException iox) {
-            if(RECORD_STATS)
-                DownloadStat.IO_EXCEPTION.incrementStat();
+            DownloadStat.IO_EXCEPTION.incrementStat();
             if(LOG.isDebugEnabled())
                 LOG.debug("iox thrown in assignAndRequest "+dloader, iox);
             
@@ -2865,7 +2843,7 @@ public class ManagedDownloader implements Downloader, Serializable {
         }
         
         //did not throw exception? OK. we are downloading
-        if(RECORD_STATS && rfd.getFailedCount() > 0)
+        if(rfd.getFailedCount() > 0)
             DownloadStat.RETRIED_SUCCESS.incrementStat();    
         
         rfd.resetFailedCount();
@@ -2888,8 +2866,7 @@ public class ManagedDownloader implements Downloader, Serializable {
             chatList.addHost(dloader);
             browseList.addHost(dloader);
         }
-        if(RECORD_STATS)
-            DownloadStat.RESPONSE_OK.incrementStat();            
+        DownloadStat.RESPONSE_OK.incrementStat();            
         return ConnectionStatus.getConnected();
     }
 	
@@ -3223,19 +3200,15 @@ public class ManagedDownloader implements Downloader, Serializable {
         try {
             downloader.doDownload(commonOutFile);
             rfd.resetFailedCount();
-            if(RECORD_STATS) {
-                if(http11)
-                    DownloadStat.SUCCESFULL_HTTP11.incrementStat();
-                else
-                    DownloadStat.SUCCESFULL_HTTP10.incrementStat();
-            }
+            if(http11)
+                DownloadStat.SUCCESFULL_HTTP11.incrementStat();
+            else
+                DownloadStat.SUCCESFULL_HTTP10.incrementStat();
         } catch (IOException e) {
-            if(RECORD_STATS) {
-                if(http11)
-                    DownloadStat.FAILED_HTTP11.incrementStat();
-                else
-                    DownloadStat.FAILED_HTTP10.incrementStat();
-             }
+            if(http11)
+                DownloadStat.FAILED_HTTP11.incrementStat();
+            else
+                DownloadStat.FAILED_HTTP10.incrementStat();
             problem = true;
 			chatList.removeHost(downloader);
             browseList.removeHost(downloader);

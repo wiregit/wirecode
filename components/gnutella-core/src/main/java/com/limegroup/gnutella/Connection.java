@@ -296,9 +296,7 @@ public class Connection implements IpPort {
         OUTGOING = true;
         REQUEST_HEADERS = requestHeaders;
         RESPONSE_HEADERS = responseHeaders;            
-		if(!CommonUtils.isJava118()) {
-			ConnectionStat.OUTGOING_CONNECTION_ATTEMPTS.incrementStat();
-		}
+		ConnectionStat.OUTGOING_CONNECTION_ATTEMPTS.incrementStat();
     }
 
     /**
@@ -329,9 +327,7 @@ public class Connection implements IpPort {
         OUTGOING = false;
         RESPONSE_HEADERS = responseHeaders;	
 		REQUEST_HEADERS = null;
-		if(!CommonUtils.isJava118()) {
-			ConnectionStat.INCOMING_CONNECTION_ATTEMPTS.incrementStat();
-		}
+		ConnectionStat.INCOMING_CONNECTION_ATTEMPTS.incrementStat();
     }
 
 
@@ -915,10 +911,7 @@ public class Connection implements IpPort {
 
         //TODO: character encodings?
         byte[] bytes=s.getBytes();
-		if(!CommonUtils.isJava118()) {
-			BandwidthStat.GNUTELLA_HEADER_UPSTREAM_BANDWIDTH.addData(
-			    bytes.length);
-        }        
+		BandwidthStat.GNUTELLA_HEADER_UPSTREAM_BANDWIDTH.addData(bytes.length);
         _out.write(bytes);
         _out.flush();
     }
@@ -960,10 +953,7 @@ public class Connection implements IpPort {
             String line=(new ByteReader(_in)).readLine();
             if (line==null)
                 throw new IOException("read null line");
-			if(!CommonUtils.isJava118()) {
-				BandwidthStat.GNUTELLA_HEADER_DOWNSTREAM_BANDWIDTH.addData(
-				    line.length());
-            }
+            BandwidthStat.GNUTELLA_HEADER_DOWNSTREAM_BANDWIDTH.addData(line.length());
             return line;
         } catch(NullPointerException npe) {
             throw CONNECTION_CLOSED;
@@ -1093,12 +1083,10 @@ public class Connection implements IpPort {
             if( isReadDeflated() ) {
                 _compressedBytesReceived = _inflater.getTotalIn();
                 _bytesReceived = _inflater.getTotalOut();
-                if(!CommonUtils.isJava118()) {
-                    CompressionStat.GNUTELLA_UNCOMPRESSED_DOWNSTREAM.addData(
-                        (int)(_inflater.getTotalOut() - pUncompressed));
-                    CompressionStat.GNUTELLA_COMPRESSED_DOWNSTREAM.addData(
-                        (int)(_inflater.getTotalIn() - pCompressed));
-                }            
+                CompressionStat.GNUTELLA_UNCOMPRESSED_DOWNSTREAM.addData(
+                    (int)(_inflater.getTotalOut() - pUncompressed));
+                CompressionStat.GNUTELLA_COMPRESSED_DOWNSTREAM.addData(
+                    (int)(_inflater.getTotalIn() - pCompressed));
             } else if(msg != null) {
                 _bytesReceived += msg.getTotalLength();
             }
@@ -1186,12 +1174,10 @@ public class Connection implements IpPort {
             _bytesSent += m.getTotalLength();
         if(isWriteDeflated()) {
             _compressedBytesSent = _deflater.getTotalOut();
-            if(!CommonUtils.isJava118()) {
-                CompressionStat.GNUTELLA_UNCOMPRESSED_UPSTREAM.addData(
-                    (int)(_deflater.getTotalIn() - pUn));
-                CompressionStat.GNUTELLA_COMPRESSED_UPSTREAM.addData(
-                    (int)(_deflater.getTotalOut() - pComp));
-            }
+            CompressionStat.GNUTELLA_UNCOMPRESSED_UPSTREAM.addData(
+                (int)(_deflater.getTotalIn() - pUn));
+            CompressionStat.GNUTELLA_COMPRESSED_UPSTREAM.addData(
+                (int)(_deflater.getTotalOut() - pComp));
         }
     }               
     

@@ -246,21 +246,18 @@ public class QueryReply extends Message implements Serializable{
         this._payload=payload;
         
 		if(!NetworkUtils.isValidPort(getPort())) {
-		    if( RECORD_STATS )
-                ReceivedErrorStat.REPLY_INVALID_PORT.incrementStat();
+		    ReceivedErrorStat.REPLY_INVALID_PORT.incrementStat();
 			throw new BadPacketException("invalid port");
 		}
 		if( (getSpeed() & 0xFFFFFFFF00000000L) != 0) {
-		    if( RECORD_STATS )
-                ReceivedErrorStat.REPLY_INVALID_SPEED.incrementStat();
+		    ReceivedErrorStat.REPLY_INVALID_SPEED.incrementStat();
 			throw new BadPacketException("invalid speed: " + getSpeed());
 		} 		
 		
 		setAddress();
 		
 		if(!NetworkUtils.isValidAddress(getIPBytes())) {
-		    if( RECORD_STATS )
-		        ReceivedErrorStat.REPLY_INVALID_ADDRESS.incrementStat();
+		    ReceivedErrorStat.REPLY_INVALID_ADDRESS.incrementStat();
 		    throw new BadPacketException("invalid address");
 		}
 		
@@ -447,9 +444,7 @@ public class QueryReply extends Message implements Serializable{
 	// inherit doc comment
     public void writePayload(OutputStream out) throws IOException {
         out.write(_payload);
-		if(RECORD_STATS) {
-			SentMessageStatHandler.TCP_QUERY_REPLIES.addMessage(this);
-		}
+		SentMessageStatHandler.TCP_QUERY_REPLIES.addMessage(this);
     }
     
     /**
@@ -1096,9 +1091,7 @@ public class QueryReply extends Message implements Serializable{
 
 	// inherit doc comment
 	public void recordDrop() {
-		if(RECORD_STATS) {
-			DroppedSentMessageStatHandler.TCP_QUERY_REPLIES.addMessage(this);
-		}
+		DroppedSentMessageStatHandler.TCP_QUERY_REPLIES.addMessage(this);
 	}
 
     public final static boolean debugOn = false;

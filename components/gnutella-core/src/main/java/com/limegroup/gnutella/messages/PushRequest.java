@@ -25,20 +25,17 @@ public class PushRequest extends Message implements Serializable {
              byte[] payload, int network) throws BadPacketException {
         super(guid, Message.F_PUSH, ttl, hops, payload.length, network);
         if (payload.length < STANDARD_PAYLOAD_SIZE) {
-            if( RECORD_STATS )
-                ReceivedErrorStat.PUSH_INVALID_PAYLOAD.incrementStat();
+            ReceivedErrorStat.PUSH_INVALID_PAYLOAD.incrementStat();
             throw new BadPacketException("Payload too small: "+payload.length);
         }
         this.payload=payload;
 		if(!NetworkUtils.isValidPort(getPort())) {
-		    if( RECORD_STATS )
-                ReceivedErrorStat.PUSH_INVALID_PORT.incrementStat();
+		    ReceivedErrorStat.PUSH_INVALID_PORT.incrementStat();
 			throw new BadPacketException("invalid port");
 		}
 		String ip = NetworkUtils.ip2string(payload, 20);
 		if(!NetworkUtils.isValidAddress(ip)) {
-		    if( RECORD_STATS )
-		        ReceivedErrorStat.PUSH_INVALID_ADDRESS.incrementStat();
+		    ReceivedErrorStat.PUSH_INVALID_ADDRESS.incrementStat();
 		    throw new BadPacketException("invalid address: " + ip);
 		}
     }
@@ -96,9 +93,7 @@ public class PushRequest extends Message implements Serializable {
 
     protected void writePayload(OutputStream out) throws IOException {
 		out.write(payload);
-		if(RECORD_STATS) {
-			SentMessageStatHandler.TCP_PUSH_REQUESTS.addMessage(this);
-		}
+		SentMessageStatHandler.TCP_PUSH_REQUESTS.addMessage(this);
     }
 
     public byte[] getClientGUID() {
@@ -143,9 +138,7 @@ public class PushRequest extends Message implements Serializable {
 
 	// inherit doc comment
 	public void recordDrop() {
-		if(RECORD_STATS) {
-			DroppedSentMessageStatHandler.TCP_PUSH_REQUESTS.addMessage(this);
-		}
+		DroppedSentMessageStatHandler.TCP_PUSH_REQUESTS.addMessage(this);
 	}
 
     public String toString() {

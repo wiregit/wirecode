@@ -72,8 +72,7 @@ public final class QueryStatusResponse extends VendorMessage {
      */
     protected void writePayload(OutputStream out) throws IOException {
         super.writePayload(out);
-        if (RECORD_STATS)
-            SentMessageStatHandler.UDP_REPLY_NUMBER.addMessage(this);
+        SentMessageStatHandler.UDP_REPLY_NUMBER.addMessage(this);
     }
 
     /** Overridden purely for stats handling.

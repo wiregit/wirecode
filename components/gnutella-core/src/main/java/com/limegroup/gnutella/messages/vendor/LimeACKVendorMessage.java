@@ -99,8 +99,7 @@ public final class LimeACKVendorMessage extends VendorMessage {
      */
     protected void writePayload(OutputStream out) throws IOException {
         super.writePayload(out);
-        if (RECORD_STATS)
-            SentMessageStatHandler.UDP_LIME_ACK.addMessage(this);
+        SentMessageStatHandler.UDP_LIME_ACK.addMessage(this);
     }
 
     /** Overridden purely for stats handling.

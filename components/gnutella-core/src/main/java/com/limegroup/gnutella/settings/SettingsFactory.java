@@ -16,13 +16,7 @@ import com.sun.java.util.collections.*;
  * to choose a unique string key for your setting name -- otherwise there
  * will be conflicts.
  */
-public final class SettingsFactory {
-    
-    /**
-     * Bytes used to ensure that we can write to the settings file.
-     */
-    private final byte[] PRE_HEADER = "#LimeWire Properties IO Test\n".getBytes();
-    
+public final class SettingsFactory {    
     /**
      * Time interval, after which the accumulated information expires
      */
@@ -209,7 +203,7 @@ public final class SettingsFactory {
                 toSave.remove( set.getKey() );
         }
         
-        FileOutputStream out = null;
+        OutputStream out = null;
         try {
             // some bugs were reported where the settings file was a directory.
             if(SETTINGS_FILE.isDirectory()) SETTINGS_FILE.delete();
@@ -222,16 +216,10 @@ public final class SettingsFactory {
                 FileUtils.setWriteable(parent);
             }
             FileUtils.setWriteable(SETTINGS_FILE);
-            out = new FileOutputStream(SETTINGS_FILE);
-
-
-            // Properties.store is not in Java 1.1.8, and Properties.save
-            // doesn't throw an IOException, so we must test the writing
-            // to ensure that an IOException won't be thrown.
-            out.write( PRE_HEADER );
+            out = new BufferedOutputStream(new FileOutputStream(SETTINGS_FILE));
 
             // save the properties to disk.
-            toSave.save( out, HEADING);            
+            toSave.store( out, HEADING);            
         } catch(FileNotFoundException e) {
             ErrorService.error(e);
         } catch (IOException e) {

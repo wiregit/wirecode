@@ -75,12 +75,10 @@ public class GiveStatsVendorMessage extends VendorMessage {
 
     protected void writePayload(OutputStream out) throws IOException {
         super.writePayload(out);
-        if(RECORD_STATS) {
-            if(isTCP())
-                SentMessageStatHandler.TCP_GIVE_STATS.addMessage(this);
-            else if(isUDP())
-                SentMessageStatHandler.UDP_GIVE_STATS.addMessage(this);
-        }
+        if(isTCP())
+            SentMessageStatHandler.TCP_GIVE_STATS.addMessage(this);
+        else if(isUDP())
+            SentMessageStatHandler.UDP_GIVE_STATS.addMessage(this);
     }
     
     /** Overridden purely for stats handling.

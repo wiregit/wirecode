@@ -94,8 +94,7 @@ public class PingRequest extends Message {
             out.write(payload);
         }
         // the ping is still written even if there's no payload
-        if (RECORD_STATS) 
-            SentMessageStatHandler.TCP_PING_REQUESTS.addMessage(this);
+        SentMessageStatHandler.TCP_PING_REQUESTS.addMessage(this);
         //Do nothing...there is no payload!
     }
 
@@ -133,9 +132,7 @@ public class PingRequest extends Message {
 
 	// inherit doc comment
 	public void recordDrop() {
-		if(RECORD_STATS) {
-			DroppedSentMessageStatHandler.TCP_PING_REQUESTS.addMessage(this);
-		}
+		DroppedSentMessageStatHandler.TCP_PING_REQUESTS.addMessage(this);
 	}
 
     public String toString() {

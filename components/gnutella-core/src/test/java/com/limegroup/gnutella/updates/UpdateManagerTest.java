@@ -418,62 +418,6 @@ public class UpdateManagerTest extends BaseTestCase {
                                                     "2.9.3", man.getVersion());
     }
 
-    public void testFileReadVerifiedWithJava118() throws Exception {
-    	removeConnections();
-        UpdateManager man = UpdateManager.instance();
-        assertEquals("setSettings not working", "2.9.3", man.getVersion());
-        PrivilegedAccessor.setValue(CommonUtils.class, 
-                                              "_isJava118", Boolean.TRUE);
-        updateVersion = DEF_MESSAGE;
-        changeUpdateFile();        
-        UpdateManager man2 = UpdateManager.instance();
-        assertEquals("Mac classic verifying on disk broken", 
-                                                 "3.6.3", man2.getVersion());
-        PrivilegedAccessor.setValue(CommonUtils.class, 
-                                              "_isJava118", Boolean.FALSE);
-    }
-
-    public void testJava118NetworkVerification() throws Exception {
-    	
-    	removeConnections();
-    	
-       UpdateManager man = UpdateManager.instance();
-       assertEquals("setSettings not working", "2.9.3", man.getVersion());
-       PrivilegedAccessor.setValue(CommonUtils.class, 
-                                              "_isJava118", Boolean.TRUE);
-       PrivilegedAccessor.setValue(UpdateMessageVerifier.class, 
-                                   "testing118", Boolean.TRUE);
-       //Make first connection
-       TestConnection conn1 = null; 
-       TestConnection conn2 = null;
-       TestConnection conn3 = null;
-       TestConnection conn4 = null;
-       try {
-           conn1 = new TestConnection(6677, "3.6.3", NEW);
-           conn2 = new TestConnection(6678, "3.6.3", NEW);
-           conn3 = new TestConnection(6679, "3.2.2", MIDDLE);
-           conn4 = new TestConnection(6680, "3.6.3", NEW);
-       } catch(IOException iox) {
-           fail("could not set test up");
-       }
-       conn1.start();
-       conn2.start();
-       conn3.start();
-       try {
-           Thread.sleep(500);
-       } catch(InterruptedException e) { }
-       UpdateManager man2 = UpdateManager.instance();
-       assertEquals("java118 verification problem", "2.9.3", man2.getVersion());
-       conn4.start();
-       try {
-           Thread.sleep(300);
-       } catch(InterruptedException e) { }
-       UpdateManager man3 = UpdateManager.instance();
-       assertEquals("java118 verification problem", "3.6.3", man3.getVersion());
-       PrivilegedAccessor.setValue(CommonUtils.class, 
-                                              "_isJava118", Boolean.FALSE);
-    }
-
    public void testUpdateNotRequesteFromSpecial() {
    		removeConnections();
        updateVersion = OLD;

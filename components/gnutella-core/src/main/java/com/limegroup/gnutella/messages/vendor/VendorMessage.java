@@ -158,18 +158,15 @@ public abstract class VendorMessage extends Message {
               network);
         // set the instance params....
         if ((vendorID.length != 4)) {
-            if( RECORD_STATS )
-                ReceivedErrorStat.VENDOR_INVALID_ID.incrementStat();            
+            ReceivedErrorStat.VENDOR_INVALID_ID.incrementStat();            
             throw new BadPacketException("Vendor ID Invalid!");
         }
         if ((selector & 0xFFFF0000) != 0) {
-            if( RECORD_STATS )
-                ReceivedErrorStat.VENDOR_INVALID_SELECTOR.incrementStat();
+            ReceivedErrorStat.VENDOR_INVALID_SELECTOR.incrementStat();
             throw new BadPacketException("Selector Invalid!");
         }
         if ((version & 0xFFFF0000) != 0) {
-            if( RECORD_STATS )
-                ReceivedErrorStat.VENDOR_INVALID_VERSION.incrementStat();
+            ReceivedErrorStat.VENDOR_INVALID_VERSION.incrementStat();
             throw new BadPacketException("Version Invalid!");
         }        
         _vendorID = vendorID;
@@ -237,8 +234,7 @@ public abstract class VendorMessage extends Message {
     	
         // sanity check
         if (fromNetwork.length < LENGTH_MINUS_PAYLOAD) {
-            if( RECORD_STATS )
-                ReceivedErrorStat.VENDOR_INVALID_PAYLOAD.incrementStat();
+            ReceivedErrorStat.VENDOR_INVALID_PAYLOAD.incrementStat();
             throw new BadPacketException("Not enough bytes for a VM!!");
         }
 
@@ -341,8 +337,7 @@ public abstract class VendorMessage extends Message {
         		(Arrays.equals(vendorID, F_LIME_VENDOR_ID)))
         	return new HeadPong(guid,ttl,hops,version,restOf);
         
-        if( RECORD_STATS )
-                ReceivedErrorStat.VENDOR_UNRECOGNIZED.incrementStat();
+        ReceivedErrorStat.VENDOR_UNRECOGNIZED.incrementStat();
         throw UNRECOGNIZED_EXCEPTION;
     }
     

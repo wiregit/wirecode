@@ -37,11 +37,6 @@ public final class UDPReplyHandler implements ReplyHandler {
 	 * Constant for the <tt>UDPService</tt>.
 	 */
 	private static final UDPService UDP_SERVICE = UDPService.instance();
-
-	/**
-	 * Constant for whether or not to record stats.
-	 */
-	private final boolean RECORD_STATS = !CommonUtils.isJava118();
     
     /**
      * Used to filter messages that are considered spam.
@@ -89,8 +84,7 @@ public final class UDPReplyHandler implements ReplyHandler {
 	 */
 	public void handlePingReply(PingReply pong, ReplyHandler handler) {
         UDP_SERVICE.send(pong, IP, PORT);
-		if(RECORD_STATS) 
-			SentMessageStatHandler.UDP_PING_REPLIES.addMessage(pong);
+		SentMessageStatHandler.UDP_PING_REPLIES.addMessage(pong);
 	}
 
 	/**
@@ -104,8 +98,7 @@ public final class UDPReplyHandler implements ReplyHandler {
 	 */
 	public void handleQueryReply(QueryReply hit, ReplyHandler handler) {
         UDP_SERVICE.send(hit, IP, PORT);
-		if(RECORD_STATS) 
-			SentMessageStatHandler.UDP_QUERY_REPLIES.addMessage(hit);
+		SentMessageStatHandler.UDP_QUERY_REPLIES.addMessage(hit);
 	}
 
 	/**
@@ -119,8 +112,7 @@ public final class UDPReplyHandler implements ReplyHandler {
 	 */
 	public void handlePushRequest(PushRequest request, ReplyHandler handler) {
         UDP_SERVICE.send(request, IP, PORT);
-		if(RECORD_STATS) 
-			SentMessageStatHandler.UDP_PUSH_REQUESTS.addMessage(request);
+		SentMessageStatHandler.UDP_PUSH_REQUESTS.addMessage(request);
 	}
 
 	public void countDroppedMessage() {}

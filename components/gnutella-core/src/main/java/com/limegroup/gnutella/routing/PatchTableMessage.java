@@ -74,9 +74,7 @@ public class PatchTableMessage extends RouteTableMessage {
         buf[3]=(byte)entryBits;
         System.arraycopy(data, 0, buf, 4, data.length); //TODO3: avoid
         out.write(buf);  
-		if(RECORD_STATS) {
-			SentMessageStatHandler.TCP_PATCH_ROUTE_TABLE_MESSAGES.addMessage(this);
-		} 
+		SentMessageStatHandler.TCP_PATCH_ROUTE_TABLE_MESSAGES.addMessage(this);
     }
 
     
@@ -140,9 +138,7 @@ public class PatchTableMessage extends RouteTableMessage {
 
 	// inherit doc comment
 	public void recordDrop() {
-		if(RECORD_STATS) {
-			DroppedSentMessageStatHandler.TCP_PATCH_ROUTE_TABLE_MESSAGES.addMessage(this);	   
-		}
+		DroppedSentMessageStatHandler.TCP_PATCH_ROUTE_TABLE_MESSAGES.addMessage(this);
 	}
 
     public String toString() {

@@ -647,8 +647,7 @@ public class HTTPDownloader implements BandwidthTracker {
 		if (str==null || str.equals(""))
             throw new IOException();
 
-		if(!CommonUtils.isJava118()) 
-			BandwidthStat.HTTP_HEADER_DOWNSTREAM_BANDWIDTH.addData(str.length());
+		BandwidthStat.HTTP_HEADER_DOWNSTREAM_BANDWIDTH.addData(str.length());
         int code=parseHTTPCode(str, _rfd);	
         //Note: According to the specification there are 5 headers, LimeWire
         //ignores 2 of them - queue length, and maxUploadSlots.
@@ -659,8 +658,7 @@ public class HTTPDownloader implements BandwidthTracker {
             if (str==null || str.equals(""))
                 break;
                 
-			if(!CommonUtils.isJava118()) 
-				BandwidthStat.HTTP_HEADER_DOWNSTREAM_BANDWIDTH.addData(str.length());
+			BandwidthStat.HTTP_HEADER_DOWNSTREAM_BANDWIDTH.addData(str.length());
             //As of LimeWire 1.9, we ignore the "Content-length" header for
             //handling normal download flow.  The Content-Length is only
             //used for reading/discarding some HTTP body messages.
@@ -844,7 +842,7 @@ public class HTTPDownloader implements BandwidthTracker {
                     synchronized(_altLocsReceived) {
                         added = _altLocsReceived.add(al);
                     }
-                    if(ManagedDownloader.RECORD_STATS && added) 
+                    if(added) 
                         DownloadStat.ALTERNATE_COLLECTED.incrementStat();
                 }
 			} catch(IOException e) {
@@ -1293,8 +1291,7 @@ public class HTTPDownloader implements BandwidthTracker {
                 if (c == -1) 
                     break;
                            
-				if(!CommonUtils.isJava118()) 
-					BandwidthStat.HTTP_BODY_DOWNSTREAM_BANDWIDTH.addData(c);
+				BandwidthStat.HTTP_BODY_DOWNSTREAM_BANDWIDTH.addData(c);
                 //2. Check that data read matches any non-zero bytes already on
                 //disk, i.e., from previous downloads.  Assumption: "holes" in
                 //file are zeroed.  Be careful not read beyond end of file,

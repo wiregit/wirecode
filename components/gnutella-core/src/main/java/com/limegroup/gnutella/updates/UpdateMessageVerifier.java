@@ -18,7 +18,6 @@ public class UpdateMessageVerifier {
     private byte[] signature;
     private byte[] xmlMessage;
     private boolean fromDisk;
-    private static boolean testing118 = false;
     
     /**
      * @param fromDisk true if the byte are being read from disk, false is the
@@ -37,12 +36,7 @@ public class UpdateMessageVerifier {
         boolean parsed = parse(); 
         if(!parsed)
             return false;
-        if(CommonUtils.isJava118()) {
-            //Java118 installs have trouble w/ publickey
-            if(fromDisk)
-                return true;
-            return checkVersionForJava118();
-        }
+
         //get the public key
         PublicKey pubKey = null;
         FileInputStream fis = null;
@@ -127,53 +121,6 @@ public class UpdateMessageVerifier {
             return i;
         return -1;
     }
-
-    /**
-     *  Checks if the version file is correct, loosely based on all the
-     *  connections machines running java118 have made with their UPs.
-     */
-    private boolean checkVersionForJava118() {
-        ConnectionManager connManager = RouterService.getConnectionManager();
-        //If we are a UP running java 118 this is bad, and we dont really want
-        //to iterate over all our connections, we simply return false, so
-        //machines that are running Java 118 and are UPs will not get the update
-        //message
-        if(!testing118 && !connManager.isShieldedLeaf())//I am a UP w/ java118?
-            return false;
-        //Let's see what the advertised message in the file is. 
-
-        //Note: Java118 machines will have to parse the xml twice, but that's
-        //not too bad.
-        UpdateFileParser parser = null;
-        String xml = null;
-        try {
-            xml = new String(getMessageBytes(), "UTF-8");
-        } catch(UnsupportedEncodingException uex) {
-            return false;
-        } 
-        try {
-            parser = new UpdateFileParser(xml);
-        } catch (SAXException sx) {
-            return false;
-        } catch (IOException iox) {
-            return false;
-        } 
-        String version = parser.getVersion();
-        if(version==null || version.equals(""))
-            return false;
-        
-        //Now iterate over all UP connections and see how many agree
-        Iterator iter = connManager.getConnections().iterator();
-        int count = 0;
-        while(iter.hasNext()) { 
-            Connection c = (Connection)iter.next();
-            String v = c.getVersion();
-            if(version.equals(v))
-                count++;
-        }
-        return (count>=3);
-    }
-
 
     public byte[] getMessageBytes() throws IllegalStateException {
         if(xmlMessage==null)
