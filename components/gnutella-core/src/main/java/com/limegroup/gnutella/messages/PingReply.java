@@ -135,7 +135,7 @@ public class PingReply extends Message implements Serializable {
      *  which sets kbytes to the nearest power of 2 not less than 8.
      */
     public PingReply(int port, byte[] ip, long files, long kbytes, 
-                     boolean isUltrapeer, QueryKey queryKey) {
+                     boolean isUltrapeer) {
         this(GUID.makeGuid(), (byte)1, port, ip, files, kbytes, isUltrapeer,
              cbGGEP());
     }
