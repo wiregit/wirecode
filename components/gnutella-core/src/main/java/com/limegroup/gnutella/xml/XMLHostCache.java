@@ -77,7 +77,7 @@ public class XMLHostCache {
                     InetAddress currIA = InetAddress.getByName(currHost);
                     ipAddresses.add(currIA.getHostAddress());
                 }
-                catch (Exception ignored) {}
+                catch (UnknownHostException ignored) {}
             }
             // aggregate all successful ones into a string array....
             retHosts = new String[ipAddresses.size()];
