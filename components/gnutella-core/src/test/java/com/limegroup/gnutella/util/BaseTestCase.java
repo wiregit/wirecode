@@ -18,6 +18,11 @@ public class BaseTestCase extends AssertComparisons implements ErrorCallback {
     protected static Class _testClass;
     protected Thread _testThread;
     protected TestResult _testResult;
+
+	/**
+	 * Unassigned port for tests to use.
+	 */
+	protected static final int PORT = 49000;
     
     /* Flag indicate that we have launched the backend process and should
      * shut it down when we are finished.
