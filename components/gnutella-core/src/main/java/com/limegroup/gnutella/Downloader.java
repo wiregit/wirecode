@@ -30,8 +30,8 @@ public interface Downloader {
     public void stop();
 
     /**
-     * Returns the state of this: one of NOT_CONNECTED, CONNECTED, ERROR, COMPLETE,
-     * REQUESTING, QUEUED, WAITING_FOR_RETRY.
+     * Returns the state of this: one of QUEUED, CONNECTING, DOWNLOADING,
+     * WAITING_FOR_RETRY, COMPLETE, ABORTED, GAVE_UP
      */
     public int getState();
 
@@ -64,4 +64,16 @@ public interface Downloader {
      * connected. 
      */
     public String getHost();
+
+    /**
+     * Returns the number of pushes results this is waiting for. 
+     *     @requires this in the WAITING_FOR_RETRY state
+     */
+    public int getPushesWaiting();
+
+    /**
+     * Returns the number of retries this is waiting for. 
+     *     @requires this in the WAITING_FOR_RETRY state
+     */
+    public int getRetriesWaiting();
 }

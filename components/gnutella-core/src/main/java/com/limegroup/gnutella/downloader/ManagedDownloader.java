@@ -209,25 +209,38 @@ public class ManagedDownloader implements Downloader {
                     if (files.size()==0 && pushFiles.size()==0)
                         break;
                     
-                    //1. Try all normal downloads first.  Exit if success.
+                    //1. TRY ALL NORMAL DOWNLOADS FIRST.  Note that this
+                    //modifies files and pushFiles.  Exit if success.
                     success=tryNormalDownloads();
                     if (success) {
                         manager.remove(ManagedDownloader.this, true);
                         return;
                     }
                     
-                    //Nothing left to do?
+                    //Nothing left to do?  This happens when tryNormalDownloads
+                    //removes element from files without adding it to pushFiles.
                     if (files.size()==0 && pushFiles.size()==0)
                         break;                    
 
-                    //2. Send pushes for those hosts that we couldn't connect to.
+                    //2. SEND PUSHES FOR THOSE HOSTS THAT WE COULDN'T CONNECT TO.
                     sendPushes();
 
-                    //3. Wait a while before retrying.  Accept any pushes.
+                    //3. WAIT A WHILE BEFORE RETRYING.  ACCEPT ANY PUSHES.
                     success=waitForPushDownloads();
                     if (success) {
                         manager.remove(ManagedDownloader.this, true);
                         return;
+                    }
+
+                    //Increment push attempts and purge ones that have been
+                    //attempted too much.  This used to be done during
+                    //sendPushes, but it made the getPushesWaiting method harder
+                    //to implement.
+                    for (Iterator iter=pushFiles.iterator(); iter.hasNext(); ) {
+                        RFDPushPair pair=(RFDPushPair)iter.next();
+                        pair.pushAttempts++;
+                        if (pair.pushAttempts>=PUSH_TRIES)
+                            iter.remove();   //can't call pushFiles.remove(..)
                     }
                 }
                 //We've failed.  Notify my manager.
@@ -351,8 +364,7 @@ public class ManagedDownloader implements Downloader {
             return false;
         }
 
-        /** Sends pushes to those locations we couldn't connect to above. 
-         *      @modifies this.pushFiles, network */
+        /** Send pushes to those locations we couldn't connect to above. */
         private void sendPushes() {
             //Just to ensure memory is bounded, remove old push request from
             //list.  This is different than requested.clear()!
@@ -375,14 +387,6 @@ public class ManagedDownloader implements Downloader {
                 }
                 manager.sendPush(rfd);
 //                  System.out.println("Sending push to "+rfd.getHost());
-
-                //Increment and check attempts variable.
-                pair.pushAttempts++;
-                if (pair.pushAttempts>=PUSH_TRIES) {
-                    iter.remove();   //can't call pushFiles.remove(..)
-                    continue;
-                }          
-                
             }
         }
 
@@ -532,6 +536,14 @@ public class ManagedDownloader implements Downloader {
 
     public synchronized String getHost() {
         return lastAddress;
+    }
+
+    public synchronized int getPushesWaiting() {
+        return pushFiles.size();
+    }
+
+    public synchronized int getRetriesWaiting() {
+        return files.size();
     }
 }
 
