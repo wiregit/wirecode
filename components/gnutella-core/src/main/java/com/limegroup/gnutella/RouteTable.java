@@ -227,7 +227,7 @@ public final class RouteTable {
      */
     public synchronized boolean getAndSetTTL(byte[] guid, byte getTTL, 
                                              byte setTTL) {
-        if ((getTTL < 1) || (setTTL < getTTL))
+        if ((getTTL < 1) || (setTTL <= getTTL))
             throw new IllegalArgumentException("Bad ttl input (get/set): " +
                                                getTTL + "/" + setTTL);
         if (getTTL(guid) == getTTL) {
