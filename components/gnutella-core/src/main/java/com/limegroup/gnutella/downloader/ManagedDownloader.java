@@ -210,6 +210,12 @@ public class ManagedDownloader implements Downloader, Serializable {
     /** The name of the last location we tried to connect to. (We may be
      *  downloading from multiple other locations. */
     private String currentLocation;
+    /** If in CORRUPT_FILE state, the number of bytes downloaded.  Note that
+     *  this is less than corruptFile.length() if there are holes. */
+    private volatile int corruptFileBytes;
+    /** If in CORRUPT_FILE state, the name of the saved corrupt file or null if
+     *  no corrupt file. */
+    private volatile File corruptFile;
     /** Lock used to communicate between addDownload and tryAllDownloads.
      */
     private RequeryLock reqLock = new RequeryLock();
@@ -543,13 +549,17 @@ public class ManagedDownloader implements Downloader, Serializable {
         //We haven't started yet.
         if (currentFileName==null)
             return null;
-
-        //a) If the file is being downloaded, create *copy* of first
+        
+        //a) Special case for saved corrupt fragments.  We don't worry about
+        //removing holes.
+        if (state==CORRUPT_FILE) 
+            return corruptFile; //may be null
+        //b) If the file is being downloaded, create *copy* of first
         //block of incomplete file.  The copy is needed because some
         //programs, notably Windows Media Player, attempt to grab
         //exclusive file locks.  If the download hasn't started, the
         //incomplete file may not even exist--not a problem.
-        if (state!=COMPLETE) {
+        else if (state!=COMPLETE) {
             File incomplete=incompleteFileManager.
                                getFile(currentFileName, currentFileSize); 
             File file=new File(incomplete.getParent(),
@@ -869,22 +879,25 @@ public class ManagedDownloader implements Downloader, Serializable {
      *  and attempts to rename incompleteFile to "CORRUPT-i-...".  Deletes
      *  incompleteFile if rename fails. */
     private void cleanupCorrupt(File incompleteFile, String name) {
+        corruptFileBytes=getAmountRead();        
         incompleteFileManager.removeBlocks(incompleteFile);
 
         //Try to rename the incomplete file to a new corrupt file in the same
         //directory (INCOMPLETE_DIRECTORY).
         boolean renamed = false;
         for (int i=0; i<10 && !renamed; i++) {
-            File corruptFile=new File(incompleteFile.getParent(),
-                                      "CORRUPT-"+i+"-"+name);
+            corruptFile=new File(incompleteFile.getParent(),
+                                 "CORRUPT-"+i+"-"+name);
             if (corruptFile.exists())
                 continue;
             renamed=incompleteFile.renameTo(corruptFile);
         }
 
         //Could not rename after ten attempts?  Delete.
-        if(!renamed) 
+        if(!renamed) {
             incompleteFile.delete();
+            this.corruptFile=null;
+        }
     }
 
 
@@ -1412,10 +1425,14 @@ public class ManagedDownloader implements Downloader, Serializable {
     }
 
     public synchronized int getAmountRead() {
-        updateIncompleteFileManager();
-        File incompleteFile=incompleteFileManager.getFile(
-            currentFileName, currentFileSize);
-        return incompleteFileManager.getBlockSize(incompleteFile);
+        if (state!=CORRUPT_FILE) {
+            updateIncompleteFileManager();
+            File incompleteFile=incompleteFileManager.getFile(
+                currentFileName, currentFileSize);
+            return incompleteFileManager.getBlockSize(incompleteFile);
+        } else {
+            return corruptFileBytes;
+        }
     }
      
     public String getAddress() {
