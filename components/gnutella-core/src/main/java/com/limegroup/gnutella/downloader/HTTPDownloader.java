@@ -449,7 +449,7 @@ public class HTTPDownloader implements Runnable {
             p = f.getCanonicalPath();
 
             if (!p.equals(shared_path)) {
-                System.out.println("Caught the malicious one!");
+                //System.out.println("Caught the malicious one!");
                 _state = ERROR;
                 return;
             }
@@ -526,7 +526,14 @@ public class HTTPDownloader implements Runnable {
 
         if ( _amountRead == _sizeOfFile ) {
             String pname = _downloadDir + _filename;
-            myFile.renameTo(new File(pname));
+            boolean ok=myFile.renameTo(new File(pname));
+            if (! ok) {
+                //renameTo is not guaranteed to work, esp. when the
+                //file is being moved across file systems.  
+                _state = ERROR;
+                _stateString = "Couldn't Move to Library";
+                return;
+            }
             _state = COMPLETE;
             FileManager.getFileManager().addFileIfShared(pname);
         }
