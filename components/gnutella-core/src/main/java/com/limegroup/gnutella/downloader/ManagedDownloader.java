@@ -51,15 +51,27 @@ public class ManagedDownloader implements Downloader, Serializable {
       locations are divided into buckets of "same" files. Then the following is
       done for each bucket:
 
-      while there are still more (grey or white) blocks to download,
-            while parallelism has not been exceeded,
-                  if there is a white region of the file,
-                       assign to a new downloader
-                  else
-                       let R be the largest grey region R of the file
-                       "steal" the top part of R from its current downloader
-                       assign this top part to a new downloader
-            wait for one downloader to terminate (normally or abnormally)
+      while the file has not been downloaded, and we have not given up
+           try to increasing parallelism, to our maximum capacity
+               
+      Each potential downloader thats working in parallel does these steps
+      1. Establish a TCP connection with an rfd
+         if unable to connect end this parallel execution
+      2. This step has two parts
+            a.  Grab a part of the file to download. If there is a white area on
+                the file grab that, otherwise try to steal a grey area
+            b.  Send http headers to the uploader on the tcp connection 
+                established  in step 1. The uploader may or may not be able to 
+                upload at this time. If the uploader can't upload, it's 
+                important that the white or grey area be restored to the state 
+                they were in before we started trying. However, if the http 
+                handshaking was successful, the downloader can keep the 
+                part it obtained.
+          The two steps above must be  atomic wrt other downloaders. 
+          Othersise, other downloaders in parallel will be  able to steal the 
+          same white areas, or grey areas from the same downloaders.
+      3. Download the file by delegating to the HTTPDownloader, and then do 
+         the book-keeping. Termination may be normal or abnormal. 
 
      ManagedDownloader delegates to multiple HTTPDownloader instances, one for
      each HTTP connection.  HTTPDownloader uses Java's RandomAccessFile class,
@@ -90,42 +102,55 @@ public class ManagedDownloader implements Downloader, Serializable {
 
       tryAllDownloads does the bucketing of files, as well as waiting for
       retries.  The core downloading loop is done by tryAllDownloads3.
-      startBestDownload executes the IF-statement in the pseudocode above.
+      connectAndDownload (which is started asynchronously in tryAllDownloads3),
+      does the three step ennumerated above.
 
-      Currently the desired parallelism is fixed at 4, except for modem users.
-      Better to choose this according to the downloaders capacity and the 
-      number and speed of uploaders.
+      Currently the desired parallelism is fixed at 2 for modem users, 6
+      for cable/T1/DSL, and 8 for T3 and above.
 
-      For push downloads, the acceptDownload(Socket) method of 
-      ManagedDownloaderis called from the Acceptor instance.  This 
-      thread simply passes the Socket to findConnectable, which waits 
-      appropriately with timeout.  */
+      For push downloads, the acceptDownload(file, Socket,index,clientGUI) 
+      method of ManagedDownloader is called from the Acceptor instance. This
+      method needs to notify the appropriate downloader so that it can use
+      the socket. The logic for this operation is a little complicated. When 
+      establishConnection() realizes that it needs to do a push, it puts an 
+      entry into miniRFDToLock, asks the DownloadManager to send a push and 
+      then waits on the same lock. Evetually acceptDownload will be called. 
+      acceptDownload uses the file, index and clientGUID to look up the map,
+      and puts an entry into threadLockToSocket, and notifies the lock.
+      At this point, the establishConnection thread wakes up, and is able to
+      get a handle to the socket. Note: The establishConnection thread waits for
+      a limited amount of time (about 9 seconds) and then checks the map for the
+      socket anyway, if there is no entry, it assumes the push failed and 
+      terminates.
+    */
     
     /** Ensures backwards compatibility. */
     static final long serialVersionUID = 2772570805975885257L;
 
     /*********************************************************************
      * LOCKING: obtain this's monitor before modifying any of the following.
-     * Finer-grained locking is probably possible but not necessary.  Do not
-     * hold lock while performing blocking IO operations.
+     * files, dloaders, needed, busy and setState.  We should  not hold lock 
+     * while performing blocking IO operations, however we need to ensure 
+     * atomicity and thread safety for step 2 of the algorithm above. For 
+     * this reason we needed to add another lock - stealLock.
+     *
+     * We don't  want to synchronize assignAndRequest on this
+     * since that freezes the GUI as it calls getAmountRead() frequently 
+     * (which also hold this' monitor
+     *
+     * Now assignAndRequest is synchronized on stealLock, and within it we
+     * acquire this' monitor when we are modifying shared datastructures.
+     * 
+     * This additional lock will prevent GUI freezes, since we hold this' 
+     * monitor for a very short time while we are updating the shared 
+     * datastructures, also atomicity is guaranteed since we are still 
+     * synchronized. 
+     *
+     * Never acquire this' monitor if you have stealLock's monitor.
+     *
+     * Also, always hold stealLock's monitor before REMOVING elements from 
+     * needed. As always, we must obtain this' monitor before modifying needed.
      ***********************************************************************/
-
-    //We need to split locks because we wanted to ensureatomicity of 
-    //assignAndRequest but did not want to synchronize assignAndRequest on this
-    // since that freezes the GUI as it calls getAmountRead() frequently 
-    //(which also hold this' monitor
-    //
-    // Now assignAndRequest is synchronized on stealLock, and within it we
-    //acquire this' monitor when we are modifying shared datastructures that 
-    //this' monitor is protecting. This chage will not freeze the GUI, since 
-    //we hold this' monitor for a very short time while we are updating the  
-    //shared datastructures, also atomicity is guaranteed since we are still 
-    //synchronized. 
-    //
-    //Futhrer there will be no deadlocks. We acquire this' monitor only after 
-    //we acquire stealLock's monitor. We never hold this' monitor while we 
-    //are waiting for stealLock.
-
     private Object stealLock = new Object();
 
     /** This' manager for callbacks and queueing. */
@@ -185,17 +210,31 @@ public class ManagedDownloader implements Downloader, Serializable {
      *  them from allFiles to support resumes.)
      */
     RemoteFileDescGrouper buckets;
+
     /** If started, the thread trying to coordinate all downloads.  
      *  Otherwise null. */
     private Thread dloaderManagerThread;
-    /** The connections we're using for the current attempts. */    
-    private List /* of HTTPDownloader */ dloaders;
     /** True iff this has been forcibly stopped. */
     private boolean stopped;
     /** True iff a corrupt byte has been detected and this has been stopped by
      *  the thread detecting the problem.  INVARIANT: corrupted=>stopped.  */
     private boolean corrupted;
 
+    
+    /** The connections we're using for the current attempts. */    
+    private List /* of HTTPDownloader */ dloaders;
+    /** List of intervals within the file which have not been allocated to
+     * any downloader yet. The set of these intervals represents the "white"
+     * region of the file we are downloading*/
+    private List /* of Interval */ needed;
+    /**List of RemoteFileDesc which were busy when we tried to connect to them.
+     * To be used when we have run out of other options.*/
+    private List /* of RemoteFileDesc2 */ busy;
+    /** List of RemoteFileDesc to which we actively connect and request parts
+     * of the file.*/
+    private List /*of RemoteFileDesc */ files;
+    
+    ////////////////datastructures used only for pushes//////////////
     /** MiniRemoteFileDesc -> Object. 
         In the case of push downloads, connecting threads write the values into
         this map. The acceptor threads consumes these values and notifies the
@@ -208,24 +247,7 @@ public class ManagedDownloader implements Downloader, Serializable {
         The connecting thread consumes data from this map.
     */
     private Map threadLockToSocket=Collections.synchronizedMap(new HashMap());
-    
-    /** List of intervals within the file which have not been allocated to
-     * any downloader yet. The set of these intervals represents the "white"
-     * region of the file we are downloading
-     */
-    private List /* of Interval */ needed;
 
-    /**List of RemoteFileDesc which were busy when we tried to connect to them.
-     * To be used when we have run out of other options.
-     */
-    private List /* of RemoteFileDesc2 */ busy;
-       
-    /** List of RemoteFileDesc to which we actively connect and request parts
-     * of the file.
-     */
-    private List /*of RemoteFileDesc */ files;
-
-    //TODO1: These dataStructures need to be synchronized.
 
 
     ///////////////////////// Variables for GUI Display  /////////////////
@@ -904,7 +926,6 @@ public class ManagedDownloader implements Downloader, Serializable {
         if (fileExists(completeFile))
             fileManager.removeFileIfShared(completeFile);
         fileManager.addFileIfShared(completeFile, getXMLDocuments());  
-        //System.out.println("About to return complete from TAD2");
         return COMPLETE;
     }   
 
@@ -1099,10 +1120,10 @@ public class ManagedDownloader implements Downloader, Serializable {
      * <p>
      * NoSuchElementException thrown when (both normal and push) connections 
      * to the given rfd fail. We discard the rfd by doing nothing and return 
-     * null
-     * <p>
-     * InterruptedException this thread was interrupted while waiting to 
-     * connect. Remember this rfd by putting it back into files and return null
+     * null.
+     * @exception InterruptedException this thread was interrupted while waiting
+     * to connect. Remember this rfd by putting it back into files and return
+     * null 
      */
     private HTTPDownloader establishConnection(RemoteFileDesc rfd) {        
         
@@ -1170,7 +1191,7 @@ public class ManagedDownloader implements Downloader, Serializable {
         //Done waiting or were notified.
         Socket pushSocket = (Socket)threadLockToSocket.remove(threadLock);
         if (pushSocket==null) 
-            return null; //throw new NoSuchElementException();
+            return null; 
         
         miniRFDToLock.remove(mrfd);//we are not going to use it after this
         ret = new HTTPDownloader(pushSocket, rfd, incompleteFile);
@@ -1179,7 +1200,7 @@ public class ManagedDownloader implements Downloader, Serializable {
             //initializing the byteReader with this call.
             ret.connectTCP(0);//just initializes the byteReader in this case
         } catch(IOException iox) {
-            return null; //throw new NoSuchElementException();
+            return null; 
         }
         return ret;
     }
@@ -1192,26 +1213,20 @@ public class ManagedDownloader implements Downloader, Serializable {
      */
     private boolean assignAndRequest(HTTPDownloader dloader) {
         synchronized(stealLock) {
-            //Update the needed list unless any of the following happened: (1)
-            //we couldn't assign dloader to a region (NoSuchElementException),
-            //(2) we tried to assign a grey region (which means needed was never
-            //modified since needed.size()==0), or (3) we completed normally.
-            //
-            //(Equivalent: update the needed list IF we assigned white and we
-            //weren't able to start the download.)
             boolean updateNeeded = true;
             try {
                 if (needed.size()>0)
                     assignWhite(dloader);
                 else {
-                    updateNeeded = false;      //2
+                    updateNeeded = false;      //1. See comment in finally
                     assignGrey(dloader); 
                 }
-                updateNeeded = false;          //3
+                updateNeeded = false;          //2. See comment in finally
             } catch(NoSuchElementException nsex) {
                 //thrown in assignGrey.The downloader we were trying to steal
                 //from is not mutated.  DO NOT CALL updateNeeded() here!
-                updateNeeded = false;          //1
+                Assert.that(updateNeeded == false,
+                            "updateNeeded not false in assignAndRequest");
                 debug("nsex thrown in assingAndReplace "+dloader);
                 synchronized(this) {
                     files.add(dloader.getRemoteFileDesc());
@@ -1233,6 +1248,13 @@ public class ManagedDownloader implements Downloader, Serializable {
                 debug("iox thrown in assignAndReplace "+dloader);
                 return false; //discard the rfd of dloader
             } finally {
+                //Update the needed list unless any of the following happened: 
+                // 1. We tried to assign a grey region - which means needed 
+                //    was never modified since needed.size()==0
+                // 2. We completed normally.
+                //
+                //Equivalent: update the needed list IF we assigned white and 
+                //we weren't able to start the download.
                 if(updateNeeded)
                     updateNeeded(dloader);
             }
@@ -1254,9 +1276,6 @@ public class ManagedDownloader implements Downloader, Serializable {
                 chatList.addHost(dloader);
             }
             return true;
-            //System.out.println("MANAGER: downloading from "
-            // +dloader.getInitialReadingPoint()+" to "+
-            //+(dloader.getInitialReadingPoint()+dloader.getAmountToRead()));
         }
     }
 
@@ -1361,8 +1380,7 @@ public class ManagedDownloader implements Downloader, Serializable {
 
     /**
      * Attempts to run downloader.doDownload, notifying manager of termination
-     * via downloaders.notify().  Typically tryOneDownload is invoked in
-     * parallel for a number of locations.
+     * via downloaders.notify().  
      * 
      * @param downloader the normal or push downloader to use for the transfer,
      * which MUST be initialized (i.e., downloader.connectTCP() and
@@ -1409,8 +1427,13 @@ public class ManagedDownloader implements Downloader, Serializable {
      * assigned to it.  
      */
     private synchronized void updateNeeded(HTTPDownloader dloader) {
+        //TODO2: call repOK() at the begining and end of this method.
+        //repOK():
+        //   -no elements of needed overlap by at most 500 bytes
+        //   -no elements of needed overlap any of the downloaders (500)
+        //   -no downloaders overlap each other (500)
         int low=dloader.getInitialReadingPoint()+dloader.getAmountRead();
-        int high = low+(dloader.getAmountToRead()-dloader.getAmountRead());
+        int high = dloader.getInitialReadingPoint()+dloader.getAmountToRead();
         if( (high-low)>0) {//dloader failed to download a part assigned to it?
             Interval in = new Interval(low,high);
             debug("Updating needed. Adding interval "+in+" from "+dloader);
