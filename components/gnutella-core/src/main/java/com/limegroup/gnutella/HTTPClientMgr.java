@@ -23,13 +23,16 @@ public class HTTPClientMgr implements Runnable {
     private int _amountRead;
     private FileManager _fmanager;
     private FileDesc _fdesc;
+    private ConnectionManager _manager;
     
-    public HTTPClientMgr(Socket s, String filename, int index) {
+    public HTTPClientMgr(Socket s, String filename, 
+			 int index, ConnectionManager m) {
 	
 	_socket = s;                    /* initialize variables */
 	_filename = filename;
 	_index = index;
 	_amountRead = 0;
+	_manager = m;
 
 	_fmanager = FileManager.getFileManager();
 	_fdesc = null;

@@ -34,11 +34,14 @@ public class HTTPMgr {
     private Socket _socket;
     private String _filename;
     private int _index;
+    private ConnectionManager _manager;
 
-    public HTTPMgr(Socket s) throws IOException {
+    public HTTPMgr(Socket s, ConnectionManager m) throws IOException {
 
 	_socket = s;                   /* creation of a socket connection */
 	
+	_manager = m;
+
 	BufferedReader in;   
  
 	String command;
@@ -76,7 +79,7 @@ public class HTTPMgr {
 	    _filename = parse_two[0];
 
 	    HTTPClientMgr client;
-	    client = new HTTPClientMgr(s, _filename, _index);    
+	    client = new HTTPClientMgr(s, _filename, _index, _manager);    
 
 	    Thread t = new Thread(client);
 	    t.setDaemon(true);
@@ -89,7 +92,7 @@ public class HTTPMgr {
 	    if (_filename != null) {
 		
 		HTTPServerMgr server;
-		server = new HTTPServerMgr(s, _filename);
+		server = new HTTPServerMgr(s, _filename, _manager);
 		Thread t = new Thread(server);
 		t.setDaemon(true);
 		t.start();

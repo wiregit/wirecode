@@ -23,9 +23,13 @@ public class HTTPServerMgr implements Runnable {
 
     private int _amountRead;
 
-    public HTTPServerMgr(Socket s, String filename) {
+    private ConnectionManager _manager;
+
+    public HTTPServerMgr(Socket s, String filename, ConnectionManager m) {
 
 	_socket = s;
+
+	_manager = m;
 
 	_filename = filename;
 

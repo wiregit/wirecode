@@ -299,7 +299,9 @@ public class ConnectionManager implements Runnable {
 		    } 
 		    else if( word.equals("GET") || word.equals("PUT") ){
 			
-			HTTPMgr mgr = new HTTPMgr(client);
+			System.out.println("handling an http...");
+
+			HTTPMgr mgr = new HTTPMgr(client, this);
 			
 		    }
 		    else {

@@ -37,6 +37,10 @@ public class RouterService
 	Thread t=new Thread(manager);
 	t.setDaemon(true);
 	t.start();	
+	// FileManager.getFileManager().addDirectory("C:/rjs/src");
+	//FileManager.getFileManager().addDirectory("E:/My Music");
+        //new LimeProperties("Neutella.props",true);
+
         manager.propertyManager();
     }
 

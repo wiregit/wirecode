@@ -49,6 +49,13 @@ public interface ActivityCallback
     /** Add a file to the download window */
     public void addDownload();
 
+    public void removeDownload();
+
+    public void addUpload();
+
+    public void removeUpload();
+
+
     /**
      * A miscellaneous error not fitting in any other category.
      */
