@@ -67,7 +67,7 @@ public class ResumeDownloaderTest extends com.limegroup.gnutella.util.BaseTestCa
 			if ( downloader.getState() != Downloader.QUEUED )
                 assertEquals(Downloader.WAITING_FOR_RESULTS, 
 				  downloader.getState());
-            try { Thread.sleep(200); } catch (InterruptedException e) { }
+            Thread.sleep(200);
 		}
         assertEquals(Downloader.WAITING_FOR_RESULTS, downloader.getState());
         assertEquals(amountDownloaded, downloader.getAmountRead());
@@ -119,13 +119,19 @@ public class ResumeDownloaderTest extends com.limegroup.gnutella.util.BaseTestCa
             new FileInputStream( CommonUtils.getResourceFile(filePath + file) )
         );
         ResumeDownloader rd=(ResumeDownloader)in.readObject();
-        QueryRequest qr=rd.newRequery(0);
-        assertEquals("filename.txt", qr.getQuery());
+        QueryRequest qr=rd.newRequery(1); //the first requery won't have a hash
         if (expectHash) {
-            assertEquals(1, qr.getQueryUrns().size());
-            assertEquals(hash, qr.getQueryUrns().iterator().next());       
+            assertEquals("unexpected amount of urns",
+                1, qr.getQueryUrns().size());
+            assertEquals("unexpected hash",
+                hash, qr.getQueryUrns().iterator().next());
+            assertEquals("hash query shouldn't have filename",
+                "\\", qr.getQuery());
         } else {
-            assertEquals(0, qr.getQueryUrns().size());
+            assertEquals("unexpected amount of urns",
+                0, qr.getQueryUrns().size());
+            assertEquals("unexpected filename",
+                "filename.txt", qr.getQuery());            
         }
     }
 
