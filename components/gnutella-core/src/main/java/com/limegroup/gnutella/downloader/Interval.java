@@ -57,6 +57,13 @@ public class Interval implements Serializable, Comparable {
             || (other.low<this.high && this.low<other.high);
     }
 
+    /**
+     * @return true if this Interval is a "subrange" of the other interval 
+     */
+    public boolean isSubrange(Interval other) {
+        return (this.low >= other.low && this.high <= other.high);
+    }
+
     public String toString() {
         if (low==high)
             return String.valueOf(low);

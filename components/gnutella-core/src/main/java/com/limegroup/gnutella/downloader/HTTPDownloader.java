@@ -169,6 +169,9 @@ public class HTTPDownloader implements BandwidthTracker {
      */
     private volatile boolean _isActive = false;
 
+
+    private Interval _requestedInterval = null;
+
     /**
      * Creates an uninitialized client-side normal download.  Call 
      * connectTCP and connectHTTP() on this before any other methods.  
@@ -428,6 +431,7 @@ public class HTTPDownloader implements BandwidthTracker {
                                 new HTTPHeaderValueCollection(writeClone),out);
 
         out.write("Range: bytes=" + startRange + "-"+(stop-1)+"\r\n");
+        _requestedInterval = new Interval(_initialReadingPoint, stop-1);
 		if (ChatSettings.CHAT_ENABLED.getValue() &&
            RouterService.acceptedIncomingConnection() &&
            !NetworkUtils.isPrivateAddress(RouterService.getAddress())) {
@@ -1053,9 +1057,8 @@ public class HTTPDownloader implements BandwidthTracker {
      * @exception ProblemReadingHeaderException when we could not parse the 
      *         header line.
      */
-    private static void parseAvailableRangesHeader(String line, 
-                                                   RemoteFileDesc rfd) 
-        throws IOException {
+    private void parseAvailableRangesHeader(String line, RemoteFileDesc rfd) 
+                                                            throws IOException {
         IntervalSet availableRanges = new IntervalSet();
         
         line = line.toLowerCase();
@@ -1118,6 +1121,16 @@ public class HTTPDownloader implements BandwidthTracker {
             }
             availableRanges.add(interval);
         }
+        //OK. All the ranges have been collated now. See if the uploader is up
+        //to mischief
+        Iterator iter = availableRanges.getAllIntervals();        
+        while(iter.hasNext()) {
+            Interval next = (Interval)iter.next();
+            if(next.isSubrange(_requestedInterval) || 
+                                        _requestedInterval.isSubrange(next))
+                throw new ProblemReadingHeaderException("Bad ranges sent");
+        }
+
         rfd.setAvailableRanges(availableRanges);
     }
 
