@@ -75,7 +75,7 @@ public abstract class DefaultHeaders extends Properties {
         if ( ConnectionSettings.ACCEPT_DEFLATE.getValue() )
             props.put(HeaderNames.ACCEPT_ENCODING, HeaderNames.DEFLATE_VALUE);
         
-        
+        props.put(HeaderNames.X_PONG_CACHING, "0.1");
         UpdateManager u = UpdateManager.instance();
         String latestVersion = u.getVersion();
         if(!latestVersion.equals("@version@"))//don't send header for @version@
