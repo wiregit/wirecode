@@ -3,9 +3,9 @@ package com.limegroup.gnutella.routing;
 import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.messages.*;
 import com.limegroup.gnutella.util.Utilities;
+import com.limegroup.gnutella.util.BitSet;
 import com.limegroup.gnutella.xml.*;
 import com.sun.java.util.collections.*;
-import java.util.BitSet;
 import java.util.zip.*;
 import java.io.*;
 
@@ -290,24 +290,11 @@ public class QueryRouteTable {
         int m2 = resizedQRT.bitTableLength;
         double scale=((double)m2)/((double)m);   //using float can cause round-off!
     
-        for (int i=0; i<m; i++) {
-            // no need to process anything if this bit wasn't set
-            if ( !this.bitTable.get(i) )
-                continue;
-                
+        for (int i = this.bitTable.nextSetBit(0); i >= 0;
+          i = this.bitTable.nextSetBit(i+1)) {
             int low=(int)Math.floor(i*scale);
             int high=(int)Math.ceil((i+1)*scale);
-//              Assert.that(low<m2,
-//                          "Low value "+low+" for "+i+" incompatible with "+m2);
-//              Assert.that(high<=m2,
-//                          "High value "+high+" for "+i+" incompatible with "+m2);
-            for (int i2=low; i2<high; i2++) {
-                // if the other is set
-                // we technically can check if this is set
-                // and only set if it isn't, but there's little-to-no
-                // optimization in that
-                resizedQRT.bitTable.set(i2);
-            }
+            resizedQRT.bitTable.set(low, high);
         }
         return resizedQRT.bitTable;
     }
@@ -421,21 +408,18 @@ public class QueryRouteTable {
         //3. Add data[0...] to table[nextPatch...]            
         for (int i=0; i<data.length; i++) {
             try {
-                boolean wasInfinity=(!bitTable.get(nextPatch));
+                boolean wasSet = bitTable.get(nextPatch);
+                boolean isSet = wasSet;
                 if (data[i] == KEYWORD_PRESENT) {
                     bitTable.set(nextPatch);
+                    isSet = true;
                 }
                 else if (data[i] == KEYWORD_ABSENT) {
                     bitTable.clear(nextPatch);
-                }
-                boolean isInfinity=(!bitTable.get(nextPatch));
-                if (wasInfinity && !isInfinity) {
+                    isSet = false;
+                }                
+                if (wasSet != isSet) {
                     resizedQRT = null;
-//                    bitEntries++;  //added entry
-                }
-                else if (!wasInfinity && isInfinity) {
-                    resizedQRT = null;
-//                    bitEntries--;  //removed entry
                 }
             } catch (IndexOutOfBoundsException e) {
                 throw new BadPacketException("Tried to patch "+nextPatch
@@ -492,16 +476,17 @@ public class QueryRouteTable {
         boolean needsPatch=false;
         boolean needsFullByte=false;
         for (int i=0; i<data.length; i++) {
+            boolean thisGet = this.bitTable.get(i);
             if (prev!=null) {
-                if (this.bitTable.get(i) == prev.bitTable.get(i))
+                if (thisGet == prev.bitTable.get(i))
                     data[i] = KEYWORD_NO_CHANGE;
-                else if (this.bitTable.get(i))
+                else if (thisGet)
                     data[i] = KEYWORD_PRESENT;
                 else // prev.bitTable.get(i)
                     data[i] = KEYWORD_ABSENT;
             }
             else {
-                if (this.bitTable.get(i))
+                if (thisGet)
                     data[i] = KEYWORD_PRESENT;
                 else
                     data[i] = KEYWORD_NO_CHANGE;
