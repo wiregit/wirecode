@@ -36,6 +36,33 @@ public class LimeXMLDocument{
         initialize(doc);
     }
     
+    /**
+     * Constructs a new LimeXMLDocument
+     * @param nameValueList List (of NameValue) of fieldnames (in canonicalized
+     * form) and corresponding values that will be used to create the 
+     * new instance
+     * @param schemaURI The schema URI for the LimeXMLDocument to be
+     * created
+     */
+    public LimeXMLDocument(List nameValueList, String schemaURI){
+       
+        //set the schema URI
+        this.schemaUri = schemaURI;
+        
+        //initialize the field mapping map
+        fieldToValue = new HashMap();
+        
+        //iterate over the passed list of fieldnames & values
+        for(Iterator iterator = nameValueList.iterator();
+            iterator.hasNext();){
+            //get the next pair
+            NameValue nameValue = (NameValue)iterator.next();
+            
+            //update the field to value map
+            fieldToValue.put(nameValue.getName(), nameValue.getValue());
+        }
+    }
+    
     private void initialize(InputSource doc) throws SchemaNotFoundException,
                             IOException, SAXException {
         DOMParser parser = new DOMParser();
