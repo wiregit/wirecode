@@ -81,7 +81,6 @@ public class ManagedConnectionTest extends com.limegroup.gnutella.util.BaseTestC
 	 * Test to make sure that GGEP extensions are correctly returned in pongs.
 	 */
     public void testForwardsGGEP() throws Exception {
-        //ManagedConnection out = newConnection("localhost", Backend.PORT);
 		ManagedConnection out = 
             new ManagedConnection("localhost", Backend.PORT);
         out.initialize();
@@ -124,7 +123,7 @@ public class ManagedConnectionTest extends com.limegroup.gnutella.util.BaseTestC
 	}
 
     public void testHorizonStatistics() {
-        ManagedConnection mc=newConnection();
+        ManagedConnection mc= new ManagedConnection("", 0);
         //For testing.  You may need to ensure that HORIZON_UPDATE_TIME is
         //non-final to compile.
         mc.HORIZON_UPDATE_TIME=1*200;   
@@ -249,7 +248,6 @@ public class ManagedConnectionTest extends com.limegroup.gnutella.util.BaseTestC
         //1. Locally closed
         //acceptor=new com.limegroup.gnutella.MiniAcceptor(null, PORT);
 		out = new ManagedConnection("localhost", Backend.PORT);
-        //out=newConnection("localhost", PORT, manager);
         out.initialize();            
 
         //in=acceptor.accept(); 
@@ -273,7 +271,6 @@ public class ManagedConnectionTest extends com.limegroup.gnutella.util.BaseTestC
 		
 		//2. Remote close: discovered on read
 		ManagedConnection out = new ManagedConnection("localhost", PORT);
-		//out = newConnection("localhost", PORT, manager);
 		out.initialize();            
         Connection in = acceptor.accept(); 
         assertTrue("connection should be open", out.isOpen());
@@ -302,7 +299,9 @@ public class ManagedConnectionTest extends com.limegroup.gnutella.util.BaseTestC
         assertTrue("connection should be open", out.isOpen());
         assertTrue("runner should not be dead", !out.runnerDied());
         in.close();
-        out.send(new PingRequest((byte)3));
+        Message m = new PingRequest((byte)3);
+        m.hop();
+        out.send(m);        
         out.send(new PingRequest((byte)3));
         sleep(100);
 
@@ -352,19 +351,4 @@ public class ManagedConnectionTest extends com.limegroup.gnutella.util.BaseTestC
 			remove(HeaderNames.GGEP);
 		}
 	}
-
-    private static ManagedConnection newConnection() {
-        return newConnection("", 0);
-    }
-
-    private static ManagedConnection newConnection(String host, int port) {
-        ManagedConnection mc = new ManagedConnection(host, port);
-		return mc;
-    }
-
-    private static ManagedConnection newConnection(String host, int port,
-                                                   ConnectionManager cm) {
-        ManagedConnection mc = new ManagedConnection(host, port);
-		return mc;
-    }
 }
