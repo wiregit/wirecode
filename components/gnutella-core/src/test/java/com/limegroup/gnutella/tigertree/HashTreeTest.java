@@ -401,7 +401,7 @@ public class HashTreeTest extends BaseTestCase {
         assertEquals(DIMERecord.TYPE_ABSOLUTE_URI, tree.getTypeId());
         assertEquals("http://open-content.net/spec/thex/breadthfirst",
             tree.getTypeString());
-        assertEquals(uuid.toString(), tree.getIdentifier());
+        assertEquals("uuid:" + uuid.toString(), tree.getIdentifier());
         assertEquals(new byte[0], tree.getOptions());
         
         byte[] data = tree.getData();

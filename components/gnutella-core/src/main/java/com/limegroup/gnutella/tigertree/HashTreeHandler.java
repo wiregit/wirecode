@@ -240,10 +240,10 @@ class HashTreeHandler {
         Assert.that(offset == size * HASH_SIZE);
         try {
             return DIMERecord.create(DIMERecord.TYPE_ABSOLUTE_URI,
-                                     null,
-                                     URI.toString().getBytes("UTF-8"),
-                                     TREE_TYPE_BYTES,
-                                     data);
+                                 null,
+                                 ("uuid:" + URI.toString()).getBytes("UTF-8"),
+                                 TREE_TYPE_BYTES,
+                                 data);
         } catch(UnsupportedEncodingException uee) {
             LOG.debug(uee);
             return null;
