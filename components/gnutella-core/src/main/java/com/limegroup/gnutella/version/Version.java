@@ -3,7 +3,7 @@ package com.limegroup.gnutella.version;
 /**
  * Enscapulates a version, allowing easy compareTos.
  */
-class Version implements Comparable {
+public class Version implements Comparable {
    
     /**
      * The version string.
@@ -37,7 +37,7 @@ class Version implements Comparable {
     /**
      * Constructs a new Version.
      */
-    Version(String s) throws VersionFormatException {
+    public Version(String s) throws VersionFormatException {
         v = s;
 
         int[] nums = parse(s);

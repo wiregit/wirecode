@@ -1,6 +1,6 @@
 package com.limegroup.gnutella.version;
 
-class VersionFormatException extends Exception {
+public class VersionFormatException extends Exception {
     
     VersionFormatException() {
         super();
