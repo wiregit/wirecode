@@ -130,7 +130,7 @@ public class PatchTableMessage extends RouteTableMessage {
     public String toString() {
         StringBuffer buf=new StringBuffer();
         buf.append("{PATCH, Sequence: "+getSequenceNumber()+"/"+getSequenceSize()
-              +", Compr: "+getCompressor()+", [");
+              +", Bits: "+entryBits+", Compr: "+getCompressor()+", [");
 //          for (int i=0; i<data.length; i++) {
 //              if (data[i]!=0)
 //                  buf.append(i+"/"+data[i]+", ");
