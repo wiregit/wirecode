@@ -98,4 +98,11 @@ public class QuestionsHandler extends AbstractSettings {
      */
     public static final BooleanSetting NO_INTERNET_RETRYING =
         FACTORY.createBooleanSetting("NO_INTERNET_RETRYING ", false);
+
+    /**
+     * Settings for whether or not to display a message that a failed preview
+     * should be ignored.
+     */
+    public static final BooleanSetting NO_PREVIEW_REPORT =
+        FACTORY.createBooleanSetting("NO_PREVIEW_REPORT ", false);
 }

@@ -1364,6 +1364,8 @@ public class ManagedDownloader implements Downloader, Serializable {
      */
     private synchronized int amountForPreview() {
         //And find the first block.
+        if (commonOutFile == null)
+            return 0; // trying to preview before incomplete file created
         synchronized (commonOutFile) {
             for (Iterator iter=commonOutFile.getBlocks();iter.hasNext() ; ) {
                 Interval interval=(Interval)iter.next();
