@@ -12,8 +12,7 @@ package com.limegroup.gnutella;
  *  @author Adam Fisk
  */
 
-public interface SettingsInterface
-{
+public interface SettingsInterface {
 	public static final boolean DEFAULT_ALLOW_BROWSER  = false;
     /** Default setting for the time to live */
     public static final byte    DEFAULT_TTL            = (byte)5;
@@ -55,7 +54,7 @@ public interface SettingsInterface
     "exe;zip;gz;gzip;hqx;tar;tgz;z;rmj;lqt;rar;ace;sit;smi";
 
 
-	/* the number of uplads allowed per person at a given time */
+	/** the number of uplads allowed per person at a given time */
     public static final int     DEFAULT_UPLOADS_PER_PERSON=3;
 
     /** default banned ip addresses */
