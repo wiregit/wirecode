@@ -430,26 +430,28 @@ public class UPnPManager extends ControlPoint implements DeviceChangeListener {
          */
    	public static InetAddress getLocalAddress()
      	  throws UnknownHostException {
-            InetAddress addr;
-            if ((addr = InetAddress.getLocalHost()) instanceof Inet4Address
-                   && !addr.isLoopbackAddress())
+            InetAddress addr = InetAddress.getLocalHost();
+            if (addr instanceof Inet4Address && !addr.isLoopbackAddress())
                 return addr;
+
             try {
-               final Enumeration interfaces =
+               Enumeration interfaces =
                    NetworkInterface.getNetworkInterfaces();
-               if (interfaces != null)
-                   while (interfaces.hasMoreElements())
-                       for (Enumeration addresses =
-                            ((NetworkInterface)interfaces.nextElement())
-                               .getInetAddresses();
-                        addresses.hasMoreElements(); ) {
-                           if ((addr=(InetAddress)addresses.nextElement())
-                                   instanceof Inet4Address &&
-                               !addr.isLoopbackAddress()) {
+
+               if (interfaces != null) {
+                   while (interfaces.hasMoreElements()) {
+                       Enumeration addresses =
+                            ((NetworkInterface)interfaces.nextElement()).getInetAddresses();
+                       while (addresses.hasMoreElements()) {
+			   addr = (InetAddress) addresses.nextElement();
+                           if (addr instanceof Inet4Address && !addr.isLoopbackAddress()) {
                                return addr;
                            }
                        }
+		   }
+	       }
             } catch (SocketException se) {}
+
        	    throw new UnknownHostException(
                "localhost has no interface with a non-loopback IPv4 address");
    	} 
