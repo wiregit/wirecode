@@ -376,6 +376,21 @@ public class LimeXMLReplyCollection{
                 _hashMap = new HashMap();
         }
 
+
+        /** @param whereToStore The name of the file to serialize from / 
+         *  deserialize to.  
+         *  @param storage A HashMap that you want to serialize / deserialize.
+         *  @exception Exception Thrown if input file whereToStore is invalid.
+         */
+        public MapSerializer(File whereToStore, HashMap storage) 
+        throws Exception {
+            _backingStoreFile = whereToStore;
+            _hashMap = storage;
+            if (_backingStoreFile.isDirectory())
+                throw new Exception();
+        }
+
+
         private void deserializeFromFile() throws Exception {            
             FileInputStream istream = new FileInputStream(_backingStoreFile);
             ObjectInputStream objStream = new ObjectInputStream(istream);
