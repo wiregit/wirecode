@@ -402,6 +402,7 @@ public class MetaFileManager extends FileManager {
      * is used only for the purpose of testing. It is not used for anything 
      * else.
      */
+     /*
     private void showXMLData(){
         //get all the schemas
         LimeXMLSchemaRepository rep = LimeXMLSchemaRepository.instance();
@@ -434,7 +435,7 @@ public class MetaFileManager extends FileManager {
                 }
             }
         }
-    }
+    } */
 
 }
 
