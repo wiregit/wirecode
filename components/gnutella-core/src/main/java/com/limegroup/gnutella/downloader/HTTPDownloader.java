@@ -16,6 +16,9 @@ import java.util.StringTokenizer;
 import com.sun.java.util.collections.*;
 import com.limegroup.gnutella.altlocs.*;
 
+import org.apache.commons.logging.LogFactory;
+import org.apache.commons.logging.Log;
+
 /**
  * Downloads a file over an HTTP connection.  This class is as simple as
  * possible.  It does not deal with retries, prioritizing hosts, etc.  Nor does
@@ -37,12 +40,26 @@ import com.limegroup.gnutella.altlocs.*;
  */
 
 public class HTTPDownloader implements BandwidthTracker {
+    
+    private static final Log LOG = LogFactory.getLog(HTTPDownloader.class);
+    
     /**
      * The length of the buffer used in downloading.
      */
     public static final int BUF_LENGTH=1024;
     
-    
+    /**
+     * The smallest possible time in seconds to wait before retrying a busy
+     * host. 
+     */
+    private static final int MIN_RETRY_AFTER = 60; // 60 seconds
+
+    /**
+     * The maximum possible time in seconds to wait before retrying a busy
+     * host. 
+     */
+    private static final int MAX_RETRY_AFTER = 60 * 60; // 1 hour
+
     /**
      * The smallest possible file to be shared with partial file sharing.
      * Non final for testing purposes.
@@ -379,7 +396,7 @@ public class HTTPDownloader implements BandwidthTracker {
 
 		// Read the response code from the first line and check for any errors
 		String str = _byteReader.readLine();  
-        //System.out.println("\t\t\t"+str);
+
 		if (str==null || str.equals(""))
             throw new IOException();
 		if(!CommonUtils.isJava118()) 
@@ -391,7 +408,6 @@ public class HTTPDownloader implements BandwidthTracker {
         //Now read each header...
 		while (true) {            
 			str = _byteReader.readLine();
-            //System.out.println("\t\t\t"+str);
             if (str==null || str.equals(""))
                 break;
 			if(!CommonUtils.isJava118()) 
@@ -426,6 +442,8 @@ public class HTTPDownloader implements BandwidthTracker {
                 _server = readServer(str);
             else if (HTTPHeaderName.AVAILABLE_RANGES.matchesStartOfString(str))
                 parseAvailableRangesHeader(str, _rfd);
+            else if (HTTPHeaderName.RETRY_AFTER.matchesStartOfString(str)) 
+                parseRetryAfterHeader(str, _rfd);
         }
 
 
@@ -436,7 +454,7 @@ public class HTTPDownloader implements BandwidthTracker {
 				    com.limegroup.gnutella.downloader.FileNotFoundException();
 			else if (code == 410) // not shared.
 				throw new NotSharingException();
-            else if (code == 416) //Shareaza's requested range not available
+            else if (code == 416) //requested range not available
                 throw new RangeNotAvailableException();
 			else if (code == 503) { // busy or queued, or range not available.
                 int min = refQueueInfo[0];
@@ -453,6 +471,12 @@ public class HTTPDownloader implements BandwidthTracker {
                     throw new RangeNotAvailableException();
                     
                 //no QueuedException or RangeNotAvailableException? not queued.
+                //test if we already read a Retry-After header: if not, set 
+                //time to wait before retrying this RFD to MIN_RETRY_AFTER 
+                //seconds
+                if ( ! _rfd.isBusy() ) {
+                    _rfd.setRetryAfter(MIN_RETRY_AFTER);
+                }
 				throw new TryAgainLaterException();
                 // a general catch for 4xx and 5xx's
                 // should maybe be a different exception?
@@ -707,7 +731,7 @@ public class HTTPDownloader implements BandwidthTracker {
      * Parses X-Available-Ranges header and stores the available ranges as a
      * list.
      * 
-     * @param str the X-Available-Ranges header line which should look like:
+     * @param line the X-Available-Ranges header line which should look like:
      *         "X-Available-Ranges: bytes A-B, C-D, E-F"
      *         "X-Available-Ranges:bytes A-B"
      * @param rfd the RemoteFileDesc2 for the location we are trying to download
@@ -775,6 +799,32 @@ public class HTTPDownloader implements BandwidthTracker {
             availableRanges.add(interval);
         }
         rfd.setAvailableRanges(availableRanges);
+    }
+
+    /**
+     * Parses the Retry-After header.
+     * @param str - expects a simple integer number specifying the
+     * number of seconds to wait before retrying the host.
+     * @exception ProblemReadingHeaderException if we could not read 
+     * the header
+     */
+    private static void parseRetryAfterHeader(String str, RemoteFileDesc rfd) 
+        throws IOException {
+        str = HTTPUtils.extractHeaderValue(str);
+        int seconds = 0;
+        try {
+            seconds = Integer.parseInt(str);
+        } catch (NumberFormatException e) {
+            throw new ProblemReadingHeaderException();
+        }
+        // make sure the value is not smaller than MIN_RETRY_AFTER seconds
+        seconds = Math.max(seconds, MIN_RETRY_AFTER);
+        // make sure the value is not larger than MAX_RETRY_AFTER seconds
+        seconds = Math.min(seconds, MAX_RETRY_AFTER);
+        if(LOG.isDebugEnabled())
+            LOG.debug("setting retry after to be [" + seconds + 
+                      "] seconds for " + rfd);
+        rfd.setRetryAfter(seconds);
     }
     
     /////////////////////////////// Download ////////////////////////////////
@@ -920,11 +970,7 @@ public class HTTPDownloader implements BandwidthTracker {
     }
 
     public float getMeasuredBandwidth() throws InsufficientDataException {
-        try {
-            return bandwidthTracker.getMeasuredBandwidth();
-        } catch(InsufficientDataException ide) {
-            throw ide;
-        }
+        return bandwidthTracker.getMeasuredBandwidth();
     }
     
     public float getAverageBandwidth() {

@@ -99,6 +99,11 @@ public class RemoteFileDesc implements Serializable {
      * to transfer data.
      */
     private transient int _failedCount = 0;
+
+    /**
+     * The earliest time to retry this host in milliseconds since 01-01-1970
+     */
+    private transient long _earliestRetryTime = 0;
     
     /**
      * Constructs a new RemoteFileDesc exactly like the other one,
@@ -301,6 +306,31 @@ public class RemoteFileDesc implements Serializable {
         return "ALT".equals(_vendor);
     }
     
+    /**
+     * @return true if this host is still busy and should not be retried
+     */
+    public boolean isBusy() {
+        return (System.currentTimeMillis() < _earliestRetryTime);
+    }
+
+    /**
+     * @return time to wait until this host will be ready to be retried
+     * in seconds
+     */
+    public int getWaitTime() {
+        return (isBusy() ? 
+                (int) (_earliestRetryTime - System.currentTimeMillis())/1000 + 1:
+                0 );
+    }
+
+    /**
+     * Mutator for _earliestRetryTime. 
+     * @param seconds number of seconds to wait before retrying
+     */
+    public void setRetryAfter(int seconds) {
+        _earliestRetryTime = System.currentTimeMillis() + seconds*1000;
+    }
+
 	/**
 	 * Accessor for the host ip with this file.
 	 *

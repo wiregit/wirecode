@@ -131,7 +131,15 @@ public class HTTPHeaderName {
      */
     public static final HTTPHeaderName QUEUE =
         new HTTPHeaderName("X-Queue");
-    
+
+    /**
+     * Header for retry after. Useful for two things:
+     * 1) LimeWire can now be queued in gtk-gnutella's PARQ
+     * 2) It's possible to tune the number of http requests down
+     *    when LimeWire is busy
+     */
+    public static final HTTPHeaderName RETRY_AFTER = 
+        new HTTPHeaderName("Retry-After");
 
 	/**
 	 * Returns whether or not the start of the passed in string matches the 

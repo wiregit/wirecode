@@ -23,6 +23,18 @@ public class LimitReachedUploadState implements HTTPMessage {
 
     private final HTTPUploader UPLOADER;
 
+    /**
+     * Number of seconds the remote host should wait before retrying in
+     * case we don't have any alt-locs left to send
+     */
+    private static final int NO_ALT_LOCS_RETRY_AFTER = 60 * 5; // 5 minutes
+
+    /**
+     * Number of seconds the remote host should wait before retrying in
+     * case we still have alt-locs left to send
+     */
+    private static final int NORMAL_RETRY_AFTER = 60 * 1; // 1 minute
+
 	/**
 	 * The error message to send in the message body.
 	 */
@@ -63,12 +75,25 @@ public class LimitReachedUploadState implements HTTPMessage {
                                           new HTTPHeaderValueCollection(alts),
                                           ostream);
 				}
+                // write retry after if the sha1 is not null
+                str = HTTPHeaderName.RETRY_AFTER.toString() + ": ";
+                if (alts.size() == 0) {
+                    str = str + String.valueOf(NO_ALT_LOCS_RETRY_AFTER);
+                } else {
+                    str = str + String.valueOf(NORMAL_RETRY_AFTER);
+                }
+                ostream.write(str.getBytes());
                 if (FILE_DESC instanceof IncompleteFileDesc) {
                     HTTPUtils.writeHeader(HTTPHeaderName.AVAILABLE_RANGES,
                                           ((IncompleteFileDesc)FILE_DESC),
                                           ostream);
                 }
-			}
+			} else {
+                // write retry after if sha1 is null
+                str = HTTPHeaderName.RETRY_AFTER.toString() + ": "
+                    + String.valueOf(NO_ALT_LOCS_RETRY_AFTER);
+                ostream.write(str.getBytes());
+            }
 		}
 		
 		HTTPUtils.writeHeader(HTTPHeaderName.CONNECTION,

@@ -18,6 +18,9 @@ import java.util.StringTokenizer;
 
 import com.sun.java.util.collections.*;
 
+import org.apache.commons.logging.LogFactory;
+import org.apache.commons.logging.Log;
+
 /**
  * A smart download.  Tries to get a group of similar files by delegating
  * to HTTPDownloader objects.  Does retries and resumes automatically.
@@ -141,6 +144,8 @@ public class ManagedDownloader implements Downloader, Serializable {
       terminates.
     */
     
+    private static final Log LOG = LogFactory.getLog(ManagedDownloader.class);
+    
     /** Ensures backwards compatibility. */
     static final long serialVersionUID = 2772570805975885257L;
 
@@ -184,8 +189,7 @@ public class ManagedDownloader implements Downloader, Serializable {
     private ActivityCallback callback;
     /** The complete list of files passed to the constructor.  Must be
      *  maintained in memory to support resume.  allFiles may only contain
-     *  elements of type RemoteFileDesc and URLRemoteFileDesc--no 
-     *  RemoteFileDesc2's are stored in the array. */
+     *  elements of type RemoteFileDesc and URLRemoteFileDesc */
     private RemoteFileDesc[] allFiles;
 
     ///////////////////////// Policy Controls ///////////////////////////
@@ -220,7 +224,11 @@ public class ManagedDownloader implements Downloader, Serializable {
     private static final int REQUERY_ATTEMPTS = 1;
     /** The size of the approx matcher 2d buffer... */
     private static final int MATCHER_BUF_SIZE = 120;
-
+    /** The number of seconds to wait for hosts that don't have any ranges we
+     *  would be interested in. */
+    private static final int NO_RANGES_RETRY_AFTER = 60 * 5; // 5 minutes
+    /** The number of seconds to wait for hosts that failed once. */
+    private static final int FAILED_RETRY_AFTER = 60 * 1; // 1 minute
 	/** The value of an unknown filename - potentially overridden in 
       * subclasses */
 	protected static final String UNKNOWN_FILENAME = "";  
@@ -301,12 +309,9 @@ public class ManagedDownloader implements Downloader, Serializable {
      * LOCKING: synchronize on this
      */
     private IntervalSet needed;
-    /**List of RemoteFileDesc which were busy when we tried to connect to them.
-     * To be used when we have run out of other options.*/
-    private List /* of RemoteFileDesc2 */ busy;
     /** List of RemoteFileDesc to which we actively connect and request parts
      * of the file.*/
-    private List /*of RemoteFileDesc2 */ files;
+    private List /*of RemoteFileDesc */ files;
 	
     /**
      * The collection of alternate locations we successfully downloaded from
@@ -906,9 +911,11 @@ public class ManagedDownloader implements Downloader, Serializable {
                                      allowedDifferences);
         }
 
-        debug("MD.namesClose(): one = " + one);
-        debug("MD.namesClose(): two = " + two);
-        debug("MD.namesClose(): retVal = " + retVal);
+        if(LOG.isDebugEnabled()) {
+            LOG.debug("MD.namesClose(): one = " + one);
+            LOG.debug("MD.namesClose(): two = " + two);
+            LOG.debug("MD.namesClose(): retVal = " + retVal);
+        }
             
         return retVal;
     }
@@ -1010,8 +1017,6 @@ public class ManagedDownloader implements Downloader, Serializable {
     
     private synchronized boolean shouldAllowRFD(RemoteFileDesc rfd) {
         if( buckets == null)
-            return false;
-        if( busy != null && busy.contains(rfd))
             return false;
         if( currentRFDs != null && currentRFDs.contains(rfd))
             return false;
@@ -1529,13 +1534,23 @@ public class ManagedDownloader implements Downloader, Serializable {
     }
 
 
-    /** Returns the amount of time to wait in milliseconds before retrying,
-     *  based on tries.  This is also the time to wait for * incoming pushes to
-     *  arrive, so it must not be too small.  A value of * tries==0 represents
-     *  the first try.  */
-    private long calculateWaitTime() {
-        //60 seconds: same as BearShare.
-        return 60*1000;
+    /**
+     * Returns the amount of time to wait in milliseconds before retrying,
+     * based on tries.  This is also the time to wait for * incoming pushes to
+     * arrive, so it must not be too small.  A value of * tries==0 represents
+     * the first try.
+     */
+    private synchronized long calculateWaitTime() {
+        if (files == null || files.size()==0)
+            return 0;
+        // waitTime is in seconds
+        int waitTime = Integer.MAX_VALUE;
+        for (int i = 0; i < files.size(); i++) {
+            waitTime = Math.min(waitTime, 
+                            ((RemoteFileDesc)files.get(i)).getWaitTime());
+        }
+        // waitTime was in seconds
+        return (waitTime*1000);
     }
 
 
@@ -1650,7 +1665,8 @@ public class ManagedDownloader implements Downloader, Serializable {
                     // will change to non-corrupt later if user ignores
                     setState(CORRUPT_FILE);
                     promptAboutCorruptDownload();
-                    debug("hash verification problem, fileHash="+
+                    if(LOG.isWarnEnabled())
+                        LOG.warn("hash verification problem, fileHash="+
                                        fileHash+", bucketHash="+bucketHash);
                 }
                 try {
@@ -1724,7 +1740,7 @@ public class ManagedDownloader implements Downloader, Serializable {
 		if(validAlts != null && 
 		   fileDesc!=null && 
 		   fileDesc.getSHA1Urn().equals(validAlts.getSHA1Urn())) {
-		    debug("MANAGER: adding valid alts to FileDesc");
+		    LOG.trace("MANAGER: adding valid alts to FileDesc");
 			// making this call now is necessary to avoid writing the 
 			// same alternate locations back to the requester as they sent 
 			// in their original headers
@@ -1738,7 +1754,7 @@ public class ManagedDownloader implements Downloader, Serializable {
             //If file is too small or partial sharing is off, send head request
             if(fileDesc.getSize() < HTTPDownloader.MIN_PARTIAL_FILE_BYTES ||
                !UploadSettings.ALLOW_PARTIAL_SHARING.getValue() ) {
-                debug("MANAGER: starting HEAD request");
+                LOG.trace("MANAGER: starting HEAD request");
                 //for small files which never add themselves to the mesh
                 //while downloading, we need to send head requests, so we
                 //get added to the mesh
@@ -1807,6 +1823,8 @@ public class ManagedDownloader implements Downloader, Serializable {
      *  download.  Calls to resume() do not result in InterruptedException.
      */
     private int tryAllDownloads3() throws InterruptedException {
+        LOG.trace("MANAGER: entered tryAllDownloads3");
+        
         //The parts of the file we still need to download.
         //INVARIANT: all intervals are disjoint and non-empty
         int completedSize = -1;
@@ -1822,7 +1840,7 @@ public class ManagedDownloader implements Downloader, Serializable {
                     incompleteFileManager.getEntry(incompleteFile);
                 }
                 if(commonOutFile==null) {//no entry in incompleteFM
-                    debug("creating a verifying file");
+                    LOG.trace("creating a verifying file");
                     commonOutFile = new VerifyingFile(true);
                     //we must add an entry for this in IncompleteFileManager
                     incompleteFileManager.
@@ -1860,8 +1878,6 @@ public class ManagedDownloader implements Downloader, Serializable {
             }
         }
 
-        //The locations that were busy, for trying later.
-        busy=new LinkedList();
         //The current RFDs that are being connected to.
         currentRFDs = new LinkedList();
         int size = -1;
@@ -1881,7 +1897,7 @@ public class ManagedDownloader implements Downloader, Serializable {
                     //thread is executing this block. In that case the manager
                     //thread will exit thinking the download is complete
                     if (stopped) {
-                        debug("MANAGER: terminating because of stop");
+                        LOG.warn("MANAGER: terminating because of stop");
                         throw new InterruptedException();
                     } 
                     
@@ -1910,22 +1926,22 @@ public class ManagedDownloader implements Downloader, Serializable {
                                 t.interrupt();
                             }
                         
-                            debug("MANAGER: terminating because of completion");
+                            LOG.trace("MANAGER: terminating because of completion");
                             return COMPLETE;
                         }
                     } 
                     
-                    if (threads.size()==0
-                               && files.size()==0) {
+                    if (threads.size() == 0) {                        
                         //No downloaders worth living for.
-                        if (busy.size()>0) {
-                            debug("MANAGER: terminating with busy");
-                            files.addAll(busy);
+                        if ( files.size() > 0 && calculateWaitTime() > 0) {
+                            LOG.trace("MANAGER: terminating with busy");
                             return WAITING_FOR_RETRY;
-                        } else {
-                            debug("MANAGER: terminating w/o hope");
+                        } else if( files.size() == 0 ) {
+                            LOG.trace("MANAGER: terminating w/o hope");
                             return GAVE_UP;
                         }
+                        // else (files.size() > 0 && calculateWaitTime() == 0)
+                        // fallthrough ...
                     }
                     size = files.size();
                     connectTo = getNumAllowedDownloads();
@@ -1943,6 +1959,13 @@ public class ManagedDownloader implements Downloader, Serializable {
                 final RemoteFileDesc rfd;
                 synchronized(this) {
                     rfd = removeBest(files);
+                    // If the rfd was busy, that means all possible RFDs
+                    // are busy, so just put it back in files and exit.
+                    if( rfd.isBusy() ) {
+                        files.add(rfd);
+                        break;
+                    }
+                    // else...
                     currentRFDs.add(rfd);
                 }
                 Thread connectCreator = new Thread("DownloadWorker") {
@@ -2072,7 +2095,8 @@ public class ManagedDownloader implements Downloader, Serializable {
                         }
                         Thread.sleep(qInfo[0]);//value from QueuedException
                     } catch (InterruptedException ix) {
-                        debug("worker: interrupted while asleep in "+
+                        if(LOG.isWarnEnabled())
+                            LOG.warn("worker: interrupted while asleep in "+
                               "queue" + dloader);
                         queuedThreads.remove(Thread.currentThread());
                         dloader.stop();//close connection
@@ -2240,7 +2264,8 @@ public class ManagedDownloader implements Downloader, Serializable {
                          needsPush ? PUSH_CONNECT_TIME : NORMAL_CONNECT_TIME);
         }
 
-        debug("WORKER: attempting connect to "
+        if(LOG.isDebugEnabled())
+            LOG.debug("WORKER: attempting connect to "
               + rfd.getHost() + ":" + rfd.getPort());        
         
         if(RECORD_STATS)
@@ -2295,7 +2320,7 @@ public class ManagedDownloader implements Downloader, Serializable {
      */
     private HTTPDownloader connectDirectly(RemoteFileDesc rfd, 
       File incFile) throws IOException {
-        debug("WORKER: attempt direct connection");
+        LOG.trace("WORKER: attempt direct connection");
         HTTPDownloader ret;
         //Establish normal downloader.              
         ret = new HTTPDownloader(rfd, incFile);
@@ -2319,7 +2344,7 @@ public class ManagedDownloader implements Downloader, Serializable {
      */
     private HTTPDownloader connectWithPush(RemoteFileDesc rfd,
       File incFile) throws IOException {
-        debug("WORKER: attempt push connection");
+        LOG.trace("WORKER: attempt push connection");
         HTTPDownloader ret;
         
         //When the push is complete and we have a socket ready to use
@@ -2412,7 +2437,8 @@ public class ManagedDownloader implements Downloader, Serializable {
                 //from is not mutated.  DO NOT CALL updateNeeded() here!
                 Assert.that(updateNeeded == false,
                             "updateNeeded not false in assignAndRequest");
-                debug("nsex thrown in assingAndRequest "+dloader);
+                if(LOG.isDebugEnabled())            
+                    LOG.debug("nsex thrown in assingAndRequest "+dloader,nsex);
                 synchronized(this) {
                     // Add to files, keep checking for stalled uploader with
                     // this rfd
@@ -2422,46 +2448,53 @@ public class ManagedDownloader implements Downloader, Serializable {
             } catch (NoSuchRangeException nsrx) { 
                 if(RECORD_STATS)
                     DownloadStat.NSR_EXCEPTION.incrementStat();
-                debug("nsrx thrown in assignAndRequest"+dloader);
+                if(LOG.isDebugEnabled())
+                    LOG.debug("nsrx thrown in assignAndRequest "+dloader,nsrx);
                 synchronized(this) {
                     //forget the ranges we are preteding uploader is busy.
                     rfd.setAvailableRanges(null);
-                    busy.add(rfd);
+                    rfd.setRetryAfter(NO_RANGES_RETRY_AFTER);
+                    files.add(rfd);
                 }
                 rfd.resetFailedCount();                
                 return 0;                
             } catch(TryAgainLaterException talx) {
                 if(RECORD_STATS)
                     DownloadStat.TAL_EXCEPTION.incrementStat();
-                debug("talx thrown in assignAndRequest"+dloader);
+                if(LOG.isDebugEnabled())
+                    LOG.debug("talx thrown in assignAndRequest "+dloader,talx);
                 synchronized(this) {
-                    busy.add(rfd);//try this rfd later
+                    files.add(rfd);//try this rfd later
                 }
                 rfd.resetFailedCount();                
                 return 0;
             } catch(RangeNotAvailableException rnae) {
                 if(RECORD_STATS)
                     DownloadStat.RNA_EXCEPTION.incrementStat();
-                debug("rnae thrown in assignAndRequest"+dloader);
+                if(LOG.isDebugEnabled())
+                    LOG.debug("rnae thrown in assignAndRequest "+dloader,rnae);
                 rfd.resetFailedCount();                
                 informMesh(rfd, true);
                 return 4; //no need to add to files or busy we keep iterating
             } catch (FileNotFoundException fnfx) {
                 if(RECORD_STATS)
                     DownloadStat.FNF_EXCEPTION.incrementStat();
-                debug("fnfx thrown in assignAndRequest "+dloader);
+                if(LOG.isDebugEnabled())
+                    LOG.debug("fnfx thrown in assignAndRequest"+dloader, fnfx);
                 informMesh(rfd, false);
                 return 0;//discard the rfd of dloader
             } catch (NotSharingException nsx) {
                 if(RECORD_STATS)
                     DownloadStat.NS_EXCEPTION.incrementStat();
-                debug("nsx thrown in assignAndRequest "+dloader);
+                if(LOG.isDebugEnabled())
+                    LOG.debug("nsx thrown in assignAndRequest "+dloader, nsx);
                 informMesh(rfd, false);
                 return 0;//discard the rfd of dloader
             } catch (QueuedException qx) { 
                 if(RECORD_STATS)
                     DownloadStat.Q_EXCEPTION.incrementStat();
-                debug("queuedEx thrown in AssignAndRequest sleeping.."+dloader);
+                if(LOG.isDebugEnabled())
+                    LOG.debug("qx thrown in assignAndRequest "+dloader, qx);
                 //The extra time to sleep can be tuned. For now it's 1 S.
                 refQueueInfo[0] = qx.getMinPollTime()*/*S->mS*/1000+1000;
                 refQueueInfo[1] = qx.getQueuePosition();
@@ -2482,28 +2515,36 @@ public class ManagedDownloader implements Downloader, Serializable {
             } catch(ProblemReadingHeaderException prhe) {
                 if(RECORD_STATS)
                     DownloadStat.PRH_EXCEPTION.incrementStat();
-                debug("prhe thrown in assignAndRequest "+dloader);
+                if(LOG.isDebugEnabled())
+                    LOG.debug("prhe thrown in assignAndRequest "+dloader,prhe);
                 informMesh(rfd, false);
                 return 0; //discard the rfd of dloader
             } catch(UnknownCodeException uce) {
                 if(RECORD_STATS)
                     DownloadStat.UNKNOWN_CODE_EXCEPTION.incrementStat();
-                debug("uce (" + uce.getCode() + ") thrown in assignAndRequest "
-                      + dloader);
+                if(LOG.isDebugEnabled())
+                    LOG.debug("uce (" + uce.getCode() +
+                              ") thrown in assignAndRequest " +
+                              dloader, uce);
                 informMesh(rfd, false);
                 return 0; //discard the rfd of dloader
             } catch (IOException iox) {
                 if(RECORD_STATS)
                     DownloadStat.IO_EXCEPTION.incrementStat();
-                debug("iox thrown in assignAndRequest "+dloader);
+                if(LOG.isDebugEnabled())
+                    LOG.debug("iox thrown in assignAndRequest "+dloader, iox);
                 
                 rfd.incrementFailedCount();
                 
                 // if this RFD had an IOX while reading headers/downloading
                 // less than twice in succession, try it again.
-                if( rfd.getFailedCount() < 2 )
-                    synchronized(this) {busy.add(rfd); }
-                else //tried the location twice -- it really is bad
+                if( rfd.getFailedCount() < 2 ) {
+                    //set retry after, wait a little before retrying this RFD
+                    rfd.setRetryAfter(FAILED_RETRY_AFTER);
+                    synchronized(this) {
+                        files.add(rfd); 
+                    }
+                } else //tried the location twice -- it really is bad
                     informMesh(rfd, false);         
                 return 0;
             } finally {
@@ -2544,7 +2585,7 @@ public class ManagedDownloader implements Downloader, Serializable {
                 setState(DOWNLOADING);
             }
             if (stopped) {
-                debug("Stopped in assignAndRequest");
+                LOG.trace("Stopped in assignAndRequest");
                 updateNeeded(dloader); //give back a white area
                 synchronized(this) {
                     files.add(rfd);
@@ -2576,17 +2617,19 @@ public class ManagedDownloader implements Downloader, Serializable {
      * Returns the amount of other hosts this download can possibly use.
      */
     public synchronized int getPossibleHostCount() {
-        if( state == WAITING_FOR_RETRY ) {
-            int filesSize = files == null ? 0 : files.size();
-            int busySize = busy == null ? 0 : busy.size();
-            Assert.that(filesSize == busySize);
-            return 0;
-        }
         return (files == null ? 0 : files.size());
     }
     
     public synchronized int getBusyHostCount() {
-        return (busy == null ? 0 : busy.size());
+        if (files == null) 
+            return 0;
+
+        int busy = 0;
+        for (int i = 0; i < files.size(); i++) {
+            if ( ((RemoteFileDesc)files.get(i)).isBusy() )
+                busy++;
+        }
+        return busy;
     }
 
     public synchronized int getQueuedHostCount() {
@@ -2638,7 +2681,8 @@ public class ManagedDownloader implements Downloader, Serializable {
         dloader.connectHTTP(getOverlapOffset(interval.low), interval.high+1,
                             true);
         dloader.stopAt(interval.high+1);
-        debug("WORKER: picking white "+interval+" to "+dloader);
+        if(LOG.isDebugEnabled())
+            LOG.debug("WORKER: picking white "+interval+" to "+dloader);
     }
 
     /**
@@ -2685,13 +2729,38 @@ public class ManagedDownloader implements Downloader, Serializable {
         //check if we need to steal the last chunk from a slow downloader.
         //TODO4: Should we check left < CHUNK_SIZE+OVERLAP_BYTES
         if ((http11 && left<CHUNK_SIZE) || (!http11 && left < MIN_SPLIT_SIZE)){ 
-            float bandwidth = -1;//initialize
+            float bandwidthVictim = -1;
+            float bandwidthStealer = -1;
+            
             try {
-                bandwidth = biggest.getMeasuredBandwidth();
+                bandwidthVictim = biggest.getAverageBandwidth();
+                biggest.getMeasuredBandwidth(); // trigger IDE.
             } catch (InsufficientDataException ide) {
-                throw new NoSuchElementException();
+                LOG.debug("victim does not have datapoints", ide);
+                bandwidthVictim = -1;
             }
-            if(bandwidth < MIN_ACCEPTABLE_SPEED) {
+            try {
+                bandwidthStealer = dloader.getAverageBandwidth();
+                dloader.getMeasuredBandwidth(); // trigger IDE.
+            } catch(InsufficientDataException ide) {
+                LOG.debug("stealer does not have datapoints", ide);
+                bandwidthStealer = -1;
+            }
+            
+            if(LOG.isDebugEnabled())
+                LOG.debug("WORKER: " + dloader + " attempting to steal from " + 
+                          biggest + ", stealer speed [" + bandwidthStealer +
+                          "], victim speed [ " + bandwidthVictim + "]");
+            
+            // If we do have a measured bandwidth for the existing download,
+            // and it is slower than what is acceptable, let the new guy steal.
+            // OR
+            // If the new guy is of an acceptable speed and his average
+            // bandwidth is faster than the existing one, let him steal.
+            if((bandwidthVictim != -1 &&
+                bandwidthVictim < MIN_ACCEPTABLE_SPEED) ||
+               (bandwidthStealer > MIN_ACCEPTABLE_SPEED &&
+                bandwidthStealer > bandwidthVictim)) {
                 //replace (bad boy) biggest if possible
                 int start=
                 biggest.getInitialReadingPoint()+amountRead;
@@ -2701,7 +2770,8 @@ public class ManagedDownloader implements Downloader, Serializable {
                 //line could throw a bunch of exceptions (not queuedException)
                 dloader.connectHTTP(getOverlapOffset(start), stop, false);
                 dloader.stopAt(stop);
-                debug("WORKER: picking stolen grey "
+                if(LOG.isDebugEnabled())
+                    LOG.debug("WORKER: picking stolen grey "
                       +start+"-"+stop+" from "+biggest+" to "+dloader);
                 biggest.stopAt(start);
                 biggest.stop();
@@ -2723,7 +2793,8 @@ public class ManagedDownloader implements Downloader, Serializable {
             dloader.connectHTTP(getOverlapOffset(start), stop,true);
             dloader.stopAt(stop);
             biggest.stopAt(start);//we know that biggest must be http1.0
-            debug("WORKER: assigning split grey "
+            if(LOG.isDebugEnabled())
+                LOG.debug("WORKER: assigning split grey "
                   +start+"-"+stop+" from "+biggest+" to "+dloader);
         }
     }
@@ -2868,7 +2939,8 @@ public class ManagedDownloader implements Downloader, Serializable {
      * otherwise.  
      */
     private boolean doDownload(HTTPDownloader downloader, boolean http11) {
-        debug("WORKER: about to start downloading "+downloader);
+        if(LOG.isTraceEnabled())
+            LOG.trace("WORKER: about to start downloading "+downloader);
         boolean problem = false;
         RemoteFileDesc rfd = downloader.getRemoteFileDesc();            
         try {
@@ -2893,7 +2965,8 @@ public class ManagedDownloader implements Downloader, Serializable {
         } finally {
             int stop=downloader.getInitialReadingPoint()
                         +downloader.getAmountRead();
-            debug("    WORKER: terminating from "+downloader+" at "+stop+ 
+            if(LOG.isDebugEnabled())
+                LOG.debug("    WORKER: terminating from "+downloader+" at "+stop+ 
                   " error? "+problem);
             synchronized (this) {
                 if (problem) {
@@ -2903,7 +2976,7 @@ public class ManagedDownloader implements Downloader, Serializable {
                     // if we failed less than twice in succession,
                     // try to use the file again much later.
                     if( rfd.getFailedCount() < 2 )
-                        busy.add(rfd);
+                        files.add(rfd);
                     else
                         informMesh(rfd, false);
                 } else {
@@ -2932,7 +3005,9 @@ public class ManagedDownloader implements Downloader, Serializable {
         //note: the high'th byte will also be downloaded.
         if( (high-low)>0) {//dloader failed to download a part assigned to it?
             Interval in = new Interval(low,high);
-            debug("Updating needed. Adding interval "+in+" from "+dloader);
+            if(LOG.isDebugEnabled())
+                LOG.debug("Updating needed. Adding interval "
+                          +in+" from "+dloader);
             addToNeeded(in);
         }
     }
@@ -2985,21 +3060,30 @@ public class ManagedDownloader implements Downloader, Serializable {
         //The best rfd found so far
         RemoteFileDesc ret=(RemoteFileDesc)iter.next();
         
-        //Find max of each (remaining) element, storing in max.  
-        //  Primary key: whether the file has a hash (avoid corruptions)
-        //  Secondary key: the quality of the results (avoid dud locations)
-        //  Ternary key: the speed of the result (avoid slow downloads)
+        //Find max of each (remaining) element, storing in max.
+        //Follows the following logic:
+        //1) Find a non-busy host (make connections)
+        //2) Find a host that uses hashes (avoid corruptions)
+        //3) Find a better quality host (avoid dud locations)
+        //4) Find a speedier host (avoid slow downloads)
         while (iter.hasNext()) {
             RemoteFileDesc rfd=(RemoteFileDesc)iter.next();
-            //rfd.hash > ret.hash?
-            if (rfd.getSHA1Urn()!=null && ret.getSHA1Urn()==null)
+            
+            // 1.
+            if (ret.isBusy())
                 ret=rfd;
+            // 2.
+            else if (rfd.getSHA1Urn()!=null && ret.getSHA1Urn()==null)
+                ret=rfd;
+            // 3 & 4.
+            // (note the use of == so that the comparison is only done
+            //  if both rfd & ret either had or didn't have a SHA1)
             else if ((rfd.getSHA1Urn()==null) == (ret.getSHA1Urn()==null)) {
-                //rfd.quality > ret.quality?
+                // 3.
                 if (rfd.getQuality() > ret.getQuality())
                     ret=rfd;
                 else if (rfd.getQuality() == ret.getQuality()) {
-                    //rfd.speed > ret.speed?
+                    // 4.
                     if (rfd.getSpeed() > ret.getSpeed())
                         ret=rfd;
                 }            
@@ -3094,7 +3178,6 @@ public class ManagedDownloader implements Downloader, Serializable {
         threadLockToSocket.clear();
         if(needed != null) //it's null while before we try first bucket
             needed.clear();
-        busy = null;
         files = null;
         validAlts = null;
     }    
@@ -3387,31 +3470,5 @@ public class ManagedDownloader implements Downloader, Serializable {
             return getAndClearNewResult();
         }
 
-    }
-   
-    private final boolean debugOn = false;
-    private final boolean log = false;
-    PrintWriter writer = null;
-    private final void debug(String out) {
-        if (debugOn) {
-            if(log) {
-                if(writer== null) {
-                    try {
-                        writer=new 
-                        PrintWriter(new FileOutputStream("log.log",true));
-                    }catch (IOException ioe) {
-                        System.out.println("could not create log file");
-                    }
-                }
-                writer.println(out);
-                writer.flush();
-            }
-            else
-                System.out.println(out);
-        }
-    }
-    private final void debug(Exception e) {
-        if (debugOn)
-            e.printStackTrace();
     }
 }

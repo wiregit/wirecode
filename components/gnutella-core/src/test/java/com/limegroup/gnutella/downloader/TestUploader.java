@@ -13,7 +13,13 @@ import com.limegroup.gnutella.http.*;
 import com.limegroup.gnutella.util.*;
 import com.limegroup.gnutella.settings.*;
 
+import org.apache.commons.logging.LogFactory;
+import org.apache.commons.logging.Log;
+
 public class TestUploader {    
+    
+    private static final Log LOG = LogFactory.getLog(TestUploader.class);
+    
     /** My name, for debugging */
     private final String name;
 
@@ -39,6 +45,8 @@ public class TestUploader {
     private boolean http11 = true;
     private ServerSocket server;
     private boolean busy = false;
+    private int retryAfter = -1;
+    private int timesBusy = Integer.MAX_VALUE;
     //Note about queue testing: This is how the queuing simulation works: If
     //queue is set, the uploader sends the X-Queue header etc in handleRequest
     //method, and sets values for minPollTime and maxPollTime. In the loop
@@ -87,7 +95,7 @@ public class TestUploader {
             server.setReuseAddress(true);
             server.bind(new InetSocketAddress(port));
         } catch (IOException e) {
-            DownloadTest.debug("Couldn't bind socket to port "+port+"\n");
+            LOG.debug("Couldn't bind socket to port "+port+"\n");
             //System.out.println("Couldn't listen on port "+port);
             ErrorService.error(e);
             return;
@@ -96,7 +104,11 @@ public class TestUploader {
         //spawn loop();
         Thread t = new Thread() {
             public void run() {
-                loop(port);
+                try {
+                    loop(port);
+                } catch(Throwable t) {
+                    ErrorService.error(t);
+                }
             }
         };
         t.setDaemon(true);
@@ -122,6 +134,8 @@ public class TestUploader {
         stopped = false;
         sendCorrupt = false;
         busy = false;
+        retryAfter = -1;
+        timesBusy = Integer.MAX_VALUE;
         queue = false;
         partial = 0;
         minPollTime = -1;
@@ -143,6 +157,27 @@ public class TestUploader {
         this.rate=rate;
     }
     
+    /**
+     * Determine how many times this test uploader should respond
+     * with a busy status.
+     */
+    public void setTimesBusy(int nTimes) {
+        this.timesBusy = nTimes;
+    }
+    
+    /**
+     * Determines what should be sent in the Retry-After header
+     */
+    public void setRetryAfter(int seconds) {
+        this.retryAfter = seconds;
+    }
+    
+    /**
+     * Sets this test uploader to be busy.
+     * Use setTimesBusy to set the number of times this
+     * uploader should respond as busy.
+     * By default it will respond Integer.MAX_VALUE times.
+     */
     public void setBusy(boolean busy) {
         this.busy = busy;
     }
@@ -217,10 +252,11 @@ public class TestUploader {
                 // make sure it's from us
 				InetAddress address = socket.getInetAddress();
                 if (isBannedIP(address.getHostAddress())) {
+                    LOG.debug("Banned address -- closing");
                     server.close();
                     continue;
                 }
-                DownloadTest.debug("UPLOADER ACCEPTED CONNECTION\n");
+                LOG.debug("Uploader accepted connection");
                 connects++;
                 //spawn thread to handle request
                 final Socket mySocket = socket;
@@ -238,7 +274,9 @@ public class TestUploader {
                                 mySocket.setSoTimeout(8000);
                             }
                         } catch (IOException e) {
-                            //e.printStackTrace();
+                            LOG.debug("Exception in uploader", e);
+                        } catch(Throwable t) {
+                            ErrorService.error(t);
                         } finally {
                             try {
                                 mySocket.close();
@@ -250,7 +288,7 @@ public class TestUploader {
                 };
                 runner.start();
             } catch (IOException e) {
-                //e.printStackTrace();
+                LOG.debug("exception in accept", e);
                 try { server.close(); } catch (IOException ignore) { }
                 return;  //server socket closed.
             }
@@ -284,7 +322,6 @@ public class TestUploader {
         AlternateLocationCollection goodLocs = null;
         while (true) {
             String line=input.readLine();
-            //DownloadTest.debug(line+"\n"); 
             if (firstLine) {
                 request=line;
                 firstLine=false;
@@ -358,20 +395,25 @@ public class TestUploader {
                         (t0-maxPollTime) +" mS");        
         
 		String str =
-            busy | queue | partial==1 ?
+            busy || queue || partial==1 ?
             "HTTP/1.1 503 Service Unavailable\r\n" :
             "HTTP/1.1 200 OK \r\n";
 		out.write(str.getBytes());
+		
+		if(busy && retryAfter != -1) {
+		    str = "Retry-After: " + retryAfter + "\r\n";
+		    out.write(str.getBytes());
+		}
 
         if(queue) {
-            DownloadTest.debug("UPLOAD QUEUED");
-            String s = "X-Queue: position="+queuePos+
+            LOG.debug("Upload Queued");
+            str = "X-Queue: position="+queuePos+
                 ", pollMin=" + MIN_POLL/1000 + 
                 ", pollMax=" + MAX_POLL/1000 +
                 "\r\n";
-            out.write(s.getBytes());
-            s = "\r\n";
-            out.write(s.getBytes());
+            out.write(str.getBytes());
+            str = "\r\n";
+            out.write(str.getBytes());
             out.flush();//don't close socket
             long t = System.currentTimeMillis();
             minPollTime = t+MIN_POLL;
@@ -380,23 +422,22 @@ public class TestUploader {
         }
         
         if(partial > 0) {
-            String s="";
             switch(partial) {
             case 1:
-                s="X-Available-Ranges: ByTes 50000-400000, 500000-600000,800000-900000\r\n";
+                str="X-Available-Ranges: ByTes 50000-400000, 500000-600000,800000-900000\r\n";
                 break;
             case 2:
-                s="X-Available-Ranges: bytes 50000-900000\r\n";
+                str="X-Available-Ranges: bytes 50000-900000\r\n";
                 break;
             default:
-                s="X-Available-Ranges: bytes 50000-150000\r\n";
+                str="X-Available-Ranges: bytes 50000-150000\r\n";
             }
-            out.write(s.getBytes());
+            out.write(str.getBytes());
             out.flush();
             partial++;
             if(partial==2) {//was 1 until last statement
-                s="\r\n";
-                out.write(s.getBytes());
+                str="\r\n";
+                out.write(str.getBytes());
                 out.flush();
                 return;
             }
@@ -412,16 +453,19 @@ public class TestUploader {
 		}
 		if(storedAltLocs != null && storedAltLocs.hasAlternateLocations()) {
 
-            DownloadTest.debug("WRITING ALTERNATE LOCATION HEADER:\n"+storedAltLocs+"\n");      
+            LOG.debug("Writing alternate location header:\n"+storedAltLocs+"\n");      
             HTTPUtils.writeHeader(HTTPHeaderName.ALT_LOCATION,
                                   storedAltLocs, out);
         } else {
-            DownloadTest.debug("DID NOT WRITE ALT LOCS::ALT LOCS: "+storedAltLocs+"\n");
+            LOG.debug("Did not write alt locs:\n"+storedAltLocs+"\n");
         }
         str = "\r\n";
 		out.write(str.getBytes());
         out.flush();
         if (busy) {
+            //turn busy off for the next time if necessary
+            if( connects >= timesBusy )
+                busy = false;
             out.close();
             return;
         }

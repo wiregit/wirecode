@@ -10,10 +10,16 @@ import com.sun.java.util.collections.*;
 import junit.framework.*;
 import com.limegroup.gnutella.settings.*;
 
+import org.apache.commons.logging.LogFactory;
+import org.apache.commons.logging.Log;
+
 /**
  * Tests backwards compatibility with old downloads.dat files.
  */
 public class OldDownloadsTest extends com.limegroup.gnutella.util.BaseTestCase {
+        
+    private static final Log LOG = LogFactory.getLog(OldDownloadsTest.class);
+    
     private static final String filePath = "com/limegroup/gnutella/downloader/";
 
     public OldDownloadsTest(String name) {
@@ -36,7 +42,7 @@ public class OldDownloadsTest extends com.limegroup.gnutella.util.BaseTestCase {
     }
 
     private void doTest(String file,String name,int size) throws Exception {
-        DownloadTest.debug("-Trying to read downloads.dat from \""+file+"\"");
+        LOG.debug("-Trying to read downloads.dat from \""+file+"\"");
 
         //Build part of backend 
 		ConnectionSettings.CONNECT_ON_STARTUP.setValue(false);
