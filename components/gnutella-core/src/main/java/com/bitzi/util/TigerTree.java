@@ -2,7 +2,7 @@
  * (PD) 2003 The Bitzi Corporation Please see http://bitzi.com/publicdomain for
  * more info.
  * 
- * $Id: TigerTree.java,v 1.2 2004-04-07 17:40:23 sberlin Exp $
+ * $Id: TigerTree.java,v 1.3 2004-05-13 17:39:05 sberlin Exp $
  */
 package com.bitzi.util;
 
@@ -12,11 +12,14 @@ import java.math.BigInteger;
 import java.security.DigestException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
 
 
 import com.sun.java.util.collections.List;
 import com.sun.java.util.collections.ArrayList;
 import com.sun.java.util.collections.Iterator;
+
+import com.limegroup.gnutella.util.CommonUtils;
 
 /**
  * Implementation of THEX tree hash algorithm, with Tiger as the internal
@@ -30,6 +33,22 @@ import com.sun.java.util.collections.Iterator;
 public class TigerTree extends MessageDigest {
     private static final int BLOCKSIZE = 1024;
     private static final int HASHSIZE = 24;
+    
+    private static final boolean USE_CRYPTIX =
+        CommonUtils.isJava14OrLater() &&
+        CommonUtils.isJaguarOrAbove() &&
+        !CommonUtils.isPantherOrAbove();
+    
+    /**
+     * Set up the CryptixCrypto provider if we're on 
+     * a platform that requires it.
+     */
+    static {
+        if(USE_CRYPTIX)
+            java.security.Security.addProvider(
+                new cryptix.jce.provider.CryptixCrypto()
+            );
+    }
 
     /** 1024 byte buffer */
     private final byte[] buffer;
@@ -55,7 +74,16 @@ public class TigerTree extends MessageDigest {
         bufferOffset = 0;
         byteCount = 0;
         nodes = new ArrayList();
-        tiger = new Tiger();
+        if(USE_CRYPTIX) {
+            try {
+                tiger = MessageDigest.getInstance("Tiger", "CryptixCrypto");
+            } catch(NoSuchAlgorithmException nsae) {
+                tiger = new Tiger();
+            } catch(NoSuchProviderException nspe) {
+                tiger = new Tiger();
+            }
+        } else
+            tiger = new Tiger();
     }
 
     protected int engineGetDigestLength() {

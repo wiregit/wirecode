@@ -509,6 +509,17 @@ public final class CommonUtils {
 		if(!isMacOSX()) return false;
 		return getOSVersion().startsWith("10.2");
 	}
+	
+	/**
+	 * Returns whether or not the os is Mac OSX 10.3 or above.
+	 *
+	 * @return <tt>true</tt> if the application is running on Mac OSX, 
+	 *  10.3 or above, <tt>false</tt> otherwise
+	 */
+	public static boolean isPantherOrAbove() {
+	    if(!isMacOSX()) return false;
+	    return getOSVersion().startsWith("10.3");
+	}
     
     /**
      * Returns whether or not the Cocoa Foundation classes are available.
