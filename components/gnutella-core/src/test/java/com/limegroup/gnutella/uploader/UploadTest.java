@@ -403,7 +403,7 @@ public class UploadTest extends com.limegroup.gnutella.util.BaseTestCase {
     public void testHTTP11MalformedHeader() throws Exception {
         tFailureHeaderRequired(
             "/uri-res/N2R?" + hash, 
-            "Range: 2-5", // should be Range: bytes 2-5
+            "Range: 2-5", // expects "Range: bytes 2-5"
             true, "HTTP/1.1 400 Malformed Request");
     }
 
