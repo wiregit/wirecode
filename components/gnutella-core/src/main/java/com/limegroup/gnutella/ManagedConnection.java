@@ -225,14 +225,24 @@ public class ManagedConnection
                       MessageRouter router,
                       ConnectionManager manager,
                       boolean isRouter) {
+        //If a router connection, connect as 0.4 by setting responders to null.
+        //(Yes, it's a hack, but this is how Connection(String,int) is
+        //implemented.)  Otherwise connect at 0.6 with re-negotiation, setting
+        //the headers according to whether we're supernode capable.
         super(host, port, 
-            manager.isSupernode() ? 
-            (Properties)(new SupernodeProperties(router)) : 
-            (Properties)(new ClientProperties(router)),
-            manager.isSupernode() ? 
-            (HandshakeResponder)(new SupernodeHandshakeResponder(manager)) :
-            (HandshakeResponder)(new ClientHandshakeResponder(manager)),
-            true);
+              isRouter ? 
+                  null :
+                  (manager.isSupernode() ? 
+                      (Properties)(new SupernodeProperties(router)) : 
+                      (Properties)(new ClientProperties(router))),
+              isRouter ? 
+                  null : 
+                  (manager.isSupernode() ?
+                      (HandshakeResponder)
+                          (new SupernodeHandshakeResponder(manager)) :
+                      (HandshakeResponder)
+                          (new ClientHandshakeResponder(manager))),
+              !isRouter);
         
         _router = router;
         _manager = manager;
