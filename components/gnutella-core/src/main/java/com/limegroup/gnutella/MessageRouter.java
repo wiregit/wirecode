@@ -1,6 +1,7 @@
 package com.limegroup.gnutella;
 
 import com.sun.java.util.collections.Iterator;
+import com.sun.java.util.collections.List;
 import java.io.IOException;
 
 /**
@@ -286,11 +287,11 @@ public abstract class MessageRouter
                                         ConnectionManager manager)
     {
         // Note the use of initializedConnections only.
-        for(Iterator iterConnections =
-                manager.getInitializedConnections().iterator();
-            iterConnections.hasNext();  )
+        // Note that we have zero allocations here.
+        List list=manager.getInitializedConnections2();
+        for(int i=0; i<list.size(); i++) 
         {
-            ManagedConnection c = (ManagedConnection)iterConnections.next();
+            ManagedConnection c = (ManagedConnection)list.get(i);
             if(c != receivingConnection)
                 c.send(pingRequest);
         }
@@ -311,11 +312,11 @@ public abstract class MessageRouter
                                         ConnectionManager manager)
     {
         // Note the use of initializedConnections only.
-        for(Iterator iterConnections =
-                manager.getInitializedConnections().iterator();
-            iterConnections.hasNext();  )
+        // Note that we have zero allocations here.
+        List list=manager.getInitializedConnections2();
+        for(int i=0; i<list.size(); i++) 
         {
-            ManagedConnection c = (ManagedConnection)iterConnections.next();
+            ManagedConnection c = (ManagedConnection)list.get(i);
             if(c != receivingConnection)
                 c.send(queryRequest);
         }

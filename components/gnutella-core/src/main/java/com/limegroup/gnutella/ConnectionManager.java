@@ -243,6 +243,17 @@ public class ConnectionManager {
     }
 
     /**
+     * @requires returned value not modified
+     * @effects returns a list of this' initialized connections.  <b>This
+     *  exposes the representation of this, but is needed in some cases
+     *  as an optimization.</b>  All lookup values in the returned value
+     *  are guaranteed to run in linear time.
+     */
+    List getInitializedConnections2() {
+        return _initializedConnections;
+    }
+
+    /**
      * @return a clone of all of this' connections.
      * The iterator yields items in any order.  It <i>is</i> permissible
      * to modify this while iterating through the elements of this, but
