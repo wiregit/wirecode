@@ -859,17 +859,6 @@ public class Connection {
             return _messagesSupported.supportsHopsFlow();
         return -1;
     }
-    
-    /**
-     * Accessor for the headers received during the connection handshake.
-     * The headers contain vital properties about the connection.
-     *
-     * @return the <tt>HandshakeResponse</tt> wrapper for the headers
-     *  sent by this connection
-     */
-    public HandshakeResponse getHeaders() {
-        return HEADERS;
-    }
 
     /**
      * Returns whether or not this connection represents a local address.
