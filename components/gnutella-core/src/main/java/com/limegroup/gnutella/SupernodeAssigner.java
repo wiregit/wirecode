@@ -222,7 +222,8 @@ public final class SupernodeAssigner implements Runnable {
         //check if the state changed
         boolean isSupernodeCapable = isSupernodeCapable();
         if((isSupernodeCapable != _wasSupernodeCapable) &&
-            !SETTINGS.hasSupernodeOrClientnodeStatusForced()){
+            !SETTINGS.hasSupernodeOrClientnodeStatusForced() 
+            && !SETTINGS.hasShieldedClientSupernodeConnection()){
                 SETTINGS.setSupernodeMode(isSupernodeCapable);
                 _manager.reconnect();
         }
