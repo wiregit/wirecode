@@ -141,6 +141,9 @@ public class QueryRequest extends Message implements Serializable{
 	 * @return a new <tt>QueryRequest</tt> for the specified SHA1 value
 	 */
 	public static QueryRequest createRequery(URN sha1) {
+        if(sha1 == null) {
+            throw new NullPointerException("null sha1");
+        }
 		Set sha1Set = new HashSet();
 		sha1Set.add(sha1);
 		return new QueryRequest(newQueryGUID(true), (byte)6, 0, "\\", "", 
@@ -172,6 +175,9 @@ public class QueryRequest extends Message implements Serializable{
 	 * @return a new <tt>QueryRequest</tt> for the specified query
 	 */
 	public static QueryRequest createRequery(String query) {
+        if(query == null) {
+            throw new NullPointerException("null query");
+        }
 		return new QueryRequest(newQueryGUID(true), (byte)6, 0, query, "",
 								true, UrnType.ANY_TYPE_SET, EMPTY_SET,
 								!RouterService.acceptedIncomingConnection());
@@ -185,8 +191,11 @@ public class QueryRequest extends Message implements Serializable{
 	 * @return a new <tt>QueryRequest</tt> for the specified query
 	 */
 	public static QueryRequest createQuery(String query) {
-		return new QueryRequest(newQueryGUID(false), (byte)6, 0, query, "",
-								false, UrnType.ANY_TYPE_SET, EMPTY_SET, 
+        if(query == null) {
+            throw new NullPointerException("null query");
+        }
+		return new QueryRequest(newQueryGUID(false), (byte)6, 0, query, "", 
+                                false, UrnType.ANY_TYPE_SET, EMPTY_SET, 
 								!RouterService.acceptedIncomingConnection());
 	}
 
@@ -216,11 +225,36 @@ public class QueryRequest extends Message implements Serializable{
 	 */
 	public static QueryRequest createQuery(byte[] guid, String query, 
 										   String xmlQuery) {
+        if(query == null) {
+            throw new NullPointerException("null query");
+        }
+        if(xmlQuery == null) {
+            throw new NullPointerException("null xml query");
+        }
 		return new QueryRequest(guid, (byte)6, 0, query, xmlQuery, false,
 								UrnType.ANY_TYPE_SET, EMPTY_SET, 
-								!RouterService.acceptedIncomingConnection());
-								
+								!RouterService.acceptedIncomingConnection()); 
 	}
+
+    /**
+     * Creates a new query with the specified query key for use in 
+     * GUESS-style UDP queries.
+     *
+     * @param query the query string
+     * @param key the query key
+     */
+    public static QueryRequest 
+        createQueryKeyQuery(String query, QueryKey key) {
+        if(query == null) {
+            throw new NullPointerException("null query");
+        }
+        if(key == null) {
+            throw new NullPointerException("null query key");
+        }
+        return new QueryRequest(newQueryGUID(false), (byte)1, 0, query, "", 
+                                false, UrnType.ANY_TYPE_SET, EMPTY_SET,
+                                !RouterService.acceptedIncomingConnection());
+    }
 
     /**
      * Builds a new query from scratch but you can flag it as a Requery, if 
