@@ -12,6 +12,43 @@ import java.net.*;
  */
 public class NetworkUtilsTest extends com.limegroup.gnutella.util.BaseTestCase {
 
+    /**
+     * Array of private addresses for testing.
+     */
+    private static final String[] PRIVATE_ADDRESSES = {
+        "0.0.0.0",
+        "127.1.1.1",
+        "127.0.0.0",
+        "172.16.0.0",
+        "172.31.255.255",
+        "172.17.0.255",
+        "192.168.0.0",
+        "192.168.0.1",
+        "192.168.255.255",
+        "169.254.0.0",
+        "169.254.255.255",
+        //"240.0.0.0",
+    };
+
+    /**
+     * Array of public addresses for testing.
+     */
+    private static final String[] PUBLIC_ADDRESSES = {
+        "2.32.0.1",
+        "20.43.2.1",
+        "1.32.0.1",
+        "172.15.0.1",
+        "172.32.0.1",
+        "192.167.0.1",
+        "192.169.0.1",
+        "1.0.0.0",
+        "180.32.0.1",
+        "239.32.0.1",
+        "128.0.0.1",
+        "169.253.0.0",
+        "169.255.0.0",
+    };
+
     public NetworkUtilsTest(String name) {
         super(name);
     }
@@ -20,85 +57,51 @@ public class NetworkUtilsTest extends com.limegroup.gnutella.util.BaseTestCase {
         return buildTestSuite(NetworkUtilsTest.class);
     }  
 
+    /**
+     * Tests the method for checking if something's from a private
+     * network with a string argument.
+     */
+    public void testIsPrivateAddressWithString() throws Exception {
+        ConnectionSettings.LOCAL_IS_PRIVATE.setValue(true);
+        for(int i=0; i<PUBLIC_ADDRESSES.length; i++) {
+            String address = PUBLIC_ADDRESSES[i];
+            assertTrue("should not be a private address: "+address, 
+                       !NetworkUtils.isPrivateAddress(address));
+        }
+
+        for(int i=0; i<PRIVATE_ADDRESSES.length; i++) {
+            String address = PRIVATE_ADDRESSES[i];
+            assertTrue("should be a private address: "+address, 
+                       NetworkUtils.isPrivateAddress(address));
+        }
+    }
+
+    /**
+     * Tests the method for whether or not an address is private,
+     * with the address is bytes.
+     */
     public void testIsPrivateAddress() throws Exception {
         ConnectionSettings.LOCAL_IS_PRIVATE.setValue(true);
         byte[] address = new byte[4];
         
-        address = InetAddress.getByName("2.32.0.1").getAddress();
-        assertTrue("should not be a private address"+address,
-                   !NetworkUtils.isPrivateAddress(address));
+        for(int i=0; i<PUBLIC_ADDRESSES.length; i++) {
+            address = 
+                InetAddress.getByName(PUBLIC_ADDRESSES[i]).getAddress();
+            assertTrue("should not be a private address"+address,
+                       !NetworkUtils.isPrivateAddress(address));
+        }
 
-        address = InetAddress.getByName("1.32.0.1").getAddress();
-        assertTrue("should not be a private address"+address,
-                   !NetworkUtils.isPrivateAddress(address));
-
-        address = InetAddress.getByName("127.0.0.1").getAddress();
-        assertTrue("should be a private address"+address,
-                   NetworkUtils.isPrivateAddress(address));
-
-        address = InetAddress.getByName("127.2.0.1").getAddress();
-        assertTrue("should be a private address"+address,
-                   NetworkUtils.isPrivateAddress(address));
-
-        address = InetAddress.getByName("192.168.0.1").getAddress();
-        assertTrue("should be a private address"+address,
-                   NetworkUtils.isPrivateAddress(address));
-
-        address = InetAddress.getByName("172.16.0.1").getAddress();
-        assertTrue("should be a private address"+address,
-                   NetworkUtils.isPrivateAddress(address));
-
-        address = InetAddress.getByName("172.31.0.1").getAddress();
-        assertTrue("should be a private address"+address,
-                   NetworkUtils.isPrivateAddress(address));
-
-        address = InetAddress.getByName("169.254.0.1").getAddress();
-        assertTrue("should be a private address"+address,
-                   NetworkUtils.isPrivateAddress(address));
-
-        address = InetAddress.getByName("0.254.0.1").getAddress();
-        assertTrue("should be a private address"+address,
-                   NetworkUtils.isPrivateAddress(address));
-
-        //address = InetAddress.getByName("240.254.0.1").getAddress();
-        //assertTrue("should be a private address"+address,
-        //         NetworkUtils.isPrivateAddress(address));
-
-        //address = InetAddress.getByName("255.254.0.1").getAddress();
-        //assertTrue("should be a private address"+address,
-        //         NetworkUtils.isPrivateAddress(address));
-
-
-        // try boundary cases to make sure they pass
-        address = InetAddress.getByName("172.15.0.1").getAddress();
-        assertTrue("should not be a private address"+address,
-                   !NetworkUtils.isPrivateAddress(address));
-
-        address = InetAddress.getByName("172.32.0.1").getAddress();
-        assertTrue("should not be a private address"+address,
-                   !NetworkUtils.isPrivateAddress(address));
-
-        address = InetAddress.getByName("192.167.0.1").getAddress();
-        assertTrue("should not be a private address"+address,
-                   !NetworkUtils.isPrivateAddress(address));
-
-        address = InetAddress.getByName("192.169.0.1").getAddress();
-        assertTrue("should not be a private address"+address,
-                   !NetworkUtils.isPrivateAddress(address));
-
-        address = InetAddress.getByName("239.32.0.1").getAddress();
-        assertTrue("should not be a private address"+address,
-                   !NetworkUtils.isPrivateAddress(address));
-
-        address = InetAddress.getByName("1.32.0.1").getAddress();
-        assertTrue("should not be a private address"+address,
-                   !NetworkUtils.isPrivateAddress(address));
-
-        address = InetAddress.getByName("180.32.0.1").getAddress();
-        assertTrue("should not be a private address"+address,
-                   !NetworkUtils.isPrivateAddress(address));
+        for(int i=0; i<PRIVATE_ADDRESSES.length; i++) {
+            address = 
+                InetAddress.getByName(PRIVATE_ADDRESSES[i]).getAddress();
+            assertTrue("should be a private address"+address,
+                       NetworkUtils.isPrivateAddress(address));
+        }
     }
 
+    /**
+     * Test to make sure the method for checking for valid ports is working.
+     */
 	public void testNetworkUtilsPortCheck() {
 		int port = -1;
 		assertTrue("port should not be valid", !NetworkUtils.isValidPort(port));
