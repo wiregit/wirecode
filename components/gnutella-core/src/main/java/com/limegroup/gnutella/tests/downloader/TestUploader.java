@@ -12,7 +12,7 @@ public class TestUploader {
     /** Number of bytes uploaded */
     private volatile int totalUploaded;
     /** The throttle rate in kilobytes/sec */
-    private volatile int rate;    
+    private volatile float rate;    
     /**The number of bytes this uploader uploads before dying*/
     private volatile int stopAfter;
     /** This is stopped. */
@@ -56,8 +56,11 @@ public class TestUploader {
     }
     
     /** Sets the upload throttle rate 
-      * @param rate kilobytes/sec. */   
-    public void setRate(int rate) {
+     * Note: Even if the rate is set to zero the send method will send atleast 
+     * one byte per second, in order to detect socket closes. 
+     * @param rate kilobytes/sec. 
+     */   
+    public void setRate(float rate) {
         this.rate=rate;
     }
 
@@ -93,17 +96,28 @@ public class TestUploader {
             Socket s=null;
             try {
                 s = server.accept();
-                if (!stopped)
-                    handleRequest(s); //TODO: could use thread per request
+                if (!stopped) {
+                    //spawn thread to handle request
+                    final Socket mySocket=s;
+                    Thread runner=new Thread() {
+                            public void run() {                                
+                                try {
+                                    handleRequest(mySocket);
+                                } catch (IOException e) {
+                                    try {
+                                        mySocket.close();
+                                    } catch(IOException i) { }
+                                }
+                            }
+                        };
+                    runner.start();
+                }
             } catch (IOException e) {
-                if (s!=null)
-                    try {
-                        s.close();
-                    } catch(IOException i) {}
+                return;  //server socket closed.
             }
-        }
+        }      
     }
-    
+
     
     private void handleRequest(Socket socket) throws IOException {
         //Find the region of the file to upload.  If a Range request is present,
@@ -137,7 +151,7 @@ public class TestUploader {
                 stop=p.b;;
             }
         }        
-        //System.out.println(System.currentTimeMillis()+" "+name+" "+start+" - "+stop);
+        System.out.println(System.currentTimeMillis()+" "+name+" "+start+" - "+stop);
 
         //Send the data.
         send(output, start, stop);
@@ -159,13 +173,14 @@ public class TestUploader {
 		}
         str = "\r\n";
 		out.write(str.getBytes());
-        
+        out.flush();
+
         //Write data at throttled rate.  See NormalUploadState.  TODO: use
         //ThrottledOutputStream
         for (int i=start; i<stop; ) {
             //1 second write cycle
             long startTime=System.currentTimeMillis();
-            for (int j=0; j<(rate*1024) && i<stop; j++) {
+            for (int j=0; j<Math.max(1,(rate*1024)) && i<stop; j++) {
                 //if we are above the threshold, simulate an interrupted connection
                 if (stopAfter>-1 && totalUploaded>=stopAfter) {
                     stopped=true;

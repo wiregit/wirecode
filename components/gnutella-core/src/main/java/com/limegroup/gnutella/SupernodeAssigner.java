@@ -58,7 +58,7 @@ public final class SupernodeAssigner {
 	 * Constant for the number of milliseconds between the timer's calls
 	 * to its <tt>Runnable</tt>s.
 	 */
-	private final int TIMER_DELAY = 1000;
+	public static final int TIMER_DELAY = 1000;
 
 	/**
 	 * Constant for the number of seconds between the timer's calls

@@ -1071,8 +1071,7 @@ public class ManagedDownloader implements Downloader, Serializable {
                 throw e;
             }
             dloader.stopAt(interval.high);
-            //System.out.println("MANAGER: assigning white "
-            //                   +interval+" to "+dloader);
+            debug("MANAGER: assigning white "+interval+" to "+dloader);
         }
         else {
             //Split largest "gray" interval, i.e., steal part of another
@@ -1110,7 +1109,10 @@ public class ManagedDownloader implements Downloader, Serializable {
                     dloader=
                     findConnectable(files, getOverlapOffset(start), stop, busy);
                     dloader.stopAt(stop);
+                    debug("MANAGER: assigning stolen grey "
+                          +start+"-"+stop+" from "+biggest+" to "+dloader);
                     biggest.stopAt(start);
+                    biggest.stop();
                 }
                 else//less than MIN_SPLIT_SIZE...but we are doing fine...
                     throw new NoSuchElementException();
@@ -1124,9 +1126,9 @@ public class ManagedDownloader implements Downloader, Serializable {
                 findConnectable(files, getOverlapOffset(start), stop, busy);
                 dloader.stopAt(stop);
                 biggest.stopAt(start);
+                debug("MANAGER: assigning split grey "
+                      +start+"-"+stop+" from "+biggest+" to "+dloader);
             }
-            //System.out.println("MANAGER: assigning grey "+start
-            //                    +"-"+stop+" to "+dloader);
         }
                 
         //2) Asynchronously do download
@@ -1278,10 +1280,9 @@ public class ManagedDownloader implements Downloader, Serializable {
             corrupted=true;
             stop();
         } finally {
-            //int stop=downloader.getInitialReadingPoint()
-            //            +downloader.getAmountRead();
-            //System.out.println("    WORKER: terminating from "+downloader
-            //                   +" at "+stop);
+            int stop=downloader.getInitialReadingPoint()
+                        +downloader.getAmountRead();
+            debug("    WORKER: terminating from "+downloader+" at "+stop);
             //In order to reuse this location again, we need to know the
             //RemoteFileDesc.  TODO2: use measured speed if possible.
             RemoteFileDesc rfd=downloader.getRemoteFileDesc();

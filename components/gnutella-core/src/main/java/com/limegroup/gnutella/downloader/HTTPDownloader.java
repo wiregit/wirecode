@@ -478,6 +478,10 @@ public class HTTPDownloader {
 
 	////////////////////////////// Unit Test ////////////////////////////////////
 
+    public String toString() {
+        return "<"+_host+":"+_port+", "+getFileName()+">";
+    }
+
 
 //  	private HTTPDownloader(String str) {
 //  		ByteArrayInputStream stream = new ByteArrayInputStream(str.getBytes());

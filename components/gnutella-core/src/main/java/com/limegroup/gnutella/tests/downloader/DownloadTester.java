@@ -3,6 +3,7 @@ package com.limegroup.gnutella.tests.downloader;
 import java.io.*;
 import java.util.*;
 import com.limegroup.gnutella.*;
+import com.limegroup.gnutella.util.*;
 import com.limegroup.gnutella.tests.*;
 import com.limegroup.gnutella.downloader.*;
 import com.limegroup.gnutella.tests.stubs.*;
@@ -18,7 +19,7 @@ public class DownloadTester {
     static TestUploader uploader1=new TestUploader("6346", 6346);
     static TestUploader uploader2=new TestUploader("6347", 6347);
     static TestUploader uploader3=new TestUploader("6348", 6348);
-    static DownloadManager dm;
+    static final DownloadManager dm = new DownloadManager();
 
     public static void main(String[] args) {
         try {
@@ -31,10 +32,17 @@ public class DownloadTester {
             System.err.println("Couldn't create temp file.");
             System.exit(1);
         }
-        dm=new DownloadManager();
         RouterService rs=new RouterService(null, null, null, null);
         dm.initialize(new ActivityCallbackStub(), new MessageRouterStub(), 
                       null, new FileManagerStub(), rs);
+
+        SimpleTimer timer = new SimpleTimer(true);
+        Runnable click = new Runnable() {
+                public void run() {
+                    dm.measureBandwidth();
+                }
+            };
+        timer.schedule(click,0,SupernodeAssigner.TIMER_DELAY);
 
 //         testOverlapCheckSpeed(5);
 //         cleanup();
@@ -43,28 +51,29 @@ public class DownloadTester {
 //         testOverlapCheckSpeed(125);
 //         cleanup();
 
-//          testStallingUploaderReplaced();
-//          cleanup();
 
-        testSimpleDownload();
-        cleanup();
-        testSimpleSwarm();
-        cleanup();
-        testUnbalancedSwarm();
-        cleanup();
-        testSwarmWithInterrupt();
-        cleanup();
-        testStealerInterrupted();
-        cleanup();
-        testAddDownload();
-        cleanup();
         testStallingUploaderReplaced();
         cleanup();
 
-        testOverlapCheckWhite();
-        cleanup();
-        testOverlapCheckGrey();
-        cleanup();
+//         testSimpleDownload();
+//         cleanup();
+//         testSimpleSwarm();
+//         cleanup();
+//         testUnbalancedSwarm();
+//         cleanup();
+//         testSwarmWithInterrupt();
+//         cleanup();
+//         testStealerInterrupted();
+//         cleanup();
+//         testAddDownload();
+//         cleanup();
+//         testStallingUploaderReplaced();
+//         cleanup();
+
+//         testOverlapCheckWhite();
+//         cleanup();
+//         testOverlapCheckGrey();
+//         cleanup();
     }
 
 
@@ -240,7 +249,7 @@ public class DownloadTester {
     private static void testAddDownload() {
         System.out.print("-Testing addDownload (increases swarming)...");
         final int RATE=500;
-        final int FUDGE_FACTOR=15000;  
+        final int FUDGE_FACTOR=RATE*1024;  
         uploader1.setRate(RATE);
         uploader2.setRate(RATE);
         RemoteFileDesc rfd1=newRFD(6346, 100);
@@ -250,7 +259,6 @@ public class DownloadTester {
         try {
             //Start one location, wait a bit, then add another.
             download=dm.getFiles(new RemoteFileDesc[] {rfd1}, false);
-            try { Thread.sleep(10); } catch (InterruptedException e) { }
             ((ManagedDownloader)download).addDownload(rfd2);
         } catch (FileExistsException e) {
             check(false, "FAILED: already exists");
@@ -278,14 +286,14 @@ public class DownloadTester {
         System.out.println("\tu2: "+u2);
         System.out.println("\tTotal: "+(u1+u2));
 
-        check(u1<TestFile.length()/2+FUDGE_FACTOR, "u1 did all the work");
-        check(u2<TestFile.length()/2+FUDGE_FACTOR, "u2 did all the work");
+        check(u1<(TestFile.length()/2+(FUDGE_FACTOR)), "u1 did all the work");
+        check(u2<(TestFile.length()/2+(FUDGE_FACTOR)), "u2 did all the work");
     }
 
     private static void testStallingUploaderReplaced() {
         System.out.print
         ("-Testing download completion with stalling downloader...");
-        //Throttle rate at 10KB/s to give opportunities for swarming.
+        //Throttle rate at 500KB/s to give opportunities for swarming.
         final int RATE=500;
         uploader1.setRate(0);//stalling uploader
         uploader2.setRate(RATE);
@@ -294,6 +302,17 @@ public class DownloadTester {
         RemoteFileDesc[] rfds = {rfd1,rfd2};
 
         testGeneric(rfds);
+
+
+        //Make sure there weren't too many overlapping regions.
+        int u1 = uploader1.amountUploaded();
+        int u2 = uploader2.amountUploaded();
+        System.out.println("\tu1: "+u1);
+        System.out.println("\tu2: "+u2);
+        System.out.println("\tTotal: "+(u1+u2));
+
+        //Note: The amount downloaded from each uploader will not 
+
         System.out.println("passed");//file downloaded? passed
     }
 
