@@ -3,7 +3,6 @@ package com.limegroup.gnutella;
 import com.limegroup.gnutella.http.*; 
 import com.limegroup.gnutella.util.Random12;
 import com.limegroup.gnutella.util.FixedsizeForgetfulHashMap;
-import com.limegroup.gnutella.util.ForgetfulHashMap;
 import com.sun.java.util.collections.*;
 import java.net.*;
 import java.util.StringTokenizer;
@@ -211,33 +210,21 @@ public final class AlternateLocationCollection
 		
 		// only allow if location was generated under a day ago
 	    if ( size <= 75 ) {
-	        if ( diff > DAY )
-	            return false;
-	        else
-	            return true;
+	        return diff <= DAY;
 	    }
 	    
 	    // only allow if location was generated under 5 hours ago
 	    if ( size <= 150 ) {
-	        if ( diff > FIVEHOURS )
-	            return false;
-	        else
-	            return true;
+	        return diff <= FIVEHOURS;
 	    }
 	    
 	    // only allow if location was generated under 1 hour ago
 	    if ( size <= 300 ) {
-	        if ( diff > ONEHOUR )
-	            return false;
-	        else
-	            return true;
+	        return diff <= ONEHOUR;
         }
         
         // only allow if location was generated under a half hour ago
-	    if ( diff > HALFHOUR )
-	        return false;
-	    else
-	        return true;
+        return diff <= HALFHOUR;
     }
 	        
 	/**

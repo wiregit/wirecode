@@ -635,7 +635,7 @@ public final class AlternateLocation
 		
 		AlternateLocation al = (AlternateLocation)obj;		
 		if(URL.equals(al.URL)) {
-		    return this.TIME == al.TIME ? 0 : this.TIME <= al.TIME ? 1 : -1;
+		    return this.TIME < al.TIME ? 1 : this.TIME == al.TIME ? 0 : -1;
 		} 
 		if(isTimestamped() && al.isTimestamped()) {
 			if(this.TIME == al.TIME) {
