@@ -49,7 +49,8 @@ public class ConnectionManager {
 	 * described above, the definition of good constantly changes with 
 	 * advances in search architecture.
 	 */
-    public static final int RESERVED_GOOD_LEAF_CONNECTIONS = 15;  
+    public static final int RESERVED_GOOD_LEAF_CONNECTIONS = 
+        UltrapeerSettings.MAX_LEAVES.getValue() - 15;  
  
     /** Similar to RESERVED_GOOD_CONNECTIONS, but measures the number of slots
      *  allowed for bad leaf connections.  A value of zero means that only
