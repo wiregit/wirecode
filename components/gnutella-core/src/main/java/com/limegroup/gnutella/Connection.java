@@ -935,8 +935,9 @@ public class Connection {
        // }
     }
 
+    // overrides Object.toString
     public String toString() {
-        return "host=" + _host  + " port=" + _port; 
+        return "CONNECTION: host=" + _host  + " port=" + _port; 
     }
     
     
