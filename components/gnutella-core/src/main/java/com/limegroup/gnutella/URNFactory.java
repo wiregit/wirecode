@@ -5,7 +5,7 @@ import java.io.*;
 /**
  * This class is a factory for creating new <tt>URN</tt> instances.  It can
  * create <tt>URN</tt>s containing SHA1 hashes, for example.  It can also
- * do so from an HTTP get request line that includes a URN as long as the
+ * do so from an HTTP request line that includes a URN as long as the
  * request is in the format specified in RFC 2169.
  */
 public final class URNFactory {
@@ -70,23 +70,26 @@ public final class URNFactory {
 	}
 
 	/**
-	 * Creates a URN instance from the specified HTTP get request line.
-	 * The get request must be in the standard from, as specified in
-	 * RFC 2169.
+	 * Creates a URN instance from the specified HTTP request line.
+	 * The request must be in the standard from, as specified in
+	 * RFC 2169.  Note that com.limegroup.gnutella.Acceptor parses out
+	 * the first word in the request, such as "GET" or "HEAD."
 	 *
-	 * @param getLine the URN HTTP GET request of the form specified in
+	 * @param requestLine the URN HTTP GET request of the form specified in
 	 *  RFC 2169, for example:<p>
 	 * 
-	 * 	GET /uri-res/N2R?urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB HTTP/1.1
+	 * 	/uri-res/N2R?urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB HTTP/1.1
 	 * @return a new <tt>URN</tt> instance from the specified request, or 
 	 *  <tt>null</tt> if no <tt>URN</tt> could be created
+	 *
+	 * @see com.limegroup.gnutella.Acceptor
 	 */
-	public static URN createSHA1UrnFromGetRequest(final String getLine) 
+	public static URN createSHA1UrnFromHttpRequest(final String requestLine) 
 		throws IOException {
-		if(!URNFactory.isValidUrnGetRequest(getLine)) {
+		if(!URNFactory.isValidUrnGetRequest(requestLine)) {
 			throw new IOException("INVALID URN GET REQUEST");
 		}
-		String urnStr = URNFactory.extractUrnFromGetRequest(getLine);
+		String urnStr = URNFactory.extractUrnFromHttpRequest(requestLine);
 		if(urnStr == null) {
 			throw new IOException("COULD NOT CONSTRUCT URN");
 		}	   
@@ -108,7 +111,7 @@ public final class URNFactory {
 	 *
 	 * "/uri-res/N2R?urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB"
 	 */
-	public static URN createUrnFromServiceRequest(final String line) 
+	public static URN createSHA1UrnFromServiceRequest(final String line) 
 		throws IOException {
 		if(!URNFactory.isValidUriRes(line)) {
 			throw new IOException("INVALID URI-RES LINE");
@@ -171,17 +174,17 @@ public final class URNFactory {
 	 * a typical SHA1 request, this will return a 41 character URN, including
 	 * the 32 character hash value.
 	 *
-	 * @param getLine the <tt>String</tt> instance containing the get request
+	 * @param requestLine the <tt>String</tt> instance containing the get request
 	 * @return a <tt>String</tt> containing the URN for the get request, or 
 	 *  <tt>null</tt> if the request could not be read
 	 */
-	private static String extractUrnFromGetRequest(final String getLine) {
-		int qIndex     = getLine.indexOf(QUESTION_MARK) + 1;
-		int spaceIndex = getLine.indexOf(SPACE, qIndex);		
+	private static String extractUrnFromHttpRequest(final String requestLine) {
+		int qIndex     = requestLine.indexOf(QUESTION_MARK) + 1;
+		int spaceIndex = requestLine.indexOf(SPACE, qIndex);		
 		if((qIndex == -1) || (spaceIndex == -1)) {
 			return null;
 		}
-		return getLine.substring(qIndex, spaceIndex);
+		return requestLine.substring(qIndex, spaceIndex);
 	}
 
 	/**
@@ -206,49 +209,27 @@ public final class URNFactory {
 	 * whether or not the URN itself is valid -- the URN constructor
 	 * can do that, however.
 	 *
-	 * @param getLine the <tt>String</tt> instance containing the get request
+	 * @param requestLine the <tt>String</tt> instance containing the get request
 	 * @return <tt>true</tt> if the reques is valid, <tt>false</tt> otherwise
 	 */
-	private static boolean isValidUrnGetRequest(final String getLine) {
-		return (URNFactory.isValidSize(getLine) &&
-				URNFactory.isValidGet(getLine) &&
-				URNFactory.isValidUriRes(getLine) &&
-				URNFactory.isValidResolutionProtocol(getLine) && 
-				URNFactory.isValidHTTPSpecifier(getLine));				
+	private static boolean isValidUrnGetRequest(final String requestLine) {
+		return (URNFactory.isValidSize(requestLine) &&
+				URNFactory.isValidUriRes(requestLine) &&
+				URNFactory.isValidResolutionProtocol(requestLine) && 
+				URNFactory.isValidHTTPSpecifier(requestLine));				
 	}
 
 	/** 
 	 * Returns whether or not the specified get request meets size 
 	 * requirements.
 	 *
-	 * @param getLine the <tt>String</tt> instance containing the get request
+	 * @param requestLine the <tt>String</tt> instance containing the get request
 	 * @return <tt>true</tt> if the get request starts with "GET "
 	 *  (case-insensitive), <tt>false</tt> otherwise
 	 */
-	private static final boolean isValidSize(final String getLine) {
-		int size = getLine.length();
-		if((size != 67) && (size != 111)) {
-			return false;
-		}
-		return true;
-	}
-
-
-	/**
-	 * Returns whether or not the get request corresponds with the standard 
-	 * start of a get request.
-	 *
-	 * @param getLine the <tt>String</tt> instance containing the get request
-	 * @return <tt>true</tt> if the get request starts with "GET "
-	 *  (case-insensitive), <tt>false</tt> otherwise
-	 */
-	private static final boolean isValidGet(final String getLine) {
-		int firstSpace = getLine.indexOf(SPACE);
-		if(firstSpace == -1) {
-			return false;
-		}
-		String getStr = getLine.substring(0, firstSpace);
-		if(!getStr.equalsIgnoreCase(HTTPConstants.GET)) {
+	private static final boolean isValidSize(final String requestLine) {
+		int size = requestLine.length();
+		if((size != 63) && (size != 107)) {
 			return false;
 		}
 		return true;
@@ -258,20 +239,20 @@ public final class URNFactory {
 	 * Returns whether or not the get request corresponds with the standard 
 	 * uri-res request
 	 *
-	 * @param getLine the <tt>String</tt> instance containing the get request
+	 * @param requestLine the <tt>String</tt> instance containing the get request
 	 * @return <tt>true</tt> if the get request includes the standard "uri-res"
 	 *  (case-insensitive) request, <tt>false</tt> otherwise
 	 */
-	private static final boolean isValidUriRes(final String getLine) {
-		int firstSlash = getLine.indexOf(SLASH);
+	private static final boolean isValidUriRes(final String requestLine) {
+		int firstSlash = requestLine.indexOf(SLASH);
 		if(firstSlash == -1) {
 			return false;
 		}
-		int secondSlash = getLine.indexOf(SLASH, firstSlash+1);
+		int secondSlash = requestLine.indexOf(SLASH, firstSlash+1);
 		if(secondSlash == -1) {
 			return false;
 		}
-		String uriStr = getLine.substring(firstSlash+1, secondSlash);
+		String uriStr = requestLine.substring(firstSlash+1, secondSlash);
 		if(!uriStr.equalsIgnoreCase(HTTPConstants.URI_RES)) {
 			return false;
 		}
@@ -283,16 +264,16 @@ public final class URNFactory {
 	 * line is valid.  We currently only support N2R, which specifies "Given 
 	 * a URN, return the named resource."
 	 *
-	 * @param getLine the <tt>String</tt> instance containing the get request
+	 * @param requestLine the <tt>String</tt> instance containing the get request
 	 * @return <tt>true</tt> if the resolution protocol is valid, <tt>false</tt>
 	 *  otherwise
 	 */
-	private static boolean isValidResolutionProtocol(final String getLine) {
-		int nIndex = getLine.indexOf(TWO);
+	private static boolean isValidResolutionProtocol(final String requestLine) {
+		int nIndex = requestLine.indexOf(TWO);
 		if(nIndex == -1) {
 			return false;
 		}
-		String n2r = getLine.substring(nIndex-1, nIndex+3);
+		String n2r = requestLine.substring(nIndex-1, nIndex+3);
 
 		// we could add more protocols to this check
 		if(!n2r.equalsIgnoreCase(HTTPConstants.NAME_TO_RESOURCE)) {
@@ -305,16 +286,16 @@ public final class URNFactory {
 	 * Returns whether or not the HTTP specifier for the URN get request
 	 * is valid.
 	 *
-	 * @param getLine the <tt>String</tt> instance containing the get request
+	 * @param requestLine the <tt>String</tt> instance containing the get request
 	 * @return <tt>true</tt> if the HTTP specifier is valid, <tt>false</tt>
 	 *  otherwise
 	 */
-	private static boolean isValidHTTPSpecifier(final String getLine) {
-		int spaceIndex = getLine.lastIndexOf(SPACE);
+	private static boolean isValidHTTPSpecifier(final String requestLine) {
+		int spaceIndex = requestLine.lastIndexOf(SPACE);
 		if(spaceIndex == -1) {
 			return false;
 		}
-		String httpStr = getLine.substring(spaceIndex+1);
+		String httpStr = requestLine.substring(spaceIndex+1);
 		if(!httpStr.equalsIgnoreCase(HTTPConstants.HTTP10) &&
 		   !httpStr.equalsIgnoreCase(HTTPConstants.HTTP11)) {
 			return false;
