@@ -21,6 +21,13 @@ public class RouteErrorStat extends AdvancedStatistic {
 			ALL_ROUTE_ERRORS.incrementStat();
 		}
 	}
+
+    private static class QueryReplyRouteErrorStat 
+        extends GeneralRouteErrorStat {
+        public void incrementStat() {
+            QUERY_REPLY_ROUTE_ERRORS.incrementStat();
+        }
+    }
 	
 	/**
 	 * <tt>Statistic</tt> for all route errors.
@@ -45,4 +52,18 @@ public class RouteErrorStat extends AdvancedStatistic {
 	 */
 	public static final Statistic PUSH_REQUEST_ROUTE_ERRORS = 
 	    new GeneralRouteErrorStat();
+
+	/**
+	 * <tt>Statistic</tt> for Gnutella query reply routing errors from
+     * hard kilobyte limit.
+	 */
+	public static final Statistic HARD_LIMIT_QUERY_REPLY_ROUTE_ERRORS = 
+	    new QueryReplyRouteErrorStat();
+
+	/**
+	 * <tt>Statistic</tt> for Gnutella query reply routing errors from
+     * not finding a route.
+	 */
+	public static final Statistic NO_ROUTE_QUERY_REPLY_ROUTE_ERRORS = 
+	    new QueryReplyRouteErrorStat();
 }
