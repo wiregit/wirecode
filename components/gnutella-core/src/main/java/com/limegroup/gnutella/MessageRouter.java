@@ -355,7 +355,7 @@ public abstract class MessageRouter
         }
     }
 
-/**
+    /**
      * Broadcasts the query request to all initialized connections that
      * are not the receivingConnection, setting up the routing
      * to the designated QueryReplyHandler.  This is called from the default
@@ -377,7 +377,9 @@ public abstract class MessageRouter
         List list=_manager.getInitializedConnections2();
         for(int i=0; i<list.size(); i++){
             ManagedConnection c = (ManagedConnection)list.get(i);
-            c.send(queryRequest);
+            if (c != receivingConnection) {
+                c.send(queryRequest);
+            }
         }
         
         //use query routing to route queries to client connections
