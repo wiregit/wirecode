@@ -1750,7 +1750,8 @@ public class ConnectionManager {
                 // already checked our connection, check to make sure the
                 // user's internet connection is live.
                 long curTime = System.currentTimeMillis();
-                if(_connectionAttempts > 40 && 
+                if(!isConnected() &&
+                   _connectionAttempts > 40 && 
                    ((curTime - _lastSuccessfulConnect)>2000) &&
                    ((curTime - _lastConnectionCheck)>120000)) {
                     _connectionAttempts = 0;
