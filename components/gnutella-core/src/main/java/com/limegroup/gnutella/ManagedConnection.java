@@ -50,7 +50,8 @@ public class ManagedConnection
     /** The timeout to use when connecting, in milliseconds.  This is NOT used
      *  for bootstrap servers.  */
     private static final int CONNECT_TIMEOUT=4000;  //4 seconds
-    /** The total amount of upstream messaging bandwidth for ALL connections. */
+    /** The total amount of upstream messaging bandwidth for ALL connections
+     *  in BYTES (not bits) per second. */
     private static final int TOTAL_OUTGOING_MESSAGING_BANDWIDTH=15000;
 
     private MessageRouter _router;
