@@ -25,7 +25,7 @@ public abstract class VendorMessage extends Message {
     protected static final byte[] F_BEAR_VENDOR_ID = {(byte) 66, (byte) 69,
                                                       (byte) 65, (byte) 82};
     protected static final byte[] F_GTKG_VENDOR_ID = {(byte) 71, (byte) 84,
-                                                      (byte) 75, (byte) 72};
+                                                      (byte) 75, (byte) 71};
     protected static final byte[] F_NULL_VENDOR_ID = {(byte) 0, (byte) 0,
                                                       (byte) 0, (byte) 0};
 
