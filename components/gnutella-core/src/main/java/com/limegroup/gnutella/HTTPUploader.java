@@ -31,6 +31,8 @@ public class HTTPUploader implements Runnable {
      */
     private static List /* of PushRequestedFile */ failedPushes=
         Collections.synchronizedList(new LinkedList());
+    private static List /* of PushRequestedFile */ attemptingPushes=
+        Collections.synchronizedList(new LinkedList());
     /** The maximum time in SECONDS after an unsuccessful push until we will
      *  try the push again.  This should be larger than the 15+4*30=135 sec
      *  window in which Gnotella resends pushes by default */
@@ -41,6 +43,9 @@ public class HTTPUploader implements Runnable {
      *  throttled uploads.  LOCKING: obtain uploadsCountLock first. */
     private static volatile int uploadCount=0;
     private static Object uploadCountLock=new Object();
+    private boolean       uploadCountIncremented = false;
+	private boolean       limitExceeded  = false;
+	private boolean       _isPushAttempt = false;
 
 
     //////////// Initialized in Constructors ///////////
@@ -49,7 +54,8 @@ public class HTTPUploader implements Runnable {
     public static final int ERROR = 2;
     public static final int COMPLETE = 3;
     /** One of NOT_CONNECTED, CONNECTED, ERROR, COMPLETE */
-    private int _state;
+    private int    _state;
+	private String _stateString=null;
     /** True if the connection is server-side,
      *  false if client-side (actively establishes connection). */
     private boolean _isServer;
@@ -170,6 +176,7 @@ public class HTTPUploader implements Runnable {
         _amountRead = 0;
         _priorAmountRead = 0;
         _clientGUID=guidString;
+		_isPushAttempt = true;
 
         synchronized (failedPushes) {
             //First remove all files that were pushed more than a few
@@ -197,6 +204,22 @@ public class HTTPUploader implements Runnable {
                 }
             }
         }
+		// Check for and add attempted push for this file
+        synchronized (attemptingPushes) {
+            //Now see if we are attempting to pus this now
+            Iterator iter=attemptingPushes.iterator();
+            PushedFile thisFile=new PushedFile(_host, _port, _index);
+            while (iter.hasNext()) {
+                PushedFile pf=(PushedFile)iter.next();
+                if (pf.equals(thisFile)) {
+                    _state = ERROR;
+                    break;
+                }
+            }
+			if ( _state != ERROR ) {
+                attemptingPushes.add(thisFile);
+			}
+        }
     }
 
     /**
@@ -215,17 +238,17 @@ public class HTTPUploader implements Runnable {
         } catch (SecurityException e) {
             throw new IOException();
         }
+
         _ostream=_socket.getOutputStream();
         BufferedWriter out=new BufferedWriter(new OutputStreamWriter(_ostream));
 
-        //2. Send GIV
+        //3. Send GIV
         Assert.that(_filename!=null);
         String give="GIV "+_index+":"+_clientGUID+"/"+_filename+"\n\n";
         out.write(give);
         out.flush();
-//System.out.println("Push :"+_filename);
 
-        //3. Wait for   "GET /get/0/sample.txt HTTP/1.0"
+        //4. Wait for   "GET /get/0/sample.txt HTTP/1.0"
         //   But use timeouts and don't wait too long.
         //   This code is stolen from HTTPManager.
         //   It should really be factored into some method.
@@ -261,6 +284,15 @@ public class HTTPUploader implements Runnable {
             int index = java.lang.Integer.parseInt(parse[1]);
             if (index!=_index)
             throw new IOException();
+
+			//2. Check for upload overload
+			if ( limitExceeded = testAndIncrementUploadCount() )
+			{ 
+				//send 503 Limit Exceeded Headers
+				doLimitReachedAfterConnect();
+				throw new IOException();
+			}
+
         } catch (IndexOutOfBoundsException e) {
             throw new IOException();
         } catch (NumberFormatException e) {
@@ -395,6 +427,13 @@ public class HTTPUploader implements Runnable {
                 try {
                     connect();
                 } catch (IOException e) {
+					// If the connect failed due to max uploads
+					// record this and don't add to the failedPushes
+					if ( limitExceeded ) {
+						_stateString = "Try Again Later";
+                        throw e;
+					}
+
                     //If we couldn't connect, make sure we don't try to push
                     //this file again in the future.
                     synchronized (failedPushes) {
@@ -404,34 +443,51 @@ public class HTTPUploader implements Runnable {
                 }
                 _state = CONNECTED;
             }
-            //2. Actually do the transfer.
-			boolean limitExceeded = false;
-            try {
-                synchronized(uploadCountLock) 
+
+            //2. Check for upload room for non-pushes
+			if ( ! uploadCountIncremented ) // Pushes have already been handled
+			{
+			    if ( testAndIncrementUploadCount() )
 				{
-                    if ( getUploadCount() >=
-                         SettingsManager.instance().getMaxUploads() )
-				        limitExceeded = true;
-					else 
-				        uploadCount++; 
-//System.out.println("Count :" +uploadCount + "  :"+_filename + "  Limit:"+limitExceeded + " Set:"+ SettingsManager.instance().getMaxUploads() );
-				}
-				if ( limitExceeded )
 				    doLimitReached(_socket);//send 503 Limit Exceeded Headers
-				else
-                    doUpload();             //sends headers via writeHeader
-            } finally {
-				if ( !limitExceeded )
-                    synchronized(uploadCountLock) { uploadCount--; }
-            }
-            _state = COMPLETE;
+            		throw new IOException();
+				}
+			}
+
+            //3. Actually do the transfer.
+			if ( uploadCountIncremented )
+			{
+				doUpload();             //sends headers via writeHeader
+            	_state = COMPLETE;
+			}
         } catch (IOException e) {
             _state = ERROR;
         } finally {
+			if ( uploadCountIncremented )
+                synchronized(uploadCountLock) { uploadCount--; }
+			if ( _isPushAttempt )
+			    cleanupAttemptedPush();
             shutdown();
             _callback.removeUpload(this);
         }
     }
+
+	private void cleanupAttemptedPush()
+	{
+        Iterator iter;
+        synchronized (attemptingPushes) {
+            //Now see if we are attempting to push this now
+            iter=attemptingPushes.iterator();
+            PushedFile thisFile=new PushedFile(_host, _port, _index);
+            while (iter.hasNext()) {
+                PushedFile pf=(PushedFile)iter.next();
+                if (pf.equals(thisFile)) {
+                    iter.remove();
+                    break;
+                }
+            }
+        }
+	}
 
     public void doUpload() throws IOException {
         writeHeader();
@@ -539,6 +595,31 @@ public class HTTPUploader implements Runnable {
 		return uploadCount;
 	}
 
+	/**
+	 *  Increment the uploadCount if the limit has not been exceeded.
+	 *  Record whether this is an active upload.
+	 *  Return true if the limit has been exceeded.  
+	 */
+    public boolean testAndIncrementUploadCount()
+	{
+		boolean limitExceeded;
+		synchronized(uploadCountLock) 
+		{
+			if ( getUploadCount() >=
+				 SettingsManager.instance().getMaxUploads() )
+			{
+				limitExceeded = true;
+			}
+			else 
+			{
+				uploadCount++; 
+				uploadCountIncremented = true;
+				limitExceeded = false;
+			}
+		}
+		return(limitExceeded);
+	}
+
     private String getMimeType() {         /* eventually this method should */
         String mimetype;                /* determine the mime type of a file */
         mimetype = "application/binary"; /* fill in the details of this later */
@@ -592,6 +673,31 @@ public class HTTPUploader implements Runnable {
         }
     }
 
+    /**
+     *   Handle too many upload requests after push has connected
+     */
+    public void doLimitReachedAfterConnect() {
+        
+        /* Sends a 503 Service Unavailable message */
+        try {
+            /* is this the right format? */
+            String str;
+            String errMsg = "Server busy.  Too many active downloads.";
+            str = "3 Upload limit reached\r\n";
+            _ostream.write(str.getBytes());
+            str = "\r\n";
+            _ostream.write(str.getBytes());
+            _ostream.write(errMsg.getBytes());
+            _ostream.flush();
+        } catch (Exception e) {
+        }
+        try {
+            _ostream.close();
+            _socket.close();
+        } catch (Exception e) {
+        }
+    }
+
 
     public void shutdown()
     {
@@ -611,6 +717,10 @@ public class HTTPUploader implements Runnable {
 
     public int getState() {
         return _state;
+    }
+
+    public String getStateString() {
+        return _stateString;
     }
 
     ///** Unit test for timestamp stuff. */
@@ -691,7 +801,7 @@ public class HTTPUploader implements Runnable {
         }
 
         public String toString() {
-            return "<"+host+", "+index+", "+index+">";
+            return "<"+host+", "+port+", "+index+",  "+time+">";
         }
     }
 }

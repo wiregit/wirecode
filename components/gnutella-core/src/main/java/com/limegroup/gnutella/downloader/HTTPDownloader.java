@@ -24,6 +24,8 @@ public class HTTPDownloader implements Runnable {
     public static final int REQUESTING    = 4;
     public static final int QUEUED        = 5;
 
+    private static final String TryAgainLater = "Try Again Later";
+
 
     private InputStream _istream;
     private String _filename;
@@ -258,7 +260,7 @@ public class HTTPDownloader implements Runnable {
             else if ( str != null && str.indexOf(" 503 ") > 0 )
             {
                 _state = ERROR;
-                _stateString = "Try Again Later";
+                _stateString = TryAgainLater;
                 return;
             }
             sendPushRequest();
@@ -276,6 +278,10 @@ public class HTTPDownloader implements Runnable {
 
     public void initThree() {
 
+		// Record a try again later case
+        boolean noPreExistingFile = (_stateString == TryAgainLater);
+		    
+
         // Reset any error message
         _stateString = null;
 
@@ -284,7 +290,7 @@ public class HTTPDownloader implements Runnable {
         String pathname = _downloadDir + _filename;
         File myFile = new File(pathname);
 
-        if (!myFile.exists()) {
+        if ( !myFile.exists() && !noPreExistingFile ) {
             // allert an error
             _stateString = "Resumed File Not Found";
             _state = ERROR;
@@ -295,7 +301,11 @@ public class HTTPDownloader implements Runnable {
 
         String furl = "/get/" + String.valueOf(_index) + "/" + _filename;
 
-        long start = myFile.length();
+        long start;
+        if ( noPreExistingFile ) 
+            start = 0;
+		else
+            start = myFile.length();
 
         String startRange = java.lang.String.valueOf(start);
 
@@ -604,7 +614,7 @@ public class HTTPDownloader implements Runnable {
                 if ( str.equals("3") || 
                      str.startsWith("3 Upload limit reached") )
                 {
-                    _stateString = "Try Again Later";
+                	_stateString = TryAgainLater;
                     _state = ERROR;
                     return;
                 }
@@ -666,7 +676,6 @@ public class HTTPDownloader implements Runnable {
             requested.remove(savedPRF);
 
         try {
-            _istream.close();
             _fos.close();
             _socket.close();
         } catch (Exception e) {

@@ -129,9 +129,11 @@ public class StandardMessageRouter
     {
         // Ignore excess upload requests
         //if (_callback.getNumUploads() >=
+/*
         if (HTTPUploader.getUploadCount() >=
                 SettingsManager.instance().getMaxUploads())
             return;
+*/
 
         // Unpack the message
         String host = new String(pushRequest.getIP());
