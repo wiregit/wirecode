@@ -473,8 +473,6 @@ public abstract class MessageRouter
     {
         ReplyHandler replyHandler =
             _queryRouteTable.getReplyHandler(queryReply.getGUID());
-        System.out.println("Received QueryReply. Reply Handler=" 
-            + replyHandler);
 
         if(replyHandler != null)
         {
