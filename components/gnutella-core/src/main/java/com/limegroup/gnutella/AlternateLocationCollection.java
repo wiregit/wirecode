@@ -20,11 +20,12 @@ public final class AlternateLocationCollection
 	/**
 	 * <tt>Map</tt> of <tt>AlternateLocation</tt> instances that map to
 	 * <tt>AlternateLocation</tt> instances.  
-     * LOCKING: obtain this' monitor
+     * LOCKING: obtain LOCATIONS monitor when iterating -- otherwise 
+	 *          it's synchronized on its own
      * INVARIANT: _alternateLocations.get(k)==k
-     * TODO: shouldn't this just be s a sorted set?
 	 */
-	private SortedMap _alternateLocations;
+	private final SortedMap LOCATIONS = 
+		Collections.synchronizedSortedMap(new TreeMap());
 
     /**
      * SHA1 <tt>URN</tt> for this collection.
@@ -71,7 +72,10 @@ public final class AlternateLocationCollection
 				if(alc == null) {
 					alc = new AlternateLocationCollection(al.getSHA1Urn());
 				}
-                alc.addAlternateLocation(al);
+
+				if(al.getSHA1Urn().equals(alc.getSHA1Urn())) {
+					alc.addAlternateLocation(al);
+				}
 			} catch(IOException e) {
 				continue;
 			}
@@ -114,33 +118,33 @@ public final class AlternateLocationCollection
 	 *  being added does not have a SHA1 urn or if the SHA1 urn does not match
 	 *  the urn for this collection
 	 */
-	public synchronized void addAlternateLocation(AlternateLocation al) {
+	public void addAlternateLocation(AlternateLocation al) {
 		URN sha1 = al.getSHA1Urn();
 		if(!sha1.equals(SHA1)) {
 			throw new IllegalArgumentException("SHA1 does not match");
 		}
-		createMap();
-
 
 		URL url = al.getUrl();
-		Set keySet = _alternateLocations.keySet();
-		Iterator iter = keySet.iterator();
-		while(iter.hasNext()) {
-			AlternateLocation curAl = (AlternateLocation)iter.next();
-			URL curUrl = curAl.getUrl();
-			
-			// make sure we don't store multiple alternate locations
-			// for the same url
-			if(curUrl.equals(url)) {
-				// this checks the date
-				int comp = curAl.compareTo(al);
-				if(comp  > 0) {
-					// the AlternateLocation argument is newer than the 
-					// existing one with the same URL
-					_alternateLocations.remove(curAl);
-					break;
-				} else {
-					return;
+		Set keySet = LOCATIONS.keySet();
+		synchronized(LOCATIONS) {
+			Iterator iter = keySet.iterator();
+			while(iter.hasNext()) {
+				AlternateLocation curAl = (AlternateLocation)iter.next();
+				URL curUrl = curAl.getUrl();
+				
+				// make sure we don't store multiple alternate locations
+				// for the same url
+				if(curUrl.equals(url)) {
+					// this checks the date
+					int comp = curAl.compareTo(al);
+					if(comp  > 0) {
+						// the AlternateLocation argument is newer than the 
+						// existing one with the same URL
+						LOCATIONS.remove(curAl);
+						break;
+					} else {
+						return;
+					}
 				}
 			}
 		}
@@ -148,13 +152,13 @@ public final class AlternateLocationCollection
 		// at the end of the map because they have the oldest possible
 		// date according to the date class, namely:
 		// January 1, 1970, 00:00:00 GMT.
-		_alternateLocations.put(al, al);
+		LOCATIONS.put(al, al);
 
 		// if the collection of alternate locations is getting too big,
 		// remove the last element (the least desirable alternate location)
 		// from the Map
-		if(_alternateLocations.size() > 100) {
-			_alternateLocations.remove(_alternateLocations.lastKey());
+		if(LOCATIONS.size() > 100) {
+			LOCATIONS.remove(LOCATIONS.lastKey());
 		}
 	}
 
@@ -177,20 +181,20 @@ public final class AlternateLocationCollection
 		if(!alc.getSHA1Urn().equals(SHA1)) {
 			throw new IllegalArgumentException("SHA1 does not match");
 		}
-		Map map = alc._alternateLocations;
-		if(map == null) return;
+		Map map = alc.LOCATIONS;
 		Collection values = map.values();
-		Iterator iter = values.iterator();
-		while(iter.hasNext()) {
-			AlternateLocation curLoc = (AlternateLocation)iter.next();
-			this.addAlternateLocation(curLoc);
+		synchronized(map) { // we must synchronize iteration over the map
+			Iterator iter = values.iterator();
+			while(iter.hasNext()) {
+				AlternateLocation curLoc = (AlternateLocation)iter.next();
+				this.addAlternateLocation(curLoc);
+			}
 		}
 	}
 
 	// implements the AlternateLocationCollector interface
-	public synchronized boolean hasAlternateLocations() {
-		if(_alternateLocations == null) return false;
-		return !_alternateLocations.isEmpty();
+	public boolean hasAlternateLocations() {
+		return !LOCATIONS.isEmpty();
 	}
 
 	/**
@@ -200,19 +204,24 @@ public final class AlternateLocationCollection
 	 * @return a new <tt>AlternateLocationCollection</tt> with the alternate 
 	 *  locations in alc but not in this
 	 */
-	public synchronized AlternateLocationCollection 
+	public AlternateLocationCollection 
 		diffAlternateLocationCollection(AlternateLocationCollection alc) {
         if(alc==null) {
             throw new NullPointerException("alc is null");
         }
 		AlternateLocationCollection nalc = new AlternateLocationCollection(SHA1);
+
+		// don't need to synchronize here because the values method returns
+		// a copy -- we're the only one that has it
 		Iterator iter = alc.values().iterator();
 		AlternateLocation value;
 		Iterator iter2;
 		AlternateLocation value2;
 		boolean  matches;
 		while (iter.hasNext()) {
-			value = (AlternateLocation) iter.next();
+			value = (AlternateLocation)iter.next();
+
+			// see above for why synchronizing here is unnecessary
             iter2 = values().iterator();
 			matches = false;
 
@@ -236,27 +245,12 @@ public final class AlternateLocationCollection
 	 *
 	 * @return a randomized <tt>Collection</tt> of <tt>AlternateLocation</tt>s
 	 */
-	public synchronized Collection values() {
-		if(_alternateLocations == null) {
-			return Collections.EMPTY_LIST;
-		}
-		List list = new ArrayList(_alternateLocations.values());
+	public Collection values() {
+		List list = new ArrayList(LOCATIONS.values());
 		Collections.shuffle(list);
 		return list;
 	}
 
-	/**
-	 * Constructs a synchronized map instance for the alternate locations
-	 * if it's not already created.
-	 */
-	private synchronized void createMap() {
-		if(_alternateLocations == null) {
-			// we use a TreeMap to both filter duplicates and provide
-			// ordering based on the timestamp
-			_alternateLocations = 
-			    Collections.synchronizedSortedMap(new TreeMap());
-		}
-	}
 
 	/**
 	 * Implements the <tt>HTTPHeaderValue</tt> interface.
@@ -268,15 +262,12 @@ public final class AlternateLocationCollection
 	 *  by commas, or the empty string if there are no alternate locations
 	 *  to report
 	 */	
-	public synchronized String httpStringValue() {
-		// if there are no alternate locations, simply return the empty
-		// string
-		if(_alternateLocations == null) return "";
-
+	public String httpStringValue() {
         // TODO: Could this be a performance issue??
-		List list = new LinkedList(_alternateLocations.values());
-		Collections.shuffle(list);
+		List list = new LinkedList(LOCATIONS.values());
         list = list.subList(0, list.size() >= 10 ? 10 : list.size());
+
+		// we have our own copy, so we don't need to synchronize
 		Iterator iter = list.iterator();
 		final String commaSpace = ", "; 
 		StringBuffer writeBuffer = new StringBuffer();
@@ -293,10 +284,7 @@ public final class AlternateLocationCollection
     // Implements AlternateLocationCollector interface -- 
     // inherit doc comment
 	public synchronized int numberOfAlternateLocations() { 
-        if(_alternateLocations == null) {
-			return 0;
-		}
-		return _alternateLocations.size();
+		return LOCATIONS.size();
     }
 
 	/**
@@ -306,20 +294,15 @@ public final class AlternateLocationCollection
 	 * @return the string representation of all alternate locations in 
 	 *  this collection
 	 */
-	public synchronized String toString() {
+	public String toString() {
 		StringBuffer sb = new StringBuffer();
 		sb.append("Alternate Locations: ");
-		if(_alternateLocations == null) {
-			sb.append("empty");
-		}
-		else {
-			synchronized(_alternateLocations) {
-				Iterator iter = _alternateLocations.values().iterator();
-				while(iter.hasNext()) {
-					AlternateLocation curLoc = (AlternateLocation)iter.next();
-					sb.append(curLoc.toString());
-					sb.append(" ");
-				}
+		synchronized(LOCATIONS) {
+			Iterator iter = LOCATIONS.values().iterator();
+			while(iter.hasNext()) {
+				AlternateLocation curLoc = (AlternateLocation)iter.next();
+				sb.append(curLoc.toString());
+				sb.append(" ");
 			}
 		}
 		return sb.toString();
