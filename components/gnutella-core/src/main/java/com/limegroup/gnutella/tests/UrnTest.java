@@ -97,6 +97,9 @@ public final class UrnTest extends TestCase {
 		}
 	}
 
+	/**
+	 * Tests that valid urn strings successfully construct new URN instances.
+	 */
 	public void testValidUrns() {
 		for(int i=0; i<VALID_URNS.length; i++) {
 			try {
@@ -108,6 +111,10 @@ public final class UrnTest extends TestCase {
 	}
 
 
+	/**
+	 * Tests the urn contructor that takes a string to make sure that invalid
+	 * string inputs fail properly.
+	 */
 	public void testInvalidUrns() {
 		boolean encounteredFailure = false;
 		for(int i=0; i<INVALID_URNS.length; i++) {
@@ -119,6 +126,9 @@ public final class UrnTest extends TestCase {
 		}
 	}
 
+	/**
+	 * Tests the URN constructor that takes a File instance.
+	 */
 	public void testUrnConstructionFromFiles() {
 		// TESTS FOR URN CONSTRUCTION FROM FILES, WITH SHA1 CALCULATION
 		File[] testFiles = new File("gui/lib").listFiles();
@@ -131,7 +141,7 @@ public final class UrnTest extends TestCase {
 				}
 				URN urn = URNFactory.createSHA1Urn(curFile);
 				assertTrue(urn.isSHA1());
-				assertTrue(urn.isUrn(urn.stringValue()));
+				assertTrue(urn.isUrn(urn.toString()));
 				assertTrue(urn.getTypeString().equals(URN.URN_SHA1+":"));
 				try {
 					URN newURN = URNFactory.createUrn(urn.toString());
@@ -145,6 +155,9 @@ public final class UrnTest extends TestCase {
 		}
 	}
 
+	/**
+	 * Tests the isUrnType method.
+	 */
 	public void testIsUrnTypeMethod() {
 		// TEST FOR isURNType method
 		String[] validURNTypes = {
@@ -174,6 +187,9 @@ public final class UrnTest extends TestCase {
 	}
 
 
+	/**
+	 * Tests the hashCode method.
+	 */
 	public void testHashCode() {
 		int[] hashCodes = new int[VALID_URNS.length];
 		for(int i=0; i<VALID_URNS.length; i++) {
@@ -193,6 +209,9 @@ public final class UrnTest extends TestCase {
 		}
 	}
 
+	/**
+	 * Tests the equals method.
+	 */
 	public void testEquals() {
 		URN curUrn;
 		for(int i=0; i<urns.length; i++) {
@@ -201,7 +220,7 @@ public final class UrnTest extends TestCase {
 			for(int j=0; j<urns.length; j++) {
 				if(i == j) {
 					try {
-						URN tempUrn = URNFactory.createUrn(urns[j].stringValue());
+						URN tempUrn = URNFactory.createUrn(urns[j].toString());
 						assertTrue(curUrn.equals(tempUrn));
 					} catch(IOException e) {
 						assertTrue(false);
@@ -214,6 +233,9 @@ public final class UrnTest extends TestCase {
 		}
 	}
 
+	/**
+	 * Tests the isSHA1 method.
+	 */
 	public void testIsSHA1Method() {
 		for(int i=0; i<sha1Urns.length; i++) {
 			assertTrue(sha1Urns[i].isSHA1());
