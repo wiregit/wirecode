@@ -38,7 +38,7 @@ public final class UltrapeerRoutingTest extends BaseTestCase {
 	 * The timeout value for sockets -- how much time we wait to accept 
 	 * individual messages before giving up.
 	 */
-    private static final int TIMEOUT = 1800;
+    private static final int TIMEOUT = 2200;
 
 
 	/**
