@@ -15,9 +15,9 @@ public class NDThread implements Runnable
 /** Contains the Graph/Network Structure
 *	Its 2_Dimensional in Nature (HashMap of HashMaps)
 * 	In the first dimension, Endpoints(host-port pairs) are stored.
-*	And corresponding to each Endpoint is another HashMap of Endpoints,
+*	And corresponding to each Endpoint is another HashSet of Endpoints,
 *	signifying the edges (endpoints to which it(endpoint in 1st dimension)
-*	is connected.
+*	is connected).
 */
 private Map graph;
 
@@ -39,10 +39,9 @@ private LinkedList hostQueue = null;
 Connection connection = null;
 
 /**
-*	HashMap (of EndPoints) to store the Endpoints that have been already visited
+*	The object that creates and manages all the NDThreads
 */
-private HashMap alreadyVisited = null;
-
+private NetworkDiscoverer parent;
 
 /**
 *	This is the time uptil which the thread should expect to receive 
@@ -58,17 +57,17 @@ private Endpoint endpoint = null;
 
 /** Default Constructor 
 *	Initializes various member fields to the arguments passed
+*	@see NDThread#parent
 *	@see NDThread#manager
 *	@see NDThread#graph
 *	@see NDThread#hostQueue
-*	@see NDThread#alreadyVisited
 */
-public NDThread(ConnectionManager manager, Map graph, LinkedList hostQueue, HashMap alreadyVisited)
+public NDThread(NetworkDiscoverer parent, ConnectionManager manager, Map graph, LinkedList hostQueue)
 {
+	this.parent = parent;
 	this.manager = manager;
 	this.graph = graph;
 	this.hostQueue = hostQueue;
-	this.alreadyVisited = alreadyVisited;
 }
 
 
@@ -134,9 +133,12 @@ try
 
 				
 				//Add info to the graph
+				synchronized(parent.graphMutex)
+				{
+				HashSet connectedNodes = (HashSet)graph.get(endpoint);
+				connectedNodes.add(remoteEndPoint);
+				}
 				
-
-				//see if an entry to the 
 			}
 			
 		}//end of if
@@ -202,12 +204,15 @@ private Connection getOpenedConnection() throws NoSuchElementException
 
 	//Check if we have already previously connected to this Endpoint
 	//In that case skip it
+	synchronized(parent.graphMutex)
+	{
 	if(graph.containsKey(e))
 	{
 		//We have already connected directly to this host.
 		//Skip it
 		//Continue to the beginning of the while loop
 		continue;
+	}
 	}
 
 	//So, open a connection and return it;
@@ -225,6 +230,14 @@ private Connection getOpenedConnection() throws NoSuchElementException
 
 		//Set the endpoint (member field) to this new endpoint
 		endpoint = e;
+
+		//Add this node to the graph
+		//Add an empty HashSet to store the nodes(Endpoints) this node(Endpoint) is 
+		//connected to
+		synchronized(parent.graphMutex)
+		{
+		graph.put(e, new HashSet());
+		}
 
 		//return the opened connection
 		return conn;
