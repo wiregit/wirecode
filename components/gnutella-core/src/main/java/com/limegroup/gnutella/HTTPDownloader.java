@@ -301,12 +301,15 @@ public class HTTPDownloader implements Runnable {
 	    initThree();
 	}
 	else 
-	    return;
+	    Assert.that(false, "Illegal state for download connection.");
 
 	 if (_state == CONNECTED) {
 	    doDownload();
 	    _callback.removeDownload(this);
+	 } else if (_state == ERROR) {
+	     _callback.removeDownload(this);
 	 }
+	 //TODO: what if in queued state?
     }
  
     public void resume() {
