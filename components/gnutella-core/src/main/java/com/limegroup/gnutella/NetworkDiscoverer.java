@@ -45,6 +45,7 @@ private HashMap alreadyVisited = (HashMap)Collections.synchronizedMap(new HashMa
 
 /** Default Constructor 
 *	Initializes the Graph thats gonna maintain Network Structure
+*	@see NetworkDiscoverer#graph
 */
 public NetworkDiscoverer()
 {

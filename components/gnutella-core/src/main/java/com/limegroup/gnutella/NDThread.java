@@ -43,6 +43,19 @@ Connection connection = null;
 */
 private HashMap alreadyVisited = null;
 
+
+/**
+*	This is the time uptil which the thread should expect to receive 
+*	PING replies (PONGS) after sending an initial PING
+*	After this much amount of time, the thread will not wait for PONGS
+*/
+private static final long TIME_TO_WAIT_FOR_PONGS = 5000; //5 seconds
+
+/**
+*	Endpoint to which this thread is connected
+*/
+private Endpoint endpoint = null;
+
 /** Default Constructor 
 *	Initializes various member fields to the arguments passed
 *	@see NDThread#manager
@@ -61,6 +74,12 @@ public NDThread(ConnectionManager manager, Map graph, LinkedList hostQueue, Hash
 
 public void run()
 {
+
+//A message object to store the current message received
+Message message = null;
+
+while(true)
+{
 try
 {
 
@@ -69,47 +88,76 @@ try
 	Const.TTL = (byte)2;
 
 
-/*
 	//Open connection to a host
 	connection = getOpenedConnection();
+
+	//Opening a connection also sends the first initial PING request to the
+	//client to which we opened connection
 		
 	
-	//Open a connection to the specified initial gnutella client
-	Connection connection =new Connection(manager, host, port);
-	Thread tc=new Thread(connection);
-	tc.setDaemon(true);
-	tc.start();
+	//Receive the PING replies
+	//till the specified TIME_TO_WAIT_FOR_PONGS
+	long startTime = (new Date()).getTime();
 
-	//Create a new ping message with TTL 2
-	Message message = new PingRequest((byte)2);
-
-
-	//Send the message
-	//connection.send(message);
-	//System.out.println("message sent " + message);
-
-	//Receive the messages
-	
-	while(true)
+	while(((new Date()).getTime() - startTime) < TIME_TO_WAIT_FOR_PONGS)
 	{
 		message = connection.receive();
 		if(message == null)
+		{
+			//Sleep for some time
+			//Dont waste CPU cycles by doing busy waiting
+			Thread.sleep(250); //sleep for 1/4th of a second
+
+			//continue to the beginning of the while loop
 			continue;
-		System.out.println("Message received " + message);	
-	}
-	
-*/
+		}	
+		//System.out.println("Message received " + message);	
 
-	//Send a ping request
-	
-	//get a response
+		//Check if the message is a PING reply
+		//no need to do anything with other messages
+		if(message instanceof PingReply)
+		{
+			byte[] guid = message.getGUID();	
+			Connection originator = manager.routeTable.get(guid);
 
+			//Check if the message is for me
+			if(originator == connection)
+			{
+				//Its PONG for me
+				//Get the info regarding the host who sent the reply
+
+				//Create a new EndPoint object (depicting the client from 
+				//where the response has come)
+
+				Endpoint remoteEndPoint = new Endpoint(((PingReply)message).getIP(),
+												((PingReply)message).getPort());
+
+				
+				//Add info to the graph
+				
+
+				//see if an entry to the 
+			}
+			
+		}//end of if
+		else 
+		{ 
+			//do nothing
+		}	
+		
+	}//end of inner while
+
+	//close the connection and proceed again
+	manager.remove(connection);
+	
 }
 catch(Exception e)
 {
 	e.printStackTrace();
 	System.exit(1);
 }
+
+}//end of outer while loop	
 }//end of run
 
 
@@ -152,10 +200,33 @@ private Connection getOpenedConnection() throws NoSuchElementException
 
 	//If came here, we have been able to find an Endpoint
 
+	//Check if we have already previously connected to this Endpoint
+	//In that case skip it
+	if(graph.containsKey(e))
+	{
+		//We have already connected directly to this host.
+		//Skip it
+		//Continue to the beginning of the while loop
+		continue;
+	}
+
 	//So, open a connection and return it;
 	try
 	{
+		//set TTL for the initial ping (that the Connection's constructor)
+		//is gonna send to 2.
+		Const.TTL = 2;
+
+		//open the connection
 		conn = new Connection(manager, e.hostname, e.port);
+		//If able to open the connection, IOException will occur at this point,
+		//and the next statements wont be executed. It will be caught by the
+		//exception handler
+
+		//Set the endpoint (member field) to this new endpoint
+		endpoint = e;
+
+		//return the opened connection
 		return conn;
 	}
 	catch(IOException ioe)
@@ -164,6 +235,9 @@ private Connection getOpenedConnection() throws NoSuchElementException
 		//We are in a while loop, and it should be able to find
 		//another active host:port pair (Endpoint)
 		//or will finally throw NoSuchElementException
+
+		//continue to the beginning of the while
+		continue;
 	}
 
 	}//end of while
