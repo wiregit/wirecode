@@ -110,16 +110,6 @@ public class RemoteFileDesc implements Serializable {
             && Arrays.equals(_clientGUID, other._clientGUID)
             && _speed==other._speed
             && _size==other._size;
-		return ((_host == null ? other._host == null : 
-				 _host.equals(other._host)) &&
-				(_port == other._port) &&
-				(_filename == null ? other._filename == null :
-				 _filename.equals(other._filename)) &&
-				(_index == other._index) &&
-				(_clientGUID == null ? other._clientGUID == null :
-				 Arrays.equals(_clientGUID, other._clientGUID)) &&
-				(_speed==other._speed) &&
-				(_size==other._size));
     }
 
     public String toString() {
