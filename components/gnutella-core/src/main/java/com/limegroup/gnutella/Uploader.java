@@ -26,14 +26,6 @@ public interface Uploader extends BandwidthTracker {
 	 */ 
 	public void stop();
     
-    /**
-     * Tells if the uploader thinks that the connection should be closed 
-     * after serving the request.
-     * @return true, if the uploader thinks that the connection should be closed 
-     * after serving the request, false otherwise
-     */
-    public boolean getCloseConnection();
-    
 	/**
 	 * returns the name of the file being uploaded.
 	 */
@@ -68,11 +60,7 @@ public interface Uploader extends BandwidthTracker {
      */
     public int getState();
 
-
-	public Socket connect() throws IOException;
 	public void start();
-	public void setState(int state);
-	public void setAmountUploaded(int amount);
 
 	/**
 	 * returns true if chat for the host is on, false if it is not.

@@ -181,7 +181,7 @@ public class UploadManager implements BandwidthTracker {
         }
 	}
     
-    private void doSingleUpload(Uploader uploader, String host,
+    private void doSingleUpload(HTTPUploader uploader, String host,
         int index) {
         long startTime=-1;
         //try {
@@ -260,8 +260,8 @@ public class UploadManager implements BandwidthTracker {
                                               final int port, 
 											  final int index, 
                                               final String guid) { 
-		final Uploader GIVuploader = new HTTPUploader(file, host, port, index, 
-                                                   guid, this, _fileManager);
+		final HTTPUploader GIVuploader = new HTTPUploader
+                         (file, host, port, index, guid, this, _fileManager);
         //Note: GIVuploader is just used to connect, and while connecting, 
         //the GIVuploader uploads the GIV message.
 
@@ -333,7 +333,8 @@ public class UploadManager implements BandwidthTracker {
      *  If uploader has exceeded its limits, places it in LIMIT_REACHED state.
      *  Notifies callback of this.
      *      @modifies _uploadsInProgress, uploader, _callback */
-	private synchronized void insertAndTest(Uploader uploader, String host) {
+	private synchronized void insertAndTest(HTTPUploader uploader, 
+                                                                String host) {
 		// add to the Map
 		insertIntoMapAndList(uploader, host);
 
