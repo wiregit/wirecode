@@ -37,7 +37,26 @@ public class ID3Editor{
         if (debugOn)
             System.out.println(out);
     }
-
+    
+    public boolean equals(Object o) {
+        if( o == this ) return true;
+        if( !(o instanceof ID3Editor) ) return false;
+        
+        ID3Editor other = (ID3Editor)o;
+        return matches(title_, other.title_) &&
+               matches(artist_, other.artist_) &&
+               matches(album_, other.album_) &&
+               matches(year_, other.year_) &&
+               matches(track_, other.track_) &&
+               matches(comment_, other.comment_) &&
+               matches(genre_, other.genre_);
+    }
+    
+    private boolean matches(final String a, final String b) {
+        if( a == null )
+            return b == null;
+        return a.equals(b);
+    }
 
     /** 
      * @return object[0] = (Integer) index just before beginning of tag=value, 
