@@ -19,20 +19,22 @@ import com.limegroup.gnutella.util.HashFunction;
 /**
  * A bloom filter factory that can create filters for direct locs and push locs
  * 
- * It assumes that each altloc hashes to a 12-bit digit, which allows us to have up to 
- * 4096 altlocs per mesh - which is plenty.
+ * The filter contains the hashes of the altlocs that are put in it.  It is flexible
+ * when it comes to the range of the hash function; that can even be changed on the fly
+ * although it is not recommended.
+ *
+ * The digest can store either pushlocs or direct altlocs, or both (not recommended).
  * 
- * In memory, those 4096 bits are stored as a BitSet, but on the network they are 
- * represented as list of values - i.e. each 3 bytes carry the hashes of two altlocs.
- * 
- * You can store either pushlocs or direct altlocs, or mix them (at your own risk).
- * 
- * 
- * On the wire, the digest is represented as a 3-byte header, and body.
- * The first byte gives the size of each element, and the next two bytes the number of elements.
- * The rest of the body is a list of elements, each one packed in size bytes.
- * Note: Whenever the default size of 12 bits/element is used, the class uses an optimized 
- * serialization, but it supports reading/writing to elements any size up to 24 bits. 
+ * In memory, the filter stored as a BitSet, but on the network it is 
+ * represented as list of values packed into a bit array. For example, if the hash function
+ * range is [0,2^12) each element will be represented with 12 bits, so every 3 bytes will
+ * have two elements in them. On the wire, that list is precedeed by a 3-byte header: 
+ * the first byte gives the size of each element, and the next two bytes the number of 
+ * elements.
+ *
+ * Note: Whenever the anticipated most common sizes of 8 or 12 bits/element is used, 
+ * an optimal serialization and deserialization is used. However, any size element up 
+ * to 24 bits is supported.
  */
 public class AltLocDigest implements BloomFilter {
 
@@ -58,9 +60,7 @@ public class AltLocDigest implements BloomFilter {
     }
     
     /**
-     * A BitSet storage for the values of the filter.
-     * When we have many entries, or need to do boolean algebra we use
-     * this representation.
+     * The backing BitSet.
      */
     private BitSet _values;
     
@@ -71,7 +71,8 @@ public class AltLocDigest implements BloomFilter {
     private int _elementSize;
     
     /**
-     * the mask to use by the hash functions - ensures the range stays within reasonable bounds
+     * the mask to use on the hash values - ensures the range stays within reasonable 
+     * bounds.  
      */
     private int _mask;
     
@@ -80,6 +81,9 @@ public class AltLocDigest implements BloomFilter {
      */
     private HashFunction _hasher;
     
+    /* (non-Javadoc)
+     * @see com.limegroup.gnutella.util.BloomFilter#add(java.util.Collection)
+     */
     public void add(Object o) {
         if (! (o instanceof AlternateLocation))
             throw new IllegalArgumentException ("trying to add a non-altloc to an altloc digest");
@@ -124,8 +128,7 @@ public class AltLocDigest implements BloomFilter {
     }
     
     /**
-     * @return a packed representation of hashes, where every 3 bytes represent
-     * two altlocs.
+     * @return a bitpacked representation of the list of hashes
      */
     public byte [] toBytes() {
         int maxElement = _values.length();
@@ -144,38 +147,15 @@ public class AltLocDigest implements BloomFilter {
         ret[0] = (byte)_elementSize;
         ByteOrder.short2leb((short)_values.cardinality(),ret,1);
         
-        // the two most common sizes will be 8 and 12 bits, so optimize those.
-        if (_elementSize == 8) {
-            int index =3;
-            for(int i=_values.nextSetBit(0); i>=0;i=_values.nextSetBit(i+1))
-                ret[index++]=(byte)i;
-            
-        } else if (_elementSize == 12) {
-            int index = 3;
-            boolean first = true;
-            for(int i=_values.nextSetBit(0); i>=0;i=_values.nextSetBit(i+1)){
-                if (first) {
-                    ret[index++] = (byte)((i & 0xFF0 ) >> 4);
-                    ret[index] = (byte)((i & 0xF) << 4);
-                    first = false;
-                } else {
-                    ret [index++] |= (byte)((i & 0xF00) >> 8);
-                    ret [index++] = (byte)(i & 0xFF);
-                    first = true;
-                }
-            }
-        } else {
-            // if its not 8 or 12 bits, serialize the slow way. 
-            BitSet tmp = new BitSet((ret.length-3)*8);
-            
-            int [] values = new int[_values.cardinality()];
-            int i=0;
-            for(int element=_values.nextSetBit(0); element >=0; 
-            		element=_values.nextSetBit(element+1)) 
-                values[i++]=element;
-            byte [] packed = DataUtils.bitPack(values,_elementSize);
-            System.arraycopy(packed,0,ret,3,packed.length);
-        }
+        int [] values = new int[_values.cardinality()];
+        int i=0;
+        for(int element=_values.nextSetBit(0); element >=0; 
+        		element=_values.nextSetBit(element+1)) 
+            values[i++]=element;
+        
+        byte [] packed = DataUtils.bitPack(values,_elementSize);
+        System.arraycopy(packed,0,ret,3,packed.length);
+        
         return ret;
     }
     
@@ -185,8 +165,8 @@ public class AltLocDigest implements BloomFilter {
     
     /**
      * parses a digest contained in the given byte array.  The resulting
-     * bloom filter does not have associated hash function with it, so use
-     * setPush or setDirect before using it.
+     * bloom filter does not have associated hash function with it, so
+     * make sure you use the appropriate type of altlocs with it. 
      * 
      * @throws IOException if input was invalid.
      */
@@ -265,7 +245,7 @@ public class AltLocDigest implements BloomFilter {
     }
     
     /**
-     * slow - use andNot whenver possible
+     * slow - use andNot whenever possible
      */
     public void invert() {
         for (int i = 0;i < _values.size();i++)
@@ -287,7 +267,13 @@ public class AltLocDigest implements BloomFilter {
     public void andNot(AltLocDigest other) {
         _values.andNot(other._values);
     }
-    
+   
+    /**
+     * Sets the range of the hash function to [0,2^size). 
+     * Can be used to shrink or expand an existing filter, but
+     * whether that will be successful depends on the hash function.
+     * Use with caution if the filter is not empty.
+     */
     public void setElementSize(int size) {
         _elementSize = size;
         for (int i=0;i < size;i++)

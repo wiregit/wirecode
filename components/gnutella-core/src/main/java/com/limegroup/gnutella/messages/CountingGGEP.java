@@ -25,6 +25,8 @@ public class CountingGGEP extends GGEP {
     public void putAndCompress(String key, byte[] value)
             throws IllegalArgumentException {
         super.putAndCompress(key, value);
+	// Note: this get() relies on the fact that the compressed value
+	// will be returned.
         value = get(key);
         _counter += KEY_OVERHEAD+VALUE_OVERHEAD+key.length()+value.length;
     }

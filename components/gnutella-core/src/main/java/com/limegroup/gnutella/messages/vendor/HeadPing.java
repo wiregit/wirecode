@@ -344,14 +344,6 @@ public class HeadPing extends VendorMessage {
 	    }
 	}
 	
-	/**
-	 * @return a location to which we can get back at the host, if it is firewalled.
-	 * null if not firewalled.
-	 */
-	public PushEndpoint getPushAddress() {
-	    return null;
-	}
-
 }
 
 /**

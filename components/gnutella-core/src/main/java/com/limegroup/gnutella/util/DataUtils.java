@@ -116,6 +116,33 @@ public final class DataUtils {
             retSize++;
         byte []ret = new byte[retSize];
         
+        // we can optimize if every element fits in a byte
+        if (size == 8) {
+            for(int i=0;i<values.length;i++)
+                ret[i]=(byte)values[i];
+            return ret;
+        }
+        
+        // we can optimize even if every element is 12 bits
+        if (size == 12) {
+            boolean first = true;
+            int index=0;
+            for(int j=0;j < values.length;j++){
+                int i = values[j];
+                if (first) {
+                    ret[index++] = (byte)((i & 0xFF0 ) >> 4);
+                    ret[index] = (byte)((i & 0xF) << 4);
+                    first = false;
+                } else {
+                    ret [index++] |= (byte)((i & 0xF00) >> 8);
+                    ret [index++] = (byte)(i & 0xFF);
+                    first = true;
+                }
+            }
+            return ret;
+        }
+        
+        // otherwise, do the slow way
         BitSet tmp = new BitSet(bitSize);
         int offset = 0;
         int mask = 1 << size-1;
