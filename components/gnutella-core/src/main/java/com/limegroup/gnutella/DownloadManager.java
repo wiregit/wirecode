@@ -244,6 +244,28 @@ public class DownloadManager implements BandwidthTracker {
     /* Adds the file named in qr to an existing downloader if appropriate.
      */
     public void handleQueryReply(QueryReply qr) {
+        // get them as RFDs....
+        RemoteFileDesc[] rfds = null;
+        try { 
+            rfds = qr.toRemoteFileDescArray();
+        }
+        catch (Exception e) {
+            debug(e);
+            rfds = new RemoteFileDesc[0];
+        }
+        
+        // right now i'm adding to active and waiting downloaders - this may not
+        // be the correct thing to do.
+        List downloaders = new ArrayList();
+        downloaders.addAll(active);
+        downloaders.addAll(waiting);
+        
+        for (int i = 0; i < rfds.length; i++) 
+            for (int j = 0; j < downloaders.size(); j++) {
+                ManagedDownloader currD = (ManagedDownloader)downloaders.get(j);
+                if (currD.conflicts(rfds[i]))
+                    currD.addDownload(rfds[i]);
+            }        
     }
 
 
