@@ -244,6 +244,13 @@ public final class HashTree implements HTTPHeaderValue, Serializable {
     }
     
     /**
+     * @return true if the DEPTH is ideal enough according to our standards.
+     */
+    public boolean isDepthGoodEnough() {
+        return DEPTH >= calculateDepth(FILE_SIZE);
+    }
+    
+    /**
      * Determines if this tree is better than another.
      *
      * A tree is considered better if the other's depth is not 'good',
