@@ -11,6 +11,10 @@ import com.limegroup.gnutella.util.*;
 import com.limegroup.gnutella.settings.*;
 import com.limegroup.gnutella.altlocs.*;
 import com.limegroup.gnutella.udpconnect.UDPConnection;
+import com.limegroup.gnutella.image.ImageManipulator;
+import com.limegroup.gnutella.image.ImageHandler;
+import java.awt.Image;
+import java.awt.image.BufferedImage;
 
 /**
  * Maintains state for an HTTP upload request.  This class follows the
@@ -179,33 +183,85 @@ public final class HTTPUploader implements Uploader {
 	 * @throws IOException if the file cannot be read from the disk.
 	 */
 	public void setFileDesc(FileDesc fd) throws IOException {
-	    if(fd == null) {
-	        File f = CommonUtils.getResourceFile(getFileName());
-	        if(f != null) {
-	            _fis = new BufferedInputStream(new FileInputStream(f));
-	            _fileSize = (int)f.length();
-	        } else {
-	            throw new IOException();
-            }
-            return;
-        }
-	    
-	    _fileDesc = fd;
-	    _fileSize = (int)fd.getSize();
-	    _fileName = fd.getName();
-	    // initializd here because we'll only write locs if a FileDesc exists
-	    // only initialize once, so we don't write out previously written locs
-	    if( _writtenLocs == null )
-	        _writtenLocs = new HashSet(); 
-	    
         // if there already was an input stream, close it.
         if( _fis != null ) {
             try {
                 _fis.close();
             } catch(IOException ignored) {}
+        }	    
+	    
+	    File file;
+	    if(fd == null) {
+	        file = CommonUtils.getResourceFile(getFileName());
+	        if(file != null) {
+	            _fis = new BufferedInputStream(new FileInputStream(file));
+	            _fileSize = (int)file.length();
+	        } else {
+	            throw new FileNotFoundException();
+            }
+        } else {
+    	    _fileDesc = fd;
+    	    file = fd.getFile();
+    	    _fileSize = (int)fd.getSize();
+    	    _fileName = fd.getName();
+    	    // initializd here because we'll only write locs if a FileDesc exists
+    	    // only initialize once, so we don't write out previously written locs
+    	    if( _writtenLocs == null )
+    	        _writtenLocs = new HashSet(); 
+            _fis = _fileDesc.createInputStream();
         }
-        _fis = _fileDesc.createInputStream();
+        
+        ImageHandler handler = ImageManipulator.getDefaultImageHandler();
+        if(handler.isImageFile(file)) {
+            String tw = (String)_parameters.get("thumbw");
+            String th = (String)_parameters.get("thumbh");
+            if(tw != null || th != null) {
+                _fileName = StringUtils.ripExtension(_fileName) + " (Preview).jpg";
+                byte[] data = thumbnail(file, tw, th);
+                _fileSize = data.length;
+                _fis = new ByteArrayInputStream(data);
+            }
+        }   
 	}
+	
+	private byte[] thumbnail(File f, String wp, String hp) throws IOException {
+	    int thumbWidth = -1;
+	    int thumbHeight = -1;
+	    
+	    try {
+	        thumbWidth = Integer.parseInt(wp);
+	    } catch(NumberFormatException nfe) {}
+	    try {
+	        thumbHeight = Integer.parseInt(hp);
+	    } catch(NumberFormatException nfe) {}
+	    
+	    if(thumbWidth == -1 && thumbHeight == -1)
+	        thumbWidth = 100;
+	    
+	        
+	    
+        ImageHandler handler = ImageManipulator.getDefaultImageHandler();
+        Image wrote;
+        BufferedImage read = handler.getBufferedImage(handler.readImage(f));
+        int width = read.getWidth();
+        int height = read.getHeight();
+
+
+		if(thumbWidth != -1 && width > thumbWidth) {
+		    int div = width/thumbWidth;
+		    height = height/div;
+		    wrote = handler.resize(read, thumbWidth, height);
+        } else if(thumbHeight != -1 && height > thumbHeight) {
+            int div = height/thumbHeight;
+            width = width/div;
+            wrote = handler.resize(read, width, thumbHeight);
+        } else {
+            wrote = read;
+        }
+        
+	    return handler.write(wrote);
+    }
+     
 
 	/**
 	 * Initializes the OutputStream for this HTTPUploader to use.
@@ -1036,6 +1092,16 @@ public final class HTTPUploader implements Uploader {
     
     public float getAverageBandwidth() {
         return bandwidthTracker.getAverageBandwidth();
+    }
+    
+    /**
+     * Determines if the uploader requires a password.
+     */
+    public boolean requiresPassword() {
+        return  _stateNum == FILE_VIEW ||
+                _stateNum == RESOURCE_GET ||
+                _parameters.get("thumbw") != null ||
+                _parameters.get("thumbh") != null;
     }
     
     /**

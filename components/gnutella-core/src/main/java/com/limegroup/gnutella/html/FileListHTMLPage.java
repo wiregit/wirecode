@@ -5,6 +5,7 @@ import com.limegroup.gnutella.image.ImageManipulator;
 import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.util.*;
 import com.limegroup.gnutella.settings.SecuritySettings;
+import com.limegroup.gnutella.http.HTTPConstants;
 import java.io.File;
 import java.net.URLEncoder;
 
@@ -123,7 +124,7 @@ public class FileListHTMLPage {
     }
     
     private String htmlImageLink(FileDesc fd) {
-        return "<img src=\""+UploadManager.RESOURCE_GET+fd.getSHA1Urn() + "\" alt=\"\">";
+        return "<img src=\""+HTTPConstants.URI_RES_N2R+fd.getSHA1Urn().httpStringValue() + "?thumbw=100\" alt=\"\">";
     }
 
 

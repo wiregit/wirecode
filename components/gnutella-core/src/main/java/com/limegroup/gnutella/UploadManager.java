@@ -891,24 +891,26 @@ public class UploadManager implements BandwidthTracker {
      * @exception IOException the request came sooner than allowed by upload
      *  queueing rules.  (Throwing IOException forces the connection to be
      *  closed by the calling code.)  */
-	private synchronized int checkAndQueue(Uploader uploader,
+	private synchronized int checkAndQueue(HTTPUploader uploader,
 	                                       Socket socket) throws IOException {
 	    RequestCache rqc = (RequestCache)REQUESTS.get(uploader.getHost());
 	    if (rqc == null)
 	    	rqc = new RequestCache();
+
+		// if it required a password & didn't have it, then see if it's ban/greedyable
+		// otherwise, immediately allow.
+		if(uploader.requiresPassword() && uploader.hasPassword())
+		    return BYPASS_QUEUE;
+
 	    // make sure we don't forget this RequestCache too soon!
 		REQUESTS.put(uploader.getHost(), rqc);
-
+		
         rqc.countRequest();
         if (rqc.isHammering()) {
             if(LOG.isWarnEnabled())
                 LOG.warn(uploader + " banned.");
         	return BANNED;
         }
-        
-
-        // if this is a file view request and it is not hammering it is cool
-        if (uploader.getState() == Uploader.FILE_VIEW) return BYPASS_QUEUE;
 
         boolean isGreedy = rqc.isGreedy(uploader.getFileDesc().getSHA1Urn());
         int size = _queuedUploads.size();
@@ -1227,18 +1229,28 @@ public class UploadManager implements BandwidthTracker {
             
             
             Map params = Collections.EMPTY_MAP;
-    		int questionIdx = str.indexOf("?");
-    		if(questionIdx != -1) {
-    		    params = getParameters(str.substring(questionIdx));
-    		    str = str.substring(0, questionIdx).trim();
-            }            
 
-            if(this.isURNGet(str))
+            if(this.isURNGet(str)) {
+                int questionIdx = str.indexOf("?");
+                // look for the next one, since there'll always be 1.
+    		    if(questionIdx != -1) {
+    		        questionIdx = str.indexOf("?", questionIdx+1);
+    		        if(questionIdx != -1) {
+    		            params = getParameters(str.substring(questionIdx));
+    		            str = str.substring(0, questionIdx).trim();
+                    }
+                }            
                 // handle the URN get request
                 return parseURNGet(str, params, isHttp11);
-            else
+            } else {
+        		int questionIdx = str.indexOf("?");
+        		if(questionIdx != -1) {
+        		    params = getParameters(str.substring(questionIdx));
+        		    str = str.substring(0, questionIdx).trim();
+                }
                 // handle the standard get request
                 return parseTraditionalGet(str, params, isHttp11);
+            }
         } catch (IOException ioe) {
             LOG.debug("http request failed", ioe);
             // this means the request was malformed somehow.

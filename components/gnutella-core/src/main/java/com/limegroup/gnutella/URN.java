@@ -189,10 +189,10 @@ public final class URN implements HTTPHeaderValue, Serializable {
 	 * @param requestLine the URN HTTP request of the form specified in
 	 *  RFC 2169, for example:<p>
 	 * 
-	 * 	/uri-res/N2R?urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB HTTP/1.1
-	 *  /uri-res/N2X?urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB HTTP/1.1
-	 *  /uri-res/N2R?urn:bitprint:QLFYWY2RI5WZCTEP6MJKR5CAFGP7FQ5X.VEKXTRSJPTZJLY2IKG5FQ2TCXK26SECFPP4DX7I HTTP/1.1
-     *  /uri-res/N2X?urn:bitprint:QLFYWY2RI5WZCTEP6MJKR5CAFGP7FQ5X.VEKXTRSJPTZJLY2IKG5FQ2TCXK26SECFPP4DX7I HTTP/1.1	 
+	 * 	/uri-res/N2R?urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB
+	 *  /uri-res/N2X?urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB
+	 *  /uri-res/N2R?urn:bitprint:QLFYWY2RI5WZCTEP6MJKR5CAFGP7FQ5X.VEKXTRSJPTZJLY2IKG5FQ2TCXK26SECFPP4DX7I
+     *  /uri-res/N2X?urn:bitprint:QLFYWY2RI5WZCTEP6MJKR5CAFGP7FQ5X.VEKXTRSJPTZJLY2IKG5FQ2TCXK26SECFPP4DX7I
 	 *
 	 * @return a new <tt>URN</tt> instance from the specified request, or 
 	 *  <tt>null</tt> if no <tt>URN</tt> could be created
@@ -201,13 +201,11 @@ public final class URN implements HTTPHeaderValue, Serializable {
 	 */
 	public static URN createSHA1UrnFromHttpRequest(final String requestLine) 
 		throws IOException {
-		if(!URN.isValidUrnHttpRequest(requestLine)) {
-			throw new IOException("INVALID URN HTTP REQUEST");
-		}
+		if(!URN.isValidUrnHttpRequest(requestLine))
+			throw new IOException("invalid urn: " + requestLine);
 		String urnString = URN.extractUrnFromHttpRequest(requestLine);
-		if(urnString == null) {
-			throw new IOException("COULD NOT CONSTRUCT URN");
-		}	   
+		if(urnString == null)
+			throw new IOException("unconstructable: " + requestLine);
 		return createSHA1Urn(urnString);
 	}
 
@@ -386,12 +384,10 @@ public final class URN implements HTTPHeaderValue, Serializable {
 	 *  <tt>null</tt> if the request could not be read
 	 */
 	private static String extractUrnFromHttpRequest(final String requestLine) {
-		int qIndex     = requestLine.indexOf(QUESTION_MARK) + 1;
-		int spaceIndex = requestLine.indexOf(SPACE, qIndex);		
-		if((qIndex == -1) || (spaceIndex == -1)) {
+		int qIndex     = requestLine.indexOf(QUESTION_MARK) + 1;	
+		if(qIndex == -1)
 			return null;
-		}
-		return requestLine.substring(qIndex, spaceIndex);
+		return requestLine.substring(qIndex);
 	}
 
 	/**
@@ -407,12 +403,11 @@ public final class URN implements HTTPHeaderValue, Serializable {
 	private static boolean isValidUrnHttpRequest(final String requestLine) {
 	    return (URN.isValidLength(requestLine) &&
 				URN.isValidUriRes(requestLine) &&
-				URN.isValidResolutionProtocol(requestLine) && 
-				URN.isValidHTTPSpecifier(requestLine));				
+				URN.isValidResolutionProtocol(requestLine));
 	}
 
 	/** 
-	 * Returns whether or not the specified http request meets size 
+	 * Returns whether or not the specified urn request meets size 
 	 * requirements.
 	 *
 	 * @param requestLine the <tt>String</tt> instance containing the http request
@@ -421,7 +416,7 @@ public final class URN implements HTTPHeaderValue, Serializable {
 	 */
 	private static final boolean isValidLength(final String requestLine) {
 		int size = requestLine.length();
-		if((size != 63) && (size != 107)) {
+		if((size != 54) && (size != 96)) {
 			return false;
 		}
 		return true;
@@ -474,27 +469,6 @@ public final class URN implements HTTPHeaderValue, Serializable {
 		}
 		return true;
 	}
-
-	/**
-	 * Returns whether or not the HTTP specifier for the URN http request
-	 * is valid.
-	 *
-	 * @param requestLine the <tt>String</tt> instance containing the http request
-	 * @return <tt>true</tt> if the HTTP specifier is valid, <tt>false</tt>
-	 *  otherwise
-	 */
-	private static boolean isValidHTTPSpecifier(final String requestLine) {
-		int spaceIndex = requestLine.lastIndexOf(SPACE);
-		if(spaceIndex == -1) {
-			return false;
-		}
-		String httpStr = requestLine.substring(spaceIndex+1);
-		if(!httpStr.equalsIgnoreCase(HTTPConstants.HTTP10) &&
-		   !httpStr.equalsIgnoreCase(HTTPConstants.HTTP11)) {
-			return false;
-		}
-		return true;
-	}	
 
 	/**
 	 * Returns the URN type string for this URN.  This requires that each URN 
