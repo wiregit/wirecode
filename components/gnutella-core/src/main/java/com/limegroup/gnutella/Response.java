@@ -634,71 +634,8 @@ public class Response {
 				"urns:         "+urns);
 	}
 
-    //Unit Test Code 
-    //(Added when bytes stuff was added here 3/2/2001 by Sumeet Thadani)
-	/*
-    public static void main(String args[]){
-        Response r = new Response(3,4096,"A.mp3");
-        int nameSize = r.getNameBytesSize();
-        Assert.that(nameSize==5);
-        byte[] nameBytes = r.getNameBytes();
-        Assert.that (nameBytes[0] == 65);
-        Assert.that(r.getMetaBytes()==null,"Spurios meta");
-        Assert.that(r.getMetaBytesSize() == 0,"Meta size not right");
-        //
-        Response r2 = new Response("",999,4,"blah.txt");
-        Assert.that(r2.getMetaBytes()==null,"bad meta");
-        Assert.that(r2.getMetaBytesSize() == 0,"Meta size not right");
-        String md = "Hello";
-        Response r3 = new Response(md,999,4,"king.txt");
-        Assert.that(r3.getMetaBytes()==null,"bad meta");
-        Assert.that(r3.getMetaBytesSize() == 0,"Meta size not right");
-        //The three formats we support
-        String[] meta = {"a kbps 44.1 kHz b","akbps 44.1 kHz b", 
-                                             "b akbps 44.1kHz" };
-        for(int i=0;i<meta.length;i++){
-            Response r4 = new Response(meta[i],999+i,4,"abc.txt");
-            LimeXMLDocument d=null;
-            String xml = r4.getMetadata();
-            try{
-                d = new LimeXMLDocument(xml);
-            }catch (Exception e){
-                Assert.that(false,"XML not created well from between nulls");
-            }
-            String br = d.getValue("audios__audio__bitrate__");
-            Assert.that(br.equals("a"));
-            String len = d.getValue("audios__audio__seconds__");
-            Assert.that(len.equals("b"));
-        }
-        //Tests for checking new LimeXMLDocument code added.
-        LimeXMLSchemaRepository rep = LimeXMLSchemaRepository.instance();
-
-        String xml1 = "<?xml version=\"1.0\"?><audios xsi:noNamespaceSchemaLocation=\"http://www.limewire.com/schemas/audio.xsd\"><audio genre=\"Speech\" bitrate=\"192\"></audio></audios>";
-        
-        String xml2 = "<?xml version=\"1.0\"?><audios xsi:noNamespaceSchemaLocation=\"http://www.limewire.com/schemas/audio.xsd\"><audio genre=\"Speech\" bitrate=\"150\"></audio></audios>";
-        
-        //create documents.
-        LimeXMLDocument d1 = null;
-        LimeXMLDocument d2 = null;
-        try {
-            d1 = new LimeXMLDocument(xml1);
-            d2 = new LimeXMLDocument(xml2);
-        } catch (Exception stop) {
-            System.out.println("Warning: Test is incorrect");
-            System.exit(1);
-        }//not the Responses fault.
-        Response ra = new Response(12,231,"def1.txt",d1);
-        Response rb = new Response(13,232,"def2.txt",d2);
-        Assert.that(ra.getDocument() == d1, "problem with doc constructor");
-        Assert.that(rb.getDocument() == d2, "problem with doc constructor");
-        
-        Assert.that(ra.getMetadata().equals(xml1),
-                    "mismatched strings"+ra.getMetadata()+", "+xml1);
-        Assert.that(rb.getMetadata().equals(xml2),
-                    "mismatched strings"+rb.getMetadata()+", "+xml2);
-    }
- 
-    }
-	*/
+    //Unit test can be found in
+    //core/com/limegroup/gnutella/tests/ResponseTest.java (soon to be
+    //tests/com/limegroup/gnutella/tests/ResponseTest.java)
 }
 
