@@ -1372,9 +1372,9 @@ public class Connection {
         // if the connection is young, give it a lot of pongs, otherwise
         // be more conservative
         if(curTime - getConnectionTime() < 10000) {
-            interval = 200;
+            interval = 300;
         } else {
-            interval = 6000;
+            interval = 8000;
         }
         _nextPongTime = curTime + interval;
     }
