@@ -50,6 +50,8 @@ public class HTTPDownloader implements Runnable {
     private HTTPDownloader _replacement = null;
     private PushRequestedFile savedPRF  = null;
 
+    /** Time count of some requesting operation */
+    private int timeCount;
 
     /**
      * The list of all files we've requested via push messages.  Only
@@ -336,7 +338,9 @@ public class HTTPDownloader implements Runnable {
         if ( _wasShutdown )
             return;
 
-        _state = REQUESTING;
+        _state    = REQUESTING;
+        timeCount = 0;
+		
 
         //Record this push so incoming push connections can be verified.
         Assert.that(clientGUID!=null);
@@ -625,6 +629,21 @@ public class HTTPDownloader implements Runnable {
         }
         return false;
     }
+
+	/** 
+     *  Get an integer time count
+     */
+    public int getTimeCount() {
+        return (timeCount);
+    }
+
+	/** 
+     *  Inc an integer time count
+     */
+    public void incTimeCount() {
+        timeCount++;
+    }
+
 }
 
 /** A file that we requested via a push message. */
@@ -669,6 +688,7 @@ class PushRequestedFile {
 //          && Arrays.equals(ip, prf.ip)
             && index==prf.index;
     }
+
 
     public int hashCode() {
         //This is good enough since we'll rarely request the
