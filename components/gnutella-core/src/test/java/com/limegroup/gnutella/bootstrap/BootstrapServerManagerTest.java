@@ -19,7 +19,7 @@ public class BootstrapServerManagerTest extends TestCase {
         return new TestSuite(BootstrapServerManagerTest.class);
     }
 
-    /////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////
     final int RESPONSES_PER_SERVER=12;
     final static int PORT=6700;
     final static String DIRECTORY="/path/to/script.php";
@@ -65,8 +65,8 @@ public class BootstrapServerManagerTest extends TestCase {
 
     ///////////////////////////////////////////////////////////////////////
 
-    /** Checks urlfile=1 request.  Also checks that unreachable hosts are visited
-     *  as needed.  */
+    /** Checks urlfile=1 request.  Also checks that unreachable hosts are
+     *  visited as needed.  */
     public void testFetchEndpointsAsync() {
         //Make first server unreachable.  (Remember try s3, s2, then s1.)
         s3.shutdown();
@@ -109,7 +109,8 @@ public class BootstrapServerManagerTest extends TestCase {
         assertEquals("GET "+DIRECTORY+"?urlfile=1 HTTP/1.1", s3.getRequest());
         assertEquals("GET "+DIRECTORY+"?urlfile=1 HTTP/1.1", s2.getRequest());
         assertEquals(null, s1.getRequest());   //wasn't contacted
-        //Check that we got the right results.  First make sure we kept the old server list...
+        //Check that we got the right results.  First make sure we kept the old
+        //server list...
         Iterator iter=bman.getBootstrapServers();
         assertEquals(url1, iter.next());
         assertEquals(url2, iter.next());
@@ -195,7 +196,8 @@ public class BootstrapServerManagerTest extends TestCase {
         s3.setResponseData("OK\r\n");
         bman.sendUpdatesAsync(new Endpoint("18.239.0.144", 6347));
         sleep();
-        assertEquals("GET "+DIRECTORY+"?ip=18.239.0.144:6347 HTTP/1.1", s3.getRequest());
+        assertEquals("GET "+DIRECTORY+"?ip=18.239.0.144:6347 HTTP/1.1", 
+                     s3.getRequest());
         assertEquals(null, s2.getRequest());
         assertEquals(null, s1.getRequest());
     }
@@ -208,7 +210,9 @@ public class BootstrapServerManagerTest extends TestCase {
         s2.setResponseData("OK\r\n");
         bman.sendUpdatesAsync(new Endpoint("18.239.0.145", 6348));
         sleep();
-        assertEquals("GET "+DIRECTORY+"?ip=18.239.0.145:6348&url="+url3+" HTTP/1.1", 
+        assertEquals("GET "+DIRECTORY+"?ip=18.239.0.145:6348&url="
+                     +"http%3A%2F%2F127.0.0.1%3A6702%2Fpath%2Fto%2Fscript.php"
+                     +" HTTP/1.1", 
                      s2.getRequest());
         assertEquals(null, s1.getRequest());
     }
@@ -218,9 +222,13 @@ public class BootstrapServerManagerTest extends TestCase {
         s2.setResponseData("OK\r\n");
         bman.sendUpdatesAsync(new Endpoint("18.239.0.144", 6347));
         sleep();
-        assertEquals("GET "+DIRECTORY+"?ip=18.239.0.144:6347 HTTP/1.1", s3.getRequest());
-        //Yes, url3 is sent to s2 even though url3 never sent OK.  TODO: fix this.
-        assertEquals("GET "+DIRECTORY+"?ip=18.239.0.144:6347&url="+url3+" HTTP/1.1", 
+        assertEquals("GET "+DIRECTORY+"?ip=18.239.0.144:6347 HTTP/1.1", 
+                     s3.getRequest());
+        //Yes, url3 is sent to s2 even though url3 never sent OK.  TODO: fix
+        //this.
+        assertEquals("GET "+DIRECTORY+"?ip=18.239.0.144:6347&url="
+                     +"http%3A%2F%2F127.0.0.1%3A6702%2Fpath%2Fto%2Fscript.php"
+                     +" HTTP/1.1", 
                      s2.getRequest());
         assertEquals(null, s1.getRequest());
     }

@@ -201,10 +201,13 @@ public class BootstrapServerManager {
         }
         public String requestURL(String url) {
             //The url of good server.  There's a small chance that we send a
-            //host its own address.
+            //host its own address.  TODO: the encoding method we use is
+            //deprecated because it doesn't take care of character conversion
+            //properly.  What to do?
             String urlPart=null;
-            if (_lastConnectable!=null)       //TODO: URL encode!
-                urlPart="url="+_lastConnectable.getURL().toString(); 
+            if (_lastConnectable!=null)
+                urlPart="url="
+                       +URLEncoder.encode(_lastConnectable.getURL().toString());
             //My ip address as a parameter.
             String ipPart=null;
             if (myIP!=null) 

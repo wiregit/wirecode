@@ -23,4 +23,5 @@ while 1:
         i=index(line, "\"")
         j=rindex(line, "\"")
         url=line[i+1:j]
+        #TODO: URL decode
         print "        \"%s\"," % url

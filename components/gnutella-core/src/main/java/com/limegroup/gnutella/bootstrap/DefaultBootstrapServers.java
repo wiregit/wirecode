@@ -26,7 +26,7 @@ public class DefaultBootstrapServers {
         }
     }
 
-    //TODO: what about "~" vs "%7"?
+    //These should NOT be URL encoded.
     static String[] urls=new String[] {
         "http://130.75.86.59/~Eadmin2/gwebcache/index.php",
         "http://209.197.225.202/gcache.php",
