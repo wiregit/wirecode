@@ -30,7 +30,7 @@ public final class SupernodeAssigner {
 	 * Constant for the minimum number of upstream kbytes per second that 
 	 * a node must be able to transfer in order to qualify as a ultrapeer.
 	 */
-	private static final int MINIMUM_REQUIRED_UPSTREAM_KBYTES_PER_SECOND = 15;
+	private static final int MINIMUM_REQUIRED_UPSTREAM_KBYTES_PER_SECOND = 10;
 
 	/**
 	 * Constant for the minimum number of downlstream kbytes per second that 
