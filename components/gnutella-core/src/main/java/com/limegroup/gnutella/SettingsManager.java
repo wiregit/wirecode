@@ -607,11 +607,18 @@ public class SettingsManager implements SettingsInterface {
     /** returns the directories to search */
     public String getDirectories(){return directories_;}
 
+	/** returns the shared directories as an array of pathname strings. */
     public String[] getDirectoriesAsArray() {
+		if(directories_ == null) return new String[0];		
         directories_.trim();
         return HTTPUtil.stringSplit(directories_, ';');
     }
 
+	/**
+	 * returns an array of Strings of directory path names.  these are the
+	 * pathnames of the shared directories as well as the pathname of 
+	 * the Incomplete directory.
+	 */
 	public String[] getDirectoriesWithIncompleteAsArray() {
 		String temp = directories_;
         temp.trim();
