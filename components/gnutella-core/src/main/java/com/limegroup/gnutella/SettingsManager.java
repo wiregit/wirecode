@@ -280,7 +280,7 @@ public final class SettingsManager {
 	public static final String DEFAULT_CLASSPATH = DEFAULT_JAR_NAME;
 	
 	private final boolean DEFAULT_CHAT_ENABLED        = true;
-	private final boolean DEFAULT_GUESS_ENABLED       = true;
+	private final boolean DEFAULT_GUESS_ENABLED       = false;
     private final boolean DEFAULT_PLAYER_ENABLED      = true;
     private final String DEFAULT_BROWSER              = "netscape";
 	private final String DEFAULT_LANGUAGE             = "";
