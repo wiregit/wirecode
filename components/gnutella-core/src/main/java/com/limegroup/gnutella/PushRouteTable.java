@@ -35,23 +35,45 @@ public class PushRouteTable{
      *Thus we use look up based on the Guid and DestinationGuid and return a connection.
      */
     public synchronized Connection get(Message m){
-	String ReplyGuid = new String(m.getGUID());
 	PushRequest mess = (PushRequest)m;
-	String DestinationGuid = new String(mess.getClientGUID());
-	String key = ReplyGuid+"|"+ DestinationGuid;
+	String key = new String(mess.getClientGUID());
+	//System.out.println("Sumeet:key is " + key);
 	return (Connection)hasher.get(key);
     }
     
+    /**
+     *Overloaded version of get. Takes a String = GUID+CliendID
+     * returns the corresponding connection
+     */
+    public synchronized Connection get(String key){
+	return (Connection)hasher.get(key);
+    }
+
+
     /**This function is used to store a which connection a particular message came  from
      *It will be used when we have a push request and we want to to find out 
      *which connection to send out a push requst on. See get
      */
     public synchronized void put(Connection c, Message m){
 	QueryReply  mes = (QueryReply)m;
-	String Guid = new String(m.getGUID());
-	String DestinationGuid = new String(mes.getClientGUID());
-	String key = Guid+"|"+DestinationGuid;
+	String key  = new String(mes.getClientGUID());
+	//System.out.println("Sumeet: putting hash table key" + key);
 	hasher.put(key,c);
     }
+    
+    public synchronized String toString() {
+	StringBuffer buf=new StringBuffer("\n");
+	Iterator iter=hasher.keySet().iterator();
+	while (iter.hasNext()) {
+	    String routeKey = (String) iter.next();
+	    Connection conn=get(routeKey);
+	    Assert.that(conn!=null);
+	    buf.append(routeKey);
+	    buf.append(" -> ");
+	    buf.append(conn.toString());
+	    buf.append("\n");
+	}
+	return buf.toString();
+    }    
 }
 

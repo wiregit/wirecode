@@ -49,6 +49,16 @@ public class RouterService
     }
 
     /**
+     * Dump the puch routing table
+     */
+    public void dumpPushRouteTable()
+    {
+        System.out.println(manager.pushRouteTable.toString());
+    }
+
+
+
+    /**
      * Dump the list of connections
      */
     public void dumpConnections()

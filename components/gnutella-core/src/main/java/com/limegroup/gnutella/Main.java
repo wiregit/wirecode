@@ -30,6 +30,9 @@ public class Main {
 		else if (command.equals("route"))
 		    service.dumpRouteTable();
 		//Print connections
+		else if (command.equals("push"))
+		    service.dumpPushRouteTable();
+		//Print push route
 		else if (command.equals("stat")) {
 		    service.dumpConnections();
 		}

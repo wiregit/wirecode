@@ -146,7 +146,7 @@ public class Connection implements Runnable {
 	    out.flush();
 	    sent++;
 	}
-	System.out.println("Wrote "+m.toString()+"\n   to "+sock.toString());
+	//System.out.println("Wrote "+m.toString()+"\n   to "+sock.toString());
     }
 
     /** 
@@ -160,8 +160,8 @@ public class Connection implements Runnable {
 	synchronized(in) {
 	    Message m=Message.read(in);
 	    received++;  //keep statistics.
-	    if (m!=null)
-	    System.out.println("Read "+m.toString()+"\n    from "+sock.toString());
+	    //if (m!=null)
+	    //System.out.println("Read "+m.toString()+"\n    from "+sock.toString());
 	    return m;
 	}
     }
@@ -281,12 +281,13 @@ public class Connection implements Runnable {
 			nextHost.send(m); //send the message to appropriate host
 		    }
 		    else if (manager.ClientId.equals(DestinationId) ){//I am the destination
-			//System.out.println("Sumeet:I am the destination"); 
+			System.out.println("Sumeet:I am the destination"); 
 			//unpack message
 			//make HTTP connection with originator
 			//TODO1: Rob makes HHTTP connection
 		    }
 		    else{// the message has arrived in error
+			System.out.println("Sumeet: Message arrived in error");
 			//do nothing.....drop the message
 		    }
 		}// else if		
