@@ -126,7 +126,7 @@ public final class SupernodeAssigner implements Runnable {
      * True, if the last time we evaluated the node for supernode capability, 
      * it came out as supernode capable. False, otherwise
      */
-    private volatile boolean _wasSupernodeCapable = SETTINGS.isSupernode();
+    private volatile boolean _wasSupernodeCapable;
 
     /** 
 	 * Creates a new <tt>SupernodeAssigner</tt>. 
@@ -143,6 +143,7 @@ public final class SupernodeAssigner implements Runnable {
 		_uploadTracker = uploadTracker;
 		_downloadTracker = downloadTracker;  
         this._manager = manager;
+        _wasSupernodeCapable = _manager.isSupernode();
 		ActionListener timerListener = new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				collectBandwidthData();
@@ -225,7 +226,7 @@ public final class SupernodeAssigner implements Runnable {
             && (isSupernodeCapable != _wasSupernodeCapable) &&
             !SETTINGS.hasSupernodeOrClientnodeStatusForced() 
             && !SETTINGS.hasShieldedClientSupernodeConnection()){
-                SETTINGS.setSupernodeMode(isSupernodeCapable);
+                _manager.setSupernodeMode(isSupernodeCapable);
                 _manager.reconnect();
         }
             _wasSupernodeCapable = isSupernodeCapable;

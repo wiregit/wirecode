@@ -594,7 +594,7 @@ public abstract class MessageRouter
     public void handleRouteTableMessage(RouteTableMessage m,
                                         ManagedConnection receivingConnection) {
         //if not a supernode, dont handle this message
-        if(!SettingsManager.instance().isSupernode())
+        if(_manager.isSupernode())
             return;
                                             
         //Mutate query route table associated with receivingConnection.  
@@ -646,7 +646,7 @@ public abstract class MessageRouter
                 //check if we do need to forward the query route tables
                 //Presently, it will be sent only by a shielded-client to
                 //its supernode
-                if(SettingsManager.instance().isSupernode() || 
+                if(_manager.isSupernode() || 
                     !c.isSupernodeConnection()){
                     return;
                 }

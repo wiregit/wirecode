@@ -522,7 +522,6 @@ public final class SettingsManager {
     private volatile boolean _supernodeModeForced;
     /** This is the transitional supernode mode, set automatically during
      * the execution of program */
-    private volatile boolean _supernodeModeTransit = false;
     private volatile boolean _shieldedClientSupernodeConnection;
     private volatile boolean _hasSupernodeOrClientnodeStatusForced = false;
 
@@ -965,9 +964,6 @@ public final class SettingsManager {
 			catch(NumberFormatException nfe){ /* continue */ }
 			catch(IllegalArgumentException iae){ /* continue */ }
 			catch(ClassCastException cce){ /* continue */ }
-            
-            //set properties whose starting value depends upon other properties
-            setDependentProperties();
 		}
 	
 		//Special case: if this is a modem, ensure that KEEP_ALIVE and
@@ -977,14 +973,6 @@ public final class SettingsManager {
 			setMaxIncomingConnections(2);
 		}
 	}
-
-    /**
-     * Sets properties whose starting value depends upon other properties
-     */
-    private void setDependentProperties(){
-        setSupernodeMode(getForcedSupernodeMode());
-    }
-    
 
     /** 
 	 * Load in the default values.  Any properties written to the real 
@@ -1779,15 +1767,6 @@ public final class SettingsManager {
      */
     public boolean getEverSupernodeCapable() {
 		return getBooleanValue(EVER_SUPERNODE_CAPABLE);
-    }
-    
-    /**
-     * Tells whether the node is gonna be a supernode or not
-     * @return true, if supernode, false otherwise
-     */
-    public boolean isSupernode()
-    {
-        return _supernodeModeTransit;
     }
     
     /** Returns forced supernode mode */
@@ -2904,14 +2883,6 @@ public final class SettingsManager {
         this._minShieldedClientConnections = minShieldedClientConnections;
         PROPS.put(MIN_SHIELDED_CLIENT_CONNECTIONS, 
             Integer.toString(minShieldedClientConnections));
-    }
-    
-    /**
-     * Sets whether the node is gonna be a supernode or not
-     */
-    public void setSupernodeMode(boolean supernodeModeTransit)
-    {
-        this._supernodeModeTransit = supernodeModeTransit;
     }
     
     /**

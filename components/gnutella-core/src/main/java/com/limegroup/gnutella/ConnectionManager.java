@@ -97,6 +97,13 @@ public class ConnectionManager {
      * are maintaining. Is false, otherwise.
      */
     private volatile boolean _hasShieldedClientSupernodeConnection = false;
+    
+    /** 
+     * This is the transitional supernode mode, set automatically during
+     * the execution of program 
+     */
+    private volatile boolean _supernodeModeTransit 
+        = SettingsManager.instance().getForcedSupernodeMode();
 
     /**
      * Constructs a ConnectionManager.  Must call initialize before using.
@@ -296,6 +303,23 @@ public class ConnectionManager {
     }
 
     /**
+     * Tells whether the node is gonna be a supernode or not
+     * @return true, if supernode, false otherwise
+     */
+    public boolean isSupernode()
+    {
+        return _supernodeModeTransit;
+    }
+    
+    /**
+     * Sets whether the node is a supernode or not
+     */
+    public void setSupernodeMode(boolean supernodeModeTransit)
+    {
+        this._supernodeModeTransit = supernodeModeTransit;
+    }    
+    
+    /**
      * Sets the maximum number of incoming connections.  This does not
      * affect the MAX_INCOMING_CONNECTIONS property.  It is useful to be
      * able to vary this without permanently setting the property.
@@ -343,7 +367,7 @@ public class ConnectionManager {
      */
     public boolean supernodeNeeded(){
         //if more than 70% slots are full, return true 
-        if(SettingsManager.instance().isSupernode() &&
+        if(isSupernode() &&
             _incomingClientConnections > 
             (SettingsManager.instance()
             .getMaxShieldedClientConnections() * 0.7)){
@@ -822,7 +846,7 @@ public class ConnectionManager {
             //to supernode. In this case, we will drop all other connections
             //and just keep this one
             //check for shieldedclient-supernode connection
-            if(!SettingsManager.instance().isSupernode() && 
+            if(isSupernode() && 
                 c.isSupernodeConnection()){
             gotShieldedClientSupernodeConnection(c);
             }
@@ -969,15 +993,14 @@ public class ConnectionManager {
     private void gotSupernodeNeededGuidance(boolean supernodeNeeded,
         String remoteAddress){
         //if we are in the state asked for, return
-        if(SettingsManager.instance().isSupernode() == supernodeNeeded)
+        if(isSupernode() == supernodeNeeded)
             return;
         //Also return, if we have a forced state
         if(SettingsManager.instance().hasSupernodeOrClientnodeStatusForced())
             return;
         
         //if is a supernode, and have client connections, dont change mode
-        if(SettingsManager.instance().isSupernode() && 
-            _incomingClientConnections > 0)
+        if(isSupernode() && _incomingClientConnections > 0)
             return;
         
         //if we are not supernode capable, and guidance received is to
@@ -994,7 +1017,7 @@ public class ConnectionManager {
                     
                 //disconnect all the connections, and set the state as guided
                 disconnect();    
-                SettingsManager.instance().setSupernodeMode(supernodeNeeded);    
+                setSupernodeMode(supernodeNeeded);    
                     
                 //open connection to the specified host
                 Endpoint endpoint = new Endpoint(remoteAddress);
@@ -1111,9 +1134,8 @@ public class ConnectionManager {
             //to supernode. In this case, we will drop all other connections
             //and just keep this one
             //check for shieldedclient-supernode connection
-            if(!SettingsManager.instance().isSupernode() && 
-                c.isSupernodeConnection()){
-            gotShieldedClientSupernodeConnection(c);
+            if(isSupernode() && c.isSupernodeConnection()){
+                gotShieldedClientSupernodeConnection(c);
             }
         }
     }

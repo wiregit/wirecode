@@ -222,10 +222,10 @@ public class ManagedConnection
                       ConnectionManager manager,
                       boolean isRouter) {
         super(host, port, 
-            SettingsManager.instance().isSupernode() ? 
+            manager.isSupernode() ? 
             (Properties)(new SupernodeProperties(router)) : 
             (Properties)(new ClientProperties(router)),
-            SettingsManager.instance().isSupernode() ? 
+            manager.isSupernode() ? 
             (HandshakeResponder)(new SupernodeHandshakeResponder(manager)) :
             (HandshakeResponder)(new ClientHandshakeResponder(manager)),
             true);
@@ -249,7 +249,7 @@ public class ManagedConnection
                       MessageRouter router,
                       ConnectionManager manager) {
         super(socket, 
-            SettingsManager.instance().isSupernode() ? 
+            manager.isSupernode() ? 
             (HandshakeResponder)(new SupernodeHandshakeResponder(manager)) : 
             (HandshakeResponder)(new ClientHandshakeResponder(manager)));
         _router = router;
