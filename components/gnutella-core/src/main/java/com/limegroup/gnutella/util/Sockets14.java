@@ -18,7 +18,7 @@ class Sockets14 {
     
     static final Socket getSocket(String host, int port, int timeout) throws IOException {
         SocketAddress addr = new InetSocketAddress(host, port);
-        Socket ret = new Socket();
+        Socket ret = new com.limegroup.gnutella.io.NIOSocket();
         ret.connect(addr, timeout);
         return ret;
     }

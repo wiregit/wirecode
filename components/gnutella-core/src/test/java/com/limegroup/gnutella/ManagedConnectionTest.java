@@ -335,15 +335,18 @@ public class ManagedConnectionTest extends BaseTestCase {
                 new UltrapeerHeaders("localhost"),new UltrapeerHandshakeResponder("localhost"));
         out.initialize();            
         out.buildAndStartQueues();
+        
         in = acceptor.accept(); 
         assertTrue("connection should be open", out.isOpen());
         assertTrue("runner should not be dead", !out.runnerDied());
+        
         in.close();
         Message m = new PingRequest((byte)4);
         m.hop();
-        out.send(m);        
+        out.send(m);   
+        sleep(200);
         out.send(new PingRequest((byte)4));
-        sleep(100);
+        sleep(200);
 
         assertTrue("connection should not be open", !out.isOpen());
         assertTrue("runner should be dead", out.runnerDied());
