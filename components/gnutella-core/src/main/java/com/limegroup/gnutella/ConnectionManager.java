@@ -760,8 +760,8 @@ public class ConnectionManager {
             // behaved.  We must add the leftover quota of reserved
             // non-limewire leaves to ensure we reserve the correct amount.
             if(hr.isGoodLeaf()) {
-                return (leaves + RESERVED_NON_LIMEWIRE_LEAVES - 
-                        nonLimeWireLeaves) < 
+                return (leaves + Math.max(0, RESERVED_NON_LIMEWIRE_LEAVES - 
+                        nonLimeWireLeaves)) < 
                           UltrapeerSettings.MAX_LEAVES.getValue();
             }            
             
@@ -819,7 +819,8 @@ public class ConnectionManager {
             
             // Otherwise, allow only if we've left enough room for the quota'd
             // number of non-limewire peers.
-            return (peers + RESERVED_NON_LIMEWIRE_PEERS - nonLimeWirePeers 
+            return (peers + Math.max(0, 
+                                RESERVED_NON_LIMEWIRE_PEERS - nonLimeWirePeers)
                     + locale_num)
                    < ULTRAPEER_CONNECTIONS;
         }
