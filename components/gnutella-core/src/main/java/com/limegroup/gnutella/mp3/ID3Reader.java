@@ -100,14 +100,12 @@ public final class ID3Reader {
      * @return an null if the document has no ID3 tag
      */
     public static String readDocument(File file,boolean solo) throws IOException{
-        Object[] info = parseFile(file);
-        String title = (String) info[0], artist = (String) info[1], 
-        album = (String) info[2], year = (String) info[3], 
-        comment = (String) info[5];
-        short track = ((Short) info[4]).shortValue(), 
-        gen = ((Short) info[6]).shortValue();
-        int bitrate = ((Integer) info[7]).intValue(),
-        seconds = ((Integer) info[8]).intValue();
+        ExtendedID3Tag id3 = parseFile(file);
+        String title = id3.getTitle(), artist = id3.getArtist(), 
+        album = id3.getAlbum(), year = id3.getYear(),
+        comment = id3.getComment();
+        short track = (short) id3.getTrack(), gen = (short) id3.getGenre();
+        int bitrate = id3.getBitrate(), seconds = id3.getRuntime();
 
         StringBuffer strB = new StringBuffer();
         if(solo){
@@ -150,24 +148,25 @@ public final class ID3Reader {
 
 
     public static LimeXMLDocument readDocument(File file) throws IOException {
-        Object[] info = parseFile(file);
-        short track = ((Short) info[4]).shortValue();
-        short gen = ((Short) info[6]).shortValue();
-        int bitrate = ((Integer) info[7]).intValue();
-        int seconds = ((Integer) info[8]).intValue();
+        ExtendedID3Tag id3 = parseFile(file);
+        String title = id3.getTitle(), artist = id3.getArtist(), 
+        album = id3.getAlbum(), year = id3.getYear(),
+        comment = id3.getComment();
+        short track = (short) id3.getTrack(), gen = (short) id3.getGenre();
+        int bitrate = id3.getBitrate(), seconds = id3.getRuntime();
         String genre = getGenreString(gen);
 
         List nameValList = new ArrayList();
-        if(!((String)info[0]).equals(""))
-            nameValList.add(new NameValue(TITLE_KEY, info[0]));
-        if(!((String)info[1]).equals(""))
-            nameValList.add(new NameValue(ARTIST_KEY, info[1]));
-        if(!((String)info[2]).equals(""))
-            nameValList.add(new NameValue(ALBUM_KEY, info[2]));
-        if(!((String)info[3]).equals(""))
-            nameValList.add(new NameValue(YEAR_KEY, info[3]));
-        if(!((String)info[5]).equals(""))
-            nameValList.add(new NameValue(COMMENTS_KEY, info[5]));
+        if(!title.equals(""))
+            nameValList.add(new NameValue(TITLE_KEY, title));
+        if(!artist.equals(""))
+            nameValList.add(new NameValue(ARTIST_KEY, artist));
+        if(!album.equals(""))
+            nameValList.add(new NameValue(ALBUM_KEY, album));
+        if(!year.equals(""))
+            nameValList.add(new NameValue(YEAR_KEY, year));
+        if(!comment.equals(""))
+            nameValList.add(new NameValue(COMMENTS_KEY, comment));
         if(track > 0)
             nameValList.add(new NameValue(TRACK_KEY, ""+track));
         if(!genre.equals("") )
@@ -180,53 +179,17 @@ public final class ID3Reader {
         return new LimeXMLDocument(nameValList, schemaURI);
     }
 
-    /** @return a Object[] with the following order: title, artist, album, year,
-       track, comment, gen, bitrate, seconds.  Indices 0, 1, 2, 3, and 5 are
-       Strings.  Indices 4 and 6 are Shorts.  Indices 7 and 8 are Integers.  
+    /** @return The object representation of the extended ID3 information.
      */
-    private static Object[] parseFile(File file) throws IOException {
-        Object[] retObjs = new Object[9];
-
-        // default vals...
-        retObjs[0] = "";
-        retObjs[1] = "";
-        retObjs[2] = "";
-        retObjs[3] = "";
-        retObjs[5] = "";
-        retObjs[4] = new Short((short)-1);
-        retObjs[6] = new Short((short)-1);
-
+    private static ExtendedID3Tag parseFile(File file) throws IOException {
         RandomAccessFile randomAccessFile = null;
-        
         try {
             randomAccessFile = new RandomAccessFile(file, "r");
-            long length = randomAccessFile.length();
-    
-            // short circuit to bitrate if not ID3 tag can be properly read...
-            // We need to read at least 128 bytes
-            if(length >= 128) {
-                ID3Tag id3 = de.ueberdosis.mp3info.ID3Reader.readTag(randomAccessFile);
-                
-                // We have an ID3 Tag, now get the parts
-                retObjs[0] = id3.getTitle();
-                retObjs[1] = id3.getArtist();
-                retObjs[2] = id3.getAlbum();
-                retObjs[3] = id3.getYear();
-                retObjs[4] = new Short(id3.getTrack());
-                retObjs[5] = id3.getComment();
-                retObjs[6] = new Short(id3.getGenre());
-            }
-    
-            MP3Info mp3Info = new MP3Info(file.getCanonicalPath());
-            // Bitrate
-            retObjs[7] = new Integer(mp3Info.getBitRate());
-            // Length
-            retObjs[8] = new Integer((int) mp3Info.getLengthInSeconds());
+            return de.ueberdosis.mp3info.ID3Reader.readExtendedTag(randomAccessFile);
         } finally {
             if( randomAccessFile != null )
                 randomAccessFile.close();
         }
-        return retObjs;
     }
 
 
