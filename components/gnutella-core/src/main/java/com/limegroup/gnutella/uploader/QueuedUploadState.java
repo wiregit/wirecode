@@ -11,12 +11,6 @@ public class QueuedUploadState implements HTTPMessage {
     private FileDesc FILE_DESC;
     private int position;
 
-	/**
-	 * The error message to send in the message body.
-	 */
-	private final byte[] ERROR_MESSAGE = 
-		"Server busy.  Too many active uploads.".getBytes();
-
     public QueuedUploadState(int pos, FileDesc desc) {
         this.position = pos;
         this.FILE_DESC= desc;
