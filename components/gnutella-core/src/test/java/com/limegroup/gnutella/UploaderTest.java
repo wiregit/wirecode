@@ -8,6 +8,9 @@ import java.io.OutputStreamWriter;
 import java.net.Socket;
 import java.io.InputStream;
 
+import com.sun.java.util.collections.HashSet;
+import com.sun.java.util.collections.Set;
+
 import junit.framework.Test;
 
 import com.limegroup.gnutella.downloader.HTTPDownloader;
@@ -102,6 +105,75 @@ public class UploaderTest extends com.limegroup.gnutella.util.BaseTestCase {
      */
     public void testLegacy() {
         UploadManager.tBandwidthTracker(new UploadManager());
+    }
+    
+    public void testUniqueUploads() throws Exception {
+    	UploadSettings.HARD_MAX_UPLOADS.setValue(2);
+    	UploadSettings.SOFT_MAX_UPLOADS.setValue(9999);
+    	UploadSettings.UPLOADS_PER_PERSON.setValue(2);
+    	UploadSettings.UPLOAD_QUEUE_SIZE.setValue(2);
+    	
+    	HTTPDownloader d1 = addUploader(upManager,rfd1,"1.1.1.1",true);
+    	connectDloader(d1,true,rfd1,true);
+    	HTTPDownloader d2 = addUploader(upManager,rfd2,"1.1.1.1",true);
+    	try{
+    		connectDloader(d2,true,rfd2,true);
+    		fail("Duplicate upload, should not have accepted d3");
+    	}catch (QueuedException qx) {
+    		fail("duplicate upload should not queue", qx);
+    	} catch (TryAgainLaterException expectedException) {
+    	}catch(IOException ioe){}
+    	
+    	d2 = addUploader(upManager,rfd2,"1.1.1.2",true);
+    	connectDloader(d2,true,rfd2,true);
+    	
+    	//upload slots are full, queue is empty
+    	
+    	HTTPDownloader d3 = addUploader(upManager,rfd3,"1.1.1.1",true);
+    	try {
+    		connectDloader(d3,true,rfd3,true);
+    		fail("duplicate upload, should not have accepted d3");
+    	} catch (QueuedException qx) {
+    		fail("duplicate upload should not queue", qx);
+    	} catch (TryAgainLaterException expectedException) {
+    	} catch (IOException ioe) {//This is similar to d5 being rejected
+    		//in testNormalQueueing, IOE may be thrown if uploader
+    		//closes the socket. 
+    	}
+    	
+    	//upload slots are still full, queue is still empty
+    	
+    	HTTPDownloader d4 = addUploader(upManager,rfd4,"1.1.1.4",true);
+    	try {
+    		connectDloader(d4,true,rfd1,true);
+    		fail("slots are full, d4 should have been queued");
+    	} catch (TryAgainLaterException tx) {
+    		fail("d4 should have been queued", tx);
+    	} catch (QueuedException expectedException) {
+    	} catch (IOException ioe) {
+    		fail("d4 should have been queued", ioe);
+    	}
+    	
+    	//upload slots are full, queue has one slot
+    	
+    	HTTPDownloader d5 = addUploader(upManager,rfd5,"1.1.1.1",true);
+    	try {
+    		connectDloader(d5,true,rfd5,true);
+    		fail("duplicate upload, should not have accepted d5");
+    	} catch (QueuedException qx) {
+    		fail("duplicate upload should not queue", qx);
+    	} catch (TryAgainLaterException expectedException) {
+    	} catch (IOException ioe) {}
+    	
+    	d5 = addUploader(upManager,rfd5,"1.1.1.3",true);
+    	try {
+    		connectDloader(d5,true,rfd5,true);
+    		fail("d5 should have been queued");
+    	}catch(QueuedException expected) {}
+    	
+    	
+    	//upload slots are full, queue still has one slot
+    	//System.out.println("passed");
     }
     
     /**
@@ -846,39 +918,7 @@ public class UploaderTest extends com.limegroup.gnutella.util.BaseTestCase {
         }
     }
     
-  /*  public void testPerHostLimitedNotQueued() throws Exception {
-        UploadSettings.HARD_MAX_UPLOADS.setValue(2);
-        UploadSettings.SOFT_MAX_UPLOADS.setValue(9999);
-        UploadSettings.UPLOADS_PER_PERSON.setValue(2);
-        UploadSettings.UPLOAD_QUEUE_SIZE.setValue(2);
-   
-        HTTPDownloader d1 = addUploader(upManager,rfd1,"1.1.1.1",true);
-        connectDloader(d1,true,rfd1,true);
-        HTTPDownloader d2 = addUploader(upManager,rfd2,"1.1.1.1",true);
-        connectDloader(d2,true,rfd2,true);
-        HTTPDownloader d3 = addUploader(upManager,rfd3,"1.1.1.1",true);
-        try {
-            connectDloader(d3,true,rfd3,true);
-            fail("Host limit reached, should not have accepted d3");
-        } catch (QueuedException qx) {
-            fail("host limit reached should not queue", qx);
-        } catch (TryAgainLaterException expectedException) {
-        } catch (IOException ioe) {//This is similar to d5 being rejected
-            //in testNormalQueueing, IOE may be thrown if uploader
-            //closes the socket. 
-        }            
-        HTTPDownloader d4 = addUploader(upManager,rfd4,"1.1.1.4",true);
-        try {
-            connectDloader(d4,true,rfd1,true);
-            fail("Host limit reached, should not have accepted d4");
-        } catch (TryAgainLaterException tx) {
-            fail("d4 should have been queued", tx);
-        } catch (QueuedException expectedException) {
-        } catch (IOException ioe) {
-            fail("d4 should have been queued", ioe);
-        }            
-        //System.out.println("passed");
-    }*/
+  
 
 
     /** 
