@@ -59,7 +59,7 @@ public class ConnectionManager {
      *  incoming connections.
      *
      *  LOCKING: obtain _incomingConnectionLock */
-    private int _incomingConnections=0;
+    private volatile int _incomingConnections=0;
     /** The lock for the number of incoming connnections. */
     private Object _incomingConnectionsLock=new Object();
 
