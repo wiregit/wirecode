@@ -1,5 +1,6 @@
 package com.limegroup.gnutella;
 
+import com.limegroup.gnutella.statistics.*;
 import java.io.*;
 import com.sun.java.util.collections.*;
 import java.util.StringTokenizer;
@@ -264,6 +265,7 @@ public class QueryRequest extends Message implements Serializable{
 
     protected void writePayload(OutputStream out) throws IOException {
         out.write(payload);
+        SentMessageStatHandler.TCP_QUERY_REQUESTS.addMessage(this);
     }
 
     /** 

@@ -1,5 +1,6 @@
 package com.limegroup.gnutella;
 
+import com.limegroup.gnutella.statistics.*;
 import java.io.*;
 import com.sun.java.util.collections.*;
 import com.limegroup.gnutella.messages.*;
@@ -362,6 +363,7 @@ public class QueryReply extends Message implements Serializable{
 
     public void writePayload(OutputStream out) throws IOException {
         out.write(payload);
+        SentMessageStatHandler.TCP_QUERY_REPLIES.addMessage(this);
     }
 
     /** Return the associated xml metadata string if the queryreply

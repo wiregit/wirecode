@@ -1,5 +1,6 @@
 package com.limegroup.gnutella;
 
+import com.limegroup.gnutella.statistics.*;
 import java.io.*;
 import com.limegroup.gnutella.messages.*;
 import com.limegroup.gnutella.util.*;
@@ -216,6 +217,7 @@ public class PingReply extends Message implements Serializable {
 
     protected void writePayload(OutputStream out) throws IOException {
         out.write(payload);
+        SentMessageStatHandler.TCP_PING_REPLIES.addMessage(this);
     }
 
     public String toString() {

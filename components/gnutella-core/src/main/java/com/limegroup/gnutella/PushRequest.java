@@ -1,5 +1,6 @@
 package com.limegroup.gnutella;
 
+import com.limegroup.gnutella.statistics.*;
 import java.io.*;
 import com.sun.java.util.collections.Arrays;
 
@@ -55,10 +56,12 @@ public class PushRequest extends Message implements Serializable {
 
 
     protected void writePayload(OutputStream out) throws IOException {
-        for (int i=0; i<payload.length; i++) {
+        out.write(payload);
+        SentMessageStatHandler.TCP_PUSH_REQUESTS.addMessage(this);
+        //for (int i=0; i<payload.length; i++) {
             //TODO3: buffer and send in batch.
-            out.write(payload[i]);
-        }
+        //out.write(payload[i]);
+        //}
     }
 
     public byte[] getClientGUID() {
