@@ -641,7 +641,7 @@ public class ConnectionManager {
             //1. Leaf. As the spec. says, this assumes we are an ultrapeer.
             //Preference trusted vendors using BearShare's clumping algorithm
             //(see above).
-			if(goodConnection(hr)) {
+			if(hr.isGoodConnection()) {
 				return getNumInitializedClientConnections() < 
                     UltrapeerSettings.MAX_LEAVES.getValue();
 			} else {
@@ -676,22 +676,6 @@ public class ConnectionManager {
         }
 		return false;
     }
-
-	/**
-	 * This method determines whether the given node is what is currently
-	 * considered a "good" connection.  Search architectures are developing
-	 * very quickly, meaning that this method will change over time.
-	 * Categorizing connections as "good" or "bad" simplifies preferencing.
-	 *
-	 * @param hr the <tt>HandshakeResponse</tt> instance containing the
-	 *  headers for the new connection
-	 */
-	private static boolean goodConnection(HandshakeResponse hr) {
-		return (hr.isHighDegreeConnection() && 
-				hr.isUltrapeerQueryRoutingConnection() &&
-                hr.isDynamicQueryConnection() &&
-                hr.isMaxTTLConnection());
-	}
 
 	/**
 	 * Helper method for determining whether or not the connecting node is
