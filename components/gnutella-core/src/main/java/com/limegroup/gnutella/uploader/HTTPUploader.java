@@ -330,7 +330,7 @@ public class HTTPUploader implements Uploader {
 		case FILE_NOT_FOUND:
 			_state = new FileNotFoundUploadState();
 		case COMPLETE:
-		case INTERRUPTED:
+		case INTERRUPTED:		   
 			break;
 		}
 	}
@@ -396,7 +396,7 @@ public class HTTPUploader implements Uploader {
 	 *  <tt>null</tt> if the <tt>FileDesc</tt> could not be assigned
 	 *  from the shared files
 	 */
-	FileDesc getFileDesc() {return _fileDesc;}
+	public FileDesc getFileDesc() {return _fileDesc;}
 
     boolean getClientAcceptsXGnutellaQueryreplies() {
         return _clientAcceptsXGnutellaQueryreplies;
