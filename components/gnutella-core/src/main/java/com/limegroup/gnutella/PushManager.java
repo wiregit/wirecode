@@ -13,11 +13,17 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.net.Socket;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 /**
  * Manages state for push upload requests.
  */
 public final class PushManager {
     
+    private static final Log LOG =
+      LogFactory.getLog(PushManager.class);
+
 	/**
 	 * The maximum time in SECONDS after an unsuccessful push until we will
      *  try the push again.  This should be larger than the 15+4*30=135 sec
@@ -74,6 +80,10 @@ public final class PushManager {
                                  final String guid,
                                  final boolean forceAllow,
                                  final boolean isFWTransfer) {
+        if(LOG.isDebugEnabled())  {
+            LOG.debug("acceptPushUp ip:"+host+" port:"+port+
+              " FW:"+isFWTransfer);
+        }
                                     
         if( host == null )
             throw new NullPointerException("null host");
