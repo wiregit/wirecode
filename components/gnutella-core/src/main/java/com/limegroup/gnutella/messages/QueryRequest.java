@@ -299,32 +299,7 @@ public class QueryRequest extends Message implements Serializable{
 			throw new IllegalArgumentException("empty query");
 		}
 		return new QueryRequest(newQueryGUID(false), query);
-	}
-
-
-	/**
-	 * Creates a new query for the specified file name, with no XML.
-	 *
-	 * @param query the file name to search for
-     * @param guid I trust that this is a address encoded guid.  Your loss if
-     * it isn't....
-	 * @return a new <tt>QueryRequest</tt> for the specified query that has
-	 * encoded the input ip and port into the GUID and appropriate marked the
-	 * query to signify out of band support.
-	 * @throws <tt>NullPointerException</tt> if the <tt>query</tt> argument
-	 *  is <tt>null</tt>
-	 * @throws <tt>IllegalArgumentException</tt> if the <tt>query</tt>
-	 *  argument is zero-length (empty)
-	 */
-    public static QueryRequest createOutOfBandQuery(byte[] guid, String query) {
-        if(query == null) {
-            throw new NullPointerException("null query");
-        }
-		if(query.length() == 0) {
-			throw new IllegalArgumentException("empty query");
-		}
-        return new QueryRequest(guid, DEFAULT_TTL, query, "", true);
-    }                                
+	}                           
     
 
 	/**
