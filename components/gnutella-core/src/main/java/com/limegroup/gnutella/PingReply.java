@@ -36,6 +36,26 @@ public class PingReply extends Message implements Serializable{
     }
 
     /**
+     * Create a new PingReply from scratch (including the hops).  This is 
+     * useful when forwarding along a PingReply, but have to change the 
+     * GUID (and keep the same hops).
+     */
+    public PingReply(byte[] guid, byte ttl, byte hops,
+             int port, byte[] ip, long files, long kbytes) {
+        super(guid, Message.F_PING_REPLY, ttl, hops, 14);
+        this.payload=new byte[14];
+        //It's ok if casting port, files, or kbytes turns negative.
+        ByteOrder.short2leb((short)port, payload, 0);
+        //Payload stores IP in BIG-ENDIAN
+        payload[2]=ip[0];
+        payload[3]=ip[1];
+        payload[4]=ip[2];
+        payload[5]=ip[3];
+        ByteOrder.int2leb((int)files, payload, 6);
+        ByteOrder.int2leb((int)kbytes, payload, 10);
+    }
+
+    /**
      * Wrap a PingReply around stuff snatched from the network.
      *
      * @requires payload.length==14

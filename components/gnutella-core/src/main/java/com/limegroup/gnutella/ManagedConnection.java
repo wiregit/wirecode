@@ -152,41 +152,11 @@ public class ManagedConnection
     private boolean _isOldClient = false;
 
     /**
-     * This is the last GUID (from a PING only) sent by the client that
-     * we are connected to.  This is used when sending cached PingReplies
-     * (PONGs).
-     */
-    private byte[] _lastPingGUID = null;
-
-    /**
-     * Used for determining if a PING received from an old client is 
-     * processed or dropped.  (Used in Throttling old clients from sending
-     * to many pings).
-     */
-    private long _oldClientAcceptTime = 0;
-
-    /**
      * First Ping is used to determine if this is a connection to an older
      * client or not.  Then, we can set the accept time for allowing Pings
      * from this older client.
      */
     private boolean _receivedFirstPing = false;
-
-    /**
-     * Throttle time for Pings from older clients.  (3 Seconds).  Note:
-     * it is the same value as HostCatcher.CACHE_EXPIRE_TIME, but for 
-     * clarity purposes, it makes sense to have a static constant 
-     * here too.
-     */
-    private static final long PING_THROTTLE_TIME = 3000;
-
-    /**
-     * Array of needed pongs where the index to the array is the Pongs 
-     * (indexed by number of hops) that we want to return to the client
-     * connected to us.
-     */
-    private int[] neededPongsArray = 
-        new int[MessageRouter.MAX_TTL_FOR_CACHE_REFRESH];
 
     /** Same as ManagedConnection(host, port, router, manager, false); */
     ManagedConnection(String host,
@@ -459,36 +429,28 @@ public class ManagedConnection
                 _numReceivedMessagesDropped++;
                 continue;
             }
-            
-            //if Ping or Pong received, we must process the request
-            //rather than incrementing the hops and decrementing the TTL
-            //here.
-            if(m instanceof PingRequest) {
-                //if an older client, see if we need to throttle the Ping.
-                if (_isOldClient && throttlePing()) {
-                    countDroppedMessage();
-                    continue;
-                }
-                //if pongs are still needed from previous ping, then drop request
-                if (stillNeedsPongs((int)m.getTTL())) {
-                    countDroppedMessage();
-                    continue;
-                }
-                _lastPingGUID = m.getGUID();
-                _router.handlePingRequest((PingRequest)m, this);
-                if (!_receivedFirstPing) 
-                    checkForOlderClient(m); //older client?
-                continue;
-            }
-            else if (m instanceof PingReply) {
-                _router.handlePingReply((PingReply)m, this);
+
+            //if crawler ping, send back pongs of neighbors.
+            if ((m instanceof PingRequest) && (isCrawlerPing(m))) {
+                _router.sendCrawlerPingReplies(m.getGUID(),this);
                 continue;
             }
 
             // Increment hops and decrease TTL
             m.hop();
 
-            if (m instanceof QueryRequest)
+            if(m instanceof PingRequest) {
+                //first ping should be checked if it is an older client (by
+                //Gnutella protocol version in GUID).
+                if (!_receivedFirstPing) 
+                    checkForOlderClient(m); 
+                if (!isHandshake(m)) //if handshake, just continue;
+                    _router.handlePingRequest((PingRequest)m, this);
+            }
+            else if (m instanceof PingReply) {
+                _router.handlePingReply((PingReply)m, this);
+            }
+            else if (m instanceof QueryRequest)
                 _router.handleQueryRequestPossibleDuplicate(
                     (QueryRequest)m, this);
             else if (m instanceof QueryReply)
@@ -509,50 +471,39 @@ public class ManagedConnection
 
         //if the protocol version is less than 1, it's an older client.
         if (GUID.getProtocolVersion(m.getGUID()) < 
-            GUID.GNUTELLA_VERSION_06) {
+            GUID.GNUTELLA_VERSION_06) 
             _isOldClient = true;
-            _oldClientAcceptTime = System.currentTimeMillis() + 
-                this.PING_THROTTLE_TIME;
-        }
     }
 
     /**
-     * Determines whether to throttle (i.e., drop) a ping request.  Basically,
-     * this method checks to make sure the ping received is greater than
-     * THROTTLE_TIME.  If so, then it's okay to process this ping, otherwise
-     * throttle the PingRequest.
-     * @requires - this is connection is to an older client.
+     * Returns whether the Ping received was from a GNUTELLA crawler, by 
+     * looking at the TTL and hops count.
      */
-    private boolean throttlePing() {
-        //if not older client, shouldn't be calling method, but just in case
-        //the ping should be processed.
-        if (!_isOldClient)
-            return false; 
+    private boolean isCrawlerPing(Message m) {
+        int ttl = (int)m.getTTL();
+        int hops = (int)m.getHops();
 
-        long currentTime = System.currentTimeMillis();
-
-        if (currentTime > _oldClientAcceptTime) {
-            _oldClientAcceptTime = System.currentTimeMillis() + 
-                PING_THROTTLE_TIME;
-            return false;
-        }
-        else {
+        if ((ttl == 2) && (hops == 0))
             return true;
-        }
+        else
+            return false;
     }
 
     /**
-     * Determines whether the connected client still needs some PingReplies 
-     * based on the ttl passed.  It does this by seeing if there are any 
-     * more needed ping replies to be sent from the array (up to ttl)
+     * Returns whether the Ping received was a handshake ping by looking at the
+     * ttl and hops count.  (ttl should be 0 and hops should be 1) since we 
+     * should be calling this method after calling hop on the messsage.
+     *
+     * @required - m.hop() has been called
      */
-    private boolean stillNeedsPongs(int ttl) {
-        for (int i = 0; i < ttl; i++) {
-            if (neededPongsArray[i] > 0) 
-                return true;
-        }
+    private boolean isHandshake(Message m) {
+        int ttl = (int)m.getTTL(); 
+        int hops = (int)m.getHops();
 
-        return false;
+        if ((ttl == 0) && (hops == 1))
+            return true;
+        else
+            return false;
     }
 
     /**
@@ -844,14 +795,6 @@ public class ManagedConnection
         return _isOldClient;
     }
 
-    /**
-     * returns the last PING GUID sent by the client that we are connected 
-     * to.
-     */
-    public byte[] getLastPingGUID() {
-        return _lastPingGUID;
-    }
-
     /** Unit test.  Only tests statistics methods. */
     /*
     public static void main(String args[]) {        
@@ -916,3 +859,6 @@ public class ManagedConnection
     }
     */
 }
+
+
+

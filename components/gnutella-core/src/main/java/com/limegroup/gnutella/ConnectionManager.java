@@ -174,12 +174,7 @@ public class ConnectionManager {
                  socket, _router, this);
              try {                     
                  initializeExternallyGeneratedConnection(connection);
-                 //We DO send ping requests on incoming connections.  This may
-                 //double ping traffic, but if gives us more accurate horizon
-                 //stats.  And it won't really affect traffic if people implement
-                 //caching properly.
-                 _router.sendPingRequest(new PingRequest(_settings.getTTL()),
-                                         connection);
+                 sendInitialPingRequest(connection);
                  connection.loopForMessages();
              } catch(IOException e) {
              } catch(Exception e) {
@@ -364,6 +359,22 @@ public class ConnectionManager {
 	public void deactivateUltraFastConnectShutdown() {
 		_ultraFastCheck = null;
 	}
+
+    /** 
+     * Sends the initial ping request to a newly initialized connection.  The ttl
+     * of the PingRequest will be 1 if we don't need any connections and there
+     * is enough hosts in the reserve cache (HostCatcher).  Otherwise, the ttl
+     * of the PingRequest = max ttl for refreshing the PingReplyCache.
+     */
+    private PingRequest sendInitialPingRequest(ManagedConnection connection) {
+        PingRequest pr;
+        //based on the invariant: numConnections + numFetchers >= _keepAlive
+        if (getNumConnections() + _fetchers.size() >= _keepAlive) 
+            pr = new PingRequest((byte)1);
+        else
+            pr = new PingRequest((byte)MessageRouter.MAX_TTL_FOR_CACHE_REFRESH);
+        connection.send(pr);
+    }
 
     /**
      * This Runnable resets the KeepAlive to the appropriate value
@@ -621,12 +632,14 @@ public class ConnectionManager {
 				{
 				    String group = "none:"+_settings.getConnectionSpeed();
 				    pingRequest = _router.createGroupPingRequest(group);
+                    _connection.send(pingRequest);
 				}
 				else
-				    pingRequest = 
-				      new PingRequest(_settings.getTTL());
-
-                _router.sendPingRequest(pingRequest, _connection);
+                {
+                    //send normal ping request (handshake or broadcast depending
+                    //on num of connections and reserve cache size.
+                    sendInitialPingRequest(_connection);
+                }
                 _connection.loopForMessages();
             } catch(IOException e) {
             } catch(Exception e) {
@@ -678,7 +691,7 @@ public class ConnectionManager {
 
         public void run() {
             try {
-                _router.sendPingRequest(_specialPing, _connection);
+                _connection.send(_specialPing );
                 _connection.loopForMessages();
             } catch(IOException e) {
             } catch(Exception e) {
@@ -694,7 +707,7 @@ public class ConnectionManager {
 	//------------------------------------------------------------------------
 
     /**
-     * Asynchronously fetches a connection from hostcatcher, then does
+     * Asynchronously fetches a connection from PingReplyCache, then does
      * then initialization and message loop.
      *
      * The ConnectionFetcher is responsible for recording its instantiation
@@ -725,16 +738,28 @@ public class ConnectionManager {
         public void run() {
             // Wait for an endpoint.
             Endpoint endpoint = null;
+            Random random = new Random();
+            int hops;
+            PingReplyCache pongCache = PingReplyCache.instance();
+            PingReply pr = null;
+
             do {
                 try {
-                    endpoint = _catcher.getAnEndpoint();
+                    hops = random.nextInt
+                        (MessageRouter.MAX_TTL_FOR_CACHE_REFRESH);
+                    pr = ((PingReplyCacheEntry)pongCache.getEntry(hops+1)).
+                        getPingReply();
+                    //no problem, just wait until pong cache returns a Ping Reply
+                    if (pr == null)
+                        continue; 
+                    endpoint = new Endpoint(pr.getIPBytes(), pr.getPort());
                 } catch (InterruptedException exc2) {
                     // Externally generated interrupt.
                     // The interrupting thread has recorded the
                     // death of the fetcher, so just return.
                     return;
                 }               
-            } while (isConnected(endpoint));
+            } while ((endpoint == null) || (isConnected(endpoint)));
 
             Assert.that(endpoint != null);
 
@@ -744,9 +769,7 @@ public class ConnectionManager {
 
             try {
                 initializeFetchedConnection(connection, this);
-                _router.sendPingRequest(
-                    new PingRequest(_settings.getTTL()),
-                    connection);
+                sendInitialPingRequest(connection);
                 connection.loopForMessages();
             } catch(IOException e) {
             } catch(Exception e) {

@@ -31,11 +31,17 @@ public class StandardMessageRouter
 
     /**
      * Responds to the PingRequest by getting information from the FileManager
-     * and the Acceptor.
+     * and the Acceptor.  However, it only sends a Ping Reply back if we
+     * are not firewalled and can currently accept incoming connections.
      */
     protected void respondToPingRequest(PingRequest pingRequest,
-                                        Acceptor acceptor)
+                                        Acceptor acceptor,
+                                        ManagedConnection connection)
     {
+        //check for preconditions: not firewalled and can accept incoming
+        if (!_acceptor.acceptedIncoming() || !_manager.haveAvailableIncoming())
+            return;
+
         int num_files = FileManager.instance().getNumFiles();
         int kilobytes = FileManager.instance().getSize()/1024;
 
@@ -45,12 +51,7 @@ public class StandardMessageRouter
                                             acceptor.getAddress(),
                                             num_files,
                                             kilobytes);
-
-        try
-        {
-            sendPingReply(pingReply);
-        }
-        catch(IOException e) {}
+        connection.send(pingReply);
     }
 
     public void handlePingReply(PingReply pingReply,
