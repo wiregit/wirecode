@@ -2000,9 +2000,9 @@ public class ManagedDownloader implements Downloader, Serializable {
         try {
             saveDir = SharingSettings.getSaveDirectory();
             completeFile = new File(saveDir, fileName);
-            String savePath = saveDir.getCanonicalPath();
+            String savePath = FileUtils.getCanonicalPath(saveDir);
             String completeFileParentPath = 
-                new File(completeFile.getParent()).getCanonicalPath();
+                FileUtils.getCanonicalPath(completeFile.getAbsoluteFile().getParentFile());
             if (!savePath.equals(completeFileParentPath))
                 throw new IOException();
         } catch (IOException e) {

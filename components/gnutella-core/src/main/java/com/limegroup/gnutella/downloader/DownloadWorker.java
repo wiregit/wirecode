@@ -843,7 +843,7 @@ public class DownloadWorker implements Runnable {
         int low = interval.low;
         int high = interval.high; // INCLUSIVE
 		_shouldRelease=true;
-        _downloader.connectHTTP(low, high + 1, true);
+        _downloader.connectHTTP(low, high + 1, true,_commonOutFile.getBlockSize());
         
         //The _downloader may have told us that we're going to read less data than
         //we expect to read.  We must release the not downloading leased intervals
@@ -973,7 +973,7 @@ public class DownloadWorker implements Runnable {
         _shouldRelease=false;
         //Note: we are not interested in being queued at this point this
         //line could throw a bunch of exceptions (not queuedException)
-        _downloader.connectHTTP(start, stop, false);
+        _downloader.connectHTTP(start, stop, false,_commonOutFile.getBlockSize());
         
         synchronized(slowest) {
             start = Math.max(slowest.getInitialReadingPoint() + slowest.getAmountRead(),
