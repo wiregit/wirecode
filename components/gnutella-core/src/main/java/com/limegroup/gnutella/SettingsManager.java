@@ -682,9 +682,9 @@ public class SettingsManager implements SettingsInterface
     /** returns the path of the properties and host list files */
     public String getPath() {return home_;}
 
-	public int getBasicInfoForQuery() {return basicQueryInfo_;}
+	public int getBasicInfoSizeForQuery() {return basicQueryInfo_;}
 
-	public int getAdvancedInfoForQuery() {return advancedQueryInfo_;}
+	public int getAdvancedInfoSizeForQuery() {return advancedQueryInfo_;}
 
     /******************************************************
      **************  END OF ACCESSOR METHODS **************
