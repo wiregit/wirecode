@@ -686,6 +686,11 @@ public class ConnectionManager {
                 return false;
             }
 		} else if (hr.isLeaf() || leaf) {
+            
+            if(!allowUltrapeer2LeafConnection(hr)) {
+                return false;
+            }
+            
             // Leaf. As the spec. says, this assumes we are an ultrapeer.
             int leaves = getNumInitializedClientConnections();
             int nonLimeWireLeaves = _nonLimeWireLeaves;
@@ -772,6 +777,22 @@ public class ConnectionManager {
         if(userAgent == null) return false;
         if(userAgent.startsWith("Morpheus")) return false;
         return true;
+    }
+    
+    /**
+     * Utility method for determining whether or not the connection should be
+     * allowed as a leaf when we're an Ultrapeer.  
+     * 
+     * @param hr the <tt>HandshakeResponse</tt> containing their connection
+     *  headers
+     * @return <tt>true</tt> if the connection should be allowed, otherwise
+     *  <tt>false</tt>
+     */
+    private boolean allowUltrapeer2LeafConnection(HandshakeResponse hr) {
+        String userAgent = hr.getUserAgent();
+        if(userAgent == null) return false;
+        if(userAgent.startsWith("Morpheus")) return false;
+        return true;        
     }
     
 	/** Returns the number of connections to other ultrapeers.  Caller MUST hold
