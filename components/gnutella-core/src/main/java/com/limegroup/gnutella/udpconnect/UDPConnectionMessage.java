@@ -59,6 +59,30 @@ public abstract class UDPConnectionMessage extends Message {
     /** The usable length of data2.  Up to 500 bytes by design. */
     protected int  _data2Length;
 
+    private static final BadPacketException NO_MATCH = 
+      	new BadPacketException("No matching UDPConnectionMessage");
+
+    public static UDPConnectionMessage createMessage(
+      byte[] guid, byte ttl, byte hops, byte[] payload) 
+      throws BadPacketException {
+        byte opcode         = (byte)((int)(guid[1] & 0xf0) >> 4); 
+ 
+        // Create appropriate UDPConnectionMessage
+        switch (opcode) {
+    		case OP_SYN:
+                return new SynMessage(guid,ttl,hops, payload);
+    		case OP_ACK:
+                return new AckMessage(guid,ttl,hops, payload);
+    		case OP_KEEPALIVE:
+                return new KeepAliveMessage(guid,ttl,hops, payload);
+    		case OP_DATA:
+                return new DataMessage(guid,ttl,hops, payload);
+    		case OP_FIN:
+                return new FinMessage(guid,ttl,hops, payload);
+        } 
+      	throw NO_MATCH;
+	}
+
 
     /**
      * Construct a new UDPConnectionMessage with the specified 

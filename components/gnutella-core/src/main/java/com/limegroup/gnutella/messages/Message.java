@@ -8,6 +8,7 @@ import com.limegroup.gnutella.statistics.ReceivedErrorStat;
 import com.limegroup.gnutella.routing.RouteTableMessage;
 import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.messages.vendor.*;
+import com.limegroup.gnutella.udpconnect.UDPConnectionMessage;
 
 /**
  * A Gnutella message (packet).  This class is abstract; subclasses
@@ -337,6 +338,9 @@ public abstract class Message
                                                  ttl + "/" + hops);
                 return VendorMessage.deriveVendorMessage(guid, ttl, hops, 
                                                          payload, network);
+            case F_UDP_CONNECTION:
+                return UDPConnectionMessage.createMessage(
+				  guid, ttl, hops, payload);
         }
         
         if( RECORD_STATS )

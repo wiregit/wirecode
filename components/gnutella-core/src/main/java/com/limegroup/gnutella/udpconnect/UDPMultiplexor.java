@@ -83,6 +83,8 @@ public class UDPMultiplexor {
 	  InetAddress senderIP, int senderPort) {
 		UDPConnectionProcessor con;
 
+System.out.println("Received:"+ msg+ " ip:"+ senderIP+ " p:"+ senderPort);
+
 		int connID = (int) msg.getConnectionID() & 0xff;
 
 		// If connID equals 0 and SynMessage then associate with a connection

@@ -511,6 +511,7 @@ public class UDPConnectionProcessor {
 	private synchronized void send(UDPConnectionMessage msg) 
       throws IllegalArgumentException {
 		_lastSendTime = System.currentTimeMillis();
+//System.out.println("send :"+msg+" ip:"+_ip+" p:"+_port+" t:"+_lastReceivedTime);
 		_udpService.send(msg, _ip, _port);  // TODO: performance
 	}
 
@@ -658,6 +659,7 @@ System.out.println("Soft resending message:"+drec.msg.getSequenceNumber());
 
 		// Record when the last message was received
 		_lastReceivedTime = System.currentTimeMillis();
+System.out.println("handleMessage :"+msg+" t:"+_lastReceivedTime);
 
         if (msg instanceof SynMessage) {
             // First Message from other host - get his connectionID.

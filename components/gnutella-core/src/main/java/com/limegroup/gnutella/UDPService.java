@@ -437,6 +437,9 @@ public final class UDPService implements Runnable {
                         continue;
                     }
                     try {
+System.out.println("Sending:"+ currBundle._dp+
+" ip:"+ currBundle._dp.getAddress()+
+" p:"+ currBundle._dp.getPort());
                         _socket.send(currBundle._dp);
                     } catch(BindException be) {
                         // oh well, if we can't bind our socket, ignore it.. 
