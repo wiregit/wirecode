@@ -540,17 +540,18 @@ public class LimeXMLDocument implements Serializable {
      * pre-encode the special XML characters into the values. 
      */
     public static String constructXML(List namValList, String uri){
+        if (namValList.size() == 0)
+            return "";
+
         //encode the URI
         uri = LimeXMLUtils.encodeXML(uri);
         int size = namValList.size();
-        String first="";
-        String last = "";
+        StringBuffer first = new StringBuffer();
+        StringBuffer last = new StringBuffer();
         String prevString = "";
         ArrayList tagsToClose = new ArrayList();
         boolean prevAtt=false;
         boolean rootAtts;//if there are root attributes besides identifier,URI
-        if (namValList.size() == 0)
-            return "";
         NameValue nv = (NameValue)namValList.get(0);
         String n = nv.getName();
         //if this string contains 2 sets of __ and the second set it at the 
@@ -558,13 +559,13 @@ public class LimeXMLDocument implements Serializable {
         boolean end = n.endsWith(XMLStringUtils.DELIMITER);
         StringTokenizer tok = new StringTokenizer(n,XMLStringUtils.DELIMITER);
         int c = tok.countTokens();
-        //System.out.println("Sumeet: "+n+","+c);
         if(end && c==2)
             rootAtts = true;
         else 
             rootAtts = false;
-        for(int i=0; i< size; i++){
-            NameValue namevalue = (NameValue)namValList.get(i);
+        int i = 0;
+        for(Iterator iter = namValList.iterator(); iter.hasNext(); i++) {
+            NameValue namevalue = (NameValue)iter.next();
             String currString = namevalue.getName();
             String value=LimeXMLUtils.encodeXML((String)namevalue.getValue());
             List currFields = XMLStringUtils.split(currString);
@@ -574,7 +575,7 @@ public class LimeXMLDocument implements Serializable {
             if (currString.endsWith(XMLStringUtils.DELIMITER))
                 attribute = true;
             if(prevAtt && !attribute)//previous was attribute and this is not
-                first = first+">";
+                first.append(">");
             if (i > 0){
                 prevFields = XMLStringUtils.split(prevString);
                 commonCount = getCommonCount(currFields,prevFields);
@@ -589,46 +590,47 @@ public class LimeXMLDocument implements Serializable {
                 for(int k=0; k<closeCount; k++){
                     String closeStr=(String)tagsToClose.remove(currClose);
                     currClose--;
-                    last = last + "</"+closeStr+">";
+                    last.append("</" + closeStr + ">");
                 }
             }
-            if(!last.equals("")){
-                first = first + last;
-                last = "";
+            if(last.length() != 0) {
+                first.append(last);
+                last.setLength(0);
             }
             //deal with parents
-            for(int j=commonCount; j<z-1; j++){
+            for(int j = commonCount; j < z-1; j++) {
                 String str = (String)currFields.get(j);
-                first = first+"<"+str;
-                if(i==0 && j==0 && !rootAtts){
-                    first=first+" xsi:noNamespaceSchemaLocation=\""+uri+"\">";
+                first.append("<" + str);
+                if( i == 0 && j == 0) {
+                    first.append(" xsi:noNamespaceSchemaLocation=\""+uri+"\"");
+                    if(!rootAtts)
+                        first.append(">");
+                } else if (!attribute) {
+                    first.append(">");
                 }
-                else if(i==0 && j==0 && rootAtts){
-                    first=first+" xsi:noNamespaceSchemaLocation=\""+uri+"\"";
-                }
-                if( (!attribute) && ( j>0 || i > 0))
-                    first = first+">";
                 tagsToClose.add(str);
             }
             String curr=(String)currFields.get(z-1);//get last=current one
             if(!attribute)
-                first = first + "<"+curr+">"+value+"</"+curr+">";
-            else{
-                first = first+" "+curr+"=\""+value+"\""; 
+                first.append("<" + curr + ">" + value + "</" + curr + ">");
+            else {
+                first.append(" " + curr + "=\"" + value + "\"");
                 if(i==size-1)
-                    first= first+">";
+                    first.append(">");
             }
             prevString = currString;
-            prevAtt = attribute;                
+            prevAtt = attribute;
         }
+
         //close remaining tags
         int stillPending = tagsToClose.size();
-        for(int l=stillPending-1;l>=0;l--){
+        for(int l = stillPending-1; l >= 0; l--) {
             String tag = (String)tagsToClose.remove(l);
-            first = first + "</"+tag+">";
+            first.append("</" + tag + ">");
         }
-        first = XML_HEADER+first;
-        return first;
+
+        first.insert(0, XML_HEADER);
+        return first.toString();
     }
 
     private static int getCommonCount(List currFields, List prevFields){
