@@ -247,11 +247,13 @@ class LanguageLoader {
             String vn = props.getProperty("LOCALE_VARIANT_NAME", vc);
             String sn = props.getProperty("LOCALE_SCRIPT_NAME", sc);
             String dn = props.getProperty("LOCALE_ENGLISH_LANGUAGE_NAME", ln);
+            String nsisName = props.getProperty("LOCALE_NSIS_NAME", "");
             boolean rtl = props.getProperty("LAYOUT_RIGHT_TO_LEFT", "false").equals("true");
             
             LanguageInfo li = new LanguageInfo(lc, cc, vc, sc,
                                                ln, cn, vn, sn,
-                                               dn, rtl, filename, props,
+                                               dn, nsisName,
+                                               rtl, filename, props,
                                                baseFileName);
             newlangs.put(li.getCode(), li);
             return li;

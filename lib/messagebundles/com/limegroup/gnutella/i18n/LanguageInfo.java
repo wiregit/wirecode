@@ -21,6 +21,7 @@ class LanguageInfo implements Comparable {
     private final Properties properties;
     private double percentage;
     private final String alternateFileName;
+    private final String nsisName;
     
     private static final String CHARSET_UTF8 = "UTF-8";
     private static final String CHARSET_8859_1 = "ISO-8859-1";
@@ -46,7 +47,7 @@ class LanguageInfo implements Comparable {
      */
     public LanguageInfo(String lc, String cc, String vc, String sc,
                         String ln, String cn, String vn, String sn,
-                        String dn, boolean rtl,
+                        String dn, String nsName, boolean rtl,
                         String fn, Properties props,
                         String alternateFile) {
         languageCode = lc.trim();
@@ -60,6 +61,7 @@ class LanguageInfo implements Comparable {
         isRightToLeft = rtl;
         displayName  = dn.trim();
         fileName     = fn.trim();
+        nsisName = nsName.trim();
         properties   = props;
         alternateFileName = alternateFile.trim();
         sourceCharset = alternateFileName.equals(fileName) ?
@@ -173,6 +175,11 @@ class LanguageInfo implements Comparable {
      * @return the source file name
      */
     public String getFileName() { return fileName; }
+    
+    /**
+     * @return the name in the NSIS installer.
+     */
+    public String getNSISName() { return nsisName; }
     
     /**
      * @return the source charset name

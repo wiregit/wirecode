@@ -29,6 +29,7 @@ public class CountPercent {
     private static final int ACTION_CHECK = 2;
     private static final int ACTION_UPDATE = 3;
     private static final int ACTION_RELEASE = 4;
+    private static final int ACTION_NSIS = 5;
     
     private static final double RELEASE_PERCENTAGE = .65;
     
@@ -52,9 +53,11 @@ public class CountPercent {
                     code = args[1];
             } else if(args[0].equals("release")) {
                 action = ACTION_RELEASE;
+            } else if(args[0].equals("nsis")) {
+                action = ACTION_NSIS;
             } else {
                 System.err.println(
-	                "Usage: java CountPercent [html|check|update [<code>]|release]");
+	                "Usage: java CountPercent [html|check|update [<code>]|release|nsis]");
                 return;
             }
         } else
@@ -116,6 +119,8 @@ public class CountPercent {
         case ACTION_RELEASE: 
             // release does an update, ensuring bad keys are gone
             // & native2ascii is done.
+        case ACTION_NSIS:
+            // nsis does an update too.
         case ACTION_UPDATE:
             loader.extendVariantLanguages();
             Set validKeys = new HashSet();
@@ -124,7 +129,7 @@ public class CountPercent {
             loader.retainKeys(validKeys);
             List lines = loader.getEnglishLines();
             LanguageUpdater updater = new LanguageUpdater(root, langs, lines);
-            if(action == ACTION_RELEASE)
+            if(action == ACTION_RELEASE || action == ACTION_NSIS)
                 updater.setSilent(true);
             if(code == null)
                 updater.updateAllLanguages();
@@ -132,10 +137,15 @@ public class CountPercent {
                 LanguageInfo info = (LanguageInfo)langs.get(code);
                 updater.updateLanguage(info);
             }
-            if(action != ACTION_RELEASE)
-                break;
-            loader.retainKeys(basicKeys);
-            release(root);
+            
+            if(action == ACTION_RELEASE) {
+                loader.retainKeys(basicKeys);
+                release(root);
+            } else if(action == ACTION_NSIS) {
+                loader.retainKeys(basicKeys);
+                nsis();
+            }
+                
             break;
         }
     }
@@ -213,6 +223,24 @@ public class CountPercent {
         deleteAll(release);
         copy(root, release, new ReleaseFilter(validLangs));
     }
+    
+    /**
+     * Lists all the languages that are of release-quality & have an NSIS name.
+     */
+    private void nsis() {
+        System.out.println("English");
+        for(Iterator i = langs.values().iterator(); i.hasNext(); ) {
+            LanguageInfo li = (LanguageInfo)i.next();
+            int count = li.getProperties().size();
+            double percentage = (double)count / (double)basicTotal;
+            if(percentage >= RELEASE_PERCENTAGE) {
+                String name = li.getNSISName();
+                if(!name.equals(""))
+                    System.out.println(name);
+            }
+        }
+    }        
+
     
     /**
      * Recursively copies all files in root to dir that match Filter.
