@@ -141,10 +141,14 @@ public final class CommonUtils {
 	}
 
 	/**
-	 * Returns the user's current working directory.
+	 * Returns the user's current working directory as a <tt>File</tt>
+	 * instance, or <tt>null</tt> if the property is not set.
+	 *
+	 * @return the user's current working directory as a <tt>File</tt>
+	 *  instance, or <tt>null</tt> if the property is not set
 	 */
-	public static String getCurrentDirectory() {
-		return PROPS.getProperty("user.dir");
+	public static File getCurrentDirectory() {
+		return new File(PROPS.getProperty("user.dir"));
 	}
 
     /**
@@ -314,10 +318,11 @@ public final class CommonUtils {
      * Returns the user home directory.
      *
      * @return the <tt>File</tt> instance denoting the abstract pathname of
-     *  the user's home directory
+     *  the user's home directory, or <tt>null</tt> if the home directory
+	 *  does not exist
      */
     public static File getUserHomeDir() {
-        return new File(System.getProperty("user.home"));
+        return new File(PROPS.getProperty("user.home"));
     }
     
     /**
@@ -327,11 +332,11 @@ public final class CommonUtils {
      * this is not guaranteed to succeed.
      *
      * @return the <tt>File</tt> instance denoting the user's home 
-     *  directory for the application
+     *  directory for the application, or <tt>null</tt> if that directory 
+	 *  does not exist
      */
     public static File getUserSettingsDir() {
-        final String USER_HOME_STR = System.getProperty("user.home");
-        final File HOME_DIR = new File(USER_HOME_STR, ".limewire");
+        final File HOME_DIR = new File(getUserHomeDir(), ".limewire");
         if(!HOME_DIR.isDirectory()) {
             HOME_DIR.mkdirs();
         }
