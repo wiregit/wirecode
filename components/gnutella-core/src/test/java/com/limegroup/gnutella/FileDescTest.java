@@ -1,30 +1,23 @@
 package com.limegroup.gnutella;
 
-import com.limegroup.gnutella.util.*;
-import com.limegroup.gnutella.http.*;
-import com.sun.java.util.collections.*;
-import junit.framework.*;
-import junit.extensions.*;
-import java.io.*;
-import java.net.*;
+import java.io.File;
+import java.io.IOException;
+import java.net.URL;
+
+import junit.framework.Test;
+
+import com.limegroup.gnutella.http.HTTPConstants;
+import com.limegroup.gnutella.util.CommonUtils;
+import com.sun.java.util.collections.HashSet;
+import com.sun.java.util.collections.LinkedList;
+import com.sun.java.util.collections.List;
+import com.sun.java.util.collections.Set;
 
 /**
  * Test the public methods of the <tt>FileDesc</tt> class.
  */
 public final class FileDescTest extends com.limegroup.gnutella.util.BaseTestCase {
 
-	private final String [] containedURNStrings = {
-		"urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB",
-		"urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGZQYPFB",
-		"Urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGZQYPFB",
-		"uRn:sHa1:PLRTHIPQGSSZTS5FJUPAKUZWUGYQYPFB",
-		"urn:sha1:PLPTHIPQGSSZTS5FJUPAKUZWUGYQYPFB",
-		"urn:Sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB",
-		"UrN:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB",
-		"urn:sHa1:PLSTIIPQGSSZTS5FJUPAKUZWUGYQYPFB",
-		"urn:sha1:PLSTXIPQGSSZTS5FJUPAKUZWUGYQYPFB",
-		"urn:sha1:PLSTTIPQGSSZTS5FJUPAKUZWUGYQYPFB"
-	};
 
 	private final String[] uncontainedURNStrings = {
 		"urn:sha1:CLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB",
@@ -92,7 +85,7 @@ public final class FileDescTest extends com.limegroup.gnutella.util.BaseTestCase
 
 		try {
 			Set urns = FileDesc.calculateAndCacheURN(file);
-			FileDesc fd = new FileDesc(null, urns, 0);
+			new FileDesc(null, urns, 0);
 			fail("null values should not be permitted for FileDesc "+
 				 "constructor");
 		} catch(NullPointerException e) {
@@ -106,13 +99,13 @@ public final class FileDescTest extends com.limegroup.gnutella.util.BaseTestCase
 		File file = new File(getSaveDirectory(), "nonexistentfile");
 		if(file.exists()) file.delete();
 		try {
-			Set urns = FileDesc.calculateAndCacheURN(file);
+			FileDesc.calculateAndCacheURN(file);
 			fail("nonexistent files should not be permitted");
 		} catch(IllegalArgumentException e) {
 		}		
 
 		try {
-			Set urns = FileDesc.calculateAndCacheURN(null);
+			FileDesc.calculateAndCacheURN(null);
 			fail("null files should not be permitted");
 		} catch(NullPointerException e) {
 		}		
