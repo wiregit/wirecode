@@ -27,6 +27,7 @@ import com.limegroup.gnutella.RouterService;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.settings.ApplicationSettings;
+import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.StringUtils;
 import com.limegroup.gnutella.util.IOUtils;
 
@@ -205,9 +206,8 @@ public class UDPCrawlerPong extends VendorMessage {
 				agents.append(agent).append(AGENT_SEP);
 			}
 			
-			//lose the trailing ~
-			if (agents.length() > 0)
-				agents.deleteCharAt(agents.length()-1);
+			// append myself at the end
+			agents.append("LimeWire/").append(CommonUtils.getLimeWireVersion());
 			
 			//zip the string
 			ByteArrayOutputStream baos = new ByteArrayOutputStream();

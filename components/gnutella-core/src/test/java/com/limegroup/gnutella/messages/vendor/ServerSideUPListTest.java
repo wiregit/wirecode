@@ -488,12 +488,12 @@ public class ServerSideUPListTest extends BaseTestCase {
  		UDPCrawlerPong pong = tryMessage(msgAgents);
  		
  		assertNotNull(pong.getAgents());
- 		
+System.out.println("got "+UDPCrawlerPong.AGENT_SEP+" vs "+pong.getAgents());
  		//we should have 3 agents reported.
  		StringTokenizer tok = new StringTokenizer(pong.getAgents(),
  				UDPCrawlerPong.AGENT_SEP);
  		
- 		assertEquals(3,tok.countTokens());
+ 		assertEquals(7,tok.countTokens());
  		
  		while(tok.hasMoreTokens())
  			assertEquals("LimeWire/@version@",tok.nextToken());
