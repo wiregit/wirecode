@@ -2041,17 +2041,17 @@ public class ManagedDownloader implements Downloader, Serializable {
                                               "some file.txt", 1000, 
                                               new byte[16], 
                                               SpeedConstants.T1_SPEED_INT, 
-                                              false, 3, false, null, null);
+                                              false, 3, false, null, null, null);
         RemoteFileDesc rf4=new RemoteFileDesc("1.2.3.6", 6346, 0, 
                                               "some file.txt", 1010, 
                                               new byte[16], 
                                               SpeedConstants.T3_SPEED_INT, 
-                                              false, 0, false, null, null);
+                                              false, 0, false, null, null, null);
         RemoteFileDesc rf5=new RemoteFileDesc("1.2.3.6", 6346, 0, 
                                               "some file.txt", 1010, 
                                               new byte[16], 
                                               SpeedConstants.T3_SPEED_INT+1, 
-                                              false, 0, false, null, null);
+                                              false, 0, false, null, null, null);
 
         List list=new LinkedList();
         list.add(rf4);
