@@ -7,7 +7,7 @@ import com.limegroup.gnutella.RemoteFileDesc;
 class DownloadWorkerStub extends DownloadWorker {
 
     public DownloadWorkerStub(ManagedDownloader manager, RemoteFileDesc rfd) {
-        super(manager, rfd);
+        super(manager, rfd,null,null);
     }
 
     HTTPDownloader getDownloader() {

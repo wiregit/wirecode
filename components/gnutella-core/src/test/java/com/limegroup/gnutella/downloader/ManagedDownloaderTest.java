@@ -38,6 +38,7 @@ import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.stubs.ConnectionManagerStub;
 import com.limegroup.gnutella.stubs.DownloadManagerStub;
+import com.limegroup.gnutella.stubs.FileDescStub;
 import com.limegroup.gnutella.stubs.FileManagerStub;
 import com.limegroup.gnutella.stubs.IncompleteFileDescStub;
 import com.limegroup.gnutella.stubs.MessageRouterStub;
@@ -82,6 +83,11 @@ public class ManagedDownloaderTest extends com.limegroup.gnutella.util.BaseTestC
         callback = new ActivityCallbackStub();
         router = new MessageRouterStub();
         manager.initialize(callback, router, fileman);
+        try {
+            PrivilegedAccessor.setValue(RouterService.class,"callback",callback);
+        }catch(Exception e) {
+            ErrorService.error(e);
+        }
     }
 
     
@@ -339,7 +345,7 @@ public class ManagedDownloaderTest extends com.limegroup.gnutella.util.BaseTestC
     /** Tests that the progress is retained for deserialized downloaders. */
     public void testSerializedProgress() throws Exception {        
         IncompleteFileManager ifm=new IncompleteFileManager();
-        RemoteFileDesc rfd=newRFD("some file.txt");
+        RemoteFileDesc rfd=newRFD("some file.txt",FileDescStub.DEFAULT_URN.toString());
         File incompleteFile=ifm.getFile(rfd);
         int amountDownloaded=100;
         VerifyingFile vf=new VerifyingFile(1024);
@@ -394,16 +400,18 @@ public class ManagedDownloaderTest extends com.limegroup.gnutella.util.BaseTestC
             //Start uploader and download.
             uploader=new TestUploader("ManagedDownloaderTest", PORT);
             uploader.stopAfter(100);
+            uploader.setSendThexTreeHeader(false);
+            uploader.setSendThexTree(false);
             downloader=
 				new ManagedDownloader(
-						new RemoteFileDesc[] {newRFD("another testfile.txt")},
+						new RemoteFileDesc[] {newRFD("another testfile.txt",FileDescStub.DEFAULT_URN.toString())},
                         new IncompleteFileManager(), null);
             downloader.initialize(manager, 
                                   fileman,
                                   callback);
             requestStart(downloader);
             //Wait for it to download until error, need to wait 
-            Thread.sleep(140000);
+            Thread.sleep(40000);
             // no more auto requeries - so the download should be waiting for
             // input from the user
             assertEquals("should have read 100 bytes", 100, 

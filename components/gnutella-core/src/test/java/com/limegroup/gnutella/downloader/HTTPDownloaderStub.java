@@ -15,7 +15,7 @@ import com.limegroup.gnutella.http.ProblemReadingHeaderException;
  */
 public class HTTPDownloaderStub extends HTTPDownloader {
 
-	public HTTPDownloaderStub(RemoteFileDesc file, File incompleteFile) {
+	public HTTPDownloaderStub(RemoteFileDesc file, VerifyingFile incompleteFile) {
 		super(file, incompleteFile);
 	}
 	

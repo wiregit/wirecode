@@ -626,7 +626,7 @@ public class ManagedDownloader implements Downloader, Serializable {
             initializeFilesAndFolders();
             initializeIncompleteFile();
             initializeVerifyingFile();
-        }catch(IOException bad) {LOG.debug("",bad);
+        }catch(IOException bad) {
             setState(DISK_PROBLEM);
             return;
         }
@@ -957,7 +957,8 @@ public class ManagedDownloader implements Downloader, Serializable {
         if (incompleteFile != null)
             return;
         
-        incompleteFile = incompleteFileManager.getFileForUrn(downloadSHA1);
+        if (downloadSHA1 != null)
+            incompleteFile = incompleteFileManager.getFileForUrn(downloadSHA1);
         
         if (incompleteFile == null) {
             if (allFiles == null || allFiles.length == 0)
@@ -2743,6 +2744,7 @@ public class ManagedDownloader implements Downloader, Serializable {
                 ourFile = commonOutFile;
             }
         }
+        
         return ourFile == null ? 0 : ourFile.getBlockSize();                
     }
      

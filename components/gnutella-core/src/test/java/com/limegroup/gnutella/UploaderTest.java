@@ -18,6 +18,7 @@ import com.limegroup.gnutella.downloader.HTTPDownloader;
 import com.limegroup.gnutella.downloader.QueuedException;
 import com.limegroup.gnutella.downloader.TryAgainLaterException;
 import com.limegroup.gnutella.downloader.UnknownCodeException;
+import com.limegroup.gnutella.downloader.VerifyingFile;
 import com.limegroup.gnutella.http.HTTPRequestMethod;
 import com.limegroup.gnutella.settings.UploadSettings;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
@@ -1033,8 +1034,10 @@ public class UploaderTest extends com.limegroup.gnutella.util.BaseTestCase {
 
         Socket sb=psf.getSocketB();
         File tmp=File.createTempFile("UploadManager_Test", "dat");
+        VerifyingFile vf = new VerifyingFile();
+        vf.open(tmp);
         HTTPDownloader downloader = 
-			new HTTPDownloader(sb, rfd, tmp);
+			new HTTPDownloader(sb, rfd, vf);
         tmp.delete();
         return downloader;
     }
