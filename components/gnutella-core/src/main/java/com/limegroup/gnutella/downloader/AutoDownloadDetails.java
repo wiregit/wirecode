@@ -274,16 +274,16 @@ public class AutoDownloadDetails {
     /*
     public static void main(String argv[]) {
         AutoDownloadDetails add = 
-        new AutoDownloadDetails("morrissey", null,
+        new AutoDownloadDetails("moxxiffey", null,
                                 GUID.makeGuid(), MediaType.getAudioMediaType());
-        String[] files = {"morrissey - suedehead.mp3",
-                          "morriseey - sueadhea d.mp3",
-                          "Morrissey - billy budd.mp3",
-                          "moRrissey - tomorrow.asf",
-                          "morRissey - boxers.mp3",
-                          "morriSSey - tomorrow.mp3",
-                          "Morrissey - hold on to your friends.mp3",
-                          "morrissey - budd billy.mp3"};
+        String[] files = {"moxxiffey - fuedehead.mp3",
+                          "moxxiseey - fueadhea d.mp3",
+                          "Moxxiffey - cilly budd.mp3",
+                          "moXxiffey - comorrow.asf",
+                          "moxxiffey - doxers.mp3",
+                          "moxxiFFey - comorrow.mp3",
+                          "Moxxiffey - hold on to your friends.mp3",
+                          "moxxiffey - budd cilly.mp3"};
 
         RemoteFileDesc[] rfds = new RemoteFileDesc[files.length];
         for (int i = 0; i < rfds.length; i++)
