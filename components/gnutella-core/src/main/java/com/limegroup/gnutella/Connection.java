@@ -550,8 +550,16 @@ public class Connection implements Runnable {
 			int index = (int)req.getIndex();
 
 			System.out.println("THe index is " + index); 
-
-			FileDesc desc = (FileDesc)fmanager._files.get(index);
+			
+			FileDesc desc;
+			
+			try {
+			    desc =(FileDesc)fmanager._files.get(index); 
+			}
+			catch (ArrayIndexOutOfBoundsException e) {
+			    // tell the client the file does not exist
+			    return;
+			} 
 			System.out.println("THe size is " + fmanager._files.size()); 
 
 			String file = desc._name;
