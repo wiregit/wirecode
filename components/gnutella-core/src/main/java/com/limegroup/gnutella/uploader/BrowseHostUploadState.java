@@ -62,7 +62,7 @@ public final class BrowseHostUploadState implements HTTPMessage {
         String str;
 		str = "HTTP/1.1 200 OK\r\n";
 		ostream.write(str.getBytes());
-		str = "User-Agent: " + CommonUtils.getHttpServer() + "\r\n";
+		str = "Server: " + CommonUtils.getHttpServer() + "\r\n";
 		ostream.write(str.getBytes());
 		str = "Content-Type: " + Constants.QUERYREPLY_MIME_TYPE + "\r\n";
 		ostream.write(str.getBytes());
