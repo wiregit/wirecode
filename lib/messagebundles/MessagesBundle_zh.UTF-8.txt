@@ -72,6 +72,22 @@ GENERAL_BROWSE_HOST_LABEL=浏览 主机
 #### GENERAL_BROWSE_HOST_TIP=View All Files on the Selected Computer
 GENERAL_BROWSE_HOST_TIP=浏览 选中的 计算机上的 所有 共享 文件.
 
+################################################################################
+# Keys/value pairs for right-click context menus.
+################################################################################
+#### CONTEXT_MENU_UNDO=Undo
+#? CONTEXT_MENU_UNDO=
+#### CONTEXT_MENU_CUT=Cut
+#? CONTEXT_MENU_CUT=
+#### CONTEXT_MENU_COPY=Copy
+#? CONTEXT_MENU_COPY=
+#### CONTEXT_MENU_PASTE=Paste
+#? CONTEXT_MENU_PASTE=
+#### CONTEXT_MENU_DELETE=Delete
+#? CONTEXT_MENU_DELETE=
+#### CONTEXT_MENU_SELECT_ALL=Select All
+#? CONTEXT_MENU_SELECT_ALL=
+
 #Options
 #### OPTIONS_BUTTONS_OK_LABEL=OK
 OPTIONS_BUTTONS_OK_LABEL=确定
