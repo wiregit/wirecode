@@ -77,7 +77,7 @@ public class FileDesc implements AlternateLocationCollector {
 	/**
 	 * The collection of alternate locations for the file.
 	 */
-	private AlternateLocationCollection ALT_LOCS;
+	protected AlternateLocationCollection ALT_LOCS;
 	
 	/**
 	 * The number of hits this file has recieved.

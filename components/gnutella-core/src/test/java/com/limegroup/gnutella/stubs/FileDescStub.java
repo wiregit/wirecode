@@ -38,11 +38,13 @@ public class FileDescStub extends FileDesc {
     public FileDescStub(String name) {
         super(new File(name), set, 0);
         localSet=new HashSet();
+        _altlocCollection = ALT_LOCS;
     }
     
     public FileDescStub(String name, URN urn, int index) {
     	super(new File(name), createUrnSet(urn),index);
     	localSet=localSet2;
+    	_altlocCollection = ALT_LOCS;
     }
     
     private static Set createUrnSet(URN urn) {
