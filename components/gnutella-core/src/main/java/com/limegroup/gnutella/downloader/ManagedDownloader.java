@@ -1218,7 +1218,7 @@ public class ManagedDownloader implements Downloader, Serializable {
         //      increasing parallelism
         Interval interval=(Interval)needed.remove(0);
         //this line can throw a bunch of exceptions.
-        dloader.connectHTTP(interval.low, interval.high);
+        dloader.connectHTTP(getOverlapOffset(interval.low), interval.high);
         dloader.stopAt(interval.high);
         debug("WORKER: picking white "+interval+" to "+dloader);
     }
