@@ -100,8 +100,10 @@ final class HeadRequester implements Runnable {
                             HTTPHeaderName.CONNECTION.httpStringValue(),
                             "close");
                         httpConnection.connect();
-                        String contentUrn = httpConnection.getHeaderField
-					        (HTTPHeaderName.GNUTELLA_CONTENT_URN.httpStringValue());
+                        String contentUrn = 
+                            getHeaderField(httpConnection, 
+                                           HTTPHeaderName.GNUTELLA_CONTENT_URN);
+
                         if(contentUrn == null) {
                             continue;
                         }
@@ -113,8 +115,9 @@ final class HeadRequester implements Runnable {
                         } catch(IOException e) {
                             continue;
                         }
-                        String altLocs = httpConnection.getHeaderField
-                            (HTTPHeaderName.ALT_LOCATION.httpStringValue());
+                        String altLocs = 
+                            getHeaderField(httpConnection, 
+                                           HTTPHeaderName.ALT_LOCATION);
                         if(altLocs == null) {
                             continue;
                         }
@@ -135,4 +138,26 @@ final class HeadRequester implements Runnable {
             ErrorService.error(e);
         }
 	}
+
+    /**
+     * Helper method that works around bug ID 4111517 in java versions
+     * 1.1.6 - 1.2beta4.  There is no known workaround, so we just catch
+     * the null pointer and throw an IOException.
+     *
+     * @param conn the <tt>HttpURLConnection</tt> to get the header field
+     *  from
+     * @param header the header name to look for
+     */
+    private static String getHeaderField(HttpURLConnection conn, 
+                                         HTTPHeaderName header) 
+        throws IOException {
+        try {
+            return conn.getHeaderField(header.httpStringValue());
+        } catch(NullPointerException e) {
+            // This works around bug ID 4111517 in java versions
+            // 1.1.6 - 1.2beta4.  This apparently occurs when the server load
+            // is high
+            throw new IOException("high server load with 1.1.8 client");
+        }        
+    } 
 }
