@@ -95,11 +95,11 @@ public class UDPScheduler extends ManagedThread {
         _updateThread.unregisterEvent(evt);
 	}
 
-	private final synchronized void registerPriv(UDPTimerEvent evt) {
+	public final synchronized void registerSync(UDPTimerEvent evt) {
 		_connectionEvents.add(evt);
 	}
 
-	private final synchronized void unregisterPriv(UDPTimerEvent evt) {
+	public final synchronized void unregisterSync(UDPTimerEvent evt) {
 		_connectionEvents.remove(evt);
 	
 		// Replace the removed connection in schedule if necessary
@@ -197,11 +197,11 @@ public class UDPScheduler extends ManagedThread {
 
                 //first remove any events
                 for (Iterator iter = localListUnregister.iterator();iter.hasNext();)
-                	unregisterPriv((UDPTimerEvent)iter.next());
+                	unregisterSync((UDPTimerEvent)iter.next());
                 
                 //then add any events
                 for (Iterator iter = localListRegister.iterator();iter.hasNext();)
-                	registerPriv((UDPTimerEvent)iter.next());
+                	registerSync((UDPTimerEvent)iter.next());
                 
                 //then reschedule any events
                 for (int i=0; i < localListSchedule.size(); i++) {
@@ -305,7 +305,6 @@ public class UDPScheduler extends ManagedThread {
  	private synchronized void runEvent() {
 		if ( _scheduledEvent != NO_EVENT ) {
 			_scheduledEvent.handleEvent();
-			Thread.yield();
 		}
 	}
 

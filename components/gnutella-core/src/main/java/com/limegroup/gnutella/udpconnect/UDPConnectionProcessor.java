@@ -1286,7 +1286,7 @@ public class UDPConnectionProcessor {
             UDPConnectionProcessor udpCon = 
             	(UDPConnectionProcessor)_udpCon.get();
             
-        	if (unregisterIfNull())
+        	if (unregisterIfNeeded())
         		return;
 
             long time = System.currentTimeMillis();
@@ -1341,7 +1341,7 @@ public class UDPConnectionProcessor {
         	UDPConnectionProcessor udpCon = 
         		(UDPConnectionProcessor) _udpCon.get();
         	
-        	if (unregisterIfNull())
+        	if (unregisterIfNeeded())
         		return;
         	
             if(LOG.isDebugEnabled())  
@@ -1380,7 +1380,7 @@ public class UDPConnectionProcessor {
         	UDPConnectionProcessor udpCon = 
         		(UDPConnectionProcessor) _udpCon.get();
         	
-        	if (unregisterIfNull())
+        	if (unregisterIfNeeded())
         		return;
         	
             if(LOG.isDebugEnabled())  
@@ -1407,7 +1407,7 @@ public class UDPConnectionProcessor {
         	UDPConnectionProcessor udpCon = 
         		(UDPConnectionProcessor) _udpCon.get();
         	
-        	if (unregisterIfNull())
+        	if (unregisterIfNeeded())
         		return;
         	
             if(LOG.isDebugEnabled())  
@@ -1435,7 +1435,7 @@ public class UDPConnectionProcessor {
         	UDPConnectionProcessor udpCon = 
         		(UDPConnectionProcessor) _udpCon.get();
         	
-        	if (unregisterIfNull())
+        	if (unregisterIfNeeded())
         		return;
         	
             if(LOG.isDebugEnabled())  
@@ -1447,6 +1447,8 @@ public class UDPConnectionProcessor {
 
             if(LOG.isDebugEnabled())  
                 LOG.debug("Closed connection done: "+ System.currentTimeMillis());
+            
+            _shouldUnregister=true;
         }
     }
     //
