@@ -21,18 +21,31 @@ public final class PongCacher {
      * Constant for the number of cached pongs returned in response to
      * pings.  Public to make testing easier.
      */
-    public static final int NUM_CACHED_PONGS = 4;
+    public static final int NUM_CACHED_PONGS = 6;
+
+    /**
+     * Constant for the number of pongs to store per hop.  Public to make
+     * testing easier.
+     */
+    public static final int NUM_PONGS_PER_HOP = 1;
 
     /**
      * Constant for the number of hops to keep track of in our pong cache.
      */
-    private static final int NUM_HOPS = 8;
+    public static final int NUM_HOPS = 8;
 
     /**
      * <tt>BucketQueue</tt> holding pongs separated by hops.
      */
     private static final BucketQueue PONGS =
-        new BucketQueue(NUM_HOPS, NUM_CACHED_PONGS);
+        new BucketQueue(NUM_HOPS, NUM_PONGS_PER_HOP);
+
+    /**
+     * Variable for the last time a pong was added, in milliseconds.
+     * This is used to determine whether or not we should cache pongs 
+     * from old connections.
+     */
+    private static long _lastPongAddTime = 0L; 
 
     /**
      * Returns the single <tt>PongCacher</tt> instance.
@@ -59,9 +72,8 @@ public final class PongCacher {
             Iterator iter = PONGS.iterator();
             int i = 0;
             List pongs = new LinkedList();
-            while(iter.hasNext() && i<NUM_CACHED_PONGS) {
+            for(;iter.hasNext() && i<NUM_CACHED_PONGS; i++) {
                 pongs.add((PingReply)iter.next());
-                i++;
             }
             return pongs;
         }
@@ -81,8 +93,30 @@ public final class PongCacher {
         if(pr.getHops() >= NUM_HOPS) return;
         synchronized(PONGS) {
             PONGS.insert(pr, pr.getHops());
+            _lastPongAddTime = System.currentTimeMillis();
+        }
+    }
+
+    /**
+     * Returns whether or not we need pongs for the cacher.
+     *
+     * @return <tt>true</tt> if we need new pongs to cache, otherwise
+     *  <tt>false</tt>
+     */
+    public boolean needsPongs() {
+        // if we're not an Ultrapeer, we don't care about caching the pong
+        if(!RouterService.isSupernode()) return false;
+
+        
+        if(System.currentTimeMillis() - _lastPongAddTime > 1000) {
+            return true;
+        }
+
+        synchronized(PONGS) {
+            return PONGS.size() < NUM_PONGS_PER_HOP*NUM_HOPS;
         }
     }
 }
+
 
 
