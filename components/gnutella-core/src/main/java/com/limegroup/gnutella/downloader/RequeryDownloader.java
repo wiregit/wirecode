@@ -77,4 +77,26 @@ public class RequeryDownloader extends ManagedDownloader {
         return retVal;
     }
 
+
+    /** Need to override this until ManagedDownloader has a allFiles of non-zero
+     * length. 
+     */
+    public synchronized String getFileName() {        
+        if (_hasFile)
+            return super.getFileName();
+        else
+            return "\"" + getQuery() + "\"";
+    }
+
+    /** Need to override this until ManagedDownloader has a allFiles of non-zero
+     * length. 
+     */
+    public synchronized int getContentLength() {
+        if (_hasFile)
+            return super.getContentLength();
+        else
+            return -1;
+    }
+
+
 }
