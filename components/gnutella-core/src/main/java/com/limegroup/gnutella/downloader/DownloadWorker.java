@@ -31,7 +31,38 @@ import com.limegroup.gnutella.util.IntervalSet;
  * Class that performs the logic of downloading a file from a single host.
  */
 public class DownloadWorker implements Runnable {
-    
+    /*
+      
+      Each potential downloader thats working in parallel does these steps
+      1. Establish a TCP connection with an rfd
+         if unable to connect end this parallel execution
+      2. This step has two parts
+            a.  Grab a part of the file to download. If there is a white area on
+                the file grab that, otherwise try to steal a grey area
+            b.  Send http headers to the uploader on the tcp connection 
+                established  in step 1. The uploader may or may not be able to 
+                upload at this time. If the uploader can't upload, it's 
+                important that the white or grey area be restored to the state 
+                they were in before we started trying. However, if the http 
+                handshaking was successful, the downloader can keep the 
+                part it obtained.
+          The two steps above must be  atomic wrt other downloaders. 
+          Othersise, other downloaders in parallel will be  able to steal the 
+          same white areas, or grey areas from the same downloaders.
+      3. Download the file by delegating to the HTTPDownloader, and then do 
+         the book-keeping. Termination may be normal or abnormal. 
+     
+     
+                              connectAndDownload
+                          /           |             \
+        establishConnection     assignAndRequest    doDownload
+             |                        |             |       \
+       HTTPDownloader.connectTCP      |             |        requestHashTree
+                                      |             |- HTTPDownloader.download
+                            assignWhite/assignGrey
+                                      |
+                           HTTPDownloader.connectHTTP
+    */
     private static final Log LOG = LogFactory.getLog(DownloadWorker.class);
     
     ///////////////////////// Policy Controls ///////////////////////////

@@ -120,26 +120,9 @@ public class ManagedDownloader implements Downloader, Serializable {
 
       While the file has not been downloaded, and we have not given up
       try to increasing parallelism, to our maximum capacity...
-      Each potential downloader thats working in parallel does these steps
-      1. Establish a TCP connection with an rfd
-         if unable to connect end this parallel execution
-      2. This step has two parts
-            a.  Grab a part of the file to download. If there is a white area on
-                the file grab that, otherwise try to steal a grey area
-            b.  Send http headers to the uploader on the tcp connection 
-                established  in step 1. The uploader may or may not be able to 
-                upload at this time. If the uploader can't upload, it's 
-                important that the white or grey area be restored to the state 
-                they were in before we started trying. However, if the http 
-                handshaking was successful, the downloader can keep the 
-                part it obtained.
-          The two steps above must be  atomic wrt other downloaders. 
-          Othersise, other downloaders in parallel will be  able to steal the 
-          same white areas, or grey areas from the same downloaders.
-      3. Download the file by delegating to the HTTPDownloader, and then do 
-         the book-keeping. Termination may be normal or abnormal. 
+      
 
-     ManagedDownloader delegates to multiple HTTPDownloader instances, one for
+     ManagedDownloader delegates to multiple DownloadWorker instances, one for
      each HTTP connection.  HTTPDownloader uses Java's RandomAccessFile class,
      which allows multiple threads to write to different parts of a file at the
      same time.  The IncompleteFileManager class maintains a list of which
@@ -156,17 +139,8 @@ public class ManagedDownloader implements Downloader, Serializable {
                                     |
                                   tryAllDownloads3
                                     | 
-                               (asynchronously)
-                                    |
-                              connectAndDownload
-                          /           |             \
-        establishConnection     assignAndRequest    doDownload
-             |                        |             |       \
-       HTTPDownloader.connectTCP      |             |        requestHashTree
-                                      |             |- HTTPDownloader.download
-                            assignWhite/assignGrey
-                                      |
-                           HTTPDownloader.connectHTTP
+                    (asynchronously start workers)
+                                    
 
       DownloadManager notifies a ManagedDownloader when it should start
       tryAllDownloads.  An inactive download (waiting for a busy host,
@@ -1922,8 +1896,6 @@ public class ManagedDownloader implements Downloader, Serializable {
         
         URN fileHash;
         int status;
-
-        
         
         status = -1;  //TODO: is this equal to COMPLETE etc?            
         try {
