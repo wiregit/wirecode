@@ -1,10 +1,16 @@
 package com.limegroup.gnutella;
 
+import java.io.IOException;
+import java.lang.reflect.Method;
+import java.util.Properties;
+
 import junit.framework.Test;
 
+import com.limegroup.gnutella.handshaking.HandshakeResponse;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.UltrapeerSettings;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
+import com.limegroup.gnutella.util.BaseTestCase;
 import com.limegroup.gnutella.util.PrivilegedAccessor;
 
 /**
@@ -12,7 +18,7 @@ import com.limegroup.gnutella.util.PrivilegedAccessor;
  * of right events.  VERY slow--involves lots of timeouts--so not part of the
  * standard test suite.  
  */
-public class ConnectionManagerTest extends com.limegroup.gnutella.util.BaseTestCase {
+public class ConnectionManagerTest extends BaseTestCase {
 
     private static final TestHostCatcher CATCHER = new TestHostCatcher();
 
@@ -67,6 +73,111 @@ public class ConnectionManagerTest extends com.limegroup.gnutella.util.BaseTestC
         CATCHER.connectFailures = 0;
         CATCHER.endpoint = null;
         sleep();
+    }
+    
+    /**
+     * Tests the method for checking whether or not connections should be 
+     * allowed.
+     * 
+     * @throws Exception if an error occurs
+     */
+    public void testAllowConnection() throws Exception {
+        
+    }
+    
+    /**
+     * Tests the method for allowing ultrapeer 2 ultrapeer connections.
+     * 
+     * @throws Exception if an error occurs
+     */
+    public void testAllowUltrapeer2UltrapeerConnection() throws Exception {
+        Method m = PrivilegedAccessor.getMethod(ConnectionManager.class,
+            "allowUltrapeer2UltrapeerConnection", 
+            new Class[] {HandshakeResponse.class});
+        
+        
+        HandshakeResponse hr = createTestResponse("Morpheus 3.3");
+        Object[] params = new Object[] {hr};
+        boolean allow =
+            ((Boolean)m.invoke(ConnectionManager.class, params)).booleanValue();
+        
+        assertFalse("connection should not have been allowed", allow);
+        
+        hr = createTestResponse("Bearshare 3.3");
+        params[0] = hr;
+        allow =
+            ((Boolean)m.invoke(ConnectionManager.class, params)).booleanValue();
+        
+        assertTrue("connection should have been allowed", allow);
+        
+        hr = createTestResponse("LimeWire 3.3");
+        params[0] = hr;
+        allow =
+            ((Boolean)m.invoke(ConnectionManager.class, params)).booleanValue();
+        
+        assertTrue("connection should have been allowed", allow);
+        
+        hr = createTestResponse("Shareaza 3.3");
+        params[0] = hr;
+        allow =
+            ((Boolean)m.invoke(ConnectionManager.class, params)).booleanValue();
+        
+        assertTrue("connection should have been allowed", allow);
+    }
+    
+    /**
+     * Tests the method for allowing ultrapeer 2 leaf connections.
+     * 
+     * @throws Exception if an error occurs
+     */
+    public void testAllowUltrapeer2LeafConnection() throws Exception {
+        Method m = PrivilegedAccessor.getMethod(ConnectionManager.class,
+            "allowUltrapeer2LeafConnection", 
+            new Class[] {HandshakeResponse.class});
+        
+        
+        HandshakeResponse hr = createTestResponse("Morpheus 3.3");
+        Object[] params = new Object[] {hr};
+        boolean allow =
+            ((Boolean)m.invoke(ConnectionManager.class, params)).booleanValue();
+        
+        assertFalse("connection should not have been allowed", allow);
+        
+        hr = createTestResponse("Bearshare 3.3");
+        params[0] = hr;
+        allow =
+            ((Boolean)m.invoke(ConnectionManager.class, params)).booleanValue();
+        
+        assertTrue("connection should have been allowed", allow);
+        
+        hr = createTestResponse("LimeWire 3.3");
+        params[0] = hr;
+        allow =
+            ((Boolean)m.invoke(ConnectionManager.class, params)).booleanValue();
+        
+        assertTrue("connection should have been allowed", allow);
+        
+        hr = createTestResponse("Shareaza 3.3");
+        params[0] = hr;
+        allow =
+            ((Boolean)m.invoke(ConnectionManager.class, params)).booleanValue();
+        
+        assertTrue("connection should have been allowed", allow);
+    }    
+
+    /**
+     * Utility method for creating a set of headers with the specified user
+     * agent value.
+     * 
+     * @param userAgent the User-Agent to include in the headers
+     * @return a new <tt>HandshakeResponse</tt> with the specified user agent
+     * @throws IOException if an error occurs
+     */
+    private static HandshakeResponse createTestResponse(String userAgent) 
+        throws IOException {
+        Properties headers = new Properties();
+        headers.put("User-Agent", userAgent);
+        return HandshakeResponse.createResponse(headers);
     }
     
     public void testSupernodeStatus() throws Exception {
