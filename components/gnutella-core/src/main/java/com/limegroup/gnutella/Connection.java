@@ -61,11 +61,24 @@ public class Connection {
     private HandshakeResponder _propertiesWrittenR;
     /** True iff this should try to reconnect at a lower protocol level on
      *  outgoing connections. */
+    
+    /**
+     * Indicates whether the connection is to a shielded client
+     */
+    private volatile boolean _isClientConnection = false;
+    
+    /**
+     * Indicates whether the connection is to a supernode 
+     */
+    private volatile boolean _isSupernodeConnection = false;
+    
     private boolean _negotiate=false;
     public static final String GNUTELLA_CONNECT_04="GNUTELLA CONNECT/0.4";
     public static final String GNUTELLA_OK_04="GNUTELLA OK";
     public static final String GNUTELLA_CONNECT_06="GNUTELLA CONNECT/0.6";
     public static final String GNUTELLA_OK_06="GNUTELLA/0.6 200 OK";
+    public static final String GNUTELLA_06 = "GNUTELLA/0.6";
+    public static final String _200_OK     = " 200 OK";
     public static final String CONNECT="CONNECT/";
     /** End of line for Gnutella 0.6 */
     public static final String CRLF="\r\n";
@@ -167,7 +180,41 @@ public class Connection {
             }
         }
     }
+    
+    /**
+     * Sets the flag indicating whether the connection is to a shielded client
+     * @param flag The flag value to be set
+     */
+    public void setClientConnectionFlag(boolean flag){
+        _isClientConnection = flag;
+    }
+    
+    /**
+     * Indicates whether the connection is to a shielded client
+     * @return true, if the connection is to a shielded client, false
+     * otherwise
+     */
+    public boolean isClientConnection(){
+        return _isClientConnection;
+    }
 
+    /**
+     * Sets the flag indicating whether the connection is to a supernode
+     * @param flag The flag value to be set
+     */
+    public void setSupernodeConnectionFlag(boolean flag){
+        _isSupernodeConnection = flag;
+    }
+    
+    /**
+     * Indicates whether the connection is to a supernode
+     * @return true, if the connection is to a supernode, false
+     * otherwise
+     */
+    public boolean isSupernodeConnection(){
+        return _isSupernodeConnection;
+    }
+    
     private static class BadHandshakeException extends IOException { }
 
     /*
@@ -235,22 +282,41 @@ public class Connection {
         else {
             //1. Send "GNUTELLA CONNECT" and headers
             sendString(GNUTELLA_CONNECT_06+CRLF);
-            sendHeaders(_propertiesWrittenP);                
-            //2. Read "GNUTELLA CONNECT" and headers.  We require that the
+            sendHeaders(_propertiesWrittenP);   
+            //2. Read "GNUTELLA/0.6 200 OK" and headers.  We require that the
             //response be at the same protocol level as we sent out.  This is
             //necessary because BearShare will accept "GNUTELLA CONNECT/0.6" and
             //respond with "GNUTELLA OK", only to be confused by the headers
             //later.
-            if (! readLine().equals(GNUTELLA_OK_06))
+            String connectLine = readLine();
+            //check if the protocol is fine. We dont worry here about the 
+            //status code (which dictates whether the connection will 
+            //be accepted or not. We will worry about that later.
+            if (! connectLine.startsWith(GNUTELLA_06))
                 throw new IOException("Bad connect string");
+            //read the headers
             _propertiesRead=new Properties();
             readHeaders();
-            //3. Send "GNUTELLA/200 OK" with no headers.
-            sendString(GNUTELLA_OK_06+CRLF);
-            sendHeaders(_propertiesWrittenR.respond(_propertiesRead));
+            
+            //if the connection was accepted (with 200 OK), we should go to the
+            //third step and send back our headers
+            if (! connectLine.equals(GNUTELLA_OK_06)){
+                throw new IOException("Bad connect string");
+            }
+            else{
+                //3. Send our response and headers
+                HandshakeResponse ourResponse = _propertiesWrittenR.respond(
+                    new HandshakeResponse(_propertiesRead), true);
+                
+                sendString(GNUTELLA_06 + " " 
+                    + ourResponse.getStatusLine() + CRLF);
+                sendHeaders(ourResponse.getHeaders());
+            }
         }
     }
 
+  
+    
     /** Sends and receives handshake strings for incoming connections,
      *  throwing IOException if any problems. */
     private void initializeIncoming() throws IOException {
@@ -272,12 +338,27 @@ public class Connection {
             _propertiesRead=new Properties();
             //1. Read GNUTELLA CONNECT
             readHeaders();
-            //2. Send GNUTELLA/200 OK
-            sendString(GNUTELLA_OK_06+CRLF);
-            if (_propertiesWrittenR==null)
+            //2. Send our response and headers
+            if (_propertiesWrittenR==null){
+                sendString(GNUTELLA_OK_06+CRLF);
                 sendString(CRLF);  //no headers specified ==> blank line
-            else
-                sendHeaders(_propertiesWrittenR.respond(_propertiesRead));
+            }
+            else{
+                HandshakeResponse ourResponse = _propertiesWrittenR.respond(
+                    new HandshakeResponse(_propertiesRead), false);
+                sendString(GNUTELLA_06 + " " 
+                    + ourResponse.getStatusLine() + CRLF);
+                sendHeaders(ourResponse.getHeaders());   
+                
+                //if our response was not OK, throw an exception so as to
+                //signal the caller to close the connection.
+                //(Needed to accomodate bad clients, who may not close the
+                //connection, even if they dont receive 200 OK
+                if(ourResponse.notOKStatusCode()){
+                    throw new IOException(
+                        "We didnt return OK code during Connection Handshake");
+                }
+            }
             //3. Read GNUTELLA/200 OK, and any private vendor headers.
             if (! readLine().equals(GNUTELLA_OK_06))
                 throw new IOException("Bad connect string");
@@ -474,6 +555,14 @@ public class Connection {
     public int getOrigPort() {
         return _port;
     }
+    
+    /** 
+     * Sets the port where the conected node listens at, not the one
+     * got from socket
+     */
+    void setOrigPort(int port){
+        this._port = port;
+    }
 
     /**
      * Returns the port of the foreign host this is connected to.
@@ -517,6 +606,19 @@ public class Connection {
             return null;
         else
             return _propertiesRead.getProperty(name);
+    }
+    
+    /**
+     * Returns the headers received during connection Handshake
+     * @return the headers received during connection Handshake. All the
+     * headers received are combined together. 
+     * (headers are received twice for the incoming connections)
+     */
+    public Properties getHeaders(){
+        if (_propertiesRead==null)
+            return null;
+        else
+            return (Properties)_propertiesRead.clone();
     }
 
     /**

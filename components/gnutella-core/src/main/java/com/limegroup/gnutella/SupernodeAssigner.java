@@ -29,13 +29,13 @@ public final class SupernodeAssigner implements Runnable {
 	 * Constant for the minimum number of upstream bytes per second that 
 	 * a node must be able to transfer in order to qualify as a supernode.
 	 */
-	private final int MINIMUM_REQUIRED_UPSTREAM_BYTES_PER_SECOND = 200000;
+	private final int MINIMUM_REQUIRED_UPSTREAM_BYTES_PER_SECOND = 10000;
 
 	/**
 	 * Constant for the minimum number of downlstream bytes per second that 
 	 * a node must be able to transfer in order to qualify as a supernode.
 	 */
-	private final int MINIMUM_REQUIRED_DOWNSTREAM_BYTES_PER_SECOND = 200000;
+	private final int MINIMUM_REQUIRED_DOWNSTREAM_BYTES_PER_SECOND = 15000;
 
 	/**
 	 * Constant for the minimum average uptime in seconds that a node must 
@@ -47,7 +47,7 @@ public final class SupernodeAssigner implements Runnable {
 	 * Constant for the minimum current uptime in seconds that a node must 
 	 * have to qualify for supernode status.
 	 */
-	private final int MINIMUM_CURRENT_UPTIME = 30 * 60;    
+	private final int MINIMUM_CURRENT_UPTIME = 9 * 60;    
 
 	/**
 	 * Constant value for whether or not the operating system qualifies
@@ -72,7 +72,7 @@ public final class SupernodeAssigner implements Runnable {
 	 * Constant for the number of milliseconds between the timer's calls
 	 * to its <tt>ActionListener</tt>s.
 	 */
-	private final int TIMER_DELAY = 5000;
+    private final int TIMER_DELAY = 10 * 60 * 1000; //10 minutes
 
 	/**
 	 * Constant for the number of seconds between the timer's calls
@@ -97,6 +97,11 @@ public final class SupernodeAssigner implements Runnable {
 	 * download bandwidth used for file downloads.
 	 */
 	private BandwidthTracker _downloadTracker;
+    
+    /**
+     * A reference to the Connection Manager
+     */
+    private ConnectionManager _manager;
 
 	/**
 	 * Variable for the current uptime of this node.
@@ -116,6 +121,12 @@ public final class SupernodeAssigner implements Runnable {
 	 */
 	private int _maxDownstreamBytesPerSec = 
         SETTINGS.getMaxDownstreamBytesPerSec();
+    
+    /**
+     * True, if the last time we evaluated the node for supernode capability, 
+     * it came out as supernode capable. False, otherwise
+     */
+    private volatile boolean _wasSupernodeCapable;
 
     /** 
 	 * Creates a new <tt>SupernodeAssigner</tt>. 
@@ -124,11 +135,15 @@ public final class SupernodeAssigner implements Runnable {
 	 *                      tracking bandwidth used for uploads
 	 * @param downloadTracker the <tt>BandwidthTracker</tt> instance for
 	 *                        tracking bandwidth used for downloads
+     * @param manager Reference to the ConnectionManager for this node
 	 */
     public SupernodeAssigner(final BandwidthTracker uploadTracker, 
-							 final BandwidthTracker downloadTracker) {
+							 final BandwidthTracker downloadTracker,
+                             ConnectionManager manager) {
 		_uploadTracker = uploadTracker;
 		_downloadTracker = downloadTracker;  
+        this._manager = manager;
+        _wasSupernodeCapable = _manager.isSupernode();
 		ActionListener timerListener = new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				collectBandwidthData();
@@ -157,10 +172,10 @@ public final class SupernodeAssigner implements Runnable {
 	 */
 	public boolean isSupernodeCapable() {
         boolean isSupernodeCapable = 
-            ((_maxUpstreamBytesPerSec >= 
-            MINIMUM_REQUIRED_UPSTREAM_BYTES_PER_SECOND) &&
+            (((_maxUpstreamBytesPerSec >= 
+            MINIMUM_REQUIRED_UPSTREAM_BYTES_PER_SECOND) ||
             (_maxDownstreamBytesPerSec >= 
-            MINIMUM_REQUIRED_DOWNSTREAM_BYTES_PER_SECOND) &&
+            MINIMUM_REQUIRED_DOWNSTREAM_BYTES_PER_SECOND)) &&
             (AVERAGE_UPTIME >= MINIMUM_AVERAGE_UPTIME) &&
 			(_currentUptime >= MINIMUM_CURRENT_UPTIME) &&
 			(!FIREWALLED) &&
@@ -176,6 +191,19 @@ public final class SupernodeAssigner implements Runnable {
 	 * and downloads.
 	 */
 	private void collectBandwidthData() {
+//		System.out.println("_maxDownstreamBytesPerSec: "+_maxDownstreamBytesPerSec);
+//        System.out.println();
+//        System.out.println("_maxUpstreamBytesPerSec: "+_maxUpstreamBytesPerSec);
+//        System.out.println();
+//        System.out.println("_currentUptime: " + _currentUptime);
+//        System.out.println();
+//        System.out.println("AVERAGE_UPTIME: " + AVERAGE_UPTIME);
+//        System.out.println();
+//        System.out.println("FIREWALLED: " + FIREWALLED);
+//        System.out.println();
+//        System.out.println("SUPERNODE_OS: " + SUPERNODE_OS);
+//        System.out.println();
+//        System.out.println("isSupernodeCapable: "+isSupernodeCapable());
 		_currentUptime += TIMER_DELAY_IN_SECONDS;
         int newUpstreamBytes   = _uploadTracker.getNewBytesTransferred();
         int newDownstreamBytes = _downloadTracker.getNewBytesTransferred();
@@ -191,6 +219,19 @@ public final class SupernodeAssigner implements Runnable {
 			_maxDownstreamBytesPerSec = newDownstreamBytesPerSec;
   			SETTINGS.setMaxDownstreamBytesPerSec(_maxDownstreamBytesPerSec);
   		}
+        
+        //check if the state changed
+        boolean isSupernodeCapable = isSupernodeCapable();
+        if(!SETTINGS.getForcedSupernodeMode() 
+            && (isSupernodeCapable != _wasSupernodeCapable) &&
+            !_manager.hasSupernodeOrClientnodeStatusForced()){
+                if(_manager.hasShieldedClientSupernodeConnection()
+                    && isSupernodeCapable){
+                    _manager.setSupernodeMode(isSupernodeCapable);
+                    _manager.reconnect();
+                }
+        }
+            _wasSupernodeCapable = isSupernodeCapable;
 	}
 
 }

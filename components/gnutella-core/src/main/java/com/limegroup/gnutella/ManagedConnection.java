@@ -4,6 +4,8 @@ import java.io.*;
 import java.net.*;
 import com.limegroup.gnutella.util.Buffer;
 import com.sun.java.util.collections.*;
+import java.util.Properties;
+import com.limegroup.gnutella.routing.*;
 
 /**
  * A Connection managed by a ConnectionManager.  Includes a loopForMessages
@@ -178,6 +180,13 @@ public class ManagedConnection
     private long _nextNumHorizonHosts=0;
     
 
+    /**
+     * The query routing state for each "new client" connection, or null if the
+     * connection doesn't support QRP.  Helps you decide when to send queries.
+     * (Compare with _querySourceTable of MessageRouter, which helps filter
+     * duplicate queries and decide where to send responses.)  
+     */
+    private volatile ManagedConnectionQueryInfo queryInfo = null;
 
     /** The total number of bytes sent/received since last checked. 
      *  These are not synchronized and not guaranteed to be 100% accurate. */
@@ -212,7 +221,15 @@ public class ManagedConnection
                       MessageRouter router,
                       ConnectionManager manager,
                       boolean isRouter) {
-        super(host, port);
+        super(host, port, 
+            manager.isSupernode() ? 
+            (Properties)(new SupernodeProperties(router)) : 
+            (Properties)(new ClientProperties(router)),
+            manager.isSupernode() ? 
+            (HandshakeResponder)(new SupernodeHandshakeResponder(manager)) :
+            (HandshakeResponder)(new ClientHandshakeResponder(manager)),
+            true);
+        
         _router = router;
         _manager = manager;
         _isRouter = isRouter;
@@ -231,7 +248,10 @@ public class ManagedConnection
     ManagedConnection(Socket socket,
                       MessageRouter router,
                       ConnectionManager manager) {
-        super(socket);
+        super(socket, 
+            manager.isSupernode() ? 
+            (HandshakeResponder)(new SupernodeHandshakeResponder(manager)) : 
+            (HandshakeResponder)(new ClientHandshakeResponder(manager)));
         _router = router;
         _manager = manager;
 
@@ -466,21 +486,24 @@ public class ManagedConnection
                 continue;
             }
 
-            // Increment hops and decrease TTL
-            m.hop();
-
-            if(m instanceof PingRequest)
-                _router.handlePingRequestPossibleDuplicate(
-                    (PingRequest)m, this);
-            else if (m instanceof PingReply)
-                _router.handlePingReply((PingReply)m, this);
-            else if (m instanceof QueryRequest)
-                _router.handleQueryRequestPossibleDuplicate(
-                    (QueryRequest)m, this);
-            else if (m instanceof QueryReply)
-                _router.handleQueryReply((QueryReply)m, this);
-            else if (m instanceof PushRequest)
-                _router.handlePushRequest((PushRequest)m, this);
+            //call MessageRouter to handle and process the message
+            _router.handleMessage(m, this);
+            
+//            // Increment hops and decrease TTL
+//            m.hop();
+//
+//            if(m instanceof PingRequest)
+//                _router.handlePingRequestPossibleDuplicate(
+//                    (PingRequest)m, this);
+//            else if (m instanceof PingReply)
+//                _router.handlePingReply((PingReply)m, this);
+//            else if (m instanceof QueryRequest)
+//                _router.handleQueryRequestPossibleDuplicate(
+//                    (QueryRequest)m, this);
+//            else if (m instanceof QueryReply)
+//                _router.handleQueryReply((QueryReply)m, this);
+//            else if (m instanceof PushRequest)
+//                _router.handlePushRequest((PushRequest)m, this);
         }
     }
 
@@ -769,7 +792,228 @@ public class ManagedConnection
     public boolean isKillable() {
         return _isKillable;
     }
+    
+    /**
+     * Returns string representing addresses of other hosts that may
+     * be connected thru gnutella.
+     * @param properties The properties instance to which to add host addresses
+     * @param manager Reference to the connection manager from whom 
+     * to retrieve the addressses
+     * @return Returns string representing addresses of other hosts that may
+     * be connected thru gnutella. Also includes the addresses of the
+     * supernodes it is connected to
+     * <p> Host address string returned is in the form:
+     * <p> IP Address:Port [,IPAddress:Port]* 
+     * <p> e.g. 123.4.5.67:6346,234.5.6.78:6347
+     */
+    private static void addHostAddresses(Properties properties, 
+        ConnectionManager manager){
+        StringBuffer hostString = new StringBuffer();
+        boolean isFirstHost = true;
+        //get the connected supernodes and pass them
+        for(Iterator iter = manager.getBestHosts(10);iter.hasNext();){
+            //get the next endpoint
+            Endpoint endpoint =(Endpoint)iter.next();
+            //if the first endpoint that we are adding
+            if(!isFirstHost){
+                //append separator to separate the entries
+                hostString.append(Constants.HTTP_ENTRY_SEPARATOR);
+            }else{
+                //unset the flag
+                isFirstHost = false;
+            }
+            //append the host information
+            hostString.append(endpoint.getHostname());
+            hostString.append(":");
+            hostString.append(endpoint.getPort());
+        }
+        //set the property
+        properties.setProperty(ConnectionHandshakeHeaders.X_TRY, 
+            hostString.toString());
 
+        //Also add neighbouring supernodes
+        Set connectedSupernodeEndpoints 
+            = manager.getConnectedSupernodeEndpoints();
+        //if nothing to add, return
+        if(connectedSupernodeEndpoints.size() < 0)
+            return;
+        
+        //else add the supernodes
+        hostString = new StringBuffer();
+        isFirstHost = true;
+        for(Iterator iter = connectedSupernodeEndpoints.iterator();
+            iter.hasNext();){
+            //get the next endpoint
+            Endpoint endpoint =(Endpoint)iter.next();
+            //if the first endpoint that we are adding
+            if(!isFirstHost){
+                //append separator to separate the entries
+                hostString.append(Constants.HTTP_ENTRY_SEPARATOR);
+            }else{
+                //unset the flag
+                isFirstHost = false;
+            }
+            //append the host information
+            hostString.append(endpoint.getHostname());
+            hostString.append(":");
+            hostString.append(endpoint.getPort());
+        }
+        //set the property
+        properties.setProperty(ConnectionHandshakeHeaders.X_TRY_SUPERNODES
+            , hostString.toString());
+    }
+    
+    private static class LazyProperties extends Properties {
+        private MessageRouter router;
+        
+        LazyProperties(MessageRouter router) {
+            this.router=router;
+            if (router!=null) {
+                setProperty(ConnectionHandshakeHeaders.X_MY_ADDRESS, "");  
+                //just temporary!
+            }
+        }
+        
+        //We don't define one method in terms of the other since that could
+        //cause infinite loops depending on the implementation of the
+        //superclass.
+        public String getProperty(String key, String defaultValue) {
+            if (router!=null && key.equals(
+                ConnectionHandshakeHeaders.X_MY_ADDRESS)) {
+                Endpoint e=new Endpoint(router.getAddress(), router.getPort());
+                return e.getHostname()+":"+e.getPort();
+            } else {
+                return super.getProperty(key, defaultValue);
+            }
+        }
+        
+        public String getProperty(String key) {
+            if (router!=null && key.equals(
+                ConnectionHandshakeHeaders.X_MY_ADDRESS)) {
+                Endpoint e=new Endpoint(router.getAddress(), router.getPort());
+                return e.getHostname()+":"+e.getPort();
+            } else {
+                return super.getProperty(key);
+            }
+        }
+    }
+
+    /**
+     * Properties for connection handshake, if the node is a supernode
+     */
+    private static class SupernodeProperties extends LazyProperties{
+        
+        public SupernodeProperties(MessageRouter router){
+            super(router);
+            //set supernode property
+            setProperty(ConnectionHandshakeHeaders.X_SUPERNODE, "True");
+            setProperty(ConnectionHandshakeHeaders.X_QUERY_ROUTING, "0.1");
+        }
+    }
+    
+    /**
+     * Properties for connection handshake, if the node is a client
+     */
+    private static class ClientProperties extends LazyProperties{
+        
+        public ClientProperties(MessageRouter router){
+            super(router);
+            //set supernode property
+            setProperty(ConnectionHandshakeHeaders.X_SUPERNODE, "False");
+            setProperty(ConnectionHandshakeHeaders.X_QUERY_ROUTING, "0.1");
+        }
+    }
+
+    /**
+     * A very simple responder to be used by supernodes during the
+     * connection handshake while accepting incoming connections
+     */
+    private static class SupernodeHandshakeResponder 
+        implements HandshakeResponder{
+        ConnectionManager _manager;
+        
+        public SupernodeHandshakeResponder(ConnectionManager manager){
+            this._manager = manager;
+        }
+        
+        public HandshakeResponse respond(HandshakeResponse response, 
+            boolean outgoing) {
+            Properties ret=new Properties();
+            
+            //on outgoing connection, we have already sent headers. Send
+            //the heaaders on incoming only
+            if(!outgoing){
+                ret.setProperty(ConnectionHandshakeHeaders.X_SUPERNODE, "True");
+                ret.setProperty(
+                    ConnectionHandshakeHeaders.X_QUERY_ROUTING, "0.1");
+                
+                //guide the incoming connection to be a supernode/clientnode
+                ret.setProperty(ConnectionHandshakeHeaders.X_SUPERNODE_NEEDED,
+                    (new Boolean(_manager.supernodeNeeded())).toString());
+                
+                //give own IP address
+                ret.setProperty(ConnectionHandshakeHeaders.X_MY_ADDRESS,
+                    _manager.getSelfAddress().getHostname() + ":"
+                    + _manager.getSelfAddress().getPort());
+                    
+                
+                //also add some host addresses in the response 
+                addHostAddresses(ret, _manager);
+            }
+            return new HandshakeResponse(ret);
+        }
+    }
+    
+    /**
+     * A very simple responder to be used by client-nodes during the
+     * connection handshake while accepting incoming connections
+     */
+    private static class ClientHandshakeResponder implements HandshakeResponder{
+        ConnectionManager _manager;
+        
+        public ClientHandshakeResponder(ConnectionManager manager){
+            this._manager = manager;
+        }
+        
+        public HandshakeResponse respond(HandshakeResponse response, 
+            boolean outgoing) throws IOException{
+            int code = 200;
+            String message = "OK";
+            
+            //set common properties
+            Properties ret=new Properties();
+            ret.setProperty(ConnectionHandshakeHeaders.X_SUPERNODE, "False");
+            ret.setProperty(ConnectionHandshakeHeaders.X_QUERY_ROUTING, "0.1");
+            
+            //do stuff specific to connection direction
+            if(!outgoing){
+                //client should never accept the connection. Therefore, set the
+                //appropriate status
+                code = 503;
+                message = "I am a shielded client";
+                
+                //also add some host addresses in the response
+                addHostAddresses(ret, _manager);
+            }
+            
+            return new HandshakeResponse(code, message, ret);
+        }
+    }
+    
+    /** Returns the query route state associated with this, or null if no
+     *  such state. 
+     */
+    public ManagedConnectionQueryInfo getQueryRouteState() {
+        return queryInfo;
+    }
+
+    /** Associates the given query route state with this.  Typically this method
+     *  is called once per connection. 
+     */
+    void setQueryRouteState(ManagedConnectionQueryInfo qi) {
+        this.queryInfo=qi;
+    } 
+    
     /** Unit test.  Only tests statistics methods. */
     /*
     public static void main(String args[]) {        

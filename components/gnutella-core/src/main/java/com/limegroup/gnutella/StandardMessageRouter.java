@@ -1,6 +1,8 @@
 package com.limegroup.gnutella;
 
-import java.io.IOException;
+import java.io.*;
+import com.limegroup.gnutella.routing.QueryRouteTable;
+import com.sun.java.util.collections.*;
 
 public class StandardMessageRouter
     extends MessageRouter
@@ -17,8 +19,8 @@ public class StandardMessageRouter
     /**
      * Override of handleQueryRequest to send query strings to the callback.
      */
-    public void handleQueryRequest(QueryRequest queryRequest,
-                                   ManagedConnection receivingConnection)
+    protected void handleQueryRequest(QueryRequest queryRequest,
+                                      ManagedConnection receivingConnection)
     {
         // Apply the personal filter to decide whether the callback
         // should be informed of the query
@@ -33,23 +35,29 @@ public class StandardMessageRouter
 
     /**
      * Responds to the PingRequest by getting information from the FileManager
-     * and the Acceptor.
+     * and the Acceptor.  However, it only sends a Ping Reply back if we
+     * can currently accept incoming connections or the hops + ttl <= 2 (to allow
+     * for crawler pings).
      */
     protected void respondToPingRequest(PingRequest pingRequest,
                                         Acceptor acceptor)
     {
-        //Only return a pong if we still have incoming connection slots or the
-        //ping is from a crawler, either directly or indirectly.
+        //check if can accept incoming and hops + ttl > 2
         int hops = (int)pingRequest.getHops();
         int ttl = (int)pingRequest.getTTL();
         if ( (!_manager.hasAvailableIncoming()) && (hops+ttl > 2) )
             return;
 
+        //for crawler pings we shouldn't send the pong with hops+1 as TTL.
+        int newTTL = hops+1;
+        if ( (hops+ttl) <=2)
+            newTTL = 1;
+        
         int num_files = _fileManager.getNumFiles();
         int kilobytes = _fileManager.getSize()/1024;
 
         PingReply pingReply = new PingReply(pingRequest.getGUID(),
-                                            (byte)(pingRequest.getHops()+1),
+                                            (byte)newTTL,
                                             acceptor.getPort(),
                                             acceptor.getAddress(),
                                             num_files,
@@ -62,7 +70,7 @@ public class StandardMessageRouter
         catch(IOException e) {}
     }
 
-    public void handlePingReply(PingReply pingReply,
+    protected void handlePingReply(PingReply pingReply,
                                 ManagedConnection receivingConnection)
     {
         //We override the super's method so the receiving connection's
@@ -258,6 +266,17 @@ public class StandardMessageRouter
 
     }
 
+    /** @see MessageRouter.addQueryRoutingEntries */
+    protected void addQueryRoutingEntries(QueryRouteTable qrt) {
+        Iterator words = _fileManager.getKeyWords().iterator();
+        while(words.hasNext())
+            qrt.add((String)words.next());
+        /*
+          File[] files = _fileManager.getSharedFiles(null);
+          for (int i=0; i<files.length; i++)
+            qrt.add(files[i].getAbsolutePath());
+        */
+    }
 
     /**
      * Handles the QueryReply by starting applying the personal filter and then

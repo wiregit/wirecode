@@ -4,6 +4,8 @@ import com.sun.java.util.collections.Iterator;
 import com.sun.java.util.collections.List;
 import java.io.IOException;
 
+import com.limegroup.gnutella.routing.*;
+
 /**
  * One of the three classes that make up the core of the backend.  This
  * class' job is to direct the routing of messages and to count those message
@@ -24,6 +26,22 @@ public abstract class MessageRouter
 
     private ForMeReplyHandler _forMeReplyHandler = new ForMeReplyHandler();
 
+    /**
+     * The lock to hold before updating or propogating tables.  TODO3: it's 
+     * probably possible to use finer-grained locking.
+     */
+    private Object queryUpdateLock=new Object();
+    /**
+     * The time when we should next broadcast route table updates.
+     * (Route tables are stored per connection in ManagedConnectionQueryInfo.)
+     * LOCKING: obtain queryUpdateLock
+     */
+    private long nextQueryUpdateTime=0l;
+    /** 
+     * The time to wait between route table updates, in milliseconds. 
+     */
+    private long QUERY_ROUTE_UPDATE_TIME=1000*60*10; //10 minutes
+    
     /**
      * Maps PingRequest GUIDs to PingReplyHandlers
      */
@@ -146,6 +164,37 @@ public abstract class MessageRouter
         _pushRouteTable.removeReplyHandler(connection);
     }
 
+        /**
+     * The handler for all message types.  Processes a message based on the 
+     * message type.
+     */
+    public void handleMessage(Message m, ManagedConnection receivingConnection)
+    {
+        // Increment hops and decrease TTL
+        m.hop();
+
+        if(m instanceof PingRequest) 
+            handlePingRequestPossibleDuplicate((PingRequest)m, receivingConnection);
+        else if (m instanceof PingReply) 
+            handlePingReply((PingReply)m, receivingConnection);
+        else if (m instanceof QueryRequest)
+            handleQueryRequestPossibleDuplicate(
+                (QueryRequest)m, receivingConnection);
+        else if (m instanceof QueryReply)
+            handleQueryReply((QueryReply)m, receivingConnection);
+        else if (m instanceof PushRequest)
+            handlePushRequest((PushRequest)m, receivingConnection);
+        else if (m instanceof RouteTableMessage)
+            handleRouteTableMessage((RouteTableMessage)m,
+                                    receivingConnection);
+
+        //This may trigger propogation of query route tables.  We do this AFTER
+        //any handshake pings.  Otherwise we'll think all clients are old
+        //clients.
+        forwardQueryRouteTables();      
+    }
+    
+    
     /**
      * The handler for PingRequests received in
      * ManagedConnection.loopForMessages().  Checks the routing table to see
@@ -172,6 +221,7 @@ public abstract class MessageRouter
             handleQueryRequest(queryRequest, receivingConnection);
     }
 
+    
     /**
      * The default handler for PingRequests received in
      * ManagedConnection.loopForMessages().  This implementation updates stats,
@@ -198,7 +248,8 @@ public abstract class MessageRouter
 
         respondToPingRequest(pingRequest, _acceptor);
     }
-
+    
+    
     /**
      * The default handler for QueryRequests received in
      * ManagedConnection.loopForMessages().  This implementation updates stats,
@@ -214,7 +265,7 @@ public abstract class MessageRouter
      *   3. Implement respondToQueryRequest.  This allows you to use the default
      *      handling framework and just customize responses.
      */
-    public void handleQueryRequest(QueryRequest queryRequest,
+    protected void handleQueryRequest(QueryRequest queryRequest,
                                    ManagedConnection receivingConnection)
     {
         _numQueryRequests++;
@@ -304,7 +355,7 @@ public abstract class MessageRouter
         }
     }
 
-    /**
+/**
      * Broadcasts the query request to all initialized connections that
      * are not the receivingConnection, setting up the routing
      * to the designated QueryReplyHandler.  This is called from the default
@@ -320,12 +371,36 @@ public abstract class MessageRouter
     {
         // Note the use of initializedConnections only.
         // Note that we have zero allocations here.
-        List list=manager.getInitializedConnections2();
-        for(int i=0; i<list.size(); i++)
-        {
+        
+        //broadcast the query to other connected nodes (supernodes or
+        //older nodes)
+        List list=_manager.getInitializedConnections2();
+        for(int i=0; i<list.size(); i++){
             ManagedConnection c = (ManagedConnection)list.get(i);
-            if(c != receivingConnection)
-                c.send(queryRequest);
+            c.send(queryRequest);
+        }
+        
+        //use query routing to route queries to client connections
+        //send queries only to the clients from whom query routing 
+        //table has been received
+        list=_manager.getInitializedClientConnections2();
+        for(int i=0; i<list.size(); i++){
+            ManagedConnection c = (ManagedConnection)list.get(i);
+            if(c != receivingConnection) {
+                //TODO:
+                //because of some very obscure optimization rules, it's actually
+                //possible that qi could be non-null but not initialized.  Need
+                //to be more careful about locking here.
+                ManagedConnectionQueryInfo qi=c.getQueryRouteState();
+                if (qi==null || qi.lastReceived==null) 
+                    return;
+                else if (qi.lastReceived.contains(queryRequest))
+                {
+                    //A new client with routing entry, or one that hasn't started
+                    //sending the patch.
+                    c.send(queryRequest);      
+                }
+            }
         }
     }
 
@@ -360,7 +435,7 @@ public abstract class MessageRouter
      * Override as desired, but you probably want to call super.handlePingReply
      * if you do.
      */
-    public void handlePingReply(PingReply pingReply,
+    protected void handlePingReply(PingReply pingReply,
                                 ManagedConnection receivingConnection)
     {
         //update hostcatcher (even if the reply isn't for me)
@@ -510,9 +585,126 @@ public abstract class MessageRouter
     /**
      * Allow the controlled creation of a GroupPingRequest
      */
-    public abstract GroupPingRequest createGroupPingRequest(String group);
+     public abstract GroupPingRequest createGroupPingRequest(String group);
+     
+    /**
+     * Handles a query route table update message that originated from
+     * receivingConnection.
+     */
+    public void handleRouteTableMessage(RouteTableMessage m,
+                                        ManagedConnection receivingConnection) {
+        //if not a supernode, dont handle this message
+        if(_manager.isSupernode())
+            return;
+                                            
+        //Mutate query route table associated with receivingConnection.  
+        //(This is legal.)  Create a new one if none exists.
+        synchronized (queryUpdateLock) {
+            ManagedConnectionQueryInfo qi=receivingConnection.getQueryRouteState();
+            if (qi==null) {
+                //There's really no need to check if c is an old client here;
+                //it certainly didn't send a RouteTableMessage by accident!
+                qi=new ManagedConnectionQueryInfo();
+                receivingConnection.setQueryRouteState(qi);
+            }
+            if (qi.lastReceived==null) {
+                //TODO3: it's somewhat silly to allocate a new table and then
+                //immediately replace its state with RESET.  Probably best to
+                //have QueryRouteTable lazily allocate memory.
+                qi.lastReceived=new QueryRouteTable(
+                    QueryRouteTable.DEFAULT_TABLE_SIZE,
+                    QueryRouteTable.DEFAULT_INFINITY);
+            }
+            try {
+                qi.lastReceived.update(m);    
+            } catch (BadPacketException e) {
+                //TODO: ?
+            }
+        }
+    }
 
+    /**
+     * Sends route updated query routing tables to all connections which haven't
+     * been updated in a while.  You can call this method as often as you want;
+     * it takes care of throttling.
+     *     @modifies connections
+     */    
+    public void forwardQueryRouteTables() {
+        synchronized (queryUpdateLock) {
+            //Check time.  Skip or update.
+            long time=System.currentTimeMillis();
+            if (time<nextQueryUpdateTime) 
+                return;
+            nextQueryUpdateTime=time+QUERY_ROUTE_UPDATE_TIME;
 
+            //For all connections to new hosts c needing an update...
+            //TODO3: use getInitializedConnections2?
+            List list=_manager.getInitializedConnections();
+            for(int i=0; i<list.size(); i++) {                        
+                ManagedConnection c=(ManagedConnection)list.get(i);
+                
+                //check if we do need to forward the query route tables
+                //Presently, it will be sent only by a shielded-client to
+                //its supernode
+                if(_manager.isSupernode() || 
+                    !c.isSupernodeConnection()){
+                    return;
+                }
+                
+                ManagedConnectionQueryInfo qi=c.getQueryRouteState();
+                if (qi==null) {
+                    qi=new ManagedConnectionQueryInfo();
+                    c.setQueryRouteState(qi);
+                }
+                    
+                //Create table to send on this connection...
+                QueryRouteTable table=createRouteTable(c);
+
+                //..and send each piece.
+                //TODO2: use incremental and interleaved update
+                for (Iterator iter=table.encode(qi.lastSent); iter.hasNext(); ) {  
+                    RouteTableMessage m=(RouteTableMessage)iter.next();
+                    //System.out.println("    Sending "+m.toString()+" to "+c);
+                    c.send(m);
+                }
+                qi.lastSent=table;
+            }
+        }
+    }
+
+    /**
+     * Creates a query route table appropriate for forwarding to connection c.
+     * This will not include information from c.
+     *     @requires queryUpdateLock held
+     */
+    private QueryRouteTable createRouteTable(ManagedConnection c) {
+        //TODO: choose size according to what's been propogated.
+        QueryRouteTable ret=new QueryRouteTable(
+            QueryRouteTable.DEFAULT_TABLE_SIZE,
+            (byte)QueryRouteTable.DEFAULT_INFINITY);
+        
+        //Add my files...
+        addQueryRoutingEntries(ret);
+
+//        //...and those of all neighbors except c.  Use higher TTLs on these.
+//        List list=_manager.getInitializedConnections();
+//        for(int i=0; i<list.size(); i++) { 
+//            ManagedConnection c2=(ManagedConnection)list.get(i);
+//            if (c2==c)
+//                continue;
+//            ManagedConnectionQueryInfo qi=c2.getQueryRouteState();
+//            if (qi!=null && qi.lastReceived!=null)
+//                ret.addAll(qi.lastReceived);
+//        }
+        return ret;
+    }
+
+    /**
+     * Adds all query routing tables for this' files to qrt.
+     *     @modifies qrt
+     */
+    protected abstract void addQueryRoutingEntries(QueryRouteTable qrt);
+    
     /**
      * Handle a reply to a PingRequest that originated here.
      * Implementations typically process that various statistics in the reply.
@@ -658,6 +850,24 @@ public abstract class MessageRouter
     public int getNumMessages()
     {
         return _numMessages;
+    }
+    
+    /**
+     * Returns the address used for downloads and messaging connections.
+     * Used to fill out the My-Address header in ManagedConnection.
+     * @see Acceptor#getAddress
+     */
+    public byte[] getAddress() {
+        return _acceptor.getAddress();
+    }
+
+    /**
+     * Returns the port used for downloads and messaging connections.
+     * Used to fill out the My-Address header in ManagedConnection.
+     * @see Acceptor#getPort
+     */    
+    public int getPort() {
+        return _acceptor.getPort();
     }
 
     //

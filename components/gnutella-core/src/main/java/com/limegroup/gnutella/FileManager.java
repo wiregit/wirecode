@@ -68,28 +68,13 @@ public class FileManager {
     /** The lock for _loadThread.  Necessary to prevent deadlocks in
      *  loadSettings. */
     private Object _loadThreadLock=new Object();
-
-    /** The single instance of FileManager.  (Singleton pattern.) */
-    private static FileManager _instance = null;
-    /*
-    //initialize _instance
-    static
-    {
-    //get the servant type
-    String servantType = SettingsManager.instance().getServantType();
-    if(servantType.equals(Constants.XML_CLIENT))
-    _instance = new MetaFileManager();
-    else
-    _instance = new FileManager();
-    }
-    */
     
     /** The callback for adding shared directories and files, or null
      *  if this has no callback.  */
     private static ActivityCallback _callback;
 
     /** Characters used to tokenize queries and file names. */
-    static final String DELIMETERS=" -._+/*()\\";
+    public static final String DELIMETERS=" -._+/*()\\";
     private static final boolean isDelimeter(char c) {
         switch (c) {
         case ' ':
@@ -120,15 +105,6 @@ public class FileManager {
         _extensions = new TreeSet(new StringComparator());
         _sharedDirectories = new TreeMap(new FileComparator());
     }
-
-    
-    /** Returns the single instance of the FileManager.  The FileManager has no
-     *  files or callback until loadSettings() or initialize is called.  */
-    /*
-      public static FileManager instance() {
-      return _instance;
-      }
-    */
 
     /** Asynchronously loads all files by calling loadSettings.  Sets this'
      *  callback to be "callback", and notifies "callback" of all file loads.
@@ -172,30 +148,46 @@ public class FileManager {
     /**
      * Returns a list of all shared files in the given directory, in any order.
      * Returns null if directory is not shared, or a zero-length array if it is
-     * shared but contains no files.  This method is not recursive; files in any
-     * of the directory's children are not returned.  
+     * shared but contains no files.  This method is not recursive; files in 
+     * any of the directory's children are not returned.   
+     * <p>
+     * If directory is null, returns all shared files.
      */
-    public synchronized File[] getSharedFiles(File directory) {        
-        //Remove case, trailing separators, etc.
-        try {
-            directory=getCanonicalFile(directory);
-        } catch (IOException e) {
-            return null;
+    public synchronized File[] getSharedFiles(File directory) {
+        if(directory!=null){
+            // a. Remove case, trailing separators, etc.
+            try {
+                directory=getCanonicalFile(directory);
+            } catch (IOException e) {
+                return null;
+            }
+            
+            //Lookup indices of files in the given directory...
+            IntSet indices=(IntSet)_sharedDirectories.get(directory);
+            if (indices==null)
+                return null;
+            //...and pack them into an array.
+            File[] ret=new File[indices.size()];
+            IntSet.IntSetIterator iter=indices.iterator(); 
+            for (int i=0; iter.hasNext(); i++) {
+                FileDesc fd=(FileDesc)_files.get(iter.next());
+                Assert.that(fd!=null, "Directory has null entry");
+                ret[i]=new File(fd._path);
+            }
+            return ret;
+        } else {
+            // b. Filter out unshared entries.
+            ArrayList buf=new ArrayList(_files.size());
+            for (int i=0; i<_files.size(); i++) {
+                FileDesc fd=(FileDesc)_files.get(i);
+                if (fd!=null)
+                    buf.add(new File(fd._path));                
+            }
+            File[] ret=new File[buf.size()];
+            Object[] out=buf.toArray(ret);
+            Assert.that(out==ret, "Couldn't fit list in returned value");
+            return ret;
         }
-
-        //Lookup indices of files in the given directory...
-        IntSet indices=(IntSet)_sharedDirectories.get(directory);
-        if (indices==null)
-            return null;
-        //...and pack them into an array.
-        File[] ret=new File[indices.size()];
-        IntSet.IntSetIterator iter=indices.iterator(); 
-        for (int i=0; iter.hasNext(); i++) {
-            FileDesc fd=(FileDesc)_files.get(iter.next());
-            Assert.that(fd!=null, "Directory has null entry");
-            ret[i]=new File(fd._path);
-        }
-        return ret;
     }
 
     /**
@@ -274,7 +266,6 @@ public class FileManager {
         return retString;
     }
 
-    
     private static boolean debugOn = false;
     public static void debug(String out) {
         if (debugOn)
@@ -714,7 +705,20 @@ public class FileManager {
 
         return ret;
     }
-
+    
+    /**
+     * called when a query route table has to be made. The current 
+     * implementaion just takes all the file names and they are split
+     * internally when added the QRT
+     */
+    public List getKeyWords(){
+        File[] files = getSharedFiles(null);
+        ArrayList retList = new ArrayList();
+        for(int i=0;i<files.length;i++)
+            retList.add(files[i].getAbsolutePath());
+        return retList;
+    }
+    
     /** Same as f.getCanonicalFile() in JDK1.3. */
     public static File getCanonicalFile(File f) throws IOException {
         return new File(f.getCanonicalPath());
@@ -1038,6 +1042,11 @@ public class FileManager {
             Assert.that(files.length==2);
             Assert.that(files[0].equals(f1), files[0]+" differs from "+f1);
             Assert.that(files[1].equals(f3), files[1]+" differs from "+f3);
+            files=fman.getSharedFiles(null);
+            Assert.that(files.length==2);
+            Assert.that(files[0].equals(f1), files[0]+" differs from "+f1);
+            Assert.that(files[1].equals(f3), files[1]+" differs from "+f3);
+
 
             //Rename files
             Assert.that(fman.renameFileIfShared(f2, f2)==false);

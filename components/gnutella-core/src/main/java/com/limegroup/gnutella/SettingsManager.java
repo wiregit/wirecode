@@ -182,6 +182,7 @@ public final class SettingsManager {
 	  (CommonUtils.isMacClassic() ? "64.61.25.171" : "router4.limewire.com");
     /** List of hosts to try on quick connect */
     private final String[] DEFAULT_QUICK_CONNECT_HOSTS = {
+		"216.27.158.74:6356",
 		DEFAULT_LIMEWIRE_ROUTER+":6346",
 		"connect1.gnutellanet.com:6346",
 		"connect2.gnutellanet.com:6346",
@@ -258,8 +259,7 @@ public final class SettingsManager {
     //settings for Supernode implementation
     private final int DEFAULT_MAX_SHIELDED_CLIENT_CONNECTIONS = 50;
     private volatile int DEFAULT_MIN_SHIELDED_CLIENT_CONNECTIONS = 4;
-    private volatile long DEFAULT_SUPERNODE_PROBATION_TIME = 300000; //5 min
-    private volatile boolean DEFAULT_SUPERNODE_MODE = true;
+    private volatile boolean DEFAULT_SUPERNODE_MODE = false;
     
 
 	/**
@@ -279,7 +279,6 @@ public final class SettingsManager {
 	 * per second upstream.
 	 */
 	private final int DEFAULT_MAX_UPSTREAM_BYTES_PER_SEC = 0;
-
     
     /**
      * Constant default value for whether or not this node has ever been
@@ -306,7 +305,6 @@ public final class SettingsManager {
 	 */
 	private final boolean DEFAULT_CONNECT_ON_STARTUP = true;
     
-
     // The property key name constants
 	private final String ALLOW_BROWSER         = "ALLOW_BROWSER";
     private final String TTL                   = "TTL";
@@ -401,8 +399,6 @@ public final class SettingsManager {
        = "MAX_SHIELDED_CLIENT_CONNECTIONS";
     private final String MIN_SHIELDED_CLIENT_CONNECTIONS 
        = "MIN_SHIELDED_CLIENT_CONNECTIONS";
-    private final String SUPERNODE_PROBATION_TIME 
-       = "SUPERNODE_PROBATION_TIME"; 
     private final String SUPERNODE_MODE             = "SUPERNODE_MODE";
 
 	/**
@@ -522,9 +518,8 @@ public final class SettingsManager {
     //settings for Supernode implementation
     private volatile int _maxShieldedClientConnections;
     private volatile int _minShieldedClientConnections;
-    private volatile long _supernodeProbationTime;
-    private volatile boolean _supernodeMode;
-    private volatile boolean _shieldedClientSupernodeConnection;
+    /** This is the forced supernode mode */
+    private volatile boolean _supernodeModeForced;
 
     /** 
 	 * Constant member variable for the main <tt>Properties</tt> instance.
@@ -954,11 +949,9 @@ public final class SettingsManager {
                 else if(key.equals(MIN_SHIELDED_CLIENT_CONNECTIONS)) {
                     setMinShieldedClientConnections((new Integer(p)).intValue());
                 }
-                else if(key.equals(SUPERNODE_PROBATION_TIME)) {
-                    setSupernodeProbationTime((new Long(p)).longValue());
-                }
-                else if(key.equals(SUPERNODE_MODE)) {
-                    setSupernodeMode((new Boolean(p)).booleanValue());
+                else if(key.equals(SUPERNODE_MODE))
+                {
+                    setForcedSupernodeMode((new Boolean(p)).booleanValue());
                 }
 				else if(key.equals(CONNECT_ON_STARTUP)) {
 					setConnectOnStartup((new Boolean(p)).booleanValue());
@@ -976,7 +969,6 @@ public final class SettingsManager {
 			setMaxIncomingConnections(2);
 		}
 	}
-
 
     /** 
 	 * Load in the default values.  Any properties written to the real 
@@ -1067,24 +1059,10 @@ public final class SettingsManager {
             DEFAULT_MAX_SHIELDED_CLIENT_CONNECTIONS);
         setMinShieldedClientConnections(
             DEFAULT_MIN_SHIELDED_CLIENT_CONNECTIONS);
-        setSupernodeProbationTime(DEFAULT_SUPERNODE_PROBATION_TIME);
-        setSupernodeMode(DEFAULT_SUPERNODE_MODE);
-		setEverAcceptedIncoming(DEFAULT_EVER_ACCEPTED_INCOMING);
-		setMaxUpstreamBytesPerSec(DEFAULT_MAX_UPSTREAM_BYTES_PER_SEC);
-		setMaxDownstreamBytesPerSec(DEFAULT_MAX_DOWNSTREAM_BYTES_PER_SEC);
-        setEverSupernodeCapable(DEFAULT_EVER_SUPERNODE_CAPABLE);
-        
-        //settings for Supernode implementation
-        setMaxShieldedClientConnections(
-            DEFAULT_MAX_SHIELDED_CLIENT_CONNECTIONS);
-        setMinShieldedClientConnections(
-            DEFAULT_MIN_SHIELDED_CLIENT_CONNECTIONS);
-        setSupernodeProbationTime(DEFAULT_SUPERNODE_PROBATION_TIME);
-        setSupernodeMode(DEFAULT_SUPERNODE_MODE);
+        setForcedSupernodeMode(DEFAULT_SUPERNODE_MODE);
 		setSessions(DEFAULT_SESSIONS);		
 		setAverageUptime(DEFAULT_AVERAGE_UPTIME);
 		setTotalUptime(DEFAULT_TOTAL_UPTIME);		
-
 		setConnectOnStartup(DEFAULT_CONNECT_ON_STARTUP);
     }
 
@@ -1783,35 +1761,14 @@ public final class SettingsManager {
      * @return <tt>true</tt> if this node has ever met supernode requirements,
      *         <tt>false</tt> otherwise
      */
-    public boolean getEverSupernodCapable() {
+    public boolean getEverSupernodeCapable() {
 		return getBooleanValue(EVER_SUPERNODE_CAPABLE);
     }
     
-    /**
-     * Returns the probation time for s supernode, during which supernode
-     * decides whether to swith to client mode or stay as supernode
-     */
-    public long getSupernodeProbationTime() {
-        return _supernodeProbationTime;
-    }
-    
-    /**
-     * Tells whether the node is gonna be a supernode or not
-     * @return true, if supernode, false otherwise
-     */
-    public boolean isSupernode() {
-        return _supernodeMode;
-    }
-
-    /**
-     * Tells whether this node has a connection to
-     * a supernode, being itself a client node. This flag has importance
-     * for client nodes only
-     * @return True, if the clientnode has connection to supernode,
-     * false otherwise
-     */
-    public boolean hasShieldedClientSupernodeConnection() {
-        return _shieldedClientSupernodeConnection;
+    /** Returns forced supernode mode */
+    public boolean getForcedSupernodeMode()
+    {
+        return _supernodeModeForced;
     }
 
 	/**
@@ -2902,36 +2859,17 @@ public final class SettingsManager {
         PROPS.put(MIN_SHIELDED_CLIENT_CONNECTIONS, 
             Integer.toString(minShieldedClientConnections));
     }
-
-    /**
-     * Sets the probation time for s supernode, during which supernode
-     * decides whether to swith to client mode or stay as supernode
-     */
-    public void setSupernodeProbationTime(long supernodeProbationTime) {
-        this._supernodeProbationTime = supernodeProbationTime;
-        PROPS.put(SUPERNODE_PROBATION_TIME, 
-            Long.toString(supernodeProbationTime));
-    }
     
     /**
-     * Sets whether the node is gonna be a supernode or not
+     * Sets forced supernode mode
      */
-    public void setSupernodeMode(boolean supernodeMode) {
-        this._supernodeMode = supernodeMode;
+    public void setForcedSupernodeMode(boolean supernodeMode)
+    {
+        this._supernodeModeForced = supernodeMode;
         PROPS.put(SUPERNODE_MODE, 
             (new Boolean(supernodeMode)).toString());
     }
     
-    /**
-     * Sets the flag indicating whether this node has a connection to
-     * a supernode, being itself a client node. This flag has importance
-     * for client nodes only
-     * @param flag the flag value to be set
-     */
-    public void setShieldedClientSupernodeConnection(boolean flag) {
-        _shieldedClientSupernodeConnection = flag;
-    }
-
 	/**
 	 * Sets whether or not to connect to the Gnutella network when the
 	 * application starts up.

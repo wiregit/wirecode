@@ -80,6 +80,14 @@ public class ConnectionWatchdog implements Runnable {
                 continue; //e.g., Clip2 reflector
             snapshot.put(c, new ConnectionState(c));
         }
+        //iterate over initialized client connections too
+        for (Iterator iter=manager.getInitializedClientConnections().iterator();
+             iter.hasNext(); ) {
+            ManagedConnection c=(ManagedConnection)iter.next();
+            if (! c.isKillable())
+                continue; //e.g., Clip2 reflector
+            snapshot.put(c, new ConnectionState(c));
+        }
 
         //Wait a bit more.
         try {

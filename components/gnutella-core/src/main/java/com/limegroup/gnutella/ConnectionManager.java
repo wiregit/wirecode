@@ -4,6 +4,9 @@ import java.net.*;
 import java.io.*;
 import com.sun.java.util.collections.*;
 
+import java.util.Properties;
+import java.util.StringTokenizer;
+
 import com.limegroup.gnutella.util.CommonUtils;
 
 /**
@@ -47,6 +50,17 @@ public class ConnectionManager {
         new ArrayList();
     private List /* of ManagedConnection */ _initializingFetchedConnections =
         new ArrayList();
+    /**
+     * List of connections to the shielded clients.
+     * INVARIANTS: 
+     * 1. _initializedConnections {intersection} _initializedClientConnections
+     * = NULL
+     * <p>
+     * 2. _connections is a superset of _initializedClientConnections
+     * 3. {Connection}.isClientConection == true iff its a client connection
+     */
+    private volatile List /* of ManagedConnection */ 
+        _initializedClientConnections = new ArrayList();
 
     /** 
      * The number of connections to keep up.  Initially we will try _keepAlive
@@ -66,6 +80,7 @@ public class ConnectionManager {
      *
      *  LOCKING: obtain _incomingConnectionLock */
     private volatile int _incomingConnections=0;
+    private volatile int _incomingClientConnections = 0;
     /** The lock for the number of incoming connnections. */
     private Object _incomingConnectionsLock=new Object();
 
@@ -75,6 +90,22 @@ public class ConnectionManager {
 	private SettingsManager _settings;
 	private ConnectionWatchdog _watchdog;
 	private Runnable _ultraFastCheck;
+    
+    /** 
+     * Is true, if we are a client node, and are currently maintaining
+     * connection to a supernode, and that is the only connection we 
+     * are maintaining. Is false, otherwise.
+     */
+    private volatile boolean _hasShieldedClientSupernodeConnection = false;
+    
+    /** 
+     * This is the transitional supernode mode, set automatically during
+     * the execution of program 
+     */
+    private volatile boolean _supernodeModeTransit 
+        = SettingsManager.instance().getForcedSupernodeMode();
+    private volatile boolean _shieldedClientSupernodeConnection;
+    private volatile boolean _hasSupernodeOrClientnodeStatusForced = false;
 
     /**
      * Constructs a ConnectionManager.  Must call initialize before using.
@@ -172,60 +203,65 @@ public class ConnectionManager {
      * will launch a RejectConnection to send pongs for other hosts.
      */
      void acceptConnection(Socket socket) {
-         //Atomically decide whether to accept connection.  Release lock
-         //before actually managing the connection.
-         boolean allowConnection=false;
-         synchronized (_incomingConnectionsLock) {
-             if (_incomingConnections < _keepAlive) {
-                 //Yes, we'll allow it.  Increment the incoming count NOW even
-                 //before this connection is processed.  The value will be
-                 //decremented in the finally clause below.
-                 _incomingConnections++;
-                 allowConnection=true;
+         //TODO2: We need to re-enable the reject connection mechanism.  The
+         //catch is that you don't know whether to reject for sure until you've
+         //handshaked.  Basically RejectConnection is no longer sufficient, so I
+         //propose eliminating it; just use a normal ManagedConnection but don't
+         //add it to list of connections, and don't add it to gui.  This
+         //requires some refactoring of that damn initialization code.
+         
+         //1. Initialize connection.  It's always safe to recommend new headers.
+         ManagedConnection connection=null;
+         try {
+             connection = new ManagedConnection(socket, _router, this);
+             initializeExternallyGeneratedConnection(connection);
+         } catch (IOException e) {
+             if(connection != null){
+                    connection.close();
              }
+             return;
          }
          
-         if (allowConnection) {
-             //a) Handle normal connection (blocking).
-             ManagedConnection connection = new ManagedConnection(
-                 socket, _router, this);
-             try {                     
-                 initializeExternallyGeneratedConnection(connection);
+         //dont keep the connection, if we are not a supernode
+         synchronized(this){
+            if(_hasShieldedClientSupernodeConnection){
+                remove(connection);
+            }
+         }
+         
+         //update the connection count
+         try {   
+             synchronized (_incomingConnectionsLock) {
+                 if(connection.isClientConnection())
+                     _incomingClientConnections++;
+                 else
+                     _incomingConnections++;
+             }                  
+
+             //a) Not needed: kill.  TODO: reject as described above.
+             if((connection.isClientConnection() &&
+                (_incomingClientConnections > 
+                SettingsManager.instance().getMaxShieldedClientConnections()))
+                || (!connection.isClientConnection() && 
+                (_incomingConnections > _keepAlive))) {
+                    synchronized(this){
+                        remove(connection);
+             }
+             }else {                     
                  sendInitialPingRequest(connection);
                  connection.loopForMessages();
-             } catch(IOException e) {
-             } catch(Exception e) {
-                 //Internal error!
-                 _callback.error(ActivityCallback.INTERNAL_ERROR, e);
-             } finally {
-                 synchronized (_incomingConnectionsLock) {
-                     _incomingConnections--;
-                 }
              }
-         } else {
-             //b) Handle reject connection if not on a Mac with OS 9.1 or below.  
-			 //The constructor does the whole deal -- intializing, looking for 
-			 //and responding to a PingRequest.  It's all synchronous, because 
-			 //we have a dedicated thread right here.
-			if(!CommonUtils.isMacClassic()) {
-				new RejectConnection(socket, _catcher);
-			}
-            
-			// Otherwise, we're not on windows.  We did this 
-			// because we know that RejectConnection was causing
-			// problems on the Mac (periodically freezing the
-			// system and leading to a 40% approval rating on
-			// download.com), and we have not been able to test
-			// it on other systems.  Since we know that not using
-			// a reject connection will not cause a problem, then
-			// we might as well just be safe and not use one on 
-			// non-windows systems.
-			else {
-				try {
-					socket.close();
-				}
-				catch(IOException ioe) {}
-			}
+         } catch(IOException e) {
+         } catch(Exception e) {
+             //Internal error!
+             _callback.error(ActivityCallback.INTERNAL_ERROR, e);
+         } finally {
+             synchronized (_incomingConnectionsLock) {
+                 if(connection.isClientConnection())
+                     _incomingClientConnections--;
+                 else
+                     _incomingConnections--;
+             }
          }
      }
 
@@ -269,14 +305,63 @@ public class ConnectionManager {
     }
 
     /**
-     * Sets the maximum number of incoming connections.  This does not
-     * affect the MAX_INCOMING_CONNECTIONS property.  It is useful to be
-     * able to vary this without permanently setting the property.
+     * Tells whether the node is gonna be a supernode or not
+     * @return true, if supernode, false otherwise
      */
-    //public void setMaxIncomingConnections(int max) {
-	//_maxIncomingConnections = max;
-    //}
-
+    public boolean isSupernode()
+    {
+        return _supernodeModeTransit;
+    }
+    
+    /**
+     * Sets whether the node is a supernode or not
+     */
+    public void setSupernodeMode(boolean supernodeModeTransit)
+    {
+        this._supernodeModeTransit = supernodeModeTransit;
+    }    
+    
+    /**
+     * Tells whether this node has a connection to
+     * a supernode, being itself a client node. This flag has importance
+     * for client nodes only
+     * @return True, if the clientnode has connection to supernode,
+     * false otherwise
+     */
+    public boolean hasShieldedClientSupernodeConnection() {
+        return _shieldedClientSupernodeConnection;
+    }
+    
+    /**
+     * Tells whether the node's status has been forced,
+     * in which case SupernodeAssigner Thread wont try
+     * to change the status
+     */
+    public boolean hasSupernodeOrClientnodeStatusForced()
+    {
+        return _hasSupernodeOrClientnodeStatusForced;
+    }
+    
+    /**
+     * Sets the flag indicating whether this node has a connection to
+     * a supernode, being itself a client node. This flag has importance
+     * for client nodes only
+     * @param flag the flag value to be set
+     */
+    public void setShieldedClientSupernodeConnection(boolean flag) {
+        _shieldedClientSupernodeConnection = flag;
+    }
+    
+    /**
+     * Sets the node's status flag. If the flag is true, it indicates that
+     * the  SupernodeAssigner Thread wont try
+     * to change the status
+     */
+    public void setSupernodeOrClientnodeStatusForced(boolean flag)
+    {
+        _hasSupernodeOrClientnodeStatusForced = flag;
+    }
+    
     /**
      * @return true if there is a connection to the given host.
      */
@@ -304,9 +389,31 @@ public class ConnectionManager {
      * @return true if incoming connection slots are still available.
      */
     public boolean hasAvailableIncoming() {
-        return (_incomingConnections < _keepAlive);
+        return ((_incomingConnections < _keepAlive)
+            || (isSupernode() && (_incomingClientConnections < 
+            _settings.getMaxShieldedClientConnections())));
     }
 
+    /**
+     * Tells if this node thinks that more supernodes are needed on the 
+     * network. This method should be invoked on a supernode only, as
+     * only supernode may have required information to make informed
+     * decision.
+     * @return true, if more supernodes needed, false otherwise
+     */
+    public boolean supernodeNeeded(){
+        //if more than 70% slots are full, return true 
+        if(isSupernode() &&
+            _incomingClientConnections > 
+            (SettingsManager.instance()
+            .getMaxShieldedClientConnections() * 0.7)){
+            return true;
+        }else{
+            //else return false
+            return false;
+        }
+    }
+    
     /**
      * @return a clone of this' initialized connections.
      * The iterator yields items in any order.  It <i>is</i> permissible
@@ -316,6 +423,18 @@ public class ConnectionManager {
     public List getInitializedConnections() {
         List clone=new ArrayList();
         clone.addAll(_initializedConnections);
+        return clone;
+    }
+    
+    /**
+     * @return a clone of this' initialized connections to shielded-clients.
+     * The iterator yields items in any order.  It <i>is</i> permissible
+     * to modify this while iterating through the elements of this, but
+     * the modifications will not be visible during the iteration.
+     */
+    public List getInitializedClientConnections() {
+        List clone=new ArrayList();
+        clone.addAll(_initializedClientConnections);
         return clone;
     }
 
@@ -329,6 +448,17 @@ public class ConnectionManager {
     List getInitializedConnections2() {
         return _initializedConnections;
     }
+    
+    /**
+     * @requires returned value not modified
+     * @effects returns a list of this' initialized connections.  <b>This
+     *  exposes the representation of this, but is needed in some cases
+     *  as an optimization.</b>  All lookup values in the returned value
+     *  are guaranteed to run in linear time.
+     */
+    List getInitializedClientConnections2() {
+        return _initializedClientConnections;
+    }
 
     /**
      * @return a clone of all of this' connections.
@@ -341,6 +471,34 @@ public class ConnectionManager {
         return clone;
     }
 
+    /**
+     * Returns the endpoints it is connected to
+     * @return Returns the endpoints it is connected to. 
+     */ 
+    public Set getConnectedSupernodeEndpoints(){
+        Set retSet = new HashSet();
+        //get an iterator over _initialized connections, and iterate to
+        //fill the retSet with supernode endpoints
+        for(Iterator iterator = _initializedConnections.iterator();
+            iterator.hasNext();)
+        {
+            Connection connection = (Connection)iterator.next();
+            if(connection.isSupernodeConnection())
+                retSet.add(new Endpoint(
+                    connection.getInetAddress().getAddress(),
+                    connection.getOrigPort()));
+        }
+        return retSet;
+    }
+    
+    /**
+     * @return Returns endpoint representing its own address and port
+     */
+    public Endpoint getSelfAddress()
+    {
+       return new Endpoint(_router.getAddress(), _router.getPort()); 
+    }
+    
     /**
      * Adds an initializing connection.
      * Should only be called from a thread that has this' monitor.
@@ -362,11 +520,21 @@ public class ConnectionManager {
      */
     private void connectionInitialized(Connection c) {
         if(_connections.contains(c)) {
-            //REPLACE _initializedConnections with the list
-            //_initializedConnections+[c]
-            List newConnections=new ArrayList(_initializedConnections);
-            newConnections.add(c);
-            _initializedConnections=newConnections;
+            //update the appropriate list of connections
+            if(!c.isClientConnection()){
+                //REPLACE _initializedConnections with the list
+                //_initializedConnections+[c]
+                List newConnections=new ArrayList(_initializedConnections);
+                newConnections.add(c);
+                _initializedConnections=newConnections;
+            }else{
+                //REPLACE _initializedClientConnections with the list
+                //_initializedClientConnections+[c]
+                List newConnections
+                    =new ArrayList(_initializedClientConnections);
+                newConnections.add(c);
+                _initializedClientConnections=newConnections;
+            }
 
             //REPLACE _endpoints with the set _endpoints+{c}
             Set newEndpoints=new HashSet(_endpoints);
@@ -394,6 +562,94 @@ public class ConnectionManager {
 		_ultraFastCheck = null;
 	}
 
+    /**
+     * Disconnects from the network.  Closes all connections and sets
+     * the number of connections to zero.
+     */
+    public synchronized void disconnect() {
+		// Deactivate checking for Ultra Fast Shutdown
+		deactivateUltraFastConnectShutdown(); 
+
+        SettingsManager settings=SettingsManager.instance();
+        int oldKeepAlive=settings.getKeepAlive();
+
+        //1. Prevent any new threads from starting.  Note that this does not
+        //   affect the permanent settings.
+        setKeepAlive(0);
+        //setMaxIncomingConnections(0);
+        //2. Remove all connections.
+        for (Iterator iter=getConnections().iterator();
+             iter.hasNext(); ) {
+            ManagedConnection c=(ManagedConnection)iter.next();
+            remove(c);
+        }
+    }
+    
+    /**
+     * Connects to the network.  Ensures the number of messaging connections
+     * (keep-alive) is non-zero and recontacts the pong server as needed.  
+     */
+    public synchronized void connect() {
+        //HACK. People used to complain to that the connect button wasn't
+        //working when the host catcher was empty and USE_QUICK_CONNECT=false.
+        //This is not a bug; LimeWire isn't supposed to connect to the pong
+        //server in this case.  But this IS admittedly confusing.  So we force a
+        //connection to the pong server in this case by disconnecting and
+        //temporarily setting USE_QUICK_CONNECT to true.  But we have to
+        //sleep(..) a little bit before setting USE_QUICK_CONNECT back to false
+        //to give the connection fetchers time to do their thing.  Ugh.  A
+        //Thread.yield() may work here too, but that's less dependable.  And I
+        //do not want to bother with wait/notify's just for this obscure case.
+        SettingsManager settings=SettingsManager.instance();
+        boolean useHack=
+            (!settings.getUseQuickConnect())
+                && _catcher.getNumHosts()==0;
+        if (useHack) {
+            settings.setUseQuickConnect(true);
+            disconnect();
+        }
+
+        //Force reconnect to pong server.
+        _catcher.expire();
+
+        //Ensure outgoing connections is positive.
+        int outgoing=settings.getKeepAlive();
+        if (outgoing<1) {
+            outgoing = settings.DEFAULT_KEEP_ALIVE;
+            settings.setKeepAlive(outgoing);
+        }
+        //Actually notify the backend.
+
+		//  Adjust up keepAlive for initial ultrafast connect
+		if ( outgoing < 10 ) {
+			outgoing = 10;
+			activateUltraFastConnectShutdown();
+		}
+        setKeepAlive(outgoing);
+
+        //int incoming=settings.getKeepAlive();
+        //setMaxIncomingConnections(incoming);
+
+        //See note above.
+        if (useHack) {
+            try {
+                Thread.sleep(100);
+            } catch (InterruptedException e) { }
+            SettingsManager.instance().setUseQuickConnect(false);
+        }
+    }
+    
+    /**
+     * Drops the current set of connections, and starts afresh based upon
+     * the supernode/client state
+     */
+    public synchronized void reconnect()
+    {
+        disconnect();
+        SettingsManager.instance().setKeepAlive(4);
+        connect();
+    }
+    
     /** 
      * Sends the initial ping request to a newly initialized connection.  The ttl
      * of the PingRequest will be 1 if we don't need any connections.  Otherwise,
@@ -457,15 +713,36 @@ public class ConnectionManager {
         // stuff associated with initialized connections.  For efficiency 
         // reasons, this must be done before (2) so packets are not forwarded
         // to dead connections (which results in lots of thrown exceptions).
-        int i=_initializedConnections.indexOf(c);
-        if (i != -1) {
-            //REPLACE _initializedConnections with the list
-            //_initializedConnections-[c]
-            List newConnections=new ArrayList();
-            newConnections.addAll(_initializedConnections);
-            newConnections.remove(c);
-            _initializedConnections=newConnections;
-
+        boolean removed = false;
+        if(!c.isClientConnection()){
+            int i=_initializedConnections.indexOf(c);
+            if (i != -1) {
+                removed = true;
+                //REPLACE _initializedConnections with the list
+                //_initializedConnections-[c]
+                List newConnections=new ArrayList();
+                newConnections.addAll(_initializedConnections);
+                newConnections.remove(c);
+                _initializedConnections=newConnections;
+            }
+        }else{
+            //check in _initializedClientConnections
+            int i=_initializedClientConnections.indexOf(c);
+            if (i != -1) {
+                removed = true;
+                //REPLACE _initializedClientConnections with the list
+                //_initializedClientConnections-[c]
+                List newConnections=new ArrayList();
+                newConnections.addAll(_initializedClientConnections);
+                newConnections.remove(c);
+                _initializedClientConnections=newConnections;
+            }
+        }
+        
+        //if connection was removed from any of the initialized lists of
+        //connections, remove from the set of connected endpoints too.
+        if(removed)
+        {
             //REPLACE _endpoints with the set _endpoints+{c}
             Set newEndpoints=new HashSet();
             newEndpoints.addAll(_endpoints);
@@ -473,9 +750,10 @@ public class ConnectionManager {
                 c.getInetAddress().getHostAddress(), c.getPort()));
             _endpoints=newEndpoints;           
         }
+        
         // 1b) Remove from the all connections list and clean up the
         // stuff associated all connections
-        i=_connections.indexOf(c);
+        int i=_connections.indexOf(c);
         if (i != -1) {
             //REPLACE _connections with the list _connections-[c]
             List newConnections=new ArrayList(_connections);
@@ -581,7 +859,12 @@ public class ConnectionManager {
             }
             throw e;
         }
-
+        finally{
+            //if the connection received headers, process the headers to
+            //take steps based on the headers
+            processConnectionHeaders(c);
+        }
+        
         boolean connectionOpen = false;
         synchronized(this) {
             _initializingFetchedConnections.remove(c);
@@ -593,9 +876,254 @@ public class ConnectionManager {
             }
         }
         if(connectionOpen)
+        {
             _callback.connectionInitialized(c);
+            //check if we are a client node, and now opened a connection 
+            //to supernode. In this case, we will drop all other connections
+            //and just keep this one
+            //check for shieldedclient-supernode connection
+            if(isSupernode() && 
+                c.isSupernodeConnection()){
+            gotShieldedClientSupernodeConnection(c);
+            }
+        }
     }
 
+    /** 
+     * Indicates that we are a client node, and have received supernode
+     * connection. Executing this method will lead to dropping all the 
+     * connections except the one to the supernode. 
+     * @param supernodeConnection The connectionto the supernode that we
+     * wanna preserve
+     */
+    private synchronized void gotShieldedClientSupernodeConnection(
+        ManagedConnection supernodeConnection)
+    {
+        // Deactivate checking for Ultra Fast Shutdown
+		deactivateUltraFastConnectShutdown(); 
+        //set keep alive to 0, so that we are not fetching any connections
+        //Keep Alive is not set to zero, so that when this connection drops,
+        //we automatically start fetching a new connection
+        setKeepAlive(0);
+        
+        //close all other connections
+        Iterator iterator = _connections.iterator();
+        while(iterator.hasNext())
+        {
+            ManagedConnection connection = (ManagedConnection)iterator.next();
+            if(!connection.equals(supernodeConnection))
+                connection.close();
+        }
+        //set the _hasShieldedClientSupernodeConnection flag to true
+        _hasShieldedClientSupernodeConnection = true;
+        
+        //reinitialize the lists
+        List newConnections=new ArrayList();
+        newConnections.add(supernodeConnection);
+        _connections = newConnections;
+        
+        newConnections = new ArrayList();
+        newConnections.add(supernodeConnection);
+        _initializedConnections = newConnections;
+        
+        _initializedClientConnections = new ArrayList();
+        
+        _incomingConnections = 0;
+        _incomingClientConnections=0;
+    }
+    
+    /** 
+     * Indicates that the node is in the client node, and has now
+     * lost its only connection to the supernode
+     */
+    private synchronized void lostShieldedClientSupernodeConnection()
+    {
+        setSupernodeOrClientnodeStatusForced(false);
+        if(_connections.size() == 0)
+        {
+            //set the _hasShieldedClientSupernodeConnection flag to false
+            _hasShieldedClientSupernodeConnection = false;
+
+            //set keep alive to 4, so that we start fetching new connections
+            setKeepAlive(4);
+        }
+    }
+    
+    /**
+     * Processes the headers received during connection handshake and updates
+     * itself with any useful information contained in those headers.
+     * Also may change its state based upon the headers.
+     * @param headers The headers to be processed
+     * @param connection The connection on which we received the headers
+     */
+    private void processConnectionHeaders(ManagedConnection connection){
+        //get the connection headers
+        Properties headers = connection.getHeaders();
+        //return if no headers to process
+        if(headers == null) return;
+        
+        //update the addresses in the host cache (in case we received some
+        //in the headers)
+        updateHostCache(headers, connection);
+        
+        //set client/supernode flag for the connection
+        String supernodeStr = headers.getProperty(
+            ConnectionHandshakeHeaders.X_SUPERNODE);
+        if(supernodeStr != null){
+            boolean isSupernode = (new Boolean(supernodeStr)).booleanValue();
+            if(isSupernode)
+                connection.setSupernodeConnectionFlag(true);
+            else
+                connection.setClientConnectionFlag(true);
+        }
+        
+        //get remote address
+        String remoteAddress 
+            = headers.getProperty(ConnectionHandshakeHeaders.X_MY_ADDRESS);
+        //set the remote port if not outgoing connection (as for the outgoing
+        //connection, we already know the port at which remote host listens)
+        if((remoteAddress != null) && (!connection.isOutgoing()))
+        {
+            try
+            {
+                connection.setOrigPort(
+                    Integer.parseInt(remoteAddress.substring(
+                    remoteAddress.indexOf(':') + 1).trim()));
+            }
+            catch(Exception e){
+                //no problem
+                //should never happen though if the other client is well-coded
+            }
+        }
+        
+        
+        //check Supernode-Needed header
+        String supernodeNeededStr = headers.getProperty(
+            ConnectionHandshakeHeaders.X_SUPERNODE_NEEDED);
+        if(supernodeNeededStr != null){
+            boolean supernodeNeeded 
+                = (new Boolean(supernodeNeededStr)).booleanValue();
+            //get the remote address
+            String remoteHost;
+            if(connection.isOutgoing())
+                remoteHost = connection.getOrigHost() + ":" + 
+                    connection.getOrigPort();
+            else
+                remoteHost = headers.getProperty(
+                    ConnectionHandshakeHeaders.X_MY_ADDRESS);
+            //take appropriate action       
+            gotSupernodeNeededGuidance(supernodeNeeded, remoteHost);
+        }
+    }
+   
+    /** 
+     * Indicates that we received guidance from another supernode about
+     * the supernode/clientnode state we should go to. 
+     * Based upon the guidance as well as our current conditions, we may
+     * change our state based upon the guidance
+     * @param supernodeNeeded True, if other node thinks we should be
+     * a supernode, false otherwise
+     * @param remoteAddress address (host:port) of the remote host who is
+     * providing the guidance
+     */
+    private void gotSupernodeNeededGuidance(boolean supernodeNeeded,
+        String remoteAddress){
+        //if we are in the state asked for, return
+        if(isSupernode() == supernodeNeeded)
+            return;
+        
+        //if is a supernode, and have client connections, dont change mode
+        if(isSupernode() && _incomingClientConnections > 0)
+            return;
+        
+        //if we are not supernode capable, and guidance received is to
+        //become supernode, discard it
+        if(supernodeNeeded
+            && !SettingsManager.instance().getEverSupernodeCapable())
+        {
+            return;
+        }
+       
+        //if the remote address is not null, connect to the remoteAddress
+        try{
+            if(remoteAddress != null){
+                    
+                //disconnect all the connections, and set the state as guided
+                disconnect();    
+                setSupernodeMode(supernodeNeeded);    
+                    
+                //open connection to the specified host
+                Endpoint endpoint = new Endpoint(remoteAddress);
+                ManagedConnection connection = new ManagedConnection(
+                    endpoint.getHostname(), endpoint.getPort(), _router,
+                    ConnectionManager.this);
+
+                initializeExternallyGeneratedConnection(connection);
+                sendInitialPingRequest(connection);
+                connection.loopForMessages();
+            }
+        }catch(Exception e){
+            //just catch any exception
+        }
+        finally{
+            //in case the guidance was to become client node
+            //if that connection worked, that was our only connection
+            //to the supernode. Else we just didnt have any connection
+            if(!supernodeNeeded)
+                lostShieldedClientSupernodeConnection();
+        }
+    }
+    
+    /**
+     * Updates the addresses in the hostCache by parsing the passed string
+     * @param headers The connection headers received
+     * @param connection The connection on which we received the headers
+     */
+    private void updateHostCache(Properties headers, ManagedConnection
+        connection){
+        //add the addresses received
+        updateHostCache(headers.getProperty(
+                ConnectionHandshakeHeaders.X_TRY),
+                connection, false);
+        
+        //get the supernodes, and add those to the host cache
+        updateHostCache(headers.getProperty(
+                ConnectionHandshakeHeaders.X_TRY_SUPERNODES),
+                connection, true);
+    }
+    
+    /**
+     * Updates the addresses in the hostCache by parsing the passed string
+     * @param hostAddresses The string representing the addressess to be 
+     * added. It should be in the form:
+     * <p> IP Address:Port [,IPAddress:Port]* 
+     * <p> e.g. 123.4.5.67:6346, 234.5.6.78:6347 
+     * @param connection The connection on which we received the addresses
+     * @param goodPriority Flag that specifies if the addresses have to be
+     * given high priority
+     */
+    private void updateHostCache(String hostAddresses, ManagedConnection
+        connection, boolean goodPriority){
+        //check for null param
+         if(hostAddresses == null)
+             return;
+         
+        //tokenize to retrieve individual addresses
+        StringTokenizer st = new StringTokenizer(hostAddresses,
+            Constants.HTTP_ENTRY_SEPARATOR);
+        //iterate over the tokens
+        while(st.hasMoreTokens()){
+            //get an address
+            String address = ((String)st.nextToken()).trim();
+            Endpoint e = new Endpoint(address);
+            //set the good priority, if specified
+            if(goodPriority)
+                e.setWeight(HostCatcher.GOOD_PRIORITY);
+            //add it to the catcher
+            _catcher.add(e, connection);
+        }
+    }
+    
     /**
      * Initializes an outgoing connection created by createConnection or any
      * incomingConnection.
@@ -617,6 +1145,11 @@ public class ConnectionManager {
             remove(c);
             throw e;
         }
+        finally{
+            //if the connection received headers, process the headers to
+            //take steps based on the headers
+            processConnectionHeaders(c);
+        }
 
         boolean connectionOpen = false;
         synchronized(this) {
@@ -628,7 +1161,16 @@ public class ConnectionManager {
             }
         }
         if(connectionOpen)
+        {
             _callback.connectionInitialized(c);
+            //check if we are a client node, and now opened a connection 
+            //to supernode. In this case, we will drop all other connections
+            //and just keep this one
+            //check for shieldedclient-supernode connection
+            if(isSupernode() && c.isSupernodeConnection()){
+                gotShieldedClientSupernodeConnection(c);
+            }
+        }
     }
 
     //
@@ -678,9 +1220,7 @@ public class ConnectionManager {
                         _router.createGroupPingRequest(group);
                     _connection.send(pingRequest);
                     //Ensure that the initial ping request is written in a timely fashion.
-                    try {
-                        _connection.flush();
-                    } catch (IOException e) { /* close it later */ }
+                    _connection.flush();
 				}
 				else
                 {
@@ -693,6 +1233,12 @@ public class ConnectionManager {
             } catch(Exception e) {
                 //Internal error!
                 _callback.error(ActivityCallback.INTERNAL_ERROR, e);
+            }
+            finally{
+                if(_hasShieldedClientSupernodeConnection)
+                {
+                    lostShieldedClientSupernodeConnection();
+                }
             }
         }
     }
@@ -715,6 +1261,18 @@ public class ConnectionManager {
 
         return c;
     }
+    
+    /**
+     * @requires n>0
+     * @effects returns an iterator that yields up the best n endpoints of this.
+     *  It's not guaranteed that these are reachable. This can be modified while
+     *  iterating through the result, but the modifications will not be
+     *  observed.  
+     */
+    public synchronized Iterator getBestHosts(int n) {
+        return _catcher.getBestHosts(n);
+    }
+    
 
     /**
      * This thread does the message loop for ManagedConnections created
@@ -745,6 +1303,11 @@ public class ConnectionManager {
             } catch(Exception e) {
                 //Internal error!
                 _callback.error(ActivityCallback.INTERNAL_ERROR, e);
+            }
+            finally{
+                if(_hasShieldedClientSupernodeConnection){
+                    lostShieldedClientSupernodeConnection();
+                }
             }
 
             //SettingsManager settings = SettingsManager.instance();
@@ -812,10 +1375,11 @@ public class ConnectionManager {
                 //Internal error!
                 _callback.error(ActivityCallback.INTERNAL_ERROR, e);
             }
+            finally{
+                if(_hasShieldedClientSupernodeConnection){
+                    lostShieldedClientSupernodeConnection();
+                }
+            }
         }
     }
-
-    //
-    // End connection launching thread inner classes
-    //
 }
