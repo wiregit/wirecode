@@ -186,7 +186,7 @@ public class HostCatcher {
 
             if ((! set.contains(e)) && (! isMe(host, port))) {
                 //add e to the head.  Order matters!
-                Object removed=queue.insert(e);
+                Object removed=queue.insert(e, e.getWeight());
                 //Shouldn't happen...
                 if (removed!=null)
                     set.remove(removed);
@@ -311,7 +311,7 @@ public class HostCatcher {
                 //Adding e may eject an older point from queue, so we have to
                 //cleanup the set to maintain rep. invariant.
                 set.add(e);
-                Object ejected=queue.insert(e);
+                Object ejected=queue.insert(e, e.getWeight());
                 if (ejected!=null)
                     set.remove(ejected);
 
@@ -705,7 +705,7 @@ public class HostCatcher {
     public static void main(String args[]) {
         HostCatcher hc=new HostCatcher(new Main());
         hc.initialize(new Acceptor(6346, null),
-                      new ConnectionManager(null));
+                      new ConnectionManager(null, null));
 
         Iterator iter=hc.getNormalHosts(10);
         Assert.that(! iter.hasNext());

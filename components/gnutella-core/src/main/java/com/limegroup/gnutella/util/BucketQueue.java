@@ -6,11 +6,12 @@ import com.sun.java.util.collections.NoSuchElementException;
 import com.sun.java.util.collections.Iterator;
 
 /** 
- * A queue of Endpoints.  Designed to be a replacement for BinaryHeap for the
- * special case when there are only a small number of positive priorities, where
- * larger numbers are higher priority.  Unless otherwise noted, all methods have
- * the same specifications as BinaryHeap.  This also has a few additional
- * methods not found in BinaryHeap.  <b>This class is not synchronized.</b> 
+ * A discrete-case priority queue.  Designed to be a replacement for BinaryHeap
+ * for the special case when there are only a small number of positive
+ * priorities, where larger numbers are higher priority.  Unless otherwise
+ * noted, all methods have the same specifications as BinaryHeap.  This also has
+ * a few additional methods not found in BinaryHeap.  <b>This class is not
+ * synchronized.</b>
  */
 public class BucketQueue implements Cloneable {
     /** 
@@ -21,14 +22,23 @@ public class BucketQueue implements Cloneable {
     private Buffer[] buckets;
 
     /**
-     * @requires capacities.length!=0 && capacities[i]>0
      * @effects makes a new queue that will hold up to capacities[i]
-     *  elements of weight i.  
+     *  elements of priority i.  Hence the legal priorities are 0
+     *  through capacities.length-1
+     * @exception IllegalArgumentException capacities.length<=0 or 
+     *  capacities[i]<=0 for any i
      */
-    public BucketQueue(int[] capacities) {
+    public BucketQueue(int[] capacities) throws IllegalArgumentException {
+        if (capacities.length<=0)
+            throw new IllegalArgumentException();
         this.buckets=new Buffer[capacities.length];
-        for (int i=0; i<buckets.length; i++) 
+
+        for (int i=0; i<buckets.length; i++) {
+            if (capacities[i]<=0)
+                throw new IllegalArgumentException(
+                    "Non-positive capacity: "+capacities[i]);
             buckets[i]=new Buffer(capacities[i]);
+        }
     }
 
     /** "Copy constructor": constructs a a new shallow copy of other. */
@@ -46,42 +56,47 @@ public class BucketQueue implements Cloneable {
     }
 
     /**
-     * @requires e.getWeight is a legal priority
      * @modifies this
-     * @effects adds e to this, removing some older element of same or lesser
-     *  priority as needed
+     * @effects adds o to this, removing and returning some older element of
+     *  same or lesser priority as needed
+     * @exception IllegalArgumentException priority is not a legal priority, 
+     *  as determined by this' constructor
      */
-    public Endpoint insert(Endpoint e) {
-        int weight=e.getWeight();
-        return (Endpoint)buckets[weight].addFirst(e);
+    public Object insert(Object o, int priority) 
+            throws IllegalArgumentException {
+        try {
+            return buckets[priority].addFirst(o);
+        } catch (IndexOutOfBoundsException e) {
+            throw new IllegalArgumentException("Bad priority: "+priority);
+        }
     }
 
     /**
      * @modifies this
-     * @effects removes all e' s.t. e'.equals(e).  Note that e's
-     *  weight is ignored.  Returns true if any elements were removed.
+     * @effects removes all o' s.t. o'.equals(o).  Note that p's
+     *  priority is ignored.  Returns true if any elements were removed.
      */
-    public boolean removeAll(Endpoint e) {
+    public boolean removeAll(Object o) {
         boolean ret=false;
         for (int i=0; i<buckets.length; i++) {
-            ret=ret | buckets[i].removeAll(e);
+            ret=ret | buckets[i].removeAll(o);
         }
         return ret;
     }
 
-    public Endpoint extractMax() throws NoSuchElementException {
+    public Object extractMax() throws NoSuchElementException {
         for (int i=buckets.length-1; i>=0 ;i--) {
             if (! buckets[i].isEmpty()) {
-                return (Endpoint)buckets[i].removeFirst();
+                return buckets[i].removeFirst();
             }
         }
         throw new NoSuchElementException();
     }
 
-    public Endpoint getMax() throws NoSuchElementException {
+    public Object getMax() throws NoSuchElementException {
         for (int i=buckets.length-1; i>=0 ;i--) {
             if (! buckets[i].isEmpty()) {
-                return (Endpoint)buckets[i].first();
+                return buckets[i].first();
             }
         }
         throw new NoSuchElementException();
@@ -96,12 +111,16 @@ public class BucketQueue implements Cloneable {
     }
 
     /** 
-     * Returns the number of entries with the given priority. 
-     * @param priority MUST be a valid priority, i.e., non-negative and less
-     *  than the length of the array passed to this' constructor 
+     * @effects returns the number of entries with the given priority. 
+     * @exception IllegalArgumentException priority is not a legal priority, 
+     *  as determined by this' constructor
      */
-    public int size(int priority) {
-        return buckets[priority].getSize();
+    public int size(int priority) throws IllegalArgumentException {
+        try {
+            return buckets[priority].getSize();
+        } catch (IndexOutOfBoundsException e) {
+            throw new IllegalArgumentException("Bad priority: "+priority);
+        }
     }
 
     public boolean isEmpty() {
@@ -124,8 +143,14 @@ public class BucketQueue implements Cloneable {
      *  priority.  Within each priority level, newer elements are yielded before
      *  older ones, and each element is yielded exactly once.  May yield fewer
      *  than n elements.
+     * @exception IllegalArgumentException startPriority is not a legal priority
+     *  as determined by this' constructor
      */
-    public Iterator iterator(int startPriority, int n) {
+    public Iterator iterator(int startPriority, int n) 
+            throws IllegalArgumentException {
+        if (startPriority<0 || startPriority>=buckets.length)
+            throw new IllegalArgumentException("Bad priority: "+startPriority);
+
         return new BucketQueueIterator(startPriority, n);
     }
 
@@ -200,10 +225,10 @@ public class BucketQueue implements Cloneable {
         BucketQueue q=new BucketQueue(new int[] {10, 10, 10, 10, 10});
         Assert.that(q.isEmpty());
 
-        Assert.that(q.insert(e0)==null);
-        Assert.that(q.insert(e4)==null);
-        Assert.that(q.insert(e2b)==null);
-        Assert.that(q.insert(e2a)==null);
+        Assert.that(q.insert(e0, 0)==null);
+        Assert.that(q.insert(e4, 4)==null);
+        Assert.that(q.insert(e2b, 2)==null);
+        Assert.that(q.insert(e2a, 2)==null);
         Assert.that(q.size()==4);
         Assert.that(q.size(4)==1);
         Assert.that(q.size(2)==2);
@@ -269,11 +294,11 @@ public class BucketQueue implements Cloneable {
 
         Endpoint f1=new Endpoint("garbage2", 6346);
         Assert.that(q.removeAll(f1)==false);
-        Assert.that(q.insert(e0)==null);
-        Assert.that(q.insert(e4)==null);
-        Assert.that(q.insert(f1)==null);
-        Assert.that(q.insert(e2b)==null);
-        Assert.that(q.insert(e2a)==null);
+        Assert.that(q.insert(e0, 0)==null);
+        Assert.that(q.insert(e4, 4)==null);
+        Assert.that(q.insert(f1, 1)==null);
+        Assert.that(q.insert(e2b, 2)==null);
+        Assert.that(q.insert(e2a, 2)==null);
         Assert.that(q.removeAll(e0)==true);
         Assert.that(q.size()==1);
         Assert.that(q.getMax()==f1);
@@ -282,9 +307,9 @@ public class BucketQueue implements Cloneable {
 
         //Test clone
         q=new BucketQueue(new int[] {10, 10, 10, 10, 10});
-        q.insert(e4);
-        q.insert(e2a);
-        q.insert(e0);
+        q.insert(e4, 4);
+        q.insert(e2a, 2);
+        q.insert(e0, 0);
 
         BucketQueue q2=new BucketQueue(q);
         Assert.that(q.size()==q2.size());
@@ -299,8 +324,61 @@ public class BucketQueue implements Cloneable {
         }
         Assert.that(! iter2.hasNext());
 
-        q.insert(e2b);
+        q.insert(e2b, 2);
         Assert.that(q.size()==(q2.size()+1));
+
+        //Test with stuff besides endpoints
+        q=new BucketQueue(new int[] {10, 10, 10});
+        q.insert("medium", 1);
+        q.insert("low", 0);
+        q.insert("high", 2);
+        Assert.that(q.extractMax().equals("high"));
+        Assert.that(q.extractMax().equals("medium"));
+        Assert.that(q.extractMax().equals("low"));
+
+        //Test exceptional cases
+        try {
+            q=new BucketQueue(new int[0]);
+            Assert.that(false);
+        } catch (IllegalArgumentException e) { }
+        try {
+            q=new BucketQueue(new int[] {1, 2, 0});
+            Assert.that(false);
+        } catch (IllegalArgumentException e) { }
+        try {
+            q=new BucketQueue(new int[] {1});
+        } catch (IllegalArgumentException e) { 
+            Assert.that(false);
+        }
+
+        q=new BucketQueue(new int[] {10, 10, 10});
+        try {
+            q.insert("oops", -1);
+            Assert.that(false);
+        } catch (IllegalArgumentException e) { }
+        try {
+            q.insert("oops", 3);
+            Assert.that(false);
+        } catch (IllegalArgumentException e) { }
+
+        try {
+            q.size(-1);
+            Assert.that(false);
+        } catch (IllegalArgumentException e) { }
+        try {
+            q.size(3);
+            Assert.that(false);
+        } catch (IllegalArgumentException e) { }
+
+
+        try {
+            iter=q.iterator(-1, 1);
+            Assert.that(false);
+        } catch (IllegalArgumentException e) { }
+        try {
+            iter=q.iterator(3, 1);
+            Assert.that(false);
+        } catch (IllegalArgumentException e) { }
     }
     */
 }
