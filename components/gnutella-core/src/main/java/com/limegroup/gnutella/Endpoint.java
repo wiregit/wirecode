@@ -195,8 +195,10 @@ com.sun.java.util.collections.Comparable
         }
     }
 
-    public Endpoint(String hostname, int port)
-    {
+    public Endpoint(String hostname, int port) {
+        if(!NetworkUtils.isValidPort(port)) {
+            throw new IllegalArgumentException("invalid port: "+port);
+        }
         this.hostname = hostname;
         this.port=port;
     }
@@ -206,8 +208,10 @@ com.sun.java.util.collections.Comparable
     * @param hostBytes IP address of the host (MSB first)
     * @param port The port number for the host
     */
-    public Endpoint(byte[] hostBytes, int port)
-    {
+    public Endpoint(byte[] hostBytes, int port) {
+        if(!NetworkUtils.isValidPort(port)) {
+            throw new IllegalArgumentException("invalid port: "+port);
+        }
         this.hostBytes = hostBytes;
         this.port = port;
         
