@@ -64,6 +64,18 @@ public class DownloadManager implements BandwidthTracker {
      *  INVARIANT: waiting contains no duplicates 
      *  LOCKING: obtain this' monitor */
     private List /* of ManagedDownloader */ waiting=new LinkedList();
+    
+    /**
+     * rfd that we have sent an udp push and are waiting a connection from.
+     */
+    private Set /* of InetAddress */ _udpFailover = 
+    	Collections.synchronizedSet(new HashSet());
+    
+    /**
+     * how long we think should take a host that receives an udp push
+     * to connect back to us.
+     */
+    private static long UDP_PUSH_FAILTIME=4500;
 
 
     /** The global minimum time between any two requeries, in milliseconds.
@@ -731,6 +743,8 @@ public class DownloadManager implements BandwidthTracker {
             String file=line.file;
             int index=line.index;
             byte[] clientGUID=line.clientGUID;
+            
+            _udpFailover.remove(socket.getInetAddress());
 
             //2. Attempt to give to an existing downloader.
             synchronized (this) {
@@ -888,6 +902,11 @@ public class DownloadManager implements BandwidthTracker {
     public boolean sendPush(RemoteFileDesc file) {
         LOG.trace("DM.sendPush(): entered.");
         
+        //whether we have already sent the UDP push and are now
+        //sending the tcp one.
+        boolean failOver = _udpFailover.remove(
+        		file.getOOBAddress().getInetAddress());
+        
         // Send as multicast if it's multicast.
         if( file.isReplyToMulticast() ) {
             byte[] addr = RouterService.getNonForcedAddress();
@@ -971,9 +990,11 @@ public class DownloadManager implements BandwidthTracker {
             // else just send a PushRequest as normal
         }
         
-        //if we can send the push through udp, do so.
+        //if we can send the push through udp, and haven't already done so, do it.
+        
         PushRequest pr;
-        if (!proxies.isEmpty() && file.canPushUDP()) 
+        
+        if (!proxies.isEmpty() && file.canPushUDP() && !failOver) 
         	pr = 
                 new PushRequest(GUID.makeGuid(),
                                 ConnectionSettings.TTL.getValue(),
@@ -996,6 +1017,13 @@ public class DownloadManager implements BandwidthTracker {
             		(pr.getNetwork()== Message.N_UDP ? "UDP: " : "Gnutella: ") + pr);
         
         if (pr.getNetwork()==Message.N_UDP) {
+        	
+        	_udpFailover.add(file.getOOBAddress().getInetAddress());
+        	
+        	RouterService.schedule(new PushFailoverRequestor(file),
+        				UDP_PUSH_FAILTIME,
+						0);
+        			
         	UDPService.instance().send(pr,file.getOOBAddress());
         }
         else
@@ -1123,5 +1151,23 @@ public class DownloadManager implements BandwidthTracker {
         dm.extractQueryStringUNITTEST();
     }
     */
+	
+	/**
+	 * sends a tcp push if the udp push has failed.
+	 * 
+	 */
+	private class PushFailoverRequestor implements Runnable {
+		
+		RemoteFileDesc _file;
+		
+		public PushFailoverRequestor(RemoteFileDesc file) {
+			_file = file;
+		}
+		public void run() {
+			if (_udpFailover.contains(
+					_file.getOOBAddress().getInetAddress()))
+				sendPush(_file);
+		}
+	}
 
 }
