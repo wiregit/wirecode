@@ -45,19 +45,19 @@ public class DownloadTester {
             };
         timer.schedule(click,0,SupernodeAssigner.TIMER_DELAY);
 
-//         testOverlapCheckSpeed(5);
-//         cleanup();
-//         testOverlapCheckSpeed(25);
-//         cleanup();
-//         testOverlapCheckSpeed(125);
-//         cleanup();
+//          testOverlapCheckSpeed(5);
+//          cleanup();
+//          testOverlapCheckSpeed(25);
+//          cleanup();
+//          testOverlapCheckSpeed(125);
+//          cleanup();
 
-//          testSimpleDownload();
-//          cleanup();
-//          testSimpleSwarm();
-//          cleanup();
-//          testUnbalancedSwarm();
-//          cleanup();
+        testSimpleDownload();
+        cleanup();
+        testSimpleSwarm();
+        cleanup();
+        testUnbalancedSwarm();
+        cleanup();
         testSwarmWithInterrupt();
         cleanup();
         testStealerInterrupted();

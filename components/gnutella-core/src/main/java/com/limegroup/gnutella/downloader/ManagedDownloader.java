@@ -1027,6 +1027,13 @@ public class ManagedDownloader implements Downloader, Serializable {
             resetNeeded(dloader);
             files.add(rfd);//we can try this rfd again later
             return;
+        } catch (InterruptedException ie) {
+            debug("connectAndStartDownload: InterruptdException thrown ");
+            resetNeeded(dloader);
+            files.add(rfd);//we can try this rfd again later
+            return;
+        } catch (NoSuchElementException nsex) {
+            ;//ignored...we have already handled it all
         } catch (Exception e) {
             debug ("connectAndStartDownload : other exception thrown");
             //IOException, FileNotFound, NotSharing
@@ -1124,21 +1131,8 @@ public class ManagedDownloader implements Downloader, Serializable {
         //TODO2: assign to existing downloader if possible, without
         //      increasing parallelism
         Interval interval=(Interval)needed.remove(0);
-        try {
-            dloader.connectHTTP(interval.low, interval.high);
-        } catch (TryAgainLaterException talx) { 
-            needed.add(interval);
-            throw talx;
-        } catch (FileNotFoundException fnfx) { 
-            needed.add(interval);
-            throw fnfx;
-        } catch (NotSharingException nsx) { 
-            needed.add(interval);
-            throw nsx;
-        }catch (IOException iox) { 
-            needed.add(interval);
-            throw iox;
-        }
+        //this line can throw a bunch of exceptions.
+        dloader.connectHTTP(interval.low, interval.high);
         dloader.stopAt(interval.high);
         debug("MANAGER: assigning white "+interval+" to "+dloader);
     }
@@ -1170,8 +1164,10 @@ public class ManagedDownloader implements Downloader, Serializable {
                     biggest=h;
             }                
         }
-        if (biggest==null)
+        if (biggest==null) {//Not using downloader...but RFD maybe useful
+            files.add(dloader.getRemoteFileDesc());
             throw new NoSuchElementException();
+        }
         //Note that getAmountToRead() and getInitialReadingPoint() are
         //constant.  getAmountRead() is not, so we "capture" it into a
         //variable.
@@ -1182,6 +1178,7 @@ public class ManagedDownloader implements Downloader, Serializable {
             try {
                 bandwidth = biggest.getMeasuredBandwidth();
             } catch (InsufficientDataException ide) {
+                files.add(dloader.getRemoteFileDesc());//RFD may still be used
                 throw new NoSuchElementException();
             }
             if(bandwidth < MIN_ACCEPTABLE_SPEED) {
@@ -1190,6 +1187,7 @@ public class ManagedDownloader implements Downloader, Serializable {
                 biggest.getInitialReadingPoint()+amountRead;
                 int stop=
                 biggest.getInitialReadingPoint()+biggest.getAmountToRead();
+                //this line could throw a bunch of exceptions
                 dloader.connectHTTP(getOverlapOffset(start), stop);
                 dloader.stopAt(stop);
                 debug("MANAGER: assigning stolen grey "
@@ -1197,14 +1195,17 @@ public class ManagedDownloader implements Downloader, Serializable {
                 biggest.stopAt(start);
                 biggest.stop();
             }
-            else//less than MIN_SPLIT_SIZE...but we are doing fine...
+            else { //less than MIN_SPLIT_SIZE...but we are doing fine...
+                files.add(dloader.getRemoteFileDesc());
                 throw new NoSuchElementException();
+            }
         }
         else { //There is a big enough chunk to split...split it
             int start=
             biggest.getInitialReadingPoint()+amountRead+left/2;
             int stop=
             biggest.getInitialReadingPoint()+biggest.getAmountToRead();
+            //this line could throw a bunch of exceptions
             dloader.connectHTTP(getOverlapOffset(start), stop);
             dloader.stopAt(stop);
             biggest.stopAt(start);
@@ -1340,7 +1341,8 @@ public class ManagedDownloader implements Downloader, Serializable {
             synchronized (this) {
                 dloaders.remove(downloader);
                 terminated.add(downloader);
-                files.add(rfd);
+                if(!problem)
+                    files.add(rfd);
                 int init=downloader.getInitialReadingPoint();
                 incompleteFileManager.addBlock(
                     incompleteFileManager.getFile(rfd),
