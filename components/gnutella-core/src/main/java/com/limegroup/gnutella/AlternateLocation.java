@@ -42,6 +42,13 @@ public final class AlternateLocation
 	 * Cached hash code that is lazily initialized.
 	 */
 	private volatile int hashCode = 0;
+
+	/**
+	 * Cached array of characters considered whitespace in HTTP.
+	 */
+	private static final char[] WHITESPACE_CHARS = {
+		' ', '\t', '\n', '\r'
+	};
 	
 
 	/**
@@ -63,24 +70,20 @@ public final class AlternateLocation
 		}
 
 		URL url = AlternateLocation.createUrl(location);
+		if(url == null) {
+			throw new IOException("could not parse url for alt loc: "+location);
+		}
+		String outputDateTime = AlternateLocation.extractTimestamp(location);
 		Date date;
-		if(!AlternateLocation.isTimestamped(location)) {			
+		if(outputDateTime == null) {
 			// just set the time to be as old as possible since there's
 			// no date information -- this makes comparisons easier
 			date = new Date(0);
-		}
-		else {
-			// this can be null
-			String outputDateTime = 
-			    AlternateLocation.extractDateTimeString(location);			
-			if(outputDateTime != null) {
-				date = AlternateLocation.createDateInstance(outputDateTime);
-				if(date.after(new Date())) {
-					// the date reported is in the future, so throw exception
-					throw new IOException("reported date is in the future");
-				}
-			} else {
-				date = new Date(0);
+		} else {
+			date = AlternateLocation.createDateInstance(outputDateTime);
+			if(date.after(new Date())) {
+				// the date reported is in the future, so throw exception
+				throw new IOException("reported date is in the future");
 			}
 		}
 		return new AlternateLocation(url, date);
@@ -156,7 +159,7 @@ public final class AlternateLocation
 	 * @return a new <tt>String</tt> instance that matches the standard
 	 *  syntax
 	 */
-	public static String convertDateToString(Date date) {
+	private static String convertDateToString(Date date) {
 		Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
 		cal.setTime(date);
 		int[]    dateInts = new int[6];
@@ -200,14 +203,14 @@ public final class AlternateLocation
 	 * @return <tt>true</tt> if the string represents a valid date 
 	 *  according to our critetia, <tt>false</tt> otherwise
 	 */
-	public static boolean isValidDate(final String date) {
+	private static boolean isValidDate(final String date) {
 		int length = date.length();
 		final String DASH = "-";
 		final String COLON = ":";
 		// if the date length is less than ten, then the date does not contain
 		// information for the day, as defined in the subset of ISO 8601, as 
 	    // defined at: http://www.w3.org/TR/NOTE-datetime, and we consider it
-		// itvalid
+		// invalid
 		if(length < 10) return false;
 
 		// if the date is not one of our valid lengths, return false
@@ -236,32 +239,6 @@ public final class AlternateLocation
 		return true;
 	}
 
-	/**
-	 * Parses out the time-date string from the alternate location
-	 * header string, throwing an exception if there is any error.
-	 *
-	 * @param location the full alternate-location HTTP header string,
-	 *  as specified in HUGE v0.93
-	 * @return the date/time string from the the alternate location
-	 *  header, or <tt>null</tt> if the date/time string could not
-	 *  be extracted, is invalid, or does not exist
-	 */
-	private static String extractDateTimeString(final String location) {
-		if(!AlternateLocation.isTimestamped(location)) {
-			return null;
-		}
-		int dateIndex = location.lastIndexOf(" ");
-		if((dateIndex == -1) ||
-		   ((dateIndex+1) >= location.length())) {
-			return null;
-		}
-		String dateTimeString = location.substring(dateIndex+1).trim(); 
-		if(AlternateLocation.isValidDate(dateTimeString)) {
-			return dateTimeString; 
-		} else {
-			return null;
-		}
-	}
 
 	/**
 	 * Creates a new <tt>Date</tt> instance from the date specified in
@@ -334,59 +311,83 @@ public final class AlternateLocation
 		String test = locationHeader.toLowerCase();
 		String urlString;	
 
-		// we currently only support the http protocol specifier or the
-		// X-Gnutella-Alternate-Location specifier for the beginning
-		// of the alternate location line
-		if((!test.startsWith("http") && 
-			!HTTPHeaderName.ALT_LOCATION.matchesStartOfString(test))) {
-			throw new IOException("invalid start for alternate location: "+test);
-		}
-		if(!test.startsWith("http")) {
-			int colonIndex  = locationHeader.indexOf(":");
-			if(colonIndex == -1) {
-				throw new IOException("ERROR EXTRACTING URL STRING");
-			}
-			if(!AlternateLocation.isTimestamped(locationHeader)) {				
-				urlString = locationHeader.substring(colonIndex+1);
-			}
-			else {
-				int dateIndex = locationHeader.lastIndexOf(" ");
-				if(dateIndex == -1) {
-					throw new IOException("ERROR EXTRACTING URL DATE");
-				}
-				urlString = locationHeader.substring(colonIndex+1, dateIndex);
-			}
-		} else {
-			if(AlternateLocation.isTimestamped(locationHeader)) {
-				int dateIndex = locationHeader.lastIndexOf(" ");
-				urlString = locationHeader.substring(0, dateIndex);
-			}
-			else {
-				urlString = locationHeader;
-			}
-		}
+		if(HTTPHeaderName.ALT_LOCATION.matchesStartOfString(test)) {
+			String altLocValue = HTTPUtils.extractHeaderValue(locationHeader);
+			return new URL(AlternateLocation.removeTimestamp(altLocValue));
+		} else if(test.startsWith("http")) {
+			return new URL(AlternateLocation.removeTimestamp(locationHeader));
 
-		// get rid of any surrounding whitespace
-		return new URL(urlString.trim());
+		} else {
+			// we could not understand the beginning of the alternate location
+			// line
+			throw new IOException("invalid start for alternate location: "+
+								  locationHeader);
+		}
 	}
 
 	/**
-	 * Convenience method for checking whether or not the specified 
-	 * alternate location header is timestamped.
+	 * Parses out the timestamp string from the alternate location
+	 * header string, throwing an exception if there is any error.
 	 *
-	 * @param locationHeader the header to check for a timestamp
-	 * @return <tt>true</tt> if the header has a timestamp, <tt>false</tt>
-	 *  otherwise
+	 * @param location the full alternate-location HTTP header string,
+	 *  as specified in HUGE v0.93
+	 * @return the date/time string from the the alternate location
+	 *  header, or <tt>null</tt> if the date/time string could not
+	 *  be extracted, is invalid, or does not exist
 	 */
-	public static boolean isTimestamped(final String locationHeader) {
-		int dateIndex = locationHeader.lastIndexOf(" ");
-		if(dateIndex == -1) {
-			return false;
+	private static String extractTimestamp(final String location) {
+		int dateIndex = getTimestampIndex(location);
+		if(dateIndex == -1) return null;
+
+		String dateTimeString = location.substring(dateIndex).trim(); 
+		if(AlternateLocation.isValidDate(dateTimeString)) {
+			return dateTimeString; 
+		} else {
+			return null;
 		}
-		else if((locationHeader.length()-dateIndex) > 21) {
-			return false;
+	}
+
+	/**
+	 * Removes the timestamp from an alternate location header.  This will
+	 * remove the timestamp from an alternate location header string that 
+	 * includes the header name, or from an alternate location string that
+	 * only contains the alternate location header value.
+	 *
+	 * @param locationHeader the string containing the full header, or only
+	 *  the header value
+	 * @return the same string as supplied in the <tt>locationHeader</tt> 
+	 *  argument, but with the timestamp removed
+	 */
+	private static String removeTimestamp(final String locationHeader) {
+		int timestampIndex= getTimestampIndex(locationHeader);
+		if(timestampIndex != -1) {
+			return locationHeader.substring(0, timestampIndex);
 		}
-		return true;
+
+		// there was no timestamp, so just return the trimmed original
+		return locationHeader.trim();
+	}
+
+	/**
+	 * Obtains the index in the string for the beginning of the timestamp.
+	 *
+	 * @param locationHeader the full header or header value containing a 
+	 *  timestamp
+	 * @return the index of the start of the timestamp, or -1 if no 
+	 *  timetamp could be found
+	 */
+	private static int getTimestampIndex(final String locationHeader) {
+		int length = locationHeader.length();
+		for(int i=0; i<WHITESPACE_CHARS.length; i++) {
+			if(!Character.isWhitespace(WHITESPACE_CHARS[i])) {
+				return -1;
+			}
+			int dateIndex = locationHeader.lastIndexOf(WHITESPACE_CHARS[i]);
+			if(dateIndex != -1 && (length - dateIndex) <= 21) {
+				return dateIndex+1;
+			}
+		}					
+		return -1;
 	}
 
 	/**
