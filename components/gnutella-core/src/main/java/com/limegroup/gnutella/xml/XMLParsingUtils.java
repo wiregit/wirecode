@@ -80,14 +80,15 @@ public class XMLParsingUtils {
      * @param aggregatedXmlDocuments
      * @return List of Strings
      */
+    static final private String XML_START = "<?xml";
     public static List split(String aggregatedXmlDocuments) {
         List results = new ArrayList();
-        int begin=aggregatedXmlDocuments.indexOf("<?xml");
-        int end=aggregatedXmlDocuments.indexOf("<?xml",begin+1);
+        int begin=aggregatedXmlDocuments.indexOf(XML_START);
+        int end=aggregatedXmlDocuments.indexOf(XML_START,begin+1);
         while(end!=-1) {
             results.add(aggregatedXmlDocuments.substring(begin,end));
             begin = end;
-            end = aggregatedXmlDocuments.indexOf("<?xml",begin+1);
+            end = aggregatedXmlDocuments.indexOf(XML_START,begin+1);
         }
         if(begin!=-1) results.add(aggregatedXmlDocuments.substring(begin));
         return results;
@@ -96,8 +97,8 @@ public class XMLParsingUtils {
         if(type.endsWith("y")) return type.substring(0,type.length()-1)+"ies";
         return type+"s";
     }
-//     public static void main(String[] args) throws Exception { //UNIT TEST
-//         //test parse
+//     public static void main(String[] args) throws Exception { UNIT TEST
+//         test parse
 //         String xml = "<?xml version=\"1.0\"?>"+
 //             "<audios xsi:noNamespaceSchemaLocation=\"http://www.limewire.com/schemas/audio.xsd\">"+
 //             "<audio genre=\"Rock\" identifier=\"def1.txt\" bitrate=\"190\"/>"+
@@ -124,10 +125,10 @@ public class XMLParsingUtils {
 //         map.put("audios__audio__bitrate__","192");
 //         list.add(map);
 //         Assert.that(r.canonicalAttributeMaps.equals(list));
-//         //test plural
+//         test plural
 //         Assert.that(plural("book").equals("books"));
 //         Assert.that(plural("property").equals("properties"));
-//         //test split
+//         test split
 //         String xml1 = "<?xml version='1.0'><text>one</text>";
 //         String xml2 = "<?xml version='1.0'><text>two</text>";
 //         String xml3 = "<?xml version='1.0'><text>three</text>";
