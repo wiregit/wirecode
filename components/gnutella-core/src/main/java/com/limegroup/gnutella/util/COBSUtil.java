@@ -58,11 +58,11 @@ public class COBSUtil {
     public static byte[] cobsDecode(byte[] src) {
         final int srcLen = src.length;
         int currIndex = 0;
-        byte code = 0;
+        int code = 0;
         ByteArrayOutputStream sink = new ByteArrayOutputStream();        
 
         while (currIndex < srcLen) {
-            code = src[currIndex++];
+            code = ByteOrder.ubyte2int(src[currIndex++]);
             for (int i = 1; i < code; i++) {
                 sink.write((int)src[currIndex++]);
             }
