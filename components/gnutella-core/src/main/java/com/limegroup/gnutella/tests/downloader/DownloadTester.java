@@ -123,6 +123,10 @@ public class DownloadTester {
     		testStealerInterruptedWithAlternate();
             cleanup();
         }
+        if(args.length == 0 || args[0].equals("16")) {
+    		testTwoAlternatesButOneWithNoSHA1();
+            cleanup();
+        }
     }
 
 
@@ -648,6 +652,37 @@ public class DownloadTester {
         SettingsManager.instance().setConnectionSpeed(capacity);
     }
 
+    private static void testTwoAlternatesButOneWithNoSHA1() {  
+        System.out.print("-Testing Two Alternates but one with no sha1...");
+        RemoteFileDesc rfd1=newRFDWithURN(6346, 100, null);
+        RemoteFileDesc rfd2=newRFD(6347, 100); // No SHA1
+        RemoteFileDesc[] rfds = {rfd1,rfd2};
+
+        testGeneric(rfds);
+
+        //Prepare to check the alternate location - second won't be there
+        //Note: adiff should be blank
+		AlternateLocationCollection alt1 = uploader1.getAlternateLocations();
+		AlternateLocationCollection alt2 = uploader2.getAlternateLocations();
+		AlternateLocationCollection ashould = new AlternateLocationCollection();
+		try {
+		    URL url1 =   rfdURL(rfd1);
+		    AlternateLocation al1 =
+		      AlternateLocation.createAlternateLocation(url1);
+		    ashould.addAlternateLocation(al1);
+		} catch (Exception e) {
+            check(false, "Couldn't setup test");
+		}
+        AlternateLocationCollection adiff = 
+		  ashould.diffAlternateLocationCollection(alt1); 
+        AlternateLocationCollection adiff2 = 
+		  alt1.diffAlternateLocationCollection(ashould); 
+        
+        check(alt1.hasAlternateLocations(), "uploader1 didn't receive alt");
+        check(alt2.hasAlternateLocations(), "uploader2 didn't receive alt");
+        check(!adiff.hasAlternateLocations(), "uploader got wrong alt");
+        check(!adiff2.hasAlternateLocations(), "uploader got wrong alt");
+    }
 
 //     private static void testGUI() {
 //         final int RATE=500;
