@@ -44,7 +44,7 @@ public abstract class MessageRouter
      * and helps filter duplicate queries.)  
      * LOCKING: obtain _queryInfoTable's monitor.
      */
-    private HashMap /* ManagedConnection -> QueryRouteTable */ 
+    private HashMap /* ManagedConnection -> ManagedConnectionQueryInfo */ 
         _queryInfoTable = new HashMap();
 
     /**
@@ -537,12 +537,14 @@ public abstract class MessageRouter
             if(c != receivingConnection) {
                 //Send query along any connection to an old client, or to a new
                 //client with routing information for the given keyword.
-                QueryRouteTable qrt=
-                    (QueryRouteTable)_queryInfoTable.get(c);
-                if (qrt==null)
-                    c.send(queryRequest);
-                else if (qrt.contains(queryRequest))
-                    c.send(queryRequest);                    
+                synchronized (_queryInfoTable) {
+                    ManagedConnectionQueryInfo qi=
+                        (ManagedConnectionQueryInfo)_queryInfoTable.get(c);
+                    if (qi==null)
+                        c.send(queryRequest);
+                    else if (qi.contains(queryRequest))
+                        c.send(queryRequest);                    
+                }
             }
         }
     }
@@ -777,14 +779,14 @@ public abstract class MessageRouter
         synchronized (_queryInfoTable) { //TODO?
             //Mutate query route table associated with receivingConnection.  
             //(This is legal.)  Create a new one if none exists.
-            QueryRouteTable qrt=
-                (QueryRouteTable)_queryInfoTable.get(receivingConnection);
-            if (qrt==null) {
-                qrt=new QueryRouteTable(QueryRouteTable.DEFAULT_TABLE_TTL, 
-                                        QueryRouteTable.DEFAULT_TABLE_SIZE);
-                _queryInfoTable.put(receivingConnection, qrt);            
+            ManagedConnectionQueryInfo qi=
+                (ManagedConnectionQueryInfo)
+                    _queryInfoTable.get(receivingConnection);
+            if (qi==null) {
+                qi=new ManagedConnectionQueryInfo();
+                _queryInfoTable.put(receivingConnection, qi);            
             }
-            qrt.update(m);    
+            qi.update(m);    
             System.out.println("Receiving "+m+" from "+receivingConnection);
 
             //Propogate tables to those connection that need it.
@@ -805,15 +807,18 @@ public abstract class MessageRouter
             List list=_manager.getInitializedConnections();
             for(int i=0; i<list.size(); i++) {
                 ManagedConnection c=(ManagedConnection)list.get(i);
-                QueryRouteTable qrt=(QueryRouteTable)_queryInfoTable.get(c);
+                ManagedConnectionQueryInfo qi=
+                    (ManagedConnectionQueryInfo)_queryInfoTable.get(c);
+                if (qi==null) {
+                    qi=new ManagedConnectionQueryInfo();
+                    _queryInfoTable.put(c, qi);
+                }
                 //TODO2: don't send to older connections
-                if (qrt!=null && !qrt.needsUpdate())
+                if (!qi.needsUpdate())
                     continue;
                 //This is a really important part.  It prevents infinite loops
-                //of messages.  TODO: but it isn't quite right because you end
-                //up sending TWO messsages to a host.
-                if (qrt!=null)
-                    qrt.resetUpdateTime(10000);
+                //of messages. 
+                qi.resetUpdateTime(10000);
                 
                 //Create table to send on this connection...
                 QueryRouteTable table=createRouteTable(c);
@@ -847,7 +852,11 @@ public abstract class MessageRouter
             ManagedConnection c2=(ManagedConnection)iter.next();
             if (c2==c)
                 continue;
-            QueryRouteTable qrt=(QueryRouteTable)_queryInfoTable.get(c2);
+            ManagedConnectionQueryInfo qi=(ManagedConnectionQueryInfo)
+                _queryInfoTable.get(c2);
+            QueryRouteTable qrt=qi.getQueryRouteTable();
+            if (qrt==null)
+                continue;
             ret.addAll(qrt);
         }
         return ret;

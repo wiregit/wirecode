@@ -9,14 +9,13 @@ import com.sun.java.util.collections.Iterator;
 import com.sun.java.util.collections.List;
 import com.sun.java.util.collections.ArrayList;
 
+//Please note that &#60; and &#62; are the HTML escapes for '<' and '>'.
+
 /**
  * A list of query keywords that a connection can respond to, as well as the
  * minimum TTL for a response.  More formally, a QueryRouteTable is a (possibly
- * infinite!) list of keyword TTL pairs, [ <keyword_1, ttl_1>, ..., <keywordN,
- * ttl_N> ]<p>
- *
- * This also maintains timestamps for the purpose of throttling table
- * propogation.  
+ * infinite!) list of keyword TTL pairs, [ &#60;keyword_1, ttl_1&#62;, ...,
+ * &#60;keywordN, ttl_N&#62; ]  Tables cannot be resized.
  */
 public class QueryRouteTable {
     /** The suggested default table size. */
@@ -35,16 +34,12 @@ public class QueryRouteTable {
      */
     private BitSet[] tables;
     /**
-     * tableLengths[i] is the size of tables[i].  This is needed because 
-     * BitSet.length() doesn't exist in Java 1.1.8.  
-     * INVARIANT: tablesLength.size==tables.size
-     *            for all i in tableLengths, tableLengths(i)%2==0
+     * The length of each table.  This is needed because BitSet.length() doesn't
+     * exist in Java 1.1.8.
+     * INVARIANT: for all i, tables[i].length()==tableLength (Java 1.3)
+     *                       tables[i].size()>=tableLength (Java 1.1.8+) 
      */
-    private int[] tableLengths;
-
-    /** Placeholder for MessageRouter.  The time we can next send RouteTableMessage's
-     *  along this connection. */
-    private long nextUpdateTime=0l;
+    private int tableLength;
 
 
     /** 
@@ -52,15 +47,9 @@ public class QueryRouteTable {
      * with TTL up to ttl.   
      */
     public QueryRouteTable(int ttl, int initialSize) {
-        this.tableLengths=new int[ttl];
         this.tables=new BitSet[ttl];
-        initialize(initialSize);
-    }
-
-    /** Resets all TTL tables to be initialSize long and empty.  */
-    private void initialize(int initialSize) {
+        this.tableLength=initialSize;
         for (int i=0; i<tables.length; i++) {
-            this.tableLengths[i]=initialSize;
             this.tables[i]=new BitSet(initialSize);
         }
     }
@@ -77,10 +66,9 @@ public class QueryRouteTable {
         String[] keywords=HashFunction.keywords(qr.getQuery());
         int ttl=Math.min(qr.getTTL(), tables.length-1);        
         BitSet table=tables[ttl];
-        int length=length(ttl);
         for (int i=0; i<keywords.length; i++) {
             String keyword=keywords[i];
-            int hash=HashFunction.hash(keyword, length);
+            int hash=HashFunction.hash(keyword, tableLength);
             if (! table.get(hash))
                 return false;
         }
@@ -96,9 +84,8 @@ public class QueryRouteTable {
         for (int i=0; i<keywords.length; i++) {
             //See contains(..) for a discussion on TTLs and decrementing.
             for (int ttl=0; ttl<tables.length; ttl++) {
-                int length=length(ttl);
                 String keyword=keywords[i];
-                int hash=HashFunction.hash(keyword, length);
+                int hash=HashFunction.hash(keyword, tableLength);
                 tables[ttl].set(hash);
             }
         }
@@ -121,14 +108,11 @@ public class QueryRouteTable {
     }
 
     /*
-     * Adds or removes keywords according to m.
+     * Adds or removes keywords according to m.  Does not resize this.
      *     @modifies this 
      */
     public void update(RouteTableMessage m) {
-        switch (m.getVariant()) {
-        case RouteTableMessage.RESET_VARIANT:
-            handleTableMessage((ResetTableMessage)m);
-            return;                       
+        switch (m.getVariant()) {                      
         case RouteTableMessage.SET_DENSE_BLOCK_VARIANT:
             handleTableMessage((SetDenseTableMessage)m);
             return;
@@ -136,10 +120,6 @@ public class QueryRouteTable {
             Assert.that(false,
                "addAll not implemented for variant "+m.getVariant());
         }
-    }
-
-    private void handleTableMessage(ResetTableMessage m) {
-        initialize(m.getTableSize());
     }
 
     private void handleTableMessage(SetDenseTableMessage m) {
@@ -176,27 +156,13 @@ public class QueryRouteTable {
         //TODO1: this is a hopelessly inefficient encoding.  Optimize.
         //TODO: should this be responsible for sending RESET?
         List buf=new ArrayList(tables.length);
+        buf.add(new ResetTableMessage((byte)1,
+                                      (byte)0, tableLength));
         for (int i=0; i<tables.length; i++) {
             buf.add(new SetDenseTableMessage((byte)1, (byte)i, 
-                                             tables[i], 0, length(i)));
+                                             tables[i], 0, tableLength-1));
         }
         return buf.iterator();
-    }
-
-
-    private int length(int ttl) {
-        return tableLengths[ttl];
-    }
-
-    /** Returns true if we can send a route table update along this
-     *  connection. */
-    public boolean needsUpdate() {
-        return System.currentTimeMillis()>nextUpdateTime;        
-    }
-
-    /** Sets this to allow an update in 'time' milliseconds. */
-    public void resetUpdateTime(long time) {
-        nextUpdateTime=System.currentTimeMillis()+time;
     }
 
     /** True if o is a QueryRouteTable with the same entries of this.
@@ -220,7 +186,7 @@ public class QueryRouteTable {
         StringBuffer buf=new StringBuffer();
         buf.append("{");
         for (int ttl=0; ttl<tables.length; ttl++) {
-            for (int i=0; i<length(ttl); i++) {
+            for (int i=0; i<tableLength; i++) {
                 if (tables[ttl].get(i)) {
                     if (ttl==0 || !tables[ttl-1].get(i))
                         buf.append("unhash("+i+")/"+ttl+", ");
