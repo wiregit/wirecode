@@ -323,4 +323,9 @@ public class RemoteFileDesc implements Serializable {
 				 +getSpeed()+", "
 				 +getSHA1Urn()+">");
     }
+
+      public boolean isChordResponse() {
+	 // TODO: This can probably be implemented in a much less "hackish" way.
+	 return (_index==0 && _size==0);
+      }
 }
