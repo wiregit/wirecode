@@ -73,7 +73,11 @@ public final class NormalUploadState implements HTTPMessage {
 				throw new IOException("Invalid Range");
 		    
 			String str;
-			str = "HTTP/1.1 200 OK\r\n";
+			if( _uploadBegin==0 && _amountRequested==_fileSize ) {
+				str = "HTTP/1.1 200 OK\r\n";
+			} else {
+				str = "HTTP/1.1 206 Partial Content\r\n";
+			}
 			ostream.write(str.getBytes());
 			str = "Server: "+CommonUtils.getHttpServer()+"\r\n";
 			ostream.write(str.getBytes());
