@@ -450,20 +450,24 @@ public class DataWindow
 		  " avgRTT:"+averageRTT+
 		  " lowRTT:"+lowRTT);
 	}
-
-
 }
 
-
 	
+/**
+ *  Record information about data messages either getting written to the 
+ *  network or  getting read from the network.  In the first case, the 
+ *  acks is important.  In the second case, the written state is important.  
+ *  For writing, the  sentTime and the ackTime form the basis for the 
+ *  round trip time and a calculation for timeout resends.
+ */
 class DataRecord {
-	public int 			 		pnum;
-	public String 				pkey;
-	public UDPConnectionMessage msg;
-    public int                  sends;
-	public boolean 		        written;
-	public int   		        acks;
-    public long                 sentTime;
-    public long                 ackTime;
+	public int 			 		pnum;     // sequence number
+	public String 				pkey;     // sequence number as a String
+	public UDPConnectionMessage msg;      // the actual data message
+    public int                  sends;    // count of the sends
+	public boolean 		        written;  // whether the data was written
+	public int   		        acks;     // count of the number of acks
+    public long                 sentTime; // when it was sent
+    public long                 ackTime;  // when it was acked
 }
 

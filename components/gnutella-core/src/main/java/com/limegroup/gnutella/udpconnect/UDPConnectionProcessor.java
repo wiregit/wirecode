@@ -399,6 +399,7 @@ public class UDPConnectionProcessor {
         return (_ackTimeoutEvent.getEventTime() == Long.MAX_VALUE);
     }
 
+    // TODO: Use this and make associated changes.
     /**
      *  Move the outgoing message sequence number forward with possible 
      *  rollover.
