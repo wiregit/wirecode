@@ -32,31 +32,29 @@ public class HTTPHeaderName {
 	}
 
 	/**
-	 * Header for alternate file locations, as per HUGE v0.94.
+	 * Header for new alternate file locations, as per new spec.
 	 */
-	public static final HTTPHeaderName ALT_LOCATION=new HTTPHeaderName("X-Alt");
-	
-    public static final HTTPHeaderName OLD_ALT_LOCS = 
-        new HTTPHeaderName("X-Gnutella-Alternate-Location");
-    
+	public static final HTTPHeaderName ALT_LOCATION = 
+		new HTTPHeaderName("X-Alt");
 
     /**
-     * Header for failed Alternate locations to be added to mesh
+     * Header that used to be used for alternate locations,
+     * as per HUGE v0.94.
+     */	
+    public static final HTTPHeaderName OLD_ALT_LOCS = 
+        new HTTPHeaderName("X-Gnutella-Alternate-Location");
+
+    /**
+     * Header for failed Alternate locations to be removed from the mesh.
      */
-    public static final HTTPHeaderName NALTS = new HTTPHeaderName("X-NAlt");
-    
+    public static final HTTPHeaderName NALTS = 
+        new HTTPHeaderName("X-NAlt");
 
 	/**
 	 * Header for specifying the URN of the file, as per HUGE v0.94.
 	 */
 	public static final HTTPHeaderName GNUTELLA_CONTENT_URN =
 		new HTTPHeaderName("X-Gnutella-Content-URN");
-
-	/**
-	 * Header for specifying the URN of the file, as per HUGE v0.94.
-	 */
-	//public static final HTTPHeaderName CONTENT_URN =
-	//new HTTPHeaderName("X--Content-URN");
 
 	/**
 	 * Header for specifying the byte range of the content.
