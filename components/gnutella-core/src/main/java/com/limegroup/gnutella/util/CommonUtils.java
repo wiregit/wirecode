@@ -127,7 +127,7 @@ public final class CommonUtils {
 	 * Returns the operating system.
 	 */
 	public static String getOS() {
-		return PROPS.getProperty("os.name");;
+		return PROPS.getProperty("os.name");
 	}
 
 	/**

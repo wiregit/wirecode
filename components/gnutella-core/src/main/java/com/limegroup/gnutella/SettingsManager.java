@@ -243,8 +243,8 @@ public final class SettingsManager {
 	private final int     DEFAULT_APP_HEIGHT          = 620;
 	private final boolean DEFAULT_RUN_ONCE            = false;
 	private final boolean DEFAULT_SHOW_TRAY_DIALOG    = true;
-	private final boolean DEFAULT_SHUTDOWN_WHEN_READY = true;
-	private final boolean DEFAULT_MINIMIZE_TO_TRAY    = true;
+	private final boolean DEFAULT_SHUTDOWN_AFTER_TRANSFERS = true;
+	private final boolean DEFAULT_MINIMIZE_TO_TRAY    = false;
 	private final boolean DEFAULT_SHOW_CLOSE_DIALOG   = true;
 	public static final String  DEFAULT_CLASSPATH           
 		= "LimeWire.jar" + File.pathSeparator + 
@@ -387,7 +387,7 @@ public final class SettingsManager {
 	private final String WINDOW_Y              = "WINDOW_Y";
 	private final String SHOW_TRAY_DIALOG      = "SHOW_TRAY_DIALOG";
 	private final String MINIMIZE_TO_TRAY      = "MINIMIZE_TO_TRAY";
-	private final String SHUTDOWN_WHEN_READY   = "SHUTDOWN_WHEN_READY";
+	private final String SHUTDOWN_AFTER_TRANSFERS   = "SHUTDOWN_AFTER_TRANSFERS";
 	private final String SHOW_CLOSE_DIALOG     = "SHOW_CLOSE_DIALOG";
 	private final String CLASSPATH             = "CLASSPATH";
 	private final String MAIN_CLASS            = "MAIN_CLASS";
@@ -961,9 +961,9 @@ public final class SettingsManager {
 					setMinimizeToTray(minimize.booleanValue());
 				}
 
-				else if(key.equals(SHUTDOWN_WHEN_READY)) {
-					Boolean whenReady = new Boolean(p);
-					setShutdownWhenReady(whenReady.booleanValue());
+				else if(key.equals(SHUTDOWN_AFTER_TRANSFERS)) {
+					Boolean afterTransfers = new Boolean(p);
+					setShutdownAfterTransfers(afterTransfers.booleanValue());
 				}
 
 				else if(key.equals(SHOW_CLOSE_DIALOG)) {
@@ -1098,7 +1098,7 @@ public final class SettingsManager {
 		setRunOnce(DEFAULT_RUN_ONCE);
 		setShowTrayDialog(DEFAULT_SHOW_TRAY_DIALOG);
 		setMinimizeToTray(DEFAULT_MINIMIZE_TO_TRAY);
-		setShutdownWhenReady(DEFAULT_SHUTDOWN_WHEN_READY);
+		setShutdownAfterTransfers(DEFAULT_SHUTDOWN_AFTER_TRANSFERS);
 		setShowCloseDialog(DEFAULT_SHOW_CLOSE_DIALOG);
 		setClassPath(DEFAULT_CLASSPATH);
 		setMainClass(DEFAULT_MAIN_CLASS);
@@ -1707,8 +1707,8 @@ public final class SettingsManager {
 	 * @param whenReady <tt>true</tt> if the application should shutdown
 	 *          only after file transfers are complete, false otherwise
 	 */
-	public boolean getShutdownWhenReady() {
-		Boolean b = new Boolean(PROPS.getProperty(SHUTDOWN_WHEN_READY));
+	public boolean getShutdownAfterTransfers() {
+		Boolean b = new Boolean(PROPS.getProperty(SHUTDOWN_AFTER_TRANSFERS));
 		return b.booleanValue();
 	}
 
@@ -2819,8 +2819,8 @@ public final class SettingsManager {
 	 * @param minimize <tt>boolean</tt> for whether or not the application
 	 *                 should shutdown only after transfers are complete
 	 */
-	public void setShutdownWhenReady(final boolean whenReady) {
-		setBooleanValue(SHUTDOWN_WHEN_READY, whenReady);
+	public void setShutdownAfterTransfers(final boolean whenReady) {
+		setBooleanValue(SHUTDOWN_AFTER_TRANSFERS, whenReady);
 	}
 	
 	/**
