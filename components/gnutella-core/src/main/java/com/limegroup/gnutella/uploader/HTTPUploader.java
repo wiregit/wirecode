@@ -691,10 +691,11 @@ public final class HTTPUploader implements Uploader {
         if ( ! HTTPHeaderName.ALT_LOCATION.matchesStartOfString(str) )
             return false;
         
-   		if(_alternateLocationCollection == null)
+   		if(_alternateLocationCollection == null && _fileDesc != null) 
    			_alternateLocationCollection = 
 				AlternateLocationCollection.createCollection(_fileDesc.getSHA1Urn());
-        HTTPUploader.parseAlternateLocations(str, _alternateLocationCollection);
+        if(_alternateLocationCollection != null)
+            HTTPUploader.parseAlternateLocations(str, _alternateLocationCollection);
 
         return true;
     }
@@ -774,7 +775,11 @@ public final class HTTPUploader implements Uploader {
 				// continuations.
 				AlternateLocation al = 
 				    AlternateLocation.createAlternateLocation(st.nextToken().trim());
-				alc.addAlternateLocation(al);
+				
+                URN sha1 = al.getSHA1Urn();
+                if(sha1.equals(alc.getSHA1Urn())) {
+                    alc.addAlternateLocation(al);
+                }
 			} catch(IOException e) {
 				// just return without adding it.
 				continue;
