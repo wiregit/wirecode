@@ -12,7 +12,7 @@ import com.limegroup.gnutella.*;
  */
 public class OutOfBandThroughputStat extends BasicStatistic {
 
-    public static final int MIN_SAMPLE_SIZE = 275;
+    public static final int MIN_SAMPLE_SIZE = 500;
     public static final int MIN_SUCCESS_RATE = 60;
     public static final int PROXY_SUCCESS_RATE = 80;
 
