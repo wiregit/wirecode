@@ -103,6 +103,16 @@ public final class QueryDispatcher implements Runnable {
         }
     }
 
+    /** Gets the number of results the Leaf has reported so far.
+     *  @return a non-negative number if the guid exists, else -1.
+     */
+    public int getLeafResultsForQuery(GUID queryGUID) {
+        synchronized (QUERIES) {
+            QueryHandler qh = (QueryHandler) QUERIES.get(queryGUID);
+            if (qh == null) return -1;
+            else return qh.getNumResultsReportedByLeaf();
+        }
+    }
 
     /**
      * Removes the specified <tt>ReplyHandler</tt> from the specified

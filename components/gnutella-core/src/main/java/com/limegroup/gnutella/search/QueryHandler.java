@@ -658,6 +658,13 @@ public final class QueryHandler {
     }
 
     /**
+     * Returns the number of results as reported by the leaf.  At least 0.
+     */
+    public int getNumResultsReportedByLeaf() {
+        return _numResultsReportedByLeaf;
+    }
+
+    /**
      * Accessor for the <tt>ReplyHandler</tt> instance for the connection
      * issuing this request.
      *

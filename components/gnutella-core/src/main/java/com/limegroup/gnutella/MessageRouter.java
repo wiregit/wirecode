@@ -964,6 +964,8 @@ public abstract class MessageRouter {
             GUID qGUID = new GUID(reply.getGUID());
             int numResults = 
             RouterService.getSearchResultHandler().getNumResultsForQuery(qGUID);
+            if (numResults < 0) // this may be a proxy query
+                numResults = DYNAMIC_QUERIER.getLeafResultsForQuery(qGUID);
 
             // see if we need more results for this query....
             // if not, remember this location for a future, 'find more sources'
@@ -995,7 +997,7 @@ public abstract class MessageRouter {
 
                 return;
             }
-            
+
             LimeACKVendorMessage ack = 
                 new LimeACKVendorMessage(qGUID, reply.getNumResults());
             UDPService.instance().send(ack, datagram.getAddress(),
