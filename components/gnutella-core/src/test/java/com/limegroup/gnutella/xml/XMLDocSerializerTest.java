@@ -3,6 +3,7 @@ package com.limegroup.gnutella.xml;
 import java.io.*;
 import com.sun.java.util.collections.*;
 import junit.framework.*;
+import com.limegroup.gnutella.util.CommonUtils;
 
 /** This class tests that present and future versions are compatible with older
  * versions of LimeXMLDocument.  Basically, for every version the current
@@ -46,14 +47,14 @@ public class XMLDocSerializerTest extends TestCase {
     /* Test the first version of LimeXMLDocument, versions 2.4.4 and preceding.
      */
     public void test244Pre() {
-        basicTest(new File(fileLocation + "audio244Pre.sxml"));
+        basicTest(CommonUtils.getResourceFile(fileLocation + "audio244Pre.sxml"));
     }
 
     /* This method should be changed as new versions are added.  And the current
      * version should be added as a new test.
      */
     public void testCurrent() {
-        basicTest(new File(fileLocation + "audio.sxml"));
+        basicTest(CommonUtils.getResourceFile(fileLocation + "audio.sxml"));
     }
 
 

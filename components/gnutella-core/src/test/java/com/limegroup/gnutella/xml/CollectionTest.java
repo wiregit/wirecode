@@ -13,9 +13,9 @@ public class CollectionTest extends TestCase {
 
     final Map files = new HashMap();
     final String fileLocation = "com/limegroup/gnutella/xml/";
-    final File mason = new File(fileLocation + "nullfile.null");
-    final File test1 = new File(fileLocation + "test1.mp3");
-    final File test2 = new File(fileLocation + "test2.mp3");
+    final File mason = CommonUtils.getResourceFile(fileLocation + "nullfile.null");
+    final File test1 = CommonUtils.getResourceFile(fileLocation + "test1.mp3");
+    final File test2 = CommonUtils.getResourceFile(fileLocation + "test2.mp3");
     final String schemaURI = "http://www.limewire.com/schemas/audio.xsd";
     final String schemaURIVideo = "http://www.limewire.com/schemas/video.xsd";
     final MetaFileManager mfm = new MFMStub();
@@ -281,7 +281,7 @@ public class CollectionTest extends TestCase {
         map.put(mfm.readFromMap(test1), doc);
         doc = (new ID3Reader()).readDocument(test2);
         map.put(mfm.readFromMap(test2), doc);
-        ms = new LimeXMLReplyCollection.MapSerializer(new File(fileLocation+"audio.collection"), map);
+        ms = new LimeXMLReplyCollection.MapSerializer(CommonUtils.getResourceFile(fileLocation+"audio.collection"), map);
         ms.commit();
         // made video.collection
         List nameVals = new ArrayList();
@@ -299,21 +299,21 @@ public class CollectionTest extends TestCase {
         doc.setIdentifier(mason.getCanonicalPath());
         doc.getXMLString();
         map.put(mfm.readFromMap(mason), doc);
-        ms = new LimeXMLReplyCollection.MapSerializer(new File(fileLocation+"video.collection"), map);
+        ms = new LimeXMLReplyCollection.MapSerializer(CommonUtils.getResourceFile(fileLocation+"video.collection"), map);
         ms.commit();
         }
         catch (Exception e) {
-            Assert.assertTrue("Could not make collections!",
-                              false);
+            e.printStackTrace();
+            fail("could not make collections!");
         }
     }
     
 
     private void populateDirectory() {
-        File audioFile = new File(fileLocation + "audio.collection");
-        File videoFile = new File(fileLocation + "video.collection");
-        File newAudio  = new File("lib/xml/data/audio.sxml");
-        File newVideo  = new File("lib/xml/data/video.sxml");
+        File audioFile = CommonUtils.getResourceFile(fileLocation + "audio.collection");
+        File videoFile = CommonUtils.getResourceFile(fileLocation + "video.collection");
+        File newAudio  = new File(LimeXMLProperties.instance().getXMLDocsDir(), "audio.sxml");
+        File newVideo  = new File(LimeXMLProperties.instance().getXMLDocsDir(), "video.sxml");
         Assert.assertTrue("Necessary file audio.collection cannot be found!",
                           audioFile.exists());
         Assert.assertTrue("Necessary file video.collection cannot be found!",
