@@ -69,6 +69,15 @@ public class Main implements ActivityCallback {
 		    Assert.that(i!=-1 && i<command.length());
 		    String query=command.substring(i+1);
 		    service.query(query,0);
+		} else if (commands.length==2 && commands[0].equals("listen")) {
+		    try {
+			int port=Integer.parseInt(commands[1]);
+			service.setListeningPort(port);
+		    } catch (NumberFormatException e) {
+			System.out.println("Please specify a valid port.");
+		    } catch (IOException e) {
+			System.out.println("Couldn't change port.  Try another value.");
+		    }
 		}
 	    } catch (IOException e) {
 		System.exit(1);
