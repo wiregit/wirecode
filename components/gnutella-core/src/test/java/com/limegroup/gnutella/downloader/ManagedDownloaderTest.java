@@ -205,7 +205,7 @@ public class ManagedDownloaderTest extends com.limegroup.gnutella.util.BaseTestC
         ManagedDownloader downloader = 
             new ManagedDownloader(new RemoteFileDesc[] { rfd }, ifm, null);
         downloader.initialize(manager, fileman, callback);
-        manager.requestStart(downloader);
+        requestStart(downloader);
         try { Thread.sleep(200); } catch (InterruptedException e) { }
         //assertEquals(Downloader.WAITING_FOR_RESULTS, downloader.getState());
         assertEquals(amountDownloaded, downloader.getAmountRead());
@@ -224,7 +224,7 @@ public class ManagedDownloaderTest extends com.limegroup.gnutella.util.BaseTestC
             downloader=(ManagedDownloader)in.readObject();
             in.close();
             downloader.initialize(manager, fileman, callback);
-            manager.requestStart(downloader);
+            requestStart(downloader);
         } catch (IOException e) {
             fail("Couldn't serialize", e);
         }
@@ -256,7 +256,7 @@ public class ManagedDownloaderTest extends com.limegroup.gnutella.util.BaseTestC
             downloader.initialize(manager, 
                                   fileman,
                                   callback);
-            manager.requestStart(downloader);
+            requestStart(downloader);
             //Wait for it to download until error, need to wait 
             Thread.sleep(140000);
             // no more auto requeries - so the download should be waiting for
@@ -301,6 +301,16 @@ public class ManagedDownloaderTest extends com.limegroup.gnutella.util.BaseTestC
                                   name, 1024,
                                   new byte[16], 56, false, 4, true, null, urns,
                                   false, false,"",0,null, -1);
+    }
+    
+    private void requestStart(ManagedDownloader dl) throws Exception {
+        List waiting = (List)PrivilegedAccessor.getValue(manager, "waiting");
+        List active = (List)PrivilegedAccessor.getValue(manager, "active");
+        synchronized(manager) {
+            waiting.remove(dl);
+            active.add(dl);
+            dl.startDownload();
+        }
     }
 
     /** Provides access to protected methods. */
