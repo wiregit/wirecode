@@ -947,15 +947,9 @@ public class ManagedDownloader implements Downloader, Serializable {
 				if ( tempRFD.getSHA1Urn() == null)
 				    continue;
 
-				// This really should be a method on RemoteFileDesc
-				// Construct a workable URL out of RFD 
-				rfdStr = "http://"+tempRFD.getHost()+":"+
-				  tempRFD.getPort()+"/get/"+String.valueOf(tempRFD.getIndex())+
-				  "/"+tempRFD.getFileName();
 				try {
-					rfdURL = new URL(rfdStr);
 				    totalAlternateLocations.addAlternateLocation(
-					    AlternateLocation.createAlternateLocation(rfdURL));
+					    AlternateLocation.createAlternateLocation(rfd));
 				} catch( IOException e ) {
                 }  
 			}
