@@ -16,38 +16,45 @@ import java.net.*;
  *  underneath it.
  *  If you run main, this will stop when you enter anything and press RETURN.
  */
-public class GUESSMonitor {
+public class GUESSMonitor extends BaseTestCase {
 
     public final static String INSTRUCTIONS = 
         "? - Help; verbose - switch verbose on/off; connect - start the " +
         "backend; disconnect - stop the backend; stats - show stats";
 
-    private Backend _backend;
+    private RouterService _backend;
     private MyMessageRouter _messageRouter;
 
     public GUESSMonitor() {
+        super("GUESS MONITOR");
+        setStandardSettings();
         // make my own MessageRouter....            
         ActivityCallback stub = new ActivityCallbackStub();
         FileManager staticFM = RouterService.getFileManager();
         _messageRouter = new MyMessageRouter(stub, staticFM);
-        _backend = Backend.createLongLivedBackend(stub, _messageRouter);
+        _backend = new RouterService(stub, _messageRouter);
+        //_backend = Backend.createLongLivedBackend(stub, _messageRouter);
         _backend.start();
-        _backend.getRouterService().forceKeepAlive(5);
+        RouterService.forceKeepAlive(8);
+        //_backend.getRouterService().forceKeepAlive(5);
     }
 
     public void shutdown() {
         _messageRouter.shutdown();
         _messageRouter.join();
-        _backend.shutdown("GUESSMonitor exiting!");
+        _backend.shutdown();
     }
 
     public void connect() {
-        _backend.getRouterService().connect();
-        _backend.getRouterService().forceKeepAlive(5);
+        //_backend.getRouterService().connect();
+        //_backend.getRouterService().forceKeepAlive(5);
+        _backend.connect();
+        RouterService.forceKeepAlive(5);
     }
 
     public void disconnect() {
-        _backend.getRouterService().disconnect();
+    //_backend.getRouterService().disconnect();
+        _backend.disconnect();
     }
 
     public static void main(String argv[]) throws Exception {
@@ -129,7 +136,6 @@ public class GUESSMonitor {
                     }
                 }
             }
-            catch (BadPacketException ignored) {}
             catch (UnknownHostException ignored) {}
         }
                 
