@@ -201,7 +201,6 @@ public abstract class MessageRouter {
      */
     public void handleMessage(Message msg, 
                               ManagedConnection receivingConnection) {
-        System.out.println("MessageRouter::handleMessage!!!!!");
         // Increment hops and decrease TTL.
         msg.hop();
 	   
