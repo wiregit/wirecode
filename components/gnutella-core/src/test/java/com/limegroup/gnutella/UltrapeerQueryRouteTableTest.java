@@ -62,7 +62,7 @@ public final class UltrapeerQueryRouteTableTest extends BaseTestCase {
 		ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);	
 		ConnectionSettings.USE_GWEBCACHE.setValue(false);
 		ConnectionSettings.WATCHDOG_ACTIVE.setValue(false);
-        ConnectionSettings.IGNORE_KEEP_ALIVE.setValue(true);
+        ConnectionSettings.ALLOW_WHILE_DISCONNECTED.setValue(true);
         ConnectionSettings.PORT.setValue(6332);
     }
     

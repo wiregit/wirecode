@@ -49,7 +49,7 @@ public final class UltrapeerHandshakeResponderTest extends BaseTestCase {
      */
     public void testRespondToOutgoingUltrapeer() throws Exception {
         UltrapeerSettings.FORCE_ULTRAPEER_MODE.setValue(false);
-        ConnectionSettings.IGNORE_KEEP_ALIVE.setValue(true);
+        ConnectionSettings.ALLOW_WHILE_DISCONNECTED.setValue(true);
 
         // test the 3 Ultrapeer cases -- 
 
@@ -99,7 +99,7 @@ public final class UltrapeerHandshakeResponderTest extends BaseTestCase {
         assertEquals("should have two headers", 2, hr.props().size());
         assertTrue("should be deflating",
                 hr.isDeflateEnabled());
-        ConnectionSettings.IGNORE_KEEP_ALIVE.setValue(false);
+        ConnectionSettings.ALLOW_WHILE_DISCONNECTED.setValue(false);
     }
 
     /**
@@ -107,7 +107,7 @@ public final class UltrapeerHandshakeResponderTest extends BaseTestCase {
      * correctly when the host we're responding to is a leaf.
      */
     public void testRespondToOutgoingLeaf() throws Exception {
-        ConnectionSettings.IGNORE_KEEP_ALIVE.setValue(true);
+        ConnectionSettings.ALLOW_WHILE_DISCONNECTED.setValue(true);
 
         UltrapeerHandshakeResponder responder = 
             new UltrapeerHandshakeResponder("23.3.4.5");
@@ -131,7 +131,7 @@ public final class UltrapeerHandshakeResponderTest extends BaseTestCase {
         assertEquals("should not have any headers", 0, hr.props().size());
 
         // clean up settings
-        ConnectionSettings.IGNORE_KEEP_ALIVE.setValue(false);
+        ConnectionSettings.ALLOW_WHILE_DISCONNECTED.setValue(false);
     }
 
 
@@ -141,7 +141,7 @@ public final class UltrapeerHandshakeResponderTest extends BaseTestCase {
     public void testRespondToIncomingUltrapeer() throws Exception {
         UltrapeerSettings.FORCE_ULTRAPEER_MODE.setValue(false);
         ConnectionSettings.PREFERENCING_ACTIVE.setValue(true);
-        ConnectionSettings.IGNORE_KEEP_ALIVE.setValue(true);
+        ConnectionSettings.ALLOW_WHILE_DISCONNECTED.setValue(true);
 
         UltrapeerHandshakeResponder responder = 
             new UltrapeerHandshakeResponder("23.3.4.5");
@@ -163,7 +163,7 @@ public final class UltrapeerHandshakeResponderTest extends BaseTestCase {
         //  2) check to make sure that Ultrapeers are accepted as 
         //     Ultrapeer connections when we have enough leaves -- create this
         //     artifially by setting the MAX_LEAVES to zero
-        ConnectionSettings.IGNORE_KEEP_ALIVE.setValue(true);
+        ConnectionSettings.ALLOW_WHILE_DISCONNECTED.setValue(true);
         UltrapeerSettings.MAX_LEAVES.setValue(0);        
         hr = responder.respondUnauthenticated(up, false);        
         assertTrue("should tell the Ultrapeer to stay an Ultrapeer", 
@@ -172,7 +172,7 @@ public final class UltrapeerHandshakeResponderTest extends BaseTestCase {
                    hr.isAccepted());
         assertTrue("should be deflating to leaf", hr.isDeflateEnabled());
         UltrapeerSettings.MAX_LEAVES.revertToDefault();
-        ConnectionSettings.IGNORE_KEEP_ALIVE.setValue(false);
+        ConnectionSettings.ALLOW_WHILE_DISCONNECTED.setValue(false);
     }
 
     /**
@@ -180,7 +180,7 @@ public final class UltrapeerHandshakeResponderTest extends BaseTestCase {
      */
     public void testRespondToIncomingLeaf() throws Exception {
         ConnectionSettings.PREFERENCING_ACTIVE.setValue(true);
-        ConnectionSettings.IGNORE_KEEP_ALIVE.setValue(true);        
+        ConnectionSettings.ALLOW_WHILE_DISCONNECTED.setValue(true);        
         // the ultrapeer we'll be testing against
         UltrapeerHandshakeResponder responder = 
             new UltrapeerHandshakeResponder("23.3.4.5");
@@ -209,7 +209,7 @@ public final class UltrapeerHandshakeResponderTest extends BaseTestCase {
 
         assertTrue("should have X-Try-Ultrapeer hosts", hr.hasXTryUltrapeers());
         UltrapeerSettings.MAX_LEAVES.revertToDefault();        
-        ConnectionSettings.IGNORE_KEEP_ALIVE.setValue(false);
+        ConnectionSettings.ALLOW_WHILE_DISCONNECTED.setValue(false);
     }
 
 }

@@ -101,6 +101,13 @@ public final class ConnectionSettings extends LimeProps {
 	 */
 	public static final BooleanSetting PREFERENCING_ACTIVE =
 		FACTORY.createBooleanSetting("PREFERENCING_ACTIVE", true);
+		
+    /**
+     * Setting for whether or not connections should be allowed to be made
+     * while we're disconnected.
+     */
+    public static final BooleanSetting ALLOW_WHILE_DISCONNECTED =
+        FACTORY.createBooleanSetting("ALLOW_WHILE_DISCONNECTED", false);
 
 	/**
 	 * Setting for whether or not the removal of connections should 
@@ -109,26 +116,12 @@ public final class ConnectionSettings extends LimeProps {
 	public static final BooleanSetting REMOVE_ENABLED =
 		FACTORY.createBooleanSetting("REMOVE_ENABLED", true);
 
-
-	/**
-	 * Setting for whether or not the keep alive setting should be ignored
-	 * -- used for testing.
-	 */
-	public static final BooleanSetting IGNORE_KEEP_ALIVE =
-		FACTORY.createBooleanSetting("IGNORE_KEEP_ALIVE", false);
-
     /**
      * Setting for whether or not hosts should exchange QRP tables.  This is
      * particularly useful for testing.
      */
     public static BooleanSetting SEND_QRP =
         FACTORY.createBooleanSetting("SEND_QRP", true);
-
-	/**
-	 * Setting for whether or not to show the keep alive in the UI.
-	 */
-	public static final BooleanSetting SHOW_KEEP_ALIVE =
-		FACTORY.createBooleanSetting("SHOW_KEEP_ALIVE", false);
 		
     /**
      * Setting for whether or not we'll accept incoming connections
