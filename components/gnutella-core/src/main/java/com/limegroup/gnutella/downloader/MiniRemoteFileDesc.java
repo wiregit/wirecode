@@ -39,8 +39,14 @@ public class MiniRemoteFileDesc {
         // for push proxy fulfillment, the index is 0 and the filename is
         // null/"", so be a little lenient - all we hope for is the clientGUID
         // is what we expect
-        if((other.getIndex() == 0) &&
-           ((other.getFile() == null) || (other.getFile().equals(""))) &&
+        // if either this miniRFD or the other is a push proxy RFD, just check
+        // clientGUIDs
+        if((
+            ((other.getIndex() == 0) && 
+             ((other.getFile() == null) || (other.getFile().equals("")))) ||
+            ((getIndex() == 0) && 
+             ((getFile() == null) || (getFile().equals(""))))
+            ) &&
            Arrays.equals(clientGUID,other.getGUID()))
             return true;
         else if(index == other.getIndex() &&
