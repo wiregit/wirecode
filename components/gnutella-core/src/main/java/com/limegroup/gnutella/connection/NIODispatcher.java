@@ -175,11 +175,13 @@ public final class NIODispatcher implements Runnable {
             try {
                 n = SELECTOR.select();
             } catch(NullPointerException e) {
-                // windows bug -- need to catch it
+                // JDK bug -- need to catch it.  Also see JDK bug 4729342.
+                // Also related to JDK bug 4458268.
                 continue;
             } catch(CancelledKeyException e) {
-                // this can also happen even though it's not supposed to --
-                // just continue
+                // This can also happen even though it's not supposed to --
+                // just continue.  Documented in JDK bug 4729342. Also related 
+                // to JDK bug 4458268.
                 continue;
             }
             
