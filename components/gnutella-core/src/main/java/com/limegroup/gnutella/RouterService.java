@@ -267,53 +267,8 @@ public class RouterService
      * (keep-alive) is non-zero and recontacts the pong server as needed.  
      */
     public void connect() {
-        //HACK. People used to complain to that the connect button wasn't
-        //working when the host catcher was empty and USE_QUICK_CONNECT=false.
-        //This is not a bug; LimeWire isn't supposed to connect to the pong
-        //server in this case.  But this IS admittedly confusing.  So we force a
-        //connection to the pong server in this case by disconnecting and
-        //temporarily setting USE_QUICK_CONNECT to true.  But we have to
-        //sleep(..) a little bit before setting USE_QUICK_CONNECT back to false
-        //to give the connection fetchers time to do their thing.  Ugh.  A
-        //Thread.yield() may work here too, but that's less dependable.  And I
-        //do not want to bother with wait/notify's just for this obscure case.
-        SettingsManager settings=SettingsManager.instance();
-        boolean useHack=
-            (!settings.getUseQuickConnect())
-                && catcher.getNumHosts()==0;
-        if (useHack) {
-            settings.setUseQuickConnect(true);
-            disconnect();
-        }
-
-        //Force reconnect to pong server.
-        catcher.expire();
-
-        //Ensure outgoing connections is positive.
-        int outgoing=settings.getKeepAlive();
-        if (outgoing<1) {
-            outgoing = settings.DEFAULT_KEEP_ALIVE;
-            settings.setKeepAlive(outgoing);
-        }
-        //Actually notify the backend.
-
-		//  Adjust up keepAlive for initial ultrafast connect
-		if ( outgoing < 10 ) {
-			outgoing = 10;
-			manager.activateUltraFastConnectShutdown();
-		}
-        setKeepAlive(outgoing);
-
-        //int incoming=settings.getKeepAlive();
-        //setMaxIncomingConnections(incoming);
-
-        //See note above.
-        if (useHack) {
-            try {
-                Thread.sleep(100);
-            } catch (InterruptedException e) { }
-            SettingsManager.instance().setUseQuickConnect(false);
-        }
+        //delegate to connection manager
+        manager.connect();
     }
 
     /**
@@ -321,22 +276,8 @@ public class RouterService
      * the number of connections to zero.
      */
     public void disconnect() {
-		// Deactivate checking for Ultra Fast Shutdown
-		manager.deactivateUltraFastConnectShutdown(); 
-
-        SettingsManager settings=SettingsManager.instance();
-        int oldKeepAlive=settings.getKeepAlive();
-
-        //1. Prevent any new threads from starting.  Note that this does not
-        //   affect the permanent settings.
-        setKeepAlive(0);
-        //setMaxIncomingConnections(0);
-        //2. Remove all connections.
-        for (Iterator iter=manager.getConnections().iterator();
-             iter.hasNext(); ) {
-            ManagedConnection c=(ManagedConnection)iter.next();
-            removeConnection(c);
-        }
+		// Delegate to connection manager
+		manager.disconnect();
     }
 
 	/**
