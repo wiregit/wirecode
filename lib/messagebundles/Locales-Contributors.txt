@@ -1,4 +1,4 @@
-﻿(C) 2001-2003 The Lime Group. All Rights Reserved.
+﻿(C) 2001-2004 The Lime Group. All Rights Reserved.
 
 This is a small list of supported locales for LimeWire, with their
 contributors, and their area of work.  Mainly, supporting a locale is a matter
