@@ -1804,6 +1804,7 @@ public class ManagedDownloader implements Downloader, Serializable {
         busy=new LinkedList();
         int size = -1;
         int connectTo = -1;
+        int dloadsCount = -1;
         Assert.that(threads.size()==0);
 
         //While there is still an unfinished region of the file...
@@ -1853,6 +1854,7 @@ public class ManagedDownloader implements Downloader, Serializable {
                     }
                     size = files.size();
                     connectTo = getNumAllowedDownloads();
+                    dloadsCount = dloaders.size();
                 }
             }
         
@@ -1862,7 +1864,7 @@ public class ManagedDownloader implements Downloader, Serializable {
             //queued slot than some other worker kills the lowest worker in some
             //remote queue.
             for(int i=0; i< (connectTo+1) && i<size && 
-                              getNumDownloaders() < getSwarmCapacity(); i++) {
+                              dloadsCount < getSwarmCapacity(); i++) {
                 final RemoteFileDesc rfd = removeBest(files);
                 Thread connectCreator = new Thread("DownloadWorker") {
                     public void run() {
