@@ -7,6 +7,8 @@ import com.limegroup.gnutella.util.StringUtils;
 /*
  * this class is used to create the data files required by
  * I18NConvert and I18NData classes...
+ * more details can be found at www.unicode.org on codepoints, categories, etc.
+ * esp. UAX#15, UCD (Unicode Character Database Documentation)
  */
 public class UDataFileCreator {
 
@@ -44,6 +46,9 @@ public class UDataFileCreator {
         System.out.println("number of excluded code points : " + numEx);
     }
 
+    /*
+     * writes out the files to be used by the conversion (I18NData)
+     */
     private void writeOutFile(Map codepoint, BitSet excluded, HashMap nfkc) 
         throws IOException {
         FileOutputStream fo = 
@@ -53,34 +58,34 @@ public class UDataFileCreator {
             new BufferedWriter(new OutputStreamWriter(fo));
         
         Iterator iter = codepoint.keySet().iterator();
+
         while(iter.hasNext()) {
             String s = (String)iter.next();
             udata u = (udata)codepoint.get(s);
 
             if(!u.deKomp.equals("")) {
                 bufo.write(s + ";");
-                //bufo.write(u.cat + ";" + u.CC + ";" + u.deKomp + "\n");
-                //bufo.write(u.deKomp + "\n");
                 String composition = (String)nfkc.get(u.deKomp);
-                composition = composition == null || composition.equals(u.deKomp)?"":composition;
+                composition = composition == null 
+                    || composition.equals(u.deKomp)?"":composition;
                 bufo.write(u.deKomp + ";" + composition + ";\n");
-                //";" + u.CC + "\n"); 
-                //bufo.write(u.deKomp + ";" + u.CC
             }
-            
-            //bufo.write(s + ";");
-            //bufo.write(u.deKomp + "\n"); 
         }
         
         bufo.flush();
         bufo.close();
-
+        
+        //create the object file from the 'excluded' BitSet
         fo = new FileOutputStream(new File("excluded.dat"));
         ObjectOutputStream oo = new ObjectOutputStream(fo);
-        //bufo = new BufferedWriter(new OutputStreamWriter(oo));
         oo.writeObject(excluded);
     }
 
+    /*
+     * read in the file that lists code points that are to be kept even
+     * though they might belong to a category that should be excluded
+     * (ie. dakuon, etc)
+     */
     private void readNonExclusion(BitSet ex) 
         throws IOException {
         //most Mn will be excluded but few will be kept like voiced marks
@@ -93,6 +98,8 @@ public class UDataFileCreator {
         while((line = buf.readLine()) != null) {
             dI = line.indexOf(';');
             codepoint = (line.substring(0,dI)).trim();
+            
+            //if the listed codepoint represents a range (ie. 3099..309A)
             if(codepoint.indexOf("..") > -1) {
                 s = StringUtils.split(codepoint, "..");
                 start = Integer.parseInt(s[0],16) -1;
@@ -106,6 +113,11 @@ public class UDataFileCreator {
         buf.close();
     }
     
+
+    /*
+     * read in the unicode data file to get a list of all the codepoints
+     * and to determine the category of these codepoints
+     */
     private void dealWithUnicodeData(Map cp, BitSet ex, BitSet excluded) 
         throws IOException {
         
@@ -120,25 +132,31 @@ public class UDataFileCreator {
         buf.close();
     }
 
-    int numEx = 0;
+    int numEx = 0; //variable keeping track of number of excluded codepoints
     private boolean processLine(Map cp, BitSet ex, 
                                 String line, BitSet excluded) {
         String[] parts = StringUtils.splitNoCoalesce(line, ";");
         if(parts[0].equals("FFEE")) return false;
-        if(!isExcluded(parts, ex)) {
-            //put stuff in the cp
-            udata u = new udata();
-            u.cat = parts[2];
-            u.CC = parts[3];
-            cp.put(parts[0], u);
-        }
-        else {
+        if(isExcluded(parts, ex)) {
+            //put the codepoint into the excluded list
             numEx++;
             excluded.set(Integer.parseInt(parts[0],16));
         }
+        else { //not expluded
+            //put this codepoint into the cp map
+            udata u = new udata();
+            //populate the category for the data wrapper
+            u.cat = parts[2];
+            //u.CC = parts[3];
+            cp.put(parts[0], u);
+        }
         return true;
     }
-
+    
+    /*
+     * check to see if code point in the array p 
+     * is excluded.  
+     */
     private boolean isExcluded(String[] p, BitSet ex) {
         String cat = p[2];
         String cc = p[3];
@@ -159,12 +177,18 @@ public class UDataFileCreator {
                 first == 'P' 
                 )
             return false;
-        else if(cat.equals("Mn") && cc.equals("0"))
+        else if(cat.equals("Mn") && cc.equals("0")) {
+            //don't exclude Mn category which has a combining class of 0
             return false;
+        }
         else
             return true;
     }
 
+    /*
+     * read in the case folding file to find the correct
+     * case mappings from uppercase to lowercase
+     */
     private void readCaseFolding(Map c) 
         throws IOException {
         BufferedReader buf = getBR("CaseFolding.txt");
@@ -179,6 +203,7 @@ public class UDataFileCreator {
                 line = line.substring(0,index).trim();
                 splitUp = StringUtils.split(line, ";");
                 status = splitUp[1].trim();
+                //C - common case folding, F - full case folding
                 if(status.equals("C") || status.equals("F")) {
                     c.put(splitUp[0].trim(), splitUp[2].trim());
                 }
@@ -187,7 +212,12 @@ public class UDataFileCreator {
         
         buf.close();
     }
-
+    
+    /*
+     * using the Map created by reading in the CaseFolding file
+     * run through all of the codepoints and replace all 
+     * instances of upper case to lowercase
+     */
     private void replaceCase(Map codepoint, Map casF, BitSet ex) {        
         //run thru and check the codepoint or deKomp for uppercase
         //this could probably done in the write out process?
@@ -195,8 +225,8 @@ public class UDataFileCreator {
         String code;
         String up;
         String[] splitUp;
-        final int CJKLow = Integer.parseInt("3400", 16);
-        final int CJKHigh = Integer.parseInt("9FA5", 16);
+        //final int CJKLow = Integer.parseInt("3400", 16);
+        //final int CJKHigh = Integer.parseInt("9FA5", 16);
         while(iter.hasNext()) {
             code = (String)iter.next();
             udata u = (udata)codepoint.get(code);
@@ -208,11 +238,18 @@ public class UDataFileCreator {
             else {
 
                 if(u.deKomp.equals("")) {
+                    //if there was no decomposition then
+                    //make sure that the codepoint is converted
+                    //to lowercase
                     up = (String)casF.get(code);
                     if(up != null)
                         u.deKomp = up;
                 }
                 else {
+                    //if there was a decomposition mapping
+                    //we need to make sure and convert each char
+                    //in the decomposed form to lowercase (or
+                    //remove if in excluded set)
                     StringBuffer dek = new StringBuffer();
                     splitUp = StringUtils.split(u.deKomp, " ");
                     boolean removed = false;
@@ -228,9 +265,13 @@ public class UDataFileCreator {
                             if(up != null)
                                 dek.append(up + " ");
                             else {
+                                //if there is no lowercase
                                 udata ud = (udata)codepoint.get(splitUp[i]);
                                 String cat = 
                                     (ud == null)?"":ud.cat;
+                                
+                                //if this codepoint belongs to a punctuation
+                                //category then replace with space
                                 if(cat.indexOf("P") > -1)
                                     up = "0020";
                                 else
@@ -247,6 +288,11 @@ public class UDataFileCreator {
         }
     }
     
+    /*
+     * use the NormalizationTest file provided by the unicode.org site
+     * we use this file since it details the full composition/decomposition
+     * of codepoints
+     */
     private void readNTestPopKD(Map c, Map kc) 
         throws IOException {
         //c - codepoints that weren't excluded...
@@ -277,10 +323,13 @@ public class UDataFileCreator {
                         parts = StringUtils.split(line, ";");
                         udata u = (udata)c.get(parts[0].trim());
 
+                        //populate the deKomp field for the udata associated
+                        //with the codepoint (through Map C)
                         if(u != null) 
                             u.deKomp = parts[4].trim();
                         //create a KC mapping to be used to
                         //build final data... 
+                        //decomposed form to composed form mapping
                         kc.put(parts[4].trim(), parts[3].trim());
                     }
                 }
@@ -299,7 +348,7 @@ public class UDataFileCreator {
 
     }
     
-    ///just a datawrapper
+    //just a datawrapper to be used during the building of the files
     private class udata {
         public String cat, CC, deKomp = "";
     }

@@ -1,35 +1,64 @@
 package com.limegroup.gnutella.util;
 
+/*
+ * class that handles the removal of accents, etc.
+ */
 public class I18NConvert {
 
+    /* data class to use for the raw look up of conversions */
     I18NData _data;
     
+    /* instance */
     private static I18NConvert _instance = new I18NConvert();
     
     private I18NConvert() {
         initialize();
     }
 
+    /* accesor */
     public static I18NConvert instance() {
         return _instance;
     }
 
+    /* load in the data class */
     private void initialize() {
         _data = new I18NData();
     }
 
+    /*
+     * Return the converted form of the string s
+     * this method will also split the s into the different
+     * unicode blocks
+     * @param s String to be converted
+     * @return the converted string
+     */
     public String getNorm(String s) {
-        return getN(s);
+        return blockSplit(getKC(getDK(s)));
     } 
     
+    
+    /*
+     * Returns an array of keywords built from parameter s.
+     * The string s will be first converted (removal of accents, etc.)
+     * then split into the unicode blocks, then the array will be created
+     * by splitting the string by 'space'.  The conversion will convert
+     * all delim characters to '\u0020' so we just split with '\u0020'
+     * @param s source string to split into keywords
+     * @return an array of keywords created from s
+     */
     public String[] getKeywords(String s) {
         return StringUtils.split(blockSplit(getKC(getDK(s))), " ");
     }
     
-    private String getN(String s) {
-        return blockSplit(getKC(getDK(s)));
-    }
 
+    /*
+     * Return the decomposed form of parameter s. For each char
+     * in the String s, we do a look up using the data class
+     * for the decomposed format (this format is not strictly 
+     * a NFKD format since it will also remove accents and symbols)
+     * @param s string to decompose
+     * @return the converted string
+     */
     private String getDK(String s) {
         if(s.length() == 0) return  s;
         else {
@@ -39,7 +68,15 @@ public class I18NConvert {
             return buf.toString();
         }
     }
-    
+
+    /*
+     * Return the composed form of string s. Do a look up on the data
+     * class for any entries that would combine two chars at a time.
+     * Similar to composition described in Technical Report 15 on 
+     * www.unicode.org site.
+     * @param s String to be composed
+     * @return converted form
+     */
     private String getKC(String s) {
         if(s.length() == 0) return s;
         else {
@@ -47,22 +84,38 @@ public class I18NConvert {
             StringBuffer b = new StringBuffer();
             String comped = "";
             
-            //need to check for more than two
             for(int i = 1, n = s.length(); i < n; i++) {
+                //see if these two chars can be combined according
+                //to the look up table
+                //TODO: this look up can use a 32bit int created from the
+                //    : two chars rather than use a string (need to change the
+                //    : underlying data struct for I18NData
                 comped = _data.getKC(String.valueOf(first) + String.valueOf(s.charAt(i)));
+                //able to compose so we set the composed char to
+                //the first to see if more compositions can be made
                 if(comped != null) 
                     first = comped.charAt(0);
                 else {
+                    //the two chars weren't composed so append to
+                    //buffer and set the first char to the next char
                     b.append(first);
                     first = s.charAt(i);
                 }
             }
-            
+            //append the last char used
             b.append(first);
         return b.toString();
         }
     }
 
+    /*
+     * Returns a string split according to the unicode blocks.  A
+     * space '\u0020' will be splaced between the blocks.
+     * The index to the blockStarts array will be used to compare
+     * when splitting the string.
+     * @param String s
+     * @return string split into blocks with '\u0020' as the delim
+     */
     private String blockSplit(String s) {
         if(s.length() == 0) return s;
         else {
@@ -72,6 +125,9 @@ public class I18NConvert {
             buf.append(s.charAt(0));
             for(int i = 1, n = s.length(); i < n; i++) {
                 curBlock = of(s.charAt(i));
+                //compare the blocks of the current char and the char
+                //right before. Also, make sure we don't add too many 
+                //'\u0020' chars
                 if(curBlock != blockb4 && 
                    (s.charAt(i) != '\u0020' && s.charAt(i - 1) != '\u0020'))
                     buf.append("\u0020");
@@ -79,10 +135,18 @@ public class I18NConvert {
                 blockb4 = curBlock;
             }
             
+            //get rid of trailing space (if any)
             return buf.toString().trim();
         }
     }
 
+    /*
+     * Returns which unicode block the parameter c
+     * belongs to. The returned int is the index to the blockStarts
+     * array. 
+     * @param char c 
+     * @return index to array
+     */
 	private int of(char c) {
 	    int top, bottom, current;
 	    bottom = 0;
@@ -99,7 +163,10 @@ public class I18NConvert {
 	    return current;
 	}
 
-    //copy from Character.java
+    /*
+     * copy from Character.java
+     * the boundaries for each of the unicode blocks
+     */
 	private static final char blockStarts[] = {
         '\u0000',
         '\u0080',

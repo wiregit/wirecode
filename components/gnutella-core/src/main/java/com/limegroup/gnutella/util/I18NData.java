@@ -7,17 +7,22 @@ import java.util.*;
 
 public class I18NData {
 
-    //these can be switched out for optimized strucs
+    /* these can be switched out for optimized strucs */
     Trie convert, kc;
+    /* the excluded chars */
     java.util.BitSet ex;
 
     public I18NData() {
         init();
     }
 
-    //decompose
+    /*
+     * decompose the char. 
+     * @param c char to decompose
+     * @return decomposed String
+     */
     public String getDK(char c) {
-        if(ex.get(c)) //excluded
+        if(ex.get(c)) //if excluded return blank
             return "";
         else {
             String s = (String)convert.get(String.valueOf(c)); 
@@ -26,12 +31,20 @@ public class I18NData {
         }
     }
     
-    //compose
+    /*
+     * look up for composition. returns null if not found.
+     * @param c char to decompose
+     * @return decomposed String
+     */
     public String getKC(String s) {
         return (String)kc.get(s);
     }
 
-    //read in the data.
+    /*
+     * Builds the trie, bitset used by the conversions.  The data is read
+     * in from files created by the UDataFileCreator.
+     * The files are in i18n.jar
+     */
     private void init() {
         convert = new Trie(false);
         kc = new Trie(false);
@@ -44,6 +57,7 @@ public class I18NData {
             String line;
             String[] splitUp;
             
+            //format of nudata.txt char;decomposed chars;composed char
             while((line = buf.readLine()) != null) {
                 splitUp = StringUtils.splitNoCoalesce(line, ";");
                 convert.add(code2char(splitUp[0]), code2char(splitUp[1]));
@@ -51,6 +65,7 @@ public class I18NData {
                     kc.add(code2char(splitUp[1]), code2char(splitUp[2]));
             }
 
+            //read in the bitset
             ObjectInputStream ois = 
                 new ObjectInputStream(getClass().getClassLoader().getResource("excluded.dat").openStream());
             ex = (java.util.BitSet)ois.readObject();
@@ -67,6 +82,13 @@ public class I18NData {
     }
     
     
+    /*
+     * converts the hex representation of a String to a String
+     * ie. 0020 -> " "
+     *     0061 0062 -> "ab"
+     * @param s String to convert
+     * @return converted s
+     */
     private String code2char(String s) {
         StringBuffer b = new StringBuffer();
         
@@ -83,4 +105,4 @@ public class I18NData {
 
 }
 
-
+             
