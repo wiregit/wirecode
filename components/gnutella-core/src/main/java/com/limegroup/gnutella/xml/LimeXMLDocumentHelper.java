@@ -297,7 +297,7 @@ public class LimeXMLDocumentHelper{
         try{            
             parser.parse(source);
         }catch(Exception e){
-            e.printStackTrace();
+            //e.printStackTrace();
             //could not parse XML well
             return null;
         }
