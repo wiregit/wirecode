@@ -83,11 +83,10 @@ public abstract class MessageRouter {
     private RouteTable _pingRouteTable = new RouteTable(2*60, 
 														MAX_ROUTE_TABLE_SIZE);
     /**
-     * Maps QueryRequest GUIDs to QueryReplyHandlers.  Stores 10 minutes,
-     * typically around 26000 entries, but never more than 100,000 entries.
-     * We extended this from 5 minutes after probe queries were introduced.
+     * Maps QueryRequest GUIDs to QueryReplyHandlers.  Stores 5-10 minutes,
+     * typically around 13000 entries, but never more than 100,000 entries.
      */
-    private RouteTable _queryRouteTable = new RouteTable(10*60,
+    private RouteTable _queryRouteTable = new RouteTable(5*60,
 														 MAX_ROUTE_TABLE_SIZE);
     /**
      * Maps QueryReply client GUIDs to PushRequestHandlers.  Stores 7-14
