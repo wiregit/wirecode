@@ -153,8 +153,13 @@ public class FileManager{
 	try{
 	    pattern = compiler.compile(query);}
 	catch(MalformedPatternException e){
-	    System.out.println("Query was malformed");
-	    return null;
+	    //If we catch and expression we seacrh without regular expressions
+	    for(int i=0; i < _numFiles; i++) {
+		FileDesc desc = (FileDesc)_files.get(i);
+		String file_name = desc._name;
+		if (file_name.indexOf(query) != -1) 
+		    response_list.add(_files.get(i));
+	    }
 	}
 	for(int i=0; i < _numFiles; i++){
 	    FileDesc desc = (FileDesc)_files.get(i);//Adam will populate the list before calling query.
