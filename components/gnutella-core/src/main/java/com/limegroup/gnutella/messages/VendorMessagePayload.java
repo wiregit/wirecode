@@ -28,7 +28,7 @@ public abstract class VendorMessagePayload {
     private int _selector = -1;
     private byte[] _vendorID = null;
 
-    VendorMessagePayload(byte[] vendorID, int version, int selector) 
+    protected VendorMessagePayload(byte[] vendorID, int selector, int version) 
         throws IllegalArgumentException {
         if (vendorID.length != 4)
             throw new IllegalArgumentException("Vendor ID Invalid!");
