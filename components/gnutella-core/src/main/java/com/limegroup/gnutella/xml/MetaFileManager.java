@@ -270,14 +270,7 @@ public class MetaFileManager extends FileManager {
                     }catch(Exception e){
                         continue;
                     }
-                    int j = name.lastIndexOf(".");
-                    String ext="";
-                    if(j>0)
-                        ext = name.substring(j);
-                    if(ext.equalsIgnoreCase(".mp3"))
-                        writeToMap(files[i],hash,true);
-                    else
-                        writeToMap(files[i],hash,false);
+                    writeToMap(files[i],hash,LimeXMLUtils.isMP3File(name));
             }
         }
     }

@@ -344,6 +344,24 @@ public class LimeXMLUtils
         //this should never happen - size >0
         return false;
     }
+
+
+    public static boolean isMP3File(String in) {
+        boolean retVal = false;
+
+        in = in.toLowerCase();
+        if (in.endsWith(".mp3"))
+            retVal = true;
+        
+        return retVal;
+    }
+
+
+    public static boolean isMP3File(File in) {
+        boolean retVal = isMP3File(in.getName());        
+        return retVal;
+    }
+
     
     /**
       * Converts the given list of xml documents to an array of responses

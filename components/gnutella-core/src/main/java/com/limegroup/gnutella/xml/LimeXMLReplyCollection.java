@@ -106,8 +106,12 @@ public class LimeXMLReplyCollection{
             hashToXMLStr = new HashMap();
         else
             hashToXMLStr = ms.getMap();
-        Iterator iter = hashToXMLStr.keySet().iterator();
-        while(iter.hasNext()){
+        
+        Iterator iter = null;
+        if ((hashToXMLStr != null) &&
+            (hashToXMLStr.keySet() != null))
+            iter = hashToXMLStr.keySet().iterator();
+        while((iter != null) && iter.hasNext()){
             boolean valid = true;
             String hash = (String)iter.next();
             String xmlStr = (String)hashToXMLStr.get(hash);//cannot be null
@@ -120,14 +124,19 @@ public class LimeXMLReplyCollection{
             if(valid)
                 addReply(hash,doc);
         }
-        checkDocuments(fileToHash,false);
+        if (fileToHash != null)
+            checkDocuments(fileToHash,false);
     }
 
     private void checkDocuments (Map fileToHash, boolean mp3){
         //compare fileNames  from documents in mainMap to 
         //actual filenames as per the map
         synchronized(fileToHash){
-            Iterator iter = fileToHash.keySet().iterator();
+            Iterator iter = null;
+            if (fileToHash.keySet() != null)
+                iter = fileToHash.keySet().iterator();
+            if (iter == null)
+                return;
             while(iter.hasNext()){
                 File file  = (File)iter.next();
                 String hash=metaFileManager.readFromMap(file,mp3);
@@ -196,7 +205,22 @@ public class LimeXMLReplyCollection{
         replyDocs=null;//things have changed
         count++;
     }
-   
+
+
+    public void addReplyWithCommit(File f, 
+                                   String hash, 
+                                   LimeXMLDocument replyDoc) {
+        addReply(hash, replyDoc);
+        // commit to disk...
+        try {
+            if (LimeXMLUtils.isMP3File(f))
+                mp3ToDisk(f.getCanonicalPath());
+            else
+                toDisk("");
+        }
+        catch (Exception ignored) {}
+    }
+
     public int getCount(){
         return count;
     }
@@ -313,7 +337,7 @@ public class LimeXMLReplyCollection{
                 if(audio){
                     String fName = currDoc.getIdentifier();
                     ID3Editor e = new ID3Editor();
-                    boolean mp3Doc = fName.endsWith("mp3");
+                    boolean mp3Doc = LimeXMLUtils.isMP3File(fName);
                     if(mp3Doc){
                         //remove the ID3 tags only if doc corresponds to mp3
                         xml = e.removeID3Tags(xml);
@@ -352,12 +376,7 @@ public class LimeXMLReplyCollection{
     }
     
     public boolean mp3ToDisk(String mp3FileName){
-        int i = mp3FileName.lastIndexOf(".");
-        boolean mp3= false;
-        if (i<0)
-            return false;
-        if(mp3FileName.substring(i+1).equalsIgnoreCase("mp3"))
-            mp3 = true;
+        boolean mp3= LimeXMLUtils.isMP3File(mp3FileName);
         boolean wrote=false;
         boolean wrote2 = false;
         //remove nonID3 stuff and store in outMap...and write out to disk 
