@@ -2464,6 +2464,12 @@ public class ManagedDownloader implements Downloader, Serializable {
      * Returns the amount of other hosts this download can possibly use.
      */
     public synchronized int getPossibleHostCount() {
+        if( state == WAITING_FOR_RETRY ) {
+            int filesSize = files == null ? 0 : files.size();
+            int busySize = busy == null ? 0 : busy.size();
+            Assert.that(filesSize == busySize);
+            return 0;
+        }
         return (files == null ? 0 : files.size());
     }
     
