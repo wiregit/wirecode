@@ -3,6 +3,7 @@ package com.limegroup.gnutella;
 import com.limegroup.gnutella.statistics.*;
 import com.limegroup.gnutella.util.*;
 import com.limegroup.gnutella.guess.*;
+import com.limegroup.gnutella.messages.*;
 import java.io.*;
 import com.sun.java.util.collections.*;
 import java.util.StringTokenizer;
@@ -53,6 +54,12 @@ public class QueryRequest extends Message implements Serializable{
 	 * Cached immutable empty array of bytes to avoid unnecessary allocations.
 	 */
 	private final static byte[] EMPTY_BYTE_ARRAY = new byte[0];
+
+    /**
+     * Keep this around for efficiency sake
+     */
+    private final static String GGEP_BLOCK_HEADER = 
+        "" + GGEP.GGEP_PREFIX_MAGIC_NUMBER;
 
     /**
      * Builds a new query from scratch, with metadata, using the given GUID.
@@ -195,6 +202,23 @@ public class QueryRequest extends Message implements Serializable{
 								   tempRequestedUrnTypes == null ? null : 
 								   tempRequestedUrnTypes.iterator());
 
+            // add the GGEP Extension
+            if (this.queryKey != null) {
+                // get query key in byte form....
+                ByteArrayOutputStream qkBytes = new ByteArrayOutputStream();
+                this.queryKey.write(qkBytes);
+                // construct the GGEP block
+                GGEP ggepBlock = new GGEP(false); // do COBS
+                ggepBlock.put(GGEP.GGEP_HEADER_QUERY_KEY_SUPPORT,
+                              qkBytes.toByteArray());
+                ByteArrayOutputStream ggepBytes = new ByteArrayOutputStream();
+                ggepBlock.write(ggepBytes);
+                // write out GGEP
+                addDelimiterBefore =
+                    writeGemExtension(baos, addDelimiterBefore,
+                                      new String(ggepBytes.toByteArray()));
+            }
+
             baos.write(0);                             // final null
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -262,7 +286,8 @@ public class QueryRequest extends Message implements Serializable{
 				} else if (curExtStr.startsWith("<?xml")) {
 					// rich query
 					tempRichQuery = curExtStr;
-				}
+				} else if (curExtStr.startsWith(GGEP_BLOCK_HEADER))
+                    tempQueryKey = parseGGEP(curExtStr);
             }
         } catch (IOException ioe) {
 			ioe.printStackTrace();
@@ -284,6 +309,28 @@ public class QueryRequest extends Message implements Serializable{
 			    Collections.unmodifiableSet(tempRequestedUrnTypes);
 		}	
         queryKey = tempQueryKey;
+    }
+
+    // handles parsing of all GGEP blocks.  may need to change return sig
+    // if new things are needed....
+    private final QueryKey parseGGEP(String ggepString) {
+        QueryKey retQK = null;
+        byte[] ggepBytes = ggepString.getBytes();
+        int[] offsetIndex = new int[1];
+        offsetIndex[0] = 0;
+        while (offsetIndex[0] < ggepBytes.length) {
+            try {
+                GGEP ggepBlock = new GGEP(ggepBytes, 0, offsetIndex);
+                if (ggepBlock.hasKey(GGEP.GGEP_HEADER_QUERY_KEY_SUPPORT)) {
+                    byte[] qkBytes = 
+                        ggepBlock.getBytes(GGEP.GGEP_HEADER_QUERY_KEY_SUPPORT);
+                    retQK = QueryKey.getQueryKey(qkBytes);
+                }
+            }
+            catch (BadGGEPBlockException ignored) {}
+            catch (BadGGEPPropertyException ignored) {}
+        }
+        return retQK;
     }
 
     /**
