@@ -86,7 +86,7 @@ public class IPTest extends com.limegroup.gnutella.util.BaseTestCase {
         SettingsManager.instance().setBannedIps(
             new String[] {"18.239.0.*", "13.0.0.0"});
         SettingsManager.instance().setAllowedIps(new String[] {"18.239.0.144"});
-        IPFilter filter = new IPFilter();
+        IPFilter filter = IPFilter.instance();
         assertTrue(filter.allow("18.240.0.0"));
         assertTrue(! filter.allow("18.239.0.142"));
         assertTrue(filter.allow("18.239.0.144"));

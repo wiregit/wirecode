@@ -55,7 +55,7 @@ public class TestUploader {
     /**
      * <tt>IPFilter</tt> for only allowing local connections.
      */
-    private final IPFilter IP_FILTER = new IPFilter();
+    private final IPFilter IP_FILTER = IPFilter.instance();
 
 
     /** 
