@@ -122,8 +122,14 @@ public class M4AMetaData extends AudioMetaData {
 		//except that the table is shifted one position
 		current = (byte []) _metaData.get(new Integer(GENRE_ATOM));
 		if (current!=null) {
-			short genreShort = (short) (ByteOrder.beb2short(current, current.length-2) -1);
-			setGenre(MP3MetaData.getGenreString(genreShort));
+			if (current[3] == 1) {
+				//we have a custom genre.
+				String genre = new String(current,8,current.length-8,"UTF-8");
+				setGenre(genre);
+			} else {
+				short genreShort = (short) (ByteOrder.beb2short(current, current.length-2) -1);
+				setGenre(MP3MetaData.getGenreString(genreShort));
+			}
 		}
 		
 		
@@ -280,8 +286,7 @@ public class M4AMetaData extends AudioMetaData {
 	}
 	
 	/**
-	 * reads the data atom contained in a metadata atom.  Supposedly,
-	 * the first 8 bytes are junk.
+	 * reads the data atom contained in a metadata atom.  
 	 * @return the content of the data atom
 	 * @throws IOException the data atom was not found or error occured
 	 */
@@ -289,8 +294,8 @@ public class M4AMetaData extends AudioMetaData {
 		int size = _in.readInt();
 		if (_in.readInt() != DATA_ATOM)
 			throw new IOException("data tag not found");
-		byte [] res = new byte[size-16];
-		_in.skip(8);
+		byte [] res = new byte[size-8];
+		//_in.skip(8);
 		_in.readFully(res);
 		return res;
 	}
