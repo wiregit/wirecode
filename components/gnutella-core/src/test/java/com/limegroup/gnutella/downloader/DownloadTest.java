@@ -305,10 +305,18 @@ public class DownloadTest extends BaseTestCase {
     /**
      * Tests a basic download that does not swarm.
      */
-    public void testSimpleDownload() throws Exception {
+    public void testSimpleDownload10() throws Exception {
         LOG.debug("-Testing non-swarmed download...");
         
         RemoteFileDesc rfd=newRFD(PORT_1, 100);
+        RemoteFileDesc[] rfds = {rfd};
+        tGeneric(rfds);
+    }
+    
+    public void testSimpleDownload11() throws Exception {
+        LOG.debug("-Testing non-swarmed download...");
+        
+        RemoteFileDesc rfd=newRFDWithURN(PORT_1, 100);
         RemoteFileDesc[] rfds = {rfd};
         tGeneric(rfds);
     }
@@ -343,8 +351,8 @@ public class DownloadTest extends BaseTestCase {
         final int FUDGE_FACTOR=RATE*1024;  
         uploader1.setRate(RATE);
         uploader2.setRate(RATE);
-        RemoteFileDesc rfd1=newRFD(PORT_1, 100);
-        RemoteFileDesc rfd2=newRFD(PORT_2, 100);
+        RemoteFileDesc rfd1=newRFDWithURN(PORT_1, 100);
+        RemoteFileDesc rfd2=newRFDWithURN(PORT_2, 100);
         RemoteFileDesc[] rfds = {rfd1,rfd2};
         
         tGeneric(rfds);
@@ -365,7 +373,7 @@ public class DownloadTest extends BaseTestCase {
     public void testSimpleSwarmPush() throws Exception {
         LOG.debug("-Testing swarming from two sources, one push...");  
         
-        RemoteFileDesc rfd1=newRFD(PORT_1, 100);
+        RemoteFileDesc rfd1=newRFDWithURN(PORT_1, 100);
         AlternateLocation pushLoc = AlternateLocation.create(
                 guid.toHexString()+";127.0.0.1:"+PPORT_2,TestFile.hash(),savedFile.getName());
         RemoteFileDesc rfd2 = pushLoc.createRemoteFileDesc(TestFile.length());
@@ -394,15 +402,13 @@ public class DownloadTest extends BaseTestCase {
         final int FUDGE_FACTOR=RATE*1024;  
         uploader1.setRate(RATE);
         uploader2.setRate(RATE/10);
-        RemoteFileDesc rfd1=newRFD(PORT_1, 100);
-        RemoteFileDesc rfd2=newRFD(PORT_2, 100);
+        RemoteFileDesc rfd1=newRFDWithURN(PORT_1, 100);
+        RemoteFileDesc rfd2=newRFDWithURN(PORT_2, 100);
         RemoteFileDesc[] rfds = {rfd1,rfd2};
 
         tGeneric(rfds);
 
-        //Make sure there weren't too many overlapping regions.  uploader1
-        //should transfer 2/3 of the file and uploader2 should transfer 1/3 of
-        //the file.
+        //Make sure there weren't too many overlapping regions.
         int u1 = uploader1.amountUploaded();
         int u2 = uploader2.amountUploaded();
         //Note: The amount downloaded from each uploader will not 
@@ -425,8 +431,8 @@ public class DownloadTest extends BaseTestCase {
         uploader1.setRate(RATE);
         uploader2.setRate(RATE);
         uploader2.stopAfter(STOP_AFTER);
-        RemoteFileDesc rfd1=newRFD(PORT_1, 100);
-        RemoteFileDesc rfd2=newRFD(PORT_2, 100);
+        RemoteFileDesc rfd1=newRFDWithURN(PORT_1, 100);
+        RemoteFileDesc rfd2=newRFDWithURN(PORT_2, 100);
 
         // Download first from rfd2 so we get its stall
         // and then add in rfd1.
@@ -445,41 +451,40 @@ public class DownloadTest extends BaseTestCase {
         assertLessThan("u1 did all the work", TestFile.length()-STOP_AFTER+FUDGE_FACTOR, u1);
         assertEquals("u2 did all the work", STOP_AFTER, u2);
     }
-
-
-    public void testStealerInterrupted() throws Exception {
-        LOG.debug("-Testing unequal swarming with stealer dying...");
+    
+    /**
+     * tests a swarm from a 1.0 and 1.1 source - designed to test stealing.
+     */
+    public void testSwarmWithTheft() throws Exception {
+        LOG.debug("-Testing swarming from two sources, one 1.0 and one 1.1");
         
-        // Note: there is a concurrency issue in the stealing code which causes this
-        // test to fail sometimes.
-        
+        //Throttle rate at 10KB/s to give opportunities for swarming.
         final int RATE=500;
-        //some small number
-        final int STOP_AFTER = 200000;
+        //The first uploader got a range of 0-100%.  After the download receives
+        //50%, it will close the socket.  But the uploader will send some data
+        //between the time it sent byte 50% and the time it receives the FIN
+        //segment from the downloader.  Half a second latency is tolerable.  
         final int FUDGE_FACTOR=RATE*1024;  
-        uploader1.setRate(RATE/10);
+        uploader1.setRate(RATE);
         uploader2.setRate(RATE);
-        uploader2.stopAfter(STOP_AFTER);
         RemoteFileDesc rfd1=newRFD(PORT_1, 100);
-        RemoteFileDesc rfd2=newRFD(PORT_2, 100);
-        RemoteFileDesc [] rfds = {rfd1,rfd2};
-
+        RemoteFileDesc rfd2=newRFDWithURN(PORT_2, 100);
+        RemoteFileDesc[] rfds = {rfd1,rfd2};
+        
         tGeneric(rfds);
-
+        
         //Make sure there weren't too many overlapping regions.
         int u1 = uploader1.amountUploaded();
         int u2 = uploader2.amountUploaded();
         LOG.debug("\tu1: "+u1+"\n");
         LOG.debug("\tu2: "+u2+"\n");
         LOG.debug("\tTotal: "+(u1+u2)+"\n");
-
+        
         //Note: The amount downloaded from each uploader will not 
         //be equal, because the uploaders are stated at different times.
-        assertLessThan("u1 did all the work",
-                    TestFile.length(), u1);
-        assertEquals("u2 did all the work", STOP_AFTER, u2);
+        assertLessThan("u1 did all the work", TestFile.length()/2+FUDGE_FACTOR, u1);
+        assertLessThan("u2 did all the work", TestFile.length()/2+FUDGE_FACTOR, u2);
     }
-
 
 
     public void testAddDownload() throws Exception {
@@ -489,8 +494,8 @@ public class DownloadTest extends BaseTestCase {
         final int FUDGE_FACTOR=RATE*1024;  
         uploader1.setRate(RATE);
         uploader2.setRate(RATE);
-        RemoteFileDesc rfd1=newRFD(PORT_1, 100);
-        RemoteFileDesc rfd2=newRFD(PORT_2, 100);
+        RemoteFileDesc rfd1=newRFDWithURN(PORT_1, 100);
+        RemoteFileDesc rfd2=newRFDWithURN(PORT_2, 100);
 
         Downloader download=null;
 
@@ -525,8 +530,8 @@ public class DownloadTest extends BaseTestCase {
         final int RATE=500;
         uploader1.setRate(0.1f);//stalling uploader
         uploader2.setRate(RATE);
-        RemoteFileDesc rfd1=newRFD(PORT_1, 100);
-        RemoteFileDesc rfd2=newRFD(PORT_2, 100);
+        RemoteFileDesc rfd1=newRFDWithURN(PORT_1, 100);
+        RemoteFileDesc rfd2=newRFDWithURN(PORT_2, 100);
         RemoteFileDesc[] rfds = {rfd1,rfd2};
 
         tGeneric(rfds);
