@@ -20,8 +20,7 @@ public class SimppSettingsManager {
         String simppSettings = SimppManager.instance().getPropsString();
         if(simppSettings == null || simppSettings.equals(""))
             throw new IllegalArgumentException("SimppManager not ready");
-        updateSimppSettings(simppSettings, false);
-        _isDefault = true;//we have not yet shifted from the defaults
+        updateSimppSettings(simppSettings, true);
     }
 
     public static SimppSettingsManager instance() {
@@ -49,19 +48,49 @@ public class SimppSettingsManager {
     }
 
     public void activateSimppSettings() {
-        //TODO: save the old setting in the defaults map, and set the value in
-        //the properties to the value in _simppProperties 
-
-        //TODO: Make sure each setting has the setting so that it's not written
-        //out to the file
+        synchronized(_simppProps) {
+            Set set = _simppProps.entrySet();
+            for(Iterator iter = set.iterator(); iter.hasNext() ; ) {
+                Map.Entry currEntry = (Map.Entry)iter.next();
+                String simppSetting = (String)currEntry.getKey();
+                Object simppValue = (Object)currValue.getValue();
+                //get the setting we want based on the name of the setting
+                Setting currSetting = findSettingByName(simppSetting);
+                //get the default/current value and cache it                
+                String defaultValue = (String)currSetting.getValueAsString();
+                _defaults.put(simppSetting, defaultValue);
+                //we never want to write this setting out
+                currSetting.setAlwaysSave(false);
+                //set the setting to the value that simpp says
+                setSettingsByType(currSetting, simppValue);
+            }
+        }//end of synchronized block
         _isDefault = false;
     }
     
     public void revertToDefaults() {
-        //TODO1: is this necessary?
-        //replace the properties in defaults map in the settings handler, and
-        //remove the other ones which are in simppProperties.
+        synchronized(_simppProps) {
+            Set set = _simppProps.keySet();
+            for(Iterator iter = set.iterator(); iter.hasNext() ; ) {
+                Object currEntry = iter.next();
+                String defaultValue = _defaults.get(currEntry);
+                Setting currSetting = findSettingByName();
+                setSettingsByType(currSetting, defaultValue);
+            }            
+        } //end of synchronized 
         _isDefault = true;
+    }
+
+
+    /////////////////////////////private helpers////////////////////////////
+
+    private Setting findSettingByName(String settingName) {
+        //TODO1: get this setting
+    }
+
+    private void setSettingByType(Setting toSet, Object value) {
+        //TODO: Find out what kind of setting it is an set the value
+        //accordingly
     }
 
 }
