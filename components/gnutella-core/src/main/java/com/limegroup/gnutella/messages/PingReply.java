@@ -5,13 +5,14 @@ import com.limegroup.gnutella.guess.*;
 import com.limegroup.gnutella.statistics.*;
 import java.io.*;
 import java.net.*;
+
 import com.limegroup.gnutella.util.*;
 
 /**
  * A ping reply message, aka, "pong".  This implementation provides a way
  * to "mark" pongs as being from supernodes.
  */
-public class PingReply extends Message implements Serializable {
+public class PingReply extends Message implements Serializable, IpPort {
 
     /**
      * Constant for the number of ultrapeer slots for this host.
@@ -34,7 +35,7 @@ public class PingReply extends Message implements Serializable {
 
     /** The IP string as extracted from payload[2..5].  Cached to avoid
      *  allocations.  LOCKING: obtain this' monitor. */
-    private final String IP;
+    private final InetAddress IP;
 
     /**
      * Constant for the port number of this pong.
@@ -451,8 +452,14 @@ public class PingReply extends Message implements Serializable {
         KILOBYTES = ByteOrder.ubytes2long(ByteOrder.leb2int(PAYLOAD,10));
 
         // IP is big-endian
-        IP = NetworkUtils.ip2string(PAYLOAD, 2);
+        String ip = NetworkUtils.ip2string(PAYLOAD, 2);
 
+        try {
+            IP = InetAddress.getByName(ip);
+        } catch (UnknownHostException e1) {
+            throw new IllegalArgumentException("should never get " +
+                "unknown IPs here");
+        }
         // GGEP parsing
         //GGEP ggep = parseGGEP();
         int dailyUptime = -1;
@@ -707,8 +714,8 @@ public class PingReply extends Message implements Serializable {
      * Returns the ip field in standard dotted decimal format, e.g.,
      * "127.0.0.1".  The most significant byte is written first.
      */
-    public String getIP() { 
-        return IP;
+    public String getAddress() { 
+        return IP.getHostAddress();
     }
 
     /**
@@ -954,9 +961,19 @@ public class PingReply extends Message implements Serializable {
 
     // overrides Object.toString
     public String toString() {
-        return "PingReply("+getIP()+":"+getPort()+
+        return "PingReply("+getAddress()+":"+getPort()+
             ", free slots: "+hasFreeSlots()+
             ", "+super.toString()+")";
+    }
+
+    /**
+     * Implements <tt>IpPort</tt> interface.  Returns the <tt>InetAddress</tt>
+     * for this host.
+     * 
+     * @return the <tt>InetAddress</tt> for this host
+     */ 
+    public InetAddress getInetAddress() {
+        return IP;
     }
 
     //Unit test: tests/com/limegroup/gnutella/messages/PingReplyTest
