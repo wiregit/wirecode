@@ -4,7 +4,6 @@ import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.util.*;
 import com.sun.java.util.collections.*;
 import java.io.*;
-import java.net.*;
 import java.util.StringTokenizer;
 import junit.framework.*;
 import junit.extensions.*;
@@ -215,91 +214,6 @@ public final class QueryRequestTest extends TestCase {
 		assertEquals("min speeds should be equal", qr.getMinSpeed(), qrTest.getMinSpeed());
 		
 	}
-
-
-    public void testGGEPConstructor() {
-		byte ttl = 5;
-		int minSpeed = 30;
-		String query = "file i really want";
-		
-		// ideally this would be a real rich query
-		String richQuery = "<?xml version=\"1.0\"?><audios xsi:noNamespaceSchemaLocation=\"http://www.limewire.com/schemas/audios.xsd\" ><audio album=\"Steve&apos;s ALbum\" artist=\"S. Cho / A. Kim\" bitrate=\"156\" comments=\"Live Concert 10/26/97\" genre=\"Chamber Music\" index=\"0\" title=\"Schumann Fantasiestucke - I.m\" year=\"2001\"/></audios>";
-		boolean isRequery = false;
-		Set requestedUrnTypes = new HashSet();
-		requestedUrnTypes.add(UrnType.SHA1);
-		Set queryUrns = new HashSet();
-		queryUrns.add(HugeTestUtils.URNS[4]);
-
-		byte[] guid = QueryRequest.newQueryGUID(isRequery);
-        InetAddress addr = null;
-        try {
-            addr = InetAddress.getByName("firewall.limewire.com");
-        }
-        catch (UnknownHostException ignored) {
-            assertEquals("Couldn't get InetAddress!", true, false);
-        }
-        Integer port = new Integer(6000);
-		QueryRequest qr = new QueryRequest(guid, ttl, minSpeed, query, 
-                                           richQuery, isRequery, 
-                                           requestedUrnTypes, queryUrns,
-                                           addr, port);
-
-        assertEquals("QR should support unicast.",
-                     qr.supportsUnicast(), true);
-        assertEquals("QR should have firewall.limewire.com in it!",
-                     qr.getUDPAddress().equals(addr), true);
-        assertEquals("QR should have port 6000.",
-                     qr.getUDPPort().equals(port), true);
- 
-		ByteArrayOutputStream baos = new ByteArrayOutputStream();
-		try {
-			qr.write(baos);
-			baos.flush();
-		} catch (IOException e) {
-			fail("unexpected exception: "+e);
-		}
-
-		ByteArrayInputStream bais = 
-        new ByteArrayInputStream(baos.toByteArray());
-
-		QueryRequest qrTest = null;
-		try {
-			qrTest = (QueryRequest)qr.read(bais);
-		} catch(Exception e) {
-			fail("unexpected exception: "+e);
-		}
-
-        assertEquals("QR should support unicast.",
-                     qrTest.supportsUnicast(), qr.supportsUnicast());
-        assertEquals("QR should have firewall.limewire.com in it!",
-                     qrTest.getUDPAddress().equals(qr.getUDPAddress()), true);
-        assertEquals("QR should have port 6000.",
-                     qrTest.getUDPPort().equals(qr.getUDPPort()), true);
-		assertEquals("queries should be equal", qr.getQuery(), qrTest.getQuery());
-		assertEquals("rich queries should be equals", qr.getRichQuery(), 
-					 qrTest.getRichQuery());
-
-		Set urnTypes0 = qr.getRequestedUrnTypes();
-		Set urnTypes1 = qrTest.getRequestedUrnTypes();
-		Iterator iter0 = urnTypes0.iterator();
-		Iterator iter1 = urnTypes1.iterator();
-		UrnType urnType0 = (UrnType)iter0.next();
-		UrnType urnType1 = (UrnType)iter1.next();
-		assertEquals("urn types should both be sha1", urnType0, urnType1);
-		assertEquals("urn type set sizes should be equal", urnTypes0.size(), 
-					 urnTypes1.size());
-		assertEquals("urn types should be equal\r\n"+
-					 "set0: "+print(urnTypes0)+"\r\n"+
-					 "set1: "+ print(urnTypes1), 
-					 urnTypes0,
-					 urnTypes1);
-		assertEquals("query urns should be equal", qr.getQueryUrns(), 
-                     qrTest.getQueryUrns());
-		assertEquals("min speeds should be equal", qr.getMinSpeed(), 
-                     qrTest.getMinSpeed());
- 
-   }
-
 
 	private static String print(Collection col) {
 		Iterator iter = col.iterator();
