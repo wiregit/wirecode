@@ -181,6 +181,9 @@ el_CY   /Κύπρος
 ------- ----------------------- ------------- -------------------------------
 ******* Languages with Cyrillic characters **********************************
 ------- ----------------------- ------------- -------------------------------
+ru      Russian/Russia          Messages      Eugene Romanenko
+ru_RU   Русский/Россия                        mail: eros2 AT os2.ru
+------- ----------------------- ------------- -------------------------------
 be      Belarussian/Belarus     Messages      New translator needed !
 be_BY   Беларускі/Беларусь                    mail: ? AT ?
 ------- ----------------------- ------------- -------------------------------
@@ -189,9 +192,6 @@ bg_BG   Български/България                    mail: ? AT ?
 ------- ----------------------- ------------- -------------------------------
 bg      Macedonian/Macedonia    Messages      New translator needed !
 bg_BG   Македонски јазик/Македонја            mail: ? AT ?
-------- ----------------------- ------------- -------------------------------
-ru      Russian/Russia          Messages      New translator needed !
-ru_RU   Русский/Россия                        mail: ? AT ?
 ------- ----------------------- ------------- -------------------------------
 sr      Serbian/Serbia-Montenegro Messages    New translator needed !
 sr_SR   Српски/Југославија                    mail: ? AT ?
