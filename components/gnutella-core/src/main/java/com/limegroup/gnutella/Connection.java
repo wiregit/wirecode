@@ -730,6 +730,10 @@ public class Connection {
 
         //TODO: character encodings?
         byte[] bytes=s.getBytes();
+		if(!CommonUtils.isJava118()) {
+			BandwidthStat.GNUTELLA_HEADER_UPSTREAM_BANDWIDTH.addData(
+			    bytes.length);
+        }        
         _out.write(bytes);
         _out.flush();
     }
@@ -769,6 +773,10 @@ public class Connection {
             String line=(new ByteReader(_in)).readLine();
             if (line==null)
                 throw new IOException("read null line");
+			if(!CommonUtils.isJava118()) {
+				BandwidthStat.GNUTELLA_HEADER_DOWNSTREAM_BANDWIDTH.addData(
+				    line.length());
+            }
             return line;
         } finally {
             //Restore socket timeout.
@@ -777,9 +785,8 @@ public class Connection {
     }
 
     /**
-     * Returns the stream to use for writing to s.  If deflate is enabled
-     * on for writing, this returns a DeflaterOutpuStream.  Otherwise,
-     * by default this is a BufferedOutputStream.
+     * Returns the stream to use for writing to s.
+     * By default this is a BufferedOutputStream.
      * Subclasses may override to decorate the stream.
      */
     protected OutputStream getOutputStream()  throws IOException {
@@ -787,9 +794,8 @@ public class Connection {
     }
 
     /**
-     * Returns the stream to use for reading from s.  If deflate is enabled
-     * on reading, this returns an InflaterInputStream.  Otherwise,
-     * by default this is a BufferedInputStream.
+     * Returns the stream to use for reading from s.
+     * By default this is a BufferedInputStream.
      * Subclasses may override to decorate the stream.
      */
     protected InputStream getInputStream() throws IOException {
@@ -831,19 +837,7 @@ public class Connection {
         Message m = null;
         while (m == null) {
             m = Message.read(_in, HEADER_BUF, _softMax);
-            if ( m != null ) {
-                // _bytesReceived must be set differently
-                // when compressed because the inflater will
-                // read more input than a single message,
-                // making it appear as if the deflated input
-                // was actually larger.
-                if( isReadDeflated() ) {
-                    _compressedBytesReceived = _inflater.getTotalIn();
-                    _bytesReceived = _inflater.getTotalOut();
-                } else {
-                    _bytesReceived += m.getTotalLength();
-                }
-            }
+            updateReadStatistics(m);
         }
         return m;
     }
@@ -868,29 +862,36 @@ public class Connection {
         //temporarily change socket timeout.
         int oldTimeout=_socket.getSoTimeout();
         _socket.setSoTimeout(timeout);
-        try {
-            
+        try {            
             Message m = Message.read(_in, HEADER_BUF, _softMax);
+            updateReadStatistics(m);
             if (m==null) {
                 throw new InterruptedIOException("null message read");
-            } else {
-                // _bytesReceived must be set differently
-                // when compressed because the inflater will
-                // read more input than a single message,
-                // making it appear as if the deflated input
-                // was actually larger.
-                if( isReadDeflated() ) {
-                    _compressedBytesReceived = _inflater.getTotalIn();
-                    _bytesReceived = _inflater.getTotalOut();
-                } else {
-                    _bytesReceived += m.getTotalLength();
-                }           
-            }            
+            }
             return m;
         } finally {
             _socket.setSoTimeout(oldTimeout);
         }
     }
+    
+    /**
+     * Updates statistics after a message is read.
+     * If m is null and the read stream is not deflated,
+     * this method has no effect.
+     */
+    private void updateReadStatistics(Message m) {
+        // _bytesReceived must be set differently
+        // when compressed because the inflater will
+        // read more input than a single message,
+        // making it appear as if the deflated input
+        // was actually larger.
+        if( isReadDeflated() ) {
+            _compressedBytesReceived = _inflater.getTotalIn();
+            _bytesReceived = _inflater.getTotalOut();
+        } else if(m != null) {
+            _bytesReceived += m.getTotalLength();
+        }
+    }           
 
     /**
      * Sends a message.  The message may be buffered, so call flush() to

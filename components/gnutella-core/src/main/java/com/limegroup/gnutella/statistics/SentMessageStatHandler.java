@@ -25,7 +25,7 @@ public class SentMessageStatHandler extends AbstractStatHandler {
 								   Statistic limeNumberStat,
 								   Statistic limeByteStat) {
 		super(numberStat, byteStat, limeNumberStat, limeByteStat,
-			  BandwidthStat.GNUTELLA_UPSTREAM_BANDWIDTH);
+			  BandwidthStat.GNUTELLA_MESSAGE_UPSTREAM_BANDWIDTH);
 		
 	}
 	
