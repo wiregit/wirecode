@@ -86,18 +86,17 @@ public interface Uploader extends BandwidthTracker {
 	/**
 	 * returns true if chat for the host is on, false if it is not.
 	 */
-	public boolean chatEnabled();
-	
-	
-	/**
-	 * return the host address of the host to chat with
-	 */
-	public String getChatHost();
+	public boolean isChatEnabled();
 	
 	/**
-	 * return the port of the host to chat with
+	 * returns true if browse host is enabled, false if it is not.
 	 */
-	public int getChatPort();
+	public boolean isBrowseHostEnabled();
+	
+	/**
+	 * return the port of the gnutella-client host (not the HTTP port)
+	 */
+	public int getGnutellaPort();
 	
 	/** 
 	 * return the userAgent
