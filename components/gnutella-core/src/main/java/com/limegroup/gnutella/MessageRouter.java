@@ -346,7 +346,7 @@ public abstract class MessageRouter
         _manager.getConnectedGUESSUltrapeers().iterator();
         while (guessUltrapeers.hasNext()) {
             ManagedConnection currMC = 
-            (ManagedConnection) guessUltrapeers.next();
+				(ManagedConnection) guessUltrapeers.next();
 			currMC.handlePingReply(reply, handler);
         }
         
@@ -375,10 +375,12 @@ public abstract class MessageRouter
     {
 		// if it's a request from a leaf and we GUESS, send it out via GUESS --
 		// otherwise, broadcast it if it still has TTL
-		if(handler.isSupernodeClientConnection() && 
-           RouterService.isGUESSCapable()) 
-			unicastQueryRequest(request, handler);
-        else if(request.getTTL() > 0) {
+		//if(handler.isSupernodeClientConnection() && 
+		// RouterService.isGUESSCapable()) 
+		//unicastQueryRequest(request, handler);
+        //else if(request.getTTL() > 0) {
+
+		if(request.getTTL() > 0) {
 			// send the request to intra-Ultrapeer connections -- this does
 			// not send the request to leaves
 			broadcastQueryRequest(request, handler);
@@ -431,11 +433,11 @@ public abstract class MessageRouter
     public void broadcastQueryRequest(QueryRequest request)
     {
         _queryRouteTable.routeReply(request.getGUID(), _forMeReplyHandler);
-        if (RouterService.isGUESSCapable()) {
-            unicastQueryRequest(request, null);
-		} else {
-            broadcastQueryRequest(request, null);
-		}
+        //if (RouterService.isGUESSCapable()) {
+		//  unicastQueryRequest(request, null);
+		//} else {
+		broadcastQueryRequest(request, null);
+		//}
     }
 
     /**
@@ -510,6 +512,7 @@ public abstract class MessageRouter
      * Adds the QueryRequest to the unicaster module.  Not much work done here,
      * see QueryUnicaster for more details.
      */
+	/*
     protected synchronized void unicastQueryRequest(QueryRequest query,
                                                     ReplyHandler conn) {
 		// set the TTL on outgoing udp queries to 1
@@ -517,6 +520,7 @@ public abstract class MessageRouter
 				
 		UNICASTER.addQuery(query, conn);
 	}
+	*/
 
 
     /**
