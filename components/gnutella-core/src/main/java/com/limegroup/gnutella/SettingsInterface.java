@@ -167,6 +167,7 @@ public interface SettingsInterface
      *  properties file for the network discoverer
      */
     public void writeNDProps();
+	public void setWrite(boolean b);
 
     /** Default setting for the time to live */
     public static final byte    DEFAULT_TTL            = (byte)5;

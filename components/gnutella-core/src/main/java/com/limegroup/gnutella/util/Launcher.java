@@ -317,6 +317,7 @@ public class Launcher {
 				
 			// First, attempt to open the file in a 
 			// currently running session of Netscape
+			// NOT SURE THIS WILL WORK FOR NON-HTML FILES!!
 			String[] strs = {(String)browser, 
 							 NETSCAPE_REMOTE_PARAMETER,
 							 NETSCAPE_OPEN_PARAMETER_START, 

@@ -1001,7 +1001,11 @@ public class SettingsManager implements SettingsInterface
 		String[] ret=new String[buf.size()];
 		buf.copyInto(ret);
 		return ret;
-    }    
+    }  
+
+	public synchronized void setWrite(boolean write) {
+		write_ = write;
+	}
 	
 	//      /** Unit test */
 	//      public static void main(String args[]) {
