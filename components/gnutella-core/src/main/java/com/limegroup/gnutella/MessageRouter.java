@@ -2717,16 +2717,17 @@ public abstract class MessageRouter {
      * @param msg the received message
      * @param handler the connection we received the message on.
      */
-    private void handlePromotionRequestVM(PromotionRequestVendorMessage msg, ReplyHandler handler) {
-    	
+    public void handlePromotionRequestVM(PromotionRequestVendorMessage msg, ReplyHandler handler) {
     	//first make sure the other side is an ultrapeer, since only UPs should send these messages
-    	if (!handler.isGoodUltrapeer())
+    	if (!handler.isGoodUltrapeer()) {
     		return;
-    	
+    	}
     	//then check the distance field, and if it is 0 verify the sender
     	if (msg.getDistance() == 0 &&
-    			! msg.getRequestor().getInetAddress().equals(handler.getInetAddress()))
-				return;
+    			! msg.getRequestor().getInetAddress().equals(handler.getInetAddress())) {
+    		return;
+    	}
+				
     	
     	//if we are a leaf and we are the target, start the promotion process.
     	//(not yet implemented, just a stub)
@@ -2743,18 +2744,19 @@ public abstract class MessageRouter {
     	//*********************
     	
     	//first make sure the request hasn't been travelling for too long.
-    	if (msg.getDistance() > 2)
+    	if (msg.getDistance() > 2) {
     		return;
-    	
+    	}
     	//then see if the specified candidate is still on our lists
     	//it should be either in the ttl 0 or ttl 1 slot.
     	//also, if it is in the ttl 1 slot is should not have traveled more than 1 hop.
     	Candidate [] ourCandidates = BestCandidates.getCandidates();
     	InetAddress candidateAddress = msg.getCandidate().getInetAddress();
     	
-    	if (ourCandidates[0].getInetAddress().equals(candidateAddress) ||
-    			 (ourCandidates[1].getInetAddress().equals(candidateAddress) &&
-    			 		msg.getDistance()<2))
+    	if ((ourCandidates[0].getInetAddress().equals(candidateAddress) && 
+    			msg.getDistance()<2) ||
+			(ourCandidates[1].getInetAddress().equals(candidateAddress) &&
+    			msg.getDistance()<1))
     		forwardPromotionRequest(msg);
     	
     }
@@ -2775,7 +2777,6 @@ public abstract class MessageRouter {
      * @param msg the original message received from the network.
      */
     private void forwardPromotionRequest(PromotionRequestVendorMessage msg) {
-    	
     	//get the address of the candidate
     	InetAddress address = msg.getCandidate().getInetAddress();
     	
@@ -2805,7 +2806,7 @@ public abstract class MessageRouter {
     			}catch(IOException ohWell) {
     				//sending failed.  not much we can do.
     			}
-    			
+    		
     		return;
     	}
     	
@@ -2828,6 +2829,7 @@ public abstract class MessageRouter {
 			}catch(IOException ohWell) {
 				//sending failed.  not much we can do.
 			}
+		
     }
 
 
