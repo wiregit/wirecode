@@ -3,6 +3,7 @@ package com.limegroup.gnutella;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -13,6 +14,7 @@ import junit.framework.Test;
 import com.limegroup.gnutella.altlocs.AlternateLocation;
 import com.limegroup.gnutella.altlocs.PushAltLoc;
 import com.limegroup.gnutella.http.HTTPConstants;
+import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.util.CommonUtils;
 
 /**
@@ -157,6 +159,7 @@ public final class FileDescTest extends com.limegroup.gnutella.util.BaseTestCase
 	 * tests whether FileDesc properly stores direct and push alternate locations.
 	 */
 	public void testAltLocSeparation () throws Exception {
+	    SharingSettings.ADD_ALTERNATE_FOR_SELF.setValue(false);
 		File file = CommonUtils.getResourceFile("build.xml");
 
 		Set urns = FileDesc.calculateAndCacheURN(file);
@@ -189,7 +192,16 @@ public final class FileDescTest extends com.limegroup.gnutella.util.BaseTestCase
 		
 		//add one, remove one
 		fd.add(d2);
-		fd.remove(p1);fd.remove(p1);
+		fd.remove(p1);fd.remove(p1);  //this will not remove the altloc - it still has proxies
+		
+		
+		assertEquals(3,fd.getAltLocsSize());
+		assertEquals(1,fd.getPushAlternateLocationCollection().getAltLocsSize());
+		assertEquals(2,fd.getAlternateLocationCollection().getAltLocsSize());
+		
+		// remove all the proxies for one of the altlocs
+		PushEndpoint.overwriteProxies(clientGUID1.bytes(),Collections.EMPTY_SET);
+		fd.remove(p1);
 		
 		assertEquals(2,fd.getAltLocsSize());
 		assertEquals(0,fd.getPushAlternateLocationCollection().getAltLocsSize());
