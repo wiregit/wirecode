@@ -143,78 +143,138 @@ public class HashTreeTest extends BaseTestCase {
         assertEquals(((Interval)cranges.get(0)).low, 0);
     }
     
-    public void testCorruptedTreeFromNetwork() throws Throwable {
+    public void testCorruptedXMLRecord() throws Throwable {
         // Easiest way to test is to use existing DIMERecords and then
         // hack them up.
-        DIMERecord corruptedXML = null, corruptedTree = null;
+        DIMERecord corruptedXML = null;
         
-        // Test various ways of XML corruption first.
+        // must have valid data.
         String data = new String(xmlRecord.getData());
-        int a, b;
-        StringBuffer sb;
-        String fakeData = data.substring(1);
-        
-        corruptedXML = createCorruptRecord(xmlRecord, fakeData);
+        corruptedXML = createCorruptRecord(xmlRecord, data.substring(1));
         try {
             HashTree tree = createTree(corruptedXML, treeRecord);
             fail("expected exception");
         } catch(IOException expected) {}
         
-        // try with an invalid file size.
-        sb = new StringBuffer(data);
-        a = data.indexOf("'", data.indexOf("file size="));
-        b = data.indexOf("'", a+1);
-        sb.replace(a+1, b, "0201981");
-        corruptedXML = createCorruptRecord(xmlRecord, sb.toString());
-        try {
-            createTree(corruptedXML, treeRecord);
-            fail("expected exception");
-        } catch(IOException expected) {}
+        // all these must be correct or the stream is bad.
+        checkXML("file size=", "02011981", false);
+        checkXML("file size=", "abcd", false);
+        checkXML("segmentsize=", "42", false);
+        checkXML("segmentsize=", "zef", false);
+        checkXML("digest algorithm=",
+            "http://open-content.net/spec/digest/sha1", false);
+        checkXML("outputsize=", "20", false);
+        checkXML("outputsize=", "pizza", false);
+        checkXML("type=", "http://open-content.net/spec/thex/depthfirst",
+            false);
+
+        // depth is not checked heavily.
+        checkXML("depth=", "1982", true);
+        checkXML("depth=", "large", true);
         
-        // try with an invalid segmentsize
-        sb = new StringBuffer(data);
-        a = data.indexOf("'", data.indexOf("segmentsize="));
-        b = data.indexOf("'", a+1);
-        sb.replace(a+1, b, "42");
-        corruptedXML = createCorruptRecord(xmlRecord, sb.toString());
-        try {
-            createTree(corruptedXML, treeRecord);
-            fail("expected exception");
-        } catch(IOException expected) {}
-        
-        // try with an invalid algorithm
-        sb = new StringBuffer(data);
-        a = data.indexOf("'", data.indexOf("digest algorithm="));
-        b = data.indexOf("'", a+1);
-        sb.replace(a+1, b, "http://open-content.net/spec/digest/sha1");
-        corruptedXML = createCorruptRecord(xmlRecord, sb.toString());
-        try {
-            createTree(corruptedXML, treeRecord);
-            fail("expected exception");
-        } catch(IOException expected) {}
-        
-        // try with an invalid hash size.
-        sb = new StringBuffer(data);
-        a = data.indexOf("'", data.indexOf("outputsize="));
-        b = data.indexOf("'", a+1);
-        sb.replace(a+1, b, "20");
-        corruptedXML = createCorruptRecord(xmlRecord, sb.toString());
-        try {
-            createTree(corruptedXML, treeRecord);
-            fail("expected exception");
-        } catch(IOException expected) {}        
-        
-        // try with an invalid serialized tree type.
-        sb = new StringBuffer(data);
-        a = data.indexOf("'", data.indexOf("type="));
-        b = data.indexOf("'", a+1);
-        sb.replace(a+1, b, "http://open-content.net/spec/thex/depthfirst");
-        corruptedXML = createCorruptRecord(xmlRecord, sb.toString());
-        try {
-            createTree(corruptedXML, treeRecord);
-            fail("expected exception");
-        } catch(IOException expected) {}                
+        // test shareaza's wrong system 
+        replaceXML("SYSTEM", "system", true);
+        // require that the main element is called hashtree
+        replaceXML("hashtree>", "random>", false);
+        // allow unknown additional elements
+        replaceXML("<hashtree>", "<hashtree><element attribute=\"a\"/>", true);
+        // allow elements to have random children.
+        replaceXML("/></hashtree>",
+            ">info</serializedtree></hashtree>", true);
     }
+    
+    private void checkXML(String search, String replace, boolean good)
+      throws Exception {
+        String data = new String(xmlRecord.getData());
+        StringBuffer sb = new StringBuffer(data);
+        int a = data.indexOf("'", data.indexOf(search));
+        int b = data.indexOf("'", a+1);
+        sb.replace(a+1, b, replace);
+        DIMERecord corrupt = createCorruptRecord(xmlRecord, sb.toString());
+        try {
+            createTree(corrupt, treeRecord);
+            if(!good)
+                fail("expected exception");
+        } catch(IOException expected) {
+            if(good)
+                throw expected;
+        }
+    }
+    
+    private void replaceXML(String search, String replace, boolean good)
+      throws Exception {
+        String data = new String(xmlRecord.getData());
+        StringBuffer sb = new StringBuffer(data);
+        int a = -1, b = -1;
+        while(true) {
+            a = data.indexOf(search, b+1);
+            if(a == -1) break;
+            b = search.length() + a;
+            sb.replace(a, b, replace);
+        }
+        DIMERecord corrupt = createCorruptRecord(xmlRecord, sb.toString());
+        try {
+            createTree(corrupt, treeRecord);
+            if(!good)
+                fail("expected exception");
+        } catch(IOException expected) {
+            if(good)
+                throw expected;
+        }
+    }    
+    
+    public void testCorruptedTreeData() throws Exception {
+        byte[] data;
+        
+        // data is too small to fit a root hash.
+        checkTree(new byte[3]);
+        
+        // random bytes in the data are off.
+        data = copyData(treeRecord);
+        data[135]++;
+        checkTree(data);        
+        
+        // the root hash is off.
+        data = copyData(treeRecord);
+        data[0]++;
+        checkTree(data);
+        
+        // the root hash is correct, but no other data exists.
+        // HashTreeHandler.HASH_SIZE==24
+        data = new byte[24];
+        for(int i = 0; i < data.length; i++)
+            data[i] = treeRecord.getData()[i];
+        checkTree(data);
+        
+        // we have some full correct generations, but not all.
+        data = new byte[24 + 24*2];
+        for(int i = 0; i < data.length; i++)
+            data[i] = treeRecord.getData()[i];
+        checkTree(data);
+        
+        // the data isn't even a multiple of the hash size.
+        data = new byte[24 + 24*3 + 1];
+        for(int i = 0; i < data.length; i++)
+            data[i] = treeRecord.getData()[i];
+        checkTree(data);        
+    }
+    
+    private void checkTree(byte[] data) {
+        DIMERecord corrupt = null;
+        corrupt = createCorruptRecord(treeRecord, data);
+        try {
+            createTree(xmlRecord, corrupt);
+            fail("expected exception");
+        } catch(IOException expected) {}
+    }
+    
+    private byte[] copyData(DIMERecord a) {
+        byte[] ret = new byte[a.getData().length];
+        for(int i = 0; i < ret.length; i++)
+            ret[i] = a.getData()[i];
+        return ret;
+    }
+        
     
     private HashTree createTree(DIMERecord a, DIMERecord b) throws IOException {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
@@ -224,6 +284,14 @@ public class HashTreeTest extends BaseTestCase {
         ByteArrayInputStream in = new ByteArrayInputStream(out.toByteArray());
         return HashTree.createHashTree(in, sha1, root32, file.length());
     }
+    
+    private DIMERecord createCorruptRecord(DIMERecord base, byte[] data) {
+        return DIMERecord.create((byte)base.getTypeId(),
+                                 base.getOptions(),
+                                 base.getId(),
+                                 base.getType(),
+                                 data);
+    }    
     
     private DIMERecord createCorruptRecord(DIMERecord base, String data) {
         return DIMERecord.create((byte)base.getTypeId(),

@@ -420,9 +420,9 @@ class HashTreeHandler {
         /*
          * Accessor for root hash.
          */
-        byte[] getRoot() {
+        byte[] getRoot() throws IOException {
             if (DATA.length < HASH_SIZE)
-                return null;
+                throw new IOException("invalid data");
             byte[] ret = new byte[HASH_SIZE];
             System.arraycopy(DATA, 0, ret, 0, HASH_SIZE);
             return ret;
