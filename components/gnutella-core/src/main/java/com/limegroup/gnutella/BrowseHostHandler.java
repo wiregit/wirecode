@@ -63,10 +63,28 @@ public class BrowseHostHandler {
      * @param port The port of the host you want to browse.
      */
     public void browseHost(String host, int port) throws IOException {
-        
-        // should we push?
-        if (_serventID != null) {
-            debug("BHH.browseHost(): need to push.");
+
+        // flow of operation:
+        // 1. check if you need to push.
+        //   a. if so, just send a Push out.
+        //   b. if not, try direct connect.  If it doesn't work, send a push.
+        int shouldPush = needsPush(host, port);
+        boolean shouldTryPush = false;
+        switch (shouldPush) {
+        case 0: // false
+            try {
+                // simply try connecting and getting results....
+                Socket socket = Sockets.connect(host, port, 0, true);
+                browseExchange(socket);
+            }
+            catch (IOException ioe) {
+                // try pushing for fun....
+                shouldTryPush = true;
+            }
+            if (!shouldTryPush) 
+                break;
+        case 1: // true
+            debug("BHH.browseHost(): trying push.");
             PushRequest pr = new PushRequest(GUID.makeGuid(),
                                              SettingsManager.instance().getTTL(),
                                              _serventID.bytes(), 
@@ -81,16 +99,7 @@ public class BrowseHostHandler {
             // send the Push after registering in case you get a response really
             // quickly.
             _router.sendPushRequest(pr);
-        }
-        else {
-            try {
-                // simply try connecting and getting results....
-                Socket socket = new Socket(host, port);
-                browseExchange(socket);
-            }
-            catch (UnknownHostException uhe) {
-                throw new IOException();
-            }
+            break;
         }
     }
 
@@ -183,6 +192,19 @@ public class BrowseHostHandler {
                 }
             }
         }        
+    }
+
+
+    /** Returns 1 iff rfd should be attempted by push download, either 
+     *  because it is a private address or was unreachable in the past. 
+     *  Returns 0 otherwise....
+     */
+    private static int needsPush(String host, int port) {
+        //Return true if rfd is private or unreachable
+        if ((new Endpoint(host, port)).isPrivateAddress())
+            return 1;
+        else
+            return 0;
     }
 
 

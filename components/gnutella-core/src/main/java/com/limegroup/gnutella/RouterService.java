@@ -927,8 +927,8 @@ public class RouterService
      * @param port The port at which to browse
      * @param guid The guid to be used for the query replies received 
      * while browsing host
-     * @param serventID The guid of the client to browse from.  Only non-null if
-     * this is supposed to be push browse....
+     * @param serventID The guid of the client to browse from.  I need this in
+     * case I need to push....
      * @exception IOException in case any I/O error occurs while 
      * connecting/reading/writing from the host
 	 */
