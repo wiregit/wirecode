@@ -155,9 +155,6 @@ public class UDPHeadPong extends VendorMessage {
 		//read the queue status
 		_queueStatus = dais.readByte();
 		
-		//the queue status can be negative.. check the msb
-		if (_queueStatus > BUSY)
-			_queueStatus = _queueStatus - 0xFF;
 		
 		//if we have a partial file and the pong carries ranges, parse their list
 		if ((code & COMPLETE_FILE) == COMPLETE_FILE) 
@@ -255,7 +252,7 @@ public class UDPHeadPong extends VendorMessage {
 		
 		
 		//write out the return code and the queue status
-		caos.write(queueStatus);
+		daos.writeByte(queueStatus);
 		
 		//if we sent partial file and the remote asked for ranges, send them 
 		if (retCode == PARTIAL_FILE && ping.requestsRanges()) {
