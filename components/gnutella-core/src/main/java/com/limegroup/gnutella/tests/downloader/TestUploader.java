@@ -2,8 +2,11 @@ package com.limegroup.gnutella.tests.downloader;
 
 import java.net.*;
 import java.io.*;
+import java.util.StringTokenizer;
 import com.limegroup.gnutella.util.*;
 import com.limegroup.gnutella.*;
+import com.limegroup.gnutella.uploader.HTTPUploader;
+import com.limegroup.gnutella.http.*;
 
 public class TestUploader {    
     /** My name, for debugging */
@@ -20,6 +23,8 @@ public class TestUploader {
     /** switch to send incorrect bytes to simulate a bad uploader*/
     private boolean sendCorrupt;
 
+	private AlternateLocationCollection storedAltLocs;
+	private AlternateLocationCollection incomingAltLocs;
 
 
     /** 
@@ -44,6 +49,8 @@ public class TestUploader {
      * Resets the rate, amount uploaded, stop byte, etc.
      */
     public void reset() {
+	    storedAltLocs   = new AlternateLocationCollection();
+	    incomingAltLocs = new AlternateLocationCollection();
         totalUploaded = 0;
         stopAfter = -1;
         rate = 10000;
@@ -77,6 +84,21 @@ public class TestUploader {
      */
     public void stopAfter(int n) {
         this.stopAfter = n;
+    }
+
+    /** 
+     * Store the alternate locations that this uploader knows about.
+     * @param alts the alternate locations
+     */
+    public void setAlternateLocations(AlternateLocationCollection alts) {
+        storedAltLocs = alts;
+    }
+    
+    /** 
+     * Get the alternate locations that this uploader has read from headers
+     */
+    public AlternateLocationCollection getAlternateLocations() {
+        return incomingAltLocs;
     }
     
 
@@ -142,6 +164,9 @@ public class TestUploader {
                 throw new IOException("Unexpected close");
             if (line.equals(""))
                 break;
+			if(HTTPHeaderName.ALT_LOCATION.matchesStartOfString(line)) {
+				readAlternateLocations(line, incomingAltLocs);
+            }        
 
             int i=line.indexOf("Range:");
             Assert.that(i<=0, "Range should be at the beginning or not at all");
@@ -155,7 +180,7 @@ public class TestUploader {
                 start=p.a;
                 stop=p.b;;
             }
-        }        
+		}
         //System.out.println(System.currentTimeMillis()+" "+name+" "+start+" - "+stop);
 
         //Send the data.
@@ -176,6 +201,9 @@ public class TestUploader {
 			"-" + (stop-1) + "/" + TestFile.length() + "\r\n"; 
 			out.write(str.getBytes());
 		}
+		if(storedAltLocs.hasAlternateLocations()) 
+		    HTTPUtils.writeHeader(HTTPHeaderName.ALT_LOCATION,
+		      storedAltLocs, out);
         str = "\r\n";
 		out.write(str.getBytes());
         out.flush();
@@ -292,4 +320,37 @@ public class TestUploader {
         }
         return new IntPair(start, stop);
     }
+	/**
+	 * Reads alternate location header.  The header can contain only one
+	 * alternate location, or it can contain many in the same header.
+	 * This method adds them all to the <tt>FileDesc</tt> for this
+	 * uploader.  This will not allow more than 20 alternate locations
+	 * for a single file.
+	 *
+	 * @param altHeader the full alternate locations header
+	 * @param alc the <tt>AlternateLocationCollector</tt> that read alternate
+	 *  locations should be added to
+	 */
+	private static void readAlternateLocations(final String altHeader,
+											   final AlternateLocationCollector alc) {
+		final String alternateLocations = HTTPUtils.extractHeaderValue(altHeader);
+
+		// return if the alternate locations could not be properly extracted
+		if(alternateLocations == null) return;
+		StringTokenizer st = new StringTokenizer(alternateLocations, ",");
+
+		while(st.hasMoreTokens()) {
+			try {
+				// note that the trim method removes any CRLF character
+				// sequences that may be used if the sender is using
+				// continuations.
+				AlternateLocation al = 
+				    AlternateLocation.createAlternateLocation(st.nextToken().trim());
+				alc.addAlternateLocation(al);
+			} catch(IOException e) {
+				// just return without adding it.
+				continue;
+			}
+		}
+	}
 }

@@ -2,6 +2,7 @@ package com.limegroup.gnutella.tests.downloader;
 
 import java.io.*;
 import java.util.*;
+import java.net.URL;
 import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.util.*;
 import com.limegroup.gnutella.tests.*;
@@ -19,6 +20,7 @@ public class DownloadTester {
     static TestUploader uploader1=new TestUploader("6346", 6346);
     static TestUploader uploader2=new TestUploader("6347", 6347);
     static TestUploader uploader3=new TestUploader("6348", 6348);
+    static TestUploader uploader4=new TestUploader("6349", 6349);
     static final DownloadManager dm = new DownloadManager();
     static final ActivityCallbackStub callback = new ActivityCallbackStub();
 
@@ -99,6 +101,26 @@ public class DownloadTester {
         }
         if(args.length == 0 || args[0].equals("10")) {
             testOverlapCheckWhite(true);//wait for corrupt
+            cleanup();
+        }
+        if(args.length == 0 || args[0].equals("11")) {
+            testSimpleAlternateLocations();
+            cleanup();
+        }
+        if(args.length == 0 || args[0].equals("12")) {
+            testTwoAlternateLocations();
+            cleanup();
+        }
+        if(args.length == 0 || args[0].equals("13")) {
+            testUploaderAlternateLocations();
+            cleanup();
+        }
+        if(args.length == 0 || args[0].equals("14")) {
+            testWeirdAlternateLocations();
+            cleanup();
+        }
+        if(args.length == 0 || args[0].equals("15")) {
+    		testStealerInterruptedWithAlternate();
             cleanup();
         }
     }
@@ -413,6 +435,214 @@ public class DownloadTester {
         System.out.println("passed");//got here? Test passed
     }
 
+    private static void testSimpleAlternateLocations() {  
+        System.out.print("-Testing AlternateLocation write...");
+        RemoteFileDesc rfd1=newRFD(6346, 100);
+        RemoteFileDesc[] rfds = {rfd1};
+
+        testGeneric(rfds);
+
+        //Prepare to check the alternate locations
+        //Note: adiff should be blank
+		AlternateLocationCollection alt1 = uploader1.getAlternateLocations();
+		AlternateLocationCollection ashould = new AlternateLocationCollection();
+		try {
+		    ashould.addAlternateLocation(
+		      AlternateLocation.createAlternateLocation(rfdURL(rfd1)));
+		} catch (Exception e) {
+            check(false, "Couldn't setup test");
+		}
+        AlternateLocationCollection adiff = 
+		  ashould.diffAlternateLocationCollection(alt1); 
+        
+        check(alt1.hasAlternateLocations(), "uploader didn't receive alt");
+        check(!adiff.hasAlternateLocations(), "uploader got wrong alt");
+    }
+
+    private static void testTwoAlternateLocations() {  
+        System.out.print("-Testing Two AlternateLocations...");
+        RemoteFileDesc rfd1=newRFD(6346, 100);
+        RemoteFileDesc rfd2=newRFD(6347, 100);
+        RemoteFileDesc[] rfds = {rfd1,rfd2};
+
+        testGeneric(rfds);
+
+        //Prepare to check the alternate locations
+        //Note: adiff should be blank
+		AlternateLocationCollection alt1 = uploader1.getAlternateLocations();
+		AlternateLocationCollection alt2 = uploader2.getAlternateLocations();
+		AlternateLocationCollection ashould = new AlternateLocationCollection();
+		try {
+		    URL url1 =   rfdURL(rfd1);
+		    URL url2 =   rfdURL(rfd2);
+		    AlternateLocation al1 =
+		      AlternateLocation.createAlternateLocation(url1);
+		    AlternateLocation al2 =
+		      AlternateLocation.createAlternateLocation(url2);
+		    ashould.addAlternateLocation(al1);
+		    ashould.addAlternateLocation(al2);
+		} catch (Exception e) {
+            check(false, "Couldn't setup test");
+		}
+        AlternateLocationCollection adiff = 
+		  ashould.diffAlternateLocationCollection(alt1); 
+        AlternateLocationCollection adiff2 = 
+		  alt1.diffAlternateLocationCollection(ashould); 
+        
+        check(alt1.hasAlternateLocations(), "uploader didn't receive alt");
+        check(alt2.hasAlternateLocations(), "uploader didn't receive alt");
+        check(!adiff.hasAlternateLocations(), "uploader got wrong alt");
+        check(!adiff2.hasAlternateLocations(), "uploader got wrong alt");
+    }
+
+    private static void testUploaderAlternateLocations() {  
+		// This is a modification of simple swarming based on alternate location
+		// for the second swarm
+        System.out.print("-Testing swarming from two sources one based on alt...");
+        //Throttle rate at 10KB/s to give opportunities for swarming.
+        final int RATE=500;
+        //The first uploader got a range of 0-100%.  After the download receives
+        //50%, it will close the socket.  But the uploader will send some data
+        //between the time it sent byte 50% and the time it receives the FIN
+        //segment from the downloader.  Half a second latency is tolerable.  
+        final int FUDGE_FACTOR=RATE*1024;  
+        uploader1.setRate(RATE);
+        uploader2.setRate(RATE);
+        RemoteFileDesc rfd1=newRFD(6346, 100);
+        RemoteFileDesc rfd2=newRFD(6347, 100);
+        RemoteFileDesc[] rfds = {rfd1};
+
+        //Prebuild an uploader alts in lieu of rdf2
+		AlternateLocationCollection ualt = new AlternateLocationCollection();
+		try {
+		    URL url2 =   rfdURL(rfd2);
+		    AlternateLocation al2 =
+		      AlternateLocation.createAlternateLocation(url2);
+		    ualt.addAlternateLocation(al2);
+		} catch (Exception e) {
+            check(false, "Couldn't setup test");
+		}
+		uploader1.setAlternateLocations(ualt);
+
+        testGeneric(rfds);
+
+        //Make sure there weren't too many overlapping regions.
+        int u1 = uploader1.amountUploaded();
+        int u2 = uploader2.amountUploaded();
+        System.out.println("\tu1: "+u1);
+        System.out.println("\tu2: "+u2);
+        System.out.println("\tTotal: "+(u1+u2));
+
+        //Note: The amount downloaded from each uploader will not 
+        //be equal, because the uploaders are stated at different times.
+        check(u1<TestFile.length()/2+FUDGE_FACTOR, "u1 did all the work");
+        check(u2<TestFile.length()/2+FUDGE_FACTOR, "u2 did all the work");
+    }
+
+    private static void testWeirdAlternateLocations() {  
+        System.out.print("-Testing AlternateLocation write...");
+        RemoteFileDesc rfd1=newRFD(6346, 100);
+        RemoteFileDesc[] rfds = {rfd1};
+
+
+        //Prebuild some uploader alts
+		AlternateLocationCollection ualt = new AlternateLocationCollection();
+		try {
+		    ualt.addAlternateLocation(
+		      AlternateLocation.createAlternateLocation(
+			    genericURL("http://211.211.211.211:6347/get/0/foobar.txt")));
+		    ualt.addAlternateLocation(
+		      AlternateLocation.createAlternateLocation(
+			    genericURL("http://211.211.211.211/get/0/foobar.txt")));
+		    ualt.addAlternateLocation(
+		      AlternateLocation.createAlternateLocation(
+			    genericURL("http://www.yahoo.com/foo/bar/foobar.txt")));
+		    ualt.addAlternateLocation(
+		      AlternateLocation.createAlternateLocation(
+			    genericURL("http://40000000.400.400.400/get/99999999999999999999999999999/foobar.txt")));
+		} catch (Exception e) {
+            check(false, "Couldn't setup test");
+		}
+		uploader1.setAlternateLocations(ualt);
+
+        testGeneric(rfds);
+
+        //Prepare to check the alternate locations
+        //Note: adiff should be blank
+		AlternateLocationCollection alt1 = uploader1.getAlternateLocations();
+		AlternateLocationCollection ashould = new AlternateLocationCollection();
+		try {
+		    ashould.addAlternateLocation(
+		      AlternateLocation.createAlternateLocation(rfdURL(rfd1)));
+		} catch (Exception e) {
+            check(false, "Couldn't setup test");
+		}
+		//ashould.addAlternateLocationCollection(ualt);
+        AlternateLocationCollection adiff = 
+		  ashould.diffAlternateLocationCollection(alt1); 
+
+        AlternateLocationCollection adiff2 = 
+		  alt1.diffAlternateLocationCollection(ashould); 
+        
+        check(alt1.hasAlternateLocations(), "uploader didn't receive alt");
+        check(!adiff.hasAlternateLocations(), "uploader got extra alts");
+        check(!adiff2.hasAlternateLocations(), "uploader didn't get all alts");
+    }
+
+    private static void testStealerInterruptedWithAlternate() {
+        System.out.print("-Testing swarming of rfds ignoring alt ...");
+        int capacity=SettingsManager.instance().getConnectionSpeed();
+        SettingsManager.instance().setConnectionSpeed(
+		  SpeedConstants.MODEM_SPEED_INT);
+        final int RATE=200;
+        //second half of file + 1/8 of the file
+        final int STOP_AFTER = 1*TestFile.length()/10;
+        final int FUDGE_FACTOR=RATE*1024;  
+        uploader1.setRate(RATE);
+        uploader1.stopAfter(STOP_AFTER);
+        uploader2.setRate(RATE);
+        uploader3.setRate(RATE);
+        RemoteFileDesc rfd1=newRFD(6346, 100);
+        RemoteFileDesc rfd2=newRFD(6347, 100);
+        RemoteFileDesc rfd3=newRFD(6348, 100);
+        RemoteFileDesc rfd4=newRFD(6349, 100);
+        RemoteFileDesc[] rfds = {rfd1,rfd2,rfd3};
+
+        //Prebuild an uploader alt in lieu of rdf4
+		AlternateLocationCollection ualt = new AlternateLocationCollection();
+		try {
+		    URL url4 =   rfdURL(rfd4);
+		    AlternateLocation al4 =
+		      AlternateLocation.createAlternateLocation(url4);
+		    ualt.addAlternateLocation(al4);
+		} catch (Exception e) {
+            check(false, "Couldn't setup test");
+		}
+		uploader1.setAlternateLocations(ualt);
+
+        testGeneric(rfds);
+
+        //Make sure there weren't too many overlapping regions.
+        int u1 = uploader1.amountUploaded();
+        int u2 = uploader2.amountUploaded();
+        int u3 = uploader3.amountUploaded();
+        int u4 = uploader4.amountUploaded();
+        System.out.println("\tu1: "+u1);
+        System.out.println("\tu2: "+u2);
+        System.out.println("\tu3: "+u3);
+        System.out.println("\tu4: "+u4);
+        System.out.println("\tTotal: "+(u1+u2+u3));
+
+        //Note: The amount downloaded from each uploader will not 
+        //be equal, because the uploaders are stated at different times.
+        check(u1==STOP_AFTER, "u1 did all the work");
+        check(u2>0, "u2 did no work");
+        check(u3>0, "u3 did no work");
+        check(u4==0, "u4 was used");
+        SettingsManager.instance().setConnectionSpeed(capacity);
+    }
+
+
 //     private static void testGUI() {
 //         final int RATE=500;
 //         uploader1.setCorruption(true);
@@ -468,6 +698,30 @@ public class DownloadTester {
             check(false, "FAILED: complete corrupt");
     }
 
+
+	private static URL rfdURL(RemoteFileDesc rfd) {
+		String rfdStr;
+		URL    rfdURL = null;
+		rfdStr = "http://"+rfd.getHost()+":"+
+		  rfd.getPort()+"/get/"+String.valueOf(rfd.getIndex())+
+		  "/"+rfd.getFileName();
+		try {
+			rfdURL = new URL(rfdStr);
+		} catch( Exception e ) {
+            check(false, "URL creation failed");
+		}  
+		return rfdURL;
+	}
+
+	private static URL genericURL(String url) {
+		URL    theURL = null;
+		try {
+			theURL = new URL(url);
+		} catch( Exception e ) {
+            check(false, "Generic URL creation failed");
+		}  
+		return theURL;
+	}
 
 
     private static RemoteFileDesc newRFD(int port, int speed) {
@@ -543,5 +797,6 @@ public class DownloadTester {
         uploader1.reset();
         uploader2.reset();
         uploader3.reset();
+        uploader4.reset();
     }
 }
