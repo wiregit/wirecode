@@ -340,7 +340,11 @@ public abstract class MessageRouter {
 				ReceivedMessageStatHandler.UDP_LIME_ACK.addMessage(msg);
             handleLimeACKMessage((LimeACKVendorMessage)msg, datagram);
         }
-        
+        else if(msg instanceof ReplyNumberVendorMessage) {
+			if(RECORD_STATS)
+                ;
+            handleReplyNumberMessage((ReplyNumberVendorMessage) msg, datagram);
+        }
     }
     
     /**
@@ -816,6 +820,28 @@ public abstract class MessageRouter {
         // else some sort of routing error or attack?
         // TODO: tally some stat stuff here
     }
+
+    /** This is called when a client on the network has results for us that we
+     *  may want.  We may contact them back directly or just cache them for
+     *  use.
+     */
+    protected void handleReplyNumberMessage(ReplyNumberVendorMessage reply,
+                                            DatagramPacket datagram) {
+        try {
+            LimeACKVendorMessage ack = 
+                 new LimeACKVendorMessage(new GUID(reply.getGUID()),
+                                          reply.getNumResults());
+            UDPService.instance().send(ack, datagram.getAddress(),
+                                       datagram.getPort());
+        }
+        catch (BadPacketException terrible) {
+            ErrorService.error(terrible);
+        }
+        catch (IOException ioe) {
+            ErrorService.error(ioe);
+        }        
+    }
+
 
     /** Stores (for a limited time) the resps for later out-of-band delivery -
      *  interacts with handleLimeACKMessage
