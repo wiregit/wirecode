@@ -363,7 +363,8 @@ public class ExternalControl {
 			if (curOptions == null) 
 				curOptions = new MagnetOptions();
 
-			if ( keystr.startsWith("xt") ) {
+			if ( keystr.startsWith("xt") &&
++                                       cmdstr.indexOf("urn:sha1:")!=-1) {
 				curOptions.xt = cmdstr;
 			} else if ( keystr.startsWith("dn") ) {
 				curOptions.dn = cmdstr;
