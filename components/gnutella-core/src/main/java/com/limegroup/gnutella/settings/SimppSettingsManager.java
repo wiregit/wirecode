@@ -18,7 +18,7 @@ public class SimppSettingsManager {
      * A cache of the values we had for the settings before the simpp settings
      * were applied to them
      */
-    private final HashMap /* String -> String*/ _defaults;
+    private final HashMap /* Setting -> String*/ _defaults;
     
     /**
      * true if we have not applied the simpp settings, or have since reverted to
@@ -36,7 +36,7 @@ public class SimppSettingsManager {
     //constructor
     private SimppSettingsManager() {
         _isDefault = true; //we are using defualt settings by default
-        String simppSettings = SimppManager.instance().getPropsString();        
+        String simppSettings = SimppManager.instance().getPropsString();
         if(simppSettings == null || simppSettings.equals(""))
             throw new IllegalArgumentException("SimppManager not ready");
         _defaults = new HashMap();
@@ -84,38 +84,36 @@ public class SimppSettingsManager {
             Set set = _simppProps.entrySet();
             for(Iterator iter = set.iterator(); iter.hasNext() ; ) {
                 Map.Entry currEntry = (Map.Entry)iter.next();
-                String rawSimppSettingStr = (String)currEntry.getKey();
-                String simppSetting = getSettingString(rawSimppSettingStr);
-                if(simppSetting == null) {//bad case, simpp message inconsistent
-                    continue;//ignore this setting and move on
-                    //TODO: Option 2 is to ignore this whole simpp message
-                    //return; //TODO: Error service here?
+                String settingKey = (String)currEntry.getKey();
+                Setting simppSetting = getSimppSettingForKey(settingKey);
+                //If this setting is null, it means that the SettingsFactory has
+                //not loaded this setting yet. We need to force it's hand. 
+                if(simppSetting == null) // load it
+                    simppSetting = loadSetting(settingKey);
+                if(simppSetting == null) {
+                    //Something is amiss, either simpp message is malformed or
+                    //the SimppProps has not got the key/value marked correctly
+                    //Ignore this setting and keep going
+                    continue;
                 }
+                //get the setting we want based on the name of the setting
                 String simppValue = (String)currEntry.getValue();
                 if(LOG.isDebugEnabled()) {
                     LOG.debug("setting:"+simppSetting);
                     LOG.debug("simpp value:"+simppValue);
                 }
-                //get the setting we want based on the name of the setting
-                Setting currSetting = findSettingByName(simppSetting);
-                if(currSetting == null) {
-                    //perhaps setting not touched with lazy loading, try load
-                    //the setting
-                    currSetting = loadSetting(rawSimppSettingStr);
-                    if(currSetting == null) //Still null?
-                        continue;//Perhaps this setting has been removed frm LW
-                }
-                if(!currSetting.isSimppEnabled())
+
+                if(!simppSetting.isSimppEnabled())
                     continue;
                 //get the default/current value and cache it                
-                String defaultValue = (String)currSetting.getValueAsString();
+                String defaultValue = (String)simppSetting.getValueAsString();
                 if(LOG.isDebugEnabled())
                     LOG.debug("current value:"+defaultValue);
                 _defaults.put(simppSetting, defaultValue);
                 //we never want to write this setting out
-                currSetting.setAlwaysSave(false);
+                simppSetting.setAlwaysSave(false);
                 //set the setting to the value that simpp says
-                currSetting.loadValue(simppValue);
+                simppSetting.loadValue(simppValue);
             }
         }//end of synchronized block
         _isDefault = false;
@@ -129,9 +127,8 @@ public class SimppSettingsManager {
         synchronized(_simppProps) {
             Set set = _simppProps.keySet();
             for(Iterator iter = set.iterator(); iter.hasNext() ; ) {
-                String currEntry = (String)iter.next();
-                String defaultValue = (String)_defaults.get(currEntry);
-                Setting currSetting = findSettingByName(currEntry);
+                Setting currSetting = (Setting)iter.next();
+                String defaultValue = (String)_defaults.get(currSetting);
                 currSetting.loadValue(defaultValue);
             }            
         } //end of synchronized 
@@ -141,26 +138,17 @@ public class SimppSettingsManager {
 
     /////////////////////////////private helpers////////////////////////////
 
-    private Setting findSettingByName(String settingName) {
+    private Setting getSimppSettingForKey(String simppKey) {
         LimeProps limeProps = LimeProps.instance();
-        return limeProps.getSetting(settingName);
+        return limeProps.getSimppSetting(simppKey);
     }
-
-    private String getSettingString(String rawSetting) {
-        //The raw string has the format settingStr{Classname.fieldname}
-        int index = rawSetting.indexOf("{");
-        if(index < 0) //we have a real serious problem
-            return null;
-        return rawSetting.substring(0,index);
-    }
-    
 
     /**
      * @param rawSetting has the form SETTING_NAME{setting_key} = setting_value
      */
-    private Setting loadSetting(String rawSetting) {
+    private Setting loadSetting(String simppKey) {
         LOG.debug("loadSetting called");
-        String fullname = getSettingsClass(rawSetting);
+        String fullname = SimppProps.instance().getClassNameForKey(simppKey);
         if(fullname == null) //simpp messasge badly formatted
             return null;
         int dot = fullname.indexOf(".");
@@ -180,16 +168,6 @@ public class SimppSettingsManager {
         } catch(IllegalAccessException iax) {
             return null;
         }
-    }
-
-   private String getSettingsClass(String rawSetting) {
-        int i = rawSetting.indexOf("{");
-        int j = rawSetting.indexOf("}");
-        if(i < 0 || j < 0) //we have a problem, the simpp message has bad format
-            return null;
-        String settingKey = rawSetting.substring(i+1, j);
-        //the class from the settingkey from the simpp-settings properties
-        return SimppProps.instance().getClassNameForKey(settingKey); 
     }
 
 }

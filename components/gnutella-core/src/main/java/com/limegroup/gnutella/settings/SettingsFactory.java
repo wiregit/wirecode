@@ -54,7 +54,16 @@ public final class SettingsFactory {
      * LOCKING: must hold this monitor
      */
     private ArrayList /* of Settings */ settings = new ArrayList(10);
+
+    /**
+     * A mapping of simppKeys to Settings. Only Simpp Enabled settings will be
+     * added to this list. As setting are created, they are added to this map so
+     * that when simpp settings are loaded, it's easy to find the targeted
+     * settings.
+     */
+    private Map /* String -> Setting */ simppKeyToSetting = new HashMap();
     
+
     private boolean expired = false;
     
 	/**
@@ -263,7 +272,7 @@ public final class SettingsFactory {
                                                           String defaultValue) {
         StringSetting result = 
             new StringSetting(DEFAULT_PROPS, PROPS, key, defaultValue, null);
-        handleSettingInternal(result);
+        handleSettingInternal(result, null);
         return result;
     }
 
@@ -274,7 +283,7 @@ public final class SettingsFactory {
                                     String defaultValue, String simppKey) {
 		StringSetting result = 
            new StringSetting(DEFAULT_PROPS, PROPS, key, defaultValue, simppKey);
-        handleSettingInternal(result);
+        handleSettingInternal(result, simppKey);
         return result;
     }
 
@@ -289,7 +298,7 @@ public final class SettingsFactory {
                                                         boolean defaultValue) {
         BooleanSetting result =
           new BooleanSetting(DEFAULT_PROPS, PROPS, key, defaultValue, null);
-        handleSettingInternal(result);
+        handleSettingInternal(result, null);
         return result;
     }
 
@@ -297,7 +306,7 @@ public final class SettingsFactory {
                                       boolean defaultValue, String simppKey) {
 		BooleanSetting result = 
           new BooleanSetting(DEFAULT_PROPS, PROPS, key, defaultValue, simppKey);
-        handleSettingInternal(result);
+        handleSettingInternal(result, simppKey);
         return result;
 	}
 
@@ -312,7 +321,7 @@ public final class SettingsFactory {
                                                          int defaultValue) {
         IntSetting result = 
             new IntSetting(DEFAULT_PROPS, PROPS, key, defaultValue, null);
-        handleSettingInternal(result);
+        handleSettingInternal(result, null);
         return result;
     }
     
@@ -320,7 +329,7 @@ public final class SettingsFactory {
                                            int defaultValue, String simppKey) {
 		IntSetting result = 
             new IntSetting(DEFAULT_PROPS, PROPS, key, defaultValue, simppKey);
-        handleSettingInternal(result);
+        handleSettingInternal(result, simppKey);
         return result;
 	}
 
@@ -336,7 +345,7 @@ public final class SettingsFactory {
                                                       byte defaultValue) {
 		ByteSetting result = 
              new ByteSetting(DEFAULT_PROPS, PROPS, key, defaultValue, null);
-        handleSettingInternal(result);
+        handleSettingInternal(result, null);
         return result;
     }
     
@@ -344,7 +353,7 @@ public final class SettingsFactory {
                                          byte defaultValue, String simppKey) {
 		ByteSetting result = 
              new ByteSetting(DEFAULT_PROPS, PROPS, key, defaultValue, simppKey);
-        handleSettingInternal(result);
+        handleSettingInternal(result, simppKey);
         return result;
 	}
 
@@ -360,7 +369,7 @@ public final class SettingsFactory {
                                                       long defaultValue) {
 		 LongSetting result = 
              new LongSetting(DEFAULT_PROPS, PROPS, key, defaultValue, null);
-         handleSettingInternal(result);
+         handleSettingInternal(result, null);
          return result;
     }
     
@@ -368,7 +377,7 @@ public final class SettingsFactory {
                                          long defaultValue, String simppKey) {
 		 LongSetting result = 
              new LongSetting(DEFAULT_PROPS, PROPS, key, defaultValue, simppKey);
-         handleSettingInternal(result);
+         handleSettingInternal(result, simppKey);
          return result;
 	}
 
@@ -390,7 +399,7 @@ public final class SettingsFactory {
 
 		FileSetting result = 
             new FileSetting(DEFAULT_PROPS, PROPS, key, defaultValue, null);
-        handleSettingInternal(result);
+        handleSettingInternal(result, null);
         return result;
     }
 
@@ -405,7 +414,7 @@ public final class SettingsFactory {
 
 		FileSetting result = 
             new FileSetting(DEFAULT_PROPS, PROPS, key, defaultValue, simppKey);
-        handleSettingInternal(result);
+        handleSettingInternal(result, simppKey);
         return result;
 	}
 
@@ -421,7 +430,7 @@ public final class SettingsFactory {
 		ColorSetting result = 
         ColorSetting.createColorSetting(DEFAULT_PROPS, PROPS, key, 
                                                         defaultValue, null);
-        handleSettingInternal(result);
+        handleSettingInternal(result, null);
         return result;
     }
 
@@ -430,7 +439,7 @@ public final class SettingsFactory {
 		ColorSetting result = 
         ColorSetting.createColorSetting(DEFAULT_PROPS, PROPS, key, 
                                                         defaultValue, simppKey);
-        handleSettingInternal(result);
+        handleSettingInternal(result, simppKey);
         return result;
 	}
 
@@ -447,7 +456,7 @@ public final class SettingsFactory {
         CharArraySetting result =
             CharArraySetting.createCharArraySetting(DEFAULT_PROPS, PROPS, 
                                                   key, defaultValue, null);
-        handleSettingInternal(result);
+        handleSettingInternal(result, null);
         return result;
     }
         
@@ -456,7 +465,7 @@ public final class SettingsFactory {
         CharArraySetting result =
             CharArraySetting.createCharArraySetting(DEFAULT_PROPS, PROPS, 
                                                   key, defaultValue, simppKey);
-        handleSettingInternal(result);
+        handleSettingInternal(result, simppKey);
         return result;
     }
     
@@ -471,7 +480,7 @@ public final class SettingsFactory {
                                                         float defaultValue) {
 		FloatSetting result = 
             new FloatSetting(DEFAULT_PROPS, PROPS, key, defaultValue, null);
-        handleSettingInternal(result);
+        handleSettingInternal(result, null);
         return result;
     }
 
@@ -479,7 +488,7 @@ public final class SettingsFactory {
                                         float defaultValue, String simppKey) {
 		FloatSetting result = 
             new FloatSetting(DEFAULT_PROPS, PROPS, key, defaultValue, simppKey);
-        handleSettingInternal(result);
+        handleSettingInternal(result, simppKey);
         return result;
 	}
     
@@ -495,7 +504,7 @@ public final class SettingsFactory {
         StringArraySetting result = 
                        new StringArraySetting(DEFAULT_PROPS, PROPS, key, 
                                                         defaultValue, null);
-        handleSettingInternal(result);
+        handleSettingInternal(result, null);
         return result;
     }
         
@@ -505,7 +514,7 @@ public final class SettingsFactory {
         StringArraySetting result = 
                        new StringArraySetting(DEFAULT_PROPS, PROPS, key, 
                                                         defaultValue, simppKey);
-        handleSettingInternal(result);
+        handleSettingInternal(result, simppKey);
         return result;
     }
     
@@ -520,7 +529,7 @@ public final class SettingsFactory {
         createFileArraySetting(String key, File[] defaultValue) {
         FileArraySetting result = 
         new FileArraySetting(DEFAULT_PROPS, PROPS, key, defaultValue, null);
-        handleSettingInternal(result);
+        handleSettingInternal(result, null);
         return result;
     }
     
@@ -528,7 +537,7 @@ public final class SettingsFactory {
                            String key, File[] defaultValue, String simppKey) {
         FileArraySetting result = 
         new FileArraySetting(DEFAULT_PROPS, PROPS, key, defaultValue, simppKey);
-        handleSettingInternal(result);
+        handleSettingInternal(result, simppKey);
         return result;
     }
     
@@ -577,7 +586,7 @@ public final class SettingsFactory {
                                                            String defaultValue){
         FontNameSetting result = 
         new FontNameSetting(DEFAULT_PROPS, PROPS, key, defaultValue, null);
-        handleSettingInternal(result);
+        handleSettingInternal(result, null);
         return result;
     }
 
@@ -585,13 +594,24 @@ public final class SettingsFactory {
                            String key, String defaultValue, String simppKey) {
         FontNameSetting result = 
         new FontNameSetting(DEFAULT_PROPS, PROPS, key, defaultValue, simppKey);
-        handleSettingInternal(result);
+        handleSettingInternal(result, simppKey);
         return result;
  	}
-
-    private void handleSettingInternal(Setting result) {
-        settings.add(result);
-        result.reload();
+    
+    
+    private synchronized void handleSettingInternal(Setting setting, 
+                                                           String simppKey) {
+        settings.add(setting);
+        setting.reload();
+        if(simppKey != null) 
+            simppKeyToSetting.put(simppKey, setting);
 	}
+    
+    /**
+     * Package access for getting a loaded setting corresponding to a simppKey
+     */
+    synchronized Setting getSettingForSimppKey(String simppKey) {
+        return (Setting)simppKeyToSetting.get(simppKey);
+    }
 
 }

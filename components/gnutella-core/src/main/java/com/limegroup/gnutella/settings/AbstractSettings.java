@@ -98,6 +98,10 @@ public abstract class AbstractSettings {
         return _shouldSave;
     }
 
+
+    /**
+     * Used to find any setting based on the key in the appropriate props file
+     */
     public Setting getSetting(String key) {
         synchronized(FACTORY) {
             Iterator iter = FACTORY.iterator();
@@ -108,5 +112,17 @@ public abstract class AbstractSettings {
             }
         }
         return null; //unable the find the setting we are looking for
+    }
+
+    /**
+     * Delegates the lookup for the setting based on simppkey to the factory
+     * which is keeping track of simpp settings as they are being loaded.
+     * <p> 
+     * If this method returns null it means that the Factory has not loaded the
+     * setting yet. In this case the caller of this method will have to handle
+     * it by forcing that setting to be loaded. 
+     */
+    public Setting getSimppSetting(String simppKey) {
+        return FACTORY.getSettingForSimppKey(simppKey);
     }
 }

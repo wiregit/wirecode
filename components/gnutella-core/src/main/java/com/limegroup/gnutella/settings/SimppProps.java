@@ -7,14 +7,13 @@ public class SimppProps {
     
     private static SimppProps INSTANCE;
     
-    private Properties _properties;
+    /**
+     * Maps simpp key to the string form of  the Setting it represents.
+     */
+    private Map /*String -> String */ _keyToSettingClass;
     
     private SimppProps() {
-        //Note: We could have stored the properties in a file, but then we would
-        //have had to reconcile the settings that are in the file, and those
-        //that are in the loadDefaults. It's better to not have a file, and
-        //always use loadDefaults.
-        _properties = new Properties();
+        _keyToSettingClass = new HashMap();
         loadDefaults();
     }
     
@@ -25,7 +24,7 @@ public class SimppProps {
     }
     
     public String getClassNameForKey(String key) {
-        return (String)_properties.get(key);
+        return (String)_keyToSettingClass.get(key);
 
     }
     
@@ -39,8 +38,9 @@ public class SimppProps {
      * the settings that are simpp-enabled must be listed here with their keys.
      */
     private void loadDefaults() {
-        _properties.put("test_upload","UploadSettings.TEST_UPLOAD_SETTING");
-        _properties.put("soft_max", "UploadSettings.SOFT_MAX_UPLOADS");
+        _keyToSettingClass.put("test_upload",
+                               "UploadSettings.TEST_UPLOAD_SETTING");
+        _keyToSettingClass.put("soft_max", "UploadSettings.SOFT_MAX_UPLOADS");
     }
 
 }
