@@ -28,9 +28,10 @@ public class MetaFileManager extends FileManager {
     }
 
     public synchronized Response[] query(QueryRequest request) {
-        // only return XML if the source wants it OR it is a LW....
+        // only return XML if the source wants it or if the source wants
+        // out-of-band results.
         if (request.desiresXMLResponses() || 
-            GUID.isLimeGUID(request.getGUID())) {
+            request.desiresOutOfBandReplies()) {
             String rich = request.getRichQuery();
             Response[] normals=super.query(request);//normal text query.
             addAudioMetadata(normals);
