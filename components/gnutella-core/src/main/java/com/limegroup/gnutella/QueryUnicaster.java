@@ -41,6 +41,10 @@ public final class QueryUnicaster {
      */
     private Stack _queryHosts;
 
+    /** The fixed size list of endpoints i've pinged.
+     */
+    private FixedSizeList _pingList;
+
     public static QueryUnicaster instance() {
         if (_instance == null)
             _instance = new QueryUnicaster();
@@ -84,6 +88,7 @@ public final class QueryUnicaster {
         // construct DSes...
         _queries = new Hashtable();
         _queryHosts = new Stack();
+        _pingList = new FixedSizeList(25);
 
         // start service...
         _querier = new Thread() {
@@ -254,15 +259,18 @@ public final class QueryUnicaster {
                 // send a ping to the guy you are popping if cache too small
                 ExtendedEndpoint toReturn = 
                 (ExtendedEndpoint) _queryHosts.pop();
-                PingRequest pr = new PingRequest((byte)1);
-                UDPAcceptor udpService = UDPAcceptor.instance();
-                try {
-                    InetAddress ip = 
-                    InetAddress.getByName(toReturn.getHostname());
-                    // send the query
-                    udpService.send(pr, ip, toReturn.getPort());
+                // if i haven't pinged him 'recently', then ping him...
+                if (_pingList.add(toReturn)) {  
+                    PingRequest pr = new PingRequest((byte)1);
+                    UDPAcceptor udpService = UDPAcceptor.instance();
+                    try {
+                        InetAddress ip = 
+                        InetAddress.getByName(toReturn.getHostname());
+                        // send the query
+                        udpService.send(pr, ip, toReturn.getPort());
+                    }
+                    catch (UnknownHostException ignored) {}
                 }
-                catch (UnknownHostException ignored) {}
                 return toReturn;
             }
             return (ExtendedEndpoint) _queryHosts.pop();
@@ -289,6 +297,36 @@ public final class QueryUnicaster {
             if (other instanceof QueryBundle)
                 retVal = _qr.equals(((QueryBundle)other)._qr);
             return retVal;
+        }
+    }
+
+
+    /** Temporary DS that keeps holds Objects and evicts the oldest entry when
+     *  the threshold is reached.
+     *  Handles all synchronization.
+     */ 
+    private class FixedSizeList {
+        
+        private int _threshold = 1;
+        private List _objects = new ArrayList();
+
+        /** Minimum threshold is 1.
+         */
+        public FixedSizeList(int threshold) {
+            if (threshold > 0)
+                _threshold = threshold;
+        }
+
+        /* @return if the badboy o was added.
+         */
+        public synchronized boolean add(Object o) {
+            boolean hasObject = _objects.contains(o);
+            if (!hasObject) {
+                if (_objects.size() >= _threshold)
+                    _objects.remove(0);
+                _objects.add(o);
+            }
+            return hasObject;
         }
     }
 
