@@ -89,7 +89,7 @@ public class SupernodeHandshakeResponder
             getProperty(ConnectionHandshakeHeaders.X_SUPERNODE_NEEDED);
             if (neededS!=null
                 && !Boolean.valueOf(neededS).booleanValue()
-                && _manager.allowClientMode())
+                && _manager.allowLeafDemotion())
             {
                 //Fine, we'll become a leaf.
                 ret.put(ConnectionHandshakeHeaders.X_SUPERNODE,
