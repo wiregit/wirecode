@@ -67,9 +67,9 @@ public class UpdateManager {
             latestVersion = parser.getVersion();
             message = parser.getMessage();
             usesLocale = parser.usesLocale();
-        } catch(Exception e) {//SAXException or IOException, we react similarly
-            // TODO: break this up into multiple exceptions -- what happens if
-            // it's not one of SAXException or IOException???  Who knows?
+        } catch(SAXException sax) {
+            latestVersion = CommonUtils.getLimeWireVersion();
+        } catch(IOException iox) {
             latestVersion = CommonUtils.getLimeWireVersion();
         } 
     }
