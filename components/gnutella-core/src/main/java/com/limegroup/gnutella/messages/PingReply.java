@@ -1238,7 +1238,12 @@ public class PingReply extends Message implements Serializable, IpPort {
             StringTokenizer st = new StringTokenizer(allCaches, "\n");
             while(st.hasMoreTokens()) {
                 String next = st.nextToken();
-                int i = next.indexOf(":");
+                // look for possible features and ignore'm
+                int i = next.indexOf("&");
+                // basically ignore.
+                if(i != -1)
+                    next = next.substring(0, i);
+                i = next.indexOf(":");
                 int port = 6346;
                 if(i == 0 || i == next.length()) {
                     continue;

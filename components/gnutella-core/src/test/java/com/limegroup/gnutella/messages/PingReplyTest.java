@@ -781,7 +781,7 @@ public class PingReplyTest extends com.limegroup.gnutella.util.BaseTestCase {
         addrs.add("1.2.3.4:81");
         addrs.add("www.limewire.com:6379");
         addrs.add("www.eff.org");
-        addrs.add("www.test.org:1");
+        addrs.add("www.test.org:1&something=somethingelse&nothing=this");
         ggep.put(GGEP.GGEP_HEADER_PACKED_HOSTCACHES, zip(addrs));
         PingReply pr = PingReply.create(
             GUID.makeGuid(), (byte)1, 1, new byte[] { 1, 1, 1, 1 },
