@@ -7,18 +7,18 @@ import java.util.StringTokenizer;
 public class QueryRequest extends Message implements Serializable{
     /** The minimum speed and query request, including the null terminator.
      *  We extract the minimum speed and String lazily. */
-    private byte[] payload;
-    private int minSpeed;
+    private final byte[] payload;
+    private final int minSpeed;
     /** The query string, if we've already extracted it.  Null otherwise. 
      *  LOCKING: obtain this' lock. */
-    private String query=null;
-    private String richQuery = null;
+    private final String query;//=null;
+    private final String richQuery;// = null;
 
     // HUGE v0.93 fields
     /** Any URN types requested on responses */
-    private Set requestedUrnTypes = null;
+    private final Set requestedUrnTypes;// = null;
     /** Any exact URNs requested to match */
-    private Set queryUrns = null;
+    private final Set queryUrns;// = null;
 
 	/**
 	 * Constant for an empty, unmodifiable <tt>Set</tt>.  This is necessary
@@ -27,6 +27,11 @@ public class QueryRequest extends Message implements Serializable{
 	 */
 	private static final Set EMPTY_SET = 
 		Collections.unmodifiableSet(new HashSet());
+
+	/**
+	 * Cached immutable empty array of bytes to avoid unnecessary allocations.
+	 */
+	private final static byte[] EMPTY_BYTE_ARRAY = new byte[0];
 
     /**
      * Builds a new query from scratch
@@ -53,30 +58,56 @@ public class QueryRequest extends Message implements Serializable{
         this.minSpeed=minSpeed;
         this.query=query;
         this.richQuery=richQuery;
+		Set tempRequestedUrnTypes = null;
+		Set tempQueryUrns = null;
 		if(requestedUrnTypes != null) {
-			this.requestedUrnTypes = new HashSet(requestedUrnTypes);
+			tempRequestedUrnTypes = new HashSet(requestedUrnTypes);
+			//this.requestedUrnTypes = new HashSet(requestedUrnTypes);
+		} else {
+			tempRequestedUrnTypes = new HashSet();
 		}
+		
 		if(queryUrns != null) {
-			this.queryUrns = new HashSet(queryUrns);
+			tempQueryUrns = new HashSet(queryUrns);
+			//this.queryUrns = new HashSet(queryUrns);
+		} else {
+			tempQueryUrns = new HashSet();
 		}
-        buildPayload(); // now the length has been set
-		if(this.queryUrns == null) {
-			// this is necessary because Collections.EMPTY_SET is not
-			// serializable in collections 1.1
-			this.queryUrns = EMPTY_SET; 
+			
+		
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        try {
+            ByteOrder.short2leb((short)minSpeed,baos); // write minspeed
+            baos.write(query.getBytes());              // write query
+            baos.write(0);                             // null
+            // now write any & all HUGE v0.93 General Extension Mechanism extensions
+            boolean addDelimiterBefore = false;
+			
+			// add the rich query
+            addDelimiterBefore = 
+			    writeGemExtension(baos, addDelimiterBefore, richQuery);
+
+			// add the urns
+            addDelimiterBefore = 
+			    writeGemExtensions(baos, addDelimiterBefore, 
+								   tempQueryUrns == null ? null : 
+								   tempQueryUrns.iterator());
+
+			// add the urn types
+            addDelimiterBefore = 
+			    writeGemExtensions(baos, addDelimiterBefore, 
+								   tempRequestedUrnTypes == null ? null : 
+								   tempRequestedUrnTypes.iterator());
+
+            baos.write(0);                             // final null
+		} catch (IOException e) {
+			e.printStackTrace();
 		}
-		else {
-			this.queryUrns = Collections.unmodifiableSet(queryUrns);
-		}
-		if(this.requestedUrnTypes == null) {
-			// this is necessary because Collections.EMPTY_SET is not
-			// serializable in collections 1.1
-			this.requestedUrnTypes = EMPTY_SET;
-		}
-		else {
-			this.requestedUrnTypes =
-			    Collections.unmodifiableSet(requestedUrnTypes);
-		}
+		payload=baos.toByteArray();
+		updateLength(payload.length); 
+
+		this.queryUrns = Collections.unmodifiableSet(tempQueryUrns);
+		this.requestedUrnTypes = Collections.unmodifiableSet(tempRequestedUrnTypes);
     }
 
     /**
@@ -106,69 +137,80 @@ public class QueryRequest extends Message implements Serializable{
     public QueryRequest(byte[] guid, byte ttl, byte hops,
 						byte[] payload) {
         super(guid, Message.F_QUERY, ttl, hops, payload.length);
-        this.payload=payload;
+		if(this.payload == null) {
+			this.payload = EMPTY_BYTE_ARRAY;
+		}
+		else {
+			this.payload=payload;
+		}
+		String tempQuery = "";
+		String tempRichQuery = "";
+		int tempMinSpeed = 0;
+		Set tempQueryUrns = null;
+		Set tempRequestedUrnTypes = null;
         try {
             ByteArrayInputStream bais = new ByteArrayInputStream(payload);
             short sp = ByteOrder.leb2short(bais);
-            minSpeed = ByteOrder.ubytes2int(sp);
-            query = readNullTerminatedString(bais);
+            tempMinSpeed = ByteOrder.ubytes2int(sp);
+            //query = readNullTerminatedString(bais);
+            tempQuery = readNullTerminatedString(bais);
             // handle extensions, which include rich query and URN stuff
-            queryUrns=null;
-            requestedUrnTypes=null;
+            //queryUrns=null;
+            //requestedUrnTypes=null;
             String exts = readNullTerminatedString(bais);
             StringTokenizer stok = new StringTokenizer(exts,"\u001c");
             while (stok.hasMoreElements()) {
-                handleGemExtensionString(stok.nextToken());
+                //handleGemExtensionString(stok.nextToken());
+				String curExtStr = stok.nextToken();
+				if(URN.isUrn(curExtStr)) {
+					// it's an URN to match, of form "urn:namespace:etc"
+					URN urn = null;
+					try {
+						urn = URNFactory.createUrn(curExtStr);
+					} catch(IOException e) {
+						// the urn string is invalid -- so continue
+						continue;
+					}
+					if(tempQueryUrns == null) {
+						tempQueryUrns = new HashSet();
+					}
+					tempQueryUrns.add(urn);
+					if(tempRequestedUrnTypes == null) {
+						tempRequestedUrnTypes = new HashSet();
+					}
+					// but also, it's an implicit request for similar
+					// URNs on responses, so add the URN prefix there, too
+					tempRequestedUrnTypes.add(urn.getUrnType());
+				} else if(UrnType.isSupportedUrnType(curExtStr)) {
+					// it's an URN type to return, of form "urn" or "urn:namespace"
+					if(tempRequestedUrnTypes == null) {
+						tempRequestedUrnTypes = new HashSet();
+					}
+					tempRequestedUrnTypes.add(curExtStr);
+				} else if (curExtStr.startsWith("<?xml")) {
+					// rich query
+					tempRichQuery = curExtStr;
+				}
             }
-            if (richQuery == null) richQuery=""; 
         } catch (IOException ioe) {
-            System.out.println("QueryRequest.scanPayload() IOException");
+			ioe.printStackTrace();
         }
-		if(this.queryUrns == null) {
+		query = tempQuery;
+		richQuery = tempRichQuery;
+		minSpeed = tempMinSpeed;
+		if(tempQueryUrns == null) {
 			this.queryUrns = EMPTY_SET; 
 		}
 		else {
-			this.queryUrns = Collections.unmodifiableSet(queryUrns);
+			this.queryUrns = Collections.unmodifiableSet(tempQueryUrns);
 		}
-		if(this.requestedUrnTypes == null) {
+		if(tempRequestedUrnTypes == null) {
 			this.requestedUrnTypes = EMPTY_SET;
 		}
 		else {
 			this.requestedUrnTypes =
-			    Collections.unmodifiableSet(requestedUrnTypes);
+			    Collections.unmodifiableSet(tempRequestedUrnTypes);
 		}		
-    }
-    
-    private void buildPayload() {
-        try {
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            ByteOrder.short2leb((short)minSpeed,baos); // write minspeed
-            baos.write(query.getBytes());              // write query
-            baos.write(0);                             // null
-            // now write any & all HUGE v0.93 General Extension Mechanism extensions
-            boolean addDelimiterBefore = false;
-			
-			// add the rich query
-            addDelimiterBefore = 
-			    writeGemExtension(baos, addDelimiterBefore, richQuery);
-
-			// add the urns
-            addDelimiterBefore = 
-			    writeGemExtensions(baos, addDelimiterBefore, 
-								   queryUrns == null ? null : queryUrns.iterator());
-
-			// add the urn types
-            addDelimiterBefore = 
-			    writeGemExtensions(baos, addDelimiterBefore, 
-								   requestedUrnTypes == null ? null : 
-								   requestedUrnTypes.iterator());
-
-            baos.write(0);                             // final null
-            payload=baos.toByteArray();
-            updateLength(payload.length); 
-		} catch (IOException ioe) {
-            System.out.println("QueryRequest.buildPayload() IOException");
-		}
     }
 
     protected void writePayload(OutputStream out) throws IOException {
@@ -215,40 +257,6 @@ public class QueryRequest extends Message implements Serializable{
 	 */
     public Set getQueryUrns() {
 		return queryUrns;
-    }
-        
-	/**
-	 * Handles an individual HUGE "General Extension Mechanism" (GEM)
-	 * string, adding the appropriate URN, URN type, or xml query data 
-	 * to the query reply.
-	 *
-	 * @param urnString the string containing the GEM data
-	 */
-    private void handleGemExtensionString(String urnString) {
-		if(URN.isUrn(urnString)) {
-			// it's an URN to match, of form "urn:namespace:etc"
-			URN urn = null;
-			try {
-				urn = URNFactory.createUrn(urnString);
-			} catch(IOException e) {
-				// the urn string is invalid -- just return
-				return;
-			}
-			if(queryUrns == null) {
-				queryUrns = new HashSet();
-			}
-			queryUrns.add(urn);
-			// but also, it's an implicit request for similar
-			// URNs on responses, so add the URN prefix there, too
-			requestedUrnTypes.add(urn.getTypeString());
-		} else if(URN.isUrnType(urnString)) {
-			// it's an URN type to return, of form "urn" or "urn:namespace"
-			if(requestedUrnTypes == null) requestedUrnTypes = new HashSet();
-			requestedUrnTypes.add(urnString);
-		} else if (urnString.startsWith("<?xml")) {
-            // rich query
-            richQuery = urnString;
-        }
     }
 
     /** 
