@@ -18,11 +18,6 @@ public abstract class SourceRanker {
      */
     public static final SourceRanker EMPTY_RANKER = new EmptyRanker();
     
-    public SourceRanker() {
-        super();
-        // TODO Auto-generated constructor stub
-    }
-    
     public void addToPool(Collection hosts) {
         for (Iterator iter = hosts.iterator(); iter.hasNext();) {
             IpPort host = (IpPort) iter.next();

@@ -856,8 +856,8 @@ public class RemoteFileDesc implements IpPort, Serializable {
             result = (37* result)+_port;
 			result = (37* result)+_size;
             result = (37* result)+_urns.hashCode();
-            if (_clientGUID!=null)
-                result = (37* result)+_clientGUID.hashCode();
+            if (_clientGUID!=null){
+                result = (37* result)+(new GUID(_clientGUID)).hashCode();}
             _hashCode = result;
         }
 		return _hashCode;

@@ -526,7 +526,8 @@ public class ManagedDownloader implements Downloader, Serializable {
 		if(ifc == null) {
 			throw new NullPointerException("null incomplete file manager");
 		}
-        this.allFiles = new TreeSet(IpPort.COMPARATOR);
+        //this.allFiles = new TreeSet(IpPort.COMPARATOR);
+        this.allFiles = new HashSet();
 		if (files != null)
 			allFiles.addAll(Arrays.asList(files));
         this.incompleteFileManager = ifc;
@@ -569,7 +570,8 @@ public class ManagedDownloader implements Downloader, Serializable {
             throws IOException, ClassNotFoundException {
         deserializedFromDisk = true;
 		
-		allFiles = new TreeSet(IpPort.COMPARATOR);
+		//allFiles = new TreeSet(IpPort.COMPARATOR);
+        allFiles = new HashSet();
         RemoteFileDesc [] rfds=(RemoteFileDesc[])stream.readObject();
 		allFiles.addAll(Arrays.asList(rfds));
 		

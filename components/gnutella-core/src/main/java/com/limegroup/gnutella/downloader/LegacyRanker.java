@@ -1,6 +1,7 @@
 
 package com.limegroup.gnutella.downloader;
 
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.TreeSet;
@@ -17,8 +18,8 @@ public class LegacyRanker extends SourceRanker {
 
 	private final Set rfds;  
 	
-	public LegacyRanker() {
-		rfds = new TreeSet(IpPort.COMPARATOR);
+	LegacyRanker() {
+		rfds = new HashSet();
 	}
 	
 	public synchronized void addToPool(IpPort host) {
