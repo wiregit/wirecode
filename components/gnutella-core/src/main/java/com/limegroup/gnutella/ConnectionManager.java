@@ -105,6 +105,7 @@ public class ConnectionManager {
      */
     public ManagedConnection createConnectionBlocking(
             String hostname, int portnum) throws IOException {
+
         ManagedConnection c = new ManagedConnection(hostname, portnum, _router,
                                                     this);
 
@@ -122,6 +123,7 @@ public class ConnectionManager {
      */
     public void createConnectionAsynchronously(
             String hostname, int portnum) {
+
         // Initialize and loop for messages on another thread.
         new OutgoingConnectionThread(
                 new ManagedConnection(hostname, portnum, _router, this),
@@ -137,8 +139,15 @@ public class ConnectionManager {
      */
     public ManagedConnection createRouterConnection(
             String hostname, int portnum) throws IOException {
-        ManagedConnection c = new ManagedConnection(hostname, portnum, _router,
-                                                    this, true);
+
+		// Use dedicated pong server instead of defaul for LimeWire
+		if ( hostname.equals(SettingsManager.DEFAULT_LIMEWIRE_ROUTER) ) {
+			hostname = SettingsManager.DEDICATED_LIMEWIRE_ROUTER;
+		}
+
+        ManagedConnection c = 
+		  new ManagedConnection(hostname, portnum, _router, this, true);
+
         // Initialize synchronously
         initializeExternallyGeneratedConnection(c);
         // Kick off a thread for the message loop.
