@@ -20,6 +20,8 @@ public class HTTPManager {
     private ByteReader _br;
     private int _uploadBegin;
     private int _uploadEnd;
+	private String userAgent    = null;
+	//private String userAltruism = null;
 
     /**
      * @requires If isPush, "GIV " was just read from s.
@@ -80,17 +82,23 @@ public class HTTPManager {
 
                 // Prevent excess uploads from starting
                 //if ( callback.getNumUploads() >=
-                if ( HTTPUploader.getUploadCount() >=
-                     SettingsManager.instance().getMaxUploads() )
+                while ( HTTPUploader.getUploadCount() >=
+                        SettingsManager.instance().getMaxUploads() )
                 {
-                    HTTPUploader.doLimitReached(s);
-                    return;
+					// If you can't blow away a "Gnutella" upload
+					if ( ! HTTPUploader.checkForLowPriorityUpload(userAgent) )
+					{
+						// Report Limit Reached
+                        HTTPUploader.doLimitReached(s);
+                        return;
+					}
                 }
 
                 HTTPUploader uploader;
                 uploader = new HTTPUploader(s, _filename, _index,
                                             callback,
                                             _uploadBegin, _uploadEnd);
+				uploader.setUserAgent(userAgent);
                 Thread.currentThread().setName("HTTPUploader (normal)");
                 uploader.run(); //Ok, since we've already spawned a thread.
             }
@@ -180,12 +188,16 @@ public class HTTPManager {
             }
 
 
+			// TODO2:  Implement some form of altruism
+  			//if (str.indexOf("User-Altruism") != -1) {
+  			//	userAltruism = str;
+  			//}
+
 			// check the User-Agent field of the header information
-			if (str.indexOf("User-Agent") != -1) {
+			if (str.indexOf("User-Agent:") != -1) {
 				// check for netscape, internet explorer,
 				// or other free riding downoaders
 				if (SettingsManager.instance().getAllowBrowser() == false) {
-
 
 					// if we are not supposed to read from them
 					// throw an exception
@@ -211,6 +223,7 @@ public class HTTPManager {
 						}
 					
 				}
+				userAgent = str.substring(12);
 			}
 		}
 	}

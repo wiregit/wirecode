@@ -660,6 +660,7 @@ public class HTTPDownloader implements Runnable {
             {
                 // Handle a 503 error from Gnotella/Gnutella
                 if ( str.equals("3") ||
+                     str.startsWith("3 Upload Limit") ||   // BearShare
                      str.startsWith("3 Upload limit reached") )
                 {
                     _stateString = TryAgainLater;
@@ -672,6 +673,14 @@ public class HTTPDownloader implements Runnable {
                      str.startsWith("4 File Not Found") )
                 {
                     _stateString = "File Not Found";
+                    _state = ERROR;
+                    return;
+                }
+
+                // Handle a Bearshare "Not Sharing" Message
+                if ( str.equals("0 Not Sharing") )
+                {
+                    _stateString = "BearShare Not Sharing";
                     _state = ERROR;
                     return;
                 }

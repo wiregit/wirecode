@@ -13,7 +13,7 @@ import java.net.*;
 import java.util.Date;
 import com.sun.java.util.collections.*;
 
-public class HTTPUploader implements Runnable {
+public class HTTPUploader implements Runnable, Comparable {
     /**
      * The list of all files that we've tried unsuccessfully to upload
      * via pushes.  (Here successful means we were able to connect.
@@ -58,6 +58,15 @@ public class HTTPUploader implements Runnable {
      */
 	private static Map /* String -> Integer */ _uploadsInProgress =
 		new HashMap();
+
+
+	/**
+	 * A SortedSet of the full uploads in progress.  
+	 * This is used to shutdown "Gnutella" uploads as needed.
+	 */
+	private static SortedSet _fullUploads =
+		Collections.synchronizedSortedSet(new TreeSet());
+
 
 
     //////////// Initialized in Constructors ///////////
@@ -115,6 +124,10 @@ public class HTTPUploader implements Runnable {
     private int BUFFSIZE = 1024;
     private int _sizeOfFile;
 
+	// The User-Agent for the request.  Used to prioritize newer clients
+	private String  _userAgent   = null;
+	// A cleanup boolean for the main run loop
+	private boolean _cleanupDone = false;
 
     /**
      * Prepares a server-side upload.  The file
@@ -276,6 +289,14 @@ public class HTTPUploader implements Runnable {
             }
             _socket.setSoTimeout(SettingsManager.instance().getTimeout());
             String line=in.readLine();
+
+			//  TODO1:  Once this code has been out long enough, we need to 
+			//  revisit this code and get the pushed UserAgent.  
+			//  Currently, we do not depreferenced pushed "Gnutella"
+			//  Because we were sending Gnutella back ourselves.
+            //String line2=in.readLine();
+			//
+
             _socket.setSoTimeout(0);
             if (line==null)
                 throw new IOException();
@@ -305,11 +326,15 @@ public class HTTPUploader implements Runnable {
             throw new IOException();
 
             //2. Check for upload overload
-            if ( limitExceeded = testAndIncrementUploadCount() )
+            while ( limitExceeded = testAndIncrementUploadCount() )
             {
-                //send 503 Limit Exceeded Headers
-                doLimitReachedAfterConnect();
-                throw new IOException();
+				// If you can't blow away a "Gnutella" upload
+				if ( ! HTTPUploader.checkForLowPriorityUpload(_userAgent) )
+				{
+                    //send 503 Limit Exceeded Headers
+                    doLimitReachedAfterConnect();
+                    throw new IOException();
+				}
             }
 
         } catch (IndexOutOfBoundsException e) {
@@ -441,6 +466,8 @@ public class HTTPUploader implements Runnable {
         }
 
         try {
+			_cleanupDone = false;
+			_fullUploads.add(this);  // Add to the User-Agent priority queue
             testAndIncrementNumUploads();
             _callback.addUpload(this);
             //1. For push requests only, establish the connection.
@@ -468,10 +495,15 @@ public class HTTPUploader implements Runnable {
             //2. Check for upload room for non-pushes
             if ( ! uploadCountIncremented ) // Pushes have already been handled
             {
-                if ( testAndIncrementUploadCount() )
+                while ( testAndIncrementUploadCount() )
                 {
-                    doLimitReached(_socket);//send 503 Limit Exceeded Headers
-                    throw new IOException();
+					// If you can't blow away a "Gnutella" upload
+					if ( ! HTTPUploader.checkForLowPriorityUpload(_userAgent) )
+					{
+						//send 503 Limit Exceeded Headers
+                        doLimitReached(_socket);
+                        throw new IOException();
+					}
                 }
             }
 
@@ -484,15 +516,28 @@ public class HTTPUploader implements Runnable {
         } catch (IOException e) {
             _state = ERROR;
         } finally {
-			decrementNumUploads();
-            if ( uploadCountIncremented )
-                synchronized(uploadCountLock) { uploadCount--; }
-            if ( _isPushAttempt )
-                cleanupAttemptedPush();
-            shutdown();
-            _callback.removeUpload(this);
+			doCleanup();
         }
     }
+
+	/**
+	 *  Cleanup after an upload.  This should only be called from the finally 
+     *  clause in run or a forced cleanup.
+	 */
+	public synchronized void doCleanup()
+	{
+		if ( _cleanupDone )
+			return;
+		_fullUploads.remove(this);
+		decrementNumUploads();
+		if ( uploadCountIncremented )
+			synchronized(uploadCountLock) { uploadCount--; }
+		if ( _isPushAttempt )
+			cleanupAttemptedPush();
+		shutdown();
+		_callback.removeUpload(this);
+		_cleanupDone = true;
+	}
 
     private void cleanupAttemptedPush()
     {
@@ -724,6 +769,74 @@ public class HTTPUploader implements Runnable {
         }
 	}
 
+	/**
+     *  Set the User-Agent for client prioritization
+	 */
+	public void setUserAgent(String userAgent) {
+		this._userAgent = userAgent;
+	}
+	
+	/**
+     *  Get the User-Agent for sorting by priority
+	 */
+	public String getUserAgent() {
+		return( _userAgent );
+	}
+
+	/**
+     *  Sort the uploads based on user agent.
+	 *  If both are equal then sort on amountRead in "this" session.
+	 */
+	public int compareTo(Object o) {
+		HTTPUploader up      = (HTTPUploader) o;
+		String       otherUA = up.getUserAgent();
+
+		// Straight equality
+		if ( _userAgent == otherUA || 
+			 (_userAgent != null && _userAgent.equals(otherUA)) )
+		{
+			
+    		if ( _amountRead > up.getAmountRead() ) {
+				return 1;
+			} 
+			else if ( _amountRead < up.getAmountRead() ) {
+				return -1;
+			}
+			return 0;
+		}
+
+		// Only case where other > is if other not Gnutella and this is.
+		if ( ! "Gnutella".equals(otherUA) &&
+			 "Gnutella".equals(_userAgent) )
+			return -1;
+
+		// If they are both anything other than Gnutella => equivalent
+		if ( ! "Gnutella".equals(otherUA) &&
+			 ! "Gnutella".equals(_userAgent) )
+			return 0;
+
+		// Your left with _userAgent > otherUA
+		return 1;
+	}
+
+	/**
+     *  Check to see if you can and should shutdown a Gutella upload
+	 *  if yes, do it.  
+	 */
+	public static boolean checkForLowPriorityUpload(String agent) {
+		if ( "Gnutella".equals(agent) )
+			return false;
+
+        HTTPUploader first = (HTTPUploader)_fullUploads.first(); 
+		if ( "Gnutella".equals(first.getUserAgent()) )
+		{
+			first.doCleanup();  
+    		first.setStateString("Bumped old client");
+			return true;
+		}
+		return false;
+	}
+
 
     private String getMimeType() {         /* eventually this method should */
         String mimetype;                /* determine the mime type of a file */
@@ -856,8 +969,19 @@ public class HTTPUploader implements Runnable {
         return _state;
     }
 
+
+	/**
+	 *  Retrieve what is normally a text error state
+	 */
     public String getStateString() {
         return _stateString;
+    }
+
+	/**
+	 *  Set what is normally a text error state
+	 */
+    public void setStateString( String stateString ) {
+        _stateString = stateString;
     }
 
     ///** Unit test for timestamp stuff. */
