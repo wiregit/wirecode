@@ -364,20 +364,24 @@ public class ConnectionManager {
      * @return true, if Ultrapeer, false otherwise
      */
     public boolean isSupernode() {
-        return
-            // If we are currently supernode to any connections,
-            // OR
-            // we are not a private address, have been ultrapeer capable
-            // in the past, and are not being shielded by anybody,
-            // then we are an ultrapeer.
-            ( _initializedClientConnections.size() > 0 ) ||
-            ( 
-             !NetworkUtils.isPrivate() &&
-             UltrapeerSettings.EVER_ULTRAPEER_CAPABLE.getValue() && 
-             !isShieldedLeaf()
-            );
+        // If we are currently supernode to any connections,
+        // OR
+        // we could be a Supernode
+        return ( _initializedClientConnections.size() > 0 ) || 
+               isSupernodeCapable();
     }
     
+    /** Return true if we are not a private address, have been ultrapeer capable
+     *  in the past, and are not being shielded by anybody, AND we don't have UP
+     *  mode disabled.
+     */
+    public boolean isSupernodeCapable() {
+        return (!NetworkUtils.isPrivate() &&
+                UltrapeerSettings.EVER_ULTRAPEER_CAPABLE.getValue() && 
+                !isShieldedLeaf()) &&
+               !UltrapeerSettings.DISABLE_ULTRAPEER_MODE.getValue();
+    }
+
     /**
      * Returns true if this is a leaf node with a connection to a ultrapeer.  It
      * is not required that the ultrapeer support query routing, though that is
@@ -1278,8 +1282,7 @@ public class ConnectionManager {
         //the amount of connections that a Ultrapeer would.  If there is a
         //possibility we may become a Ultrapeer though, go ahead and fetch
         //a lot of connections.
-		int outgoing = (UltrapeerSettings.DISABLE_ULTRAPEER_MODE.getValue() ?
-                        PREFERRED_CONNECTIONS_FOR_LEAF :
+		int outgoing = (!isSupernodeCapable() ? PREFERRED_CONNECTIONS_FOR_LEAF :
                         ConnectionSettings.NUM_CONNECTIONS.getValue());
         if (outgoing < 1) {
 			ConnectionSettings.NUM_CONNECTIONS.revertToDefault();
