@@ -1432,10 +1432,14 @@ public abstract class MessageRouter {
             }
         }
 
+        //forward only to a quarter of the leaves in case the query is
+        //very popular.
         if(list.size() > 8 && 
            (double)hitConnections.size()/(double)list.size() > .8) {
+        	int startIndex = (int) Math.floor(
+        			Math.random() * hitConnections.size() * 0.75);
             hitConnections = 
-                hitConnections.subList(0, hitConnections.size()/4);
+                hitConnections.subList(startIndex, startIndex+hitConnections.size()/4);
         }
         
         int notSent = list.size() - hitConnections.size();
