@@ -173,7 +173,7 @@ public final class ConnectionSettings extends LimeProps {
      * JVMs.
      */
     public static final BooleanSetting USE_NIO =
-        FACTORY.createBooleanSetting("USE_NIO", true);
+        FACTORY.createBooleanSetting("USE_NIO", false);
           
     /**
      * Helper method left from Settings Manager
