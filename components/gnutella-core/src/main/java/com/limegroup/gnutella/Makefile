@@ -1,4 +1,4 @@
-javac=javac
+javac=javac -g
 
 classes = Main.class ConnectionManager.class RouteTable.class \
 	Connection.class BadPacketException.class GUID.class \
@@ -13,7 +13,7 @@ $(classes) : %.class: %.java
 	$(javac) $<
 
 # doc:
-# 	cd p:/crohrs
-# 	C:\progra~1\Cygwin\bin\sh.exe  -c " ./javadoc170 -d doc/api com.limegroup.gnutella"
+# 	cd ../../..
+# 	javadoc170 -d doc/api com.limegroup.gnutella"
 
 # skip:
