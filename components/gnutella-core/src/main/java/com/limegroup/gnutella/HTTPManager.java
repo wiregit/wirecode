@@ -21,7 +21,7 @@ public class HTTPManager {
     private int _uploadBegin;
     private int _uploadEnd;
 	
-	private boolean readFromBrowser = false;
+	private boolean _readFromBrowser = false;
 	
 
     /**
@@ -138,7 +138,7 @@ public class HTTPManager {
     }
 
 	public void setReadFromBrowser(boolean b) {
-		readFromBrowser = b;
+		_readFromBrowser = b;
 	}
 	
 
@@ -190,7 +190,7 @@ public class HTTPManager {
 			if (str.indexOf("Mozilla") != -1) {
 				// if we are not supposed to read from them
 				// throw an exception
-				if (!readFromBrowser)
+				if (!_readFromBrowser)
 					throw new IOException("Web Browser");
 			}
 
