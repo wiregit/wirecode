@@ -4,6 +4,7 @@ import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.util.*;
 import com.sun.java.util.collections.*;
 import java.io.*;
+import java.net.*;
 import junit.framework.*;
 import junit.extensions.*;
 
@@ -548,6 +549,7 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.BaseTestCa
         basicTest(false, true);
         basicTest(true, false);
         basicTest(true, true);
+        badPushProxyInput();
     }
 
 
@@ -582,6 +584,54 @@ public final class QueryReplyTest extends com.limegroup.gnutella.util.BaseTestCa
             retProxies[i].equals(proxies[i]);
 
     }
+
+    private void badPushProxyInput() throws Exception {
+        byte[] badBytes = new byte[6];
+        GGEP ggep[] = new GGEP[1];
+        // test a bad ip
+        // 0.0.0.0 is a bad address
+
+        // trying to input
+        try {
+            PushProxyInterface proxy = 
+                new QueryReply.PushProxyContainer("0.0.0.0", 6346);
+        }
+        catch (IllegalArgumentException expected) {}
+
+        // from the network
+        ggep[0] = new GGEP();
+        ggep[0].put(GGEP.GGEP_HEADER_PUSH_PROXY, badBytes);
+        assertTrue(_ggepUtil.getPushProxies(ggep) == null);
+
+        // test a bad port
+
+        // trying to input is the only case
+        try {
+            PushProxyInterface proxy = 
+                new QueryReply.PushProxyContainer("0.0.0.0", 634600);
+        }
+        catch (IllegalArgumentException expected) {}
+
+        // try to get proxies when the lengths are wrong
+        for (int i = 0; i < 100; i++) {
+            badBytes = new byte[i];
+            // just put some filler in here....
+            for (int j = 0; j < badBytes.length; j++)
+                badBytes[j] = (byte)i;
+            ggep[0] = new GGEP();
+            ggep[0].put(GGEP.GGEP_HEADER_PUSH_PROXY, badBytes);
+            if (i == 0)
+                assertTrue(_ggepUtil.getPushProxies(ggep) == null);
+            else if (i < 6) 
+                assertTrue(_ggepUtil.getPushProxies(ggep) == null);
+            else // length is fine
+                assertEquals(_ggepUtil.getPushProxies(ggep).length, (i / 6));
+        }
+
+    }
+
+
+
 
     /**
      * Test to make sure that results that have no name are rejected 
