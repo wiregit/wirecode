@@ -459,7 +459,7 @@ public final class CommonUtils {
             if(settingsDir.isDirectory()) {
                 settingsDir.mkdirs();
             }
-            copy(curDirFile, curUserFile));
+            copy(curDirFile, curUserFile);
         }
         _windowsFilesMoved = true;
     }
