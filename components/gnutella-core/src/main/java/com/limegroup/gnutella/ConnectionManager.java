@@ -191,9 +191,11 @@ public class ConnectionManager implements Runnable {
 		//Accept an incoming connection, make it into a Connection
 		//object, handshake, and give it a thread to service it.
 
+		Socket client = null;
+
 		try
 		{
-			Socket client=sock.accept();
+			client=sock.accept();
 		}
 		catch(NullPointerException nfe)
 		{
