@@ -1,6 +1,7 @@
 package com.limegroup.gnutella;
 
 import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -306,7 +307,8 @@ public final class CreationTimeCache {
         //it's a problem in practice.
         ObjectOutputStream oos = null;
         try {
-            oos = new ObjectOutputStream(new FileOutputStream(CTIME_CACHE_FILE));
+            oos = new ObjectOutputStream(
+                    new BufferedOutputStream(new FileOutputStream(CTIME_CACHE_FILE)));
             oos.writeObject(URN_TO_TIME_MAP);
         } catch (IOException e) {
             ErrorService.error(e);

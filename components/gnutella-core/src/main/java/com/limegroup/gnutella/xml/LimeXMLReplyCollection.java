@@ -1,6 +1,7 @@
 package com.limegroup.gnutella.xml;
 
 import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -813,7 +814,8 @@ public class LimeXMLReplyCollection {
             ObjectOutputStream objStream = null;
             try {
                 ostream = new FileOutputStream(_backingStoreFile);
-                objStream = new ObjectOutputStream(ostream);
+                objStream = new ObjectOutputStream(
+                        new BufferedOutputStream(ostream));
                 synchronized (_hashMap) {
                     objStream.writeObject(_hashMap);
                 }

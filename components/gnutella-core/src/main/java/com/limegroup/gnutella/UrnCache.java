@@ -1,6 +1,7 @@
 package com.limegroup.gnutella;
 
 import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -198,7 +199,8 @@ public final class UrnCache {
         URN_CACHE_FILE.renameTo(URN_CACHE_BACKUP_FILE);
         ObjectOutputStream oos = null;
         try {
-            oos = new ObjectOutputStream(new FileOutputStream(URN_CACHE_FILE));
+            oos = new ObjectOutputStream(
+                    new BufferedOutputStream(new FileOutputStream(URN_CACHE_FILE)));
             oos.writeObject(URN_MAP);
         } catch (Exception e) {
             ErrorService.error(e);

@@ -1,6 +1,7 @@
 package com.limegroup.gnutella.tigertree;
 
 import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -192,7 +193,8 @@ public final class TigerTreeCache {
 
         ObjectOutputStream oos = null;
         try {
-            oos = new ObjectOutputStream(new FileOutputStream(CACHE_FILE));
+            oos = new ObjectOutputStream(
+                    new BufferedOutputStream(new FileOutputStream(CACHE_FILE)));
             oos.writeObject(TREE_MAP);
         } catch (IOException e) {
             ErrorService.error(e);

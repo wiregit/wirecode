@@ -1,6 +1,7 @@
 package com.limegroup.gnutella;
 
 import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -356,8 +357,9 @@ public class DownloadManager implements BandwidthTracker {
         //   IncompleteFileManager.
         try {
             ObjectOutputStream out=new ObjectOutputStream(
-                new FileOutputStream(
-                    SharingSettings.DOWNLOAD_SNAPSHOT_FILE.getValue()));
+                new BufferedOutputStream(
+                        new FileOutputStream(
+                                SharingSettings.DOWNLOAD_SNAPSHOT_FILE.getValue())));
             out.writeObject(buf);
             //Blocks can be written to incompleteFileManager from other threads
             //while this downloader is being serialized, so lock is needed.

@@ -54,10 +54,13 @@
 
 package com.limegroup.gnutella.util;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -102,7 +105,8 @@ public final class Expand {
      */
     public static void expandFile(File source, File dest, boolean overwrite) 
         throws IOException {
-        ZipInputStream zis = new ZipInputStream(new FileInputStream(source));
+        ZipInputStream zis = new ZipInputStream(
+                new BufferedInputStream(new FileInputStream(source)));
         ZipEntry ze = null;
         
         while ((ze = zis.getNextEntry()) != null) {
@@ -118,7 +122,7 @@ public final class Expand {
                 FileUtils.setWriteable(f);
                 byte[] buffer = new byte[1024];
                 int length = 0;
-                FileOutputStream fos = new FileOutputStream(f);
+                OutputStream fos = new BufferedOutputStream(new FileOutputStream(f));
                 
                 while ((length = zis.read(buffer)) >= 0) {
                     fos.write(buffer, 0, length);
