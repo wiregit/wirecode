@@ -195,7 +195,8 @@ public class LimeXMLReplyCollection {
             if(!doc.supportsID3v2() && LimeXMLUtils.isMP3File(file)) {
                 if(LOG.isDebugEnabled())
                     LOG.debug("reconstructing document for id3v2: " + file);
-                doc = constructDocument(null, file);
+                LimeXMLDocument tempDoc = constructDocument(null, file);
+                if (tempDoc != null) doc = tempDoc;
             }
                 
             // Verify the doc has information in it.
