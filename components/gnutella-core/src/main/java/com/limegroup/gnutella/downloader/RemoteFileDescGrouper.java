@@ -223,11 +223,13 @@ class RemoteFileDescGrouper implements Serializable {
         return 0;
     }
 
+    /**
+     * Accessor for the <tt>List</tt> of all URNs for this grouper.
+     * 
+     * @return a new, unmodifiable <tt>List</tt> of URNs for this grouper
+     */
     synchronized List getURNs() {
-        List retList = new ArrayList();
-        for (int i = 0; i < sha1s.length; i++)
-            retList.add(sha1s[i]);
-        return retList;
+        return Collections.unmodifiableList(Arrays.asList(sha1s));
     }
 
     synchronized URN getURNForBucket(int n) {
@@ -334,13 +336,11 @@ class RemoteFileDescGrouper implements Serializable {
         for (int i=0; i<buckets.size(); i++) {
             List bucket=(List)buckets.get(i);
             URN urn1=sha1s[i];
-            boolean gotURN=false;
             for (int j=0; j<bucket.size(); j++) {
                 URN urn2=((RemoteFileDesc)bucket.get(j)).getSHA1Urn();
                 if (urn2!=null) {      
                     Assert.that(urn1!=null);
                     Assert.that(urn1.equals(urn2));
-                    gotURN=true;
                 }
             }
         }
