@@ -64,9 +64,6 @@ public class ManagedDownloader implements Downloader, Serializable {
     /** The number of times to requery the network.
      */
     private static final int REQUERY_ATTEMPTS = 60;
-    /** The number of times to retry a set of RFDs (per query);
-     */
-    private static final int RETRY_ATTEMPTS = 4;
 
     /** the size of the approx matcher 2d buffer...
      */
