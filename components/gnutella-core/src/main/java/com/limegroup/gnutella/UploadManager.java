@@ -177,10 +177,9 @@ public class UploadManager implements BandwidthTracker {
     public static final int FILE_VIEW_FILE_INDEX = -6;
     
     /** 
-     * The file index used in this structure to indicate a HTTP File View GIF
-     * Get.
+     * The file index used in this structure to indicate a HTTP Resource Get.
      */
-    public static final int FILE_VIEW_GIF_INDEX = -7;
+    public static final int RESOURCE_INDEX = -7;
     
     /**
      * Whether or not to record stats.
@@ -200,7 +199,7 @@ public class UploadManager implements BandwidthTracker {
     /**
      * Constant for file-view gif get.
      */
-    public static final String FV_GIF_GET = "/gnutella/gif/file_view_logo.gif";
+    public static final String RESOURCE_GET = "/gnutella/res/";
 
 	/**
      * Remembers uploaders to disadvantage uploaders that
@@ -436,7 +435,7 @@ public class UploadManager implements BandwidthTracker {
                uploader.getIndex() != MALFORMED_REQUEST_INDEX &&
                uploader.getIndex() != BAD_URN_QUERY_INDEX &&
                uploader.getIndex() != FILE_VIEW_FILE_INDEX &&
-               uploader.getIndex() != FILE_VIEW_GIF_INDEX &&
+               uploader.getIndex() != RESOURCE_INDEX &&
                uploader.getMethod() != HTTPRequestMethod.HEAD;
 	}
     
@@ -528,8 +527,8 @@ public class UploadManager implements BandwidthTracker {
         case FILE_VIEW_FILE_INDEX:
             uploader.setState(Uploader.FILE_VIEW);
             return;
-        case FILE_VIEW_GIF_INDEX:
-            uploader.setState(Uploader.FILE_VIEW_GIF);
+        case RESOURCE_INDEX:
+            uploader.setState(Uploader.RESOURCE_GET);
             return;
         case PUSH_PROXY_FILE_INDEX:
             uploader.setState(Uploader.PUSH_PROXY);
@@ -1301,10 +1300,10 @@ public class UploadManager implements BandwidthTracker {
                 fileName = fileInfoPart;
                 if( RECORD_STATS )
                     ;
-            } else if(fileInfoPart.startsWith(FV_GIF_GET)) {
+            } else if(fileInfoPart.startsWith(RESOURCE_GET)) {
                 //special case for file view gif get
-                index = FILE_VIEW_GIF_INDEX;
-                fileName = fileInfoPart;
+                index = RESOURCE_INDEX;
+                fileName = fileInfoPart.substring(RESOURCE_GET.length());
                 if( RECORD_STATS )
                     ;
             } else if (fileInfoPart.equals("/update.xml")) {
