@@ -281,7 +281,7 @@ public abstract class FileManager {
         _fileToFileDesc = new HashMap();
     }
 
-    /** Asynchronously loads all files by calling loadSettings.  Sets this'
+    /** Asynchronously loads all files by calling loadSettings.  Sets this's
      *  callback to be "callback", and notifies "callback" of all file loads.
      *      @modifies this
      *      @see loadSettings */
@@ -394,7 +394,7 @@ public abstract class FileManager {
 
 	/**
 	 * Returns the <tt>FileDesc</tt> for the specified URN.  This only returns 
-	 * one <tt>FileDesc</tt>, even though multiple indeces are possible with 
+	 * one <tt>FileDesc</tt>, even though multiple indices are possible with 
 	 * HUGE v. 0.93.
 	 *
 	 * @param urn the urn for the file
@@ -402,10 +402,10 @@ public abstract class FileManager {
 	 *  <tt>null</tt> if no matching <tt>FileDesc</tt> could be found
 	 */
 	public synchronized FileDesc getFileDescForUrn(final URN urn) {
-		IntSet indeces = (IntSet)_urnIndex.get(urn);
-		if(indeces == null) return null;
+		IntSet indices = (IntSet)_urnIndex.get(urn);
+		if(indices == null) return null;
 
-		IntSet.IntSetIterator iter = indeces.iterator();
+		IntSet.IntSetIterator iter = indices.iterator();
 		
         //Pick the first non-null non-Incomplete FileDesc.
         FileDesc ret = null;
