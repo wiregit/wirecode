@@ -64,6 +64,13 @@ public class XMLStringUtils
     public static final String XML_VERSION_DELIM = "<?xml version=\"1.0\"?>";
 
 
+    /** The xml tag for audio schemas.
+     */
+    public static final String AUDIO_SCHEMA_TAG = "audio";
+
+    /** The xml tag for video schemas.
+     */
+    public static final String VIDEO_SCHEMA_TAG = "video";
     
     /**
      * Breaks the given string (which confirms to the pattern defined above

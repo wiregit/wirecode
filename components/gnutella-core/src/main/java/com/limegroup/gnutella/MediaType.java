@@ -49,8 +49,22 @@ public class MediaType {
 		return description;
     }
 
-    /** Returns an array of default media types. */
+    private static MediaType[] allMediaTypes = null;
     public static MediaType[] getDefaultMediaTypes() {
+        if (allMediaTypes == null)
+            allMediaTypes = getTypes();
+        return allMediaTypes;
+    }
+
+    public static MediaType getAudioMediaType() {
+        return (getDefaultMediaTypes())[3];
+    }
+    public static MediaType getVideoMediaType() {
+        return (getDefaultMediaTypes())[4];
+    }
+
+    /** Returns an array of default media types. */
+    private static MediaType[] getTypes() {
 		MediaType any=new MediaType("Any Type", null);
 		//This list isn't exhaustive, but it's not clear that we want it
 		//to.  We may only want the most common file types here.

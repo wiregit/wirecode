@@ -109,17 +109,24 @@ public class Response {
             length=first;
             //extract the bitrate from second
             int i=second.indexOf("kbps");
-            bitrate = second.substring(0,i);
+            if(i>-1)//see if we can find the bitrate                
+                bitrate = second.substring(0,i);
+            else//not gnotella, after all...some other format we do not know
+                gnotella=false;
         }
         if(bearShare1 || bearShare2 || gnotella){//some metadata we understand
             this.metadata = "<audios xsi:noNamespaceSchemaLocation="+
                  "\"http://www.limewire.com/schemas/audio.xsd\">"+
                  "<audio title=\""+name+"\" bitrate=\""+bitrate+
-                 "\" length=\""+length+"\">"+
+                 "\" seconds=\""+length+"\">"+
                  "</audio></audios>";
             this.metaBytes=metadata.getBytes();
-            this.index=index;
         }
+        else{
+            this.metadata= "";
+            this.metaBytes = metadata.getBytes();
+        }
+        this.index=index;
         this.size=size;
         this.name=name;
         this.nameBytes = name.getBytes(); 
@@ -199,7 +206,6 @@ public class Response {
         return name.hashCode()+(int)size+(int)index;
     }
 
-    /*
     //Unit Test Code 
     //(Added when bytes stuff was added here 3/2/2001 by Sumeet Thadani)
     public static void main(String args[]){
@@ -208,7 +214,33 @@ public class Response {
         Assert.that(nameSize==5);
         byte[] nameBytes = r.getNameBytes();
         Assert.that (nameBytes[0] == 65);
+        Assert.that((new String(r.getMetaBytes())).equals(""),"Spurios meta");
+        Assert.that(r.getMetaBytesSize() == 0,"Meta size not right");
+        //
+        Response r2 = new Response("",999,4,"blah.txt");
+        Assert.that((new String(r2.getMetaBytes())).equals(""),"bad meta");
+        Assert.that(r2.getMetaBytesSize() == 0,"Meta size not right");
+        String md = "Hello";
+        Response r3 = new Response(md,999,4,"king.txt");
+        Assert.that((new String(r3.getMetaBytes())).equals(""),"bad meta");
+        Assert.that(r3.getMetaBytesSize() == 0,"Meta size not right");
+        //The three formats we support
+        String[] meta = {"a kbps 44.1 kHz b","akbps 44.1 kHz b", 
+                                             "b akbps 44.1kHz" };
+        for(int i=0;i<meta.length;i++){
+            Response r4 = new Response(meta[i],999+i,4,"abc.txt");
+            com.limegroup.gnutella.xml.LimeXMLDocument d=null;
+            String xml = r4.getMetadata();
+            try{
+                d = new com.limegroup.gnutella.xml.LimeXMLDocument(xml);
+            }catch (Exception e){
+                Assert.that(false,"XML not created well from between nulls");
+            }
+            String br = d.getValue("audios__audio__bitrate__");
+            Assert.that(br.equals("a"));
+            String len = d.getValue("audios__audio__seconds__");
+            Assert.that(len.equals("b"));
+        }
     } 
-    */
 }
 

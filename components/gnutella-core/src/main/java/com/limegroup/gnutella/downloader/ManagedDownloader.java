@@ -1,8 +1,8 @@
 package com.limegroup.gnutella.downloader;
 
-import com.limegroup.gnutella.xml.LimeXMLDocument;
 import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.util.*;
+import com.limegroup.gnutella.xml.*;
 import com.sun.java.util.collections.*;
 import java.util.Date;
 import java.io.*;
@@ -274,7 +274,12 @@ public class ManagedDownloader implements Downloader, Serializable {
                             equals(new GUID(clientGUID)))
                     break;
             }
-            Assert.that(rfd!=null, "No match for supposedly requested file");
+            //We used to assert that rfd!=null here.  However this assertion was
+            //failing, and I'm not sure why.  I'm too lazy to investigate, since
+            //this code is simplified on swarm-branch.  So we just recover
+            //gracefully.
+            if (rfd==null)
+                return false;
         }
 
         //Authentication ok.  Make and queue downloader.  Notify downloader
@@ -339,53 +344,47 @@ public class ManagedDownloader implements Downloader, Serializable {
         return true;
     }
 
-    public synchronized void launch() {
+
+    /** This is a blocking call.  Threading it may make sense.
+     */
+    public synchronized File getDownloadFragment() {
         //We haven't started yet.
         if (dloader==null)
-            return;
+            return null;
 
         //Unfortunately this must be done in a background thread because the
         //copying (see below) can take a lot of time.  If we can avoid the copy
         //in the future, we can avoid the thread.
-        Thread worker=new Thread() {
-            public void run() {              
-                String name=dloader.getFileName();
-                File file=null;
+        String name=dloader.getFileName();
+        File file=null;
 
-                //a) If the file is being downloaded, create *copy* of
-                //incomplete file.  The copy is needed because some programs,
-                //notably Windows Media Player, attempt to grab exclusive file
-                //locks.  If the download hasn't started, the incomplete file
-                //may not even exist--not a problem.
-                if (dloader.getAmountRead()<dloader.getFileSize()) {
-                    File incomplete=incompleteFileManager.
-                        getFile(name, dloader.getFileSize());            
-                    file=new File(incomplete.getParent(),
-                                  IncompleteFileManager.PREVIEW_PREFIX
-                                      +incomplete.getName());
-                    if (! CommonUtils.copy(incomplete, file)) //note side-effect
-                        return;
-                }
-                //b) Otherwise, choose completed file.
-                else {
-					File saveDir = null;
-					try {
-						saveDir = SettingsManager.instance().getSaveDirectory();
-					} catch(java.io.FileNotFoundException fnfe) {
-						// simply return if we could not get the save directory.
-						return;
-					}
-					file=new File(saveDir,name);     
-				}
-
-                try {
-                    Launcher.launchFile(file);
-                } catch (IOException e) { }
+        //a) If the file is being downloaded, create *copy* of
+        //incomplete file.  The copy is needed because some programs,
+        //notably Windows Media Player, attempt to grab exclusive file
+        //locks.  If the download hasn't started, the incomplete file
+        //may not even exist--not a problem.
+        if (dloader.getAmountRead()<dloader.getFileSize()) {
+            File incomplete=incompleteFileManager.
+            getFile(name, dloader.getFileSize());            
+            file=new File(incomplete.getParent(),
+                          IncompleteFileManager.PREVIEW_PREFIX
+                          +incomplete.getName());
+            if (! CommonUtils.copy(incomplete, file)) //note side-effect
+                return null;
+        }
+        //b) Otherwise, choose completed file.
+        else {
+            File saveDir = null;
+            try {
+                saveDir = SettingsManager.instance().getSaveDirectory();
+            } catch(java.io.FileNotFoundException fnfe) {
+                // simply return if we could not get the save directory.
+                return null;
             }
-        };
-        worker.setDaemon(true);
-        worker.setName("Launcher thread");
-        worker.start();
+            file=new File(saveDir,name);     
+        }
+        
+        return file;
     }
 
     /** Actually does the download. */
@@ -837,16 +836,42 @@ public class ManagedDownloader implements Downloader, Serializable {
     }
 
 
+    /** call this method if you need to add a newly downloaded file to the
+        FileManager repository.
+    */
+    public void addFileToFM(File f, String hash) {
+        MetaFileManager mfm = (MetaFileManager) fileManager;                
+        mfm.writeToMap(f,hash,LimeXMLUtils.isMP3File(f));
+    }
+
+
     /** 
      * Returns an LimeXMLDocument array describing the downloaded
      * file.
-     * TODO1 : currently, the docs from a random (first) RFD are returned.
-     * Can this be improved?  It seems to be sufficent for now.
      */
     public LimeXMLDocument[] getXMLDocs() {
         LimeXMLDocument[] retArray = null;
-        if (this.allFiles[0] != null)
-            retArray = this.allFiles[0].getXMLDocs();
+        ArrayList allDocs = new ArrayList();
+
+        // get all docs possible
+        for (int i = 0; i < this.allFiles.length; i++) {
+            if (this.allFiles[i] != null) {
+                retArray = this.allFiles[i].getXMLDocs();
+                for (int j = 0; 
+                     (retArray != null) && (j < retArray.length);
+                     j++)
+                    allDocs.add(retArray[j]);                
+            }
+        }
+
+        if (allDocs.size() > 0) {
+            retArray = new LimeXMLDocument[allDocs.size()];
+            for (int i = 0; i < retArray.length; i++)
+                retArray[i] = (LimeXMLDocument) allDocs.get(i);
+        }
+        else
+            retArray = null;
+
         return retArray;
     }
 

@@ -20,6 +20,7 @@ public class Main implements ActivityCallback {
                               (new StandardMessageRouter(callback,fm)),fm);
     
     service.initialize();
+    service.postGuiInit();    
 
     System.out.println("For a command list type help.");
     BufferedReader in=new BufferedReader(new InputStreamReader(System.in));

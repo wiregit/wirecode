@@ -94,9 +94,15 @@ public class RouterService
 		this.uploadManager.initialize(callback, router, acceptor,fileManager);
 		this.acceptor.initialize(manager, router, downloader, uploadManager);
         this.chatManager.setActivityCallback(callback);
+
+
 		// Make the call to connect to the router after everything else has
-		// been initialized
-		this.catcher.connectToRouter();
+		// been initialized, but only if the user has specified that we
+		// should do so
+		if(settings.getConnectOnStartup()) {
+			this.catcher.connectToRouter();
+		}
+
 		this.downloader.initialize(callback, router, acceptor,
                                    fileManager);
 		
@@ -105,12 +111,19 @@ public class RouterService
 		supernodeThread.setDaemon(true);
 		supernodeThread.start();
 
-  		// Make sure connections come up ultra-fast (beyond default keepAlive)
-		int outgoing = settings.getKeepAlive();
-  		if ( outgoing > 0 ) 
-  			connect();
+		if(settings.getConnectOnStartup()) {
+			// Make sure connections come up ultra-fast (beyond default keepAlive)		
+			int outgoing = settings.getKeepAlive();
+			if ( outgoing > 0 ) 
+				connect();
+		}
   	}
 
+	/**
+	 * Accessor for the <tt>FileManager</tt> instance in use.
+	 *
+	 * @return the <tt>FileManager</tt> in use
+	 */
     public FileManager getFileManager(){
         return fileManager;
     }
@@ -512,12 +525,15 @@ public class RouterService
      * the it creates a rich Query. 
      * @return the guid of the search, used to match up query with 
      * replies. 
+     * @param type the desired type of result (e.g., audio, video), or
+     *  null if you don't care
      */
-    public byte[] query(String query, String richQuery, int minSpeed) {
+    public byte[] query(String query, String richQuery, 
+                        int minSpeed, MediaType type) {
         //System.out.println("Sumeet rich query coming...");
         QueryRequest qr=new QueryRequest(SettingsManager.instance().getTTL(),
                                          minSpeed, query, richQuery);
-        verifier.record(qr, null);
+        verifier.record(qr, type);
         router.broadcastQueryRequest(qr);
         return qr.getGUID();
     }

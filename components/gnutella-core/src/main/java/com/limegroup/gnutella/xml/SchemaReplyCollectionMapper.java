@@ -45,20 +45,26 @@ public class SchemaReplyCollectionMapper{
      */
     public void add(String schemaURI, LimeXMLReplyCollection replyCollection){
         LimeXMLReplyCollection l=(LimeXMLReplyCollection)mapper.get(schemaURI);
-        mapper.put(schemaURI,replyCollection);        
+        synchronized(mapper){
+            mapper.put(schemaURI,replyCollection);        
+        }
     }
     
     /**
      * Returns null if the schemaURI does not correspond to any ReplyCollection
      */
     public LimeXMLReplyCollection getReplyCollection(String schemaURI){
-        LimeXMLReplyCollection replyCollection = 
-                           (LimeXMLReplyCollection)mapper.get(schemaURI);
+        LimeXMLReplyCollection replyCollection;
+        synchronized(mapper){
+            replyCollection = (LimeXMLReplyCollection)mapper.get(schemaURI);
+        }
         return replyCollection;
     }
 
     protected void removeReplyCollection(String schemaURI){
-        mapper.remove(schemaURI);
+        synchronized(mapper){
+            mapper.remove(schemaURI);
+        }
     }
 
 }

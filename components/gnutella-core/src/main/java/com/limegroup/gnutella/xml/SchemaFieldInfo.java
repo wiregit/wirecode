@@ -47,6 +47,11 @@ public class SchemaFieldInfo
         return _type;
     }
     
+    public Class getJavaType()
+    {
+        return TypeConverter.getType(_type);
+    }
+
     /**
      * Adds the passed value to the list of enumeration values
      */

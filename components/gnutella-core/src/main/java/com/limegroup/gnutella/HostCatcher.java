@@ -89,11 +89,18 @@ public class HostCatcher {
     //added.
     private boolean alwaysNotifyKnownHost=false;
 
+	/**
+	 * Boolean value for whether or not the thread to connect to the 
+	 * router has been started or not.
+	 */
+	private boolean routerConnectorThreadStarted = false;
+
     /**
      * Creates an empty host catcher.  Must call initialize before using.
      */
     public HostCatcher(ActivityCallback callback) {
         this.callback=callback;
+        routerConnectorThread=new RouterConnectorThread();
     }
 
     /**
@@ -108,8 +115,9 @@ public class HostCatcher {
 	 * Connects to the router in a background thread.
 	 */
 	public void connectToRouter() {
-        routerConnectorThread=new RouterConnectorThread();
+		routerConnectorThread.setDaemon(true);
         routerConnectorThread.start();
+		routerConnectorThreadStarted = true;
 	}
 
     /**
@@ -578,7 +586,11 @@ public class HostCatcher {
      *  contact the pong server.
      */
     public synchronized void expire() {
-        routerConnectorThread.interrupt();
+		if(routerConnectorThreadStarted)
+			routerConnectorThread.interrupt();
+		else {
+			connectToRouter();
+		}
     }
 
     /**

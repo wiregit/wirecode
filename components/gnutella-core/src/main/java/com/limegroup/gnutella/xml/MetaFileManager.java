@@ -113,6 +113,34 @@ public class MetaFileManager extends FileManager {
         }
     }
 
+    /**
+     * Looks at the  LimeXMlReplyCollections other than the one passed as
+     * a parameter, and replaces the old hashValue with the new one.
+     * <p>
+     * package access, since this method is only called from 
+     * LimeXMLReplyCollection. Further the caller is always the 
+     * audio LimeXMLReplyCollectin and, even further, it is only called
+     * when the file being edited is an mp3 file
+     */
+    void handleChangedHash(String oldHash, String newHash, 
+                                      LimeXMLReplyCollection collection){
+        LimeXMLSchemaRepository rep = LimeXMLSchemaRepository.instance();
+        SchemaReplyCollectionMapper map=SchemaReplyCollectionMapper.instance();
+        String[] schemas = rep.getAvailableSchemaURIs();
+        int l = schemas.length;
+        for(int i=0;i<l;i++){
+            LimeXMLReplyCollection coll = map.getReplyCollection(schemas[i]);
+            if(coll!=collection){//only look at other collections
+                LimeXMLDocument d=coll.getDocForHash(oldHash);
+                if(d!=null){//we have a value...must replace
+                    coll.removeDoc(oldHash);
+                    coll.addReply(newHash,d);
+                    coll.toDisk("");
+                }//affected collection done
+            }
+        }
+    }
+
 
     /**This method overrides FileManager.loadSettingsBlocking(), though
      * it calls the super method to load up the shared file DB.  Then, it
@@ -208,26 +236,32 @@ public class MetaFileManager extends FileManager {
      */
     private void createFileToHashMaps(){
         SettingsManager man = SettingsManager.instance();
+        //ArrayList dirs = new 
+		//            ArrayList(Arrays.asList(man.getDirectoriesAsArray()));
         ArrayList dirs = new 
-                      ArrayList(Arrays.asList(man.getDirectoriesAsArray()));
+                      ArrayList(Arrays.asList(man.getDirectories()));
 
         int k=0;
         while(k < dirs.size()) {
-            String dir = (String)dirs.get(k);
+            //String dir = (String)dirs.get(k);
+            //File currDir = new File(dir);
+            File currDir = (File)dirs.get(k);
             k++;
-            File currDir = new File(dir);
             //add all subdirectories to dirs
             String[] subFiles = currDir.list();
             int z = subFiles.length;
             for(int j=0;j<z;j++){
-                File f = new File(dir,subFiles[j]);
+                File f = new File(currDir,subFiles[j]);
                 if(f.isDirectory()){
-                    try {
-                        String newDir = f.getCanonicalPath();                  
-                        dirs.add(newDir);
-                    } catch (IOException ignored) {
-                        continue;
-                    }
+                    dirs.add(f);
+                    /*
+                      try {
+                      String newDir = f.getCanonicalPath();                  
+                      dirs.add(newDir);
+                      } catch (IOException ignored) {
+                      continue;
+                      }
+                    */
                 }
             }
             //check files in this dir for .mp3 files.
@@ -242,14 +276,7 @@ public class MetaFileManager extends FileManager {
                     }catch(Exception e){
                         continue;
                     }
-                    int j = name.lastIndexOf(".");
-                    String ext="";
-                    if(j>0)
-                        ext = name.substring(j);
-                    if(ext.equalsIgnoreCase(".mp3"))
-                        writeToMap(files[i],hash,true);
-                    else
-                        writeToMap(files[i],hash,false);
+                    writeToMap(files[i],hash,LimeXMLUtils.isMP3File(name));
             }
         }
     }

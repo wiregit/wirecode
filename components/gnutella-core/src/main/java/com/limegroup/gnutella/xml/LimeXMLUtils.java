@@ -334,7 +334,11 @@ public class LimeXMLUtils
         if(size > 1){
             if( ( (nullCountD+matchCountD)/sizeD ) < MATCHING_RATE)
                 return false;
-            return true;
+            // ok, it passed rate test, now make sure it had SOME matches...
+            if (matchCount > 0)
+                return true;
+            else
+                return false;
         }
         else if (size == 1){
             if(matchCountD/sizeD < 1)
@@ -344,6 +348,24 @@ public class LimeXMLUtils
         //this should never happen - size >0
         return false;
     }
+
+
+    public static boolean isMP3File(String in) {
+        boolean retVal = false;
+
+        in = in.toLowerCase();
+        if (in.endsWith(".mp3"))
+            retVal = true;
+        
+        return retVal;
+    }
+
+
+    public static boolean isMP3File(File in) {
+        boolean retVal = isMP3File(in.getName());        
+        return retVal;
+    }
+
     
     /**
       * Converts the given list of xml documents to an array of responses
@@ -459,13 +481,16 @@ public class LimeXMLUtils
     /**
      * takes a string and returns the same string with the first letter 
      * capitalized
+     * <p>
+     * 11/2/01 Also replaces any "_" with " "
      */
     public static String capitalizeFirst(String str)
     {
-        String first = str.substring(0,1);
-        String newFirst = first.toUpperCase();
+        String first = str.substring(0,1).toUpperCase();
         String last = str.substring(1); 
-        return  newFirst+last;
+        String retStr = first+last;
+        return retStr.replace('_',' ');
+        
     }
 
     /**

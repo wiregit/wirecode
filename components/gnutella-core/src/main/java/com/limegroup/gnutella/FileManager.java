@@ -93,7 +93,7 @@ public class FileManager {
         }
     }
 
-    protected FileManager() {
+    public FileManager() {
         // We'll initialize all the instance variables so that the FileManager
         // is ready once the constructor completes, even though the
         // thread launched at the end of the constructor will immediately
@@ -149,49 +149,125 @@ public class FileManager {
      * Returns a list of all shared files in the given directory, in any order.
      * Returns null if directory is not shared, or a zero-length array if it is
      * shared but contains no files.  This method is not recursive; files in any
-     * of the directory's children are not returned.  If directory is null,
-     * returns all shared files.
+     * of the directory's children are not returned.  
      */
-    public synchronized File[] getSharedFiles(File directory) {   
-        if (directory!=null) {
-            //a) Remove case, trailing separators, etc.
-            try {
-                directory=getCanonicalFile(directory);
-            } catch (IOException e) {
-                return null;
-            }
-
-            //Lookup indices of files in the given directory...
-            IntSet indices=(IntSet)_sharedDirectories.get(directory);
-            if (indices==null)
-                return null;
-
-
-            //...and pack them into an array.
-            File[] ret=new File[indices.size()];
-            IntSet.IntSetIterator iter=indices.iterator(); 
-            for (int i=0; iter.hasNext(); i++) {
-                FileDesc fd=(FileDesc)_files.get(iter.next());
-                Assert.that(fd!=null, "Directory has null entry");
-                ret[i]=new File(fd._path);
-            }
-            return ret;
-        } else {
-            //b) Filter out unshared entries.
-            ArrayList buf=new ArrayList(_files.size());
-            for (int i=0; i<_files.size(); i++) {
-                FileDesc fd=(FileDesc)_files.get(i);
-                if (fd!=null)
-                    buf.add(new File(fd._path));                
-            }
-            File[] ret=new File[buf.size()];
-            Object[] out=buf.toArray(ret);
-            Assert.that(out==ret, "Couldn't fit list in returned value");
-            return ret;
+    public synchronized File[] getSharedFiles(File directory) {        
+        //Remove case, trailing separators, etc.
+        try {
+            directory=getCanonicalFile(directory);
+        } catch (IOException e) {
+            return null;
         }
+
+        //Lookup indices of files in the given directory...
+        IntSet indices=(IntSet)_sharedDirectories.get(directory);
+        if (indices==null)
+            return null;
+        //...and pack them into an array.
+        File[] ret=new File[indices.size()];
+        IntSet.IntSetIterator iter=indices.iterator(); 
+        for (int i=0; iter.hasNext(); i++) {
+            FileDesc fd=(FileDesc)_files.get(iter.next());
+            Assert.that(fd!=null, "Directory has null entry");
+            ret[i]=new File(fd._path);
+        }
+        return ret;
     }
 
-    
+    /**
+     * @param directory Gets all files under this directory RECURSIVELY.
+     * @param filter If null, then returns all files.  Else, only returns files
+     * extensions in the filter array.
+     * @return A Array of Files recursively obtained from the directory,
+     * according to the filter.
+     */
+    public static File[] getFilesRecursive(File directory,
+                                           String[] filter) {
+
+        debug("FileManager.getFilesRecursive(): entered.");
+        ArrayList dirs = new ArrayList();
+        // the return array of files...
+        ArrayList retFileArray = new ArrayList();
+        File[] retArray = null;
+
+        // bootstrap the process
+        if (directory.exists() && directory.isDirectory())
+            dirs.add(directory);
+
+        // while i have dirs to process
+        while (dirs.size() > 0) {
+            File currDir = (File) dirs.remove(0);
+            debug("FileManager.getFilesRecursive(): currDir = " +
+                  currDir);
+            String[] listedFiles = currDir.list();
+            for (int i = 0; i < listedFiles.length; i++) {
+
+                File currFile = new File(currDir,listedFiles[i]);
+                if (currFile.isDirectory()) // to be dealt with later
+                    dirs.add(currFile);
+                else if (currFile.isFile()) { // we have a 'file'....
+
+                    boolean shouldAdd = false;
+                    if (filter == null)
+                        shouldAdd = true;
+                    else {
+                        String ext = getFileExtension(currFile);
+                        for (int j = 0; 
+                             (j < filter.length) && (ext != null); 
+                             j++)
+                            if (ext.equalsIgnoreCase(filter[j]))
+                                shouldAdd = true;
+                    }
+
+                    if (shouldAdd)
+                        retFileArray.add(currFile);
+                }
+            }
+        }        
+
+        if (!retFileArray.isEmpty()) {
+            retArray = new File[retFileArray.size()];
+            for (int i = 0; i < retArray.length; i++)
+                retArray[i] = (File) retFileArray.get(i);
+        }
+
+        debug("FileManager.getFilesRecursive(): returning.");
+        return retArray;
+    }
+
+
+    // simply gets whatever is after the "." in a filename, or the first thing
+    // after the first "." in the filename
+    private static String getFileExtension(File f) {
+        String retString = null;
+
+        java.util.StringTokenizer st = 
+        new java.util.StringTokenizer(f.getName(), ".");
+        if (st.countTokens() > 1) {
+            st.nextToken();
+            retString = st.nextToken();
+        }
+        return retString;
+    }
+
+    private static boolean debugOn = false;
+    public static void debug(String out) {
+        if (debugOn)
+            System.out.println(out);
+    }
+
+    /*
+      public static void main(String argv[]) {
+      String[] filter = {"mp3"};
+      File[] toPrint = FileManager.getFilesRecursive(new File(argv[0]), 
+      filter);
+      for (int i = 0; 
+      (toPrint != null) && (i < toPrint.length); 
+      i++)
+      System.out.println(""+toPrint[i]);
+      }
+    */
+
     ///////////////////////////// Mutators ////////////////////////////////////   
 
     /**
@@ -260,7 +336,7 @@ public class FileManager {
      *  @modifies this */
     protected void loadSettingsBlocking(boolean notifyOnClear) {
 
-        String[] tempDirVar;
+        File[] tempDirVar;
         synchronized (this) {
             // Reset the file list info
             _size = 0;
@@ -292,23 +368,31 @@ public class FileManager {
             //So we just approximate this by sorting by filename length, from
             //smallest to largest.  Unless directories are specified as
             //"C:\dir\..\dir\..\dir", this will do the right thing.
-            final String[] directories = 
-            StringUtils.split(SettingsManager.instance().getDirectories().trim(),
-                              ';');
+            //final String[] directories = 
+            //StringUtils.split(SettingsManager.instance().getDirectories().trim(),
+			//                ';');
+
+			final File[] directories = SettingsManager.instance().getDirectories();
 
             if (_loadThread.isInterrupted())
                 return;
 
             Arrays.sort(directories, new Comparator() {
                 public int compare(Object a, Object b) {
-                    return ((String)a).length()-((String)b).length();
+                    return (a.toString()).length()-(b.toString()).length();
                 }
             });
+
+            //Arrays.sort(directories, new Comparator() {
+			//  public int compare(Object a, Object b) {
+			//      return ((String)a).length()-((String)b).length();
+			//  }
+			// });
             tempDirVar = directories;
         }
 
         //clear this, list of directories retreived
-        final String[] directories = tempDirVar;
+        final File[] directories = tempDirVar;
         if (notifyOnClear) 
             _callback.clearSharedFiles();
         
@@ -320,7 +404,7 @@ public class FileManager {
             // Add each directory as long as we're not interrupted.
             int i=0;
             while (i<directories.length && !_loadThread.isInterrupted()) {
-                addDirectory(new File(directories[i]), null);      
+                addDirectory(directories[i], null);      
                 i++;
             }
             

@@ -15,20 +15,97 @@ import com.limegroup.gnutella.util.CommonUtils;
  * settings for values not set in the saved settings files and 
  * updates those settings based on user input, checking for errors 
  * where appropriate.  It also saves the settings file to disk when 
- * the session terminates.
+ * the session terminates.  Any properties that should persist between 
+ * user sessions should be added here.<p>
+ *
+ * Adding a new property is a bit cumbersome at first, but it's not so bad
+ * once you get used to it.  Below are the steps that were necessary to 
+ * add the property for whether or not to automatically connect to the 
+ * network on startup. This should be used as a general outline for adding
+ * more properties.<p>
+ *
+ * <ol> 
+ *      <li>Add a default value for the property using the general naming 
+ *          convention of DEFAULT_MY_PROPERTY_NAME for the constant, as 
+ *          illustrated below:<p>
+ *
+ *          private final boolean DEFAULT_CONNECT_ON_STARTUP = true;<p>
+ *
+ *      <li>Once this is added, the properties file also needs a key name to 
+ *          identify this property in the limewire.props file, as in:<p>
+ * 
+ *          private final String CONNECT_ON_STARTUP = "CONNECT_ON_STARTUP";<p>
+ *   
+ *          Using human readable keys is useful if you want to allow developers 
+ *          (or savvy users) to easily modify the properties file.<p>
+ *
+ *      <li>The next step is to add accessors and mutator methods for the
+ *          property.  This requires accessing the "PROPS" constant for the
+ *          <tt>Properties</tt> class that loads the limewire.props file on
+ *          startup.  While the <tt>Properties</tt> class is one of the most
+ *          notoriously poorly designed clases in the JRE (it extends  
+ *          Hashtable -- that can't be good!), we don't have a lot of other  
+ *          options (ok, theres the preferences package in 1.4, but an 8MB 
+ *          download?).  You will notice that we use the deprecated put() 
+ *          method of the <tt>Properties</tt> class as well, but we only do 
+ *          this to remain compatible with the 1.1.8 JRE available on the  
+ *          Mac.<p>
+ *          
+ *          So, getting back to our example, for our "connect on startup" 
+ *          property, we simply added the accessor:<p>
+ *  
+ *          public boolean getConnectOnStartup() {
+ * 		        return getBooleanValue(CONNECT_ON_STARTUP);
+ *          }<p>
+ *
+ *          and the mutator:<p>
+ *
+ *          public void setConnectOnStartup(boolean connect) {
+ *              setBooleanValue(CONNECT_ON_STARTUP, connect);
+ *          }<p>
+ *
+ *          Notice that this is where the constant key for the property
+ *          gets put to good use (CONNECT_ON_STARTUP).<p>
+ *      
+ *      <li>The final step is to handle loading the property on startup.  
+ *          This is done in two private methods.  First, the "loadDefaults"
+ *          method loads all of the default values for the properties.  For
+ *          our example property, we simply added the line:<p>
+ *
+ *          setConnectOnStartup(DEFAULT_CONNECT_ON_STARTUP);<p>
+ *
+ *          to the end of the loadDefaults() method.  Finally, we need to add
+ *          the call to set the property from the file (which will overwrite
+ *          the default if the property exists in limewire.props).  This
+ *          is done in the "validateFile()" method.  In this example, we 
+ *          added the lines:<p>
+ *
+ *          else if(key.equals(CONNECT_ON_STARTUP)) {
+ *              setConnectOnStartup((new Boolean(p)).booleanValue());
+ *			}
+ *
+ *          Once you've done this, you're done.  Now that was, ahh, easy right?                    
+ * </ol><p>
+ *
+ * The one major exception to the above set of rules is the case where you 
+ * are adding a property that will be accessed extremely frequently.  In this
+ * case, you probably want to cache the value in a local variable instead of
+ * looking it up in the PROPS constant each time.  There are many examples
+ * of this in the code.  Also, as always, it's very important to add detailed
+ * comments to all methods and constants.
  */
 //2345678|012345678|012345678|012345678|012345678|012345678|012345678|012345678|
-public class SettingsManager {
+public final class SettingsManager {
 
 	private final String CURRENT_DIRECTORY = System.getProperty("user.dir");
 
 	/**
-	 * the default name of the shared directory.
+	 * Default name of the shared directory.
 	 */
 	private final String  SAVE_DIRECTORY_NAME = "Shared";
 
 	/**
-	 * the name of the host list file.
+	 * Name of the host list file.
 	 */
 	private final String HOST_LIST_NAME = "gnutella.net";	
 
@@ -160,12 +237,16 @@ public class SettingsManager {
 	private final boolean DEFAULT_SHOW_TRAY_DIALOG    = true;
 	private final boolean DEFAULT_MINIMIZE_TO_TRAY    = true;
 	private final boolean DEFAULT_SHOW_CLOSE_DIALOG   = true;
-	public final String  DEFAULT_CLASSPATH           
-		= "LimeWire.jar" + File.pathSeparator + "collections.jar";
+	public static final String  DEFAULT_CLASSPATH           
+		= "LimeWire.jar" + File.pathSeparator + 
+		"collections.jar" + File.pathSeparator + 
+		"xerces.jar" + File.pathSeparator + 
+		"jl011.jar";
 	private final String  DEFAULT_MAIN_CLASS           
 		= "com.limegroup.gnutella.gui.Main";
 
 	private final boolean DEFAULT_CHAT_ENABLED        = true;
+    private final boolean DEFAULT_PLAYER_ENABLED      = true;
 	private final String DEFAULT_LANGUAGE             = "en";
 	private final String DEFAULT_COUNTRY              = "US";
 
@@ -218,6 +299,12 @@ public class SettingsManager {
 	 * run on this machine.
 	 */
 	private final int DEFAULT_SESSIONS = 1;
+
+	/**
+	 * Default value for whether or not to connect to the Gnutella
+	 * network on startup.
+	 */
+	private final boolean DEFAULT_CONNECT_ON_STARTUP = true;
     
     // The property key name constants
 	private final String ALLOW_BROWSER         = "ALLOW_BROWSER";
@@ -293,6 +380,11 @@ public class SettingsManager {
 	private final String CHAT_ENABLED = "CHAT_ENABLED";
 
 	/**
+	 * Constant key for whether or not the internal player is enabled.
+	 */
+	private final String PLAYER_ENABLED = "PLAYER_ENABLED";
+
+	/**
 	 * Constant key for the language we're currently using.
 	 */
 	private final String LANGUAGE = "LANGUAGE";
@@ -350,6 +442,11 @@ public class SettingsManager {
      * "supernode capable" across all sessions.
      */
     private final String EVER_SUPERNODE_CAPABLE = "EVER_SUPERNODE_CAPABLE";
+
+	/**
+	 * Constant key for whether or not to connect on startup.
+	 */
+	private final String CONNECT_ON_STARTUP = "CONNECT_ON_STARTUP";
  
 	/** Variables for the various settings */
     private volatile boolean  _forceIPAddress;
@@ -371,7 +468,7 @@ public class SettingsManager {
     private volatile int      _maxIncomingConn;
     private volatile File     _saveDirectory;
     private volatile File     _incompleteDirectory;
-    private volatile String   _directories;
+    private volatile File[]   _directories;
     private volatile String   _extensions;
     private volatile String[] _bannedIps;
     private volatile String[] _bannedWords;
@@ -392,6 +489,7 @@ public class SettingsManager {
     private volatile int      _uploadsPerPerson;
 
 	private volatile boolean  _chatEnabled;          
+	private volatile boolean  _playerEnabled;          
 
     /** connectString_ is something like "GNUTELLA CONNECT..."
      *  connectStringOk_ is something like "GNUTELLA OK..."
@@ -601,6 +699,16 @@ public class SettingsManager {
                     else
                         break;
                     setChatEnabled(bs);
+				}
+				else if(key.equals(PLAYER_ENABLED)) {
+					boolean bs;
+                    if (p.equals("true"))
+                        bs=true;
+                    else if (p.equals("false"))
+                        bs=false;
+                    else
+                        break;
+                    setPlayerEnabled(bs);
 				}
                 else if(key.equals(CLIENT_ID)) {
                     setClientID(p);
@@ -844,22 +952,22 @@ public class SettingsManager {
                     setEverSupernodeCapable(b.booleanValue());
                 }
 				
-                else if(key.equals(MAX_SHIELDED_CLIENT_CONNECTIONS))
-                {
+                else if(key.equals(MAX_SHIELDED_CLIENT_CONNECTIONS)) {
                     setMaxShieldedClientConnections((new Integer(p)).intValue());
                 }
-                else if(key.equals(MIN_SHIELDED_CLIENT_CONNECTIONS))
-                {
+                else if(key.equals(MIN_SHIELDED_CLIENT_CONNECTIONS)) {
                     setMinShieldedClientConnections((new Integer(p)).intValue());
                 }
-                else if(key.equals(SUPERNODE_PROBATION_TIME))
-                {
+                else if(key.equals(SUPERNODE_PROBATION_TIME)) {
                     setSupernodeProbationTime((new Long(p)).longValue());
                 }
                 else if(key.equals(SUPERNODE_MODE))
                 {
                     setForcedSupernodeMode((new Boolean(p)).booleanValue());
                 }
+				else if(key.equals(CONNECT_ON_STARTUP)) {
+					setConnectOnStartup((new Boolean(p)).booleanValue());
+				}
 			}
 			catch(NumberFormatException nfe){ /* continue */ }
 			catch(IllegalArgumentException iae){ /* continue */ }
@@ -886,9 +994,10 @@ public class SettingsManager {
     
 
     /** 
-	 * Load in the default values.  Any properties
-     * written to the real properties file will overwrite
-     * these. 
+	 * Load in the default values.  Any properties written to the real 
+     * properties file will overwrite these. This method ensures that some
+     * reasonable values are always loaded even in the case of any
+     * failure in loading the properties file from disk.
 	 */
     private void loadDefaults() {
 		setAllowBrowser(DEFAULT_ALLOW_BROWSER);
@@ -957,6 +1066,7 @@ public class SettingsManager {
 		setAppHeight(DEFAULT_APP_HEIGHT);
 
 		setChatEnabled(DEFAULT_CHAT_ENABLED);
+		setPlayerEnabled(DEFAULT_PLAYER_ENABLED);
 
 		setLanguage(DEFAULT_LANGUAGE);
 		setCountry(DEFAULT_COUNTRY);
@@ -976,7 +1086,8 @@ public class SettingsManager {
         setForcedSupernodeMode(DEFAULT_SUPERNODE_MODE);
 		setSessions(DEFAULT_SESSIONS);		
 		setAverageUptime(DEFAULT_AVERAGE_UPTIME);
-		setTotalUptime(DEFAULT_TOTAL_UPTIME);
+		setTotalUptime(DEFAULT_TOTAL_UPTIME);		
+		setConnectOnStartup(DEFAULT_CONNECT_ON_STARTUP);
     }
 
     /**
@@ -1003,8 +1114,8 @@ public class SettingsManager {
     public int getTimeout(){return _timeout;}
 
     /** 
-	 * Returns a string specifying the full
-     * pathname of the file listing the hosts 
+	 * Returns a string specifying the full pathname of the file listing 
+     * the hosts 
 	 */
     public String getHostList() {
 		return new File(HOST_LIST_NAME).getAbsolutePath();		
@@ -1052,6 +1163,13 @@ public class SettingsManager {
 	/** Returns true if the chat is enabled */
 	public boolean getChatEnabled() {return _chatEnabled;}
 
+	/** Returns true if the player is enabled */
+	public boolean getPlayerEnabled() {
+        if (CommonUtils.isMacClassic())
+            return false;
+        return _playerEnabled;
+    }
+
     /** 
 	 * Returns a new <tt>File</tt> instance that denotes the abstract
 	 * pathname of the directory for saving incomplete files.
@@ -1079,33 +1197,43 @@ public class SettingsManager {
 		return new File(SAVE_DIRECTORY_NAME);
     }
 
-    /** Returns the directories to search */
-    public String getDirectories(){return _directories;}
-
-	/** Returns the shared directories as an array of pathname strings. */
-    public String[] getDirectoriesAsArray() {
-		if(_directories == null) return new String[0];		
-        _directories.trim();
-        return StringUtils.split(_directories, ';');
-    }
+    /** 
+	 * Returns the directories to search as an array of <tt>File</tt>
+	 * instances.
+	 *
+	 * @return the directories to search as an array of <tt>File</tt>
+	 *  instances
+	 */
+    public File[] getDirectories() {
+		return _directories;
+	}
 
 	/**
 	 * Returns an array of Strings of directory path names.  these are the
 	 * pathnames of the shared directories as well as the pathname of 
 	 * the Incomplete directory.
+     *
+     * @return the array of <tt>File</tt> instances denoting the abstract
+     *  pathnames of the shared directories, with the <tt>File</tt>
+     *  instance denoting the abstract pathname of the incomplete directory
+     *  appended to the end (the last <tt>File</tt> instance in the array),
+     *  unless obtaining the incomplete directory throws an exception, in
+     *  which case this will simply return the array of shared directories
 	 */
-	public String[] getDirectoriesWithIncompleteAsArray() {
-		String temp = _directories;
-        temp.trim();
-		if(!temp.endsWith(";")) 
-			temp += ";";
-		String incompleteDir = "";
+	public File[] getDirectoriesWithIncompleteAsArray() {
+        int newLength = _directories.length + 1;
+        File[] newFiles = new File[newLength];
+        File incompleteDir = null;
 		try {
-			incompleteDir = getIncompleteDirectory().getAbsolutePath();
-		} catch(FileNotFoundException fnfe) {			
+			incompleteDir = getIncompleteDirectory();
+            newFiles[_directories.length] = incompleteDir;
+            for(int i=0; i<_directories.length; i++) {
+                newFiles[i] = _directories[i];
+            }
+		} catch(FileNotFoundException fnfe) {	
+            return _directories;
 		}
-		temp += incompleteDir;
-        return StringUtils.split(temp, ';');		
+		return newFiles;
 	}
     
     /** 
@@ -1216,7 +1344,7 @@ public class SettingsManager {
      * @return <tt>true</tt> if quick connect is active, <tt>false</tt>
      *         otherwise
      */
-    public boolean getUseQuickConnect(){return _useQuickConnect;}
+    public boolean getUseQuickConnect(){return true;}
     
     /**
      * Returns an array of servers to automatically connect to via "quick
@@ -1294,13 +1422,18 @@ public class SettingsManager {
     }
     
     /** 
-     * Returns the remaing words of the connect string, without the leading
+     * Returns the remaining words of the connect string, without the leading
      * space.  This is solely a convenience routine. 
      */
     public String getConnectStringRemainder() { 
         return _connectStringRemainder; 
     }
     
+	/**
+	 * Returns the string used for verifying a Gnutella connection.
+	 *
+	 * @return the string used for verifying a Gnutella connection
+	 */
     public String getConnectOkString(){ return _connectOkString; }
 
 
@@ -1308,24 +1441,38 @@ public class SettingsManager {
     /** Returns the Network Discovery specialized properties file */
     public Properties getNDProps(){return ND_PROPS;}
 
-    /** Returns the path of the properties and host list files */
-    public String getPath() {return CURRENT_DIRECTORY + File.separator;}
+    /** 
+	 * Returns the path of the properties and host list files. 
+	 */
+    public String getPath() {
+		return CURRENT_DIRECTORY + File.separator;
+	}
 
-    public int getBasicInfoSizeForQuery() {return _basicQueryInfo;}
+    public int getBasicInfoSizeForQuery() {
+		return _basicQueryInfo;
+	}
 
-    public int getAdvancedInfoSizeForQuery() {return _advancedQueryInfo;}
+    public int getAdvancedInfoSizeForQuery() {
+		return _advancedQueryInfo;
+	}
 
-    /** Returns true iff this should force its IP address. */
+    /** 
+	 * Returns true iff this should force its IP address. 
+	 */
     public boolean getForceIPAddress() {
         return _forceIPAddress;
     }
 
-    /** Returns the forced IP address as an array of bytes. */
+    /** 
+	 * Returns the forced IP address as an array of bytes. 
+	 */
     public byte[] getForcedIPAddress() {
         return _forcedIPAddress;
     }
 
-    /** Returns the forced IP address in dotted-quad format. */
+    /** 
+	 * Returns the forced IP address in dotted-quad format. 
+	 */
     public String getForcedIPAddressString() {
         return Message.ip2string(_forcedIPAddress);
     }
@@ -1515,8 +1662,7 @@ public class SettingsManager {
 	 *         established, <tt>false</tt> otherwise
 	 */
 	public boolean getEverAcceptedIncoming() {
-		Boolean b = Boolean.valueOf(PROPS.getProperty(EVER_ACCEPTED_INCOMING));
-		return b.booleanValue();
+		return getBooleanValue(EVER_ACCEPTED_INCOMING);
 	}
 
 	/**
@@ -1528,8 +1674,7 @@ public class SettingsManager {
 	 *         application should be shown, <tt>false</tt> otherwise
 	 */
 	public boolean getShowCloseDialog() {
-		Boolean b = Boolean.valueOf(PROPS.getProperty(SHOW_CLOSE_DIALOG));
-		return b.booleanValue();	
+		return getBooleanValue(SHOW_CLOSE_DIALOG);
 	}
   
     /**
@@ -1581,8 +1726,7 @@ public class SettingsManager {
 	 * @return the minimum search quality, on a scale of 0 to 3 inclusive
 	 */
 	public int getMinimumSearchQuality() {
-		String str = PROPS.getProperty(MINIMUM_SEARCH_QUALITY);
-		return Integer.parseInt(str);
+		return getIntValue(MINIMUM_SEARCH_QUALITY);
 	}
 
 	/**
@@ -1592,8 +1736,7 @@ public class SettingsManager {
 	 * @return the minimum search speed to display
 	 */
 	public int getMinimumSearchSpeed() {
-		String str = PROPS.getProperty(MINIMUM_SEARCH_SPEED);
-		return Integer.parseInt(str);
+		return getIntValue(MINIMUM_SEARCH_SPEED);
 	}
 	
 	/**
@@ -1604,8 +1747,7 @@ public class SettingsManager {
 	 * passed by this node
 	 */
 	public int getMaxUpstreamBytesPerSec() {
-		String str = PROPS.getProperty(MAX_UPSTREAM_BYTES_PER_SEC);
-		return Integer.parseInt(str);
+		return getIntValue(MAX_UPSTREAM_BYTES_PER_SEC);
 	}
 
 	/**
@@ -1616,8 +1758,7 @@ public class SettingsManager {
 	 * passed by this node
 	 */
 	public int getMaxDownstreamBytesPerSec() {
-		String str = PROPS.getProperty(MAX_DOWNSTREAM_BYTES_PER_SEC);
-		return Integer.parseInt(str);
+		return getIntValue(MAX_DOWNSTREAM_BYTES_PER_SEC);
 	}
     
     //settings for Supernode implementation
@@ -1625,8 +1766,7 @@ public class SettingsManager {
      * Returns the maximum number of shielded connections to be supported by
      * the supernode
      */
-    public int getMaxShieldedClientConnections()
-    {
+    public int getMaxShieldedClientConnections() {
         return _maxShieldedClientConnections;
     }
     
@@ -1634,8 +1774,7 @@ public class SettingsManager {
      * Returns the minimum number of shielded connections to be supported by
      * the supernode
      */
-    public int getMinShieldedClientConnections()
-    {
+    public int getMinShieldedClientConnections() {
         return _minShieldedClientConnections;
     }
 
@@ -1647,17 +1786,14 @@ public class SettingsManager {
      *         <tt>false</tt> otherwise
      */
     public boolean getEverSupernodeCapable() {
-        Boolean b = 
-            Boolean.valueOf(PROPS.getProperty(EVER_SUPERNODE_CAPABLE));
-        return b.booleanValue();
+		return getBooleanValue(EVER_SUPERNODE_CAPABLE);
     }
     
     /**
      * Returns the probation time for s supernode, during which supernode
      * decides whether to swith to client mode or stay as supernode
      */
-    public long getSupernodeProbationTime()
-    {
+    public long getSupernodeProbationTime() {
         return _supernodeProbationTime;
     }
     
@@ -1670,6 +1806,7 @@ public class SettingsManager {
         return _supernodeModeTransit;
     }
     
+    /** Returns forced supernode mode */
     public boolean getForcedSupernodeMode()
     {
         return _supernodeModeForced;
@@ -1682,8 +1819,7 @@ public class SettingsManager {
      * @return True, if the clientnode has connection to supernode,
      * false otherwise
      */
-    public boolean hasShieldedClientSupernodeConnection()
-    {
+    public boolean hasShieldedClientSupernodeConnection() {
         return _shieldedClientSupernodeConnection;
     }
     
@@ -1696,6 +1832,17 @@ public class SettingsManager {
     {
         return _hasSupernodeOrClientnodeStatusForced;
     }
+
+	/**
+	 * Returns whether or not we should connect to the Gnutella network
+	 * on startup.
+	 *
+	 * @return <tt>true</tt> if we should connect to the network on
+	 *  startup, <tt>false</tt> otherwise
+	 */
+	public boolean getConnectOnStartup() {
+		return getBooleanValue(CONNECT_ON_STARTUP);
+	}
     
     /******************************************************
      **************  END OF ACCESSOR METHODS **************
@@ -1928,6 +2075,12 @@ public class SettingsManager {
         PROPS.put(BASIC_QUERY_INFO, s);
     }
 
+    /**
+     * Sets the maximum number of uploads per person to allow (the uploads
+     * per unique uploader).
+     *
+     * @param uploads the number of uploads to allow
+     */
 	public void setUploadsPerPerson(int uploads) {
 		_uploadsPerPerson = uploads;
 		String s = Integer.toString(uploads);
@@ -1975,6 +2128,24 @@ public class SettingsManager {
 		PROPS.put(SAVE_DIRECTORY, saveDir.getAbsolutePath());
     }
 
+
+	/**
+	 * This method sets the shared directories based on the
+	 * string of semi-colon delimited directories stored in 
+	 * the props file.
+	 *
+	 * @param dirs the string of directories
+	 */
+	private void setDirectories(final String dirs) {
+		StringTokenizer st = new StringTokenizer(dirs, ";");
+		int length = st.countTokens();
+		File[] files = new File[length];
+		for(int i=0; i<length; i++) {
+			files[i] = new File(st.nextToken());
+		}
+		setDirectories(files);
+	}
+
     /** 
 	 * Sets the shared directories.  This method filters
      * out any duplicate or invalid directories in the string.
@@ -1982,102 +2153,68 @@ public class SettingsManager {
      * listing subdirectories that have parent directories
      * also in the string. 
 	 *
-	 * @param dirs A semicolon delimited <tt>String</tt> instance 
-	 *             containing the paths of shared directories.
+	 * @param dirs an array of <tt>File</tt> instances denoting
+	 *  the abstract pathnames of the shared directories
 	 */
-    public void setDirectories(final String dirs) {
-        boolean dirsModified = false;
+	public void setDirectories(final File[] dirArray) {
 		
-		// this is necessary because the getDirectoriesAsArray
-		// method creates its array from the _directories variable.
-		_directories = dirs;
-        String[] dirArray = getDirectoriesAsArray();
-        int i = 0;
-        while(i < dirArray.length) {
-            if(dirArray[i] != null) {
-                File f = new File(dirArray[i]);
-                if(f.isDirectory()) {
-                    int count = 0;
-                    int z = 0;
-                    String str = "";
-                    try {str = f.getCanonicalPath();}
-                    catch(IOException ioe) {break;}
-                    while(z < dirArray.length) {
-                        if(dirArray[z] != null) {
-                            File file = new File(dirArray[z]);
-                            String name = "";
-                            try {name = file.getCanonicalPath();}
-                            catch(IOException ioe) {break;}
-                            if(str.equals(name)) {
-                                count++;
-                                if(count > 1) {
-                                    dirArray[z] = null;
-                                    dirsModified = true;
-                                }
-                            }
-                        }
-                        z++;
-                    }
-                }
-                else {
-                    dirArray[i] = null;
-                    dirsModified = true;
-                }
-            }
-            i++;
-        }
-        if(dirsModified) {
-            i = 0;
-            StringBuffer sb = new StringBuffer();
-            while(i < dirArray.length) {
-                if(dirArray[i] != null) {
-                    sb.append(dirArray[i]);
-                    sb.append(';');
-                }
-                i++;
-            }
-            _directories = sb.toString();
-        }
-        PROPS.put(DIRECTORIES, _directories);
-    }
+		// ok, let's prune out any duplicates if they're there
+		HashMap directories = new HashMap();
+		for(int i=0; i<dirArray.length; i++) {
+			if(dirArray[i].isDirectory())
+				directories.put(dirArray[i], "");
+		}
+		
+		Set fileSet = directories.keySet();
+
+		Object[] prunedFiles = fileSet.toArray();
+		StringBuffer sb = new StringBuffer();
+		for(int z=0; z<prunedFiles.length; z++) {
+			if(prunedFiles[z] != null) {
+				sb.append(prunedFiles[z]);
+				sb.append(';');
+			}
+		}
+		_directories = new File[prunedFiles.length];
+		for(int r=0; r<prunedFiles.length; r++) {
+			_directories[r] = (File)prunedFiles[r];
+		}
+        PROPS.put(DIRECTORIES, sb.toString());
+	}
 
     /** 
 	 * Adds one directory to the directory string only if
      * it is a directory and is not already listed. 
 	 *
-	 * @param dir  A <tt>File</tt> instance denoting the 
+	 * @param dir  a <tt>File</tt> instance denoting the 
 	 *             abstract pathname of the new directory 
-	 *             to add.
+	 *             to add
 	 *
 	 * @throws  IOException 
-	 *          If the directory denoted by the directory pathname
+	 *          if the directory denoted by the directory pathname
 	 *          String parameter did not exist prior to this method
 	 *          call and could not be created, or if the canonical
-	 *          path could not be retrieved from the file system.
+	 *          path could not be retrieved from the file system
 	 */
     public void addDirectory(File dir) throws IOException {
 		if(!dir.isDirectory()) throw new IOException();
-		String[] dirs = getDirectoriesAsArray();
-		String newPath = "";
-		newPath = dir.getCanonicalPath();
-		int i = 0;
-		while(i < dirs.length) {
-			File file = new File(dirs[i]);
-			String name = "";
-			name = file.getCanonicalPath();
-			if(name.equals(newPath)) {
-				// throw the exception because the shared 
-				// directory already exists
-				throw new IOException();
-			}
-			i++;
+
+		if(_directories == null) {
+			_directories = new File[1];
+			_directories[0] = dir;
 		}
-		if(!_directories.endsWith(";"))
-			_directories += ";";
-		_directories += newPath;
-		_directories += ";";
-		PROPS.put(DIRECTORIES, _directories);
-    }
+		else {
+			int newLength = _directories.length + 1;
+			File[] newFiles = new File[newLength];
+			
+			for(int i=0; i<_directories.length; i++) {
+				newFiles[i] = _directories[i];
+			}
+			newFiles[_directories.length] = dir;
+			// this will prune it out if it's a duplicate and add it too
+			setDirectories(newFiles);			
+		}
+	}
 
     /** 
 	 * Sets the file extensions that are shared.
@@ -2090,7 +2227,7 @@ public class SettingsManager {
     }
 
     /** 
-	 * Sets the time to live 
+	 * Sets the time to live. 
 	 */
     public void setTTL(byte ttl) {
         if (ttl < 1 || ttl > 14)
@@ -2103,7 +2240,7 @@ public class SettingsManager {
     }
 
     /** 
-	 * Sets the soft maximum time to live 
+	 * Sets the soft maximum time to live. 
 	 */
     public void setSoftMaxTTL(byte softmaxttl) {
         if (softmaxttl < 0 || softmaxttl > 14)
@@ -2131,9 +2268,8 @@ public class SettingsManager {
     }
 
     /** 
-	 * Sets the connection speed.  throws an
-     * exception if you try to set the speed
-     * far faster than a T3 line or less than
+	 * Sets the connection speed.  throws an exception if you 
+	 * try to set the speed far faster than a T3 line or less than
      * 0.
 	 */
     public void setConnectionSpeed(int speed) {
@@ -2162,6 +2298,11 @@ public class SettingsManager {
         }
     }
 
+	/**
+	 * Sets the string for making gnutella connections.
+	 *
+	 * @param connect the connect string
+	 */
     public void setConnectString(String connect)
         throws IllegalArgumentException {
         int i=connect.indexOf(" ");
@@ -2200,6 +2341,11 @@ public class SettingsManager {
         PROPS.put(CONNECT_STRING, connect);
     }
 
+	/**
+	 * Sets the string for verifying Gnutella connections.
+	 *
+	 * @param ok the string for verifying Gnutella connections
+	 */
     public void setConnectOkString(String ok)
         throws IllegalArgumentException {
         if (ok.length()<1)
@@ -2209,6 +2355,11 @@ public class SettingsManager {
         PROPS.put(CONNECT_OK_STRING, ok);
     }
 
+	/**
+	 * Sets the maximum number of simultaneous searches to allow.
+	 *
+	 * @param max the maximum number of simultaneous searches
+	 */
     public void setParallelSearchMax(int max) {
         if(max<1)
             throw new IllegalArgumentException();
@@ -2244,12 +2395,34 @@ public class SettingsManager {
 		PROPS.put(CHAT_ENABLED, s);
 	}
 
+
+	/**
+	 * Sets whether or not player should be enabled.
+	 *
+	 * @param playerEnabled specified whether or not player is enabled
+	 */
+	public void setPlayerEnabled(boolean playerEnabled) {
+		_playerEnabled = playerEnabled;
+		String s = String.valueOf(playerEnabled);
+		PROPS.put(PLAYER_ENABLED, s);
+	}
+
+	/**
+	 * Sets the maximum number of simultaneous downloads to allow.
+	 *
+	 * @param max the maximum number of simultaneous downloads to allow
+	 */
     public void setMaxSimDownload(int max) {
 		_maxSimDownload = max;
 		String s = String.valueOf(max);
 		PROPS.put(MAX_SIM_DOWNLOAD, s);        
     }
 
+	/**
+	 * Sets the maximum number of simultaneous uploads to allow.
+	 *
+	 * @param max the maximum number of simultaneous uploads to allow
+	 */
     public void setMaxUploads(int max) {
 		_maxUploads = max;
 		String s = String.valueOf(max);
@@ -2262,12 +2435,25 @@ public class SettingsManager {
 		PROPS.put(CLEAR_UPLOAD, s);
     }
 
-    public void setClearCompletedDownload(boolean b) {
-		_clearCompletedDownload = b;
-		String s = String.valueOf(b);
-		PROPS.put(CLEAR_DOWNLOAD, s);
+	/**
+	 * Sets whether or not completed downloads should be automatically
+	 * cleared or not.
+	 *
+	 * @param clear specifies whether or not they should be 
+	 * automatically cleared
+	 */
+	public void setClearCompletedDownload(boolean clear) {
+		_clearCompletedDownload = clear;
+		PROPS.put(CLEAR_DOWNLOAD, String.valueOf(clear));
     }
 
+	/**
+	 * Sets whether or not the users ip address should be forced to
+	 * the value they have entered.
+	 *
+	 * @param clear specifies whether or not the ip address should
+	 * be forced
+	 */
     public void setForceIPAddress(boolean force) {
         String c;
         if (force == true)
@@ -2438,8 +2624,7 @@ public class SettingsManager {
     public void setUseQuickConnect(boolean useQuickConnect) {
 		_useQuickConnect = useQuickConnect;
 		Boolean b = new Boolean(useQuickConnect);
-		String s = b.toString();
-		PROPS.put(USE_QUICK_CONNECT, s);
+		PROPS.put(USE_QUICK_CONNECT, b.toString());
     }
 
 	/**
@@ -2452,8 +2637,7 @@ public class SettingsManager {
             throw new IllegalArgumentException();
         else {
             _quickConnectHosts = hosts;
-            PROPS.put(QUICK_CONNECT_HOSTS,
-                       encode(hosts));
+            PROPS.put(QUICK_CONNECT_HOSTS, encode(hosts));
         }
     }
 
@@ -2557,8 +2741,7 @@ public class SettingsManager {
 	 *                   should be shown in the future
 	 */
 	public void setShowTrayDialog(final boolean showDialog) {
-		Boolean b = new Boolean(showDialog);
-		PROPS.put(SHOW_TRAY_DIALOG, b.toString());
+		setBooleanValue(SHOW_TRAY_DIALOG, showDialog);
 	}
 
 	/**
@@ -2569,8 +2752,7 @@ public class SettingsManager {
 	 *                 should be minimized to the tray 
 	 */
 	public void setMinimizeToTray(final boolean minimize) {
-		Boolean b = new Boolean(minimize);
-		PROPS.put(MINIMIZE_TO_TRAY, b.toString());
+		setBooleanValue(MINIMIZE_TO_TRAY, minimize);
 	}	
 
 	/**
@@ -2593,8 +2775,7 @@ public class SettingsManager {
 	 *                         client has ever accepted an incoming connection
 	 */
 	public void setEverAcceptedIncoming(final boolean acceptedIncoming) {
-		Boolean b = new Boolean(acceptedIncoming);
-		PROPS.put(EVER_ACCEPTED_INCOMING, b.toString());
+		setBooleanValue(EVER_ACCEPTED_INCOMING, acceptedIncoming);
 	}
 
 	/**
@@ -2722,8 +2903,7 @@ public class SettingsManager {
      * the supernode
      */
     public void setMaxShieldedClientConnections(
-        int maxShieldedClientConnections)
-    {
+        int maxShieldedClientConnections) {
         this._maxShieldedClientConnections = maxShieldedClientConnections;
         PROPS.put(MAX_SHIELDED_CLIENT_CONNECTIONS, 
             Integer.toString(maxShieldedClientConnections));
@@ -2736,8 +2916,7 @@ public class SettingsManager {
      * supernode to client-node.
      */
     public void setMinShieldedClientConnections(
-        int minShieldedClientConnections)
-    {
+        int minShieldedClientConnections) {
         this._minShieldedClientConnections = minShieldedClientConnections;
         PROPS.put(MIN_SHIELDED_CLIENT_CONNECTIONS, 
             Integer.toString(minShieldedClientConnections));
@@ -2747,8 +2926,7 @@ public class SettingsManager {
      * Sets the probation time for s supernode, during which supernode
      * decides whether to swith to client mode or stay as supernode
      */
-    public void setSupernodeProbationTime(long supernodeProbationTime)
-    {
+    public void setSupernodeProbationTime(long supernodeProbationTime) {
         this._supernodeProbationTime = supernodeProbationTime;
         PROPS.put(SUPERNODE_PROBATION_TIME, 
             Long.toString(supernodeProbationTime));
@@ -2778,8 +2956,7 @@ public class SettingsManager {
      * for client nodes only
      * @param flag the flag value to be set
      */
-    public void setShieldedClientSupernodeConnection(boolean flag)
-    {
+    public void setShieldedClientSupernodeConnection(boolean flag) {
         _shieldedClientSupernodeConnection = flag;
     }
     
@@ -2792,10 +2969,90 @@ public class SettingsManager {
     {
         _hasSupernodeOrClientnodeStatusForced = flag;
     }
+
+	/**
+	 * Sets whether or not to connect to the Gnutella network when the
+	 * application starts up.
+	 *
+	 * @param connect specifies whether or not to connect on startup
+	 */
+	public void setConnectOnStartup(boolean connect) {
+		setBooleanValue(CONNECT_ON_STARTUP, connect);
+	}
     
     /******************************************************
      ***************  END OF MUTATOR METHODS **************
      ******************************************************/
+
+	/**
+	 * Sets the <tt>boolean</tt> value for the specified key as a
+	 * <tt>String</tt> entry.
+	 *
+	 * @param KEY the key for the value to set
+	 * @param BOOL the <tt>boolean</tt> value to set
+	 */
+	private void setBooleanValue(final String KEY, final boolean BOOL) {
+		PROPS.put(KEY, new Boolean(BOOL).toString());
+	}
+
+	/**
+	 * Sets the <tt>int</tt> value for the specified key as a
+	 * <tt>String</tt> entry.
+	 *
+	 * @param KEY the key for the value to set
+	 * @param INT the <tt>int</tt> value to set
+	 */
+	private void setIntValue(final String KEY, final int INT) {
+		PROPS.put(KEY, Integer.toString(INT));
+	}
+
+	/**
+	 * Sets the <tt>String</tt> value for the specified key.
+	 *
+	 * @param KEY the key for the value to set
+	 * @param STR the <tt>String</tt> value to set
+	 */
+	private void setStringValue(final String KEY, final String STR) {
+		PROPS.put(KEY, STR);
+	}
+
+	
+
+	/**
+	 * Returns the <tt>boolean</tt> value for the specified
+	 * key.
+	 * 
+	 * @param KEY the key for the desired value
+	 * @return the <tt>boolean</tt> value associated with the
+	 *  specified key
+	 */
+	private boolean getBooleanValue(final String KEY) {
+		return Boolean.valueOf(PROPS.getProperty(KEY)).booleanValue();
+	}
+	
+	/**
+	 * Returns the <tt>String</tt> value associated with the
+	 * specified key.
+	 *
+	 * @param KEY the key for the desired value
+	 * @return the <tt>String</tt> value associated with the
+	 *  specified key
+	 */
+	private String getStringValue(final String KEY) {
+		return PROPS.getProperty(KEY);
+	}
+
+	/**
+	 * Returns the <tt>int</tt> value associated with the
+	 * specified key.
+	 *
+	 * @param KEY the key for the desired value
+	 * @return the <tt>int</tt> value associated with the
+	 *  specified key
+	 */
+	private int getIntValue(final String KEY) {
+		return Integer.parseInt(PROPS.getProperty(KEY));
+	}
 
 
     /** 
