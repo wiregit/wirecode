@@ -5,6 +5,7 @@ import java.util.StringTokenizer;
 import java.io.*;
 import com.limegroup.gnutella.util.*;
 import org.apache.xerces.parsers.DOMParser;
+import com.limegroup.gnutella.Assert;
 import org.xml.sax.*;
 import org.w3c.dom.*;
 
@@ -15,6 +16,9 @@ import org.w3c.dom.*;
  * Names of fields to the values as per a XML document.
  */
 public class LimeXMLDocument implements Serializable {
+
+    public static final String XML_ID_ATTRIBUTE_STRING = "identifier";
+    public static final String XML_HEADER = "<?xml version=\"1.0\"?>";
 
 	/**
 	 * Cached hash code for this instance.
@@ -29,7 +33,7 @@ public class LimeXMLDocument implements Serializable {
     
     private final Map fieldToValue = new TreeMap(new StringComparator());
     protected String schemaUri;
-    //protected String XMLString;//this is what is sent back on the wire.
+    protected String xmlString;//this is what is sent back on the wire.
     /** 
      * Field corresponds to the name of the file for which this
      * meta-data corresponds to. It can be null if the data is pure meta-data
@@ -41,11 +45,32 @@ public class LimeXMLDocument implements Serializable {
     protected String action="";
 
     //constructor
-    public LimeXMLDocument(String XMLString) throws SAXException, 
+    public LimeXMLDocument(String XMLStr) throws SAXException, 
                                         SchemaNotFoundException, IOException{
-        InputSource doc = new InputSource(new StringReader(XMLString));
+        InputSource doc = new InputSource(new StringReader(XMLStr));
         initialize(doc);
+        this.xmlString = ripIdentifier(XMLStr);
     }
+    
+    /** expunges the 'identifier' tag from the xml string, if present....
+     */
+    private static String ripIdentifier(String xmlWithID) {
+        String retString = xmlWithID;
+
+        int indexOfID = xmlWithID.indexOf(XML_ID_ATTRIBUTE_STRING);
+        if (indexOfID > -1) {
+            final String quote = "\"";
+            int indexOfEndQuote = xmlWithID.indexOf(quote, indexOfID+1);
+            indexOfEndQuote = xmlWithID.indexOf(quote, indexOfEndQuote+1);
+            String begin = xmlWithID.substring(0, indexOfID);
+            String end = xmlWithID.substring(indexOfEndQuote+1);
+            retString = begin + end;
+        }
+        if (retString.indexOf(XML_HEADER) < 0)
+            retString = XML_HEADER + retString;
+        return retString;
+    }
+    
     
     public LimeXMLDocument(Node node, Node rootElement){        
         try{
@@ -135,7 +160,7 @@ public class LimeXMLDocument implements Serializable {
             String lowerAttName = attName.toLowerCase();
             if (lowerAttName.indexOf("schemalocation") >= 0)
                 schemaUri = att.getNodeValue();
-            else if (lowerAttName.indexOf("identifier") >= 0) {
+            else if (lowerAttName.indexOf(XML_ID_ATTRIBUTE_STRING) >= 0) {
                 identifier = att.getNodeValue();
                 //This indentifier corresponds to the ED of the response in
                 //the system. Remove this attribute from the node. We are not 
@@ -375,9 +400,11 @@ public class LimeXMLDocument implements Serializable {
      * yourself with setSchemaURI().
      */
     public String getXMLString() throws SchemaNotFoundException {        
-        //return XMLString;
-        String ret = constructXML(getOrderedNameValueList(),schemaUri);
-        return ret;
+        if (xmlString == null) {
+            // derive xml...
+            xmlString = constructXML(getOrderedNameValueList(),schemaUri);
+        }
+        return xmlString;
     }
     
 
@@ -391,7 +418,7 @@ public class LimeXMLDocument implements Serializable {
      * yourself with setSchemaURI().
      */
     public String getXMLStringWithIdentifier() throws SchemaNotFoundException {
-        String ret = constructXML(getOrderedNameValueList(),schemaUri);
+        String ret = getXMLString();
         //Insert the identifier name in the xmlString
         int index = ret.indexOf(">");//end of the header string
         if (index < 0)
@@ -405,6 +432,7 @@ public class LimeXMLDocument implements Serializable {
         return ret;
     }
 
+    /*
     //Unit Tester    
     public static void main(String args[]){
         //File f = new File("C:/down/xerces-1_3_1/data","personal-schema.xml");
@@ -436,9 +464,19 @@ public class LimeXMLDocument implements Serializable {
             String value = (String)a.getValue();
             System.out.println("Sumeet : name "+name);
             System.out.println("Sumeet : value "+value);
-        }
+       }
+        ripIDTest();
     }
-    
+    */
+
+    static void ripIDTest() {
+        final String xml = "<?xml version=\"1.0\"?><backslash xsi:noNamespaceSchemaLocation=\"http://www.limewire.com/schemas/slashdotNews.xsd\"><story identifier=\"robbie hranac\"><image>J. Lo</image><title>Oops, I did it Again!</title></story></backslash>";
+
+        Assert.that(ripIdentifier(xml).equals("<?xml version=\"1.0\"?><backslash xsi:noNamespaceSchemaLocation=\"http://www.limewire.com/schemas/slashdotNews.xsd\"><story ><image>J. Lo</image><title>Oops, I did it Again!</title></story></backslash>"));
+    }
+
+
+
     /**
      * finds the structure of the document by looking at the names of 
      * the keys in the NameValue List and creates an XML string.
@@ -537,7 +575,7 @@ public class LimeXMLDocument implements Serializable {
             String tag = (String)tagsToClose.remove(l);
             first = first + "</"+tag+">";
         }
-        first = "<?xml version=\"1.0\"?>"+first;
+        first = XML_HEADER+first;
         return first;
     }
 
