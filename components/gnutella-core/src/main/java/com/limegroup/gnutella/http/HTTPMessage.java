@@ -24,4 +24,12 @@ public interface HTTPMessage {
 	 * @param os the <tt>OutputStream</tt> to write to
 	 */
 	public void writeMessageBody(OutputStream os) throws IOException;
+	
+	/**
+	 * Determines whether or not the connection this HTTPMessage was sent on
+	 * should be terminated after sending.
+	 *
+	 * @return true if the connection should be closed, false otherwise.
+	 */
+	public boolean getCloseConnection();
 }

@@ -664,9 +664,13 @@ public final class UploadManager implements BandwidthTracker {
         
         debug(uploader + " doing single upload");
         
+        boolean closeConnection = false;
+        
         try {
             uploader.initializeStreams();
             uploader.writeResponse();
+            // get the value before we change state to complete.
+            closeConnection = uploader.getCloseConnection();
             uploader.setState(Uploader.COMPLETE);
         } catch(IOException failed) {
             uploader.setState(Uploader.INTERRUPTED);
@@ -674,6 +678,10 @@ public final class UploadManager implements BandwidthTracker {
         } finally {
             uploader.closeFileStreams();
         }
+        
+        // If the state wanted us to close the connection, throw an IOX.
+        if(closeConnection)
+            throw new IOException("close connection");
     }
 
     /**

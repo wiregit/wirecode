@@ -348,7 +348,7 @@ public class UploadTest extends com.limegroup.gnutella.util.BaseTestCase {
 /////////////////Miscellaneous tests for acceptable failure behaviour//////////
     public void testIncompleteFileUpload() throws Exception {
         tFailureHeaderRequired(
-            "/uri-res/N2R?" + incompleteHash, null, true,
+            "/uri-res/N2R?" + incompleteHash, null, true, true,
                 "HTTP/1.1 416 Requested Range Unavailable");
     }
     
@@ -357,21 +357,21 @@ public class UploadTest extends com.limegroup.gnutella.util.BaseTestCase {
         Interval iv = new Interval(50, 102500);
         vf.addInterval(iv);
         tFailureHeaderRequired(
-            "/uri-res/N2R?" + incompleteHash, null, true,
+            "/uri-res/N2R?" + incompleteHash, null, true, true,
                 "X-Available-Ranges: bytes 50-102499");
                 
         // add another range and make sure we display it.
         iv = new Interval(150050, 252450);
         vf.addInterval(iv);
         tFailureHeaderRequired(
-            "/uri-res/N2R?" + incompleteHash, null, true,
+            "/uri-res/N2R?" + incompleteHash, null, true, true,
                 "X-Available-Ranges: bytes 50-102499, 150050-252449");
         
         // add an interval too small to report and make sure we don't report        
         iv = new Interval(102505, 150000);
         vf.addInterval(iv);
         tFailureHeaderRequired(
-            "/uri-res/N2R?" + incompleteHash, null, true,
+            "/uri-res/N2R?" + incompleteHash, null, true, true,
                 "X-Available-Ranges: bytes 50-102499, 150050-252449");
                 
         // add the glue between the other intervals and make sure we condense
@@ -381,7 +381,7 @@ public class UploadTest extends com.limegroup.gnutella.util.BaseTestCase {
         iv = new Interval(150000, 150050);
         vf.addInterval(iv);
         tFailureHeaderRequired(
-            "/uri-res/N2R?" + incompleteHash, null, true,
+            "/uri-res/N2R?" + incompleteHash, null, true, true,
                 "X-Available-Ranges: bytes 50-252449");
         
     }
@@ -389,13 +389,13 @@ public class UploadTest extends com.limegroup.gnutella.util.BaseTestCase {
     public void testIncompleteFileWithRangeRequest() throws Exception {
         String header = "Range: bytes 30-50";
         tFailureHeaderRequired(
-            "/uri-res/N2R?" + incompleteHash, header, true,
+            "/uri-res/N2R?" + incompleteHash, header, true, true,
                  "HTTP/1.1 416 Requested Range Unavailable");
     }        
 
     public void testHTTP11WrongURI() throws Exception {
         tFailureHeaderRequired(
-            "/uri-res/N2R?" + badHash, null, true,
+            "/uri-res/N2R?" + badHash, null, true, true,
                 "HTTP/1.1 404 Not Found");
     }
     
@@ -403,25 +403,25 @@ public class UploadTest extends com.limegroup.gnutella.util.BaseTestCase {
         // note that the header will be returned with 1.1
         // even though we sent with 1.0
         tFailureHeaderRequired(
-            "/uri-res/N2R?" + badHash, null, false,
+            "/uri-res/N2R?" + badHash, null, false, false,
                 "HTTP/1.1 404 Not Found");
     }
     
     public void testHTTP11MalformedURI() throws Exception {
         tFailureHeaderRequired(
-            "/uri-res/N2R?" + "no more school", null, true,
+            "/uri-res/N2R?" + "no more school", null, true, false,
                 "HTTP/1.1 400 Malformed Request");
     }
     
     public void testHTTP10MalformedURI() throws Exception {
         tFailureHeaderRequired(
-            "/uri-res/N2R?" + "no more school", null, false,
+            "/uri-res/N2R?" + "no more school", null, false, false,
                 "HTTP/1.1 400 Malformed Request");
     }
     
 	public void testHTTP11MalformedGet() throws Exception {
         tFailureHeaderRequired(
-            "/get/some/dr/pepper", null, true,
+            "/get/some/dr/pepper", null, true, false,
                 "HTTP/1.1 400 Malformed Request");
     }
     
@@ -429,7 +429,7 @@ public class UploadTest extends com.limegroup.gnutella.util.BaseTestCase {
         tFailureHeaderRequired(
             "/uri-res/N2R?" + hash, 
             "Range: 2-5", // expects "Range: bytes 2-5"
-            true, "HTTP/1.1 400 Malformed Request");
+            true, false, "HTTP/1.1 400 Malformed Request");
     }
 
     /** 
@@ -679,7 +679,9 @@ public class UploadTest extends com.limegroup.gnutella.util.BaseTestCase {
             
         while (true) { 
             String line = in.readLine();
-            if (line == null || line.equals(""))
+            if( line == null )
+                throw new InterruptedIOException("connection closed");
+            if (line.equals(""))
                 break;
             if (requiredHeader != null) {
                 if (canonicalizeHeader(line).equals(expectedHeader)) {
@@ -957,6 +959,7 @@ public class UploadTest extends com.limegroup.gnutella.util.BaseTestCase {
     public void tFailureHeaderRequired(String file,
                                        String sendHeader,
                                        boolean http11,
+                                       boolean repeat,
                                        String requiredHeader)
                                         throws Exception {
         Socket s = null;
@@ -971,13 +974,22 @@ public class UploadTest extends com.limegroup.gnutella.util.BaseTestCase {
             downloadInternal("GET", file, sendHeader, out, in, 
                              requiredHeader, http11);
             
-            //3. If we're testing HTTP1.1 then send another request
-            //   to make sure that failures keep the connection alive
-            //   if requested.
-            if( http11 ) {
+            //3. If the connection should remain open, make sure we
+            //   can request again.
+            if( repeat ) {
                 downloadInternal("GET", file, sendHeader, out, in,
                                  requiredHeader, http11);
-            }                
+            } else {
+                try {
+                    downloadInternal("GET", file, sendHeader, out, in,
+                                     requiredHeader, http11);
+                    fail("Connection should be closed");
+                } catch(InterruptedIOException good) {
+                    // good.
+                } catch(SocketException good) {
+                    // good too.
+                }
+            }
             
         } finally {
             if (s!=null)

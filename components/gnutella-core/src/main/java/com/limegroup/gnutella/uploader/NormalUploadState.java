@@ -226,6 +226,10 @@ public final class NormalUploadState implements HTTPMessage {
 	        * 1024;
 	    return ret;
     }
+    
+	public boolean getCloseConnection() {
+	    return false;
+	}
 
 	// overrides Object.toString
 	public String toString() {

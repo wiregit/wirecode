@@ -78,6 +78,10 @@ public final class PushProxyUploadState implements HTTPMessage {
         _uploader.setAmountUploaded(BAOS.size());
         debug("PPUS.doUpload(): returning.");
 	}
+	
+	public boolean getCloseConnection() {
+	    return false;
+	}
 
     private final static boolean debugOn = false;
     private final void debug(String out) {

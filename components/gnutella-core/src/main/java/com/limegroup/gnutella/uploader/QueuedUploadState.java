@@ -60,4 +60,8 @@ public class QueuedUploadState implements HTTPMessage {
     public void writeMessageBody(OutputStream ostream) throws IOException {
         //this method should MUST NOT do anything.
     }
+    
+	public boolean getCloseConnection() {
+	    return false;
+	}    
 }

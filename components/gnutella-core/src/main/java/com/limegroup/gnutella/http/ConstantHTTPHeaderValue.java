@@ -41,4 +41,11 @@ public class ConstantHTTPHeaderValue implements HTTPHeaderValue {
      */
     public static final HTTPHeaderValue DEFLATE_VALUE =
         new ConstantHTTPHeaderValue("deflate");
+        
+    /**
+     * Constant for the 'close' value sent the server expects to close
+     * the connection.
+     */
+    public static final HTTPHeaderValue CLOSE_VALUE =
+        new ConstantHTTPHeaderValue("close");
 }

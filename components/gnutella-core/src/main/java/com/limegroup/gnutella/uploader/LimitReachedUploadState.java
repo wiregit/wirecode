@@ -63,11 +63,20 @@ public class LimitReachedUploadState implements HTTPMessage {
                 }
 			}
 		}
+		
+		HTTPUtils.writeHeader(HTTPHeaderName.CONNECTION,
+		                      ConstantHTTPHeaderValue.CLOSE_VALUE,
+		                      ostream);
+		                      
 		str = "\r\n";
 		ostream.write(str.getBytes());
 	}
 
 	public void writeMessageBody(OutputStream ostream) throws IOException {
 		ostream.write(ERROR_MESSAGE);
+	}
+	
+	public boolean getCloseConnection() {
+	    return true;
 	}
 }

@@ -75,6 +75,10 @@ public final class BrowseHostUploadState implements HTTPMessage {
         _uploader.setAmountUploaded(BAOS.size());
         debug("BHUS.doUpload(): returning.");
 	}
+	
+	public boolean getCloseConnection() {
+	    return false;
+	}  	
 
     private final static boolean debugOn = false;
     private final void debug(String out) {

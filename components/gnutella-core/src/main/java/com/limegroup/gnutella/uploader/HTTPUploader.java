@@ -304,9 +304,28 @@ public final class HTTPUploader implements Uploader {
         }
 	}
 	
-	OutputStream getOutputStream() {return _ostream;}
-	InputStream getInputStream() {return _fis;}
+	/**
+	 * Returns the output stream this uploader is writing to.
+	 */
+	OutputStream getOutputStream() {
+        return _ostream;
+    }
     
+    /**
+     * Returns the FileInputStream this uploader is reading from.
+     */
+	InputStream getInputStream() {
+	    return _fis;
+    }
+    
+    /**
+     * Returns whether or not the current state wants
+     * to close the connection.
+     */
+    public boolean getCloseConnection() {
+        Assert.that(_state != null);
+        return _state.getCloseConnection();
+    }    
     
 	/**
      * Returns the current HTTP Request Method.

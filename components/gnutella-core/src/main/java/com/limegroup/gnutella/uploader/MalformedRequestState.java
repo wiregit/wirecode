@@ -30,11 +30,19 @@ public final class MalformedRequestState implements HTTPMessage {
 		ostream.write(str.getBytes());
 	    str = "Content-Length: " + ERROR_MESSAGE.length + "\r\n";
 		ostream.write(str.getBytes());
+		HTTPUtils.writeHeader(HTTPHeaderName.CONNECTION,
+		                      ConstantHTTPHeaderValue.CLOSE_VALUE,
+		                      ostream);
 		str = "\r\n";
 		ostream.write(str.getBytes());
+
 	}
 
 	public void writeMessageBody(OutputStream ostream) throws IOException {
 		ostream.write(ERROR_MESSAGE);
 	}
+	
+	public boolean getCloseConnection() {
+	    return true;
+	}	
 }

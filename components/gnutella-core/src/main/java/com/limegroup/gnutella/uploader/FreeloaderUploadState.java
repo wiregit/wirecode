@@ -37,6 +37,9 @@ public class FreeloaderUploadState implements HTTPMessage {
 		os.write(str.getBytes());
 		str = "Content-Length: " + RESPONSE_PAGE.length() + "\r\n";
 		os.write(str.getBytes());
+		HTTPUtils.writeHeader(HTTPHeaderName.CONNECTION,
+		                      ConstantHTTPHeaderValue.CLOSE_VALUE,
+		                      os);		
 		str = "\r\n";
 		os.write(str.getBytes());
 	}
@@ -44,4 +47,8 @@ public class FreeloaderUploadState implements HTTPMessage {
 	public void writeMessageBody(OutputStream os) throws IOException {
 		os.write(RESPONSE_PAGE.getBytes());
 	}
+	
+	public boolean getCloseConnection() {
+	    return true;
+	}	
 }
