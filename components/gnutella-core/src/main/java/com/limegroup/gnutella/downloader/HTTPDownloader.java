@@ -281,8 +281,8 @@ public class HTTPDownloader implements BandwidthTracker {
 //AAAAA
 			else if(HTTPHeaderName.ALT_LOCATION.matchesStartOfString(str)) {
 				readAlternateLocations(str, _alternateLocationsReceived);
-System.out.println("Downloader Receive ("+_host+":"+_port+"):");
-System.out.println(_alternateLocationsReceived);
+                //System.out.println("Downloader Receive ("+_host+":"+_port+"):");
+                //System.out.println(_alternateLocationsReceived);
 			}
 //AAAAA
         }
