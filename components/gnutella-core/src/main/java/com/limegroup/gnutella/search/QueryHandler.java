@@ -18,7 +18,27 @@ public final class QueryHandler {
 	/**
 	 * Constant for the number of results to look for.
 	 */
-	private final int RESULTS = 150;
+	private final int RESULTS;
+
+	/**
+	 * The number of results to try to get if we're an Ultrapeer originating
+	 * the query.
+	 */
+	private static final int ULTRAPEER_RESULTS = 160;
+
+	/**
+	 * The number of results to try to get if the query came from an old
+	 * leaf -- they are connected to 2 other Ultrapeers that may or may
+	 * not use this algorithm.
+	 */
+	private static final int OLD_LEAF_RESULTS = 50;
+
+	/**
+	 * The number of results to try to get for new leaves -- they only 
+	 * maintain 2 connections and don't generate as much overall traffic,
+	 * so give them a little more.
+	 */
+	private static final int NEW_LEAF_RESULTS = 80;
 
 	/**
 	 * Constant for the query quid.
@@ -119,12 +139,13 @@ public final class QueryHandler {
 	 * <tt>QueryFactory</tt> instances.
 	 */
  	private QueryHandler(byte[] guid, String query, String xmlQuery, 
- 						 byte hops, byte[] payload) {
+ 						 byte hops, byte[] payload, int results) {
  		GUID = guid;
  		QUERY = query;
  		XML_QUERY = xmlQuery;
  		HOPS = hops;
  		PAYLOAD = payload;
+		RESULTS = results;
  	}
 
 
@@ -138,7 +159,33 @@ public final class QueryHandler {
 	public static QueryHandler createHandler(QueryRequest query) {	
 		return new QueryHandler(query.getGUID(), query.getQuery(), 
 								query.getRichQuery(), query.getHops(),
-								query.getPayload());
+								query.getPayload(), ULTRAPEER_RESULTS);
+	}
+
+	/**
+	 * Factory constructor for generating a new <tt>QueryHandler</tt> 
+	 * for the given <tt>QueryRequest</tt>.
+	 *
+	 * @param guid the <tt>QueryRequest</tt> instance containing data
+	 *  for this set of queries
+	 */
+	public static QueryHandler createHandlerForOldLeaf(QueryRequest query) {	
+		return new QueryHandler(query.getGUID(), query.getQuery(), 
+								query.getRichQuery(), query.getHops(),
+								query.getPayload(), OLD_LEAF_RESULTS);
+	}
+
+	/**
+	 * Factory constructor for generating a new <tt>QueryHandler</tt> 
+	 * for the given <tt>QueryRequest</tt>.
+	 *
+	 * @param guid the <tt>QueryRequest</tt> instance containing data
+	 *  for this set of queries
+	 */
+	public static QueryHandler createHandlerForNewLeaf(QueryRequest query) {	
+		return new QueryHandler(query.getGUID(), query.getQuery(), 
+								query.getRichQuery(), query.getHops(),
+								query.getPayload(), NEW_LEAF_RESULTS);
 	}
 
 	/**
