@@ -98,7 +98,7 @@ assert contains(test_list, "http://b.com/path/index.php")
 
 #Prints the valid URLs of candidates, along with Java formatting.    
 def print_valid_candidates():
-    timeoutsocket.setDefaultSocketTimeout(5)
+    timeoutsocket.setDefaultSocketTimeout(60)
     first_line=1     #Used to keep track of commas
     for url in candidates:
         wrote=0
