@@ -305,10 +305,9 @@ public class HTTPDownloader {
             //EOF?
             if (str==null || str.equals(""))
                 break;
-
         }
+    }
 
-}
 	private void doDownload() throws IOException {
 
 		SettingsManager settings = SettingsManager.instance();
@@ -399,22 +398,6 @@ public class HTTPDownloader {
 		} else 
 			throw new FileIncompleteException();
 	}
-
-
-	private void shutdown() throws IOException {
-		
-		if (_byteReader != null)
-			_byteReader.close();
-
-		if (_fos != null)
-			_fos.close();
-
-		if (_socket != null)
-			_socket.close();
-
-
-	}
-
 }
 
 
