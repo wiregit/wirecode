@@ -202,7 +202,6 @@ public class DataWindow
 			 drec != null   &&
 			 drec.acks < 1  &&
 		     drec.sentTime + (multiple * smoothRTT) < time ) {
-System.out.println("RTO:"+rto);
 			return true;
 		}
 
@@ -258,12 +257,10 @@ System.out.println("RTO:"+rto);
             // g is the gain applied to the RTT estimator and equals 
             // 1/8. h is the gain applied to the mean deviation estimator 
             // and equals 1/4. 
-System.out.println("RAW sends: "+drec.sends);
 
 			// Add to the averageRTT
 			if ( drec.acks == 1 && drec.sends == 1 ) {
 				long  rtt    = (drec.ackTime-drec.sentTime);
-System.out.println("RAW rtt: "+rtt);
 				long  adjRTT = rtt + HIST_SIZE/2 + 1;
                 float delta  = ((float) rtt) - srtt;
 				if ( rtt > 0 ) {

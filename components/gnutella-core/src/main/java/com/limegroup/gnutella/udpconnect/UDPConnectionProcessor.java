@@ -69,7 +69,9 @@ public class UDPConnectionProcessor {
     private static final long MAX_CONNECT_WAIT_TIME   = 20*1000;
 
 	/** Define the maximum wait time before sending a message in order to
-        keep the connection alive (and firewalls open) */
+        keep the connection alive (and firewalls open).  
+ 		Note: in an idle state, this affects data writing if the 
+		receivers window is full. */
 	private static final long KEEPALIVE_WAIT_TIME     = (3*1000 - 500);
 
 	/** Define the startup time before starting to send data.  Note that
@@ -551,7 +553,7 @@ public class UDPConnectionProcessor {
 	private synchronized void send(UDPConnectionMessage msg) 
       throws IllegalArgumentException {
 		_lastSendTime = System.currentTimeMillis();
-System.out.println("send :"+msg+" ip:"+_ip+" p:"+_port+" t:"+_lastReceivedTime);
+log("send :"+msg+" ip:"+_ip+" p:"+_port+" t:"+_lastReceivedTime);
 		_udpService.send(msg, _ip, _port);  // TODO: performance
 	}
 
@@ -593,7 +595,7 @@ System.out.println("send :"+msg+" ip:"+_ip+" p:"+_port+" t:"+_lastReceivedTime);
 
             int start = _sendWindow.getWindowStart();
 
-System.out.println("Soft resend data:"+ start+ " rto:"+rto+
+log("Soft resend data:"+ start+ " rto:"+rto+
 " uS:"+_sendWindow.getUsedSpots());
 
             DataRecord drec;
@@ -613,7 +615,7 @@ System.out.println("Soft resend data:"+ start+ " rto:"+rto+
 
 				// If too many sends then abort connection
 				if ( drec.sends > MAX_SEND_TRIES+1 ) {
-System.out.println("Tried too many send on:"+drec.msg.getSequenceNumber());
+log("Tried too many send on:"+drec.msg.getSequenceNumber());
 					closeAndCleanup();
 					return;
 				}
@@ -622,7 +624,7 @@ System.out.println("Tried too many send on:"+drec.msg.getSequenceNumber());
 
                 // If it looks like we waited too long then speculatively resend
                 if ( currentWait > adjRTO ) {
-System.out.println("Soft resending message:"+drec.msg.getSequenceNumber());
+log("Soft resending message:"+drec.msg.getSequenceNumber());
                     safeSend(drec.msg);
                     currTime      = _lastSendTime;
                     drec.sentTime = currTime;
@@ -696,7 +698,7 @@ System.out.println("Soft resending message:"+drec.msg.getSequenceNumber());
 
 		// Record when the last message was received
 		_lastReceivedTime = System.currentTimeMillis();
-System.out.println("handleMessage :"+msg+" t:"+_lastReceivedTime);
+log("handleMessage :"+msg+" t:"+_lastReceivedTime);
 
         if (msg instanceof SynMessage) {
             // First Message from other host - get his connectionID.
@@ -734,7 +736,7 @@ System.out.println("handleMessage :"+msg+" t:"+_lastReceivedTime);
             } else {
             	// Record the ack
 				_sendWindow.ackBlock(seqNo);
-System.out.println("STATS RTO: "+_sendWindow.getRTO()+" seq: "+seqNo);
+log("STATS RTO: "+_sendWindow.getRTO()+" seq: "+seqNo);
 			}
         } else if (msg instanceof DataMessage) {
             // Pass the data message to the output window
@@ -748,7 +750,7 @@ System.out.println("STATS RTO: "+_sendWindow.getRTO()+" seq: "+seqNo);
 				drec.acks++;
                 // TODO: You are not enforcing any real upper limit 
             } else {
-System.out.println("Received duplicate block num: "+ dmsg.getSequenceNumber());
+log("Received duplicate block num: "+ dmsg.getSequenceNumber());
             }
 
             // Ack the Data message
@@ -837,12 +839,12 @@ System.out.println("Received duplicate block num: "+ dmsg.getSequenceNumber());
 
         public void handleEvent() {
             long time = System.currentTimeMillis();
-System.out.println("keepalive");
+log("keepalive");
 		
 			// Make sure that some messages are received within timeframe
 			if ( isConnected() && 
 				 _lastReceivedTime + MAX_MESSAGE_WAIT_TIME < time ) {
-System.out.println("shutdown");
+log("shutdown");
 				// If no incoming messages for very long time then 
 				// close connection
 				closeAndCleanup();
@@ -852,7 +854,7 @@ System.out.println("shutdown");
             // If reevaluation of the time still requires a keepalive then send
             if ( time+1 >= (_lastSendTime + KEEPALIVE_WAIT_TIME) ) {
                 if ( isConnected() ) {
-System.out.println("sendKeepAlive");
+log("sendKeepAlive");
                     sendKeepAlive();
                 } else {
                     return;
@@ -873,7 +875,7 @@ System.out.println("sendKeepAlive");
         }
 
         public void handleEvent() {
-System.out.println("data timeout");
+log("data timeout");
             long time = System.currentTimeMillis();
 
 			// Make sure that some messages are received within timeframe
@@ -902,7 +904,7 @@ System.out.println("data timeout");
         }
 
         public void handleEvent() {
-System.out.println("ack timeout");
+log("ack timeout");
             
             if ( isConnected() ) {
                 validateAckedData();
@@ -911,4 +913,8 @@ System.out.println("ack timeout");
     }
     //
     // -----------------------------------------------------------------
+
+	public static void log(String msg) {
+		System.out.println(msg);
+	}
 }

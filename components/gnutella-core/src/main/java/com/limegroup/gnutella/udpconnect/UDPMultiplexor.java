@@ -83,20 +83,16 @@ public class UDPMultiplexor {
 	  InetAddress senderIP, int senderPort) {
 		UDPConnectionProcessor con;
 
-System.out.println("Received:"+ msg+ " ip:"+ senderIP+ " p:"+ senderPort);
-
 		int connID = (int) msg.getConnectionID() & 0xff;
 
 		// If connID equals 0 and SynMessage then associate with a connection
         // that appears to want it (connecting and with knowledge of it).
 		if ( connID == 0 && msg instanceof SynMessage ) {
-System.out.println("R Step 2:"+ msg+ " ip:"+ senderIP+ " p:"+ senderPort);
 			for (int i = 1; i < _connections.length; i++) {
 				con = _connections[i];
 				if ( con != null && 
 					 con.isConnecting() &&
 					 con.matchAddress(senderIP, senderPort) ) {
-System.out.println("R Step 3:"+ msg+ " ip:"+ senderIP+ " p:"+ senderPort);
 					 con.handleMessage(msg);
 					 break;
 				} 
