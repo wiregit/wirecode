@@ -1,7 +1,7 @@
 package com.limegroup.gnutella.filters;
 
 import com.limegroup.gnutella.*;
-import java.util.*;
+import com.sun.java.util.collections.*;
 
 public class CompositeFilter extends SpamFilter {
     SpamFilter[] delegates;

@@ -1,7 +1,8 @@
 package com.limegroup.gnutella.filters;
 
 import com.limegroup.gnutella.*;
-import java.util.*;
+import com.sun.java.util.collections.*;
+import java.util.Locale;
 
 /** 
  * A spam filter that removes certain "bad" keywords. 

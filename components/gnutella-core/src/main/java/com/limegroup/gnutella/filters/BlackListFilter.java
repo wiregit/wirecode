@@ -1,6 +1,6 @@
 package com.limegroup.gnutella.filters;
 
-import java.util.*;
+import com.sun.java.util.collections.*;
 import com.limegroup.gnutella.*;
 
 /**This class provides an interface to the list of ip addresses that
