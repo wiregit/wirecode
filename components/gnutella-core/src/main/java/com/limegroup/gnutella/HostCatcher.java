@@ -74,8 +74,10 @@ public class HostCatcher {
     private boolean gotGoodPong=false;
     private Object gotGoodPongLock=new Object();
 
+	// TODO1 - This methodology just does not scale.
+	// It is set to 48 hours to suppress the hits on central server.
     /** The number of MILLISECONDS a server's pong is valid for. */
-    private static final int STALE_TIME=90*60*1000; //90 minutes
+    private static final int STALE_TIME=48*60*60*1000; 
     /** The number of MILLISECONDS to wait before retrying quick-connect. */
     private static final int RETRY_TIME=5*60*1000; //5 minutes
     /** The amount of MILLISECONDS to wait after starting a connection before
