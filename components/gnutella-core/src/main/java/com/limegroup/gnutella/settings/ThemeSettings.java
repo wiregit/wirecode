@@ -199,7 +199,241 @@ public final class ThemeSettings {
 	 */
 	public static final IntSetting SECONDARY3_COLOR_B = 
 		FACTORY.createIntSetting("SECONDARY3_COLOR_B", 209);
+		
+	
+	/**
+	 * Setting for the secondary 3 color blue value.
+	 */
+	public static final IntSetting WINDOW1_COLOR_R = 
+		FACTORY.createIntSetting("WINDOW1_COLOR_R", 209);	
+		
 
+	/**
+	 * Setting for the secondary 3 color blue value.
+	 */
+	public static final IntSetting WINDOW1_COLOR_G = 
+		FACTORY.createIntSetting("WINDOW1_COLOR_G", 209);
+		
+	/**
+	 * Setting for the secondary 3 color blue value.
+	 */
+	public static final IntSetting WINDOW1_COLOR_B = 
+		FACTORY.createIntSetting("WINDOW1_COLOR_B", 209);	
+		
+
+	/**
+	 * Setting for the secondary 3 color blue value.
+	 */
+	public static final IntSetting WINDOW2_COLOR_R = 
+		FACTORY.createIntSetting("WINDOW2_COLOR_R", 209);	
+		
+
+	/**
+	 * Setting for the secondary 3 color blue value.
+	 */
+	public static final IntSetting WINDOW2_COLOR_G = 
+		FACTORY.createIntSetting("WINDOW2_COLOR_G", 209);
+		
+	/**
+	 * Setting for the secondary 3 color blue value.
+	 */
+	public static final IntSetting WINDOW2_COLOR_B = 
+		FACTORY.createIntSetting("WINDOW2_COLOR_B", 209);			
+		
+	/**
+	 * Setting for the secondary 3 color blue value.
+	 */
+	public static final IntSetting WINDOW3_COLOR_R = 
+		FACTORY.createIntSetting("WINDOW3_COLOR_R", 209);	
+		
+
+	/**
+	 * Setting for the secondary 3 color blue value.
+	 */
+	public static final IntSetting WINDOW3_COLOR_G = 
+		FACTORY.createIntSetting("WINDOW3_COLOR_G", 209);
+		
+	/**
+	 * Setting for the secondary 3 color blue value.
+	 */
+	public static final IntSetting WINDOW3_COLOR_B = 
+		FACTORY.createIntSetting("WINDOW3_COLOR_B", 209);			
+		
+	/**
+	 * Setting for the secondary 3 color blue value.
+	 */
+	public static final IntSetting WINDOW4_COLOR_R = 
+		FACTORY.createIntSetting("WINDOW4_COLOR_R", 209);	
+		
+
+	/**
+	 * Setting for the secondary 3 color blue value.
+	 */
+	public static final IntSetting WINDOW4_COLOR_G = 
+		FACTORY.createIntSetting("WINDOW4_COLOR_G", 209);
+		
+	/**
+	 * Setting for the secondary 3 color blue value.
+	 */
+	public static final IntSetting WINDOW4_COLOR_B = 
+		FACTORY.createIntSetting("WINDOW4_COLOR_B", 209);			
+		
+	/**
+	 * Setting for the secondary 3 color blue value.
+	 */
+	public static final IntSetting WINDOW5_COLOR_R = 
+		FACTORY.createIntSetting("WINDOW5_COLOR_R", 209);	
+		
+
+	/**
+	 * Setting for the secondary 3 color blue value.
+	 */
+	public static final IntSetting WINDOW5_COLOR_G = 
+		FACTORY.createIntSetting("WINDOW5_COLOR_G", 209);
+		
+	/**
+	 * Setting for the secondary 3 color blue value.
+	 */
+	public static final IntSetting WINDOW5_COLOR_B = 
+		FACTORY.createIntSetting("WINDOW5_COLOR_B", 209);			
+
+		
+	/**
+	 * Setting for the secondary 3 color blue value.
+	 */
+	public static final IntSetting WINDOW6_COLOR_R = 
+		FACTORY.createIntSetting("WINDOW6_COLOR_R", 209);	
+		
+
+	/**
+	 * Setting for the secondary 3 color blue value.
+	 */
+	public static final IntSetting WINDOW6_COLOR_G = 
+		FACTORY.createIntSetting("WINDOW6_COLOR_G", 209);
+		
+	/**
+	 * Setting for the secondary 3 color blue value.
+	 */
+	public static final IntSetting WINDOW6_COLOR_B = 
+		FACTORY.createIntSetting("WINDOW6_COLOR_B", 209);			
+		
+	/**
+	 * Setting for the secondary 3 color blue value.
+	 */
+	public static final IntSetting WINDOW7_COLOR_R = 
+		FACTORY.createIntSetting("WINDOW7_COLOR_R", 209);	
+		
+
+	/**
+	 * Setting for the secondary 3 color blue value.
+	 */
+	public static final IntSetting WINDOW7_COLOR_G = 
+		FACTORY.createIntSetting("WINDOW7_COLOR_G", 209);
+		
+	/**
+	 * Setting for the secondary 3 color blue value.
+	 */
+	public static final IntSetting WINDOW7_COLOR_B = 
+		FACTORY.createIntSetting("WINDOW7_COLOR_B", 209);		
+		
+	/**
+	 * Setting for the secondary 3 color blue value.
+	 */
+	public static final IntSetting WINDOW8_COLOR_R = 
+		FACTORY.createIntSetting("WINDOW8_COLOR_R", 209);	
+		
+
+	/**
+	 * Setting for the secondary 3 color blue value.
+	 */
+	public static final IntSetting WINDOW8_COLOR_G = 
+		FACTORY.createIntSetting("WINDOW8_COLOR_G", 209);
+		
+	/**
+	 * Setting for the secondary 3 color blue value.
+	 */
+	public static final IntSetting WINDOW8_COLOR_B = 
+		FACTORY.createIntSetting("WINDOW8_COLOR_B", 209);	
+		
+		
+	/**
+	 * Setting for the secondary 3 color blue value.
+	 */
+	public static final IntSetting WINDOW9_COLOR_R = 
+		FACTORY.createIntSetting("WINDOW9_COLOR_R", 209);	
+		
+
+	/**
+	 * Setting for the secondary 3 color blue value.
+	 */
+	public static final IntSetting WINDOW9_COLOR_G = 
+		FACTORY.createIntSetting("WINDOW9_COLOR_G", 209);
+		
+	/**
+	 * Setting for the secondary 3 color blue value.
+	 */
+	public static final IntSetting WINDOW9_COLOR_B = 
+		FACTORY.createIntSetting("WINDOW9_COLOR_B", 209);			
+		
+		
+	/**
+	 * Setting for the secondary 3 color blue value.
+	 */
+	public static final IntSetting WINDOW10_COLOR_R = 
+		FACTORY.createIntSetting("WINDOW10_COLOR_R", 209);	
+		
+
+	/**
+	 * Setting for the secondary 3 color blue value.
+	 */
+	public static final IntSetting WINDOW10_COLOR_G = 
+		FACTORY.createIntSetting("WINDOW10_COLOR_G", 209);
+		
+	/**
+	 * Setting for the secondary 3 color blue value.
+	 */
+	public static final IntSetting WINDOW10_COLOR_B = 
+		FACTORY.createIntSetting("WINDOW10_COLOR_B", 209);			
+		
+		
+	/**
+	 * Setting for the secondary 3 color blue value.
+	 */
+	public static final IntSetting WINDOW11_COLOR_R = 
+		FACTORY.createIntSetting("WINDOW11_COLOR_R", 209);	
+		
+
+	/**
+	 * Setting for the secondary 3 color blue value.
+	 */
+	public static final IntSetting WINDOW11_COLOR_G = 
+		FACTORY.createIntSetting("WINDOW11_COLOR_G", 209);
+		
+	/**
+	 * Setting for the secondary 3 color blue value.
+	 */
+	public static final IntSetting WINDOW11_COLOR_B = 
+		FACTORY.createIntSetting("WINDOW11_COLOR_B", 209);			
+		
+
+	/**
+	 * Setting for the secondary 3 color blue value.
+	 */
+	public static final IntSetting WINDOW12_COLOR_R = 
+		FACTORY.createIntSetting("WINDOW12_COLOR_R", 209);	
+		
+
+	/**
+	 * Setting for the secondary 3 color blue value.
+	 */
+	public static final IntSetting WINDOW12_COLOR_G = 
+		FACTORY.createIntSetting("WINDOW12_COLOR_G", 209);
+		
+	/**
+	 * Setting for the secondary 3 color blue value.
+	 */
+	public static final IntSetting WINDOW12_COLOR_B = 
+		FACTORY.createIntSetting("WINDOW12_COLOR_B", 209);								
 
 	/////////////////// FONTS //////////////////////
 	/**
