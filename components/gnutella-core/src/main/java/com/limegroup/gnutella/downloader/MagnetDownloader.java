@@ -12,6 +12,8 @@ import org.apache.commons.httpclient.HttpMethod;
 import org.apache.commons.httpclient.methods.HeadMethod;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpStatus;
+import org.apache.commons.httpclient.URI;
+import org.apache.commons.httpclient.URIException;
 
 /**
  * A ManagedDownloader for MAGNET URIs.  Unlike a ManagedDownloader, a
@@ -186,6 +188,14 @@ public class MagnetDownloader extends ManagedDownloader implements Serializable 
     /** Returns the length of the content at the given URL. 
      *  @exception IOException couldn't find the length for some reason */
     private static int contentLength(URL url) throws IOException {
+        try {
+            // Verify that the URL is valid.
+            new URI(url.toExternalForm());
+        } catch(URIException e) {
+            //invalid URI, don't allow this URL.
+            throw new IOException("invalid url: " + url);
+        }
+    
         HttpMethod head = new HeadMethod(url.toExternalForm());
         head.addRequestHeader("User-Agent",
                               CommonUtils.getHttpServer());
