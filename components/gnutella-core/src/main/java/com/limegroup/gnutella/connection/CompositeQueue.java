@@ -1,7 +1,5 @@
 package com.limegroup.gnutella.connection;
 
-import java.io.IOException;
-
 import com.limegroup.gnutella.Connection;
 import com.limegroup.gnutella.messages.Message;
 
@@ -213,6 +211,18 @@ public final class CompositeQueue {
                     _size -= (msg==null?0:1) + dropped;  //maintain invariant
                     
                     if(msg != null) {
+                        
+                        // if this is the last message, reset the cycle.  This
+                        // is necessary because otherwise this queue's cycle
+                        // would not get reset until it returned null on the
+                        // next pass, even though it may have messages.
+                        if(queue.size() == 0) {
+                            queue.resetCycle();
+                            
+                            // move the priority along to make sure we go to 
+                            // the next queue on the next pass
+                            _priority = (_priority+1)%PRIORITIES;
+                        }
                         return msg;
                     } else {
                         // tricky part -- either we've come to the end of the 
@@ -242,70 +252,6 @@ public final class CompositeQueue {
         return null;
     }
      
-    /** 
-     * Removes and returns the next message to send from this.  Returns null if
-     * there are no more messages to send.  The returned message is guaranteed
-     * be younger than TIMEOUT milliseconds.  Messages may be dropped in the
-     * process; find out how many by calling resetDropped().  For this reason
-     * note that size()>0 does not imply that removeBest()!=null.
-     * 
-     * @return the next message, or <tt>null</tt> if none
-     * @see com.limegroup.gnutella.connection.MessageQueue#resetCycle()
-     * TODO:: make syncrhonization more fine-grained
-     */
-    public void write() throws IOException {    
-        //try { 
-            //repOk();
-            
-        int start = _priority;
-        int i = start;
-        
-        do {
-            MessageQueue queue = _queues[i];
-            queue.resetCycle();
-            boolean emptied = false;
-            while(true) {
-                Message msg = null;
-                synchronized (QUEUE_LOCK) {
-                    msg = queue.removeNext();
-                    int dropped = queue.resetDropped();
-                    CONNECTION.stats().addSentDropped(dropped);
-                    _size -= (msg==null?0:1) + dropped;  //maintain invariant
-                    if (_size == 0) {
-                        emptied = true;
-                    } 
-                    if(msg == null) {
-                        break;
-                    }
-                }
-                
-                //Note that if the ougoing stream is compressed
-                //(isWriteDeflated()), this call may not actually
-                //do anything.  This is because the Deflater waits
-                //until an optimal time to start deflating, buffering
-                //up incoming data until that time is reached, or the
-                //data is explicitly flushed.
-                CONNECTION.writer().simpleWrite(msg);
-                CONNECTION.stats().addSent();
-            }
-            
-            // Optimization: the if statement below is not needed for
-            // correctness but works nicely with the _priorityHint trick.
-            if (emptied)
-                break;
-            i = (i+1)%PRIORITIES;
-        } while(i != start);
-        
-
-        //2. Now force data from Connection's BufferedOutputStream into the
-        //kernel's TCP send buffer.  It doesn't force TCP to
-        //actually send the data to the network.  That is determined
-        //by the receiver's window size and Nagle's algorithm.
-        //Note that if the outgoing stream is compressed 
-        //(isWriteDeflated()), then this call may block while the
-        //Deflater deflates the data.        
-        CONNECTION.writer().flush();
-    }
 
     /** 
      * Returns the number of messages in this.  Note that size()>0 does not
