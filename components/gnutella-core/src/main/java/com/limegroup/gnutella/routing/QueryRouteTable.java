@@ -112,7 +112,6 @@ public class QueryRouteTable {
      * been decremented, i.e., is the outbound not inbound TTL.  
      */
     public boolean contains(QueryRequest qr) {
-        int ttl=qr.getTTL();
         byte bits=Utilities.log2(bitTableLength);
 
         //1. First we check that all the normal keywords of qr are in the route
