@@ -92,5 +92,46 @@ public void set(long speed, byte[] clientGUID)
 }
 
 
+/**
+* Checks if two instances of this class are same or not.
+* They are same if the super class verifies that they are same, and in addition,
+* if the client IDs are defined for both the instances, they should also be
+* same.
+* @param o The instance to compare with
+*/
+public boolean equals(Object o)
+{
+    //if ot of proper type, return false
+    if (! (o instanceof EndpointData))
+        return false;
+    
+    //type cast
+    EndpointData endpointData = (EndpointData)o;
+    
+    //if super class returns false, return false
+    if(! super.equals(endpointData))
+        return false;
+    //if the client IDs are defined for both the instances, 
+    //they should also be same.
+    if(clientGUID != null && endpointData.clientGUID != null)
+    {
+        //just to prevent object creation by converting to GUID instances,
+        //comparing the bytes directly
+        
+        //if not of same size return false
+        if(clientGUID.length != endpointData.clientGUID.length)
+            return false;
+        
+        //compare the bytes. If any byte doesnt match return false
+        for (int i=0; i<clientGUID.length; i++)
+            if (clientGUID[i] != endpointData.clientGUID[i])
+                return false;
+    }
+    
+    //if passed all the above tests, return true
+    return true;
+    
+    
+}
 
 }//end of class
