@@ -89,14 +89,7 @@ public class RemoteFileDesc implements Serializable {
     private transient Set _proxies;
 		
     /**
-     * The List of available ranges.  Should not be serialized.
-     * This is not an IntervalSet for a reason:
-     * We do not want to compact overlapping ranges into a single range,
-     * because the remote host may not understand them as such.
-     * We must act off the ranges as they're listed to us.
-     * For LimeWires, the ranges will always be as compact as possible,
-     * but for other vendors this is unknown.
-     *
+     * The list of available ranges.
      * This is NOT SERIALIZED.
      */
     private transient IntervalSet _availableRanges = null;

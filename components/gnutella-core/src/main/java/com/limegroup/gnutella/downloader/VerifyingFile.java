@@ -5,6 +5,9 @@ import java.io.*;
 import com.limegroup.gnutella.util.*;
 import com.limegroup.gnutella.tigertree.HashTree;
 
+import org.apache.commons.logging.LogFactory;
+import org.apache.commons.logging.Log;
+
 /**
  * All the HTTPDownloaders associated with a ManagedDownloader will commit
  * the parts of the file they are downloading through a single object of this 
@@ -20,21 +23,38 @@ import com.limegroup.gnutella.tigertree.HashTree;
  */
 public class VerifyingFile {
     
+    private static final Log LOG = LogFactory.getLog(VerifyingFile.class);
+    
+    /**
+     * The file we're writing to / reading from.
+     */
     private RandomAccessFile fos;
 
-    private boolean checkOverlap;
+    /**
+     * Whether or not we're doing overlap checking.
+     */
+    private final boolean checkOverlap;
     
+    /**
+     * Whether or not we've detected corruption in the file.
+     */
     private volatile boolean isCorrupted;
 
+    /**
+     * The ManagedDownloader this is working for.
+     */
     private ManagedDownloader managedDownloader; 
     
-    private int completedSize;
+    /**
+     * The eventual completed size of the file we're writing.
+     */
+    private final int completedSize;
     
     /**
      * The VerifyingFile uses an IntervalSet to keep track of the blocks written
      * to disk and find out which blocks to check before writing to disk
      */
-    private IntervalSet writtenBlocks;
+    private final IntervalSet writtenBlocks;
     
     /**
      * Ranges that are currently being written by the ManagedDownloader. 
@@ -45,6 +65,10 @@ public class VerifyingFile {
      */
     private IntervalSet leasedBlocks;
     
+    /**
+     * Constructs a new VerifyingFile for the specified size.
+     * If checkOverlap is true, will scan for overlap corruption.
+     */
     public VerifyingFile(boolean checkOverlap, int completedSize) {
         this.completedSize = completedSize;
         this.checkOverlap = checkOverlap;
@@ -52,6 +76,10 @@ public class VerifyingFile {
         leasedBlocks = new IntervalSet();
     }
     
+    /**
+     * Opens this VerifyingFile for writing.
+     * MUST be called before anything else.
+     */
     public void open(File file, ManagedDownloader md) throws IOException {
         this.managedDownloader = md;
         // Ensure that the directory this file is in exists & is writeable.
@@ -74,8 +102,12 @@ public class VerifyingFile {
     public synchronized void addInterval(Interval interval) {
         //delegates to underlying IntervalSet
         writtenBlocks.add(interval);
+        releaseBlock(interval);
     }
 
+    /**
+     * Writes bytes to the underlying file.
+     */
     public synchronized void writeBlock(long currPos, int numBytes, byte[] buf)
                                                     throws IOException {
         if(numBytes==0) //nothing to write? return
@@ -84,9 +116,8 @@ public class VerifyingFile {
             throw new IOException();
         boolean checkBeforeWrite = false;
         List overlapBlocks = null;
-        Interval intvl= null;
+        Interval intvl = new Interval((int)currPos,(int)currPos+numBytes-1);
         if(checkOverlap) {
-            intvl =new Interval((int)currPos,(int)currPos+numBytes-1);
             overlapBlocks = writtenBlocks.getOverlapIntervals(intvl);
             if(overlapBlocks.size()>0)
                 checkBeforeWrite = true;
@@ -117,14 +148,14 @@ public class VerifyingFile {
         //3. Write to disk.
         fos.write(buf, 0, numBytes);
         //4. add this interval
-        if(intvl==null)
-            writtenBlocks.
-            add(new Interval((int)currPos, (int)currPos+numBytes-1));
-        else 
-            writtenBlocks.add(intvl);
+        writtenBlocks.add(intvl);
+        releaseBlock(intvl);
     }
 
-    public synchronized Interval leaseWhite() {
+    /**
+     * Returns the first full block of data that needs to be written.
+     */
+    public synchronized Interval leaseWhite() throws NoSuchElementException {
         IntervalSet freeBlocks = writtenBlocks.invert(completedSize);
         freeBlocks.delete(leasedBlocks);
         Interval ret = freeBlocks.removeFirst();
@@ -132,14 +163,22 @@ public class VerifyingFile {
         return ret;
     }
     
-    public synchronized Interval leaseWhite(int chunkSize) {
+    /**
+     * Returns the first block of data that needs to be written.
+     * The returned block will NEVER be larger than chunkSize.
+     */
+    public synchronized Interval leaseWhite(int chunkSize) 
+      throws NoSuchElementException {
         Interval temp = leaseWhite();
-        if (temp == null)
-            return temp;
         return fixIntervalForChunk(temp, chunkSize);
     }
     
-    public synchronized Interval leaseWhite(IntervalSet ranges) {
+    /**
+     * Returns the first block of data that needs to be written
+     * and is within the specified set of ranges.
+     */
+    public synchronized Interval leaseWhite(IntervalSet ranges)
+      throws NoSuchElementException {
         ranges.delete(writtenBlocks);
         ranges.delete(leasedBlocks);
         Interval temp = ranges.removeFirst();
@@ -149,47 +188,73 @@ public class VerifyingFile {
                && temp.high - temp.low <= ManagedDownloader.OVERLAP_BYTES)
             temp = ranges.removeFirst();
         
-        if (temp == null)
-            return null;
-        
-        Interval ret = new Interval(temp.low+ManagedDownloader.OVERLAP_BYTES, 
-            temp.high);
+        Interval ret =
+            new Interval(temp.low+ManagedDownloader.OVERLAP_BYTES, temp.high);
+
         leaseBlock(ret);
         return ret;
     }
     
-    public synchronized Interval leaseWhite(IntervalSet ranges, int chunkSize) {
+    /**
+     * Returns the first block of data that needs to be written
+     * and is within the specified set of ranges.
+     * The returned block will NEVER be larger than chunkSize.
+     */
+    public synchronized Interval leaseWhite(IntervalSet ranges, int chunkSize)
+      throws NoSuchElementException {
         Interval temp = leaseWhite(ranges);
-        if (temp == null)
-            return temp;
         return fixIntervalForChunk(temp, chunkSize);
     }
 
+    /**
+     * Removes the specified internal from the set of leased intervals.
+     */
     public synchronized void releaseBlock(Interval in) {
-        if (in != null)
-            leasedBlocks.delete(in);
+        if(LOG.isDebugEnabled())
+            LOG.debug("Releasing interval: " + in);
+        leasedBlocks.delete(in);
     }
     
+    /**
+     * Returns all written blocks with an Iterator.
+     */
     public synchronized Iterator getBlocks() {
         return writtenBlocks.getAllIntervals();
     }
 
+    /**
+     * Returns all written blocks as a List.
+     */ 
     public synchronized List getBlocksAsList() {
         return writtenBlocks.getAllIntervalsAsList();
     }
 
+    /**
+     * Returns all blocks that are free assuming the specified
+     * maximum size, as an Iterator.
+     */
     public synchronized Iterator getFreeBlocks(int maxSize) {
         return writtenBlocks.getNeededIntervals(maxSize);
     }
 
+    /**
+     * Returns the total number of bytes written to disk.
+     */
     public synchronized int getBlockSize() {
         return writtenBlocks.getSize();
     }
   
+    /**
+     * Determines if all blocks have been written to disk.
+     */
     public synchronized boolean isComplete() {
         return (writtenBlocks.getSize() == completedSize);
     }
     
+    /**
+     * Determines if there are any blocks that are not assigned
+     * or written.
+     */
     public synchronized boolean hasFreeBlocksToAssign() {
         return ( writtenBlocks.getSize() + leasedBlocks.getSize() < completedSize); 
     }
@@ -289,12 +354,16 @@ public class VerifyingFile {
             releaseBlock(temp);
         } else { //temp's size <= chunkSize
             interval = temp;
-}
+        }
         return interval;
     }
 
+    /**
+     * Leases the specified interval.
+     */
     private synchronized void leaseBlock(Interval in) {
-        if (in != null)
-            leasedBlocks.add(in);
+        if(LOG.isDebugEnabled())
+            LOG.debug("Obtaining interval: " + in);
+        leasedBlocks.add(in);
     }
 }

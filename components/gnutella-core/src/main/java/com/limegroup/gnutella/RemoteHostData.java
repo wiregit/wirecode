@@ -1,6 +1,6 @@
 package com.limegroup.gnutella;
 
-import com.sun.java.util.collections.*;
+import com.sun.java.util.collections.Arrays;
 
 /**
  * Simple representation of a remote host.
@@ -15,12 +15,12 @@ public class RemoteHostData {
     /**
      * The host's port.
      */
-    private int _port;
+    private final int _port;
 
     /**
      * The host's clientGUID.
      */
-    private byte[] _clientGUID;
+    private final byte[] _clientGUID;
 
     /**
      * The cached hashCode.

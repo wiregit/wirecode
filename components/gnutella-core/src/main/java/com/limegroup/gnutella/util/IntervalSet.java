@@ -14,7 +14,10 @@ import com.limegroup.gnutella.downloader.Interval;
  */
 public class IntervalSet {
     
-    private SortedSet /*of Interval*/ intervals;
+    /**
+     * The sorted set of intervals this contains.
+     */
+    private final SortedSet /*of Interval*/ intervals;
     
     //constructor.
     public IntervalSet() {
@@ -119,14 +122,20 @@ public class IntervalSet {
             add(higher);
     }
     
+    /**
+     * Deletes the specified all intervals in the specified set
+     * from this set.
+     */
     public void delete(IntervalSet set) {
         for (Iterator iter = set.getAllIntervals(); iter.hasNext(); )
             delete((Interval)iter.next());
     }
     
-    public Interval removeFirst() {
-        if (intervals.size()==0)
-            return null;
+    /**
+     * Removes the first element.  Throws NoSuchElementException
+     * if no intervals exist.
+     */
+    public Interval removeFirst() throws NoSuchElementException {
         Interval ret = (Interval)intervals.first();
         intervals.remove(ret);
         return ret;
@@ -247,6 +256,11 @@ public class IntervalSet {
         return this.invert(maxSize).getAllIntervals();
     }
 
+    /**
+     * Clones the IntervalSet.  The underlying intervals are the same
+     * (so they should never be modified), but the TreeSet this is
+     * backed off of is new.
+     */
     public Object clone() {
         IntervalSet ret = new IntervalSet();
         for (Iterator iter = getAllIntervals(); iter.hasNext(); )
@@ -256,6 +270,9 @@ public class IntervalSet {
     }
 
 
+    /**
+     * Comparator for intervals.
+     */
     private class IntervalComparator implements Comparator {
         public int compare(Object a, Object b) {
             Interval ia=(Interval)a;
@@ -264,6 +281,9 @@ public class IntervalSet {
         }
     }
     
+    /**
+     * Lists the contained intervals.
+     */
     public String toString() {
         return intervals.toString();
     }
