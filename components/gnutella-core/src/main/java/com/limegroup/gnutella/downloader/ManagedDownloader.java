@@ -1353,7 +1353,7 @@ public class ManagedDownloader implements Downloader, Serializable {
         //totalAlternateLocations
         if( sha1!=null && 
             (validAlts == null || !validAlts.getSHA1Urn().equals(sha1)) )
-            validAlts  = AlternateLocationCollection.createCollection(sha1);
+            validAlts  = AlternateLocationCollection.create(sha1);
         
         //2. Do the download
         int status = -1;  //TODO: is this equal to COMPLETE etc?
@@ -2127,7 +2127,7 @@ public class ManagedDownloader implements Downloader, Serializable {
         // been created yet.
         if(validAlts == null)
             validAlts =
-            AlternateLocationCollection.createCollection(alt.getSHA1Urn());
+            AlternateLocationCollection.create(alt.getSHA1Urn());
                 
         boolean added = validAlts.add(alt);
         

@@ -87,7 +87,7 @@ public final class HTTPUploader implements Uploader {
 	 * Stores any alternate locations specified in the HTTP headers for 
 	 * this upload.
 	 */
-	private AlternateLocationCollection _alternateLocationCollection;
+	private AltLocCollectionsManager _altLocs;
 
 	/**
 	 * The <tt>HTTPRequestMethod</tt> to use for the upload.
@@ -138,7 +138,7 @@ public final class HTTPUploader implements Uploader {
         _supportsQueueing = false;
         _requestedURN = null;
         _clientAcceptsXGnutellaQueryreplies = false;
-        _alternateLocationCollection = null;
+        _altLocs = null;
         
         // If this is the first time we are initializing it,
         // create a new bandwidth tracker and set a few more variables.
@@ -171,6 +171,21 @@ public final class HTTPUploader implements Uploader {
         _fis = _fileDesc.createInputStream();
 	}
 	
+    /**
+     * Creates the valid and failed AlternateLocationCollections with the
+     * correct hash and initializes _altLocs
+     */
+    public void initializeAltLocs() {
+        Assert.that(_fileDesc!=null,"trying to upload a null file desc");
+        AlternateLocationCollection v = 
+        AlternateLocationCollection.create(_fileDesc.getSHA1Urn());
+        AlternateLocationCollection f = 
+        AlternateLocationCollection.create(_fileDesc.getSHA1Urn());
+        
+        _altLocs = new AltLocCollectionsManager(v,f);        
+    }
+    
+
 	/**
 	 * Initializes the OutputStream for this HTTPUploader to use.
 	 * Throws IOException if the connection was closed.
@@ -202,11 +217,22 @@ public final class HTTPUploader implements Uploader {
             if ( _amountRead < _amountRequested )
                 throw e;
 		} finally {    
-    		if(_alternateLocationCollection != null && _fileDesc != null) {
+    		if(_altLocs != null && _fileDesc != null) {
     			// making this call now is necessary to avoid writing the 
     			// same alternate locations back to the requester as were 
     			// sent in the request headers
-    			_fileDesc.addAll(_alternateLocationCollection);
+                AlternateLocationCollection badLocs=_altLocs.getFailedAltLocs();
+                synchronized(badLocs) {
+                    Iterator iter = badLocs.iterator();
+                    while(iter.hasNext()) 
+                        _fileDesc.remove((AlternateLocation)iter.next());
+                }
+                AlternateLocationCollection goodLoc=_altLocs.getFailedAltLocs();
+                synchronized(goodLoc) {
+                    Iterator iter = goodLoc.iterator();
+                    while(iter.hasNext()) 
+                        _fileDesc.add((AlternateLocation)iter.next());
+                }
             }
         }
 	}
@@ -508,6 +534,7 @@ public final class HTTPUploader implements Uploader {
                 else if ( readUserAgentHeader(str)   ) ;
                 else if ( readContentURNHeader(str)  ) ;
                 else if ( readAltLocationHeader(str) ) ;
+                else if ( readNAltLocationHeader(str)) ;
                 else if ( readAcceptHeader(str)      ) ;
                 else if ( readQueueVersion(str)      ) ;
                 else if ( readNodeHeader(str)        ) ;
@@ -733,14 +760,22 @@ public final class HTTPUploader implements Uploader {
 	private boolean readAltLocationHeader(String str) {
         if ( ! HTTPHeaderName.ALT_LOCATION.matchesStartOfString(str) )
             return false;
-        
-   		if(_alternateLocationCollection == null && _fileDesc != null) 
-   			_alternateLocationCollection = 
-				AlternateLocationCollection.createCollection(_fileDesc.getSHA1Urn());
-        if(_alternateLocationCollection != null)
-            HTTPUploader.parseAlternateLocations(
-                str, _alternateLocationCollection, _fileDesc);
+                
+        if(_altLocs != null) {
+            AlternateLocationCollection goodLocs = _altLocs.getGoodAltLocs();
+            HTTPUploader.parseAlternateLocations(str, goodLocs, _fileDesc);
+        }
+        return true;
+    }
 
+    private boolean readNAltLocationHeader(String str) {
+        if (!HTTPHeaderName.NALTS.matchesStartOfString(str))
+            return false;
+        
+        if(_altLocs != null) {
+            AlternateLocationCollection badLocs = _altLocs.getFailedAltLocs();
+            HTTPUploader.parseAlternateLocations(str,badLocs,_fileDesc);
+        }
         return true;
     }
 
@@ -834,31 +869,28 @@ public final class HTTPUploader implements Uploader {
 	 *  locations should be added to
 	 */
 	private static void parseAlternateLocations(final String altHeader,
-												final AlternateLocationCollector alc,
-												final FileDesc fd) {
-		final String alternateLocations = HTTPUtils.extractHeaderValue(altHeader);
+				final AlternateLocationCollector alc, final FileDesc fd) {
+		final String alternateLocations=HTTPUtils.extractHeaderValue(altHeader);
 
 		// return if the alternate locations could not be properly extracted
 		if(alternateLocations == null) return;
 		StringTokenizer st = new StringTokenizer(alternateLocations, ",");
-
-		while(st.hasMoreTokens()) {
-			try {
-				// note that the trim method removes any CRLF character
-				// sequences that may be used if the sender is using
-				// continuations.
-				AlternateLocation al = 
-				    AlternateLocation.create(st.nextToken().trim());
-				
+        while(st.hasMoreTokens()) {
+            try {
+                // note that the trim method removes any CRLF character
+                // sequences that may be used if the sender is using
+                // continuations.
+                AlternateLocation al = 
+                AlternateLocation.create(st.nextToken().trim());
+                
                 URN sha1 = al.getSHA1Urn();
-                if(sha1.equals(alc.getSHA1Urn())) {
+                if(sha1.equals(alc.getSHA1Urn()))
                     alc.add(al);
-                }
-			} catch(IOException e) {
-				// just return without adding it.
-				continue;
-			}
-		}
+            } catch(IOException e) {
+                // just return without adding it.
+                continue;
+            }
+        }
 	}
 
 	/**

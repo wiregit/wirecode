@@ -68,7 +68,7 @@ public final class AlternateLocationCollection
      * @return a new <tt>AlternateLocationCollection</tt> instance for
      *  this SHA1
      */
-	public static AlternateLocationCollection createCollection(URN sha1) {
+	public static AlternateLocationCollection create(URN sha1) {
 		return new AlternateLocationCollection(sha1);
 	}
 
@@ -203,7 +203,9 @@ public final class AlternateLocationCollection
 		if(!alc.getSHA1Urn().equals(SHA1)) {
 			throw new IllegalArgumentException("SHA1 does not match");
 		}
-		
+		//Sumeet:TODO1: potential deadlock. Let a and b are 2
+		//AlternateLocationCollection, a.addAll(b) and b.addAll(a) are called on
+		//two threads at the same time, we could have a deadlock
 		int added = 0;
 		synchronized(alc) {
 			Iterator iter = alc.LOCATIONS.keySet().iterator();
