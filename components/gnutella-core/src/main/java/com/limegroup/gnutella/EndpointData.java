@@ -19,14 +19,19 @@ public class EndpointData extends Endpoint implements Cloneable,
 {
 
 /**
-* Client GUID of the host this endpoint refers to
+* serial version
 */
-private byte[] clientGUID = null;
+static final long serialVersionUID = 5045818571228406227L;    
 
+/**
+* set the default speed to be 56k
+*/
+public static final int DEFAULT_SPEED = 56; 
+    
 /**
 * Speed in kilobytes of the host this endpoint refers to
 */
-private long speed = 56;
+private long speed = DEFAULT_SPEED;
     
 
 /**
@@ -50,6 +55,20 @@ public EndpointData(String hostname, int port)
     super(hostname,port);
 }
 
+
+/**
+* Creates a new EndpointData instance
+* @param hostname Hostname of the node this endpoint refers to
+* @param port The port number for the host
+* @param speed Spped in kbps of the host
+*/
+public EndpointData(String hostname, int port, long speed)
+{
+    //initialize the fields in the super class
+    super(hostname,port);
+    this.speed = speed;
+}
+
 /**
 * Creates a new EndpointData instance
 * @param hostname Hostname of the node this endpoint refers to
@@ -70,27 +89,34 @@ public EndpointData(String hostname, int port, long files, long kbytes)
 * @param speed Speed of the host
 * @param clientGUID Unique GUID for the host
 */
-public EndpointData(Endpoint endpoint, long speed, byte[] clientGUID)
+public EndpointData(Endpoint endpoint, long speed)
 {
     //initialize the fields in the super class
     super(endpoint);
     //set the speed and client GUID
-    this.set(speed, clientGUID);
+    this.setSpeed(speed);
 }
+
+
+/**
+* returns the speed of the host
+*/
+public long getSpeed()
+{
+    return speed;
+}
+
 
 
 /**
 * Sets the speed and clientGUID for the host this endpoint refers to
 * @param speed Speed of the host
-* @param clientGUID Unique GUID for the host
 */
-public void set(long speed, byte[] clientGUID)
+public void setSpeed(long speed)
 {
     //set the fields
     this.speed = speed;
-    this.clientGUID = clientGUID;
 }
-
 
 
 }//end of class

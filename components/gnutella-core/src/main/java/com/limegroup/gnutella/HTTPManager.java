@@ -33,7 +33,7 @@ public class HTTPManager {
         _socket = s;
 
         String command=null;
-        FileManager fm = FileManager.getFileManager();
+        FileManager fm = FileManager.instance();
 
         try {
             //We set the timeout now so we don't block reading
@@ -41,7 +41,12 @@ public class HTTPManager {
             //reset the timeout immediately before downloading;
             //otherwise, it isn't touched again.
             _socket.setSoTimeout(SettingsManager.instance().getTimeout());
-            _istream = _socket.getInputStream();
+            //The try-catch below is a work-around for JDK bug 4091706.
+            try {
+                _istream = _socket.getInputStream();
+            } catch (Exception e) {
+                throw new IOException();
+            }
             _br = new ByteReader(_istream);
             command = _br.readLine();   /* read in the first line */
             if (command==null)
@@ -92,6 +97,8 @@ public class HTTPManager {
 
             else /* isPush */ {
                 //Expect  "GIV 0:BC1F6870696111D4A74D0001031AE043/sample.txt\n\n"
+
+
                 String next=_br.readLine();
                 if (next==null || (! next.equals(""))) {
                     throw new IOException();
@@ -171,8 +178,42 @@ public class HTTPManager {
                     }
                 }
             }
-        }
-    }
+
+
+			// check the User-Agent field of the header information
+			if (str.indexOf("User-Agent") != -1) {
+				// check for netscape, internet explorer,
+				// or other free riding downoaders
+				if (SettingsManager.instance().getAllowBrowser() == false) {
+
+
+					// if we are not supposed to read from them
+					// throw an exception
+					if( (str.indexOf("Mozilla") != -1) ||
+						(str.indexOf("DA") != -1) ||
+						(str.indexOf("Download") != -1) ||
+						(str.indexOf("FlashGet") != -1) ||
+						(str.indexOf("GetRight") != -1) ||
+						(str.indexOf("Go!Zilla") != -1) ||
+						(str.indexOf("Inet") != -1) ||
+						(str.indexOf("MIIxpc") != -1) ||
+						(str.indexOf("MSProxy") != -1) ||
+						(str.indexOf("Mass") != -1) ||
+						(str.indexOf("MyGetRight") != -1) ||
+						(str.indexOf("NetAnts") != -1) ||
+						(str.indexOf("NetZip") != -1) ||
+						(str.indexOf("RealDownload") != -1) ||
+						(str.indexOf("SmartDownload") != -1) ||
+						(str.indexOf("Teleport") != -1) ||
+						(str.indexOf("WebDownloader") != -1) ) {
+							HTTPUploader.doFreeloaderResponse(_socket);
+						    throw new IOException("Web Browser");
+						}
+					
+				}
+			}
+		}
+	}
 
     public void shutdown() {
         try {

@@ -44,6 +44,7 @@ public interface SettingsInterface
     public boolean    getFilterVbs();
     public boolean    getFilterHtml();
     public boolean    getFilterGreedyQueries();
+    public boolean    getFilterBearShareQueries();
     public boolean    getUseQuickConnect();
     public String[]   getQuickConnectHosts();
     public int        getParallelSearchMax();
@@ -51,22 +52,24 @@ public interface SettingsInterface
     public int        getMaxUploads();
     public boolean    getClearCompletedUpload();
     public boolean    getClearCompletedDownload();
-    /** special method for getting the number of files scanned */
-    public int        getFilesScanned();
-    public int        getSearchAnimationTime();		
-	
+    public int        getSearchAnimationTime();
+
+	public int        getUploadsPerPerson();
+
     public String     getConnectString();
     public String     getConnectOkString();
 
-   /** The current version of LimeWire.  This is read-only. */
-	public String getCurrentVersion();
-	public String getLastVersionChecked();
-	public boolean getCheckAgain();
+	/** allowing browsers to download from us */
+	public boolean    getAllowBrowser();
 
-	/* For Forced IP and Port */
-	public boolean getForceIPAddress();
-	public String getForcedIPAddress();
-	public int getForcedPort();
+
+   /** The current version of LimeWire.  This is read-only. */
+    public String getCurrentVersion();
+    public String getLastVersionChecked();
+    public boolean getCheckAgain();
+
+    public int getFreeloaderFiles();
+    public int getFreeloaderAllowed();
 
     /** writes out the properties to disk */
     public void writeProperties();
@@ -77,6 +80,10 @@ public interface SettingsInterface
     /** returns the path where the properties and host
      *  host list file get saved*/
     public String getPath();
+
+	/* allow web browsers to download */
+	public void setAllowBrowser(boolean allow)
+		throws IllegalArgumentException;
 
     /** set the user time to live */
     public void setTTL(byte ttl)
@@ -172,6 +179,7 @@ public interface SettingsInterface
     public void setFilterVbs(boolean b);
     public void setFilterHtml(boolean b);
     public void setFilterGreedyQueries(boolean b);
+    public void setFilterBearShareQueries(boolean b);
 
     public void setUseQuickConnect(boolean b);
     public void setQuickConnectHosts(String[] hosts);
@@ -182,28 +190,24 @@ public interface SettingsInterface
     public void setClearCompletedDownload(boolean b);
     public void setSearchAnimationTime(int seconds);
 
+    public void setUploadsPerPerson(int uploads);
+
     /** Sets the handshake string for initializing outgoing connections,
      *  without trailing newlines. */
     public void setConnectString(String connect);
     /** Sets the handshake string for initializing outgoing connections,
      *  without trailing newlines. */
     public void setConnectOkString(String ok);
-	
-	public void setForceIPAddress(boolean force)
-		throws IllegalArgumentException;
-	public void setForcedIPAddress(String address)
-		throws IllegalArgumentException;
-	public void setForcedPort(int port)
-		throws IllegalArgumentException;
-	public void setLastVersionChecked(String last);
-	public void setCheckAgain(boolean check);
 
-    /** specialized method for writing the
-     *  properties file for the network discoverer
-     */
-    public void writeNDProps();
+    public void setLastVersionChecked(String last);
+    public void setCheckAgain(boolean check);
+
+    public void setFreeloaderFiles(int files);
+    public void setFreeloaderAllowed(int probability);
+
     public void setWrite(boolean b);
 
+	public static final boolean DEFAULT_ALLOW_BROWSER  = false;
     /** Default setting for the time to live */
     public static final byte    DEFAULT_TTL            = (byte)5;
     /** Default setting for the soft maximum time to live */
@@ -221,33 +225,32 @@ public interface SettingsInterface
     /** Default name for the network discovery properties */
     public static final String  DEFAULT_ND_PROPS_NAME  = "nd.props";
     /** Default value for the keep alive */
-    public static final int     DEFAULT_KEEP_ALIVE     = 3;
+    public static final int     DEFAULT_KEEP_ALIVE     = 4;
     /** Default port*/
     public static final int     DEFAULT_PORT           = 6346;
     /** Default network connection speed */
     public static final int     DEFAULT_SPEED          = 56;
-    public static final int     DEFAULT_UPLOAD_SPEED   = 100;
+    public static final int     DEFAULT_UPLOAD_SPEED   = 50;
     /** Default limit for the number of searches */
     public static final byte    DEFAULT_SEARCH_LIMIT   = (byte)64;
     /** Default client/gu id */
     //public static final String  DEFAULT_CLIENT_ID      = "A0B447F77853D411B05B0001023AF3D6";
     public static final String  DEFAULT_CLIENT_ID      = null;
     /** Default maximum number of connections */
-    public static final int     DEFAULT_MAX_INCOMING_CONNECTION=3;
+    public static final int     DEFAULT_MAX_INCOMING_CONNECTION=2;
     /** Default directories for file searching */
     public static final String  DEFAULT_SAVE_DIRECTORY = "";
     /** Default directories for file searching */
     public static final String  DEFAULT_DIRECTORIES    = "";
     /** Default file extensions */
     public static final String  DEFAULT_EXTENSIONS     =
-    "html;htm;xml;txt;pdf;ps;rtf;doc;tex;"+
-    "mp3;wav;au;aif;aiff;ra;ram;"+
-    "mpg;mpeg;asf;qt;mov;avi;mpe;swf;dcr;"+
-    "gif;jpg;jpeg;jpe;png;tif;tiff;"+
-    "exe;zip;gz;gzip;hqx;tar;tgz;z";
+    "html;htm;xml;txt;pdf;ps;rtf;doc;tex;mp3;wav;au;aif;aiff;ra;ram;"+
+    "mpg;mpeg;asf;qt;mov;avi;mpe;swf;dcr;gif;jpg;jpeg;jpe;png;tif;tiff;"+
+    "exe;zip;gz;gzip;hqx;tar;tgz;z;rmj;lqt";
 
-	
 
+	/* the number of uplads allowed per person at a given time */
+    public static final int     DEFAULT_UPLOADS_PER_PERSON=3;
 
     /** default banned ip addresses */
     public static final String[] DEFAULT_BANNED_IPS     = {};
@@ -259,6 +262,7 @@ public interface SettingsInterface
     /** Filter .htm[l] files? */
     public static final boolean DEFAULT_FILTER_HTML    = false;
     public static final boolean DEFAULT_FILTER_GREEDY_QUERIES = true;
+    public static final boolean DEFAULT_FILTER_BEARSHARE_QUERIES = true;
     /** Use quick connect hosts instead of gnutella.net? */
     public static final boolean DEFAULT_USE_QUICK_CONNECT = true;
     /** List of hosts to try on quick connect */
@@ -268,22 +272,26 @@ public interface SettingsInterface
     };
     public static final int     DEFAULT_PARALLEL_SEARCH  = 5;
     public static final int     DEFAULT_MAX_SIM_DOWNLOAD = 4;
-    public static final int     DEFAULT_MAX_UPLOADS      = 4;
+    public static final int     DEFAULT_MAX_UPLOADS      = 8;
     public static final boolean DEFAULT_CLEAR_UPLOAD     = false;
     public static final boolean DEFAULT_CLEAR_DOWNLOAD   = false;
-    public static final int     DEFAULT_SEARCH_ANIMATION_TIME = 45;
+    public static final int     DEFAULT_SEARCH_ANIMATION_TIME = 20;
     public static final String  DEFAULT_CONNECT_STRING    = "GNUTELLA CONNECT/0.4";
     public static final String  DEFAULT_CONNECT_OK_STRING = "GNUTELLA OK";
     public static final int     DEFAULT_BASIC_INFO_FOR_QUERY = 1000;
-    public static final int     DEFAULT_ADVANCED_INFO_FOR_QUERY = 50;	
+    public static final int     DEFAULT_ADVANCED_INFO_FOR_QUERY = 50;
 
-    public static final String DEFAULT_LAST_VERSION_CHECKED = "0.5";
+    public static final String  DEFAULT_LAST_VERSION_CHECKED = "1.0";
     public static final boolean DEFAULT_CHECK_AGAIN = true;
-	public static final boolean DEFAULT_FORCE_IP_ADDRESS = false;
-	public static final String DEFAULT_FORCED_IP_ADDRESS = "";
-	public static final int DEFAULT_FORCED_PORT = 6346;
+    public static final boolean DEFAULT_FORCE_IP_ADDRESS = false;
+    public static final byte[]  DEFAULT_FORCED_IP_ADDRESS = {};
+    public static final String  DEFAULT_FORCED_IP_ADDRESS_STRING = "";
+    public static final int     DEFAULT_FORCED_PORT = 6346;
+    public static final int     DEFAULT_FREELOADER_FILES = 1;
+    public static final int     DEFAULT_FREELOADER_ALLOWED = 100;
 
     // The property key name constants
+	public static final String ALLOW_BROWSER  = "ALLOW_BROWSER";
     public static final String TTL            = "TTL";
     public static final String SOFT_MAX_TTL   = "SOFT_MAX_TTL";
     public static final String MAX_TTL        = "MAX_TTL";
@@ -308,6 +316,7 @@ public interface SettingsInterface
     public static final String FILTER_HTML    = "FILTER_HTML";
     public static final String FILTER_VBS     = "FILTER_VBS";
     public static final String FILTER_GREEDY_QUERIES = "FILTER_GREEDY_QUERIES";
+    public static final String FILTER_BEARSHARE_QUERIES = "FILTER_HIGHBIT_QUERIES";
     public static final String USE_QUICK_CONNECT = "USE_QUICK_CONNECT";
     public static final String QUICK_CONNECT_HOSTS = "QUICK_CONNECT_HOSTS";
     public static final String PARALLEL_SEARCH= "PARALLEL_SEARCH";
@@ -320,12 +329,18 @@ public interface SettingsInterface
 
     public static final String CONNECT_STRING = "CONNECT_STRING";
     public static final String CONNECT_OK_STRING = "CONNECT_OK_STRING";
-	public static final String LAST_VERSION_CHECKED = "LAST_VERSION_CHECKED";
+    public static final String LAST_VERSION_CHECKED = "LAST_VERSION_CHECKED";
     public static final String CHECK_AGAIN = "CHECK_AGAIN";
-	public static final String BASIC_QUERY_INFO = "BASIC_QUERY_INFO";
-	public static final String ADVANCED_QUERY_INFO = "ADVANCED_QUERY_INFO";
-	public static final String FORCE_IP_ADDRESS = "FORCE_IP_ADDRESS";
-	public static final String FORCED_IP_ADDRESS = "FORCED_IP_ADDRESS";
-	public static final String FORCED_PORT = "FORCED_PORT";
+    public static final String BASIC_QUERY_INFO = "BASIC_QUERY_INFO";
+    public static final String ADVANCED_QUERY_INFO = "ADVANCED_QUERY_INFO";
+    public static final String FORCE_IP_ADDRESS = "FORCE_IP_ADDRESS";
+    public static final String FORCED_IP_ADDRESS = "FORCED_IP_ADDRESS";
+    public static final String FORCED_IP_ADDRESS_STRING
+        = "FORCED_IP_ADDRESS_STRING";
+    public static final String FORCED_PORT = "FORCED_PORT";
+    public static final String FREELOADER_FILES = "FREELOADER_FILES";
+    public static final String FREELOADER_ALLOWED = "FREELOADER_ALLOWED";
+
+    public static final String UPLOADS_PER_PERSON = "UPLOADS_PER_PERSON";
 
 }

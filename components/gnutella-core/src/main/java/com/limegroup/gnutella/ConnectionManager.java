@@ -20,7 +20,7 @@ public class ConnectionManager {
      * exactly those endpoints that could be made from the elements of
      * "connections".
      *
-     * INVARIANT: numFetchers = max(0, keepAlive - getNumOutConnections())
+     * INVARIANT: numFetchers = max(0, keepAlive - getNumConnections())
      *            Number of fetchers equals number of connections needed, unless
      *            that number is less than zero.
      *
@@ -132,6 +132,13 @@ public class ConnectionManager {
                                                                  this);
             try {
                 initializeExternallyGeneratedConnection(connection);
+                //We DO send ping requests on incoming connections.  This may
+                //double ping traffic, but if gives us more accurate horizon
+                //stats.  And it won't really affect traffic if people implement
+                //caching properly.
+                _router.sendPingRequest(
+                    new PingRequest(SettingsManager.instance().getTTL()),
+                    connection);
                 connection.loopForMessages();
             } catch(IOException e) {
             } catch(Exception e) {
@@ -209,21 +216,6 @@ public class ConnectionManager {
     }
 
     /**
-     * @return the number of outgoing connections
-     */
-    private int getNumOutConnections() {
-        //This could be optimized if desired by augmenting the state of
-        //ConnectionManager.
-        int ret=0;
-        //Note that we DON'T use getInitializedConnections.
-        for (Iterator iter=getConnections().iterator(); iter.hasNext(); ) {
-            if (((Connection)iter.next()).isOutgoing())
-                ret++;
-        }
-        return ret;
-    }
-
-    /**
      * @return a clone of this' initialized connections.
      * The iterator yields items in any order.  It <i>is</i> permissible
      * to modify this while iterating through the elements of this, but
@@ -233,6 +225,17 @@ public class ConnectionManager {
         List clone=new ArrayList();
         clone.addAll(_initializedConnections);
         return clone;
+    }
+
+    /**
+     * @requires returned value not modified
+     * @effects returns a list of this' initialized connections.  <b>This
+     *  exposes the representation of this, but is needed in some cases
+     *  as an optimization.</b>  All lookup values in the returned value
+     *  are guaranteed to run in linear time.
+     */
+    List getInitializedConnections2() {
+        return _initializedConnections;
     }
 
     /**
@@ -348,7 +351,7 @@ public class ConnectionManager {
      * Only call this method when the monitor is held.
      */
     private void adjustConnectionFetchers() {
-        int need = _keepAlive - getNumOutConnections() - _fetchers.size();
+        int need = _keepAlive - getNumConnections() - _fetchers.size();
 
         // Start connection fetchers as necessary
         while(need > 0) {
@@ -501,9 +504,22 @@ public class ConnectionManager {
             try {
                 if(_doInitialization)
                     initializeExternallyGeneratedConnection(_connection);
-                _router.sendPingRequest(
-                    new PingRequest(SettingsManager.instance().getTTL()),
-                    _connection);
+
+				PingRequest pingRequest;
+
+				// Send GroupPingRequest to router
+				String origHost = _connection.getOrigHost();
+				if (origHost != null && origHost.equals("router.limewire.com"))
+				{
+                    SettingsManager settings = SettingsManager.instance();
+				    String group = "none:"+settings.getConnectionSpeed();
+				    pingRequest = _router.createGroupPingRequest(group);
+				}
+				else
+				    pingRequest = 
+				      new PingRequest(SettingsManager.instance().getTTL());
+
+                _router.sendPingRequest(pingRequest, _connection);
                 _connection.loopForMessages();
             } catch(IOException e) {
             } catch(Exception e) {
@@ -512,6 +528,63 @@ public class ConnectionManager {
             }
         }
     }
+
+    //------------------------------------------------------------------------
+    /**
+     * Create a new connection, blocking until it's initialized, but launching
+     * a new thread to do the message loop.
+     */
+    public ManagedConnection createGroupConnectionBlocking(
+      String hostname, int portnum, GroupPingRequest specialPing) 
+	  throws IOException {
+        ManagedConnection c = 
+		  new ManagedConnection(hostname, portnum, _router, this, true);
+
+        // Initialize synchronously
+        initializeExternallyGeneratedConnection(c);
+        // Kick off a thread for the message loop.
+        new GroupOutgoingConnectionThread(c, specialPing);
+
+        return c;
+    }
+
+    /**
+     * This thread does the message loop for ManagedConnections created
+     * through createGroupConnectionBlocking
+     */
+    private class GroupOutgoingConnectionThread
+            extends Thread {
+        private ManagedConnection _connection;
+        private PingRequest       _specialPing;
+
+        /**
+         * The constructor calls start(), so allow you need to do
+         * is construct the thread.
+         */
+        public GroupOutgoingConnectionThread(
+                ManagedConnection connection, PingRequest specialPing) {
+            _connection  = connection;
+            _specialPing = specialPing;
+            setDaemon(true);
+            start();
+        }
+
+        public void run() {
+            try {
+                _router.sendPingRequest(_specialPing, _connection);
+                _connection.loopForMessages();
+            } catch(IOException e) {
+            } catch(Exception e) {
+                //Internal error!
+                _callback.error(ActivityCallback.ERROR_20, e);
+            }
+
+            //SettingsManager settings = SettingsManager.instance();
+		    //settings.setUseQuickConnect(true);
+            //setKeepAlive(2);
+        }
+    }
+	//------------------------------------------------------------------------
 
     /**
      * Asynchronously fetches a connection from hostcatcher, then does

@@ -33,13 +33,11 @@ public class RemoteFileDesc implements Comparable {
 
 	/* speed priorities */
 	public static final int PRIVATE_MODEM_PRIORITY       = 10;
-	public static final int PRIVATE_ISDN_PRIORITY        = 9;
 	public static final int PRIVATE_CABLE_PRIORITY       = 8;
 	public static final int PRIVATE_T1_PRIORITY          = 7;
 	public static final int PRIVATE_T3_PRIORITY          = 6;
 
 	public static final int PUBLIC_MODEM_PRIORITY        = 5;
-	public static final int PUBLIC_ISDN_PRIORITY         = 4;
 	public static final int PUBLIC_CABLE_PRIORITY        = 3;
 	public static final int PUBLIC_T1_PRIORITY           = 2;
 	public static final int PUBLIC_T3_PRIORITY           = 1;
@@ -156,9 +154,6 @@ public class RemoteFileDesc implements Comparable {
 			if (_speed <= GUIStyles.MODEM_SPEED_INT) {
 				_speed_priority = PRIVATE_MODEM_PRIORITY;
 			}
-			else if (_speed <= GUIStyles.ISDN_SPEED_INT) {
-				_speed_priority = PRIVATE_ISDN_PRIORITY;
-			}
 			else if (_speed <= GUIStyles.CABLE_SPEED_INT) {
 				_speed_priority = PRIVATE_CABLE_PRIORITY;
 			}
@@ -173,9 +168,6 @@ public class RemoteFileDesc implements Comparable {
 		else {
 			if (_speed <= GUIStyles.MODEM_SPEED_INT) {
 				_speed_priority = PUBLIC_MODEM_PRIORITY;
-			}
-			else if (_speed <= GUIStyles.ISDN_SPEED_INT) {
-				_speed_priority = PUBLIC_ISDN_PRIORITY;
 			}
 			else if (_speed <= GUIStyles.CABLE_SPEED_INT) {
 				_speed_priority = PUBLIC_CABLE_PRIORITY;

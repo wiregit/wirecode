@@ -554,11 +554,9 @@ public class HTTPDownloader implements Runnable {
 			//file is being moved across file systems.  
 
 			_state = COMPLETE;
-			FileManager.getFileManager().addFileIfShared(path_to_complete);
+			FileManager.instance().addFileIfShared(path_to_complete);
 
-		}			
-		
-		else 
+		} else 
 			throw new IOException("File Incomplete");
 
 	}
@@ -657,7 +655,6 @@ public class HTTPDownloader implements Runnable {
 
 					beforeSlash = str.substring(dash+1, slash);
 					beforeSlash = beforeSlash.trim();
-
                 } catch (IndexOutOfBoundsException e) {
 					throw new IOException("Problem Reading Header");
                 }
@@ -669,7 +666,6 @@ public class HTTPDownloader implements Runnable {
                 catch (NumberFormatException e) {
 					throw new IOException("Problem Reading Header");
                 }
-
 
 				// In order to be backwards compatible with
 				// LimeWire 0.5, which sent broken headers like:
@@ -687,6 +683,7 @@ public class HTTPDownloader implements Runnable {
 
 				_amountRead = numBeforeDash;
 				tempSize = numAfterSlash;
+
                 _resume = true;
 				foundLength = true;
 				
@@ -701,7 +698,6 @@ public class HTTPDownloader implements Runnable {
         } 
 		else 
 			throw new IOException("Problem Reading Header");
-
     }
 
     public void shutdown()

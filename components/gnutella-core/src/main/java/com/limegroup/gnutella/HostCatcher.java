@@ -513,6 +513,15 @@ public class HostCatcher {
 
     /**
      * @modifies this
+     * @effects removes all entries from this.  Does not wake up fetcher.
+     */
+    public synchronized void silentClear() {
+        queue.clear();
+        set.clear();
+    }
+
+    /**
+     * @modifies this
      * @effects ensures that the next call to getAnEndpoint will attempt to
      *  contact the pong server.
      */

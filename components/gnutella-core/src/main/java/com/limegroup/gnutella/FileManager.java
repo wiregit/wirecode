@@ -15,55 +15,58 @@ package com.limegroup.gnutella;
 import java.io.*;
 import com.sun.java.util.collections.*;
 import com.limegroup.gnutella.util.StringUtils;
-import java.util.Enumeration;
 
 public class FileManager{
-    /** the total size of all files, in bytes. 
+    /** the total size of all files, in bytes.
      *  INVARIANT: _size=sum of all size of the elements of _files */
-    private int _size;                  
-    /** the total number of files.  INVARIANT: _numFiles==number of 
+    private int _size;
+    /** the total number of files.  INVARIANT: _numFiles==number of
      *  elements of _files that are not null. */
-    private int _numFiles;      
+    private int _numFiles;
     /** the list of shareable files.  An entry is null if it is no longer
      *  shared.  INVARIANT: for all i, f[i]==null, or f[i].index==i and
-     *  f[i]._path is in the shared folder with the shareable extension. */
-    private ArrayList /* of FileDesc */ _files;             
+     *  f[i]._path is in the shared folder with the shareable extension.
+     *  LOCKING: obtain this before modifying. */
+    private ArrayList /* of FileDesc */ _files;
     private String[] _extensions;
 
-    private static FileManager _myFileManager;
+    private static FileManager _instance = new FileManager();
 
-	private MDFiveCalculator _mdfive;
+    private Set _sharedDirectories;
 
-    java.util.Hashtable _sharedHash;
-
-    public FileManager() {               /* the constructor initializes */
-        _size = 0;                       /* all the provate variables */
+    private FileManager() {
+        // We'll initialize all the instance variables so that the FileManager
+        // is ready once the constructor completes, even though the
+        // thread launched at the end of the constructor will immediately
+        // overwrite all these variables
+        _size = 0;
         _numFiles = 0;
         _files = new ArrayList();
         _extensions = new String[0];
-		_mdfive = new MDFiveCalculator();
+        _sharedDirectories = new HashSet();
 
+        // Launch a thread to asynchronously scan directories to load files
+        Thread loadSettingsThread =
+            new Thread()
+            {
+                public void run()
+                {
+                    loadSettings();
+                }
+            };
+        // Not a daemon thread -- terminating early is fine
+        loadSettingsThread.start();
     }
 
-    public static synchronized FileManager getFileManager() {
-        if(_myFileManager == null)
-            _myFileManager = new FileManager();
-        return _myFileManager;
-
+    public static FileManager instance() {
+        return _instance;
     }
 
     /** Returns the size of all files, in <b>bytes</b>. */
     public int getSize() {return _size;}
     public int getNumFiles() {return _numFiles;}
 
-    public void reset() {
-        _size = 0;
-        _numFiles = 0;
-        _files = new ArrayList();
-        // _extensions = new String[0];
-    }
-
-    /** 
+    /**
      * Returns the file descriptor with the given index.  Throws
      * IndexOutOfBoundsException if the index is not valid, either because the
      * file was never shared or was "unshared".<p>
@@ -71,11 +74,11 @@ public class FileManager{
      * Design note: this is slightly unusual use of NoSuchElementException.  For
      * example, get(0) and get(2) may throw an exception but get(1) may not.
      * NoSuchElementException was considered as an alernative, but this can
-     * create ambiguity problems between java.util and com.sun.java.util.  
+     * create ambiguity problems between java.util and com.sun.java.util.
      */
-    public FileDesc get(int i) throws IndexOutOfBoundsException { 
+    public FileDesc get(int i) throws IndexOutOfBoundsException {
         FileDesc ret=(FileDesc)_files.get(i);
-        if (ret==null) 
+        if (ret==null)
             throw new IndexOutOfBoundsException();
         return ret;
     }
@@ -84,11 +87,11 @@ public class FileManager{
     /**
      * Returns an array of all responses matching the given request, or null if
      * there are no responses.<p>
-     * 
+     *
      * Design note: this method returns null instead of an empty array to avoid
-     * allocations in the common case of no matches.)  
+     * allocations in the common case of no matches.)
      */
-    public synchronized Response[] query(QueryRequest request) {
+    public Response[] query(QueryRequest request) {
         String str = request.getQuery();
         ArrayList list = search(str);
         if (list==null)
@@ -97,31 +100,21 @@ public class FileManager{
         int size = list.size();
         Response[] response = new Response[size];
         FileDesc desc;
-		Response r;
         for(int j=0; j < size; j++) {
             desc = (FileDesc)list.get(j);
-			r = new Response(desc._index, desc._size, desc._name); 
-			r.setMeta(desc.getMeta());
-            response[j] = r;
+            response[j] =
+            new Response(desc._index, desc._size, desc._name);
         }
         return response;
     }
 
-    public void setExtensions(String str) {
-        /* recieves a semi-colon separated list of extensions */
-        _extensions =  HTTPUtil.stringSplit(str, ';');
-        // int length = _extensions.length;
-    }
-
-
-    public boolean hasExtension(String filename) {
-        int begin = filename.lastIndexOf(".") + 1;
+    private boolean hasExtension(String filename) {
+        int begin = filename.lastIndexOf(".");
 
         if (begin == -1)
             return false;
 
-        int end = filename.length();
-        String ext = filename.substring(begin, end);
+        String ext = filename.substring(begin + 1);
 
         int length = _extensions.length;
         for (int i = 0; i < length; i++) {
@@ -136,11 +129,12 @@ public class FileManager{
     /**
      * @modifies this
      * @effects adds the given file to this, if it exists
-     *  and is of the proper extension.  <b>WARNING: this is a 
+     *  and is of the proper extension.  <b>WARNING: this is a
      *  potential security hazard; caller must ensure the file
      *  is in the shared directory.</b>
+     * This method should only be called from threads that hold this' monitor
      */
-    private synchronized void addFile(String path) {
+    private void addFile(String path) {
         File myFile = new File(path);
 
         if (!myFile.exists())
@@ -150,11 +144,7 @@ public class FileManager{
         if (hasExtension(name)) {
             int n = (int)myFile.length();       /* the list, and increments */
             _size += n;                         /* the appropriate info */
-			FileDesc fd = new FileDesc(_files.size(), name, path,  n);
-			int md5 = _mdfive.getValue(myFile);
-			Integer myint = new Integer(md5);
-			fd.setMeta(myint.toString());
-            _files.add(fd);
+            _files.add(new FileDesc(_files.size(), name, path,  n));
             _numFiles++;
         }
     }
@@ -167,8 +157,7 @@ public class FileManager{
      */
     public synchronized void addFileIfShared(String path) {
 
-        if (_sharedHash == null)
-            return;
+        Assert.that(_sharedDirectories != null);
 
         File f = new File(path);
 
@@ -186,7 +175,7 @@ public class FileManager{
         } catch (IOException e) {
             return;
         }
-        if (!_sharedHash.containsKey(p))
+        if (!_sharedDirectories.contains(p))
             return;
 
         addFile(path);
@@ -194,7 +183,7 @@ public class FileManager{
 
     }
 
-    /** 
+    /**
      * @modifies this
      * @effects ensures the given file is not shared.  Returns
      *  true iff the file was previously shared.  In this case,
@@ -215,25 +204,43 @@ public class FileManager{
                 _numFiles--;
                 _size-=fd._size;
                 return true;  //No more files in list will match this.
-            }                
+            }
         }
         return false;
     }
 
     /**
+     * Loads the extensions and directories settings and rebuilds the file
+     * index.
+     *
      * @modifies this
-     * @effects recursively adds the following directories
-     *  to this.  <b>WARNING: this is a potential security hazard.</b>
+     * @effects ensures that this contains exactly the files recursively given
+     *  directories and all their recursive subdirectories.  If dir_names
+     *  contains duplicate directories, the duplicates will be ignored.  If
+     *  the directories list contains files, they will be ignored. Note that
+     *  some files in this before the call will not be in this after the call,
+     *  or they may have a different index.
+     * <b>WARNING: this is a potential security hazard.</b>
+     * WARNING: This call could run for a long time. Only threads that
+     * are prepared for that possibility should invoke it.  See the
+     * FileManager constructor for an example.
      */
-    public synchronized void addDirectories(String dir_names) {
-		
-		dir_names.trim();
+    public synchronized void loadSettings() {
+        // Reset the file list info
+        _size = 0;
+        _numFiles = 0;
+        _files=new ArrayList();
+        _sharedDirectories = new HashSet();
+
+        // Load the settings info
+        String dir_names = SettingsManager.instance().getDirectories();
+        dir_names.trim();
         String[] names = HTTPUtil.stringSplit(dir_names, ';');
+        _extensions =  HTTPUtil.stringSplit(
+            SettingsManager.instance().getExtensions(), ';');
+
 
         // need to see if there are duplicated directories...
-
-        _sharedHash = new java.util.Hashtable();
-
         int size = names.length;
 
         File f;  // temporary file for testing existence
@@ -254,19 +261,17 @@ public class FileManager{
             catch (Exception e) {
                 continue;
             }
-            if (!_sharedHash.containsKey(p)) {
-                _sharedHash.put(p, p);
-            }
+            _sharedDirectories.add(p);
         }
 
-        int hashsize = _sharedHash.size();
+        int hashsize = _sharedDirectories.size();
 
         String[] dirs = new String[hashsize];
 
         int j=0;
 
-        for(Enumeration e = _sharedHash.keys(); e.hasMoreElements() ;) {
-            dirs[j++] = (String)e.nextElement();
+        for(Iterator iter = _sharedDirectories.iterator(); iter.hasNext() ;) {
+            dirs[j++] = (String)iter.next();
         }
 
         for (int i=0; i < hashsize; i++) {
@@ -291,11 +296,17 @@ public class FileManager{
         return theFiles;
     }
 
-    public synchronized void addDirectory(String dir_name) { /* the addDirectory method */
-        File myFile = new File(dir_name);       /* recursively adds all of */
+    /**
+     * @modifies this
+     * @effects adds the all the files with shared extensions
+     *  in the given directory and its recursive children.
+     *  If dir_name is actually a file, it will be added if it has
+     *  a shared extension.  Entries in this before the call are unmodified.
+     */
+    public synchronized void addDirectory(String dir_name) {
+        File myFile = new File(dir_name);
         if (!myFile.exists())
             return;
-        //File[] file_list = myFile.listFiles();  /* This is JDK1.2 specific */
         File[] file_list = listFiles(myFile);   /* the files in a specified */
         int n = file_list.length;               /* directory */
 
@@ -316,12 +327,17 @@ public class FileManager{
 
     ////////////////////////////////// Queries ///////////////////////////////
 
-    /** 
+    /**
      * Returns a list of FileDesc matching q, or null if there are no matches.
-     * Subclasses may override to provide different notions of matching.  
+     * Subclasses may override to provide different notions of matching.
      */
-    protected ArrayList search(String query) {
-        //Don't allocate until needed
+    protected synchronized ArrayList search(String query) {
+        //TODO2: ideally this wouldn't be synchronized, a la ConnectionManager.
+        //Doing so would allow multiple queries to proceed in parallel.  But
+        //then you need to make _files volatile and work on a local reference,
+        //i.e., "_files=this._files"
+
+        // Don't allocate until needed
         ArrayList response_list=null;
 
         for(int i=0; i < _files.size(); i++) {
@@ -335,7 +351,7 @@ public class FileManager{
                 response_list.add(_files.get(i));
             }
         }
-        return response_list;               
+        return response_list;
     }
 
     /** Unit test--REQUIRES JAVA2 FOR USE OF CREATETEMPFILE */
@@ -348,7 +364,7 @@ public class FileManager{
         try {
             f1=createNewTestFile(1);
             System.out.println("Creating temporary files in "+f1.getParent());
-            FileManager fman=FileManager.getFileManager();
+            FileManager fman=FileManager.instance();
             fman.setExtensions("XYZ");
             fman.addDirectory(f1.getParent());
             f2=createNewTestFile(3);
@@ -376,19 +392,19 @@ public class FileManager{
                 Assert.that(responses[i].getIndex()==0
                                || responses[i].getIndex()==1);
             }
-            
+
             //Remove file that's shared.  Back to 1 file.
             Assert.that(fman.removeFileIfShared(f2)==true);
             Assert.that(fman.getSize()==1);
             Assert.that(fman.getNumFiles()==1);
             responses=fman.query(new QueryRequest((byte)3,0,"unit"));
-            Assert.that(responses.length==1);                       
+            Assert.that(responses.length==1);
 
             fman.addFile(f3.getAbsolutePath());
             Assert.that(fman.getSize()==12, "size of files: "+fman.getSize());
             Assert.that(fman.getNumFiles()==2, "# files: "+fman.getNumFiles());
             responses=fman.query(new QueryRequest((byte)3,0,"unit"));
-            Assert.that(responses.length==2, "response: "+responses.length);     
+            Assert.that(responses.length==2, "response: "+responses.length);
             Assert.that(responses[0].getIndex()!=1);
             Assert.that(responses[1].getIndex()!=1);
             fman.get(0);
@@ -397,17 +413,17 @@ public class FileManager{
                 fman.get(1);
                 Assert.that(false);
             } catch (IndexOutOfBoundsException e) { }
-          
-            responses=fman.query(new QueryRequest((byte)3,0,"*unit*"));
-            Assert.that(responses.length==2, "response: "+responses.length);     
 
-        } finally {        
+            responses=fman.query(new QueryRequest((byte)3,0,"*unit*"));
+            Assert.that(responses.length==2, "response: "+responses.length);
+
+        } finally {
             if (f1!=null) f1.delete();
             if (f2!=null) f2.delete();
             if (f3!=null) f3.delete();
         }
     }
-    
+
     static File createNewTestFile(int size) {
         try {
             File ret=File.createTempFile("FileManager_unit_test",".XYZ");
@@ -422,7 +438,7 @@ public class FileManager{
             System.exit(1);
             return null; //never executed
         }
-    }        
+    }
     */
 }
 

@@ -1,6 +1,7 @@
 package com.limegroup.gnutella;
 
 import com.sun.java.util.collections.Iterator;
+import com.sun.java.util.collections.List;
 import java.io.IOException;
 
 /**
@@ -11,9 +12,9 @@ import java.io.IOException;
  */
 public abstract class MessageRouter
 {
-    private HostCatcher _catcher;
-    private ConnectionManager _manager;
-    private Acceptor _acceptor;
+    protected HostCatcher _catcher;
+    protected ConnectionManager _manager;
+    protected Acceptor _acceptor;
 
     /**
      * @return the GUID we attach to QueryReplies to allow PushRequests in
@@ -33,8 +34,11 @@ public abstract class MessageRouter
     private RouteTable _queryRouteTable = new RouteTable(2048);
     /**
      * Maps QueryReply client GUIDs to PushRequestHandlers
+     * Because client GUID's can be re-mapped to different connections, we
+     * must force RouteTable to used FixedsizeForgetfulHashMap instead of
+     * the lighter ForgetfulHashMap.
      */
-    private RouteTable _pushRouteTable = new RouteTable(2048);
+    private RouteTable _pushRouteTable = new RouteTable(2048, true);
 
     // NOTE: THESE VARIABLES ARE NOT SYNCHRONIZED...SO THE STATISTICS MAY NOT
     // BE 100% ACCURATE.
@@ -221,7 +225,7 @@ public abstract class MessageRouter
             receivingConnection.setKillable(false);
         }
 
-        
+
         if(queryRequest.getTTL() > 0)
             broadcastQueryRequest(queryRequest, receivingConnection,
                                   _manager);
@@ -286,11 +290,11 @@ public abstract class MessageRouter
                                         ConnectionManager manager)
     {
         // Note the use of initializedConnections only.
-        for(Iterator iterConnections =
-                manager.getInitializedConnections().iterator();
-            iterConnections.hasNext();  )
+        // Note that we have zero allocations here.
+        List list=manager.getInitializedConnections2();
+        for(int i=0; i<list.size(); i++)
         {
-            ManagedConnection c = (ManagedConnection)iterConnections.next();
+            ManagedConnection c = (ManagedConnection)list.get(i);
             if(c != receivingConnection)
                 c.send(pingRequest);
         }
@@ -311,11 +315,11 @@ public abstract class MessageRouter
                                         ConnectionManager manager)
     {
         // Note the use of initializedConnections only.
-        for(Iterator iterConnections =
-                manager.getInitializedConnections().iterator();
-            iterConnections.hasNext();  )
+        // Note that we have zero allocations here.
+        List list=manager.getInitializedConnections2();
+        for(int i=0; i<list.size(); i++)
         {
-            ManagedConnection c = (ManagedConnection)iterConnections.next();
+            ManagedConnection c = (ManagedConnection)list.get(i);
             if(c != receivingConnection)
                 c.send(queryRequest);
         }
@@ -500,6 +504,23 @@ public abstract class MessageRouter
     }
 
     /**
+     * Allow the controlled creation of a GroupPingRequest
+     */
+    public GroupPingRequest createGroupPingRequest(String group)
+    {
+        FileManager fm = FileManager.instance();
+        int num_files = fm.getNumFiles();
+        int kilobytes = fm.getSize()/1024;
+
+        GroupPingRequest pingRequest =
+          new GroupPingRequest(SettingsManager.instance().getTTL(),
+            _acceptor.getPort(), _acceptor.getAddress(),
+            num_files, kilobytes, group);
+        return( pingRequest );
+    }
+
+
+    /**
      * Handle a reply to a PingRequest that originated here.
      * Implementations typically process that various statistics in the reply.
      * This method is called from the default handlePingReply.
@@ -525,6 +546,9 @@ public abstract class MessageRouter
     protected abstract void handlePushRequestForMe(
         PushRequest pushRequest,
         ManagedConnection receivingConnection);
+
+
+
 
     //
     // Begin Statistics Accessors
@@ -674,7 +698,7 @@ public abstract class MessageRouter
             handlePushRequestForMe(pushRequest, receivingConnection);
         }
 
-        public boolean isOpen() 
+        public boolean isOpen()
         {
             //I'm always ready to handle replies.
             return true;

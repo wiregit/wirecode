@@ -46,7 +46,7 @@ public abstract class Message implements Serializable{
                     || func==F_PUSH
                     || func==F_QUERY || func==F_QUERY_REPLY,
                     "Bad function code");
-        if (func==F_PING) Assert.that(length==0, "Bad ping length: "+length);
+        //if (func==F_PING) Assert.that(length==0, "Bad ping length: "+length);
         if (func==F_PING_REPLY) Assert.that(length==14, "Bad pong length: "+length);
         if (func==F_PUSH) Assert.that(length==26, "Bad push length: "+length);
         Assert.that(ttl>=0, "Negative TTL: "+ttl);
@@ -168,9 +168,15 @@ public abstract class Message implements Serializable{
 
         //Dispatch based on opcode.
         switch (func) {
+
             case F_PING:
-                if (length!=0) break;
+                if (length>=15) {
+				    // Build a GroupPingRequest
+                    return new GroupPingRequest(guid,ttl,hops,payload);
+				}
+				else if (length>0) break;
                 return new PingRequest(guid,ttl,hops);
+
             case F_PING_REPLY:
                 if (length!=14) break;
                 return new PingReply(guid,ttl,hops,payload);
@@ -227,8 +233,15 @@ public abstract class Message implements Serializable{
         return hops;
     }
 
+    /** Returns the length of this' payload, in bytes. */
     public int getLength() {
         return length;
+    }
+
+    /** Returns the total length of this, in bytes */
+    public int getTotalLength() {
+        //Header is 23 bytes.
+        return 23+length;
     }
 
     /** Returns the ip (given in BIG-endian) format as standard

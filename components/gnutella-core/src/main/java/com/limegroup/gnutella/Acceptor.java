@@ -99,6 +99,9 @@ public class Acceptor extends Thread {
         //TODO3: if FORCE_LOCAL_IP is true, then use that value instead.
         //       (Alternative implementation: just set this._address accordingly
         //        during initialization.)
+
+		if(SettingsManager.instance().getForceIPAddress())
+			return SettingsManager.instance().getForcedIPAddress();
         return _address;
     }
 
@@ -108,6 +111,8 @@ public class Acceptor extends Thread {
      * @return the listening port
      */
     public int getPort() {
+		if(SettingsManager.instance().getForceIPAddress())
+			return SettingsManager.instance().getForcedPort();
         return _port;
     }
 
@@ -202,7 +207,6 @@ public class Acceptor extends Thread {
 
         if (_port!=oldPort) {
             SettingsManager.instance().setPort(_port);
-            _callback.setPort(_port);
         }
 
         while (true) {
@@ -273,7 +277,13 @@ public class Acceptor extends Thread {
 
         public void run() {
             try {
-                InputStream in=_socket.getInputStream();
+                //The try-catch below is a work-around for JDK bug 4091706.
+                InputStream in=null;
+                try {
+                    in=_socket.getInputStream(); 
+                } catch (Exception e) {
+                    throw new IOException();
+                }
                 _socket.setSoTimeout(SettingsManager.instance().getTimeout());
                 String word=readWord(in);
                 _socket.setSoTimeout(0);

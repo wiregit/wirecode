@@ -1,6 +1,7 @@
 package com.limegroup.gnutella;
 
 import com.limegroup.gnutella.util.ForgetfulHashMap;
+import com.limegroup.gnutella.util.FixedsizeForgetfulHashMap;
 import com.sun.java.util.collections.*;
 
 /**
@@ -11,19 +12,39 @@ import com.sun.java.util.collections.*;
  * policy.
  */
 class RouteTable {
-    /* The ForgetfulHashMap takes care of all the work.
+    /* Map is either a ForgetfulHashMap (pings and queries) or a 
+     * FixedsizeForgetfulHashMap (pushes).  These classes take care
+     * of the work of expiring old entries.  Note however they may
+     * not be fully implemented, so only some operations in _map
+     * can be used.
+     *
      * TODO3: I wish we could avoid creating new GUIDs everytime
+     * TODO3: I wish ForgetfulHashMap and FixedsizeForgetfulHashMap
+     *  implemented some common interface.
      */
     private Map _map;
 
 
     /**
      * @requires size>0
-     * @effects Create a new RouteTable holds only the last "size" routing
-     * entries.
+     * @effects same as RouteTable(size, false)
      */
     public RouteTable(int size) {
-        _map=new ForgetfulHashMap(size);
+        this(size, false);
+    }
+
+    /**
+     * @requires size>0
+     * @effects Create a new RouteTable holds only the last "size" routing
+     *  entries.  If allowRemap==false, it is assumed that guid's will never
+     *  be remapped to different ReplyHandlers.
+     */
+    public RouteTable(int size, boolean allowRemap) {
+        if (allowRemap)
+            //More expensive, but has stronger ordering properties.
+            _map=new FixedsizeForgetfulHashMap(size);
+        else
+            _map=new ForgetfulHashMap(size);
     }
 
     /**
@@ -85,21 +106,32 @@ class RouteTable {
      *  time with respect to this' size.
      */
     public synchronized void removeReplyHandler(ReplyHandler replyHandler) {        
-         Iterator iter = _map.values().iterator();
-         while (iter.hasNext()) {
-             if (iter.next().equals(replyHandler))
-                 iter.remove();
-         }
+        //The aggressive asserts below are to make sure bug X75 has been fixed.
+        Assert.that(replyHandler!=null,
+                    "Null replyHandler in removeReplyHandler");
+        //IMPORTANT: because_map.values() may not be defined (see note above),
+        //we can only use _map.keySet().iterator()
+        Iterator iter = _map.keySet().iterator();
+        while (iter.hasNext()) {
+            Object key=iter.next();
+            Assert.that(key!=null, "Null key in removeReplyHandler");
+            Object value=_map.get(key);
+            Assert.that(value!=null, "Null value in removeReplyHandler");
+            if (value.equals(replyHandler))
+                iter.remove();
+        }
     }
 
     public synchronized String toString() {
+        //IMPORTANT: because_map.values() may not be defined (see note above),
+        //we can only use _map.keySet().iterator()
         StringBuffer buf=new StringBuffer("\n");
-        Iterator iter=_map.entrySet().iterator();
+        Iterator iter=_map.keySet().iterator();
         while (iter.hasNext()) {
-            Map.Entry entry = (Map.Entry)(iter.next());
-            buf.append(entry.getKey()); // GUID
+            Object key=iter.next();
+            buf.append(key); // GUID
             buf.append(" -> ");
-            buf.append(entry.getValue()); // Connection
+            buf.append(_map.get(key)); // Connection
             buf.append("\n");
         }
         return buf.toString();

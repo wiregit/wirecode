@@ -309,8 +309,8 @@ public class Launcher {
 		case WINDOWS_NT: // this also gets called for Windows 2000
 			File f = new File(path);
 			if(f.isFile()) {
-				//System.out.println("Launcher::found the file: "+path);
 				FileInputStream fis = new FileInputStream(f);
+				String name = f.getName();			
 				String hex = Integer.toHexString(fis.read());
 				hex += Integer.toHexString(fis.read());
 				fis.close();							
@@ -319,8 +319,10 @@ public class Launcher {
 										"for security reasons.");
 					return;
 				}
-				command = "cmd /c "+"\""+ checkChars(path)+"\"";
-				Runtime.getRuntime().exec(command);				
+				else {
+					command = "cmd /c "+"\""+ checkChars(path)+"\"";				
+					Runtime.getRuntime().exec(command);				
+				}
 			}
 			break;
 		case WINDOWS_9x:

@@ -85,7 +85,7 @@ public class ManagedConnection
     private int _lastSent;
     private int _lastSentDropped;
 
-    /*
+    /**
      * These are the horizon statistics kept whenever a PingReply is received
      * on this connection.
      */
@@ -93,6 +93,12 @@ public class ManagedConnection
     private volatile long _totalHorizonFileSize;
     private volatile long _numHorizonFiles;
     private volatile long _numHorizonHosts;
+
+
+    /** The total number of bytes sent/received since last checked. 
+     *  These are not synchronized and not guaranteed to be 100% accurate. */
+    private volatile long _bytesSent;
+    private volatile long _bytesReceived;
 
     /** 
      * True if this connected to a router (e.g. future router.limewire.com) or
@@ -156,6 +162,7 @@ public class ManagedConnection
         Message m = null;
         try {
             m = super.receive();
+            _bytesReceived+=m.getTotalLength();
         } catch(IOException e) {
             _manager.remove(this);
             throw e;
@@ -174,6 +181,7 @@ public class ManagedConnection
         Message m = null;
         try {
             m = super.receive(timeout);
+            _bytesReceived+=m.getTotalLength();
         } catch(IOException e) {
             _manager.remove(this);
             throw e;
@@ -265,6 +273,7 @@ public class ManagedConnection
      */
     private void superSend(Message m) throws IOException {
         super.send(m);
+        _bytesSent+=m.getTotalLength();
     }
 
     /**
@@ -549,6 +558,30 @@ public class ManagedConnection
         _lastSentDropped = _numSentMessagesDropped;
         return percent;
     }
+
+    /**
+     * @modifies this
+     * @effects returns and resets the number of bytes received since the last
+     *  call to this method.  This number may exclude bytes read in bad messages
+     *  and bytes from TCP/IP protocol headers.
+     */
+    public synchronized long getBytesReceived() {
+        long ret=_bytesReceived;
+        _bytesReceived=0;
+        return ret;
+    }
+    
+    /**
+     * @modifies this
+     * @effects returns and resets the number of bytes sent since the last
+     *  call to this method.  This number may exclude TCP/IP protocol headers.
+     */
+    public synchronized long getBytesSent() {
+        long ret=_bytesSent;
+        _bytesSent=0;
+        return ret;
+    }
+
 
     /** Clears the statistics about files reachable from me. */
     public void clearHorizonStats() {

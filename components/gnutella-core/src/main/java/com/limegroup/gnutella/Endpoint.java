@@ -14,6 +14,11 @@ import java.net.UnknownHostException;
 public class Endpoint implements Cloneable, Serializable,
 com.sun.java.util.collections.Comparable
 {
+    /**
+    * serial version (needed for serialization/deserialization)
+    */
+    static final long serialVersionUID = 4686711693494625070L;
+    
     String hostname = null;
     int port = 0;
     /** Number of files at the host, or -1 if unknown */
@@ -342,6 +347,11 @@ com.sun.java.util.collections.Comparable
         else if (bytes[0]==(byte)192 &&
                  bytes[1]==(byte)168)
             return true; //192.168.0.0 - 192.168.255.255
+        else if (bytes[0]==(byte)0 &&
+                 bytes[1]==(byte)0 &&
+                 bytes[2]==(byte)0 &&
+                 bytes[3]==(byte)0)
+            return true; //0.0.0.0 - Gnutella (well BearShare really) convention
         else
             return false;
     }
@@ -433,6 +443,8 @@ com.sun.java.util.collections.Comparable
         e=new Endpoint("11.0.0.0",0);
         Assert.that(! e.isPrivateAddress());
         e=new Endpoint("172.16.0.0",0);
+        Assert.that(e.isPrivateAddress());
+        e=new Endpoint("0.0.0.0");
         Assert.that(e.isPrivateAddress());
 
         Endpoint e1;

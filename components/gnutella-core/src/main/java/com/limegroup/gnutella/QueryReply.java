@@ -7,7 +7,11 @@ import com.sun.java.util.collections.*;
  * A query reply.  Contains information about the responding host in
  * addition to an array of responses.  For efficiency reasons, bad query
  * reply packets may not be discovered until the getResponses
- * methods are called.
+ * methods are called.<p>
+ *
+ * This class has partial support for BearShare-style query trailer payloads.
+ * You can extract the vendor code and push flags, but you can't create them.
+ * TODO: clarify when an exception is thrown and when it is silently ignored.
  */
 public class QueryReply extends Message implements Serializable{
     //Rep rationale: because most queries aren't directed to us (we'll just
@@ -21,6 +25,13 @@ public class QueryReply extends Message implements Serializable{
     /** The response records in this, or null if they have not yet been
      *  extracted from payload. */
     private Response[] responses=null;
+    /** If responses==null, undefined.  Otherwise the vendor string, if 
+     *  defined, or "" otherwise. */
+    private String vendor="";
+    /** If responses==null, undefined.  Otherwise true if the push flag is
+     *  set, false if the flag isn't set or isn't defined. */
+    private boolean pushFlagSet=false;
+    
 
     /** Creates a new query reply.  The number of responses is responses.length
      *
@@ -61,16 +72,12 @@ public class QueryReply extends Message implements Serializable{
             ByteOrder.int2leb((int)r.getSize(),payload,i+4);
             i+=8;
             String name=r.getName();
-            //This getBytes method is deprecated because it does
-            //not properly convert Unicode (it throws away the high
-            //byte.  But this is not a problem since most Gnutella
-            //clients probably do not understand Unicode!
-            name.getBytes(0, name.length(), payload, i);
-            i+=name.length();
+            byte[] nameBytes = r.getName().getBytes();
+            System.arraycopy(nameBytes, 0, payload, i, nameBytes.length);
+            i+=nameBytes.length;
             //Write double null terminator.
-            payload[i]=(byte)0;
-            payload[i+1]=(byte)0;
-            i+=2;
+            payload[i++]=(byte)0;
+            payload[i++]=(byte)0;
         }
 
         //Write footer at payload[i...i+16-1]
@@ -78,114 +85,8 @@ public class QueryReply extends Message implements Serializable{
             payload[i+j]=clientGUID[j];
         }
     }
-    
-	/**
-	 * This is the constructor for a query reply that also 
-	 * includes some per packet (per host, per query reply)  
-	 * meta information.  the general strategy for including 
-	 * this information is to increase the size of the payload
-	 * length field in the descriptor header, and to add the meta
-	 * data after the Servant identifier.
-	 * 
-	 */ 
-    public QueryReply(byte[] guid, byte ttl,
-					  int port, byte[] ip, long speed, 
-					  Response[] responses,
-					  byte[] clientGUID, String meta) {
 
-		// invoke the super class constructor, adding the
-		// length of the meta data.
-		//11 bytes for header, plus file records, 
-		// plus 16-byte footer, plus meta length
-		
-		super(guid, Message.F_QUERY_REPLY, ttl, (byte)0,
-              11+rLength(responses)+16+meta.getBytes().length);
-
-		// create the meta info wrapper
-		PerPacketMetaInfo ppmi = new PerPacketMetaInfo(meta);
-		// get the size of the byte array of the meta info
-		int metaSize = ppmi.getSize();
-
-		// proceed with the normal query reply constructor 
-		Assert.that((port&0xFFFF0000)==0);
-        Assert.that(ip.length==4);
-        Assert.that((speed&0xFFFFFFFF00000000l)==0);
-        final int n=responses.length;
-        Assert.that(n<256);
-
-        payload=new byte[getLength()];
-        //Write beginning of payload.
-        //Downcasts are ok, even if they go negative
-        payload[0]=(byte)n;
-        ByteOrder.short2leb((short)port,payload,1);
-        payload[3]=ip[0];
-        payload[4]=ip[1];
-        payload[5]=ip[2];
-        payload[6]=ip[3];
-        ByteOrder.int2leb((int)speed,payload,7);
-
-		String metaStr;
-		byte[] metaBytes;
-
-        //Write each response at index i
-        int i=11;
-        for (int left=n; left>0; left--) {
-            Response r=responses[n-left];
-            ByteOrder.int2leb((int)r.getIndex(),payload,i);
-            ByteOrder.int2leb((int)r.getSize(),payload,i+4);
-            i+=8;
-            String name=r.getName();
-            //This getBytes method is deprecated because it does
-            //not properly convert Unicode (it throws away the high
-            //byte.  But this is not a problem since most Gnutella
-            //clients probably do not understand Unicode!
-            name.getBytes(0, name.length(), payload, i);
-            i+=name.length();
-            //Write double null terminator.
-            payload[i]=(byte)0;
-
-
-			// THIS IS WHERE I"M PUTTIND THE META DATA
-			i++; // i is in the position right after the first null
-
-			metaStr = r.getMeta();
-			if (!metaStr.equals("")) {
-				metaBytes = metaStr.getBytes();
-				int len = metaBytes.length;
-				int k;
-				for (k=0; k < len; k++) {
-					payload[i+k] = metaBytes[k];  // array index out of bounds...y?
-				}
-				// i += k+1;
-				i += k;
-			}
-
-			// END OF META SECTION
-
-            payload[i]=(byte)0;
-            // payload[i+1]=(byte)0;
-            // i+=2;
-			i++;
-        }
-
-        //Write footer at payload[i...i+16-1]
-		int j =0;
-        for (; j<16; j++) {
-            payload[i+j]=clientGUID[j];
-        }
-
-		// after normal construction, add the meta info
-		// place i into position for adding the meta info
-		i += j;      
-		byte[] metaAsBytes = ppmi.getMetaInfoAsBytes();
-		// write the meta data at the footer of payload
-		for (int k=0; k<metaSize; k++) {
-			payload[i+k] = metaAsBytes[k];
-		}
-
-
-	}
-    /** 
+    /**
     * Creates a new query reply from the passed query Reply. The new one is
     * same as the passed one, but with different specified GUID
     * @param guid The new GUID for the reply
@@ -193,14 +94,14 @@ public class QueryReply extends Message implements Serializable{
     * new constructed query reply
     * Note: The payload is not really copied, but the reference in the newly
     * constructed query reply, points to the one in the passed reply.
-    * but since the payload is not meant to be 
+    * but since the payload is not meant to be
     * mutated, it shouldnt make difference if different query replies
     * maintain reference to same payload
     */
     public QueryReply(byte[] guid, QueryReply reply){
         //call the super constructor with new GUID
-        super(guid, Message.F_QUERY_REPLY, reply.getTTL(), reply.getHops(), 
-                                                            reply.getLength()); 
+        super(guid, Message.F_QUERY_REPLY, reply.getTTL(), reply.getHops(),
+                                                            reply.getLength());
         //set the payload field
         this.payload = reply.payload;
     }
@@ -211,8 +112,7 @@ public class QueryReply extends Message implements Serializable{
         int ret=0;
         for (int i=0; i<responses.length; i++)
             //8 bytes for index and size, plus name and two null terminators
-            ret += (8+responses[i].getName().length()+2+
-					responses[i].getMeta().getBytes().length);
+            ret += 8+responses[i].getName().length()+2;
         return ret;
     }
 
@@ -265,94 +165,141 @@ public class QueryReply extends Message implements Serializable{
         return list.iterator();
     }
 
-    /** @modifies this.responses
-     *  @effects extracts response from payload and stores in responses. */
+    /** 
+     * Returns the name of this' vendor, all capitalized.  Returns "" if the the
+     * vendor wasn't specified.  
+     */
+    public String getVendor() {
+        if (responses==null) {
+            try {
+                parseResults();
+            } catch (BadPacketException e) { }
+        }
+        Assert.that(vendor!=null);
+        return vendor;
+    }
+
+    /** Returns true if this's push flag is set, i.e., a push download is
+     *  needed.   Returns false if the flag isn't set or doesn't exist, i.e.,
+     *  because this is an older client.  
+     */
+    public boolean getNeedsPush() {
+        if (responses==null) {
+            try {
+                parseResults();
+            } catch (BadPacketException e) { }
+            Assert.that(responses!=null);
+        }
+        return pushFlagSet;
+    }
+
+
+    /** @modifies this.responses, this.pushFlagSet, this.vendor
+     *  @effects extracts response from payload and stores in responses. 
+     *    Throws BadPacketException if the responses couldn't be extracted.
+     *    Returns silently if the metainformation couldn't be extracted.
+     */
     private void parseResults() throws BadPacketException {
         //index into payload to look for next response
         int i=11;
-        //number of records left to get
-        int left=getResultCount();
-        responses=new Response[left];
 
-
-		
-
-
+        //1. Extract responses.  These are not copied to this.responses until they
+        //are verified.  Note, however that the metainformation need not be
+        //verified for these to be acceptable.
+        int left=getResultCount();          //number of records left to get
+        Response[] responses=new Response[left];
         try {
             //For each record...
             for ( ; left > 0; left--) {
-				long index=ByteOrder.ubytes2long(ByteOrder.leb2int(payload,i));
-				long size=ByteOrder.ubytes2long(ByteOrder.leb2int(payload,i+4));
-				i+=8;
-				
-				//The file name is supposed to be terminated by a double null
-				//terminator.  But Gnotella inserts meta-information between
-				//these null characters.  So we have to handle this.
-				//
-				//See http://gnutelladev.wego.com/go/wego.discussion.message?groupId=139406&view=message&curMsgId=319258&discId=140845&index=-1&action=view
-				
-				//Search for first single null terminator.
-				int j=i;
-				for ( ; ; j++) {
-					if (payload[j]==(byte)0) 
-						break;
-				}
-				
-				//payload[i..j-1] is name.  This excludes the null terminator.
-				String name=new String(payload,i,j-i);
-				Response myResponse = new Response(index,size,name);
-				responses[responses.length-left]= myResponse;
-				
-				//Search for remaining null terminator.
-				int l = j+1;
-				for ( j=j+1; ; j++) {
-					if (payload[j]==(byte)0) 
-						break;
-				}
-				
-				int blen = j-l; 
-				
-				if (blen > 0) {
-					//  String myMeta = new String(payload, l, blen);
-//  					// add the meta information to the response[]
-//  					myResponse.setMeta(myMeta);
-//  					// i=j+1;
-//  					// j+= blen;
-//  					System.out.println("myMeta: " + myMeta);
-				}
-				i = j+1;
+                long index=ByteOrder.ubytes2long(ByteOrder.leb2int(payload,i));
+                long size=ByteOrder.ubytes2long(ByteOrder.leb2int(payload,i+4));
+                i+=8;
+
+                //The file name is supposed to be terminated by a double null
+                //terminator.  But Gnotella inserts meta-information between
+                //these null characters.  So we have to handle this.
+                //
+                //See http://gnutelladev.wego.com/go/
+                //         wego.discussion.message?groupId=139406&
+                //         view=message&curMsgId=319258&discId=140845&
+                //         index=-1&action=view
+
+                //Search for first single null terminator.
+                int j=i;
+                for ( ; ; j++) {
+                    if (payload[j]==(byte)0)
+                        break;
+                }
+
+                //payload[i..j-1] is name.  This excludes the null terminator.
+                String name=new String(payload,i,j-i);
+                responses[responses.length-left]=new Response(index,size,name);
+
+                //Search for remaining null terminator.
+                for ( j=j+1; ; j++) {
+                    if (payload[j]==(byte)0)
+                        break;
+                }
+                i=j+1;
+
+                if (i>payload.length-16)
+                    throw new BadPacketException("Missing null terminator "
+                                                 +"filename");
             }
-			
-
-
-			// Maybe the meta info is here?
-			if (i < payload.length-16) {
-				// i+=16;  // two nulls + 16 bit guid
-				// there is extra data!
-				int metaLength = payload.length -16 - i;
-				// int metaLength = i - 16;
-  				char[] metaData = new char[metaLength];
-  				for (int k = 0; k < metaLength; k++) {
-  					// metaData[k] = payload[i+k];
-  					//metaData[k] = payload[k];
-  					// System.out.print(metaData[k] + " ");
-  					metaData[k] = (char)payload[i+k];
-  				}
-
-				//  System.out.println("");
-//  				System.out.println("metaData: " + new String(metaData) );
-				// PerPacketMetaInfo ppmi = new PerPacketMetaInfo(metaData);
-				// ppmi.print();
-
-				i+= 16;
-
-			}
-
-
-
-
         } catch (ArrayIndexOutOfBoundsException e) {
             throw new BadPacketException();
+        }
+        this.responses=responses;
+
+        //2. Extract BearShare-style metainformation, if any. 
+        //The format is 
+        //      vendor code           (4 bytes, case insensitive)
+        //      common payload length (1 byte, unsigned, always>0)
+        //      common payload        (length given above.  See below.)
+        //      vendor payload length (1 byte, unsigned)
+        //      vendor payload        (length given above)
+        //The normal 16 byte clientGUID follows, of course.
+        //
+        //Currently the common payload consists of a single byte
+        //whose low bit is one if we should try a push.
+        try {
+			if (i > (payload.length-16-4-2-1)) {   //see above
+                return; //no metainformation!
+            }
+            //Attempt to verify.  Results are not copied to this until verified.
+            String vendorT=null;
+            boolean pushFlagSetT;
+            try {
+                //Must use ASCII encoding since characters are more than two
+                //bytes on other platforms!
+                vendorT=new String(payload, i, 4, "US-ASCII");
+                Assert.that(vendorT.length()==4,
+                            "Vendor length wrong.  Wrong character encoding?");
+            } catch (UnsupportedEncodingException e) {
+                Assert.that(false, "No support for ASCII encoding.");
+            }
+            i+=4;
+            int length=ByteOrder.ubyte2int(payload[i]);
+            if (length==0)
+                throw new BadPacketException("Common payload length zero.");
+            i++;
+            pushFlagSetT = (payload[i]&0x1)==1;
+            i+=length;
+            length=ByteOrder.ubyte2int(payload[i]);
+            i++;
+            i+=length;                
+            if (i!=payload.length-16)
+                throw new BadPacketException(
+                                             "Query reply trailer length wrong");
+                
+            //All set.  Accept parsed values.
+            this.pushFlagSet=pushFlagSetT;
+            Assert.that(vendorT!=null);
+            this.vendor=vendorT.toUpperCase();
+        } catch (BadPacketException e) {
+            return; //silently ignore
+        } catch (IndexOutOfBoundsException e) {
+            return; //just in case.  silently ignore.
         }
     }
 
@@ -360,7 +307,9 @@ public class QueryReply extends Message implements Serializable{
      *  responding host.  */
     public byte[] getClientGUID() {
         byte[] result=new byte[16];
-        //Copy the last 16 bytes of payload to result
+        //Copy the last 16 bytes of payload to result.  Note that there may
+        //be metainformation before the client GUID.  So it is not correct
+        //to simply count after the last result record.
         int length=super.getLength();
         System.arraycopy(payload, length-16, result, 0, 16);
         return result;
@@ -370,81 +319,142 @@ public class QueryReply extends Message implements Serializable{
         return "QueryReply("+getResultCount()+" hits, "+super.toString()+")";
     }
 
-//      /** Unit test */
-//      public static void main(String args[]) {
-//      byte[] ip={(byte)0xFF, (byte)0, (byte)0, (byte)0x1};
-//      long u4=0x00000000FFFFFFFFl;
-//      byte[] guid=new byte[16]; guid[0]=(byte)1; guid[15]=(byte)0xFF;
-//      Response[] responses=new Response[0];
-//      QueryReply qr=new QueryReply(guid, (byte)5,
-//                       0xF3F1, ip, 1, responses,
-//                       guid);
-//      Assert.that(qr.getSpeed()==1);
-//      Assert.that(qr.getPort()==0xF3F1, Integer.toHexString(qr.getPort()));
-//      try {
-//          Assert.that(!qr.getResults().hasNext());
-//      } catch (BadPacketException e) {
-//          Assert.that(false);
-//      }
-//      responses=new Response[2];
-//      responses[0]=new Response(11,22,"Sample.txt");
-//      responses[1]=new Response(0x2FF2,0xF11F,"Another file  ");
-//      qr=new QueryReply(guid, (byte)5,
-//                0xFFFF, ip, u4, responses,
-//                guid);
-//      Assert.that(qr.getIP().equals("255.0.0.1"));
-//      Assert.that(qr.getPort()==0xFFFF);
-//      Assert.that(qr.getSpeed()==u4);
-//      Assert.that(Arrays.equals(qr.getClientGUID(),guid));
-//      try {
-//          Iterator iter=qr.getResults();
-//          Response r1=(Response)iter.next();
-//          Assert.that(r1.equals(responses[0]));
-//          Response r2=(Response)iter.next();
-//          Assert.that(r2.equals(responses[1]));
-//          Assert.that(!iter.hasNext());
-//      } catch (BadPacketException e) {
-//          Assert.that(false);
-//      } catch (NoSuchElementException e) {
-//          Assert.that(false);
-//      }
+    /** Unit test */
+    /*
+    public static void main(String args[]) {
+        byte[] ip={(byte)0xFF, (byte)0, (byte)0, (byte)0x1};
+        long u4=0x00000000FFFFFFFFl;
+        byte[] guid=new byte[16]; guid[0]=(byte)1; guid[15]=(byte)0xFF;
+        Response[] responses=new Response[0];
+        QueryReply qr=new QueryReply(guid, (byte)5,
+                                     0xF3F1, ip, 1, responses,
+                                     guid);
+        Assert.that(qr.getSpeed()==1);
+        Assert.that(qr.getPort()==0xF3F1, Integer.toHexString(qr.getPort()));
+        try {
+            Assert.that(!qr.getResults().hasNext());
+        } catch (BadPacketException e) {
+            Assert.that(false);
+        }
+        responses=new Response[2];
+        responses[0]=new Response(11,22,"Sample.txt");
+        responses[1]=new Response(0x2FF2,0xF11F,"Another file  ");
+        qr=new QueryReply(guid, (byte)5,
+                          0xFFFF, ip, u4, responses,
+                          guid);
+        Assert.that(qr.getIP().equals("255.0.0.1"));
+        Assert.that(qr.getPort()==0xFFFF);
+        Assert.that(qr.getSpeed()==u4);
+        Assert.that(Arrays.equals(qr.getClientGUID(),guid));
+        try {
+            Iterator iter=qr.getResults();
+            Response r1=(Response)iter.next();
+            Assert.that(r1.equals(responses[0]));
+            Response r2=(Response)iter.next();
+            Assert.that(r2.equals(responses[1]));
+            Assert.that(!iter.hasNext());
+        } catch (BadPacketException e) {
+            Assert.that(false);
+        } catch (NoSuchElementException e) {
+            Assert.that(false);
+        }
 
-//      ////////////////////  Contruct from Raw Bytes /////////////
+        ////////////////////  Contruct from Raw Bytes /////////////
 
-//      //Normal case: double null-terminated result
-//      byte[] payload=new byte[11+11+16];
-//      payload[0]=1;            //Number of results
-//      payload[11+8]=(byte)65;  //The character 'A'
-//      qr=new QueryReply(new byte[16], (byte)5, (byte)0,
-//                payload);
-//      try {
-//          Iterator iter=qr.getResults();
-//          Response response=(Response)iter.next();
-//          Assert.that(response.getName().equals("A"),
-//              "'"+response.getName()+"'");
-//          Assert.that(! iter.hasNext());
-//      } catch (Exception e) {
-//          Assert.that(false);
-//          e.printStackTrace();
-//      }
+        //Normal case: double null-terminated result
+        byte[] payload=new byte[11+11+16];
+        payload[0]=1;            //Number of results
+        payload[11+8]=(byte)65;  //The character 'A'
+        qr=new QueryReply(new byte[16], (byte)5, (byte)0,
+                          payload);
+        try {
+            Iterator iter=qr.getResults();
+            Response response=(Response)iter.next();
+            Assert.that(response.getName().equals("A"),
+                        "'"+response.getName()+"'");
+            Assert.that(! iter.hasNext());
+            Assert.that(qr.getVendor().equals(""));
+            Assert.that(qr.getNeedsPush()==false);
+        } catch (Exception e) {
+            Assert.that(false);
+            e.printStackTrace();
+        }
 
+        //Bad case: not enough space for client GUID.  We can get
+        //the client GUID, but not the results.
+        payload=new byte[11+11+15];
+        payload[0]=1;                    //Number of results
+        payload[11+8]=(byte)65;          //The character 'A'
+        qr=new QueryReply(new byte[16], (byte)5, (byte)0,
+                          payload);
+        try {
+            Iterator iter=qr.getResults();
+            Assert.that(false);
+        } catch (BadPacketException e) { }
+        try {
+            Iterator iter=qr.getResults();
+            Assert.that(false);
+        } catch (BadPacketException e) { }
+        Assert.that(qr.getVendor().equals(""));
 
-//      //Weird case: metadata between null characters.
-//      payload=new byte[11+11+1+16];
-//      payload[0]=1;            //Number of results
-//      payload[11+8]=(byte)65;  //The character 'A'
-//      payload[11+10]=(byte)66; //The metadata 'B'
-//      qr=new QueryReply(new byte[16], (byte)5, (byte)0,
-//                payload);
-//      try {
-//          Iterator iter=qr.getResults();
-//          Response response=(Response)iter.next();
-//          Assert.that(response.getName().equals("A"),
-//              "'"+response.getName()+"'");
-//          Assert.that(! iter.hasNext());
-//      } catch (Exception e) {
-//          Assert.that(false);
-//          e.printStackTrace();
-//      }
-//      }
+        //Normal case: basic metainfo with no vendor data
+        payload=new byte[11+11+(4+2+1)+16];
+        payload[0]=1;            //Number of results
+        payload[11+8]=(byte)65;  //The character 'A'
+        payload[11+11+0]=(byte)76;   //The character 'L'
+        payload[11+11+1]=(byte)105;  //The character 'i'
+        payload[11+11+2]=(byte)77;   //The character 'M'
+        payload[11+11+3]=(byte)69;   //The character 'E'
+        payload[11+11+4+0]=(byte)1;
+        payload[11+11+4+1]=(byte)0xB1; //set push flag (and other stuff)
+        payload[11+11+4+2+0]=(byte)0; //no vendor data
+        qr=new QueryReply(new byte[16], (byte)5, (byte)0,
+                          payload);
+        try {
+            String vendor=qr.getVendor();
+            Assert.that(vendor.equals("LIME"), vendor);
+            vendor=qr.getVendor();
+            Assert.that(vendor.equals("LIME"), vendor);
+            Assert.that(qr.getNeedsPush()==true);
+        } catch (Exception e) {
+            e.printStackTrace();
+            Assert.that(false);
+        }
+        
+        //Normal case: basic metainfo with extra vendor data
+        payload=new byte[11+11+(4+2+3)+16];
+        payload[0]=1;            //Number of results
+        payload[11+8]=(byte)65;  //The character 'A'
+        payload[11+11+0]=(byte)76;   //The character 'L'
+        payload[11+11+1]=(byte)76;   //The character 'L'
+        payload[11+11+2]=(byte)77;   //The character 'M'
+        payload[11+11+3]=(byte)69;   //The character 'E'
+        payload[11+11+4+0]=(byte)1;
+        payload[11+11+4+1]=(byte)0xF0; //set push flag (and other crap)
+        payload[11+11+4+2+0]=(byte)2; //one byte vendor
+        payload[11+11+4+2+1]=(byte)0xFF; //garbage data
+        qr=new QueryReply(new byte[16], (byte)5, (byte)0,
+                          payload);
+        try {
+            String vendor=qr.getVendor();
+            Assert.that(vendor.equals("LLME"), vendor);
+            vendor=qr.getVendor();
+            Assert.that(vendor.equals("LLME"), vendor);
+            Assert.that(qr.getNeedsPush()==false);
+        } catch (Exception e) {
+            Assert.that(false);
+            e.printStackTrace();
+        }
+
+        //Weird case.  No common data.
+        payload=new byte[11+11+(4+1+2)+16];
+        payload[0]=1;            //Number of results
+        payload[11+8]=(byte)65;  //The character 'A'
+        payload[11+11+4+1+0]=(byte)1;
+        qr=new QueryReply(new byte[16], (byte)5, (byte)0,
+                          payload);
+        Assert.that(! qr.getNeedsPush());
+        Assert.that(qr.getVendor().equals(""));
+    }
+    */
 }
