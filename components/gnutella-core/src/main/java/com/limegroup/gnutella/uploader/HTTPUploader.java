@@ -658,7 +658,7 @@ public class HTTPUploader implements Uploader {
         _fileSize = fdesc._size;
 
 		// get the fileInputStream
-		_fis = fdesc.getInputStream();
+		_fis = fdesc.createInputStream();
 
 	}
   
