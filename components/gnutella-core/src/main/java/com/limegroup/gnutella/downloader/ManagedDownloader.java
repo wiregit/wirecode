@@ -1486,7 +1486,8 @@ public class ManagedDownloader implements Downloader, Serializable {
         // If that fails, try killing any partial uploads we may have
         // to unlock the file, and then rename it.
         if (!success) {
-            FileDesc fd = RouterService.getFileManager().getFileDescMatching(
+            FileDesc fd =
+              RouterService.getFileManager().getMatchingIncompleteFileDesc(
                 incompleteFile);
             if( fd != null ) {
                 UploadManager upMan = RouterService.getUploadManager();
@@ -1513,13 +1514,12 @@ public class ManagedDownloader implements Downloader, Serializable {
         // first check if it conflicts with the saved dir....
         if (fileExists(completeFile))
             fileManager.removeFileIfShared(completeFile);
-        boolean fileAdded = 
+        int fileAddedAt = 
 		    fileManager.addFileIfShared(completeFile, getXMLDocuments());  
 
 		// Add the alternate locations to the newly saved local file
-		if(totalAlternateLocations != null && fileAdded) {
-			FileDesc fileDesc = 
-			    fileManager.getFileDescMatching(completeFile);  
+		if(totalAlternateLocations != null && fileAddedAt != -1) {
+			FileDesc fileDesc = fileManager.get(fileAddedAt);
 			// making this call now is necessary to avoid writing the 
 			// same alternate locations back to the requester as they sent 
 			// in their original headers
