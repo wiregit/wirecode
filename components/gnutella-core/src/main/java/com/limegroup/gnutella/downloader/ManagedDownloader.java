@@ -756,6 +756,31 @@ public class ManagedDownloader implements Downloader, Serializable {
         return (int)Math.max(remaining, 0)/1000;
     }
 
+
+
+	public boolean chatEnabled() {
+		if (dloader == null)
+			return false;
+		else 
+			return dloader.chatEnabled();
+	}
+
+	public String getChatHost() {
+		if (dloader == null)
+			return "";
+		else 
+			return dloader.getChatHost();
+	}
+
+	public int getChatPort() {
+		if (dloader == null)
+			return 0;
+		else 
+			return dloader.getChatPort();
+	}
+
+
+
     public synchronized String getFileName() {
         if (dloader!=null)
             return dloader.getFileName();

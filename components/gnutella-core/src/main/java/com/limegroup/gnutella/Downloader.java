@@ -89,4 +89,5 @@ public interface Downloader {
      *     @requires this in the WAITING_FOR_RETRY state
      */
     public int getRetriesWaiting();
+
 }

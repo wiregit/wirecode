@@ -57,9 +57,9 @@ public class ChatManager {
 			_activityCallback.acceptChat(im);
 			im.start();
 		} catch (IOException e) {
-			System.out.println("error in accept: ");
-			e.printStackTrace();
-		}
+		} // catch (ConnectException ce) {
+
+		// }
 
 	}
 
@@ -74,9 +74,8 @@ public class ChatManager {
 			_activityCallback.acceptChat(im);
 			im.start();
 		} catch (IOException e) {
-			System.out.println("error in request: ");
-			e.printStackTrace();
-		}
+		} // catch (ConnectException ce) {
+		// }
 		return im;
 	}
 
