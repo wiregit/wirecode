@@ -196,11 +196,11 @@ public class FileViewRequestTest extends ClientSideTestCase {
         URL url = new URL("http", "localhost", SERVER_PORT,
                           UploadManager.RESOURCE_GET + logo);
         HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-        InputStream is = conn.getInputStream();
+        DataInputStream is = new DataInputStream(conn.getInputStream());
         assertEquals(output.length, conn.getContentLength());
         byte[] bytes = new byte[output.length];
-        is.read(bytes);
-        assertEquals(bytes, output);
+        is.readFully(bytes);
+        assertTrue(Arrays.equals(bytes, output));
         assertTrue((conn.getResponseCode() >= 200) &&
                    (conn.getResponseCode() < 300));
     }
