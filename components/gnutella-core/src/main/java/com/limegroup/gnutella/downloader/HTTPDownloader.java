@@ -303,6 +303,9 @@ public class HTTPDownloader implements Runnable {
 		// incompleteFile represents the file as it would
 		// be named in the temporary incomplete directory.
 
+		System.out.println("The incomplete directory: " + incompletePath);
+
+
 		int start = 0;
 		_resume = false;
 		// if there is a file, set the initial amount
@@ -316,6 +319,9 @@ public class HTTPDownloader implements Runnable {
 		}
 		// convert the int start to String equivalent
 		String startRange = java.lang.String.valueOf(start);
+
+
+		System.out.println("The startRange is: " + startRange);
 
 		// Now, try to establish a socket connection
 		URLConnection conn;
@@ -475,11 +481,10 @@ public class HTTPDownloader implements Runnable {
         File myTest = new File(_downloadDir, _filename);
         String path = myTest.getAbsolutePath();
 
-        /********* Double Checking For Security **********/
-        /* This is necessary, and a little tricky. I
-           check to see if the canonical path of the
-           parent of the requested file is equivalent
-           to the canonical path of the shared directory. */
+        // This is necessary, and a little tricky. I
+		//  check to see if the canonical path of the
+		//  parent of the requested file is equivalent
+		//  to the canonical path of the shared directory. */
 
         File f;
         String p;
@@ -491,7 +496,6 @@ public class HTTPDownloader implements Runnable {
             p = f.getCanonicalPath();
 
             if (!p.equals(shared_path)) {
-                //System.out.println("Caught the malicious one!");
                 _state = ERROR;
                 return;
             }
@@ -500,7 +504,7 @@ public class HTTPDownloader implements Runnable {
             return;
         }
 
-        /***********End of Double Check ***********/
+
 		
 		if ( ( myFile.exists() && !_resume  ) 
 			|| (myTest.exists()) ) {
@@ -563,9 +567,9 @@ public class HTTPDownloader implements Runnable {
 
             _amountRead+=c;
 
-			System.out.println("*******************");
-			System.out.println("The amount read is: " + _amountRead);
-			System.out.println("The size of the file is: " + _sizeOfFile);
+			//  System.out.println("*******************");
+//  			System.out.println("The amount read is: " + _amountRead);
+//  			System.out.println("The size of the file is: " + _sizeOfFile);
 
         }
 
@@ -718,9 +722,12 @@ public class HTTPDownloader implements Runnable {
                     return;
                 }
 				_amountRead = resumeInit;
-				tempSize++;
-				if (_amountRead > 1)
-					_amountRead--;
+				// tempSize++;
+				// amountRead is actually one less than the value sent, 
+				// becasue the value sent says you will be getting the
+				// values of n - m, which means we've already only read
+				// (n-1)
+				_amountRead--;  
                 _resume = true;
 				foundLength = true;
             }
