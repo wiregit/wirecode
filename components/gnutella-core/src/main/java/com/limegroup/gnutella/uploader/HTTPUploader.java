@@ -39,10 +39,6 @@ public class HTTPUploader implements Uploader {
     private FileManager _fileManager;
 
     private BandwidthTrackerImpl bandwidthTracker=new BandwidthTrackerImpl();
-    
-    /** Flag indicating if the connection should be closed after this request*/
-    private boolean _closeConnection = false;
-
 
 	/****************** Constructors ***********************/
 	/**
