@@ -2,7 +2,7 @@
 
 
 # the java compiler
-JAVAC  = javac -O
+JAVAC  = javac -g
 RM      = /bin/rm -rf
 
 # grab all sources - kind of hacky

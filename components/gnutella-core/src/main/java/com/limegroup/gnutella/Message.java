@@ -73,7 +73,7 @@ public abstract class Message implements Serializable{
         this.hops=hops; this.length=length;
         //repOk();
     }
-
+	
     /**
      * @modifies in
      * @effects reads a packet from the network and returns it as an

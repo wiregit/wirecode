@@ -11,7 +11,7 @@ SRCS := $(wildcard *.java)
 OBJS  = $(SRCS:.java=.class)
 
 # make everything, (just makes .class files, for now)
-all: $(OBJS) gui util filters
+all: $(OBJS) gui util filters downloader
 
 $(OBJS): %.class: %.java
 	$(JAVAC) $<
@@ -25,6 +25,9 @@ util:
 	$(MAKE) -C $@
 .PHONY: filters
 filters:
+	$(MAKE) -C $@
+.PHONY: downloader
+downloader:
 	$(MAKE) -C $@
 
 # clean and then make again

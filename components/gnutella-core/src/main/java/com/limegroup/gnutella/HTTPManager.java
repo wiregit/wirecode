@@ -24,8 +24,7 @@ public class HTTPManager {
 	//private String userAltruism = null;
 
     /**
-     * @requires If isPush, "GIV " was just read from s.
-     *           Otherwise, "GET " was just read from s.
+     * @requires !isPush and "GET " was just read from s.
      * @effects  Transfers the file over s <i>in the foreground</i>.
      *           Throws IOException if the handshake failed.
      */
@@ -104,37 +103,7 @@ public class HTTPManager {
             }
 
             else /* isPush */ {
-                //Expect  "GIV 0:BC1F6870696111D4A74D0001031AE043/sample.txt\n\n"
-
-
-                String next=_br.readLine();
-                if (next==null || (! next.equals(""))) {
-                    throw new IOException();
-                }
-
-                //1. Extract file index.  IndexOutOfBoundsException
-                //   or NumberFormatExceptions will be thrown here if there's
-                //   a problem.  They're caught below.
-                int i=command.indexOf(":");
-                _index=Integer.parseInt(command.substring(0,i));
-                //2. Extract clientID.  This can throw
-                //   IndexOutOfBoundsException or
-                //   IllegalArgumentException, which is caught below.
-                int j=command.indexOf("/", i);
-                byte[] guid=GUID.fromHexString(command.substring(i+1,j));
-                //3. Extract file name.  This can throw
-                //   IndexOutOfBoundsException.
-                _filename=command.substring(j+1);
-
-
-                //Constructor to HTTPUploader checks that we can accept the
-                //file.
-                s.setSoTimeout(0);
-                HTTPDownloader downloader;
-                downloader = new HTTPDownloader(s, _filename, _index, guid,
-                                                router, acceptor, callback);
-                Thread.currentThread().setName("HTTPDownload (push)");
-                downloader.run(); //Ok, since we've already spawned a thread.
+                Assert.that(false, "HTTManager is obsolescent.  Pushes no longer supported.");
             }
         } catch (IndexOutOfBoundsException e) {
             throw new IOException();
@@ -142,10 +111,7 @@ public class HTTPManager {
             throw new IOException();
         } catch (IllegalArgumentException e) {
             throw new IOException();
-        } catch (IllegalAccessException e) {
-            //We never requested the specified file!
-            throw new IOException();
-        }
+        } 
     }
 
     public void readRange() throws IOException {

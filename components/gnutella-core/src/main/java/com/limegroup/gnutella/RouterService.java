@@ -16,6 +16,7 @@ public class RouterService
     private Acceptor acceptor;
     private ConnectionManager manager;
     private ResponseVerifier verifier = new ResponseVerifier();
+    private DownloadManager downloader;
 
     /**
      * Create a RouterService accepting connections on the default port
@@ -40,13 +41,15 @@ public class RouterService
         this.manager = new ConnectionManager(callback);
         this.router = router;
         this.catcher = new HostCatcher(callback);
+        downloader = new DownloadManager();
 
         // Now, link all the pieces together, starting the various threads.
         this.catcher.initialize(acceptor, manager,
                                 SettingsManager.instance().getHostList());
         this.router.initialize(acceptor, manager, catcher);
         this.manager.initialize(router, catcher);
-        this.acceptor.initialize(manager, router);
+        this.acceptor.initialize(manager, router, downloader);
+        this.downloader.initialize(callback, router, acceptor, FileManager.instance());
     }
 
     /**
@@ -548,67 +551,31 @@ public class RouterService
         return SettingsManager.instance();
     }
 
-    /**
-     * Initialize a download request
-     */
-    public HTTPDownloader initDownload(String ip, int port, int index,
-          String fname, byte[] bguid, int size) {
-        return new HTTPDownloader("http", ip, port, index, fname, router,
-                                  acceptor, callback, bguid, size);
-
-    }
-
-    /**
-     * Kickoff a download request
-     */
-    public void kickoffDownload(HTTPDownloader down) {
-
-        down.ensureDequeued();
-
-        Thread t = new Thread(down);
-
-        t.setDaemon(true);
-
-        t.start();
-    }
-
-    /**
-     * Create and kickoff a download request
-     */
-    public void tryDownload(String ip, int port, int index, String fname,
-      byte[] bguid, int size) {
-
-        HTTPDownloader down = initDownload(ip, port, index, fname, bguid, size);
-
-        kickoffDownload(down);
-    }
-
-    /**
-     * Create a queued download request
-     */
-    public void queueDownload(String ip, int port, int index, String fname,
-            byte[] bguid, int size) {
-
-        HTTPDownloader down = initDownload(ip, port, index, fname, bguid, size);
-
-        down.setQueued();
-        callback.addDownload( down );
-    }
-
-    /**
-     * Try to resume a download request
-     */
-    public void resumeDownload( HTTPDownloader mgr ) {
-        mgr.resume();
-
-        kickoffDownload(mgr);
-    }
-
 
     /**
      * Return how many files are being shared
      */
     public int getNumSharedFiles( ) {
         return( FileManager.instance().getNumFiles() );
+    }
+
+    /** 
+     * Tries to "smart download" any of the given files.<p>  
+     *
+     * If overwrite==false, then if any of the files already exists in the
+     * download directory, FileExistsException is thrown and no files are
+     * modified.  If overwrite==true, the files may be overwritten.<p>
+     * 
+     * Otherwise returns a Downloader that allows you to stop and resume this
+     * download.  The ActivityCallback will also be notified of this download,
+     * so the return value can usually be ignored.  The download begins
+     * immediately, unless it is queued.  It stops after any of the files
+     * succeeds.
+     *
+     *     @modifies this, disk 
+     */
+    public Downloader download(RemoteFileDesc[] files, boolean overwrite) 
+        throws com.limegroup.gnutella.downloader.FileExistsException {
+        return downloader.getFiles(files, overwrite);
     }
 }

@@ -14,6 +14,12 @@ public class Response {
      */
     private String name;
 
+	/** The meta variable is a string of meta information that
+	 *  will be added per response (as opposed to per QueryReply
+	 */
+	private String meta;
+	
+
     /** Creates a fresh new response.
      *
      * @requires index and size can fit in 4 unsigned bytes, i.e.,
@@ -28,6 +34,7 @@ public class Response {
         this.index=index;
         this.size=size;
         this.name=name;
+		meta = "";
     }
 
     public long getIndex() {
@@ -41,6 +48,15 @@ public class Response {
     public String getName() {
         return name;
     }
+
+	public void setMeta(String m) {
+		meta = m;
+	}
+	
+	public String getMeta() {
+		return meta;
+	}
+
 
     public boolean equals(Object o) {
         if (! (o instanceof Response))
