@@ -2,6 +2,7 @@ package com.limegroup.gnutella;
 
 import java.io.*;
 import com.sun.java.util.collections.*;
+import com.limegroup.gnutella.message.*;
 
 /**
  * A query reply.  Contains information about the responding host in addition to
@@ -71,12 +72,11 @@ public class QueryReply extends Message implements Serializable{
     private static final byte UPLOADED_MASK=(byte)0x08;
     /** The mask for extracting the busy flag from the QHD common area. */
     private static final byte SPEED_MASK=(byte)0x10;
+    /** The mask for extracting the GGEP flag from the QHD common area. */
+    private static final byte GGEP_MASK=(byte)0x40;
 
     /** The mask for extracting the chat flag from the QHD private area. */
     private static final byte CHAT_MASK=(byte)0x01;
-    /** The mask for extracting the browse host flag 
-     * from the QHD private area. */
-    private static final byte BROWSE_HOST_MASK=(byte)0x02;
     
     /** The xml chunk that contains metadata about xml responses*/
     private byte[] _xmlBytes = new byte[0];
@@ -94,7 +94,7 @@ public class QueryReply extends Message implements Serializable{
             int port, byte[] ip, long speed, Response[] responses,
             byte[] clientGUID) {
         this(guid, ttl, port, ip, speed, responses, clientGUID, new byte[0],
-             false, false, false, false, false, false);
+             false, false, false, false, false, false, true);
     }
 
 
@@ -118,7 +118,9 @@ public class QueryReply extends Message implements Serializable{
             boolean needsPush, boolean isBusy,
             boolean finishedUpload, boolean measuredSpeed,boolean supportsChat) {
         this(guid, ttl, port, ip, speed, responses, clientGUID, new byte[0],
-             true, needsPush, isBusy, finishedUpload, measuredSpeed,supportsChat);
+             true, needsPush, isBusy, finishedUpload,
+             measuredSpeed,supportsChat,
+             true);
     }
 
 
@@ -150,7 +152,7 @@ public class QueryReply extends Message implements Serializable{
         throws Exception {
         this(guid, ttl, port, ip, speed, responses, clientGUID, 
              xmlBytes, true, needsPush, isBusy, 
-             finishedUpload, measuredSpeed,supportsChat);
+             finishedUpload, measuredSpeed,supportsChat,true);
         if (xmlBytes.length > XML_MAX_SIZE)
             throw new Exception();
         _xmlBytes = xmlBytes;        
@@ -165,11 +167,11 @@ public class QueryReply extends Message implements Serializable{
              byte[] clientGUID, byte[] xmlBytes,
              boolean includeQHD, boolean needsPush, boolean isBusy,
              boolean finishedUpload, boolean measuredSpeed,
-             boolean supportsChat) {
+             boolean supportsChat, boolean supportsBH) {
         super(guid, Message.F_QUERY_REPLY, ttl, (byte)0,
               11 +                             // 11 bytes of header
               rLength(responses) +             // file records size
-              qhdLength(includeQHD, xmlBytes) + 
+              qhdLength(includeQHD, xmlBytes, supportsBH) + 
                                                // conditional xml-style QHD len
               16);                             // 16-byte footer
         // you aren't going to send this.  it will throw an exception above in
@@ -222,16 +224,22 @@ public class QueryReply extends Message implements Serializable{
             //b) payload length
             payload[i++]=(byte)COMMON_PAYLOAD_LEN;
 
+            // size of standard, no options, ggep block...
+            int ggepLen = GGEPUtil.getQRGGEP(false).length;
+
             //c) PART 1: common area flags and controls.  See format in
             //parseResults2.
             payload[i++]=(byte)((needsPush ? PUSH_MASK : 0) 
                 | BUSY_MASK 
                 | UPLOADED_MASK 
-                | SPEED_MASK);
+                | SPEED_MASK
+                | (supportsBH ? GGEP_MASK : (ggepLen > 0 ? GGEP_MASK : 0)) );
             payload[i++]=(byte)(PUSH_MASK
                 | (isBusy ? BUSY_MASK : 0) 
                 | (finishedUpload ? UPLOADED_MASK : 0)
-                | (measuredSpeed ? SPEED_MASK : 0));
+                | (measuredSpeed ? SPEED_MASK : 0)
+                | (supportsBH ? GGEP_MASK : (ggepLen > 0 ? GGEP_MASK : 0)) );
+
 
             //d) PART 2: size of xmlBytes + 1.
             int xmlSize = xmlBytes.length + 1;
@@ -241,11 +249,16 @@ public class QueryReply extends Message implements Serializable{
             i += 2;
 
             //e) private area: one byte with flags 
-            //for chat and browse-host support
-            payload[i++]=(byte)((supportsChat ? CHAT_MASK : 0)
-                | BROWSE_HOST_MASK);
+            //for chat support
+            payload[i++]=(byte)(supportsChat ? CHAT_MASK : 0);
 
-            //f) actual xml.
+            //f) the GGEP block
+            byte[] ggepBytes = GGEPUtil.getQRGGEP(supportsBH);
+            System.arraycopy(ggepBytes, 0,
+                             payload, i, ggepBytes.length);
+            i += ggepBytes.length;
+
+            //g) actual xml.
             System.arraycopy(xmlBytes, 0, 
                              payload, i, xmlSize-1);
             // adjust i...
@@ -311,12 +324,16 @@ public class QueryReply extends Message implements Serializable{
      *  even include a QHD.
      */
     private static int qhdLength(boolean includeQHD, 
-                                 byte[] xmlBytes) {
+                                 byte[] xmlBytes, 
+                                 boolean supportsBH) {
         int retInt = 0;
         if (includeQHD) {
             retInt += 4; // 'LIME'
             retInt += 1; // 1 byte for size of public area
             retInt += COMMON_PAYLOAD_LEN; 
+            // the size of the GGEP block for Query Replies with optional Browse
+            // Host flag...
+            retInt += GGEPUtil.getQRGGEP(supportsBH).length;
             retInt += 1;//One byte in the private area for chat
             // size of xml string, max XML_MAX_SIZE            
             int numBytes = xmlBytes.length;
@@ -646,6 +663,13 @@ public class QueryReply extends Message implements Serializable{
         //      bit 4   1 iff server's reported speed was actually measured, not
         //              simply set by the user.
         //
+        // GGEP Stuff
+        // Byte 5 and 6, if the 5th bit is set, signal that there is a GGEP
+        // block.  The GGEP block will be after the common payload and will be
+        // headed by the GGEP magic prefix (see the GGEP class for more details.
+        //
+        // If there is a GGEP block, then we look to see what is supported.
+        //
         //*Here, we use 0-(N-1) numbering.  So "0'th bit" refers to the least
         //significant bit.
         /* ----------------------------------------------------------------
@@ -657,7 +681,9 @@ public class QueryReply extends Message implements Serializable{
          * Byte 5-6 : Public area (as described above)
          * Byte 7-8 : Size of XML + 1 (for a null), you need to count backward
          * from the client GUID.
-         * Byte 9-beginning of xml : (new) private area
+         * Byte 9   : private vendor flag
+         * Byte 10-X: GGEP area
+         * Byte X-beginning of xml : (new) private area
          * Byte (payload.length - 16 - xmlSize (above)) - 
                 (payload.length - 16 - 1) : XML!!
          * Byte (payload.length - 16 - 1) : NULL
@@ -712,6 +738,25 @@ public class QueryReply extends Message implements Serializable{
                     uploadedFlagT = (flags&UPLOADED_MASK)!=0 ? TRUE : FALSE;
                 if ((control & SPEED_MASK)!=0)
                     measuredSpeedFlagT = (flags&SPEED_MASK)!=0 ? TRUE : FALSE;
+                if ((control & GGEP_MASK)!=0 && (flags & GGEP_MASK)!=0) {
+                    // GGEP processing
+                    // iterate past flags...
+                    int magicIndex = i + 2;
+                    for (; 
+                         (payload[magicIndex]!=GGEP.GGEP_PREFIX_MAGIC_NUMBER) &&
+                         (magicIndex < payload.length);
+                         magicIndex++)
+                        ; // get the beginning of the GGEP stuff...
+                    GGEP[] ggepBlocks = null;
+                    try {
+                        // if there are GGEPs, see if Browse Host supported...
+                        ggepBlocks = GGEP.read(payload, magicIndex);
+                        if (GGEPUtil.allowsBrowseHost(ggepBlocks))
+                            supportsBrowseHostT = TRUE;
+                    }
+                    catch (BadGGEPBlockException ignored) {
+                    }
+                }
                 i+=2; // increment used bytes appropriately...
             }
 
@@ -742,8 +787,6 @@ public class QueryReply extends Message implements Serializable{
             if (privateLength>0 && vendorT.equals("LIME")) {
                 byte privateFlags = payload[i];
                 supportsChatT = (privateFlags&CHAT_MASK)!=0 ? TRUE : FALSE;
-                supportsBrowseHostT 
-                    = (privateFlags&BROWSE_HOST_MASK)!=0 ? TRUE : FALSE;
             }
 
             if (i>payload.length-16)
