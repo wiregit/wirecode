@@ -100,7 +100,6 @@ public class ConnectionManager {
 	public static final String QUERY_ROUTING_VERSION = "0.1";
 
     
-    private MessageRouter _router;
     private HostCatcher _catcher;
 	private final ConnectionWatchdog _watchdog;
 
