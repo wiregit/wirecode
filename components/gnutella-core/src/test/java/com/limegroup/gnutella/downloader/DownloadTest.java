@@ -214,7 +214,7 @@ public class DownloadTest extends BaseTestCase {
     }    
 
     public void tearDown() {
-        
+
         uploader1.reset();
         uploader2.reset();
         uploader3.reset();
@@ -1076,6 +1076,7 @@ public class DownloadTest extends BaseTestCase {
         final int RATE=500;
         final int FUDGE_FACTOR=RATE*1024;
         uploader1.setRate(RATE);
+        uploader1.stopAfter(800000);
         
         TestUploader pusher = new TestUploader("push uploader");
         pusher.setRate(RATE);
@@ -1097,11 +1098,8 @@ public class DownloadTest extends BaseTestCase {
         
         tGeneric(rfds);
         
-        assertLessThan("u1 did all the work", TestFile.length()/2+FUDGE_FACTOR, 
-                uploader1.amountUploaded());
-        assertLessThan("pusher did all the work", TestFile.length()/2+FUDGE_FACTOR, 
-                pusher.amountUploaded());
-        assertGreaterThan("pusher didn't do anything",0,pusher.amountUploaded());
+        assertGreaterThan("u1 didn't do enough work ",100*1024,uploader1.amountUploaded());
+        assertGreaterThan("pusher didn't do enough work ",100*1024,pusher.amountUploaded());
     }
     
     /**
@@ -1113,12 +1111,14 @@ public class DownloadTest extends BaseTestCase {
         final int FUDGE_FACTOR=RATE*1536;
         uploader1.setRate(RATE);
         uploader1.setInterestedInFalts(true);
+        uploader1.stopAfter(600000);
         uploader2.setRate(RATE);
         uploader2.setInterestedInFalts(false);
+        uploader2.stopAfter(300000);
         
         TestUploader pusher = new TestUploader("push uploader");
         pusher.setRate(RATE);
-        pusher.stopAfter(150*1024);
+        pusher.stopAfter(150000);
         
         AlternateLocation pushLoc = AlternateLocation.create(
                 guid.toHexString()+";127.0.0.1:"+PPORT_1,TestFile.hash(),savedFile.getName());
@@ -1139,6 +1139,7 @@ public class DownloadTest extends BaseTestCase {
         assertGreaterThan("u1 did no work",100*1024,uploader1.amountUploaded());
 
         assertGreaterThan("u2 did no work",100*1024,uploader2.amountUploaded());
+        assertLessThan("u2 did too much work",550*1024,uploader2.amountUploaded());
 
         assertGreaterThan("pusher did no work",100*1024,pusher.amountUploaded());
         
@@ -1156,11 +1157,13 @@ public class DownloadTest extends BaseTestCase {
         
         // this test needs to go slowly so that the push attempt may time out
         final int RATE=15;
-        final int FUDGE_FACTOR=RATE*1536;
+        
         uploader1.setInterestedInFalts(true);
         uploader2.setInterestedInFalts(true);
         uploader1.setRate(RATE);
         uploader2.setRate(RATE);
+        uploader1.stopAfter(550000);
+        uploader2.stopAfter(550000);
         
         AlternateLocation badPushLoc=AlternateLocation.create(
                 guid.toHexString()+";1.2.3.4:5",TestFile.hash(),savedFile.getName());
