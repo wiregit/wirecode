@@ -711,8 +711,19 @@ public class RouterService
      *  Returns the number of messaging connections.
      */
     public int getNumConnections() {
-        return manager.getNumConnections();
+		return manager.getNumConnections();
     }
+
+	/**
+	 * Returns whether or not this client currently has any initialized 
+	 * connections.
+	 *
+	 * @return <tt>true</tt> if the client does have initialized connections,
+	 *  <tt>false</tt> otherwise
+	 */
+	public boolean isConnected() {
+		return manager.isConnected();
+	}
 
     /**
      *  Returns the number searches made to the local database.
@@ -776,12 +787,11 @@ public class RouterService
      * @exception FileExistsException the file already exists in the library
      * @see DownloadManager#getFiles(RemoteFileDesc[], boolean)
      */
-    public Downloader download(RemoteFileDesc[] files, boolean overwrite) 
-        throws FileExistsException, AlreadyDownloadingException, 
-			   java.io.FileNotFoundException {
-        return downloader.getFiles(files, overwrite);
-    }
-
+	public Downloader download(RemoteFileDesc[] files, boolean overwrite) 
+		throws FileExistsException, AlreadyDownloadingException, 
+  			   java.io.FileNotFoundException {
+		return downloader.getFiles(files, overwrite);
+	}
 
     /** 
       * Notifies the backend that the BLACKLISTED_IP property has changed,
