@@ -150,6 +150,9 @@ public class HostCatcher {
      * number of endpoints to keep in the locale set
      */
     private static final int LOCALE_SET_SIZE = 100;
+    
+    /** How many pongs to return each time */
+    private static final int NUM_ENDPOINTS = 10;
 
     /** The list of pongs with the highest average daily uptimes.  Each host's
      * weight is set to the uptime.  These are most likely to be reachable
@@ -1030,19 +1033,19 @@ public class HostCatcher {
         if(loc == null || loc.equals(""))
             loc = ApplicationSettings.DEFAULT_LOCALE.getValue();
 
-        Set hosts = new HashSet();
+        Set hosts = new HashSet(NUM_ENDPOINTS);
         Iterator i;
 
         Set locales = (Set)LOCALE_SET_MAP.get(loc);
         if(locales != null) {
-            for(i = locales.iterator(); i.hasNext() && hosts.size() < 10; ) {
+            for(i = locales.iterator(); i.hasNext() && hosts.size() < NUM_ENDPOINTS; ) {
                 Object next = i.next();
                 if(base.contains(next))
                     hosts.add(next);
             }
         }
         
-        for(i = base.iterator(); i.hasNext() && hosts.size() < 10;) {
+        for(i = base.iterator(); i.hasNext() && hosts.size() < NUM_ENDPOINTS;) {
             hosts.add(i.next());
         }
         
