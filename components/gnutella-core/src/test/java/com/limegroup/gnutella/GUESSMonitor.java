@@ -167,7 +167,10 @@ public class GUESSMonitor {
                           currPong.getPort() + " . " + "Success Rate = " +
                           successRate + " at an average of " +
                           averageTime + " ms per Query.");
-
+                    try {
+                        Thread.sleep(500); // wait a little, don't kill guys....
+                    }
+                    catch (InterruptedException ignored) {}
                 }
             }
             debug("guessPongLoop(): returning.");
