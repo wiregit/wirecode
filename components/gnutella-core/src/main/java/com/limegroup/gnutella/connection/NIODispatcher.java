@@ -7,7 +7,6 @@ import java.nio.channels.SelectableChannel;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 
-import com.limegroup.gnutella.Assert;
 import com.limegroup.gnutella.Connection;
 import com.limegroup.gnutella.ErrorService;
 import com.limegroup.gnutella.RouterService;
@@ -158,14 +157,19 @@ public final class NIODispatcher implements Runnable {
                 continue;
             }
 			
-			// register any new readers and writers
+			// register any new readers...
 			registerReaders();
 			if(n == 0) {
 				continue;
 			}
             
+            // and read from any existing readers
 			handleReaders();
+            
+            // register any new writers...
 			registerWriters();
+            
+            // and write to any existing writers
 			handleWriters();
 		}
     }
@@ -181,7 +185,6 @@ public final class NIODispatcher implements Runnable {
 			for(Iterator iter = READERS.iterator(); iter.hasNext();) {
 				Connection conn = (Connection)iter.next();
 				SelectableChannel channel = conn.getSocket().getChannel();
-                Assert.that(channel != null, "channel is null");
 				
 				// try to make sure the channel's open instead of just
 				// hammering our way into ClosedChannelExceptions -- 
@@ -230,13 +233,8 @@ public final class NIODispatcher implements Runnable {
 			// ignore invalid keys
 			if(!key.isValid()) continue;
             if(!key.isReadable()) continue;
-            Connection conn = null;
+            Connection conn = (Connection)key.attachment();
 			try {
-                conn = (Connection)key.attachment();
-                if(!conn.isOpen()) {
-                    // continue if the connection is no longer open
-                    continue;
-                }
 				Message msg = conn.reader().createMessageFromTCP(key);
 				
 				if(msg == null) {
@@ -246,17 +244,17 @@ public final class NIODispatcher implements Runnable {
 				}
 
                 conn.stats().addReceived();
+                
                 // make sure this message isn't considered spam                    
                 if(!conn.isSpam(msg)) {
                     // TODO:: don't use RouterService
-                    RouterService.getMessageRouter().handleMessage(msg, 
-                        (Connection)key.attachment());
+                    RouterService.getMessageRouter().handleMessage(msg, conn);
                 } else {
                     if(!CommonUtils.isJava118()) {
                         ReceivedMessageStatHandler.TCP_FILTERED_MESSAGES.
                             addMessage(msg);
                     }
-                    conn.countDroppedMessage();
+                    conn.stats().countDroppedMessage();
                 }
 			} catch (BadPacketException e) {
                 MessageReadErrorStat.BAD_PACKET_EXCEPTIONS.incrementStat();
@@ -281,14 +279,14 @@ public final class NIODispatcher implements Runnable {
 			keyIter.remove();
 			if(!key.isValid()) continue;
 			if(key.isWritable()) {
-				Connection conn = 
-                    (Connection)key.attachment();
+				Connection conn = (Connection)key.attachment();
 				try {
                     if(conn.writer().write()) {
                         // if the message was successfully written, switch it 
                         // back to only being registered for read events
                         register(conn, SelectionKey.OP_READ);
-                    }
+                        conn.writer().setRegistered(false);
+                    } 
                 } catch (IOException e) {
                     RouterService.removeConnection(conn);
                 }
