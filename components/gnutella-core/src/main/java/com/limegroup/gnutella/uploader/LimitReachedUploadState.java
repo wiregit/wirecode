@@ -33,7 +33,7 @@ public class LimitReachedUploadState implements UploadState {
 		str = "Content-Length: " + errMsg.length() + "\r\n";
 		ostream.write(str.getBytes());
 		FileDesc fileDesc = uploader.getFileDesc();
-		if(fileDesc != null && fileDesc.hasSHA1Urn()) {
+		if(fileDesc != null) {
 			// write the URN in case the caller wants it
 			HTTPUtils.writeHeader(HTTPHeaderName.CONTENT_URN,
 								  fileDesc.getSHA1Urn(),
