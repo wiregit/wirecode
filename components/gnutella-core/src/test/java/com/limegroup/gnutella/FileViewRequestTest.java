@@ -12,6 +12,7 @@ import com.limegroup.gnutella.messages.PushRequest;
 import com.limegroup.gnutella.messages.QueryReply;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.search.HostData;
+import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
 import com.limegroup.gnutella.uploader.*;
 import com.limegroup.gnutella.html.FileListHTMLPage;
@@ -182,6 +183,27 @@ public class FileViewRequestTest extends ClientSideTestCase {
                    (conn.getResponseCode() < 500));
         
     }
+
+    public void testGetResource() throws Exception {
+
+        final String logo = "com/limegroup/gnutella/AcceptorTest.class";
+        final File rFile = CommonUtils.getResourceFile(logo);
+        final byte[] output = new byte[(int)rFile.length()];
+        int read = 0;
+        FileInputStream fr = new FileInputStream(rFile);
+        while (read < output.length)
+            read += fr.read(output, read, (output.length - read)); 
+
+        URL url = new URL("http", "localhost", SERVER_PORT,
+                          UploadManager.RESOURCE_GET + logo);
+        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+        InputStream is = conn.getInputStream();
+        assertEquals(output.length, conn.getContentLength());
+        byte[] bytes = new byte[output.length];
+        is.read(bytes);
+        assertEquals(bytes, output);
+    }
+
 
     //////////////////////////////////////////////////////////////////
     public static Integer numUPs() {
