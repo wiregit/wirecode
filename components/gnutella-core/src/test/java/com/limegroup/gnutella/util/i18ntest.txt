@@ -1,5 +1,5 @@
-# BEGIN CASE
-heあllo;ＨＥあＬＬＯ
+﻿# BEGIN CASE
+he あ llo;ＨＥあＬＬＯ
 limewire;ＬＩＭＥＷＩＲＥ
 hello;ＨＥllo
 カ;ｶ
@@ -29,7 +29,7 @@ a;ª
 o;º
 a;À
 a;Á
-やaや;やÂや
+や a や;やÂや
 sag;sÃg
 daaad;daÄad
 ecace;ecÅce

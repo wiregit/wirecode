@@ -38,19 +38,21 @@ public class I18NConvertTest extends BaseTestCase {
         _instance = I18NConvert.instance();
     }
     
-    public void testConversions() {
-        readLines(CASE,0);
-        readLines(ACCENTS,0);
+    public void testConversions() throws Exception {
+        long l = System.currentTimeMillis();
+        readLines(CASE);
+        readLines(ACCENTS);
         _last = true;
-        readLines(SPLIT,1);
+        readLines(SPLIT);
+        System.out.println(System.currentTimeMillis() - l);
     }
 
-    private void readLines(String what, int which) {
+    private void readLines(String what) {
         String line = "";
         try {
             while((line = _buf.readLine()) != null &&
                   !line.equals("# END " + what)) {
-                doNorm(line, what, which);
+                doNorm(line, what);
             }
         }
         catch(IOException ioe) {
@@ -62,14 +64,12 @@ public class I18NConvertTest extends BaseTestCase {
 
     }
 
-    private void doNorm(String line, final String what, int which) 
+    private void doNorm(String line, final String what) 
         throws Throwable {
 
         if(line.indexOf("# ") == -1) {
             String[] split = StringUtils.split(line, DELIM);
-            String x = getKC(getDK(split[1]));
-            if(which == 1)
-                x = _instance.getNorm(split[1]);
+            String x = _instance.getNorm(split[1]);
 
             assertEquals(what + " " + line + ":", 
                          split[0], 
@@ -81,39 +81,6 @@ public class I18NConvertTest extends BaseTestCase {
         System.out.println("tear down");
         if(_last && _buf != null)
             _buf.close();
-    }
-
-    
-    private final String getDK(String s) 
-        throws Throwable { 
-        try {
-            return ((String)
-                    PrivilegedAccessor.invokeMethod(_instance,
-                                                    "getDK",
-                                                    new Object[] {s},
-                                                    new Class[] {String.class}));
-        }
-        catch(Exception e) {
-            if(e.getCause() != null)
-                throw e.getCause();
-            throw e;
-        }
-    }
-
-    private final String getKC(String s) 
-        throws Throwable { 
-        try {
-            return ((String)
-                    PrivilegedAccessor.invokeMethod(_instance,
-                                                    "getKC",
-                                                    new Object[] {s},
-                                                    new Class[] {String.class}));
-        }
-        catch(Exception e) {
-            if(e.getCause() != null)
-                throw e.getCause();
-            throw e;
-        }
     }
 
 }
