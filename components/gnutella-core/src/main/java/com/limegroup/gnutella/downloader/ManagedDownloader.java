@@ -60,6 +60,20 @@ public class ManagedDownloader implements Downloader, Serializable {
     /** The smallest interval that can be split for parallel download */
     private static final int MIN_SPLIT_SIZE=100000;      //100 KB        
 
+    /** The amount of time to wait before requerying the network.  Should not be
+     *  too small such that it hurts Gnutella.  Also the time to wait for
+     *  replies from a query to return.
+     */
+    private static final int REQUERY_TIMEOUT = 1 * 60 * 1000 ; // 1 minute
+    /** The number of times to requery the network.
+     */
+    private static final int REQUERY_ATTEMPTS = 5;
+    /** Lock used to communicate between addDownload and tryAllDownloads.
+     */
+    private Object reqLock = new Object();
+    private boolean shouldWait = true;
+
+    
 
     ////////////////////////// Core Variables /////////////////////////////
     /** The buckets of "same" files, each a list of RemoteFileDesc.  One by one,
@@ -237,6 +251,7 @@ public class ManagedDownloader implements Downloader, Serializable {
      *  same to some entry in this, but that is not required.  
      */
     public synchronized void addDownload(RemoteFileDesc rfd) {
+        debug("ManagedDownloader.addDownload(): entered.");
         //Ignore if this was already added.  This includes existing downloaders
         //as well as busy lists.
         for (int i=0; i<allFiles.length; i++) {
@@ -258,8 +273,19 @@ public class ManagedDownloader implements Downloader, Serializable {
         //otherwise).  So instead we target the two cases we're interested:
         //waiting for downloaders to complete (by waiting on this) or waiting
         //for retry (by sleeping).
+        debug("ManagedDownloader.addDownload(): branching, state = " + 
+              getState());
         if (state==Downloader.WAITING_FOR_RETRY)
             dloaderManagerThread.interrupt();   //see tryAllDownloads    
+        else if ((state==Downloader.REQUERYING_NETWORK) ||
+            (state==Downloader.WAITING_FOR_RESULTS)) {
+            debug("ManagedDownloader.addDownload():" + 
+                  " adding download to requery.");
+            synchronized (reqLock) {
+                shouldWait = false;
+                reqLock.notifyAll();
+            }
+        }
         else
             this.notify();                      //see tryAllDownloads3
     }
@@ -416,6 +442,9 @@ public class ManagedDownloader implements Downloader, Serializable {
      * file to the library.  Called from dloadManagerThread.  
      */
     private void tryAllDownloads() {     
+
+        int numRequeries = 0;
+
         synchronized (this) {
             buckets=new RemoteFileDescGrouper(allFiles, incompleteFileManager);
         }
@@ -479,11 +508,37 @@ public class ManagedDownloader implements Downloader, Serializable {
                     setState(WAITING_FOR_RETRY, time);
                     Thread.sleep(time);
                 } else {
-                    setState(GAVE_UP);
-                    manager.remove(this, false);
-                    return;
+                    if (stopped) {
+                        setState(ABORTED);
+                        manager.remove(this, false);
+                        return;
+                    }
+                    else if (numRequeries++ < REQUERY_ATTEMPTS) {
+                        setState(REQUERYING_NETWORK);
+                        manager.sendQuery(allFiles);
+
+                        setState(WAITING_FOR_RESULTS);
+                        synchronized (reqLock) {
+                            // max REQUERY_TIMEOUT i'll wait, best case i'll get
+                            // interrupted 
+                            debug("ManagedDownloader.tADs(): " +
+                                  "requery (" + this + ") sleeping " +
+                                  numRequeries);
+                            if (shouldWait) 
+                                reqLock.wait(REQUERY_TIMEOUT);
+                            shouldWait = true;
+                            debug("ManagedDownloader.tADs(): " + 
+                                  "requery ( " + this + ") sleep done...");
+                        }
+                    }
+                    else {
+                        setState(GAVE_UP);
+                        manager.remove(this, false);
+                        return;
+                    }
                 }
             } catch (InterruptedException e) {
+                debug("ManagedDownloader.tADs(): sleep interrupted....");
                 if (stopped) {
                     setState(ABORTED);
                     manager.remove(this, false);
@@ -1125,6 +1180,17 @@ public class ManagedDownloader implements Downloader, Serializable {
         return bandwidthTracker.getMeasuredBandwidth();
     }
 
+
+    private boolean debugOn = false;
+    private void debug(String out) {
+        if (debugOn)
+            System.out.println(out);
+    }
+    private void debug(Exception e) {
+        if (debugOn)
+            e.printStackTrace();
+    }
+
     /** Unit test */
     /*
     public static void main(String args[]) {
@@ -1159,4 +1225,5 @@ public class ManagedDownloader implements Downloader, Serializable {
     private ManagedDownloader() {
     }
     */
+
 }
