@@ -103,6 +103,21 @@ public class UDPService implements Runnable {
      * LOCKING: this
      */
     private byte[] _lastReportedIP;
+    
+    
+    /**
+     * if our isp changed our ip, this holds the previous value
+     * LOCKING: this
+     */
+    private byte[] _previousIP;
+
+    /**
+     * Whether we have discovered our external tcp address.
+     * Used to differentiate between initial connection to the network
+     * and subsequent address changes by the ISP.
+     * LOCKING: this
+     */
+    private boolean _tcpAddressInitialized;
 
 	/**
 	 * The thread for listening of incoming messages.
@@ -315,8 +330,17 @@ public class UDPService implements Runnable {
                             PingReply r = (PingReply)message;
                             if (r.getMyInetAddress() != null) {
                                 
+                                byte [] newAddr = r.getMyInetAddress().getAddress();
+                                
                                 synchronized(this){ 
-                                    _lastReportedIP=r.getMyInetAddress().getAddress();
+                                    
+                                    // we may receive a late pong after the isp has
+                                    // changed our address.  We should not let that pong
+                                    // affect us. (port is unaffected)
+                                    
+                                    if (_previousIP!=null && 
+                                            !Arrays.equals(_previousIP,newAddr)) 
+                                        _lastReportedIP=newAddr;
                                 
                                     if (_lastReportedPort!=r.getMyPort()) {
                                         _portStable=false;
@@ -664,13 +688,31 @@ public class UDPService implements Runnable {
 
 	/**
 	 * called by Acceptor when we discover our external address. 
-	 * Used to initialize our address.  We initialize it only once;
-	 * this does not affect the _addressStable flag. 
+	 * Used to initialize our address.  
+	 * Since the isp may change our ip address,  we reset our FWT status.
 	 */
 	synchronized void updateExternalAddr(byte [] addr) {
-	    if (_lastReportedIP==null ||
-	            NetworkUtils.isPrivateAddress(_lastReportedIP))
+	    
+	    // before we have connected to the network, our _lastReportedIP
+	    // will have been initialized by the udp pongs.  We do not 
+	    // want to lose that information.
+
+        // if our tcp address changes after we have connected to the 
+        // network and we were able to do FWT, we need to update our 
+	    // state since any newly received pongs will disable FWT.
+	    
+	    if (!_tcpAddressInitialized) {
+	        if (_lastReportedIP==null ||
+	                NetworkUtils.isPrivateAddress(_lastReportedIP))
+	            _lastReportedIP=addr;
+	        _tcpAddressInitialized=true;
+	    }
+	    else if (canDoFWT()){
+	        _previousIP=_lastReportedIP;
 	        _lastReportedIP=addr;
+	        _lastReportedPort=RouterService.getPort();
+	        _portStable=true;
+	    }
 	}
 	/**
 	 * Sets whether or not this node is capable of receiving SOLICITED
