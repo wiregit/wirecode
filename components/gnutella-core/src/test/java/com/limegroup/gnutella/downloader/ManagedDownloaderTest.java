@@ -136,13 +136,34 @@ public class ManagedDownloaderTest extends com.limegroup.gnutella.util.BaseTestC
     			(ManagedDownloader)md,"informMesh",new Object[]{rfd,new Boolean(true)},
 				new Class[]{RemoteFileDesc.class,boolean.class});
     	
-    	//make sure the downloader did not get notified
+    	//make sure the downloader did get notified
     	assertFalse(fakeDownloader._addedFailed);
     	assertTrue(fakeDownloader._addedSuccessfull);
     	
     	//make sure the file was added to the file descriptor
     	test = RouterService.getFileManager().getFileDescForUrn(partialURN);
     	assertEquals(1,test.getAlternateLocationCollection().getAltLocsSize());
+    	
+    	//rince and repeat, saying this was a bad altloc. 
+    	//it should be sent to the other downloaders. 
+    	fakeDownloader._addedSuccessfull=false;
+    	
+    	PrivilegedAccessor.invokeMethod(
+    			(ManagedDownloader)md,"informMesh",new Object[]{rfd,new Boolean(false)},
+				new Class[]{RemoteFileDesc.class,boolean.class});
+    	
+    	//make sure the downloader did get notified
+    	assertTrue(fakeDownloader._addedFailed);
+    	assertFalse(fakeDownloader._addedSuccessfull);
+    	
+    	//make sure the file was added to the file descriptor
+    	test = RouterService.getFileManager().getFileDescForUrn(partialURN);
+    	assertEquals(1,test.getAlternateLocationCollection().getAltLocsSize());
+    	
+    	AlternateLocation alt = 
+    	    (AlternateLocation)test.getAlternateLocationCollection().iterator().next();
+    	
+    	assertTrue(alt instanceof PushAltLoc);
     }
     
     public void testLegacy() throws Exception {
