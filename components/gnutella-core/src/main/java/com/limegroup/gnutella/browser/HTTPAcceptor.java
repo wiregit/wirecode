@@ -8,6 +8,7 @@ import java.net.Socket;
 import java.net.BindException;
 import java.net.UnknownHostException;
 import java.util.Date;
+import java.util.Random;
 
 import com.limegroup.gnutella.ByteReader;
 import com.limegroup.gnutella.Constants;
@@ -17,7 +18,6 @@ import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.IOUtils;
 import com.limegroup.gnutella.util.URLDecoder;
 import com.limegroup.gnutella.util.ManagedThread;
-import com.limegroup.gnutella.util.Random12;
 
 /**
  * Listens on an HTTP port, accepts incoming connections, and dispatches 
@@ -143,7 +143,7 @@ public class HTTPAcceptor implements Runnable {
         } catch (IOException e) {
 			boolean error = true;
             socketError = e;
-            Random12 gen = new Random12();
+            Random gen = new Random();
             //2. Try 20 different random ports from 45100 to 50100
             for (int i=0; i<20; i++) {
                 int rand = gen.nextInt(5000);

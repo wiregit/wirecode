@@ -10,6 +10,7 @@ import com.limegroup.gnutella.statistics.*;
 import com.limegroup.gnutella.settings.*;
 import com.limegroup.gnutella.browser.ExternalControl;
 import java.util.Arrays;
+import java.util.Random;
 
 import org.apache.commons.logging.LogFactory;
 import org.apache.commons.logging.Log;
@@ -388,13 +389,13 @@ public class Acceptor implements Runnable {
             //sequentially from 6346. The next 10 tries are random ports between
             //2000 and 52000
             int numToTry = 20;
-            Random12 gen = null;
+            Random gen = null;
             for (int i=0; i<numToTry; i++) {
                 if(i < 10)
                     tempPort = i+6346;
                 else {
                     if(gen==null)
-                        gen = new Random12();
+                        gen = new Random();
                     tempPort = gen.nextInt(50000);
                     tempPort += 2000;//avoid the first 2000 ports
                 }

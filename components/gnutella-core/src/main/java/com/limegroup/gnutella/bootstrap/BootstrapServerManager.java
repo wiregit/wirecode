@@ -103,7 +103,7 @@ public class BootstrapServerManager {
     
     /** Source of randomness for picking servers.
      *  TODO: this is thread-safe, right? */
-    private Random12 _rand=new Random12();    
+    private Random _rand=new Random();
     
     /** True if a thread is currently executing a hostfile request. 
      *  LOCKING: this (don't want multiple fetches) */
