@@ -115,8 +115,7 @@ public class LimeXMLProperties
      * Schema Transformation DataMap
      */
     private static final String SCHEMA_TRANSFORMATION_DATA_MAP_FILE_DEF 
-        = "etc" + File.separator + "STDataMap.dat";
-    
+        = "STDataMap.dat";
     
     /**
      * The property that denotes the
@@ -130,8 +129,7 @@ public class LimeXMLProperties
       * corresponding to which are to be transformed to http requests for
       * processing
       */
-    private static final String HTTP_MAPPING_FILE_DEF =  "etc"
-        + File.separator + "httpmapping.xml";
+    private static final String HTTP_MAPPING_FILE_DEF = "httpmapping.xml";
     
      /**
      * The property that denotes the
@@ -145,8 +143,8 @@ public class LimeXMLProperties
       * corresponding to which are to be transformed to database requests for
       * processing
       */
-    private static final String DATABASE_MAPPING_FILE_DEF =  "etc"
-        + File.separator + "databasemapping.xml";
+    private static final String DATABASE_MAPPING_FILE_DEF = 
+        "databasemapping.xml";
     
     /**
      * The property that denotes the
@@ -160,8 +158,7 @@ public class LimeXMLProperties
      * name of the file that contains configuration information
      * for various feeds from providers (like news feed etc)
      */
-    private static final String FEED_PROPS_FILE_DEF =  "etc"
-        + File.separator + "feedreceiverprops.xml";
+    private static final String FEED_PROPS_FILE_DEF = "feedreceiverprops.xml";
     
      /**
      * The property that denotes the 
@@ -173,8 +170,7 @@ public class LimeXMLProperties
      * Name of the file that contains schema => QueryHandler mappings for 
      * the schemas that are to be handled directly without any transformation
      */
-    private static final String DIRECT_MAPPING_FILE_DEF =  "etc"
-        + File.separator + "directmapping.xml";
+    private static final String DIRECT_MAPPING_FILE_DEF = "directmapping.xml";
     
     /**
      * The property that denotes the 
@@ -186,8 +182,7 @@ public class LimeXMLProperties
      * name of the file that contains the keywords we are interested in 
      * answering queries for
      */
-    private static final String KEYWORD_LIST_FILE_DEF =  "etc"
-        + File.separator + "keywords.list";
+    private static final String KEYWORD_LIST_FILE_DEF = "keywords.list";
     
     /**
      * The property that denotes the 
@@ -443,9 +438,9 @@ public class LimeXMLProperties
         }
         else
         {
-            return limeHome;
+            return limeHome + "lib" + File.separator;
         }
-//        return "e:/work/";
+//        return "e:/work/lib/";
     }    
     
 }//end of class
