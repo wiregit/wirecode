@@ -221,9 +221,12 @@ public abstract class MessageRouter
     {
         // Increment hops and decrease TTL.
         msg.hop();
+        
+        ExtendedEndpoint ee = 
+        new ExtendedEndpoint(datagram.getAddress().getHostName(), 
+                             datagram.getPort(), 0, true);
+		QueryUnicaster.instance().addUnicastEndpoint(ee);
 
-		QueryUnicaster.instance().addUnicastEndpoint(datagram.getAddress(), 
-													 datagram.getPort());
 		UDPReplyHandler handler = 
 		    new UDPReplyHandler(datagram.getAddress(), datagram.getPort());
 		

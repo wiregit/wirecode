@@ -48,7 +48,7 @@ public final class QueryUnicaster {
     }
 
 
-    /** Returns a List of unicast Pongs (PingReply).
+    /** Returns a List of unicast Endpoints.
      */
     public List getUnicastEndpoints() {
         List retList = new ArrayList();
@@ -163,26 +163,16 @@ public final class QueryUnicaster {
         return retBool;
     }
 
-    /** Just feed me PingReplies - I'll check if I could use them or not.
+    /** Just feed me ExtendedEndpoints - I'll check if I could use them or not.
      */
-    public void addUnicastEndpoint(PingReply endpoint) {
-        try {
-            if (endpoint.supportsUnicast()) {
-                synchronized (_queryHosts) {
-                    _queryHosts.push(endpoint);
-                    _queryHosts.notify();
-                }
+    public void addUnicastEndpoint(ExtendedEndpoint endpoint) {
+        if (endpoint.getUnicastSupport()) {
+            synchronized (_queryHosts) {
+                _queryHosts.push(endpoint);
+                _queryHosts.notify();
             }
         }
-        catch (BadPacketException ignored) {}
     }
-
-	/** Adds the specified <tt>InetAddress</tt> and port to the list
-	 *  of endpoints to query.
-	 */
-	public void addUnicastEndpoint(InetAddress address, int port) {
-		
-	}
 
     /** Feed me QRs so I can keep track of stuff.
      */
@@ -218,23 +208,22 @@ public final class QueryUnicaster {
             }
             debug("QueryUnicaster.getUnicastHost(): got a host!");
 
-            PingReply pr = (PingReply) _queryHosts.pop();            
-            Endpoint toReturn = new Endpoint(pr.getIP(), pr.getPort());
-
             if (_queryHosts.size() < MIN_ENDPOINTS) {
                 // send a ping to the guy you are popping if cache too small
-                PingRequest pReq = new PingRequest((byte)1);
+                ExtendedEndpoint toReturn = 
+                (ExtendedEndpoint) _queryHosts.pop();
+                PingRequest pr = new PingRequest((byte)1);
                 UDPAcceptor udpService = UDPAcceptor.instance();
                 try {
                     InetAddress ip = 
                     InetAddress.getByName(toReturn.getHostname());
                     // send the query
-                    udpService.send(pReq, ip, toReturn.getPort());
+                    udpService.send(pr, ip, toReturn.getPort());
                 }
                 catch (UnknownHostException ignored) {}
                 return toReturn;
             }
-            return toReturn;
+            return (ExtendedEndpoint) _queryHosts.pop();
         }
     }
 
