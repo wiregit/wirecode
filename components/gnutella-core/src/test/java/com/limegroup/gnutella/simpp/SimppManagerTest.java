@@ -26,6 +26,10 @@ public class SimppManagerTest extends BaseTestCase {
     
     static final int RANDOM_BYTES = 7;
 
+    static final int ABOVE_MAX = 8;
+
+    static final int BELOW_MIN = 9;    
+
     private static File OLD_SIMPP_FILE;
     
     private static File MIDDLE_SIMPP_FILE;
@@ -112,7 +116,6 @@ public class SimppManagerTest extends BaseTestCase {
 		ConnectionSettings.NUM_CONNECTIONS.setValue(5);
 		ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);	
 		ConnectionSettings.USE_GWEBCACHE.setValue(false);
-
     }
     
     public void setUp() throws Exception {
@@ -421,12 +424,12 @@ public class SimppManagerTest extends BaseTestCase {
         //1. Test that Simpp files read off disk take effect. 
         _simppMessageNumber = OLD;
         changeSimppFile();
+        resetSettingmanager();
         try {
             Thread.sleep(1000);
         } catch (InterruptedException ix) {
             fail("could not set up test");
         }
-        resetSettingmanager();
         assertEquals("base case did not revert to defaults",12, 
                               UploadSettings.TEST_UPLOAD_SETTING.getValue());
         //2. Test that simpp messages read off the network take effect
@@ -447,6 +450,68 @@ public class SimppManagerTest extends BaseTestCase {
                                  UploadSettings.TEST_UPLOAD_SETTING.getValue());
     }
 
+    public void testSimppSettingStaysBelowMax() {
+        assertEquals("base case did not revert to defaults", 4, 
+                              UploadSettings.TEST_UPLOAD_SETTING.getValue());
+        _simppMessageNumber = OLD;
+        changeSimppFile();
+        try {
+            Thread.sleep(1000);
+        } catch (InterruptedException ix) {
+            fail("could not set up test");
+        }
+        resetSettingmanager();
+        assertEquals("base case did not revert to defaults",12, 
+                              UploadSettings.TEST_UPLOAD_SETTING.getValue());
+        //2. Test that simpp messages read off the network take effect
+        //Get a new message from a connection and make sure the value is changed
+        TestConnection conn = null;
+        try {
+            conn = new TestConnection(ABOVE_MAX, true, true, NEW);
+        } catch(IOException iox) {
+            fail("could not set up test connection");
+        }
+        conn.start();
+        try {
+            Thread.sleep(6000);//let the message exchange take place
+        } catch (InterruptedException ix) {
+            fail("interrupted while waiting for simpp exchange to complete");
+        }
+        assertEquals("test_upload setting not changed to simpp value", 12,
+                                UploadSettings.TEST_UPLOAD_SETTING.getValue());
+        
+    }
+
+    public void testSimppSettingStaysAboveMin() {
+        assertEquals("base case did not revert to defaults", 4, 
+                              UploadSettings.TEST_UPLOAD_SETTING.getValue());
+        _simppMessageNumber = OLD;
+        changeSimppFile();
+        try {
+            Thread.sleep(1000);
+        } catch (InterruptedException ix) {
+            fail("could not set up test");
+        }
+        resetSettingmanager();
+        assertEquals("base case did not revert to defaults",12, 
+                              UploadSettings.TEST_UPLOAD_SETTING.getValue());
+        //2. Test that simpp messages read off the network take effect
+        //Get a new message from a connection and make sure the value is changed
+        TestConnection conn = null;
+        try {
+            conn = new TestConnection(BELOW_MIN, true, true, NEW);
+        } catch(IOException iox) {
+            fail("could not set up test connection");
+        }
+        conn.start();
+        try {
+            Thread.sleep(6000);//let the message exchange take place
+        } catch (InterruptedException ix) {
+            fail("interrupted while waiting for simpp exchange to complete");
+        }
+        assertEquals("test_upload setting not changed to simpp value", 12,
+                                UploadSettings.TEST_UPLOAD_SETTING.getValue());
+    }
 
     public void testIOXLeavesSimppUnchanged() {
        //1. Set up limewire correctly

@@ -55,5 +55,5 @@ public final class UploadSettings extends LimeProps {
 
     public static final IntSetting TEST_UPLOAD_SETTING = 
         FACTORY.createSettableIntSetting("TEST_UPLOAD_SETTING",4, 
-                                                         "test_upload", 1, 20);
+                                                         "test_upload", 20, 3);
 }

@@ -198,7 +198,11 @@ public class TestConnection {
         else if(fileVersion == SimppManagerTest.BAD_XML)
             file = CommonUtils.getResourceFile(simppDir+"badXmlFile.xml");
         else if(fileVersion == SimppManagerTest.RANDOM_BYTES)
-            file =CommonUtils.getResourceFile(simppDir+"randFile.xml");
+            file = CommonUtils.getResourceFile(simppDir+"randFile.xml");
+        else if(fileVersion == SimppManagerTest.ABOVE_MAX)
+            file = CommonUtils.getResourceFile(simppDir+"aboveMaxFile.xml");
+        else if(fileVersion == SimppManagerTest.BELOW_MIN)
+            file = CommonUtils.getResourceFile(simppDir+"belowMinFile.xml");
         else
             Assert.that(false,"simpp version set to illegal value");
         

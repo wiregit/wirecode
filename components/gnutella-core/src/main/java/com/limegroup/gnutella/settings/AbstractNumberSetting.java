@@ -19,9 +19,12 @@ public abstract class AbstractNumberSetting extends Setting{
     
     protected AbstractNumberSetting(Properties defaultProps, Properties props,
                                     String key, String defaultValue, 
-                                    String simppKey, Object max, Object min) {
-
+                              String simppKey, Comparable max, Comparable min) {
         super(defaultProps, props, key, defaultValue, simppKey);
+        if(max != null && min != null) {//do we need to check max, min?
+            if(max.compareTo(min) < 0) //max less than min?
+                throw new IllegalArgumentException("max less than min");
+        }
         MAX_VALUE = max;
         MIN_VALUE = min;
     }
