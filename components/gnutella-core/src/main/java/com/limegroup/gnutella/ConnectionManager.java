@@ -1447,14 +1447,13 @@ public class ConnectionManager {
      */
     private void completeConnectionInitialization(ManagedConnection mc, 
                                                   boolean fetched) {
-        boolean connectionOpen = false;
         synchronized(this) {
             if(fetched) {
                 _initializingFetchedConnections.remove(mc);
             }
             // If the connection was killed while initializing, we shouldn't
             // announce its initialization
-            connectionOpen = connectionInitialized(mc);
+            boolean connectionOpen = connectionInitialized(mc);
             if(connectionOpen) {
                 // check to see if this is the first leaf to ultrapeer 
                 // connection we've made.  if it is, then we're a leaf,
