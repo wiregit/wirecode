@@ -214,7 +214,7 @@ public class PushEndpoint implements HTTPHeaderValue{
 		}
 		
 		if (proxies.size() == 0)
-			_proxies = DataUtils.EMPTY_SET;
+			_proxies = Collections.EMPTY_SET;
 		else
 			_proxies = proxies;
 		
@@ -222,6 +222,8 @@ public class PushEndpoint implements HTTPHeaderValue{
 		
 		_fwtVersion=fwtVersion;
 		
+		// its ok to use the _proxies and _size fields directly since altlocs created
+		// from http string do not need to change
 		_features = _proxies.size() | (_fwtVersion << 3);
 		_size = HEADER_SIZE+
 			Math.min(_proxies.size(),4) * PROXY_SIZE;
@@ -230,7 +232,7 @@ public class PushEndpoint implements HTTPHeaderValue{
 	protected final int getHashcode() {
 	    int hashcode = _guid.hashCode();
 		
-		for (Iterator iter = _proxies.iterator();iter.hasNext();) {
+		for (Iterator iter = getProxies().iterator();iter.hasNext();) {
 			PushProxyInterface cur = (PushProxyInterface)iter.next();
 			hashcode = 37 *hashcode+cur.hashCode();	
 		}
@@ -370,7 +372,7 @@ public class PushEndpoint implements HTTPHeaderValue{
 		ret = ret & getProxies().size() == o.getProxies().size();
 		
 		//and the same proxies
-		HashSet temp = new HashSet(_proxies);
+		HashSet temp = new HashSet(getProxies());
 		temp.retainAll(o.getProxies());
 		
 		ret = ret & temp.size() ==getProxies().size();
@@ -413,7 +415,7 @@ public class PushEndpoint implements HTTPHeaderValue{
 		}
 		
 		//trim the ; at the end
-		if (_proxies.size() > 0)
+		if (getProxies().size() > 0)
 			httpString = httpString.substring(0,httpString.length()-1);
 		
 		return httpString;
