@@ -255,7 +255,6 @@ public class StandardMessageRouter
 */
 		
         // Unpack the message
-        String host = new String(pushRequest.getIP());
         byte[] ip = pushRequest.getIP();
         StringBuffer buf = new StringBuffer();
         buf.append(ByteOrder.ubyte2int(ip[0])+".");
@@ -282,9 +281,9 @@ public class StandardMessageRouter
 
         String file = desc._name;
 
-	
-	_uploadManager.acceptPushUpload(file, h, port, 
-					index, req_guid_hexstring);
+        if (!_acceptor.isBannedIP(h))	
+            _uploadManager.acceptPushUpload(file, h, port, 
+                                            index, req_guid_hexstring);
 
 //          HTTPUploader up = new HTTPUploader(h, port, index, req_guid_hexstring,
 //                                             _callback);
