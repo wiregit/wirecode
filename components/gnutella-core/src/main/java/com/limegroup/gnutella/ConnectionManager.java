@@ -540,7 +540,7 @@ public class ConnectionManager {
     public void measureBandwidth() {
         float upstream=0.f;
         float downstream=0.f;
-        List connections = getInitializedConnections2();
+        List connections = getInitializedConnections();
         for (Iterator iter=connections.iterator(); iter.hasNext(); ) {
             ManagedConnection mc=(ManagedConnection)iter.next();
             mc.measureBandwidth();
@@ -832,7 +832,7 @@ public class ConnectionManager {
      *  as an optimization.</b>  All lookup values in the returned value
      *  are guaranteed to run in linear time.
      */
-    public List getInitializedConnections2() {
+    public List getInitializedConnections() {
         return _initializedConnections;
     }
     
@@ -843,7 +843,7 @@ public class ConnectionManager {
      *  as an optimization.</b>  All lookup values in the returned value
      *  are guaranteed to run in linear time.
      */
-    public List getInitializedClientConnections2() {
+    public List getInitializedClientConnections() {
         return _initializedClientConnections;
     }
 
@@ -874,7 +874,7 @@ public class ConnectionManager {
             // this should be fast since leaves don't maintain a lot of
             // connections and the test for proxy support is cached boolean
             // value
-            Iterator ultrapeers = getInitializedConnections2().iterator();
+            Iterator ultrapeers = getInitializedConnections().iterator();
             Set proxies = new HashSet();
             while (ultrapeers.hasNext() && (proxies.size() < 4)) {
                 ManagedConnection currMC = (ManagedConnection) ultrapeers.next();
@@ -895,7 +895,7 @@ public class ConnectionManager {
      * 
      */
     public Connection getTCPRedirectUltrapeer() {
-        Iterator ultrapeers = getInitializedConnections2().iterator();
+        Iterator ultrapeers = getInitializedConnections().iterator();
         while (ultrapeers.hasNext()) {
             ManagedConnection currMC = (ManagedConnection) ultrapeers.next();
             if (currMC.remoteHostSupportsTCPRedirect() >= 0)
@@ -912,7 +912,7 @@ public class ConnectionManager {
      * 
      */
     public Connection getUDPRedirectUltrapeer() {
-        Iterator ultrapeers = getInitializedConnections2().iterator();
+        Iterator ultrapeers = getInitializedConnections().iterator();
         while (ultrapeers.hasNext()) {
             ManagedConnection currMC = (ManagedConnection) ultrapeers.next();
             if (currMC.remoteHostSupportsUDPRedirect() >= 0)
@@ -931,7 +931,7 @@ public class ConnectionManager {
             // this should be fast since leaves don't maintain a lot of
             // connections and the test for query status response is a cached
             // value
-            Iterator ultrapeers = getInitializedConnections2().iterator();
+            Iterator ultrapeers = getInitializedConnections().iterator();
             while (ultrapeers.hasNext()) {
                 ManagedConnection currMC = (ManagedConnection) ultrapeers.next();
                 if (currMC.remoteHostSupportsLeafGuidance() >= 0)
