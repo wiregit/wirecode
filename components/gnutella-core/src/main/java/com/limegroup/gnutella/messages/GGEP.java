@@ -42,7 +42,7 @@ public class GGEP extends Object {
     /** The extension header (key) for MetaType query support */
     public static final String GGEP_HEADER_META = "M";
     /** The extension header (key) for Firewalled Transfer support in Hits. */
-    public static final String GGEP_FW_TRANS = "FW";
+    public static final String GGEP_HEADER_FW_TRANS = "FW";
 
     /** The maximum size of a extension header (key). */
     public static final int MAX_KEY_SIZE_IN_BYTES = 15;

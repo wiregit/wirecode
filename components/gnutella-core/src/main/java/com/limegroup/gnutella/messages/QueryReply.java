@@ -65,6 +65,11 @@ public class QueryReply extends Message implements Serializable{
      /** If parsed, one of TRUE (reply sent in response to a multicast query), 
       * FALSE, or UNDEFINED. */
     private volatile int _replyToMulticast = FALSE;
+    /** Boolean for whether or not the remote host supports Firewalled Transfer.
+     *  This does not follow the usual example where an int takes on TRUE,
+     *  FALSE, or UNDEFINED.  Assume it is false and set it to true if otherwise.
+     */
+    private volatile boolean _supportsFWTransfer = false;
     
     private static final int TRUE=1;
     private static final int FALSE=0;
@@ -124,7 +129,7 @@ public class QueryReply extends Message implements Serializable{
         this(guid, ttl, port, ip, speed, responses, clientGUID, 
              DataUtils.EMPTY_BYTE_ARRAY,
              false, false, false, false, false, false, true, isMulticastReply,
-             DataUtils.EMPTY_SET);
+             false, DataUtils.EMPTY_SET);
     }
 
 
@@ -153,7 +158,7 @@ public class QueryReply extends Message implements Serializable{
              DataUtils.EMPTY_BYTE_ARRAY,
              true, needsPush, isBusy, finishedUpload,
              measuredSpeed,supportsChat,
-             true, isMulticastReply, DataUtils.EMPTY_SET);
+             true, isMulticastReply, false, DataUtils.EMPTY_SET);
     }
 
 
@@ -165,7 +170,7 @@ public class QueryReply extends Message implements Serializable{
      *
      * @param needsPush true iff this is firewalled and the downloader should
      *  attempt a push without trying a normal download.
-     * @param isBusy true iff this server is busy, i.e., has no more upload slots.  
+     * @param isBusy true iff this server is busy, i.e., has no more upload slots
      * @param finishedUpload true iff this server has successfully finished an 
      *  upload
      * @param measuredSpeed true iff speed is measured, not as reported by the
@@ -199,7 +204,7 @@ public class QueryReply extends Message implements Serializable{
      *
      * @param needsPush true iff this is firewalled and the downloader should
      *  attempt a push without trying a normal download.
-     * @param isBusy true iff this server is busy, i.e., has no more upload slots.  
+     * @param isBusy true iff this server is busy, i.e., has no more upload slots
      * @param finishedUpload true iff this server has successfully finished an 
      *  upload
      * @param measuredSpeed true iff speed is measured, not as reported by the
@@ -225,9 +230,52 @@ public class QueryReply extends Message implements Serializable{
         this(guid, ttl, port, ip, speed, responses, clientGUID, 
              xmlBytes, true, needsPush, isBusy, 
              finishedUpload, measuredSpeed,supportsChat, true, isMulticastReply,
-             proxies);
+             false, proxies);
         if (xmlBytes.length > XML_MAX_SIZE)
-            throw new IllegalArgumentException("XML bytes too big: "+xmlBytes.length);
+            throw new IllegalArgumentException("XML bytes too big: " +
+                                               xmlBytes.length);
+        _xmlBytes = xmlBytes;        
+    }
+
+
+    /** 
+     * Creates a new QueryReply with a BearShare 2.2.0-style QHD.  The QHD with
+     * the LIME vendor code and the given busy and push flags.  Note that this
+     * constructor has no support for undefined push or busy bits.
+     * The Browse Host GGEP extension is ON by default.  
+     *
+     * @param needsPush true iff this is firewalled and the downloader should
+     *  attempt a push without trying a normal download.
+     * @param isBusy true iff this server is busy, i.e., has no more upload slots
+     * @param finishedUpload true iff this server has successfully finished an 
+     *  upload
+     * @param measuredSpeed true iff speed is measured, not as reported by the
+     *  user
+     * @param xmlBytes The (non-null) byte[] containing aggregated
+     * and indexed information regarding file metadata.  In terms of byte-size, 
+     * this should not be bigger than 65535 bytes.  Anything larger will result
+     * in an Exception being throw.  This String is assumed to consist of
+     * compressed data.
+     * @param supportsChat true iff the host currently allows chatting.
+     * @param proxies an array of PushProxy interfaces.  will be included in 
+     * the replies GGEP extension.
+     * @exception IllegalArgumentException Thrown if 
+     * xmlBytes.length > XML_MAX_SIZE
+     */
+    public QueryReply(byte[] guid, byte ttl, 
+            int port, byte[] ip, long speed, Response[] responses,
+            byte[] clientGUID, byte[] xmlBytes,
+            boolean needsPush, boolean isBusy,
+            boolean finishedUpload, boolean measuredSpeed,boolean supportsChat,
+            boolean isMulticastReply, boolean supportsFWTransfer, Set proxies) 
+        throws IllegalArgumentException {
+        this(guid, ttl, port, ip, speed, responses, clientGUID, 
+             xmlBytes, true, needsPush, isBusy, 
+             finishedUpload, measuredSpeed,supportsChat, true, isMulticastReply,
+             supportsFWTransfer, proxies);
+        if (xmlBytes.length > XML_MAX_SIZE)
+            throw new IllegalArgumentException("XML bytes too big: " +
+                                               xmlBytes.length);
         _xmlBytes = xmlBytes;        
     }
 
@@ -292,7 +340,8 @@ public class QueryReply extends Message implements Serializable{
              boolean includeQHD, boolean needsPush, boolean isBusy,
              boolean finishedUpload, boolean measuredSpeed,
              boolean supportsChat, boolean supportsBH,
-             boolean isMulticastReply, Set proxies) {
+             boolean isMulticastReply, boolean supportsFWTransfer, 
+             Set proxies) {
         super(guid, Message.F_QUERY_REPLY, ttl, (byte)0,
               0,                               // length, update later
               16);                             // 16-byte footer
@@ -317,6 +366,7 @@ public class QueryReply extends Message implements Serializable{
 
         // set up proxies
         _proxies = proxies;
+        _supportsFWTransfer = supportsFWTransfer;
 
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
 
@@ -350,7 +400,7 @@ public class QueryReply extends Message implements Serializable{
                 
                 // size of standard, no options, ggep block...
                 int ggepLen=
-                    _ggepUtil.getQRGGEP(false, false, 
+                    _ggepUtil.getQRGGEP(false, false, false,
                                         DataUtils.EMPTY_SET).length;
                 
                 //c) PART 1: common area flags and controls.  See format in
@@ -367,7 +417,8 @@ public class QueryReply extends Message implements Serializable{
                            | (isBusy && !isMulticastReply ? BUSY_MASK : 0) 
                            | (finishedUpload ? UPLOADED_MASK : 0)
                            | (measuredSpeed || isMulticastReply ? SPEED_MASK : 0)
-                           | (supportsBH || isMulticastReply || hasProxies ? 
+                           | (supportsBH || isMulticastReply || hasProxies ||
+                              supportsFWTransfer ? 
                               GGEP_MASK : (ggepLen > 0 ? GGEP_MASK : 0)) );
 
                 baos.write(flags);
@@ -387,6 +438,7 @@ public class QueryReply extends Message implements Serializable{
                 //f) the GGEP block
                 byte[] ggepBytes = _ggepUtil.getQRGGEP(supportsBH,
                                                        isMulticastReply,
+                                                       supportsFWTransfer,
                                                        _proxies);
                 baos.write(ggepBytes, 0, ggepBytes.length);
                 
@@ -634,6 +686,13 @@ public class QueryReply extends Message implements Serializable{
         }
     }
 
+    /** @return true if the remote host can firewalled transfers.
+     */
+    public boolean getSupportsFWTransfer() {
+        parseResults();
+        return _supportsFWTransfer;
+    }
+
     /** 
      * Returns true iff the client supports browse host feature.
      * @return true, if the client supports browse host feature,
@@ -848,7 +907,7 @@ public class QueryReply extends Message implements Serializable{
                 byte control=_payload[i];
                 byte flags=_payload[i+1];
                 if ((flags & PUSH_MASK)!=0)
-                    pushFlagT = (control&PUSH_MASK)==1 ? TRUE : FALSE;                
+                    pushFlagT = (control&PUSH_MASK)==1 ? TRUE : FALSE;
                 if ((control & BUSY_MASK)!=0)
                     busyFlagT = (flags&BUSY_MASK)!=0 ? TRUE : FALSE;
                 if ((control & UPLOADED_MASK)!=0)
@@ -872,6 +931,8 @@ public class QueryReply extends Message implements Serializable{
                         ggepBlocks = GGEP.read(_payload, magicIndex);
                         if (_ggepUtil.allowsBrowseHost(ggepBlocks))
                             supportsBrowseHostT = TRUE;
+                        if (_ggepUtil.allowsFWTransfer(ggepBlocks))
+                            _supportsFWTransfer = true;
                         if (_ggepUtil.replyToMulticastQuery(ggepBlocks))
                             replyToMulticastT = TRUE;
                         else
@@ -1164,6 +1225,7 @@ public class QueryReply extends Message implements Serializable{
          */
         public byte[] getQRGGEP(boolean supportsBH,
                                 boolean isMulticastResponse,
+                                boolean supportsFWTransfer,
                                 Set proxies) {
             byte[] retGGEPBlock = _standardGGEP;
             if ((proxies != null) && (proxies.size() > 0)) {
@@ -1175,6 +1237,8 @@ public class QueryReply extends Message implements Serializable{
                     retGGEP.put(GGEP.GGEP_HEADER_BROWSE_HOST);
                 if (isMulticastResponse)
                     retGGEP.put(GGEP.GGEP_HEADER_MULTICAST_RESPONSE);
+                if (supportsFWTransfer)
+                    retGGEP.put(GGEP.GGEP_HEADER_FW_TRANS);
 
                 // if a PushProxyInterface is valid, write up to MAX_PROXIES
                 ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -1212,6 +1276,9 @@ public class QueryReply extends Message implements Serializable{
                 }
 
             }
+            // else if (supportsBH && supportsFWTransfer &&
+            // isMulticastResponse), since supportsFWTransfer is only helpful
+            // if we have proxies
             else if (supportsBH && isMulticastResponse)
                 retGGEPBlock = _comboGGEP;
             else if (supportsBH)
@@ -1232,6 +1299,20 @@ public class QueryReply extends Message implements Serializable{
                  i++) {
                 Set headers = ggeps[i].getHeaders();
                 retBool = headers.contains(GGEP.GGEP_HEADER_BROWSE_HOST);
+            }
+            return retBool;
+        }
+
+        /** @return whether or not FW Transfer support can be inferred from this
+         *  block of GGEPs.
+         */
+        public boolean allowsFWTransfer(GGEP[] ggeps) {
+            boolean retBool = false;
+            for (int i = 0; 
+                 (ggeps != null) && (i < ggeps.length) && !retBool; 
+                 i++) {
+                Set headers = ggeps[i].getHeaders();
+                retBool = headers.contains(GGEP.GGEP_HEADER_FW_TRANS);
             }
             return retBool;
         }
