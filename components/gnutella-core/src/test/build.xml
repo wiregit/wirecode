@@ -19,7 +19,6 @@
   <property name="coredir"     value="../core"/>
   <property name="guidir"      value="../gui"/>
   <property name="settings"    value="${coredir}/com/limegroup/gnutella/settings"/>
-  <property name="tests"       value="${coredir}/com/limegroup/gnutella/tests"/>
 
   <!-- constants -->
   <property name="DEBUG" value="yes" />
