@@ -8,15 +8,25 @@ import java.io.*;
  * network IO.
  */
 public interface HeaderWriter {
-
-    boolean write() throws IOException;
-
+    
+    /**
+     * Writes the specified header out to the socket.
+     * 
+     * @param header the header to write to the remote host
+     * @return <tt>true</tt> if the header was successfully written, 
+     *  otherwise <tt>false</tt>
+     * @throws IOException if there was an IO error writing the header
+     */
     boolean writeHeader(String header) throws IOException;
 
-    boolean closeHeaderWriting() throws IOException;
-
     /**
-     * @return
+     * Closes the writing of headers by sending the trailing "\r\n".  This
+     * denotes the end of a set of Gnutella connection headers.
+     * 
+     * @return <tt>true</tt> if the closing "\r\n" was successfully sent, 
+     *  otherwise <tt>false</tt>
+     * @throws IOException if there was an IO error closing the header
+     *  sequence
      */
-    boolean hasBufferedData();
+    boolean closeHeaderWriting() throws IOException;
 }
