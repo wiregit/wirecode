@@ -181,6 +181,8 @@ public class DownloadManager implements BandwidthTracker {
         buf.addAll(waiting);
         
         File outFile = SharingSettings.DOWNLOAD_SNAPSHOT_FILE.getValue();
+        //must delete in order for renameTo to work.
+        SharingSettings.DOWNLOAD_SNAPSHOT_BACKUP_FILE.getValue().delete();
         outFile.renameTo(
             SharingSettings.DOWNLOAD_SNAPSHOT_BACKUP_FILE.getValue());
         
