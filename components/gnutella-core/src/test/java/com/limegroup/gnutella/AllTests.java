@@ -11,7 +11,7 @@ public class AllTests {
         TestSuite suite=new TestSuite("All LimeWire tests");
 
         //Unit tests
-        suite.addTest(com.limegroup.gnutella.messages.AllTests.suite());
+        //suite.addTest(com.limegroup.gnutella.messages.AllTests.suite());
         suite.addTest(com.limegroup.gnutella.util.AllTests.suite());
         suite.addTest(com.limegroup.gnutella.filters.AllTests.suite());
         suite.addTest(com.limegroup.gnutella.http.AllTests.suite());
@@ -33,6 +33,10 @@ public class AllTests {
 		suite.addTest(AlternateLocationCollectionTest.suite());
 		suite.addTest(ResponseTest.suite());
 		suite.addTest(UrnCacheTest.suite());
+		suite.addTest(UrnHttpRequestTest.suite());
+		suite.addTest(UrnTest.suite());
+
+        suite.addTest(com.limegroup.gnutella.messages.AllTests.suite());
 
         //End-to-end integration tests (includes some unit tests too)
         suite.addTest(com.limegroup.gnutella.UltrapeerRoutingTest.suite());
