@@ -2,7 +2,7 @@ package com.limegroup.gnutella;
 
 import com.limegroup.gnutella.http.*;
 import com.limegroup.gnutella.messages.*;
-import com.limegroup.gnutella.util.URLDecoder;
+import com.limegroup.gnutella.util.*;
 import com.sun.java.util.collections.*;
 import java.net.*;
 import java.util.Date;
@@ -510,7 +510,7 @@ public final class AlternateLocation
             // format..
             if(Character.isDigit(host.charAt(0))) {
                 InetAddress address = InetAddress.getByName(host);
-                if(Endpoint.isPrivateAddress(address.getAddress())) {
+                if(CommonUtils.isPrivateAddress(address.getAddress())) {
                     throw new IOException("cannot include private address in "+
                                           "alt loc: "+host);
                 } 

@@ -1,5 +1,6 @@
 package com.limegroup.gnutella.util;
 
+import com.limegroup.gnutella.settings.*;
 import java.util.Properties;
 import java.io.*;
 import java.net.*;
@@ -994,6 +995,33 @@ public final class CommonUtils {
         } catch(UnknownHostException e) {
             return false;
         }
+    }
+
+    /**
+     * Checks to see if the given address is a firewalled address.
+     * 
+     * @param address the address to check
+     */
+    public static boolean isPrivateAddress(byte[] address) {
+        if (address[0]==(byte)10)
+            return true;  //10.0.0.0 - 10.255.255.255
+        else if (address[0]==(byte)127 && 
+                 ConnectionSettings.LOCAL_IS_PRIVATE.getValue())
+            return true;  //127.x.x.x
+        else if (address[0]==(byte)172 &&
+                 address[1]>=(byte)16 &&
+                 address[1]<=(byte)31)
+            return true;  //172.16.0.0 - 172.31.255.255
+        else if (address[0]==(byte)192 &&
+                 address[1]==(byte)168)
+            return true; //192.168.0.0 - 192.168.255.255
+        else if (address[0]==(byte)0 &&
+                 address[1]==(byte)0 &&
+                 address[2]==(byte)0 &&
+                 address[3]==(byte)0)
+            return true; //0.0.0.0 - Gnutella (well BearShare really) convention
+        else
+            return false;        
     }
 
     /*
