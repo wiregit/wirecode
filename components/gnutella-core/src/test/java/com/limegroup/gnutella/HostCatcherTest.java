@@ -168,11 +168,11 @@ public class HostCatcherTest extends TestCase {
                           0l, 0l, false, 3000),
                    null);  //private address (ignored)
             File tmp=File.createTempFile("hc_test", ".net" );
-            hc.write(tmp.getAbsolutePath());
+            hc.write(tmp);
 
             //2. read HC from file.
             setUp();
-            hc.read(tmp.getAbsolutePath());
+            hc.read(tmp);
             assertTrue("Got: "+hc.getNumHosts(), hc.getNumHosts()==3);
             assertEquals(new Endpoint("18.239.0.142", 6342),
                          hc.getAnEndpoint());
@@ -217,12 +217,12 @@ public class HostCatcherTest extends TestCase {
                    null);
 
             File tmp=File.createTempFile("hc_test", ".net" );
-            hc.write(tmp.getAbsolutePath());            
+            hc.write(tmp);            
 
             //2. Read
             setUp();
             HostCatcher.DEBUG=false;  //Too darn slow
-            hc.read(tmp.getAbsolutePath());
+            hc.read(tmp);
             assertEquals(0, hc.getNumUltrapeerHosts());
             assertEquals(new Endpoint("18.239.0.142", 0),
                          hc.getAnEndpoint());
@@ -302,7 +302,7 @@ public class HostCatcherTest extends TestCase {
 
             //2. Read and verify
             setUp();
-            hc.read(tmp.getAbsolutePath());
+            hc.read(tmp);
             assertTrue(hc.getAnEndpoint().equals( 
                 new Endpoint("18.239.0.142", 6342)));
             assertTrue(hc.getAnEndpoint().equals( 
