@@ -527,8 +527,8 @@ public class UPnPManager extends ControlPoint implements DeviceChangeListener {
 			try {
 				for (int i=0;;i++) {
     				getGeneric.setArgumentValue("NewPortMappingIndex",i);
-				    LOG.debug("Stale Iteration: " + i + ", generic.input: " + list(getGeneric.getInputArgumentList()) + ", generic.output: " + list(getGeneric.getOutputArgumentList()));
-				    getGeneric.print();
+    				if(LOG.isDebugEnabled())
+				        LOG.debug("Stale Iteration: " + i + ", generic.input: " + list(getGeneric.getInputArgumentList()) + ", generic.output: " + list(getGeneric.getOutputArgumentList()));
 					
 					if (!getGeneric.postControlAction())
 						break;
