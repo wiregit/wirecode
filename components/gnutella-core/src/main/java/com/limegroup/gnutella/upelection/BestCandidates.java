@@ -55,7 +55,7 @@ public class BestCandidates {
 		if(_advertiser!=null)
 			_advertiser.cancel();
 		
-		_advertiser = new CandidateAdvertiser(true);
+		_advertiser = new CandidateAdvertiser();
 
 		
 	}

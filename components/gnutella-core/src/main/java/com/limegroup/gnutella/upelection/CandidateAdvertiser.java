@@ -61,11 +61,10 @@ public class CandidateAdvertiser implements Runnable {
 	 * the thread will be scheduled to run after INITIAL_DELAY and
 	 * it will initialize the BestCandidates table.
 	 */
-	public CandidateAdvertiser(boolean init) {
-		_initialize = init;
+	public CandidateAdvertiser() {
+		_initialize = true;
 		
-		if (init)
-			RouterService.schedule(this,INITIAL_DELAY,0);
+		RouterService.schedule(this,INITIAL_DELAY,0);
 	}
 	
 	public void run() {
@@ -101,16 +100,18 @@ public class CandidateAdvertiser implements Runnable {
 	
 		public void managedRun() {
 
-			if (_initialize)
+			if (_initialize) {
 				_bestCandidates.initialize();
+				_initialize=false;
+			}
 			
 			if (!RouterService.isSupernode()) { 
 				sendFeaturesMessage();
-				RouterService.schedule(new CandidateAdvertiser(false),LEAF_INTERVAL,0);
+				RouterService.schedule(CandidateAdvertiser.this,LEAF_INTERVAL,0);
 			}
 			else {
 				sendCandidatesMessage();
-				RouterService.schedule(new CandidateAdvertiser(false),UP_INTERVAL,0);
+				RouterService.schedule(CandidateAdvertiser.this,UP_INTERVAL,0);
 			}
 		
 		}
