@@ -11,6 +11,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 import java.util.StringTokenizer;
+import java.util.TreeSet;
 import java.util.WeakHashMap;
 
 import com.limegroup.gnutella.http.HTTPConstants;
@@ -164,10 +165,9 @@ public class PushEndpoint implements HTTPHeaderValue,IpPort{
 		_fwtVersion=version;
 		_clientGUID=guid;
 		_guid = new GUID(_clientGUID);
+        _proxies = new TreeSet(IpPort.COMPARATOR);
 		if (proxies!=null)
-		    _proxies = proxies;
-		else 
-		    _proxies = new HashSet();
+		    _proxies.addAll(proxies);
 		_externalAddr = addr;
 	}
 	
@@ -206,7 +206,7 @@ public class PushEndpoint implements HTTPHeaderValue,IpPort{
 		
 		StringTokenizer tok = new StringTokenizer(httpString,";");
 		
-		Set proxies = new HashSet();
+		Set proxies = new TreeSet(IpPort.COMPARATOR);
 		
 		int fwtVersion =0;
 		
@@ -346,7 +346,7 @@ public class PushEndpoint implements HTTPHeaderValue,IpPort{
 		throws BadPacketException {
 		byte [] tmp = new byte[6];
 		byte [] guid =new byte[16];
-		Set proxies = new HashSet(); //PushProxyContainers are good with HashSets
+		Set proxies = new TreeSet(IpPort.COMPARATOR); 
 		IpPort addr = null;
 		boolean hasAddr=false;
 		

@@ -40,16 +40,4 @@ public class IpPortImpl implements IpPort {
     public String toString() {
         return "host: " + addrString + ", port: " + port;
     }
-    
-    public boolean equals(Object other) {
-        if (other == null || !(other instanceof IpPortImpl))
-            return false;
-        
-        IpPort o = (IpPort) other;
-        return o.getInetAddress().equals(getInetAddress()) && o.getPort() == getPort();
-    }
-    
-    public int hashCode() {
-        return getInetAddress().hashCode() * 37 + getPort();
-    }
 }
