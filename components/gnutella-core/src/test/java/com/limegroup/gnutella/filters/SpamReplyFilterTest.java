@@ -34,32 +34,27 @@ public class SpamReplyFilterTest extends BaseTestCase {
 		junit.textui.TestRunner.run(suite());
 	}
 	
-    public void setUp() {
-        try {
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            _reply.write(baos);
-            _replyBytes = baos.toByteArray();
-            boolean notFound = true;
-            int index = 0;
-            while (notFound && ((index+3) < _replyBytes.length)) {
-                if ((_replyBytes[index+0] == (byte) 76) &&
-                    (_replyBytes[index+1] == (byte) 73) &&
-                    (_replyBytes[index+2] == (byte) 77) &&
-                    (_replyBytes[index+3] == (byte) 69)) {
-                    notFound = false;
-                    _indexOfVendor = index;
-                }
-                index++;
+    public void setUp() throws Exception {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        _reply.write(baos);
+        _replyBytes = baos.toByteArray();
+        boolean notFound = true;
+        int index = 0;
+        while (notFound && ((index+3) < _replyBytes.length)) {
+            if ((_replyBytes[index+0] == (byte) 76) &&
+                (_replyBytes[index+1] == (byte) 73) &&
+                (_replyBytes[index+2] == (byte) 77) &&
+                (_replyBytes[index+3] == (byte) 69)) {
+                notFound = false;
+                _indexOfVendor = index;
             }
-            // this should NEVER happen
-            assertTrue(!notFound);
+            index++;
         }
-        catch (IOException damn) {
-            assertTrue(false);
-        }
+        // this should NEVER happen
+        assertTrue(!notFound);
     }
 
-    public void testReplies() {
+    public void testReplies() throws Exception{
         assertTrue( allow("LIME"));
         assertTrue( allow("BEAR"));
         assertTrue( allow("RAZA"));
@@ -69,20 +64,15 @@ public class SpamReplyFilterTest extends BaseTestCase {
     }
     
 
-    private boolean allow(String vendorCode) {
+    private boolean allow(String vendorCode) throws Exception {
         byte[] vendorBytes = vendorCode.getBytes();
-        assertTrue(vendorBytes.length == 4);
+        assertEquals(4, vendorBytes.length);
         for (int i = 0; i < vendorBytes.length; i++)
             _replyBytes[_indexOfVendor+i] = vendorBytes[i];
-        try {
-            QueryReply qr = 
-                (QueryReply) Message.read(new ByteArrayInputStream(_replyBytes));
-            return _filter.allow(qr);
-        }
-        catch (Exception why) {
-            assertTrue(false);
-        }
-        return false;
+        
+        QueryReply qr = 
+            (QueryReply) Message.read(new ByteArrayInputStream(_replyBytes));
+        return _filter.allow(qr);
     }
 
 }
