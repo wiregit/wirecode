@@ -49,8 +49,15 @@ public final class BIOHandshaker extends AbstractHandshaker {
     }
     
     
-    /* (non-Javadoc)
-     * @see com.limegroup.gnutella.connection.Handshaker#handshake()
+    /**
+     * Performs the blocking handshake to the remote host.
+     * 
+     * @throws IOException if there is an IO error reading from or writing to
+     *  the remote host
+     * @throws NoGnutellaOkException if the remote host does not accept the
+     *  connection
+     * @return <tt>true</tt> if no exception is thrown, indicating that the
+     *  handshake succeeded
      */
     public boolean handshake() throws IOException, NoGnutellaOkException {  
         
