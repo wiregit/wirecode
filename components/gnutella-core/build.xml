@@ -57,7 +57,17 @@
     </javac>
 </target>
 
-	
+<!-- Creates a core.jar file in a platform independent manner -->
+<target name="corejar" depends="clean, core">
+   <jar jarfile="core.jar" basedir="${basedir}" includes="**/*.class" />
+</target>
+
+<!-- Creates a core.jar file in a platform independent manner and copies -->
+<!-- it to the gui/lib directory, assuming that core and gui are on the  -->
+<!-- package level -->
+<target name="copycorejar" depends="corejar">
+   <copy file="core.jar" todir="../gui/lib"/>
+</target>
 
 <!-- CLEAN -->
 <target name="clean">
