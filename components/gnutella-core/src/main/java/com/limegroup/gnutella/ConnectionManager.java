@@ -136,6 +136,7 @@ public class ConnectionManager implements Runnable {
     }
 
     /**
+     * @requires only one thread is calling this method at a time
      * @modifies this
      * @effects sets the port on which the ConnectionManager is listening. 
      *  If that fails, this is <i>not</i> modified and IOException is thrown.
@@ -144,46 +145,53 @@ public class ConnectionManager implements Runnable {
      *  being called.
      */
     public void setListeningPort(int port) throws IOException {
-	synchronized (socketLock) {
-	    //Special case: if unchanged, do nothing.
-	    if (socket!=null && this.port==port)
-		return;
-	    //Special case if port==0.  This ALWAYS works.
-	    if (port==0) {
-		//Close old socket (if non-null)
-		if (socket!=null) {
-		    try {
-			socket.close();
-		    } catch (IOException e) { }
-		}
+	//1. Special case: if unchanged, do nothing.
+	if (socket!=null && this.port==port)
+	    return;
+	//2. Special case if port==0.  This ALWAYS works.
+	//Note that we must close the socket BEFORE grabbing
+	//the lock.  Otherwise deadlock will occur since
+	//the acceptor thread is listening to the socket
+	//while holding the lock.  Also note that port
+	//will not have changed before we grab the lock.
+	else if (port==0) {
+	    //Close old socket (if non-null)
+	    if (socket!=null) {
+		try {
+		    socket.close();
+		} catch (IOException e) { }
+	    }
+	    synchronized (socketLock) {
 		socket=null;
 		this.port=0;
 		socketLock.notifyAll();
-		return;
-	    } 
-	    //Normal case.
-	    else {
-		//1. Try new port.
-		ServerSocket newSocket=null;
+	    }
+	    return;
+	} 
+	//3. Normal case.  See note about locking above.
+	else {
+	    //a) Try new port.
+	    ServerSocket newSocket=null;
+	    try {
+		newSocket=new ServerSocket(port);
+	    } catch (IOException e) {
+		throw e;
+	    } catch (IllegalArgumentException e) {
+		throw new IOException();
+	    }
+	    //b) Close old socket (if non-null)
+	    if (socket!=null) {
 		try {
-		    newSocket=new ServerSocket(port);
-		} catch (IOException e) {
-		    throw e;
-		} catch (IllegalArgumentException e) {
-		    throw new IOException();
-		}
-		//2. Close old socket (if non-null)
-		if (socket!=null) {
-		    try {
-			socket.close();
-		    } catch (IOException e) { }
-		}
-		//3. Replace with new sock.  Notify the accept thread.
+		    socket.close();
+		} catch (IOException e) { }
+	    }
+	    //c) Replace with new sock.  Notify the accept thread.
+	    synchronized (socketLock) {
 		socket=newSocket;
 		this.port=port;
 		socketLock.notifyAll();
-		return;
 	    }
+	    return;
 	}
     }
 
@@ -375,19 +383,18 @@ public class ConnectionManager implements Runnable {
 	while (true) {
 	    Connection c = null;
 	    try {
-		//Accept an incoming connection, make it into a Connection
-		//object, handshake, and give it a thread to service it.
-		//If not bound to a port, wait until we are.  We have a timeout
-		//here so that setListeningPort will not block for more than
-		//a second.  We may want to disable setListeningPort in
-		//the router version of this class and get rid of the timeout here.
+		//Accept an incoming connection, make it into a
+		//Connection object, handshake, and give it a thread
+		//to service it.  If not bound to a port, wait until
+		//we are.  If the port is changed while we are
+		//waiting, IOException will be thrown, forcing us to
+		//release the lock.
 		Socket client=null;
 		synchronized (socketLock) {
 		    if (socket!=null) {
-			socket.setSoTimeout(500); //0.5 second
 			try { 
 			    client=socket.accept(); 
-			} catch (InterruptedIOException e) {
+			} catch (IOException e) {
 			    continue;
 			}
 		    } else {
