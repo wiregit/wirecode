@@ -104,17 +104,6 @@ public class Connection {
 	 */
 	private final SettingsManager SETTINGS = SettingsManager.instance();
 
-    /**
-     * Creates an uninitialized outgoing Gnutella 0.4 connection.
-	 * This is only used for testing purposes.
-     *
-     * @param host the name of the host to connect to
-     * @param port the port of the remote host 
-     */
-    public Connection(String host, int port) {
-		this(host, port, null, null, true);
-    }
-
 
     /**
      * Creates an uninitialized outgoing Gnutella 0.6 connection with the
