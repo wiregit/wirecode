@@ -3,6 +3,7 @@ package com.limegroup.gnutella.handshaking;
 import com.limegroup.gnutella.*;
 import java.util.Properties;
 import java.io.IOException;
+import com.limegroup.gnutella.statistics.HandshakingStat;
 
 /**
  * A very simple responder to be used by leaf-nodes during the
@@ -42,10 +43,14 @@ public final class LeafHandshakeResponder
 
         // leaves should never accept connections to other leaves
         if(response.isLeaf()) {
+            if( RECORD_STATS )
+                HandshakingStat.LEAF_OUTGOING_REJECT_LEAF.incrementStat();
             return HandshakeResponse.createLeafRejectOutgoingResponse();
         }
         
         if(!response.isGoodUltrapeer()) {
+            if( RECORD_STATS )
+                HandshakingStat.LEAF_OUTGOING_REJECT_OLD_UP.incrementStat();
             return HandshakeResponse.createLeafRejectOutgoingResponse();
         }
         
@@ -55,6 +60,9 @@ public final class LeafHandshakeResponder
 		if(response.isDeflateAccepted()) {
 		    ret.put(HeaderNames.CONTENT_ENCODING, HeaderNames.DEFLATE_VALUE);
 		}
+        
+        if( RECORD_STATS )
+            HandshakingStat.LEAF_OUTGOING_ACCEPT.incrementStat();
         
         // let the Ultrapeer know of any high-hops Ultrapeers
         // we're aware of
@@ -76,6 +84,8 @@ public final class LeafHandshakeResponder
 
         if (RouterService.isShieldedLeaf()) {
             //a) If we're already a leaf, reject
+            if( RECORD_STATS )
+                HandshakingStat.LEAF_INCOMING_REJECT.incrementStat();
             return HandshakeResponse.createLeafRejectIncomingResponse();
         } 
 
@@ -83,6 +93,9 @@ public final class LeafHandshakeResponder
 		if(hr.isDeflateAccepted()) {
 		    ret.put(HeaderNames.CONTENT_ENCODING, HeaderNames.DEFLATE_VALUE);
 		}         
+
+        if( RECORD_STATS )
+            HandshakingStat.LEAF_INCOMING_ACCEPT.incrementStat();
 
         //b) We're not a leaf yet, so accept the incoming connection
         return HandshakeResponse.createAcceptIncomingResponse(ret);

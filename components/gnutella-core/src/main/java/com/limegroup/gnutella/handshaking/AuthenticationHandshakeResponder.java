@@ -4,6 +4,7 @@ import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.security.*;
 import com.limegroup.gnutella.settings.*;
 import com.limegroup.gnutella.util.StringUtils;
+import com.limegroup.gnutella.util.CommonUtils;
 import java.util.Properties;
 import java.io.IOException;
 import com.sun.java.util.collections.*;
@@ -26,6 +27,9 @@ public abstract class AuthenticationHandshakeResponder
      * purposes
      */
     private final Cookies COOKIES = Cookies.instance();
+    
+    protected static final boolean RECORD_STATS =
+        !CommonUtils.isJava118();
     
     /**
      * Constant handle to the <tt>SettingsManager</tt> for accessing
