@@ -95,11 +95,19 @@ public class QueryRouteTable {
         int ttl=qr.getTTL();
         for (int i=0; i<keywords.length; i++) {
             String keyword=keywords[i];
-            int hash=HashFunction.hash(keyword, table.length);
+            int hash=HashFunction.hash(keyword, log2(table.length));
             if (table[hash]>ttl || table[hash]>=infinity)
                 return false;
         }
         return true;
+    }
+    
+    /**
+     * @requires num be a power of 2.
+     */
+    private static byte log2(int num)
+    {
+        return (byte)(Math.log(num)/Math.log(2));
     }
     
     /**
@@ -116,7 +124,7 @@ public class QueryRouteTable {
     public void add(String filename, int ttl) {
         String[] keywords=HashFunction.keywords(filename);
         for (int i=0; i<keywords.length; i++) {
-            int hash=HashFunction.hash(keywords[i], table.length);
+            int hash=HashFunction.hash(keywords[i], log2(table.length));
             if (ttl<table[hash]) {
                 if (table[hash]>=infinity)
                     entries++;  //added new entry

@@ -16,7 +16,8 @@ import com.limegroup.gnutella.ByteOrder;
 public class HashFunction {
     private static final double A=(Math.sqrt(5.0)-1.0)/2.0;
     private static final long TWO_31=0x80000000l;
-    private static final int A_INT=(int)(A*TWO_31);
+    //private static final int A_INT=(int)(A*TWO_31); //=1327217884
+    private static final int A_INT=0x4F1BBCDC;
     
     /*
      * Implementation note: we special case the algorith depending on 
@@ -28,31 +29,31 @@ public class HashFunction {
 //       * returned value value can fit in "bits" unsigned bits.
 //       *     @requires n is a power of two.
 //       */
-//      private static int hashFast(int x, int n) {
-//          Assert.that(n%2==0, "Precondition to hashFast violated.");
-//          //Multiplication-based hash function.  See Chapter 12.3.2. of CLR.
-//          int prod=x*A_INT;
-//          int ret=prod>>>(31-log2(n));
-//          return ret;
-//      }
-
-    /**
-     * Returns the hash of x.  The returned value is greater than 0 and
-     * less than n.
-     */
-    private static int hashSlow(int x, int n) {
+    private static int hashFast(int x, byte bits) {
         //Multiplication-based hash function.  See Chapter 12.3.2. of CLR.
-        double prod=A*x;
-        double scale=prod-Math.floor(prod);
-        return (int)Math.floor(((float)n) * scale);
+        long prod= (long)x * (long)A_INT;
+        long ret= prod << 32;
+        ret = ret >>> (32 + (32 - bits));
+        return (int)ret;
     }
+
+//    /**
+//     * Returns the hash of x.  The returned value is greater than 0 and
+//     * less than n.
+//     */
+//    private static int hashSlow(int x, int n) {
+//        //Multiplication-based hash function.  See Chapter 12.3.2. of CLR.
+//        double prod=A*x;
+//        double scale=prod-Math.floor(prod);
+//        return (int)Math.floor(((float)n) * scale);
+//    }
 
     /**
      * Returns the hash of x.  The returned value is greater than 0 and
      * less than n.
      *     @requires 1<=bits<=32 
      */    
-    public static int hash(String x, int n) {
+    public static int hash(String x, byte bits) {
         //TODO2: can you do this without allocations?
 
         //Get the bytes of x, padding with zeroes so length is a multiple of 4.
@@ -69,7 +70,7 @@ public class HashFunction {
         for (int i=0; i<bytes4.length; i+=4)
             xor=xor^ByteOrder.leb2int(bytes4, i);
         //And fit number to n.
-        return hashSlow(xor, n);
+        return hashFast(xor, bits);
     }       
 
     /** 
@@ -91,17 +92,17 @@ public class HashFunction {
         //TODO: we should verify the scaling property described in the header
         //above.
         System.out.println("Informal scaling tests:");
-        System.out.println(hash("Hello", 256));
-        System.out.println(hash("Hallo", 256));
-        System.out.println(hash("Hellu", 256));
+        System.out.println(hash("Hello", (byte)16));
+        System.out.println(hash("Hallo", (byte)16));
+        System.out.println(hash("Hellu", (byte)16));
         System.out.println();
-        System.out.println(hash("Hello", 257));
-        System.out.println(hash("Hallo", 257));
-        System.out.println(hash("Hellu", 257));
+        System.out.println(hash("Hello", (byte)16));
+        System.out.println(hash("Hallo", (byte)16));
+        System.out.println(hash("Hellu", (byte)16));
         System.out.println();                           
-        System.out.println(hash("Hello", 512));
-        System.out.println(hash("Hallo", 512));
-        System.out.println(hash("Hellu", 512));
+        System.out.println(hash("Hello", (byte)16));
+        System.out.println(hash("Hallo", (byte)16));
+        System.out.println(hash("Hellu", (byte)16));
         System.out.println();                           
 
         System.out.println("Testing keywords:");
@@ -109,15 +110,15 @@ public class HashFunction {
         test("Real");
         test("Nixon");
         test("");
-        test("a");
-        test("ab");
+        test("A");
+        test("AB");
         test("abc");
     }
 
     private static void test(String s) {
-        System.out.println(s+": "+hash(s, 256));
+        System.out.println(s+": "+hash(s, (byte)16));
         s=s.toLowerCase();
-        System.out.println(s+": "+hash(s, 256));
+        System.out.println(s+": "+hash(s, (byte)16));
     }
 
 
