@@ -1515,8 +1515,8 @@ public class ConnectionManager {
      * the thread is interrupted externally, the interrupting thread is
      * responsible for recording the death.
      */
-    private class ConnectionFetcher
-            extends Thread {
+    private class ConnectionFetcher extends Thread {
+
         /**
          * Tries to add a connection.  Should only be called from a thread
          * that has the enclosing ConnectionManager's monitor.  This method

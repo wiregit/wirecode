@@ -86,15 +86,12 @@ public abstract class MessageRouter {
     /**
      * Creates a MessageRouter.  Must call initialize before using.
      */
-    protected MessageRouter()
-    {
-        try
-        {
+    protected MessageRouter() {
+        try {
             _clientGUID = new GUID(GUID.fromHexString(
                 SettingsManager.instance().getClientID())).bytes();
         }
-        catch (IllegalArgumentException e)
-        {
+        catch (IllegalArgumentException e) {
             //This should never happen! But if it does, we can recover.
             _clientGUID = Message.makeGuid();
         }
@@ -103,24 +100,20 @@ public abstract class MessageRouter {
     /**
      * Links the MessageRouter up with the other back end pieces
      */
-    public void initialize()
-    {
+    public void initialize() {
         _manager = RouterService.getConnectionManager();
 		_forMeReplyHandler = new ForMeReplyHandler();
     }
 
-    public String getPingRouteTableDump()
-	{
+    public String getPingRouteTableDump() {
         return _pingRouteTable.toString();
     }
 
-    public String getQueryRouteTableDump()
-    {
+    public String getQueryRouteTableDump() {
         return _queryRouteTable.toString();
     }
 
-    public String getPushRouteTableDump()
-    {
+    public String getPushRouteTableDump() {
         return _pushRouteTable.toString();
     }
 
@@ -128,8 +121,7 @@ public abstract class MessageRouter {
      * A callback for ConnectionManager to clear a ManagedConnection from
      * the routing tables when the connection is closed.
      */
-    public void removeConnection(ManagedConnection connection)
-    {
+    public void removeConnection(ManagedConnection connection) {
         _pingRouteTable.removeReplyHandler(connection);
         _queryRouteTable.removeReplyHandler(connection);
         _pushRouteTable.removeReplyHandler(connection);
@@ -143,8 +135,7 @@ public abstract class MessageRouter {
 	 * @param receivingConnection the <tt>ManagedConnection</tt> over which
 	 *  the message was received
      */
-    public void handleMessage(Message msg, ManagedConnection receivingConnection)
-    {
+    public void handleMessage(Message msg, ManagedConnection receivingConnection) {
         // Increment hops and decrease TTL.
         msg.hop();
 	   
@@ -273,8 +264,7 @@ public abstract class MessageRouter {
      * if the request has already been seen.  If not, calls handlePingRequest.
      */
     final void handlePingRequestPossibleDuplicate(
-        PingRequest pingRequest, ReplyHandler handler)
-    {
+        PingRequest pingRequest, ReplyHandler handler) {
         if(_pingRouteTable.tryToRouteReply(pingRequest.getGUID(),
 										   handler))
             handlePingRequest(pingRequest, handler);
@@ -286,8 +276,7 @@ public abstract class MessageRouter {
      * if the request has already been seen.  If not, calls handlePingRequest.
      */
     final void handleUDPPingRequestPossibleDuplicate(
-        PingRequest pingRequest, ReplyHandler handler)
-    {
+        PingRequest pingRequest, ReplyHandler handler) {
         if(_pingRouteTable.tryToRouteReply(pingRequest.getGUID(), handler))
             handleUDPPingRequest(pingRequest, handler);
     }
@@ -298,8 +287,7 @@ public abstract class MessageRouter {
      * if the request has already been seen.  If not, calls handleQueryRequest.
      */
     final void handleQueryRequestPossibleDuplicate(
-        QueryRequest request, ManagedConnection receivingConnection)
-    {
+        QueryRequest request, ManagedConnection receivingConnection) {
         if(_queryRouteTable.tryToRouteReply(request.getGUID(),
                                             receivingConnection)) {
 			//Hack! If this is the indexing query from a Clip2 reflector, mark the
@@ -763,7 +751,6 @@ public abstract class MessageRouter {
 
         if(rrp != null) {
             queryReply.setPriority(rrp.getBytesRouted());
-            //_numQueryReplies++;
             // Prepare a routing for a PushRequest, which works
             // here like a QueryReplyReply
             // Note the use of getClientGUID() here, not getGUID()

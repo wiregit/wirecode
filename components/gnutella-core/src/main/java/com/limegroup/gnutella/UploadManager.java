@@ -144,8 +144,8 @@ public final class UploadManager implements BandwidthTracker {
                                     queued==ACCEPTED);
 
                 queued = doSingleUpload(uploader, socket,
-                                     socket.getInetAddress().getHostAddress(), 
-                                                         line._index, giveSlot);
+										socket.getInetAddress().getHostAddress(), 
+										line._index, giveSlot);
                 
                 oldFileName = fileName;
                 
