@@ -125,7 +125,7 @@ public class ConnectionWatchdog implements Runnable {
                 continue; //e.g., Clip2 reflector
             snapshot.put(c, new ConnectionState(c));
             c.setHorizonEnabled(false);
-            router.sendPingRequest(new PingRequest((byte)2), c);
+            router.sendPingRequest(new PingRequest((byte)1), c);
         }
         
         //Wait a tiny amount of time.
