@@ -78,9 +78,9 @@ final class HeadRequester implements Runnable {
                 if(urn.equals(RESOURCE_NAME)) {
                     URL url = rfd.getUrl();
                     if(url == null) continue;
+                    HttpURLConnection httpConnection = null;
                     try {
-                        HttpURLConnection httpConnection = 
-                            (HttpURLConnection)url.openConnection();
+                        httpConnection = (HttpURLConnection)url.openConnection();
                         httpConnection.setRequestMethod("HEAD");
                         httpConnection.setRequestProperty(
                             "User-Agent",
@@ -119,11 +119,13 @@ final class HeadRequester implements Runnable {
                         }
                         AlternateLocationCollection alc = 
                             AlternateLocationCollection.createCollectionFromHttpValue(altLocs);
+                        if (alc == null) continue;
                         COLLECTOR.addAlternateLocationCollection(alc);
-                        httpConnection.disconnect();
                     } catch(IOException e) {
                         continue;
-                    }			
+                    } finally {
+                        httpConnection.disconnect();
+                    }
                 }
             }
         } catch(Exception e) {
