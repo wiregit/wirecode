@@ -137,6 +137,17 @@ public class SmartDownloader extends HTTPDownloader {
 				_state = COMPLETE;
 				break;
 			}
+			catch (IOException ioe) {
+				String str = ioe.getMessage();
+				String try_again = "Try Again Later"; 
+				if (try_again.equals(str) ) {
+					int num = file.getNumAttempts();
+					if (num != 1) {
+						file.setNumAttempts(num--);
+						_qDownloads.insert(file);
+					}
+				}
+			}
 			catch (Exception e) {
 				// there was an error, then the download failed.
 				// increase the index, and try the next file
