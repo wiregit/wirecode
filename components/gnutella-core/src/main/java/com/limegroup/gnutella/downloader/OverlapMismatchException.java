@@ -10,6 +10,7 @@ public class OverlapMismatchException extends Exception {
     private int _bytesDownloaded;
     private int _amountToCheck;
     private int _errorOffset;
+    private int _byteRead;
 
     /**
      * @param fileOffset the position to write in the temp file
@@ -19,17 +20,20 @@ public class OverlapMismatchException extends Exception {
      * @param amountToCheck the number of bytes to read from disk for
      *  checking, typically min(bytesDownloaded, fileLength-fileOffset)
      * @param errorOffset the offset of the first error in the block read
+     * @param byteRead the byte read from disk
      */
     public OverlapMismatchException(long fileOffset,
                                     long fileLength,
                                     int bytesDownloaded,
                                     int amountToCheck,
-                                    int errorOffset) {
+                                    int errorOffset,
+                                    byte byteRead) {
         this._fileOffset=fileOffset;
         this._fileLength=fileLength;
         this._bytesDownloaded=bytesDownloaded;
         this._amountToCheck=amountToCheck;
         this._errorOffset=errorOffset;
+        this._byteRead=byteRead;
     }
     
     public long getFileOffset() { return _fileOffset; }
@@ -37,4 +41,5 @@ public class OverlapMismatchException extends Exception {
     public int getBytesDownloaded() { return _bytesDownloaded; }
     public int getAmountToCheck() { return _amountToCheck; }
     public int getErrorOffset() { return _errorOffset; }    
+    public int getByteRead() { return _byteRead; }
 }

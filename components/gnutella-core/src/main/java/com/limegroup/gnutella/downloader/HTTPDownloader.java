@@ -405,7 +405,7 @@ public class HTTPDownloader implements BandwidthTracker {
                     for(int i=0;i<amountToCheck;i++) {
                         if (fileBuf[i]!=0 &&  buf[i]!=fileBuf[i]) 
                             throw new OverlapMismatchException(
-                                currPos, length, c, amountToCheck, i);
+                                currPos, length, c, amountToCheck, i, fileBuf[i]);
                     }
                     //get the fp back where it was before we checked
                     fos.seek(currPos);

@@ -1330,7 +1330,7 @@ public class ManagedDownloader implements Downloader, Serializable {
             debug("    WORKER: detected corruption in "+downloader+" at "
                   +getAmountRead()+"/"+getContentLength()+": "
                   +e.getFileOffset()+" "+e.getFileLength()+" "+e.getBytesDownloaded()
-                  +" "+e.getAmountToCheck()+" "+e.getErrorOffset());
+                  +" "+e.getAmountToCheck()+" "+e.getErrorOffset()+" "+e.getByteRead());
             corrupted=true;
             stop();
         } finally {
