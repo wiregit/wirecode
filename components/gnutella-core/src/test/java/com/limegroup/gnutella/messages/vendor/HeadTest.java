@@ -2,6 +2,7 @@ package com.limegroup.gnutella.messages.vendor;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.net.InetAddress;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -24,6 +25,7 @@ import com.limegroup.gnutella.altlocs.AlternateLocation;
 import com.limegroup.gnutella.altlocs.AlternateLocationCollection;
 import com.limegroup.gnutella.altlocs.PushAltLoc;
 import com.limegroup.gnutella.downloader.Interval;
+import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.settings.UploadSettings;
 import com.limegroup.gnutella.stubs.ConnectionManagerStub;
 import com.limegroup.gnutella.stubs.FileDescStub;
@@ -93,6 +95,8 @@ public class HeadTest extends BaseTestCase {
 	 */
 	public static void globalSetUp() throws Exception{
 	    
+	    SharingSettings.ADD_ALTERNATE_FOR_SELF.setValue(false);
+	    
 	    MessageRouterStub mrStub = new MessageRouterStub() {
 	        public byte[] getOurGUID() {
 	            return SOMEGUID;
@@ -101,6 +105,7 @@ public class HeadTest extends BaseTestCase {
 	    
 	    PrivilegedAccessor.setValue(RouterService.class,"router",mrStub);
 	    
+	    final InetAddress addr = InetAddress.getByName("1.2.3.4");
 	    ManagedConnectionStub mStub = new ManagedConnectionStub();
 	    final Set conns = new HashSet();
 	    conns.add(mStub);
