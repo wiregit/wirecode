@@ -3334,7 +3334,6 @@ public class ManagedDownloader implements Downloader, Serializable {
      * asked the user.
      */
     void promptAboutCorruptDownload() {
-        LOG.error("PROMPT ABOUT CORRUPT DOWNLOAD");
         synchronized(corruptStateLock) {
             //If we are corrupt, we want to stop sharing the incomplete file,
             //as it is not going to generate the same SHA1 anymore.
