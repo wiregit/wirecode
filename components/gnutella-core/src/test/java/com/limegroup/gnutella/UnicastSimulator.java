@@ -188,6 +188,10 @@ public class UnicastSimulator {
                         // send the QR...
                         send(socket, qr, datagram.getAddress(),
                              datagram.getPort());
+                        // also ack with a pong
+                        PingReply toSend = _pongs[port - PORT_RANGE_BEGIN];
+                        send(socket, toSend, datagram.getAddress(),
+                             datagram.getPort());
                     }
                     else if (message instanceof PingRequest) {
                         PingReply toSend = _pongs[port - PORT_RANGE_BEGIN];
