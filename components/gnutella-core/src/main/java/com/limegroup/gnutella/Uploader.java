@@ -17,7 +17,8 @@ public interface Uploader extends BandwidthTracker {
 	public static final int INTERRUPTED      = 5;
 	public static final int PUSH_FAILED      = 6;
 	public static final int FILE_NOT_FOUND   = 7;
-    public static final int BROWSE_HOST   = 8;
+    public static final int BROWSE_HOST      = 8;
+    public static final int QUEUED           = 9;
 
     /**
 	 * Stops this upload.  If the download is already 
