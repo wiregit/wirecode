@@ -636,6 +636,9 @@ public class UDPService implements Runnable {
             final long currTime = System.currentTimeMillis();
             final MessageRouter mr = RouterService.getMessageRouter();
             final ConnectionManager cm = RouterService.getConnectionManager();
+            // if these haven't been created yet, exit and wait till they have.
+            if(mr == null || cm == null)
+                return;
             if (
                 (_acceptedUnsolicitedIncoming && //1)
                  ((currTime - _lastUnsolicitedIncomingTime) > 
