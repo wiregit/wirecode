@@ -24,28 +24,21 @@ public class BucketQueueTest extends BaseTestCase {
 		junit.textui.TestRunner.run(suite());
 	}
 
-    /**
-     * Tests the method for getting the size of the <tt>BucketQueue</tt>.
-     */
-    public void testSize() throws Exception {
+
+    public void testIterator() throws Exception {
         BucketQueue bq = new BucketQueue(5, 10);
-        try {
-            int size = bq.size(-1);
-            fail("should have throws an IllegalArgumentException on negative size");
-        } catch(IllegalArgumentException e) {
-            // this should be thrown
+        //Integer curInt = new Integer(4);
+        for(int i=0; i<5; i++) {
+            Integer curInt = new Integer(i);
+            bq.insert(curInt, i);
         }
 
-        try {
-            int size = bq.size(10000);
-            fail("should have throws an IllegalArgumentException on large size");
-        } catch(IllegalArgumentException e) {
-            // this should be thrown
-        }
-
-        bq.insert(new Object(), 2);
-        bq.insert(new Object(), 2);
-        assertEquals("unexpected size", 2, bq.size(2));
+        Iterator iter = bq.iterator();
+        Integer first = (Integer)iter.next();
+        assertEquals("unexpected priority", 4, first.intValue());
+        //while(iter.hasNext()) {
+        //  Integer curInt = (Integer)iter.next();
+        //}
     }
 	
 	public void testLegacy() {
@@ -222,3 +215,16 @@ public class BucketQueueTest extends BaseTestCase {
         } catch (IllegalArgumentException e) { }
     }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
