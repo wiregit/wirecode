@@ -143,7 +143,7 @@ public class Connection implements Runnable {
 	    out.flush();
 	    sent++;
 	}
-	System.out.println("Wrote "+m.toString()+"\n   to "+sock.toString());
+	//System.out.println("Wrote "+m.toString()+"\n   to "+sock.toString());
     }
 
     /** 
@@ -157,8 +157,8 @@ public class Connection implements Runnable {
 	synchronized(in) {
 	    Message m=Message.read(in);
 	    received++;  //keep statistics.
-	    if (m!=null)
-		System.out.println("Read "+m.toString()+"\n    from "+sock.toString());
+	    //if (m!=null)
+	    //System.out.println("Read "+m.toString()+"\n    from "+sock.toString());
 	    return m;
 	}
     }
