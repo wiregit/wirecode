@@ -203,19 +203,25 @@ public final class NIODispatcher implements Runnable {
                 // remove the current entry 
                 iter.remove();
                 
-                // Check the state of the key.  We need to check all states 
-                // because individual channels can be registered for multiple 
-                // events, so we need to handle all of them.
-                if(key.isReadable())  {
-                    handleReader(key);
-                }
-                
-                else if(key.isWritable())  {
-                    handleWriter(key);
-                }
-                
-                else if(key.isConnectable())  {
-                    handleConnector(key);
+                try {
+                    // Check the state of the key.  We need to check all states 
+                    // because individual channels can be registered for 
+                    // multiple events, so we need to handle all of them.
+                    if(key.isReadable())  {
+                        handleReader(key);
+                    }
+                    
+                    else if(key.isWritable())  {
+                        handleWriter(key);
+                    }
+                    
+                    else if(key.isConnectable())  {
+                        handleConnector(key);
+                    }
+                } catch(CancelledKeyException e) {
+                    // the channel was closed since the key became selected,
+                    // so just keep going.
+                    continue;
                 }
             }
 		}
@@ -330,42 +336,6 @@ public final class NIODispatcher implements Runnable {
     }
 
     
-
-    /**
-     * Reads any new messages from all connections and dispatches
-	 * them to the message processing infrastructure.
-     */
-	private void handleReaders() {
-		java.util.Iterator keyIter = SELECTOR.selectedKeys().iterator();
-		while(keyIter.hasNext()) {
-			SelectionKey key = (SelectionKey)keyIter.next();
-			keyIter.remove();
-			
-			// ignore invalid keys
-			if(!key.isValid()) continue;
-            if(!key.isReadable()) continue;
-            Connection conn = (Connection)key.attachment();
-			try {
-                MessageReader reader = conn.reader();
-				Message msg = reader.createMessageFromTCP(key);
-				
-				if(msg == null) {
-                    // the message was not read completely -- we'll get
-                    // another read event on the channel and keep reading
-					continue;
-				}
-
-                reader.routeMessage(msg);
-			} catch (BadPacketException e) {
-                MessageReadErrorStat.BAD_PACKET_EXCEPTIONS.incrementStat();
-			} catch (IOException e) {
-                // remove the connection if we got an IOException
-                RouterService.removeConnection(conn);
-                MessageReadErrorStat.IO_EXCEPTIONS.incrementStat();
-			}
-		}
-	}
-    
     /**
      * Handles a read event for the specified <tt>SelectionKey</tt> instance 
      * and it's contained channel.  The event indicates that there's data
@@ -408,33 +378,6 @@ public final class NIODispatcher implements Runnable {
         }
     }
 	
-	/**
-	 * Writes any new data to the network.  Writers are only registered for
-     * write events when the TCP buffers have filled up, causing messages 
-     * to not be fully written in previous calls to Channel.write(...).
-	 */
-	private void handleWriters() {
-		
-		java.util.Iterator keyIter = SELECTOR.selectedKeys().iterator();
-		while(keyIter.hasNext()) {
-			SelectionKey key = (SelectionKey)keyIter.next();
-			keyIter.remove();
-			if(!key.isValid()) continue;
-			if(key.isWritable()) {
-				Connection conn = (Connection)key.attachment();
-				try {
-                    if(conn.write()) {
-                        // if the message was successfully written, switch it 
-                        // back to only being registered for read events
-                        register(conn, SelectionKey.OP_READ);
-                        conn.setWriteRegistered(false);
-                    } 
-                } catch (IOException e) {
-                    RouterService.removeConnection(conn);
-                }
-			}
-		}			
-	}
     
     /**
      * Writes any new data to the network.  Writers are only registered for
