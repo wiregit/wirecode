@@ -548,7 +548,14 @@ public class DIMERecord {
     private static void skipPaddedData(int length, InputStream in)
       throws IOException {
         int padding = calculatePaddingLength(length);
-        in.skip(padding);
+        long skipped = 0;
+        while(skipped < padding) {
+            long current = in.skip(padding - skipped);
+            if(current == -1)
+                throw new IOException("eof");
+            else
+                skipped += current;
+        }
     }        
     
     /**
