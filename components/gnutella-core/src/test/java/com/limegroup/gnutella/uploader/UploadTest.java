@@ -497,9 +497,13 @@ public class UploadTest extends BaseTestCase {
                     else if(!line.startsWith("HTTP")) // check only the first time.
                         return;
                     UploadManager umanager = RouterService.getUploadManager();
-		            assertEquals(1,umanager.uploadsInProgress());
-		            List l = (List) PrivilegedAccessor.getValue(umanager,"_activeUploadList");
-		            HTTPUploader u = (HTTPUploader)l.get(0);
+		            List l;
+		            HTTPUploader u;
+		            synchronized(umanager){
+		                l = (List) PrivilegedAccessor.getValue(umanager,"_activeUploadList");
+		                assertEquals(1,l.size());
+		                u = (HTTPUploader)l.get(0);
+		            }
 		            assertFalse(u.wantsFAlts());
 		            assertEquals(0,u.wantsFWTAlts());
                 }
@@ -540,9 +544,13 @@ public class UploadTest extends BaseTestCase {
                     if(!line.startsWith("HTTP")) // check only the first time
                         return;
 	                UploadManager umanager = RouterService.getUploadManager();
-	                assertEquals(1,umanager.uploadsInProgress());
-		            List l = (List) PrivilegedAccessor.getValue(umanager,"_activeUploadList");
-		            HTTPUploader u = (HTTPUploader)l.get(0);
+	                List l;
+	                HTTPUploader u;
+	                synchronized(umanager){
+	                    l = (List) PrivilegedAccessor.getValue(umanager,"_activeUploadList");
+	                    assertEquals(1,l.size());
+	                    u = (HTTPUploader)l.get(0);
+	                }
 		            assertTrue(u.wantsFAlts());
  		            assertEquals(0,u.wantsFWTAlts());        
                 }
@@ -583,9 +591,13 @@ public class UploadTest extends BaseTestCase {
                     if(!line.startsWith("HTTP")) // check only the first time.
                         return;
                     UploadManager umanager = RouterService.getUploadManager();
-                    assertEquals(1,umanager.uploadsInProgress());
-                    List l = (List) PrivilegedAccessor.getValue(umanager,"_activeUploadList");
-                    HTTPUploader u = (HTTPUploader)l.get(0);
+                    List l;
+                    HTTPUploader u;
+                    synchronized(umanager) {
+                        l= (List) PrivilegedAccessor.getValue(umanager,"_activeUploadList");
+                        assertEquals(1,l.size());
+                        u = (HTTPUploader)l.get(0);
+                    }
                     assertTrue(u.wantsFAlts());
                     assertEquals((int)HTTPConstants.FWT_TRANSFER_VERSION,u.wantsFWTAlts());
                 }
