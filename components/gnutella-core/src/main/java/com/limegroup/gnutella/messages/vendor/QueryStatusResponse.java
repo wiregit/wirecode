@@ -27,8 +27,8 @@ public final class QueryStatusResponse extends VendorMessage {
                                          getPayload().length);
     }
 
-    /** @param numResults The number of results (1-255 inclusive) that you have
-     *  for this query.  If you have more than 255 just send 255.
+    /** @param numResults The number of results (1-65535) that you have
+     *  for this query.  If you have more than 65535 just send 65535.
      *  @param replyGUID The guid of the original query/reply that you want to
      *  send reply info for.
      */
@@ -39,11 +39,17 @@ public final class QueryStatusResponse extends VendorMessage {
         setGUID(replyGUID);
     }
 
-    /** @return an int (1-255) representing the amount of results that a host
+    /** @return an int (1-65535) representing the amount of results that a host
      *  for a given query (as specified by the guid of this message).
      */
     public int getNumResults() {
         return ByteOrder.ubytes2int(ByteOrder.leb2short(getPayload(), 0));
+    }
+
+    /** The query guid that this response refers to.
+     */
+    public GUID getQueryGUID() {
+        return new GUID(getGUID());
     }
 
     private static byte[] derivePayload(int numResults) 
