@@ -96,6 +96,9 @@ public class UploaderTest extends com.limegroup.gnutella.util.BaseTestCase {
         connectDloader(d1,true,rfd1,true);
         d2 = addUploader(upManager, rfd2, "1.1.1.2", true);
         connectDloader(d2,true,rfd2,true);
+        
+        assertEquals("should have 2 active uploaders",
+            2, upManager.uploadsInProgress() );
        
         // assert that we can reach the limit
         d3 = addUploader(upManager, rfd3, "1.1.1.3", true);
@@ -106,6 +109,9 @@ public class UploaderTest extends com.limegroup.gnutella.util.BaseTestCase {
             assertEquals(1, e.getQueuePosition());
         }
         
+        assertEquals("should have 1 queued uploader",
+            1, upManager.getNumQueuedUploads());
+        
         // okay, we know its full, now drop the guy from the queue.
         try {
             connectDloader(d3, false, rfd3, true);
@@ -114,8 +120,15 @@ public class UploaderTest extends com.limegroup.gnutella.util.BaseTestCase {
             // expected behaviour.
         }
         
+        assertEquals("should have no queued uploaders",
+            0, upManager.getNumQueuedUploads());
+        
         //sleep a little more than needed for the stall to die.
         Thread.sleep(StalledUploadWatchdog.DELAY_TIME+5);
+        
+        assertEquals("should have no active uploaders",
+            0, upManager.uploadsInProgress());
+        
         // should be able to connect now.
         d3 = addUploader(upManager, rfd3, "1.1.1.3", false);
         connectDloader(d3, true, rfd3, true);        
@@ -134,7 +147,7 @@ public class UploaderTest extends com.limegroup.gnutella.util.BaseTestCase {
      * - when an uploade with slot terminates first uploader gets slot
      * - when an uploader with slot terminates, everyone in queue advances.
      */
-    public void testNormalQueueing() throws Exception {
+    public void testNormalQueueing() throws Exception {        
         SettingsManager.instance().setMaxUploads(2);
         SettingsManager.instance().setSoftMaxUploads(9999);
         UploadSettings.UPLOADS_PER_PERSON.setValue(99999);
@@ -145,6 +158,10 @@ public class UploaderTest extends com.limegroup.gnutella.util.BaseTestCase {
         connectDloader(d1,true,rfd1,true);
         HTTPDownloader d2 = addUploader(upManager,rfd2,"1.1.1.2",true);
         connectDloader(d2,true,rfd2,true);
+        
+        assertEquals("should have two active uploaders",
+            2, upManager.uploadsInProgress());
+        
         try { //queued at 1st position
             d3 = addUploader(upManager,rfd3,"1.1.1.3",true);
             connectDloader(d3,true,rfd3,true);
@@ -154,6 +171,10 @@ public class UploaderTest extends com.limegroup.gnutella.util.BaseTestCase {
         } catch (Exception ioe) {
             fail("not queued", ioe);
         }
+        
+        assertEquals("should have 1 queued uploader",
+            1, upManager.getNumQueuedUploads());
+        
         HTTPDownloader d4 = null;
         try { //queued at 2nd position
             d4 = addUploader(upManager,rfd4,"1.1.1.4",true);
@@ -164,6 +185,10 @@ public class UploaderTest extends com.limegroup.gnutella.util.BaseTestCase {
         } catch (Exception ioe) {
             fail("not queued", ioe);
         }
+        
+        assertEquals("should have 2 queued uploaders",
+            2, upManager.getNumQueuedUploads());
+        
         HTTPDownloader d5 = null;
         try { //rejected
             d5 = addUploader(upManager,rfd5,"1.1.1.5",true);
@@ -176,8 +201,12 @@ public class UploaderTest extends com.limegroup.gnutella.util.BaseTestCase {
             //this is OK(see TODO) for now, since the uploader
             //may close the socket
         }
+        
         //free up a slot
         kill(d1);//now the queue should free up, but we need to request
+        
+        assertEquals("should have 1 active uploader",
+            1, upManager.uploadsInProgress());
         
         //wait till min Poll time + 2 seconds to be safe, we have been
         //burned by this before - if d4 responds too fast it gets
@@ -192,12 +221,22 @@ public class UploaderTest extends com.limegroup.gnutella.util.BaseTestCase {
         } catch (Exception e) {//any other is bad
             fail("wrong exception thrown", e);
         }
+        
+        assertEquals("should have 2 queued uploaders",
+            2, upManager.getNumQueuedUploads());
+        
         //test that first uploader in queue is given the slot
         try { //should get the slot
             connectDloader(d3,false,rfd3,true);
         } catch (QueuedException e) {
             fail("downloader should have got slot "+e.getQueuePosition(), e);
         }
+        
+        assertEquals("should have 2 active uploads",
+            1, upManager.uploadsInProgress());
+        assertEquals("should have 1 queued upload",
+            1, upManager.getNumQueuedUploads());
+        
         //Test that uploads in queue advance. d4 should have 0th position
         Thread.sleep((UploadManager.MIN_POLL_TIME+
                       UploadManager.MAX_POLL_TIME)/2);
