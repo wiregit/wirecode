@@ -238,10 +238,10 @@ public final class SettingsManager {
 	 * whether it be InstallShield, InstallAnywhere, or our own
 	 * setup wizard, has set up the user's properties.
 	 */
-	private final boolean DEFAULT_INSTALLED           = false;
-	private final int     DEFAULT_APP_WIDTH           = 640;
-	private final int     DEFAULT_APP_HEIGHT          = 620;
-	private final boolean DEFAULT_RUN_ONCE            = false;
+	private final boolean DEFAULT_INSTALLED = false;
+	private final int DEFAULT_APP_WIDTH = 840;
+	private final int DEFAULT_APP_HEIGHT = 600;
+	private final boolean DEFAULT_RUN_ONCE = false;
 
 	/**
 	 * Default value for whether or not the application is minimized
@@ -268,7 +268,19 @@ public final class SettingsManager {
 	private final boolean DEFAULT_SHUTDOWN_AFTER_TRANSFERS = 
 		!DEFAULT_MINIMIZE_TO_TRAY;       
 
+	/**
+	 * The default name of the jar to load.
+	 */
 	public static final String DEFAULT_JAR_NAME = "LimeWire.jar";
+	
+	/**
+	 * The default classpath.
+	 */
+	public static final String DEFAULT_CLASSPATH = 
+		DEFAULT_JAR_NAME+File.pathSeparator+
+		"collections.jar"+File.pathSeparator+
+		"xerces.jar"+File.pathSeparator+
+		"jl011.jar";
 	
 	private final boolean DEFAULT_CHAT_ENABLED        = true;
     private final boolean DEFAULT_PLAYER_ENABLED      = true;
@@ -1128,13 +1140,6 @@ public final class SettingsManager {
 					Boolean afterTransfers = new Boolean(p);
 					setShutdownAfterTransfers(afterTransfers.booleanValue());
 				}
-
-                //else if(key.equals(CLASSPATH)){
-				//  setClassPath(p);
-                //}
-                //else if(key.equals(MAIN_CLASS)){
-				//  setMainClass(p);
-                //}
 				else if(key.equals(LANGUAGE)) {
 					setLanguage(p);
 				}
@@ -1196,6 +1201,9 @@ public final class SettingsManager {
 				}
 				else if(key.equals(JAR_NAME)) {
 					setJarName(p);
+				}
+				else if(key.equals(CLASSPATH)) {
+					setClasspath(p);
 				}
 			}
 			catch(NumberFormatException nfe){ /* continue */ }
@@ -1274,8 +1282,6 @@ public final class SettingsManager {
 		setRunOnce(DEFAULT_RUN_ONCE);
 		setMinimizeToTray(DEFAULT_MINIMIZE_TO_TRAY);
 		setShutdownAfterTransfers(DEFAULT_SHUTDOWN_AFTER_TRANSFERS);
-		//setClassPath(DEFAULT_CLASSPATH);
-		//setMainClass(DEFAULT_MAIN_CLASS);
 
 		setAppWidth(DEFAULT_APP_WIDTH);
 		setAppHeight(DEFAULT_APP_HEIGHT);
@@ -1322,6 +1328,7 @@ public final class SettingsManager {
         setLastExpireTime(DEFAULT_LAST_EXPIRE_TIME);
 		setAdVersion(DEFAULT_AD_VERSION);
 		setJarName(DEFAULT_JAR_NAME);
+		setClasspath(DEFAULT_CLASSPATH);
     }
 
     /**
@@ -3271,7 +3278,15 @@ public final class SettingsManager {
 	 */
 	public void setJarName(final String jarName) {
 		setStringValue(JAR_NAME, jarName);
-		setStringValue(CLASSPATH, jarName);
+	}
+
+	/**
+	 * Sets the classpath for legacy RunLime.jars.
+	 *
+	 * @param classpath the classpath to set
+	 */
+	public void setClasspath(final String classpath) {
+		setStringValue(CLASSPATH, classpath);
 	}
 
 	/**
