@@ -1,7 +1,7 @@
 package com.limegroup.gnutella.connection;
 
 import java.io.IOException;
-import java.io.InputStream;
+import java.nio.ByteBuffer;
 
 import com.limegroup.gnutella.ByteReader;
 import com.limegroup.gnutella.Constants;
@@ -154,7 +154,7 @@ public final class BIOHeaderReader implements HeaderReader {
      * @return <tt>null</tt> since there is never any data leftover from 
      *  blocking handshakes
      */
-    public InputStream getRemainingData() {
+    public ByteBuffer getRemainingData() {
         return null;
     }
 }

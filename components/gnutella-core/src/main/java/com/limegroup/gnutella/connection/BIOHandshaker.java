@@ -1,6 +1,7 @@
 package com.limegroup.gnutella.connection;
 
 import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.util.Enumeration;
 import java.util.Properties;
 
@@ -367,5 +368,14 @@ public final class BIOHandshaker extends AbstractHandshaker {
      */
     public void read() {
         throw new IllegalStateException("in blocking mode");
+    }
+
+    /**
+     * Throws <tt>IllegalStateException</tt> since there is never any remaining
+     * data after reading the headers in blocking mode, and this method should
+     * never be called.
+     */
+    public ByteBuffer getRemainingData() {
+        throw new IllegalStateException("in blocking mode -- no extra data");
     }
 }
