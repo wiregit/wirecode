@@ -25,6 +25,8 @@ public class ID3Editor {
     private String comment_;
     private String genre_;
 
+    private LimeXMLDocument correctDocument= null;
+
     private static final String TITLE_STRING   = "title=\"";
     private static final String ARTIST_STRING  = "artist=\"";
     private static final String ALBUM_STRING   = "album=\"";
@@ -55,6 +57,7 @@ public class ID3Editor {
         if( !(o instanceof ID3Editor) ) return false;
         
         ID3Editor other = (ID3Editor)o;
+
         return matches(title_, other.title_) &&
                matches(artist_, other.artist_) &&
                matches(album_, other.album_) &&
@@ -239,6 +242,54 @@ public class ID3Editor {
         return xmlStr;//this has been suitable modified
     }
     
+    /**
+     * @return true if I have better data than other, false otherwise. Better is
+     * defined as having better values for every field. If there is even one
+     * field where other has better values than me, I am not better. We do this
+     * so we have a chance to pick the better fields later
+     */
+    public boolean betterThan(ID3Editor other) {
+        return ( firstBetter(title_, other.title_) &&
+                 firstBetter(artist_, other.artist_) &&
+                 firstBetter(album_, other.album_) &&
+                 firstBetter(track_, other.track_) &&
+                 firstBetter(comment_, other.comment_) &&
+                 firstBetter(genre_, other.genre_) );                 
+    }
+    
+    /**
+     * @return true if first field is better than the second field. Better is
+     * defined as being equal to the second, or having a value 
+     */
+    private boolean firstBetter(String first, String second) {
+        if(first == null && second == null)
+            return true;
+        if(first.equals(second))
+            return true;
+        if(first != null && !"".equals(first))
+            return true;
+        //first has no value, and second does
+        return false;
+    }
+
+    /**
+     * Sets the fields of this if the corresponding fields of other are better
+     * than their values. In this case other's values get presidence. 
+     */
+    public void pickBetterFields(ID3Editor other) {
+        if(firstBetter(other.title_, title_))
+            title_ = other.title_;
+        if(firstBetter(other.artist_, artist_))
+           artist_ = other.artist_;
+        if(firstBetter(other.album_, album_))
+           album_ = other.album_;
+        if(firstBetter(other.track_, track_))
+           track_ = other.track_;
+        if(firstBetter(other.comment_, comment_))
+           comment_ = other.comment_;
+        if(firstBetter(other.genre_, genre_))
+           genre_ = other.genre_;
+    }
 
 
     public int writeID3DataToDisk(String filename) {
@@ -283,6 +334,13 @@ public class ID3Editor {
         }
     }
 
+    public void setCorrectDocument(LimeXMLDocument document) {
+        this.correctDocument = document;
+    }
+
+    public LimeXMLDocument getCorrectDocument() {
+        return correctDocument;
+    }
 
     /**
      * Actually writes the ID3 tags out to the ID3V3 section of the mp3 file

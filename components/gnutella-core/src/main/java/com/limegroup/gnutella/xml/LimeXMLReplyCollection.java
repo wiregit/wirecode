@@ -189,7 +189,7 @@ public class LimeXMLReplyCollection {
             // check to see if it's corrupted and if so, fix it.
             if( ID3Reader.isCorrupted(doc) ) {
                 doc = ID3Reader.fixCorruption(doc);
-                addReplyWithCommit(file, fd, doc);
+                addReplyWithCommit(file, fd, doc, false);
             } else {
                 addReply(fd, doc);
             }
@@ -391,13 +391,14 @@ public class LimeXMLReplyCollection {
      * the map of (URN -> LimeXMLDocument) will always be serialized
      * to disk.
      */
-    void addReplyWithCommit(File f, FileDesc fd, LimeXMLDocument replyDoc) {
+    void addReplyWithCommit(File f, FileDesc fd, LimeXMLDocument replyDoc, 
+                                                         boolean checkBetter) {
         addReply(fd, replyDoc);
         
         // commit to disk...
         if (audio) {
             try {
-                mp3ToDisk(f.getCanonicalPath(), replyDoc);
+                mp3ToDisk(fd, f.getCanonicalPath(), replyDoc, checkBetter);
             } catch(IOException ignored) {}
         } else
             write();
@@ -590,7 +591,8 @@ public class LimeXMLReplyCollection {
     /**
      * Writes this mp3 file to disk, using the XML in the doc.
      */
-    public int mp3ToDisk(String mp3FileName, LimeXMLDocument doc) {
+    public int mp3ToDisk(FileDesc fd, String mp3FileName, LimeXMLDocument doc, 
+                                                          boolean checkBetter) {
         boolean wrote=false;
         int mp3WriteState = -1;
         
@@ -598,9 +600,18 @@ public class LimeXMLReplyCollection {
 
         // see if you need to change a hash for a file due to a write...
         // if so, we need to commit the ID3 data to disk....
-        ID3Editor commitWith = ripMP3XML(mp3FileName, doc);
-        if (commitWith != null)  // commit to disk.
-            mp3WriteState = commitID3Data(mp3FileName, commitWith);
+        ID3Editor commitWith = ripMP3XML(mp3FileName, doc, checkBetter);
+        if (commitWith != null)  {// commit to disk.
+            if(commitWith.getCorrectDocument() == null) 
+                mp3WriteState = commitID3Data(mp3FileName, commitWith);
+            else { 
+                //The id3 data on disk is better than the data we got in the
+                //query reply. So we should update the Document we added
+                removeDoc(fd);
+                addReply(fd, commitWith.getCorrectDocument());
+                mp3WriteState = NORMAL;//no need to write anything
+            }
+        }
         
         Assert.that(mp3WriteState != INCORRECT_FILETYPE, 
                     "trying to write id3 to non mp3 file");
@@ -622,7 +633,8 @@ public class LimeXMLReplyCollection {
      * @return An ID3Editor to use when committing or null if nothing 
      *  should be editted.
      */
-    private ID3Editor ripMP3XML(String mp3File, LimeXMLDocument doc){
+    private ID3Editor ripMP3XML(String mp3File, LimeXMLDocument doc, 
+                                                        boolean checkBetter) {
         if (!LimeXMLUtils.isMP3File(mp3File))
             return null;
 
@@ -652,12 +664,30 @@ public class LimeXMLReplyCollection {
         }
         existing.removeID3Tags(existingXML);
         
-        // The ID3 tag is the same as the document, don't do anything.
+        
+        if(!checkBetter) { //if we are not required to choose better tags
+            if(newValues.equals(existing)) // The ID3 tags are same do nothing.
+                return null;
+            else
+                return newValues;
+        }
+        
+        //We are supposed to pick and chose the better set of tags
         if( newValues.equals(existing) ) {
             debug("tag read from disk is same as XML doc.");
             return null;
         }
-
+        else if (existing.betterThan(newValues)) {
+            //Note: In this case we are going to discard the LimeXMLDocument we
+            //got off the network, because the data on the file is better than
+            //the data in the query reply. Only in this case, we set the
+            //"correctDocument variable of the ID3Editor.
+            existing.setCorrectDocument(existingDoc);
+            return existing;
+        }
+        else
+            newValues.pickBetterFields(existing);        
+            
         // Commit using this ID3Editor ... 
         return newValues;
     }

@@ -1856,6 +1856,7 @@ public class ManagedDownloader implements Downloader, Serializable {
         
         //if the user has not been asked before.               
         URN bucketHash = buckets.getURNForBucket(bucketNumber);
+
         URN fileHash=null;
         try {
             // let the user know we're hashing the file
