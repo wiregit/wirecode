@@ -325,31 +325,31 @@ public class ID3Editor {
             value = "";
         String tag = frame.getID();
         if("TIT2".equals(tag)) {
-            add = value.equals(title_);
+            add = !value.equals(title_);
             newValue = title_;
         }
         else if ("TPE1".equals(tag)) {
-            add = value.equals(artist_);
+            add = !value.equals(artist_);
             newValue = artist_;
         }
         else if ("TALB".equals(tag)) {
-            add = value.equals(album_);
+            add = !value.equals(album_);
             newValue = album_;
         }
         else if ("TYER".equals(tag)) {
-            add = value.equals(year_);
+            add = !value.equals(year_);
             newValue = year_;
         }
         else if ("TRCK".equals(tag)) {
-            add = value.equals(track_);
+            add = !value.equals(track_);
             newValue = track_;
         }
         else if ("COMM".equals(tag)) {
-            add = value.equals(comment_);
+            add = !value.equals(comment_);
             newValue = comment_;
         }
         else if ("TCON".equals(tag)) {
-            add = value.equals(genre_);
+            add = !value.equals(genre_);
             newValue = genre_;
         }
         else
