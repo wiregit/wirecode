@@ -745,6 +745,7 @@ public class ConnectionManager {
         String supernodeStr = headers.getProperty(
             ConnectionHandshakeHeaders.SUPERNODE);
         
+        
         if(supernodeStr != null)
         {
             boolean isSupernode = Boolean.getBoolean(supernodeStr);
@@ -801,6 +802,11 @@ public class ConnectionManager {
         } catch(IOException e) {
             remove(c);
             throw e;
+        }
+        finally{
+            //if the connection received headers, process those to update
+            //local information (e.g. addresses of other hosts)
+            processConnectionHeaders(c);
         }
 
         boolean connectionOpen = false;
