@@ -1144,7 +1144,7 @@ public class ManagedConnection
 			getProperty(ConnectionHandshakeHeaders.X_ULTRAPEER_QUERY_ROUTING);
 		if(value == null) return false;
 		
-		return Boolean.valueOf(value).booleanValue();
+		return value.equals(ConnectionManager.QUERY_ROUTING_VERSION);
 	}
 
 
@@ -1358,36 +1358,6 @@ public class ManagedConnection
         this.queryInfo=qi;
     } 
 
-    /** Maps router.limewire.com to router4.limewire.com. 
-     *  Package-access for testing purposes only. */
-    static String translateHost(String hostname) {
-        if (hostname.equals(SettingsManager.DEFAULT_LIMEWIRE_ROUTER))
-            return SettingsManager.DEDICATED_LIMEWIRE_ROUTER;
-        else
-            return hostname;
-    }
-
-    /** Returns true iff hostname is any of the routerX.limewire.com's (possibly
-     *  in dotted-quad form). */
-	/*
-    public static boolean isRouter(String hostname) {
-        //Taken from the old ConnectionManager.createRouterConnection method.
-        if (hostname.startsWith("router") && hostname.endsWith("limewire.com"))
-            return true;
-        //Take from the old HostCatcher.isRouter method.  
-        //Check for 64.61.25.139-143 and 64.61.25.171
-        if (hostname.startsWith("64.61.25") 
-            && (hostname.endsWith("171")
-                || hostname.endsWith("139")
-                || hostname.endsWith("140")
-                || hostname.endsWith("141")
-                || hostname.endsWith("142")
-                || hostname.endsWith("143"))) 
-            return true;
-        return false;
-    }
-	*/
-
     /** 
      * Tests representation invariants.  For performance reasons, this is
      * private and final.  Make protected if ManagedConnection is subclassed.
@@ -1403,6 +1373,12 @@ public class ManagedConnection
         }
         */
     }
+
+	// overrides Object.toString
+	public String toString() {
+		return "ManagedConnection: Ultrapeer: "+isSupernodeConnection()+
+			" Leaf: "+isLeafConnection();
+	}
     
     /***************************************************************************
      * UNIT TESTS: tests/com/limegroup/gnutella/ManagedConnectionTest
