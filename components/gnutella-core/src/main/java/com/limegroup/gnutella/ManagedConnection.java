@@ -548,16 +548,17 @@ public class ManagedConnection extends Connection
      */
     private int calculatePriority(Message m) {
         byte opcode=m.getFunc();
-        boolean watchdog=m.getHops()==0 && m.getTTL()<=2;
         switch (opcode) {
             case Message.F_QUERY:
                 return PRIORITY_QUERY;
             case Message.F_QUERY_REPLY: 
                 return PRIORITY_QUERY_REPLY;
             case Message.F_PING_REPLY: 
-                return watchdog ? PRIORITY_WATCHDOG : PRIORITY_PING_REPLY;
+                return (m.getHops()==0 && m.getTTL()<=2) ? 
+                    PRIORITY_WATCHDOG : PRIORITY_PING_REPLY;
             case Message.F_PING: 
-                return watchdog ? PRIORITY_WATCHDOG : PRIORITY_PING;
+                return (m.getHops()==0 && m.getTTL()==1) ? 
+                    PRIORITY_WATCHDOG : PRIORITY_PING;
             case Message.F_PUSH: 
                 return PRIORITY_PUSH;                
             default: 
@@ -890,7 +891,7 @@ public class ManagedConnection extends Connection
         while (true) {
             Message m=null;
             try {
-                m=receive();
+                m = receive();
                 if (m==null)
                     continue;
             } catch (BadPacketException e) {
