@@ -1003,6 +1003,17 @@ public class RouterService {
   			   java.io.FileNotFoundException {
 		return downloader.download(files, alts, overwrite);
 	}
+	
+	/**
+	 * Stub for calling download(RemoteFileDesc[], DataUtils.EMPTY_LIST, boolean)
+	 */
+	public static Downloader download(RemoteFileDesc[] files,
+	                                boolean overwrite)
+		throws FileExistsException, AlreadyDownloadingException, 
+  			   java.io.FileNotFoundException {
+		return download(files, DataUtils.EMPTY_LIST, overwrite);
+	}
+        
 
     /*
      * Creates a new MAGNET downloader.  Immediately tries to download from
