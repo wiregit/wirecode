@@ -500,36 +500,6 @@ public final class AlternateLocation
 			return this.URL.toExternalForm();
 		}		
 	}
-
-	/**
-	 * A factory method for creating new <tt>Comparator</tt> instances 
-	 * for comparing alternate locations.
-	 *
-	 * @return a new <tt>Comparator</tt> instance for comparing
-	 * alternate locations
-	 */
-	/*
-	public static com.sun.java.util.collections.Comparator createComparator() {
-		return new AlternateLocationsComparator();
-	}
-	*/
-	
-
-	/**
-	 * Private class for comparing <tt>AlternateLocation</tt> instances.
-	 */
-	/*
-	private static class AlternateLocationsComparator 
-		implements com.sun.java.util.collections.Comparator {
-		public int compare(Object obj1, Object obj2) {
-			return ((AlternateLocation)obj1).compareTo(obj2);
-		}
-		
-		public boolean equals(Object obj) {
-			return this.equals(obj);
-		}
-	} 
-	*/
 }
 
 
