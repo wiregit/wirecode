@@ -103,6 +103,11 @@ public class QueryRouteTableTest extends com.limegroup.gnutella.util.BaseTestCas
         catch (Exception ignored) {}
         return retBytes;
     }
+    
+    private int entries(QueryRouteTable tbl) {
+        BitSet set = getBitTable(tbl);
+        return set.cardinality();
+    }
 
 
     public void testLegacy() throws Exception {
@@ -152,11 +157,11 @@ public class QueryRouteTableTest extends com.limegroup.gnutella.util.BaseTestCas
 
         QueryRouteTable qrt=new QueryRouteTable(1000);
         qrt.add("good book");
-        assertEquals(2,qrt.entries());
+        assertEquals(2,entries(qrt));
         qrt.add("bad");   //{good, book, bad}
-        assertEquals(3,qrt.entries());
+        assertEquals(3,entries(qrt));
         qrt.add("bad");   //{good, book, bad}
-        assertEquals(3,qrt.entries());
+        assertEquals(3,entries(qrt));
 
         //1. Simple keyword tests (add, contains)
         //we have moved to 1-bit entry per hash, so either absent or present....
@@ -173,12 +178,12 @@ public class QueryRouteTableTest extends com.limegroup.gnutella.util.BaseTestCas
 
         //2. addAll tests
         QueryRouteTable qrt2=new QueryRouteTable(1000);
-        assertEquals(0,qrt2.entries());
+        assertEquals(0,entries(qrt2));
         qrt2.add("new");
         qrt2.add("book");
         qrt2.addAll(qrt);     //{book, good, new, bad}
         QueryRouteTable qrt3=new QueryRouteTable(1000);
-        assertEquals(4, qrt2.entries());
+        assertEquals(4, entries(qrt2));
         qrt3.add("book");
         qrt3.add("good");
         qrt3.add("new");
@@ -215,7 +220,7 @@ public class QueryRouteTableTest extends com.limegroup.gnutella.util.BaseTestCas
                     ==PatchTableMessage.COMPRESSOR_DEFLATE);
         }
         assertEquals(qrt2,qrt);
-        assertEquals(qrt.entries(),qrt2.entries());
+        assertEquals(entries(qrt),entries(qrt2));
 
         Iterator iter=qrt2.encode(qrt);
         assertTrue(! iter.hasNext());                     //test optimization
@@ -300,7 +305,7 @@ public class QueryRouteTableTest extends com.limegroup.gnutella.util.BaseTestCas
         assertTrue(getBitTable(qrt2).get(0));
         assertTrue(getBitTable(qrt2).get(1));
         assertTrue(getBitTable(qrt2).get(2));
-        assertEquals(3, qrt2.entries());
+        assertEquals(3, entries(qrt2));
 
         qrt=new QueryRouteTable(3);  // 1 4 X ==> 2 2 5 X
         qrt2=new QueryRouteTable(4);
@@ -312,7 +317,7 @@ public class QueryRouteTableTest extends com.limegroup.gnutella.util.BaseTestCas
         assertTrue(getBitTable(qrt2).get(1));
         assertTrue(getBitTable(qrt2).get(2));
         assertTrue(!getBitTable(qrt2).get(3));
-        assertEquals(3, qrt2.entries());
+        assertEquals(3, entries(qrt2));
 
         //5b. Black-box test for addAll.
         qrt=new QueryRouteTable(128);
