@@ -987,6 +987,7 @@ public class RouterService {
      * succeeds.  
      *
      * @param files a group of "similar" files to smart download
+     * @param alts a List of secondary RFDs to use for other sources
      * @param overwrite true iff the download should proceded without
      *  checking if it's on disk
      * @return the download object you can use to start and resume the download
@@ -995,10 +996,12 @@ public class RouterService {
      * @exception FileExistsException the file already exists in the library
      * @see DownloadManager#getFiles(RemoteFileDesc[], boolean)
      */
-	public static Downloader download(RemoteFileDesc[] files, boolean overwrite)
+	public static Downloader download(RemoteFileDesc[] files, 
+	                                  List alts,
+	                                  boolean overwrite)
 		throws FileExistsException, AlreadyDownloadingException, 
   			   java.io.FileNotFoundException {
-		return downloader.download(files, overwrite);
+		return downloader.download(files, alts, overwrite);
 	}
 
     /*
