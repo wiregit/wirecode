@@ -31,22 +31,36 @@ public final class AlternateLocationTest extends TestCase {
 		               "2002-04-09T20:32:33Z",
 		"http: //Y.R.Y.Y:6352/get/2/"+
 		               "lime%20capital%20management%2001.mpg "+
-		               "2002-04-09T20:32:33Z",
+		               "2002-04-09T20:32:33Z"
 	};
 
-	private static final String[] validlocs = {
-		"Alternate-Location: http://Y.Y.Y.Y:6352/get/2/"+
-		"lime%20capital%20management%2001.mpg",
-		"Alt-Location: http://Y.Y.Y.Y:6352/get/2/"+
-		"lime%20capital%20management%2001.mpg",
-		"Alt-Location: http://Y.Y.Y.Y:6352/get/2/"+
-		"lime%20capital%20management%2001.mpg",
-		"X-Gnutella-Alternate-Location: http://Y.Y.Y.Y:6352/get/2/"+
-		"lime%20capital%20management%2001.mpg",
+	private static final String[] validNonTimestampedLocs = {
+		HTTPHeaderName.ALT_LOCATION.httpStringValue()+
+		    ": http://Y.Y.Y.Y:6352/get/2/"+
+		    "lime%20capital%20management%2001.mpg",
+		HTTPHeaderName.ALT_LOCATION.httpStringValue()+
+		    ": http://Y.X.Y.Y:6352/get/2/"+
+		    "lime%20capital%20management%2001.mpg",
+		HTTPHeaderName.ALT_LOCATION.httpStringValue()+
+		    ": http://Y.R.Y.Y:6352/get/2/"+
+		    "lime%20capital%20management%2001.mpg",
 		"http://Y.Y.Y.Y:6352/get/2/"+
-		"lime%20capital%20management%2001.mpg",
+		    "lime%20capital%20management%2001.mpg",
 		"http: //Y.Y.Y.Y:6352/get/2/"+
-		"lime%20capital%20management%2001.mpg"
+		    "lime%20capital%20management%2001.mpg",
+		"http://Y.S.Y.Y:6352/get/2/"+
+		    "lime%20capital%20management%2001.mpg",
+		"http://Y.Z.Y.Y:6352/get/2/"+
+		    "lime%20capital%20management%2001.mpg"
+	};
+
+
+	private static final String[] equalLocs = {
+		HTTPHeaderName.ALT_LOCATION.httpStringValue()+
+		    ": http://Y.Y.Y.Y:6352/get/2/"+
+		    "lime%20capital%20management%2001.mpg",
+		"http://Y.Y.Y.Y:6352/get/2/"+
+		    "lime%20capital%20management%2001.mpg"
 	};
 	
 	
@@ -148,8 +162,8 @@ public final class AlternateLocationTest extends TestCase {
 	 */
 	public void testStringConstructorForNotTimestampedLocs() {
 		try {
-			for(int i=0; i<validlocs.length; i++) {
-				AlternateLocation al = new AlternateLocation(validlocs[i]);
+			for(int i=0; i<validNonTimestampedLocs.length; i++) {
+				AlternateLocation al = new AlternateLocation(validNonTimestampedLocs[i]);
 			}
 		} catch(IOException e) {
 			assertTrue("test failed with exception: "+e, false); 
@@ -173,6 +187,18 @@ public final class AlternateLocationTest extends TestCase {
 	 * Test the equals method.
 	 */
 	public void testAlternateLocationEquals() {
+
+		for(int i=0; i<equalLocs.length; i++) {
+			try {
+				AlternateLocation curLoc = new AlternateLocation(equalLocs[i]);
+				for(int j=0; j<equalLocs.length; j++) {
+					AlternateLocation newLoc = new AlternateLocation(equalLocs[j]);
+					assertEquals("locations should be equal", curLoc, newLoc);
+				}
+			} catch(IOException e) {
+				assertTrue("unexpected exception: "+e, false);
+			}
+		}
 		TreeMap timeStampedAltLocs0 = new TreeMap();
 		TreeMap testMap = new TreeMap();
 		for(int i=0; i<validTimestampedLocs.length; i++) {
@@ -234,5 +260,23 @@ public final class AlternateLocationTest extends TestCase {
 		// why, especially considering that all of the above code passes the 
 		// assertions??
 		//assertEquals("maps should be equal: "+timeStampedAltLocs0, timeStampedAltLocs1);
+	}
+
+	/**
+	 * Tests the compareTo method of the AlternateLocation class.
+	 */
+	public void testAlternateLocationCompareTo() {
+		for(int i=0; i<equalLocs.length; i++) {
+			try {
+				AlternateLocation curLoc = new AlternateLocation(equalLocs[i]);
+				for(int j=0; j<equalLocs.length; j++) {
+					AlternateLocation newLoc = new AlternateLocation(equalLocs[j]);
+					int z = curLoc.compareTo(newLoc);
+					assertEquals("locations should be equal", z, 0);
+				}
+			} catch(IOException e) {
+				assertTrue("unexpected exception: "+e, false);
+			}
+		}		
 	}
 }
