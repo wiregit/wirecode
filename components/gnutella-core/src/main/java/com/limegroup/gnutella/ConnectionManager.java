@@ -576,13 +576,6 @@ public class ConnectionManager {
             || useragentHeader.startsWith("Swapper");
     }
         
-    /**
-     * Provides handle to the activity callback
-     * @return Handle to the activity callback
-     */
-    public ActivityCallback getCallback(){
-        return _callback;
-    }
 
     /** Returns the number of connections to other ultrapeers.  Caller MUST hold
      *  this' monitor. */
