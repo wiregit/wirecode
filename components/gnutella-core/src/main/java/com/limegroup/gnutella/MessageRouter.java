@@ -170,8 +170,10 @@ public abstract class MessageRouter
      */
     public void handleMessage(Message m, ManagedConnection receivingConnection)
     {
-        // Increment hops and decrease TTL
-        m.hop();
+        // Increment hops and decrease TTL. But dont hop (and decrement TTL)
+        //if message came from client, as we are acting proxy for that
+        if(!receivingConnection.isSupernodeClientConnection())
+            m.hop();
 
         if(m instanceof PingRequest) 
             handlePingRequestPossibleDuplicate((PingRequest)m, receivingConnection);
