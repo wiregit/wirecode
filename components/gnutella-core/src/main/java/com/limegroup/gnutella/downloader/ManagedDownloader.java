@@ -802,8 +802,23 @@ public class ManagedDownloader implements Downloader, Serializable {
         return addDownloadForced(rfd, cache);
     }
 
-    /** Like addDownload, but doesn't call allowAddition(..). 
-     *  @return true, since download always allowed or silently ignored */
+    /**
+     * Like addDownload, but doesn't call allowAddition(..).
+     *
+     * If cache is false, the RFD is not added to allFiles, but is
+     * added to the appropriate bucket.
+     *
+     * If the RFD matches one already in allFiles, the new one is
+     * NOT added to allFiles, but IS added the appropriate bucket
+     * if and only if a matching RFD is not currently in the bucket.
+     *
+     * If the file is ultimately added to buckets, either reqLock is released
+     * or this is notified.
+     *
+     * This ALWAYS returns true, because the download is either allowed
+     * or silently ignored (because we're already downloading or going to
+     * attempt to download from the host described in the RFD).
+     */
     protected final synchronized boolean addDownloadForced(RemoteFileDesc rfd,
                                                            boolean cache) {
                                                             
@@ -811,38 +826,51 @@ public class ManagedDownloader implements Downloader, Serializable {
         if( NetworkUtils.isMe(rfd.getHost(), rfd.getPort()) )
             return true;
         
-        //Ignore if this was already added.  This includes existing downloaders
-        //as well as busy lists.
-        for (int i=0; i<allFiles.length; i++) {
-            if (rfd.equals(allFiles[i]))
-                return true;          
-        }  
-
-        //System.out.println("Adding "+rfd);
-        //Add to buckets (will be seen because buckets exposes
-        //representation)...
+        boolean exists = false;
         
-        if (buckets != null)
-            buckets.add(rfd);
+        // If this already exists in allFiles, DO NOT ADD IT AGAIN.
+        // However, when we add it to buckets, we have to make sure
+        // it didn't already exist in the specified bucket.
+        for (int i=0; i<allFiles.length; i++) {
+            if (rfd.equals(allFiles[i])) {
+                cache = false; // do not store in allFiles.
+                exists = true; // do not add if already in bucket.
+                break;
+            }
+        }
+
+        
+        boolean added = false;
+        //Add to buckets (will be seen because buckets exposes representation).        
+        if (buckets != null) {
+            // Do not check for existing values if it didn't exist in allFiles
+            added = (buckets.add(rfd, exists) != -1);
+        }
+        
+        //Append to allFiles for resume purposes if caching...
         if(cache) {
-            //...append to allFiles for resume purposes...
             RemoteFileDesc[] newAllFiles=new RemoteFileDesc[allFiles.length+1];
             System.arraycopy(allFiles, 0, newAllFiles, 0, allFiles.length);
             newAllFiles[newAllFiles.length-1]=rfd;
             allFiles=newAllFiles;
-            //...and notify manager to look for new workers.  You might be
-            //tempted to just call dloaderManagerThread.interrupt(), but that
-            //causes spurious interrupts to happen when establishing connections
-            //(push or otherwise).  So instead we target the two cases we're
-            //interested: waiting for downloaders to complete (by waiting on
-            //this) or waiting for retry (by sleeping).
         }
-        if ((state==Downloader.WAITING_FOR_RETRY) ||
-            (state==Downloader.WAITING_FOR_RESULTS) || 
-            (state==Downloader.GAVE_UP))
-            reqLock.release();
-        else
-            this.notify();                      //see tryAllDownloads3
+
+
+        //...and notify manager to look for new workers.  You might be
+        //tempted to just call dloaderManagerThread.interrupt(), but that
+        //causes spurious interrupts to happen when establishing connections
+        //(push or otherwise).  So instead we target the two cases we're
+        //interested: waiting for downloaders to complete (by waiting on
+        //this) or waiting for retry (by sleeping).
+        if ( added ) {
+            if ((state==Downloader.WAITING_FOR_RETRY) ||
+                (state==Downloader.WAITING_FOR_RESULTS) || 
+                (state==Downloader.GAVE_UP))
+                reqLock.release();
+            else
+                this.notify();                      //see tryAllDownloads3
+        }
+        
         return true;
     }
 
@@ -2004,6 +2032,7 @@ public class ManagedDownloader implements Downloader, Serializable {
     private int assignAndRequest(HTTPDownloader dloader,int[] refSleepTime, 
                                                               boolean http11) {
         synchronized(stealLock) {
+            RemoteFileDesc rfd = dloader.getRemoteFileDesc();
             boolean updateNeeded = true;
             try {
                 if (!needed.isEmpty()) {
@@ -2024,7 +2053,7 @@ public class ManagedDownloader implements Downloader, Serializable {
                 synchronized(this) {
                     // Add to files, keep checking for stalled uploader with
                     // this rfd
-                    files.add(dloader.getRemoteFileDesc());
+                    files.add(rfd);
                 }
                 return 3;
             } catch (NoSuchRangeException nsrx) { 
@@ -2032,36 +2061,38 @@ public class ManagedDownloader implements Downloader, Serializable {
                     DownloadStat.NSR_EXCEPTION.incrementStat();
                 debug("nsrx thrown in assignAndRequest"+dloader);
                 synchronized(this) {
-                    RemoteFileDesc rfd = dloader.getRemoteFileDesc();
                     //forget the ranges we are preteding uploader is busy.
                     rfd.setAvailableRanges(null);
                     busy.add(rfd);
                 }
+                rfd.resetFailedCount();                
                 return 0;                
             } catch(TryAgainLaterException talx) {
                 if(RECORD_STATS)
                     DownloadStat.TAL_EXCEPTION.incrementStat();
                 debug("talx thrown in assignAndRequest"+dloader);
                 synchronized(this) {
-                    busy.add(dloader.getRemoteFileDesc());//try this rfd later
+                    busy.add(rfd);//try this rfd later
                 }
+                rfd.resetFailedCount();                
                 return 0;
             } catch(RangeNotAvailableException rnae) {
                 if(RECORD_STATS)
                     DownloadStat.RNA_EXCEPTION.incrementStat();
                 debug("rnae thrown in assignAndRequest"+dloader);
+                rfd.resetFailedCount();                
                 return 4; //no need to add to files or busy we keep iterating
             } catch (FileNotFoundException fnfx) {
                 if(RECORD_STATS)
                     DownloadStat.FNF_EXCEPTION.incrementStat();
                 debug("fnfx thrown in assignAndRequest "+dloader);
-                removeAlternateLocation(dloader.getRemoteFileDesc());
+                removeAlternateLocation(rfd);
                 return 0;//discard the rfd of dloader
             } catch (NotSharingException nsx) {
                 if(RECORD_STATS)
                     DownloadStat.NS_EXCEPTION.incrementStat();
                 debug("nsx thrown in assignAndRequest "+dloader);
-                removeAlternateLocation(dloader.getRemoteFileDesc());
+                removeAlternateLocation(rfd);
                 return 0;//discard the rfd of dloader
             } catch (QueuedException qx) { 
                 if(RECORD_STATS)
@@ -2081,32 +2112,44 @@ public class ManagedDownloader implements Downloader, Serializable {
                         queuedVendor = dloader.getVendor();
                     }                    
                 }
+                rfd.resetFailedCount();                
                 return 1;
             } catch(ProblemReadingHeaderException prhe) {
                 if(RECORD_STATS)
                     DownloadStat.PRH_EXCEPTION.incrementStat();
                 debug("prhe thrown in assignAndRequest "+dloader);
-                removeAlternateLocation(dloader.getRemoteFileDesc());
+                removeAlternateLocation(rfd);
                 return 0; //discard the rfd of dloader
             } catch(UnknownCodeException uce) {
                 if(RECORD_STATS)
                     DownloadStat.UNKNOWN_CODE_EXCEPTION.incrementStat();
                 debug("uce (" + uce.getCode() + ") thrown in assignAndRequest "
                       + dloader);
-                removeAlternateLocation(dloader.getRemoteFileDesc());
+                removeAlternateLocation(rfd);
                 return 0; //discard the rfd of dloader
             } catch (IOException iox) {
                 if(RECORD_STATS)
                     DownloadStat.IO_EXCEPTION.incrementStat();
                 debug("iox thrown in assignAndRequest "+dloader);
-                removeAlternateLocation(dloader.getRemoteFileDesc());
-                return 0; //discard the rfd of dloader
+                
+                removeAlternateLocation(rfd);
+                rfd.incrementFailedCount();
+                
+                // if this RFD had an IOX while reading headers/downloading
+                // less than twice in succession, try it again.
+                if( rfd.getFailedCount() < 2 ) {
+                    synchronized(this) {
+                        busy.add(rfd);
+                    }
+                }
+                
+                return 0;
             } finally {
                 //add alternate locations, which we could have gotten from 
                 //the downloader
                 synchronized(this) {
                     addAlternateLocations(dloader.getAlternateLocations(),
-                                          dloader.getRemoteFileDesc().getSize()
+                                          rfd.getSize()
                                          );
                 }
                 //Update the needed list unless any of the following happened: 
@@ -2123,6 +2166,11 @@ public class ManagedDownloader implements Downloader, Serializable {
             }
             
             //did not throw exception? OK. we are downloading
+            if(RECORD_STATS && rfd.getFailedCount() > 0)
+                DownloadStat.RETRIED_SUCCESS.incrementStat();    
+            
+            rfd.resetFailedCount();
+
             synchronized(this) {
                 setState(DOWNLOADING);
             }
@@ -2130,7 +2178,7 @@ public class ManagedDownloader implements Downloader, Serializable {
                 debug("Stopped in assignAndRequest");
                 updateNeeded(dloader); //give back a white area
                 synchronized(this) {
-                    files.add(dloader.getRemoteFileDesc());
+                    files.add(rfd);
                 }
                 return 0;//throw new InterruptedException();
             }
@@ -2507,8 +2555,10 @@ public class ManagedDownloader implements Downloader, Serializable {
     private void doDownload(HTTPDownloader downloader, boolean http11) {
         debug("WORKER: about to start downloading "+downloader);
         boolean problem = false;
+        RemoteFileDesc rfd=downloader.getRemoteFileDesc();            
         try {
             downloader.doDownload(commonOutFile);
+            rfd.resetFailedCount();
             if(RECORD_STATS) {
                 if(http11)
                     DownloadStat.SUCCESFULL_HTTP11.incrementStat();
@@ -2525,20 +2575,21 @@ public class ManagedDownloader implements Downloader, Serializable {
             problem = true;
 			chatList.removeHost(downloader);
             browseList.removeHost(downloader);
-            //e.printStackTrace();
         }
         finally {
             int stop=downloader.getInitialReadingPoint()
                         +downloader.getAmountRead();
             debug("    WORKER: terminating from "+downloader+" at "+stop+ 
                   " error? "+problem);
-            //In order to reuse this location again, we need to know the
-            //RemoteFileDesc.  TODO2: use measured speed if possible.
-            RemoteFileDesc rfd=downloader.getRemoteFileDesc();            
             synchronized (this) {
                 if (problem) {
                     updateNeeded(downloader);
                     downloader.stop();
+                    rfd.incrementFailedCount();
+                    // if we failed less than twice in succession,
+                    // try to use the file again much later.
+                    if( rfd.getFailedCount() < 2 )
+                        busy.add(rfd);
                 }
                 
                 dloaders.remove(downloader);

@@ -71,7 +71,7 @@ class RemoteFileDescGrouper implements Serializable {
         //1. Bucket the requested files by repeatedly calling add(..).  This
         //runs in O(N^2) time.  It's possible to optimize.
         for (int i=0; i<rfds.length; i++) 
-            add(rfds[i]);
+            add(rfds[i], false);
         repOk();
 
         //2.  Now we need to rearrange the buckets according to download time.
@@ -154,16 +154,18 @@ class RemoteFileDescGrouper implements Serializable {
                 return 0;
         }
     }
-
     
     /** 
      * Adds the given rfd to this, modifying an existing bucket or adding a new
      * bucket as needed.
-     *     @return true if a copy of rfd was added to an existing bucket, false
-     *      added to a new bucket.
-     *     @see buckets 
+     * @param rfd the RemoteFileDesc to add to a specific bucket
+     * @param checkExisting whether or not we should iterate over the elements
+     *        in the specific bucket and add if the RFD doesn't already exist.
+     * @return 1 if added to an existing bucket, 0 if added to a
+     *         new bucket, -1 if not added.
+     * @see buckets 
      */
-    synchronized boolean add(RemoteFileDesc rfd) {
+    synchronized int add(RemoteFileDesc rfd, boolean checkExisting) {
         repOk();
         File incompleteFile=incompleteFileManager.getFile(rfd);
 
@@ -187,9 +189,14 @@ class RemoteFileDescGrouper implements Serializable {
                 if(sha1s[i]==null && rfd.getSHA1Urn()!=null)
                     sha1s[i]=rfd.getSHA1Urn();
                 List bucket=(List)buckets.get(i);
+                
+                // if we want to make sure it didn't exist...
+                if (checkExisting && bucket.contains(rfd))
+                    return -1;
+                
                 bucket.add(rfd);
                 repOk();
-                return true;
+                return 1;
             }
         }
 
@@ -206,7 +213,7 @@ class RemoteFileDescGrouper implements Serializable {
         newArray[p-1] = rfd.getSHA1Urn();   //may be null
         sha1s = newArray;
         repOk();
-        return false;
+        return 0;
     }
 
     synchronized URN getURNForBucket(int n) {

@@ -253,7 +253,7 @@ public class ManagedDownloaderTest extends com.limegroup.gnutella.util.BaseTestC
                                   new FileManagerStub(),
                                   new ActivityCallbackStub(), false);
             //Wait for it to download until error.
-            try { Thread.sleep(6000); } catch (InterruptedException e) { }
+            try { Thread.sleep(66000); } catch (InterruptedException e) { }
             assertEquals("should be waiting for results",
                          Downloader.GAVE_UP, 
                          downloader.getState());
