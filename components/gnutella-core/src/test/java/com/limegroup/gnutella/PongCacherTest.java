@@ -74,6 +74,19 @@ public final class PongCacherTest extends BaseTestCase {
         iter = pongs.iterator();
         retrievedPong = (PingReply)iter.next();
         assertEquals("unexpected pong", pr, retrievedPong);
+
+        // Create a second pong with the correct GGEP for our cacher
+        // to accept it.
+        PingReply pr2 = MessageTestUtils.createPongWithFreeLeafSlots();
+        pr2.hop();
+        PongCacher.instance().addPong(pr2);
+        
+        // Make sure we get the 2 pongs successfully in the correct order.
+        pongs = PongCacher.instance().getBestPongs();
+        assertEquals("should be 2 pongs",2,pongs.size());
+        assertContains("no p2", pongs, pr2);
+        assertContains("no p", pongs, pr);
+
         
         // Finally, make sure the pong expires on a sleep -- add a bit to the
         // sleep to avoid thread scheduling craziness.
