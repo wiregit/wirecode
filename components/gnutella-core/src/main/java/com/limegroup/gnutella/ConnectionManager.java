@@ -56,15 +56,6 @@ public class ConnectionManager implements Runnable {
         Collections.synchronizedList(new ArrayList());
     public HostCatcher catcher;
     
-    /** Queued up entries to send to each */
-    static class MessagePair {
-        Message m;
-        Connection except;
-        MessagePair (Message m, Connection except) { this.m=m; this.except=except; }
-    }
-    private static final int MESSAGE_QUEUE_SIZE=500;
-    private Buffer /* of MessagePair */ messageQueue=new Buffer(MESSAGE_QUEUE_SIZE);
-
     private int keepAlive=0;
     private ActivityCallback callback;
     public GUID ClientId;
@@ -73,14 +64,14 @@ public class ConnectionManager implements Runnable {
 
     /** Variables for statistical purposes */
     /*NOTE: THESE VARIABLES ARE NOT SYNCHRONIZED...SO THE STATISTICS MAY NOT BE 100% ACCURATE. */
-    public int total; //total number of messages sent and received
-    public  int PReqCount; //Ping Request count
-    public int PRepCount; //Ping Reply count
-    public int QReqCount; //Query Request count
-    public int QRepCount; //Query Reply count
-    public int pushCount; //Push request count
-    public int totDropped; //Total dropped messages
-    public int totRouteError; //Total misrouted messages
+    public volatile int total; //total number of messages sent and received
+    public volatile int PReqCount; //Ping Request count
+    public volatile int PRepCount; //Ping Reply count
+    public volatile int QReqCount; //Query Request count
+    public volatile int QRepCount; //Query Reply count
+    public volatile int pushCount; //Push request count
+    public volatile int totDropped; //Total dropped messages
+    public volatile int totRouteError; //Total misrouted messages
     
     private Vector badHosts = new Vector();
 
@@ -107,10 +98,6 @@ public class ConnectionManager implements Runnable {
             catcher=new HostCatcher(this);
         else
             catcher=new HostCatcher(this,SettingsManager.instance().getHostList());     
-
-        Thread t=new Thread(new MessageBroadcaster());
-        t.setDaemon(true);
-        t.start();    
     }
     
     /** Creates a manager that listens on the default port. Equivalent to
@@ -279,17 +266,20 @@ public class ConnectionManager implements Runnable {
      *   Underlying IO errors (e.g., because a connection has closed) are caught
      *   and silently ignored.
      */
-    public void sendToAllExcept(Message m, Connection c) {
+    public void sendToAllExcept(Message m, Connection except) {
         Assert.that(m!=null);
-        Object dropped;
-        //Queue the message.  MessageBroadcaster will dequeue and send.
-        synchronized (messageQueue) {
-            dropped=messageQueue.add(new MessagePair(m,c));
-            messageQueue.notify();
-        }
-        if (dropped!=null) {
-            //TODO: increment dropped message count if returned value
-            //of add(..) is not null, i.e., if buffer capacity is reached.      
+        List connectionsSnapshot=connections;
+        int n=connectionsSnapshot.size();
+        for (int i=0; i<n; i++) {
+            Connection c2=(Connection)connectionsSnapshot.get(i);
+            Assert.that(c2!=null);
+            if (c2!=except) {
+                try {
+                    c2.send(m);
+                } catch (IOException e) { 
+                    remove(c2);
+                }
+            }
         }
     }
 
@@ -301,37 +291,6 @@ public class ConnectionManager implements Runnable {
     public void sendToAll(Message m) {
         sendToAllExcept(m, null);
     }
-
-    /** Broadcasts queued messages to connections. */
-    class MessageBroadcaster implements Runnable {          
-        public void run() {
-            while (true) {
-                //Get a MessagePair from the messageQueue. (Wait if empty.)
-                MessagePair pair=null;
-                synchronized(messageQueue) {
-                    while (messageQueue.isEmpty())
-                        try {
-                            messageQueue.wait();
-                        } catch (InterruptedException e) { /* do nothing */ }
-                    pair=(MessagePair)messageQueue.removeLast();
-                }
-                Message m=pair.m;
-                Connection except=pair.except;
-        
-                List connectionsSnapshot=connections;
-                int n=connectionsSnapshot.size();
-                for (int i=0; i<n; i++) {
-                    Connection c2=(Connection)connectionsSnapshot.get(i);
-                    Assert.that(c2!=null);
-                    if (c2!=except) {
-                        try {
-                            c2.send(m);
-                        } catch (IOException e) { /* ignore */ }
-                    }
-                }
-            }
-        }
-    }    
     
     /**
      *  Return the total number of messages sent and received

@@ -3,7 +3,7 @@ package com.limegroup.gnutella;
 import java.net.*;
 import java.io.*;
 import com.sun.java.util.collections.*;
-//2345678|012345678|012345678|012345678|012345678|012345678|012345678|012345678|
+import com.limegroup.gnutella.util.Buffer;
 
 /**
  * A Gnutella connection. A connection is either INCOMING or OUTGOING;
@@ -64,15 +64,31 @@ public class Connection implements Runnable {
     protected volatile SpamFilter routeFilter=SpamFilter.newRouteFilter();
     protected volatile SpamFilter personalFilter=SpamFilter.newPersonalFilter();
 
-    /** The underlying socket.  sock, in, and out are null iff this is in
-     *  the unconnected state.
+    /** The underlying socket, its address, and input and output
+     *  streams.  sock, in, and out are null iff this is in the
+     *  unconnected state.  For thread synchronization reasons, it is
+     *  important that this only be modified by the send(m) and
+     *  receive() methods.
      * 
-     *  For thread synchronization reasons, it is important that this
-     *  only be modified by the send(m) and receive() methods.  Also,
-     *  only use in and out, buffered versions of the input and output
-     *  streams, for writing.  
-     */
-
+     *  This implementation has two goals:
+     *    1) a slow connection cannot prevent other connections from making 
+     *       progress.  Packets must be dropped.
+     *    2) packets should be sent in large batches to the OS, but the
+     *       batches should not be so long as to cause undue latency.
+     * 
+     *  Towards this end, we queue sent messages on the front of
+     *  outputQueue.  Whenever outputQueue contains at least
+     *  BATCH_SIZE messages or QUEUE_TIME milliseconds has passed, the
+     *  messages on outputQueue are written to out.  Out is then
+     *  flushed exactly once. outputQueue is fixed size, so if the
+     *  output thread can't keep up with the producer, packets will be
+     *  (intentionally) droppped.  LOCKING: obtain outputQueueLock
+     *  lock before modifying or replacing outputQueue.
+     *
+     *  One problem with this scheme is that IOExceptions from sending
+     *  data happen asynchronously.  When this happens, connectionClosed
+     *  is set to true.  Then the next time send is called, an IOException
+     *  is thrown.  */
     protected String host;
     protected int port;
     protected Socket sock;
@@ -80,6 +96,22 @@ public class Connection implements Runnable {
     protected OutputStream out;
     protected boolean incoming;
 
+    /** The (approximate) max time a packet can be queued, in milliseconds. */
+    private static final int QUEUE_TIME=1000;
+    /** The number of packets to present to the OS at a time.  This
+     *  should be roughly proportional to the OS's send buffer. */
+    private static final int BATCH_SIZE=20;
+    /** The size of the queue.  This must be larger than BATCH_SIZE.
+     *  Larger values tolerate temporary bursts of producer traffic
+     *  without traffic but may result in overall latency. */
+    private static final int QUEUE_SIZE=100;
+    /** A lock to protect the swapping of outputQueue and oldOutputQueue. */
+    private Object outputQueueLock=new Object();
+    /** The producer's queue. */
+    private volatile Buffer outputQueue=new Buffer(QUEUE_SIZE);
+    /** The consumer's queue. */
+    private volatile Buffer oldOutputQueue=new Buffer(QUEUE_SIZE);
+    private boolean connectionClosed=false;
 
     /** Trigger an opening connection to shutdown after it opens */
     private boolean doShutdown;
@@ -100,6 +132,7 @@ public class Connection implements Runnable {
     protected int sent=0;
     protected int received=0;
     protected int dropped=0;
+    //protected int unsent=0;
     protected int lastReceived=0;
     protected int lastDropped=0;
 
@@ -144,6 +177,10 @@ public class Connection implements Runnable {
         expectString(settings.getConnectOkString()+"\n\n");
         if ( doShutdown )
             sock.close();
+
+        Thread t=new Thread(new OutputRunner());
+        t.setDaemon(true);
+        t.start();
     }
 
     /** 
@@ -180,6 +217,11 @@ public class Connection implements Runnable {
         sendString(settings.getConnectOkString()+"\n\n");
         if ( doShutdown )
             sock.close();
+
+
+        Thread t=new Thread(new OutputRunner());
+        t.setDaemon(true);
+        t.start();
     }    
 
     protected synchronized void sendString(String s) throws IOException {
@@ -223,17 +265,70 @@ public class Connection implements Runnable {
      * @requires this is in the CONNECTED state
      * @modifies the network underlying this
      * @effects send m on the network.  Throws IOException if problems
-     *   arise.  This is thread-safe.
+     *   arise.  This is thread-safe and guaranteed not to block.
      */
     public void send(Message m) throws IOException {
-        Assert.that(sock!=null && in!=null && out!=null, "Illegal socket state for send");
-        //Can't use same lock as receive()!
-        synchronized (out) {
-            m.write(out);
-            out.flush();
-            sent++;     
-            if (manager!=null)
-                manager.total++;
+        if (connectionClosed)
+            throw new IOException();
+        
+        synchronized (outputQueueLock) {
+            Object removed=outputQueue.addFirst(m);
+            //if (removed!=null)
+            //    unsent++;
+            if (outputQueue.getSize() >= BATCH_SIZE)
+                //TODO2: if the queue is full, we could use a smarter
+                //replacement scheme.
+                outputQueueLock.notify();
+        }
+    }
+
+    /** Repeatedly sends all the queued data every few seconds. */
+    private class OutputRunner implements Runnable {
+        public void run() {
+            while (!connectionClosed) {
+                //1. Wait until (1) the queue is full or (2) the
+                //maximum allowable send latency has passed (and the
+                //queue is not empty)... 
+                synchronized (outputQueueLock) {
+                    try {
+                        if (outputQueue.getSize()<BATCH_SIZE)
+                            outputQueueLock.wait(QUEUE_TIME);
+                    } catch (InterruptedException e) { }
+                    if (outputQueue.isEmpty())
+                        continue;
+                    //...and swap outputQueue and oldOutputQueue.
+                    Buffer tmp=outputQueue;
+                    outputQueue=oldOutputQueue;  outputQueue.clear();
+                    oldOutputQueue=tmp;
+                }
+
+                //2. Now send all the data on the old queue.
+                //No need for any locks here since there is only one
+                //OutputRunner thread.
+                Assert.that(sock!=null && in!=null && out!=null, 
+                            "Illegal socket state for send");
+                while (! oldOutputQueue.isEmpty()) {
+                    Message m=(Message)oldOutputQueue.removeLast();
+                    try {
+                        m.write(out);
+                    } catch (IOException e) {
+                        //An IO error while sending will be detected next
+                        //time send() is called.
+                        connectionClosed=true;
+                        break;
+                    }
+                    sent++;     
+                    if (manager!=null)
+                        manager.total++;
+                }                
+
+                //3. Flush.  IOException can also happen hear.  Treat as above.
+                try {
+                    out.flush();
+                } catch (IOException e) {
+                    connectionClosed=true;
+                }
+            }
         }
     }
 
