@@ -314,23 +314,35 @@ public class RouterService
     }
 
     /**
-     * Searches Gnutellanet with the given query string and minimum
-     * speed.  Returns the GUID of the query request sent as a 16 byte
-     * array, or null if there was a network error.  ActivityCallback
-     * is notified asynchronously of responses.  These responses can
-     * be matched with requests by looking at their GUIDs.  (You may
-     * want to wrap the bytes with a GUID object for simplicity.)
-     */
-    public byte[] query(String query, int minSpeed) {
+     * Searches Gnutellanet files of the given type with the given
+     * query string and minimum speed.  If type is null, any file type
+     * is acceptable.  Returns the GUID of the query request sent as a
+     * 16 byte array, or null if there was a network error.
+     * ActivityCallback is notified asynchronously of responses.
+     * These responses can be matched with requests by looking at
+     * their GUIDs.  (You may want to wrap the bytes with a GUID
+     * object for simplicity.)  */
+    public byte[] query(String query, int minSpeed, MediaType type) {
 	QueryRequest qr=new QueryRequest(SettingsManager.instance().getTTL(), minSpeed, query);
 	manager.fromMe(qr);
-	verifier.record(qr); //record the sent query with verifier to be able to find accuracy of replies.
+	verifier.record(qr, type);
 	manager.sendToAll(qr);
 	return qr.getGUID();
     }
 
+    /** Same as query(query, minSpeed, null), i.e., searches for files of any type. */
+    public byte[] query(String query, int minSpeed) {
+	return query(query, minSpeed, null);
+    }
+
+    /** Same as ResponseVerifier.score. */
     public int score(byte[] Guid, Response resp){
 	return verifier.score(Guid,resp);
+    }
+
+    /** Same as ResponseVerifier.matchesType. */
+    public boolean matchesType(byte[] guid, Response response) {
+	return verifier.matchesType(guid, response);
     }
 
     /**

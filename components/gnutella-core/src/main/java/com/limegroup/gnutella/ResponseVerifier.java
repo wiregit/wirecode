@@ -6,7 +6,17 @@ import java.util.StringTokenizer;
 import com.sun.java.util.collections.*;
 
 
-public class ResponseVerifier{
+public class ResponseVerifier {
+
+    private static class RequestData {
+	String[] queryWords;
+	MediaType type;
+	RequestData(String[] queryWords, MediaType type) {
+	    this.queryWords=queryWords;
+	    this.type=type;
+	}
+    }
+
     /** A mapping from GUIDs to the words of the search made with that GUID.
      *
      *  INVARIANT: for each String[] V in the range of mapper,
@@ -14,16 +24,22 @@ public class ResponseVerifier{
      *        +no string in V contains any of the characters in DELIMETER
      *        +no string in V contains upper-case characters
      */
-    private ForgetfulHashMap /* GUID -> String[] */ mapper = new ForgetfulHashMap(50);
+    private ForgetfulHashMap /* GUID -> RequestData */ mapper = new ForgetfulHashMap(15);
     /** The characters to use in stripping apart queries and replies. */
     private static final String DELIMITERS="_,.-+/\\ *()";
+
+    /** Same as record(qr, null). */
+    public synchronized void record(QueryRequest qr) {
+	record(qr, null);
+    }
     
     /** 
      *  @modifies this
-     *  @effects memorizes the query string for qr.  This will be used to score
-     *   responses later.
+     *  @effects memorizes the query string for qr; this will be used to score
+     *   responses later.  If type!=null, also memorizes that qr was for the given 
+     *   media type; otherwise, this is assumed to be for any type.
      */
-    public synchronized void record(QueryRequest qr){
+    public synchronized void record(QueryRequest qr, MediaType type){
 	//Copy words in the query to queryWords.
 	List buf=new ArrayList();
 	StringTokenizer st = new StringTokenizer(qr.getQuery().toLowerCase(),
@@ -35,9 +51,9 @@ public class ResponseVerifier{
 	}
 	String[] queryWords=new String[buf.size()];
 	buf.toArray(queryWords);
-
+	
 	byte[] guid = qr.getGUID();
-	mapper.put(new GUID(guid),queryWords);
+	mapper.put(new GUID(guid),new RequestData(queryWords, type));
     }
 	
     
@@ -57,9 +73,10 @@ public class ResponseVerifier{
     public synchronized int score(byte[] guid, Response resp){
 	int numMatchingWords=0;
 
-	String[] queryWords = (String[])mapper.get(new GUID(guid));
-	if (queryWords == null)
+	RequestData request=(RequestData)mapper.get(new GUID(guid));
+	if (request == null)
 	    return 100; // assume 100% match if no corresponding query found.
+	String[] queryWords = request.queryWords;
 	int numQueryWords=queryWords.length;
 	if (numQueryWords==0)
 	    return 100; // avoid divide-by-zero errors below
@@ -90,11 +107,25 @@ public class ResponseVerifier{
 	return (int)((float)numMatchingWords * 100.f/(float)numQueryWords);
     }
 
+    /** 
+     * Returns true if response has the same media type as the
+     * corresponding query request the given GUID.  In the rare case
+     * that guid is not known (because this' buffers overflowed),
+     * conservatively returns true.  
+     */
+    public boolean matchesType(byte[] guid, Response response) {
+	RequestData request=(RequestData)mapper.get(new GUID(guid));
+	if (request == null || request.type==null) 
+	    return true;
+	String reply = response.getName();
+	return request.type.matches(reply);
+    }
+
     public String toString() {
 	return mapper.toString();
     }
-    
-    /* Unit tests */   
+        
+    /* Unit tests */      
     /*
     public static void main(String args[]){
 	ResponseVerifier rv = new ResponseVerifier();
@@ -131,6 +162,19 @@ public class ResponseVerifier{
 	Response r5=new Response(1,1,"Wierd Al-The Weird Al Show Theme.mp3");
 	int score2=rv.score(qr4.getGUID(), r5);
 	Assert.that(score2==100, "Score is "+score2);
+	
+	//////////////////////// matchesType tests ////////////////////////////
+	MediaType mt=new MediaType("Audio", new String[] {"mp3"});
+
+	rv=new ResponseVerifier();
+	rv.record(qr4, mt);
+	Assert.that(rv.matchesType(qr4.getGUID(), r5));
+	Assert.that(! rv.matchesType(qr4.getGUID(), r4));
+
+	rv=new ResponseVerifier();
+	rv.record(qr4, null);
+	Assert.that(rv.matchesType(qr4.getGUID(), r5));
+	Assert.that(rv.matchesType(qr4.getGUID(), r4));
     }    
     */
 }
