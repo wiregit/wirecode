@@ -90,6 +90,12 @@ public class RemoteFileDesc implements Serializable {
      * This is NOT SERIALIZED.
      */
     private transient List _availableRanges = null;
+    
+    /**
+     * The number of times this download has failed while attempting
+     * to transfer data.
+     */
+    private transient int _failedCount = 0;
 
 	/** 
      * Constructs a new RemoteFileDesc with metadata.
@@ -234,7 +240,28 @@ public class RemoteFileDesc implements Serializable {
      */
     public void setAvailableRanges(List availableRanges) {
         this._availableRanges = availableRanges;
-    }    
+    }
+    
+    /**
+     * Returns the current failed count.
+     */
+    public int getFailedCount() {
+        return _failedCount;
+    }
+    
+    /**
+     * Increments the failed count by one.
+     */
+    public void incrementFailedCount() {
+        _failedCount++;
+    }
+    
+    /**
+     * Resets the failed count back to zero.
+     */
+    public void resetFailedCount() {
+        _failedCount = 0;
+    }
     
 	/**
 	 * Accessor for the host ip with this file.
@@ -412,9 +439,10 @@ public class RemoteFileDesc implements Serializable {
 	 *  fields of the specified object, and <tt>false</tt> if this
 	 *  is not the case, or if the specified object is not a 
 	 *  <tt>RemoteFileDesc</tt>.
-     *
-     * We do not evaluate PushProxy equality here since a responses PushProxy
-     * set is dynamic.
+	 *
+	 * Dynamic values such as _http11, _proxies and _availableSources
+	 * are not checked here, as they can change and still be considered
+	 * the same "remote file".
 	 */
     public boolean equals(Object o) {
 		if(o == this) return true;
@@ -434,8 +462,7 @@ public class RemoteFileDesc implements Serializable {
 				(getXMLDoc() == null ? other.getXMLDoc() == null :
 				  getXMLDoc().equals(other.getXMLDoc())) &&
 				(_urns == null ? other._urns == null :
-				 _urns.equals(other._urns)) &&
-                (_proxies.equals(other._proxies)));		
+				 _urns.equals(other._urns)));		
     }
 
 	//TODO:: ADD HASHCODE OVERRIDE
