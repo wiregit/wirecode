@@ -7,6 +7,7 @@ import com.limegroup.gnutella.messages.*;
 import com.limegroup.gnutella.filters.*;
 import com.limegroup.gnutella.downloader.*;
 import com.limegroup.gnutella.chat.*;
+import com.limegroup.gnutella.connection.NIODispatcher;
 import com.limegroup.gnutella.xml.*;
 import com.limegroup.gnutella.security.ServerAuthenticator;
 import com.limegroup.gnutella.security.Authenticator;
@@ -221,6 +222,12 @@ public class RouterService {
 	    new HTTPAcceptor().start();	
         Pinger.instance().start();
         ConnectionWatchdog.instance().start();
+        
+        // start the NIO dispatcher thread if we want to use NIO
+        if(CommonUtils.isJava14OrLater() &&
+           ConnectionSettings.USE_NIO.getValue()) {
+            NIODispatcher.instance();
+        }
 	}
 
     /**
