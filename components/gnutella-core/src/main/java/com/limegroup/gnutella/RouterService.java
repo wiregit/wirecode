@@ -973,7 +973,8 @@ public class RouterService
      * @param type The mediatype associated with this search.
      */
     public Downloader requeryDownload(String query, String richQuery,
-                                      byte[] guid, MediaType type) {
+                                      byte[] guid, MediaType type) 
+        throws AlreadyDownloadingException {
         return downloader.startRequeryDownload(query, richQuery,
                                                guid, type);
     }

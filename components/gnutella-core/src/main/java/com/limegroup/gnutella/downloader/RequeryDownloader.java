@@ -52,6 +52,22 @@ public class RequeryDownloader extends ManagedDownloader {
         return _add.getRichQuery();
     }
 
+    /** Returns the MediaType associated with this Downloader.
+     */
+    private final MediaType getMediaType() {
+        return _add.getMediaType();
+    }
+
+    /** Returns true if the parameters of the add are sufficiently similar such
+     *  that spawning a new RequeryDownloader would be redundant.
+     */
+    public boolean conflicts(AutoDownloadDetails add) {
+        // currently, if the query is equal and the mediatype is the same.  this
+        // may not be the most comprehensive test, but i'm trying to stop
+        // AddWishList calls for the same search mainly....
+        return (getQuery().equals(add.getQuery()) &&
+               getMediaType().toString().equals(add.getMediaType().toString()));
+    }
 
     /**
      * Returns true if 'other' could conflict with one of the files in this. 

@@ -280,11 +280,15 @@ public class DownloadManager implements BandwidthTracker {
     public synchronized Downloader startRequeryDownload(String query,
                                                         String richQuery,
                                                         byte[] guid,
-                                                        MediaType type) {
+                                                        MediaType type) 
+    throws AlreadyDownloadingException {
         AutoDownloadDetails add = new AutoDownloadDetails(query,
                                                           richQuery,
                                                           guid,
                                                           type);
+        if (requeryConflicts(add))
+            throw new AlreadyDownloadingException(query);
+
         Downloader downloader = new RequeryDownloader(this,
                                                       fileManager,
                                                       incompleteFileManager,
@@ -326,6 +330,29 @@ public class DownloadManager implements BandwidthTracker {
         return null;
     }
 
+    /** Returns true if there is a RequeryDownloader of sufficient similarity
+     *  in existence.
+     */
+    private synchronized boolean requeryConflicts(AutoDownloadDetails add) {
+        boolean retVal = false;
+        //Active downloads...
+        for (Iterator iter=active.iterator(); iter.hasNext() && !retVal; ) {
+            ManagedDownloader md=(ManagedDownloader)iter.next();
+            if (md instanceof RequeryDownloader) {
+                RequeryDownloader rd = (RequeryDownloader) md;
+                retVal = rd.conflicts(add);
+            }
+        }
+        //Queued downloads...
+        for (Iterator iter=waiting.iterator(); iter.hasNext() && !retVal; ) {
+            ManagedDownloader md=(ManagedDownloader)iter.next();
+            if (md instanceof RequeryDownloader) {
+                RequeryDownloader rd = (RequeryDownloader) md;
+                retVal = rd.conflicts(add);
+            }
+        }
+        return retVal;
+    }
 
     /* Adds the file named in qr to an existing downloader if appropriate.
      */
