@@ -4,6 +4,7 @@ import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.util.*;
 import com.limegroup.gnutella.statistics.*;
 import java.io.*;
+import java.net.*;
 import java.util.Locale;
 import com.sun.java.util.collections.*;
 
@@ -88,6 +89,10 @@ public class QueryReply extends Message implements Serializable{
 	/** The raw ip address of the host returning the hit.*/
 	private byte[] _address = new byte[4];
 
+    /** the PushProxy info for this hit.
+     */
+    private PushProxyInterface[] _proxies;
+
     /** Our static and final instance of the GGEPUtil helper class.
      */
     private static final GGEPUtil _ggepUtil = new GGEPUtil();
@@ -105,7 +110,8 @@ public class QueryReply extends Message implements Serializable{
             int port, byte[] ip, long speed, Response[] responses,
             byte[] clientGUID, boolean isMulticastReply) {
         this(guid, ttl, port, ip, speed, responses, clientGUID, new byte[0],
-             false, false, false, false, false, false, true, isMulticastReply);
+             false, false, false, false, false, false, true, isMulticastReply,
+             new PushProxyInterface[0]);
     }
 
 
@@ -133,7 +139,7 @@ public class QueryReply extends Message implements Serializable{
         this(guid, ttl, port, ip, speed, responses, clientGUID, new byte[0],
              true, needsPush, isBusy, finishedUpload,
              measuredSpeed,supportsChat,
-             true, isMulticastReply);
+             true, isMulticastReply, new PushProxyInterface[0]);
     }
 
 
@@ -168,7 +174,8 @@ public class QueryReply extends Message implements Serializable{
         throws IllegalArgumentException {
         this(guid, ttl, port, ip, speed, responses, clientGUID, 
              xmlBytes, true, needsPush, isBusy, 
-             finishedUpload, measuredSpeed,supportsChat, true, isMulticastReply);
+             finishedUpload, measuredSpeed,supportsChat, true, isMulticastReply,
+             new PushProxyInterface[0]);
         if (xmlBytes.length > XML_MAX_SIZE)
             throw new IllegalArgumentException();
         _xmlBytes = xmlBytes;        
@@ -219,7 +226,7 @@ public class QueryReply extends Message implements Serializable{
              boolean includeQHD, boolean needsPush, boolean isBusy,
              boolean finishedUpload, boolean measuredSpeed,
              boolean supportsChat, boolean supportsBH,
-             boolean isMulticastReply) {
+             boolean isMulticastReply, PushProxyInterface[] proxies) {
         super(guid, Message.F_QUERY_REPLY, ttl, (byte)0,
               0,                               // length, update later
               16);                             // 16-byte footer
@@ -270,7 +277,9 @@ public class QueryReply extends Message implements Serializable{
                 baos.write(COMMON_PAYLOAD_LEN);
                 
                 // size of standard, no options, ggep block...
-                int ggepLen=_ggepUtil.getQRGGEP(false, false).length;
+                int ggepLen=
+                    _ggepUtil.getQRGGEP(false, false, 
+                                        new PushProxyInterface[0]).length;
                 
                 //c) PART 1: common area flags and controls.  See format in
                 //parseResults2.
@@ -301,7 +310,8 @@ public class QueryReply extends Message implements Serializable{
                 
                 //f) the GGEP block
                 byte[] ggepBytes = _ggepUtil.getQRGGEP(supportsBH,
-                                                       isMulticastReply);
+                                                       isMulticastReply,
+                                                       _proxies);
                 baos.write(ggepBytes, 0, ggepBytes.length);
                 
                 //g) actual xml.
@@ -354,33 +364,6 @@ public class QueryReply extends Message implements Serializable{
             ret += responses[i].getLength();
         }
         return ret;
-    }
-
-    /** Returns the number of bytes necessary to represent the QHD in the
-     *  payload.  Needs to take account of size of XML and whether or not to
-     *  even include a QHD.
-     */
-    private static int qhdLength(boolean includeQHD, 
-                                 byte[] xmlBytes, 
-                                 boolean supportsBH,
-                                 boolean isMulticastReply) {
-        int retInt = 0;
-        if (includeQHD) {
-            retInt += 4; // 'LIME'
-            retInt += 1; // 1 byte for size of public area
-            retInt += COMMON_PAYLOAD_LEN; 
-            // the size of the GGEP block for Query Replies with optional Browse
-            // Host flag...
-            retInt += _ggepUtil.getQRGGEP(supportsBH, isMulticastReply).length;
-            retInt += 1;//One byte in the private area for chat
-            // size of xml string, max XML_MAX_SIZE            
-            int numBytes = xmlBytes.length;
-            if ((numBytes + 1) > XML_MAX_SIZE)
-                retInt += XML_MAX_SIZE;
-            else
-                retInt += (numBytes + 1);
-        }
-        return retInt;
     }
 
 	// inherit doc comment
@@ -1120,7 +1103,8 @@ public class QueryReply extends Message implements Serializable{
          * desire. 
          */
         public byte[] getQRGGEP(boolean supportsBH,
-                                boolean isMulticastResponse) {
+                                boolean isMulticastResponse,
+                                PushProxyInterface[] proxies) {
             byte[] retGGEPBlock = _standardGGEP;
             if (supportsBH && isMulticastResponse)
                 retGGEPBlock = _comboGGEP;
@@ -1161,6 +1145,26 @@ public class QueryReply extends Message implements Serializable{
         }
 
 
+    }
+
+    /** A simple utility class for doling out PushProxy information.
+     */
+    private static class PushProxyContainer implements PushProxyInterface {
+        private int _port;
+        private InetAddress _addr;
+
+        public PushProxyContainer(String hostAddress, int port) 
+            throws UnknownHostException {
+            _addr = InetAddress.getByName(hostAddress);
+            _port = port;
+        }
+
+        public int getPushProxyPort() {
+            return _port;
+        }
+        public InetAddress getPushProxyAddress() {
+            return _addr;
+        }
     }
 
 } //end QueryReply

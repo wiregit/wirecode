@@ -33,6 +33,8 @@ public class GGEP extends Object {
     public static final String GGEP_HEADER_QUERY_KEY_SUPPORT = "QK";
     /** The extension header (key) for QueryKey support. */
     public static final String GGEP_HEADER_MULTICAST_RESPONSE = "MCAST";
+    /** The extension header (key) for PushProxy support. */
+    public static final String GGEP_HEADER_PUSH_PROXY = "PUSH";
     /** The maximum size of a extension header (key). */
     public static final int MAX_KEY_SIZE_IN_BYTES = 15;
 

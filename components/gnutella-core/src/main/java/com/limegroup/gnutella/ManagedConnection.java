@@ -53,7 +53,7 @@ import com.limegroup.gnutella.updates.*;
  * originated from it.<p> 
  */
 public class ManagedConnection extends Connection 
-	implements ReplyHandler {
+	implements ReplyHandler, PushProxyInterface {
 
     /** 
      * The time to wait between route table updates for leaves, 
