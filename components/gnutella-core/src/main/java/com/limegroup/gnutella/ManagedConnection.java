@@ -1092,6 +1092,22 @@ public class ManagedConnection extends Connection
             softMaxHops = hops.getHopValue();
         }
         else if (vm instanceof MessagesSupportedVendorMessage) {
+
+            // see if you need a PushProxy - the remoteHostSupportsPushProxy
+            // test incorporates my leaf status in it.....
+            if (remoteHostSupportsPushProxy() > -1) {
+                // get the client GUID and send off a PushProxyRequest
+                GUID clientGUID =
+                    new GUID(RouterService.getMessageRouter()._clientGUID);
+                try {
+                    PushProxyRequest req = new PushProxyRequest(clientGUID);
+                    send(req);
+                }
+                catch (BadPacketException never) {
+                    never.printStackTrace();
+                }
+            }
+
             // if we are ignoring local addresses and the connection is local
             // or the guy has a similar address then ignore
             if(ConnectionSettings.LOCAL_IS_PRIVATE.getValue() && 

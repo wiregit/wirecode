@@ -85,6 +85,26 @@ public class VendorMessageTest extends com.limegroup.gnutella.util.BaseTestCase 
         // test other constructor....
         vm = new ReplyNumberVendorMessage(new GUID(GUID.makeGuid()), 5);
         testRead(vm);
+
+        // Push Proxy Request
+        // -----------------------------
+        // test network constructor....
+        vm = new PushProxyRequest(GUID.makeGuid(), (byte) 1, 
+                                  (byte) 0, 1, new byte[0]);
+        testWrite(vm);
+        // test other constructor....
+        vm = new PushProxyRequest(new GUID(GUID.makeGuid()));
+        testRead(vm);
+
+        // Push Proxy Acknowledgement
+        // -----------------------------
+        // test network constructor....
+        vm = new PushProxyAcknowledgement(GUID.makeGuid(), (byte) 1, 
+                                          (byte) 0, 1, new byte[2]);
+        testWrite(vm);
+        // test other constructor....
+        vm = new PushProxyAcknowledgement(5);
+        testRead(vm);
     }
 
 
@@ -153,6 +173,21 @@ public class VendorMessageTest extends com.limegroup.gnutella.util.BaseTestCase 
             assertEquals("after Read guids aren't equal!", guid, 
                          new GUID(vmRead.getGUID()));
         }
+    }
+
+
+    public void testPushProxyVMs() throws Exception {
+        GUID guid = new GUID(GUID.makeGuid());
+        PushProxyRequest req = new PushProxyRequest(guid);
+        assertTrue(req.getClientGUID().equals(new GUID(req.getGUID())));
+        assertTrue(req.getClientGUID().equals(guid));
+        testWrite(req);
+        testRead(req);
+        
+        PushProxyAcknowledgement ack = new PushProxyAcknowledgement(6346);
+        assertTrue(ack.getListeningPort() == 6346);
+        testWrite(ack);
+        testRead(req);
     }
 
 

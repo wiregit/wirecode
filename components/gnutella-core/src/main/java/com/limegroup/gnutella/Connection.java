@@ -1201,6 +1201,15 @@ public class Connection {
         return -1;
     }
 
+    /** @return -1 if the message isn't supported, else the version number 
+     *  supported.
+     */
+    public int remoteHostSupportsPushProxy() {
+        if ((_messagesSupported != null) && isClientSupernodeConnection())
+            return _messagesSupported.supportsPushProxy();
+        return -1;
+    }
+
     /**
      * Returns whether or not this connection represents a local address.
      *
