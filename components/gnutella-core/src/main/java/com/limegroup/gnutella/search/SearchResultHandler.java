@@ -46,14 +46,10 @@ public final class SearchResultHandler {
 	 */
     private long lastTime;
 
-	//private final Map GUID_MAP = new HashMap();
 
-    /**
-	 * Creates a new <tt>SearchResultPipeliner</tt> instance.
-     */
-    //public SearchResultHandler() {
-    //}
-
+	/**
+	 * Starts the thread that processes search results.
+	 */
 	public void start() {
         //Start REPLIES consumer thread.
 		Runnable resultRunner = new ReplyProcessor();
