@@ -46,7 +46,7 @@ public class LimeXMLDocumentHelper{
      * If none of the responses have any metadata, this method returns an
      * empty string.
      */
-    public String getAggrigrateString(Response[] responses){
+    public String getAggregrateString(Response[] responses){
         //get the first DOMTree(with only 1 child)
         int len = responses.length;
         int initIndex=-1;
