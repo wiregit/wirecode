@@ -20,7 +20,7 @@ public final class PongCacher implements Runnable {
     /**
      * <tt>BucketQueue</tt> holding pongs separated by hops.
      */
-    private static BucketQueue _pongs;
+    private static volatile BucketQueue _pongs;
 
     /**
      * Variable for the <tt>Set</tt> of the best cached pongs currently 
@@ -30,9 +30,16 @@ public final class PongCacher implements Runnable {
         Collections.unmodifiableSet(new HashSet());
 
     /**
-     * Constant for the number of pongs to store at each hop.
+     * Constant for the number of pongs to store at each hop. Public to 
+     * make testing easier.
      */
-    private static final int PONGS_PER_HOP = 20;
+    public static final int PONGS_PER_HOP = 20;
+
+    /**
+     * Constant for the number of cached pongs returned in response to
+     * pings.  Public to make testing easier.
+     */
+    public static final int NUM_CACHED_PONGS = 10;
 
     /**
      * Flag for whether or not we've received a new pong -- allows slight
@@ -40,6 +47,11 @@ public final class PongCacher implements Runnable {
      * pongs have come in.
      */
     private static volatile boolean _newPong = false;
+
+    /**
+     * Boolean storing whether or not the cacher has already been started.
+     */
+    private static boolean _started = false;
 
     /**
      * Returns the single <tt>PongCacher</tt> instance.
@@ -57,9 +69,11 @@ public final class PongCacher implements Runnable {
      * Starts the thread that continually updates the most recent cached pongs.
      */
     public void start() {
+        if(_started) return;
         Thread pongCacher = new Thread(this, "pong cacher");
         pongCacher.setDaemon(true);
         pongCacher.start();
+        _started = true;
     }
 
 
@@ -118,8 +132,9 @@ public final class PongCacher implements Runnable {
             Iterator iter = _pongs.iterator();
             int i = 0;
             Set pongs = new HashSet();
-            while(iter.hasNext() && i<10) {
+            while(iter.hasNext() && i<NUM_CACHED_PONGS) {
                 pongs.add((PingReply)iter.next());
+                i++;
             }
             return pongs;
         }
