@@ -38,4 +38,9 @@ public class NameValue
         this._value = value;
     }
     
+    public String toString()
+    {
+        return "name = " + _name + " value = " + _value;
+    }
+    
 }
