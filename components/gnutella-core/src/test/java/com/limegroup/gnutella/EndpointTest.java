@@ -40,32 +40,32 @@ public class EndpointTest extends com.limegroup.gnutella.util.BaseTestCase {
 
         ////////////////////////// Private IP and Subnet Tests ////////////////
         //These tests are incomplete since the methods are somewhat trivial.
-        e=new Endpoint("18.239.0.1",0);
+        e=new Endpoint("18.239.0.1",1);
         assertTrue(! e.isPrivateAddress());
-        e=new Endpoint("10.0.0.0",0);
+        e=new Endpoint("10.0.0.0",1);
         assertTrue(e.isPrivateAddress());
-        e=new Endpoint("10.255.255.255",0);
+        e=new Endpoint("10.255.255.255",1);
         assertTrue(e.isPrivateAddress());
-        e=new Endpoint("11.0.0.0",0);
+        e=new Endpoint("11.0.0.0",1);
         assertTrue(! e.isPrivateAddress());
-        e=new Endpoint("172.16.0.0",0);
+        e=new Endpoint("172.16.0.0",1);
         assertTrue(e.isPrivateAddress());
         e=new Endpoint("0.0.0.0");
         assertTrue(e.isPrivateAddress());
 
         Endpoint e1;
         Endpoint e2;
-        e1=new Endpoint("172.16.0.0",0);    e2=new Endpoint("172.16.0.1",0);
+        e1=new Endpoint("172.16.0.0",1);    e2=new Endpoint("172.16.0.1",1);
         assertTrue(e1.isSameSubnet(e2));
         assertTrue(e2.isSameSubnet(e1));
-        e2=new Endpoint("18.239.0.1",0);
+        e2=new Endpoint("18.239.0.1",1);
         assertTrue(! e2.isSameSubnet(e1));
         assertTrue(! e1.isSameSubnet(e2));
 
-        e1=new Endpoint("192.168.0.1",0);    e2=new Endpoint("192.168.0.2",0);
+        e1=new Endpoint("192.168.0.1",1);    e2=new Endpoint("192.168.0.2",1);
         assertTrue(e1.isSameSubnet(e2));
         assertTrue(e2.isSameSubnet(e1));
-        e2=new Endpoint("192.168.1.1",0);
+        e2=new Endpoint("192.168.1.1",1);
         assertTrue(! e2.isSameSubnet(e1));
         assertTrue(! e1.isSameSubnet(e2));
     }
