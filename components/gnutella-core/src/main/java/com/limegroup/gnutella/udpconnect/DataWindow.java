@@ -29,11 +29,10 @@ public class DataWindow
     private static final float RTT_GAIN            = 1.0f / 8.0f;
     private static final float DEVIATION_GAIN      = 1.0f / 4.0f;
 
-	private HashMap window;
+	private final HashMap window;
 	private long    windowStart;
 	private int     windowSize;
 	private long    averageRTT;
-	private long    smoothRTT;
 	private long    lowRTT;
 	private int     lowRTTCount;
     private float   srtt;
@@ -49,9 +48,6 @@ public class DataWindow
 		windowStart = start;
 		windowSize  = size;
 		window      = new HashMap(size+2);
-		averageRTT  = 0;
-		lowRTT      = 0;
-		lowRTTCount = 0;
 	}
 
     /*
@@ -60,16 +56,8 @@ public class DataWindow
 	public DataRecord addData(UDPConnectionMessage msg) {
 		if (LOG.isDebugEnabled())
 			LOG.debug("adding message seq "+msg.getSequenceNumber()+ " window start "+windowStart);
-		DataRecord d;
-		d          = new DataRecord();
-		d.pnum     = msg.getSequenceNumber();
-		d.msg      = msg;
-		d.pkey     = new Long(d.pnum);
-		d.sends    = 0;
-		d.written  = false;
-		d.acks     = 0;
-        d.sentTime = 0;
-        d.ackTime  = 0;
+		
+		DataRecord d = new DataRecord(msg.getSequenceNumber(),msg);
 		window.put(d.pkey, d);
 
         return d;
@@ -241,12 +229,6 @@ public class DataWindow
         return srtt;
     }
 
-    /** 
-     *  Return the current measure of average round trip time.
-     */
-    public int averageRoundTripTime() {
-		return (int) averageRTT;
-	}
 
     /** 
      *  Return the current measure of low round trip time.
@@ -255,12 +237,6 @@ public class DataWindow
         return (int) lowRTT;
     }
 
-    /** 
-     *  Return a measure of the smoothed round trip time
-     */
-    public int smoothRoundTripTime() {
-		return (int) smoothRTT;
-	}
 
     /** 
      *  Record that a block was acked and calculate the 
@@ -275,7 +251,7 @@ public class DataWindow
 			drec.ackTime = System.currentTimeMillis();	
 
 
-            // TODO:
+
             // delta  = measuredRTT - srtt
             // srtt   = srtt + g * delta
             // rttvar = rttvar + h*(abs(delta) - rttvar)
@@ -289,7 +265,6 @@ public class DataWindow
 			// Add to the averageRTT
 			if ( drec.acks == 1 && drec.sends == 1 ) {
 				long  rtt    = (drec.ackTime-drec.sentTime);
-				long  adjRTT = rtt + HIST_SIZE/2 + 1;
                 float delta  = ((float) rtt) - srtt;
 				if ( rtt > 0 ) {
                     // Compute RTO
@@ -306,26 +281,18 @@ public class DataWindow
 					else {
 						averageRTT = 
 						  (averageRTT*(HIST_SIZE-1))/HIST_SIZE +
-						   adjRTT/HIST_SIZE;
+						   rtt/HIST_SIZE;
 					}
-
-					// Compute a longer moving average of the RTT
-					long adjAvgRTT = averageRTT + HIST_SIZE + 2;
-					if ( smoothRTT == 0 ) 
-						smoothRTT = rtt*4;
-					else 
-						smoothRTT = 
-						  ((smoothRTT+2)*(2*HIST_SIZE-1))/(2*HIST_SIZE) + 
-						   adjAvgRTT/(2*HIST_SIZE);
 		
 					// Compute a measure of the lowest RTT
+					//TODO: replace this formula with the same one used for rtt
 					if ( lowRTTCount < 10 || rtt < lowRTT ) {
 						if ( lowRTT == 0 ) 
 							lowRTT = rtt;
 						else 
 							lowRTT = 
 							  ((lowRTT+1)*(HIST_SIZE-1))/HIST_SIZE + 
-							   adjRTT/HIST_SIZE;
+							   rtt/HIST_SIZE;
 						lowRTTCount++;
 					}
 				}
@@ -506,7 +473,6 @@ public class DataWindow
 
 	public void printFinalStats() {
 		System.out.println(
-		  "smoothRTT:"+smoothRTT+
 		  " avgRTT:"+averageRTT+
 		  " lowRTT:"+lowRTT);
 	}
@@ -521,13 +487,17 @@ public class DataWindow
  *  round trip time and a calculation for timeout resends.
  */
 class DataRecord {
-	public long			 		pnum;     // sequence number
-	public Long 				pkey;     // sequence number as a Long
-	public UDPConnectionMessage msg;      // the actual data message
-    public int                  sends;    // count of the sends
-	public boolean 		        written;  // whether the data was written
-	public int   		        acks;     // count of the number of acks
-    public long                 sentTime; // when it was sent
-    public long                 ackTime;  // when it was acked
+	final Long 				pkey;     // sequence number as a Long
+	final UDPConnectionMessage msg;      // the actual data message
+    int                  sends;    // count of the sends
+	boolean 		        written;  // whether the data was written
+	int   		        acks;     // count of the number of acks
+    long                 sentTime; // when it was sent
+    long                 ackTime;  // when it was acked
+    
+    DataRecord(long pnum, UDPConnectionMessage msg) {
+    	pkey = new Long(pnum);
+    	this.msg=msg;
+    }
 }
 

@@ -841,7 +841,7 @@ public class UDPConnectionProcessor {
             int        numResent = 0;
 
             // Resend up to 1 packet at a time
-            for (int i = 0; i < 1; i++) {
+            resend: {
 
                 // Get the oldest unacked block out of storage
                 drec     = _sendWindow.getOldestUnackedBlock();
@@ -858,8 +858,9 @@ public class UDPConnectionProcessor {
                 }
 
                 // The assumption is that this record has not been acked
-                if ( drec == null ) break;
-                if ( drec.acks > 0 ) continue;
+                if ( drec == null || drec.acks > 0) 
+                	break resend;
+                
 
 				// If too many sends then abort connection
 				if ( drec.sends > MAX_SEND_TRIES+1 ) {
