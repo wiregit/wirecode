@@ -139,7 +139,7 @@ public class ManagedConnection extends Connection
      *  of producer traffic, though they waste more memory. This queue is
      *  slightly smaller so that we don't waste too much memory on lower
      *  priority messages. */
-    private static final int QUEUE_SIZE = 5;
+    private static final int QUEUE_SIZE = 1;
     /** The max time to keep reply messages and pushes in the queues, in
      *  milliseconds. */
     private static int BIG_QUEUE_TIME=10*1000;
