@@ -935,14 +935,30 @@ public class RouterService
         try {
             URLConnection conn 
                 = (new URL("http://"+host+":"+port)).openConnection();
-            conn.setRequestProperty("accept", 
+            conn.setRequestProperty("Accept", 
                                     Constants.QUERYREPLY_MIME_TYPE);
+            conn.setRequestProperty("User-Agent", CommonUtils.getVendor());
+            conn.setRequestProperty("Content-Length", "0");
+            conn.setRequestProperty("Connection", "close");
             InputStream in = conn.getInputStream();
             
+            if (conn instanceof HttpURLConnection) {
+                HttpURLConnection httpConn = (HttpURLConnection) conn;
+                int respCode = httpConn.getResponseCode();
+                if (respCode != HttpURLConnection.HTTP_OK)
+                    ; // notify user of the no go....
+            }
+
+            final String cType = conn.getContentType();
+            if (!cType.equalsIgnoreCase(Constants.QUERYREPLY_MIME_TYPE))
+                return; // weird, returned a type we didn't understand...
+
+            final String cEnc  = conn.getContentEncoding();
+            if ((cEnc != null) && cEnc.equals("deflate"))
+                return; // need to uncompress
+
             while(true) {
                 Message m = Message.read(in);
-//                System.out.println("read " + m);
-                
                 if(m == null) {
                     //we are finished reading the stream
                     return;

@@ -71,7 +71,7 @@ public class BrowseHostUploadState implements UploadState
         String str;
 		str = "HTTP/1.1 200 OK\r\n";
 		_ostream.write(str.getBytes());
-		str = "Server: " + CommonUtils.getVendor() + "\r\n";
+		str = "User-Agent: " + CommonUtils.getVendor() + "\r\n";
 		_ostream.write(str.getBytes());
 		str = "Content-Type: " + Constants.QUERYREPLY_MIME_TYPE + "\r\n";
 		_ostream.write(str.getBytes());

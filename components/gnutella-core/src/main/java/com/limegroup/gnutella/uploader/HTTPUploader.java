@@ -332,6 +332,7 @@ public class HTTPUploader implements Uploader {
 		while (true) {
 			// read the line in from the socket.
             str = br.readLine();
+            debug("HTTPUploader.readHeader(): str = " +  str);
 			// break out of the loop if it is null or blank
             if ( (str==null) || (str.equals("")) )
                 break;
@@ -549,6 +550,14 @@ public class HTTPUploader implements Uploader {
     public boolean getCloseConnection() {
         return _state.getCloseConnection();
     }
+
+
+    private final boolean debugOn = false;
+    private void debug(String out) {
+        if (debugOn)
+            System.out.println(out);
+    }
+
 }
 
 
