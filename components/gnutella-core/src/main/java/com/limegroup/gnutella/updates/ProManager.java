@@ -25,7 +25,9 @@ public class ProManager {
     private String macAddress = null;
     private final String START = "{";
     private final String END = "}";
+    private final long EXPIRY = 16070400000l;//6*31*24*60*60*1000
 
+    /////////////////////////External Interface////////////////////
     /**
      * @return true if we can find the MAC address of this machine - for
      * purposes of unique identifier, and we have a high enough version of java
@@ -36,14 +38,59 @@ public class ProManager {
         this.macAddress = maf.getMacAddress();
         return(macAddress!=null && CommonUtils.isJava13OrLater());
     }
-    
+
+    /**
+     * @exception IOException if unable to read the ProFile. This means the
+     * file exists, but we are not able to read if for some reason. 
+     * How should we deal with this? 
+     */
+    public boolean isPro() throws IOException, UnsupportedEncodingException {
+        MacAddressFinder maf = new MacAddressFinder();
+        this.macAddress = maf.getMacAddress();
+        if(macAddress==null)
+            return false;
+        //read the file -- no file - we are not pro
+        File file = null;
+        byte[] bytes = null;
+        file = new File(CommonUtils.getUserSettingsDir(),"ProFile");
+        if(!file.exists())
+            return false;
+        RandomAccessFile raf = new RandomAccessFile(file, "r");
+        bytes = new byte[(int)raf.length()];
+        raf.readFully(bytes);
+        raf.close();
+        String str = new String(bytes,"UTF-8");
+        int index = str.indexOf("|");//works because we use base 32 on server
+        if(index < 0) {//defective file and we are not pro 
+            file.delete(); 
+            return false;
+        }
+        byte[] signature = str.substring(0,index).getBytes("UTF-8");
+        String startDate = str.substring(index);//includes the separator
+        byte[] plainText = (this.macAddress+startDate).getBytes("UTF-8");
+        UpdateMessageVerifier verifier = 
+                                new UpdateMessageVerifier(signature,plainText);
+        if(!verifier.verifySource())//not verified
+            return false;
+        //OK. The File is verified. Check if its still time to be PRO
+        long expiryTime = Long.parseLong(startDate) + EXPIRY;
+        return System.currentTimeMillis() <= expiryTime;
+    }
+
+    /**
+     * @exception IOException is thrown if the file the server sent back
+     * could not be written
+     */
     public boolean buyPro(String name, String address, String city, 
                           String state, String zip, String country, 
-                          String email, String ccNumber, String expDate)  {
+                          String email, String ccNumber, String expDate)  
+    throws IOException, UnsupportedEncodingException {
+        FileOutputStream fos =null;
+        SSLSocket socket = null;
         try {
             Assert.that(canBuyPro());
             //1. open a secure socket to LimeWire server.
-            SSLSocket socket = (SSLSocket)createConnectionToPayServer();
+            socket = (SSLSocket)createConnectionToPayServer();
             //Force the socket to do the SSL handshake now.
             socket.startHandshake();
             OutputStream os = socket.getOutputStream();
@@ -56,7 +103,7 @@ public class ProManager {
             //3. generate and send info for server  -- including MAC address
             String str = getInfoForServer(name,address,city,state,zip,country,
                                        email, ccNumber, expDate);
-            byte[] info = str.getBytes("UTF-8");
+            byte[] info = str.getBytes("UTF-8");//this has to be in English
             int size = info.length;//this can be more than 127...we need an int
             byte[] s = {0,0,0,0};
             ByteOrder.int2leb(size,s,0);
@@ -67,19 +114,25 @@ public class ProManager {
             os.write(info);
             os.flush();
             //4. Server will send back a signed file, save it.
-            while(true) {
-                int a = is.read();
-                if(a==-1)
-                    break;
-                System.out.print((char)a);
+            File file=new File(CommonUtils.getUserSettingsDir(),"ProFile");
+            fos = new FileOutputStream(file);
+            int a = 0;
+            while(a!=-1) {
+                a = is.read();
+                fos.write(a);
             }
-        } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
-            //5. close the socket.
             return true;
+        } catch (Exception e) {           
+            e.printStackTrace();
+            return false;
+        } finally {
+            //always close the file and the socket
+            fos.close();//this will flush it automatically
+            socket.close();
         }
     }
+    
+    ///////////////////////////Helper methods/////////////////////////////
 
     /**
      * Establishes a connection with the payment server using SSL. For the 
@@ -108,7 +161,8 @@ public class ProManager {
         //Get SSLSocketFactory from the context
         SSLSocketFactory factory = context.getSocketFactory();
         //connect to the server
-        return factory.createSocket(InetAddress.getByName("127.0.0.1"),7000);
+        //return factory.createSocket(InetAddress.getByName("sales.limewire.com"),6002);
+        return factory.createSocket(InetAddress.getByName("127.0.0.1"),6002);
     }
 
     /**
@@ -167,25 +221,15 @@ public class ProManager {
         return sb.toString();
     }
 
-    public boolean isPro() {
-        MacAddressFinder maf = new MacAddressFinder();
-        this.macAddress = maf.getMacAddress();
-        if(macAddress==null)
-            return false;
-        //1. read the file -- no file - we are not pro
-        //2. get expiry date from the files plain text
-        //3. conbine expiry date with macAddress 
-        //4.  verify that the signature in the file.
-        //5. If not verified return false
-        //6. If verified  and  currTimeMillis() < expiry time return true
-        //7. Else return false
-        return false;
-    }    
-
+    ////////////////////////////testing code///////////////////////////////
+    
     public static void main(String[] args) {
         try {
             ProManager man = new ProManager();
-            man.buyPro("Thadani Anurag Adam Susheel John Jay", "300 Oak Tree Street, Third Avenue and Sixth Street ","New York","NY","04033","US","abcdefght@blahsblahs.com","112222222222","123233333333333333333");
+            //invalid
+            //man.buyPro("Sumeet Thadani", "Blah 21 xth  St, 1R ","New York","NY","90210","USA","big@shit.com","4111111111111113","0504");
+            //valid
+            man.buyPro("Sumeet Thadani", "Blah 21 xth St, 1R ","New York","NY","90210","USA","big@shit.com","4111111111111111","0504");
         } catch(Exception e) {
             e.printStackTrace();
             System.out.println("Sumeet: test failed");
