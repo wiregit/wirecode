@@ -67,14 +67,17 @@ public class NonBlockingServer implements Runnable {
         selectorThread.start();
         
         ServerSocketChannel ssc = ServerSocketChannel.open();
+        ssc.configureBlocking(false);
         ServerSocket ss = ssc.socket();  
         ss.bind(new InetSocketAddress(7777));
 
-        while(true) {
-            Socket client = ss.accept();
-            client.getChannel().configureBlocking(false);
-            addReader(client);
-        }      
+        ssc.register(SELECTOR, SelectionKey.OP_ACCEPT);
+        
+        //while(true) {
+          //  Socket client = ss.accept();
+            //client.getChannel().configureBlocking(false);
+            //addReader(client);
+        //}      
     }
 
     /**
@@ -112,6 +115,7 @@ public class NonBlockingServer implements Runnable {
             try {
                 n = SELECTOR.select();
             } catch(NullPointerException e) {
+                e.printStackTrace();
                 // windows bug -- need to catch it
                 continue;
             } catch(CancelledKeyException e) {
@@ -139,6 +143,9 @@ public class NonBlockingServer implements Runnable {
                 iter.remove();
                 
                 try {
+                    if(key.isAcceptable()) {
+                        handleAcceptable(key);
+                    }
                     // Check the state of the key.  We need to check all states 
                     // because individual channels can be registered for 
                     // multiple events, so we need to handle all of them.
@@ -158,6 +165,25 @@ public class NonBlockingServer implements Runnable {
     }
 
 
+
+    /**
+     * @param key
+     */
+    private void handleAcceptable(SelectionKey key) {
+        ServerSocketChannel ssc = (ServerSocketChannel)key.channel();
+        
+        try {
+            //ssc.configureBlocking(false);
+            Socket client = ssc.accept().socket();
+            System.out.println("accepted socket...");
+            
+            client.getChannel().configureBlocking(false);
+            addReader(client);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        
+    }
 
     /**
      * @param key
@@ -274,6 +300,12 @@ public class NonBlockingServer implements Runnable {
 
         void read() throws IOException {
             CHANNEL.read(READ_BUFFER);
+            
+            //byte[] readBytes = new byte[READ_BUFFER.position()];
+            //READ_BUFFER.flip();
+            //READ_BUFFER.get(readBytes);
+            
+            //System.out.println(new String(readBytes));
             READ_BUFFER.clear();
         }
     }
