@@ -342,11 +342,11 @@ public class HTTPUploader implements Runnable {
 	    }
 	    doUpload(); //sends headers via writeHeader
 	    _state = COMPLETE;
-	    _callback.removeUpload(this);	    
 	} catch (IOException e) {
 	    _state = ERROR;
 	} finally {
 	    shutdown();
+	    _callback.removeUpload(this);
 	}
     }
 
