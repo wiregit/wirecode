@@ -35,6 +35,13 @@ public class HandshakeResponse {
      *  connections.  */
     public static final String SHIELDED_MESSAGE = "I am a shielded leaf node";
 
+    /** The error code that a node with no slots should give to incoming
+     *  connections.  */
+    public static final int SLOTS_FULL = 503;
+    /** The error message that a node with no slots should give to incoming
+     *  connections.  */
+    public static final String SLOTS_FULL_MESSAGE = "Service unavailable";
+
 
     /**
      * HTTP-like status code used when handshaking (e.g., 200, 401, 503).
