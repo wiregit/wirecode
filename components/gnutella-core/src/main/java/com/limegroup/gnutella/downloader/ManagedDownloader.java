@@ -2430,10 +2430,12 @@ public class ManagedDownloader implements Downloader, Serializable {
             if(LOG.isWarnEnabled())
                 LOG.warn("worker: interrupted while asleep in "+
                   "queue" + dloader);
-            queuedThreads.remove(Thread.currentThread());
-            dloader.stop();//close connection
-                    // notifying will make no diff, coz the next 
-                    //iteration will throw interrupted exception.
+            synchronized(this) {
+                queuedThreads.remove(Thread.currentThread());
+            }
+            dloader.stop(); //close connection
+            // notifying will make no diff, coz the next 
+            //iteration will throw interrupted exception.
             return true;
         }
     }
@@ -2473,13 +2475,12 @@ public class ManagedDownloader implements Downloader, Serializable {
             }
             
             // Search for the queued thread with a slot worse than ours.
-            Iterator iter = queuedThreads.keySet().iterator();
-            int highest = queuePos; // -1 if we aren't queued.
-            while(iter.hasNext()) {
-                Object o = iter.next();
-                int currQueue = ((Integer)queuedThreads.get(o)).intValue();
+            int highest = queuePos; // -1 if we aren't queued.            
+            for(Iterator i = queuedThreads.entrySet().iterator(); i.hasNext(); ) {
+                Map.Entry entry = (Map.Entry)i.next();
+                int currQueue = ((Integer)entry.getValue()).intValue();
                 if(currQueue > highest) {
-                    killThread=(Thread)o;
+                    killThread = (Thread)entry.getKey();
                     highest = currQueue;
                 }
             }
