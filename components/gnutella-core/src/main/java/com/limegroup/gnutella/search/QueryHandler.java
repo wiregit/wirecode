@@ -52,9 +52,24 @@ public final class QueryHandler {
     /**
      * The number of milliseconds to wait per query hop.  So, if we send
      * out a TTL=3 query, we will then wait TTL*_timeToWaitPerHop
-     * milliseconds.
+     * milliseconds.  As the query continues and we gather more data
+     * regarding the popularity of the file, this number may decrease.
      */
-    private long _timeToWaitPerHop = 2400;
+    private volatile long _timeToWaitPerHop = 2400;
+
+    /**
+     * Variable for the number of milliseconds to shave off of the time
+     * to wait per hop after a certain point in the query.  As the query
+     * continues, the time to shave may increase as well.
+     */
+    private volatile long _timeToDecreasePerHop = 10;
+
+    /**
+     * Variable for the number of times we've decremented the per hop wait
+     * time.  This is used to determine how much more we should decrement
+     * it on this pass.
+     */
+    private volatile int _numDecrements = 0;
 
     /**
      * Constant for the maximum number of milliseconds the entire query
@@ -321,6 +336,7 @@ public final class QueryHandler {
             _nextQueryTime = 
                 System.currentTimeMillis() + timeToWait;
             _probeQuerySent = true;
+            return;
         }
 
         // 3) If we haven't yet satisfied the query, keep trying
@@ -338,11 +354,29 @@ public final class QueryHandler {
             // if we've already queried quite a few hosts, not gotten
             // many results, and have been querying for awhile, start
             // decreasing the per-hop wait time
-            if(QUERIED_CONNECTIONS.size() > 4 && 
-               _timeToWaitPerHop > 50 &&
-               RESULT_COUNTER.getNumResults() < 80 &&
-               (_queryStartTime - System.currentTimeMillis()) > 10000) {
-                _timeToWaitPerHop -= 100; 
+            if(_timeToWaitPerHop > 100 &&
+               (System.currentTimeMillis() - _queryStartTime) > 6000) {
+                _timeToWaitPerHop -= _timeToDecreasePerHop;
+
+                int resultFactor =
+                    Math.max(1, (int)(RESULTS/2)-(30*RESULT_COUNTER.getNumResults()));
+
+                int decrementFactor = Math.max(1, (int)(_numDecrements/6));
+
+                // the current decrease is weighted based on the number
+                // of results returned and on the number of connections
+                // we've tried -- the fewer results and the more 
+                // connections, the more the decrease
+                int currentDecrease = resultFactor * decrementFactor;
+
+                currentDecrease = 
+                    Math.max(5, currentDecrease);
+                _timeToDecreasePerHop += currentDecrease; 
+
+                _numDecrements++;
+                if(_timeToWaitPerHop < 100) {
+                    _timeToWaitPerHop = 100;
+                }
             }
         }
     }
