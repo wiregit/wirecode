@@ -87,7 +87,7 @@ public class XMLStringUtils
     public static List split(String canonicalizedField)
     {
         //form a blank list
-        List returnList = new LinkedList();
+        List returnList = new ArrayList();
         
         int lastIndex = 0;
         int index = 0;
