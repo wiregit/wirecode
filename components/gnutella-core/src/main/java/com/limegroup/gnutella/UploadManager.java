@@ -148,6 +148,12 @@ public final class UploadManager implements BandwidthTracker {
                   && !oldFileName.equalsIgnoreCase(fileName) ) {
                     RouterService.getCallback().removeUpload(uploader);
                 }
+                //We wait until the last moment before remvoving the uploader
+                //from the _activeUploadsList, because if we removed it any
+                //earlier, some other uploader could be given a slot, while we
+                //are not finished with this upload. Note that this does not
+                //completely solve the problem, but reduces it considerably.
+                removeFromList(uploader);
                 
                 uploader = new HTTPUploader(currentMethod, fileName, 
 											socket, line._index,uploader);
@@ -201,6 +207,12 @@ public final class UploadManager implements BandwidthTracker {
             debug("AIOOBE thrown, closing socket");
         } finally {
             synchronized(this) {
+                //This call to remove is when we are finally done with all the
+                //requests. This call to to removeFromList is needed because we
+                //have shifted the (per itertion) call to the top of the loop
+                //rather than the bottom, so the last iteration does not remove
+                //the uploader from _activeUploadList.
+                removeFromList(uploader);
                 boolean found = false;
                 for(Iterator iter=_queuedUploads.iterator();iter.hasNext();){
                     KeyValue kv = (KeyValue)iter.next();
@@ -327,7 +339,6 @@ public final class UploadManager implements BandwidthTracker {
             if (startTime>0)
                 reportUploadSpeed(finishTime-startTime,
                                   uploader.amountUploaded());
-            removeFromList(uploader);
            // if (!isBHUploader) // it was added earlier if !BrowseHost - remove.
            //     RouterService.getCallback().removeUpload(uploader);
             return queued;
