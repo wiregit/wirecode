@@ -6,6 +6,7 @@ import com.limegroup.gnutella.messages.*;
 import com.limegroup.gnutella.xml.*;
 import com.limegroup.gnutella.util.*;
 import com.limegroup.gnutella.messages.vendor.*;
+import com.limegroup.gnutella.settings.ChatSettings;
 import com.limegroup.gnutella.statistics.RoutedQueryStat;
 import com.limegroup.gnutella.guess.GUESSEndpoint;
 import com.sun.java.util.collections.*;
@@ -289,17 +290,25 @@ public class StandardMessageRouter extends MessageRouter {
      *
      * @return a new <tt>List</tt> of <tt>QueryReply</tt> instances
      */
-    protected List createQueryReply(byte[] guid, byte ttl, int port, 
-                                    byte[] ip , long speed, Response[] res,
-                                    byte[] clientGUID, boolean notIncoming,
+    protected List createQueryReply(byte[] guid, byte ttl,
+                                    long speed, Response[] res,
+                                    byte[] clientGUID, 
                                     boolean busy, boolean uploaded, 
                                     boolean measuredSpeed, 
-                                    boolean supportsChat,
                                     boolean isFromMcast) {
         
         List queryReplies = new ArrayList();
         QueryReply queryReply = null;
 
+        // if it is a multicasted response, use the non-forced address
+        // and port
+        int port = isFromMcast ?
+            RouterService.getNonForcedPort() :
+            RouterService.getPort();
+        byte[] ip = isFromMcast ? 
+            RouterService.getNonForcedAddress() :
+            RouterService.getAddress();
+        
         // get the xml collection string...
         String xmlCollectionString = 
         LimeXMLDocumentHelper.getAggregateString(res);
@@ -314,9 +323,12 @@ public class StandardMessageRouter extends MessageRouter {
             xmlBytes = xmlCollectionString.getBytes();
         }
         
-        // get the *latest* push proxies
+        // get the *latest* push proxies if we have not accepted an incoming
+        // connection in this session
+        boolean notIncoming = !RouterService.acceptedIncomingConnection();
         Set proxies = 
-            (notIncoming ? _manager.getPushProxies() : null);
+            (notIncoming ? 
+             _manager.getPushProxies() : null);
         
         // it may be too big....
         if (xmlBytes.length > QueryReply.XML_MAX_SIZE) {
@@ -351,7 +363,8 @@ public class StandardMessageRouter extends MessageRouter {
                                                 currResps, _clientGUID, 
                                                 xmlCompressed, notIncoming, 
                                                 busy, uploaded, 
-                                                measuredSpeed, supportsChat,
+                                                measuredSpeed, 
+                                                ChatSettings.CHAT_ENABLED.getValue(),
                                                 isFromMcast, proxies);
                     queryReplies.add(queryReply);
                 }
@@ -371,13 +384,15 @@ public class StandardMessageRouter extends MessageRouter {
             queryReply = new QueryReply(guid, ttl, port, ip, speed, res, 
                                         _clientGUID, xmlCompressed,
                                         notIncoming, busy, uploaded, 
-                                        measuredSpeed, supportsChat,
+                                        measuredSpeed, 
+                                        ChatSettings.CHAT_ENABLED.getValue(),
                                         isFromMcast, proxies);
             queryReplies.add(queryReply);
         }
 
         return queryReplies;
     }
+    
 
     
     /** @return Simply splits the input array into two (almost) equally sized

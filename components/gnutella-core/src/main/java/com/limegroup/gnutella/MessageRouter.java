@@ -1725,8 +1725,6 @@ public abstract class MessageRouter {
         // get the appropriate queryReply information
         byte[] guid = queryRequest.getGUID();
         byte ttl = (byte)(queryRequest.getHops() + 1);
-        int port = RouterService.getPort();
-        byte[] ip = RouterService.getAddress();
 
 		UploadManager um = RouterService.getUploadManager();
 
@@ -1794,28 +1792,21 @@ public abstract class MessageRouter {
 			// see if there are any open slots
 			boolean busy = !um.isServiceable();
             boolean uploaded = um.hadSuccesfulUpload();
-
-			// see if we have accepted an incoming connection during this session
-			boolean incoming = RouterService.acceptedIncomingConnection();
-
-			boolean chat = ChatSettings.CHAT_ENABLED.getValue();
 			
             // We only want to return a "reply to multicast query" QueryReply
             // if the request travelled a single hop.
 			boolean mcast = queryRequest.isMulticast() && 
                 (queryRequest.getTTL() + queryRequest.getHops()) == 1;
 			
-            // if it is a multicasted response, use the non-forced address.
+            
 			if ( mcast ) {
-			    ip = RouterService.getNonForcedAddress();
-			    port = RouterService.getNonForcedPort();
                 ttl = 1; // not strictly necessary, but nice.
             }
             
             List replies =
-                createQueryReply(guid, ttl, port, ip, speed, res, 
-                                 _clientGUID, !incoming, busy, uploaded, 
-                                 measuredSpeed, chat, mcast);
+                createQueryReply(guid, ttl, speed, res, 
+                                 _clientGUID, busy, uploaded, 
+                                 measuredSpeed, mcast);
 
             //add to the list
             queryReplies.addAll(replies);
@@ -1831,13 +1822,12 @@ public abstract class MessageRouter {
      *
      * @return a <tt>List</tt> of <tt>QueryReply</tt> instances
      */
-    protected abstract List createQueryReply(byte[] guid, byte ttl, int port, 
-                                             byte[] ip , long speed, 
+    protected abstract List createQueryReply(byte[] guid, byte ttl,
+                                            long speed, 
                                              Response[] res, byte[] clientGUID, 
-                                             boolean notIncoming, boolean busy, 
+                                             boolean busy, 
                                              boolean uploaded, 
                                              boolean measuredSpeed, 
-                                             boolean supportsChat,
                                              boolean isFromMcast);
 
     /**
