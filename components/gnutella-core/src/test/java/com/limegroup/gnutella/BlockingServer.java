@@ -63,8 +63,6 @@ public class BlockingServer {
         
         private final byte[] READ_BYTES = new byte[20];
         
-        
-        
         private final SocketWriter WRITER;
         
         SocketHandler(Socket client) {
@@ -91,6 +89,7 @@ public class BlockingServer {
             InputStream is = CLIENT.getInputStream();
             while(true) {
                 is.read(READ_BYTES);
+                //System.out.println(new String(READ_BYTES));
                 WRITER.addWriter();
             }
         }
@@ -151,6 +150,7 @@ public class BlockingServer {
             OutputStream os = CLIENT.getOutputStream();
             while(_writesToPerform > 0) {
                 os.write(WRITE_BYTES);
+                os.flush();
             }
         }
     }
