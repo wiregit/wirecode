@@ -309,11 +309,18 @@ public final class ThemeFileHandler {
 								   new Color(117, 142, 197));
 
 	/**
-	 * Setting for the table background color.
+	 * Setting for the table odd row color color.
 	 */
 	public static final ColorSetting TABLE_BACKGROUND_COLOR =
 		FACTORY.createColorSetting("TABLE_BACKGROUND_COLOR", 
 								   new Color(255,255,255));
+								   
+    /**
+     * Setting for the table even row color.
+     */
+    public static final ColorSetting TABLE_ALTERNATE_COLOR =
+        FACTORY.createColorSetting("TABLE_ALTERNATE_COLOR",
+                                    new Color(248, 248, 255));
 
 	/**
 	 * Setting for the not sharing label color.

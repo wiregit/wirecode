@@ -335,6 +335,10 @@ public class ManagedDownloader implements Downloader, Serializable {
     /**
      * The position of the downloader in the uploadQueue */
     private String queuePosition;
+    /**
+     * The vendor the of downloader we're queued from.
+     */
+    private String queuedVendor;
     /** The name of the last location we tried to connect to. (We may be
      *  downloading from multiple other locations. */
     private String currentLocation;
@@ -1012,6 +1016,7 @@ public class ManagedDownloader implements Downloader, Serializable {
                 //setState(DOWNLOADING) as appropriate.
                 setState(QUEUED);  
                 queuePosition="";//initialize
+                queuedVendor="";//initialize
                 queuedCount=0;
                 manager.waitForSlot(this);
                 boolean waitForRetry=false;
@@ -1836,7 +1841,10 @@ public class ManagedDownloader implements Downloader, Serializable {
                     int oldPos = queuePosition.equals("")?
                     Integer.MAX_VALUE:Integer.parseInt(queuePosition);
                     int newPos = qx.getQueuePosition();
-                    queuePosition=oldPos<newPos?""+oldPos:""+newPos;
+                    if ( newPos < oldPos ) {
+                        queuePosition = "" + newPos;
+                        queuedVendor = dloader.getVendor();
+                    }                    
                 }
                 return 1;
             } catch (IOException iox) {
@@ -2438,9 +2446,11 @@ public class ManagedDownloader implements Downloader, Serializable {
         if ( dloaders.size() > 0 ) {
             HTTPDownloader dl = (HTTPDownloader)dloaders.get(0);
             return dl.getVendor();
+        } else if (getState() == REMOTE_QUEUED) {
+            return queuedVendor;
         } else {
             return "";
-        }   
+        }
     }
 
     public synchronized int getRetriesWaiting() {
