@@ -236,9 +236,10 @@ public final class NormalUploadState implements HTTPMessage {
     }
     
 
-	/** eventually this method should determine the 
-	 * mime type of a file fill in the details of 
-	 * this later. assume binary for now */
+	/** 
+	 * Eventually this method should determine the mime type of a file fill 
+	 * in the details of this later. Assume binary for now. 
+	 */
 	private String getMimeType() {
         return "application/binary";                  
 	}
@@ -257,32 +258,7 @@ public final class NormalUploadState implements HTTPMessage {
 		       "File Size:  "+_fileSize+"\r\n"+
 		       "File Index: "+_index+"\r\n"+
 		       "File Desc:  "+_fileDesc;
-	}
-
-	/*
-	public static void main(String[] args) {
-		NormalUploadState nus = new NormalUploadState();
-		FileDesc fd = new FileDesc(new File("NormalUploadState.java"), 0, 
-								   new HashSet());
-		String alt0 = "Alt-Location: http://Y.Y.Y.Y:6352/get/2/"+
-		"lime%20capital%20management%2001.mpg "+
-		"2002-04-09T20:32:33Z";
-		nus._ostream = new ByteArrayOutputStream();	   
-		try {
-			nus._urn = new URN("urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB");
-			AlternateLocation al = new AlternateLocation(alt0);
-			fd.addAlternateLocation(al);
-			nus._fileDesc = fd;			
-			nus.writeHeader();
-		} catch(IOException e) {
-			e.printStackTrace();
-		}
-		System.out.println("NORMAL UPLOAD HEADER:");
-		System.out.println(); 
-		System.out.println(nus._ostream); 
-	}
-	*/
-    
+	}    
 }
 
 
