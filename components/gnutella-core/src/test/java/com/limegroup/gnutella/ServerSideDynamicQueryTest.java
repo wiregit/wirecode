@@ -169,12 +169,16 @@ public final class ServerSideDynamicQueryTest extends BaseTestCase {
 		buildConnections();
         //1. first Ultrapeer connection 
         ULTRAPEER_2.initialize();
+        ULTRAPEER_2.buildAndStartQueues();
 
         //2. second Ultrapeer connection
         ULTRAPEER_1.initialize();
+        ULTRAPEER_1.buildAndStartQueues();
         
         //3. routed leaf, with route table for "test"
         LEAF.initialize();
+        LEAF.buildAndStartQueues();
+        
         QueryRouteTable qrt = new QueryRouteTable();
         qrt.add("berkeley");
         qrt.add("susheel");
