@@ -87,6 +87,16 @@ public final class BIOMessageWriter implements MessageWriter, Runnable {
         return false;
     }
     
+    /**
+     * Writes the specified message to the queue.  This method is called after
+     * messages pass through all of the message buffering, flow control code.
+     * This also may be called from tests to send messages directly between
+     * hosts, bypassing the queueing.
+     * 
+     * @param msg the <tt>Message</tt> to write to the network
+     * @throws IOException if there is an IO error writing data to the output
+     *  stream
+     */
     public void simpleWrite(Message msg) throws IOException {
         // in order to analyze the savings of compression,
         // we must add the 'new' data to a stat.
@@ -104,9 +114,9 @@ public final class BIOMessageWriter implements MessageWriter, Runnable {
             
             try {
                 msg.write(OUTPUT_STREAM);
-            } catch(IOException ioe) {
-                close(); // make sure we close.
-                throw ioe;
+            } catch(IOException e) {
+                CONNECTION.close(); // make sure we close.
+                throw e;
             }
 
             updateWriteStatistics(msg, priorUncompressed, priorCompressed);
@@ -135,15 +145,15 @@ public final class BIOMessageWriter implements MessageWriter, Runnable {
 
             try {
                 OUTPUT_STREAM.flush();
-            } catch(IOException ioe) {
-                close();
-                throw ioe;
+            } catch(IOException e) {
+                CONNECTION.close();
+                throw e;
             }
 
             // we must update the write statistics again,
             // because flushing forces the deflater to deflate.
             updateWriteStatistics(null, priorUncompressed, priorCompressed);
-        } catch(NullPointerException npe) {
+        } catch(NullPointerException e) {
             throw CONNECTION_CLOSED;
         }
     }
@@ -209,6 +219,7 @@ public final class BIOMessageWriter implements MessageWriter, Runnable {
                 repOk();
             }                
         } catch (IOException e) {
+            // TODO:: tell ConnectionManager to remove the connection??
             CONNECTION.setSenderDied(true);
         } catch(Throwable t) {
             CONNECTION.setSenderDied(true);     
