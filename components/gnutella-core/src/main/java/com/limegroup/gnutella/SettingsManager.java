@@ -1810,9 +1810,9 @@ public final class SettingsManager {
     /**
 	 * Returns the path of the properties and host list files.
 	 */
-    public String getPath() {
-		return CURRENT_DIRECTORY + File.separator;
-	}
+    //public String getPath() {
+    //return CURRENT_DIRECTORY + File.separator;
+	//}
 
     public int getBasicInfoSizeForQuery() {
 		return _basicQueryInfo;
