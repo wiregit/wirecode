@@ -48,15 +48,13 @@ public class RequeryDownloader extends ManagedDownloader
         _add = add;
     }
 
-    /** Returns the query that spawned this Downloader.
-     */
-    public String getQuery() {
+    /** Returns the query that spawned this Downloader. */
+    private String getQuery() {
         return _add.getQuery();
     }
 
-    /** Returns the rich query that spawned this Downloader.
-     */
-    public String getRichQuery() {
+    /** Returns the rich query that spawned this Downloader. */
+    private String getRichQuery() {
         return _add.getRichQuery();
     }
 
@@ -75,6 +73,16 @@ public class RequeryDownloader extends ManagedDownloader
         // AddWishList calls for the same search mainly....
         return (getQuery().equals(add.getQuery()) &&
                getMediaType().toString().equals(add.getMediaType().toString()));
+    }
+
+    protected QueryRequest newRequery() throws CantResumeException {
+        //If this already started downloading, specifically ask for matches to
+        //that file.
+        if (_hasFile)
+            return super.newRequery();
+        //Otherwise just spit out the original search keywords.
+        return new QueryRequest(SettingsManager.instance().getTTL(),
+                                0, getQuery(), true);
     }
 
     /**

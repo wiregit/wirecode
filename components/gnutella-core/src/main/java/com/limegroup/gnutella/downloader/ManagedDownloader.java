@@ -7,6 +7,7 @@ import com.limegroup.gnutella.xml.*;
 import com.sun.java.util.collections.*;
 import java.util.Date;
 import java.util.Calendar;
+import java.util.StringTokenizer;
 import java.io.*;
 import java.net.*;
 
@@ -21,7 +22,7 @@ import java.net.*;
  * multiple hosts.  See the accompanying white paper for details.<p>
  *
  * Subclasses may refine the requery behavior by overriding the
- * allowAddition(..) or addDownload(..) methods.<p>
+ * newRequery(), allowAddition(..), and addDownload(..) methods.<p>
  * 
  * This class implements the Serializable interface but defines its own
  * writeObject and readObject methods.  This is necessary because parts of the
@@ -439,8 +440,8 @@ public class ManagedDownloader implements Downloader, Serializable {
                     //don't really try to recover at this point, but we do
                     //attempt to display the error in the GUI for debugging
                     //purposes.
-                    ManagedDownloader.this.manager.internalError(e);
                     e.printStackTrace();
+                    ManagedDownloader.this.manager.internalError(e);
                 }
             }
         };
@@ -478,6 +479,76 @@ public class ManagedDownloader implements Downloader, Serializable {
         return false;
     }
 
+    /////////////////////////////// Requery Code ///////////////////////////////
+
+    /** 
+     * Returns a new QueryRequest for requery purposes.  Subclasses may wish to
+     * override to modify add hashes, etc.  Note that the requery will not be
+     * sent if global limits are exceeded.
+     * @exception CantResumeException if this doesn't know what to search for 
+     */
+    protected synchronized QueryRequest newRequery() throws CantResumeException { 
+        if (allFiles.length<0)                  //TODO: what filename?
+            throw new CantResumeException("");  //      maybe another exception?
+        return new QueryRequest(SettingsManager.instance().getTTL(),
+                                0,              //minimum speed
+                                extractQueryString(), 
+                                true);          //mark as requery
+    }
+
+
+    private final String[] invalidWords = {"the", "an", "a"};
+    private final HashSet wordSet = new HashSet(Arrays.asList(invalidWords));
+
+
+    /** @return the intersection of all rfd filename keywords */
+    private final String extractQueryString() {
+        // used for intersection
+        Map words = new HashMap();        
+        for (int i = 0; i < allFiles.length; i++) 
+            canonicalize(ripExtension(allFiles[i].getFileName()), words);
+        
+        // create the query string....
+        StringBuffer sb = new StringBuffer();
+        Iterator keys = words.keySet().iterator();
+        while (keys.hasNext()) {
+            String currKey = (String) keys.next();
+            Integer count = (Integer) words.get(currKey);
+            // if the string 'intersected', add it...
+            // TODO: this code doesn't do the right thing
+            if (count.intValue() == allFiles.length)
+                sb.append(currKey + " ");
+        }
+        
+        return sb.toString();
+    }
+
+    /** Canonicalizes a file name.  Adds all non-trivial keywords--i.e. not
+     *  articles or numbers--from FILENAME to MAP, along with counts.
+     *  @param map a map from keywords (String) to counts (Integer) */
+    private final void canonicalize(String fileName,
+                                    Map map) {
+        // separate by whitespace and _ 
+        StringTokenizer st = new StringTokenizer(fileName, FileManager.DELIMETERS);
+        while (st.hasMoreTokens()) {
+            final String currToken = st.nextToken().toLowerCase();
+            if (wordSet.contains(currToken))
+                continue;
+            try {
+                Double d = new Double(currToken);
+                continue;
+            }
+            catch (NumberFormatException ignored) {}
+            { // success
+                Integer occurrences = (Integer) map.get(currToken);
+                if (occurrences == null)
+                    occurrences = new Integer(1);
+                else
+                    occurrences = new Integer(occurrences.intValue()+1);
+                map.put(currToken, occurrences);
+            }
+        }
+    }
 
     private final long SIXTY_KB = 60000;
     private final boolean sizeClose(long one, long two) {
@@ -631,6 +702,9 @@ public class ManagedDownloader implements Downloader, Serializable {
             this.notify();                      //see tryAllDownloads3
         return true;
     }
+
+
+    ///////////////////////////////////////////////////////////////////////////
 
     /**
      * Accepts a push download.  If this chooses to download the given file
@@ -854,8 +928,10 @@ public class ManagedDownloader implements Downloader, Serializable {
                 if ((currTime >= nextRequeryTime) &&
                     (numRequeries < REQUERY_ATTEMPTS)) {
                     // yeah, it is about time and i've not sent too many...
-                    if (manager.sendQuery(this, allFiles))
-                        numRequeries++;
+                    try {
+                        if (manager.sendQuery(this, newRequery()))
+                            numRequeries++;
+                    } catch (CantResumeException ignore) { }
                     // set time for next requery...
                     nextRequeryTime = currTime + TIME_BETWEEN_REQUERIES;
                 }
@@ -2110,8 +2186,13 @@ public class ManagedDownloader implements Downloader, Serializable {
 //          }
     }
     
-    //Stub constructor for above test.
+    /** Stub constructor for above test. */
     private ManagedDownloader() {
+    }
+
+    /** Stub constructor for testing only.  Does not actually start downloads. */
+    protected ManagedDownloader(RemoteFileDesc[] allFiles) {
+        this.allFiles=allFiles;
     }
 
     //More tests:

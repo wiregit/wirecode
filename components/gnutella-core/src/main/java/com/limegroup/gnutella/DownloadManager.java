@@ -544,103 +544,26 @@ public class DownloadManager implements BandwidthTracker {
         // Enable auto shutdown
         if(active.isEmpty() && waiting.isEmpty())
             callback.downloadsComplete();
-    }
-
+    }    
     
-    private final String[] invalidWords = {"the", "an", "a"};
-    private final HashSet wordSet = new HashSet(Arrays.asList(invalidWords));
-    /** Canonicalizes a file name - gets rid of articles, etc...
-     *  @param map Adds the canonicalized elements to this map.
-     */    
-    private final void canonicalize(String fileName,
-                                    Map map) {
-        // separate by whitespace and _ 
-        StringTokenizer st = new StringTokenizer(fileName, FileManager.DELIMETERS);
-        while (st.hasMoreTokens()) {
-            final String currToken = st.nextToken().toLowerCase();
-            if (wordSet.contains(currToken))
-                continue;
-            try {
-                Double d = new Double(currToken);
-                continue;
-            }
-            catch (NumberFormatException ignored) {}
-            { // success
-                Integer occurrences = (Integer) map.get(currToken);
-                if (occurrences == null)
-                    occurrences = new Integer(1);
-                else
-                    occurrences = new Integer(occurrences.intValue()+1);
-                map.put(currToken, occurrences);
-            }
-        }
-    }
-
-    /** @return A String Array of size 1 that is a intersection of all the
-     *  canonicalized rfd filename values.
-     */
-    private final String[] extractQueryStrings(String[] names) {
-        String[] retStrings = new String[1];
-        // used for intersection
-        Map words = new HashMap();
-        
-        for (int i = 0; i < names.length; i++) 
-            canonicalize(ripExtension(names[i]), words);
-        
-        // create the query string....
-        StringBuffer sb = new StringBuffer();
-        Iterator keys = words.keySet().iterator();
-        while (keys.hasNext()) {
-            String currKey = (String) keys.next();
-            Integer count = (Integer) words.get(currKey);
-            // if the string 'intersected', add it....
-            if (count.intValue() == names.length)
-                sb.append(currKey + " ");
-        }
-        
-        retStrings[0] = sb.toString();
-        return retStrings;
-    }
-
-
-    void extractQueryStringUNITTEST() {
-        String[] queries = {"Susheel_Daswani_Neil_Daswani",
-                            "Susheel Ruchika Mahesh Kyle Daswani",
-                            "Susheel" + FileManager.DELIMETERS + "Daswani",
-                            "Sumeet (Susheel) Anurag (Daswani)Chris"};
-        String[] retStrings = extractQueryStrings(queries);
-        System.out.println(retStrings[0]);      
-    }
-
-
-
-    private final QueryRequest[] constructQueryRequests(String[] queryStrings) {
-        final int minSpeed = 0;  // minSpeed of 0 is used in StandardSearchView...
-        QueryRequest[] retQRs= new QueryRequest[queryStrings.length];
-        for (int i = 0; i < queryStrings.length; i++)
-            // mark the query as a requery...
-            retQRs[i] = new QueryRequest(SettingsManager.instance().getTTL(),
-                                         minSpeed, queryStrings[i], true);
-        return retQRs;
-    }
-
-    
-    /** Initiates a search for files similar to rfd.
-     *  PRE: rfds is a array of length 0 or more of non-null RemoteFileDesc 
-     *  objects.
-     *  Now does sophisticated round-robin sending of queries to minimize
-     *  requery traffic seen on the network...
-     *  It is important to note that this methodology works because we KNOW
-     *  that requeries are always trying to requery....
+    /** 
+     * Attempts to send the given requery to provide the given downloader with 
+     * more sources to download.  May not actually send the requery if it doing
+     * so would exceed the maximum requery rate.
+     * 
+     * @param query the requery to send, which should have a marked GUID
+     * @param requerier the downloader requesting more sources.  Needed to 
+     *  ensure fair requery scheduling.
+     * @return true iff the query was actually sent.  If false is returned,
+     *  the downloader should attempt to send the query later.
      */
     public synchronized boolean sendQuery(ManagedDownloader requerier, 
-                          RemoteFileDesc[] rfds) {
-
+                                          QueryRequest query) {
         debug("DM.sendQuery(): entered.");
         Assert.that(waiting.contains(requerier),
                     "Unknown or non-waiting MD trying to send requery.");
         boolean allowed = true;
-        
+        //Check limits
         if ((System.currentTimeMillis() - lastRequeryTime) > 
             TIME_BETWEEN_REQUERIES) {
             debug("DM.sendQuery(): requery allowed!!");            
@@ -671,40 +594,7 @@ public class DownloadManager implements BandwidthTracker {
             allowed = false;
 
         if (allowed) {
-            if (rfds.length > 0) { // requery based on filename...
-                // convert....
-                String[] names = new String[rfds.length];
-                for (int i = 0; i < rfds.length; i++)
-                    names[i] = rfds[i].getFileName();
-                
-                // construct QRs
-                String[] qStrings= extractQueryStrings(names);
-                QueryRequest[] qReqs = constructQueryRequests(qStrings);
-                
-                // send away....
-                for (int i = 0; i < qReqs.length; i++)
-                    router.broadcastQueryRequest(qReqs[i]);            
-            }
-            else if ((rfds.length == 0) && 
-                     (requerier instanceof RequeryDownloader)) {
-                // downloader without any files, get the query from the
-                // RequeryDownloader...
-                RequeryDownloader dlder = (RequeryDownloader) requerier;
-                QueryRequest qr = 
-                new QueryRequest(SettingsManager.instance().getTTL(),
-                                 0, dlder.getQuery(), true);
-                router.broadcastQueryRequest(qr);
-            } 
-            else if ((rfds.length == 0) && 
-                     (requerier instanceof ResumeDownloader)) {
-                // downloader without any files, get the query from the
-                // ResumeDownloader...   TODO: factor
-                ResumeDownloader dlder = (ResumeDownloader) requerier;
-                QueryRequest qr = dlder.newRequery();
-                router.broadcastQueryRequest(qr);
-            } else
-                Assert.that(false, 
-                            "Downloader has no files and is not a Requerier.");
+            router.broadcastQueryRequest(query);
         }
         debug("DM.sendQuery(): returning " + allowed);
         return allowed;
