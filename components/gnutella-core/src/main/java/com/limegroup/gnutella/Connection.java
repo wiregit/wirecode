@@ -59,6 +59,11 @@ public class Connection {
      *  Gnutella 0.6 connections, the properties written after the client's
      *  "GNUTELLA CONNECT".  Null otherwise. */
     private HandshakeResponder _propertiesWrittenR;
+    /** The list of all properties written during the handshake sequence,
+     *  analogous to _propertiesRead.  This is needed because
+     *  _propertiesWrittenR lazily calculates properties according to what it
+     *  read. */
+    private Properties _propertiesWrittenTotal=new Properties();
     /** True iff this should try to reconnect at a lower protocol level on
      *  outgoing connections. */
     private boolean _negotiate=false;
@@ -473,7 +478,8 @@ public class Connection {
                 String value=props.getProperty(key);
                 if (value==null)
                     value="";
-                sendString(key+": "+value+CRLF);            
+                sendString(key+": "+value+CRLF);   
+                _propertiesWrittenTotal.put(key, value);
             }
         }
         //send the trailer
@@ -726,6 +732,16 @@ public class Connection {
             return (Properties)_propertiesRead.clone();
     }
     
+    /**
+     * Returns the value of the given outgoing (written) connection property, or
+     * null if no such property.  For example, getProperty("X-Supernode") tells
+     * whether I am a supernode or a leaf node.  If I wrote a property multiple
+     * time during connection, returns the latest.
+     */
+    public String getPropertyWritten(String name) {
+        return _propertiesWrittenTotal.getProperty(name);
+     }
+     
     /**
      * @return true until close() is called on this Connection
      */
