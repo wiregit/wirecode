@@ -116,7 +116,7 @@ public class UnicastSimulator {
 
                 if (word.equals(SettingsManager.instance().
                         getConnectStringFirstWord())) {
-                    Connection conn = new Connection(sock);
+                    Connection conn = new Connection(sock, null);
                     conn.initialize();
                     debug("UnicastSimulator.tcpLoop(): sending pings.");
                     for (int i = 0; i < _pongs.length; i++) {
