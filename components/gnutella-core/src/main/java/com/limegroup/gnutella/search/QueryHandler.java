@@ -589,6 +589,17 @@ public final class QueryHandler {
     public ReplyHandler getReplyHandler() {
         return REPLY_HANDLER;
     }
+    
+    /**
+     * Accessor for the time to wait per hop, in milliseconds,
+     * for this QueryHandler.
+     *
+     * @return the time to wait per hop in milliseconds for this
+     *  QueryHandler
+     */
+    public long getTimeToWaitPerHop() {
+        return _timeToWaitPerHop;
+    }
 
 	// overrides Object.toString
 	public String toString() {
