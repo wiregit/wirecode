@@ -58,10 +58,10 @@ public class UpdateMessageVerifier {
         System.arraycopy(data,j+1,xmlMessage,0,data.length-1-j);       
     }
 
-    public byte[] getDataBytes() throws IllegalStateException {
-        if(data==null)
+    public byte[] getMessageBytes() throws IllegalStateException {
+        if(xmlMessage==null)
             throw new IllegalStateException();
-        return data;
+        return xmlMessage;
     }
 
     public static void main(String[] args) {

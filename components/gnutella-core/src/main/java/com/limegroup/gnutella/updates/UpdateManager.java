@@ -86,18 +86,25 @@ public class UpdateManager {
                     return;
                 }
                 System.out.println("Sumeet: verified file contents");
-                String xml = new String(verifier.getDataBytes(),"UTF-8");
+                String xml = new String(verifier.getMessageBytes(),"UTF-8");
                 UpdateFileParser parser = new UpdateFileParser(xml);
-                //TODO1:parseFile using UpdateFileParser
+                System.out.println("Sumeet: new version: "+parser.getVersion());
+                //we checked for new version while handshaking, but we should
+                //check again with the authenticated xml data.
+                newVersion = parser.getVersion();
+                if(newVersion==null)
+                    return;
+                if(isGreaterVersion(newVersion)) {
+                    synchronized(UpdateManager.this) {
+                        //TODO1:write data to disk
+                        //TODO1:update value of latestVersion
+                    }
+                }
                 } catch(Exception e ) {
                     //any errors? We can't continue...forget it.
                     return;
                 }
-                synchronized(UpdateManager.this) {
-                    //write the file to disk
-                    //update the version number
-                }
-            }
+            }//end of run
         };
         checker.start();      
     }
