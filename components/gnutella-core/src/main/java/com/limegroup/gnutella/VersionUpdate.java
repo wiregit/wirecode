@@ -22,7 +22,6 @@ import com.limegroup.gnutella.util.URLOpener;
  */
 public class VersionUpdate
 {
-	private static final VersionUpdate _updater = new VersionUpdate();	
     /** The max time to wait when looking for a new version, in msecs. */
     private static final int CONNECT_TIMEOUT=1500;
 	private String _latest;
@@ -34,67 +33,89 @@ public class VersionUpdate
 	private SettingsManager _settings;
 	
 
-	// private constructor for singleton
-	private VersionUpdate() 
-	{
-		_settings = SettingsManager.instance();
-		_latest = _settings.getLastVersionChecked();
+	public VersionUpdate() {
 	}
 
-	// static method for getting an instance of VersionUpdate
-	public static VersionUpdate instance() 
-	{
-		return _updater;
+	public void initialize() {
+		_settings = SettingsManager.instance();
+		_latest = _settings.getLastVersionChecked();
 	}
 		
 	/** Checks for available updates.  If one is found, prompts the user
 	 *  if they'd like to update.  If they say yes, actually does the update.
      *  If it is successful, exits the JVM via System.exit(0).  Otherwise
      *  just returns. */
-	public void checkPromptAndUpdate() 
-	{
-		_currentDirectory = System.getProperty("user.dir");
-		if(!_currentDirectory.endsWith(File.separator))
-			_currentDirectory += File.separator;	
+	public void doVersionCheckingAndHandling() {
+  		_currentDirectory = System.getProperty("user.dir");
+  		if(!_currentDirectory.endsWith(File.separator))
+  			_currentDirectory += File.separator;	
 		boolean delete = _settings.getDeleteOldJAR();
-		if(_settings.getDeleteOldJAR()) {
-			String oldJARName = _settings.getOldJARName();
-			File oldCharFile = new File(_currentDirectory, oldJARName);
-			if(oldCharFile.delete()) {
-				_settings.setDeleteOldJAR(false);
-				_settings.setOldJARName("");
-			}
-		}
-		boolean checkAgain;		
-		checkAgain = _settings.getCheckAgain();
-
-		if (!checkAgain)
+  		if(_settings.getDeleteOldJAR()) {
+  			String oldJARName = _settings.getOldJARName();
+  			File oldCharFile = new File(_currentDirectory, oldJARName);
+  			if(oldCharFile.delete()) {
+  				_settings.setDeleteOldJAR(false);
+  				_settings.setOldJARName("");
+  			}
+  		}
+		
+		if (!_settings.getCheckAgain())
 			return;
 
-		ByteReader br;
-		String latest = "";
-		String fileName = "";
 		if(Utilities.isWindows()) {
-			fileName = "WindowsVersion.txt";
+			handleWindowsUpdate();
 		} else if(Utilities.isMacClassic()) {
-		} else if(Utilities.isUnix()) {
-		}
+			handleMacClassicUpdate();
+		} else if(Utilities.isMacOSX()) {
+			handleMacOSXUpdate();
+		} else if(Utilities.isLinux()) {
+			handleLinuxUpdate();
+		} else if(Utilities.isSolaris()) {
+			handleSolarisUpdate();
+		} 
+	}
 
+	private void handleWindowsUpdate() {
+		if(newVersionAvailable("/WindowsVersion.txt")) {
+		}
+	}
+
+	private void handleMacClassicUpdate() {
+		if(newVersionAvailable("/MacClassicVersion.txt")) {
+		}
+	}
+
+	private void handleMacOSXUpdate() {
+		if(newVersionAvailable("/MacOSXVersion.txt")) {
+		}
+	}
+
+	private void handleLinuxUpdate() {
+		if(newVersionAvailable("/LinuxVersion.txt")) {
+		}
+	}
+
+	private void handleSolarisUpdate() {
+		if(newVersionAvailable("/SolarisVersion.txt")) {
+		}
+	}
+
+	private boolean newVersionAvailable(String fileName) {
+		String latest = "";
+		ByteReader br = null;
 		try {
 			// open the http connection, and grab 
 			// the file with the version number in it.
-			URL url = new URL("http", "www.limewire.com", 
-							  "/version.txt");
+			URL url = new URL("http", "www.limewire.com", fileName);
 			URLConnection conn = (new URLOpener(url)).connect(CONNECT_TIMEOUT);
             //The try-catch below works around JDK bug 4091706.
 			InputStream input = conn.getInputStream();
 			br = new ByteReader(input);
 		} catch(MalformedURLException mue) {
-			return;
+			return false;
 		} catch(IOException ioe) {
-			return;
+			return false;
 		}
-
 
         // read in the version number
         while (true) {
@@ -107,12 +128,14 @@ public class VersionUpdate
                 }
             } catch (IOException ioe) {
                 br.close();
-                return;
+                return false;
             }			
             //EOF?
-            if (str==null || str.equals(""))
-                break;
+            if(str == null || str.equals("")) {
+				break;
+			}
         }
+		br.close();
 
         String current = _settings.getCurrentVersion(); 
         int version = compare(current, latest);
@@ -121,20 +144,13 @@ public class VersionUpdate
             // the current version is not the newest
 				
             String lastChecked;
-            lastChecked = _settings.getLastVersionChecked();
-            checkAgain = _settings.getCheckAgain();
-				
-            if( (compare(lastChecked, latest) == 0) ) {
-                // dont ask 
-            }
-            else {
-                // otherwise ask...
+            lastChecked = _settings.getLastVersionChecked();				
+            if((compare(lastChecked, latest) != 0)) {
                 _newVersion = latest;
-                promptAndUpdate(current, latest);
+				return true;
             }
-        }
-
-		br.close();
+        }		
+		return false;
 	}
 
 	// This methos will compare two strings representing a 
@@ -143,8 +159,7 @@ public class VersionUpdate
 	// less than it returns -1.  If there is a problem, it
 	// will just return 0, altough it might be better to 
 	// throw an exception.
-	private int compare(String old_version, String new_version)
-	{
+	private int compare(String old_version, String new_version) {
 
 		// first check to see if the values are null or blank
 		// and return 0 if there is an error.
@@ -180,7 +195,7 @@ public class VersionUpdate
 		try {
 			numOld = java.lang.Integer.parseInt(strOld);
 			numNew = java.lang.Integer.parseInt(strNew);
-		} catch (Exception e) {
+		} catch (NumberFormatException e) {
 			return 0;
 		}
 	   
@@ -248,8 +263,7 @@ public class VersionUpdate
 	/** If the CHECK_AGAIN property is false, returns.  Otherwise asks the user
      *  if they want to update from version oldV to newV.  If the user chooses
      *  yes, does the update, notifying the GUI of progress.  */
-	private void promptAndUpdate(String oldV, String newV) 
-	{		
+	private void promptAndUpdate(String oldV, String newV) {		
 		if (!_settings.getCheckAgain())
 			return;
 		_updateHandler = new UpdateHandler();
@@ -268,8 +282,7 @@ public class VersionUpdate
 	 *  "LAX" file.  If the update is succesful, terminates the JVM.  Throws
 	 *  CantConnectException if the update failed.  Note that this method
      *  should never return without an exception.  */
-	private void update() throws CantConnectException
-	{			
+	private void update() throws CantConnectException {			
 		StringBuffer newFileBuf = new StringBuffer("LimeWire");
 		StringTokenizer fileTok = new StringTokenizer(_newVersion,".");
 		newFileBuf.append(fileTok.nextToken());
