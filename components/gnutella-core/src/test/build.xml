@@ -1,4 +1,4 @@
-<project name="Gnutella" default="test all" basedir="." >
+<project name="Gnutella" default="build" basedir="." >
 
   <!-- set global properties for this basedir -->
   <property name="builddir"    value="build" />
