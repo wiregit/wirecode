@@ -216,10 +216,15 @@ public class UDPBufferedInputStream extends InputStream {
     /**
      *  Wait for a new chunk to become available.
      */
-    private void waitOnData() throws InterruptedIOException {
+    private void waitOnData() throws InterruptedIOException,SocketTimeoutException {
         synchronized(_processor) {  // Lock on the ConnectionProcessor
             try { 
-                _processor.wait(_processor.getReadTimeout()); 
+            	int timeout = _processor.getReadTimeout();
+            	long now = System.currentTimeMillis();
+                _processor.wait(timeout);
+                if (timeout > 0 &&
+                		System.currentTimeMillis() - now > timeout) 
+                	throw new SocketTimeoutException();
             } catch(InterruptedException e) {
                 throw new InterruptedIOException(e.getMessage()); 
             } 
