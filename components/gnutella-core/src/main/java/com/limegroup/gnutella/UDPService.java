@@ -197,6 +197,10 @@ public final class UDPService implements Runnable {
                             _acceptedSolicitedIncoming = true;
                     }
                     if(message == null) continue;
+                    // need to set router because this might have started
+                    // before RouterService was instantiated.
+                    // but we can cache the value for speed
+                    if(router == null) router = RouterService.getMessageRouter();
                     router.handleUDPMessage(message, datagram);
                 }
                 catch (IOException e) {
