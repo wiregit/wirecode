@@ -48,6 +48,10 @@ public abstract class Message
         return GUID.makeGuid();
     }
 
+    /** Define reused exceptions for efficiency */
+    private static final BadPacketException HOPS_EXCEED_SOFT_MAX = 
+        new BadPacketException("Hops already exceeds soft maximum");
+
     ////////////////////////// Instance Data //////////////////////
 
     private byte[] guid;
@@ -201,6 +205,9 @@ public abstract class Message
         return Message.read(in, buf, N_UNKNOWN, softMax);
     }
 
+
+static int maxlength = 0;
+
     /**
      * @param network the network this was received from.
      * @requires buf.length==23
@@ -211,6 +218,7 @@ public abstract class Message
      */
     public static Message read(InputStream in, byte[] buf, int network, byte softMax)
 		throws BadPacketException, IOException {
+
         //1. Read header bytes from network.  If we timeout before any
         //   data has been read, return null instead of throwing an
         //   exception.
@@ -228,9 +236,6 @@ public abstract class Message
         }
 
         //2. Unpack.
-        byte[] guid=new byte[16];
-        for (int i=0; i<16; i++) //TODO3: can optimize
-            guid[i]=buf[i];
         byte func=buf[16];
         byte ttl=buf[17];
         byte hops=buf[18];
@@ -264,7 +269,7 @@ public abstract class Message
         else if (ttl<0)
             throw new BadPacketException("Negative (or very large) TTL");
         else if ((hops >= softMax) && (func != F_QUERY_REPLY))
-            throw new BadPacketException("Hops already exceeds soft maximum");
+            throw HOPS_EXCEED_SOFT_MAX;
         else if (ttl+hops > hardMax)
             throw new BadPacketException("TTL+hops exceeds hard max; probably spam");
         else if ((ttl+hops > softMax) && (func != F_QUERY_REPLY)) {
@@ -273,6 +278,11 @@ public abstract class Message
             Assert.that(ttl>=0);     //should hold since hops<=softMax ==>
                                      //new ttl>=0
         }
+
+		// Delayed GUID allocation
+        byte[] guid=new byte[16];
+        for (int i=0; i<16; i++) //TODO3: can optimize
+            guid[i]=buf[i];
 
         //Dispatch based on opcode.
         switch (func) {

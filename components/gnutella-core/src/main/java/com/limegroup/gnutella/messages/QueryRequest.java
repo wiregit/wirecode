@@ -100,6 +100,19 @@ public class QueryRequest extends Message implements Serializable{
     private static final int MAX_XML_QUERY_LENGTH =
         SearchSettings.MAX_XML_QUERY_LENGTH.getValue();
 
+
+    /**
+     * Predefine popular exceptions for efficiency.
+     */
+    public static final BadPacketException CANNOT_ACCEPT_URN_QUERIES =
+        new BadPacketException("cannot accept URN queries");
+    public static final BadPacketException QUERY_TOO_BIG =
+        new BadPacketException("query too big");
+    public static final BadPacketException XML_QUERY_TOO_BIG =
+        new BadPacketException("XML query too big");
+    public static final BadPacketException ILLEGAL_CHAR_IN_QUERY =
+        new BadPacketException("illegal chars in query");
+
 	/**
 	 * Creates a new requery for the specified SHA1 value.
 	 *
@@ -811,18 +824,18 @@ public class QueryRequest extends Message implements Serializable{
 			throw new BadPacketException("empty query");
 		}       
         if(QUERY_URNS.size() != 0) {
-            throw new BadPacketException("cannot accept URN queries");
+            throw CANNOT_ACCEPT_URN_QUERIES;
         }
         if(QUERY.length() > MAX_QUERY_LENGTH) {
-            throw new BadPacketException("query too big: "+QUERY.length());
+            throw QUERY_TOO_BIG;
         }        
 
         if(XML_QUERY.length() > MAX_XML_QUERY_LENGTH) {
-            throw new BadPacketException("XML query too big: "+XML_QUERY.length());
+            throw XML_QUERY_TOO_BIG;
         }
 
         if(hasIllegalChars(QUERY)) {
-            throw new BadPacketException("illegal chars in query: "+QUERY);
+            throw ILLEGAL_CHAR_IN_QUERY;
         }
     }
 
