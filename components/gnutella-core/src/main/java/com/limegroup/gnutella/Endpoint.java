@@ -173,7 +173,7 @@ public class Endpoint implements Cloneable, IpPort
 
     public String toString()
     {
-        return hostname+":"+port + " files="+ files + " kbytes=" + kbytes;
+        return hostname+":"+port;
     }
 
     public String getAddress()

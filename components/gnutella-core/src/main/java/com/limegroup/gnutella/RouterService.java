@@ -1109,6 +1109,13 @@ public class RouterService {
 	}
 	
 	/**
+	 * Returns whether or not this client is attempting to connect.
+	 */
+	public static boolean isConnecting() {
+	    return manager.isConnecting();
+	}
+	
+	/**
 	 * Returns whether or not this client is currently fetching
 	 * endpoints from a GWebCache.
 	 *

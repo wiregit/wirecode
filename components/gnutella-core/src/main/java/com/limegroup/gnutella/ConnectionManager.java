@@ -591,6 +591,21 @@ public class ConnectionManager {
 		return ((_initializedClientConnections.size() > 0) ||
 				(_initializedConnections.size() > 0));
 	}
+	
+	/**
+	 * Returns whether or not we are currently attempting to connect to the
+	 * network.
+	 */
+	public boolean isConnecting() {
+	    if(_disconnectTime != 0)
+	        return false;
+	    if(isConnected())
+	        return false;
+	    synchronized(this) {
+	        return _fetchers.size() != 0 ||
+	               _initializingFetchedConnections.size() != 0;
+	    }
+	}
 
     /**
      * Takes a snapshot of the upstream and downstream bandwidth since the last
