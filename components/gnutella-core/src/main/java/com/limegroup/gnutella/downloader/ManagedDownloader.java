@@ -2250,7 +2250,8 @@ public class ManagedDownloader implements Downloader, Serializable {
         else
             ret = UNKNOWN_FILENAME;
 
-        return CommonUtils.convertFileName(ret);
+        _fileName = CommonUtils.convertFileName(ret);
+        return _fileName;
     }
 
 
