@@ -64,6 +64,8 @@ public abstract class AudioMetaData extends MetaData {
     		return new MP3MetaData(f);
     	if (LimeXMLUtils.isOGGFile(f))
     		return new OGGMetaData(f);
+    	if (LimeXMLUtils.isM4AFile(f))
+    		return new M4AMetaData(f);
     	
     	//TODO: add future supported audio types here
     	

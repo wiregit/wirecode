@@ -4,6 +4,7 @@ package com.limegroup.gnutella.mp3;
 import java.io.*;
 
 import com.limegroup.gnutella.util.*;
+import com.limegroup.gnutella.ByteOrder;
 import com.sun.java.util.collections.*;
 
 /**
@@ -70,22 +71,51 @@ public class M4AMetaData extends AudioMetaData {
 	/**
 	 * the data atom within each metadata atom
 	 */
-	final static int DATA_TAG = 0x64617461; //"data"
+	final static int DATA_ATOM = 0x64617461; //"data"
 	
 	
 	
-	InputStream _in;
+	DataInputStream _in;
 	File _f;
+	
+	HashMap _metaData;
 	
 	public M4AMetaData(File f) throws IOException{
 		super(f);
+		_f = f;
+		_in = new DataInputStream(new FileInputStream(_f));
+		_metaData = new HashMap();
 	}
 	
 	/* (non-Javadoc)
 	 * @see com.limegroup.gnutella.mp3.MetaData#parseFile(java.io.File)
 	 */
 	protected void parseFile(File f) throws IOException {
-		// TODO Auto-generated method stub
+		_in = getMetaDataStream();
+		
+		populateMetaDataMap();
+		
+		//the title, artist and album tags are in string format.
+		//so we just set them
+		byte []current = (byte []) _metaData.get(new Integer(NAME_ATOM));
+		setTitle(current == null ? "" : new String(current));
+		
+		current = (byte []) _metaData.get(new Integer(ARTIST_ATOM));
+		setArtist(current == null ? "" : new String(current));
+		
+		current = (byte []) _metaData.get(new Integer(ALBUM_ATOM));
+		setAlbum(current == null ? "" : new String(current));
+		
+		
+		//the genre is byte encoded the same way as with id3 tags
+		//except that the table is shifted one position
+		//for some reason the atom is much larger than a scalar type, 
+		//and the actual value is held at the end... oh well.
+		current = (byte []) _metaData.get(new Integer(GENRE_ATOM));
+		short genreShort = (short) (ByteOrder.leb2short(current, current.length-2) -1);
+		setGenre(MP3MetaData.getGenreString(genreShort));
+		
+		//TODO: add more fields as we discover their meaning.
 	}
 	
 	/**
@@ -128,5 +158,88 @@ public class M4AMetaData extends AudioMetaData {
 		size-= extended ? 16 : 8;
 		
 		return size;
+	}
+	
+	/**
+	 * skips through the headers of the file that we do not care about,
+	 * loads the metadata atom into memory and returns a stream for it
+	 * 
+	 * @return a <tt>DataInputStream</tt> whose source is a copy of the
+	 * atom containing the metadata atoms
+	 */
+	private DataInputStream getMetaDataStream() throws IOException{
+		byte []ILST = null;
+		try {
+			skipAtom(FTYP_ATOM,_in);
+			enterAtom(MOOV_ATOM,_in);
+			skipAtom(MVHD_ATOM,_in);
+			skipAtom(TRAK_ATOM,_in);
+			enterAtom(UDTA_ATOM,_in);
+			enterAtom(META_ATOM,_in);
+			skipAtom(HDLR_ATOM,_in);
+			
+			//at this point we are about to enter the ILST atom
+			//which is the atom containing the metadata atoms.
+			//for simplicity, lets load this atom in memory -
+			//its pretty small and we don't have to worry about closing the stream
+			ILST = new byte[enterAtom(ILST_ATOM,_in)];
+			_in.readFully(ILST);
+			
+		}finally {
+			//close the file before proceeding futher
+			try {_in.close();}catch(IOException ignored){}
+		}
+		
+		//create a ByteArrayInputStream and read from it.
+		return new DataInputStream(new ByteArrayInputStream(ILST));
+	}
+	
+	
+	/**
+	 * populates the metaData map with values read from the file
+	 * @throws IOException parsing failed
+	 */
+	private void populateMetaDataMap() throws IOException {
+		try {
+			while (true) {
+				int currentSize = _in.readInt();
+				if (currentSize > _f.length())
+					throw new IOException("invalid file size");
+				int currentType = _in.readInt();
+				
+				switch(currentType) {
+					case NAME_ATOM :
+						_metaData.put(new Integer(NAME_ATOM), readDataAtom());break;
+					case ARTIST_ATOM :
+						_metaData.put(new Integer(ARTIST_ATOM), readDataAtom());break;
+					case ALBUM_ATOM :
+						_metaData.put(new Integer(ALBUM_ATOM), readDataAtom());break;
+					case TRACK_ATOM :
+						_metaData.put(new Integer(TRACK_ATOM), readDataAtom());break;
+					case GENRE_ATOM :
+						_metaData.put(new Integer(GENRE_ATOM), readDataAtom());break;
+						
+						//add more atoms as we learn their meaning
+					default:
+						//skip unknown atoms.
+						_in.skip(currentSize-8);
+				}
+			}
+		}catch(EOFException ignored) {}
+		//let IOExceptions go through.
+	}
+	
+	/**
+	 * reads the data atom contained in a metadata atom
+	 * @return the content of the data atom
+	 * @throws IOException the data atom was not found or error occured
+	 */
+	private byte[] readDataAtom() throws IOException{
+		int size = _in.readInt();
+		if (_in.readInt() != DATA_ATOM)
+			throw new IOException("data tag not found");
+		byte [] res = new byte[size-8];
+		_in.readFully(res);
+		return res;
 	}
 }
