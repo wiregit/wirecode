@@ -32,7 +32,7 @@ public class Interval implements Serializable, Comparable {
      */
     public int compareTo(Object o) {
         Interval other = (Interval)o;
-        if( this.low == other.low )
+        if( this.low != other.low )
             return this.low - other.low;
         else
             return this.high - other.high;
