@@ -63,7 +63,7 @@ public final class UploadManager implements BandwidthTracker {
      *  Each pair contains the underlying socket and the time of the last
      *  request. */
     private List /*of KeyValue (Socket,Long) */ _queuedUploads = 
-        new LinkedList();
+        new ArrayList();
 
 
 	/** set to true when an upload has been succesfully completed. */
