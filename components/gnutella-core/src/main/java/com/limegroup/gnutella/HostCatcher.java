@@ -826,7 +826,7 @@ public class HostCatcher {
     public synchronized void putHostOnProbation(Endpoint host) {
         PROBATION_HOSTS.add(host);
         if(PROBATION_HOSTS.size() > 500) {
-            PROBATION_HOSTS.remove(EXPIRED_HOSTS.iterator().next());
+            PROBATION_HOSTS.remove(PROBATION_HOSTS.iterator().next());
         }
     }
     
