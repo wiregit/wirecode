@@ -9,6 +9,8 @@ import junit.framework.Test;
 import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.altlocs.AlternateLocation;
 import com.limegroup.gnutella.altlocs.AlternateLocationCollection;
+import com.limegroup.gnutella.altlocs.AlternateLocationCollector;
+import com.limegroup.gnutella.altlocs.DirectAltLoc;
 import com.limegroup.gnutella.downloader.VerifyingFile;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.FilterSettings;
@@ -461,18 +463,31 @@ public class PushLocTest extends BaseTestCase {
 		assertTrue(b.booleanValue());
 		
 		boolean present = false;
+		AlternateLocationCollection returned = 
+			AlternateLocationCollection.create(sha1);
+		String header=null;
 		try {
 			while(true) {
-				String header = readLine(in);
+				header = readLine(in);
 				if (header == null)
 					break;
-				if (header.startsWith(HTTPHeaderName.FALT_LOCATION.toString()))
+				if (header.startsWith(HTTPHeaderName.FALT_LOCATION.toString())) {
 					present=true;
+					break;
+				}
 			}
 		
 		}catch(IOException expected ){}
 		
 		assertTrue(present);
+		assertNotNull(header);
+		parseHeader(header,returned);
+		assertEquals(1,returned.getAltLocsSize());
+		
+		
+		//clean up for next test
+		fd.remove(direct);fd.remove(direct);
+		fd.remove(push);fd.remove(push);
 		
 		try {
 			in.close();
@@ -485,6 +500,143 @@ public class PushLocTest extends BaseTestCase {
 		assertEquals(0,l.size());
 	}
 	
+	
+	/**
+	 * tests that even if the uploader does not know of any push altlocs,
+	 * it still indicates interest in receiving them.
+	 */
+	public void testNoAltsSendsHeader() throws Exception {
+		
+		//make sure the FD has got no push altlocs.
+		FileDesc fd = RouterService.getFileManager().get(0);
+		
+		assertNotNull(fd);
+		assertEquals(0,fd.getPushAlternateLocationCollection().getAltLocsSize());
+		
+		Socket s = new Socket("localhost",PORT);
+		BufferedReader in = new BufferedReader(
+				new InputStreamReader(s.getInputStream()));
+		BufferedWriter out = new BufferedWriter(
+				new OutputStreamWriter(s.getOutputStream()));
+		
+		sendHeader(fileName,HTTPHeaderName.FALT_LOCATION+":", out);
+		
+		Thread.sleep(500);
+		
+		UploadManager umanager = RouterService.getUploadManager();
+		
+		assertEquals(1,umanager.uploadsInProgress());
+		
+		List l = (List) PrivilegedAccessor.getValue(umanager,"_activeUploadList");
+		
+		HTTPUploader u = (HTTPUploader)l.get(0);
+		
+		Boolean b = (Boolean)PrivilegedAccessor.getValue(u,"_wantsFalts");
+		
+		assertTrue(b.booleanValue());
+		
+		boolean present = false;
+		String header=null;
+		AlternateLocationCollection returned = 
+			AlternateLocationCollection.create(fd.getSHA1Urn());
+		try {
+			while(true) {
+				header = readLine(in);
+				if (header == null)
+					break;
+				if (header.startsWith(HTTPHeaderName.FALT_LOCATION.toString())) {
+					parseHeader(header,returned);
+					present=true;
+					break;
+				}
+			}
+		
+		}catch(IOException expected ){}
+		
+		assertTrue(present);
+		assertEquals(0,returned.getAltLocsSize());
+		
+		try {
+			in.close();
+		}catch(IOException ignored){}
+		try {
+			out.close();
+		}catch(IOException ignored){}
+		
+		Thread.sleep(700);
+		assertEquals(0,l.size());
+		
+		
+	}
+	
+	
+	/**
+	 * tests that the uploader properly stores falts given by downloaders.
+	 */
+	public void testUploaderStoresFAlts () throws Exception {
+		//make sure the FD has got no push altlocs.
+		FileDesc fd = RouterService.getFileManager().get(0);
+		
+		assertNotNull(fd);
+		assertEquals(0,fd.getPushAlternateLocationCollection().getAltLocsSize());
+		
+		Socket s = new Socket("localhost",PORT);
+		BufferedReader in = new BufferedReader(
+				new InputStreamReader(s.getInputStream()));
+		BufferedWriter out = new BufferedWriter(
+				new OutputStreamWriter(s.getOutputStream()));
+		
+		
+		//generate a header that contains one push loc and one direct loc.
+		GUID guid = new GUID(GUID.makeGuid());
+		AlternateLocation push = AlternateLocation.create(
+				guid.toHexString()+";1.2.3.4:5",fd.getSHA1Urn());
+		
+		AlternateLocation direct = 
+			AlternateLocation.create("1.2.3.4:5",fd.getSHA1Urn());
+		
+		String header = HTTPHeaderName.ALT_LOCATION+":"+direct.httpStringValue()+
+			"\n\r"+HTTPHeaderName.FALT_LOCATION+":"+push.httpStringValue();
+		
+		
+		sendHeader(fileName,header,out);
+		
+		Thread.sleep(500);
+		
+		UploadManager umanager = RouterService.getUploadManager();
+		
+		assertEquals(1,umanager.uploadsInProgress());
+		
+		List l = (List) PrivilegedAccessor.getValue(umanager,"_activeUploadList");
+		
+		HTTPUploader u = (HTTPUploader)l.get(0);
+		
+		Boolean b = (Boolean)PrivilegedAccessor.getValue(u,"_wantsFalts");
+		
+		assertTrue(b.booleanValue());
+		
+		assertEquals(2,fd.getAltLocsSize());
+		assertEquals(1,fd.getPushAlternateLocationCollection().getAltLocsSize());
+		assertEquals(1,fd.getAlternateLocationCollection().getAltLocsSize());
+		
+		assertTrue(fd.getPushAlternateLocationCollection().contains(push));
+		assertTrue(fd.getAlternateLocationCollection().contains(direct));
+		
+		
+		fd.remove(push);fd.remove(push);
+		fd.remove(direct);fd.remove(direct);
+		assertEquals(0,fd.getAltLocsSize());
+		
+		try {
+			in.close();
+		}catch(IOException ignored){}
+		try {
+			out.close();
+		}catch(IOException ignored){}
+		
+		Thread.sleep(700);
+		assertEquals(0,l.size());
+	}
 	private static String makeRequest(String req) {
 		if (req.startsWith("/uri-res"))
 			return req;
@@ -503,6 +655,33 @@ public class PushLocTest extends BaseTestCase {
 			out.write("Connection: Keep-Alive\r\n");
 		out.write("\r\n");
 		out.flush();
+	}
+	
+	private static void parseHeader(String altHeader,AlternateLocationCollector alc) {
+		
+		final String alternateLocations=HTTPUtils.extractHeaderValue(altHeader);
+
+		// return if the alternate locations could not be properly extracted
+		if(alternateLocations == null) return;
+		StringTokenizer st = new StringTokenizer(alternateLocations, ",");
+        while(st.hasMoreTokens()) {
+            try {
+                // note that the trim method removes any CRLF character
+                // sequences that may be used if the sender is using
+                // continuations.
+                AlternateLocation al = 
+                AlternateLocation.create(st.nextToken().trim(),
+                                         alc.getSHA1Urn());
+                
+                URN sha1 = al.getSHA1Urn();
+                if(sha1.equals(alc.getSHA1Urn())) {
+                        alc.add(al);
+                }
+            } catch(IOException e) {
+                // just return without adding it.
+                continue;
+            }
+        }
 	}
 
 
