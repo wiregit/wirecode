@@ -146,30 +146,20 @@ public class PushAltLoc extends AlternateLocation {
 	}
 
 
-	public int compareTo(Object o) {
-		
-		int ret= super.compareTo(o);
-		
+	public int compareTo(Object obj) {
+	    int ret = super.compareTo(obj); 
+	    
 		if (ret!=0)
 			return ret;
 
-        // this doesn't work, because the size of proxies
-        // can change while it is stored inside the TreeMap
-        // nothing that is in a SortedSet can be mutated
-        // if it is used in the compareTo.
-        
-//		if (o instanceof PushAltLoc) {
-//			PushAltLoc other = (PushAltLoc)o;
-//			
-//			
-//	        ret = other._pushAddress.getProxies().size() - 
-//				_pushAddress.getProxies().size();
-//	        if (ret!=0)
-//	        	return ret;
-//	        
-//		}
-		
-		return hashCode() - o.hashCode();
+		return hashCode() - obj.hashCode();
+	}
+	
+	/**
+	 * avoid comparing the demoted value when the comparant is a pushloc.
+	 */
+	protected boolean bothDemotedSame(AlternateLocation other) {
+	    return true;
 	}
 	
 	public int hashCode() {

@@ -457,7 +457,7 @@ public abstract class AlternateLocation implements HTTPHeaderValue,
         if( !(obj instanceof AlternateLocation) ) //I am greater
             return 1;
         AlternateLocation other = (AlternateLocation) obj;
-        if(_demoted != other._demoted) {
+        if(!bothDemotedSame(other)) {
             if(_demoted) //I am demoted and not him
                 return 1; //I am higher
             return -1;//he is demoted, and I am not
@@ -473,6 +473,13 @@ public abstract class AlternateLocation implements HTTPHeaderValue,
         return ret;
  
         			
+    }
+    
+    /**
+     * whether this and the other altlocs are demoted.
+     */
+    protected boolean bothDemotedSame(AlternateLocation other) {
+        return _demoted == other._demoted;
     }
     
     protected abstract String generateHTTPString();
