@@ -186,14 +186,24 @@ public class SentMessageStatHandler extends AbstractStatHandler {
 								   LimeSentMessageStatBytes.UDP_ROUTE_TABLE_MESSAGES);
 
 	/**
-	 * <tt>SentMessageStatHandler</tt> for Gnutella route table messages sent 
-	 * over TCP.
+	 * <tt>SentMessageStatHandler</tt> for Gnutella reset route table messages 
+	 * sent ver TCP.
 	 */
-	public static final SentMessageStatHandler TCP_ROUTE_TABLE_MESSAGES = 
-	    new SentMessageStatHandler(SentMessageStat.TCP_ROUTE_TABLE_MESSAGES,
-								   SentMessageStatBytes.TCP_ROUTE_TABLE_MESSAGES,
-								   LimeSentMessageStat.TCP_ROUTE_TABLE_MESSAGES,
-								   LimeSentMessageStatBytes.TCP_ROUTE_TABLE_MESSAGES);
+	public static final SentMessageStatHandler TCP_RESET_ROUTE_TABLE_MESSAGES = 
+	    new SentMessageStatHandler(SentMessageStat.TCP_RESET_ROUTE_TABLE_MESSAGES,
+								   SentMessageStatBytes.TCP_RESET_ROUTE_TABLE_MESSAGES,
+								   LimeSentMessageStat.TCP_RESET_ROUTE_TABLE_MESSAGES,
+								   LimeSentMessageStatBytes.TCP_RESET_ROUTE_TABLE_MESSAGES);
+
+	/**
+	 * <tt>SentMessageStatHandler</tt> for Gnutella patch route table messages 
+	 * sent over TCP.
+	 */
+	public static final SentMessageStatHandler TCP_PATCH_ROUTE_TABLE_MESSAGES = 
+	    new SentMessageStatHandler(SentMessageStat.TCP_PATCH_ROUTE_TABLE_MESSAGES,
+								   SentMessageStatBytes.TCP_PATCH_ROUTE_TABLE_MESSAGES,
+								   LimeSentMessageStat.TCP_PATCH_ROUTE_TABLE_MESSAGES,
+								   LimeSentMessageStatBytes.TCP_PATCH_ROUTE_TABLE_MESSAGES);
 								   
 	/**
 	 * <tt>SentMessageStatHandler</tt> for Gnutella route table messages sent 

@@ -212,7 +212,7 @@ com.sun.java.util.collections.Comparable
         this.port = port;
         
         //initialize hostname also
-        this.hostname = Message.ip2string(hostBytes);
+        this.hostname = NetworkUtils.ip2string(hostBytes);
     }
     
     

@@ -3,6 +3,7 @@ package com.limegroup.gnutella.handshaking;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.util.*;
 import com.limegroup.gnutella.*;
+import com.limegroup.gnutella.settings.*;
 import java.util.Properties;
 import java.util.StringTokenizer;
 import com.sun.java.util.collections.*;
@@ -34,6 +35,27 @@ public final class HandshakeResponseTest extends BaseTestCase {
     public void setUp() {
         ConnectionSettings.ACCEPT_DEFLATE.setValue(true);
         ConnectionSettings.ENCODE_DEFLATE.setValue(true);
+    }
+
+    /**
+     * Tests the method for checking whether or not the specified
+     * host supports probe queries.
+     */
+    public void testSupportsProbeQueries() throws Exception {
+        Properties props = new Properties();
+        HandshakeResponse hr = HandshakeResponse.createResponse(props);
+        assertTrue("should not support probes", !hr.supportsProbeQueries());
+        props.put(HeaderNames.X_PROBE_QUERIES, "0.0");
+        hr = HandshakeResponse.createResponse(props);
+        assertTrue("should not support probes", !hr.supportsProbeQueries());
+
+        props.put(HeaderNames.X_PROBE_QUERIES, "0.1");
+        hr = HandshakeResponse.createResponse(props);
+        assertTrue("should support probes", hr.supportsProbeQueries());
+
+        props.put(HeaderNames.X_PROBE_QUERIES, "0.2");
+        hr = HandshakeResponse.createResponse(props);
+        assertTrue("should support probes", hr.supportsProbeQueries());
     }
     
     /**
@@ -276,7 +298,8 @@ public final class HandshakeResponseTest extends BaseTestCase {
      */
     public void testFactoryConstructors() {
         Properties props = new Properties();
-        HandshakeResponse hr = HandshakeResponse.createAcceptOutgoingResponse(props);
+        HandshakeResponse hr = 
+            HandshakeResponse.createAcceptOutgoingResponse(props);
         assertTrue("should be accepted", hr.isAccepted());
         assertEquals("should not have any properties", 0, hr.props().size());
     }
@@ -438,8 +461,10 @@ public final class HandshakeResponseTest extends BaseTestCase {
                      CommonUtils.getHttpServer(), hr.getUserAgent());
 
         assertTrue("should be a high-degree connection", hr.isHighDegreeConnection());
-        assertEquals("unexpected max ttl", 4, hr.getMaxTTL());
-        assertEquals("unexpected degree", 15, hr.getNumIntraUltrapeerConnections());
+        assertEquals("unexpected max ttl", 
+                     ConnectionSettings.SOFT_MAX.getValue(), 
+                     hr.getMaxTTL());
+        assertEquals("unexpected degree", 32, hr.getNumIntraUltrapeerConnections());
         assertTrue("should be GUESS capable", hr.isGUESSCapable());
         assertTrue("should support GGEP", hr.supportsGGEP());
         assertTrue("should support vendor messages", hr.supportsVendorMessages());
@@ -532,7 +557,7 @@ public final class HandshakeResponseTest extends BaseTestCase {
         
         Byte ttl = (Byte)m.invoke(null, params);
 
-        assertEquals("should have X-Max-TTL: 4", (byte)4, ttl.byteValue());
+        assertEquals("should have X-Max-TTL: 3", (byte)3, ttl.byteValue());
     }
 
     /**
@@ -556,8 +581,8 @@ public final class HandshakeResponseTest extends BaseTestCase {
         Byte ttl = (Byte)m.invoke(null, params);
 
         // should use contain 4 from the UltrapeerHeaders
-        assertEquals("should have X-Max-TTL: 4", 
-                     4, ttl.byteValue());
+        assertEquals("should have X-Max-TTL: 3", 
+                     3, ttl.byteValue());
 
         params[0] = new Properties();
         ttl = (Byte)m.invoke(null, params);
@@ -602,7 +627,7 @@ public final class HandshakeResponseTest extends BaseTestCase {
 
         // should use the default degree from the UltrapeerHeaders
         assertEquals("should have different X-Degree", 
-                     15, degree.intValue());
+                     32, degree.intValue());
 
         params[0] = new Properties();
         degree = (Integer)m.invoke(null, params);

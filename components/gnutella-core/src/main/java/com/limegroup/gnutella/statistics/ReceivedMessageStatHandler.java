@@ -195,15 +195,26 @@ public final class ReceivedMessageStatHandler extends AbstractMessageStatHandler
 									   LimeReceivedMessageStatBytes.UDP_ROUTE_TABLE_MESSAGES,
 									   "RECEIVED_UDP_ROUTE_TABLE_MESSAGES");
 	/**
-	 * <tt>ReceivedMessageStatHandler</tt> for Gnutella route table messages received 
-	 * over TCP.
+	 * <tt>ReceivedMessageStatHandler</tt> for Gnutella reset route table messages
+     * received over TCP.
 	 */
-	public static final ReceivedMessageStatHandler TCP_ROUTE_TABLE_MESSAGES = 
-	    new ReceivedMessageStatHandler(ReceivedMessageStat.TCP_ROUTE_TABLE_MESSAGES, 
-									   ReceivedMessageStatBytes.TCP_ROUTE_TABLE_MESSAGES,
-									   LimeReceivedMessageStat.TCP_ROUTE_TABLE_MESSAGES, 
-									   LimeReceivedMessageStatBytes.TCP_ROUTE_TABLE_MESSAGES,
-									   "RECEIVED_TCP_ROUTE_TABLE_MESSAGES");
+	public static final ReceivedMessageStatHandler TCP_RESET_ROUTE_TABLE_MESSAGES = 
+	    new ReceivedMessageStatHandler(ReceivedMessageStat.TCP_RESET_ROUTE_TABLE_MESSAGES, 
+									   ReceivedMessageStatBytes.TCP_RESET_ROUTE_TABLE_MESSAGES,
+									   LimeReceivedMessageStat.TCP_RESET_ROUTE_TABLE_MESSAGES, 
+									   LimeReceivedMessageStatBytes.TCP_RESET_ROUTE_TABLE_MESSAGES,
+									   "RECEIVED_TCP_RESET_ROUTE_TABLE_MESSAGES");
+
+	/**
+	 * <tt>ReceivedMessageStatHandler</tt> for Gnutella route table patch messages
+     * received over TCP.
+	 */
+	public static final ReceivedMessageStatHandler TCP_PATCH_ROUTE_TABLE_MESSAGES = 
+	    new ReceivedMessageStatHandler(ReceivedMessageStat.TCP_PATCH_ROUTE_TABLE_MESSAGES, 
+									   ReceivedMessageStatBytes.TCP_PATCH_ROUTE_TABLE_MESSAGES,
+									   LimeReceivedMessageStat.TCP_PATCH_ROUTE_TABLE_MESSAGES, 
+									   LimeReceivedMessageStatBytes.TCP_PATCH_ROUTE_TABLE_MESSAGES,
+									   "RECEIVED_TCP_PATCH_ROUTE_TABLE_MESSAGES");
 									   
 	/**
 	 * <tt>ReceivedMessageStatHandler</tt> for Gnutella route table messages received 

@@ -187,7 +187,7 @@ public final class AlternateLocation
 		if(urn == null) throw new NullPointerException("null sha1");
 		URL url = 
 			new URL("http", 
-					Message.ip2string(RouterService.getAddress()), 
+					NetworkUtils.ip2string(RouterService.getAddress()), 
 					RouterService.getPort(), 
 					HTTPConstants.URI_RES_N2R + urn.httpStringValue());
 		return new AlternateLocation(url, new Date(), urn);

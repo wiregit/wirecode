@@ -2,6 +2,7 @@ package com.limegroup.gnutella.routing;
 
 import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.messages.*;
+import com.limegroup.gnutella.statistics.*;
 import java.io.*;
 
 
@@ -41,6 +42,9 @@ public class ResetTableMessage extends RouteTableMessage {
         ByteOrder.int2leb(tableSize, buf, 0);
         buf[4]=infinity;
         out.write(buf);   
+		if(RECORD_STATS) {
+			SentMessageStatHandler.TCP_RESET_ROUTE_TABLE_MESSAGES.addMessage(this);
+		} 
     }
 
     
@@ -80,6 +84,13 @@ public class ResetTableMessage extends RouteTableMessage {
     public int getTableSize() {
         return tableSize;
     }
+
+	// inherit doc comment
+  	public void recordDrop() {
+  		if(RECORD_STATS) {
+  			DroppedSentMessageStatHandler.TCP_RESET_ROUTE_TABLE_MESSAGES.addMessage(this);	   
+  		}
+  	}
 
     public String toString() {
         return "{RESET, tableSize: "+getTableSize()

@@ -18,7 +18,7 @@ import com.limegroup.gnutella.messages.vendor.*;
  * only the TTL, hops, and priority field can be changed.
  */
 public abstract class Message 
-        implements Serializable, com.sun.java.util.collections.Comparable {
+    implements Serializable, com.sun.java.util.collections.Comparable {
     //Functional IDs defined by Gnutella protocol.
     public static final byte F_PING=(byte)0x0;
     public static final byte F_PING_REPLY=(byte)0x1;
@@ -48,9 +48,6 @@ public abstract class Message
         return GUID.makeGuid();
     }
 
-    /** Define reused exceptions for efficiency */
-    private static final BadPacketException HOPS_EXCEED_SOFT_MAX = 
-        new BadPacketException("Hops already exceeds soft maximum");
 
     ////////////////////////// Instance Data //////////////////////
 
@@ -73,11 +70,6 @@ public abstract class Message
      */
     private final int network;
 
-	/**
-	 * Constant byte buffer for storing the GUID for incoming messages --
-	 * an easy optimization.
-	 */
-	//private final static byte[] GUID_BUF = new byte[16];
 
 	/**
 	 * Constant for whether or not to record stats.
@@ -250,9 +242,9 @@ public abstract class Message
         if (length!=0) {
             payload=new byte[length];
             for (int i=0; i<length; ) {
-            int got=in.read(payload, i, length-i);
-            if (got==-1) throw new IOException("Connection closed.");
-            i+=got;
+                int got=in.read(payload, i, length-i);
+                if (got==-1) throw new IOException("Connection closed.");
+                i+=got;
             }
         }
         else
@@ -266,8 +258,9 @@ public abstract class Message
             throw new BadPacketException("Negative (or very large) hops");
         else if (ttl<0)
             throw new BadPacketException("Negative (or very large) TTL");
-        else if ((hops >= softMax) && (func != F_QUERY_REPLY))
-            throw HOPS_EXCEED_SOFT_MAX;
+        else if ((hops >= softMax) && (func != F_QUERY_REPLY)) {
+            throw BadPacketException.HOPS_EXCEED_SOFT_MAX;
+        }
         else if (ttl+hops > hardMax)
             throw new BadPacketException("TTL+hops exceeds hard max; probably spam");
         else if ((ttl+hops > softMax) && (func != F_QUERY_REPLY)) {
@@ -289,17 +282,12 @@ public abstract class Message
             //messages except for their function codes.  I've started this
             //refactoring with PushRequest and PingReply.
             case F_PING:
-                if (PARSE_GROUP_PINGS && length>=15) {
-				    // Build a GroupPingRequest
-                    return new GroupPingRequest(guid,ttl,hops,payload);
-				}
-				else if (length>0) //Big ping
+				if (length>0) //Big ping
                     return new PingRequest(guid,ttl,hops,payload);
                 return new PingRequest(guid,ttl,hops);
 
             case F_PING_REPLY:
                 return PingReply.createFromNetwork(guid, ttl, hops, payload);
-                //return new PingReply(guid,ttl,hops,payload);
             case F_QUERY:
                 if (length<3) break;
 				return QueryRequest.createNetworkQuery(
@@ -457,7 +445,7 @@ public abstract class Message
      */
     public void setTTL(byte ttl) throws IllegalArgumentException {
         if (ttl < 0)
-            throw new IllegalArgumentException();
+            throw new IllegalArgumentException("invalid TTL: "+ttl);
         this.ttl = ttl;
     }
     
@@ -489,27 +477,6 @@ public abstract class Message
     public int getTotalLength() {
         //Header is 23 bytes.
         return 23+length;
-    }
-
-    /** Returns the ip (given in BIG-endian) format as standard
-     *  dotted-decimal, e.g., 192.168.0.1<p> */
-     public static final String ip2string(byte[] ip) {
-         return ip2string(ip, 0);
-     }
-         
-    /** Returns the ip (given in BIG-endian) format of
-     *  buf[offset]...buf[offset+3] as standard dotted-decimal, e.g.,
-     *  192.168.0.1<p> */
-    static final String ip2string(byte[] buf, int offset) {
-        StringBuffer sbuf=new StringBuffer(16);   //xxx.xxx.xxx.xxx => 15 chars
-        sbuf.append(ByteOrder.ubyte2int(buf[offset]));
-        sbuf.append('.');
-        sbuf.append(ByteOrder.ubyte2int(buf[offset+1]));
-        sbuf.append('.');
-        sbuf.append(ByteOrder.ubyte2int(buf[offset+2]));
-        sbuf.append('.');
-        sbuf.append(ByteOrder.ubyte2int(buf[offset+3]));
-        return sbuf.toString();
     }
 
     /** @modifies this

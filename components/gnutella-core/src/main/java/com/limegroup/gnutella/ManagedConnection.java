@@ -145,7 +145,7 @@ public class ManagedConnection extends Connection
      *  milliseconds.  Package-access for testing purposes only! */
     static int QUEUE_TIME=5*1000;
     /** The number of different priority levels. */
-    private static final int PRIORITIES=7;
+    private static final int PRIORITIES = 8;
     /** Names for each priority. "Other" includes QRP messages and is NOT
      * reordered.  These numbers do NOT translate directly to priorities;
      * that's determined by the cycle fields passed to MessageQueue. */
@@ -155,7 +155,15 @@ public class ManagedConnection extends Connection
     private static final int PRIORITY_QUERY=3; //TODO: add requeries
     private static final int PRIORITY_PING_REPLY=4;
     private static final int PRIORITY_PING=5;
-    private static final int PRIORITY_OTHER=6;       
+    private static final int PRIORITY_OTHER=6;    
+    
+    /**
+     * Separate priority for queries that we originate.  These are very
+     * high priority because we don't want to drop queries that are
+     * originating from us -- we want to largely bypass the message
+     * queues when we are first sending a query out on the network.
+     */
+    private static final int PRIORITY_OUR_QUERY=7;
                                                             
     /** Limits outgoing bandwidth for ALL connections. */
     private final static BandwidthThrottle _throttle=
@@ -249,15 +257,6 @@ public class ManagedConnection extends Connection
     private long _nextNumHorizonHosts=0;
     
 
-    /**
-     * The query routing state for each "new client" connection, or null if the
-     * connection doesn't support QRP.  Helps you decide when to send queries.
-     * (Compare with _querySourceTable of MessageRouter, which helps filter
-     * duplicate queries and decide where to send responses.)  
-     */
-    private final ManagedConnectionQueryInfo queryInfo = 
-        new ManagedConnectionQueryInfo();
-
     /** The next time I should send a query route table to this connection.
 	 */
     private long _nextQRPForwardTime;
@@ -295,6 +294,18 @@ public class ManagedConnection extends Connection
      *  request sent.
      */
     private static int _numTCPConnectBackRequests = 0;
+
+    /**
+     * Variable for the <tt>QueryRouteTable</tt> received for this 
+     * connection.
+     */
+    private QueryRouteTable _lastQRPTableReceived;
+
+    /**
+     * Variable for the <tt>QueryRouteTable</tt> sent for this 
+     * connection.
+     */
+    private QueryRouteTable _lastQRPTableSent;
 
     /**
      * Creates a new outgoing connection to the specified host on the
@@ -373,6 +384,8 @@ public class ManagedConnection extends Connection
             = new PriorityMessageQueue(1, QUEUE_TIME, QUEUE_SIZE);
         _outputQueue[PRIORITY_PING]       
             = new PriorityMessageQueue(1, QUEUE_TIME, QUEUE_SIZE);
+        _outputQueue[PRIORITY_OUR_QUERY]
+            = new PriorityMessageQueue(10, BIG_QUEUE_TIME, BIG_QUEUE_SIZE);
         _outputQueue[PRIORITY_OTHER]       //FIFO, no timeout
             = new SimpleMessageQueue(1, Integer.MAX_VALUE, BIG_QUEUE_SIZE, false);
         
@@ -382,6 +395,70 @@ public class ManagedConnection extends Connection
         UpdateManager updater = UpdateManager.instance();
         updater.checkAndUpdate(this);
     }
+
+
+    /**
+     * Resets the query route table for this connection.  The new table
+     * will be of the size specified in <tt>rtm</tt> and will contain
+     * no data.  If there is no <tt>QueryRouteTable</tt> yet created for
+     * this connection, this method will create one.
+     *
+     * @param rtm the <tt>ResetTableMessage</tt> 
+     */
+    public void resetQueryRouteTable(ResetTableMessage rtm) {
+        if(_lastQRPTableReceived == null) {
+            _lastQRPTableReceived = new QueryRouteTable(rtm.getTableSize());
+        } else {
+            _lastQRPTableReceived.reset(rtm);
+        }
+    }
+
+    /**
+     * Patches the <tt>QueryRouteTable</tt> for this connection.
+     *
+     * @param ptm the patch with the data to update
+     */
+    public void patchQueryRouteTable(PatchTableMessage ptm) {
+
+        // we should always get a reset before a patch, but 
+        // allocate a table in case we don't
+        if(_lastQRPTableReceived == null) {
+            _lastQRPTableReceived = new QueryRouteTable();
+        }
+        try {
+            _lastQRPTableReceived.patch(ptm);
+        } catch(BadPacketException e) {
+            // not sure what to do here!!
+        }                    
+    }
+
+
+    /**
+     * Determines whether or not the specified <tt>QueryRequest</tt>
+     * instance has a hit in the query routing tables.
+     *
+     * @param query the <tt>QueryRequest</tt> to check against
+     *  the tables
+     * @return <tt>true</tt> if the <tt>QueryRequest</tt> has a hit
+     *  in the tables, otherwise <tt>false</tt>
+     */
+    public boolean hitsQueryRouteTable(QueryRequest query) {
+        if(_lastQRPTableReceived == null) return false;
+        return _lastQRPTableReceived.contains(query);
+    }
+
+    /**
+     * Accessor for the <tt>QueryRouteTable</tt> received along this 
+     * connection.  Can be <tt>null</tt> if no query routing table has been 
+     * received yet.
+     *
+     * @return the last <tt>QueryRouteTable</tt> received along this
+     *  connection
+     */
+    public QueryRouteTable getQueryRouteTableReceived() {
+        return _lastQRPTableReceived;
+    }
+
 
     /**
      * Throttles the super's OutputStream.  This works quite well with
@@ -438,7 +515,7 @@ public class ManagedConnection extends Connection
      * payloads if the receiving connection does not support GGGEP.   Also
      * updates MessageRouter stats.<p>
      *
-     * This methodIS thread safe.  Multiple threads can be in a send call
+     * This method IS thread safe.  Multiple threads can be in a send call
      * at the same time for a given connection.
      *
      * @requires this is fully constructed
@@ -447,6 +524,28 @@ public class ManagedConnection extends Connection
      *  is already closed.  This is thread-safe and guaranteed not to block.
      */
     public void send(Message m) {
+        send(m, calculatePriority(m));
+    }
+
+    /**
+     * This is a specialized send method for queries that we originate, 
+     * either from ourselves directly, or on behalf of one of our leaves
+     * when we're an Ultrapeer.  These queries have a special sending 
+     * queue of their own and are treated with a higher priority.
+     *
+     * @param query the <tt>QueryRequest</tt> to send
+     */
+    public void originateQuery(QueryRequest query) {
+        send(query, PRIORITY_OUR_QUERY);
+    }
+
+    /**
+     * Sends the message with the specified, pre-calculated priority.
+     *
+     * @param m the <tt>Message</tt> to send
+     * @param priority the priority to send the message with
+     */
+    private void send(Message m, int priority) {
         if (! supportsGGEP())
             m=m.stripExtendedPayload();
         // if Hops Flow is in effect, and this is a QueryRequest, and the
@@ -458,7 +557,7 @@ public class ManagedConnection extends Connection
 
         repOk();
         Assert.that(_outputQueue!=null, "Connection not initialized");
-        int priority = calculatePriority(m);        
+
         synchronized (_outputQueueLock) {
             _numMessagesSent++;
             _outputQueue[priority].add(m);
@@ -468,7 +567,7 @@ public class ManagedConnection extends Connection
             _lastPriority=priority;
             _outputQueueLock.notify();
         }
-        repOk();
+        repOk();        
     }
 
     private void addDropped(int dropped) {
@@ -485,7 +584,7 @@ public class ManagedConnection extends Connection
         byte opcode=m.getFunc();
         boolean watchdog=m.getHops()==0 && m.getTTL()<=2;
         switch (opcode) {
-            case Message.F_QUERY: 
+            case Message.F_QUERY:
                 return PRIORITY_QUERY;
             case Message.F_QUERY_REPLY: 
                 return PRIORITY_QUERY_REPLY;
@@ -494,7 +593,7 @@ public class ManagedConnection extends Connection
             case Message.F_PING: 
                 return watchdog ? PRIORITY_WATCHDOG : PRIORITY_PING;
             case Message.F_PUSH: 
-                return PRIORITY_PUSH;
+                return PRIORITY_PUSH;                
             default: 
                 return PRIORITY_OTHER;  //includes QRP Tables
         }
@@ -579,7 +678,7 @@ public class ManagedConnection extends Connection
                 while (true) {
                     Message m=null;
                     synchronized (_outputQueueLock) {
-                        m=(Message)queue.removeNext(); 
+                        m=(Message)queue.removeNext();
                         int dropped=queue.resetDropped();
                         addDropped(dropped);
                         _queued-=(m==null?0:1)+dropped;  //maintain invariant
@@ -1270,12 +1369,29 @@ public class ManagedConnection extends Connection
 		return _isKillable;
 	}
     
-    /** Returns the query route state associated with this, or null if no
-     *  such state. 
+    /** 
+     * Accessor for the query route table associated with this.  This is
+     * guaranteed to be non-null, but it may not yet contain any data.
+     *
+     * @return the <tt>QueryRouteTable</tt> instance containing
+     *  query route table data sent along this connection, or <tt>null</tt>
+     *  if no data has yet been sent
      */
-    public ManagedConnectionQueryInfo getQueryRouteState() {
-        return queryInfo;
+    public QueryRouteTable getQueryRouteTableSent() {
+        return _lastQRPTableSent;
     }
+
+    /**
+     * Mutator for the last query route table that was sent along this
+     * connection.
+     *
+     * @param qrt the last query route table that was sent along this
+     *  connection
+     */
+    public void setQueryRouteTableSent(QueryRouteTable qrt) {
+        _lastQRPTableSent = qrt;
+    }
+
     
     /** 
      * Tests representation invariants.  For performance reasons, this is

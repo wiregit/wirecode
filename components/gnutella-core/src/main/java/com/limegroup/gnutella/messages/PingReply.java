@@ -371,7 +371,7 @@ public class PingReply extends Message implements Serializable {
         KILOBYTES = ByteOrder.ubytes2long(ByteOrder.leb2int(PAYLOAD,10));
 
         // IP is big-endian
-        IP = ip2string(PAYLOAD, 2);
+        IP = NetworkUtils.ip2string(PAYLOAD, 2);
 
         // GGEP parsing
         GGEP ggep = parseGGEP();

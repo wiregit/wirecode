@@ -56,7 +56,7 @@ public final class HandshakingTest extends BaseTestCase {
 		ConnectionSettings.WATCHDOG_ACTIVE.setValue(false);
 		//ConnectionSettings.REMOVE_ENABLED.setValue(false);
 		ConnectionSettings.IGNORE_KEEP_ALIVE.setValue(true);
-		//ConnectionSettings.KEEP_ALIVE.setValue(1);
+		//ConnectionSettings.NUM_CONNECTIONS.setValue(1);
 		//RouterService rs = new RouterService(new ActivityCallbackStub());
 		//rs.start();		
 		ROUTER_SERVICE.clearHostCatcher();

@@ -105,9 +105,15 @@ public final class HandshakeResponse {
     
     /**
      * Cached boolean for whether or not this is considered a considered a
-     * "good" connection.
+     * "good" leaf connection.
      */
-    private final boolean GOOD;
+    private final boolean GOOD_LEAF;
+
+    /**
+     * Cached boolean for whether or not this is considered a considered a
+     * "good" ultrapeer connection.
+     */
+    private final boolean GOOD_ULTRAPEER;
 
     /**
      * Cached value for the number of Ultrapeers this Ultrapeer attempts
@@ -155,6 +161,11 @@ public final class HandshakeResponse {
      */
     private final boolean DEFLATE_ENCODED;
 
+    /**
+     * Constant for whether or not this connection supports probe
+     * queries.
+     */
+    private final boolean PROBE_QUERIES;
 
     /**
      * Creates a HandshakeResponse which defaults the status code and status
@@ -172,28 +183,37 @@ public final class HandshakeResponse {
      * @param message the response message to use.
      * @param headers the headers to use in the response.
      */
-     HandshakeResponse(int code, String message, Properties headers) { 
-         STATUS_CODE = code;
-         STATUS_MESSAGE = message;
-         HEADERS = headers;//Collections.unmodifiableMap(headers);
-         DEGREE = extractIntHeaderValue(HEADERS, HeaderNames.X_DEGREE, 6);         
-         HIGH_DEGREE = getNumIntraUltrapeerConnections() >= 15;
-         ULTRAPEER_QRP = 
-             isVersionOrHigher(HEADERS, 
-                               HeaderNames.X_ULTRAPEER_QUERY_ROUTING, 0.1F);
-         MAX_TTL = extractByteHeaderValue(HEADERS, HeaderNames.X_MAX_TTL, (byte)5);
-         DYNAMIC_QUERY = isVersionOrHigher(HEADERS, HeaderNames.X_DYNAMIC_QUERY, 0.1F);
-         GOOD = isHighDegreeConnection() &&
-             isUltrapeerQueryRoutingConnection() &&
-             (getMaxTTL() < 5) &&
-             isDynamicQueryConnection();
-
-         ULTRAPEER = isTrueValue(HEADERS, HeaderNames.X_ULTRAPEER);
-         LEAF = isFalseValue(HEADERS, HeaderNames.X_ULTRAPEER);
-         DEFLATE_ENCODED = isStringValue(HEADERS,
+    HandshakeResponse(int code, String message, Properties headers) { 
+        STATUS_CODE = code;
+        STATUS_MESSAGE = message;
+        HEADERS = headers;
+        DEGREE = extractIntHeaderValue(HEADERS, HeaderNames.X_DEGREE, 6);         
+        HIGH_DEGREE = getNumIntraUltrapeerConnections() >= 15;
+        ULTRAPEER_QRP = 
+            isVersionOrHigher(HEADERS, 
+                              HeaderNames.X_ULTRAPEER_QUERY_ROUTING, 0.1F);
+        MAX_TTL = extractByteHeaderValue(HEADERS, HeaderNames.X_MAX_TTL, 
+                                         (byte)4);
+        DYNAMIC_QUERY = 
+            isVersionOrHigher(HEADERS, HeaderNames.X_DYNAMIC_QUERY, 0.1F);
+        PROBE_QUERIES = 
+            isVersionOrHigher(HEADERS, HeaderNames.X_PROBE_QUERIES, 0.1F);
+        
+        GOOD_LEAF = isHighDegreeConnection() &&
+            isUltrapeerQueryRoutingConnection() &&
+            (getMaxTTL() < 5) &&
+            isDynamicQueryConnection();
+        
+        GOOD_ULTRAPEER = isGoodLeaf() && 
+            supportsProbeQueries();
+        
+        
+        ULTRAPEER = isTrueValue(HEADERS, HeaderNames.X_ULTRAPEER);
+        LEAF = isFalseValue(HEADERS, HeaderNames.X_ULTRAPEER);
+        DEFLATE_ENCODED = isStringValue(HEADERS,
             HeaderNames.CONTENT_ENCODING, HeaderNames.DEFLATE_VALUE);
-     }
-   
+    }
+    
     /**
      * Creates an empty response with no headers.  This is useful, for 
      * example, during connection handshaking when we haven't yet read
@@ -204,7 +224,7 @@ public final class HandshakeResponse {
     public static HandshakeResponse createEmptyResponse() {
         return new HandshakeResponse(new Properties());
     }
-
+    
     /**
      * Constructs the response from the other host during connection
      * handshaking.
@@ -216,7 +236,7 @@ public final class HandshakeResponse {
         createResponse(Properties headers) throws IOException {
         return new HandshakeResponse(headers);
     }
-
+    
     /**
      * Constructs the response from the other host during connection
      * handshaking.
@@ -236,7 +256,7 @@ public final class HandshakeResponse {
         }
         return new HandshakeResponse(code, message, headers);        
     }
-
+    
     /**
      * Creates a new <tt>HandshakeResponse</tt> instance that accepts the
      * potential connection.
@@ -526,16 +546,15 @@ public final class HandshakeResponse {
 	}
 
     /**
-     * Returns whether or not this connections is a "good" connection,
-     * a definition that changes over time as features are added
-     * to the network.
+     * Returns whether or not this is connection passed the headers to be
+     * considered a "good" leaf.
      *
-     * @return <tt>true</tt> if this connection is considered "good",
-     *  otherwise <tt>false</tt>
+     * @return <tt>true</tt> if this is considered a "good" leaf, otherwise
+     *  <tt>false</tt>
      */
-    public boolean isGoodConnection() {
-        return GOOD;
-    }    
+    public boolean isGoodLeaf() {
+        return GOOD_LEAF;
+    }
 
     /**
      * Returns whether or not this connnection is encoded in deflate.
@@ -560,6 +579,17 @@ public final class HandshakeResponse {
                 HeaderNames.DEFLATE_VALUE); // the value to look for
     }
     
+    /**
+     * Returns whether or not this is connection passed the headers to be
+     * considered a "good" ultrapeer.
+     *
+     * @return <tt>true</tt> if this is considered a "good" ultrapeer, otherwise
+     *  <tt>false</tt>
+     */
+    public boolean isGoodUltrapeer() {
+        return GOOD_ULTRAPEER;
+    }
+
 	/**
 	 * Returns whether or not this connection supports query routing 
      * between Ultrapeers at 1 hop.
@@ -705,6 +735,19 @@ public final class HandshakeResponse {
      */
     public boolean isDynamicQueryConnection() {
         return DYNAMIC_QUERY;
+    }
+
+    /**
+     * Accessor for whether or not this connection supports TTL=1 probe
+     * queries.  These queries are treated separately from other queries.
+     * In particular, if a second query with the same GUID is received,
+     * it is not considered a duplicate.
+     *
+     * @return <tt>true</tt> if this connection supports probe queries,
+     *  otherwise <tt>false</tt>
+     */
+    public boolean supportsProbeQueries() {
+        return PROBE_QUERIES;
     }
 
     /**

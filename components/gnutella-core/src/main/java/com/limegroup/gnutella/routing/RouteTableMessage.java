@@ -1,6 +1,5 @@
 package com.limegroup.gnutella.routing;
 
-import com.limegroup.gnutella.statistics.*;
 import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.messages.*;
 import com.limegroup.gnutella.util.*;
@@ -35,9 +34,6 @@ public abstract class RouteTableMessage extends Message {
     protected void writePayload(OutputStream out) throws IOException {
         out.write(variant);
         writePayloadData(out);
-		if(RECORD_STATS) {
-			SentMessageStatHandler.TCP_ROUTE_TABLE_MESSAGES.addMessage(this);
-		}
     }
 
     /** 
@@ -117,14 +113,9 @@ public abstract class RouteTableMessage extends Message {
     public Message stripExtendedPayload() {
         return this;
     }
-
-	// inherit doc comment
-	public void recordDrop() {
-		if(RECORD_STATS) {
-			DroppedSentMessageStatHandler.TCP_ROUTE_TABLE_MESSAGES.addMessage(this);	   
-		}
-	}
 }
 
 
  
+
+

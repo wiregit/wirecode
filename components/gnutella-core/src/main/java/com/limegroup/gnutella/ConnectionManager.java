@@ -77,10 +77,11 @@ public class ConnectionManager {
 	/**
 	 * The number of Ultrapeer connections to ideally maintain.
 	 */
-	public static final int ULTRAPEER_CONNECTIONS = 15;
+	public static final int ULTRAPEER_CONNECTIONS =
+        ConnectionSettings.NUM_CONNECTIONS.getValue();
 
     /** Ideal number of connections for a leaf.  */
-    public static final int PREFERRED_CONNECTIONS_FOR_LEAF = 3;
+    public static final int PREFERRED_CONNECTIONS_FOR_LEAF = 2;
 
 	//public static final int HIGH_DEGREE_CONNECTIONS_FOR_LEAF = 2;
 
@@ -125,7 +126,7 @@ public class ConnectionManager {
 
     /** The number of connections to keep up.  */
     private volatile int _keepAlive=0;
-    /** Threads trying to maintain the KEEP_ALIVE.  This is generally
+    /** Threads trying to maintain the NUM_CONNECTIONS.  This is generally
      *  some multiple of _keepAlive.   LOCKING: obtain this. */
     private final List /* of ConnectionFetcher */ _fetchers =
         new ArrayList();
@@ -136,12 +137,13 @@ public class ConnectionManager {
         new ArrayList();
 
 
-    /* List of all connections.  The core data structures are lists, which allow
+    /**
+     * List of all connections.  The core data structures are lists, which allow
      * fast iteration for message broadcast purposes.  Actually we keep a couple
      * of lists: the list of all initialized and uninitialized connections
      * (_connections), the list of all initialized non-leaf connections
-     * (_incomingConnections), and the list of all initialized leaf connections
-     * (_incomingClientConnections).
+     * (_initializedConnections), and the list of all initialized leaf connections
+     * (_initializedClientConnections).
      * 
      * INVARIANT: neither _connections, _initializedConnections, nor 
      *   _initializedClientConnections contains any duplicates.
@@ -326,6 +328,7 @@ public class ConnectionManager {
 		// removal may be disabled for tests
 		if(!ConnectionSettings.REMOVE_ENABLED.getValue()) return;        
         removeInternal(c);
+
         adjustConnectionFetchers();
     }
 
@@ -646,7 +649,7 @@ public class ConnectionManager {
             //1. Leaf. As the spec. says, this assumes we are an ultrapeer.
             //Preference trusted vendors using BearShare's clumping algorithm
             //(see above).
-			if(hr.isGoodConnection()) {
+			if(hr.isGoodLeaf()) {
 				return getNumInitializedClientConnections() < 
                     UltrapeerSettings.MAX_LEAVES.getValue();
 			} else {
@@ -969,10 +972,10 @@ public class ConnectionManager {
         _catcher.expire();
 
         //Ensure outgoing connections is positive.
-		int outgoing = ConnectionSettings.KEEP_ALIVE.getValue();
+		int outgoing = ConnectionSettings.NUM_CONNECTIONS.getValue();
         if (outgoing < 1) {
-			ConnectionSettings.KEEP_ALIVE.revertToDefault();
-			outgoing = ConnectionSettings.KEEP_ALIVE.getValue();
+			ConnectionSettings.NUM_CONNECTIONS.revertToDefault();
+			outgoing = ConnectionSettings.NUM_CONNECTIONS.getValue();
         }
         //Actually notify the backend.		
         setKeepAlive(outgoing);
@@ -1088,7 +1091,7 @@ public class ConnectionManager {
      */
     private void adjustConnectionFetchers() {
         //How many connections do we need?  To prefer ultrapeers, we try to
-        //achieve KEEP_ALIVE ultrapeer connections.  But to prevent
+        //achieve NUM_CONNECTIONS ultrapeer connections.  But to prevent
         //fragmentation with clients that don't support ultrapeers, we'll give
         //the first DESIRED_OLD_CONNECTIONS ultrapeers protected status.  See
         //allowConnection(boolean, boolean) and killExcessConnections().
@@ -1105,8 +1108,8 @@ public class ConnectionManager {
 
         // Start connection fetchers as necessary
         while(need > 0) {
-            new ConnectionFetcher(); // This kicks off a thread and registers
-                                     // the fetcher in the list
+            // This kicks off the thread for the fetcher
+            _fetchers.add(new ConnectionFetcher());
             need--;
         }
 
@@ -1178,43 +1181,25 @@ public class ConnectionManager {
             }
             throw e;
         }
-        finally{
+        finally {
             //if the connection received headers, process the headers to
             //take steps based on the headers
             processConnectionHeaders(mc);
         }
         
-        boolean connectionOpen = false;
-        synchronized(this) {
-            _initializingFetchedConnections.remove(mc);
-            // If the connection was killed while initializing, we shouldn't
-            // announce its initialization
-            connectionOpen = connectionInitialized(mc);
-        }
-        if(connectionOpen) {
-            RouterService.getCallback().connectionInitialized(mc);
-            //check if we are a client node, and now opened a connection 
-            //to ultrapeer. In this case, we will drop all other connections
-            //and just keep this one
-            //check for shieldedclient-ultrapeer connection
-            if(mc.isClientSupernodeConnection()) {
-                gotShieldedClientSupernodeConnection();
-            }
-        }
+        completeConnectionInitialization(mc, true);
     }
 
     /** 
      * Indicates that we are a client node, and have received ultrapeer
      * connection.  This may choose to adjust its keep-alive. 
-     * @param ultrapeerConnection the newly initialized leaf-ultrapeer
-     *  connection
      */
     private synchronized void gotShieldedClientSupernodeConnection() {
         //How many leaf connections should we have?  There's a tension between
         //doing what LimeWire thinks is best and what the user wants.  Ideally
-        //we would set the KEEP_ALIVE iff the user hasn't recently manually
+        //we would set the NUM_CONNECTIONS iff the user hasn't recently manually
         //adjusted it.  Because this is a pain to implement, we use a hack; only
-        //adjust the KEEP_ALIVE if there is only one shielded leaf-ultrapeer
+        //adjust the NUM_CONNECTIONS if there is only one shielded leaf-ultrapeer
         //connection.  Typically this will happen just once, when we enter leaf
         //mode.  Note that we actually call ultrapeerConnections() instead of a
         //"clientSupernodeConnections()" method; if this method is called and
@@ -1420,23 +1405,41 @@ public class ConnectionManager {
             RouterService.getCallback().connectionInitializing(c);
         }
 
+        completeConnectionInitialization(c, false);
+    }
+
+    /**
+     * Performs the steps necessary to complete connection initialization.
+     *
+     * @param mc the <tt>ManagedConnection</tt> to finish initializing
+     * @param fetched Specifies whether or not this connection is was fetched
+     *  by a connection fetcher.  If so, this removes that connection from 
+     *  the list of fetched connections being initialized, keeping the
+     *  connection fetcher data in sync
+     */
+    private void completeConnectionInitialization(ManagedConnection mc, 
+                                                  boolean fetched) {
         boolean connectionOpen = false;
         synchronized(this) {
+            if(fetched) {
+                _initializingFetchedConnections.remove(mc);
+            }
             // If the connection was killed while initializing, we shouldn't
             // announce its initialization
-            connectionOpen = connectionInitialized(c);
+            connectionOpen = connectionInitialized(mc);
         }
         if(connectionOpen) {
-            RouterService.getCallback().connectionInitialized(c);
+            RouterService.getCallback().connectionInitialized(mc);
             //check if we are a client node, and now opened a connection 
             //to ultrapeer. In this case, we will drop all other connections
             //and just keep this one
             //check for shieldedclient-ultrapeer connection
-            if(c.isClientSupernodeConnection()) {
+            if(mc.isClientSupernodeConnection()) {
                 gotShieldedClientSupernodeConnection();
             }
         }
     }
+
 
     //
     // End connection list management functions
@@ -1529,8 +1532,6 @@ public class ConnectionManager {
          * locking requirement.
          */
         public ConnectionFetcher() {
-            // Record the fetcher creation
-            _fetchers.add(this);
             setName("ConnectionFetcher");
 
             // Kick off the thread.

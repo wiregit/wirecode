@@ -131,7 +131,7 @@ public class BrowseHostHandler {
         // ask for the browse results..
         str = "GET / HTTP/1.1" + LF;
         oStream.write(str.getBytes());
-        str = "Host: " + Message.ip2string(RouterService.getAddress()) + 
+        str = "Host: " + NetworkUtils.ip2string(RouterService.getAddress()) + 
               ":" + RouterService.getPort() + LF;
         oStream.write(str.getBytes());
         str = "User-Agent: " + CommonUtils.getVendor() + LF;

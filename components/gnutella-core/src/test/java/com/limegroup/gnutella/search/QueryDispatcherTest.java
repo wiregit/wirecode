@@ -31,6 +31,7 @@ public class QueryDispatcherTest extends BaseTestCase {
      * from the query dispatcher.
      */
     public void testRemoveReplyHandler() throws Exception {
+        RouterService rs = new RouterService(new ActivityCallbackStub());
         QueryDispatcher qd = QueryDispatcher.instance();
         qd.start();
         
@@ -41,8 +42,8 @@ public class QueryDispatcherTest extends BaseTestCase {
         QueryRequest qr = QueryRequest.createQuery("test");
         ReplyHandler rh = new TestReplyHandler();
         QueryHandler handler = 
-            QueryHandler.createHandlerForNewLeaf(qr, rh);
-        handler.setResultCounter(new TestResultCounter());
+            QueryHandler.createHandlerForNewLeaf(qr, rh, 
+                                                 new TestResultCounter(0));
 
 
         qd.addQuery(handler);
@@ -55,12 +56,6 @@ public class QueryDispatcherTest extends BaseTestCase {
         
     }
 
-    private static final class TestResultCounter implements ResultCounter {
-        
-        public int getNumResults() {
-            return 0;
-        }
-    }
 
     private static final class TestReplyHandler extends ReplyHandlerStub {
         

@@ -207,7 +207,7 @@ public final class RouterService {
 
 		if(ConnectionSettings.CONNECT_ON_STARTUP.getValue()) {
 			// Make sure connections come up ultra-fast (beyond default keepAlive)		
-			int outgoing = ConnectionSettings.KEEP_ALIVE.getValue();
+			int outgoing = ConnectionSettings.NUM_CONNECTIONS.getValue();
 			if ( outgoing > 0 ) 
 				connect();
 		}
@@ -497,7 +497,7 @@ public final class RouterService {
 
     /**
      * Forces the backend to try to establish newKeep connections by kicking
-     * off connection fetchers as needed.  Does not affect the KEEP_ALIVE
+     * off connection fetchers as needed.  Does not affect the NUM_CONNECTIONS
      * property.
      * @param newKeep the desired total number of messaging connections
      */
@@ -511,7 +511,7 @@ public final class RouterService {
     /**
      * Validates the passed new keep alive, and sets the backend to 
      * try to establish newKeep connections by kicking
-     * off connection fetchers as needed.  Does not affect the KEEP_ALIVE
+     * off connection fetchers as needed.  Does not affect the NUM_CONNECTIONS
      * property.
      * @param newKeep the desired total number of messaging connections
      * @exception if the suggested keep alive value is not suitable
@@ -524,7 +524,7 @@ public final class RouterService {
         if(newKeep < 0)
             throw new BadConnectionSettingException(
                 BadConnectionSettingException.NEGATIVE_VALUE,
-				ConnectionSettings.KEEP_ALIVE.getValue());
+				ConnectionSettings.NUM_CONNECTIONS.getValue());
         
         //TODO: we may want to re-enable this...with a higher limit.
         ////The request for increasing keep alive if we are leaf node is invalid
@@ -557,7 +557,7 @@ public final class RouterService {
         //expire the HostCatcher if the keep alive was zero.  This is similar to
         //calling connect(), except that it does not get the keep alive from
         //SettingsManager.
-        if (ConnectionSettings.KEEP_ALIVE.getValue() == 0) //manager.getKeepAlive()==0)
+        if (ConnectionSettings.NUM_CONNECTIONS.getValue() == 0) //manager.getKeepAlive()==0)
             catcher.expire();
         forceKeepAlive(newKeep);
     }

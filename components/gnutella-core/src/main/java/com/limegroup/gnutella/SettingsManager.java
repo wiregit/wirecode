@@ -14,8 +14,7 @@ import java.awt.*;
 import java.awt.event.*;
 import java.lang.reflect.*;
 import com.limegroup.gnutella.messages.*;
-import com.limegroup.gnutella.util.StringUtils;
-import com.limegroup.gnutella.util.CommonUtils;
+import com.limegroup.gnutella.util.*;
 import com.limegroup.gnutella.settings.*;
 
 /**
@@ -256,7 +255,7 @@ public final class SettingsManager {
 		"ra;ram;wma;wm;wmv;mp2v;mlv;mpa;mpv2;mid;midi;rmi;aifc;snd;"+
 		"mpg;mpeg;asf;qt;mov;avi;mpe;swf;dcr;gif;jpg;jpeg;jpe;png;tif;tiff;"+
 		"exe;zip;gz;gzip;hqx;tar;tgz;z;rmj;lqt;rar;ace;sit;smi;img;ogg;rm;"+
-		"bin;dmg;jve;nsv;med;mod;7z;iso";
+		"bin;dmg;jve;nsv;med;mod;7z;iso;lwtp";
 
     // The property key name constants
 	private final String ALLOW_BROWSER         = "ALLOW_BROWSER";
@@ -990,7 +989,7 @@ public final class SettingsManager {
         setPort(DEFAULT_PORT);
         setConnectionSpeed(DEFAULT_CONNECTION_SPEED);
         setSearchLimit(DEFAULT_SEARCH_LIMIT);
-        setClientID( (new GUID(Message.makeGuid())).toHexString() );
+        setClientID( (new GUID()).toHexString() );
         setBannedIps(DEFAULT_BLACK_LISTED_IP_ADDRESSES);
         setAllowedIps(DEFAULT_WHITE_LISTED_IP_ADDRESSES);
         setBannedWords(DEFAULT_BANNED_WORDS);
@@ -1526,7 +1525,7 @@ public final class SettingsManager {
 	 * Returns the forced IP address in dotted-quad format.
 	 */
     public String getForcedIPAddressString() {
-        return Message.ip2string(_forcedIPAddress);
+        return NetworkUtils.ip2string(_forcedIPAddress);
     }
 
     /**

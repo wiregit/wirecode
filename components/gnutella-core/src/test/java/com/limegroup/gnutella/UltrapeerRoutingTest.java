@@ -56,7 +56,7 @@ public final class UltrapeerRoutingTest extends BaseTestCase {
      * since our connectin pass this headers, and this is what the
      * per-connection soft max is based on.
 	 */    
-    private static final byte SOFT_MAX = (byte)5; // X-Max-TTL+1
+    private static final byte SOFT_MAX = (byte)4; // X-Max-TTL+1
 
 
 	/**
@@ -136,7 +136,7 @@ public final class UltrapeerRoutingTest extends BaseTestCase {
 		UltrapeerSettings.DISABLE_ULTRAPEER_MODE.setValue(false);
 		UltrapeerSettings.FORCE_ULTRAPEER_MODE.setValue(true);
 		UltrapeerSettings.MAX_LEAVES.setValue(1);
-		ConnectionSettings.KEEP_ALIVE.setValue(3);
+		ConnectionSettings.NUM_CONNECTIONS.setValue(3);
 		ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);	
 		ConnectionSettings.USE_GWEBCACHE.setValue(false);
 		ConnectionSettings.WATCHDOG_ACTIVE.setValue(false);

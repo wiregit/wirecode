@@ -54,7 +54,7 @@ public class ConnectionManagerTest extends com.limegroup.gnutella.util.BaseTestC
     
     private static void setSettings() throws Exception {
         SettingsManager.instance().setPort(6346);
-		ConnectionSettings.KEEP_ALIVE.setValue(1);
+		ConnectionSettings.NUM_CONNECTIONS.setValue(1);
 		ConnectionSettings.CONNECT_ON_STARTUP.setValue(false);
 		ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
         ConnectionSettings.EVER_ACCEPTED_INCOMING.setValue(true);

@@ -196,9 +196,13 @@ public class QueryRouteTableTest extends com.limegroup.gnutella.util.BaseTestCas
         qrt2=new QueryRouteTable(1000);
         for (Iterator iter=qrt.encode(null); iter.hasNext(); ) {
             RouteTableMessage m=(RouteTableMessage)iter.next();
-            try { 
-                qrt2.update(m); 
-            } catch (BadPacketException e) {
+            if(m instanceof PatchTableMessage) {
+                try { 
+                    qrt2.patch((PatchTableMessage)m); 
+                } catch (BadPacketException e) {
+                }
+            } else {
+                qrt2.reset((ResetTableMessage)m);
             }
             if (m instanceof PatchTableMessage)
                 assertTrue(((PatchTableMessage)m).getCompressor()
@@ -211,9 +215,13 @@ public class QueryRouteTableTest extends com.limegroup.gnutella.util.BaseTestCas
         assertNotEquals(qrt2,(qrt));
         for (Iterator iter=qrt.encode(qrt2); iter.hasNext(); ) {
             RouteTableMessage m=(RouteTableMessage)iter.next();
-            try { 
-                qrt2.update(m); 
-            } catch (BadPacketException e) {
+            if(m instanceof PatchTableMessage) {
+                try { 
+                    qrt2.patch((PatchTableMessage)m); 
+                } catch (BadPacketException e) {
+                }
+            } else {
+                qrt2.reset((ResetTableMessage)m);
             }
             if (m instanceof PatchTableMessage)
                 assertTrue(((PatchTableMessage)m).getCompressor()
@@ -243,9 +251,13 @@ public class QueryRouteTableTest extends com.limegroup.gnutella.util.BaseTestCas
 
         for (iter=qrt.encode(qrt2); iter.hasNext(); ) {
             RouteTableMessage m=(RouteTableMessage)iter.next();
-            try { 
-                qrt2.update(m); 
-            } catch (BadPacketException e) {
+            if(m instanceof PatchTableMessage) {
+                try { 
+                    qrt2.patch((PatchTableMessage)m); 
+                } catch (BadPacketException e) {
+                }
+            } else {
+                qrt2.reset((ResetTableMessage)m);
             }
             if (m instanceof PatchTableMessage)
                 assertEquals(PatchTableMessage.COMPRESSOR_NONE,
@@ -264,9 +276,13 @@ public class QueryRouteTableTest extends com.limegroup.gnutella.util.BaseTestCas
 
         for (iter=qrt.encode(qrt2); iter.hasNext(); ) {
             RouteTableMessage m=(RouteTableMessage)iter.next();
-            try { 
-                qrt2.update(m); 
-            } catch (BadPacketException e) {
+            if(m instanceof PatchTableMessage) {
+                try { 
+                    qrt2.patch((PatchTableMessage)m); 
+                } catch (BadPacketException e) {
+                }
+            } else {
+                qrt2.reset((ResetTableMessage)m);
             }
         }
         assertEquals(qrt2,(qrt));
@@ -338,7 +354,7 @@ public class QueryRouteTableTest extends com.limegroup.gnutella.util.BaseTestCas
         PatchTableMessage patch=new PatchTableMessage((short)2, (short)2,
             PatchTableMessage.COMPRESSOR_DEFLATE, (byte)8, new byte[10], 0, 10);
         try {
-            qrt.update(patch);
+            qrt.patch(patch);
             fail("bpe should have been thrown.");
         } catch (BadPacketException e) { 
         }
@@ -346,17 +362,17 @@ public class QueryRouteTableTest extends com.limegroup.gnutella.util.BaseTestCas
         qrt=new QueryRouteTable();  //b. message sizes don't match
         try {
             reset=new ResetTableMessage(1024, (byte)2);
-            qrt.update(reset);
+            qrt.reset(reset);
             patch=new PatchTableMessage((short)1, (short)3,
                 PatchTableMessage.COMPRESSOR_NONE, (byte)8, new byte[10], 0, 10);
-            qrt.update(patch);
+            qrt.patch(patch);
         } catch (BadPacketException e) {
             fail("bpe should have been thrown.");
         }
         try {
             patch=new PatchTableMessage((short)2, (short)4,
                 PatchTableMessage.COMPRESSOR_NONE, (byte)8, new byte[10], 0, 10);
-            qrt.update(patch);
+            qrt.patch(patch);
             fail("bpe should have been thrown.");
         } catch (BadPacketException e) { 
         }
@@ -365,14 +381,14 @@ public class QueryRouteTableTest extends com.limegroup.gnutella.util.BaseTestCas
         try {
             patch=new PatchTableMessage((short)1, (short)3,
                 PatchTableMessage.COMPRESSOR_NONE, (byte)8, new byte[10], 0, 10);
-            qrt.update(patch);
+            qrt.patch(patch);
         } catch (BadPacketException e) {
             fail("bpe should have been thrown.");
         }
         try {
             patch=new PatchTableMessage((short)3, (short)3,
                 PatchTableMessage.COMPRESSOR_NONE, (byte)8, new byte[10], 0, 10);
-            qrt.update(patch);
+            qrt.patch(patch);
             fail("bpe should have been thrown.");
         } catch (BadPacketException e) {
         }        
@@ -380,26 +396,26 @@ public class QueryRouteTableTest extends com.limegroup.gnutella.util.BaseTestCas
         qrt=new QueryRouteTable();  //d. sequence interrupted by reset
         patch=new PatchTableMessage((short)1, (short)3,
             PatchTableMessage.COMPRESSOR_NONE, (byte)8, new byte[10], 0, 10);
-        qrt.update(patch);
+        qrt.patch(patch);
         reset=new ResetTableMessage(1024, (byte)2);
-        qrt.update(reset);
+        qrt.reset(reset);
 
         patch=new PatchTableMessage((short)1, (short)6,
             PatchTableMessage.COMPRESSOR_NONE, (byte)8, new byte[10], 0, 10);
-        qrt.update(patch);
+        qrt.patch(patch);
 
         qrt=new QueryRouteTable();  //e. Sequence too big
         patch=new PatchTableMessage((short)1, (short)2,
             PatchTableMessage.COMPRESSOR_NONE, (byte)8, new byte[10], 0, 10);
-        qrt.update(patch);
+        qrt.patch(patch);
         patch=new PatchTableMessage((short)2, (short)2,
             PatchTableMessage.COMPRESSOR_NONE, (byte)8, new byte[10], 0, 10);
-        qrt.update(patch);
+        qrt.patch(patch);
 
         try {
             patch=new PatchTableMessage((short)3, (short)2,
                 PatchTableMessage.COMPRESSOR_NONE, (byte)8, new byte[10], 0, 10);
-            qrt.update(patch);
+            qrt.patch(patch);
             fail("bpe should have been thrown.");
         } catch (BadPacketException e) {
         }

@@ -67,6 +67,19 @@ public class GUID implements  com.sun.java.util.collections.Comparable {
     /** The contents of the GUID.  INVARIANT: bytes.length==SZ */
     private byte[] bytes;
 
+    /**
+     * Creates a new Globally Unique Identifier (GUID).
+     */
+    public GUID() {
+        this(makeGuid());
+    }
+
+    /**
+     * Creates a new <tt>GUID</tt> instance with the specified array
+     * of unique bytes.
+     *
+     * @param bytes the array of unique bytes
+     */
     public GUID(byte[] bytes) {
         Assert.that(bytes.length==SZ);
         this.bytes=bytes;
@@ -278,7 +291,7 @@ public class GUID implements  com.sun.java.util.collections.Comparable {
     /** Gets bytes 0-4 as a dotted ip address.
      */
     public static String getIP(byte[] guidBytes) {
-        return Message.ip2string(guidBytes);
+        return NetworkUtils.ip2string(guidBytes);
     }
 
     /** Gets bytes 13-14 as a port.

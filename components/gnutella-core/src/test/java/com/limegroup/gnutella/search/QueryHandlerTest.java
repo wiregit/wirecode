@@ -32,6 +32,60 @@ public final class QueryHandlerTest extends BaseTestCase {
         junit.textui.TestRunner.run(suite());
     }
 
+
+    /**
+     * Tests the method for sending an individual query to a 
+     * single connections.
+     */
+    public void testSendQueryToHost() throws Exception {
+        RouterService rs = new RouterService(new ActivityCallbackStub());
+        ReplyHandler rh = new UltrapeerConnection();        
+        QueryRequest query = QueryRequest.createQuery("test", (byte)1);
+        QueryHandler qh = 
+            QueryHandler.createHandler(query, rh, new TestResultCounter());
+        Class[] paramTypes = new Class[] {
+            QueryRequest.class, 
+            ManagedConnection.class,
+            QueryHandler.class,
+        };
+
+		Method m = 
+            PrivilegedAccessor.getMethod(QueryHandler.class, 
+                                         "sendQueryToHost",
+                                         paramTypes);
+
+        ManagedConnection mc = new UltrapeerConnection();
+        Object[] params = new Object[] {
+            query, mc, qh,
+        };
+
+        m.invoke(null, params);
+        List hostsQueried = 
+            (List)PrivilegedAccessor.getValue(qh, "QUERIED_CONNECTIONS");
+        assertEquals("should not have added host", 0, hostsQueried.size());
+
+        // make sure we add the connection to the queries handlers
+        // if it doesn't support probe queries and the TTL is 1
+        params[1] = new LeafConnection();
+        m.invoke(null, params);
+        hostsQueried = 
+            (List)PrivilegedAccessor.getValue(qh, "QUERIED_CONNECTIONS");
+        assertEquals("should have added host", 1, hostsQueried.size());
+
+        // make sure it adds the connection when the ttl is higher
+        // than one and the connection supports probe queries
+        params[0] = QueryRequest.createQuery("test");
+        params[1] = new UltrapeerConnection();
+
+        m.invoke(null, params);
+        hostsQueried = 
+            (List)PrivilegedAccessor.getValue(qh, "QUERIED_CONNECTIONS");
+        assertEquals("should have added host", 2, hostsQueried.size());
+
+        
+        
+    }    
+
     /**
      * Tests the method for calculating the next TTL.
      */
@@ -42,18 +96,21 @@ public final class QueryHandlerTest extends BaseTestCase {
                                          "calculateNewTTL",
                                          params);        
         byte ttl = getTTL(m, 2000, 15, (byte)5);
-        assertEquals("unexpected ttl", 4, ttl);
+        assertEquals("unexpected ttl", 3, ttl);
 
         ttl = getTTL(m, 200, 15, (byte)5);
-        assertEquals("unexpected ttl", 3, ttl);
+        assertEquals("unexpected ttl", 2, ttl);
 
 
         ttl = getTTL(m, 200000, 15, (byte)4);
         assertEquals("unexpected ttl", 4, ttl);
+
+        ttl = getTTL(m, 20000, 5, (byte)2);
+        assertEquals("unexpected ttl", 2, ttl);
     }
 
     /**
-     * Convenience method for getting the TTL from QueryHandler/
+     * Convenience method for getting the TTL from QueryHandler.
      */
     private byte getTTL(Method m, int hosts, int degree, byte maxTTL) 
         throws Exception {
@@ -78,22 +135,17 @@ public final class QueryHandlerTest extends BaseTestCase {
 
         List connections = new LinkedList();
         for(int i=0; i<15; i++) {
-            connections.add(new TestConnection(10));
+            connections.add(NewConnection.createConnection());
         }   
 
         QueryHandler handler = 
             QueryHandler.createHandler(QueryRequest.createQuery("test"),
-                                       new TestConnection(8));
-        try {
-            handler.sendQuery();
-            fail("should have failed due to null result counter");
-        } catch(NullPointerException e) {
-            // this is expected before the result counter is set
-        }
-        handler.setResultCounter(new TestResultCounter(0));
+                                       NewConnection.createConnection(),
+                                       new TestResultCounter(0));
 
         TestConnectionManager tcm = new TestConnectionManager();
 
+        assertTrue(tcm.getInitializedConnections().size() > 0);
         PrivilegedAccessor.setValue(QueryHandler.class, "_connectionManager", tcm);
                                            
         handler.sendQuery();
@@ -126,7 +178,7 @@ public final class QueryHandlerTest extends BaseTestCase {
 
         assertEquals("unexpected number of queries sent", 4, tcm.getNumQueries());        
         
-        Thread.sleep(2000);
+        Thread.sleep(8000);
         handler.sendQuery();
 
         // after the sleep, it should go through!
@@ -138,7 +190,7 @@ public final class QueryHandlerTest extends BaseTestCase {
         // should be relatively high, causing us to hit the theoretical 
         // horizon limit!
 
-        for(int i=0; i<tcm.CONNECTIONS.size()-2; i++) {
+        for(int i=0; i<tcm.getInitializedConnections2().size()-2; i++) {
             Thread.sleep(2000);
             handler.sendQuery();
         }        
@@ -150,48 +202,6 @@ public final class QueryHandlerTest extends BaseTestCase {
                    (tcm.getNumQueries() <= 12));
     }
 
-    /**
-     * Helper class that supplies the list of connections for searching.
-     */
-    private static final class TestConnectionManager extends ConnectionManager {
-
-        /**
-         * The list of <tt>Connection</tt> instances
-         */
-        private final List CONNECTIONS;
-       
-        /**
-         * Creates a new <tt>ConnectionManager</tt> with a list of 
-         * <tt>TestConnection</tt>s for testing.
-         */
-        TestConnectionManager() {
-            super(new DummyAuthenticator());
-            CONNECTIONS = new LinkedList();
-            for(int i=0; i<20; i++) {
-                CONNECTIONS.add(new TestConnection(15));
-            }
-        }
-
-        /**
-         * Accessor for the custom list of connections.
-         */
-        public List getInitializedConnections2() {
-            return CONNECTIONS;
-        }
-
-        /**
-         * Returns the total number of queries received over all connections.
-         */
-        public int getNumQueries() {
-            int numQueries = 0;
-            Iterator iter = CONNECTIONS.iterator();
-            while(iter.hasNext()) {
-                TestConnection tc = (TestConnection)iter.next();
-                numQueries += tc.getNumQueries();
-            }
-            return numQueries;
-        }
-    }
 
     /**
      * Test to make sure that the theoretical horizon we've reached
@@ -205,7 +215,7 @@ public final class QueryHandlerTest extends BaseTestCase {
                                                      Byte.TYPE});
         
         // test for a degree 19, ttl 4 network
-        ManagedConnection mc = new TestConnection(19);
+        ManagedConnection mc = NewConnection.createConnection(19);
         int horizon = 0;
         for(int i=0; i<19; i++) {
             horizon += 
@@ -215,7 +225,7 @@ public final class QueryHandlerTest extends BaseTestCase {
         assertEquals("incorrect horizon", 117325, horizon);
 
         // test for a degree 30, ttl 3 network
-        mc = new TestConnection(30);
+        mc = NewConnection.createConnection(30);
         horizon = 0;
         for(int i=0; i<30; i++) {
             horizon += 
@@ -223,44 +233,6 @@ public final class QueryHandlerTest extends BaseTestCase {
                                    new Object[]{mc, new Byte((byte)3)})).intValue();
         }                
         assertEquals("incorrect horizon", 26130, horizon);
-    }
-
-
-    /**
-     * Tests the method for sending a probe query to make sure it is sent to
-     * the number of nodes we think it's sent to and to make sure it's sent
-     * with the proper TTL.
-     */
-    public void testProbeQuery() throws Exception {
-        RouterService rs = new RouterService(new ActivityCallbackStub());
-        assertNotNull("should have a message router", rs.getMessageRouter());
-		Method m = 
-            PrivilegedAccessor.getMethod(QueryHandler.class, 
-                                         "sendProbeQuery",
-                                         new Class[]{QueryHandler.class, 
-                                                     List.class});
-        List connections = new LinkedList();
-        for(int i=0; i<15; i++) {
-            connections.add(new TestConnection(10));
-        }
-
-        QueryHandler handler = 
-            QueryHandler.createHandler(QueryRequest.createQuery("test"),
-                                       new TestConnection(8));
-        
-        m.invoke(null, new Object[]{handler, connections});
-
-        int queriesSent = 0;
-        int totalTTL = 0;
-        Iterator iter = connections.iterator();
-        while(iter.hasNext()) {
-            TestConnection tc = (TestConnection)iter.next();
-            queriesSent += tc.getNumQueries();
-            totalTTL += tc.getTotalTTL();
-        }
-
-        assertEquals("should have only sent two queries", 3, queriesSent);
-        assertEquals("should have sent 2 queries with TTL=2", 6, totalTTL);
     }
 
     
@@ -274,112 +246,33 @@ public final class QueryHandlerTest extends BaseTestCase {
 		Method m = 
             PrivilegedAccessor.getMethod(QueryHandler.class, 
                                          "sendQuery",
-                                         new Class[]{QueryHandler.class, 
-                                                     List.class});
+                                         new Class[]{List.class});
 
-        List connections = new LinkedList();
-        for(int i=0; i<15; i++) {
-            connections.add(new TestConnection(10));
+        int numConnections = 15;
+        List connections = new ArrayList();
+        for(int i=0; i<numConnections; i++) {
+            connections.add(NewConnection.createConnection(10));
         }   
 
         QueryHandler handler = 
             QueryHandler.createHandler(QueryRequest.createQuery("test"),
-                                       new TestConnection(8));
+                                       NewConnection.createConnection(8),
+                                       new TestResultCounter(0));
+        
+        
+        Object[] params = new Object[] {connections};
 
-        handler.setResultCounter(new TestResultCounter(0));
-        
-        
-        Iterator iter = connections.iterator();
-        //int results = 0;
-        while(iter.hasNext()) {
-            TestConnection tc = (TestConnection)iter.next();
-            m.invoke(null, new Object[]{handler, connections}); 
+        // just send queries to all connections
+        for(int i=0; i<numConnections; i++) {
+            m.invoke(handler, params);
         }
 
 
         // just make sure all of the connections received the query
-        iter = connections.iterator();
+        Iterator iter = connections.iterator();
         while(iter.hasNext()) {
             TestConnection tc = (TestConnection)iter.next();
             assertTrue("should have received the query", tc.receivedQuery());
-        }
-
-        
-        //m.invoke(null, new Object[]{handler, connections});        
-    }
-
-
-    /**
-     * Helper result counter that we can use to artificially produce 
-     * results.
-     */
-    private static final class TestResultCounter implements ResultCounter {
-        private final int RESULTS;
-        TestResultCounter(int results) {
-            RESULTS = results;
-        }
-        public int getNumResults() {
-            return RESULTS;
-        }
-    }
-    
-    /**
-     * Helper class that overrides getNumIntraUltrapeerConnections for
-     * testing the horizon calculation and testing the new search
-     * architecture.
-     */
-    private static final class TestConnection extends ManagedConnection {
-        
-        private final int CONNECTIONS;
-
-        private int _numQueries = 0;
-
-        private int _totalTTL = 0;
-
-        private boolean _receivedQuery;
-
-        TestConnection(int connections) {
-            super("60.76.5.3", 4444);
-            CONNECTIONS = connections;
-        }
-
-        public int getNumIntraUltrapeerConnections() {
-            return CONNECTIONS;
-        }
-
-        /**
-         * Override the stability check method -- assume we're always stable.
-         */
-        public boolean isStable(long time) {
-            return true;
-        }
-
-        public void send(Message msg) {
-            if(!(msg instanceof QueryRequest)) return;
-
-            _receivedQuery = true;
-            _numQueries++;
-            QueryRequest qr = (QueryRequest)msg;
-            int ttl = qr.getTTL();
-
-            if(ttl > headers().getMaxTTL()) {
-                // the TTL is higher than we specified
-                throw new IllegalArgumentException("ttl too high: "+ttl);
-            }
-
-            _totalTTL += ttl;
-        }
-
-        int getNumQueries() {
-            return _numQueries;
-        }
-
-        int getTotalTTL() {
-            return _totalTTL;
-        }
-
-        boolean receivedQuery() {
-            return _receivedQuery;
         }
     }
 }

@@ -71,7 +71,7 @@ public class UploadTest extends com.limegroup.gnutella.util.BaseTestCase {
         SettingsManager.instance().setFilterDuplicates(false);
 
 
-		ConnectionSettings.KEEP_ALIVE.setValue(8);
+		ConnectionSettings.NUM_CONNECTIONS.setValue(8);
 		ConnectionSettings.CONNECT_ON_STARTUP.setValue(true);
 		ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
         ConnectionSettings.EVER_ACCEPTED_INCOMING.setValue(true);

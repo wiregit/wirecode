@@ -41,7 +41,7 @@ public class PushRequestTest extends com.limegroup.gnutella.util.BaseTestCase {
     public void testBigPush() throws Exception {        
         byte[] bytes=new byte[23+26+10];
         bytes[16]=Message.F_PUSH;
-        bytes[17]=(byte)3;     //ttl .. ttl + hops must be <= 4
+        bytes[17]=(byte)2;     //ttl .. ttl + hops must be <= 3
         bytes[18]=(byte)1;     //hops
         bytes[19]=(byte)26+10; //payload length
         bytes[23+16]=(byte)3;  //index
@@ -56,7 +56,7 @@ public class PushRequestTest extends com.limegroup.gnutella.util.BaseTestCase {
             pr.getLength());
         assertEquals("unexpected func", Message.F_PUSH, pr.getFunc());
         assertEquals("unexpected hops", (byte)1, pr.getHops());
-        assertEquals("unexpected ttl", (byte)3, pr.getTTL());
+        assertEquals("unexpected ttl", (byte)2, pr.getTTL());
 
         //2. Test that yields returns the same thing
         ByteArrayOutputStream out=new ByteArrayOutputStream();

@@ -40,7 +40,7 @@ public class ManagedConnectionBufferTest extends BaseTestCase {
 	public void setUp() throws Exception {
 		setStandardSettings();
 		
-		ConnectionSettings.KEEP_ALIVE.setValue(2);
+		ConnectionSettings.NUM_CONNECTIONS.setValue(2);
 		ConnectionSettings.WATCHDOG_ACTIVE.setValue(true);
 		ConnectionSettings.PREFERENCING_ACTIVE.setValue(false);
 
@@ -49,6 +49,7 @@ public class ManagedConnectionBufferTest extends BaseTestCase {
 
 		// disable connection removal
 		ConnectionSettings.REMOVE_ENABLED.setValue(false);
+        ConnectionSettings.SOFT_MAX.setValue((byte)4);
 
         RouterService rs = 
 			new RouterService(new ActivityCallbackStub());
@@ -156,7 +157,7 @@ public class ManagedConnectionBufferTest extends BaseTestCase {
 
         assertEquals("unexpected # sent messages", 0, out.getNumMessagesSent()); 
         assertEquals("unexpected # sent bytes", 0, out.getBytesSent());
-        pr=new PingRequest((byte)4);
+        pr=new PingRequest((byte)3);
         out.send(pr);
         start=System.currentTimeMillis();        
         pr=(PingRequest)in.receive();
@@ -166,7 +167,7 @@ public class ManagedConnectionBufferTest extends BaseTestCase {
         assertEquals( pr.getTotalLength(), out.getUncompressedBytesSent() );
         assertLessThan("Unreasonably long send time", 500, elapsed);
         assertEquals("hopped something other than 0", 0, pr.getHops());
-        assertEquals("unexpected ttl", 4, pr.getTTL());
+        assertEquals("unexpected ttl", 3, pr.getTTL());
     }
     
     /**

@@ -25,8 +25,8 @@ public final class ConnectionSettings extends LimeProps {
 	/**
 	 * Settings for the number of connections to maintain.
 	 */
-	public static final IntSetting KEEP_ALIVE =
-		FACTORY.createIntSetting("KEEP_ALIVE", 15);
+	public static final IntSetting NUM_CONNECTIONS =
+        FACTORY.createIntSetting("NUM_CONNECTIONS", 32);
 
 	
     /**
@@ -39,7 +39,7 @@ public final class ConnectionSettings extends LimeProps {
      * If this is the case, the TTL is set to SOFT_MAX - hops.
      */
     public static final ByteSetting SOFT_MAX =
-        FACTORY.createByteSetting("SOFT_MAX", (byte)4);
+        FACTORY.createByteSetting("SOFT_MAX", (byte)3);
 
 	/**
 	 * Settings for whether or not to local addresses should be considered

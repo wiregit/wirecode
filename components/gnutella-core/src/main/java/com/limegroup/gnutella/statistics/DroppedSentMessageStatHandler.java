@@ -184,14 +184,24 @@ public class DroppedSentMessageStatHandler extends AbstractStatHandler {
 								   DroppedLimeSentMessageStatBytes.UDP_ROUTE_TABLE_MESSAGES);
 
 	/**
-	 * <tt>DroppedSentMessageStatHandler</tt> for Gnutella route table messages sent 
-	 * over TCP.
+	 * <tt>DroppedSentMessageStatHandler</tt> for Gnutella reset route table messages 
+	 * sent over TCP.
 	 */
-	public static final DroppedSentMessageStatHandler TCP_ROUTE_TABLE_MESSAGES = 
-	    new DroppedSentMessageStatHandler(DroppedSentMessageStat.TCP_ROUTE_TABLE_MESSAGES,
-								   DroppedSentMessageStatBytes.TCP_ROUTE_TABLE_MESSAGES,
-								   DroppedLimeSentMessageStat.TCP_ROUTE_TABLE_MESSAGES,
-								   DroppedLimeSentMessageStatBytes.TCP_ROUTE_TABLE_MESSAGES);
+	public static final DroppedSentMessageStatHandler TCP_RESET_ROUTE_TABLE_MESSAGES = 
+	    new DroppedSentMessageStatHandler(DroppedSentMessageStat.TCP_RESET_ROUTE_TABLE_MESSAGES,
+								   DroppedSentMessageStatBytes.TCP_RESET_ROUTE_TABLE_MESSAGES,
+								   DroppedLimeSentMessageStat.TCP_RESET_ROUTE_TABLE_MESSAGES,
+								   DroppedLimeSentMessageStatBytes.TCP_RESET_ROUTE_TABLE_MESSAGES);
+
+	/**
+	 * <tt>DroppedSentMessageStatHandler</tt> for Gnutella patch route table messages 
+	 * sent over TCP.
+	 */
+	public static final DroppedSentMessageStatHandler TCP_PATCH_ROUTE_TABLE_MESSAGES = 
+	    new DroppedSentMessageStatHandler(DroppedSentMessageStat.TCP_PATCH_ROUTE_TABLE_MESSAGES,
+								   DroppedSentMessageStatBytes.TCP_PATCH_ROUTE_TABLE_MESSAGES,
+								   DroppedLimeSentMessageStat.TCP_PATCH_ROUTE_TABLE_MESSAGES,
+								   DroppedLimeSentMessageStatBytes.TCP_PATCH_ROUTE_TABLE_MESSAGES);
 								   
 	/**
 	 * <tt>DroppedSentMessageStatHandler</tt> for Gnutella route table messages sent 

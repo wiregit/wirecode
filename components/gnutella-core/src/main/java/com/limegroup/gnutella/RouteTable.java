@@ -275,7 +275,8 @@ public final class RouteTable {
             return null;
             
         //Increment count, returning old count in tuple.
-        ReplyRoutePair ret=new ReplyRoutePair(handler, entry.bytesRouted);
+        ReplyRoutePair ret = 
+            new ReplyRoutePair(handler, entry.bytesRouted, entry.repliesRouted);
 
         entry.bytesRouted += replyBytes;
         entry.repliesRouted += numReplies;
@@ -283,18 +284,29 @@ public final class RouteTable {
     }
 
     /** The return value from getReplyHandler. */
-    public static class ReplyRoutePair {
+    public static final class ReplyRoutePair {
         private final ReplyHandler handler;
         private final int volume;
+        private final int REPLIES_ROUTED;
 
-        ReplyRoutePair(ReplyHandler handler, int volume) {
+        ReplyRoutePair(ReplyHandler handler, int volume, int hits) {
             this.handler = handler;
             this.volume = volume;
+            REPLIES_ROUTED = hits;
         }
         /** Returns the ReplyHandler to route your message */
         public ReplyHandler getReplyHandler() { return handler; }
         /** Returns the volume of messages already routed for the given GUID. */
         public int getBytesRouted() { return volume; }
+        
+        /** 
+         * Accessor for the number of query results that have been routed
+         * for the GUID that identifies this <tt>ReplyRoutePair</tt>.
+         *
+         * @return the number of query results that have been routed for this
+         *  guid
+         */
+        public int getResultsRouted() { return REPLIES_ROUTED; }
     }
 
 

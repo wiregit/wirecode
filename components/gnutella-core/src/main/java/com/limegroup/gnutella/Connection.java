@@ -46,7 +46,18 @@ import com.limegroup.gnutella.statistics.*;
  *
  * The amount of bytes written and received are maintained by this class.  This
  * is necessary because of compression and decompression are considered
- * implementation details in this class.
+ * implementation details in this class.<p>
+ * 
+ * Finally, <tt>Connection</tt> also handles setting the SOFT_MAX_TTL on a
+ * per-connection basis.  The SOFT_MAX TTL is the limit for hops+TTL on all
+ * incoming traffic, with the exception of query hits.  If an incoming 
+ * message has hops+TTL greater than SOFT_MAX, we set the TTL to 
+ * SOFT_MAX-hops.  We do this on a per-connection basis because on newer
+ * connections that understand X-Max-TTL, we can regulate the TTLs they 
+ * send us.  This helps prevent malicious hosts from using headers like 
+ * X-Max-TTL to simply get connections.  This way, they also have to abide
+ * by the contract of the X-Max-TTL header, illustrated by sending lower
+ * TTL traffic generally.
  */
 public class Connection {
     /** 
@@ -401,6 +412,7 @@ public class Connection {
 
             _headers = HandshakeResponse.createResponse(HEADERS_READ);
             _headersWritten = HandshakeResponse.createResponse(HEADERS_WRITTEN);
+
             _connectionTime = System.currentTimeMillis();
 
             // Now set the soft max TTL that should be used on this connection.
@@ -408,11 +420,12 @@ public class Connection {
             // may come from a leaf, and therefore can have an extra hop.
             // "Good" connections are connections with features such as 
             // intra-Ultrapeer QRP passing.
-            if(isGoodConnection()) {
-                _softMax = (byte)(_headers.getMaxTTL()+(byte)1);
-            } else {
-                _softMax = ConnectionSettings.SOFT_MAX.getValue();
-            }
+            _softMax = ConnectionSettings.SOFT_MAX.getValue();
+            if(isGoodUltrapeer() || isGoodLeaf()) {
+                // we give these an extra hop because they might be sending
+                // us traffic from their leaves
+                _softMax++;
+            } 
             
             //wrap the streams with inflater/deflater
             // These calls must be delayed until absolutely necessary (here)
@@ -494,13 +507,15 @@ public class Connection {
                     connectLine.substring(GNUTELLA_06.length()).trim(), 
                     HEADERS_READ);
 
-            int theirCode = theirResponse.getStatusCode();
-            if (theirCode != HandshakeResponse.OK 
-				&&  theirCode != HandshakeResponse.UNAUTHORIZED_CODE)
-                throw new NoGnutellaOkException(false, 
-                                                theirResponse.getStatusCode(),
-                                                "Server sent fatal response: "+
-												theirResponse.getStatusCode());
+            int code = theirResponse.getStatusCode();
+            if (code != HandshakeResponse.OK &&  
+                code != HandshakeResponse.UNAUTHORIZED_CODE) {
+                if(code == HandshakeResponse.SLOTS_FULL) {
+                    throw NoGnutellaOkException.SERVER_REJECT;
+                } else {
+                    throw NoGnutellaOkException.createServerUnknown(code);
+                }
+            }
 
             //4. Write "GNUTELLA/0.6" plus response code, such as "200 OK", 
 			//   and headers.
@@ -510,31 +525,32 @@ public class Connection {
             sendString(GNUTELLA_06 + " " 
                 + ourResponse.getStatusLine() + CRLF);
             sendHeaders(ourResponse.props());
+
+            code = ourResponse.getStatusCode();
             //Consider termination...
-            if(ourResponse.getStatusCode() == HandshakeResponse.OK) {
+            if(code == HandshakeResponse.OK) {
                 if(ourResponse.getStatusMessage().equals(
                     HandshakeResponse.OK_MESSAGE)){
                     //a) Terminate normally if we wrote "200 OK".
                     return;
                 } else {
-                    //b) Continue loop if we wrote "200 AUTHENTICATING".                    
+                    //b) Continue loop if we wrote "200 AUTHENTICATING".
                     continue;
                 }
-            } else {
-                //c) Terminate abnormally if we wrote anything else.               
-                throw new NoGnutellaOkException(true,
-                                                ourResponse.getStatusCode(),
-                                                "We sent fatal response: "+
-												ourResponse);
+            } else {                
+                //c) Terminate abnormally if we wrote anything else.
+                if(code == HandshakeResponse.SLOTS_FULL) {
+                    throw NoGnutellaOkException.CLIENT_REJECT;
+                } else {
+                    throw NoGnutellaOkException.createClientUnknown(code);
+                }
             }
         }
             
         //If we didn't successfully return out of the method, throw an exception
         //to indicate that handshaking didn't reach any conclusion.  The values
         //here are kind of a hack.
-        throw new NoGnutellaOkException(false,
-                                        HandshakeResponse.UNAUTHORIZED_CODE,
-                                        "Too much handshaking, no conclusion");
+        throw NoGnutellaOkException.UNRESOLVED_SERVER;
     }
     
     /** 
@@ -591,13 +607,14 @@ public class Connection {
             sendHeaders(ourResponse.props());                   
             //Our response should be either OK or UNAUTHORIZED for the handshake
             //to proceed.
-            if((ourResponse.getStatusCode() != HandshakeResponse.OK)
-               && (ourResponse.getStatusCode() !=
-                   HandshakeResponse.UNAUTHORIZED_CODE)) {
-                throw new NoGnutellaOkException(true,
-                                                ourResponse.getStatusCode(),
-                                                "We sent fatal status code: "+
-                                                ourResponse);
+            int code = ourResponse.getStatusCode();
+            if((code != HandshakeResponse.OK) && 
+               (code != HandshakeResponse.UNAUTHORIZED_CODE)) {
+                if(code == HandshakeResponse.SLOTS_FULL) {
+                    throw NoGnutellaOkException.CLIENT_REJECT;
+                } else {
+                    throw NoGnutellaOkException.createClientUnknown(code);
+                }
             }
                     
             //3. read the response from the other side.  If we asked the other
@@ -623,31 +640,27 @@ public class Connection {
 
 
             //Decide whether to proceed.
-            int ourCode=ourResponse.getStatusCode();
-            if(ourCode == HandshakeResponse.OK) {
+            code = ourResponse.getStatusCode();
+            if(code == HandshakeResponse.OK) {
                 if(theirResponse.getStatusCode()==HandshakeResponse.OK)
                     //a) If we wrote 200 and they wrote 200 OK, stop normally.
                     return;
             } else {
-                Assert.that(ourCode==HandshakeResponse.UNAUTHORIZED_CODE,
-                            "Response code: "+ourCode);
+                Assert.that(code==HandshakeResponse.UNAUTHORIZED_CODE,
+                            "Response code: "+code);
                 if(theirResponse.getStatusCode()==HandshakeResponse.OK)
                     //b) If we wrote 401 and they wrote "200...", keep looping.
                     continue;
             }
             //c) Terminate abnormally
-            throw new NoGnutellaOkException(false,
-                                            theirResponse.getStatusCode(),
-                                            "Initiator sent fatal status code: "+
-                                            theirResponse);
+            throw NoGnutellaOkException.
+                createServerUnknown(theirResponse.getStatusCode());
         }        
-
+        
         //If we didn't successfully return out of the method, throw an exception
         //to indicate that handshaking didn't reach any conclusion.  The values
         //here are kind of a hack.
-        throw new NoGnutellaOkException(true,
-                                        HandshakeResponse.UNAUTHORIZED_CODE,
-                                        "Too much handshaking, no conclusion");
+        throw NoGnutellaOkException.UNRESOLVED_CLIENT;
     }
     
     /** Returns true iff line ends with "CONNECT/N", where N
@@ -1261,11 +1274,6 @@ public class Connection {
     public String getUserAgent() {
 		return _headers.getUserAgent();
     }
-
-    // inherit doc comment
-    public boolean isGoodConnection() {
-        return _headers.isGoodConnection();
-    }
     
     /**
      * Returns true if the outgoing stream is deflated.
@@ -1283,6 +1291,16 @@ public class Connection {
      */
     public boolean isReadDeflated() {
         return _headers.isDeflateEnabled();
+    }
+
+    // inherit doc comment
+    public boolean isGoodUltrapeer() {
+        return _headers.isGoodUltrapeer();
+    }
+
+    // inherit doc comment
+    public boolean isGoodLeaf() {
+        return _headers.isGoodLeaf();
     }
 
 	/**
@@ -1309,6 +1327,18 @@ public class Connection {
 	 */
 	public boolean isUltrapeerQueryRoutingConnection() {
 		return _headers.isUltrapeerQueryRoutingConnection();
+    }
+
+    /**
+     * Returns whether or not this connections supports "probe" queries,
+     * or queries sent at TTL=1 that should not block the send path
+     * of subsequent, higher TTL queries.
+     *
+     * @return <tt>true</tt> if this connection supports probe queries,
+     *  otherwise <tt>false</tt>
+     */
+    public boolean supportsProbeQueries() {
+        return _headers.supportsProbeQueries();
     }
 
 	/**

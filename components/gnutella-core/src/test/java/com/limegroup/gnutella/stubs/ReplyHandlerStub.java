@@ -52,7 +52,11 @@ public class ReplyHandlerStub implements ReplyHandler {
         return false;
     }
     
-    public boolean isGoodConnection() {
+    public boolean isGoodUltrapeer() {
+        return false;
+    }
+
+    public boolean isGoodLeaf() {
         return false;
     }
 }

@@ -1,6 +1,7 @@
 package com.limegroup.gnutella.util;
 
 import com.limegroup.gnutella.settings.*;
+import com.limegroup.gnutella .*;
 import java.io.*;
 import java.net.*;
 
@@ -68,6 +69,39 @@ public final class NetworkUtils {
         } else {
             return false; // otherwise, it's not private
         }
+    }
+
+    /** 
+     * Returns the ip (given in BIG-endian) format as standard
+     * dotted-decimal, e.g., 192.168.0.1<p> 
+     *
+     * @param ip the ip address in BIG-endian format
+     * @return the IP address as a dotted-quad string
+     */
+     public static final String ip2string(byte[] ip) {
+         return ip2string(ip, 0);
+     }
+         
+    /** 
+     * Returns the ip (given in BIG-endian) format of
+     * buf[offset]...buf[offset+3] as standard dotted-decimal, e.g.,
+     * 192.168.0.1<p> 
+     *
+     * @param ip the IP address to convert
+     * @param offset the offset into the IP array to convert
+     * @return the IP address as a dotted-quad string
+     */
+    public static final String ip2string(byte[] ip, int offset) {
+        // xxx.xxx.xxx.xxx => 15 chars
+        StringBuffer sbuf = new StringBuffer(16);   
+        sbuf.append(ByteOrder.ubyte2int(ip[offset]));
+        sbuf.append('.');
+        sbuf.append(ByteOrder.ubyte2int(ip[offset+1]));
+        sbuf.append('.');
+        sbuf.append(ByteOrder.ubyte2int(ip[offset+2]));
+        sbuf.append('.');
+        sbuf.append(ByteOrder.ubyte2int(ip[offset+3]));
+        return sbuf.toString();
     }
 }
 

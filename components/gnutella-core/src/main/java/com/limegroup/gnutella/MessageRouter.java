@@ -32,7 +32,7 @@ public abstract class MessageRouter {
      * Constant for the number of old connections to use when forwarding
      * traffic from old connections.
      */
-    private static final int OLD_CONNECTIONS_TO_USE = 5;
+    private static final int OLD_CONNECTIONS_TO_USE = 15;
 
     /**
      * The GUID we attach to QueryReplies to allow PushRequests in
@@ -68,11 +68,10 @@ public abstract class MessageRouter {
     private final ReplyHandler FOR_ME_REPLY_HANDLER = 
 		ForMeReplyHandler.instance();
 		
-    /** 
-     * The time to wait between route table updates, in milliseconds. 
+    /**
+     * The maximum size for <tt>RouteTable</tt>s.
      */
-    private long QUERY_ROUTE_UPDATE_TIME=1000*60*5; //5 minutes
-    private int MAX_ROUTE_TABLE_SIZE=50000;        //actually 100,000 entries
+    private int MAX_ROUTE_TABLE_SIZE = 50000;  //actually 100,000 entries
 
     /**
      * Maps PingRequest GUIDs to PingReplyHandlers.  Stores 2-4 minutes,
@@ -143,6 +142,14 @@ public abstract class MessageRouter {
 	 * A handle to the thread that deals with QRP Propagation
 	 */
 	private final QRPPropagator QRP_PROPAGATOR = new QRPPropagator();
+
+
+    /**
+     * Variable for the most recent <tt>QueryRouteTable</tt> created
+     * for this node.  If this node is an Ultrapeer, the routing
+     * table will include the tables from its leaves.
+     */
+    private QueryRouteTable _lastQueryRouteTable;
 
     /**
      * Creates a MessageRouter.  Must call initialize before using.
@@ -232,12 +239,17 @@ public abstract class MessageRouter {
 			if(RECORD_STATS)
 				ReceivedMessageStatHandler.TCP_PUSH_REQUESTS.addMessage(msg);
             handlePushRequest((PushRequest)msg, receivingConnection);
-		} else if (msg instanceof RouteTableMessage) {
+		} else if (msg instanceof ResetTableMessage) {
 			if(RECORD_STATS)
-				ReceivedMessageStatHandler.TCP_ROUTE_TABLE_MESSAGES.addMessage(msg);
-            handleRouteTableMessage((RouteTableMessage)msg,
+				ReceivedMessageStatHandler.TCP_RESET_ROUTE_TABLE_MESSAGES.addMessage(msg);
+            handleResetTableMessage((ResetTableMessage)msg,
                                     receivingConnection);
-		} 
+		} else if (msg instanceof PatchTableMessage) {
+			if(RECORD_STATS)
+				ReceivedMessageStatHandler.TCP_PATCH_ROUTE_TABLE_MESSAGES.addMessage(msg);
+            handlePatchTableMessage((PatchTableMessage)msg,
+                                    receivingConnection);            
+        }
         else if (msg instanceof MessagesSupportedVendorMessage) 
             receivingConnection.handleVendorMessage((VendorMessage) msg);
         else if (msg instanceof HopsFlowVendorMessage)
@@ -633,16 +645,6 @@ public abstract class MessageRouter {
            (!reply.getIP().equals(address.getHostAddress()))) {
             UNICASTER.addUnicastEndpoint(address, port);
 		}
-
-		// TODO: are we sure we want to do this?
-        // notify neighbors of new unicast endpoint...
-//         Iterator guessUltrapeers = 
-// 			_manager.getConnectedGUESSUltrapeers().iterator();
-//         while (guessUltrapeers.hasNext()) {
-//             ManagedConnection currMC = 
-// 				(ManagedConnection) guessUltrapeers.next();
-// 			currMC.handlePingReply(reply, handler);
-//         }
         
         // normal pong processing...
         handlePingReply(reply, handler);
@@ -699,22 +701,28 @@ public abstract class MessageRouter {
                 // continue below, everything looks good
             }
 
-			if(handler.isGoodConnection()) {
+            // don't send it to leaves here -- the dynamic querier will 
+            // handle that
+            locallyEvaluate = false;
+			if(handler.isGoodLeaf()) {
 				sendDynamicQuery(QueryHandler.createHandlerForNewLeaf(request, 
-																	  handler), 
-								 handler, counter);
+																	  handler,
+                                                                      counter), 
+								 handler);
 			} else {
 				sendDynamicQuery(QueryHandler.createHandlerForOldLeaf(request,
-																	  handler), 
-								 handler, counter);
+																	  handler,
+                                                                      counter), 
+								 handler);
 			}
-		} else if(request.getTTL() > 0 && !RouterService.isShieldedLeaf()) {
+		} else if(request.getTTL() > 0 && RouterService.isSupernode()) {
             // send the request to intra-Ultrapeer connections -- this does
 			// not send the request to leaves
-            if(handler.isGoodConnection()) {
+            if(handler.isGoodUltrapeer()) {
                 // send it to everyone
                 forwardQueryToUltrapeers(request, handler);
             } else {
+                // otherwise, only send it to some connections
                 forwardLimitedQueryToUltrapeers(request, handler);
             }
 		}
@@ -861,12 +869,10 @@ public abstract class MessageRouter {
 			_queryRouteTable.routeReply(query.getGUID(), 
 										FOR_ME_REPLY_HANDLER);
 		if(RouterService.isSupernode()) {
-			// create a query to send to leaves
-			forwardQueryRequestToLeaves(query, 
-										FOR_ME_REPLY_HANDLER);
 			sendDynamicQuery(QueryHandler.createHandler(query, 
-														FOR_ME_REPLY_HANDLER), 
-							 FOR_ME_REPLY_HANDLER, counter);
+														FOR_ME_REPLY_HANDLER,
+                                                        counter), 
+							 FOR_ME_REPLY_HANDLER);
 		} else {
             originateLeafQuery(query);
 		} 
@@ -887,17 +893,12 @@ public abstract class MessageRouter {
 	 *  for the guid cannot be found -- this should never happen, or if any
 	 *  of the arguments is <tt>null</tt>
 	 */
-	private void sendDynamicQuery(QueryHandler qh, ReplyHandler handler,
-								  ResultCounter counter) {
+	private void sendDynamicQuery(QueryHandler qh, ReplyHandler handler) {
 		if(qh == null) {
 			throw new NullPointerException("null QueryHandler");
 		} else if(handler == null) {
 			throw new NullPointerException("null ReplyHandler");
-		} else if(counter == null) {
-			throw new NullPointerException("null ResultCounter");
-		}
-
-		qh.setResultCounter(counter);
+		} 
 		DYNAMIC_QUERIER.addQuery(qh);
 	}
 
@@ -920,13 +921,21 @@ public abstract class MessageRouter {
         //Broadcast the ping to other connected nodes (supernodes or older
         //nodes), but DON'T forward any ping not originating from me 
         //along leaf to ultrapeer connections.
-        List list=manager.getInitializedConnections2();
-        for(int i=0; i<list.size(); i++) {
+        List list = manager.getInitializedConnections2();
+        int size = list.size();
+        boolean randomlyForward = false;
+        if(size > 3) randomlyForward = true;
+        for(int i=0; i<size; i++) {
             ManagedConnection c = (ManagedConnection)list.get(i);
             if (   receivingConnection==FOR_ME_REPLY_HANDLER
 				   || (c!=receivingConnection
                      && !c.isClientSupernodeConnection())) {
-                c.send(request);
+
+                if(randomlyForward && (Math.random() < 0.95)) {
+                    continue;
+                } else {
+                    c.send(request);
+                }
             }
         }
     }
@@ -940,22 +949,36 @@ public abstract class MessageRouter {
 	 * @param manager the <tt>ConnectionManager</tt> that provides
 	 *  access to any leaf connections that we should forward to
 	 */
-	protected void forwardQueryRequestToLeaves(QueryRequest request,
-											   ReplyHandler handler) {
+	public final void forwardQueryRequestToLeaves(QueryRequest query,
+                                                  ReplyHandler handler) {
 		if(!RouterService.isSupernode()) return;
         //use query routing to route queries to client connections
         //send queries only to the clients from whom query routing 
         //table has been received
         List list = _manager.getInitializedClientConnections2();
+        List hitConnections = new ArrayList();
         for(int i=0; i<list.size(); i++) {
             ManagedConnection mc = (ManagedConnection)list.get(i);
-            if(mc != handler) {
-				boolean sent = sendRoutedQueryToHost(request, mc, handler);
-				if(sent && RECORD_STATS) {
-					RoutedQueryStat.LEAF_SEND.incrementStat();
-				} else if(RECORD_STATS) {
-					RoutedQueryStat.LEAF_DROP.incrementStat();
-				}				
+            if(mc == handler) continue;
+            if(mc.hitsQueryRouteTable(query)) {
+                hitConnections.add(mc);
+            }
+        }
+
+        if(list.size() > 8 && 
+           (double)hitConnections.size()/(double)list.size() > .8) {
+            hitConnections = 
+                hitConnections.subList(0, hitConnections.size()/4);
+        }
+        for(int i=0; i<hitConnections.size(); i++) {
+            ManagedConnection mc = (ManagedConnection)list.get(i);
+            if(mc == handler) continue;
+
+            boolean sent = sendRoutedQueryToHost(query, mc, handler);
+            if(sent && RECORD_STATS) {
+                RoutedQueryStat.LEAF_SEND.incrementStat();
+            } else if(RECORD_STATS) {
+                RoutedQueryStat.LEAF_DROP.incrementStat();
             }
         }
 	}
@@ -973,14 +996,7 @@ public abstract class MessageRouter {
 	 */
 	private boolean sendRoutedQueryToHost(QueryRequest query, ManagedConnection mc,
 										  ReplyHandler handler) {
-		//TODO:
-		//because of some very obscure optimization rules, it's actually
-		//possible that qi could be non-null but not initialized.  Need
-		//to be more careful about locking here.
-		ManagedConnectionQueryInfo qi = mc.getQueryRouteState();
-		if (qi.lastReceived==null) 
-			return false;
-		else if (qi.lastReceived.contains(query)) {
+		if (mc.hitsQueryRouteTable(query)) {
 			//A new client with routing entry, or one that hasn't started
 			//sending the patch.
 			sendQueryRequest(query, mc, handler);
@@ -1078,7 +1094,7 @@ public abstract class MessageRouter {
             // if the query is comiing from an old connection, try to
             // send it's traffic to old connections.  Only send it to
             // new connections if we only have a minimum number left
-            if(mc.isGoodConnection() && 
+            if(mc.isGoodUltrapeer() && 
                (limit-i) > connectionsNeededForOld) {
                 continue;
             }
@@ -1325,7 +1341,7 @@ public abstract class MessageRouter {
 
 			// TODO: What happens if we get a TTL=0 query that's not intended
 			// for us?  At first glance, it looks like we keep forwarding it!
-            if(!shouldDropReply(rrp.getBytesRouted(), queryReply.getTTL()) ||
+            if(!shouldDropReply(rrp, queryReply.getTTL()) ||
 			   rh == FOR_ME_REPLY_HANDLER) {
                 
                 rh.handleQueryReply(queryReply, handler);
@@ -1355,9 +1371,23 @@ public abstract class MessageRouter {
      * hits.  This ensures that hits that are closer to the query originator
      * -- hits for which we've already done most of the work, are not 
      * dropped unless we've routed a really large number of bytes for that
-     * guid.
+     * guid.  This method also checks that hard number of results that have
+     * been sent for this GUID.  If this number is greater than a specified
+     * limit, we simply drop the reply.
+     *
+     * @param rrp the <tt>ReplyRoutePair</tt> containing data about what's 
+     *  been routed for this GUID
+     * @param ttl the time to live of the query hit
+     * @return <tt>true if the reply should be dropped, otherwise <tt>false</tt>
      */
-    private static boolean shouldDropReply(int bytesRouted, int ttl) {
+    private static boolean shouldDropReply(RouteTable.ReplyRoutePair rrp, byte ttl) {
+        int resultsRouted = rrp.getResultsRouted();
+
+        // drop the reply if we've already sent more than the specified number
+        // of results for this GUID
+        if(resultsRouted > 100) return true;
+
+        int bytesRouted = rrp.getBytesRouted();
         // send replies with ttl above 2 if we've routed under 50K 
         if(ttl > 2 && bytesRouted < 50    * 1024) return false;
         // send replies with ttl 0 if we've routed under 50K, as this 
@@ -1647,36 +1677,74 @@ public abstract class MessageRouter {
 
 
     /**
-     * Handles a query route table update message that originated from
-     * receivingConnection.
+     * Handles a message to reset the query route table for the given
+     * connection.
+     *
+     * @param rtm the <tt>ResetTableMessage</tt> for resetting the query
+     *  route table
+     * @param mc the <tt>ManagedConnection</tt> for which the query route
+     *  table should be reset
      */
-    private void handleRouteTableMessage(RouteTableMessage m,
-										 ManagedConnection receivingConnection) {
-        //System.out.println("MessageRouter::handleRouteTableMessage: "+receivingConnection); 
-        //if not a supernode-client, ignore
-        if(! receivingConnection.isSupernodeClientConnection() &&
-		   ! receivingConnection.isUltrapeerQueryRoutingConnection())
-            return;
-                                            
-        //Mutate query route table associated with receivingConnection.  
-        //(This is legal.)  Create a new one if none exists.
-        synchronized (receivingConnection.getQRPLock()) {
-            ManagedConnectionQueryInfo qi =
-                receivingConnection.getQueryRouteState();
-            if (qi.lastReceived==null) {
-                //TODO3: it's somewhat silly to allocate a new table and then
-                //immediately replace its state with RESET.  Probably best to
-                //have QueryRouteTable lazily allocate memory.
-                qi.lastReceived=new QueryRouteTable();
-            }
-            try {
-                qi.lastReceived.update(m);    
-            } catch (BadPacketException e) {
-                //TODO: ?
-            }
+    private void handleResetTableMessage(ResetTableMessage rtm,
+                                         ManagedConnection mc) {
+        // if it's not from a leaf or an Ultrapeer advertising 
+        // QRP support, ignore it
+        if(!isQRPConnection(mc)) return;
+
+        // reset the query route table for this connection
+        synchronized (mc.getQRPLock()) {
+            mc.resetQueryRouteTable(rtm);
+        }
+
+        // if this is coming from a leaf, make sure we update
+        // our tables so that the dynamic querier has correct
+        // data
+        if(mc.isLeafConnection()) {
+            _lastQueryRouteTable = createRouteTable();
         }
     }
 
+    /**
+     * Handles a message to patch the query route table for the given
+     * connection.
+     *
+     * @param rtm the <tt>PatchTableMessage</tt> for patching the query
+     *  route table
+     * @param mc the <tt>ManagedConnection</tt> for which the query route
+     *  table should be patched
+     */
+    private void handlePatchTableMessage(PatchTableMessage ptm,
+                                         ManagedConnection mc) {
+        // if it's not from a leaf or an Ultrapeer advertising 
+        // QRP support, ignore it
+        if(!isQRPConnection(mc)) return;
+
+        // patch the query route table for this connection
+        synchronized(mc.getQRPLock()) {
+            mc.patchQueryRouteTable(ptm);
+        }
+
+        // if this is coming from a leaf, make sure we update
+        // our tables so that the dynamic querier has correct
+        // data
+        if(mc.isLeafConnection()) {
+            _lastQueryRouteTable = createRouteTable();
+        }
+    }
+
+    /**
+     * Utility method for checking whether or not the given connection
+     * is able to pass QRP messages.
+     *
+     * @param c the <tt>Connection</tt> to check
+     * @return <tt>true</tt> if this is a QRP-enabled connection,
+     *  otherwise <tt>false</tt>
+     */
+    private static boolean isQRPConnection(Connection c) {
+        if(c.isSupernodeClientConnection()) return true;
+        if(c.isUltrapeerQueryRoutingConnection()) return true;
+        return false;
+    }
 
     /** Thread the processing of QRP Table delivery. */
     private class QRPPropagator extends Thread {
@@ -1744,13 +1812,12 @@ public abstract class MessageRouter {
 
 
 			c.incrementNextQRPForwardTime(time);
-
-			ManagedConnectionQueryInfo qi=c.getQueryRouteState();
 				
-			//Create table to send on this connection...
+			// Create a new query route table if we need to
 			if (table == null) {
-				table=createRouteTable();
-			}                    
+				table = createRouteTable();
+                _lastQueryRouteTable = table;
+			} 
 
 			//..and send each piece.
 			//TODO2: use incremental and interleaved update
@@ -1763,13 +1830,23 @@ public abstract class MessageRouter {
 			// (We always want to allow deflation of the QRP tables. This
 			//  is because we don't want to potentially clutter the stream's
 			//  dictionary with rare data, and because we want better stats.)
-			Iterator iter=table.encode(qi.lastSent, true);
-			for (; iter.hasNext(); ) {  
-				RouteTableMessage m=(RouteTableMessage)iter.next();
-				c.send(m);
+			for (Iterator iter=table.encode(c.getQueryRouteTableSent(), true); 
+                 iter.hasNext();) {  
+				c.send((RouteTableMessage)iter.next());
 			}
-			qi.lastSent=table;
+            c.setQueryRouteTableSent(table);
 		}
+    }
+
+    /**
+     * Accessor for the most recently calculated <tt>QueryRouteTable</tt>
+     * for this node.  If this node is an Ultrapeer, the table will include
+     * all data for leaf nodes in addition to data for this node's files.
+     *
+     * @return the <tt>QueryRouteTable</tt> for this node
+     */
+    public QueryRouteTable getQueryRouteTable() {
+        return _lastQueryRouteTable;
     }
 
     /**
@@ -1817,9 +1894,9 @@ public abstract class MessageRouter {
 		for(int i=0; i<leaves.size(); i++) {
 			ManagedConnection mc = (ManagedConnection)leaves.get(i);
         	synchronized (mc.getQRPLock()) {
-				ManagedConnectionQueryInfo qi = mc.getQueryRouteState();
-				if(qi.lastReceived != null) {
-					qrt.addAll(qi.lastReceived);
+                QueryRouteTable qrtr = mc.getQueryRouteTableReceived();
+				if(qrtr != null) {
+					qrt.addAll(qrtr);
 				}
 			}
 		}
