@@ -132,8 +132,6 @@ public final class NormalUploadState implements HTTPMessage {
                     HTTPUtils.writeHeader(HTTPHeaderName.CREATION_TIME,
                                           cache.getCreationTime(urn).toString(),
                                           ostream);
-                    else if (FILE_DESC instanceof FileDesc)
-                        ErrorService.error(new Exception("FD no create time"));
                 }
 			}
 			
