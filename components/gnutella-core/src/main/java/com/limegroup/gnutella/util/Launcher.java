@@ -6,7 +6,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.String;
 
-import com.limegroup.gnutella.gui.Utilities;
+import com.limegroup.gnutella.gui.MessageService;
 
 import NativeLauncher;
 
@@ -86,7 +86,7 @@ public class Launcher {
 	 */
 	private static String _errorMessage;
 
-	private static final String NATIVE_LAUNCHER_NAME = "NativeLauncher.dll";
+	private static final String WINDOWS_LIBRARY_NAME = "LimeWire.dll";
 
 
 	/** 
@@ -97,13 +97,19 @@ public class Launcher {
 		if(CommonUtils.isWindows()) {
 			String libraryPath = CommonUtils.getCurrentDirectory();
 			File nativeLauncherLibrary = new File(libraryPath, 
-												  NATIVE_LAUNCHER_NAME);
+												  WINDOWS_LIBRARY_NAME);
 			
 			// return if the dll is already there
 			if(nativeLauncherLibrary.exists()) return;
 
-			InputStream is = ClassLoader.getSystemResourceAsStream(NATIVE_LAUNCHER_NAME);
+			ClassLoader cl = Launcher.class.getClassLoader();
+			InputStream is;
+            if (cl!=null)
+                is=cl.getResourceAsStream(WINDOWS_LIBRARY_NAME); 
+            else //Can happen if Launcher loaded by system class loader
+                is=ClassLoader.getSystemResourceAsStream(WINDOWS_LIBRARY_NAME);
 			if(is == null) return;
+
 			try {
 				FileOutputStream fos = new FileOutputStream(nativeLauncherLibrary);
 				int c;
@@ -136,13 +142,13 @@ public class Launcher {
 	 *  http://www.whatevername.com
 	 */
 	public static int launch(String path) throws IOException {
-		String s = path.toLowerCase();
-		if(!path.endsWith(".exe") &&
-		   !path.endsWith(".vbs") &&
-		   !path.endsWith(".lnk") &&
-		   !path.endsWith(".bat") &&
-		   !path.endsWith(".sys") &&
-		   !path.endsWith(".com")) {
+		String extCheckString = path.toLowerCase();
+		if(!extCheckString.endsWith(".exe") &&
+		   !extCheckString.endsWith(".vbs") &&
+		   !extCheckString.endsWith(".lnk") &&
+		   !extCheckString.endsWith(".bat") &&
+		   !extCheckString.endsWith(".sys") &&
+		   !extCheckString.endsWith(".com")) {
 			if(CommonUtils.isWindows()) {
 				return launchFileWindows(path);
 			}	   
@@ -156,7 +162,7 @@ public class Launcher {
 		else {
 			String msg = "LimeWire will not launch the specified "+
 			"file for security reasons.";
-			Utilities.showError(msg);
+			MessageService.showError(msg);
 		}
 		return -1;
 	}

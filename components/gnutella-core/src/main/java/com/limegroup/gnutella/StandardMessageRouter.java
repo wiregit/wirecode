@@ -36,6 +36,13 @@ public class StandardMessageRouter
     protected void respondToPingRequest(PingRequest pingRequest,
                                         Acceptor acceptor)
     {
+        //Only return a pong if we still have incoming connection slots or the
+        //ping is from a crawler, either directly or indirectly.
+        int hops = (int)pingRequest.getHops();
+        int ttl = (int)pingRequest.getTTL();
+        if ( (!_manager.hasAvailableIncoming()) && (hops+ttl > 2) )
+            return;
+
         int num_files = FileManager.instance().getNumFiles();
         int kilobytes = FileManager.instance().getSize()/1024;
 
@@ -61,7 +68,7 @@ public class StandardMessageRouter
         receivingConnection.updateHorizonStats(pingReply);
         super.handlePingReply(pingReply, receivingConnection);
     }
-    
+
     /**
      * Handles the PingReply by updating horizon stats.
      */
@@ -147,7 +154,14 @@ public class StandardMessageRouter
         byte ttl = (byte)(queryRequest.getHops() + 1);
         int port = acceptor.getPort();
         byte[] ip = acceptor.getAddress();
-        long speed = SettingsManager.instance().getConnectionSpeed();
+
+        //Return measured speed if possible, or user's speed otherwise.
+        long speed = _uploadManager.measuredUploadSpeed();
+        boolean measuredSpeed=true;
+        if (speed==-1) {
+            speed=SettingsManager.instance().getConnectionSpeed();
+            measuredSpeed=false;
+        }
 
         int numResponses = responses.length;
         int index = 0;
@@ -194,6 +208,7 @@ public class StandardMessageRouter
 
 			// see id there are any open slots
 			boolean busy = _uploadManager.isBusy();
+            boolean uploaded = _uploadManager.hadSuccesfulUpload();
 
 			// see if we have ever accepted an incoming connection
 			boolean incoming = _acceptor.acceptedIncoming();
@@ -201,7 +216,7 @@ public class StandardMessageRouter
             // create the new queryReply
             queryReply = new QueryReply(guid, ttl, port, ip,
                                         speed, res, clientGUID, 
-										!incoming, busy);
+										!incoming, busy, uploaded, measuredSpeed);
 
             // try to send the new queryReply
             try {
@@ -249,7 +264,6 @@ public class StandardMessageRouter
 */
 		
         // Unpack the message
-        String host = new String(pushRequest.getIP());
         byte[] ip = pushRequest.getIP();
         StringBuffer buf = new StringBuffer();
         buf.append(ByteOrder.ubyte2int(ip[0])+".");
@@ -276,9 +290,9 @@ public class StandardMessageRouter
 
         String file = desc._name;
 
-	
-	_uploadManager.acceptPushUpload(file, h, port, 
-					index, req_guid_hexstring);
+        if (!_acceptor.isBannedIP(h))	
+            _uploadManager.acceptPushUpload(file, h, port, 
+                                            index, req_guid_hexstring);
 
 //          HTTPUploader up = new HTTPUploader(h, port, index, req_guid_hexstring,
 //                                             _callback);

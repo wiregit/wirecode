@@ -17,7 +17,21 @@ public class FreeloaderUploadState implements UploadState {
 	
 	private HTTPUploader _uploader;
 	private OutputStream _ostream;	
-  
+
+    public static final String RESPONSE_PAGE =
+		"<html>\r\n"+
+		"<head>\r\n"+
+		"<title>Please Share</title>\r\n"+
+		"<meta http-equiv=\"refresh\" \r\n"+
+		"content=\"0; \r\n"+
+		"URL=http://www2.limewire.com/browser.htm\">\r\n"+
+		"</head>\r\n"+
+		"<body>\r\n"+
+		"<a href=\"http://www2.limewire.com/browser.htm\">Please Share</a>\r\n"+
+		"</body>\r\n"+
+		"</html>\r\n";  
+
+
 	/**
 	 * This class implements a failed upload 
 	 * due to a freeloader making an upload attempt.
@@ -29,18 +43,17 @@ public class FreeloaderUploadState implements UploadState {
 		_ostream = uploader.getOutputStream();
 
 		String str;
-		String errMsg = HTTPPage.responsePage;
 		str = "HTTP 200 OK \r\n";
 		_ostream.write(str.getBytes());
 		str = "Server: " + CommonUtils.getVendor() + "\r\n";
 		_ostream.write(str.getBytes());
 		str = "Content-Type: text/html\r\n";
 		_ostream.write(str.getBytes());
-		str = "Content-Length: " + errMsg.length() + "\r\n";
+		str = "Content-Length: " + RESPONSE_PAGE.length() + "\r\n";
 		_ostream.write(str.getBytes());
 		str = "\r\n";
 		_ostream.write(str.getBytes());
-		_ostream.write(errMsg.getBytes());
+		_ostream.write(RESPONSE_PAGE.getBytes());
 		_ostream.flush();
 
 	}

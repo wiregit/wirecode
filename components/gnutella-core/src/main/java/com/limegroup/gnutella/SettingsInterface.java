@@ -1,5 +1,7 @@
 package com.limegroup.gnutella;
 
+import java.io.File;
+
 /**
  *  This class sets up an interface for the SettingsManager
  *  It's designed to make life simpler, so hopefully it
@@ -11,9 +13,28 @@ package com.limegroup.gnutella;
  *
  *  @author Adam Fisk
  */
+//2345678|012345678|012345678|012345678|012345678|012345678|012345678|012345678|
+public interface SettingsInterface {
+	/**
+	 * the default name of the shared directory.
+	 */
+	public static final String  SAVE_DIRECTORY_NAME = "Shared";
 
-public interface SettingsInterface
-{
+	/**
+	 * the name of the host list file.
+	 */
+	public static final String  HOST_LIST_NAME = "gnutella.net";	
+
+    /** 
+	 * Default name for the properties file 
+	 */
+    public static final String  PROPS_NAME = "limewire.props";
+
+    /** 
+	 * Default name for the network discovery properties 
+	 */
+    public static final String  ND_PROPS_NAME  = "nd.props";
+
 	public static final boolean DEFAULT_ALLOW_BROWSER  = false;
     /** Default setting for the time to live */
     public static final byte    DEFAULT_TTL            = (byte)5;
@@ -25,23 +46,18 @@ public interface SettingsInterface
     public static final int     DEFAULT_MAX_LENGTH     = 65536;
     /** Default timeout */
     public static final int     DEFAULT_TIMEOUT        = 8000;
-    /** Default file path for the host list */
-    public static final String  DEFAULT_HOST_LIST      = "gnutella.net";
-    /** Default name for the properties file */
-    public static final String  DEFAULT_FILE_NAME      = "limewire.props";
-    /** Default name for the network discovery properties */
-    public static final String  DEFAULT_ND_PROPS_NAME  = "nd.props";
+
     /** Default value for the keep alive */
     public static final int     DEFAULT_KEEP_ALIVE     = 4;
     /** Default port*/
     public static final int     DEFAULT_PORT           = 6346;
     /** Default network connection speed */
     public static final int     DEFAULT_SPEED          = 56;
-    public static final int     DEFAULT_UPLOAD_SPEED   = 50;
+    public static final int     DEFAULT_UPLOAD_SPEED   = 100;
     /** Default limit for the number of searches */
     public static final byte    DEFAULT_SEARCH_LIMIT   = (byte)64;
     /** Default client guid */
-    public static final String  DEFAULT_LIENT_ID      = null;
+    public static final String  DEFAULT_CLIENT_ID      = null;
     /** Default maximum number of connections */
     public static final int     DEFAULT_MAX_INCOMING_CONNECTION=4;
     /** Default directories for file searching */
@@ -50,12 +66,13 @@ public interface SettingsInterface
     public static final String  DEFAULT_DIRECTORIES    = "";
     /** Default file extensions */
     public static final String  DEFAULT_EXTENSIONS     =
-    "html;htm;xml;txt;pdf;ps;rtf;doc;tex;mp3;wav;au;aif;aiff;ra;ram;"+
-    "mpg;mpeg;asf;qt;mov;avi;mpe;swf;dcr;gif;jpg;jpeg;jpe;png;tif;tiff;"+
-    "exe;zip;gz;gzip;hqx;tar;tgz;z;rmj;lqt;rar;ace;sit;smi";
+		"html;htm;xml;txt;pdf;ps;rtf;doc;tex;mp3;wav;au;aif;aiff;ra;ram;"+
+		"mpg;mpeg;asf;qt;mov;avi;mpe;swf;dcr;gif;jpg;jpeg;jpe;png;tif;tiff;"+
+		"exe;zip;gz;gzip;hqx;tar;tgz;z;rmj;lqt;rar;ace;sit;smi;img;ogg;rm;"+
+		"bin;dmg";
 
 
-	/* the number of uplads allowed per person at a given time */
+	/** the number of uplads allowed per person at a given time */
     public static final int     DEFAULT_UPLOADS_PER_PERSON=3;
 
     /** default banned ip addresses */
@@ -71,9 +88,15 @@ public interface SettingsInterface
     public static final boolean DEFAULT_FILTER_BEARSHARE_QUERIES = true;
     /** Use quick connect hosts instead of gnutella.net? */
     public static final boolean DEFAULT_USE_QUICK_CONNECT = true;
+	/** This is limewire's public pong cache */
+    public static final String  DEFAULT_LIMEWIRE_ROUTER    = 
+	  "router.limewire.com";
+	/** This is limewire's dedicated pong cache */
+    public static final String  DEDICATED_LIMEWIRE_ROUTER  = 
+	  "router4.limewire.com";
     /** List of hosts to try on quick connect */
     public static final String[] DEFAULT_QUICK_CONNECT_HOSTS
-    = {"router.limewire.com:6346",
+    = {DEFAULT_LIMEWIRE_ROUTER+":6346",
        "gnutellahosts.com:6346",
     };
     public static final int     DEFAULT_PARALLEL_SEARCH  = 5;
@@ -84,78 +107,110 @@ public interface SettingsInterface
     public static final boolean DEFAULT_CLEAR_UPLOAD     = false;
     public static final boolean DEFAULT_CLEAR_DOWNLOAD   = false;
     public static final int     DEFAULT_SEARCH_ANIMATION_TIME = 20;
-    public static final String  DEFAULT_CONNECT_STRING    = "GNUTELLA CONNECT/0.4";
-    public static final String  DEFAULT_CONNECT_OK_STRING = "GNUTELLA OK";
+    public static final String  DEFAULT_CONNECT_STRING    
+		= "GNUTELLA CONNECT/0.4";
+    public static final String  DEFAULT_CONNECT_OK_STRING 
+		= "GNUTELLA OK";
     public static final int     DEFAULT_BASIC_INFO_FOR_QUERY = 1000;
     public static final int     DEFAULT_ADVANCED_INFO_FOR_QUERY = 50;
 
-    public static final boolean DEFAULT_CHECK_AGAIN = true;
-    public static final boolean DEFAULT_FORCE_IP_ADDRESS = false;
-    public static final byte[]  DEFAULT_FORCED_IP_ADDRESS = {};
+    public static final boolean DEFAULT_CHECK_AGAIN        = true;
+    public static final boolean DEFAULT_FORCE_IP_ADDRESS   = false;
+    public static final byte[]  DEFAULT_FORCED_IP_ADDRESS  = {};
     public static final String  DEFAULT_FORCED_IP_ADDRESS_STRING = "";
-    public static final int     DEFAULT_FORCED_PORT = 6346;
-    public static final int     DEFAULT_FREELOADER_FILES = 1;
-    public static final int     DEFAULT_FREELOADER_ALLOWED = 100;
-	public static final long    DEFAULT_AVERAGE_UPTIME = 200;
-	public static final long    DEFAULT_TOTAL_UPTIME = 0;
-	public static final int     DEFAULT_SESSIONS = 1;
     public static final String  DEFAULT_SERVANT_TYPE = Constants.XML_CLIENT;
 
+    public static final int     DEFAULT_FORCED_PORT         = 6346;
+    public static final int     DEFAULT_FREELOADER_FILES    = 1;
+    public static final int     DEFAULT_FREELOADER_ALLOWED  = 100;
+	public static final long    DEFAULT_AVERAGE_UPTIME      = 200;
+	public static final long    DEFAULT_TOTAL_UPTIME        = 0;
+	public static final int     DEFAULT_SESSIONS            = 1;
+	public static final boolean DEFAULT_INSTALLED           = false;
+	public static final int     DEFAULT_APP_WIDTH           = 640;
+	public static final int     DEFAULT_APP_HEIGHT          = 620;
+	public static final boolean DEFAULT_RUN_ONCE            = false;
+	public static final boolean DEFAULT_SHOW_TRAY_DIALOG    = true;
+	public static final boolean DEFAULT_MINIMIZE_TO_TRAY    = true;
+	public static final boolean DEFAULT_SHOW_CLOSE_DIALOG   = true;
+	public static final String  DEFAULT_CLASSPATH           
+		= "LimeWire.jar" + File.pathSeparator + "collections.jar";
+	public static final String  DEFAULT_MAIN_CLASS           
+		= "a.a.a.b.Main";
+
     // The property key name constants
-	public static final String ALLOW_BROWSER  = "ALLOW_BROWSER";
-    public static final String TTL            = "TTL";
-    public static final String SOFT_MAX_TTL   = "SOFT_MAX_TTL";
-    public static final String MAX_TTL        = "MAX_TTL";
-    public static final String MAX_LENGTH     = "MAX_LENGTH";
-    public static final String TIMEOUT        = "TIMEOUT";
-    public static final String KEEP_ALIVE     = "KEEP_ALIVE";
-    public static final String PORT           = "PORT";
-    public static final String SPEED          = "CONNECTION_SPEED";
-    public static final String UPLOAD_SPEED   = "UPLOAD_SPEED";
-    public static final String SEARCH_LIMIT   = "SEARCH_LIMIT";
-    public static final String CLIENT_ID      = "CLIENT_ID";
+	public static final String ALLOW_BROWSER         = "ALLOW_BROWSER";
+    public static final String TTL                   = "TTL";
+    public static final String SOFT_MAX_TTL          = "SOFT_MAX_TTL";
+    public static final String MAX_TTL               = "MAX_TTL";
+    public static final String MAX_LENGTH            = "MAX_LENGTH";
+    public static final String TIMEOUT               = "TIMEOUT";
+    public static final String KEEP_ALIVE            = "KEEP_ALIVE";
+    public static final String PORT                  = "PORT";
+    public static final String SPEED                 = "CONNECTION_SPEED";
+    public static final String UPLOAD_SPEED          = "UPLOAD_SPEED";
+    public static final String SEARCH_LIMIT          = "SEARCH_LIMIT";
+    public static final String CLIENT_ID             = "CLIENT_ID";
     public static final String MAX_INCOMING_CONNECTIONS
         = "MAX_INCOMING_CONNECTIONS";
-    public static final String SAVE_DIRECTORY = "DIRECTORY_FOR_SAVING_FILES";
-    public static final String INCOMPLETE_DIR = "INCOMPLETE_FILE_DIRECTORY";
-    public static final String DIRECTORIES    = "DIRECTORIES_TO_SEARCH_FOR_FILES";
-    public static final String EXTENSIONS     = "EXTENSIONS_TO_SEARCH_FOR";
-    public static final String BANNED_IPS     = "BLACK_LISTED_IP_ADDRESSES";
-    public static final String BANNED_WORDS   = "BANNED_WORDS";
-    public static final String FILTER_DUPLICATES = "FILTER_DUPLICATES";
-    public static final String FILTER_ADULT   = "FILTER_ADULT";
-    public static final String FILTER_HTML    = "FILTER_HTML";
-    public static final String FILTER_VBS     = "FILTER_VBS";
+    public static final String SAVE_DIRECTORY        
+		= "DIRECTORY_FOR_SAVING_FILES";
+    public static final String DIRECTORIES
+		= "DIRECTORIES_TO_SEARCH_FOR_FILES";
+    public static final String EXTENSIONS            = "EXTENSIONS_TO_SEARCH_FOR";
+    public static final String BANNED_IPS            = "BLACK_LISTED_IP_ADDRESSES";
+    public static final String BANNED_WORDS          = "BANNED_WORDS";
+    public static final String FILTER_DUPLICATES     = "FILTER_DUPLICATES";
+    public static final String FILTER_ADULT          = "FILTER_ADULT";
+    public static final String FILTER_HTML           = "FILTER_HTML";
+    public static final String FILTER_VBS            = "FILTER_VBS";
     public static final String FILTER_GREEDY_QUERIES = "FILTER_GREEDY_QUERIES";
-    public static final String FILTER_BEARSHARE_QUERIES = "FILTER_HIGHBIT_QUERIES";
-    public static final String USE_QUICK_CONNECT = "USE_QUICK_CONNECT";
-    public static final String QUICK_CONNECT_HOSTS = "QUICK_CONNECT_HOSTS";
-    public static final String PARALLEL_SEARCH= "PARALLEL_SEARCH";
-    public static final String MAX_SIM_DOWNLOAD="MAX_SIM_DOWNLOAD";
-    public static final String PROMPT_EXE_DOWNLOAD="PROMPT_EXE_DOWNLOAD";
-    public static final String MAX_UPLOADS     ="MAX_UPLOADS";
-    public static final String CLEAR_UPLOAD   = "CLEAR_UPLOAD";
-    public static final String CLEAR_DOWNLOAD = "CLEAR_DOWNLOAD";
+    public static final String FILTER_BEARSHARE_QUERIES 
+		= "FILTER_HIGHBIT_QUERIES";
+    public static final String USE_QUICK_CONNECT     = "USE_QUICK_CONNECT";
+    public static final String QUICK_CONNECT_HOSTS   = "QUICK_CONNECT_HOSTS";
+    public static final String PARALLEL_SEARCH       = "PARALLEL_SEARCH";
+    public static final String MAX_SIM_DOWNLOAD      = "MAX_SIM_DOWNLOAD";
+    public static final String PROMPT_EXE_DOWNLOAD   = "PROMPT_EXE_DOWNLOAD";
+    public static final String MAX_UPLOADS           = "MAX_UPLOADS";
+    public static final String CLEAR_UPLOAD          = "CLEAR_UPLOAD";
+    public static final String CLEAR_DOWNLOAD        = "CLEAR_DOWNLOAD";
     public static final String SEARCH_ANIMATION_TIME = "SEARCH_ANIMATION_TIME";
-    public static final String SAVE_DEFAULT   = "SAVE_DEFAULT";
 
-    public static final String CONNECT_STRING = "CONNECT_STRING";
-    public static final String CONNECT_OK_STRING = "CONNECT_OK_STRING";
-    public static final String CHECK_AGAIN = "CHECK_AGAIN";
-    public static final String BASIC_QUERY_INFO = "BASIC_QUERY_INFO";
-    public static final String ADVANCED_QUERY_INFO = "ADVANCED_QUERY_INFO";
-    public static final String FORCE_IP_ADDRESS = "FORCE_IP_ADDRESS";
-    public static final String FORCED_IP_ADDRESS = "FORCED_IP_ADDRESS";
+    public static final String CONNECT_STRING        = "CONNECT_STRING";
+    public static final String CONNECT_OK_STRING     = "CONNECT_OK_STRING";
+    public static final String CHECK_AGAIN           = "CHECK_AGAIN";
+    public static final String BASIC_QUERY_INFO      = "BASIC_QUERY_INFO";
+    public static final String ADVANCED_QUERY_INFO   = "ADVANCED_QUERY_INFO";
+    public static final String FORCE_IP_ADDRESS      = "FORCE_IP_ADDRESS";
+    public static final String FORCED_IP_ADDRESS     = "FORCED_IP_ADDRESS";
     public static final String FORCED_IP_ADDRESS_STRING
         = "FORCED_IP_ADDRESS_STRING";
-    public static final String FORCED_PORT = "FORCED_PORT";
-    public static final String FREELOADER_FILES = "FREELOADER_FILES";
-    public static final String FREELOADER_ALLOWED = "FREELOADER_ALLOWED";
-
-    public static final String UPLOADS_PER_PERSON = "UPLOADS_PER_PERSON";
-    public static final String AVERAGE_UPTIME     = "AVERAGE_UPTIME";
-    public static final String TOTAL_UPTIME       = "TOTAL_UPTIME";
-    public static final String SESSIONS           = "SESSIONS";
     
-    public static final String SERVANT_TYPE       = "SERVANT_TYPE";
+    public static final String SERVANT_TYPE          = "SERVANT_TYPE";
+
+    public static final String FORCED_PORT           = "FORCED_PORT";
+    public static final String FREELOADER_FILES      = "FREELOADER_FILES";
+    public static final String FREELOADER_ALLOWED    = "FREELOADER_ALLOWED";
+
+    public static final String UPLOADS_PER_PERSON    = "UPLOADS_PER_PERSON";
+    public static final String AVERAGE_UPTIME        = "AVERAGE_UPTIME";
+    public static final String TOTAL_UPTIME          = "TOTAL_UPTIME";
+    public static final String SESSIONS              = "SESSIONS";
+	public static final String INSTALLED             = "INSTALLED";
+	public static final String APP_WIDTH             = "APP_WIDTH";
+	public static final String APP_HEIGHT            = "APP_HEIGHT";
+	public static final String RUN_ONCE              = "RUN_ONCE";
+	public static final String WINDOW_X              = "WINDOW_X";
+	public static final String WINDOW_Y              = "WINDOW_Y";
+	public static final String SHOW_TRAY_DIALOG      = "SHOW_TRAY_DIALOG";
+	public static final String MINIMIZE_TO_TRAY      = "MINIMIZE_TO_TRAY";
+	public static final String SHOW_CLOSE_DIALOG     = "SHOW_CLOSE_DIALOG";
+	public static final String CLASSPATH             = "CLASSPATH";
+	public static final String MAIN_CLASS            = "MAIN_CLASS";
 }
+
+
+
+
+

@@ -130,7 +130,8 @@ public class RouterService
                 return;
         }
 
-        manager.createConnectionAsynchronously(hostname, portnum);
+        if (!acceptor.isBannedIP(hostname))
+            manager.createConnectionAsynchronously(hostname, portnum);
     }
 
 
@@ -304,6 +305,13 @@ public class RouterService
         }
     }
 
+	/**
+	 * lower the number of connections for "low-power" mode.
+	 */
+	public void reduceConnections() {
+		manager.reduceConnections();
+	}
+
     /**
      * Remove a connection based on the host/port
      */
@@ -330,9 +338,24 @@ public class RouterService
      * Shut stuff down and write the gnutella.net file
      */
     public void shutdown() {
+        //Write gnutella.net
         try {
             catcher.write(SettingsManager.instance().getHostList());
         } catch (IOException e) {}
+		finally {
+			SettingsManager.instance().writeProperties();
+		}
+        //Cleanup any preview files.  Note that these will not be deleted if
+        //your previewer is still open.
+        File incompleteDir=new File(
+            SettingsManager.instance().getIncompleteDirectory());
+        String[] files=incompleteDir.list();
+        for (int i=0; i<files.length; i++) {
+            if (files[i].startsWith(IncompleteFileManager.PREVIEW_PREFIX)) {
+                File file=new File(incompleteDir, files[i]);
+                file.delete();  //May or may not work; ignore return code.
+            }
+        }
     }
 
     /**
@@ -598,6 +621,13 @@ public class RouterService
     }
 
     /**
+     *  Return the number of connections to maintain
+     */
+    public int getKeepAlive() {
+        return manager.getKeepAlive();
+    }
+
+    /**
      *  Return the number searches made locally ( QReq )
      */
     public int getNumLocalSearches() {
@@ -659,4 +689,17 @@ public class RouterService
         throws FileExistsException, AlreadyDownloadingException {
         return downloader.getFiles(files, overwrite);
     }
+
+
+    /** Added to fix bug where banned IP added is not effective until restart
+     *  (Bug 62001).
+     *  Simply allows a new host to be added to the Banned IPs list.  Just
+     *  routes to the acceptor, who reloads from SettingsManager.
+     *  @author Susheel M. Daswani
+     */
+    public void refreshBannedIPs() {
+        acceptor.refreshBannedIPs();
+    }
+
+
 }

@@ -32,6 +32,7 @@ public class QueryReply extends Message implements Serializable{
     /** If parsed, the response records for this, or null if they could not
      *  be parsed. */
     private volatile Response[] responses=null;
+
     /** If parsed, the responses vendor string, if defined, or null
      *  otherwise. */
     private volatile String vendor=null;
@@ -39,15 +40,24 @@ public class QueryReply extends Message implements Serializable{
     private volatile int pushFlag=UNDEFINED;
     /** If parsed, one of TRUE (server busy), FALSE, or UNDEFINTED. */
     private volatile int busyFlag=UNDEFINED;
+    /** If parsed, one of TRUE (server busy), FALSE, or UNDEFINTED. */
+    private volatile int uploadedFlag=UNDEFINED;
+    /** If parsed, one of TRUE (server busy), FALSE, or UNDEFINTED. */
+    private volatile int measuredSpeedFlag=UNDEFINED;
     
     private static final int TRUE=1;
     private static final int FALSE=0;
     private static final int UNDEFINED=-1;
 
     /** The mask for extracting the push flag from the QHD common area. */
-    private static final byte PUSH_MASK=(byte)0x1;
+    private static final byte PUSH_MASK=(byte)0x01;
     /** The mask for extracting the busy flag from the QHD common area. */
-    private static final byte BUSY_MASK=(byte)0x4;
+    private static final byte BUSY_MASK=(byte)0x04;
+    /** The mask for extracting the busy flag from the QHD common area. */
+    private static final byte UPLOADED_MASK=(byte)0x08;
+    /** The mask for extracting the busy flag from the QHD common area. */
+    private static final byte SPEED_MASK=(byte)0x10;
+
 
     /** Creates a new query reply.  The number of responses is responses.length
      *
@@ -61,7 +71,7 @@ public class QueryReply extends Message implements Serializable{
             int port, byte[] ip, long speed, Response[] responses,
             byte[] clientGUID) {
         this(guid, ttl, port, ip, speed, responses, clientGUID, 
-             false, false, false);
+             false, false, false, false, false);
     }
 
 
@@ -73,13 +83,18 @@ public class QueryReply extends Message implements Serializable{
      * @param needsPush true iff this is firewalled and the downloader should
      *  attempt a push without trying a normal download.
      * @param isBusy true iff this server is busy, i.e., has no more upload slots.  
+     * @param finishedUpload true iff this server has successfully finished an 
+     *  upload
+     * @param measuredSpeed true iff speed is measured, not as reported by the
+     *  user
      */
     public QueryReply(byte[] guid, byte ttl, 
             int port, byte[] ip, long speed, Response[] responses,
             byte[] clientGUID,
-            boolean needsPush, boolean isBusy) {
+            boolean needsPush, boolean isBusy,
+            boolean finishedUpload, boolean measuredSpeed) {
         this(guid, ttl, port, ip, speed, responses, clientGUID, 
-             true, needsPush, isBusy);
+             true, needsPush, isBusy, finishedUpload, measuredSpeed);
     }
 
     /** 
@@ -88,7 +103,8 @@ public class QueryReply extends Message implements Serializable{
     private QueryReply(byte[] guid, byte ttl, 
              int port, byte[] ip, long speed, Response[] responses,
              byte[] clientGUID,
-             boolean includeQHD, boolean needsPush, boolean isBusy) {
+             boolean includeQHD, boolean needsPush, boolean isBusy,
+             boolean finishedUpload, boolean measuredSpeed) {
         super(guid, Message.F_QUERY_REPLY, ttl, (byte)0,
               //11 bytes for header, plus file records, plus optional 7 byte QHD
               //without private area, plus 16-byte footer
@@ -144,9 +160,14 @@ public class QueryReply extends Message implements Serializable{
             //b) payload length
             payload[i++]=(byte)2;
             //c) common area flags and controls.  See format in parseResults2.
-            payload[i++]=(byte)((needsPush ? PUSH_MASK : (byte)0) 
-                | BUSY_MASK);
-            payload[i++]=(isBusy ? BUSY_MASK : (byte)0);
+            payload[i++]=(byte)((needsPush ? PUSH_MASK : 0) 
+                | BUSY_MASK 
+                | UPLOADED_MASK 
+                | SPEED_MASK);
+            payload[i++]=(byte)(PUSH_MASK
+                | (isBusy ? BUSY_MASK : 0) 
+                | (finishedUpload ? UPLOADED_MASK : 0)
+                | (measuredSpeed ? SPEED_MASK : 0));
         }        
 
         //Write footer at payload[i...i+16-1]
@@ -297,6 +318,48 @@ public class QueryReply extends Message implements Serializable{
         }
     }
 
+    /** 
+     * Returns true if this has successfully uploaded a complete file (bit set).
+     * Returns false if the bit is not set.  Throws BadPacketException if the
+     * flag couldn't be extracted, either because it is missing or corrupted.  
+     */
+    public boolean getHadSuccessfulUpload() throws BadPacketException {
+        parseResults();
+
+        switch (uploadedFlag) {
+        case UNDEFINED:
+            throw new BadPacketException();
+        case TRUE:
+            return true;
+        case FALSE:
+            return false;
+        default:
+            Assert.that(false, "Bad value for uploaded flag: "+pushFlag);
+            return false;
+        }
+    }
+
+    /** 
+     * Returns true if the speed in this QueryReply was measured (bit set).
+     * Returns false if it was set by the user (bit unset).  Throws
+     * BadPacketException if the flag couldn't be extracted, either because it
+     * is missing or corrupted.  
+     */
+    public boolean getIsMeasuredSpeed() throws BadPacketException {
+        parseResults();
+
+        switch (measuredSpeedFlag) {
+        case UNDEFINED:
+            throw new BadPacketException();
+        case TRUE:
+            return true;
+        case FALSE:
+            return false;
+        default:
+            Assert.that(false, "Bad value for measured speed flag: "+pushFlag);
+            return false;
+        }
+    }
 
     /** @modifies this.responses, this.pushFlagSet, this.vendor, parsed
      *  @effects tries to extract responses from payload and store in responses. 
@@ -371,27 +434,33 @@ public class QueryReply extends Message implements Serializable{
             return;
         }                
 
-        //2. Extract BearShare-style metainformation, if any.  Any
-        //exceptions are silently caught. The format is 
+        //2. Extract BearShare-style metainformation, if any.  Any exceptions
+        //are silently caught.  The definitive reference for this format is at
+        //http://www.clip2.com/GnutellaProtocol04.pdf.  Briefly, the format is 
         //      vendor code           (4 bytes, case insensitive)
         //      common payload length (1 byte, unsigned, always>0)
         //      common payload        (length given above.  See below.)
         //      vendor payload        (length until clientGUID)
         //The normal 16 byte clientGUID follows, of course.
         //
-        //The first byte of the common payload has a one in its first bit* if we
-        //should try a push.  The remaining bits tell whether the corresponding
-        //bits in the optional second byte is defined.  These bits are as 
-        //followed:
-        //      bit 2*  undefined, for historical reasons
-        //      bit 3   1 iff server is busy
-        //      bit 4   1 iff server has successfully completed an upload
-        //      bit 5   1 iff server's reported speed was actually measured, not
-        //              simply set by the user.
-        //The idea behind having two bits per flag is to distinguish between
-        //YES, NO, and MAYBE.
+        //The first byte of the common payload has a one in its 0'th bit* if we
+        //should try a push.  However, if there is a second byte, and if the
+        //0'th bit of this byte is zero, the 0'th bit of the first byte should
+        //actually be interpreted as MAYBE.  Unfortunately LimeWire 1.4 failed
+        //to set this bit in the second byte, so it should be ignored when 
+        //parsing, though set on writing.
         //
-        //*Here, we use 1-N numbering.  So "first bit" refers to the least
+        //The remaining bits of the first byte of the common payload area tell
+        //whether the corresponding bits in the optional second byte is defined.
+        //The idea behind having two bits per flag is to distinguish between
+        //YES, NO, and MAYBE.  These bits are as followed:
+        //      bit 1*  undefined, for historical reasons
+        //      bit 2   1 iff server is busy
+        //      bit 3   1 iff server has successfully completed an upload
+        //      bit 4   1 iff server's reported speed was actually measured, not
+        //              simply set by the user.
+        //
+        //*Here, we use 0-(N-1) numbering.  So "0'th bit" refers to the least
         //significant bit.
         try {
 			if (i > (payload.length-16-4-2)) {   //see above
@@ -401,6 +470,8 @@ public class QueryReply extends Message implements Serializable{
             String vendorT=null;
             int pushFlagT=UNDEFINED;
             int busyFlagT=UNDEFINED;
+            int uploadedFlagT=UNDEFINED;
+            int measuredSpeedFlagT=UNDEFINED;
 
             //a) extract vendor code
             try {
@@ -421,20 +492,21 @@ public class QueryReply extends Message implements Serializable{
             i++;
 
             //c) extract push and busy bits from common payload
+            //Note: technically, you should look at the second byte [sic] to
+            //see if the push flag of the first byte is set.  (Again note
+            //that this is the reverse of the other bits.)  However, older
+            //LimeWire's don't set this.  So we always assume that the push
+            //bit is defined.
             pushFlagT = (payload[i]&PUSH_MASK)==1 ? TRUE : FALSE;
             if (length > 1) {   //BearShare 2.2.0+
                 byte control=payload[i];
                 byte flags=payload[i+1];
                 if ((control & BUSY_MASK)!=0)
                     busyFlagT = (flags&BUSY_MASK)!=0 ? TRUE : FALSE;
-//                  System.out.println("Got extended QHD");
-//                  System.out.println("   vendor: "+vendorT);
-//                  System.out.println("   flags: "
-//                                     +Integer.toBinaryString(flags));
-//                  System.out.println("   control: "
-//                                     +Integer.toBinaryString(control));
-//                  System.out.println("   busy? "+busyFlagT);
-//                  System.out.println("   push? "+pushFlagT);
+                if ((control & UPLOADED_MASK)!=0)
+                    uploadedFlagT = (flags&UPLOADED_MASK)!=0 ? TRUE : FALSE;
+                if ((control & SPEED_MASK)!=0)
+                    measuredSpeedFlagT = (flags&SPEED_MASK)!=0 ? TRUE : FALSE;
             }
             i+=length;
 
@@ -447,6 +519,8 @@ public class QueryReply extends Message implements Serializable{
             this.vendor=vendorT.toUpperCase();
             this.pushFlag=pushFlagT;
             this.busyFlag=busyFlagT;
+            this.uploadedFlag=uploadedFlagT;
+            this.measuredSpeedFlag=measuredSpeedFlagT;
         } catch (BadPacketException e) {
             return;
         } catch (IndexOutOfBoundsException e) {
@@ -471,7 +545,7 @@ public class QueryReply extends Message implements Serializable{
         return "QueryReply("+getResultCount()+" hits, "+super.toString()+")";
     }
 
-    /** Unit test */
+    /** Unit test.  TODO: these badly need to be factored. */
     /*
     public static void main(String args[]) {
         byte[] ip={(byte)0xFF, (byte)0, (byte)0, (byte)0x1};
@@ -698,6 +772,14 @@ public class QueryReply extends Message implements Serializable{
             qr.getIsBusy();
             Assert.that(false);
         } catch (BadPacketException e) { }
+        try {
+            qr.getHadSuccessfulUpload();
+            Assert.that(false);
+        } catch (BadPacketException e) { }
+        try {
+            qr.getIsMeasuredSpeed();
+            Assert.that(false);
+        } catch (BadPacketException e) { }
        
 
         //Normal case: busy and push bits defined and set
@@ -709,8 +791,8 @@ public class QueryReply extends Message implements Serializable{
         payload[11+11+2]=(byte)77;   //The character 'M'
         payload[11+11+3]=(byte)69;   //The character 'E'
         payload[11+11+4+0]=(byte)2;
-        payload[11+11+4+1]=(byte)0x5; 
-        payload[11+11+4+2]=(byte)0x4;  
+        payload[11+11+4+1]=(byte)0x1d;  //111X1 
+        payload[11+11+4+2]=(byte)0x1c;  //111X0
         qr=new QueryReply(new byte[16], (byte)5, (byte)0,
                           payload);
         try {
@@ -718,8 +800,12 @@ public class QueryReply extends Message implements Serializable{
             Assert.that(vendor.equals("LIME"), vendor);
             Assert.that(qr.getNeedsPush()==true);
             Assert.that(qr.getNeedsPush()==true);
-            Assert.that(qr.getIsBusy()==true); //==> throws BPExc
             Assert.that(qr.getIsBusy()==true);
+            Assert.that(qr.getIsBusy()==true);
+            Assert.that(qr.getIsMeasuredSpeed()==true);
+            Assert.that(qr.getIsMeasuredSpeed()==true);
+            Assert.that(qr.getHadSuccessfulUpload()==true);
+            Assert.that(qr.getHadSuccessfulUpload()==true);
         } catch (BadPacketException e) {
             System.out.println(e.toString());
             Assert.that(false);
@@ -735,8 +821,8 @@ public class QueryReply extends Message implements Serializable{
         payload[11+11+2]=(byte)77;   //The character 'M'
         payload[11+11+3]=(byte)69;   //The character 'E'
         payload[11+11+4+0]=(byte)2;
-        payload[11+11+4+1]=(byte)0x4;
-        payload[11+11+4+2]=(byte)0x0;
+        payload[11+11+4+1]=(byte)0x1c; //111X0
+        payload[11+11+4+2]=(byte)0x0;  //000X0
         qr=new QueryReply(new byte[16], (byte)5, (byte)0,
                           payload);
         try {
@@ -744,6 +830,8 @@ public class QueryReply extends Message implements Serializable{
             Assert.that(vendor.equals("LIME"), vendor);
             Assert.that(qr.getNeedsPush()==false);
             Assert.that(qr.getIsBusy()==false);
+            Assert.that(qr.getIsMeasuredSpeed()==false);
+            Assert.that(qr.getHadSuccessfulUpload()==false);
         } catch (BadPacketException e) {
             System.out.println(e.toString());
             Assert.that(false);
@@ -756,7 +844,7 @@ public class QueryReply extends Message implements Serializable{
         qr=new QueryReply(guid, (byte)5,
                           0xFFFF, ip, u4, responses,
                           guid,
-                          false, true);
+                          false, true, true, false);
         Assert.that(qr.getIP().equals("255.0.0.1"));
         Assert.that(qr.getPort()==0xFFFF);
         Assert.that(qr.getSpeed()==u4);
@@ -771,6 +859,8 @@ public class QueryReply extends Message implements Serializable{
             Assert.that(qr.getVendor().equals("LIME"));
             Assert.that(qr.getNeedsPush()==false);
             Assert.that(qr.getIsBusy()==true);
+            Assert.that(qr.getHadSuccessfulUpload()==true);
+            Assert.that(qr.getIsMeasuredSpeed()==false);
         } catch (BadPacketException e) {
             Assert.that(false);
         } catch (NoSuchElementException e) {
@@ -784,16 +874,31 @@ public class QueryReply extends Message implements Serializable{
         qr=new QueryReply(guid, (byte)5,
                           0xFFFF, ip, u4, responses,
                           guid,
-                          true, false);
+                          true, false, false, true);
         try {
             Assert.that(qr.getVendor().equals("LIME"));
             Assert.that(qr.getNeedsPush()==true);
             Assert.that(qr.getIsBusy()==false);
+            Assert.that(qr.getHadSuccessfulUpload()==false);
+            Assert.that(qr.getIsMeasuredSpeed()==true);
         } catch (BadPacketException e) {
             Assert.that(false);
         } catch (NoSuchElementException e) {
             Assert.that(false);
         }
+        //And check raw bytes....
+        ByteArrayOutputStream out=new ByteArrayOutputStream();
+        try {
+            qr.write(out);
+        } catch (IOException e) {
+            Assert.that(false);
+        }
+        byte[] bytes=out.toByteArray();
+        //Length includes header, query hit header and footer, responses, and QHD
+        Assert.that(bytes.length==(23+11+16)+(8+10+2)+(8+14+2)+(4+3));
+        Assert.that(bytes[bytes.length-16-2]==0x1d); //11101
+        Assert.that(bytes[bytes.length-16-1]==0x11); //10001
+
 
         //Create from scratch with no bits set
         responses=new Response[2];
@@ -814,7 +919,14 @@ public class QueryReply extends Message implements Serializable{
             qr.getIsBusy();
             Assert.that(false);
         } catch (BadPacketException e) { }
-        
+        try {
+            qr.getHadSuccessfulUpload();
+            Assert.that(false);
+        } catch (BadPacketException e) { }
+        try {
+            qr.getIsMeasuredSpeed();
+            Assert.that(false);
+        } catch (BadPacketException e) { }
     } //end unit test
     */
 } //end QueryReply

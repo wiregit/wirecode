@@ -1,3 +1,8 @@
+package com.limegroup.gnutella.util;
+
+import java.util.Properties;
+import java.io.*;
+
 /**
  * This class handles common utility functions that many classes
  * may want to access.
@@ -6,21 +11,19 @@
  */
 //2345678|012345678|012345678|012345678|012345678|012345678|012345678|012345678|
 
-package com.limegroup.gnutella.util;
-
-import java.util.Properties;
-
 
 public class CommonUtils {
 
 	// constant for the current version of LimeWire
-	private static final String LIMEWIRE_VERSION = "1.4b";
+	private static final String LIMEWIRE_VERSION = "1.6";
 	
 	// variable for the system properties
 	private static Properties _props;
 
 	// variable for whether or not we're on Windows
 	private static boolean _isWindows    = false;
+    // true if NT or 2000.
+    private static boolean _supportsTray  = false;
 
 	// variable for whether or not we're on Mac 9.1 or below
 	private static boolean _isMacClassic = false;
@@ -40,12 +43,9 @@ public class CommonUtils {
 	private CommonUtils() {}
 
 	/**
-	 * initialize the settings statically. this gives a little
-	 * more control over when the class is initialized over
-	 * a simple static initializer.
+	 * initialize the settings statically. 
 	 */
-	public static void initialize() {
-
+	static {
 		// get the system properties object
 		_props = System.getProperties();
 
@@ -54,6 +54,8 @@ public class CommonUtils {
 
 		// set the operating system variables
 		_isWindows = os.indexOf("Windows") != -1;
+		if (os.indexOf("Windows NT")!=-1 || os.indexOf("Windows 2000")!=-1)
+			_supportsTray=true;
 		_isSolaris = os.indexOf("Solaris") != -1;
 		_isLinux   = os.indexOf("Linux")   != -1;
 		if(os.startsWith("Mac OS")) {
@@ -78,7 +80,7 @@ public class CommonUtils {
      * Same as '"LimeWire "+getLimeWireVersion'.
 	 */
 	public static String getVendor() {
-		return "LimeWire "+LIMEWIRE_VERSION;
+		return "LimeWire " + LIMEWIRE_VERSION;
 	}    
 
 	/**
@@ -108,6 +110,14 @@ public class CommonUtils {
 	public static boolean isWindows() {
 		return _isWindows;
 	}
+
+    /**
+     * Returns true iff this is Windows NT or Windows 2000 and
+	 * hence can support a system tray feature.
+     */
+    public static boolean supportsTray() {
+        return _supportsTray;
+    }
 
 	/** 
 	 * returns whether or not the os is Mac 9.1 or earlier.
@@ -143,27 +153,35 @@ public class CommonUtils {
 	 */
 	public static boolean isUnix() {
 		return _isLinux || _isSolaris; 
-	}
+	}   
 
-	/**
-	 * This static method converts the passed in
-	 * number of bytes into a kilobyte string 
-	 * separated by commas and with "KB" at the
-	 * end. 
-	 */
-	public static String toKilobytes(int bytes) {
-		double d = (double)bytes/(double)1024;
-		if(d < 1 && d > 0)
-			d = 1;
-		StringBuffer sb = new StringBuffer(Integer.toString((int)d));
-		if(d > 999) {
-			sb.insert(sb.length() - 3, ",");
-  			if(d > 999999) {
-  				sb.insert(sb.length() - 7, ",");
-  			}
-		}
-		sb.append("KB");
-		return sb.toString();
-	}
-	
+    /** Copies the file 'src' to 'dst', returning true iff the copy succeeded.
+     *  If 'dst' already exists, the copy may or may not succeed. */
+    public static boolean copy(File src, File dst) {
+        boolean ok=true;
+        InputStream in=null;
+        OutputStream out=null;
+        try {
+            //I'm not sure whether buffering is needed here.  It can't hurt.
+            in=new BufferedInputStream(new FileInputStream(src));
+            out=new BufferedOutputStream(new FileOutputStream(dst));
+            byte[] buf=new byte[1024];
+            while (true) {
+                int read=in.read(buf);
+                if (read==-1)
+                    break;
+                out.write(buf, 0, read);
+            }
+        } catch (IOException e) {
+            ok=false;
+        } finally {
+            if (in!=null)
+                try { in.close(); } catch (IOException e) { ok=false; }
+            if (out!=null) {
+                try { out.flush(); } catch (IOException e) { ok=false; }
+                try { out.close(); } catch (IOException e) { ok=false; }
+            }
+        }
+        return ok;
+    }
 }

@@ -284,9 +284,8 @@ public class FileManager {
         _sharedDirectories = new TreeMap(new FileComparator());
 		
         // Load the extensions.
-        String[] extensions = HTTPUtil.stringSplit(
-            SettingsManager.instance().getExtensions().trim(),
-                                                   ';');
+        String[] extensions = StringUtils.split(
+            SettingsManager.instance().getExtensions().trim(), ';');
         for (int i=0; i<extensions.length; i++)
             _extensions.add(extensions[i].toLowerCase());
                       
@@ -297,9 +296,8 @@ public class FileManager {
         //So we just approximate this by sorting by filename length, from
         //smallest to largest.  Unless directories are specified as
         //"C:\dir\..\dir\..\dir", this will do the right thing.
-        final String[] directories = HTTPUtil.stringSplit(
-            SettingsManager.instance().getDirectories().trim(),
-            ';');
+        final String[] directories = StringUtils.split(
+            SettingsManager.instance().getDirectories().trim(), ';');
         Arrays.sort(directories, new Comparator() {
             public int compare(Object a, Object b) {
                 return ((String)a).length()-((String)b).length();
@@ -363,14 +361,6 @@ public class FileManager {
             addDirectory((File)iter.next(), directory);
     }
 
-	/**
-	 * Same as addFileIfShared(new File(path)). This method is obsolescent * and
-	 * exists only for backwards compatibility.  
-     */
-    public synchronized boolean addFileIfShared(String path) {
-		return addFileIfShared(new File(path));
-    }
-
     /**
      * @modifies this
      * @effects adds the given file to this, if it exists in a shared 
@@ -413,7 +403,7 @@ public class FileManager {
         String name = file.getName();    
         if (hasExtension(name)) {
             long n = file.length();  
-            if (n > Integer.MAX_VALUE)
+            if (n>Integer.MAX_VALUE || n<0)
                 return false;
             _size += n;                    
             _files.add(new FileDesc(_files.size(), name, path,  (int)n));
@@ -938,11 +928,16 @@ public class FileManager {
             //addFileIfShared since the file doesn't exist.
             f4=new HugeFakeFile(directory, "big.XYZ", Integer.MAX_VALUE-1);
             File f5=new HugeFakeFile(directory, "big2.XYZ",
-                                     Integer.MAX_VALUE-1);
+                                     Integer.MAX_VALUE);
             Assert.that(fman.addFile(f4)==true);
             Assert.that(fman.addFile(f5)==true);
             Assert.that(fman.getNumFiles()==3);
             Assert.that(fman.getSize()==Integer.MAX_VALUE);
+            responses=fman.query(new QueryRequest((byte)3, (byte)0, "*.*"));
+            Assert.that(responses.length==3);
+            Assert.that(responses[0].getName().equals(f3.getName()));
+            Assert.that(responses[1].getName().equals(f4.getName()));
+            Assert.that(responses[2].getName().equals(f5.getName()));
         } finally {
             if (f1!=null) f1.delete();
             if (f2!=null) f2.delete();

@@ -536,6 +536,7 @@ public class IntSet {
 }
 
 /** Checks invariants. */
+/*
 class TestingIntSet extends IntSet {
     public boolean add(int x) {
         try {
@@ -555,3 +556,4 @@ class TestingIntSet extends IntSet {
         }
     }
 }
+*/

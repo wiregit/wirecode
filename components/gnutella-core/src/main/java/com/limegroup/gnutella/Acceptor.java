@@ -43,7 +43,7 @@ public class Acceptor extends Thread {
      */
     private static byte[] _address=new byte[4];
 
-    private Vector _badHosts = new Vector();
+    private Vector /* of String */ _badHosts = new Vector();
 
     private ConnectionManager _connectionManager;
     private DownloadManager _downloadManager;
@@ -51,7 +51,7 @@ public class Acceptor extends Thread {
     private MessageRouter _router;
     private ActivityCallback _callback;
 
-	private boolean _acceptedIncoming = false;
+	private volatile boolean _acceptedIncoming = false;
 
 
 	/**
@@ -239,7 +239,7 @@ public class Acceptor extends Thread {
 
             // If we still don't have a socket, there's an error
             if(_socket == null)
-                _callback.error(ActivityCallback.ERROR_0);
+                _callback.error(ActivityCallback.PORT_ERROR);
         }
 
         if (_port!=oldPort) {
@@ -275,7 +275,7 @@ public class Acceptor extends Thread {
                 }
 
                 //Check if IP address of the incoming socket is in _badHosts
-                if (_badHosts.contains(
+                if (isBannedIP(
                         client.getInetAddress().getHostAddress())) {
                     client.close();
                     continue;
@@ -283,16 +283,17 @@ public class Acceptor extends Thread {
 
 				// we have accepted an incoming socket.
 				_acceptedIncoming = true;
+				SettingsManager.instance().setAcceptedIncoming(_acceptedIncoming);
 
                 //Dispatch asynchronously.
                 new ConnectionDispatchRunner(client);
 
             } catch (SecurityException e) {
-                _callback.error(ActivityCallback.ERROR_3);
+                _callback.error(ActivityCallback.SOCKET_ERROR);
                 return;
             } catch (Exception e) {
                 //Internal error!
-                _callback.error(ActivityCallback.ERROR_20, e);
+                _callback.error(ActivityCallback.INTERNAL_ERROR, e);
             }
         }
     }
@@ -386,7 +387,42 @@ public class Acceptor extends Thread {
         throw new IOException();
     }
 
+    /** Added to fix bug where banned IP added is not effective until restart
+     *  (Bug 62001).
+     *  Allows a new host to be dynamically added to the Banned IPs list (via a
+     *  reload from SettingsManager).
+     */
+    public void refreshBannedIPs() {
 
+        // synch to ensure no concurrent access by Acceptor thread, as this will
+        // always be called by the gui thread.....
+        synchronized (_badHosts) {
+            // reset list
+            _badHosts.removeAllElements();
+            
+            // reload list
+            String[] allHosts = SettingsManager.instance().getBannedIps();
+            for (int i=0; i<allHosts.length; i++)
+                _badHosts.add(allHosts[i]);
+        }
+
+        // kill any connections that may now be banned.....
+        // this method isn't too inefficient, as the normal connections per
+        // client is about 4.
+        final List connections = _connectionManager.getConnections();
+        for (int i = 0; i < connections.size(); i++) {
+            ManagedConnection curr = (ManagedConnection) connections.get(i);
+            if (isBannedIP(curr.getOrigHost()))
+                _connectionManager.remove(curr);                
+        }
+    }
+
+    /** @return true if the input dotted address (i.e. 'W.X.Y.Z') is banned,
+     *  else false.
+     */
+    public boolean isBannedIP(String ip) {
+        return _badHosts.contains(ip);
+    }
 
 
 }

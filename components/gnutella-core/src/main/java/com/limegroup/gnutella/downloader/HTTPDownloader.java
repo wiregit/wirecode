@@ -1,8 +1,5 @@
 /**
- * auth: rsoule
- * file: HTTPDownloader.java
- * desc: Read data from the net and write to disk.
- *
+ * Read data from the net and write to disk.
  */
 //2345678|012345678|012345678|012345678|012345678|012345678|012345678|012345678|
 
@@ -22,7 +19,7 @@ import com.limegroup.gnutella.util.CommonUtils;
  */
 public class HTTPDownloader {
 
-	private long _index;
+	private long  _index;
 	private String _filename; 
 	private byte[] _guid;
 
@@ -38,45 +35,30 @@ public class HTTPDownloader {
 	/**
      * Creates a server-side push download.
      * 
-	 * @param file the name of the file	
      * @param socket the socket to download from.  The "GIV..." line must
      *  have been read from socket.  HTTP headers may not have been read or 
      *  buffered.
-	 * @param index the index of the file that the uploader sent in the GIV line.
-	 * @param guid the unique identifier of the uploader sent in the GIV line.
+	 * @param rfd complete information for the file to download.  Note that
+     *  the host address and port in this is ignored.
      * @param incompleteFile the temp file to use while downloading.  No other 
      *  thread or process should be using this file.
      *
 	 * @exception CantConnectException couldn't connect to the host.
 	 */
-	public HTTPDownloader(String file, Socket socket, 
-                          long index, byte[] guid,
+	public HTTPDownloader(Socket socket, 
+                          RemoteFileDesc rfd,
                           File incompleteFile) 
-		throws IOException {
-		_filename = file;
-		_index = index;
-		_guid = guid;
-
-		_amountRead = 0;
-		_fileSize = -1;
-		_initialReadingPoint = 0;
-        _incompleteFile=incompleteFile;
-
-		connect(socket, file, index);
-		
+		    throws IOException {
+        initializeFile(rfd, incompleteFile);
+        _socket=socket;
+		connect();		
 	}
 	
     /**
      * Creates a client-side normal download.
      *
-     * @param file the name of the file to get
-     * @param host the name of the host to connect to
-     * @param port the port to use on "host"
-     * @param index the index of the file on the server
-     * @param guid the uploader's unique server GUID.  I don't think this is
-     *  currently used.
-     * @param size the expected size of the file when the download is complete
-     * @param resume true if we should initially resume for the temporary file
+     * @param rfd complete information for the file to download, including
+     *  host address and port
      * @param timeout the amount of time, in milliseconds, to wait
      *  when establishing a connection.   Must be non-negative.  A
      *  timeout of 0 means no timeout.
@@ -85,54 +67,44 @@ public class HTTPDownloader {
      *
      * @exception CantConnectException couldn't connect to the host.
      */
-	public HTTPDownloader(String file, String host, 
-                          int port, long index, byte[] guid, 
-                          int size, boolean resume, int timeout,
+	public HTTPDownloader(RemoteFileDesc rfd,
+                          int timeout,
                           File incompleteFile) 
-		throws IOException {
-
-		_filename = file;
-		_index = index;
-		_guid = guid;
-		_amountRead = 0;
-		_fileSize = size;
-		_initialReadingPoint = 0;
-		
-        _incompleteFile=incompleteFile;
-		if (resume) {			
-			// now, check to see if a file of that name alread exists in the
-			// temporary directory.  incompleteFile represents the file as it
-			// would be named in the temporary incomplete directory
-			if (incompleteFile.exists()) {
-				// dont alert an error if the file doesn't 
-				// exist, just assume a starting range of 0;
-				_initialReadingPoint = (int)incompleteFile.length();
-                _amountRead = _initialReadingPoint;
-			}
-		}
-
-		connect(host, port, file, index, timeout);		
-	}
-
-	/**
-	 * Private connection methods
-	 */
-
-	private void connect(String host, int port,
-                         String file, long index,
-                         int timeout ) 
-		throws CantConnectException {
+		    throws IOException {
+        initializeFile(rfd, incompleteFile);
         try {
-            Socket socket = (new SocketOpener(host, port)).connect(timeout);
-            connect(socket, file, index);
+            _socket = (new SocketOpener(rfd.getHost(), rfd.getPort())).
+                                                         connect(timeout);
         } catch (IOException e) {
             throw new CantConnectException();
         }
+        connect();
 	}
 
-	private void connect(Socket s, String file, long index) throws IOException {
-		_socket = s;
+    /** Sets up this' instance variables according to rfd and incompleteFile,
+     *  except for _byteReader, _fos, _socket
+     *      @modifies this  */
+    private void initializeFile(RemoteFileDesc rfd, File incompleteFile) {
+        _incompleteFile=incompleteFile;
+		_filename = rfd.getFileName();
+		_index = rfd.getIndex();
+		_guid = rfd.getClientGUID();
+		_fileSize = rfd.getSize();
 
+        //If the incomplete file exists, set up a resume just past the end.
+        //Otherwise, begin from the start.
+		_amountRead = 0;
+		_initialReadingPoint = 0;
+        if (_incompleteFile.exists()) {
+            _initialReadingPoint = (int)incompleteFile.length();
+            _amountRead = _initialReadingPoint;
+        }
+    }
+
+    /** Sends the HTTP GET along the given socket. 
+     *       @requires this initialized except for _byteReader, _fos
+     *       @modifies this._byteReader, network */
+	private void connect() throws IOException {
         //The try-catch below is a work-around for JDK bug 4091706.
         InputStream istream=null;
         try {
@@ -145,7 +117,7 @@ public class HTTPDownloader {
         OutputStreamWriter osw = new OutputStreamWriter(os);
         BufferedWriter out=new BufferedWriter(osw);
         String startRange = java.lang.String.valueOf(_initialReadingPoint);
-        out.write("GET /get/"+index+"/"+file+" HTTP/1.0\r\n");
+        out.write("GET /get/"+_index+"/"+_filename+" HTTP/1.0\r\n");
         out.write("User-Agent: "+CommonUtils.getVendor()+"\r\n");
         out.write("Range: bytes=" + startRange + "-\r\n");
         out.write("\r\n");
@@ -192,7 +164,7 @@ public class HTTPDownloader {
     public InetAddress getInetAddress() {return _socket.getInetAddress();}
 
 	/* Construction time variables */
-	public long getIndex() {return _index;}
+	public long  getIndex() {return _index;}
   	public String getFileName() {return _filename;}
   	public byte[] getGUID() {return _guid;}
 
@@ -323,7 +295,6 @@ public class HTTPDownloader {
 		String download_dir = settings.getSaveDirectory();
 
 		File complete_file = new File(download_dir, _filename);
-		String path_to_complete = complete_file.getAbsolutePath();
 		
 		File shared = new File(download_dir);
 		String shared_path = shared.getCanonicalPath();
@@ -338,7 +309,7 @@ public class HTTPDownloader {
 
 	  
         //2. Do actual download, appending to incomplete file if necessary.
-		String path_to_incomplete = _incompleteFile.getAbsolutePath();
+		String path_to_incomplete = _incompleteFile.getCanonicalPath();
 		boolean append = false;
 
 		if (_initialReadingPoint > 0)
@@ -378,18 +349,18 @@ public class HTTPDownloader {
 
 		//3. If not interrupted, move from temporary directory to final directory.
 		if ( _amountRead == _fileSize ) {
-			//If target doesn't exist, this will fail silently.  Otherwise, it's
-			//always safe to do this since we prompted the user in
-			//SearchView/DownloadManager.
+			//Delete target.  If target doesn't exist, this will fail silently.
+			//Otherwise, it's always safe to do this since we prompted the user
+			//in SearchView/DownloadManager.
 			complete_file.delete();
-			boolean ok = _incompleteFile.renameTo(complete_file);
-			if (! ok) 
-				throw new FileCantBeMovedException();
-			//renameTo is not guaranteed to work, esp. when the
-			//file is being moved across file systems.  
-
-			FileManager.instance().addFileIfShared(path_to_complete);
-
+            //Try moving file.  If we couldn't move the file, i.e., because
+            //someone is previewing it or it's on a different volume, try copy
+            //instead.  If that failed, notify user.
+            if (!_incompleteFile.renameTo(complete_file))
+                if (! CommonUtils.copy(_incompleteFile, complete_file))
+                    throw new FileCantBeMovedException();
+            //Add file to library.
+			FileManager.instance().addFileIfShared(complete_file);
 		} else 
 			throw new FileIncompleteException();
 	}

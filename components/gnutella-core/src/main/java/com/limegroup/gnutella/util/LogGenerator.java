@@ -8,6 +8,8 @@ package com.limegroup.gnutella.util;
 
 import java.io.*;
 import java.util.Date;
+import java.util.Timer;
+import java.util.TimerTask;
 
 /**
  * Generates a buffered log. It buffers the input and dumps it out after 
@@ -41,6 +43,28 @@ public class LogGenerator
      * buffer was last written out to the 'out' stream
      */
     private int _count = 0;
+    
+    /**
+     * A single date insance, that will get updated periodically
+     */
+    private static volatile Date _date = new Date();
+    
+    static
+    {
+        //keep updating the date every 2 minutes
+        Timer timer = new Timer();
+        
+        //schedule date updating task
+        timer.schedule(
+            new TimerTask()
+            {
+                public void run()
+                {
+                    _date = new Date();
+                }
+            },
+            0, 120000);
+    }
     
     
     /**
@@ -82,7 +106,7 @@ public class LogGenerator
     
     public void printlnWithDateStamp(Object o)
     {
-        _buffer.append(new Date());
+        _buffer.append(_date);
         _buffer.append(" ");
         this.println(o);
     }
