@@ -64,11 +64,6 @@ public final class UDPService implements Runnable {
 	private final Thread UDP_THREAD = new Thread(this, "UDPService");
 
 	/**
-	 * Cached <tt>QueryUnicaster</tt> instnace.
-	 */
-	private QueryUnicaster UNICASTER = QueryUnicaster.instance();
-
-	/**
 	 * Instance accessor.
 	 */
 	public static UDPService instance() {
