@@ -1,6 +1,7 @@
 package com.limegroup.gnutella.messages;
 
 import com.limegroup.gnutella.*;
+import com.limegroup.gnutella.util.I18NConvert;
 import com.limegroup.gnutella.settings.*;
 import com.limegroup.gnutella.statistics.*;
 import com.limegroup.gnutella.guess.*;
@@ -343,6 +344,7 @@ public class QueryRequest extends Message implements Serializable{
 	 */
     public static QueryRequest createOutOfBandQuery(byte[] guid, String query, 
                                                     String xmlQuery) {
+        query = I18NConvert.instance().getNorm(query);
         if(query == null) {
             throw new NullPointerException("null query");
         }
@@ -469,6 +471,7 @@ public class QueryRequest extends Message implements Serializable{
 	 */
 	public static QueryRequest createQuery(byte[] guid, String query, 
 										   String xmlQuery) {
+        query = I18NConvert.instance().getNorm(query);
 		if(guid == null) {
 			throw new NullPointerException("null guid");
 		}

@@ -817,11 +817,11 @@ public class RouterService {
                 // it seems tremendously unlikely, even over the course of a 
                 // VERY long lived client
                 qr = QueryRequest.createOutOfBandQuery(guid, 
-                                                       I18NConvert.instance().getNorm(query), 
+                                                       query, 
                                                        richQuery);
             else
                 qr = QueryRequest.createQuery(guid, 
-                                              I18NConvert.instance().getNorm(query), 
+                                              query, 
                                               richQuery);
 			verifier.record(qr, type);
             RESULT_HANDLER.addQuery(qr); // so we can leaf guide....
