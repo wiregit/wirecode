@@ -396,6 +396,7 @@ public class QueryReply extends Message implements Serializable{
      *  contained one.
      */
     public byte[] getXMLBytes() {
+        parseResults();
         return _xmlBytes;
     }
 
