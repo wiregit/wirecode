@@ -125,7 +125,6 @@ public class BootstrapServerManager {
      * progress.  Uses the "hostfile=1" message.
      */
     public synchronized void fetchEndpointsAsync() {
-        System.out.println("HostCatcher::fetchEndpointsAsync");
 		if(!ConnectionSettings.USE_GWEBCACHE.getValue()) return;
         addDefaultsIfNeeded();
         if (! _hostFetchInProgress) {
