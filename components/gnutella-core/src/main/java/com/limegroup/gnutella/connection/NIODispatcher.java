@@ -1,6 +1,7 @@
 package com.limegroup.gnutella.connection;
 
 import java.io.IOException;
+import java.nio.channels.CancelledKeyException;
 import java.nio.channels.ClosedChannelException;
 import java.nio.channels.SelectableChannel;
 import java.nio.channels.SelectionKey;
@@ -78,6 +79,7 @@ public final class NIODispatcher implements Runnable {
      * from the network
 	 */
     public void addReader(Connection conn) {
+        System.out.println("NIODispatcher::addReader");
 		READERS.add(conn);
 		_selector.wakeup();
 	}
@@ -124,7 +126,19 @@ public final class NIODispatcher implements Runnable {
 			_selector = Selector.open();
 		}
 		while(true) {
-			int n = _selector.select();
+            
+			int n = -1;
+            
+            try {
+                n = _selector.select();
+            } catch(NullPointerException e) {
+                // windows bug -- need to catch it
+                continue;
+            } catch(CancelledKeyException e) {
+                // this can also happen even though it's not supposed to --
+                // just continue
+                continue;
+            }
 			
 			// register any new readers and writers
 			registerReaders();
@@ -143,27 +157,28 @@ public final class NIODispatcher implements Runnable {
 	 * read events.
      */
     private void registerReaders() {
+        System.out.println("NIODispatcher::registerReaders");
         synchronized(READERS) {
-				// do nothing if there are no new readers
-				if(READERS.isEmpty()) return;
-				for(Iterator iter = READERS.iterator(); iter.hasNext();) {
-					Connection conn = (Connection)iter.next();
-					SelectableChannel channel = conn.getChannel();
-					
-					// try to make sure the channel's open instead of just
-					// hammering our way into ClosedChannelExceptions -- 
-					// more efficient and cleaner
-					if(channel.isOpen()) {
-						try {
-                            channel.register(_selector, SelectionKey.OP_READ, conn);
-                        } catch (ClosedChannelException e) {
-                        	// keep registering the other connections
-                            continue;
-                        }
-					}
+			// do nothing if there are no new readers
+			if(READERS.isEmpty()) return;
+			for(Iterator iter = READERS.iterator(); iter.hasNext();) {
+				Connection conn = (Connection)iter.next();
+				SelectableChannel channel = conn.getChannel();
+				
+				// try to make sure the channel's open instead of just
+				// hammering our way into ClosedChannelExceptions -- 
+				// more efficient and cleaner
+				if(channel.isOpen()) {
+					try {
+                        channel.register(_selector, SelectionKey.OP_READ, conn);
+                    } catch (ClosedChannelException e) {
+                    	// keep registering the other connections
+                        continue;
+                    }
 				}
-				READERS.clear();
-			}  
+			}
+			READERS.clear();
+		}  
     }
 
 	 /**
@@ -189,24 +204,32 @@ public final class NIODispatcher implements Runnable {
 	 * them to the message processing infrastructure.
      */
 	private void handleReaders() {
+        System.out.println("NIODispatcher::handleReaders");
 		java.util.Iterator keyIter = _selector.selectedKeys().iterator();
 		while(keyIter.hasNext()) {
+            System.out.println("NIODispatcher::handleReaders::in while");
 			SelectionKey key = (SelectionKey)keyIter.next();
 			keyIter.remove();
 			
 			// ignore invalid keys
 			if(!key.isValid()) continue;
 			if(key.isReadable()) {
+                ManagedConnection mc = null;
 				try {
-                    ManagedConnection mc = (ManagedConnection)key.attachment();
+                    mc = (ManagedConnection)key.attachment();
+                    if(!mc.isOpen()) {
+                        // continue if the connection is no longer open
+                        continue;
+                    }
 					Message msg = mc.getReader().createMessageFromTCP(key);
 					
 					if(msg == null) {
-                        System.out.println("NIODispatcher::read NULL message");
+                        // the message was not read completely -- we'll get
+                        // another read event on the channel and keep reading
 						continue;
 					}
-                    System.out.println("NIODispatcher::read message: "+msg);
-                    
+
+                    // make sure this message isn't considered spam                    
                     if(!mc.isSpam(msg)) {
                         // TODO:: don't use RouterService
                         RouterService.getMessageRouter().handleMessage(msg, 
@@ -215,6 +238,8 @@ public final class NIODispatcher implements Runnable {
 				} catch (BadPacketException e) {
                     MessageReadErrorStat.BAD_PACKET_EXCEPTIONS.incrementStat();
 				} catch (IOException e) {
+                    // remove the connection if we got an IOException
+                    RouterService.getConnectionManager().remove(mc);
                     MessageReadErrorStat.IO_EXCEPTIONS.incrementStat();
 				}
 			}
@@ -244,11 +269,11 @@ public final class NIODispatcher implements Runnable {
 	}
     
     /**
-     * Helper method that registers the given <tt>Connection</tt> for future write
-     * events (for future open space in our TCP buffers).
+     * Helper method that registers the given <tt>Connection</tt> for future 
+     * write events (for future open space in our TCP buffers).
      * 
      * @param conn the <tt>Connection</tt> whose channel should be registered
-     *     for write events
+     *  for write events
      */
     private void registerWriter(Connection conn) {
 		SelectableChannel channel = conn.getChannel();
@@ -258,7 +283,8 @@ public final class NIODispatcher implements Runnable {
 		// more efficient and cleaner
 		if(channel.isOpen()) {
 			try {
-                channel.register(_selector, SelectionKey.OP_WRITE | SelectionKey.OP_READ, 
+                channel.register(_selector, 
+                    SelectionKey.OP_WRITE | SelectionKey.OP_READ, 
                 	conn);
             } catch (ClosedChannelException e) {
                 // no problem -- just don't register it
