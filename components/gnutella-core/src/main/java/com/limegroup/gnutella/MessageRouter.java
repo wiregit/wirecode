@@ -1428,6 +1428,132 @@ public abstract class MessageRouter {
             throw new IOException("no route for push");
     }
 
+
+    /**
+     * Converts the passed responses to QueryReplies. Each QueryReply can
+     * accomodate atmost 255 responses. Not all the responses may get included
+     * in QueryReplies in case the query request came from a far away host.
+     * <p>
+     * NOTE: This method doesnt have any side effect, 
+     * and does not modify the state of this object
+     * @param responses The responses to be converted
+     * @param queryRequest The query request corresponding to which we are
+     * generating query replies.
+     * @return Iterator (on QueryReply) over the Query Replies
+     */
+    public Iterator responsesToQueryReplies(Response[] responses,
+                                            QueryRequest queryRequest) {
+        //List to store Query Replies
+        List /*<QueryReply>*/ queryReplies = new LinkedList();
+        
+        // get the appropriate queryReply information
+        byte[] guid = queryRequest.getGUID();
+        byte ttl = (byte)(queryRequest.getHops() + 1);
+        int port = RouterService.getPort();
+        byte[] ip = RouterService.getAddress();
+
+		UploadManager um = RouterService.getUploadManager();
+
+        //Return measured speed if possible, or user's speed otherwise.
+        long speed = um.measuredUploadSpeed();
+        boolean measuredSpeed=true;
+        if (speed==-1) {
+            speed=SettingsManager.instance().getConnectionSpeed();
+            measuredSpeed=false;
+        }
+
+        int numResponses = responses.length;
+        int index = 0;
+
+        int numHops = queryRequest.getHops();
+
+		final int REPLY_LIMIT = 10;
+        while (numResponses > 0) {
+            int arraySize;
+            // if there are more than 255 responses,
+            // create an array of 255 to send in the queryReply
+            // otherwise, create an array of whatever size is left.
+            if (numResponses < REPLY_LIMIT) {
+                // break;
+                arraySize = numResponses;
+            }
+            else
+                arraySize = REPLY_LIMIT;
+
+            Response[] res;
+            // a special case.  in the common case where there
+            // are less than 256 responses being sent, there
+            // is no need to copy one array into another.
+            if ( (index == 0) && (arraySize < REPLY_LIMIT) ) {
+                res = responses;
+            }
+            else {
+                res = new Response[arraySize];
+                // copy the reponses into bite-size chunks
+                for(int i =0; i < arraySize; i++) {
+                    res[i] = responses[index];
+                    index++;
+                }
+            }
+
+            // decrement the number of responses we have left
+            numResponses-= arraySize;
+
+			// see id there are any open slots
+			boolean busy = um.isBusy();
+            boolean uploaded = um.hadSuccesfulUpload();
+
+			// see if we have ever accepted an incoming connection
+			boolean incoming = RouterService.acceptedIncomingConnection();
+
+			boolean chat = SettingsManager.instance().getChatEnabled();
+			
+			boolean mcast = queryRequest.isMulticast();
+			// if it is a multicasted response, use the non-forced address.
+			if ( mcast ) {
+			    ip = RouterService.getNonForcedAddress();
+			    port = RouterService.getNonForcedPort();
+            }
+
+            // create the new queryReply
+            List qrList = createQueryReply(guid, ttl, port, ip, speed, 
+                                           res, _clientGUID, !incoming, 
+                                           busy, uploaded, measuredSpeed, 
+                                           chat, mcast);
+
+            if (qrList != null) 
+                //add to the list
+                queryReplies.addAll(qrList);
+
+            // we only want to send multiple queryReplies
+            // if the number of hops is small.
+            if (numHops > 2)
+                break;
+
+        }//end of while
+        
+        return queryReplies.iterator();
+    }
+    
+    /** If there is special processing needed to building a query reply,
+     * subclasses can override this method as necessary.
+     * @return A (possibly empty) List of query replies
+     */
+    protected List createQueryReply(byte[] guid, byte ttl, int port, 
+                                    byte[] ip , long speed, Response[] res,
+                                    byte[] clientGUID, boolean notIncoming,
+                                    boolean busy, boolean uploaded, 
+                                    boolean measuredSpeed, boolean chat,
+                                    boolean isFromMcast) {
+        List list = new ArrayList();
+        list.add(new QueryReply(guid, ttl, port, ip,
+                                speed, res, _clientGUID, 
+                                notIncoming, busy, uploaded, 
+                                measuredSpeed, chat, isFromMcast));
+        return list;
+    }
+
+
     /**
      * Handles a query route table update message that originated from
      * receivingConnection.
@@ -1560,130 +1686,6 @@ public abstract class MessageRouter {
         return ret;
     }
 
-    /**
-     * Converts the passed responses to QueryReplies. Each QueryReply can
-     * accomodate atmost 255 responses. Not all the responses may get included
-     * in QueryReplies in case the query request came from a far away host.
-     * <p>
-     * NOTE: This method doesnt have any side effect, 
-     * and does not modify the state of this object
-     * @param responses The responses to be converted
-     * @param queryRequest The query request corresponding to which we are
-     * generating query replies.
-     * @return Iterator (on QueryReply) over the Query Replies
-     */
-    public Iterator responsesToQueryReplies(Response[] responses,
-                                            QueryRequest queryRequest) {
-        //List to store Query Replies
-        List /*<QueryReply>*/ queryReplies = new LinkedList();
-        
-        // get the appropriate queryReply information
-        byte[] guid = queryRequest.getGUID();
-        byte ttl = (byte)(queryRequest.getHops() + 1);
-        int port = RouterService.getPort();
-        byte[] ip = RouterService.getAddress();
-
-		UploadManager um = RouterService.getUploadManager();
-
-        //Return measured speed if possible, or user's speed otherwise.
-        long speed = um.measuredUploadSpeed();
-        boolean measuredSpeed=true;
-        if (speed==-1) {
-            speed=SettingsManager.instance().getConnectionSpeed();
-            measuredSpeed=false;
-        }
-
-        int numResponses = responses.length;
-        int index = 0;
-
-        int numHops = queryRequest.getHops();
-
-		final int REPLY_LIMIT = 10;
-        while (numResponses > 0) {
-            int arraySize;
-            // if there are more than 255 responses,
-            // create an array of 255 to send in the queryReply
-            // otherwise, create an array of whatever size is left.
-            if (numResponses < REPLY_LIMIT) {
-                // break;
-                arraySize = numResponses;
-            }
-            else
-                arraySize = REPLY_LIMIT;
-
-            Response[] res;
-            // a special case.  in the common case where there
-            // are less than 256 responses being sent, there
-            // is no need to copy one array into another.
-            if ( (index == 0) && (arraySize < REPLY_LIMIT) ) {
-                res = responses;
-            }
-            else {
-                res = new Response[arraySize];
-                // copy the reponses into bite-size chunks
-                for(int i =0; i < arraySize; i++) {
-                    res[i] = responses[index];
-                    index++;
-                }
-            }
-
-            // decrement the number of responses we have left
-            numResponses-= arraySize;
-
-			// see id there are any open slots
-			boolean busy = um.isBusy();
-            boolean uploaded = um.hadSuccesfulUpload();
-
-			// see if we have ever accepted an incoming connection
-			boolean incoming = RouterService.acceptedIncomingConnection();
-
-			boolean chat = SettingsManager.instance().getChatEnabled();
-			
-			boolean mcast = queryRequest.isMulticast();
-			// if it is a multicasted response, use the non-forced address.
-			if ( mcast ) {
-			    ip = RouterService.getNonForcedAddress();
-			    port = RouterService.getNonForcedPort();
-            }
-
-            // create the new queryReply
-            List qrList = createQueryReply(guid, ttl, port, ip, speed, 
-                                           res, _clientGUID, !incoming, 
-                                           busy, uploaded, measuredSpeed, 
-                                           chat, mcast);
-
-            if (qrList != null) 
-                //add to the list
-                queryReplies.addAll(qrList);
-
-            // we only want to send multiple queryReplies
-            // if the number of hops is small.
-            if (numHops > 2)
-                break;
-
-        }//end of while
-        
-        return queryReplies.iterator();
-    }
-    
-    /** If there is special processing needed to building a query reply,
-     * subclasses can override this method as necessary.
-     * @return A (possibly empty) List of query replies
-     */
-    protected List createQueryReply(byte[] guid, byte ttl, int port, 
-                                    byte[] ip , long speed, Response[] res,
-                                    byte[] clientGUID, boolean notIncoming,
-                                    boolean busy, boolean uploaded, 
-                                    boolean measuredSpeed, boolean chat,
-                                    boolean isFromMcast) {
-        List list = new ArrayList();
-        list.add(new QueryReply(guid, ttl, port, ip,
-                                speed, res, _clientGUID, 
-                                notIncoming, busy, uploaded, 
-                                measuredSpeed, chat, isFromMcast));
-        return list;
-    }
-                                    
 
     /**
      * Adds all query routing tables for this' files to qrt.
