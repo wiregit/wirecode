@@ -621,9 +621,12 @@ public class ServerSideWhatIsNewTest
         Downloader downloader = 
             rs.download(new RemoteFileDesc[] { rfd }, false, new GUID(guid));
         
-        Thread.sleep(5000);
-        assertEquals("State = " + downloader.getState(),
-                     Downloader.COMPLETE, downloader.getState());
+        int sleeps = 0;
+        while (downloader.getState() != Downloader.COMPLETE) {
+            Thread.sleep(1000);
+            sleeps++;
+            if (sleeps > 120) assertTrue("download never completed", false);
+        }
         
         assertEquals("num shared files? " + rs.getNumSharedFiles(), 2,
                      rs.getNumSharedFiles());
@@ -681,6 +684,12 @@ public class ServerSideWhatIsNewTest
 
         Downloader downloader = rs.download(rfds, false, new GUID(guid));
         
+        Thread.sleep(2000);
+        assertTrue(downloader.getState() != Downloader.COMPLETE);
+        // make sure that the partial file has a creation time - by now one of
+        // the downloaders must have got X-Create-Time
+        assertNotNull(ctCache.getCreationTime(TestFile.hash()));
+
         int sleeps = 0;
         while (downloader.getState() != Downloader.COMPLETE) {
             Thread.sleep(1000);
