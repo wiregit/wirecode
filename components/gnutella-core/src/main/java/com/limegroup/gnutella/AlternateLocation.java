@@ -75,8 +75,12 @@ public final class AlternateLocation
 		else {
 			// this can be null
 			OUTPUT_DATE_TIME = AlternateLocation.extractDateTimeString(location);			
-			Date date = AlternateLocation.createDateInstance(OUTPUT_DATE_TIME);
-			TIME = date.getTime();
+			if(OUTPUT_DATE_TIME != null) {
+				Date date = AlternateLocation.createDateInstance(OUTPUT_DATE_TIME);
+				TIME = date.getTime();
+			} else {
+				TIME = new Date(0).getTime();
+			}
 		}		
 	}
 
