@@ -83,6 +83,7 @@ public class QueryReply extends Message implements Serializable{
 
 
     /** Creates a new query reply.  The number of responses is responses.length
+     *  The Browse Host GGEP extension is on by default.  
      *
      *  @requires  0 < port < 2^16 (i.e., can fit in 2 unsigned bytes),
      *    ip.length==4 and ip is in <i>BIG-endian</i> byte order,
@@ -102,6 +103,7 @@ public class QueryReply extends Message implements Serializable{
      * Creates a new QueryReply with a BearShare 2.2.0-style QHD.  The QHD with
      * the LIME vendor code and the given busy and push flags.  Note that this
      * constructor has no support for undefined push or busy bits.
+     * The Browse Host GGEP extension is on by default.  
      *
      * @param needsPush true iff this is firewalled and the downloader should
      *  attempt a push without trying a normal download.
@@ -128,6 +130,7 @@ public class QueryReply extends Message implements Serializable{
      * Creates a new QueryReply with a BearShare 2.2.0-style QHD.  The QHD with
      * the LIME vendor code and the given busy and push flags.  Note that this
      * constructor has no support for undefined push or busy bits.
+     * The Browse Host GGEP extension is on by default.  
      *
      * @param needsPush true iff this is firewalled and the downloader should
      *  attempt a push without trying a normal download.
