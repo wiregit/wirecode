@@ -20,9 +20,10 @@ class NIOOutputStream implements ReadHandler {
     
     private final NIOSocket handler;
     private final SocketChannel channel;
-    private final OutputStream sink;
-    private final Pipe.SourceChannel source;
+    private OutputStream sink;
+    private Pipe.SourceChannel source;
     private ByteBuffer buffer;
+    private boolean shutdown;
     
     /**
      * Constructs a new pipe to allow SocketChannel's reading to funnel
@@ -31,20 +32,24 @@ class NIOOutputStream implements ReadHandler {
     NIOOutputStream(NIOSocket handler, SocketChannel channel) throws IOException {
         this.handler = handler;
         this.channel = channel;
+    }
+    
+    /**
+     * Creates the pipes, buffer & registers channels for interest.
+     */
+    synchronized void init() throws IOException {
+        if(buffer != null)
+            throw new IllegalStateException("already init'd!");
+            
+        if(shutdown)
+            throw new IOException("already closed!");
         
         Pipe pipe = Pipe.open();
         pipe.sink().configureBlocking(true);
         sink = Channels.newOutputStream(pipe.sink());
         source = pipe.source();
         source.configureBlocking(false);
-    }
-    
-    /**
-     * Initializes the internal ByteBuffer & registers the source for selection.
-     */
-    void init() {
-        if(buffer != null)
-            throw new IllegalStateException("already init'd!");
+
         this.buffer = ByteBuffer.allocate(8192); // TODO: use a ByteBufferPool
         NIODispatcher.instance().registerRead(source, this);
         NIODispatcher.instance().interestWrite(channel);
@@ -53,7 +58,10 @@ class NIOOutputStream implements ReadHandler {
     /**
      * Retrieves the OutputStream to write to.
      */
-    OutputStream getOutputStream() {
+    synchronized OutputStream getOutputStream() throws IOException {
+        if(buffer == null)
+            init();
+        
         return sink;
     }
     
@@ -106,13 +114,22 @@ class NIOOutputStream implements ReadHandler {
      * Shuts down all internal channels.
      * The SocketChannel should be shut by NIOSocket.
      */
-    void shutdown() {
-        try {
-            sink.close();
-        } catch(IOException ignored) {}
+    synchronized void shutdown() {
+        if(shutdown)
+            return;
+
+        if(sink != null) {
+            try {
+                sink.close();
+            } catch(IOException ignored) {}
+        }
+         
+        if(source != null) {   
+            try {
+                source.close();
+            } catch(IOException ignored) {}
+        }
             
-        try {
-            source.close();
-        } catch(IOException ignored) {}
+        shutdown = true;
     }
 }

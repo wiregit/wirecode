@@ -27,8 +27,10 @@ public class NIOSocket extends Socket implements ConnectHandler, ReadHandler, Wr
     private final Object LOCK = new Object();
     
     
-    // Constructs an NIOSocket using a preestablished socket.
-    // Used by NIOServerSocket.
+    /**
+     * Constructs an NIOSocket using a pre-existing Socket.
+     * To be used by NIOServerSocket while accepting incoming connections.
+     */
     NIOSocket(Socket s) throws IOException {
         channel = s.getChannel();
         socket = s;
@@ -40,6 +42,7 @@ public class NIOSocket extends Socket implements ConnectHandler, ReadHandler, Wr
         connectedTo = s.getInetAddress();
     }
     
+    /** Creates an unconnected NIOSocket. */
     public NIOSocket() throws IOException {
         channel = SocketChannel.open();
         socket = channel.socket();
@@ -48,6 +51,7 @@ public class NIOSocket extends Socket implements ConnectHandler, ReadHandler, Wr
         reader = new NIOInputStream(this, channel);
     }
     
+    /** Creates an NIOSocket and connects (with no timeout) to addr/port */
     public NIOSocket(InetAddress addr, int port) throws IOException {
         channel = SocketChannel.open();
         socket = channel.socket();
@@ -57,6 +61,7 @@ public class NIOSocket extends Socket implements ConnectHandler, ReadHandler, Wr
         connect(new InetSocketAddress(addr, port));
     }
     
+    /** Creates an NIOSocket locally bound to localAddr/localPort and connects (with no timeout) to addr/port */
     public NIOSocket(InetAddress addr, int port, InetAddress localAddr, int localPort) throws IOException {
         channel = SocketChannel.open();
         socket = channel.socket();
@@ -67,32 +72,59 @@ public class NIOSocket extends Socket implements ConnectHandler, ReadHandler, Wr
         connect(new InetSocketAddress(addr, port));
     }
     
+    /** Creates an NIOSocket and connects (with no timeout) to addr/port */
     public NIOSocket(String addr, int port) throws UnknownHostException, IOException {
         this(InetAddress.getByName(addr), port);
     }
     
+    /** Creates an NIOSocket locally bound to localAddr/localPort and connects (with no timeout) to addr/port */
     public NIOSocket(String addr, int port, InetAddress localAddr, int localPort) throws IOException {
         this(InetAddress.getByName(addr), port, localAddr, localPort);
     }
     
+    /**
+     * Performs initialization for this NIOSocket.
+     * Currently just makes the channel non-blocking.
+     */
     private void init() throws IOException {
         channel.configureBlocking(false);
     }
     
+    /**
+     * Notification that a connect can occur.
+     *
+     * This notifies the waiting lock so that connect can continue.
+     */
     public void handleConnect() throws IOException {
         synchronized(LOCK) {
             LOCK.notify();
         }
     }
     
+    /**
+     * Notification that a read can occur.
+     *
+     * This passes it off to the NIOInputStream.
+     */
     public boolean handleRead() throws IOException {
         return reader.readChannel();
     }
     
+    /**
+     * Notification that a write can occur.
+     *
+     * This passes it off to the NIOOutputStream.
+     */
     public boolean handleWrite() throws IOException {
         return writer.writeChannel();
     }
     
+    /**
+     * Notification that an IOException occurred while processing a
+     * read, connect, or write.
+     *
+     * This wakes up any waiting locks and shuts down the socket & all streams.
+     */
     public void handleIOException(IOException iox) {
         synchronized(LOCK) {
             storedException = iox;
@@ -125,27 +157,27 @@ public class NIOSocket extends Socket implements ConnectHandler, ReadHandler, Wr
             channel.close();
         } catch(IOException ignored) {}
     }
-           
     
-    public SelectableChannel getSelectableChannel() {
-        return channel;
-    }
-    
+    /** Binds the socket to the SocketAddress */
     public void bind(SocketAddress endpoint) throws IOException {
         socket.bind(endpoint);
     }
     
+    /** Closes the socket & all streams, waking up any waiting locks.  */
     public void close() throws IOException {
+        shutdown();
+        
         synchronized(LOCK) {
             LOCK.notify();
-            socket.close();
         }
     }
     
+    /** Connects to addr with no timeout */
     public void connect(SocketAddress addr) throws IOException {
         connect(addr, 0);
     }
     
+    /** Connects to addr with the given timeout (in milliseconds) */
     public void connect(SocketAddress addr, int timeout) throws IOException {
         connectedTo = ((InetSocketAddress)addr).getAddress();
 
@@ -174,14 +206,49 @@ public class NIOSocket extends Socket implements ConnectHandler, ReadHandler, Wr
         reader.init();
     }
     
+     /**
+      * Retrieves the host this is connected to.
+      * The separate variable for storage is necessary because Sockets created
+      * with SocketChannel.open() return null when there's no connection.
+      */
+     public InetAddress getInetAddress() {
+        return connectedTo;
+    }
+    
+    /**
+     * Returns the InputStream from the NIOInputStream.
+     *
+     * Internally, this is a blocking Pipe from the non-blocking SocketChannel.
+     */
+    public InputStream getInputStream() throws IOException {
+        if(isClosed())
+            throw new IOException("Socket closed.");
+        
+        return reader.getInputStream();
+    }
+    
+    /**
+     * Returns the OutputStream from the NIOOutputStream.
+     *
+     * Internally, this is a blcoking Pipe from the non-blocking SocketChannel.
+     */
+    public OutputStream getOutputStream() throws IOException {
+        if(isClosed())
+            throw new IOException("Socket closed.");
+        
+        return writer.getOutputStream();
+    }
+    
+    
+    ///////////////////////////////////////////////
+    /// BELOW ARE ALL WRAPPERS FOR SOCKET.
+    ///////////////////////////////////////////////
+    
+    
     public SocketChannel getChannel() {
         return socket.getChannel();
     }
  
-    public InetAddress getInetAddress() {
-        return connectedTo;
-    }
-    
     public int getLocalPort() {
         return socket.getLocalPort();
     }
@@ -192,14 +259,6 @@ public class NIOSocket extends Socket implements ConnectHandler, ReadHandler, Wr
     
     public boolean getOOBInline() throws SocketException {
         return socket.getOOBInline();
-    }
-    
-    public InputStream getInputStream() {
-        return reader.getInputStream();
-    }
-    
-    public OutputStream getOutputStream() {
-        return writer.getOutputStream();
     }
     
     public int getPort() {

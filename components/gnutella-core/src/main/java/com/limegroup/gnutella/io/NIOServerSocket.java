@@ -27,13 +27,17 @@ public class NIOServerSocket extends ServerSocket implements AcceptHandler {
     
     private final Object LOCK = new Object();
     
-    
+    /**
+     * Constructs a new, unbound, NIOServerSocket.
+     * You must call 'bind' to start listening for incoming connections.
+     */
     public NIOServerSocket() throws IOException {
         channel = ServerSocketChannel.open();
         socket = channel.socket();
         init();
     }
     
+    /** Constructs a new NIOServerSocket bound to the given port */
     public NIOServerSocket(int port) throws IOException {
         channel = ServerSocketChannel.open();
         socket = channel.socket();
@@ -41,6 +45,10 @@ public class NIOServerSocket extends ServerSocket implements AcceptHandler {
         bind(new InetSocketAddress(port));
     }
     
+    /**
+     * Constructs a new NIOServerSocket bound to the given port, able to accept
+     * the given backlog of connections.
+     */
     public NIOServerSocket(int port, int backlog) throws IOException {
         channel = ServerSocketChannel.open();
         socket = channel.socket();
@@ -49,6 +57,10 @@ public class NIOServerSocket extends ServerSocket implements AcceptHandler {
         
     }
     
+    /**
+     * Constructs a new NIOServerSocket bound to the given port & addr, able to accept
+     * the given backlog of connections.
+     */
     public NIOServerSocket(int port, int backlog, InetAddress bindAddr) throws IOException {
         channel = ServerSocketChannel.open();
         socket = channel.socket();
@@ -56,11 +68,18 @@ public class NIOServerSocket extends ServerSocket implements AcceptHandler {
         bind(new InetSocketAddress(bindAddr, port), backlog);
     }
     
+    /**
+     * Initializes the connection.
+     * Currently this sets the channel to blocking & reuse addr to false.
+     */
     private void init() throws IOException {
         channel.configureBlocking(false);
         socket.setReuseAddress(false);
     }
-        
+
+    /**
+     * Accepts an incoming connection.
+     */
     public Socket accept() throws IOException {
         synchronized(LOCK){
             while(!isClosed() && isBound() && storedException == null && pendingSockets.isEmpty()) {
@@ -88,6 +107,9 @@ public class NIOServerSocket extends ServerSocket implements AcceptHandler {
         }
     }
     
+    /**
+     * Notification that a socket has been accepted.
+     */
     public void handleAccept(SocketChannel channel) {
         synchronized(LOCK) {
             pendingSockets.add(channel.socket());
@@ -95,37 +117,40 @@ public class NIOServerSocket extends ServerSocket implements AcceptHandler {
         }
     }
     
+    /**
+     * Notification that an IOException occurred while accepting.
+     */
     public void handleIOException(IOException iox) {
         synchronized(LOCK) {
             storedException = iox;
         }
     }
     
-    public int interestOps() {
-        return SelectionKey.OP_ACCEPT;
-    }
-    
-    public SelectableChannel getSelectableChannel() {
-        return channel;
-    }
-    
+    /** Binds the socket to the endpoint & starts listening for incoming connections */
     public void bind(SocketAddress endpoint) throws IOException {
         socket.bind(endpoint);
         NIODispatcher.instance().registerAccept(channel, this);
     }
      
+    /** Binds the socket to the endpoint & starts listening for incoming connections */
     public void bind(SocketAddress endpoint, int backlog) throws IOException {
         socket.bind(endpoint, backlog);
         NIODispatcher.instance().registerAccept(channel, this);
     }
     
+    /** Shuts down this NIOServerSocket */
     public void close() throws IOException {
         synchronized(LOCK) {
             LOCK.notify();
             socket.close();
         }
     }
-    
+
+
+    /////////////////////////////////////////////////////////////
+    /////////// Below are simple wrappers for the socket.
+    /////////////////////////////////////////////////////////////    
+
     public ServerSocketChannel getChannel() {
         return socket.getChannel();
     }

@@ -546,16 +546,25 @@ public class Acceptor implements Runnable {
                         continue;
                     }
                 }
-                
 
-                //Check if IP address of the incoming socket is in _badHosts
-				
+                // If the client was closed before we were able to get the address,
+                // then getInetAddress will return null.
 				InetAddress address = client.getInetAddress();
+				if(address == null) {
+				    try {
+				        client.close();
+				    } catch(IOException ignored) {}
+				    continue;
+				}
+				    
+                //Check if IP address of the incoming socket is in _badHosts
                 if (isBannedIP(address.getAddress())) {
                     if(LOG.isWarnEnabled())
                         LOG.warn("Ignoring banned host: " + address);
                     HTTPStat.BANNED_REQUESTS.incrementStat();
-                    client.close();
+                    try {
+                        client.close();
+                    } catch(IOException ignored) {}
                     continue;
                 }
                 

@@ -5,6 +5,7 @@ import java.nio.*;
 import java.nio.channels.*;
 import java.util.*;
 
+import com.limegroup.gnutella.ErrorService;
 import com.limegroup.gnutella.util.ManagedThread;
 import org.apache.commons.logging.*;
 
@@ -18,6 +19,9 @@ class NIODispatcher implements Runnable {
     private static final NIODispatcher INSTANCE = new NIODispatcher();
     public static final NIODispatcher instance() { return INSTANCE; }
     
+    /**
+     * Constructs the sole NIODispatcher, starting its thread.
+     */
     private NIODispatcher() {
         try {
             selector = Selector.open();
@@ -29,54 +33,47 @@ class NIODispatcher implements Runnable {
         t.start();
     }
     
-    
+    /** The selector this uses. */
     private Selector selector = null;
     
-    /** Lock for pending items. */
-    private final Object PENDING_LOCK = new Object();
-    /** List of pending channels/attachments wanting OP_ACCEPT */
-    private final List PENDING_ACCEPT = new LinkedList();
-    /** List of pending channels/attachments wanting OP_CONNECT */
-    private final List PENDING_CONNECT = new LinkedList();
-    /** List of pending channels/attachments wanting OP_READ */
-    private final List PENDING_READ = new LinkedList();
-    /** List of pending channels/attachments wanting OP_WRITE */
-    private final List PENDING_WRITE = new LinkedList();
-    /** List of pending channels/attachments wanting OP_WRITE & OP_READ */
-    private final List PENDING_RW = new LinkedList();
+    /** Pending queue. */
+    private final List PENDING = new LinkedList();
     
     /** Register interest in accepting */
     void registerAccept(SelectableChannel channel, NIOHandler attachment) {
-        register(PENDING_ACCEPT, channel, attachment);
+        register(channel, attachment, SelectionKey.OP_ACCEPT);
     }
     
     /** Register interest in connecting */
     void registerConnect(SelectableChannel channel, NIOHandler attachment) {
-        register(PENDING_CONNECT, channel, attachment);
+        register(channel, attachment, SelectionKey.OP_CONNECT);
     }
     
     /** Register interest in reading */
     void registerRead(SelectableChannel channel, NIOHandler attachment) {
-        register(PENDING_READ, channel, attachment);
+        register(channel, attachment, SelectionKey.OP_READ);
     }
     
     /** Register interest in writing */
     void registerWrite(SelectableChannel channel, NIOHandler attachment) {
-        register(PENDING_WRITE, channel, attachment);
+        register(channel, attachment, SelectionKey.OP_WRITE);
     }
     
     /** Register interest in both reading & writing */
     void registerReadWrite(SelectableChannel channel, NIOHandler attachment) {
-        register(PENDING_RW, channel, attachment);
+        register(channel, attachment, SelectionKey.OP_READ | SelectionKey.OP_WRITE);
     }
     
     /** Register interest */
-    private void register(List list, SelectableChannel channel, NIOHandler attachment) {
-        synchronized(PENDING_LOCK) {
-            list.add(new Object[] { channel, attachment });
+    private void register(SelectableChannel channel, NIOHandler attachment, int op) {
+        synchronized(PENDING) {
+            PENDING.add(new PendingOp(channel, attachment, op));
         }
-        LOG.trace("Waking selector up.");
-        selector.wakeup();
+        
+        // Technically, it is possible (and recommended) to do a selector.wakeup() here,
+        // and have selector.select() without a timeout.  Unfortunately, due to bugs
+        // with Selector on various OS's, specifically bugs with wakeup() causing 
+        // select() to always return immediately forever, this isn't possible.
     }
     
     /** Registers a SelectableChannel as being interested in a write again. */
@@ -199,50 +196,43 @@ class NIODispatcher implements Runnable {
      * Adds any pending registrations.
      */
     private void addPendingItems() {
-        synchronized(PENDING_LOCK) {
-            doRegister(PENDING_ACCEPT, SelectionKey.OP_ACCEPT);
-            doRegister(PENDING_CONNECT, SelectionKey.OP_CONNECT);
-            doRegister(PENDING_READ, SelectionKey.OP_READ);
-            doRegister(PENDING_WRITE, SelectionKey.OP_WRITE);
-            doRegister(PENDING_RW, SelectionKey.OP_READ | SelectionKey.OP_WRITE);
-        }
-    }
-    
-    /** Register pending items from a list with the given op */
-    private void doRegister(List l, int op) {
-        for(Iterator i = l.iterator(); i.hasNext(); ) {
-            Object[] next = (Object[])i.next();
-            SelectableChannel channel = (SelectableChannel)next[0];
-            NIOHandler attachment = (NIOHandler)next[1];
-            try {
-                channel.register(selector, op, attachment);
-            } catch(IOException iox) {
-                attachment.handleIOException(iox);
+        synchronized(PENDING) {
+            for(Iterator i = PENDING.iterator(); i.hasNext(); ) {
+                PendingOp next = (PendingOp)i.next();
+                try {
+                    next.channel.register(selector, next.op, next.handler);
+                } catch(IOException iox) {
+                    next.handler.handleIOException(iox);
+                }
             }
+            PENDING.clear();
         }
-        l.clear();
     }
     
     /**
      * The actual NIO run loop
      */
     private void process() {
-       
-        int n = -1;
-                
         while(true) {
-            
-            //try {
-             //   Thread.sleep(50);
-            //} catch(InterruptedException ix) {
-             //   LOG.warn("Selector interrupted", ix);
-           // }
+            // This sleep is technically not necessary, however occasionally selector
+            // begins to wakeup with nothing selected.  This happens very frequently on Linux,
+            // and sometimes on Windows (bugs, etc..).  The sleep prevents busy-looping.
+            // It also allows pending registrations & network events to queue up so that
+            // selection can handle more things in one round.
+            // This is unrelated to the wakeup()-causing-busy-looping.  There's other bugs
+            // that cause this.
+            try {
+               Thread.sleep(50);
+            } catch(InterruptedException ix) {
+               LOG.warn("Selector interrupted", ix);
+            }
             
             addPendingItems();
 
             LOG.debug("Selecting");
             try {
-                n = selector.select();
+                // see register(...) for why this has a timeout
+                n = selector.select(50);
             } catch (NullPointerException err) {
                 LOG.warn("npe", err);
                 continue;
@@ -250,13 +240,9 @@ class NIODispatcher implements Runnable {
                 LOG.warn("cancelled", err);
                 continue;
             } catch (IOException iox) {
-                selector = null;
                 throw new RuntimeException(iox);
             }
             
-            if (n == 0)
-                continue;
-                
             Collection keys = selector.selectedKeys();
             if(LOG.isDebugEnabled())
                 LOG.debug("Selected (" + n + ") keys.");
@@ -298,9 +284,25 @@ class NIODispatcher implements Runnable {
                     selector = Selector.open();
                 process();
             } catch(Throwable err) {
+                selector = null;
                 LOG.error("Error in Selector!", err);
+                ErrorService.error(err);
             } 
         }
     }
+    
+    /** Encapsulates a pending op. */
+    private static class PendingOp {
+        private final SelectableChannel channel;
+        private final NIOHandler handler;
+        private final int op;
+    
+        PendingOp(SelectableChannel channel, NIOHandler handler, int op) {
+            this.channel = channel;
+            this.handler = handler;
+            this.op = op;
+        }
+    }
+    
 }
 

@@ -21,9 +21,10 @@ class NIOInputStream implements WriteHandler {
     
     private final NIOSocket handler;
     private final SocketChannel channel;
-    private final InputStream source;
-    private final Pipe.SinkChannel sink;
+    private InputStream source;
+    private Pipe.SinkChannel sink;
     private ByteBuffer buffer;
+    private boolean shutdown;
     
     /**
      * Constructs a new pipe to allow SocketChannel's reading to funnel
@@ -32,22 +33,26 @@ class NIOInputStream implements WriteHandler {
     NIOInputStream(NIOSocket handler, SocketChannel channel) throws IOException {
         this.handler = handler;
         this.channel = channel;
+    }
+    
+    /**
+     * Creates the pipes, buffer, and registers channels for interest.
+     */
+    synchronized void init() throws IOException {
+        if(buffer != null)
+            throw new IllegalStateException("already init'd!");
+            
+        if(shutdown)
+            throw new IOException("Already closed!");
         
         Pipe pipe = Pipe.open();
         sink = pipe.sink();
         sink.configureBlocking(false);
         pipe.source().configureBlocking(true);
         source = Channels.newInputStream(pipe.source());
-    }
-    
-    /**
-     * Initializes the internal ByteBuffer & registers the sink for selection.
-     */
-    void init() {
-        if(buffer != null)
-            throw new IllegalStateException("already init'd!");
-
-        this.buffer = ByteBuffer.allocate(8192); // TODO: use a ByteBufferPool
+        
+        buffer = ByteBuffer.allocate(8192); // TODO: use a ByteBufferPool
+        
         NIODispatcher.instance().registerWrite(sink, this);
         NIODispatcher.instance().interestRead(channel);
     }
@@ -55,7 +60,10 @@ class NIOInputStream implements WriteHandler {
     /**
      * Retrieves the InputStream to read from.
      */
-    InputStream getInputStream() {
+    synchronized InputStream getInputStream() throws IOException {
+        if(buffer == null)
+            init();
+        
         return source;
     }
     
@@ -109,14 +117,23 @@ class NIOInputStream implements WriteHandler {
      * Shuts down all internal channels.
      * The SocketChannel should be shut by NIOSocket.
      */
-    void shutdown() {
-        try {
-            sink.close();
-        } catch(IOException ignored) {}
-            
-        try {
-            source.close();
-        } catch(IOException ignored) {}
+    synchronized void shutdown() {
+        if(shutdown)
+            return;
+        
+        if(sink != null) {
+            try {
+                sink.close();
+            } catch(IOException ignored) {}
+        }
+         
+       if(source != null) {       
+            try {
+                source.close();
+            } catch(IOException ignored) {}
+        }
+        
+        shutdown = true;
     }
 }
                 
