@@ -380,15 +380,6 @@ public final class CommonUtils {
 		   _isWindowsNT) {
 			return false;
 		}
-		if(isMacOSX()) {
-			// randomly eliminate some OS X Ultrapeers, as they're less
-			// stable
-
-			// get a random # between 0 and 1.0
-			double rand = Math.random();
-			if(rand < (double)0.25) return false;
-			return true;
-		}
 		return true;
 	}
 
