@@ -1089,7 +1089,8 @@ public class UDPConnectionProcessor {
                     drec.acks++;
 
                     // Notify InputStream that data is available for reading
-                    if ( _outputToInputStream != null ) {
+                    if ( _outputToInputStream != null &&
+                    		seqNo==baseSeqNo) {
                         _outputToInputStream.wakeup();
 
                         // Get the reader moving after 1k received 

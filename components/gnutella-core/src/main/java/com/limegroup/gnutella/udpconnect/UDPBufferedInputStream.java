@@ -63,7 +63,12 @@ public class UDPBufferedInputStream extends InputStream {
                     // Wait for some data to become available
                 	if (timedOut) {
                 		InterruptedIOException e = new InterruptedIOException();
-                		LOG.debug("",e);
+                		
+                		if (LOG.isDebugEnabled()) {
+                			LOG.debug("read() timed out for timeout "+
+                					_processor.getReadTimeout(),e);
+                		}
+                		
                 		throw e;
                 	}
                     waitOnData();
@@ -124,9 +129,15 @@ public class UDPBufferedInputStream extends InputStream {
                     // Wait for some data to become available
                 	if (timedOut) {
                 		InterruptedIOException e = new InterruptedIOException();
-                		LOG.debug("",e);
+                		
+                		if (LOG.isDebugEnabled()) {
+                			LOG.debug("read(byte [], int, int) timed out for timeout "+
+                					_processor.getReadTimeout(),e);
+                		}
+                		
                 		throw e;
                 	}
+                	
                     waitOnData();
                     timedOut=true;
                 } else {
@@ -177,7 +188,12 @@ public class UDPBufferedInputStream extends InputStream {
                     // Wait for some data to become available
                 	if (timedOut) {
                 		InterruptedIOException e = new InterruptedIOException();
-                		LOG.debug("",e);
+                		
+                		if (LOG.isDebugEnabled()) {
+                			LOG.debug("skip() timed out for timeout "+
+                					_processor.getReadTimeout(),e);
+                		}
+                		
                 		throw e;
                 	}
                     waitOnData();
