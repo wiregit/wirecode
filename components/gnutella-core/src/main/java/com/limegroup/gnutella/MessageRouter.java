@@ -148,24 +148,24 @@ public abstract class MessageRouter
         msg.hop();
 	   
         if(msg instanceof PingRequest) {
-			ReceivedMessageStat.TCP_PING_REQUESTS.incrementStat();
+			ReceivedMessageStatHandler.TCP_PING_REQUESTS.addMessage(msg);
             handlePingRequestPossibleDuplicate((PingRequest)msg, 
 											   receivingConnection);
 		} else if (msg instanceof PingReply) {
-			ReceivedMessageStat.TCP_PING_REPLIES.incrementStat();
+			ReceivedMessageStatHandler.TCP_PING_REPLIES.addMessage(msg);
             handlePingReply((PingReply)msg, receivingConnection);
 		} else if (msg instanceof QueryRequest) {
-			ReceivedMessageStat.TCP_QUERY_REQUESTS.incrementStat();
+			ReceivedMessageStatHandler.TCP_QUERY_REQUESTS.addMessage(msg);
             handleQueryRequestPossibleDuplicate(
                 (QueryRequest)msg, receivingConnection);
 		} else if (msg instanceof QueryReply) {
-			ReceivedMessageStat.TCP_QUERY_REPLIES.incrementStat();
+			ReceivedMessageStatHandler.TCP_QUERY_REPLIES.addMessage(msg);
             handleQueryReply((QueryReply)msg, receivingConnection);
 		} else if (msg instanceof PushRequest) {
-			ReceivedMessageStat.TCP_PUSH_REQUESTS.incrementStat();
+			ReceivedMessageStatHandler.TCP_PUSH_REQUESTS.addMessage(msg);
             handlePushRequest((PushRequest)msg, receivingConnection);
 		} else if (msg instanceof RouteTableMessage) {
-			ReceivedMessageStat.TCP_ROUTE_TABLE_MESSAGES.incrementStat();
+			ReceivedMessageStatHandler.TCP_ROUTE_TABLE_MESSAGES.addMessage(msg);
             handleRouteTableMessage((RouteTableMessage)msg,
                                     receivingConnection);
 		}
@@ -194,23 +194,23 @@ public abstract class MessageRouter
 		UDPReplyHandler handler = new UDPReplyHandler(address, port);
 		
         if (msg instanceof QueryRequest) {
-			ReceivedMessageStat.UDP_QUERY_REQUESTS.incrementStat();
+			ReceivedMessageStatHandler.UDP_QUERY_REQUESTS.addMessage(msg);
 			// a TTL above zero may indicate a malicious client, as UDP
 			// messages queries should not be sent with TTL above 1.
 			if(msg.getTTL() > 0) return;
             handleUDPQueryRequestPossibleDuplicate((QueryRequest)msg, 
 												   handler);
 		} else if (msg instanceof QueryReply) {			
-			ReceivedMessageStat.UDP_QUERY_REPLIES.incrementStat();
+			ReceivedMessageStatHandler.UDP_QUERY_REPLIES.addMessage(msg);
             handleQueryReply((QueryReply)msg, handler);
 		} else if(msg instanceof PingRequest) {
-			ReceivedMessageStat.UDP_PING_REQUESTS.incrementStat();
+			ReceivedMessageStatHandler.UDP_PING_REQUESTS.addMessage(msg);
 			handleUDPPingRequestPossibleDuplicate((PingRequest)msg, handler);
 		} else if(msg instanceof PingReply) {
-            ReceivedMessageStat.UDP_PING_REPLIES.incrementStat();
+            ReceivedMessageStatHandler.UDP_PING_REPLIES.addMessage(msg);
             handleUDPPingReply((PingReply)msg, handler, address, port);
 		} else if(msg instanceof PushRequest) {
-			ReceivedMessageStat.UDP_PUSH_REQUESTS.incrementStat();
+			ReceivedMessageStatHandler.UDP_PUSH_REQUESTS.addMessage(msg);
 			handlePushRequest((PushRequest)msg, handler);
 		}
     }
@@ -389,24 +389,24 @@ public abstract class MessageRouter
      * Sends the ping request to the designated connection,
      * setting up the proper reply routing.
      */
-    public void sendPingRequest(PingRequest pingRequest,
+    public void sendPingRequest(PingRequest request,
                                 ManagedConnection connection)
     {
-        _pingRouteTable.routeReply(pingRequest.getGUID(), _forMeReplyHandler);
-		SentMessageStat.TCP_PING_REQUESTS.incrementStat();
-        connection.send(pingRequest);
+        _pingRouteTable.routeReply(request.getGUID(), _forMeReplyHandler);
+		SentMessageStatHandler.TCP_PING_REQUESTS.addMessage(request);
+        connection.send(request);
     }
 
     /**
      * Sends the query request to the designated connection,
      * setting up the proper reply routing.
      */
-    public void sendQueryRequest(QueryRequest queryRequest,
+    public void sendQueryRequest(QueryRequest request,
                                  ManagedConnection connection)
     {
-        _queryRouteTable.routeReply(queryRequest.getGUID(), _forMeReplyHandler);
-		SentMessageStat.TCP_QUERY_REQUESTS.incrementStat();
-        connection.send(queryRequest);
+        _queryRouteTable.routeReply(request.getGUID(), _forMeReplyHandler);
+		SentMessageStatHandler.TCP_QUERY_REQUESTS.addMessage(request);
+        connection.send(request);
     }
 
     /**
@@ -443,7 +443,7 @@ public abstract class MessageRouter
      * as desired.  If you do, note that receivingConnection may be null (for
      * requests originating here).
      */
-    protected void broadcastPingRequest(PingRequest pingRequest,
+    protected void broadcastPingRequest(PingRequest request,
                                         ReplyHandler receivingConnection,
                                         ConnectionManager manager)
     {
@@ -460,8 +460,8 @@ public abstract class MessageRouter
             if (   receivingConnection==null   //came from me
                 || (c!=receivingConnection
                      && !c.isClientSupernodeConnection())) {
-				SentMessageStat.TCP_PING_REQUESTS.incrementStat();
-                c.send(pingRequest);
+				SentMessageStatHandler.TCP_PING_REQUESTS.addMessage(request);
+                c.send(request);
             }
         }
     }
@@ -554,7 +554,7 @@ public abstract class MessageRouter
      * @param handler The connection on which we originally
      * received the query
      */
-    protected void sendQueryRequest(QueryRequest queryRequest, 
+    protected void sendQueryRequest(QueryRequest request, 
 									ManagedConnection sendConnection, 
 									ReplyHandler handler)
     {
@@ -571,8 +571,8 @@ public abstract class MessageRouter
             containsDefaultUnauthenticatedDomainOnly(sendConnection.getDomains())
             || Utilities.hasIntersection(handler.getDomains(), 
 										 sendConnection.getDomains()))) {
-			SentMessageStat.TCP_QUERY_REQUESTS.incrementStat();
-            sendConnection.send(queryRequest);
+			SentMessageStatHandler.TCP_QUERY_REQUESTS.addMessage(request);
+            sendConnection.send(request);
 		}		
     }
     
@@ -649,13 +649,11 @@ public abstract class MessageRouter
 
         if(replyHandler != null)
         {
-            //_numPingReplies++;
             replyHandler.handlePingReply(reply, handler);
         }
         else
         {
-			SentMessageStat.PING_REPLY_ROUTE_ERRORS.incrementStat();
-            //_numRouteErrors++;
+			RouteErrorStat.PING_REPLY_ROUTE_ERRORS.incrementStat();
             handler.countDroppedMessage();
         }
 
@@ -730,7 +728,7 @@ public abstract class MessageRouter
         }
         else
         {
-			SentMessageStat.QUERY_REPLY_ROUTE_ERRORS.incrementStat();
+			RouteErrorStat.QUERY_REPLY_ROUTE_ERRORS.incrementStat();
             handler.countDroppedMessage();
         }
     }
@@ -745,20 +743,20 @@ public abstract class MessageRouter
      * Override as desired, but you probably want to call
      * super.handlePushRequest if you do.
      */
-    public void handlePushRequest(PushRequest pushRequest,
+    public void handlePushRequest(PushRequest request,
                                   ReplyHandler handler)
     {
         // Note the use of getClientGUID() here, not getGUID()
         ReplyHandler replyHandler =
-            _pushRouteTable.getReplyHandler(pushRequest.getClientGUID());
+            _pushRouteTable.getReplyHandler(request.getClientGUID());
 
         if(replyHandler != null)
         {
-            replyHandler.handlePushRequest(pushRequest, handler);
+            replyHandler.handlePushRequest(request, handler);
         }
         else
         {
-			SentMessageStat.PUSH_REQUEST_ROUTE_ERRORS.incrementStat();
+			RouteErrorStat.PUSH_REQUEST_ROUTE_ERRORS.incrementStat();
             handler.countDroppedMessage();
         }
     }
@@ -915,7 +913,7 @@ public abstract class MessageRouter
                 //TODO2: use incremental and interleaved update
                 for (Iterator iter=table.encode(qi.lastSent); iter.hasNext(); ) {  
                     RouteTableMessage m=(RouteTableMessage)iter.next();
-					SentMessageStat.TCP_ROUTE_TABLE_MESSAGES.incrementStat();
+					SentMessageStatHandler.TCP_ROUTE_TABLE_MESSAGES.addMessage(m);
                     c.send(m);
                 }
                 qi.lastSent=table;

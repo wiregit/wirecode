@@ -174,9 +174,10 @@ public final class QueryUnicaster {
 							InetAddress ip = toQuery.getAddress();
 							debug("QueryUnicaster.queryLoop(): sending" +
 								  " query " + currQB._qr.getQuery());
-							SentMessageStat.UDP_QUERY_REQUESTS.incrementStat();
 							udpService.send(currQB._qr, ip, 
 											toQuery.getPort());
+							SentMessageStatHandler.UDP_QUERY_REQUESTS.
+                                addMessage(currQB._qr);
 							currQB._hostsQueried.add(toQuery);
                         }
                     }
@@ -269,9 +270,9 @@ public final class QueryUnicaster {
 				if(UDPService.instance().isListening() &&
 				   !RouterService.isGUESSCapable() &&
 				   _testUDPPingsSent < 5) {
-					SentMessageStat.UDP_PING_REQUESTS.incrementStat();
-					UDPService.instance().send(new PingRequest((byte)1), 
-											   address, port);
+					PingRequest pr = new PingRequest((byte)1);
+					UDPService.instance().send(pr, address, port);
+					SentMessageStatHandler.UDP_PING_REQUESTS.addMessage(pr);
 					_testUDPPingsSent++;
 				}
                 debug("QueryUnicaster.addUnicastEndpoint(): released lock.");
@@ -375,9 +376,9 @@ public final class QueryUnicaster {
             if (_pingList.add(toReturn)) {  
                 PingRequest pr = new PingRequest((byte)1);
                 UDPService udpService = UDPService.instance();
-				InetAddress ip = toReturn.getAddress();
-				SentMessageStat.UDP_PING_REQUESTS.incrementStat();
+				InetAddress ip = toReturn.getAddress();				
 				UDPService.instance().send(pr, ip, toReturn.getPort());
+				SentMessageStatHandler.UDP_PING_REQUESTS.addMessage(pr);
             }
             return toReturn;
         }

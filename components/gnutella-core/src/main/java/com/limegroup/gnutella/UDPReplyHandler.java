@@ -55,7 +55,7 @@ public final class UDPReplyHandler implements ReplyHandler {
 	 * @param handler the <tt>ReplyHandler</tt> to use for sending the reply
 	 */
 	public void handlePingReply(PingReply pong, ReplyHandler handler) {
-		SentMessageStat.UDP_PING_REPLIES.incrementStat();
+		SentMessageStatHandler.UDP_PING_REPLIES.addMessage(pong);
 		UDP_SERVICE.send(pong, IP, PORT);
 	}
 
@@ -69,7 +69,7 @@ public final class UDPReplyHandler implements ReplyHandler {
 	 * @param handler the <tt>ReplyHandler</tt> to use for sending the reply
 	 */
 	public void handleQueryReply(QueryReply hit, ReplyHandler handler) {
-		SentMessageStat.UDP_QUERY_REPLIES.incrementStat();
+		SentMessageStatHandler.UDP_QUERY_REPLIES.addMessage(hit);
 		UDP_SERVICE.send(hit, IP, PORT);
 	}
 
@@ -83,7 +83,7 @@ public final class UDPReplyHandler implements ReplyHandler {
 	 * @param handler the <tt>ReplyHandler</tt> to use for sending the reply
 	 */
 	public void handlePushRequest(PushRequest request, ReplyHandler handler) {
-		SentMessageStat.UDP_PUSH_REQUESTS.incrementStat();
+		SentMessageStatHandler.UDP_PUSH_REQUESTS.addMessage(request);
 		UDP_SERVICE.send(request, IP, PORT);
 	}
 

@@ -173,6 +173,7 @@ public final class NormalUploadState implements HTTPMessage {
             } catch (java.net.SocketException e) {
                 throw new IOException();
             }
+			
             _amountRead += c;
             _uploader.setAmountUploaded(_amountRead);
 

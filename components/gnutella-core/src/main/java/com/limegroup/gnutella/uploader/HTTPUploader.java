@@ -7,6 +7,7 @@ import java.util.StringTokenizer;
 import com.sun.java.util.collections.*;
 import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.http.*;
+import com.limegroup.gnutella.statistics.*;
 import com.limegroup.gnutella.util.StringUtils;
 import com.limegroup.gnutella.util.URLDecoder;
 
@@ -339,7 +340,20 @@ public final class HTTPUploader implements Uploader {
 	OutputStream getOutputStream() {return _ostream;}
 	InputStream getInputStream() {return _fis;}
 
-	void setAmountUploaded(int amount) {_amountRead = amount;}
+	/**
+	 * Sets the number of bytes that have been uploaded along for this
+	 * upload.
+	 *
+	 * @param amount the number of bytes that have been uploaded
+	 */
+	void setAmountUploaded(int amount) {
+		int newData = amount - _amountRead;
+		if(newData > 0) {
+			BandwidthStat.HTTP_BODY_UPSTREAM_BANDWIDTH.addData(newData);
+		}
+		_amountRead = amount;
+	}
+
     /** The byte offset where we should start the upload. */
 	int getUploadBegin() {return _uploadBegin;}
     /** Returns the offset of the last byte to send <b>PLUS ONE</b>. */
@@ -378,10 +392,7 @@ public final class HTTPUploader implements Uploader {
 	//implements the Uploader interface
 	public boolean isHeaderParsed() { return _headersParsed; }
 
-    /**
-     * The number of bytes read. 
-	 * Implements the Uploader interface.
-     */
+	//implements the Uploader interface
 	public int amountUploaded() {return _amountRead;}
 
 	/**
@@ -415,6 +426,7 @@ public final class HTTPUploader implements Uploader {
         	while (true) {
         		// read the line in from the socket.
                 String str = br.readLine();
+				BandwidthStat.HTTP_HEADER_DOWNSTREAM_BANDWIDTH.addData(str.length());
                 debug("HTTPUploader.readHeader(): str = " +  str);
                 
         		// break out of the loop if it is null or blank

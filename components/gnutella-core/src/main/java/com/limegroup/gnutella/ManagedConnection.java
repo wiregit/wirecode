@@ -650,7 +650,7 @@ public class ManagedConnection
                         bestEndPoint.getPort(),
                         bestEndPoint.getHostBytes(), 0, 0);
 					
-					SentMessageStat.TCP_PING_REPLIES.incrementStat();
+					SentMessageStatHandler.TCP_PING_REPLIES.addMessage(pr);
                     // the ttl is 1; and for now the number of files
                     // and kbytes is set to 0 until chris stores more
                     // state in the hostcatcher
@@ -739,7 +739,7 @@ public class ManagedConnection
             //hop the message, as it is ideally coming from the connected host
             pr.hop();
 
-            SentMessageStat.TCP_PING_REPLIES.incrementStat();
+            SentMessageStatHandler.TCP_PING_REPLIES.addMessage(pr);
             //send the message
             super.send(pr);
         }
@@ -780,9 +780,7 @@ public class ManagedConnection
 
             // Run through the route spam filter and drop accordingly.
             if (!_routeFilter.allow(m)) {
-				ReceivedMessageStat.ALL_FILTERED_MESSAGES.incrementStat();
-				//MessageStatistics.addFilteredTCPMessage();
-                //_router.countFilteredMessage();
+				ReceivedMessageStatHandler.TCP_FILTERED_MESSAGES.addMessage(m);
                 _numReceivedMessagesDropped++;
                 continue;
             }
@@ -898,7 +896,7 @@ public class ManagedConnection
      */
     public void handlePingReply(PingReply pingReply,
                                 ReplyHandler receivingConnection) {
-		SentMessageStat.TCP_PING_REPLIES.incrementStat();
+		SentMessageStatHandler.TCP_PING_REPLIES.addMessage(pingReply);
         send(pingReply);
     }
 
@@ -910,7 +908,7 @@ public class ManagedConnection
      */
     public void handleQueryReply(QueryReply queryReply,
                                  ReplyHandler receivingConnection) {
-		SentMessageStat.TCP_QUERY_REPLIES.incrementStat();
+		SentMessageStatHandler.TCP_QUERY_REPLIES.addMessage(queryReply);
         send(queryReply);
     }
 
@@ -922,7 +920,7 @@ public class ManagedConnection
      */
     public void handlePushRequest(PushRequest pushRequest,
                                   ReplyHandler receivingConnection) {
-		SentMessageStat.TCP_PUSH_REQUESTS.incrementStat();
+		SentMessageStatHandler.TCP_PUSH_REQUESTS.addMessage(pushRequest);
         send(pushRequest);
     }
 

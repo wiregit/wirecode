@@ -156,8 +156,9 @@ public final class UDPService implements Runnable {
 		} else {
 			reply = createPingReply(guid);
 		}
-		SentMessageStat.UDP_PING_REPLIES.incrementStat();
+
 		send(reply, datagram.getAddress(), datagram.getPort());
+		SentMessageStatHandler.UDP_PING_REPLIES.addMessage(reply);
 	}
 
 	/**

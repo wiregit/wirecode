@@ -6,6 +6,7 @@ package com.limegroup.gnutella.downloader;
 
 import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.http.*;
+import com.limegroup.gnutella.statistics.*;
 import com.limegroup.gnutella.util.Sockets;
 import java.io.*;
 import java.net.*;
@@ -235,6 +236,7 @@ public class HTTPDownloader implements BandwidthTracker {
 		String str = _byteReader.readLine();  
 		if (str==null || str.equals(""))
 			return;
+		BandwidthStat.HTTP_HEADER_DOWNSTREAM_BANDWIDTH.addData(str.length());
         int code=parseHTTPCode(str);		
 
 		//Accept any 2xx's, but reject other codes.
@@ -259,6 +261,7 @@ public class HTTPDownloader implements BandwidthTracker {
 			str = _byteReader.readLine();			
             if (str==null || str.equals(""))
                 break;
+			BandwidthStat.HTTP_HEADER_DOWNSTREAM_BANDWIDTH.addData(str.length());
 
             //As of LimeWire 1.9, we ignore the "Content-length" header;
             //handling an unexpectedly low Content-length value is no different
@@ -453,7 +456,8 @@ public class HTTPDownloader implements BandwidthTracker {
                 c = _byteReader.read(buf, 0, Math.min(BUF_LENGTH, left));
                 if (c == -1) 
                     break;
-                            
+                 
+				BandwidthStat.HTTP_BODY_DOWNSTREAM_BANDWIDTH.addData(c);
                 //2. Check that data read matches any non-zero bytes already on
                 //disk, i.e., from previous downloads.  Assumption: "holes" in
                 //file are zeroed.  Be careful not read beyond end of file,

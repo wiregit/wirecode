@@ -1,5 +1,6 @@
 package com.limegroup.gnutella.http;
 
+import com.limegroup.gnutella.statistics.*;
 import java.io.*;
 
 /**
@@ -18,6 +19,11 @@ public final class HTTPUtils {
 	 * Cached colon followed by a space to avoid excessive allocations.
 	 */
 	private static final String COLON_SPACE = ": ";
+
+	/**
+	 * Cached colon to avoid excessive allocations.
+	 */
+	private static final String COLON = ":";
 
 	/**
 	 * Private constructor to ensure that this class cannot be constructed
@@ -47,7 +53,9 @@ public final class HTTPUtils {
 			throw new NullPointerException("null os in writing http header: "+
 										   name);
 		}
-		os.write(createHeader(name, value).getBytes());
+		String header = createHeader(name, value);
+		os.write(header.getBytes());
+		BandwidthStat.HTTP_HEADER_UPSTREAM_BANDWIDTH.addData(header.length());
 	}
 
 	/**
@@ -73,7 +81,9 @@ public final class HTTPUtils {
 			throw new NullPointerException("null os in writing http header: "+
 										   name);
 		}
-		out.write(createHeader(name, value));
+		String header = createHeader(name, value);
+		out.write(header);
+		BandwidthStat.HTTP_HEADER_UPSTREAM_BANDWIDTH.addData(header.length());
 	}
 
 	/**
@@ -110,7 +120,7 @@ public final class HTTPUtils {
 	 *  <tt>null</tt> if the value could not be extracted
 	 */
 	public static String extractHeaderValue(final String header) {
-		int index = header.indexOf(":");
+		int index = header.indexOf(COLON);
 		if(index <= 0) return null;
 		return header.substring(index+1).trim();
 	}
