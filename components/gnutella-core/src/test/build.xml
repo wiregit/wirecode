@@ -2,6 +2,7 @@
 
   <!-- set global properties for this basedir -->
   <property name="basedir" value="." />
+  <property name="tests" value="com/limegroup/gnutella" /> 
   <property name="messages" value="com/limegroup/gnutella/messages" /> 
   <property name="util" value="com/limegroup/gnutella/util" /> 
 
@@ -49,7 +50,7 @@
       deprecation="${DEPRECATION}"
       srcdir="${basedir}"
       destdir="${basedir}"
-      includes="${gui}/**,${messages}/**,${util}/**"
+      includes="${tests}/**,${messages}/**,${util}/**"
      >
       <classpath refid="default.classpath" />
     </javac>
