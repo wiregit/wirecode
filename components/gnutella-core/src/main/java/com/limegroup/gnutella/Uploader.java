@@ -20,6 +20,12 @@ public interface Uploader extends BandwidthTracker {
 	public static final int FILE_NOT_FOUND   = 7;
 
     /**
+	 * Stops this upload.  If the download is already 
+	 * stopped, it does nothing.
+	 */ 
+	public void stop();
+    
+    /**
      * Tells if the uploader thinks that the connection should be closed 
      * after serving the request.
      * @return true, if the uploader thinks that the connection should be closed 

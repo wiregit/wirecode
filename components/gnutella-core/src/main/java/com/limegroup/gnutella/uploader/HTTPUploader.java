@@ -228,6 +228,25 @@ public class HTTPUploader implements Uploader {
 		}
 	}
 
+    /**
+	 * closes the outputstream, inputstream, and socket
+	 * if they are not null.
+	 */
+	public void stop() {
+		try {
+			if (_ostream != null)
+				_ostream.close();
+		} catch (IOException e) {}
+		try {
+			if (_fis != null)
+				_fis.close();
+		} catch (IOException e) {}
+		try {
+			if (_socket != null) 
+				_socket.close();
+		} catch (IOException e) {}
+	}
+    
 	/**
 	 * This method changes the appropriate state class based on
 	 * the integer representing the state.  I'm not sure if this
