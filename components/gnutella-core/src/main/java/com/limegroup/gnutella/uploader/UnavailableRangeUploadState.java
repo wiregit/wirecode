@@ -48,8 +48,6 @@ public class UnavailableRangeUploadState extends UploadState {
 		
 		writeAlts(ostream);
 		writeRanges(ostream);        
-		str = "\r\n";
-		ostream.write(str.getBytes());
 
 		
         if (FILE_DESC!=null && FILE_DESC instanceof IncompleteFileDesc) {
@@ -60,6 +58,9 @@ public class UnavailableRangeUploadState extends UploadState {
                                       ostream);    
             }                                  
         }
+        
+		str = "\r\n";
+		ostream.write(str.getBytes());
 	}
     
 	public void writeMessageBody(OutputStream ostream) throws IOException {
