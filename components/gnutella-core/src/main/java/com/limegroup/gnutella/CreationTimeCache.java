@@ -206,6 +206,9 @@ public final class CreationTimeCache {
         final MediaType.Aggregator filter = 
             (request == null ? null : MediaType.getAggregator(request));
 
+        // may be non-null at loop end
+        List toRemove = null;
+
         // we bank on the fact that the TIME_TO_URNSET_MAP iterator returns the 
         // entries in descending order....
         while (iter.hasNext() && (urnList.size() < max)) {
@@ -219,11 +222,24 @@ public final class CreationTimeCache {
                 URN currURN = (URN) innerIter.next();
                 FileDesc fd = fileManager.getFileDescForUrn(currURN);
                 // unfortunately fds can turn into ifds so ignore
-                if (fd instanceof IncompleteFileDesc) continue;
+                if (fd instanceof IncompleteFileDesc) {
+                    if (toRemove == null) toRemove = new ArrayList();
+                    toRemove.add(currURN);
+                    continue;
+                }
 
                 if (filter == null) urnList.add(currURN);
                 else if ((fd != null) && filter.allow(fd.getName())) 
                     urnList.add(currURN);
+            }
+        }
+
+        // clear any ifd's that may have snuck into structures
+        if (toRemove != null) {
+            Iterator removees = toRemove.iterator();
+            while (removees.hasNext()) {
+                URN currURN = (URN) removees.next();
+                removeTime(currURN);
             }
         }
 
