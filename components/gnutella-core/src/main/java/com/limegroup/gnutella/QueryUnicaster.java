@@ -153,6 +153,18 @@ public class QueryUnicaster {
         }
     }
 
+
+    /** Add results to a query so we can invalidate it when enough results are
+     *  received.
+     */
+    public void addResults(GUID queryGUID, int numResultsToAdd) {
+        synchronized (_queries) {
+            QueryBundle qb = (QueryBundle) _queries.get(queryGUID);
+            if (qb != null) // add results if possible...
+                qb._numResults += numResultsToAdd;
+        }
+    }
+
     /** May block if no hosts exist.
      */
     private ExtendedEndpoint getUnicastHost() throws InterruptedException {
