@@ -20,22 +20,25 @@ import com.limegroup.gnutella.http.HTTPHeader;
 public final class BIOHandshaker extends AbstractHandshaker {
 
 
-    private boolean _handshakeComplete;
-    
     /**
      * Time to wait for inut from user at the remote end. (in milliseconds)
      */
     public static final int USER_INPUT_WAIT_TIME = 2 * 60 * 1000; //2 min
-    
+          
     /**
-     * The <tt>HandshakeResponse</tt> wrapper for the connection headers.
+     * Creates a new blocking handshaker for the specified connection with
+     * different handshaking classes depending on whether we're a leaf or an
+     * Ultrapeer.
+     * 
+     * @param conn the <tt>Connection</tt> this handshaker will handshake for
+     * @param requestHeaders the request headers to send -- only relevant for
+     *  outgoing connections
+     * @param responder the class that will create the response
+     * @return a new <tt>BIOHandshaker</tt> with the desired properties
      */
-    private HandshakeResponse _headers = 
-        HandshakeResponse.createEmptyResponse();       
-
     public static Handshaker createHandshaker(Connection conn, 
-        Properties requestHeaders, HandshakeResponder responseHeaders)  {
-        return new BIOHandshaker(conn, requestHeaders, responseHeaders);
+        Properties requestHeaders, HandshakeResponder responder)  {
+        return new BIOHandshaker(conn, requestHeaders, responder);
     }
     
     /**
@@ -43,11 +46,11 @@ public final class BIOHandshaker extends AbstractHandshaker {
      * 
      * @param conn the <tt>Connection</tt> that this will handshake for
      * @param requestHeaders the headers for incoming request headers
-     * @param responseHeaders the headers we respond with
+     * @param responder the headers we respond with
      */
     private BIOHandshaker(Connection conn, Properties requestHeaders, 
-        HandshakeResponder responseHeaders)  {
-        super(conn, requestHeaders, responseHeaders); 
+        HandshakeResponder responder)  {
+        super(conn, requestHeaders, responder); 
     }
     
     
@@ -66,16 +69,9 @@ public final class BIOHandshaker extends AbstractHandshaker {
         else
             initializeIncoming();      
             
-        _handshakeComplete = true ; 
         return true;       
     }
 
-    /* (non-Javadoc)
-     * @see com.limegroup.gnutella.connection.Handshaker#handshakeComplete()
-     */
-    public boolean handshakeComplete() {
-        return _handshakeComplete;
-    }
     
     /** 
      * Sends and receives handshake strings for outgoing connections,
