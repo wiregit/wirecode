@@ -1,6 +1,6 @@
 /*
  * A class which forces the X-Ultrapeer : True header to be written
- * in a handshake.  Don't
+ * in a handshake.
  */
 package com.limegroup.gnutella.handshaking;
 

@@ -1,9 +1,13 @@
 /*
  * This class maintains state for the election process.
  * 
- * If a promotion request arrives while we are currently promoting
- * ourselves, add the promoter to the list because we know for sure that
- * that UP needs is running out of slots, so we will connect to it.
+ * TODO: Decide what to do when a promotion request arrives while we are currently promoting
+ * ourselves.  Keep in mind the best leaf is consistent within ttl 2, which is 30x30 = 900 Ultrapeers!
+ * This means the best candidate may end up receiving requests quite often.
+ * 
+ * So either A) add the promoter to the list because we know for sure that
+ * that UP needs is running out of slots, so we will connect to it or B) ignore it. 
+ * 
  */
 package com.limegroup.gnutella.upelection;
 

@@ -209,9 +209,9 @@ public class UPListVendorMessage extends VendorMessage {
 			bytesPerResult+=2;
 		
 		//check if the payload is legal length
-		if (payload.length!= (numberUP+numberLeaves)*bytesPerResult+3) //evil evil
+		if (payload.length!= (numberUP+numberLeaves)*bytesPerResult+3) 
 			throw new BadPacketException("size is "+payload.length+ 
-					" but should have been "+ (numberUP+numberLeaves)*bytesPerResult+2);
+					" but should have been "+ (numberUP+numberLeaves)*bytesPerResult+3);
 		
 		//parse the up ip addresses
 		for (int i = 3;i<numberUP*bytesPerResult;i+=bytesPerResult) {
@@ -229,7 +229,7 @@ public class UPListVendorMessage extends VendorMessage {
 			//store the result in an ExtendedEndpoint
 			ExtendedEndpoint result; 
 			
-			if(_connectionTime)  //FIXME: when the changes to EE get merged, add a setter rather than doing this 
+			if(_connectionTime)  //FIXME: when the locale changes to EE get merged, add a setter rather than doing this 
 				result= new ExtendedEndpoint(combo.getAddress(),
 								combo.getPort(),
 								ByteOrder.leb2short(payload,i+6));
@@ -273,7 +273,7 @@ public class UPListVendorMessage extends VendorMessage {
 			 _leaves.add(result);
 		}
 		
-		//do the check whether we got as many UPs as requested elsewhere.
+		//Note: do the check whether we got as many results as requested elsewhere.
 	}
 	/**
 	 * @return Returns the List of Ultrapeers contained in the message.

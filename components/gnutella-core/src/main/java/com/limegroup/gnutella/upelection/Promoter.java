@@ -26,9 +26,8 @@ public class Promoter implements Runnable {
 			return;
 		}
 		
+		//start the crawl (once implemented)
 		
-		//throw new RuntimeException("keep implementing");
-		//System.out.println("keep implementing");
 		
 	}
 	

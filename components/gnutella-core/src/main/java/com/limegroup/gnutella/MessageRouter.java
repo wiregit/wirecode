@@ -1006,7 +1006,6 @@ public abstract class MessageRouter {
             }
         }
         // else some sort of routing error or attack?
-        // or an ack for a promotion request - would rather handle it through a listener.
         // TODO: tally some stat stuff here
     }
 
@@ -2703,11 +2702,8 @@ public abstract class MessageRouter {
      * forwards a promotion request to a candidate.  This method will route
      * the Promotion Request VM to the appropriate destination.
      * If the route to the target is no longer open, the message is dropped.
-     * 
-     * Note: if we decide that every routing UP needs to ACK the message, this method 
-     * will need to add a listener on the udp port with the GUID of the message.
      *  
-     * @param msg the original message received from the network.
+     * @param msg the PromotionRequestVendorMEssage to forward
      */
     public void forwardPromotionRequest(PromotionRequestVendorMessage msg) {
     	//get the address of the candidate
@@ -2743,7 +2739,7 @@ public abstract class MessageRouter {
     	
     	//the target is ttl 1 from us.  Forward the query to its advertiser.
     	Connection up = null;
-    	Iterator iter = RouterService.getConnectionManager().getConnectedGUESSUltrapeers().iterator();
+    	Iterator iter = RouterService.getConnectionManager().getInitializedConnections().iterator();
     	while (iter.hasNext()) {
     		Connection current = (Connection)iter.next();
     		if (current.getInetAddress().equals(

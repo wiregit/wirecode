@@ -58,14 +58,14 @@ public class CandidateAdvertiser implements Runnable {
 			ManagedConnection current = (ManagedConnection)iter.next();
 			if (current.isGoodLeaf() &&
 					current.isStable() && 
-					current.isLimeWire() &&
+					current.remoteHostSupportsBestCandidates() >=1 &&
 					current.isUDPCapable()) //unsolicited udp
 				//add more criteria here
 				try {
 					Candidate currentCandidate = new Candidate(current);
 					if (currentCandidate.compareTo(best) > 0)
 						best = currentCandidate;
-				}catch (UnknownHostException ignored) {
+				}catch (UnknownHostException leafIgnored) {
 					//if the leaf doesn't have valid address it should be rightfully ignored.
 				}
 		}

@@ -1481,7 +1481,6 @@ public class ConnectionManager {
      * and then adding the guaranteed up2up connection.  Used for promotion.
      * @param host the host to connect to that we are sure has a slot waiting for us
      * @param port the port that host is listening to
-     * @return whether we became an UP successfully.
      */
     public void becomeAnUPWithBackupConn(String host, int port) throws IOException {
    
@@ -1505,7 +1504,7 @@ public class ConnectionManager {
 		processConnectionHeaders(UPconn);
 		
 		//if we got here, the connection is initialized
-		//shut down the other connections, try to become an ultrapeer.
+		//shut down the other connections
 		disconnect(); 
 		
 		//now add our backup connection to the lists.

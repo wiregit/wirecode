@@ -62,7 +62,7 @@ public class BestCandidates {
 	public static void update(Candidate [] newCandidates) {
 		Comparator comp = Candidate.priorityComparator();
 		
-		//if the other guy doesn't have a beast leaf, he shouldn't
+		//if the other guy doesn't have a best leaf, he shouldn't
 		//have sent this message in the first place.  discard, regardless
 		//whether he has a best leaf on ttl 1
 		if (newCandidates[0]==null)
@@ -95,11 +95,9 @@ public class BestCandidates {
 	/**
 	 * updates my own best leaf.  Can be called as often as the best leaf 
 	 * changes.
-	 * @param myLeaf an ExtendedEndpoint representation of my new best leaf
+	 * @param myLeaf a Candidate representation of my new best leaf
 	 */
 	public static void update(Candidate myLeaf) {
-		//no need to compare, just update
-		//or maybe put some update flag here?
 		synchronized(instance) {
 			instance._best[0] = myLeaf;
 		}
