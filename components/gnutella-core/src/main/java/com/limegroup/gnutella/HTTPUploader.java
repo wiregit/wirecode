@@ -506,6 +506,7 @@ public class HTTPUploader implements Runnable, Comparable {
 			// after connect has been called also.  
 			if (!uplimit) {
 				//send 503 Limit Exceeded Headers
+				_stateString = "Try Again Later";
 				doLimitReached(_socket);
 				throw new IOException();
 			} 
@@ -721,8 +722,9 @@ public class HTTPUploader implements Runnable, Comparable {
 	 * we have added a hashmap, and every time an upload
 	 * is initiated, it is inserted into the map.  however,
 	 * if the map already contains more that the allowed
-	 * number of uploads per person, that this method will 
-	 * throw an IOException.
+	 * number of uploads per person, we return the boolean
+	 * false.  If the limit has not been exceeded, true
+	 * is returned. 
 	 * 
 	 */
 	private boolean testAndIncrementNumUploads() {
