@@ -18,12 +18,20 @@ import java.io.*;
  * ConnectionManager and a thread.<p>
  *
  * <pre>
+ *   //1. Setup manager and connection.
  *   ConnectionManager cm=new ConnectionManager();
  *   Connection c=new Connection(host, port);
  *   c.connect();                  //actually connect
- *   cm.add(c);                    //register for broadcasting purposes
- *   c.setManager(cm);             //Must set before calling run.
- *   c.send(new PingRequest(Const.TTL); //initial ping
+ *
+ *   //2. Send initial ping request.  The second line is a complete hack
+ *   //   hack so that we know responses are for this.
+ *   PingRequest pr=new PingRequest(Const.TTL); //Send initial ping.
+ *   cm.fromMe(pr);
+ *   c.send(pr); 
+ *
+ *   //3. Handle everything else asynchronously
+ *   cm.add(c);                    //connnections in cm can broadcast via c
+ *   c.setManager(cm);             //c can broadcast via cm
  *   Thread t=new Thread(c);       //create new handler thread
  *   t.start();                    //services connection by calling run()
  * </pre>
@@ -38,7 +46,8 @@ import java.io.*;
  */
 public class Connection implements Runnable { 
     /** These are only needed for the run method.
-     *  INVARIANT: (manager==null)==(routeTable==null)==(pushRouteTable==null) */
+     *  INVARIANT: (manager==null)==(routeTable==null)==(pushRouteTable==null) 
+     */
     private ConnectionManager manager=null; //may be null
     private RouteTable routeTable=null;     //may be null
     private RouteTable pushRouteTable=null; 
@@ -62,6 +71,11 @@ public class Connection implements Runnable {
      *  These are synchronized by out and in, respectively. */
     private int sent=0;
     private int received=0;
+    
+    /** Statistics about horizon size. */
+    public long totalFileSize;
+    public long numFiles;
+    public long numHosts;
 
     static final String CONNECT="GNUTELLA CONNECT/0.4\n\n";
     static final String CONNECT_WITHOUT_FIRST_WORD="CONNECT/0.4\n\n";
@@ -266,16 +280,17 @@ public class Connection implements Runnable {
 		}
 		else if (m instanceof PingReply){
 		    Connection outConnection = routeTable.get(m.getGUID());
+		    manager.catcher.spy(m);//update hostcatcher (even if this isn't for me)
 		    if(outConnection!=null){ //we have a place to route it
 			if (manager.stats==true)
 			    manager.PRepCount++; //keep stats if stats is turned on
-			if (outConnection.equals(this)){ //I am the destination
-			    manager.catcher.spy(m);//update hostcatcher
-			    //TODO2: So what else do we have to do here??
-
-			    manager.totalSize += ((PingReply)m).getKbytes();
-			    manager.totalFiles += ((PingReply)m).getFiles();
-			    
+			//HACK: is the reply for me?
+			if (outConnection.equals(manager.ME_CONNECTION)) { 
+			    //Update horizon stats.
+			    //This is not necessarily atomic, but that doesn't matter.
+			    totalFileSize += ((PingReply)m).getKbytes();
+			    numFiles += ((PingReply)m).getFiles();
+			    numHosts++;			    
 			}
 			else{//message needs to routed
 			    outConnection.send(m);
@@ -348,18 +363,11 @@ public class Connection implements Runnable {
 			//System.out.println("Sumeet:found connection");
 			QueryReply qrep = (QueryReply)m;
 			pushRouteTable.put(qrep.getClientGUID(),this);//first store this in pushRouteTable
-			//System.out.println("Sumeet: stored reply in push route table");
-			if (outConnection.equals(this)){ //I am the destination
-			    //TODO1: This needs to be interfaced with Rob
-			    //Unpack message
-			    // and present it to user
-			    //make HTTP connection with chosen message
-			    //does this go here?
-			    // interface with GUI client 
-
-			    
-
-
+			//HACK: is the reply for me?
+			if (outConnection.equals(manager.ME_CONNECTION)) { 
+			    //Unpack message and present it to user via ActivityCallback.
+			    ActivityCallback ui=manager.getCallback();
+			    if (ui!=null) ui.handleQueryReply((QueryReply)m);
 			}
 			else {//message needs to be routed.
 			    //System.out.println("Sumeet:About to route reply");
@@ -399,7 +407,6 @@ public class Connection implements Runnable {
 	}//try
 	catch (IOException e){
 	    ConnectionManager.error("Connection closed: "+sock.toString());
-	    //e.printStackTrace();
 	    manager.remove(this);
 	}
     }//run
@@ -442,4 +449,25 @@ public class Connection implements Runnable {
 	return sock.getLocalAddress();
     }
 
+    /** Clears the statistics about files reachable from me. */
+    public void clearHorizonStats() {
+	totalFileSize=0;
+	numHosts=0;
+	numFiles=0;
+    }
+
+    /** Returns the number of hosts reachable from me. */
+    public long getNumHosts() {
+	return numHosts;
+    }
+
+    /** Returns the number of files reachable from me. */
+    public long getNumFiles() {
+	return numFiles;
+    }
+
+    /** Returns the size of all files reachable from me. */
+    public long getTotalFileSize() {
+	return totalFileSize;
+    }   
 }
