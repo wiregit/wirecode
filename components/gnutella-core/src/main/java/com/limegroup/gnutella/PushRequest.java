@@ -40,10 +40,17 @@ public class PushRequest extends Message implements Serializable {
     public PushRequest(byte[] guid, byte ttl,
                byte[] clientGUID, long index, byte[] ip, int port) {
         super(guid, Message.F_PUSH, ttl, (byte)0, STANDARD_PAYLOAD_SIZE);
-        Assert.that(clientGUID.length==16);
-        Assert.that((index&0xFFFFFFFF00000000l)==0);
-        Assert.that(ip.length==4);
-        Assert.that((port&0xFFFF0000)==0);
+		if(clientGUID.length != 16) {
+			throw new IllegalArgumentException("invalid guid length: "+
+											   clientGUID.length);
+		} else if((index&0xFFFFFFFF00000000l)!=0) {
+			throw new IllegalArgumentException("invalid index: "+index);
+		} else if(ip.length!=4) {
+			throw new IllegalArgumentException("invalid ip length: "+
+											   ip.length);
+		} else if((port&0xFFFF0000)!=0) {
+			throw new IllegalArgumentException("invalid port: "+port);
+		}
 
         payload=new byte[STANDARD_PAYLOAD_SIZE];
         System.arraycopy(clientGUID, 0, payload, 0, 16);

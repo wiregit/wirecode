@@ -217,11 +217,16 @@ public class QueryReply extends Message implements Serializable{
         if (xmlBytes.length > XML_MAX_SIZE)
             return;  
 
-        Assert.that((port&0xFFFF0000)==0);
-        Assert.that(ip.length==4);
-        Assert.that((speed&0xFFFFFFFF00000000l)==0);
-        final int n=responses.length;
-        Assert.that(n<256);
+        final int n = responses.length;
+		if((port & 0xFFFF0000) != 0) {
+			throw new IllegalArgumentException("invalid port: "+port);
+		} else if(ip.length != 4) {
+			throw new IllegalArgumentException("invalid ip length: "+ip.length);
+		} else if((speed & 0xFFFFFFFF00000000l) != 0) {
+			throw new IllegalArgumentException("invalid speed: "+speed);
+		} else if(n >= 256) {
+			throw new IllegalArgumentException("invalid num responses: "+n);
+		}
 
         payload=new byte[getLength()];
         //Write beginning of payload.
