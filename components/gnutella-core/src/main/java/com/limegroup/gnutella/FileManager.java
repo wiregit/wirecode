@@ -34,6 +34,10 @@ public class FileManager {
      *  f[i]._path is in a shared directory with a shareable extension. */
     private List /* of FileDesc */ _files;
 
+	/** <tt>Map</tt> of <tt>URN</tt>s to <tt>FileDesc</tt>s used in 
+	 *  HTTP requests by URN.*/
+	private Map /* URN -> FileDesc */ _urnMap;
+
     /** an index mapping keywords in file names to the indices in _files.  A
      * keyword of a filename f is defined to be a maximal sequence of characters
      * without a character from DELIMETERS.  INVARIANT: For all keys k in
@@ -112,6 +116,7 @@ public class FileManager {
         _size = 0;
         _numFiles = 0;
         _files = new ArrayList();
+		_urnMap = new HashMap();
         _index = new Trie(true);  //ignore case
         _urnIndex = new HashMap();
         _extensions = new TreeSet(new StringComparator());
@@ -163,20 +168,10 @@ public class FileManager {
 	 *
 	 * @param urn the urn for the file
 	 * @return the <tt>FileDesc</tt> corresponding to the requested urn, or
-	 *  <tt>null</tt> if not matching <tt>FileDesc</tt> could be found
+	 *  <tt>null</tt> if no matching <tt>FileDesc</tt> could be found
 	 */
 	public synchronized FileDesc getFileDescForUrn(final URN urn) {
-		Iterator iter = _files.iterator();
-		while(iter.hasNext()) {
-			FileDesc candidate = (FileDesc)iter.next();
-			if (candidate==null) continue;
-			if (candidate.containsUrn(urn)) {
-				return candidate;
-			}
-		}
-
-        // none found
-        return null;
+		return (FileDesc)_urnMap.get(urn);
 	}
 
 	/**
@@ -414,6 +409,7 @@ public class FileManager {
             _size = 0;
             _numFiles = 0;
             _files=new ArrayList();
+			_urnMap = new HashMap();
             _index=new Trie(true);   //maintain invariant
             _urnIndex=new HashMap(); //maintain invariant
             _extensions = new TreeSet(new StringComparator());
@@ -600,6 +596,10 @@ public class FileManager {
             int fileIndex = _files.size();
             FileDesc fileDesc = new FileDesc(file, urns, fileIndex);
             _files.add(fileDesc);
+			URN sha1 = fileDesc.getSHA1Urn();
+			if(sha1 != null) {
+				_urnMap.put(sha1, fileDesc);
+			}
             _numFiles++;
 		
             //Register this file with its parent directory.
@@ -686,6 +686,7 @@ public class FileManager {
             //Aha, it's shared. Unshare it by nulling it out.
             if (f.equals(candidate)) {
                 _files.set(i,null);
+				_urnMap.remove(fd);
                 _numFiles--;
                 _size-=fd.getSize();
 
