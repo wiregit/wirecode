@@ -26,5 +26,11 @@ public final class DataUtils {
      * Collections class in collections).
      */
     public static final Set EMPTY_SET = 
-        Collections.unmodifiableSet(new HashSet());
+        Collections.unmodifiableSet(new HashSet(0));
+        
+    /**
+     * An empty list.
+     */
+    public static final List EMPTY_LIST =
+        Collections.unmodifiableList(new ArrayList(0));
 }

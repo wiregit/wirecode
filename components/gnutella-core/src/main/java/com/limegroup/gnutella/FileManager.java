@@ -8,13 +8,13 @@ import com.limegroup.gnutella.downloader.VerifyingFile;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.util.FileComparator;
+import com.limegroup.gnutella.util.FileUtils;
 import com.limegroup.gnutella.util.Function;
 import com.limegroup.gnutella.util.IntSet;
 import com.limegroup.gnutella.util.KeyValue;
 import com.limegroup.gnutella.util.StringComparator;
 import com.limegroup.gnutella.util.StringUtils;
 import com.limegroup.gnutella.util.Trie;
-import com.limegroup.gnutella.xml.LimeXMLDocument;
 import com.sun.java.util.collections.ArrayList;
 import com.sun.java.util.collections.Arrays;
 import com.sun.java.util.collections.Comparator;
@@ -34,7 +34,7 @@ import com.sun.java.util.collections.TreeSet;
  *
  * This class is thread-safe.
  */
-public class FileManager {
+public abstract class FileManager {
     /** The string used by Clip2 reflectors to index hosts. */
     public static final String INDEXING_QUERY="    ";
     /** The string used by LimeWire to browse hosts. */
@@ -79,6 +79,17 @@ public class FileManager {
      *  f[i]._path is the incomplete directory if f is an IncompleteFileDesc.
      */
     private List /* of FileDesc */ _files;
+    
+    /**
+     * An index mapping <tt>File</tt>s on disk to the 
+     * <tt>FileDesc</tt> holding it.
+     *
+     * INVARIANT: For all keys k in _fileIndex, 
+     * _files[_fileIndex.get(k).getIndex()].getFile().equals(k)
+     *
+     * A File keys must be created with a canonical path.
+     */
+    private Map /* of File -> FileDesc */ _fileToFileDesc;
 
     /**
      * An index mapping keywords in file names to the indices in _files.  A
@@ -216,6 +227,15 @@ public class FileManager {
         // is ready once the constructor completes, even though the
         // thread launched at the end of the constructor will immediately
         // overwrite all these variables
+        resetVariables();
+    }
+    
+    /**
+     * Method that resets all of the variables for this class, maintaining
+     * all invariants.  This is necessary, for example, when the shared
+     * files are reloaded.
+     */
+    private void resetVariables()  {
         _size = 0;
         _numFiles = 0;
         _numIncompleteFiles = 0;
@@ -226,6 +246,7 @@ public class FileManager {
         _extensions = new TreeSet(new StringComparator());
         _sharedDirectories = new TreeMap(new FileComparator());
         _incompletesShared = new IntSet();
+        _fileToFileDesc = new HashMap();
     }
 
     /** Asynchronously loads all files by calling loadSettings.  Sets this'
@@ -298,6 +319,21 @@ public class FileManager {
     public synchronized boolean isValidIndex(int i) {
         return (i >= 0 && i < _files.size());
     }
+    
+    
+    /**
+     * Returns the <tt>FileDesc</tt> that is wrapping this <tt>File</tt>
+     * or null if the file is not shared.
+     */
+    public synchronized FileDesc getFileDescForFile(File f) {
+        try {
+            f = FileUtils.getCanonicalFile(f);
+        } catch(IOException ioe) {
+            return null;
+        }
+
+        return (FileDesc)_fileToFileDesc.get(f);
+    }    
 
 	/**
 	 * Returns the <tt>FileDesc</tt> for the specified URN.  This only returns 
@@ -323,31 +359,11 @@ public class FileManager {
 		}
         return ret;
 	}
-
-	/**
-     * Returns the FileDesc matching the passed-in path and size, if any,
-     * null otherwise. Kind of silly, definitely inefficient, but only
-     * needed rarely, from library view, because there's no sharing of
-     * data structures for local files
-     */
-    public synchronized FileDesc getFileDescMatching(File file) {
-		// linear probe. thankfully it's rare
-		Iterator iter = _files.iterator();
-		while(iter.hasNext()) {
-			FileDesc candidate = (FileDesc)iter.next();
-			if (candidate==null) continue;
-			if(file.equals(candidate.getFile())) {
-				return candidate;
-			}
-		}
-        // none found
-        return null;
-	}
 	
 	/**
 	 * Returns a list of all shared incomplete file descriptors.
 	 */
-	public FileDesc[] getIncompleteFileDescriptors() {
+	public synchronized FileDesc[] getIncompleteFileDescriptors() {
         if (_incompletesShared == null) {
             return null;
         }
@@ -362,17 +378,18 @@ public class FileManager {
         
         return ret;
     }
-
+    
     /**
-     * Returns a list of all shared files in the given directory, in any order.
-     * Returns null if directory is not shared, or a zero-length array if it is
-     * shared but contains no files.  This method is not recursive; files in 
-     * any of the directory's children are not returned.   
-     * <p>
-     * If directory is null, returns all shared files.
+     * Returns a list of all shared file descriptors.
      */
-    public File[] getSharedFiles(File directory) {
-        return (File[])getSharedFilesImpl(false, new File[0], directory);
+    public synchronized FileDesc[] getAllSharedFileDescriptors() {
+        // Instead of using _files.toArray, use
+        // _fileToFileDesc.values().toArray.  This is because
+        // _files will still contain null values for removed
+        // shared files, but _fileToFileDesc will not.
+        FileDesc[] fds = new FileDesc[_fileToFileDesc.size()];        
+        fds = (FileDesc[])_fileToFileDesc.values().toArray(fds);
+        return fds;
     }
 
     /**
@@ -380,74 +397,34 @@ public class FileManager {
      * in any order.
      * Returns null if directory is not shared, or a zero-length array if it is
      * shared but contains no files.  This method is not recursive; files in 
-     * any of the directory's children are not returned.   
-     * <p>
-     * If directory is null, returns all shared file descriptors.
+     * any of the directory's children are not returned.
      */    
-    public FileDesc[] getSharedFileDescriptors(File directory) {
-        return (FileDesc[])getSharedFilesImpl(true,
-                             new FileDesc[0], directory);
-    }
-    
-    /**
-     * The implementation of the code to scan through files.
-     * Returns true if the directory was shared, false otherwise.
-     * @param descs If true, the returned array will be FileDescs,
-     *    If false, the returned array will be Files.
-     * @param type An array whose type should be either FileDesc
-     *    or File, to be filled with the appropriate object.
-     * @param directory The directory you want to search shared files for.
-     * @return An array (FileDesc or File) of the shared files.
-     */
-    private synchronized Object[] getSharedFilesImpl(boolean descs,
-                                                 Object[] type,
-                                                 File directory) {
-        if(directory!=null){
-            // a. Remove case, trailing separators, etc.
-            try {
-                directory=getCanonicalFile(directory);
-            } catch (IOException e) {
-                return null;
-            }
-            
-            //Lookup indices of files in the given directory...
-            IntSet indices=(IntSet)_sharedDirectories.get(directory);
-            if (indices==null) {
-                return null;
-            }
-            //...and pack them into an array.
-            if (type.length < indices.size())
-                type = (Object[])java.lang.reflect.Array.newInstance(
-                                type.getClass().getComponentType(), 
-                                indices.size());
-            IntSet.IntSetIterator iter=indices.iterator(); 
-            for (int i=0; iter.hasNext(); i++) {
-                FileDesc fd=(FileDesc)_files.get(iter.next());
-                Assert.that(fd!=null, "Directory has null entry");
-                if (descs)
-                    type[i]=fd;
-                else
-                    type[i]=fd.getFile();
-            }
-            return type;
-        } else {
-            // b. Filter out unshared entries.
-            ArrayList buf=new ArrayList(_files.size());
-            for (int i=0; i<_files.size(); i++) {
-                FileDesc fd=(FileDesc)_files.get(i);
-                if (fd!=null) {
-                    if ( descs )
-                        buf.add(fd);                
-                    else
-                        buf.add(fd.getFile());
-                }
-            }
-            Object[] ret = buf.toArray(type);
-            Assert.that(ret.length==buf.size(), 
-                "Couldn't fit list in returned value");
-            return ret;
+    public synchronized FileDesc[] getSharedFileDescriptors(File directory) {
+        if( directory == null )
+            throw new NullPointerException("null directory");
+        
+        // a. Remove case, trailing separators, etc.
+        try {
+            directory = FileUtils.getCanonicalFile(directory);
+        } catch (IOException e) { // invalid directory ?
+            return null;
         }
-    }        
+        
+        //Lookup indices of files in the given directory...
+        IntSet indices=(IntSet)_sharedDirectories.get(directory);
+        if (indices==null) // directory not shared.
+            return null;
+
+        FileDesc[] fds = new FileDesc[indices.size()];
+        IntSet.IntSetIterator iter=indices.iterator();
+        for (int i=0; iter.hasNext(); i++) {
+            FileDesc fd=(FileDesc)_files.get(iter.next());
+            Assert.that(fd!=null, "Directory has null entry");
+            fds[i] = fd;
+        }
+        
+        return fds;
+    }
 
     /**
      * @param directory Gets all files under this directory RECURSIVELY.
@@ -455,6 +432,8 @@ public class FileManager {
      * extensions in the filter array.
      * @return A Array of Files recursively obtained from the directory,
      * according to the filter.
+     * 
+     * TODO:: add test!
      */
     public static File[] getFilesRecursive(File directory,
                                            String[] filter) {
@@ -486,7 +465,7 @@ public class FileManager {
                     if (filter == null)
                         shouldAdd = true;
                     else {
-                        String ext = getFileExtension(currFile);
+                        String ext = FileUtils.getFileExtension(currFile);
                         for (int j = 0; 
                              (j < filter.length) && (ext != null); 
                              j++)
@@ -510,20 +489,6 @@ public class FileManager {
         return retArray;
     }
 
-
-    // simply gets whatever is after the "." in a filename, or the first thing
-    // after the first "." in the filename
-    private static String getFileExtension(File f) {
-        String retString = null;
-
-        java.util.StringTokenizer st = 
-        new java.util.StringTokenizer(f.getName(), ".");
-        if (st.countTokens() > 1) {
-            st.nextToken();
-            retString = st.nextToken();
-        }
-        return retString;
-    }
 
     private static boolean debugOn = false;
     public static void debug(String out) {
@@ -615,16 +580,7 @@ public class FileManager {
         File[] tempDirVar;
         synchronized (this) {
             // Reset the file list info
-            _size = 0;
-            _numFiles = 0;
-            _numIncompleteFiles = 0;
-            _numPendingFiles = 0;
-            _files=new ArrayList();
-            _index=new Trie(true);   //maintain invariant
-            _urnIndex=new HashMap(); //maintain invariant
-            _extensions = new TreeSet(new StringComparator());
-            _sharedDirectories = new TreeMap(new FileComparator());
-            _incompletesShared = new IntSet();
+            resetVariables();
 
             // Load the extensions.
             String[] extensions = StringUtils.split(SharingSettings.EXTENSIONS_TO_SHARE.getValue(), ";");
@@ -707,15 +663,15 @@ public class FileManager {
         //We have to get the canonical path to make sure "D:\dir" and "d:\DIR"
         //are the same on Windows but different on Unix.
         try {
-            directory=getCanonicalFile(directory);
+            directory=FileUtils.getCanonicalFile(directory);
         } catch (IOException e) {
             return new LinkedList();  //doesn't exist?
         }
         
         //STEP 1:
         // Scan subdirectory for the amount of shared files.
-        File[] dir_list = listFiles(directory, DIRECTORY_FILTER);
-        File[] file_list = listFiles(directory, SHAREABLE_FILE_FILTER);
+        File[] dir_list = FileUtils.listFiles(directory, DIRECTORY_FILTER);
+        File[] file_list = FileUtils.listFiles(directory, SHAREABLE_FILE_FILTER);
         
         // no shared files or subdirs
         if ( dir_list == null && file_list == null )
@@ -783,20 +739,23 @@ public class FileManager {
      *  directory and has a shared extension.  Returns true iff the file
      *  was actually added.  <b>WARNING: this is a potential security 
      *  hazard.</b> 
+     *
+     * @return the <tt>FileDesc</tt> for the new file if it was successfully 
+     *  added, otherwise <tt>null</tt>
      */
-	public boolean addFileIfShared(File file) {
+	public FileDesc addFileIfShared(File file) {
         //Make sure capitals are resolved properly, etc.
         File f = null;
         try {
-            f=getCanonicalFile(file);
+            f = FileUtils.getCanonicalFile(file);
             if (!f.exists()) 
-                return false;
+                return null;
         } catch (IOException e) {
-            return false;
+            return null;
 		}
-        File dir = getParentFile(file);
+        File dir = FileUtils.getParentFile(file);
         if (dir==null) 
-            return false;
+            return null;
 
         //TODO: if overwriting an existing, take special care.
         boolean directoryShared;
@@ -804,13 +763,13 @@ public class FileManager {
             directoryShared=_sharedDirectories.containsKey(dir);
             _numPendingFiles++;
         }
-        boolean retval;
+        FileDesc fd;
         if (directoryShared)
-            retval = addFile(file);
+            fd = addFile(file);
         else 
-            retval = false;
+            fd = null;
         synchronized(this) { _numPendingFiles--; }
-        return retval;
+        return fd;
 	}
 
     /**
@@ -819,12 +778,11 @@ public class FileManager {
      *  in the given XML documents.  metadata may be null if there is no data.
      *  Returns the value from addFileIfShared. <b>WARNING: this is a potential
      *  security hazard.</b> 
+     *
+     * @return the <tt>FileDesc</tt> for the new file if it was successfully 
+     *  added, otherwise <tt>null</tt>
      */
-	public boolean addFileIfShared(File file,
-                                   LimeXMLDocument[] metadata) {
-        return addFileIfShared(file);
-        //This implementation does nothing with metadata.  See MetaFileManager.
-    }
+	public abstract FileDesc addFileIfShared(File file, List metadata);
 
     /**
      * @requires the given file exists and is in a shared directory
@@ -832,13 +790,16 @@ public class FileManager {
      * @effects adds the given file to this if it is of the proper extension and
      *  not too big (>~2GB).  Returns true iff the file was actually added.
      *  <b>WARNING: this is a potential security hazard; caller must ensure the
-     *  file is in the shared directory.</b> 
+     *  file is in the shared directory.</b>
+     *
+     * @return the <tt>FileDesc</tt> for the new file if it was successfully 
+     *  added, otherwise <tt>null</tt>
      */
-    private boolean addFile(File file) {
+    private FileDesc addFile(File file) {
         repOk();
         long fileLength = file.length();
         if( !isFileShareable(file, fileLength) )
-            return false;
+            return null;
         
         //Calculate hash OUTSIDE of lock.
         
@@ -848,18 +809,18 @@ public class FileManager {
         } catch(IOException e) {
             // there was an IO error calculating the hash, so we can't
             // add the file
-            return false;
+            return null;
         } catch(InterruptedException e) {
             // the hash calculation was interrupted, so we can't add
             // the file -- should get reloaded
-            return false;
+            return null;
         }
         if (loadThreadInterrupted()) 
-            return false;
+            return null;
         
         if(urns.size() == 0) {
             // the URN was not calculated correctly for some reason
-            return false;
+            return null;
         }
 
         synchronized (this) {
@@ -867,10 +828,11 @@ public class FileManager {
             int fileIndex = _files.size();
             FileDesc fileDesc = new FileDesc(file, urns, fileIndex);
             _files.add(fileDesc);
+            _fileToFileDesc.put(file, fileDesc);
             _numFiles++;
 		
             //Register this file with its parent directory.
-            File parent=getParentFile(file);
+            File parent=FileUtils.getParentFile(file);
             Assert.that(parent!=null, "Null parent to \""+file+"\"");
             IntSet siblings=(IntSet)_sharedDirectories.get(parent);
             Assert.that(siblings!=null,
@@ -899,7 +861,7 @@ public class FileManager {
             this.updateUrnIndex(fileDesc);
 		
             repOk();
-            return true;
+            return fileDesc;
         }
     }
 
@@ -918,6 +880,12 @@ public class FileManager {
                                                String name,
                                                int size,
                                                VerifyingFile vf) {
+        try {
+            incompleteFile = FileUtils.getCanonicalFile(incompleteFile);
+        } catch(IOException ioe) {
+            // file doesn't exist?
+        }
+
         // We want to ensure that incomplete files are never added twice.
         // This may happen if IncompleteFileManager is deserialized before
         // FileManager finishes loading ...
@@ -954,10 +922,11 @@ public class FileManager {
         IncompleteFileDesc ifd = new IncompleteFileDesc(
             incompleteFile, urns, fileIndex, name, size, vf);            
         _files.add(ifd);
+        _fileToFileDesc.put(incompleteFile, ifd);
         this.updateUrnIndex(ifd);
         _numIncompleteFiles++;
         if (_callback != null) {
-            File parent = getParentFile(incompleteFile);
+            File parent = FileUtils.getParentFile(incompleteFile);
             _callback.addSharedFile(ifd, parent);
         }
     }
@@ -980,6 +949,26 @@ public class FileManager {
 		}
     }
     
+    /**
+     * Notification that a file has changed and new hashes should be
+     * calculated.
+     * 
+     * @return the new <tt>FileDesc</tt> for the file if it was successfully 
+     *  changed, otherwise <tt>null</tt>
+     */
+    public FileDesc fileChanged(File f) {
+        try {
+            f = FileUtils.getCanonicalFile(f);
+        } catch(IOException ioe) {
+            return null;
+        }
+        FileDesc fd = (FileDesc)_fileToFileDesc.get(f);
+        List xmlDocs = new LinkedList();
+        xmlDocs.addAll(fd.getLimeXMLDocuments());
+        FileDesc removed = removeFileIfShared(f);        
+        Assert.that( fd == removed, "did not remove valid fd.");
+        return addFileIfShared(f, xmlDocs);
+    }
 
     /**
      * @modifies this
@@ -989,74 +978,72 @@ public class FileManager {
      *  other files.  Note that the file is not actually removed from
      *  disk.
      */
-    public synchronized boolean removeFileIfShared(File f) {
+    public synchronized FileDesc removeFileIfShared(File f) {
         repOk();
         //Take care of case, etc.
         try {
-            f=getCanonicalFile(f);
+            f=FileUtils.getCanonicalFile(f);
         } catch (IOException e) {
+            e.printStackTrace();
             repOk();
-            return false;
+            return null;
         }
 
         //Look for a file matching <file>...
-        for (int i=0; i<_files.size(); i++) {
-            FileDesc fd=(FileDesc)_files.get(i);
-            if (fd==null)
-                continue;
-            File candidate = fd.getFile();
+        FileDesc fd = (FileDesc)_fileToFileDesc.get(f);
+        if (fd==null)
+            return null;
+        
+        int i = fd.getIndex();
+        Assert.that(((FileDesc)_files.get(i)).getFile().equals(f),
+                    "invariant broken!");
+        
+        _files.set(i,null);
+        _fileToFileDesc.remove(f);
+        
+        // If it's an incomplete file, the only reference we 
+        // have is the URN, so remove that and be done.
+        // We also return false, because the file was never really
+        // "shared" to begin with.
+        if (fd instanceof IncompleteFileDesc) {
+            this.removeUrnIndex(fd);
+            _numIncompleteFiles--;
+            boolean removed = _incompletesShared.remove(i);
+            Assert.that(removed,
+                "File "+i+" not found in " + _incompletesShared);
+            repOk();
+            return null;
+        }
+        
+        _numFiles--;
+        _size-=fd.getSize();
 
-            //Aha, it's shared. Unshare it by nulling it out.
-            if (f.equals(candidate)) {
-                _files.set(i,null);
-                
-                // If it's an incomplete file, the only reference we 
-                // have is the URN, so remove that and be done.
-                // We also return false, because the file was never really
-                // "shared" to begin with.
-                if (fd instanceof IncompleteFileDesc) {
-                    this.removeUrnIndex(fd);
-                    _numIncompleteFiles--;
-                    boolean removed = _incompletesShared.remove(i);
-                    Assert.that(removed,
-                        "File "+i+" not found in " + _incompletesShared);
-                    repOk();
-                    return false;
-                }
-                
-                _numFiles--;
-                _size-=fd.getSize();
+        //Remove references to this from directory listing
+        File parent=FileUtils.getParentFile(f);
+        IntSet siblings=(IntSet)_sharedDirectories.get(parent);
+        Assert.that(siblings!=null,
+            "Rem directory \""+parent+"\" not in "+_sharedDirectories);
+        boolean removed=siblings.remove(i);
+        Assert.that(removed, "File "+i+" not found in "+siblings);
 
-                //Remove references to this from directory listing
-                File parent=getParentFile(f);
-                IntSet siblings=(IntSet)_sharedDirectories.get(parent);
-                Assert.that(siblings!=null,
-                    "Rem directory \""+parent+"\" not in "+_sharedDirectories);
-                boolean removed=siblings.remove(i);
-                Assert.that(removed, "File "+i+" not found in "+siblings);
-
-                //Remove references to this from index.
-                String[] keywords=StringUtils.split(fd.getPath(),
-                                                    DELIMETERS);
-                for (int j=0; j<keywords.length; j++) {
-                    String keyword=keywords[j];
-                    IntSet indices=(IntSet)_index.get(keyword);
-                    if (indices!=null) {
-                        indices.remove(i);
-                        //TODO2: prune tree if possible.  call
-                        //_index.remove(keyword) if indices.size()==0.
-                    }
-                }
-
-                //Remove hash information.
-                this.removeUrnIndex(fd);
-
-                repOk();
-                return true;  //No more files in list will match this.
+        //Remove references to this from index.
+        String[] keywords=StringUtils.split(fd.getPath(),
+                                            DELIMETERS);
+        for (int j=0; j<keywords.length; j++) {
+            String keyword=keywords[j];
+            IntSet indices=(IntSet)_index.get(keyword);
+            if (indices!=null) {
+                indices.remove(i);
+                //TODO2: prune tree if possible.  call
+                //_index.remove(keyword) if indices.size()==0.
             }
         }
+
+        //Remove hash information.
+        this.removeUrnIndex(fd);
+
         repOk();
-        return false;
+        return fd;
     }
 
     /** Removes any URN index information for desc */
@@ -1094,11 +1081,11 @@ public class FileManager {
         ActivityCallback savedCallback=_callback;
         _callback=null;
         try {
-            boolean removed=removeFileIfShared(oldName);
-            if (! removed)
+            FileDesc removed=removeFileIfShared(oldName);
+            if (removed == null)
                 return false;
-            boolean added=addFileIfShared(newName);
-            if (! added)
+            FileDesc fd = addFileIfShared(newName);
+            if (fd == null)
                 return false;
             return true;
         } finally {
@@ -1147,62 +1134,16 @@ public class FileManager {
         return true;
     }
 
-    /** 
-	 * Same as f.getParentFile() in JDK1.3. 
-	 * @requires the File parameter must be a File object constructed
-	 *  with the canonical path.
-	 */
-    public static File getParentFile(File f) {
-		// slight changes to get around getParent bug on Mac
-		String name=f.getParent();
-		if(name == null) return null;
-		try {
-			return getCanonicalFile(new File(name));
-		} catch(IOException ioe) {
-  			//if the exception occurs, simply return null
-  			return null;
-  		}
-    }
-    
-    /** Same as the f.listFiles() in JDK1.3. */
-    public static File[] listFiles(File f) {
-        String[] children=f.list();
-        if (children==null)
-            return null;
-
-        File[] ret = new File[children.length];
-        for (int i=0; i<children.length; i++) {
-            ret[i] = new File(f, children[i]);
-        }
-
-        return ret;
-    }
-    
-    /**
-     * Same as f.listFiles(FileNameFilter) in JDK1.2
-     */
-    public static File[] listFiles(File f, FilenameFilter filter) {
-        String[] children=f.list(filter);
-        if(children == null)
-            return null;
-        File[] ret = new File[children.length];
-        for (int i=0; i<children.length; i++) {
-            ret[i] = new File(f, children[i]);
-        }
-
-        return ret;
-    }    
-    
     /**
      * called when a query route table has to be made. The current 
      * implementaion just takes all the file names and they are split
      * internally when added the QRT
      */
     public List getKeyWords(){
-        File[] files = getSharedFiles(null);
+        FileDesc[] fds = getAllSharedFileDescriptors();
         ArrayList retList = new ArrayList();
-        for(int i=0;i<files.length;i++)
-            retList.add(files[i].getAbsolutePath());
+        for(int i=0;i<fds.length;i++)
+            retList.add(fds[i].getFile().getAbsolutePath());
         return retList;
     }
     
@@ -1219,12 +1160,6 @@ public class FileManager {
         // Just return an empty list.
         return new ArrayList();
     }
-
-    /** Same as f.getCanonicalFile() in JDK1.3. */
-    public static File getCanonicalFile(File f) throws IOException {
-        return new File(f.getCanonicalPath());
-    }
-
 
     ////////////////////////////////// Queries ///////////////////////////////
 
@@ -1245,6 +1180,7 @@ public class FileManager {
      */
     public synchronized Response[] query(QueryRequest request) {
         String str = request.getQuery();
+        boolean includeXML = shouldIncludeXMLInResponse(request);
 
         //Special case: return everything for Clip2 indexing query ("    ") and
         //browse queries ("*.*").  If these messages had initial TTLs too high,
@@ -1271,6 +1207,8 @@ public class FileManager {
                 Assert.that(j<ret.length,
                             "_numFiles is too small");
                 ret[j] = new Response(desc);
+                if(includeXML)
+                    addXMLToResponse(ret[j], desc);
                 j++;
             }
             Assert.that(j==ret.length,
@@ -1314,25 +1252,28 @@ public class FileManager {
                 desc.incrementHitCount();
                 if ( _callback != null )
                     _callback.handleSharedFileUpdate(desc.getFile());
-                responses.add(new Response(desc));
+                Response resp = new Response(desc);
+                if(includeXML)
+                    addXMLToResponse(resp, desc);
+                responses.add(resp);
             } 
         }
         Response[] retArray = new Response[responses.size()];
         return (Response[])responses.toArray(retArray);
     }
-
-    public synchronized FileDesc file2index(String fullName) {  
-        // TODO1: precompute and store in table.
-        for (int i = 0; i < _files.size(); i++) {
-            FileDesc fd = (FileDesc)_files.get(i);
-            if (fd==null) //unshared
-                continue;
-            else if (fd.getPath().equals(fullName))
-                return fd;
-        }
-        return null;//The file with this name was not found.
-    }
     
+    /**
+     * A normal FileManager will never include XML.
+     * It is expected that MetaFileManager overrides this and returns
+     * true in some instances.
+     */
+    protected abstract boolean shouldIncludeXMLInResponse(QueryRequest qr);
+    
+    /**
+     * This implementation does nothing.
+     */
+    protected abstract void addXMLToResponse(Response res, FileDesc desc);
+
 
     /**
      * Returns a set of indices of files matching q, or null if there are no
@@ -1526,7 +1467,7 @@ public class FileManager {
             //c) Ensure properly listed in directory
             try {
                 IntSet siblings=(IntSet)_sharedDirectories.get(
-                    getCanonicalFile(getParentFile(desc.getFile())));
+                    FileUtils.getCanonicalFile(FileUtils.getParentFile(desc.getFile())));
                 Assert.that(siblings!=null, 
                     "Directory for "+desc.getPath()+" isn't shared");
                 Assert.that(siblings.contains(i),

@@ -5,10 +5,17 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+
+import com.limegroup.gnutella.xml.LimeXMLDocument;
+import com.limegroup.gnutella.util.DataUtils;
+
 import com.sun.java.util.collections.Collections;
 import com.sun.java.util.collections.HashSet;
 import com.sun.java.util.collections.Iterator;
 import com.sun.java.util.collections.Set;
+import com.sun.java.util.collections.List;
+import com.sun.java.util.collections.ArrayList;
+
 
 /**
  * This class contains data for an individual shared file.  It also provides
@@ -61,9 +68,14 @@ public class FileDesc implements AlternateLocationCollector {
 	private final File FILE;
 
 	/**
-	 * Constant for the SHA1 <tt>URN</tt> instance.
+	 * The constant SHA1 <tt>URN</tt> instance.
 	 */
 	private final URN SHA1_URN;
+	
+	/**
+	 * The LimeXMLDocs associated with this FileDesc.
+	 */
+	private List /* of LimeXMLDocument */ _limeXMLDocs;
 
 	/**
 	 * The collection of alternate locations for the file.
@@ -211,7 +223,6 @@ public class FileDesc implements AlternateLocationCollector {
 		return SHA1_URN;
 	}
 
-
 	/**
 	 * Extracts the SHA1 URN from the set of urns.
 	 */
@@ -247,7 +258,7 @@ public class FileDesc implements AlternateLocationCollector {
 	 */
 	public Set getUrns() {
 		return URNS;
-	}
+	}   
 
 	/**
 	 * Returns the absolute path of the file represented wrapped by this
@@ -258,7 +269,51 @@ public class FileDesc implements AlternateLocationCollector {
 	public String getPath() {
 		return FILE.getAbsolutePath();
 	}
+	
+	/**
+	 * Adds a LimeXMLDocument to this FileDesc.
+	 */
+	public void addLimeXMLDocument(LimeXMLDocument doc) {
+	    if( _limeXMLDocs == null ) {
+	        _limeXMLDocs = new ArrayList(1);
+	    }
+	    _limeXMLDocs.add(doc);
+    }
+    
+    /**
+     * Replaces one LimeXMLDocument with another.
+     */
+    public boolean replaceLimeXMLDocument(LimeXMLDocument oldDoc, 
+                                          LimeXMLDocument newDoc) {
+        if( _limeXMLDocs == null )
+            return false;
 
+        int index = _limeXMLDocs.indexOf(oldDoc);
+        if( index == -1 )
+            return false;
+        _limeXMLDocs.remove(index);
+        _limeXMLDocs.add(newDoc);
+        return true;
+    }
+    
+    /**
+     * Removes a LimeXMLDocument from the FileDesc.
+     */
+    public boolean removeLimeXMLDocument(LimeXMLDocument toRemove) {
+        if( _limeXMLDocs == null )
+            return false;
+        return _limeXMLDocs.remove(toRemove);
+    }   
+    
+    /**
+     * Returns the LimeXMLDocuments for this FileDesc.
+     */
+    public List getLimeXMLDocuments() {
+        if(_limeXMLDocs == null )
+            return DataUtils.EMPTY_LIST;
+        else
+            return _limeXMLDocs;
+    }
 
 	/**
 	 * Returns the <tt>AlternateLocationCollection</tt> instance for this
@@ -359,7 +414,7 @@ public class FileDesc implements AlternateLocationCollector {
      */
     private static Set calculateUrns(File file) 
         throws IOException, InterruptedException {
-        Set set = new HashSet();
+        Set set = new HashSet(1);
         set.add(URN.createSHA1Urn(file));
         return set;
 	}
@@ -443,6 +498,23 @@ public class FileDesc implements AlternateLocationCollector {
     public InputStream createInputStream() throws FileNotFoundException {
 		return new FileInputStream(FILE);
     }
+    
+    /**
+     * Utility method for toString that converts the specified
+     * <tt>Iterator</tt>'s items to a string.
+     *
+     * @param i the <tt>Iterator</tt> to convert
+     * @return the contents of the set as a comma-delimited string
+     */
+    private String listInformation(Iterator i) {
+        StringBuffer stuff = new StringBuffer();
+        for(; i.hasNext(); ) {
+            stuff.append(i.next().toString());
+            if( i.hasNext() )
+                stuff.append(", ");
+        }
+        return stuff.toString();
+    }
 
 	// overrides Object.toString to provide a more useful description
 	public String toString() {
@@ -453,7 +525,11 @@ public class FileDesc implements AlternateLocationCollector {
 				"size:     "+_size+"\r\n"+
 				"modTime:  "+_modTime+"\r\n"+
 				"File:     "+FILE+"\r\n"+
-				"urns:     "+URNS+"\r\n"+
+				"urns:     "+listInformation(URNS.iterator())+"\r\n"+
+				"docs:     "+
+				 (_limeXMLDocs == null ? "null" : 
+				        listInformation(_limeXMLDocs.iterator()) )
+				            +"\r\n"+
 				"alt locs: "+ALT_LOCS+"\r\n");
 	}
 }

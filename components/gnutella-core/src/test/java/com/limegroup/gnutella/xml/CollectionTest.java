@@ -2,6 +2,8 @@ package com.limegroup.gnutella.xml;
 
 import java.io.*;
 import com.sun.java.util.collections.*;
+import com.limegroup.gnutella.URN;
+import com.limegroup.gnutella.FileDesc;
 import com.limegroup.gnutella.util.*;
 import com.limegroup.gnutella.mp3.*;
 import junit.framework.*;
@@ -11,14 +13,13 @@ import junit.framework.*;
  */
 public class CollectionTest extends com.limegroup.gnutella.util.BaseTestCase {
 
-    final Map files = new HashMap();
+    FileDesc[] files = new FileDesc[3];
     final String fileLocation = "com/limegroup/gnutella/xml/";
     final File mason = CommonUtils.getResourceFile(fileLocation + "nullfile.null");
     final File test1 = CommonUtils.getResourceFile(fileLocation + "test1.mp3");
     final File test2 = CommonUtils.getResourceFile(fileLocation + "test2.mp3");
     final String schemaURI = "http://www.limewire.com/schemas/audio.xsd";
     final String schemaURIVideo = "http://www.limewire.com/schemas/video.xsd";
-    final MetaFileManager mfm = new MFMStub();
     final boolean audio = true;
 
     private final String KEY_PREFIX = "audios" + XMLStringUtils.DELIMITER +
@@ -37,6 +38,14 @@ public class CollectionTest extends com.limegroup.gnutella.util.BaseTestCase {
     public CollectionTest(String name) {
         super(name);
     }
+
+    public static void main(String argv[]) {
+        junit.textui.TestRunner.run(suite());
+    }
+
+    public static Test suite() {
+        return buildTestSuite(CollectionTest.class);
+    }
     
     protected void setUp() throws Exception {
         
@@ -51,33 +60,37 @@ public class CollectionTest extends com.limegroup.gnutella.util.BaseTestCase {
             assertTrue("Could not find necessary file!", false);
         if (!test2.exists())
             assertTrue("Could not find necessary file!", false);
-        files.clear();
+        files = new FileDesc[3];
         assertTrue("Necessary file nullfile.null cannot be found!",
                           mason.exists());
         assertTrue("Necessary file test1.mp3 cannot be found!",
                           test1.exists());
         assertTrue("Necessary file test2.mp3 cannot be found!",
                           test2.exists());
-        files.put(mason, mfm.readFromMap(mason));
-        files.put(test1, mfm.readFromMap(test1));
-        files.put(test2, mfm.readFromMap(test2));
+        Set urns;
+        urns = FileDesc.calculateAndCacheURN(mason);
+        files[0] = new FileDesc(mason, urns, 0);
+        urns = FileDesc.calculateAndCacheURN(test1);
+        files[1] = new FileDesc(test1, urns, 1);
+        urns = FileDesc.calculateAndCacheURN(test2);
+        files[2] = new FileDesc(test2, urns, 2);
     }
 
     public void testAudio() {
         clearDirectory();
         // test construction
         LimeXMLReplyCollection collection = 
-        new LimeXMLReplyCollection(files, schemaURI, mfm, audio);
+            new LimeXMLReplyCollection(files, schemaURI, audio);
         assertEquals("LimeXMLCollection count wrong!",
                          2, collection.getCount());
 
         // test assocation
         LimeXMLDocument doc = null;
-        doc = collection.getDocForHash(mfm.readFromMap(mason));
+        doc = collection.getDocForHash(getHash(mason));
         assertNull("Mason should not have a doc!", doc);
-        doc = collection.getDocForHash(mfm.readFromMap(test1));
+        doc = collection.getDocForHash(getHash(test1));
         assertNotNull("Test1 should have a doc!", doc);
-        doc = collection.getDocForHash(mfm.readFromMap(test2));
+        doc = collection.getDocForHash(getHash(test2));
         assertNotNull("Test2 should have a doc!", doc);
 
         // test keyword generation
@@ -100,17 +113,17 @@ public class CollectionTest extends com.limegroup.gnutella.util.BaseTestCase {
         clearDirectory();
         // test construction
         LimeXMLReplyCollection collection = 
-        new LimeXMLReplyCollection(files, schemaURIVideo, mfm, !audio);
+            new LimeXMLReplyCollection(files, schemaURIVideo, !audio);
         assertEquals("LimeXMLCollection count wrong!",
                          0, collection.getCount());
 
         // test assocation
         LimeXMLDocument doc = null;
-        doc = collection.getDocForHash(mfm.readFromMap(mason));
+        doc = collection.getDocForHash(getHash(mason));
         assertNull("Mason should not have a doc!", doc);
-        doc = collection.getDocForHash(mfm.readFromMap(test1));
+        doc = collection.getDocForHash(getHash(test1));
         assertNull("Test1 should not have a doc!", doc);
-        doc = collection.getDocForHash(mfm.readFromMap(test2));
+        doc = collection.getDocForHash(getHash(test2));
         assertNull("Test2 should not have a doc!", doc);
 
         // test keyword generation
@@ -124,7 +137,7 @@ public class CollectionTest extends com.limegroup.gnutella.util.BaseTestCase {
     public void testMatching() {
         clearDirectory();
         LimeXMLReplyCollection collection = 
-        new LimeXMLReplyCollection(files, schemaURI, mfm, audio);
+            new LimeXMLReplyCollection(files, schemaURI, audio);
 
         // make sure that a simple match works....
         List nameVals = new ArrayList();
@@ -198,9 +211,9 @@ public class CollectionTest extends com.limegroup.gnutella.util.BaseTestCase {
         populateDirectory();
 
         LimeXMLReplyCollection audioCollection = 
-        new LimeXMLReplyCollection(files, schemaURI, mfm, audio);
+            new LimeXMLReplyCollection(files, schemaURI, audio);
         LimeXMLReplyCollection videoCollection = 
-        new LimeXMLReplyCollection(files, schemaURIVideo, mfm, !audio);
+            new LimeXMLReplyCollection(files, schemaURIVideo, !audio);
 
         // test it got the count right....        
         assertEquals("LimeXMLCollection count wrong!",
@@ -210,17 +223,17 @@ public class CollectionTest extends com.limegroup.gnutella.util.BaseTestCase {
 
         // test assocation
         LimeXMLDocument doc = null;
-        doc = audioCollection.getDocForHash(mfm.readFromMap(mason));
+        doc = audioCollection.getDocForHash(getHash(mason));
         assertNull("Mason should not have a doc!", doc);
-        doc = audioCollection.getDocForHash(mfm.readFromMap(test1));
+        doc = audioCollection.getDocForHash(getHash(test1));
         assertNotNull("Test1 should have a doc!", doc);
-        doc = audioCollection.getDocForHash(mfm.readFromMap(test2));
+        doc = audioCollection.getDocForHash(getHash(test2));
         assertNotNull("Test2 should have a doc!", doc);
-        doc = videoCollection.getDocForHash(mfm.readFromMap(mason));
+        doc = videoCollection.getDocForHash(getHash(mason));
         assertNotNull("Mason should have a doc!", doc);
-        doc = videoCollection.getDocForHash(mfm.readFromMap(test1));
+        doc = videoCollection.getDocForHash(getHash(test1));
         assertNull("Test1 should not have a doc!", doc);
-        doc = videoCollection.getDocForHash(mfm.readFromMap(test2));
+        doc = videoCollection.getDocForHash(getHash(test2));
         assertNotNull("Test2 should have a doc!", doc);
 
 
@@ -266,10 +279,10 @@ public class CollectionTest extends com.limegroup.gnutella.util.BaseTestCase {
         LimeXMLDocument doc = null;
         LimeXMLReplyCollection.MapSerializer ms = null;
         // make audio.collection
-        doc = (new ID3Reader()).readDocument(test1);
-        map.put(mfm.readFromMap(test1), doc);
-        doc = (new ID3Reader()).readDocument(test2);
-        map.put(mfm.readFromMap(test2), doc);
+        doc = ID3Reader.readDocument(test1);
+        map.put(getHash(test1), doc);
+        doc = ID3Reader.readDocument(test2);
+        map.put(getHash(test2), doc);
         ms = new LimeXMLReplyCollection.MapSerializer(CommonUtils.getResourceFile(fileLocation+"audio.collection"), map);
         ms.commit();
         // made video.collection
@@ -280,14 +293,14 @@ public class CollectionTest extends com.limegroup.gnutella.util.BaseTestCase {
         doc = new LimeXMLDocument(nameVals, schemaURIVideo);
         doc.setIdentifier(test2.getCanonicalPath());
         doc.getXMLString();
-        map.put(mfm.readFromMap(test2), doc);
+        map.put(getHash(test2), doc);
         nameVals = new ArrayList();
         nameVals.add(new NameValue("videos__video__director__","file"));
         nameVals.add(new NameValue("videos__video__title__","null"));
         doc = new LimeXMLDocument("<?xml version=\"1.0\"?><videos xsi:noNamespaceSchemaLocation=\"http://www.limewire.com/schemas/video.xsd\"><video title=\"null\" director=\"file\" ></video></videos>");
         doc.setIdentifier(mason.getCanonicalPath());
         doc.getXMLString();
-        map.put(mfm.readFromMap(mason), doc);
+        map.put(getHash(mason), doc);
         ms = new LimeXMLReplyCollection.MapSerializer(CommonUtils.getResourceFile(fileLocation+"video.collection"), map);
         ms.commit();
     }
@@ -305,16 +318,14 @@ public class CollectionTest extends com.limegroup.gnutella.util.BaseTestCase {
         audioFile.renameTo(newAudio);
         videoFile.renameTo(newVideo);
     }
-
-
-    public static void main(String argv[]) {
-        junit.textui.TestRunner.run(suite());
-    }
-
-    public static Test suite() {
-        TestSuite suite =  new TestSuite("LimeXMLReplyCollection Unit Test");
-        suite.addTest(new TestSuite(CollectionTest.class));
-        return suite;
-    }
-
+    
+    private static URN getHash(File f) {
+        try {
+            return URN.createSHA1Urn(f);
+        } catch(IOException ioe) {
+            return null;
+        } catch(InterruptedException ie) {
+            return null;
+        }
+    }       
 }

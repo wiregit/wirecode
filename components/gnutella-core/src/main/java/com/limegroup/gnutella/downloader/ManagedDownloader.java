@@ -1496,7 +1496,7 @@ public class ManagedDownloader implements Downloader, Serializable {
         // If that fails, try killing any partial uploads we may have
         // to unlock the file, and then rename it.
         if (!success) {
-            FileDesc fd = RouterService.getFileManager().getFileDescMatching(
+            FileDesc fd = RouterService.getFileManager().getFileDescForFile(
                 incompleteFile);
             if( fd != null ) {
                 UploadManager upMan = RouterService.getUploadManager();
@@ -1523,13 +1523,11 @@ public class ManagedDownloader implements Downloader, Serializable {
         // first check if it conflicts with the saved dir....
         if (fileExists(completeFile))
             fileManager.removeFileIfShared(completeFile);
-        boolean fileAdded = 
+        FileDesc fileDesc = 
 		    fileManager.addFileIfShared(completeFile, getXMLDocuments());  
 
 		// Add the alternate locations to the newly saved local file
-		if(totalAlternateLocations != null && fileAdded) {
-			FileDesc fileDesc = 
-			    fileManager.getFileDescMatching(completeFile);  
+		if(totalAlternateLocations != null && fileDesc != null) {
 			// making this call now is necessary to avoid writing the 
 			// same alternate locations back to the requester as they sent 
 			// in their original headers
@@ -2751,11 +2749,10 @@ public class ManagedDownloader implements Downloader, Serializable {
     /**
      * Returns the union of all XML metadata documents from all hosts.
      */
-    private synchronized LimeXMLDocument[] getXMLDocuments() {
+    private synchronized List getXMLDocuments() {
         //TODO: we don't actually union here.  Also, should we only consider
         //those locations that we download from?  How about only those in this
         //bucket?
-        LimeXMLDocument[] retArray = null;
         List allDocs = new ArrayList();
 
         // get all docs possible
@@ -2768,13 +2765,7 @@ public class ManagedDownloader implements Downloader, Serializable {
             }
         }
 
-        if (allDocs.size() > 0) {
-			retArray = (LimeXMLDocument[])allDocs.toArray(new LimeXMLDocument[0]);
-        }
-        else
-            retArray = null;
-
-        return retArray;
+        return allDocs;
     }
 
     private void cleanup() {

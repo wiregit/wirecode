@@ -1,12 +1,14 @@
 package com.limegroup.gnutella.xml;
 
-import com.limegroup.gnutella.Response;
-import com.limegroup.gnutella.FileManager;
-import com.limegroup.gnutella.FileDesc;
-import com.limegroup.gnutella.ErrorService;
-import com.limegroup.gnutella.RouterService;
-import org.xml.sax.SAXException;
+import java.io.File;
 import java.io.IOException;
+
+import org.xml.sax.SAXException;
+
+import com.limegroup.gnutella.FileDesc;
+import com.limegroup.gnutella.FileManager;
+import com.limegroup.gnutella.Response;
+import com.limegroup.gnutella.RouterService;
 import com.sun.java.util.collections.List;
 
 
@@ -44,7 +46,6 @@ public class RichQueryHandler{
      * connections make two different queries. Then all bad things can happen.
      */
     public synchronized Response[] query(String XMLQuery,FileManager fManager){
-        debug("Sumeet: "+XMLQuery);
         if (XMLQuery.equals(""))
             return null;
         LimeXMLDocument queryDoc = null;
@@ -73,12 +74,10 @@ public class RichQueryHandler{
         long index=-1;
         long size=-1;
         String name="";
-        int z =0;
-        boolean valid = true;
-        debug("RQH.query(): # of resps = " + s);
+        int z = 0;
         boolean busy = 
             RouterService.getUploadManager().isBusy() &&
-            RouterService.getUploadManager().isQueueFull();        
+            RouterService.getUploadManager().isQueueFull();
         for(int i = 0; i < s; i++) {
             LimeXMLDocument currDoc = (LimeXMLDocument)matchingReplies.get(i);
             String subjectFile = currDoc.getIdentifier();//returns null if none
@@ -90,12 +89,12 @@ public class RichQueryHandler{
                 name = " "; //leave blank
                 res = new Response(index, size, name);
             } else { //meta-data about a specific file
-                fd = fManager.file2index(subjectFile);
+                fd = fManager.getFileDescForFile(new File(subjectFile));
                 if( fd == null || 
                    (busy && fd.getNumberOfAlternateLocations() >= 10) ) {
                     // if fd is null, MetaFileManager is out of synch with
                     // FileManager -- this is bad.
-                    valid = false;
+                    continue;
                 } else { //we found a file with the right name
 					index = fd.getIndex();
                     //need not send whole path; just name + index					
@@ -104,32 +103,27 @@ public class RichQueryHandler{
 					res = new Response(fd);
                 }
             }
-            if (valid) {
-                // Note that if any response was invalid,
-                // the array will be too small, and we'll
-                // have to resize it.
-                res.setDocument(currDoc);
-                retResponses[z] = res;
-                z++;
-            }
-            valid = true;
+            
+            // Note that if any response was invalid,
+            // the array will be too small, and we'll
+            // have to resize it.
+            res.setDocument(currDoc);
+            retResponses[z] = res;
+            z++;
         }
 
         // need to ensure that no nulls are returned in my response[]
         // z is a count of responses constructed, see just above...
-        // s == retResponses.length
-        if (z < s){
-            Response[] temp = new Response[z];  
-            for (int i = 0, j = 0; i < s; i++) // at most s responses
-                if (retResponses[i] != null)
-                    temp[j++] = retResponses[i];
+        // s == retResponses.length        
+        if (z < s) {
+            Response[] temp = new Response[z];
+            System.arraycopy(retResponses, 0, temp, 0, z);
             retResponses = temp;
         }
 
         debug("RQH: num Response = " + retResponses.length);
         return retResponses;
     }
-
 
     private final boolean debugOn = false;
     private void debug(String out) {

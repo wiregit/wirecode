@@ -16,34 +16,39 @@ public final class ID3Reader {
     private static final String schemaURI = 
          "http://www.limewire.com/schemas/audio.xsd";
 
-    private final String KEY_PREFIX = "audios" + XMLStringUtils.DELIMITER +
+    private static final String KEY_PREFIX = "audios" + XMLStringUtils.DELIMITER +
         "audio" + XMLStringUtils.DELIMITER;
 
-    private final String TRACK_KEY =    KEY_PREFIX + "track" + 
+    private static final String TRACK_KEY =    KEY_PREFIX + "track" + 
         XMLStringUtils.DELIMITER;
-    private final String ARTIST_KEY =   KEY_PREFIX + "artist" + 
+    private static final String ARTIST_KEY =   KEY_PREFIX + "artist" + 
         XMLStringUtils.DELIMITER;
-    private final String ALBUM_KEY =    KEY_PREFIX + "album" + 
+    private static final String ALBUM_KEY =    KEY_PREFIX + "album" + 
         XMLStringUtils.DELIMITER;
-    private final String TITLE_KEY =    KEY_PREFIX + "title" + 
+    private static final String TITLE_KEY =    KEY_PREFIX + "title" + 
         XMLStringUtils.DELIMITER;
-    private final String GENRE_KEY =    KEY_PREFIX + "genre" + 
+    private static final String GENRE_KEY =    KEY_PREFIX + "genre" + 
         XMLStringUtils.DELIMITER;
-    private final String YEAR_KEY =     KEY_PREFIX + "year" + 
+    private static final String YEAR_KEY =     KEY_PREFIX + "year" + 
         XMLStringUtils.DELIMITER;
-    private final String COMMENTS_KEY = KEY_PREFIX + "comments" + 
+    private static final String COMMENTS_KEY = KEY_PREFIX + "comments" + 
         XMLStringUtils.DELIMITER;
-    private final String BITRATE_KEY =  KEY_PREFIX + "bitrate" + 
+    private static final String BITRATE_KEY =  KEY_PREFIX + "bitrate" + 
         XMLStringUtils.DELIMITER;
-    private final String SECONDS_KEY =  KEY_PREFIX + "seconds" + 
+    private static final String SECONDS_KEY =  KEY_PREFIX + "seconds" + 
         XMLStringUtils.DELIMITER;
+        
+    /**
+     * This class should never be constructed.
+     */
+    private ID3Reader() {}
 
 
     /**
      * Attempts to read an ID3 tag from the specified file.
      * @return an null if the document has no ID3 tag
      */
-    public String readDocument(File file,boolean solo) throws IOException{
+    public static String readDocument(File file,boolean solo) throws IOException{
         Object[] info = parseFile(file);
         String title = (String) info[0], artist = (String) info[1], 
         album = (String) info[2], year = (String) info[3], 
@@ -56,7 +61,7 @@ public final class ID3Reader {
         StringBuffer strB = new StringBuffer();
         if(solo){
             appendStrings("<audios noNamespaceSchemaLocation=\"",
-                          this.schemaURI,
+                          schemaURI,
                           strB);
             strB.append("><audio ");
             String filename = file.getCanonicalPath();
@@ -93,7 +98,7 @@ public final class ID3Reader {
     }
 
 
-    public LimeXMLDocument readDocument(File file) throws IOException {
+    public static LimeXMLDocument readDocument(File file) throws IOException {
         Object[] info = parseFile(file);
         short track = ((Short) info[4]).shortValue();
         short gen = ((Short) info[6]).shortValue();
@@ -128,7 +133,7 @@ public final class ID3Reader {
        track, comment, gen, bitrate, seconds.  Indices 0, 1, 2, 3, and 5 are
        Strings.  Indices 4 and 6 are Shorts.  Indices 7 and 8 are Integers.  
      */
-    private Object[] parseFile(File file) throws IOException {
+    private static Object[] parseFile(File file) throws IOException {
         Object[] retObjs = new Object[9];
 
         // default vals...
@@ -216,7 +221,7 @@ public final class ID3Reader {
     }
 
 
-    private void appendStrings(String key, String value,StringBuffer appendTo) {
+    private static void appendStrings(String key, String value,StringBuffer appendTo) {
         appendTo.append(key);
         appendTo.append(value);
         appendTo.append("\"");

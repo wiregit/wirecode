@@ -6,19 +6,10 @@ import java.io.*;
 import com.sun.java.util.collections.*;
 
 /**
- * A simple FileManager that shares one file of (near) infinite length.
+ * A file manager that behaves exactly like FileManager would if
+ * MetaFileManager didn't exist.
  */
-public class FileManagerStub extends FileManager {
-
-    FileDescStub fdStub = new FileDescStub();
-
-    public FileDesc get(int i) {
-        return fdStub;
-    }
-    
-    public boolean isValidIndex(int i) {
-        return true;
-    }
+public class SimpleFileManager extends FileManager {
     
     public boolean shouldIncludeXMLInResponse(QueryRequest qr) {
         return false;

@@ -17,8 +17,7 @@ import com.limegroup.gnutella.ByteOrder;
  *			One of the Sindhis (both?), limewire team
  *			Gustav "Grim Reaper" Munkby, grd@swipnet.se
  *
- * TODO: remove all of the crazy catch(Throwable) instances from this class
- *       -- add tests?
+ * TODO: add tests?
  */
 //34567890123456789012345678901234567890123456789012345678901234567890123456789 
 public final class MP3Info {
@@ -187,8 +186,7 @@ public final class MP3Info {
      *
      * @exception java.io.IOException mp3 fileName had no valid header
      */
-    public MP3Info(String file) 
-    	throws IOException {
+    public MP3Info(String file) throws IOException {
         
         _file = file;
              //TODO:use 1.4 BufferMaps
@@ -274,11 +272,11 @@ public final class MP3Info {
 				pos += c - 3;
 				
 				c = fis.read(buf, 3, buf.length-3); //read next chunk			
-			} while (c != -1 && pos < 20000); //c is # of bytes read; until EOF
-			//stop checking after first 20k, could be corrupted/infected file
+			} while (c != -1 && pos < 100000); //c is # of bytes read; until EOF
+			//stop checking after first 100k, could be corrupted/infected file
 
 			
-		if (c == -1 || pos >= 20000) { // what the $#*!
+		if (c == -1 || pos >= 100000) { // what the $#*!
 			_header = 0;
 			throw new IOException("MP3 header not found.");
 		}
@@ -288,27 +286,39 @@ public final class MP3Info {
 		// @see loadVBRHeeader for VBR format specifics
 		// advance to check where Xing header would be
 		// make sure we have enough data to test/work with
-		// pos= current pos in file, i= pos in buffer
         // 120 is total 'possible' VBR length
         // 36  max bytes to skip
         // 3   is to cover length of VBR header
-        int need = (int)((adjustedEOB + 3) - (120 + 36 + i)); 
+        int need = buf.length   // total we have.
+                   - i          // where we're currently at
+                   - 3          // VBR header
+                   - 120        // max possible VBR length
+                   - 36;        // max bytes to skip
   		if (need < 0) { //special case, we need more data
-	  		//shift current data left to make room for need data
-	  		i -= need;
-			for (i = 0, need = -need; 
-		  		 need < buf.length; i++, need++ ) {
-		  		buf[i] = buf[need];
+	  		need = -need; // flip need to be positive.
+	  		i -= need; // shift our offset down by the amount we'll be moving
+	  		int j = 0;
+			for (; need < buf.length; j++, need++ ) { // shift data
+		  		buf[j] = buf[need];
 	  		}
+	  		// IMPORTANT:
+	  		// j is NOT equal to i for the following reason:
+	  		// i is where we last stopped reading data from the buffer.
+	  		// j is where the last bit of valid information in the buffer is.
+	  		// we must continue reading from the buffer using i, but we must
+	  		// fill up the the rest of the buffer from j on.
 	  		
-			c = fis.read(buf, 0, buf.length); //more
+	  		//read more, starting at where we last have valid data.
+			c = fis.read(buf, j, buf.length-j);
 		}
+		
+		
 		if ( getVersionIndex() == 3 ) { // mpeg version 1            
             i += (getModeIndex()==3  ?  21  :  36);
         }
         else { // mpeg version 2 or 2.5            
             i += (getModeIndex()==3  ?  23  :  21);
-        }		
+        }
 		
         // Doh!! not all VBR files will have correct tags, it's optional
         switch (buf[i+0]) {
@@ -341,13 +351,9 @@ public final class MP3Info {
 			//true VBR file may not have a proper tag, to find out for sure
 			//read every header to calculate true variable rate, length, etc
 
-		}
-        
-        }
-		catch (Throwable t) {
-			throw new IOException("Invalid MP3 File! " + t);
-		}
-		finally { //cleanup
+		} 
+		
+	    } finally { //cleanup
 			try {				
 				if( fis != null )
 				    fis.close(); 
@@ -905,13 +911,16 @@ public final class MP3Info {
 			  && buffer[12] == 'f'
 			  && buffer[13] == 'm'
 			  && buffer[14] == 't'
-			  && buffer[15] == ' ';		
-			  
-			  fis.close(); //finally not necessary
-	    }
-	    catch (Throwable t) {
-		    //an error isn't important; we know file is NOT RIFF-WAV		    
-	    }
+			  && buffer[15] == ' ';
+	    } catch(IOException ignored) {
+	        // not a riff.
+	    } finally {
+	        if( fis != null ) {
+	            try {
+	                fis.close();
+                } catch(IOException ioe) {}
+            }
+        }
 	    
 	    return result; 
 	}
@@ -1009,34 +1018,30 @@ i 0
 	 *              seek offsets 0-F (from beginning of file)
 	 *              
 	 */
-	private void loadFhgHeader (byte buf[], int pos) {
-	
-		try {	        
-			_vbrHeader = new MP3Info.VBRHeader();
+	private void loadFhgHeader (byte buf[], int pos) {	        
+		_vbrHeader = new MP3Info.VBRHeader();
+		
+		 _vbrHeader.scale = ByteOrder.ubyte2int(buf[pos+=2]);
 			
-			 _vbrHeader.scale = ByteOrder.ubyte2int(buf[pos+=2]);
-				
-			 _vbrHeader.numBytes = ((ByteOrder.ubyte2int(buf[++pos]) << 24) 
-			    				  + (ByteOrder.ubyte2int(buf[++pos]) << 16)
-			    				  + (ByteOrder.ubyte2int(buf[++pos]) <<  8) 
-			    				  + (ByteOrder.ubyte2int(buf[++pos])     ));
-			 _vbrHeader.numFrames =((ByteOrder.ubyte2int(buf[++pos]) << 24)
-			    				  + (ByteOrder.ubyte2int(buf[++pos]) << 16)
-			    				  + (ByteOrder.ubyte2int(buf[++pos]) <<  8) 
-			    				  + (ByteOrder.ubyte2int(buf[++pos])     ));
+		 _vbrHeader.numBytes = ((ByteOrder.ubyte2int(buf[++pos]) << 24) 
+		    				  + (ByteOrder.ubyte2int(buf[++pos]) << 16)
+		    				  + (ByteOrder.ubyte2int(buf[++pos]) <<  8) 
+		    				  + (ByteOrder.ubyte2int(buf[++pos])     ));
+		 _vbrHeader.numFrames =((ByteOrder.ubyte2int(buf[++pos]) << 24)
+		    				  + (ByteOrder.ubyte2int(buf[++pos]) << 16)
+		    				  + (ByteOrder.ubyte2int(buf[++pos]) <<  8) 
+		    				  + (ByteOrder.ubyte2int(buf[++pos])     ));
 
-			/* TOC ignored  [format is sketchy]
-			byte b = (byte)ByteOrder.ubyte2int(buf[pos+=3]);			
-			if((b & (byte)(1 << 2 )) != 0 ) {
-				_vbrHeader.seek =((ByteOrder.ubyte2int(buf[++pos]) << 8)
-			    			    + (ByteOrder.ubyte2int(buf[++pos])     ))
-			    _vbrHeader.toc = new byte[100];
-			    System.arraycopy(buf, ++pos, _vbrHeader.toc, 0, f);
-			    
-			}
-			*/								 
-		}	
-		catch (Throwable t) {} //bombed trying to build VBitRate
+		/* TOC ignored  [format is sketchy]
+		byte b = (byte)ByteOrder.ubyte2int(buf[pos+=3]);			
+		if((b & (byte)(1 << 2 )) != 0 ) {
+			_vbrHeader.seek =((ByteOrder.ubyte2int(buf[++pos]) << 8)
+		    			    + (ByteOrder.ubyte2int(buf[++pos])     ))
+		    _vbrHeader.toc = new byte[100];
+		    System.arraycopy(buf, ++pos, _vbrHeader.toc, 0, f);
+		    
+		}
+		*/
 	}
 
 	/** 
@@ -1070,31 +1075,27 @@ i 0
 	 *              A VBR quality indicator: 0=best 100=worst 
 	 */
 	private void loadXingHeader (byte buf[], int offset) {
-	
-		try {	        
-			_vbrHeader = new MP3Info.VBRHeader();
-			byte b = (byte)ByteOrder.ubyte2int(buf[offset+=3]);
-			if ((b & 1) != 0) {	
-		     _vbrHeader.numFrames =((ByteOrder.ubyte2int(buf[++offset]) << 24)
-			    				  + (ByteOrder.ubyte2int(buf[++offset]) << 16)
-			    				  + (ByteOrder.ubyte2int(buf[++offset]) <<  8) 
-			    				  + (ByteOrder.ubyte2int(buf[++offset])     ));
-			}
-			if((b & 2) != 0 ) {
-			 _vbrHeader.numBytes = ((ByteOrder.ubyte2int(buf[++offset]) << 24) 
-			    				  + (ByteOrder.ubyte2int(buf[++offset]) << 16)
-			    				  + (ByteOrder.ubyte2int(buf[++offset]) <<  8) 
-			    				  + (ByteOrder.ubyte2int(buf[++offset])     ));
-			}
-			if((b & 4) != 0 ) {
-			    _vbrHeader.toc = new byte[100];
-			    System.arraycopy(buf, ++offset, _vbrHeader.toc, 0, 100);
-			    offset += 99;
-			}
-			if((b & 8) != 0 ) {
-				_vbrHeader.scale = ByteOrder.ubyte2int(buf[offset+=4]);
-			}						 
-		}	
-		catch (Throwable t) {} //bombed trying to build VBitRate
+		_vbrHeader = new MP3Info.VBRHeader();
+		byte b = (byte)ByteOrder.ubyte2int(buf[offset+=3]);
+		if ((b & 1) != 0) {	
+	     _vbrHeader.numFrames =((ByteOrder.ubyte2int(buf[++offset]) << 24)
+		    				  + (ByteOrder.ubyte2int(buf[++offset]) << 16)
+		    				  + (ByteOrder.ubyte2int(buf[++offset]) <<  8) 
+		    				  + (ByteOrder.ubyte2int(buf[++offset])     ));
+		}
+		if((b & 2) != 0 ) {
+		 _vbrHeader.numBytes = ((ByteOrder.ubyte2int(buf[++offset]) << 24) 
+		    				  + (ByteOrder.ubyte2int(buf[++offset]) << 16)
+		    				  + (ByteOrder.ubyte2int(buf[++offset]) <<  8) 
+		    				  + (ByteOrder.ubyte2int(buf[++offset])     ));
+		}
+		if((b & 4) != 0 ) {
+		    _vbrHeader.toc = new byte[100];
+		    System.arraycopy(buf, ++offset, _vbrHeader.toc, 0, 100);
+		    offset += 99;
+		}
+		if((b & 8) != 0 ) {
+			_vbrHeader.scale = ByteOrder.ubyte2int(buf[offset+=4]);
+        }
 	}
 }

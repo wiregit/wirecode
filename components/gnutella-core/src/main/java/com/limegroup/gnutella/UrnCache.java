@@ -10,6 +10,7 @@ import java.io.ObjectOutputStream;
 import java.io.Serializable;
 
 import com.limegroup.gnutella.util.CommonUtils;
+import com.limegroup.gnutella.util.DataUtils;
 import com.sun.java.util.collections.Collections;
 import com.sun.java.util.collections.HashMap;
 import com.sun.java.util.collections.HashSet;
@@ -48,14 +49,6 @@ public final class UrnCache {
     private static final Map /* UrnSetKey -> HashSet */ URN_MAP =
 		createMap();
 
-	/**
-	 * Constant for an empty, unmodifiable <tt>Set</tt>.  This is necessary
-	 * because Collections.EMPTY_SET is not serializable in the collections 
-	 * 1.1 implementation.
-	 */
-	private static final Set EMPTY_SET = 
-		Collections.unmodifiableSet(new HashSet());
-
     /**
 	 * Returns the <tt>UrnCache</tt> instance.
 	 *
@@ -88,20 +81,26 @@ public final class UrnCache {
     public synchronized Set getUrns(File file) {
         // don't trust failed mod times
         if (file.lastModified() == 0L) {
-			return EMPTY_SET;
+			return DataUtils.EMPTY_SET;
 		} 
 		UrnSetKey key = new UrnSetKey(file);
 
         // one or more "urn:" names for this file 
 		Set cachedUrns = (Set)URN_MAP.get(key);
 		if(cachedUrns == null) {
-			return EMPTY_SET;
+			return DataUtils.EMPTY_SET;
 		}
 
 		return Collections.unmodifiableSet(cachedUrns);
     }
-
-
+    
+    /**
+     * Removes any URNs that associated with a specified file.
+     */
+    public synchronized void removeUrns(File f) {
+        UrnSetKey k = new UrnSetKey(f);
+        URN_MAP.remove(k);
+    }
 
     /**
      * Add URNs for the specified <tt>FileDesc</tt> instance to URN_MAP.

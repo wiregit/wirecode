@@ -37,7 +37,26 @@ public class ID3Editor{
         if (debugOn)
             System.out.println(out);
     }
-
+    
+    public boolean equals(Object o) {
+        if( o == this ) return true;
+        if( !(o instanceof ID3Editor) ) return false;
+        
+        ID3Editor other = (ID3Editor)o;
+        return matches(title_, other.title_) &&
+               matches(artist_, other.artist_) &&
+               matches(album_, other.album_) &&
+               matches(year_, other.year_) &&
+               matches(track_, other.track_) &&
+               matches(comment_, other.comment_) &&
+               matches(genre_, other.genre_);
+    }
+    
+    private boolean matches(final String a, final String b) {
+        if( a == null )
+            return b == null;
+        return a.equals(b);
+    }
 
     /** 
      * @return object[0] = (Integer) index just before beginning of tag=value, 
@@ -278,9 +297,6 @@ public class ID3Editor{
             
             //genre
             byte genreByte= getGenreByte();
-            if(genreByte == -1) {
-                return LimeXMLReplyCollection.FAILED_GENRE;
-            } 
             try {
                 file.write(genreByte);
             } catch(IOException e) {
@@ -304,14 +320,14 @@ public class ID3Editor{
         
         if (val==null || val.equals("")) {
             fromString = new byte[maxLen];
-            Arrays.fill(fromString,0,maxLen-1,(byte)0);//fill it all with 0
+            Arrays.fill(fromString,0,maxLen,(byte)0);//fill it all with 0
         } else
             fromString = val.getBytes();
             
         int len = fromString.length;
         if (len < maxLen) {
             System.arraycopy(fromString,0,buffer,0,len);
-            Arrays.fill(buffer,len,maxLen-1,(byte)0);//fill the rest with 0s
+            Arrays.fill(buffer,len,maxLen,(byte)0);//fill the rest with 0s
         } else//cut off the rest
             System.arraycopy(fromString,0,buffer,0,maxLen);
             

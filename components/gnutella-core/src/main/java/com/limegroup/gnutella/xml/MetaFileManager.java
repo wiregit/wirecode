@@ -2,26 +2,19 @@ package com.limegroup.gnutella.xml;
 
 import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.messages.*;
-import com.limegroup.gnutella.settings.*;
 import java.io.*;
 import com.sun.java.util.collections.*;
 
-//imports to make the test code work
-import com.limegroup.gnutella.util.NameValue;
-
+/**
+ * This class handles querying shared files with XML data and returning XML data
+ * in replies.
+ */
 public class MetaFileManager extends FileManager {
     
-    Object metaLocker = new Object();
-    boolean initialized = false;
-    
     /**
-     * keeps a file -> hash of files (file -> string)
-     * <p>
-     * <b>You must use the synchronized method in this class to read
-     *  or write from this map
-     * </b>
+     * Lock used when loading meta-settings.
      */
-    private Map fileToHash /* File -> String */ = new HashMap();
+    private final Object META_LOCK = new Object();
     
     /**
      * Overrides FileManager.query.
@@ -29,22 +22,75 @@ public class MetaFileManager extends FileManager {
      * Used to search XML information in addition to normal searches.
      */
     public synchronized Response[] query(QueryRequest request) {
-        // only return XML if the source wants it or if the source wants
-        // out-of-band results.
-        if (request.desiresXMLResponses() || 
-            request.desiresOutOfBandReplies()) {
+        Response[] result = super.query(request);
+
+        if (shouldIncludeXMLInResponse(request)) {
             String rich = request.getRichQuery();
-            Response[] normals=super.query(request);//normal text query.
-            addAudioMetadata(normals);
-            RichQueryHandler richHandler = RichQueryHandler.instance();
-            Response[] metas=richHandler.query(rich,this);
-            if (metas == null)// the rich query is malformed OR non-existent
-                return normals;
-            Response[] result = union(normals,metas);
-            return result;
+            Response[] metas = RichQueryHandler.instance().query(rich,this);
+            if (metas != null) // valid query & responses.
+                result = union(result, metas);
         }
-        else
-            return super.query(request);
+        
+        return result;
+    }
+    
+    /**
+     * Returns whether or not a response to this query should include XML.
+     * Currently only includes XML if the request desires it or
+     * if the request wants an out of band reply.
+     */
+    protected boolean shouldIncludeXMLInResponse(QueryRequest qr) {
+        return qr.desiresXMLResponses() || 
+               qr.desiresOutOfBandReplies();
+    }
+    
+    /**
+     * Adds XML to the response.  This assumes that shouldIncludeXMLInResponse
+     * was already consulted and returned true.
+     *
+     * If the FileDesc has no XMLDocuments, this does nothing.
+     * If the FileDesc has one XML Document, this sets it as the response doc.
+     * If the FileDesc has multiple XML Documents, this does nothing.
+     * The reasoning behind not setting the document when there are multiple
+     * XML docs is that presumably the query will be a 'rich' query,
+     * and we want to include only the schema that was in the query.
+     */
+    protected void addXMLToResponse(Response response, FileDesc fd) {
+        List docs = fd.getLimeXMLDocuments();
+        if( docs.size() == 0 )
+            return;
+        if( docs.size() == 1 )
+            response.setDocument((LimeXMLDocument)docs.get(0));
+    }
+    
+    /**
+     * Removes the LimeXMLDocuments associated with the removed
+     * FileDesc from the various LimeXMLReplyCollections.
+     */
+    public FileDesc removeFileIfShared(File f) {
+        FileDesc fd = super.removeFileIfShared(f);
+        // nothing removed, ignore.
+        if( fd == null )
+            return null;
+            
+        SchemaReplyCollectionMapper mapper =
+            SchemaReplyCollectionMapper.instance();            
+            
+        //Get the schema URI of each document and remove from the collection
+        // We must remember the schemas and then remove the doc, or we will
+        // get a concurrent mod exception because removing the doc also
+        // removes it from the FileDesc.
+        List xmlDocs = fd.getLimeXMLDocuments();
+        List schemas = new LinkedList();
+        for(Iterator i = xmlDocs.iterator(); i.hasNext(); )
+            schemas.add( ((LimeXMLDocument)i.next()).getSchemaURI() );
+        for(Iterator i = schemas.iterator(); i.hasNext(); ) {
+            String uri = (String)i.next();
+            LimeXMLReplyCollection col = mapper.getReplyCollection(uri);
+            if( col != null )
+                col.removeDoc( fd );
+        }
+        return fd;
     }
 
     /**
@@ -53,138 +99,33 @@ public class MetaFileManager extends FileManager {
      *  given XML documents.  metadata may be null if there is no data.  Returns
      *  the value from addFileIfShared.  Returns the value from addFileIfShared.
      *  <b>WARNING: this is a potential security hazard.</b> 
+     *
+     * @return -1 if the file was not added, otherwise the index of the newly
+     * added file.
      */
-	public synchronized boolean addFileIfShared(File file,
-                                                LimeXMLDocument[] metadata) {
-        boolean added=super.addFileIfShared(file, metadata);
+	public FileDesc addFileIfShared(File file, List metadata) {
+        FileDesc fd = super.addFileIfShared(file);
+        
+        // if not added or no metadata, nothing else to do.
+        if( fd == null || metadata == null )
+            return fd;
 
-        if (added && metadata!=null) {
-            SchemaReplyCollectionMapper mapper =
-                SchemaReplyCollectionMapper.instance();
+        SchemaReplyCollectionMapper mapper =
+            SchemaReplyCollectionMapper.instance();
 
-            // compute the hash of the file.  integral for proceeding.
-            String hash;
-            try {
-                hash = new String(LimeXMLUtils.hashFile(file));
-                if (hash == null)
-                    throw new IOException("hash failed");
-                // add to the file manager
-                writeToMap(file, hash);
-            } catch (IOException hashFailed) {
-                return true;  //file added but not metadata!
-            }
-            
-            // add xml docs as appropriate
-            for (int i = 0;
-                 (metadata != null) && (i < metadata.length);
-                 i++) {
-                LimeXMLDocument currDoc = metadata[i];
-                String uri = currDoc.getSchemaURI();
-                LimeXMLReplyCollection collection =
-                mapper.getReplyCollection(uri);
-                
-                if (collection != null)
-                    collection.addReplyWithCommit(file, hash, currDoc);
-            }
+        Assert.that( fd != null, "null fd just added.");
+        
+        // add xml docs as appropriate
+        for(Iterator iter = metadata.iterator(); iter.hasNext(); ) {
+            LimeXMLDocument currDoc = (LimeXMLDocument)iter.next();
+            String uri = currDoc.getSchemaURI();
+            LimeXMLReplyCollection collection = mapper.getReplyCollection(uri);
+            if (collection != null)
+                collection.addReplyWithCommit(file, fd, currDoc);
         }
-        return added;
+        
+        return fd;
     }
-
-    public synchronized boolean renameFileIfShared(File oldFile, File newFile) {
-        LimeXMLSchemaRepository rep = LimeXMLSchemaRepository.instance();
-        String[] uris = rep.getAvailableSchemaURIs();
-        ArrayList l = new ArrayList();
-        for(int i=0; i< uris.length; i++) {
-            LimeXMLDocument d = getDocument(uris[i],oldFile);
-            if(d!=null)
-                l.add(d);
-        }
-        LimeXMLDocument[] docs = new LimeXMLDocument[l.size()];
-        l.toArray(docs);
-        //OK. We have all the information we need.
-        ActivityCallback savedCallback = _callback;
-        _callback = null;
-        try {
-            boolean removed = removeFileIfShared(oldFile);
-            if(!removed)
-                return false;
-            boolean added = addFileIfShared(newFile, docs);
-            if(!added)//This is probably inadequate, we should roll back. 
-                return false; //But FM does it like this.
-            return true;
-        } finally {
-            _callback=savedCallback;
-        }
-    }
-
-    private void addAudioMetadata(Response[] responses){
-        if (responses == null)//responses may be null
-            return;
-        String audioURI = "http://www.limewire.com/schemas/audio.xsd";
-        SchemaReplyCollectionMapper map=SchemaReplyCollectionMapper.instance();
-        LimeXMLReplyCollection coll = map.getReplyCollection(audioURI);
-        if(coll == null)//if there schemas are not loaded
-            return;
-        int z = responses.length;
-        for(int i = 0; i < z; i++){
-            FileDesc f = get((int)responses[i].getIndex());
-			File file = f.getFile();
-            String hash=readFromMap(file);
-            LimeXMLDocument doc = coll.getDocForHash(hash);
-            if(doc==null)
-                continue;
-            responses[i].setDocument(doc);            
-        }
-    }
-    
-    /**
-     * The rule is that to either read or write to/from this
-     * map you have to obtain a lock on it
-     */    
-    public String readFromMap(Object file){
-        String hash = null;
-        synchronized (fileToHash) {
-            hash = (String) fileToHash.get(file);
-        }
-        return hash;
-    }
-
-    
-    public void writeToMap(Object file, Object hash) {
-        synchronized (fileToHash) {
-            fileToHash.put(file, hash);
-        }
-    }
-
-
-    /**
-     * Looks at the  LimeXMlReplyCollections other than the one passed as
-     * a parameter, and replaces the old hashValue with the new one.
-     * <p>
-     * package access, since this method is only called from 
-     * LimeXMLReplyCollection. Further the caller is always the 
-     * audio LimeXMLReplyCollectin and, even further, it is only called
-     * when the file being edited is an mp3 file
-     */
-    void handleChangedHash(String oldHash, String newHash, 
-                                      LimeXMLReplyCollection collection){
-        LimeXMLSchemaRepository rep = LimeXMLSchemaRepository.instance();
-        SchemaReplyCollectionMapper map=SchemaReplyCollectionMapper.instance();
-        String[] schemas = rep.getAvailableSchemaURIs();
-        int l = schemas.length;
-        for(int i=0;i<l;i++){
-            LimeXMLReplyCollection coll = map.getReplyCollection(schemas[i]);
-            if(coll!=collection){//only look at other collections
-                LimeXMLDocument d=coll.getDocForHash(oldHash);
-                if(d!=null){//we have a value...must replace
-                    coll.removeDoc(oldHash);
-                    coll.addReply(newHash,d);
-                    coll.write();
-                }//affected collection done
-            }
-        }
-    }
-
 
     /**This method overrides FileManager.loadSettingsBlocking(), though
      * it calls the super method to load up the shared file DB.  Then, it
@@ -202,123 +143,64 @@ public class MetaFileManager extends FileManager {
         super.loadSettingsBlocking(notifyOnClear);
         if (loadThreadInterrupted())
             return;
-        synchronized(metaLocker){
-            if (!initialized){//do this only on startup
-                //clear out the HashMap, don't want to have old and potentially
-                //unshared hashes around anymore.
-                fileToHash.clear();
-                // now recreate the hashes
-                createFileToHashMaps();
-                SchemaReplyCollectionMapper mapper = 
-                      SchemaReplyCollectionMapper.instance();
-                //created maper schemaURI --> ReplyCollection
-                LimeXMLSchemaRepository schemaRepository = 
-                      LimeXMLSchemaRepository.instance();                
+        synchronized(META_LOCK){
+            SchemaReplyCollectionMapper mapper = 
+                  SchemaReplyCollectionMapper.instance();
+            //created maper schemaURI --> ReplyCollection
+            LimeXMLSchemaRepository schemaRepository = 
+                  LimeXMLSchemaRepository.instance();
 
-                if (loadThreadInterrupted())
-                    return;
+            if (loadThreadInterrupted())
+                return;
 
-                //now the schemaRepository contains all the schemas.
-                String[] schemas = schemaRepository.getAvailableSchemaURIs();
-                //we have a list of schemas
-                int len = schemas.length;
-                LimeXMLReplyCollection collection;  
-                for(int i=0;
-                    (i<len) && !loadThreadInterrupted();
-                    i++){
-                    //One ReplyCollection per schema
-                    String s = LimeXMLSchema.getDisplayString(schemas[i]);
-                    collection = 
-                    new LimeXMLReplyCollection(fileToHash, schemas[i], this, 
-                                               s.equalsIgnoreCase("audio"));
-                    //Note: the collection may have size==0!
-                    mapper.add(schemas[i],collection);
-                }                
-            }//end of if, we may be initialized, may have been interrupted 
-            // fell through...
-            /* We never set it to true.
-              if (!loadThreadInterrupted())
-              initialized = true;
-            */
+            //now the schemaRepository contains all the schemas.
+            String[] schemas = schemaRepository.getAvailableSchemaURIs();
+            //we have a list of schemas
+            int len = schemas.length;
+            LimeXMLReplyCollection collection;
+            FileDesc fds[] = super.getAllSharedFileDescriptors();
+            for(int i=0; i < len && !loadThreadInterrupted(); i++) {
+                //One ReplyCollection per schema
+                String s = LimeXMLSchema.getDisplayString(schemas[i]);
+                collection = 
+                    new LimeXMLReplyCollection(fds, schemas[i], 
+                                           s.equalsIgnoreCase("audio"));
+                //Note: the collection may have size==0!
+                mapper.add(schemas[i],collection);
+            }
             //showXMLData();
         }//end of synchronized block
 		_callback.setAnnotateEnabled(true);
-    }//end of loadSettings.
-
-
-    private Response[] union(Response[] normals, Response[] metas){       
-        if(normals == null)
-            return metas;
-        if(metas==null)
-            return normals;
-        //So they are both not null
-        HashSet unionSet = new HashSet();
-        for (int j =0; j<metas.length; j++){
-            if(metas[j] != null){
-                //There will be nulls at the end of metas if meta-data 
-                // inconsistent see bad case in RichQueryHandler for details
-                unionSet.add(metas[j]);
-            }
-        }
-        for(int i =0; i<normals.length; i++)
-            unionSet.add(normals[i]);
-        //The set contains all the elements that are the union of the 2 arrays
-        int size = unionSet.size();
-        Iterator iter = unionSet.iterator();
-        unionSet = null;//clear the memory
-        Response[] retArray = new Response[size];
-        for (int k =0; k< size; k++){
-            Response r = (Response)iter.next();
-            retArray[k]=r;
-        }
-        return retArray;
     }
 
     /**
-     * Scans all the shared directories recursively and finds files that
-     * have .mp3 extension, and adds them to a hashmap keyed by hashes.
-     * <p> 
-     * Also creates another map that stores the hash to File of non mp3 files
+     * Creates a new array, the size of which is less than or equal
+     * to normals.length + metas.length.
      */
-    private void createFileToHashMaps(){
-        //ArrayList dirs = new 
-		//            ArrayList(Arrays.asList(man.getDirectoriesAsArray()));
-        ArrayList dirs = new 
-            ArrayList(Arrays.asList((File[])SharingSettings.DIRECTORIES_TO_SHARE.getValue()));
+    private Response[] union(Response[] normals, Response[] metas){       
+        if(normals == null)
+            return metas;
+        if(metas == null)
+            return normals;
+            
+            
+        // It is important to use a HashSet here so that duplicate
+        // responses are not sent.
+        // Unfortunately, it is still possible that one Response
+        // did not have metadata but the other did, causing two
+        // responses for the same file.
+            
+        Set unionSet = new HashSet();
+        for(int i = 0; i < metas.length; i++)
+            unionSet.add(metas[i]);
+        for(int i = 0; i < normals.length; i++)
+            unionSet.add(normals[i]);
 
-        int k=0;
-        while(k<dirs.size() && !loadThreadInterrupted()) {
-            File currDir = (File)dirs.get(k);
-            k++;
-            //add all subdirectories to dirs
-            String[] subFiles = currDir.list();
-            int z = 0;
-            if (subFiles != null) 
-                z = subFiles.length;
-            for(int j=0;j<z;j++){
-                File f = new File(currDir,subFiles[j]);
-                if(f.isDirectory())
-                    dirs.add(f);
-            }
-            //check files in this dir for .mp3 files.
-            File[] files = getSharedFiles(currDir);
-            int size = 0;
-            if (files != null)
-                size = files.length;
-            for(int i=0;i<size && !loadThreadInterrupted();i++){
-                    String name="";
-                    String hash="";
-                    try{
-                        name = files[i].getCanonicalPath();
-                        hash = new String(LimeXMLUtils.hashFile(files[i]));
-                    }catch(IOException e){
-                        continue;
-                    }
-                    writeToMap(files[i],hash);
-            }
-        }
+        //The set contains all the elements that are the union of the 2 arrays
+        Response[] retArray = new Response[unionSet.size()];
+        retArray = (Response[])unionSet.toArray(retArray);
+        return retArray;
     }
-
 
     /**
      * Returns a list of all the words in the annotations - leaves out
@@ -359,32 +241,6 @@ public class MetaFileManager extends FileManager {
                 words.add(schemas[i]);        
         return words;
     }
-    
-    /**
-     * returns the document corresponding to the schame and the file
-     * passed as parametere. 
-     * <p>
-     * Returns null if the document is not found in the schema
-     */
-    public LimeXMLDocument getDocument(String schemaURI, File f){
-        String hash = null;
-        hash = readFromMap(f);
-        
-        // no hash, return null.
-        if (hash == null) {
-            return null;
-        }
-
-        //OK we have the hash now
-        SchemaReplyCollectionMapper map=SchemaReplyCollectionMapper.instance();
-        LimeXMLReplyCollection coll = map.getReplyCollection(schemaURI);
-        
-        if (coll == null) { //lets be defensive
-            return null;
-        }
-        return coll.getDocForHash(hash);
-    }
-
 
     /**
      * Used only for showing the current XML data in the system. This method

@@ -971,20 +971,10 @@ public class RouterService {
      * If directory is not a shared directory, returns null.
      */
     public static FileDesc[] getSharedFileDescriptors(File directory) {
-        return fileManager.getSharedFileDescriptors(directory);
-    }
-    
-    /**
-     * Returns a list of all shared file in the given directory.
-     * All the file returned have already been passed to the gui
-     * via ActivityCallback.addSharedFile.  Note that if a file 
-     * is added to the given directory after this method completes, 
-     * addSharedFile will be called for that file.<p>
-     *
-     * If directory is not a shared directory, returns null.
-     */
-    public static File[] getSharedFiles(File directory) {
-        return fileManager.getSharedFiles(directory);
+        if( directory == null )
+            return fileManager.getAllSharedFileDescriptors();
+        else
+            return fileManager.getSharedFileDescriptors(directory);
     }
     
     /** 
