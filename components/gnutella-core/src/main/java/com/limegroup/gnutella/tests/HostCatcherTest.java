@@ -5,6 +5,7 @@ import java.io.*;
 import java.net.*;
 import java.util.Date;
 import com.sun.java.util.collections.NoSuchElementException;
+import com.sun.java.util.collections.Iterator;
 
 /**
  * Unit test for the HostCatcher, since it's too large and complicated
@@ -107,6 +108,22 @@ public class HostCatcherTest {
         }
         cache.listen();
  
+        //0. Test iterators.
+        hc.clear();
+        hc.spy(reply("192.168.0.1"), receiver);
+        hc.spy(reply("18.239.0.144"), receiver);
+        Iterator iter=hc.getHosts();
+        hc.spy(reply("192.168.0.2"), receiver);
+        Assert.that(((Endpoint)iter.next()).
+                       getHostname().equals("18.239.0.144"));
+        Assert.that(((Endpoint)iter.next()).
+                       getHostname().equals("192.168.0.1"));
+        Assert.that(! iter.hasNext()); //doesn't reflect last spy
+        iter=hc.getBestHosts(1);
+        Assert.that(((Endpoint)iter.next()).
+                       getHostname().equals("18.239.0.144"));
+        Assert.that(! iter.hasNext());
+
         //1. Quick-connect enabled but no quick connect hosts.  Should eventually
         //give normal pongs.
         System.out.println("****************** Test 1 *****************");
