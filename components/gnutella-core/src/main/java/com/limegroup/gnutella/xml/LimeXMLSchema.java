@@ -7,16 +7,19 @@
 package com.limegroup.gnutella.xml;
 import java.util.*;
 import java.io.*;
+import java.limegroup.gnutella.xml.basic.*;
 
 /**
  * Stores a XML schema, and provides access to various components
  * of schema
- * @author  asingla
+ * @author asingla
  * @version
  */
-public class LimeXMLSchema extends LimeXMLDocument
-{
+public class LimeXMLSchema extends LimeXMLDocument{
     
+    Vector 
+    
+
     /** 
      * Creates new LimeXMLSchema 
      * @param schemaFile The filefrom where to read the schema definition
