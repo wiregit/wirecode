@@ -39,6 +39,9 @@ public class HTTPUploader implements Uploader {
     private FileManager _fileManager;
 
     private BandwidthTrackerImpl bandwidthTracker=new BandwidthTrackerImpl();
+    
+    /** Flag indicating if the connection should be closed after this request*/
+    private boolean _closeConnection = false;
 
 
 	/****************** Constructors ***********************/
@@ -223,27 +226,6 @@ public class HTTPUploader implements Uploader {
 		} catch (IOException e) {
 			setState(INTERRUPTED);
 		}
-		stop();
-		
-	}
-
-	/**
-	 * closes the outputstream, inputstream, and socket
-	 * if they are not null.
-	 */
-	public void stop() {
-		try {
-			if (_ostream != null)
-				_ostream.close();
-		} catch (IOException e) {}
-		try {
-			if (_fis != null)
-				_fis.close();
-		} catch (IOException e) {}
-		try {
-			if (_socket != null) 
-				_socket.close();
-		} catch (IOException e) {}
 	}
 
 	/**
@@ -499,6 +481,11 @@ public class HTTPUploader implements Uploader {
 
     public float getMeasuredBandwidth() {
         return bandwidthTracker.getMeasuredBandwidth();
+    }
+    
+    //inherit doc comment
+    public boolean getCloseConnection() {
+        return _state.getCloseConnection();
     }
 }
 
