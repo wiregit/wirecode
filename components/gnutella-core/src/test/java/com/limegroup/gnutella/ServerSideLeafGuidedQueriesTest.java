@@ -170,8 +170,8 @@ public final class ServerSideLeafGuidedQueriesTest extends BaseTestCase {
 	 * Drains all messages 
 	 */
  	private static void drainAll() throws Exception {
- 	    drainAll(ULTRAPEERS);
- 	    drain(LEAF);
+ 	    drainAll(ULTRAPEERS, TIMEOUT);
+ 	    drain(LEAF, TIMEOUT);
  	}
 
 	/**
@@ -239,7 +239,7 @@ public final class ServerSideLeafGuidedQueriesTest extends BaseTestCase {
         QueryRequest nQuery = null;
         for (int i = 0; (i < ULTRAPEERS.length); i++)
             if (nQuery == null)
-                nQuery = getFirstQueryRequest(ULTRAPEERS[i]);
+                nQuery = getFirstQueryRequest(ULTRAPEERS[i], TIMEOUT);
 
         assertTrue(nQuery != null);
 
@@ -253,7 +253,7 @@ public final class ServerSideLeafGuidedQueriesTest extends BaseTestCase {
         Thread.sleep(3000);
         nQuery = null;
         for (int i = 0; (i < ULTRAPEERS.length); i++) {
-            nQuery = getFirstQueryRequest(ULTRAPEERS[i]);
+            nQuery = getFirstQueryRequest(ULTRAPEERS[i], TIMEOUT);
             assertNull(nQuery);
         }
         
@@ -275,7 +275,7 @@ public final class ServerSideLeafGuidedQueriesTest extends BaseTestCase {
         Thread.sleep(3000);
         QueryRequest nQuery = null;
         for (int i = 0; (i < ULTRAPEERS.length); i++) {
-            QueryRequest local = getFirstQueryRequest(ULTRAPEERS[i]);
+            QueryRequest local = getFirstQueryRequest(ULTRAPEERS[i], TIMEOUT);
             if ((nQuery == null) && (local != null))
                 nQuery = local;
             // send 10 results from this Ultrapeer....
@@ -289,7 +289,7 @@ public final class ServerSideLeafGuidedQueriesTest extends BaseTestCase {
         Thread.sleep(5000);
         nQuery = null;
         for (int i = 0; (i < ULTRAPEERS.length); i++) {
-            QueryRequest local  = getFirstQueryRequest(ULTRAPEERS[i]);
+            QueryRequest local  = getFirstQueryRequest(ULTRAPEERS[i], TIMEOUT);
             if ((nQuery == null) && (local != null))
                 nQuery = local;
         }
@@ -304,7 +304,7 @@ public final class ServerSideLeafGuidedQueriesTest extends BaseTestCase {
         Thread.sleep(3000);
         nQuery = null;
         for (int i = 0; (i < ULTRAPEERS.length); i++) {
-            nQuery = getFirstQueryRequest(ULTRAPEERS[i]);
+            nQuery = getFirstQueryRequest(ULTRAPEERS[i], TIMEOUT);
             assertNull(nQuery);
         }
     }
@@ -325,7 +325,7 @@ public final class ServerSideLeafGuidedQueriesTest extends BaseTestCase {
         Thread.sleep(3000);
         QueryRequest nQuery = null;
         for (int i = 0; (i < ULTRAPEERS.length) && (nQuery == null); i++) {
-            QueryRequest local = getFirstQueryRequest(ULTRAPEERS[i]);
+            QueryRequest local = getFirstQueryRequest(ULTRAPEERS[i], TIMEOUT);
             if ((nQuery == null) && (local != null))
                 nQuery = local;
             // send 10 results from this Ultrapeer....
@@ -345,7 +345,7 @@ public final class ServerSideLeafGuidedQueriesTest extends BaseTestCase {
         Thread.sleep(3000);
         nQuery = null;
         for (int i = 0; (i < ULTRAPEERS.length) && (nQuery == null); i++) {
-            QueryRequest local  = getFirstQueryRequest(ULTRAPEERS[i]);
+            QueryRequest local  = getFirstQueryRequest(ULTRAPEERS[i], TIMEOUT);
             if ((nQuery == null) && (local != null))
                 nQuery = local;
         }
@@ -360,7 +360,7 @@ public final class ServerSideLeafGuidedQueriesTest extends BaseTestCase {
         Thread.sleep(4000);
         nQuery = null;
         for (int i = 0; (i < ULTRAPEERS.length); i++) {
-            nQuery = getFirstQueryRequest(ULTRAPEERS[i]);
+            nQuery = getFirstQueryRequest(ULTRAPEERS[i], TIMEOUT);
             assertNull(nQuery);
         }
     }
@@ -381,7 +381,7 @@ public final class ServerSideLeafGuidedQueriesTest extends BaseTestCase {
         Thread.sleep(3000);
         QueryRequest nQuery = null;
         for (int i = 0; (i < ULTRAPEERS.length) && (nQuery == null); i++) {
-            QueryRequest local = getFirstQueryRequest(ULTRAPEERS[i]);
+            QueryRequest local = getFirstQueryRequest(ULTRAPEERS[i], TIMEOUT);
             if ((nQuery == null) && (local != null))
                 nQuery = local;
         }
@@ -398,7 +398,7 @@ public final class ServerSideLeafGuidedQueriesTest extends BaseTestCase {
         Thread.sleep(3000);
         nQuery = null;
         for (int i = 0; (i < ULTRAPEERS.length) && (nQuery == null); i++) {
-            QueryRequest local = getFirstQueryRequest(ULTRAPEERS[i]);
+            QueryRequest local = getFirstQueryRequest(ULTRAPEERS[i], TIMEOUT);
             if ((nQuery == null) && (local != null))
                 nQuery = local;
         }
@@ -414,7 +414,7 @@ public final class ServerSideLeafGuidedQueriesTest extends BaseTestCase {
         Thread.sleep(4000);
         nQuery = null;
         for (int i = 0; (i < ULTRAPEERS.length) && (nQuery == null); i++) {
-            QueryRequest local = getFirstQueryRequest(ULTRAPEERS[i]);
+            QueryRequest local = getFirstQueryRequest(ULTRAPEERS[i], TIMEOUT);
             if ((nQuery == null) && (local != null))
                 nQuery = local;
         }
@@ -431,7 +431,7 @@ public final class ServerSideLeafGuidedQueriesTest extends BaseTestCase {
         Thread.sleep(3000);
         nQuery = null;
         for (int i = 0; (i < ULTRAPEERS.length); i++) {
-            nQuery = getFirstQueryRequest(ULTRAPEERS[i]);
+            nQuery = getFirstQueryRequest(ULTRAPEERS[i], TIMEOUT);
             assertNull(nQuery);
         }
     }
