@@ -149,7 +149,7 @@ public final class HashTree implements HTTPHeaderValue, Serializable {
         // calculate the intermediary nodes to get the root hash & others.
         List allNodes = createAllParentNodes(nodes);
         return new HashTree(allNodes, sha1.toString(), fileSize);
-    }        
+    }
 
     /**
      * Reads a new HashTree from the network.  It is expected that the

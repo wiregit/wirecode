@@ -3,27 +3,24 @@ package com.limegroup.gnutella.downloader;
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.io.InputStream;
+import java.io.FileInputStream;
+
+import java.lang.reflect.InvocationTargetException;
 
 import com.limegroup.gnutella.ErrorService;
 import com.limegroup.gnutella.URN;
+import com.limegroup.gnutella.tigertree.HashTree;
+
+import com.limegroup.gnutella.util.PrivilegedAccessor;
 
 public class TestFile {
     private static final int A_INT=0x4F1BBCDC;
     private static URN myHash = null;
+    private static HashTree myTree = null;
 
     public static byte getByte(int i) {
         //Generates a consistent stream of psuedorandom bytes
-
-        //Not very random
-        //return (byte)(new Random(i).nextInt(256));
-
-        //Very random, too slow
-        //Random rand=new Random(0);
-        //for (int j=0; j<i; j++) {
-        //    rand.nextInt(256);
-        //}
-        //return (byte)rand.nextInt(256);
-
         //This has cycles, but its ok.  Stolen from HashFunction.
         int bits = 7;
         long prod = (long)i * (long)A_INT;
@@ -41,11 +38,7 @@ public class TestFile {
         if( myHash == null ) {
             try {
                 File tmpFile = File.createTempFile("tst", "tmp");
-                tmpFile.deleteOnExit();
-                RandomAccessFile raf = new RandomAccessFile(tmpFile, "rw");
-                for(int i=0; i<TestFile.length(); i++)
-                    raf.writeByte(TestFile.getByte(i));
-                raf.close();
+                writeFile(tmpFile);
                 myHash = URN.createSHA1Urn(tmpFile);
             } catch ( InterruptedException e) {
                 ErrorService.error(e);
@@ -55,6 +48,48 @@ public class TestFile {
         } 
         return myHash;
     }
+    
+    public static synchronized HashTree tree() {
+        if( myTree == null ) {
+            try {
+                URN hash = hash();
+                File tmpFile = File.createTempFile("tst2", "tmp");
+                writeFile(tmpFile);
+                InputStream is = new FileInputStream(tmpFile);
+                myTree = createHashTree(tmpFile, hash);
+            } catch(IOException e) {
+                ErrorService.error(e);
+            } catch(Throwable t) {
+                ErrorService.error(t);
+            }
+        }
+        return myTree;
+    }
+    
+    private static void writeFile(File tmpFile) throws IOException {
+        tmpFile.deleteOnExit();
+        RandomAccessFile raf = new RandomAccessFile(tmpFile, "rw");
+        for(int i=0; i<TestFile.length(); i++)
+            raf.writeByte(TestFile.getByte(i));
+        raf.close();
+    }
+    
+    private static HashTree createHashTree(File file, URN sha1)
+      throws Throwable {
+        Object ret = null;
+        try {
+            ret = PrivilegedAccessor.invokeMethod(
+                HashTree.class, "createHashTree", 
+                new Object[] { new Long(file.length()), new FileInputStream(file),
+                            sha1 },
+                new Class[] { long.class, InputStream.class, URN.class }
+            );
+        } catch(InvocationTargetException ite) {
+            throw ite.getCause();
+        }
+        return (HashTree)ret;
+    }    
+    
     
     public static void main(String[] args) {
         System.out.println( hash().toString() );

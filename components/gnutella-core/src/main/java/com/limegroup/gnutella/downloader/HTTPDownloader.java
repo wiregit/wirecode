@@ -497,6 +497,9 @@ public class HTTPDownloader implements BandwidthTracker {
      * Consumes the headers of an HTTP message, returning the Content-Length.
      */
     private int consumeHeaders(int[] queueInfo) throws IOException {
+        if(LOG.isDebugEnabled())
+            LOG.debug(_rfd + " consuming headers");
+            
         int contentLength = -1;
         String str;
         while(true) {
@@ -522,6 +525,9 @@ public class HTTPDownloader implements BandwidthTracker {
      * Consumes the response of an HTTP message.
      */
     private ConnectionStatus consumeResponse(int code) throws IOException {
+        if(LOG.isDebugEnabled())
+            LOG.debug(_rfd + " consuming response, code: " + code);
+
         int[] queueInfo = { -1, -1, -1 };
         int contentLength = consumeHeaders(queueInfo);
         if(code == 503) {
@@ -804,7 +810,7 @@ public class HTTPDownloader implements BandwidthTracker {
 		
 		// the first token should contain HTTP
 		if (token.toUpperCase().indexOf("HTTP") < 0 )
-			throw new NoHTTPOKException();
+			throw new NoHTTPOKException("got: " + str);
         // does the server support http 1.1?
         else 
             rfd.setHTTP11( token.indexOf("1.1") > 0 );

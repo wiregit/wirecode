@@ -147,10 +147,11 @@ class HashTreeHandler {
             LOG.debug("xml type num: [" + xmlRecord.getTypeId() + "]");
             LOG.debug("tree type num: [" + treeRecord.getTypeId() + "]");
         }
-        
-        if(LOG.isWarnEnabled()) {
-            if(parser.hasNext())
+
+        while(parser.hasNext()) {
+            if(LOG.isWarnEnabled())
                 LOG.warn("more elements in the dime record.");
+            parser.nextRecord(); // ignore them.
         }
                 
         String xml = new String(xmlRecord.getData(), "UTF-8");

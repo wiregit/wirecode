@@ -13,6 +13,9 @@ import com.limegroup.gnutella.util.DataUtils;
 import com.limegroup.gnutella.ByteOrder;
 import com.limegroup.gnutella.ErrorService;
 
+import org.apache.commons.logging.LogFactory;
+import org.apache.commons.logging.Log;
+
 /**
  * Class holding a DIMERecord as part of a DIME Message.
  *
@@ -20,6 +23,8 @@ import com.limegroup.gnutella.ErrorService;
  * @author Sam Berlin 
  */
 public class DIMERecord {
+    private static final Log LOG = LogFactory.getLog(DIMERecord.class);
+    
     // A DIME Record looks like the following:
     ///////////////////////////////////////////////////////////////////
     // 0 1 2 3 4 5 6 7 0 1 2 3 4 5 6 7 0 1 2 3 4 5 6 7 0 1 2 3 4 5 6 7 
@@ -200,11 +205,24 @@ public class DIMERecord {
     public static DIMERecord createFromStream(InputStream in) throws IOException {
         byte[] header = new byte[12];
         fillBuffer(header, in);
+        try {
+            validateFirstBytes(header[0], header[1]);
+        } catch(IllegalArgumentException iae) {
+            throw new IOException(iae.getMessage());
+        }
 
         int optionsLength = ByteOrder.beb2int(header, 2, 2);
         int idLength = ByteOrder.beb2int(header, 4, 2);
         int typeLength = ByteOrder.beb2int(header, 6, 2);
         int dataLength = ByteOrder.beb2int(header, 8, 4);
+        
+        if(LOG.isDebugEnabled()) {
+            LOG.debug("creating dime record." + 
+                      "  optionsLength: " + optionsLength +
+                      ", idLength: " + idLength +
+                      ", typeLength: " + typeLength + 
+                      ", dataLength: " + dataLength);
+        }
         
         //The DIME specification allows this to be a 32-bit unsigned field,
         //which in Java would be a long -- but in order to hold the array
@@ -354,17 +372,24 @@ public class DIMERecord {
     }
     
     /**
+     * Validates the first two bytes.
+     */
+    private static void validateFirstBytes(byte one, byte two) {
+        if((one & VERSION_MASK) != VERSION)
+            throw new IllegalArgumentException("invalid version: " + 
+                                     (((one & VERSION_MASK) >> 3) & 0x1F));
+                                  
+        if((two & RESERVED_MASK) != RESERVED)
+            throw new IllegalArgumentException("invalid reserved: " +
+                                          (two & RESERVED_MASK));
+    }        
+    
+    /**
      * Validates the given DIMERecord, throwing IllegalArgumentException
      * if any fields are invalid.
      */
     private void validate() {
-        if((_byte1 & VERSION_MASK) != VERSION)
-            throw new IllegalArgumentException("invalid version: " + 
-                                     (((_byte1 & VERSION_MASK) >> 3) & 0x1F));
-                                  
-        if((_byte2 & RESERVED_MASK) != RESERVED)
-            throw new IllegalArgumentException("invalid reserved: " +
-                                          (_byte2 & RESERVED_MASK));
+        validateFirstBytes(_byte1, _byte2);
 
         byte maskedType = (byte)(_byte2 & TYPE_MASK);
         switch(maskedType) {

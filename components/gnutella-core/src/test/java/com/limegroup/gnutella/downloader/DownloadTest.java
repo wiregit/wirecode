@@ -34,6 +34,8 @@ import com.limegroup.gnutella.util.BaseTestCase;
 import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.DataUtils;
 import com.limegroup.gnutella.util.PrivilegedAccessor;
+import com.limegroup.gnutella.tigertree.TigerTreeCache;
+import com.limegroup.gnutella.tigertree.HashTree;
 import com.sun.java.util.collections.Iterator;
 import com.sun.java.util.collections.LinkedList;
 import com.sun.java.util.collections.List;
@@ -592,6 +594,45 @@ public class DownloadTest extends BaseTestCase {
         assertGreaterThan("u3 invalid request attempts", 1, r3);
         assertEquals("u4 invalid request attempts", 1, r4);
         assertGreaterThan("u5 invalid request attempts", 1, r5);
+    }
+    
+    public void testReuseHostWithBadTree() throws Exception {
+        final int RATE=500;
+        uploader1.setRate(RATE);
+        uploader1.setSendThexTreeHeader(true);
+        uploader1.setSendThexTree(false);
+        RemoteFileDesc rfd1=newRFDWithURN(PORT_1, 100);
+        TigerTreeCache.instance().purgeTree(TestFile.hash());
+        
+        // it will fail the first time, then re-use the host after
+        // a little waiting and not request thex.
+        tGeneric(new RemoteFileDesc[] { rfd1 } );
+        
+        HashTree tree = TigerTreeCache.instance().getHashTree(TestFile.hash());
+        assertNull(tree);
+        
+        assertTrue(uploader1.thexWasRequested());
+        assertEquals(2, uploader1.getRequestsReceived());        
+    }
+    
+    public void testGetsThex() throws Exception {
+        final int RATE=500;
+        uploader1.setRate(RATE);
+        uploader1.setSendThexTreeHeader(true);
+        uploader1.setSendThexTree(true);
+        RemoteFileDesc rfd1=newRFDWithURN(PORT_1, 100);
+        TigerTreeCache.instance().purgeTree(TestFile.hash());
+        
+        // it will fail the first time, then re-use the host after
+        // a little waiting and not request thex.
+        tGeneric(new RemoteFileDesc[] { rfd1 } );
+        
+        HashTree tree = TigerTreeCache.instance().getHashTree(TestFile.hash());
+        assertNotNull(tree);
+        assertEquals(TestFile.tree().getRootHash(), tree.getRootHash());
+        
+        assertTrue(uploader1.thexWasRequested());
+        assertEquals(1, uploader1.getConnections());        
     }
     
     public void testOverlapCheckGreyNoStopOnCorrupt() throws Exception {
@@ -1214,43 +1255,7 @@ public class DownloadTest extends BaseTestCase {
         assertEquals("u2 did wrong work", STOP_AFTER, u2);
         assertGreaterThan("u3 did no work", 0, u3);
         ConnectionSettings.CONNECTION_SPEED.setValue(capacity);
-    }    
-
-	// no longer in use, as alternate locations should always have SHA1s
-	/*
-    private static void tTwoAlternatesButOneWithNoSHA1() {  
-        LOG.debug("-Testing Two Alternates but one with no sha1...");
-        RemoteFileDesc rfd1=newRFDWithURN(PORT_1, 100, TestFile.hash().toString());
-        RemoteFileDesc rfd2=newRFDWithURN(PORT_2, 100); // No SHA1
-        RemoteFileDesc[] rfds = {rfd1,rfd2};
-
-        tGeneric(rfds);
-
-        //Prepare to check the alternate location - second won't be there
-        //Note: adiff should be blank
-        AlternateLocationCollection alt1 = uploader1.getAlternateLocations();
-        AlternateLocationCollection alt2 = uploader2.getAlternateLocations();
-        AlternateLocationCollection ashould = 
-			AlternateLocationCollection.create(rfd1.getSHA1Urn());
-        try {
-            URL url1 = rfd1.getUrl();//  rfdURL(rfd1);
-            AlternateLocation al1 =
-				AlternateLocation.create(url1);
-            ashould.add(al1);
-        } catch (Exception e) {
-            check(false, "Couldn't setup test");
-        }
-        AlternateLocationCollection adiff = 
-			ashould.diffAlternateLocationCollection(alt1); 
-        AlternateLocationCollection adiff2 = 
-			alt1.diffAlternateLocationCollection(ashould); 
-        
-        check(alt1.hasAlternateLocations(), "uploader1 didn't receive alt");
-        check(alt2.hasAlternateLocations(), "uploader2 didn't receive alt");
-        check(!adiff.hasAlternateLocations(), "uploader got wrong alt");
-        check(!adiff2.hasAlternateLocations(), "uploader got wrong alt");
-		}
-	*/
+    } 
 
     public void testUpdateWhiteWithFailingFirstUploader() throws Exception {
         LOG.debug("-Testing corruption of needed. \n");
@@ -1840,22 +1845,6 @@ public class DownloadTest extends BaseTestCase {
         VerifyingFile vf = ifm.getEntry(incFile);
         assertNull("verifying file should be null", vf);
     }
-
-	/*
-    private static URL rfdURL(RemoteFileDesc rfd) {
-        String rfdStr;
-        URL    rfdURL = null;
-        rfdStr = "http://"+rfd.getHost()+":"+
-        rfd.getPort()+"/get/"+String.valueOf(rfd.getIndex())+
-        "/"+rfd.getFileName();
-        try {
-            rfdURL = new URL(rfdStr);
-        } catch( Exception e ) {
-            check(false, "URL creation failed");
-        }  
-        return rfdURL;
-    }
-	*/
 
     private static URL genericURL(String url) {
         URL    theURL = null;

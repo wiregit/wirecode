@@ -102,6 +102,21 @@ public class TestUploader extends AssertComparisons {
     private boolean respondWithHTTP11 = true;
     
     /**
+     * Whether or not we'll include the THEX-Tree header in our response.
+     */
+    private boolean sendThexTreeHeader = false;
+    
+    /**
+     * Whether or not we'll include the THEX-Tree in our response.
+     */
+    private boolean sendThexTree = false;    
+    
+    /**
+     * Whether or not thex was requested.
+     */
+    private boolean thexWasRequested = false;
+    
+    /**
      * The sum of the number of bytes we need to upload across all requests.  If
      * this value is less than totalUploaded and the uploader encountered an
      * IOException in handle request it means the downloader killed the
@@ -193,6 +208,9 @@ public class TestUploader extends AssertComparisons {
         lowChunkOffset = 0;
         highChunkOffset = 0;
         respondWithHTTP11 = true;
+        sendThexTreeHeader = false;
+        sendThexTree = false;
+        thexWasRequested = false;
     }
 
     public int amountUploaded() {
@@ -289,6 +307,27 @@ public class TestUploader extends AssertComparisons {
      */
     public void setHTTP11(boolean yes) {
         respondWithHTTP11 = yes;
+    }
+    
+    /**
+     * Sets whether or not we'll send the thex tree header in our response.
+     */
+    public void setSendThexTreeHeader(boolean yes) {
+        sendThexTreeHeader = yes;
+    }    
+    
+    /**
+     * Sets whether or not we'll send the thex tree in our response.
+     */
+    public void setSendThexTree(boolean yes) {
+        sendThexTree = yes;
+    }
+    
+    /**
+     * Determiens whether or not thex was requested this time.
+     */
+    public boolean thexWasRequested() {
+        return thexWasRequested;
     }
     
     /** 
@@ -444,8 +483,11 @@ public class TestUploader extends AssertComparisons {
             }
             
             i = line.indexOf("GET");
-            if(i==0)
+            if(i==0) {
                 http11 = line.indexOf("1.1") > 0;
+                thexWasRequested |= 
+                    line.indexOf(TestFile.tree().getThexURI()) > 0;
+            }
 		}
         if(_sha1!=null) {
             if(incomingAltLocs == null)
@@ -466,9 +508,26 @@ public class TestUploader extends AssertComparisons {
             }
         }
         //System.out.println(System.currentTimeMillis()+" "+name+" "+start+" - "+stop);
-
-    //Send the data.
-        send(output, start, stop);
+        
+        if(thexWasRequested && sendThexTree) {
+            LOG.debug("sending thex tree.");
+            sendThexTree = false;
+            sendThexTree(output);
+            output.flush();
+            LOG.debug("done sending thex tree.");
+        } else {    
+            //Send the data.
+            send(output, start, stop);
+        }
+    }
+    
+    private void sendThexTree(OutputStream out) throws IOException {
+        String str = "HTTP/1.1 200 OK\r\n" +
+                     "ugly-header: ugly-value\r\n" + 
+                     "hot diggity doo\r\n" +
+                     "\r\n";
+        out.write(str.getBytes());
+        TestFile.tree().write(out);
     }
 
     private void send(OutputStream out, int start, int stop) 
@@ -554,6 +613,11 @@ public class TestUploader extends AssertComparisons {
         if(creationTime != null) {
             LOG.debug("Writing out Creation Time.");
             HTTPUtils.writeHeader(HTTPHeaderName.CREATION_TIME, ""+creationTime,
+                                  out);
+        }
+        if(sendThexTreeHeader) {
+            HTTPUtils.writeHeader(HTTPHeaderName.X_THEX_URI,
+                                  TestFile.tree(),
                                   out);
         }
         str = "\r\n";
