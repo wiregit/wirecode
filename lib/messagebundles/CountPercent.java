@@ -149,6 +149,40 @@ public class CountPercent {
     }
     
     /**
+     * Loads a single file into a List.
+     */
+    private LanguageInfo loadFile(Map langs, InputStream in, String filename) {
+        try {
+            in = new BufferedInputStream(in);
+            final Properties p = new Properties();
+            p.load(in);
+            String lc = p.getProperty("LOCALE_LANGUAGE_CODE", "");
+            String cc = p.getProperty("LOCALE_COUNTRY_CODE", "");
+            String vc = p.getProperty("LOCALE_VARIANT_CODE", "");
+            String sc = p.getProperty("LOCALE_SCRIPT_CODE", "");
+            String ln = p.getProperty("LOCALE_LANGUAGE_NAME", lc);
+            String cn = p.getProperty("LOCALE_COUNTRY_NAME", cc);
+            String vn = p.getProperty("LOCALE_VARIANT_NAME", vc);
+            String sn = p.getProperty("LOCALE_SCRIPT_NAME", sc);
+            String dn = p.getProperty("LOCALE_ENGLISH_LANGUAGE_NAME", ln);
+            
+            LanguageInfo li = new LanguageInfo(lc, cc, vc, sc,
+                                               ln, cn, vn, sn,
+                                               dn, filename, p);
+            langs.put(li.getCode(), li);
+            return li;
+        } catch (IOException e) {
+            // ignore.
+        } finally {
+            if (in != null)
+                try {
+                   in.close();
+                } catch (IOException ioe) {}
+        }
+        return null;
+    }
+    
+    /**
      * Keep only resources with a basic set of valid keys.
      */
     private void retainBasicKeys(Set basicKeys) {
@@ -185,40 +219,6 @@ public class CountPercent {
                 }
             }
         }
-    }
-    
-    /**
-     * Loads a single file into a List.
-     */
-    private LanguageInfo loadFile(Map langs, InputStream in, String filename) {
-        try {
-            in = new BufferedInputStream(in);
-            final Properties p = new Properties();
-            p.load(in);
-            String lc = p.getProperty("LOCALE_LANGUAGE_CODE", "");
-            String cc = p.getProperty("LOCALE_COUNTRY_CODE", "");
-            String vc = p.getProperty("LOCALE_VARIANT_CODE", "");
-            String sc = p.getProperty("LOCALE_SCRIPT_CODE", "");
-            String ln = p.getProperty("LOCALE_LANGUAGE_NAME", lc);
-            String cn = p.getProperty("LOCALE_COUNTRY_NAME", cc);
-            String vn = p.getProperty("LOCALE_VARIANT_NAME", vc);
-            String sn = p.getProperty("LOCALE_SCRIPT_NAME", sc);
-            String dn = p.getProperty("LOCALE_ENGLISH_LANGUAGE_NAME", ln);
-            
-            LanguageInfo li = new LanguageInfo(lc, cc, vc, sc,
-                                               ln, cn, vn, sn,
-                                               dn, filename, p);
-            langs.put(li.getCode(), li);
-            return li;
-        } catch (IOException e) {
-            // ignore.
-        } finally {
-            if (in != null)
-                try {
-                   in.close();
-                } catch (IOException ioe) {}
-        }
-        return null;
     }
     
     private void checkLanguages() {
