@@ -283,9 +283,6 @@ public final class RouterService {
         timer.schedule(task, delay, period);
     }
 
-    private static final byte[] LOCALHOST={(byte)127, (byte)0, (byte)0,
-                                           (byte)1};
-
     /**
      * Creates a new outgoing messaging connection to the given host and port.
      * Blocks until the connection established.  Throws IOException if
@@ -308,16 +305,14 @@ public final class RouterService {
         //case connections to "localhost" or "127.0.0.1" since
         //they are aliases for this machine.
 		
-		// TODO: should we not block all 127.x.x.x addresses?
         byte[] cIP = null;
         try {
             cIP=InetAddress.getByName(hostname).getAddress();
         } catch(UnknownHostException e) {
             return;
         }
-        if ((Arrays.equals(cIP, LOCALHOST)) &&
-            (portnum==acceptor.getPort())) {
-                return;
+        if ((cIP[0] == 127) && (portnum==acceptor.getPort())) {
+			return;
         } else {
             byte[] managerIP=acceptor.getAddress();
             if (Arrays.equals(cIP, managerIP)
@@ -325,8 +320,9 @@ public final class RouterService {
                 return;
         }
 
-        if (!acceptor.isBannedIP(hostname))
+        if (!acceptor.isBannedIP(hostname)) {
             manager.createConnectionAsynchronously(hostname, portnum);
+		}
     }
 
     /**
