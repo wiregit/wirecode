@@ -401,7 +401,7 @@ public class HTTPUploader implements Runnable {
         try {
             /* is this the right format? */
             String str;
-            str = "HTTP 404 Not Found \r\n";
+            str = "HTTP/1.1 404 Not Found \r\n";
             _ostream.write(str.getBytes());
             str = "\r\n";     /* Even if it is, can Gnutella */
             _ostream.write(str.getBytes());
@@ -421,10 +421,18 @@ public class HTTPUploader implements Runnable {
             ostream = s.getOutputStream();
             /* is this the right format? */
             String str;
-            str = "HTTP 503 Service Unavailable \r\n";
+	        String errMsg = "Server busy.  Too many active downloads."; 
+            str = "HTTP/1.1 503 Service Unavailable\r\n";
+            ostream.write(str.getBytes());
+			str = "Server: " + "LimeWire" + "\r\n";
+            ostream.write(str.getBytes());
+		    str = "Content-Type: text/plain\r\n";
+            ostream.write(str.getBytes());
+		    str = "Content-Length: " + errMsg.length() + "\r\n";
             ostream.write(str.getBytes());
             str = "\r\n";     
             ostream.write(str.getBytes());
+            ostream.write(errMsg.getBytes());
             ostream.flush();    
         } catch (Exception e) {
         }
