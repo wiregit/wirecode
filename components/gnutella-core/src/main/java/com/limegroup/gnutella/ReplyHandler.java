@@ -164,9 +164,9 @@ public interface ReplyHandler {
     public void handleStatisticVM(StatisticVendorMessage m) throws IOException;
     
     /**
-     * Handles the UDP analog of reply to "Crawler:" header
+     * Just sends whatever message we ask it to.
      */
-    public void handleUDPCrawlerPong(UDPCrawlerPong m);
+    public void reply(Message m);
 
     /**
      * Handles SimppVM

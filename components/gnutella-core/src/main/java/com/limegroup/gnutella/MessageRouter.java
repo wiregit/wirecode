@@ -2568,7 +2568,7 @@ public abstract class MessageRouter {
     	if (!_promotionManager.allowUDPPing(handler))
     		return; 
     	UDPCrawlerPong newMsg = new UDPCrawlerPong(msg);
-    	handler.handleUDPCrawlerPong(newMsg);
+    	handler.reply(newMsg);
     }
     
     /**
@@ -2583,17 +2583,28 @@ public abstract class MessageRouter {
     	FileManager fmanager = RouterService.getFileManager();
     	UploadManager umanager = RouterService.getUploadManager();
     	UDPService uservice = UDPService.instance();
+    	
     	if (_udpHeadRequests.add(host)) {
     		
     		HeadPong pong = new HeadPong(ping);
+
     		uservice.send(pong, host, port);
-    		
+    
+
     	}
     }
     
+        
     /**
      * replies to a head ping that came through tcp
      * unless the same person has pinged us too recently.
+<<<<<<< MessageRouter.java
+=======
+     * 
+     * Note: if I'm a leaf, I can only receive these pings
+     * from my Ultrapeer(s). In this case, the time limit is ignored.
+     * 
+>>>>>>> 1.203.4.5
      */
     private void handleHeadPing(HeadPing ping, ManagedConnection conn) {
     	
@@ -2601,12 +2612,13 @@ public abstract class MessageRouter {
     	UploadManager umanager = RouterService.getUploadManager();
     	UDPService uservice = UDPService.instance();
     	
-    	if (_udpHeadRequests.add(conn.getInetAddress())) {
+    	if (_udpHeadRequests.add(conn.getInetAddress())){
     		HeadPong pong = new HeadPong(ping);
     		conn.send(pong);
     	}
-    	
+    		
     }
+    
     
     private static class QueryResponseBundle {
         public final QueryRequest _query;

@@ -3,21 +3,20 @@ package com.limegroup.gnutella.uploader;
 import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.settings.ChatSettings;
 import com.limegroup.gnutella.http.*;
+
 import java.io.*;
 import com.sun.java.util.collections.Set;
 import com.sun.java.util.collections.HashSet;
 import com.sun.java.util.collections.Iterator;
 
-public class QueuedUploadState implements HTTPMessage {
+public class QueuedUploadState extends UploadState {
 
-    private final FileDesc FILE_DESC;
-    private final HTTPUploader UPLOADER;
+
     private final int POSITION;
 
     public QueuedUploadState(int pos, HTTPUploader uploader) {
+    	super(uploader);
         this.POSITION = pos;
-        this.UPLOADER = uploader;
-        this.FILE_DESC= uploader.getFileDesc();
     }
 
     public void writeMessageHeaders(OutputStream ostream) throws IOException {
@@ -32,27 +31,9 @@ public class QueuedUploadState implements HTTPMessage {
         ", pollMin="+(UploadManager.MIN_POLL_TIME/1000)+/*mS to S*/
         ", pollMax="+(UploadManager.MAX_POLL_TIME/1000)+/*mS to S*/"\r\n";
         ostream.write(str.getBytes());
-        if(FILE_DESC != null) {
-            // write the URN in case the caller wants it
-            URN sha1 = FILE_DESC.getSHA1Urn();
-            if(sha1!=null) {
-                HTTPUtils.writeHeader(HTTPHeaderName.GNUTELLA_CONTENT_URN,
-                                      FILE_DESC.getSHA1Urn(),
-                                      ostream);
-                Set alts = UPLOADER.getNextSetOfAltsToSend();
-				if(alts.size() > 0) {
-					HTTPUtils.writeHeader(HTTPHeaderName.ALT_LOCATION,
-                                          new HTTPHeaderValueCollection(alts),
-                                          ostream);
-				}
-                if (FILE_DESC instanceof IncompleteFileDesc) {
-                    HTTPUtils.writeHeader(HTTPHeaderName.AVAILABLE_RANGES,
-                                          ((IncompleteFileDesc)FILE_DESC),
-                                          ostream);
-                }
-            }
-        }
         
+        writeAlts(ostream);
+        writeRanges(ostream);
         if (UPLOADER.isFirstReply())
             HTTPUtils.writeFeatures(ostream);
             

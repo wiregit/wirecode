@@ -132,12 +132,23 @@ public class HTTPDownloader implements BandwidthTracker {
 	/**
 	 * The new alternate locations we've received for this file.
 	 */
-	private AlternateLocationCollection _altLocsReceived;
+	private AlternateLocationCollection _altLocsReceived, _pushAltLocsReceived;
 
     /**
      *  The good locations to send the uploaders as in the alts list
      */
     private Set _goodLocs;
+    
+    /**
+     * The firewalled locations to send to uploaders that are interested
+     */
+    private Set _goodPushLocs;
+    
+    
+    /**
+     * The bad firewalled locations to send to uploaders that are interested
+     */
+    private Set _badPushLocs;
     
     /** 
      * The list to send in the n-alts list
@@ -153,6 +164,16 @@ public class HTTPDownloader implements BandwidthTracker {
      * The list of already written n-alts, used to stop duplicates
      */ 
     private Set _writtenBadLocs;
+    
+    /**
+     * The list of already written push alts, used to stop duplicates
+     */
+    private Set _writtenPushLocs;
+    
+    /**
+     * The list of already written bad push alts, used to stop duplicates
+     */
+    private Set _writtenBadPushLocs;
 
     
 	private int _port;
@@ -190,6 +211,12 @@ public class HTTPDownloader implements BandwidthTracker {
 
 
     private Interval _requestedInterval = null;
+    
+    /**
+     * whether the other side wants to receive firewalled altlocs
+     */
+    private boolean _wantsFalts = false;
+    
 
     /**
      * Creates an uninitialized client-side normal download.  Call 
@@ -240,12 +267,20 @@ public class HTTPDownloader implements BandwidthTracker {
 		_chatEnabled = rfd.chatEnabled();
         _browseEnabled = rfd.browseHostEnabled();
         URN urn = rfd.getSHA1Urn();
-        _altLocsReceived = urn==null ? null:
-            AlternateLocationCollection.create(urn);
+        if (urn!=null) {
+        	_altLocsReceived = AlternateLocationCollection.create(urn);
+        	_pushAltLocsReceived = AlternateLocationCollection.create(urn);
+        } else  {
+        	_altLocsReceived=null;
+        	_pushAltLocsReceived=null;
+        }
         _goodLocs = new HashSet();
         _badLocs = new HashSet();
+        _goodPushLocs = new HashSet();
         _writtenGoodLocs = new HashSet();
         _writtenBadLocs = new HashSet();
+        _writtenPushLocs = new HashSet();
+        _writtenBadPushLocs = new HashSet();
 		_amountRead = 0;
 		_totalAmountRead = 0;
 		applyRate();
@@ -264,33 +299,66 @@ public class HTTPDownloader implements BandwidthTracker {
     AlternateLocationCollection getAltLocsReceived() { 
 	    return _altLocsReceived;
     }
+    
+    AlternateLocationCollection getPushLocsReceived() {
+    	return _pushAltLocsReceived;
+    }
         
     void addSuccessfulAltLoc(AlternateLocation loc) {
-        synchronized(_badLocs) {
-            //If we ever thought loc was bad, forget that we did, so that we can
-            //add it to the n-alts list again, if it fails -- remove from
-            //writtenBadlocs
-            _writtenBadLocs.remove(loc);           
-            _badLocs.remove(loc);
-        }
-        synchronized(_goodLocs) {
-            if(!_writtenGoodLocs.contains(loc)) //not written earlier
-                _goodLocs.add(loc); //duplicates make no difference
-        }
+    	if (loc instanceof DirectAltLoc) {
+    		synchronized(_badLocs) {
+    			//If we ever thought loc was bad, forget that we did, so that we can
+    			//add it to the n-alts list again, if it fails -- remove from
+    			//writtenBadlocs
+    			_writtenBadLocs.remove(loc);           
+    			_badLocs.remove(loc);
+    		}
+    		synchronized(_goodLocs) {
+    			if(!_writtenGoodLocs.contains(loc)) //not written earlier
+    				_goodLocs.add(loc); //duplicates make no difference
+    		}
+    	}
+    	else {
+    		synchronized(_badPushLocs) {
+    			//If we ever thought loc was bad, forget that we did, so that we can
+    			//add it to the n-alts list again, if it fails -- remove from
+    			//writtenBadlocs
+    			_writtenBadPushLocs.remove(loc);           
+    			_badPushLocs.remove(loc);
+    		}
+    		synchronized(_goodPushLocs) {
+    			if(!_writtenPushLocs.contains(loc)) //not written earlier
+    				_goodPushLocs.add(loc); //duplicates make no difference
+    		}
+    	}
     }
     
     void addFailedAltLoc(AlternateLocation loc) {
         //if we ever thought it was good, forget that we did, so we can write it
         //out as good again -- remove it from writtenGoodLocs if it was there
-        synchronized(_goodLocs) {
-            _writtenGoodLocs.remove(loc);
-            _goodLocs.remove(loc);
-        }
+    	
+    	if (loc instanceof DirectAltLoc){
+    		synchronized(_goodLocs) {
+    			_writtenGoodLocs.remove(loc);
+    			_goodLocs.remove(loc);
+    		}
         
-        synchronized(_badLocs) {
-            if(!_writtenBadLocs.contains(loc))//no need to repeat to uploader
-                _badLocs.add(loc); //duplicates make no difference
-        }
+    		synchronized(_badLocs) {
+    			if(!_writtenBadLocs.contains(loc))//no need to repeat to uploader
+    				_badLocs.add(loc); //duplicates make no difference
+    		}
+    	}
+    	else {
+    		synchronized(_goodPushLocs) {
+    			_writtenPushLocs.remove(loc);
+    			_goodPushLocs.remove(loc);
+    		}
+        
+    		synchronized(_badLocs) {
+    			if(!_writtenBadPushLocs.contains(loc))//no need to repeat to uploader
+    				_badPushLocs.add(loc); //duplicates make no difference
+    		}
+    	}
     }
     
     ///////////////////////////////// Connection /////////////////////////////
@@ -398,6 +466,12 @@ public class HTTPDownloader implements BandwidthTracker {
             out.write("X-Queue: 0.1\r\n"); //we support remote queueing
             features.add(ConstantHTTPHeaderValue.QUEUE_FEATURE);
         }
+        
+        //say that I want firewalled altlocs.
+        //if I am firewalled, send the version of the FWT protocol I support.
+        features.add(ConstantHTTPHeaderValue.PUSH_LOCS_FEATURE);
+        if (!RouterService.acceptedIncomingConnection())
+        	features.add(ConstantHTTPHeaderValue.FWT_PUSH_LOCS_FEATURE);
 
         // Add ourselves to the mesh if the partial file is valid
         if( isPartialFileValid() ) {
@@ -449,7 +523,50 @@ public class HTTPDownloader implements BandwidthTracker {
         if(writeClone != null) //have something to write?
             HTTPUtils.writeHeader(HTTPHeaderName.NALTS,
                                 new HTTPHeaderValueCollection(writeClone),out);
+        
+        //if the other side indicated they want firewalled altlocs, send some
+        if (_wantsFalts) {
+        	writeClone = null;
+        	synchronized(_goodPushLocs) {
+        		if(_goodPushLocs.size() > 0) {
+        			writeClone = new HashSet();
+        			Iterator iter = _goodPushLocs.iterator();
+        			while(iter.hasNext()) {
+        				Object next = iter.next();
+        				writeClone.add(next);
+        				_writtenPushLocs.add(next);
+        			}
+        			_goodPushLocs.clear();
+        		}
+        	}
+        	if (writeClone!=null) 
+        		HTTPUtils.writeHeader(HTTPHeaderName.FALT_LOCATION,
+        			new HTTPHeaderValueCollection(writeClone),out);
+        	
+        	//do the same with bad push locs
+        	writeClone = null;
+        	synchronized(_badPushLocs) {
+                if(_badPushLocs.size() > 0) {
+                    writeClone = new HashSet();
+                    Iterator iter = _badPushLocs.iterator();
+                    while(iter.hasNext()) {
+                        Object next = iter.next();
+                        writeClone.add(next);
+                        _writtenBadPushLocs.add(next);
+                    }
+                    _badPushLocs.clear();
+                }
+            }
+        	
+        	if (writeClone!=null) 
+        		HTTPUtils.writeHeader(HTTPHeaderName.BFALT_LOCATION,
+        				new HTTPHeaderValueCollection(writeClone),out);
+        }
+        
+        
+        
 
+        
         out.write("Range: bytes=" + startRange + "-"+(stop-1)+"\r\n");
         _requestedInterval = new Interval(_initialReadingPoint, stop-1);
 		if (ChatSettings.CHAT_ENABLED.getValue() &&
@@ -711,6 +828,9 @@ public class HTTPDownloader implements BandwidthTracker {
             	parseFeatureHeader(str);
             else if (HTTPHeaderName.THEX_URI.matchesStartOfString(str))
                 parseTHEXHeader(str);
+            else if (HTTPHeaderName.FALT_LOCATION.matchesStartOfString(str)){
+            	parseFALTHeader(str);
+            }
         }
 
 
@@ -824,33 +944,62 @@ public class HTTPDownloader implements BandwidthTracker {
 
 		while(st.hasMoreTokens()) {
 			try {
-				AlternateLocation al=AlternateLocation.create(
-				    st.nextToken().trim(), _rfd.getSHA1Urn());
+				AlternateLocation al=(AlternateLocation ) 
+					AlternateLocation.create(
+							st.nextToken().trim(), _rfd.getSHA1Urn());
                 URN alSha1 = al.getSHA1Urn();
                 if(alSha1 == null) {
                     continue;
                 }
                 
-                // in general, most alternate locations will already
-                // be in ip format -- but we do the lookup anyway
-                // just incase they aren't.
-                String ipString = NetworkUtils.ip2string(
-                    al.getHost().getHostBytes());
-                if(!IPFilter.instance().allow(ipString))
-                    continue;
                 
-                if(_altLocsReceived == null)
-                    _altLocsReceived = 
-                    AlternateLocationCollection.create(alSha1);
+                //if this is a direct altloc, add it to the appropriate collection
                 
-                boolean added = false;
+                if (al instanceof DirectAltLoc) {
+                	DirectAltLoc dal = (DirectAltLoc)al;
+                 
+
+                	// in general, most alternate locations will already
+                	// be in ip format -- but we do the lookup anyway
+                	// just incase they aren't.
+                	String ipString = NetworkUtils.ip2string(
+                		dal.getHost().getHostBytes());
+                	if(!IPFilter.instance().allow(ipString))
+                		continue;
                 
-                if(alSha1.equals(_altLocsReceived.getSHA1Urn())) {
-                    synchronized(_altLocsReceived) {
-                        added = _altLocsReceived.add(al);
-                    }
-                    if(added) 
-                        DownloadStat.ALTERNATE_COLLECTED.incrementStat();
+                
+                	if(_altLocsReceived == null)
+                		_altLocsReceived = 
+                			AlternateLocationCollection.create(alSha1);
+                
+                	boolean added = false;
+                
+                	if(alSha1.equals(_altLocsReceived.getSHA1Urn())) {
+                		synchronized(_altLocsReceived) {
+                			added = _altLocsReceived.add(al);
+                		}
+                		if(added) 
+                			DownloadStat.ALTERNATE_COLLECTED.incrementStat();
+                	}
+                }
+                
+                //this is a Push location.  add it to the other collection.
+                else {
+                	if(_pushAltLocsReceived == null)
+                		_pushAltLocsReceived = 
+                			AlternateLocationCollection.create(alSha1);
+                
+                	boolean added = false;
+                
+
+                	if(alSha1.equals(_pushAltLocsReceived.getSHA1Urn())) {
+                		synchronized(_pushAltLocsReceived) {
+                			added = _pushAltLocsReceived.add(al);
+                		}
+                		if(added); 
+                			//TODO: put in a different stat
+                	}
+
                 }
 			} catch(IOException e) {
 				// continue without adding it.
@@ -1224,6 +1373,8 @@ public class HTTPDownloader implements BandwidthTracker {
     private void parseFeatureHeader(String str) {
         str = HTTPUtils.extractHeaderValue(str);
         StringTokenizer tok = new StringTokenizer(str, ",");
+        
+        
         while (tok.hasMoreTokens()) {
             String feature = tok.nextToken();
             String protocol = "";
@@ -1239,6 +1390,8 @@ public class HTTPDownloader implements BandwidthTracker {
                 _chatEnabled = true;
             else if (protocol.equals(HTTPConstants.BROWSE_PROTOCOL))
                 _browseEnabled = true;
+            else if (protocol.equals(HTTPConstants.PUSH_LOCS))
+            	_wantsFalts=true;
         }
     }
 
@@ -1257,6 +1410,23 @@ public class HTTPDownloader implements BandwidthTracker {
         } else
             _thexUri = str;
     }    
+    
+    /**
+     * 
+     * Method for parsing the header containing firewalled alternate
+     * locations.  The format is described at the Push Proxy spec at the_gdf,
+     * except that an empty header just indicates the other side is interested
+     * in receiving them.
+     * 
+     */
+    private void parseFALTHeader(String str) {
+    	//if we entered this method means the other side is interested
+    	//in receiving firewalled locations.
+    	_wantsFalts=true;
+    	
+    	//this just delegates to readAlternateLocationHeader
+    	readAlternateLocations(str);
+    }
       
     /////////////////////////////// Download ////////////////////////////////
 
@@ -1379,6 +1549,14 @@ public class HTTPDownloader implements BandwidthTracker {
 
 	public boolean browseEnabled() {
 		return _browseEnabled;
+	}
+	
+	/**
+	 * @return whether the remote host is interested in receiving
+	 * firewalled alternate locations.
+	 */
+	public boolean wantsFalts() {
+		return _wantsFalts;
 	}
 	
 	public String getVendor() { return _server; }

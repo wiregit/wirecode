@@ -34,6 +34,7 @@ public final class AlternateLocationCollection
      */
  
 	private final FixedSizeSortedSet LOCATIONS=new FixedSizeSortedSet(MAX_SIZE);
+	
         
     /**
      * SHA1 <tt>URN</tt> for this collection.
@@ -135,13 +136,16 @@ public final class AlternateLocationCollection
             if(alt==null) {//it was not in collections.
                 ret = true;
                 LOCATIONS.add(al);
+
             }
             else {
                 LOCATIONS.remove(alt);
+
                 alt.increment();
                 alt.promote();
                 ret =  false;
                 LOCATIONS.add(alt); //add incremented version
+
             }
             return ret;
         }
@@ -167,8 +171,10 @@ public final class AlternateLocationCollection
             }   
             else {
                 LOCATIONS.remove(loc);
+
                 loc.demote(); //one more strike and you are out...
                 LOCATIONS.add(loc); //make it replace the older loc
+
                 return false;
             }
 		}
@@ -225,7 +231,7 @@ public final class AlternateLocationCollection
 	 * Implements the <tt>HTTPHeaderValue</tt> interface.
 	 *
 	 * This adds randomness to the order in which alternate locations are
-	 * reported and only reports 10 locations.
+	 * reported and only reports 10 non-firewalled locations.
 	 *
 	 * @return an HTTP-compliant string of alternate locations, delimited
 	 *  by commas, or the empty string if there are no alternate locations
@@ -238,8 +244,9 @@ public final class AlternateLocationCollection
         synchronized(this) {
 	        Iterator iter = LOCATIONS.iterator();
             while(iter.hasNext()) {
-			    writeBuffer.append((
-                           (HTTPHeaderValue)iter.next()).httpStringValue());
+            	AlternateLocation current = (AlternateLocation)iter.next();
+			    writeBuffer.append(
+                           current.httpStringValue());
 			    writeBuffer.append(commaSpace);
 			    wrote = true;
 			}
@@ -309,7 +316,7 @@ public final class AlternateLocationCollection
     
     /**
      * 
-     * @return the alternate locations packed as ip:port pairs.
+     * @return the non-firewalled alternate locations packed as ip:port pairs.
      */
     public byte [] toBytes() {
     	return toBytes(MAX_SIZE);
@@ -318,31 +325,84 @@ public final class AlternateLocationCollection
     /**
      * 
      * @param number number of altlocs to return. 
-     * @return the alternate locations packed as ip:port pairs.
+     * @return the non-firewlled alternate locations packed as ip:port pairs.
      */
     public byte [] toBytes(int number) {
     	
-    	if (number > LOCATIONS.size())
-    		number = LOCATIONS.size();
+    
+	FixedSizeSortedSet clone=null;
+
+	
+	
+	if (number <=0)
+		return null;
+	
+	synchronized(this) {
+		clone = (FixedSizeSortedSet) LOCATIONS.clone();
+	}
+	ByteArrayOutputStream baos = new ByteArrayOutputStream();
+	
+	
+	try{
+    	for(Iterator iter = clone.iterator();iter.hasNext() && number >0;) {
+    		Object o = iter.next();
+    		if (!(o instanceof DirectAltLoc))
+    			continue;
+    		
+    		DirectAltLoc current = (DirectAltLoc)o;
+    		byte [] addr = current.getHost().getInetAddress().getAddress();
+    		baos.write(addr);
+    		ByteOrder.short2leb((short)current.getHost().getPort(),baos);
+    		number--;
+    	}
+	}catch(IOException impossible){
+		ErrorService.error(impossible);
+	}
+	
+    	return baos.toByteArray();
+    }
+    
+    /**
+     * 
+     * @return the firewalled alternate locations packed as ip:port pairs.
+     */
+    public byte [] toBytesPush() {
+    	return toBytesPush(MAX_SIZE);
+    }
+
+    /**
+     * 
+     * @param number number of altlocs to return. 
+     * @return the non-firewlled alternate locations packed as ip:port pairs.
+     */
+    public byte [] toBytesPush(int number) {
     	
     	if (number <=0)
     		return null;
     	
-    	byte [] ret = new byte[6*number];
-    	int index=0;
-	FixedSizeSortedSet clone=null;
-	synchronized(this) {
-		clone = (FixedSizeSortedSet) LOCATIONS.clone();
-	}
-    	for(Iterator iter = clone.iterator();iter.hasNext() && number >0;) {
-    		AlternateLocation current = (AlternateLocation)iter.next();
-    		byte [] addr = current.getHost().getInetAddress().getAddress();
-    		System.arraycopy(addr,0,ret,index,4);
-    		ByteOrder.short2leb((short)
-    				current.getHost().getPort(),ret,index+4 );
-    		index+=6;
-    		number--;
+    	ByteArrayOutputStream baos = new ByteArrayOutputStream();
+    	FixedSizeSortedSet clone;
+    	
+    	
+    	synchronized(this) {
+    		clone =(FixedSizeSortedSet)LOCATIONS.clone();
     	}
-    	return ret;
+    	
+    	int total = 0;
+    	
+    	try {
+    		for (Iterator iter = clone.iterator();iter.hasNext() && total <number;) {
+    			Object o = iter.next();
+    			if (!(o instanceof PushAltLoc))
+    				continue;
+    			PushAltLoc current = (PushAltLoc)o;
+    			baos.write(current.getPushAddress().toBytes());
+    			total++;
+    		}
+    	}catch(IOException impossible) {
+    		ErrorService.error(impossible);
+    	}
+    	
+    	return baos.toByteArray();
     }
 }

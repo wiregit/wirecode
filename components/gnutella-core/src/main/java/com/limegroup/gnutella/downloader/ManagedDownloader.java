@@ -984,6 +984,19 @@ public class ManagedDownloader implements Downloader, Serializable {
                         addDownload(loc.createRemoteFileDesc((int)size),false);
                     }
                 }
+                
+                //also adds any existing firewalled locations if 
+                //I am not firewalled.
+                if (RouterService.acceptedIncomingConnection()) {
+                	coll = fd.getPushAlternateLocationCollection();
+                	synchronized(coll) {
+                		Iterator iter = coll.iterator();
+                		while(iter.hasNext()) {
+                			AlternateLocation loc = (AlternateLocation)iter.next();
+                			addDownload(loc.createRemoteFileDesc((int)size),false);
+                		}
+                	}
+                }
             }
         }
     }
@@ -1501,7 +1514,7 @@ public class ManagedDownloader implements Downloader, Serializable {
         
         if(!rfd.isAltLocCapable())
             return;
-            
+        
         // Verify that this download has a hash.  If it does not,
         // we should not have been getting locations in the first place.
         Assert.that(downloadSHA1 != null, "null hash.");
@@ -1527,10 +1540,16 @@ public class ManagedDownloader implements Downloader, Serializable {
             RemoteFileDesc r = httpDloader.getRemoteFileDesc();
             if(r.getHost()==rfd.getHost() && r.getPort()==rfd.getPort()) 
                 continue;//no need to tell uploader about itself
-            if(good)
-                httpDloader.addSuccessfulAltLoc(loc);
-            else
-                httpDloader.addFailedAltLoc(loc);
+            
+            
+            //no need to send push altlocs to older uploaders
+            if (loc instanceof DirectAltLoc || 
+            		httpDloader.wantsFalts())
+            	if (good)
+            		httpDloader.addSuccessfulAltLoc(loc);
+            	else
+            		httpDloader.addFailedAltLoc(loc);
+           	
         }
 
         FileDesc fd = fileManager.getFileDescForFile(incompleteFile);
@@ -2353,12 +2372,15 @@ public class ManagedDownloader implements Downloader, Serializable {
                 Iterator iter = validAlts.iterator();
                 int count = 0;
                 while(iter.hasNext() && count < 10) {
-                    dloader.addSuccessfulAltLoc((AlternateLocation)iter.next());
-                    count++;
+                	AlternateLocation current = (AlternateLocation)iter.next();
+                	dloader.addSuccessfulAltLoc(current);
+                	count++;
                 }
                 iter = recentInvalidAlts.iterator();
                 while(iter.hasNext()) {
-                    dloader.addFailedAltLoc((AlternateLocation)iter.next());
+                	AlternateLocation current = (AlternateLocation)iter.next();
+                	dloader.addFailedAltLoc(current);
+                	count++;
                 }
             }
         }
@@ -2625,7 +2647,8 @@ public class ManagedDownloader implements Downloader, Serializable {
 
         File incFile = incompleteFile;
         HTTPDownloader ret;
-        boolean needsPush = needsPush(rfd);
+        boolean needsPush = rfd.needsPush();//needsPush(rfd);
+        
         
         synchronized (this) {
             currentLocation=rfd.getHost();
@@ -2678,20 +2701,18 @@ public class ManagedDownloader implements Downloader, Serializable {
                 // fall through to the push ...
             }
         }
-        
-        // must notify that we cannot connect directly.
-        informMesh(rfd, false);
-
-        if (!rfd.isFromAlternateLocation()) {
-            try {
+        try {
                  ret = connectWithPush(rfd, incFile);
                  return ret;
-            } catch(IOException e) {
+        } catch(IOException e) {
                 // even the push failed :(
-            }
         }
         
+        
         // if we're here, everything failed.
+        
+        informMesh(rfd, false);
+        
         return null;
     }
         
@@ -2924,6 +2945,20 @@ public class ManagedDownloader implements Downloader, Serializable {
             //the downloader
             AlternateLocationCollection c = dloader.getAltLocsReceived();
             if(c!=null) {
+                synchronized(c) { 
+                    Iterator iter = c.iterator();
+                    while(iter.hasNext()) {
+                        AlternateLocation al=(AlternateLocation)iter.next();
+                        RemoteFileDesc rfd1 =
+                            al.createRemoteFileDesc(rfd.getSize());
+                        addDownload(rfd1, false);//don't cache
+                    }
+                }
+            }
+            
+            //if we are not firewalled, we also want to try the firewalled push locs
+            c = dloader.getPushLocsReceived();
+            if(c!=null && RouterService.acceptedIncomingConnection()) {
                 synchronized(c) { 
                     Iterator iter = c.iterator();
                     while(iter.hasNext()) {

@@ -7,43 +7,46 @@ import com.limegroup.gnutella.util.*;
 import java.net.*;
 import java.util.StringTokenizer;
 import java.io.*;
-import com.sun.java.util.collections.Set;
-import com.sun.java.util.collections.HashSet;
-import com.sun.java.util.collections.Comparable;
+
+import com.sun.java.util.collections.*;
 
 /**
  * This class encapsulates the data for an alternate resource location, as 
  * specified in HUGE v0.93.  This also provides utility methods for such 
  * operations as comparing alternate locations based on the date they were 
  * stored.
+ * 
+ * Firewalled hosts can also be alternate locations, although the format is
+ * slightly different.
  */
-public final class AlternateLocation implements HTTPHeaderValue, Comparable {
+public abstract class AlternateLocation implements HTTPHeaderValue, 
+	com.sun.java.util.collections.Comparable {
     
     /**
      * The vendor to use.
      */
     public static final String ALT_VENDOR = "ALT";
 
-	/**
-	 * A <tt>URL</tt> instance for the URL specified in the header.
-	 */
-	private final URL URL;
-
+	
 	/**
 	 * Constant for the sha1 urn for this <tt>AlternateLocation</tt> --
 	 * can be <tt>null</tt>.
 	 */
-	private final URN SHA1_URN;
+	protected final URN SHA1_URN;
 	
 	/**
 	 * Constant for the string to display as the httpStringValue.
 	 */
-	private final String DISPLAY_STRING;
+	protected String DISPLAY_STRING;
+	
+
 
 	/**
 	 * Cached hash code that is lazily initialized.
 	 */
-	private volatile int hashCode = 0;
+	protected volatile int hashCode = 0;
+	
+
 
     /**
      * LOCKING: obtain this' monitor while changing/accessing _count and 
@@ -56,7 +59,7 @@ public final class AlternateLocation implements HTTPHeaderValue, Comparable {
      * it has succeeded. Newly created AlternateLocations start out wit a value
      * of 1.
      */
-    private volatile int _count = 0;
+    protected volatile int _count = 0;
 
     /**
      * Remembers if this AltLoc ever failed, if it did _demoted is set. If this
@@ -68,7 +71,7 @@ public final class AlternateLocation implements HTTPHeaderValue, Comparable {
      * modules like the download may not want to demote an AlternatLocation, 
      * other like the uploader may rely on it.
      */
-    private volatile boolean _demoted = false;
+    protected volatile boolean _demoted = false;
 
 
     ////////////////////////"Constructors"//////////////////////////////
@@ -92,7 +95,7 @@ public final class AlternateLocation implements HTTPHeaderValue, Comparable {
 
 		URL url = AlternateLocation.createUrl(location);
 		URN sha1 = URN.createSHA1UrnFromURL(url);
-		return new AlternateLocation(url, sha1);
+		return new DirectAltLoc(url, sha1);
 	}
 	
 	/**
@@ -123,9 +126,17 @@ public final class AlternateLocation implements HTTPHeaderValue, Comparable {
             return al;
         }
         
-        // Case 2.
-		URL url = AlternateLocation.createUrlFromMini(location, urn);
-		return new AlternateLocation(url, urn);
+        // Case 2. Direct Alt Loc
+        if (location.indexOf(";")==-1) {
+        	URL url = AlternateLocation.createUrlFromMini(location, urn);
+			return new DirectAltLoc(url, urn);
+        }
+        
+        //Case 3. Push Alt loc
+        //Note: the AlternateLocation object created this way does not know 
+        //the name of the file it is pointing to.  
+        PushEndpoint pe = new PushEndpoint(location);
+        return new PushAltLoc(pe,urn,"");
     }
 
 	/**
@@ -152,7 +163,7 @@ public final class AlternateLocation implements HTTPHeaderValue, Comparable {
 		URL tempUrl = new URL(url.getProtocol(), url.getHost(), url.getPort(),
 							  url.getFile());
 		URN sha1 = URN.createSHA1UrnFromURL(tempUrl);
-		return new AlternateLocation(tempUrl, sha1);
+		return new DirectAltLoc(tempUrl, sha1);
 	}
 
 	/**
@@ -178,9 +189,13 @@ public final class AlternateLocation implements HTTPHeaderValue, Comparable {
 		    throw new NullPointerException("cannot accept null URN");
 		int port = rfd.getPort();
 
-		URL url = new URL("http", rfd.getHost(), port,						  
+		if (!rfd.needsPush()) {
+			URL url = new URL("http", rfd.getHost(), port,						  
 						  HTTPConstants.URI_RES_N2R + urn.httpStringValue());
-		return new AlternateLocation(url, urn);
+			return new DirectAltLoc(url, urn);
+		}else {
+			return new PushAltLoc(rfd.getPushAddr(),urn,rfd.getFileName());
+		}
 	}
 
 	/**
@@ -201,68 +216,23 @@ public final class AlternateLocation implements HTTPHeaderValue, Comparable {
             ErrorService.error(e);
         }
         try {
-		    return new AlternateLocation(url, urn);
+		    return new DirectAltLoc(url, urn);
         } catch(IOException ioe) {
             throw new IllegalArgumentException(ioe.getMessage());
         }
 	}
 
-	/**
-	 * Creates a new <tt>AlternateLocation</tt> with the specified <tt>URL</tt>
-	 * and <tt>Date</tt> timestamp.
-	 *
-	 * @param url the <tt>URL</tt> for the <tt>AlternateLocation</tt>
-	 * @param date the <tt>Date</tt> timestamp for the 
-	 *  <tt>AlternateLocation</tt>
-	 */
-	private AlternateLocation(final URL url, final URN sha1)
-	  throws IOException {
-		if(!NetworkUtils.isValidPort(url.getPort()))
-			throw new IOException("invalid port: " + url.getPort());
-        if(!NetworkUtils.isValidAddress(url.getHost()))
-            throw new IOException("invalid address: " + url.getHost());
-        if(NetworkUtils.isPrivateAddress(url.getHost()))
-            throw new IOException("invalid address: " + url.getHost());
-        if(sha1 == null)
-            throw new IOException("null sha1");	    
-	    
-		this.URL       = url;
-		this.SHA1_URN  = sha1;
-		InetAddress ia = InetAddress.getByName(URL.getHost());
-		String ip = NetworkUtils.ip2string(ia.getAddress());
-		if( URL.getPort() == 6346 )
-		    DISPLAY_STRING = ip;
-		else
-		    DISPLAY_STRING = ip + ":" + URL.getPort();
-        _count = 1;
-        _demoted = false;
+
+	protected AlternateLocation(URN sha1) throws IOException {
+		if(sha1 == null)
+            throw new IOException("null sha1");	
+		SHA1_URN=sha1;
 	}
+	
 
     //////////////////////////////accessors////////////////////////////
 
-	/**
-	 * Returns an instance of the <tt>URL</tt> instance for this alternate
-	 * location.  
-     * <p>
-	 * @return a <tt>URL</tt> instance corresponding to the URL for this
-	 * alternate location, or <tt>null</tt> if an instance could not be created
-	 */
-	public URL getUrl() {
-		try {
-			return new URL(this.URL.getProtocol(), this.URL.getHost(), 
-						   this.URL.getPort(),this.URL.getFile());
-		} catch(MalformedURLException e) {
-			// this should never happen in practice, but retun null nevertheless
-			return null;
-		}
-	}
 	
-	/**
-	 * Returns the host/port of this alternate location as an endpoint.
-	 */
-	public Endpoint getHost() {
-	    return new Endpoint(this.URL.getHost(), this.URL.getPort());
-	}
 
 	/**
 	 * Accessor for the SHA1 urn for this <tt>AlternateLocation</tt>.
@@ -276,6 +246,8 @@ public final class AlternateLocation implements HTTPHeaderValue, Comparable {
      */
     public synchronized int getCount() { return _count; }
     
+
+    
     /**
      * package access, accessor to the value of _demoted
      */ 
@@ -287,6 +259,7 @@ public final class AlternateLocation implements HTTPHeaderValue, Comparable {
 	    return DISPLAY_STRING;
     }
 
+	
 	/**
 	 * Creates a new <tt>RemoteFileDesc</tt> from this AlternateLocation
      *
@@ -296,18 +269,10 @@ public final class AlternateLocation implements HTTPHeaderValue, Comparable {
 	 * @return new <tt>RemoteFileDesc</tt> based off of this, or 
 	 *  <tt>null</tt> if the <tt>RemoteFileDesc</tt> could not be created
 	 */
-	public RemoteFileDesc createRemoteFileDesc(int size) {
-		Set urnSet = new HashSet();
-		urnSet.add(getSHA1Urn());
-        int quality = 3;
-		return new RemoteFileDesc(URL.getHost(), URL.getPort(),
-								  0, URL.getFile(), size,  
-								  DataUtils.EMPTY_GUID, 1000,
-								  true, quality, false, null, urnSet, false,
-                                  false, //assume altLoc is not firewalled
-                                  ALT_VENDOR,//Never displayed, and we don't know
-                                  System.currentTimeMillis(), null, -1, false);
-	}
+
+	public abstract RemoteFileDesc createRemoteFileDesc(int size);
+	
+	
 
     /**
      * increment the count.
@@ -328,18 +293,8 @@ public final class AlternateLocation implements HTTPHeaderValue, Comparable {
     /**
      * could return null
      */ 
-    public synchronized AlternateLocation createClone() {
-        AlternateLocation ret = null;
-        try {
-            ret = new AlternateLocation(this.URL, this.SHA1_URN);
-        } catch(IOException ioe) {
-            ErrorService.error(ioe);
-            return null;
-        }
-        ret._demoted = this._demoted;
-        ret._count = this._count;
-        return ret;
-    }
+    public abstract AlternateLocation createClone();
+    
     
     ///////////////////////////////helpers////////////////////////////////
 
@@ -463,10 +418,9 @@ public final class AlternateLocation implements HTTPHeaderValue, Comparable {
 		if(obj == this) return true;
 		if(!(obj instanceof AlternateLocation)) return false;
 		AlternateLocation other = (AlternateLocation)obj;
-		return (URL.getHost().equals(other.URL.getHost()) &&
-                URL.getPort() == other.URL.getPort() &&
-                SHA1_URN.equals(other.SHA1_URN) &&
-                URL.getProtocol().equals(other.URL.getProtocol()) );
+		
+		return SHA1_URN.equals(other.SHA1_URN);
+		
 	}
 
     /**
@@ -499,17 +453,13 @@ public final class AlternateLocation implements HTTPHeaderValue, Comparable {
         int ret = _count - other._count;
         if(ret!=0) 
             return ret;
-        ret = this.URL.getHost().compareTo(other.URL.getHost());
-        if(ret!=0)
-            return ret;
-        ret = (this.URL.getPort() - other.URL.getPort());
-        if(ret!=0)
-            return ret;
+        
         ret = SHA1_URN.httpStringValue().compareTo(
-            other.SHA1_URN.httpStringValue());
-        if(ret != 0)
-            return ret;
-        return URL.getProtocol().hashCode()-other.URL.getProtocol().hashCode();
+                other.SHA1_URN.httpStringValue());
+
+        return ret;
+ 
+        			
     }
 
 	/**
@@ -522,25 +472,8 @@ public final class AlternateLocation implements HTTPHeaderValue, Comparable {
 	 * @return a hash code value for this object
 	 */
 	public int hashCode() {
-		if(hashCode == 0) {
-            int result = 17;
-            result = (37* result)+this.URL.getHost().hashCode();
-            result = (37* result)+this.URL.getPort();
-            result = (37* result)+this.SHA1_URN.hashCode();
-            result = (37* result)+this.URL.getProtocol().hashCode();
-            hashCode = result;
-        }
-		return hashCode;
-	}
-
-	/**
-	 * Overrides toString to return a string representation of this 
-	 * <tt>AlternateLocation</tt>, namely the url and the date.
-	 *
-	 * @return the string representation of this alternate location
-	 */
-	public String toString() {
-        return this.URL.toExternalForm()+","+_count+","+_demoted;
+		
+        return 17*37+this.SHA1_URN.hashCode();        
 	}
 
 }

@@ -17,16 +17,13 @@ import com.sun.java.util.collections.Set;
  * for the limit of uploads allowed has been reached. This is an
  * HTTP 503 error.
  */
-public class LimitReachedUploadState implements HTTPMessage {
+public class LimitReachedUploadState extends UploadState {
+
 
     private static final Log LOG = LogFactory.getLog(LimitReachedUploadState.class);
 	
-	/**
-	 * Constant for the <tt>FileDesc</tt> instance that was requested.
-	 */
-	private final FileDesc FILE_DESC;
 
-    private final HTTPUploader UPLOADER;
+    
     
     /**
      * The time to wait for a normal retry after.
@@ -58,9 +55,9 @@ public class LimitReachedUploadState implements HTTPMessage {
 	 * @param fd the <tt>FileDesc</tt> for the upload
 	 */
 	public LimitReachedUploadState(HTTPUploader uploader) {
+		super(uploader);
+
 		LOG.debug("creating limit reached state");
-        UPLOADER = uploader;
-		FILE_DESC = uploader.getFileDesc();
 	}
 
 	public void writeMessageHeaders(OutputStream ostream) throws IOException {
@@ -74,31 +71,20 @@ public class LimitReachedUploadState implements HTTPMessage {
 		ostream.write(str.getBytes());
 		str = "Content-Length: " + ERROR_MESSAGE.length + "\r\n";
 		ostream.write(str.getBytes());
+		writeAlts(ostream);
 		if(FILE_DESC != null) {
 			// write the URN in case the caller wants it
 			URN sha1 = FILE_DESC.getSHA1Urn();
 			if(sha1 != null) {
-				HTTPUtils.writeHeader(HTTPHeaderName.GNUTELLA_CONTENT_URN,
-									  sha1,
-									  ostream);
-                Set alts = UPLOADER.getNextSetOfAltsToSend();
-				if(alts.size() > 0) {
-					HTTPUtils.writeHeader(HTTPHeaderName.ALT_LOCATION,
-                                          new HTTPHeaderValueCollection(alts),
-                                          ostream);
-				}
+				
 				// write the Retry-After header, using different values
 				// depending on if we had any alts to send or not.
 				HTTPUtils.writeHeader(HTTPHeaderName.RETRY_AFTER,
-				    alts.size() == 0 ? 
+				    ! FILE_DESC.hasAlternateLocations() ? 
 				        NO_ALT_LOCS_RETRY_AFTER : NORMAL_RETRY_AFTER,
 				    ostream);
                 ostream.write(str.getBytes());
-                if (FILE_DESC instanceof IncompleteFileDesc) {
-                    HTTPUtils.writeHeader(HTTPHeaderName.AVAILABLE_RANGES,
-                                          ((IncompleteFileDesc)FILE_DESC),
-                                          ostream);
-                }
+                writeRanges(ostream);
 			} else {
 			    HTTPUtils.writeHeader(HTTPHeaderName.RETRY_AFTER,
 			                          NO_ALT_LOCS_RETRY_AFTER,

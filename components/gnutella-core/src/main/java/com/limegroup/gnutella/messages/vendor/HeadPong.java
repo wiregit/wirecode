@@ -2,8 +2,13 @@ package com.limegroup.gnutella.messages.vendor;
 
 import java.io.*;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.altlocs.AlternateLocationCollection;
+import com.limegroup.gnutella.altlocs.PushAltLoc;
+import com.limegroup.gnutella.downloader.HTTPDownloader;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.settings.UploadSettings;
 import com.limegroup.gnutella.util.*;
@@ -45,6 +50,7 @@ import com.sun.java.util.collections.*;
  */
 public class HeadPong extends VendorMessage {
 	
+	private static final Log LOG = LogFactory.getLog(HeadPong.class);
 	/**
 	 * cache references to the upload manager and file manager for
 	 * easier stubbing and testing.
@@ -62,13 +68,16 @@ public class HeadPong extends VendorMessage {
 	
 	/**
 	 * instead of using the HTTP codes, use bit values.  The first three 
-	 * possible values are mutually exclusive though.
+	 * possible values are mutually exclusive though.  DOWNLOADING is
+	 * possible only if PARTIAL_FILE is set as well.
 	 */
 	private static final byte FILE_NOT_FOUND= (byte)0x0;
 	private static final byte COMPLETE_FILE= (byte)0x1;
 	private static final byte PARTIAL_FILE = (byte)0x2;
 	private static final byte FIREWALLED = (byte)0x4;
+	private static final byte DOWNLOADING = (byte)0x8;
 	
+	private static final byte CODES_MASK=(byte)0xF;
 	/**
 	 * all our slots are full..
 	 */
@@ -92,6 +101,11 @@ public class HeadPong extends VendorMessage {
 	private Set _altLocs;
 	
 	/**
+	 * the firewalled altlocs that were sent, if any
+	 */
+	private Set _pushLocs;
+	
+	/**
 	 * the queue status, can be negative
 	 */
 	private int _queueStatus;
@@ -107,9 +121,14 @@ public class HeadPong extends VendorMessage {
 	private byte [] _vendorId;
 	
 	/**
-	 * whether the other host can receive unsolicited udp
+	 * whether the other host can receive tcp
 	 */
 	private boolean _isFirewalled;
+	
+	/**
+	 * whether the other host is currently downloading the file
+	 */
+	private boolean _isDownloading;
 	
 	/**
 	 * creates a message object with data from the network.
@@ -124,10 +143,10 @@ public class HeadPong extends VendorMessage {
 			throw new BadPacketException("bad payload");
 		
 		
-		//if we are version 1, the first byte has to be FILE_NOT_FOUND, PARTIAL_FILE 
-		//or COMPLETE_FILE
+		//if we are version 1, the first byte has to be FILE_NOT_FOUND, PARTIAL_FILE, 
+		//COMPLETE_FILE, FIREWALLED or DOWNLOADING
 		if (version == VERSION && 
-				payload[1]>6) 
+				payload[1]>CODES_MASK) 
 			throw new BadPacketException("invalid payload for version "+version);
 		
 		try {
@@ -162,26 +181,27 @@ public class HeadPong extends VendorMessage {
 		//if we have a partial file and the pong carries ranges, parse their list
 		if ((code & COMPLETE_FILE) == COMPLETE_FILE) 
 			_completeFile=true;
-		else 
-			if ( (_features & HeadPing.INTERVALS) == 
-				HeadPing.INTERVALS){
+		else {
+			//also check if the host is downloading the file
+			if ( (code & DOWNLOADING) == DOWNLOADING)
+				_isDownloading=true;
 			
-				short rangeLength=dais.readShort();
-				byte [] ranges = new byte [rangeLength];
-				dais.readFully(ranges);
-				_ranges = IntervalSet.parseBytes(ranges);
-			}
-		
-		//parse any included altlocs
-		if ((_features & HeadPing.ALT_LOCS) == HeadPing.ALT_LOCS) {
-			int size = dais.readShort();
-			byte [] altlocs = new byte[size];
-			dais.readFully(altlocs);
-			_altLocs = new HashSet();
-			_altLocs.addAll(NetworkUtils.unpackIps(altlocs));
+			if ( (_features & HeadPing.INTERVALS) == 
+				HeadPing.INTERVALS)
+				_ranges = readRanges(dais);
 		}
 		
-		}catch(IOException oops) {
+		//parse any included firewalled altlocs
+		if ((_features & HeadPing.PUSH_ALTLOCS) == HeadPing.PUSH_ALTLOCS) 
+			_pushLocs=readPushLocs(dais);
+		
+			
+		//parse any included altlocs
+		if ((_features & HeadPing.ALT_LOCS) == HeadPing.ALT_LOCS) 
+			_altLocs=readLocs(dais);
+		
+		
+		}catch(IOException oops) {oops.printStackTrace();
 			throw new BadPacketException(oops.getMessage());
 		}
 	}
@@ -215,6 +235,7 @@ public class HeadPong extends VendorMessage {
 		FileDesc desc = _fileManager.getFileDescForUrn(urn);
 		
 		boolean didNotSendAltLocs=false;
+		boolean didNotSendPushAltLocs = false;
 		boolean didNotSendRanges = false;
 		
 		try{
@@ -222,9 +243,12 @@ public class HeadPong extends VendorMessage {
 		byte features = ping.getFeatures();
 		
 		caos.write(features);
+		if (LOG.isDebugEnabled())
+			LOG.debug("writing features "+features);
 		
 		//if we don't have the file..
 		if (desc == null) {
+			LOG.debug("we do not have the file");
 			caos.write(FILE_NOT_FOUND);
 			return baos.toByteArray();
 		}
@@ -234,11 +258,22 @@ public class HeadPong extends VendorMessage {
 			retCode = FIREWALLED;
 		
 		//we have the file... is it complete or not?
-		if (desc instanceof IncompleteFileDesc)
+		if (desc instanceof IncompleteFileDesc) {
 			retCode = (byte) (retCode | PARTIAL_FILE);
+			
+			//also check if the file is currently being downloaded 
+			//or is waiting for sources.  This does not care for queued downloads.
+			DownloadManager dm = RouterService.getDownloadManager();
+			if (dm.conflicts(urn))
+				retCode = (byte) (retCode | DOWNLOADING);
+		}
 		else 
 			retCode = (byte) (retCode | COMPLETE_FILE);
+		
 		caos.write(retCode);
+		
+		if(LOG.isDebugEnabled())
+			LOG.debug("our return code is "+retCode);
 		
 		//write the vendor id
 		caos.write(F_LIME_VENDOR_ID);
@@ -260,45 +295,31 @@ public class HeadPong extends VendorMessage {
 		//write out the return code and the queue status
 		daos.writeByte(queueStatus);
 		
+		if (LOG.isDebugEnabled())
+			LOG.debug("our queue status is "+queueStatus);
+		
 		
 		
 		//if we sent partial file and the remote asked for ranges, send them 
-		if (retCode == PARTIAL_FILE && ping.requestsRanges()) {
-			IncompleteFileDesc ifd = (IncompleteFileDesc) desc;
-			byte [] ranges =ifd.getRangesAsByte();
+		if (retCode == PARTIAL_FILE && ping.requestsRanges()) 
+			didNotSendRanges=!writeRanges(caos,desc);
 			
-			//write the ranges only if they will fit in the packet
-			if (caos.getAmountWritten() + ranges.length <= PACKET_SIZE) {
-				daos.writeShort((short)ranges.length);
-				caos.write(ranges);
-			} 
-			else { //the ranges will not fit - say we didn't send them.
-				didNotSendRanges=true;
-			}
+		
+		
+		//if we have any firewalled altlocs and enough room in the packet, add them.		
+		if (ping.requestsPushLocs()){
 			
+			boolean FWTOnly = (features & HeadPing.FWT_PUSH_ALTLOCS) ==
+				HeadPing.FWT_PUSH_ALTLOCS;
+			
+			didNotSendPushAltLocs = !writePushLocs(caos,desc,
+					FWTOnly);
 		}
 		
-		//if we have any altlocs and enough room in the packet, add them.
-		AlternateLocationCollection altlocs = desc.getAlternateLocationCollection();
-		
-		
-		
-		if (altlocs!= null && altlocs.hasAlternateLocations() &&
-				ping.requestsAltlocs()) {
+		//now add any non-firewalled altlocs in case they were requested. 
+		if (ping.requestsAltlocs()) 
+			didNotSendAltLocs=!writeLocs(caos,desc);
 			
-			int toPack = (PACKET_SIZE - (caos.getAmountWritten()+1) ) /6;
-			
-			byte [] altbytes = altlocs.toBytes(toPack);
-			
-			if (altbytes ==null){
-				//altlocs will not fit or none available - say we didn't send them
-				didNotSendAltLocs=true;
-			} else { 
-				daos.writeShort((short)altbytes.length);
-				caos.write(altbytes);
-			}
-				
-		}
 			
 		}catch(IOException impossible) {
 			ErrorService.error(impossible);
@@ -310,11 +331,18 @@ public class HeadPong extends VendorMessage {
 		//if we did not add ranges or altlocs due to constraints, 
 		//update the flags now.
 		
-		if (didNotSendRanges)
+		if (didNotSendRanges){
+			LOG.debug("not sending ranges");
 			ret[0] = (byte) (ret[0] & ~HeadPing.INTERVALS);
-		if (didNotSendAltLocs)
+		}
+		if (didNotSendAltLocs){
+			LOG.debug("not sending altlocs");
 			ret[0] = (byte) (ret[0] & ~HeadPing.ALT_LOCS);
-		
+		}
+		if (didNotSendPushAltLocs){
+			LOG.debug("not sending push altlocs");
+			ret[0] = (byte) (ret[0] & ~HeadPing.PUSH_ALTLOCS);
+		}
 		return ret;
 	}
 	
@@ -344,10 +372,42 @@ public class HeadPong extends VendorMessage {
 	
 	/**
 	 * 
-	 * @return any alternate locations this alternate location returned.
+	 * @return set of <tt>Endpoint</tt> 
+	 * containing any alternate locations this alternate location returned.
 	 */
 	public Set getAltLocs() {
 		return _altLocs;
+	}
+	
+	/**
+	 * 
+	 * @return set of <tt>PushEndpoint</tt>
+	 * containing any firewalled locations this alternate location returned.
+	 */
+	public Set getPushLocs() {
+		return _pushLocs;
+	}
+	
+	/**
+	 * @return all altlocs carried in the pong as 
+	 * set of <tt>RemoteFileDesc</tt>
+	 */
+	public Set getAllLocsRFD(RemoteFileDesc original){
+		Set ret = new HashSet();
+		
+		if (_altLocs!=null)
+			for(Iterator iter = _altLocs.iterator();iter.hasNext();) {
+				Endpoint current = (Endpoint)iter.next();
+				ret.add(new RemoteFileDesc(original,current));
+			}
+		
+		if (_pushLocs!=null)
+			for(Iterator iter = _pushLocs.iterator();iter.hasNext();) {
+				PushEndpoint current = (PushEndpoint)iter.next();
+				ret.add(new RemoteFileDesc(original,current));
+			}
+		
+		return ret;
 	}
 	
 	/**
@@ -373,5 +433,158 @@ public class HeadPong extends VendorMessage {
 	public boolean isBusy() {
 		return _queueStatus >= BUSY;
 	}
+	
+	public boolean isDownloading() {
+		return _isDownloading;
+	}
+	
+	//*************************************
+	//utility methods
+	//**************************************
+	
+	/**
+	 * reads available ranges from an inputstream
+	 */
+	private final IntervalSet readRanges(DataInputStream dais)
+		throws IOException{
+		short rangeLength=dais.readShort();
+		byte [] ranges = new byte [rangeLength];
+		dais.readFully(ranges);
+		return IntervalSet.parseBytes(ranges);
+	}
+	
+	/**
+	 * reads firewalled alternate locations from an input stream
+	 */
+	private final Set readPushLocs(DataInputStream dais) 
+		throws IOException, BadPacketException {
+		int size = dais.readShort();
+		byte [] altlocs = new byte[size];
+		dais.readFully(altlocs);
+		Set ret = new HashSet();
+		ret.addAll(NetworkUtils.unpackPushEPs(altlocs));
+		return ret;
+	}
+	
+	/**
+	 * reads non-firewalled alternate locations from an input stream
+	 */
+	private final Set readLocs(DataInputStream dais) 
+		throws IOException, BadPacketException {
+		int size = dais.readShort();
+		byte [] altlocs = new byte[size];
+		dais.readFully(altlocs);
+		Set ret = new HashSet();
+		ret.addAll(NetworkUtils.unpackIps(altlocs));
+		return ret;
+	}
+	
+	
+	/**
+	 * @param daos the output stream to write the ranges to
+	 * @return if they were written or not.
+	 */
+	private static final boolean writeRanges(CountingOutputStream caos,
+			FileDesc desc) throws IOException{
+		DataOutputStream daos = new DataOutputStream(caos);
+		LOG.debug("adding ranges to pong");
+		IncompleteFileDesc ifd = (IncompleteFileDesc) desc;
+		byte [] ranges =ifd.getRangesAsByte();
+		
+		//write the ranges only if they will fit in the packet
+		if (caos.getAmountWritten()+2 + ranges.length <= PACKET_SIZE) {
+			LOG.debug("added ranges");
+			daos.writeShort((short)ranges.length);
+			caos.write(ranges);
+			return true;
+		} 
+		else { //the ranges will not fit - say we didn't send them.
+			LOG.debug("ranges will not fit :(");
+			return false;
+		}
+	}
+	
+	private static final boolean writePushLocs(CountingOutputStream caos,
+			FileDesc desc,boolean FWTonly) throws IOException {
+	
+		
+		DataOutputStream daos = new DataOutputStream(caos);
+		//this operates on a copy of the alternate location collection
+		//since it may need to remove any PushLocs that do not support
+		//FW2FW transfer.
+		AlternateLocationCollection altlocs = 
+			AlternateLocationCollection.create(desc.getSHA1Urn());
+		
+		altlocs.addAll(desc.getPushAlternateLocationCollection());
+		
+		
+		if (FWTonly) {
+			LOG.debug("adding only fwt-enabled pushlocs in pong");
+			for (Iterator iter = altlocs.iterator();iter.hasNext();) {
+				PushAltLoc current = (PushAltLoc)iter.next();
+				if (current.supportsFWTVersion() <1)
+					iter.remove();
+			}
+		}
+		
+		//do we have any (left) ?
+		if (altlocs.getAltLocsSize()==0)
+			return false;
+		
+		//push altlocs are bigger than normal altlocs, however we 
+		//don't know by how much.  The size can be between
+		//23 and 41 bytes.  We assume its 41.
+		int available = (PACKET_SIZE - (caos.getAmountWritten()+2)) / 41;
+		
+		if (LOG.isDebugEnabled())
+			LOG.debug("trying to add up to "+available+ " push locs to pong");
+		
+		byte [] altbytes = altlocs.toBytesPush(available);
+		
+		if (altbytes == null){
+			//altlocs will not fit or none available - say we didn't send them
+			LOG.debug("push locs will not fit :(");
+			return false;
+		} else { 
+			LOG.debug("adding push altlocs");
+			daos.writeShort((short)altbytes.length);
+			caos.write(altbytes);
+			return true;
+		}
+
+	}
+	
+	private static final boolean writeLocs(CountingOutputStream caos,
+			FileDesc desc) throws IOException {
+		
+		DataOutputStream daos = new DataOutputStream(caos);
+		AlternateLocationCollection altlocs = desc.getAlternateLocationCollection();
+		
+		//do we have any altlocs?
+		if (altlocs==null)
+			return false;
+		
+		//how many can we fit in the packet?
+		int toPack = (PACKET_SIZE - (caos.getAmountWritten()+2) ) /6;
+		
+		if (LOG.isDebugEnabled())
+			LOG.debug("trying to add up to "+toPack+" locs to pong");
+		
+		byte [] altbytes = altlocs.toBytes(toPack);
+		
+		if (altbytes ==null){
+			//altlocs will not fit or none available - say we didn't send them
+			LOG.debug("altlocs will not fit :(");
+			return false;
+			
+		} else { 
+			LOG.debug("adding altlocs");
+			daos.writeShort((short)altbytes.length);
+			caos.write(altbytes);
+			return true;
+		}
+			
+	}
+	
 }
 	

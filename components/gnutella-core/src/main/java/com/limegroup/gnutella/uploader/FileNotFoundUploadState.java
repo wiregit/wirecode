@@ -15,7 +15,7 @@ import com.limegroup.gnutella.util.CommonUtils;
  * error codes to the requesting client indicating that this is the 
  * case.
  */
-public final class FileNotFoundUploadState implements HTTPMessage {
+public final class FileNotFoundUploadState extends UploadState {
 
     private static final Log LOG = LogFactory.getLog(FileNotFoundUploadState.class);
 	

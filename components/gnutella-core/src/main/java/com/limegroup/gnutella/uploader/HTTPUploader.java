@@ -3,6 +3,10 @@ package com.limegroup.gnutella.uploader;
 import java.io.*;
 import java.net.*;
 import java.util.StringTokenizer;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import com.sun.java.util.collections.*;
 import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.http.*;
@@ -28,6 +32,7 @@ import com.limegroup.gnutella.udpconnect.UDPConnection;
  */
 public final class HTTPUploader implements Uploader {
     
+	private static final Log LOG = LogFactory.getLog(HTTPUploader.class);
     /**
      * The outputstream -- a CountingOutputStream so that we can
      * keep track of the amount of bytes written.
@@ -58,6 +63,19 @@ public final class HTTPUploader implements Uploader {
 	private boolean _browseEnabled;
     private boolean _supportsQueueing = false;
     private final boolean _hadPassword;
+    
+    /**
+     * whether the remote side indicated they want to receive
+     * firewalled altlocs.
+     */
+    private boolean _wantsFalts = false;
+    
+    /**
+     * the version of the F2F transfer protocol the altloc supports.
+     * if this is greater than 0, the other host is most likely firewalled.
+     * INVARIANT: if this is greater than 0, _wantsFalts is set.
+     */
+    private int _FWTVersion = 0;
 
     /**
      * The Watchdog that will kill this uploader if it takes too long.
@@ -103,9 +121,19 @@ public final class HTTPUploader implements Uploader {
     private Set _writtenLocs;
     
     /**
+     * The firewalled alternate locations that have been written out as good locations.
+     */
+    private Set _writtenPushLocs;
+    
+    /**
      * The maximum number of alts to write per http transfer.
      */
     private static final int MAX_LOCATIONS = 10;
+    
+    /**
+     * The maximum number of firewalled alts to write per http transfer.
+     */
+    private static final int MAX_PUSH_LOCATIONS = 5;
 
 	/**
 	 * The <tt>HTTPRequestMethod</tt> to use for the upload.
@@ -183,15 +211,22 @@ public final class HTTPUploader implements Uploader {
 	 * @throws IOException if the file cannot be read from the disk.
 	 */
 	public void setFileDesc(FileDesc fd) throws IOException {
+		if (LOG.isDebugEnabled())
+			LOG.debug("trying to set the fd for uploader "+this+ " with "+fd);
 	    _fileDesc = fd;
 	    _fileSize = (int)fd.getSize();
 	    // initializd here because we'll only write locs if a FileDesc exists
 	    // only initialize once, so we don't write out previously written locs
 	    if( _writtenLocs == null )
-	        _writtenLocs = new HashSet(); 
+	        _writtenLocs = new HashSet();
+	    
+	    if( _writtenPushLocs == null )
+	        _writtenPushLocs = new HashSet(); 
 	    
         // if there already was an input stream, close it.
         if( _fis != null ) {
+        	if (LOG.isDebugEnabled())
+        		LOG.debug(this+ " had an existing stream");
             try {
                 _fis.close();
             } catch(IOException ignored) {}
@@ -501,8 +536,45 @@ public final class HTTPUploader implements Uploader {
                 ret.add(al);
                 i++;
             }
-            return ret == null ? DataUtils.EMPTY_SET : ret;
+            
         }
+        return ret == null ? DataUtils.EMPTY_SET : ret;
+    }
+    
+    Set getNextSetOfPushAltsToSend() {
+    	AlternateLocationCollection coll = 
+    		_fileDesc.getPushAlternateLocationCollection();
+    	
+    	Set ret = null;
+    	
+    	if (coll != null && _wantsFalts)
+        	synchronized(coll) {
+        		Iterator iter  = coll.iterator();
+        		//Synchronization note: We hold the locks of two
+        		//AlternateLocationCollections concurrently, but one of them is a
+        		//local variable, so we are OK.            
+        		for(int i = 0; iter.hasNext() && i < MAX_PUSH_LOCATIONS;) {
+        			PushAltLoc al = (PushAltLoc)iter.next();
+        			if(_writtenPushLocs.contains(al))
+        				continue;
+        			
+        			//if the downloader indicated that they are firewalled
+        			//but the altloc did not say that it support FWT transfer,
+        			//we do not send it.
+        			if (_FWTVersion>0 && al.supportsFWTVersion()==0)
+        					continue;
+
+        			
+        			
+        			_writtenPushLocs.add(al);
+        			if(ret == null) ret = new HashSet();
+        			ret.add(al);
+        			i++;
+        		}
+            
+        	}
+        
+        return ret == null ? DataUtils.EMPTY_SET : ret;
     }
     
     /**
@@ -601,8 +673,13 @@ public final class HTTPUploader implements Uploader {
                 if ( (str==null) || (str.equals("")) ) 
                     break;
 
-                BandwidthStat.HTTP_HEADER_DOWNSTREAM_BANDWIDTH.addData(str.length());
-                debug("HTTPUploader.readHeader(): str = " +  str);
+
+ 
+				BandwidthStat.
+                        HTTP_HEADER_DOWNSTREAM_BANDWIDTH.addData(str.length());
+                if (LOG.isDebugEnabled())
+                	LOG.debug("HTTPUploader.readHeader(): str = " +  str);
+
                 
         		// break out of the loop if it is null or blank
 
@@ -612,9 +689,12 @@ public final class HTTPUploader implements Uploader {
                 else if ( readContentURNHeader(str)  ) ;
                 else if ( readAltLocationHeader(str) ) ;
                 else if ( readNAltLocationHeader(str)) ;
+                else if ( readFAltLocationHeader(str)) ;
+                else if ( readNFAltLocationHeader(str));
                 else if ( readAcceptHeader(str)      ) ;
                 else if ( readQueueVersion(str)      ) ;
                 else if ( readNodeHeader(str)        ) ;
+                else if ( readFeatureHeader(str)     ) ;
         	}
         } catch(ProblemReadingHeaderException prhe) {
             // there was a problem reading the header.. gobble up
@@ -856,6 +936,33 @@ public final class HTTPUploader implements Uploader {
             parseAlternateLocations(str, _fileDesc, false);
         return true;
     }
+    
+	private boolean readFAltLocationHeader(String str) {
+        if ( ! HTTPHeaderName.FALT_LOCATION.matchesStartOfString(str) )
+            return false;
+        
+        //also set the interested flag
+        _wantsFalts=true;
+        
+        if(_fileDesc != null) 
+            parseAlternateLocations(str, _fileDesc, true);
+        return true;
+    }
+
+    private boolean readNFAltLocationHeader(String str) {
+        if (!HTTPHeaderName.BFALT_LOCATION.matchesStartOfString(str))
+            return false;
+
+        //also set the interested flag
+        _wantsFalts=true;
+        
+        if(_fileDesc != null)
+            parseAlternateLocations(str, _fileDesc, false);
+        return true;
+    }
+    
+    
+    
 
     /** 
      * Reads the Accept heder
@@ -924,6 +1031,8 @@ public final class HTTPUploader implements Uploader {
 		if ( !HTTPHeaderName.FEATURES.matchesStartOfString(str) )
 			return false;
         str = HTTPUtils.extractHeaderValue(str);
+        if (LOG.isDebugEnabled())
+        	LOG.debug("reading feature header: "+str);
         StringTokenizer tok = new StringTokenizer(str, ",");
         while (tok.hasMoreTokens()) {
             String feature = tok.nextToken();
@@ -942,6 +1051,22 @@ public final class HTTPUploader implements Uploader {
 				_browseEnabled = true;
 			else if (protocol.equals(HTTPConstants.QUEUE_PROTOCOL))
 				_supportsQueueing = true;
+			else if (protocol.equals(HTTPConstants.PUSH_LOCS))
+            	_wantsFalts=true;
+            else if (protocol.equals(HTTPConstants.FW_TRANSFER)){
+            	_wantsFalts=true;
+            	
+            	//for this header we care about the version.
+            	String versionS = feature.substring(slash+1);
+            	
+            	try {
+            		_FWTVersion = (int)Float.parseFloat(versionS);
+            	}catch(NumberFormatException nfe) {
+            		//we couldn't parse the version number - we should ignore
+            		//this header.
+            		continue;
+            	}
+            }
 			
 		}
 		return true;
@@ -1003,7 +1128,10 @@ public final class HTTPUploader implements Uploader {
                     else
                         alc.remove(al);
                         
-                    _writtenLocs.add(al);
+                    if (al instanceof DirectAltLoc)
+                    	_writtenLocs.add(al);
+                    else
+                    	_writtenPushLocs.add(al);
                 }
             } catch(IOException e) {
                 // just return without adding it.
@@ -1031,6 +1159,14 @@ public final class HTTPUploader implements Uploader {
     
     public float getAverageBandwidth() {
         return bandwidthTracker.getAverageBandwidth();
+    }
+    
+    public boolean wantsFAlts() {
+    	return _wantsFalts;
+    }
+    
+    public int wantsFWTAlts() {
+    	return _FWTVersion;
     }
     
     private final boolean debugOn = false;

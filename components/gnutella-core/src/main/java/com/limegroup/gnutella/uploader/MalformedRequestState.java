@@ -14,7 +14,8 @@ import org.apache.commons.logging.LogFactory;
  * error codes to the requesting client indicating that this is the 
  * case.
  */
-public final class MalformedRequestState implements HTTPMessage {
+public final class MalformedRequestState extends UploadState {
+
 
     private static final Log LOG = LogFactory.getLog(MalformedRequestState.class);
 	

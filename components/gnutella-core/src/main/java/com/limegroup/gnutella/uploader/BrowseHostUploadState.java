@@ -12,22 +12,21 @@ import com.limegroup.gnutella.util.CommonUtils;
  * when the request is to browse the host
  * @author Anurag Singla
  */
-public final class BrowseHostUploadState implements HTTPMessage {
+public final class BrowseHostUploadState extends UploadState {
     
-    private final HTTPUploader _uploader;
 
 	private final ByteArrayOutputStream BAOS = 
 		new ByteArrayOutputStream();
     
     public BrowseHostUploadState(HTTPUploader uploader) {
-		this._uploader = uploader;
+		super(uploader);
     }
         
 	public void writeMessageHeaders(OutputStream ostream) throws IOException {
         //GUARD CLAUSE
         // we can only handle query replies, so reply back with a 406 if they
         // don't accept them...
-        if(!_uploader.getClientAcceptsXGnutellaQueryreplies()) {
+        if(!UPLOADER.getClientAcceptsXGnutellaQueryreplies()) {
             // send back a 406...
             String str = "HTTP/1.1 406 Not Acceptable\r\n";
             ostream.write(str.getBytes());
@@ -72,7 +71,7 @@ public final class BrowseHostUploadState implements HTTPMessage {
 
 	public void writeMessageBody(OutputStream ostream) throws IOException {
         ostream.write(BAOS.toByteArray());
-        _uploader.setAmountUploaded(BAOS.size());
+        UPLOADER.setAmountUploaded(BAOS.size());
         debug("BHUS.doUpload(): returning.");
 	}
 	

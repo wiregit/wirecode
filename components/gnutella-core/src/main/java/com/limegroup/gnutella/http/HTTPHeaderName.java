@@ -37,6 +37,18 @@ public class HTTPHeaderName {
 	public static final HTTPHeaderName ALT_LOCATION = 
 		new HTTPHeaderName("X-Alt");
 
+	/**
+	 * Header for alternate locations behind firewalls.
+	 */
+	public static final HTTPHeaderName FALT_LOCATION =
+		new HTTPHeaderName("X-Falt");
+	
+	/**
+	 * Header for bad alternate locations behind firewalls.
+	 */
+	public static final HTTPHeaderName BFALT_LOCATION =
+		new HTTPHeaderName("X-NFalt");
+	
     /**
      * Header that used to be used for alternate locations,
      * as per HUGE v0.94.
