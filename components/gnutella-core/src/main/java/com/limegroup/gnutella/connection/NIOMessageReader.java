@@ -203,12 +203,16 @@ public class NIOMessageReader extends AbstractMessageReader {
      * Creates a new <tt>Message</tt> instance from the specified header,
      * payload, connection, and network.
      * 
-     * @param header
-     * @param payloadBuffer
-     * @param conn
-     * @param network
-     * @return
-     * @throws BadPacketException
+     * @param header the <tt>ByteBuffer</tt> containing the read Gnutella header
+     *  for the message
+     * @param payloadBuffer the <tt>ByteBuffer</tt> containing the read message
+     *  payload
+     * @param conn the <tt>Connection</tt> the message was read over
+     * @param network the "network" transport the message was received over,
+     *  such as UDP, TCP, or multicast (UDP)
+     * @return a new <tt>Message</tt> instance from the specified data
+     * @throws BadPacketException if the data does not match the expected 
+     *  message format
      */  
     private Message createMessage(ByteBuffer header, ByteBuffer payloadBuffer, 
         Connection conn, int network) 
