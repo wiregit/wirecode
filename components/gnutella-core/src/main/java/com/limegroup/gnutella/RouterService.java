@@ -137,8 +137,8 @@ public class RouterService
             settings.setKeepAlive(outgoing);                    
         }
         int incoming=settings.getMaxIncomingConnections();
-        if (incoming<1) {
-            incoming = outgoing;
+        if (incoming<1 && outgoing!=0) {
+            incoming = outgoing/2;
             settings.setMaxIncomingConnections(incoming);
         }
         
