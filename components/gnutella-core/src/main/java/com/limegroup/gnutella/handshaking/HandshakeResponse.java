@@ -589,24 +589,10 @@ public final class HandshakeResponse {
         
         // If we don't have enough hosts for the X-Try-Ultrapeers header, add
         // hosts that we're connected to.
-        /*
-        if(hosts.size() < 10) {
-            List connections = 
-                RouterService.getConnectionManager().getInitializedConnections();
-            Iterator iter = connections.iterator();
-            for(int i=0; iter.hasNext() && i<(10-hosts.size()); i++) {
-                IpPort host = (IpPort)iter.next();
-                hosts.add(host);
-            }
-        }
-    
-        headers.put(HeaderNames.X_TRY_ULTRAPEERS, createEndpointString(hosts));
-        return headers;
-        */
         
         //is this efficient?
         if(hosts.size() < 10) {
-            //we first try to get the connections that match the locale...
+            //we first try to get the connections that match the locale.
             List conns = 
                 RouterService.getConnectionManager().
                 getInitializedConnectionsMatchLocale(hr.getLocalePref());
@@ -615,7 +601,9 @@ public final class HandshakeResponse {
                 IpPort host = (IpPort)itr.next();
                 hosts.add(host);
             }
-
+            
+            //if we still don't have enough hosts, get them from the list
+            //of all initialized connection
             if(hosts.size() < 10) {
                 //list returned is unmmodifiable
                 conns =

@@ -67,21 +67,30 @@ public final class PongCacher {
      */
     public List getBestPongs(String loc) {
         synchronized(PONGS) { 
-            List pongs = new LinkedList();
+            List pongs = new LinkedList(); //list to return
             long curTime = System.currentTimeMillis();
+            //first we try to populate "pongs" with those pongs
+            //that match the locale 
             List removeList = 
                 addBestPongs(loc, pongs, curTime, 0);
+            //remove all stale pongs that were reported for the
+            //locale
             removePongs(loc, removeList);
-            
+
+            //if the locale that we were searching for was not the default
+            //"en" locale and we do not have enough pongs in the list
+            //then populate the list "pongs" with the default locale pongs
             if(!ApplicationSettings.DEFAULT_LOCALE.getValue().equals(loc)
                && pongs.size() < NUM_HOPS) {
 
+                //get the best pongs for default locale
                 removeList = 
                     addBestPongs(ApplicationSettings.DEFAULT_LOCALE.getValue(),
                                  pongs,
                                  curTime,
                                  pongs.size());
                 
+                //remove any pongs that were reported as stale pongs
                 removePongs(ApplicationSettings.DEFAULT_LOCALE.getValue(),
                             removeList);
             }
@@ -105,13 +114,22 @@ public final class PongCacher {
             EXPIRE_TIME :
             EXPIRE_TIME_LOC;
         
+        //check if there are any pongs of the specific locale stored
+        //in PONGS.
         List remove = null;
         if(PONGS.containsKey(loc)) { 
+            //get all the pongs that are of the specific locale and
+            //make sure that they are not stale
             BucketQueue bq = (BucketQueue)PONGS.get(loc);
             Iterator iter = bq.iterator();
             for(;iter.hasNext() && i < NUM_HOPS; i++) {
                 PingReply pr = (PingReply)iter.next();
                 
+                //if the pongs are stale put into the remove list
+                //to be returned.  Didn't pass in the remove list
+                //into this function because we may never see stale
+                //pongs so we won't need to new a linkedlist
+                //this may be a premature and unnecessary opt.
                 if(curTime - pr.getCreationTime() > exp_time) {
                     if(remove == null) 
                         remove = new LinkedList();

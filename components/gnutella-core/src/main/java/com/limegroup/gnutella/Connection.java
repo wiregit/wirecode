@@ -264,12 +264,6 @@ public class Connection implements IpPort {
         new IOException("connection closed");
 
     /**
-     * boolean to tell if this connection should preference during the
-     * connection attempt
-     */
-    private boolean _isPreference = false;
-
-    /**
      * Creates an uninitialized outgoing Gnutella 0.6 connection with the
      * desired outgoing properties, possibly reverting to Gnutella 0.4 if
      * needed.
@@ -636,7 +630,7 @@ public class Connection implements IpPort {
                     throw NoGnutellaOkException.CLIENT_REJECT;
                 } 
                 else if(code == HandshakeResponse.LOCALE_NO_MATCH) {
-                    //if reponder's locale preferencing was set 
+                    //if responder's locale preferencing was set 
                     //and didn't match the locale this code is used.
                     //(currently in use by the dedicated connectionfetcher)
                     throw NoGnutellaOkException.CLIENT_REJECT_LOCALE;

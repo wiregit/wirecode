@@ -76,7 +76,7 @@ public class ExtendedEndpoint extends Endpoint {
     private Buffer /* of Long */ connectFailures=new Buffer(HISTORY_SIZE);
 
     /** the locale of the client that this endpoint represents */
-    private String client_locale = 
+    private String _clientLocale = 
         ApplicationSettings.DEFAULT_LOCALE.getValue();
 
     /** locale of this client */
@@ -112,7 +112,7 @@ public class ExtendedEndpoint extends Endpoint {
         super(host, port);
         this.dailyUptime = dailyUptime;
         this.timeRecorded = now();
-        client_locale = locale;
+        _clientLocale = locale;
     }
 
     /**
@@ -120,7 +120,7 @@ public class ExtendedEndpoint extends Endpoint {
      */
     public ExtendedEndpoint(String host, int port, String locale) {
         this(host, port);
-        client_locale = locale;
+        _clientLocale = locale;
     }
     
     ////////////////////// Mutators and Accessors ///////////////////////
@@ -170,14 +170,14 @@ public class ExtendedEndpoint extends Endpoint {
      * accessor for the locale of this endpoint
      */
     public String getClientLocale() {
-        return client_locale;
+        return _clientLocale;
     }
 
     /**
      * set the locale
      */
     public void setClientLocale(String l) {
-        client_locale = l;
+        _clientLocale = l;
     }
 
     private void recordConnectionAttempt(Buffer buf, long now) {
@@ -236,7 +236,7 @@ public class ExtendedEndpoint extends Endpoint {
         out.write(FIELD_SEPARATOR);
         write(out, getConnectionFailures());
         out.write(FIELD_SEPARATOR);
-        out.write(client_locale);
+        out.write(_clientLocale);
         out.write(EOL);
     }
 
@@ -361,15 +361,14 @@ public class ExtendedEndpoint extends Endpoint {
                 if(!bLoc) 
                     return 1;
             }
-            else 
-                if(bLoc) 
-                    return -1;
+            else if(bLoc) 
+                return -1;
 
             int ret=a.connectScore()-b.connectScore();
             if (ret!=0) 
                 return ret;
-            
-            return a.getDailyUptime() - b.getDailyUptime();
+            else
+                return a.getDailyUptime() - b.getDailyUptime();
         }
     }
     
