@@ -237,7 +237,7 @@ public final class UDPService implements Runnable {
 	 * @return <tt>true</tt> if the UDP socket is listening for incoming
 	 *  UDP messages, <tt>false</tt> otherwise
 	 */
-	public synchronized boolean isListening() {
+	public boolean isListening() {
 		return (_socket.getPort() != -1);
 	}
 
