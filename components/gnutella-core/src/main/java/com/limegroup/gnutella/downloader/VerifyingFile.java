@@ -35,7 +35,15 @@ public class VerifyingFile {
     
     private static final Log LOG = LogFactory.getLog(VerifyingFile.class);
     
+    /**
+     * The thread that does the actual verification
+     */
     private static final ProcessingQueue CHUNK_VERIFIER = new ProcessingQueue("chunk verifier");
+    
+    /**
+     * If the number of corrupted data gets over this, assume the file will not be recovered
+     */
+    private static final float MAX_CORRUPTION = 0.1f;
     
     /**
      * The file we're writing to / reading from.
@@ -398,6 +406,21 @@ public class VerifyingFile {
      */
     public synchronized boolean isComplete() {
         return (verifiedBlocks.getSize() == completedSize);
+    }
+    
+    /**
+     * @return whether we think we will not be able to complete this file
+     */
+    public synchronized boolean isHopeless() {
+        return lostSize >= MAX_CORRUPTION * completedSize;
+    }
+    
+    /**
+     * if the file has become too corrupt prompt the user to cancel it
+     */
+    public void promptIfHopeless() {
+        if (isHopeless())
+            managedDownloader.promptAboutCorruptDownload();
     }
     
     /**

@@ -26,6 +26,7 @@ import com.limegroup.gnutella.BandwidthTrackerImpl;
 import com.limegroup.gnutella.ByteReader;
 import com.limegroup.gnutella.Constants;
 import com.limegroup.gnutella.CreationTimeCache;
+import com.limegroup.gnutella.DownloadManager;
 import com.limegroup.gnutella.InsufficientDataException;
 import com.limegroup.gnutella.PushEndpoint;
 import com.limegroup.gnutella.PushEndpointForSelf;
@@ -1623,6 +1624,9 @@ public class HTTPDownloader implements BandwidthTracker {
 				        break;
 				    }
 				} 
+                
+                // if we got too corrupted, notify the user
+                commonOutFile.promptIfHopeless();
             }  // end of while loop
 
             //It's OK to have read too much; see comment (1) above.

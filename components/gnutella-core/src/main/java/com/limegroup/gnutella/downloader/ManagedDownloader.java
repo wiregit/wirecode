@@ -2588,21 +2588,19 @@ public class ManagedDownloader implements Downloader, Serializable {
 
     /**
      * Informs this downloader about how to handle corruption.
-     *
-     * If we received a HashTree while waiting for the response,
-     * we ignore the response and will recover automatically.
-     * Otherwise, we may continue the download or stop it immediately.
      */
     public void discardCorruptDownload(boolean delete) {
-        if(getHashTree() != null) {
-            corruptState = CORRUPT_CONTINUE_STATE;
-        } else if(delete) {
-            corruptState = CORRUPT_STOP_STATE;
-            stop();
-        } else {
-            corruptState = CORRUPT_CONTINUE_STATE;
+        synchronized(corruptStateLock) {
+            if(delete) {
+                corruptState = CORRUPT_STOP_STATE;
+            } else {
+                corruptState = CORRUPT_CONTINUE_STATE;
+            }
         }
 
+        if (delete)
+            stop();
+        
         synchronized(corruptStateLock) {
             corruptStateLock.notify();
         }

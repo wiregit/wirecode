@@ -1,5 +1,6 @@
 package com.limegroup.gnutella;
 
+import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -85,12 +86,8 @@ public class IncompleteFileDesc extends FileDesc implements HTTPHeaderValue {
         // have entered the download mesh in the first place!!!
         if (getFile().length() == 0)
             throw new FileNotFoundException("nothing downloaded");
-        
-        // If the underlying data is corrupt, do not output anything.
-        if (_verifyingFile.isCorrupted())
-            throw new FileNotFoundException("data is corrupt");
-        
-        return new FileInputStream(getFile());
+                
+        return new BufferedInputStream(new FileInputStream(getFile()));
     }
     
     /**
