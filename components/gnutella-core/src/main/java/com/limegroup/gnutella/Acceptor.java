@@ -6,6 +6,7 @@ import com.sun.java.util.collections.*;
 
 import com.limegroup.gnutella.chat.*;
 import com.limegroup.gnutella.http.*;
+import com.limegroup.gnutella.util.*;
 import com.limegroup.gnutella.filters.IPFilter;
 
 /**
