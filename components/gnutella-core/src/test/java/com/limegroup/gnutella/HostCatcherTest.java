@@ -84,17 +84,21 @@ public class HostCatcherTest extends com.limegroup.gnutella.util.BaseTestCase {
         
         for(int i=0; i<250; i++) {
             Endpoint curHost = new Endpoint(startAddress+i, 6346);
-            //catcher.add(host, true);
             catcher.doneWithConnect(curHost, false);
         }
         
-        //Endpoint gWebCacheHost = catcher.getAnEndpoint();  
+        Endpoint gWebCacheHost = null;
+        try {
+            gWebCacheHost = catcher.getAnEndpoint();  
+        } catch(InterruptedException e) {
+            e.printStackTrace();
+        }
 
         // This time, the host should not be one of the addresses we added,
         // since it should come from the cache.  There's some remote chance of
         // collision, but it's unlikely.
-        //assertFalse("unexpected address", 
-          //  gWebCacheHost.getAddress().startsWith(startAddress));       
+        assertFalse("unexpected address", 
+            gWebCacheHost.getAddress().startsWith(startAddress));       
         
         HostCatcher.DEBUG = true;
     }
