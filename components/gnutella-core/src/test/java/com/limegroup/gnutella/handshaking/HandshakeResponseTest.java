@@ -98,7 +98,7 @@ public final class HandshakeResponseTest extends BaseTestCase {
 	    assertEquals("wrong sizes", one.size(), two.size());
 	    
 	    for(Iterator a = one.iterator(); a.hasNext(); ) {
-	        found = false;
+            found = false;
             c1 = (Connection)a.next();
             for(Iterator b = two.iterator(); b.hasNext();) {
                 c2 = (Connection)b.next();
@@ -110,7 +110,7 @@ public final class HandshakeResponseTest extends BaseTestCase {
         }
         
 	    for(Iterator a = two.iterator(); a.hasNext(); ) {
-	        found = false;
+            found = false;
             c1 = (Connection)a.next();
             for(Iterator b = one.iterator(); b.hasNext();) {
                 c2 = (Connection)b.next();
