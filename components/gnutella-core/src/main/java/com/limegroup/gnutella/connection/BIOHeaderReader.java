@@ -13,10 +13,9 @@ import com.limegroup.gnutella.util.CommonUtils;
  */
 public final class BIOHeaderReader implements HeaderReader {
 
-    //private final InputStream INPUT_STREAM;
-
-    //private final Socket SOCKET;
-
+    /**
+     * Flag for whether or not we're done reading headers from the connection.
+     */
     private boolean _headersComplete;
 
     /**
@@ -32,24 +31,30 @@ public final class BIOHeaderReader implements HeaderReader {
         new IOException("connection closed");
 
     /**
-     * @param connection
-     * @return
+     * Factory method for creating new <tt>BIOHeaderReader</tt> instances for
+     * reading headers from the specified connection.
+     * 
+     * @param conn the <tt>Connection</tt> instance this reader will read 
+     *  headers for
+     * @return a new <tt>BIOHeaderReader</tt> ready to read headers for the 
+     *  specified connection
      */
     public static HeaderReader createReader(Connection conn) {
         return new BIOHeaderReader(conn);
     }
 
     /**
-     * @param conn
+     * Creates a new <tt>BIOHeaderReader</tt> instance for performing blocking
+     * header reads on behalf of the specified connection.
+     * 
+     * @param conn the <tt>Connection</tt> this header reader will read for
      */
     private BIOHeaderReader(Connection conn) {
         CONNECTION = conn;
     }
 
             
-    /* (non-Javadoc)
-     * @see com.limegroup.gnutella.connection.HeaderReader#readHeader()
-     */
+    // inherit doc comment
     public HTTPHeader readHeader() throws IOException {
         return readHeader(Constants.TIMEOUT);
     }
@@ -74,14 +79,22 @@ public final class BIOHeaderReader implements HeaderReader {
         return HTTPHeader.createHeader(header);
     }
 
-    /* (non-Javadoc)
-     * @see com.limegroup.gnutella.connection.HeaderReader#headersComplete()
-     */
+    // inherit doc comment
     public boolean headersComplete() {
         return _headersComplete;
     }
 
-    
+    /**
+     * Helper method for reading one line of a connection request/response line
+     * or headers. 
+     * 
+     * @param timeout the time in milliseconds to wait for data before closing
+     *  the connection -- if no data is read within this timeframe, the 
+     *  connection will be closed
+     * @return the read line of characters, or <tt>null</tt> if we read the 
+     *  final "\r\n" indicating the end of a header sequence
+     * @throws IOException if there is an IO error reading data from the socket
+     */
     private String readLine(int timeout) throws IOException  {
         int oldTimeout = CONNECTION.getSocket().getSoTimeout();
         // InputStream.read can throw an NPE if we closed the connection,
@@ -104,22 +117,31 @@ public final class BIOHeaderReader implements HeaderReader {
         } catch(NullPointerException e) {
             throw CONNECTION_CLOSED;
         } finally {
-            //Restore socket timeout.
+            // Restore socket timeout.
             CONNECTION.getSocket().setSoTimeout(oldTimeout);
         }
     }
 
-    /* (non-Javadoc)
-     * @see com.limegroup.gnutella.connection.HeaderReader#readConnect()
-     */
+    // inherit doc comment
     public String readConnect() throws IOException {
         return readConnect(Constants.TIMEOUT);
     }
     
-    /* (non-Javadoc)
-     * @see com.limegroup.gnutella.connection.HeaderReader#readConnect(int)
-     */
+    // inherit doc comment
     public String readConnect(int timeout) throws IOException {
         return readLine(timeout);
+    }
+
+    /**
+     * In the case of blocking reads, the reader never reads more data than it
+     * needs to beyond the end of the headers, so this always returns 
+     * <tt>false</tt>.
+     * 
+     * @return <tt>false</tt> because blocking reads look at one character at a
+     *  time, and therefore don't even have to read beyond the end of the
+     *  headers
+     */
+    public boolean hasRemainingData() {
+        return false;
     }
 }
