@@ -1,29 +1,12 @@
 package com.limegroup.gnutella.xml;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.FileNotFoundException;
-import java.io.StringReader;
-import java.util.List;
+import java.util.*;
+import java.io.*;
 import com.limegroup.gnutella.util.NameValue;
 import org.apache.xerces.parsers.DOMParser;
-import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
-import org.w3c.dom.Document;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-import org.w3c.dom.NamedNodeMap;
-import org.w3c.dom.Element;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.ArrayList;
+import org.xml.sax.*;
+import org.w3c.dom.*;
 
-//import for Testing
-import java.io.BufferedReader;
-import java.io.FileReader;
 
 /**
  * @author  Sumeet Thadani
@@ -44,7 +27,8 @@ public class LimeXMLDocument{
      * meta-data corresponds to. It can be null if the data is pure meta-data
      */
     protected String identifier;
-    
+    protected String action;
+
     //constructor
     public LimeXMLDocument(String XMLString) throws SAXException, 
                                         SchemaNotFoundException, IOException{
@@ -78,11 +62,15 @@ public class LimeXMLDocument{
                 schemaUri = att.getNodeValue();
             else if (lowerAttName.indexOf("identifier") >= 0)
                 identifier = att.getNodeValue();
+            else if (lowerAttName.indexOf("action") >= 0)
+                action = att.getNodeValue();
         }
         if(schemaUri == null)//we cannot have a doc with out a schema
             throw new SchemaNotFoundException();
         //Note: However if the identifier is null it just implies that
         // the meta data is not associated with any file!
+        //Similarly, if the action is null, it just means there is no
+        //action associated with this Document. 
     }
 
     private void createMap(Document doc) {
@@ -153,6 +141,11 @@ public class LimeXMLDocument{
         return identifier;
     }
     
+    public String getAction(){
+        return action;
+    }
+
+
     /**
      * Returns a List <NameValue>, where each name-value corresponds to a
      * Canonicalized field name (placeholder), and its corresponding value in
@@ -247,6 +240,20 @@ public class LimeXMLDocument{
         String prevString = "";
         ArrayList tagsToClose = new ArrayList();
         boolean prevAtt=false;
+        boolean rootAtts;//if there are root attributes besides identifier,URI
+        NameValue nv = (NameValue)namValList.get(0);
+        String n = nv.getName();
+        //if this string contains 2 sets of __ and the second set it at the 
+        //end then we know it that the root has attributes.
+        boolean end = n.endsWith(XMLStringUtils.DELIMITER);
+        int c=0;
+        c = n.indexOf(XMLStringUtils.DELIMITER);//firt delimiter
+        c = n.indexOf(XMLStringUtils.DELIMITER,c);//second
+        c = n.indexOf(XMLStringUtils.DELIMITER,c);//should be -1 for root att
+        if(end && c==-1)
+            rootAtts = true;
+        else 
+            rootAtts = false;
         for(int i=0; i< size; i++){
             NameValue namevalue = (NameValue)namValList.get(i);
             String currString = namevalue.getName();
@@ -255,7 +262,7 @@ public class LimeXMLDocument{
             int commonCount = 0;
             List prevFields = null;            
             boolean attribute = false;            
-            if (currString.endsWith("__"))
+            if (currString.endsWith(XMLStringUtils.DELIMITER))
                 attribute = true;
             if(prevAtt && !attribute)//previous was attribute and this is not
                 first = first+">";
@@ -284,8 +291,11 @@ public class LimeXMLDocument{
             for(int j=commonCount; j<z-1; j++){
                 String str = (String)currFields.get(j);
                 first = first+"<"+str;
-                if(i==0 && j==0){
+                if(i==0 && j==0 && !rootAtts){
                     first=first+" xsi:noNamespaceSchemaLocation=\""+uri+"\">";
+                }
+                else if(i==0 && j==0 && rootAtts){
+                    first=first+" xsi:noNamespaceSchemaLocation=\""+uri+"\"";
                 }
                 if( (!attribute) && ( j>0 || i > 0))
                     first = first+">";
