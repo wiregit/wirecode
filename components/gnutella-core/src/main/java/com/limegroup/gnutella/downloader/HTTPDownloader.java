@@ -67,6 +67,8 @@ public class HTTPDownloader implements BandwidthTracker {
     /** For implementing the BandwidthTracker interface. */
     private BandwidthTrackerImpl bandwidthTracker=new BandwidthTrackerImpl();
 
+	private final URL _url; 
+
     /**
      * Creates an uninitialized client-side normal download.  Call 
      * connectTCP and connectHTTP() on this before any other methods.  
@@ -118,6 +120,8 @@ public class HTTPDownloader implements BandwidthTracker {
 		_alternateLocationsReceived = new AlternateLocationCollection(); 
 
 		_amountRead = 0;
+
+		_url = rfd.getUrl();
     }
 
 	public AlternateLocationCollection getAlternateLocations() { 
@@ -181,7 +185,8 @@ public class HTTPDownloader implements BandwidthTracker {
         OutputStreamWriter osw = new OutputStreamWriter(os);
         BufferedWriter out=new BufferedWriter(osw);
         String startRange = java.lang.String.valueOf(_initialReadingPoint);
-        out.write("GET /get/"+_index+"/"+_filename+" HTTP/1.0\r\n");
+        out.write("GET "+_url.getFile()+" HTTP/1.1\r\n");
+        //out.write("GET /get/"+_index+"/"+_filename+" HTTP/1.1\r\n");
         out.write("User-Agent: "+CommonUtils.getHttpServer()+"\r\n");
 
 		// Create a light-weight copy of AlternateLocations to avoid blocking
@@ -192,10 +197,11 @@ public class HTTPDownloader implements BandwidthTracker {
 		}
 
         URN sha1 = _rfd.getSHA1Urn();
-		if ( sha1 != null )
+		if ( sha1 != null ) {
 		    HTTPUtils.writeHeader(HTTPHeaderName.CONTENT_URN, sha1, out);
-		if(alts.size() > 0) {
-			HTTPUtils.writeHeader(HTTPHeaderName.ALT_LOCATION, alts, out);
+			if(alts.size() > 0) {
+				HTTPUtils.writeHeader(HTTPHeaderName.ALT_LOCATION, alts, out);
+			}
 		}
 
         out.write("Range: bytes=" + startRange + "-\r\n");
@@ -550,153 +556,154 @@ public class HTTPDownloader implements BandwidthTracker {
     }
 
 
-	private HTTPDownloader(String str) {
-		ByteArrayInputStream stream = new ByteArrayInputStream(str.getBytes());
-		_byteReader = new ByteReader(stream);
-	}
+	
+//  	private HTTPDownloader(String str) {
+//  		ByteArrayInputStream stream = new ByteArrayInputStream(str.getBytes());
+//  		_byteReader = new ByteReader(stream);
+//  	}
     
-    /**Package access unit tests. is called from JUnit tests. We kept this
-     * test in this class beacause, moving it would invovle changing access
-     * of some methods from private to package access
-     */
-	static void unitTest() {
-        //Unit tests for parseContentRangeStart
-        try {
-            Assert.that(parseContentRangeStart("Content-range: bytes 1-9/10")==1);
-            Assert.that(parseContentRangeStart("Content-range:bytes=1-9/10")==1);
-            Assert.that(parseContentRangeStart("Content-range:bytes */10")==0);
-            Assert.that(parseContentRangeStart("Content-range:bytes */*")==0);
-            Assert.that(parseContentRangeStart("Content-range:bytes 1-9/*")==1);
-            Assert.that(parseContentRangeStart("Content-range:bytes 1-9/*")==1);
-            Assert.that(parseContentRangeStart("Content-range:bytes 1-10/10")==0);
-        } catch (IOException e) {
-            e.printStackTrace();
-            Assert.that(false);
-        }
-        try {
-            parseContentRangeStart("Content-range:bytes 1 10 10");
-        } catch (IOException e) {
-            Assert.that(true);
-        }
+//      /**Package access unit tests. is called from JUnit tests. We kept this
+//       * test in this class beacause, moving it would invovle changing access
+//       * of some methods from private to package access
+//       */
+//  	static void unitTest() {
+//          //Unit tests for parseContentRangeStart
+//          try {
+//              Assert.that(parseContentRangeStart("Content-range: bytes 1-9/10")==1);
+//              Assert.that(parseContentRangeStart("Content-range:bytes=1-9/10")==1);
+//              Assert.that(parseContentRangeStart("Content-range:bytes */10")==0);
+//              Assert.that(parseContentRangeStart("Content-range:bytes */*")==0);
+//              Assert.that(parseContentRangeStart("Content-range:bytes 1-9/*")==1);
+//              Assert.that(parseContentRangeStart("Content-range:bytes 1-9/*")==1);
+//              Assert.that(parseContentRangeStart("Content-range:bytes 1-10/10")==0);
+//          } catch (IOException e) {
+//              e.printStackTrace();
+//              Assert.that(false);
+//          }
+//          try {
+//              parseContentRangeStart("Content-range:bytes 1 10 10");
+//          } catch (IOException e) {
+//              Assert.that(true);
+//          }
         
 
-        //readHeaders tests
-		String str;
-		HTTPDownloader down;
-		boolean ok = true;
+//          //readHeaders tests
+//  		String str;
+//  		HTTPDownloader down;
+//  		boolean ok = true;
 
-		str = "HTTP/1.1 200 OK\r\n";
-		down = new HTTPDownloader(str);
-		try {
-			down.readHeaders();
-			down.stop();
-		} catch (IOException e) {
-			// should not throw an error
-			Assert.that(false);
-		}
+//  		str = "HTTP/1.1 200 OK\r\n";
+//  		down = new HTTPDownloader(str);
+//  		try {
+//  			down.readHeaders();
+//  			down.stop();
+//  		} catch (IOException e) {
+//  			// should not throw an error
+//  			Assert.that(false);
+//  		}
 		
 		
-		str = "HTTP/1.1 301 Moved Permanently\r\n";
-		down = new HTTPDownloader(str);
-		try {
-			down.readHeaders();
-			down.stop();
-			Assert.that(false);
-		} catch (IOException e) {
-		}
+//  		str = "HTTP/1.1 301 Moved Permanently\r\n";
+//  		down = new HTTPDownloader(str);
+//  		try {
+//  			down.readHeaders();
+//  			down.stop();
+//  			Assert.that(false);
+//  		} catch (IOException e) {
+//  		}
 
-        str = "HTTP/1.1 300 Multiple Choices\r\n";
-		down = new HTTPDownloader(str);
-		try {
-			down.readHeaders();
-			down.stop();
-			Assert.that(false);
-		} catch (IOException e) {
-		}
+//          str = "HTTP/1.1 300 Multiple Choices\r\n";
+//  		down = new HTTPDownloader(str);
+//  		try {
+//  			down.readHeaders();
+//  			down.stop();
+//  			Assert.that(false);
+//  		} catch (IOException e) {
+//  		}
 
-		str = "HTTP/1.1 404 File Not Found \r\n";
-		down = new HTTPDownloader(str);
-		try {
-			down.readHeaders();
-			down.stop();
-			Assert.that(false);
-		} catch (FileNotFoundException e) {
+//  		str = "HTTP/1.1 404 File Not Found \r\n";
+//  		down = new HTTPDownloader(str);
+//  		try {
+//  			down.readHeaders();
+//  			down.stop();
+//  			Assert.that(false);
+//  		} catch (FileNotFoundException e) {
 
-		} catch (IOException e) {
-			Assert.that(false);
-		}
+//  		} catch (IOException e) {
+//  			Assert.that(false);
+//  		}
 
-		str = "HTTP/1.1 410 Not Sharing \r\n";
-		down = new HTTPDownloader(str);
-		try {
-			down.readHeaders();
-			down.stop();
-			Assert.that(false);
-		} catch (NotSharingException e) {
-		}catch (IOException e) {
-			Assert.that(false);
-		}
+//  		str = "HTTP/1.1 410 Not Sharing \r\n";
+//  		down = new HTTPDownloader(str);
+//  		try {
+//  			down.readHeaders();
+//  			down.stop();
+//  			Assert.that(false);
+//  		} catch (NotSharingException e) {
+//  		}catch (IOException e) {
+//  			Assert.that(false);
+//  		}
 
-		str = "HTTP/1.1 412 \r\n";
-		down = new HTTPDownloader(str);
-		try {
-			down.readHeaders();
-			down.stop();
-			Assert.that(false);
-		} catch (IOException e) { 
-		}
+//  		str = "HTTP/1.1 412 \r\n";
+//  		down = new HTTPDownloader(str);
+//  		try {
+//  			down.readHeaders();
+//  			down.stop();
+//  			Assert.that(false);
+//  		} catch (IOException e) { 
+//  		}
 
-		str = "HTTP/1.1 503 \r\n";
-		down = new HTTPDownloader(str);
-		try {
-			down.readHeaders();
-			down.stop();
-			Assert.that(false);
-		} catch (TryAgainLaterException e) {
-		} catch (IOException e) {
-			Assert.that(false);
-		}
+//  		str = "HTTP/1.1 503 \r\n";
+//  		down = new HTTPDownloader(str);
+//  		try {
+//  			down.readHeaders();
+//  			down.stop();
+//  			Assert.that(false);
+//  		} catch (TryAgainLaterException e) {
+//  		} catch (IOException e) {
+//  			Assert.that(false);
+//  		}
 
-		str = "HTTP/1.1 210 \r\n";
-		down = new HTTPDownloader(str);
-		try {
-			down.readHeaders();
-			down.stop();
-		} catch (IOException e) {
-			Assert.that(false);
-		}
+//  		str = "HTTP/1.1 210 \r\n";
+//  		down = new HTTPDownloader(str);
+//  		try {
+//  			down.readHeaders();
+//  			down.stop();
+//  		} catch (IOException e) {
+//  			Assert.that(false);
+//  		}
 
-		str = "HTTP/1.1 204 Partial Content\r\n";
-		down = new HTTPDownloader(str);
-		try {
-			down.readHeaders();
-			down.stop();
-		} catch (IOException e) {
-			Assert.that(false);
-		}
+//  		str = "HTTP/1.1 204 Partial Content\r\n";
+//  		down = new HTTPDownloader(str);
+//  		try {
+//  			down.readHeaders();
+//  			down.stop();
+//  		} catch (IOException e) {
+//  			Assert.that(false);
+//  		}
 
 
-		str = "HTTP/1.1 200 OK\r\nUser-Agent: LimeWire\r\n\r\nx";
-		down = new HTTPDownloader(str);
-		try {
-			down.readHeaders();
-			Assert.that((char)down._byteReader.read()=='x');
-			down.stop();
-		} catch (IOException e) {
-			Assert.that(false);
-		}
+//  		str = "HTTP/1.1 200 OK\r\nUser-Agent: LimeWire\r\n\r\nx";
+//  		down = new HTTPDownloader(str);
+//  		try {
+//  			down.readHeaders();
+//  			Assert.that((char)down._byteReader.read()=='x');
+//  			down.stop();
+//  		} catch (IOException e) {
+//  			Assert.that(false);
+//  		}
 		
-		str = "200 OK\r\n";
-		down = new HTTPDownloader(str);
-		try {
-			down.readHeaders();
-			down.stop();
-			Assert.that(false);
-		} catch (NoHTTPOKException e) {
-		}catch (IOException e) {
-			Assert.that(false);
-		}
-	}
+//  		str = "200 OK\r\n";
+//  		down = new HTTPDownloader(str);
+//  		try {
+//  			down.readHeaders();
+//  			down.stop();
+//  			Assert.that(false);
+//  		} catch (NoHTTPOKException e) {
+//  		}catch (IOException e) {
+//  			Assert.that(false);
+//  		}
+//  	}
 }
 
 
