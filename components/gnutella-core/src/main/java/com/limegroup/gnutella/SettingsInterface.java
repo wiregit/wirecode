@@ -42,7 +42,9 @@ public interface SettingsInterface
     public boolean    getFilterHtml();
     public boolean    getUseQuickConnect();
     public String[]   getQuickConnectHosts();
-
+    public int        getParallelSearchMax();
+    public int        getMaxSimDownload();
+    public boolean    getClearCompletedDownload();
     /** special method for getting the number of files scanned */
     public int        getFilesScanned();
 
@@ -135,6 +137,9 @@ public interface SettingsInterface
 
     public void setUseQuickConnect(boolean b);
     public void setQuickConnectHosts(String[] hosts);
+    public void setParallelSearchMax(int max);
+    public void setMaxSimDownload(int max);
+    public void setClearCompletedDownload(boolean b);
 
 
     /** specialized method for writing the 
@@ -197,6 +202,9 @@ public interface SettingsInterface
 	= {"gnutellahosts.com:6346", "gnet.ath.cx:6346",
 	   "gnet1.ath.cx:6346","gnet2.ath.cx:6346","gnet3.ath.cx:6346",
 	   "gnet4.ath.cx:6346"};
+    public static final int     DEFAULT_PARALLEL_SEARCH  = 5;
+    public static final int     DEFAULT_MAX_SIM_DOWNLOAD = 2;
+    public static final boolean DEFAULT_CLEAR_DOWNLOAD   = false;
 
     // The property key name constants 
     public static final String TTL            = "TTL";
@@ -222,6 +230,9 @@ public interface SettingsInterface
     public static final String FILTER_VBS     = "FILTER_VBS";
     public static final String USE_QUICK_CONNECT = "USE_QUICK_CONNECT";
     public static final String QUICK_CONNECT_HOSTS = "QUICK_CONNECT_HOSTS";
+    public static final String PARALLEL_SEARCH= "PARALLEL_SEARCH";
+    public static final String MAX_SIM_DOWNLOAD="MAX_SIM_DOWNLOAD";
+    public static final String CLEAR_DOWNLOAD = "CLEAR_DOWNLOAD";
 
     public static final String HEADER = "Properties file for the LimeWire gnutella client.\nYou can modify any of the default properties here if\nyou wish, but if your modifications do not fit the\nrange of expected values for specific properties, those\nproperties will revert to their default values.\n\n";
 }

@@ -45,6 +45,9 @@ public class SettingsManager implements SettingsInterface
     private static boolean  filterHtml_;
     private static boolean  useQuickConnect_;
     private static String[] quickConnectHosts_;
+    private static int      parallelSearchMax_;
+    private static boolean  clearCompletedDownload_;
+    private static int      maxSimDownload_;
 
     /** Set up a local variable for the properties */
     private static Properties props_;
@@ -375,6 +378,9 @@ public class SettingsManager implements SettingsInterface
 	catch(IllegalArgumentException e){setSaveDirectory(home_);}
 	setUseQuickConnect(SettingsInterface.DEFAULT_USE_QUICK_CONNECT);
 	setQuickConnectHosts(SettingsInterface.DEFAULT_QUICK_CONNECT_HOSTS);
+	setParallelSearchMax(SettingsInterface.DEFAULT_PARALLEL_SEARCH);
+	setClearCompletedDownload(SettingsInterface.DEFAULT_CLEAR_DOWNLOAD);
+	setMaxSimDownload(SettingsInterface.DEFAULT_MAX_SIM_DOWNLOAD);
     }
 
     /** returns the time to live */
@@ -438,6 +444,9 @@ public class SettingsManager implements SettingsInterface
 
     public boolean getUseQuickConnect(){return useQuickConnect_;}
     public String[] getQuickConnectHosts(){return quickConnectHosts_;}    
+    public int getParallelSearchMax(){return parallelSearchMax_;}    
+    public int getMaxSimDownload(){return parallelSearchMax_;}    
+    public boolean getClearCompletedDownload(){return clearCompletedDownload_;} 
  
     /** specialized method for getting the number 
      *  of files scanned */
@@ -785,6 +794,45 @@ public class SettingsManager implements SettingsInterface
 		props_.setProperty(SettingsInterface.QUICK_CONNECT_HOSTS, 
 				   encode(hosts));
 		writeProperties();
+	    }
+    }
+
+    public synchronized void setParallelSearchMax(int max)
+    {
+	if(false)
+	    throw new IllegalArgumentException();
+	else
+	    {
+		parallelSearchMax_ = max;
+		String s = String.valueOf(max);
+		props_.setProperty(SettingsInterface.PARALLEL_SEARCH, s);
+		writeProperties();	
+	    }
+    }
+
+    public synchronized void setMaxSimDownload(int max)
+    {
+	if(false)
+	    throw new IllegalArgumentException();
+	else
+	    {
+		maxSimDownload_ = max;
+		String s = String.valueOf(max);
+		props_.setProperty(SettingsInterface.MAX_SIM_DOWNLOAD, s);
+		writeProperties();	
+	    }
+    }
+
+    public synchronized void setClearCompletedDownload(boolean b)
+    {
+	if(false)
+	    throw new IllegalArgumentException();
+	else
+	    {
+		clearCompletedDownload_ = b;
+		String s = String.valueOf(b);
+		props_.setProperty(SettingsInterface.CLEAR_DOWNLOAD, s);
+		writeProperties();	
 	    }
     }
 
