@@ -60,7 +60,6 @@ public class LimeXMLReplyCollection{
         // construct a backing store object (for serialization)
         MapSerializer ms = initializeMapSerializer(URI);
         Map hashToXMLStr;
-        boolean shouldWrite = false;
 
         //if File is invalid, ms== null
         if (ms == null) // create a dummy
@@ -68,10 +67,6 @@ public class LimeXMLReplyCollection{
         else 
             hashToXMLStr = ms.getMap();
         
-        // the there were no docs on file, we should write it out...
-        if (hashToXMLStr.size() == 0)
-            shouldWrite = true;
-
         if (this.audio) // special processing for mp3s needed
             constructAudioCollection(hashSet, hashToXMLStr);
 
@@ -83,22 +78,21 @@ public class LimeXMLReplyCollection{
 
         // get the hash to xml (from the serialized file) and create a
         // LimeXMLDocument out of each.  Then add it to the collection.
-        Iterator iter = null;
-        if ((hashToXMLStr != null) &&
-            (hashToXMLStr.keySet() != null))
-            iter = hashToXMLStr.keySet().iterator();
-        while((iter != null) && iter.hasNext()){
-            String hash = (String)iter.next();
+        Iterator iter = hashSet.iterator();
+        while((iter != null) && iter.hasNext()) {
+            File file = (File)iter.next();
+            String hash = metaFileManager.readFromMap(file, audio);
             Object xml = hashToXMLStr.get(hash); //cannot be null
             LimeXMLDocument doc=null;
             try{
-                if (xml instanceof LimeXMLDocument) // NEW
+                if ((xml == null) || mainMap.containsKey(hash))
+                    continue;
+                else if (xml instanceof LimeXMLDocument) // NEW
                     doc = (LimeXMLDocument) xml;
-                else { // OLD
+                else // OLD
                     // old style still exists, we need to write...
-                    shouldWrite = true;  
                     doc = new LimeXMLDocument((String) xml);
-                }
+                
                 addReply(hash, doc);
             }
             catch(Exception e){
@@ -108,10 +102,9 @@ public class LimeXMLReplyCollection{
         if (hashSet != null)
             checkDocuments(hashSet,false);
 
-        debug("LimeXMLReplyCollection(): returning with shouldWrite = " +
-              shouldWrite);
+        debug("LimeXMLReplyCollection(): returning.");
 
-        if (shouldWrite) write();
+        write();
     }
 
 

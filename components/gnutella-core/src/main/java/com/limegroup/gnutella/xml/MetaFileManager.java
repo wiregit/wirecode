@@ -202,6 +202,11 @@ public class MetaFileManager extends FileManager {
             return;
         synchronized(metaLocker){
             if (!initialized){//do this only on startup
+                //clear out the HashMap, don't want to have old and potentially
+                //unshared hashes around anymore.
+                mp3FileToHash.clear();
+                nonMP3FileToHash.clear();
+                // now recreate the hashes
                 createFileToHashMaps();
                 SchemaReplyCollectionMapper mapper = 
                       SchemaReplyCollectionMapper.instance();
@@ -299,21 +304,14 @@ public class MetaFileManager extends FileManager {
             int z = subFiles.length;
             for(int j=0;j<z;j++){
                 File f = new File(currDir,subFiles[j]);
-                if(f.isDirectory()){
+                if(f.isDirectory())
                     dirs.add(f);
-                    /*
-                      try {
-                      String newDir = f.getCanonicalPath();                  
-                      dirs.add(newDir);
-                      } catch (IOException ignored) {
-                      continue;
-                      }
-                    */
-                }
             }
             //check files in this dir for .mp3 files.
             File[] files = getSharedFiles(currDir);
-            int size = files.length;
+            int size = 0;
+            if (files != null)
+                size = files.length;
             for(int i=0;i<size;i++){
                     String name="";
                     String hash="";
