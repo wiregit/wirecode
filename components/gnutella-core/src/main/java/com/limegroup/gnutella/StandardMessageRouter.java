@@ -228,9 +228,9 @@ public class StandardMessageRouter
     }
 
     public void sendResponses(Response[] responses, 
-                                        QueryRequest queryRequest,
-                                         Acceptor acceptor,
-                                         byte[] clientGUID) {
+							  QueryRequest queryRequest,
+							  Acceptor acceptor,
+							  byte[] clientGUID) {
         // if either there are no responses or, the
         // response array came back null for some reason,
         // exit this method
@@ -238,10 +238,6 @@ public class StandardMessageRouter
             return;
 
         // get the appropriate queryReply information
-        byte[] guid = queryRequest.getGUID();
-        byte ttl = (byte)(queryRequest.getHops() + 1);
-        int port = acceptor.getPort();
-        byte[] ip = acceptor.getAddress();
 
         //Return measured speed if possible, or user's speed otherwise.
         long speed = _uploadManager.measuredUploadSpeed();
@@ -250,11 +246,6 @@ public class StandardMessageRouter
             speed=SettingsManager.instance().getConnectionSpeed();
             measuredSpeed=false;
         }
-
-        int numResponses = responses.length;
-        int index = 0;
-
-        int numHops = queryRequest.getHops();
 
         //convert responses to QueryReplies
         Iterator /*<QueryReply>*/iterator= responsesToQueryReplies(responses,
