@@ -168,12 +168,12 @@ public class InstantMessenger implements Chatter {
 					// reached. then alert the gui to 
 					// write to the screen.
 					str = _reader.readLine();
-					// synchronized(InstantMessenger.this) {
-					if( ( str == null ) || (str == "") )
-						throw new IOException();
-					_message += str;
-					_activityCallback.receiveMessage(_chatter);
-						// } 
+					synchronized(InstantMessenger.this) {
+						if( ( str == null ) || (str == "") )
+							throw new IOException();
+						_message += str;
+						_activityCallback.receiveMessage(_chatter);
+					} 
 					
 				} catch (IOException e) {
 					// if an exception was thrown, then 
