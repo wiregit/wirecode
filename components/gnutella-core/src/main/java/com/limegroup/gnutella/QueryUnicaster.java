@@ -347,9 +347,12 @@ public final class QueryUnicaster {
     /** Just feed me ExtendedEndpoints - I'll check if I could use them or not.
      */
     public void addUnicastEndpoint(InetAddress address, int port) {
+        if(NetworkUtils.isPrivateAddress(address)) {
+            throw new IllegalArgumentException("private address");
+        }
         if (!SearchSettings.GUESS_ENABLED.getValue()) return;
         if (notMe(address, port) && NetworkUtils.isValidPort(port) &&
-          NetworkUtils.isValidAddress(address)) {
+            NetworkUtils.isValidAddress(address)) {
 			GUESSEndpoint endpoint = new GUESSEndpoint(address, port);
 			addUnicastEndpoint(endpoint);
         }
@@ -457,7 +460,10 @@ public final class QueryUnicaster {
         int port = pr.getPort();
         GUESSEndpoint endpoint = new GUESSEndpoint(address, port);
         _queryKeys.put(endpoint, new QueryKeyBundle(qk));
-        addUnicastEndpoint(endpoint);
+        
+        if(!NetworkUtils.isPrivateAddress(address)) {
+            addUnicastEndpoint(endpoint);
+        }
     }
 
 
