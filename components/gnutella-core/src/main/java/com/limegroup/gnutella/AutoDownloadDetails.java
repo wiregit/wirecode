@@ -30,7 +30,9 @@ class AutoDownloadDetails {
      */
     private float MATCH_PRECISION_DL = .30f;
 
-    /**
+    /** the percentage of matching that invalidates a new file from being
+     *  downloaded.  in other words, if a file matches on more than ~51% of
+     *  words, then don't download it.
      */
     private float WORD_INCIDENCE_RATE = .509999f;
 
@@ -238,6 +240,7 @@ class AutoDownloadDetails {
             e.printStackTrace();
     }
 
+    /*
     public static void main(String argv[]) {
         AutoDownloadDetails add = 
         new AutoDownloadDetails("morrissey", null,
@@ -276,7 +279,7 @@ class AutoDownloadDetails {
         // seems like we've committed MAX_DOWNLOADS, should be expired...
         Assert.that(add.expired());
     }
-
+    */
     
 }
 
