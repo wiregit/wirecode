@@ -4,6 +4,7 @@ import java.util.Properties;
 import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.updates.*;
 import com.limegroup.gnutella.util.CommonUtils;
+import com.limegroup.gnutella.util.NetworkUtils;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 
 /**
@@ -18,34 +19,19 @@ public abstract class DefaultHeaders extends Properties {
     private static final String QUERY_ROUTING_VERSION = "0.1";
 
     protected DefaultHeaders(String remoteIP) {
-		put(HeaderNames.LISTEN_IP, "");
-		//just temporary!
+        byte[] addr = RouterService.getAddress();
+        int port = RouterService.getPort();
+        if(NetworkUtils.isValidAddress(addr) &&
+           NetworkUtils.isValidPort(port)) {
+            put(HeaderNames.LISTEN_IP,
+                NetworkUtils.ip2string(addr) + ":" + port);
+        }
 
         if (remoteIP!=null) {
             put(HeaderNames.REMOTE_IP, remoteIP);
         }
 
         addCommonHeaders(this);
-    }
-    
-    public String getProperty(String key, String defaultValue) {
-        if (key.equals(HeaderNames.LISTEN_IP)) {
-            Endpoint e=new Endpoint(RouterService.getAddress(), 
-									RouterService.getPort());
-            return e.getHostname()+":"+e.getPort();
-        } else {
-            return super.getProperty(key, defaultValue);
-        }
-    }
-    
-    public String getProperty(String key) {
-        if (key.equals(HeaderNames.LISTEN_IP)) {
-            Endpoint e=new Endpoint(RouterService.getAddress(), 
-									RouterService.getPort());
-            return e.getHostname()+":"+e.getPort();
-        } else {
-            return super.getProperty(key);
-        }
     }
     
     /** 
