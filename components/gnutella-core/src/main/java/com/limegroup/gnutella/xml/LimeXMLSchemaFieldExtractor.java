@@ -25,8 +25,11 @@ import org.w3c.dom.Element;
  * </li>
  * <li> might have problems if same field name is used in two different
  * contexts in the schema document (attribute names are no problem)
+ * </li>
  * <li>Will work only if schema is valid. If schema is invalid (has errors),
  * the result may be unpredictable 
+ * </li>
+ * <li> Doesn't resolve references to other schemas
  * </ul>
  * Its just a 'quick & dirty' approach to extract the field names. Whenever
  * available, a standard parser should be used for parsing schemas. It is 
@@ -111,11 +114,12 @@ class LimeXMLSchemaFieldExtractor
      * are in canonicalized form.
      * @param document The XML Schema documnet from where to extract fields
      * @requires The document be a valid XML Schema without any errors
-     * @return All the field names in the passed document. The fields returned
+     * @return A list containing all the field names in the passed document. 
+     * The fields returned
      * are in canonicalized form.
      * @see XMLStringUtils for more information on canonicalized form
      */
-    public static String[] getFields(Document document)
+    public static List getFields(Document document)
     {
         try
         {
@@ -131,11 +135,13 @@ class LimeXMLSchemaFieldExtractor
                 (FieldTypeSet)_nameFieldTypeSetMap.get(rootElementName),
                 rootElementName);
             
-            return (String[])fieldNames.toArray(new String[0]);
+            System.out.println("fields: " + fieldNames);
+            
+            return fieldNames;
         }
         catch(NullPointerException npe)
         {
-            return new String[0];
+            return new LinkedList();
         }
     }
     
@@ -389,9 +395,32 @@ class LimeXMLSchemaFieldExtractor
             }
 
            //add mapping to fieldTypeMap
-           fieldTypeSet.add(new FieldTypePair(name, typeName));   
+           fieldTypeSet.add(new FieldTypePair(name, removeNameSpace(typeName)));   
         }
 
+    }
+    
+    /**
+     * Removes the namespace part from the passed string
+     * @param typeName The string whose namespace part is to be removed
+     * @return The string after removing the namespace part (if present).
+     * For eg If the passed string was "ns:type", the returned value will
+     * be "type"
+     */
+    private static String removeNameSpace(String typeName)
+    {
+        //if no namespace part
+        if(typeName.indexOf(':') == -1)
+        {
+            //return the original string
+            return typeName;
+        }
+        else 
+        {
+            //return the part of the string without namespace
+            return typeName.substring(typeName.indexOf(':') + 1);
+        }
+        
     }
     
     /**
@@ -422,7 +451,7 @@ class LimeXMLSchemaFieldExtractor
         String typeName = typeAttribute.getNodeValue();
        
         //add mapping to fieldTypeMap
-        fieldTypeSet.add(new FieldTypePair(name, typeName));   
+        fieldTypeSet.add(new FieldTypePair(name, removeNameSpace(typeName)));   
     }
     
     private static void traverseChildren(Node n)
@@ -521,13 +550,13 @@ class LimeXMLSchemaFieldExtractor
     {
         //get new fieldtype set
         FieldTypeSet fieldTypeSet = new FieldTypeSet();
-        fieldTypeSet.add(new FieldTypePair(DUMMY, typeName));
+        fieldTypeSet.add(new FieldTypePair(DUMMY, removeNameSpace(typeName)));
         
         //add mapping to _nameFieldTypeSetMap
         _nameFieldTypeSetMap.put(name, fieldTypeSet);
         
         //add type name to the referenced names set
-        _referencedNames.add(typeName);
+        _referencedNames.add(removeNameSpace(typeName));
     }
     
     private static boolean isElementTag(String tag)
