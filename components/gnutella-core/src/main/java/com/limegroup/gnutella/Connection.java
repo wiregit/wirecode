@@ -805,8 +805,16 @@ public class Connection {
      * necessary.
      */
     private void changeAddress(final String v) {
+        InetAddress ia = null;
+        try {
+            ia = InetAddress.getByName(v);
+        } catch(UnknownHostException uhe) {
+            return; // invalid.
+        }
+        
         // invalid or private, exit
-        if(!NetworkUtils.isValidAddress(v) || NetworkUtils.isPrivateAddress(v))
+        if(!NetworkUtils.isValidAddress(ia) ||
+            NetworkUtils.isPrivateAddress(ia))
             return;
             
         // If we're forcing, change that if necessary.
@@ -819,12 +827,11 @@ public class Connection {
         }
         // Otherwise, if our current address is invalid, change.
         else if(!NetworkUtils.isValidAddress(RouterService.getAddress())) {
-            try {
-                InetAddress ia = InetAddress.getByName(v);
-                // will auto-call addressChanged.
-                RouterService.getAcceptor().setAddress(ia);
-            } catch(UnknownHostException ignored) {}
+            // will auto-call addressChanged.
+            RouterService.getAcceptor().setAddress(ia);
         }
+        
+        RouterService.getAcceptor().setExternalAddress(ia);
     }
             
 

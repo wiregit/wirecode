@@ -61,6 +61,13 @@ public class Acceptor implements Runnable {
      */
     private static byte[] _address = new byte[4];
     
+    /**
+     * The external address.  This is the address as visible from other peers.
+     *
+     * LOCKING: obtain Acceptor.class' lock
+     */
+    private static byte[] _externalAddress = new byte[4];
+    
 	/**
 	 * Variable for whether or not we have accepted an incoming connection --
 	 * used to determine firewall status.
@@ -103,6 +110,22 @@ public class Acceptor implements Runnable {
 		if( addrChanged )
 		    RouterService.addressChanged();
 	}
+	
+	/**
+	 * Sets the external address.
+	 */
+	public void setExternalAddress(InetAddress address) {
+	    byte[] byteAddr = address.getAddress();
+
+		if( byteAddr[0] == 127 &&
+           ConnectionSettings.LOCAL_IS_PRIVATE.getValue()) {
+            return;
+        }
+
+		synchronized(Acceptor.class) {
+		    _externalAddress = byteAddr;
+		}
+    }
 
     /**
      * Launches the port monitoring thread, MulticastService, and UDPService.
@@ -113,6 +136,25 @@ public class Acceptor implements Runnable {
 		Thread at = new Thread(this, "Acceptor");
 		at.setDaemon(true);
 		at.start();
+	}
+	
+	/**
+	 * Returns whether or not our advertised IP address
+	 * is the same as what remote peers believe it is.
+	 */
+	public boolean isAddressExternal() {
+	    synchronized(Acceptor.class) {
+	        return Arrays.equals(getAddress(true), _externalAddress);
+	    }
+	}
+	
+	/**
+	 * Returns this' external address.
+	 */
+	public byte[] getExternalAddress() {
+	    synchronized(Acceptor.class) {
+	        return _externalAddress;
+        }
 	}
 
     /**

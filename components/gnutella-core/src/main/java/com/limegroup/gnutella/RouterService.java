@@ -758,7 +758,8 @@ public class RouterService {
         if (isGUESSCapable() && !uploadManager.isBusy() && 
             OutOfBandThroughputStat.isSuccessRateGood() &&
             acceptedIncomingConnection() && !NetworkUtils.isPrivate() &&
-            SearchSettings.OOB_ENABLED.getValue())
+            SearchSettings.OOB_ENABLED.getValue() &&
+            acceptor.isAddressExternal())
             return GUID.makeAddressEncodedGuid(getAddress(), getPort());
         else
             return GUID.makeGuid();
@@ -1206,6 +1207,13 @@ public class RouterService {
             fds[i].addUrnsForSelf();
 
         return true;
+    }
+    
+    /**
+     * Returns the external IP address for this host.
+     */
+    public static byte[] getExternalAddress() {
+        return acceptor.getExternalAddress();
     }
 
 	/**
