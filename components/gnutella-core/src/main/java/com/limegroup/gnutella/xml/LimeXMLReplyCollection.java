@@ -143,15 +143,19 @@ public class LimeXMLReplyCollection{
                     String fileXMLString = (String) xml;
                     solo = ((fileXMLString == null) || 
                             fileXMLString.equals(""));
-                    String xmlString = id3Reader.readDocument(file,solo);
-                    if(!solo)
+                    if(!solo) {
+                        String xmlString = id3Reader.readDocument(file,solo);
                         xmlString = 
                         joinAudioXMLStrings(xmlString,fileXMLString);
-                    doc = new LimeXMLDocument(xmlString);
+                        doc = new LimeXMLDocument(xmlString);
+                    }
+                    else
+                        doc = id3Reader.readDocument(file);
                 }
                 addReply(hash,doc);
             }
             catch(Exception e){
+                debug(e);
             }
         }
     }
