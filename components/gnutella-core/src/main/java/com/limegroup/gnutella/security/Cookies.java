@@ -13,6 +13,11 @@ import com.limegroup.gnutella.util.FileUtils;
  */
 public class Cookies implements Serializable
 {
+    //NOTE that the User information in a cookie always have the domains
+    //authenticated, as default only
+    //This is however not a problem, as only username and password are used from
+    //the User info contained in a cookie
+    
     /**
      * Map from hostname/IPAddressString to corresponding user authentication
      * info for the host (String -> User)
