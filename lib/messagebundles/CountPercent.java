@@ -39,7 +39,7 @@ public class CountPercent {
             int size = value.size();
             double percentage = (double)size / (double)total * 100.0;
             System.out.print("(" + key.getCode() + ") " + pc.format(percentage) + "%, size: " + rc.format(size));
-            System.out.print("(");
+            System.out.print(" (");
             byte[] lang = key.toString().getBytes("UTF-8");
             System.out.write(lang, 0, lang.length);
             System.out.println(")");
