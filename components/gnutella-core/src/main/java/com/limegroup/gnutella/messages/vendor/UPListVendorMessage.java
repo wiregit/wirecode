@@ -242,9 +242,12 @@ public class UPListVendorMessage extends VendorMessage {
 		
 		//parse the up ip addresses
 		for (int i = 3;i<numberUP*bytesPerResult;i+=bytesPerResult) {
+		
+			int index = i; //the index within the result block.
 			
 			byte [] current = new byte[6];
-			System.arraycopy(payload,i,current,0,6);
+			System.arraycopy(payload,index,current,0,6);
+			index+=6;
 			
 			QueryReply.IPPortCombo combo = 
 	            QueryReply.IPPortCombo.getCombo(current);
@@ -257,13 +260,15 @@ public class UPListVendorMessage extends VendorMessage {
 			ExtendedEndpoint result = new ExtendedEndpoint(combo.getAddress(),combo.getPort()); 
 			
 			//add connection lifetime
-			if(_connectionTime)   
-				result.setDailyUptime(ByteOrder.leb2short(payload,i+6));
-			
+			if(_connectionTime) {   
+				result.setDailyUptime(ByteOrder.leb2short(payload,index));
+				index+=2;
+			}
 			//add locale info.
 			if (_localeInfo) {
-				String langCode = new String(payload, i+8,2);
+				String langCode = new String(payload, index, 2);
 				result.setClientLocale(langCode);
+				index+=2;
 			}
 			 _ultrapeers.add(result);
 			
@@ -272,8 +277,12 @@ public class UPListVendorMessage extends VendorMessage {
 		
 		//parse the leaf ip addresses
 		for (int i = numberUP*bytesPerResult+3;i<payload.length;i+=bytesPerResult) {
+		
+			int index =i;
+		
 			byte [] current = new byte[6];
-			System.arraycopy(payload,i,current,0,6);
+			System.arraycopy(payload,index,current,0,6);
+			index+=6;
 			
 			QueryReply.IPPortCombo combo = 
 	            QueryReply.IPPortCombo.getCombo(current);
@@ -286,13 +295,16 @@ public class UPListVendorMessage extends VendorMessage {
 			ExtendedEndpoint result = new ExtendedEndpoint(combo.getAddress(),combo.getPort()); 
 			
 			//add connection lifetime
-			if(_connectionTime)   
-				result.setDailyUptime(ByteOrder.leb2short(payload,i+6));
+			if(_connectionTime) {   
+				result.setDailyUptime(ByteOrder.leb2short(payload,index));
+				index+=2;
+			}
 			
 			//add locale info.
 			if (_localeInfo) {
-				String langCode = new String(payload, i+8,2);
+				String langCode = new String(payload, index,2);
 				result.setClientLocale(langCode);
+				index+=2;
 			}
 			 _leaves.add(result);
 		}
