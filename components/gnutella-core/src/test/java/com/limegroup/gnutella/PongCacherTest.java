@@ -4,12 +4,11 @@ import java.net.InetAddress;
 
 import junit.framework.Test;
 
-import com.limegroup.gnutella.messages.GGEP;
 import com.limegroup.gnutella.messages.PingReply;
 import com.limegroup.gnutella.security.ServerAuthenticator;
 import com.limegroup.gnutella.util.BaseTestCase;
 import com.limegroup.gnutella.util.BucketQueue;
-import com.limegroup.gnutella.util.CommonUtils;
+import com.limegroup.gnutella.util.MessageTestUtils;
 import com.limegroup.gnutella.util.PrivilegedAccessor;
 import com.limegroup.gnutella.util.UltrapeerConnectionManager;
 import com.sun.java.util.collections.Iterator;
@@ -21,10 +20,7 @@ import com.sun.java.util.collections.List;
  */
 public final class PongCacherTest extends BaseTestCase {
 
-    /**
-     * Cached constant for the vendor GGEP extension.
-     */
-    private static final byte[] CACHED_VENDOR = new byte[5];
+
     
     private static final PongCacher PC = PongCacher.instance();
 
@@ -62,10 +58,7 @@ public final class PongCacherTest extends BaseTestCase {
             new TestManager());
         
         // Create a pong with the correct GGEP for our cacher to accept it.
-        GGEP ggep = newGGEP(10, true, true);
-        PingReply pr = PingReply.create(GUID.makeGuid(), (byte)2, 
-            10, new byte[]{20,2,4,3}, 10, 10, true, ggep);
-        
+        PingReply pr = MessageTestUtils.createPongWithFreeLeafSlots();
         PongCacher.instance().addPong(pr);
         
         // Make sure we get the pong successfully.
@@ -192,71 +185,7 @@ public final class PongCacherTest extends BaseTestCase {
                      PongCacher.NUM_PONGS_PER_HOP, bq.size(0));
     }
     
-    /** Returns the GGEP payload bytes to encode the given uptime */
-    private static GGEP newGGEP(int dailyUptime, boolean isUltrapeer,
-                                boolean isGUESSCapable) {
-        GGEP ggep=new GGEP(true);
-        
-        if (dailyUptime >= 0)
-            ggep.put(GGEP.GGEP_HEADER_DAILY_AVERAGE_UPTIME, dailyUptime);
-        
-        if (isGUESSCapable && isUltrapeer) {
-            // indicate guess support
-            byte[] vNum = {
-                convertToGUESSFormat(CommonUtils.getGUESSMajorVersionNumber(),
-                                     CommonUtils.getGUESSMinorVersionNumber())};
-            ggep.put(GGEP.GGEP_HEADER_UNICAST_SUPPORT, vNum);
-        }
-        
-        if (isUltrapeer) { 
-            // indicate UP support
-            addUltrapeerExtension(ggep);
-        }
-        
-        // all pongs should have vendor info
-        ggep.put(GGEP.GGEP_HEADER_VENDOR_INFO, CACHED_VENDOR); 
 
-        return ggep;
-    }
-
-
-    /**
-     * Adds the ultrapeer GGEP extension to the pong.  This has the version of
-     * the Ultrapeer protocol that we support as well as the number of free
-     * leaf and Ultrapeer slots available.
-     * 
-     * @param ggep the <tt>GGEP</tt> instance to add the extension to
-     */
-    private static void addUltrapeerExtension(GGEP ggep) {
-        byte[] payload = new byte[3];
-        // put version
-        payload[0] = convertToGUESSFormat(CommonUtils.getUPMajorVersionNumber(),
-                                          CommonUtils.getUPMinorVersionNumber()
-                                          );
-        payload[1] = (byte)10;
-        payload[2] = (byte)10;
-
-        // add it
-        ggep.put(GGEP.GGEP_HEADER_UP_SUPPORT, payload);
-    }
-
-    /** 
-     * puts major as the high order bits, minor as the low order bits.
-     * @exception IllegalArgumentException thrown if major/minor is greater 
-     *  than 15 or less than 0.
-     */
-    private static byte convertToGUESSFormat(int major, int minor) 
-        throws IllegalArgumentException {
-        if ((major < 0) || (minor < 0) || (major > 15) || (minor > 15))
-            throw new IllegalArgumentException();
-        // set major
-        int retInt = major;
-        retInt = retInt << 4;
-        // set minor
-        retInt |= minor;
-
-        return (byte) retInt;
-    }
     
     private static class TestManager extends ConnectionManager {
         /**
