@@ -296,11 +296,11 @@ public class ManagedConnection extends Connection
     private boolean _horizonEnabled = true;
     
     /**
-     * Whether this connection can receive unsolicited UDP.
-     * Ultrapeers always can, leafs can if they send queries that desire
-     * out of band results.
+     * Whether this connection has requested OOB results.
+     * Useful for verifying a connection's claim that it can 
+     * receive unsolicited UDP.
      */
-    private boolean _UDPCapable = false;
+    private boolean _hasRequestedOOB = false;
     
     /**
      * whether this connection is the connection from the leaf we are trying
@@ -1572,17 +1572,20 @@ public class ManagedConnection extends Connection
 
     /**
      * @return whether the peer on the other side of this connection
-     * can receive unsolicited UDP.  Ultrapeers always can.
+     * has requested OOB results - useful for checking if it
+     * can receive unsolicited UDP.  
      */
     public boolean hasRequestedOOB() {
-    	return isSupernodeConnection() ? true : _UDPCapable;
+    	return _hasRequestedOOB;
     }
     
     /**
-     * marks this connection as capable of receiving unsolicited UDP
+     * marks this connection as having requested OOB queries.
+     * useful for checking if it can receive unsolicited UDP.
+     * should be called only for leaf connections.
      */
     public void setUDPCapable(boolean status) {
-    	_UDPCapable=status;  
+    	_hasRequestedOOB=status;  
     }
     
 
