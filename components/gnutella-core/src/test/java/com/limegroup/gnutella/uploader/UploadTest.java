@@ -89,11 +89,6 @@ public class UploadTest extends TestCase {
 	}
 
 	protected void setUp() {
-
-        //assertEquals("ports should be equal", PORT, 
-        //           SettingsManager.instance().getPort());
-		
-        //router.connect();
         assertEquals("ports should be equal",
                      PORT, SettingsManager.instance().getPort());
 
