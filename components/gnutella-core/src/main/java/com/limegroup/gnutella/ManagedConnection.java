@@ -1001,6 +1001,18 @@ public class ManagedConnection extends Connection
         // QueryStatus message that shuts off the query so you can clean up
         // your tables.
         // THIS IS SOME MAJOR HOKERY-POKERY!!!
+        
+        // 1) mutate the GUID of the query
+        byte[] origGUID = query.getGUID();
+        byte[] oobGUID = new byte[origGUID.length];
+        System.arraycopy(origGUID, 0, oobGUID, 0, origGUID.length);
+        GUID.addressEncodeGuid(oobGUID, RouterService.getAddress(),
+                               RouterService.getPort());
+
+        query = QueryRequest.createProxyQuery(query, oobGUID);
+
+        // 2) set up mappings between the guids
+
         return query;
     }
 

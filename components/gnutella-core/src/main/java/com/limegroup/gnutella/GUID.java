@@ -136,14 +136,24 @@ public class GUID implements  com.sun.java.util.collections.Comparable {
      */
     public static byte[] makeAddressEncodedGuid(byte[] ip, int port) 
         throws IllegalArgumentException {
+        return addressEncodeGuid(makeGuid(), ip, port);
+    }
+
+    /** Modifies the input guid by address encoding it with the ip and port.
+     *  @exception IllegalArgumentException thrown if ip.length != 4 or if the
+     *  port is not a valid value or if the size of the input guid is not 16.
+     *  @returns the input guid, now modified as appropriate.  note that since
+     *  you have a handle to the original bytes you don't need the return value.
+     */
+    public static byte[] addressEncodeGuid(byte[] ret, byte[] ip, int port) 
+        throws IllegalArgumentException {
         
+        if (ret.length != SZ)
+            throw new IllegalArgumentException("Input byte array wrong length.");
         if (!NetworkUtils.isValidAddress(ip))
             throw new IllegalArgumentException("IP is invalid!");
         if (!NetworkUtils.isValidPort(port))
             throw new IllegalArgumentException("Port is invalid: " + port);
-
-
-        byte[] ret = makeGuid();
 
         // put the IP in there....
         for (int i = 0; i < 4; i++)
