@@ -175,8 +175,7 @@ public class NormalUploadState implements UploadState {
 		String str;
 		str = "HTTP 200 OK \r\n";
 		_ostream.write(str.getBytes());
-		String version = CommonUtils.getLimeWireVersion();
-		str = "Server: LimeWire " + version + " \r\n";
+		str = "Server: "+CommonUtils.getVendor()+"\r\n";
 		_ostream.write(str.getBytes());
 		String type = getMimeType();       /* write this method later  */
 		str = "Content-type:" + type + "\r\n";

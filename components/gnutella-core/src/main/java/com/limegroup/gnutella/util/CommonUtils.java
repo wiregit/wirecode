@@ -66,11 +66,20 @@ public class CommonUtils {
 	}
 
 	/**
-	 * returns the current version of LimeWire.
+	 * returns the current version number of LimeWire as
+     * a string, e.g., "1.4".
 	 */
 	public static String getLimeWireVersion() {
 		return LIMEWIRE_VERSION;
 	}
+
+	/**
+	 * Returns a version number appropriate for upload headers.
+     * Same as '"LimeWire "+getLimeWireVersion'.
+	 */
+	public static String getVendor() {
+		return "LimeWire "+LIMEWIRE_VERSION;
+	}    
 
 	/**
 	 * returns the version of java we're using.

@@ -12,6 +12,8 @@ import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.util.SocketOpener;
 import java.io.*;
 import java.net.*;
+import com.limegroup.gnutella.util.CommonUtils;
+
 
 /**
  * Downloads a file over an HTTP connection.  This class is as simple as possible.
@@ -144,7 +146,7 @@ public class HTTPDownloader {
         BufferedWriter out=new BufferedWriter(osw);
         String startRange = java.lang.String.valueOf(_initialReadingPoint);
         out.write("GET /get/"+index+"/"+file+" HTTP/1.0\r\n");
-        out.write("User-Agent: LimeWire\r\n");
+        out.write("User-Agent: "+CommonUtils.getVendor()+"\r\n");
         out.write("Range: bytes=" + startRange + "-\r\n");
         out.write("\r\n");
         out.flush();

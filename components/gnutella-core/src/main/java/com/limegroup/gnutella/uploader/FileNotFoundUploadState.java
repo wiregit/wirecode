@@ -30,7 +30,7 @@ public class FileNotFoundUploadState implements UploadState {
 		String errMsg = "File not found on server.";
 		str = "HTTP/1.1 404 Not Found\r\n";
 		_ostream.write(str.getBytes());
-		str = "Server: " + "LimeWire" + "\r\n";
+		str = "Server: " + CommonUtils.getVendor() + "\r\n";
 		_ostream.write(str.getBytes());
 		str = "Content-Type: text/plain\r\n";
 		_ostream.write(str.getBytes());
