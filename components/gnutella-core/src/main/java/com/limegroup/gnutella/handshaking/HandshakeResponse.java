@@ -3,6 +3,7 @@ package com.limegroup.gnutella.handshaking;
 import com.limegroup.gnutella.*;
 import java.util.Properties;
 import com.sun.java.util.collections.*;
+import java.io.*;
 
 /**
  * This class contains the necessary information to form a response to a 
@@ -80,7 +81,7 @@ public final class HandshakeResponse {
     /**
      * HTTP-like status code used when handshaking (e.g., 200, 401, 503).
      */
-    private int statusCode;
+    private final int STATUS_CODE;
 
     /**
      * Message used with status code when handshaking (e.g., "OK, "Service Not
@@ -88,7 +89,7 @@ public final class HandshakeResponse {
      * the status line (i.e., first line) of an HTTP-like response to a 
      * connection handshake.
      */
-    private String statusMessage;
+    private final String STATUS_MESSAGE;
 
     /**
      * Headers to use in the response to a connection handshake.
@@ -100,16 +101,60 @@ public final class HandshakeResponse {
 	 */
     private Boolean _supportsGGEP;
     
-    
+    /**
+     * Cached boolean for whether or not this is considered a considered a
+     * "good" connection.
+     */
+    private final boolean GOOD;
+
+    /**
+     * Cached value for the number of Ultrapeers this Ultrapeer attempts
+     * to connect to.
+     */
+    private final int DEGREE;
+
+    /**
+     * Cached value for whether or not this is a high degree connection.
+     */
+    private final boolean HIGH_DEGREE;
+
+    /**
+     * Cached value for whether or not this is an Ultrapeer connection that
+     * supports Ultrapeer query routing.
+     */
+    private final boolean ULTRAPEER_QRP;
+
+    /**
+     * Cached value for the maximum TTL to use along this connection.
+     */
+    private final byte MAX_TTL;
+
+    /**
+     * Cached value for whether or not this connection supports dynamic
+     * querying.
+     */
+    private final boolean DYNAMIC_QUERY;
+
+    /**
+     * Cached value for whether or not this connection reported
+     * X-Ultrapeer: true in it's handshake headers.
+     */
+    private final boolean ULTRAPEER;
+
+    /**
+     * Cached value for whether or not this connection reported
+     * X-Ultrapeer: false in it's handshake headers.
+     */
+    private final boolean LEAF;
+
+
     /**
      * Creates a HandshakeResponse which defaults the status code and status
      * message to be "200 Ok" and uses the desired headers in the response. 
      * @param headers the headers to use in the response. 
      */
-    public HandshakeResponse(Properties headers) {
-        statusCode = OK;
-        statusMessage = OK_MESSAGE;
-        HEADERS = headers;
+    private HandshakeResponse(Properties headers) {
+        this(OK, OK_MESSAGE, headers);
     }    
 
     /**
@@ -119,36 +164,51 @@ public final class HandshakeResponse {
      * @param message the response message to use.
      * @param headers the headers to use in the response.
      */
-     public HandshakeResponse(int code, String message, Properties headers) { 
-         this.statusCode = code;
-         this.statusMessage = message;
-         this.HEADERS = headers;
+     HandshakeResponse(int code, String message, Properties headers) { 
+         STATUS_CODE = code;
+         STATUS_MESSAGE = message;
+         HEADERS = Collections.unmodifiableMap(headers);
+         DEGREE = extractIntHeaderValue(HEADERS, HeaderNames.X_DEGREE, 6);         
+         HIGH_DEGREE = getNumIntraUltrapeerConnections() >= 15;
+         ULTRAPEER_QRP = 
+             isVersionOrHigher(HEADERS, 
+                               HeaderNames.X_ULTRAPEER_QUERY_ROUTING, 0.1F);
+         MAX_TTL = extractByteHeaderValue(HEADERS, HeaderNames.X_MAX_TTL, (byte)5);
+         DYNAMIC_QUERY = isVersionOrHigher(HEADERS, HeaderNames.X_DYNAMIC_QUERY, 0.1F);
+         GOOD = isHighDegreeConnection() &&
+             isUltrapeerQueryRoutingConnection() &&
+             (getMaxTTL() < 5) &&
+             isDynamicQueryConnection();
+
+         ULTRAPEER = isTrueValue(HEADERS, HeaderNames.X_ULTRAPEER);
+         LEAF = isFalseValue(HEADERS, HeaderNames.X_ULTRAPEER);
      }
-    
+   
+
     /**
-     * Creates a HandshakeResponse with the desired status line, 
-     * and headers
-     * @param statusLine the status code and status message together used in the
-     * HTTP status line. (e.g., "200 OK", "503 Service Not Available")
-     * @param headers the headers to use in the response.
+     * Utility method to extract the connection code from the connect string,
+     * such as "200" in a "200 OK" message.
+     *
+     * @param line the full connection string, such as "200 OK."
+     * @return the status code for the connection string
      */
-    private HandshakeResponse(String statusLine, Properties headers) { 
-        try {
-            //get the status code and message out of the status line
-            int statusMessageIndex = statusLine.indexOf(" ");
-            this.statusCode = Integer.parseInt(statusLine.substring(0, 
-                statusMessageIndex).trim());
-            this.statusMessage = statusLine.substring(
-                statusMessageIndex).trim();
-        }
-        catch(Exception e){
-            //in case of any exception, use default bad codes
-            //TODO: this is bogus
-            this.statusCode = DEFAULT_BAD_STATUS_CODE;
-            this.statusMessage = DEFAULT_BAD_STATUS_MESSAGE;
-        }
-        
-        this.HEADERS = headers;
+    private static int extractCode(String line) {
+        //get the status code and message out of the status line
+        int statusMessageIndex = line.indexOf(" ");
+        return Integer.parseInt(line.substring(0, statusMessageIndex).trim());
+    }
+
+    /**
+     * Utility method to extract the connection message from the connect string,
+     * such as "OK" in a "200 OK" message.
+     *
+     * @param line the full connection string, such as "200 OK."
+     * @return the status message for the connection string
+     */
+    private static String extractMessage(String line) {
+        //get the status code and message out of the status line
+        int statusMessageIndex = line.indexOf(" ");
+        return line.substring(statusMessageIndex).trim();
     }
 
     /**
@@ -159,8 +219,28 @@ public final class HandshakeResponse {
      *  sent by the other host
      */
     public static HandshakeResponse 
-        createServerResponse(String message, Properties headers) {
-        return new HandshakeResponse(message, headers);        
+        createServerResponse(Properties headers) throws IOException {
+        return new HandshakeResponse(headers);
+    }
+
+    /**
+     * Constructs the response from the other host during connection
+     * handshaking.
+     *
+     * @return a new <tt>HandshakeResponse</tt> instance with the headers
+     *  sent by the other host
+     */
+    public static HandshakeResponse 
+        createServerResponse(String line, Properties headers) throws IOException {
+        int code;
+        String message;
+        try {
+            code = extractCode(line);
+            message = extractMessage(line);
+        } catch(Exception e) {
+            throw new IOException("could not parse connect string: "+line);
+        }
+        return new HandshakeResponse(code, message, headers);        
     }
 
     /**
@@ -218,6 +298,7 @@ public final class HandshakeResponse {
                                      HandshakeResponse.SLOTS_FULL_MESSAGE,
                                      headers);        
     }
+
 
     /**
      * Adds the addresses of connected Ultrapeers for X-Try-Ultrapeer
@@ -295,7 +376,7 @@ public final class HandshakeResponse {
      * Returns the response code.
      */
     public int getStatusCode() {
-        return statusCode;
+        return STATUS_CODE;
     }
     
     /**
@@ -303,7 +384,7 @@ public final class HandshakeResponse {
      * @return the status message (e.g. "OK" , "Service Not Available" etc.)
      */
     public String getStatusMessage(){
-        return statusMessage;
+        return STATUS_MESSAGE;
     }
     
     /**
@@ -312,7 +393,7 @@ public final class HandshakeResponse {
      * otherwise
      */
     public boolean notOKStatusCode(){
-        if(statusCode != OK)
+        if(STATUS_CODE != OK)
             return true;
         else
             return false;
@@ -327,7 +408,7 @@ public final class HandshakeResponse {
      *  otherwise <tt>false</tt>
      */
     public boolean isAccepted() {
-        return statusCode == OK;
+        return STATUS_CODE == OK;
     }
 
     /**
@@ -335,7 +416,7 @@ public final class HandshakeResponse {
      * status line. (e.g., "200 OK", "503 Service Not Available")
      */
     public String getStatusLine() {
-        return new String(statusCode + " " + statusMessage);
+        return new String(STATUS_CODE + " " + STATUS_MESSAGE);
     }
 
     /**
@@ -370,7 +451,7 @@ public final class HandshakeResponse {
      *  should have -- this will always be 5 or less
      */
     public byte getMaxTTL() {
-        return extractByteHeaderValue(HEADERS, HeaderNames.X_MAX_TTL, (byte)5);
+        return MAX_TTL;
     }
     
     /**
@@ -416,12 +497,12 @@ public final class HandshakeResponse {
 	 * @return the number of intra-Ultrapeer connections this node maintains
 	 */
 	public int getNumIntraUltrapeerConnections() {
-        return extractIntHeaderValue(HEADERS, HeaderNames.X_DEGREE, 6);
+        return DEGREE;
 	}
 
 	// implements ReplyHandler interface -- inherit doc comment
 	public boolean isHighDegreeConnection() {
-		return getNumIntraUltrapeerConnections() >= 15;
+        return HIGH_DEGREE;
 	}
 
     /**
@@ -433,10 +514,7 @@ public final class HandshakeResponse {
      *  otherwise <tt>false</tt>
      */
     public boolean isGoodConnection() {
-        return isHighDegreeConnection() &&
-            isUltrapeerQueryRoutingConnection() &&
-            isMaxTTLConnection() &&
-            isDynamicQueryConnection();
+        return GOOD;
     }    
 
 
@@ -449,21 +527,19 @@ public final class HandshakeResponse {
 	 *  otherwise <tt>false</tt>
 	 */
 	public boolean isUltrapeerQueryRoutingConnection() {
-        return 
-            isVersionOrHigher(HEADERS, 
-                              HeaderNames.X_ULTRAPEER_QUERY_ROUTING, 0.1F);
+        return ULTRAPEER_QRP;
     }
 
 
     /** Returns true iff this connection wrote "X-Ultrapeer: false".
      *  This does NOT necessarily mean the connection is shielded. */
     public boolean isLeaf() {
-        return isFalseValue(HEADERS, HeaderNames.X_ULTRAPEER);
+        return LEAF;
     }
 
     /** Returns true iff this connection wrote "X-Ultrapeer: true". */
     public boolean isUltrapeer() {
-        return isTrueValue(HEADERS, HeaderNames.X_ULTRAPEER);
+        return ULTRAPEER;
     }
 
 
@@ -586,17 +662,7 @@ public final class HandshakeResponse {
      *  <tt>false</tt>
      */
     public boolean isDynamicQueryConnection() {
-        return isVersionOrHigher(HEADERS, HeaderNames.X_DYNAMIC_QUERY, 0.1F);
-    }
-
-    /**
-     * Returns whether or not this connection uses the X-Max-TTL header.
-     *
-     * @return <tt>true</tt> if the X-Max-TTL header is present, otherwise
-     *  <tt>false</tt>
-     */
-    public boolean isMaxTTLConnection() {
-        return headerExists(HEADERS, HeaderNames.X_MAX_TTL);
+        return DYNAMIC_QUERY;
     }
 
     /**
@@ -736,7 +802,7 @@ public final class HandshakeResponse {
     }
 
     public String toString() {
-        return "<"+statusCode+", "+statusMessage+">"+HEADERS;
+        return "<"+STATUS_CODE+", "+STATUS_MESSAGE+">"+HEADERS;
     }
 }
 
