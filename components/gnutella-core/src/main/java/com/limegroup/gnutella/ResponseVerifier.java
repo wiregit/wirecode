@@ -4,29 +4,31 @@ import com.limegroup.gnutella.util.*;
 import com.limegroup.gnutella.*;
 import java.util.StringTokenizer;
 import com.sun.java.util.collections.*;
+import com.oroinc.text.regex.*;
 
-
+/**
+ * Records information about queries so that responses can be
+ * validated later. 
+ */
 public class ResponseVerifier {
+    private PatternMatcher matcher = new Perl5Matcher();
+    private PatternCompiler compiler = new Perl5Compiler();
 
     private static class RequestData {
-	String[] queryWords;
+	Pattern[] queryWords;
 	MediaType type;
-	RequestData(String[] queryWords, MediaType type) {
+	RequestData(Pattern[] queryWords, MediaType type) {
 	    this.queryWords=queryWords;
 	    this.type=type;
 	}
     }
 
-    /** A mapping from GUIDs to the words of the search made with that GUID.
-     *
-     *  INVARIANT: for each String[] V in the range of mapper,
-     *        +V contains no duplicates
-     *        +no string in V contains any of the characters in DELIMETER
-     *        +no string in V contains upper-case characters
+    /**
+     *  A mapping from GUIDs to the words of the search made with that GUID.
      */
     private ForgetfulHashMap /* GUID -> RequestData */ mapper = new ForgetfulHashMap(15);
-    /** The characters to use in stripping apart queries and replies. */
-    private static final String DELIMITERS="_,.-+/\\ *()";
+    /** The characters to use in stripping apart queries. */
+    private static final String DELIMITERS="+ ";
 
     /** Same as record(qr, null). */
     public synchronized void record(QueryRequest qr) {
@@ -40,16 +42,25 @@ public class ResponseVerifier {
      *   media type; otherwise, this is assumed to be for any type.
      */
     public synchronized void record(QueryRequest qr, MediaType type){
-	//Copy words in the query to queryWords.
-	List buf=new ArrayList();
+	//Copy words in the query to queryWords.  Each word is treated
+	//as an independent regular expression.
+	List /* of Pattern */ buf=new ArrayList();
 	StringTokenizer st = new StringTokenizer(qr.getQuery().toLowerCase(),
 						 DELIMITERS);
 	while(st.hasMoreTokens()) {
 	    String word=(String)st.nextToken();
-	    if (! buf.contains(word))
-		buf.add(word);	    
+	    String regexp=FileManager.wildcard2regexp(word).toLowerCase();
+	    try {
+		Pattern pattern=compiler.compile(regexp);
+		buf.add(pattern);	    
+	    } catch (MalformedPatternException e) {
+		//Just ignore.  The alternative is to store patterns
+		//AND strings in ResultData, but that's annoying.
+		continue;
+	    }
+
 	}
-	String[] queryWords=new String[buf.size()];
+	Pattern[] queryWords=new Pattern[buf.size()];
 	buf.toArray(queryWords);
 	
 	byte[] guid = qr.getGUID();
@@ -61,14 +72,6 @@ public class ResponseVerifier {
      * Returns the score of the given response to the reply with the given GUID,
      * on a scale from 0 to 100.  If Guid is not recognized, a result of
      * 100 is given.<p>
-     *
-     * Let words(s) be the set of all words in a string s, where word
-     * divisions are marked by certain non-alphanumeric characters.
-     * Let Q be the original search string with the given GUID.  Let R
-     * be resp.getName().  The returned score is currently equal to
-     * |words(Q)*words(R)|/words(Q), i.e., the percentage of words in
-     * the query found in the reply.  Future versions may score responses
-     * differently, perhaps to treat regular expressions properly.
      */
     public synchronized int score(byte[] guid, Response resp){
 	int numMatchingWords=0;
@@ -76,34 +79,23 @@ public class ResponseVerifier {
 	RequestData request=(RequestData)mapper.get(new GUID(guid));
 	if (request == null)
 	    return 100; // assume 100% match if no corresponding query found.
-	String[] queryWords = request.queryWords;
+	Pattern[] queryWords = request.queryWords;
 	int numQueryWords=queryWords.length;
 	if (numQueryWords==0)
 	    return 100; // avoid divide-by-zero errors below
 
-	//Extract words from reply into an array
-	String Reply = resp.getName().toLowerCase(); // so we have the returned filename in lower case	
-	StringTokenizer st = new StringTokenizer(Reply,DELIMITERS);
-	List buf=new ArrayList();
-	while (st.hasMoreTokens())
-	    buf.add(st.nextToken());	
-	String[] replyWords=new String[buf.size()];
-	buf.toArray(replyWords);
-	
-	/* Note that this algorithm runs in O(M*N) time, where M=|words(Q)|
-	   and N=|words(R)|.  It is possible to make this run is sub-quadratic
-	   time by using more efficient set representations. */
-	//For each word in the query...
+	//Count the number of regular expressions from the query that 
+	//match the result's name.
+	String name=resp.getName().toLowerCase();
 	for (int i=0; i<numQueryWords; i++) {
-	    String word=queryWords[i];
-	    //Increment numMatchingWords if word in query
-	    for (int j=0; j<replyWords.length; j++) {
-		if (word.equals(replyWords[j])) {
-		    numMatchingWords++;
-		    break;
-		}
-	    }
+	    Pattern pattern=queryWords[i];
+	    PatternMatcherInput input = new PatternMatcherInput(name);
+	    if (matcher.contains(input,pattern)) {
+		numMatchingWords++;
+		continue;
+	    } 
 	}	
+
 	return (int)((float)numMatchingWords * 100.f/(float)numQueryWords);
     }
 
@@ -134,25 +126,21 @@ public class ResponseVerifier {
 	byte[] guid = qr.getGUID();
 	Response r = new Response(1,1,"blah");
 	Assert.that(rv.score(guid,r)==0);
-	System.out.println("blah gets : " + rv.score(guid,r) );
 
 	Response r1 = new Response(1,1,"test this file will ya");
 	Assert.that(rv.score(guid,r1)==50);
-	System.out.println("test this file will ya  gets : " + rv.score(guid,r1) );
 	
 	Response r2 = new Response(1,1,"Sumeet says that this is the best");
-	Assert.that(rv.score(guid,r2)==50);
-	System.out.println("Sumeet says that this is the best  gets : " + rv.score(guid,r2) );
+	Assert.that(rv.score(guid,r2)==50, rv.score(guid,r2)+"");
 
 	Response r3 = new Response(1,1,"Sumeet test the moon");
-	Assert.that(rv.score(guid,r3)==100);
-	System.out.println("Sumeet tests the moon  gets : " + rv.score(guid,r3) );
+	Assert.that(rv.score(guid,r3)==100,  rv.score(guid,r3)+"");
 
 	QueryRequest qr2=new QueryRequest((byte)7,0,"Weird Al Cantina");
 	rv.record(qr2);
 	Response r4=new Response(1,1,"SSC2-CannibalTheMusical.asf");
 	int score=rv.score(qr2.getGUID(), r4);
-	Assert.that(score==0, "Score is "+score);	
+	Assert.that(score==33, "Score is "+score);	
        
 	QueryRequest qr3=new QueryRequest((byte)7,0,"");
 	rv.record(qr3);
@@ -162,8 +150,23 @@ public class ResponseVerifier {
 	Response r5=new Response(1,1,"Wierd Al-The Weird Al Show Theme.mp3");
 	int score2=rv.score(qr4.getGUID(), r5);
 	Assert.that(score2==100, "Score is "+score2);
+
+	//////////////////// Wildcard tests /////////////////////////////
 	
-	//////////////////////// matchesType tests ////////////////////////////
+	qr4=new QueryRequest((byte)7,0,"*.mp3 weird*whoops weird*show");
+	rv.record(qr4);
+	r5=new Response(1,1,"Wierd Al-The Weird Al Show Theme.mp3");
+	score2=rv.score(qr4.getGUID(), r5);
+	Assert.that(score2==66, "Score is "+score2);
+
+	qr4=new QueryRequest((byte)7,0,"show+al+weir*+metallica");
+	rv.record(qr4);
+	r5=new Response(1,1,"Wierd Al-The Weird Al Show Theme.mp3");
+	score2=rv.score(qr4.getGUID(), r5);
+	Assert.that(score2==75, "Score is "+score2);
+
+	
+	//////////////////////// matchesType tests //////////////////////
 	MediaType mt=new MediaType("Audio", new String[] {"mp3"});
 
 	rv=new ResponseVerifier();
