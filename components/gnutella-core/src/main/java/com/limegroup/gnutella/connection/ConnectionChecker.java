@@ -2,7 +2,6 @@ package com.limegroup.gnutella.connection;
 
 import java.io.IOException;
 
-import org.apache.commons.httpclient.Header;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpMethod;
 import org.apache.commons.httpclient.methods.HeadMethod;
@@ -198,15 +197,7 @@ public final class ConnectionChecker implements Runnable {
         HttpClient client = HttpClientManager.getNewClient(20000, 3000);
         try {
             client.executeMethod(head);
-            _connected = true;
-            
-            if(LOG.isDebugEnabled()) {
-                Header[] headers = head.getResponseHeaders();
-                for(int i=0; i<headers.length; i++) {
-                    LOG.debug(headers[i]);
-                }
-            }        
-
+            _connected = true;     
         } catch (IOException e) {
             LOG.warn("Exception while handling server", e);
             _unsuccessfulAttempts++;
