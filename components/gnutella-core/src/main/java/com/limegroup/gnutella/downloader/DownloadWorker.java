@@ -293,7 +293,6 @@ public class DownloadWorker implements Runnable {
                 // if we didn't get queued doing the tree request,
                 // request another file.
                 if (status == null || !status.isQueued()) {
-                    synchronized(_stealLock) {
                         try {
                             status = assignAndRequest(http11);
                             
@@ -306,7 +305,6 @@ public class DownloadWorker implements Runnable {
                             if( status == null || !status.isConnected() )
                                 releaseRanges();
                         }
-                    }
                 }
                 
                 if(status.isPartialData()) {
@@ -742,7 +740,9 @@ public class DownloadWorker implements Runnable {
             if (_commonOutFile.hasFreeBlocksToAssign() > 0) {
                 assignWhite(http11);
             } else {
-                assignGrey(); 
+		synchronized(_stealLock) {
+                	assignGrey(); 
+		}
             }
             
         } catch(NoSuchElementException nsex) {
