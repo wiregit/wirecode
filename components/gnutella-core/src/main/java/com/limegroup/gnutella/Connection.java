@@ -471,6 +471,20 @@ public class Connection {
         }
     }
 
+    /**
+     * Accessor for whether or not this connection has been initialized.
+     * Several methods of this class require that the connection is 
+     * initialized, particularly that the socket is established.  These
+     * methods should verify that the connection is initialized before
+     * being called.
+     *
+     * @return <tt>true</tt> if the connection has been initialized and
+     *  the socket established, otherwise <tt>false</tt>
+     */
+    public boolean isInitialized() {
+        return _socket != null;
+    }
+
     /** 
      * Sends and receives handshake strings for outgoing connections,
      * throwing exception if any problems. 
