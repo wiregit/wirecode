@@ -359,13 +359,11 @@ public final class ConnectionStats {
      * @see BandwidthTracker#measureBandwidth 
      */
     public float getMeasuredUpstreamBandwidth() {
-        float retValue = 0; //initialize to default
         try {
-            retValue = _upBandwidthTracker.getMeasuredBandwidth();
+            return _upBandwidthTracker.getMeasuredBandwidth();
         } catch(InsufficientDataException ide) {
             return 0;
         }
-        return retValue;
     }
 
     /**
