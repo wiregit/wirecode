@@ -352,7 +352,7 @@ public class ConnectionManager {
     }
     
     /**
-     * Ensures that if a node is acting as ultrapeer, it has atleast 
+     * Ensures that if a node is acting as ultrapeer, it has at least 
      * some minimum number of connections opened
      */ 
     public synchronized void ensureConnectionsForSupernode(){
@@ -977,6 +977,7 @@ public class ConnectionManager {
 			ConnectionSettings.NUM_CONNECTIONS.revertToDefault();
 			outgoing = ConnectionSettings.NUM_CONNECTIONS.getValue();
         }
+
         //Actually notify the backend.		
         setKeepAlive(outgoing);
     }
