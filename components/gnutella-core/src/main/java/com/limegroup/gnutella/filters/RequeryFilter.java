@@ -27,29 +27,4 @@ public class RequeryFilter extends SpamFilter {
         }
         return true;
     }
-
-    /*
-    public static void main(String args[]) {
-        SettingsManager.instance().setFilterDuplicates(false);
-        SettingsManager.instance().setFilterGreedyQueries(false);
-        SpamFilter filter=SpamFilter.newRouteFilter();
-        Assert.that(filter.allow(new PingRequest((byte)3)));
-        Assert.that(filter.allow(new QueryRequest((byte)3, 0, "Hello")));
-        Assert.that(filter.allow(new QueryRequest((byte)3, 0, "Hello")));
-        Assert.that(filter.allow(new QueryRequest((byte)3, 0, "Hel lo", true)));
-        Assert.that(filter.allow(new QueryRequest((byte)3, 0, "asd", false)));
- 
-        byte[] guid=GUID.makeGuid();   //version 1
-        guid[0]=(byte)0x02;
-        guid[1]=(byte)0x01;
-        guid[2]=(byte)0x17;
-        guid[3]=(byte)0x05;
-        guid[13]=(byte)0x2E;
-        guid[14]=(byte)0x05;
-        Assert.that(GUID.isLimeGUID(guid));
-        Assert.that(GUID.isLimeRequeryGUID(guid, 1));
-        Assert.that(! GUID.isLimeRequeryGUID(guid, 0));
-        Assert.that(! filter.allow(new QueryRequest(guid, (byte)5, 0, "asdf")));
-    }
-    */
 }
