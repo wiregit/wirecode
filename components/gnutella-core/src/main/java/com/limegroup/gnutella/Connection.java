@@ -89,8 +89,15 @@ public class Connection {
      *  read. */
     private final Properties HEADERS_WRITTEN = new Properties();
 
-    public static final String GNUTELLA_CONNECT_06="GNUTELLA CONNECT/0.6";
-    public static final String GNUTELLA_OK_06="GNUTELLA/0.6 200 OK";
+	/**
+	 * Gnutella 0.6 connect string.
+	 */
+    private String GNUTELLA_CONNECT_06 = "GNUTELLA CONNECT/0.6";
+
+	/**
+	 * Gnutella 0.6 accept connection string.
+	 */
+    public static final String GNUTELLA_OK_06 = "GNUTELLA/0.6 200 OK";
     public static final String GNUTELLA_06 = "GNUTELLA/0.6";
     public static final String _200_OK     = " 200 OK";
     public static final String GNUTELLA_06_200 = "GNUTELLA/0.6 200";
@@ -410,14 +417,15 @@ public class Connection {
     private void initializeIncoming() throws IOException {
         //Dispatch based on first line read.  Remember that "GNUTELLA " has
         //already been read by Acceptor.  Hence we are looking for "CONNECT/0.6"
-        if (notLessThan06(readLine())) {
+		String connectString = readLine();
+        if (notLessThan06(connectString)) {
             //1. Read headers (connect line has already been read)
             readHeaders();
             //Conclude the handshake (This may involve exchange of information
             //multiple times with the host at the other end).
             concludeIncomingHandshake();
         } else {
-            throw new IOException("Unexpected connect string");
+            throw new IOException("Unexpected connect string: "+connectString);
         }
     }
 
@@ -471,6 +479,7 @@ public class Connection {
                 connectLine = readLine();  
                 readHeaders();
             }
+			
             if (! connectLine.startsWith(GNUTELLA_06))
                 throw new IOException("Bad connect string");
             HandshakeResponse theirResponse=new HandshakeResponse(
@@ -593,6 +602,7 @@ public class Connection {
         if(s == null || s.equals("")) {
             throw new NullPointerException("null or empty string: "+s);
         }
+
         //TODO: character encodings?
         byte[] bytes=s.getBytes();
         _out.write(bytes);
@@ -888,7 +898,7 @@ public class Connection {
         // method is called asynchronously before the socket is initialized.
         _closed = true;
         if(_socket != null) {
-            try {
+            try {				
                 _socket.close();
             } catch(IOException e) {}
         }
