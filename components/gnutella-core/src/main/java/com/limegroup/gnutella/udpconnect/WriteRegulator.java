@@ -25,7 +25,7 @@ public class WriteRegulator {
     private static final float TARGET_FAILURE_RATE  = 3f / 100f;
 
     /** The low failure rate at optimal throughput */
-    private static final float LOW_FAILURE_RATE     = 2f / 100f;
+    private static final float LOW_FAILURE_RATE     = 3f / 100f;
 
     /** The high failure rate at optimal throughput */
     private static final float HIGH_FAILURE_RATE    = 4f / 100f;
@@ -60,8 +60,9 @@ public class WriteRegulator {
             _limitHit = true;
             _skipLimit /= 2;
             _limitCount = 0;
+System.out.println("hitResendTimeout _skipLimit = "+_skipLimit+
+" fR="+_tracker.failureRateAsString());
             _tracker.clearOldFailures();
-System.out.println("hitResendTimeout _skipLimit = "+_skipLimit);
         }
     }
 
@@ -78,7 +79,8 @@ System.out.println("hitResendTimeout _skipLimit = "+_skipLimit);
             //_skipLimit /= 2;
             //_limitCount = 0;
             _zeroCount = 0;
-System.out.println("hitZeroWindow _skipLimit = "+_skipLimit);
+System.out.println("hitZeroWindow _skipLimit = "+_skipLimit+
+" fR="+_tracker.failureRateAsString());
         }
     }
 
@@ -140,7 +142,8 @@ System.out.println("hitZeroWindow _skipLimit = "+_skipLimit);
               " RTO:"+rto+
               " RTTVar:"+rttvar+
               " srtt:"+srtt+
-              " sL:"+_skipLimit);
+              " sL:"+_skipLimit +
+              " fR="+_tracker.failureRateAsString());
 
         if ( _skipLimit < 1 )
             _skipLimit = 1;
@@ -337,6 +340,19 @@ System.out.println("_skipLimit = "+_skipLimit);
 
             return ((float) failure) / ((float) count);
         }
+
+        
+        /**
+         * Report the failure rate as string for debugging.
+         */
+        public String failureRateAsString() {
+
+           float rate  = failureRate() * 1000; 
+           int   irate = ((int)rate) / 10 ;
+           int   drate = (((int)rate) - (irate * 10));
+           return "" + irate + "." + drate;
+        }
+        
 
         /**
          * Make sure there is space for an addition and 
