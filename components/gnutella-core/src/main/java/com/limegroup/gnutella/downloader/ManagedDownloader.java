@@ -357,7 +357,8 @@ public class ManagedDownloader implements Downloader, Serializable {
                 manager.waitForSlot(this);
                 boolean waitForRetry=false;
                 for (int i=0; i<buckets.length; i++) {    
-                    Assert.that(buckets[i].size() > 0, "Empty bucket");
+                    if (buckets[i].size() <= 0)
+                        continue;
                     synchronized (this) {
                         RemoteFileDesc rfd=(RemoteFileDesc)buckets[i].get(0);
                         currentFileName=rfd.getFileName();
