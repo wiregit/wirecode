@@ -72,15 +72,13 @@ public class RequeryDownloader extends ManagedDownloader
 
     /** Overrides ManagedDownloader to use the original search keywords. */
     protected QueryRequest newRequery(int numRequeries) 
-                                                    throws CantResumeException {
+		throws CantResumeException {
         //If this already started downloading, specifically ask for matches to
         //that file.
         if (_hasFile)
             return super.newRequery(numRequeries);
         //Otherwise just spit out the original search keywords.
-        return new QueryRequest((byte)4,
-                                0, getQuery(), true, 
-                                !RouterService.acceptedIncomingConnection());
+		return QueryRequest.createRequery(getQuery());
     }
 
     /**

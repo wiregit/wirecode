@@ -236,17 +236,16 @@ public class MagnetDownloader extends ManagedDownloader implements Serializable 
             queryUrns.add(_urn);
         }
 
-        boolean isRequery=numRequeries!=0;
-        return new QueryRequest(QueryRequest.newQueryGUID(isRequery),
-								(byte)4,
-                                0,                 //speed
-                                _textQuery==null ? "" : _textQuery,
-                                null,              //metadata
-                                isRequery,         //is requery
-                                null,              //requested types
-                                queryUrns,         //requested urns (if any)
-								true
-								);
+        boolean isRequery = numRequeries!=0;
+		if(_urn != null && isRequery) {
+			return QueryRequest.createRequery(_urn);
+		} 
+		if(isRequery && (_urn != null)) {
+			return QueryRequest.createRequery(_urn);
+		} else if(isRequery) {
+			return QueryRequest.createRequery(_textQuery);
+		}
+		return QueryRequest.createQuery(_textQuery);
     }
 
     /** 
