@@ -3,6 +3,7 @@ package com.limegroup.gnutella.uploader;
 import com.limegroup.gnutella.*;
 import java.io.*;
 import java.util.Date;
+import com.limegroup.gnutella.util.CommonUtils;
 
 /**
  * auth: rsoule
@@ -174,7 +175,7 @@ public class NormalUploadState implements UploadState {
 		String str;
 		str = "HTTP 200 OK \r\n";
 		_ostream.write(str.getBytes());
-		String version = SettingsManager.instance().getCurrentVersion();
+		String version = CommonUtils.getLimeWireVersion();
 		str = "Server: LimeWire " + version + " \r\n";
 		_ostream.write(str.getBytes());
 		String type = getMimeType();       /* write this method later  */
