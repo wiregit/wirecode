@@ -9,7 +9,7 @@ public class CountPercent {
     private static final String BUNDLE_NAME = "MessagesBundle";
     private static final String PROPS_EXT = ".properties";
     private static final String UTF8_EXT = ".UTF-8.txt";
-    private static final String ENGLISH_LINK = PRE_LINK + BUNDLE_NAME + PROPS_EXT;
+    private static final String DEFAULT_LINK = PRE_LINK + BUNDLE_NAME + PROPS_EXT;
     
     private static final String HTML_TRANSLATE_EMAIL_ADDRESS =
 "<b><script type=\"text/javascript\" language=\"JavaScript\"><!--\n" +
@@ -62,11 +62,11 @@ public class CountPercent {
         
         langs = new TreeMap();
         
-        final Properties english = getEnglish();
+        final Properties defaultProps = getDefaultProperties();
         advancedKeys = getAdvancedKeys();
-        english.keySet().removeAll(advancedKeys);
-        basicKeys = english.keySet();
-        total = english.size();
+        defaultProps.keySet().removeAll(advancedKeys);
+        basicKeys = defaultProps.keySet();
+        total = defaultProps.size();
 
         switch (action) {
         case ACTION_CHECK:
@@ -90,7 +90,7 @@ public class CountPercent {
         }
     }
     
-    private Properties getEnglish() throws java.io.IOException {
+    private Properties getDefaultProperties() throws java.io.IOException {
         Properties p = new Properties();
         InputStream in = new FileInputStream(new File(BUNDLE_NAME + PROPS_EXT));
         p.load(in);
@@ -119,6 +119,11 @@ public class CountPercent {
         return p.keySet();
     }
     
+    /**
+     * List and load all available bundles and map them into the languages map.
+     * Note that resources are not expanded here per base language, and not cleaned
+     * here from extra keys (needed to support the resources "check" option).
+     */
     private void loadLanguages() {
         File lib = new File(".");
         if (!lib.isDirectory())
@@ -149,26 +154,26 @@ public class CountPercent {
     }
     
     /**
-     * Loads a single file into a List.
+     * Loads a single file into the languages map.
      */
     private LanguageInfo loadFile(Map langs, InputStream in, String filename) {
         try {
             in = new BufferedInputStream(in);
-            final Properties p = new Properties();
-            p.load(in);
-            String lc = p.getProperty("LOCALE_LANGUAGE_CODE", "");
-            String cc = p.getProperty("LOCALE_COUNTRY_CODE", "");
-            String vc = p.getProperty("LOCALE_VARIANT_CODE", "");
-            String sc = p.getProperty("LOCALE_SCRIPT_CODE", "");
-            String ln = p.getProperty("LOCALE_LANGUAGE_NAME", lc);
-            String cn = p.getProperty("LOCALE_COUNTRY_NAME", cc);
-            String vn = p.getProperty("LOCALE_VARIANT_NAME", vc);
-            String sn = p.getProperty("LOCALE_SCRIPT_NAME", sc);
-            String dn = p.getProperty("LOCALE_ENGLISH_LANGUAGE_NAME", ln);
+            final Properties props = new Properties();
+            props.load(in);
+            String lc = props.getProperty("LOCALE_LANGUAGE_CODE", "");
+            String cc = props.getProperty("LOCALE_COUNTRY_CODE", "");
+            String vc = props.getProperty("LOCALE_VARIANT_CODE", "");
+            String sc = props.getProperty("LOCALE_SCRIPT_CODE", "");
+            String ln = props.getProperty("LOCALE_LANGUAGE_NAME", lc);
+            String cn = props.getProperty("LOCALE_COUNTRY_NAME", cc);
+            String vn = props.getProperty("LOCALE_VARIANT_NAME", vc);
+            String sn = props.getProperty("LOCALE_SCRIPT_NAME", sc);
+            String dn = props.getProperty("LOCALE_ENGLISH_LANGUAGE_NAME", ln);
             
             LanguageInfo li = new LanguageInfo(lc, cc, vc, sc,
                                                ln, cn, vn, sn,
-                                               dn, filename, p);
+                                               dn, filename, props);
             langs.put(li.getCode(), li);
             return li;
         } catch (IOException e) {
@@ -197,7 +202,7 @@ public class CountPercent {
     }
     
     /**
-     * Extend variant resources from base languages.
+     * Extend variant resources from *already loaded* base languages.
      */
     private void extendVariantLanguages() {
         /* Extends missing resources with those from the base language */
@@ -221,9 +226,13 @@ public class CountPercent {
         }
     }
     
+    /**
+     * Check and list extra or badly names names found in resources.
+     * Use the default (English) basic and extended resource keys.
+     */
     private void checkLanguages() {
-        System.out.println("Extra or badly named keys:");
-        System.out.println("---------------------------------");
+        System.out.println("List of extra or badly named resource keys:");
+        System.out.println("-------------------------------------------");
         
         for (Iterator i = langs.entrySet().iterator(); i.hasNext(); ) {
             final Map.Entry entry = (Map.Entry)i.next();
@@ -235,7 +244,7 @@ public class CountPercent {
             if (props.size() != 0) {
                 System.out.println("(" + code + ") " + li.getName() + ": " + li.getFileName());
                 props.list(System.out);
-                System.out.println("---------------------------------");
+                System.out.println("-------------------------------------------");
             }
         }
     }
@@ -344,13 +353,12 @@ public class CountPercent {
  */
 "<table width=\"100%\" border=\"0\" cellspacing=\"0\" cellpadding=\"0\">\n" +
 "<tr>\n" +
-" <td valign=\"top\" colspan=\"2\">\n" +
+" <td valign=\"top\">\n" +
 "  <div id=\"bod1\">\n" +
 "   <h1>Help Internationalize LimeWire</h1>\n" +
-"   <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\">\n" +
+"   <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\">\n" + /* Three columns */
 "   <tr>\n" +
-     /* Horizontal cell 1 (main content) */
-"    <td valign=\"top\" style=\"line-height: 16px;\">\n" +
+"    <td valign=\"top\" style=\"line-height: 16px;\">\n" + /* Start column 1 (main content) */
 "     The LimeWire Open Source project has embarked on an effort to\n" +
 "     internationalize LimeWire. This involves efforts not just by programmers and\n" +
 "     developers, but also avid LimeWire users who are bilingual. If you are an\n" +
@@ -558,9 +566,9 @@ public class CountPercent {
 "     be used unambiguously, please use it in preference to the English term, even\n" +
 "     if you have seen many uses of this English term on web sites. A good\n" +
 "     translation must be understood by most native people that are not addicted to\n" +
-"     the Internet and computers \"jargon\". Pay particularly attention to\n" +
-"     the translation of: download, upload, host, byte, firewall, port, file,\n" +
-"     directory, # (number of), leaf (terminal node)...<br>\n" +
+"     the Internet and computers \"jargon\". Pay particularly attention to the\n" +
+"     non-technical translation of common terms: download, upload, host, byte,\n" +
+"     firewall, address, file, directory, # (number of), leaf (terminal node)...<br>\n" +
 "     <br>\n" +
 "     Avoid translating word for word, don't use blindly automatic translators,\n" +
 "     be imaginative but make a <b>clear and concise</b> translation. For button\n" +
@@ -577,11 +585,9 @@ public class CountPercent {
 "     versions after review.</i><br>\n"+
 "     <br>\n" +
 "     <br>\n" +
-"    </td>\n" +
-     /* Horizontal cell 2 (spacing) */
-"    <td>&nbsp;&nbsp;&nbsp;</td>\n" +
-     /* Horizontal cell 3 */
-"    <td valign=\"top\">\n" +
+"    </td>\n" + /* End of column 1 (spacing) */
+"    <td>&nbsp;&nbsp;&nbsp;</td>\n" + /* Column 2 (spacing) */
+"    <td valign=\"top\">\n" + /* Start of column 3 (status) */
       /* Start shaded right rectangle */
 "     <table border=\"0\" cellspacing=\"1\" cellpadding=\"4\" bgcolor=\"#b1b1b1\" width=\"270\">\n" +
 "     <tr bgcolor=\"#EFEFEF\">\n" + 
@@ -609,7 +615,7 @@ public class CountPercent {
 "         Languages written with Latin (Western European) characters:</td>\n" +
 "       </tr>\n" +
 "       <tr>\n" +
-"        <td valign=\"top\"><a href=\"" + ENGLISH_LINK + "\" target=\"_blank\"><b>English</b> (US)</a></td>\n" +
+"        <td valign=\"top\"><a href=\"" + DEFAULT_LINK + "\" target=\"_blank\"><b>English</b> (US)</a></td>\n" +
 "        <td align=\"right\">(default)</td>\n" +
 "        <td>en</td>\n" + 
 "       </tr>\n");
@@ -650,12 +656,10 @@ public class CountPercent {
         page.append(
 "      </td>\n" +
 "     </tr>\n" +
-"     </table>\n" +
-      /* End shaded right rectangle */
-"    </td>\n" +
-     /* End horizontal cell 3 */
+"     </table>\n" + /* End of shaded right rectangle */
+"    </td>\n" + /* End of column 3 (status) */
 "   </tr>\n" +
-"   </table>\n" +
+"   </table>\n" + /* End of the 3 columns table below the title */
 "  </div>\n" + /* (div id="bod1") */
 " </td>\n" +
 "</tr>\n" +
@@ -688,7 +692,7 @@ class LanguageInfo implements Comparable {
      */
     public LanguageInfo(String lc, String cc, String vc, String sc,
                         String ln, String cn, String vn, String sn,
-                        String dn, String fn, Properties p) {
+                        String dn, String fn, Properties props) {
         languageCode = lc.trim();
         countryCode  = cc.trim();
         variantCode  = vc.trim();
@@ -699,7 +703,7 @@ class LanguageInfo implements Comparable {
         scriptName   = sn.trim();
         displayName  = dn.trim();
         fileName     = fn.trim();
-        properties   = p;
+        properties   = props;
     }
     
     /**
@@ -753,7 +757,8 @@ class LanguageInfo implements Comparable {
     public String getName() { return displayName; }
     
     public String getLink() {
-        return "<a href=\"" + CountPercent.PRE_LINK + fileName + "\">" + displayName + "</a>";
+        return "<a href=\"" + CountPercent.PRE_LINK + fileName + "\">" +
+               displayName + "</a>";
     }
     
     public void setPercentage(double percentage) {
