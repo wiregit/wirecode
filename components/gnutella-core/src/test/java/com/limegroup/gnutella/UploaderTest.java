@@ -416,7 +416,7 @@ public class UploaderTest extends TestCase {
             out.flush();
             byteReader = new ByteReader(sb.getInputStream());
             s = byteReader.readLine();
-            assertEquals("HTTP/1.1 200 OK",s);
+            assertEquals("HTTP/1.1 206 Partial Content",s);
         } catch (Exception e) {
             fail("problem with first downloader");
         }
@@ -449,7 +449,7 @@ public class UploaderTest extends TestCase {
             out.write("\r\n");
             out.flush();
             s = byteReader.readLine();
-            assertEquals("HTTP/1.1 200 OK",s);
+            assertEquals("HTTP/1.1 206 Partial Content",s);
         } catch(Exception e) {
             fail("exception thrown while trying HTTP 1.1 pipling");
         }

@@ -137,48 +137,32 @@ public final class UploadManager implements BandwidthTracker {
 	 */
     public void acceptUpload(HTTPRequestMethod method, Socket socket) {
         debug(" accepting upload");
+        HTTPUploader uploader = null;
 		try {
             int queued = -1;
             String oldFileName = "";
             //do uploads
             while(true) {
                 //parse the get line
-                HttpRequestLine line;
-				try {
-					line = parseHttpRequest(socket);
-				} catch(IOException e) {
-					// TODO: we should really be returning 4XX errors here, 
-					// as this indicates that there was a problem with the
-					// client request
-					return;
-				}
+                HttpRequestLine line = parseHttpRequest(socket);
+
                 debug(" successfully parsed request");
                 
                 String fileName = line._fileName;
-
-                HTTPUploader uploader=new HTTPUploader(method, fileName, 
+                
+                uploader=new HTTPUploader(method, fileName, 
                               socket, line._index, this, _fileManager, _router);
                 
-                try {
-                    uploader.readHeader();
-                } catch(IOException iox) {
-                    return;
-                }
+                uploader.readHeader();
                 
                 debug(uploader+" HTTPUploader created and read all headers");
                 boolean giveSlot = (oldFileName.equalsIgnoreCase(fileName) &&
                                     queued==ACCEPTED);
 
-                try {
-                    //do the upload
-                    queued = doSingleUpload(uploader, socket,
-                    socket.getInetAddress().getHostAddress(), 
-                                            line._index, giveSlot);
-                }   catch (IOException ioe) {
-                    //A queued uploader was too early in responding...drop it
-                    return;
-                }
-                    
+                queued = doSingleUpload(uploader, socket,
+                                     socket.getInetAddress().getHostAddress(), 
+                                                         line._index, giveSlot);
+                
                 oldFileName = fileName;
                 
                 //if not to keep the connection open (either due to protocol
@@ -189,48 +173,39 @@ public final class UploadManager implements BandwidthTracker {
                 //read the first word of the next request
                 //and proceed only if "GET" or "HEAD" request
                 debug(uploader+" waiting for next request with socket ");
-                try {
-                    int oldTimeout = socket.getSoTimeout();
-                    if(queued!=QUEUED) {
-                        socket.setSoTimeout(SettingsManager.instance().
-                                         getPersistentHTTPConnectionTimeout());
-                    }
-                    //dont read a word of size more than 4 
-                    //as we will handle only the next "GET" request
-                    String word = IOUtils.readWord(socket.getInputStream(), 4);
-                    debug(uploader+" next request arrived ");
-                    socket.setSoTimeout(oldTimeout);
-                    if(!word.equalsIgnoreCase("GET") &&
-                       !word.equalsIgnoreCase("HEAD")) {
-                        return;
-                    }
-                } catch(IOException ioe) {//including InterruptedIOException
-                    debug("IOE thrown, closing socket");
-                    synchronized(this) {
-                        int i=0;
-                        boolean found = false;
-                        for(Iterator iter=_queuedUploads.iterator();
-                                                        iter.hasNext();i++) {
-                            KeyValue kv = (KeyValue)iter.next();
-                            if(kv.getKey()==socket) {
-                                found = true;
-                                break;
-                            }
-                        }
-                        if(found)
-                            _queuedUploads.remove(i);
-                        uploader.setState(Uploader.INTERRUPTED);
-                    }
-                    close(socket);
+                int oldTimeout = socket.getSoTimeout();
+                if(queued!=QUEUED)
+                    socket.setSoTimeout(SettingsManager.instance().
+                                        getPersistentHTTPConnectionTimeout());
+                //dont read a word of size more than 4 
+                //as we will handle only the next "GET" request
+                String word = IOUtils.readWord(socket.getInputStream(), 4);
+                debug(uploader+" next request arrived ");
+                socket.setSoTimeout(oldTimeout);
+                if(!word.equalsIgnoreCase("GET")&&!word.equalsIgnoreCase
+                                                                     ("HEAD"))
                     return;
-                }
             }//end of while
+        } catch(IOException ioe) {//including InterruptedIOException
+            debug("IOE thrown, closing socket");
         } finally {
-            debug("shutting down");
+            synchronized(this) {
+                boolean found = false;
+                for(Iterator iter=_queuedUploads.iterator();iter.hasNext();){
+                    KeyValue kv = (KeyValue)iter.next();
+                    if(kv.getKey()==socket) {
+                        found = true;
+                        iter.remove();
+                    }
+                }
+                if(found)
+                    uploader.setState(Uploader.INTERRUPTED);
+            }
+            debug("closing socket");
             //close the socket
             close(socket);
         }
-	}
+    }
     
     /**
      * Attempts to upload the given file for the given uploader.  May instead 
