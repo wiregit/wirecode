@@ -65,12 +65,12 @@ public class Connection {
     /**
      * Indicates whether the connection is to a shielded client
      */
-    private boolean _isClientConnection = false;
+    private volatile boolean _isClientConnection = false;
     
     /**
      * Indicates whether the connection is to a supernode 
      */
-    private boolean _isSupernodeConnection = false;
+    private volatile boolean _isSupernodeConnection = false;
     
     private boolean _negotiate=false;
     public static final String GNUTELLA_CONNECT_04="GNUTELLA CONNECT/0.4";
