@@ -16,6 +16,9 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.net.*;
 
+import org.apache.commons.logging.LogFactory;
+import org.apache.commons.logging.Log;
+
 
 /**
  * One of the three classes that make up the core of the backend.  This
@@ -24,6 +27,8 @@ import java.net.*;
  * maintains a list of connections.
  */
 public abstract class MessageRouter {
+    
+    private static final Log LOG = LogFactory.getLog(MessageRouter.class);
 	
     /**
      * Handle to the <tt>ConnectionManager</tt> to access our TCP connections.
@@ -2312,6 +2317,8 @@ public abstract class MessageRouter {
 				// only skip it if it's not an Ultrapeer query routing
 				// connection
 				if(!c.isUltrapeerQueryRoutingConnection()) { 
+				    if(c.isBearShare())
+				        LOG.debug("Igoring connection: " + c);
 					continue;
 				}
 			} 				
@@ -2320,13 +2327,18 @@ public abstract class MessageRouter {
 			// or if query routing is not enabled on the connection
 			else if (!(c.isClientSupernodeConnection() && 
 					   c.isQueryRoutingEnabled())) {
+			    if(c.isBearShare())
+			        LOG.debug("Ignoring connection: " + c);
 				continue;
 			}
 			
 			// See if it is time for this connections QRP update
 			// This call is safe since only this thread updates time
-			if (time<c.getNextQRPForwardTime())
+			if (time<c.getNextQRPForwardTime()) {
+			    if(c.isBearShare())
+			        LOG.debug("Ignoring connection: " + c);
 				continue;
+            }
 
 
 			c.incrementNextQRPForwardTime(time);
@@ -2348,6 +2360,8 @@ public abstract class MessageRouter {
 			
 			//  (This if works for 'null' sent tables too)
 			if( lastSent == c.getQueryRouteTableSent() ) {
+			   // if(c.isBearShare())
+			   //     LOG.debug("last sent: " + lastSent);
 			    // if we have not constructed the patches yet, then do so.
 			    if( patches == null )
 			        patches = table.encode(lastSent, true);
@@ -2359,12 +2373,15 @@ public abstract class MessageRouter {
 			    patches = table.encode(lastSent, true);
             }
             
+            //if(c.isBearShare())
+                LOG.debug("Patches: " + patches + " to " + c);
+            
 		    for(Iterator iter = patches.iterator(); iter.hasNext();) {
 		        c.send((RouteTableMessage)iter.next());
     	    }
     	    
-            if(c.isBearShare())
-                System.out.println("Sent QRP with % full: " + table.getPercentFull());
+            //if(c.isBearShare())
+                System.out.println("Sent QRP with % full: " + table.getPercentFull() + " to " + c);
             
             c.setQueryRouteTableSent(table);
 		}

@@ -29,18 +29,30 @@ import java.io.*;
  * <b>This class is NOT synchronized.</b>
  */
 public class QueryRouteTable {
-    /** The suggested default max table TTL. */
+    /** 
+     * The suggested default max table TTL.
+     */
     public static final byte DEFAULT_INFINITY=(byte)7;
-    /** What should come across the wire if a keyword is present. */
-    public static final byte KEYWORD_PRESENT=(byte)(1 - DEFAULT_INFINITY);
-    /** What should come across the wire if a keyword is absent. */
-    public static final byte KEYWORD_ABSENT=(byte)(DEFAULT_INFINITY - 1);
     /** What should come across the wire if a keyword status is unchanged. */
     public static final byte KEYWORD_NO_CHANGE=(byte)0;
     /** The suggested default table size. */
     public static final int DEFAULT_TABLE_SIZE=1<<16;  //64KB
     /** The maximum size of patch messages, in bytes. */
     public static final int MAX_PATCH_SIZE=1<<12;      //4 KB
+    
+    /**
+     * What should come across the wire if a keyword is present.
+     * The nature of this value is dependent on the infinity of the
+     * ResetTableMessage.
+     */
+    public byte keywordPresent;
+    
+    /**
+     * What should come across the wire if a keyword is absent.
+     * The nature of thsi value is dependent on the infinity of the
+     * ResetTableMessage.
+     */
+    public byte keywordAbsent;
 
     /** The *new* table implementation.  The table of keywords - each value in
      *  the BitSet is either 'true' or 'false' - 'true' signifies that a keyword
@@ -95,8 +107,21 @@ public class QueryRouteTable {
      * @param size the size of the query routing table
      */
     public QueryRouteTable(int size) {
-        initialize(size);
+        this(size, DEFAULT_INFINITY);
     }
+    
+    /**
+     * Creates a new <tt>QueryRouteTable</tt> instance with the specified
+     * size and infinity.  This <tt>QueryRouteTable</tt> will be completely 
+     * empty with no keywords -- no queries will have hits in this route 
+     * table until patch messages are received.
+     *
+     * @param size the size of the query routing table
+     * @param infinity the infinity to use
+     */
+    public QueryRouteTable(int size, int infinity) {
+        initialize(size, infinity);
+    }    
 
     /**
      * Initializes this <tt>QueryRouteTable</tt> to the specified size.
@@ -104,12 +129,14 @@ public class QueryRouteTable {
      *
      * @param size the size of the query route table
      */
-    private void initialize(int size) {
+    private void initialize(int size, int infinity) {
         this.bitTableLength = size;
         this.bitTable = new BitSet();
         this.sequenceNumber = -1;
         this.sequenceSize = -1;
-        this.nextPatch = 0;                
+        this.nextPatch = 0;
+        this.keywordPresent = (byte)(1 - infinity);
+        this.keywordAbsent = (byte)(infinity - 1);
     }
     
     /**
@@ -351,7 +378,7 @@ public class QueryRouteTable {
      *  to reset the table to
      */
     public void reset(ResetTableMessage rtm) {
-        initialize(rtm.getTableSize());
+        initialize(rtm.getTableSize(), rtm.getInfinity());
     }
 
     /**
@@ -407,22 +434,24 @@ public class QueryRouteTable {
         }
         
         //2. Expand nibbles if necessary.
-        if (m.getEntryBits()==4) 
+        if (m.getEntryBits()==4)
             data=unhalve(data);
         else if (m.getEntryBits()!=8)
             throw new BadPacketException("Unknown value for entry bits");
 
-        //3. Add data[0...] to table[nextPatch...]            
+        //3. Add data[0...] to table[nextPatch...]
         for (int i=0; i<data.length; i++) {
             try {
-                if (data[i] == KEYWORD_PRESENT) {
+                if (data[i] == keywordPresent) {
                     bitTable.set(nextPatch);
                     resizedQRT = null;
                 }
-                else if (data[i] == KEYWORD_ABSENT) {
+                else if (data[i] == keywordAbsent) {
                     bitTable.clear(nextPatch);
                     resizedQRT = null;
                 }
+                else if (data[i] != KEYWORD_NO_CHANGE) 
+                    ;//System.out.println("Unknown keyword value: " + data[i]);
             } catch (IndexOutOfBoundsException e) {
                 throw new BadPacketException("Tried to patch "+nextPatch
                                              +" of an "+data.length
@@ -500,7 +529,7 @@ public class QueryRouteTable {
             //      values have not changed.  Thus, we can use
             //      nextSetBit on the xOr'd table & this.bitTable.get
             //      to determine whether or not we should set
-            //      data[x] to KEYWORD_PRESENT or KEYWORD_ABSENT.
+            //      data[x] to keywordPresent or keywordAbsent.
             //      Because this is an xOr, we know that if 
             //      this.bitTable.get is true, prev.bitTable.get
             //      is false, and vice versa.            
@@ -509,7 +538,7 @@ public class QueryRouteTable {
                 xOr.xor(prev.bitTable);
                 for (int i=xOr.nextSetBit(0); i >= 0; i=xOr.nextSetBit(i+1)) {
                     data[i] = this.bitTable.get(i) ?
-                        KEYWORD_PRESENT : KEYWORD_ABSENT;
+                        keywordPresent : keywordAbsent;
                     needsPatch = true;
                 }
             }
@@ -520,7 +549,7 @@ public class QueryRouteTable {
         //    nextSetBit, avoiding bitTableLength calls to BitSet.get(int).
         else {
             for (int i=bitTable.nextSetBit(0);i>=0;i=bitTable.nextSetBit(i+1)){
-                data[i] = KEYWORD_PRESENT;
+                data[i] = keywordPresent;
                 needsPatch = true;
             }
         }

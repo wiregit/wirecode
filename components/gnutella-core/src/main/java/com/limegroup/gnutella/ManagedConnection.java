@@ -363,7 +363,8 @@ public class ManagedConnection extends Connection
      */
     public void resetQueryRouteTable(ResetTableMessage rtm) {
         if(_lastQRPTableReceived == null) {
-            _lastQRPTableReceived = new QueryRouteTable(rtm.getTableSize());
+            _lastQRPTableReceived =
+                new QueryRouteTable(rtm.getTableSize(), rtm.getInfinity());
         } else {
             _lastQRPTableReceived.reset(rtm);
         }
