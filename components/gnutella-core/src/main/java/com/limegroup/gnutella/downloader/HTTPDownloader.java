@@ -357,8 +357,9 @@ public class HTTPDownloader implements BandwidthTracker {
                     alc = 
                         AlternateLocationCollection.createCollection(alSha1);
                 }
-                
-				alc.addAlternateLocation(al);
+                if(alSha1.equals(alc.getSHA1Urn())) {
+                    alc.addAlternateLocation(al);
+                }
 			} catch(IOException e) {
 				// continue without adding it.
 				continue;
