@@ -48,7 +48,8 @@ public final class NIOMessageWriter implements MessageWriter {
     
     /**
      * Flag for whether or not the <tt>NIODispatcher</tt> has already registered
-     * this writer for write events.
+     * this writer for write events.  YOU MUST OBTAIN THE LOCK ON "this" BEFORE
+     * MODIFYING THIS VALUE.
      */
     private volatile boolean _registered = false;
     
@@ -196,7 +197,7 @@ public final class NIOMessageWriter implements MessageWriter {
      * 
      * @param b boolean specifying registration status
      */
-    public void setRegistered(boolean b) {
+    public synchronized void setRegistered(boolean b) {
         _registered = b;
     }
 
