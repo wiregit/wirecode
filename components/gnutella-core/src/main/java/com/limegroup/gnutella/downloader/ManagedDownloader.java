@@ -705,6 +705,7 @@ public class ManagedDownloader implements Downloader, Serializable {
         altLock = new Object();
         numMeasures = 0;
         averageBandwidth = 0f;
+        queuePosition=Integer.MAX_VALUE;
         queuedVendor = "";
         triedLocatingSources = false;
         // get the SHA1 if we can.
@@ -3780,9 +3781,10 @@ public class ManagedDownloader implements Downloader, Serializable {
 		return browseList.hasBrowseHostEnabledHost();
 	}
 
+	/**
+	 * @return the lowest queue position any one of the download workers has.
+	 */
     public synchronized int getQueuePosition() {
-        if(getState() != REMOTE_QUEUED)
-            return 0;
         return queuePosition;
     }
     

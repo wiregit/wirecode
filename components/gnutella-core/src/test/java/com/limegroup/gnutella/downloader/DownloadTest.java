@@ -2113,11 +2113,10 @@ public class DownloadTest extends BaseTestCase {
         
         ManagedDownloader downloader = null;
         downloader = (ManagedDownloader)RouterService.download(rfds, false, null);
-        Thread.sleep(1000);
+        Thread.sleep(2000);
         int swarm = downloader.getNumDownloaders();
         int queued = downloader.getQueuedHostCount();
-        int qPos = 
-        ((Integer)PrivilegedAccessor.getValue(downloader,"queuePosition")).intValue();
+        int qPos=downloader.getQueuePosition();
         
         assertEquals("incorrect swarming",2,swarm);
         assertEquals("uploader 2 not queued ",1,queued);
@@ -2128,8 +2127,7 @@ public class DownloadTest extends BaseTestCase {
         Thread.sleep(2000);
         swarm = downloader.getNumDownloaders();
         queued = downloader.getQueuedHostCount();
-        qPos = Integer.parseInt
-        ((String)PrivilegedAccessor.getValue(downloader,"queuePosition"));
+        qPos = downloader.getQueuePosition();
         
         assertEquals("incorrect swarming",2,swarm);
         assertEquals("uploader 2 not queued ",1,queued);
@@ -2140,8 +2138,7 @@ public class DownloadTest extends BaseTestCase {
         Thread.sleep(2000);
         swarm = downloader.getNumDownloaders();
         queued = downloader.getQueuedHostCount();
-        qPos = Integer.parseInt
-        ((String)PrivilegedAccessor.getValue(downloader,"queuePosition"));
+        qPos = downloader.getQueuePosition();
         
         assertEquals("incorrect swarming",2,swarm);
         assertEquals("uploader 4 not queued ",1,queued);
