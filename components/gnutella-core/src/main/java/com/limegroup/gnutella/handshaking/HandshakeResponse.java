@@ -2,6 +2,8 @@ package com.limegroup.gnutella.handshaking;
 
 import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.settings.ConnectionSettings;
+import com.limegroup.gnutella.util.CommonUtils;
+
 import java.util.Properties;
 import com.sun.java.util.collections.*;
 import java.io.*;
@@ -371,13 +373,18 @@ public final class HandshakeResponse {
 	static HandshakeResponse createCrawlerResponse() {
 		Properties headers = new Properties();
 		
+        // add our user agent
+        headers.put(HeaderNames.USER_AGENT, CommonUtils.getHttpServer());
+        
 		// add any leaves
 		headers.put(HeaderNames.LEAVES, 
-			createEndpointString(RouterService.getConnectionManager().getInitializedClientConnections2()));
+			createEndpointString(RouterService.
+                getConnectionManager().getInitializedClientConnections2()));
 
 		// add any Ultrapeers
 		headers.put(HeaderNames.PEERS,
-			createEndpointString(RouterService.getConnectionManager().getInitializedConnections2()));
+			createEndpointString(RouterService.
+                getConnectionManager().getInitializedConnections2()));
 			
 		return new HandshakeResponse(HandshakeResponse.OK,
 			HandshakeResponse.OK_MESSAGE, headers);        
@@ -640,8 +647,7 @@ public final class HandshakeResponse {
      *  @return the vendor string, or null if unknown */
     public String getUserAgent() {
         return HEADERS.getProperty(
-            com.limegroup.gnutella.handshaking.
-                HeaderNames.USER_AGENT);
+            com.limegroup.gnutella.handshaking.HeaderNames.USER_AGENT);
     }
 
     /**
