@@ -918,9 +918,7 @@ public class UDPConnectionProcessor {
         _closeReasonCode = reasonCode;
 		try {
 			close();
-		} catch (IOException ioe) {
-			ErrorService.error(ioe);
-		}
+		} catch (IOException ioe) {}
 	}
 
 
