@@ -118,18 +118,19 @@ public class FileManager{
      * allocations in the common case of no matches.)
      */
     public Response[] query(QueryRequest request) {
+        //TODO1: handle clip2 indexing query
+        //TODO1: handle wildcards
         String str = request.getQuery();
-        ArrayList list = search(str);
-        if (list==null)
+        Set matches = search(str);
+        if (matches==null)
             return null;
 
-        int size = list.size();
-        Response[] response = new Response[size];
-        FileDesc desc;
-        for(int j=0; j < size; j++) {
-            desc = (FileDesc)list.get(j);
-            response[j] =
-            new Response(desc._index, desc._size, desc._name);
+        Response[] response = new Response[matches.size()];
+        int j=0;
+        for (Iterator iter=matches.iterator(); iter.hasNext(); j++) {            
+            int i=((Integer)iter.next()).intValue();
+            FileDesc desc = (FileDesc)_files.get(i);
+            response[j] = new Response(desc._index, desc._size, desc._name);
         }
         return response;
     }
@@ -375,18 +376,19 @@ public class FileManager{
     ////////////////////////////////// Queries ///////////////////////////////
 
     /**
-     * Returns a list of FileDesc matching q, or null if there are no matches.
-     * Subclasses may override to provide different notions of matching.
+     * Returns a set of indices of files matching q, or null if there are no
+     * matches.  Subclasses may override to provide different notions of
+     * matching.  
      */
-    protected synchronized ArrayList search(String query) {
+    protected synchronized Set search(String query) {
         //TODO2: ideally this wouldn't be synchronized, a la ConnectionManager.
         //Doing so would allow multiple queries to proceed in parallel.  But
         //then you need to make _files volatile and work on a local reference,
         //i.e., "_files=this._files"
 
-        //TODO1: handle clip2 indexing query
-        //TODO2: can we avoid allocating sets here?
-        Set matches=null;
+        //TODO3: can we avoid allocating sets here?  Are better representations
+        //better?
+        Set ret=null;
 
         //For each keyword in the query....  (Note that we avoid calling
         //StringUtils.split and take advantage of Trie's offset/limit feature.)
@@ -401,34 +403,35 @@ public class FileManager{
                     break;
             }
 
-            //Now keywords[i...j-1] is the keyword to search for.
+            //Now search for keywords[i...j-1].
             Iterator /* of List<Integer> */ iter=
                 _index.getPrefixedBy(query, i, j);
-            Set matches2=new TreeSet(ArrayListUtil.integerComparator());
+            Set matches=null;  //allocated lazily below
             while (iter.hasNext()) {
                 Integer k=(Integer)iter.next();
-                matches2.add(k);
+                if (matches==null)
+                    matches=new TreeSet(ArrayListUtil.integerComparator());
+                matches.add(k);
             }
+            //No matches for this keyword?
+            if (matches==null)
+                return null;
 
-            if (matches==null)   //first time through for loop?
-                matches=matches2;
+            //Set up ret variable as needed.
+            else if (ret==null)   
+                ret=matches;
             else
-                matches.retainAll(matches2);
+                ret.retainAll(matches);
+
             //Optimization: if no matches, don't check others..
-            if (matches.size()==0)
+            if (ret.size()==0)
                 return null;        
             i=j;
         }
-        if (matches==null || matches.size()==0)
+        if (ret==null || ret.size()==0)
             return null;
-        else {
-            ArrayList ret=new ArrayList();
-            for (Iterator iter=matches.iterator(); iter.hasNext(); ) {
-                int i=((Integer)iter.next()).intValue();
-                ret.add(_files.get(i));
-            }
+        else 
             return ret;
-        }
     }
 
     /** Unit test--REQUIRES JAVA2 FOR USE OF CREATETEMPFILE */
