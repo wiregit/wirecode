@@ -23,7 +23,7 @@ public class Acceptor extends Thread {
      * when done.
      */
     private volatile ServerSocket _socket=null;
-    private int _port=0;
+    private volatile int _port=-1;
     private Object _socketLock=new Object();
 
     /**
@@ -45,7 +45,7 @@ public class Acceptor extends Thread {
      *
      * LOCKING: obtain Acceptor.class' lock 
      */
-    private static byte[] _address=new byte[4];
+    private static byte[] _address = new byte[4];
 
     private IPFilter _filter=new IPFilter();;
     
@@ -64,34 +64,18 @@ public class Acceptor extends Thread {
 	 *  to get around JDK bug #4073539, as well as to try to handle the case of a
      *  computer whose IP address keeps changing.
 	 */
-	public static synchronized void setAddress(byte [] addr) {
+	public static synchronized void setAddress(byte[] address) {
         //Ignore localhost.
-        if (addr[0]==(byte)127
-                && addr[1]==(byte)0
-                && addr[2]==(byte)0
-                && addr[3]==(byte)1)
+        if (address[0]==(byte)127)
             return;
 
-	    _address = addr; 
+		_address = address;
 	}
-
-    
-
-    /**
-     * Creates an acceptor that tries to listen to incoming connections
-     * on the given port.  If this is a bad port, the port will be
-     * changed when run is called and SettingsManager will be updated.
-     * If that fails, ActivityCallback.error will be called.  A port
-     * of 0 means do not accept incoming connections.
-     */
-    public Acceptor(int port) {
-        _port = port;
-    }
 
     /**
      * Launches the port monitoring thread.
      */
-	public void initialize() {		
+	public void initialize() { 
         setDaemon(true);
         start();
 	}
@@ -199,12 +183,15 @@ public class Acceptor extends Thread {
      *   changed accordingly.
      */
     public void run() {
-
+		int tempPort = SettingsManager.instance().getPort();
 		ActivityCallback callback = RouterService.instance().getCallback();
 
         //0. Get local address.  This must be done here--not in the static
         //   initializer--because it can block under certain conditions.
         //   See the notes for _address.
+
+		// TODO: Why do we do this??  Local hosts are blocked in the
+		// setAddress method
         try {
             setAddress(InetAddress.getLocalHost().getAddress());
         } catch (UnknownHostException e) {
@@ -215,15 +202,17 @@ public class Acceptor extends Thread {
         // incoming connections.  If there are problems, we can continue
         // onward.
         //1. Try suggested port.
-        int oldPort = _port;
+		int oldPort = tempPort;
         try {
-            setListeningPort(_port);
+			setListeningPort(tempPort);
+			_port = tempPort;
         } catch (IOException e) {
             //2. Try 10 different ports
             for (int i=0; i<10; i++) {
-                _port=i+6346;
+				tempPort = i+6346;
                 try {
-                    setListeningPort(_port);
+                    setListeningPort(tempPort);
+					_port = tempPort;
                     break;
                 } catch (IOException e2) { }
             }
