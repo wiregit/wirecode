@@ -431,17 +431,6 @@ public abstract class MessageRouter {
             handlePatchTableMessage((PatchTableMessage)msg,
                                     receivingConnection);            
         }
-        else if (msg instanceof MessagesSupportedVendorMessage) {
-			ReceivedMessageStatHandler.TCP_MESSAGES_SUPPORTED.addMessage(msg);
-            receivingConnection.handleVendorMessage((VendorMessage) msg);
-        }
-        else if (msg instanceof CapabilitiesVM) {
-            receivingConnection.handleVendorMessage((VendorMessage) msg);
-        }
-        else if (msg instanceof HopsFlowVendorMessage) {
-            ReceivedMessageStatHandler.TCP_HOPS_FLOW.addMessage(msg);
-            receivingConnection.handleVendorMessage((VendorMessage) msg);
-        }
         else if (msg instanceof TCPConnectBackVendorMessage) {
             ReceivedMessageStatHandler.TCP_TCP_CONNECTBACK.addMessage(msg);
             handleTCPConnectBackRequest((TCPConnectBackVendorMessage) msg,
@@ -462,9 +451,6 @@ public abstract class MessageRouter {
         }
         else if (msg instanceof PushProxyRequest) {
             handlePushProxyRequest((PushProxyRequest) msg, receivingConnection);
-        }
-        else if (msg instanceof PushProxyAcknowledgement) {
-            receivingConnection.handleVendorMessage((VendorMessage) msg);
         }
         else if (msg instanceof QueryStatusResponse) {
             handleQueryStatus((QueryStatusResponse) msg, receivingConnection);
@@ -488,6 +474,10 @@ public abstract class MessageRouter {
         else if(msg instanceof SimppVM) {
             handleSimppVM((SimppVM)msg);
         }
+        else if (msg instanceof VendorMessage) {
+            receivingConnection.handleVendorMessage((VendorMessage)msg);
+        }
+        
         //This may trigger propogation of query route tables.  We do this AFTER
         //any handshake pings.  Otherwise we'll think all clients are old
         //clients.

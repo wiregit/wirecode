@@ -136,6 +136,11 @@ public final class MessagesSupportedVendorMessage extends VendorMessage {
                                         SimppVM.VERSION);
         hashSet.add(smp);
         
+        //Header update
+        smp = new SupportedMessageBlock(F_LIME_VENDOR_ID,
+                						F_HEADER_UPDATE,
+                						HeaderUpdateVendorMessage.VERSION);
+        hashSet.add(smp);
     }
 
 
@@ -238,6 +243,10 @@ public final class MessagesSupportedVendorMessage extends VendorMessage {
      */
     public int supportsUDPCrawling() {
     	return supportsMessage(F_LIME_VENDOR_ID, F_ULTRAPEER_LIST);
+    }
+    
+    public int supportsHeaderUpdate() {
+        return supportsMessage(F_LIME_VENDOR_ID,F_HEADER_UPDATE);
     }
 
     // override super

@@ -25,6 +25,7 @@ import com.limegroup.gnutella.handshaking.NoGnutellaOkException;
 import com.limegroup.gnutella.messages.BadPacketException;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.vendor.CapabilitiesVM;
+import com.limegroup.gnutella.messages.vendor.HeaderUpdateVendorMessage;
 import com.limegroup.gnutella.messages.vendor.MessagesSupportedVendorMessage;
 import com.limegroup.gnutella.messages.vendor.SimppVM;
 import com.limegroup.gnutella.messages.vendor.StatisticVendorMessage;
@@ -195,7 +196,7 @@ public class Connection implements IpPort {
     /**
      * The <tt>HandshakeResponse</tt> wrapper for the connection headers.
      */
-	private HandshakeResponse _headers = 
+	private volatile HandshakeResponse _headers = 
         HandshakeResponse.createEmptyResponse();
         
     /**
@@ -389,6 +390,13 @@ public class Connection implements IpPort {
             _messagesSupported = (MessagesSupportedVendorMessage) vm;
         if (vm instanceof CapabilitiesVM)
             _capabilities = (CapabilitiesVM) vm;
+        if (vm instanceof HeaderUpdateVendorMessage) {
+            HeaderUpdateVendorMessage huvm = (HeaderUpdateVendorMessage)vm;
+            HEADERS_READ.putAll(huvm.getProperties());
+            try {
+                _headers = HandshakeResponse.createResponse(HEADERS_READ);
+            }catch(IOException ignored){}
+        }
     }
 
 
@@ -1441,6 +1449,12 @@ public class Connection implements IpPort {
     public int remoteHostSupportsLeafGuidance() {
         if (_messagesSupported != null)
             return _messagesSupported.supportsLeafGuidance();
+        return -1;
+    }
+    
+    public int remoteHostSupportsHeaderUpdate() {
+        if (_messagesSupported != null)
+            return _messagesSupported.supportsHeaderUpdate();
         return -1;
     }
     

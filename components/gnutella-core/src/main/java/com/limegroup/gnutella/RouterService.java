@@ -9,6 +9,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Properties;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -27,7 +28,9 @@ import com.limegroup.gnutella.downloader.IncompleteFileManager;
 import com.limegroup.gnutella.filters.IPFilter;
 import com.limegroup.gnutella.filters.MutableGUIDFilter;
 import com.limegroup.gnutella.filters.SpamFilter;
+import com.limegroup.gnutella.handshaking.HeaderNames;
 import com.limegroup.gnutella.messages.QueryRequest;
+import com.limegroup.gnutella.messages.vendor.HeaderUpdateVendorMessage;
 import com.limegroup.gnutella.search.QueryDispatcher;
 import com.limegroup.gnutella.search.SearchResultHandler;
 import com.limegroup.gnutella.security.Authenticator;
@@ -1458,14 +1461,15 @@ public class RouterService {
     /**
      * Notifies components that this' IP address has changed.
      */
-    public static boolean addressChanged() {
+    public static boolean addressChanged() {System.out.println("changed address");
         // Only continue if the current address/port is valid & not private.
         byte addr[] = getAddress();
+        int port = getPort();
         if(!NetworkUtils.isValidAddress(addr))
             return false;
         if(NetworkUtils.isPrivateAddress(addr))
             return false;            
-        if(!NetworkUtils.isValidPort(getPort()))
+        if(!NetworkUtils.isValidPort(port))
             return false;
 
         FileDesc[] fds = fileManager.getAllSharedFileDescriptors();
@@ -1476,6 +1480,22 @@ public class RouterService {
         // validators run they try to connect back.
         acceptor.resetLastConnectBackTime();
         udpService.resetLastConnectBackTime();
+        
+        Properties props = new Properties();
+        props.put(HeaderNames.LISTEN_IP,NetworkUtils.ip2string(addr)+":"+port);
+        HeaderUpdateVendorMessage huvm = new HeaderUpdateVendorMessage(props);
+        
+        for (Iterator iter = manager.getInitializedConnections().iterator();iter.hasNext();) {
+            ManagedConnection c = (ManagedConnection)iter.next();
+            if (c.remoteHostSupportsHeaderUpdate() >= huvm.VERSION)
+                c.send(huvm);
+        }
+        
+        for (Iterator iter = manager.getInitializedClientConnections().iterator();iter.hasNext();) {
+            ManagedConnection c = (ManagedConnection)iter.next();
+            if (c.remoteHostSupportsHeaderUpdate() >= huvm.VERSION)
+                c.send(huvm);
+        }
 
         return true;
     }

@@ -37,6 +37,7 @@ public abstract class VendorMessage extends Message {
     protected static final int F_SIMPP = 17;
     protected static final int F_UDP_HEAD_PING = 23;
     protected static final int F_UDP_HEAD_PONG = 24;
+    protected static final int F_HEADER_UPDATE = 25;
 
 
     
