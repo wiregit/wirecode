@@ -357,9 +357,18 @@ public class ConnectionManager {
      * @return true, if Ultrapeer, false otherwise
      */
     public boolean isSupernode() {
-        return 
-            UltrapeerSettings.EVER_ULTRAPEER_CAPABLE.getValue() && 
-            !isShieldedLeaf();
+        return
+            // If we are currently supernode to any connections,
+            // OR
+            // we are not a private address, have been ultrapeer capable
+            // in the past, and are not being shielded by anybody,
+            // then we are an ultrapeer.
+            ( _initializedClientConnections.size() > 0 ) ||
+            ( 
+             !NetworkUtils.isPrivate() &&
+             UltrapeerSettings.EVER_ULTRAPEER_CAPABLE.getValue() && 
+             !isShieldedLeaf()
+            );
     }
     
     /**
@@ -1795,9 +1804,7 @@ public class ConnectionManager {
                    ((curTime - _lastConnectionCheck)>60000)) {
                     _connectionAttempts = 0;
                     _lastConnectionCheck = curTime;
-                    if(LOG.isDebugEnabled()) {
-                        LOG.debug("checking for live connection");
-                    }
+                    LOG.debug("checking for live connection");
                     ConnectionChecker.checkForLiveConnection();
                 }
                 
@@ -1857,8 +1864,8 @@ public class ConnectionManager {
         // them to reconnect.  Otherwise, there may have been a temporary 
         // hiccup in the network connection, and we'll keep automatically 
         // trying to recover the connection.
-        if(SystemUtils.getIdleTime() < 30*1000 && 
-           SystemUtils.supportsIdleTime()) {
+        if(SystemUtils.supportsIdleTime() &&
+           SystemUtils.getIdleTime() < 30*1000) {
             // Notify the user that they have no internet connection.
             MessageService.showError("NO_INTERNET", 
                 QuestionsHandler.NO_INTERNET);
@@ -1868,7 +1875,7 @@ public class ConnectionManager {
             MessageService.showError("NO_INTERNET_RETRYING",
                 QuestionsHandler.NO_INTERNET);
             
-            // Try to reconnect in 2 minutes, and then every 30 minutes after
+            // Try to reconnect in 10 seconds, and then every minute after
             // that.
             RouterService.schedule(new Runnable() {
                 public void run() {

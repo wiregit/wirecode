@@ -1,6 +1,7 @@
 package com.limegroup.gnutella;
 
 import com.limegroup.gnutella.util.CommonUtils;
+import com.limegroup.gnutella.util.NetworkUtils;
 import com.limegroup.gnutella.settings.*;
 import com.limegroup.gnutella.statistics.*;
 
@@ -197,7 +198,9 @@ public final class SupernodeAssigner {
             //AND I have accepted incoming messages over UDP
             //RouterService.isGUESSCapable() &&
             //AND am I a capable OS?
-			ULTRAPEER_OS;
+			ULTRAPEER_OS &&
+			//AND I do not have a private address
+			!NetworkUtils.isPrivate();
 
 		long curTime = System.currentTimeMillis();
 
