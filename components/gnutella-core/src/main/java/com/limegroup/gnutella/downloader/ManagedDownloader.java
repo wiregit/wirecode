@@ -373,9 +373,7 @@ public class ManagedDownloader implements Downloader, Serializable {
      *  Integer.MAX_VALUE if we don't know. Should be modified only through
      *  setState. */
     private long stateTime;
-    /** If in the wait state, the number of retries we're waiting for.
-     *  Otherwise undefined. */
-    private int retriesWaiting;
+    
     /** The current incomplete file that we're downloading, or the last
      *  incomplete file if we're not currently downloading, or null if we
      *  haven't started downloading.  Used for previewing purposes. */
@@ -487,6 +485,11 @@ public class ManagedDownloader implements Downloader, Serializable {
      * started.
      */
     private volatile boolean receivedNewSources;
+    
+    /**
+     * The time the last query was sent out.
+     */
+    private long lastQuerySent;
 
 
     /**
@@ -640,19 +643,25 @@ public class ManagedDownloader implements Downloader, Serializable {
         // If that sent some queries, don't do anything else.
         if(tryGUESSing())
             return;
+            
+        int state = getState();
+        LOG.trace("MD<" + getFileName() + "> completed download, state: " + state + ", numQueries: " + numQueries + ", lastQuerySent: " + lastQuerySent);
 
         // If busy, try waiting for that busy host.
-        if (getState() == WAITING_FOR_RETRY) {
-            synchronized (this) {
-                retriesWaiting = files.size();
-            }
+        if (state == WAITING_FOR_RETRY) {
             setState(WAITING_FOR_RETRY, calculateWaitTime());
+            return;
+        }
+        
+        long now = System.currentTimeMillis();
+        if(now - lastQuerySent < TIME_BETWEEN_REQUERIES) {
+            setState(WAITING_FOR_RESULTS, TIME_BETWEEN_REQUERIES - (now - lastQuerySent));
             return;
         }
 
         // If we're at our requery limit, give up.
         if( numQueries >= REQUERY_ATTEMPTS ) {
-            setState(GAVE_UP, TIME_BETWEEN_REQUERIES);
+            setState(GAVE_UP);
             return;
         }
     
@@ -660,19 +669,27 @@ public class ManagedDownloader implements Downloader, Serializable {
         if(shouldSendRequeryImmediately(numQueries)) {
             if(!hasStableConnections())
                 setState(WAITING_FOR_CONNECTIONS, 750);
-            else {
-                try {
-                    if(manager.sendQuery(this, newRequery(numQueries))) {
-                        numQueries++;
-                        setState(WAITING_FOR_RESULTS);
-                    }
-                } catch(CantResumeException cre) {
-                    // oh well.
-                }
-            }
-        } else {
-            // Otherwise, wait for the user to initiate us.
+            else
+                sendRequery();
+        } else { // Otherwise, wait for the user to initiate us.
             setState(WAITING_FOR_USER);
+        }
+        
+        LOG.trace("!!MD<" + getFileName() + "> completed download, state: " + state + ", numQueries: " + numQueries);        
+    }
+    
+    /**
+     * Attempts to send a requery.
+     */
+    private void sendRequery() {
+        try {
+            if(manager.sendQuery(this, newRequery(numQueries))) {
+                lastQuerySent = System.currentTimeMillis();
+                numQueries++;
+                setState(WAITING_FOR_RESULTS, TIME_BETWEEN_REQUERIES);
+            }
+        } catch(CantResumeException cre) {
+            // oh well.
         }
     }
     
@@ -683,12 +700,18 @@ public class ManagedDownloader implements Downloader, Serializable {
         switch(getState()) {
         case WAITING_FOR_RETRY:
         case WAITING_FOR_CONNECTIONS:
-        case WAITING_FOR_RESULTS:
-        case WAITING_FOR_USER:
         case ITERATIVE_GUESSING:
-            if(calculateWaitTime() <= 0)
+            if(getRemainingStateTime() <= 0)
                 setState(QUEUED);
             break;
+        case WAITING_FOR_RESULTS:
+            if(hasNewSources())
+                setState(QUEUED);
+            else if(getRemainingStateTime() <= 0)
+                setState(GAVE_UP);
+            break;        
+        case WAITING_FOR_USER:
+        case GAVE_UP:
         case QUEUED:
             break;
         default:
@@ -914,7 +937,7 @@ public class ManagedDownloader implements Downloader, Serializable {
      */
     protected boolean shouldSendRequeryImmediately(int numRequeries) {
         // MD's never want to requery without user input.
-        return true;
+        return false;
     }
 
     /** Subclasses should override this method when necessary.
@@ -1387,16 +1410,8 @@ public class ManagedDownloader implements Downloader, Serializable {
             if(state == WAITING_FOR_USER) {
                 if(!hasStableConnections())
                     setState(WAITING_FOR_CONNECTIONS);
-                else {
-                    try {
-                        if(manager.sendQuery(this, newRequery(numQueries))) {
-                            numQueries++;
-                            setState(WAITING_FOR_RESULTS);
-                        }
-                    } catch(CantResumeException cre) {
-                        // oh well.
-                    }
-                }
+                else
+                    sendRequery();
             }
         }
         
@@ -1558,8 +1573,8 @@ public class ManagedDownloader implements Downloader, Serializable {
 		// Wait till your connections are stable enough to get the minimum 
 		// number of messages
 		return RouterService.countConnectionsWithNMessages(MIN_CONNECTION_MESSAGES) 
-			        < MIN_NUM_CONNECTIONS &&
-               RouterService.getActiveConnectionMessages() < MIN_TOTAL_MESSAGES;
+			        >= MIN_NUM_CONNECTIONS &&
+               RouterService.getActiveConnectionMessages() >= MIN_TOTAL_MESSAGES;
     }
 
 
@@ -3370,8 +3385,12 @@ public class ManagedDownloader implements Downloader, Serializable {
         case CONNECTING:
         case WAITING_FOR_RETRY:
         case WAITING_FOR_RESULTS:
+        case ITERATIVE_GUESSING:
+        case WAITING_FOR_CONNECTIONS:
             remaining=stateTime-System.currentTimeMillis();
             return (int)Math.max(remaining, 0)/1000;
+        case QUEUED:
+            return 0;
         default:
             return Integer.MAX_VALUE;
         }
@@ -3498,10 +3517,6 @@ public class ManagedDownloader implements Downloader, Serializable {
         } else {
             return "";
         }
-    }
-
-    public synchronized int getRetriesWaiting() {
-        return retriesWaiting;
     }
 
     public synchronized void measureBandwidth() {

@@ -100,12 +100,6 @@ public interface Downloader extends BandwidthTracker {
      * Returns the amount read by this so far, in bytes.
      */
     public int getAmountRead();
-  
-    /**
-     * Returns the number of retries this is waiting for. 
-     * Result meaningful on in WAIT_FOR_RETRY state.
-     */
-     public int getRetriesWaiting();
     
     /**
      * Returns the last address that this tried to connect to, or null if it

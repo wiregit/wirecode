@@ -331,6 +331,7 @@ public class DownloadManager implements BandwidthTracker {
                 waiting.add(downloader);                                 //1
                 downloader.initialize(this, this.fileManager, callback); //2
                 callback.addDownload(downloader);                        //3
+                requestStart(downloader);                                //4
             }
             return true;
         } catch (ClassCastException e) {
@@ -751,8 +752,11 @@ public class DownloadManager implements BandwidthTracker {
                 router.downloadFinished(downloader.getQueryGUID());
             callback.removeDownload(downloader);
             
-            if(!waiting.isEmpty())
-                requestStart((ManagedDownloader)waiting.get(0));
+            if(!waiting.isEmpty()) {
+                ManagedDownloader md = (ManagedDownloader)waiting.get(0);
+                if(md.hasNewSources() || md.getRemainingStateTime() <= 0)
+                    requestStart(md);
+            }
             
             //Save this' state to disk for crash recovery.
             writeSnapshot();
