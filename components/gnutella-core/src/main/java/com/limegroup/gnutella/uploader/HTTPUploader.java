@@ -484,6 +484,7 @@ public class HTTPUploader implements Runnable {
 			decrementNumUploads();
             _state = ERROR;
         } finally {
+			decrementNumUploads();
             if ( uploadCountIncremented )
                 synchronized(uploadCountLock) { uploadCount--; }
             if ( _isPushAttempt )
@@ -645,8 +646,22 @@ public class HTTPUploader implements Runnable {
     }
 
 
-
-	public void testAndIncrementNumUploads() 
+	/**
+	 * In this version of the HTTPUploader, we've decided
+	 * to limit the total number of uploads at any given 
+	 * time by a particilar host.  As a result, we've added
+	 * a variable in the SettingsManager for the maximum
+	 * number of uploads per person.
+	 *
+	 * To keep track of the number of uploads per host, 
+	 * we have added a hashmap, and every time an upload
+	 * is initiated, it is inserted into the map.  however,
+	 * if the map already contains more that the allowed
+	 * number of uploads per person, that this method will 
+	 * throw an IOException.
+	 * 
+	 */
+	private void testAndIncrementNumUploads() 
 		throws IOException {
 		/* the ip address will be the key for the map */
 		String ip = getInetAddress().getHostAddress();
@@ -680,7 +695,16 @@ public class HTTPUploader implements Runnable {
 		
 	}
 
-	public void decrementNumUploads() {
+	/**
+	 * as explained above, we now limit the number of uploads
+	 * allowed per host, at a ny given time.  once an upload
+	 * has been succesful, this method removes the reference 
+	 * to it in the map, which is really just a key/value pair 
+	 * of a string for the host ip address, and an intereger
+	 * for the number of uploads in progress.  
+	 *
+	 */
+	private void decrementNumUploads() {
 		/* the ip address that is the key for the map */
 		String ip = getInetAddress().getHostAddress();		
 		
@@ -813,7 +837,6 @@ public class HTTPUploader implements Runnable {
 
     public void shutdown()
     {
-		decrementNumUploads();
         try {
             _fis.close();
         } catch (Exception e) {
