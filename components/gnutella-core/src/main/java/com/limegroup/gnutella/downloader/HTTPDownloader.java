@@ -261,8 +261,10 @@ public class HTTPDownloader implements BandwidthTracker {
         }
         
         // Add ourselves to the mesh if we have downloaded a large enough
-        // portion of the file.
-        if (_incompleteFile.length() > _minPartialFileSize)
+        // portion of the file AND we have accepted an incoming connection
+        // during this session.
+        if (RouterService.acceptedIncomingConnection() &&
+            _incompleteFile.length() > _minPartialFileSize)
             alts.addAlternateLocation(
                 AlternateLocation.createAlternateLocation(
                     alts.getSHA1Urn()
