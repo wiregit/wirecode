@@ -27,6 +27,26 @@ public KeyValue(Object key, Object value)
 	this.value = value;
 }//end of constructor
 
+/**
+* Default Constructor
+*/
+public KeyValue()
+{
+    this.key = null;
+    this.value = null;
+}
+
+
+/**	
+* Sets the key and value fields
+* @param key key of the property
+* @param value corresponding value of the property
+*/
+public void set(Object key, Object value)
+{
+	this.key = key;
+	this.value = value;
+}//end of constructor
 
 /** Compares the instance of this class with another instance. 
 	Returns true, if the key field is same, regardless of the 
