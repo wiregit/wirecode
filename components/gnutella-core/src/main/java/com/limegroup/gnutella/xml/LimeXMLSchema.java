@@ -20,6 +20,11 @@ import javax.xml.parsers.DocumentBuilderFactory;
  */
 public class LimeXMLSchema 
 {
+    /**
+     * List<String> of elements (in canonicalized form to preserve the structural
+     * information)
+     */
+    List /* of String */ canonicalizedElements = new LinkedList();
 
     /** 
      * Creates new LimeXMLSchema 
@@ -47,9 +52,15 @@ public class LimeXMLSchema
      */
     public LimeXMLSchema(InputSource inputSource) throws IOException
     {
-        //TODO anu
+        //initialize schema
+        initializeSchema(inputSource);
     }
     
+    /**
+     * Initilizes the schema after parsing it from the input source
+     * @param inputSource The source representing the XML schema definition
+     * to be parsed
+     */
     private void initializeSchema(InputSource inputSource)
     {
         //get an instance of DocumentBuilderFactory
@@ -58,7 +69,8 @@ public class LimeXMLSchema
         //set validating, and namespace awareness
         documentBuilderFactory.setValidating(true);
         documentBuilderFactory.setNamespaceAware(true);
-            DocumentBuilder documentBuilder=null;
+            
+        //    
             
         //TODO anu
             
