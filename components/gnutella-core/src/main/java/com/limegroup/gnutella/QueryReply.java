@@ -573,10 +573,6 @@ public class QueryReply extends Message implements Serializable{
             // d) currently, the xml metadata about the file is stored in the
             // private area of the QHD.  this will probably change...
             xmlCollectionString = new String(payload, i, payload.length-16-i);
-            System.out.println("QueryReply.parseResults2(): " +
-                               " xmlCollectionString = " + 
-                               xmlCollectionString);
-            
 
             //All set.  Accept parsed values.
             Assert.that(vendorT!=null);
