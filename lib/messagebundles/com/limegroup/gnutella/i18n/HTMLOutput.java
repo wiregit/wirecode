@@ -302,7 +302,7 @@ class HTMLOutput {
 "     <br />\n" +
 "     <b>Macintosh users</b> should use a word-processor and send us their\n" +
 "     translations in an unambiguous format. Mac OS 8/9 \"SimpleText\"\n" +
-"     files use a Mac specific specific encoding for international languages\n" +
+"     files use a Mac-specific encoding for international languages\n" +
 "     (additionally, SimpleText is too much limited to edit large files), and a\n" +
 "     specific format for text attachments (we may enventually have difficulties to\n" +
 "     decipher some Mac encodings used in simple text files attachment). On Mac OSX,\n" +
