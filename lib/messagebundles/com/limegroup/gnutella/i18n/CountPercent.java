@@ -217,7 +217,7 @@ public class CountPercent {
         dst = new File(dst, src.getName());
         
         BufferedReader reader = null;
-        BufferedWriter writer  = null;
+        BufferedWriter writer = null;
         try {
             reader = new BufferedReader(new InputStreamReader(
                 new FileInputStream(src), "ISO-8859-1"));
@@ -229,7 +229,7 @@ public class CountPercent {
                 if(line.isComment())
                     continue;
                 writer.write(read);
-                writer.write("\n");
+                writer.newLine();
             }
         } catch (IOException e) {
             e.printStackTrace();

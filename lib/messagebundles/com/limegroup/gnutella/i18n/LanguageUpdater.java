@@ -37,7 +37,15 @@ class LanguageUpdater {
      */
     void print(String msg) {
         if(verbose)
+            System.out.print(msg);
+    }
+    void println(String msg) {
+        if(verbose)
             System.out.println(msg);
+    }
+    void println() {
+        if(verbose)
+            System.out.println();
     }
     
     /**
@@ -57,37 +65,52 @@ class LanguageUpdater {
      * Updates a single language.
      */
     void updateLanguage(LanguageInfo info) {
-        if(info == null) {
-            print("Unknown language.");
+        if (info == null) {
+            println("Unknown language.");
             return;
         }
         
         print("Updating language: " + info.getName() + " (" + info.getCode() + ")... ");
         String filename = info.getFileName();
         File f = new File(lib, filename);
-        if(!f.isFile())
+        if (!f.isFile())
             throw new IllegalArgumentException("Invalid info: " + info);
             
         File temp;
-        FileOutputStream fos;
+        BufferedReader reader;
+        PrintWriter printer;
         try {
             temp = File.createTempFile("TEMP", info.getCode(), lib);
-            fos = new FileOutputStream(temp);
-            writeInitialComments(fos, f, info);
-            writeBody(fos, info);
-            fos.close();
-            if(isDifferent(f, temp)) {
-                print("...changes.");
+            reader = new BufferedReader(new InputStreamReader(
+                                        new FileInputStream(f),
+                                        info.isUTF8() ? "UTF-8" : "ISO-8859-1"
+                                        ));
+            printer = new PrintWriter(
+                                        temp,
+                                        info.isUTF8() ? "UTF-8" : "ISO-8859-1"
+                                        );
+            if (info.isUTF8()) {
+                reader.mark(1);
+                if (reader.read() != '\uFEFF')
+                    reader.reset(); /* was not a leading BOM */
+                printer.print('\uFEFF'); /* force a leading BOM */
+            }
+            printInitialComments(printer, reader, info);
+            printBody(printer, info);
+            reader.close();
+            printer.close();
+            if (isDifferent(f, temp)) {
+                println("...changes.");
                 f.delete();
                 temp.renameTo(f);
             } else {
-                print("...no changes!");
+                println("...no changes!");
                 temp.delete();
             }
-            if(info.isUTF8())
+            if (info.isUTF8())
                 native2ascii(info);
-        } catch(IOException ioe) {
-            print("...error! (" + ioe.getMessage() + ")");
+        } catch (IOException ioe) {
+            println("...error! (" + ioe.getMessage() + ")");
         }
     }
     
@@ -114,15 +137,15 @@ class LanguageUpdater {
             BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(out, "ISO-8859-1"));
             
             String read;
-            while( (read = reader.readLine()) != null) {
+            while ((read = reader.readLine()) != null) {
                 writer.write(ascii(read));
-                writer.write("\n");
+                writer.newLine();
             }
             writer.flush();
             out.flush();
-            print("... done!");
+            println("... done!");
         } catch(IOException ignored) {
-            print("... error! (" + ignored.getMessage() + ")");
+            println("... error! (" + ignored.getMessage() + ")");
         } finally {
             if(in != null)
                 try { in.close(); } catch(IOException ignored) {}
@@ -160,13 +183,7 @@ class LanguageUpdater {
     /**
      * Writes the body of the bundle.
      */
-    private void writeBody(OutputStream fos, LanguageInfo info) throws IOException {
-        BufferedWriter writer = new BufferedWriter(
-                                 new OutputStreamWriter(fos, 
-                                    info.isUTF8() ? "UTF-8" : "ISO-8859-1"
-                                 )
-                                );
-                                
+    private void printBody(PrintWriter printer, LanguageInfo info) throws IOException {
         Properties props = info.getProperties();
         boolean reachedTranslations = false;
         for(Iterator i = englishList.iterator(); i.hasNext(); ) {
@@ -175,81 +192,56 @@ class LanguageUpdater {
                 reachedTranslations = true;
                 
             if(line.isComment()) {
-                writer.write(line.getLine());
+                printer.println(line.getLine());
             } else {
                 String key = line.getKey();
                 String value = props.getProperty(key);
                 // always write the English version, so translators
                 // have a reference point for possibly needing to update
                 // an older translation.
-                if(reachedTranslations) {
-                    writer.write("#### ");
-                    writer.write(key);
-                    writer.write("=");
-                    writer.write(escape(line.getValue()));
-                    writer.write("\n");
+                if (reachedTranslations) {
+                    printer.print("#### ");
+                    printer.print(key);
+                    printer.print("=");
+                    printer.print(escape(line.getValue()));
+                    printer.println();
                 }
                 
-                if(value != null) {
-                    writer.write(key);
-                    writer.write("=");
-                    writer.write(escape(value));
+                if (value != null) {
+                    printer.print(key);
+                    printer.print("=");
+                    printer.println(escape(value));
                 } else {
-                    writer.write("#? ");
-                    writer.write(key);
-                    writer.write("=");
+                    printer.print("#? ");
+                    printer.print(key);
+                    printer.print("=");
                     // only write the non-translated value if we didn't
                     // above.
                     if(!reachedTranslations)
-                        writer.write(escape(line.getValue()));
+                        printer.print(escape(line.getValue()));
+                    printer.println();
                 }
             }
-            writer.write("\n");
         }
-        writer.flush();
+        //printer.flush();
     }
     
     /**
      * Writes the initial comments from a given file to fos.
      */
-    private void writeInitialComments(OutputStream fos, File file, LanguageInfo info) throws IOException {
+    private void printInitialComments(PrintWriter printer, BufferedReader reader, LanguageInfo info) throws IOException {
         InputStream in = null;
         
         try {
-            // use BufferedInputStream (even though we use BufferedReader)
-            // to make sure that mark is supported.
-            in = new BufferedInputStream(new FileInputStream(file));
-            BufferedReader reader;
-            String charset = "ISO-8859-1";
-            
-            // Make sure we write the UTF8 marker at the beginning if it's UTF8.
-            if(info.isUTF8()) {
-                in.mark(3);
-                if (in.read() != 0xEF || in.read() != 0xBB || in.read() != 0xBF) {
-                    in.reset();
-                }
-                fos.write(new byte[] { (byte)0xEF, (byte)0xBB, (byte)0xBF } );
-                charset = "UTF-8";
-            }
-            
-            reader = new BufferedReader(new InputStreamReader(in, charset));
-            
             String read;
             // Read through and write the initial lines until we reach a non-comment
-            while( (read = reader.readLine()) != null) {
+            while ((read = reader.readLine()) != null) {
                 Line line = new Line(read);
                 if(!line.isComment())
                     break;
-                byte[] data = read.getBytes(charset);
-                fos.write(data);
-                fos.write('\n');
+                printer.println(read);
             }
         } finally {
-            if(in != null) {
-                try {
-                    in.close();
-                } catch(IOException ignored) {}
-            }
         }
     }
     
@@ -327,4 +319,3 @@ class LanguageUpdater {
         return sb.toString();
     }
 }            
-    
