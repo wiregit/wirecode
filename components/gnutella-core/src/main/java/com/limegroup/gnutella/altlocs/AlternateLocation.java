@@ -71,8 +71,6 @@ public final class AlternateLocation implements HTTPHeaderValue, Comparable {
     private volatile boolean _demoted = false;
 
 
-    private boolean _old = false;
-
     ////////////////////////"Constructors"//////////////////////////////
     
 	/**
@@ -301,7 +299,7 @@ public final class AlternateLocation implements HTTPHeaderValue, Comparable {
 	public RemoteFileDesc createRemoteFileDesc(int size) {
 		Set urnSet = new HashSet();
 		urnSet.add(getSHA1Urn());
-        int quality = _old ? 2 : 3;
+        int quality = 3;
 		return new RemoteFileDesc(URL.getHost(), URL.getPort(),
 								  0, URL.getFile(), size,  
 								  DataUtils.EMPTY_GUID, 1000,
@@ -326,12 +324,6 @@ public final class AlternateLocation implements HTTPHeaderValue, Comparable {
      * package access for promoting this.
      */
     synchronized void promote() { _demoted = false; }
-
-    /**
-     * to set this._old to true, meaning that this is a location from the old
-     * mesh.
-     */
-    public void setOld() { _old = true; }
 
     /**
      * could return null

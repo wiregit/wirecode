@@ -493,9 +493,7 @@ public class HTTPDownloader implements BandwidthTracker {
 				checkContentUrnHeader(str, _rfd.getSHA1Urn());
 			// Read any alternate locations
 			else if(HTTPHeaderName.ALT_LOCATION.matchesStartOfString(str))
-                readAlternateLocations(str, false);
-            else if(HTTPHeaderName.OLD_ALT_LOCS.matchesStartOfString(str))
-                readAlternateLocations(str, true);
+                readAlternateLocations(str);
             else if(HTTPHeaderName.QUEUE.matchesStartOfString(str)) 
                 parseQueueHeaders(str, refQueueInfo);
             else if (HTTPHeaderName.SERVER.matchesStartOfString(str)) 
@@ -584,7 +582,7 @@ public class HTTPDownloader implements BandwidthTracker {
 	 *
 	 * @param altHeader the full alternate locations header
 	 */
-	private void readAlternateLocations(final String altHeader, boolean old) {
+	private void readAlternateLocations(final String altHeader) {
 		final String altStr = HTTPUtils.extractHeaderValue(altHeader);
 		if(altStr == null) return;
 		StringTokenizer st = new StringTokenizer(altStr, ",");
@@ -610,9 +608,6 @@ public class HTTPDownloader implements BandwidthTracker {
                     _altLocsReceived = 
                     AlternateLocationCollection.create(alSha1);
                 
-                if(old)
-                    al.setOld();
-
                 boolean added = false;
                 
                 if(alSha1.equals(_altLocsReceived.getSHA1Urn())) {
