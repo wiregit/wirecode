@@ -438,6 +438,10 @@ public class PushEndpoint implements HTTPHeaderValue{
 	        }catch(IOException ohWell){}
 	    }
 
+        overwriteProxies(guid, newSet);
+    }
+    
+    public static void overwriteProxies(byte[] guid, Set newSet) {
 	    GUID g = new GUID(guid);
 	    GuidSetWrapper wrapper;
 	    synchronized(GUID_PROXY_MAP) {
