@@ -118,11 +118,12 @@ public final class UrnHttpRequestTest extends com.limegroup.gnutella.util.BaseTe
 	
 	/**
 	 * Test requests by URN that came from LimeWire 2.8.6.
+	 * /get/0//uri-res/N2R?urn:sha1:AZUCWY54D63______PHN7VSVTKZA3YYT HTTP/1.1
 	 */
 	public void testMalformedHttpUrnRequest() throws Exception {
 		for(int i=0; i<RouterService.getFileManager().getNumFiles(); i++) {
 			FileDesc fd = RouterService.getFileManager().get(i);
-			String request = "//uri-res/N2R?"+fd.getSHA1Urn().httpStringValue()+
+			String request = "/get/0//uri-res/N2R?"+fd.getSHA1Urn().httpStringValue()+
 			" HTTP/1.1\r\n\r\n";
 			sendRequestThatShouldSucceed(HTTPRequestMethod.GET, request, fd);
 			sendRequestThatShouldSucceed(HTTPRequestMethod.HEAD, request, fd);

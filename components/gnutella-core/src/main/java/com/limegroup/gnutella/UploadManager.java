@@ -853,7 +853,11 @@ public final class UploadManager implements BandwidthTracker {
 	
 	/**
 	 * Returns whether or not the get request for the specified line is
-	 * a malformed URN request coming from LimeWire 2.8.6.
+	 * a malformed URN request coming from LimeWire 2.8.6.<p>
+	 *
+	 * An example malformed request is:
+	 * /get/0//uri-res/N2R?urn:sha1:AZUCWY54D63___Z3WPHN7VSVTKZA3YYT HTTP/1.1
+	 * (where the /get/0// are the malformations)
 	 *
 	 * @param requestLine the <tt>String</tt> to parse to check whether it's
 	 *  following the URN request syntax as specified in HUGE v. 0.93
@@ -861,9 +865,14 @@ public final class UploadManager implements BandwidthTracker {
 	 *  <tt>false</tt> otherwise
 	 */
 	private boolean isMalformedURNGet(final String requestLine) {
-	    if ( requestLine.charAt(0) == '/' )
-	        return isURNGet(requestLine.substring(1));
-        return false;	        
+	    // we want to move to the double //
+	    int slashes = requestLine.indexOf("//");
+	    
+	    if ( slashes != -1 ) {
+	        return isURNGet(requestLine.substring(slashes+1));
+        }
+	    
+	    return false;
 	}	
 
 	/**
@@ -964,7 +973,8 @@ public final class UploadManager implements BandwidthTracker {
 	 */
 	private HttpRequestLine parseMalformedURNGet(final String requestLine) 
 		throws IOException {
-		return parseURNGet(requestLine.substring(1));
+        int slashes = requestLine.indexOf("//");
+		return parseURNGet(requestLine.substring(slashes+1));
 	}
 	
 
