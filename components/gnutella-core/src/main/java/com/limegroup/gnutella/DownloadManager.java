@@ -75,7 +75,7 @@ public class DownloadManager implements BandwidthTracker {
      * how long we think should take a host that receives an udp push
      * to connect back to us.
      */
-    private static long UDP_PUSH_FAILTIME=4500;
+    private static long UDP_PUSH_FAILTIME=5000;
 
 
     /** The global minimum time between any two requeries, in milliseconds.
@@ -888,24 +888,8 @@ public class DownloadManager implements BandwidthTracker {
         return true;
     }
 
-
-    /**
-     * Sends a push request for the given file.  Returns false iff no push could
-     * be sent, i.e., because no routing entry exists. That generally means you
-     * shouldn't send any more pushes for this file.
-     *
-     * @param file the <tt>RemoteFileDesc</tt> constructed from the query 
-     *  hit, containing data about the host we're pushing to
-     * @return <tt>true</tt> if the push was successfully sent, otherwise
-     *  <tt>false</tt>
-     */
-    public boolean sendPush(RemoteFileDesc file) {
-        LOG.trace("DM.sendPush(): entered.");
-        
-        //whether we have already sent the UDP push and are now
-        //sending the tcp one.
-        boolean failOver = file.getOOBAddress()!=null &&
-			_udpFailover.remove(file.getOOBAddress().getInetAddress());
+    private boolean sendPush(RemoteFileDesc file, boolean udp) {
+    	LOG.trace("DM.sendPush(): entered.");
         
         // Send as multicast if it's multicast.
         if( file.isReplyToMulticast() ) {
@@ -935,8 +919,7 @@ public class DownloadManager implements BandwidthTracker {
         // If it wasn't multicast, try sending to the proxies if it had them.
         // and cannot accept udp push or the udp push was already sent.
         Set proxies = file.getPushProxies();
-        if (!proxies.isEmpty() && 
-        		(!file.canPushUDP() || failOver)) {
+        if (!proxies.isEmpty() && !udp) {
             //TODO: investigate not sending a HTTP request to a proxy
             //you are directly connected to.  How much of a problem is this?
             //Probably not much of one at all.  Classic example of code
@@ -992,11 +975,11 @@ public class DownloadManager implements BandwidthTracker {
             // else just send a PushRequest as normal
         }
         
-        //if we can send the push through udp, and haven't already done so, do it.
+        //send the push through udp if we can
         
         PushRequest pr;
         
-        if (file.canPushUDP() && !failOver) 
+        if (udp) {
         	pr = 
                 new PushRequest(GUID.makeGuid(),
                                 ConnectionSettings.TTL.getValue(),
@@ -1005,9 +988,28 @@ public class DownloadManager implements BandwidthTracker {
                                 addr,
                                 port,
 								Message.N_UDP);
-        else 
-        	pr = 
-        		new PushRequest(GUID.makeGuid(),
+        	
+        	if (LOG.isInfoEnabled())
+        		LOG.info("Sending push request through udp "+pr);
+            
+            
+            // remember that we are waiting a push from this host.
+            _udpFailover.add(file.getOOBAddress().getInetAddress());
+        	
+            // schedule the failover tcp pusher
+        	RouterService.schedule(new PushFailoverRequestor(file),
+        				UDP_PUSH_FAILTIME,
+						0);
+        			
+        	//and send the push
+        	UDPService.instance().send(pr,file.getOOBAddress());
+        	
+        	return true;
+        }
+        
+        //send the push through tcp.
+        pr = 
+        	new PushRequest(GUID.makeGuid(),
                             ConnectionSettings.TTL.getValue(),
                             file.getClientGUID(),
                             file.getIndex(),
@@ -1015,27 +1017,32 @@ public class DownloadManager implements BandwidthTracker {
                             port);
 
         if(LOG.isInfoEnabled())
-            LOG.info("Sending push request through "+ 
-            		(pr.getNetwork()== Message.N_UDP ? "UDP: " : "Gnutella: ") + pr);
+            LOG.info(("Sending push request through Gnutella: ") + pr);
         
-        if (pr.getNetwork()==Message.N_UDP) {
-        	
-        	_udpFailover.add(file.getOOBAddress().getInetAddress());
-        	
-        	RouterService.schedule(new PushFailoverRequestor(file),
-        				UDP_PUSH_FAILTIME,
-						0);
-        			
-        	UDPService.instance().send(pr,file.getOOBAddress());
+        
+        
+        try {
+        	router.sendPushRequest(pr);
+        } catch (IOException e) {
+        	return false;
         }
-        else
-        	try {
-        		router.sendPushRequest(pr);
-        	} catch (IOException e) {
-        		return false;
-        	}
 
         return true;
+
+    }
+
+    /**
+     * Sends a push request for the given file.  Returns false iff no push could
+     * be sent, i.e., because no routing entry exists. That generally means you
+     * shouldn't send any more pushes for this file.
+     *
+     * @param file the <tt>RemoteFileDesc</tt> constructed from the query 
+     *  hit, containing data about the host we're pushing to
+     * @return <tt>true</tt> if the push was successfully sent, otherwise
+     *  <tt>false</tt>
+     */
+    public boolean sendPush(RemoteFileDesc file) {
+    	return sendPush(file, file.canPushUDP());
     }
 
 
@@ -1156,7 +1163,6 @@ public class DownloadManager implements BandwidthTracker {
 	
 	/**
 	 * sends a tcp push if the udp push has failed.
-	 * 
 	 */
 	private class PushFailoverRequestor implements Runnable {
 		
@@ -1165,10 +1171,11 @@ public class DownloadManager implements BandwidthTracker {
 		public PushFailoverRequestor(RemoteFileDesc file) {
 			_file = file;
 		}
+		
 		public void run() {
 			if (_udpFailover.contains(
 					_file.getOOBAddress().getInetAddress()))
-				sendPush(_file);
+				sendPush(_file,false);
 		}
 	}
 
