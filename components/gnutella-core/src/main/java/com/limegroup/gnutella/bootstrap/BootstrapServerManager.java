@@ -352,6 +352,11 @@ public class BootstrapServerManager {
                 // This can happen because of JDK bug 4218806
                 // See http://developer.java.sun.com/developer/bugParade/bugs/4218806.html
                 throw new IOException("null .getInputStream()");
+            } catch(ArrayIndexOutOfBoundsException e) {
+                // There is a bug in java's implementation that can cause this
+                // error to happen.  It has been reported mostly on macs,
+                // on OS9 (with 1.1.8) and OSX (with 1.3.1).
+                throw new IOException("aiioe");
             }
 
             //For each line of data (excludes HTTP headers)...
