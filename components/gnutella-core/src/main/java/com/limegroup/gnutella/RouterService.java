@@ -464,11 +464,6 @@ public class RouterService
         return SettingsManager.instance();
     }
 
-    /** Returns an instance of the library class */
-    public Library getLibrary() {
-        return Library.instance();
-    }
-
     /**
      * Initialize a download request
      */
