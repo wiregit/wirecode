@@ -838,7 +838,8 @@ public class ManagedDownloader implements Downloader, Serializable {
             //this) or waiting for retry (by sleeping).
         }
         if ((state==Downloader.WAITING_FOR_RETRY) ||
-            (state==Downloader.WAITING_FOR_RESULTS))
+            (state==Downloader.WAITING_FOR_RESULTS) ||
+            (state==Downloader.WAITING_FOR_USER))
             reqLock.releaseDueToNewResults();
         else
             this.notify();                      //see tryAllDownloads3
@@ -1115,7 +1116,7 @@ public class ManagedDownloader implements Downloader, Serializable {
                         catch (InterruptedException timeOut) {}
                     }
 
-                    // 2B) should i send a requery?
+                    // 2B) should we wait for the user to respawn a query?
                     if (!areThereNewResults) {
                         // pauseForRequery delegates to subclasses when
                         // necessary, it returns if it was woken up due to new
@@ -1133,7 +1134,6 @@ public class ManagedDownloader implements Downloader, Serializable {
                             // reset wait time for results
                             timeQuerySent = System.currentTimeMillis();
                         } catch (CantResumeException ignore) { }
-                        // set time for next requery...
                     }
 
 
