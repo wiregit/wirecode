@@ -929,7 +929,8 @@ public class ManagedDownloader implements Downloader, Serializable {
                                                             
         // DO NOT DOWNLOAD FROM YOURSELF.
         if( NetworkUtils.isMe(rfd.getHost(), rfd.getPort()) )
-            return true;
+System.out.println("Downloading from myself.");
+            //return true;
         
         // If this already exists in allFiles, DO NOT ADD IT AGAIN.
         // However, when we add it to buckets, we have to make sure

@@ -76,6 +76,11 @@ public class RouterService {
 	 */
     private static final Acceptor acceptor = new Acceptor();
 
+    /**
+     * <tt>HTTPAcceptor</tt> instance for accepting magnet requests, etc.
+     */
+    private static HTTPAcceptor httpAcceptor;
+
 	/**
 	 * Initialize the class that manages all TCP connections.
 	 */
@@ -217,7 +222,8 @@ public class RouterService {
         
         UpdateManager.instance();//initialize
 		QueryUnicaster.instance().start();
-	    new HTTPAcceptor().start();	
+        httpAcceptor = new HTTPAcceptor();  
+        httpAcceptor.start();   
         Pinger.instance().start();
         ConnectionWatchdog.instance().start();
 	}
@@ -319,6 +325,15 @@ public class RouterService {
 	public static Acceptor getAcceptor() {
 		return acceptor;
 	}
+
+    /** 
+     * Accessor for the <tt>Acceptor</tt> instance.
+     *
+     * @return the <tt>Acceptor</tt> in use
+     */
+    public static HTTPAcceptor getHTTPAcceptor() {
+        return httpAcceptor;
+    }
 
     /** 
      * Accessor for the <tt>HostCatcher</tt> instance.
