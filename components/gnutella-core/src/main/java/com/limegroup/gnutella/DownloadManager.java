@@ -67,9 +67,15 @@ public class DownloadManager implements BandwidthTracker {
     
     /**
      * rfd that we have sent an udp push and are waiting a connection from.
+     * LOCKING: obtain _failoverLock
      */
-    private Map /* of InetAddress -> Set of RFDs*/ _udpFailover = 
-    	Collections.synchronizedMap(new HashMap());
+    private Map /* of InetAddress -> Set of RFDs*/ 
+		_udpFailover = new HashMap();
+    
+    /**
+     * LOCKS _udpFailover AND the sets it contains.
+     */
+    private Object _failoverLock = new Object();
     
     /**
      * how long we think should take a host that receives an udp push
@@ -744,13 +750,15 @@ public class DownloadManager implements BandwidthTracker {
             int index=line.index;
             byte[] clientGUID=line.clientGUID;
             
-            // if the push was sent through udp, make sure we cancel
-            // the failover push.
-            Set files = (Set)_udpFailover.get(socket.getInetAddress());
+            synchronized(_failoverLock) {
+            	// if the push was sent through udp, make sure we cancel
+            	// the failover push.
+            	Set files = (Set)_udpFailover.get(socket.getInetAddress());
             
-            if (files!=null) {
-            	files.remove(file);
-            	_udpFailover.put(socket.getInetAddress(),files);
+            	if (files!=null) {
+            		files.remove(file);
+            		_udpFailover.put(socket.getInetAddress(),files);
+            	}
             }
 
             //2. Attempt to give to an existing downloader.
@@ -1004,14 +1012,16 @@ public class DownloadManager implements BandwidthTracker {
         	//for the specific file.
         	InetAddress key = file.getOOBAddress().getInetAddress();
         	
-        	Set files = (Set)_udpFailover.get(key);
+        	synchronized(_failoverLock) {
+        		Set files = (Set)_udpFailover.get(key);
         	
-        	if (files==null)
-        		files = new HashSet();
+        		if (files==null)
+        			files = new HashSet();
         	
-        	files.add(file.getFileName());
+        		files.add(file.getFileName());
         	
-            _udpFailover.put(key,files);
+        		_udpFailover.put(key,files);
+        	}
         	
             // schedule the failover tcp pusher
         	RouterService.schedule(new PushFailoverRequestor(file),
@@ -1194,10 +1204,18 @@ public class DownloadManager implements BandwidthTracker {
 		}
 		
 		public void run() {
-			InetAddress key = _file.getOOBAddress().getInetAddress();
-			Set files = (Set) _udpFailover.get(key);
+			boolean proceed = false;
 			
-			if (files!=null && files.contains(_file.getFileName()))
+			InetAddress key = _file.getOOBAddress().getInetAddress();
+			
+			synchronized(_failoverLock) {
+				Set files = (Set) _udpFailover.get(key);
+			
+				if (files!=null && files.contains(_file.getFileName()))
+					proceed = true;
+			}
+			
+			if (proceed)
 				sendPush(_file,false);
 		}
 	}
