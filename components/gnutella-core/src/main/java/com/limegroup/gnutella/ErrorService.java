@@ -58,5 +58,12 @@ public final class ErrorService {
 			t.printStackTrace();
 			throw new RuntimeException(t.getMessage());
 		}
+		
+		//inherit doc comment
+		public void error(Throwable t, String msg) {
+		    t.printStackTrace();
+		    System.out.println(msg);
+		    throw new RuntimeException(t.getMessage());
+		}
 	}
 }

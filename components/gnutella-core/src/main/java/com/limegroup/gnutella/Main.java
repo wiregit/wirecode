@@ -155,6 +155,11 @@ public class Main implements ActivityCallback, ErrorCallback {
 	public void error(int errorCode) {
 		error(errorCode, null);
     }
+    
+    public void error(Throwable problem, String msg) {
+        problem.printStackTrace();
+        System.out.println(msg);
+    }
 
 	/**
 	 * Implements ActivityCallback.
