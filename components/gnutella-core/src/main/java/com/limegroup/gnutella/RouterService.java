@@ -448,6 +448,13 @@ public class RouterService {
     }
     
     /**
+     * Returns the number of active downloads.
+     */
+    public static int getNumActiveDownloads() {
+        return downloader.getNumActiveDownloads();
+    }
+    
+    /**
      * Returns the number of downloads waiting to be started.
      */
     public static int getNumWaitingDownloads() {
