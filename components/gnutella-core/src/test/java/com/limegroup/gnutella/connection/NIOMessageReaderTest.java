@@ -48,14 +48,40 @@ public class NIOMessageReaderTest extends BaseTestCase {
      * @throws Exception if any unexpected exception is thrown, indicating an
      *  error
      */
-    public void testConstructor() throws Exception {
+    public void testConstructor() throws Exception {    
+        
+
         PingRequest ping = new PingRequest((byte)3);
-        String header = HeaderNames.USER_AGENT + ": "+
-            CommonUtils.getHttpServer() + "\r\n";
-        ByteBuffer buffer = createTestBuffer(ping, header);        
+        String header = HeaderNames.X_DYNAMIC_QUERY + ": 0.1\r\n";
+
+        // create a handshakers with leftover buffer data
+        ByteBuffer buffer = createTestBuffer(ping, header); 
         Handshaker testHandshaker = new TestHandshaker(buffer);
-    }
-    
+        
+        
+        // Read the header data from the buffer
+        Connection conn = new Connection(new TestSocket());
+        NIOHeaderReader reader = NIOHeaderReader.createReader(conn);
+        Method read = 
+            PrivilegedAccessor.getMethod(reader, "read", 
+                new Class[]{ByteBuffer.class});    
+        
+        String headerRead = (String)read.invoke(reader, new Object[] {buffer});
+        assertEquals("unexpected header read", header.trim(), headerRead);
+
+
+        assertTrue("buffer should have remaining data", buffer.hasRemaining());
+        
+        // Simply constructing the reader will cause it to process any 
+        // leftover messages from the handshake.  All we can do here is make
+        // sure the buffer is emptied -- the unit test below actually tests
+        // the creation of messages.
+        NIOMessageReader.createReader(conn, testHandshaker);
+            
+        assertFalse("buffer should not have remaining data", 
+            buffer.hasRemaining());
+        
+    }   
 
     
     /**
