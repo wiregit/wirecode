@@ -555,6 +555,8 @@ public final class CommonUtils {
         }
         // make sure Windows files are moved
         moveWindowsFiles(settingsDir);
+        // make sure old metadata files are moved
+        moveXMLFiles(settingsDir);
         return settingsDir;
     }
 
@@ -562,6 +564,11 @@ public final class CommonUtils {
      * Boolean for whether or not the windows files have been copied.
      */
     private static boolean _windowsFilesMoved = false;
+    
+    /**
+     * Boolean for whether or not XML files have been copied.
+     */
+    private static boolean _xmlFilesMoved = false;
 
     /**
      * The array of files that should be stored in the user's home 
@@ -599,6 +606,37 @@ public final class CommonUtils {
         }
         _windowsFilesMoved = true;
     }
+
+    /**
+     * Old metadata definitions must be moved from ./lib/xml/data/*.*
+     * This is done like the windows files copying, but for all files
+     * in the data directory.
+     */
+    private synchronized static void moveXMLFiles(File settingsDir) {
+        if(_xmlFilesMoved) return;
+        // We must extend the currentDir & settingsDir to look 
+        // in the right places (lib/xml/data & xml/data).
+        File currentDir = new File( 
+            CommonUtils.getCurrentDirectory().getPath() + "/lib/xml/data"
+        );
+        settingsDir = new File(settingsDir.getPath() + "/xml/data");
+        settingsDir.mkdirs();
+        String[] filesToMove = currentDir.list();
+        if ( filesToMove != null ) {
+            for(int i=0; i<filesToMove.length; i++) {
+                File curUserFile = new File(settingsDir, filesToMove[i]);
+                File curDirFile  = new File(currentDir,  filesToMove[i]);
+                
+                // if the file already exists in the user's home directory,
+                // don't copy it
+                if(curUserFile.isFile()) {
+                    continue;
+                }
+                copy(curDirFile, curUserFile);
+            }
+        }
+        _xmlFilesMoved = true;
+    }    
 	
 	/**
 	 * Returns whether or not the QuickTime libraries are available

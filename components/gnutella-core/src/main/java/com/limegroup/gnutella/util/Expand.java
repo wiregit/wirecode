@@ -93,7 +93,7 @@ public final class Expand {
             
             if (ze.isDirectory()) {
                 f.mkdirs(); 
-            } else {
+            } else if ( ze.getTime() > f.lastModified() ) {
                 byte[] buffer = new byte[1024];
                 int length = 0;
                 FileOutputStream fos = new FileOutputStream(f);

@@ -362,7 +362,7 @@ public class LimeXMLProperties
         String limeHome = System.getProperty("LIME_HOME"); 
         if(limeHome == null || limeHome.trim().equals(""))
         {
-            File libDir = new File(CommonUtils.getCurrentDirectory(), "lib");
+            File libDir = CommonUtils.getUserSettingsDir();
             String stringPath = libDir.getAbsolutePath();
             if(!stringPath.endsWith(File.separator)) {
                 stringPath = stringPath + File.separator;
