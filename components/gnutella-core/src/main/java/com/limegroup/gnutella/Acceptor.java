@@ -52,7 +52,6 @@ public class Acceptor extends Thread {
     private ConnectionManager _connectionManager;
     private DownloadManager _downloadManager;
     private UploadManager _uploadManager;
-    private MessageRouter _router;
     private ActivityCallback _callback;
 
 	private volatile boolean _acceptedIncoming = false;
@@ -95,11 +94,9 @@ public class Acceptor extends Thread {
      * the port monitoring thread
      */
     public void initialize(ConnectionManager connectionManager,
-                           MessageRouter router,
                            DownloadManager downloadManager,
                            UploadManager uploadManager) {
         _connectionManager = connectionManager;
-        _router = router;
         _downloadManager = downloadManager;
         _uploadManager = uploadManager;
 		
