@@ -60,18 +60,20 @@ public class HTTPUploader implements Uploader {
 		_index = index;
 		_amountRead = 0;
 		FileDesc desc;
+		boolean failed = false;
 		try {
 			desc = FileManager.instance().get(_index);
 			_fileSize = desc._size;
+			_ostream = _socket.getOutputStream();
 		} catch (IndexOutOfBoundsException e) {
-			setState(COULDNT_CONNECT);
-		}
-		setState(CONNECTING);
-		try {
-		    _ostream = _socket.getOutputStream();
+			failed = true;
 		} catch (IOException e) {
-		    setState(COULDNT_CONNECT);
+			failed = true;
 		}
+		if (failed)
+			setState(COULDNT_CONNECT);
+		else
+			setState(CONNECTING);
 	}
 		
 	// Push requested Upload
@@ -89,10 +91,10 @@ public class HTTPUploader implements Uploader {
 		try {
 			desc = FileManager.instance().get(_index);
 			_fileSize = desc._size;
+			setState(CONNECTING);
 		} catch (IndexOutOfBoundsException e) {
 			setState(PUSH_FAILED);
 		}
-		setState(CONNECTING);
 	}
 
 	// This method must be called in the case of a push.
