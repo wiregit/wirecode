@@ -14,5 +14,11 @@ public final class UploadSettings extends LimeProps {
 	 */
 	public static final IntSetting UPLOAD_SPEED =
 		FACTORY.createIntSetting("UPLOAD_SPEED", 100);
+
+    /**
+     * Setting for the size of the upload queue.
+     */
+    public static final IntSetting UPLOAD_QUEUE_SIZE =
+        FACTORY.createIntSetting("UPLOAD_QUEUE_SIZE", 10);
     
 }
