@@ -7,6 +7,9 @@ import java.util.Enumeration;
  * A collection of utility methods for OSX.
  * These methods should only be called if run from OSX,
  * otherwise ClassNotFoundErrors may occur.
+ *
+ * To determine if the Cocoa Foundation classes are present,
+ * use the method CommonUtils.isCocoaFoundationAvailable().
  */
 public class MacOSXUtils {
     private MacOSXUtils() {}
@@ -36,7 +39,7 @@ public class MacOSXUtils {
      * The name of the app that launches.
      */
     private static final String APP_NAME = "LimeWire At Login.app";
-    
+
     /**
      * Creates a mutable clone of the specified object.
      */

@@ -483,6 +483,23 @@ public final class CommonUtils {
 		if(!isMacOSX()) return false;
 		return getOSVersion().startsWith("10.2");
 	}
+    
+    /**
+     * Returns whether or not the Cocoa Foundation classes are available.
+     */
+    public static boolean isCocoaFoundationAvailable() {
+        try {
+            Class.forName("com.apple.cocoa.foundation.NSUserDefaults");
+            Class.forName("com.apple.cocoa.foundation.NSMutableDictionary");
+            Class.forName("com.apple.cocoa.foundation.NSMutableArray");
+            Class.forName("com.apple.cocoa.foundation.NSObject");
+            return true;
+        } catch(ClassNotFoundException error) {
+            return false;
+        } catch(NoClassDefFoundError error) {
+            return false;
+        }
+    }   
 
 	/** 
 	 * Returns whether or not the os is any Mac os.
