@@ -333,6 +333,26 @@ public class ConnectionManager {
     }
 
     /**
+     * Tells if this node thinks that more supernodes are needed on the 
+     * network. This method should be invoked on a supernode only, as
+     * only supernode may have required information to make informed
+     * decision.
+     * @return true, if more supernodes needed, false otherwise
+     */
+    public boolean superNodesNeeded(){
+        //if more than 70% slots are full, return true 
+        if(SettingsManager.instance().isSupernode() &&
+            _incomingClientConnections > 
+            (SettingsManager.instance()
+            .getMaxShieldedClientConnections() * 0.7)){
+            return true;
+        }else{
+            //else return false
+            return false;
+        }
+    }
+    
+    /**
      * @return a clone of this' initialized connections.
      * The iterator yields items in any order.  It <i>is</i> permissible
      * to modify this while iterating through the elements of this, but
@@ -470,6 +490,83 @@ public class ConnectionManager {
 		_ultraFastCheck = null;
 	}
 
+    /**
+     * Disconnects from the network.  Closes all connections and sets
+     * the number of connections to zero.
+     */
+    public void disconnect() {
+		// Deactivate checking for Ultra Fast Shutdown
+		deactivateUltraFastConnectShutdown(); 
+
+        SettingsManager settings=SettingsManager.instance();
+        int oldKeepAlive=settings.getKeepAlive();
+
+        //1. Prevent any new threads from starting.  Note that this does not
+        //   affect the permanent settings.
+        setKeepAlive(0);
+        //setMaxIncomingConnections(0);
+        //2. Remove all connections.
+        for (Iterator iter=getConnections().iterator();
+             iter.hasNext(); ) {
+            ManagedConnection c=(ManagedConnection)iter.next();
+            remove(c);
+        }
+    }
+    
+    /**
+     * Connects to the network.  Ensures the number of messaging connections
+     * (keep-alive) is non-zero and recontacts the pong server as needed.  
+     */
+    public void connect() {
+        //HACK. People used to complain to that the connect button wasn't
+        //working when the host catcher was empty and USE_QUICK_CONNECT=false.
+        //This is not a bug; LimeWire isn't supposed to connect to the pong
+        //server in this case.  But this IS admittedly confusing.  So we force a
+        //connection to the pong server in this case by disconnecting and
+        //temporarily setting USE_QUICK_CONNECT to true.  But we have to
+        //sleep(..) a little bit before setting USE_QUICK_CONNECT back to false
+        //to give the connection fetchers time to do their thing.  Ugh.  A
+        //Thread.yield() may work here too, but that's less dependable.  And I
+        //do not want to bother with wait/notify's just for this obscure case.
+        SettingsManager settings=SettingsManager.instance();
+        boolean useHack=
+            (!settings.getUseQuickConnect())
+                && _catcher.getNumHosts()==0;
+        if (useHack) {
+            settings.setUseQuickConnect(true);
+            disconnect();
+        }
+
+        //Force reconnect to pong server.
+        _catcher.expire();
+
+        //Ensure outgoing connections is positive.
+        int outgoing=settings.getKeepAlive();
+        if (outgoing<1) {
+            outgoing = settings.DEFAULT_KEEP_ALIVE;
+            settings.setKeepAlive(outgoing);
+        }
+        //Actually notify the backend.
+
+		//  Adjust up keepAlive for initial ultrafast connect
+		if ( outgoing < 10 ) {
+			outgoing = 10;
+			activateUltraFastConnectShutdown();
+		}
+        setKeepAlive(outgoing);
+
+        //int incoming=settings.getKeepAlive();
+        //setMaxIncomingConnections(incoming);
+
+        //See note above.
+        if (useHack) {
+            try {
+                Thread.sleep(100);
+            } catch (InterruptedException e) { }
+            SettingsManager.instance().setUseQuickConnect(false);
+        }
+    }
+    
     /** 
      * Sends the initial ping request to a newly initialized connection.  The ttl
      * of the PingRequest will be 1 if we don't need any connections.  Otherwise,
