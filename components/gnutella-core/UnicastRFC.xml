@@ -7,7 +7,7 @@
 <rfc docname="gnutella-unicast-search-01">
   <front>
     <title abbrev="GUESS">
-	  Gnutella Ultrapeer Extension for Scalable Searches (GUESS) v0.2
+	  Gnutella UDP Extension for Scalable Searches (GUESS) v0.2
 	</title>
     <author initials="S.D" surname="Daswani" fullname="Susheel Daswani">
 	  <organization>LimeWire LLC</organization>
@@ -240,7 +240,7 @@
 		be reached, making sending the query to another Ultrapeer 
 		unnecessary.  The optimal 
 		interval between searches should be determined by 
-		experimentation, but implementors MUST send as few queries 
+		experimentation, but developers MUST send as few queries 
 		as possible without degrading user experience and without 
 		prohibitively increasing the load on participating 
 		Ultrapeers. Implementations may also vary the interval 
@@ -262,8 +262,8 @@
 		<vspace/>
 		<vspace/>
 		With regard to the desired number of results, 
-		implementors have some flexibility, particularly in 
-		their technique for determing what they consider "enough"
+		developers have some flexibility, particularly in 
+		their technique for determining what they consider "enough"
 		results to stop the search.  A simple  
 		algorithm would be for the client to continue 
 		querying until it has received 100 results or queried 1,000 
@@ -279,12 +279,14 @@
 		The details of these algorithms should also be determined 
 		through experimentation by Gnutella developers, again keeping
 		in mind that the overall goal is to reduce query and query 
-		hit traffic for everyone while maintaining current levels of 
-		searchability for common files and improving searchability 
-		for rare files.  Clients should also keep in mind that an 
-		overly aggressive implementation will ultimately damage 
-		their own clients through increasing everyone's overall 
-		network load.
+		hit traffic for everyone while maintaining current search
+		performance for common files and improving search performance
+		for rare files.  Here, "search performance" is measured as
+		providing results for the desired file, not necessarily
+		corresponding with the raw number of results received.  Clients 
+		should also keep in mind that an overly aggressive 
+		implementation will ultimately damage their own clients 
+		through increasing everyone's overall network load.
 		
 		<vspace/>
 		<vspace/>
@@ -311,16 +313,17 @@
 			  than once.  In particular, a node MUST NOT send a 
 			  second query to an Ultrapeer if it does not receive responses 
 			  to the first query (it MUST NOT consider that the datagram 
-			  was lost and requery as a result).  If the datagram was,
-			  in fact, lost, this indicates high loss around that node,
-			  and resending the query will only make the situation worse.
+			  was lost and re-query as a result).  If the datagram was,
+			  in fact, lost, this likely indicates high overall packet 
+			  loss rates around that node, and resending the query will 
+			  only make the situation worse.
 			</t>
 		  </list>
 
-	    These numbers should be considered the absolute maximum
-		values, and they are not the settings developers should use.
+	    These numbers should be considered the absolute limits, and 
+		they are not the settings developers should use.
 		Again, the optimal limits should be determined by 
-		experimentation, but the above rules always apply.  Implementors
+		experimentation, but the above rules always apply.  Developers
 		should keep in mind that Gnutella is a network that relies on
 		the fact that other clients are not overly selfish or
 		abusive -- Gnutella relies on trust to a large degree.  
@@ -333,10 +336,8 @@
 	  <section anchor="server" title="Server">
 	    <t>
 	    The changes on the server side are less significant.  Again,
-		no changes are required for leaves.  In fact, leaves SHOULD NOT 
-		open UDP ports for incoming traffic, as they never receive UDP
-		messages directly.  Ultrapeers MUST, however, open a port
-		for incoming UDP traffic, and they MUST use the same 
+		no changes are REQUIRED for leaves.  Ultrapeers MUST, however, 
+		open a port for incoming UDP traffic, and they MUST use the same 
 		port that they are using for incoming Gnutella messages 
 		over TCP.  The details of this are discussed in 
 		the <xref target="udp">section</xref> on UDP.
@@ -347,10 +348,11 @@
 		an important point in terms 
 		of <xref target="security">security</xref>.  Otherwise,
 		servers should respond to messages just as if they 
-		recieved them over TCP.  Servers SHOULD accept all of the
+		received them over TCP.  Servers MUST accept all of the
 		traditional Gnutella messages over their UDP port.  These
 		messages are defined in 
-		the <xref target="refs.clip2">Gnutella Protocol Specification v0.4</xref>.
+		the <xref target="refs.clip2">Gnutella Protocol Specification v0.4</xref>.  This 
+		will be particularly useful for push messages.
 		
 		<vspace/>
 		<vspace/>
@@ -531,7 +533,7 @@
 			correctly measuring bandwidth.  This means that any
 			fragmentation that may occur along modem links will
 			likely result in little to no packet loss, so we
-			need not consider this barrier when determing
+			need not consider this barrier when determining
 			datagram sizes.  In general, clients SHOULD limit the
 			size of their datagrams whenever appropriate.  A limit
 			of 512 is very conservative, and limiting datagrams 
@@ -539,9 +541,15 @@
 			the vast majority of 
 			routers.<xref target="RFC1191"/>  This is because 
 			1,500 bytes is the MTU for Ethernet links, which most
-			TCP/IP stacks take into account.  Assuming 20 bytes 
-			for the IP header and 8 bytes for the UDP header, this
-			leaves 1,472 bytes for Gnutella message data.
+			TCP/IP stacks take into account.  Clients should stay
+			significantly under this limit if possible.  IP headers
+			are at least 20 bytes, and UDP headers are 8 bytes.  
+			In addition, however, there are many other protocols, 
+			such as PPP, that can add bytes of their own.  As a 
+			result, developers should stay significantly under 
+			the 1,500 byte limit for Gnutella message data.  A limit 
+			of 1K should suffice in all cases, with a hard upper limit 
+			of 1,400 bytes.
 			
 			<vspace/>
 			<vspace/>	
@@ -577,6 +585,12 @@
 			proposal and would require significant changes.
 		  </t>
 		</section>
+	  </section>
+	  
+	  <section anchor="backwards" title="Backwards Compatibility">
+	    <t>
+		  During the initial rollout, GUESS can peacefully co-exist
+		</t>
 	  </section>
 
 	    <section anchor="security" title="Security Considerations">
@@ -665,9 +679,10 @@
 		  GUESS has the added benefit that it makes the most obvious 
 		  DDOS attack on Gnutella less feasible.  In such an attack, a
 		  single attacker can connect to a large number of hosts simultaneously
-		  and send out repeated queries for popular content with a high TTL.  
-		  Given current flow control algorithms, relatively few attackers could
-		  likely have a rapid and dramatic negative impact on overall network
+		  and send out repeated queries for popular content with a high TTL
+		  to sets of those Ultrapeers, disconnecting to that set after sending 
+		  the query.  Given current flow control algorithms, relatively few attackers 
+		  could likely have a rapid and dramatic negative impact on overall network
 		  performance.  While attackers can still connect to many Ultrapeers
 		  in this scheme, the effective elimination of TTL in GUESS means that
 		  an attacker would have to use far more bandwidth to achieve the
@@ -914,9 +929,10 @@
 	    The authors would like to thank Christopher Rohrs and the rest of the 
 		LimeWire team.  In addition, we would like to thank Gordon Mohr of Bitzi,
 		Inc., Jakob Eriksson, Ph.D. student at the Computer Science department at
-		the University of California, Riverside, all participants in the 
-		Gnutella Developer Forum (GDF), and all members of the LimeWire open 
-		source initiative.
+		the University of California, Riverside, Jason Thomas of Swapper, Inc.,
+		Raphael Manfredi of Gtk-Gnutella, Phillipe Verdy, Sam Berlin, all participants 
+		in the Gnutella Developer Forum (GDF), and all members of the LimeWire 
+		open source initiative.
 	  </t>
 	</section>
   </back>

@@ -1,7 +1,7 @@
 Content-Type: text/html
 
-<html><head><title>Gnutella Developer Forum: Gnutella Ultrapeer Extension for Scalable Searches (GUESS) v0.2</title>
-<meta http-equiv="Expires" content="Tue, 10 Sep 2002 15:02:12 +0000">
+<html><head><title>Gnutella Developer Forum: Gnutella UDP Extension for Scalable Searches (GUESS) v0.2</title>
+<meta http-equiv="Expires" content="Tue, 10 Sep 2002 22:44:50 +0000">
 <STYLE type='text/css'>
     .title { color: #990000; font-size: 22px; line-height: 22px; font-weight: bold; text-align: right;
              font-family: helvetica, arial, sans-serif }
@@ -47,7 +47,7 @@ Content-Type: text/html
 <tr valign="top"><td width="33%" bgcolor="#666666" class="header">&nbsp;</td><td width="33%" bgcolor="#666666" class="header">LimeWire LLC</td></tr>
 <tr valign="top"><td width="33%" bgcolor="#666666" class="header">&nbsp;</td><td width="33%" bgcolor="#666666" class="header">August 2002</td></tr>
 </table></td></tr></table>
-<div align="right"><font face="monaco, MS Sans Serif" color="#990000" size="+3"><b><br><span class="title">Gnutella Ultrapeer Extension for Scalable Searches (GUESS) v0.2</span></b></font></div>
+<div align="right"><font face="monaco, MS Sans Serif" color="#990000" size="+3"><b><br><span class="title">Gnutella UDP Extension for Scalable Searches (GUESS) v0.2</span></b></font></div>
 <font face="verdana, helvetica, arial, sans-serif" size="2">
 
 <h3>Abstract</h3>
@@ -97,23 +97,25 @@ Open a UDP Port<br></b>
 Fragmentation<br></b>
 <b><a href="#congestion">4.3</a>&nbsp;
 Congestion<br></b>
-<b><a href="#security">5.</a>&nbsp;
+<b><a href="#backwards">5.</a>&nbsp;
+Backwards Compatibility<br></b>
+<b><a href="#security">6.</a>&nbsp;
 Security Considerations<br></b>
-<b><a href="#anchor3">5.1</a>&nbsp;
+<b><a href="#anchor3">6.1</a>&nbsp;
 Distributed Denial of Service (DDOS) Attack<br></b>
-<b><a href="#ggep">6.</a>&nbsp;
+<b><a href="#ggep">7.</a>&nbsp;
 GGEP Extensions<br></b>
-<b><a href="#ggep_pongs">6.1</a>&nbsp;
+<b><a href="#ggep_pongs">7.1</a>&nbsp;
 Advertise GUESS Support in Pongs<br></b>
-<b><a href="#features">7.</a>&nbsp;
+<b><a href="#features">8.</a>&nbsp;
 Additional Features<br></b>
-<b><a href="#cycles">7.1</a>&nbsp;
+<b><a href="#cycles">8.1</a>&nbsp;
 Cycles No Longer a Concern<br></b>
-<b><a href="#push">7.2</a>&nbsp;
+<b><a href="#push">8.2</a>&nbsp;
 Higher Success Rate for Push Downloads<br></b>
-<b><a href="#stop">7.3</a>&nbsp;
+<b><a href="#stop">8.3</a>&nbsp;
 Stopping Queries Has Meaning<br></b>
-<b><a href="#improved_security">7.4</a>&nbsp;
+<b><a href="#improved_security">8.4</a>&nbsp;
 Moderately Improved Security<br></b>
 <b><a href="#rfc.references1">&#167;</a>&nbsp;
 References<br></b>
@@ -334,7 +336,7 @@ Acknowledgements<br></b>
 		be reached, making sending the query to another Ultrapeer 
 		unnecessary.  The optimal 
 		interval between searches should be determined by 
-		experimentation, but implementors MUST send as few queries 
+		experimentation, but developers MUST send as few queries 
 		as possible without degrading user experience and without 
 		prohibitively increasing the load on participating 
 		Ultrapeers. Implementations may also vary the interval 
@@ -357,8 +359,8 @@ Acknowledgements<br></b>
 <br>
 
 		With regard to the desired number of results, 
-		implementors have some flexibility, particularly in 
-		their technique for determing what they consider "enough"
+		developers have some flexibility, particularly in 
+		their technique for determining what they consider "enough"
 		results to stop the search.  A simple  
 		algorithm would be for the client to continue 
 		querying until it has received 100 results or queried 1,000 
@@ -374,12 +376,14 @@ Acknowledgements<br></b>
 		The details of these algorithms should also be determined 
 		through experimentation by Gnutella developers, again keeping
 		in mind that the overall goal is to reduce query and query 
-		hit traffic for everyone while maintaining current levels of 
-		searchability for common files and improving searchability 
-		for rare files.  Clients should also keep in mind that an 
-		overly aggressive implementation will ultimately damage 
-		their own clients through increasing everyone's overall 
-		network load.
+		hit traffic for everyone while maintaining current search
+		performance for common files and improving search performance
+		for rare files.  Here, "search performance" is measured as
+		providing results for the desired file, not necessarily
+		corresponding with the raw number of results received.  Clients 
+		should also keep in mind that an overly aggressive 
+		implementation will ultimately damage their own clients 
+		through increasing everyone's overall network load.
 		
 		<br>
 <br>
@@ -411,17 +415,18 @@ Acknowledgements<br></b>
 			  than once.  In particular, a node MUST NOT send a 
 			  second query to an Ultrapeer if it does not receive responses 
 			  to the first query (it MUST NOT consider that the datagram 
-			  was lost and requery as a result).  If the datagram was,
-			  in fact, lost, this indicates high loss around that node,
-			  and resending the query will only make the situation worse.
+			  was lost and re-query as a result).  If the datagram was,
+			  in fact, lost, this likely indicates high overall packet 
+			  loss rates around that node, and resending the query will 
+			  only make the situation worse.
 			
 </li>
 </ol><p>
 
-	    These numbers should be considered the absolute maximum
-		values, and they are not the settings developers should use.
+	    These numbers should be considered the absolute limits, and 
+		they are not the settings developers should use.
 		Again, the optimal limits should be determined by 
-		experimentation, but the above rules always apply.  Implementors
+		experimentation, but the above rules always apply.  Developers
 		should keep in mind that Gnutella is a network that relies on
 		the fact that other clients are not overly selfish or
 		abusive -- Gnutella relies on trust to a large degree.  
@@ -435,10 +440,8 @@ Acknowledgements<br></b>
 
 <p>
 	    The changes on the server side are less significant.  Again,
-		no changes are required for leaves.  In fact, leaves SHOULD NOT 
-		open UDP ports for incoming traffic, as they never receive UDP
-		messages directly.  Ultrapeers MUST, however, open a port
-		for incoming UDP traffic, and they MUST use the same 
+		no changes are REQUIRED for leaves.  Ultrapeers MUST, however, 
+		open a port for incoming UDP traffic, and they MUST use the same 
 		port that they are using for incoming Gnutella messages 
 		over TCP.  The details of this are discussed in 
 		the <a href="#udp">section</a> on UDP.
@@ -449,10 +452,11 @@ Acknowledgements<br></b>
 		an important point in terms 
 		of <a href="#security">security</a>.  Otherwise,
 		servers should respond to messages just as if they 
-		recieved them over TCP.  Servers SHOULD accept all of the
+		received them over TCP.  Servers MUST accept all of the
 		traditional Gnutella messages over their UDP port.  These
 		messages are defined in 
-		the <a href="#refs.clip2" title="Clip2, The Gnutella Protocol Specification v0.4, Document Revision 1.2, .">Gnutella Protocol Specification v0.4</a>[13].
+		the <a href="#refs.clip2" title="Clip2, The Gnutella Protocol Specification v0.4, Document Revision 1.2, .">Gnutella Protocol Specification v0.4</a>[13].  This 
+		will be particularly useful for push messages.
 		
 		<br>
 <br>
@@ -646,7 +650,7 @@ Acknowledgements<br></b>
 			correctly measuring bandwidth.  This means that any
 			fragmentation that may occur along modem links will
 			likely result in little to no packet loss, so we
-			need not consider this barrier when determing
+			need not consider this barrier when determining
 			datagram sizes.  In general, clients SHOULD limit the
 			size of their datagrams whenever appropriate.  A limit
 			of 512 is very conservative, and limiting datagrams 
@@ -654,9 +658,15 @@ Acknowledgements<br></b>
 			the vast majority of 
 			routers.<a href="#RFC1191" title="Mogul, J. and S. Deering, Path MTU discovery, November 1990.">[8]</a>  This is because 
 			1,500 bytes is the MTU for Ethernet links, which most
-			TCP/IP stacks take into account.  Assuming 20 bytes 
-			for the IP header and 8 bytes for the UDP header, this
-			leaves 1,472 bytes for Gnutella message data.
+			TCP/IP stacks take into account.  Clients should stay
+			significantly under this limit if possible.  IP headers
+			are at least 20 bytes, and UDP headers are 8 bytes.  
+			In addition, however, there are many other protocols, 
+			such as PPP, that can add bytes of their own.  As a 
+			result, developers should stay significantly under 
+			the 1,500 byte limit for Gnutella message data.  A limit 
+			of 1K should suffice in all cases, with a hard upper limit 
+			of 1,400 bytes.
 			
 			<br>
 <br>
@@ -694,11 +704,19 @@ Acknowledgements<br></b>
 			proposal and would require significant changes.
 		  
 </p>
+<a name="backwards"><br><hr size="1" shade="0"></a>
+<table border="0" cellpadding="0" cellspacing="2" width="30" height="15" align="right"><tr><td bgcolor="#990000" align="center" width="30" height="15"><a href="#toc" CLASS="link2"><font face="monaco, MS Sans Serif" color="#ffffff" size="1"><b>&nbsp;TOC&nbsp;</b></font></a><br></td></tr></table>
+<a name="rfc.section.5"></a><h3>5.&nbsp;Backwards Compatibility</h3>
+
+<p>
+		  During the initial rollout, GUESS can peacefully co-exist
+		
+</p>
 <a name="security"><br><hr size="1" shade="0"></a>
 <table border="0" cellpadding="0" cellspacing="2" width="30" height="15" align="right"><tr><td bgcolor="#990000" align="center" width="30" height="15"><a href="#toc" CLASS="link2"><font face="monaco, MS Sans Serif" color="#ffffff" size="1"><b>&nbsp;TOC&nbsp;</b></font></a><br></td></tr></table>
-<a name="rfc.section.5"></a><h3>5.&nbsp;Security Considerations</h3>
+<a name="rfc.section.6"></a><h3>6.&nbsp;Security Considerations</h3>
 
-<a name="rfc.section.5.1"></a><h4><a name="anchor3">5.1</a>&nbsp;Distributed Denial of Service (DDOS) Attack</h4>
+<a name="rfc.section.6.1"></a><h4><a name="anchor3">6.1</a>&nbsp;Distributed Denial of Service (DDOS) Attack</h4>
 
 <p>
 			In the past, a principal objection to using UDP has been
@@ -713,9 +731,9 @@ Acknowledgements<br></b>
 </p>
 <a name="ggep"><br><hr size="1" shade="0"></a>
 <table border="0" cellpadding="0" cellspacing="2" width="30" height="15" align="right"><tr><td bgcolor="#990000" align="center" width="30" height="15"><a href="#toc" CLASS="link2"><font face="monaco, MS Sans Serif" color="#ffffff" size="1"><b>&nbsp;TOC&nbsp;</b></font></a><br></td></tr></table>
-<a name="rfc.section.6"></a><h3>6.&nbsp;GGEP Extensions</h3>
+<a name="rfc.section.7"></a><h3>7.&nbsp;GGEP Extensions</h3>
 
-<a name="rfc.section.6.1"></a><h4><a name="ggep_pongs">6.1</a>&nbsp;Advertise GUESS Support in Pongs</h4>
+<a name="rfc.section.7.1"></a><h4><a name="ggep_pongs">7.1</a>&nbsp;Advertise GUESS Support in Pongs</h4>
 
 <p>
 		    Ultrapeers that support GUESS MUST advertise that fact 
@@ -739,9 +757,9 @@ Acknowledgements<br></b>
 </p>
 <a name="features"><br><hr size="1" shade="0"></a>
 <table border="0" cellpadding="0" cellspacing="2" width="30" height="15" align="right"><tr><td bgcolor="#990000" align="center" width="30" height="15"><a href="#toc" CLASS="link2"><font face="monaco, MS Sans Serif" color="#ffffff" size="1"><b>&nbsp;TOC&nbsp;</b></font></a><br></td></tr></table>
-<a name="rfc.section.7"></a><h3>7.&nbsp;Additional Features</h3>
+<a name="rfc.section.8"></a><h3>8.&nbsp;Additional Features</h3>
 
-<a name="rfc.section.7.1"></a><h4><a name="cycles">7.1</a>&nbsp;Cycles No Longer a Concern</h4>
+<a name="rfc.section.8.1"></a><h4><a name="cycles">8.1</a>&nbsp;Cycles No Longer a Concern</h4>
 
 <p>
 	      Adoption of this proposal has several additional benefits.  For 
@@ -758,7 +776,7 @@ Acknowledgements<br></b>
 		  their Ultrapeers are sent the same query.
 	    
 </p>
-<a name="rfc.section.7.2"></a><h4><a name="push">7.2</a>&nbsp;Higher Success Rate for Push Downloads</h4>
+<a name="rfc.section.8.2"></a><h4><a name="push">8.2</a>&nbsp;Higher Success Rate for Push Downloads</h4>
 
 <p>
 		  This query scheme gracefully handles push downloads.  In
@@ -779,7 +797,7 @@ Acknowledgements<br></b>
 		  are leaves or Ultrapeers). 
 		
 </p>
-<a name="rfc.section.7.3"></a><h4><a name="stop">7.3</a>&nbsp;Stopping Queries Has Meaning</h4>
+<a name="rfc.section.8.3"></a><h4><a name="stop">8.3</a>&nbsp;Stopping Queries Has Meaning</h4>
 
 <p>
 		  Another benefit of this scheme is that the user manually "stopping"
@@ -787,15 +805,16 @@ Acknowledgements<br></b>
 		  hosts, saving network resources.
 		
 </p>
-<a name="rfc.section.7.4"></a><h4><a name="improved_security">7.4</a>&nbsp;Moderately Improved Security</h4>
+<a name="rfc.section.8.4"></a><h4><a name="improved_security">8.4</a>&nbsp;Moderately Improved Security</h4>
 
 <p>
 		  GUESS has the added benefit that it makes the most obvious 
 		  DDOS attack on Gnutella less feasible.  In such an attack, a
 		  single attacker can connect to a large number of hosts simultaneously
-		  and send out repeated queries for popular content with a high TTL.  
-		  Given current flow control algorithms, relatively few attackers could
-		  likely have a rapid and dramatic negative impact on overall network
+		  and send out repeated queries for popular content with a high TTL
+		  to sets of those Ultrapeers, disconnecting to that set after sending 
+		  the query.  Given current flow control algorithms, relatively few attackers 
+		  could likely have a rapid and dramatic negative impact on overall network
 		  performance.  While attackers can still connect to many Ultrapeers
 		  in this scheme, the effective elimination of TTL in GUESS means that
 		  an attacker would have to use far more bandwidth to achieve the
@@ -875,9 +894,10 @@ Acknowledgements<br></b>
 	    The authors would like to thank Christopher Rohrs and the rest of the 
 		LimeWire team.  In addition, we would like to thank Gordon Mohr of Bitzi,
 		Inc., Jakob Eriksson, Ph.D. student at the Computer Science department at
-		the University of California, Riverside, all participants in the 
-		Gnutella Developer Forum (GDF), and all members of the LimeWire open 
-		source initiative.
+		the University of California, Riverside, Jason Thomas of Swapper, Inc.,
+		Raphael Manfredi of Gtk-Gnutella, Phillipe Verdy, Sam Berlin, all participants 
+		in the Gnutella Developer Forum (GDF), and all members of the LimeWire 
+		open source initiative.
 	  
 </p></font></body></html>
 
