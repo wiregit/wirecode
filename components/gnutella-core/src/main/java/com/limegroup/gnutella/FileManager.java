@@ -753,7 +753,7 @@ public abstract class FileManager {
         } catch (IOException e) {
             return null;
 		}
-        File dir = FileUtils.getParentFile(file);
+        File dir = FileUtils.getParentFile(f);
         if (dir==null) 
             return null;
 
@@ -765,7 +765,7 @@ public abstract class FileManager {
         }
         FileDesc fd;
         if (directoryShared)
-            fd = addFile(file);
+            fd = addFile(f);
         else 
             fd = null;
         synchronized(this) { _numPendingFiles--; }
