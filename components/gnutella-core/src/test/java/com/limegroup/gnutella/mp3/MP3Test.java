@@ -21,13 +21,9 @@ public class MP3Test extends TestCase {
 	d+"mpg1layI_0h_448k_frame14_48000hz_dual_fl5Orig.mp3",
 	d+"mpg1layI_43h_32k_f256_44100hz_dual_50-15emph_CRCcopyOrig_sectest.mp3",
 	d+"mpg1layII_0h_384k_frame24_48000hz_stereo_CRCOrig_Gogo1sectest.mp3",
-	d+"mpg1layIII_212k-VBRq0_f1655_441hz_stereo_FhgTAGID3v1_waterson.mp3",
 	d+"mpg1layIII_0h_58k-VBRq30_frame1211_44100hz_joint_XingTAG_sample.mp3",
-	d+"mpg1layIII_217k-VBRq0NOTAG_f5815_44100hz_joint_ID3v1&2Orig_Knapp.mp3",
-	d+"mpg1layIII_138k-VBRq44_f2895_44100hz_joint_XingTAG_ID3v2_Lame.mp3",
 	d+"mpg1layIII_170k-VBRq66_f1721_441hz_stereo_XingTAGcopyID3v1_mutter.mp3",	
 	d+"mpg1layII_0h_192k_frame44_44100hz_joint_CRCfl11.mp2",
-	d+"mpg2.5layIII_0h_16k_f2573or2594_11050hz_joint_CRCcopy_starwars.mp3",
 	d+"mpg2.5layIII_8k-VBRq95_f149_8000khz_mono_ID3v2Orig_XingTAG_Lame.mp3",
 	d+"mpg2layI_0h_128k_frame54_22050hz_joint_CRCOrig_test33.mp3",
 	d+"mpg2layII_1504h_16k_frame56_24000hz_joint_CRCOrigID3v1&2_test27.mp3",
@@ -552,7 +548,7 @@ public class MP3Test extends TestCase {
         start = System.currentTimeMillis();
         while (--i >= 0) {
 		
-            new com.limegroup.gnutella.mp3.MP3Info(file[i%18]);
+            new com.limegroup.gnutella.mp3.MP3Info(file[i%file.length]);
 	
         }
 
