@@ -245,4 +245,28 @@ public class BufferTest extends TestCase {
         assertTrue(buf2.last().equals("b"));
     }
 
+
+    public void testContains() {
+        Buffer buf = new Buffer(3);
+        buf.add("a");
+        assertTrue(buf.contains("a"));
+        buf.add("b");
+        assertTrue(buf.contains("b"));
+        buf.addLast("c");
+        assertTrue(buf.contains("a"));
+        assertTrue(buf.contains("b"));
+        assertTrue(buf.contains("c"));
+        buf.add("d");
+        assertTrue(buf.contains("d"));        
+        assertTrue(buf.contains("a"));
+        assertTrue(buf.contains("b"));
+        assertTrue(!buf.contains("c"));
+        buf.addLast("e");
+        assertTrue(buf.contains("e"));        
+        assertTrue(buf.contains("a"));
+        assertTrue(buf.contains("b"));
+        assertTrue(!buf.contains("d"));
+    }
+
+
 }
