@@ -630,14 +630,14 @@ public class QueryRequest extends Message implements Serializable{
 	 * @return a new <tt>QueryRequest</tt> with the specified ttl
 	 */
 	public static QueryRequest createQuery(QueryRequest qr, byte ttl) {
-		return new QueryRequest(qr.getGUID(), ttl, qr.getQuery(),
-								qr.getRichQueryString(), 
-								qr.getRequestedUrnTypes(),
-								qr.getQueryUrns(), qr.getQueryKey(),
-								qr.isFirewalledSource(),
-								qr.getNetwork(), qr.desiresOutOfBandReplies(),
-                                qr.getFeatureSelector(), qr.doNotProxy(),
-                                qr.getMetaMask());
+	    // Construct a query request that is EXACTLY like the other query,
+	    // but with a different TTL.
+	    try {
+	        return createNetworkQuery(qr.getGUID(), ttl, qr.getHops(),
+	                                  qr.PAYLOAD, qr.getNetwork());
+	    } catch(BadPacketException ioe) {
+	        throw new IllegalArgumentException(ioe.getMessage());
+	    }
 	}
 
 	/**
@@ -662,9 +662,8 @@ public class QueryRequest extends Message implements Serializable{
         try {
             return createNetworkQuery(guid, qr.getTTL(), qr.getHops(), 
                                       newPayload, qr.getNetwork());
-        }
-        catch (BadPacketException ioe) {
-            throw new IllegalArgumentException("Input QR was bad!");
+        } catch (BadPacketException ioe) {
+            throw new IllegalArgumentException(ioe.getMessage());
         }
 	}
 
@@ -675,14 +674,18 @@ public class QueryRequest extends Message implements Serializable{
 	 * @return a new <tt>QueryRequest</tt> with no OOB marking
 	 */
 	public static QueryRequest unmarkOOBQuery(QueryRequest qr) {
-		return new QueryRequest(qr.getGUID(), qr.getTTL(), qr.getQuery(),
-								qr.getRichQueryString(), 
-								qr.getRequestedUrnTypes(),
-								qr.getQueryUrns(), qr.getQueryKey(),
-								qr.isFirewalledSource(),
-								qr.getNetwork(), false, 
-                                qr.getFeatureSelector(),
-                                qr.doNotProxy(), qr.getMetaMask());
+        //modify the payload to not be OOB.
+        byte[] newPayload = new byte[qr.PAYLOAD.length];
+        System.arraycopy(qr.PAYLOAD, 0, newPayload, 0, newPayload.length);
+        newPayload[0] &= ~SPECIAL_OUTOFBAND_MASK;
+        newPayload[0] |= SPECIAL_XML_MASK;
+        
+        try {
+            return createNetworkQuery(qr.getGUID(), qr.getTTL(), qr.getHops(), 
+                                      newPayload, qr.getNetwork());
+        } catch (BadPacketException ioe) {
+            throw new IllegalArgumentException(ioe.getMessage());
+        }
 	}
 
     /**
@@ -760,20 +763,22 @@ public class QueryRequest extends Message implements Serializable{
 	 * @throws <tt>NullPointerException</tt> if the <tt>qr</tt> argument
 	 *  is <tt>null</tt> 
 	 */
-	public static QueryRequest 
-		createMulticastQuery(QueryRequest qr) {
-		if(qr == null) {
+	public static QueryRequest createMulticastQuery(QueryRequest qr) {
+		if(qr == null)
 			throw new NullPointerException("null query");
-		}
-        // always unmark multicast queries for OOB stuff....
-        QueryRequest mQr =
-            new QueryRequest(qr.getGUID(), (byte)1, qr.getQuery(),
-                             qr.getRichQueryString(),  qr.getRequestedUrnTypes(),
-                             qr.getQueryUrns(), qr.getQueryKey(), false, 
-                             Message.N_MULTICAST, false, 
-                             qr.getFeatureSelector(), false, 0);
-        mQr.setHops(qr.getHops());
-        return mQr;
+
+        //modify the payload to not be OOB.
+        byte[] newPayload = new byte[qr.PAYLOAD.length];
+        System.arraycopy(qr.PAYLOAD, 0, newPayload, 0, newPayload.length);
+        newPayload[0] &= ~SPECIAL_OUTOFBAND_MASK;
+        newPayload[0] |= SPECIAL_XML_MASK;
+        
+        try {
+            return createNetworkQuery(qr.getGUID(), (byte)1, qr.getHops(),
+                                      newPayload, Message.N_MULTICAST);
+        } catch (BadPacketException ioe) {
+            throw new IllegalArgumentException(ioe.getMessage());
+        }
 	}
 
     /** 
@@ -787,6 +792,9 @@ public class QueryRequest extends Message implements Serializable{
      */
 	public static QueryRequest 
 		createQueryKeyQuery(QueryRequest qr, QueryKey key) {
+		    
+        // TODO: Copy the payload verbatim, except add the query-key
+        //       into the GGEP section.
         return new QueryRequest(qr.getGUID(), qr.getTTL(), 
                                 qr.getQuery(), qr.getRichQueryString(), 
                                 qr.getRequestedUrnTypes(), qr.getQueryUrns(),
