@@ -2,6 +2,9 @@ package com.limegroup.gnutella.settings;
 
 import com.limegroup.gnutella.util.CommonUtils;
 
+import java.awt.Dimension;
+import java.awt.Toolkit;
+
 /**
  * Settings to deal with UI.
  */ 
@@ -26,13 +29,13 @@ public final class UISettings extends LimeProps {
      */
     public static final BooleanSetting MAGNETMIX_BUTTON = 
         FACTORY.createBooleanSetting("SEARCH_MAGNETMIX_BUTTON",
-                                     !CommonUtils.isPro());
+                                     !CommonUtils.isPro() && !isResolutionLow());
                                      
     /**
      * Setting for using small icons.
      */
     public static final BooleanSetting SMALL_ICONS =
-        FACTORY.createBooleanSetting("UI_SMALL_ICONS", false);
+        FACTORY.createBooleanSetting("UI_SMALL_ICONS", resolutionIsLow());
         
     /**
      * Setting for displaying text under icons.
@@ -51,4 +54,12 @@ public final class UISettings extends LimeProps {
      */
     public static final BooleanSetting UI_ADD_REPLY_ALT_LOCS =
         FACTORY.createBooleanSetting("UI_ADD_REPLY_ALT_LOCS", true);
+        
+    /**
+     * For people with bad eyes.
+     */
+    private static boolean isResolutionLow() {
+        Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+        return screenSize.width <= 800 || screenSize.height <= 600;
+    }
 }
