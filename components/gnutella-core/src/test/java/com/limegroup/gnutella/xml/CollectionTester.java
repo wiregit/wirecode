@@ -80,13 +80,15 @@ public class CollectionTester extends TestCase {
 
         // test keyword generation
         List keywords = collection.getKeyWords();
-        Assert.assertTrue("Keywords should have 4, instead " + keywords.size(),
-                          (keywords.size() == 4));
+        Assert.assertTrue("Keywords should have 6, instead " + keywords.size(),
+                          (keywords.size() == 6));
         Assert.assertTrue("Correct keywords not in map!", 
                           (keywords.contains("ferris") && 
                            keywords.contains("swing")  &&
+                           keywords.contains("Other")  &&
                            keywords.contains("darth")  &&
-                           keywords.contains("vader") )
+                           keywords.contains("darth")  &&
+                           keywords.contains("Vocal") )
                           );
         
     }
@@ -243,13 +245,15 @@ public class CollectionTester extends TestCase {
 
         // test keyword generation
         List keywords = audioCollection.getKeyWords();
-        Assert.assertTrue("Keywords should have 4, instead " + keywords.size(),
-                          (keywords.size() == 4));
+        Assert.assertTrue("Keywords should have 6, instead " + keywords.size(),
+                          (keywords.size() == 6));
         Assert.assertTrue("Correct keywords not in map!", 
                           (keywords.contains("ferris") && 
                            keywords.contains("swing")  &&
+                           keywords.contains("Other")  &&
                            keywords.contains("darth")  &&
-                           keywords.contains("vader") )
+                           keywords.contains("vader")  &&
+                           keywords.contains("Vocal") )
                           );
         keywords = videoCollection.getKeyWords();
         Assert.assertTrue("Keywords should have 4, instead " + keywords.size(),
