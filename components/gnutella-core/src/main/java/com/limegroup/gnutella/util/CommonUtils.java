@@ -1074,28 +1074,6 @@ public final class CommonUtils {
     public static boolean recordStats() {
         return !CommonUtils.isJava118();
     }
-
-    /**
-     * Compares two <code>Long</code> objects numerically.  This function is
-     * identical to the Long compareTo method.  The Long compareTo method was
-     * added in Java 1.2, however, so any app that is 1.1.8 compatible must use
-     * this method.
-     *
-     * @param firstLong the first <code>Long</code> to be compared.
-     * @param secondLong the second <code>Long</code> to be compared.
-     * @return the value <code>0</code> if the first <code>Long</code> 
-     *  argument is equal to the second <code>Long</code> argument; a value 
-     *  less than <code>0</code> if the first <code>Long</code> argument is  
-     *  numerically less than the second <code>Long</code>; and a 
-     *  value greater than <code>0</code> if the first <code>Long</code>  
-     *  argument is numerically greater than the second <code>Long</code> 
-     *  argument (signed comparison).
-     */
-    public static int longCompareTo(Long firstLong, Long secondLong) {
-        long firstVal = firstLong.longValue();
-        long secondVal = secondLong.longValue();
-        return (firstVal<secondVal ? -1 : (firstVal==secondVal ? 0 : 1));
-    }
     
     /*
     public static void main(String args[]) {
