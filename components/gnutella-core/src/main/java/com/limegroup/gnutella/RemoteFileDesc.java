@@ -11,7 +11,6 @@ package com.limegroup.gnutella;
 import java.io.Serializable;
 import com.sun.java.util.collections.Comparator;
 import com.sun.java.util.collections.Comparable;
-import com.limegroup.gnutella.gui.GUIConstants;
 import com.sun.java.util.collections.Arrays;
 
 public class RemoteFileDesc implements Comparable, Serializable {
@@ -172,16 +171,16 @@ public class RemoteFileDesc implements Comparable, Serializable {
 		}
 		
 		else {
-			if (_speed <= GUIConstants.MODEM_SPEED_INT) {
+			if (_speed <= SpeedConstants.MODEM_SPEED_INT) {
 				_speed_priority = PUBLIC_MODEM_PRIORITY;
 			}
-			else if (_speed <= GUIConstants.CABLE_SPEED_INT) {
+			else if (_speed <= SpeedConstants.CABLE_SPEED_INT) {
 				_speed_priority = PUBLIC_CABLE_PRIORITY;
 			}
-			else if (_speed <= GUIConstants.T1_SPEED_INT) {
+			else if (_speed <= SpeedConstants.T1_SPEED_INT) {
 				_speed_priority = PUBLIC_T1_PRIORITY;
 			}
-			else if (_speed <= GUIConstants.T3_SPEED_INT) {
+			else if (_speed <= SpeedConstants.T3_SPEED_INT) {
 				_speed_priority = PUBLIC_T3_PRIORITY;
 			}
 		}
