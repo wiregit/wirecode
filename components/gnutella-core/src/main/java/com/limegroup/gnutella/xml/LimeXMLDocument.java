@@ -52,7 +52,7 @@ public class LimeXMLDocument{
     
     private void makeSchemaURI(Document doc){
         Element docElement = doc.getDocumentElement();
-        List attributes = DOMUtils.getAttributes(docElement.getAttributes());
+        List attributes = LimeXMLUtils.getAttributes(docElement.getAttributes());
         int size = attributes.size();
         for(int i=0; i< size; i++){
             Node att = (Node)attributes.get(i);
@@ -102,7 +102,7 @@ public class LimeXMLDocument{
             return;
         }
         String currString = doEntry(currNode,parentName);
-        List children = DOMUtils.getElements(currNode.getChildNodes());
+        List children = LimeXMLUtils.getElements(currNode.getChildNodes());
         int size = children.size();
         for(int i=0; i< size; i++){            
             Node child = (Node)children.get(i);
@@ -121,13 +121,13 @@ public class LimeXMLDocument{
             System.out.println("this node has type  "+ currNode.getNodeType());
 
         Element currElement = (Element)currNode;
-        String nodeValue = DOMUtils.getText(currElement.getChildNodes());
+        String nodeValue = LimeXMLUtils.getText(currElement.getChildNodes());
         nodeValue = nodeValue.trim();
         if (nodeValue != null && !nodeValue.equals(""))
             fieldToValue.put(currTag, nodeValue);
         //We only want 
         //add the attributes
-        List attributes = DOMUtils.getAttributes(currNode.getAttributes());
+        List attributes = LimeXMLUtils.getAttributes(currNode.getAttributes());
         int size = attributes.size();
         for(int i=0; i< size; i++){
             Node att = (Node)attributes.get(i);
