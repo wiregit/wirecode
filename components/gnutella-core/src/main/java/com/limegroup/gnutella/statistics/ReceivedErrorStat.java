@@ -205,6 +205,12 @@ public class ReceivedErrorStat extends AdvancedStatistic {
         new PushErrorStat();
     
     /**
+     * Statistic for failure due to invalid address in a push.
+     */
+    public static final Statistic PUSH_INVALID_ADDRESS =
+        new PushErrorStat();
+    
+    /**
      * Statistic for failure due to invalid payload in a push.
      */
     public static final Statistic PUSH_INVALID_PAYLOAD =
