@@ -375,9 +375,9 @@ public final class SettingsManager {
 	    new File(CommonUtils.getUserHomeDir(), SAVE_DIRECTORY_NAME);
 
 	/**
-	 * Constant for the skin theme pack
+	 * Constant for the skin theme pack.
 	 */
-	private final String DEFAULT_SKIN_THEME = "";
+	private final File DEFAULT_SKIN_THEME = new File("");
 
 
 	/**
@@ -1236,7 +1236,7 @@ public final class SettingsManager {
 					setClasspath(p);
 				}
 				else if(key.equals(SKIN_THEME)) {
-					setSkinTheme(p);
+					setSkinTheme(new File(p));
 				}
 			}
 			catch(NumberFormatException nfe){ /* continue */ }
@@ -1454,8 +1454,8 @@ public final class SettingsManager {
 	 * Returns the path to the current theme, or the empty string if there
 	 * is no theme currently set.
 	 */
-	public String getSkinTheme() {
-		return getStringValue(SKIN_THEME);
+	public File getSkinTheme() {
+		return getFileValue(SKIN_THEME);
 	}
 
 	/** Returns true if the chat is enabled */
@@ -3366,12 +3366,12 @@ public final class SettingsManager {
 	}
 
 	/**
-	 * Sets the used skin theme
+	 * Sets the used skin theme.
 	 *
-	 * @param SKIN_THEME the skin theme to use
+	 * @param theme the skin theme to use
 	 */
-	public void setSkinTheme(final String THEME) {
-		setStringValue(SKIN_THEME, THEME);
+	public void setSkinTheme(final File theme) {
+		setFileValue(SKIN_THEME, theme);
 	}
 
 
@@ -3390,6 +3390,15 @@ public final class SettingsManager {
      */
     public void setCookiesFile(final String filename) {
 		setStringValue(COOKIES_FILE, filename);
+    }
+
+    /**
+     * Sets the flag indicating whether this node should accept
+     * only authenticated connections
+     * @param flag the flag value to be set
+     */
+    public void setAcceptAuthenticatedConnectionsOnly(final boolean flag) {
+		setBooleanValue(ACCEPT_AUTHENTICATED_CONNECTIONS_ONLY, flag);
     }
 
 	/**
@@ -3446,6 +3455,15 @@ public final class SettingsManager {
 		PROPS.put(KEY, STR);
 	}
 
+	/**
+	 * Sets the <tt>File</tt> value for the specified key.
+	 *
+	 * @param key the key for the value to set
+	 * @param file the <tt>File</tt> value to set
+	 */
+	private void setFileValue(final String key, final File file) {
+		PROPS.put(key, file.getAbsolutePath());
+	}
 
 	/**
 	 * Returns the <tt>boolean</tt> value for the specified
@@ -3507,16 +3525,17 @@ public final class SettingsManager {
 		return Float.valueOf(PROPS.getProperty(KEY)).floatValue();
 	}
 
-    /**
-     * Sets the flag indicating whether this node should accept
-     * only authenticated connections
-     * @param flag the flag value to be set
-     */
-    public void setAcceptAuthenticatedConnectionsOnly(
-        final boolean flag) {
-        PROPS.put(ACCEPT_AUTHENTICATED_CONNECTIONS_ONLY,
-            (new Boolean(flag)).toString());
-    }
+	/**
+	 * Returns the <tt>File</tt> value associated with the 
+	 * specified key.
+	 *
+	 * @param key the key for the desired value
+	 * @return the <tt>File</tt> value associated with the
+	 *  specified key
+	 */
+	private File getFileValue(final String key) {
+		return new File(PROPS.getProperty(key));
+	}
 
     /**
 	 * Writes out the properties file to with the specified
