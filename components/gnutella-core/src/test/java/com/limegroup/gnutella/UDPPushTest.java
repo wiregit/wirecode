@@ -64,6 +64,13 @@ public class UDPPushTest extends BaseTestCase {
 	}
 	
 	public void setUp() {
+		try{
+			Map map = (Map)
+				PrivilegedAccessor.getValue(RouterService.getDownloadManager(),
+					"_udpFailover");
+			map.clear();
+		}catch(Exception tough){tough.printStackTrace();}
+		
 		long now = System.currentTimeMillis();
 		
 		Set proxies = new HashSet();
@@ -143,9 +150,158 @@ public class UDPPushTest extends BaseTestCase {
 		
 		
 		Socket s = serversocket.accept();
-		assertTrue(s.isConnected());
+		assertTrue(s.isConnected());s.close();
 
 		
+	}
+	
+	/**
+	 * tests the scenario where an UDP push is sent and
+	 * a connection is established, so no failover occurs.
+	 */
+	public void testUDPPush() throws Exception {
+		Endpoint us = new Endpoint("127.0.0.1",20000);
+		rfd1.setOOBStatus(System.currentTimeMillis(),us);
+		
+		assertTrue(rfd1.canPushUDP());
+		
+		requestPush(rfd1);
+		
+		try {
+			serversocket.accept();
+			fail("tcp attempt was made");
+		}catch(IOException expected){}
+		
+		DatagramPacket push = new DatagramPacket(new byte[1000],1000);
+		udpsocket.receive(push);
+		
+		ByteArrayInputStream bais = new ByteArrayInputStream(push.getData());
+		PushRequest pr = (PushRequest)Message.read(bais);
+		assertEquals(rfd1.getIndex(),pr.getIndex());
+		
+		socket = new Socket(InetAddress.getLocalHost(),10000);
+		Socket other = serversocket.accept();
+		/*SocketAddress sockaddr = 
+			new InetSocketAddress(InetAddress.getLocalHost(),10000);
+		socket.bind(sockaddr);*/
+		
+		assertEquals(InetAddress.getLocalHost(),socket.getInetAddress());
+		assertEquals(10000,socket.getPort());
+		
+		sendGiv(other, "0:BC1F6870696111D4A74D0001031AE043/file1\n\n");
+		
+		
+		RouterService.getDownloadManager().acceptDownload(socket);
+		other.close();
+		
+		Thread.sleep(5000);
+		
+		try {
+			Socket s =serversocket.accept();
+			s.close();
+			fail("tcp attempt was made");
+		}catch(IOException expected){}
+		Thread.sleep(3000);
+		
+	}
+	
+	/**
+	 * tests the scenario where two pushes are made to the same host
+	 * for different files and both succeed.
+	 */
+	public void testTwoPushesBothGood() throws Exception{
+		Endpoint us = new Endpoint("127.0.0.1",20000);
+		rfd1.setOOBStatus(System.currentTimeMillis(),us);
+		rfd2.setOOBStatus(System.currentTimeMillis(),us);
+		
+		assertTrue(rfd1.canPushUDP());
+		assertTrue(rfd2.canPushUDP());
+		
+		requestPush(rfd1);
+		requestPush(rfd2);
+		
+		try {
+			serversocket.accept();
+			fail("tcp attempt was made");
+		}catch(IOException expected){}
+		
+		DatagramPacket push = new DatagramPacket(new byte[1000],1000);
+		udpsocket.receive(push);
+		
+		ByteArrayInputStream bais = new ByteArrayInputStream(push.getData());
+		PushRequest pr = (PushRequest)Message.read(bais);
+		assertEquals(rfd1.getIndex(),pr.getIndex());
+		
+		udpsocket.receive(push);
+		bais = new ByteArrayInputStream(push.getData());
+		pr = (PushRequest)Message.read(bais);
+		assertEquals(rfd2.getIndex(),pr.getIndex());
+		
+		Thread.sleep(2000);
+		
+		socket = new Socket(InetAddress.getLocalHost(),10000);
+		Socket other = serversocket.accept();
+		
+		sendGiv(other, "0:BC1F6870696111D4A74D0001031AE043/file1\n\n");
+		RouterService.getDownloadManager().acceptDownload(socket);
+		socket.close();
+		
+		socket = new Socket(InetAddress.getLocalHost(),10000);
+		other = serversocket.accept();
+		
+		sendGiv(other, "0:BC1F6870696111D4A74D0001031AE043/file2\n\n");
+		RouterService.getDownloadManager().acceptDownload(socket);
+		socket.close();
+		Thread.sleep(5200);
+		
+		try {
+			serversocket.accept();
+			fail("tcp attempt was made");
+		}catch(IOException expected){}
+	}
+	
+	public void testTwoPushesOneFails() throws Exception {
+		Endpoint us = new Endpoint("127.0.0.1",20000);
+		rfd1.setOOBStatus(System.currentTimeMillis(),us);
+		rfd2.setOOBStatus(System.currentTimeMillis(),us);
+		
+		assertTrue(rfd1.canPushUDP());
+		assertTrue(rfd2.canPushUDP());
+		
+		requestPush(rfd1);
+		requestPush(rfd2);
+		
+		try {
+			serversocket.accept();
+			fail("tcp attempt was made");
+		}catch(IOException expected){}
+		
+		DatagramPacket push = new DatagramPacket(new byte[1000],1000);
+		udpsocket.receive(push);
+		
+		ByteArrayInputStream bais = new ByteArrayInputStream(push.getData());
+		PushRequest pr = (PushRequest)Message.read(bais);
+		assertEquals(rfd1.getIndex(),pr.getIndex());
+		
+		udpsocket.receive(push);
+		bais = new ByteArrayInputStream(push.getData());
+		pr = (PushRequest)Message.read(bais);
+		assertEquals(rfd2.getIndex(),pr.getIndex());
+		
+		Thread.sleep(2000);
+		
+		socket = new Socket(InetAddress.getLocalHost(),10000);
+		Socket other = serversocket.accept();
+		
+		sendGiv(other, "0:BC1F6870696111D4A74D0001031AE043/file1\n\n");
+		RouterService.getDownloadManager().acceptDownload(socket);
+		socket.close();
+		
+		Thread.sleep(5200);
+		
+		
+		serversocket.accept().close();
+			
 	}
 	
 	
@@ -157,6 +313,19 @@ public class UDPPushTest extends BaseTestCase {
 		};
 		t.start();
 		Thread.sleep(100);
+	}
+	
+	static void sendGiv(final Socket sock,final String str) {
+		Thread t = new Thread() {
+			public void run()  {
+				try {
+					sock.getOutputStream().write(str.getBytes());
+				}catch(IOException e) {
+					fail(e);
+				}
+			}
+		};
+		t.start();
 	}
 	
 	static class PPI implements PushProxyInterface {
