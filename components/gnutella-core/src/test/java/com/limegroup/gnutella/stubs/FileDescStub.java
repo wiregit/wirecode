@@ -13,11 +13,15 @@ import com.sun.java.util.collections.Set;
 public class FileDescStub extends FileDesc {
     public static final String urn = "urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB";
     public static final Set set;
+    private static Set localSet2,globalSet;
+    public Set localSet;
     public static final int size = 1126400;
     static {
         set = new HashSet();
+        globalSet=new HashSet();
         try {
             set.add(URN.createSHA1Urn(urn));
+            globalSet.addAll(set);
         } catch(IOException ioe) {
             ErrorService.error(ioe);
         }
@@ -29,6 +33,25 @@ public class FileDescStub extends FileDesc {
     
     public FileDescStub(String name) {
         super(new File(name), set, 0);
+        localSet=new HashSet();
+    }
+    
+    public FileDescStub(String name, URN urn, int index) {
+    	super(new File(name), createUrnSet(urn),index);
+    	localSet=localSet2;
+    }
+    
+    private static Set createUrnSet(URN urn) {
+    	localSet2 = new HashSet();
+    	localSet2.add(urn);
+    	globalSet.add(urn);
+    	return localSet2;
+    }
+    
+    public boolean containsUrn(URN urn) {
+    	if (globalSet.contains(urn))
+    		return true;
+    	else return super.containsUrn(urn);
     }
 
     public InputStream createInputStream() {
@@ -46,5 +69,12 @@ public class FileDescStub extends FileDesc {
     
     public long getSize() {
         return size;
+    }
+    
+    public URN getSHA1Urn() {
+    	if (localSet.isEmpty())
+    		return super.getSHA1Urn();
+    	else return
+			(URN)localSet.toArray()[0];
     }
 }
