@@ -10,8 +10,15 @@ import java.security.*;
 import java.util.Enumeration;
 
 /**
- * This class contains data frr an individual shared file.  It also provides
- * various utility methods for checking against the encapsulated data.
+ * This class contains data for an individual shared file.  It also provides
+ * various utility methods for checking against the encapsulated data.<p>
+ *
+ * Constructing a FileDesc is usually done in two steps, which allows the caller
+ * to avoid holding a lock when hashing a file:
+ * <pre>
+ *    Set urns=FileDesc.calculateAndCacheURN(file);
+ *    FileDesc fd=new FileDesc(file, urns, index);
+ * </pre>
  */
 public final class FileDesc implements AlternateLocationCollector {
     
@@ -45,7 +52,7 @@ public final class FileDesc implements AlternateLocationCollector {
 	 * Constant <tt>Set</tt> of <tt>URN</tt> instances for the file.  This
 	 * is immutable.
 	 */
-    private volatile Set /* of URNS */ _urns; 
+    private final Set /* of URNS */ URNS; 
 
 	/**
 	 * Constant for the <tt>File</tt> instance.
@@ -66,14 +73,30 @@ public final class FileDesc implements AlternateLocationCollector {
 		Collections.unmodifiableSet(new HashSet());
 		
     /**
+     * Constructs a new <tt>FileDesc</tt> instance from the specified 
+	 * <tt>File</tt> class, calculating the hash as needed.   Same
+     * as FileDesc(file, calculateAndCacheURN(file), index).
+     *
+	 * @param file the <tt>File</tt> instance to use for constructing the
+	 *  <tt>FileDesc</tt>
+     * @param index the index in the FileManager
+     */
+    public FileDesc(File file, int index) {
+        this(file, calculateAndCacheURN(file), index);
+    }
+
+    /**
 	 * Constructs a new <tt>FileDesc</tt> instance from the specified 
 	 * <tt>File</tt> class and the associated urns.
 	 *
 	 * @param file the <tt>File</tt> instance to use for constructing the
 	 *  <tt>FileDesc</tt>
-	 * @param index the index of the file in the file manager
+     * @param urns the return value from calculateAndCacheURN(file);
+     *  an unmodifiable <tt>Set</tt> of <tt>URN</tt>'s.
+     * @param index the index in the FileManager
+     * @see calculateAndCacheURN
      */
-    public FileDesc(File file, int index) {	
+    public FileDesc(File file, Set urns, int index) {	
 		if((file == null)) {
 			throw new NullPointerException("cannot create a FileDesc with "+
 										   "a null File");
@@ -89,20 +112,27 @@ public final class FileDesc implements AlternateLocationCollector {
         _name = FILE.getName();
         _path = FILE.getAbsolutePath(); //TODO: right method?
         _size = (int)FILE.length();
-        _modTime = FILE.lastModified();		
-		_urns = UrnCache.instance().getUrns(FILE);
-    }
+        _modTime = FILE.lastModified();
+        URNS=urns;
+    }		
 
-	/**
-	 * Calculates urns for this <tt>FileDesc</tt> if it doesn't already
-	 * contain them.
-	 */
-	public void calculateUrns() {
-		if(_urns.isEmpty()) {
-			_urns = Collections.unmodifiableSet(calculateUrns(FILE));
-			UrnCache.instance().addUrns(FILE, _urns);
+    /** 
+     * Returns the set of URNs for a file to be passed to the FileDesc
+     * constructor.  This is done by looking it up in UrnCache or calculating it
+     * from disk.  constructor.  Updates the UrnCache. 
+     * 
+     * @return an unmodifiable <tt>Set</tt> of <tt>URN</tt>.  If the calling
+     * thread is interrupted while executing this, returns an empty set.  
+     */
+    public static Set /* of URN */ calculateAndCacheURN(File file) {
+		Set urns = UrnCache.instance().getUrns(file);
+		if(urns.size() == 0) {			
+			// expensive the first time a new file is added
+			urns = Collections.unmodifiableSet(calculateUrns(file));
+			UrnCache.instance().addUrns(file, urns);
 		}
-	}
+        return urns;
+    }
 
 	/**
 	 * Returns whether or not this <tt>FileDesc</tt> has any urns.
@@ -111,7 +141,7 @@ public final class FileDesc implements AlternateLocationCollector {
 	 *  <tt>false</tt> otherwise
 	 */
 	public boolean hasUrns() {
-		return !_urns.isEmpty();
+		return !URNS.isEmpty();
 	}
 
 	/**
@@ -158,7 +188,7 @@ public final class FileDesc implements AlternateLocationCollector {
 	 *  otherwise
      */
     public URN getSHA1Urn() {
-        Iterator iter = _urns.iterator(); 
+        Iterator iter = URNS.iterator(); 
         while(iter.hasNext()) {
             URN urn = (URN)iter.next();
             if(urn.isSHA1()) {
@@ -188,7 +218,7 @@ public final class FileDesc implements AlternateLocationCollector {
 	 *  <tt>FileDesc</tt>
 	 */
 	public Set getUrns() {
-		return _urns;
+		return URNS;
 	}
 
 
@@ -235,14 +265,20 @@ public final class FileDesc implements AlternateLocationCollector {
 	 * complete on large files.
 	 *
 	 * @param file the <tt>File</tt> instance to calculate URNs for
-	 * @return the new <tt>Set</tt> of calculated <tt>URN</tt> instances
+	 * @return the new <tt>Set</tt> of calculated <tt>URN</tt> instances.  If 
+     * the calling thread is interrupted while executing this, returns an empty
+     * set.
      */
     private static Set calculateUrns(File file) {
 		try {
 			Set set = new HashSet();
 			set.add(URN.createSHA1Urn(file));
 			return set;
-		} catch(IOException e) {
+		} catch (InterruptedException e) { 
+            // calculation aborted so return empty thing.  That's ok, as we're
+            // typically going to start loading everything over.
+            return EMPTY_SET;
+        } catch (IOException e) {
 			// the urn just does not get added
 			return EMPTY_SET;
 		}				
@@ -258,7 +294,7 @@ public final class FileDesc implements AlternateLocationCollector {
      */
     public boolean containsUrn(URN urn) {
         // now check if given urn matches
-        Iterator iter = _urns.iterator();
+        Iterator iter = URNS.iterator();
         while(iter.hasNext()){
             if (urn.equals((URN)iter.next())) {
                 return true;
@@ -289,7 +325,7 @@ public final class FileDesc implements AlternateLocationCollector {
 				"size:     "+_size+"\r\n"+
 				"modTime:  "+_modTime+"\r\n"+
 				"File:     "+FILE+"\r\n"+
-				"urns:     "+_urns+"\r\n"+
+				"urns:     "+URNS+"\r\n"+
 				"alt locs: "+_altLocs+"\r\n");
 	}
 }

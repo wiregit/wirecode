@@ -224,7 +224,9 @@ public final class UrnTest extends TestCase {
 			}
 		} catch(IOException e) {
 			assertTrue("unexpected exception: "+e, false);
-		}
+		} catch(InterruptedException e) {
+            fail("Thread interrupted.");
+        }
 	}
 
 
@@ -264,7 +266,9 @@ public final class UrnTest extends TestCase {
 			} catch(IOException e) {
 				assertTrue("could not create a SHA1 URN from a valid file: "+
 						   e, false);
-			}
+			} catch(InterruptedException e) {
+                fail("Thread interrupted.");
+            }
 		}
 	}
 

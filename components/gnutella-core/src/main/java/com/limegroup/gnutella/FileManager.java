@@ -70,6 +70,10 @@ public class FileManager {
      *  LOCKING: obtain _loadThreadLock before modifying and before obtaining
      *  this (to prevent deadlock). */
     private Thread _loadThread;
+    /** True if _loadThread.interrupt() was called.  This is needed because
+     *  _loadThread.isInterrupted() does not behave as expected.  See
+     *  http://developer.java.sun.com/developer/bugParade/bugs/4092438.html */
+    private boolean _loadThreadInterrupted=false;   
     /** The lock for _loadThread.  Necessary to prevent deadlocks in
      *  loadSettings. */
     private Object _loadThreadLock=new Object();
@@ -77,11 +81,6 @@ public class FileManager {
     /** The callback for adding shared directories and files, or null
      *  if this has no callback.  */
     private static ActivityCallback _callback;
-
-	/**
-	 * Reference to the <tt>FileDescLoader</tt> for creating <tt>FileDesc</tt>s.
-	 */
-	private FileDescLoader _fileDescLoader;
 
     /** Characters used to tokenize queries and file names. */
     public static final String DELIMETERS=" -._+/*()\\";
@@ -115,7 +114,6 @@ public class FileManager {
         _urnIndex = new Hashtable();
         _extensions = new TreeSet(new StringComparator());
         _sharedDirectories = new TreeMap(new FileComparator());
-		_fileDescLoader = new FileDescLoader(this);
     }
 
     /** Asynchronously loads all files by calling loadSettings.  Sets this'
@@ -394,6 +392,7 @@ public class FileManager {
             //by listFiles called by addDirectory blocks.  If this is the case,
             //we need to spawn a thread before join'ing.
             if (_loadThread!=null) {
+                _loadThreadInterrupted = true;
                 _loadThread.interrupt();
                 try {
                     _loadThread.join();
@@ -403,6 +402,7 @@ public class FileManager {
             }
 
             final boolean notifyOnClearFinal = notifyOnClear;
+            _loadThreadInterrupted = false;
             _loadThread = new Thread("FileManager.loadSettingsBlocking") {
                 public void run() {
 					try {
@@ -423,7 +423,6 @@ public class FileManager {
      *  thread (the GUI).
      *  @modifies this */
     protected void loadSettingsBlocking(boolean notifyOnClear) {
-
         File[] tempDirVar;
         synchronized (this) {
             // Reset the file list info
@@ -433,21 +432,15 @@ public class FileManager {
             _index=new Trie(true); //maintain invariant
             _extensions = new TreeSet(new StringComparator());
             _sharedDirectories = new TreeMap(new FileComparator());
-            
-            if (_loadThread.isInterrupted())
-                return;
 
             // Load the extensions.
             String[] extensions = 
             StringUtils.split(SettingsManager.instance().getExtensions().trim(),
                               ';');
             for (int i=0; 
-                 (i<extensions.length) && !_loadThread.isInterrupted();
+                 (i<extensions.length) && !_loadThreadInterrupted;
                  i++)
                 _extensions.add(extensions[i].toLowerCase());
-            
-            if (_loadThread.isInterrupted())
-                return;
 
             //Ideally we'd like to ensure that "C:\dir\" is loaded BEFORE
             //C:\dir\subdir.  Although this isn't needed for correctness, it may
@@ -461,9 +454,6 @@ public class FileManager {
 			//                ';');
 
 			final File[] directories = SettingsManager.instance().getDirectories();
-
-            if (_loadThread.isInterrupted())
-                return;
 
             Arrays.sort(directories, new Comparator() {
                 public int compare(Object a, Object b) {
@@ -491,14 +481,14 @@ public class FileManager {
         {
             // Add each directory as long as we're not interrupted.
             int i=0;
-            while (i<directories.length && !_loadThread.isInterrupted()) {
+            while (i<directories.length && !_loadThreadInterrupted) {
                 addDirectory(directories[i], null);      
                 i++;
             }
             
             // Compact the index once.  As an optimization, we skip this
             // if loadSettings has subsequently been called.
-            if (! _loadThread.isInterrupted())
+            if (! _loadThreadInterrupted)
                 trim();                    
         }
 
@@ -549,7 +539,7 @@ public class FileManager {
         //in _sharedDirectories.  Again, this is not strictly necessary for
         //correctness.
         List /* of File */ directories=new ArrayList();
-        for (int i=0; i<n && !_loadThread.isInterrupted(); i++) {
+        for (int i=0; i<n && !_loadThreadInterrupted; i++) {
             if (file_list[i].isDirectory())     /* the recursive call */
                 directories.add(file_list[i]);
             else                                /* add the file with the */
@@ -557,7 +547,7 @@ public class FileManager {
         }
         //Now add directories discovered in previous pass.
         Iterator iter=directories.iterator();
-        while (iter.hasNext() && !_loadThread.isInterrupted())
+        while (iter.hasNext() && !_loadThreadInterrupted)
             addDirectory((File)iter.next(), directory);
     }
 
@@ -568,7 +558,7 @@ public class FileManager {
      *  was actually added.  <b>WARNING: this is a potential security 
      *  hazard.</b> 
      */
-	public synchronized boolean addFileIfShared(File file) {
+	public boolean addFileIfShared(File file) {
         //Make sure capitals are resolved properly, etc.
         File f = null;
         try {
@@ -583,7 +573,11 @@ public class FileManager {
             return false;
 
         //TODO: if overwriting an existing, take special care.
-        if (_sharedDirectories.containsKey(dir))
+        boolean directoryShared;
+        synchronized (this) {
+            directoryShared=_sharedDirectories.containsKey(dir);
+        }
+        if (directoryShared)
             return addFile(file);
         else
             return false;
@@ -596,8 +590,8 @@ public class FileManager {
      *  Returns the value from addFileIfShared. <b>WARNING: this is a potential
      *  security hazard.</b> 
      */
-	public synchronized boolean addFileIfShared(File file,
-												   LimeXMLDocument[] metadata) {
+	public boolean addFileIfShared(File file,
+                                   LimeXMLDocument[] metadata) {
         return addFileIfShared(file);
         //This implementation does nothing with metadata.  See MetaFileManager.
     }
@@ -610,47 +604,60 @@ public class FileManager {
      *  <b>WARNING: this is a potential security hazard; caller must ensure the
      *  file is in the shared directory.</b> 
      */
-    private synchronized boolean addFile(File file) {
+    private boolean addFile(File file) {
+        repOk();
         if (!hasExtension(file.getName())) {
 			return false;
 		}
 		long fileLength = file.length();  
 		if (fileLength>Integer.MAX_VALUE || fileLength<0)
 			return false;
-		_size += fileLength;
-		int fileIndex = _files.size();
-		FileDesc fileDesc = _fileDescLoader.createFileDesc(file, fileIndex);
-		//FileDesc fileDesc = new FileDesc(file, fileIndex);
-		_files.add(fileDesc);
-		_numFiles++;
+        
+        //Calculate hash OUTSIDE of lock.
+        Set urns=FileDesc.calculateAndCacheURN(file);  
+        if (_loadThreadInterrupted)
+            return false;
+
+        synchronized (this) {
+            _size += fileLength;
+            int fileIndex = _files.size();
+            FileDesc fileDesc = new FileDesc(file, urns, fileIndex);
+            _files.add(fileDesc);
+            _numFiles++;
 		
-		//Register this file with its parent directory.
-		File parent=getParentFile(file);
-		Assert.that(parent!=null, "Null parent to \""+file+"\"");
-		IntSet siblings=(IntSet)_sharedDirectories.get(parent);
-		Assert.that(siblings!=null,
-					"Add directory \""+parent+"\" not in "+_sharedDirectories);
-		boolean added=siblings.add(fileIndex);
-		Assert.that(added, "File "+fileIndex+" already found in "+siblings);
-		if (_callback!=null)
-			_callback.addSharedFile(file, parent);
+            //Register this file with its parent directory.
+            File parent=getParentFile(file);
+            Assert.that(parent!=null, "Null parent to \""+file+"\"");
+            IntSet siblings=(IntSet)_sharedDirectories.get(parent);
+            Assert.that(siblings!=null,
+                "Add directory \""+parent+"\" not in "+_sharedDirectories);
+            boolean added=siblings.add(fileIndex);
+            Assert.that(added, "File "+fileIndex+" already found in "+siblings);
+            if (_callback!=null)
+                _callback.addSharedFile(file, parent);
 		
-		String path = file.getAbsolutePath();
-		//Index the filename.  For each keyword...
-		String[] keywords=StringUtils.split(path, DELIMETERS);
-		for (int i=0; i<keywords.length; i++) {
-			String keyword=keywords[i];
-			//Ensure there _index has a set of indices associated with
-			//keyword.
-			IntSet indices=(IntSet)_index.get(keyword);
-			if (indices==null) {
-				indices=new IntSet();
-				_index.add(keyword, indices);
-			}
-			//Add fileIndex to the set.
-			indices.add(fileIndex);
-		}		
-		return true;
+            String path = file.getAbsolutePath();
+            //Index the filename.  For each keyword...
+            String[] keywords=StringUtils.split(path, DELIMETERS);
+            for (int i=0; i<keywords.length; i++) {
+                String keyword=keywords[i];
+                //Ensure there _index has a set of indices associated with
+                //keyword.
+                IntSet indices=(IntSet)_index.get(keyword);
+                if (indices==null) {
+                    indices=new IntSet();
+                    _index.add(keyword, indices);
+                }
+                //Add fileIndex to the set.
+                indices.add(fileIndex);
+            }
+		
+            // Ensure file can be found by URN lookups
+            this.updateUrnIndex(fileDesc);
+		
+            repOk();
+            return true;
+        }
     }
 
     /**
@@ -658,7 +665,7 @@ public class FileManager {
      * @effects enters the given FileDesc into the _urnIndex under all its 
      * reported URNs
      */
-    public synchronized void updateUrnIndex(FileDesc fileDesc) {
+    private synchronized void updateUrnIndex(FileDesc fileDesc) {
 		Iterator iter = fileDesc.getUrns().iterator();
 		while (iter.hasNext()) {
 			URN urn = (URN)iter.next();
@@ -1015,8 +1022,12 @@ public class FileManager {
     ///////////////////////////////////// Testing //////////////////////////////
 
     /** Checks this' rep. invariants.  VERY expensive. */
-    /*
+    private boolean DEBUG=false;
     protected synchronized void repOk() {
+        if (!DEBUG)
+            return;
+        System.err.println("WARNING: running repOk()");
+
         //Verify index.  Get the set of indices in the _index....
         IntSet indices=new IntSet();
         for (Iterator iter=_index.getPrefixedBy(""); iter.hasNext(); ) {
@@ -1083,7 +1094,6 @@ public class FileManager {
         Assert.that(_size==sizeFilesCount,
                     _size+" should be "+sizeFilesCount);
     }
-    */
 
     //Unit tests: tests/com/limegroup/gnutella/FileManagerTest.java
 }

@@ -70,9 +70,12 @@ public final class URN implements HTTPHeaderValue, Serializable {
 	 * @return a new <tt>URN</tt> instance
 	 * @throws <tt>IOException</tt> if there was an error constructing
 	 *  the <tt>URN</tt>
+     * @throws <tt>InterruptedException</tt> if the calling thread was 
+     *  interrupted while hashing.  (This method can take a while to
+     *  execute.)
 	 */
 	public static URN createSHA1Urn(File file) 
-		throws IOException {
+		throws IOException, InterruptedException {
 		return new URN(createSHA1String(file), UrnType.SHA1);
 	}
 
@@ -379,11 +382,14 @@ public final class URN implements HTTPHeaderValue, Serializable {
 	 * @param file the file to construct the hash from
 	 * @return the SHA1 hash string
 	 * @throws <tt>IOException</tt> if there is an error creating the hash
-	 * @throws <tt>NoSuchAlgorithmException</tt> if the specified algorithm
+	 * @throws <tt>IOException</tt> if the specified algorithm
 	 *  cannot be found
+     * @throws <tt>InterruptedException</tt> if the calling thread was 
+     *  interrupted while hashing.  (This method can take a while to
+     *  execute.)
 	 */
 	private static String createSHA1String(final File file) 
-		throws IOException {
+		    throws IOException, InterruptedException {
 		FileInputStream fis = new FileInputStream(file);   		
 		// we can only calculate SHA1 for now
 		MessageDigest md = null;
@@ -392,21 +398,21 @@ public final class URN implements HTTPHeaderValue, Serializable {
 		} catch(NoSuchAlgorithmException e) {
 			throw new IOException("NO SUCH ALGORITHM");
 		}
-		byte[] buffer = new byte[16384];
-		int read;
-		while ((read=fis.read(buffer))!=-1) {
-			long start = System.currentTimeMillis();
-			md.update(buffer,0,read);
-			long end = System.currentTimeMillis();
-			long interval = Math.abs(end - start);
-			try {
-				Thread.sleep(interval*2) ;
-			} catch(InterruptedException e) {
-				// just keep going!
-			}
-		}
-		
-		fis.close();
+        
+        try {
+            byte[] buffer = new byte[16384];
+            int read;
+            while ((read=fis.read(buffer))!=-1) {
+                long start = System.currentTimeMillis();
+                md.update(buffer,0,read);
+                long end = System.currentTimeMillis();
+                long interval = Math.max(0, end-start);   //ensure non-negative
+                Thread.sleep(interval*2);                 //throws InterruptedException 
+            }
+        } finally {		
+            fis.close();
+        }
+
 		byte[] sha1 = md.digest();
 
 		// preferred casing: lowercase "urn:sha1:", uppercase encoded value
