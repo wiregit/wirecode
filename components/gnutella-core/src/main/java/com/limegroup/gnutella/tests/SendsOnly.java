@@ -2,6 +2,7 @@ package com.limegroup.gnutella.tests;
 
 import com.limegroup.gnutella.*;
 import java.io.IOException;
+import java.util.*;
 
 /** A bad client that sends data without receiving. */
 public class SendsOnly {
@@ -25,6 +26,7 @@ public class SendsOnly {
             System.exit(1);
         }
         
+        Random r=new Random();
         //Send a ping every second...
         while (true) {
 //              try {
@@ -32,7 +34,12 @@ public class SendsOnly {
 //              } catch (InterruptedException e) {}
 
             try {
-                c.send(new PingRequest((byte)3));
+                char[] buf=new char[20];
+                for (int i=0; i<buf.length; i++) {
+                    buf[i]=(char)('A'+r.nextInt(52));
+                }
+                String query=new String(buf);
+                c.send(new QueryRequest((byte)3, 0, query));
                 c.flush();
             } catch (IOException e) {
                 break;
