@@ -92,7 +92,7 @@ public class QueryReply extends Message implements Serializable{
 
     /** the PushProxy info for this hit.
      */
-    private PushProxyInterface[] _proxies;
+    private Set _proxies;
 
     /** Our static and final instance of the GGEPUtil helper class.
      */
@@ -110,9 +110,10 @@ public class QueryReply extends Message implements Serializable{
     public QueryReply(byte[] guid, byte ttl,
             int port, byte[] ip, long speed, Response[] responses,
             byte[] clientGUID, boolean isMulticastReply) {
-        this(guid, ttl, port, ip, speed, responses, clientGUID, new byte[0],
+        this(guid, ttl, port, ip, speed, responses, clientGUID, 
+             DataUtils.EMPTY_BYTE_ARRAY,
              false, false, false, false, false, false, true, isMulticastReply,
-             new PushProxyInterface[0]);
+             DataUtils.EMPTY_SET);
     }
 
 
@@ -137,10 +138,11 @@ public class QueryReply extends Message implements Serializable{
             boolean needsPush, boolean isBusy,
             boolean finishedUpload, boolean measuredSpeed,boolean supportsChat,
             boolean isMulticastReply) {
-        this(guid, ttl, port, ip, speed, responses, clientGUID, new byte[0],
+        this(guid, ttl, port, ip, speed, responses, clientGUID, 
+             DataUtils.EMPTY_BYTE_ARRAY,
              true, needsPush, isBusy, finishedUpload,
              measuredSpeed,supportsChat,
-             true, isMulticastReply, new PushProxyInterface[0]);
+             true, isMulticastReply, DataUtils.EMPTY_SET);
     }
 
 
@@ -175,7 +177,7 @@ public class QueryReply extends Message implements Serializable{
         throws IllegalArgumentException {
         this(guid, ttl, port, ip, speed, responses, clientGUID, 
              xmlBytes, needsPush, isBusy,  finishedUpload, measuredSpeed, 
-             supportsChat, isMulticastReply, new PushProxyInterface[0]);
+             supportsChat, isMulticastReply, DataUtils.EMPTY_SET);
     }
 
     /** 
@@ -207,7 +209,7 @@ public class QueryReply extends Message implements Serializable{
             byte[] clientGUID, byte[] xmlBytes,
             boolean needsPush, boolean isBusy,
             boolean finishedUpload, boolean measuredSpeed,boolean supportsChat,
-            boolean isMulticastReply, PushProxyInterface[] proxies) 
+            boolean isMulticastReply, Set proxies) 
         throws IllegalArgumentException {
         this(guid, ttl, port, ip, speed, responses, clientGUID, 
              xmlBytes, true, needsPush, isBusy, 
@@ -264,7 +266,7 @@ public class QueryReply extends Message implements Serializable{
              boolean includeQHD, boolean needsPush, boolean isBusy,
              boolean finishedUpload, boolean measuredSpeed,
              boolean supportsChat, boolean supportsBH,
-             boolean isMulticastReply, PushProxyInterface[] proxies) {
+             boolean isMulticastReply, Set proxies) {
         super(guid, Message.F_QUERY_REPLY, ttl, (byte)0,
               0,                               // length, update later
               16);                             // 16-byte footer
@@ -274,7 +276,7 @@ public class QueryReply extends Message implements Serializable{
             return;  
 
         final int n = responses.length;
-		if((port & 0xFFFF0000) != 0) {
+		if(!NetworkUtils.isValidPort(port)) {
 			throw new IllegalArgumentException("invalid port: "+port);
 		} else if(ip.length != 4) {
 			throw new IllegalArgumentException("invalid ip length: "+ip.length);
@@ -320,7 +322,7 @@ public class QueryReply extends Message implements Serializable{
                 // size of standard, no options, ggep block...
                 int ggepLen=
                     _ggepUtil.getQRGGEP(false, false, 
-                                        new PushProxyInterface[0]).length;
+                                        DataUtils.EMPTY_SET).length;
                 
                 //c) PART 1: common area flags and controls.  See format in
                 //parseResults2.
@@ -654,7 +656,7 @@ public class QueryReply extends Message implements Serializable{
     /**
      * @return null or a non-zero lenght array of PushProxy hosts.
      */
-    public PushProxyInterface[] getPushProxies() {
+    public Set getPushProxies() {
         parseResults();
         return _proxies;
     }
@@ -773,7 +775,7 @@ public class QueryReply extends Message implements Serializable{
             int supportsChatT=UNDEFINED;
             int supportsBrowseHostT=UNDEFINED;
             int replyToMulticastT=UNDEFINED;
-            PushProxyInterface[] proxies=null;
+            Set proxies=null;
             
             //a) extract vendor code
             try {
@@ -856,7 +858,7 @@ public class QueryReply extends Message implements Serializable{
                                      (xmlSize-1));
                 }
                 else
-                    _xmlBytes = new byte[0];
+                    _xmlBytes = DataUtils.EMPTY_BYTE_ARRAY;
             }
 
             //Parse LimeWire's private area.  Currently only a single byte
@@ -883,7 +885,11 @@ public class QueryReply extends Message implements Serializable{
             this.supportsChat=supportsChatT;
             this.supportsBrowseHost=supportsBrowseHostT;
             this.replyToMulticast=replyToMulticastT;
-            this._proxies=proxies;
+            if(proxies == null) {
+                this._proxies = DataUtils.EMPTY_SET;
+            } else {
+                this._proxies = proxies;
+            }
 
             debug("QR.parseResults2(): returning w/o exception.");
 
@@ -1168,10 +1174,10 @@ public class QueryReply extends Message implements Serializable{
          */
         public byte[] getQRGGEP(boolean supportsBH,
                                 boolean isMulticastResponse,
-                                PushProxyInterface[] proxies) {
+                                Set proxies) {
             byte[] retGGEPBlock = _standardGGEP;
-            if ((proxies != null) && (proxies.length > 0)) {
-                final int MAX_PROXIES = 3;
+            if ((proxies != null) && (proxies.size() > 0)) {
+                final int MAX_PROXIES = 4;
                 GGEP retGGEP = new GGEP();
 
                 // write easy extensions if applicable
@@ -1182,11 +1188,13 @@ public class QueryReply extends Message implements Serializable{
 
                 // if a PushProxyInterface is valid, write up to MAX_PROXIES
                 ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                int numWritten = 0, index = 0;
-                while ((index < proxies.length) && (numWritten < MAX_PROXIES)) {
+                int numWritten = 0;
+                Iterator iter = proxies.iterator();
+                while(iter.hasNext() && (numWritten < MAX_PROXIES)) {
+                    PushProxyInterface ppi = (PushProxyInterface)iter.next();
                     String host = 
-                        proxies[index].getPushProxyAddress().getHostAddress();
-                    int port = proxies[index].getPushProxyPort();
+                        ppi.getPushProxyAddress().getHostAddress();
+                    int port = ppi.getPushProxyPort();
                     try {
                         IPPortCombo combo = new IPPortCombo(host, port);
                         baos.write(combo.toBytes());
@@ -1195,9 +1203,9 @@ public class QueryReply extends Message implements Serializable{
                     catch (UnknownHostException bad) {
                     }
                     catch (IOException terrible) {
+                        // TODO: something else we can do here??
                         terrible.printStackTrace();
                     }
-                    index++;
                 }
 
                 try {
@@ -1211,6 +1219,7 @@ public class QueryReply extends Message implements Serializable{
                     retGGEPBlock = baos.toByteArray();
                 }
                 catch (IOException terrible) {
+                    // TODO: something else we can do here??
                     terrible.printStackTrace();
                 }
 
@@ -1254,11 +1263,16 @@ public class QueryReply extends Message implements Serializable{
         }
 
         
-        /** @return non-zero-length array of PushProxyInterfaces or null,
-         *  as described by the GGEP blocks.
+        /** @return a <tt>Set</tt> of <tt>PushProxyContainer</tt> instances,
+         *  which can be empty but is guaranteed not to be <tt>null</tt>, as 
+         *  described by the GGEP blocks.
+         *
+         * @param ggeps the array of GGEP extensions that may or may not
+         *  contain push proxy data
          */
-        public PushProxyInterface[] getPushProxies(GGEP[] ggeps) {
-            List proxies = new ArrayList();
+        public Set getPushProxies(GGEP[] ggeps) {
+            Set proxies = new HashSet();
+            
             for (int i = 0; (ggeps != null) && (i < ggeps.length); i++) {
                 Set headers = ggeps[i].getHeaders();
                 // if the block has a PUSH_PROXY value, get it, parse it,
@@ -1278,7 +1292,8 @@ public class QueryReply extends Message implements Serializable{
                         new ByteArrayInputStream(proxyBytes);
                     while (bais.available() > 0) {
                         byte[] combo = new byte[6];
-                        if (bais.read(combo, 0, combo.length) == combo.length) {
+                        if (bais.read(combo, 0, combo.length) == 
+                            combo.length) {
                             try {
                                 proxies.add(new PushProxyContainer(combo));
                             }
@@ -1288,17 +1303,8 @@ public class QueryReply extends Message implements Serializable{
                     }
                 }
             }
-
-            if (proxies.size() > 0) {
-                PushProxyInterface[] retProxies = 
-                    new PushProxyInterface[proxies.size()];
-                retProxies = (PushProxyInterface[]) proxies.toArray(retProxies);
-                return retProxies;
-            }
-            return null;
+            return proxies;
         }
-
-
     }
 
     /** A simple utility class for doling out PushProxy information.
@@ -1324,13 +1330,19 @@ public class QueryReply extends Message implements Serializable{
         }
 
         public boolean equals(Object other) {
+            if(this == other) return true;
             if (other instanceof PushProxyContainer) {
                 PushProxyContainer iface = (PushProxyContainer) other;
                 return _combo.equals(iface._combo);
             }
             return false;
         }
-        
+
+        // overridden to fulfill contract with equals for hash-based
+        // collections
+        public int hashCode() {
+            return _combo.hashCode() * 17;
+        }
     }
 
     /** Another utility class the encapsulates some complexity.
@@ -1400,6 +1412,12 @@ public class QueryReply extends Message implements Serializable{
                 return _addr.equals(combo._addr) && (_port == combo._port);
             }
             return false;
+        }
+
+        // overridden to fulfill contract with equals for hash-based
+        // collections
+        public int hashCode() {
+            return _addr.hashCode() * _port;
         }
 
     }
