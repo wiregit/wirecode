@@ -32,7 +32,7 @@ public interface Verifier {
     /**
      * Returns a description of this license.
      */
-    public String getVerifiedDescrption();
+    public String getVerifiedDescription();
     
     /**
      * Returns a URL that the user can visit to manually verify.

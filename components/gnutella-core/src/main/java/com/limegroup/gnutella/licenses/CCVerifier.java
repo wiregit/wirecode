@@ -112,7 +112,7 @@ import org.xml.sax.SAXException;
      * Builds a description of this license based on what is permitted,
      * probibited, and required.
      */
-    public String getVerifiedDescrption() {
+    public String getVerifiedDescription() {
         StringBuffer sb = new StringBuffer();
         if(permitted != null && !permitted.isEmpty()) {
             sb.append("Permitted: ");
@@ -146,7 +146,10 @@ import org.xml.sax.SAXException;
      * The listener is notified when verification is finished.
      */
     public void verify(VerificationCallback listener) {
-        VQUEUE.add(new VImpl(listener));
+        if(!isVerifying() && !isVerificationDone()) {
+            state = VERIFYING;
+            VQUEUE.add(new VImpl(listener));
+        }
     }
 
     /**
@@ -209,12 +212,16 @@ import org.xml.sax.SAXException;
         }
         
         Document doc = parser.getDocument();
-        Node workItem = doc.getElementsByTagName("Work").item(0);
-        Node licenseItem = doc.getElementsByTagName("License").item(0);
-        if(!parseWorkItem(workItem))
-            return false;
-        parseLicenseItem(licenseItem);
-        return true;
+        NodeList workItems = doc.getElementsByTagName("Work");
+        boolean workPassed = false;
+        for(int i = 0; i < workItems.getLength(); i++)
+            workPassed |= parseWorkItem(workItems.item(i));
+        NodeList licenseItems = doc.getElementsByTagName("License");
+        for(int i = 0; i < licenseItems.getLength(); i++)
+            parseLicenseItem(licenseItems.item(i));
+            
+        // so long as we found a valid work item, we're good.
+        return workPassed;
     }
     
     /**
@@ -339,7 +346,8 @@ import org.xml.sax.SAXException;
             else
                 state = VERIFIED;
             
-            vc.verificationCompleted(CCVerifier.this);
+            if(vc != null)
+                vc.verificationCompleted(CCVerifier.this);
         }
     }
 }

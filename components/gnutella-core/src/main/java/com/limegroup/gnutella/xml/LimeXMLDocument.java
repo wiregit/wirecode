@@ -360,6 +360,25 @@ public class LimeXMLDocument implements Serializable {
     public Collection getValueList() {
         return fieldToValue.values();
     }
+    
+    /**
+     * Determines if a license exists that this LimeXMLDocument knows about.
+     */
+    public boolean isLicenseAvailable() {
+        return hasCCLicense;
+    }
+    
+    /**
+     * Returns the license string.
+     */
+    public String getLicenseString() {
+        for(Iterator i = fieldToValue.entrySet().iterator(); i.hasNext(); ) {
+            Map.Entry next = (Map.Entry)i.next();
+            if(((String)next.getKey()).endsWith(XML_LICENSE_ATTRIBUTE))
+                return (String)next.getValue();
+        }
+        return null;
+    }
 
     /**
      * Returns a list of attributes and their values in the same order
