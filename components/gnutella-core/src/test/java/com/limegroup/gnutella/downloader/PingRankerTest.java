@@ -1,25 +1,31 @@
 package com.limegroup.gnutella.downloader;
 
 
+import java.io.IOException;
+import java.net.InetAddress;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import junit.framework.Test;
 
+import com.limegroup.gnutella.ErrorService;
+import com.limegroup.gnutella.PushEndpoint;
 import com.limegroup.gnutella.RemoteFileDesc;
 import com.limegroup.gnutella.UDPPinger;
+import com.limegroup.gnutella.UDPReplyHandler;
+import com.limegroup.gnutella.URN;
 import com.limegroup.gnutella.messages.Message;
 import com.limegroup.gnutella.messages.vendor.HeadPing;
 import com.limegroup.gnutella.messages.vendor.HeadPong;
-import com.limegroup.gnutella.stubs.FileDescStub;
-import com.limegroup.gnutella.stubs.FileManagerStub;
-import com.limegroup.gnutella.stubs.IncompleteFileDescStub;
-import com.limegroup.gnutella.stubs.UploadManagerStub;
 import com.limegroup.gnutella.util.BaseTestCase;
+import com.limegroup.gnutella.util.IntervalSet;
 import com.limegroup.gnutella.util.IpPort;
-import com.limegroup.gnutella.util.IpPortImpl;
 
 
 /**
@@ -37,22 +43,17 @@ public class PingRankerTest extends BaseTestCase {
         return buildTestSuite(PingRankerTest.class);
     }
     
-    
-    static PingRanker ranker;
     static MockPinger pinger;
-    
-    static HeadPong completeNoLocs;
+    static PingRanker ranker;
+     
     
     /**
      * file descs for the partial and complete files
+     *
+     *
      */
-    static IncompleteFileDescStub _partial;
-    static FileDescStub _complete;
-    
-    static FileManagerStub _fm;
-    static UploadManagerStub _um;
-    
     public static void globalSetUp()  {
+        // set up a mock pinger
         pinger = new MockPinger();
     }
     
@@ -96,8 +97,92 @@ public class PingRankerTest extends BaseTestCase {
         Thread.sleep(100);
         
         // send a pong back from a single host
+        MockPong pong = new MockPong(true,true,0,true,false,true,null,null,null);
+        ranker.processMessage(pong, new UDPReplyHandler(InetAddress.getByName("1.2.3.5"),1));
+        
+        // now this host should be prefered over other hosts.
+        RemoteFileDesc rfd = ranker.getBest();
+        assertEquals("1.2.3.5",rfd.getHost());
     }
     
+    /**
+     * Tests that the ranker discards sources that claim they do not have the file.
+     */
+    public void testDiscardsNoFile() throws Exception {
+        ranker.addToPool(newRFDWithURN("1.2.3.4",3));
+        assertTrue(ranker.hasMore());
+        MockPong pong = new MockPong(false,true,0,true,false,true,null,null,null);
+        assertFalse(pong.hasFile());
+        
+        ranker.processMessage(pong,new UDPReplyHandler(InetAddress.getByName("1.2.3.4"),1));
+        assertFalse(ranker.hasMore());
+    }
+    
+    /**
+     * Tests that the ranker offers hosts that indicated they were busy last
+     */
+    public void testBusyOfferedLast() throws Exception {
+        ranker.addToPool(newRFDWithURN("1.2.3.4",3));
+        ranker.addToPool(newRFDWithURN("1.2.3.5",3));
+        MockPong busy = new MockPong(true,true,0,true,true,true,null,null,null);
+        MockPong notBusy = new MockPong(true,true,0,true,false,true,null,null,null);
+        
+        ranker.processMessage(busy,new UDPReplyHandler(InetAddress.getByName("1.2.3.4"),1));
+        ranker.processMessage(notBusy,new UDPReplyHandler(InetAddress.getByName("1.2.3.5"),1));
+        
+        RemoteFileDesc best = ranker.getBest();
+        assertEquals("1.2.3.5",best.getHost());
+        best = ranker.getBest();
+        assertEquals("1.2.3.4",best.getHost());
+    }
+    
+    /**
+     * Tests that the ranker offers hosts that have more free slots first 
+     */
+    public void testSortedByQueueRank() throws Exception {
+        ranker.addToPool(newRFDWithURN("1.2.3.4",3));
+        ranker.addToPool(newRFDWithURN("1.2.3.5",3));
+        ranker.addToPool(newRFDWithURN("1.2.3.6",3));
+        
+        MockPong oneFree = new MockPong(true,true,-1,true,false,true,null,null,null);
+        MockPong noFree = new MockPong(true,true,0,true,false,true,null,null,null);
+        MockPong oneQueue = new MockPong(true,true,1,true,false,true,null,null,null);
+        
+        ranker.processMessage(oneQueue,new UDPReplyHandler(InetAddress.getByName("1.2.3.4"),1));
+        ranker.processMessage(oneFree,new UDPReplyHandler(InetAddress.getByName("1.2.3.5"),1));
+        ranker.processMessage(noFree,new UDPReplyHandler(InetAddress.getByName("1.2.3.6"),1));
+        
+        RemoteFileDesc best = ranker.getBest();
+        assertEquals("1.2.3.5",best.getHost());
+        best = ranker.getBest();
+        assertEquals("1.2.3.6",best.getHost());
+        best = ranker.getBest();
+        assertEquals("1.2.3.4",best.getHost());
+    }
+    
+    /**
+     * tests that within the same rank, partial sources are preferred
+     */
+    public void testPartialPreferred() throws Exception {
+        ranker.addToPool(newRFDWithURN("1.2.3.4",3));
+        ranker.addToPool(newRFDWithURN("1.2.3.5",3));
+        ranker.addToPool(newRFDWithURN("1.2.3.6",3));
+        
+        MockPong oneFree = new MockPong(true,true,-1,true,false,true,null,null,null);
+        MockPong oneFreePartial = new MockPong(true,false,-1,true,false,true,new IntervalSet(),null,null);
+        MockPong noSlotsFull = new MockPong(true,true,0,true,false,true,null,null,null);
+        
+        ranker.processMessage(noSlotsFull,new UDPReplyHandler(InetAddress.getByName("1.2.3.4"),1));
+        ranker.processMessage(oneFree,new UDPReplyHandler(InetAddress.getByName("1.2.3.5"),1));
+        ranker.processMessage(oneFreePartial,new UDPReplyHandler(InetAddress.getByName("1.2.3.6"),1));
+        
+        RemoteFileDesc best = ranker.getBest();
+        assertEquals("1.2.3.6",best.getHost());
+        best = ranker.getBest();
+        assertEquals("1.2.3.5",best.getHost());
+        best = ranker.getBest();
+        assertEquals("1.2.3.4",best.getHost());
+    }
     
     private static RemoteFileDesc newRFD(String host, int speed){
         return new RemoteFileDesc(host, 1,
@@ -147,6 +232,87 @@ public class PingRankerTest extends BaseTestCase {
             messages.add(message);
             hosts.add(host);
         }
+    }
+    
+    /**
+     * a very customizable HeadPong
+     */
+    static class MockPong extends HeadPong {
+        
+        private Set altLocs, pushLocs;
+        private boolean have, full, firewalled, busy, downloading;
+        private IntervalSet ranges;
+        private int queueStatus;
+        public MockPong(boolean have, boolean full, int queueStatus, 
+                boolean firewalled, boolean busy, boolean downloading,
+                IntervalSet ranges, Set altlocs, Set pushLocs) 
+        throws IOException{
+            super(new HeadPing(URN.createSHA1Urn("urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFE")));
+            this.altLocs = altLocs;
+            this.pushLocs = pushLocs;
+            this.queueStatus = queueStatus;
+            this.have = have;
+            this.full = full;
+            this.firewalled = firewalled;
+            this.busy = busy;
+            this.downloading = downloading;
+            this.ranges = ranges;
+        }
+
+        public Set getAllLocsRFD(RemoteFileDesc original) {
+            Set ret = new HashSet();
+            
+            if (altLocs!=null)
+                for(Iterator iter = altLocs.iterator();iter.hasNext();) {
+                    IpPort current = (IpPort)iter.next();
+                    ret.add(new RemoteFileDesc(original,current));
+                }
+            
+            if (pushLocs!=null)
+                for(Iterator iter = pushLocs.iterator();iter.hasNext();) {
+                    PushEndpoint current = (PushEndpoint)iter.next();
+                    ret.add(new RemoteFileDesc(original,current));
+                }
+            
+            return ret;
+        }
+
+        public Set getAltLocs() {
+            return this.altLocs;
+        }
+
+        public Set getPushLocs() {
+            return pushLocs;
+        }
+        
+        public int getQueueStatus() {
+            return queueStatus;
+        }
+        
+        public IntervalSet getRanges() {
+            return ranges;
+        }
+        
+        public boolean hasCompleteFile() {
+            return full;
+        }
+        
+        public boolean hasFile() {
+            return have;
+        }
+        
+        public boolean isBusy() {
+            return busy;
+        }
+        
+        public boolean isDownloading() {
+            return downloading;
+        }
+        
+        public boolean isFirewalled() {
+            return firewalled;
+        }
+        
         
     }
 
