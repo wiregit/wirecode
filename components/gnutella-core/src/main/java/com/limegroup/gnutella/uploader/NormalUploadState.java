@@ -189,7 +189,7 @@ public final class NormalUploadState implements HTTPMessage {
      */
     private void uploadThrottled(OutputStream ostream) throws IOException {
         while (true) {
-            int max = _uploader.getManager().calculateBandwidth();
+			int max = RouterService.getUploadManager().calculateBandwidth();
             int burstSize=max*CYCLE_TIME;
 
             int c = -1;
