@@ -28,18 +28,6 @@ public class QueryUnicasterTest extends com.limegroup.gnutella.util.BaseTestCase
     private boolean shouldRun() {
         return _shouldRun;
     }
-    
-    private static boolean anError = false;
-
-//      static {
-        
-//          try {
-//      		Backend backend = Backend.createBackend(40*1000);
-//              backend.start();
-//          } catch (Throwable t) {
-//              anError = true;
-//          }
-//      }
 
 
     // produces should add(), consumers should firstElement()
