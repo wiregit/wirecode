@@ -17,8 +17,17 @@
 
 
 <!-- constants -->
-<property name="DEBUG" value="no"/>  
-<property name="OPTIMIZE" value="yes"/>  
+<property name="DEBUG" value="yes"/>  
+<property name="OPTIMIZE" value="no"/>  
+
+<!-- default classpath for javac.  it is set as the user's CLASSPATH
+     environment with the jar files necessary for compilation appended. -->
+<path id="default.classpath" >
+  <pathelement path="${CLASSPATH}" />
+  <pathelement location="lib/collections.jar" />
+  <pathelement location="lib/xerces.jar" />
+  <pathelement location="lib/MRJToolkitStubs.jar" />
+</path>
 
 
 <!-- Initialization stuff -->
@@ -33,7 +42,9 @@
 	<javac debug="${DEBUG}" optimize="${OPTIMIZE}"
 		srcdir="${basedir}" destdir="${basedir}"
 		excludes="${unused}/**"
-	/>
+	>
+      <classpath refid="default.classpath" />
+    </javac>
 </target>
 
 <!-- Core -->
@@ -41,7 +52,9 @@
 	<javac debug="${DEBUG}" optimize="${OPTIMIZE}"
 		srcdir="${basedir}" destdir="${basedir}"
 		includes="${downloader}/**,${filters}/**,${uploader}/**,${util}/**,${gnutella}/*,${xml}/**,${routing}/**,${chat}/**,${mp3}/**,${security}/**,${handshaking}/**"
-	/>
+	>
+    <classpath refid="default.classpath" />
+    </javac>
 </target>
 
 	
@@ -54,3 +67,16 @@
 </target>		
 
 </project>
+
+
+
+
+
+
+
+
+
+
+
+
+
