@@ -17,9 +17,204 @@ import com.limegroup.gnutella.util.StringUtils;
  * terminates.
  */
 //2345678|012345678|012345678|012345678|012345678|012345678|012345678|012345678|
-public class SettingsManager implements SettingsInterface {
+public class SettingsManager {
 
 	private final String CURRENT_DIRECTORY = System.getProperty("user.dir");
+
+	/**
+	 * the default name of the shared directory.
+	 */
+	private final String  SAVE_DIRECTORY_NAME = "Shared";
+
+	/**
+	 * the name of the host list file.
+	 */
+	private final String  HOST_LIST_NAME = "gnutella.net";	
+
+    /** 
+	 * Default name for the properties file 
+	 */
+    private final String  PROPS_NAME = "limewire.props";
+
+    /** 
+	 * Default name for the network discovery properties 
+	 */
+    private final String  ND_PROPS_NAME  = "nd.props";
+
+	private final boolean DEFAULT_ALLOW_BROWSER  = false;
+    /** Default setting for the time to live */
+    private final byte    DEFAULT_TTL            = (byte)7;
+    /** Default setting for the soft maximum time to live */
+    private final byte    DEFAULT_SOFT_MAX_TTL   = (byte)10;
+    /** Default setting for the hard maximum time to live */
+    private final byte    DEFAULT_MAX_TTL        = (byte)50;
+    /** Default maximum packet length */
+    private final int     DEFAULT_MAX_LENGTH     = 65536;
+    /** Default timeout */
+    private final int     DEFAULT_TIMEOUT        = 8000;
+
+    /** Default value for the keep alive */
+    public static final int DEFAULT_KEEP_ALIVE     = 4;
+    /** Default port*/
+    private final int     DEFAULT_PORT           = 6346;
+    /** Default network connection speed */
+    private final int     DEFAULT_SPEED          = 56;
+    private final int     DEFAULT_UPLOAD_SPEED   = 100;
+    /** Default limit for the number of searches */
+    private final byte    DEFAULT_SEARCH_LIMIT   = (byte)64;
+    /** Default client guid */
+    private final String  DEFAULT_CLIENT_ID      = null;
+    /** Default maximum number of connections */
+    private final int     DEFAULT_MAX_INCOMING_CONNECTION=4;
+    /** Default directories for file searching */
+    private final String  DEFAULT_SAVE_DIRECTORY = "";
+    /** Default directories for file searching */
+    private final String  DEFAULT_DIRECTORIES    = "";
+    /** Default file extensions */
+    private final String  DEFAULT_EXTENSIONS     =
+		"html;htm;xml;txt;pdf;ps;rtf;doc;tex;mp3;wav;au;aif;aiff;ra;ram;"+
+		"mpg;mpeg;asf;qt;mov;avi;mpe;swf;dcr;gif;jpg;jpeg;jpe;png;tif;tiff;"+
+		"exe;zip;gz;gzip;hqx;tar;tgz;z;rmj;lqt;rar;ace;sit;smi;img;ogg;rm;"+
+		"bin;dmg";
+
+
+	/** the number of uplads allowed per person at a given time */
+    private final int     DEFAULT_UPLOADS_PER_PERSON=3;
+
+    /** default banned ip addresses */
+    private final String[] DEFAULT_BANNED_IPS     = {};
+    private final String[] DEFAULT_BANNED_WORDS   = {};
+    private final boolean DEFAULT_FILTER_ADULT   = false;
+    private final boolean DEFAULT_FILTER_DUPLICATES = true;
+    /** Filter .vbs files? */
+    private final boolean DEFAULT_FILTER_VBS     = true;
+    /** Filter .htm[l] files? */
+    private final boolean DEFAULT_FILTER_HTML    = false;
+    private final boolean DEFAULT_FILTER_GREEDY_QUERIES = true;
+    private final boolean DEFAULT_FILTER_BEARSHARE_QUERIES = true;
+    /** Use quick connect hosts instead of gnutella.net? */
+    private final boolean DEFAULT_USE_QUICK_CONNECT = true;
+	/** This is limewire's public pong cache */
+    public static final String  DEFAULT_LIMEWIRE_ROUTER    = 
+	  "router.limewire.com";
+	/** This is limewire's dedicated pong cache */
+    public static final String  DEDICATED_LIMEWIRE_ROUTER  = 
+	  "router4.limewire.com";
+    /** List of hosts to try on quick connect */
+    private final String[] DEFAULT_QUICK_CONNECT_HOSTS
+    = {DEFAULT_LIMEWIRE_ROUTER+":6346",
+       "gnutellahosts.com:6346",
+    };
+    private final int     DEFAULT_PARALLEL_SEARCH  = 5;
+    private final int     DEFAULT_MAX_SIM_DOWNLOAD = 4;
+    /** Default for whether user should be prompted before downloading exe's. */
+    private final boolean DEFAULT_PROMPT_EXE_DOWNLOAD = true;
+    private final int     DEFAULT_MAX_UPLOADS      = 8;
+    private final boolean DEFAULT_CLEAR_UPLOAD     = false;
+    private final boolean DEFAULT_CLEAR_DOWNLOAD   = false;
+    private final int     DEFAULT_SEARCH_ANIMATION_TIME = 20;
+    public static final String  DEFAULT_CONNECT_STRING    
+		= "GNUTELLA CONNECT/0.4";
+    private final String  DEFAULT_CONNECT_OK_STRING 
+		= "GNUTELLA OK";
+    private final int     DEFAULT_BASIC_INFO_FOR_QUERY = 1000;
+    private final int     DEFAULT_ADVANCED_INFO_FOR_QUERY = 50;
+
+    private final boolean DEFAULT_CHECK_AGAIN        = true;
+    private final boolean DEFAULT_FORCE_IP_ADDRESS   = false;
+    private final byte[]  DEFAULT_FORCED_IP_ADDRESS  = {};
+    private final String  DEFAULT_FORCED_IP_ADDRESS_STRING = "";
+    private final int     DEFAULT_FORCED_PORT         = 6346;
+    private final int     DEFAULT_FREELOADER_FILES    = 1;
+    private final int     DEFAULT_FREELOADER_ALLOWED  = 100;
+	private final long    DEFAULT_AVERAGE_UPTIME      = 200;
+	private final long    DEFAULT_TOTAL_UPTIME        = 0;
+	private final int     DEFAULT_SESSIONS            = 1;
+	private final boolean DEFAULT_INSTALLED           = false;
+	private final int     DEFAULT_APP_WIDTH           = 640;
+	private final int     DEFAULT_APP_HEIGHT          = 620;
+	private final boolean DEFAULT_RUN_ONCE            = false;
+	private final boolean DEFAULT_SHOW_TRAY_DIALOG    = true;
+	private final boolean DEFAULT_MINIMIZE_TO_TRAY    = true;
+	private final boolean DEFAULT_SHOW_CLOSE_DIALOG   = true;
+	private final String  DEFAULT_CLASSPATH           
+		= "LimeWire.jar" + File.pathSeparator + "collections.jar";
+	private final String  DEFAULT_MAIN_CLASS           
+		= "com.limegroup.gnutella.gui.Main";
+
+	private final boolean DEFAULT_CHAT_ENABLED        = true;
+
+    // The property key name constants
+	private final String ALLOW_BROWSER         = "ALLOW_BROWSER";
+    private final String TTL                   = "TTL";
+    private final String SOFT_MAX_TTL          = "SOFT_MAX_TTL";
+    private final String MAX_TTL               = "MAX_TTL";
+    private final String MAX_LENGTH            = "MAX_LENGTH";
+    private final String TIMEOUT               = "TIMEOUT";
+    private final String KEEP_ALIVE            = "KEEP_ALIVE";
+    private final String PORT                  = "PORT";
+    private final String SPEED                 = "CONNECTION_SPEED";
+    private final String UPLOAD_SPEED          = "UPLOAD_SPEED";
+    private final String SEARCH_LIMIT          = "SEARCH_LIMIT";
+    private final String CLIENT_ID             = "CLIENT_ID";
+    private final String MAX_INCOMING_CONNECTIONS 
+		= "MAX_INCOMING_CONNECTIONS";
+    private final String SAVE_DIRECTORY 
+		= "DIRECTORY_FOR_SAVING_FILES";
+    private final String DIRECTORIES
+		= "DIRECTORIES_TO_SEARCH_FOR_FILES";
+    private final String EXTENSIONS            
+		= "EXTENSIONS_TO_SEARCH_FOR";
+    private final String BANNED_IPS            
+		= "BLACK_LISTED_IP_ADDRESSES";
+    private final String BANNED_WORDS          = "BANNED_WORDS";
+    private final String FILTER_DUPLICATES     = "FILTER_DUPLICATES";
+    private final String FILTER_ADULT          = "FILTER_ADULT";
+    private final String FILTER_HTML           = "FILTER_HTML";
+    private final String FILTER_VBS            = "FILTER_VBS";
+    private final String FILTER_GREEDY_QUERIES = "FILTER_GREEDY_QUERIES";
+    private final String FILTER_BEARSHARE_QUERIES 
+		= "FILTER_HIGHBIT_QUERIES";
+    private final String USE_QUICK_CONNECT     = "USE_QUICK_CONNECT";
+    private final String QUICK_CONNECT_HOSTS   = "QUICK_CONNECT_HOSTS";
+    private final String PARALLEL_SEARCH       = "PARALLEL_SEARCH";
+    private final String MAX_SIM_DOWNLOAD      = "MAX_SIM_DOWNLOAD";
+    private final String PROMPT_EXE_DOWNLOAD   = "PROMPT_EXE_DOWNLOAD";
+    private final String MAX_UPLOADS           = "MAX_UPLOADS";
+    private final String CLEAR_UPLOAD          = "CLEAR_UPLOAD";
+    private final String CLEAR_DOWNLOAD        = "CLEAR_DOWNLOAD";
+    private final String SEARCH_ANIMATION_TIME = "SEARCH_ANIMATION_TIME";
+
+    private final String CONNECT_STRING        = "CONNECT_STRING";
+    private final String CONNECT_OK_STRING     = "CONNECT_OK_STRING";
+    private final String CHECK_AGAIN           = "CHECK_AGAIN";
+    private final String BASIC_QUERY_INFO      = "BASIC_QUERY_INFO";
+    private final String ADVANCED_QUERY_INFO   = "ADVANCED_QUERY_INFO";
+    private final String FORCE_IP_ADDRESS      = "FORCE_IP_ADDRESS";
+    private final String FORCED_IP_ADDRESS     = "FORCED_IP_ADDRESS";
+    private final String FORCED_IP_ADDRESS_STRING
+        = "FORCED_IP_ADDRESS_STRING";
+    private final String FORCED_PORT           = "FORCED_PORT";
+    private final String FREELOADER_FILES      = "FREELOADER_FILES";
+    private final String FREELOADER_ALLOWED    = "FREELOADER_ALLOWED";
+
+    private final String UPLOADS_PER_PERSON    = "UPLOADS_PER_PERSON";
+    private final String AVERAGE_UPTIME        = "AVERAGE_UPTIME";
+    private final String TOTAL_UPTIME          = "TOTAL_UPTIME";
+    private final String SESSIONS              = "SESSIONS";
+	private final String INSTALLED             = "INSTALLED";
+	private final String APP_WIDTH             = "APP_WIDTH";
+	private final String APP_HEIGHT            = "APP_HEIGHT";
+	private final String RUN_ONCE              = "RUN_ONCE";
+	private final String WINDOW_X              = "WINDOW_X";
+	private final String WINDOW_Y              = "WINDOW_Y";
+	private final String SHOW_TRAY_DIALOG      = "SHOW_TRAY_DIALOG";
+	private final String MINIMIZE_TO_TRAY      = "MINIMIZE_TO_TRAY";
+	private final String SHOW_CLOSE_DIALOG     = "SHOW_CLOSE_DIALOG";
+	private final String CLASSPATH             = "CLASSPATH";
+	private final String MAIN_CLASS            = "MAIN_CLASS";
+
+	private final String CHAT_ENABLED          = "CHAT_ENABLED";
  
 	/** Variables for the various settings */
     private volatile boolean  _forceIPAddress;
@@ -724,7 +919,7 @@ public class SettingsManager implements SettingsInterface {
 
     /** returns the string of default file extensions to share.*/
     public String getDefaultExtensions() {
-		return SettingsInterface.DEFAULT_EXTENSIONS;
+		return DEFAULT_EXTENSIONS;
 	}
 
     public String[] getBannedIps(){return _bannedIps;}
