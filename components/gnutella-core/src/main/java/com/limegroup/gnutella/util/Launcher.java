@@ -338,84 +338,84 @@ public class Launcher {
 		}
 	}
 
-	private static void launchMacFile(String file) {
-	}
+//  	private static void launchMacFile(String file) {
+//  	}
 
-	private static void launchUnixFile(String file) {
-	}
+//  	private static void launchUnixFile(String file) {
+//  	}
 
-	private static void launchAppWithFile(String key, String file) {
-		System.out.println("Launcher::launchAppWithFile:key: "+key+" file: "+file);
-		Win32RegKey regKey = new Win32RegKey
-		(Win32RegKey.HKEY_CLASSES_ROOT, key);		
-		String exe = (String)regKey.getValue("");
-		System.out.println("exe: "+exe);
-		if(exe != null) {
-			int i = exe.lastIndexOf(".exe");
-			if(i == -1) {
-				i = exe.lastIndexOf(".EXE");
-			}
-			if(i != -1) {
-				// if the executable path in the registry is in quotes, then 
-				// include the quotes in our command string and increase
-				// the offset by one.
-				int offset = i + 4;
-				if(exe.startsWith("\"")) {
-					offset++;
-				}		
-				exe = exe.substring(0, offset);
-				String command = exe + " \"" + file +"\"";
-				String fn = " \"" + file +"\"";
-				System.out.println("command: "+command);
-				String[] cmds = {exe, fn};
-				try {
-					Runtime.getRuntime().exec(cmds);
-				}
-				catch(IOException ioe) {
-					System.out.println("caught io exception");
-				}		   		
-			}											
-		}
-		// otherwise we have no executable -- let's wait and see what we can do
-		else { 
-			//return "";
-		}
-	}
+//  	private static void launchAppWithFile(String key, String file) {
+//  		System.out.println("Launcher::launchAppWithFile:key: "+key+" file: "+file);
+//  		Win32RegKey regKey = new Win32RegKey
+//  		(Win32RegKey.HKEY_CLASSES_ROOT, key);		
+//  		String exe = (String)regKey.getValue("");
+//  		System.out.println("exe: "+exe);
+//  		if(exe != null) {
+//  			int i = exe.lastIndexOf(".exe");
+//  			if(i == -1) {
+//  				i = exe.lastIndexOf(".EXE");
+//  			}
+//  			if(i != -1) {
+//  				// if the executable path in the registry is in quotes, then 
+//  				// include the quotes in our command string and increase
+//  				// the offset by one.
+//  				int offset = i + 4;
+//  				if(exe.startsWith("\"")) {
+//  					offset++;
+//  				}		
+//  				exe = exe.substring(0, offset);
+//  				String command = exe + " \"" + file +"\"";
+//  				String fn = " \"" + file +"\"";
+//  				System.out.println("command: "+command);
+//  				String[] cmds = {exe, fn};
+//  				try {
+//  					Runtime.getRuntime().exec(cmds);
+//  				}
+//  				catch(IOException ioe) {
+//  					System.out.println("caught io exception");
+//  				}		   		
+//  			}											
+//  		}
+//  		// otherwise we have no executable -- let's wait and see what we can do
+//  		else { 
+//  			//return "";
+//  		}
+//  	}
 
-	private static String formatExecutable(String exe) {
-		if(exe != null) {
-			int i = exe.lastIndexOf(".exe");
-			if(i == -1) {
-				i = exe.lastIndexOf(".EXE");
-				if(i == -1) {
-					return "";
-				}			
-			}				
-			// if the executable path in the registry is in quotes, then 
-			// include the quotes in our command string and increase
-			// the offset by one.
-			int offset = i + 4;
-			if(exe.startsWith("\"")) {
-				offset++;
-			}		
-			exe = exe.substring(0, offset);
-			return exe;
-		}
-		else { 
-			return "";
-		}
-	}	
+//  	private static String formatExecutable(String exe) {
+//  		if(exe != null) {
+//  			int i = exe.lastIndexOf(".exe");
+//  			if(i == -1) {
+//  				i = exe.lastIndexOf(".EXE");
+//  				if(i == -1) {
+//  					return "";
+//  				}			
+//  			}				
+//  			// if the executable path in the registry is in quotes, then 
+//  			// include the quotes in our command string and increase
+//  			// the offset by one.
+//  			int offset = i + 4;
+//  			if(exe.startsWith("\"")) {
+//  				offset++;
+//  			}		
+//  			exe = exe.substring(0, offset);
+//  			return exe;
+//  		}
+//  		else { 
+//  			return "";
+//  		}
+//  	}	
 
-	private static void runExecutableWithFile(String exe, String file) {
-		String command = exe + " \"" + file +"\"";
-		System.out.println("command: "+command);
-		try {
-			Runtime.getRuntime().exec(command);
-		}
-		catch(IOException ioe) {
-			System.out.println("caught io exception");
-		}		   		
-	}
+//  	private static void runExecutableWithFile(String exe, String file) {
+//  		String command = exe + " \"" + file +"\"";
+//  		System.out.println("command: "+command);
+//  		try {
+//  			Runtime.getRuntime().exec(command);
+//  		}
+//  		catch(IOException ioe) {
+//  			System.out.println("caught io exception");
+//  		}		   		
+//  	}
 
 
 	public static void launch(String path) throws IOException {
