@@ -16,6 +16,8 @@ import org.apache.commons.httpclient.HttpMethod;
 import org.apache.commons.httpclient.methods.HeadMethod;
 import org.apache.commons.httpclient.HttpClient;
 
+import org.apache.commons.logging.LogFactory;
+import org.apache.commons.logging.Log;
 
 
 /** 
@@ -35,6 +37,9 @@ import org.apache.commons.httpclient.HttpClient;
  * serialized.  
  */
 public class DownloadManager implements BandwidthTracker {
+    
+    private static final Log LOG = LogFactory.getLog(DownloadManager.class);
+    
     /** The time in milliseconds between checkpointing downloads.dat.  The more
      * often this is written, the less the lost data during a crash, but the
      * greater the chance that downloads.dat itself is corrupt.  */
@@ -772,7 +777,8 @@ public class DownloadManager implements BandwidthTracker {
         //NOTE: this algorithm provides global but not local fairness.  That is,
         //if two requeries x and y are competing for a slot, patterns like
         //xyxyxy or xyyxxy are allowed, though xxxxyx is not.
-        debug("DM.sendQuery():" + query.getQuery());
+        if(LOG.isTraceEnabled())
+            LOG.trace("DM.sendQuery():" + query.getQuery());
         Assert.that(waiting.contains(requerier),
                     "Unknown or non-waiting MD trying to send requery.");
 
@@ -786,18 +792,20 @@ public class DownloadManager implements BandwidthTracker {
 
         //Has everyone had a chance to send a query?  If so, clear the slate.
         if (querySentMDs.size() >= waiting.size()) {
-            debug("DM.sendQuery(): reseting query sent queue");
+            LOG.trace("DM.sendQuery(): reseting query sent queue");
             querySentMDs.clear();
         }
 
         //If downloader has already sent a query, give someone else a turn.
         if (querySentMDs.contains(requerier)) {
             // nope, sorry, must lets others go first...
-            debug("DM.sendQuery(): out of turn:" + query.getQuery());
+            if(LOG.isWarnEnabled())
+                LOG.warn("DM.sendQuery(): out of turn:" + query.getQuery());
             return false;
         }
         
-        debug("DM.sendQuery(): requery allowed:" + query.getQuery());  
+        if(LOG.isTraceEnabled())
+            LOG.trace("DM.sendQuery(): requery allowed:" + query.getQuery());  
         querySentMDs.add(requerier);                  
         lastRequeryTime = System.currentTimeMillis();
 		router.sendDynamicQuery(query);
@@ -816,7 +824,7 @@ public class DownloadManager implements BandwidthTracker {
      *  <tt>false</tt>
      */
     public boolean sendPush(RemoteFileDesc file) {
-        debug("DM.sendPush(): entered.");
+        LOG.trace("DM.sendPush(): entered.");
         
         // Send as multicast if it's multicast.
         if( file.isReplyToMulticast() ) {
@@ -854,7 +862,7 @@ public class DownloadManager implements BandwidthTracker {
             //connection was incoming since the port on the socket is ephemeral 
             //and not necessarily the proxies listening port
             // we have proxy info - give them a try
-            debug("DM.sendPush(): proxy info exists.");
+            LOG.info("DM.sendPush(): proxy info exists.");
             boolean requestSuccessful = false;
 
             // set up request
@@ -875,10 +883,21 @@ public class DownloadManager implements BandwidthTracker {
                 head.addRequestHeader(nodeString, nodeValue);
                 head.addRequestHeader("Cache-Control", "no-cache");                
                 HttpClient client = HttpClientManager.getNewClient();
+                if(LOG.isTraceEnabled())
+                    LOG.trace("Push Proxy Requesting with: " + connectTo);
                 try {
                     client.executeMethod(head);
-                    requestSuccessful = (head.getStatusCode() == 202);
+                    if(head.getStatusCode() == 202) {
+                        if(LOG.isInfoEnabled())
+                            LOG.info("Succesful push proxy: " + connectTo);
+                        requestSuccessful = true;
+                    } else {
+                        if(LOG.isWarnEnabled())
+                            LOG.warn("Invalid push proxy: " + connectTo +
+                                     ", response: " + head.getStatusCode());
+                    }
                 } catch (IOException ioe) {
+                    LOG.warn("PushProxy request exception", ioe);
                 } finally {
                     if( head != null )
                         head.releaseConnection();
@@ -897,6 +916,9 @@ public class DownloadManager implements BandwidthTracker {
                             file.getIndex(),
                             addr,
                             port);
+
+        if(LOG.isInfoEnabled())
+            LOG.info("Sending push request through Gnutella: " + pr);
 
         try {
             router.sendPushRequest(pr);
@@ -1015,17 +1037,6 @@ public class DownloadManager implements BandwidthTracker {
 	public synchronized float getAverageBandwidth() {
         return averageBandwidth;
 	}
-
-    private final boolean debugOn = false;
-    private final void debug(String out) {
-        if (debugOn)
-            System.out.println(out);
-    }
-    private final void debug(Exception e) {
-        if (debugOn)
-            e.printStackTrace();
-    }
-
 
     /*
     public static void main(String argv[]) {
