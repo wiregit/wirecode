@@ -1331,7 +1331,8 @@ public class ManagedDownloader implements Downloader, Serializable {
         try {
             File downloadDir = SettingsManager.instance().getSaveDirectory();
             String filename=f.getName();
-            File completeFile = new File(downloadDir, CommonUtils.convertFileName(filename));  
+            File completeFile = 
+				new File(downloadDir, CommonUtils.convertFileName(filename));  
             if ( completeFile.exists() ) 
                 retVal = true;
         }
