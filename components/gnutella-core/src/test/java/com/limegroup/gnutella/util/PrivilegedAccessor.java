@@ -182,10 +182,22 @@ public class PrivilegedAccessor {
                     classTypes[i] = args[i].getClass();
             }
         }
+        return invokeConstructor(clazz, args, classTypes);
+    }
+    
+    /**
+     * Constructs an object with the given parameters and classtypes
+     */
+    public static Object invokeConstructor(Class clazz,
+                                         Object[] args, Class[] classTypes)
+        throws NoSuchMethodException,
+               IllegalAccessException,
+               InvocationTargetException,
+               InstantiationException {
         Constructor cs = getConstructorImpl(clazz, classTypes);
         cs.setAccessible(true);
         return cs.newInstance(args);
-    }
+    }                                                 
     
     
 
