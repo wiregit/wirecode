@@ -74,11 +74,11 @@ public class StandardMessageRouter extends MessageRouter {
 	 * Responds to a ping request received over a UDP port.  This is
 	 * handled differently from all other ping requests.  Instead of
 	 * responding with a pong from this node, we respond with a pong
-	 * from other UltraPeers supporting UDP from our cache.  This method
-	 * should only be called if this host is an UltraPeer, as only UltaPeers
-	 * should accept messages over UDP.
+	 * from other UltraPeers supporting UDP from our cache.
 	 *
 	 * @param request the <tt>PingRequest</tt> to service
+     * @param datagram the <tt>DatagramPacket</tt> containing the IP
+     *  and port of the client node
 	 */
 	protected void respondToUDPPingRequest(PingRequest request, 
 										   DatagramPacket datagram) {
