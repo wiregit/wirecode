@@ -18,6 +18,8 @@ public class HTTPDownloader implements Runnable {
     public static final int CONNECTED = 1;
     public static final int ERROR = 2;
     public static final int COMPLETE = 3;
+	/** Push initialization */
+    public static final int REQUESTING = 4;
 
 
     private InputStream _istream;
@@ -147,8 +149,16 @@ public class HTTPDownloader implements Runnable {
     public InetAddress getInetAddress() {
 	if (_socket != null) 
 	    return _socket.getInetAddress();
+	else {
+	    try {
+		return InetAddress.getByName(new String(_host));
+	    }
+	    catch (Exception e) {
+	    }
+	}
 	return null;
-    }
+    }  
+
 
     public void construct(String file, ConnectionManager m) {
 	_state = NOT_CONNECTED;
@@ -230,10 +240,10 @@ public class HTTPDownloader implements Runnable {
 	
 	if (_mode == 1)
 	    initOne();
-	else if (_mode ==2)
+	else if (_mode == 2)
 	    initTwo();
 	else if (_mode == 3) {
-	    // do nothing...
+	    initThree();
 	}
 	else 
 	    return;
@@ -248,6 +258,10 @@ public class HTTPDownloader implements Runnable {
 	
 	_mode = 3;
 	
+    }
+
+    public void initThree() {
+
 	SettingsManager set = SettingsManager.instance();
 	_downloadDir = set.getSaveDirectory();
 	String pathname = _downloadDir + _filename;
@@ -258,7 +272,7 @@ public class HTTPDownloader implements Runnable {
 	    _state = ERROR;
 	    return;
 	}
-	
+
   	URLConnection conn;
 	
   	String furl = "/get/" + String.valueOf(_index) + "/" + _filename;
@@ -341,6 +355,8 @@ public class HTTPDownloader implements Runnable {
     public void sendPushRequest(String hostname, int index, 
 				int port, byte[] cguid) {
 
+	_state = REQUESTING;
+
 	StringTokenizer tokenizer = new StringTokenizer(hostname,".");
 	String a = tokenizer.nextToken();
 	String b = tokenizer.nextToken();
@@ -374,6 +390,7 @@ public class HTTPDownloader implements Runnable {
 	}
 
     }
+
 
     public void doDownload() {
 
