@@ -641,7 +641,7 @@ public class DownloadTest extends BaseTestCase {
         uploader5.setRate(RATE*2); // control, to finish the test.
         
         // Muck around with the chunk sizes the uploaders will return
-        uploader1.setLowChunkOffset(50); // add 10 to'm
+        uploader1.setLowChunkOffset(50); // add 50 to'm
         uploader2.setLowChunkOffset(-10); // subtract 10, should always fail
         uploader3.setHighChunkOffset(-50); // subtract 50 to'm
         uploader4.setHighChunkOffset(50); // add 50, should always fail
@@ -651,13 +651,22 @@ public class DownloadTest extends BaseTestCase {
         RemoteFileDesc rfd3 = newRFDWithURN(PORT_3, 100);
         RemoteFileDesc rfd4 = newRFDWithURN(PORT_4, 100);
         RemoteFileDesc rfd5 = newRFDWithURN(PORT_5, 100);
+        
         RemoteFileDesc[] rfds = { rfd1, rfd3, rfd4 };
+        ManagedDownloader md = (ManagedDownloader)
+        	RouterService.download(rfds,true,null);
         // u2 cannot be used first 'cause it may just work (if it responds
         // to a request of range 0, it'll return starting at range 0,
         // which is allowed)
-        RemoteFileDesc[] later = { rfd5, rfd2 }; // u2 cannot be used fi
-
-        tGeneric(rfds, later);
+        // so it is added last
+        
+        Thread.sleep(100);
+        md.addDownloadForced(rfd5,true);
+        Thread.sleep(100);
+        md.addDownloadForced(rfd2,true);
+        
+        waitForComplete(false);
+        
         
         int u1 = uploader1.amountUploaded();
         int u2 = uploader2.amountUploaded();
