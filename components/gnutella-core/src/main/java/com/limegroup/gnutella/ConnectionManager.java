@@ -776,7 +776,6 @@ public class ConnectionManager {
             // to connect to.
             // Thus, we only worry about the case we're connecting to
             // another ultrapeer (internally or externally generated)
-            
             int peers = getNumInitializedConnections();
             int nonLimeWirePeers = _nonLimeWirePeers;
             int locale_num = 0;
@@ -797,9 +796,12 @@ public class ConnectionManager {
                 
                 //this number will be used at the end to figure out
                 //if the connection should be allowed
+                //(the reserved slots is to make sure we have at least
+                // NUM_LOCALE_PREF locale connections but we could have more so
+                // we get the max)
                 locale_num = 
-                    ConnectionSettings.NUM_LOCALE_PREF.getValue()
-                    - _localeMatchingPeers;
+                    Math.max(0, ConnectionSettings.NUM_LOCALE_PREF.getValue()
+                             - _localeMatchingPeers);
             }
 
 
@@ -818,7 +820,6 @@ public class ConnectionManager {
             return (peers + RESERVED_NON_LIMEWIRE_PEERS - nonLimeWirePeers 
                     + locale_num)
                    < ULTRAPEER_CONNECTIONS;
-            
         }
 		return false;
     }
