@@ -262,10 +262,11 @@ public class ConnectionManager {
      * Reset how many connections you want and start kicking more off
      * if required.  This IS synchronized because we don't want threads
      * adding or removing connections while this is deciding whether
-     * to add more threads.  Ignores request if a shielded leaf node.
+     * to add more threads.  Ignores request if a shielded leaf node
+     * and newKeep>1 (sic).
      */
     public synchronized void setKeepAlive(int newKeep) {
-        if (hasClientSupernodeConnection())
+        if (newKeep>1 && hasClientSupernodeConnection())
             return;
         _keepAlive = newKeep;
         adjustConnectionFetchers();
@@ -374,13 +375,14 @@ public class ConnectionManager {
      */
     public boolean hasAvailableIncoming(boolean leaf) {
         SettingsManager settings=SettingsManager.instance();
-        //Don't allow anything if disconnected or shielded leaf
+        //Don't allow anything if disconnected or shielded leaf.  This rule is
+        //critical to the working of gotShieldedClientSupernodeConnection.
         if (_keepAlive<=0)
             return false;
         else if (hasClientSupernodeConnection())
             return false;
         else if (leaf) {
-            //TODO: if we aren't in supernode mode, this will be lower.
+            //As the spec. says, this assumes we are in supernode mode.
             int shieldedMax=
                 SettingsManager.instance().getMaxShieldedClientConnections();
             return _incomingClientConnections < shieldedMax;
@@ -569,9 +571,9 @@ public class ConnectionManager {
         int oldKeepAlive=settings.getKeepAlive();
 
         //1. Prevent any new threads from starting.  Note that this does not
-        //   affect the permanent settings.
+        //   affect the permanent settings.  We have to use setKeepAliveNow
+        //   to ignore the fact that we have a client-supernode connection.
         setKeepAlive(0);
-        //setMaxIncomingConnections(0);
         //2. Remove all connections.
         for (Iterator iter=getConnections().iterator();
              iter.hasNext(); ) {
@@ -884,10 +886,18 @@ public class ConnectionManager {
     {
         // Deactivate checking for Ultra Fast Shutdown
 		deactivateUltraFastConnectShutdown(); 
-        //set keep alive to 0, so that we are not fetching any connections
-        //KEEP_ALIVE property is not set to zero, so that when this connection
-        //drops, we automatically start fetching a new connection
-        setKeepAlive(0);
+        //Set keep alive to 1, so that we are not fetching any connections.
+        //KEEP_ALIVE property is not modified, so that when this connection
+        //drops, we can restore _keepAlive to its old value.  Note that we do
+        //not set _keepAlive to 0.  This allows
+        //lostShieldedClientSupernodeConnection to distinguish between being
+        //disconnected by the user and being disconnected by the remote host.
+        //(An earlier version required you to press the disconnect button twice
+        //when in leaf mode.)  hasAvailableIncoming will not allow incoming
+        //connections when we have a client/supernode connection, regardless of
+        //_keepAlive.  The call to math.min prevents us from reconnecting if
+        //disconnected.
+        setKeepAlive(Math.min(1, _keepAlive));
         
         //close all other connections
         Iterator iterator = _connections.iterator();
@@ -905,9 +915,11 @@ public class ConnectionManager {
      */
     private synchronized void lostShieldedClientSupernodeConnection()
     {
-        if(_connections.size() == 0)
+        //Return KEEP_ALIVE to old value...unless we're disconnected.
+        //(Recall that the KEEP_ALIVE is set to *one* when getting 
+        //a shielded leaf connection.)
+        if(_connections.size() == 0 && _keepAlive>0)
         {
-            //Return KEEP_ALIVE to old value.
             setKeepAlive(SettingsManager.instance().getKeepAlive());
         }
     }
