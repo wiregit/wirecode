@@ -1011,7 +1011,7 @@ public class HTTPDownloader implements BandwidthTracker {
                 		synchronized(_pushAltLocsReceived) {
                 			added = _pushAltLocsReceived.add(al);
                 		}
-                		if(added); 
+                		if(added) ;
                 			//TODO: put in a different stat
                 	}
 
@@ -1407,6 +1407,28 @@ public class HTTPDownloader implements BandwidthTracker {
                 _browseEnabled = true;
             else if (protocol.equals(HTTPConstants.PUSH_LOCS))
             	_wantsFalts=true;
+            else if (protocol.equals(HTTPConstants.FW_TRANSFER)) {
+                //for this header we care about the version
+                _wantsFalts=true;
+                String versionS = feature.substring(slash+1);
+            	int FWTVersion=0;
+            	try {
+            		FWTVersion = (int)Float.parseFloat(versionS);
+            	}catch(NumberFormatException nfe) {
+            		//we couldn't parse the version number - we should ignore
+            		//this header.
+            		continue;
+            	}
+            	
+            	// replace the FWT version in the rfd with the one reported
+            	// by the header if they don't match
+            	if (_rfd.getPushAddr().supportsFWTVersion()!=FWTVersion)
+            	    _rfd = new RemoteFileDesc(_rfd,
+            	        new PushEndpoint(_rfd.getClientGUID(),
+            	                _rfd.getPushProxies(),
+            	                _rfd.getPushAddr().getFeatures(),
+            	                FWTVersion));
+            }
         }
     }
 

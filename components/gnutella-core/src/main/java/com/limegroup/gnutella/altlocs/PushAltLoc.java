@@ -71,11 +71,11 @@ public class PushAltLoc extends AlternateLocation {
         int quality = 3;
  
 		
-
+        //invalid ip address - not important.
 		RemoteFileDesc	ret = new RemoteFileDesc("1.1.1.1",6346,0,_fileName,size,
-					_pushAddress.getClientGUID(), 1000, true, quality, false, null,
+					1000, true, quality, false, null,
 					urnSet,false, true,ALT_VENDOR,System.currentTimeMillis(),
-					_pushAddress.getProxies(),-1);
+					-1,_pushAddress);
 
 		
 		return ret;

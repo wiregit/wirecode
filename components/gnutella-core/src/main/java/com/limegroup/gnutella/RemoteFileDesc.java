@@ -173,7 +173,6 @@ public class RemoteFileDesc implements Serializable {
                 COPY_INDEX,                   // index (unknown)
                 rfd.getFileName(),            // filename
                 rfd.getSize(),                // filesize
-                pe.getClientGUID(),         // client GUID
                 rfd.getSpeed(),                            // speed
                 false,                        // chat capable
                 rfd.getQuality(),                            // quality
@@ -184,9 +183,8 @@ public class RemoteFileDesc implements Serializable {
                 true,                        // is firewalled
                 AlternateLocation.ALT_VENDOR, // vendor
                 System.currentTimeMillis(),   // timestamp
-                pe.getProxies(),          // push proxies
                 rfd.getCreationTime(),	// creation time
-				pe.supportsFWTVersion());       //firewall transfer
+                pe);
     }
 
 	/** 
@@ -263,7 +261,20 @@ public class RemoteFileDesc implements Serializable {
                           String vendor, long timestamp,
                           Set proxies, long createTime, 
                           int FWTVersion) {
-		if(!NetworkUtils.isValidPort(port)) {
+		this(host,port,index,filename,size,speed,chat,quality,browseHost,xmlDoc,
+		        urns,replyToMulticast,firewalled,vendor,timestamp,createTime,
+		        clientGUID == null? null : new PushEndpoint(clientGUID,
+		                proxies,PushEndpoint.PLAIN,FWTVersion));
+        
+	}
+	
+	public RemoteFileDesc(String host, int port, long index, String filename,
+	        			int size,int speed,boolean chat, int quality, boolean browseHost,
+	        			LimeXMLDocument xmlDoc, Set urns, boolean replyToMulticast,
+	        			boolean firewalled, String vendor,long timestamp,long createTime,
+	        			PushEndpoint pe) {
+	    
+	    if(!NetworkUtils.isValidPort(port)) {
 			throw new IllegalArgumentException("invalid port: "+port);
 		} 
 		if((speed & 0xFFFFFFFF00000000L) != 0) {
@@ -284,20 +295,20 @@ public class RemoteFileDesc implements Serializable {
         if(host == null) {
             throw new NullPointerException("null host");
         }
-		_speed = speed;
+        
+	    _speed = speed;
 		_host = host;
 		_port = port;
 		_index = index;
 		_filename = filename;
 		_size = size;
 		
-		if (clientGUID!=null)
-			_pushAddr = new PushEndpoint(clientGUID,
-					proxies,
-					PushEndpoint.PLAIN,
-					FWTVersion);
+		_pushAddr=pe;
+		if (pe!=null)
+		    _clientGUID=pe.getClientGUID();
+		else
+		    _clientGUID=null;
 		
-		_clientGUID = clientGUID;
 		_chatEnabled = chat;
         _quality = quality;
 		_browseHostEnabled = browseHost;
@@ -306,8 +317,8 @@ public class RemoteFileDesc implements Serializable {
         _vendor = vendor;
         _timestamp = timestamp;
         _creationTime = createTime;
-        
-        if(xmlDoc!=null) //not strictly needed
+		
+		if(xmlDoc!=null) //not strictly needed
             _xmlDocs = new LimeXMLDocument[] {xmlDoc};
         else
             _xmlDocs = null;
@@ -318,7 +329,6 @@ public class RemoteFileDesc implements Serializable {
 			_urns = Collections.unmodifiableSet(urns);
 		}
         _http11 = ( !_urns.isEmpty() );
-        
 	}
 
     private void readObject(ObjectInputStream stream) 
@@ -738,9 +748,13 @@ public class RemoteFileDesc implements Serializable {
 	 *  is not the case, or if the specified object is not a 
 	 *  <tt>RemoteFileDesc</tt>.
 	 *
-	 * Dynamic values such as _http11, _proxies and _availableSources
+	 * Dynamic values such as _http11, and _availableSources
 	 * are not checked here, as they can change and still be considered
 	 * the same "remote file".
+	 * 
+	 * The _host field may be equal for many firewalled locations; 
+	 * therefore it is necessary that we distinguish those by their different
+	 * push addresses.
 	 */
     public boolean equals(Object o) {
 		if(o == this) return true;
@@ -750,9 +764,10 @@ public class RemoteFileDesc implements Serializable {
         if (! (nullEquals(_host, other._host) && (_port==other._port)) )
             return false;
 
-        if( (NetworkUtils.isPrivateAddress(_host) ||
-             NetworkUtils.isPrivateAddress(other._host)) && 
-            !_pushAddr.equals(other._pushAddr) )
+        if( _firewalled && 
+                other._firewalled &&
+                _pushAddr!=null && 
+                !_pushAddr.equals(other._pushAddr) )
             return false;
 
         if (_size != other._size)

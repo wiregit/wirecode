@@ -272,12 +272,15 @@ public final class HTTPUtils {
      * Utlity method for getting the currently supported features.
      */
     private static Set getFeaturesValue() {
-        Set features = new HashSet(2);
+        Set features = new HashSet(4);
         features.add(ConstantHTTPHeaderValue.BROWSE_FEATURE);
         if (ChatSettings.CHAT_ENABLED.getValue())
             features.add(ConstantHTTPHeaderValue.CHAT_FEATURE);
         
        	features.add(ConstantHTTPHeaderValue.PUSH_LOCS_FEATURE);
+       	
+       	if (!RouterService.acceptedIncomingConnection())
+       	    features.add(ConstantHTTPHeaderValue.FWT_PUSH_LOCS_FEATURE);
         
         return features;
     }        
