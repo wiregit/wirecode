@@ -25,20 +25,14 @@ package de.kapsi.util;
  */
 public class OSAException extends Exception {
     
-	static {
-        System.loadLibrary("OpenScripting");
-    }
-	
 	private String msg;
 	private int errorCode;
 	private int errorNum;
 	
 	/* friendly */
-	OSAException(OSAScript script, int errorCode) {
-		
-		msg = GetErrorMessage(script.ptr);
-		errorNum = GetErrorNumber(script.ptr);
-		
+	OSAException(String msg, int errorNum, int errorCode) {
+		this.msg = msg;
+		this.errorNum = errorNum;
 		this.errorCode = errorCode;
 	}
 	
@@ -57,7 +51,4 @@ public class OSAException extends Exception {
 			return msg + " (" + errorCode + ", " + errorNum + ")";
 		}
 	}
-	
-	private static native synchronized String GetErrorMessage(int ptr);
-	private static native synchronized int GetErrorNumber(int ptr);
 }

@@ -35,8 +35,7 @@ public class OSAScript {
         System.loadLibrary("OpenScripting");
     }
 	
-	/* friendly */
-    int ptr = 0;
+    private int ptr = 0;
 	    
     /**
      * Creates a new OSAScript from the passed source code. E.g.
@@ -55,10 +54,16 @@ public class OSAScript {
         int errorCode = NewOSAScriptWithSrc(tmp, source);
 		ptr = tmp[0];
 		
+		if (ptr == 0) {
+            throw (new IllegalStateException());
+        }
+		
 		if (errorCode < 0) {
-			throw (new OSAException(this, errorCode));
+			String msg = GetErrorMessage(ptr);
+			int errorNum = GetErrorNumber(ptr);
+			throw (new OSAException(msg, errorNum, errorCode));
 		}
-			
+		
 		compile();
     }
     
@@ -82,10 +87,16 @@ public class OSAScript {
             int errorCode = NewOSAScriptWithBin(tmp, buf);
 			ptr = tmp[0];
 			
-			if (errorCode < 0) {
-				throw (new OSAException(this, errorCode));
+			if (ptr == 0) {
+				throw (new IllegalStateException());
 			}
 			
+			if (errorCode < 0) {
+				String msg = GetErrorMessage(ptr);
+				int errorNum = GetErrorNumber(ptr);
+				throw (new OSAException(msg, errorNum, errorCode));
+			}
+		
         } finally {
             if (in != null) { 
 				in.close(); 
@@ -105,7 +116,9 @@ public class OSAScript {
         ptr = tmp[0];
         
         if (errorCode < 0) {
-            throw (new OSAException(this, errorCode));
+            String msg = GetErrorMessage(ptr);
+			int errorNum = GetErrorNumber(ptr);
+			throw (new OSAException(msg, errorNum, errorCode));
         }
     }
     
@@ -128,7 +141,9 @@ public class OSAScript {
         int errorCode = GetOSAScript(ptr, dst, 0, size);
         
         if (errorCode < 0) {
-            throw (new OSAException(this, errorCode));
+            String msg = GetErrorMessage(ptr);
+			int errorNum = GetErrorNumber(ptr);
+			throw (new OSAException(msg, errorNum, errorCode));
         }
         
 		return dst;
@@ -146,16 +161,16 @@ public class OSAScript {
 		int errorCode = CompileOSAScript(ptr);
 			
 		if (errorCode < 0) {
-			throw (new OSAException(this, errorCode));
+			String msg = GetErrorMessage(ptr);
+			int errorNum = GetErrorNumber(ptr);
+			throw (new OSAException(msg, errorNum, errorCode));
 		}
     }
     
     /**
-     * Executes the script and returns the results as byte-array.
-     * It is up to you to interpret the data (usually Strings). The
-     * script will be compiled automatically if necessary.
+     * Executes the scrip. The script will be compiled automatically if necessary.
      */
-    public AEDesc execute() throws OSAException, IllegalStateException {
+    public void execute() throws OSAException, IllegalStateException {
 
         if (ptr == 0) {
             throw (new IllegalStateException());
@@ -164,21 +179,19 @@ public class OSAScript {
 		int errorCode = ExecuteOSAScript(ptr);
 		
 		if (errorCode < 0) {
-			throw (new OSAException(this, errorCode));
+			String msg = GetErrorMessage(ptr);
+			int errorNum = GetErrorNumber(ptr);
+			throw (new OSAException(msg, errorNum, errorCode));
 		}
-		
-		AEDesc desc = new AEDesc(this);
-		return (desc.getData() != null) ? desc : null;
     }
     
     /**
-     * Executes a specific subroutine of the script and returns the results as byte-array.
-     * It is up to you to interpret the data (usually Strings). The script will be compiled 
+     * Executes a specific subroutine of the script. The script will be compiled 
      * automatically if necessary.
      *
      * <p>The name of the subroutine must be written in lower case!</p>
      */
-    public AEDesc execute(String subroutine) throws OSAException, IllegalStateException {
+    public void execute(String subroutine) throws OSAException, IllegalStateException {
     
         if (ptr == 0) {
             throw (new IllegalStateException());
@@ -187,21 +200,19 @@ public class OSAScript {
 		int errorCode = ExecuteOSAScriptEvent(ptr, subroutine, null);
 		
 		if (errorCode < 0) {
-			throw (new OSAException(this, errorCode));
+			String msg = GetErrorMessage(ptr);
+			int errorNum = GetErrorNumber(ptr);
+			throw (new OSAException(msg, errorNum, errorCode));
 		}
-		
-		AEDesc desc = new AEDesc(this);
-		return (desc.getData() != null) ? desc : null;
     }
     
     /**
-     * Executes a specific subroutine of the script with optional parameters and returns the 
-     * results as byte-array. It is up to you to interpret the data (usually Strings). The script 
+     * Executes a specific subroutine of the script with optional parameters. The script 
      * will be compiled automatically if necessary.
      *
      * <p>The name of the subroutine must be written in lower case!</p>
      */
-    public AEDesc execute(String subroutine, String[] args) throws OSAException, IllegalStateException {
+    public void execute(String subroutine, String[] args) throws OSAException, IllegalStateException {
     
         if (ptr == 0) {
             throw (new IllegalStateException());
@@ -210,13 +221,37 @@ public class OSAScript {
         int errorCode = ExecuteOSAScriptEvent(ptr, subroutine, args);
 	
 		if (errorCode < 0) {
-			throw (new OSAException(this, errorCode));
+			String msg = GetErrorMessage(ptr);
+			int errorNum = GetErrorNumber(ptr);
+			throw (new OSAException(msg, errorNum, errorCode));
 		}
-		
-		AEDesc desc = new AEDesc(this);
-		return (desc.getData() != null) ? desc : null;
     }
     
+	/** 
+	* Returns the results of this script as byte-array. It is up to you 
+	* to interpret the data (usually Strings)
+	*/
+	public AEDesc getResult() throws OSAException, IllegalStateException {
+		
+		if (ptr == 0) {
+            throw (new IllegalStateException());
+        }
+		
+		int size = GetResultDataSize(ptr);
+		
+		if (size > 0) {
+			
+			String type = GetResultType(ptr);
+			
+			byte[] data = new byte[size];
+			GetResultData(ptr, data, 0, size);
+			
+			return (new AEDesc(type, data));
+		} else {
+			return null;
+		}
+	}
+	
     /**
      * Releases the native resources
      */
@@ -244,4 +279,11 @@ public class OSAScript {
     
 	private static native synchronized int GetOSAScriptSize(int ptr);
     private static native synchronized int GetOSAScript(int ptr, byte[] buf, int pos, int length);
+	
+	private static native synchronized String GetResultType(int ptr);
+	private static native synchronized int GetResultDataSize(int ptr);
+	private static native synchronized int GetResultData(int ptr, byte[] buf, int pos, int length);
+	
+	private static native synchronized String GetErrorMessage(int ptr);
+	private static native synchronized int GetErrorNumber(int ptr);
 }

@@ -22,24 +22,14 @@ package de.kapsi.util;
 
 public class AEDesc {
     
-	static {
-        System.loadLibrary("OpenScripting");
-    }
-    
     private String type;
     private byte[] data;
     
     /* friendly */
-    AEDesc(OSAScript script) {
-	
-        type = GetType(script.ptr);
-		
-		int size = GetDataSize(script.ptr);
-        if (size > 0) {
-			data = new byte[size];
-			GetData(script.ptr, data, 0, size);
-		}
-    }
+	AEDesc(String type, byte[] data) {
+		this.type = type;
+		this.data = data;
+	}
     
     /**
      * Returns a four-charcter code that indicates the type
@@ -61,8 +51,4 @@ public class AEDesc {
         return "AEDesc(type=" + type + ", data.length=" + 
 					((data != null) ? data.length : 0) + ")";
     }
-	
-	private static native synchronized String GetType(int ptr);
-	private static native synchronized int GetDataSize(int ptr);
-	private static native synchronized int GetData(int ptr, byte[] buf, int pos, int length);
 }
