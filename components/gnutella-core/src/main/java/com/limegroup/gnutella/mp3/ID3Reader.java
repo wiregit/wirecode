@@ -98,8 +98,11 @@ public final class ID3Reader {
     /**
      * Attempts to read an ID3 tag from the specified file.
      * @return an null if the document has no ID3 tag
+     * @param singleDoc true if String we return is the only document associated
+     * with the file. 
      */
-    public static String readDocument(File file,boolean solo) throws IOException{
+    public static String readDocument(File file, boolean singleDoc) 
+                                                            throws IOException {
         Object[] info = parseFile(file);
         String title = (String) info[0], artist = (String) info[1], 
         album = (String) info[2], year = (String) info[3], 
@@ -110,7 +113,7 @@ public final class ID3Reader {
         seconds = ((Integer) info[8]).intValue();
 
         StringBuffer strB = new StringBuffer();
-        if(solo){
+        if(singleDoc) {
             appendStrings("<audios noNamespaceSchemaLocation=\"",
                           schemaURI,
                           strB);
@@ -139,7 +142,7 @@ public final class ID3Reader {
             appendStrings(" bitrate=\"", ""+bitrate, strB);
         if(seconds > 0)
             appendStrings(" seconds=\"", ""+seconds, strB);
-        if(solo){
+        if(singleDoc) {
             //str = str+"</audio>";
             strB.append("/>");
             strB.append("</audios>");
@@ -399,8 +402,8 @@ public final class ID3Reader {
     /**
      * Takes a short and returns the corresponding genre string
      */
-    public static String getGenreString(short genre){
-        switch(genre){
+    public static String getGenreString(short genre) {
+        switch(genre) {
         case 0: return "Blues";
         case 1: return "Classic Rock";
         case 2: return "Country";

@@ -13,7 +13,7 @@ import com.limegroup.gnutella.util.FileUtils;
  * @author Sumeet Thadani
  */
 
-public class ID3Editor{
+public class ID3Editor {
 
     private String title_;
     private String artist_;
@@ -101,11 +101,23 @@ public class ID3Editor{
     }
 
 
-    /*
+    /** 
+     * The caller of this method has the xml string that represents a
+     * LimeXMLDocument, and wants to write the document out to disk. For this
+     * method to work effectively, the caller must instantiate this class and
+     * call this method first, and then call (TODO) to actually write the ID3
+     * tags out.
+     * <p>
+     * This method reads the complete xml string and removes the id3 *
+     * components of the xml string, and stores the values of the id3 tags in a
+     * class variable which will later be used to write the id3 tags in the
+     * mp3file.
+     * <p>
+     * @return a parseable xml string which has the same attributes as the
+     * xmlStr paramter minus the id3 tags.
      */
-    public String removeID3Tags(String xmlStr){
-
-        // will be used to reconstruct xmlStr after ripping stuff from it
+    public String removeID3Tags(String xmlStr) {
+        //will be used to reconstruct xmlStr after ripping stuff from it
         int i, j;
         Object[] rippedStuff = null;
 
@@ -216,7 +228,7 @@ public class ID3Editor{
         return xmlStr;//this has been suitable modified
     }
     
-    public int writeID3DataToDisk(String fileName){
+    public int writeID3DataToDisk(String fileName) {
         File f= null;
         RandomAccessFile file = null;
         
@@ -225,7 +237,7 @@ public class ID3Editor{
                 f = new File(fileName);
                 FileUtils.setWriteable(f);
                 file = new RandomAccessFile(f,"rw");
-            }catch(IOException e){
+            } catch(IOException e) {
                 return LimeXMLReplyCollection.FILE_DEFECTIVE;
             }
             long length=0;
@@ -234,7 +246,7 @@ public class ID3Editor{
                 if(length < 128) //could not write - file too small
                     return LimeXMLReplyCollection.FILE_DEFECTIVE;
                 file.seek(length - 128);
-            }catch(IOException ee){
+            } catch(IOException ee) {
                 return LimeXMLReplyCollection.RW_ERROR;
             }
             byte[] buffer = new byte[30];//max buffer length...drop/pickup vehicle
@@ -251,7 +263,7 @@ public class ID3Editor{
             }
             //We are sure this is an MP3 file.Otherwise this method would never be 
             //called.
-            if(!tag.equals("TAG")){
+            if(!tag.equals("TAG")) {
                 //Write the TAG
                 try{
                     byte[] tagBytes = "TAG".getBytes();//has to be len 3
@@ -286,14 +298,14 @@ public class ID3Editor{
                     trackByte = (byte)0;
                 else
                     trackByte = Byte.parseByte(track_);
-            }catch(NumberFormatException nfe){
+            } catch(NumberFormatException nfe) {
                 return LimeXMLReplyCollection.FAILED_TRACK;
             }
                     
             try{
                 file.write(0);//separator b/w comment and track(track is optional)
                 file.write(trackByte);
-            } catch(IOException e){
+            } catch(IOException e) {
                 return LimeXMLReplyCollection.FAILED_TRACK;
             }
             
@@ -316,7 +328,7 @@ public class ID3Editor{
     }
 
     private boolean toFile(String val,int maxLen, RandomAccessFile file,
-                        byte[] buffer){
+                        byte[] buffer) {
         debug("writing value to file "+val);
         byte[] fromString;
         
@@ -335,14 +347,14 @@ public class ID3Editor{
             
         try {
             file.write(buffer,0,maxLen);
-        } catch (IOException e){
+        } catch (IOException e) {
             return false;
         }
 
         return true;
     }
 
-    private byte getGenreByte(){
+    private byte getGenreByte() {
         if(genre_==null) return -1;            
         else if(genre_.equals("Blues")) return 0;
         else if(genre_.equals("Classic Rock")) return 1;
