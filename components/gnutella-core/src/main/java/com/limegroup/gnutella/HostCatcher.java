@@ -69,6 +69,16 @@ public class HostCatcher {
     static final int NORMAL_SIZE=400;
 
     /**
+     * Size of the queue for hosts returned from the GWebCaches.
+     */
+    static final int CACHE_SIZE = 20;
+    
+    /**
+     * Size of the queue for hosts returned from pongs listing free slots.
+     */
+    static final int FREE_SLOTS_SIZE = 200;
+
+    /**
      * The number of permanent locations to store in gnutella.net 
      * This MUST NOT BE GREATER THAN NORMAL_SIZE.  This is because when we read
      * in endpoints, we add them as NORMAL_PRIORITY.  If we have written
@@ -82,14 +92,25 @@ public class HostCatcher {
     static final int PERMANENT_SIZE = NORMAL_SIZE;
 
     /**
+     * Constant for the priority of hosts retrieved from pongs that have free
+     * connection slots.
+     */
+    public static final int FREE_SLOTS_PRIORITY = 3;
+    
+    /**
+     * Constant for the priority of hosts retrieved from GWebCaches.
+     */
+    public static final int CACHE_PRIORITY = 2;
+
+    /**
      * Constant for the index of good priority hosts (Ultrapeers)
      */
-    static final int GOOD_PRIORITY=1;
+    public static final int GOOD_PRIORITY = 1;
 
     /**
      * Constant for the index of non-Ultrapeer hosts.
      */
-    static final int NORMAL_PRIORITY=0;
+    public static final int NORMAL_PRIORITY = 0;
 
 
     /** The list of hosts to try.  These are sorted by priority: ultrapeers,
@@ -102,8 +123,9 @@ public class HostCatcher {
      * INVARIANT: queue contains no duplicates and contains exactly the
      *  same elements as set.
      * LOCKING: obtain this' monitor before modifying either.  */
-    private final BucketQueue /* of ExtendedEndpoint */ ENDPOINT_QUEUE = //queue =
-        new BucketQueue(new int[] {NORMAL_SIZE, GOOD_SIZE});
+    private final BucketQueue /* of ExtendedEndpoint */ ENDPOINT_QUEUE = 
+        new BucketQueue(new int[] {NORMAL_SIZE, GOOD_SIZE, 
+            CACHE_SIZE, FREE_SLOTS_SIZE});
     private final Set /* of ExtendedEndpoint */ ENDPOINT_SET = new HashSet();
 
 
@@ -125,7 +147,9 @@ public class HostCatcher {
 
     
     /** The GWebCache bootstrap system. */
-    private BootstrapServerManager gWebCache=new BootstrapServerManager(this);
+    private BootstrapServerManager gWebCache = 
+        BootstrapServerManager.instance();
+    
     /** The time we're next allowed to send a HOSTFILE request because of no
      *  fresh ultrapeer pongs.  The default value of MAX_VALUE means we're not
      *  initially allowed to. */
@@ -145,6 +169,14 @@ public class HostCatcher {
 	 */
 	private final File HOST_FILE;
 
+    private int _failures;
+    
+    private final Set EXPIRED_HOSTS = new HashSet();
+    
+    private final Set PROBATION_HOSTS = new HashSet();
+
+    private boolean _hitCaches;
+    
 	/**
 	 * Creates a new <tt>HostCatcher</tt> instance with a constant setting
 	 * for the host file location.
@@ -181,7 +213,8 @@ public class HostCatcher {
                                NetworkUtils.isValidPort(port) &&
                                !NetworkUtils.isPrivateAddress(addr)) {
                                 Endpoint e=new Endpoint(addr, port);
-								//This spawn another thread, so blocking is not an issue.
+								// This spawns another thread, so blocking is  
+                                // not an issue.
 								gWebCache.sendUpdatesAsync(e);
 							}
                         }
@@ -194,6 +227,28 @@ public class HostCatcher {
         RouterService.schedule(updater, 
 							   BootstrapServerManager.UPDATE_DELAY_MSEC, 
 							   BootstrapServerManager.UPDATE_DELAY_MSEC);
+        
+        Runnable probationRestorer = new Runnable() {
+            public void run() {
+                try {
+                    LOG.trace("restoring hosts on probation");
+                    synchronized(HostCatcher.this) {
+                        Iterator iter = PROBATION_HOSTS.iterator();
+                        while(iter.hasNext()) {
+                            Endpoint host = (Endpoint)iter.next();
+                            add(host, false);
+                        }
+                        
+                        PROBATION_HOSTS.clear();
+                    }
+                } catch(Throwable t) {
+                    ErrorService.error(t);
+                }
+            } 
+        };
+        
+        // Recover hosts on probation every minute.
+        RouterService.schedule(probationRestorer, 60000, 60000);
     }
 
     /**
@@ -218,15 +273,13 @@ public class HostCatcher {
                 //If endpoint a special GWebCache endpoint?  If so, add it to
                 //gWebCache but not this.
                 try {
-                    BootstrapServer e=new BootstrapServer(line);
-                    gWebCache.addBootstrapServer(e);
+                    gWebCache.addBootstrapServer(new BootstrapServer(line));
                     continue;
                 } catch (ParseException ignore) { }
     
                 //Is it a normal endpoint?
                 try {
-                    ExtendedEndpoint e=ExtendedEndpoint.read(line);
-                    add(e, NORMAL_PRIORITY);
+                    add(ExtendedEndpoint.read(line), NORMAL_PRIORITY);
                 } catch (ParseException pe) {
                     continue;
                 }
@@ -315,9 +368,13 @@ public class HostCatcher {
         //Add the endpoint, forcing it to be high priority if marked pong from 
         //an ultrapeer.
             
-        if (pr.isUltrapeer())
+        if (pr.isUltrapeer()) {
+            if(pr.hasFreeSlots()) {
+                return add(endpoint, FREE_SLOTS_PRIORITY);
+            } else {
             return add(endpoint, GOOD_PRIORITY);
-        else
+            }
+        } else
             return add(endpoint, NORMAL_PRIORITY);
     }
 
@@ -332,12 +389,23 @@ public class HostCatcher {
      * @return true iff e was actually added
      */
     public boolean add(Endpoint e, boolean forceHighPriority) {
-        ExtendedEndpoint ee=new ExtendedEndpoint(e.getHostname(), e.getPort());
-        //See preamble for a discussion of priorities
         if (forceHighPriority)
-            return add(ee, GOOD_PRIORITY);
+            return add(e, GOOD_PRIORITY);
         else
-            return add(ee, NORMAL_PRIORITY);
+            return add(e, NORMAL_PRIORITY);
+    }
+
+    /**
+     * Adds the specified host to the host catcher with the specified priority.
+     * 
+     * @param host the endpoint to add
+     * @param priority the priority of the endpoint
+     * @return <tt>true</tt> if the endpoint was added, otherwise <tt>false</tt>
+     */
+    public boolean add(Endpoint host, int priority) {
+        LOG.trace("adding host");
+        return add(new ExtendedEndpoint(host.getHostname(), host.getPort()), 
+            priority);
     }
 
     /**
@@ -360,7 +428,6 @@ public class HostCatcher {
         //We used to check that we're not connected to e, but now we do that in
         //ConnectionFetcher after a call to getAnEndpoint.  This is not a big
         //deal, since the call to "set.contains(e)" below ensures no duplicates.
-
         //Skip if this would connect us to our listening port.  TODO: I think
         //this check is too strict sometimes, which makes testing difficult.
         if (NetworkUtils.isMe(e.getHostname(), e.getPort()))
@@ -377,6 +444,15 @@ public class HostCatcher {
         boolean ret=false;
         boolean notifyGUI=false;
         synchronized(this) {
+            // Don't add this host if it has previously failed.
+            if(EXPIRED_HOSTS.contains(e)) {
+                return false;
+            }
+            
+            // Don't add this host if it has previously rejected us.
+            if(PROBATION_HOSTS.contains(e)) {
+                return false;
+            }
             if (! (ENDPOINT_SET.contains(e))) {
                 ret=true;
                 //Add to temporary list. Adding e may eject an older point from
@@ -402,12 +478,12 @@ public class HostCatcher {
         }
 
         //we notify the callback in two different situations.  One situation, we
-        //always notify the GUI (e.g., a SimplePongCacheServer which needs to know
-        //when a new host was added).  The second situation is if the host catcher
-        //is not full, so that the endpoint is added to the GUI for the user to
-        //view and use.  The second situation occurs the majority of times and
-        //only in special cases such as a SimplePongCacheServer would the first 
-        //situation occur.
+        //always notify the GUI (e.g., a SimplePongCacheServer which needs to 
+        //know when a new host was added).  The second situation is if the host 
+        //catcher is not full, so that the endpoint is added to the GUI for the 
+        //user to view and use.  The second situation occurs the majority of 
+        //times and only in special cases such as a SimplePongCacheServer would 
+        //the first situation occur.
         if (alwaysNotifyKnownHost || notifyGUI) {
             RouterService.getCallback().knownHost(e);
 		}
@@ -425,7 +501,7 @@ public class HostCatcher {
      * @return true iff e was actually added 
      */
     private synchronized boolean addPermanent(ExtendedEndpoint e) {
-        if (e.isPrivateAddress())
+        if (NetworkUtils.isPrivateAddress(e.getHostname()))
             return false;
         if (permanentHostsSet.contains(e))
             //TODO: we could adjust the key
@@ -474,8 +550,10 @@ public class HostCatcher {
             //GWebCache server to get more addresses.  Note, however, that this
             //will not do anything if we're currently connecting to a GWebCache.
             //TODO: do we need rate-limiting code?
-            if (getNumHosts()==0) {
+            if (getNumHosts()==0 || 
+                (!RouterService.isConnected()&&_failures > 200&&!_hitCaches)) {
                 LOG.debug("getNumHosts() == 0, fetching endpoints");
+                _hitCaches = true;
                 gWebCache.fetchEndpointsAsync();
             }
             //If there are no good, fresh ultrapeer pongs--these exclude
@@ -540,6 +618,7 @@ public class HostCatcher {
         if (success) {
             ee.recordConnectionSuccess();
         } else {
+            _failures++;
             ee.recordConnectionFailure();
         }
         addPermanent(ee);
@@ -612,7 +691,8 @@ public class HostCatcher {
         n=Math.min(n, ENDPOINT_QUEUE.size(GOOD_PRIORITY));
         //Copy n best hosts into temporary buffer.
         ArrayList /* of ExtendedEndpoint */ buf=new ArrayList(n);
-        for (Iterator iter=ENDPOINT_QUEUE.iterator(GOOD_PRIORITY, n); iter.hasNext(); )
+        for (Iterator iter=ENDPOINT_QUEUE.iterator(GOOD_PRIORITY, n); 
+             iter.hasNext(); )
             buf.add(iter.next());
         //And return iterator of contents.
         return buf.iterator();
@@ -626,7 +706,8 @@ public class HostCatcher {
         boolean removed1=ENDPOINT_SET.remove(e);
         boolean removed2=ENDPOINT_QUEUE.removeAll(e);
         //Check that ENDPOINT_SET.contains(e) <==> ENDPOINT_QUEUE.contains(e)
-        Assert.that(removed1==removed2, "Rep. invariant for HostCatcher broken.");
+        Assert.that(removed1==removed2, "Rep. invariant for HostCatcher " +
+            "broken.");
     }
 
     /**
@@ -660,6 +741,8 @@ public class HostCatcher {
     /** Enable very slow rep checking?  Package access for use by
      *  HostCatcherTest. */
     static boolean DEBUG=false;
+
+    
     /** Checks invariants. Very slow; method body should be enabled for testing
      *  purposes only. */
     protected void repOk() {
@@ -671,7 +754,8 @@ public class HostCatcher {
             outer:
             for (Iterator iter=ENDPOINT_SET.iterator(); iter.hasNext(); ) {
                 Object e=iter.next();
-                for (Iterator iter2=ENDPOINT_QUEUE.iterator(); iter2.hasNext(); ) {
+                for (Iterator iter2=ENDPOINT_QUEUE.iterator(); 
+                     iter2.hasNext();) {
                     if (e.equals(iter2.next()))
                         continue outer;
                 }
@@ -718,9 +802,38 @@ public class HostCatcher {
      * removal from our hosts list.
      */
     public void recoverHosts() {
+        LOG.debug("recovering hosts file");
         readHostsFile();
     }
 
+    /**
+     * Adds the specified host to the group of hosts currently on "probation."
+     * These are hosts that are on the network but that have rejected a 
+     * connection attempt.  They will periodically be re-activated as needed.
+     * 
+     * @param host the <tt>Endpoint</tt> to put on probation
+     */
+    public synchronized void putHostOnProbation(Endpoint host) {
+        PROBATION_HOSTS.add(host);
+        if(PROBATION_HOSTS.size() > 500) {
+            PROBATION_HOSTS.remove(EXPIRED_HOSTS.iterator().next());
+        }
+    }
+    
+    /**
+     * Adds the specified host to the group of expired hosts.  These are hosts
+     * that we have been unable to create a TCP connection to, let alone a 
+     * Gnutella connection.
+     * 
+     * @param host the <tt>Endpoint</tt> to expire
+     */
+    public synchronized void expireHost(Endpoint host) {
+        EXPIRED_HOSTS.add(host);
+        if(EXPIRED_HOSTS.size() > 500) {
+            EXPIRED_HOSTS.remove(EXPIRED_HOSTS.iterator().next());
+        }       
+    }
+    
     //Unit test: tests/com/.../gnutella/HostCatcherTest.java   
     //           tests/com/.../gnutella/bootstrap/HostCatcherFetchTest.java
     //           
