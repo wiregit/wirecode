@@ -175,11 +175,16 @@ public final class AlternateLocationCollection
 	public String toString() {
 		StringBuffer sb = new StringBuffer();
 		sb.append("Alternate Locations: ");
-		Iterator iter = _alternateLocations.values().iterator();
-		while(iter.hasNext()) {
-			AlternateLocation curLoc = (AlternateLocation)iter.next();
-			sb.append(curLoc.toString());
-			sb.append(" ");
+		if(_alternateLocations == null) {
+			sb.append("empty");
+		}
+		else {
+			Iterator iter = _alternateLocations.values().iterator();
+			while(iter.hasNext()) {
+				AlternateLocation curLoc = (AlternateLocation)iter.next();
+				sb.append(curLoc.toString());
+				sb.append(" ");
+			}
 		}
 		return sb.toString();
 	}
