@@ -70,6 +70,11 @@
   <!-- CLEAN -->
   <target name="clean">
     <delete dir="${builddir}"/>
+    <ant target="clean reports"/>
+  </target>
+  
+  <!-- clean just the reports -->
+  <target name="clean reports">
     <delete dir="${reports}"/>
   </target>
   
@@ -92,15 +97,12 @@
  </target>
  
  <!-- Tests all tests in the gnutella package -->
- <target name="gnutella" depends="prepare, build" if="serversRunning">
+ <target name="gnutella" depends="prepare, build">
     <junit printsummary="withOutAndErr" 
 	       haltonfailure="no"
 	       showoutput="true"
 		   fork="on"
     >
-      <sysproperty key="servers" value="all"/>
-
-	 <!-- <formatter type="plain" useFile="false"/> -->
 	  <formatter type="xml" />
 	  
 	  <classpath refid="default.classpath" />
@@ -112,7 +114,7 @@
 	  <test name="${GNUTELLA}.AlternateLocationCollectionTest"
 	        todir="${reports}" />
 	  <test name="${GNUTELLA}.ConnectionManagerTest"
-	        todir="${reports}" /> -->
+	        todir="${reports}" />
 	  <test name="${GNUTELLA}.EndpointTest"
 	        todir="${reports}" />
 	  <test name="${GNUTELLA}.ExtendedEndpointTest"
@@ -419,23 +421,29 @@
  </target>
  
   <!-- Runs ALL TESTS -->
- <target name="test all" depends="clean, prepare, build"> 
+ <target name="test all" depends="clean reports, prepare, build"> 
 
-    <antcall target="run all servers"/>
-    <antcall target="gnutella">
-      <param name="serversRunning" value="true"/>
-    </antcall>
-    <antcall target="bootstrap"/> 
-    <antcall target="downloader"/>
-    <antcall target="filters"/>
-    <antcall target="guess"/> 
-    <antcall target="http"/>
-    <antcall target="messages"/>
-    <antcall target="mp3"/>
-    <antcall target="routing"/>
-    <antcall target="uploader"/>
-    <antcall target="util"/>
-    <antcall target="xml"/>
+    <parallel>
+        <antcall target="run all servers"/>
+        
+        <sequential>
+            <sleep seconds="20"/>
+            <antcall target="gnutella">
+              <param name="serversRunning" value="true"/>
+            </antcall>
+            <antcall target="bootstrap"/> 
+            <antcall target="downloader"/>
+            <antcall target="filters"/>
+            <antcall target="guess"/> 
+            <antcall target="http"/>
+            <antcall target="messages"/>
+            <antcall target="mp3"/>
+            <antcall target="routing"/>
+            <antcall target="uploader"/>
+            <antcall target="util"/>
+            <antcall target="xml"/>
+        </sequential>
+    </parallel>
         
     <antcall target="html"/>    
  </target>
