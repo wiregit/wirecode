@@ -33,4 +33,14 @@ public class OutOfBandThroughputStat extends AdvancedStatistic {
 	public static final Statistic RESPONSES_RECEIVED = 
 	    new OutOfBandThroughputStat();
 
+
+	/**
+	 * <tt>Statistic</tt> for number of Responses send via a ReplyNUmberVM but 
+     * not retrieved.
+	 */
+	public static final Statistic RESPONSES_BYPASSED = 
+	    new OutOfBandThroughputStat();
+
+    
+
 }

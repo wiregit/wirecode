@@ -839,8 +839,11 @@ public abstract class MessageRouter {
             // see if we need more results for this query....
             // TODO: remember this location for a future, 'find more sources'
             // targeted GUESS query.
-            if ((numResults<0) || (numResults>QueryHandler.ULTRAPEER_RESULTS))
+            if ((numResults<0) || (numResults>QueryHandler.ULTRAPEER_RESULTS)) {
+            if (RECORD_STATS)
+                OutOfBandThroughputStat.RESPONSES_BYPASSED.addData(reply.getNumResults());
                 return;
+            }
             
             LimeACKVendorMessage ack = 
                 new LimeACKVendorMessage(qGUID, reply.getNumResults());
