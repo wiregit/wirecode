@@ -13,9 +13,9 @@ import com.limegroup.gnutella.*;
 public final class QueryDispatcher implements Runnable {
 
 	/**
-	 * <tt>List</tt> of outstanding queries.  
+	 * <tt>Map</tt> of outstanding queries.  
 	 */
-	private final Map QUERIES = new HashMap();
+	private final Map QUERIES = new HashMap(); // GUID -> QueryHandler
 
 	/**
 	 * <tt>List</tt> of new queries to add.
