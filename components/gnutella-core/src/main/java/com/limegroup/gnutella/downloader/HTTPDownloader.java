@@ -187,13 +187,25 @@ public class HTTPDownloader implements Runnable {
 		int count = 0;
 		int c = -1;
 		
-		byte[] buf = new byte[BUFFSIZE];
-
-		while ( (c = _istream.read(buf) ) != -1) {
+		while (true) {
+		    
+		    int buf_size = _istream.available();
+		    byte[] buf = new byte[buf_size];
+		    c = _istream.read(buf);
+		    if (c == -1) 
+			break;
 		    myFile.write(buf);
 		    _amountRead+=c;
 		    count++;
+		    
 		}
+
+//  		byte[] buf = new byte[BUFFSIZE];
+//  		while ( (c = _istream.read(buf) ) != -1) {
+//  		    myFile.write(buf);
+//  		    _amountRead+=c;
+//  		    count++;
+//  		}
 		    
 	    }
 	}
