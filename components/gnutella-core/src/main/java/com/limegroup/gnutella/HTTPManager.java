@@ -223,7 +223,7 @@ public class HTTPManager {
 						}
 					
 				}
-				userAgent = str.substring(12);
+				userAgent = str.substring(11).trim();
 			}
 		}
 	}

@@ -64,8 +64,8 @@ public class HTTPUploader implements Runnable, Comparable {
 	 * A SortedSet of the full uploads in progress.  
 	 * This is used to shutdown "Gnutella" uploads as needed.
 	 */
-	private static SortedSet _fullUploads =
-		Collections.synchronizedSortedSet(new TreeSet());
+	private static List _fullUploads =
+		Collections.synchronizedList(new LinkedList());
 
 
 
@@ -294,7 +294,7 @@ public class HTTPUploader implements Runnable, Comparable {
 			//  revisit this code and get the pushed UserAgent.  
 			//  Currently, we do not depreferenced pushed "Gnutella"
 			//  Because we were sending Gnutella back ourselves.
-            //String line2=in.readLine();
+			//String line2=in.readLine();
 			//
 
             _socket.setSoTimeout(0);
@@ -852,7 +852,7 @@ public class HTTPUploader implements Runnable, Comparable {
 		if ( "Gnutella".equals(agent) )
 			return false;
 
-        HTTPUploader first = (HTTPUploader)_fullUploads.first(); 
+        HTTPUploader first = (HTTPUploader)Collections.min(_fullUploads); 
 		if ( "Gnutella".equals(first.getUserAgent()) )
 		{
 			first.doCleanup();  
