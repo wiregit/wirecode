@@ -1,6 +1,6 @@
 /*
  * This class represents a promotion request message that an ultrapeer
- * sends to a candidate leaf.  This message is send in-band and is routed
+ * sends to a candidate leaf.  This message is sent in-band and is routed
  * by any ultrapeers along the path.
  */
 package com.limegroup.gnutella.messages.vendor;
@@ -59,14 +59,45 @@ public class PromotionRequestVendorMessage extends VendorMessage {
 		}	
 	}
 	
+	/**
+	 * creates an outgoing promotion request based on the best candidate we know of.
+	 * @param candidate the leaf within ttl 2 that we know is the best candidate for an UP.
+	 */
 	public PromotionRequestVendorMessage(Candidate candidate) {
 		super(F_LIME_VENDOR_ID,F_PROMOTION_REQUEST,VERSION,derivePayload(candidate));
 		setGUID(new GUID(GUID.makeGuid()));
 		
-		//these fields should not be used when constructing the object this way.
-		_candidate = null;
-		_requestor = null;
+		//these fields should not be used when constructing the object this way,
+		//but lets initialize them just in case
+		_candidate = candidate.getAddress();
+		
+		//(stupid final beurocracy)
+		QueryReply.IPPortCombo requestor;
+		
+		try {
+			requestor = new QueryReply.IPPortCombo(
+				NetworkUtils.ip2string(RouterService.getAddress()),
+				RouterService.getPort()); 
+		}catch (UnknownHostException yeah) {
+			requestor=null;
+		}
+		_requestor = requestor;
 		_distance = 0;
+	}
+	
+	/**
+	 * creates a message as a result of a received promotion request.
+	 * This message is meant to be forwarded to the appropriate candidate advertiser
+	 * Note: the check whether the message should be forwarded or not needs to happen
+	 * elsewhere. 
+	 * @param original the message received from someone on the network.
+	 */
+	public PromotionRequestVendorMessage(PromotionRequestVendorMessage original) {
+		super(F_LIME_VENDOR_ID,F_PROMOTION_REQUEST,VERSION,derivePayload(original));
+		setGUID(new GUID(original.getGUID()));
+		_candidate = original.getCandidate();
+		_requestor = original.getRequestor();
+		_distance = original.getDistance()+1;
 	}
 	
 	protected static byte [] derivePayload(Candidate candidate) {
@@ -80,8 +111,42 @@ public class PromotionRequestVendorMessage extends VendorMessage {
 		
 		//the last 6 bytes are our address
 		System.arraycopy(RouterService.getExternalAddress(),0,payload,7,4);
-		ByteOrder.short2leb((short)RouterService.getPort(),payload,11);  //TODO:check if this is the UDP port
+		ByteOrder.short2leb((short)RouterService.getPort(),payload,11);  
 		
 		return payload;
+	}
+	
+	protected static byte [] derivePayload(PromotionRequestVendorMessage other) {
+		byte [] ret = new byte [13];
+		
+		byte [] received = other.getPayload();
+		
+		//keep everything the same except the distance value
+		System.arraycopy(received,1,ret,1,12);
+		
+		//which is incremented by 1
+		int distance = received[0];  
+		distance++;
+		ret[0] = (byte)distance;
+		
+		return ret;
+	}
+	/**
+	 * @return Returns the _candidate.
+	 */
+	protected QueryReply.IPPortCombo getCandidate() {
+		return _candidate;
+	}
+	/**
+	 * @return Returns the _distance.
+	 */
+	protected int getDistance() {
+		return _distance;
+	}
+	/**
+	 * @return Returns the _requestor.
+	 */
+	protected QueryReply.IPPortCombo getRequestor() {
+		return _requestor;
 	}
 }
