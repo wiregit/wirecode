@@ -1486,8 +1486,7 @@ public class ManagedDownloader implements Downloader, Serializable {
         // If that fails, try killing any partial uploads we may have
         // to unlock the file, and then rename it.
         if (!success) {
-            FileDesc fd =
-              RouterService.getFileManager().getMatchingIncompleteFileDesc(
+            FileDesc fd = RouterService.getFileManager().getFileDescForFile(
                 incompleteFile);
             if( fd != null ) {
                 UploadManager upMan = RouterService.getUploadManager();

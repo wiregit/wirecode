@@ -314,23 +314,17 @@ public class FileManager {
     
     
     /**
-     * Returns the first FileDesc that matches both this URN and File.
+     * Returns the <tt>FileDesc</tt> that is wrapping this <tt>File</tt>
+     * or null if the file is not shared.
      */
-    public synchronized FileDesc getMatchingFileDesc(URN urn, File f) {
-        IntSet hits = (IntSet)_urnIndex.get(urn);
-        if( hits == null )
+    public synchronized FileDesc getFileDescForFile(File f) {
+        try {
+            f = getCanonicalFile(f);
+        } catch(IOException ioe) {
             return null;
-
-        // double-check hits to be defensive (not strictly needed)
-        IntSet.IntSetIterator iter = hits.iterator();
-        while(iter.hasNext()) {
-            FileDesc fd = (FileDesc)_files.get(iter.next());
-            if( fd == null ) // unshared.
-                continue;
-            if(fd.containsUrn(urn) && fd.getFile().equals(f))
-                return fd;
         }
-        return null;
+
+        return (FileDesc)_fileToFileDesc.get(f);
     }    
 
 	/**
@@ -356,22 +350,6 @@ public class FileManager {
             ret = (FileDesc)_files.get(index);
 		}
         return ret;
-	}
-	
-	/**
-	 * Returns an IncompleteFileDesc matching f.
-	 */
-	public synchronized FileDesc getMatchingIncompleteFileDesc(File f) {
-	    IntSet.IntSetIterator iter = _incompletesShared.iterator();
-	    for(; iter.hasNext(); ) {
-	        int index = iter.next();
-	        FileDesc fd = (FileDesc)_files.get(index);
-	        if( fd == null )
-	            continue;
-	        if(fd.getFile().equals(f))
-	            return fd;
-	    }
-	    return null;
 	}
 	
 	/**

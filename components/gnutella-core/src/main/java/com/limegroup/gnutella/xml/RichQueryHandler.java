@@ -93,7 +93,7 @@ public class RichQueryHandler{
                 URN hash = currDoc.getXMLUrn();
                 if( hash == null ) 
                     continue;
-                fd = fManager.getMatchingFileDesc(hash, new File(subjectFile));
+                fd = fManager.getFileDescForFile(new File(subjectFile));
                 if( fd == null || 
                    (busy && fd.getNumberOfAlternateLocations() >= 10) ) {
                     // if fd is null, MetaFileManager is out of synch with
