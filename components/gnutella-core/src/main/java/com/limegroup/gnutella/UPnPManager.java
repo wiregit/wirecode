@@ -3,12 +3,15 @@ package com.limegroup.gnutella;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.cybergarage.upnp.Action;
 import org.cybergarage.upnp.Argument;
+import org.cybergarage.upnp.ArgumentList;
 import org.cybergarage.upnp.ControlPoint;
 import org.cybergarage.upnp.Device;
 import org.cybergarage.upnp.DeviceList;
@@ -183,6 +186,73 @@ public class UPnPManager extends ControlPoint implements DeviceChangeListener{
 			}
 		}
 	}
+	
+	private Map /*String description->Mapping */ getExistingMappings() {
+		Map ret = new HashMap();
+		Action check;
+		synchronized(this){
+			check = _service.getAction("GetGenericPortMappingEntry");
+		}
+		for (int i=0;;i++) {
+			
+			check.setArgumentValue("NewPortMappingIndex",i);
+			if (!check.postControlAction()) 
+				break;
+			
+			ArgumentList l = check.getOutputArgumentList();
+			Mapping m = new Mapping(
+					l.getArgument("NewRemoteHost").getValue(),
+					l.getArgument("NewExternalPort").getValue(),
+					l.getArgument("NewInternalClient").getValue(),
+					l.getArgument("NewInternalPort").getValue(),
+					l.getArgument("NewProtocol").getValue(),
+					l.getArgument("NewPortMappingDescription").getValue());
+			
+			ret.put(m._description,m);
+
+		}
+		
+		return ret;
+	}
+	
+	/**
+	 * @param m Port mapping to send to the NAT
+	 * @return whether it worked or not
+	 */
+	private boolean addMapping(Mapping m) {
+		Action add;
+		synchronized(this) {
+			add = _service.getAction("AddPortMapping");
+		}
+		
+		add.setArgumentValue("NewRemoteHost",m._externalAddress);
+		add.setArgumentValue("NewExternalPort",m._externalPort);
+		add.setArgumentValue("NewInternalClient",m._internalAddress);
+		add.setArgumentValue("NewInternalPort",m._internalPort);
+		add.setArgumentValue("NewProtocol",m._protocol);
+		add.setArgumentValue("NewPortMappingDescription",m._description);
+		add.setArgumentValue("NewEnabled","1");
+		add.setArgumentValue("NewLeaseDuration",0);
+		
+		return add.postControlAction();
+	}
+	
+	/**
+	 * @param m the mapping to remove from the NAT
+	 * @return whether it worked or not
+	 */
+	private boolean removeMapping(Mapping m) {
+		Action remove;
+		synchronized(this) {
+			remove = _service.getAction("DeletePortMapping");
+		}
+		
+		remove.setArgumentValue("NewRemoteHost",m._externalAddress);
+		remove.setArgumentValue("NewExternalPort",m._externalPort);
+		remove.setArgumentValue("NewProtocol",m._protocol);
+		
+		return remove.postControlAction();
+	}
 
 	/**
 	 * halts any UPnP operations.  Not called stop() because there 
@@ -206,11 +276,30 @@ public class UPnPManager extends ControlPoint implements DeviceChangeListener{
 	 */
 	public void deviceRemoved(Device dev) {}
 	
+	private final class Mapping {
+		public final String _externalAddress, _externalPort;
+		public final String _internalAddress, _internalPort;
+		public final String _protocol,_description;
+		
+		public Mapping(String externalAddress,String externalPort,
+				String internalAddress, String internalPort,
+				String protocol, String description) {
+			_externalAddress=externalAddress;
+			_externalPort=externalPort;
+			_internalAddress=internalAddress;
+			_internalPort=internalPort;
+			_protocol=protocol;
+			_description=description;
+		}
+		
+	}
 	public static void main(String[] args) throws Exception {
 		final UPnPManager cp = new UPnPManager();
 		Thread.sleep(4000);
 		LOG.debug("start");
 		LOG.debug("found "+cp.getNATAddress());
+		Map m = cp.getExistingMappings();
+		System.out.println(m);
 		synchronized(cp)  {
 			cp.wait();
 		}
