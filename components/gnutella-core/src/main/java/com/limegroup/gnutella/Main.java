@@ -20,7 +20,7 @@ public class Main implements ActivityCallback {
 	//                            new StandardMessageRouter(callback));
     //} else {
         service=new RouterService(callback,
-              (new com.limegroup.gnutella.server.ServerMessageRouter(callback)));
+              (new StandardMessageRouter(callback)));
                                   
         service.initialize();
         
