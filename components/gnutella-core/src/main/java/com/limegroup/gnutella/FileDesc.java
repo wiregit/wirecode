@@ -78,7 +78,7 @@ public final class FileDesc implements AlternateLocationCollector {
 			throw new NullPointerException("cannot create a FileDesc with "+
 										   "a null File");
 		}
-		if(index <0) {
+		if(index < 0) {
 			throw new IndexOutOfBoundsException("negative values not "+
 												"permitted in FileDesc: " +
 												index);
@@ -267,6 +267,19 @@ public final class FileDesc implements AlternateLocationCollector {
     public InputStream createInputStream() throws FileNotFoundException {
 		return new FileInputStream(FILE);
     }
+
+	// overrides Object.toString to provide a more useful description
+	public String toString() {
+		return ("FileDesc:\r\n"+
+				"name:     "+_name+"\r\n"+
+				"index:    "+_index+"\r\n"+
+				"path:     "+_path+"\r\n"+
+				"size:     "+_size+"\r\n"+
+				"modTime:  "+_modTime+"\r\n"+
+				"File:     "+FILE+"\r\n"+
+				"urns:     "+URNS+"\r\n"+
+				"alt locs: "+_altLocs+"\r\n");
+	}
 }
 
 
