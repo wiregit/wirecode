@@ -1,5 +1,6 @@
 package com.limegroup.gnutella;
 
+import com.limegroup.gnutella.util.Buffer;
 import java.net.*;
 import java.io.*;
 import java.util.*;
@@ -53,6 +54,15 @@ public class ConnectionManager implements Runnable {
     List /* of ConnectionFetcher */ fetchers=
 	Collections.synchronizedList(new ArrayList());
     public  HostCatcher catcher=new HostCatcher(this,SettingsManager.instance().getHostList());
+    
+    /** Queued up entries to send to each. TODO2: used fixed-size buffer here. */
+    static class MessagePair {
+	Message m;
+	Connection except;
+	MessagePair (Message m, Connection except) { this.m=m; this.except=except; }
+    }
+    private static final int MESSAGE_QUEUE_SIZE=1000;
+    private Buffer /* of MessagePair */ messageQueue=new Buffer(MESSAGE_QUEUE_SIZE);
 
     private int keepAlive=0;
     private ActivityCallback callback;
@@ -70,11 +80,15 @@ public class ConnectionManager implements Runnable {
     public int pushCount; //Push request count
     
     private Vector badHosts = new Vector();
+
     /** Creates a manager that listens for incoming connections on the given
      * port.  If this is a bad port, you will get weird messages when you
      * call run. */
     public ConnectionManager(int port) {
 	this.port=port;
+	Thread t=new Thread(new MessageBroadcaster());
+	t.setDaemon(true);
+	t.start();
     }
     
     /** Creates a manager that listens on the default port. Equivalent to
@@ -179,19 +193,12 @@ public class ConnectionManager implements Runnable {
      */
     public void sendToAllExcept(Message m, Connection c) {
 	Assert.that(m!=null);
-
-	//Eventually this code will be specialized a choose a "good" subset
-	//to forward to, especially on searches.
-	List connectionsSnapshot=connections;
-	int n=connectionsSnapshot.size();
-	for (int i=0; i<n; i++) {
-	    Connection c2=(Connection)connectionsSnapshot.get(i);
-	    Assert.that(c2!=null);
-	    if (c2!=c) {
-		try {
-		    c2.send(m);
-		} catch (IOException e) { /* ignore */ }
-	    }
+	//Queue the message.  MessageBroadcaster will dequeue and send.
+	synchronized (messageQueue) {
+	    //TODO: increment dropped message count if returned value
+	    //of add(..) is not null, i.e., if buffer capacity is reached.	    
+	    messageQueue.add(new MessagePair(m,c));
+	    messageQueue.notify();
 	}
     }
 
@@ -203,6 +210,37 @@ public class ConnectionManager implements Runnable {
     public void sendToAll(Message m) {
 	sendToAllExcept(m, null);
     }
+
+    /** Broadcasts queued messages to connections. */
+    class MessageBroadcaster implements Runnable {  	    
+	public void run() {
+	    while (true) {
+		//Get a MessagePair from the messageQueue. (Wait if empty.)
+		MessagePair pair=null;
+		synchronized(messageQueue) {
+		    while (messageQueue.isEmpty())
+			try {
+			    messageQueue.wait();
+			} catch (InterruptedException e) { /* do nothing */ }
+		    pair=(MessagePair)messageQueue.removeLast();
+		}
+		Message m=pair.m;
+		Connection except=pair.except;
+		
+		List connectionsSnapshot=connections;
+		int n=connectionsSnapshot.size();
+		for (int i=0; i<n; i++) {
+		    Connection c2=(Connection)connectionsSnapshot.get(i);
+		    Assert.that(c2!=null);
+		    if (c2!=except) {
+			try {
+			    c2.send(m);
+			} catch (IOException e) { /* ignore */ }
+		    }
+		}
+	    }
+	}
+    }    
     
     /**
      *  Return the total number of messages sent and received
@@ -670,3 +708,4 @@ class ConnectionFetcher extends Thread {
     }		
 
 }
+
