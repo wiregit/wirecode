@@ -86,6 +86,16 @@ public class ManagedConnection
      */
     private boolean _receivedFirstPing = false;
 
+    /**
+     * This is the pong that the remote side sends after receiving a handshake
+     * ping.  It contains the IP address and listening port of the remote side
+     * of this managed connection and is used in responding to crawler pings
+     * with all the addresses of our neighbors.  Note: We cannot use the address
+     * from the socket, since the port for incoming connections is an ephemeral
+     * port.
+     */
+    private PingReply _remotePong;
+
     /** Same as ManagedConnection(host, port, router, manager, false); */
     ManagedConnection(String host,
                       int port,
@@ -407,11 +417,16 @@ public class ManagedConnection
                 //Gnutella protocol version in GUID).
                 if (!_receivedFirstPing) 
                     checkForOlderClient(m); 
-                if (!isHandshake(m)) //if handshake, just continue;
+                if (isHandshake(m)) //if handshake, respond with own address
+                    _router.sendMyAddress((PingRequest)m, this);
+                else //normal case, MessageRouter handles the ping request
                     _router.handlePingRequest((PingRequest)m, this);
             }
             else if (m instanceof PingReply) {
-                _router.handlePingReply((PingReply)m, this);
+                if (isHandshake(m)) //if handshake respond pong, store it.
+                    _remotePong = (PingReply)m;
+                else //normal case, MessageRouter handles the pong
+                    _router.handlePingReply((PingReply)m, this);
             }
             else if (m instanceof QueryRequest)
                 _router.handleQueryRequestPossibleDuplicate(
@@ -426,15 +441,18 @@ public class ManagedConnection
     /**
      * Determines if this connection is to an older client by checking the
      * Protocol Version (of the GUID of the Message) and sets necessary
-     * flags.
+     * flags.  It also makes sure the GUID is a new GUID (based on byte[8])
      */
     private void checkForOlderClient(Message m)
     {
         _receivedFirstPing = true;
+        byte[] guid = m.getGUID();
 
-        //if the protocol version is less than 1, it's an older client.
-        if (GUID.getProtocolVersion(m.getGUID()) < 
-            GUID.GNUTELLA_VERSION_06) 
+        //if it is an old GUID or the protocol version is less than 1, 
+        //it's an older client.
+        if ((!GUID.isNewGUID(guid)) || 
+             (GUID.getProtocolVersion(guid) < 
+              GUID.GNUTELLA_VERSION_06) ) 
             _isOldClient = true;
     }
 
@@ -453,7 +471,7 @@ public class ManagedConnection
     }
 
     /**
-     * Returns whether the Ping received was a handshake ping by looking at the
+     * Returns whether the message received was a handshake by looking at the
      * ttl and hops count.  (ttl should be 0 and hops should be 1) since we 
      * should be calling this method after calling hop on the messsage.
      *
@@ -467,6 +485,15 @@ public class ManagedConnection
             return true;
         else
             return false;
+    }
+
+    /**
+     * Return the remote pong (sent in the response to the handshake ping 
+     * request).  This is used to return pongs to the crawler of all our 
+     * neighbors.
+     */
+    public PingReply getRemotePong() {
+        return _remotePong;
     }
 
     /**

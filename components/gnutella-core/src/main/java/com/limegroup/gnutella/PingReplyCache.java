@@ -4,35 +4,25 @@ import com.limegroup.gnutella.util.UnmodifiableIterator;
 import com.sun.java.util.collections.*;
 
 /**
- * Singleton cache used to store all the Ping Replies (i.e., Pongs) sent to us.
- * It stores all the pongs as an array of ArrayLists.  We use an ArrayList 
- * (instead of a DoublyLinkedList) because we don't need to remove entries one 
- * at a time (we just clear the cache at once).  Also, ArrayList allows us to 
- * return a random element (using the indexOf method) whereas DoublyLinkedList
- * has only basic methods to access the list.  The Ping Replies are stored as
- * <PingReply,ManagedConnection> in the cache.  Each PingReply is stored in 
- * cache based on the hops count (since that indicates how many hops away
- * from us this client is).
- *
- * Note: Only newer clients's pongs are stored in this cache.  That is, only
- *       clients using protocol version (0.6) or higher.
+ * Main cache used to store all the Ping Replies (i.e., Pongs) sent to us.
  *
  * @author Tarun Kapoor
  */
 public class PingReplyCache
 {    
     /**
-     * Increment for number of pongs stored in the cache (per hops).  So if
-     * the number of pongs for hops 1 = 10, then number of pongs for hops 2 = 
-     * hops 1 number of pongs + increment, hops 3 = hops 2 number of pongs +
-     * increment, etc.  This is done because we will store more pongs from
-     * hosts that are further away from us (i.e., greater hops), since it is
-     * more likely that I will have more pongs from all my neighbors's 
-     * neighbors, than from my direct neighbors.
+     * We store all the pongs as an array of ArrayLists.  We use an ArrayList 
+     * (instead of a DoublyLinkedList) because we don't need to remove entries 
+     * one at a time (we just clear the cache at once).  Also, ArrayList allows 
+     * us to return a random element (using the indexOf method) whereas 
+     * DoublyLinkedList has only basic methods to access the list.  The Ping 
+     * Replies are stored as <PingReply,ManagedConnection> in the cache.  Each 
+     * PingReply is stored in cache based on the hops count (since that indicates
+     * how many hops away from us this client is).  This is a singleton cache.
+     *
+     * Note: Only newer clients's pongs are stored in this cache.  That is, only
+     *       clients using protocol version (0.6) or higher.
      */
-    private static final int CACHE_HOPS_SIZE_INCREMENT = 10;
-    /** Number of pongs to store in cache for Hops 1. */
-    private static final int CACHE_HOPS_1_SIZE = 10;
 
     /** Cache expire time is 3 seconds */
     private static final long CACHE_EXPIRE_TIME = 3000;
@@ -52,11 +42,9 @@ public class PingReplyCache
         //array of 0 .. maxHops ArrayLists
         pingReplies = new ArrayList[maxHops];
 
-        int numOfPongsAllowed = CACHE_HOPS_1_SIZE;
         for (int i = 0; i < pingReplies.length; i++)
         {
-            pingReplies[i] = new ArrayList(numOfPongsAllowed);
-            numOfPongsAllowed += CACHE_HOPS_SIZE_INCREMENT;
+            pingReplies[i] = new ArrayList();
         }
 
         random = new Random();
@@ -107,6 +95,11 @@ public class PingReplyCache
         if (hops > (pingReplies.length-1))
             return false; //if greater than Max Hops allowed, do nothing.
 
+        //if private IP address, ignore.
+        Endpoint e = new Endpoint(pr.getIPBytes(), pr.getPort());
+        if (e.isPrivateAddress())
+            return false;
+
         //only add to cache, if the cache already doesn't contain that PingReply
         //(determined by IP, port, hops, and different managed connections).
         PingReplyCacheEntry newEntry = new PingReplyCacheEntry(pr, connection);
@@ -132,9 +125,10 @@ public class PingReplyCache
      * Return a cache entry for a specified hops.  Basically, return a random
      * cache entry from the ArrayList of that specified hops.  Return null 
      * if the hops is greater than the Max Hops allowed for caching.  If no
-     * entries in the cache returns null.
+     * entries in the cache returns null.  Also, return null, if the retrieved
+     * entry is from the connection passed in.
      */
-    public synchronized PingReplyCacheEntry getEntry(int hops) 
+    public synchronized PingReply getEntry(int hops, Connection conn) 
     {
         if (size() <= 0) 
             return null;
@@ -148,7 +142,11 @@ public class PingReplyCache
 
         ArrayList arrayOfPongs = pingReplies[hops-1];
         int index = random.nextInt(arrayOfPongs.size());
-        return (PingReplyCacheEntry)arrayOfPongs.get(index);
+        PingReplyCacheEntry entry = (PingReplyCacheEntry)arrayOfPongs.get(index);
+        if (entry.getManagedConnection() == conn)
+            return null;
+        else 
+            return entry.getPingReply();
     }
 
     /**

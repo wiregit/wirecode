@@ -15,11 +15,11 @@ public class ManagedConnectionPingInfo {
     private byte[] _lastGUID = null;
 
     /**
-     * Used for determining if a PING received from an old client is 
-     * processed or dropped.  (Used in Throttling old clients from sending
-     * to many pings).
+     * Used for determining if a PING received from any client is 
+     * processed or dropped.  (Used in throttling clients from sending
+     * too many pings).
      */
-    private long _oldClientAcceptTime = 0;
+    private long _clientAcceptTime = 0;
 
     /**
      * Throttle time for Pings from older clients. Note:
@@ -46,12 +46,7 @@ public class ManagedConnectionPingInfo {
     private int _totalNeeded;
 
     public ManagedConnectionPingInfo(boolean isOldClient) {
-        //if older client, then set the next time to allow another Ping.
-        if (isOldClient) 
-            _oldClientAcceptTime = System.currentTimeMillis() + 
-                PING_THROTTLE_TIME;
-        else
-            _oldClientAcceptTime = 0; //newer client.
+        _clientAcceptTime = System.currentTimeMillis() + PING_THROTTLE_TIME;
 
         resetNeeded();
         _lastTTL = 0;
@@ -128,16 +123,10 @@ public class ManagedConnectionPingInfo {
      * THROTTLE_TIME.  If so, then it's okay to process this ping, otherwise
      * throttle the PingRequest.  If the ping is to be processed, then reset
      * the accept time for the next ping from this client.
-     * @requires - this is connection is to an older client.
      */
     public boolean throttlePing() {
-        //if not older client, shouldn't be calling method, but just in case
-        //the ping should be processed.
-        if (_oldClientAcceptTime == 0)
-            return false; 
-
-        if (System.currentTimeMillis() > _oldClientAcceptTime) {
-            _oldClientAcceptTime = System.currentTimeMillis() + 
+        if (System.currentTimeMillis() > _clientAcceptTime) {
+            _clientAcceptTime = System.currentTimeMillis() + 
                 PING_THROTTLE_TIME;
             return false;
         }

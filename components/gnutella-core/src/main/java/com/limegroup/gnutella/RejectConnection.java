@@ -67,7 +67,8 @@ class RejectConnection extends Connection {
             if((m instanceof PingRequest) && (m.getHops()==0)) {
                 //forward some pongs from the PingReplyCache back to this 
                 //rejected connection.
-                if (PingReplyCache.instance().size() <= 10)
+                if (PingReplyCache.instance().size() <= 
+                    MessageRouter.MAX_PONGS_TO_RETURN)
                     sendAllPongs(m);
                 else
                     sendSomePongs(m);
@@ -111,10 +112,9 @@ class RejectConnection extends Connection {
         PingReply cachedPingReply = null;
         int hops;
 
-        for (int i = 0; i < 10; i++) {
+        for (int i = 0; i < MessageRouter.MAX_PONGS_TO_RETURN; i++) {
             hops = random.nextInt(MessageRouter.MAX_TTL_FOR_CACHE_REFRESH);
-            cachedPingReply = 
-                ((PingReplyCacheEntry)pongCache.getEntry(hops+1)).getPingReply();
+            cachedPingReply = pongCache.getEntry(hops+1, this);
             PingReply newReply = new PingReply(m.getGUID(), (byte)1,
                 cachedPingReply.getPort(), cachedPingReply.getIPBytes(),
                 cachedPingReply.getFiles(), cachedPingReply.getKbytes());

@@ -389,21 +389,16 @@ public class ConnectionManager {
 	}
 
     /** 
-     * Sends the initial ping request to a newly initialized connection.  The ttl
-     * of the PingRequest will be 1 if we don't need any connections and there
-     * is enough hosts in the reserve cache (HostCatcher).  Otherwise, the ttl
-     * of the PingRequest = max ttl for refreshing the PingReplyCache.
+     * Sends two ping requests to the connection.  First ping request has a TTL of
+     * 1 for handshaking purposes.  Then, send another ping request with TTL of 7
+     * to get some pongs back.
      */
     private void sendInitialPingRequest(ManagedConnection connection) {
-        PingRequest pr;
-        //based on the invariant: numInitializedConnections + numFetchers >= 
-        //_keepAlive
-        if ( (getNumInitializedConnections() + _fetchers.size() >= _keepAlive) &&
-             (_catcher.reserveCacheSufficient()))
-            pr = new PingRequest((byte)1);
-        else
-            pr = new PingRequest((byte)MessageRouter.MAX_TTL_FOR_CACHE_REFRESH);
-        connection.send(pr);
+        PingRequest handshake = new PingRequest((byte)1);
+        connection.send(handshake);
+        PingRequest initialPing = 
+            new PingRequest((byte)MessageRouter.MAX_TTL_FOR_CACHE_REFRESH);
+        connection.send(initialPing);
     }
 
     /**
@@ -659,7 +654,8 @@ public class ConnectionManager {
 
 				// Send GroupPingRequest to router
 				String origHost = _connection.getOrigHost();
-				if (origHost != null && origHost.equals("router.limewire.com"))
+				if (origHost != null && 
+                    origHost.equals(SettingsManager.DEDICATED_LIMEWIRE_ROUTER))
 				{
 				    String group = "none:"+_settings.getConnectionSpeed();
 				    pingRequest = _router.createGroupPingRequest(group);
