@@ -30,8 +30,8 @@ public class BIOMessageReaderTest extends BaseTestCase {
      * @throws Exception if anything goes wrong
      */
     public void testBadPacketException() throws Exception {
-        Message m1=new PingRequest((byte)3);
-        Message m2=new PingRequest((byte)3);
+        Message m1 = new PingRequest((byte)3);
+        Message m2 = new PingRequest((byte)3);
         m2.setPriority(5);
         assertGreaterThan(0, m1.compareTo(m2));
         assertLessThan(0, m2.compareTo(m1));
