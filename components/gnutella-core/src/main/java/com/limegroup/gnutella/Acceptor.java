@@ -34,7 +34,8 @@ public class Acceptor {
      *  returns.  
      */
     public void dispatch(Socket socket) {
-        Thread t=new Thread(new ConnectionDispatchRunner(socket), "ConnectionDispatchRunner");
+        Thread t=new Thread(new ConnectionDispatchRunner(socket),
+                            "ConnectionDispatchRunner");
         t.setDaemon(true);
         t.start();
     }
