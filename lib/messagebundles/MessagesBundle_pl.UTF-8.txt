@@ -896,7 +896,7 @@ OPTIONS_UPLOAD_SOFT_MAX_TITLE=Dozwolona ilość wysyłek
 OPTIONS_UPLOAD_SOFT_MAX_LABEL=Określ maks. ilość jednoczesnych wysyłek. Po przekroczeniu tego limitu, kolejne będą aktywowane tylko gdy pozwoli na to przepływność. Podanie tutaj zbyt niskiej wartości nie jest zalecane, gdyż utrudni innym użytkownikom korzystanie z zasobów.
 OPTIONS_UPLOAD_SOFT_MAX_NUMBER_LABEL=Liczba wysyłek:
 
-f################################################################################
+################################################################################
 # Key/Value pairs for the options for the number of uploads per persons
 ################################################################################
 OPTIONS_UPLOAD_PER_PERSON_TITLE=Wysyłanie do pojedyńczego użytkownika
