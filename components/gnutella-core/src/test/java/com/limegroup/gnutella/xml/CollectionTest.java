@@ -266,9 +266,9 @@ public class CollectionTest extends com.limegroup.gnutella.util.BaseTestCase {
         LimeXMLDocument doc = null;
         LimeXMLReplyCollection.MapSerializer ms = null;
         // make audio.collection
-        doc = (new ID3Reader()).readDocument(test1);
+        doc = ID3Reader.readDocument(test1);
         map.put(mfm.readFromMap(test1), doc);
-        doc = (new ID3Reader()).readDocument(test2);
+        doc = ID3Reader.readDocument(test2);
         map.put(mfm.readFromMap(test2), doc);
         ms = new LimeXMLReplyCollection.MapSerializer(CommonUtils.getResourceFile(fileLocation+"audio.collection"), map);
         ms.commit();
