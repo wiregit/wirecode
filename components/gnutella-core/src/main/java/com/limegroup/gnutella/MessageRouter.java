@@ -1653,42 +1653,17 @@ public abstract class MessageRouter {
 			    port = RouterService.getNonForcedPort();
             }
 
-            // create the new queryReply
-            List qrList = createQueryReply(guid, ttl, port, ip, speed, 
-                                           res, _clientGUID, !incoming, 
-                                           busy, uploaded, measuredSpeed, 
-                                           chat, mcast);
+            QueryReply reply = 
+                new QueryReply(guid, ttl, port, ip, speed, res, 
+                               _clientGUID, !incoming, busy, uploaded, 
+                               measuredSpeed, chat, mcast);
 
-            if (qrList != null) 
-                //add to the list
-                queryReplies.addAll(qrList);
-
-            // we only want to send multiple queryReplies
-            // if the number of hops is small.
-            if (numHops > 2)
-                break;
+            //add to the list
+            queryReplies.add(reply);
 
         }//end of while
         
         return queryReplies.iterator();
-    }
-    
-    /** If there is special processing needed to building a query reply,
-     * subclasses can override this method as necessary.
-     * @return A (possibly empty) List of query replies
-     */
-    protected List createQueryReply(byte[] guid, byte ttl, int port, 
-                                    byte[] ip , long speed, Response[] res,
-                                    byte[] clientGUID, boolean notIncoming,
-                                    boolean busy, boolean uploaded, 
-                                    boolean measuredSpeed, boolean chat,
-                                    boolean isFromMcast) {
-        List list = new ArrayList();
-        list.add(new QueryReply(guid, ttl, port, ip,
-                                speed, res, _clientGUID, 
-                                notIncoming, busy, uploaded, 
-                                measuredSpeed, chat, isFromMcast));
-        return list;
     }
 
 
