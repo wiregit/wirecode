@@ -610,8 +610,8 @@ public abstract class MessageRouter
      */
     public void handleRouteTableMessage(RouteTableMessage m,
                                         ManagedConnection receivingConnection) {
-        //if not a supernode, dont handle this message
-        if(!_manager.isSupernode())
+        //if not a supernode-client, ignore
+        if(! receivingConnection.isSupernodeClientConnection())
             return;
                                             
         //Mutate query route table associated with receivingConnection.  
