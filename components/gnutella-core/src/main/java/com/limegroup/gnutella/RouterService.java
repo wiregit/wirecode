@@ -688,7 +688,7 @@ public class RouterService
                             
         // per HUGE v0.93, ask for URNs on responses
         Set reqUrns = new HashSet();
-        reqUrns.add(URN.URN_NAMESPACE_ID);
+        reqUrns.add(UrnType.ANY_TYPE);
 
         QueryRequest qr=new QueryRequest(SettingsManager.instance().getTTL(),
                                          minSpeed, query, richQuery, false, reqUrns, null);
