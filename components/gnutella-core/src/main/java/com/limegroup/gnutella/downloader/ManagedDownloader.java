@@ -220,7 +220,7 @@ public class ManagedDownloader implements Downloader, Serializable {
     /**
      * The maximum amount of times we'll try to recover.
      */
-    private static final int MAX_RECOVERY_ATTEMPTS = 5;
+    private static final int MAX_CORRUPTION_RECOVERY_ATTEMPTS = 5;
 
     /** The time to wait between requeries, in milliseconds.  This time can
      *  safely be quite small because it is overridden by the global limit in
@@ -1893,6 +1893,9 @@ public class ManagedDownloader implements Downloader, Serializable {
             // immediately set as corrupt,
             // will change to non-corrupt later if user ignores
             setState(CORRUPT_FILE);
+            // Note that no prompting or waiting will be done if hashTree
+            // is null, but we still want to use promptAboutCorruptDownload
+            // because it removes the file from being shared.
             promptAboutCorruptDownload();
             waitForCorruptResponse();
         }
@@ -1901,8 +1904,8 @@ public class ManagedDownloader implements Downloader, Serializable {
         if (corruptState==CORRUPT_STOP_STATE)
             return fileHash;
             
-        // only try recovering MAX_RECOVERY_ATTEMPTS amount of times.
-        if(iteration == MAX_RECOVERY_ATTEMPTS) {
+        // only try recovering MAX_CURROPTION_RECOVERY_ATTEMPTS times.
+        if(iteration == MAX_CORRUPTION_RECOVERY_ATTEMPTS) {
             treeRecoveryFailed(bucketHash);
         } else if (hashTree != null) {
             // we can try to use the hashtree to identify corrupt ranges!
@@ -3561,9 +3564,6 @@ public class ManagedDownloader implements Downloader, Serializable {
             //as it is not going to generate the same SHA1 anymore.
             RouterService.getFileManager().removeFileIfShared(incompleteFile);
             
-            // Only notify about corruption if we haven't already
-            // AND if we don't have a THEX tree from which we can
-            // recover.
             if(corruptState == NOT_CORRUPT_STATE && hashTree == null) {
                 corruptState = CORRUPT_WAITING_STATE;
                 //Note:We are going to inform the user. The GUI will notify us

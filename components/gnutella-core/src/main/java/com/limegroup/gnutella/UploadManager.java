@@ -23,6 +23,7 @@ import org.apache.commons.logging.LogFactory;
  * The state of HTTPUploader is maintained by this class.
  * HTTPUploader's state follows the following pattern:
  *                                                           \ /
+ *                             |->---- THEX_REQUEST ------->--|
  *                             |->---- UNAVAILABLE_RANGE -->--|
  *                             |->---- PUSH_PROXY --------->--|
  *                            /-->---- FILE NOT FOUND ----->--|
@@ -1180,9 +1181,6 @@ public final class UploadManager implements BandwidthTracker {
             if(this.isURNGet(str)) {
                 // handle the URN get request
                 return this.parseURNGet(str);
-            //} else if (this.isMalformedURNGet(str)) {
-                // handle the malforned URN get request
-                //return this.parseMalformedURNGet(str);
             }
 		
             // handle the standard get request
@@ -1224,29 +1222,6 @@ public final class UploadManager implements BandwidthTracker {
 		String idString = requestLine.substring(slash1Index+1, slash2Index);
 		return idString.equalsIgnoreCase("uri-res");
 	}
-	
-	/**
-	 * Returns whether or not the get request for the specified line is
-	 * a malformed URN request coming from LimeWire 2.8.6.<p>
-	 *
-	 * An example malformed request is:
-	 * /get/0//uri-res/N2R?urn:sha1:AZUCWY54D63___Z3WPHN7VSVTKZA3YYT HTTP/1.1
-	 * (where the /get/0// are the malformations)
-	 *
-	 * @param requestLine the <tt>String</tt> to parse to check whether it's
-	 *  following the URN request syntax as specified in HUGE v. 0.93
-	 * @return <tt>true</tt> if the request is a valid URN request, 
-	 *  <tt>false</tt> otherwise
-	 */
-	private boolean isMalformedURNGet(final String requestLine) {
-	    // the malformed request will always start with /get/0//
-	    if ( requestLine.startsWith("/get/0//") ) {
-	        // the valid request starts with the last slash of the malformation
-	        return isURNGet(requestLine.substring(7));
-        }
-	    
-	    return false;
-	}	
 
 	/**
 	 * Performs the parsing for a traditional HTTP Gnutella get request,
@@ -1406,23 +1381,6 @@ public final class UploadManager implements BandwidthTracker {
 		return new HttpRequestLine(desc.getIndex(), desc.getName(), 
 								   isHTTP11Request(requestLine), params);
 	}
-	
-	/**
-	 * Parses the get line for a malformed URN request, throwing an exception 
-	 * if there are any errors in parsing.
-	 *
-	 * @param requestLine the <tt>String</tt> instance containing the get
-	 *        request
-	 * @return a new <tt>RequestLine</tt> instance containing all of the data
-	 *  for the get request
-	 */
-	private HttpRequestLine parseMalformedURNGet(final String requestLine)
-      throws IOException {
-		// this assumes the malformation is a /get/0/ before the /uri-res..
-		return parseURNGet(requestLine.substring(7));
-	}
-	
-
 
 	/**
 	 * Returns whether or the the specified get request is using HTTP 1.1.

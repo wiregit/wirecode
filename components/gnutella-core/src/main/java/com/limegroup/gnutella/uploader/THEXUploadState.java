@@ -50,6 +50,8 @@ public class THEXUploadState implements HTTPMessage {
         UPLOADER = uploader;
         FILE_DESC = uploader.getFileDesc();
         TREE = FILE_DESC.getHashTree();
+        if(TREE == null)
+            throw new NullPointerException("null TREE in THEXUploadState");
         WATCHDOG = dog;
     }
 
