@@ -52,6 +52,11 @@ class LimeXMLSchemaFieldExtractor
     private static final String DUMMY = "DUMMY";
     
     /**
+     * A dummy name that can be used for a simple type
+     */
+    private static final String DUMMY_SIMPLETYPE = "DUMMY_SIMPLETYPE";
+    
+    /**
      * Set of primitive types (as per XML Schema specifications)
      */
     private static final Set PRIMITIVE_TYPES;
@@ -464,24 +469,78 @@ class LimeXMLSchemaFieldExtractor
         //get attributes
         NamedNodeMap attributes = n.getAttributes();
         
-        //get name attribute
+        //get name
         Node nameAttribute = attributes.getNamedItem("name");
-        Node typeAttribute = attributes.getNamedItem("type");
-        if(nameAttribute == null || typeAttribute == null)
+        if(nameAttribute == null)
         {
             //cant do much, return
             return;
         }
        
-        //get field and type names
         //append DELIMITER after name of the attribute (as per convention
         //@see XMLStringUtils
         String name = nameAttribute.getNodeValue() + XMLStringUtils.DELIMITER;
-        String typeName = typeAttribute.getNodeValue();
+        
+        //get type
+        Node typeAttribute = attributes.getNamedItem("type");
+        String typeName;
+        if(typeAttribute == null)
+        {
+            typeName = DUMMY_SIMPLETYPE;
+        }
+        else
+        {
+            typeName = typeAttribute.getNodeValue();
+        }
        
+        //get fieldinfo object out of type
+        FieldInfo fieldInfo = new FieldInfo(removeNameSpace(typeName));
+        
+        //test for enumeration
+        processSimpleTypeForEnumeration(n, fieldInfo);
+        
         //add mapping to fieldInfoList
-        fieldInfoList.addFirst(new FieldInfoPair(name, 
-            new FieldInfo(removeNameSpace(typeName))));   
+        fieldInfoList.addFirst(new FieldInfoPair(name, fieldInfo));   
+        
+    }
+    
+    /**
+     * Tests the given node if it has enumerative type. If yes, then 
+     * records the info (enumerations) in the passed fieldInfo
+     * object
+     */
+    private static void processSimpleTypeForEnumeration(Node n, 
+        FieldInfo fieldInfo)
+    {
+        //iterate over the child nodes to check for enumeration
+        NodeList children = n.getChildNodes();
+        int numChildren = children.getLength();
+        for(int i=0;i<numChildren; i++)
+        {
+            //get the child node
+            Node child = children.item(i);
+            //get the name of the node
+            String nodeName = child.getNodeName();
+            
+            //if isnt an enumeration tag
+            if(!isEnumerationTag(nodeName))
+            {
+                //process this node (a child of it may be enumeration
+                //element
+                processSimpleTypeForEnumeration(child, fieldInfo);
+            }
+            else
+            {
+                //get the value attribute 
+                Node valueAttribute = n.getAttributes().getNamedItem("value");
+                //add the enumeration to fieldInfo
+                if(valueAttribute != null)
+                {
+                    fieldInfo.addEnumerationValue(
+                        valueAttribute.getNodeValue());
+                }
+            }
+        }
     }
     
     /**
@@ -599,9 +658,25 @@ class LimeXMLSchemaFieldExtractor
         _referencedNames.add(removeNameSpace(typeName));
     }
     
+    /**
+     * Tests if the passed tag is a element tag
+     * @return true, if element tag, false otherwise
+     */
     private static boolean isElementTag(String tag)
     {
         if(tag.trim().equals("element") || tag.trim().equals("xsd:element"))
+            return true;
+        return false;
+    }
+    
+     /**
+     * Tests if the passed tag is a enumeration tag
+     * @return true, if enumeration tag, false otherwise
+     */
+    private static boolean isEnumerationTag(String tag)
+    {
+        if(tag.trim().equals("enumeration") 
+            || tag.trim().equals("xsd:enumeration"))
             return true;
         return false;
     }
@@ -704,6 +779,12 @@ private static class FieldInfo
     private String _type;
     
     /**
+     * List (of Strings) to store enumerated values, if associated with this
+     *field
+     */
+    private List enumerationList = null;
+    
+    /**
      * Creates a new instance of FieldInfo and initializes internal fields
      * with the passed values
      * @param type The tye of the field (eg Integer, String, complex etc)
@@ -716,6 +797,19 @@ private static class FieldInfo
     public String getType()
     {
         return _type;
+    }
+    
+    /**
+     * Adds the passed value to the list of enumeration values
+     */
+    public void addEnumerationValue(String value)
+    {
+        //create a new list, if doesnt exist
+        if(enumerationList == null)
+            enumerationList = new LinkedList();
+        
+        //add the value
+        enumerationList.add(value);
     }
     
 }//end of class FieldInfo
