@@ -186,6 +186,17 @@ public class RouterService
 		// Reset the KeepAlive to greater than 1
         //oldKeepAlive;
 
+        //Ensure settings are positive
+        int outgoing=settings.getKeepAlive();
+        if (outgoing<1) {
+            outgoing = settings.DEFAULT_KEEP_ALIVE;
+            settings.setKeepAlive(outgoing);                    
+        }
+        int incoming=settings.getMaxIncomingConnections();
+        if (incoming<1 && outgoing!=0) {
+            incoming = outgoing/2;
+            settings.setMaxIncomingConnections(incoming);
+        }    
         setKeepAlive(oldKeepAlive);
 		settings.setUseQuickConnect(useQuickConnect);
     }
