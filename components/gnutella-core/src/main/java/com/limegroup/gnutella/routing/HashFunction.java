@@ -104,7 +104,7 @@ public class HashFunction {
 
 
     /** 
-     * Returns a list of canonicalized keywords in the given query, suitable
+     * Returns a list of canonicalized keywords in the given file name, suitable
      * for passing to hash(String,int).  The returned keywords are
      * lower-cased, though that is not strictly needed as hash ignores
      * case.<p>
@@ -118,11 +118,14 @@ public class HashFunction {
      * A better way to hash strings would be to use String conversion in the
      * Locale.US context (for stability across servents) after transformation
      * to NFKD and removal of all diacritics from hashed keywords.  If needed,
-     * this should be done before splitting the query string into hashable
+     * this should be done before splitting the file name string into hashable
      * keywords. Then we should remove the unneeded toLowerCase() call in
      * the <tt>hash(String, int, int, byte)</tt> function.
+     * 
+     * @param fileName The name of the file to break up into keywords.  These
+     *  keywords will subsequently be hashed for inclusion in the bit vector.
      */
-    public static String[] keywords(String query) {
+    public static String[] keywords(String fileName) {
         //TODO1: this isn't a proper implementation.  It should really be
         //to tokenized by ALL non-alphanumeric characters.
 
@@ -134,7 +137,7 @@ public class HashFunction {
             // TODO: a better canonicalForm(query) function here that
             // also removes accents by converting first to NFKD and keeping
             // only PRIMARY differences
-            I18NConvert.instance().getNorm(query),
+            I18NConvert.instance().getNorm(fileName),
             FileManager.DELIMETERS);
     }
 
