@@ -20,7 +20,8 @@ public class LimeXMLDocumentHelper{
         ArrayList retList = new ArrayList();
         if(aggregrateXMLStr==null || aggregrateXMLStr.equals(""))
             return retList;
-        int startIndex=aggregrateXMLStr.indexOf(XMLStringUtils.XML_VERSION_DELIM);
+        int startIndex=aggregrateXMLStr.indexOf
+                                (XMLStringUtils.XML_DOC_START_IDENTIFIER);
         int endIndex = startIndex;
         String chunk = "";
         boolean finished= false;
@@ -31,20 +32,21 @@ public class LimeXMLDocumentHelper{
                 continue;
             }
             endIndex=aggregrateXMLStr.indexOf
-            (XMLStringUtils.XML_VERSION_DELIM,startIndex+1);
+            (XMLStringUtils.XML_DOC_START_IDENTIFIER,startIndex+1);
             if (endIndex > 0)
                 chunk = aggregrateXMLStr.substring(startIndex, endIndex);
             else
                 chunk = aggregrateXMLStr.substring(startIndex);        
             
+            //System.out.println("Sumeet : XML chunk "+chunk);
             LimeXMLDocument[] docs = new LimeXMLDocument[totalResponseCount];
             Element rootElement = getDOMTree(chunk);
             if(rootElement==null){
                 retList.add(null);
                 continue;
             }
-            //String schemaURI = getAttributeValue(rootElement,"schemaLocation");
-            List children = LimeXMLUtils.getElements(rootElement.getChildNodes());
+            //String schemaURI=getAttributeValue(rootElement,"schemaLocation");
+            List children=LimeXMLUtils.getElements(rootElement.getChildNodes());
             //Note: each child corresponds to a LimeXMLDocument
             int z = children.size();
             for(int i=0;i<z;i++){
@@ -200,6 +202,7 @@ public class LimeXMLDocumentHelper{
         try{            
             parser.parse(source);
         }catch(Exception e){
+            e.printStackTrace();
             //could not parse XML well
             return null;
         }
