@@ -59,7 +59,19 @@ public class NIOMessageReaderTest extends BaseTestCase {
         } catch (IOException e) {
             fail("unexpected exception: "+e);
         }
-        buffer.put(baos.toByteArray());    
+        byte[] bytes = baos.toByteArray();
+        int numPings = 0;
+        while(buffer.remaining() > ping.getTotalLength()) {
+            buffer.put(bytes);
+            numPings++;
+        }    
+        
+        
+        // fill it up with a partial header...
+        int remaining = buffer.remaining();
+        for(int i=0; i<remaining; i++) {
+            buffer.put(bytes[i]);
+        }
         buffer.flip();
         
         Connection testConnection = new Connection(new TestSocket());
@@ -85,17 +97,37 @@ public class NIOMessageReaderTest extends BaseTestCase {
         Object[] params = new Object[] {
             headerBuffer, payloadBuffer, testConnection, buffer,
         };        
+
+        // make sure we can read in all of the pings in the buffer
+        while(buffer.remaining() >= ping.getTotalLength()) {
+            headerBuffer.clear();
+            payloadBuffer.clear();      
+            // we should be able to successfully read in the ping.    
+            PingRequest pingRead = 
+                (PingRequest)createMessage.invoke(NIOMessageReader.class, 
+                    params);
+                
+            // make sure the GUID is the same as the one we wrote to the buffer
+            assertEquals("should have same ttls", ping.getTTL(), 
+                pingRead.getTTL());
+            assertEquals("should have same hops", ping.getHops(), 
+                pingRead.getHops());
+            assertEquals("should have same guids", new GUID(ping.getGUID()), 
+                new GUID(pingRead.getGUID()));
+        }
         
+        // Now, there should be 3 bytes left over in the buffer -- the partial
+        // header for the next ping.  Make sure this is read into the header
+        // correctly
+        headerBuffer.clear();
+        payloadBuffer.clear();    
+          
         // we should be able to successfully read in the ping.    
         PingRequest pingRead = 
             (PingRequest)createMessage.invoke(NIOMessageReader.class, params);
-            
-        // make sure the GUID is the same as the one we wrote to the buffer
-        assertEquals("should have same ttls", ping.getTTL(), pingRead.getTTL());
-        assertEquals("should have same hops", ping.getHops(), 
-            pingRead.getHops());
-        assertEquals("should have same guids", new GUID(ping.getGUID()), 
-            new GUID(pingRead.getGUID()));
+        assertNull("should be null", pingRead);
+        assertEquals("unexpected number of bytes remaining in the header",
+            headerBuffer.remaining(), 20);
     }
 
 
