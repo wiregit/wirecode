@@ -1036,7 +1036,7 @@ public class SettingsManager implements SettingsInterface
 			props_.put(SAVE_DIRECTORY, saveDirectory_);
 		} catch(IOException ioe) {
 			// this call to set save directory will simply fail
-			// if an io error occurs.
+			// if an io error occurs
 		}
     }
 
