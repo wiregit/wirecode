@@ -1174,17 +1174,6 @@ public class Connection {
         this._port = port;
     }
 
-    /**
-     * Returns the port of the foreign host this is connected to.
-     * @exception IllegalStateException this is not initialized
-     */
-//    public int getPort() throws IllegalStateException {
-//		if(_socket == null) {
-//			throw new IllegalStateException("Not initialized");
-//		}
-//		return _socket.getPort();
-//    }
-
 
     /**
      * Returns the address of the foreign host this is connected to.
