@@ -18,6 +18,6 @@ public class LeafHeaders extends Headers {
     public LeafHeaders(String remoteIP){
         super(remoteIP);
         //set Ultrapeer property
-        put(ConnectionHandshakeHeaders.X_ULTRAPEER, "False");
+        put(HeaderNames.X_ULTRAPEER, "False");
     }
 }

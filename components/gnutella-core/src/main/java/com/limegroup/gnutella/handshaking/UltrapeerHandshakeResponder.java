@@ -56,7 +56,7 @@ public class UltrapeerHandshakeResponder
 
 		//Did the server request we become a leaf?
 		String neededS = response.getHeaders().
-            getProperty(ConnectionHandshakeHeaders.X_ULTRAPEER_NEEDED);
+            getProperty(HeaderNames.X_ULTRAPEER_NEEDED);
 
 		Properties ret = new Properties();
 		if (neededS!=null && 
@@ -64,7 +64,7 @@ public class UltrapeerHandshakeResponder
 			isNotBearshare(response) &&
 			_manager.allowLeafDemotion()) {
 			//Fine, we'll become a leaf.
-			ret.put(ConnectionHandshakeHeaders.X_ULTRAPEER, "False");
+			ret.put(HeaderNames.X_ULTRAPEER, "False");
 		}
         
         // accept the response
@@ -81,11 +81,11 @@ public class UltrapeerHandshakeResponder
 		Properties ret=new UltrapeerHeaders(getRemoteIP());
 		
 		//guide the incoming connection to be a ultrapeer/clientnode
-		ret.put(ConnectionHandshakeHeaders.X_ULTRAPEER_NEEDED,
+		ret.put(HeaderNames.X_ULTRAPEER_NEEDED,
 				(new Boolean(_manager.supernodeNeeded())).toString());
 		
 		//give own IP address
-		ret.put(ConnectionHandshakeHeaders.LISTEN_IP,
+		ret.put(HeaderNames.LISTEN_IP,
 				Message.ip2string(RouterService.getAddress())+":"
 				+ RouterService.getPort());
 		

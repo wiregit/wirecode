@@ -237,7 +237,7 @@ public final class HandshakeResponse {
         }
 
         //add the connected Ultrapeers to the handshake headers
-        headers.put(ConnectionHandshakeHeaders.X_TRY_ULTRAPEERS, 
+        headers.put(HeaderNames.X_TRY_ULTRAPEERS, 
                     hostString.toString());        
     }
 
@@ -267,7 +267,7 @@ public final class HandshakeResponse {
             }
         }
 
-        headers.put(ConnectionHandshakeHeaders.X_TRY_ULTRAPEERS,
+        headers.put(HeaderNames.X_TRY_ULTRAPEERS,
                     hostString.toString());
     }
 
@@ -327,7 +327,7 @@ public final class HandshakeResponse {
     public String getUserAgent() {
         return HEADERS.getProperty(
             com.limegroup.gnutella.handshaking.
-                ConnectionHandshakeHeaders.USER_AGENT);
+                HeaderNames.USER_AGENT);
     }
 
 	/**
@@ -336,7 +336,7 @@ public final class HandshakeResponse {
 	 * @return the number of intra-Ultrapeer connections this node maintains
 	 */
 	public int getNumIntraUltrapeerConnections() {
-		String connections = HEADERS.getProperty(ConnectionHandshakeHeaders.X_DEGREE);
+		String connections = HEADERS.getProperty(HeaderNames.X_DEGREE);
 		if(connections == null) {
 			if(isSupernodeConnection()) return 6;
 			return 0;
@@ -365,17 +365,17 @@ public final class HandshakeResponse {
 	public boolean isUltrapeerQueryRoutingConnection() {
 		if(!isSupernodeConnection()) return false;
         String value = 
-            HEADERS.getProperty(ConnectionHandshakeHeaders.X_ULTRAPEER_QUERY_ROUTING);
+            HEADERS.getProperty(HeaderNames.X_ULTRAPEER_QUERY_ROUTING);
         if(value == null) return false;
 		
-        return value.equals(ConnectionHandshakeHeaders.QUERY_ROUTING_VERSION);
+        return value.equals(HeaderNames.QUERY_ROUTING_VERSION);
     }
 
 
     /** Returns true iff this connection wrote "Ultrapeer: false".
      *  This does NOT necessarily mean the connection is shielded. */
     public boolean isLeafConnection() {
-        String value=HEADERS.getProperty(ConnectionHandshakeHeaders.X_ULTRAPEER);
+        String value=HEADERS.getProperty(HeaderNames.X_ULTRAPEER);
         if (value==null)
             return false;
         else
@@ -386,7 +386,7 @@ public final class HandshakeResponse {
 
     /** Returns true iff this connection wrote "Supernode: true". */
     public boolean isSupernodeConnection() {
-        String value=HEADERS.getProperty(ConnectionHandshakeHeaders.X_ULTRAPEER);
+        String value=HEADERS.getProperty(HeaderNames.X_ULTRAPEER);
         if (value==null)
             return false;
         else
@@ -431,7 +431,7 @@ public final class HandshakeResponse {
 	 *  or -1 if GUESS is not supported
 	 */
 	public int getGUESSVersion() {
-		String value = HEADERS.getProperty(ConnectionHandshakeHeaders.X_GUESS);
+		String value = HEADERS.getProperty(HeaderNames.X_GUESS);
 		if(value == null) return -1;
 		else {
 			float version = Float.valueOf(value).floatValue();
@@ -444,7 +444,7 @@ public final class HandshakeResponse {
      the headers. */
     public boolean isTempConnection() {
         //get the X-Temp-Connection from either the headers received
-        String value=HEADERS.getProperty(ConnectionHandshakeHeaders.X_TEMP_CONNECTION);
+        String value=HEADERS.getProperty(HeaderNames.X_TEMP_CONNECTION);
         //if X-Temp-Connection header is not received, return false, else
         //return the value received
         if(value == null)
@@ -459,7 +459,7 @@ public final class HandshakeResponse {
     public boolean supportsGGEP() {
         if (_supportsGGEP==null) {
 			String value = 
-				HEADERS.getProperty(ConnectionHandshakeHeaders.GGEP);
+				HEADERS.getProperty(HeaderNames.GGEP);
 			
 			//Currently we don't care about the version number.
             _supportsGGEP = new Boolean(value != null);
@@ -475,7 +475,7 @@ public final class HandshakeResponse {
 	 */
 	public boolean supportsVendorMessages() {
 		String value = 
-			HEADERS.getProperty(ConnectionHandshakeHeaders.X_VENDOR_MESSAGE);
+			HEADERS.getProperty(HeaderNames.X_VENDOR_MESSAGE);
 		if ((value != null) && !value.equals("")) {		
 			return true;
 		}
@@ -490,12 +490,12 @@ public final class HandshakeResponse {
 	 */
 	public String getDomainsAuthenticated() {
 		return HEADERS.getProperty(
-		    ConnectionHandshakeHeaders.X_DOMAINS_AUTHENTICATED);
+		    HeaderNames.X_DOMAINS_AUTHENTICATED);
 		
 	}
 
 	public String getVersion() {
-		return HEADERS.getProperty(ConnectionHandshakeHeaders.X_VERSION);
+		return HEADERS.getProperty(HeaderNames.X_VERSION);
 	}
 
 
@@ -505,7 +505,7 @@ public final class HandshakeResponse {
         //We are ALWAYS QRP-enabled, so we only need to look at what the remote
         //host wrote.
         String value = 
-			HEADERS.getProperty(ConnectionHandshakeHeaders.X_QUERY_ROUTING);
+			HEADERS.getProperty(HeaderNames.X_QUERY_ROUTING);
         if (value==null)
             return false;
         try {            

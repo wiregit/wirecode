@@ -1,16 +1,17 @@
-/*
- * ConnectionHandshakeHeaders.java
- *
- * Created on September 27, 2001, 3:20 PM
- */
-
 package com.limegroup.gnutella.handshaking;
 
 /**
  * Provides names for the headers used in the gnutella connection handshake
  * @author Anurag Singla
  */
-public final class ConnectionHandshakeHeaders {
+public final class HeaderNames {
+    
+    /**
+     * Private constructor to ensure that other classes cannot mistakenly
+     * construct an instance of this class.
+     */
+    private HeaderNames() {}
+
     /** Obsolete; use X_LISTEN_IP instead */
     public static final String X_MY_ADDRESS         = "X-My-Address";
     /** The replacement for X_MY_ADDRESS */
@@ -35,14 +36,14 @@ public final class ConnectionHandshakeHeaders {
 	/**
 	 * Header name for the GUESS version.
 	 */
-    public static final String X_GUESS              = "X-Guess";
+    public static final String X_GUESS = "X-Guess";
     public static final String X_VERSION            = "X-Version";
 
 	/**
 	 * Header name for the degree of intra-Ultrapeer connections the
 	 * host tries to maintain.
 	 */
-	public static final String X_DEGREE             = "X-Degree";
+	public static final String X_DEGREE = "X-Degree";
 
 	/**
 	 * Header for the version of query routing supported at the Ultrapeer level.
@@ -50,16 +51,16 @@ public final class ConnectionHandshakeHeaders {
 	public static final String X_ULTRAPEER_QUERY_ROUTING = 
 		"X-Ultrapeer-Query-Routing";
 
-    public static final String X_VENDOR_MESSAGE     = "Vendor-Message";
-    public static final String VM_VERSION           = "0.1";
+    public static final String X_VENDOR_MESSAGE = "Vendor-Message";
+    public static final String VM_VERSION = "0.1";
 
     /** 
      * The true/false values for some headers.  Note that these are not the only
      * legal values--case doesn't matter--and LimeWire does not always use these
      * constants.  Hopefully it will in the future.  
      */
-    public static final String TRUE                 = "true";
-    public static final String FALSE                = "false";
+    public static final String TRUE = "true";
+    public static final String FALSE = "false";
 
     /**
      * Returns true if v.toLowerCase().equals("true").

@@ -143,7 +143,7 @@ public abstract class AuthenticationHandshakeResponder
             //add the property in the response letting the
             //remote host know of the domains successfully authenticated
             ourResponse.getHeaders().put(
-            ConnectionHandshakeHeaders.X_DOMAINS_AUTHENTICATED,
+            HeaderNames.X_DOMAINS_AUTHENTICATED,
             StringUtils.getEntriesAsString(domains));
             //return our response
             return ourResponse;
@@ -163,9 +163,9 @@ public abstract class AuthenticationHandshakeResponder
         //pass the username and password to authenticator
         return _manager.getAuthenticator().authenticate(
         headersReceived.getProperty(
-        ConnectionHandshakeHeaders.X_USERNAME),
+        HeaderNames.X_USERNAME),
         headersReceived.getProperty(
-        ConnectionHandshakeHeaders.X_PASSWORD), null);
+        HeaderNames.X_PASSWORD), null);
     }
     
     /**
@@ -216,9 +216,9 @@ public abstract class AuthenticationHandshakeResponder
             code = HandshakeResponse.OK;
             message = HandshakeResponse.AUTHENTICATING;
             //add user authentication headers
-            ret.put(ConnectionHandshakeHeaders.X_USERNAME,
+            ret.put(HeaderNames.X_USERNAME,
             user.getUsername());
-            ret.put(ConnectionHandshakeHeaders.X_PASSWORD,
+            ret.put(HeaderNames.X_PASSWORD,
             user.getPassword());
             
             //also store the authentication information in a

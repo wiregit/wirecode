@@ -12,18 +12,18 @@ import com.limegroup.gnutella.util.CommonUtils;
 public class Headers extends Properties {
 
     protected Headers(String remoteIP) {
-		put(ConnectionHandshakeHeaders.LISTEN_IP, "");
+		put(HeaderNames.LISTEN_IP, "");
 		//just temporary!
 
         if (remoteIP!=null) {
-            put(ConnectionHandshakeHeaders.REMOTE_IP, remoteIP);
+            put(HeaderNames.REMOTE_IP, remoteIP);
         }
 
         addCommonHeaders(this);
     }
     
     public String getProperty(String key, String defaultValue) {
-        if (key.equals(ConnectionHandshakeHeaders.LISTEN_IP)) {
+        if (key.equals(HeaderNames.LISTEN_IP)) {
             Endpoint e=new Endpoint(RouterService.getAddress(), 
 									RouterService.getPort());
             return e.getHostname()+":"+e.getPort();
@@ -33,7 +33,7 @@ public class Headers extends Properties {
     }
     
     public String getProperty(String key) {
-        if (key.equals(ConnectionHandshakeHeaders.LISTEN_IP)) {
+        if (key.equals(HeaderNames.LISTEN_IP)) {
             Endpoint e=new Endpoint(RouterService.getAddress(), 
 									RouterService.getPort());
             return e.getHostname()+":"+e.getPort();
@@ -47,26 +47,26 @@ public class Headers extends Properties {
      * send, like Query-Routing and User-Agent.
      */
     private static void addCommonHeaders(Properties props) {
-        props.put(ConnectionHandshakeHeaders.X_QUERY_ROUTING, 
-				  ConnectionHandshakeHeaders.QUERY_ROUTING_VERSION);
-        props.put(ConnectionHandshakeHeaders.USER_AGENT,
+        props.put(HeaderNames.X_QUERY_ROUTING, 
+				  HeaderNames.QUERY_ROUTING_VERSION);
+        props.put(HeaderNames.USER_AGENT,
 				  CommonUtils.getHttpServer());       
-        props.put(ConnectionHandshakeHeaders.GGEP, "0.5");
-		props.put(ConnectionHandshakeHeaders.X_GUESS, "0.1");
-        props.put(ConnectionHandshakeHeaders.X_VENDOR_MESSAGE,
-                  ConnectionHandshakeHeaders.VM_VERSION);
+        props.put(HeaderNames.GGEP, "0.5");
+		props.put(HeaderNames.X_GUESS, "0.1");
+        props.put(HeaderNames.X_VENDOR_MESSAGE,
+                  HeaderNames.VM_VERSION);
 
         // even though these are only really used by Ultrapeers, we
         // include them with leaves to as an indication that they
         // understand these protocols
-        props.put(ConnectionHandshakeHeaders.X_DEGREE, 
+        props.put(HeaderNames.X_DEGREE, 
                   Integer.toString(ConnectionManager.ULTRAPEER_CONNECTIONS));
-		props.put(ConnectionHandshakeHeaders.X_ULTRAPEER_QUERY_ROUTING, 
-                  ConnectionHandshakeHeaders.QUERY_ROUTING_VERSION);
+		props.put(HeaderNames.X_ULTRAPEER_QUERY_ROUTING, 
+                  HeaderNames.QUERY_ROUTING_VERSION);
         UpdateManager u = UpdateManager.instance();
         String latestVersion = u.getVersion();
         if(!latestVersion.equals("@version@"))//don't send header for @version@
-            props.put(ConnectionHandshakeHeaders.X_VERSION, latestVersion);
+            props.put(HeaderNames.X_VERSION, latestVersion);
     }
     
 }

@@ -18,7 +18,7 @@ public class UltrapeerHeaders extends Headers {
     public UltrapeerHeaders(String remoteIP) {
         super(remoteIP);
         //set Ultrapeer property
-        put(ConnectionHandshakeHeaders.X_ULTRAPEER, "True");
+        put(HeaderNames.X_ULTRAPEER, "True");
     }
     
 }
