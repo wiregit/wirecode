@@ -128,6 +128,10 @@ public class ManagedDownloaderTest extends com.limegroup.gnutella.util.BaseTestC
     	assertFalse(fakeDownloader._addedFailed);
     	assertFalse(fakeDownloader._addedSuccessfull);
     	
+    	//the altloc should have been added to the file descriptor
+    	test = RouterService.getFileManager().getFileDescForUrn(partialURN);
+    	assertEquals(1,test.getAlternateLocationCollection().getAltLocsSize());
+    	
     	//now repeat the test, pretending the uploader wants push altlocs
     	fakeDownloader.setWantsFalts(true);
     	
@@ -164,6 +168,9 @@ public class ManagedDownloaderTest extends com.limegroup.gnutella.util.BaseTestC
     	    (AlternateLocation)test.getAlternateLocationCollection().iterator().next();
     	
     	assertTrue(alt instanceof PushAltLoc);
+    	assertTrue(alt.getDemoted());
+            
+        
     }
     
     public void testLegacy() throws Exception {

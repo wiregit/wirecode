@@ -126,4 +126,8 @@ public class IncompleteFileDescStub extends IncompleteFileDesc {
 	public boolean addVerified(AlternateLocation al) {
 		return _altlocCollection.add(al);
 	}
+	
+	public boolean remove(AlternateLocation al) {
+	    return _altlocCollection.remove(al);
+	}
 }
