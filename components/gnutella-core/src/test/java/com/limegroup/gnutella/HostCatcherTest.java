@@ -24,13 +24,8 @@ public class HostCatcherTest extends TestCase {
         HostCatcher.DEBUG=true;
 		rs = new RouterService(new ActivityCallbackStub());
 
-        //This creates an acceptor thread.  We should probably use an Acceptor
-        //stub or write a tearDown() method.
-		//if(!RouterService.instance().isStarted()) {
-		//RouterService.instance().start();
-		//}
-        hc = new HostCatcher();//RouterService.instance().getHostCatcher();
-		hc.initialize();
+        hc = new HostCatcher();
+		hc.initialize();		
     }
 
 	public void tearDown() {
@@ -59,7 +54,8 @@ public class HostCatcherTest extends TestCase {
         //Endpoints.
         setUp();
         hc.add(new Endpoint("192.168.0.1"), false);
-        assertTrue(hc.getNumUltrapeerHosts()==0);
+        assertEquals("should not be any Ultrapeer hosts in catcher",
+					 0,hc.getNumUltrapeerHosts());
         assertTrue(hc.getNumNormalHosts()==0);
         assertTrue(hc.getNumPrivateHosts()==1);
 
