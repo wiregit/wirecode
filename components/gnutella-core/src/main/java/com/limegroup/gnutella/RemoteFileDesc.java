@@ -397,6 +397,14 @@ public class RemoteFileDesc implements Serializable {
     }
     
     /**
+     * @return whether this rfd points to myself.
+     */
+    public boolean isMe() {
+        return needsPush() ? 
+                Arrays.equals(_clientGUID,RouterService.getMyGUID()) :
+                    NetworkUtils.isMe(getHost(),getPort());
+    }
+    /**
      * Accessor for the available ranges.
      */
     public IntervalSet getAvailableRanges() {
@@ -737,8 +745,7 @@ public class RemoteFileDesc implements Serializable {
             return true;
         
         // make sure we have some push proxies.
-        else return _firewalled && _pushAddr!=null &&
-			_pushAddr.getProxies().size()>0;
+        else return _firewalled && _pushAddr!=null;
     }
     
     /**

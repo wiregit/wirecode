@@ -1299,7 +1299,7 @@ public class ManagedDownloader implements Downloader, Serializable {
             downloadSHA1 = rfd.getSHA1Urn();
             
         // DO NOT DOWNLOAD FROM YOURSELF.
-        if( NetworkUtils.isMe(rfd.getHost(), rfd.getPort()) )
+        if( rfd.isMe() )
             return true;
         // If this already exists in allFiles, DO NOT ADD IT AGAIN.
         // However, we must still add it to files if it didn't already exist
