@@ -162,7 +162,7 @@ public class Connection implements Runnable {
 	    if (manager!=null)
 		manager.total++;
 	}
-	System.out.println("Wrote "+m.toString()+"\n   to "+sock.toString());
+	//System.out.println("Wrote "+m.toString()+"\n   to "+sock.toString());
     }
 
     /** 
@@ -181,8 +181,8 @@ public class Connection implements Runnable {
 	    received++;  //keep statistics.
 	    if (manager!=null)
 		manager.total++;
-	    if (m!=null)
-	    	System.out.println("Read "+m.toString()+"\n    from "+sock.toString());
+	    //if (m!=null)
+	    //	System.out.println("Read "+m.toString()+"\n    from "+sock.toString());
 	    return m;
 	}
     }
