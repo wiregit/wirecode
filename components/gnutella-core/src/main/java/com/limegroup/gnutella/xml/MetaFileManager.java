@@ -21,7 +21,7 @@ public class MetaFileManager extends FileManager {
      *  or write from this map
      * </b>
      */
-    private Map fileToHash /* File -> String */ = new HashMap();
+    private Map fileToHash /* File -> URN */ = new HashMap();
     
     /**
      * Overrides FileManager.query.
@@ -53,41 +53,39 @@ public class MetaFileManager extends FileManager {
      *  given XML documents.  metadata may be null if there is no data.  Returns
      *  the value from addFileIfShared.  Returns the value from addFileIfShared.
      *  <b>WARNING: this is a potential security hazard.</b> 
+     *
+     * @return -1 if the file was not added, otherwise the index of the newly
+     * added file.
      */
-	public synchronized boolean addFileIfShared(File file,
-                                                LimeXMLDocument[] metadata) {
-        boolean added=super.addFileIfShared(file, metadata);
+	public int addFileIfShared(File file, LimeXMLDocument[] metadata) {
+        int addedAt = super.addFileIfShared(file, metadata);
+        
+        // if not added or no metadata, nothing else to do.
+        if( addedAt == -1 || metadata == null )
+            return addedAt;
 
-        if (added && metadata!=null) {
-            SchemaReplyCollectionMapper mapper =
-                SchemaReplyCollectionMapper.instance();
+        SchemaReplyCollectionMapper mapper =
+            SchemaReplyCollectionMapper.instance();
 
-            // compute the hash of the file.  integral for proceeding.
-            String hash;
-            try {
-                hash = new String(LimeXMLUtils.hashFile(file));
-                if (hash == null)
-                    throw new IOException("hash failed");
-                // add to the file manager
-                writeToMap(file, hash);
-            } catch (IOException hashFailed) {
-                return true;  //file added but not metadata!
-            }
+        FileDesc fd = super.get(addedAt);
+        Assert.that( fd != null, "null fd just added.");
+        URN xmlHash = fd.getSHA1Urn();
+        writeToMap(file, xmlHash);
+        
+        // add xml docs as appropriate
+        for (int i = 0;
+             (metadata != null) && (i < metadata.length);
+             i++) {
+            LimeXMLDocument currDoc = metadata[i];
+            String uri = currDoc.getSchemaURI();
+            LimeXMLReplyCollection collection =
+            mapper.getReplyCollection(uri);
             
-            // add xml docs as appropriate
-            for (int i = 0;
-                 (metadata != null) && (i < metadata.length);
-                 i++) {
-                LimeXMLDocument currDoc = metadata[i];
-                String uri = currDoc.getSchemaURI();
-                LimeXMLReplyCollection collection =
-                mapper.getReplyCollection(uri);
-                
-                if (collection != null)
-                    collection.addReplyWithCommit(file, hash, currDoc);
-            }
+            if (collection != null)
+                collection.addReplyWithCommit(file, xmlHash, currDoc);
         }
-        return added;
+        
+        return addedAt;
     }
 
     public synchronized boolean renameFileIfShared(File oldFile, File newFile) {
@@ -108,8 +106,8 @@ public class MetaFileManager extends FileManager {
             boolean removed = removeFileIfShared(oldFile);
             if(!removed)
                 return false;
-            boolean added = addFileIfShared(newFile, docs);
-            if(!added)//This is probably inadequate, we should roll back. 
+            int added = addFileIfShared(newFile, docs);
+            if(added == -1)//This is probably inadequate, we should roll back. 
                 return false; //But FM does it like this.
             return true;
         } finally {
@@ -129,7 +127,7 @@ public class MetaFileManager extends FileManager {
         for(int i = 0; i < z; i++){
             FileDesc f = get((int)responses[i].getIndex());
 			File file = f.getFile();
-            String hash=readFromMap(file);
+            URN hash=readFromMap(file);
             LimeXMLDocument doc = coll.getDocForHash(hash);
             if(doc==null)
                 continue;
@@ -141,16 +139,16 @@ public class MetaFileManager extends FileManager {
      * The rule is that to either read or write to/from this
      * map you have to obtain a lock on it
      */    
-    public String readFromMap(Object file){
-        String hash = null;
+    public URN readFromMap(Object file){
+        URN hash = null;
         synchronized (fileToHash) {
-            hash = (String) fileToHash.get(file);
+            hash = (URN) fileToHash.get(file);
         }
         return hash;
     }
 
     
-    public void writeToMap(Object file, Object hash) {
+    public void writeToMap(Object file, URN hash) {
         synchronized (fileToHash) {
             fileToHash.put(file, hash);
         }
@@ -158,16 +156,26 @@ public class MetaFileManager extends FileManager {
 
 
     /**
-     * Looks at the  LimeXMlReplyCollections other than the one passed as
-     * a parameter, and replaces the old hashValue with the new one.
+     * Determines new hashes for the file and updates the needed data
+     * structures.
      * <p>
      * package access, since this method is only called from 
      * LimeXMLReplyCollection. Further the caller is always the 
      * audio LimeXMLReplyCollectin and, even further, it is only called
      * when the file being edited is an mp3 file
      */
-    void handleChangedHash(String oldHash, String newHash, 
-                                      LimeXMLReplyCollection collection){
+    void fileChanged(File f, URN oldHash, LimeXMLReplyCollection collection) {
+        // Let FileManager know and get the index of the changed file.
+        int index = super.fileChanged(f, oldHash);
+        if( index == -1 ) // not shared of hashing failed, oh well.
+            return;
+
+        FileDesc fd = super.get(index);
+        URN newHash = fd.getSHA1Urn();
+        
+        // record we have a new shared file with metadata.
+        writeToMap(f, newHash);
+
         LimeXMLSchemaRepository rep = LimeXMLSchemaRepository.instance();
         SchemaReplyCollectionMapper map=SchemaReplyCollectionMapper.instance();
         String[] schemas = rep.getAvailableSchemaURIs();
@@ -275,47 +283,14 @@ public class MetaFileManager extends FileManager {
     }
 
     /**
-     * Scans all the shared directories recursively and finds files that
-     * have .mp3 extension, and adds them to a hashmap keyed by hashes.
-     * <p> 
-     * Also creates another map that stores the hash to File of non mp3 files
+     * Adds all shared file's to the map as File -> URN.
      */
     private void createFileToHashMaps(){
-        //ArrayList dirs = new 
-		//            ArrayList(Arrays.asList(man.getDirectoriesAsArray()));
-        ArrayList dirs = new 
-            ArrayList(Arrays.asList((File[])SharingSettings.DIRECTORIES_TO_SHARE.getValue()));
-
-        int k=0;
-        while(k<dirs.size() && !loadThreadInterrupted()) {
-            File currDir = (File)dirs.get(k);
-            k++;
-            //add all subdirectories to dirs
-            String[] subFiles = currDir.list();
-            int z = 0;
-            if (subFiles != null) 
-                z = subFiles.length;
-            for(int j=0;j<z;j++){
-                File f = new File(currDir,subFiles[j]);
-                if(f.isDirectory())
-                    dirs.add(f);
-            }
-            //check files in this dir for .mp3 files.
-            File[] files = getSharedFiles(currDir);
-            int size = 0;
-            if (files != null)
-                size = files.length;
-            for(int i=0;i<size && !loadThreadInterrupted();i++){
-                    String name="";
-                    String hash="";
-                    try{
-                        name = files[i].getCanonicalPath();
-                        hash = new String(LimeXMLUtils.hashFile(files[i]));
-                    }catch(IOException e){
-                        continue;
-                    }
-                    writeToMap(files[i],hash);
-            }
+        FileDesc[] fds = super.getSharedFileDescriptors(null);
+        
+        for(int i = 0; i < fds.length; i++) {
+            FileDesc fd = fds[i];
+            writeToMap(fd.getFile(), fd.getSHA1Urn());
         }
     }
 
@@ -367,7 +342,7 @@ public class MetaFileManager extends FileManager {
      * Returns null if the document is not found in the schema
      */
     public LimeXMLDocument getDocument(String schemaURI, File f){
-        String hash = null;
+        URN hash = null;
         hash = readFromMap(f);
         
         // no hash, return null.
