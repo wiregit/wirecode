@@ -638,9 +638,6 @@ public abstract class MessageRouter {
             QueryKey key = QueryKey.getQueryKey(address, port);
 
             // respond with Pong with QK, as GUESS requires....
-            int num_files = RouterService.getNumSharedFiles();
-            int kilobytes = RouterService.getSharedFileSize()/1024;           
-
             PingReply reply = 
                 PingReply.createQueryKeyReply(pr.getGUID(), (byte)1, key);
             UDPService.instance().send(reply, datagram.getAddress(),
@@ -1191,8 +1188,6 @@ public abstract class MessageRouter {
 		List list = _manager.getInitializedConnections2();
         int limit = list.size();
 
-		// are we sending it to the last hop??
-		boolean lastHop = query.getTTL() == 1;
         int connectionsNeededForOld = OLD_CONNECTIONS_TO_USE;
 		for(int i=0; i<limit; i++) {
             
@@ -1534,7 +1529,6 @@ public abstract class MessageRouter {
                                     ReplyHandler rh,
                                     QueryReply qr) {
         int ttl = qr.getTTL();
-        int hops = qr.getHops();
                                            
         // Reason 3 --  The reply is meant for me, do not drop it.
         if( rh == FOR_ME_REPLY_HANDLER ) return false;
