@@ -750,16 +750,16 @@ public class HostCatcher {
     static boolean DEBUG=false;
 
     /**
-     * Constant for the size of the set of hosts put on probation.  Non-final
-     * for testing.
-     */
-    private int PROBATION_HOSTS_SIZE;
-
-    /**
-     * Constant for the size of the set of expired hosts.  Non-final for
+     * Constant for the size of the set of hosts put on probation.  Public for
      * testing.
      */
-    private int EXPIRED_HOSTS_SIZE;
+    public static final int PROBATION_HOSTS_SIZE = 500;
+
+    /**
+     * Constant for the size of the set of expired hosts.  Public for
+     * testing.  
+     */
+    public static final int EXPIRED_HOSTS_SIZE = 500;
 
     
     /** Checks invariants. Very slow; method body should be enabled for testing
