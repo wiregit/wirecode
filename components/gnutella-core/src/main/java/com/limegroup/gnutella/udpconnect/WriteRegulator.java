@@ -59,12 +59,14 @@ public class WriteRegulator {
             rtt = 10;
         int baseWait   = Math.min(realRTT, 2000)/3;  
         int sleepTime  = ((usedSpots) * baseWait) / windowSize;
+        int rto        = _sendWindow.getRTO();
 System.out.println(
 "sleepTime:"+sleepTime+
 " uS:"+usedSpots+
 " smoothRTT:"+smoothRTT+
 " realRTT:"+realRTT+
 " rtt:"+rtt+
+" RTO:"+rto+
 " sL:"+_skipLimit);
 
         if ( _skipLimit < 1 )
