@@ -16,6 +16,7 @@ import com.limegroup.gnutella.util.*;
 import com.limegroup.gnutella.updates.*;
 import com.limegroup.gnutella.settings.*;
 import com.limegroup.gnutella.browser.*;
+import com.limegroup.gnutella.websearch.*;
 import com.limegroup.gnutella.search.*;
 
 
@@ -124,6 +125,15 @@ public class RouterService {
 	 */
 	private static final SearchResultHandler RESULT_HANDLER =
 		new SearchResultHandler();
+
+    
+    /**
+     * Constant for the <tt>WebSearchHandler</tt> class that processes web
+     * searches
+     */
+    private static final WebSearchHandler WEB_SEARCH_HANDLER = 
+         new WebSearchHandler();
+
 
     /**
      * isShuttingDown flag
@@ -845,6 +855,12 @@ public class RouterService {
     public static void stopQuery(GUID guid) {
         QueryUnicaster.instance().purgeQuery(guid);
         RESULT_HANDLER.removeQuery(guid);
+    }
+
+
+    public static void doWebSearch(String searchString, int searchIndex) {
+        WEB_SEARCH_HANDLER.search(searchString, searchIndex);
+        
     }
 
     /** 
