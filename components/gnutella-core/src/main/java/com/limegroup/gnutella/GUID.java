@@ -26,9 +26,10 @@ import com.sun.java.util.collections.*;
  * identifying a LimeWire.
  *
  * ADDITION: added makeRequeryGuid() method.
- * A Requery GUID has the extra property that G[14] = G[9] XOR G[10]
- * So the chances of a false positive RequeryGuid are (1/65000) * (1/255)
- * This still leaves 11 bytes for randomness, which is PLENTY of GUIDs. 
+ * A Requery GUID has the extra property that:
+ * G[13][14]= 0xFFFF & ((G[0]G[1]+2)*(G[9][10]+3) >> 8).
+ * So the chances of a false positive RequeryGuid are (1/65000) * (1/65000)
+ * This still leaves 10 bytes for randomness, which is PLENTY of GUIDs. 
  */
 public class GUID /* implements Comparable */ {
     /** The size of a GUID. */
@@ -44,6 +45,25 @@ public class GUID /* implements Comparable */ {
         this.bytes=bytes;
     }
 
+    /** See the class header description for more details.
+     * @param first The first index of the first two bytes involved in the
+     * marking.
+     * @param second The first index of the second two bytes involved in the
+     * marking.
+     * @param markPoint The first index of the two bytes where to put the 
+     * marking.
+     */
+    private static void tagGuid(byte[] guid,
+                                int first,
+                                int second,
+                                int markPoint) {
+        // You could probably avoid calls to ByteOrder as an optimization.
+        short a=ByteOrder.leb2short(guid, first);
+        short b=ByteOrder.leb2short(guid, second);
+        short tag=tag(a, b);
+        ByteOrder.short2leb(tag, guid, markPoint);        
+    }
+
     /** Returns the bytes for a new GUID. */
     public static byte[] makeGuid() {
         //Start with random bytes.  You could avoid filling them all in,
@@ -55,12 +75,8 @@ public class GUID /* implements Comparable */ {
         ret[8]=(byte)0xFF;    //Mark as "new" GUID.  (See isNewGUID().)
         ret[15]=(byte)0x00;   //Version number is 0.
 
-        //Apply LimeWire's marking.  You could probably avoid calls to ByteOrder
-        //as an optimization.
-        short a=ByteOrder.leb2short(ret, 4);
-        short b=ByteOrder.leb2short(ret, 6);
-        short tag=tag(a, b);
-        ByteOrder.short2leb(tag, ret, 9);
+        //Apply LimeWire's marking.
+        tagGuid(ret, 4, 6, 9);
         return ret;
     }
 
@@ -69,9 +85,8 @@ public class GUID /* implements Comparable */ {
     public static byte[] makeGuidRequery() {
         byte[] ret = makeGuid();
 
-        // use the fact we just tagged as a LW GUID.....        
-        short lwIndic = ByteOrder.leb2short(ret,9);
-        ret[14] = tagRequery(lwIndic);
+        //Apply LimeWire's marking.
+        tagGuid(ret, 0, 9, 13);
 
         return ret;
     }
@@ -85,14 +100,6 @@ public class GUID /* implements Comparable */ {
         return productMiddle;
     }
     
-    /** @return LimeWire's secret requery tag as described above.
-     */
-    private static final byte tagRequery(short in) {
-        byte[] inBytes = new byte[2];
-        ByteOrder.short2leb(in, inBytes, 0);
-        Byte xor = new Byte((byte)(inBytes[0] ^ inBytes[1]));
-        return xor.byteValue();
-    }
 
     /** Same as isLimeGUID(this.bytes) */
     public boolean isLimeGUID() {    
@@ -105,31 +112,35 @@ public class GUID /* implements Comparable */ {
         return isLimeRequeryGUID(this.bytes);
     }
 
+
+    private static boolean checkMatching(byte[] bytes, 
+                                         int first,
+                                         int second,
+                                         int found) {
+        short a = ByteOrder.leb2short(bytes, first);
+        short b = ByteOrder.leb2short(bytes, second);
+        short foundTag = ByteOrder.leb2short(bytes, found);
+        short expectedTag = tag(a, b); 
+        return foundTag == expectedTag;
+    }
+
+
     /** Returns true if this is a specially marked LimeWire GUID.
      *  This does NOT mean that it's a new GUID as well; the caller
      *  will probably want to check that. */
     public static boolean isLimeGUID(byte[] bytes) {    
-        short a=ByteOrder.leb2short(bytes, 4);
-        short b=ByteOrder.leb2short(bytes, 6);
-        short foundTag=ByteOrder.leb2short(bytes, 9);
-        short expectedTag=tag(a, b); 
-        return foundTag==expectedTag;
+        return checkMatching(bytes, 4, 6, 9);
     }    
 
 
-    /** Returns true if this is a specially marked LimeWire GUID.
+    /** Returns true if this is a specially marked LimeWire Requery GUID.
      *  This does NOT mean that it's a new GUID as well; the caller
      *  will probably want to check that. */
     public static boolean isLimeRequeryGUID(byte[] bytes) {    
-        short in = ByteOrder.leb2short(bytes, 9);
-        byte foundTag = bytes[14];
-        byte expectedTag = tagRequery(in);
-        return foundTag == expectedTag;
+        return checkMatching(bytes, 0, 9, 13);
     }    
     
     
-
-
     /** Same as isWindowsGUID(this.bytes). */
     public final boolean isWindowsGUID() {    
         return isWindowsGUID(bytes);
@@ -338,13 +349,27 @@ public class GUID /* implements Comparable */ {
         Assert.that(s2==(short)0x0500, Integer.toHexString(s2));
         Assert.that(tag==(short)0x0517, Integer.toHexString(tag));
         Assert.that(g1.isLimeGUID());
+        System.out.println(g1);
 
         // Test isLimeRequeryGUID
-        bytes[14] = tagRequery(tag);
-        Assert.that(bytes[14] == 0x12);
+        bytes[0]=(byte)0x02;
+        bytes[1]=(byte)0x01;
+        // bytes[9]=(byte)0x17;
+        // bytes[10]=(byte)0x05;
+        //Note everything is LITTLE endian.
+        //(0x0102+2)*(0x0517+3)=0x0104*0x051A=0x52E68 ==> 0x052E
+        bytes[13]=(byte)0x2E;
+        bytes[14]=(byte)0x05;
         g1 = new GUID(bytes);
+        s1=ByteOrder.leb2short(bytes, 0);
+        s2=ByteOrder.leb2short(bytes, 9);
+        tag=tag(s1,s2);
         System.out.println(g1);
+        Assert.that(s1==(short)0x0102, Integer.toHexString(s1));
+        Assert.that(s2==(short)0x0517, Integer.toHexString(s2));
+        Assert.that(tag==(short)0x052E, Integer.toHexString(tag));
         Assert.that(g1.isLimeRequeryGUID() && g1.isLimeGUID());
+
 
         // Test LimeRequeryGUID construction....
         bytes = makeGuidRequery();
