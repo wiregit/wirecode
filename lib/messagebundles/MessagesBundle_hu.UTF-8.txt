@@ -114,7 +114,6 @@ SEARCH_TITLE=Keres
 MONITOR_TITLE=Monitor
 CONNECTIONS_TITLE=Kapcsolódás
 LIBRARY_TITLE=Könyvtár
-SHOPPING_TITLE=LimeBolt
 OPTIONS_TITLE=Választás
 STATS_TITLE=Statisztika
 DOWNLOAD_TITLE=Letöltés
@@ -127,7 +126,6 @@ SEARCH_TIP=File keresés letöltés
 MONITOR_TIP=Keresés és feltöltés megtekintés
 CONNECTIONS_TIP=Kapcsolódás másik taghoz
 LIBRARY_TIP=Mentett fileok megtekintése
-SHOPPING_TIP=Vásárlás a LimeWire piacon
 
 ################################################################################
 # Key/Value pairs for the pull-down menus in the main window
@@ -181,9 +179,6 @@ MENU_NAV_CONN_ACCESSIBLE=Kapcsolatképernyő megjelenítése
 MENU_NAV_LIB=Könyvtár
 MENU_NAV_LIB_MNEMONIC=N
 MENU_NAV_LIB_ACCESSIBLE=Könyvtárképernyő megjelenítése
-MENU_NAV_SHOPPING=LimeShop
-MENU_NAV_SHOPPING_MNEMONIC=L
-MENU_NAV_SHOPPING_ACCESSIBLE=LimeShop honlap megjelenítése
 
 MENU_VIEW_TITLE=Nézet
 MENU_VIEW_TITLE_MNEMONIC=N
@@ -196,18 +191,12 @@ MENU_VIEW_CONNECTIONS_ACCESSIBLE=Kapcsolat ablak megjelenítés
 MENU_VIEW_LIBRARY=Könyvtár
 MENU_VIEW_LIBRARY_MNEMONIC=N
 MENU_VIEW_LIBRARY_ACCESSIBLE=Könyvtár ablak megjelenítés
-MENU_VIEW_SHOPPING=LimeShop
-MENU_VIEW_SHOPPING_MNEMONIC=L
-MENU_VIEW_SHOPPING_ACCESSIBLE=Bevásárló ablak megjelenítés
 
 MENU_RESOURCES_TITLE=Erőforrások
 MENU_RESOURCES_TITLE_MNEMONIC=R
 MENU_RESOURCES_PRO=LimeWire PRO
 MENU_RESOURCES_PRO_MNEMONIC=P
 MENU_RESOURCES_PRO_ACCESSIBLE=LimeWire PRO honlap megjelenítése
-MENU_RESOURCES_LIMESHOP=LimeShop
-MENU_RESOURCES_LIMESHOP_MNEMONIC=L
-MENU_RESOURCES_LIMESHOP_ACCESSIBLE=LimeShop honlap megjelenítése
 
 MENU_TOOLS_TITLE=Eszközök
 MENU_TOOLS_TITLE_MNEMONIC=E

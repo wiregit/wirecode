@@ -116,7 +116,6 @@ SEARCH_TITLE=Szukanie
 MONITOR_TITLE=Kontrola
 CONNECTIONS_TITLE=Połączenia
 LIBRARY_TITLE=Plikoteka
-SHOPPING_TITLE=Sklepik
 OPTIONS_TITLE=Opcje
 STATS_TITLE=Statystyki
 DOWNLOAD_TITLE=Pobieranie
@@ -129,7 +128,6 @@ SEARCH_TIP=Wyszukiwanie i pobieranie plików
 MONITOR_TIP=Kontrola transferów oraz przeglądanie wyników wyszukiwania
 CONNECTIONS_TIP=Łączenie się z innymi
 LIBRARY_TIP=Przeglądanie pobranych plików
-SHOPPING_TIP=Zakupy w sklepiku LimeWire
 
 ################################################################################
 # Key/Value pairs for the pull-down menus in the main window
@@ -186,9 +184,6 @@ MENU_NAV_CONN_ACCESSIBLE=Pokaż panel połączeń.
 MENU_NAV_LIB=Plikoteka
 MENU_NAV_LIB_MNEMONIC=P
 MENU_NAV_LIB_ACCESSIBLE=Pokaż panel plikoteki.
-MENU_NAV_SHOPPING=Sklepik LimeWire
-MENU_NAV_SHOPPING_MNEMONIC=L
-MENU_NAV_SHOPPING_ACCESSIBLE=Pokaż panel sklepiku LimeWire.
 
 MENU_VIEW_TITLE=Widok
 MENU_VIEW_TITLE_MNEMONIC=W
@@ -204,9 +199,6 @@ MENU_VIEW_CONNECTIONS_ACCESSIBLE=Pokaż panel połączeń.
 MENU_VIEW_LIBRARY=Plikoteka
 MENU_VIEW_LIBRARY_MNEMONIC=P
 MENU_VIEW_LIBRARY_ACCESSIBLE=Pokaż panel plikoteki.
-MENU_VIEW_SHOPPING=Sklepik LimeWire
-MENU_VIEW_SHOPPING_MNEMONIC=L
-MENU_VIEW_SHOPPING_ACCESSIBLE=Pokaż panel sklepiku LimeWire.
 #??? MENU_VIEW_THEMES_TITLE=Zastosuj themes
 #??? MENU_VIEW_THEMES_TITLE_MNEMONIC=T
 #??? MENU_VIEW_THEMES_GET_MORE=Get more themes
@@ -221,9 +213,6 @@ MENU_RESOURCES_TITLE_MNEMONIC=Z
 MENU_RESOURCES_PRO=LimeWire PRO
 MENU_RESOURCES_PRO_MNEMONIC=L
 MENU_RESOURCES_PRO_ACCESSIBLE=Pokaż stronę domową LimeWire PRO.
-MENU_RESOURCES_LIMESHOP=Sklepik LimeWire
-MENU_RESOURCES_LIMESHOP_MNEMONIC=K
-MENU_RESOURCES_LIMESHOP_ACCESSIBLE=Pokaż stronę domową Sklepiku LimeWire.
 
 MENU_TOOLS_TITLE=Narzędzia
 MENU_TOOLS_TITLE_MNEMONIC=A

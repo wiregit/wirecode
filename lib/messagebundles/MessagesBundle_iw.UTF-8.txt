@@ -116,7 +116,6 @@ SEARCH_TITLE=חִפֵּשׂ
 MONITOR_TITLE=סִפְרִיָּה
 CONNECTIONS_TITLE=קֶשֶׁר
 LIBRARY_TITLE=סִפְרִיָּה
-SHOPPING_TITLE=Limeחֲנוּת
 OPTIONS_TITLE=אוֹפְּצְיָה
 STATS_TITLE=סְטָטִיסְטִיקָה
 DOWNLOAD_TITLE=הוֹרִיד
@@ -129,7 +128,6 @@ UPLOAD_TITLE=הֶעֱלָה
 #??? MONITOR_TIP=View searches and uploads
 #??? CONNECTIONS_TIP=Connect to other clients
 #??? LIBRARY_TIP=View your repository of saved files
-#??? SHOPPING_TIP=Go shopping at the LimeWire marketplace
 
 ################################################################################
 # Key/Value pairs for the pull-down menus in the main window
@@ -186,9 +184,6 @@ MENU_NAV_CONN_MNEMONIC=C
 MENU_NAV_LIB=(L)סִפְרִיָּה
 MENU_NAV_LIB_MNEMONIC=L
 #??? MENU_NAV_LIB_ACCESSIBLE=Display the library screen
-MENU_NAV_SHOPPING=Limeחֲנוּת
-MENU_NAV_SHOPPING_MNEMONIC=E
-#??? MENU_NAV_SHOPPING_ACCESSIBLE=Display the LimeShop web site
 
 MENU_VIEW_TITLE=(V)רָאָה
 MENU_VIEW_TITLE_MNEMONIC=V
@@ -201,18 +196,12 @@ MENU_VIEW_CONNECTIONS_MNEMONIC=C
 MENU_VIEW_LIBRARY=(L)סִפְרִיָּה
 MENU_VIEW_LIBRARY_MNEMONIC=L
 #??? MENU_VIEW_LIBRARY_ACCESSIBLE=Show library window
-MENU_VIEW_SHOPPING=Limeחֲנוּת
-MENU_VIEW_SHOPPING_MNEMONIC=E
-#??? MENU_VIEW_SHOPPING_ACCESSIBLE=Show shopping window
 
 MENU_RESOURCES_TITLE=(R)מַשְׁאָב
 MENU_RESOURCES_TITLE_MNEMONIC=R
 MENU_RESOURCES_PRO=LimeWire PRO
 MENU_RESOURCES_PRO_MNEMONIC=P
 #??? MENU_RESOURCES_PRO_ACCESSIBLE=Display the LimeWire PRO web site
-MENU_RESOURCES_LIMESHOP=Limeחֲנוּת
-MENU_RESOURCES_LIMESHOP_MNEMONIC=E
-#??? MENU_RESOURCES_LIMESHOP_ACCESSIBLE=Display the LimeShop web site
 
 MENU_TOOLS_TITLE=(T)כְּלִי
 MENU_TOOLS_TITLE_MNEMONIC=T
