@@ -146,6 +146,6 @@ public final class RemoteFileDescTest extends com.limegroup.gnutella.util.BaseTe
 		 
 		 //it should not be a capable altloc.
 		 assertFalse(fwalledNotGood.isAltLocCapable());
-		 assertFalse(fwalledNotGood.needsPush());
+		 assertTrue(fwalledNotGood.needsPush());
 	}
 }

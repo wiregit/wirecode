@@ -1107,7 +1107,7 @@ public class DownloadTest extends BaseTestCase {
     /**
      * tests that a download from a push location becomes an alternate location      
      */
-    public void testPusherBecomesPushLocAndSentToInterrested() throws Exception {
+    public void testPusherBecomesPushLocAndSentToInterested() throws Exception {
         LOG.debug("-Testing push download creating a push location...");
         final int RATE=200;
         final int FUDGE_FACTOR=RATE*1536;
@@ -1147,6 +1147,61 @@ public class DownloadTest extends BaseTestCase {
         
         alc=uploader2.getAlternateLocations();
         assertFalse("not interested uploader got pushloc",alc.contains(pushLoc));
+    }
+    
+    /**
+     * tests that bad push locs get demoted
+     */
+    public void testBadPushLocGetsDemotedNotAdvertised() throws Exception {
+        
+        // this test needs to go slowly so that the push attempt may time out
+        final int RATE=15;
+        final int FUDGE_FACTOR=RATE*1536;
+        uploader1.setInterestedInFalts(true);
+        uploader2.setInterestedInFalts(true);
+        uploader1.setRate(RATE);
+        uploader2.setRate(RATE);
+        
+        AlternateLocation badPushLoc=AlternateLocation.create(
+                guid.toHexString()+";1.2.3.4:5",TestFile.hash(),savedFile.getName());
+        
+        AlternateLocationCollection alc = 
+            AlternateLocationCollection.create(TestFile.hash());
+        
+        alc.add(badPushLoc);
+        
+        uploader1.setAlternateLocations(alc);
+        
+        //add the push loc directly to the _incomming collection,
+        //otherwise it doesn't get demoted
+        PrivilegedAccessor.setValue(uploader1,"incomingAltLocs",alc);
+        
+        RemoteFileDesc rfd1 = newRFDWithURN(PORT_1,100);
+        RemoteFileDesc rfd2 = newRFDWithURN(PORT_2,100);
+        
+        RemoteFileDesc [] rfds = {rfd1,rfd2};
+        
+        tGeneric(rfds);
+        
+        assertGreaterThan("u1 did no work",100*1024,uploader1.amountUploaded());
+        assertGreaterThan("u2 did no work",100*1024,uploader2.amountUploaded());
+        
+        assertFalse("bad pushloc got advertised",
+                uploader2.getAlternateLocations().contains(badPushLoc));
+        
+        AlternateLocationCollection newAlc = uploader1.getAlternateLocations();
+        assertEquals(2,newAlc.getAltLocsSize());
+        
+        Iterator it = newAlc.iterator();
+        AlternateLocation current = (AlternateLocation) it.next();
+        
+        if(! (current instanceof PushAltLoc))
+            current = (AlternateLocation)it.next();
+        
+        assertTrue(current instanceof PushAltLoc);
+        
+        assertTrue(current.getDemoted());
+        
     }
     
     public void testAlternateLocationsAreRemoved() throws Exception {  
