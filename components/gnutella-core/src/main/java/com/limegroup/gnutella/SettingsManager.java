@@ -95,13 +95,9 @@ public class SettingsManager implements SettingsInterface {
     private volatile Properties _ndProps;
 
     /**
-     *  Set up the manager instance to follow the singleton pattern.
+     * Set up the manager instance to follow the singleton pattern.
      */
     private static SettingsManager _instance = new SettingsManager();
-
-    private String _curDir;
-    private String _fileName;
-    private String _ndFileName;
 
 
     /**
@@ -121,13 +117,9 @@ public class SettingsManager implements SettingsInterface {
         _props      = new Properties();
         _ndProps    = new Properties();
 		
-        _fileName   = CURRENT_DIRECTORY + File.separator;
-        _ndFileName = CURRENT_DIRECTORY + File.separator;
-        _fileName   += PROPS_NAME;
-        _ndFileName += ND_PROPS_NAME;
         FileInputStream fis;
         try {
-            fis = new FileInputStream(_ndFileName);
+            fis = new FileInputStream(new File(ND_PROPS_NAME));
             try {_ndProps.load(fis);}
             catch(IOException ioe) {}
         }
@@ -142,7 +134,7 @@ public class SettingsManager implements SettingsInterface {
         Properties tempProps = new Properties();
         FileInputStream fis;
         try {
-            fis = new FileInputStream(_fileName);
+            fis = new FileInputStream(new File(PROPS_NAME));
             try {
                 tempProps.load(fis);
                 loadDefaults();
@@ -150,7 +142,10 @@ public class SettingsManager implements SettingsInterface {
                     fis.close();
                     validateFile(tempProps);
                 }
-                catch(IOException e){loadDefaults();}
+                catch(IOException e) {
+					// error closing the file, so continue using the 
+					// defaults.
+				}
             }
             catch(IOException e){loadDefaults();}
         }
@@ -158,12 +153,11 @@ public class SettingsManager implements SettingsInterface {
         catch(SecurityException se){loadDefaults();}
     }
 
-    /** Makes sure that each property in the file
-     *  is valid.  If not, it sets that property
-     *  to the default value.
+    /** 
+	 * Sets all of the properties manually to ensure that each
+	 * property is valid.
      */
-    private void validateFile(Properties tempProps)
-        throws IOException {
+    private void validateFile(Properties tempProps) {
         String p;
         Enumeration enum = tempProps.propertyNames();
         while(enum.hasMoreElements()){
@@ -271,7 +265,13 @@ public class SettingsManager implements SettingsInterface {
 						// if we get an IOException, then the save 
 						// directory could not be set for some reason,
 						// so simply use the default
-						setSaveDirectory(getSaveDefault());
+						try {
+							setSaveDirectory(getSaveDefault());							
+							addDirectory(getSaveDefault());
+						} catch(IOException ioe2) {
+							// not much we can do if this also throws
+							// an exception.
+						}
 					}
                 }
 
@@ -1080,7 +1080,7 @@ public class SettingsManager implements SettingsInterface {
      * not necessarily guaranteed to be valid however.
      */
     public void setMaxIncomingConnections(int maxConn,
-                                                       boolean checkLimit)
+										  boolean checkLimit)
         throws BadConnectionSettingException {
         if (checkLimit) {
             int max=maxConnections();
@@ -1175,36 +1175,42 @@ public class SettingsManager implements SettingsInterface {
     }
 
     /** 
-	 * set the directories to search.  this method will filter
+	 * Sets the shared directories.  This method filters
      * out any duplicate or invalid directories in the string.
-     * note, however, that it does not currently filter out
+     * Note, however, that it does not currently filter out
      * listing subdirectories that have parent directories
-     * also in the string.  this should change at some point.
+     * also in the string. 
+	 *
+	 * @param dirs A semicolon delimited <code>String</code> instance 
+	 *             containing the paths of shared directories.
 	 */
-    public void setDirectories(String dir) {
+    public void setDirectories(final String dirs) {
         boolean dirsModified = false;
-        _directories = dir;
-        String[] dirs = getDirectoriesAsArray();
+		
+		// this is necessary because the getDirectoriesAsArray
+		// method creates its array from the _directories variable.
+		_directories = dirs;
+        String[] dirArray = getDirectoriesAsArray();
         int i = 0;
-        while(i < dirs.length) {
-            if(dirs[i] != null) {
-                File f = new File(dirs[i]);
+        while(i < dirArray.length) {
+            if(dirArray[i] != null) {
+                File f = new File(dirArray[i]);
                 if(f.isDirectory()) {
                     int count = 0;
                     int z = 0;
                     String str = "";
                     try {str = f.getCanonicalPath();}
                     catch(IOException ioe) {break;}
-                    while(z < dirs.length) {
-                        if(dirs[z] != null) {
-                            File file = new File(dirs[z]);
+                    while(z < dirArray.length) {
+                        if(dirArray[z] != null) {
+                            File file = new File(dirArray[z]);
                             String name = "";
                             try {name = file.getCanonicalPath();}
                             catch(IOException ioe) {break;}
                             if(str.equals(name)) {
                                 count++;
                                 if(count > 1) {
-                                    dirs[z] = null;
+                                    dirArray[z] = null;
                                     dirsModified = true;
                                 }
                             }
@@ -1213,7 +1219,7 @@ public class SettingsManager implements SettingsInterface {
                     }
                 }
                 else {
-                    dirs[i] = null;
+                    dirArray[i] = null;
                     dirsModified = true;
                 }
             }
@@ -1222,9 +1228,9 @@ public class SettingsManager implements SettingsInterface {
         if(dirsModified) {
             i = 0;
             StringBuffer sb = new StringBuffer();
-            while(i < dirs.length) {
-                if(dirs[i] != null) {
-                    sb.append(dirs[i]);
+            while(i < dirArray.length) {
+                if(dirArray[i] != null) {
+                    sb.append(dirArray[i]);
                     sb.append(';');
                 }
                 i++;
@@ -1235,36 +1241,41 @@ public class SettingsManager implements SettingsInterface {
     }
 
     /** 
-	 * adds one directory to the directory string (if
+	 * Adds one directory to the directory string only if
      * it is a directory and is not already listed. 
+	 *
+	 * @param dir  A <code>File</code> instance denoting the 
+	 *             abstract pathname of the new directory 
+	 *             to add.
+	 *
+	 * @throws  IOException 
+	 *          If the directory denoted by the directory pathname
+	 *          String parameter did not exist prior to this method
+	 *          call and could not be created, or if the canonical
+	 *          path could not be retrieved from the file system.
 	 */
-    public boolean addDirectory(String dir) {
-        File f = new File(dir);
-        if(f.isDirectory()) {
-            String[] dirs = getDirectoriesAsArray();
-            String newPath = "";
-            try {newPath = f.getCanonicalPath();}
-            catch(IOException ioe) {return false;}
-            // check for directory
-            int i = 0;
-            while(i < dirs.length) {
-                File file = new File(dirs[i]);
-                String name = "";
-                try {name = file.getCanonicalPath();}
-                catch(IOException ioe) {break;}
-                if(name.equals(newPath)) {
-                    return false;
-                }
-                i++;
-            }
-            if(!_directories.endsWith(";"))
-                _directories += ";";
-            _directories += newPath;
-            _directories += ";";
-            _props.put(DIRECTORIES, _directories);
-            return true;
-        }
-        return false;
+    public void addDirectory(File dir) throws IOException {
+		if(!dir.isDirectory()) throw new IOException();
+		String[] dirs = getDirectoriesAsArray();
+		String newPath = "";
+		newPath = dir.getCanonicalPath();
+		int i = 0;
+		while(i < dirs.length) {
+			File file = new File(dirs[i]);
+			String name = "";
+			name = file.getCanonicalPath();
+			if(name.equals(newPath)) {
+				// throw the exception because the shared 
+				// directory already exists
+				throw new IOException();
+			}
+			i++;
+		}
+		if(!_directories.endsWith(";"))
+			_directories += ";";
+		_directories += newPath;
+		_directories += ";";
+		_props.put(DIRECTORIES, _directories);
     }
 
     /** 
@@ -1726,7 +1737,7 @@ public class SettingsManager implements SettingsInterface {
     public void writeProperties() {
 		FileOutputStream ostream = null;
 		try {
-			ostream = new FileOutputStream(_fileName);
+			ostream = new FileOutputStream(new File(PROPS_NAME));
 			_props.save(ostream, "");
 			ostream.close();
 		}
@@ -1785,17 +1796,39 @@ public class SettingsManager implements SettingsInterface {
 //  		System.out.println("host list path: " + settings.getHostList());
 //  	}
 	
+//  	// test verifying that the limewire.lax file is actually a Java Properties file.
+//  	public static void main(String[] args) {
+//  		Properties props = new Properties();
+//  		FileInputStream fis;
+//  		try {
+//  			fis = new FileInputStream(new File("limewire.lax"));
+//  			props.load(fis);
+//  			Enumeration enum = props.propertyNames();
+//  			String key = "";
+//  			String value = "";
+//  			while(enum.hasMoreElements()) {
+//  				key = (String)enum.nextElement();
+//  				System.out.print(key);
+//  				System.out.print("="+props.getProperty(key));
+//  				System.out.println();
+//  			}
+//  		} catch(FileNotFoundException fnfe) {
+//  		} catch(SecurityException se) {
+//  		} catch(IOException ioe) {
+//  		}
+		
+//  	}
 	
-	public static void main(String args[]) {
-        boolean installed = true;
-        String s = String.valueOf(installed);
-		System.out.println("string: "+s);
+//  	public static void main(String args[]) {
+//          boolean installed = true;
+//          String s = String.valueOf(installed);
+//  		System.out.println("string: "+s);
 
 		
-		Boolean b = new Boolean(s);
-		System.out.println("boolean: "+b.booleanValue());
-        //_props.put(INSTALLED, s);
-	}
+//  		Boolean b = new Boolean(s);
+//  		System.out.println("boolean: "+b.booleanValue());
+//          //_props.put(INSTALLED, s);
+//  	}
 
     //      /** Unit test */
     //      public static void main(String args[]) {
