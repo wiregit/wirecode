@@ -60,6 +60,9 @@ public class LimeXMLReplyCollection{
     public static final int HASH_FAILED  = 11;
 
     /**
+     * Creates a new LimeXMLReplyCollection.  The reply collection
+     * will retain only those XMLDocs that match the given schema URI.
+     *
      * @param fds The list of shared FileDescs.
      * @param URI This collection's schema URI
      * @param audio Whether this is a collection of audio files.
@@ -172,7 +175,8 @@ public class LimeXMLReplyCollection{
     
     /**
      * Creates a LimeXMLDocument from the XML String.
-     * If the string is null, it reads the file to create some XML.
+     * If the string is null, the collection is for audio files,
+     * and the file is an MP3 file, it reads the file to create some XML.
      */
     private LimeXMLDocument constructDocument(String xmlStr, File file) {
         // old style may exist or there may be no xml associated
@@ -184,18 +188,13 @@ public class LimeXMLReplyCollection{
             boolean onlyID3=((xmlStr == null) || xmlStr.equals(""));
             try {
                 if(!onlyID3) {  //non-id3 values with mp3 file
-                    String id3XML =
-                    ID3Reader.readDocument(file,onlyID3);
-                    String joinedXML = 
-                    joinAudioXMLStrings(id3XML, xmlStr);
-                    if( joinedXML == null ) {
-                        debug("poorly joined XML");
-                        return ID3Reader.readDocument(file);
-                    } else
+                    String id3XML = ID3Reader.readDocument(file,onlyID3);
+                    String joinedXML = joinAudioXMLStrings(id3XML, xmlStr);
+                    if( joinedXML != null )
                         return new LimeXMLDocument(joinedXML);
                 }
-                else // only id3 data with mp3 files
-                    return ID3Reader.readDocument(file);
+                // no XML data we can use.
+                return ID3Reader.readDocument(file);
             }
             catch (SAXException ignored) { }
             catch (IOException ignored) { }
@@ -233,8 +232,9 @@ public class LimeXMLReplyCollection{
     }
 
     /**
-     * returns null if there was an exception while creating the
-     * MapSerializer
+     * Creates the MapSerializer object that deserializes the .sxml file.
+     * @return the MapSerializer or null if there was an exception
+     *   while creating the MapSerializer
      */
     private MapSerializer initializeMapSerializer(String URI){
         String fname = LimeXMLSchema.getDisplayString(URI)+".sxml";
@@ -252,6 +252,10 @@ public class LimeXMLReplyCollection{
         }
     }
 
+    /**
+     * Joins two XML strings together.
+     * Returns null if the second string is malformed.
+     */
     private String joinAudioXMLStrings(String mp3Str, String fileStr) {
         int p = fileStr.lastIndexOf("></audio>");
         if( p == -1 )
@@ -265,10 +269,19 @@ public class LimeXMLReplyCollection{
     }
 
     
+    /**
+     * Returns the schema URI of this collection.
+     */
     public String getSchemaURI(){
         return schemaURI;
     }
 
+    /**
+     * Adds a reply into the mainMap of this collection.
+     * Also sets the LimeXMLDocument's XMLUrn to be the FileDesc's SHA1.
+     * Also adds this LimeXMLDocument to the list of documents the
+     * FileDesc knows about.
+     */
     public void addReply(FileDesc fd, LimeXMLDocument replyDoc) {
         URN hash = fd.getSHA1Urn();
         synchronized(mainMap){
@@ -283,6 +296,17 @@ public class LimeXMLReplyCollection{
     }
 
 
+    /**
+     * Adds a reply into the mainMap of this collection, associating
+     * the XMLUrn with the FileDesc and the FileDesc with the LimeXMLDocument.
+     * If this collection is an audio collection, this will write out the
+     * file to disk, possibly adding/changing ID3 tags on an MP3 file.
+     * If the file changed because of this operation, the FileManager
+     * is notified of the changed file, redoing its hashes.
+     * Regardless of whether or not this collection is for audio files,
+     * the map of (URN -> LimeXMLDocument) will always be serialized
+     * to disk.
+     */
     void addReplyWithCommit(File f, FileDesc fd, LimeXMLDocument replyDoc) {
         addReply(fd, replyDoc);
         
@@ -295,6 +319,9 @@ public class LimeXMLReplyCollection{
             write();
     }
 
+    /**
+     * Returns the amount of items in this collection.
+     */
     public int getCount(){
         synchronized(mainMap) {
             return mainMap.size();
@@ -309,7 +336,8 @@ public class LimeXMLReplyCollection{
     }
     
     /**
-     * may return null if the hash is not found
+     * Returns the LimeXMLDocument associated with this hash.
+     * May return null if the hash is not found.
      */
     public LimeXMLDocument getDocForHash(URN hash){
         synchronized(mainMap){
@@ -317,6 +345,9 @@ public class LimeXMLReplyCollection{
         }
     }
 
+    /**
+     * Returns the list of LimeXMLDocuments contained in this collection.
+     */
     public List getCollectionList(){
         List replyDocs = new ArrayList();
         synchronized(mainMap){
@@ -326,8 +357,8 @@ public class LimeXMLReplyCollection{
     }
         
     /**
-     * Returns and empty list if there are not matching documents with
-     * that correspond to the same schema as the query.
+     * Returns all documents that match the particular query.
+     * If no documents match, this returns an empty list.
      */    
     public List getMatchingReplies(LimeXMLDocument queryDoc){
         List matchingReplyDocs;
@@ -344,6 +375,7 @@ public class LimeXMLReplyCollection{
     }
     
     /**
+     * Replaces the document in the map with a newer LimeXMLDocument.
      * @return the older document, which is being replaced. Can be null.
      */
     public LimeXMLDocument replaceDoc(FileDesc fd, LimeXMLDocument newDoc){
@@ -441,8 +473,12 @@ public class LimeXMLReplyCollection{
     }
 
     /**
-     * @return An ID3Editor to use when committing or
-     *  null if nothing should be editted.
+     * Determines whether or not this LimeXMLDocument can or should be
+     * commited to disk to replace the ID3 tags in the mp3File.
+     * If the ID3 tags in the file are the same as those in document,
+     * this returns null (indicating no changes required).
+     * @return An ID3Editor to use when committing or null if nothing 
+     *  should be editted.
      */
     private ID3Editor ripMP3XML(String mp3File, LimeXMLDocument doc){
         if (!LimeXMLUtils.isMP3File(mp3File))
@@ -485,6 +521,10 @@ public class LimeXMLReplyCollection{
     }
 
 
+    /**
+     * Commits the changes to disk.
+     * If anything was changed on disk, notifies the FileManager of a change.
+     */
     private int commitID3Data(String mp3FileName,
                               ID3Editor editor) {
         //write to mp3 file...
