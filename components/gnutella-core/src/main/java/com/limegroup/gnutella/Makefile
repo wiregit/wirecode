@@ -1,5 +1,5 @@
 #Makefile for LimeWire
-javac=javac -O
+javac=javac -g
 
 classes = Main.class ConnectionManager.class RouteTable.class \
 	Connection.class BadPacketException.class GUID.class \
@@ -7,12 +7,14 @@ classes = Main.class ConnectionManager.class RouteTable.class \
 	Message.class PingRequest.class PingReply.class \
 	QueryRequest.class QueryReply.class Response.class \
 	PushRequest.class ByteOrder.class HostCatcher.class \
-	ForgetfulHashMap.class Endpoint.class \
+	Endpoint.class \
 	SettingsInterface.class SettingsManager.class \
-	HTTPClientMgr.class HTTPMgr.class HTTPServerMgr.class HTTPUtil.class
+	HTTPClientMgr.class HTTPMgr.class HTTPServerMgr.class HTTPUtil.class \
+	SpamFilter.class DuplicateFilter.class
 
+subpackages = util gui
 
-all : $(classes) gui networkdiscoverer
+all : $(classes) $(subpackages)
 
 $(classes) : %.class: %.java
 	$(javac) $<
@@ -21,6 +23,11 @@ $(classes) : %.class: %.java
 .PHONY: gui
 gui:
 	$(MAKE) -C gui
+
+.PHONY: util
+util:
+	$(MAKE) -C util
+
 # .PHONY: doc
 # doc:
 # 	cd ../../..
