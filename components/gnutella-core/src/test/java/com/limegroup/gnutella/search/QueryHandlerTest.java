@@ -33,6 +33,23 @@ public final class QueryHandlerTest extends BaseTestCase {
     }
 
     /**
+     * Test to make sure that the utility method for creating
+     * our probe query lists is working as we expect it to.
+     */
+    public void testCreateProbeLists() throws Exception {
+        Class[] params = new Class[]{List.class, QueryRequest.class};
+		Method m = 
+            PrivilegedAccessor.getMethod(QueryHandler.class, 
+                                         "createProbeLists",
+                                         params);
+        List connections = new LinkedList();
+        for(int i=0; i<15; i++) {
+            connections.add(new TestConnection(10));
+        }           
+    }
+
+
+    /**
      * Tests the method for calculating the next TTL.
      */
     public void testCalculateNewTTL() throws Exception {
@@ -83,14 +100,14 @@ public final class QueryHandlerTest extends BaseTestCase {
 
         QueryHandler handler = 
             QueryHandler.createHandler(QueryRequest.createQuery("test"),
-                                       new TestConnection(8));
+                                       new TestConnection(8),
+                                       new TestResultCounter(0));
         try {
             handler.sendQuery();
             fail("should have failed due to null result counter");
         } catch(NullPointerException e) {
             // this is expected before the result counter is set
         }
-        handler.setResultCounter(new TestResultCounter(0));
 
         TestConnectionManager tcm = new TestConnectionManager();
 
@@ -246,7 +263,8 @@ public final class QueryHandlerTest extends BaseTestCase {
 
         QueryHandler handler = 
             QueryHandler.createHandler(QueryRequest.createQuery("test"),
-                                       new TestConnection(8));
+                                       new TestConnection(8),
+                                       new TestResultCounter(0));
         
         m.invoke(null, new Object[]{handler, connections});
 
@@ -284,9 +302,8 @@ public final class QueryHandlerTest extends BaseTestCase {
 
         QueryHandler handler = 
             QueryHandler.createHandler(QueryRequest.createQuery("test"),
-                                       new TestConnection(8));
-
-        handler.setResultCounter(new TestResultCounter(0));
+                                       new TestConnection(8),
+                                       new TestResultCounter(0));
         
         
         Iterator iter = connections.iterator();

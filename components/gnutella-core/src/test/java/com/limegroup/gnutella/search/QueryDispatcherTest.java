@@ -41,8 +41,8 @@ public class QueryDispatcherTest extends BaseTestCase {
         QueryRequest qr = QueryRequest.createQuery("test");
         ReplyHandler rh = new TestReplyHandler();
         QueryHandler handler = 
-            QueryHandler.createHandlerForNewLeaf(qr, rh);
-        handler.setResultCounter(new TestResultCounter());
+            QueryHandler.createHandlerForNewLeaf(qr, rh, 
+                                                 new TestResultCounter());
 
 
         qd.addQuery(handler);
