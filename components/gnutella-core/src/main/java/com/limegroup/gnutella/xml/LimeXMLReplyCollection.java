@@ -62,39 +62,30 @@ public class LimeXMLReplyCollection{
         else
             hashToXMLStr = ms.getMap();
         
-        if (!this.audio) 
-            constructCollection(fileToHash, hashToXMLStr);        
-        else 
+        if (this.audio) // special processing for mp3s needed
             constructAudioCollection(fileToHash, hashToXMLStr);
-    }
 
-
-    /**
-     * Constructs the usual XML Collection.
-     */
-    private void constructCollection(Map fileToHash, Map hashToXMLStr) {
+        // get the hash to xml (from the serialized file) and create a
+        // LimeXMLDocument out of each.  Then add it to the collection.
         Iterator iter = null;
         if ((hashToXMLStr != null) &&
             (hashToXMLStr.keySet() != null))
             iter = hashToXMLStr.keySet().iterator();
         while((iter != null) && iter.hasNext()){
-            boolean valid = true;
             String hash = (String)iter.next();
             String xmlStr = (String)hashToXMLStr.get(hash);//cannot be null
             LimeXMLDocument doc=null;
             try{
                 doc = new LimeXMLDocument(xmlStr);
-            }catch(Exception e){
-                valid = false;
+                addReply(hash, doc);
             }
-            if(valid)
-                addReply(hash,doc);
+            catch(Exception e){
+            }
         }
+
         if (fileToHash != null)
             checkDocuments(fileToHash,false);
     }
-
-
 
 
     /**
@@ -103,48 +94,28 @@ public class LimeXMLReplyCollection{
      */
     private void constructAudioCollection(Map fileToHash, Map hashToXMLStr) {
         ID3Reader id3Reader = new ID3Reader();
+        // for each file, get the hash, then get the fileXMLString, and
+        // (possiblY) join it with the ID3 info.  Then add the reply.
         synchronized(fileToHash){
             Iterator iter = fileToHash.keySet().iterator();
             LimeXMLDocument doc=null;
             while(iter.hasNext()) {
-                boolean solo=false;
+                boolean solo = false; //rich data only from ID3?
                 File file = (File)iter.next();
-                String hash = metaFileManager.readFromMap(file,audio);
+                String hash = metaFileManager.readFromMap(file, audio);
                 String fileXMLString=(String)hashToXMLStr.remove(hash);
-                if(fileXMLString==null || fileXMLString.equals(""))
-                    solo = true;//rich data only from ID3
+                solo = ((fileXMLString == null) || fileXMLString.equals(""));
                 try{
                     String xmlString = id3Reader.readDocument(file,solo);
                     if(!solo)
                         xmlString =joinAudioXMLStrings(xmlString,fileXMLString);
                     doc = new LimeXMLDocument(xmlString);
-                }catch(Exception e){
-                    //System.out.println("Audio file "+file);
-                    //e.printStackTrace();
-                    continue;
-                }
-                if(doc!=null)
                     addReply(hash,doc);
+                }
+                catch(Exception e){
+                }
             }
         }//end of synch
-        //ensure that the files are documents are consistent with the files.
-        //Now if there all the audio docs pertained only to 
-        //.mp3 file we would stop...but we need to check for other file types.
-        //This iterator will contain whats left ie non mp3 files w/ audio meta
-        Iterator iterator = hashToXMLStr.keySet().iterator();
-        while(iterator.hasNext()){
-            String h = (String)iterator.next();
-            String xmlStr = (String)hashToXMLStr.get(h);
-            LimeXMLDocument d=null;
-            try{
-                d = new LimeXMLDocument(xmlStr);
-            }catch(Exception ee){
-                continue;
-            }
-            if(d!=null)
-                addReply(h,d);
-        }            
-        checkDocuments(fileToHash,audio);
     }
     
 
