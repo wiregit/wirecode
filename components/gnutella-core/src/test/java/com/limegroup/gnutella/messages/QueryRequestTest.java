@@ -149,10 +149,6 @@ public final class QueryRequestTest extends BaseTestCase {
 	 */
 	public void testStillAcceptedIfOnlyPartsAreEmpty() throws Exception {
 		QueryRequest qr = null;
-		qr = QueryRequest.createQuery("blah");
-		qr = QueryRequest.createQuery("","blah");
-
-		qr = QueryRequest.createRequery(HugeTestUtils.SHA1);
 
 		//String is double null-terminated.
 		byte[] payload = new byte[2+3];
@@ -383,19 +379,19 @@ public final class QueryRequestTest extends BaseTestCase {
 	/**
 	 * Tests constructor that only takes a string and a TTL.
 	 */
-	public void testStringXMLConstructor() {
-		QueryRequest qr = QueryRequest.createQuery("tests", "xml");
-		runStandardChecks(qr, "tests", "xml");
-		runNonRequeryChecks(qr);
-	}
+ 	public void testStringXMLConstructor() {
+ 		QueryRequest qr = QueryRequest.createQuery("tests", "<?xml");
+ 		runStandardChecks(qr, "tests", "<?xml");
+ 		runNonRequeryChecks(qr);
+ 	}
 
 	/**
 	 * Tests constructor that only takes a string and a TTL and a GUID.
 	 */
 	public void testGUIDStringXMLConstructor() {
 		QueryRequest qr = 
-			QueryRequest.createQuery(QueryRequest.newQueryGUID(false), "tests", "xml");
-		runStandardChecks(qr, "tests", "xml");
+			QueryRequest.createQuery(QueryRequest.newQueryGUID(false), "tests", "<?xml");
+		runStandardChecks(qr, "tests", "<?xml");
 		runNonRequeryChecks(qr);
 	}
 
@@ -548,8 +544,7 @@ public final class QueryRequestTest extends BaseTestCase {
 			fail("unexpected exception: "+e);
 		}
 
-		// TODO:: ADD THISS!!
-		//assertEquals("queries should be equal", storedQuery, qrTest);
+		assertEquals("queries should be equal", storedQuery, qrTest);
 	}
 
 
