@@ -117,7 +117,13 @@ public class Connection {
      * The number of times we will respond to a given challenge 
      * from the other side, or otherwise, during connection handshaking
      */
-    public static final int MAX_HANDSHAKE_ATTEMPTS = 5;    
+    public static final int MAX_HANDSHAKE_ATTEMPTS = 5;  
+
+    /**
+     * This time in milliseconds since 1970 that this connection was
+     * established.
+     */
+    private long _connectionTime = Long.MAX_VALUE;
 
 
     /** if I am a Ultrapeer shielding the given connection */
@@ -308,6 +314,8 @@ public class Connection {
                 initializeOutgoing();
             else
                 initializeIncoming();
+
+            _connectionTime = System.currentTimeMillis();
 						
         } catch (NoGnutellaOkException e) {
             close();
@@ -822,6 +830,39 @@ public class Connection {
 			throw new IllegalStateException("Not initialized");
 		}
 		return _socket.getLocalAddress();
+    }
+
+    /**
+     * Returns the time this connection was established, in milliseconds
+     * since January 1, 1970.
+     *
+     * @return the time this connection was established
+     */
+    public long getConnectionTime() {
+        return _connectionTime;
+    }
+
+    /**
+     * Checks whether this connection is considered a stable connection,
+     * meaning it has been up for enough time to be considered stable.
+     *
+     * @return <tt>true</tt> if the connection is considered stable,
+     *  otherwise <tt>false</tt>
+     */
+    public boolean isStable() {
+        return isStable(System.currentTimeMillis());
+    }
+
+    /**
+     * Checks whether this connection is considered a stable connection,
+     * by comparing the time it was established with the <tt>millis</tt>
+     * argument.
+     *
+     * @return <tt>true</tt> if the connection is considered stable,
+     *  otherwise <tt>false</tt>
+     */
+    public boolean isStable(long millis) {
+        return (millis - getConnectionTime())/1000 > 5;
     }
 
     /** @return -1 if the message isn't supported, else the version number 
