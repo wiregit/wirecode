@@ -39,19 +39,22 @@ public class UploadManager {
     private List /* of PushRequestedFile */ _attemptingPushes=
         new LinkedList();
 	/**
-	 * A Map of all the uploads in progress.  If the number
+	 * The number of uploads in progress from each host. If the number
 	 * of uploads by a single user exceeds the SettingsManager's
 	 * uploadsPerPerson_ variable, then the upload is denied, 
 	 * and the used gets a Try Again Later message.
      *
-
+     * INVARIANT: for all keys k in _uploadsInProgress with value v, 
+     * there are exactly v uploads in _fullUploads with the same 
+     * same address.  Conversely, all hosts in _uploadsInProgress
+     * occur as a key in _uploadsInProgress.
      */
 	private static Map /* String -> Integer */ _uploadsInProgress =
 		new HashMap();
 	/**
-	 * A SortedSet of the full uploads in progress.  
-	 * This is used to shutdown "Gnutella" uploads as needed.
-	 */
+	 * The list of all uploads in progress.  This is used to shutdown 
+     * "Gnutella" uploads as needed.  
+     */
 	private static List _fullUploads = new LinkedList();
 
 	/** The callback for notifying the GUI of major changes. */
@@ -157,7 +160,10 @@ public class UploadManager {
 
 	//////////////////////// Private Interface /////////////////////////
 
-
+    /** Increments the count of uploads in progress for host.
+     *  If uploader has exceeded its limits, places it in LIMIT_REACHED state.
+     *  Notifies callback of this.
+     *      @modifies _uploadsInProgress, uploader, _callback */
 	private void insertAndTest(Uploader uploader, String host) {
 		// add to the Map
 		insertIntoMap(host);
@@ -170,6 +176,8 @@ public class UploadManager {
 
 	}
 
+    /** Increments the count of uploads in progress for host. 
+     *      @modifies _uploadsInProgress */
 	private void insertIntoMap(String host) {
 		int numUploads = 1;
 		// check to see if the map aleady contains
@@ -179,9 +187,7 @@ public class UploadManager {
 			Integer myInteger = (Integer)_uploadsInProgress.get(host);
 			numUploads += myInteger.intValue();
 		}
-		_uploadsInProgress.put(host, new Integer(numUploads));
-		
-			
+		_uploadsInProgress.put(host, new Integer(numUploads));		
 	}
 
 	private void removeFromMap(String host) {
