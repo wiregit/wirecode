@@ -71,7 +71,7 @@ public Endpoint(String hostname, int port, long files, long kbytes) {
 }
 
 public String toString() {
-	return hostname+":"+port + " connectivity=" + connectivity;
+	return hostname+":"+port;
 }
 
 public String getHostname()
