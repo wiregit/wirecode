@@ -57,13 +57,13 @@ public class JOrbisComment {
    * @param file the .ogg file to be updated
    */
   public void update(Comment comment, File file) throws IOException{
-  	FileInputStream in =null;
-  	FileOutputStream out = null;
+  	InputStream in =null;
+  	OutputStream out = null;
   	File tempFile = null;
   	
   	try {
   		state =new State();
-    	in =new FileInputStream(file);
+    	in =new BufferedInputStream(new FileInputStream(file));
     
     	read(in);
     
@@ -87,7 +87,7 @@ public class JOrbisComment {
     		tempFile = new File(file.getAbsolutePath(),
 				file.getName()+".tmp");
     	}
-    	out=new FileOutputStream(tempFile);
+    	out=new BufferedOutputStream(new FileOutputStream(tempFile));
     
     
     	LOG.debug("about to write ogg file");

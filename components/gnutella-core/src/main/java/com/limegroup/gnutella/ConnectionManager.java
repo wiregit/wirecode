@@ -795,27 +795,37 @@ public class ConnectionManager {
             // Thus, we only worry about the case we're connecting to
             // another ultrapeer (internally or externally generated)
             
-            // Actually, this code is always called when we get our first
-            // established connection.  Therefore it is essential that it allows
-            // the first good ultrapeer regardless of locale or vendor.
-            // (unless the user has specified they want ALL their slots to be 
-            // preferenced - in that case its their problem if they can't connect)
-            
             int peers = getNumInitializedConnections();
             int nonLimeWirePeers = _nonLimeWirePeers;
             int locale_num = 0;
 
+            // Actually, this code is always called when we get our first
+            // established connection. Therefore, it is essential that it allows
+            // the first good ultrapeer regardless of locale or vendor.
+            
+            // Exception1:  if the user has specified they want ALL their slots to be 
+            // preferenced we only allow connection with proper locale;
+            // its their problem if they can't connect that way
+            
+            // Exception2: if we are idle and have lost our only connection, we
+            // accept only Limewire ultrapeers for that one connection.
+            
+            if (peers==0 && hr.isGoodUltrapeer()) {
+                
+                if (isIdle()) 
+                    return hr.isLimeWire();
+
+                if (!ConnectionSettings.USE_LOCALE_PREF.getValue() ||
+                    _preferredConnections > 
+                    ConnectionSettings.NUM_LOCALE_PREF.getValue())
+                return true;
+                
+            }
+            
             if(!allowUltrapeer2UltrapeerConnection(hr)) {
                 return false;
             }
             
-            if (peers==0 && 
-                hr.isGoodUltrapeer() && 
-                !(ConnectionSettings.USE_LOCALE_PREF.getValue() &&
-                    _preferredConnections > 
-                    ConnectionSettings.NUM_LOCALE_PREF.getValue()))
-                return true;
-
             if(ConnectionSettings.USE_LOCALE_PREF.getValue()) {
                 //if locale matches and we haven't satisfied the
                 //locale reservation then we force return a true
