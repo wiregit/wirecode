@@ -164,10 +164,13 @@ public class BootstrapServerManager {
         }
         public void handleResponseData(BootstrapServer server, String line) {
             try {
-                //We don't know whether the host ia an ultrapeer or not, but we
+                //Only accept numeric addresses.  (An earlier version of this
+                //did not do strict checking, possibly resulting in HTML in the
+                //gnutella.net file!)
+                Endpoint host=new Endpoint(line, true);
+                //We don't know whether the host is an ultrapeer or not, but we
                 //need to force a higher priority to prevent repeated fetching.
                 //(See HostCatcher.expire)
-                Endpoint host=new Endpoint(line);
                 _catcher.add(host, true);       
                 responses++;
             } catch (IllegalArgumentException bad) { 

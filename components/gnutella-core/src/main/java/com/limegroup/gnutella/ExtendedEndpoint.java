@@ -208,7 +208,8 @@ public class ExtendedEndpoint extends Endpoint {
     }
 
     /**
-     * Parses a new ExtendedEndpoint.
+     * Parses a new ExtendedEndpoint.  Strictly validates all data.  For
+     * example, addresses MUST be in dotted quad format.
      *
      * @param line a single line read from the stream
      * @return the endpoint constructed from the line
@@ -225,12 +226,13 @@ public class ExtendedEndpoint extends Endpoint {
         if (linea.length==0)
             throw new ParseException("Empty line", 0);
 
-        //1. Host and port.  As a dirty trick, we use existing code
-        //   in Endpoint.
+        //1. Host and port.  As a dirty trick, we use existing code in Endpoint.
+        //Note that we strictly validate the address to work around corrupted
+        //gnutella.net files from an earlier version
         String host;
         int port;
         try {
-            Endpoint tmp=new Endpoint(linea[0]);
+            Endpoint tmp=new Endpoint(linea[0], true);
             host=tmp.getHostname();
             port=tmp.getPort();
         } catch (IllegalArgumentException e) {
