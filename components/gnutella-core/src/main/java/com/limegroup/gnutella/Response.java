@@ -171,7 +171,7 @@ public class Response {
 	 * specified <tt>FileDesc</tt>.  
 	 *
 	 * @param fd the <tt>FileDesc</tt> containing the data to construct 
-	 *  this <tt>Response</tt>
+	 *  this <tt>Response</tt> -- must not be <tt>null</tt>
 	 */
 	public Response(FileDesc fd) {
 		this(fd.getIndex(), fd.getFile().length(), fd.getFile().getName(), 
