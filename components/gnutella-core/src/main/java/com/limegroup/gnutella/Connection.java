@@ -220,7 +220,7 @@ public class Connection implements Runnable {
 	//Can't use same lock as receive()!
 	synchronized (out) {
 	    m.write(out);
-	    out.flush();
+//  	    out.flush();
 	    sent++;	    
 	    if (manager!=null)
 		manager.total++;
@@ -474,7 +474,7 @@ public class Connection implements Runnable {
 		}
 		else if (m instanceof PushRequest){
 
-		    System.out.println("Requested a push");
+		    //System.out.println("Requested a push");
 
 		    if (manager.stats==true)
 			manager.pushCount++;//keeps stats if stats turned on
@@ -510,7 +510,7 @@ public class Connection implements Runnable {
 		    }
 		    else{// the message has arrived in error
 			//System.out.println("Sumeet: Message arrived in error");
-		    System.out.println("Droppoing message");
+			//System.out.println("Droppoing message");
 			//do nothing.....drop the message
 			dropped++;
 		    }
