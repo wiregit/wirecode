@@ -217,7 +217,7 @@ public final class ID3Reader {
         
         ID3v2 id3v2Parser = null;
         try {
-            id3v3Parser = new ID3v2(file);
+            id3v2Parser = new ID3v2(file);
         } catch (ID3v2Exception idvx) { //can't go on
             return data;
         } catch (IOException iox) {
@@ -235,7 +235,7 @@ public final class ID3Reader {
         //and iterate, leaving the ones we are not concerned with
 
         for(Iterator iter=frames.iterator() ; iter.hasNext() ; ) {
-            ID2v3Frame frame = (ID3v2Frame)iter.next();
+            ID3v2Frame frame = (ID3v2Frame)iter.next();
             String frameID = frame.getID();
             String frameContent = new String(frame.getContent());
             if(frameContent == null || frameContent.trim().equals(""))
