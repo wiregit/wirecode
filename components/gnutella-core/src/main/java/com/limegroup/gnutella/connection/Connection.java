@@ -586,7 +586,7 @@ public class Connection implements ReplyHandler, PushProxyInterface {
         // exception was thrown, the connection will be removed anyway.
         RESPONSE_HEADERS = null;
         
-        // create the output queues for messages
+        // create the read/write classes for messages
         _messageWriter = new MessageWriterProxy(this); 
         _messageReader = new MessageReaderProxy(this);
         
@@ -1977,6 +1977,7 @@ public class Connection implements ReplyHandler, PushProxyInterface {
         return STATS;
     }
     
+
     /**
      * Handles core Gnutella request/reply protocol.  This call
      * will run until the connection is closed.  Note that this is called
