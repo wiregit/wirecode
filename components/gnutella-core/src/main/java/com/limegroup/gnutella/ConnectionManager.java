@@ -22,13 +22,12 @@ import com.limegroup.gnutella.handshaking.*;
  * Because this is the only list of all connections, it plays an important role
  * in message broadcasting.  For this reason, the code is highly tuned to avoid
  * locking in the getInitializedConnections() methods.  Adding and removing
- * connections is a slower operation.  
+ * connections is a slower operation.<p>
  * 
  * ConnectionManager has methods to get up and downstream bandwidth, but it 
  * doesn't quite fit the BandwidthTracker interface.
  */
 public class ConnectionManager {
-    
     /*********** IMPORTANT NOTE ABOUT THIS CLASS *************
      * The acceptConnection() method is a template method, and the behaviour
      * is modified in the subclasses by providing alternate implementations 
@@ -49,90 +48,89 @@ public class ConnectionManager {
      * lot on the private variables. Therefore having abstract class wont
      * necessarily help too much.
      * 
-     * Please send an email to asingla@limewire.com, if and when you plan to 
+     * Please send an email to dev@core.limewire.org if and when you plan to 
      * change the behaviour of these methods.
      **********************************************************
      */
     
-    /* List of all connections.  This is implemented with two data structures:
-     * a list for fast iteration, and a set for quickly telling what we're
-     * connected to.
-     *
-     * INVARIANT: "connections" contains no duplicates, and "endpoints" contains
-     * exactly those endpoints that could be made from the elements of
-     * "connections".
-     *
-     * INVARIANT: numFetchers = max(0, keepAlive - getNumConnections())
-     *            Number of fetchers equals number of connections needed, unless
-     *            that number is less than zero.
-     *
-     * LOCKING: connections and endpoints must NOT BE MUTATED.  Instead they
-     *          should be replaced as necessary with new copies.  Before
-     *          replacing the structures, obtain this' monitor.
-     *          *** All six of the following members should only be modified
-     *              from threads that have this' monitor ***
-     */
-    private volatile List /* of ManagedConnection */ _initializedConnections =
-        new ArrayList();
-    private volatile List /* of ManagedConnection */ _connections =
-        new ArrayList();
-    private volatile Set /* of Endpoint */ _endpoints = new HashSet();
-    private List /* of ConnectionFetcher */ _fetchers =
-        new ArrayList();
-    private List /* of ManagedConnection */ _initializingFetchedConnections =
-        new ArrayList();
-    /**
-     * List of connections to the shielded clients.
-     * INVARIANTS: 
-     * 1. _initializedConnections {intersection} _initializedClientConnections
-     * = NULL
-     * <p>
-     * 2. _connections is a superset of _initializedClientConnections
-     * 3. {Connection}.isClientConection == true iff its a client connection
-     */
-    private volatile List /* of ManagedConnection */ 
-        _initializedClientConnections = new ArrayList();
+    /** Minimum number of connections that a supernode with leaf connections,
+     * must have. */
+    public static final int MIN_CONNECTIONS_FOR_SUPERNODE = 6;
+    /** The desired number of old fashioned unrouted connections to keep, in
+     * order to prevent fragmentation of the network.  */
+    public static final int DESIRED_OLD_CONNECTIONS = 2;
+    /** Ideal number of connections for a leaf.  */
+    public static final int PREFERRED_CONNECTIONS_FOR_LEAF = 3;    
+    /** The maximum number of ultrapeer endpoints to give out from the host
+     *  catcher in X_TRY_SUPERNODES headers. */
+    private int MAX_SUPERNODE_ENDPOINTS=10;
 
-    /** 
-     * The number of connections to keep up.  Initially we will try _keepAlive
-     * outgoing connections.  At the same time we will accept up to _keepAlive
-     * incoming connections.  As outgoing connections fail, we will not accept
-     * any more incoming connections.  Hence we will converge on exactly
-     * _keepAlive incoming connections.  
-     */
-    private volatile int _keepAlive=0;
-
+    
+    /* Sister backend classes. */
     private MessageRouter _router;
     private HostCatcher _catcher;
     private ActivityCallback _callback;
 	private SettingsManager _settings;
 	private ConnectionWatchdog _watchdog;
 
+
+    /** The number of connections to keep up.  */
+    private volatile int _keepAlive=0;
+    /** Threads trying to maintain the KEEP_ALIVE.  This is generally
+     *  some multiple of _keepAlive.   LOCKING: obtain this. */
+    private List /* of ConnectionFetcher */ _fetchers =
+        new ArrayList();
+    /** Connections that have been fetched but not initialized.  I don't
+     *  know the relation between _initializingFetchedConnections and
+     *  _connections (see below).  LOCKING: obtain this. */
+    private List /* of ManagedConnection */ _initializingFetchedConnections =
+        new ArrayList();
+
+
+    /* List of all connections.  The core data structures are lists, which allow
+     * fast iteration for message broadcast purposes.  Actually we keep a couple
+     * of lists: the list of all initialized and uninitialized connections
+     * (_connections), the list of all initialized non-leaf connections
+     * (_incomingConnections), and the list of all initialized leaf connections
+     * (_incomingClientConnections).
+     * 
+     * INVARIANT: neither _connections, _initializedConnections, nor 
+     *   _initializedClientConnections contains any duplicates.
+     * INVARIANT: for all c in _initializedConnections, 
+     *   c.isSupernodeClientConnection()==false
+     * INVARIANT: for all c in _initializedClientConnections, 
+     *   c.isSupernodeClientConnection()==true
+     * COROLLARY: the intersection of _initializedClientConnections 
+     *   and _initializedConnections is the empty set
+     * INVARIANT: _initializedConnections is a subset of _connections
+     * INVARIANT: _initializedClientConnections is a subset of _connections
+     *
+     * In addition, we maintain a set (_endpoints) for quickly telling what
+     * we're connected to.  This is marginally useful for deciding whether
+     * to store a pong in the host catcher, though not essential.
+     *
+     * INVARIANT: _endpoints contains exactly those endpoints that could be
+     * made from the elements of _connections.
+     *
+     * LOCKING: CONNECTIONS AND ENDPOINTS MUST NOT BE MUTATED.  Instead they
+     *   should be replaced as necessary with new copies.  Before replacing 
+     *   the structures, obtain this' monitor.  This avoids lock overhead
+     *   when message broadcasting, though it makes adding/removing connections
+     *   much slower.
+     */
+    private volatile List /* of ManagedConnection */ 
+        _connections = new ArrayList();
+    private volatile List /* of ManagedConnection */ 
+        _initializedConnections = new ArrayList();
+    private volatile List /* of ManagedConnection */ 
+        _initializedClientConnections = new ArrayList();
+    private volatile Set /* of Endpoint */ _endpoints = new HashSet();
+
     /**
      * For authenticating users
      */
     private Authenticator _authenticator;
 
-    /**
-     * Minimum umber of connections that a supernode with leaf connections,
-     * must have
-     */
-    public static final int MIN_CONNECTIONS_FOR_SUPERNODE = 6;
-
-    /**
-     * The desired number of old fashioned unrouted connections to
-     * keep, in order to prevent fragmentation of the network.
-     */
-    public static final int DESIRED_OLD_CONNECTIONS = 2;
-
-    /**
-     * Ideal number of connections for a leaf.
-     */
-    public static final int PREFERRED_CONNECTIONS_FOR_LEAF = 3;    
-
-    /** The maximum number of ultrapeer endpoints to give out from the host
-     *  catcher in X_TRY_SUPERNODES headers. */
-    private int MAX_SUPERNODE_ENDPOINTS=10;
 
     /**
      * Constructs a ConnectionManager.  Must call initialize before using.
