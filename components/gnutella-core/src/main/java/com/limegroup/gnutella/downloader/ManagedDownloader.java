@@ -1059,88 +1059,11 @@ public class ManagedDownloader implements Downloader, Serializable {
         //downloader requests until the end of the file (second arg to
         //findConnectable) though it secretly plans on terminating sooner
         //(stopAt(..)).
-        HTTPDownloader dloader;
-        if (needed.size()>0) {
-            //Assign "white" (unclaimed) interval to new downloader.
-            //TODO2: choose biggest, earliest, etc.
-            //TODO2: assign to existing downloader if possible, without
-            //      increasing parallelism
-            Interval interval=(Interval)needed.remove(0);
-            try {                
-                dloader=findConnectable(files, 
-                                        getOverlapOffset(interval.low), 
-                                        interval.high,
-                                        busy);
-            } catch (NoSuchElementException e) {
-                //Need to re-add the interval.  If there is an existing
-                //downloader, it will be reassigned to this later.
-                needed.add(interval);
-                throw e;
-            }
-            dloader.stopAt(interval.high);
-            debug("MANAGER: assigning white "+interval+" to "+dloader);
-        }
-        else {
-            //Split largest "gray" interval, i.e., steal part of another
-            //downloader's region for a new downloader.  
-            //TODO3: split interval into P-|dloaders|, etc., not just half
-            //TODO3: account for speed
-            //TODO3: there is a minor race condition where biggest and 
-            //      dloader could write to the same region of the file
-            //      I think it's ok, though it could result in >100% in the GUI
-            HTTPDownloader biggest=null;
-            synchronized (this) {
-                for (Iterator iter=dloaders.iterator(); iter.hasNext();) {
-                    HTTPDownloader h=(HTTPDownloader)iter.next();
-                    if (biggest==null 
-                           || h.getAmountToRead()>biggest.getAmountToRead())
-                        biggest=h;
-                }                
-            }
-            if (biggest==null)
-                throw new NoSuchElementException();
-            //Note that getAmountToRead() and getInitialReadingPoint() are
-            //constant.  getAmountRead() is not, so we "capture" it into a
-            //variable.
-            int amountRead=biggest.getAmountRead();
-            int left=biggest.getAmountToRead()-amountRead;
-            if (left < MIN_SPLIT_SIZE) { 
-                float bandwidth = -1;//initialize
-                try{
-                    bandwidth = biggest.getMeasuredBandwidth();
-                } catch (InsufficientDataException ide) {
-                    throw new NoSuchElementException();
-                }
-                if(bandwidth < MIN_ACCEPTABLE_SPEED) {
-                    //replace (bad boy) biggest if possible
-                    int start=
-                    biggest.getInitialReadingPoint()+amountRead;
-                    int stop=
-                    biggest.getInitialReadingPoint()+biggest.getAmountToRead();
-                    dloader=
-                    findConnectable(files, getOverlapOffset(start), stop, busy);
-                    dloader.stopAt(stop);
-                    debug("MANAGER: assigning stolen grey "
-                          +start+"-"+stop+" from "+biggest+" to "+dloader);
-                    biggest.stopAt(start);
-                    biggest.stop();
-                }
-                else//less than MIN_SPLIT_SIZE...but we are doing fine...
-                    throw new NoSuchElementException();
-            }
-            else { //There is a big enough chunk to split...split it
-                int start=
-                biggest.getInitialReadingPoint()+amountRead+left/2;
-                int stop=
-                biggest.getInitialReadingPoint()+biggest.getAmountToRead();
-                dloader=
-                findConnectable(files, getOverlapOffset(start), stop, busy);
-                dloader.stopAt(stop);
-                biggest.stopAt(start);
-                debug("MANAGER: assigning split grey "
-                      +start+"-"+stop+" from "+biggest+" to "+dloader);
-            }
-        }
+        HTTPDownloader dloader = null;//intialize
+        if (needed.size()>0)
+            dloader = assignWhite(files,needed,busy);
+        else
+            dloader = assignGrey(files, busy);
                 
         //2) Asynchronously do download
         //System.out.println("MANAGER: downloading from "
@@ -1360,6 +1283,109 @@ public class ManagedDownloader implements Downloader, Serializable {
             return false;
     }
 
+    /**
+     * Assigns a white part of the file to a HTTPDownloader and returns it
+     * This method has side effects
+     */
+    private HTTPDownloader assignWhite( List/*of RemoteFileDesc*/  files,
+                             List/*of interval*/  needed,
+                             List /*of RemoteFileDesc*/ busy) 
+                                          throws InterruptedException {
+        //Assign "white" (unclaimed) interval to new downloader.
+        //TODO2: choose biggest, earliest, etc.
+        //TODO2: assign to existing downloader if possible, without
+        //      increasing parallelism
+        HTTPDownloader dloader;
+        Interval interval=(Interval)needed.remove(0);
+        try {                
+            dloader=findConnectable(files, 
+                                    getOverlapOffset(interval.low), 
+                                    interval.high,
+                                    busy);
+        } catch (NoSuchElementException e) {
+            //Need to re-add the interval.  If there is an existing
+            //downloader, it will be reassigned to this later.
+            needed.add(interval);
+            throw e;
+        }
+        dloader.stopAt(interval.high);
+        debug("MANAGER: assigning white "+interval+" to "+dloader);
+        return dloader;
+    }
+
+    /**
+     * Steals a grey area from the biggesr HHTPDownloader and gives it to
+     * the HTTPDownloader this method will return. 
+     * <p> 
+     * If there is less than MIN_SPLIT_SIZE left, we will assign the entire
+     * area to a new HTTPDownloader, if the current downloader is going too
+     * slow.
+     */
+    private HTTPDownloader assignGrey( List/*of RemoteFileDesc*/  files,
+                                       List /*of RemoteFileDesc*/ busy) 
+                                          throws InterruptedException {
+        //Split largest "gray" interval, i.e., steal part of another
+        //downloader's region for a new downloader.  
+        //TODO3: split interval into P-|dloaders|, etc., not just half
+        //TODO3: account for speed
+        //TODO3: there is a minor race condition where biggest and 
+        //      dloader could write to the same region of the file
+        //      I think it's ok, though it could result in >100% in the GUI
+        HTTPDownloader dloader;
+        HTTPDownloader biggest=null;
+        synchronized (this) {
+            for (Iterator iter=dloaders.iterator(); iter.hasNext();) {
+                HTTPDownloader h=(HTTPDownloader)iter.next();
+                if (biggest==null 
+                    || h.getAmountToRead()>biggest.getAmountToRead())
+                    biggest=h;
+            }                
+        }
+        if (biggest==null)
+            throw new NoSuchElementException();
+        //Note that getAmountToRead() and getInitialReadingPoint() are
+        //constant.  getAmountRead() is not, so we "capture" it into a
+        //variable.
+        int amountRead=biggest.getAmountRead();
+        int left=biggest.getAmountToRead()-amountRead;
+        if (left < MIN_SPLIT_SIZE) { 
+            float bandwidth = -1;//initialize
+            try {
+                bandwidth = biggest.getMeasuredBandwidth();
+            } catch (InsufficientDataException ide) {
+                throw new NoSuchElementException();
+            }
+            if(bandwidth < MIN_ACCEPTABLE_SPEED) {
+                //replace (bad boy) biggest if possible
+                int start=
+                biggest.getInitialReadingPoint()+amountRead;
+                int stop=
+                biggest.getInitialReadingPoint()+biggest.getAmountToRead();
+                dloader=
+                findConnectable(files, getOverlapOffset(start), stop, busy);
+                dloader.stopAt(stop);
+                debug("MANAGER: assigning stolen grey "
+                      +start+"-"+stop+" from "+biggest+" to "+dloader);
+                biggest.stopAt(start);
+                biggest.stop();
+            }
+            else//less than MIN_SPLIT_SIZE...but we are doing fine...
+                throw new NoSuchElementException();
+        }
+        else { //There is a big enough chunk to split...split it
+            int start=
+            biggest.getInitialReadingPoint()+amountRead+left/2;
+            int stop=
+            biggest.getInitialReadingPoint()+biggest.getAmountToRead();
+            dloader=
+            findConnectable(files, getOverlapOffset(start), stop, busy);
+            dloader.stopAt(stop);
+            biggest.stopAt(start);
+            debug("MANAGER: assigning split grey "
+                  +start+"-"+stop+" from "+biggest+" to "+dloader);
+        }
+        return dloader;
+    }
 
     /**
      * Returns the union of all XML metadata documents from all hosts.
