@@ -327,7 +327,7 @@ public class Backend extends com.limegroup.gnutella.util.BaseTestCase {
             try {
                 postTearDown();
             } finally {
-                deleteFiles(_baseDir, true); // get rid of tmp dirs.
+                cleanFiles(_baseDir, true); // get rid of tmp dirs.
             }
         }
         
