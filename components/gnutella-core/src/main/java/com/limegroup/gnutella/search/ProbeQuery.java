@@ -14,17 +14,19 @@ final class ProbeQuery {
     /**
      * Constant list of hosts to probe query at ttl=1.
      */
-    private final LinkedList TTL_1_PROBES;
+    private final List TTL_1_PROBES;
     
     /**
      * Constant list of hosts to probe query at ttl=2.
      */
-    private final LinkedList TTL_2_PROBES;
+    private final List TTL_2_PROBES;
 
     /**
      * Constant reference to the query handler instance.
      */
     private final QueryHandler QUERY_HANDLER;
+
+    private boolean _probeSent;
 
     /**
      * Constructs a new <tt>ProbeQuery</tt> instance with the specified
@@ -39,34 +41,38 @@ final class ProbeQuery {
         QUERY_HANDLER = qh;
         LinkedList[] lists = 
             createProbeLists(connections, qh.QUERY);
+
         TTL_1_PROBES = lists[0];
-        TTL_2_PROBES = lists[1];
-        
-        if(QUERY_HANDLER.QUERY.getHops() == 0) {
-            System.out.println("ProbeQuery::ProbeQuery::"+
-                               " ttl1: "+TTL_1_PROBES.size()+
-                               " ttl2: "+TTL_2_PROBES.size()); 
-        }
+        TTL_2_PROBES = lists[1];        
     }
     
     /**
-     * Determines whether or not the probe is finished.
+     * Checks to see if the probe has already been sent. 
      *
-     * @return <tt>true</tt> if the probe is finished, otherwise
-     *  <tt>false</tt>
+     * @return <tt>true</tt> if this probe has already been sent,
+     *  otherwise <tt>false</tt>
      */
-    boolean finishedProbe() {
-        return (TTL_1_PROBES.isEmpty() &&  TTL_2_PROBES.isEmpty());
+    boolean probeSent() {
+        return _probeSent;
     }
 
     /**
      * Obtains the time to wait for probe results to return.
+     *
+     * @return the time to wait for this probe to complete, in
+     *  milliseconds
      */
     long getTimeToWait() {
-        return (TTL_1_PROBES.size() * 
-                QueryHandler.TIME_TO_WAIT_PER_HOP) +
-            (TTL_2_PROBES.size() * 2 * 
-             QueryHandler.TIME_TO_WAIT_PER_HOP);
+
+        // determine the wait time.  we wait a little longer per
+        // hop for probes to give them more time
+        if(!TTL_2_PROBES.isEmpty()) 
+            return QueryHandler.TIME_TO_WAIT_PER_HOP*2*
+                TTL_2_PROBES.size();
+        if(!TTL_1_PROBES.isEmpty()) 
+            return QueryHandler.TIME_TO_WAIT_PER_HOP*
+                TTL_1_PROBES.size();
+        return 0L;
     }
     
     /**
@@ -77,9 +83,11 @@ final class ProbeQuery {
      *  probe
      */
     int sendProbe() {
-        if(QUERY_HANDLER.QUERY.getHops() == 0) {
-            System.out.println("ProbeQuery::sendProbe"); 
-        }
+        _probeSent = true;
+        //if(QUERY_HANDLER.QUERY.getHops() == 0) {
+            System.out.println("ProbeQuery::sendProbe::"+
+                               QUERY_HANDLER.QUERY); 
+            //}
         Iterator iter = TTL_1_PROBES.iterator();
         int hosts = 0;
         QueryRequest query = QUERY_HANDLER.createQuery((byte)1);
@@ -87,10 +95,16 @@ final class ProbeQuery {
             if(QUERY_HANDLER.QUERY.getHops() == 0) {
                 System.out.println("ProbeQuery::sendProbe::TTL=1"); 
             }
-            ManagedConnection mc = (ManagedConnection)iter.next();
-            hosts += 
-                QUERY_HANDLER.sendQueryToHost(query, 
-                                              mc, QUERY_HANDLER);
+            ManagedConnection mc = null;
+            try {
+                mc = (ManagedConnection)iter.next();
+                hosts += 
+                    QUERY_HANDLER.sendQueryToHost(query, 
+                                                  mc, QUERY_HANDLER);
+            } catch(Exception e) {
+                System.out.println("mc: "+mc);
+                e.printStackTrace();
+            }
         }
         
         query = QUERY_HANDLER.createQuery((byte)2);
@@ -107,6 +121,7 @@ final class ProbeQuery {
         
         TTL_1_PROBES.clear();
         TTL_2_PROBES.clear();
+
         return hosts;
     }
 
@@ -121,14 +136,13 @@ final class ProbeQuery {
         LinkedList missConnections = new LinkedList();
         LinkedList oldConnections  = new LinkedList();
         LinkedList hitConnections  = new LinkedList();
+
+        // iterate through our connections, adding them to the hit, miss, or
+        // old connections list
         while(iter.hasNext()) {
             ManagedConnection mc = (ManagedConnection)iter.next();
             
-            if(mc.isGoodUltrapeer()) {
-                //ManagedConnectionQueryInfo qi = mc.getQueryRouteState();
-                
-                //QueryRouteTable qrt = mc.getQueryKey
-                //if(qi.lastReceived == null) continue;
+            if(mc.isUltrapeerQueryRoutingConnection()) {
                 if(mc.hitsQueryRouteTable(query)) { 
                     hitConnections.add(mc);
                 } else {
@@ -178,6 +192,12 @@ final class ProbeQuery {
         // if the file appears to be very popular, send it to only one host
         if(popularity == 1.0) {
             ttl1List.add(hitConnections.getFirst());
+            return returnLists;
+        }
+
+        if(numHitConnections > 4) {
+            ttl1List.addAll(hitConnections.subList(numHitConnections-4, 
+                                                   numHitConnections));
             return returnLists;
         }
 
