@@ -7,7 +7,7 @@ import com.limegroup.gnutella.util.*;
 import com.limegroup.gnutella.security.Authenticator;
 import com.limegroup.gnutella.security.DummyAuthenticator;
 import com.limegroup.gnutella.downloader.*;
-import com.limegroup.gnutella.uploader.StalledUploadChecker;
+import com.limegroup.gnutella.uploader.StalledUploadWatchdog;
 import com.limegroup.gnutella.http.*;
 import java.io.*;
 import java.net.*;
@@ -114,7 +114,7 @@ public class UploaderTest extends com.limegroup.gnutella.util.BaseTestCase {
         }
         
         //sleep a little more than needed for the stall to die.
-        Thread.sleep(StalledUploadChecker.DELAY_TIME+5);
+        Thread.sleep(StalledUploadWatchdog.DELAY_TIME+5);
         // should be able to connect now.
         d3 = addUploader(upManager, rfd3, "1.1.1.3", false);
         connectDloader(d3, true, rfd3, true);        
