@@ -43,71 +43,21 @@ import com.sun.java.util.collections.Random;
  *  tests the following methods of MessageRouter: handleQueryRequest,
  *  handleUDPMessage, handleLimeAckMessage, Expirer, QueryBundle, sendQueryReply
  *
- *  ULTRAPEER_1  ----  CENTRAL TEST ULTRAPEER  ----  ULTRAPEER_2
+ *  ULTRAPEER_1  ----  CENTRAL TEST ULTRAPEER  ----  ULTRAPEER[1]
  *                              |
  *                              |
  *                              |
- *                             LEAF
+ *                             LEAF[0]
  *
  *  This test should cover the case for leaves too, since there is no difference
  *  between Leaf and UP when it comes to this behavior.
  */
-public final class ServerSideOutOfBandReplyTest extends BaseTestCase {
-
-	/**
-	 * The port that the central Ultrapeer listens on, and that the other nodes
-	 * connect to it on.
-	 */
-    private static final int PORT = 6667;
-
-	/**
-	 * The timeout value for sockets -- how much time we wait to accept 
-	 * individual messages before giving up.
-	 */
-    private static final int TIMEOUT = 2000;
-
-	/**
-	 * The default TTL to use for request messages.
-	 */
-	private final static byte TTL = 7;
-
-	/**
-	 * The "soft max" TTL used by LimeWire's message routing -- hops + ttl 
-	 * greater than this value have their TTLs automatically reduced
-	 */
-	private static final byte SOFT_MAX = 3;
-
-	/**
-	 * The TTL of the initial "probe" queries that the Ultrapeer uses to
-	 * determine how widely distributed a file is.
-	 */
-	private static final byte PROBE_QUERY_TTL = 2;
-
-    /**
-     * Leaf connection to the Ultrapeer.
-     */
-    private static Connection LEAF;
-
-    /**
-     * Ultrapeer connection.
-     */
-    private static Connection ULTRAPEER_1;
+public final class ServerSideOutOfBandReplyTest extends ServerSideTestCase {
 
     /**
      * Ultrapeer 1 UDP connection.
      */
     private static DatagramSocket UDP_ACCESS;
-
-    /**
-	 * Second Ultrapeer connection
-     */
-    private static Connection ULTRAPEER_2;
-
-	/**
-	 * The central Ultrapeer used in the test.
-	 */
-	private static final RouterService ROUTER_SERVICE = 
-		new RouterService(new ActivityCallbackStub());
 
     public ServerSideOutOfBandReplyTest(String name) {
         super(name);
@@ -120,123 +70,27 @@ public final class ServerSideOutOfBandReplyTest extends BaseTestCase {
 	public static void main(String[] args) {
 		junit.textui.TestRunner.run(suite());
 	}
+
+    public static Integer numUPs() {
+        return new Integer(2);
+    }
+
+    public static Integer numLeaves() {
+        return new Integer(1);
+    }
 	
-	private static void buildConnections() throws Exception {
-	    LEAF =
-			new Connection("localhost", PORT, 
-						   new LeafHeaders("localhost"),
-						   new EmptyResponder()
-						   );
-        
-        ULTRAPEER_1 = 
-			new Connection("localhost", PORT,
-						   new UltrapeerHeaders("localhost"),
-						   new EmptyResponder()
-						   );
-
-        UDP_ACCESS = new DatagramSocket();
-
-        ULTRAPEER_2 = 
-			new Connection("localhost", PORT,
-						   new UltrapeerHeaders("localhost"),
-						   new EmptyResponder()
-						   );
+    public static ActivityCallback getActivityCallback() {
+        return new ActivityCallbackStub();
     }
 
-    public static void setSettings() {
-        FilterSettings.BLACK_LISTED_IP_ADDRESSES.setValue(
-            new String[] {"*.*.*.*"});
-        FilterSettings.WHITE_LISTED_IP_ADDRESSES.setValue(
-            new String[] {"127.*.*.*"});
-        ConnectionSettings.PORT.setValue(PORT);
-        SharingSettings.EXTENSIONS_TO_SHARE.setValue("txt;");
-        // get the resource file for com/limegroup/gnutella
-        File berkeley = 
-            CommonUtils.getResourceFile("com/limegroup/gnutella/berkeley.txt");
-        File susheel = 
-            CommonUtils.getResourceFile("com/limegroup/gnutella/susheel.txt");
-        // now move them to the share dir        
-        CommonUtils.copy(berkeley, new File(_sharedDir, "berkeley.txt"));
-        CommonUtils.copy(susheel, new File(_sharedDir, "susheel.txt"));
-		ConnectionSettings.CONNECT_ON_STARTUP.setValue(false);
-		UltrapeerSettings.EVER_ULTRAPEER_CAPABLE.setValue(true);
-		UltrapeerSettings.DISABLE_ULTRAPEER_MODE.setValue(false);
-		UltrapeerSettings.FORCE_ULTRAPEER_MODE.setValue(true);
-		UltrapeerSettings.MAX_LEAVES.setValue(4);
-		ConnectionSettings.NUM_CONNECTIONS.setValue(3);
-		ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);	
-		ConnectionSettings.USE_GWEBCACHE.setValue(false);
-		ConnectionSettings.WATCHDOG_ACTIVE.setValue(false);
-    }
-
-	public static void globalSetUp() throws Exception {
-        setSettings();
-
-        assertEquals("unexpected port", PORT, 
-					 ConnectionSettings.PORT.getValue());
-
-		ROUTER_SERVICE.start();
-		ROUTER_SERVICE.clearHostCatcher();
-		ROUTER_SERVICE.connect();	
-		connect();
-        assertEquals("unexpected port", PORT, 
-					 ConnectionSettings.PORT.getValue());
-	}
-
-    
-    public void setUp() {
-        setSettings();
-    }
-
-
-	public static void globalTearDown() throws Exception {
-		ROUTER_SERVICE.disconnect();
-		sleep();
-		LEAF.close();
-		ULTRAPEER_1.close();
-		ULTRAPEER_2.close();
-		sleep();
-	}
-
-	private static void sleep() {
-		try {Thread.sleep(300);}catch(InterruptedException e) {}
-	}
-
-	/**
-	 * Drains all messages 
-	 */
- 	private static void drainAll() throws Exception {
- 		if(ULTRAPEER_1.isOpen()) {
- 			drain(ULTRAPEER_1);
- 		}
- 		if(ULTRAPEER_2.isOpen()) {
- 			drain(ULTRAPEER_2);
- 		}
- 		if(LEAF.isOpen()) {
- 			drain(LEAF);
- 		}
- 	}
-
-	/**
-	 * Connects all of the nodes to the central test Ultrapeer.
-	 */
-    private static void connect() throws Exception {
-		buildConnections();
-        //1. first Ultrapeer connection 
-        ULTRAPEER_2.initialize();
-
-        //2. second Ultrapeer connection
-        ULTRAPEER_1.initialize();
-        
-        //3. routed leaf, with route table for "test"
-        LEAF.initialize();
+    public static void setUpQRPTables() throws Exception {
         QueryRouteTable qrt = new QueryRouteTable();
         qrt.add("berkeley");
         qrt.add("susheel");
         qrt.addIndivisible(HugeTestUtils.UNIQUE_SHA1.toString());
         for (Iterator iter=qrt.encode(null).iterator(); iter.hasNext(); ) {
-            LEAF.send((RouteTableMessage)iter.next());
-			LEAF.flush();
+            LEAF[0].send((RouteTableMessage)iter.next());
+			LEAF[0].flush();
         }
 
         // for Ultrapeer 1
@@ -244,62 +98,20 @@ public final class ServerSideOutOfBandReplyTest extends BaseTestCase {
         qrt.add("leehsus");
         qrt.add("berkeley");
         for (Iterator iter=qrt.encode(null).iterator(); iter.hasNext(); ) {
-            ULTRAPEER_1.send((RouteTableMessage)iter.next());
-			ULTRAPEER_1.flush();
+            ULTRAPEER[0].send((RouteTableMessage)iter.next());
+			ULTRAPEER[0].flush();
         }
-
-		assertTrue("ULTRAPEER_2 should be connected", ULTRAPEER_2.isOpen());
-		assertTrue("ULTRAPEER_1 should be connected", ULTRAPEER_1.isOpen());
-		assertTrue("LEAF should be connected", LEAF.isOpen());
-
-		// make sure we get rid of any initial ping pong traffic exchanges
-		sleep();
-		drainAll();
-		//sleep();
-		drainAll();
-		sleep();
     }
 
     // BEGIN TESTS
     // ------------------------------------------------------
 
-    // tests basic out of band functionality
-    // this tests no UDP support - it should just send a UDP reply
-    // this test is DEPRECATED - we do not send out-of-band replies unless
-    // you are GUESS-capable
-    public void notestOutOfBandRequest() throws Exception {
-        drainAll();
-
-        QueryRequest query = 
-            QueryRequest.createOutOfBandQuery("susheel",
-                                              InetAddress.getLocalHost().getAddress(),
-                                              UDP_ACCESS.getLocalPort());
-        query.hop();
-
-        // we needed to hop the message because we need to make it seem that it
-        // is from sufficiently far away....
-        ULTRAPEER_1.send(query);
-        ULTRAPEER_1.flush();
-
-        // we should get a reply via UDP
-        UDP_ACCESS.setSoTimeout(500);
-        DatagramPacket pack = new DatagramPacket(new byte[1000], 1000);
-        try {
-            UDP_ACCESS.receive(pack);
-        }
-        catch (IOException bad) {
-            fail("Did not get reply", bad);
-        }
-        InputStream in = new ByteArrayInputStream(pack.getData());
-        // as long as we don't get a ClassCastException we are good to go
-        QueryReply reply = (QueryReply) Message.read(in);
-        assertTrue(Arrays.equals(reply.getGUID(), query.getGUID()));
-    }
 
     // tests basic out of band functionality
     // this tests solicited UDP support - it should participate in ACK exchange
     public void testBasicOutOfBandRequest() throws Exception {
         DatagramPacket pack = null;
+        UDP_ACCESS = new DatagramSocket();
         // set up solicited UDP support
         {
             drainAll();
@@ -308,8 +120,8 @@ public final class ServerSideOutOfBandReplyTest extends BaseTestCase {
                                  UDP_ACCESS.getLocalPort(), 
                                  InetAddress.getLocalHost().getAddress(), 
                                  10, 10, true, 900, true);
-            ULTRAPEER_1.send(pong);
-            ULTRAPEER_1.flush();
+            ULTRAPEER[0].send(pong);
+            ULTRAPEER[0].flush();
 
             // wait for the ping request from the test UP
             UDP_ACCESS.setSoTimeout(500);
@@ -342,14 +154,14 @@ public final class ServerSideOutOfBandReplyTest extends BaseTestCase {
             // tell the UP i can support UDP connect back
             MessagesSupportedVendorMessage support = 
                 MessagesSupportedVendorMessage.instance();
-            ULTRAPEER_1.send(support);
-            ULTRAPEER_1.flush();
+            ULTRAPEER[0].send(support);
+            ULTRAPEER[0].flush();
 
             byte[] cbGuid = null;
             int cbPort = -1;
             while (cbGuid == null) {
                 try {
-                    Message m = ULTRAPEER_1.receive(TIMEOUT);
+                    Message m = ULTRAPEER[0].receive(TIMEOUT);
                     if (m instanceof UDPConnectBackVendorMessage) {
                         UDPConnectBackVendorMessage udp = 
                             (UDPConnectBackVendorMessage) m;
@@ -369,7 +181,7 @@ public final class ServerSideOutOfBandReplyTest extends BaseTestCase {
             pr.write(baos);
             pack = new DatagramPacket(baos.toByteArray(), 
                                       baos.toByteArray().length,
-                                      ULTRAPEER_1.getInetAddress(), cbPort);
+                                      ULTRAPEER[0].getInetAddress(), cbPort);
             UDP_ACCESS.send(pack);
         }
 
@@ -383,8 +195,8 @@ public final class ServerSideOutOfBandReplyTest extends BaseTestCase {
 
         // we needed to hop the message because we need to make it seem that it
         // is from sufficiently far away....
-        ULTRAPEER_1.send(query);
-        ULTRAPEER_1.flush();
+        ULTRAPEER[0].send(query);
+        ULTRAPEER[0].flush();
 
         // we should get a ReplyNumberVendorMessage via UDP - we'll get an
         // interrupted exception if not
@@ -500,8 +312,8 @@ public final class ServerSideOutOfBandReplyTest extends BaseTestCase {
 
         // we needed to hop the message because we need to make it seem that it
         // is from sufficiently far away....
-        ULTRAPEER_1.send(query);
-        ULTRAPEER_1.flush();
+        ULTRAPEER[0].send(query);
+        ULTRAPEER[0].flush();
 
         // we should get a ReplyNumberVendorMessage via UDP - we'll get an
         // interrupted exception if not
@@ -593,8 +405,8 @@ public final class ServerSideOutOfBandReplyTest extends BaseTestCase {
 
         // we needed to hop the message because we need to make it seem that it
         // is from sufficiently far away....
-        ULTRAPEER_1.send(query);
-        ULTRAPEER_1.flush();
+        ULTRAPEER[0].send(query);
+        ULTRAPEER[0].flush();
 
         // we should get a ReplyNumberVendorMessage via UDP - we'll get an
         // interrupted exception if not
@@ -661,8 +473,8 @@ public final class ServerSideOutOfBandReplyTest extends BaseTestCase {
 
         // we needed to hop the message because we need to make it seem that it
         // is from sufficiently far away....
-        ULTRAPEER_2.send(query);
-        ULTRAPEER_2.flush();
+        ULTRAPEER[1].send(query);
+        ULTRAPEER[1].flush();
 
         // we should get a ReplyNumberVendorMessage via UDP - we'll get an
         // interrupted exception if not
@@ -733,12 +545,12 @@ public final class ServerSideOutOfBandReplyTest extends BaseTestCase {
             query.hop();
 
             if (rand.nextInt(2) == 0) {
-                ULTRAPEER_2.send(query);
-                ULTRAPEER_2.flush();
+                ULTRAPEER[1].send(query);
+                ULTRAPEER[1].flush();
             }
             else {
-                ULTRAPEER_1.send(query);
-                ULTRAPEER_1.flush();
+                ULTRAPEER[0].send(query);
+                ULTRAPEER[0].flush();
             }
 
             Thread.sleep(1250);
@@ -768,8 +580,8 @@ public final class ServerSideOutOfBandReplyTest extends BaseTestCase {
                                                   UDP_ACCESS.getLocalPort());
             query.hop();
 
-            ULTRAPEER_1.send(query);
-            ULTRAPEER_1.flush();
+            ULTRAPEER[0].send(query);
+            ULTRAPEER[0].flush();
         }
 
         // count NO ReplyNumberVMs
@@ -794,32 +606,32 @@ public final class ServerSideOutOfBandReplyTest extends BaseTestCase {
         byte[] crapIP = {(byte)192,(byte)168,(byte)1,(byte)1};
         QueryRequest query = QueryRequest.createOutOfBandQuery("berkeley", 
                                                                crapIP, 6346);
-        LEAF.send(query);
-        LEAF.flush();
+        LEAF[0].send(query);
+        LEAF[0].flush();
 
         // ultrapeers should NOT get the QR
-        assertNull(getFirstQueryRequest(ULTRAPEER_1));
-        assertNull(getFirstQueryRequest(ULTRAPEER_2));
+        assertNull(getFirstQueryRequest(ULTRAPEER[0]));
+        assertNull(getFirstQueryRequest(ULTRAPEER[1]));
         
         
         Socket socket = 
-            (Socket)PrivilegedAccessor.getValue(LEAF, "_socket");
+            (Socket)PrivilegedAccessor.getValue(LEAF[0], "_socket");
         // try a good query
         query = 
             QueryRequest.createOutOfBandQuery("berkeley", 
                                               socket.getLocalAddress().getAddress(),
                                               6346);
-        LEAF.send(query);
-        LEAF.flush();
+        LEAF[0].send(query);
+        LEAF[0].flush();
 
         Thread.sleep(4000);
 
         // ultrapeers should get the QR
-        assertNotNull(getFirstQueryRequest(ULTRAPEER_1) );
-        assertNotNull(getFirstQueryRequest(ULTRAPEER_2) );
+        assertNotNull(getFirstQueryRequest(ULTRAPEER[0]) );
+        assertNotNull(getFirstQueryRequest(ULTRAPEER[1]) );
 
-        // LEAF should get the reply
-        assertNotNull(getFirstQueryReply(LEAF));
+        // LEAF[0] should get the reply
+        assertNotNull(getFirstQueryReply(LEAF[0]));
     }
 
     // a node should NOT send a reply out of band via UDP if it is not
@@ -831,11 +643,11 @@ public final class ServerSideOutOfBandReplyTest extends BaseTestCase {
         QueryRequest query = 
             QueryRequest.createOutOfBandQuery("susheel", meIP, 
                                               UDP_ACCESS.getLocalPort());
-        ULTRAPEER_2.send(query);
-        ULTRAPEER_2.flush();
+        ULTRAPEER[1].send(query);
+        ULTRAPEER[1].flush();
 
-        // ULTRAPEER_2 should get a reply via TCP
-        assertNotNull(getFirstQueryReply(ULTRAPEER_2));
+        // ULTRAPEER[1] should get a reply via TCP
+        assertNotNull(getFirstQueryReply(ULTRAPEER[1]));
     }
 
     
