@@ -96,26 +96,31 @@ public class TestUploader {
             Socket s=null;
             try {
                 s = server.accept();
-                if (!stopped) {
-                    //spawn thread to handle request
-                    final Socket mySocket=s;
-                    Thread runner=new Thread() {
-                            public void run() {                                
-                                try {
-                                    handleRequest(mySocket);
-                                } catch (IOException e) {
-                                    try {
-                                        mySocket.close();
-                                    } catch(IOException i) { }
-                                }
+                //spawn thread to handle request
+                final Socket mySocket=s;
+                Thread runner=new Thread() {
+                    public void run() {                                
+                        try {
+                            if (!stopped) {
+                                handleRequest(mySocket);
                             }
-                        };
-                    runner.start();
-                }
+                        } catch (IOException e) {
+                            //e.printStackTrace();
+                        } finally {
+                            try {
+                                mySocket.close();
+                            } catch(IOException e) { 
+                                return;
+                            }
+                        }//end of finally
+                    }//end of run
+                };
+                runner.start();
             } catch (IOException e) {
+                //e.printStackTrace();
                 return;  //server socket closed.
             }
-        }      
+        }
     }
 
     

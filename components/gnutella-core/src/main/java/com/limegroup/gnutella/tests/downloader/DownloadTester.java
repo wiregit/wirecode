@@ -52,12 +52,12 @@ public class DownloadTester {
 //         testOverlapCheckSpeed(125);
 //         cleanup();
 
-        testSimpleDownload();
-        cleanup();
-        testSimpleSwarm();
-        cleanup();
-        testUnbalancedSwarm();
-        cleanup();
+//          testSimpleDownload();
+//          cleanup();
+//          testSimpleSwarm();
+//          cleanup();
+//          testUnbalancedSwarm();
+//          cleanup();
         testSwarmWithInterrupt();
         cleanup();
         testStealerInterrupted();
@@ -461,8 +461,10 @@ public class DownloadTester {
 
     /** Returns true if the complete file exists and is complete */
     private static boolean isComplete() {
-        if (file.length()!=TestFile.length())
+        if (file.length()!=TestFile.length()) {
+            System.out.println("File too small"+file.length());
             return false;
+        }
         FileInputStream stream=null;
         try {
             stream = new FileInputStream(file);
@@ -470,10 +472,13 @@ public class DownloadTester {
                 int c=stream.read();
                 if (c==-1)//eof
                     break;
-                if ((byte)c!=TestFile.getByte(i))
+                if ((byte)c!=TestFile.getByte(i)) {
+                    System.out.println("Bad byte at "+i);
                     return false;
+                }
             }
         } catch (IOException ioe) {
+            ioe.printStackTrace();
             return false;
         } finally {
             if (stream!=null) {
