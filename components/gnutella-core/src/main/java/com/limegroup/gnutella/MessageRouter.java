@@ -1702,7 +1702,7 @@ public abstract class MessageRouter {
             _pushRouteTable.getReplyHandler(push.getClientGUID());
 
         if(replyHandler != null)
-            replyHandler.handlePushRequest(push, null);
+            replyHandler.handlePushRequest(push, FOR_ME_REPLY_HANDLER);
         else
             throw new IOException("no route for push");
     }
