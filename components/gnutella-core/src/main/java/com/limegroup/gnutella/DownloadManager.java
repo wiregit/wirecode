@@ -278,6 +278,9 @@ public class DownloadManager implements BandwidthTracker {
         } catch(IllegalStateException e) {
             LOG.debug(e);
             return false;
+        } catch(SecurityException e) {
+            LOG.debug(e);
+            return false;
         }
         
         //Remove entries that are too old or no longer existent.  This is done

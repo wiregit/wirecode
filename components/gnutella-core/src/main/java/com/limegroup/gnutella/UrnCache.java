@@ -120,17 +120,21 @@ public final class UrnCache {
             ois = 
 			    new ObjectInputStream(new FileInputStream(URN_CACHE_FILE));            
 			return (Map)ois.readObject();
-		} catch(FileNotFoundException e) {
-			return new HashMap();
-		} catch(IOException e) {
+        } catch (IOException e) {
             return new HashMap();
-        } catch(ClassNotFoundException e) {
+        } catch (ClassCastException e) {
             return new HashMap();
-        } catch(ClassCastException e) {
+        } catch (ClassNotFoundException e) {
             return new HashMap();
-        } catch(IndexOutOfBoundsException ioobe) {
+        } catch(ArrayStoreException e) {
             return new HashMap();
-        } catch(SecurityException se) {
+        } catch(IndexOutOfBoundsException e) {
+            return new HashMap();
+        } catch(NegativeArraySizeException e) {
+            return new HashMap();
+        } catch(IllegalStateException e) {
+            return new HashMap();
+        } catch(SecurityException e) {
             return new HashMap();
         } finally {
             if(ois != null) {
