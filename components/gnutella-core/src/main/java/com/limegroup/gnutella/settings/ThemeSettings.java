@@ -6,6 +6,7 @@ import java.io.*;
 import java.util.Properties;
 import java.util.Enumeration;
 import java.util.zip.*;
+import java.awt.*;
 
 /**
  * This class contains key/value pairs for the current "theme."  The
@@ -36,6 +37,7 @@ public final class ThemeSettings {
 					 dirName);
 
 		final File THEME_PROPS = new File(themeDir, "theme.txt");
+		System.out.println("theme file: "+THEME_PROPS); 
 
 		// unpack the zip if we haven't already
 		if(!themeDir.isDirectory() ||
@@ -63,356 +65,6 @@ public final class ThemeSettings {
 			FACTORY.reload(file);
 		}
 	}
-
-	/**
-	 * Setting for the primary 1 color red value.
-	 */
-	public static final IntSetting PRIMARY1_COLOR_R = 
-		FACTORY.createIntSetting("PRIMARY1_COLOR_R", 74);
-
-	/**
-	 * Setting for the primary 1 color green value.
-	 */
-	public static final IntSetting PRIMARY1_COLOR_G = 
-		FACTORY.createIntSetting("PRIMARY1_COLOR_G", 110);
-
-	/**
-	 * Setting for the primary 1 color blue value.
-	 */
-	public static final IntSetting PRIMARY1_COLOR_B = 
-		FACTORY.createIntSetting("PRIMARY1_COLOR_B", 188);
-
-	/**
-	 * Setting for the primary 2 color red value.
-	 */
-	public static final IntSetting PRIMARY2_COLOR_R = 
-		FACTORY.createIntSetting("PRIMARY2_COLOR_R", 135);
-
-	/**
-	 * Setting for the primary 2 color green value.
-	 */
-	public static final IntSetting PRIMARY2_COLOR_G = 
-		FACTORY.createIntSetting("PRIMARY2_COLOR_G", 145);
-
-	/**
-	 * Setting for the primary 2 color blue value.
-	 */
-	public static final IntSetting PRIMARY2_COLOR_B = 
-		FACTORY.createIntSetting("PRIMARY2_COLOR_B", 170);
-
-
-	/**
-	 * Setting for the primary 3 color red value.
-	 */
-	public static final IntSetting PRIMARY3_COLOR_R = 
-		FACTORY.createIntSetting("PRIMARY3_COLOR_R", 216);
-
-	/**
-	 * Setting for the primary 3 color green value.
-	 */
-	public static final IntSetting PRIMARY3_COLOR_G = 
-		FACTORY.createIntSetting("PRIMARY3_COLOR_G", 225);
-
-
-	/**
-	 * Setting for the primary 3 color blue value.
-	 */
-	public static final IntSetting PRIMARY3_COLOR_B = 
-		FACTORY.createIntSetting("PRIMARY3_COLOR_B", 244);
-
-
-	/**
-	 * Setting for the secondary 1 color red value.
-	 */
-	public static final IntSetting SECONDARY1_COLOR_R = 
-		FACTORY.createIntSetting("SECONDARY1_COLOR_R", 50);
-
-	/**
-	 * Setting for the secondary 1 color green value.
-	 */
-	public static final IntSetting SECONDARY1_COLOR_G = 
-		FACTORY.createIntSetting("SECONDARY1_COLOR_G", 68);
-
-
-	/**
-	 * Setting for the secondary 1 color blue value.
-	 */
-	public static final IntSetting SECONDARY1_COLOR_B = 
-		FACTORY.createIntSetting("SECONDARY1_COLOR_B", 107);
-
-	/**
-	 * Setting for the secondary 2 color red value.
-	 */
-	public static final IntSetting SECONDARY2_COLOR_R = 
-		FACTORY.createIntSetting("SECONDARY2_COLOR_R", 167);
-
-	/**
-	 * Setting for the secondary 2 color green value.
-	 */
-	public static final IntSetting SECONDARY2_COLOR_G = 
-		FACTORY.createIntSetting("SECONDARY2_COLOR_G", 173);
-
-
-	/**
-	 * Setting for the secondary 2 color blue value.
-	 */
-	public static final IntSetting SECONDARY2_COLOR_B = 
-		FACTORY.createIntSetting("SECONDARY2_COLOR_B", 190);
-
-
-	/**
-	 * Setting for the secondary 3 color red value.
-	 */
-	public static final IntSetting SECONDARY3_COLOR_R = 
-		FACTORY.createIntSetting("SECONDARY3_COLOR_R", 199);
-
-	/**
-	 * Setting for the secondary 3 color green value.
-	 */
-	public static final IntSetting SECONDARY3_COLOR_G = 
-		FACTORY.createIntSetting("SECONDARY3_COLOR_G", 201);
-
-
-	/**
-	 * Setting for the secondary 3 color blue value.
-	 */
-	public static final IntSetting SECONDARY3_COLOR_B = 
-		FACTORY.createIntSetting("SECONDARY3_COLOR_B", 209);
-		
-	
-	/**
-	 * Setting for the secondary 3 color blue value.
-	 */
-	public static final IntSetting WINDOW1_COLOR_R = 
-		FACTORY.createIntSetting("WINDOW1_COLOR_R", 0);	
-		
-
-	/**
-	 * Setting for the secondary 3 color blue value.
-	 */
-	public static final IntSetting WINDOW1_COLOR_G = 
-		FACTORY.createIntSetting("WINDOW1_COLOR_G", 0);
-		
-	/**
-	 * Setting for the secondary 3 color blue value.
-	 */
-	public static final IntSetting WINDOW1_COLOR_B = 
-		FACTORY.createIntSetting("WINDOW1_COLOR_B", 0);	
-		
-
-	/**
-	 * Setting for the secondary 3 color blue value.
-	 */
-	public static final IntSetting WINDOW2_COLOR_R = 
-		FACTORY.createIntSetting("WINDOW2_COLOR_R", 209);	
-		
-
-	/**
-	 * Setting for the secondary 3 color blue value.
-	 */
-	public static final IntSetting WINDOW2_COLOR_G = 
-		FACTORY.createIntSetting("WINDOW2_COLOR_G", 209);
-		
-	/**
-	 * Setting for the secondary 3 color blue value.
-	 */
-	public static final IntSetting WINDOW2_COLOR_B = 
-		FACTORY.createIntSetting("WINDOW2_COLOR_B", 209);			
-		
-	/**
-	 * Setting for the secondary 3 color blue value.
-	 */
-	public static final IntSetting WINDOW3_COLOR_R = 
-		FACTORY.createIntSetting("WINDOW3_COLOR_R", 209);	
-		
-
-	/**
-	 * Setting for the secondary 3 color blue value.
-	 */
-	public static final IntSetting WINDOW3_COLOR_G = 
-		FACTORY.createIntSetting("WINDOW3_COLOR_G", 209);
-		
-	/**
-	 * Setting for the secondary 3 color blue value.
-	 */
-	public static final IntSetting WINDOW3_COLOR_B = 
-		FACTORY.createIntSetting("WINDOW3_COLOR_B", 209);			
-		
-	/**
-	 * Setting for the secondary 3 color blue value.
-	 */
-	public static final IntSetting WINDOW4_COLOR_R = 
-		FACTORY.createIntSetting("WINDOW4_COLOR_R", 0);	
-		
-
-	/**
-	 * Setting for the secondary 3 color blue value.
-	 */
-	public static final IntSetting WINDOW4_COLOR_G = 
-		FACTORY.createIntSetting("WINDOW4_COLOR_G", 0);
-		
-	/**
-	 * Setting for the secondary 3 color blue value.
-	 */
-	public static final IntSetting WINDOW4_COLOR_B = 
-		FACTORY.createIntSetting("WINDOW4_COLOR_B", 0);			
-		
-	/**
-	 * Setting for the secondary 3 color blue value.
-	 */
-	public static final IntSetting WINDOW5_COLOR_R = 
-		FACTORY.createIntSetting("WINDOW5_COLOR_R", 0);	
-		
-
-	/**
-	 * Setting for the secondary 3 color blue value.
-	 */
-	public static final IntSetting WINDOW5_COLOR_G = 
-		FACTORY.createIntSetting("WINDOW5_COLOR_G", 0);
-		
-	/**
-	 * Setting for the secondary 3 color blue value.
-	 */
-	public static final IntSetting WINDOW5_COLOR_B = 
-		FACTORY.createIntSetting("WINDOW5_COLOR_B", 0);			
-
-		
-	/**
-	 * Setting for the secondary 3 color blue value.
-	 */
-	public static final IntSetting WINDOW6_COLOR_R = 
-		FACTORY.createIntSetting("WINDOW6_COLOR_R", 255);	
-		
-
-	/**
-	 * Setting for the secondary 3 color blue value.
-	 */
-	public static final IntSetting WINDOW6_COLOR_G = 
-		FACTORY.createIntSetting("WINDOW6_COLOR_G", 255);
-		
-	/**
-	 * Setting for the secondary 3 color blue value.
-	 */
-	public static final IntSetting WINDOW6_COLOR_B = 
-		FACTORY.createIntSetting("WINDOW6_COLOR_B", 255);			
-		
-	/**
-	 * Setting for the window 7 color blue value -- text fields, etc.
-	 */
-	public static final IntSetting WINDOW7_COLOR_R = 
-		FACTORY.createIntSetting("WINDOW7_COLOR_R", 255);	
-		
-
-	/**
-	 * Setting for the window 7 color blue value.
-	 */
-	public static final IntSetting WINDOW7_COLOR_G = 
-		FACTORY.createIntSetting("WINDOW7_COLOR_G", 255);
-		
-	/**
-	 * Setting for the window 7 color blue value.
-	 */
-	public static final IntSetting WINDOW7_COLOR_B = 
-		FACTORY.createIntSetting("WINDOW7_COLOR_B", 255);		
-		
-	/**
-	 * Setting for the secondary 3 color blue value.
-	 */
-	public static final IntSetting WINDOW8_COLOR_R = 
-		FACTORY.createIntSetting("WINDOW8_COLOR_R", 0);	
-		
-
-	/**
-	 * Setting for the secondary 3 color blue value.
-	 */
-	public static final IntSetting WINDOW8_COLOR_G = 
-		FACTORY.createIntSetting("WINDOW8_COLOR_G", 0);
-		
-	/**
-	 * Setting for the secondary 3 color blue value.
-	 */
-	public static final IntSetting WINDOW8_COLOR_B = 
-		FACTORY.createIntSetting("WINDOW8_COLOR_B", 0);	
-		
-		
-	/**
-	 * Setting for the secondary 3 color blue value.
-	 */
-	public static final IntSetting WINDOW9_COLOR_R = 
-		FACTORY.createIntSetting("WINDOW9_COLOR_R", 0);	
-		
-
-	/**
-	 * Setting for the secondary 3 color blue value.
-	 */
-	public static final IntSetting WINDOW9_COLOR_G = 
-		FACTORY.createIntSetting("WINDOW9_COLOR_G", 0);
-		
-	/**
-	 * Setting for the secondary 3 color blue value.
-	 */
-	public static final IntSetting WINDOW9_COLOR_B = 
-		FACTORY.createIntSetting("WINDOW9_COLOR_B", 0);			
-		
-		
-	/**
-	 * Setting for the secondary 3 color blue value.
-	 */
-	public static final IntSetting WINDOW10_COLOR_R = 
-		FACTORY.createIntSetting("WINDOW10_COLOR_R", 0);	
-		
-
-	/**
-	 * Setting for the secondary 3 color blue value.
-	 */
-	public static final IntSetting WINDOW10_COLOR_G = 
-		FACTORY.createIntSetting("WINDOW10_COLOR_G", 0);
-		
-	/**
-	 * Setting for the secondary 3 color blue value.
-	 */
-	public static final IntSetting WINDOW10_COLOR_B = 
-		FACTORY.createIntSetting("WINDOW10_COLOR_B", 0);			
-		
-		
-	/**
-	 * Setting for the secondary 3 color blue value.
-	 */
-	public static final IntSetting WINDOW11_COLOR_R = 
-		FACTORY.createIntSetting("WINDOW11_COLOR_R", 0);	
-		
-
-	/**
-	 * Setting for the secondary 3 color blue value.
-	 */
-	public static final IntSetting WINDOW11_COLOR_G = 
-		FACTORY.createIntSetting("WINDOW11_COLOR_G", 0);
-		
-	/**
-	 * Setting for the secondary 3 color blue value.
-	 */
-	public static final IntSetting WINDOW11_COLOR_B = 
-		FACTORY.createIntSetting("WINDOW11_COLOR_B", 0);			
-		
-
-	/**
-	 * Setting for the secondary 3 color blue value.
-	 */
-	public static final IntSetting WINDOW12_COLOR_R = 
-		FACTORY.createIntSetting("WINDOW12_COLOR_R", 199);	
-		
-
-	/**
-	 * Setting for the secondary 3 color blue value.
-	 */
-	public static final IntSetting WINDOW12_COLOR_G = 
-		FACTORY.createIntSetting("WINDOW12_COLOR_G", 201);
-		
-	/**
-	 * Setting for the secondary 3 color blue value.
-	 */
-	public static final IntSetting WINDOW12_COLOR_B = 
-		FACTORY.createIntSetting("WINDOW12_COLOR_B", 209);								
 
 	/////////////////// FONTS //////////////////////
 	/**
@@ -526,174 +178,192 @@ public final class ThemeSettings {
 	/////////////////// END FONTS //////////////////////
 
 	/**
-	 * Setting for the table header background color red value.
+	 * Setting for the primary 1 color.
 	 */
-	public static final IntSetting TABLE_HEADER_BACKGROUND_COLOR_R = 
-		FACTORY.createIntSetting("TABLE_HEADER_BACKGROUND_COLOR_R", 117);
+	public static final ColorSetting PRIMARY1_COLOR = 
+		FACTORY.createColorSetting("PRIMARY1_COLOR", 
+								   new Color(74,110,188));
 
 	/**
-	 * Setting for the table header background color green value.
+	 * Setting for the primary 2 color.
 	 */
-	public static final IntSetting TABLE_HEADER_BACKGROUND_COLOR_G = 
-		FACTORY.createIntSetting("TABLE_HEADER_BACKGROUND_COLOR_G", 142);
+	public static final ColorSetting PRIMARY2_COLOR = 
+		FACTORY.createColorSetting("PRIMARY2_COLOR", 
+								   new Color(135,145,170));
 
 	/**
-	 * Setting for the table header background color blue value.
+	 * Setting for the primary 3 color.
 	 */
-	public static final IntSetting TABLE_HEADER_BACKGROUND_COLOR_B = 
-		FACTORY.createIntSetting("TABLE_HEADER_BACKGROUND_COLOR_B", 197);
-
+	public static final ColorSetting PRIMARY3_COLOR = 
+		FACTORY.createColorSetting("PRIMARY3_COLOR", 
+								   new Color(216,225,244));
 
 	/**
-	 * Setting for the table background color red value.
+	 * Setting for the secondary 1 color.
 	 */
-	public static final IntSetting TABLE_BACKGROUND_COLOR_R = 
-		FACTORY.createIntSetting("TABLE_BACKGROUND_COLOR_R", 255);
+	public static final ColorSetting SECONDARY1_COLOR =
+		FACTORY.createColorSetting("SECONDARY1_COLOR", 
+								   new Color(50,68,107));
 
 	/**
-	 * Setting for the table background color green value.
+	 * Setting for the secondary 2 color.
 	 */
-	public static final IntSetting TABLE_BACKGROUND_COLOR_G = 
-		FACTORY.createIntSetting("TABLE_BACKGROUND_COLOR_G", 255);
+	public static final ColorSetting SECONDARY2_COLOR =
+		FACTORY.createColorSetting("SECONDARY2_COLOR", 
+								   new Color(167,173,190));
 
 	/**
-	 * Setting for the table background color blue value.
+	 * Setting for the secondary 3 color.
 	 */
-	public static final IntSetting TABLE_BACKGROUND_COLOR_B = 
-		FACTORY.createIntSetting("TABLE_BACKGROUND_COLOR_B", 255);
-
+	public static final ColorSetting SECONDARY3_COLOR =
+		FACTORY.createColorSetting("SECONDARY3_COLOR", 
+								   new Color(199,201,209));
 
 	/**
-	 * Setting for the not sharing label color red value.
+	 * Setting for the window 1 color.
 	 */
-	public static final IntSetting NOT_SHARING_LABEL_COLOR_R = 
-		FACTORY.createIntSetting("NOT_SHARING_LABEL_COLOR_R", 208);
+	public static final ColorSetting WINDOW1_COLOR =
+		FACTORY.createColorSetting("WINDOW1_COLOR", 
+								   new Color(0,0,0));
 
 	/**
-	 * Setting for the not sharing label color green value.
+	 * Setting for the window 2 color.
 	 */
-	public static final IntSetting NOT_SHARING_LABEL_COLOR_G = 
-		FACTORY.createIntSetting("NOT_SHARING_LABEL_COLOR_G", 0);
+	public static final ColorSetting WINDOW2_COLOR =
+		FACTORY.createColorSetting("WINDOW2_COLOR", 
+								   new Color(199,201,209));
 
 	/**
-	 * Setting for the not sharing label color blue value.
+	 * Setting for the window 3 color.
 	 */
-	public static final IntSetting NOT_SHARING_LABEL_COLOR_B = 
-		FACTORY.createIntSetting("NOT_SHARING_LABEL_COLOR_B", 5);
+	public static final ColorSetting WINDOW3_COLOR =
+		FACTORY.createColorSetting("WINDOW3_COLOR", 
+								   new Color(199,201,209));
 
+	/**
+	 * Setting for the window 4 color.
+	 */
+	public static final ColorSetting WINDOW4_COLOR =
+		FACTORY.createColorSetting("WINDOW4_COLOR", 
+								   new Color(0,0,0));
+
+	/**
+	 * Setting for the window 5 color.
+	 */
+	public static final ColorSetting WINDOW5_COLOR =
+		FACTORY.createColorSetting("WINDOW5_COLOR", 
+								   new Color(0,0,0));
+
+	/**
+	 * Setting for the window 6 color.
+	 */
+	public static final ColorSetting WINDOW6_COLOR =
+		FACTORY.createColorSetting("WINDOW6_COLOR", 
+								   new Color(255,255,255));
+
+	/**
+	 * Setting for the window 7 color.
+	 */
+	public static final ColorSetting WINDOW7_COLOR =
+		FACTORY.createColorSetting("WINDOW7_COLOR", 
+								   new Color(255,255,255));
+
+	/**
+	 * Setting for the window 8 color.
+	 */
+	public static final ColorSetting WINDOW8_COLOR =
+		FACTORY.createColorSetting("WINDOW8_COLOR", 
+								   new Color(0,0,0));
+
+	/**
+	 * Setting for the window 9 color.
+	 */
+	public static final ColorSetting WINDOW9_COLOR =
+		FACTORY.createColorSetting("WINDOW9_COLOR", 
+								   new Color(0,0,0));	
+
+	/**
+	 * Setting for the window 10 color.
+	 */
+	public static final ColorSetting WINDOW10_COLOR =
+		FACTORY.createColorSetting("WINDOW10_COLOR", 
+								   new Color(0,0,0));
+
+	/**
+	 * Setting for the window 11 color.
+	 */
+	public static final ColorSetting WINDOW11_COLOR =
+		FACTORY.createColorSetting("WINDOW11_COLOR", 
+								   new Color(0,0,0));
+
+	/**
+	 * Setting for the window 12 color.
+	 */
+	public static final ColorSetting WINDOW12_COLOR =
+		FACTORY.createColorSetting("WINDOW12_COLOR", 
+								   new Color(199,201,209));							
+
+	/**
+	 * Setting for the table header background color.
+	 */
+	public static final ColorSetting TABLE_HEADER_BACKGROUND_COLOR =
+		FACTORY.createColorSetting("TABLE_HEADER_BACKGROUND_COLOR",
+								   new Color(117, 142, 197));
+
+	/**
+	 * Setting for the table background color.
+	 */
+	public static final ColorSetting TABLE_BACKGROUND_COLOR =
+		FACTORY.createColorSetting("TABLE_BACKGROUND_COLOR", 
+								   new Color(255,255,255));
+
+	/**
+	 * Setting for the not sharing label color.
+	 */
+	public static final ColorSetting NOT_SHARING_LABEL_COLOR =
+		FACTORY.createColorSetting("NOT_SHARING_LABEL_COLOR", 
+								   new Color(208, 0, 5));
 	
 	/**
-	 * Setting for the search fade color red value.
+	 * Setting for the search fade color.
 	 */
-	public static final IntSetting SEARCH_FADE_COLOR_R = 
-		FACTORY.createIntSetting("SEARCH_FADE_COLOR_R", 135);
+	public static final ColorSetting SEARCH_FADE_COLOR =
+		FACTORY.createColorSetting("SEARCH_FADE_COLOR", 
+								   new Color(135,146,185));
 
 	/**
-	 * Setting for the search fade color green value.
+	 * Setting for the search button color.
 	 */
-	public static final IntSetting SEARCH_FADE_COLOR_G = 
-		FACTORY.createIntSetting("SEARCH_FADE_COLOR_G", 146);
+	public static final ColorSetting SEARCH_BUTTON_COLOR =
+		FACTORY.createColorSetting("SEARCH_BUTTON_COLOR", 
+								   new Color(255,255,255));
 
 	/**
-	 * Setting for the search fade color blue value.
+	 * Setting for the search result speed color.
 	 */
-	public static final IntSetting SEARCH_FADE_COLOR_B = 
-		FACTORY.createIntSetting("SEARCH_FADE_COLOR_B", 185);
-
+	public static final ColorSetting SEARCH_RESULT_SPEED_COLOR =
+		FACTORY.createColorSetting("SEARCH_RESULT_SPEED_COLOR", 
+								   new Color(7,170,0));
 
 	/**
-	 * Setting for the search button color red value.
+	 * Setting for the playlist "playing song" color.
 	 */
-	public static final IntSetting SEARCH_BUTTON_COLOR_R = 
-		FACTORY.createIntSetting("SEARCH_BUTTON_COLOR_R", 255);
+	public static final ColorSetting PLAYING_SONG_COLOR =
+		FACTORY.createColorSetting("PLAYING_SONG_COLOR", 
+								   new Color(7,170,0));
+	/**
+	 * Setting for the search ip address color.
+	 */
+	public static final ColorSetting SEARCH_IP_COLOR =
+		FACTORY.createColorSetting("SEARCH_IP_COLOR", 
+								   new Color(0,0,0));
 
 	/**
-	 * Setting for the search button color green value.
+	 * Setting for the search ip private address color.
 	 */
-	public static final IntSetting SEARCH_BUTTON_COLOR_G = 
-		FACTORY.createIntSetting("SEARCH_BUTTON_COLOR_G", 255);
-
-	/**
-	 * Setting for the search button color blue value.
-	 */
-	public static final IntSetting SEARCH_BUTTON_COLOR_B = 
-		FACTORY.createIntSetting("SEARCH_BUTTON_COLOR_B", 255);
-
-	/**
-	 * Setting for the search result speed color red value.
-	 */
-	public static final IntSetting SEARCH_RESULT_SPEED_COLOR_R = 
-		FACTORY.createIntSetting("SEARCH_RESULT_SPEED_COLOR_R", 7);
-
-	/**
-	 * Setting for the search result speed color green value.
-	 */
-	public static final IntSetting SEARCH_RESULT_SPEED_COLOR_G = 
-		FACTORY.createIntSetting("SEARCH_RESULT_SPEED_COLOR_G", 170);
-
-	/**
-	 * Setting for the search result speed color blue value.
-	 */
-	public static final IntSetting SEARCH_RESULT_SPEED_COLOR_B = 
-		FACTORY.createIntSetting("SEARCH_RESULT_SPEED_COLOR_B", 0);
-
-
-	/**
-	 * Setting for the playlist "playing song" color red value.
-	 */
-	public static final IntSetting PLAYING_SONG_COLOR_R = 
-		FACTORY.createIntSetting("PLAYING_SONG_COLOR_R", 7);
-
-	/**
-	 * Setting for the playlist "playing song" color green value.
-	 */
-	public static final IntSetting PLAYING_SONG_COLOR_G = 
-		FACTORY.createIntSetting("PLAYING_SONG_COLOR_G", 170);
-
-	/**
-	 * Setting for the playlist "playing song" color blue value.
-	 */
-	public static final IntSetting PLAYING_SONG_COLOR_B = 
-		FACTORY.createIntSetting("PLAYING_SONG_COLOR_B", 0);
-
-	/**
-	 * Setting for the search ip address color red value.
-	 */
-	public static final IntSetting SEARCH_IP_COLOR_R = 
-		FACTORY.createIntSetting("SEARCH_IP_COLOR_R", 0);
-
-	/**
-	 * Setting for the search ip address color green value.
-	 */
-	public static final IntSetting SEARCH_IP_COLOR_G = 
-		FACTORY.createIntSetting("SEARCH_IP_COLOR_G", 0);
-
-	/**
-	 * Setting for the search ip address color blue value.
-	 */
-	public static final IntSetting SEARCH_IP_COLOR_B = 
-		FACTORY.createIntSetting("SEARCH_IP_COLOR_B", 0);
-
-
-
-	/**
-	 * Setting for the search ip private address color red value.
-	 */
-	public static final IntSetting SEARCH_PRIVATE_IP_COLOR_R = 
-		FACTORY.createIntSetting("SEARCH_PRIVATE_IP_COLOR_R", 255);
-
-	/**
-	 * Setting for the search ip private address color green value.
-	 */
-	public static final IntSetting SEARCH_PRIVATE_IP_COLOR_G = 
-		FACTORY.createIntSetting("SEARCH_PRIVATE_IP_COLOR_G", 0);
-
-	/**
-	 * Setting for the search ip private address color blue value.
-	 */
-	public static final IntSetting SEARCH_PRIVATE_IP_COLOR_B = 
-		FACTORY.createIntSetting("SEARCH_PRIVATE_IP_COLOR_B", 0);
-
+	public static final ColorSetting SEARCH_PRIVATE_IP_COLOR =
+		FACTORY.createColorSetting("SEARCH_PRIVATE_IP_COLOR", 
+								   new Color(255, 0, 0));
 
 	/*
 	public static void main(String[] args) {
