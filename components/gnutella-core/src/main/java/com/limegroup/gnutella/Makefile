@@ -1,11 +1,11 @@
-javac=C:/jdk1.2.2/bin/javac -g
+javac=javac
 
 classes = Main.class Router.class RouteTable.class \
 	Connection.class BadPacketException.class GUID.class \
-	UnmodifiableIterator.class Assert.class \
+	UnmodifiableIterator.class Assert.class Const.class \
 	Message.class PingRequest.class PingReply.class \
 	QueryRequest.class QueryReply.class Response.class \
-	PushRequest.class ByteOrder.class
+	PushRequest.class ByteOrder.class HostCatcher.class
 
 all : $(classes)
 
