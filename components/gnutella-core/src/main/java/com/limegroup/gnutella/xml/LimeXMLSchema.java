@@ -209,6 +209,46 @@ public class LimeXMLSchema
         return _canonicalizedFields;
     }
     
+    /**
+     * Returns all the fields(placeholders) names in this schema.
+     * The field names are canonicalized as mentioned below:
+     * <p>
+     * So as to preserve the structure, Structure.Field will be represented as
+     * Structure__Field (Double Underscore is being used as a delimiter to 
+     * represent the structure).
+     *<p>
+     * In case of multiple structured values with same name, 
+     * as might occur while using + or * in the regular expressions in schema,
+     * those should be represented as using the array index using the __ 
+     * notation (withouth the square brackets)
+     * for e.g. myarray[0].name ==> myarray__0__name
+     *     
+     * attribute names for an element in the XML schema should be postfixed 
+     * with __ (double underscore).
+     * So element.attribute ==> element__attribute__
+     *
+     * @return list (Strings) of all the field names in this schema.
+     */
+    public String[] getCanonicalizedFieldNames()
+    {
+        //get the fields
+        List canonicalizedFields = this.getCanonicalizedFields();
+        
+        //extract field names out of those
+        String[] fieldNames = new String[canonicalizedFields.size()];
+        Iterator iterator = canonicalizedFields.iterator();
+        for(int i=0; i < fieldNames.length; i++)
+        {
+            fieldNames[i] = ((SchemaFieldInfo)iterator.next())
+                .getCanonicalizedFieldName();
+        }
+        
+        //return the field names
+        return fieldNames;
+    }
+    
+    
+    
     public static void Test()
     {
         try
