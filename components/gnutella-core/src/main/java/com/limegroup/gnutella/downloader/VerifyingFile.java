@@ -59,6 +59,11 @@ public class VerifyingFile {
      * LOCKING: itself. this->fos is ok
      */
     private RandomAccessFile fos;
+    
+    /**
+     * Whether this file is open for writing
+     */
+    private volatile boolean isOpen;
 
     /**
      * The eventual completed size of the file we're writing.
@@ -159,6 +164,7 @@ public class VerifyingFile {
         this.fos =  new RandomAccessFile(file,"rw");
         // cleanup leased blocks
         leasedBlocks = new IntervalSet();
+        isOpen = true;
     }
 
     /**
@@ -186,6 +192,9 @@ public class VerifyingFile {
             return;
         if(fos == null)
             throw new IllegalStateException("no fos!");
+        
+        if (!isOpen())
+            return;
 		
 		Interval intvl = new Interval((int)currPos,(int)currPos+length-1);
 		
@@ -394,6 +403,9 @@ public class VerifyingFile {
         return lostSize >= MAX_CORRUPTION * completedSize;
     }
     
+    public boolean isOpen() {
+        return isOpen;
+    }
     /**
      * Determines if there are any blocks that are not assigned
      * or written.
@@ -414,6 +426,7 @@ public class VerifyingFile {
         // it could still be in a waiting state, and we need
         // it to allow IncompleteFileDescs to funnel alt-locs
         // as sources to the downloader.
+        isOpen = false;
         if(fos==null)
             return;
         try { 

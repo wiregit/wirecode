@@ -622,6 +622,15 @@ public class ManagedDownloader implements Downloader, Serializable {
                 initializeAlternateLocations();
             }
         }
+        
+        try {
+            initializeFilesAndFolders();
+            initializeVerifyingFile();
+        }catch(IOException bad) {
+            setState(DISK_PROBLEM);
+            return;
+        }
+        
         setState(QUEUED);
     }
     
@@ -930,6 +939,28 @@ public class ManagedDownloader implements Downloader, Serializable {
             return;
         this.incompleteFile=incFile;
         this.commonOutFile=incompleteFileManager.getEntry(incFile);
+    }
+    
+    private void initializeVerifyingFile() throws IOException {
+        Assert.that(incompleteFile != null);
+
+        int completedSize = 
+           (int)IncompleteFileManager.getCompletedSize(incompleteFile);
+
+        //get VerifyingFile
+        commonOutFile= incompleteFileManager.getEntry(incompleteFile);
+
+        if(commonOutFile==null) {//no entry in incompleteFM
+            commonOutFile = new VerifyingFile(completedSize);
+            try {
+                //we must add an entry in IncompleteFileManager
+                incompleteFileManager.
+                           addEntry(incompleteFile,commonOutFile);
+            } catch(IOException ioe) {
+                ErrorService.error(ioe, "file: " + incompleteFile);
+                throw ioe;
+            }
+        }        
     }
     
     /**
@@ -1844,8 +1875,7 @@ public class ManagedDownloader implements Downloader, Serializable {
         }
         
         try {
-            initializeFilesAndFolders(firstDesc);
-            initializeVerifyingFile();
+            openVerifyingFile();
         } catch (IOException iox) {
             return DISK_PROBLEM;
         }
@@ -1947,7 +1977,7 @@ public class ManagedDownloader implements Downloader, Serializable {
     /**
      * initialize the directory where the file is to be saved.
      */
-    private void initializeFilesAndFolders(RemoteFileDesc firstDesc) throws IOException{
+    private void initializeFilesAndFolders() throws IOException{
         
         //1. Verify it's safe to download.  Filename must not have "..", "/",
         //etc.  We check this by looking where the downloaded file will end up.
@@ -1960,8 +1990,9 @@ public class ManagedDownloader implements Downloader, Serializable {
         
         File saveDir;
         String fileName = getFileName();
+        
         try {
-            incompleteFile = incompleteFileManager.getFile(firstDesc);
+            incompleteFile = incompleteFileManager.getFileForUrn(downloadSHA1);
             saveDir = SharingSettings.getSaveDirectory();
             completeFile = new File(saveDir, fileName);
             String savePath = saveDir.getCanonicalPath();
@@ -2143,28 +2174,8 @@ public class ManagedDownloader implements Downloader, Serializable {
     /**
      * Initializes the verifiying file.
      */
-    private synchronized void initializeVerifyingFile() throws IOException {
-        Assert.that(incompleteFile != null);
+    private synchronized void openVerifyingFile() throws IOException {
 
-        int completedSize = 
-           (int)IncompleteFileManager.getCompletedSize(incompleteFile);
-
-        synchronized (incompleteFileManager) {
-            //get VerifyingFile
-            commonOutFile= incompleteFileManager.getEntry(incompleteFile);
-        }
-
-        if(commonOutFile==null) {//no entry in incompleteFM
-            commonOutFile = new VerifyingFile(completedSize);
-            try {
-                //we must add an entry in IncompleteFileManager
-                incompleteFileManager.
-                           addEntry(incompleteFile,commonOutFile);
-            } catch(IOException ioe) {
-                ErrorService.error(ioe, "file: " + incompleteFile);
-                throw ioe;
-            }
-        }
         //need to get the VerifyingFile ready to write
         try {
             commonOutFile.open(incompleteFile);
