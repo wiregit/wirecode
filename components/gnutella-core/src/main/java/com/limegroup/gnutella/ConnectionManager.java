@@ -1237,6 +1237,10 @@ public class ConnectionManager {
      * @param connection The connection on which we received the headers
      */
     private void processConnectionHeaders(Connection connection){
+        if(!connection.receivedHeaders()) {
+            return;
+        }
+
         //get the connection headers
         Properties headers = connection.headers().props();
         //return if no headers to process

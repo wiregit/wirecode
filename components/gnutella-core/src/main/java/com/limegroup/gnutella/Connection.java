@@ -1021,6 +1021,17 @@ public class Connection {
 		return HEADERS.getDomainsAuthenticated();
 	}
 
+    /**
+     * Accessor for whether or not this connection has received any
+     * headers.
+     *
+     * @return <tt>true</tt> if this connection has finished initializing
+     *  and therefore has headers, otherwise <tt>false</tt>
+     */
+    public boolean receivedHeaders() {
+        return HEADERS != null;
+    }
+
 	/**
 	 * Accessor for the <tt>HandshakeResponse</tt> instance containing all
 	 * of the Gnutella connection headers passed by this node.
