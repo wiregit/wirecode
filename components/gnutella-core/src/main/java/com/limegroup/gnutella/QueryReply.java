@@ -160,6 +160,35 @@ public class QueryReply extends Message implements Serializable{
         _xmlBytes = xmlBytes;        
     }
 
+    /** Creates a new query reply with data read from the network. */
+    public QueryReply(byte[] guid, byte ttl, byte hops,
+              byte[] payload) {
+        super(guid, Message.F_QUERY_REPLY, ttl, hops, payload.length);
+        this.payload=payload;
+        //repOk();                               
+    }
+
+    /**
+	 * Copy constructor.  Creates a new query reply from the passed query
+	 * Reply. The new one is same as the passed one, but with different specified
+	 * GUID.<p>
+	 *
+	 * Note: The payload is not really copied, but the reference in the newly
+	 * constructed query reply, points to the one in the passed reply.  But since
+	 * the payload cannot be mutated, it shouldn't make difference if different
+	 * query replies maintain reference to same payload
+	 *
+	 * @param guid The new GUID for the reply
+	 * @param reply The query reply from where to copy the fields into the
+	 *  new constructed query reply 
+	 */
+    public QueryReply(byte[] guid, QueryReply reply){
+        //call the super constructor with new GUID
+        super(guid, Message.F_QUERY_REPLY, reply.getTTL(), reply.getHops(),
+			  reply.getLength());
+        //set the payload field
+        this.payload = reply.payload;
+    }
 
     /** 
      * Internal constructor.  Only creates QHD if includeQHD==true.  
@@ -266,29 +295,6 @@ public class QueryReply extends Message implements Serializable{
         }
     }
 
-
-    /**
-    * Copy constructor.  Creates a new query reply from the passed query
-    * Reply. The new one is same as the passed one, but with different specified
-    * GUID.<p>
-    *
-    * Note: The payload is not really copied, but the reference in the newly
-    * constructed query reply, points to the one in the passed reply.  But since
-    * the payload cannot be mutated, it shouldn't make difference if different
-    * query replies maintain reference to same payload
-    *
-    * @param guid The new GUID for the reply
-    * @param reply The query reply from where to copy the fields into the
-    *  new constructed query reply 
-    */
-    public QueryReply(byte[] guid, QueryReply reply){
-        //call the super constructor with new GUID
-        super(guid, Message.F_QUERY_REPLY, reply.getTTL(), reply.getHops(),
-                                                            reply.getLength());
-        //set the payload field
-        this.payload = reply.payload;
-    }
-
     /**
      * Sets the guid for this message. Is needed, when we want to cache 
      * query replies or sfor some other reason want to change the GUID as 
@@ -336,14 +342,6 @@ public class QueryReply extends Message implements Serializable{
         return retInt;
     }
 
-    /** Creates a new query reply with data read from the network. */
-    public QueryReply(byte[] guid, byte ttl, byte hops,
-              byte[] payload) {
-        super(guid, Message.F_QUERY_REPLY, ttl, hops, payload.length);
-        this.payload=payload;
-        //repOk();                               
-    }
-
     public void writePayload(OutputStream out) throws IOException {
         out.write(payload);
     }
@@ -354,7 +352,6 @@ public class QueryReply extends Message implements Serializable{
     public byte[] getXMLBytes() {
         return _xmlBytes;
     }
-
 
     /** Return the number of results N in this query. */
     public short getResultCount() {
