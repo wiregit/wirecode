@@ -73,6 +73,8 @@ public final class ColorSetting extends Setting {
             value = new Color(r,g,b);
         } catch(NumberFormatException nfe) {
             revertToDefault();
+        } catch(StringIndexOutOfBoundsException sioobe) {
+            revertToDefault();
         }
 	}
     
