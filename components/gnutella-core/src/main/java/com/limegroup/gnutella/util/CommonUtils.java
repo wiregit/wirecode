@@ -410,7 +410,7 @@ public final class CommonUtils {
         if(CommonUtils.isMacOSX()) {            
             File tempSettingsDir = new File(getUserHomeDir(), 
                                             "Library/Preferences");
-            settingsDir = new File(tempSettingsDir, LIMEWIRE_PREFS_DIR_NAME);
+            settingsDir = new File(tempSettingsDir, "LimeWire");
 		} 
 
         if(!settingsDir.isDirectory()) {
