@@ -150,10 +150,12 @@ public class UpdateManager {
                     if(newVersion==null)
                         return;
                     if(isGreaterVersion(newVersion,latestVersion)) {
+                        debug("committing new update file");
                         synchronized(UpdateManager.this) {
                             commitVersionFile(data);//could throw an exception
                             //committed file, update the value of latestVersion
                             latestVersion = newVersion;
+                            debug("commited file. Latest is:"+latestVersion);
                         }
                         //Note: At this point, the connections that are already
                         //established, still think the latest version is the
@@ -229,9 +231,19 @@ public class UpdateManager {
         File nf = new File(CommonUtils.getUserSettingsDir(),"update.new");
         RandomAccessFile raf = new RandomAccessFile(nf,"rw");
         raf.write(data);
-        boolean deleted = nf.renameTo(f);
-        if(!deleted)
-            throw new IOException();
+        raf.close();
+        boolean deleteOld = f.delete();
+        if(deleteOld) {
+            boolean renamed = nf.renameTo(f);//dont update latestVersion
+            if(!renamed) {
+                nf.delete();
+                throw new IOException();
+            }
+        } 
+        else { //delete the file. The .ver file will be unpacked
+            nf.delete();
+            throw new IOException();//dont update latestVersion
+        }
     }
     
     private boolean debug = false;
