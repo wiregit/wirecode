@@ -166,16 +166,14 @@ public abstract class MessageRouter {
     }
 
     /**
-     * A callback for ConnectionManager to clear a ManagedConnection from
+     * A callback for ConnectionManager to clear a <tt>ReplyHandler</tt> from
      * the routing tables when the connection is closed.
-	 *
-	 * TODO: we don't currently remove UDPReplyHandlers -- allowing the route
-	 * tables to grow without bound!!
      */
-    public void removeConnection(ManagedConnection connection) {
-        _pingRouteTable.removeReplyHandler(connection);
-        _queryRouteTable.removeReplyHandler(connection);
-        _pushRouteTable.removeReplyHandler(connection);
+    public void removeConnection(ReplyHandler rh) {
+        DYNAMIC_QUERIER.removeReplyHandler(rh);
+        _pingRouteTable.removeReplyHandler(rh);
+        _queryRouteTable.removeReplyHandler(rh);
+        _pushRouteTable.removeReplyHandler(rh);
     }
 
 	/**
@@ -1105,7 +1103,6 @@ public abstract class MessageRouter {
      */
     public void handleQueryReply(QueryReply queryReply,
                                  ReplyHandler handler) {
-
         if(queryReply == null) {
             throw new NullPointerException("null query reply");
         }
@@ -1132,12 +1129,14 @@ public abstract class MessageRouter {
             //GUID.  Note that replies destined for me all always delivered to
             //the GUI.
 
+            ReplyHandler rh = rrp.getReplyHandler();
+
 			// TODO: What happens if we get a TTL=0 query that's not intended
 			// for us?  At first glance, it looks like we keep forwarding it!
             if(!shouldDropReply(rrp.getBytesRouted(), queryReply.getTTL()) ||
-			   rrp.getReplyHandler()==FOR_ME_REPLY_HANDLER) {
-                rrp.getReplyHandler().handleQueryReply(queryReply,
-                                                       handler);
+			   rh == FOR_ME_REPLY_HANDLER) {
+                
+                rh.handleQueryReply(queryReply, handler);
                 // also add to the QueryUnicaster for accounting - basically,
                 // most results will not be relevant, but since it is a simple
                 // HashSet lookup, it isn't a prohibitive expense...
