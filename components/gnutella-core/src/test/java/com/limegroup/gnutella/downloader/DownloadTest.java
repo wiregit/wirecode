@@ -93,7 +93,11 @@ public class DownloadTest extends TestCase {
         junit.textui.TestRunner.run(suite());
     }
     
-    public void setUp() {   
+    public void setUp() {
+        
+        try {
+            Thread.sleep(300);   
+        } catch (Interupted
         uploader1=new TestUploader("6346", 6346);
         uploader2=new TestUploader("6347", 6347);
         uploader3=new TestUploader("6348", 6348);
@@ -272,8 +276,8 @@ public class DownloadTest extends TestCase {
         
         //Note: The amount downloaded from each uploader will not 
         //be equal, because the uploaders are stated at different times.
-        check(u1<TestFile.length()/2+FUDGE_FACTOR, "u1 did all the work");
-        check(u2<TestFile.length()/2+FUDGE_FACTOR, "u2 did all the work");
+        assertTrue("u1 did all the work", u1<TestFile.length()/2+FUDGE_FACTOR);
+        assertTrue("u2 did all the work", u2<TestFile.length()/2+FUDGE_FACTOR);
     }
 
 
@@ -302,8 +306,8 @@ public class DownloadTest extends TestCase {
         debug("\tu2: "+u2+"\n");
         debug("\tTotal: "+(u1+u2)+"\n");
 
-        check(u1<9*TestFile.length()/10+FUDGE_FACTOR*10, "u1 did all the work");
-        check(u2<TestFile.length()/10+FUDGE_FACTOR, "u2 did all the work");
+        assertTrue("u1 did all the work", u1<9*TestFile.length()/10+FUDGE_FACTOR*10);
+        assertTrue("u2 did all the work", u2<TestFile.length()/10+FUDGE_FACTOR);
     }
 
 
@@ -363,9 +367,9 @@ public class DownloadTest extends TestCase {
 
         //Note: The amount downloaded from each uploader will not 
         //be equal, because the uploaders are stated at different times.
-        check(u1<TestFile.length()-STOP_AFTER+2*FUDGE_FACTOR,
-              "u1 did all the work");
-        check(u2==STOP_AFTER, "u2 did all the work");
+        assertTrue("u1 did all the work",
+                    u1<TestFile.length()-STOP_AFTER+2*FUDGE_FACTOR);
+        assertTrue("u2 did all the work", u2==STOP_AFTER);
     }
 
 
@@ -412,8 +416,8 @@ public class DownloadTest extends TestCase {
         debug("\tu2: "+u2+"\n");
         debug("\tTotal: "+(u1+u2)+"\n");
 
-        check(u1<(TestFile.length()/2+(FUDGE_FACTOR)), "u1 did all the work");
-        check(u2<(TestFile.length()/2+(FUDGE_FACTOR)), "u2 did all the work");
+        assertTrue("u1 did all the work", u1<(TestFile.length()/2+FUDGE_FACTOR));
+        assertTrue("u2 did all the work", u2<(TestFile.length()/2+FUDGE_FACTOR));
     }
 
     public void testStallingUploaderReplaced() {
@@ -596,9 +600,9 @@ public class DownloadTest extends TestCase {
         boolean sha1Matches = 
         (sha1 != null && uSHA1 != null && sha1.equals(uSHA1));
         
-        check(alt1.hasAlternateLocations(), "uploader didn't receive alt");
-        check(!adiff.hasAlternateLocations(), "uploader got wrong alt");
-        check(sha1Matches, "SHA1 test failed");
+        assertTrue("uploader didn't recieve alt", alt1.hasAlternateLocations());
+        assertTrue("uploader got wrong alt", !adiff.hasAlternateLocations());
+        assertTrue("SHA1 test failed", sha1Matches);
     }
 
     public void testTwoAlternateLocations() {  
@@ -635,10 +639,10 @@ public class DownloadTest extends TestCase {
         AlternateLocationCollection adiff2 = 
             alt1.diffAlternateLocationCollection(ashould); 
         
-        check(alt1.hasAlternateLocations(), "uploader didn't receive alt");
-        check(alt2.hasAlternateLocations(), "uploader didn't receive alt");
-        check(!adiff.hasAlternateLocations(), "uploader got wrong alt");
-        check(!adiff2.hasAlternateLocations(), "uploader got wrong alt");
+        assertTrue("uploader didn't recieve alt", alt1.hasAlternateLocations());
+        assertTrue("uploader didn't recieve alt", alt2.hasAlternateLocations());
+        assertTrue("uploader got wrong alt", !adiff.hasAlternateLocations());
+        assertTrue("uploader got wrong alt", !adiff2.hasAlternateLocations());
     }
 
     public void testUploaderAlternateLocations() {  
@@ -685,8 +689,8 @@ public class DownloadTest extends TestCase {
 
         //Note: The amount downloaded from each uploader will not 
         //be equal, because the uploaders are stated at different times.
-        check(u1<TestFile.length()/2+FUDGE_FACTOR, "u1 did all the work");
-        check(u2<TestFile.length()/2+FUDGE_FACTOR, "u2 did all the work");
+        assertTrue("u1 did all the work", u1<TestFile.length()/2+FUDGE_FACTOR);
+        assertTrue("u2 did all the work", u2<TestFile.length()/2+FUDGE_FACTOR);
     }
 
     public void testWeirdAlternateLocations() {  
@@ -1047,8 +1051,10 @@ public class DownloadTest extends TestCase {
         com.sun.java.util.collections.Set set = 
 			new com.sun.java.util.collections.HashSet();
         try {
+            // for convenience, don't require that they pass the urn.
+            // assume a null one is the TestFile's hash.
             if (urn == null)
-                set.add(URN.createSHA1Urn("urn:sha1:MTSUIEFABDVUDXZMJEBQWNI6RVYHTNIJ"));
+                set.add(TestFile.hash());
             else
                 set.add(URN.createSHA1Urn(urn));
         } catch(Exception e) {
@@ -1116,26 +1122,11 @@ public class DownloadTest extends TestCase {
         return true;
     }
 
-    private static void check(boolean ok, String message) {
-        assertTrue(message,ok);
-    }
-
     private static final boolean DEBUG = false;
     
     static void debug(String message) {
         if(DEBUG) 
             System.out.print(message);
-    }
-
-    /** Cleans up the complete file */
-    private static void cleanup() {
-        uploader1.reset();
-        uploader2.reset();
-        uploader3.reset();
-        uploader4.reset();
-        boolean deleted=savedFile.delete();
-        if (!deleted)
-            debug("WARNING: couldn't delete "+savedFile+"\n");        
     }
 }
 
