@@ -841,6 +841,8 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
             Set endpoints = (Set) _bypassedResults.get(new GUID(qr.getGUID()));
             assertNull(endpoints);
         }
+
+        uploader.stopThread();
     }
 
 
@@ -992,7 +994,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
             }
         }
 
-        long timeoutVal = 5000 - (System.currentTimeMillis() - currTime);
+        long timeoutVal = 8000 - (System.currentTimeMillis() - currTime);
         Thread.sleep(timeoutVal > 0 ? timeoutVal : 0);
         assertEquals(Downloader.WAITING_FOR_RETRY, downloader.getState());
         // purge front end of query
@@ -1032,6 +1034,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
             Set endpoints = (Set) _bypassedResults.get(new GUID(qr.getGUID()));
             assertNull(endpoints);
         }
+        uploader.stopThread();
     }
 
 
@@ -1179,6 +1182,8 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
             Set endpoints = (Set) _bypassedResults.get(new GUID(qr.getGUID()));
             assertNull(endpoints);
         }
+
+        uploader.stopThread();
     }
 
 
@@ -1221,7 +1226,7 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
         uploader.setBusy(true);
         RemoteFileDesc rfd = makeRFD("GLIQY64M7FSXBSQEZY37FIM5QQSA2OUJ");
         
-        TestUploader uploader2 = new TestUploader("whatever", UPLOADER_PORT);
+        TestUploader uploader2 = new TestUploader("whatever", UPLOADER_PORT*2);
         uploader2.setBusy(true);
         RemoteFileDesc rfd2 = makeRFD("GLIQY64M7FSXBSQEZY37FIM5QQSASUSH");
 
@@ -1305,6 +1310,8 @@ public class ClientSideOOBRequeryTest extends ClientSideTestCase {
             Set endpoints = (Set) _bypassedResults.get(new GUID(qr.getGUID()));
             assertNull(endpoints);
         }
+        uploader.stopThread();
+        uploader2.stopThread();
     }
 
     // RUN THIS TEST LAST!!
