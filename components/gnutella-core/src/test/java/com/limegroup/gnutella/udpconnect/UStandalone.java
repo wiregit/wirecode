@@ -431,6 +431,8 @@ public class UStandalone implements ActivityCallback, ErrorCallback {
 		t.printStackTrace();
     }
 
+    public void addressStateChanged() {}
+
     ///////////////////////////////////////////////////////////////////////////
 
 

@@ -75,4 +75,5 @@ public class ActivityCallbackStub implements ActivityCallback {
     public boolean isQueryAlive(GUID guid) {
         return false;
     }
+    public void addressStateChanged() {}
 }
