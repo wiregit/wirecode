@@ -1,8 +1,6 @@
 package com.limegroup.gnutella.util;
 
 import java.io.*;
-import java.util.StringTokenizer;
-
 import com.sun.java.util.collections.*;
 
 /**
@@ -112,21 +110,26 @@ public class FileUtils
     }
 
     /**
-     * simply gets whatever is after the "." in a filename, or the first thing
-     * after the first "." in the filename.
+     * Utility method that returns the file extension of the given file.
      * 
-     * TODO:: test and improve -- doesn't look quite right!!
-     */ 
+     * @param f the <tt>File</tt> instance that the extension should
+     *   be extracted from
+     * @return the file extension string, or <tt>null</tt> if the extension
+     *   could not be extracted
+     */
     public static String getFileExtension(File f) {
-        String retString = null;
-    
-        StringTokenizer st = 
-            new StringTokenizer(f.getName(), ".");
-        if (st.countTokens() > 1) {
-            st.nextToken();
-            retString = st.nextToken();
-        }
-        return retString;
+        String name = f.getName();
+        int index = name.lastIndexOf(".");
+        if(index == -1) return null;
+        
+        // the file must have a name other than the extension
+        if(index == 0) return null;
+        
+        // if the last character of the string is the ".", then there's
+        // no extension
+        if(index == (name.length()-1)) return null;
+        
+        return name.substring(index+1);
     }    
     
 }
