@@ -9,6 +9,7 @@
 package com.limegroup.gnutella;
 
 import com.limegroup.gnutella.downloader.*;
+import com.limegroup.gnutella.util.SocketOpener;
 import java.io.*;
 import java.net.*;
 
@@ -52,9 +53,14 @@ public class HTTPDownloader {
 		
 	}
 	
+    /**
+     * @param timeout the amount of time, in milliseconds, to wait
+     *  when establishing a connection.   Must be non-negative.  A
+     *  timeout of 0 means no timeout.
+     */
 	public HTTPDownloader(String file, String host, 
 							 int port, int index, byte[] guid, 
-							 int size, boolean resume) // size???
+							 int size, boolean resume, int timeout) 
 		throws IOException {
 
 		_filename = file;
@@ -90,18 +96,19 @@ public class HTTPDownloader {
 			}
 		}
 
-		connect(host, port, file, index);
-		
+		connect(host, port, file, index, timeout);		
 	}
 
 	/**
 	 * Private connection methods
 	 */
 
-	private void connect(String host, int port, String file, int index ) 
+	private void connect(String host, int port,
+                         String file, int index,
+                         int timeout ) 
 		throws IOException {
-		Socket socket = new Socket(host, port);
-		connect(socket, file, index);
+        Socket socket = (new SocketOpener(host, port)).connect(timeout);
+        connect(socket, file, index);
 	}
 
 	private void connect(Socket s, String file, int index) throws IOException {

@@ -24,9 +24,13 @@ public class ManagedDownloader implements Downloader {
     private static final int TRIES=5;
     /** The amount of time to wait before retrying in milliseconds, This is also
      *  the time to wait for incoming pushes to arrive.  TODO: increase 
-     *  exponentially with number of tries. */
-    private static final int WAIT_TIME=30000;
-
+     *  exponentially with number of tries.   WARNING: if WAIT_TIME and
+     *  CONNECT_TIME are much smaller than the socket's natural timeout,
+     *  memory will be consumed since threads don't die! */
+    private static final int WAIT_TIME=30000;     //30 seconds
+    /** The time to wait trying to establish each connection, in milliseconds.*/
+    private static final int CONNECT_TIME=10000;  //8 seconds
+    
 
     /** The current state.  One of Downloader.CONNECTING, Downloader.ERROR,
       *  etc. */
@@ -204,14 +208,15 @@ public class ManagedDownloader implements Downloader {
                     if (isPrivate(rfd))
                         continue;
                     try {
-                        //Make a new downloader.  Only actually start it if this is
-                        //still wanted.  The construction of the downloader cannot
-                        //go in the synchronized statement since it may be blocking.
+                        //Make a new downloader.  Only actually start it if this
+                        //is still wanted.  The construction of the downloader
+                        //cannot go in the synchronized statement since it may
+                        //be blocking.
                         setState(CONNECTING);
                         HTTPDownloader dloader2=new HTTPDownloader(
                             rfd.getFileName(), rfd.getHost(), rfd.getPort(),
                             rfd.getIndex(), rfd.getClientGUID(),
-                            rfd.getSize(), false);
+                            rfd.getSize(), false, CONNECT_TIME);
                         synchronized (ManagedDownloader.this) {
                             if (stopped) {
                                 dloader2.stop();
