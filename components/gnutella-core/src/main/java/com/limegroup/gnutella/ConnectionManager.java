@@ -1497,48 +1497,6 @@ public class ConnectionManager {
         //of ManagedConnection have a reference to this but not the HostCatcher.
         return _catcher.getNormalHosts(n);
     }
-    
-
-    /**
-     * This thread does the message loop for ManagedConnections created
-     * through createGroupConnectionBlocking
-     */
-    private class GroupOutgoingConnectionThread extends Thread {
-        private ManagedConnection _connection;
-        private PingRequest       _specialPing;
-
-        /**
-         * The constructor calls start(), so allow you need to do
-         * is construct the thread.
-         */
-        public GroupOutgoingConnectionThread(
-                ManagedConnection connection, PingRequest specialPing) {
-            _connection  = connection;
-            _specialPing = specialPing;
-            setDaemon(true);
-            start();
-        }
-
-        public void run() {
-            try {
-                _router.sendPingRequest(_specialPing, _connection);
-                _connection.loopForMessages();
-            } catch(IOException e) {
-            } catch(Throwable e) {
-                //Internal error!
-                RouterService.error(ActivityCallback.INTERNAL_ERROR, e);
-            }
-            finally{
-                if (_connection.isClientSupernodeConnection())
-                    lostShieldedClientSupernodeConnection();
-            }
-
-            //SettingsManager settings = SettingsManager.instance();
-		    //settings.setUseQuickConnect(true);
-            //setKeepAlive(2);
-        }
-    }
-	//------------------------------------------------------------------------
 
     /**
      * Asynchronously fetches a connection from hostcatcher, then does
