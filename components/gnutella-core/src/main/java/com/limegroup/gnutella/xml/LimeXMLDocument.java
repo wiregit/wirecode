@@ -241,6 +241,8 @@ public class LimeXMLDocument{
         ArrayList tagsToClose = new ArrayList();
         boolean prevAtt=false;
         boolean rootAtts;//if there are root attributes besides identifier,URI
+        if (namValList.size() == 0)
+            return "";
         NameValue nv = (NameValue)namValList.get(0);
         String n = nv.getName();
         //if this string contains 2 sets of __ and the second set it at the 
