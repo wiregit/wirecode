@@ -22,10 +22,14 @@ public class LimeXMLReplyCollection{
     //Note: Each ReplyCollection is written out to 1 physical file on shutdown.
     private ArrayList replyDocs;
     private boolean done= false;
-    
+    public boolean audio = false;//package access
+    private ID3Editor editor = null;
+
+
     //Constructor for audio Schema
     public LimeXMLReplyCollection(Map nameToFile, String URI){
         schemaURI = URI;
+        audio = true;
         replyDocs = new ArrayList();
         ID3Reader id3Reader = new ID3Reader();
         String content = getContent();
@@ -265,8 +269,10 @@ public class LimeXMLReplyCollection{
             }
         }
         boolean written = false;
-        if(found)
-            written = toDisk();
+        if(found){
+            ID3Editor editor = null;
+            written = toDisk("");//no file modified...just del meta
+        }
         if(!written && found)//put it back to maintin consistency
             replyDocs.add(doc);
         else if(found && written)
@@ -280,7 +286,7 @@ public class LimeXMLReplyCollection{
     }
 
 
-    public boolean toDisk(){
+    public boolean toDisk(String modifiedFile){
         String schemaStr = LimeXMLSchema.getDisplayString(schemaURI);
         String schemaName= schemaStr+".xml";
         //Load up the docs from the file.
@@ -291,6 +297,14 @@ public class LimeXMLReplyCollection{
         for(int i=0; i<size;i++){
             LimeXMLDocument currDoc = (LimeXMLDocument)replyDocs.get(i);
             String xml = currDoc.getXMLString();
+            if(audio){
+                String fName = currDoc.getIdentifier();
+                ID3Editor e = new ID3Editor();
+                xml = e.removeID3Tags(xml);
+                if(fName.equals(modifiedFile)){
+                    this.editor = e;
+                }
+            }
             content = content+xml+"\n";
         }
         try{
@@ -312,6 +326,20 @@ public class LimeXMLReplyCollection{
         //file...
     }
     
+    public boolean mp3ToDisk(String mp3FileName){
+        int i = mp3FileName.lastIndexOf(".");
+        if (i<0)
+            return false;
+        boolean wrote=false;
+        boolean wrote2 = false;
+        //write out to disk in the regular way
+        wrote = toDisk(mp3FileName);//write the flat file stuff
+        wrote2 = this.editor.writeID3DataToDisk(mp3FileName);
+        this.editor= null; //reset the value
+        return (wrote && wrote2);
+    }    
+
+
     public void appendCollectionList(List newReplyCollection){
         replyDocs.addAll(newReplyCollection);
     }
