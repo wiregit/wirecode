@@ -932,47 +932,54 @@ public class RouterService
 	 */
 	public void doBrowseHost(String host, int port, GUID guid) 
         throws IOException{
-        try {
-            URLConnection conn 
-                = (new URL("http://"+host+":"+port)).openConnection();
-            conn.setRequestProperty("Accept", 
-                                    Constants.QUERYREPLY_MIME_TYPE);
-            conn.setRequestProperty("User-Agent", CommonUtils.getVendor());
-            conn.setRequestProperty("Content-Length", "0");
-            conn.setRequestProperty("Connection", "close");
-            InputStream in = conn.getInputStream();
-            
-            if (conn instanceof HttpURLConnection) {
-                HttpURLConnection httpConn = (HttpURLConnection) conn;
-                int respCode = httpConn.getResponseCode();
-                if (respCode != HttpURLConnection.HTTP_OK)
-                    ; // notify user of the no go....
+        URLConnection conn 
+        = (new URL("http://"+host+":"+port)).openConnection();
+        conn.setRequestProperty("Accept", 
+                                Constants.QUERYREPLY_MIME_TYPE);
+        conn.setRequestProperty("User-Agent", CommonUtils.getVendor());
+        conn.setRequestProperty("Content-Length", "0");
+        conn.setRequestProperty("Connection", "close");
+        InputStream in = conn.getInputStream();
+        
+        if (conn instanceof HttpURLConnection) {
+            HttpURLConnection httpConn = (HttpURLConnection) conn;
+            int respCode = httpConn.getResponseCode();
+            // didn't get a OK message!!
+            if (respCode != HttpURLConnection.HTTP_OK)
+                throw new IOException();
+        }
+        
+        final String cType = conn.getContentType();
+        if (!cType.equalsIgnoreCase(Constants.QUERYREPLY_MIME_TYPE))
+            // weird, returned a type we didn't understand...
+            throw new IOException(); 
+        
+        final String cEnc  = conn.getContentEncoding();
+        if ((cEnc != null) && cEnc.equals("deflate"))
+            // need to uncompress, not currently supported...
+            throw new IOException();
+        
+        Message m = null;
+        while(true) {
+            try {
+                m = null;
+                m = Message.read(in);
             }
-
-            final String cType = conn.getContentType();
-            if (!cType.equalsIgnoreCase(Constants.QUERYREPLY_MIME_TYPE))
-                return; // weird, returned a type we didn't understand...
-
-            final String cEnc  = conn.getContentEncoding();
-            if ((cEnc != null) && cEnc.equals("deflate"))
-                return; // need to uncompress
-
-            while(true) {
-                Message m = Message.read(in);
-                if(m == null) {
-                    //we are finished reading the stream
-                    return;
-                } else {
-                    if(m instanceof QueryReply) {
-                        QueryReply queryReply = (QueryReply)m;
-                        m.setGUID(guid);
-                        callback.handleQueryReply(queryReply);
-                    }
+            catch (BadPacketException bpe) {
+            }
+            catch (IOException bpe) {
+                // thrown when stream is closed
+            }
+            if(m == null) 
+                //we are finished reading the stream
+                return;
+            else {
+                if(m instanceof QueryReply) {
+                    QueryReply queryReply = (QueryReply)m;
+                    m.setGUID(guid);
+                    callback.handleQueryReply(queryReply);
                 }
             }
-        } catch (Exception e) {
-            //TODO take out the print statement after testing
-//            e.printStackTrace();
         }
 	}
 
