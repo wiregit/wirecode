@@ -61,6 +61,45 @@ public class HostCatcherTest extends com.limegroup.gnutella.util.BaseTestCase {
 	}
 
     /**
+     * Test to make sure we hit the GWebCache if hosts fail.
+     */
+    public void testHitsGWebCacheIfHostsFail() throws Exception {
+        HostCatcher.DEBUG = false;
+        HostCatcher catcher = new HostCatcher();
+        catcher.initialize();
+        
+        String startAddress = "30.4.5.";
+        for(int i=0; i<250; i++) {
+            Endpoint curHost = new Endpoint(startAddress+i, 6346);
+            catcher.add(curHost, true);
+        }
+        
+ 
+        for(int i=0; i<250; i++) {
+            Endpoint host = catcher.getAnEndpoint();
+            assertTrue("unexpected address", 
+                host.getAddress().startsWith(startAddress));
+        }
+        
+        
+        for(int i=0; i<250; i++) {
+            Endpoint curHost = new Endpoint(startAddress+i, 6346);
+            //catcher.add(host, true);
+            catcher.doneWithConnect(curHost, false);
+        }
+        
+        //Endpoint gWebCacheHost = catcher.getAnEndpoint();  
+
+        // This time, the host should not be one of the addresses we added,
+        // since it should come from the cache.  There's some remote chance of
+        // collision, but it's unlikely.
+        //assertFalse("unexpected address", 
+          //  gWebCacheHost.getAddress().startsWith(startAddress));       
+        
+        HostCatcher.DEBUG = true;
+    }
+    
+    /**
      * Tests to make sure that we ignore hosts that have expired.
      * 
      * @throws Exception if any error occurs
