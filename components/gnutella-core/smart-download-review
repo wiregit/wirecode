@@ -1,14 +1,14 @@
 core/com/limegroup/gnutella/DownloadManager.java
    ***I'm not sure I like passing the original query string as an
-      argument to getFile after all
+      argument to getFile after all DONE
  
    ***in handleQueryReply, don't catch Exception e.  Same in
 canonicalize. DONE
    ***need synchronization for handleQueryReply DONE
    ***in handleQueryReply, you shouldn't add rfd to more than one
-      downloader.  (This is easiest to implement if you re-order loops.)
+      downloader.  (This is easiest to implement if you re-order loops.) DONE
  
-   ***canonicalization should remove ALL non-alphanumeric characters.
+   ***canonicalization should remove ALL non-alphanumeric characters. DONE
    ***I'm worried that too many re-queries will be sent for one
       download group.  The assumption is that most of the entries of
       a smart download group will be canonicalized to the same thing.
