@@ -977,22 +977,6 @@ public class RouterService {
             return fileManager.getSharedFileDescriptors(directory);
     }
     
-    /**
-     * Returns a list of all shared file in the given directory.
-     * All the file returned have already been passed to the gui
-     * via ActivityCallback.addSharedFile.  Note that if a file 
-     * is added to the given directory after this method completes, 
-     * addSharedFile will be called for that file.<p>
-     *
-     * If directory is not a shared directory, returns null.
-     */
-    public static File[] getSharedFiles(File directory) {
-        if( directory == null )
-            return fileManager.getAllSharedFiles();
-        else
-            return fileManager.getSharedFiles(directory);
-    }
-    
     /** 
      * Tries to "smart download" <b>any</b> [sic] of the given files.<p>  
      *
