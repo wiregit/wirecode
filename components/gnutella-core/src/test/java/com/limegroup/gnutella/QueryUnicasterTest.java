@@ -20,6 +20,10 @@ public class QueryUnicasterTest extends com.limegroup.gnutella.util.BaseTestCase
 
     private final int NUM_UDP_LOOPS = 25;
 
+    private final RouterService _rs = new RouterService(new
+                                                        ActivityCallbackStub(),
+                                                        new MessageRouterStub());
+
     private boolean _shouldRun = true;
     private boolean shouldRun() {
         return _shouldRun;
@@ -50,8 +54,7 @@ public class QueryUnicasterTest extends com.limegroup.gnutella.util.BaseTestCase
     }
     
     public void setUp() throws Exception {
-        launchBackend();
-        if ( anError ) fail( "error during Backend creation" );
+        _rs.start();
     }
 
     
