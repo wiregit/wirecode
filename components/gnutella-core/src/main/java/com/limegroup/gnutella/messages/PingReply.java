@@ -347,7 +347,7 @@ public class PingReply extends Message implements Serializable {
      * @return a new <tt>PingReply</tt> instance containing the specified
      *  data
      */
-    private static PingReply 
+    public static PingReply 
         create(byte[] guid, byte ttl, int port, byte[] ip, long files,
                long kbytes, boolean isUltrapeer, GGEP ggep) {
 
