@@ -298,12 +298,19 @@ public final class MP3Info {
   		if (need < 0) { //special case, we need more data
 	  		need = -need; // flip need to be positive.
 	  		i -= need; // shift our offset down by the amount we'll be moving
-			for (int j = 0; need < buf.length; j++, need++ ) { // shift data
+	  		int j = 0;
+			for (; need < buf.length; j++, need++ ) { // shift data
 		  		buf[j] = buf[need];
 	  		}
+	  		// IMPORTANT:
+	  		// j is NOT equal to i for the following reason:
+	  		// i is where we last stopped reading data from the buffer.
+	  		// j is where the last bit of valid information in the buffer is.
+	  		// we must continue reading from the buffer using i, but we must
+	  		// fill up the the rest of the buffer from j on.
 	  		
 	  		//read more, starting at where we last have valid data.
-			c = fis.read(buf, i, buf.length-i);
+			c = fis.read(buf, j, buf.length-j);
 		}
 		
 		
