@@ -71,7 +71,22 @@ public final class UrnTest extends TestCase {
 		"/uri-res/N2R?urn:sha1:ULSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB HtTP/1.0"
 	};
 
+	private final String [] VALID_URN_URI_RES_STRINGS = {
+		"/uri-res/N2R?urn:sha1:BLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB",
+		"/uri-res/N2R?urn:sha1:BLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB",
+		"/URI-RES/N2R?urn:sha1:WLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB",
+		"/uri-res/n2R?urn:sha1:RLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB",
+		"/uri-res/N2r?urn:sha1:ZLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB",
+		"/uri-res/n2r?urn:sha1:GLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB",
+		"/uri-res/N2R?UrN:sha1:LLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB",
+		"/uri-res/N2R?urn:sHa1:VLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB",
+		"/uri-res/N2R?urn:sha1:OLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB",
+		"/uri-res/N2R?urn:sha1:ULSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB",
+	};
+
 	private final URN[] VALID_URNS_HTTP = new URN[VALID_URN_HTTP_STRINGS.length];
+
+	private final URN[] VALID_URNS_URI_RES = new URN[VALID_URN_URI_RES_STRINGS.length];
 	
 	private final String [] invalidURNStrings = {
 		"GET /uri-res/N2R?urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB HTTP/1.2",
@@ -145,9 +160,17 @@ public final class UrnTest extends TestCase {
 		}
 		for(int i=0; i<VALID_URN_HTTP_STRINGS.length; i++) {
 			try {
-				VALID_URNS_HTTP[i] = URN.createSHA1UrnFromHttpRequest(VALID_URN_HTTP_STRINGS[0]);
+				VALID_URNS_HTTP[i] = URN.createSHA1UrnFromHttpRequest(VALID_URN_HTTP_STRINGS[i]);
 			} catch(IOException e) {
 				assertTrue("could not create urns for URNTest setup: "+e, false);
+			}
+		}
+
+		for(int i=0; i<VALID_URN_URI_RES_STRINGS.length; i++) {
+			try {
+				VALID_URNS_URI_RES[i] = URN.createSHA1UrnFromUriRes(VALID_URN_URI_RES_STRINGS[i]);
+			} catch(IOException e) {
+				fail("could not create urns for URNTest setup: "+e);
 			}
 		}
 
