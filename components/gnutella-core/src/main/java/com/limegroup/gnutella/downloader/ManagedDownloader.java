@@ -413,9 +413,6 @@ public class ManagedDownloader implements Downloader, Serializable {
 		if(files == null) {
 			throw new NullPointerException("null RFDS");
 		}
-		if(files.length == 0) {
-			throw new IllegalArgumentException("empty RFD array");
-		}
 		if(ifc == null) {
 			throw new NullPointerException("null incomplete file manager");
 		}
