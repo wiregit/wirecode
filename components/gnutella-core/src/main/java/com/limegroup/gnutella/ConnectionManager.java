@@ -3,7 +3,7 @@ package com.limegroup.gnutella;
 import com.limegroup.gnutella.util.Buffer;
 import java.net.*;
 import java.io.*;
-import java.util.*;
+import com.sun.java.util.collections.*;
 
 /**
  * The list of all connections.  Accepts new connections and creates

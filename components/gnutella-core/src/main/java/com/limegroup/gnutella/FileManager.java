@@ -13,7 +13,7 @@
 package com.limegroup.gnutella;
 
 import java.io.*;
-import java.util.*;
+import com.sun.java.util.collections.*;
 import com.oroinc.text.regex.*;
 
 public class FileManager{
@@ -135,11 +135,28 @@ public class FileManager{
 	
     }
 
+    /** 
+     *  Build the equivalent of the File.listFiles() utility in jdk1.2.2
+     */
+    private File[] listFiles(File dir)
+    {
+	String [] fnames   = dir.list();
+	File   [] theFiles = new File[fnames.length];
+
+	for ( int i = 0; i < fnames.length; i++ )
+	{
+	    theFiles[i] = new File(dir, fnames[i]);
+	}
+
+	return theFiles;
+    }
+
     public synchronized void addDirectory(String dir_name) { /* the addDirectory method */
 	File myFile = new File(dir_name);       /* recursively adds all of */
 	if (!myFile.exists())
 	    return;
-	File[] file_list = myFile.listFiles();  /* the files in a specified */
+	//File[] file_list = myFile.listFiles();  /* This is JDK1.2 specific */
+	File[] file_list = listFiles(myFile);   /* the files in a specified */
 	int n = file_list.length;               /* directory */
 
 	// go through file_list
