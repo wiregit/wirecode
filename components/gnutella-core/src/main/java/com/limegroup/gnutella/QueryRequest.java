@@ -6,7 +6,8 @@ public class QueryRequest extends Message implements Serializable{
     /** The minimum speed and query request, including the null terminator.
      *  We extract the minimum speed and String lazily. */
     private byte[] payload;
-    /** The query string, if we've already extracted it.  Null otherwise. */
+    /** The query string, if we've already extracted it.  Null otherwise. 
+     *  LOCKING: obtain this' lock. */
     private String query=null;
 
     /**
@@ -42,12 +43,14 @@ public class QueryRequest extends Message implements Serializable{
         out.write(payload);
     }
 
-    /** If getBytes() is called in the Strng that this method returns 
-     *  it creates an error on Japanese Macs. Therefore, if bytes from 
-     * the query are needed use the getQueryByteAt(int pseudoIndex) method
-     * below.
+    /** 
+     * Returns the query string of this message.<p>
+     *
+     * The caller should not call the getBytes() method on the returned value,
+     * as this seems to cause problems on the Japanese Macintosh.  If you need
+     * the raw bytes of the query string, call getQueryByteAt(int).
      */
-    public String getQuery() {
+    public synchronized String getQuery() {
         //Use cached result if possible.  This is always safe since
         //strings are immutable.
         if (query!=null)
@@ -63,13 +66,16 @@ public class QueryRequest extends Message implements Serializable{
         //This also handles the special case of an empty search string.
         else
             query=new String(payload,2,payload.length-3);
+        Assert.that(query!=null, "Returning null value in getQuery");
         return query;
     }
     
-    /** Returns the  number of bytes in the raw query. The raw query is just 
-     *  the query part of the payload the value this method returns is 
-     *  different than payload.length
-     * @author Sumeet Thadani
+    /** 
+     * Returns the number of raw bytes used to represent the query in this
+     * message, excluding any null terminators.  The returned value is typically
+     * used in conjunction with getQueryByteAt.  Because of character encoding
+     * problems, the returned value does not necessarily equal getQuery.length()
+     * or getQuery.getBytes().length.  
      */
     public int getQueryLength(){
         //if it's double null terminated
@@ -79,12 +85,13 @@ public class QueryRequest extends Message implements Serializable{
             return payload.length-3;
     }
 
-    /** Returns the byte at the specified index starting from the quiery only
-     * Throws an ArrayIndexOutOfBoundsException if the given index is either 
-     * within the first two bytes of the payload or goes into the null termination
-     * <p>When psedudoIndex = 0 it referes to the first byte of the 
-     * query not of the whole payload
-     * @author Sumeet Thadani
+    /** 
+     * Returns the pseudoIndex'th byte of the raw query in this message.  Throws
+     * ArrayIndexOutOfBoundsException if pseudoIndex<0 or
+     * pseudoIndex>=getQueryLength, i.e., if the given index is either within
+     * the first two bytes of the payload or goes into the null termination
+     * area.  Because of different character encodings, the returned value does
+     * not necessarily equal getQuery().getBytes()[pseudoIndex].
      */
     public byte getQueryByteAt(int pseudoIndex)throws 
                                       ArrayIndexOutOfBoundsException{
