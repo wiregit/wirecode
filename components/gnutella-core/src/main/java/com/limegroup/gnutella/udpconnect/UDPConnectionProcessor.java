@@ -882,11 +882,7 @@ public class UDPConnectionProcessor {
 
             // Build SYN message with my connectionID in it
             SynMessage synMsg     = null;
-            try {
-                synMsg     = new SynMessage(_myConnectionID);
-            } catch (BadPacketException bpe) {
-                throw new IOException(bpe.getMessage());
-            }
+            synMsg     = new SynMessage(_myConnectionID);
 
             // Keep sending and waiting until you get a Syn and an Ack from 
             // the other side of the connection.

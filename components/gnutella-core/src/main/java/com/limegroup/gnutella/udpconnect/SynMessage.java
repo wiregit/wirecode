@@ -8,21 +8,23 @@ import com.limegroup.gnutella.messages.BadPacketException;
 public class SynMessage extends UDPConnectionMessage {
 
 	private byte _senderConnectionID;
+    private int  _protocolVersionNumber;
 
     /**
      * Construct a new SynMessage with the specified settings and data
      */
-    public SynMessage(byte connectionID) 
-      throws BadPacketException {
+    public SynMessage(byte connectionID) {
 
         super(
           /* his connectionID           */ (byte)0, 
           /* opcode                     */ OP_SYN, 
           /* sequenceNumber             */ 0, 
-          /* my data is my connectionID */ buildByteArray(connectionID),
+          /* my data is my connectionID and the protocol version number */ 
+          buildByteArray(connectionID, PROTOCOL_VERSION_NUMBER),
           /* data length                */ 1
           );
-		  _senderConnectionID = connectionID;
+		  _senderConnectionID    = connectionID;
+          _protocolVersionNumber = PROTOCOL_VERSION_NUMBER;
     }
 
     /**
@@ -33,15 +35,21 @@ public class SynMessage extends UDPConnectionMessage {
       throws BadPacketException {
 
       	super(guid, ttl, hops, payload);
-        _senderConnectionID = guid[GUID_DATA_START];
+        _senderConnectionID    = guid[GUID_DATA_START];
+        _protocolVersionNumber = 
+          getShortInt(guid[GUID_DATA_START+1],guid[GUID_DATA_START+2]);
     }
 
-	public byte getSenderConnectionID() {
-		return _senderConnectionID; 
+    public byte getSenderConnectionID() {
+        return _senderConnectionID; 
+    }
+
+	public int getProtocolVersionNumber() {
+		return _protocolVersionNumber; 
 	}
 
 	public String toString() {
 		return "SynMessage DestID:"+getConnectionID()+
-		  " SrcID:"+_senderConnectionID;
+		  " SrcID:"+_senderConnectionID+" vNo:"+_protocolVersionNumber;
 	}
 }

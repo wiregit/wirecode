@@ -11,6 +11,9 @@ public abstract class UDPConnectionMessage extends Message {
 
     // Referenced from message
     // public static final byte F_UDP_CONNECTION = (byte)0x41;
+
+    // The version number of the protocol to allow for future improvements
+    public static final int PROTOCOL_VERSION_NUMBER = 0;
     
     // Opcode identifiers for the sub-message types
     protected static final byte OP_SYN        = 0x0;
@@ -90,8 +93,7 @@ public abstract class UDPConnectionMessage extends Message {
      */
     protected UDPConnectionMessage(
       byte connectionID, byte opcode, long sequenceNumber, byte[] data,
-	  int  datalength ) 
-      throws BadPacketException {
+	  int  datalength ) {
 
         super(
           /*guid*/   buildGUID(connectionID, opcode, sequenceNumber, 
@@ -208,6 +210,18 @@ public abstract class UDPConnectionMessage extends Message {
     public static byte[] buildByteArray(byte data) {
         byte[] darray = new byte[1];
         darray[0]     = data;
+
+        return darray;
+    } 
+
+    /**
+     * Create a byte array from 1 byte and 1 short int
+     */
+    public static byte[] buildByteArray(byte val1, int val2) {
+        byte[] darray = new byte[3];
+        darray[0] = val1;
+        darray[1] = (byte)((val2 & 0xff00) >> 8);
+        darray[2] = (byte)((val2 & 0x00ff));
 
         return darray;
     } 
