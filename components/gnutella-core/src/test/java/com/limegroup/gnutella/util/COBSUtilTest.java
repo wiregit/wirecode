@@ -18,14 +18,14 @@ public class COBSUtilTest extends TestCase {
 
 
     public void testEncode() throws java.io.IOException {
-        for (int num = 255; num < 260; num++) 
+        for (int num = 1; num < 520; num++) 
             encode(num);
     }
     
 
     private void encode(int num) throws java.io.IOException {
         // test all 0s...
-        System.out.println("COBSUtilTest.encode(): num = " +
+        debug("COBSUtilTest.encode(): num = " +
               num);
         byte[] bytes = new byte[num];
         for (int i = 0; i < bytes.length; i++)
@@ -40,11 +40,15 @@ public class COBSUtilTest extends TestCase {
         for (int i = 0; i < bytes.length; i++)
             bytes[i] = 1;
         after = COBSUtil.cobsEncode(bytes);
-        assertTrue(bytes.length == (after.length-1));
-        for (int i = 1; i < after.length; i++)
-            assertTrue(after[i] == 0x01);
+        assertTrue("bytes.length = " + bytes.length + ", after.length + " +
+                   after.length + ", num = " + num,
+                   bytes.length == (after.length-((num / 254) + 1)));
+        for (int i = 1; i < after.length; i++) 
+            if (i % 255 != 0)
+                assertTrue(after[i] == 0x01);
         assertTrue("after[0] = " + after[0], 
-                   (after[0] == (num+1)) || (after[0] == 255)
+                   (ByteOrder.ubyte2int(after[0]) == (num+1)) || 
+                   (ByteOrder.ubyte2int(after[0]) == 255)
                    );
         
         // ----------------------------------
