@@ -142,7 +142,7 @@ public class ResumeDownloader extends ManagedDownloader
 //            queryUrns.add(downloadSHA1);
 //        }
         // Extract a query string from our filename.
-        String queryName = extractQueryString(getFileName());
+        String queryName = StringUtils.createQueryString(getFileName());
 
         if (downloadSHA1 != null)
             // TODO: we should be sending the URN with the query, but

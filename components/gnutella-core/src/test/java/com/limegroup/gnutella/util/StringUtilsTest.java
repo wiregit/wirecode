@@ -2,6 +2,12 @@ package com.limegroup.gnutella.util;
 
 import junit.framework.Test;
 
+import com.sun.java.util.collections.Iterator;
+import com.sun.java.util.collections.List;
+import com.sun.java.util.collections.LinkedList;
+import com.sun.java.util.collections.Collection;
+import com.sun.java.util.collections.Set;
+import com.sun.java.util.collections.HashSet;
 import com.sun.java.util.collections.Arrays;
 
 /**
@@ -271,5 +277,71 @@ public class StringUtilsTest extends com.limegroup.gnutella.util.BaseTestCase {
         
     }
 
+    public void testCreateQueryString() {
+        String query = StringUtils.createQueryString("file and 42-name_minus #numbers");
+        containsAll("file name minus numbers", query);
+        
+        query = StringUtils.createQueryString("reallylongfilenamethatisgoingtotruncate");
+        assertEquals("reallylongfilenamethatisgoingt", query);
+        
+        query = StringUtils.createQueryString("short one, reallylongotherfilename");
+        containsAll("short one", query);
+        
+        query = StringUtils.createQueryString("longfirstthingthatwontfitatall, but short others");
+        containsAll("but short others", query);
+    }
+    
+    private void containsAll(String match, String query) {
+        Collection matchSet = Arrays.asList(match.split(" "));
+        
+        String[] array = query.split(" ");
+        List set = new LinkedList();
+        for(int i = 0; i < array.length; i++)
+            set.add(array[i]);
+        for(Iterator i = matchSet.iterator(); i.hasNext(); ) {
+            String next = (String)i.next();
+            assertContains(set, next);
+            set.remove(next);
+        }
+        assertEquals(set.toString(), 0, set.size());
+    }
+            
+    
+    public void testKeywords() {
+        Set valid = new HashSet();
+        valid.add("phish");
+        valid.add("is");
+        valid.add("dead");
+        valid.add("long");
+        valid.add("live");
+        
+        assertEquals(valid, StringUtils.keywords("Phish is dead! :( Long-live Phish. :)"));
+        
+        
+        valid.clear();
+        valid.add("quick");
+        valid.add("foot");
+        valid.add("brown");
+        valid.add("fox");
+        valid.add("jumped");
+        valid.add("over");
+        valid.add("fence");
+        assertEquals(valid, StringUtils.keywords("THE 12 foot quick\\brown]\nfox[jumped [] # over-the _brown*fence_"));
+        
+        valid.clear();
+        valid.add("sam");
+        valid.add("born");
+        assertEquals(valid, StringUtils.keywords("sam, 2.1.81. born."));
+        
+        valid.clear();
+        valid.add("file");
+        assertEquals(valid, StringUtils.keywords("a file.extension"));
+    }
+    
+    public void testRipExtension() {
+        assertEquals("a", StringUtils.ripExtension("a.b"));
+        assertEquals("c.d", StringUtils.ripExtension("c.d."));
+        assertEquals("e.f.g", StringUtils.ripExtension("e.f.g.h"));
+    }
 }
 

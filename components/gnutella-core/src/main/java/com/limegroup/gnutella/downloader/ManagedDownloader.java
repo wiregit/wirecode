@@ -1041,11 +1041,6 @@ public class ManagedDownloader implements Downloader, Serializable {
      * override this to be more or less specific.  Note that the requery will
      * not be sent if global limits are exceeded.<p>
      *
-     * The default implementation uses extractQueryString, which
-     * includes all non-trivial keywords found in the first RFD in allFiles.
-     * A keyword is "non-trivial" if it is not a number of a common English
-     * article (e.g., "the"), a number (e.g., "2"), or the file extension.
-     *
      * Since there are no more AUTOMATIC requeries, subclasses are advised to
      * stop using createRequery(...).  All attempts to 'requery' the network is
      * spawned by the user, so use createQuery(...) .  The reason we need to
@@ -1064,9 +1059,9 @@ public class ManagedDownloader implements Downloader, Serializable {
 		String name = allFiles[0].getFileName();
 		    
 		if(allFiles[0].getSHA1Urn() == null)
-			return QueryRequest.createQuery(extractQueryString(name));
+			return QueryRequest.createQuery(StringUtils.createQueryString(name));
         else // this is where a SHA1 query would be sent, if desired
-            return QueryRequest.createQuery(extractQueryString(name));
+            return QueryRequest.createQuery(StringUtils.createQueryString(name));
     }
 
 
@@ -1092,108 +1087,6 @@ public class ManagedDownloader implements Downloader, Serializable {
      */
     protected boolean shouldInitAltLocs(boolean deserializedFromDisk) {
         return false;
-    }
-
-
-    /**
-     * Returns a string to be used for querying from the given name.
-     */
-    protected final String extractQueryString(String name) {
-        String retString = null;
-
-        final int MAX_LEN = 30;
-
-        // Put the keywords into a string, up to MAX_LEN
-        Set intersection=keywords(name);
-        if (intersection.size() < 1) // nothing to extract!
-            retString = StringUtils.truncate(name, 30);
-        else {
-            StringBuffer sb = new StringBuffer();
-            int numWritten = 0;
-            for (Iterator keys=intersection.iterator(); 
-                 keys.hasNext() && (numWritten < MAX_LEN); 
-                 ) {
-                String currKey = (String) keys.next();
-                
-                // if we have space to add the keyword
-                if ((numWritten + currKey.length()) < MAX_LEN) {
-                    if (numWritten > 0) // add a space if we've written before
-                        sb.append(" ");
-                    sb.append(currKey); // add the new keyword
-                    numWritten += currKey.length() + (numWritten == 0 ? 0 : 1);
-                }
-            }
-
-            retString = sb.toString();
-
-            //one small problem - if every keyword in the filename is
-            //greater than MAX_LEN, then the string returned will be empty.
-            //if this happens just truncate the first word....
-            if (retString.equals(""))
-                retString = StringUtils.truncate(name, 30);
-        }
-
-        // Added a bunch of asserts to catch bugs.  There is some form of
-        // input we are not considering in our algorithms....
-        Assert.that(retString.length() <= MAX_LEN, 
-                    "Original filename: " + name +
-                    ", converted: " + retString);
-        Assert.that(!retString.equals(""), 
-                    "Original filename: " + name);
-        Assert.that(retString != null, 
-                    "Original filename: " + name);
-        retString = I18NConvert.instance().getNorm(retString);
-        Assert.that(!retString.equals(""), 
-                    "I18N: Original filename: " + name);
-        Assert.that(retString != null, 
-                    "I18N: Original filename: " + name);
-        return retString;
-    }
-
-    /** Returns the canonicalized non-trivial search keywords in fileName. */
-    private static final Set keywords(String fileName) {
-        //Remove extension
-        fileName = ripExtension(fileName);
-        
-        //Separate by whitespace and _, etc.
-        Set ret=new HashSet();
-        String delim = FileManager.DELIMETERS;
-        char[] illegal = SearchSettings.ILLEGAL_CHARS.getValue();
-        StringBuffer sb = new StringBuffer(delim.length() + illegal.length);
-        sb.append(FileManager.DELIMETERS);
-        sb.append(illegal);
-        StringTokenizer st = new StringTokenizer(fileName, sb.toString());
-        while (st.hasMoreTokens()) {
-            final String currToken = st.nextToken().toLowerCase();
-            try {                
-                //Ignore if a number
-                //(will trigger NumberFormatException if not)
-                new Double(currToken);
-                continue;
-            } catch (NumberFormatException normalWord) {
-                //Add non-numeric words that are not an (in)definite article.
-                if (! TRIVIAL_WORDS.contains(currToken))
-                    ret.add(currToken);
-            }
-        }
-        return ret;
-    }
-
-    /** Returns fileName without any file extension. */
-    private static String ripExtension(String fileName) {
-        String retString = null;
-        int extStart = fileName.lastIndexOf('.');
-        if (extStart == -1)
-            retString = fileName;
-        else
-            retString = fileName.substring(0, extStart);
-        return retString;
-    }
-
-    private static final List TRIVIAL_WORDS=new ArrayList(3); {
-        TRIVIAL_WORDS.add("the");  //must be lower-case
-        TRIVIAL_WORDS.add("an");
-        TRIVIAL_WORDS.add("a");
     }
     
     /**
@@ -1272,8 +1165,8 @@ public class ManagedDownloader implements Downloader, Serializable {
         //last.  Allow 10% edit difference in filenames or 6 characters,
         //whichever is smaller.
         int allowedDifferences=Math.round(Math.min(
-             0.10f*((float)(ripExtension(one)).length()),
-             0.10f*((float)(ripExtension(two)).length())));
+             0.10f*((float)(StringUtils.ripExtension(one)).length()),
+             0.10f*((float)(StringUtils.ripExtension(two)).length())));
         allowedDifferences=Math.min(allowedDifferences, 6);
 
         synchronized (matcher) {

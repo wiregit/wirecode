@@ -213,7 +213,7 @@ public abstract class FileManager {
     /**
      * Characters used to tokenize queries and file names.
      */
-    public static final String DELIMETERS=" -._+/*()\\";    
+    public static final String DELIMETERS=" -._+/*()\\,";
     private static final boolean isDelimeter(char c) {
         switch (c) {
         case ' ':
@@ -226,6 +226,7 @@ public abstract class FileManager {
         case '(':
         case ')':
         case '\\':
+        case ',':
             return true;
         default:
             return false;

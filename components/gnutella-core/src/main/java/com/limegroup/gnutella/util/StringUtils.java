@@ -3,6 +3,9 @@ package com.limegroup.gnutella.util;
 import com.limegroup.gnutella.Constants;
 import java.util.StringTokenizer;
 import com.sun.java.util.collections.*;
+import com.limegroup.gnutella.Assert;
+import com.limegroup.gnutella.FileManager;
+import com.limegroup.gnutella.settings.SearchSettings;
 import com.limegroup.gnutella.settings.ApplicationSettings;
 import java.util.Locale;
 import java.text.Collator;
@@ -11,14 +14,29 @@ import java.text.Collator;
 /** Various static routines for manipulating strings.*/
 public class StringUtils {
 
-    private static Collator _col;
+    /**
+     * Trivial words that are not considered keywords.
+     */
+    private static final List TRIVIAL_WORDS;
+
+    /**
+     * Collator used for internationalization.
+     */
+    private final static Collator COLLATOR;
+    
     static {
-        _col = Collator.getInstance
+        TRIVIAL_WORDS = new ArrayList(3);        
+        TRIVIAL_WORDS.add("the");  //must be lower-case
+        TRIVIAL_WORDS.add("an");
+        TRIVIAL_WORDS.add("a");
+        TRIVIAL_WORDS.add("and");
+        
+        COLLATOR = Collator.getInstance
             (new Locale(ApplicationSettings.LANGUAGE.getValue(),
                         ApplicationSettings.COUNTRY.getValue(),
                         ApplicationSettings.LOCALE_VARIANT.getValue()));
-        _col.setDecomposition(Collator.FULL_DECOMPOSITION);
-        _col.setStrength(Collator.PRIMARY);
+        COLLATOR.setDecomposition(Collator.FULL_DECOMPOSITION);
+        COLLATOR.setStrength(Collator.PRIMARY);
     }
 
     
@@ -287,7 +305,7 @@ public class StringUtils {
      * differences like FULLWIDTH vs HALFWIDTH
      */
     public static int compareFullPrimary(String s1, String s2) {
-        return _col.compare(s1, s2);
+        return COLLATOR.compare(s1, s2);
     }
 
     /** 
@@ -388,10 +406,14 @@ public class StringUtils {
 		return buf.toString();
     }
 
-    
+    /**
+     * Returns a truncated string, up to the maximum number of characters
+     */
     public static String truncate(final String string, final int maxLen) {
-        final int max = string.length() > maxLen ? maxLen : string.length();
-        return string.substring(0, max);
+        if(string.length() <= maxLen)
+            return string;
+        else
+            return string.substring(0, maxLen);
     }
 
     /**
@@ -413,5 +435,110 @@ public class StringUtils {
     	return str.toLowerCase().indexOf(substring.toLowerCase());
     }
 
+    /**
+     * Returns a string to be used for querying from the given name.
+     */
+    public static String createQueryString(String name) {
+        String retString = null;
+
+        final int MAX_LEN = SearchSettings.MAX_QUERY_LENGTH.getValue();
+
+        //Get the set of keywords within the name.
+        Set intersection = keywords(name);
+
+        if (intersection.size() < 1) { // nothing to extract!
+            retString = StringUtils.truncate(name, MAX_LEN);
+        } else {
+            StringBuffer sb = new StringBuffer();
+            int numWritten = 0;
+            Iterator keys = intersection.iterator();
+            for (; keys.hasNext() && (numWritten < MAX_LEN); ) {
+                String currKey = (String) keys.next();
+                
+                // if we have space to add the keyword
+                if ((numWritten + currKey.length()) < MAX_LEN) {
+                    if (numWritten > 0) { // add a space if we've written before
+                        sb.append(" ");
+                        numWritten++;
+                    }
+                    sb.append(currKey); // add the new keyword
+                    numWritten += currKey.length();
+                }
+            }
+
+            retString = sb.toString();
+
+            //one small problem - if every keyword in the filename is
+            //greater than MAX_LEN, then the string returned will be empty.
+            //if this happens just truncate the first word....
+            if (retString.equals(""))
+                retString = StringUtils.truncate(name, MAX_LEN);
+        }
+
+        // Added a bunch of asserts to catch bugs.  There is some form of
+        // input we are not considering in our algorithms....
+        Assert.that(retString.length() <= MAX_LEN, 
+                    "Original filename: " + name +
+                    ", converted: " + retString);
+        Assert.that(!retString.equals(""), 
+                    "Original filename: " + name);
+        Assert.that(retString != null, 
+                    "Original filename: " + name);
+                    
+        // Normalize for internationalization, and more assertions...
+        retString = I18NConvert.instance().getNorm(retString);
+        Assert.that(!retString.equals(""), 
+                    "I18N: Original filename: " + name);
+        Assert.that(retString != null, 
+                    "I18N: Original filename: " + name);
+
+        return retString;
+    }
+
+    /**
+     * Gets the keywords in this filename, seperated by delimeters & illegal
+     * characters.
+     */
+    public static final Set keywords(String fileName) {
+        //Remove extension
+        fileName = ripExtension(fileName);
+        
+        //Separate by whitespace and _, etc.
+        Set ret=new HashSet();
+        String delim = FileManager.DELIMETERS;
+        char[] illegal = SearchSettings.ILLEGAL_CHARS.getValue();
+        StringBuffer sb = new StringBuffer(delim.length() + illegal.length);
+        sb.append(illegal).append(FileManager.DELIMETERS);
+
+        StringTokenizer st = new StringTokenizer(fileName, sb.toString());
+        while (st.hasMoreTokens()) {
+            final String currToken = st.nextToken().toLowerCase();
+            try {                
+                //Ignore if a number
+                //(will trigger NumberFormatException if not)
+                new Double(currToken);
+                continue;
+            } catch (NumberFormatException normalWord) {
+                //Add non-numeric words that are not an (in)definite article.
+                if (!TRIVIAL_WORDS.contains(currToken))
+                    ret.add(currToken);
+            }
+        }
+        return ret;
+    }
+
+    /**
+     * Strips an extension off of a file's filename.
+     */
+    public static String ripExtension(String fileName) {
+        String retString = null;
+        int extStart = fileName.lastIndexOf('.');
+        if (extStart == -1)
+            retString = fileName;
+        else
+            retString = fileName.substring(0, extStart);
+        return retString;
+    }
+    
     //Unit tests: tests/com/limegroup/gnutella/util/StringUtils
 }

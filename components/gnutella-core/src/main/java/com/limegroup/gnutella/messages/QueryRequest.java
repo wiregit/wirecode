@@ -1327,18 +1327,21 @@ public class QueryRequest extends Message implements Serializable{
 		}       
         if(QUERY.length() > MAX_QUERY_LENGTH) {
             ReceivedErrorStat.QUERY_TOO_LARGE.incrementStat();
-            throw BadPacketException.QUERY_TOO_BIG;
+            //throw BadPacketException.QUERY_TOO_BIG;
+            throw new BadPacketException("query too big: " + QUERY);
         }        
 
         if(tempRichQuery.length() > MAX_XML_QUERY_LENGTH) {
             ReceivedErrorStat.QUERY_XML_TOO_LARGE.incrementStat();
-            throw BadPacketException.XML_QUERY_TOO_BIG;
+            //throw BadPacketException.XML_QUERY_TOO_BIG;
+            throw new BadPacketException("xml too big: " + tempRichQuery);
         }
 
         if(!(QUERY_URNS.size() > 0 && QUERY.equals(DEFAULT_URN_QUERY))
            && hasIllegalChars(QUERY)) {
             ReceivedErrorStat.QUERY_ILLEGAL_CHARS.incrementStat();
-            throw BadPacketException.ILLEGAL_CHAR_IN_QUERY;
+            //throw BadPacketException.ILLEGAL_CHAR_IN_QUERY;
+            throw new BadPacketException("illegal chars: " + QUERY);
         }
     }
 

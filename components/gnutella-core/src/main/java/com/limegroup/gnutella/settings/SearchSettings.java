@@ -14,7 +14,9 @@ public final class SearchSettings extends LimeProps {
      */
     private static final char[] BAD_CHARS = {
         '_', '#', '!', '|', '?', '<', '>', '^', '(', ')', 
-        ':', ';', '/', '\\', '[', ']', '{', '}', 
+        ':', ';', '/', '\\', '[', ']', 
+        '\t', '\n', '\r', '\f', // these cannot be last or first 'cause they're trimmed
+        '{', '}',
     };
 
 	/**
@@ -82,5 +84,5 @@ public final class SearchSettings extends LimeProps {
      * require firewall-to-firewall transfer.  For testing purposes only
      */
     public static final BooleanSetting FWT_ONLY = 
-	FACTORY.createBooleanSetting("FWT_TEST",false);
+	    FACTORY.createBooleanSetting("FWT_TEST", false);
 }
