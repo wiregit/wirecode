@@ -496,4 +496,6 @@ public class UTest implements ActivityCallback, ErrorCallback {
     public boolean isQueryAlive(GUID guid) {
         return false;
     }
+
+    public void componentLoading(String component) {}
 }
