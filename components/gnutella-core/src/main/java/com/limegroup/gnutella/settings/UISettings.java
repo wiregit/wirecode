@@ -32,7 +32,7 @@ public final class UISettings extends LimeProps {
      * Setting for using small icons.
      */
     public static final BooleanSetting SMALL_ICONS =
-        FACTORY.createBooleanSetting("UI_SMALL_ICONS", true);
+        FACTORY.createBooleanSetting("UI_SMALL_ICONS", false);
         
     /**
      * Setting for displaying text under icons.
