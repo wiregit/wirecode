@@ -63,10 +63,9 @@ public class ResumeDownloader extends ManagedDownloader
      *  non-zero and file previewing works. */
     public void initialize(DownloadManager manager, 
                            FileManager fileManager, 
-                           ActivityCallback callback,
-                           boolean deserialized) {
+                           ActivityCallback callback) {
         initializeIncompleteFile(_incompleteFile);
-        super.initialize(manager, fileManager, callback, deserialized);
+        super.initialize(manager, fileManager, callback);
     }
 
     /**
@@ -110,17 +109,13 @@ public class ResumeDownloader extends ManagedDownloader
     /*
      * @param numRequeries The number of requeries sent so far.
      */
-    protected boolean pauseForRequery(int numRequeries, 
-                                      boolean deserializedFromDisk) 
-        throws InterruptedException {
+    protected boolean shouldSendRequeryImmediately(int numRequeries) {
         // if i've sent a query already or i was respawned from disk, act like
         // a ManagedDownloader
-        if (numRequeries > 0 || deserializedFromDisk)
-            return super.pauseForRequery(numRequeries, deserializedFromDisk);
-        else
-            // don't wait the first time!!  we want to immediately start a new
-            // query
-            return false; 
+        if (numRequeries > 0)
+            return super.shouldSendRequeryImmediately(numRequeries);
+        else // yup, send it immediately.
+            return true; 
     }
  
     protected boolean shouldInitAltLocs(boolean deserializedFromDisk) {

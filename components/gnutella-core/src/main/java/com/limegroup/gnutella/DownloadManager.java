@@ -134,20 +134,36 @@ public class DownloadManager implements BandwidthTracker {
         
         Runnable checkpointer=new Runnable() {
             public void run() {
-                try {
-                    if (downloadsInProgress() > 0) { //optimization
-                        // If the write failed, move the backup to the real.
-                        if(!writeSnapshot())
-                            copyBackupToReal();
-                    }
-                } catch(Throwable t) {
-                    ErrorService.error(t);
+                if (downloadsInProgress() > 0) { //optimization
+                    // If the write failed, move the backup to the real.
+                    if(!writeSnapshot())
+                        copyBackupToReal();
                 }
             }
         };
         RouterService.schedule(checkpointer, 
 							   SNAPSHOT_CHECKPOINT_TIME, 
 							   SNAPSHOT_CHECKPOINT_TIME);
+							   
+        Runnable waitingReader = new Runnable() {
+            public void run() {
+                synchronized(this) {
+                    for(Iterator i = waiting.iterator(); i.hasNext(); ) {
+                        ManagedDownloader md = (ManagedDownloader)i.next();
+                        if(hasFreeSlot() && (md.hasNewSources() || md.getRemainingStateTime() <= 0)) {
+                            i.remove();
+                            active.add(md);
+                            md.startDownload();
+                        } else {
+                            md.handleInactivity();
+                        }
+                    }
+                }
+            }
+        };
+        RouterService.schedule(waitingReader,
+                               1000,
+                               1000);
     }
     
     /**
@@ -308,8 +324,12 @@ public class DownloadManager implements BandwidthTracker {
         try {
             for (Iterator iter=buf.iterator(); iter.hasNext(); ) {
                 ManagedDownloader downloader=(ManagedDownloader)iter.next();
+                // ignore RequeryDownloaders -- they're legacy
+                if(downloader instanceof RequeryDownloader)
+                    continue;
+
                 waiting.add(downloader);                                 //1
-                downloader.initialize(this, this.fileManager, callback, true);//2
+                downloader.initialize(this, this.fileManager, callback); //2
                 callback.addDownload(downloader);                        //3
             }
             return true;
@@ -380,7 +400,7 @@ public class DownloadManager implements BandwidthTracker {
         ManagedDownloader downloader =
             new ManagedDownloader(files, incompleteFileManager, queryGUID);
 
-        startDownload(downloader, false);
+        startDownload(downloader);
         
         //Now that the download is started, add the alts without caching.
         for(Iterator iter = alts.iterator(); iter.hasNext(); ) {
@@ -449,7 +469,7 @@ public class DownloadManager implements BandwidthTracker {
         MagnetDownloader downloader = 
             new MagnetDownloader(incompleteFileManager, urn, textQuery,
                 filename, defaultURL);
-        startDownload(downloader, false);
+        startDownload(downloader);
         return downloader;
     }
 
@@ -514,47 +534,8 @@ public class DownloadManager implements BandwidthTracker {
             throw new CantResumeException(incompleteFile.getName());
         }
         
-        startDownload(downloader, false);
+        startDownload(downloader);
         return downloader;
-    }
-
-
-    /**
-     * Starts a "requery download", aka, a "wishlist download".  A "requery
-     * download" should be started when the user has not received any results
-     * for her query, and wants LimeWire to spawn a specialized Downloader that
-     * requeries the network until a 'appropriate' file is found.
-     * 
-     * @param query The original query string.
-     * @param richQuery The original richQuery string.
-     * @param guid The guid associated with this query request.
-     * @param type The mediatype associated with this search.  
-     */
-    public synchronized Downloader download(String query,
-                                            String richQuery,
-                                            byte[] guid,
-                                            MediaType type) 
-    throws AlreadyDownloadingException {
-        AutoDownloadDetails add = new AutoDownloadDetails(query,
-                                                          richQuery,
-                                                          guid,
-                                                          type);
-        if (requeryConflicts(add))
-            throw new AlreadyDownloadingException(query);
-
-        //Purge entries from incompleteFileManager that have no corresponding
-        //file on disk.  This protects against stupid users who delete their
-        //temporary files while LimeWire is running, either through the command
-        //prompt or the library.  Note that you could optimize this by just
-        //purging files corresponding to the current download, but it's not
-        //worth it.
-        incompleteFileManager.purge(false);
-
-        RequeryDownloader downloader=
-            new RequeryDownloader(incompleteFileManager, add, new GUID(guid));
-
-        startDownload(downloader, false);
-        return downloader;        
     }
     
     /**
@@ -564,11 +545,12 @@ public class DownloadManager implements BandwidthTracker {
      * 3) Notifies the callback about the new downloader.
      * 4) Writes the new snapshot out to disk.
      */
-    private void startDownload(ManagedDownloader md, boolean deserialized) {
-        md.initialize(this, fileManager, callback, deserialized);
+    private void startDownload(ManagedDownloader md) {
+        md.initialize(this, fileManager, callback);
         waiting.add(md);
         callback.addDownload(md);
         writeSnapshot(); // Save state for crash recovery.
+        requestStart(md);
     }
 
 
@@ -616,31 +598,6 @@ public class DownloadManager implements BandwidthTracker {
                 return true;
         }
         return false;
-    }
-
-
-    /** Returns true if there is a RequeryDownloader of sufficient similarity
-     *  in existence.
-     */
-    private synchronized boolean requeryConflicts(AutoDownloadDetails add) {
-        boolean retVal = false;
-        //Active downloads...
-        for (Iterator iter=active.iterator(); iter.hasNext() && !retVal; ) {
-            ManagedDownloader md=(ManagedDownloader)iter.next();
-            if (md instanceof RequeryDownloader) {
-                RequeryDownloader rd = (RequeryDownloader) md;
-                retVal = rd.conflicts(add);
-            }
-        }
-        //Queued downloads...
-        for (Iterator iter=waiting.iterator(); iter.hasNext() && !retVal; ) {
-            ManagedDownloader md=(ManagedDownloader)iter.next();
-            if (md instanceof RequeryDownloader) {
-                RequeryDownloader rd = (RequeryDownloader) md;
-                retVal = rd.conflicts(add);
-            }
-        }
-        return retVal;
     }
 
     /** 
@@ -764,60 +721,48 @@ public class DownloadManager implements BandwidthTracker {
     private boolean hasFreeSlot() {
         return active.size() < DownloadSettings.MAX_SIM_DOWNLOAD.getValue();
     }
-
-    /** 
-     * Blocks until a download slot has been assigned to downloader.  Throws
-     * InterruptedException if the current thread is interrupted while waiting.
-     * If InterruptedException is thrown, this is not modified.
-     *     @requires downloader queued
-     *     @modifies this 
-     */
-    public synchronized void waitForSlot(ManagedDownloader downloader) 
-            throws InterruptedException {
-        while (! hasFreeSlot()) 
-            wait();
-        waiting.remove(downloader);
-        active.add(downloader);
-    }
-
+    
     /**
-     * Relinquishes downloader's slot.  This is idempotent and non-blocking.
-     *     @modifies this
+     * Requests a download to start.
      */
-    public synchronized void yieldSlot(ManagedDownloader downloader) {
-        Assert.that(downloader!=null, "Null downloader");
-        Assert.that(active!=null, "Null active");
-        Assert.that(waiting!=null, "Null waiting");
-        active.remove(downloader);
-        waiting.add(downloader);
-        notify();
+    public synchronized void requestStart(ManagedDownloader md) {
+        if(hasFreeSlot()) {
+            waiting.remove(md);
+            active.add(md);
+            md.startDownload();
+        }
     }
 
     /**
      * Removes downloader entirely from the list of current downloads.
      * Notifies callback of the change in status.
+     * If completed is true, finishes the download completely.  Otherwise,
+     * puts the download back in the waiting list to be finished later.
      *     @modifies this, callback
      */
-    public synchronized void remove(ManagedDownloader downloader,
-                                    boolean success) {
-        //As a minor optimization, only waiting.remove(..) or notify(..)
-        //is needed.  But we do both just to be safe.
+    public synchronized void remove(ManagedDownloader downloader, 
+                                    boolean completed) {
         active.remove(downloader);
         waiting.remove(downloader);
-        querySentMDs.remove(downloader);
-        downloader.finish();
-        if (downloader.getQueryGUID() != null)
-            router.downloadFinished(downloader.getQueryGUID());
-        notify();
-        callback.removeDownload(downloader);
-        //Save this' state to disk for crash recovery.  Note that a downloader
-        //in the GAVE_UP state is not serialized here even if still displayed in
-        //the GUI.  Maybe this callback model needs a little tweaking.
-        writeSnapshot();
-
-        // Enable auto shutdown
-        if(active.isEmpty() && waiting.isEmpty())
-            callback.downloadsComplete();
+        if(completed) {
+            querySentMDs.remove(downloader);
+            downloader.finish();
+            if (downloader.getQueryGUID() != null)
+                router.downloadFinished(downloader.getQueryGUID());
+            callback.removeDownload(downloader);
+            
+            if(!waiting.isEmpty())
+                requestStart((ManagedDownloader)waiting.get(0));
+            
+            //Save this' state to disk for crash recovery.
+            writeSnapshot();
+    
+            // Enable auto shutdown
+            if(active.isEmpty() && waiting.isEmpty())
+                callback.downloadsComplete();
+        } else {
+            waiting.add(downloader);
+        }
     } 
     
     /** 

@@ -74,12 +74,11 @@ public class OnDemandUnicaster {
 
     /** Sends out a UDP query with the specified URN to the specified host.
      *  @throws IllegalArgumentException if ep or queryURN are null.
-     *  @throws InterruptedException useful for guys who want to be notified.
      *  @param ep the location you want to query.
      *  @param queryURN the URN you are querying for.
      */
     public static void query(GUESSEndpoint ep, URN queryURN) 
-        throws IllegalArgumentException, InterruptedException {
+        throws IllegalArgumentException {
 
         // validity checks
         // ------

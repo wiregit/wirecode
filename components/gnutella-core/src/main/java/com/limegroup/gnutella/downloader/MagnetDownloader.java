@@ -98,7 +98,7 @@ public class MagnetDownloader extends ManagedDownloader implements Serializable 
     /**
      * Overrides ManagedDownloader to ensure that the default location is tried.
      */
-    protected void tryAllDownloads(boolean deserialized) {     
+    protected void tryAllDownloads() {     
 
 		for (int i = 0; _defaultURLs != null && i < _defaultURLs.length; i++) {
 			//Send HEAD request to default location (if present)to get its size.
@@ -120,7 +120,7 @@ public class MagnetDownloader extends ManagedDownloader implements Serializable 
 		}
 
         //Start the downloads for real.
-        super.tryAllDownloads(deserialized);
+        super.tryAllDownloads();
     }
 
 
@@ -239,7 +239,7 @@ public class MagnetDownloader extends ManagedDownloader implements Serializable 
      * Overrides ManagedDownloader to use the query words and hash (if any)
      * specified by the MAGNET URI.
      */
-    protected QueryRequest newRequery(int numRequeries) 
+    protected QueryRequest newRequery(int numRequeries)
         throws CantResumeException {
 
         if (_textQuery != null)
