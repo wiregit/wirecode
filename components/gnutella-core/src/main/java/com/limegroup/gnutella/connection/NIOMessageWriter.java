@@ -104,7 +104,7 @@ public final class NIOMessageWriter implements MessageWriter {
             register();
             return false;
         }
-        //System.out.println("MessageWriter::write");
+        
         //Copy m to a ByteBuffer.  TODO: avoid allocating ByteBuffer each time.
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         try {
@@ -147,7 +147,6 @@ public final class NIOMessageWriter implements MessageWriter {
         	if(!_message.hasRemaining()) {
         		_message = null;
                 return QUEUE.size() == 0;
-        		//return true;
         	} else {
                 register();
         		return false;
@@ -167,10 +166,7 @@ public final class NIOMessageWriter implements MessageWriter {
      * 
      * @see com.limegroup.gnutella.connection.MessageWriter#close()
      */
-    public void close() {
-        // TODO implement this method if necessary
-        
-    }
+    public void close() {}
 
     /* (non-Javadoc)
      * @see com.limegroup.gnutella.connection.MessageWriter#simpleWrite(com.limegroup.gnutella.messages.Message)
