@@ -17,11 +17,13 @@ public class MessageRouterStub extends MessageRouter {
     protected void addQueryRoutingEntries(QueryRouteTable qrt) {
     }    
 
-    protected void respondToPingRequest(PingRequest request) {
+    protected void respondToPingRequest(PingRequest request,
+                                        ReplyHandler handler) {
 	}
 
     protected void respondToUDPPingRequest(PingRequest request, 
-		DatagramPacket datagram) {}
+                                           DatagramPacket datagram,
+                                           ReplyHandler handler) {}
 
     protected List createQueryReply(byte[] guid, byte ttl, int port, 
                                     byte[] ip , long speed, Response[] res,
