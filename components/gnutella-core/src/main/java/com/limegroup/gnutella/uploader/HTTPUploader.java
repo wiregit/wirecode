@@ -6,6 +6,7 @@ import java.util.Date;
 import java.util.StringTokenizer;
 import com.sun.java.util.collections.*;
 import com.limegroup.gnutella.*;
+import com.limegroup.gnutella.http.*;
 import com.limegroup.gnutella.util.StringUtils;
 import com.limegroup.gnutella.util.URLDecoder;
 
@@ -40,7 +41,7 @@ public class HTTPUploader implements Uploader {
 	private final int _port;
 	private int _stateNum = CONNECTING;
 
-	private UploadState _state;
+	private HTTPMessage _state;
 	private final UploadManager _manager;
     private final MessageRouter _router;
 	
@@ -75,17 +76,25 @@ public class HTTPUploader implements Uploader {
 	private AlternateLocationCollection _alternateLocationCollection;
 
 	/**
+	 * The <tt>HTTPRequestMethod</tt> to use for the upload.
+	 */
+	private HTTPRequestMethod _method;
+
+	/**
 	 * Consructor for a "normal" non-push upload.  Note that this can
 	 * be a URN get request.
 	 *
+	 * @param method the <tt>HTTPRequestMethod</tt> for the request
 	 * @param fileName the name of the file
 	 * @param socket the <tt>Socket</tt> instance to serve the upload over
 	 * @param index the index of the file in the set of shared files
 	 * @param um a reference to the <tt>UploadManager</tt> instance 
 	 * @param fm a reference to the <tt>FileManager</tt> instance
 	 */
-	public HTTPUploader(String fileName, Socket socket, int index, 
-						UploadManager um, FileManager fm, MessageRouter router) {
+	public HTTPUploader(HTTPRequestMethod method, String fileName, Socket socket, 
+						int index, UploadManager um, FileManager fm, 
+						MessageRouter router) {
+		_method = method;
 		_socket = socket;
 		_hostName = _socket.getInetAddress().getHostAddress();
 		_fileName = fileName;
@@ -114,9 +123,9 @@ public class HTTPUploader implements Uploader {
 				setState(FILE_NOT_FOUND);
 			}
 			else {
-				setState(CONNECTING);
 				// get the fileInputStream
 				_fis = _fileDesc.createInputStream();
+				setState(CONNECTING);
 			}
 		} catch (IndexOutOfBoundsException e) {
 			setState(FILE_NOT_FOUND);
@@ -129,19 +138,19 @@ public class HTTPUploader implements Uploader {
 	}
 		
 
-	// Push requested Upload
     /**
      * The other constructor that is used for push uploads. This constructor
      * does not take a socket. An uploader created with this constructor 
      * must eventually connect to the downloader using the connect method of 
-     * this class
+     * this class.
+	 *
      * @param fileName The name of the file to be uploaded
      * @param host The downloaders ip address
      * @param port The port at which the downloader is listneing 
      * @param index index of file to be uploaded
      */
-	public HTTPUploader(String fileName, String host, int port, int index,
-						String guid, UploadManager um, FileManager fm,
+	public HTTPUploader(String fileName, String host, int port, 
+						int index, String guid, UploadManager um, FileManager fm,
                         MessageRouter router) {
 		_fileName = fileName;
 		_manager = um;
@@ -162,8 +171,8 @@ public class HTTPUploader implements Uploader {
 				setState(FILE_NOT_FOUND);
 			}
 			else {
-				setState(CONNECTING);
 				_fis = _fileDesc.createInputStream();
+				setState(CONNECTING);
 			}
 		} catch (IndexOutOfBoundsException e) {
 			setState(PUSH_FAILED);
@@ -244,14 +253,14 @@ public class HTTPUploader implements Uploader {
 	 *
 	 * Implements the <tt>Uploader</tt> interface.
 	 */
-	public void start() {
+	public void writeResponse() {
 		try {
 			readHeader();
-			_state.doUpload(this);		   
+			_method.writeHttpResponse(_state, _ostream);
 		} catch (FreeloaderUploadingException e) { 
 			setState(FREELOADER);
 			try {
-			    _state.doUpload(this);
+				_method.writeHttpResponse(_state, _ostream);
 			} catch (IOException e2) {};
 		} catch (IOException e) {
 			setState(INTERRUPTED);
@@ -298,10 +307,10 @@ public class HTTPUploader implements Uploader {
 		_stateNum = state;
 		switch (state) {
 		case CONNECTING:
-			_state = new NormalUploadState();
+			_state = new NormalUploadState(this);
 			break;
 		case LIMIT_REACHED:
-			_state = new LimitReachedUploadState();
+			_state = new LimitReachedUploadState(_fileDesc);
 			break;
 		case PUSH_FAILED:
 			_state = new PushFailedUploadState();
@@ -310,7 +319,7 @@ public class HTTPUploader implements Uploader {
 			_state = new FreeloaderUploadState();
 			break;
         case BROWSE_HOST:
-            _state = new BrowseHostUploadState(_fileManager, _router);
+            _state = new BrowseHostUploadState(this, _fileManager, _router);
             break;
 		case FILE_NOT_FOUND:
 			_state = new FileNotFoundUploadState();
