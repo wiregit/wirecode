@@ -146,4 +146,14 @@ public interface ReplyHandler {
      * @return the <tt>InetAddress</tt> instance for this host
      */
     InetAddress getInetAddress();
+
+    /**
+     * Determines whether or not this <tt>ReplyHandler</tt> is considered
+     * stable.  For TCP connections, this will mean that the connection
+     * has been alive for some minimal period of time, while UDP handlers
+     * will never be considered stable.
+     *
+     * @return <tt>true</tt> if this <tt>ReplyHandler</tt>
+     */
+    boolean isStable();
 }
