@@ -1020,10 +1020,6 @@ public class ConnectionManager {
             pr = new PingRequest((byte)4);   
         
         connection.send(pr);
-        //Ensure that the initial ping request is written in a timely fashion.
-        try {
-            connection.flush();
-        } catch (IOException e) { /* close it later */ }
     }
 
     /**
