@@ -503,12 +503,15 @@ public class HTTPDownloader implements BandwidthTracker {
             features.add(ConstantHTTPHeaderValue.QUEUE_FEATURE);
         }
         
-        //say that I want firewalled altlocs.
+        //if I'm not firewalled or I can do FWT, say that I want pushlocs.
         //if I am firewalled, send the version of the FWT protocol I support.
         // (which implies that I want only altlocs that support FWT)
-        features.add(ConstantHTTPHeaderValue.PUSH_LOCS_FEATURE);
-        if (!RouterService.acceptedIncomingConnection() && UDPService.instance().canDoFWT())
-        	features.add(ConstantHTTPHeaderValue.FWT_PUSH_LOCS_FEATURE);
+        if (RouterService.acceptedIncomingConnection() || UDPService.instance().canDoFWT()) {
+            features.add(ConstantHTTPHeaderValue.PUSH_LOCS_FEATURE);
+            if (!RouterService.acceptedIncomingConnection())
+                features.add(ConstantHTTPHeaderValue.FWT_PUSH_LOCS_FEATURE);
+        }
+        	
 
         // Add ourselves to the mesh if the partial file is valid
         //if I'm firewalled add myself only if the other guy wants falts
@@ -631,8 +634,7 @@ public class HTTPDownloader implements BandwidthTracker {
         
         out.write("Range: bytes=" + startRange + "-"+(stop-1)+"\r\n");
         _requestedInterval = new Interval(_initialReadingPoint, stop-1);
-		if (ChatSettings.CHAT_ENABLED.getValue() &&
-           RouterService.acceptedIncomingConnection() &&
+		if (RouterService.acceptedIncomingConnection() &&
            !NetworkUtils.isPrivateAddress(RouterService.getAddress())) {
             int port = RouterService.getPort();
             String host = NetworkUtils.ip2string(RouterService.getAddress());
