@@ -26,8 +26,8 @@ public class RemoteFileDesc implements Serializable {
 
 	/**
 	 * Constant for an empty, unmodifiable <tt>Set</tt>.  This is necessary
-	 * because Collections.EMPTY_SET is not serializable in the collections 1.1
-	 * implementation.
+	 * because Collections.EMPTY_SET is not serializable in the collections
+	 * 1.1 implementation.
 	 */
 	private static final Set EMPTY_SET = 
 		Collections.unmodifiableSet(new HashSet());
