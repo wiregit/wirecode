@@ -124,7 +124,8 @@ public class PingRankerTest extends BaseTestCase {
     }
     
     /**
-     * Tests that the ranker learns about new hosts from altlocs
+     * Tests that the ranker learns about new hosts from altlocs, and filters
+     * hosts it already knew about
      */
     public void testLearnsFromAltLocs() throws Exception {
         PrivilegedAccessor.setValue(RouterService.getAcceptor(),"_acceptedIncoming",Boolean.TRUE);
@@ -133,10 +134,12 @@ public class PingRankerTest extends BaseTestCase {
         assertEquals(1,pinger.hosts.size());
         pinger.hosts.clear();
         
-        // send one altloc 
+        // send two altlocs, one containing the node itself (spammer ;-) 
         IpPort ip = new IpPortImpl("1.2.3.5",1);
+        IpPort ip2 = new IpPortImpl("1.2.3.4",1);
         Set alts = new HashSet();
         alts.add(ip);
+        alts.add(ip2);
         
         //and one push loc
         PushEndpoint pe =new PushEndpoint((new GUID(GUID.makeGuid())).toHexString()+";1.2.3.6:7");
@@ -155,8 +158,15 @@ public class PingRankerTest extends BaseTestCase {
         // pinged any.
         assertTrue(ranker.hasMore());
         
-        // after a while, the ranker should have pinged the other two hosts.
+        // the ranker should have pinged the other two hosts.
         assertEquals(2,pinger.hosts.size());
+        pinger.hosts.clear();
+        
+        // receive a pong from one of the altlocs, that carries the same set of altlocs
+        ranker.processMessage(pong,new UDPReplyHandler(InetAddress.getByName("1.2.3.5"),1));
+        
+        // the pinger should not have pinged anybody.
+        assertTrue(pinger.hosts.isEmpty());
     }
     
     /**
@@ -532,12 +542,12 @@ public class PingRankerTest extends BaseTestCase {
                     ret.add(new RemoteFileDesc(original,current));
                 }
             
-            if (pushLocs!=null)
+            if (pushLocs!=null){
                 for(Iterator iter = pushLocs.iterator();iter.hasNext();) {
                     PushEndpoint current = (PushEndpoint)iter.next();
                     ret.add(new RemoteFileDesc(original,current));
                 }
-            
+            }
             return ret;
         }
 

@@ -189,8 +189,8 @@ public class RemoteFileDesc implements IpPort, Serializable {
      * head pongs.
      */
     public RemoteFileDesc(RemoteFileDesc rfd, PushEndpoint pe){
-    	this( rfd.getHost(),              // host - ignored
-                rfd.getPort(),                 // port -ignored
+    	this( pe.getAddress(),              // host - ignored
+                pe.getPort(),                 // port -ignored
                 COPY_INDEX,                   // index (unknown)
                 rfd.getFileName(),            // filename
                 rfd.getSize(),                // filesize

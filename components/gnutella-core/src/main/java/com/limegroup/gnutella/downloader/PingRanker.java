@@ -60,6 +60,12 @@ public class PingRanker extends SourceRanker implements MessageListener, Cancell
     private TreeSet verifiedHosts;
     
     /**
+     * IpPorts/PEs of people that we have ever known about - used to filter
+     * incoming altlocs (and eventually to prepare bloom filters) 
+     */
+    private Set everybody,everybodyPush;
+    
+    /**
      * The urn to use to create pings
      */
     private URN sha1;
@@ -71,14 +77,30 @@ public class PingRanker extends SourceRanker implements MessageListener, Cancell
         pingedHosts = new TreeMap(IpPort.COMPARATOR);
         newHosts = new HashSet();
         verifiedHosts = new TreeSet(RFD_COMPARATOR);
+        everybody = new TreeSet(IpPort.COMPARATOR);
+        everybodyPush = new HashSet();
     }
     
     public synchronized void addToPool(RemoteFileDesc host){
         if (sha1 == null && host.getSHA1Urn() != null)
             sha1 = host.getSHA1Urn();
-            
+        
+        if (host.needsPush()) 
+            everybodyPush.add(host.getPushAddr());
+        else
+            everybody.add(host);
+        
         newHosts.add(host);
         pingIfNeeded();
+    }
+    
+    private void addIfNew(RemoteFileDesc host) {
+        if (host.needsPush() && everybodyPush.contains(host.getPushAddr()))
+                return;
+        else if (everybody.contains(host))
+                return;
+        
+        addToPool(host);
     }
     
     public synchronized RemoteFileDesc getBest() throws NoSuchElementException{
@@ -206,8 +228,11 @@ public class PingRanker extends SourceRanker implements MessageListener, Cancell
         // update the rfd with information from the pong
         pong.updateRFD(rfd);
         
-        // extract any altlocs the pong had
-        newHosts.addAll(pong.getAllLocsRFD(rfd));
+        // extract any altlocs the pong had and filter ones we know about
+        for (Iterator iter = pong.getAllLocsRFD(rfd).iterator(); iter.hasNext();) {
+            RemoteFileDesc current = (RemoteFileDesc) iter.next();
+            addIfNew(current);
+        }
         
         // and sort the host.
         verifiedHosts.add(rfd);
