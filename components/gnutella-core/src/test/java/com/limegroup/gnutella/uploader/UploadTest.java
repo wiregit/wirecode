@@ -35,20 +35,22 @@ public class UploadTest extends TestCase {
     private static final RouterService ROUTER_SERVICE =
         new RouterService(new ActivityCallbackStub());
 
-    static {
+	/**
+	 * Creates a new UploadTest with the specified name.
+	 */
+	public UploadTest(String name) {
+		super(name);
+		
 		try {
   			address = InetAddress.getLocalHost().getHostAddress();
   		} catch(UnknownHostException e) {
-  			fail("unexpected exception: "+e);
+  		    fail("could not get local host address ??? ");
   		}
         SettingsManager.instance().setBannedIps(new String[] {"*.*.*.*"});
         SettingsManager.instance().setAllowedIps(new String[] {"127.*.*.*"});
 		SettingsManager.instance().setPort(PORT);
         //This assumes we're running in the limewire/tests directory
-		File testDir = new File("com/limegroup/gnutella/uploader/data");
-		if(!testDir.isDirectory()) {
-			testDir = new File("com/limegroup/gnutella/uploader/data");
-		}
+		File testDir = CommonUtils.getResourceFile("com/limegroup/gnutella/uploader/data");
 		assertTrue("shared directory could not be found", testDir.isDirectory());
 		assertTrue("test file should be in shared directory", 
 				   new File(testDir, file).isFile());
@@ -67,14 +69,8 @@ public class UploadTest extends TestCase {
         UltrapeerSettings.FORCE_ULTRAPEER_MODE.setValue(true);
         UltrapeerSettings.EVER_ULTRAPEER_CAPABLE.setValue(true);
 
-        ROUTER_SERVICE.start();
-    }
-
-	/**
-	 * Creates a new UploadTest with the specified name.
-	 */
-	public UploadTest(String name) {
-		super(name);
+        if ( !ROUTER_SERVICE.isStarted() )
+            ROUTER_SERVICE.start();		
 	}
 
 	/**
