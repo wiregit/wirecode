@@ -96,6 +96,11 @@ public final class QueryRequestTest extends BaseTestCase {
 			fail("exception should have been thrown");
 		} catch(NullPointerException e) {}				
 
+		try {
+			qr = QueryRequest.createMulticastQuery(null);
+			fail("exception should have been thrown");
+		} catch(NullPointerException e) {}				
+
 
 		try {
 			//String is double null-terminated.
@@ -137,6 +142,11 @@ public final class QueryRequestTest extends BaseTestCase {
 
 	}
 
+	/**
+	 * Tests to make sure that queries are still created correctly
+	 * if some of the potential data is not filled in, such as
+	 * XML vs. no XML, URN vs. no URN, etc.
+	 */
 	public void testStillAcceptedIfOnlyPartsAreEmpty() throws Exception {
 		QueryRequest qr = null;
 		qr = QueryRequest.createQuery("blah");
@@ -445,7 +455,7 @@ public final class QueryRequestTest extends BaseTestCase {
 	 */
 	public void testQueryRequestPrimaryConstructor() {
 		byte ttl = 5;
-		int minSpeed = 30;
+		//int minSpeed = 30;
 		String query = "file i really want";
 		
 		// ideally this would be a real rich query
@@ -456,21 +466,25 @@ public final class QueryRequestTest extends BaseTestCase {
 		Set queryUrns = new HashSet();
 		queryUrns.add(HugeTestUtils.URNS[4]);
 
-		byte[] guid = QueryRequest.newQueryGUID(isRequery);
-        QueryKey qk = QueryKey.getQueryKey(guid, true);
-		QueryRequest qr = new QueryRequest(guid, ttl, minSpeed, query, 
-                                           richQuery, isRequery, 
-                                           requestedUrnTypes, queryUrns, qk,
-                                           false);
+		// use the quid as our key -- a bit of a hack -- it isn't really
+		// based on the guid
+		byte[] key = QueryRequest.newQueryGUID(isRequery);
+        QueryKey qk = QueryKey.getQueryKey(key, true);
+		QueryRequest qr = QueryRequest.createQueryKeyQuery(query, qk);
+		byte[] guid = qr.getGUID();
+		//QueryRequest qr = new QueryRequest(guid, ttl, minSpeed, query, 
+		//                                 richQuery, isRequery, 
+		//                                 requestedUrnTypes, queryUrns, qk,
+		//                                 false);
 		
-		assertEquals("ttls should be equal", ttl, qr.getTTL());
-		assertEquals("min speeds should be equal", minSpeed, qr.getMinSpeed());
+		assertEquals("ttls should be equal", 1, qr.getTTL());
+		//assertEquals("min speeds should be equal", minSpeed, qr.getMinSpeed());
 		assertEquals("queries should be equal", query, qr.getQuery());
 		assertEquals("rich queries should be equal", richQuery, 
                      qr.getRichQuery());
-		assertEquals("query urn types should be equal", requestedUrnTypes, 
+		assertEquals("query urn types should be equal", UrnType.ANY_TYPE_SET, 
 					 qr.getRequestedUrnTypes());
-		assertEquals("query urns should be equal", queryUrns, 
+		assertEquals("query urns should be equal", new HashSet(), 
                      qr.getQueryUrns());
 		assertEquals("query keys should be equal", qk, qr.getQueryKey());
 				
@@ -540,24 +554,35 @@ public final class QueryRequestTest extends BaseTestCase {
         qr = new QueryRequest(GUID.makeGuid(), (byte)0, (byte)0, payload);
         assertTrue(!qr.desiresXMLResponses());
         assertTrue(!qr.isFirewalledSource());
+        assertTrue("should not be from multicast", !qr.isMulticast());
 
         // firewalled and not wanting rich, just 11000000
         payload[0] = (byte) 0xC0;
         qr = new QueryRequest(GUID.makeGuid(), (byte)0, (byte)0, payload);
         assertTrue(!qr.desiresXMLResponses());
         assertTrue(qr.isFirewalledSource());
+        assertTrue("should not be from multicast", !qr.isMulticast());
 
         // not firewalled and wanting rich, just 10100000
         payload[0] = (byte) 0xA0;
         qr = new QueryRequest(GUID.makeGuid(), (byte)0, (byte)0, payload);
         assertTrue(qr.desiresXMLResponses());
         assertTrue(!qr.isFirewalledSource());
+        assertTrue("should not be from multicast", !qr.isMulticast());
 
         // firewalled and wanting rich, just 11100000
         payload[0] = (byte) 0xE0;
         qr = new QueryRequest(GUID.makeGuid(), (byte)0, (byte)0, payload);
         assertTrue(qr.desiresXMLResponses());
         assertTrue(qr.isFirewalledSource());
+        assertTrue("should not be from multicast", !qr.isMulticast());
+
+        // firewalled, wanting rich, and multicast -- 11110000
+        payload[0] = (byte) 0xF0;
+        qr = new QueryRequest(GUID.makeGuid(), (byte)0, (byte)0, payload);
+        assertTrue("should want XML", qr.desiresXMLResponses());
+        assertTrue("should be considered firewalled", qr.isFirewalledSource());
+        assertTrue("should be from multicast", qr.isMulticast());
         // --------------------------------------
 
 
@@ -568,6 +593,7 @@ public final class QueryRequestTest extends BaseTestCase {
         qr = new QueryRequest((byte)3, 0, "susheel", false);
         assertTrue(qr.desiresXMLResponses());
         assertTrue(!qr.isFirewalledSource());
+		assertTrue("multicast should not be set", !qr.isMulticast());
         try {
             baos = new ByteArrayOutputStream();
             qr.write(baos);
@@ -575,6 +601,7 @@ public final class QueryRequestTest extends BaseTestCase {
             QueryRequest check = (QueryRequest) Message.read(bais);
             assertTrue(check.desiresXMLResponses());
             assertTrue(!check.isFirewalledSource());
+			assertTrue("multicast should not be set", !check.isMulticast());
         }
         catch (Exception crap) {
             assertTrue(false);
@@ -583,6 +610,7 @@ public final class QueryRequestTest extends BaseTestCase {
         qr = new QueryRequest((byte)3, 0, "susheel", true);
         assertTrue(qr.desiresXMLResponses());
         assertTrue(qr.isFirewalledSource());
+		assertTrue("multicast should not be set", !qr.isMulticast());
         try {
             baos = new ByteArrayOutputStream();
             qr.write(baos);
@@ -590,6 +618,7 @@ public final class QueryRequestTest extends BaseTestCase {
             QueryRequest check = (QueryRequest) Message.read(bais);
             assertTrue(check.desiresXMLResponses());
             assertTrue(check.isFirewalledSource());
+			assertTrue("multicast should not be set", !check.isMulticast());
         }
         catch (Exception crap) {
             assertTrue(false);
@@ -617,6 +646,7 @@ public final class QueryRequestTest extends BaseTestCase {
                                   false);
             assertTrue(qr.desiresXMLResponses());
             assertTrue(!qr.isFirewalledSource());
+			assertTrue("multicast should not be set", !qr.isMulticast());
             try {
                 baos = new ByteArrayOutputStream();
                 qr.write(baos);
@@ -624,6 +654,7 @@ public final class QueryRequestTest extends BaseTestCase {
                 QueryRequest check = (QueryRequest) Message.read(bais);
                 assertTrue(check.desiresXMLResponses());
                 assertTrue(!check.isFirewalledSource());
+				assertTrue("multicast should not be set", !check.isMulticast());
             }
             catch (Exception crap) {
                 assertTrue(false);
@@ -635,6 +666,7 @@ public final class QueryRequestTest extends BaseTestCase {
                                   true);
             assertTrue(qr.desiresXMLResponses());
             assertTrue(qr.isFirewalledSource());
+			assertTrue("multicast should not be set", !qr.isMulticast());
             try {
                 baos = new ByteArrayOutputStream();
                 qr.write(baos);
@@ -642,6 +674,7 @@ public final class QueryRequestTest extends BaseTestCase {
                 QueryRequest check = (QueryRequest) Message.read(bais);
                 assertTrue(check.desiresXMLResponses());
                 assertTrue(check.isFirewalledSource());
+				assertTrue("multicast should not be set", !check.isMulticast());
             }
             catch (Exception crap) {
                 assertTrue(false);
