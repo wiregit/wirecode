@@ -11,12 +11,6 @@ import com.limegroup.gnutella.messages.*;
 public class NewConnection extends TestConnection {    
 
     /**
-     * Constant route table data for testing.
-     */
-    private final ManagedConnectionQueryInfo QUERY_INFO =
-        new ManagedConnectionQueryInfo();
-    
-    /**
      * Constant for the <tt>QueryRouteTable</tt> for this
      * connection -- can be used by subclasses.
      */
