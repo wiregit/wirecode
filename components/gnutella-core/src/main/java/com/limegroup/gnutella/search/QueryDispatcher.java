@@ -54,7 +54,9 @@ public final class QueryDispatcher implements Runnable {
 	 * Schudules the processing of queries for execution.
 	 */
 	public void start() {
-		RouterService.schedule(this, 0, 400);
+        Thread dispatcher = new Thread(this, "QueryDispatcher");
+        dispatcher.setDaemon(true);
+        dispatcher.start();
 	}
 
 	/**
@@ -107,7 +109,14 @@ public final class QueryDispatcher implements Runnable {
 	 * Starts the thread that processes queries.
 	 */
 	public void run() {
-		processQueries();
+        try {
+            while(true) {
+                Thread.sleep(400);
+                processQueries();
+            }
+        } catch(Throwable t) {
+            ErrorService.error(t);
+        }
 	}
 
 	/**
@@ -142,3 +151,6 @@ public final class QueryDispatcher implements Runnable {
         _done = true;
 	}
 }
+
+
+
