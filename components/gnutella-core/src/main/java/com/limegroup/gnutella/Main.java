@@ -14,22 +14,12 @@ public class Main implements ActivityCallback {
     //listening port number.
     RouterService service;
     ActivityCallback callback = new Main();
-
-	// commented this segment out because RouterService changed--Adam
-    //if (args.length==1) {
-	//  service=new RouterService(Integer.parseInt(args[0]),
-	//                            callback,
-	//                            new StandardMessageRouter(callback));
-    //} else {
-	service=new RouterService(callback,
-	    (new StandardMessageRouter(callback)), 
-	    new MetaFileManager());
-                                  
-	service.initialize();
-        
-		//}
-
-
+ 
+    FileManager fm = new FileManager();
+    service=new RouterService(callback,
+                              (new StandardMessageRouter(callback,fm)),fm);
+    
+    service.initialize();
 
     System.out.println("For a command list type help.");
     BufferedReader in=new BufferedReader(new InputStreamReader(System.in));

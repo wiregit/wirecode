@@ -400,7 +400,6 @@ public class DownloadManager implements BandwidthTracker {
 	 * the last time this call was made.
 	 */
 	public synchronized int getNewBytesTransferred() {
-        System.out.println("DownloadManager::getNewBytesTransferred");
 		int newBytes = 0;
 		Iterator iter = active.iterator();
 		while(iter.hasNext()) {

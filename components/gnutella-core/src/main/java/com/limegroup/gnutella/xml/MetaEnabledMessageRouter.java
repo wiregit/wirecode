@@ -11,8 +11,8 @@ import java.util.*;
 public class MetaEnabledMessageRouter extends StandardMessageRouter {
 
 
-    public MetaEnabledMessageRouter(ActivityCallback callback) {
-        super(callback);
+    public MetaEnabledMessageRouter(ActivityCallback callback,FileManager fm) {
+        super(callback,fm);
     }
   
 

@@ -66,29 +66,29 @@ public class LimeXMLProperties
      * of canonicalized field names to display string will be stores
      * per schema
      */
-    private static final String XML_DISPLAY_PROPS_DIR="XML_DISPLAY+PROPS_DIR";
+    private static final String XML_DISPLAY_PROPS_DIR="XML_DISPLAY_PROPS_DIR";
 
 
     /**
      * The name of the directory in which XML Schemas will be 
      * kept for querying and responding.
      */
-    private static final String XML_SCHEMA_DIR_DEF = "etc" + File.separator + 
+    private static final String XML_SCHEMA_DIR_DEF = "xml" + File.separator + 
                                                 "schemas" + File.separator;
     
     /**
      * The name of the directory in which XML Documents will be 
      * kept for querying and responding.
      */
-    private static final String XML_DOCS_DIR_DEF = "etc" + File.separator + 
-                                                "xml" + File.separator;
+    private static final String XML_DOCS_DIR_DEF = "xml" + File.separator + 
+                                                "data" + File.separator;
 
     /**
      * The name of the directory in which the field names for various 
      * schemas will have their display strings.
      */
-    private static final String XML_DISPLAY_PROPS_DIR_DEF = "etc"+
-        File.separator + "xml"+File.separator+"display"+File.separator;
+    private static final String XML_DISPLAY_PROPS_DIR_DEF = "xml"+ 
+        File.separator+"display"+File.separator;
 
     
     /**
@@ -429,7 +429,8 @@ public class LimeXMLProperties
         String limeHome = System.getProperty("LIME_HOME"); 
         if(limeHome == null || limeHome.trim().equals(""))
         {
-            return SettingsManager.instance().getPath();
+            return SettingsManager.instance().getPath() + 
+                                                    "lib" + File.separator;
         }
         else
         {

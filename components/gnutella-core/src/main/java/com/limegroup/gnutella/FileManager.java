@@ -68,20 +68,6 @@ public class FileManager {
     /** The lock for _loadThread.  Necessary to prevent deadlocks in
      *  loadSettings. */
     private Object _loadThreadLock=new Object();
-
-    /** The single instance of FileManager.  (Singleton pattern.) */
-    private static FileManager _instance = null;
-    //initialize _instance
-    static
-    {
-        //get the servant type
-        String servantType = SettingsManager.instance().getServantType();
-        if(servantType.equals(Constants.XML_CLIENT))
-            _instance = new MetaFileManager();
-        else
-            _instance = new FileManager();
-    }
-    
     
     /** The callback for adding shared directories and files, or null
      *  if this has no callback.  */
@@ -118,13 +104,6 @@ public class FileManager {
         _index = new Trie(true);  //ignore case
         _extensions = new TreeSet(new StringComparator());
         _sharedDirectories = new TreeMap(new FileComparator());
-    }
-
-    
-    /** Returns the single instance of the FileManager.  The FileManager has no
-     *  files or callback until loadSettings() or initialize is called.  */
-    public static FileManager instance() {
-        return _instance;
     }
 
     /** Asynchronously loads all files by calling loadSettings.  Sets this'

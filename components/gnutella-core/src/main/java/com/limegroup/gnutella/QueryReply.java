@@ -547,8 +547,9 @@ public class QueryReply extends Message implements Serializable{
                 //payload[i..j-1] is name.  This excludes the null terminator.
                 String name=new String(payload,i,j-i);
 
+                int l = j+1;
                 //Search for remaining null terminator.
-                int k = j+1;//next byte after the first null
+                int k = l;//next byte after the first null
                 for ( ; ; k++) {
                     if (k>=payload.length-16)//k is already in the GUID
                         throw new BadPacketException("Missing null terminator "
@@ -556,8 +557,13 @@ public class QueryReply extends Message implements Serializable{
                     if (payload[k]==(byte)0)
                         break;
                 }
-                responses[responses.length-left]=
-                                          new Response(index,size,name);
+                String betweenNulls = new String(payload,l,k-l);
+                if(betweenNulls==null || betweenNulls.equals(""))
+                    responses[responses.length-left]=
+                                    new Response(index,size,name);
+                else
+                    responses[responses.length-left]=new 
+                          Response(betweenNulls.toLowerCase(),index,size,name);
                 i=k+1;//The byte after the second null
             }
 

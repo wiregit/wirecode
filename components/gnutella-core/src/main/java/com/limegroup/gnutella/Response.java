@@ -1,5 +1,7 @@
 package com.limegroup.gnutella;
 
+import java.util.StringTokenizer;
+
 /**
  * A single result from a query reply message.
  * Create these to respond to a search.   Immutable.
@@ -58,6 +60,68 @@ public class Response {
         this.metaBytes = metadata.getBytes();
     }
 
+    /**
+     * Overloaded constructor that picks up data from between the  nulls
+     * That data is then made into a nice xml string that can 
+     * be converted into a LimeXMLDocument
+     */
+    public Response(String betweenNulls, long index, long size, String name){
+        Assert.that((index & 0xFFFFFFFF00000000l)==0,
+                    "Response constructor: index too big!");
+        Assert.that((size &  0xFFFFFFFF00000000l)==0,
+                    "Response constructor: size too big!");
+        //create an XML string out of the data between the nulls
+        //System.out.println("Between nulls is "+betweenNulls);
+        String length="";
+        String bitrate="";
+        StringTokenizer tok = new StringTokenizer(betweenNulls);
+        String first = tok.nextToken();
+        String second = tok.nextToken();
+        boolean bearShare1 = false;        
+        boolean bearShare2 = false;
+        boolean gnotella = false;
+        if(second.startsWith("kbps"))
+            bearShare1 = true;
+        else if (first.endsWith("kbps"))
+            bearShare2 = true;
+        if(bearShare1){
+            bitrate = first;
+        }
+        else if (bearShare2){
+            int j = first.indexOf("kbps");
+            bitrate = first.substring(0,j);
+        }
+        if(bearShare1 || bearShare2){
+            while(tok.hasMoreTokens())
+                length=tok.nextToken();
+            //OK we have the bitrate and the length
+        }
+        else if (betweenNulls.endsWith("kHz")){//Gnotella
+            gnotella = true;
+            length=first;
+            //extract the bitrate from second
+            int i=second.indexOf("kbps");
+            bitrate = second.substring(0,i);
+        }
+        if(bearShare1 || bearShare2 || gnotella){//some metadata we understand
+            this.metadata = "<audios xsi:noNamespaceSchemaLocation="+
+                 "\"http://www.limewire.com/schemas/audio.xsd\">"+
+                 "<audio title=\""+name+"\" bitrate=\""+bitrate+
+                 "\" length=\""+length+"\">"+
+                 "</audio></audios>";
+            this.metaBytes=metadata.getBytes();
+            this.index=index;
+        }
+        this.size=size;
+        this.name=name;
+        this.nameBytes = name.getBytes(); 
+    }
+
+    /**
+     * To add metaData to a response after it has been created.
+     * Added to faciliatate setting audio metadata for responses
+     * generated from ordinary searches. 
+     */
     public void setMetadata(String meta){
         this.metadata = meta;
         this.metaBytes = meta.getBytes();
@@ -102,14 +166,16 @@ public class Response {
 		return metadata;
 	}
 
+    
     /**
      * returns true if metadata is not XML, but ToadNode's response
-     */
-    public boolean hasToadNodeData(){
-        if(metadata.indexOf("<")>-1 && metadata.indexOf(">") > -1)
-            return false;
-        return true;//no angular brackets. This is a TOADNODE response
-    }
+
+     public boolean hasToadNodeData(){
+     if(metadata.indexOf("<")>-1 && metadata.indexOf(">") > -1)
+     return false;
+     return true;//no angular brackets. This is a TOADNODE response
+     }
+    */
 
     public boolean equals(Object o) {
         if (! (o instanceof Response))

@@ -7,10 +7,12 @@ public class StandardMessageRouter
     extends MessageRouter
 {
     private ActivityCallback _callback;
+    private FileManager _fileManager;
 
-    public StandardMessageRouter(ActivityCallback callback)
+    public StandardMessageRouter(ActivityCallback callback, FileManager fm)
     {
         _callback = callback;
+        _fileManager = fm;
     }
 
     /**
@@ -49,9 +51,9 @@ public class StandardMessageRouter
         int newTTL = hops+1;
         if ( (hops+ttl) <=2)
             newTTL = 1;
-
-        int num_files = FileManager.instance().getNumFiles();
-        int kilobytes = FileManager.instance().getSize()/1024;
+        
+        int num_files = _fileManager.getNumFiles();
+        int kilobytes = _fileManager.getSize()/1024;
 
         PingReply pingReply = new PingReply(pingRequest.getGUID(),
                                             (byte)newTTL,
@@ -75,6 +77,24 @@ public class StandardMessageRouter
         receivingConnection.updateHorizonStats(pingReply);
         super.handlePingReply(pingReply, receivingConnection);
     }
+
+    /**
+     * Allow the controlled creation of a GroupPingRequest
+     */
+    public GroupPingRequest createGroupPingRequest(String group)
+    {
+        int num_files = _fileManager.getNumFiles();
+        int kilobytes = _fileManager.getSize()/1024;
+        
+        GroupPingRequest pingRequest =
+          new GroupPingRequest(SettingsManager.instance().getTTL(),
+            _acceptor.getPort(), _acceptor.getAddress(),
+            num_files, kilobytes, group);
+        return( pingRequest );
+    }
+
+    
+
 
     /**
      * Handles the PingReply by updating horizon stats.
@@ -138,8 +158,8 @@ public class StandardMessageRouter
     {
 
         // Run the local query
-        FileManager fm = FileManager.instance();
-        Response[] responses = fm.query(queryRequest);
+        //FileManager fm = FileManager.instance();
+        Response[] responses = _fileManager.query(queryRequest);
 
         sendResponses(responses, queryRequest, acceptor, clientGUID);
         
@@ -247,7 +267,7 @@ public class StandardMessageRouter
 
     /** @see MessageRouter.addQueryRoutingEntries */
     protected void addQueryRoutingEntries(QueryRouteTable qrt) {
-        File[] files = FileManager.instance().getSharedFiles(null);
+        File[] files = _fileManager.getSharedFiles(null);
         for (int i=0; i<files.length; i++)
             qrt.add(files[i].getAbsolutePath());
     }
@@ -295,7 +315,7 @@ public class StandardMessageRouter
         FileDesc desc;
         try
         {
-            desc = FileManager.instance().get(index);
+            desc = _fileManager.get(index);
         }
         catch (IndexOutOfBoundsException e)
         {

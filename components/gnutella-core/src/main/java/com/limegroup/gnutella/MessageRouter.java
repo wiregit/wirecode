@@ -587,20 +587,9 @@ public abstract class MessageRouter
     /**
      * Allow the controlled creation of a GroupPingRequest
      */
-    public GroupPingRequest createGroupPingRequest(String group)
-    {
-        FileManager fm = FileManager.instance();
-        int num_files = fm.getNumFiles();
-        int kilobytes = fm.getSize()/1024;
-
-        GroupPingRequest pingRequest =
-          new GroupPingRequest(SettingsManager.instance().getTTL(),
-            _acceptor.getPort(), _acceptor.getAddress(),
-            num_files, kilobytes, group);
-        return( pingRequest );
-    }
-
-        /**
+     public abstract GroupPingRequest createGroupPingRequest(String group);
+     
+    /**
      * Handles a query route table update message that originated from
      * receivingConnection.
      */
@@ -714,8 +703,6 @@ public abstract class MessageRouter
      */
     protected abstract void addQueryRoutingEntries(QueryRouteTable qrt);
     
-    
-
     /**
      * Handle a reply to a PingRequest that originated here.
      * Implementations typically process that various statistics in the reply.
