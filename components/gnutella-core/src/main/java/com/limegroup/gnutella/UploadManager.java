@@ -414,7 +414,7 @@ public final class UploadManager implements BandwidthTracker {
      * @param forceAllow whether or not to force the UploadManager to send
      *  accept this request when it comes back.
 	 */
-	public synchronized void acceptPushUpload(final String file, 
+	public void acceptPushUpload(final String file, 
 											  final String host, 
                                               final int port, 
 											  final int index, 
@@ -427,12 +427,14 @@ public final class UploadManager implements BandwidthTracker {
 
         // Test if we are either currently attempting a push, or we have
         // unsuccessfully attempted a push with this host in the past.
-		clearFailedPushes();
-        if ( !forceAllow && (
-             (! testAttemptingPush(host, index) )  ||
-             (! testFailedPush(host, index) ) ) )
-            return;
-        insertAttemptingPush(host, index);        
+        synchronized(UploadManager.this) {
+    		clearFailedPushes();
+            if ( !forceAllow && (
+                 (! testAttemptingPush(host, index) )  ||
+                 (! testFailedPush(host, index) ) ) )
+                return;
+            insertAttemptingPush(host, index);
+        }    
 
         Thread runner=new Thread() {
             public void run() {
