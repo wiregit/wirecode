@@ -32,7 +32,9 @@ public class ConnectionManager implements Runnable {
     /** List of all connections.  This is <i>not</i> synchronized, so you must
      * always hold this' monitor before modifying it. */
     private List /* of Connection */ connections=new ArrayList();
-    public  List /* of ConnectionFetchers */ fetchers =new ArrayList();
+    /** List of all connection fetchers.  This is synchronized. */
+    List /* of ConnectionFetcher */ fetchers=
+	Collections.synchronizedList(new ArrayList());
     public  HostCatcher catcher=new HostCatcher(this,SettingsManager.instance().getHostList());
 
     private int keepAlive=0;
