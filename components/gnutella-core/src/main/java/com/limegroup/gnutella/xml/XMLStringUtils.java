@@ -36,10 +36,17 @@ public class XMLStringUtils
      */
     public static final String DELIMITER = "__";
     
-    /** Creates new XMLStringUtils */
-    public XMLStringUtils()
-    {
-    }
+    /**
+     * Fields ending with this string are supposed to be representing
+     * MAX value in the xml queries
+     */
+    public static final String MAX_ENDING = "_MAX";
+    
+    /**
+     * Fields ending with this string are supposed to be representing
+     * MIN value in the xml queries
+     */
+    public static final String MIN_ENDING = "_MIN";
     
     /**
      * Breaks the given string (which confirms to the pattern defined above
