@@ -44,8 +44,7 @@ public class PushAltLoc extends AlternateLocation {
 		
 		
 		_pushAddress = address;
-		
-		DISPLAY_STRING= ""; //eventually this will be a proper X-Alt header
+		DISPLAY_STRING= _pushAddress.httpStringValue(); 
 		_fileName = name;
 	}
 	

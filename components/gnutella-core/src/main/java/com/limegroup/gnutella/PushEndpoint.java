@@ -4,6 +4,7 @@ package com.limegroup.gnutella;
 import com.sun.java.util.collections.*;
 
 import com.limegroup.gnutella.util.*;
+import com.limegroup.gnutella.http.HTTPHeaderValue;
 import com.limegroup.gnutella.messages.*;
 
 /**
@@ -17,7 +18,7 @@ import com.limegroup.gnutella.messages.*;
  * bytes 1-16 : the guid
  * followed by 6 bytes per PushProxy
  */
-public class PushEndpoint {
+public class PushEndpoint implements HTTPHeaderValue{
 
 	public static final int HEADER_SIZE=17; //guid+# of proxies, maybe other things too
 	public static final int PROXY_SIZE=6; //ip:port
@@ -49,6 +50,11 @@ public class PushEndpoint {
 	 */
 	private final int _hashcode;
 	
+	/**
+	 * the string representation as sent in headers.
+	 */
+	private final String _httpString;
+	
 
 	/**
 	 * 
@@ -68,6 +74,9 @@ public class PushEndpoint {
 		_size = HEADER_SIZE+
 			Math.min(_proxies.size(),4) * PROXY_SIZE;
 		
+		//create the http string representation
+		String httpString = _guid.toHexString()+";";
+		
 		//also calculate the hashcode in the constructor
 		
 		int hashcode = _guid.hashCode();
@@ -75,7 +84,16 @@ public class PushEndpoint {
 		for (Iterator iter = _proxies.iterator();iter.hasNext();) {
 			PushProxyInterface cur = (PushProxyInterface)iter.next();
 			hashcode = 37 *hashcode+cur.hashCode();
+			httpString = httpString + 
+				NetworkUtils.ip2string(cur.getPushProxyAddress().getAddress());
+			httpString = httpString +":"+cur.getPushProxyPort()+";";
 		}
+		
+		//trim the ; at the end
+		if (_proxies.size() > 0)
+			httpString = httpString.substring(0,httpString.length()-1);
+		
+		_httpString = httpString;
 		_hashcode = hashcode;
 	}
 	
@@ -214,5 +232,9 @@ public class PushEndpoint {
 		}
 		ret = ret+ "}]";
 		return ret;
+	}
+	
+	public String httpStringValue() {
+		return _httpString;
 	}
 }

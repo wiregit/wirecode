@@ -943,6 +943,19 @@ public class ManagedDownloader implements Downloader, Serializable {
                         addDownload(loc.createRemoteFileDesc((int)size),false);
                     }
                 }
+                
+                //also adds any existing firewalled locations if 
+                //I am not firewalled.
+                if (RouterService.acceptedIncomingConnection()) {
+                	coll = fd.getPushAlternateLocationCollection();
+                	synchronized(coll) {
+                		Iterator iter = coll.iterator();
+                		while(iter.hasNext()) {
+                			AlternateLocation loc = (AlternateLocation)iter.next();
+                			addDownload(loc.createRemoteFileDesc((int)size),false);
+                		}
+                	}
+                }
             }
         }
     }
@@ -1460,12 +1473,11 @@ public class ManagedDownloader implements Downloader, Serializable {
             if(r.getHost()==rfd.getHost() && r.getPort()==rfd.getPort()) 
                 continue;//no need to tell uploader about itself
             
-            //inform downloaders only about non-firewalled altlocs
-            if (loc instanceof DirectAltLoc)
-            	if(good)
-            		httpDloader.addSuccessfulAltLoc(loc);
-            	else
-            		httpDloader.addFailedAltLoc(loc);
+            //inform downloaders only about altlocs
+           	if(good)
+           		httpDloader.addSuccessfulAltLoc(loc);
+           	else
+           		httpDloader.addFailedAltLoc(loc);
         }
 
         FileDesc fd = fileManager.getFileDescForFile(incompleteFile);
@@ -2273,18 +2285,14 @@ public class ManagedDownloader implements Downloader, Serializable {
                 int count = 0;
                 while(iter.hasNext() && count < 10) {
                 	AlternateLocation current = (AlternateLocation)iter.next();
-                	if (current instanceof DirectAltLoc) {
-                		dloader.addSuccessfulAltLoc(current);
-                		count++;
-                	}
+                	dloader.addSuccessfulAltLoc(current);
+                	count++;
                 }
                 iter = recentInvalidAlts.iterator();
                 while(iter.hasNext()) {
                 	AlternateLocation current = (AlternateLocation)iter.next();
-                	if (current instanceof DirectAltLoc) {
-                		dloader.addFailedAltLoc(current);
-                		count++;
-                	}
+                	dloader.addFailedAltLoc(current);
+                	count++;
                 }
             }
         }

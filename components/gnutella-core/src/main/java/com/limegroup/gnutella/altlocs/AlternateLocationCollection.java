@@ -245,8 +245,6 @@ public final class AlternateLocationCollection
 	        Iterator iter = LOCATIONS.iterator();
             while(iter.hasNext()) {
             	AlternateLocation current = (AlternateLocation)iter.next();
-            	if (current instanceof PushAltLoc)
-            		continue;
 			    writeBuffer.append(
                            current.httpStringValue());
 			    writeBuffer.append(commaSpace);

@@ -515,8 +515,32 @@ public final class HTTPUploader implements Uploader {
                 ret.add(al);
                 i++;
             }
-            return ret == null ? DataUtils.EMPTY_SET : ret;
+            
         }
+        
+        //if the other side indicated they want firewalled altlocs
+        //send some.
+        
+        coll = _fileDesc.getPushAlternateLocationCollection();
+        
+        synchronized(coll) {
+            Iterator iter  = coll.iterator();
+            //Synchronization note: We hold the locks of two
+            //AlternateLocationCollections concurrently, but one of them is a
+            //local variable, so we are OK.            
+            for(int i = 0; iter.hasNext() && i < MAX_PUSH_LOCATIONS;) {
+                AlternateLocation al = (AlternateLocation)iter.next();
+                if(_writtenPushLocs.contains(al))
+                    continue;
+                _writtenPushLocs.add(al);
+                if(ret == null) ret = new HashSet();
+                ret.add(al);
+                i++;
+            }
+            
+        }
+        
+        return ret == null ? DataUtils.EMPTY_SET : ret;
     }
     
     /**
@@ -876,7 +900,7 @@ public final class HTTPUploader implements Uploader {
     }
     
 	private boolean readFAltLocationHeader(String str) {
-        if ( ! HTTPHeaderName.ALT_LOCATION.matchesStartOfString(str) )
+        if ( ! HTTPHeaderName.FALT_LOCATION.matchesStartOfString(str) )
             return false;
         
         //also set the interested flag
@@ -888,7 +912,7 @@ public final class HTTPUploader implements Uploader {
     }
 
     private boolean readBFAltLocationHeader(String str) {
-        if (!HTTPHeaderName.NALTS.matchesStartOfString(str))
+        if (!HTTPHeaderName.BFALT_LOCATION.matchesStartOfString(str))
             return false;
 
         //also set the interested flag
@@ -1057,7 +1081,7 @@ public final class HTTPUploader implements Uploader {
         }
 	}
 	
-	public void parseFAlternateLocations(final String altHeader,
+	private void parseFAlternateLocations(final String altHeader,
 			final AlternateLocationCollector alc,
 			boolean isGood){
 		//TODO: parse firewalled altlocs and add to appropriate structure here.

@@ -287,31 +287,60 @@ public class HTTPDownloader implements BandwidthTracker {
     }
         
     void addSuccessfulAltLoc(AlternateLocation loc) {
-        synchronized(_badLocs) {
-            //If we ever thought loc was bad, forget that we did, so that we can
-            //add it to the n-alts list again, if it fails -- remove from
-            //writtenBadlocs
-            _writtenBadLocs.remove(loc);           
-            _badLocs.remove(loc);
-        }
-        synchronized(_goodLocs) {
-            if(!_writtenGoodLocs.contains(loc)) //not written earlier
-                _goodLocs.add(loc); //duplicates make no difference
-        }
+    	if (loc instanceof DirectAltLoc) {
+    		synchronized(_badLocs) {
+    			//If we ever thought loc was bad, forget that we did, so that we can
+    			//add it to the n-alts list again, if it fails -- remove from
+    			//writtenBadlocs
+    			_writtenBadLocs.remove(loc);           
+    			_badLocs.remove(loc);
+    		}
+    		synchronized(_goodLocs) {
+    			if(!_writtenGoodLocs.contains(loc)) //not written earlier
+    				_goodLocs.add(loc); //duplicates make no difference
+    		}
+    	}
+    	else {
+    		synchronized(_badPushLocs) {
+    			//If we ever thought loc was bad, forget that we did, so that we can
+    			//add it to the n-alts list again, if it fails -- remove from
+    			//writtenBadlocs
+    			_writtenBadPushLocs.remove(loc);           
+    			_badPushLocs.remove(loc);
+    		}
+    		synchronized(_pushLocs) {
+    			if(!_writtenPushLocs.contains(loc)) //not written earlier
+    				_pushLocs.add(loc); //duplicates make no difference
+    		}
+    	}
     }
     
     void addFailedAltLoc(AlternateLocation loc) {
         //if we ever thought it was good, forget that we did, so we can write it
         //out as good again -- remove it from writtenGoodLocs if it was there
-        synchronized(_goodLocs) {
-            _writtenGoodLocs.remove(loc);
-            _goodLocs.remove(loc);
-        }
+    	
+    	if (loc instanceof DirectAltLoc){
+    		synchronized(_goodLocs) {
+    			_writtenGoodLocs.remove(loc);
+    			_goodLocs.remove(loc);
+    		}
         
-        synchronized(_badLocs) {
-            if(!_writtenBadLocs.contains(loc))//no need to repeat to uploader
-                _badLocs.add(loc); //duplicates make no difference
-        }
+    		synchronized(_badLocs) {
+    			if(!_writtenBadLocs.contains(loc))//no need to repeat to uploader
+    				_badLocs.add(loc); //duplicates make no difference
+    		}
+    	}
+    	else {
+    		synchronized(_pushLocs) {
+    			_writtenPushLocs.remove(loc);
+    			_pushLocs.remove(loc);
+    		}
+        
+    		synchronized(_badLocs) {
+    			if(!_writtenBadPushLocs.contains(loc))//no need to repeat to uploader
+    				_badPushLocs.add(loc); //duplicates make no difference
+    		}
+    	}
     }
     
     ///////////////////////////////// Connection /////////////////////////////
@@ -471,7 +500,7 @@ public class HTTPDownloader implements BandwidthTracker {
             HTTPUtils.writeHeader(HTTPHeaderName.NALTS,
                                 new HTTPHeaderValueCollection(writeClone),out);
         
-        //write f-alts.  However, first send a header the value "true"
+        //write push alts.  However, first send a header indicating we are intersted.
         writeClone = null;
         synchronized(_pushLocs) {
             if(_pushLocs.size() > 0) {
@@ -490,7 +519,7 @@ public class HTTPDownloader implements BandwidthTracker {
         if (RouterService.acceptedIncomingConnection()) {
         	
         	//however, if the other side has not yet indicated that they are interested
-        	//themselves, we only send a header indicating interest.
+        	//themselves, we only send an empty header indicating our interest.
         	if (!_wantsFalts) 
         		HTTPUtils.writeHeader(HTTPHeaderName.FALT_LOCATION,"",out);
         	

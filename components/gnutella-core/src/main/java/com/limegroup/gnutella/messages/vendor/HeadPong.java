@@ -313,7 +313,7 @@ public class HeadPong extends VendorMessage {
 		
 		
 		//if we have any altlocs and enough room in the packet, add them.
-		AlternateLocationCollection altlocs = desc.getAlternateLocationCollection();
+		AlternateLocationCollection altlocs = desc.getPushAlternateLocationCollection();
 		
 		if (altlocs !=null && altlocs.hasAlternateLocations() &&
 			ping.requestsPushLocs()) {
@@ -334,6 +334,8 @@ public class HeadPong extends VendorMessage {
 				}
 				
 			}
+		
+		altlocs = desc.getAlternateLocationCollection();
 		
 		if (altlocs!= null && altlocs.hasAlternateLocations() &&
 				ping.requestsAltlocs()) {
