@@ -51,6 +51,11 @@ public class PingRanker extends SourceRanker implements MessageListener, Cancell
      */
     private TreeMap verifiedHosts;
     
+    /**
+     * The urn to use to create pings
+     */
+    private URN sha1;
+    
     private static final Comparator PONG_COMPARATOR = new HeadPongComparator();
     
     public PingRanker() {
@@ -61,6 +66,9 @@ public class PingRanker extends SourceRanker implements MessageListener, Cancell
     }
     
     public synchronized void addToPool(RemoteFileDesc host){
+        if (sha1 == null && host.getSHA1Urn() != null)
+            sha1 = host.getSHA1Urn();
+            
         newHosts.add(host);
         pingIfNeeded();
     }
@@ -68,11 +76,14 @@ public class PingRanker extends SourceRanker implements MessageListener, Cancell
     public synchronized RemoteFileDesc getBest() throws NoSuchElementException{
         RemoteFileDesc ret;
         
+        // try a verified host
         if (!verifiedHosts.isEmpty()) 
             ret =(RemoteFileDesc) verifiedHosts.remove(verifiedHosts.firstKey());
+        // try a host we've recently pinged
         else if (!pingedHosts.isEmpty()){
             ret =(RemoteFileDesc) pingedHosts.remove(pingedHosts.firstKey());
         }else {
+            // return an unverified host at random
             ret = getNewRFD();
             newHosts.remove(ret);
         }
@@ -93,8 +104,12 @@ public class PingRanker extends SourceRanker implements MessageListener, Cancell
         if (newHosts.isEmpty())
             return;
         
+        // if we haven't found a single RFD with URN, don't ping anybody
+        if (sha1 == null)
+            return;
+        
         // create a ping for the non-firewalled hosts
-        HeadPing ping = new HeadPing(getNewRFD().getSHA1Urn(),getPingFlags());
+        HeadPing ping = new HeadPing(sha1,getPingFlags());
         
         // iterate through the list and select some hosts to ping
         List toSend = new ArrayList();
@@ -134,12 +149,16 @@ public class PingRanker extends SourceRanker implements MessageListener, Cancell
      * schedules a push ping to each proxy of the given host
      */
     private void schedulePushPings(RemoteFileDesc rfd) {
-        HeadPing pushPing = 
-            new HeadPing(rfd.getSHA1Urn(),new GUID(rfd.getPushAddr().getClientGUID()),getPingFlags());
-        pinger.rank(rfd.getPushProxies(),this,this,pushPing);
-        
-        for (Iterator iter = rfd.getPushProxies().iterator(); iter.hasNext();) 
-            pingedHosts.put(iter.next(),rfd);
+        if (RouterService.acceptedIncomingConnection() || 
+                (RouterService.getUdpService().canDoFWT() && rfd.supportsFWTransfer())) {
+            HeadPing pushPing = 
+                new HeadPing(rfd.getSHA1Urn(),new GUID(rfd.getPushAddr().getClientGUID()),getPingFlags());
+            
+            for (Iterator iter = rfd.getPushProxies().iterator(); iter.hasNext();) 
+                pingedHosts.put(iter.next(),rfd);
+            
+            pinger.rank(rfd.getPushProxies(),this,this,pushPing);
+        }
         
     }
     
@@ -192,9 +211,10 @@ public class PingRanker extends SourceRanker implements MessageListener, Cancell
     }
     
     protected synchronized Collection getShareableHosts(){
-        Set ret = new HashSet(verifiedHosts.size()+newHosts.size());
+        Set ret = new HashSet(verifiedHosts.size()+newHosts.size()+pingedHosts.size());
         ret.addAll(verifiedHosts.values());
         ret.addAll(newHosts);
+        ret.addAll(pingedHosts.values());
         return ret;
     }
     

@@ -73,6 +73,7 @@ public class PingRankerTest extends BaseTestCase {
         ranker = new PingRanker();
         PrivilegedAccessor.setValue(ranker,"pinger",pinger);
         DownloadSettings.MAX_VERIFIED_HOSTS.revertToDefault();
+        PrivilegedAccessor.setValue(RouterService.getAcceptor(),"_acceptedIncoming",Boolean.FALSE);
     }
     
     /**
@@ -82,7 +83,6 @@ public class PingRankerTest extends BaseTestCase {
         for (int i =1;i <= 10;i++) 
             ranker.addToPool(newRFDWithURN("1.2.3."+i,3));
         
-        Thread.sleep(1000);
         
         assertEquals(10,pinger.hosts.size());
         assertEquals(10,pinger.messages.size());
@@ -114,14 +114,12 @@ public class PingRankerTest extends BaseTestCase {
         
         
         // no more pings should have been sent out.
-        Thread.sleep(100);
         assertEquals(1,pinger.hosts.size());
         
         // consume the host we know about
         ranker.getBest();
         
         // we should send out some more pings
-        Thread.sleep(100);
         assertGreaterThan(1,pinger.hosts.size());
     }
     
@@ -129,9 +127,9 @@ public class PingRankerTest extends BaseTestCase {
      * Tests that the ranker learns about new hosts from altlocs
      */
     public void testLearnsFromAltLocs() throws Exception {
+        PrivilegedAccessor.setValue(RouterService.getAcceptor(),"_acceptedIncoming",Boolean.TRUE);
         RemoteFileDesc original = newRFDWithURN("1.2.3.4",3); 
         ranker.addToPool(original);
-        Thread.sleep(100);
         assertEquals(1,pinger.hosts.size());
         pinger.hosts.clear();
         
@@ -158,7 +156,6 @@ public class PingRankerTest extends BaseTestCase {
         assertTrue(ranker.hasMore());
         
         // after a while, the ranker should have pinged the other two hosts.
-        Thread.sleep(100);
         assertEquals(2,pinger.hosts.size());
     }
     
@@ -171,7 +168,6 @@ public class PingRankerTest extends BaseTestCase {
         assertTrue(RouterService.acceptedIncomingConnection());
         GUID g = new GUID(GUID.makeGuid());
         ranker.addToPool(newPushRFD(g.bytes(),"1.2.2.2:3","2.2.2.3:5"));
-        Thread.sleep(100);
         assertEquals(1,pinger.hosts.size());
         assertEquals(new IpPortImpl("1.2.2.2",3),pinger.hosts.get(0));
         HeadPing ping = (HeadPing)pinger.messages.get(0);
@@ -184,9 +180,9 @@ public class PingRankerTest extends BaseTestCase {
      */
     public void testSkipsFirewalledHosts() throws Exception {
         assertFalse(RouterService.acceptedIncomingConnection());
+        assertFalse(RouterService.getUdpService().canDoFWT());
         GUID g = new GUID(GUID.makeGuid());
         ranker.addToPool(newPushRFD(g.bytes(),"1.2.2.2:3","2.2.2.3:5"));
-        Thread.sleep(100);
         assertEquals(0,pinger.hosts.size());
         assertEquals(0,pinger.hosts.size());
     }
@@ -285,7 +281,7 @@ public class PingRankerTest extends BaseTestCase {
     public void testBusyOfferedLast() throws Exception {
         ranker.addToPool(newRFDWithURN("1.2.3.4",3));
         ranker.addToPool(newRFDWithURN("1.2.3.5",3));
-        MockPong busy = new MockPong(true,true,0,true,true,true,null,null,null);
+        MockPong busy = new MockPong(true,true,20,true,true,true,null,null,null);
         MockPong notBusy = new MockPong(true,true,0,true,false,true,null,null,null);
         
         ranker.processMessage(busy,new UDPReplyHandler(InetAddress.getByName("1.2.3.4"),1));
@@ -351,7 +347,7 @@ public class PingRankerTest extends BaseTestCase {
         RemoteFileDesc best = ranker.getBest();
         assertEquals("1.2.3.5",best.getHost()); // open with more slots
         best = ranker.getBest();
-        assertEquals("1.2.3.6",best.getHost()); // firewalled
+        assertTrue(best.getPushProxies().contains(new IpPortImpl("1.2.3.6",6))); // firewalled
         best = ranker.getBest();
         assertEquals("1.2.3.4",best.getHost()); // open
         
@@ -361,6 +357,7 @@ public class PingRankerTest extends BaseTestCase {
      * tests that within the same rank and firewall status, partial sources are preferred
      */
     public void testPartialPreferred() throws Exception {
+        PrivilegedAccessor.setValue(RouterService.getAcceptor(),"_acceptedIncoming",Boolean.TRUE);
         ranker.addToPool(newRFDWithURN("1.2.3.4",3));
         ranker.addToPool(newRFDWithURN("1.2.3.5",3));
         ranker.addToPool(newRFDWithURN("1.2.3.6",3));
@@ -381,9 +378,9 @@ public class PingRankerTest extends BaseTestCase {
         best = ranker.getBest();
         assertEquals("1.2.3.5",best.getHost()); // full, firewalled, one slot 
         best = ranker.getBest();
-        assertEquals("1.2.3.7",best.getHost()); // full, open, one slot
+        assertTrue(best.getPushProxies().contains(new IpPortImpl("1.2.3.7",7))); // full, open, one slot
         best = ranker.getBest();
-        assertEquals("1.2.3.4",best.getHost()); // full, no slots
+        assertEquals("1.2.3.4",best.getHost()); // full, no slots, firewalled
     }
     
     /**
@@ -392,7 +389,7 @@ public class PingRankerTest extends BaseTestCase {
      */
     public void testGetShareable() throws Exception {
         RemoteFileDesc rfd1, rfd2;
-        rfd1 = newRFD("1.2.3.4",3);
+        rfd1 = newRFDWithURN("1.2.3.4",3);
         rfd2 = newRFDWithURN("1.2.3.5",3);
         ranker.addToPool(rfd1);
         ranker.addToPool(rfd2);
@@ -412,7 +409,7 @@ public class PingRankerTest extends BaseTestCase {
         alts.add(ip1);
         alts.add(ip2);
         MockPong oneFreeOpen= new MockPong(true,true,-1,false,false,true,null,alts,null);
-        ranker.processMessage(oneFreeOpen,new UDPReplyHandler(InetAddress.getByName("1.2.3.4"),7));
+        ranker.processMessage(oneFreeOpen,new UDPReplyHandler(InetAddress.getByName("1.2.3.4"),1));
         
         // the ranker should pass on the altlocs it discovered as well.
         c = ranker.getShareableHosts();
@@ -471,7 +468,7 @@ public class PingRankerTest extends BaseTestCase {
         
         PushEndpoint pe = new PushEndpoint(s);
         RemoteFileDesc ret = newRFDWithURN(host,3);
-        ret.setPushAddress(pe);
+        ret = new RemoteFileDesc(ret,pe);
         return ret;
     }
     
