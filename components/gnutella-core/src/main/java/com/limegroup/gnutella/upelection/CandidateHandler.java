@@ -136,7 +136,6 @@ public class CandidateHandler {
     public synchronized void handleBestCandidatesMessage(BestCandidatesVendorMessage m) 
 		throws IOException {
 	
-	
     	//first see if we are not sending to this connection too soon.
     	if (System.currentTimeMillis() - _lastSentAdvertisementTime 
 			< ADVERTISEMENT_INTERVAL) {
@@ -232,6 +231,13 @@ public class CandidateHandler {
 	public int getBandwidth() {
 		return _features == null ? -1 :
 			Integer.parseInt(_features.getProperty(FeaturesVendorMessage.BANDWIDTH,"-1"));
+	}
+	
+	public String toString() {
+		return "CandidateHandler for " + _connection+ " connection. \n  "+
+		 "needs advertisement "+ _needsAdvertisement+"\n"+
+		 "lastSentTime "+_lastSentAdvertisementTime+"\n"+
+		 "lastReceivedTime "+_lastReceivedAdvertisementTime;
 	}
     
 }

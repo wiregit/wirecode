@@ -151,12 +151,13 @@ public class BestCandidates {
 					update=true;
 				}
 		
+		
 		if (update) {
 			synchronized(this) {
 				_best=copy;
 			}
 			propagateChange();
-		}
+		} 
 		
 	}
 	
@@ -167,6 +168,9 @@ public class BestCandidates {
 	private synchronized void propagateChange(){
 		if (_best[0]==null && _best[1]==null)
 			return;
+		// the BCVM instance cached at the CandidateHandlers contains direct
+		//reference to the array; that is ok because any changes swap the array
+		//with a new one
 		_advertiser.setMsg(new BestCandidatesVendorMessage(_best));
 	} 
 	
