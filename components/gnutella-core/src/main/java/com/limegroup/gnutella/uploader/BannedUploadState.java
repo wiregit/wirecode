@@ -14,7 +14,7 @@ public class BannedUploadState implements HTTPMessage {
 	/**
 	 * Constant for the error message to send.
 	 */
-	private static final byte[] ERROR_MESSAGE =
+	public static final byte[] ERROR_MESSAGE =
 		"Your client sends too many requests.".getBytes();
 
 	/**

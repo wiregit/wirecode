@@ -73,7 +73,8 @@ import org.apache.commons.logging.LogFactory;
 public final class UploadManager implements BandwidthTracker {
     
     private static final Log LOG = LogFactory.getLog(UploadManager.class);
-    
+    public static final String FV_PASS =
+        new String(""+(new Random()).nextInt(999999));
 
     /** An enumeration of return values for queue checking. */
     private final int BYPASS_QUEUE = -1;
@@ -169,6 +170,12 @@ public final class UploadManager implements BandwidthTracker {
      */
     public static final int PUSH_PROXY_FILE_INDEX = -5;
     
+    /** 
+     * The file index used in this structure to indicate a HTTP File View
+     * download request.
+     */
+    public static final int FILE_VIEW_FILE_INDEX = -6;
+    
     /**
      * Whether or not to record stats.
      */
@@ -179,6 +186,11 @@ public final class UploadManager implements BandwidthTracker {
      */
     public static final String SERVICE_ID = "service_id";
                 
+    /**
+     * Constant for the beginning of a file-view request.
+     */
+    public static final String FV_REQ_BEGIN = "/gnutella/file-view";
+
 	/**
      * Remembers uploaders to disadvantage uploaders that
      * hammer us for download slots. Stores up to 250 entries
@@ -261,7 +273,8 @@ public final class UploadManager implements BandwidthTracker {
 						    			        socket,
 							    		        line._index,
 							    		        line.getParameters(),
-								    	        watchdog);
+								    	        watchdog,
+                                                line.hadPassword());
                 }
                 // Otherwise (we're continuing an uploader),
                 // reinitialize the existing HTTPUploader.
@@ -411,6 +424,7 @@ public final class UploadManager implements BandwidthTracker {
                uploader.getIndex() != UPDATE_FILE_INDEX &&
                uploader.getIndex() != MALFORMED_REQUEST_INDEX &&
                uploader.getIndex() != BAD_URN_QUERY_INDEX &&
+               uploader.getIndex() != FILE_VIEW_FILE_INDEX &&
                uploader.getMethod() != HTTPRequestMethod.HEAD;
 	}
     
@@ -421,9 +435,13 @@ public final class UploadManager implements BandwidthTracker {
      *
      * All requests that are not the 'connecting' state should bypass
      * the queue, because they have already been queued once.
+     *
+     * Don't let FILE_VIEW requests bypass the queue, we want to make sure
+     * those guys don't hammer.
      */
     private boolean shouldBypassQueue(Uploader uploader) {
-        return uploader.getState() != Uploader.CONNECTING ||
+        return (uploader.getState() != Uploader.CONNECTING &&
+                uploader.getState() != Uploader.FILE_VIEW) ||
                uploader.getMethod() == HTTPRequestMethod.HEAD;
     }
     
@@ -494,6 +512,9 @@ public final class UploadManager implements BandwidthTracker {
         switch(uploader.getIndex()) {
         case BROWSE_HOST_FILE_INDEX:
             uploader.setState(Uploader.BROWSE_HOST);
+            return;
+        case FILE_VIEW_FILE_INDEX:
+            uploader.setState(Uploader.FILE_VIEW);
             return;
         case PUSH_PROXY_FILE_INDEX:
             uploader.setState(Uploader.PUSH_PROXY);
@@ -626,12 +647,9 @@ public final class UploadManager implements BandwidthTracker {
                 queued = ACCEPTED;
             // Otherwise, determine whether or not to queue, accept
             // or reject the uploader.
-            else {
+            else
                 // note that checkAndQueue can throw an IOException
                 queued = checkAndQueue(uploader, socket);
-                Assert.that(queued != -1);
-            
-            }
         } else {
             queued = BYPASS_QUEUE;
         }
@@ -866,9 +884,10 @@ public final class UploadManager implements BandwidthTracker {
      *  
      * @return ACCEPTED if the download may proceed, QUEUED if this is in the
      *  upload queue, REJECTED if this is flat-out disallowed (and hence not
-     *  queued) and BANNED if the downloader is hammering us.  If REJECTED, 
+     *  queued) and BANNED if the downloader is hammering us, and BYPASS_QUEUE
+     *  if this is a File-View request that isn't hammering us. If REJECTED, 
      *  <tt>uploader</tt>'s state will be set to LIMIT_REACHED. If BANNED,
-     *  the <tt>Uploader</tt>'s state will be set to BANNED_GREEDY 
+     *  the <tt>Uploader</tt>'s state will be set to BANNED_GREEDY.
      * @exception IOException the request came sooner than allowed by upload
      *  queueing rules.  (Throwing IOException forces the connection to be
      *  closed by the calling code.)  */
@@ -879,8 +898,8 @@ public final class UploadManager implements BandwidthTracker {
 	    	rqc = new RequestCache();
 	    // make sure we don't forget this RequestCache too soon!
 		REQUESTS.put(uploader.getHost(), rqc);
-	    	
-        boolean isGreedy = rqc.isGreedy(uploader.getFileDesc().getSHA1Urn());
+
+        rqc.countRequest();
         if (rqc.isHammering()) {
             if(LOG.isWarnEnabled())
                 LOG.warn(uploader + " banned.");
@@ -888,6 +907,10 @@ public final class UploadManager implements BandwidthTracker {
         }
         
 
+        // if this is a file view request and it is not hammering it is cool
+        if (uploader.getState() == Uploader.FILE_VIEW) return BYPASS_QUEUE;
+
+        boolean isGreedy = rqc.isGreedy(uploader.getFileDesc().getSHA1Urn());
         int size = _queuedUploads.size();
         int posInQueue = positionInQueue(socket);//-1 if not in queue
         int maxQueueSize = UploadSettings.UPLOAD_QUEUE_SIZE.getValue();
@@ -1274,6 +1297,7 @@ public final class UploadManager implements BandwidthTracker {
             String fileInfoPart = st.nextToken().trim();
 			String fileName = null;
 			Map parameters = null;
+            boolean hadPassword = false;
 			
             if(fileInfoPart.equals("/")) {
                 //special case for browse host request
@@ -1281,6 +1305,12 @@ public final class UploadManager implements BandwidthTracker {
                 fileName = "Browse-Host Request";
                 if( RECORD_STATS )
                     UploadStat.BROWSE_HOST.incrementStat();
+            } else if(fileInfoPart.startsWith(FV_REQ_BEGIN)) {
+                //special case for browse host request
+                index = FILE_VIEW_FILE_INDEX;
+                fileName = fileInfoPart;
+                if( RECORD_STATS )
+                    ;
             } else if (fileInfoPart.equals("/update.xml")) {
                 index = UPDATE_FILE_INDEX;
                 fileName = "Update-File Request";
@@ -1350,13 +1380,22 @@ public final class UploadManager implements BandwidthTracker {
 				} catch(IllegalArgumentException e) {
 					fileName = requestLine.substring( (d+1), f);
 				}
+                // if this is a request from a file-view, trim the fileName
+                // and remember if it had the correct password
+                final String password = FV_PASS+"/";
+                if (fileName.startsWith(password)) {
+                    fileName = fileName.substring(password.length(),
+                                                  fileName.length());
+                    hadPassword = true;
+                }
                 if( RECORD_STATS )
                     UploadStat.TRADITIONAL_GET.incrementStat();				
             }
             //check if the protocol is HTTP1.1.
             //Note that this is not a very strict check.
             boolean http11 = isHTTP11Request(requestLine);
-			return new HttpRequestLine(index, fileName, http11, parameters);
+			return new HttpRequestLine(index, fileName, http11, parameters,
+                                       hadPassword);
 		} catch (NumberFormatException e) {
 			throw new IOException();
 		} catch (IndexOutOfBoundsException e) {
@@ -1405,7 +1444,7 @@ public final class UploadManager implements BandwidthTracker {
         if( RECORD_STATS )
 		    UploadStat.URN_GET.incrementStat();
 		return new HttpRequestLine(desc.getIndex(), desc.getName(), 
-								   isHTTP11Request(requestLine), params);
+								   isHTTP11Request(requestLine), params, false);
 	}
 
 	/**
@@ -1469,6 +1508,11 @@ public final class UploadManager implements BandwidthTracker {
          */
         final Map _params;
         
+        /**
+         * Flag for whether or not the get request had the correct password.
+         */
+        final boolean _hadPass;
+
 		/**
 		 * Constructs a new <tt>RequestLine</tt> instance with no parameters.
 		 *
@@ -1477,7 +1521,7 @@ public final class UploadManager implements BandwidthTracker {
 		 * @param http11 specifies whether or not it's an HTTP 1.1 request
 		 */
 		HttpRequestLine(int index, String fileName, boolean http11) {
-		    this(index, fileName, http11, DataUtils.EMPTY_MAP);
+		    this(index, fileName, http11, DataUtils.EMPTY_MAP, false);
   		}
   		
 		/**
@@ -1488,7 +1532,8 @@ public final class UploadManager implements BandwidthTracker {
 		 * @param http11 specifies whether or not it's an HTTP 1.1 request
 		 * @param params a map of params in this request line
 		 */
-  		HttpRequestLine(int index, String fName, boolean http11, Map params) {
+  		HttpRequestLine(int index, String fName, boolean http11, Map params,
+                        boolean hadPass) {
   			_index = index;
   			_fileName = fName;
             _http11 = http11;
@@ -1496,6 +1541,7 @@ public final class UploadManager implements BandwidthTracker {
                 _params = DataUtils.EMPTY_MAP;
             else
                 _params = params;
+            _hadPass = hadPass;
         }
         
 		/**
@@ -1513,6 +1559,13 @@ public final class UploadManager implements BandwidthTracker {
          */
         Map getParameters() {
             return _params;
+        }
+
+        /**
+         * @return true if the get request had a matching password
+         */
+        boolean hadPassword() {
+            return _hadPass;
         }
   	}
 
@@ -1641,9 +1694,6 @@ public final class UploadManager implements BandwidthTracker {
          * as a request.
          */
     	boolean isGreedy(URN sha1) {
-    		countRequest();
-
-    		
     		return REQUESTS.contains(sha1);
     	}
     	
@@ -1677,7 +1727,7 @@ public final class UploadManager implements BandwidthTracker {
     	/**
     	 * Adds a new request.
     	 */
-    	private void countRequest() {
+    	void countRequest() {
     		_numRequests++;
     		_lastRequest = System.currentTimeMillis();
     	}

@@ -56,6 +56,7 @@ public final class HTTPUploader implements Uploader {
 	private boolean _chatEnabled;
 	private boolean _browseEnabled;
     private boolean _supportsQueueing = false;
+    private final boolean _hadPassword;
 
     /**
      * The Watchdog that will kill this uploader if it takes too long.
@@ -125,6 +126,7 @@ public final class HTTPUploader implements Uploader {
 	 * @param index the index of the file in the set of shared files
 	 * @param params the map of parameters in the http request.
      * @param dog the StalledUploadWatchdog to use for monitor stalls.
+     * @param hadPassword the get line had a matching password.
      * to initialize this' bandwidth tracker so we have history
 	 */
 	public HTTPUploader(HTTPRequestMethod method,
@@ -132,13 +134,15 @@ public final class HTTPUploader implements Uploader {
                         Socket socket,
                         int index,
                         Map params,
-                        StalledUploadWatchdog dog) {
+                        StalledUploadWatchdog dog,
+                        boolean hadPassword) {
         STALLED_WATCHDOG = dog;
 		_socket = socket;
 		_hostName = _socket.getInetAddress().getHostAddress();
 		_fileName = fileName;
 		_index = index;
 		_writtenLocs = null;
+        _hadPassword = hadPassword;
 		reinitialize(method, params);
     }
     
@@ -292,6 +296,9 @@ public final class HTTPUploader implements Uploader {
 			break;
         case BROWSE_HOST:
             _state = new BrowseHostUploadState(this);
+            break;
+        case FILE_VIEW:
+            _state = new FileViewUploadState(this);
             break;
         case PUSH_PROXY:
             _state = new PushProxyUploadState(this);
@@ -776,6 +783,7 @@ public final class HTTPUploader implements Uploader {
         //Allow them to browse the host though
 		if (SharingSettings.ALLOW_BROWSER.getValue() == false
             && !(_stateNum == BROWSE_HOST)  
+            && !(_stateNum == FILE_VIEW)  
             && !(_stateNum == PUSH_PROXY)  
 			&& !(_fileName.toUpperCase().startsWith("LIMEWIRE"))) {
 			// if we are not supposed to read from them
@@ -799,7 +807,8 @@ public final class HTTPUploader implements Uploader {
 				(str.indexOf("SmartDownload") != -1) ||
 				(str.indexOf("Teleport") != -1) ||
 				(str.indexOf("WebDownloader") != -1) ) {
-				throw new FreeloaderUploadingException();
+                if (!_hadPassword)
+                    throw new FreeloaderUploadingException();
 			}
 		}
 		_userAgent = str.substring(11).trim();
