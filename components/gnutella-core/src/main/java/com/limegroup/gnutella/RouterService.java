@@ -384,7 +384,7 @@ public class RouterService
      * Clears the hostcatcher.
      */
     public void clearHostCatcher() {
-        catcher.silentClear();
+        catcher.clear();
     }
 
     /**

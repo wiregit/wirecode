@@ -190,31 +190,6 @@ public class ConnectionManager {
                 true);
     }
 
-    /**
-     * Create and returns a new connection to a router, blocking until it's
-     * initialized, but launching a new thread to do the message loop.  Throws
-     * IOException if the connection couldn't be established.  The router
-     * connection is treated like a normal connection, except that its pongs are
-     * given higher priority.  
-     */
-    public ManagedConnection createRouterConnection(
-            String hostname, int portnum) throws IOException {
-            
-		// Use dedicated pong server instead of defaul for LimeWire
-		if ( hostname.equals(SettingsManager.DEFAULT_LIMEWIRE_ROUTER) ) {
-			hostname = SettingsManager.DEDICATED_LIMEWIRE_ROUTER;
-		}
-
-        ManagedConnection c = 
-		  new ManagedConnection(hostname, portnum, _router, this, true);
-
-        // Initialize synchronously
-        initializeExternallyGeneratedConnection(c);
-        // Kick off a thread for the message loop.
-        new OutgoingConnectionThread(c, false);
-
-        return c;
-    }
 
     /**
      * Create an incoming connection.  This method starts the message loop,
@@ -832,7 +807,7 @@ public class ConnectionManager {
             disconnect();
         }
 
-        //Force reconnect to pong server.
+        //Tell the HostCatcher it's ok to reconnect to router.limewire.com.
         _catcher.expire();
 
         //Ensure outgoing connections is positive.
@@ -857,23 +832,31 @@ public class ConnectionManager {
     }
     
     /** 
-     * Sends the initial ping request to a newly initialized connection.  The ttl
-     * of the PingRequest will be 1 if we don't need any connections.  Otherwise,
-     * the ttl = max ttl.
+     * Sends the initial ping request to a newly initialized connection.  If
+     * connection is router.limewire.com (e.g.,
+     * connection.isRouterConnection()), sends a special group ping.  Otherwise
+     * the ttl of the PingRequest will be 1 if we don't need any connections.
+     * Otherwise, the ttl = max ttl.
      */
     private void sendInitialPingRequest(ManagedConnection connection) {
         PingRequest pr;
-        //we need to compare how many connections we have to the keep alive to
+        //Bootstrap server: send group ping.
+        if (connection.isRouterConnection()) {
+            String group = "none:"+_settings.getConnectionSpeed();
+            pr = _router.createGroupPingRequest(group);                 //a
+        }
+        //We need to compare how many connections we have to the keep alive to
         //determine whether to send a broadcast ping or a handshake ping, 
         //initially.  However, in this case, we can't check the number of 
         //connection fetchers currently operating, as that would always then
         //send a handshake ping, since we're always adjusting the connection 
         //fetchers to have the difference between keep alive and num of
         //connections.
-        if (getNumInitializedConnections() >= _keepAlive)
-            pr = new PingRequest((byte)1);
+        else if (getNumInitializedConnections() >= _keepAlive)
+            pr = new PingRequest((byte)1);                              //b
         else
-            pr = new PingRequest(SettingsManager.instance().getTTL());
+            pr = new PingRequest(SettingsManager.instance().getTTL());  //c
+
         connection.send(pr);
         //Ensure that the initial ping request is written in a timely fashion.
         try {
@@ -1331,24 +1314,8 @@ public class ConnectionManager {
                 if(_doInitialization)
                     initializeExternallyGeneratedConnection(_connection);
 
-				// Send GroupPingRequest to router
-				String origHost = _connection.getOrigHost();
-				if (origHost != null && 
-                    origHost.equals(SettingsManager.DEDICATED_LIMEWIRE_ROUTER))
-				{
-				    String group = "none:"+_settings.getConnectionSpeed();
-				    PingRequest pingRequest = 
-                        _router.createGroupPingRequest(group);
-                    _connection.send(pingRequest);
-                    //Ensure that the initial ping request is written in a timely fashion.
-                    _connection.flush();
-				}
-				else
-                {
-                    //send normal ping request (handshake or broadcast depending
-                    //on num of current connections.
-                    sendInitialPingRequest(_connection);
-                }
+				// Send ping...possibly group ping.
+                sendInitialPingRequest(_connection);
                 _connection.loopForMessages();
             } catch(IOException e) {
             } catch(Exception e) {
@@ -1363,23 +1330,23 @@ public class ConnectionManager {
     }
 
     //------------------------------------------------------------------------
-    /**
-     * Create a new connection, blocking until it's initialized, but launching
-     * a new thread to do the message loop.
-     */
-    public ManagedConnection createGroupConnectionBlocking(
-      String hostname, int portnum, GroupPingRequest specialPing) 
-	  throws IOException {
-        ManagedConnection c = 
-		  new ManagedConnection(hostname, portnum, _router, this, true);
+//     /**
+//      * Create a new connection, blocking until it's initialized, but launching
+//      * a new thread to do the message loop.
+//      */
+//     public ManagedConnection createGroupConnectionBlocking(
+//       String hostname, int portnum, GroupPingRequest specialPing) 
+// 	  throws IOException {
+//         ManagedConnection c = 
+// 		  new ManagedConnection(hostname, portnum, _router, this, true);
 
-        // Initialize synchronously
-        initializeExternallyGeneratedConnection(c);
-        // Kick off a thread for the message loop.
-        new GroupOutgoingConnectionThread(c, specialPing);
+//         // Initialize synchronously
+//         initializeExternallyGeneratedConnection(c);
+//         // Kick off a thread for the message loop.
+//         new GroupOutgoingConnectionThread(c, specialPing);
 
-        return c;
-    }
+//         return c;
+//     }
     
     /**
      * @requires n>0
@@ -1496,6 +1463,7 @@ public class ConnectionManager {
                 _callback.error(ActivityCallback.INTERNAL_ERROR, e);
             }
             finally{
+                _catcher.doneWithEndpoint(endpoint);
                 if (connection.isClientSupernodeConnection())
                     lostShieldedClientSupernodeConnection();
             }

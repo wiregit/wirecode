@@ -266,24 +266,35 @@ public class ManagedConnection
 	 */
 	private final SettingsManager SETTINGS = SettingsManager.instance();
     
-    /** Same as ManagedConnection(host, port, router, manager, false); */
-    ManagedConnection(String host,
-                      int port,
-                      MessageRouter router,
-                      ConnectionManager manager) {
-        this(host, port, router, manager, false);
-    }
-
-    /**
-     * Creates an outgoing connection.  The connection is considered a special
-     * "router connection" iff isRouter==true.  ManagedConnections should only
-     * be constructed within ConnectionManager.  
+    /** 
+     * Creates an outgoing connection. 
+     *
+     * @param host the address to connect to in symbolic or dotted-quad format
+     *  If host names a special bootstrap server, e.g., "router.limewire.com",
+     *  this may take special action, like trying "router4.limewire.com" instead
+     *  with a 0.4 handshake.
+     * @param port the port to connect to
+     * @param router where to report messages
+     * @param where to report my death.  Also used for reject connections.
      */
     ManagedConnection(String host,
                       int port,
                       MessageRouter router,
-                      ConnectionManager manager,
-                      boolean isRouter) {
+                      ConnectionManager manager) {
+        this(translateHost(host), port, router, manager, isRouter(host));
+    }
+
+    /**
+     * Creates an outgoing connection.  The connection is considered a special
+     * LimeWire router connection iff isRouter==true.  In this case host should
+     * already be translated.  This constructor exists only for the convenience
+     * of implementation.
+     */
+    private ManagedConnection(String host,
+                              int port,
+                              MessageRouter router,
+                              ConnectionManager manager,
+                              boolean isRouter) {
         //If a router connection, connect as 0.4 by setting responders to null.
         //(Yes, it's a hack, but this is how Connection(String,int) is
         //implemented.)  Otherwise connect at 0.6 with re-negotiation, setting
@@ -1272,6 +1283,33 @@ public class ManagedConnection
         this.queryInfo=qi;
     } 
 
+    /** Maps router.limewire.com to router4.limewire.com. */
+    private static String translateHost(String hostname) {
+        if (hostname.equals(SettingsManager.DEFAULT_LIMEWIRE_ROUTER))
+            return SettingsManager.DEDICATED_LIMEWIRE_ROUTER;
+        else
+            return hostname;
+    }
+
+    /** Returns true iff hostname is any of the routerX.limewire.com's (possibly
+     *  in dotted-quad form). */
+    public static boolean isRouter(String hostname) {
+        //Taken from the old ConnectionManager.createRouterConnection method.
+        if (hostname.startsWith("router") && hostname.endsWith("limewire.com"))
+            return true;
+        //Take from the old HostCatcher.isRouter method.  
+        //Check for 64.61.25.139-143 and 64.61.25.171
+        if (hostname.startsWith("64.61.25") 
+            && (hostname.endsWith("171")
+                || hostname.endsWith("139")
+                || hostname.endsWith("140")
+                || hostname.endsWith("141")
+                || hostname.endsWith("142")
+                || hostname.endsWith("143"))) 
+            return true;
+        return false;
+    }
+
     /** 
      * Tests representation invariants.  For performance reasons, this is
      * private and final.  Make protected if ManagedConnection is subclassed.
@@ -1320,6 +1358,7 @@ public class ManagedConnection
         }
 
         testHorizonStatistics();
+        testIsRouter();
     }
 
     private static void testSendFlush(ManagedConnection out, Connection in) 
@@ -1771,6 +1810,26 @@ public class ManagedConnection
         Assert.that(mc.getNumHosts()==0);
         Assert.that(mc.getTotalFileSize()==0);                
     }
+    
+    private static void testIsRouter() {
+        System.out.println("-Testing isRouter helper methods");
+        Assert.that(! isRouter("127.0.0.1"));
+        Assert.that(! isRouter("18.239.0.1"));
+        Assert.that(isRouter("64.61.25.171"));
+        Assert.that(isRouter("64.61.25.139"));
+        Assert.that(isRouter("64.61.25.143"));
+        Assert.that(! isRouter("64.61.25.138"));
+        Assert.that(! isRouter("64.61.25.170"));
+        Assert.that(! isRouter("www.limewire.com"));
+        Assert.that(! isRouter("public.bearshare.net"));
+        Assert.that(isRouter("router.limewire.com"));
+        Assert.that(isRouter("router4.limewire.com"));
+        Assert.that(isRouter("router2.limewire.com"));
+        Assert.that(translateHost("router.limewire.com").equals(
+            "router4.limewire.com"));
+        Assert.that(translateHost("router4.limewire.com").equals(
+            "router4.limewire.com"));
+     }
 
     // Stub for testing statistics
     private ManagedConnection() {

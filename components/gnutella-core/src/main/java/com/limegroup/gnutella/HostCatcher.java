@@ -6,6 +6,7 @@ import java.io.*;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Date;
+import com.limegroup.gnutella.tests.stubs.ActivityCallbackStub;
 
 /**
  * The host catcher.  This peeks at pong messages coming on the
@@ -24,10 +25,13 @@ import java.util.Date;
  * <li> Private addresses.  This means that the host catcher will still 
  *      work on private networks, although we will normally ignore private
  *      addresses.        
- * </ol>
- * 
- * The HostCatcher may initiate outgoing "router" connections.  This behavior is
- * confusing and will likely be refactored in the future.  
+ * </ol> 
+ *
+ * HostCatcher also manages the list of permanent bootstrap servers like
+ * <tt>router.limewire.com</tt>.  The expire() method can force this to
+ * reconnect to the bootstrap server by demoting ultrapeer pongs.  The
+ * doneWithEndpoint(e) method helps this connect to only one bootstrap
+ * server at a time.
  */
 public class HostCatcher {    
     /** The number of supernode pongs to store. */
@@ -56,77 +60,43 @@ public class HostCatcher {
         new BucketQueue(new int[] {BAD_SIZE, NORMAL_SIZE, GOOD_SIZE});
     private Set /* of Endpoint */ set=new HashSet();
 
+    /** The bootstrap hosts from the QUICK_CONNECT_HOSTS property, e.g.,
+     * router.limewire.com.  We try these hosts serially (starting with the
+     * head) until we get some good endpoints, e.g. size(GOOD_SIZE)>0.  */
+    private LinkedList /* of Endpoint */ bootstrapHosts=new LinkedList();
+    /** The bootstrap host we're trying to connect from, or null if none.
+     * Prevents us from connecting to more than one bootstrap host at a time.
+     * This value is set when removing entries from bootstrapHosts.  It's
+     * cleared in doneWithEndpoint(). */
+    private Endpoint bootstrapHostInProgress=null;
+
     private Acceptor acceptor;
     private ConnectionManager manager;
     private ActivityCallback callback;
     private SettingsManager settings=SettingsManager.instance();
 
-    private Thread routerConnectorThread;
-    /* True if the cache has expired and the host catcher has not yet tried
-     * (successfully or not) to connect to the pong cache.  It is also used to
-     * force the first connection fetchers to wait for the initial connection to
-     * the router.  LOCKING: obtain staleLock.
+    /**
+     * whether or not to always notify the activity callback implementor that
+     * a host was added to the host catcher.  This is used when the hostcatcher
+     * is used with the SimplePongCacheServer to always notify when a host was
+     * added.
      */
-    private boolean stale=true;
-    private Object staleLock=new Object();
-    /* The number of threads waiting for stale to become false.  This is used as
-     * an optimization to avoid reconnecting to the server unless someone needs
-     * it. LOCKING: obtain staleWaitersLock.  
-     */
-    private int staleWaiters=0;
-    private Object staleWaitersLock=new Object();
-    /* True iff we have gotten a good pong since setting stale=false.
-     * LOCKING: obtain gotGoodPongLock.
-     */
-    private boolean gotGoodPong=false;
-    private Object gotGoodPongLock=new Object();
-
-	// TODO1 - This methodology just does not scale.
-	// It is set to 48 hours to suppress the hits on central server.
-    /** The number of MILLISECONDS a server's pong is valid for. */
-    private static final int STALE_TIME=48*60*60*1000; 
-    /** The number of MILLISECONDS to wait before retrying quick-connect. */
-    private static final int RETRY_TIME=5*60*1000; //5 minutes
-    /** The amount of MILLISECONDS to wait after starting a connection before
-     *  trying another. */
-    private static final int CONNECT_TIME=6000;  //6 seconds
-
-    //whether or not to always notify the activity callback implementor that
-    //a host was added to the host catcher.  This is used when the hostcatcher
-    //is used with the SimplePongCacheServer to always notify when a host was
-    //added.
     private boolean alwaysNotifyKnownHost=false;
 
-	/**
-	 * Boolean value for whether or not the thread to connect to the 
-	 * router has been started or not.
-	 */
-	private boolean routerConnectorThreadStarted = false;
 
     /**
      * Creates an empty host catcher.  Must call initialize before using.
      */
     public HostCatcher(ActivityCallback callback) {
         this.callback=callback;
-        routerConnectorThread=new RouterConnectorThread();
     }
 
     /**
      * Links the HostCatcher up with the other back end pieces
      */
     public void initialize(Acceptor acceptor, ConnectionManager manager) {
-        this.acceptor = acceptor;
-        this.manager = manager;
+        initialize(acceptor, manager, null);
     }
-
-	/**
-	 * Connects to the router in a background thread.
-	 */
-	public void connectToRouter() {
-		routerConnectorThread.setDaemon(true);
-        routerConnectorThread.start();
-		routerConnectorThreadStarted = true;
-	}
 
     /**
      * Links the HostCatcher up with the other back end pieces, and, if quick
@@ -140,8 +110,11 @@ public class HostCatcher {
                            String filename) {
         this.acceptor = acceptor;
         this.manager = manager;
+
+        //Read gnutella.net
         try {
-            read(filename);
+            if (filename!=null)
+                read(filename);
         } catch (FileNotFoundException e) {
         } catch (IOException e) {
         }
@@ -299,14 +272,8 @@ public class HostCatcher {
             return false;
 
         //Skip if this is the router.
-        try {
-            if (isRouter(e.getHostBytes())) 
-                return false;
-        }
-        catch(UnknownHostException uhe){
-            //return in this case, without adding the host
+        if (ManagedConnection.isRouter(e.getHostname())) 
             return false;
-        }
 
         boolean ret=false;
         boolean notifyGUI=false;
@@ -333,15 +300,6 @@ public class HostCatcher {
             }
         }
 
-        //If we're trying to connect to pong, notify the router connection
-        //thread.  This will in turn notify any connection fetchers waiting for
-        //the cache to refresh.  We used to do this only for router pongs.  Now
-        //GOOD_PRIORITY is redefined to mean supernode.  Is this new code ok?
-        synchronized (gotGoodPongLock) {
-            gotGoodPong=true;
-            gotGoodPongLock.notify();
-        }
-
         //we notify the callback in two different situations.  One situation, we
         //always notify the GUI (e.g., a SimplePongCacheServer which needs to know
         //when a new host was added).  The second situation is if the host catcher
@@ -360,170 +318,35 @@ public class HostCatcher {
     }
 
     /**
-     *  @requires this' monitor held by caller
-     *  @effects returns true iff this has a host with weight GOOD_PRIORITY
-     */
-    private boolean hasRouterHost() {
-        //Because priorities are only -1, 0, or 1, it suffices to look at the
-        //head of the queue.  If this were not the case, we would likely have
-        //to augment the state of this.
-        if (! queue.isEmpty()) {
-            Endpoint e=(Endpoint)queue.getMax();
-            return e.getWeight()==GOOD_PRIORITY;
-        } else {
-            return false;
-        }
-    }
-
-    /**
-     * This thread loops forever, contacting the pong server about every 30
-     * minutes.  An earlier implementation created a new thread every time a
-     * reconnect was needed, but that proved somewhat complicated.
-     */
-    private class RouterConnectorThread extends Thread {
-        RouterConnectorThread() {
-            setDaemon(true);
-            setName("RouterConnectorThread");
-        }
-
-        /** Repeatedly contacts the pong server at most every STALE_TIME
-         *  milliseconds. */
-        public void run() {
-            while(true) {  
-                stale=true;
-                //1. Wait until someone is waiting on staleLock.  (Really!) The
-                //following code is here solely as an optimization to avoid
-                //connecting to the pong server every STALE_TIME minutes if not
-                //necessary.
-                synchronized (staleWaitersLock) {
-                    while (staleWaiters==0) { 
-                        try {
-                            staleWaitersLock.wait();
-                        } catch (InterruptedException e) {
-                            continue;
-                        }
-                    }
-                }
-
-                //2. Try connecting every RETRY_TIME milliseconds until we get a
-                //good pong...
-                try {
-                    connectUntilPong();
-                } catch (InterruptedException e) {
-                    continue;
-                }
-
-                //3. Sleep until the cache expires and try again.
-                try {
-                    Thread.sleep(STALE_TIME);
-                } catch (InterruptedException e) {
-                    continue;
-                }
-            }
-        }
-
-        /** Blocks until we get a good pong. Throws InterruptedException
-         *  if interrupted while waiting. */
-        private void connectUntilPong() throws InterruptedException {
-            gotGoodPong=false;
-            while (! gotGoodPong) {
-                //1) Try each quick-connect host until we connect
-                String[] hosts=settings.getQuickConnectHosts();
-                for (int i=0; i<hosts.length && !gotGoodPong; i++) {
-                    //a) Extract hostname+port and try to connect synchronously.
-                    Endpoint e;
-                    try {
-                        e=new Endpoint(hosts[i]);
-                    } catch (IllegalArgumentException exc) {
-                        continue;
-                    }
-                    try {
-                        manager.createRouterConnection(e.getHostname(),
-                                                       e.getPort());
-                    } catch (IOException exc) {
-                        continue;
-                    }
-
-                    //b) Wait CONNECT_TIME milliseconds for good pong.
-                    //Note the boolean check to avoid missing notify.
-                    synchronized (gotGoodPongLock) {
-                        if (! gotGoodPong) {
-                            gotGoodPongLock.wait(CONNECT_TIME);
-                        }                        
-                    }
-                }
-
-                //2) Regardless of whether we connected or not, anyone waiting
-                //for the cache to be refreshed can continue.  The check for
-                //stale is just a mini optimization.
-                if (stale) {
-                    synchronized (staleLock) {
-                        stale=false;
-                        staleLock.notifyAll();
-                    }
-                }
-                    
-                //3) If we need to retry, sleep a little first.  Otherwise
-                //we'll immediately exit the loop.
-                if (! gotGoodPong) 
-                    Thread.sleep(RETRY_TIME);
-            }
-        }
-    } //end RouterConnectorThread
-
-    /**
      * @modifies this
      * @effects atomically removes and returns the highest priority host in
      *  this.  If no host is available, blocks until one is.  If the calling
      *  thread is interrupted during this process, throws InterruptedException.
+     *  The caller should call doneWithEndpoint(..) when done with the 
+     *  returned value.
      */
-    public Endpoint getAnEndpoint() throws InterruptedException {
-        //If cache has expired, wait for reconnect to finish (normally or
-        //timeout).  See RouterConnectionThread.run().
-        if(settings.getUseQuickConnect() && stale) {
-            try {
-                synchronized (staleWaitersLock) {
-                    staleWaiters++;
-                    staleWaitersLock.notify();
+    public synchronized Endpoint getAnEndpoint() throws InterruptedException {
+        while (true)  {
+            try { 
+                //a) If we have a good endpoint, use that.
+                if (queue.size(GOOD_PRIORITY)>0) 
+                    return getAnEndpointInternal(); 
+                //b) If we're not currently connecting to a bootstrap server and
+                //there are servers left to try, do so.
+                else if (bootstrapHostInProgress==null
+                         && !bootstrapHosts.isEmpty()) {                    
+                    Endpoint ret=(Endpoint)bootstrapHosts.removeFirst();
+                    bootstrapHostInProgress=ret;
+                    return ret;
                 }
-                synchronized(staleLock) {
-                    if (stale) {
-                        //When you exit the synchronized block, the host catcher
-                        //may still be stale.  Big deal.  This is better than
-                        //waiting for too long here because Java socket timeouts
-                        //are slow.
-                        staleLock.wait(CONNECT_TIME);
-                    }
-                }
-            } finally {
-                synchronized (staleWaitersLock) {
-                    staleWaiters--;
-                }
-            }
-        }
-
-        Endpoint endpoint = null; 
-        synchronized (this) { 
-			while (true)  {
-				try { 
-					endpoint = getAnEndpointInternal(); 
-					break; 
-				} catch (NoSuchElementException e) {
-					wait(); //throws InterruptedException 
-				} 
-			} 
+                //c) Try one of the crap pongs.
+                else
+                    return getAnEndpointInternal();
+            } catch (NoSuchElementException e) { }
+            
+            //No luck?  Wait and try again.
+            wait();  //throws InterruptedException 			
         } 
-        return endpoint;
-
-//        synchronized (this) {
-//            while (true) {                                
-//                try {
-//                    return getAnEndpointInternal();
-//                } catch (NoSuchElementException e) { 
-//                    wait(); //throws InterruptedException
-//                }
-//            }
-//        }
     }
 
     /**
@@ -597,6 +420,18 @@ public class HostCatcher {
     }
 
     /**
+     * Notifies this that the fetcher is done with the fetched connection to
+     * host.  This exists primarily to tell if we're done with
+     * router.limewire.com.
+     */
+    public synchronized void doneWithEndpoint(Endpoint e) {
+        if (e==bootstrapHostInProgress) {  //not .equals
+            bootstrapHostInProgress=null;
+            notifyAll();  //may be able to try other bootstrap servers
+        }
+    }
+
+    /**
      *  Remove unwanted or used entries
      */
     public synchronized void removeHost(String host, int port) {
@@ -608,36 +443,45 @@ public class HostCatcher {
     }
 
     /**
+     * Notifies this that connect() has been called.  This may decide to give
+     * out bootstrap pongs if necessary.
+     */
+    public synchronized void expire() {
+        //Add bootstrap hosts IN ORDER.
+        bootstrapHostInProgress=null;
+        bootstrapHosts.clear();
+        String[] hosts=settings.getQuickConnectHosts();
+        for (int i=0; i<hosts.length; i++) {
+            Endpoint e=new Endpoint(hosts[i]);
+            bootstrapHosts.addLast(e);
+        }
+        
+        //Move the N ultrapeer hosts from GOOD to NORMAL.  This forces
+        //getAnEndpointInternal() to return a bootstrap pong next.  This is a
+        //little weird, because these hosts really still are ultrapeer
+        //pongs--just lesser priority.
+        int n=getNumUltrapeerHosts();
+        for (int i=0; i<n; i++) {
+            try {
+                Endpoint e=getAnEndpointInternal();
+                e.setWeight(NORMAL_PRIORITY);
+                add(e);
+            } catch (NoSuchElementException e) {
+                Assert.that(false, 
+                    i+"'th getAnEndpointInternal not consistent with "+n);
+            }
+        }
+    }
+
+    /**
      * @modifies this
      * @effects removes all entries from this
      */
     public synchronized void clear() {
         queue.clear();
         set.clear();
-        expire();
     }
 
-    /**
-     * @modifies this
-     * @effects removes all entries from this.  Does not wake up fetcher.
-     */
-    public synchronized void silentClear() {
-        queue.clear();
-        set.clear();
-    }
-
-    /**
-     * @modifies this
-     * @effects ensures that the next call to getAnEndpoint will attempt to
-     *  contact the pong server.
-     */
-    public synchronized void expire() {
-		if(routerConnectorThreadStarted)
-			routerConnectorThread.interrupt();
-		else {
-			connectToRouter();
-		}
-    }
 
     /**
      * If host is not a valid host address, returns false.
@@ -664,18 +508,6 @@ public class HostCatcher {
         }
     }
 
-    /** Returns true iff ip is the ip address of router.limewire.com.
-     *      @requires ip.length==4 */
-    private static boolean isRouter(byte[] ip) {
-        //Check for 64.61.25.139-143 and 64.61.25.171
-        return ip[0]==(byte)64
-            && ip[1]==(byte)61
-            && ip[2]==(byte)25
-            && (ip[3]==(byte)171
-                    || (ip[3]>=(byte)139 && ip[3]<=(byte)143) );
-                    
-    }
-
     public String toString() {
         return queue.toString();
     }
@@ -684,38 +516,86 @@ public class HostCatcher {
         alwaysNotifyKnownHost = notifyKnownHost;
     }
 
-//      /** Unit test: just calls tests.HostCatcherTest, since it
-//       *  is too large and complicated for this.
-//       */
-//      public static void main(String args[]) {
-//          String newArgs[]={String.valueOf(STALE_TIME),
-//                            String.valueOf(RETRY_TIME),
-//                            String.valueOf(CONNECT_TIME)};
-//          com.limegroup.gnutella.tests.HostCatcherTest.main(newArgs);
-//      }
-
-//      public static void main(String args[]) {
-//          Assert.that(! HostCatcher.isRouter(
-//              new byte[] {(byte)127, (byte)0, (byte)0, (byte)1}));
-//          Assert.that(! HostCatcher.isRouter(
-//              new byte[] {(byte)18, (byte)239, (byte)0, (byte)1}));
-//          Assert.that(HostCatcher.isRouter(
-//              new byte[] {(byte)64, (byte)61, (byte)25, (byte)171}));
-//          Assert.that(HostCatcher.isRouter(
-//              new byte[] {(byte)64, (byte)61, (byte)25, (byte)139}));
-//          Assert.that(HostCatcher.isRouter(
-//              new byte[] {(byte)64, (byte)61, (byte)25, (byte)143}));
-//          Assert.that(! HostCatcher.isRouter(
-//              new byte[] {(byte)64, (byte)61, (byte)25, (byte)138}));
-//          Assert.that(! HostCatcher.isRouter(
-//              new byte[] {(byte)64, (byte)61, (byte)25, (byte)170}));
-//      }
-
-
-    /** A simpler unit test */
+    /** Unit test */
     /*
     public static void main(String args[]) {
-        HostCatcher hc=new HostCatcher(new Main());
+        testBootstraps();
+        testExpire();
+        testIterators();
+    }
+
+    private static void testBootstraps() {
+        try {
+            //TODO: factor the new HostCatcher code into a setUp() method.
+            System.out.println("-Testing bootstrap servers");
+            SettingsManager.instance().setQuickConnectHosts(
+                new String[] { "r1.b.c.d:6346", "r2.b.c.d:6347"});
+            HostCatcher hc=new HostCatcher(new ActivityCallbackStub());
+            hc.initialize(new Acceptor(6346, null),
+                          new ConnectionManager(null, null));
+
+            hc.add(new Endpoint("128.103.60.3", 6346), false);
+            hc.add(new Endpoint("128.103.60.2", 6346), false);
+            hc.add(new Endpoint("128.103.60.1", 6346), false);
+
+            Endpoint router1=hc.getAnEndpoint();
+            Assert.that(router1.equals(new Endpoint("r1.b.c.d", 6346)));         
+            Assert.that(hc.getAnEndpoint().equals(
+                new Endpoint("128.103.60.1", 6346)));
+            hc.add(new Endpoint("18.239.0.144", 6346), true);
+            hc.doneWithEndpoint(router1);    //got pong
+            Assert.that(hc.getAnEndpoint().equals(
+                new Endpoint("18.239.0.144", 6346)));        
+
+            Endpoint router2=hc.getAnEndpoint();
+            Assert.that(router2.equals(new Endpoint("r2.b.c.d", 6347)));        
+            Assert.that(hc.getAnEndpoint().equals(
+                new Endpoint("128.103.60.2", 6346)));        
+            hc.doneWithEndpoint(router2);    //did't get any pongs
+
+            Assert.that(hc.getAnEndpoint().equals(
+                new Endpoint("128.103.60.3", 6346))); //no more bootstraps
+        } catch (InterruptedException e) {
+            Assert.that(false, "Mysterious InterruptedException");
+        }
+    }
+
+    private static void testExpire() {
+        try {
+            System.out.println("-Testing expire");
+            SettingsManager.instance().setQuickConnectHosts(
+                 new String[] { "r1.b.c.d:6346", "r2.b.c.d:6347"});
+            HostCatcher hc=new HostCatcher(new ActivityCallbackStub());
+            hc.initialize(new Acceptor(6346, null),
+                          new ConnectionManager(null, null));
+
+            Assert.that(hc.getAnEndpoint().equals(new Endpoint("r1.b.c.d", 6346)));
+
+            hc.add(new Endpoint("18.239.0.144", 6346), true);
+            hc.add(new Endpoint("128.103.60.3", 6346), false);
+            hc.add(new Endpoint("192.168.0.1", 6346));
+            Assert.that(hc.getNumUltrapeerHosts()==1);
+
+            hc.expire();
+            Assert.that(hc.getNumUltrapeerHosts()==0);
+            Endpoint e=hc.getAnEndpoint();
+            Assert.that(e.equals(new Endpoint("r1.b.c.d", 6346)));
+            hc.doneWithEndpoint(e);
+            e=hc.getAnEndpoint();
+            Assert.that(e.equals(new Endpoint("r2.b.c.d", 6347)));
+            hc.doneWithEndpoint(e);
+            Assert.that(hc.getAnEndpoint().equals(
+                new Endpoint("18.239.0.144", 6346)));
+            Assert.that(hc.getAnEndpoint().equals(
+                new Endpoint("128.103.60.3", 6346)));
+        } catch (InterruptedException e) { 
+            Assert.that(false, "Mysterious InterruptedException");
+        }
+    }
+
+    private static void testIterators() {
+        System.out.println("-Testing iterators");
+        HostCatcher hc=new HostCatcher(new ActivityCallbackStub());
         hc.initialize(new Acceptor(6346, null),
                       new ConnectionManager(null, null));
 
