@@ -51,6 +51,8 @@ public class Main implements ActivityCallback {
 			service.connectToHost(commands[1], port);
 		    } catch (IOException e) {
 			System.out.println("Couldn't establish connection.");
+		    } catch (NumberFormatException e) {
+			System.out.println("Please specify a valid port.");
 		    }
 		} else if (commands.length>=2 && commands[0].equals("query")) {
 		    //Get query string from command (possibly multiple words)
