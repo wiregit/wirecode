@@ -244,8 +244,13 @@ public class IntervalSet {
         Interval interval=null;
         for (Iterator iter=intervals.iterator(); iter.hasNext(); ) {
             interval=(Interval)iter.next();
-            if (interval.low!=0 && low<interval.low)//needed for first interval
+            if (interval.low!=0 && low<interval.low) {//needed for first interval
+                if (low+1 > interval.low-1)
+                    throw new Error("constructing invalid interval "+
+                            " while trying to invert \n"+toString()+
+                            " \n with size "+maxSize);
                 ret.add(new Interval(low+1, interval.low-1));
+            }
             low=interval.high;
         }
         //Special case space between last block and end of file.
