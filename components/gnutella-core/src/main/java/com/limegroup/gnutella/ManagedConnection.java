@@ -219,8 +219,10 @@ public class ManagedConnection
      *  because this is a connection to a Clip2 reflector. */
     private boolean _isKillable=true;
     
-    //if I am a supernode shielding the given connection
+    /** if I am a supernode shielding the given connection */
     private Boolean _isSupernodeClientConnection=null;
+    /** if I am a leaf connected to a supernode  */
+    private Boolean _isClientSupernodeConnection=null;
 
     /** Same as ManagedConnection(host, port, router, manager, false); */
     ManagedConnection(String host,
@@ -902,6 +904,14 @@ public class ManagedConnection
      *  between the two; the supernode could be using reflector indexing, for
      *  example. */
     public boolean isClientSupernodeConnection() {
+        if(_isClientSupernodeConnection == null) {
+            _isClientSupernodeConnection = 
+                new Boolean(isClientSupernodeConnection2());
+        }
+        return _isClientSupernodeConnection.booleanValue();
+    }
+
+    private boolean isClientSupernodeConnection2() {
         //Is remote host a supernode...
         if (! isSupernodeConnection())
             return false;

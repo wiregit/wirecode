@@ -348,12 +348,19 @@ public abstract class MessageRouter
     {
         // Note the use of initializedConnections only.
         // Note that we have zero allocations here.
+
+        //Broadcast the ping to other connected nodes (supernodes or older
+        //nodes), but DON'T forward any ping not originating from me (i.e.,
+        //receivingConnection!=null) along leaf to ultrapeer connections.
         List list=manager.getInitializedConnections2();
         for(int i=0; i<list.size(); i++)
         {
             ManagedConnection c = (ManagedConnection)list.get(i);
-            if(c != receivingConnection)
+            if (   receivingConnection==null   //came from me
+                || (c!=receivingConnection
+                     && !receivingConnection.isClientSupernodeConnection())) {
                 c.send(pingRequest);
+            }
         }
     }
 
@@ -374,12 +381,15 @@ public abstract class MessageRouter
         // Note the use of initializedConnections only.
         // Note that we have zero allocations here.
         
-        //broadcast the query to other connected nodes (supernodes or
-        //older nodes)
+        //Broadcast the query to other connected nodes (supernodes or older
+        //nodes), but DON'T forward any queries not originating from me (i.e.,
+        //receivingConnection!=null) along leaf to ultrapeer connections.
         List list=_manager.getInitializedConnections2();
         for(int i=0; i<list.size(); i++){
             ManagedConnection c = (ManagedConnection)list.get(i);
-            if (c != receivingConnection) {
+            if (   receivingConnection==null   //came from me
+                || (c!=receivingConnection
+                     && !receivingConnection.isClientSupernodeConnection())) {
                 c.send(queryRequest);
             }
         }
@@ -663,8 +673,7 @@ public abstract class MessageRouter
             for(int i=0; i<list.size(); i++) {                        
                 ManagedConnection c=(ManagedConnection)list.get(i);
                 
-                //There should only be one leaf/supernode connection.  But we
-                //can recover gracefully if that for some reason isn't the case.
+                //Not every connection need be a leaf/supernode connection.
                 if (! (c.isClientSupernodeConnection() 
                           && c.isQueryRoutingEnabled())) 
                     continue;

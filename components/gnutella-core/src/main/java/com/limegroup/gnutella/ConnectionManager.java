@@ -95,11 +95,15 @@ public class ConnectionManager {
 	private Runnable _ultraFastCheck;
 
     /**
-     * Minimum umber of connections that a supernode with leaf connections,
+     * Minimum number of connections that a supernode with leaf connections,
      * must have
      */
-    public static final int MIN_CONNECTIONS_FOR_SUPERNODE = 6;
-    
+    public static final int MIN_CONNECTIONS_FOR_SUPERNODE = 6;    
+    /**
+     * Ideal number of connections for a leaf.
+     */
+    public static final int PREFERRED_CONNECTIONS_FOR_LEAF = 3;    
+
     /** The maximum number of ultrapeer endpoints to give out from the host
      *  catcher in X_TRY_SUPERNODES headers. */
     private int MAX_SUPERNODE_ENDPOINTS=10;
@@ -280,10 +284,11 @@ public class ConnectionManager {
      * and newKeep>1 (sic).
      */
     public synchronized void setKeepAlive(int newKeep) {
-        //The request for increasing keep alive if we are leaf node is invalid.
-        //This logic is duplicated in RouterService.setKeepAlive.
-        if ((newKeep > 1) && hasClientSupernodeConnection())
-            return;
+        //TODO: we may want to re-enable this...with a higher limit.
+        ////The request for increasing keep alive if we are leaf node is invalid
+        ////This logic is duplicated in RouterService.setKeepAlive.
+        //if ((newKeep > 1) && hasClientSupernodeConnection())
+        //    return;
         
         _keepAlive = newKeep;
         adjustConnectionFetchers();
@@ -316,17 +321,16 @@ public class ConnectionManager {
      * is not required that the supernode support query routing, though that is
      * generally the case.  
      */
-    public synchronized boolean hasClientSupernodeConnection() {
-        //TODO3: it may be possible to remove the synchronized statement here,
-        //depending on whether Java ALWAYS stores the value of
-        //_incomingConnections in a register before proceeding.
-        List connections=_initializedConnections;
-        if (connections.size()!=1)
-            return false;
-        else {
+    public boolean hasClientSupernodeConnection() {
+        //TODO2: should we make this faster by augmenting state?  We could
+        //also return false if isSupernode().
+        List connections=getInitializedConnections();
+        for (int i=0; i<connections.size(); i++) {
             ManagedConnection first=(ManagedConnection)connections.get(0);
-            return first.isClientSupernodeConnection();
+            if (first.isClientSupernodeConnection())
+                return true;
         }
+        return false;
     }
     
     /**
@@ -947,29 +951,38 @@ public class ConnectionManager {
     private synchronized void gotShieldedClientSupernodeConnection(
         ManagedConnection supernodeConnection)
     {
-        // Deactivate checking for Ultra Fast Shutdown
-		deactivateUltraFastConnectShutdown(); 
-        //Set keep alive to 1, so that we are not fetching any connections.
-        //KEEP_ALIVE property is not modified, so that when this connection
-        //drops, we can restore _keepAlive to its old value.  Note that we do
-        //not set _keepAlive to 0.  This allows
-        //lostShieldedClientSupernodeConnection to distinguish between being
-        //disconnected by the user and being disconnected by the remote host.
-        //(An earlier version required you to press the disconnect button twice
-        //when in leaf mode.)  hasAvailableIncoming will not allow incoming
-        //connections when we have a client/supernode connection, regardless of
-        //_keepAlive.  The call to math.min prevents us from reconnecting if
-        //disconnected.
-        setKeepAlive(Math.min(1, _keepAlive));
+        //If we're quick-connecting (on startup or from file menu), set
+        //KEEP_ALIVE to preferred value.  Note that this is not stored in
+        //limewire.props.  Otherwise, we use the user's desired value.
+        //In either case, make sure the ultra-fast connect logic is disabled,
+        //since it tries to get keep-alive connections.
+        boolean wasQuickConnecting=(_ultraFastCheck!=null) && _keepAlive>0;
+  		deactivateUltraFastConnectShutdown(); 
+        if (wasQuickConnecting)
+            setKeepAlive(PREFERRED_CONNECTIONS_FOR_LEAF);    
+
+        //This is totally disabled now that leaves can have multiple connections.
+//          //Set keep alive to 1, so that we are not fetching any connections.
+//          //KEEP_ALIVE property is not modified, so that when this connection
+//          //drops, we can restore _keepAlive to its old value.  Note that we do
+//          //not set _keepAlive to 0.  This allows
+//          //lostShieldedClientSupernodeConnection to distinguish between being
+//          //disconnected by the user and being disconnected by the remote host.
+//          //(An earlier version required you to press the disconnect button twice
+//          //when in leaf mode.)  hasAvailableIncoming will not allow incoming
+//          //connections when we have a client/supernode connection, regardless of
+//          //_keepAlive.  The call to math.min prevents us from reconnecting if
+//          //disconnected.
+//          setKeepAlive(Math.min(1, _keepAlive));
         
-        //close all other connections
-        Iterator iterator = _connections.iterator();
-        while(iterator.hasNext())
-        {
-            ManagedConnection connection = (ManagedConnection)iterator.next();
-            if(!connection.equals(supernodeConnection))
-                remove(connection);
-        }
+//          //close all other connections
+//          Iterator iterator = _connections.iterator();
+//          while(iterator.hasNext())
+//          {
+//              ManagedConnection connection = (ManagedConnection)iterator.next();
+//              if(!connection.equals(supernodeConnection))
+//                  remove(connection);
+//          }
     }
     
     /** 
