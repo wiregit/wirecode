@@ -1782,8 +1782,14 @@ public class ManagedDownloader implements Downloader, Serializable {
                     //we must add an entry for this in IncompleteFileManager
                     incompleteFileManager.
                                    addEntry(incompleteFile,commonOutFile);
+                    {//debugging block
+                      FileDesc f=fileManager.getFileDescForFile(incompleteFile);
+                      URN bucketHash = buckets.getURNForBucket(bucketNumber);
+                      if(bucketHash != null && f!=null) 
+                          Assert.silent(bucketHash.equals(f.getSHA1Urn()),
+                                        "IncompleteFileManager wrong fd");
+                    }
                 }
-                                
                 //need to get the VerifyingFile ready to write
                 try {
                     commonOutFile.open(incompleteFile,this);
