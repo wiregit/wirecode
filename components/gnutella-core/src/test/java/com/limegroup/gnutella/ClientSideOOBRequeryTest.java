@@ -1551,7 +1551,7 @@ public class ClientSideOOBRequeryTest
         public void setGUID(GUID guid) { aliveGUID = guid; }
         public void clearGUID() { aliveGUID = null; }
 
-        public boolean queryIsAlive(GUID guid) {
+        public boolean isQueryAlive(GUID guid) {
             if (aliveGUID != null)
                 return (aliveGUID.equals(guid));
             return false;

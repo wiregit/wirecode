@@ -59,7 +59,7 @@ public class ActivityCallbackStub implements ActivityCallback {
     public void fileManagerLoaded() {}
     public void indicateNewVersion() {}
     public void showError(String message, String messageKey) {}
-    public boolean queryIsAlive(GUID guid) {
+    public boolean isQueryAlive(GUID guid) {
         return false;
     }
 }

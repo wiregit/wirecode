@@ -181,7 +181,7 @@ public class DownloadManager implements BandwidthTracker {
         return waiting.size();
     }
 
-    public synchronized boolean guidForQueryIsDownloading(GUID guid) {
+    public synchronized boolean isGuidForQueryDownloading(GUID guid) {
         for (Iterator iter=active.iterator(); iter.hasNext(); ) {
             GUID dGUID = ((ManagedDownloader) iter.next()).getQueryGUID();
             if ((dGUID != null) && (dGUID.equals(guid)))

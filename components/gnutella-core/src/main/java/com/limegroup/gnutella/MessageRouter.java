@@ -212,7 +212,7 @@ public abstract class MessageRouter {
         if (guid == null)
             throw new IllegalArgumentException("Input GUID is null!");
         synchronized (_bypassedResults) {
-        if (!RouterService.getDownloadManager().guidForQueryIsDownloading(guid))
+        if (!RouterService.getDownloadManager().isGuidForQueryDownloading(guid))
             _bypassedResults.remove(guid);
         }
     }
@@ -227,8 +227,8 @@ public abstract class MessageRouter {
         if (guid == null)
             throw new IllegalArgumentException("Input GUID is null!");
         synchronized (_bypassedResults) {
-        if (!_callback.queryIsAlive(guid) && 
-            !RouterService.getDownloadManager().guidForQueryIsDownloading(guid))
+        if (!_callback.isQueryAlive(guid) && 
+            !RouterService.getDownloadManager().isGuidForQueryDownloading(guid))
             _bypassedResults.remove(guid);
         }
     }
@@ -956,8 +956,8 @@ public abstract class MessageRouter {
                 DownloadManager dManager = RouterService.getDownloadManager();
                 // only store result if it is being shown to the user or if a
                 // file with the same guid is being downloaded
-                if (!_callback.queryIsAlive(qGUID) && 
-                    !dManager.guidForQueryIsDownloading(qGUID))
+                if (!_callback.isQueryAlive(qGUID) && 
+                    !dManager.isGuidForQueryDownloading(qGUID))
                     return;
 
                 GUESSEndpoint ep = new GUESSEndpoint(datagram.getAddress(),
