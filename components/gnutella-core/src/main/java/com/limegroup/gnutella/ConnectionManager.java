@@ -252,7 +252,8 @@ public class ConnectionManager {
      */
     public synchronized void remove(ManagedConnection c) {
         removeInternal(c);
-        adjustConnectionFetchers();
+        adjustConnectionFetchers(false);
+        adjustConnectionFetchers(true);  //TODO3: only adjust one
     }
 
     /**
@@ -280,7 +281,7 @@ public class ConnectionManager {
      */
     public synchronized void setKeepAlive(int n, boolean isNew) {
         _keepAlive[isNew ? NEW : OLD]=n;
-        adjustConnectionFetchers();
+        adjustConnectionFetchers(isNew);
     }
 
     /**
@@ -558,40 +559,36 @@ public class ConnectionManager {
      *
      * Only call this method when the monitor is held.
      */
-    private void adjustConnectionFetchers() {
-        //Adjust for both old and new connections...
-        for (int i=0; i<2; i++) {
-            Assert.that(i==NEW || i==OLD, "Bad value of i: "+i);
-            boolean isNew=(i==NEW) ? true : false;
-            int need=_keepAlive[i]-getNumConnections(isNew)-_fetchers[i].size();
+    private void adjustConnectionFetchers(boolean isNew) {
+        int i=isNew ? NEW : OLD;
+        int need=_keepAlive[i]-getNumConnections(isNew)-_fetchers[i].size();
         
-            // Start connection fetchers as necessary
-            while(need > 0) {
-                // This kicks off a thread and register the fetcher in the list
-                new ConnectionFetcher(true); 
-                need--;
-            }
+        // Start connection fetchers as necessary
+        while(need > 0) {
+            // This kicks off a thread and register the fetcher in the list
+            new ConnectionFetcher(isNew); 
+            need--;
+        }
 
-            // Stop ConnectionFetchers as necessary, but it's possible there
-            // aren't enough fetchers to stop.  In this case, close some of the
-            // connections started by ConnectionFetchers.
-            int lastFetcherIndex = _fetchers[i].size();
+        // Stop ConnectionFetchers as necessary, but it's possible there
+        // aren't enough fetchers to stop.  In this case, close some of the
+        // connections started by ConnectionFetchers.
+        int lastFetcherIndex = _fetchers[i].size();
 
-            while((need < 0) && (lastFetcherIndex > 0)) {
-                ConnectionFetcher fetcher = (ConnectionFetcher)
-                    _fetchers[i].remove(--lastFetcherIndex);
-                fetcher.interrupt();
-                need++;
-            }
-            int lastInitializingConnectionIndex =
-                _initializingFetchedConnections[i].size();
-            while((need < 0) && (lastInitializingConnectionIndex > 0)) {
-                ManagedConnection connection = (ManagedConnection)
-                    _initializingFetchedConnections[i].remove(
-                        --lastInitializingConnectionIndex);
-                removeInternal(connection);
-                need++;
-            }
+        while((need < 0) && (lastFetcherIndex > 0)) {
+            ConnectionFetcher fetcher = (ConnectionFetcher)
+            _fetchers[i].remove(--lastFetcherIndex);
+            fetcher.interrupt();
+            need++;
+        }
+        int lastInitializingConnectionIndex =
+        _initializingFetchedConnections[i].size();
+        while((need < 0) && (lastInitializingConnectionIndex > 0)) {
+            ManagedConnection connection = (ManagedConnection)
+            _initializingFetchedConnections[i].remove(
+                --lastInitializingConnectionIndex);
+            removeInternal(connection);
+            need++;
         }
     }
 
@@ -629,7 +626,7 @@ public class ConnectionManager {
                 removeInternal(c);
                 // We've removed a connection, so the need for connections went
                 // up.  We may need to launch a fetcher.
-                adjustConnectionFetchers();
+                adjustConnectionFetchers(fetcher._isNew);
             }
             throw e;
         }
@@ -659,7 +656,8 @@ public class ConnectionManager {
         synchronized(this) {
             connectionInitializing(c);
             // We've added a connection, so the need for connections went down.
-            adjustConnectionFetchers();
+            adjustConnectionFetchers(true);
+            adjustConnectionFetchers(false); //TODO3: you can remove one
         }
         _callback.connectionInitializing(c);
 
