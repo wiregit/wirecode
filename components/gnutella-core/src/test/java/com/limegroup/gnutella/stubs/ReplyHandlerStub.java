@@ -83,7 +83,7 @@ public class ReplyHandlerStub implements ReplyHandler {
         }
     }
 
-    public void sendVendorMessage(VendorMessage vm) { }
+    public void handleStatisticVM(StatisticVendorMessage svm) { }
 
     public boolean isStable() {
         return true;

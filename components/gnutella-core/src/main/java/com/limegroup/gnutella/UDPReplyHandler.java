@@ -225,8 +225,8 @@ public final class UDPReplyHandler implements ReplyHandler {
      * sends a Vendor Message to the host/port in this reply handler by UDP
      * datagram.
      */
-    public void sendVendorMessage(VendorMessage vm) throws IOException {        
-        UDPService.instance().send(vm, IP, PORT);
+    public void handleStatisticVM(StatisticVendorMessage m) throws IOException {
+        UDPService.instance().send(m, IP, PORT);
     }
     
 

@@ -265,7 +265,7 @@ public final class ForMeReplyHandler implements ReplyHandler {
         }
     }
     
-    public void sendVendorMessage(VendorMessage vm) {
+    public void handleStatisticVM(StatisticVendorMessage vm) {
         Assert.that(false, "ForMeReplyHandler asked to send vendor message");
     }
 

@@ -1936,25 +1936,18 @@ public abstract class MessageRouter {
 
     private void handleGiveStats(final GiveStatsVendorMessage gsm, 
                                              final ReplyHandler replyHandler) {
-        Thread statHandler = new Thread("Give Stat Handler ") {
-            public void run() {
-                StatisticVendorMessage statVM = null;
-                try {
-                    //create the reply -- StatisticVendorMessage
-                    statVM = new StatisticVendorMessage(gsm);
-                } catch (BadPacketException bpx) {
-                    return;
-                }
-                //OK. Now send this message back to the client that asked for
-                //stats
-                try {
-                    replyHandler.sendVendorMessage(statVM);
-                } catch(IOException iox) {
-                    return; //what can we really do now?
-                }
-            }
-        };
-        statHandler.start();
+        StatisticVendorMessage statVM = null;
+        try {
+            //create the reply -- StatisticVendorMessage
+            statVM = new StatisticVendorMessage(gsm);
+            //OK. Now send this message back to the client that asked for
+            //stats
+            replyHandler.handleStatisticVM(statVM);
+        } catch (BadPacketException bpx) {
+            return;
+        } catch(IOException iox) {
+            return; //what can we really do now?
+        }
     }
 
     private void handleStatisticsMessage(final StatisticVendorMessage svm, 

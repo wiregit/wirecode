@@ -154,8 +154,8 @@ public interface ReplyHandler {
     boolean isStable();
 
     /**
-     * Sends the VendorMessage using this ReplyHandler
+     * Handles StatisticVendorMessage using this ReplyHandler
      */ 
-    public void sendVendorMessage(VendorMessage vm) throws IOException;
+    public void handleStatisticVM(StatisticVendorMessage m) throws IOException;
 
 }

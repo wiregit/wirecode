@@ -1775,8 +1775,9 @@ public class Connection {
 		return _headers.supportsGGEP();
     }
 
-    public void sendVendorMessage(VendorMessage vm) throws IOException {
-        send(vm);
+    public void handleStatisticVM(StatisticVendorMessage svm) 
+                                                            throws IOException {
+        send(svm);
     }
 
     /** True if the remote host supports query routing (QRP).  This is only 
