@@ -1036,21 +1036,25 @@ public class UploadTest extends BaseTestCase {
         assertNotNull(cTime);
         assertTrue(cTime.longValue() > 0);
 
-        //1. Write request
-        Socket s = new Socket("localhost", PORT);
-        BufferedReader in = new BufferedReader(new InputStreamReader(
-            s.getInputStream()));
-        BufferedWriter out = new BufferedWriter(new OutputStreamWriter(
-            s.getOutputStream()));
-            
-        //2. request the file
-        String reqFile  = "/uri-res/N2R?" + hash;
-
-        downloadInternal11(reqFile, "Range: bytes=0-1", out, in,
-                           "X-Create-Time: " + cTime);
-
+        assertTrue(download("/uri-res/N2R?" + hash, null,
+                          "abcdefghijklmnopqrstuvwxyz",
+                            "X-Create-Time: " + cTime));
     }
     
+    
+    public void testCreationTimeGivenForPartial() throws Exception {
+
+        //0. make creatio time
+        
+        URN urn = URN.createSHA1Urn(incompleteHash);
+        Long cTime = new Long("10776");
+        CreationTimeCache.instance().addTime(urn, cTime.longValue());
+
+        // successful interval 2-5 was set above
+        assertTrue(download("/uri-res/N2R?" + incompleteHash, "Range: bytes 2-5",
+                          "cdef", "X-Create-Time: " + cTime));
+    }
+
 
     
     /** 
