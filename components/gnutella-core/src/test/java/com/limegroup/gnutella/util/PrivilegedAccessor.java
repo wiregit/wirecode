@@ -42,20 +42,6 @@ public class PrivilegedAccessor {
     }
 
     /**
-     * Gets the value of the STATIC named field and returns it as an object.
-     *
-     * @param instance the object instance
-     * @param fieldName the name of the field
-     * @return an object representing the value of the static field
-     */
-    public static Object getValue(Class classObj, String fieldName )     
-           throws IllegalAccessException, NoSuchFieldException {
-        Field field = getField(classObj, fieldName);
-        field.setAccessible(true);
-        return field.get(null);
-    }
-
-    /**
      * Sets the value of the named field.
      *
      * @param instance the object instance
@@ -69,23 +55,6 @@ public class PrivilegedAccessor {
         Field field = getField(instance.getClass(), fieldName);
         field.setAccessible(true);
         field.set(instance, value);
-    }
-
-    /**
-     * Sets the value of the STATIC named field.
-     *
-     * @param instance the object instance
-     * @param fieldName the name of the field
-     * @param value an object representing the value the static field should be
-     * set to.
-     */
-    public static void setValue(Class classObj, 
-                                String fieldName, 
-                                Object value) 
-            throws IllegalAccessException, NoSuchFieldException {
-        Field field = getField(classObj, fieldName);
-        field.setAccessible(true);
-        field.set(null, value);
     }
 
     /**
@@ -130,50 +99,6 @@ public class PrivilegedAccessor {
             }
         }
         return getMethod(instance,methodName,classTypes).invoke(instance,args);
-    }
-
-    /**
-     * Calls a static method on the given object with the given argument.
-     *
-     * @param instance the object instance
-     * @param methodName the name of the method to invoke
-     * @param arg the argument to pass to the method
-     * @see PrivilegedAccessor#invokeMethod(Object,String,Object[])
-     */
-    public static Object invokeMethod(Class classObj, 
-                                      String methodName,
-                                      Object arg) 
-        throws NoSuchMethodException,
-               IllegalAccessException, 
-               InvocationTargetException  {
-        Object[] args = new Object[1];
-        args[0] = arg;
-        return invokeMethod(classObj, methodName, args);
-    }
-
-    /**
-     * Calls a static method on the given object with the given arguments.
-     *
-     * @param instance the object instance
-     * @param methodName the name of the method to invoke
-     * @param args an array of objects to pass as arguments
-     * @see PrivilegedAccessor#invokeMethod(Class,String,Object)
-     */
-    public static Object invokeMethod(Class classObj, 
-                                      String methodName, 
-                                      Object[] args ) 
-        throws NoSuchMethodException,
-               IllegalAccessException, 
-               InvocationTargetException  {
-        Class[] classTypes = null;
-        if( args != null) {
-            classTypes = new Class[args.length];
-            for( int i = 0; i < args.length; i++ ) {
-                if( args[i] != null )
-                    classTypes[i] = args[i].getClass();
-            }
-        }
-        return getMethod(classObj,methodName,classTypes).invoke(null,args);
     }
 
     /**
