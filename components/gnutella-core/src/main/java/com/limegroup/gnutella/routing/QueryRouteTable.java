@@ -198,13 +198,23 @@ public class QueryRouteTable {
 
         //TODO: different values of entryBits, split messages, compression,
         //avoid updates if nothings changed
+        boolean gotDifference=false;
         byte[] patch=new byte[table.length];
         for (int i=0; i<patch.length; i++) {
             if (prev!=null)
                 patch[i]=(byte)(this.table[i]-prev.table[i]);
             else
                 patch[i]=(byte)(this.table[i]-infinity);
+
+            if (patch[i]!=0)
+                gotDifference=true;
         }
+        //As an optimization, we don't send message if no changes.
+        if (! gotDifference) {
+            buf.clear();
+            return buf.iterator();
+        }
+
         buf.add(new PatchTableMessage((short)1, (short)1,
                                       PatchTableMessage.COMPRESSOR_NONE,
                                       (byte)8, patch, 0, patch.length));
@@ -304,5 +314,10 @@ public class QueryRouteTable {
             }
         }
         Assert.that(qrt2.equals(qrt));
+
+        Iterator iter=qrt2.encode(qrt);
+        Assert.that(! iter.hasNext());
+        iter=(new QueryRouteTable(1000, (byte)7)).encode(null);  //blank table
+        Assert.that(! iter.hasNext());
     }
 }
