@@ -91,31 +91,12 @@ public class GUIDTest extends com.limegroup.gnutella.util.BaseTestCase {
         //Try new GUID generator.
         for (int i=0; i<50; i++) {
             bytes=GUID.makeGuid();     g1=new GUID(bytes);
-            assertEquals("unexpected 8th byte", (byte)0xFF, bytes[8]);
             assertEquals("unexpected 15th byte", (byte)0x00, bytes[15]);
-            assertTrue(g1.isNewGUID());
             assertTrue(g1.isLimeGUID());
-            assertTrue(! g1.isWindowsGUID());
             //System.out.println(g1);
         }               
     }
      
-    public void testIsWindowsGUID() {
-        //Try isWindowsGUID (again)
-        bytes[8]=(byte)0xc0;   g1=new GUID(bytes);
-        assertTrue(! g1.isWindowsGUID());
-        bytes[8]=(byte)0x80;   g1=new GUID(bytes);
-        assertTrue(g1.isWindowsGUID());
-    }        
-
-    public void testIsNewGUID() { 
-        //Try isNewGUID (again)
-        bytes[8]=(byte)0xFE;   g1=new GUID(bytes);
-        assertTrue(! g1.isNewGUID());
-        bytes[8]=(byte)0xFF;  bytes[15]=(byte)0x00;   g1=new GUID(bytes);
-        assertTrue(g1.isNewGUID());
-    }
-
     public void testIsLimeGUID() {
         //Try isLimeGUID (again)
         bytes[9]=(byte)0xFF;   g1=new GUID(bytes);

@@ -264,26 +264,6 @@ public class GUID implements Comparable {
             return checkMatching(bytes, 0, 11, 13);
     }    
     
-    
-    /** Same as isWindowsGUID(this.bytes). */
-    public final boolean isWindowsGUID() {    
-        return isWindowsGUID(bytes);
-    }
-
-    /** Returns true if this is a GUID created by the Windows CoCreateGUID()
-     *  routine.  Note that the converse does not hold; this method may
-     *  also return true for other randomly generated GUID's. 
-     *     @requires bytes.length==16
-     */      
-    public static boolean isWindowsGUID(byte[] bytes) {    
-        //Windows GUID's are of the form 10------, where "1" is the most
-        //significant bit and "-" means "don't care".  See the internet
-        //draft by Salz and Leach:
-        //       http://www.ics.uci.edu/~ejw/authoring/uuid-guid/
-        //                              draft-leach-uuids-guids-01.txt    
-        return (bytes[8]&0xc0)==0x80;
-    }
-
     /** @return true if the input ip and port match the one encoded in the guid.
      *  @exception IllegalArgumentException thrown if ip.length != 4 or if the
      *  port is not a valid value.     
@@ -330,25 +310,6 @@ public class GUID implements Comparable {
      */
     public static int getPort(byte[] guidBytes) {
         return ByteOrder.ubytes2int(ByteOrder.leb2short(guidBytes, 13));
-    }
-
-    /** Same as isNewGUID(this.bytes). 
-     * @deprecated This method was hardly ever used in the first place, but
-     * don't use it in the future.
-     */
-    public final boolean isNewGUID() {
-        return isNewGUID(this.bytes);
-    }
-    
-    /** Returns true if this is a GUID from newer Gnutella clients, e.g.,
-     *  LimeWire and BearShare. 
-     * @deprecated This method was hardly ever used in the first place, but
-     * don't use it in the future.
-     */
-    public static boolean isNewGUID(byte[] bytes) {
-        //Is byte 8 all 1's?  Note that we downcast 0xFF first so both sides of
-        //the equality are automatically widened, with the same sign extension.
-        return bytes[8]==(byte)0xFF;
     }
 
     /** 
