@@ -109,7 +109,7 @@ public class ClientSideBrowseHostTest
      
      private static Connection connect(RouterService rs, int port, 
                                        boolean ultrapeer) 
-         throws IOException, BadPacketException {
+         throws IOException, BadPacketException, Exception {
          ServerSocket ss=new ServerSocket(port);
          rs.connectToHostAsynchronously("127.0.0.1", port);
          Socket socket = ss.accept();
@@ -156,22 +156,32 @@ public class ClientSideBrowseHostTest
          throw new IOException();
      }
 
-     private static void replyToPing(Connection c, boolean ultrapeer) 
-             throws IOException, BadPacketException {
-         Message m=c.receive(5000);
-         assertTrue(m instanceof PingRequest);
-         PingRequest pr=(PingRequest)m;
-         byte[] localhost=new byte[] {(byte)127, (byte)0, (byte)0, (byte)1};
-         PingReply reply = 
-             PingReply.createExternal(pr.getGUID(), (byte)7,
-                                       c.getLocalPort(), 
-                                       ultrapeer ? ultrapeerIP : oldIP,
-                                       ultrapeer);
-         reply.hop();
-         c.send(reply);
-         c.flush();
-     }
-
+    private static void replyToPing(Connection c, boolean ultrapeer) 
+        throws Exception {
+        // respond to a ping iff one is given.
+        Message m = null;
+        byte[] guid;
+        try {
+            while (!(m instanceof PingRequest)) {
+                m = c.receive(500);
+            }
+            guid = ((PingRequest)m).getGUID();            
+        } catch(InterruptedIOException iioe) {
+            //nothing's coming, send a fake pong anyway.
+            guid = new GUID().bytes();
+        }
+        
+        Socket socket = (Socket)PrivilegedAccessor.getValue(c, "_socket");
+        PingReply reply = 
+        PingReply.createExternal(guid, (byte)7,
+                                 socket.getLocalPort(), 
+                                 ultrapeer ? ultrapeerIP : oldIP,
+                                 ultrapeer);
+        reply.hop();
+        c.send(reply);
+        c.flush();
+    }
+    
     ///////////////////////// Actual Tests ////////////////////////////
     
     // Tests the following behaviors:
@@ -503,11 +513,8 @@ public class ClientSideBrowseHostTest
     private static class UltrapeerResponder implements HandshakeResponder {
         public HandshakeResponse respond(HandshakeResponse response, 
                 boolean outgoing) throws IOException {
-            Properties props=new Properties();
-            props.put(HeaderNames.USER_AGENT, 
-                      CommonUtils.getHttpServer());
-            props.put(HeaderNames.X_QUERY_ROUTING, "0.1");
-            props.put(HeaderNames.X_ULTRAPEER, "True");
+            Properties props = new UltrapeerHeaders("127.0.0.1"); 
+            props.put(HeaderNames.X_DEGREE, "42");           
             return HandshakeResponse.createResponse(props);
         }
     }
