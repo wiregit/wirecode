@@ -106,9 +106,12 @@ public class ResumeDownloader extends ManagedDownloader
     /*
      * @param numRequeries The number of requeries sent so far.
      */
-    protected boolean pauseForRequery(int numRequeries) {
-        if (numRequeries > 0)
-            return super.pauseForRequery(numRequeries);
+    protected boolean pauseForRequery(int numRequeries, 
+                                      boolean deserializedFromDisk) {
+        // if i've sent a query already or i was respawned from disk, act like
+        // a ManagedDownloader
+        if (numRequeries > 0 || deserializedFromDisk)
+            return super.pauseForRequery(numRequeries, deserializedFromDisk);
         else
             // don't wait the first time!!  we want to immediately start a new
             // query

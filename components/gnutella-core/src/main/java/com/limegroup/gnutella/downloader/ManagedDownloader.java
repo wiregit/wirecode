@@ -606,8 +606,11 @@ public class ManagedDownloader implements Downloader, Serializable {
      * @return true if we the pause was broken because of new results.  false
      * if the user woke us up.
      * @param numRequeries The number of requeries sent so far.
+     * @param deserializedFromDisk If the downloader was deserialized from a 
+     * snapshot.  May be useful for subclasses.
      */
-    protected boolean pauseForRequery(int numRequeries) {
+    protected boolean pauseForRequery(int numRequeries, 
+                                      boolean deserializedFromDisk) {
         // MD's never want to requery without user input.
         boolean retVal = false;
         synchronized (reqLock) {
@@ -998,7 +1001,7 @@ public class ManagedDownloader implements Downloader, Serializable {
      * of moving file from incomplete directory to save directory and adding
      * file to the library.  Called from dloadManagerThread.  
      */
-    protected void tryAllDownloads(boolean deserializedFromDisk) {     
+    protected void tryAllDownloads(final boolean deserializedFromDisk) {     
         // the number of queries i've done for this downloader - this is
         // influenced by the type of downloader i am and if i was started from
         // disk or from scratch
@@ -1124,7 +1127,7 @@ public class ManagedDownloader implements Downloader, Serializable {
                         // results.  so if new results, go up top and try and
                         // get them, else the user woke us up so send another
                         // query
-                        if (pauseForRequery(numQueries)) 
+                        if (pauseForRequery(numQueries, deserializedFromDisk)) 
                             continue;
                         waitForStableConnections();
                         // yeah, it is about time and i've not sent too many...
