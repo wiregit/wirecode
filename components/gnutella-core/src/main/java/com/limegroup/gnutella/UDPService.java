@@ -674,11 +674,14 @@ public class UDPService implements Runnable {
 	 *   connections.
 	 */
 	public boolean canDoFWT(){
-	    if (!RouterService.isConnected() || !_receivedIPPong)
+	    if (!RouterService.isConnected())
 	        return !ConnectionSettings.EVER_DISABLED_FWT.getValue();
 	    
 	    boolean ret = true;
 	    synchronized(this) {     	
+	        if (!_receivedIPPong)
+	            return !ConnectionSettings.EVER_DISABLED_FWT.getValue();
+	        
 	        ret= 
 	            NetworkUtils.isValidAddress(RouterService.getExternalAddress()) && 
 	            canReceiveSolicited() && 
