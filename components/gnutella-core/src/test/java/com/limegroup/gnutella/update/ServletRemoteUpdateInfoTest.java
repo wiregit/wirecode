@@ -1,0 +1,142 @@
+package com.limegroup.gnutella.update;
+
+import com.limegroup.gnutella.gui.*;
+import com.limegroup.gnutella.util.Launcher;
+import junit.framework.*;
+import junit.extensions.*;
+import java.io.*;
+
+/**
+ * Class for testing updates.  This may change frequently as updates
+ * change.
+ */
+public final class ServletRemoteUpdateInfoTest extends TestCase {
+
+	private static final String[] OPERATING_SYSTEMS = {
+		"Windows 95",
+		"Windows NT",
+		"Windows 98",
+		"Windows 2000",
+		"Windows XP",
+		"Windows ME",
+		"Linux",
+		"Solaris",
+		"Mac OS",
+		"Mac OS X"
+	};
+
+	//private final String CURRENT_VERSION = CommonUtils.getLimeWireVersion();
+
+	private static final String[] VERSIONS = {
+		"2.3.3", "2.4.4" 
+	};
+
+	/**
+	 * Constructs a new <tt>ServletRemoteUpdateInfoTest</tt> intance
+	 * with the specified name.
+	 */
+	public ServletRemoteUpdateInfoTest(String name) {
+		super(name);
+	}
+
+	/**
+	 * Runs this suite of tests.
+	 */
+	public static Test suite() {
+		return new TestSuite(ServletRemoteUpdateInfoTest.class);
+	}
+
+	/**
+	 * Runs this test individually.
+	 */
+	public static void main(String[] args) {
+		junit.textui.TestRunner.run(suite());
+	}	
+
+	protected void setUp() {
+		try {
+			System.loadLibrary("LimeWire20");
+		} catch(UnsatisfiedLinkError e) {
+			fail("unexpected exception: "+e);
+		}
+	}
+
+	/**
+	 * Tests update with multiple values for operating system and LimeWire
+	 * version.
+	 */
+	public void testVaryingUpdateValues() {
+		try {
+			for(int i=0; i<1; i++) {//OPERATING_SYSTEMS.length; i++) {
+				ServletLocalUpdateInfo localInfo = new ServletLocalUpdateInfo();
+				localInfo.addKeyValuePair(localInfo.OS, OPERATING_SYSTEMS[i]);
+				for(int j=0; j<VERSIONS.length; j++) {
+					localInfo.addKeyValuePair(localInfo.LIMEWIRE_VERSION, VERSIONS[j]);
+					ServletRemoteUpdateInfo srui = 
+						new ServletRemoteUpdateInfo(localInfo);
+
+					String urlString = srui.getURLEncodedString();
+					InputStream is = new ByteArrayInputStream(urlString.getBytes());
+					InputStreamReader isr = new InputStreamReader(is);
+					
+					// create the buffered reader to read from the stream
+					BufferedReader in = new BufferedReader(isr);           
+				
+					StringBuffer lineBuffer = new StringBuffer();
+					String line;
+					while((line = in.readLine()) != null) {
+						lineBuffer.append(line + "\r\n");
+					}
+
+					ClientRemoteUpdateInfo crui = new ClientRemoteUpdateInfo();
+					crui.addRemoteInfo(lineBuffer.toString());
+
+					Updator updator = crui.getUpdator();
+					if(OPERATING_SYSTEMS[i].startsWith("Win")) {
+						assertTrue("should be a web page updator: "+updator, 
+								   (updator instanceof WebPageUpdator));
+						//String updatorStr = updator.toString();
+						//System.out.println(updatorStr); 
+						//updator.doUpdate();
+					} else if(OPERATING_SYSTEMS[i].startsWith("Mac")) {
+						assertTrue("should be a web page updator: "+updator, 
+								   (updator instanceof WebPageUpdator));
+					} else {
+						assertTrue("should be a message updator: "+updator, 
+								   (updator instanceof DisplayMessageUpdator));					
+					}
+				}
+			}
+		} catch(Exception e) {
+			fail("unexpected exception: "+e);
+		}
+	}
+
+	/**
+	 * Tests that updates with the current most recent version give a 
+	 * no update available update.
+	 */
+	public void testThatCurrentVersionGivesNoUpdate() {
+		try {
+			for(int i=0; i<OPERATING_SYSTEMS.length; i++) {
+				ServletLocalUpdateInfo localInfo = new ServletLocalUpdateInfo();
+				localInfo.addKeyValuePair(localInfo.OS, OPERATING_SYSTEMS[i]);
+		   
+				localInfo.addKeyValuePair(localInfo.LIMEWIRE_VERSION, 
+				    ServletRemoteUpdateInfo.LIMEWIRE_VERSION_ON_SERVER);
+				ServletRemoteUpdateInfo srui = 
+					new ServletRemoteUpdateInfo(localInfo);
+				String urlString = srui.getURLEncodedString();
+				
+				ClientRemoteUpdateInfo crui = new ClientRemoteUpdateInfo();
+				crui.addRemoteInfo(urlString);
+				Updator updator = crui.getUpdator();
+				assertTrue("should be a web page updator: "+updator, 
+						   (updator instanceof NoUpdateUpdator));
+			}
+
+		} catch(Exception e) {
+			fail("unexpected exception: "+e);
+		}		
+	}
+}
