@@ -71,7 +71,11 @@ public interface ActivityCallback
      *  as an argument, and parent contains f 
      */
     public void addSharedFile(final File file, final File parent);
-           
+
+	/**
+	 * Nofifies the GUI that the shared files should be visually removed.
+	 */
+	public void clearSharedFiles();           
 
     /**
      * Equivalent to error(errorCode, t).

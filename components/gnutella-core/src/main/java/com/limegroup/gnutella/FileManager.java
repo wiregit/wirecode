@@ -113,7 +113,7 @@ public class FileManager {
      *      @see loadSettings */
     public void initialize(ActivityCallback callback) {
         this._callback=callback;
-        loadSettings();
+        loadSettings(false);
     }
     
     /** Returns the size of all files, in <b>bytes</b>.  Note that the largest
@@ -182,7 +182,7 @@ public class FileManager {
      * a different index.  If DIRECTORIES_TO_SEARCH_FOR_FILES contains duplicate
      * directories, the duplicates will be ignored.  If it contains files, they
      * will be ignored.<p>
-     *
+	 *
      * This method is thread-safe but non-blocking.  When the method returns,
      * the directory and extension settings used by addFileIfShared() are
      * initialized.  However, files will actually be indexed asynchronously in
@@ -192,8 +192,10 @@ public class FileManager {
      * discarded, and loading starts over immediately.
      *
      * @modifies this 
+	 * @param notifyOnClear determines whether or not to make the callback to
+	 *  clear the shared files from the gui.
      */
-    public synchronized void loadSettings() {
+    public synchronized void loadSettings(boolean notifyOnClear) {
         // If settings are already being loaded, interrupt and wait for them to
         // complete.  TODO: the call to join would block if the call to
         // File.list called by listFiles called by addDirectory blocks.  If this
@@ -214,7 +216,9 @@ public class FileManager {
         _index=new Trie(true); //maintain invariant
         _extensions = new TreeSet(new StringComparator());
         _sharedDirectories = new TreeMap(new FileComparator());
-        
+        if (notifyOnClear) 
+			_callback.clearSharedFiles();
+		
         // Load the extensions.
         String[] extensions = HTTPUtil.stringSplit(
             SettingsManager.instance().getExtensions().trim(),

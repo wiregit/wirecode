@@ -203,5 +203,7 @@ public class Main implements ActivityCallback {
 
 	public void addSharedFile(File file, File parent) {}
 
+	public void clearSharedFiles() {}
+
 }
 
