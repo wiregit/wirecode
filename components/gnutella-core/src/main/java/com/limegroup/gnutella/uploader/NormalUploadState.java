@@ -5,7 +5,6 @@ import com.limegroup.gnutella.settings.*;
 import com.limegroup.gnutella.http.*;
 import com.sun.java.util.collections.*;
 import java.io.*;
-import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.BandwidthThrottle;
 
 /**
@@ -67,7 +66,7 @@ public final class NormalUploadState implements HTTPMessage {
     
 	public void writeMessageHeaders(OutputStream network) throws IOException {
 		try {
-		    StringWriter ostream = new StringWriter();
+		    Writer ostream = new StringWriter();
 			_fis =  _uploader.getInputStream();
 			_uploadBegin =  _uploader.getUploadBegin();
 			_uploadEnd =  _uploader.getUploadEnd();
@@ -84,13 +83,16 @@ public final class NormalUploadState implements HTTPMessage {
 			}
 			
 			// Server
-			ostream.write("Server: " + CommonUtils.getHttpServer() + "\r\n");
-
+            HTTPUtils.writeHeader(HTTPHeaderName.SERVER, 
+                ConstantHTTPHeaderValue.SERVER_VALUE, ostream);
+            
             // Content Type
-            ostream.write("Content-Type: " + getMimeType() + "\r\n");
+            HTTPUtils.writeHeader(HTTPHeaderName.CONTENT_TYPE, 
+                getMimeType(), ostream);
             
             // Content Length
-			ostream.write("Content-Length: "+ _amountRequested + "\r\n");
+            HTTPUtils.writeHeader(HTTPHeaderName.CONTENT_LENGTH, 
+                _amountRequested, ostream);
 			
 			// Version 0.5 of limewire misinterpreted Content-range
 			// to be 1 - n instead of 0 - (n-1), but because this is
