@@ -95,8 +95,8 @@ public class FWTDetectionTest extends BaseTestCase {
         
         try {
             UDPService service = UDPService.instance();
-            PrivilegedAccessor.setValue(service,"_lastReportedPort",
-                    new Integer(RouterService.getPort()));
+            PrivilegedAccessor.setValue(service,"_lastReportedPort",new Integer(0));
+            PrivilegedAccessor.setValue(service,"_numReceivedIPPongs",new Integer(0));
             PrivilegedAccessor.setValue(service,"_acceptedSolicitedIncoming",new Boolean(true));
             PrivilegedAccessor.setValue(service,"_portStable",new Boolean(true));
             PrivilegedAccessor.setValue(Acceptor.class,"_externalAddress",new byte[4]);
@@ -166,6 +166,47 @@ public class FWTDetectionTest extends BaseTestCase {
     }
     
     /**
+     * tests the scenarios where we have received more than one pongs,
+     * sometimes reporting different ports.
+     */
+    public void testReceivedManyPongs() throws Exception {
+        cmStub.setConnected(false);
+        ConnectionSettings.EVER_ACCEPTED_INCOMING.setValue(false);
+        UDPService.instance().setReceiveSolicited(true);
+        assertEquals(RouterService.getPort(),UDPService.instance().getStableUDPPort());
+        
+        writeToGnet("127.0.0.1:"+REMOTE_PORT1+"\n");
+        
+        RouterService.getHostCatcher().expire();
+        RouterService.getHostCatcher().sendUDPPings();
+        
+        //we should receive a udp ping requesting ip
+        assertTrue(ponger1.listen().requestsIP());
+        
+        //send one pong which does has a different port
+        RouterService.getAcceptor().setExternalAddress(InetAddress.getLocalHost());
+        ponger1.reply(new Endpoint(RouterService.getExternalAddress(),1000));
+        
+        Thread.sleep(1000);
+        
+        cmStub.setConnected(true);
+        assertFalse(UDPService.instance().canDoFWT());
+        
+        // our external port should still point to our router service port
+        assertEquals(RouterService.getPort(),UDPService.instance().getStableUDPPort());
+        
+        // send a second pong.. now we should be able to do FWT
+        ponger1.reply(new Endpoint(RouterService.getExternalAddress(),1000));
+        Thread.sleep(1000);
+        
+        cmStub.setConnected(true);
+        assertTrue(UDPService.instance().canDoFWT());
+        
+        // and our external port should become the new port
+        assertEquals(1000,UDPService.instance().getStableUDPPort());
+    }
+    
+    /**
      * tests scenarios where we can and can't do solicited
      */
     public void testSolicited() throws Exception{
@@ -194,11 +235,28 @@ public class FWTDetectionTest extends BaseTestCase {
         UDPService.instance().setReceiveSolicited(true);
         assertTrue(UDPService.instance().canReceiveSolicited());
         
+        // send a pong
+        writeToGnet("127.0.0.1:"+REMOTE_PORT1+"\n");
+        
+        RouterService.getHostCatcher().expire();
+        RouterService.getHostCatcher().sendUDPPings();
+        
+        //we should receive a udp ping requesting ip
+        assertTrue(ponger1.listen().requestsIP());
+        
+        //send one pong which does has a different port
+        RouterService.getAcceptor().setExternalAddress(InetAddress.getLocalHost());
+        ponger1.reply(new Endpoint(RouterService.getExternalAddress(),RouterService.getPort()));
+        
+        Thread.sleep(1000);
+        
+        // try with valid external address
         RouterService.getAcceptor().setExternalAddress(InetAddress.getLocalHost());
         assertTrue(
                 NetworkUtils.isValidAddress(RouterService.getExternalAddress()));
         assertTrue(UDPService.instance().canDoFWT());
         
+        // and with an invalid one
         RouterService.getAcceptor().setExternalAddress(InetAddress.getByName("0.0.0.0"));
         assertFalse(
                 NetworkUtils.isValidAddress(RouterService.getExternalAddress()));
@@ -270,9 +328,10 @@ public class FWTDetectionTest extends BaseTestCase {
         assertTrue(ponger2.listen().requestsIP());
         RouterService.getAcceptor().setExternalAddress(InetAddress.getLocalHost());
         
-        Endpoint badPort = new Endpoint(InetAddress.getLocalHost().getAddress(),12345);
-        ponger1.reply(badPort);
-        ponger2.reply(badPort);
+        Endpoint badPort1 = new Endpoint(InetAddress.getLocalHost().getAddress(),12345);
+        Endpoint badPort2 = new Endpoint(InetAddress.getLocalHost().getAddress(),12346);
+        ponger1.reply(badPort1);
+        ponger2.reply(badPort2);
         Thread.sleep(500);
         cmStub.setConnected(true);
         assertFalse(UDPService.instance().canDoFWT());
