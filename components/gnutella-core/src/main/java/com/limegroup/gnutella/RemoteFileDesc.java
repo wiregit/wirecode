@@ -1,28 +1,29 @@
 package com.limegroup.gnutella;
 
-import java.io.Serializable;
-import com.sun.java.util.collections.Comparator;
-import com.sun.java.util.collections.Comparable;
-import com.sun.java.util.collections.Arrays;
-import com.limegroup.gnutella.xml.LimeXMLDocument;
+import java.io.*;
+import com.sun.java.util.collections.*;
+import com.limegroup.gnutella.xml.*;
+import org.xml.sax.*;
 
 /**
  * A reference to a single file on a remote machine.  In this respect
  * RemoteFileDesc is similar to a URL, but it contains Gnutella-
- * specific data as well, such as the server's 16-byte GUID.
+ * specific data as well, such as the server's 16-byte GUID.<p>
+ *
+ * This class is immutable.
  */
 public class RemoteFileDesc implements Serializable {
 
-	private String _host;
-	private int _port;
-	private String _filename; 
-	private long _index;
-	private byte[] _clientGUID;
-	private int _speed;
-	private int _size;
-	private boolean _chatEnabled;
-    private int _quality;
-    private LimeXMLDocument[] _xmlDocs = null;
+	private final String _host;
+	private final int _port;
+	private final String _filename; 
+	private final long _index;
+	private final byte[] _clientGUID;
+	private final int _speed;
+	private final int _size;
+	private final boolean _chatEnabled;
+    private final int _quality;
+    private final LimeXMLDocument[] _xmlDocs;
 
 	/** 
      * Constructs a new RemoteFileDesc without metadata.
@@ -41,15 +42,8 @@ public class RemoteFileDesc implements Serializable {
 	public RemoteFileDesc(String host, int port, long index, String filename,
 						  int size, byte[] clientGUID, int speed, 
 						  boolean chat, int quality) {	   
-		_speed = speed;
-		_host = host;
-		_port = port;
-		_index = index;
-		_filename = filename;
-		_size = size;
-		_clientGUID = clientGUID;
-		_chatEnabled = chat;
-        _quality = quality;
+        this(host, port, index, filename, size,
+             clientGUID, speed, chat, quality, null);
 	}
 
 	/** 
@@ -70,24 +64,41 @@ public class RemoteFileDesc implements Serializable {
 	public RemoteFileDesc(String host, int port, long index, String filename,
 						  int size, byte[] clientGUID, int speed, 
 						  boolean chat, int quality, LimeXMLDocument[] xmlDocs) {
-        this(host, port, index, filename, size,
-             clientGUID, speed, chat, quality);
-        _xmlDocs=xmlDocs;
+		_speed = speed;
+		_host = host;
+		_port = port;
+		_index = index;
+		_filename = filename;
+		_size = size;
+		_clientGUID = clientGUID;
+		_chatEnabled = chat;
+        _quality = quality;
+        _xmlDocs = xmlDocs;
 	}
 
 	/* Accessor Methods */
-	public String getHost() {return _host;}
-	public int getPort() {return _port;}
-	public long getIndex() {return _index;}
-	public int getSize() {return _size;}
-	public String getFileName() {return _filename;}
-	public byte[] getClientGUID() {return _clientGUID;}
-	public int getSpeed() {return _speed;}	
-	public boolean chatEnabled() {return _chatEnabled;}
-    public int getQuality() {return _quality;}
-    public LimeXMLDocument[] getXMLDocs() {return _xmlDocs;}
+	public final String getHost() {return _host;}
+	public final int getPort() {return _port;}
+	public final long getIndex() {return _index;}
+	public final int getSize() {return _size;}
+	public final String getFileName() {return _filename;}
+	public final byte[] getClientGUID() {return _clientGUID;}
+	public final int getSpeed() {return _speed;}	
+	public final boolean chatEnabled() {return _chatEnabled;}
+    public final int getQuality() {return _quality;}
 
-	public boolean isPrivate() {
+	/**
+	 * Returns a copy of the <tt>LimeXMLDocument</tt> array.
+	 *
+	 * @return a copy of the <tt>LimeXMLDocument</tt> array
+	 */
+    public final LimeXMLDocument[] getXMLDocs() {
+		LimeXMLDocument[] xmlDocsCopy = new LimeXMLDocument[_xmlDocs.length];
+		System.arraycopy(_xmlDocs, 0, xmlDocsCopy, 0, _xmlDocs.length);
+		return xmlDocsCopy;
+	}
+
+	public final boolean isPrivate() {
 		// System.out.println("host: " + _host);
 		if (_host == null) return true;
 		Endpoint e = new Endpoint(_host, _port);
@@ -102,6 +113,8 @@ public class RemoteFileDesc implements Serializable {
             return false;
         RemoteFileDesc other=(RemoteFileDesc)o;
         
+		// TODO: XML is ignored in this comparison, so this method is really
+		// broken
         return _host.equals(other._host)
             && _port==other._port
             && _filename.equals(other._filename)
