@@ -412,7 +412,7 @@ public class QueryReply extends Message implements Serializable{
     /** Returns the IP address of the responding host in standard
      *  dotted-decimal format, e.g., "192.168.0.1" */
     public String getIP() {
-        return ip2string(_address); //takes care of signs
+        return NetworkUtils.ip2string(_address); //takes care of signs
     }
 
     public long getSpeed() {
