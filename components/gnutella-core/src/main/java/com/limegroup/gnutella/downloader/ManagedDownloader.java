@@ -1013,12 +1013,15 @@ public class ManagedDownloader implements Downloader, Serializable {
 	 * @return a new <tt>QueryRequest</tt> for making the requery
      */
     protected synchronized QueryRequest newRequery(int numRequeries)
-		throws CantResumeException {
+      throws CantResumeException {
+        Assert.that(allFiles.length > 0, "precondition violated");
+		    
+		String name = allFiles[0].getFileName();
 		    
 		if(allFiles[0].getSHA1Urn() == null)
-			return QueryRequest.createQuery(extractQueryString());
+			return QueryRequest.createQuery(extractQueryString(name));
         else // this is where a SHA1 query would be sent, if desired
-            return QueryRequest.createQuery(extractQueryString());
+            return QueryRequest.createQuery(extractQueryString(name));
     }
 
 
@@ -1047,18 +1050,18 @@ public class ManagedDownloader implements Downloader, Serializable {
     }
 
 
-    /** Returns the keywords for a requery, i.e., the keywords found in all
-     *  filenames.  REQUIRES: allFiles.length MUST be greater than 0. */
-    private final synchronized String extractQueryString() {
-        Assert.that(allFiles.length>0, "Precondition violated");
+    /**
+     * Returns a string to be used for querying from the given name.
+     */
+    protected final String extractQueryString(String name) {
         String retString = null;
 
         final int MAX_LEN = 30;
 
         // Put the keywords into a string, up to MAX_LEN
-        Set intersection=keywords(allFiles[0].getFileName());
+        Set intersection=keywords(name);
         if (intersection.size() < 1) // nothing to extract!
-            retString = StringUtils.truncate(allFiles[0].getFileName(), 30);
+            retString = StringUtils.truncate(name, 30);
         else {
             StringBuffer sb = new StringBuffer();
             int numWritten = 0;
@@ -1082,23 +1085,23 @@ public class ManagedDownloader implements Downloader, Serializable {
             //greater than MAX_LEN, then the string returned will be empty.
             //if this happens just truncate the first word....
             if (retString.equals(""))
-                retString = StringUtils.truncate(allFiles[0].getFileName(), 30);
+                retString = StringUtils.truncate(name, 30);
         }
 
         // Added a bunch of asserts to catch bugs.  There is some form of
         // input we are not considering in our algorithms....
         Assert.that(retString.length() <= MAX_LEN, 
-                    "Original filename: " + allFiles[0].getFileName() +
+                    "Original filename: " + name +
                     ", converted: " + retString);
         Assert.that(!retString.equals(""), 
-                    "Original filename: " + allFiles[0].getFileName());
+                    "Original filename: " + name);
         Assert.that(retString != null, 
-                    "Original filename: " + allFiles[0].getFileName());
+                    "Original filename: " + name);
         retString = I18NConvert.instance().getNorm(retString);
         Assert.that(!retString.equals(""), 
-                    "I18N: Original filename: " + allFiles[0].getFileName());
+                    "I18N: Original filename: " + name);
         Assert.that(retString != null, 
-                    "I18N: Original filename: " + allFiles[0].getFileName());
+                    "I18N: Original filename: " + name);
         return retString;
     }
 
@@ -1147,6 +1150,27 @@ public class ManagedDownloader implements Downloader, Serializable {
         TRIVIAL_WORDS.add("an");
         TRIVIAL_WORDS.add("a");
     }
+    
+    /**
+     * Determines if the specified host is allowed to download.
+     */
+    protected boolean hostIsAllowed(RemoteFileDesc other) {
+         // If this host is banned, don't add.
+        if ( !IPFilter.instance().allow(other.getHost()) )
+            return false;            
+            
+        // See if we have already tried and failed with this location
+        // This is only done if the location we're trying is an alternate..
+        synchronized(altLock) {
+            if (other.isFromAlternateLocation() && 
+                invalidAlts.contains(other.getRemoteHostData())) {
+                return false;
+            }
+        }
+        
+        return true;
+    }
+              
 
 
     private static boolean initDone = false; // used to init
@@ -1166,21 +1190,7 @@ public class ManagedDownloader implements Downloader, Serializable {
 
         // before doing expensive stuff, see if connection is even possible...
         if (other.getQuality() < 1) // I only want 2,3,4 star guys....
-            return false;
-            
-        // If this host is banned, don't add.
-        if ( !IPFilter.instance().allow(other.getHost()) )
-            return false;            
-            
-        // See if we have already tried and failed with this location
-        // This is only done if the location we're trying is an alternate..
-        synchronized(altLock) {
-            if (other.isFromAlternateLocation() && 
-                invalidAlts.contains(other.getRemoteHostData())) {
-                return false;
-            }
-        }
-        
+            return false;        
 
         // get other info...
 		final URN otherUrn = other.getSHA1Urn();
@@ -1250,9 +1260,11 @@ public class ManagedDownloader implements Downloader, Serializable {
      *  not offer rfd to another ManagedDownloaders.
      */
     public synchronized boolean addDownload(RemoteFileDesc rfd, boolean cache) {
-        if (! allowAddition(rfd)) {
+        if(!hostIsAllowed(rfd))
             return false;
-        }
+        
+        if (!allowAddition(rfd))
+            return false;
         
         return addDownloadForced(rfd, cache);
     }

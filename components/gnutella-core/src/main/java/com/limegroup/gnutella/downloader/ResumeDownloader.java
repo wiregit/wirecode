@@ -81,7 +81,7 @@ public class ResumeDownloader extends ManagedDownloader
      * Overrides ManagedDownloader to allow any RemoteFileDesc that would
      * resume from _incompleteFile.
      */
-    protected boolean allowAddition(RemoteFileDesc other) { 
+    protected boolean allowAddition(RemoteFileDesc other) {
         //Like "_incompleteFile.equals(_incompleteFileManager.getFile(other))"
         //but more efficient since no allocations in IncompleteFileManager.
         return IncompleteFileManager.same(
@@ -127,25 +127,21 @@ public class ResumeDownloader extends ManagedDownloader
     /** Overrides ManagedDownloader to use the filename and hash (if present) of
      *  the incomplete file. */
     protected QueryRequest newRequery(int numRequeries) {
-        Set queryUrns=null;
-        if (_hash!=null) {
-            queryUrns=new HashSet(1);
-            queryUrns.add(_hash);
-        }
-        //TODO: we always include the file name since HUGE specifies that
-        //results should be sent if the name OR the hashes match.  But
-        //ultrapeers may insist that all keywords are in the QRP tables.
-        //we have to substring the filename because we don't accept queries
-        //that have big search strings
-        //searches with strings greater than 30 characters are dropped.
-        String truncFileName = StringUtils.truncate(getFileName(), 30);
+//        Set queryUrns=null;
+//        if (_hash!=null) {
+//            queryUrns=new HashSet(1);
+//            queryUrns.add(_hash);
+//        }
+        // Extract a query string from our filename.
+        String queryName = extractQueryString(getFileName());
+
         if (_hash != null)
             // TODO: we should be sending the URN with the query, but
             // we don't because URN queries are summarily dropped, though
             // this may change
-            return QueryRequest.createQuery(truncFileName);
+            return QueryRequest.createQuery(queryName);
         else
-            return QueryRequest.createQuery(truncFileName);
+            return QueryRequest.createQuery(queryName);
     }
 
 }
