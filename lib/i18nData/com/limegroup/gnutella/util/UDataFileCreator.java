@@ -1,13 +1,18 @@
 package com.limegroup.gnutella.util;
 
-import java.io.*;
-import java.util.*;
-import com.limegroup.gnutella.util.StringUtils;
-
-import java.util.Map;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.ObjectOutputStream;
+import java.io.OutputStreamWriter;
 import java.util.HashMap;
-import java.util.TreeMap;
 import java.util.Iterator;
+import java.util.Map;
+import java.util.TreeMap;
 
 
 /**
@@ -43,11 +48,17 @@ public class UDataFileCreator {
     private static final String NORMALIZATION_TEST = "NormalizationTest-3.2.0.txt";
     
 
+    /**
+     * @param args unused
+     */
     public static void main(String[] args) {
         UDataFileCreator ufc = new UDataFileCreator();
         ufc.createFile();
     }
     
+    /**
+     * 
+     */
     public void createFile() {
         java.util.BitSet dontExclude = new java.util.BitSet();
         Map codepoints = new TreeMap(new StringComparator());
@@ -183,7 +194,11 @@ public class UDataFileCreator {
         buf.close();
     }
 
-    int numEx = 0; //variable keeping track of number of excluded codepoints
+    /**
+     * variable keeping track of number of excluded codepoints.
+     */
+    int numEx = 0;
+    
     private boolean processLine(Map cp, 
                                 java.util.BitSet dontExclude, 
                                 String line, 
@@ -238,10 +253,9 @@ public class UDataFileCreator {
     private boolean excludedPClass(String codepoint) {
         //TODO: may need to add to this list of one
         //for all the different languages
-        if(codepoint.equals("0027"))
+        if (codepoint.equals("0027"))
             return true;
-        else
-            return false;
+        return false;
     }
 
     /**
@@ -361,8 +375,8 @@ public class UDataFileCreator {
         String code;
         String up;
         String[] splitUp;
-        final int CJKLow = Integer.parseInt("3400", 16);
-        final int CJKHigh = Integer.parseInt("9FA5", 16);
+        //final int CJKLow = Integer.parseInt("3400", 16);
+        //final int CJKHigh = Integer.parseInt("9FA5", 16);
         while(iter.hasNext()) {
             code = (String)iter.next();
             udata u = (udata)codepoint.get(code);
@@ -381,7 +395,7 @@ public class UDataFileCreator {
                 else {
                     StringBuffer dek = new StringBuffer();
                     splitUp = StringUtils.split(u.deKomp, " ");
-                    boolean removed = false;
+                    //boolean removed = false;
                     for(int i = 0; i < splitUp.length; i++) {
                         //check if it should be removed...
                         int codeInt = Integer.parseInt(splitUp[i], 16);
@@ -427,8 +441,8 @@ public class UDataFileCreator {
         char first;
         boolean skip = false;
 
-        int hangulFirst = 0xAC00;
-        int hangulLast = 0xD7A3;
+        //int hangulFirst = 0xAC00;
+        //int hangulLast = 0xD7A3;
 
         while((line = buf.readLine()) != null) {
             first = line.charAt(0);
@@ -471,7 +485,18 @@ public class UDataFileCreator {
     
     //just a datawrapper to be used during the building of the files
     private class udata {
-        public String cat, CC, deKomp = "";
+        /**
+         * Comment for <code>cat</code>
+         */
+        public String cat;
+        /**
+         * Comment for <code>CC</code>
+         */
+        public String CC;
+        /**
+         * Comment for <code>deKomp</code>
+         */
+        public String deKomp = "";
     }
 
 }
