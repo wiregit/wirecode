@@ -284,15 +284,12 @@ public class ID3Editor {
         Map updateFrames = new HashMap();
         for(Iterator iter = frames.iterator(); iter.hasNext() ;) {
             ID3v2Frame frame = (ID3v2Frame)iter.next();
-            System.out.println("Sumeet: id:"+frame.getID()+", "+
-                               "value: "+new String(frame.getContent()));
             checkFrameForUpdates(frame, updateFrames);
         }
         
         //now updates the frames we need
         for(Iterator iter = updateFrames.keySet().iterator(); iter.hasNext();) {
             ID3v2Frame frame = (ID3v2Frame)iter.next();
-            //ID3v2Frame repFrame=new ID3v2Frame(frame,updateFrames.get(frame));
             String val = (String)updateFrames.get(frame);
             ID3v2Frame repFrame = new ID3v2Frame(frame.getID(),
                                              val.getBytes(),
