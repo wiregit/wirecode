@@ -40,7 +40,7 @@ import org.apache.commons.logging.LogFactory;
  * are NOT bootstrap servers like router.limewire.com; LimeWire doesn't
  * use those anymore.
  */
-public class HostCatcher {    
+public class HostCatcher implements HostListener {    
     
     /**
      * Log for logging this class.
@@ -53,7 +53,12 @@ public class HostCatcher {
     /** The number of milliseconds to wait after trying gnutella.net entries
      *  before resorting to GWebCache HOSTFILE requests. */
     public static final int GWEBCACHE_DELAY=6000;  //6 seconds    
-
+    
+    /**
+     * Size of the queue for hosts returned from the GWebCaches.
+     */
+    static final int CACHE_SIZE = 20;
+    
     /**
      * The number of ultrapeer pongs to store.
      */
@@ -66,11 +71,6 @@ public class HostCatcher {
      * normal priority.
      */    
     static final int NORMAL_SIZE=400;
-
-    /**
-     * Size of the queue for hosts returned from the GWebCaches.
-     */
-    static final int CACHE_SIZE = 20;
 
     /**
      * The number of permanent locations to store in gnutella.net 
@@ -112,8 +112,18 @@ public class HostCatcher {
      *  same elements as set.
      * LOCKING: obtain this' monitor before modifying either.  */
     private final BucketQueue /* of ExtendedEndpoint */ ENDPOINT_QUEUE = 
-        new BucketQueue(new int[] {NORMAL_SIZE, GOOD_SIZE, CACHE_SIZE});
+        new BucketQueue(new int[] {NORMAL_SIZE,GOOD_SIZE, CACHE_SIZE});
     private final Set /* of ExtendedEndpoint */ ENDPOINT_SET = new HashSet();
+    
+    /**
+     * <tt>Set</tt> of hosts advertising free Ultrapeer connection slots.
+     */
+    private final Set FREE_ULTRAPEER_SLOTS_SET = new HashSet();
+    
+    /**
+     * <tt>Set</tt> of hosts advertising free leaf connection slots.
+     */
+    private final Set FREE_LEAF_SLOTS_SET = new HashSet();    
 
 
     /** The list of pongs with the highest average daily uptimes.  Each host's
@@ -177,11 +187,6 @@ public class HostCatcher {
     private boolean _hitCaches;
     
     /**
-     * Constant for the <tt>Set</tt> of ultrapeers with free leaf slots.
-     */
-    private final Set FREE_LEAF_SLOTS = new HashSet();
-    
-    /**
      * Constant for the number of milliseconds to wait before periodically
      * recovering hosts on probation.  Non-final for testing.
      */
@@ -226,6 +231,8 @@ public class HostCatcher {
     public void initialize() {
         //Read gnutella.net
         readHostsFile();
+        
+        sendUDPPings();
         
         //Register to send updates every hour (starting in one hour) if we're a
         //supernode and have accepted incoming connections.  I think we should
@@ -281,6 +288,16 @@ public class HostCatcher {
             PROBATION_RECOVERY_WAIT_TIME, PROBATION_RECOVERY_TIME);
     }
 
+    /**
+     * Sends UDP pings to hosts read from disk.
+     */
+    private void sendUDPPings() {
+        // We need the lock on this so that we can copy the set of endpoints.
+        synchronized(this) {
+            UDPHostRanker.rank(new HashSet(ENDPOINT_SET), this);
+        }
+    }
+    
     /**
      * Reads in endpoints from the given file.  This is called by initialize, so
      * you don't need to call it manually.  It is package access for
@@ -382,6 +399,8 @@ public class HostCatcher {
             endpoint = new ExtendedEndpoint(pr.getAddress(), pr.getPort());
         }
 
+        if(!isValidHost(endpoint)) return false;
+        
         if(pr.supportsUnicast()) {
             QueryUnicaster.instance().
 				addUnicastEndpoint(pr.getInetAddress(), pr.getPort());
@@ -394,20 +413,43 @@ public class HostCatcher {
             // Add it to our free leaf slots list if it has free leaf slots and
             // is an Ultrapeer.
             if(pr.hasFreeLeafSlots()) {
-                synchronized(FREE_LEAF_SLOTS) {
-                    FREE_LEAF_SLOTS.add(endpoint);
-                    
-                    // Don't allow the free slots host to expand infinitely.
-                    if(FREE_LEAF_SLOTS.size() > 30) {
-                        FREE_LEAF_SLOTS.remove(
-                            FREE_LEAF_SLOTS.iterator().next());
-                    }
+                addToFixedSizeSet(endpoint, FREE_LEAF_SLOTS_SET);
+                // Return now if the pong is not also advertising free 
+                // ultrapeer slots.
+                if(!pr.hasFreeUltrapeerSlots()) {
+                    return true;
                 }
+            } 
+            
+            // Add it to our free leaf slots list if it has free leaf slots and
+            // is an Ultrapeer.
+            if(pr.hasFreeUltrapeerSlots()) {
+                addToFixedSizeSet(endpoint, FREE_ULTRAPEER_SLOTS_SET);
+                return true;
             } 
             
             return add(endpoint, GOOD_PRIORITY); 
         } else
             return add(endpoint, NORMAL_PRIORITY);
+    }
+    
+    /**
+     * Utility method for adding the specified host to the specified 
+     * <tt>Set</tt>, fixing the size of the set at the pre-defined limit for
+     * the number of hosts with free slots to store.
+     * 
+     * @param host the host to add
+     * @param hosts the <tt>Set</tt> to add it to
+     */
+    private synchronized void addToFixedSizeSet(ExtendedEndpoint host, 
+        Set hosts) {
+        hosts.add(host);
+                
+        // Don't allow the free slots host to expand infinitely.
+        if(hosts.size() > 200) {
+            hosts.remove(hosts.iterator().next());
+        }
+        notify();
     }
 
     /**
@@ -440,6 +482,8 @@ public class HostCatcher {
             priority);
     }
 
+
+    
     /**
      * Adds the passed endpoint to the set of hosts maintained, temporary and
      * permanent. The endpoint may not get added due to various reasons
@@ -455,35 +499,15 @@ public class HostCatcher {
      * @return true iff e was actually added 
      */
     private boolean add(ExtendedEndpoint e, int priority) {
-        if(e.isPrivateAddress()) return false;
         repOk();
-        //We used to check that we're not connected to e, but now we do that in
-        //ConnectionFetcher after a call to getAnEndpoint.  This is not a big
-        //deal, since the call to "set.contains(e)" below ensures no duplicates.
-        //Skip if this would connect us to our listening port.  TODO: I think
-        //this check is too strict sometimes, which makes testing difficult.
-        if (NetworkUtils.isMe(e.getAddress(), e.getPort()))
-            return false;
-
-        //Skip if this host is banned.
-        if (RouterService.getAcceptor().isBannedIP(e.getAddress()))
-            return false;
-
+        if(!isValidHost(e)) return false;
+        
         //Add to permanent list, regardless of whether it's actually in queue.
         //Note that this modifies e.
         addPermanent(e);
 
         boolean ret = false;
         synchronized(this) {
-            // Don't add this host if it has previously failed.
-            if(EXPIRED_HOSTS.contains(e)) {
-                return false;
-            }
-            
-            // Don't add this host if it has previously rejected us.
-            if(PROBATION_HOSTS.contains(e)) {
-                return false;
-            }
             if (! (ENDPOINT_SET.contains(e))) {
                 ret=true;
                 //Add to temporary list. Adding e may eject an older point from
@@ -544,7 +568,45 @@ public class HostCatcher {
         return removed1;
     }
 
+    /**
+     * Utility method for verifying that the given host is a valid host to add
+     * to the group of hosts to try.  This verifies that the host does not have
+     * a private address, is not banned, is not this node, is not in the
+     * expired or probated hosts set, etc.
+     * 
+     * @param host the host to check
+     * @return <tt>true</tt> if the host is valid and can be added, otherwise
+     *  <tt>false</tt>
+     */
+    private boolean isValidHost(ExtendedEndpoint host) {
+        if(host.isPrivateAddress()) return false;
+        //We used to check that we're not connected to e, but now we do that in
+        //ConnectionFetcher after a call to getAnEndpoint.  This is not a big
+        //deal, since the call to "set.contains(e)" below ensures no duplicates.
+        //Skip if this would connect us to our listening port.  TODO: I think
+        //this check is too strict sometimes, which makes testing difficult.
+        if (NetworkUtils.isMe(host.getAddress(), host.getPort()))
+            return false;
 
+        //Skip if this host is banned.
+        if (RouterService.getAcceptor().isBannedIP(host.getAddress()))
+            return false;  
+        
+        synchronized(this) {
+            // Don't add this host if it has previously failed.
+            if(EXPIRED_HOSTS.contains(host)) {
+                return false;
+            }
+            
+            // Don't add this host if it has previously rejected us.
+            if(PROBATION_HOSTS.contains(host)) {
+                return false;
+            }
+        }
+        
+        return true;
+    }
+    
     ///////////////////////////////////////////////////////////////////////
 
     /**
@@ -646,6 +708,32 @@ public class HostCatcher {
     private ExtendedEndpoint getAnEndpointInternal()
             throws NoSuchElementException {
         //LOG.trace("entered getAnEndpointInternal");
+        // If we're already an ultrapeer and we know about hosts with free
+        // ultrapeer slots, try them.
+        if(RouterService.isSupernode() && !FREE_ULTRAPEER_SLOTS_SET.isEmpty()) {
+            Iterator iter = FREE_ULTRAPEER_SLOTS_SET.iterator();
+            ExtendedEndpoint ee = (ExtendedEndpoint)iter.next();
+            iter.remove();
+            return ee;
+        } 
+        // Otherwise, if we're already a leaf and we know about ultrapeers with
+        // free leaf slots, try those.
+        else if(RouterService.isShieldedLeaf() && 
+                !FREE_LEAF_SLOTS_SET.isEmpty()) {
+            Iterator iter = FREE_LEAF_SLOTS_SET.iterator();
+            ExtendedEndpoint ee = (ExtendedEndpoint)iter.next();
+            iter.remove();
+            return ee;
+        } 
+        // Otherwise, assume we'll be a leaf and we're trying to connect, since
+        // this is more common than wanting to become an ultrapeer and because
+        // we want to fill any remaining leaf slots if we can.
+        else if(!FREE_ULTRAPEER_SLOTS_SET.isEmpty()) {
+            Iterator iter = FREE_ULTRAPEER_SLOTS_SET.iterator();
+            ExtendedEndpoint ee = (ExtendedEndpoint)iter.next();
+            iter.remove();
+            return ee;
+        } 
         if (! ENDPOINT_QUEUE.isEmpty()) {
             //pop e from queue and remove from set.
             ExtendedEndpoint e=(ExtendedEndpoint)ENDPOINT_QUEUE.extractMax();
@@ -659,28 +747,22 @@ public class HostCatcher {
     }
 
     /**
-     * Return the number of hosts, i.e.,
-     * getNumUltrapeerHosts()+getNumNormalHosts()+getNumPrivateHosts().  
+     * Accessor for the total number of hosts stored, including Ultrapeers and
+     * leaves.
+     * 
+     * @return the total number of hosts stored 
      */
     public int getNumHosts() {
-        return( ENDPOINT_QUEUE.size() );
+        return ENDPOINT_QUEUE.size()+FREE_LEAF_SLOTS_SET.size()+
+            FREE_ULTRAPEER_SLOTS_SET.size();
     }
 
     /**
      * Returns the number of marked ultrapeer hosts.
      */
     public int getNumUltrapeerHosts() {
-        return ENDPOINT_QUEUE.size(GOOD_PRIORITY);
-    }
-
-    /**
-     * Returns an iterator of the hosts in this, in order of priority.
-     * This can be modified while iterating through the result, but
-     * the modifications will not be observed.
-     */
-    public synchronized Iterator getHosts() {
-        //Clone the queue before iterating.
-        return (new BucketQueue(ENDPOINT_QUEUE)).iterator();
+        return ENDPOINT_QUEUE.size(GOOD_PRIORITY)+FREE_LEAF_SLOTS_SET.size()+
+            FREE_ULTRAPEER_SLOTS_SET.size();
     }
 
     /**
@@ -692,49 +774,41 @@ public class HostCatcher {
         return permanentHosts.iterator();
     }
 
-    /**
-     *  Returns an iterator of the (at most) n best ultrapeer endpoints of this.
-     *  It's not guaranteed that these are reachable. This can be modified while
-     *  iterating through the result, but the modifications will not be
-     *  observed.  
-     */
-    public synchronized Collection getUltrapeerHosts(int n) {
-        //Make n the # of hosts to return--never more than the # of ultrapeers.
-        n=Math.min(n, ENDPOINT_QUEUE.size(GOOD_PRIORITY));
-        //Copy n best hosts into temporary buffer.
-        List /* of ExtendedEndpoint */ buf = new ArrayList(n);
-        for (Iterator iter=ENDPOINT_QUEUE.iterator(GOOD_PRIORITY, n); 
-             iter.hasNext(); )
-            buf.add(iter.next());
-        //And return iterator of contents.
-        return buf;
-    }
     
     /**
-     * Accessor for the <tt>Collection</tt> of Ultrapeers that have advertised
-     * free leaf slots.  The returned <tt>Collection</tt> is a complete copy
-     * of the hosts with free slots and can therefore be modified in any way.
+     * Accessor for the <tt>Collection</tt> of 10 Ultrapeers that have 
+     * advertised free Ultrapeer slots.  The returned <tt>Collection</tt> is a 
+     * new <tt>Collection</tt> and can therefore be modified in any way.
      * 
-     * @return a copy of the <tt>Collection</tt> of hosts that have advertised 
-     *  that they have free leaf slots
+     * @return a <tt>Collection</tt> containing 10 <tt>IpPort</tt> hosts that 
+     *  have advertised they have free ultrapeer slots
      */
-    public Collection getUltrapeersWithFreeLeafSlots() {
-        synchronized(FREE_LEAF_SLOTS) {
-            return new HashSet(FREE_LEAF_SLOTS);
+    public synchronized Collection getUltrapeersWithFreeUltrapeerSlots() {
+        Set copy = new HashSet();
+        Iterator iter = FREE_ULTRAPEER_SLOTS_SET.iterator();
+        for(int i=0; iter.hasNext() && i<10; i++) {
+            copy.add(iter.next());
         }
+        return copy;
     }
 
     /**
-     *  Remove unwanted or used entries
+     * Accessor for the <tt>Collection</tt> of 10 Ultrapeers that have 
+     * advertised free leaf slots.  The returned <tt>Collection</tt> is a 
+     * new <tt>Collection</tt> and can therefore be modified in any way.
+     * 
+     * @return a <tt>Collection</tt> containing 10 <tt>IpPort</tt> hosts that 
+     *  have advertised they have free leaf slots
      */
-    public synchronized void removeHost(String host, int port) {
-        Endpoint e=new Endpoint(host, port);
-        boolean removed1=ENDPOINT_SET.remove(e);
-        boolean removed2=ENDPOINT_QUEUE.removeAll(e);
-        //Check that ENDPOINT_SET.contains(e) <==> ENDPOINT_QUEUE.contains(e)
-        Assert.that(removed1==removed2, "Rep. invariant for HostCatcher " +
-            "broken.");
+    public synchronized Collection getUltrapeersWithFreeLeafSlots() {
+        Set copy = new HashSet();
+        Iterator iter = FREE_LEAF_SLOTS_SET.iterator();
+        for(int i=0; iter.hasNext() && i<10; i++) {
+            copy.add(iter.next());
+        }
+        return copy;
     }
+
 
     /**
      * Notifies this that connect() has been called.  This may decide to give
@@ -751,6 +825,8 @@ public class HostCatcher {
      * @effects removes all entries from this
      */
     public synchronized void clear() {
+        FREE_LEAF_SLOTS_SET.clear();
+        FREE_ULTRAPEER_SLOTS_SET.clear();
         ENDPOINT_QUEUE.clear();
         ENDPOINT_SET.clear();
     }
@@ -862,6 +938,22 @@ public class HostCatcher {
         if(EXPIRED_HOSTS.size() > EXPIRED_HOSTS_SIZE) {
             EXPIRED_HOSTS.remove(EXPIRED_HOSTS.iterator().next());
         }       
+    }
+
+    /**
+     * Adds the specified host to the group of hosts to try.
+     * 
+     * @param host the <tt>IpPort</tt> for the new host
+     * @throws NullPointerException if the <tt>host</tt> argument is 
+     *  <tt>null</tt>
+     */
+    public void addHost(IpPort host) {
+        if(host == null) {
+            throw new NullPointerException("null host");
+        }
+        if(host instanceof PingReply) {
+            add((PingReply)host);
+        }
     }
     
     //Unit test: tests/com/.../gnutella/HostCatcherTest.java   

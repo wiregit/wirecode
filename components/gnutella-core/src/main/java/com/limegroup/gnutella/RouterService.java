@@ -895,14 +895,6 @@ public class RouterService {
     }
 
     /**
-     * Returns an iterator of the hosts in the host catcher, each
-     * an Endpoint.
-     */
-    public static Iterator getHosts() {
-        return catcher.getHosts();
-    }
-
-    /**
      *  Returns the number of messaging connections.
      */
     public static int getNumConnections() {
@@ -955,19 +947,6 @@ public class RouterService {
 		return manager.isConnected();
 	}
 
-    /**
-     *  Returns the number searches made to the local database.
-     */
-//      public static int getNumLocalSearches() {
-//          return router.getNumQueryRequests();
-//      }
-
-    /**
-     *  Ensures that the given host:port pair is not in the host catcher.
-     */
-    public static void removeHost(String host, int port) {
-        catcher.removeHost(host, port);
-    }
 
     /**
      * Returns the number of files being shared locally.
