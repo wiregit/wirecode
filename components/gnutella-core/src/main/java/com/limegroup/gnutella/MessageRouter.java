@@ -1174,7 +1174,7 @@ public abstract class MessageRouter {
         synchronized (queryUpdateLock) {
 			//Check the time to decide if it needs an update.
 			long time = System.currentTimeMillis();
-			if(_nextQueryUpdateTime < time) return;
+			if(time < _nextQueryUpdateTime) return;
 
 			_nextQueryUpdateTime = time + 1000;
 
