@@ -110,8 +110,16 @@ public class QueryRequest extends Message implements Serializable{
         // don't worry about getting the length right at first
         super(guid, Message.F_QUERY, ttl, /* hops */ (byte)0, /* length */ 0);
         this.minSpeed=minSpeed;
-        this.query=query;
-        this.richQuery=richQuery;
+		if(query == null) {
+			this.query = "";
+		} else {
+			this.query = query;
+		}
+		if(richQuery == null) {
+			this.richQuery = "";
+		} else{
+			this.richQuery = richQuery;
+		}
 		Set tempRequestedUrnTypes = null;
 		Set tempQueryUrns = null;
 		if(requestedUrnTypes != null) {
@@ -242,7 +250,7 @@ public class QueryRequest extends Message implements Serializable{
 		else {
 			this.requestedUrnTypes =
 			    Collections.unmodifiableSet(tempRequestedUrnTypes);
-		}		
+		}	
     }
 
     /**
@@ -309,8 +317,12 @@ public class QueryRequest extends Message implements Serializable{
     }
 
     public String toString() {
-        return "QueryRequest("+getQuery()+", "+getMinSpeed()
-            +", "+super.toString()+")";
+		return "QueryRequest:\r\n"+ 
+		       "query:             "+getQuery()+"\r\n"+
+		       "rich query:        "+getRichQuery()+"\r\n"+
+		       "requestedUrnTypes: "+getRequestedUrnTypes()+"\r\n"+
+		       "query urns:        "+getQueryUrns()+"\r\n"+
+		       "min speed:         "+getMinSpeed();
     }
 }
 
