@@ -238,6 +238,95 @@ public class LimeXMLDocument{
         }
     }
     
+    public static String constructXML(ArrayList namValList, String uri){
+        //OK so we have a list of all the populated fields. In correct order
+        int size = namValList.size();
+        String first="";
+        String last = "";
+        String prevString = "";
+        ArrayList tagsToClose = new ArrayList();
+        boolean prevAtt=false;
+        for(int i=0; i< size; i++){
+            NameValue namevalue = (NameValue)namValList.get(i);
+            String currString = namevalue.getName();
+            String value = (String)namevalue.getValue();
+            List currFields = XMLStringUtils.split(currString);
+            int commonCount = 0;
+            List prevFields = null;            
+            boolean attribute = false;            
+            if (currString.endsWith("__"))
+                attribute = true;
+            if(prevAtt && !attribute)//previous was attribute and this is not
+                first = first+">";
+            if (i > 0){
+                prevFields = XMLStringUtils.split(prevString);
+                commonCount = getCommonCount(currFields,prevFields);
+            }        
+            int z = currFields.size();
+            //close any tags that need to be closed
+            int numPending = tagsToClose.size();
+            if(commonCount < numPending){//close some tags
+                int closeCount = numPending-commonCount;
+                int currClose = numPending-1;
+                //close the last closeCount tags
+                for(int k=0; k<closeCount; k++){
+                    String closeStr=(String)tagsToClose.remove(currClose);
+                    currClose--;
+                    last = last + "</"+closeStr+">";
+                }
+            }
+            if(!last.equals("")){
+                first = first + last;
+                last = "";
+            }
+            //deal with parents
+            for(int j=commonCount; j<z-1; j++){
+                String str = (String)currFields.get(j);
+                first = first+"<"+str;
+                if(i==0 && j==0){
+                    first=first+" xsi:noNamespaceSchemaLocation=\""+uri+"\">";
+                }
+                if( (!attribute) && ( j>0 || i > 0))
+                    first = first+">";
+                tagsToClose.add(str);
+            }
+            String curr=(String)currFields.get(z-1);//get last=current one
+            if(!attribute)
+                first = first + "<"+curr+">"+value+"</"+curr+">";
+            else{
+                first = first+" "+curr+"=\""+value+"\""; 
+                if(i==size-1)
+                    first= first+">";
+            }
+            prevString = currString;
+            prevAtt = attribute;                
+        }
+        //close remaining tags
+        int stillPending = tagsToClose.size();
+        for(int l=stillPending-1;l>=0;l--){
+            String tag = (String)tagsToClose.remove(l);
+            first = first + "</"+tag+">";
+        }
+        return first;
+    }
+
+    private static int getCommonCount(List currFields, List prevFields){
+        int retValue =0;
+        int smaller;
+        if (currFields.size() < prevFields.size())
+            smaller = currFields.size();
+        else 
+            smaller = prevFields.size();
+
+        for(int i=0; i<smaller; i++){
+            if(currFields.get(i).equals(prevFields.get(i)))
+                retValue++;
+            else//stop counting and get outta here
+                break;
+        }
+        return retValue;
+    }
+    
 }
 
 
