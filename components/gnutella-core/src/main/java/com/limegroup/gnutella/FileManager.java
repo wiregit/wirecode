@@ -670,18 +670,18 @@ public class FileManager {
      * reported URNs
      */
     public synchronized void updateUrnIndex(FileDesc fileDesc) {
-        if (fileDesc._urns != null) {
-            Iterator iter = fileDesc._urns.iterator();
-            while (iter.hasNext()) {
-                URN urn = (URN)iter.next();
-                IntSet indices=(IntSet)_urnIndex.get(urn);
-                if (indices==null) {
-                    indices=new IntSet();
-                    _urnIndex.put(urn, indices);
-                }
-                indices.add(fileDesc._index);
-            }
-        }
+		Iterator iter = fileDesc.getUrns().iterator();
+		while (iter.hasNext()) {
+			URN urn = (URN)iter.next();
+			IntSet indices=(IntSet)_urnIndex.get(urn);
+			if (indices==null) {
+				indices=new IntSet();
+				_urnIndex.put(urn, indices);
+			}
+
+			// hmmnn...suspicious line.
+			indices.add(fileDesc._index);
+		}
     }
     
 
