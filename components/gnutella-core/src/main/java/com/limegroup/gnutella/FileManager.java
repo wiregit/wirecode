@@ -1,15 +1,31 @@
 package com.limegroup.gnutella;
 
-import com.limegroup.gnutella.downloader.IncompleteFileManager;
+import java.io.File;
+import java.io.FilenameFilter;
+import java.io.IOException;
+
 import com.limegroup.gnutella.downloader.VerifyingFile;
-import com.limegroup.gnutella.messages.*;
+import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.settings.SharingSettings;
-import com.limegroup.gnutella.util.*;
-import com.limegroup.gnutella.xml.*;
-
-import java.io.*;
-
-import com.sun.java.util.collections.*;
+import com.limegroup.gnutella.util.FileComparator;
+import com.limegroup.gnutella.util.Function;
+import com.limegroup.gnutella.util.IntSet;
+import com.limegroup.gnutella.util.KeyValue;
+import com.limegroup.gnutella.util.StringComparator;
+import com.limegroup.gnutella.util.StringUtils;
+import com.limegroup.gnutella.util.Trie;
+import com.limegroup.gnutella.xml.LimeXMLDocument;
+import com.sun.java.util.collections.ArrayList;
+import com.sun.java.util.collections.Arrays;
+import com.sun.java.util.collections.Comparator;
+import com.sun.java.util.collections.HashMap;
+import com.sun.java.util.collections.Iterator;
+import com.sun.java.util.collections.LinkedList;
+import com.sun.java.util.collections.List;
+import com.sun.java.util.collections.Map;
+import com.sun.java.util.collections.Set;
+import com.sun.java.util.collections.TreeMap;
+import com.sun.java.util.collections.TreeSet;
 
 /**
  * The list of all shared files.  Provides operations to add and remove
@@ -155,7 +171,7 @@ public class FileManager {
     /** The callback for adding shared directories and files, or null
      *  if this has no callback.
      */
-    protected static ActivityCallback _callback;
+    protected ActivityCallback _callback;
     
     /**
      * The only ShareableFileFilter object that should be used.
