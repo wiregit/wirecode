@@ -83,8 +83,6 @@ public class GGEP extends Object {
     public GGEP(byte[] messageBytes, final int beginOffset, int[] endOffset) 
         throws BadGGEPBlockException {
 
-        _props = new HashMap();
-
         // all GGEP blocks start with this prefix....
         if (messageBytes[beginOffset] != GGEP_PREFIX_MAGIC_NUMBER)
             throw new BadGGEPBlockException();
