@@ -455,7 +455,7 @@ public abstract class MessageRouter {
 
             // 1a: set the TTL of the query so it can be potentially extended  
             if (isProbeQuery) 
-                _queryRouteTable.setTTL(request.getGUID(), (byte)1);
+                _queryRouteTable.setTTL(counter, (byte)1);
 
             // 1a and 2b2
             // if a new probe or a new request, do everything (so input true

@@ -180,41 +180,21 @@ public final class RouteTable {
     }
 
     /** Optional operation - if you want to remember the TTL associated with a
-     *  message, in order to allow for extendable execution, you can set the TTL
+     *  counter, in order to allow for extendable execution, you can set the TTL
      *  a message (guid).
-     *  If the guid is not present (evicted or forgotten), this is a noop.
      *  @param ttl should be greater than 0.
-     *  @exception IllegalArgumentException thrown if !(ttl > 0)
+     *  @exception IllegalArgumentException thrown if !(ttl > 0), or if entry is
+     *  null or is not something I recognize.  So only put in what I dole out.
      */
-    public synchronized void setTTL(byte[] guid, byte ttl) {
+    public synchronized void setTTL(ResultCounter entry, byte ttl) {
+        if (entry == null)
+            throw new IllegalArgumentException("Null entry!!");
+        if (!(entry instanceof RouteTableEntry))
+            throw new IllegalArgumentException("entry is not recognized.");
         if (!(ttl > 0))
             throw new IllegalArgumentException("Input TTL too small: " + ttl);
 
-        //Look up guid in _newMap. If not there, check _oldMap. 
-        RouteTableEntry entry=(RouteTableEntry)_newMap.get(guid);
-        if (entry==null)
-            entry=(RouteTableEntry)_oldMap.get(guid);
-
-        if (entry==null)
-            ; // nothing to do
-        else
-            entry.setTTL(ttl);
-    }
-
-    /** Optional accessor - use this if you used setTTL(byte[]) to remember the
-     *  ttl of a message (guid).  If it returns 0, then it was never set.
-     *  @return 0 if the guid was never remembered, >0 if so.
-     */
-    public synchronized byte getTTL(byte[] guid) {
-        //Look up guid in _newMap. If not there, check _oldMap. 
-        RouteTableEntry entry=(RouteTableEntry)_newMap.get(guid);
-        if (entry==null)
-            entry=(RouteTableEntry)_oldMap.get(guid);
-
-        if (entry==null)
-            return (byte) 0;
-        else 
-            return entry.getTTL();
+        ((RouteTableEntry)entry).setTTL(ttl);
     }
 
 
@@ -230,9 +210,14 @@ public final class RouteTable {
         if ((getTTL < 1) || (setTTL <= getTTL))
             throw new IllegalArgumentException("Bad ttl input (get/set): " +
                                                getTTL + "/" + setTTL);
-        if (getTTL(guid) == getTTL) {
-            setTTL(guid, setTTL);
-            return true;
+
+        RouteTableEntry entry=(RouteTableEntry)_newMap.get(guid);
+        if (entry==null)
+            entry=(RouteTableEntry)_oldMap.get(guid);
+        
+        if ((entry != null) && (entry.getTTL() == getTTL)) {
+                entry.setTTL(setTTL);
+                return true;
         }
         return false;
     }
