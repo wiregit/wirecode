@@ -2,6 +2,7 @@ package com.limegroup.gnutella.downloader;
 
 import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.http.*;
+import com.limegroup.gnutella.util.CommonUtils;
 import com.sun.java.util.collections.*;
 import java.net.*;
 import java.io.*;
@@ -81,6 +82,9 @@ final class HeadRequester implements Runnable {
                         HttpURLConnection httpConnection = 
                             (HttpURLConnection)url.openConnection();
                         httpConnection.setRequestMethod("HEAD");
+                        httpConnection.setRequestProperty(
+                            "User-Agent",
+                            CommonUtils.getHttpServer());
                         httpConnection.setDoOutput(true);
                         httpConnection.setDoInput(true);
                         httpConnection.setUseCaches(false);
