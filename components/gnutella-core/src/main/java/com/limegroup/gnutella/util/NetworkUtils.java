@@ -344,7 +344,7 @@ public final class NetworkUtils {
     		PushEndpoint current = PushEndpoint.fromBytes(data,i);
     		i+=PushEndpoint.getSizeBytes(current.getProxies());
     		if (!current.getAddress().equals(RemoteFileDesc.BOGUS_IP))
-    		    i=6;
+    		    i+=6;
     		ret.add(current);
     	}
     	
