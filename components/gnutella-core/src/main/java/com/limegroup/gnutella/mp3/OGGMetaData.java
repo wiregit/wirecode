@@ -62,21 +62,23 @@ public class OGGMetaData extends AudioMetaData{
 		
 		if (comments.length > 0 && comments[0]!=null) {
 			
+			//any given tag may or may not exist.  If it doesn't, the
+			//query method returns null.
 			
-			setTitle(comments[0].query(TITLE_TAG));
-			setArtist(comments[0].query(ARTIST_TAG));
-			setAlbum(comments[0].query(ALBUM_TAG));
-			setComment(comments[0].query(COMMENT_TAG));
-			setGenre(comments[0].query(GENRE_TAG));
+			setTitle(safeQuery(TITLE_TAG,comments[0]));
+			setArtist(safeQuery(ARTIST_TAG,comments[0]));
+			setAlbum(safeQuery(ALBUM_TAG,comments[0]));
+			setComment(safeQuery(COMMENT_TAG,comments[0]));
+			setGenre(safeQuery(GENRE_TAG,comments[0]));
 			
 			//oggs store the year in yyyy-mm-dd format
-			String year = comments[0].query(DATE_TAG);
-			if (year != null && year.length()>4)
+			String year = safeQuery(DATE_TAG,comments[0]);
+			if (year.length()>4)
 				year = year.substring(4);
 			setYear(year);
 			
 			try {
-				short track = Short.parseShort(comments[0].query(TRACK_TAG));
+				short track = Short.parseShort(safeQuery(TRACK_TAG,comments[0]));
 				setTrack(track);
 			}catch(NumberFormatException ignored) {}
 			
@@ -85,6 +87,15 @@ public class OGGMetaData extends AudioMetaData{
 		}
 	}
 	
+	/**
+	 * oggs may contain a tag, or may not.  If they don't, the provided 
+	 * query method returns null, and we don't want that.
+	 */
+	private String safeQuery(String tag, Comment comment) {
+		String res = comment.query(tag);
+		
+		return res == null ? "" : res;
+	}
 	
 	
 }
