@@ -32,6 +32,31 @@ public class QueryRequest extends Message implements Serializable{
     public static final int SPECIAL_XML_MASK       = 0x0020;
     public static final int SPECIAL_OUTOFBAND_MASK = 0x0004;
 
+    /** Mask for audio queries - input 0 | AUDIO_MASK | .... to specify
+     *  audio responses.
+     */
+    public static final int AUDIO_MASK  = 0x0004;
+    /** Mask for video queries - input 0 | VIDEO_MASK | .... to specify
+     *  video responses.
+     */
+    public static final int VIDEO_MASK  = 0x0008; 
+    /** Mask for document queries - input 0 | DOC_MASK | .... to specify
+     *  document responses.
+     */
+    public static final int DOC_MASK  = 0x0010;
+    /** Mask for image queries - input 0 | IMAGE_MASK | .... to specify
+     *  image responses.
+     */
+    public static final int IMAGE_MASK  = 0x0020;
+    /** Mask for windows programs/packages queries - input 0 | WIN_PROG_MASK
+     *  | .... to specify windows programs/packages responses.
+     */
+    public static final int WIN_PROG_MASK  = 0x0040;
+    /** Mask for linux/osx programs/packages queries - input 0 | LIN_PROG_MASK
+     *  | .... to specify linux/osx programs/packages responses.
+     */
+    public static final int LIN_PROG_MASK  = 0x0080;
+
     public static final String WHAT_IS_NEW_QUERY_STRING = "WhatIsNewXOXO";
     // kept public, non-final for testing sake
     public static int WHAT_IS_NEW_GGEP_VALUE = 1;
@@ -86,7 +111,7 @@ public class QueryRequest extends Message implements Serializable{
      * The flag in the 'M' GGEP extension - if non-null, the query is requesting
      * only certain types.
      */
-    private Byte _metaMask = null;
+    private Integer _metaMask = null;
 
 	/**
 	 * Cached hash code for this instance.
@@ -762,8 +787,36 @@ public class QueryRequest extends Message implements Serializable{
                         QueryKey queryKey, boolean isFirewalled, 
                         int network, boolean canReceiveOutOfBandReplies,
                         int capabilitySelector) {
+        this(guid, ttl, query, richQuery, requestedUrnTypes, queryUrns,
+             queryKey, isFirewalled, network, canReceiveOutOfBandReplies,
+             capabilitySelector, 0);
+    }
+
+    /**
+     * Builds a new query from scratch but you can flag it as a Requery, if 
+     * needed.  If you need to make a query that accepts out-of-band results, 
+     * be sure to set the guid correctly (see GUID.makeAddressEncodedGUI) and 
+     * set canReceiveOutOfBandReplies .
+     *
+     * @requires 0<=minSpeed<2^16 (i.e., can fit in 2 unsigned bytes)
+     * @param requestedUrnTypes <tt>Set</tt> of <tt>UrnType</tt> instances
+     *  requested for this query, which may be empty or null if no types were
+     *  requested
+	 * @param queryUrns <tt>Set</tt> of <tt>URN</tt> instances requested for 
+     *  this query, which may be empty or null if no URNs were requested
+	 * @throws <tt>IllegalArgumentException</tt> if the query string, the xml
+	 *  query string, and the urns are all empty, or if the capability selector
+     *  is bad
+     */
+    public QueryRequest(byte[] guid, byte ttl,  
+                        String query, String richQuery, 
+                        Set requestedUrnTypes, Set queryUrns,
+                        QueryKey queryKey, boolean isFirewalled, 
+                        int network, boolean canReceiveOutOfBandReplies,
+                        int capabilitySelector, int metaFlagMask) {
         // don't worry about getting the length right at first
-        super(guid, Message.F_QUERY, ttl, /* hops */ (byte)0, /* length */ 0, network);
+        super(guid, Message.F_QUERY, ttl, /* hops */ (byte)0, /* length */ 0, 
+              network);
 		if((query == null || query.length() == 0) &&
 		   (richQuery == null || richQuery.length() == 0) &&
 		   (queryUrns == null || queryUrns.size() == 0)) {
@@ -774,6 +827,10 @@ public class QueryRequest extends Message implements Serializable{
             throw new IllegalArgumentException("Bad capability = " +
                                                capabilitySelector);
         _capabilitySelector = capabilitySelector;
+        if ((metaFlagMask < 4) || (metaFlagMask > 251))
+            throw new IllegalArgumentException("Bad Meta Flag = " +
+                                               metaFlagMask);
+        _metaMask = new Integer(metaFlagMask);
 
 		// the new Min Speed format - looks reversed but
 		// it isn't because of ByteOrder.short2leb
@@ -785,7 +842,9 @@ public class QueryRequest extends Message implements Serializable{
         // if we can NOT receive out of band replies, we want in-band XML - so
 		// set the correct bit.
         // if we can receive out of band replies, we do not want in-band XML -
-		// we'll hope the out-of-band reply guys will provide us all necessary XML.
+		// we'll hope the out-of-band reply guys will provide us all necessary
+		// XML.
+
         if (!canReceiveOutOfBandReplies) 
             minSpeed |= SPECIAL_XML_MASK;
         else // bit 10 flags out-of-band support
@@ -879,8 +938,13 @@ public class QueryRequest extends Message implements Serializable{
             if (_capabilitySelector > 0)
                 ggepBlock.put(GGEP.GGEP_HEADER_WHAT_IS, _capabilitySelector);
 
+            // add a meta flag
+            if (_metaMask != null)
+                ggepBlock.put(GGEP.GGEP_HEADER_META, _metaMask.intValue());
+
             // if there are GGEP headers, write them out...
-            if ((this.QUERY_KEY != null) || (_capabilitySelector > 0)) {
+            if ((this.QUERY_KEY != null) || (_capabilitySelector > 0) ||
+                (_metaMask != null)) {
                 ByteArrayOutputStream ggepBytes = new ByteArrayOutputStream();
                 ggepBlock.write(ggepBytes);
                 // write out GGEP
@@ -967,7 +1031,7 @@ public class QueryRequest extends Message implements Serializable{
                                 ggep.getInt(GGEP.GGEP_HEADER_WHAT_IS);
                         if (ggep.hasKey(GGEP.GGEP_HEADER_META))
                             _metaMask = 
-                            new Byte(ggep.getBytes(GGEP.GGEP_HEADER_META)[0]);
+                                new Integer(ggep.getInt(GGEP.GGEP_HEADER_META));
                     }
                     catch (BadGGEPBlockException ignored) {}
                     catch (BadGGEPPropertyException ignored) {}
@@ -1296,7 +1360,7 @@ public class QueryRequest extends Message implements Serializable{
      */
     public boolean desiresAudio() {
         if (_metaMask != null) 
-            return MetaTypeParser.desiresAudio(_metaMask.byteValue());
+            return ((_metaMask.intValue() & AUDIO_MASK) > 0);
         return true;
     }
     
@@ -1304,7 +1368,7 @@ public class QueryRequest extends Message implements Serializable{
      */
     public boolean desiresVideo() {
         if (_metaMask != null) 
-            return MetaTypeParser.desiresVideo(_metaMask.byteValue());
+            return ((_metaMask.intValue() & VIDEO_MASK) > 0);
         return true;
     }
     
@@ -1312,7 +1376,7 @@ public class QueryRequest extends Message implements Serializable{
      */
     public boolean desiresDocuments() {
         if (_metaMask != null) 
-            return MetaTypeParser.desiresDocuments(_metaMask.byteValue());
+            return ((_metaMask.intValue() & DOC_MASK) > 0);
         return true;
     }
     
@@ -1320,7 +1384,7 @@ public class QueryRequest extends Message implements Serializable{
      */
     public boolean desiresImages() {
         if (_metaMask != null) 
-            return MetaTypeParser.desiresImages(_metaMask.byteValue());
+            return ((_metaMask.intValue() & IMAGE_MASK) > 0);
         return true;
     }
     
@@ -1329,7 +1393,7 @@ public class QueryRequest extends Message implements Serializable{
      */
     public boolean desiresWindowsPrograms() {
         if (_metaMask != null) 
-            return MetaTypeParser.desiresWindowsPrograms(_metaMask.byteValue());
+            return ((_metaMask.intValue() & WIN_PROG_MASK) > 0);
         return true;
     }
     
@@ -1338,7 +1402,7 @@ public class QueryRequest extends Message implements Serializable{
      */
     public boolean desiresLinuxOSXPrograms() {
         if (_metaMask != null) 
-            return MetaTypeParser.desiresLinuxOSXPrograms(_metaMask.byteValue());
+            return ((_metaMask.intValue() & LIN_PROG_MASK) > 0);
         return true;
     }
 
@@ -1395,53 +1459,4 @@ public class QueryRequest extends Message implements Serializable{
             "types: "+getRequestedUrnTypes().size()+","+
             "urns: "+getQueryUrns().size()+">";
     }
-
-    
-    private static final class MetaTypeParser {
-        public static final int AUDIO_MASK  = 0x0004;
-        public static final int VIDEO_MASK  = 0x0008; 
-        public static final int DOC_MASK  = 0x0010;
-        public static final int IMAGE_MASK  = 0x0020;
-        public static final int WIN_PROG_MASK  = 0x0040;
-        public static final int LIN_PROG_MASK  = 0x0080;
-
-        private static int extend(byte b) {
-            return ByteOrder.ubyte2int(b);
-        }
-       
-        public static boolean desiresAudio(byte b) {
-            return (extend(b) & AUDIO_MASK) > 0;
-        }
-        
-        public static boolean desiresVideo(byte b) {
-            return (extend(b) & VIDEO_MASK) > 0;
-        }
-        
-        public static boolean desiresDocuments(byte b) {
-            return (extend(b) & DOC_MASK) > 0;
-        }
-        
-        public static boolean desiresImages(byte b) {
-            return (extend(b) & IMAGE_MASK) > 0;
-        }
-        
-        public static boolean desiresWindowsPrograms(byte b) {
-            return (extend(b) & WIN_PROG_MASK) > 0;
-        }
-        
-        public static boolean desiresLinuxOSXPrograms(byte b) {
-            return (extend(b) & LIN_PROG_MASK) > 0;
-        }
-        
-
-    }
-
 }
-
-
-
-
-
-
-
-
