@@ -297,11 +297,11 @@ public class ManagedConnection extends Connection
     public ManagedConnection(String host, int port) {
         this(host, port, 
 			 (RouterService.isSupernode() ? 
-			  (Properties)(new SupernodeProperties(host)) : 
-			  (Properties)(new ClientProperties(host))),
+			  (Properties)(new UltrapeerHeaders(host)) : 
+			  (Properties)(new LeafHeaders(host))),
 			 (RouterService.isSupernode() ?
-			  (HandshakeResponder)new SupernodeHandshakeResponder(host) :
-			  (HandshakeResponder)new ClientHandshakeResponder(host)));
+			  (HandshakeResponder)new UltrapeerHandshakeResponder(host) :
+			  (HandshakeResponder)new LeafHandshakeResponder(host)));
     }
 
 	/**
@@ -335,9 +335,9 @@ public class ManagedConnection extends Connection
     ManagedConnection(Socket socket) {
         super(socket, 
 			  RouterService.isSupernode() ? 
-			  (HandshakeResponder)(new SupernodeHandshakeResponder(
+			  (HandshakeResponder)(new UltrapeerHandshakeResponder(
 			      socket.getInetAddress().getHostAddress())) : 
-			  (HandshakeResponder)(new ClientHandshakeResponder(
+			  (HandshakeResponder)(new LeafHandshakeResponder(
 				  socket.getInetAddress().getHostAddress())));
         _manager = RouterService.getConnectionManager();
     }
