@@ -73,9 +73,8 @@ public class QueryReply extends Message implements Serializable{
             Response r=responses[n-left];
             ByteOrder.int2leb((int)r.getIndex(),payload,i);
             ByteOrder.int2leb((int)r.getSize(),payload,i+4);
-            i+=8;
-            String name=r.getName();
-            byte[] nameBytes = r.getName().getBytes();
+            i+=8;            
+            byte[] nameBytes = r.getNameBytes();
             System.arraycopy(nameBytes, 0, payload, i, nameBytes.length);
             i+=nameBytes.length;
             //Write double null terminator.
@@ -115,7 +114,9 @@ public class QueryReply extends Message implements Serializable{
         int ret=0;
         for (int i=0; i<responses.length; i++)
             //8 bytes for index and size, plus name and two null terminators
-            ret += 8+responses[i].getName().length()+2;
+            //response.getNameBytesSize() returns the size of the 
+            //file name in bytes
+            ret += 8+responses[i].getNameBytesSize()+2;
         return ret;
     }
 
