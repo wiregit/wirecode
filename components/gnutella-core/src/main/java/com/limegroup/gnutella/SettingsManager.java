@@ -8,6 +8,10 @@ import com.sun.java.util.collections.*;
 import java.lang.IllegalArgumentException;
 import java.util.Enumeration;
 import java.util.StringTokenizer;
+import javax.swing.*;
+import javax.swing.event.*;
+import java.awt.*;
+import java.awt.event.*;
 import com.limegroup.gnutella.util.StringUtils;
 import com.limegroup.gnutella.util.CommonUtils;
 
@@ -3570,13 +3574,15 @@ public final class SettingsManager {
 			ostream.close();
 		}
 		catch (Exception e){
-            // TODO: we really should find a way to log this
+            showInternalError(e);
         }
 		finally {
 			try {
 				if(ostream != null) ostream.close();
 			}
-			catch(IOException io) {}
+			catch(IOException e) {
+                showInternalError(e);
+            }
 		}
 	}
 
@@ -3605,6 +3611,157 @@ public final class SettingsManager {
         String[] ret=new String[buf.size()];
         buf.copyInto(ret);
         return ret;
+    }
+
+	/**
+	 * Display a standardly formatted internal error message
+	 * coming from the backend.
+	 *
+	 * @param message the message to display to the user
+	 *
+	 * @param t the <tt>Throwable</tt> object containing information 
+	 *          about the error
+	 */	
+	private void showInternalError(Throwable t) {
+		t.printStackTrace();
+		StringWriter sw = new StringWriter();
+		PrintWriter pw = new PrintWriter(sw);
+		pw.print("LimeWire version ");
+		pw.println(CommonUtils.getLimeWireVersion());            
+		pw.print("Java version ");
+		pw.print(CommonUtils.getJavaVersion());
+		pw.print(" from ");
+		pw.println(prop("java.vendor"));
+		pw.print(CommonUtils.getOS());
+		pw.print(" v. ");
+		pw.print(prop("os.version"));
+		pw.print(" on ");
+		pw.println(prop("os.arch"));
+		Runtime runtime = Runtime.getRuntime();
+		pw.println("Free/total memory: "
+				   +runtime.freeMemory()+"/"+runtime.totalMemory());
+		pw.println();
+		
+		t.printStackTrace(pw);
+
+		pw.println();
+
+		File propsFile = new File(CommonUtils.getUserSettingsDir(),
+								  "limewire.props");
+		Properties props = new Properties();
+		try {
+			FileInputStream fis = new FileInputStream(propsFile);
+			props.load(fis);
+			fis.close();
+			// list the properties in the PrintWriter.
+			props.list(pw);
+		} catch(FileNotFoundException fnfe) {
+		} catch(IOException ioe) {
+		}
+
+        pw.println("");
+        pw.println("");
+        pw.println("");
+		pw.println("FILES IN CURRENT DIRECTORY:");
+        File curDir = CommonUtils.getCurrentDirectory();
+        String[] files = curDir.list();
+        for(int i=0; i<files.length; i++) {
+            File curFile = new File(curDir, files[i]);
+            pw.println(curFile.toString());
+            pw.println("LAST MODIFIED: "+curFile.lastModified());
+            pw.println("SIZE: "+curFile.length());
+            pw.println();
+        }
+
+		pw.flush();
+		
+		displayError(sw.toString());
+
+        if(t instanceof ExceptionInInitializerError) {
+            showInternalError(((ExceptionInInitializerError)t).getException());
+        }
+	}
+
+    /** 
+	 * Returns the System property with the given name, or
+     * "?" if it is unknown. 
+	 */
+    private String prop(String name) {
+        String value = System.getProperty(name);
+        if (value == null) return "?";
+        else return value;
+    }
+
+
+	/**
+	 * Displays an internal error with specialized formatting.
+	 *
+	 * @param error the string containing the stack trace, properties, etc. 
+     *  for the error
+	 */
+	private void displayError(String error) {
+		final JDialog DIALOG = new JDialog();
+		final Dimension DIALOG_DIMENSION = new Dimension(260, 120);
+		final Dimension INNER_SIZE = new Dimension(220, 100);
+		DIALOG.setSize(DIALOG_DIMENSION);
+
+        JPanel mainPanel = new JPanel();
+        mainPanel.setBorder(BorderFactory.createEmptyBorder(10,10,10,10));
+		mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
+
+
+
+        JLabel label = new JLabel("LimeWire has encountered an error.  "+
+                                  "If you would be so kind, please copy this "+
+                                  "message and send it to bugs@limewire.com.");
+		JPanel labelPanel = new JPanel();
+		JPanel innerLabelPanel = new JPanel();
+		labelPanel.setLayout(new BoxLayout(labelPanel, BoxLayout.X_AXIS));		
+		innerLabelPanel.setLayout(new BoxLayout(innerLabelPanel, 
+                                                BoxLayout.Y_AXIS));
+		innerLabelPanel.add(label);
+		innerLabelPanel.add(Box.createVerticalStrut(6));
+		labelPanel.add(innerLabelPanel);
+		labelPanel.add(Box.createHorizontalGlue());
+
+        final JTextArea textArea = new JTextArea(error);
+        textArea.selectAll();
+        textArea.copy();
+        textArea.setColumns(50);
+        textArea.setEditable(false);
+        JScrollPane scroller = new JScrollPane(textArea);
+        scroller.setBorder(BorderFactory.createEtchedBorder());
+		scroller.setPreferredSize(INNER_SIZE);
+
+
+        JPanel buttonPanel = new JPanel();
+        JButton copyButton = new JButton("Copy Selection");
+        copyButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				textArea.copy();
+			}
+		});
+        JButton quitButton = new JButton("Ok");
+        quitButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e){
+				DIALOG.dispose();
+			}
+		});
+        buttonPanel.add(copyButton);
+        buttonPanel.add(quitButton);
+
+        mainPanel.add(labelPanel);
+        mainPanel.add(scroller);
+        mainPanel.add(buttonPanel);
+
+        DIALOG.getContentPane().add(mainPanel);
+		
+        Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+        DIALOG.setLocation((screenSize.width - DIALOG_DIMENSION.width)/2,
+                           (screenSize.height - DIALOG_DIMENSION.height)/2);
+        
+		DIALOG.pack();
+		DIALOG.show();
     }
 
 	// unit tests
