@@ -18,7 +18,7 @@ import java.net.*;
 public abstract class MessageRouter
 {
 
-    public static final boolean UNICAST_MODE = false;
+    public static final boolean UNICAST_MODE = true;
 
     protected ConnectionManager _manager;
     protected Acceptor _acceptor;
