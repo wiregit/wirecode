@@ -21,7 +21,7 @@ public class TestConnection {
     // used to determine if the file should actually be sent.
     private boolean _sendUpdateData;
 
-    private boolean _testUpdateNotRequested;
+    private volatile boolean _testUpdateNotRequested;
 
 
     public TestConnection(int port, String headerVersion, int fileVersion) 
@@ -29,13 +29,15 @@ public class TestConnection {
         _headerVersion = headerVersion;
         _port = port;
         _updateData = readCorrectFile(fileVersion);        
+        _testUpdateNotRequested = false;
+        _sendUpdateData = true;//we want to send in the default case
     }
     
     public void start() {
         //1. set up an incoming socket
         try {
             _server = new ServerSocket();
-            _server.setReuseAddress(true);
+            //_server.setReuseAddress(true);
             _server.bind(new InetSocketAddress(_port));
         } catch (IOException iox) {
             ErrorService.error(iox);
@@ -54,7 +56,7 @@ public class TestConnection {
         t.start();
 
         try {
-            Thread.sleep(2000);//give the server socket a little time to start
+            Thread.sleep(500);//give the server socket a little time to start
         } catch(InterruptedException e) {
             ErrorService.error(e);
         }
@@ -72,6 +74,8 @@ public class TestConnection {
         try {
             if(_server != null)
                 _server.close();
+            if(_socket != null)
+                _socket.close();
         } catch(IOException iox) {}
     }
     
@@ -87,7 +91,7 @@ public class TestConnection {
         os.write("GNUTELLA CONNECT/0.6\r\n".getBytes());
         os.write("User-Agent: LimeWire/3.4.4\r\n".getBytes());
         os.write(
-            ("Listen-IP:127.0.0.1:"+UpdateManagerTest.PORT+"\r\n").getBytes());
+            ("Listen-IP:127.0.0.1:"+_port+"\r\n").getBytes());
         os.write("X-Query-Routing: 0.1\r\n".getBytes());
         os.write("X-Max-TTL: 3\r\n".getBytes());
         os.write("X-Dynamic-Querying: 0.1\r\n".getBytes());
@@ -117,29 +121,21 @@ public class TestConnection {
         }
     }
 
-    //Server side code that services requsts for update file. 
+    //Server side code that services requsts for update file. Note: this server
+    //processes only one request
     private void loop() throws IOException {
         Socket incoming = null;
-        while(true) {
-            incoming = _server.accept();
-            final Socket mySocket = incoming;
-            Thread runner = new Thread() {
-                public void run() {
-                    try {
-                        handleRequest(mySocket);
-                    } catch (IOException iox) {
-
-                    }
-                }
-            };
-            runner.setDaemon(true);
-            runner.start();
-        } //end of while
+        incoming = _server.accept();
+        final Socket mySocket = incoming;
+        try {
+            handleRequest(incoming);
+        } catch (IOException iox) {
+            
+        }
     }
     
 
     private void handleRequest(Socket socket) throws IOException {
-        System.out.println("\t\t\t handling request");
         if(_testUpdateNotRequested)
             Assert.that(false, "Unexpected behaviour -- update requested");
         InputStream is = socket.getInputStream();
@@ -152,6 +148,14 @@ public class TestConnection {
         }
         if(!_sendUpdateData)//simply close the socket
             throw new IOException();
+        //first write the headers
+        os.write("HTTP/1.1 200 OK\r\n".getBytes());
+        os.write(("User-Agent: LimeWire/"+_headerVersion+"\r\n").getBytes());
+        os.write(("Content-Type: "+
+                          Constants.QUERYREPLY_MIME_TYPE+"\r\n").getBytes());
+        os.write(("Content-Length: "+_updateData.length + "\r\n").getBytes());
+        os.write("\r\n".getBytes());
+        //then write the body
         os.write(_updateData);
         os.flush();
         socket.close(); //thanks and bye bye

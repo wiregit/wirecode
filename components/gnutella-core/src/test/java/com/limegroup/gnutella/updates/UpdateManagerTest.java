@@ -16,17 +16,21 @@ public class UpdateManagerTest extends BaseTestCase {
     
     static final int OLD = 0;
     
-    static final int NEW = 1;
-    
-    static final int DEF_SIGNATURE = 2;
+    static final int MIDDLE = 1;
 
-    static final int DEF_MESSAGE = 3;
-
-    static final int BAD_XML = 4;
+    static final int NEW = 2;
     
-    static final int RANDOM_BYTES = 5;
+    static final int DEF_SIGNATURE = 3;
+
+    static final int DEF_MESSAGE = 4;
+
+    static final int BAD_XML = 5;
+    
+    static final int RANDOM_BYTES = 6;
     
     private static File OLD_VERSION_FILE;
+
+    private static File MIDDLE_VERSION_FILE;
     
     private static File NEW_VERSION_FILE;
 
@@ -43,13 +47,14 @@ public class UpdateManagerTest extends BaseTestCase {
     private static int updateVersion; 
 
     static final int PORT = 6347;
+    
 
 	public UpdateManagerTest(String name) {
 		super(name);
 	}
 
 	public static Test suite() {
-		return buildTestSuite(UpdateManagerTest.class);//,"testNewerVersionFileWithSameVersionRequested");
+		return buildTestSuite(UpdateManagerTest.class);// ,"testNewerVersionAcceptedOnNetwork");
 	}
 
 	public static void main(String[] args) {
@@ -70,6 +75,8 @@ public class UpdateManagerTest extends BaseTestCase {
         String updateDir = "com/limegroup/gnutella/updates/";
         OLD_VERSION_FILE =
                 CommonUtils.getResourceFile(updateDir + "old_verFile.xml"); 
+        MIDDLE_VERSION_FILE = 
+                CommonUtils.getResourceFile(updateDir + "middle_verFile.xml");
         NEW_VERSION_FILE = 
                 CommonUtils.getResourceFile(updateDir + "new_verFile.xml");
         DEF_SIG_FILE = 
@@ -82,6 +89,7 @@ public class UpdateManagerTest extends BaseTestCase {
                 CommonUtils.getResourceFile(updateDir + "random_bytesFile.xml");
 
         assertTrue(OLD_VERSION_FILE.exists());
+        assertTrue(MIDDLE_VERSION_FILE.exists());
         assertTrue(NEW_VERSION_FILE.exists());
         assertTrue(DEF_SIG_FILE.exists());
         assertTrue(DEF_MESSAGE_FILE.exists());
@@ -115,6 +123,7 @@ public class UpdateManagerTest extends BaseTestCase {
     }
 
     public void setUp() throws Exception {
+        Thread.sleep(3000);
         setSettings();
     }
 
@@ -165,9 +174,9 @@ public class UpdateManagerTest extends BaseTestCase {
         UpdateManager man = UpdateManager.instance();
         assertEquals("Problem with new update file", "3.2.2", man.getVersion());
     }
-    
+
     public void testOldVersionNotAcceptedFromNetwork() {
-        updateVersion = OLD;
+        updateVersion = MIDDLE;
         changeUpdateFile();
         TestConnection conn = null;
         try {
@@ -176,25 +185,38 @@ public class UpdateManagerTest extends BaseTestCase {
             fail("could not set up test");
         }
         conn.start();
+        try {
+            Thread.sleep(2000);
+        } catch(InterruptedException ix) {
+            fail("unable to set up test");
+        }
         UpdateManager man = UpdateManager.instance();
         assertEquals("Update manager accepted lower version",
-                                                    "2.9.3",man.getVersion());
+                                                    "3.2.2",man.getVersion());
+        conn.killThread();
     }
+
 
     public void testIOXLeavesVersionIntact() {
         updateVersion = OLD;
         changeUpdateFile();
         TestConnection conn = null;
         try {
-            conn = new TestConnection(6666,"3.6.3",OLD); 
+            conn = new TestConnection(6667,"3.6.3",OLD); 
         } catch(IOException iox) {
             fail("could not set up test");
         }
         conn.setSendUpdateData(false);
         conn.start();
+        try {
+            Thread.sleep(2000);
+        } catch(InterruptedException ix) {
+            fail("unable to set up test");
+        }
         UpdateManager man = UpdateManager.instance();
         assertEquals("Update manager accepted lower version",
                                                     "2.9.3",man.getVersion());
+        conn.killThread();
     }
 
 
@@ -203,14 +225,20 @@ public class UpdateManagerTest extends BaseTestCase {
         changeUpdateFile();
         TestConnection conn = null;
         try {
-            conn = new TestConnection(6666,"3.6.3", DEF_SIGNATURE);
+            conn = new TestConnection(6668,"3.6.3", DEF_SIGNATURE);
         } catch(IOException iox) {
             fail("could not set test up");
         }
         conn.start();
+       try {
+            Thread.sleep(2000);
+        } catch(InterruptedException ix) {
+            fail("unable to set up test");
+        }
         UpdateManager man = UpdateManager.instance();
         assertEquals("Update manager accepted lower version",
                                                     "2.9.3", man.getVersion());
+        conn.killThread();
     }
 
     public void testEqualVersionNotRequested() {
@@ -218,15 +246,21 @@ public class UpdateManagerTest extends BaseTestCase {
         changeUpdateFile();
         TestConnection conn = null;
         try {
-            conn = new TestConnection(6666, "2.9.3", DEF_SIGNATURE);
+            conn = new TestConnection(6669, "2.9.3", DEF_SIGNATURE);
         } catch(IOException iox) {
             fail("could not set test up");
         }
         conn.setTestUpdateNotRequested(true);
         conn.start();
+       try {
+            Thread.sleep(3000);
+        } catch(InterruptedException ix) {
+            fail("unable to set up test");
+        }
         UpdateManager man = UpdateManager.instance();
         assertEquals("Update manager accepted lower version",
                              "2.9.3", man.getVersion());
+        //conn.killThread();
     }
 
     public void testLowerMajorVersionNotRequested() {
@@ -234,51 +268,72 @@ public class UpdateManagerTest extends BaseTestCase {
         changeUpdateFile();
         TestConnection conn = null;
         try {
-            conn = new TestConnection(6666, "2.3.3", DEF_SIGNATURE);
+            conn = new TestConnection(6670, "2.3.3", DEF_SIGNATURE);
         } catch(IOException iox) {
             fail("could not set test up");
         }
         conn.setTestUpdateNotRequested(true);
         conn.start();
+        try {
+            Thread.sleep(2000);
+        } catch(InterruptedException ix) {
+            fail("unable to set up test");
+        }
         UpdateManager man = UpdateManager.instance();
         assertEquals("Update manager accepted lower version",
                              "2.9.3", man.getVersion());
+        //conn.killThread();
     }
-
 
     public void testDifferentMinorVersionNotRequested() {
         updateVersion = OLD;
         changeUpdateFile();
         TestConnection conn = null;
         try {
-            conn = new TestConnection(6666, "2.9.5", DEF_SIGNATURE);
+            conn = new TestConnection(6671, "2.9.5", DEF_SIGNATURE);
         } catch(IOException iox) {
             fail("could not set test up");
         }
         conn.setTestUpdateNotRequested(true);
         conn.start();
+       try {
+            Thread.sleep(2000);
+        } catch(InterruptedException ix) {
+            fail("unable to set up test");
+        }
         UpdateManager man = UpdateManager.instance();
         assertEquals("Update manager accepted lower version",
                              "2.9.3", man.getVersion());
+        //conn.killThread();
     }
 
-//      public void testNewerVersionAcceptedonNetwork() {
-//          updateVersion = OLD;
-//          changeUpdateFile();
-//          TestConnection conn = null;
-//          try { //header says same as me, but my version file is older, 
-//              conn = new TestConnection(6666, "3.6.3", NEW);
-//          } catch(IOException iox) {
-//              fail("could not set test up");
-//          }
-//          conn.setTestUpdateNotRequested(true);
-//          conn.start();
-//          UpdateManager man = UpdateManager.instance();
-//          assertEquals("Update should have got new version",
-//                                                      "3.6.3", man.getVersion());
-//      }
+   public void testNewerVersionAcceptedOnNetwork() {
+        updateVersion = OLD;
+        changeUpdateFile();
+        TestConnection conn = null;
+        try { //header says same as me, but my version file is older, 
+            conn = new TestConnection(6672, "3.6.3", NEW);
+        } catch(IOException iox) {
+            fail("could not set test up");
+        }
+        conn.setTestUpdateNotRequested(false);
+        conn.start();
+        try {
+            Thread.sleep(2000);
+        } catch(InterruptedException ix) {
+            fail("unable to set up test");
+        }
+        UpdateManager man = UpdateManager.instance();
+       assertEquals("Update should have got new version",
+                                                    "3.6.3", man.getVersion());
+    }
 
 
+//      /**
+//       * Tests that we will request the update file even our version is the same
+//       * as the version advertised, but our version file is older than the version
+//       * file advertised by the other guy
+//       */
 //      public void testNewerVersionFileWithSameVersionRequested() {
 //          updateVersion = OLD;
 //          changeUpdateFile();
@@ -291,7 +346,7 @@ public class UpdateManagerTest extends BaseTestCase {
 //          conn.setTestUpdateNotRequested(true);
 //          conn.start();
 //          try {
-//              Thread.sleep(1000);
+//              Thread.sleep(300);
 //          } catch(Exception e) {}
 //          UpdateManager man = UpdateManager.instance();
 //          assertEquals("Update should have got new version",
@@ -353,6 +408,8 @@ public class UpdateManagerTest extends BaseTestCase {
     private static void changeUpdateFile() {        
         if(updateVersion == OLD) 
             CommonUtils.copy(OLD_VERSION_FILE, updateXMLFile);
+        else if(updateVersion == MIDDLE)
+            CommonUtils.copy(MIDDLE_VERSION_FILE, updateXMLFile);
         else if(updateVersion == NEW) 
             CommonUtils.copy(NEW_VERSION_FILE, updateXMLFile);
         else if(updateVersion == DEF_MESSAGE)

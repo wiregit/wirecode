@@ -181,7 +181,13 @@ public class UpdateManager {
                         return;
                     UpdateMessageVerifier verifier =
                          new UpdateMessageVerifier(data, false);// from network
-                    if(!verifier.verifySource())
+                    boolean verified = false;
+                    try {
+                        verified = verifier.verifySource();
+                    } catch (ClassCastException ccx) {
+                        verified = false;
+                    }
+                    if(!verified)
                         return;
                     LOG.trace("Verified file contents");
                     String xml = new String(verifier.getMessageBytes(),"UTF-8");
