@@ -1180,15 +1180,15 @@ public final class UploadManager implements BandwidthTracker {
             if(this.isURNGet(str)) {
                 // handle the URN get request
                 return this.parseURNGet(str);
-            } else if (this.isMalformedURNGet(str)) {
+            //} else if (this.isMalformedURNGet(str)) {
                 // handle the malforned URN get request
-                return this.parseMalformedURNGet(str);
+                //return this.parseMalformedURNGet(str);
             }
 		
             // handle the standard get request
             return UploadManager.parseTraditionalGet(str);
         } catch (IOException ioe) {
-            LOG.debug(ioe);
+            LOG.debug("http request failed", ioe);
             // this means the request was malformed somehow.
             // instead of closing the connection, we tell them
             // by constructing a HttpRequestLine with a fake

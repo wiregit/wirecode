@@ -1220,8 +1220,8 @@ public class UploadTest extends BaseTestCase {
         InputStream in = s.getInputStream();
         OutputStream out = s.getOutputStream();
 
-
-        byte[] ret = getBytes("GET", "/get/" + index + "/" + file, header,
+        String req = makeRequest(file);
+        byte[] ret = getBytes("GET", req, header,
                              out, in, expheader, false);
         in.close();
         out.close();
@@ -1254,7 +1254,7 @@ public class UploadTest extends BaseTestCase {
     private static boolean downloadPush1(String indexedFile, String header, 
 										 String expResp)
            		                         throws IOException, BadPacketException{
-        return downloadPush1("GET", "/get/"+index+"/"+indexedFile, header, expResp);        
+        return downloadPush1("GET", makeRequest(indexedFile), header, expResp);        
     }
 
     /** 
@@ -1590,7 +1590,7 @@ public class UploadTest extends BaseTestCase {
                                            BufferedReader in,
                                            String requiredHeader) 
             throws IOException {
-        return downloadInternal("GET", "/get/" + index + "/" + file, header,
+        return downloadInternal("GET", makeRequest(file), header,
                                     out, in, requiredHeader, true);
 	}
     
@@ -1605,7 +1605,7 @@ public class UploadTest extends BaseTestCase {
                                            BufferedReader in,
                                            String requiredHeader) 
             throws IOException {
-        return downloadInternal("GET", "/get/" + index + "/" + file, header,
+        return downloadInternal("GET", makeRequest(file), header,
                                     out, in, requiredHeader, false);
 	}
 
@@ -1653,7 +1653,7 @@ public class UploadTest extends BaseTestCase {
                                                 (s.getOutputStream()));
         
         //write first request
-        out.write("GET /get/"+index+"/"+file+" HTTP/1.1\r\n");
+        out.write("GET " + makeRequest(file)+" HTTP/1.1\r\n");
         if (header!=null)
             out.write(header+"\r\n");
         out.write("Connection:Keep-Alive\r\n");
@@ -1661,7 +1661,7 @@ public class UploadTest extends BaseTestCase {
         out.flush();
         
         //write second request 
-        out.write("GET /get/"+index+"/"+file+" HTTP/1.1\r\n");
+        out.write("GET " + makeRequest(file) +" HTTP/1.1\r\n");
         if (header!=null)
             out.write(header+"\r\n");
         out.write("Connection:Keep-Alive\r\n");
@@ -1732,7 +1732,7 @@ public class UploadTest extends BaseTestCase {
         in.readLine();  //skip blank line
         
         //write first request
-        out.write("GET /get/"+index+"/"+file+" HTTP/1.1\r\n");
+        out.write("GET " + makeRequest(file) +" HTTP/1.1\r\n");
         if (header!=null)
             out.write(header+"\r\n");
         out.write("Connection:Keep-Alive\r\n");
@@ -1740,7 +1740,7 @@ public class UploadTest extends BaseTestCase {
         out.flush();
 
         //write second request
-        out.write("GET /get/"+index+"/"+file+" HTTP/1.1\r\n");
+        out.write("GET " + makeRequest(file) +" HTTP/1.1\r\n");
         if (header!=null)
             out.write(header+"\r\n");
         out.write("Connection:Keep-Alive\r\n");
@@ -1912,6 +1912,13 @@ public class UploadTest extends BaseTestCase {
             }
         }
     }      
+    
+    private static String makeRequest(String req) {
+        if(req.startsWith("/uri-res"))
+            return req;
+        else
+            return "/get/" + index + "/" + req;
+    }
     
     /** 
      * Reads a new line WITHOUT end of line characters.  A line is 
