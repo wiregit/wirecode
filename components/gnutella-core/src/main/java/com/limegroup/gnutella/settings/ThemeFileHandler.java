@@ -15,10 +15,15 @@ import java.awt.*;
 public final class ThemeFileHandler {
 
 	/**
+	 * The current theme version.
+	 */
+	private static final int CURRENT_VERSION = 2;
+
+	/**
 	 * Handle to the <tt>SettingsFactory</tt> for theme settings.
 	 */
 	private static SettingsFactory FACTORY;	
-
+	
     /**
      * Private constructor to ensure that this class is not constructed.
      */
@@ -58,6 +63,13 @@ public final class ThemeFileHandler {
 		handleFactory(THEME_PROPS);		
 		ThemeSettings.THEME_DIR.setValue(themeDir);
 	}
+	
+	/**
+	 * Determines if the current theme is current.
+	 */
+	public static boolean isCurrent() {
+	    return CURRENT_VERSION <= VERSION.getValue();
+    }
 
 	/**
 	 * Either creates the factory or reloads it as needed.
@@ -395,7 +407,13 @@ public final class ThemeFileHandler {
      */
     public static final ColorSetting SEARCH_PANEL_BG_2 =
         FACTORY.createColorSetting("SEARCH_PANEL_BG_2",
-            TABLE_HEADER_BACKGROUND_COLOR.getValue());                 
+            TABLE_HEADER_BACKGROUND_COLOR.getValue());
+            
+    /**
+     * The current theme version.
+     */
+    public static final IntSetting VERSION = 
+        FACTORY.createIntSetting("THEME_VERSION", 0);
 
 	/*
 	public static void main(String[] args) {
