@@ -170,40 +170,46 @@ public class QueryReply extends Message implements Serializable{
         try {
             //For each record...
             for ( ; left > 0; left--) {
-            long index=ByteOrder.ubytes2long(ByteOrder.leb2int(payload,i));
-            long size=ByteOrder.ubytes2long(ByteOrder.leb2int(payload,i+4));
-            i+=8;
+                long index=ByteOrder.ubytes2long(ByteOrder.leb2int(payload,i));
+                long size=ByteOrder.ubytes2long(ByteOrder.leb2int(payload,i+4));
+                i+=8;
 
-            //The file name is supposed to be terminated by a double null
-            //terminator.  But Gnotella inserts meta-information between
-            //these null characters.  So we have to handle this.
+                //The file name is supposed to be terminated by a double null
+                //terminator.  But Gnotella inserts meta-information between
+                //these null characters.  So we have to handle this.
+                //
+                //See http://gnutelladev.wego.com/go/wego.discussion.message?groupId=139406&view=message&curMsgId=319258&discId=140845&index=-1&action=view
+
+                //Search for first single null terminator.
+                int j=i;
+                for ( ; ; j++) {
+                    if (payload[j]==(byte)0)
+                        break;
+                }
+
+                //payload[i..j-1] is name.  This excludes the null terminator.
+                String name=new String(payload,i,j-i);
+                responses[responses.length-left]=new Response(index,size,name);
+
+                //Search for remaining null terminator.
+                for ( j=j+1; ; j++) {
+                    if (payload[j]==(byte)0)
+                        break;
+                }
+                i=j+1;
+            }
+
+            //We used to ensure that there was no information between the
+            //last result record and the client GUID:
             //
-            //See http://gnutelladev.wego.com/go/wego.discussion.message?groupId=139406&view=message&curMsgId=319258&discId=140845&index=-1&action=view
-
-            //Search for first single null terminator.
-            int j=i;
-            for ( ; ; j++) {
-                if (payload[j]==(byte)0)
-                break;
-            }
-
-            //payload[i..j-1] is name.  This excludes the null terminator.
-            String name=new String(payload,i,j-i);
-            responses[responses.length-left]=new Response(index,size,name);
-
-            //Search for remaining null terminator.
-            for ( j=j+1; ; j++) {
-                if (payload[j]==(byte)0)
-                break;
-            }
-            i=j+1;
-            }
-            if (i<payload.length-16)
-            throw new BadPacketException("Extra data after "
-                             +"double null terminators");
-            else if (i>payload.length-16)
-            throw new BadPacketException("Missing null terminator "
-                             +"filename");
+            //     if (i<payload.length-16) throw new BadPacketException();
+            //
+            //But this space can be used for meta information, so we allow
+            //these packets.  The metainformation is currently ignored.
+            
+            if (i>payload.length-16)
+                throw new BadPacketException("Missing null terminator "
+                                             +"filename");
         } catch (ArrayIndexOutOfBoundsException e) {
             throw new BadPacketException();
         }
@@ -213,7 +219,9 @@ public class QueryReply extends Message implements Serializable{
      *  responding host.  */
     public byte[] getClientGUID() {
         byte[] result=new byte[16];
-        //Copy the last 16 bytes of payload to result
+        //Copy the last 16 bytes of payload to result.  Note that there may
+        //be metainformation before the client GUID.  So it is not correct
+        //to simply count after the last result record.
         int length=super.getLength();
         System.arraycopy(payload, length-16, result, 0, 16);
         return result;
@@ -223,81 +231,139 @@ public class QueryReply extends Message implements Serializable{
         return "QueryReply("+getResultCount()+" hits, "+super.toString()+")";
     }
 
-//      /** Unit test */
-//      public static void main(String args[]) {
-//      byte[] ip={(byte)0xFF, (byte)0, (byte)0, (byte)0x1};
-//      long u4=0x00000000FFFFFFFFl;
-//      byte[] guid=new byte[16]; guid[0]=(byte)1; guid[15]=(byte)0xFF;
-//      Response[] responses=new Response[0];
-//      QueryReply qr=new QueryReply(guid, (byte)5,
-//                       0xF3F1, ip, 1, responses,
-//                       guid);
-//      Assert.that(qr.getSpeed()==1);
-//      Assert.that(qr.getPort()==0xF3F1, Integer.toHexString(qr.getPort()));
-//      try {
-//          Assert.that(!qr.getResults().hasNext());
-//      } catch (BadPacketException e) {
-//          Assert.that(false);
-//      }
-//      responses=new Response[2];
-//      responses[0]=new Response(11,22,"Sample.txt");
-//      responses[1]=new Response(0x2FF2,0xF11F,"Another file  ");
-//      qr=new QueryReply(guid, (byte)5,
-//                0xFFFF, ip, u4, responses,
-//                guid);
-//      Assert.that(qr.getIP().equals("255.0.0.1"));
-//      Assert.that(qr.getPort()==0xFFFF);
-//      Assert.that(qr.getSpeed()==u4);
-//      Assert.that(Arrays.equals(qr.getClientGUID(),guid));
-//      try {
-//          Iterator iter=qr.getResults();
-//          Response r1=(Response)iter.next();
-//          Assert.that(r1.equals(responses[0]));
-//          Response r2=(Response)iter.next();
-//          Assert.that(r2.equals(responses[1]));
-//          Assert.that(!iter.hasNext());
-//      } catch (BadPacketException e) {
-//          Assert.that(false);
-//      } catch (NoSuchElementException e) {
-//          Assert.that(false);
-//      }
+    /** Unit test */
+    /*
+    public static void main(String args[]) {
+        byte[] ip={(byte)0xFF, (byte)0, (byte)0, (byte)0x1};
+        long u4=0x00000000FFFFFFFFl;
+        byte[] guid=new byte[16]; guid[0]=(byte)1; guid[15]=(byte)0xFF;
+        Response[] responses=new Response[0];
+        QueryReply qr=new QueryReply(guid, (byte)5,
+                                     0xF3F1, ip, 1, responses,
+                                     guid);
+        Assert.that(qr.getSpeed()==1);
+        Assert.that(qr.getPort()==0xF3F1, Integer.toHexString(qr.getPort()));
+        try {
+            Assert.that(!qr.getResults().hasNext());
+        } catch (BadPacketException e) {
+            Assert.that(false);
+        }
+        responses=new Response[2];
+        responses[0]=new Response(11,22,"Sample.txt");
+        responses[1]=new Response(0x2FF2,0xF11F,"Another file  ");
+        qr=new QueryReply(guid, (byte)5,
+                          0xFFFF, ip, u4, responses,
+                          guid);
+        Assert.that(qr.getIP().equals("255.0.0.1"));
+        Assert.that(qr.getPort()==0xFFFF);
+        Assert.that(qr.getSpeed()==u4);
+        Assert.that(Arrays.equals(qr.getClientGUID(),guid));
+        try {
+            Iterator iter=qr.getResults();
+            Response r1=(Response)iter.next();
+            Assert.that(r1.equals(responses[0]));
+            Response r2=(Response)iter.next();
+            Assert.that(r2.equals(responses[1]));
+            Assert.that(!iter.hasNext());
+        } catch (BadPacketException e) {
+            Assert.that(false);
+        } catch (NoSuchElementException e) {
+            Assert.that(false);
+        }
 
-//      ////////////////////  Contruct from Raw Bytes /////////////
+        ////////////////////  Contruct from Raw Bytes /////////////
 
-//      //Normal case: double null-terminated result
-//      byte[] payload=new byte[11+11+16];
-//      payload[0]=1;            //Number of results
-//      payload[11+8]=(byte)65;  //The character 'A'
-//      qr=new QueryReply(new byte[16], (byte)5, (byte)0,
-//                payload);
-//      try {
-//          Iterator iter=qr.getResults();
-//          Response response=(Response)iter.next();
-//          Assert.that(response.getName().equals("A"),
-//              "'"+response.getName()+"'");
-//          Assert.that(! iter.hasNext());
-//      } catch (Exception e) {
-//          Assert.that(false);
-//          e.printStackTrace();
-//      }
+        //Normal case: double null-terminated result
+        byte[] payload=new byte[11+11+16];
+        payload[0]=1;            //Number of results
+        payload[11+8]=(byte)65;  //The character 'A'
+        qr=new QueryReply(new byte[16], (byte)5, (byte)0,
+                          payload);
+        try {
+            Iterator iter=qr.getResults();
+            Response response=(Response)iter.next();
+            Assert.that(response.getName().equals("A"),
+                        "'"+response.getName()+"'");
+            Assert.that(! iter.hasNext());
+        } catch (Exception e) {
+            Assert.that(false);
+            e.printStackTrace();
+        }
 
 
-//      //Weird case: metadata between null characters.
-//      payload=new byte[11+11+1+16];
-//      payload[0]=1;            //Number of results
-//      payload[11+8]=(byte)65;  //The character 'A'
-//      payload[11+10]=(byte)66; //The metadata 'B'
-//      qr=new QueryReply(new byte[16], (byte)5, (byte)0,
-//                payload);
-//      try {
-//          Iterator iter=qr.getResults();
-//          Response response=(Response)iter.next();
-//          Assert.that(response.getName().equals("A"),
-//              "'"+response.getName()+"'");
-//          Assert.that(! iter.hasNext());
-//      } catch (Exception e) {
-//          Assert.that(false);
-//          e.printStackTrace();
-//      }
-//      }
+        //Weird case: metadata between null characters.
+        payload=new byte[11+11+1+16];
+        payload[0]=1;            //Number of results
+        payload[11+8]=(byte)65;  //The character 'A'
+        payload[11+10]=(byte)66; //The metadata 'B'
+        qr=new QueryReply(new byte[16], (byte)5, (byte)0,
+                          payload);
+        try {
+            Iterator iter=qr.getResults();
+            Response response=(Response)iter.next();
+            Assert.that(response.getName().equals("A"),
+                        "'"+response.getName()+"'");
+            Assert.that(! iter.hasNext());
+        } catch (Exception e) {
+            Assert.that(false);
+            e.printStackTrace();
+        }
+
+        //Weird case: one byte metadata between last record and client GUID.
+        payload=new byte[11+11+1+16];
+        payload[0]=1;                    //Number of results
+        payload[11+8]=(byte)65;          //The character 'A'
+        payload[11+11+1+0]=(byte)0xFF;   //The first byte of client GUID
+        payload[11+11+1+15]=(byte)0x11;  //The last byte of client GUID
+        qr=new QueryReply(new byte[16], (byte)5, (byte)0,
+                          payload);
+        try {
+            Iterator iter=qr.getResults();
+            Response response=(Response)iter.next();
+            Assert.that(response.getName().equals("A"),
+                        "'"+response.getName()+"'");
+            Assert.that(! iter.hasNext());
+        } catch (Exception e) {
+            Assert.that(false);
+            e.printStackTrace();
+        }
+        byte[] clientGUID=qr.getClientGUID();
+        Assert.that(clientGUID[0]==(byte)0xFF);
+        Assert.that(clientGUID[15]==(byte)0x11);
+
+        //Weird case: 3 bytes metadata between last record and client GUID.
+        payload=new byte[11+11+10+16];
+        payload[0]=1;                    //Number of results
+        payload[11+8]=(byte)65;          //The character 'A'
+        payload[11+11+10+0]=(byte)0xFF;  //The first byte of client GUID
+        payload[11+11+10+15]=(byte)0x11; //The last byte of client GUID
+        qr=new QueryReply(new byte[16], (byte)5, (byte)0,
+                          payload);
+        try {
+            Iterator iter=qr.getResults();
+            Response response=(Response)iter.next();
+            Assert.that(response.getName().equals("A"),
+                        "'"+response.getName()+"'");
+            Assert.that(! iter.hasNext());
+        } catch (Exception e) {
+            Assert.that(false);
+            e.printStackTrace();
+        }
+        clientGUID=qr.getClientGUID();
+        Assert.that(clientGUID[0]==(byte)0xFF);
+        Assert.that(clientGUID[15]==(byte)0x11);
+
+        //Bad case: not enough space for client GUID.  We can get
+        //the client GUID, but not the results.
+        payload=new byte[11+11+15];
+        payload[0]=1;                    //Number of results
+        payload[11+8]=(byte)65;          //The character 'A'
+        qr=new QueryReply(new byte[16], (byte)5, (byte)0,
+                          payload);
+        try {
+            Iterator iter=qr.getResults();
+            Assert.that(false);
+        } catch (BadPacketException e) { }
+    }
+    */
 }
