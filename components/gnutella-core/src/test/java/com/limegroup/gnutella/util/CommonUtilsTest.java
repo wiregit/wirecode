@@ -51,6 +51,16 @@ public class CommonUtilsTest extends TestCase {
         minorVersion = CommonUtils.getMinorVersionNumberInternal("2.7.13");
         assertEquals("unexpected minor version number",7, minorVersion); 
     }
+
+
+	public void testCommonUtilsPortCheck() {
+		int port = -1;
+		assertTrue("port should not be valid", !CommonUtils.isValidPort(port));
+		port = 99999999;
+		assertTrue("port should not be valid", !CommonUtils.isValidPort(port));
+		port = 20;
+		assertTrue("port should be valid", CommonUtils.isValidPort(port));
+	}
     
 
 	/**
