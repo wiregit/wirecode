@@ -1,8 +1,7 @@
 package com.limegroup.gnutella;
 
 import java.io.*;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
+import java.net.*;
 import com.sun.java.util.collections.*;
 import com.limegroup.gnutella.downloader.*;
 import com.limegroup.gnutella.chat.*;
@@ -993,6 +992,45 @@ public class RouterService
 	public Chatter createChat(String host, int port) {
 		Chatter chatter = ChatManager.instance().request(host, port);
 		return chatter;
+	}
+    
+    /**
+	 * Browses the passed host
+     * @param host The host to browse
+     * @param port The port at which to browse
+     * @param guid The guid to be used for the query replies received 
+     * while browsing host
+     * @exception IOException in case any I/O error occurs while 
+     * connecting/reading/writing from the host
+	 */
+	public void doBrowseHost(String host, int port, GUID guid) 
+        throws IOException{
+        try {
+            URLConnection conn 
+                = (new URL("http://"+host+":"+port)).openConnection();
+            conn.setRequestProperty("accept", 
+                                    Constants.QUERYREPLY_MIME_TYPE);
+            InputStream in = conn.getInputStream();
+            
+            while(true) {
+                Message m = Message.read(in);
+//                System.out.println("read " + m);
+                
+                if(m == null) {
+                    //we are finished reading the stream
+                    return;
+                } else {
+                    if(m instanceof QueryReply) {
+                        QueryReply queryReply = (QueryReply)m;
+                        m.setGUID(guid);
+                        callback.handleQueryReply(queryReply);
+                    }
+                }
+            }
+        } catch (Exception e) {
+            //TODO take out the print statement after testing
+//            e.printStackTrace();
+        }
 	}
 
     /**
