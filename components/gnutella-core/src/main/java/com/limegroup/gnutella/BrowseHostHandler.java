@@ -62,12 +62,13 @@ public class BrowseHostHandler {
     }
 
     /** 
+     * Browses the files on the specified host and port.
+     *
      * @param host The IP of the host you want to browse.
      * @param port The port of the host you want to browse.
+     * @param proxies the <tt>Set</tt> of push proxies to try
      */
-    public void browseHost(String host, int port, 
-                           PushProxyInterface[] proxies) {
-
+    public void browseHost(String host, int port, Set proxies) {
         // flow of operation:
         // 1. check if you need to push.
         //   a. if so, just send a Push out.
@@ -337,8 +338,8 @@ public class BrowseHostHandler {
         }
     }
 
-    private class PushRequestDetails { 
-        public BrowseHostHandler bhh;
+    private static class PushRequestDetails { 
+        private BrowseHostHandler bhh;
         private long timeStamp;
         
         public PushRequestDetails(BrowseHostHandler bhh) {

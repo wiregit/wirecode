@@ -813,28 +813,32 @@ public class ConnectionManager {
         return clone;
     }
 
-    /** @return may return null or a zero-length array.  the max size of the 
-     *  array will be 3.
+    /**
+     * Accessor for the <tt>Set</tt> of push proxies for this node.  If
+     * there are no push proxies available, or if this node is an Ultrapeer,
+     * this will return an empty <tt>Set</tt>.
+     *
+     * @return a <tt>Set</tt> of push proxies with a maximum size of 4
+     * 
      *  TODO: should the set of pushproxy UPs be cached and updated as
      *  connections are killed and created?
      */
-    public PushProxyInterface[] getPushProxies() {
-        PushProxyInterface[] retProxies = null;
+    public Set getPushProxies() {
         if (isShieldedLeaf()) {
             // this should be fast since leaves don't maintain a lot of
             // connections and the test for proxy support is cached boolean
             // value
             Iterator ultrapeers = getInitializedConnections().iterator();
-            List proxies = new ArrayList();
-            while (ultrapeers.hasNext() && (proxies.size() < 3)) {
+            Set proxies = new HashSet();
+            while (ultrapeers.hasNext() && (proxies.size() < 4)) {
                 ManagedConnection currMC = (ManagedConnection) ultrapeers.next();
                 if (currMC.getPushProxyPort() >= 0)
                     proxies.add(currMC);
             }
-            retProxies = new PushProxyInterface[proxies.size()];
-            retProxies = (PushProxyInterface[]) proxies.toArray(retProxies);
-        }
-        return retProxies;
+            return proxies;
+        } 
+
+        return DataUtils.EMPTY_SET;
     }
 
     /**

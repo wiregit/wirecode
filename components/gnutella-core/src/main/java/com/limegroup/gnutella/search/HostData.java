@@ -4,6 +4,7 @@ import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.messages.*;
 import com.limegroup.gnutella.util.*;
 import java.net.*;
+import com.sun.java.util.collections.*;
 
 /**
  * This class contains data about a host that has returned a query hit,
@@ -80,9 +81,9 @@ public final class HostData {
     
 
     /**
-     * The list of PushProxies for this Host.
+     * The <tt>Set</tt> of PushProxies for this host.
      */
-    private final PushProxyInterface[] PROXIES;
+    private final Set PROXIES;
 
 	/**
 	 * Constructs a new <tt>HostData</tt> instance from a 
@@ -290,11 +291,11 @@ public final class HostData {
 	}
 
     /**
-     * Returns the (potentially null) list of PushProxies.
+     * Returns the <tt>Set</tt> of push proxies, which can be empty.
      *
-     * @return an array of PushProxies or null.
+     * @return a <tt>Set</tt> of push proxies, which can be empty
      */
-    public PushProxyInterface[] getPushProxies() {
+    public Set getPushProxies() {
         return PROXIES;
     }
 
