@@ -27,7 +27,8 @@ public class NIOMessageReader extends AbstractMessageReader {
 	 
 	
 	/**
-	 * Constant for the <tt>ByteBuffer</tt> for reading headers.
+	 * Constant for the <tt>ByteBuffer</tt> for reading headers.  Note that 
+     * this is fixed size because all Gnutella headers have the same size.
 	 */
      private final ByteBuffer HEADER = ByteBuffer.allocate(HEADER_SIZE);
         
