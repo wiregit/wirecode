@@ -64,6 +64,12 @@ public final class AlternateLocation
 		}
 
 		URL url = AlternateLocation.createUrl(location);
+
+        if(url.getPort()==-1) {
+			//System.out.println("Sumeet: about to throw IOX");
+            throw new IOException("No port set on the URL");
+        }
+
 		if(url == null) {
 			throw new IOException("could not parse url for alt loc: "+
 								  location);
