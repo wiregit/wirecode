@@ -19,7 +19,17 @@ import java.net.InetAddress;
  * getQueryKey(ip, port, ....) and the two Secret inner classes (SecretKey and
  * SecretPad).
  */
-public class QueryKey {
+public final class QueryKey {
+
+    /**
+     * Constant for the <tt>SecretKey</tt> to use.
+     */
+    private static final SecretKey SECRET_KEY = new SecretKey();
+    
+    /**
+     * Constant for the <tt>SecretPad</tt> to use.
+     */
+    private static final SecretPad SECRET_PAD = new SecretPad();
 
     /** As detailed by the GUESS spec.
      */
@@ -56,6 +66,19 @@ public class QueryKey {
         for (int i = 0; i < _queryKey.length; i++) 
             if (_queryKey[i] == (byte) 0x1c) _queryKey[i] = (byte) 0xFA;
     }
+
+
+     /** Returns a new SecretKey to be used in generation of QueryKeys.
+      */
+     public static SecretKey generateSecretKey() {
+         return new SecretKey();
+     }
+
+     /** Returns a new SecretPad to be used in generation of QueryKeys.
+      */
+     public static SecretPad generateSecretPad() {
+         return new SecretPad();
+     }
 
 
     public boolean equals(Object o) {
@@ -107,28 +130,27 @@ public class QueryKey {
             retQK.prepareForNetwork();
         return retQK;
     }
-     
-    /** Returns a new SecretKey to be used in generation of QueryKeys.
-     */   
-    public static SecretKey generateSecretKey() {
-        return new SecretKey();
-    }
 
-    /** Returns a new SecretPad to be used in generation of QueryKeys.
+    /** Generates a QueryKey for a given IP:Port combo.
+     *  For a given IP:Port combo, using a different SecretKey and/or SecretPad
+     *  will result in a different QueryKey.  The instance method
+     *  prepareForNetwork() is called prior to returning the QueryKey.
+     * @param ip the IP address of the other node
+     * @param port the port of the other node
      */
-    public static SecretPad generateSecretPad() {
-        return new SecretPad();
+    public static QueryKey getQueryKey(InetAddress ip, int port) {
+        return getQueryKey(ip, port, SECRET_KEY, SECRET_PAD);
     }
 
     /** Generates a QueryKey for a given IP:Port combo.
      *  For a given IP:Port combo, using a different SecretKey and/or SecretPad
      *  will result in a different QueryKey.  The instance method
      *  prepareForNetwork() is called prior to returning the QueryKey.
-     *  @param secretKey The SecretKey to be used in the generation.
-     *  @param secretPad The SecretPad to be used in the generation.
+     * @param ip the IP address of the other node
+     * @param port the port of the other node
      */
     public static QueryKey getQueryKey(InetAddress ip, int port,
-                                       SecretKey secretKey, 
+                                       SecretKey secretKey,
                                        SecretPad secretPad) {
         byte[] toEncrypt = new byte[8];
         // get all the input bytes....
