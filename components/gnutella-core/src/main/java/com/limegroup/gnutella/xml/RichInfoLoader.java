@@ -126,7 +126,8 @@ class RichInfoLoader {
     private void test(){
 	FileInputStream f = null;
 	try{
-	    f = new FileInputStream("c:\\home\\etc\\schemas\\gen-books.xsd");
+	    f = new FileInputStream(XMLProperties.instance().getXMLSchemaDir() 
+                                        + File.separator + "gen-books.xsd");
 	}catch (IOException e){
 	    e.printStackTrace();
 	}
