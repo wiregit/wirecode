@@ -467,6 +467,13 @@ public class FileDesc implements AlternateLocationCollector {
 		return new FileInputStream(FILE);
     }
     
+    /**
+     * Utility method for toString that converts the specified
+     * <tt>Set</tt> to a string.
+     *
+     * @param info the <tt>Set</tt> to convert
+     * @return the contents of the set as a comma-delimited string
+     */
     private String listSet(Set info) {
         StringBuffer stuff = new StringBuffer();
         for(Iterator i = info.iterator(); i.hasNext(); ) {
