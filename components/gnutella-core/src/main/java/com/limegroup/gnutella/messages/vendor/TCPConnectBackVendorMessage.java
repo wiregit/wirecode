@@ -76,5 +76,12 @@ public final class TCPConnectBackVendorMessage extends VendorMessage {
         super.recordDrop();
     }
 
-
+    /**
+     * Overridden to provide more information about this class.
+     * 
+     * @return a description of this class
+     */
+    public String toString() {
+        return "TCPConnectBackVendorMessage::VERSION: "+VERSION+" PORT: "+_port;
+    }
 }
