@@ -665,6 +665,20 @@ public abstract class MessageRouter {
         //else if(request.getTTL() > 0) {
 
 		if(handler.isSupernodeClientConnection()) {
+            if (request.desiresOutOfBandReplies() &&
+                (handler instanceof Connection)) {
+                // this query came from a leaf - so check if it desires out-of-band
+                // responses and make sure that the IP it advertises is legit -
+                // if it isn't drop away....
+                Connection conn = (Connection) handler;
+                if (request.getReplyPort() != conn.getPort())
+                    return;
+                String remoteAddr = conn.getInetAddress().getHostAddress();
+                if (!request.getReplyAddress().equals(remoteAddr))
+                    return;
+                // continue below, everything looks good
+            }
+
 			if(handler.isGoodConnection()) {
 				sendDynamicQuery(QueryHandler.createHandlerForNewLeaf(request, 
 																	  handler), 
