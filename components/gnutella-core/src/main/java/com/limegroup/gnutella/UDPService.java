@@ -95,10 +95,10 @@ public final class UDPService implements Runnable {
             return new DatagramSocket(port);
         }
         catch (SocketException se) {
-            throw new IOException();
+            throw new IOException("socket could not be set on port: "+port);
         }
         catch (SecurityException se) {
-            throw new IOException();
+            throw new IOException("security exception on port: "+port);
         }
     }
 

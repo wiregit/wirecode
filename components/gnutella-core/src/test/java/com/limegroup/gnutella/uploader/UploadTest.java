@@ -62,6 +62,7 @@ public class UploadTest extends TestCase {
 		assertTrue("test file should be in shared directory", 
 				   new File(testDir, file).isFile());
 		SettingsManager.instance().setPort(port);
+        assertEquals(port, SettingsManager.instance().getPort());
 		SettingsManager.instance().setDirectories(new File[] {testDir});
 		SettingsManager.instance().setExtensions("txt");
 		ConnectionSettings.KEEP_ALIVE.setValue(8);
@@ -81,9 +82,6 @@ public class UploadTest extends TestCase {
 		SettingsManager.instance().writeProperties();
 		
 		ActivityCallback callback = new ActivityCallbackStub();
-		FileManager fm = new MetaFileManager();
-		fm.initialize();		
-		MessageRouter mr = new StandardMessageRouter(callback, fm);
 		RouterService router = new RouterService(callback);
 		router.start();
         assertEquals(port, SettingsManager.instance().getPort());
@@ -416,7 +414,7 @@ public class UploadTest extends TestCase {
         c.close();
         s.close();
         ss.close();    
-		assertEquals("message body should be equal to expected string", expResp, retStr);
+		assertEquals("was "+retStr+" instead of "+expResp, expResp, retStr);
         return retStr.equals(expResp);
     }
 
