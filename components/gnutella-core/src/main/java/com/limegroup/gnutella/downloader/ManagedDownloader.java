@@ -618,6 +618,11 @@ public class ManagedDownloader implements Downloader, Serializable {
         return false;
     }
 
+    public boolean conflicts(URN urn) {
+        File otherFile = incompleteFileManager.getFileForUrn(urn);
+        return conflicts(otherFile);
+    }
+
     /////////////////////////////// Requery Code ///////////////////////////////
 
     /** 

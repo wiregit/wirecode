@@ -348,15 +348,30 @@ public class DownloadManager implements BandwidthTracker {
      *  another downloader is getting the file
      * @exception IllegalArgumentException both urn and textQuery are null 
      */
-    public synchronized Downloader download(
-            URN urn, String textQuery, String filename, String [] defaultURL) 
-            throws IllegalArgumentException, AlreadyDownloadingException {         
+    public synchronized Downloader download(URN urn, String textQuery, 
+            String filename, String [] defaultURL, boolean overwrite) 
+            throws IllegalArgumentException, AlreadyDownloadingException,
+                                                       FileExistsException {
         if (textQuery==null && urn==null)
             throw new IllegalArgumentException("Need something for requeries");
-
-        //Check for conflicts.  
-        //TODO: refactor to make less like conflicts().
-
+        
+        //if we have a valid filename to check against, and we are not supposed
+        //to overwrite, thrown an exception if the file already exists
+        if(!overwrite && (filename!=null || !filename.equals(""))) {
+            File downloadDir = SharingSettings.getSaveDirectory();
+            File completeFile = new File(downloadDir,filename);
+            if(completeFile.exists()) 
+                throw new FileExistsException(filename);
+        }
+        
+        //remove entry from IFM if the incomplete file was deleted.
+        incompleteFileManager.purge(false);
+        
+        if(filename!=null && !filename.equals("")) {
+            if(conflicts(urn)) 
+                throw new AlreadyDownloadingException(filename);
+        }
+        
         //Instantiate downloader, validating incompleteFile first.
         MagnetDownloader downloader = new MagnetDownloader(this,
                                               fileManager,
@@ -514,6 +529,24 @@ public class DownloadManager implements BandwidthTracker {
         }
         return null;
     }
+
+
+    private synchronized boolean conflicts(URN urn) {
+        Iterator iter = active.iterator();
+        while(iter.hasNext()) {
+            ManagedDownloader md = (ManagedDownloader)iter.next();
+            if(md.conflicts(urn))
+                return true;
+        }
+        iter = waiting.iterator();
+        while(iter.hasNext()) {
+            ManagedDownloader md = (ManagedDownloader)iter.next();
+            if(md.conflicts(urn))
+                return true;
+        }
+        return false;
+    }
+
 
     /** Returns true if there is a RequeryDownloader of sufficient similarity
      *  in existence.

@@ -8,12 +8,9 @@ import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.Date;
 
-import com.limegroup.gnutella.ByteReader;
-import com.limegroup.gnutella.Constants;
-import com.limegroup.gnutella.ErrorService;
-import com.limegroup.gnutella.util.CommonUtils;
-import com.limegroup.gnutella.util.IOUtils;
-import com.limegroup.gnutella.util.URLDecoder;
+import com.limegroup.gnutella.downloader.*;
+import com.limegroup.gnutella.*;
+import com.limegroup.gnutella.util.*;
 
 
 /**
@@ -312,8 +309,8 @@ public class HTTPAcceptor implements Runnable {
 		if ( !(command.equals(_lastRequest) &&  
 			   (curTime - _lastRequestTime) < 1500l) ) {
 			
-			// trigger an operation
-			ExternalControl.handleMagnetRequest(command);
+            // trigger an operation
+            ExternalControl.handleMagnetRequest(command);
 			_lastRequest     = command;
 			_lastRequestTime = curTime;
 		} 

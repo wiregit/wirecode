@@ -1061,10 +1061,11 @@ public class RouterService {
      *  another downloader is getting the file
      * @exception IllegalArgumentException both urn and textQuery are null 
      */
-    public static synchronized Downloader download(
-            URN urn, String textQuery, String filename, String [] defaultURL) 
-            throws IllegalArgumentException, AlreadyDownloadingException { 
-        return downloader.download(urn, textQuery, filename, defaultURL);
+    public static synchronized Downloader download(URN urn, String textQuery,
+            String filename, String [] defaultURL, boolean overwrite) 
+            throws IllegalArgumentException, AlreadyDownloadingException, 
+                                                          FileExistsException { 
+        return downloader.download(urn,textQuery,filename,defaultURL,overwrite);
     }
 
    /**

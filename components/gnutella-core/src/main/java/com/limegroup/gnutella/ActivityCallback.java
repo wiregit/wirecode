@@ -187,4 +187,6 @@ public interface ActivityCallback
 
     public void indicateNewVersion();
 
+    public void showError(String message, String messageKey);
+
 }

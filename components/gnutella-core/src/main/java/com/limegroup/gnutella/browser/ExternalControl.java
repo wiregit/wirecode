@@ -60,7 +60,7 @@ public class ExternalControl {
 	    if ( enqueuedRequest != null ) {
 			String request   = enqueuedRequest;
 			enqueuedRequest = null;
-	        handleMagnetRequest(request);
+            handleMagnetRequest(request);
 		}
 	}
 	
@@ -100,23 +100,27 @@ public class ExternalControl {
 				defaultURLs = new String[urls.size()];
 		        defaultURLs = (String[]) urls.toArray(defaultURLs);
 			}
-
-			try {
-				//System.out.println("download parms:");
-				//System.out.println("urn:"+urn);
-				//System.out.println("kt:"+options[i].kt);
-				//System.out.println("dn:"+options[i].dn);
-				//System.out.println("xs:"+options[i].xs);
-				//System.out.println("as:"+options[i].as);
-
-				// TODO:  Need to juggle xt, xs and as if SHA1s and URLs are
-				// being used loosely.
-                RouterService.download(urn,options[i].kt,options[i].dn,defaultURLs);
-			} catch ( AlreadyDownloadingException a ) {  
-			    // Silently fail
+            //System.out.println("download parms:");
+            //System.out.println("urn:"+urn);
+            //System.out.println("kt:"+options[i].kt);
+            //System.out.println("dn:"+options[i].dn);
+            //System.out.println("xs:"+options[i].xs);
+            //System.out.println("as:"+options[i].as);
+            
+            // TODO:  Need to juggle xt, xs and as if SHA1s and URLs are
+            // being used loosely.
+            try {
+                RouterService.download
+                (urn,options[i].kt,options[i].dn,defaultURLs,false);//!overwrite
+            } catch ( AlreadyDownloadingException a ) {  
+                RouterService.getCallback().showError(
+                                a.getFilename(),"ERROR_ALREADY_DOWNLOADING");
 			} catch ( IllegalArgumentException il ) { 
-			    // Silently fail
-			}
+			    ErrorService.error(il);
+			} catch (FileExistsException fex) {
+                RouterService.getCallback().showError(
+                                   fex.getFileName(), "ERROR_ALREADY_EXISTS");
+            }
 		}
 	}
 
@@ -146,7 +150,7 @@ public class ExternalControl {
 			byte[] bytes=s.getBytes();
 			out.write(bytes);
 			out.flush();
-		    handleMagnetRequest(line);
+            handleMagnetRequest(line);
 		} catch (IOException e) {
 		}
 			
