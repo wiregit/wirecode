@@ -230,4 +230,7 @@ public class RemoteFileDesc implements Comparable {
             && _size==other._size;
     }
 
+    public String toString() {
+        return  "<"+getHost()+", "+getSpeed()+">";
+    }
 }
