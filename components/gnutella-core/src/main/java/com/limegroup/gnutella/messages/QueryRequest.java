@@ -82,6 +82,12 @@ public class QueryRequest extends Message implements Serializable{
      */
     private final QueryKey QUERY_KEY;
 
+    /**
+     * The flag in the 'M' GGEP extension - if non-null, the query is requesting
+     * only certain types.
+     */
+    private Byte _metaMask = null;
+
 	/**
 	 * Cached hash code for this instance.
 	 */
@@ -958,6 +964,9 @@ public class QueryRequest extends Message implements Serializable{
                         if (ggep.hasKey(GGEP.GGEP_HEADER_WHAT_IS))
                             _capabilitySelector = 
                                 ggep.getInt(GGEP.GGEP_HEADER_WHAT_IS);
+                        if (ggep.hasKey(GGEP.GGEP_HEADER_META))
+                            _metaMask = 
+                            new Byte(ggep.getBytes(GGEP.GGEP_HEADER_META)[0]);
                     }
                     catch (BadGGEPBlockException ignored) {}
                     catch (BadGGEPPropertyException ignored) {}
