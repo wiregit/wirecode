@@ -476,7 +476,7 @@ public class LimeXMLDocument implements Serializable {
 
         for(Iterator i = attributes.iterator(); i.hasNext(); ) {
             NameValue nv = (NameValue)i.next();
-            String name = getLastField(canonicalKey, nv.getName());
+            String name = XMLStringUtils.getLastField(canonicalKey, nv.getName());
             if(name == null)
                 continue;
             // Construct: ' attribute="value"'
@@ -605,28 +605,6 @@ public class LimeXMLDocument implements Serializable {
             
         // 2 == XMLStringUtils.DELIMITER.length()
         return firstKey.substring(0, idx + 2);
-    }
-    
-    /**
-     * Derives the last field name from a given name.
-     * With input "things__thing__field__", this will return "field".
-     */
-    private String getLastField(String canonicalKey, String full) {
-        //      things__thing__field__
-        //      ^                   ^
-        //     idx                 idx2
-        
-        int idx = full.indexOf(canonicalKey);
-        if(idx == -1 || idx != 0)
-            return null;
-            
-        int length = canonicalKey.length();
-        int idx2 = full.indexOf(XMLStringUtils.DELIMITER, length);
-        if(idx2 == -1)
-            return null;
-            
-        // insert quotes around field name if it has a space.
-        return full.substring(length, idx2);
     }
 }
 

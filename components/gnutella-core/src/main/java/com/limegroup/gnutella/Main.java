@@ -281,5 +281,7 @@ public class Main implements ActivityCallback, ErrorCallback {
     public void componentLoading(String component) {
         System.out.println("Loading component: " + component);
     }
+    
+    public void addressStateChanged() {}
 
 }
