@@ -60,6 +60,10 @@ public class ManagedConnection
      *  Call notify when outputQueueLock and oldOutputQueueLock are
      *  empty. */
     private Object _flushLock=new Object();
+    /** The protocol of this.  Used to implement isOldClient() when this
+     *  is still initializing, which makes connection management easier.
+     *  INVARIANT: one of PROTOCOL_OLD, PROTOCOL_BEST, or PROTOCOL_NEW */
+    private int _protocol;
 
     /**
      * Reference to Message Statistics for this connection.
@@ -173,6 +177,7 @@ public class ManagedConnection
         _router = router;
         _manager = manager;
         _isRouter = isRouter;
+        _protocol = protocol;
         
         new OutputRunner(); // Start the thread to empty the output queue
     }
@@ -193,6 +198,7 @@ public class ManagedConnection
         super(socket, protocol!=PROTOCOL_OLD ? createNewResponder() : null);
         _router = router;
         _manager = manager;
+        _protocol = protocol;
 
         new OutputRunner(); // Start the thread to empty the output queue
     }
@@ -731,12 +737,18 @@ public class ManagedConnection
     }
 
     /**
-     * Is this is connected to an older client.  This is determined by looking
-     * at the headers exchanged during handshaking.
+     * Returns true iff this connected to an "old" client, i.e., one without
+     * query routing and pong caching.  If this is still initializing, returns
+     * true iff we expect the client to be "old"; our guess may of course be
+     * wrong.  (This bizarre behavior makes connection fetching simpler.)
      */
     public boolean isOldClient() {
-        return getProperty("Query-Routing")==null
-            || getProperty("Pong-Caching")==null;
+        if (! super.isOpen()) 
+            //Still initializing?
+            return _protocol==PROTOCOL_OLD;
+        else 
+            return getProperty("Query-Routing")==null
+                || getProperty("Pong-Caching")==null;
     }
 
     /** Creates the property set for "new" connections. */

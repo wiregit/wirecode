@@ -42,7 +42,7 @@ public class Connection {
      */
     private String _host;
     private int _port;
-    private Socket _socket;
+    private volatile Socket _socket;
     private InputStream _in;
     private OutputStream _out;
     private boolean _outgoing;
@@ -522,10 +522,10 @@ public class Connection {
     }
 
     /**
-     * @return true until close() is called on this Connection
+     * @return true if this has been initialized but not closed
      */
     public boolean isOpen() {
-        return !_closed;
+        return _socket!=null && !_closed;
     }
 
     /**
