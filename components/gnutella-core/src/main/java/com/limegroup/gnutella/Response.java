@@ -6,14 +6,14 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.UnknownHostException;
+import java.util.List;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.StringTokenizer;
-
-import org.xml.sax.SAXException;
 
 import com.limegroup.gnutella.altlocs.AlternateLocationCollection;
 import com.limegroup.gnutella.altlocs.DirectAltLoc;
@@ -23,11 +23,10 @@ import com.limegroup.gnutella.messages.BadGGEPPropertyException;
 import com.limegroup.gnutella.messages.GGEP;
 import com.limegroup.gnutella.messages.HUGEExtension;
 import com.limegroup.gnutella.search.HostData;
+import com.limegroup.gnutella.util.NameValue;
 import com.limegroup.gnutella.util.DataUtils;
 import com.limegroup.gnutella.util.NetworkUtils;
-import com.limegroup.gnutella.xml.LimeXMLDocumentHelper;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
-import com.limegroup.gnutella.xml.SchemaNotFoundException;
 
 import org.apache.commons.logging.LogFactory;
 import org.apache.commons.logging.Log;
@@ -49,11 +48,6 @@ public class Response {
      * The magic byte to use as extension seperators.
      */
     private static final byte EXT_SEPERATOR = 0x1c;
-    
-    /**
-     * The magic byte, as a string, to use as extension seperators.
-     */
-    private static final String EXT_STRING = "\u001c";
     
     /**
      * The maximum number of alternate locations to include in responses
@@ -102,45 +96,6 @@ public class Response {
      * The container for extra GGEP data.
      */
     private final GGEPContainer ggepData;
-
-	
-	/**
-	 * Static constant for the beginning of the xml audios schema so
-	 * that we don't have to generate new strings each time.
-	 */
- 	private static final String AUDIOS_NAMESPACE =
- 	    LimeXMLDocumentHelper.XML_HEADER + 
-		"<audios " + LimeXMLDocumentHelper.XML_NAMESPACE + 
-		AudioMetaData.schemaURI + "\">";
-
-	/**
-	 * Constant for the XML audio title key.
-	 */
-	private static final String AUDIO_TITLE =
-		"<audio title=\"";
-	
-	/**
-	 * Constant for the XML audio bitrate key.
-	 */
-	private static final String AUDIO_BITRATE = 
-		"bitrate=\"";
-
-	/**
-	 * Constant for the XML audio seconds key.
-	 */
-	private static final String AUDIO_SECONDS =
-		"seconds=\"";
-
-	/**
-	 * Constant for the string that ends the audios xml.
-	 */
-	private static final String AUDIOS_CLOSE =
-		"\"/></audios>";				
-
-	/**
-	 * Constant for a quote followed by a space, used in XML.
-	 */
-	private static final String QUOTE_SPACE ="\" ";
 
 	/**
 	 * Constant for the KBPS string to avoid constructing it too many
@@ -319,22 +274,10 @@ public class Response {
 
 			Set urns = huge.getURNS();
 
-			String metaString = "";
 			LimeXMLDocument doc = null;
             Iterator iter = huge.getMiscBlocks().iterator();
-            while (iter.hasNext() && metaString.equals(""))
-                metaString = createXmlString(name, (String)iter.next());
-            if(!metaString.equals("")) {
-                try {
-                    doc = new LimeXMLDocument(metaString);
-                } catch(SAXException se) {
-                    LOG.warn("unable to construct doc: " + metaString, se);
-                } catch(SchemaNotFoundException snfe) {
-                    LOG.warn("unable to construct doc: " + metaString, snfe);
-                } catch(IOException io) {
-                    LOG.warn("Unable to construct doc: " + metaString, io);
-                }
-            }
+            while (iter.hasNext() && doc == null)
+                doc = createXmlDocument(name, (String)iter.next());
 
 			GGEPContainer ggep = GGEPUtil.getGGEP(huge.getGGEPBlocks());
 
@@ -352,13 +295,13 @@ public class Response {
 	 * @return the xml formatted string, or the empty string if the
 	 *  xml could not be parsed
 	 */
-	private static String createXmlString(String name, String ext) {
+	private static LimeXMLDocument createXmlDocument(String name, String ext) {
 		StringTokenizer tok = new StringTokenizer(ext);
-		if(tok.countTokens() < 2) {
-			// if there aren't the expected number of tokens, simply
-			// return the empty string
-			return "";
-		}
+		// if there aren't the expected number of tokens, simply
+		// return the empty string
+		if(tok.countTokens() < 2)
+			return null;
+		
 		String first  = tok.nextToken();
 		String second = tok.nextToken();
 		if (first != null)
@@ -396,21 +339,24 @@ public class Response {
 			else//not gnotella, after all...some other format we do not know
 				gnotella=false;
 		}
-		if(bearShare1 || bearShare2 || gnotella) {//some metadata we understand
-			StringBuffer sb = new StringBuffer();
-			sb.append(AUDIOS_NAMESPACE);
-			sb.append(AUDIO_TITLE);
-			sb.append(name);
-			sb.append(QUOTE_SPACE);
-			sb.append(AUDIO_BITRATE);
-			sb.append(bitrate);
-			sb.append(QUOTE_SPACE);
-			sb.append(AUDIO_SECONDS);
-			sb.append(length);
-			sb.append(AUDIOS_CLOSE);
-			return sb.toString();
+		
+		// make sure these are valid numbers.
+		try {
+		    Integer.parseInt(bitrate);
+		    Integer.parseInt(length);
+		} catch(NumberFormatException nfe) {
+		    return null;
 		}
-		return "";
+		
+		if(bearShare1 || bearShare2 || gnotella) {//some metadata we understand
+		    List values = new ArrayList(3);
+		    values.add(new NameValue("audios__audio__title__", name));
+		    values.add(new NameValue("audios__audio__bitrate__", bitrate));
+		    values.add(new NameValue("audios__audio__seconds__", length));
+		    return new LimeXMLDocument(values, AudioMetaData.schemaURI);
+		}
+		
+		return null;
 	}
 
 	/**
