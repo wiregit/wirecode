@@ -1,7 +1,5 @@
 package com.limegroup.gnutella.util;
 
-import com.limegroup.gnutella.Endpoint;
-import com.limegroup.gnutella.Assert;
 import com.sun.java.util.collections.NoSuchElementException;
 import com.sun.java.util.collections.Iterator;
 
