@@ -32,7 +32,7 @@ public class GiveUPVendorMessage extends VendorMessage {
 	
 	/**
 	 * a bitmask representing the format of the message.  Extensible with up to 8 features.
-	 * Add more to the list below
+	 * Add more to the list below, make sure you update the feature mask.
 	 */
 	private byte _format;
 	
@@ -40,10 +40,11 @@ public class GiveUPVendorMessage extends VendorMessage {
 	
 	public static final byte CONNECTION_TIME = 1;
 	public static final byte LOCALE_INFO = 2;
-	//public static final byte SAMPLE_FEATURE = 4; //its a bitmask, so the next feature would be 8, etc.
+	public static final byte NEW_ONLY = 4;
+	//public static final byte SAMPLE_FEATURE = 8; //its a bitmask, so the next feature would be 16, etc.
 	
-	//also update the max feature supported
-	public static final byte FEATURE_MASK = 3; //all features OR'd.
+	//all features OR'd.
+	public static final byte FEATURE_MASK = 7; 
 	
 	/**
 	 * constructs a new ultrapeer request message.
@@ -154,6 +155,15 @@ public class GiveUPVendorMessage extends VendorMessage {
 	}
 	
 	/**
+	 * 
+	 * @return whether the ping wants to receive only connections which
+	 * support UDP pinging (useful for crawling)
+	 */
+	public boolean asks4NewOnly() {
+		return (byte)(NEW_ONLY & _format) == NEW_ONLY;
+	}
+	
+	/**
 	 * checks whether ht ping is requesting a specific feature.
 	 * @param featureId the byte id of the feature
 	 * @return whether the ping is asking for it
@@ -161,6 +171,7 @@ public class GiveUPVendorMessage extends VendorMessage {
 	public boolean asks4Feature(byte featureId) {
 		return (byte)(featureId & _format) == featureId;
 	}
+	
 	/**
 	 * @return Returns the _format.
 	 */

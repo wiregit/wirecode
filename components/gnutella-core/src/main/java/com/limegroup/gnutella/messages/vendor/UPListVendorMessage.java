@@ -20,7 +20,7 @@ public class UPListVendorMessage extends VendorMessage {
 	
 	List _ultrapeers, _leaves;
 	
-	final boolean _connectionTime, _localeInfo;
+	final boolean _connectionTime, _localeInfo, _newOnly;
 	
 	/**
 	 * the format of the response.
@@ -42,6 +42,7 @@ public class UPListVendorMessage extends VendorMessage {
 		_format = (byte)(request.getFormat() & GiveUPVendorMessage.FEATURE_MASK);
 		_localeInfo = request.asks4LocaleInfo();
 		_connectionTime = request.asks4ConnectionTime();
+		_newOnly = request.asks4NewOnly();
 	}
 	
 	private static byte [] derivePayload(GiveUPVendorMessage request) {
@@ -56,10 +57,18 @@ public class UPListVendorMessage extends VendorMessage {
 		Iterator iter = RouterService.getConnectionManager()
 			.getInitializedConnections().iterator();
 		
-		//add only good ultrapeers
+		//add only good ultrapeers or just those who support UDP pinging
+		//(they also support BEST_CANDIDATE message)
+		boolean newOnly = request.asks4NewOnly();
+		
 		while(iter.hasNext()) {
 			Connection c = (Connection)iter.next();
-			if (c.isGoodUltrapeer()) 
+			if (newOnly && 
+					c.supportsVendorMessage
+					(VendorMessage.F_LIME_VENDOR_ID, VendorMessage.F_BEST_CANDIDATE) != -1)
+				endpointsUP.add(c);
+			else 
+				if (c.isGoodUltrapeer()) 
 				endpointsUP.add(c);
 		}
 		
@@ -189,6 +198,8 @@ public class UPListVendorMessage extends VendorMessage {
 			== (int)GiveUPVendorMessage.CONNECTION_TIME);
 		_localeInfo = (_format & GiveUPVendorMessage.LOCALE_INFO)
 			== (int)GiveUPVendorMessage.LOCALE_INFO;
+		_newOnly =(_format & GiveUPVendorMessage.NEW_ONLY)
+			== (int)GiveUPVendorMessage.NEW_ONLY;
 		
 		int bytesPerResult = 6;
 		
