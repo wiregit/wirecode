@@ -131,12 +131,19 @@ public class HTTPDownloader {
         out.write("Range: bytes=" + startRange + "-\r\n");
 		SettingsManager sm = SettingsManager.instance();
 		if (sm.getChatEnabled() ) {
+            //Get our own address and port.  This duplicates the getAddress and
+            //getPort methods of Acceptor.  Unfortunately we don't have a
+            //reference to Acceptor, nor do we particularly want one.
 			int port;
-			if ( sm.getForceIPAddress() )
+            String host;
+			if ( sm.getForceIPAddress() ) {
 				port = sm.getForcedPort();
-			else 
+                host = sm.getForcedIPAddressString();
+            } else {
 				port = sm.getPort();
-			out.write("Chat: " + _host + ":" + port + "\r\n");;
+                host = _socket.getLocalAddress().getHostAddress();
+            }
+			out.write("Chat: " + host + ":" + port + "\r\n");
 		}
         out.write("\r\n");
         out.flush();
