@@ -459,15 +459,15 @@
 	    </t>
 		<section anchor="port" title="Open a UDP Port">
 		  <t>
-		    To implement this change, clients MUST open a UDP
+		    To implement this change, UltraPeers MUST open a UDP
 			port that listens for incoming UDP traffic.  It is
-			RECOMMENDED that clients listen on port 6346, the same
-			port registered for Gnutella for TCP.
-			Clients MAY, however, listen 
+			RECOMMENDED that UltraPeers listen on port 6346, the 
+			same port registered for Gnutella for TCP.
+			UltraPeers MAY, however, listen 
 			on a different port, particularly when, for example,
 			there is anothing Gnutella client listening on 6346,
 			or when another application is using that port for
-			any reason.  In all cases, however, clients MUST
+			any reason.  In all cases, clients MUST
 			listen on the same port for both TCP and UDP traffic.
 			This makes the implementation slightly more
 			rigid.  The IP and TCP port are already reported in a
@@ -589,9 +589,7 @@
 			    UltraPeers that are capable of receiving Gnutella 
 			    messages over UDP MUST advertise that fact in a
 			    new GGEP extension in 
-			    pongs.<xref target="refs.GGEP"/>  This extension simply
-			    lists the UDP port that the UltraPeer is listening on,
-			    notifying other nodes of its presense.
+			    pongs.<xref target="refs.GGEP"/>
 			    TODO: describe the GGEP extension in more detail.		  
 		      </t>
 		    </section>
@@ -606,7 +604,7 @@
 		  messages.<xref target="refs.RandomWalk"/>  This eliminates
 		  these duplicates except in the case where leaves are connected to 
 		  multiple UltraPeers, and two or more of their UltraPeers are sent
-		  the same query.
+		  the same query.  
 	    </t>
 	  </section>
 	</section>
