@@ -126,7 +126,7 @@ public final class AlternateLocation
 	 * @return a new <tt>String</tt> instance that matches the standard
 	 *  syntax
 	 */
-	private static String convertDateToString(Date date) {
+	public static String convertDateToString(Date date) {
 		Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
 		cal.setTime(date);
 		int[]    dateInts = new int[6];
@@ -170,7 +170,7 @@ public final class AlternateLocation
 	 * @return <tt>true</tt> if the string represents a valid date 
 	 *  according to our critetia, <tt>false</tt> otherwise
 	 */
-	private static boolean isValidDate(final String date) {
+	public static boolean isValidDate(final String date) {
 		int length = date.length();
 		final String DASH = "-";
 		final String COLON = ":";
@@ -340,7 +340,7 @@ public final class AlternateLocation
 	 * @return <tt>true</tt> if the header has a timestamp, <tt>false</tt>
 	 *  otherwise
 	 */
-	private static boolean isTimestamped(final String locationHeader) {
+	public static boolean isTimestamped(final String locationHeader) {
 		int dateIndex = locationHeader.lastIndexOf(" ");
 		if(dateIndex == -1) {
 			return false;
@@ -358,7 +358,7 @@ public final class AlternateLocation
 	 * @return <tt>true</tt> if this <tt>AlternateLocation</tt> includes
 	 *  a timestamp, <tt>false</tt> otherwise
 	 */
-	private boolean isTimestamped() {
+	public boolean isTimestamped() {
 		return (OUTPUT_DATE_TIME != null);
 	}
 
@@ -464,183 +464,7 @@ public final class AlternateLocation
 		public boolean equals(Object obj) {
 			return this.equals(obj);
 		}
-	}
-
-	
-	
-	public static void main(String[] args) {
-		String[] validTimestampedLocs = {
-			"Alternate-Location: http://Y.Y.Y.Y:6352/get/2/"+
-			"lime%20capital%20management%2001.mpg "+
-			"2002-04-09T20:32:33Z",
-			"Alt-Location: http://Y.Y.Y.Y:6352/get/2/"+
-			"lime%20capital%20management%2001.mpg "+
-			"2002-04-09T20:32:33Z",
-			"Alt-Location: http://Y.Y.Y.Y:6352/get/2/"+
-			"lime%20capital%20management%2001.mpg "+
-			"2002-04-09T20:32:33Z",
-			"X-Gnutella-Alternate-Location: http://Y.Y.Y.Y:6352/get/2/"+
-			"lime%20capital%20management%2001.mpg "+
-			"2002-04-09T20:32:33Z",
-			"http://Y.Y.Y.Y:6352/get/2/"+
-			"lime%20capital%20management%2001.mpg "+
-			"2002-04-09T20:32:33Z",
-			"http: //Y.Y.Y.Y:6352/get/2/"+
-			"lime%20capital%20management%2001.mpg "+
-			"2002-04-09T20:32:33Z"
-		};
-
-		String[] validlocs = {
-			"Alternate-Location: http://Y.Y.Y.Y:6352/get/2/"+
-			"lime%20capital%20management%2001.mpg",
-			"Alt-Location: http://Y.Y.Y.Y:6352/get/2/"+
-			"lime%20capital%20management%2001.mpg",
-			"Alt-Location: http://Y.Y.Y.Y:6352/get/2/"+
-			"lime%20capital%20management%2001.mpg",
-			"X-Gnutella-Alternate-Location: http://Y.Y.Y.Y:6352/get/2/"+
-			"lime%20capital%20management%2001.mpg",
-			"http://Y.Y.Y.Y:6352/get/2/"+
-			"lime%20capital%20management%2001.mpg",
-			"http: //Y.Y.Y.Y:6352/get/2/"+
-			"lime%20capital%20management%2001.mpg"
-		};
-
-
-		String [] validURNS = {
-		    "urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB",
-		    "urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB",
-		    "urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB",
-		    "urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB",
-		    "urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB",
-		    "UrN:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB",
-		    "urn:sHa1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB",
-		    "urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB",
-		    "urn:sha1:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB",
-		    "urn:bitprint:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB."+
-			             "PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB1234567",
-		    "urn:bitprint:PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB."+
-			             "PLSTHIPQGSSZTS5FJUPAKUZWUGYQYPFB1234567"
-		};
-
-		String [] validURLS = {
-		    "www.limewire.org",
-		    "www.limewire.org",
-		    "www.limewire.org",
-		    "www.limewire.org",
-		    "www.limewire.org",
-		    "www.limewire.org",
-		    "www.limewire.org",
-		    "www.limewire.org",
-		    "www.limewire.org",
-		    "www.limewire.org",
-		    "www.limewire.org"
-		};
-		
-		boolean failureEncountered = false;
-		boolean thisTestFailed = false;
-
-		// TEST ALTERNATE LOCATION CONSTRUCTOR THAT TAKES A URL AND A URN
-		System.out.println("TESTING URL/URN CONSTRUCTOR...");
-		try {
-			for(int i=0; i<validURNS.length; i++) {
-				URN urn = new URN(validURNS[i]);
-				URL url1 = new URL("http", validURLS[i], 6346, 
-								   URNFactory.createHttpUrnFileString(urn));
-				URL url2 = new URL("http", validURLS[i], "/test.htm");
-				AlternateLocation al1 = new AlternateLocation(url1);
-				AlternateLocation al2 = new AlternateLocation(url2);
-				AlternateLocation al3 = 
-				    new AlternateLocation("http://"+validURLS[i] + ":6346"+
-										  URNFactory.createHttpUrnFileString(urn)+
-										  " "+convertDateToString(new Date()));
-				AlternateLocation al4 = 
-				    new AlternateLocation("http://"+validURLS[i] + "/test.htm"+
-										  " "+convertDateToString(new Date()));
-				URL urlTest1 = al1.getUrl();
-				URL urlTest2 = al2.getUrl();
-				Date date1 = new Date(al1.TIME);
-				Date date2 = new Date(al2.TIME);
-				String dateStr1 = AlternateLocation.convertDateToString(date1);
-				String dateStr2 = AlternateLocation.convertDateToString(date2);
-				Assert.that(al1.equals(al3));
-				Assert.that(al2.equals(al4));
-				Assert.that(url1.equals(urlTest1));				
-				Assert.that(url2.equals(urlTest2));			
-				Assert.that(dateStr1.equals(dateStr2));
-				//System.out.println("al:   "+al1);
-				//System.out.println("file: "+al1.getUrl().getFile()); 
-			}
-			System.out.println("TEST PASSED"); 
-		} catch(IOException e) {
-			// this also catches MalformedURLException
-			System.out.println("TEST FAILED WITH EXCEPTION: "); 
-			System.out.println(e); 
-			e.printStackTrace();
-			failureEncountered = true;
-		} 
-
-		// TEST ALTERNATE LOCATIONS WITH TIMESTAMPS
-		System.out.println(); 
-		System.out.println("TESTING VALID ALTERNATE LOCATIONS WITH TIMESTAMPS..."); 
-		thisTestFailed = false;
-		try {
-			for(int i=0; i<validTimestampedLocs.length; i++) {
-				AlternateLocation al = new AlternateLocation(validTimestampedLocs[i]);
-				if(!AlternateLocation.isTimestamped(validTimestampedLocs[i])) {
-					System.out.println("TEST FAILED -- ALTERNATE LOCATION STRING "+
-									   "NOT CONSIDERED STAMPED"); 
-					failureEncountered = true;
-					thisTestFailed = true;
-				}
-				if(!al.isTimestamped()) {
-					System.out.println("TEST FAILED -- ALTERNATE LOCATION INSTANCE "+
-									   "NOT CONSIDERED STAMPED"); 
-					failureEncountered = true;
-					thisTestFailed = true;
-				}
-			}
-			if(!thisTestFailed) {
-				System.out.println("TEST PASSED"); 
-			}
-		} catch(IOException e) {
-			System.out.println("TEST FAILED WITH EXCEPTION: "); 
-			e.printStackTrace();
-			failureEncountered = true;
-		}		
-
-		// TEST ALTERNATE LOCATIONS WITH NO TIMESTAMPS		
-		System.out.println(); 
-		System.out.println("TESTING VALID ALTERNATE LOCATIONS WITHOUT TIMESTAMPS..."); 
-		try {
-			for(int i=0; i<validlocs.length; i++) {
-				AlternateLocation al = new AlternateLocation(validlocs[i]);
-			}
-			System.out.println("TEST PASSED"); 
-		} catch(IOException e) {
-			System.out.println("TEST FAILED WITH EXCEPTION: "); 
-			e.printStackTrace();
-			failureEncountered = true;
-		}		
-
-		// TEST DATE METHODS
-		System.out.println(); 
-		System.out.println("TESTING CONVERT DATE TO STRING METHOD...");
-		
-		Date date = new Date();
-		String dateStr = AlternateLocation.convertDateToString(date);
-		if(!AlternateLocation.isValidDate(dateStr)) {
-			failureEncountered = true;
-			System.out.println("TEST FAILED: VALID DATE NOT CONSIDERED VALID");
-			System.out.println("DATE: "+date);
-			System.out.println("DATE STRING: "+dateStr); 
-		}
-		
-
-		if(!failureEncountered) {
-			System.out.println("ALL TESTS PASSED"); 
-		}
-	}
-   
+	}   
 }
 
 
