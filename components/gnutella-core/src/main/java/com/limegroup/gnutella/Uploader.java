@@ -64,7 +64,7 @@ public interface Uploader extends BandwidthTracker {
 	 */
 	public void setState(int state);
 
-	public void start();
+	public void writeResponse();
 
 	/**
 	 * returns true if chat for the host is on, false if it is not.
