@@ -46,12 +46,6 @@ public final class NIOMessageWriter implements MessageWriter {
      */
     private final Object QUEUE_LOCK = new Object();
     
-    /**
-     * Flag for whether or not the <tt>NIODispatcher</tt> has already registered
-     * this writer for write events.  YOU MUST OBTAIN THE LOCK ON "this" BEFORE
-     * MODIFYING THIS VALUE.
-     */
-    private volatile boolean _registered = false;
     
     /**
      * Variable used to open and close this writer.  ONLY USED FOR TESTING.
@@ -171,10 +165,13 @@ public final class NIOMessageWriter implements MessageWriter {
         }
     }
 
+    /**
+     * Registers this connection for write events if it's not already 
+     * registered.
+     */
     private void register() {
-        if(!_registered && !_closed) {
+        if(!CONNECTION.writeRegistered() && !_closed) {
             NIODispatcher.instance().addWriter(CONNECTION);
-            _registered = true;
         }      
     }
     
@@ -191,15 +188,6 @@ public final class NIOMessageWriter implements MessageWriter {
      */
     public void flush() throws IOException {}
 
-    /**
-     * Sets the flag for whether or not this writer is registered for write 
-     * events with the <tt>NIODispatcher</tt>,
-     * 
-     * @param b boolean specifying registration status
-     */
-    public synchronized void setWriteRegistered(boolean b) {
-        _registered = b;
-    }
 
     /* (non-Javadoc)
      * @see com.limegroup.gnutella.connection.MessageWriter#setClosed(boolean)

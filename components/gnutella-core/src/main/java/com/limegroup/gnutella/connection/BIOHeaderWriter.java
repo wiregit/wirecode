@@ -44,10 +44,6 @@ public final class BIOHeaderWriter implements HeaderWriter {
         throw new IllegalStateException("no left over data in blocking writer");
     }
 
-    public void setWriteRegistered(boolean registered) {
-        throw new IllegalStateException("no reg with blocking writers");
-    }
-
     /**
      * Implements <tt>HeaderWriter</tt> interface.  Performs a blocking 
      * write of the specified header.

@@ -15,8 +15,6 @@ public interface HeaderWriter {
 
     boolean closeHeaderWriting() throws IOException;
 
-    void setWriteRegistered(boolean registered);
-
     /**
      * @return
      */

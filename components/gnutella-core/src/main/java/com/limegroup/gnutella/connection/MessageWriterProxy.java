@@ -75,12 +75,4 @@ public final class MessageWriterProxy implements MessageWriter {
     public void flush() throws IOException {
         DELEGATE.flush();
     }
-
-    /* (non-Javadoc)
-     * @see com.limegroup.gnutella.connection.MessageWriter#setRegistered(boolean)
-     */
-    public void setWriteRegistered(boolean b) {
-        DELEGATE.setWriteRegistered(b);
-    }
-
 }
