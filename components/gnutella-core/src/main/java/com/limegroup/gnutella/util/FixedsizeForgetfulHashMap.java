@@ -25,14 +25,14 @@ import com.limegroup.gnutella.Assert;
 * <li><b>This class is not thread safe.</b>  Synchronize externally if needed.
 * </ul>
 * 
-* Note that this interface is currently incomplete.  Also note that this does
+* Note that some methods of this are unimplemented.  Also note that this does
 * not extend HashMap, unlike ForgetfulHashMap; ForgetfulHashMap does, but it 
 * never should have.
 *  
 * @author Anurag Singla -- initial version
 * @author Christopher Rohrs -- cleaned up and added unit tests 
 */
-public class FixedsizeForgetfulHashMap
+public class FixedsizeForgetfulHashMap implements Map
 {
     /* Implementation note:
      *
@@ -256,6 +256,52 @@ public class FixedsizeForgetfulHashMap
         //remove all the entries from remove list
         removeList.clear();
     }
+
+    /////////////////////////// Implemented Map Methods ////////////////
+
+    public boolean containsKey(Object key) {
+        return map.containsKey(key);
+    }
+
+    public boolean equals(Object o) {
+        if (o instanceof FixedsizeForgetfulHashMap)
+            return false;
+        FixedsizeForgetfulHashMap other=(FixedsizeForgetfulHashMap)o;
+        return map.equals(other.map);
+    }
+            
+    public boolean isEmpty() {
+        return map.isEmpty();
+    }
+
+    public Set keySet() {
+        return map.keySet();
+    }
+
+    public int size() {
+        return map.size();
+    }
+
+    /////////////////////////// Unimplemented Map Methods //////////////
+
+    /** <b>Not implemented; throws an exception</b> */
+    public boolean containsValue(Object value) {
+        Assert.that(false, "Not implemented");
+        return false;
+    }
+
+    /** <b>Not implemented; throws an exception</b> */
+    public Set entrySet() {
+        Assert.that(false, "Not implemented");
+        return null;
+    }
+
+    /** <b>Not implemented; throws an exception</b> */
+    public Collection values() {
+       Assert.that(false, "Not implemented");
+        return null;
+    }
+ 
 
     /**
      * class to store the value to be stored in the hashMap
