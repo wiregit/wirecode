@@ -257,12 +257,14 @@ public class DownloadManager implements BandwidthTracker {
             rfds = new RemoteFileDesc[0];
         }
         
-        // right now i'm adding to active and waiting downloaders - this may not
-        // be the correct thing to do.
+        // need to synch because active and waiting are not thread safe
         List downloaders = new ArrayList();
-        downloaders.addAll(active);
-        downloaders.addAll(waiting);
-        
+        synchronized (this) { 
+            // add to all downloaders, even if they are waiting....
+            downloaders.addAll(active);
+            downloaders.addAll(waiting);
+        }        
+
         // for each downloader, see if any RFD conflicts
         // philosophical question - usually we don't allow ManagedDownloaders to
         // be downloading the same file.  so once i find a match, should i be
