@@ -341,7 +341,13 @@ public final class AlternateLocationCollectionTest extends BaseTestCase {
     }
     
     public void testToBytes() throws Exception {
-    	byte [] altlocs =_alCollection.toBytes();
+    	byte [] altlocs =_alCollection.toBytes(3);
+    	assertEquals(3*6,altlocs.length);
+    	altlocs = _alCollection.toBytes(0);
+    	assertNull(altlocs);
+    	altlocs = _alCollection.toBytes(-3);
+    	assertNull(altlocs);
+    	altlocs =_alCollection.toBytes();
     	assertEquals(_alternateLocations.size()*6,altlocs.length);
     	
     	Collection parsed =NetworkUtils.unpackIps(altlocs);
