@@ -66,6 +66,7 @@ public class ServerSideUPListTest extends BaseTestCase {
     private static final GiveUPVendorMessage msgLeafsOnly = new GiveUPVendorMessage(new GUID(GUID.makeGuid()), 0, 2);
     private static final GiveUPVendorMessage msgNone = new GiveUPVendorMessage(new GUID(GUID.makeGuid()), 0, 0);
     private static final GiveUPVendorMessage msgBad = new GiveUPVendorMessage(new GUID(GUID.makeGuid()), -9, -2);
+    private static final GiveUPVendorMessage msgMore = new GiveUPVendorMessage(new GUID(GUID.makeGuid()), 20, 30);
 	
     
     /**
@@ -289,6 +290,34 @@ public class ServerSideUPListTest extends BaseTestCase {
  		
  		assertEquals(1,reply.getLeaves().size());
  		assertEquals(2,reply.getUltrapeers().size());
+ 	}
+ 	
+ 	/**
+ 	 * sends a message requesting more UPs and Leafs that the host has.
+ 	 */
+ 	public void testMsgMore() throws Exception {
+ 		UPListVendorMessage reply = tryMessage(msgMore);
+ 		
+ 		//we should get the number we have connected.
+ 		assertEquals(3,reply.getLeaves().size());
+ 		assertEquals(3,reply.getUltrapeers().size());
+ 	}
+ 	
+ 	
+ 	/**
+ 	 * requests all connections of a node; few of them disconnect
+ 	 * and then they are requested again.
+ 	 */
+ 	public void testAllDisconnectAllAgain() throws Exception {
+ 		LEAF_2.close();
+ 		LEAF_3.close();
+ 		UP2.close();
+ 		
+ 		sleep();
+ 		UPListVendorMessage reply = tryMessage(msgAll);
+ 		
+ 		assertEquals(2,reply.getUltrapeers().size());
+ 		assertEquals(1,reply.getLeaves().size());
  	}
  	
  	private final UPListVendorMessage tryMessage(GiveUPVendorMessage which) throws Exception {
