@@ -9,21 +9,7 @@ import com.limegroup.gnutella.*;
  * data for Gnutella message statistics should go through this class to 
  * avoid losing any data.
  */
-public final class ReceivedMessageStatHandler {
-
-	/**
-	 * The <tt>Statistic</tt> that should be incremented for each new 
-	 * message.
-	 */
-	private final Statistic NUMBER_STAT;
-
-	/**
-	 * The <tt>Statistic</tt> for the number of bytes for this message
-	 * type.  For each new message added, the number of bytes are added
-	 * to this <tt>Statistic</tt>.
-	 */
-	private final Statistic BYTE_STAT;
-
+public final class ReceivedMessageStatHandler extends AbstractStatHandler {
 
 	/**
 	 * Creates a new <tt>ReceivedMessageStatHandler</tt> instance.  
@@ -35,9 +21,10 @@ public final class ReceivedMessageStatHandler {
 	 * @param byteStat the statistic for keeping track of the total bytes
 	 */
 	private ReceivedMessageStatHandler(Statistic numberStat, 
-									   Statistic byteStat) {
-		NUMBER_STAT = numberStat;
-		BYTE_STAT = byteStat;
+									   Statistic byteStat,
+									   Statistic limeNumberStat,
+									   Statistic limeByteStat) {
+		super(numberStat, byteStat, limeNumberStat, limeByteStat);
 	} 
 
 	/**
@@ -46,8 +33,7 @@ public final class ReceivedMessageStatHandler {
 	 * @param msg the received <tt>Message</tt> to add to the data
 	 */
 	public void addMessage(Message msg) {
-		NUMBER_STAT.incrementStat();
-		BYTE_STAT.addData(msg.getTotalLength());
+		super.addMessage(msg);
 		BandwidthStat.GNUTELLA_DOWNSTREAM_BANDWIDTH.addData(msg.getTotalLength());
 	}
 	
@@ -57,28 +43,36 @@ public final class ReceivedMessageStatHandler {
 	 */
 	public static final ReceivedMessageStatHandler UDP_PING_REQUESTS = 
 		new ReceivedMessageStatHandler(ReceivedMessageStat.UDP_PING_REQUESTS, 
-									   ReceivedMessageStat.UDP_PING_REQUESTS_BYTES);
+									   ReceivedMessageStat.UDP_PING_REQUESTS_BYTES,
+									   LimeReceivedMessageStat.UDP_PING_REQUESTS,
+									   LimeReceivedMessageStat.UDP_PING_REQUESTS_BYTES);
 
 	/**
 	 * <tt>ReceivedMessageStatHandler</tt> for Gnutella pings received over TCP.
 	 */
 	public static final ReceivedMessageStatHandler TCP_PING_REQUESTS = 
 		new ReceivedMessageStatHandler(ReceivedMessageStat.TCP_PING_REQUESTS,
-									   ReceivedMessageStat.TCP_PING_REQUESTS_BYTES);
+									   ReceivedMessageStat.TCP_PING_REQUESTS_BYTES,
+									   LimeReceivedMessageStat.TCP_PING_REQUESTS,
+									   LimeReceivedMessageStat.TCP_PING_REQUESTS_BYTES);
 
 	/**
 	 * <tt>ReceivedMessageStatHandler</tt> for Gnutella pongs received over UDP.
 	 */
 	public static final ReceivedMessageStatHandler UDP_PING_REPLIES = 
 	    new ReceivedMessageStatHandler(ReceivedMessageStat.UDP_PING_REPLIES, 
-									   ReceivedMessageStat.UDP_PING_REPLIES_BYTES);
+									   ReceivedMessageStat.UDP_PING_REPLIES_BYTES,
+									   LimeReceivedMessageStat.UDP_PING_REPLIES, 
+									   LimeReceivedMessageStat.UDP_PING_REPLIES_BYTES);
 
 	/**
 	 * <tt>ReceivedMessageStatHandler</tt> for Gnutella pongs received over TCP.
 	 */
 	public static final ReceivedMessageStatHandler TCP_PING_REPLIES = 
 	    new ReceivedMessageStatHandler(ReceivedMessageStat.TCP_PING_REPLIES, 
-									   ReceivedMessageStat.TCP_PING_REPLIES_BYTES);
+									   ReceivedMessageStat.TCP_PING_REPLIES_BYTES,
+									   LimeReceivedMessageStat.TCP_PING_REPLIES, 
+									   LimeReceivedMessageStat.TCP_PING_REPLIES_BYTES);
 
 	/**
 	 * <tt>ReceivedMessageStatHandler</tt> for Gnutella query requests received 
@@ -86,7 +80,9 @@ public final class ReceivedMessageStatHandler {
 	 */
 	public static final ReceivedMessageStatHandler UDP_QUERY_REQUESTS = 
 	    new ReceivedMessageStatHandler(ReceivedMessageStat.UDP_QUERY_REQUESTS, 
-									   ReceivedMessageStat.UDP_QUERY_REQUESTS_BYTES);
+									   ReceivedMessageStat.UDP_QUERY_REQUESTS_BYTES,
+									   LimeReceivedMessageStat.UDP_QUERY_REQUESTS, 
+									   LimeReceivedMessageStat.UDP_QUERY_REQUESTS_BYTES);
 
 	/**
 	 * <tt>ReceivedMessageStatHandler</tt> for Gnutella query requests received 
@@ -94,7 +90,9 @@ public final class ReceivedMessageStatHandler {
 	 */
 	public static final ReceivedMessageStatHandler TCP_QUERY_REQUESTS = 
 	    new ReceivedMessageStatHandler(ReceivedMessageStat.TCP_QUERY_REQUESTS, 
-								   ReceivedMessageStat.TCP_QUERY_REQUESTS_BYTES);
+									   ReceivedMessageStat.TCP_QUERY_REQUESTS_BYTES,
+									   LimeReceivedMessageStat.TCP_QUERY_REQUESTS, 
+									   LimeReceivedMessageStat.TCP_QUERY_REQUESTS_BYTES);
 
 	/**
 	 * <tt>ReceivedMessageStatHandler</tt> for Gnutella query replies received over 
@@ -102,7 +100,9 @@ public final class ReceivedMessageStatHandler {
 	 */
 	public static final ReceivedMessageStatHandler UDP_QUERY_REPLIES = 
 	    new ReceivedMessageStatHandler(ReceivedMessageStat.UDP_QUERY_REPLIES, 
-								   ReceivedMessageStat.UDP_QUERY_REPLIES_BYTES);
+									   ReceivedMessageStat.UDP_QUERY_REPLIES_BYTES,
+									   LimeReceivedMessageStat.UDP_QUERY_REPLIES, 
+									   LimeReceivedMessageStat.UDP_QUERY_REPLIES_BYTES);
 
 	/**
 	 * <tt>ReceivedMessageStatHandler</tt> for Gnutella query replies received over 
@@ -110,7 +110,9 @@ public final class ReceivedMessageStatHandler {
 	 */
 	public static final ReceivedMessageStatHandler TCP_QUERY_REPLIES = 
 	    new ReceivedMessageStatHandler(ReceivedMessageStat.TCP_QUERY_REPLIES, 
-									   ReceivedMessageStat.TCP_QUERY_REPLIES_BYTES);
+									   ReceivedMessageStat.TCP_QUERY_REPLIES_BYTES,
+									   LimeReceivedMessageStat.TCP_QUERY_REPLIES, 
+									   LimeReceivedMessageStat.TCP_QUERY_REPLIES_BYTES);
 
 	/**
 	 * <tt>ReceivedMessageStatHandler</tt> for Gnutella push requests received over 
@@ -118,7 +120,9 @@ public final class ReceivedMessageStatHandler {
 	 */
 	public static final ReceivedMessageStatHandler UDP_PUSH_REQUESTS = 
 	    new ReceivedMessageStatHandler(ReceivedMessageStat.UDP_PUSH_REQUESTS, 
-									   ReceivedMessageStat.UDP_PUSH_REQUESTS_BYTES);
+									   ReceivedMessageStat.UDP_PUSH_REQUESTS_BYTES,
+									   LimeReceivedMessageStat.UDP_PUSH_REQUESTS, 
+									   LimeReceivedMessageStat.UDP_PUSH_REQUESTS_BYTES);
 
 	/**
 	 * <tt>ReceivedMessageStatHandler</tt> for Gnutella push requests received over 
@@ -126,7 +130,9 @@ public final class ReceivedMessageStatHandler {
 	 */
 	public static final ReceivedMessageStatHandler TCP_PUSH_REQUESTS = 
 	    new ReceivedMessageStatHandler(ReceivedMessageStat.TCP_PUSH_REQUESTS, 
-									   ReceivedMessageStat.TCP_PUSH_REQUESTS_BYTES);
+									   ReceivedMessageStat.TCP_PUSH_REQUESTS_BYTES,
+									   LimeReceivedMessageStat.TCP_PUSH_REQUESTS, 
+									   LimeReceivedMessageStat.TCP_PUSH_REQUESTS_BYTES);
 
 	/**
 	 * <tt>ReceivedMessageStatHandler</tt> for Gnutella route table messages received 
@@ -134,7 +140,9 @@ public final class ReceivedMessageStatHandler {
 	 */
 	public static final ReceivedMessageStatHandler UDP_ROUTE_TABLE_MESSAGES = 
 	    new ReceivedMessageStatHandler(ReceivedMessageStat.UDP_ROUTE_TABLE_MESSAGES, 
-									   ReceivedMessageStat.UDP_ROUTE_TABLE_MESSAGES_BYTES);
+									   ReceivedMessageStat.UDP_ROUTE_TABLE_MESSAGES_BYTES,
+									   LimeReceivedMessageStat.UDP_ROUTE_TABLE_MESSAGES, 
+									   LimeReceivedMessageStat.UDP_ROUTE_TABLE_MESSAGES_BYTES);
 
 	/**
 	 * <tt>ReceivedMessageStatHandler</tt> for Gnutella route table messages received 
@@ -142,7 +150,9 @@ public final class ReceivedMessageStatHandler {
 	 */
 	public static final ReceivedMessageStatHandler TCP_ROUTE_TABLE_MESSAGES = 
 	    new ReceivedMessageStatHandler(ReceivedMessageStat.UDP_FILTERED_MESSAGES,
-									   ReceivedMessageStat.UDP_FILTERED_MESSAGES_BYTES);
+									   ReceivedMessageStat.UDP_FILTERED_MESSAGES_BYTES,
+									   LimeReceivedMessageStat.UDP_FILTERED_MESSAGES,
+									   LimeReceivedMessageStat.UDP_FILTERED_MESSAGES_BYTES);
 
 	/**
 	 * <tt>ReceivedMessageStatHandler</tt> for Gnutella filtered messages received 
@@ -150,7 +160,9 @@ public final class ReceivedMessageStatHandler {
 	 */
 	public static final ReceivedMessageStatHandler UDP_FILTERED_MESSAGES = 
 	    new ReceivedMessageStatHandler(ReceivedMessageStat.UDP_FILTERED_MESSAGES,
-									   ReceivedMessageStat.UDP_FILTERED_MESSAGES_BYTES);
+									   ReceivedMessageStat.UDP_FILTERED_MESSAGES_BYTES,
+									   LimeReceivedMessageStat.UDP_FILTERED_MESSAGES,
+									   LimeReceivedMessageStat.UDP_FILTERED_MESSAGES_BYTES);
 
 	/**
 	 * <tt>ReceivedMessageStatHandler</tt> for Gnutella filtered messages received 
@@ -158,5 +170,30 @@ public final class ReceivedMessageStatHandler {
 	 */
 	public static final ReceivedMessageStatHandler TCP_FILTERED_MESSAGES = 
 	    new ReceivedMessageStatHandler(ReceivedMessageStat.TCP_FILTERED_MESSAGES,
-									   ReceivedMessageStat.TCP_FILTERED_MESSAGES_BYTES);
+									   ReceivedMessageStat.TCP_FILTERED_MESSAGES_BYTES,
+									   LimeReceivedMessageStat.TCP_FILTERED_MESSAGES,
+									   LimeReceivedMessageStat.TCP_FILTERED_MESSAGES_BYTES);
+
+
+	/**
+	 * <tt>ReceivedMessageStatHandler</tt> for duplicate queries received 
+	 * over UDP.
+	 */
+	public static final ReceivedMessageStatHandler UDP_DUPLICATE_QUERIES = 
+	    new ReceivedMessageStatHandler(ReceivedMessageStat.UDP_DUPLICATE_QUERIES,
+									   ReceivedMessageStat.UDP_DUPLICATE_QUERIES_BYTES,
+									   LimeReceivedMessageStat.UDP_DUPLICATE_QUERIES,
+									   LimeReceivedMessageStat.UDP_DUPLICATE_QUERIES_BYTES);
+
+	/**
+	 * <tt>ReceivedMessageStatHandler</tt> for duplicate queries received 
+	 * over TCP.
+	 */
+	public static final ReceivedMessageStatHandler TCP_DUPLICATE_QUERIES = 
+	    new ReceivedMessageStatHandler(ReceivedMessageStat.TCP_DUPLICATE_QUERIES,
+									   ReceivedMessageStat.TCP_DUPLICATE_QUERIES_BYTES,
+									   LimeReceivedMessageStat.TCP_DUPLICATE_QUERIES,
+									   LimeReceivedMessageStat.TCP_DUPLICATE_QUERIES_BYTES);
+
+	
 }
