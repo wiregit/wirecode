@@ -31,6 +31,9 @@ public abstract class VendorMessage extends Message {
 
     private static final int LENGTH_MINUS_PAYLOAD = 8;
 
+    private static final BadPacketException UNRECOGNIZED_EXCEPTION =
+        new BadPacketException("Unrecognized Vendor Message");
+
     /**
      * Bytes 0-3 of the Vendor Message.  Something like "LIME".getBytes().
      */
@@ -204,7 +207,7 @@ public abstract class VendorMessage extends Message {
             // UDP CONNECT BACK
             return new UDPConnectBackVendorMessage(guid, ttl, hops, version, 
                                                    restOf);
-        throw new BadPacketException("Unrecognized Vendor Message");
+        throw UNRECOGNIZED_EXCEPTION;
     }
     
     /**
