@@ -571,6 +571,25 @@ public class AssertComparisonsTest extends BaseTestCase {
         assertInstanceof("string", java.lang.Comparable.class, new Integer(1));
     }
     
+    public void testNotInstanceof() {
+        try {
+            assertNotInstanceof(Object.class, new Object());
+            assertNotInstanceof("string", Object.class, new Object());
+            fail("object is an instanceof object");
+        } catch(AssertionFailedError ignored) {}
+        
+        try {
+            assertNotInstanceof(Number.class, new Integer(1));
+            assertNotInstanceof("string", Number.class, new Integer(1));
+            fail("integer is an instanceof number");
+        } catch(AssertionFailedError ignored) {}
+        
+        assertNotInstanceof(Number.class, new Object());
+        assertNotInstanceof("string", Number.class, new Object());
+        assertNotInstanceof(java.lang.Comparable.class, new Object());
+        assertNotInstanceof("stg", java.lang.Comparable.class, new Object());
+    }
+
     public void testNullChecks() {
         try {
             assertNull(new Object());

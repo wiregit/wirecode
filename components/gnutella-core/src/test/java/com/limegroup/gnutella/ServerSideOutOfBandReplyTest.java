@@ -358,10 +358,7 @@ public final class ServerSideOutOfBandReplyTest extends BaseTestCase {
 	 * @param m the <tt>Message</tt> to check
 	 */
 	private static void assertQuery(Message m) {
-		if(m instanceof QueryRequest) return;
-
-		System.out.println(m); 
-		assertInstanceof("message not a QueryRequest",
+        assertInstanceof("message not a QueryRequest: " + m,
 		    QueryRequest.class, m);
 	}
 
@@ -394,7 +391,7 @@ public final class ServerSideOutOfBandReplyTest extends BaseTestCase {
             UDP_ACCESS.receive(pack);
         }
         catch (IOException bad) {
-            assertTrue("Did not get reply", false);
+            fail("Did not get reply", bad);
         }
         InputStream in = new ByteArrayInputStream(pack.getData());
         // as long as we don't get a ClassCastException we are good to go
@@ -424,7 +421,7 @@ public final class ServerSideOutOfBandReplyTest extends BaseTestCase {
                 UDP_ACCESS.receive(pack);
             }
             catch (IOException bad) {
-                assertTrue("Did not get ping", false);
+               fail("Did not get ping", bad);
             }
             InputStream in = new ByteArrayInputStream(pack.getData());
             // as long as we don't get a ClassCastException we are good to go
@@ -464,7 +461,7 @@ public final class ServerSideOutOfBandReplyTest extends BaseTestCase {
                     }
                 }
                 catch (Exception ie) {
-                    assertTrue("did not get the UDP CB message!", false);
+                    fail("did not get the UDP CB message!", ie);
                 }
             }
 
@@ -502,10 +499,11 @@ public final class ServerSideOutOfBandReplyTest extends BaseTestCase {
                 UDP_ACCESS.receive(pack);
             }
             catch (IOException bad) {
-                assertTrue("Did not get VM", false);
+                fail("Did not get VM", bad);
             }
             InputStream in = new ByteArrayInputStream(pack.getData());
             message = Message.read(in);
+
             // we should NOT get a reply to our query
             assertTrue(!((message instanceof QueryReply) &&
                          (Arrays.equals(message.getGUID(), query.getGUID()))));
@@ -514,7 +512,7 @@ public final class ServerSideOutOfBandReplyTest extends BaseTestCase {
         // make sure the GUID is correct
         assertTrue(Arrays.equals(query.getGUID(), message.getGUID()));
         ReplyNumberVendorMessage reply = (ReplyNumberVendorMessage) message;
-        assertTrue(reply.getNumResults() == 2);
+        assertEquals(2, reply.getNumResults());
 
         // ok - we should ACK the ReplyNumberVM
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -535,7 +533,7 @@ public final class ServerSideOutOfBandReplyTest extends BaseTestCase {
                 UDP_ACCESS.receive(pack);
             }
             catch (IOException bad) {
-                assertTrue("Did not get reply", false);
+                fail("Did not get reply", bad);
             }
             InputStream in = new ByteArrayInputStream(pack.getData());
             // as long as we don't get a ClassCastException we are good to go
@@ -543,7 +541,7 @@ public final class ServerSideOutOfBandReplyTest extends BaseTestCase {
         }
         // make sure this is the correct QR
         assertTrue(Arrays.equals(message.getGUID(), ack.getGUID()));
-        assertTrue(((QueryReply)message).getResultCount() == 1);
+        assertEquals(1, ((QueryReply)message).getResultCount());
 
         //2) null out 'message' so we can get the next reply....
         message = null;
@@ -554,7 +552,7 @@ public final class ServerSideOutOfBandReplyTest extends BaseTestCase {
                 UDP_ACCESS.receive(pack);
             }
             catch (IOException bad) {
-                assertTrue("Did not get reply", false);
+                fail("Did not get reply", bad);
             }
             InputStream in = new ByteArrayInputStream(pack.getData());
             // as long as we don't get a ClassCastException we are good to go
@@ -562,7 +560,7 @@ public final class ServerSideOutOfBandReplyTest extends BaseTestCase {
         }
         // make sure this is the correct QR
         assertTrue(Arrays.equals(message.getGUID(), ack.getGUID()));
-        assertTrue(((QueryReply)message).getResultCount() == 1);
+        assertEquals(1, ((QueryReply)message).getResultCount());
 
         // make sure that if we send the ACK we don't get another reply - this
         // is current policy but we may want to change it in the future
@@ -618,7 +616,7 @@ public final class ServerSideOutOfBandReplyTest extends BaseTestCase {
                 UDP_ACCESS.receive(pack);
             }
             catch (IOException bad) {
-                assertTrue("Did not get VM", false);
+                fail("Did not get VM", bad);
             }
             InputStream in = new ByteArrayInputStream(pack.getData());
             message = Message.read(in);
@@ -630,7 +628,7 @@ public final class ServerSideOutOfBandReplyTest extends BaseTestCase {
         // make sure the GUID is correct
         assertTrue(Arrays.equals(query.getGUID(), message.getGUID()));
         ReplyNumberVendorMessage reply = (ReplyNumberVendorMessage) message;
-        assertTrue(reply.getNumResults() == 2);
+        assertEquals(2, reply.getNumResults());
 
         // ok - we should ACK the ReplyNumberVM
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -649,7 +647,7 @@ public final class ServerSideOutOfBandReplyTest extends BaseTestCase {
                 UDP_ACCESS.receive(pack);
             }
             catch (IOException bad) {
-                assertTrue("Did not get reply", false);
+                fail("Did not get reply", bad);
             }
             InputStream in = new ByteArrayInputStream(pack.getData());
             // as long as we don't get a ClassCastException we are good to go
@@ -657,7 +655,7 @@ public final class ServerSideOutOfBandReplyTest extends BaseTestCase {
         }
         // make sure this is the correct QR
         assertTrue(Arrays.equals(message.getGUID(), ack.getGUID()));
-        assertTrue(((QueryReply)message).getResultCount() == 1);
+        assertEquals(1, ((QueryReply)message).getResultCount());
 
         // make sure that if we send the ACK we don't get another reply - this
         // is current policy but we may want to change it in the future
@@ -711,7 +709,7 @@ public final class ServerSideOutOfBandReplyTest extends BaseTestCase {
                 UDP_ACCESS.receive(pack);
             }
             catch (IOException bad) {
-                assertTrue("Did not get VM", false);
+                fail("Did not get VM", bad);
             }
             InputStream in = new ByteArrayInputStream(pack.getData());
             message = Message.read(in);
@@ -723,7 +721,7 @@ public final class ServerSideOutOfBandReplyTest extends BaseTestCase {
         // make sure the GUID is correct
         assertTrue(Arrays.equals(query.getGUID(), message.getGUID()));
         ReplyNumberVendorMessage reply = (ReplyNumberVendorMessage) message;
-        assertTrue(reply.getNumResults() == 2);
+        assertEquals(2, reply.getNumResults());
 
         // ok - we should ACK the ReplyNumberVM
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -779,7 +777,7 @@ public final class ServerSideOutOfBandReplyTest extends BaseTestCase {
                 UDP_ACCESS.receive(pack);
             }
             catch (IOException bad) {
-                assertTrue("Did not get VM", false);
+                fail("Did not get VM", bad);
             }
             InputStream in = new ByteArrayInputStream(pack.getData());
             // as long as we don't get a ClassCastException we are good to go
@@ -789,7 +787,7 @@ public final class ServerSideOutOfBandReplyTest extends BaseTestCase {
         // make sure the GUID is correct
         assertTrue(Arrays.equals(query.getGUID(), message.getGUID()));
         ReplyNumberVendorMessage reply = (ReplyNumberVendorMessage) message;
-        assertTrue(reply.getNumResults() == 1);
+        assertEquals(1, reply.getNumResults());
 
         // WAIT for the expirer to expire the query reply
         Thread.sleep(60 * 1000); // 1 minute - expirer must run twice
@@ -862,8 +860,8 @@ public final class ServerSideOutOfBandReplyTest extends BaseTestCase {
             catch (IOException expected) {}
         }
 
-        assertEquals("Didn't get all VMs!!", numReplyNumberVMs, 
-                     MAX_BUFFERED_REPLIES);
+        assertEquals("Didn't get all VMs!!", MAX_BUFFERED_REPLIES,
+            numReplyNumberVMs);
 
         // send 2 new queries that shouldn't be ACKed
         for (int i = 0; i < 2; i++) {
@@ -885,7 +883,7 @@ public final class ServerSideOutOfBandReplyTest extends BaseTestCase {
                 UDP_ACCESS.receive(pack);
                 InputStream in = new ByteArrayInputStream(pack.getData());
                 message = Message.read(in);
-                assertTrue(!(message instanceof ReplyNumberVendorMessage));
+                assertNotInstanceof( ReplyNumberVendorMessage.class, message );
             }
         }
         catch (IOException expected) {}
@@ -903,8 +901,8 @@ public final class ServerSideOutOfBandReplyTest extends BaseTestCase {
         LEAF.flush();
 
         // ultrapeers should NOT get the QR
-        assertTrue(getFirstQueryRequest(ULTRAPEER_1) == null);
-        assertTrue(getFirstQueryRequest(ULTRAPEER_2) == null);
+        assertNull(getFirstQueryRequest(ULTRAPEER_1));
+        assertNull(getFirstQueryRequest(ULTRAPEER_2));
         
         // try a good query
         query = QueryRequest.createOutOfBandQuery("berkeley", 
@@ -916,11 +914,11 @@ public final class ServerSideOutOfBandReplyTest extends BaseTestCase {
         Thread.sleep(4000);
 
         // ultrapeers should get the QR
-        assertTrue(getFirstQueryRequest(ULTRAPEER_1) != null);
-        assertTrue(getFirstQueryRequest(ULTRAPEER_2) != null);
+        assertNotNull(getFirstQueryRequest(ULTRAPEER_1) );
+        assertNotNull(getFirstQueryRequest(ULTRAPEER_2) );
 
         // LEAF should get the reply
-        assertTrue(getFirstQueryReply(LEAF) != null);
+        assertNotNull(getFirstQueryReply(LEAF));
     }
 
     // a node should NOT send a reply out of band via UDP if it is not
@@ -936,7 +934,7 @@ public final class ServerSideOutOfBandReplyTest extends BaseTestCase {
         ULTRAPEER_2.flush();
 
         // ULTRAPEER_2 should get a reply via TCP
-        assertTrue(getFirstQueryReply(ULTRAPEER_2) != null);
+        assertNotNull(getFirstQueryReply(ULTRAPEER_2));
     }
 
     

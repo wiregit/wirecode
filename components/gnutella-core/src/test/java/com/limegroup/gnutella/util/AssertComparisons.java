@@ -16,6 +16,7 @@ public class AssertComparisons extends TestCase {
     private static final int INSTANCE_OF = 4;
     private static final int NOT_EQUAL = 5;
     private static final int NOT_SAME = 6;
+    private static final int NOT_INSTANCE_OF = 7;
     
     /**
      * Named constructor.
@@ -40,6 +41,24 @@ public class AssertComparisons extends TestCase {
         if (!instanceofCheck(expected, actual.getClass()))
             fail(formatComparison(INSTANCE_OF, msg, 
                     expected.getName(), actual.getClass().getName()));
+    }
+    
+    /**
+     * Asserts that actual is not an instanceof the expected class.  If it is,
+     * an AssertionFailedError is thrown.
+     */
+    static public void assertNotInstanceof(Class expected, Object actual) {
+        assertNotInstanceof(null, expected, actual);
+    }
+    
+    /**
+     * Asserts that actual is an not instance of the class expected.  If it is,
+     * an AssertionFailedError is thrown with the given message.
+     */
+    static public void assertNotInstanceof(String msg, Class expected, Object actual) {
+        if(instanceofCheck(expected, actual.getClass()))
+            fail(formatComparison(NOT_INSTANCE_OF, msg,
+                expected.getName(), actual.getClass().getName()));
     }
     
     /**
@@ -721,6 +740,8 @@ public class AssertComparisons extends TestCase {
             compare = "greater than or equal to"; break;
         case INSTANCE_OF:
             compare = "instanceof"; break;
+        case NOT_INSTANCE_OF:
+            compare = "not instanceof"; break;
         case NOT_EQUAL:
             compare = "something other than"; break;
         case NOT_SAME:
