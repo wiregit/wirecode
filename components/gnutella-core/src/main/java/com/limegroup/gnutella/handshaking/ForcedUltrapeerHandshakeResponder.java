@@ -73,16 +73,15 @@ public class ForcedUltrapeerHandshakeResponder
 	 */
 	private HandshakeResponse respondToOutgoing(HandshakeResponse response) {
 		
-	
-		Properties ret = new Properties();
-		
 		// They supposedly requested our promotion and are now giving us guidance?
 		// reject the connection.
-        if(response.hasLeafGuidance()) 
+        if(response.hasLeafGuidance() || response.isLeaf() || !response.isLimeWire()) 
            	return HandshakeResponse.createRejectOutgoingResponse();
 		 else if( RECORD_STATS )
             HandshakingStat.UP_OUTGOING_ACCEPT.incrementStat();
 
+		Properties ret = new Properties();
+		 
 		// deflate if we can ...
 		if(response.isDeflateAccepted()) {
 		    ret.put(HeaderNames.CONTENT_ENCODING, HeaderNames.DEFLATE_VALUE);
