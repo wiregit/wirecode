@@ -1,6 +1,7 @@
 package com.limegroup.gnutella;
 
 import java.io.*;
+import com.sun.java.util.collections.*;
 
 /**
  * This class defines the types of URNs supported in the application and 
@@ -12,6 +13,18 @@ import java.io.*;
 public class UrnType implements Serializable {
 
 	private static final long serialVersionUID = -8211681448456483713L;
+
+	/**
+	 * Constant for specifying SHA1 URNs in replies.
+	 */
+	public static final Set SHA1_SET = new HashSet();	
+
+	/**
+	 * Statically add the SHA1 type to the set. 
+	 */
+	static {
+		SHA1_SET.add(UrnType.SHA1);
+	}
 
 	/**
 	 * Cached constant for a colon string.
