@@ -38,6 +38,12 @@ public class HTTPUploader implements Uploader {
 	private String  _chatHost;
 	private int _chatPort;
     private FileManager _fileManager;
+    
+    /**
+     * Indicates that the client to which we are uploading is capable of
+     * accepting Queryreplies in the response.
+     */
+    private boolean _clientAcceptsXGnutellaQueryreplies = false;
 
     private BandwidthTrackerImpl bandwidthTracker=new BandwidthTrackerImpl();
 
@@ -313,6 +319,10 @@ public class HTTPUploader implements Uploader {
 	public boolean chatEnabled() {return _chatEnabled;}
 	public String getChatHost() {return _chatHost;}
 	public int getChatPort() {return _chatPort;}
+    public boolean getClientAcceptsXGnutellaQueryreplies() {
+        return _clientAcceptsXGnutellaQueryreplies;
+    }
+    
 	/****************** private methods *******************/
 
 
@@ -322,7 +332,8 @@ public class HTTPUploader implements Uploader {
         _uploadBegin = 0;
         _uploadEnd = 0;
 		String userAgent;
-		
+		_clientAcceptsXGnutellaQueryreplies = false;
+        
 		InputStream istream = _socket.getInputStream();
 		ByteReader br = new ByteReader(istream);
         
@@ -335,7 +346,7 @@ public class HTTPUploader implements Uploader {
 			// break out of the loop if it is null or blank
             if ( (str==null) || (str.equals("")) )
                 break;
-
+            
 			if (str.toUpperCase().indexOf("CHAT:") != -1) {
 				String sub;
 				try {
@@ -471,6 +482,13 @@ public class HTTPUploader implements Uploader {
 				}
 				userAgent = str.substring(11).trim();
 			}
+            //check the "accept:" header
+            if (indexOfIgnoreCase(str, "accept:") != -1) {
+                if(indexOfIgnoreCase(str, "application/x-gnutella-queryreplies")
+                    != -1) {
+                    _clientAcceptsXGnutellaQueryreplies = true;
+                }
+            }
 		}
 
 		if (_uploadEnd == 0)

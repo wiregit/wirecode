@@ -929,6 +929,8 @@ public class RouterService
         try {
             URLConnection conn 
                 = (new URL("http://"+host+":"+port)).openConnection();
+            conn.setRequestProperty("accept", 
+                "application/x-gnutella-queryreplies");
             InputStream in = conn.getInputStream();
             
             while(true) {

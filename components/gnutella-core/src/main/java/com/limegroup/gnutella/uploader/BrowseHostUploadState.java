@@ -35,6 +35,13 @@ public class BrowseHostUploadState implements UploadState
      */
     public void doUpload(HTTPUploader uploader) throws IOException
     {
+        //GUARD CLAUSE
+        //dont do anything if the client cant accept Queryreplies in the 
+        //response
+        if(!uploader.getClientAcceptsXGnutellaQueryreplies())
+            throw new IOException(
+                "Client can not accept QueryReplies in HTTP Response");
+        
         _uploader = uploader;
         _ostream = uploader.getOutputStream();
         
