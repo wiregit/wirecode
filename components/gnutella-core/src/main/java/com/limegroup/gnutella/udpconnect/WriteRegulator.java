@@ -70,9 +70,9 @@ public class WriteRegulator {
         //
         int sleepTime  = ((usedSpots+1) * baseWait);
 
-        if ( receiverWindowSpace <= 4 ) {
+        if ( receiverWindowSpace <= 5 ) {
             sleepTime += 1;
-            sleepTime = 3 * (5 - receiverWindowSpace) * sleepTime / 2;  
+            sleepTime = 3 * (6 - receiverWindowSpace) * sleepTime / 2;  
         }
 
         // Ensure the sleep time is fairly distributed
