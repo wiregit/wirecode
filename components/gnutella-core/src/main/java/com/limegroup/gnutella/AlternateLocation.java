@@ -78,6 +78,10 @@ public final class AlternateLocation
 			throw new IOException("could not parse url for alt loc: "+
 								  location);
 		}
+		
+		if( !NetworkUtils.isValidPort(url.getPort()) )
+		    throw new IOException("invalid port.");
+		
 		String outputDateTime = AlternateLocation.extractTimestamp(location);
 		Date date;
 		if(outputDateTime == null) {
@@ -120,7 +124,7 @@ public final class AlternateLocation
 			throw new NullPointerException("cannot accept null URL");
 		}
 
-		if((url.getPort() & 0xFFFF0000) != 0) {
+		if(!NetworkUtils.isValidPort(url.getPort())) {
 			throw new IllegalArgumentException("invalid port: "+url.getPort());
 		}
 		// create a new URL instance from the data for the given url
