@@ -15,7 +15,7 @@ public class GGEPTest extends TestCase {
 
     public void testStringKeys() {
         try {
-            GGEP temp = new GGEP();
+            GGEP temp = new GGEP(true);
             temp.put("A", "B");
             temp.put("C", (String)null);
             temp.put(GGEP.GGEP_HEADER_BROWSE_HOST, "");
@@ -33,7 +33,7 @@ public class GGEPTest extends TestCase {
 
     public void testByteKeys() {
         try {
-            GGEP temp = new GGEP();
+            GGEP temp = new GGEP(true);
             temp.put("A", new byte[] { (byte)3 });
             assertTrue(temp.hasKey("A"));
             assertTrue(Arrays.equals(temp.getBytes("A"),
@@ -47,7 +47,7 @@ public class GGEPTest extends TestCase {
 
     public void testIntKeys() {
         try {
-            GGEP temp = new GGEP();
+            GGEP temp = new GGEP(true);
             temp.put("A", 527);
             assertTrue(temp.hasKey("A"));
             assertTrue(temp.getInt("A")==527);
@@ -64,7 +64,7 @@ public class GGEPTest extends TestCase {
      *  throw an exception */
     public void testKeyTooBig() {
         try {
-            GGEP temp = new GGEP();
+            GGEP temp = new GGEP(true);
             temp.put("THIS KEY IS WAY TO LONG!", "");
             fail("No IllegalArgumentException.");
         } catch (IllegalArgumentException pass) { 
@@ -79,37 +79,50 @@ public class GGEPTest extends TestCase {
             bigBoy.append("1");
         
         try {
-            GGEP temp = new GGEP();
+            GGEP temp = new GGEP(true);
             temp.put("WHATEVER", bigBoy.toString());
             fail("No IllegalArgumentException.");
         } catch (IllegalArgumentException pass) { }
     }
 
-
-    /** tests that map constructor doesn't accept data that has a 0x0, should
-     *  throw an exception */
-    public void testValueContainsNull() {
+    /** Null bytes allowed, e.g., in ping replies */
+    public void testValueContainsLegalNull() {
         byte[] bytes = new byte[2];
         bytes[0] = (byte)'S';
         bytes[1] = (byte)0x0;
         String hasANull = new String(bytes);
 
         try {
-            GGEP temp = new GGEP();
+            GGEP temp = new GGEP(true);
+            temp.put("WHATEVER", hasANull);
+        } catch (IllegalArgumentException pass) { 
+            fail("No IllegalArgumentException.");
+        }
+    }
+
+    /** Null bytes disallowed, e.g., in query replies.  
+     *  TODO: ultimately this will enable COBS encoding. */
+    public void testValueContainsIllegalNull() {
+        byte[] bytes = new byte[2];
+        bytes[0] = (byte)'S';
+        bytes[1] = (byte)0x0;
+        String hasANull = new String(bytes);
+
+        try {
+            GGEP temp = new GGEP(false);
             temp.put("WHATEVER", hasANull);
             fail("No IllegalArgumentException.");
         } catch (IllegalArgumentException pass) { }
     }
 
-
     public void testEquals() {
-        GGEP a1=new GGEP();
+        GGEP a1=new GGEP(true);
         a1.put("K1", "V1");
-        GGEP a2=new GGEP();
+        GGEP a2=new GGEP(true);
         a2.put("K1", "V1");
-        GGEP b1=new GGEP();
+        GGEP b1=new GGEP(true);
         b1.put("K1");
-        GGEP b2=new GGEP();
+        GGEP b2=new GGEP(true);
         b2.put("K1");
 
         assertTrue(a1.equals(a1));
@@ -119,10 +132,10 @@ public class GGEPTest extends TestCase {
         assertTrue(! a1.equals(b1));
         assertTrue(! b1.equals(a1));
         
-        GGEP c1=new GGEP();
+        GGEP c1=new GGEP(true);
         c1.put("K1", "V1");
         c1.put("K2", "V2");
-        GGEP c2=new GGEP();
+        GGEP c2=new GGEP(true);
         c2.put("K1", "V1");
         c2.put("K2", "V2");        
 

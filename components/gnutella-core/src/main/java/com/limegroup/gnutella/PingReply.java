@@ -122,7 +122,7 @@ public class PingReply extends Message implements Serializable {
     /** Returns the GGEP payload bytes to encode the given uptime */
     private static byte[] newGGEP(int dailyUptime) {
         try {
-            GGEP ggep=new GGEP();
+            GGEP ggep=new GGEP(true);
             ggep.put(GGEP.GGEP_HEADER_DAILY_AVERAGE_UPTIME, dailyUptime);
             ByteArrayOutputStream baos=new ByteArrayOutputStream();
             ggep.write(baos);

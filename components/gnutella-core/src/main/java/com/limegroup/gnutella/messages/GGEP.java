@@ -11,9 +11,11 @@ import com.limegroup.gnutella.util.StringComparator;
  * A mutable GGEP extension block.  A GGEP block can be thought of as a
  * collection of key/value pairs.  A key (extension header) cannot be greater
  * than 15 bytes.  The value (extension data) can be 0 to 2^24-1 bytes.  Values
- * can be formatted as a number, boolean, or generic binaric blob of binary
- * data.  The order of the extensions is immaterial.  Extensions supported by
- * LimeWire have keys specified in this class (prefixed by GGEP_HEADER...)  
+ * can be formatted as a number, boolean, or generic blob of binary data.  If
+ * necessary (e.g., for query replies), GGEP will COBS-encode values to remove
+ * null bytes.  (TODO: THIS IS NOT CURRENTLY IMPLEMENTED.)  The order of the
+ * extensions is immaterial.  Extensions supported by LimeWire have keys
+ * specified in this class (prefixed by GGEP_HEADER...)  
  */
 public class GGEP extends Object {
 
@@ -40,6 +42,12 @@ public class GGEP extends Object {
      */
     private Map /*String->byte[]*/ _props = new TreeMap(new StringComparator());
 
+    /**
+     * False iff this should COBS encode values to prevent null bytes.
+     * Default is false, to be conservative.
+     */
+    public boolean allowNulls=false;
+
 	/**
 	 * Cached hash code value to avoid calculating the hash code from the
 	 * map each time.
@@ -52,8 +60,12 @@ public class GGEP extends Object {
     /** 
      * Creates a new empty GGEP block.  Typically this is used for outgoing
      * messages and mutated before encoding.  
+     *
+     * @param allowNulls true if nulls are allowed in extension values; true if
+     *  this should activate COBS encoding if necessary to remove null bytes. 
      */
-    public GGEP() {
+    public GGEP(boolean allowNulls) {
+        this.allowNulls=allowNulls;
     }    
 
     /** Constructs a GGEP instance based on the GGEP block beginning at
@@ -312,7 +324,9 @@ public class GGEP extends Object {
      * @param key the name of the GGEP extension, whose length should be between
      *  1 and 15, inclusive
      * @param value the GGEP extension data
-     * @exception IllegalArgumentException key is of an illegal length
+     * @exception IllegalArgumentException key is of an illegal length;
+     *  or value contains a null bytes, null bytes are disallowed, and
+     *  COBS encoding is not supported
      */
     public void put(String key, byte[] value) throws IllegalArgumentException {
         validateKey(key);
@@ -327,7 +341,9 @@ public class GGEP extends Object {
      * @param key the name of the GGEP extension, whose length should be between
      *  1 and 15, inclusive
      * @param value the GGEP extension data
-     * @exception IllegalArgumentException key is of an illegal length
+     * @exception IllegalArgumentException key is of an illegal length;
+     *  or value contains a null bytes, null bytes are disallowed, and
+     *  COBS encoding is not supported
      */
     public void put(String key, String value) throws IllegalArgumentException {
         put(key, value==null ? null : value.getBytes());
@@ -338,8 +354,9 @@ public class GGEP extends Object {
      * @param key the name of the GGEP extension, whose length should be between
      *  1 and 15, inclusive
      * @param value the GGEP extension data, which should be an unsigned integer
-     * @exception IllegalArgumentException key is of an illegal length or
-     *  value is negative
+     * @exception IllegalArgumentException key is of an illegal length; or value
+     *  is negative; or value contains a null bytes, null bytes are disallowed,
+     *  and COBS encoding is not supported 
      */
     public void put(String key, int value) throws IllegalArgumentException {
         if (value<0)  //TODO: ?
@@ -351,7 +368,9 @@ public class GGEP extends Object {
      * Adds a key without any value.
      * @param key the name of the GGEP extension, whose length should be between
      *  1 and 15, inclusive
-     * @exception IllegalArgumentException key is of an illegal length
+     * @exception IllegalArgumentException key is of an illegal length;
+     *  or value contains a null bytes, null bytes are disallowed, and
+     *  COBS encoding is not supported
      */
     public void put(String key) throws IllegalArgumentException {
         put(key, (byte[])null);
@@ -431,7 +450,9 @@ public class GGEP extends Object {
     private void validateValue(byte[] value) throws IllegalArgumentException {
         if (value==null)
             return;
-        if (value.length>MAX_VALUE_SIZE_IN_BYTES || containsNull(value))            
+        if (value.length>MAX_VALUE_SIZE_IN_BYTES)
+            throw new IllegalArgumentException();
+        if (!allowNulls && containsNull(value))
             throw new IllegalArgumentException();
     }
 

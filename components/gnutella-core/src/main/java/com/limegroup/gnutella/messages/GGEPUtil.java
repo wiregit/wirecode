@@ -24,7 +24,7 @@ public class GGEPUtil {
 
         // the standard GGEP has nothing.
         try {
-            GGEP standard = new GGEP();
+            GGEP standard = new GGEP(false);
             standard.write(oStream);
             standardGGEP = oStream.toByteArray();
         }
@@ -34,7 +34,7 @@ public class GGEPUtil {
         // a GGEP block with BHOST
         oStream.reset();
         try {
-            GGEP bhost = new GGEP();
+            GGEP bhost = new GGEP(false);
             bhost.put(GGEP.GGEP_HEADER_BROWSE_HOST);
             bhost.write(oStream);
             qrGGEP = oStream.toByteArray();
