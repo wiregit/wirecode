@@ -148,6 +148,11 @@ public class HTTPDownloader implements BandwidthTracker {
      */
 	private int _amountToRead;
     
+    /**
+     * Whether to disconnect after reading the amount we have wanted to read
+     */
+    private volatile boolean _disconnect;
+    
     /** 
      *  The index to start reading from the server 
      * LOCKING: this 
@@ -1636,7 +1641,7 @@ public class HTTPDownloader implements BandwidthTracker {
         } finally {
             _bodyConsumed = true;
             _isActive = false;
-            if(!isHTTP11())
+            if(!isHTTP11() || _disconnect)
                 _byteReader.close();
         }
 	}
@@ -1675,6 +1680,7 @@ public class HTTPDownloader implements BandwidthTracker {
      *  stop-1 is the index of the last byte to be downloaded
      */
     public synchronized void stopAt(int stop) {
+        _disconnect = true;
         _amountToRead = Math.min(_amountToRead,stop-_initialReadingPoint);
     }
     

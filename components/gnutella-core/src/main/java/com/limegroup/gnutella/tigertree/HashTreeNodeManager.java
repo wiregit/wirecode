@@ -25,7 +25,7 @@ class HashTreeNodeManager {
      *
      * This number MUST be greater than the maximum possible number
      * of nodes for the largest depth this stores.  Currently
-     * we store up to depth 6, which has a maximum node count of 127
+     * we store up to depth 7, which has a maximum node count of 127
      * nodes.
      */
     private static final int MAX_NODES = 500;    
@@ -51,29 +51,28 @@ class HashTreeNodeManager {
      * Returns all intermediary nodes for the tree.
      */
     List /* of List of byte[] */ getAllNodes(HashTree tree) {
-        switch(tree.getDepth()) {
-        case 0:
+        int depth = tree.getDepth();
+        if(tree.getDepth() == 0) {
             // trees of depth 0 have only one row.
             List outer = new ArrayList(1);
             outer.add(tree.getNodes());
             return outer;
-        case 1: case 2: case 7: case 8: case 9:
+        }else if (depth <2 || depth >= 7)
             // trees of depth 1 & 2 are really easy to calculate, so
             // always do those on the fly.
-            // trees of depth 7, 8 & 9 take up too much memory to store,
+            // trees deeper than 7 take up too much memory to store,
             // so don't store them.
             return HashTree.createAllParentNodes(tree.getNodes());
-        default:
+        else 
             // other trees need to battle it out for storage.
             return getAllNodesImpl(tree);
-        }
     }
     
     /**
      * Registers the given list of nodes for the tree.
      */
     void register(HashTree tree, List nodes) {
-        // don't register depths 0-2 and 7-9
+        // don't register depths 0-2 and 7-11
         int depth = tree.getDepth();
         if(depth > 2 && depth < 7 && !MAP.containsKey(tree))
             insertEntry(tree, nodes);

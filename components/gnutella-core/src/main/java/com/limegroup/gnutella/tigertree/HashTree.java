@@ -82,7 +82,7 @@ public class HashTree implements HTTPHeaderValue, Serializable {
      */
     private transient int _nodeSize;
 
-    /*
+    /**
      * Constructs a new HashTree out of the given nodes, root, sha1
      * and filesize.
      */
@@ -90,6 +90,10 @@ public class HashTree implements HTTPHeaderValue, Serializable {
         this(allNodes,sha1,fileSize,calculateNodeSize(fileSize,allNodes.size()-1));
     }
     
+    /**
+     * Constructs a new HashTree out of the given nodes, root, sha1
+     * filesize and chunk size.
+     */
     private HashTree(List allNodes, String sha1, long fileSize, int nodeSize) {
         THEX_URI = HTTPConstants.URI_RES_N2X + sha1;
         NODES = (List)allNodes.get(allNodes.size()-1);
@@ -101,8 +105,6 @@ public class HashTree implements HTTPHeaderValue, Serializable {
         _nodeSize = nodeSize;
     }
     
-    
-
     /**
      * Creates a new HashTree for the given FileDesc.
      */
@@ -122,6 +124,16 @@ public class HashTree implements HTTPHeaderValue, Serializable {
         }                
     }
     
+    /**
+     *  Calculates a the node size based on the file size and the target depth.
+     *  
+     *   A tree of depth n has 2^(n-1) leaf nodes, so ideally the file will be
+     *   split in that many chunks.  However, since chunks have to be powers of 2,
+     *   we make the size of each chunk the closest power of 2 that is bigger than
+     *   the ideal size.
+     *   
+     *   This ensures the resulting tree will have between 2^(n-2) and 2^(n-1) nodes.
+     */
     public static int calculateNodeSize(long fileSize, int depth) {
         
         // don't create more than this many nodes
