@@ -87,21 +87,21 @@ public class PushEndpointForSelf extends PushEndpoint {
      * Our port is our external port
      */
     public int getPort() {
-        int port = RouterService.getPort();
-        if (NetworkUtils.isValidPort(port))
-            return port;
-        return 6346;
+        return RouterService.getPort();
     }
     
     /**
-     * appends our external address at the end, if valid && external.
+     * appends our external address at the end, if valid && external && port 
+     * valid
      */
     public String httpStringValue() {
         StringBuffer sup = new StringBuffer(super.httpStringValue());
         String addr = getAddress();
-        if (!addr.equals(RemoteFileDesc.BOGUS_IP)) {
+        int port = getPort();
+        if (!addr.equals(RemoteFileDesc.BOGUS_IP) && 
+                NetworkUtils.isValidPort(port)) {
             sup.append(";");
-            sup.append(getPort());
+            sup.append(port);
             sup.append(":");
             sup.append(addr);
         }
