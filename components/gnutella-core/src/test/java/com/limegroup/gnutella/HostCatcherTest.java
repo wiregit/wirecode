@@ -1,6 +1,5 @@
 package com.limegroup.gnutella;
 
-import java.lang.reflect.*;
 import junit.framework.*;
 import java.io.*;
 import com.sun.java.util.collections.*;
@@ -11,7 +10,6 @@ import com.limegroup.gnutella.settings.*;
 
 public class HostCatcherTest extends com.limegroup.gnutella.util.BaseTestCase {  
     private HostCatcher hc;
-    private RouterService rs;
 
     public HostCatcherTest(String name) {
         super(name);
@@ -31,7 +29,7 @@ public class HostCatcherTest extends com.limegroup.gnutella.util.BaseTestCase {
             new String[] { "*.*" });
         
         HostCatcher.DEBUG=true;
-		rs = new RouterService(new ActivityCallbackStub());
+		new RouterService(new ActivityCallbackStub());
 
         hc = new HostCatcher();
 
@@ -61,6 +59,38 @@ public class HostCatcherTest extends com.limegroup.gnutella.util.BaseTestCase {
 	    }
 	    
 	}
+
+    /**
+     * Tests to make sure that recovering used hosts works as expected.  This
+     * method is used when the user's network connection goes down.
+     *
+     * @throws Exception if any error occurs
+     */    
+    public void testRecoversUsedHosts() throws Exception {
+        // write data to gnutella.net
+        hc.add(new Endpoint("18.239.0.1"), false);
+        hc.add(new Endpoint("18.239.0.2"), false);
+        hc.add(new Endpoint("18.239.0.3"), false);
+        hc.add(new Endpoint("18.239.0.4"), false);
+        hc.add(new Endpoint("18.239.0.5"), false);
+        hc.add(new Endpoint("18.239.0.6"), false);
+        hc.add(new Endpoint("18.239.0.7"), false);
+        hc.add(new Endpoint("18.239.0.8"), false);
+        hc.add(new Endpoint("18.239.0.9"), false);
+        hc.add(new Endpoint("18.239.0.10"), false);
+
+        hc.write();
+        int numHosts = hc.getNumHosts();
+        
+        System.out.println("HostCatcherTest::num hosts: "+numHosts);
+        for(int i=0; i<10; i++) {
+            hc.getAnEndpoint();
+        }
+        
+        hc.recoverHosts();
+        assertEquals("hosts should have been recovered", 
+            numHosts, hc.getNumHosts());
+    }
     
     /** Tests that FixedsizePriorityQueue can hold two endpoints with same
      *  priority but different ip's.  This was a problem at one point. */
