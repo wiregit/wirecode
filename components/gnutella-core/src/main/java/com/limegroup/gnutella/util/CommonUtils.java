@@ -604,6 +604,19 @@ public final class CommonUtils {
 	}
 	
 	/**
+	 * Returns whether or not the current JVM is 1.4.x or later
+	 *
+	 * @return <tt>true</tt> if we are running on 1.4.x or later, 
+     *  <tt>false</tt> otherwise
+	 */
+	public static boolean isJava142OrLater() {
+        String version = CommonUtils.getJavaVersion();
+        return !version.startsWith("1.4.1")
+            && !version.startsWith("1.4.0")
+            && isJava14OrLater();
+	}	
+	
+	/**
 	 * Returns whether or not the current JVM is 1.5.x or later.
 	 */
 	public static boolean isJava15OrLater() {
