@@ -1123,6 +1123,7 @@ public class ManagedDownloader implements Downloader, Serializable {
                 // Assert that the SHA1 of the IFD and the bucketHash match.
                 Assert.silent(false, "wrong IFD.");
                 fileManager.removeFileIfShared(incompleteFile);
+                ifd = null; // do not use, it's bad.
             }
         }
         
