@@ -26,6 +26,9 @@
   <property name="tests"       value="com/limegroup/gnutella/tests/"/>
   <property name="reports"     value="reports"/>
   <property name="datadir"     value="${basedir}"/>
+  <property name="pmd"         value="lib/pmd.jar"/>
+  <property name="jaxen"       value="lib/jaxen-core-1.0-fcs.jar"/>
+  <property name="saxpath"     value="lib/saxpath-1.0-fcs.jar"/>
 
   <!-- constants -->
   <property name="DEBUG" value="yes" />
@@ -50,6 +53,9 @@
 	<pathelement location="${quicktime}"/>
 	<pathelement location="${logicrypto}"/>
 	<pathelement location="${datadir}"/>
+	<pathelement location="${pmd}"/>
+	<pathelement location="${jaxen}"/>
+	<pathelement location="${saxpath}"/>
   </path>
 
   <!-- Initialization stuff -->
