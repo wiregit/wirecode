@@ -49,6 +49,11 @@ public class LimeXMLUtils
     private static final String COMPRESS_HEADER_NONE = 
         C_HEADER_BEGIN + C_HEADER_NONE_VAL + C_HEADER_END;
 
+    
+    private static final int NONE = 0;
+    private static final int GZIP = 1;
+    private static final int ZLIB = 2;
+
 
     /**
      * Returns an instance of InputSource after reading the file, and trimming
@@ -602,37 +607,32 @@ public class LimeXMLUtils
         }
     }
 
-
-
- 
-
     /** @return Correctly uncompressed data (according to Content-Type header) 
      *  May return a byte[] of length 0 if something bad happens. 
      */
     public static byte[] uncompress(byte[] data) throws Exception {
         byte[] retBytes = new byte[0];
-
         String headerFragment = new String(data, 0, 
                                            C_HEADER_BEGIN.length());
-        
         if (headerFragment.equals(C_HEADER_BEGIN)) {
             // we have well formed input (so far)
-            headerFragment = new String(data,
-                                        (C_HEADER_BEGIN.length()),
-                                        max3(C_HEADER_NONE_VAL.length(),
-                                             C_HEADER_ZLIB_VAL.length(),
-                                             C_HEADER_GZIP_VAL.length())
-                                        );
-
-            if (headerFragment.indexOf(C_HEADER_NONE_VAL) == 0) {
-                retBytes = new byte[data.length-COMPRESS_HEADER_NONE.length()];
+            boolean found = false;
+            int i=0;
+            for(; i<data.length && !found; i++)
+                if(data[i]==(byte)125)
+                    found = true;
+            //We know know that "{" is at 1 because we are in this if block
+            headerFragment = new String(data,1,i-1-1);
+            int comp = getCompressionType(headerFragment);
+            if (comp == NONE) {
+                retBytes = new byte[data.length-(headerFragment.length()+2)];
                 System.arraycopy(data,
-                                 COMPRESS_HEADER_NONE.length(),
+                                 i,
                                  retBytes,
                                  0,
-                                 data.length-COMPRESS_HEADER_NONE.length());
+                                 data.length-(headerFragment.length()+2));
             }
-            else if (headerFragment.indexOf(C_HEADER_GZIP_VAL) == 0) {
+            else if (comp == GZIP) {
                 retBytes = new byte[data.length-COMPRESS_HEADER_GZIP.length()];
                 System.arraycopy(data,
                                  COMPRESS_HEADER_GZIP.length(),
@@ -641,7 +641,7 @@ public class LimeXMLUtils
                                  data.length-COMPRESS_HEADER_GZIP.length());
                 retBytes = uncompressGZIP(retBytes);                
             }
-            else if (headerFragment.indexOf(C_HEADER_ZLIB_VAL) == 0) {
+            else if (comp == ZLIB) {
                 retBytes = new byte[data.length-COMPRESS_HEADER_ZLIB.length()];
                 System.arraycopy(data,
                                  COMPRESS_HEADER_ZLIB.length(),
@@ -655,12 +655,22 @@ public class LimeXMLUtils
         }
         else
             return data;  // the Content-Type header is optional, assumes PT
-        
-
         return retBytes;
     }
 
-
+    private static int getCompressionType(String header) {
+        String s = header.trim();
+        if(s.equals("") || s.equalsIgnoreCase(C_HEADER_NONE_VAL))
+            return NONE;
+        else if(s.equalsIgnoreCase(C_HEADER_GZIP_VAL))
+            return GZIP;
+        else if(s.equalsIgnoreCase(C_HEADER_ZLIB_VAL))
+            return ZLIB;
+        else
+            return -1;
+        
+    }
+    
 
     /** Returns the uncompressed version of the given ZLIB'ed bytes.  Throws
      *  IOException if the data is corrupt. */
