@@ -353,10 +353,11 @@ public class RouterService
      * Initialize a download request
      */
     public HTTPDownloader initDownload(String ip, int port, int index, 
-      String fname, byte[] bguid) {
+      String fname, byte[] bguid, int size) {
 
         HTTPDownloader down = new
-            HTTPDownloader("http", ip, port, index, fname, manager, bguid);
+            HTTPDownloader("http", ip, port, index, fname, manager, bguid, 
+	      size);
 
 	return( down );
     }
@@ -376,9 +377,9 @@ public class RouterService
      * Create and kickoff a download request
      */
     public void tryDownload(String ip, int port, int index, String fname, 
-      byte[] bguid) {
+      byte[] bguid, int size) {
 
-        HTTPDownloader down = initDownload(ip, port, index, fname, bguid);
+        HTTPDownloader down = initDownload(ip, port, index, fname, bguid, size);
 
         kickoffDownload(down);
     }
@@ -387,9 +388,9 @@ public class RouterService
      * Create a queued download request
      */
     public void queueDownload(String ip, int port, int index, String fname, 
-      byte[] bguid) {
+      byte[] bguid, int size) {
 
-        HTTPDownloader down = initDownload(ip, port, index, fname, bguid);
+        HTTPDownloader down = initDownload(ip, port, index, fname, bguid, size);
 
         down.setQueued();
 	manager.getCallback().addDownload( down );

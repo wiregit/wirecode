@@ -104,7 +104,7 @@ public class HTTPDownloader implements Runnable {
     /* The client side get */
     public HTTPDownloader(String protocol, String host, 
 			  int port, int index, String file, 
-			  ConnectionManager m, byte[] guid ) {
+			  ConnectionManager m, byte[] guid, int size ) {
 			
 	construct(file, m);
 	_mode = 2;
@@ -114,6 +114,7 @@ public class HTTPDownloader implements Runnable {
 	_index = index;
 	_port = port;
 	_guid = guid;
+        _sizeOfFile = size;
 
     }
 
@@ -124,6 +125,7 @@ public class HTTPDownloader implements Runnable {
 	_index = down.getIndex();
 	_port = down.getPort();
 	_guid = down.getGUID();
+        _sizeOfFile = down.getContentLength();
 
     } 
 
