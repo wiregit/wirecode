@@ -895,11 +895,13 @@ public class SettingsManager implements SettingsInterface
     }
 
 	public void setBasicInfoForQuery(int basicInfo) {
+		basicQueryInfo_ = basicInfo;
 		String s = Integer.toString(basicInfo);
 		props_.put(SettingsInterface.BASIC_QUERY_INFO, s);
 	}
 	
 	public void setAdvancedInfoForQuery(int advancedInfo) {
+		advancedQueryInfo_ = advancedInfo;
 		String s = Integer.toString(advancedInfo);
 		props_.put(SettingsInterface.ADVANCED_QUERY_INFO, s);
 	}
