@@ -56,15 +56,6 @@ public interface MessageWriter {
      */
     boolean hasPendingMessage();
 
-
-    /**
-     * Sets whether or not this writer is registered with any relevant write
-     * notification classes, such as <tt>NIODispatcher</tt>.
-     * 
-     * @param b registration status
-     */
-    void setWriteRegistered(boolean b);
-
     /**
      * This method is only used for testing.  This sets the closed status of
      * the writer, specifying whether or not it should write messages to the
