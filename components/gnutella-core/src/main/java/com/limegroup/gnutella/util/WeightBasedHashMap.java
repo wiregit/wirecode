@@ -103,7 +103,6 @@ public WeightBasedHashMap(int maxSize)
 */
 public boolean incrementWeight(Object key)
 {
-    int oldWeight = 0;
     Weighable weighable = null;
 
     //get the old value for the given key

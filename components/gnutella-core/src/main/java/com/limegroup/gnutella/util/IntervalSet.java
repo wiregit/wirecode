@@ -81,7 +81,6 @@ public class IntervalSet {
         List overlapBlocks = new ArrayList(); //initialize for this write
         long high =checkInterval.high;
         long low = checkInterval.low;
-        long numBytes = high-low+1;
         if (low >= high)
             return overlapBlocks;
         

@@ -543,7 +543,6 @@ public final class CommonUtils {
     public static int copy(File src, int amount, File dst) {
         final int BUFFER_SIZE=1024;
         int amountToRead=amount;
-        boolean ok=true;
         InputStream in=null;
         OutputStream out=null;
         try {
