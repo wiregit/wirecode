@@ -76,8 +76,7 @@ public class UDPConnectionProcessor {
 
 	/** Define the maximum wait time before sending a message in order to
         keep the connection alive (and firewalls open).  */
-	//private static final long KEEPALIVE_WAIT_TIME     = (3*1000 - 500);
-    private static final long KEEPALIVE_WAIT_TIME     = 200;
+	private static final long KEEPALIVE_WAIT_TIME     = (3*1000 - 500);
 
 	/** Define the startup time before starting to send data.  Note that
         on the receivers end, they may not be setup initially.  */
@@ -500,7 +499,9 @@ public class UDPConnectionProcessor {
         // If the receive window opened up then send a special 
         // KeepAliveMessage so that the window state can be 
         // communicated.
-        if ( priorSpace == 0 ) {
+        if ( priorSpace == 0 || 
+             (priorSpace <= SMALL_SEND_WINDOW && 
+              _receiveWindow.getWindowSpace() > SMALL_SEND_WINDOW) ) {
             sendKeepAlive();
         }
 
