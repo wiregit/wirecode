@@ -46,9 +46,12 @@ public class LimitReachedUploadState implements HTTPMessage {
 		ostream.write(str.getBytes());
 		if(FILE_DESC != null) {
 			// write the URN in case the caller wants it
-			HTTPUtils.writeHeader(HTTPHeaderName.CONTENT_URN,
-								  FILE_DESC.getSHA1Urn(),
-								  ostream);
+			URN sha1 = FILE_DESC.getSHA1Urn();
+			if(sha1 != null) {
+				HTTPUtils.writeHeader(HTTPHeaderName.CONTENT_URN,
+									  sha1,
+									  ostream);
+			}
 			if(FILE_DESC.hasAlternateLocations()) {
 				HTTPUtils.writeHeader(HTTPHeaderName.ALT_LOCATION,
 									  FILE_DESC.getAlternateLocationCollection(),
