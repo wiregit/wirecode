@@ -17,8 +17,7 @@ public final class AlternateLocationTest extends TestCase {
 
 
 	private static final String[] equalLocs = {
-		HTTPHeaderName.ALT_LOCATION.httpStringValue()+
-		    ": http://Y.Y.Y.Y:6352/get/2/"+
+		"http://Y.Y.Y.Y:6352/get/2/"+
 		    "lime%20capital%20management%2001.mpg",
 		"http://Y.Y.Y.Y:6352/get/2/"+
 		    "lime%20capital%20management%2001.mpg"

@@ -125,12 +125,10 @@ final class HugeTestUtils {
 		"http: //Y.R.Y.Y:6382/get/2/"+
 		               "lime%20capital%20management%2001.mpg "+
 		               "  \n\r\n2002-04-09T20:32:33Z",
-		HTTPHeaderName.ALT_LOCATION.httpStringValue()+
-		               ":http: //Y.R.Y.Y:6352/get/2/"+
+		"http: //Y.R.Y.Y:6352/get/2/"+
 		               "lime%20capital%20management%2001.mpg "+
 		               "  \n\r\n2002-04-09T20:32:33Z",
-		HTTPHeaderName.ALT_LOCATION.httpStringValue()+
-		               ":http: //Y.R.Y.Y:6352/get/2/"+
+		"http: //Y.R.Y.Y:6352/get/2/"+
 		               "lime%20capital%20management%2001.mpg "+
 		               "  \n\r\n2002-04-09T20:32:33Z"
 	};
@@ -139,14 +137,11 @@ final class HugeTestUtils {
 	 * Alternate locations without timestamps.
 	 */
 	static final String[] VALID_NONTIMESTAMPED_LOCS = {
-		HTTPHeaderName.ALT_LOCATION.httpStringValue()+
-		    ": http://Y.Y.C.Y:6352/get/2/"+
+		"http://Y.Y.C.Y:6352/get/2/"+
 		    "lime%20capital%20management%2001.mpg",
-		HTTPHeaderName.ALT_LOCATION.httpStringValue()+
-		    ": http://Y.X.Y.Y:6352/get/2/"+
+		"http://Y.X.Y.Y:6352/get/2/"+
 		    "lime%20capital%20management%2001.mpg",
-		HTTPHeaderName.ALT_LOCATION.httpStringValue()+
-		    ": http://Y.R.Y.Y:6352/get/2/"+
+		"http://Y.R.Y.Y:6352/get/2/"+
 		    "lime%20capital%20management%2001.mpg",
 		"http://Y.Y.Y.Y:6322/get/2/"+
 		    "lime%20capital%20management%2001.mpg",
