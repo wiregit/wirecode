@@ -58,6 +58,7 @@ public final class LeafHandshakeResponder
         
         // let the Ultrapeer know of any high-hops Ultrapeers
         // we're aware of
+        // TODO:: add high hops in the response -- we don't do that now
         return HandshakeResponse.createAcceptOutgoingResponse(ret);
     }
 
