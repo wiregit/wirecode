@@ -237,8 +237,10 @@ public class ConnectionManager {
      * only the externally exposed version of remove does that.
      */
     private void removeInternal(ManagedConnection c) {
-        // Remove from the initialized connections list and clean up the
-        // stuff associated with initialized connections
+        // 1a) Remove from the initialized connections list and clean up the
+        // stuff associated with initialized connections.  For efficiency 
+        // reasons, this must be done before (2) so packets are not forwarded
+        // to dead connections (which results in lots of thrown exceptions).
         int i=_initializedConnections.indexOf(c);
         if (i != -1) {
             //REPLACE _initializedConnections with the list
@@ -253,13 +255,9 @@ public class ConnectionManager {
             newEndpoints.addAll(_endpoints);
             newEndpoints.remove(new Endpoint(
                 c.getInetAddress().getHostAddress(), c.getPort()));
-            _endpoints=newEndpoints;
-
-            //Clean up route tables.
-            _router.removeConnection(c);
+            _endpoints=newEndpoints;           
         }
-
-        // Remove from the all connections list and clean up the
+        // 1b) Remove from the all connections list and clean up the
         // stuff associated all connections
         i=_connections.indexOf(c);
         if (i != -1) {
@@ -267,10 +265,18 @@ public class ConnectionManager {
             List newConnections=new ArrayList(_connections);
             newConnections.remove(c);
             _connections=newConnections;
-
-            c.close();//ensure that the connection is closed.
-            _callback.connectionClosed(c); // Notify the listener
         }
+
+        // 2) Ensure that the connection is closed.  This must be done before
+        // step (3) to ensure that dead connections are not added to the route
+        // table, resulting in dangling references.
+        c.close();
+
+        // 3) Clean up route tables.
+        _router.removeConnection(c);
+
+        // 4) Notify the listener
+        _callback.connectionClosed(c); 
     }
 
     /**
