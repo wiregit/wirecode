@@ -1338,6 +1338,13 @@ public class ManagedDownloader implements Downloader, Serializable {
         }
         return true;
     }
+    
+    /**
+     * Determines if this download was cancelled.
+     */
+    public boolean isCancelled() {
+        return stopped;
+    }
 
     public void stop() {
         // make redundant calls to stop() fast
@@ -1353,14 +1360,6 @@ public class ManagedDownloader implements Downloader, Serializable {
         //thing is to set the stopped flag.  That guarantees run will terminate
         //eventually.
         stopped=true;
-        
-        // Tell the manager to remove us if we're inactive.
-        // The "if waiting" part may be an optimization, since I don't think
-        // anything bad will occur if a download is removed multiple times,
-        // but it is safest to only remove if we know it's not going to
-        // remove shortly.
-        // This call MUST be outside this' lock, else deadlock could occur.
-        manager.removeIfWaiting(this);
         
         synchronized(this) {
             //This guarantees any downloads in progress will be killed.  New
@@ -1484,32 +1483,27 @@ public class ManagedDownloader implements Downloader, Serializable {
      * If the download is not inactive, this does nothing.
      * If the downloader was waiting for the user, a requery is sent.
      */
-    public boolean resume() {
-        synchronized(this) {
-            //Ignore request if already in the download cycle.
-            if (!isInactive())
-                return false;
-    
-            // if we were waiting for the user to start us,
-            // then try to send the requery.
-            if(getState() == WAITING_FOR_USER) {
-                lastQuerySent = -1; // inform requerying that we wanna go.
-                setState(QUEUED); // queue ourselves
-            }
+    public synchronized boolean resume() {
+        //Ignore request if already in the download cycle.
+        if (!isInactive())
+            return false;
 
-            // also retry any hosts that we have leftover.
-            initializeFiles();
-            
-            // if any guys were busy, reduce their retry time to 0,
-            // since the user really wants to resume right now.
-            for(Iterator i = files.iterator(); i.hasNext(); )
-                ((RemoteFileDesc)i.next()).setRetryAfter(0);
-        }
+        // if we were waiting for the user to start us,
+        // then try to send the requery.
+        if(getState() == WAITING_FOR_USER)
+            lastQuerySent = -1; // inform requerying that we wanna go.
+
+        // also retry any hosts that we have leftover.
+        initializeFiles();
         
-        // Notify the manager that we want to resume.
-        // It will start us if we're allowed to start.
-        // This must be outside this' lock, else deadlock could occur.
-        manager.requestStart(this);
+        // if any guys were busy, reduce their retry time to 0,
+        // since the user really wants to resume right now.
+        for(Iterator i = files.iterator(); i.hasNext(); )
+            ((RemoteFileDesc)i.next()).setRetryAfter(0);
+            
+        // queue ourselves so we'll try and become active immediately
+        setState(QUEUED);
+
         return true;
     }
     

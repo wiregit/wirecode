@@ -114,6 +114,17 @@ public class ResumeDownloader extends ManagedDownloader
     public synchronized String getFileName() {
         return _name;
     }
+    
+    /**
+     * Overriden to unset deserializedFromDisk too.
+     */
+    public synchronized boolean resume() {
+        boolean ret = super.resume();
+        // unset deserialized once we clicked resume
+        if(ret)
+            deserializedFromDisk = false;
+        return ret;
+    }
 
     /*
      * @param numRequeries The number of requeries sent so far.
