@@ -2,6 +2,7 @@ package com.limegroup.gnutella.connection;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.nio.channels.SelectableChannel;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.SocketChannel;
 
@@ -71,21 +72,22 @@ public final class MessageReader {
 	/**
 	 * Constant for the <tt>ByteBuffer</tt> for reading headers.
 	 */
-     private static final ByteBuffer HEADER = 
+     private final ByteBuffer HEADER = 
     	ByteBuffer.allocate(HEADER_SIZE);
         
     /**
      * Constant for the <tt>ByteBuffer</tt> for reading payloads.
      */
-     private static final ByteBuffer PAYLOAD = 
+     private final ByteBuffer PAYLOAD = 
         ByteBuffer.allocate(MessageSettings.MAX_LENGTH.getValue());
+       
 
-		
 	/**
 	 * Constant for the hard max TTL for incoming messages.  If the TTL+hops of 
 	 * incoming messages exceeds this value, the message is dropped.
 	 */
 	private static final byte HARD_MAX = (byte)14;
+    
 	
     /**
      * Factory method for creating new <tt>MessageReader</tt>
@@ -100,7 +102,9 @@ public final class MessageReader {
 	/**
 	 * Ensure that this class cannot be constructed.
 	 */
-	private MessageReader() {}
+	private MessageReader() {
+        HEADER.order(java.nio.ByteOrder.LITTLE_ENDIAN);
+    }
 		
 	
 	/**
@@ -119,70 +123,127 @@ public final class MessageReader {
 	}
 
 	/**
-	 * Creates a new <tt>Message</tt> instance from the specified <tt>SelectionKey</tt>
-	 * and it's associated channel and connection.
+	 * Creates a new <tt>Message</tt> instance from the specified 
+     * <tt>SelectionKey</tt> and it's associated channel and connection.
 	 * 
 	 * @param key  the <tt>SelectionKey</tt> for the new data
-	 * @param network the network interface this message arrived over, such as TCP,
-	 *     UDP, multicast, etc.
+	 * @param network the network interface this message arrived over, such as 
+     *  TCP, UDP, multicast, etc.
 	 * @return a new <tt>Message</tt> instance created from the specified data
-	 * @throws IOException if there is an IO error reading the data or writing it to the
-	 * 	new message
-	 * @throws BadPacketException if the data received from the network is invalid for 
-	 *    any reason
+	 * @throws IOException if there is an IO error reading the data or writing 
+     *  it to the new message, which will subsequently close the socket
+	 * @throws BadPacketException if the data received from the network is 
+     *  invalid for any reason
 	 */
 	private Message createMessage(SelectionKey key, int network) 
 		throws IOException, BadPacketException {
 
-		ByteBuffer HEADER = 
-				ByteBuffer.allocate(HEADER_SIZE);
-		HEADER.order(java.nio.ByteOrder.LITTLE_ENDIAN);
 		SocketChannel channel = (SocketChannel)key.channel();
-		int n = channel.read(HEADER);
-		if(n < 0) {
-			HEADER.clear();
-            MessageReadErrorStat.CONNECTION_CLOSED_READING_HEADER.incrementStat();
-			return null; 
-		}
-		if(HEADER.hasRemaining()) {
-			HEADER.clear();
-            MessageReadErrorStat.INVALID_HEADER.incrementStat();
-			return null;
-		}
+        
+        // if there's more header to read, return to read it on the next pass
+        if(!readHeader(channel)) {
+            System.out.println("MessageReader::createMessage::read only part");
+            return null;
+        }
+        
+        // Now read the payload.  This will either read the entire payload and
+        // return the message, or it will not read all of the payload, in which
+        // case it will return null, leaving us to keep reading the rest on the
+        // next pass.
+        Message msg = readPayload(key, network);
+        if(msg == null) {
+            System.out.println("MessageReader::createMessage::read only part of payload");
+        }
+        return msg;
+    }
+
+    /**
+     * Reads the message header into the HEADER ByteBuffer.
+     * 
+     * @param channel the channel to read from
+     * @return <tt>true</tt> if the header was completely read, otherwise
+     *  <tt>false</tt>
+     * @throws IOException if the connection was closed or any other IO error
+     *  occurred during reading
+     */
+    private boolean readHeader(SocketChannel channel) throws IOException {
+        System.out.println("MessageReader::readHeader");
+        if(!HEADER.hasRemaining()) return true;
+        
+        if(channel.read(HEADER) < 0) {
+            HEADER.clear();
+            //PAYLOAD.clear();
+            MessageReadErrorStat.CONNECTION_CLOSED_READING_HEADER.
+                incrementStat();
+            //Thread.dumpStack();
+            throw new IOException("end of stream reading header");
+        } else if(HEADER.hasRemaining()) {
+            // if we still haven't read all of the header, return
+            // to get the rest on the next pass.
+            return false;
+        }
+        
+        // if we get here, the header has been completely read
+        
+        // flip it for reading
+        //HEADER.flip();
+        return true;
+    }
+       
+    private Message readPayload(SelectionKey key, int network) 
+        throws IOException, BadPacketException {
+        System.out.println("MessageReader::readPayload");
+        SocketChannel channel = (SocketChannel)key.channel();
+        // if we've made it this far, the entire header has been
+        // successfully read, so read the payload
 		
 		int length = HEADER.getInt(LENGTH_OFFSET);  //little endian
-		//If the length is hopelessly off (this includes lengths > than 2^31
-		//bytes, throw an irrecoverable exception to cause this connection
-		//to be closed.  Note we don't bother checking other fields here.
+        
+       
+		// If the length is hopelessly off (this includes lengths > than 2^31
+		// bytes, throw an irrecoverable exception to cause this connection
+		// to be closed.  Note we don't bother checking other fields here.
 		if (length<0 || 
-			length > MessageSettings.MAX_LENGTH.getValue())  {
+			length>MessageSettings.MAX_LENGTH.getValue())  {
+            HEADER.clear();
+            //PAYLOAD.clear();
             MessageReadErrorStat.BAD_MESSAGE_LENGTH.incrementStat();
-			return null;
+			throw new IOException("unreasonable message length");
 		}
+        
+        // now set the read limit on the payload buffer so we'll only
+        // read to the end of the message
+        PAYLOAD.limit(length); 
 		
-		//Allocate enough space for payload.  TODO2: avoid allocating
-		//buffers each time.  Be careful not to use payload.hasRemaining()
-		//and payload.capacity() below.
-		ByteBuffer payload = ByteBuffer.allocate(length);            
-		n = channel.read(payload);
-		if (n<0) {
-            MessageReadErrorStat.CONNECTION_CLOSED_READING_PAYLOAD.incrementStat();
-			return null;
+        // read in the payload
+		if (channel.read(PAYLOAD) < 0) {
+            // free memory as soon as possible
+            HEADER.clear();
+            PAYLOAD.clear();
+            MessageReadErrorStat.CONNECTION_CLOSED_READING_PAYLOAD.
+                incrementStat();
+			throw new IOException("connection closed reading payload");
 		}
 
-		if(payload.hasRemaining()) {
-            MessageReadErrorStat.INVALID_PAYLOAD.incrementStat();
+        // if there's still more to read, return to read it on the next pass
+		if(PAYLOAD.hasRemaining()) {
+            //MessageReadErrorStat.INVALID_PAYLOAD.incrementStat();
 			return null;
 		}
 			
 		try {
-			return createMessage(HEADER, payload, (Connection)key.attachment(), network);
-		}  finally {                
-			// be sure that the ByteBuffer for the header is cleared every time before the next
-			// message is read
-			HEADER.clear();
-		}
+        
+            return createMessage(HEADER, PAYLOAD, 
+                (Connection)key.attachment(), network);
+        } finally {
+            // either the message was returned, or it was corrupt in some way,
+            // so clear our buffers for new messages
+            HEADER.clear();
+            PAYLOAD.clear();
+        }
     }
+    
+
     
     /**
      * Creates a new <tt>Message</tt> instance from the specified header,
@@ -199,20 +260,22 @@ public final class MessageReader {
    		createMessage(ByteBuffer header, ByteBuffer payloadBuffer, 
             Connection conn, int network) 
         throws BadPacketException {
-    	//System.out.println("MessageReader::createMessage");
+            
+        Assert.that(payloadBuffer.limit() == payloadBuffer.position(),
+            "something wrong with buffer");
 		header.flip();
 		byte[] guid = new byte[GUID_SIZE];
 		header.get(guid);
-		int length = payloadBuffer.capacity();
+		int length = payloadBuffer.limit();
 		byte func  = header.get(OPCODE_OFFSET);
-		byte ttl       = header.get(TTL_OFFSET);
-		byte hops = header.get(HOPS_OFFSET);
+		byte ttl   = header.get(TTL_OFFSET);
+		byte hops  = header.get(HOPS_OFFSET);
 		
 		//  Check values. 
 		byte softMax = conn.getSoftMax();
 		if (hops<0) {
             MessageReadErrorStat.NEGATIVE_HOPS.incrementStat();
-			return null;
+			throw new BadPacketException("negative hops");
 		} else if (ttl<0) {
             MessageReadErrorStat.NEGATIVE_TTL.incrementStat();
 			return null;
@@ -221,12 +284,12 @@ public final class MessageReader {
 				 (func != F_PING_REPLY)) {
 			
             MessageReadErrorStat.HOPS_OVER_SOFT_MAX.incrementStat();
-			return null;
+            throw new BadPacketException("hops over soft max");
 		}
 		else if (ttl+hops > HARD_MAX) {
             
             MessageReadErrorStat.HOPS_PLUS_TTL_OVER_HARD_MAX.incrementStat();
-			return null;
+            throw new BadPacketException("ttl+hops over hard max");
 		} else if ((ttl+hops > softMax) && 
 				 (func != F_QUERY_REPLY) &&
 				 (func != F_PING_REPLY)) {
@@ -239,12 +302,9 @@ public final class MessageReader {
 		
 		// dispatch based on opcode.
 		payloadBuffer.flip();     
-		byte[] payload = new byte[payloadBuffer.capacity()];
-		payloadBuffer.get(payload, 0, payload.length);
-		Message msg = createMessage(guid, func, ttl, hops, length, payload, network);
-		//System.out.println("MessageReader::createMessage:::::CREATED MESSAGE!!!!!!!!!::"+msg);
-		return msg;
-		//return createMessage(guid, func, ttl, hops, length, payload, network);
+		byte[] payload = new byte[length];
+		payloadBuffer.get(payload, 0, length);
+		return createMessage(guid, func, ttl, hops, length, payload, network);
 	}
         
     private Message createMessage(byte[] guid, byte func, byte ttl, 
