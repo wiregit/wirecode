@@ -155,13 +155,13 @@ public class HostCatcher {
                 try {
                     if (RouterService.acceptedIncomingConnection() && 
                         RouterService.isSupernode()) {
-                            Endpoint e=new Endpoint(RouterService.getAddress(),
-                                                    RouterService.getPort());
-							if(!e.isPrivateAddress()) {
-								//This spawn another thread, so blocking is not an issue.
-								gWebCache.sendUpdatesAsync(e);
-							}
+                        if(!NetworkUtils.isPrivate()) {
+                            Endpoint e = new Endpoint(RouterService.getAddress(),
+                                                      RouterService.getPort());
+                            //This spawn another thread, so blocking is not an issue.
+                            gWebCache.sendUpdatesAsync(e);
                         }
+                    }
                 } catch(Throwable t) {
                     ErrorService.error(t);
                 }
@@ -331,6 +331,7 @@ public class HostCatcher {
      * @return true iff e was actually added 
      */
     private boolean add(ExtendedEndpoint e, int priority) {
+        System.out.println("HostCatcher::add"); 
         if(e.isPrivateAddress()) return false;
         repOk();
         //We used to check that we're not connected to e, but now we do that in
