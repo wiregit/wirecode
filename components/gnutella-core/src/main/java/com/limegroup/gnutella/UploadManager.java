@@ -8,7 +8,6 @@ import java.io.*;
 import com.sun.java.util.collections.*;
 import java.util.Date;
 import com.limegroup.gnutella.util.URLDecoder;
-import com.limegroup.gnutella.util.IOUtils;
 import java.util.StringTokenizer;
 import com.limegroup.gnutella.downloader.*; //for testing
 
