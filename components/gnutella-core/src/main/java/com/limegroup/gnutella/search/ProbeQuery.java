@@ -182,7 +182,7 @@ final class ProbeQuery {
         }
 
         // mitigate the extremes of the popularity measurement a bit
-        popularity = popularity * 0.75;
+        //popularity = popularity * 0.75;
         
         // the number of TTL=1 nodes we would hit if we had that many
         // connections with hits
@@ -200,7 +200,7 @@ final class ProbeQuery {
             idealTTL1ConnectionsToHit - realTTL1ConnectionsToHit;
         
         // add more TTL=2 nodes to the probe if we need them
-        if(extraNodesNeeded > 0) {
+        if(extraNodesNeeded > 0 && numHitConnections < 3) {
             if(extraNodesNeeded < 25) {
                 addToList(ttl2List, oldConnections, missConnections, 1);
             } else {
