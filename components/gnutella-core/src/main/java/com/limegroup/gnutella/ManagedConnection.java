@@ -587,10 +587,10 @@ public class ManagedConnection
         String domainsAuthenticated;
         if(this.isOutgoing())
             domainsAuthenticated = getProperty(
-                ConnectionHandshakeHeaders.DOMAINS_AUTHENTICATED);
+                ConnectionHandshakeHeaders.X_DOMAINS_AUTHENTICATED);
         else
             domainsAuthenticated = getPropertyWritten(
-                ConnectionHandshakeHeaders.DOMAINS_AUTHENTICATED);
+                ConnectionHandshakeHeaders.X_DOMAINS_AUTHENTICATED);
 
         //for unauthenticated connections
         if(domainsAuthenticated == null){
@@ -950,9 +950,9 @@ public class ManagedConnection
                 //authenticate
                 Set domains = _manager.getAuthenticator().authenticate(
                     headersReceived.getProperty(
-                    ConnectionHandshakeHeaders.USERNAME),
+                    ConnectionHandshakeHeaders.X_USERNAME),
                     headersReceived.getProperty(
-                    ConnectionHandshakeHeaders.PASSWORD), null);
+                    ConnectionHandshakeHeaders.X_PASSWORD), null);
 
                 if(domains == null){
                     code = HandshakeResponse.UNAUTHORIZED_CODE;
@@ -962,7 +962,7 @@ public class ManagedConnection
                     //let the other side know of the domains successfully
                     //authenticated
                     ret.setProperty(
-                        ConnectionHandshakeHeaders.DOMAINS_AUTHENTICATED,
+                        ConnectionHandshakeHeaders.X_DOMAINS_AUTHENTICATED,
                         StringUtils.getEntriesAsString(domains));
                 }
             }
@@ -1019,9 +1019,9 @@ public class ManagedConnection
                     code = HandshakeResponse.OK;
                     message = HandshakeResponse.AUTHENTICATING;
                     //add user authentication headers
-                    ret.setProperty(ConnectionHandshakeHeaders.USERNAME,
+                    ret.setProperty(ConnectionHandshakeHeaders.X_USERNAME,
                         user.getUsername());
-                    ret.setProperty(ConnectionHandshakeHeaders.PASSWORD,
+                    ret.setProperty(ConnectionHandshakeHeaders.X_PASSWORD,
                         user.getPassword());
 
                     //also store the authentication information in a 
