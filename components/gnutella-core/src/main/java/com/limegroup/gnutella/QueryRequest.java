@@ -18,9 +18,9 @@ public class QueryRequest extends Message implements Serializable{
 
     // HUGE v0.93 fields
     /** Any URN types requested on responses */
-    private HashSet requestedUrnTypes = null;
+    private Collection requestedUrnTypes = null;
     /** Any exact URNs requested to match */
-    private HashSet queryUrns = null;
+    private Collection queryUrns = null;
 
     /**
      * Builds a new query from scratch
@@ -40,7 +40,7 @@ public class QueryRequest extends Message implements Serializable{
      */
     public QueryRequest(byte ttl, int minSpeed, 
                         String query, String richQuery, boolean isRequery,
-                        HashSet requestedUrnTypes, HashSet queryUrns) {
+                        Collection requestedUrnTypes, Collection queryUrns) {
         // don't worry about getting the length right at first
         super((isRequery ? GUID.makeGuidRequery() : GUID.makeGuid()),
               Message.F_QUERY, ttl, /* hops */ (byte)0, /* length */ 0);
@@ -140,21 +140,21 @@ public class QueryRequest extends Message implements Serializable{
         return richQuery;
     }
  
-    public synchronized HashSet getRequestedUrnTypes() {
+    public synchronized Collection getRequestedUrnTypes() {
         if(!payloadHarmonized) {
             scanPayload();
         }
         return requestedUrnTypes;
     }
     
-    public synchronized HashSet getQueryUrns() {
+    public synchronized Collection getQueryUrns() {
         if(!payloadHarmonized) {
             scanPayload();
         }
         return queryUrns;
     }
     
-    protected void scanPayload() {
+    private void scanPayload() {
         try {
             ByteArrayInputStream bais = new ByteArrayInputStream(payload);
             short sp = ByteOrder.leb2short(bais);
@@ -175,7 +175,7 @@ public class QueryRequest extends Message implements Serializable{
         }
     }
     
-    protected void handleGemExtensionString(String urnString) {
+    private void handleGemExtensionString(String urnString) {
 		if(URN.isURN(urnString)) {
 			// it's an URN to match, of form "urn:namespace:etc"
 			URN urn = null;
