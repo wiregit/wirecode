@@ -32,7 +32,7 @@ public abstract class MessageRouter {
      * Constant for the number of old connections to use when forwarding
      * traffic from old connections.
      */
-    private static final int OLD_CONNECTIONS_TO_USE = 5;
+    private static final int OLD_CONNECTIONS_TO_USE = 15;
 
     /**
      * The GUID we attach to QueryReplies to allow PushRequests in
