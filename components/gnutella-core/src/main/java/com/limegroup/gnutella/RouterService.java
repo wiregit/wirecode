@@ -762,12 +762,7 @@ public final class RouterService {
 							 final int minSpeed, 
 							 final MediaType type) {
 
-		// TODO: should we start a thread here?  otherwise, this is on the
-		// swing thread
-		//Thread searcherThread = new Thread("SearcherThread") {
-		//public void run() {
 		try {
-			//if(!isSupernode()) {
 			// per HUGE v0.94, ask for URNs on responses
 			Set urnTypes = new HashSet();
 			urnTypes.add(UrnType.ANY_TYPE);
@@ -780,18 +775,12 @@ public final class RouterService {
 			if(!isSupernode()) {
 				router.broadcastQueryRequest(qr);
 			} else {
-				// TODO: should we really do this on the swing thread??
-				// requeries are an issue
 				router.sendDynamicQuery(QueryHandler.createHandler(qr));
 			}
 		} catch(Throwable t) {
 			RouterService.error(t);
 		}
 	}
-	//	};
-	//searcherThread.setDaemon(true);
-	//searcherThread.start();
-    //}
 
 
     /** 
