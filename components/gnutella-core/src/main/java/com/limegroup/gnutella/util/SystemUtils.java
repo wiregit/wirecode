@@ -6,7 +6,10 @@ package com.limegroup.gnutella.util;
  */
 public class SystemUtils {
     
-    final static boolean isLoaded;
+    /**
+     * Whether or not the native libraries could be loaded.
+     */
+    private final static boolean isLoaded;
     
     static {
         boolean canLoad;
