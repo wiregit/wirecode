@@ -52,19 +52,49 @@ public class LimeTestSuite extends TestSuite implements ErrorCallback {
         _testResult = result;
         ErrorService.setErrorCallback(this);
         Backend.setErrorCallback(this);
+        
+        // First try doing the before-tests-setup
         try {
             BaseTestCase.beforeAllTestsSetUp();
         } catch(Throwable t) {
+            // If there is an error here, report it,
+            // run the after all tests tear down, and exit.
             error(t);
+            try {
+                BaseTestCase.afterAllTestsTearDown();
+            } catch(Throwable t2) {
+                error(t2);
+            }
+            return;
         }
-        runStaticMethod(preTestName);
+        
+        // Then try running the preTest method
+        try {
+            runStaticMethod(preTestName);
+        } catch(TestFailedException tfe) {
+            // If it fails, run the post test and exit.
+            try {
+                runStaticMethod(postTestName);
+            } catch(TestFailedException tfe2) {
+                // oh well.
+            }
+            return;
+        }        
+        
+        // Try running all the tests.
         try {
             super.run(result);
         } finally {
+            // Regardless of if any fail or not, 
+            // always run the last post test & after all tests methods.
             _beforeTests = false;
             ErrorService.setErrorCallback(this);
             Backend.setErrorCallback(this);
-            runStaticMethod(postTestName);
+            try {
+                runStaticMethod(postTestName);
+            } catch(TestFailedException tfe) {
+                // oh well.
+            }
             try {
                 BaseTestCase.afterAllTestsTearDown();
             } catch(Throwable t) {
@@ -73,7 +103,7 @@ public class LimeTestSuite extends TestSuite implements ErrorCallback {
         }
     }
     
-    public void runStaticMethod(String name) {
+    public void runStaticMethod(String name) throws TestFailedException {
         Method m = null;
         try {
             m = _testClass.getDeclaredMethod(name, null);
@@ -83,16 +113,23 @@ public class LimeTestSuite extends TestSuite implements ErrorCallback {
         }
                     
         if ( !Modifier.isStatic(m.getModifiers()) ) {
-            addTest(warning("Method "+name+" must be declared static."));
+            runTest(warning("Method "+name+" must be declared static."),
+                    _testResult);
+            throw new TestFailedException();
         } else if ( !Modifier.isPublic(m.getModifiers()) ) {
-            addTest(warning("Method "+name+" must be declared public."));            
+            runTest(warning("Method "+name+" must be declared public."),
+                    _testResult);
+            throw new TestFailedException();
         } else {
             try {
                 m.invoke(_testClass, new Object[] {});
     		} catch (InvocationTargetException e) {
-    		    addTest(reportError(e.getCause(), _testResult));
+    		    runTest(reportError(e.getCause(), _testResult), _testResult);
+                throw new TestFailedException();
     		} catch (IllegalAccessException e) {
-    			addTest(warning("Cannot access method: "+name, e));
+    			runTest(warning("Cannot access method: "+name, e),
+    			        _testResult);
+                throw new TestFailedException();
     		}                
         }
     }
@@ -165,5 +202,9 @@ public class LimeTestSuite extends TestSuite implements ErrorCallback {
 				fail(message, thrown);
 			}
 		};
-	}  	
+	}
+	
+	private class TestFailedException extends Exception {
+	    TestFailedException() { super(); }
+	}
 }
