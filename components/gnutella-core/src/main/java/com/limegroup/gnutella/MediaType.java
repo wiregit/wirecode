@@ -119,6 +119,32 @@ public class MediaType implements Serializable {
         return (getDefaultMediaTypes())[2]; /* PROGS */
     }
 
+    private static MediaType linProgMediaType = null; 
+    // necessary for the meta-flag in queries
+    private static MediaType getLinuxProgramMediaType() {
+        if (linProgMediaType == null)
+        linProgMediaType = new MediaType(SCHEMA_PROGRAMS, PROGRAMS,
+            new String[] {
+                "bin", "mdb", "sh", "csh", "awk", "pl",
+                "rpm", "deb", "gz", "gzip", "z", "bz2", "zoo", "tar", "tgz",
+                "taz", "shar", "hqx", "sit", "dmg", "7z", "jar", "zip", "nrg",
+                "cue"
+            });
+        return linProgMediaType;
+    }
+
+    private static MediaType winProgMediaType = null;
+    // necessary for the meta-flag in queries
+    private static MediaType getWindowsProgramMediaType() {
+        if (winProgMediaType == null)
+        winProgMediaType = new MediaType(SCHEMA_PROGRAMS, PROGRAMS,
+            new String[] {
+                "exe", "zip", "jar", "cab", "msi", "msp",
+                "arj", "rar", "ace", "lzh", "lha", "bin", "nrg", "cue"
+            });
+        return winProgMediaType;
+    }
+
     // do we really need this static method ?
     public static MediaType getAudioMediaType() {
         // index should match the above constructor
@@ -208,8 +234,10 @@ public class MediaType implements Serializable {
     public static Aggregator getAggregator(QueryRequest query) {
         if (query.desiresAll()) return null;
         Aggregator retAggr = new Aggregator();
-        if (query.desiresLinuxOSXPrograms() || query.desiresWindowsPrograms())
-            retAggr.addFilter(getProgramMediaType());
+        if (query.desiresLinuxOSXPrograms())
+            retAggr.addFilter(getLinuxProgramMediaType());
+        if (query.desiresWindowsPrograms())
+            retAggr.addFilter(getWindowsProgramMediaType());
         if (query.desiresDocuments()) retAggr.addFilter(getDocumentMediaType());
         if (query.desiresAudio()) retAggr.addFilter(getAudioMediaType());
         if (query.desiresVideo()) retAggr.addFilter(getVideoMediaType());

@@ -174,8 +174,8 @@ public class ServerSideMetaQueryTest extends ClientSideTestCase {
         if ((flag & QueryRequest.VIDEO_MASK) > 0) numFilters++;
         if ((flag & QueryRequest.DOC_MASK) > 0) numFilters++;
         if ((flag & QueryRequest.IMAGE_MASK) > 0) numFilters++;
-        if (((flag & QueryRequest.WIN_PROG_MASK) > 0) ||
-            ((flag & QueryRequest.LIN_PROG_MASK) > 0)) numFilters++;
+        if ((flag & QueryRequest.WIN_PROG_MASK) > 0) numFilters++;
+        if ((flag & QueryRequest.LIN_PROG_MASK) > 0) numFilters++;
         assertEquals(numFilters, filterList.size());
         assertEquals(((flag & QueryRequest.AUDIO_MASK) > 0),
                      filter.allow("susheel.mp3"));
@@ -185,10 +185,10 @@ public class ServerSideMetaQueryTest extends ClientSideTestCase {
                      filter.allow("susheel.txt"));
         assertEquals(((flag & QueryRequest.IMAGE_MASK) > 0),
                      filter.allow("susheel.png"));
-        assertEquals((((flag & QueryRequest.WIN_PROG_MASK) > 0) ||
-                      ((flag & QueryRequest.LIN_PROG_MASK) > 0)),
-                     (filter.allow("susheel.exe") || 
-                      filter.allow("susheel.bin")));
+        assertEquals(((flag & QueryRequest.WIN_PROG_MASK) > 0),
+                     filter.allow("susheel.exe"));
+        assertEquals(((flag & QueryRequest.LIN_PROG_MASK) > 0),
+                     filter.allow("susheel.csh"));
     }
 
     
