@@ -825,6 +825,8 @@ public class HostCatcher implements HostListener {
      * @effects removes all entries from this
      */
     public synchronized void clear() {
+        FREE_LEAF_SLOTS_SET.clear();
+        FREE_ULTRAPEER_SLOTS_SET.clear();
         ENDPOINT_QUEUE.clear();
         ENDPOINT_SET.clear();
     }
