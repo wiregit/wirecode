@@ -2023,8 +2023,8 @@ public class ManagedDownloader implements Downloader, Serializable {
                     commonOutFile.open(incompleteFile,this);
                 } catch(IOException e) {
                     // If the user's disk is full, let them know.
-                    if(e.getMessage().trim().
-                           endsWith("No space left on device)")) {
+                    if(StringUtils.contains(e.getMessage(), "No space left", 
+                           true)) { 
                         MessageService.showMessage("DOWNLOAD_DISK_FULL");
                     } else {
                         // This is a serious problem if it happens.
