@@ -128,7 +128,6 @@ public final class ConnectionChecker implements Runnable {
         ConnectionChecker checker = new ConnectionChecker();
         Thread connectionThread = 
         new ManagedThread(checker, "check for live connection");
-        connectionThread.setDaemon(false);
         connectionThread.setDaemon(true);
         connectionThread.start();
         return checker;
