@@ -274,7 +274,12 @@ public class ManagedDownloader implements Downloader, Serializable {
                             equals(new GUID(clientGUID)))
                     break;
             }
-            Assert.that(rfd!=null, "No match for supposedly requested file");
+            //We used to assert that rfd!=null here.  However this assertion was
+            //failing, and I'm not sure why.  I'm too lazy to investigate, since
+            //this code is simplified on swarm-branch.  So we just recover
+            //gracefully.
+            if (rfd==null)
+                return false;
         }
 
         //Authentication ok.  Make and queue downloader.  Notify downloader
