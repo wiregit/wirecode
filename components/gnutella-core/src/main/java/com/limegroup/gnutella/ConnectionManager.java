@@ -52,7 +52,7 @@ public class ConnectionManager implements Runnable {
      */
     private void propertyManager(){
 	ClientId = lp.getProperty("clientID");
-	if (ClientId.equals(null)){
+	if (ClientId == null){
 	    ClientId = new String(Message.makeGuid() );
 	    lp.setProperty("ClientID",ClientId);
 	}

@@ -112,6 +112,8 @@ try
 		}	
 		//System.out.println("Message received " + message);	
 
+
+
 		//Check if the message is a PING reply
 		//no need to do anything with other messages
 		if(message instanceof PingReply)

@@ -39,7 +39,7 @@ private ConnectionManager manager = null;
 /**
 *	Queue of EndPoints (hosts) for BFS traversal of hosts
 */
-private LinkedList hostQueue = (LinkedList)Collections.synchronizedList(new LinkedList());
+private List hostQueue = (List)Collections.synchronizedList(new LinkedList());
 
 /** 
 *	Object for synchronizing access to graph
@@ -76,7 +76,7 @@ try
 	Thread thread = null;
 	for(int i=0; i< NUM_THREADS; i++)
 	{
-		ndThread = new NDThread(this, manager, graph, hostQueue);
+		ndThread = new NDThread(this, manager, graph, (LinkedList)hostQueue);
 		thread = new Thread(ndThread);
 		thread.setDaemon(true);
 		thread.start();	
