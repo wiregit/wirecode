@@ -71,6 +71,7 @@ public class UploadTest extends TestCase {
 		SettingsManager.instance().setMaxUploads(10);
 		SettingsManager.instance().setUploadsPerPerson(10);
 		ConnectionSettings.CONNECT_ON_STARTUP.setValue(true);
+		ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
 		//SettingsManager.instance().setConnectOnStartup(true);
         SettingsManager.instance().setFilterDuplicates(false);
 
