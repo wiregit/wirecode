@@ -301,12 +301,15 @@ public class HTTPDownloader implements BandwidthTracker {
                     throw new IOException(
                         "Unexpected start offset; too dumb to recover");
             }
+
+            // TODO: we should read the X-Gnutella-Content-URN header here
+
 			// Read any alternate locations
 			else if(HTTPHeaderName.ALT_LOCATION.matchesStartOfString(str)) {
                 readAlternateLocations(str, _alternateLocationsReceived);
 			}
-            else if(str.toUpperCase().startsWith("X-QUEUE")) {
-                parseQueueHeaders(str,refQueueInfo);
+            else if(HTTPHeaderName.QUEUE.matchesStartOfString(str)) {
+                parseQueueHeaders(str, refQueueInfo);
             }                
         }
 
