@@ -59,6 +59,14 @@ public class DownloadStat extends AdvancedStatistic {
         new DownloadStat();
         
     /**
+     * Statistics for pushed connection attempts that failed because
+     * the socket connection was lost between the time we connected
+     * and the time we attempted to retrieve the output stream.
+     */
+    public static final Statistic PUSH_FAILURE_LOST =
+        new DownloadStat();
+        
+    /**
      * Statistic for attempting to steal from a grey area of another downloader
      * when no such grey area existed.
      */ 

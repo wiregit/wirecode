@@ -1856,14 +1856,16 @@ public class ManagedDownloader implements Downloader, Serializable {
         ret = new HTTPDownloader(pushSocket, rfd, incompleteFile,
 		  totalAlternateLocations);
         
-        //This should never really throw an exception since we are only
-        //initializing the byteReader with this call.
+        //Socket.getInputStream() throws IOX if the connection is closed.
+        //So this connectTCP *CAN* throw IOX.
         try {
-        ret.connectTCP(0);//just initializes the byteReader in this case
+            ret.connectTCP(0);//just initializes the byteReader in this case
             if(RECORD_STATS)
                 DownloadStat.CONNECT_PUSH_SUCCESS.incrementStat();
         } catch(IOException iox) {
-            Assert.that(false, "push connectTCP should not throw IOX");
+            if(RECORD_STATS)
+                DownloadStat.PUSH_FAILURE_LOST.incrementStat();
+            throw iox;
         }
         
          
