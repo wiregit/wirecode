@@ -7,7 +7,7 @@ import java.util.*;
 public class RequeryMessageRouter extends MessageRouterStub {
 
     private long lastQRReceivedTime = 0;
-    private final long BETWEEN_TIME = 30 * 60 * 1000; // 30 minutes...
+    private final long BETWEEN_TIME = DownloadManager.TIME_BETWEEN_REQUERIES;
     
     private List queryStrings = new ArrayList();
 
