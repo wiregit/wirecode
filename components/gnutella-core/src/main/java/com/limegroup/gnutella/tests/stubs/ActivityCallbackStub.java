@@ -8,8 +8,11 @@ import java.io.*;
 /**
  * A stub for ActivityCallback.  Does nothing.
  */
-public class ActivityCallbackStub implements ActivityCallback
-{
+public class ActivityCallbackStub implements ActivityCallback {
+    
+    //don't delete corrupt file on detection
+    public static boolean delCorrupt = false;
+
     public void connectionInitializing(Connection c) { }
     public void connectionInitialized(Connection c) { }
     public void connectionClosed(Connection c) { }
@@ -35,5 +38,7 @@ public class ActivityCallbackStub implements ActivityCallback
     public User getUserAuthenticationInfo(String host) { 
         return null;
     }    
-
+    public void promptAboutCorruptDownload(Downloader dloader) {
+        dloader.discardCorruptDownload(delCorrupt);
+    }    
 }

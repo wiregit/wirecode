@@ -368,8 +368,8 @@ public class HTTPDownloader implements BandwidthTracker {
      * @exception IOException download was interrupted, typically (but not
      *  always) because the other end closed the connection.
      */
-	public void doDownload(boolean checkOverlap) 
-            throws IOException, OverlapMismatchException {
+	public void doDownload(boolean checkOverlap, ManagedDownloader md) 
+            throws IOException {
         RandomAccessFile fos = new RandomAccessFile(_incompleteFile, "rw");
         try {            
             fos.seek(_initialReadingPoint);
@@ -402,8 +402,10 @@ public class HTTPDownloader implements BandwidthTracker {
                 if(checkOverlap && amountToCheck>0) {                    
                     fos.readFully(fileBuf,0,amountToCheck);
                     for(int i=0;i<amountToCheck;i++) {
-                        if (fileBuf[i]!=0 &&  buf[i]!=fileBuf[i]) 
-                            throw new OverlapMismatchException();
+                        if (fileBuf[i]!=0 &&  buf[i]!=fileBuf[i]) {
+                            if(md!=null) //for tesing purposes md may == null
+                                md.promptAboutCorruptDownload();
+                        }
                     }
                     //get the fp back where it was before we checked
                     fos.seek(currPos);

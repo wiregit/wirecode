@@ -20,6 +20,7 @@ public class DownloadTester {
     static TestUploader uploader2=new TestUploader("6347", 6347);
     static TestUploader uploader3=new TestUploader("6348", 6348);
     static final DownloadManager dm = new DownloadManager();
+    static final ActivityCallbackStub callback = new ActivityCallbackStub();
 
     public static void main(String[] args) {
         try {
@@ -34,7 +35,7 @@ public class DownloadTester {
             System.exit(1);
         }
         RouterService rs=new RouterService(null, null, null, null);
-        dm.initialize(new ActivityCallbackStub(), new MessageRouterStub(), 
+        dm.initialize(callback, new MessageRouterStub(), 
                       null, new FileManagerStub());
         dm.postGuiInit(rs);
 
@@ -67,10 +68,17 @@ public class DownloadTester {
         cleanup();
         testStallingUploaderReplaced();
         cleanup();
-        
-        testOverlapCheckGrey();
+        //test corruption and ignore it
+        //Note: callback.delCorrupt = false by default.
+        testOverlapCheckGrey(false);//wait for complete
         cleanup();
-        testOverlapCheckWhite();
+        testOverlapCheckWhite(false);//wait for complete
+        cleanup();
+        //now test corruption without ignoring it
+        callback.delCorrupt = true;
+        testOverlapCheckGrey(true);//wait for corrupt
+        cleanup();
+        testOverlapCheckWhite(true);//wait for corrupt
         cleanup();
     }
 
@@ -86,12 +94,10 @@ public class DownloadTester {
             HTTPDownloader downloader=new HTTPDownloader(
                 rfd, file, 0, TestFile.length());
             downloader.connect();
-            downloader.doDownload(true);        
+            downloader.doDownload(true,null);        
         } catch (IOException e) {
             Assert.that(false, "Unexpected exception: "+e);
-        } catch (OverlapMismatchException e) {
-            Assert.that(false, "Unexpected mismatch");
-        }
+        } 
         long elapsed1=System.currentTimeMillis()-start1;
         
 //         try{
@@ -107,12 +113,10 @@ public class DownloadTester {
             HTTPDownloader downloader=new HTTPDownloader(
                 rfd, file, 0, TestFile.length());
             downloader.connect();
-            downloader.doDownload(false);        
+            downloader.doDownload(false,null);        
         } catch (IOException e) {
             Assert.that(false, "Unexpected exception: "+e);
-        } catch (OverlapMismatchException e) {
-            Assert.that(false, "Unexpected mismatch");
-        }
+        } 
         long elapsed2=System.currentTimeMillis()-start2;
         System.out.println("  No check="+elapsed2+", check="+elapsed1);
     }
@@ -314,8 +318,9 @@ public class DownloadTester {
         System.out.println("passed");//file downloaded? passed
     }
 
-    private static void testOverlapCheckGrey() {
-        System.out.print("-Testing overlap checking from Grey area...");
+    private static void testOverlapCheckGrey(boolean deleteCorrupt) {
+        System.out.print("-Testing overlap checking from Grey area..." +
+                         "stop when corrupt "+deleteCorrupt+" ");
         final int RATE=500;
         uploader1.setRate(RATE);
         uploader2.setRate(RATE/100);
@@ -337,16 +342,22 @@ public class DownloadTester {
             check(false, "FAILED: file not found (huh?)");
             return;
         }
-        waitForCorrupt(download);
-        check(download.getAmountRead()<2*TestFile.length()/3, 
-              "Didn't interrupt soon enough: "+download.getAmountRead());
+        if(deleteCorrupt)
+            waitForCorrupt(download);
+        else
+            waitForComplete(download);
+        if(deleteCorrupt) {//we are not interrupted if we choose to keep going
+            check(download.getAmountRead()<2*TestFile.length()/3, 
+                  "Didn't interrupt soon enough: "+download.getAmountRead());
+        }
         System.out.println("passed");//got here? Test passed
         //TODO: check IncompleteFileManager, disk
     }
 
 
-    private static void testOverlapCheckWhite() {
-        System.out.print("-Testing overlap checking from White area...");
+    private static void testOverlapCheckWhite(boolean deleteCorrupt) {
+        System.out.print("-Testing overlap checking from White area..."+
+                         "stop when corrupt "+deleteCorrupt+" ");
         final int RATE=500;
         uploader1.setCorruption(true);
         uploader1.stopAfter(TestFile.length()/8);//blinding fast
@@ -368,7 +379,10 @@ public class DownloadTester {
             check(false, "FAILED: file not found (huh?)");
             return;
         }
-        waitForCorrupt(download);
+        if(deleteCorrupt)
+            waitForCorrupt(download);
+        else
+            waitForComplete(download);
         System.out.println("passed");//got here? Test passed
     }
 

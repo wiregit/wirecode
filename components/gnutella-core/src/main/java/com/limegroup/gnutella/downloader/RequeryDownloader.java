@@ -35,9 +35,10 @@ public class RequeryDownloader extends ManagedDownloader
     public RequeryDownloader(DownloadManager manager,
                              FileManager fileManager,
                              IncompleteFileManager incompleteFileManager,
-                             AutoDownloadDetails add) {
+                             AutoDownloadDetails add,
+                             ActivityCallback callback) {
         super(manager, new RemoteFileDesc[0], fileManager,
-              incompleteFileManager);
+              incompleteFileManager,callback);
         Assert.that(add != null, 
                     "Instantiated with a null AutoDownloadDetail!");
         _add = add;

@@ -257,7 +257,7 @@ public class DownloadManager implements BandwidthTracker {
         //Start download asynchronously.  This automatically moves downloader to
         //active if it can.
         ManagedDownloader downloader=new ManagedDownloader(
-            this, files, fileManager, incompleteFileManager);
+            this, files, fileManager, incompleteFileManager, callback);
         waiting.add(downloader);
         callback.addDownload(downloader);
         //Save this' state to disk for crash recovery.
@@ -292,7 +292,7 @@ public class DownloadManager implements BandwidthTracker {
         Downloader downloader = new RequeryDownloader(this,
                                                       fileManager,
                                                       incompleteFileManager,
-                                                      add);
+                                                      add, callback);
         waiting.add(downloader);
         callback.addDownload(downloader);
         //Save this' state to disk for crash recovery.

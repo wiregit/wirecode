@@ -113,6 +113,10 @@ public class ManagedDownloader implements Downloader, Serializable {
     private FileManager fileManager;
     /** The repository of incomplete files. */
     private IncompleteFileManager incompleteFileManager;
+    /** A ManagedDownloader needs to have a handle to the ActivityCallback, so
+     * that it can notify the gui that a file is corrupt to ask the user what
+     * should be done.  */
+    private ActivityCallback callback;
     /** The complete list of files passed to the constructor.  Must be
      *  maintained in memory to support resume. */
     private RemoteFileDesc[] allFiles;
@@ -224,11 +228,28 @@ public class ManagedDownloader implements Downloader, Serializable {
 	 */
 	private DownloadChatList chatList;
 
+    
+    /** The various states of the ManagedDownloade with respect to the 
+     * corruption state of this download. 
+     */
+    private static final int NOT_CORRUPT_STATE = 0;
+    private static final int CORRUPT_WAITING_STATE = 1;
+    private static final int CORRUPT_STOP_STATE = 2;
+    private static final int CORRUPT_CONTINUE_STATE = 3;
+    /**
+     * The actual state of the ManagedDownloader with respect to corruption
+     * LOCKING: obtain corruptStateLock
+     * INVARIANT: one of NOT_CORRUPT_STATE, CORRUPT_WAITING_STATE, etc.
+     */
+    private int corruptState = NOT_CORRUPT_STATE;
+    private Object corruptStateLock = new Object();
+    
+
     /**
      * Creates a new ManagedDownload to download the given files.  The download
      * attempts to begin immediately; there is no need to call initialize.
      * Non-blocking.
-     *     @param manager the delegate for queueing purposes.  Also the callback
+     *     @param manager the delegate for queueing purposes. Also the callback
      *      for changes in state.
      *     @param files the list of files to get.  This stops after ANY of the
      *      files is downloaded.
@@ -238,9 +259,11 @@ public class ManagedDownloader implements Downloader, Serializable {
     public ManagedDownloader(DownloadManager manager,
                              RemoteFileDesc[] files,
                              FileManager fileManager,
-                             IncompleteFileManager incompleteFileManager) {
+                             IncompleteFileManager incompleteFileManager,
+                             ActivityCallback callback) {
         this.allFiles=files;
         this.incompleteFileManager=incompleteFileManager;
+        this.callback = callback;
         initialize(manager, fileManager);
     }
 
@@ -787,9 +810,13 @@ public class ManagedDownloader implements Downloader, Serializable {
      * @param files a list of files to pick from, all of which MUST be
      *  "identical" instances of RemoteFileDesc.  Unreachable locations
      *  are removed from files.
-     * @return COMPLETE if a file was successfully downloaded
+     * @return COMPLETE if a file was successfully downloaded.  This can
+     *             happen even if the file is corrupt, if the user explicitly
+     *             approved.
      *         CORRUPT_FILE a bytes mismatched when checking overlapping
-     *             regions of resume or swarm, and all downloader were aborted
+     *             regions of resume or swarm, and the user decided they'
+     *             did not want the download fragment, which is now
+     *             quarantined.
      *         COULDNT_MOVE_TO_LIBRARY the download completed but the
      *             temporary file couldn't be moved to the library
      *         WAITING_FOR_RETRY if no file was downloaded, but it makes sense 
@@ -832,21 +859,37 @@ public class ManagedDownloader implements Downloader, Serializable {
         }           
 
         //2. Do the download
-        int status;
+        int status = -1;  //TODO: is this equal to COMPLETE etc?
         try {
-            status=tryAllDownloads3(files);
-        } catch (InterruptedException e) {
-            //Convert InterruptedException&corrupted to "return CORRUPT_FILE".
-            if (corrupted) {
+            status=tryAllDownloads3(files);//Exception may be thrown here. 
+        } catch (InterruptedException e) { }
+
+        if(corruptState != NOT_CORRUPT_STATE) {//it is corrupt
+            synchronized(corruptStateLock) {
+                try{
+                    while(corruptState==CORRUPT_WAITING_STATE) {
+                        corruptStateLock.wait();
+                    }
+                } catch(InterruptedException ignored) {
+                    //interruped while waiting for user. do nothing
+                }
+            }
+            if (corruptState==CORRUPT_STOP_STATE) {
                 cleanupCorrupt(incompleteFile, completeFile.getName());
                 return CORRUPT_FILE;
-            } else {
-                throw e;
+            } 
+            else if (corruptState==CORRUPT_CONTINUE_STATE) {
+                ;//do nothing. 
+                //Just fall through and and behave as normal complete
             }
         }
+        
+        if (status==-1) //InterruptedException was thrown in tryAllDownloads3
+            throw new InterruptedException();
         if (status!=COMPLETE)
             return status;
-                
+
+
         //3. Move to library.  
         //System.out.println("MANAGER: completed");
         //Delete target.  If target doesn't exist, this will fail silently.
@@ -922,7 +965,9 @@ public class ManagedDownloader implements Downloader, Serializable {
 
     /** 
      * Like tryDownloads2, but does not deal with the library, cleaning
-     * up corrupt files, etc.
+     * up corrupt files, etc.  Caller should look at corruptState to
+     * determine if the file is corrupted; a return value of COMPLETE
+     * does not mean no corruptions where encountered.
      *
      * @param files a list of files to pick from, all of which MUST be
      *  "identical" instances of RemoteFileDesc.  Unreachable locations
@@ -933,9 +978,10 @@ public class ManagedDownloader implements Downloader, Serializable {
      *             The caller should usually wait before retrying.
      *         GAVE_UP the download attempt failed, and there are 
      *             no more locations to try.
-     * @exception InterruptedException if the user stop()'ed this download
-     *  or a corrupt byte was detected.  (Calls to resume() do not result
-     *  in InterruptedException.)
+     * @exception InterruptedException if the someone stop()'ed this download.
+     *  stop() was called either because the user killed the download or
+     *  a corruption was detected and they chose to kill and discard the
+     *  download.  Calls to resume() do not result in InterruptedException.
      */
     private int tryAllDownloads3(final List /* of RemoteFileDesc */ files) 
             throws InterruptedException {
@@ -1315,13 +1361,11 @@ public class ManagedDownloader implements Downloader, Serializable {
                                 List /* of RemoteFileDesc */ files,
                                 List /* of HTTPDownloader */ terminated) {
         try {
-            downloader.doDownload(true);
+            downloader.doDownload(true,this);
         } catch (IOException e) {
 			chatList.removeHost(downloader);
-        } catch (OverlapMismatchException e) {
-            corrupted=true;
-            stop();
-        } finally {
+        } 
+        finally {
             int stop=downloader.getInitialReadingPoint()
                         +downloader.getAmountRead();
             debug("    WORKER: terminating from "+downloader+" at "+stop);
@@ -1388,6 +1432,38 @@ public class ManagedDownloader implements Downloader, Serializable {
         else
             return false;
     }
+
+    /**
+     * package access. Passes the call up to the activity callback
+     */
+    void promptAboutCorruptDownload() {
+        synchronized(corruptStateLock) {
+            //For any other state we don't do anything
+            if(corruptState == NOT_CORRUPT_STATE) {
+                corruptState = CORRUPT_WAITING_STATE;
+                //Note:We are going to inform the user. The GUI will notify us
+                //when the user has made a decision. Until then the corruptState
+                //is set to waiting. We are not going to move files unless we
+                //are out of this state
+                callback.promptAboutCorruptDownload(this);
+                //Note2: ActivityCallback is going to ask a message to be show to
+                //the user asynchronously
+            }
+        }
+    }
+
+    public void discardCorruptDownload(boolean delete) {
+        if(delete) {
+            corruptState = CORRUPT_STOP_STATE;
+            stop();
+        }
+        else 
+            corruptState = CORRUPT_CONTINUE_STATE;
+        synchronized(corruptStateLock) {
+            corruptStateLock.notify();
+        }
+    }
+            
 
     /**
      * Returns the union of all XML metadata documents from all hosts.

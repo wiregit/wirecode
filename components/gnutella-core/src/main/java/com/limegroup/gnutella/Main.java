@@ -260,6 +260,10 @@ public class Main implements ActivityCallback {
     }
 
     public void uploadsComplete() {}
+
+    public void promptAboutCorruptDownload(Downloader dloader) {
+        dloader.discardCorruptDownload(false);
+    }
         
 }
 

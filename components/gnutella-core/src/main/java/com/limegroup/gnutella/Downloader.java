@@ -113,4 +113,11 @@ public interface Downloader extends BandwidthTracker {
 	 *  <tt>Downloader</tt>, <tt>false</tt> otherwise
 	 */
 	public boolean hasChatEnabledHost();
+
+    /**
+     * either treats a corrupt file as normal file and saves it, or 
+     * discards the corruptFile, depending on the value of delete.
+     */
+    public void discardCorruptDownload(boolean delete);
+
 }
