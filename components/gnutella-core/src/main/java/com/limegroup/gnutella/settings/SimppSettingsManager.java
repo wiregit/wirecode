@@ -166,31 +166,4 @@ public class SimppSettingsManager {
         return limeProps.getSimppSetting(simppKey);
     }
 
-    /**
-     * @param rawSetting has the form SETTING_NAME{setting_key} = setting_value
-     */
-    private Setting loadSetting(String simppKey) {
-        LOG.debug("loadSetting called");
-        String fullname = SimppProps.instance().getClassNameForKey(simppKey);
-        if(fullname == null) //simpp messasge badly formatted
-            return null;
-        int dot = fullname.indexOf(".");
-        if(dot < 0) //simpp setting badly formatted
-            return null;
-        try {
-            String classname = fullname.substring(0, dot);
-            String fieldname = fullname.substring(dot+1);
-            Class settingsClass = Class.forName(classname);
-            Object obj = settingsClass.getField(fieldname).get(settingsClass);
-            Setting ret = (Setting)obj;
-            return ret;
-        } catch (ClassNotFoundException cnfx) {
-            return null;
-        } catch (NoSuchFieldException nsfx) {
-            return null;
-        } catch(IllegalAccessException iax) {
-            return null;
-        }
-    }
-
 }
