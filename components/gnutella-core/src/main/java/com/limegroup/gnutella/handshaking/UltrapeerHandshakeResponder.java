@@ -61,9 +61,9 @@ public class UltrapeerHandshakeResponder
 			//Fine, we'll become a leaf.
 			ret.put(HeaderNames.X_ULTRAPEER, "False");
 		}
-		// only encode if we're not going to become a leaf.
-		// (because leaves send such little traffic)
-		else if(response.isDeflateAccepted()) {
+
+		// deflate if we can ...
+		if(response.isDeflateAccepted()) {
 		    ret.put(HeaderNames.CONTENT_ENCODING, HeaderNames.DEFLATE_VALUE);
 		}
 		    

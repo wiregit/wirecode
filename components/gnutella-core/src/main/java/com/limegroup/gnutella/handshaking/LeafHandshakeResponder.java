@@ -47,10 +47,10 @@ public final class LeafHandshakeResponder
         
         Properties ret = new Properties();
 
-        // leaves don't need to encode, they send such little traffic.   
-//		if(response.isDeflateAccepted()) {
-//		    ret.put(HeaderNames.CONTENT_ENCODING, HeaderNames.DEFLATE_VALUE);
-//		}
+        // might as well save a little bandwidth.
+		if(response.isDeflateAccepted()) {
+		    ret.put(HeaderNames.CONTENT_ENCODING, HeaderNames.DEFLATE_VALUE);
+		}
         
         // let the Ultrapeer know of any high-hops Ultrapeers
         // we're aware of
@@ -74,11 +74,8 @@ public final class LeafHandshakeResponder
             return HandshakeResponse.createRejectIncomingResponse(ret);
         } 
 
-		// Only encode if the other side's not an ultrapeer &
-		// we'd be creating an unshielded connection.
-		// (If it's shielded there's such little traffic we'd send
-		//  that it doesn't matter.)
-		if(!hr.isUltrapeer() && hr.isDeflateAccepted()) {
+		//deflate if we can ...
+		if(hr.isDeflateAccepted()) {
 		    ret.put(HeaderNames.CONTENT_ENCODING, HeaderNames.DEFLATE_VALUE);
 		}         
 
