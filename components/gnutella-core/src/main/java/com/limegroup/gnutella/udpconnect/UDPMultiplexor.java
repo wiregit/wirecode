@@ -1,5 +1,6 @@
 package com.limegroup.gnutella.udpconnect;
 
+import java.lang.ref.WeakReference;
 import java.net.*;
 import com.limegroup.gnutella.messages.BadPacketException;
 
@@ -13,7 +14,7 @@ import org.apache.commons.logging.LogFactory;
 public class UDPMultiplexor {
 
     private static final Log LOG =
-      LogFactory.getLog(UDPConnectionProcessor.class);
+      LogFactory.getLog(UDPMultiplexor.class);
 
 	/** Keep track of a singleton instance */
     private static UDPMultiplexor     _instance    = null;
@@ -22,7 +23,7 @@ public class UDPMultiplexor {
 	public static final byte          UNASSIGNED_SLOT   = 0;
 
 	/** Keep track of the assigned connections */
-	private UDPConnectionProcessor[]  _connections;
+	private WeakReference[]  _connections;
 
 	/** Keep track of the last assigned connection id so that we can use a 
 		circular assignment algorithm.  This should cut down on message
@@ -44,7 +45,7 @@ public class UDPMultiplexor {
      *  Initialize the UDPMultiplexor.
      */
     private UDPMultiplexor() {
-		_connections       = new UDPConnectionProcessor[256];
+		_connections       = new WeakReference[256];
 		_lastConnectionID  = 0;
     }
 
@@ -62,9 +63,10 @@ public class UDPMultiplexor {
 				continue;
 
 			// If the slot is open, take it.
-			if (_connections[connID] == null) {
+			if (_connections[connID] == null ||
+					_connections[connID].get()==null) {
 				_lastConnectionID     = connID;
-				_connections[connID] = con;
+				_connections[connID] = new WeakReference(con);
 				return (byte) connID;
 			}
 		}
@@ -77,7 +79,7 @@ public class UDPMultiplexor {
      */
 	public synchronized void unregister(UDPConnectionProcessor con) {
 		int connID = (int) con.getConnectionID() & 0xff;
-		if ( _connections[connID] == con )
+		if ( _connections[connID].get() == con )
 		    _connections[connID] = null;
 	}
 
@@ -87,6 +89,7 @@ public class UDPMultiplexor {
      */
 	public synchronized void routeMessage(UDPConnectionMessage msg, 
 	  InetAddress senderIP, int senderPort) {
+
 		UDPConnectionProcessor con;
 
 		int connID = (int) msg.getConnectionID() & 0xff;
@@ -98,7 +101,7 @@ public class UDPMultiplexor {
                 LOG.debug("Receiving SynMessage :"+msg);
             }
 			for (int i = 1; i < _connections.length; i++) {
-				con = _connections[i];
+				con = (UDPConnectionProcessor)_connections[i].get();
 				if ( con != null && 
 					 con.isConnecting() &&
 					 con.matchAddress(senderIP, senderPort) ) {
@@ -115,7 +118,7 @@ public class UDPMultiplexor {
 			// so it is safe to throw away premature ones
 
 		} else {  // If valid connID then send on to connection
-			con = _connections[connID];
+			con = (UDPConnectionProcessor)_connections[connID].get();
 			if ( con != null &&
                  con.matchAddress(senderIP, senderPort) ) {
 				con.handleMessage(msg);

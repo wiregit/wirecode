@@ -1409,4 +1409,13 @@ public class UDPConnectionProcessor {
     }
     //
     // -----------------------------------------------------------------
+    
+    protected void finalize() {
+    	if (!isClosed()) {
+    		LOG.warn("finalizing an open UDPConnectionProcessor!");
+    		try {
+    			close();
+    		}catch (IOException ignored) {}
+    	}
+    }
 }
