@@ -1,8 +1,6 @@
 package com.limegroup.gnutella.settings;
 
 import java.util.Properties;
-import java.util.StringTokenizer;
-import java.util.Locale;
 
 /**
  * Class for a setting that's an array of chars.
