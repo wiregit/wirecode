@@ -13,6 +13,9 @@ import java.awt.event.*;
 
 import com.limegroup.gnutella.update.*;
 import com.limegroup.gnutella.util.CommonUtils;
+import com.limegroup.gnutella.SettingsManager;
+import com.limegroup.gnutella.FileManager;
+import com.limegroup.gnutella.gui.LimeLookAndFeel;
 
 public class UpdateTester extends JFrame {
 
@@ -65,7 +68,7 @@ public class UpdateTester extends JFrame {
 	private void startTest() {
 		String version = (String)_versionBox.getSelectedItem();
 		String os = (String)_osBox.getSelectedItem();
-		_manager.startTest(version,os);
+		//_manager.startTest(version,os);
 	}
 
 	/**
@@ -73,7 +76,13 @@ public class UpdateTester extends JFrame {
 	 */
 	public static void main(String args[]) {
 		CommonUtils.initialize();
+		SettingsManager.instance();
+        FileManager.instance();
+        try {UIManager.setLookAndFeel(new LimeLookAndFeel());}
+        catch (UnsupportedLookAndFeelException ulafe) {}
 		UpdateTester tester = new UpdateTester();
+		//UpdateManager manager = UpdateManager.instance();
+		//manager.startTest("1.1", "Mac OS");
 		tester.setVisible(true);
 	}
 }
