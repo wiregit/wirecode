@@ -722,18 +722,26 @@ public class LimeXMLUtils
             hashBytes[i] = (byte)0;
     }
 
-    /** @return The SHA hash bytes of hte input bytes.
-     *  @exception java.lang.Exception Thrown if hashing encountered serious 
-     *  flaw, such as size of file changed while executing this method....
+    /**
+     * Hashes the file using bits and pieces of the file.
+     * 
+     * @return The SHA hash bytes of hte input bytes.
+     * @throws IOException if hashing failed for any reason.
      */
-    public static byte[] hashFile(File toHash) throws Exception {
+    public static byte[] hashFile(File toHash) throws IOException {
         byte[] retBytes = null;
         FileInputStream fis = null;
         try {        
 
             // setup
-            fis = new FileInputStream(toHash);           
-            MessageDigest md = MessageDigest.getInstance("SHA");
+            fis = new FileInputStream(toHash);
+            MessageDigest md = null;
+           
+            try {
+                md = MessageDigest.getInstance("SHA");
+            } catch(NoSuchAlgorithmException nsae) {
+                Assert.that(false, "no sha algorithm.");
+            }
 
             long fileLength = toHash.length();            
             if (fileLength < NUM_TOTAL_HASH) {
@@ -744,7 +752,7 @@ public class LimeXMLUtils
                     md.update(hashBytes);
                     // if the file changed underneath me, throw away...
                     if (toHash.length() != fileLength)
-                        throw new Exception();
+                        throw new IOException("invalid length");
                 } while (numRead == NUM_BYTES_TO_HASH);
             }
             else { // need to do some mathy stuff.......
@@ -758,7 +766,7 @@ public class LimeXMLUtils
 
                 // if the file changed underneath me, throw away...
                 if (toHash.length() != fileLength)
-                    throw new Exception();
+                    throw new IOException("invalid length");
 
                 // middle input...
                 clearHashBytes();
@@ -768,7 +776,7 @@ public class LimeXMLUtils
 
                 // if the file changed underneath me, throw away...
                 if (toHash.length() != fileLength)
-                    throw new Exception();
+                    throw new IOException("invalid length");
                 
                 // ending input....
                 clearHashBytes();
@@ -780,16 +788,12 @@ public class LimeXMLUtils
 
                 // if the file changed underneath me, throw away...
                 if (toHash.length() != fileLength)
-                    throw new Exception();
+                    throw new IOException("invalid length");
 
             }
                 
             retBytes = md.digest();
-        }
-        catch (Exception e) {
-            throw new Exception(e.toString());
-        }
-        finally {
+        } finally {
             if (fis != null)
                 fis.close();
         }

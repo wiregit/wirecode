@@ -22,12 +22,12 @@ public class MetaFileManager extends FileManager {
      * </b>
      */
     private Map fileToHash = new HashMap();
-
-    //constructor
-    public MetaFileManager(){
-        super();
-    }
-
+    
+    /**
+     * Overrides FileManager.query.
+     *
+     * Used to search XML information in addition to normal searches.
+     */
     public synchronized Response[] query(QueryRequest request) {
         // only return XML if the source wants it or if the source wants
         // out-of-band results.
@@ -57,6 +57,7 @@ public class MetaFileManager extends FileManager {
 	public synchronized boolean addFileIfShared(File file,
                                                 LimeXMLDocument[] metadata) {
         boolean added=super.addFileIfShared(file, metadata);
+
         if (added && metadata!=null) {
             SchemaReplyCollectionMapper mapper =
                 SchemaReplyCollectionMapper.instance();
@@ -66,12 +67,10 @@ public class MetaFileManager extends FileManager {
             try {
                 hash = new String(LimeXMLUtils.hashFile(file));
                 if (hash == null)
-                    throw new Exception();
+                    throw new IOException("hash failed");
                 // add to the file manager
                 writeToMap(file, hash);
-            }
-            catch (Exception hashFailed) {
-                //TODO: get rid of blanket catch.  Problem is with hashFile.
+            } catch (IOException hashFailed) {
                 return true;  //file added but not metadata!
             }
             
@@ -79,18 +78,13 @@ public class MetaFileManager extends FileManager {
             for (int i = 0;
                  (metadata != null) && (i < metadata.length);
                  i++) {
-                try {
-                    LimeXMLDocument currDoc = metadata[i];
-                    String uri = currDoc.getSchemaURI();
-                    LimeXMLReplyCollection collection =
-                    mapper.getReplyCollection(uri);
-                    
-                    if (collection != null)
-                        collection.addReplyWithCommit(file, hash, currDoc);
-                }
-                catch (Exception ignored) {
-                    //TODO: get rid of blanket catch.
-                }
+                LimeXMLDocument currDoc = metadata[i];
+                String uri = currDoc.getSchemaURI();
+                LimeXMLReplyCollection collection =
+                mapper.getReplyCollection(uri);
+                
+                if (collection != null)
+                    collection.addReplyWithCommit(file, hash, currDoc);
             }
         }
         return added;
@@ -132,16 +126,13 @@ public class MetaFileManager extends FileManager {
         if(coll == null)//if there schemas are not loaded
             return;
         int z = responses.length;
-        for(int i=0;i<z;i++){
+        for(int i = 0; i < z; i++){
             FileDesc f = get((int)responses[i].getIndex());
 			File file = f.getFile();
             String hash=readFromMap(file);
-            if(hash==null)//not an mp3 file
-                hash = readFromMap(file);
             LimeXMLDocument doc = coll.getDocForHash(hash);
             if(doc==null)
                 continue;
-            //System.out.println("Sumeet audioXML="+XMLString);
             responses[i].setDocument(doc);            
         }
     }
@@ -377,20 +368,18 @@ public class MetaFileManager extends FileManager {
      */
     public LimeXMLDocument getDocument(String schemaURI, File f){
         String hash = null;
-        hash = readFromMap(f);//try mp3 first
-        if(hash == null){//not mp3...try non mp3
-            //System.out.println("Sumeet hashNot found with mp3");
-            hash = readFromMap(f);
-        }
-        if (hash==null){//still null? return null
-            //System.out.println("Sumeet hashNot found...returning");
+        hash = readFromMap(f);
+        
+        // no hash, return null.
+        if (hash == null) {
             return null;
         }
+
         //OK we have the hash now
         SchemaReplyCollectionMapper map=SchemaReplyCollectionMapper.instance();
         LimeXMLReplyCollection coll = map.getReplyCollection(schemaURI);
-        if(coll==null){//lets be defensive
-            //System.out.println("Collection is null...returning");
+        
+        if (coll == null) { //lets be defensive
             return null;
         }
         return coll.getDocForHash(hash);

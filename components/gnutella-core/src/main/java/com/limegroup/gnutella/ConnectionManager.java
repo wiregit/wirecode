@@ -119,6 +119,7 @@ public class ConnectionManager {
         _initializedConnections = new ArrayList();
     private volatile List /* of ManagedConnection */ 
         _initializedClientConnections = new ArrayList();
+        
     private volatile int _shieldedConnections = 0;
 
     /**
@@ -690,7 +691,7 @@ public class ConnectionManager {
 
     /** Returns the number of connections to other ultrapeers.  Caller MUST hold
      *  this' monitor. */
-    private int ultrapeerConnections() {
+    public synchronized int ultrapeerConnections() {
         //TODO3: augment state of this if needed to avoid loop
         int ret=0;
         for (Iterator iter=_initializedConnections.iterator(); iter.hasNext();){
