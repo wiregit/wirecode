@@ -10,6 +10,7 @@ import com.limegroup.gnutella.statistics.*;
 import com.limegroup.gnutella.util.*;
 import com.limegroup.gnutella.settings.*;
 import com.limegroup.gnutella.altlocs.*;
+import com.limegroup.gnutella.udpconnect.UDPConnection;
 
 /**
  * Maintains state for an HTTP upload request.  This class follows the
@@ -344,6 +345,13 @@ public final class HTTPUploader implements Uploader {
      */
 	InputStream getInputStream() {
 	    return _fis;
+    }
+    
+    /**
+      * Determines if this is uploading to via a UDP transfer.
+      */
+    boolean isUDPTransfer() {
+        return (_socket instanceof UDPConnection);
     }
     
     /**

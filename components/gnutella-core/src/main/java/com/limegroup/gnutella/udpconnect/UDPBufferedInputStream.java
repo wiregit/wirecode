@@ -216,12 +216,12 @@ public class UDPBufferedInputStream extends InputStream {
     /**
      *  Wait for a new chunk to become available.
      */
-    private void waitOnData() throws java.io.InterruptedIOException {
+    private void waitOnData() throws InterruptedIOException {
         synchronized(_processor) {  // Lock on the ConnectionProcessor
             try { 
                 _processor.wait(_processor.getReadTimeout()); 
             } catch(InterruptedException e) {
-                throw new java.io.InterruptedIOException(); 
+                throw new InterruptedIOException(e.getMessage()); 
             } 
         }
     }
@@ -234,12 +234,5 @@ public class UDPBufferedInputStream extends InputStream {
             // Wakeup any read operation waiting for data
             _processor.notify();  
         }
-    }
-
-    private static void log(String str) {
-    }
-
-    private static void log2(String str) {
-       System.err.println(str); 
     }
 }

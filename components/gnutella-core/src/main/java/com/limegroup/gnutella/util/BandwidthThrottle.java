@@ -78,8 +78,7 @@ public class BandwidthThrottle {
      */    
     public BandwidthThrottle(float bytesPerSecond, boolean switching) {
         setRate(bytesPerSecond);
-    	//WARNING: do not merge this to mainline!  Find a real solution instead.
-        //setSwitching(switching);
+        setSwitching(switching);
 
     }    
 
@@ -100,10 +99,9 @@ public class BandwidthThrottle {
      * Sets whether or not this throttle is switching bandwidth on/off.
      */
     public void setSwitching(boolean switching) {
-    	//WARNING: do not merge this to mainline!  Find a real solution instead.
-      //  if(_switching != switching)
-      //      fixBytesPerTick(switching);
-      //  _switching = switching;
+        if(_switching != switching)
+            fixBytesPerTick(switching);
+        _switching = switching;
     }
     
     /**

@@ -47,6 +47,12 @@ public final class NormalUploadState implements HTTPMessage {
      */
     private static final BandwidthThrottle THROTTLE = 
         new BandwidthThrottle(getUploadSpeed(), false);
+        
+    /**
+     * UDP throttle.
+     */
+    private static final BandwidthThrottle UDP_THROTTLE =
+        new BandwidthThrottle(getUploadSpeed(), false);
 
 	/**
 	 * <tt>FileDesc</tt> instance for the file being uploaded.
@@ -201,12 +207,14 @@ public final class NormalUploadState implements HTTPMessage {
         // have to reconstruct new byte arrays every BLOCK_SIZE.
         byte[] buf = new byte[BLOCK_SIZE];
         while (true) {
-            THROTTLE.setRate(getUploadSpeed());
+            BandwidthThrottle throttle =
+                _uploader.isUDPTransfer() ? THROTTLE : UDP_THROTTLE;        
+            throttle.setRate(getUploadSpeed());
 
             int c = -1;
             // request the bytes from the throttle
             // BLOCKING (only if we need to throttle)
-            int allowed = THROTTLE.request(BLOCK_SIZE);
+            int allowed = throttle.request(BLOCK_SIZE);
             int burstSent=0;            
             c = _fis.read(buf, 0, allowed);
             if (c == -1)

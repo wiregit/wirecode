@@ -9,6 +9,7 @@ import com.limegroup.gnutella.settings.ChatSettings;
 import com.limegroup.gnutella.settings.ConnectionSettings;
 import com.limegroup.gnutella.settings.DownloadSettings;
 import com.limegroup.gnutella.settings.UploadSettings;
+import com.limegroup.gnutella.udpconnect.UDPConnection;
 import com.limegroup.gnutella.util.BandwidthThrottle;
 import com.limegroup.gnutella.util.IntervalSet;
 import com.limegroup.gnutella.util.Sockets;
@@ -67,9 +68,15 @@ public class HTTPDownloader implements BandwidthTracker {
     private static final int MAX_RETRY_AFTER = 60 * 60; // 1 hour
     
     /**
-     * The throttle to use for all downloads.
+     * The throttle to use for all TCP downloads.
      */
     private static final BandwidthThrottle THROTTLE =
+        new BandwidthThrottle(Float.MAX_VALUE, false);
+        
+    /**
+     * The throttle to use for UDP downloads.
+     */
+    private static final BandwidthThrottle UDP_THROTTLE =
         new BandwidthThrottle(Float.MAX_VALUE, false);
 
     /**
@@ -1286,7 +1293,9 @@ public class HTTPDownloader implements BandwidthTracker {
                 int left=atr - _amountRead;
                 Assert.that(left>0);
 
-                int toRead = THROTTLE.request(Math.min(BUF_LENGTH, left));
+                BandwidthThrottle throttle = _socket instanceof UDPConnection ?
+                    THROTTLE : UDP_THROTTLE;
+                int toRead = throttle.request(Math.min(BUF_LENGTH, left));
                 c = _byteReader.read(buf, 0, toRead);
                 if (c == -1) 
                     break;
@@ -1426,6 +1435,7 @@ public class HTTPDownloader implements BandwidthTracker {
      */
     public static void setRate(float bytesPerSecond) {
         THROTTLE.setRate(bytesPerSecond);
+        UDP_THROTTLE.setRate(bytesPerSecond);
     }
     
     /**
@@ -1452,6 +1462,7 @@ public class HTTPDownloader implements BandwidthTracker {
     
     public static void setThrottleSwitching(boolean on) {
         THROTTLE.setSwitching(on);
+        // DO NOT PUT SWITCHING ON THE UDP SIDE.
     }
     
 	private HTTPDownloader(String str) {
