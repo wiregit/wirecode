@@ -31,6 +31,10 @@ public class HTTPUploader implements Runnable {
     private BufferedReader _fin;
     private String _host;
     
+    FileInputStream _fis;
+    BufferedInputStream _bis;
+    BufferedOutputStream _bos;
+
     public HTTPUploader(Socket s, String file, 
 			int index, ConnectionManager m) {
 
@@ -74,6 +78,7 @@ public class HTTPUploader implements Runnable {
 	try {
 	    File myFile = new File(_fdesc._path);  /* _path is the full name */
 	    _fin = new BufferedReader(new FileReader(myFile));
+	    _fis = new FileInputStream(myFile);
 	}
 
 	catch (Exception e) {
@@ -214,37 +219,32 @@ public class HTTPUploader implements Runnable {
 	
 	int c = -1;
 	
-	char[] buff = new char[BUFFSIZE];
-	
-	try {
-	    while (true){
-		c = _fin.read(buff);
-		if (c == -1)
-		    break;
-		_out.write(buff);
-		_amountRead += c;
-	    }
-	    _out.flush();
-	}
-	catch (Exception e) {
-	    uploadError("Unable to read from the file");
-	    return;
-	}
-	
+	int available = 0;
 
-//  	try {
-//  	    while ( (c = _fin.read())  != -1) {
-//  		_out.write(c);
-//  		_amountRead++;
-//  	    }
-//  	    _out.flush();
-//  	}
+	byte[] buff;
+
+	_bis = new BufferedInputStream(_fis);
+	_bos = new BufferedOutputStream(_ostream);
+
+  	try {
+  	    while (true){
+		
+		available = _bis.available();
+		buff = new byte[available];		
+  		c = _bis.read(buff);
+  		if (c == -1)
+  		    break;
+		_bos.write(buff);
+  		_amountRead += c;
+  	    }
+	    _out.flush();
+  	}
 	
-//  	catch (Exception e) {
-//  	    uploadError("Unable to read from the file");
-//  	    return;
-	    
-//  	}
+  	catch (Exception e) {
+  	    uploadError("Unable to read from the file");
+  	    return;
+  	}
+
     }
     
     private String getMimeType() {         /* eventually this method should */
@@ -280,7 +280,7 @@ public class HTTPUploader implements Runnable {
 
     private void uploadError(String str)
     {
-	System.out.println(str);
+	// System.out.println(str);
 	// These should not go anywhere for uploads
     }
 

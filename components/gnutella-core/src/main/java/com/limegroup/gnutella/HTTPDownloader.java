@@ -68,8 +68,6 @@ public class HTTPDownloader implements Runnable {
 
 	URLConnection conn;
 
-	// port = 1111; // For Testing.
-
 	String furl = "/get/" + String.valueOf(index) + "/" + file;
 
 	try {
@@ -132,9 +130,6 @@ public class HTTPDownloader implements Runnable {
 	PushRequest push = new PushRequest(guid, ttl, clientGUID, 
   					   index, ip, port);
 	
-	//  PushRequest push = new PushRequest(clientGUID, ttl, guid,  
-//  					   index, ip, port);
-	
 	try {
 
 	    System.out.println("Sending push Request");
@@ -145,10 +140,6 @@ public class HTTPDownloader implements Runnable {
 	    return;
 	}
 
-    }
-
-    public void setDownloadDirectory(String path) {
-	_downloadDir = path;
     }
 
     public String getFileName() {
@@ -186,9 +177,13 @@ public class HTTPDownloader implements Runnable {
 	try {
 
 	    if (_sizeOfFile != -1) {
+
+		SettingsManager set = SettingsManager.instance();
+		_downloadDir = set.getSaveDirectory();
+
+		String pathname = _downloadDir  + _filename;
 		
-		FileOutputStream myFile = new FileOutputStream(_filename);
-		
+		FileOutputStream myFile = new FileOutputStream(pathname);
 		BufferedOutputStream bos = new BufferedOutputStream(myFile);
 
 		int count = 0;
@@ -196,32 +191,24 @@ public class HTTPDownloader implements Runnable {
 		
 		_bis = new BufferedInputStream(_istream);
 
-		
-
 		while (true) {
 		    
 		    int buf_size = _bis.available();
 
-		    System.out.println("THe amount available: " + buf_size);
 
 		    byte[] buf = new byte[buf_size];
-		    c = _bis.read(buf);
-		    if (c == -1) 
-			break;
-		    // myFile.write(buf);
-		    bos.write(buf);
-		    _amountRead+=c;
-		    count++;
+
+		    if (buf_size > 0) {
+			c = _bis.read(buf);
+			if (c == -1) 
+			    break;
+			bos.write(buf);
+			_amountRead+=c;
+			count++;
+		    }
 		    
 		}
 
-//  		byte[] buf = new byte[BUFFSIZE];
-//  		while ( (c = _istream.read(buf) ) != -1) {
-//  		    myFile.write(buf);
-//  		    _amountRead+=c;
-//  		    count++;
-//  		}
-		    
 	    }
 	}
 
