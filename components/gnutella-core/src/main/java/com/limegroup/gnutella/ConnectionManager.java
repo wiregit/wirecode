@@ -99,6 +99,25 @@ public class ConnectionManager {
     }
 
     /**
+     * Create and returns a new connection to a router, blocking until it's
+     * initialized, but launching a new thread to do the message loop.  Throws
+     * IOException if the connection couldn't be established.  The router
+     * connection is treated like a normal connection, except that its pongs are
+     * given higher priority.  
+     */
+    public ManagedConnection createRouterConnection(
+            String hostname, int portnum) throws IOException {
+        ManagedConnection c = new ManagedConnection(hostname, portnum, _router,
+                                                    this, true);
+        // Initialize synchronously
+        initializeExternallyGeneratedConnection(c);
+        // Kick off a thread for the message loop.
+        new OutgoingConnectionThread(c, false);
+
+        return c;
+    }
+
+    /**
      * Create an incoming connection.  This method starts the message loop,
      * so it will block for a long time.  Make sure the thread that calls
      * this method is suitable doing a connection message loop.
@@ -495,26 +514,16 @@ public class ConnectionManager {
         public void run() {
             // Wait for an endpoint.
             Endpoint endpoint = null;
-            synchronized(_catcher) {
-                while(endpoint == null) {
-                    try {
-                        endpoint = _catcher.getAnEndpoint();
-                    } catch (NoSuchElementException exc) {
-                        try {
-                            _catcher.wait();
-                        } catch (InterruptedException exc2) {
-                            // Externally generated interrupt.
-                            // The interrupting thread has recorded the
-                            // death of the fetcher, so just return.
-                            return;
-                        }
-                    }
-
-                    // Only connect to currently unconnected endpoints.
-                    if(isConnected(endpoint))
-                        endpoint = null;  // and go around again.
-                }
-            }
+            do {
+                try {
+                    endpoint = _catcher.getAnEndpoint();
+                } catch (InterruptedException exc2) {
+                    // Externally generated interrupt.
+                    // The interrupting thread has recorded the
+                    // death of the fetcher, so just return.
+                    return;
+                }               
+            } while (isConnected(endpoint));
 
             Assert.that(endpoint != null);
 

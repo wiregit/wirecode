@@ -94,17 +94,35 @@ public class ManagedConnection
     private volatile long _numHorizonFiles;
     private volatile long _numHorizonHosts;
 
-    /**
-     * Creates an outgoing connection.
-     * ManagedConnections should only be constructed within ConnectionManager.
+    /** 
+     * True if this connected to a router (e.g. future router.limewire.com) or
+     * pong-cache server (e.g. gnutellahosts.com).  This may be replaced
+     * with a more general priority-based scheme later.
      */
+    private boolean _isRouter=false;
+
+    /** Same as ManagedConnection(host, port, router, manager, false); */
     ManagedConnection(String host,
                       int port,
                       MessageRouter router,
                       ConnectionManager manager) {
+        this(host, port, router, manager, false);
+    }
+
+    /**
+     * Creates an outgoing connection.  The connection is considered a special
+     * "router connection" iff isRouter==true.  ManagedConnections should only
+     * be constructed within ConnectionManager.  
+     */
+    ManagedConnection(String host,
+                      int port,
+                      MessageRouter router,
+                      ConnectionManager manager,
+                      boolean isRouter) {
         super(host, port);
         _router = router;
         _manager = manager;
+        _isRouter = isRouter;
 
         new OutputRunner(); // Start the thread to empty the output queue
     }
@@ -576,4 +594,10 @@ public class ManagedConnection
     //
     // End statistics accessors
     //
+
+    /** Returns true if this is as a special "router" connection, e.g. to
+     *  router.limewire.com.  */
+    public boolean isRouterConnection() {
+        return this._isRouter;
+    }
 }
