@@ -185,8 +185,9 @@ public class LimeXMLReplyCollection{
     public List getMatchingReplies(LimeXMLDocument queryDoc){
         Iterator iter = mainMap.keySet().iterator();
         List matchingReplyDocs = new ArrayList();
-        while(iter.hasNext()){            
-            LimeXMLDocument currReplyDoc = (LimeXMLDocument)iter.next();
+        while(iter.hasNext()){
+            Object hash = iter.next();
+            LimeXMLDocument currReplyDoc = (LimeXMLDocument)mainMap.get(hash); 
             boolean match = LimeXMLUtils.match(currReplyDoc, queryDoc);
             if(match){
                 matchingReplyDocs.add(currReplyDoc);
