@@ -1,20 +1,15 @@
 package com.limegroup.gnutella;
 
-import com.limegroup.gnutella.*;
-import com.limegroup.gnutella.messages.*;
-import com.limegroup.gnutella.settings.*;
-import com.limegroup.gnutella.search.*;
-import com.limegroup.gnutella.stubs.*;
-import com.limegroup.gnutella.util.*;
-import com.limegroup.gnutella.handshaking.*;
-import com.limegroup.gnutella.security.*;
-import com.limegroup.gnutella.routing.*;
-import com.limegroup.gnutella.xml.*;
+import junit.framework.Test;
 
-import junit.framework.*;
-import java.util.Properties;
-import com.sun.java.util.collections.*;
-import java.io.*;
+import com.limegroup.gnutella.messages.QueryRequest;
+import com.limegroup.gnutella.search.HostData;
+import com.limegroup.gnutella.settings.ConnectionSettings;
+import com.limegroup.gnutella.stubs.ActivityCallbackStub;
+import com.limegroup.gnutella.util.BaseTestCase;
+import com.limegroup.gnutella.xml.MetaFileManager;
+import com.sun.java.util.collections.LinkedList;
+import com.sun.java.util.collections.List;
 
 /**
  * Test to make sure that query routing tables are correctly exchanged between
