@@ -204,9 +204,6 @@ public final class SearchResultHandler {
             String name = response.getName();
             long maxIndex = LimeXMLProperties.DEFAULT_NONFILE_INDEX;
             
-            int score = RouterService.score(replyGUID,response);
-            if(isSpecificXMLSearch && (score == 0)) continue;
-            
             ArrayList docs = null;
             if(xmlCollectionString==null || xmlCollectionString.equals("")){
                 //Note:This means no XML in QHD. create docs from between nulls

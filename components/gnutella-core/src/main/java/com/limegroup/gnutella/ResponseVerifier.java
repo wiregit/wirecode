@@ -89,28 +89,6 @@ public class ResponseVerifier {
         return retVal;
     }
 
-    /**
-     * Returns the score of the given response compared to a previosly recorded
-     * query with the given GUID, on a scale from 0 to 100.  If guid is not
-     * recognized, a result of 100 is given.
-     *
-     * @param guid the 16-byte guid used to look up the original query
-     * @param resp the response to score
-     * @return the percentage of query keywords (0-100) matching
-     */
-    public synchronized int score(byte[] guid, Response resp) {
-        //Lookup original query from guid.
-        RequestData request=(RequestData)mapper.get(new GUID(guid));
-        if (request == null)
-            return 100; // assume 100% match if no corresponding query found.
-        String[] queryWords = request.queryWords;
-
-        //Calculate score.  Consider metadata part of filename.
-        String filename=request.xmlQuery()
-                            ? getSearchTerms(resp)
-                            : resp.getName().toLowerCase();
-        return score(queryWords, filename);
-    }
 
     /**
      * Returns the score of the given response compared to the given query.

@@ -837,18 +837,6 @@ public class RouterService {
         QueryUnicaster.instance().purgeQuery(guid);
     }
 
-    /** 
-     * Returns the percentage of keywords in the query with the given guid that
-     * match the given response.  Returns 100 if guid is not recognized.
-     *
-     * @param guid the value returned by query(..)  MUST be 16 bytes long.
-     * @param resp a response delivered by ActivityCallback.handleQueryReply
-     * @see ResponseVerifier#score(byte[], Response) 
-     */
-    public static int score(byte[] guid, Response resp){
-        return verifier.score(guid,resp);
-    }
-
     /**
      * Returns true if the search related to the corresponding guid was a
      * 'specific' xml search, ie if it had two or more XML fields specified.
