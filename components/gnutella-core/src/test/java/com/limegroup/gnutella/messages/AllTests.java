@@ -12,6 +12,7 @@ public class AllTests {
         suite.addTest(PingReplyTest.suite());
         suite.addTest(PingRequestTest.suite());
         suite.addTest(PushRequestTest.suite());
+		suite.addTest(MessageUtilsTest.suite());
         return suite;
     }
 

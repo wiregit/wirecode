@@ -6,6 +6,7 @@ import java.io.*;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import com.limegroup.gnutella.util.StringUtils;
+import com.limegroup.gnutella.messages.MessageUtils;
 
 /**
  * Immutable IP/port pair.  Also contains an optional number and size
@@ -169,6 +170,9 @@ com.sun.java.util.collections.Comparable
             {
                 throw new IllegalArgumentException();
             }
+			if(!MessageUtils.isValidPort(getPort())) {
+			    throw new IllegalArgumentException("invalid port");
+		    }	
         }
 
         if (requireNumeric) 

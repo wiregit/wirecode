@@ -166,10 +166,14 @@ public class QueryReply extends Message implements Serializable{
     }
 
     /** Creates a new query reply with data read from the network. */
-    public QueryReply(byte[] guid, byte ttl, byte hops,
-              byte[] payload) {
+    public QueryReply(byte[] guid, byte ttl, byte hops,byte[] payload) 
+		throws BadPacketException {
         super(guid, Message.F_QUERY_REPLY, ttl, hops, payload.length);
         this.payload=payload;
+		if(!MessageUtils.isValidPort(getPort())) {
+			throw new BadPacketException("invalid port");
+		}
+		
 		setAddress();
         //repOk();                               
     }

@@ -78,8 +78,12 @@ public final class QueryReplyTest extends TestCase {
 		byte[] payload=new byte[11+11+16];
 		payload[0]=1;            //Number of results
 		payload[11+8]=(byte)65;  //The character 'A'
-		qr=new QueryReply(new byte[16], (byte)5, (byte)0,
-						  payload);
+		try {
+			qr=new QueryReply(new byte[16], (byte)5, (byte)0,
+							  payload);
+		} catch(BadPacketException e) {
+			fail("unexpected exception: "+e);
+		}
 		try {
 			Iterator iter=qr.getResults();
 			Response response=(Response)iter.next();
@@ -103,8 +107,12 @@ public final class QueryReplyTest extends TestCase {
         payload=new byte[11+11+15];
         payload[0]=1;                    //Number of results
         payload[11+8]=(byte)65;          //The character 'A'
-        qr=new QueryReply(new byte[16], (byte)5, (byte)0,
-                          payload);
+		try {
+			qr=new QueryReply(new byte[16], (byte)5, (byte)0,
+							  payload);
+		} catch(BadPacketException e) {
+			fail("unexpected exception: "+e);
+		}
         try {
             Iterator iter=qr.getResults();
             assertTrue(false);
@@ -131,8 +139,13 @@ public final class QueryReplyTest extends TestCase {
         payload[11+11+4+1+4+2]=(byte)'S';   //The character 'M'
         payload[11+11+4+1+4+3]=(byte)'H';   //The character 'E'
         payload[11+11+4+1+4+4]=(byte)0;   //null terminator
-        qr=new QueryReply(new byte[16], (byte)5, (byte)0,
-                          payload);
+		
+		try {
+			qr=new QueryReply(new byte[16], (byte)5, (byte)0,
+							  payload);
+		} catch(BadPacketException e) {
+			fail("unexpected exception: "+e);
+		}
         try {
             Iterator iter=qr.getResults();
             Response r = (Response)iter.next();
@@ -159,8 +172,12 @@ public final class QueryReplyTest extends TestCase {
         payload[11+11+4+1]=(byte)0xB1; //set push flag (and other stuff)
         payload[11+11+4+1+2]=(byte)4;  // set xml length
         payload[11+11+4+1+3]=(byte)0;
-        qr=new QueryReply(new byte[16], (byte)5, (byte)0,
-                          payload);
+		try {
+			qr=new QueryReply(new byte[16], (byte)5, (byte)0,
+							  payload);
+		} catch(BadPacketException e) {
+			fail("unexpected exception: "+e);
+		}
         try {
             String vendor=qr.getVendor();
             assertEquals(vendor, "LIME", vendor);
@@ -186,8 +203,12 @@ public final class QueryReplyTest extends TestCase {
         payload[11+11+4+1+3]=(byte)78; // size of xml msb
         for (int i = 0; i < 20000; i++)
             payload[11+11+4+1+4+i] = 'a';
-        qr=new QueryReply(new byte[16], (byte)5, (byte)0,
-                          payload);
+		try {
+			qr=new QueryReply(new byte[16], (byte)5, (byte)0,
+							  payload);
+		} catch(BadPacketException e) {
+			fail("unexpected exception: "+e);
+		}		
         try {
             String vendor=qr.getVendor();
             assertEquals(vendor, "LLME", vendor);
@@ -209,8 +230,12 @@ public final class QueryReplyTest extends TestCase {
         payload[0]=1;            //Number of results
         payload[11+8]=(byte)65;  //The character 'A'
         payload[11+11+4+1+0]=(byte)1;
-        qr=new QueryReply(new byte[16], (byte)5, (byte)0,
-                          payload);
+		try {
+			qr=new QueryReply(new byte[16], (byte)5, (byte)0,
+							  payload);
+		} catch(BadPacketException e) {
+			fail("unexpected exception: "+e);
+		}		
         try {
             qr.getNeedsPush();
             assertTrue(false);
@@ -229,8 +254,12 @@ public final class QueryReplyTest extends TestCase {
         payload[11+11+2]=(byte)77;   //The character 'M'
         payload[11+11+3]=(byte)69;   //The character 'E'
         payload[11+11+4+0]=(byte)2;
-        qr=new QueryReply(new byte[16], (byte)5, (byte)0,
-                          payload);            
+		try {
+			qr=new QueryReply(new byte[16], (byte)5, (byte)0,
+							  payload);            
+		} catch(BadPacketException e) {
+			fail("unexpected exception: "+e);
+		}
         try {
             qr.getResults();
         } catch (BadPacketException e) {
@@ -258,8 +287,12 @@ public final class QueryReplyTest extends TestCase {
         payload[11+11+4+1]=(byte)0x0; //no data known
         payload[11+11+4+1+1]=(byte)0x0; 
         payload[11+11+4+1+2]=(byte)1;         
-        qr=new QueryReply(new byte[16], (byte)5, (byte)0,
-                          payload);
+		try {
+			qr=new QueryReply(new byte[16], (byte)5, (byte)0,
+							  payload);
+		} catch(BadPacketException e) {
+			fail("unexpected exception: "+e);
+		}
         try {
             String vendor=qr.getVendor();
             assertEquals(vendor, vendor, "LIME");
@@ -300,8 +333,12 @@ public final class QueryReplyTest extends TestCase {
         payload[11+11+4+1+1]=(byte)0x1c;  //111X0
         payload[11+11+4+1+2]=(byte)1;  // no xml, just a null, so 1
         payload[11+11+4+1+4]=(byte)0x1; //supports chat
-        qr=new QueryReply(new byte[16], (byte)5, (byte)0,
-                          payload);
+		try {
+			qr=new QueryReply(new byte[16], (byte)5, (byte)0,
+							  payload);
+		} catch(BadPacketException e) {
+			fail("unexpected exception: "+e);
+		}
         try {
             String vendor=qr.getVendor();
             assertEquals(vendor, "LIME", vendor);
@@ -332,8 +369,12 @@ public final class QueryReplyTest extends TestCase {
         payload[11+11+4+1]=(byte)0x1c;  //111X1 
         payload[11+11+4+1+1]=(byte)0x0;  //111X0
         payload[11+11+4+1+2]=(byte)1;  // no xml, just a null, so 1
-        qr=new QueryReply(new byte[16], (byte)5, (byte)0,
-                          payload);
+		try {
+			qr=new QueryReply(new byte[16], (byte)5, (byte)0,
+							  payload);
+		} catch(BadPacketException e) {
+			fail("unexpected exception: "+e);
+		}
         try {
             String vendor=qr.getVendor();
             assertEquals(vendor, "LIME", vendor);

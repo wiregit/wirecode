@@ -172,6 +172,8 @@ public final class SupernodeAssigner {
              _currentUptime >= MINIMUM_CURRENT_UPTIME) &&
             //AND am I not firewalled?
 			ConnectionSettings.EVER_ACCEPTED_INCOMING.getValue() &&
+            //AND I have accepted incoming messages over UDP
+            //RouterService.isGUESSCapable() &&
             //AND am I a capable OS?
 			SUPERNODE_OS;
         
