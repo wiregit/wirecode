@@ -43,6 +43,8 @@ public class GGEP extends Object {
     public static final String GGEP_HEADER_META = "M";
     /** The extension header (key) for client locale */
     public static final String GGEP_HEADER_CLIENT_LOCALE = "LOC";
+    /** The extension header (key) for creation time */
+    public static final String GGEP_HEADER_CREATE_TIME = "CT";
 
     /** The maximum size of a extension header (key). */
     public static final int MAX_KEY_SIZE_IN_BYTES = 15;
@@ -450,6 +452,21 @@ public class GGEP extends Object {
     }
 
     /** 
+     * Adds a key with long value.
+     * @param key the name of the GGEP extension, whose length should be between
+     *  1 and 15, inclusive
+     * @param value the GGEP extension data, which should be an unsigned long
+     * @exception IllegalArgumentException key is of an illegal length; or value
+     *  is negative; or value contains a null bytes, null bytes are disallowed,
+     *  and COBS encoding is not supported 
+     */
+    public void put(String key, long value) throws IllegalArgumentException {
+        if (value<0)  //TODO: ?
+            throw new IllegalArgumentException("Negative value");
+        put(key, ByteOrder.long2minLeb(value));
+    }
+
+    /** 
      * Adds a key without any value.
      * @param key the name of the GGEP extension, whose length should be between
      *  1 and 15, inclusive
@@ -501,6 +518,23 @@ public class GGEP extends Object {
         if (bytes.length>4)
             throw new BadGGEPPropertyException("Integer too big");
         return ByteOrder.leb2int(bytes, 0, bytes.length);
+    }
+    
+    /**
+     * Returns the value for a key as a long.
+     * @param key the name of the GGEP extension
+     * @return the GGEP extension data associated with the key
+     * @exception BadGGEPPropertyException extension not found, was corrupt,
+     *  or has no associated data.   Note that BadGGEPPropertyException is
+     *  is always thrown for extensions with no data; use hasKey instead.
+     */
+    public long getLong(String key) throws BadGGEPPropertyException {
+        byte[] bytes=getBytes(key);
+        if (bytes.length<1)
+            throw new BadGGEPPropertyException("No bytes");
+        if (bytes.length>8)
+            throw new BadGGEPPropertyException("Integer too big");
+        return ByteOrder.leb2long(bytes, 0, bytes.length);
     }
 
     /**

@@ -154,7 +154,73 @@ public class ByteOrder {
     }
 
     /**
-     * Big-endian bytes to int.  Unlike beb2int(x, offset), this version can
+     * Little-endian bytes to long.  This version can
+     * read fewer than 8 bytes.  If n &lt; 8, the returned value is never negative.
+     *
+     * @param x the source of the bytes
+     * @param offset the index to start reading bytes
+     * @param n the number of bytes to read, which must be between 1 and 8,
+     *   inclusive
+     * @return the value of x[offset .. offset + N] as an int, assuming x is
+     *   interpreted as an unsigned little-endian number (i.e., x[offset] is LSB).
+     * @exception IllegalArgumentException if n is less than 1 or greater than 8
+     * @exception IndexOutOfBoundsException if offset &lt; 0 or
+     *   offset + n &gt; x.length
+     */
+    public static long leb2long(final byte[] x, final int offset, final int n)
+            throws IndexOutOfBoundsException, IllegalArgumentException {
+        switch (n) {
+        case 1:
+            return   (long)x[offset    ] & 0xFF        ;
+        case 2:
+            return ( (long)x[offset    ] & 0xFF       ) |
+                   (((long)x[offset + 1] & 0xFF) <<  8);
+        case 3:
+            return ( (long)x[offset    ] & 0xFF       ) |
+                   (((long)x[offset + 1] & 0xFF) <<  8) |
+                   (((long)x[offset + 2] & 0xFF) << 16);
+        case 4:
+            return ( (long)x[offset    ] & 0xFF       ) |
+                   (((long)x[offset + 1] & 0xFF) <<  8) |
+                   (((long)x[offset + 2] & 0xFF) << 16) |
+                   ( (long)x[offset + 3]         << 24);
+        case 5:
+            return ( (long)x[offset    ] & 0xFF       ) |
+                   (((long)x[offset + 1] & 0xFF) <<  8) |
+                   (((long)x[offset + 2] & 0xFF) << 16) |
+                   (((long)x[offset + 3] & 0xFF) << 24) |
+                   ( (long)x[offset + 4]         << 32);
+        case 6:
+            return ( (long)x[offset    ] & 0xFF       ) |
+                   (((long)x[offset + 1] & 0xFF) <<  8) |
+                   (((long)x[offset + 2] & 0xFF) << 16) |
+                   (((long)x[offset + 3] & 0xFF) << 24) |
+                   (((long)x[offset + 4] & 0xFF) << 32) |
+                   ( (long)x[offset + 5]         << 40);
+        case 7:
+            return ( (long)x[offset    ] & 0xFF       ) |
+                   (((long)x[offset + 1] & 0xFF) <<  8) |
+                   (((long)x[offset + 2] & 0xFF) << 16) |
+                   (((long)x[offset + 3] & 0xFF) << 24) |
+                   (((long)x[offset + 4] & 0xFF) << 32) |
+                   (((long)x[offset + 5] & 0xFF) << 40) |
+                   ( (long)x[offset + 6]         << 48);
+        case 8:
+            return ( (long)x[offset    ] & 0xFF       ) |
+                   (((long)x[offset + 1] & 0xFF) <<  8) |
+                   (((long)x[offset + 2] & 0xFF) << 16) |
+                   (((long)x[offset + 3] & 0xFF) << 24) |
+                   (((long)x[offset + 4] & 0xFF) << 32) |
+                   (((long)x[offset + 5] & 0xFF) << 40) |
+                   (((long)x[offset + 6] & 0xFF) << 48) |
+                   ( (long)x[offset + 7]         << 56);
+        default:
+            throw new IllegalArgumentException("No bytes specified");
+        }
+    }
+
+    /**
+     * Big-endian bytes to long.  Unlike beb2long(x, offset), this version can
      * read fewer than 4 bytes.  If n &lt; 4, the returned value is never negative.
      *
      * @param x the source of the bytes
@@ -331,6 +397,45 @@ public class ByteOrder {
         return new byte[] {
             (byte)x, (byte)(x >> 8), (byte)(x >> 16), (byte)(x >> 24)};
     }
+    
+    /**
+     * Returns the minimum number of bytes needed to encode x in little-endian
+     * format, assuming x is non-negative.
+     * @param x a non-negative integer
+     * @exception IllegalArgumentException x is negative
+     */
+    public static byte[] long2minLeb(final long x)
+            throws IllegalArgumentException {
+        if(x <= 0xFFFFFFFFFFFFFFL) {
+            if(x <= 0xFFFFFFFFFFFFL) {
+                if(x <= 0xFFFFFFFFFFL) {
+                    if(x <= 0xFFFFFFFFL) {
+                        if(x <= 0xFFFFFFL) {
+                            if (x <= 0xFFFFL) {
+                                if (x <= 0xFFL) {
+                                    if (x < 0)
+                                        throw new IllegalArgumentException();
+                                    return new byte[] {(byte)x};
+                                }
+                                return new byte[] {(byte)x, (byte)(x >> 8)};
+                            }
+                            return new byte[] {(byte)x, (byte)(x >> 8), (byte)(x >> 16)};
+                        }
+                        return new byte[] {
+                            (byte)x, (byte)(x >> 8), (byte)(x >> 16), (byte)(x >> 24)};
+                    }
+                    return new byte[] {
+                        (byte)x, (byte)(x >> 8), (byte)(x >> 16), (byte)(x >> 24), (byte)(x >> 32)};
+                }
+                return new byte[] {
+                    (byte)x, (byte)(x >> 8), (byte)(x >> 16), (byte)(x >> 24), (byte)(x >> 32), (byte)(x >> 40)};
+            }
+            return new byte[] {
+                (byte)x, (byte)(x >> 8), (byte)(x >> 16), (byte)(x >> 24), (byte)(x >> 32), (byte)(x >> 40), (byte)(x >> 48)};
+        }
+        return new byte[] {
+            (byte)x, (byte)(x >> 8), (byte)(x >> 16), (byte)(x >> 24), (byte)(x >> 32), (byte)(x >> 40), (byte)(x >> 48), (byte)(x >> 56)};
+    }    
 
     /**
      * Returns the minimum number of bytes needed to encode x in big-endian

@@ -126,6 +126,11 @@ public class RemoteFileDesc implements Serializable {
     private transient boolean _isDownloading = false;
     
     /**
+     * The creation time of this file.
+     */
+    private transient long _creationTime;
+    
+    /**
      * Constructs a new RemoteFileDesc exactly like the other one,
      * but with a different remote host.
      *
@@ -133,7 +138,7 @@ public class RemoteFileDesc implements Serializable {
      * for URNs because the Set is immutable.
      */
     public RemoteFileDesc(RemoteFileDesc rfd, Endpoint ep) {
-        this( ep.getAddress(),             // host
+        this( ep.getAddress(),              // host
               ep.getPort(),                 // port
               COPY_INDEX,                   // index (unknown)
               rfd.getFileName(),            // filename
@@ -149,7 +154,8 @@ public class RemoteFileDesc implements Serializable {
               false,                        // is firewalled
               AlternateLocation.ALT_VENDOR, // vendor
               System.currentTimeMillis(),   // timestamp
-              DataUtils.EMPTY_SET );        // push proxies
+              DataUtils.EMPTY_SET,          // push proxies
+              rfd.getCreationTime());       // creation time
     }
 
 	/** 
@@ -159,19 +165,23 @@ public class RemoteFileDesc implements Serializable {
 	 * @param port the host's port
 	 * @param index the index of the file that the client sent
 	 * @param filename the name of the file
+	 * @param size the completed size of this file
 	 * @param clientGUID the unique identifier of the client
 	 * @param speed the speed of the connection
      * @param chat true if the location is chattable
      * @param quality the quality of the connection, where 0 is the
      *  worst and 3 is the best.  (This is the same system as in the
      *  GUI but on a 0 to N-1 scale.)
-     * @param xmlDocs the array of XML documents pertaining to this file
 	 * @param browseHost specifies whether or not the remote host supports
 	 *  browse host
 	 * @param xmlDoc the <tt>LimeXMLDocument</tt> for the response
 	 * @param urns the <tt>Set</tt> of <tt>URN</tt>s for the file
 	 * @param replyToMulticast true if its from a reply to a multicast query
-	 *
+	 * @param firewalled true if the host is firewalled
+	 * @param vendor the vendor of the remote host
+	 * @param timestamp the time this RemoteFileDesc was instantiated
+	 * @param proxies the push proxies for this host
+	 * @param createTime the network-wide creation time of this file
 	 * @throws <tt>IllegalArgumentException</tt> if any of the arguments are
 	 *  not valid
      * @throws <tt>NullPointerException</tt> if the host argument is 
@@ -183,7 +193,7 @@ public class RemoteFileDesc implements Serializable {
 						  LimeXMLDocument xmlDoc, Set urns,
 						  boolean replyToMulticast, boolean firewalled, 
                           String vendor, long timestamp,
-                          Set proxies) {
+                          Set proxies, long createTime) {
 		if(!NetworkUtils.isValidPort(port)) {
 			throw new IllegalArgumentException("invalid port: "+port);
 		} 
@@ -219,6 +229,7 @@ public class RemoteFileDesc implements Serializable {
         _firewalled = firewalled;
         _vendor = vendor;
         _timestamp = timestamp;
+        _creationTime = createTime;
         if(proxies == null) {
             _proxies = DataUtils.EMPTY_SET;
         } else {
@@ -373,6 +384,13 @@ public class RemoteFileDesc implements Serializable {
             LOG.debug("setting retry after to be [" + seconds + 
                       "] seconds for " + this);        
         _earliestRetryTime = System.currentTimeMillis() + seconds*1000;
+    }
+    
+    /**
+     * The creation time of this file.
+     */
+    public long getCreationTime() {
+        return _creationTime;
     }
 
 	/**
