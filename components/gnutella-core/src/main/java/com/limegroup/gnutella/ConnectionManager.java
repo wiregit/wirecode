@@ -411,6 +411,10 @@ public class ConnectionManager {
         else
             pr = new PingRequest(SettingsManager.instance().getTTL());
         connection.send(pr);
+        //Ensure that the initial ping request is written in a timely fashion.
+        try {
+            connection.flush();
+        } catch (IOException e) { /* close it later */ }
     }
 
 
@@ -662,16 +666,19 @@ public class ConnectionManager {
                 if(_doInitialization)
                     initializeExternallyGeneratedConnection(_connection);
 
-				PingRequest pingRequest;
-
 				// Send GroupPingRequest to router
 				String origHost = _connection.getOrigHost();
 				if (origHost != null && 
                     origHost.equals(SettingsManager.DEDICATED_LIMEWIRE_ROUTER))
 				{
 				    String group = "none:"+_settings.getConnectionSpeed();
-				    pingRequest = _router.createGroupPingRequest(group);
+				    PingRequest pingRequest = 
+                        _router.createGroupPingRequest(group);
                     _connection.send(pingRequest);
+                    //Ensure that the initial ping request is written in a timely fashion.
+                    try {
+                        _connection.flush();
+                    } catch (IOException e) { /* close it later */ }
 				}
 				else
                 {
