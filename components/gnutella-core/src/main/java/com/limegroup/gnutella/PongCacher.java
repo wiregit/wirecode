@@ -2,6 +2,7 @@ package com.limegroup.gnutella;
 
 import com.limegroup.gnutella.util.*;
 import com.limegroup.gnutella.messages.*;
+import com.limegroup.gnutella.settings.ApplicationSettings;
 import com.sun.java.util.collections.*;
 
 /**
@@ -36,8 +37,8 @@ public final class PongCacher {
     /**
      * <tt>BucketQueue</tt> holding pongs separated by hops.
      */
-    private static final BucketQueue PONGS =
-        new BucketQueue(NUM_HOPS, NUM_PONGS_PER_HOP);
+    private static final Map PONGS = new HashMap();
+    //new BucketQueue(NUM_HOPS, NUM_PONGS_PER_HOP);
 
     /**
      * Returns the single <tt>PongCacher</tt> instance.
@@ -59,37 +60,67 @@ public final class PongCacher {
      *
      * @return the <tt>List</tt> of cached pongs -- continually updated
      */
-    public List getBestPongs() {
+    public List getBestPongs(String loc) {
         synchronized(PONGS) {
-            Iterator iter = PONGS.iterator();
-            int i = 0;
             List pongs = new LinkedList();
-            List removeList = null;
             long curTime = System.currentTimeMillis();
-            for(;iter.hasNext() && i<NUM_HOPS; i++) {
-                PingReply pr = (PingReply)iter.next();
-                
-                // If the pong is very old, purge it.
-                if(curTime - pr.getCreationTime() > EXPIRE_TIME) {
-                    if(removeList == null) {
-                        removeList = new LinkedList();
-                    }
-                    removeList.add(pr);
-                } else {
-                    pongs.add(pr);
-                }
-            }
+            List removeList = 
+                addBestPongs(loc, pongs, curTime, 0);
             
-            if(removeList != null) {
-                iter = removeList.iterator();
-                while(iter.hasNext()) {
-                    PingReply pr = (PingReply)iter.next();
-                    PONGS.removeAll(pr);
-                }
+            removePongs(loc, removeList);
+            
+            if(pongs.size() < NUM_HOPS) {
+                removeList = 
+                    addBestPongs(ApplicationSettings.DEFAULT_LOCALE.getValue(),
+                                 pongs,
+                                 curTime,
+                                 pongs.size());
+                
+                removePongs(ApplicationSettings.DEFAULT_LOCALE.getValue(),
+                            removeList);
             }
+
             return pongs;
         }
     }
+    
+    /** .return to remove list
+     */
+    private List addBestPongs(String loc, List pongs, 
+                              long curTime, int i) {
+        List remove = null;
+        if(PONGS.containsKey(loc)) { 
+            BucketQueue bq = (BucketQueue)PONGS.get(loc);
+            Iterator iter = bq.iterator();
+            for(;iter.hasNext() && i < NUM_HOPS; i++) {
+                PingReply pr = (PingReply)iter.next();
+                
+                if(curTime - pr.getCreationTime() > EXPIRE_TIME) {
+                    if(remove == null) 
+                        remove = new LinkedList();
+                    remove.add(pr);
+                }
+                else {
+                    pongs.add(pr);
+                }
+            }
+        }
+        
+        return remove;
+    }
+
+    
+    private void removePongs(String loc, List l) {
+        if(l != null) {
+            BucketQueue bq = (BucketQueue)PONGS.get(loc);
+            Iterator iter = l.iterator();
+            while(iter.hasNext()) {
+                PingReply pr = (PingReply)iter.next();
+                bq.removeAll(pr);
+            }
+        }
+    }                             
+
 
     /**
      * Adds the specified <tt>PingReply</tt> instance to the cache of pongs.
@@ -107,7 +138,16 @@ public final class PongCacher {
         // if the hops are too high, ignore it
         if(pr.getHops() >= NUM_HOPS) return;
         synchronized(PONGS) {
-            PONGS.insert(pr, pr.getHops());
+            //PONGS.insert(pr, pr.getHops());
+            if(PONGS.containsKey(pr.getClientLocale())) {
+                BucketQueue bq = (BucketQueue)PONGS.get(pr.getClientLocale());
+                bq.insert(pr, pr.getHops());
+            }
+            else {
+                BucketQueue bq = new BucketQueue(NUM_HOPS, NUM_PONGS_PER_HOP);
+                bq.insert(pr, pr.getHops());
+                PONGS.put(pr.getClientLocale(), bq);
+            }
         }
     }
 }

@@ -1348,7 +1348,7 @@ public class ConnectionManager {
         if(RouterService.isShieldedLeaf() 
            && _needPref 
            && _dedicatedPrefFetcher == null) {
-            System.out.println("creating dedicated fetcher");
+            //System.out.println("creating dedicated fetcher");
             _dedicatedPrefFetcher = new ConnectionFetcher(true);
         }
         //How many connections do we need?  To prefer ultrapeers, we try to

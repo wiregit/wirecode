@@ -74,7 +74,9 @@ public class StandardMessageRouter extends MessageRouter {
             }
         }
 
-        List pongs = PongCacher.instance().getBestPongs();
+        List pongs = PongCacher.instance().getBestPongs(ping.getLocale());
+        System.out.println("StandardMessageRouter : pongs : " + 
+                           pongs.size());
         Iterator iter = pongs.iterator();
         byte[] guid = ping.getGUID();
 
