@@ -1,12 +1,10 @@
 package com.limegroup.gnutella.uploader;
 
 import com.limegroup.gnutella.*;
-import com.limegroup.gnutella.altlocs.*;
 import com.limegroup.gnutella.settings.*;
 import com.limegroup.gnutella.http.*;
 import com.sun.java.util.collections.*;
 import java.io.*;
-import java.util.Date;
 import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.util.BandwidthThrottle;
 
@@ -203,7 +201,7 @@ public final class NormalUploadState implements HTTPMessage {
     /**
      * @return the bandwidth for uploads in bytes per second
      */
-    public static float getUploadSpeed() {
+    private static float getUploadSpeed() {
 	    // if the user chose not to limit his uploads
 	    // by setting the upload speed to unlimited
 	    // set the upload speed to 3.4E38 bytes per second.
