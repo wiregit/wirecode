@@ -12,6 +12,32 @@ public class MacOSXUtils {
     private MacOSXUtils() {}
     
     /**
+     * The login domain.
+     */
+    private static final String LOGIN_DOMAIN = "loginwindow";
+    
+    /**
+     * The name of the dictionary which contains the apps that are launched.
+     */
+    private static final String DICTIONARY =
+        "AutoLaunchedApplicationDictionary";
+    
+    /**
+     * The key for "hide"
+     */
+    private static final String HIDE = "Hide";
+    
+    /**
+     * The key for "path";
+     */
+    private static final String PATH = "Path";
+    
+    /**
+     * The name of the app that launches.
+     */
+    private static final String APP_NAME = "LimeWire At Login.app";
+    
+    /**
      * Creates a mutable clone of the specified object.
      */
     private static Object createMutableClone(Object a)
@@ -32,12 +58,12 @@ public class MacOSXUtils {
         Object temp; // Used for the assignment when retrieiving as an object.
         NSUserDefaults defaults = NSUserDefaults.standardUserDefaults();
 
-        temp = defaults.persistentDomainForName("loginwindow");
+        temp = defaults.persistentDomainForName(LOGIN_DOMAIN);
         // If no domain existed, create one and make its initial dictionary.
         if(temp == null) {
             temp = new NSMutableDictionary();
             ((NSMutableDictionary)temp).setObjectForKey(new NSMutableArray(),
-                                        "AutoLaunchedApplicationDictionary");
+                                        DICTIONARY);
         } else if(!(temp instanceof NSMutableDictionary))
             return; // nothing we can do.
 
@@ -50,7 +76,7 @@ public class MacOSXUtils {
         }
         
         // Retrieve the array that contains the various dictionaries
-        temp = logins.objectForKey("AutoLaunchedApplicationDictionary");
+        temp = logins.objectForKey(DICTIONARY);
         // If no object existed, create one.
         if(temp == null)
             temp = new NSMutableArray();
@@ -85,13 +111,13 @@ public class MacOSXUtils {
                 continue; // can't do anything, continue.
             }
             
-            Object path = itemInfo.objectForKey("Path");
+            Object path = itemInfo.objectForKey(PATH);
             // If it isn't a String, ignore it because we
             // won't know how to handle it.
             if(!(path instanceof String))
                 continue;
             String itemPath = (String)path;
-            if(itemPath.indexOf("/LimeWire/LoginStartup.app") != -1) {
+            if(itemPath.indexOf(APP_NAME) != -1) {
                 found = true;
                 // If not allowed, remove.
                 // We must remove with temp, not itemInfo, because itemInfo
@@ -99,7 +125,7 @@ public class MacOSXUtils {
                 if(!allow)
                     allApps.removeIdenticalObject(temp);
                 else
-                    itemInfo.setObjectForKey(getAppDir(), "Path");
+                    itemInfo.setObjectForKey(getAppDir(), PATH);
                 break;
             }
         }
@@ -109,17 +135,17 @@ public class MacOSXUtils {
                 return;
             else {
                 NSMutableDictionary newItem = new NSMutableDictionary();
-                newItem.setObjectForKey(new Integer(0), "Hide");
-                newItem.setObjectForKey(getAppDir(), "Path");
+                newItem.setObjectForKey(new Integer(0), HIDE);
+                newItem.setObjectForKey(getAppDir(), PATH);
                 allApps.addObject(newItem);
             }
         }
         
         //Make sure we set add our new allApps to the dictionary.
-        logins.setObjectForKey(allApps, "AutoLaunchedApplicationDictionary");
+        logins.setObjectForKey(allApps, DICTIONARY);
         
         // Set the new domain.
-        defaults.setPersistentDomainForName(logins, "loginwindow");
+        defaults.setPersistentDomainForName(logins, LOGIN_DOMAIN);
         // Synchronize it to disk immediately
         defaults.synchronize();
     }
@@ -132,11 +158,11 @@ public class MacOSXUtils {
      */
     public static String getAppDir() {
         if(CommonUtils.isTestingVersion()) {
-            return "/Applications/LimeWire/LoginStartup.app/";
+            return "/Applications/LimeWire/" + APP_NAME;
         } else {
             String appDir = CommonUtils.getCurrentDirectory().getPath();
             int app = appDir.indexOf("LimeWire.app");
-            appDir = appDir.substring(0, app) + "LoginStartup.app/";
+            appDir = appDir.substring(0, app) + APP_NAME;
             return appDir;
         }
     }
