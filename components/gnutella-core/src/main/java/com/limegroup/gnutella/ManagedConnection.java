@@ -1204,11 +1204,22 @@ public class ManagedConnection
 	 * @return <tt>true</tt> if the node on the other end of this 
 	 *  connection supports GUESS, <tt>false</tt> otherwise
 	 */
-	public boolean isGUESSUltrapeer() {
+	public boolean isGUESSCapable() {
 		int version = getGUESSVersion();
 		if(version == -1) return false;
 		else if(version < 20 && version > 0) return true;
 		return false;
+	}
+
+	/**
+	 * Returns whether or not this connection is to a ultrapeer supporting
+	 * GUESS.
+	 *
+	 * @return <tt>true</tt> if the node on the other end of this 
+	 *  Ultrapeer connection supports GUESS, <tt>false</tt> otherwise
+	 */
+	public boolean isGUESSUltrapeer() {
+		return isGUESSCapable() && isSupernodeConnection();
 	}
 
 	/**
