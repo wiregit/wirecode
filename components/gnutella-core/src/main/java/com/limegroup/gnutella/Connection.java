@@ -1321,10 +1321,13 @@ public class Connection {
         long curTime = System.currentTimeMillis();
         if(curTime < _nextPingTime) {
             return false;
-        } else {
-            _nextPingTime = curTime + 800;
-            return true;
-        }         
+        } 
+        return true;
+    }
+
+    // inherit doc comment
+    public void updatePingTime() {
+        _nextPingTime = System.currentTimeMillis() + 800;
     }
 
 	/**
