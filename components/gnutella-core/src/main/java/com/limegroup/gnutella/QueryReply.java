@@ -298,16 +298,28 @@ public class QueryReply extends Message implements Serializable{
 				
 				//payload[i..j-1] is name.  This excludes the null terminator.
 				String name=new String(payload,i,j-i);
-				responses[responses.length-left]=new Response(index,size,name);
+				Response myResponse = new Response(index,size,name);
+				responses[responses.length-left]= myResponse;
 				
 				//Search for remaining null terminator.
+				int l = j+1;
 				for ( j=j+1; ; j++) {
-					System.out.print(payload[j]);
 					if (payload[j]==(byte)0)
 						break;
 				}
-				System.out.println("");
-				// i=j+1;
+				
+				int blen = j-l; 
+				
+				if (blen > 0) {
+					String myMeta = new String(payload, l, blen);
+					// add the meta information to the response[]
+					myResponse.setMeta(myMeta);
+					System.out.println("myMeta: " + myMeta);
+					// i=j+1;
+					// j+= blen;
+				}
+
+
 				i = j+1;
             }
 			
