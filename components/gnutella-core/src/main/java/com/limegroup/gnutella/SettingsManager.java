@@ -54,6 +54,7 @@ public class SettingsManager implements SettingsInterface
     private static boolean  clearCompletedUpload_;
     private static boolean  clearCompletedDownload_;
     private static int      maxSimDownload_;
+    private static int      maxUploads_;
     private static int      searchAnimationTime_;
     private static String   saveDefault_;
 
@@ -406,6 +407,7 @@ public class SettingsManager implements SettingsInterface
 		setClearCompletedUpload(SettingsInterface.DEFAULT_CLEAR_UPLOAD);
 		setClearCompletedDownload(SettingsInterface.DEFAULT_CLEAR_DOWNLOAD);
 		setMaxSimDownload(SettingsInterface.DEFAULT_MAX_SIM_DOWNLOAD);
+		setMaxUploads(SettingsInterface.DEFAULT_MAX_UPLOADS);
 		setSearchAnimationTime(SettingsInterface.DEFAULT_SEARCH_ANIMATION_TIME);
 		setConnectString(SettingsInterface.DEFAULT_CONNECT_STRING);
 		setConnectOkString(SettingsInterface.DEFAULT_CONNECT_OK_STRING);
@@ -504,6 +506,7 @@ public class SettingsManager implements SettingsInterface
     public String[] getQuickConnectHosts(){return quickConnectHosts_;}    
     public int getParallelSearchMax(){return parallelSearchMax_;}    
     public int getMaxSimDownload(){return maxSimDownload_;}    
+    public int getMaxUploads(){return maxUploads_;}    
     public boolean getClearCompletedUpload(){return clearCompletedUpload_;} 
     public boolean getClearCompletedDownload(){return clearCompletedDownload_;} 
     public int getSearchAnimationTime(){ return searchAnimationTime_; }
@@ -966,6 +969,17 @@ public class SettingsManager implements SettingsInterface
 			maxSimDownload_ = max;
 			String s = String.valueOf(max);
 			props_.put(SettingsInterface.MAX_SIM_DOWNLOAD, s);
+			writeProperties();	
+		}
+    }
+
+    public synchronized void setMaxUploads(int max) {
+		if(false)
+			throw new IllegalArgumentException();
+		else {
+			maxUploads_ = max;
+			String s = String.valueOf(max);
+			props_.put(SettingsInterface.MAX_UPLOADS, s);
 			writeProperties();	
 		}
     }

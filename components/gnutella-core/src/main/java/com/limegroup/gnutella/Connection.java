@@ -620,6 +620,12 @@ public class Connection implements Runnable {
                     // // if (manager.ClientId.equals(DestinationId) ){
                     //I am the destination
                     else if (manager.isClient(req_guid)) {
+				
+						// Ignore excess upload requests
+						if ( manager.getCallback().getNumUploads() >=
+                             SettingsManager.instance().getMaxUploads() )
+						    continue;
+
                         //unpack message
                         //make HTTP connection with originator
                         String host = new String(req.getIP());
