@@ -245,7 +245,7 @@ public interface SettingsInterface
     };
     public static final int     DEFAULT_PARALLEL_SEARCH  = 5;
     public static final int     DEFAULT_MAX_SIM_DOWNLOAD = 4;
-    public static final int     DEFAULT_MAX_UPLOADS      = 2;
+    public static final int     DEFAULT_MAX_UPLOADS      = 4;
     public static final boolean DEFAULT_CLEAR_UPLOAD     = false;
     public static final boolean DEFAULT_CLEAR_DOWNLOAD   = false;
     public static final int     DEFAULT_SEARCH_ANIMATION_TIME = 45;
