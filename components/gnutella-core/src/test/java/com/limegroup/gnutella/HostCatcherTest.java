@@ -7,6 +7,7 @@ import com.sun.java.util.collections.*;
 import com.limegroup.gnutella.messages.*;
 import com.limegroup.gnutella.util.*;
 import com.limegroup.gnutella.stubs.ActivityCallbackStub;
+import com.limegroup.gnutella.settings.*;
 
 public class HostCatcherTest extends com.limegroup.gnutella.util.BaseTestCase {  
     private HostCatcher hc;
@@ -25,9 +26,9 @@ public class HostCatcherTest extends com.limegroup.gnutella.util.BaseTestCase {
     public void setUp() {
 
         //explicitly allow all ips to test.
-        SettingsManager settings = SettingsManager.instance();
-        settings.setBannedIps(new String[] {});
-        settings.setAllowedIps(new String[] { "*.*" });
+        FilterSettings.BLACK_LISTED_IP_ADDRESSES.setValue(new String[] {});
+        FilterSettings.WHITE_LISTED_IP_ADDRESSES.setValue(
+            new String[] { "*.*" });
         
         HostCatcher.DEBUG=true;
 		rs = new RouterService(new ActivityCallbackStub());

@@ -2,6 +2,7 @@ package com.limegroup.gnutella.downloader;
 
 import java.io.*;
 import com.limegroup.gnutella.*;
+import com.limegroup.gnutella.settings.*;
 import com.limegroup.gnutella.util.CommonUtils;
 import com.sun.java.util.collections.*;
 import com.limegroup.gnutella.util.FileComparator;
@@ -126,7 +127,7 @@ public class IncompleteFileManager implements Serializable {
     private static final boolean isOld(File file) {
         //Inlining this method allows some optimizations--not that they matter.
         long lastModified=file.lastModified();
-        long days=SettingsManager.instance().getIncompletePurgeTime();
+        long days=SharingSettings.INCOMPLETE_PURGE_TIME.getValue();;
         //Back up a couple days. 
         //24 hour/day * 60 min/hour * 60 sec/min * 1000 msec/sec
         long purgeTime=System.currentTimeMillis()-days*24l*60l*60l*1000l;
@@ -185,15 +186,9 @@ public class IncompleteFileManager implements Serializable {
      * </pre>
      */
     public synchronized File getFile(RemoteFileDesc rfd) {
-		File incDir = null;
-		try {
-			incDir = SettingsManager.instance().getIncompleteDirectory();
-			//make sure its created.. (the user might have deleted it)
-			incDir.mkdirs();
-		} catch(java.io.FileNotFoundException fnfe) {
-			// this is fine, as this will just create a file in the current
-			// working directory.
-		}
+	    File incDir = SharingSettings.INCOMPLETE_DIRECTORY.getValue();
+		//make sure its created.. (the user might have deleted it)
+		incDir.mkdirs();
 		
 		String convertedName =
 		    CommonUtils.convertFileName(rfd.getFileName());

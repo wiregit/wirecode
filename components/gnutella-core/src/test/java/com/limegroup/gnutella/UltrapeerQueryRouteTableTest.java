@@ -1,7 +1,6 @@
 package com.limegroup.gnutella;
 
 import junit.framework.Test;
-
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.search.HostData;
 import com.limegroup.gnutella.settings.ConnectionSettings;
@@ -10,6 +9,7 @@ import com.limegroup.gnutella.util.BaseTestCase;
 import com.limegroup.gnutella.xml.MetaFileManager;
 import com.sun.java.util.collections.LinkedList;
 import com.sun.java.util.collections.List;
+
 
 /**
  * Test to make sure that query routing tables are correctly exchanged between
@@ -67,8 +67,7 @@ public final class UltrapeerQueryRouteTableTest extends BaseTestCase {
 		ConnectionSettings.USE_GWEBCACHE.setValue(false);
 		ConnectionSettings.WATCHDOG_ACTIVE.setValue(false);
         ConnectionSettings.IGNORE_KEEP_ALIVE.setValue(true);
-        SettingsManager settings = SettingsManager.instance();
-        settings.setPort(6332);
+        ConnectionSettings.PORT.setValue(6332);
     }
     
     public static void globalSetUp() throws Exception {

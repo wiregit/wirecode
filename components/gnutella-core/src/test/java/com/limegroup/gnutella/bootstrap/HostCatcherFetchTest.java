@@ -4,6 +4,7 @@ import junit.framework.*;
 import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.stubs.*;
 import com.limegroup.gnutella.util.PrivilegedAccessor;
+import com.limegroup.gnutella.settings.*;
 
 /**
  * Unit tests for the HostCatcher/BootstrapServerManager interface.
@@ -25,7 +26,7 @@ public class HostCatcherFetchTest extends com.limegroup.gnutella.util.BaseTestCa
     }
 
     public void setUp() throws Exception {
-        SettingsManager.instance().setBannedIps(new String[0]);
+        FilterSettings.BLACK_LISTED_IP_ADDRESSES.setValue(new String[0]);
         // we don't actually need the service, we just need it
         // to start up the other services.
         new RouterService( new ActivityCallbackStub() );

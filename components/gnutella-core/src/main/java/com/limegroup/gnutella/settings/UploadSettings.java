@@ -1,6 +1,5 @@
 package com.limegroup.gnutella.settings;
 
-
 /**
  * Settings for uploads.
  */
@@ -32,4 +31,25 @@ public final class UploadSettings extends LimeProps {
      */
     public static final BooleanSetting ALLOW_PARTIAL_SHARING =
         FACTORY.createBooleanSetting("ALLOW_PARTIAL_SHARING", true);
+        
+    /**
+	 * The maximum number of upstream bytes per second ever passed by
+	 * this node.
+	 */
+    public static final IntSetting MAX_UPLOAD_BYTES_PER_SEC =
+        FACTORY.createExpirableIntSetting("MAX_UPLOAD_BYTES_PER_SEC", 0);
+     
+    /**
+	 * The maximum number of simultaneous uploads to allow.
+	 */
+    public static final IntSetting MAX_UPLOADS =
+        FACTORY.createIntSetting("MAX_UPLOADS", 20);
+    
+    /**
+	 * The "soft" maximum number of simultaneous uploads to allow,
+     * i.e., the minimum number of people to allow before determining
+     * whether to allow more uploads.
+	 */
+    public static final IntSetting SOFT_MAX_UPLOADS =
+        FACTORY.createIntSetting("SOFT_MAX_UPLOADS", 5);        
 }

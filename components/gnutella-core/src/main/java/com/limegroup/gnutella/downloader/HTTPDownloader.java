@@ -7,12 +7,16 @@ package com.limegroup.gnutella.downloader;
 import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.http.*;
 import com.limegroup.gnutella.statistics.*;
+import com.limegroup.gnutella.settings.ChatSettings;
 import com.limegroup.gnutella.settings.UploadSettings;
 import com.limegroup.gnutella.util.Sockets;
+import com.limegroup.gnutella.util.CommonUtils;
+import com.limegroup.gnutella.util.NetworkUtils;
+
 import java.io.*;
 import java.net.*;
-import com.limegroup.gnutella.util.CommonUtils;
 import java.util.StringTokenizer;
+
 import com.sun.java.util.collections.*;
 
 /**
@@ -300,20 +304,9 @@ public class HTTPDownloader implements BandwidthTracker {
 			HTTPUtils.writeHeader(HTTPHeaderName.ALT_LOCATION, alts, out);
 		}
         out.write("Range: bytes=" + startRange + "-"+(stop-1)+"\r\n");
-        SettingsManager sm=SettingsManager.instance();
-		if (sm.getChatEnabled() ) {
-            //Get our own address and port.  This duplicates the getAddress an
-            //getPort methods of Acceptor.  Unfortunately we don't have a
-            //reference to Acceptor, nor do we particularly want one.
-            int port;
-            String host;
-            if ( sm.getForceIPAddress() ) {
-                port = sm.getForcedPort();
-                host = sm.getForcedIPAddressString();
-            } else {
-                port = sm.getPort();
-                host = _socket.getLocalAddress().getHostAddress();
-            }
+		if (ChatSettings.CHAT_ENABLED.getValue() ) {
+            int port = RouterService.getPort();
+            String host = NetworkUtils.ip2string(RouterService.getAddress());
             out.write("Chat: " + host + ":" + port + "\r\n");            
 		}
         out.write("\r\n");

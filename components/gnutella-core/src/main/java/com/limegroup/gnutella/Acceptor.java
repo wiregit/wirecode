@@ -108,8 +108,21 @@ public class Acceptor implements Runnable {
      *   If true, the forced IP address will only be used if one is set.
      */
     public byte[] getAddress(boolean checkForce) {
-		if(checkForce && SettingsManager.instance().getForceIPAddress())
-			return SettingsManager.instance().getForcedIPAddress();
+		if(checkForce && ConnectionSettings.FORCE_IP_ADDRESS.getValue()) {
+        
+            String address = ConnectionSettings.FORCED_IP_ADDRESS_STRING.getValue();
+            if (address.equals("0.0.0.0")) {
+                return (new byte[]{ (byte)0, (byte)0, (byte)0, (byte)0 });
+            } else {
+                try {
+                    InetAddress ia = InetAddress.getByName(address);
+                    return ia.getAddress();
+                } catch (UnknownHostException err) {
+                    // ignore and return _address
+                }
+            }
+        }
+        
         synchronized (Acceptor.class) {
             return _address;
         }
@@ -123,8 +136,8 @@ public class Acceptor implements Runnable {
      * @return the listening port
      */
     public int getPort(boolean checkForce) {
-        if(checkForce && SettingsManager.instance().getForceIPAddress())
-			return SettingsManager.instance().getForcedPort();
+        if(checkForce && ConnectionSettings.FORCE_IP_ADDRESS.getValue())
+			return ConnectionSettings.FORCED_PORT.getValue();
         return _port;
     }
 
@@ -267,8 +280,8 @@ public class Acceptor implements Runnable {
      *   changed accordingly.
      */
     public void run() {
-		SettingsManager settings = SettingsManager.instance();
-		int tempPort = settings.getPort();
+		
+        int tempPort = ConnectionSettings.PORT.getValue();
 
         //0. Get local address.  This must be done here because it can
         //   block under certain conditions.
@@ -316,8 +329,8 @@ public class Acceptor implements Runnable {
         socketError = null;
 
         if (_port!=oldPort) {
-            settings.setPort(_port);
-            settings.writeProperties();
+            ConnectionSettings.PORT.setValue(_port);
+            SettingsHandler.save();
         }
 
         while (true) {
@@ -446,12 +459,10 @@ public class Acceptor implements Runnable {
                 //   ("LIMEWIRE CONNECT/0.4").  Otherwise we just accept
                 //   the user's value.
                 boolean useDefaultConnect=
-                    SettingsManager.instance().getConnectString().equals(
-                         SettingsManager.DEFAULT_CONNECT_STRING);
+                    ConnectionSettings.CONNECT_STRING.isDefault();
 
 
-                if (word.equals(SettingsManager.instance().
-                        getConnectStringFirstWord())) {
+                if (word.equals(ConnectionSettings.CONNECT_STRING_FIRST_WORD)) {
                     cm.acceptConnection(_socket);
                 }
                 else if (useDefaultConnect && word.equals("LIMEWIRE")) {

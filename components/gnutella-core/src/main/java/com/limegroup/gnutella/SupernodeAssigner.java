@@ -24,7 +24,7 @@ public final class SupernodeAssigner {
 	 * Constant handle to the <tt>SettingsManager</tt> for accessing
 	 * various properties.
 	 */
-	private static final SettingsManager SETTINGS = SettingsManager.instance();
+	//private static final SettingsManager SETTINGS = SettingsManager.instance();
 
 	/**
 	 * Constant for the minimum number of upstream kbytes per second that 
@@ -101,14 +101,14 @@ public final class SupernodeAssigner {
 	 * downstream over the history of the application.
 	 */
 	private static int _maxUpstreamBytesPerSec =
-        SETTINGS.getMaxUpstreamBytesPerSec();
+        UploadSettings.MAX_UPLOAD_BYTES_PER_SEC.getValue();
 
 	/**
 	 * Variable for the maximum number of bytes per second transferred 
 	 * upstream over the history of the application.
 	 */
 	private static int _maxDownstreamBytesPerSec = 
-        SETTINGS.getMaxDownstreamBytesPerSec();
+        DownloadSettings.MAX_DOWNLOAD_BYTES_PER_SEC.getValue();
     
     /**
      * True, if the last time we evaluated the node for ultrapeer capability, 
@@ -201,9 +201,9 @@ public final class SupernodeAssigner {
              _maxDownstreamBytesPerSec >= 
                     MINIMUM_REQUIRED_DOWNSTREAM_KBYTES_PER_SECOND) &&
             //AND I'm not a modem (in case estimate wrong)
-            (SETTINGS.getConnectionSpeed() > SpeedConstants.MODEM_SPEED_INT) &&
+            (ConnectionSettings.CONNECTION_SPEED.getValue() > SpeedConstants.MODEM_SPEED_INT) &&
             //AND is my average uptime OR current uptime high enough?
-            (SETTINGS.getAverageUptime() >= MINIMUM_AVERAGE_UPTIME ||
+            (ApplicationSettings.AVERAGE_UPTIME.getValue() >= MINIMUM_AVERAGE_UPTIME ||
              _currentUptime >= MINIMUM_CURRENT_UPTIME) &&
             //AND am I not firewalled?
 			ConnectionSettings.EVER_ACCEPTED_INCOMING.getValue() &&
@@ -300,11 +300,11 @@ public final class SupernodeAssigner {
            +(int)_manager.getMeasuredDownstreamBandwidth();
 		if(newUpstreamBytesPerSec > _maxUpstreamBytesPerSec) {
 			_maxUpstreamBytesPerSec = newUpstreamBytesPerSec;
-			SETTINGS.setMaxUpstreamBytesPerSec(_maxUpstreamBytesPerSec);
+			UploadSettings.MAX_UPLOAD_BYTES_PER_SEC.setValue(_maxUpstreamBytesPerSec);
 		}
   		if(newDownstreamBytesPerSec > _maxDownstreamBytesPerSec) {
 			_maxDownstreamBytesPerSec = newDownstreamBytesPerSec;
-  			SETTINGS.setMaxDownstreamBytesPerSec(_maxDownstreamBytesPerSec);
+  			DownloadSettings.MAX_DOWNLOAD_BYTES_PER_SEC.setValue(_maxDownstreamBytesPerSec);
   		}
     
         //check if became ultrapeer capable

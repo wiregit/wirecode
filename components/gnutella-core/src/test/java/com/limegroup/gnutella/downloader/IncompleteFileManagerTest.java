@@ -6,17 +6,13 @@ import com.limegroup.gnutella.util.PrivilegedAccessor;
 import com.sun.java.util.collections.*;
 import junit.framework.*;
 import java.io.*;
+import com.limegroup.gnutella.settings.*;
 
 public class IncompleteFileManagerTest extends com.limegroup.gnutella.util.BaseTestCase {
     private IncompleteFileManager ifm;
     private RemoteFileDesc rfd1, rfd2;
     private FileManager fm;
     
-    static {
-        SettingsManager.instance();
-    }
-    
-
     public IncompleteFileManagerTest(String name) {
         super(name);
     }
@@ -65,7 +61,7 @@ public class IncompleteFileManagerTest extends com.limegroup.gnutella.util.BaseT
         assertEquals(new Interval(0, 10), iter.next());
         assertTrue(! iter.hasNext());
         
-        SettingsManager.instance().setIncompletePurgeTime(26);
+        SharingSettings.INCOMPLETE_PURGE_TIME.setValue(26);
         File young=new FakeTimedFile(25);
         File old=new FakeTimedFile(27);
         assertTrue(!isOld(young));
@@ -331,10 +327,12 @@ public class IncompleteFileManagerTest extends com.limegroup.gnutella.util.BaseT
             //Make sure it's the same.
             File incomp = null;
             File inDir = null;
-            try {
-                inDir = SettingsManager.instance().getIncompleteDirectory();
-            } catch(java.io.FileNotFoundException fnfe) {
-                fail("unable to set up test-cannot find incomplete directory", fnfe);
+            inDir = SharingSettings.INCOMPLETE_DIRECTORY.getValue();
+            if( inDir == null ||
+               !inDir.isDirectory() ||
+               !inDir.exists() ||
+               !inDir.canWrite() ) {
+                fail("unable to set up test-cannot find incomplete directory");
             }
             incomp =  new File(inDir, "T-1839-file name.txt");
             VerifyingFile vf2=(VerifyingFile)ifm2.getEntry(incomp);

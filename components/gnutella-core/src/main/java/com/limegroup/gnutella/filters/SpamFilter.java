@@ -1,6 +1,7 @@
 package com.limegroup.gnutella.filters;
 
 import com.limegroup.gnutella.*;
+import com.limegroup.gnutella.settings.*;
 import com.limegroup.gnutella.messages.*;
 import com.sun.java.util.collections.Vector;
 
@@ -25,21 +26,23 @@ public abstract class SpamFilter {
      * search results.
      */
     public static SpamFilter newPersonalFilter() {
-        SettingsManager settings=SettingsManager.instance();
+        
         Vector /* of SpamFilter */ buf=new Vector();
 
         //1. IP-based techniques.
-        String[] badIPs=settings.getBannedIps();
+        String[] badIPs = FilterSettings.BLACK_LISTED_IP_ADDRESSES.getValue();
         if (badIPs.length!=0) {   //no need to check getAllowIPs
             IPFilter bf=IPFilter.instance();
             buf.add(bf);
         }
 
         //2. Keyword-based techniques.
-        String[] badWords=settings.getBannedWords();
-        boolean filterAdult=settings.getFilterAdult();
-        boolean filterVbs=settings.getFilterVbs();
-        boolean filterHtml=settings.getFilterHtml();
+        String[] badWords = FilterSettings.BANNED_WORDS.getValue();
+        
+        boolean filterAdult = FilterSettings.FILTER_ADULT.getValue();
+        boolean filterVbs = FilterSettings.FILTER_VBS.getValue();
+        boolean filterHtml = FilterSettings.FILTER_HTML.getValue();
+        
         if (badWords.length!=0 || filterAdult || filterVbs || filterHtml) {
             KeywordFilter kf=new KeywordFilter();
             for (int i=0; i<badWords.length; i++)
@@ -67,7 +70,7 @@ public abstract class SpamFilter {
      */
     public static SpamFilter newRouteFilter() {
         //Assemble spam filters. Order matters a little bit.
-        SettingsManager settings=SettingsManager.instance();
+        
         Vector /* of SpamFilter */ buf=new Vector();
 
         //1. Eliminate old LimeWire requeries.
@@ -77,15 +80,15 @@ public abstract class SpamFilter {
         buf.add(new GUIDFilter());
 
         //2. Duplicate-based techniques.
-        if (settings.getFilterDuplicates())
+        if (FilterSettings.FILTER_DUPLICATES.getValue())
             buf.add(new DuplicateFilter());
 
         //3. Greedy queries.  Yes, this is a route filter issue.
-        if (settings.getFilterGreedyQueries())
+        if (FilterSettings.FILTER_GREEDY_QUERIES.getValue())
             buf.add(new GreedyQueryFilter());
 
         //4. BearShare high-bit queries.
-        // if (settings.getFilterBearShareQueries())
+        // if (FilterSettings.FILTER_HIGHBIT_QUERIES.getValue())
         //     buf.add(new BearShareFilter());
 
         return compose(buf);

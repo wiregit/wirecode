@@ -3,6 +3,7 @@ package com.limegroup.gnutella.updates;
 import org.apache.xerces.parsers.*;
 import com.limegroup.gnutella.xml.*;
 import com.limegroup.gnutella.*;
+import com.limegroup.gnutella.settings.*;
 import org.xml.sax.*;
 import org.w3c.dom.*;
 import java.io.*;
@@ -64,7 +65,7 @@ public class UpdateFileParser {
      * we set the value of usingLocale to false. 
      */
     private String getLocaleSpecificMessage(Node node) {
-        String locale = SettingsManager.instance().getLanguage().toLowerCase();
+        String locale = ApplicationSettings.LANGUAGE.getValue().toLowerCase();
         String defaultMessage=null;
         String localeMessage=null;
         NodeList children = node.getChildNodes();

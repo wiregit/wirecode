@@ -1,12 +1,15 @@
 package com.limegroup.gnutella;
 
-import java.io.*;
-import com.sun.java.util.collections.*;
-import com.limegroup.gnutella.messages.*;
-import com.limegroup.gnutella.util.*;
-import com.limegroup.gnutella.xml.*;
 import com.limegroup.gnutella.downloader.IncompleteFileManager;
 import com.limegroup.gnutella.downloader.VerifyingFile;
+import com.limegroup.gnutella.messages.*;
+import com.limegroup.gnutella.settings.SharingSettings;
+import com.limegroup.gnutella.util.*;
+import com.limegroup.gnutella.xml.*;
+
+import java.io.*;
+
+import com.sun.java.util.collections.*;
 
 /**
  * The list of all shared files.  Provides operations to add and remove
@@ -517,11 +520,11 @@ public class FileManager {
 
     /**
      * Ensures this contains exactly the files specified by the
-     * EXTENSIONS_TO_SEARCH_FOR and DIRECTORIES_TO_SEARCH_FOR_FILES properties.
+     * EXTENSIONS_TO_SHARE and DIRECTORIES_TO_SHARE properties.
      * That is, clears this and loads all files with the given extensions in the
      * given directories <i>and their children</i>.  Note that some files in
      * this before the call will not be in this after the call, or they may have
-     * a different index.  If DIRECTORIES_TO_SEARCH_FOR_FILES contains duplicate
+     * a different index.  If DIRECTORIES_TO_SHARE contains duplicate
      * directories, the duplicates will be ignored.  If it contains files, they
      * will be ignored.<p>
 	 *
@@ -608,9 +611,8 @@ public class FileManager {
             _incompletesShared = new IntSet();
 
             // Load the extensions.
-            String[] extensions = 
-            StringUtils.split(SettingsManager.instance().getExtensions().trim(),
-                              ';');
+            String[] extensions = StringUtils.split(SharingSettings.EXTENSIONS_TO_SHARE.getValue(), ";");
+            
             for (int i=0; 
                  (i<extensions.length) && !loadThreadInterrupted();
                  i++)
@@ -623,7 +625,7 @@ public class FileManager {
             //So we just approximate this by sorting by filename length, from
             //smallest to largest.  Unless directories are specified as
             //"C:\dir\..\dir\..\dir", this will do the right thing.
-			final File[] directories = SettingsManager.instance().getDirectories();
+			final File[] directories = (File[])SharingSettings.DIRECTORIES_TO_SHARE.getValue();
 
             Arrays.sort(directories, new Comparator() {
                 public int compare(Object a, Object b) {
@@ -676,7 +678,7 @@ public class FileManager {
      * This method is thread-safe.  It acquires locks on a per-directory basis.
      * If the _loadThread is interrupted while scanning the contents of
      * directory, it returns immediately.
-     * @requires directory is part of DIRECTORIES_TO_SEARCH_FOR_FILES or one of
+     * @requires directory is part of DIRECTORIES_TO_SHARE or one of
      *  its children, and parent is directory's shared parent or null if
      *  directory's parent is not shared.
      * @modifies this

@@ -62,11 +62,11 @@ public class RequeryDownloadTest
 		ConnectionSettings.NUM_CONNECTIONS.setValue(0);
 		ConnectionSettings.CONNECT_ON_STARTUP.setValue(false);
 		ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
-        SettingsManager.instance().setPort(6346);
+		ConnectionSettings.PORT.setValue(6346);
         
         _router=new TestMessageRouter();
         new RouterService(new ActivityCallbackStub(), _router);        
-        RouterService.setListeningPort(SettingsManager.instance().getPort());
+        RouterService.setListeningPort(ConnectionSettings.PORT.getValue());
         PrivilegedAccessor.setValue(
             RouterService.class, "manager", new ConnectionManagerStub());
         _router.initialize();

@@ -122,15 +122,16 @@ public final class UltrapeerRoutingTest extends BaseTestCase {
         //Setup LimeWire backend.  For testing other vendors, you can skip all
         //this and manually configure a client to listen on port 6667, with
         //incoming slots and no connections.
-        SettingsManager settings=SettingsManager.instance();
         //To keep LimeWire from connecting to the outside network, we filter out
         //all addresses but localhost and 18.239.0.*.  The latter is used in
         //pongs for testing.  TODO: it would be nice to have a way to prevent
         //BootstrapServerManager from adding defaults and connecting.
-        settings.setBannedIps(new String[] {"*.*.*.*"});
-        settings.setAllowedIps(new String[] {"127.*.*.*", "18.239.0.*"});
-        settings.setPort(PORT);
-        settings.setDirectories(new File[0]);
+        FilterSettings.BLACK_LISTED_IP_ADDRESSES.setValue(
+            new String[] {"*.*.*.*"});
+        FilterSettings.WHITE_LISTED_IP_ADDRESSES.setValue(
+            new String[] {"127.*.*.*", "18.239.0.*"});
+        ConnectionSettings.PORT.setValue(PORT);
+        SharingSettings.setDirectories(new File[0]);
 		ConnectionSettings.CONNECT_ON_STARTUP.setValue(false);
 		UltrapeerSettings.EVER_ULTRAPEER_CAPABLE.setValue(true);
 		UltrapeerSettings.DISABLE_ULTRAPEER_MODE.setValue(false);
@@ -144,14 +145,14 @@ public final class UltrapeerRoutingTest extends BaseTestCase {
 
 
         assertEquals("unexpected port", PORT, 
-					 SettingsManager.instance().getPort());
+					 ConnectionSettings.PORT.getValue());
 
 		ROUTER_SERVICE.start();
 		ROUTER_SERVICE.clearHostCatcher();
 		ROUTER_SERVICE.connect();	
 		connect();
         assertEquals("unexpected port", PORT, 
-					 SettingsManager.instance().getPort());
+					 ConnectionSettings.PORT.getValue());
 	}
 
 	public void tearDown() throws Exception {

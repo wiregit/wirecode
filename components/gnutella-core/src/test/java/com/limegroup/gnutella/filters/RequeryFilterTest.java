@@ -4,10 +4,10 @@ import junit.framework.*;
 import com.limegroup.gnutella.util.PrivilegedAccessor;
 import com.limegroup.gnutella.util.BaseTestCase;
 import com.sun.java.util.collections.*;
+import com.limegroup.gnutella.settings.*;
 
 import com.limegroup.gnutella.messages.*;
 import com.limegroup.gnutella.GUID;
-import com.limegroup.gnutella.SettingsManager;
 
 /**
  * Unit tests for RequeryFilter
@@ -27,8 +27,8 @@ public class RequeryFilterTest extends BaseTestCase {
 	}
 	
 	public void testLegacy() throws Exception {
-        SettingsManager.instance().setFilterDuplicates(false);
-        SettingsManager.instance().setFilterGreedyQueries(false);
+	    FilterSettings.FILTER_DUPLICATES.setValue(false);
+	    FilterSettings.FILTER_GREEDY_QUERIES.setValue(false);
         SpamFilter filter=SpamFilter.newRouteFilter();
         assertTrue(filter.allow(new PingRequest((byte)3)));
         assertTrue(filter.allow(QueryRequest.createQuery("Hello")));

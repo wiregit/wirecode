@@ -1,11 +1,14 @@
 package com.limegroup.gnutella.search;
 
 import com.limegroup.gnutella.*;
-import com.limegroup.gnutella.util.*;
-import com.sun.java.util.collections.*;
-import com.limegroup.gnutella.xml.*;
 import com.limegroup.gnutella.messages.*;
+import com.limegroup.gnutella.settings.SearchSettings;
+import com.limegroup.gnutella.util.*;
+import com.limegroup.gnutella.xml.*;
+
 import java.net.*;
+
+import com.sun.java.util.collections.*;
 
 /**
  * Handles incoming search results from the network.  This class parses the 
@@ -126,7 +129,6 @@ public final class SearchResultHandler {
 	 *  otherwise <tt>false</tt> 
      */
     private boolean handleReply(final QueryReply qr) {
-		SettingsManager settings = SettingsManager.instance();
 		HostData data = new HostData(qr);
         
         // always handle reply to multicast queries.
@@ -134,10 +136,10 @@ public final class SearchResultHandler {
             // note that the minimum search quality will always be greater
             // than -1, so -1 qualities (the impossible case) are never
             // displayed
-            if(data.getQuality() < settings.getMinimumSearchQuality()) {
+            if(data.getQuality() < SearchSettings.MINIMUM_SEARCH_QUALITY.getValue()) {
                 return false;
             }
-            if(data.getSpeed() < settings.getMinimumSearchSpeed()) {
+            if(data.getSpeed() < SearchSettings.MINIMUM_SEARCH_SPEED.getValue()) {
                 return false;
             }
             // if the other side is firewalled AND

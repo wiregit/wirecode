@@ -3,7 +3,7 @@ package com.limegroup.gnutella.security;
 import com.sun.java.util.collections.*;
 import java.io.*;
 
-import com.limegroup.gnutella.SettingsManager;
+import com.limegroup.gnutella.settings.*;
 import com.limegroup.gnutella.util.FileUtils;
 
 /**
@@ -77,7 +77,7 @@ public class Cookies implements Serializable
     private Map readCookies() throws IOException, ClassNotFoundException
     {
         return FileUtils.readMap(
-            SettingsManager.instance().getCookiesFile());
+            SecuritySettings.COOKIES_FILE.getValue());
     }
     
     /**
@@ -119,7 +119,7 @@ public class Cookies implements Serializable
                 clone = (Map)((HashMap)_hostUserInfoMap).clone();
             }
             //save to file
-            FileUtils.writeMap(SettingsManager.instance().getCookiesFile(),
+            FileUtils.writeMap(SecuritySettings.COOKIES_FILE.getValue(),
                 clone);
         }
         catch(Exception e)

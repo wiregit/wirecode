@@ -232,7 +232,7 @@ public class BaseTestCase extends AssertComparisons implements ErrorCallback {
      */
     public static void beforeAllTestsSetUp() throws Throwable {
         setupSettings();
-        setupUniqueDirectories();
+        setupUniqueDirectories();        
     }
     
     /**
@@ -256,7 +256,6 @@ public class BaseTestCase extends AssertComparisons implements ErrorCallback {
      * Ensures that no settings are saved.
      */
     public static void setupSettings() {
-        SettingsManager.instance(); // initialize SettingsManager
         SettingsHandler.setShouldSave(false);
         SettingsHandler.revertToDefault();
     }
@@ -313,13 +312,13 @@ public class BaseTestCase extends AssertComparisons implements ErrorCallback {
         _xmlDataDir.mkdirs();
         _xmlSchemasDir.mkdirs();
         
-        SettingsManager settings = SettingsManager.instance();
-        settings.setSaveDirectory(_savedDir);
-        _incompleteDir = settings.getIncompleteDirectory();
-        settings.setDirectories( new File[] { _sharedDir } );
         PrivilegedAccessor.setValue(CommonUtils.class,
                                     "SETTINGS_DIRECTORY",
                                     _settingsDir);
+
+        SharingSettings.setSaveDirectory(_savedDir);
+        _incompleteDir = SharingSettings.INCOMPLETE_DIRECTORY.getValue();
+        SharingSettings.setDirectories( new File[] { _sharedDir } );
 
         // copy over the necessary schemas to the schemas dir
         File audioSchema = 
@@ -342,9 +341,8 @@ public class BaseTestCase extends AssertComparisons implements ErrorCallback {
      * Sets standard settings for a pristine test environment.
      */
     public static void setStandardSettings() {
-        SettingsManager settings = SettingsManager.instance();
         SettingsHandler.revertToDefault();
-		settings.setExtensions("tmp");
+        SharingSettings.EXTENSIONS_TO_SHARE.setValue("tmp");
 		ConnectionSettings.NUM_CONNECTIONS.setValue(4);
 		SearchSettings.GUESS_ENABLED.setValue(true);
 		UltrapeerSettings.DISABLE_ULTRAPEER_MODE.setValue(false);
@@ -353,9 +351,11 @@ public class BaseTestCase extends AssertComparisons implements ErrorCallback {
 		ConnectionSettings.EVER_ACCEPTED_INCOMING.setValue(true);
 		ConnectionSettings.CONNECT_ON_STARTUP.setValue(false);
         ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
-        ConnectionSettings.USE_GWEBCACHE.setValue(false);        
-        settings.setBannedIps(new String[] {"*.*.*.*"});
-        settings.setAllowedIps(new String[] {"127.*.*.*"});        
+        ConnectionSettings.USE_GWEBCACHE.setValue(false);
+        FilterSettings.BLACK_LISTED_IP_ADDRESSES.setValue(
+            new String[] {"*.*.*.*"});
+        FilterSettings.WHITE_LISTED_IP_ADDRESSES.setValue(
+            new String[] {"127.*.*.*"});        
     }
 
     /**

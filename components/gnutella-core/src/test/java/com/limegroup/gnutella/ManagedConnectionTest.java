@@ -44,7 +44,6 @@ public class ManagedConnectionTest extends BaseTestCase {
     public void setUp() throws Exception {
         if(ROUTER_SERVICE.isStarted()) return;
         sleep(4000);
-        //SettingsManager.instance().setPort(6444);
         setStandardSettings();
         UltrapeerSettings.FORCE_ULTRAPEER_MODE.setValue(false);
         UltrapeerSettings.EVER_ULTRAPEER_CAPABLE.setValue(false);

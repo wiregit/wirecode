@@ -66,21 +66,22 @@ public class UploadTest extends com.limegroup.gnutella.util.BaseTestCase {
 
 	protected void setUp() throws Exception {
 		address = InetAddress.getLocalHost().getHostAddress();
-        SettingsManager.instance().setBannedIps(new String[] {"*.*.*.*"});
-        SettingsManager.instance().setAllowedIps(new String[] {"127.*.*.*"});
-		SettingsManager.instance().setPort(PORT);
+		FilterSettings.BLACK_LISTED_IP_ADDRESSES.setValue(
+		    new String[] {"*.*.*.*"});
+        FilterSettings.WHITE_LISTED_IP_ADDRESSES.setValue(
+            new String[] {"127.*.*.*"});
+        ConnectionSettings.PORT.setValue(PORT);
         //This assumes we're running in the limewire/tests directory
 		File testDir = CommonUtils.getResourceFile(testDirName);
 		assertTrue("shared directory could not be found", testDir.isDirectory());
 		assertTrue("test file should be in shared directory", 
 				   new File(testDir, file).isFile());
-		SettingsManager.instance().setDirectories(new File[] {testDir});
-		SettingsManager.instance().setExtensions("txt");
-		SettingsManager.instance().setMaxUploads(10);
+        SharingSettings.setDirectories(new File[] {testDir});
+        SharingSettings.EXTENSIONS_TO_SHARE.setValue("txt");
+        UploadSettings.MAX_UPLOADS.setValue(10);
 		UploadSettings.UPLOADS_PER_PERSON.setValue(10);
 
-        SettingsManager.instance().setFilterDuplicates(false);
-
+        FilterSettings.FILTER_DUPLICATES.setValue(false);
 
 		ConnectionSettings.NUM_CONNECTIONS.setValue(8);
 		ConnectionSettings.CONNECT_ON_STARTUP.setValue(true);
@@ -95,7 +96,7 @@ public class UploadTest extends com.limegroup.gnutella.util.BaseTestCase {
         }
 	    
         assertEquals("ports should be equal",
-                     PORT, SettingsManager.instance().getPort());
+                     PORT, ConnectionSettings.PORT.getValue());
                      
         upMan = RouterService.getUploadManager();
         

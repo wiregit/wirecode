@@ -115,15 +115,16 @@ public final class ServerSideXMLReplyTest extends BaseTestCase {
         //Setup LimeWire backend.  For testing other vendors, you can skip all
         //this and manually configure a client to listen on port 6667, with
         //incoming slots and no connections.
-        SettingsManager settings=SettingsManager.instance();
         //To keep LimeWire from connecting to the outside network, we filter out
         //all addresses but localhost and 18.239.0.*.  The latter is used in
         //pongs for testing.  TODO: it would be nice to have a way to prevent
         //BootstrapServerManager from adding defaults and connecting.
-        settings.setBannedIps(new String[] {"*.*.*.*"});
-        settings.setAllowedIps(new String[] {"127.*.*.*"});
-        settings.setPort(PORT);
-        settings.setExtensions("mp3;");
+        FilterSettings.BLACK_LISTED_IP_ADDRESSES.setValue(
+            new String[] {"*.*.*.*"});
+        FilterSettings.WHITE_LISTED_IP_ADDRESSES.setValue(
+            new String[] {"127.*.*.*"});
+        ConnectionSettings.PORT.setValue(PORT);
+        SharingSettings.EXTENSIONS_TO_SHARE.setValue("mp3;");
         // get the resource file for com/limegroup/gnutella
         File mp3 = 
             CommonUtils.getResourceFile("com/limegroup/gnutella/mp3/mpg2layII_1504h_16k_frame56_24000hz_joint_CRCOrigID3v1&2_test27.mp3");
@@ -145,14 +146,14 @@ public final class ServerSideXMLReplyTest extends BaseTestCase {
         setSettings();
 
         assertEquals("unexpected port", PORT, 
-					 SettingsManager.instance().getPort());
+					 ConnectionSettings.PORT.getValue());
 
 		ROUTER_SERVICE.start();
 		ROUTER_SERVICE.clearHostCatcher();
 		ROUTER_SERVICE.connect();	
 		connect();
         assertEquals("unexpected port", PORT, 
-					 SettingsManager.instance().getPort());
+					 ConnectionSettings.PORT.getValue());
 	}
 
     

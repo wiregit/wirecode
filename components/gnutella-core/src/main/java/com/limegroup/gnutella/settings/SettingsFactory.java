@@ -25,6 +25,16 @@ public final class SettingsFactory {
      */
     private final byte[] PRE_HEADER = "#LimeWire Properties IO Test\n".getBytes();
     
+    /**
+     * Time interval, after which the accumulated information expires
+     */
+    private static final long EXPIRY_INTERVAL = 14 * 24 * 60 * 60 * 1000; //14 days
+    
+    /**
+     * An internal Setting to store the last expire time
+     */
+    private LongSetting LAST_EXPIRE_TIME = null;
+    
     /** 
 	 * <tt>File</tt> object from which settings are loaded and saved 
 	 */    
@@ -46,8 +56,9 @@ public final class SettingsFactory {
      * LOCKING: must hold this monitor
      */
     private ArrayList /* of Settings */ settings = new ArrayList(10);
-
-	
+    
+    private boolean expired = false;
+    
 	/**
 	 * Creates a new <tt>SettingsFactory</tt> instance with the specified file
 	 * to read from and write to.
@@ -104,6 +115,22 @@ public final class SettingsFactory {
             Setting set = (Setting)ii.next();
             set.reload();
         }
+        
+        // Note: this has only an impact on launch time when this
+        // method is called by the constructor of this class!
+        if (LAST_EXPIRE_TIME == null) {
+            LAST_EXPIRE_TIME = createLongSetting("LAST_EXPIRE_TIME", 0);
+            
+            // Set flag to true if Settings are expiried. See
+            // createExpirable<whatever>Setting at the bottom
+            expired =
+                (LAST_EXPIRE_TIME.getValue() + EXPIRY_INTERVAL <
+                        System.currentTimeMillis());
+            
+            if (expired) {
+                LAST_EXPIRE_TIME.setValue(System.currentTimeMillis());
+            }
+        }
 	}
 	
 	/**
@@ -148,15 +175,6 @@ public final class SettingsFactory {
                 tempProps.remove( set.getKey() );
             }
         }
-        // Then rescan over it for settings that are from the old
-        // SettingsManager
-        String key = null;
-        for (Enumeration e = tempProps.keys(); e.hasMoreElements();) {
-            key = (String)e.nextElement();
-            if ( SettingsManager.instance().isDefault(key) ) {
-                tempProps.remove(key);
-            }
-        }
         
         FileOutputStream out = null;
         try {
@@ -184,7 +202,7 @@ public final class SettingsFactory {
     Properties getProperties() {
         return PROPS;
     }
-
+    
 	/**
 	 * Creates a new <tt>StringSetting</tt> instance with the specified
 	 * key and default value.
@@ -303,8 +321,7 @@ public final class SettingsFactory {
      * @param key the key for the setting
      * @param defaultValue the default value for the setting
      */
-    public synchronized CharArraySetting 
-        createCharArraySetting(String key, char[] defaultValue) {
+    public synchronized CharArraySetting createCharArraySetting(String key, char[] defaultValue) {
         
         CharArraySetting result =
             CharArraySetting.createCharArraySetting(DEFAULT_PROPS, PROPS, 
@@ -313,4 +330,89 @@ public final class SettingsFactory {
         result.reload();
         return result;
     }
+    
+    /**
+	 * Creates a new <tt>FloatSetting</tt> instance with the specified
+	 * key and default value.
+	 *
+	 * @param key the key for the setting
+	 * @param defaultValue the default value for the setting
+	 */
+	public synchronized FloatSetting createFloatSetting(String key, float defaultValue) {
+		FloatSetting result = 
+            new FloatSetting(DEFAULT_PROPS, PROPS, key, defaultValue);
+        settings.add(result);
+        result.reload();
+        return result;
+	}
+    
+    /**
+     * Creates a new <tt>StringArraySetting</tt> instance for a String array 
+     * setting with the specified key and default value.
+     *
+     * @param key the key for the setting
+     * @param defaultValue the default value for the setting
+     */
+    public synchronized StringArraySetting 
+        createStringArraySetting(String key, String[] defaultValue) {
+        
+        StringArraySetting result = 
+                new StringArraySetting(DEFAULT_PROPS, PROPS, key, defaultValue);
+                
+        settings.add(result);
+        result.reload();
+        return result;
+    }
+    
+    /**
+     * Creates a new <tt>FileArraySetting</tt> instance for a File array 
+     * setting with the specified key and default value.
+     *
+     * @param key the key for the setting
+     * @param defaultValue the default value for the setting
+     */
+    public synchronized FileArraySetting 
+        createFileArraySetting(String key, File[] defaultValue) {
+        
+        FileArraySetting result = 
+                new FileArraySetting(DEFAULT_PROPS, PROPS, key, defaultValue);
+                
+        settings.add(result);
+        result.reload();
+        return result;
+    }
+    
+    /**
+	 * Creates a new expiring <tt>BooleanSetting</tt> instance with the specified
+	 * key and default value.
+	 *
+	 * @param key the key for the setting
+	 * @param defaultValue the default value for the setting
+	 */
+	public synchronized BooleanSetting createExpirableBooleanSetting(String key, boolean defaultValue) {
+        BooleanSetting result = createBooleanSetting(key, defaultValue);
+        
+        if (expired) {
+            result.revertToDefault();
+        }
+        
+        return result;
+	}
+    
+    /**
+	 * Creates a new expiring <tt>IntSetting</tt> instance with the specified
+	 * key and default value.
+	 *
+	 * @param key the key for the setting
+	 * @param defaultValue the default value for the setting
+	 */
+	public synchronized IntSetting createExpirableIntSetting(String key, int defaultValue) {
+		IntSetting result = createIntSetting(key, defaultValue);
+        
+        if (expired) {
+            result.revertToDefault();
+        }
+        
+        return result;
+	}
 }

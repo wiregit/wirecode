@@ -92,9 +92,9 @@ public class UploaderTest extends com.limegroup.gnutella.util.BaseTestCase {
      *   the test is slightly more complicated than it needs to be.)
      */
     public void testStalledUploader() throws Exception {
-        StalledUploadWatchdog.DELAY_TIME = 1000 * 60 * 2; //2 minutes            
-        SettingsManager.instance().setMaxUploads(2);
-        SettingsManager.instance().setSoftMaxUploads(9999);
+        StalledUploadWatchdog.DELAY_TIME = 1000 * 60 * 2; //2 minutes
+        UploadSettings.MAX_UPLOADS.setValue(2);
+        UploadSettings.SOFT_MAX_UPLOADS.setValue(9999);
         UploadSettings.UPLOADS_PER_PERSON.setValue(99999);
         UploadSettings.UPLOAD_QUEUE_SIZE.setValue(1);
        
@@ -155,8 +155,8 @@ public class UploaderTest extends com.limegroup.gnutella.util.BaseTestCase {
      * - when an uploader with slot terminates, everyone in queue advances.
      */
     public void testNormalQueueing() throws Exception {
-        SettingsManager.instance().setMaxUploads(2);
-        SettingsManager.instance().setSoftMaxUploads(9999);
+        UploadSettings.MAX_UPLOADS.setValue(2);
+        UploadSettings.SOFT_MAX_UPLOADS.setValue(9999);
         UploadSettings.UPLOADS_PER_PERSON.setValue(99999);
         UploadSettings.UPLOAD_QUEUE_SIZE.setValue(2);
         HTTPDownloader d3 = null;
@@ -270,8 +270,8 @@ public class UploaderTest extends com.limegroup.gnutella.util.BaseTestCase {
      * MUST respond bewteen MIN_POLL_TIME and MAX_POLL_TIME
      */
     public void testQueueTiming() throws Exception {
-        SettingsManager.instance().setMaxUploads(2);
-        SettingsManager.instance().setSoftMaxUploads(9999);
+        UploadSettings.MAX_UPLOADS.setValue(2);
+        UploadSettings.SOFT_MAX_UPLOADS.setValue(9999);
         UploadSettings.UPLOADS_PER_PERSON.setValue(99999);
         UploadSettings.UPLOAD_QUEUE_SIZE.setValue(2);
         HTTPDownloader d3 = null;
@@ -333,8 +333,8 @@ public class UploaderTest extends com.limegroup.gnutella.util.BaseTestCase {
      * support queueing
      */
     public void testNotQueuedUnlessHeaderSent() throws Exception {
-        SettingsManager.instance().setMaxUploads(1);
-        SettingsManager.instance().setSoftMaxUploads(9999);
+        UploadSettings.MAX_UPLOADS.setValue(1);
+        UploadSettings.SOFT_MAX_UPLOADS.setValue(9999);
         UploadSettings.UPLOADS_PER_PERSON.setValue(99999);
         UploadSettings.UPLOAD_QUEUE_SIZE.setValue(1);
         //take the only available slto
@@ -365,8 +365,8 @@ public class UploaderTest extends com.limegroup.gnutella.util.BaseTestCase {
     }
 
     public void testPerHostLimitedNotQueued() throws Exception {
-        SettingsManager.instance().setMaxUploads(2);
-        SettingsManager.instance().setSoftMaxUploads(9999);
+        UploadSettings.MAX_UPLOADS.setValue(2);
+        UploadSettings.SOFT_MAX_UPLOADS.setValue(9999);
         UploadSettings.UPLOADS_PER_PERSON.setValue(2);
         UploadSettings.UPLOAD_QUEUE_SIZE.setValue(2);
    
@@ -399,8 +399,8 @@ public class UploaderTest extends com.limegroup.gnutella.util.BaseTestCase {
     }
  
     public void testSoftMax() throws Exception {
-        SettingsManager.instance().setMaxUploads(9999);
-        SettingsManager.instance().setSoftMaxUploads(2);
+        UploadSettings.MAX_UPLOADS.setValue(9999);
+        UploadSettings.SOFT_MAX_UPLOADS.setValue(2);
         UploadSettings.UPLOADS_PER_PERSON.setValue(99999);
         UploadSettings.UPLOAD_QUEUE_SIZE.setValue(2);
         HTTPDownloader d3 = null;
@@ -437,8 +437,8 @@ public class UploaderTest extends com.limegroup.gnutella.util.BaseTestCase {
      * Tests this. 
      */
     public void testUploadLimtIncludesQueue() throws Exception {
-        SettingsManager.instance().setMaxUploads(1);
-        SettingsManager.instance().setSoftMaxUploads(1);
+        UploadSettings.MAX_UPLOADS.setValue(1);
+        UploadSettings.SOFT_MAX_UPLOADS.setValue(1);
         UploadSettings.UPLOADS_PER_PERSON.setValue(1);
         UploadSettings.UPLOAD_QUEUE_SIZE.setValue(10);
         //first two uploads to get slots
@@ -473,8 +473,8 @@ public class UploaderTest extends com.limegroup.gnutella.util.BaseTestCase {
      * not cause the second request to be queued.
      */
     public void testSameFileSameHostGivenSlot() throws Exception { 
-        SettingsManager.instance().setMaxUploads(1);
-        SettingsManager.instance().setSoftMaxUploads(1);
+        UploadSettings.MAX_UPLOADS.setValue(1);
+        UploadSettings.SOFT_MAX_UPLOADS.setValue(1);
         UploadSettings.UPLOADS_PER_PERSON.setValue(99999);
         UploadSettings.UPLOAD_QUEUE_SIZE.setValue(2);
         //connect the first downloader.

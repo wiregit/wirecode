@@ -55,15 +55,14 @@ public class ClientSidePushProxyTest
         //this and manually configure a client in leaf mode to listen on port
         //6669, with no slots and no connections.  But you need to re-enable
         //the interactive prompts below.
-        SettingsManager settings=SettingsManager.instance();
-        settings.setPort(PORT);
+        ConnectionSettings.PORT.setValue(PORT);
 		ConnectionSettings.CONNECT_ON_STARTUP.setValue(false);
 		UltrapeerSettings.EVER_ULTRAPEER_CAPABLE.setValue(false);
 		UltrapeerSettings.DISABLE_ULTRAPEER_MODE.setValue(true);
 		UltrapeerSettings.FORCE_ULTRAPEER_MODE.setValue(false);
 		ConnectionSettings.NUM_CONNECTIONS.setValue(0);
 		ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
-        settings.setExtensions("txt;");
+		SharingSettings.EXTENSIONS_TO_SHARE.setValue("txt;");
         // get the resource file for com/limegroup/gnutella
         File berkeley = 
             CommonUtils.getResourceFile("com/limegroup/gnutella/berkeley.txt");
@@ -73,21 +72,22 @@ public class ClientSidePushProxyTest
         CommonUtils.copy(berkeley, new File(_sharedDir, "berkeley.txt"));
         CommonUtils.copy(susheel, new File(_sharedDir, "susheel.txt"));
         // make sure results get through
-        settings.setMinimumSearchQuality(-2);
+        SearchSettings.MINIMUM_SEARCH_QUALITY.setValue(-2);
     }        
     
     public static void globalSetUp() throws Exception {
         doSettings();
 
-        SettingsManager settings=SettingsManager.instance();
         callback=new MyActivityCallback();
         rs=new RouterService(callback);
-        assertEquals("unexpected port", PORT, settings.getPort());
+        assertEquals("unexpected port",
+            PORT, ConnectionSettings.PORT.getValue());
         rs.start();
         rs.clearHostCatcher();
         rs.connect();
         Thread.sleep(1000);
-        assertEquals("unexpected port", PORT, settings.getPort());
+        assertEquals("unexpected port",
+            PORT, ConnectionSettings.PORT.getValue());
         connect(rs);
     }        
     

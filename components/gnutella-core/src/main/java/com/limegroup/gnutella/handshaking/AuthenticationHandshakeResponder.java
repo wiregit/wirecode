@@ -2,6 +2,7 @@ package com.limegroup.gnutella.handshaking;
 
 import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.security.*;
+import com.limegroup.gnutella.settings.*;
 import com.limegroup.gnutella.util.StringUtils;
 import java.util.Properties;
 import java.io.IOException;
@@ -30,7 +31,7 @@ public abstract class AuthenticationHandshakeResponder
      * Constant handle to the <tt>SettingsManager</tt> for accessing
      * various properties.
      */
-    private final SettingsManager SETTINGS = SettingsManager.instance();
+    //private final SettingsManager SETTINGS = SettingsManager.instance();
     
     /**
      * An instance of connection manager (to reference other stuff
@@ -106,7 +107,7 @@ public abstract class AuthenticationHandshakeResponder
         //if authentication is not required, return normal response
         //else authenticate
         if(_authenticated ||
-        !SETTINGS.acceptAuthenticatedConnectionsOnly())
+        !SecuritySettings.ACCEPT_AUTHENTICATED_CONNECTIONS_ONLY.getValue())
             return respondUnauthenticated(response, false);
         else
             return respondIncomingAuthenticate(response);

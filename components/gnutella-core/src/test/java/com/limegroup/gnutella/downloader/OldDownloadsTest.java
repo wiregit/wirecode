@@ -8,6 +8,7 @@ import com.limegroup.gnutella.util.*;
 import com.limegroup.gnutella.stubs.*;
 import com.sun.java.util.collections.*;
 import junit.framework.*;
+import com.limegroup.gnutella.settings.*;
 
 /**
  * Tests backwards compatibility with old downloads.dat files.
@@ -39,8 +40,7 @@ public class OldDownloadsTest extends com.limegroup.gnutella.util.BaseTestCase {
 
         //Build part of backend 
 		ConnectionSettings.CONNECT_ON_STARTUP.setValue(false);
-        //SettingsManager.instance().setConnectOnStartup(false);
-        SettingsManager.instance().setMaxSimDownload(0);  //queue everything
+        DownloadSettings.MAX_SIM_DOWNLOAD.setValue(0);
         TestActivityCallback callback=new TestActivityCallback();
         RouterService rs = new RouterService(callback);
         DownloadManager dm = rs.getDownloadManager();

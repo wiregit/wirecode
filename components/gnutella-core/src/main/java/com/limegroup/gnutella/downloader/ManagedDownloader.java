@@ -5,14 +5,20 @@ import com.limegroup.gnutella.messages.*;
 import com.limegroup.gnutella.http.*;
 import com.limegroup.gnutella.util.*;
 import com.limegroup.gnutella.xml.*;
+import com.limegroup.gnutella.settings.ConnectionSettings;
+import com.limegroup.gnutella.settings.DownloadSettings;
+import com.limegroup.gnutella.settings.SharingSettings;
 import com.limegroup.gnutella.settings.ThemeSettings;
 import com.limegroup.gnutella.statistics.DownloadStat;
-import com.sun.java.util.collections.*;
+
+import java.io.*;
+import java.net.*;
+
 import java.util.Date;
 import java.util.Calendar;
 import java.util.StringTokenizer;
-import java.io.*;
-import java.net.*;
+
+import com.sun.java.util.collections.*;
 
 /**
  * A smart download.  Tries to get a group of similar files by delegating
@@ -202,7 +208,7 @@ public class ManagedDownloader implements Downloader, Serializable {
     /** The lowest (cumulative) bandwith we will accept without stealing the
      * entire grey area from a downloader for a new one */
     private static final float MIN_ACCEPTABLE_SPEED = 
-		SettingsManager.instance().getMaxDownstreamBytesPerSec() < 8 ? 
+		DownloadSettings.MAX_DOWNLOAD_BYTES_PER_SEC.getValue() < 8 ? 
 		0.1f:
 		0.5f;
     /** The number of bytes to overlap when swarming and resuming, used to help
@@ -1303,7 +1309,7 @@ public class ManagedDownloader implements Downloader, Serializable {
             if( fileName.toLowerCase().endsWith("." + ThemeSettings.EXTENSION))
                 saveDir = ThemeSettings.THEME_DIR_FILE;
             else 
-                saveDir=SettingsManager.instance().getSaveDirectory();
+                saveDir = SharingSettings.DIRECTORY_FOR_SAVING_FILES.getValue();
             completeFile=new File(saveDir, fileName);
             String savePath = saveDir.getCanonicalPath();		
             String completeFileParentPath = 
@@ -1489,20 +1495,13 @@ public class ManagedDownloader implements Downloader, Serializable {
         return COMPLETE;
     }   
 
-    /** @return True returned if the File exists in the Save directory....
+    /**
+     * Returns true if the file exists.
+     * The file must be an absolute path.
+     * @return True returned if the File exists.
      */
     private boolean fileExists(File f) {
-        boolean retVal = false;
-        try {
-            File downloadDir = SettingsManager.instance().getSaveDirectory();
-            String filename=f.getName();
-            File completeFile = 
-				new File(downloadDir, CommonUtils.convertFileName(filename));  
-            if ( completeFile.exists() ) 
-                retVal = true;
-        }
-        catch (Exception e) { }
-        return retVal;
+        return f.exists();
     }
 
     /** Removes all entries for incompleteFile from incompleteFileManager 
@@ -2563,7 +2562,7 @@ public class ManagedDownloader implements Downloader, Serializable {
         //locations without hashes if throughput is good enough.
         //and load, but that's hard to do.
         int downloads=threads.size();
-        int capacity=SettingsManager.instance().getConnectionSpeed();
+        int capacity=ConnectionSettings.CONNECTION_SPEED.getValue();
         if (capacity<=SpeedConstants.MODEM_SPEED_INT)
             //Modems get 2 hosts at most...be safe and return positives
             return Math.max(2-downloads,0);

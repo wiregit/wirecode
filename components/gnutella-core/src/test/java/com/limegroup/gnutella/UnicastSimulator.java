@@ -3,6 +3,7 @@ package com.limegroup.gnutella;
 import com.limegroup.gnutella.messages.*; 
 import com.limegroup.gnutella.guess.*; 
 import com.limegroup.gnutella.util.*;
+import com.limegroup.gnutella.settings.*;
 import java.net.*;
 import java.io.*;
 import java.util.*;
@@ -117,8 +118,7 @@ public class UnicastSimulator {
                 String word=IOUtils.readWord(sock.getInputStream(),8);
                 sock.setSoTimeout(0);
 
-                if (word.equals(SettingsManager.instance().
-                        getConnectStringFirstWord())) {
+                if (word.equals(ConnectionSettings.CONNECT_STRING_FIRST_WORD)) {
                     Connection conn = new Connection(sock, null);
                     conn.initialize();
                     debug("UnicastSimulator.tcpLoop(): sending pings.");

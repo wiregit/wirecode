@@ -3,6 +3,7 @@ package com.limegroup.gnutella;
 import com.limegroup.gnutella.messages.*;
 import com.limegroup.gnutella.util.*;
 import com.limegroup.gnutella.search.*;
+import com.limegroup.gnutella.settings.*;
 import com.sun.java.util.collections.*;
 import java.net.*;
 
@@ -37,7 +38,7 @@ public final class ForMeReplyHandler implements ReplyHandler {
 	private ForMeReplyHandler() {}
 
 	public void handlePingReply(PingReply pingReply, ReplyHandler handler) {
-        SettingsManager settings = SettingsManager.instance();
+        
         //Kill incoming connections that don't share.  Note that we randomly
         //allow some freeloaders.  (Hopefully they'll get some stuff and then
         //share!)  Note that we only consider killing them on the first ping.
@@ -46,9 +47,9 @@ public final class ForMeReplyHandler implements ReplyHandler {
 			&& (handler.getNumMessagesReceived() <= 2)
 			&& (!handler.isOutgoing())
 			&& (handler.isKillable())
-			&& (pingReply.getFiles() < settings.getFreeloaderFiles())
+			&& (pingReply.getFiles() < SharingSettings.FREELOADER_FILES.getValue())
 			&& ((int)(Math.random()*100.f) >
-				settings.getFreeloaderAllowed())
+				SharingSettings.FREELOADER_ALLOWED.getValue())
 			&& (handler instanceof ManagedConnection)
             && (handler.isStable())) {
 			ConnectionManager cm = RouterService.getConnectionManager();

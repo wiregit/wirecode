@@ -2,6 +2,7 @@ package com.limegroup.gnutella.chat;
 
 import com.sun.java.util.collections.*;
 import com.limegroup.gnutella.*;
+import com.limegroup.gnutella.settings.*;
 import com.limegroup.gnutella.util.StringComparator;
 import java.net.*;
 import java.io.*;
@@ -48,7 +49,7 @@ public final class ChatManager {
         Thread.currentThread().setName("IncommingChatThread");
 		// the Acceptor class recieved a message already, 
 		// and asks the ChatManager to create an InstantMessager
-		boolean allowChats = SettingsManager.instance().getChatEnabled();
+		boolean allowChats = ChatSettings.CHAT_ENABLED.getValue();
 
 		// see if chatting is turned off
 		if (! allowChats) {
@@ -61,8 +62,8 @@ public final class ChatManager {
 
 		// do a check to see it the host has been blocked
 		String host = socket.getInetAddress().getHostAddress();
-		SettingsManager sm = SettingsManager.instance();
-		String[] bannedIPs = sm.getBannedIps();
+		String[] bannedIPs = FilterSettings.BLACK_LISTED_IP_ADDRESSES.getValue();
+        
 		List bannedList = Arrays.asList(bannedIPs);
 		if (bannedList.contains(host) ) {
 			try {
@@ -119,8 +120,8 @@ public final class ChatManager {
 
 	/** blocks incoming connections from a particular ip address  */
 	public void blockHost(String host) {
-		SettingsManager sm = SettingsManager.instance();
-		String[] bannedIPs = sm.getBannedIps();
+		String[] bannedIPs = FilterSettings.BLACK_LISTED_IP_ADDRESSES.getValue();
+        
 		Arrays.sort(bannedIPs);		
 		synchronized (this) {
 			if ( Arrays.binarySearch(bannedIPs, host, 
@@ -129,18 +130,17 @@ public final class ChatManager {
 				System.arraycopy(bannedIPs, 0, more_banned, 0, 
 								 bannedIPs.length);
 				more_banned[bannedIPs.length] = host;
-				sm.setBannedIps(more_banned);
+                FilterSettings.BLACK_LISTED_IP_ADDRESSES.setValue(more_banned);
 			}
 		}
 	}
 	
 	public void unblockHost(String host) {
-		SettingsManager sm = SettingsManager.instance();
-		String[] bannedIPs = sm.getBannedIps();
+		String[] bannedIPs = FilterSettings.BLACK_LISTED_IP_ADDRESSES.getValue();
 		List bannedList = Arrays.asList(bannedIPs);
 		synchronized (this) {
 			if (bannedList.remove(host) )
-				sm.setBannedIps((String[])bannedList.toArray() );
+                FilterSettings.BLACK_LISTED_IP_ADDRESSES.setValue((String[])bannedList.toArray());
 		}
 	}
 }

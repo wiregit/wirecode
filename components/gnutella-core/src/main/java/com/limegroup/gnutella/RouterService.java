@@ -146,12 +146,6 @@ public class RouterService {
 	 */
     private static MessageRouter router;
 
-	/**
-	 * Constant for the <tt>SettingsManager</tt>.
-	 */
-	private static final SettingsManager SETTINGS = 
-		SettingsManager.instance();
-
     /**
      * Variable for whether or not that backend threads have been started.
      */
@@ -418,6 +412,8 @@ public class RouterService {
      * (keep-alive) is non-zero and recontacts the pong server as needed.  
      */
     public static void connect() {
+        adjustSpamFilters();
+        
         //delegate to connection manager
         manager.connect();
     }
@@ -516,17 +512,12 @@ public class RouterService {
                 catcher.write();
             } catch (IOException e) {}
             finally {
-                SETTINGS.writeProperties();
+                SettingsHandler.save();
             }
             //Cleanup any preview files.  Note that these will not be deleted if
             //your previewer is still open.
-            File incompleteDir=null;
-            try {
-                incompleteDir=SETTINGS.getIncompleteDirectory();
-            } catch(java.io.FileNotFoundException fnfe) {
-                // if we could not get the incomplete directory, simply return.
-                return;
-            }
+            File incompleteDir = SharingSettings.INCOMPLETE_DIRECTORY.getValue();
+            if (incompleteDir == null) { return; } // if we could not get the incomplete directory, simply return.
             
             String[] files=incompleteDir.list();
             
@@ -590,7 +581,7 @@ public class RouterService {
         //       BadConnectionSettingException.TOO_HIGH_FOR_LEAF, 1);
 
         //max connections for this connection speed
-        int max = SETTINGS.maxConnections();
+        int max = ConnectionSettings.getMaxConnections();
         if (manager.hasSupernodeClientConnection()) {
             //Also the request to decrease the keep alive below a minimum
             //level is invalid, if we are an Ultrapeer with leaves

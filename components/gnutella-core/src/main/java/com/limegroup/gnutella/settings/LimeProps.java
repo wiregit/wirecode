@@ -1,7 +1,6 @@
 package com.limegroup.gnutella.settings;
 
 import com.limegroup.gnutella.Assert;
-import com.limegroup.gnutella.SettingsManager;
 
 /**
  * Handler for all 'LimeWire.props' settings.  Classes such
@@ -29,13 +28,4 @@ public class LimeProps extends AbstractSettings {
      * Returns the only instance of this class.
      */
     public static LimeProps instance() { return INSTANCE; }
-    
-    /**
-     * Overriden to revert to SettingsManager defaults as well
-     * as the factory defaults.
-     */
-    public void revertToDefault() {
-        super.revertToDefault();
-        SettingsManager.instance().loadDefaults();
-    }
 }

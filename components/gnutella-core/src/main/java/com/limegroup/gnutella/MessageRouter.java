@@ -9,6 +9,7 @@ import com.limegroup.gnutella.statistics.*;
 import com.limegroup.gnutella.messages.*;
 import com.limegroup.gnutella.messages.vendor.*;
 import com.limegroup.gnutella.settings.ConnectionSettings;
+import com.limegroup.gnutella.settings.*;
 
 import com.sun.java.util.collections.*;
 import java.io.IOException;
@@ -145,7 +146,7 @@ public abstract class MessageRouter {
     protected MessageRouter() {
         try {
             _clientGUID = new GUID(GUID.fromHexString(
-                SettingsManager.instance().getClientID())).bytes();
+                ApplicationSettings.CLIENT_ID.getValue())).bytes();
         }
         catch (IllegalArgumentException e) {
             //This should never happen! But if it does, we can recover.
@@ -1744,7 +1745,7 @@ public abstract class MessageRouter {
         long speed = um.measuredUploadSpeed();
         boolean measuredSpeed=true;
         if (speed==-1) {
-            speed=SettingsManager.instance().getConnectionSpeed();
+            speed=ConnectionSettings.CONNECTION_SPEED.getValue();
             measuredSpeed=false;
         }
 
@@ -1808,7 +1809,7 @@ public abstract class MessageRouter {
 			// see if we have accepted an incoming connection during this session
 			boolean incoming = RouterService.acceptedIncomingConnection();
 
-			boolean chat = SettingsManager.instance().getChatEnabled();
+			boolean chat = ChatSettings.CHAT_ENABLED.getValue();
 			
             // We only want to return a "reply to multicast query" QueryReply
             // if the request travelled a single hop.

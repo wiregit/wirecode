@@ -11,7 +11,7 @@ public final class UltrapeerSettings extends LimeProps {
 	 * Setting for whether or not we've ever been Ultrapeer capable.
 	 */
 	public static final BooleanSetting EVER_ULTRAPEER_CAPABLE =
-		FACTORY.createBooleanSetting("EVER_SUPERNODE_CAPABLE", false);
+		FACTORY.createExpirableBooleanSetting("EVER_SUPERNODE_CAPABLE", false);
 
 
 	/**

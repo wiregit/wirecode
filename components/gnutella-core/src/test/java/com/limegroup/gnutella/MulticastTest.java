@@ -42,13 +42,14 @@ public class MulticastTest extends BaseTestCase {
 	}
     
     private static void setSettings() throws Exception {
-        SettingsManager settings=SettingsManager.instance();
-        settings.setBannedIps(new String[] {"*.*.*.*"});
+        FilterSettings.BLACK_LISTED_IP_ADDRESSES.setValue(
+            new String[] {"*.*.*.*"});
         // Set the local host to not be banned so pushes can go through
         String ip = InetAddress.getLocalHost().getHostAddress();
-        settings.setAllowedIps(new String[] {ip});
-        settings.setPort(PORT);
-        settings.setExtensions("mp3;");
+        FilterSettings.WHITE_LISTED_IP_ADDRESSES.setValue(
+            new String[] {ip});
+        ConnectionSettings.PORT.setValue(PORT);
+        SharingSettings.EXTENSIONS_TO_SHARE.setValue("mp3;");
         File mp3 = CommonUtils.getResourceFile(MP3_NAME);
         assertTrue(mp3.exists());
         CommonUtils.copy(mp3, new File(_sharedDir, "metadata.mp3"));

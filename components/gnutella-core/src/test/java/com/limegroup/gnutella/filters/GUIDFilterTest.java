@@ -3,6 +3,7 @@ package com.limegroup.gnutella.filters;
 import junit.framework.*;
 import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.messages.*;
+import com.limegroup.gnutella.settings.*;
 
 /**
  * Unit tests for GUIDFilterTest
@@ -21,10 +22,8 @@ public class GUIDFilterTest extends com.limegroup.gnutella.util.BaseTestCase {
 
     public void setUp() {
         guid=new byte[16];
-        SettingsManager settings=SettingsManager.instance();
-        settings.setFilterDuplicates(false);
-        settings.setFilterGreedyQueries(false);
-        settings.setFilterBearShareQueries(false);
+        FilterSettings.FILTER_DUPLICATES.setValue(false);
+        FilterSettings.FILTER_GREEDY_QUERIES.setValue(false);
         filter=SpamFilter.newRouteFilter();
     }
 

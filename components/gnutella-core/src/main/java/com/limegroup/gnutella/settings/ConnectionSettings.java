@@ -1,5 +1,7 @@
 package com.limegroup.gnutella.settings;
 
+import com.limegroup.gnutella.SpeedConstants;
+
 /**
  * Settings for Gnutella TCP connections.
  */
@@ -12,8 +14,7 @@ public final class ConnectionSettings extends LimeProps {
 	 * accepted.
 	 */
 	public static final BooleanSetting EVER_ACCEPTED_INCOMING =
-		FACTORY.createBooleanSetting("EVER_ACCEPTED_INCOMING", false);
-
+		FACTORY.createExpirableBooleanSetting("EVER_ACCEPTED_INCOMING", false);
 
 	/**
 	 * Settings for whether or not to automatically connect to the network
@@ -119,6 +120,71 @@ public final class ConnectionSettings extends LimeProps {
      * via deflate.
      */
     public static final BooleanSetting ENCODE_DEFLATE =
-        FACTORY.createBooleanSetting("ENCODE_DEFLATE", true);		
+        FACTORY.createBooleanSetting("ENCODE_DEFLATE", true);
+    
+    /**
+	 * The time to live.
+	 */
+    public static final ByteSetting TTL =
+        FACTORY.createByteSetting("TTL", (byte)4);
+        
+    /**
+	 * The connection speed in kbyte/s
+	 */
+    public static final IntSetting CONNECTION_SPEED = 
+        FACTORY.createIntSetting("CONNECTION_SPEED", 56);
+    
+    /**
+	 * The port to connect on
+	 */
+    public static final IntSetting PORT =
+        FACTORY.createIntSetting("PORT", 6346);
+    
+    /**
+	 * Sets whether or not the users ip address should be forced to
+	 * the value they have entered.
+	 */
+    public static final BooleanSetting FORCE_IP_ADDRESS =
+        FACTORY.createBooleanSetting("FORCE_IP_ADDRESS", false);
+    
+    /**
+     * Forces IP address to the given address.
+     */
+    public static final StringSetting FORCED_IP_ADDRESS_STRING =
+        FACTORY.createStringSetting("FORCED_IP_ADDRESS_STRING", "0.0.0.0");
+    
+    /**
+     * The port to use when forcing the ip address.
+     */
+    public static final IntSetting FORCED_PORT =
+        FACTORY.createIntSetting("FORCED_PORT", 6346);
+    
+    public static final String CONNECT_STRING_FIRST_WORD = "GNUTELLA";
+    
+    public static final StringSetting CONNECT_STRING =
+        FACTORY.createStringSetting("CONNECT_STRING", "GNUTELLA CONNECT/0.4");
+        
+    public static final StringSetting CONNECT_OK_STRING =
+        FACTORY.createStringSetting("CONNECT_OK_STRING", "GNUTELLA OK");
+        
+    /**
+     * Helper method left from Settings Manager
+     *
+	 * Returns the maximum number of connections for the given connection
+     * speed.
+	 */
+    public static final int getMaxConnections() {
+        int speed = CONNECTION_SPEED.getValue();
+        
+        if (speed <= SpeedConstants.MODEM_SPEED_INT) {
+            return 3;
+        } else if (speed <= SpeedConstants.CABLE_SPEED_INT) {
+            return 6;
+        } else if (speed <= SpeedConstants.T1_SPEED_INT) {
+            return 10;
+        } else {                 //T3: no limit
+            return 12;
+        }
+    }
 }
 

@@ -33,7 +33,7 @@ abstract class Setting {
 	 * Constant for the default value for this <tt>Setting</tt>.
 	 */
 	protected final String DEFAULT_VALUE;
-
+    
 	/**
 	 * Constructs a new setting with the specified key and default
 	 * value.  Private access ensures that only this class can construct
@@ -97,7 +97,7 @@ abstract class Setting {
         PROPS.put(KEY, value);
         loadValue(value);
     }
-    
+
     /**
      * Load value from property string value
      * @param sValue property string value

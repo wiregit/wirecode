@@ -2,6 +2,7 @@ package com.limegroup.gnutella;
 
 import com.limegroup.gnutella.messages.*;
 import com.limegroup.gnutella.downloader.*;
+import com.limegroup.gnutella.settings.*;
 import com.sun.java.util.collections.*;
 import java.io.*;
 import java.net.*;
@@ -101,7 +102,7 @@ public class DownloadManager implements BandwidthTracker {
      * snapshots and scheduling snapshot checkpointing.
      */
     public void postGuiInit() {
-        readSnapshot(SettingsManager.instance().getDownloadSnapshotFile());
+        readSnapshot(SharingSettings.DOWNLOAD_SNAPSHOT_FILE.getValue());
         Runnable checkpointer=new Runnable() {
             public void run() {
                 try {
@@ -160,7 +161,7 @@ public class DownloadManager implements BandwidthTracker {
         try {
             ObjectOutputStream out=new ObjectOutputStream(
                 new FileOutputStream(
-                    SettingsManager.instance().getDownloadSnapshotFile()));
+                    SharingSettings.DOWNLOAD_SNAPSHOT_FILE.getValue()));
             out.writeObject(buf);
             //Blocks can be written to incompleteFileManager from other threads
             //while this downloader is being serialized, so lock is needed.
@@ -266,7 +267,7 @@ public class DownloadManager implements BandwidthTracker {
         //Check if file exists.  TODO3: ideally we'd pass ALL conflicting files
         //to the GUI, so they know what they're overwriting.
         if (! overwrite) {
-            File downloadDir = SettingsManager.instance().getSaveDirectory();
+            File downloadDir = SharingSettings.DIRECTORY_FOR_SAVING_FILES.getValue();
             String filename=files[0].getFileName();
             File completeFile = new File(downloadDir, filename);  
             if ( completeFile.exists() ) 
@@ -596,8 +597,7 @@ public class DownloadManager implements BandwidthTracker {
 
     /** @requires this monitor' held by caller */
     private boolean hasFreeSlot() {
-        SettingsManager settings=SettingsManager.instance();
-        return active.size() < settings.getMaxSimDownload();
+        return active.size() < DownloadSettings.MAX_SIM_DOWNLOAD.getValue();
     }
 
     /** 
@@ -770,7 +770,7 @@ public class DownloadManager implements BandwidthTracker {
         
         // multicast push requests must have a TTL of 1
         byte ttl = multicast ? 
-            1 : SettingsManager.instance().getTTL();
+            1 : ConnectionSettings.TTL.getValue();
             
         // make sure we don't use the forced ip address and port if 
         // we received the reply via UDP (in response to a 

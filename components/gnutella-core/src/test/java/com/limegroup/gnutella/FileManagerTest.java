@@ -5,6 +5,7 @@ import com.limegroup.gnutella.util.PrivilegedAccessor;
 import com.limegroup.gnutella.messages.*;
 import junit.framework.*;
 
+import com.limegroup.gnutella.settings.*;
 import com.limegroup.gnutella.messages.QueryRequest;
 import com.limegroup.gnutella.util.CommonUtils;
 import com.limegroup.gnutella.downloader.VerifyingFile;
@@ -35,8 +36,7 @@ public class FileManagerTest extends com.limegroup.gnutella.util.BaseTestCase {
     }
     
 	public void setUp() throws Exception {
-        SettingsManager settings=SettingsManager.instance();
-        settings.setExtensions(EXTENSION);
+        SharingSettings.EXTENSIONS_TO_SHARE.setValue(EXTENSION);
         	    
 	    cleanFiles(_sharedDir, false);
 	    fman = new FileManager();

@@ -2,6 +2,7 @@ package com.limegroup.gnutella.xml;
 
 import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.messages.*;
+import com.limegroup.gnutella.settings.*;
 import java.io.*;
 import com.sun.java.util.collections.*;
 
@@ -289,11 +290,10 @@ public class MetaFileManager extends FileManager {
      * Also creates another map that stores the hash to File of non mp3 files
      */
     private void createFileToHashMaps(){
-        SettingsManager man = SettingsManager.instance();
         //ArrayList dirs = new 
 		//            ArrayList(Arrays.asList(man.getDirectoriesAsArray()));
         ArrayList dirs = new 
-                      ArrayList(Arrays.asList(man.getDirectories()));
+            ArrayList(Arrays.asList((File[])SharingSettings.DIRECTORIES_TO_SHARE.getValue()));
 
         int k=0;
         while(k<dirs.size() && !loadThreadInterrupted()) {

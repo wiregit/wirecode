@@ -3,6 +3,7 @@ package com.limegroup.gnutella.filters;
 import junit.framework.*;
 import com.limegroup.gnutella.messages.*;
 import com.limegroup.gnutella.*;
+import com.limegroup.gnutella.settings.*;
 
 /**
  * Unit tests for IP, IPFilter, IPList
@@ -88,9 +89,10 @@ public class IPTest extends com.limegroup.gnutella.util.BaseTestCase {
 
 
     public void testIPFilterLegacy() {
-        SettingsManager.instance().setBannedIps(
+        FilterSettings.BLACK_LISTED_IP_ADDRESSES.setValue(
             new String[] {"18.239.0.*", "13.0.0.0"});
-        SettingsManager.instance().setAllowedIps(new String[] {"18.239.0.144"});
+        FilterSettings.WHITE_LISTED_IP_ADDRESSES.setValue(
+            new String[] {"18.239.0.144"});
         IPFilter filter = IPFilter.instance();
         assertTrue(filter.allow("18.240.0.0"));
         assertTrue(! filter.allow("18.239.0.142"));

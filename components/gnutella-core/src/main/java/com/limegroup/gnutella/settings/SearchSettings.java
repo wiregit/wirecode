@@ -49,4 +49,23 @@ public final class SearchSettings extends LimeProps {
      */
     public static final IntSetting MAX_XML_QUERY_LENGTH =
         FACTORY.createIntSetting("MAX_XML_QUERY_LENGTH", 200);
+    
+    /**
+	 * The minimum quality (number of stars) for search results to
+	 * display.
+	 */
+    public static final IntSetting MINIMUM_SEARCH_QUALITY =
+        FACTORY.createIntSetting("MINIMUM_SEARCH_QUALITY", 0);
+    
+    /**
+	 * The minimum speed for search results to display.
+	 */
+    public static final IntSetting MINIMUM_SEARCH_SPEED =
+        FACTORY.createIntSetting("MINIMUM_SEARCH_SPEED", 0);
+    
+    /**
+	 * The maximum number of simultaneous searches to allow.
+	 */    
+    public static final IntSetting PARALLEL_SEARCH =
+        FACTORY.createIntSetting("PARALLEL_SEARCH", 5);
 }

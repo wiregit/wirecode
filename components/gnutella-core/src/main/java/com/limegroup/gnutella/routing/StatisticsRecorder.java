@@ -1,6 +1,7 @@
 package com.limegroup.gnutella.routing;
 
 import com.limegroup.gnutella.*;
+import com.limegroup.gnutella.settings.*;
 
 import com.sun.java.util.collections.*;
 import java.net.*; 
@@ -36,7 +37,7 @@ public class StatisticsRecorder
      * The client GUID is always the first parameter sent to the servlet. 
      */
     private static String clientID = 
-        SettingsManager.instance().getClientID();
+        ApplicationSettings.CLIENT_ID.getValue();
 
     /**
      * Mapping of statistic name (i.e., "Route Table Size") to <sum, count>

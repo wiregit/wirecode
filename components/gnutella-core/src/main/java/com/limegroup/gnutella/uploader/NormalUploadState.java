@@ -219,7 +219,7 @@ public final class NormalUploadState implements HTTPMessage {
 	    int uSpeed = UploadSettings.UPLOAD_SPEED.getValue();
 	    float ret = ( uSpeed == 100 ) ? Float.MAX_VALUE : 
 	        // connection speed is in kbits per second
-	        SettingsManager.instance().getConnectionSpeed() / 8.f 
+	        ConnectionSettings.CONNECTION_SPEED.getValue() / 8.f 
 	        // upload speed is in percent
 	        * uSpeed / 100.f
 	        // wee need bytes per second

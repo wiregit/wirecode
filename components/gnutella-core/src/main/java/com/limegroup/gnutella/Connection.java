@@ -389,7 +389,7 @@ public class Connection {
 		InetAddress localAddress = _socket.getLocalAddress();
         if (ConnectionSettings.LOCAL_IS_PRIVATE.getValue() &&
             _socket.getInetAddress().equals(localAddress) &&
-            _port == SettingsManager.instance().getPort()) {
+            _port == ConnectionSettings.PORT.getValue()) {
             throw new IOException("Connection to self");
         }
 
@@ -767,9 +767,9 @@ public class Connection {
                 continue;                  //ignore lines without ':'
             String key=line.substring(0, i);
             String value=line.substring(i+1).trim();
-            if (HeaderNames.REMOTE_IP.equals(key) && SettingsManager.instance().getForceIPAddress()) {
+            if (HeaderNames.REMOTE_IP.equals(key) && ConnectionSettings.FORCE_IP_ADDRESS.getValue()) {
             	try {
-            		SettingsManager.instance().setForcedIPAddressString(value);
+            		ConnectionSettings.FORCED_IP_ADDRESS_STRING.setValue(value);
             	} catch (IllegalArgumentException ex) {
             	}
             }

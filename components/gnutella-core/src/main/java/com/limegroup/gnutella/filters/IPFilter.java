@@ -3,6 +3,7 @@ package com.limegroup.gnutella.filters;
 import com.sun.java.util.collections.*;
 import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.messages.*;
+import com.limegroup.gnutella.settings.*;
 import com.limegroup.gnutella.util.NetworkUtils;
 
 import java.net.InetAddress;
@@ -14,7 +15,7 @@ import java.net.UnknownHostException;
  */
 public final class IPFilter extends SpamFilter {
     
-    private static IPFilter _instance = new IPFilter();
+    private static IPFilter _instance;
     
     private final IPList badHosts = new IPList();
     private final IPList goodHosts = new IPList();
@@ -22,11 +23,11 @@ public final class IPFilter extends SpamFilter {
     /** Constructs a new BlackListFilter containing the addresses listed
      *  in the SettingsManager. */
     private IPFilter(){        
-        String[] allHosts = SettingsManager.instance().getBannedIps();
+        String[] allHosts = FilterSettings.BLACK_LISTED_IP_ADDRESSES.getValue();
         for (int i=0; i<allHosts.length; i++)
             badHosts.add(allHosts[i]);
         
-        allHosts = SettingsManager.instance().getAllowedIps();
+        allHosts = FilterSettings.WHITE_LISTED_IP_ADDRESSES.getValue();
         for (int i=0; i<allHosts.length; i++)
             goodHosts.add(allHosts[i]);        
     }
@@ -35,6 +36,8 @@ public final class IPFilter extends SpamFilter {
      * Returns the current active instance of IPFilter.
      */
     public static IPFilter instance() {
+        if( _instance == null )
+            _instance = new IPFilter();
         return _instance;
     }
     

@@ -294,8 +294,8 @@ public final class UploadManager implements BandwidthTracker {
                 debug(uploader+" waiting for next request with socket ");
                 int oldTimeout = socket.getSoTimeout();
                 if(queued!=QUEUED)
-                    socket.setSoTimeout(SettingsManager.instance().
-                                        getPersistentHTTPConnectionTimeout());
+                    socket.setSoTimeout(SharingSettings.PERSISTENT_HTTP_CONNECTION_TIMEOUT.getValue());
+                    
                 //dont read a word of size more than 4 
                 //as we will handle only the next "HEAD" or "GET" request
                 String word = IOUtils.readWord(
@@ -907,10 +907,9 @@ public final class UploadManager implements BandwidthTracker {
         //expensive of quality, making swarmed downloads work better.        
 
 		int current = uploadsInProgress();
-        SettingsManager settings=SettingsManager.instance();
-		if (current >= settings.getMaxUploads()) {
+		if (current >= UploadSettings.MAX_UPLOADS.getValue()) {
             return false;
-        } else if (current < settings.getSoftMaxUploads()) {
+        } else if (current < UploadSettings.SOFT_MAX_UPLOADS.getValue()) {
             return true;
         } else {
             float fastest=0.0f;
@@ -949,14 +948,13 @@ public final class UploadManager implements BandwidthTracker {
 	 */
 	private float getTotalBandwith() {
 
-		SettingsManager manager = SettingsManager.instance();
 		// To calculate the total bandwith available for
 		// uploads, there are two properties.  The first
 		// is what the user *thinks* their connection
 		// speed is.  Note, that they may have set this
 		// wrong, but we have no way to tell.
 		float connectionSpeed = 
-            ((float)manager.getConnectionSpeed())/8.f;
+            ((float)ConnectionSettings.CONNECTION_SPEED.getValue())/8.f;
 		// the second number is the speed that they have 
 		// allocated to uploads.  This is really a percentage
 		// that the user is willing to allocate.

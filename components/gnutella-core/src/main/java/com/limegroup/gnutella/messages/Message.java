@@ -75,11 +75,6 @@ public abstract class Message
 	 * Constant for whether or not to record stats.
 	 */
 	protected final boolean RECORD_STATS = !CommonUtils.isJava118();
-
-	/**
-	 * Cached reference to <tt>SettingsManager</tt>.
-	 */
-	private static final SettingsManager SETTINGS = SettingsManager.instance();
    
     /** Rep. invariant */
     protected void repOk() {
@@ -233,7 +228,7 @@ public abstract class Message
         //2.5 If the length is hopelessly off (this includes lengths >
         //    than 2^31 bytes, throw an irrecoverable exception to
         //    cause this connection to be closed.
-        if (length<0 || length>SettingsManager.instance().getMaxLength())
+        if (length<0 || length > MessageSettings.MAX_LENGTH.getValue())
             throw new IOException("Unreasonable message length: "+length);
 
         //3. Read rest of payload.  This must be done even for bad

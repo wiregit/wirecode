@@ -9,6 +9,7 @@ import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.uploader.HTTPUploader;
 import com.limegroup.gnutella.http.*;
 import com.limegroup.gnutella.util.*;
+import com.limegroup.gnutella.settings.*;
 
 public class TestUploader {    
     /** My name, for debugging */
@@ -65,9 +66,10 @@ public class TestUploader {
     public TestUploader(String name, final int port) {
 
         // ensure that only local machines can connect!!
-        SettingsManager settings = SettingsManager.instance();
-        settings.setBannedIps(new String[] {"*.*.*.*"});
-        settings.setAllowedIps(new String[] {"127.*.*.*"});
+        FilterSettings.BLACK_LISTED_IP_ADDRESSES.setValue(
+            new String[] {"*.*.*.*"});
+        FilterSettings.WHITE_LISTED_IP_ADDRESSES.setValue(
+            new String[] {"127.*.*.*"});
         this.name=name;
         reset();
         

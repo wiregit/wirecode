@@ -6,6 +6,7 @@ import com.limegroup.gnutella.security.*;
 import com.limegroup.gnutella.xml.*;
 import com.limegroup.gnutella.util.*;
 import com.limegroup.gnutella.stubs.*;
+import com.limegroup.gnutella.settings.*;
 import com.sun.java.util.collections.*;
 import junit.framework.*;
 import junit.extensions.*;
@@ -46,15 +47,15 @@ public final class UrnHttpRequestTest extends com.limegroup.gnutella.util.BaseTe
 		junit.textui.TestRunner.run(suite());
 	}
 
-	protected void setUp() {
+	protected void setUp() throws Exception {
 
 		if(ROUTER_SERVICE.isStarted()) return;
 
 		final File TEMP_DIR = new File("temp");
 		TEMP_DIR.mkdirs();
 		TEMP_DIR.deleteOnExit();
-		SettingsManager.instance().setDirectories(new File[] {TEMP_DIR});
-		SettingsManager.instance().setExtensions("tmp");
+		SharingSettings.setDirectories(new File[] {TEMP_DIR});
+		SharingSettings.EXTENSIONS_TO_SHARE.setValue("tmp");
 		String dirString = "com/limegroup/gnutella";
 		File testDir = CommonUtils.getResourceFile(dirString);
 		assertTrue("could not find the images directory", testDir.isDirectory());
@@ -86,8 +87,8 @@ public final class UrnHttpRequestTest extends com.limegroup.gnutella.util.BaseTe
 	 * the X-Gnutella-Content-URN header is always returned.
 	 */
 	public void testLimitReachedRequests()  throws Exception {
-		int maxUploads = SettingsManager.instance().getMaxUploads();
-		SettingsManager.instance().setMaxUploads(0);
+		int maxUploads = UploadSettings.MAX_UPLOADS.getValue();
+		UploadSettings.MAX_UPLOADS.setValue(0);
 		for(int i=0; i<RouterService.getFileManager().getNumFiles(); i++) {
 			FileDesc fd = RouterService.getFileManager().get(i);
 			String request = "/get/"+fd.getIndex()+"/"+fd.getName()+" HTTP/1.1\r\n"+
@@ -98,7 +99,7 @@ public final class UrnHttpRequestTest extends com.limegroup.gnutella.util.BaseTe
 			sendRequestThatShouldFail(HTTPRequestMethod.GET, request, fd, STATUS_503);
 			//sendRequestThatShouldFail(HTTPRequestMethod.HEAD, request, fd, STATUS_503);
 		}				
-		SettingsManager.instance().setMaxUploads(maxUploads);
+		UploadSettings.MAX_UPLOADS.setValue(maxUploads);
 	}
 
 

@@ -52,7 +52,7 @@ public final class HandshakingTest extends BaseTestCase {
 	public void setUp() throws Exception {
 		//launchBackend();
 		setStandardSettings();
-		SettingsManager.instance().setPort(PORT);
+		ConnectionSettings.PORT.setValue(PORT);
 		ConnectionSettings.WATCHDOG_ACTIVE.setValue(false);
 		//ConnectionSettings.REMOVE_ENABLED.setValue(false);
 		ConnectionSettings.IGNORE_KEEP_ALIVE.setValue(true);

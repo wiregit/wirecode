@@ -355,7 +355,7 @@ public class Backend extends com.limegroup.gnutella.util.BaseTestCase {
             shutdownSocket = new ServerSocket(shutdownPort);
             
             preSetUp();
-    		setStandardSettings(port, reject);
+    		setStandardSettings(port);
             populateSharedDirectory();
             ROUTER_SERVICE = new RouterService(new ActivityCallbackStub());
             ROUTER_SERVICE.start();
@@ -366,7 +366,8 @@ public class Backend extends com.limegroup.gnutella.util.BaseTestCase {
                 Thread.sleep(2000);
             } catch(InterruptedException e) {}
             if (ROUTER_SERVICE.getPort() != port) {
-                throw new IOException("Opened wrong port");
+                throw new IOException("Opened wrong port (wanted: "
+                     + port + ", was: " + ROUTER_SERVICE.getPort() +")");
             }
             
             waitForShutdown(shutdownSocket);
@@ -426,24 +427,27 @@ public class Backend extends com.limegroup.gnutella.util.BaseTestCase {
 	 * Sets the standard settings for a test backend, such as the ports, the
 	 * number of connections to maintain, etc.
 	 */
-	private void setStandardSettings(int port, boolean reject) {
-		SettingsManager settings = SettingsManager.instance();
-		settings.setPort(port);
-		settings.setExtensions(SHARED_EXTENSION);
-		//ConnectionSettings.NUM_CONNECTIONS.setValue(10);
+	private void setStandardSettings(int port) {
+        SharingSettings.EXTENSIONS_TO_SHARE.setValue(SHARED_EXTENSION);
+
 		SearchSettings.GUESS_ENABLED.setValue(true);
+
 		UltrapeerSettings.DISABLE_ULTRAPEER_MODE.setValue(false);
 		UltrapeerSettings.EVER_ULTRAPEER_CAPABLE.setValue(true);
 		UltrapeerSettings.FORCE_ULTRAPEER_MODE.setValue(true);
+
+        ConnectionSettings.PORT.setValue(port);
 		ConnectionSettings.EVER_ACCEPTED_INCOMING.setValue(true);
 		ConnectionSettings.CONNECT_ON_STARTUP.setValue(false);
         ConnectionSettings.LOCAL_IS_PRIVATE.setValue(false);
         ConnectionSettings.USE_GWEBCACHE.setValue(false);
-        // let the other side negotiate if they want it.
 		ConnectionSettings.ACCEPT_DEFLATE.setValue(true);
 		ConnectionSettings.ENCODE_DEFLATE.setValue(true);         
-        settings.setBannedIps(new String[] {"*.*.*.*"});
-        settings.setAllowedIps(new String[] {"127.*.*.*"});        
+
+        FilterSettings.BLACK_LISTED_IP_ADDRESSES.setValue(
+            new String[] {"*.*.*.*"});
+        FilterSettings.WHITE_LISTED_IP_ADDRESSES.setValue(
+            new String[] {"127.*.*.*"});        
 	}
 
 	/**

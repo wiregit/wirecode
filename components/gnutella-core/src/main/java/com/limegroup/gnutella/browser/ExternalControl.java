@@ -4,6 +4,7 @@ import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.util.URLDecoder;
 import com.limegroup.gnutella.util.*;
 import com.limegroup.gnutella.downloader.*;
+import com.limegroup.gnutella.settings.*;
 import com.sun.java.util.collections.*;
 import java.util.StringTokenizer;
 import java.net.*;
@@ -66,7 +67,6 @@ public class ExternalControl {
 	public static void handleMagnetRequest(String arg) {
 
 		ActivityCallback callback = RouterService.getCallback();
-        SettingsManager  settings = SettingsManager.instance();
 
 		// Make sure that connections are active
 		if ( RouterService.getNumInitializedConnections() <= 0 ) 
@@ -165,7 +165,7 @@ public class ExternalControl {
 		Socket socket = null;
 		try {
 			socket = Sockets.connect(LOCALHOST, 
-		      SettingsManager.instance().getPort(), 500);
+		      ConnectionSettings.PORT.getValue(), 500);
 		} catch (IOException e) {
 		    return false;
 		}

@@ -8,7 +8,6 @@ package com.limegroup.gnutella.xml;
 
 import com.sun.java.util.collections.*;
 import java.io.*;
-import com.limegroup.gnutella.SettingsManager;
 import com.limegroup.gnutella.*;
 
 /**
@@ -172,7 +171,7 @@ public class XMLStringUtils
         File dir = null;
         try{
             // file needs to be properly located...
-            dir = SettingsManager.instance().getSaveDirectory();
+            dir = SharingSettings.SAVE_DIRECTORY.getValue();
         }catch (FileNotFoundException e){
             return;//fail silently
         }

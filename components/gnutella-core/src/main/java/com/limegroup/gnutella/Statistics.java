@@ -1,5 +1,7 @@
 package com.limegroup.gnutella;
 
+import com.limegroup.gnutella.settings.*;
+
 /**
  * Maintains various session statistics, like uptime.  Implements the Singleton
  * pattern.  Statistics are initialized the when the class is loaded; call
@@ -78,11 +80,11 @@ public class Statistics {
         //days ago contributes 1/W * ((W-1)/W)^i part of the average.  The
         //default value of W (7 days) means, for example, that the past 9 days
         //account for 75% of the calculation.
-        SettingsManager settings=SettingsManager.instance();
+        
         final float W=WINDOW_MILLISECONDS;
-        float T=Math.min(W, now()-settings.getLastShutdownTime());
+        float T=Math.min(W, now() - ApplicationSettings.LAST_SHUTDOWN_TIME.getValue());
         float t=Math.min(W, getUptime());
-        float P=settings.getFractionalUptime();
+        float P=ApplicationSettings.FRACTIONAL_UPTIME.getValue();
         
         //Occasionally clocks can go backwards, e.g., if user adjusts them or
         //from daylight savings time.  In this case, ignore the current session
@@ -100,9 +102,8 @@ public class Statistics {
     public void shutdown() {
         //Order matters, as calculateFractionalUptime() depends on the
         //LAST_SHUTDOWN_TIME property.
-        SettingsManager settings=SettingsManager.instance();
-        settings.setFractionalUptime(calculateFractionalUptime());
-        settings.setLastShutdownTime(now());
+        ApplicationSettings.FRACTIONAL_UPTIME.setValue(calculateFractionalUptime());
+        ApplicationSettings.LAST_SHUTDOWN_TIME.setValue(now());
     }
 
     /** The current system time, in milliseconds.  Exists as a hook for testing

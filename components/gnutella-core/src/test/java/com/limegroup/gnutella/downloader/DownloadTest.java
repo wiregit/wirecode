@@ -114,7 +114,7 @@ public class DownloadTest extends com.limegroup.gnutella.util.BaseTestCase {
         saveDir.mkdirs();
         
         try {
-            SettingsManager.instance().setSaveDirectory(saveDir);        
+            SharingSettings.setSaveDirectory(saveDir);        
         } catch(IOException e) {
             fail( "cannot set save directory.", e);
         }
@@ -122,7 +122,7 @@ public class DownloadTest extends com.limegroup.gnutella.util.BaseTestCase {
         //Pick random name for file.
         savedFile = new File( saveDir, savedFileName );
         savedFile.delete();
-        SettingsManager.instance().setConnectionSpeed(1000);
+        ConnectionSettings.CONNECTION_SPEED.setValue(1000);
         
         callback.delCorrupt = false;
     }    
@@ -723,9 +723,8 @@ public class DownloadTest extends com.limegroup.gnutella.util.BaseTestCase {
     public void testStealerInterruptedWithAlternate() throws Exception {
         debug("-Testing swarming of rfds ignoring alt ...");
         
-        int capacity=SettingsManager.instance().getConnectionSpeed();
-        SettingsManager.instance().setConnectionSpeed(
-                                                      SpeedConstants.MODEM_SPEED_INT);
+        int capacity=ConnectionSettings.CONNECTION_SPEED.getValue();
+        ConnectionSettings.CONNECTION_SPEED.setValue(SpeedConstants.MODEM_SPEED_INT);
         final int RATE=200;
         //second half of file + 1/8 of the file
         final int STOP_AFTER = 1*TestFile.length()/10;
@@ -770,7 +769,7 @@ public class DownloadTest extends com.limegroup.gnutella.util.BaseTestCase {
         assertGreaterThan("u2 did no work", 0, u2);
         assertGreaterThan("u3 did no work", 0, u3);
         assertEquals("u4 was used", 0, u4);
-        SettingsManager.instance().setConnectionSpeed(capacity);
+        ConnectionSettings.CONNECTION_SPEED.setValue(capacity);
     }
     
     public void testPartialSourceIsAddedAfterPortion() throws Exception {
@@ -783,8 +782,8 @@ public class DownloadTest extends com.limegroup.gnutella.util.BaseTestCase {
             
         debug("-Testing that downloader adds itself to the mesh");
         
-        int capacity=SettingsManager.instance().getConnectionSpeed();
-        SettingsManager.instance().setConnectionSpeed(
+        int capacity=ConnectionSettings.CONNECTION_SPEED.getValue();
+        ConnectionSettings.CONNECTION_SPEED.setValue(
             SpeedConstants.MODEM_SPEED_INT);
         
         AlternateLocationCollection u1Alt = uploader1.getAlternateLocations();
@@ -832,7 +831,7 @@ public class DownloadTest extends com.limegroup.gnutella.util.BaseTestCase {
 
         assertEquals("u1 did too much work", STOP_AFTER, u1);
         assertGreaterThan("u2 did no work", 0, u2);
-        SettingsManager.instance().setConnectionSpeed(capacity);
+        ConnectionSettings.CONNECTION_SPEED.setValue(capacity);
     }
     
     public void testPartialSourceNotAddedWithCorruption() throws Exception {
@@ -845,8 +844,8 @@ public class DownloadTest extends com.limegroup.gnutella.util.BaseTestCase {
             
         debug("-Testing that downloader does not add to mesh if corrupt");
         
-        int capacity=SettingsManager.instance().getConnectionSpeed();
-        SettingsManager.instance().setConnectionSpeed(
+        int capacity=ConnectionSettings.CONNECTION_SPEED.getValue();
+        ConnectionSettings.CONNECTION_SPEED.setValue(
             SpeedConstants.MODEM_SPEED_INT);
         
         AlternateLocationCollection u1Alt = uploader1.getAlternateLocations();
@@ -895,14 +894,14 @@ public class DownloadTest extends com.limegroup.gnutella.util.BaseTestCase {
 
         assertEquals("u1 did too much work", STOP_AFTER, u1);
         assertGreaterThan("u2 did no work", 0, u2);
-        SettingsManager.instance().setConnectionSpeed(capacity);
+        ConnectionSettings.CONNECTION_SPEED.setValue(capacity);
     }
     
     public void testAlternateLocationsFromPartialDoBootstrap() throws Exception {
         debug("-Testing a shared partial funnels alt locs to downloader");
         
-        int capacity=SettingsManager.instance().getConnectionSpeed();
-        SettingsManager.instance().setConnectionSpeed(
+        int capacity=ConnectionSettings.CONNECTION_SPEED.getValue();
+        ConnectionSettings.CONNECTION_SPEED.setValue(
             SpeedConstants.MODEM_SPEED_INT);
             
         final int RATE=200;
@@ -961,14 +960,14 @@ public class DownloadTest extends com.limegroup.gnutella.util.BaseTestCase {
         assertEquals("u1 did too much work", STOP_AFTER, u1);
         assertEquals("u2 did too much work", STOP_AFTER, u2);
         assertGreaterThan("u3 did no work", 0, u3);
-        SettingsManager.instance().setConnectionSpeed(capacity);
+        ConnectionSettings.CONNECTION_SPEED.setValue(capacity);
     }
     
     public void testResumeFromPartialWithAlternateLocations() throws Exception {
         debug("-Testing alt locs from partial bootstrap resumed download");
         
-        int capacity=SettingsManager.instance().getConnectionSpeed();
-        SettingsManager.instance().setConnectionSpeed(
+        int capacity=ConnectionSettings.CONNECTION_SPEED.getValue();
+        ConnectionSettings.CONNECTION_SPEED.setValue(
             SpeedConstants.MODEM_SPEED_INT);
             
         final int RATE=200;
@@ -1023,7 +1022,7 @@ public class DownloadTest extends com.limegroup.gnutella.util.BaseTestCase {
         assertEquals("u1 did wrong work", STOP_AFTER, u1);
         assertEquals("u2 did wrong work", STOP_AFTER, u2);
         assertGreaterThan("u3 did no work", 0, u3);
-        SettingsManager.instance().setConnectionSpeed(capacity);
+        ConnectionSettings.CONNECTION_SPEED.setValue(capacity);
     }    
 
 	// no longer in use, as alternate locations should always have SHA1s

@@ -481,7 +481,7 @@ public final class QueryUnicaster {
                     20000) { // don't sent too many pings..
                     // first send a Ping, hopefully we'll get some pongs....
                     PingRequest pr = 
-                    new PingRequest(SettingsManager.instance().getTTL());
+                    new PingRequest(ConnectionSettings.TTL.getValue());
                     RouterService.getMessageRouter().broadcastPingRequest(pr);
                     _lastPingTime = System.currentTimeMillis();
                 }

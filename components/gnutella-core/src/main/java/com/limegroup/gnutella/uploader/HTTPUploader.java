@@ -9,6 +9,7 @@ import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.http.*;
 import com.limegroup.gnutella.statistics.*;
 import com.limegroup.gnutella.util.*;
+import com.limegroup.gnutella.settings.*;
 
 /**
  * Maintains state for an HTTP upload request.  This class follows the
@@ -680,7 +681,7 @@ public final class HTTPUploader implements Uploader {
 		// check for netscape, internet explorer,
 		// or other free riding downoaders
         //Allow them to browse the host though
-		if (SettingsManager.instance().getAllowBrowser() == false
+		if (SharingSettings.ALLOW_BROWSER.getValue() == false
             && !(_stateNum == BROWSE_HOST)  
             && !(_stateNum == PUSH_PROXY)  
 			&& !(_fileName.toUpperCase().startsWith("LIMEWIRE"))) {
