@@ -8,13 +8,14 @@ import java.util.Properties;
 public final class BooleanSetting extends Setting {
 
 	/**
-	 * Creates a new <tt>SettingBool</tt> instance with the specified
+	 * Creates a new <tt>BooleanSetting</tt> instance with the specified
 	 * key and defualt value.
 	 *
 	 * @param key the constant key to use for the setting
 	 * @param defaultBool the default value to use for the setting
 	 */
-	BooleanSetting(Properties defaultProps, Properties props, String key, boolean defaultBool) {
+	BooleanSetting(Properties defaultProps, Properties props, String key, 
+				   boolean defaultBool) {
 		super(defaultProps, props, key, String.valueOf(defaultBool));
 	}
         

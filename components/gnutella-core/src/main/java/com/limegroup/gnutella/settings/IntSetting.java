@@ -8,7 +8,7 @@ import java.util.Properties;
 public final class IntSetting extends Setting {
 
 	/**
-	 * Creates a new <tt>SettingBool</tt> instance with the specified
+	 * Creates a new <tt>IntSetting</tt> instance with the specified
 	 * key and defualt value.
 	 *
 	 * @param key the constant key to use for the setting
