@@ -334,7 +334,11 @@ public class LimeXMLUtils
         if(size > 1){
             if( ( (nullCountD+matchCountD)/sizeD ) < MATCHING_RATE)
                 return false;
-            return true;
+            // ok, it passed rate test, now make sure it had SOME matches...
+            if (matchCount > 0)
+                return true;
+            else
+                return false;
         }
         else if (size == 1){
             if(matchCountD/sizeD < 1)
