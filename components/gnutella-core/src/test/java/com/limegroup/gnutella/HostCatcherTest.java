@@ -61,6 +61,92 @@ public class HostCatcherTest extends com.limegroup.gnutella.util.BaseTestCase {
 	}
 
     /**
+     * Test the method for putting hosts on probation.
+     * 
+     * @throws Exception if an error occurs
+     */
+    public void testPutHostOnProbation() throws Exception {
+        HostCatcher catcher = new HostCatcher();
+        String ipStart = "34.56.";
+        int penultimatetByte;
+        for(int i=0; i<HostCatcher.PROBATION_HOSTS_SIZE; i++) {
+            
+            // Add a bunch of unique endpoints.
+            if(i >= 512) {
+                penultimatetByte = 2;
+            } else if(i >= 255) {
+                penultimatetByte = 1;
+            } else {
+                penultimatetByte = 0;
+            }
+            
+            int lastByte = i%256;
+            Endpoint curHost = 
+                new Endpoint(ipStart+penultimatetByte+"."+lastByte, 6346);
+            catcher.putHostOnProbation(curHost);
+        }
+        
+        Set probatedHosts =
+            (Set)PrivilegedAccessor.getValue(catcher, "PROBATION_HOSTS");
+        
+        assertEquals("unexpected size", HostCatcher.PROBATION_HOSTS_SIZE,
+            probatedHosts.size());
+        
+        // Start adding slightly different IPs
+        ipStart = "35.56.5.";
+        for(int i=0; i<10; i++) {
+            Endpoint curHost = new Endpoint(ipStart+i, 6346);
+            catcher.putHostOnProbation(curHost);
+            assertEquals("unexpected size", HostCatcher.PROBATION_HOSTS_SIZE,
+            probatedHosts.size());
+        }
+    }
+    
+    
+    /**
+     * Test the method for expiring hosts
+     * 
+     * @throws Exception if an error occurs
+     */
+    public void testExpireHosts() throws Exception {
+        HostCatcher catcher = new HostCatcher();
+        String ipStart = "34.56.";
+        int penultimatetByte;
+        for(int i=0; i<HostCatcher.EXPIRED_HOSTS_SIZE; i++) {
+            
+            // Add a bunch of unique endpoints.
+            if(i >= 512) {
+                penultimatetByte = 2;
+            } else if(i >= 255) {
+                penultimatetByte = 1;
+            } else {
+                penultimatetByte = 0;
+            }
+            
+            int lastByte = i%256;
+            Endpoint curHost = 
+                new Endpoint(ipStart+penultimatetByte+"."+lastByte, 6346);
+            catcher.expireHost(curHost);
+        }
+        
+        Set expiredHosts =
+            (Set)PrivilegedAccessor.getValue(catcher, "EXPIRED_HOSTS");
+        
+        assertEquals("unexpected size", HostCatcher.EXPIRED_HOSTS_SIZE,
+            expiredHosts.size());
+        
+        // Start adding slightly different IPs
+        ipStart = "35.56.5.";
+        for(int i=0; i<10; i++) {
+            Endpoint curHost = new Endpoint(ipStart+i, 6346);
+            catcher.putHostOnProbation(curHost);
+            assertEquals("unexpected size", HostCatcher.EXPIRED_HOSTS_SIZE,
+            expiredHosts.size());
+        }
+    }
+    
+    
+    /**
      * Test to make sure we hit the GWebCache if hosts fail.
      */
     public void testHitsGWebCacheIfHostsFail() throws Exception {
