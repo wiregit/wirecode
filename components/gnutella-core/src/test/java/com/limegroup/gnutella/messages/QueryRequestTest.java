@@ -109,7 +109,8 @@ public final class QueryRequestTest extends BaseTestCase {
 		try {
 			//String is double null-terminated.
 			byte[] payload = new byte[2+3];
-			qr = QueryRequest.createNetworkQuery(new byte[16], (byte)0, (byte)0, payload);
+			qr = QueryRequest.createNetworkQuery(
+			    new byte[16], (byte)0, (byte)0, payload, Message.N_UNKNOWN );
 			fail("exception should have been thrown");
 		} catch(BadPacketException e) {
 		}
@@ -157,7 +158,8 @@ public final class QueryRequestTest extends BaseTestCase {
 		//String is double null-terminated.
 		byte[] payload = new byte[2+3];
 		payload[2] = (byte)65;
-		qr = QueryRequest.createNetworkQuery(new byte[16], (byte)0, (byte)0, payload);
+		qr = QueryRequest.createNetworkQuery(
+		    new byte[16], (byte)0, (byte)0, payload, Message.N_UNKNOWN);
 
 		
 		// now test everything empty but URN
@@ -170,7 +172,8 @@ public final class QueryRequestTest extends BaseTestCase {
 		baos.write(HugeTestUtils.URNS[0].toString().getBytes()); 		
 		baos.write(0); // last null
 
-		qr = QueryRequest.createNetworkQuery(new byte[16], (byte)0, (byte)0, payload);
+		qr = QueryRequest.createNetworkQuery(
+		    new byte[16], (byte)0, (byte)0, payload, Message.N_UNKNOWN);
 	}
 
 	/**
@@ -188,7 +191,8 @@ public final class QueryRequestTest extends BaseTestCase {
         //String is single null-terminated.
 		byte[] payload = new byte[2+2];
 		payload[2]=(byte)65;
-		qr=QueryRequest.createNetworkQuery(new byte[16], (byte)0, (byte)0, payload);
+		qr=QueryRequest.createNetworkQuery(
+		    new byte[16], (byte)0, (byte)0, payload, Message.N_UNKNOWN);
 		
   		assertEquals("queries should be equal", "A", qr.getQuery());
   		assertEquals("query lengths should be equal", 4, qr.getLength());
@@ -196,14 +200,16 @@ public final class QueryRequestTest extends BaseTestCase {
         //String is double null-terminated.
         payload = new byte[2+3];
         payload[2]=(byte)65;
-        qr = QueryRequest.createNetworkQuery(new byte[16], (byte)0, (byte)0, payload);
+        qr = QueryRequest.createNetworkQuery(
+            new byte[16], (byte)0, (byte)0, payload, Message.N_UNKNOWN);
 
 		assertEquals("queries should be equal", "A", qr.getQuery());
 
 		try {
 			//String is empty.
 			payload = new byte[2+1];
-			qr = QueryRequest.createNetworkQuery(new byte[16], (byte)0, (byte)0, payload);
+			qr = QueryRequest.createNetworkQuery(
+			    new byte[16], (byte)0, (byte)0, payload, Message.N_UNKNOWN);
 			fail("should not have accepted query");
 			//assertEquals("queries should be equal", "", qr.getQuery());
 		} catch(BadPacketException e) {
@@ -237,9 +243,9 @@ public final class QueryRequestTest extends BaseTestCase {
 				}
 			}
 			baos[i].write(0);
-			QueryRequest qr = QueryRequest.createNetworkQuery(GUID.makeGuid(), (byte)6, 
-											   (byte)4, 
-											   baos[i].toByteArray());
+			QueryRequest qr = QueryRequest.createNetworkQuery(
+			    GUID.makeGuid(), (byte)6, (byte)4, 
+			    baos[i].toByteArray(), Message.N_UNKNOWN);
 			assertEquals("speeds should be equal", 0, qr.getMinSpeed());
 			assertEquals("queries should be equal", 
 						 HugeTestUtils.QUERY_STRINGS[i], qr.getQuery());
@@ -301,9 +307,9 @@ public final class QueryRequestTest extends BaseTestCase {
 				baos[i].write(0);
 				QueryRequest qr = null;
 				try {
-					qr = QueryRequest.createNetworkQuery(GUID.makeGuid(), (byte)6, 
-										  (byte)4, 
-										  baos[i].toByteArray());
+					qr = QueryRequest.createNetworkQuery(
+					    GUID.makeGuid(), (byte)6, (byte)4, 
+                        baos[i].toByteArray(), Message.N_UNKNOWN);
 				} catch(BadPacketException e) {
 					fail("should have accepted query: "+qr);
 				}
@@ -570,43 +576,82 @@ public final class QueryRequestTest extends BaseTestCase {
 
         // not firewalled and not wanting rich, just 10000000
         payload[0] = (byte) 0x80;
-        qr = QueryRequest.createNetworkQuery(GUID.makeGuid(), (byte)0, (byte)0, payload);
+        qr = QueryRequest.createNetworkQuery(
+            GUID.makeGuid(), (byte)0, (byte)0, payload, Message.N_UNKNOWN);
         assertTrue(!qr.desiresXMLResponses());
         assertTrue(!qr.isFirewalledSource());
-        assertTrue("should not be from multicast", !qr.isMulticast());
 
         // firewalled and not wanting rich, just 11000000
         payload[0] = (byte) 0xC0;
-        qr = QueryRequest.createNetworkQuery(GUID.makeGuid(), (byte)0, (byte)0, payload);
+        qr = QueryRequest.createNetworkQuery(
+            GUID.makeGuid(), (byte)0, (byte)0, payload, Message.N_UNKNOWN);
         assertTrue(!qr.desiresXMLResponses());
         assertTrue(qr.isFirewalledSource());
-        assertTrue("should not be from multicast", !qr.isMulticast());
 
         // not firewalled and wanting rich, just 10100000
         payload[0] = (byte) 0xA0;
-        qr = QueryRequest.createNetworkQuery(GUID.makeGuid(), (byte)0, (byte)0, payload);
+        qr = QueryRequest.createNetworkQuery(
+            GUID.makeGuid(), (byte)0, (byte)0, payload, Message.N_UNKNOWN);
         assertTrue(qr.desiresXMLResponses());
         assertTrue(!qr.isFirewalledSource());
-        assertTrue("should not be from multicast", !qr.isMulticast());
 
         // firewalled and wanting rich, just 11100000
         payload[0] = (byte) 0xE0;
-        qr = QueryRequest.createNetworkQuery(GUID.makeGuid(), (byte)0, (byte)0, payload);
+        qr = QueryRequest.createNetworkQuery(
+            GUID.makeGuid(), (byte)0, (byte)0, payload, Message.N_UNKNOWN);
         assertTrue(qr.desiresXMLResponses());
         assertTrue(qr.isFirewalledSource());
-        assertTrue("should not be from multicast", !qr.isMulticast());
-
-        // firewalled, wanting rich, and multicast -- 11110000
-        payload[0] = (byte) 0xF0;
-        qr = QueryRequest.createNetworkQuery(GUID.makeGuid(), (byte)0, (byte)0, payload);
-        assertTrue("should want XML", qr.desiresXMLResponses());
-        assertTrue("should be considered firewalled", qr.isFirewalledSource());
-        assertTrue("should be from multicast", qr.isMulticast());
+        
+        // make sure that a multicast source overrides that firewalled bit.
+        payload[0] = (byte) 0xE0;
+        qr = QueryRequest.createNetworkQuery(
+            GUID.makeGuid(), (byte)0, (byte)0, payload, Message.N_MULTICAST);
+        assertTrue(qr.desiresXMLResponses());
+        assertTrue(!qr.isFirewalledSource());
+        assertTrue(qr.isMulticast());
         // --------------------------------------
     }
 
-
-
+    public void testNetworkParameter() throws Exception {
+        QueryRequest qr;
+        
+        qr = QueryRequest.createQuery("sam");
+        assertTrue(!qr.isMulticast());
+        assertEquals(Message.N_UNKNOWN, qr.getNetwork());
+        
+        qr = QueryRequest.createMulticastQuery(qr);
+        assertTrue(qr.isMulticast());
+        assertEquals(Message.N_MULTICAST, qr.getNetwork());
+        
+        //String is empty.
+        byte[] payload = new byte[2+1];
+        // these two don't matter....give a query string, otherwise the query
+		// will be rejected
+        payload[2] = (byte) 65;
+        payload[1] = (byte) 0;
+        
+        qr = QueryRequest.createNetworkQuery(
+            GUID.makeGuid(), (byte)0, (byte)0, payload, Message.N_UNKNOWN);
+        assertTrue(qr.isUnknownNetwork());
+        assertEquals(Message.N_UNKNOWN, qr.getNetwork());
+        
+        qr = QueryRequest.createNetworkQuery(
+            GUID.makeGuid(), (byte)0, (byte)0, payload, Message.N_TCP);
+        assertTrue(qr.isTCP());
+        assertEquals(Message.N_TCP, qr.getNetwork());
+        
+        qr = QueryRequest.createNetworkQuery(
+            GUID.makeGuid(), (byte)0, (byte)0, payload, Message.N_UDP);
+        assertTrue(qr.isUDP());
+        assertEquals(Message.N_UDP, qr.getNetwork());
+        
+        qr = QueryRequest.createNetworkQuery(
+            GUID.makeGuid(), (byte)0, (byte)0, payload, Message.N_MULTICAST);        
+        assertTrue(qr.isMulticast());
+        assertEquals(Message.N_MULTICAST, qr.getNetwork());
+    }
+    
+    
 	private static String print(Collection col) {
 		Iterator iter = col.iterator();
 		StringBuffer sb = new StringBuffer();
