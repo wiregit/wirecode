@@ -474,6 +474,13 @@ public class RouterService {
     public static int getNumQueuedUploads() {
         return uploadManager.getNumQueuedUploads();
     }
+    
+    /**
+     * Returns the current uptime.
+     */
+    public static long getCurrentUptime() {
+        return statistics.getUptime();
+    }
 
 
     /**
