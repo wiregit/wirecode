@@ -861,8 +861,7 @@ public class ConnectionManager {
      */
     private static boolean allowUltrapeer2LeafConnection(HandshakeResponse hr) {
         String userAgent = hr.getUserAgent();
-        if(userAgent == null) 
-        return false;
+        if(userAgent == null) return false;
         if(userAgent.startsWith("Morpheus")) return false;
         return true;        
     }
@@ -1907,7 +1906,6 @@ public class ConnectionManager {
             //No need to remove, since it hasn't been added to any lists.
             throw new IOException("No space for connection");
         }
-        
         //For incoming connections, add it to the GUI.  For outgoing connections
         //this was done at the top of the method.  See note there.
         if (! c.isOutgoing()) {

@@ -90,7 +90,8 @@ public final class LeafHandshakeResponder
      *  headers to send in response to the connection attempt
      */
     private HandshakeResponse respondToIncoming(HandshakeResponse hr) {
-        Properties ret = new LeafHeaders(getRemoteIP());       
+        Properties ret = new LeafHeaders(getRemoteIP());
+        
         //If we already have enough ultrapeers, reject.
         if(!_manager.allowConnection(hr)) {
             if( RECORD_STATS )

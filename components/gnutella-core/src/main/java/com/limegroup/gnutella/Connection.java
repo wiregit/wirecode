@@ -543,8 +543,7 @@ public class Connection implements Candidate {
      *  of 401's)
      * @exception IOException any other error.  
      */
-    private void concludeOutgoingHandshake() throws IOException {
-    	
+    private void concludeOutgoingHandshake() throws IOException {	
         //This step may involve handshaking multiple times so as
         //to support challenge/response kind of behaviour
         for(int i=0; i < MAX_HANDSHAKE_ATTEMPTS; i++) {
@@ -558,6 +557,7 @@ public class Connection implements Candidate {
                 }
                 throw new IOException("Bad connect string");
             }	
+			
 			
 			//3. Read the Gnutella headers. 
 			readHeaders();
@@ -710,6 +710,7 @@ public class Connection implements Candidate {
 			//loop.
 			HandshakeResponse ourResponse = 
 				RESPONSE_HEADERS.respond(_headers, false);
+			
             writeLine(GNUTELLA_06 + " " + ourResponse.getStatusLine() + CRLF);
             sendHeaders(ourResponse.props());                   
             //Our response should be either OK or UNAUTHORIZED for the handshake

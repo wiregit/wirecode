@@ -56,7 +56,7 @@ import com.limegroup.gnutella.upelection.*;
  * originated from it.<p> 
  */
 public class ManagedConnection extends Connection 
-	implements ReplyHandler, PushProxyInterface, Candidate {
+	implements ReplyHandler, PushProxyInterface {
 
     /** 
      * The time to wait between route table updates for leaves, 
