@@ -76,7 +76,7 @@ public class ConnectionManager {
 	/**
 	 * The number of Ultrapeer connections to ideally maintain.
 	 */
-	public static final int ULTRAPEER_CONNECTIONS = 30;
+	public static final int ULTRAPEER_CONNECTIONS = 20;
 
     /** Ideal number of connections for a leaf.  */
     public static final int PREFERRED_CONNECTIONS_FOR_LEAF = 3;
