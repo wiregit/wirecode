@@ -497,10 +497,14 @@ public class Acceptor implements Runnable {
                 InputStream in=null;
                 try {
                     in=_socket.getInputStream(); 
-                } catch (Exception e) {
+                } catch (IOException e) {
                     if( RECORD_STATS )
                         HTTPStat.CLOSED_REQUESTS.incrementStat();
-                    throw new IOException("could not access socket stream");
+                    throw new IOException(e.getMessage());
+                } catch(NullPointerException e) {
+                    // This should only happen extremely rarely.
+                    // JDK bug 4091706
+                    throw new IOException(e.getMessage());
                 }
                 _socket.setSoTimeout(Constants.TIMEOUT);
                 //dont read a word of size more than 8 
