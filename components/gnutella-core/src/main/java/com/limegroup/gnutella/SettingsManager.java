@@ -118,6 +118,11 @@ public final class SettingsManager {
 	 * Default name for the network discovery properties 
 	 */
     private final String ND_PROPS_NAME  = "nd.props";
+    
+    /**
+     * Time interval, after which the accumulated information expires
+     */
+    private final long EXPIRY_INTERVAL = 14 * 24 * 60 * 60 * 1000; //14 days
 
 	private final boolean DEFAULT_ALLOW_BROWSER  = false;
     /** Default setting for the time to live */
@@ -304,6 +309,11 @@ public final class SettingsManager {
 	 */
 	private final boolean DEFAULT_CONNECT_ON_STARTUP = true;
     
+    /**
+     * The time when we last expired accumulated information
+     */
+    private final long DEFAULT_LAST_EXPIRE_TIME = 0L;
+    
     // The property key name constants
 	private final String ALLOW_BROWSER         = "ALLOW_BROWSER";
     private final String TTL                   = "TTL";
@@ -443,6 +453,12 @@ public final class SettingsManager {
 	 * Constant key for whether or not to connect on startup.
 	 */
 	private final String CONNECT_ON_STARTUP = "CONNECT_ON_STARTUP";
+    
+    /**
+     * Property that denotes the time when we last expired accumulated
+     * information
+     */
+    private final String LAST_EXPIRE_TIME = "LAST_EXPIRE_TIME";
  
 	/** Variables for the various settings */
     private volatile boolean  _forceIPAddress;
@@ -577,8 +593,29 @@ public final class SettingsManager {
         }
         catch(FileNotFoundException fnfe){loadDefaults();}
         catch(SecurityException se){loadDefaults();}
+        
+        //reset the values that have expired
+        resetExpiredValues();
     }
 
+    /**
+     * Resets the expired values to defaults
+     */
+    private void resetExpiredValues(){
+        //if hasnt expired, return
+        if(System.currentTimeMillis() - getLastExpireTime() < EXPIRY_INTERVAL)
+            return;
+        
+        //change the last expired time
+        setLastExpireTime(System.currentTimeMillis());
+        //reset the expired values;
+        setAverageUptime(DEFAULT_AVERAGE_UPTIME);
+        setEverAcceptedIncoming(DEFAULT_EVER_ACCEPTED_INCOMING);
+        setMaxUpstreamBytesPerSec(DEFAULT_MAX_UPSTREAM_BYTES_PER_SEC);
+		setMaxDownstreamBytesPerSec(DEFAULT_MAX_DOWNSTREAM_BYTES_PER_SEC);
+        setEverSupernodeCapable(DEFAULT_EVER_SUPERNODE_CAPABLE);
+    }
+    
     /** 
 	 * Sets all of the properties manually to ensure that each
 	 * property is valid.
@@ -949,6 +986,9 @@ public final class SettingsManager {
 				else if(key.equals(CONNECT_ON_STARTUP)) {
 					setConnectOnStartup((new Boolean(p)).booleanValue());
 				}
+                else if(key.equals(LAST_EXPIRE_TIME)){
+                    setLastExpireTime((new Long(p)).longValue());
+                }
 			}
 			catch(NumberFormatException nfe){ /* continue */ }
 			catch(IllegalArgumentException iae){ /* continue */ }
@@ -1056,6 +1096,7 @@ public final class SettingsManager {
 		setAverageUptime(DEFAULT_AVERAGE_UPTIME);
 		setTotalUptime(DEFAULT_TOTAL_UPTIME);		
 		setConnectOnStartup(DEFAULT_CONNECT_ON_STARTUP);
+        setLastExpireTime(DEFAULT_LAST_EXPIRE_TIME);
     }
 
     /**
@@ -1767,6 +1808,14 @@ public final class SettingsManager {
 	public boolean getConnectOnStartup() {
 		return getBooleanValue(CONNECT_ON_STARTUP);
 	}
+    
+     /**
+     * Returns The time when we last expired accumulated information
+      * @return The time when we last expired accumulated information
+     */
+    public long getLastExpireTime(){
+        return getLongValue(LAST_EXPIRE_TIME);
+    }
     
     /******************************************************
      **************  END OF ACCESSOR METHODS **************
@@ -2856,6 +2905,14 @@ public final class SettingsManager {
 		setBooleanValue(CONNECT_ON_STARTUP, connect);
 	}
     
+    /**
+     * Returns The time when we last expired accumulated information
+      * @return The time when we last expired accumulated information
+     */
+    public void setLastExpireTime(long lastExpireTime){
+        setLongValue(LAST_EXPIRE_TIME, lastExpireTime);
+    }
+    
     /******************************************************
      ***************  END OF MUTATOR METHODS **************
      ******************************************************/
@@ -2869,6 +2926,17 @@ public final class SettingsManager {
 	 */
 	private void setBooleanValue(final String KEY, final boolean BOOL) {
 		PROPS.put(KEY, new Boolean(BOOL).toString());
+	}
+    
+    /**
+	 * Sets the <tt>long</tt> value for the specified key as a
+	 * <tt>String</tt> entry.
+	 *
+	 * @param KEY the key for the value to set
+	 * @param LONG the <tt>long</tt> value to set
+	 */
+	private void setLongValue(final String KEY, final long LONG) {
+		PROPS.put(KEY, new Long(LONG).toString());
 	}
 
 	/**
@@ -2904,6 +2972,18 @@ public final class SettingsManager {
 	 */
 	private boolean getBooleanValue(final String KEY) {
 		return Boolean.valueOf(PROPS.getProperty(KEY)).booleanValue();
+	}
+    
+    /**
+	 * Returns the <tt>long</tt> value for the specified
+	 * key.
+	 * 
+	 * @param KEY the key for the desired value
+	 * @return the <tt>long</tt> value associated with the
+	 *  specified key
+	 */
+	private long getLongValue(final String KEY) {
+		return Long.valueOf(PROPS.getProperty(KEY)).longValue();
 	}
 	
 	/**
