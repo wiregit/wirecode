@@ -14,7 +14,7 @@ public class CommonUtils {
 	/** 
 	 * Constant for the current version of LimeWire.
 	 */
-	private static final String LIMEWIRE_VERSION = "1.7";
+	private static final String LIMEWIRE_VERSION = "1.8";
 	
 	/** 
 	 * Variable for the java system properties.
@@ -55,17 +55,17 @@ public class CommonUtils {
 	/** 
 	 * Variable for whether or not we're on MacOSX.
 	 */
-	private static boolean _isMacOSX     = false;
+	private static boolean _isMacOSX = false;
 
 	/** 
 	 * Variable for whether or not we're on Linux.
 	 */
-	private static boolean _isLinux      = false;
+	private static boolean _isLinux = false;
 
 	/** 
 	 * Variable for whether or not we're on Solaris.
 	 */
-	private static boolean _isSolaris    = false;
+	private static boolean _isSolaris = false;
 
 	/**
 	 * Variable for whether or not the localhost is running on a private
