@@ -149,8 +149,6 @@ public class FileUtils
         } catch(IOException ioe) {
             fName = f.getPath();
         }
-        
-        System.out.println("fName: " + fName);
             
         String cmds[] = null;
         if( CommonUtils.isWindows() )
