@@ -439,7 +439,6 @@ public final class MessageRouterTest extends BaseTestCase {
         QueryRequest qr = QueryRequest.createQuery("test");      
 
         
-        ReplyHandler rh = new OldConnection(10);
         m.invoke(ROUTER, new Object[] {qr});
         assertEquals("unexpected number of queries sent", 4, 
                      tcm.getNumQueries());
