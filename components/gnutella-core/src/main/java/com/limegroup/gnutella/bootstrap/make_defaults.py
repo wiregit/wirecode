@@ -18,7 +18,8 @@ import sys
 
 #The latest complete GWebCache scan.  This is a mirror of
 #http://zero-g.net/gwc/GWebCache.net, which is currently out.
-start_url="http://www.gnucleus.net/gwebcache/GWebCache.net"
+#start_url="http://www.gnucleus.net/gwebcache/GWebCache.net"
+start_url="http://www.rodage.net/gnetcache/gcache.php?urlfile=400"
 #Where to write the output.  Default: console
 out=sys.stdout
 #Write bad hosts as comments?
