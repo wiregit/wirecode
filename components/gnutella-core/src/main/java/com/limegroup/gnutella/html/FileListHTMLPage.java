@@ -51,25 +51,27 @@ public class FileListHTMLPage {
         final String host = NetworkUtils.ip2string(RouterService.getAddress());
         final String port = ""+RouterService.getPort();
         sb.append(host + ":" + port + htmlMiddle);
-
+        
+        boolean shouldShowMagnets = false;
+        
         {
             // get all the Shared files from the FM
             final String beginURL = "\r\n<a href=/get/";
             for (int i = 0; i < sharedFiles.length; i++) {
-                File currFile = sharedFiles[i].getFile();
-                sb.append(beginURL + sharedFiles[i].getIndex() + "/" +
-                          UploadManager.FV_PASS + "/" +
-                      StringUtils.replace(URLEncoder.encode(currFile.getName()),
-                                          "+", "%20") + ">" + 
-                          currFile.getName() + "</a><br>");
+                if (!(sharedFiles[i] instanceof IncompleteFileDesc)) {
+                    File currFile = sharedFiles[i].getFile();
+                    sb.append(beginURL + sharedFiles[i].getIndex() + "/" + 
+                              UploadManager.FV_PASS + "/" +
+                              StringUtils.replace(URLEncoder.encode(currFile.getName()),
+                                                  "+", "%20") + ">" + 
+                              currFile.getName() + "</a><br>");
+                    
+                    if (!shouldShowMagnets && hasEnoughAltLocs(sharedFiles[i]))
+                        shouldShowMagnets = true;
+                }
             }
         }
         
-        boolean shouldShowMagnets = false;
-        for (int i = 0; (i < sharedFiles.length && !shouldShowMagnets); i++)
-            if(hasEnoughAltLocs(sharedFiles[i]))
-                shouldShowMagnets = true;
-
         if (shouldShowMagnets) {
             // put the magnet links
             sb.append(htmlMagnet);
@@ -81,10 +83,12 @@ public class FileListHTMLPage {
             final String endURL = "</a><br>";
             for (int i = 0; i < sharedFiles.length; i++) {
                 if (!hasEnoughAltLocs(sharedFiles[i])) continue;
-                final String sha1 = sharedFiles[i].getSHA1Urn().toString();
-                final String fname = sharedFiles[i].getFile().getName();
-                sb.append(beginURL + sha1 + middle1URL + fname + middle2URL +
-                          sha1 + middle3URL + fname + endURL);
+                if (!(sharedFiles[i] instanceof IncompleteFileDesc)) {
+                    final String sha1 = sharedFiles[i].getSHA1Urn().toString();
+                    final String fname = sharedFiles[i].getFile().getName();
+                    sb.append(beginURL + sha1 + middle1URL + fname + middle2URL +
+                              sha1 + middle3URL + fname + endURL);
+                }
             }
         }
         
