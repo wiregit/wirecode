@@ -2138,6 +2138,9 @@ public abstract class MessageRouter {
     /**
      * Adds all query routing tables for this' files to qrt.
      *     @modifies qrt
+     * 
+     * TODO: store QRP table for our own files in FileManager instead of 
+     * rebuilding it each time!
      */
     private static void addQueryRoutingEntries(QueryRouteTable qrt) {
         Iterator words = _fileManager.getKeyWords().iterator();
