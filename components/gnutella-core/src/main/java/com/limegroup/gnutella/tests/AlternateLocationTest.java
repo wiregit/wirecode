@@ -23,6 +23,37 @@ public final class AlternateLocationTest extends TestCase {
 		"http://Y.Y.Y.Y:6352/get/2/"+
 		    "lime%20capital%20management%2001.mpg"
 	};
+
+	private static final String[] VALID_TIMESTAMPS = {
+		"2002-04-30",
+		"2002-04-30T08:31Z",
+		"2002-04-30T08:31:20Z",
+		"2002-04-30T08:31:21.45Z",
+		"2002-04-30T00:31:21.45Z",
+		"2002-04-30T23:31:21.45Z",
+		"2002-04-30T23:00:21.45Z",
+		"2002-04-30T23:59:21.45Z",
+		"2002-04-30T23:31:00.45Z",
+		"2002-04-30T23:31:59.45Z",
+		"2002-01-30T23:31:59.45Z",
+		"2002-01-01T23:31:59.45Z",
+		"2002-01-31T23:31:59.45Z"
+	};
+
+	private static final String[] INVALID_TIMESTAMPS = {
+		"2002-04",
+		"2002-04-30T",
+		"2002-04-30T08:31:21.45TZD",
+		"2000-04-30T08:31:21.45Z",
+		"2002-04-40T08:31:21.45Z",
+		"2002-12-30T08:31:21.45Z",
+		"2002-04-30T08:31:21.45",
+		"2002-04-30T08:31:60Z",
+		"2002-04-30T08:60:21Z",
+		"2002-04-30T24:31:21Z",
+		"2002-04-32T08:31:21Z",
+		"2002-00-00T08:31:21Z"
+	};
 	  
 
 	public AlternateLocationTest(String name) {
@@ -54,8 +85,8 @@ public final class AlternateLocationTest extends TestCase {
 			}
 		} catch(IOException e) {
 			// this also catches MalformedURLException
-			assertTrue("AlternateLocation constructor should not have thrown an "+
-					   "exception: "+e, false);
+			fail("AlternateLocation constructor should not have thrown an "+
+			"exception: "+e);
 		}
 	}
 
@@ -90,8 +121,7 @@ public final class AlternateLocationTest extends TestCase {
 				    AlternateLocation.createAlternateLocation(HugeTestUtils.VALID_NONTIMESTAMPED_LOCS[i]);
 			}
 		} catch(IOException e) {
-			assertTrue("test failed with exception: "+e, false); 
-			e.printStackTrace();
+			fail("test failed with exception: "+e); 
 		}		
 	}
 
@@ -115,7 +145,6 @@ public final class AlternateLocationTest extends TestCase {
 	 * Test the equals method.
 	 */
 	public void testAlternateLocationEquals() {
-
 		for(int i=0; i<equalLocs.length; i++) {
 			try {
 				AlternateLocation curLoc = 
@@ -210,8 +239,117 @@ public final class AlternateLocationTest extends TestCase {
 					assertEquals("locations should be equal", z, 0);
 				}
 			} catch(IOException e) {
-				assertTrue("unexpected exception: "+e, false);
+				fail("unexpected exception: "+e);
 			}
-		}		
+		}
+
+		// make sure that alternate locations with the same timestamp and
+		// different URLs are not considered the same
+		for(int i=0; i<(HugeTestUtils.VALID_NONTIMESTAMPED_LOCS.length-1); i++) {
+			String loc0 = HugeTestUtils.VALID_NONTIMESTAMPED_LOCS[i];
+			String loc1 = HugeTestUtils.VALID_NONTIMESTAMPED_LOCS[i+1];
+
+			// give them the same timestamp to make sure compareTo 
+			// differentiates properly
+			loc0 = loc0 + " 2002-04-30T08:30Z";
+			loc1 = loc1 + " 2002-04-30T08:30Z";
+			try {
+				AlternateLocation curLoc0 = 
+			        AlternateLocation.createAlternateLocation(loc0);
+				AlternateLocation curLoc1 = 
+			        AlternateLocation.createAlternateLocation(loc1);
+				int z = curLoc0.compareTo(curLoc1);
+				assertTrue("locations should compare to different values", z!=0);
+			} catch(Exception e) {
+				fail("unexpected exception: "+e);
+			}
+		}
+	}
+
+	/**
+	 * Tests to make sure that alternate locations with equal URLs and 
+	 * different timestamps are considered different.  This test relies
+	 * on several properties of the VALID_TIMESTAMPS list.  For example,
+	 * the java Calendar class's set method does not take fractions of a
+	 * second, so we consider timestamps with the same second reading as
+	 * identical regardless of whether or not they have different fractions
+	 * of that second, which is the behavior we want.
+	 */
+	public void testAlternateLocationCompareToWithEqualUrlsDifferentDates() {
+		// make sure that alternate locations with the same urls and different
+		// timestamps are considered different
+		for(int i=0; i<(HugeTestUtils.VALID_NONTIMESTAMPED_LOCS.length-1); i++) {
+			String nonTSloc0 = HugeTestUtils.VALID_NONTIMESTAMPED_LOCS[i];
+			String nonTSloc1 = HugeTestUtils.VALID_NONTIMESTAMPED_LOCS[i];
+
+			for(int j=0; j<VALID_TIMESTAMPS.length-1; j++) {
+				// give them the same timestamp to make sure compareTo 
+				// differentiates properly
+				String loc0 = nonTSloc0 + " "+VALID_TIMESTAMPS[j];
+				String loc1 = nonTSloc1 + " "+VALID_TIMESTAMPS[j+1];
+				try {
+					AlternateLocation curLoc0 = 
+			            AlternateLocation.createAlternateLocation(loc0);
+					AlternateLocation curLoc1 = 
+			            AlternateLocation.createAlternateLocation(loc1);
+					int z = curLoc0.compareTo(curLoc1);
+					assertTrue("locations should compare to different values:\r\n"+
+							   curLoc0 + "\r\n" + curLoc1+"\r\n"+
+							   loc0+ "\r\n"+
+							   loc1+ "\r\n", 
+							   z!=0);
+				} catch(Exception e) {
+					e.printStackTrace();
+					fail("unexpected exception: "+e);
+				}
+			}
+		}
+	}
+
+	/**
+	 * Tests the construction of alternate locations with dates that do 
+	 * not meet the appropriate syntax to make sure they fail.
+	 */
+	public void testAlternateLocationConstructorWithInvalidDates() {
+		// make sure that alternate locations with the same urls and different
+		// timestamps are considered different
+		for(int i=0; i<(HugeTestUtils.VALID_NONTIMESTAMPED_LOCS.length-1); i++) {
+			String nonTSloc = HugeTestUtils.VALID_NONTIMESTAMPED_LOCS[i];
+
+			for(int j=0; j<INVALID_TIMESTAMPS.length-1; j++) {
+				String loc = nonTSloc + " "+INVALID_TIMESTAMPS[j];
+				try {
+					AlternateLocation al = 
+			            AlternateLocation.createAlternateLocation(loc);
+					assertEquals("alternate location should not have a timestamp: "+loc,
+								 false, al.isTimestamped());
+				} catch(IOException e) {
+				}
+			}
+		}
+	}
+
+	/**
+	 * Tests the construction of alternate locations with dates that do 
+	 * meet the appropriate syntax to make sure they fail.
+	 */
+	public void testAlternateLocationConstructorWithValidDates() {
+		// make sure that alternate locations with the same urls and different
+		// timestamps are considered different
+		for(int i=0; i<(HugeTestUtils.VALID_NONTIMESTAMPED_LOCS.length-1); i++) {
+			String nonTSloc = HugeTestUtils.VALID_NONTIMESTAMPED_LOCS[i];
+
+			for(int j=0; j<VALID_TIMESTAMPS.length-1; j++) {
+				String loc = nonTSloc + " "+VALID_TIMESTAMPS[j];
+				try {
+					AlternateLocation al = 
+			            AlternateLocation.createAlternateLocation(loc);
+					assertEquals("alternate location should not have a timestamp: "+loc,
+								 true, al.isTimestamped());
+				} catch(IOException e) {
+					fail("unexpected exception: "+e);
+				}
+			}
+		}
 	}
 }
