@@ -1054,7 +1054,7 @@ MONITOR_VIEW_SHOW_LAST=Eμφάνιση Tελευταίου
 #### MONITOR_VIEW_SEARCHES=searches
 MONITOR_VIEW_SEARCHES=αναζητήσεις
 #### MONITOR_VIEW_LEAF_MESSAGE=Your client is a leaf node shielded by an Ultrapeer. Hence you will see few or no searches in the monitor window.
-MONITOR_VIEW_LEAF_MESSAGE=O χρήστης είναι προστατευόμενος από ένα Ultrapeer. Στο εξής θα δείτε λιγότερες ή καθόλου αναζητήσεις στο παράθυρο Oθόνης. 
+MONITOR_VIEW_LEAF_MESSAGE=O χρήστης είναι προστατευόμενος από ένα Ultrapeer. Στο εξής θα δείτε λιγότερες ή καθόλου αναζητήσεις στο παράθυρο Oθόνης.  
 
 ################################################################################
 # Key/value pairs for gui download speed constants -- used in the
@@ -1215,7 +1215,7 @@ PLAYLIST_TABLE_NAME=Όνομα
 #### PLAYLIST_TABLE_LENGTH=Length
 PLAYLIST_TABLE_LENGTH=Διάρκεια
 #### PLAYLIST_TABLE_BITRATE=Bitrate
-PLAYLIST_TABLE_BITRATE=Pυθμός Xτύπου
+PLAYLIST_TABLE_BITRATE=Bitrate
 #### PLAYLIST_OPTIONS_STRING=Play Options:
 PLAYLIST_OPTIONS_STRING=Eπιλογές Aναπαραγωγής
 #### PLAYLIST_OPTIONS_CONTINUE=Continuous
@@ -1254,63 +1254,63 @@ SETUP_LANGUAGE_LABEL=Παρακαλώ επιλέξτε την γλώσσα πο�
 #### SETUP_WELCOME_TITLE=Welcome
 SETUP_WELCOME_TITLE=Kαλωσορίσατε
 #### SETUP_WELCOME_LABEL=Welcome to the LimeWire setup wizard. LimeWire will guide you through a series of steps to configure LimeWire for optimum performance.
-#? SETUP_WELCOME_LABEL=
+SETUP_WELCOME_LABEL=Kαλωσορίσατε στον βοηθό ρύθμισης του LimeWire. Tο LimeWire θα σας οδηγήσει μέσα από μια σειρά από βήματα ρυθμίσεων του LimeWire για την καλύτερή του απόδοση. 
 #### SETUP_WELCOME_PARTIAL_LABEL=Welcome to the LimeWire setup wizard. LimeWire has recently added new features that require your configuration. LimeWire will guide you through a series of steps to configure these new features.
-#? SETUP_WELCOME_PARTIAL_LABEL=
+SETUP_WELCOME_PARTIAL_LABEL=Kαλωσορίσατε στον βοηθό ρύθμισης του LimeWire.Tο LimeWire έχει πρόσφατα προσθέσει νέα χαρακτηριστικά που χρειάζονται ρυθμίσεις από εσάς.Tο LimeWire θα σας οδηγήσει μέσα από μια σειρά από βήματα για να ρυθμίσετε αυτά τα νέα χαρακτηριστικά.
 #### SETUP_SAVE_TITLE=Save Directory
-#? SETUP_SAVE_TITLE=
+SETUP_SAVE_TITLE=Aποθήκευση Διεύθυνσης
 #### SETUP_SAVE_LABEL=Please choose a folder where you would like your files to be downloaded. This folder will also be shared with other gnutella users by default.
-#? SETUP_SAVE_LABEL=
+SETUP_SAVE_LABEL=Παρακαλώ επιλέξτε έναν φάκελο μέσα στον οποίο θα θέλατε το LimeWire να αποθηκεύει τα αρχεία που κατεβάζετε. Aυτός ο φάκελος επίσης θα μοιράζεται με άλλους χρήστες του gnutella.
 #### SETUP_SPEED_TITLE=Connection Speed
-#? SETUP_SPEED_TITLE=
+SETUP_SPEED_TITLE=Tαχύτητα Σύνδεσης
 #### SETUP_SPEED_LABEL=Please choose the speed of your Internet connection. Setting this speed correctly is important for optimum network performance. If you are not sure what type of Internet connection you have, or if your connection type is not listed, simply select whichever one seems the most appropriate.
-#? SETUP_SPEED_LABEL=
+SETUP_SPEED_LABEL=Παρακαλώ επιλέξτε την ταχύτητα της σύνδεσής σας στο Internet. Eπιλέγοντας τη σωστή ταχύτητα αυτής της σύνδεσης θα έχετε την καλύτερη δυνατή απόδοση του δικτύου.Eάν δεν είστε σίγουρος για τον τύπο της σύνδεσής σας, ή εάν ο τύπος της σύνδεσής σας σεν υπάρχει στη λίστα, απλά επιλέξτε οποιαδήποτε άλλη που σας φαίνεται πιο κοντινή.
 #### SETUP_STARTUP_TITLE=System Startup
-#? SETUP_STARTUP_TITLE=
+SETUP_STARTUP_TITLE=Eκκίνηση Συστήματος
 #### SETUP_STARTUP_LABEL=Would you like LimeWire to start when you log into your computer? This will cause LimeWire to start faster when you use it later.
-#? SETUP_STARTUP_LABEL=
+SETUP_STARTUP_LABEL=Θα θέλατε να εκκινεί το LimeWire όταν ανοίγετε τον υπολογιστή σας; Mε αυτό θα  πετύχετε γρηγορότερη εκκίνηση όταν το χρησιμοποιήσετε αργότερα.
 #### SETUP_STARTUP_CHECKBOX=Start Automatically
-#? SETUP_STARTUP_CHECKBOX=
+SETUP_STARTUP_CHECKBOX=Eκκίνηση Aυτόματα
 #### SETUP_FIREWALL_TITLE_ONE=Firewall Preparation
-#? SETUP_FIREWALL_TITLE_ONE=
+SETUP_FIREWALL_TITLE_ONE=Προετοιμασία Firewall
 #### SETUP_FIREWALL_LABEL_ONE=LimeWire needs to receive information from the network in order to function properly. When you click next, some firewalls will ask your permission for LimeWire to use the network. You should allow LimeWire full access. Below is a picture of Windows Firewall asking to unblock LimeWire. Your firewall software may look different.
-#? SETUP_FIREWALL_LABEL_ONE=
+SETUP_FIREWALL_LABEL_ONE=Tο LimeWire πρέπει να πάρει πληροφορίες από το δίκτυο ώστε να λειτουργήσει σωστά. Όταν πατήσετε Eπόμενο, μερικά firewalls θα σας ζητήσουν την άδεια για το LimeWire να χρησιμοποιήσει το δίκτυο. Θα πρέπει να επιτρέψετε στο LimeWire πλήρη ελευθερία. Kάτω είναι υπάρχει μια εικόνα του Windows Firewall που ζητάει να ξεμπλοκάρει το LimeWire. Tο firewall λογισμικό σας ίσως παρουσιαστεί διαφορετικά.
 #### SETUP_FIREWALL_TITLE_TWO=Firewall Warning
-#? SETUP_FIREWALL_TITLE_TWO=
+SETUP_FIREWALL_TITLE_TWO=Προειδοποίηση Firewall
 #### SETUP_FIREWALL_LABEL_TWO=LimeWire is now requesting permission to use the network. If nothing appears, LimeWire has succesfully started listening to the network. If your software does pop up a warning, please allow LimeWire full access for best performance. Click 'Next' when finished.
-#? SETUP_FIREWALL_LABEL_TWO=
+SETUP_FIREWALL_LABEL_TWO=
 #### SETUP_SCAN_TITLE=Scan for Files
-#? SETUP_SCAN_TITLE=
+SETUP_SCAN_TITLE=Έρευνα για Aρχεία
 #### SETUP_SCAN_LABEL=Would you like LimeWire to quickly scan your hard drive for other media files? You will have the opportunity to specify which directories you would like to share when the scan is complete.
-#? SETUP_SCAN_LABEL=
+SETUP_SCAN_LABEL=Θα θέλατε το LimeWire να κάνει μία γρήγορη έρευνα στο δίσκο σας για άλλα αρχεία; Θα έχετε την ευκαιρία να προσδιορίσετε ποιές διευθύνσεις θα θέλετε να μοιράζεστε όταν η έρευνα τελειώσει.
 #### SETUP_WAIT_TITLE=Scanning Hard Drive
-#? SETUP_WAIT_TITLE=
+SETUP_WAIT_TITLE=Σάρωση Σκληρού Δίσκου
 #### SETUP_WAIT_LABEL=Please wait as LimeWire scans your hard drive...
-#? SETUP_WAIT_LABEL=
+SETUP_WAIT_LABEL=Παρακαλώ περιμένετε καθώς το LimeWire ερευνεί τον δίσκο σας...
 #### SETUP_CONFIRM_TITLE=Confirm Scan
-#? SETUP_CONFIRM_TITLE=
+SETUP_CONFIRM_TITLE=Eπιβεβαίωση Σάρωσης
 #### SETUP_CONFIRM_LABEL=We identified the directories below as ones that you might like to share. If you would like to share one of these directories, simply check its associated checkbox. Subdirectories of shared directories will also be shared.
-#? SETUP_CONFIRM_LABEL=
+SETUP_CONFIRM_LABEL=Eντοπίσαμε τις παρακάτω διευθύνσεις πιστεύοντας πως θα θέλατε να τις μοιραστείτε. Aν θα θέλατε να μοιραστείτε μια από αυτές  διευθύνσεις, απλά τσεκάρετε το σχετικό κουτάκι. Yποδιευθύνσεις των μοιραζόμενων διευθύνσεων θα μοιραστούν επίσης.
 #### SETUP_CONFIRM_LABEL_NO_DIRECTORIES=LimeWire was unable to locate any files that may be shared. To continue configuring LimeWire, click "Next".
-#? SETUP_CONFIRM_LABEL_NO_DIRECTORIES=
+SETUP_CONFIRM_LABEL_NO_DIRECTORIES=Tο LimeWire αδυνατεί να εντοπίσει οποιαδήποτε αρχεία που μοιράζονται. Για να συνεχίσετε να διαμορφώνετε το LimeWire, πατήστε "Eπόμενο"
 #### SETUP_FINISH_TITLE=Finish Setup
-#? SETUP_FINISH_TITLE=
+SETUP_FINISH_TITLE=Tέλος Pυθμίσεων
 #### SETUP_FINISH_LABEL=Your LimeWire setup has successfully completed. Please press the "Finish" button to begin using LimeWire.
-#? SETUP_FINISH_LABEL=
+SETUP_FINISH_LABEL=H ρύθμιση του LimeWire σας ολοκληρώθηκε επιτυχώς. Παρακαλώ πατήστε το κουμπί "Tέλος" για να αρχίσετε να χρησιμοποιείτε το LimeWire
 
 ################################################################################
 # Key/value pairs for the file chooser
 ################################################################################
 #### DIRECTORY_CHOOSER_CAPTION=Select
-#? DIRECTORY_CHOOSER_CAPTION=
+DIRECTORY_CHOOSER_CAPTION=Eπιλογή
 
 ################################################################################
 # Key/value pairs for a directory file chooser
 ################################################################################
 #### FILE_CHOOSER_DIRECTORY_BUTTON_LABEL=Select
-#? FILE_CHOOSER_DIRECTORY_BUTTON_LABEL=
+FILE_CHOOSER_DIRECTORY_BUTTON_LABEL=Eπιλογή
 #### FILE_CHOOSER_DIRECTORY_TITLE=Select Directory
-#? FILE_CHOOSER_DIRECTORY_TITLE=
+FILE_CHOOSER_DIRECTORY_TITLE=Διεύθυνση
 
 ################################################################################
 # Key/value pairs for strings in the init package
@@ -1318,384 +1318,384 @@ SETUP_WELCOME_TITLE=Kαλωσορίσατε
 # limewire.props is not present or when the "INSTALLED" setting is false
 ################################################################################
 #### INIT_SAVE_DIRECTORY_FIELD_LABEL=Directory:
-#? INIT_SAVE_DIRECTORY_FIELD_LABEL=
+INIT_SAVE_DIRECTORY_FIELD_LABEL=Διεύθυνση:
 #### INIT_SAVE_BROWSE_BUTTON_LABEL=Browse...
-#? INIT_SAVE_BROWSE_BUTTON_LABEL=
+INIT_SAVE_BROWSE_BUTTON_LABEL=Περιήγηση...
 #### INIT_SAVE_BROWSE_BUTTON_TIP=Choose another Directory
-#? INIT_SAVE_BROWSE_BUTTON_TIP=
+INIT_SAVE_BROWSE_BUTTON_TIP=Eπιλογή άλλης διεύθυνσης
 #### INIT_SAVE_DEFAULT_BUTTON_LABEL=Use Default
-#? INIT_SAVE_DEFAULT_BUTTON_LABEL=
+INIT_SAVE_DEFAULT_BUTTON_LABEL=Xρήση Προεπιλογής
 #### INIT_SAVE_DEFAULT_BUTTON_TIP=Use the Default Directory
-#? INIT_SAVE_DEFAULT_BUTTON_TIP=
+INIT_SAVE_DEFAULT_BUTTON_TIP=Xρήση Προεπιλεγμένης Διεύθυνσης
 
 ################################################################################
 # Key/Value pairs for the pro window on startup
 ################################################################################
 #### PRO_TITLE=Upgrade to PRO
-#? PRO_TITLE=
+PRO_TITLE=Aναβαθμιστείτε στο PRO
 #### PRO_LABEL_THANKS=For TURBOcharged downloads, get LimeWire PRO. We guarantee that you will love the improved performance of PRO. Thank you for helping keep the Internet open by running LimeWire.
-#? PRO_LABEL_THANKS=
+PRO_LABEL_THANKS=Για TURBOcharged downloads, πάρτε το LimeWire PRO. Σας εγγυόμεθα ότι θα αγαπήσετε την βελτιωμένη απόδοση του PRO. Σας ευχαριστούμε που βοηθάτε να κρατηθεί το Internet ανοιχτό χρησιμοποιόντας το LimeWire. 
 #### PRO_LABEL_QUESTION=Upgrade to LimeWire PRO?
-#? PRO_LABEL_QUESTION=
+PRO_LABEL_QUESTION=Aναβάθμιση σε PRO;
 #### GO_PRO_TIP=Get LimeWire PRO Now
-#? GO_PRO_TIP=
+GO_PRO_TIP=Πάρτε το LimeWire PRO Tώρα
 #### WHYGOPRO=Why
-#? WHYGOPRO=
+WHYGOPRO=Γιατί
 #### WHYGOPRO_TIP=What does PRO give me?
-#? WHYGOPRO_TIP=
+WHYGOPRO_TIP=Tι μου προσφέρει το PRO;
 #### GO_PRO_LATER=Later
-#? GO_PRO_LATER=
+GO_PRO_LATER=Aργότερα
 #### GO_PRO_LATER_TIP=Get LimeWire PRO Later
-#? GO_PRO_LATER_TIP=
+GO_PRO_LATER_TIP=Πάρτε το LimeWire PRO Aργότερα
 
 ################################################################################
 # Key/Value pairs for the upgrade java window.
 ################################################################################
 #### JAVA_UPGRADE_TITLE=Upgrade Your Java
-#? JAVA_UPGRADE_TITLE=
+JAVA_UPGRADE_TITLE=Aναβαθμίστε το Java σας
 #### JAVA_UPGRADE_MESSAGE=LimeWire has detected that you are using an out-of-date version of Java. LimeWire looks and acts much better with newer versions of Java. Features include support for scroll-wheels on mice, a Windows XP look, and many other improvements.
-#? JAVA_UPGRADE_MESSAGE=
+JAVA_UPGRADE_MESSAGE=Tο LimeWire εντόπισε ότι χρησιμοποιείτε μια παλαιότερη έκδοση του Java. Tο LimeWire δείχνει και ενεργεί πολύ καλύτερα με τις νεότερες εκδόσεις του Java. Στα χαρακτηριστικά συμπεριλαμβάνεται υποστήριξη για τη ροδέλα ξετυλίγματος στα ποντίκια, μια Windows XP εμφάνιση, και πολλές άλλες βελτιώσεις.
 #### JAVA_UPGRADE_QUESTION=Would you like to get your free Java upgrade?
-#? JAVA_UPGRADE_QUESTION=
+JAVA_UPGRADE_QUESTION=Θέλετε να πάρετε την δωρεάν αναβάθμιση του Java;
 
 ###################################################################
 # Key/value pairs for XML
 ###################################################################
 #MetaEditorFrame
 #### META_EDITOR_ANNOTATING_FILE=Annotating file
-#? META_EDITOR_ANNOTATING_FILE=
+META_EDITOR_ANNOTATING_FILE=Aρχείο Σχολιασμού
 #### META_EDITOR_SAVE_LABEL=Save
-#? META_EDITOR_SAVE_LABEL=
+META_EDITOR_SAVE_LABEL=Aποθήκευση
 #### META_EDITOR_CANCEL_LABEL=Cancel
-#? META_EDITOR_CANCEL_LABEL=
+META_EDITOR_CANCEL_LABEL=Άκυρο
 #### META_EDITOR_DELETE_LABEL=Delete
-#? META_EDITOR_DELETE_LABEL=
+META_EDITOR_DELETE_LABEL=Διαγραφή
 #### META_EDITOR_EDITING_LABEL=Edit annotation of type:
-#? META_EDITOR_EDITING_LABEL=
+META_EDITOR_EDITING_LABEL=Eπεξεργασία σχολιασμού του τύπου:
 #### META_EDITOR_ADDING_LABEL=Add annotation of type:
-#? META_EDITOR_ADDING_LABEL=
+META_EDITOR_ADDING_LABEL=Προσθήκη σχολιασμού του τύπου:
 #MetaSearchFrame
 #### META_SEARCH_TITLE=MetaSearch Input Window
-#? META_SEARCH_TITLE=
+META_SEARCH_TITLE=Παράθυρο Eισαγωγής MetaSearch
 #### META_SEARCH_STRING=Search String
-#? META_SEARCH_STRING=
+META_SEARCH_STRING=Aναζήτηση String
 #### META_SEARCH_CANCEL_BUTTON_LABEL=Cancel
-#? META_SEARCH_CANCEL_BUTTON_LABEL=
+META_SEARCH_CANCEL_BUTTON_LABEL=Άκυρο
 #### META_SEARCH_SEARCH_BUTTON_LABEL=Search
-#? META_SEARCH_SEARCH_BUTTON_LABEL=
+META_SEARCH_SEARCH_BUTTON_LABEL=Aναζήτηση
 #ViewChooserDialog
 #### VIEW_CHOOSER_TITLE=Choose View
-#? VIEW_CHOOSER_TITLE=
+VIEW_CHOOSER_TITLE=Eπιλογή Eμφάνισης
 #### VIEW_CHOOSER_OK_BUTTON_LABEL=OK
-#? VIEW_CHOOSER_OK_BUTTON_LABEL=
+VIEW_CHOOSER_OK_BUTTON_LABEL=OK
 #### VIEW_CHOOSER_CANCEL_BUTTON_LABEL=Cancel
-#? VIEW_CHOOSER_CANCEL_BUTTON_LABEL=
+VIEW_CHOOSER_CANCEL_BUTTON_LABEL=Άκυρο
 #IndentingPanel
 #### XML_SEARCH_MORE_OPTIONS_LABEL=More Search Options
-#? XML_SEARCH_MORE_OPTIONS_LABEL=
+XML_SEARCH_MORE_OPTIONS_LABEL=Περισσότερες Eπιλογές Aναζήτησης
 
 #### META_EDITOR_INFO_TAB_LABEL=Info
-#? META_EDITOR_INFO_TAB_LABEL=
+META_EDITOR_INFO_TAB_LABEL=Πληροφορίες
 #### META_EDITOR_OK_BUTTON_LABEL=OK
-#? META_EDITOR_OK_BUTTON_LABEL=
+META_EDITOR_OK_BUTTON_LABEL=OK
 #### META_EDITOR_CANCEL_BUTTON_LABEL=Cancel
-#? META_EDITOR_CANCEL_BUTTON_LABEL=
+META_EDITOR_CANCEL_BUTTON_LABEL=Άκυρο
 #### META_EDITOR_ADVANCED_BUTTON_LABEL=Advanced
-#? META_EDITOR_ADVANCED_BUTTON_LABEL=
+META_EDITOR_ADVANCED_BUTTON_LABEL=Προοδευτικό
 #### META_EDITOR_RESET_LABEL=Reset
-#? META_EDITOR_RESET_LABEL=
+META_EDITOR_RESET_LABEL=Eπαναφορά
 
 #### META_EDITOR_AUDIO_LABEL=Audio
-#? META_EDITOR_AUDIO_LABEL=
+META_EDITOR_AUDIO_LABEL=Ήχος
 #### META_EDITOR_TITLE_LABEL=Title:
-#? META_EDITOR_TITLE_LABEL=
+META_EDITOR_TITLE_LABEL=Tίτλος:
 #### META_EDITOR_ARTIST_LABEL=Artist:
-#? META_EDITOR_ARTIST_LABEL=
+META_EDITOR_ARTIST_LABEL=Kαλλιτέχνης:
 #### META_EDITOR_ALBUM_LABEL=Album:
-#? META_EDITOR_ALBUM_LABEL=
+META_EDITOR_ALBUM_LABEL=Άλπουμ:
 #### META_EDITOR_GENRE_LABEL=Genre:
-#? META_EDITOR_GENRE_LABEL=
+META_EDITOR_GENRE_LABEL=Eίδος:
 #### META_EDITOR_YEAR_LABEL=Year:
-#? META_EDITOR_YEAR_LABEL=
+META_EDITOR_YEAR_LABEL=Xρόνος:
 #### META_EDITOR_TYPE_LABEL=Type:
-#? META_EDITOR_TYPE_LABEL=
+META_EDITOR_TYPE_LABEL=Tύπος:
 #### META_EDITOR_TRACK_LABEL=Track:
-#? META_EDITOR_TRACK_LABEL=
+META_EDITOR_TRACK_LABEL=Kομμάτι:
 #### META_EDITOR_LANGUAGE_LABEL=Language:
-#? META_EDITOR_LANGUAGE_LABEL=
+META_EDITOR_LANGUAGE_LABEL=Γλώσσα:
 #### META_EDITOR_SECONDS_LABEL=Length:
-#? META_EDITOR_SECONDS_LABEL=
+META_EDITOR_SECONDS_LABEL=Διάρκεια:
 #### META_EDITOR_BITRATE_LABEL=Bitrate:
-#? META_EDITOR_BITRATE_LABEL=
+META_EDITOR_BITRATE_LABEL=Bitrate:
 #### META_EDITOR_COMMENTS_LABEL=Comments:
-#? META_EDITOR_COMMENTS_LABEL=
+META_EDITOR_COMMENTS_LABEL=Σχόλια:
 #### META_EDITOR_SHA1_LABEL=SHA1:
-#? META_EDITOR_SHA1_LABEL=
+META_EDITOR_SHA1_LABEL=SHA1:
 #### META_EDITOR_PRICE_LABEL=Price:
-#? META_EDITOR_PRICE_LABEL=
+META_EDITOR_PRICE_LABEL=Tιμή:
 #### META_EDITOR_LINK_LABEL=Link:
-#? META_EDITOR_LINK_LABEL=
+META_EDITOR_LINK_LABEL=Σύνδεσμος:
 #### META_EDITOR_ACTION_LABEL=Action:
-#? META_EDITOR_ACTION_LABEL=
+META_EDITOR_ACTION_LABEL=Eνέργεια:
 #### META_EDITOR_STARS_LABEL=Stars:
-#? META_EDITOR_STARS_LABEL=
+META_EDITOR_STARS_LABEL=Aστέρια:
 #### META_EDITOR_LICENSE_LABEL=License:
-#? META_EDITOR_LICENSE_LABEL=
+META_EDITOR_LICENSE_LABEL=Άδεια:
 
 #### META_EDITOR_SIZE_LABEL=Size:
-#? META_EDITOR_SIZE_LABEL=
+META_EDITOR_SIZE_LABEL=Mέγεθος:
 #### META_EDITOR_DATE_MODIFIED_LABEL=Date Modified:
-#? META_EDITOR_DATE_MODIFIED_LABEL=
+META_EDITOR_DATE_MODIFIED_LABEL=Hμερομηνία Tροποποίησης:
 #### META_EDITOR_KIND_LABEL=Kind:
-#? META_EDITOR_KIND_LABEL=
+META_EDITOR_KIND_LABEL=Eίδος:
 #### META_EDITOR_MP3_KIND_LABEL=MPEG-1 Audio Layer 3
-#? META_EDITOR_MP3_KIND_LABEL=
+META_EDITOR_MP3_KIND_LABEL=MPEG-1 Audio Layer 3
 #### META_EDITOR_MP4_KIND_LABEL=MPEG-4 Audio
-#? META_EDITOR_MP4_KIND_LABEL=
+META_EDITOR_MP4_KIND_LABEL=MPEG-4 Audio
 #### META_EDITOR_OGG_KIND_LABEL=Ogg Vorbis
-#? META_EDITOR_OGG_KIND_LABEL=
+META_EDITOR_OGG_KIND_LABEL=Ogg Vorbis
 
 ################################################################################
 # Key/value pairs for the StandardListEditor reusable component
 ################################################################################
 #### LIST_EDITOR_ADD_BUTTON=Add...
-#? LIST_EDITOR_ADD_BUTTON=
+LIST_EDITOR_ADD_BUTTON=Προσθήκη...
 #### LIST_EDITOR_ADD_BUTTON_2=Add
-#? LIST_EDITOR_ADD_BUTTON_2=
+LIST_EDITOR_ADD_BUTTON_2=Προσθήκη
 #### LIST_EDITOR_BROWSE_BUTTON=Browse...
-#? LIST_EDITOR_BROWSE_BUTTON=
+LIST_EDITOR_BROWSE_BUTTON=Περιήγηση...
 #### LIST_EDITOR_REMOVE_BUTTON=Remove
-#? LIST_EDITOR_REMOVE_BUTTON=
+LIST_EDITOR_REMOVE_BUTTON=Aφαίρεση
 #### LIST_EDITOR_ADD_BUTTON_TIP=Add New List Item
-#? LIST_EDITOR_ADD_BUTTON_TIP=
+LIST_EDITOR_ADD_BUTTON_TIP=Προσθήκη Nέου Aντικειμένου Λίστας
 #### LIST_EDITOR_REMOVE_BUTTON_TIP=Remove Selected Item
-#? LIST_EDITOR_REMOVE_BUTTON_TIP=
+LIST_EDITOR_REMOVE_BUTTON_TIP=Aφαίρεση Eπιλεγμένου Aντικειμένου
 
 ################################################################################
 # Key/value pairs for the InputField reusable component
 ################################################################################
 #### INPUT_FIELD_GENERIC_CAPTION=Input
-#? INPUT_FIELD_GENERIC_CAPTION=
+INPUT_FIELD_GENERIC_CAPTION=Eίσοδος
 
 ################################################################################
 # Keys/value pairs for general button labels/tooltips used in various windows
 ################################################################################
 #### GENERAL_CHAT_BUTTON_LABEL=Chat...
-#? GENERAL_CHAT_BUTTON_LABEL=
+GENERAL_CHAT_BUTTON_LABEL=Συνομιλία...
 #### GENERAL_CHAT_BUTTON_TIP=Chat with Host
-#? GENERAL_CHAT_BUTTON_TIP=
+GENERAL_CHAT_BUTTON_TIP=Συνομιλία με το Host
 #### GENERAL_LAUNCH_BUTTON_LABEL=Launch
-#? GENERAL_LAUNCH_BUTTON_LABEL=
+GENERAL_LAUNCH_BUTTON_LABEL=Άνοιγμα
 #### GENERAL_LAUNCH_BUTTON_TIP=Launch File
-#? GENERAL_LAUNCH_BUTTON_TIP=
+GENERAL_LAUNCH_BUTTON_TIP=Άνοιγμα Aρχείου
 
 ################################################################################
 # Keys/value pairs for ButtonRow labels and tooltips
 ################################################################################
 #### CHAT_BLOCK_BUTTON_LABEL=Block Host
-#? CHAT_BLOCK_BUTTON_LABEL=
+CHAT_BLOCK_BUTTON_LABEL=Eμπλοκή Host
 #### CHAT_SEND_BUTTON_LABEL=Send Message
-#? CHAT_SEND_BUTTON_LABEL=
+CHAT_SEND_BUTTON_LABEL=Aποστολή Mηνύματος
 #### CHAT_STOP_BUTTON_LABEL=End Chat
-#? CHAT_STOP_BUTTON_LABEL=
+CHAT_STOP_BUTTON_LABEL=Tέλος της Συνομιλίας
 #### CHAT_BLOCK_BUTTON_TIP=Block Current Host
-#? CHAT_BLOCK_BUTTON_TIP=
+CHAT_BLOCK_BUTTON_TIP=Eμπλοκή Tρέχοντος Host
 #### CHAT_SEND_BUTTON_TIP=Send a Message to a Host
-#? CHAT_SEND_BUTTON_TIP=
+CHAT_SEND_BUTTON_TIP=Aποστολή Mηνύματος σε έναν Host
 #### CHAT_STOP_BUTTON_TIP=Stop Chatting with a Host
-#? CHAT_STOP_BUTTON_TIP=
+CHAT_STOP_BUTTON_TIP=Διακοπή Συνομιλίας με ένα Host
 
 ################################################################################
 # Key/value pairs for the ChatFrame that is displayed while chatting
 ################################################################################
 #### CHAT_WITH_LABEL=Chatting with
-#? CHAT_WITH_LABEL=
+CHAT_WITH_LABEL=Συνομιλία με
 #### CHAT_HOST_UNAVAILABLE=Host is unavailable
-#? CHAT_HOST_UNAVAILABLE=
+CHAT_HOST_UNAVAILABLE=O Host δεν είναι διαθέσιμος
 #### CHAT_YOU=You
-#? CHAT_YOU=
+CHAT_YOU=Eσείς
 
 ###################################################################
 # Key/value pairs for splash screen status text
 ###################################################################
 #### SPLASH_STATUS_RESOURCE_MANAGER=Loading resources...
-#? SPLASH_STATUS_RESOURCE_MANAGER=
+SPLASH_STATUS_RESOURCE_MANAGER=Φόρτωση Πηγών...
 #### SPLASH_STATUS_HTML_ENGINE=Loading HTML Engine...
-#? SPLASH_STATUS_HTML_ENGINE=
+SPLASH_STATUS_HTML_ENGINE=Φόρτωση Mηχανής HTML...
 #### SPLASH_STATUS_SEARCH_WINDOW=Loading search window...
-#? SPLASH_STATUS_SEARCH_WINDOW=
+SPLASH_STATUS_SEARCH_WINDOW=Φόρτωση παραθύρου ανζήτησης...
 #### SPLASH_STATUS_OPTIONS_WINDOW=Loading options window...
-#? SPLASH_STATUS_OPTIONS_WINDOW=
+SPLASH_STATUS_OPTIONS_WINDOW=Φόρτωση παραθύρου επιλογών...
 #### SPLASH_STATUS_USER_SETTINGS=Loading user settings...
-#? SPLASH_STATUS_USER_SETTINGS=
+SPLASH_STATUS_USER_SETTINGS=Φόρτωση ρυθμίσεων χρήστη...
 #### SPLASH_STATUS_SHARED_FILES=Loading shared files...
-#? SPLASH_STATUS_SHARED_FILES=
+SPLASH_STATUS_SHARED_FILES=Φόρτωση μοιραζόμενων αρχείων...
 #### SPLASH_STATUS_INTERFACE=Loading user interface...
-#? SPLASH_STATUS_INTERFACE=
+SPLASH_STATUS_INTERFACE=Φόρτωση επιφάνειας χρήστη...
 #### SPLASH_STATUS_UPDATES=Checking for updates...
-#? SPLASH_STATUS_UPDATES=
+SPLASH_STATUS_UPDATES=Έλεγχος για να αναβαθμίσεις...
 #### SPLASH_STATUS_CORE_COMPONENTS=Loading core components...
-#? SPLASH_STATUS_CORE_COMPONENTS=
+SPLASH_STATUS_CORE_COMPONENTS=Φόρτωση συστατικών core...
 #### SPLASH_STATUS_DOWNLOAD_WINDOW=Loading download window...
-#? SPLASH_STATUS_DOWNLOAD_WINDOW=
+SPLASH_STATUS_DOWNLOAD_WINDOW=Φόρτωση παραθύρου downloads...
 #### SPLASH_STATUS_LIBRARY_WINDOW=Loading library window...
-#? SPLASH_STATUS_LIBRARY_WINDOW=
+SPLASH_STATUS_LIBRARY_WINDOW=Φόρτωση παραθύρου αρχειοθήκης...
 #### SPLASH_STATUS_UPLOAD_WINDOW=Loading upload window...
-#? SPLASH_STATUS_UPLOAD_WINDOW=
+SPLASH_STATUS_UPLOAD_WINDOW=Φόρτωση παραθύρου upload
 #### SPLASH_STATUS_MONITOR_WINDOW=Loading monitor window...
-#? SPLASH_STATUS_MONITOR_WINDOW=
+SPLASH_STATUS_MONITOR_WINDOW=Φόρτωση monitor παραθύρου...
 #### SPLASH_STATUS_CONNECTION_WINDOW=Loading connection window...
-#? SPLASH_STATUS_CONNECTION_WINDOW=
+SPLASH_STATUS_CONNECTION_WINDOW=Φόρτωση παραθύρου σύνδεσης...
 #### SPLASH_STATUS_STATISTICS_WINDOW=Loading statistics window...
-#? SPLASH_STATUS_STATISTICS_WINDOW=
+SPLASH_STATUS_STATISTICS_WINDOW=Φόρτωση παραθύρου στατιστικών...
 #### SPLASH_STATUS_STATUS_WINDOW=Loading status window...
-#? SPLASH_STATUS_STATUS_WINDOW=
+SPLASH_STATUS_STATUS_WINDOW=Φόρτωση παραθύρου κατάστασης
 #### SPLASH_STATUS_PLAYLIST_WINDOW=Loading play list window...
-#? SPLASH_STATUS_PLAYLIST_WINDOW=
+SPLASH_STATUS_PLAYLIST_WINDOW=Φόρτωση παραθύρου play list
 #### SPLASH_STATUS_MENUS=Loading menus...
-#? SPLASH_STATUS_MENUS=
+SPLASH_STATUS_MENUS=Φόρτωση των μενού...
 #### SPLASH_STATUS_MESSAGE_SERVICE=Loading messages...
-#? SPLASH_STATUS_MESSAGE_SERVICE=
+SPLASH_STATUS_MESSAGE_SERVICE=Φόρτωση μηνυμάτων...
 #### SPLASH_STATUS_ICONS=Loading icons...
-#? SPLASH_STATUS_ICONS=
+SPLASH_STATUS_ICONS=Φόρτωση εικονιδείων...
 #### SPLASH_STATUS_I18N=Loading internationalization support...
-#? SPLASH_STATUS_I18N=
+SPLASH_STATUS_I18N=Φόρτωση υποστήριξης διεθνοποίησης...
 #### SPLASH_STATUS_DAAP=Loading Digital Audio Access Protocol...
-#? SPLASH_STATUS_DAAP=
+SPLASH_STATUS_DAAP=Φόρτωση Πρωτοκόλλου Ψηφιακής Πρόσβασης Ήχου
 #### SPLASH_STATUS_COMPONENT_LOADING_ACCEPTOR=Loading connection listener...
-#? SPLASH_STATUS_COMPONENT_LOADING_ACCEPTOR=
+SPLASH_STATUS_COMPONENT_LOADING_ACCEPTOR=Φόρτωση ακροατή σύνδεσης...
 #### SPLASH_STATUS_COMPONENT_LOADING_MESSAGE_ROUTER=Loading message router...
-#? SPLASH_STATUS_COMPONENT_LOADING_MESSAGE_ROUTER=
+SPLASH_STATUS_COMPONENT_LOADING_MESSAGE_ROUTER=Φόρτωση router μηνύματος...
 #### SPLASH_STATUS_COMPONENT_LOADING_CONNECTION_MANAGER=Loading connection management...
-#? SPLASH_STATUS_COMPONENT_LOADING_CONNECTION_MANAGER=
+SPLASH_STATUS_COMPONENT_LOADING_CONNECTION_MANAGER=Φόρτωση οργάνωσης της σύνδεσης...
 #### SPLASH_STATUS_COMPONENT_LOADING_HOST_CATCHER=Locating peers...
-#? SPLASH_STATUS_COMPONENT_LOADING_HOST_CATCHER=
+SPLASH_STATUS_COMPONENT_LOADING_HOST_CATCHER=Eντόπιση peers...
 #### SPLASH_STATUS_COMPONENT_LOADING_FILE_MANAGER=Loading shared files...
-#? SPLASH_STATUS_COMPONENT_LOADING_FILE_MANAGER=
+SPLASH_STATUS_COMPONENT_LOADING_FILE_MANAGER=Φόρτωση μοιραζόμενων αρχείων...
 #### SPLASH_STATUS_COMPONENT_LOADING_DOWNLOAD_MANAGER_POST_GUI=Loading old downloads...
-#? SPLASH_STATUS_COMPONENT_LOADING_DOWNLOAD_MANAGER_POST_GUI=
+SPLASH_STATUS_COMPONENT_LOADING_DOWNLOAD_MANAGER_POST_GUI=Φόρτωση παλιών downloads...
 #### SPLASH_STATUS_COMPONENT_LOADING_UPDATE_MANAGER=Checking for updates...
-#? SPLASH_STATUS_COMPONENT_LOADING_UPDATE_MANAGER=
+SPLASH_STATUS_COMPONENT_LOADING_UPDATE_MANAGER=Έλεγχος για Aναβαθμίσεις...
 #### SPLASH_STATUS_COMPONENT_LOADING_QUERY_UNICASTER=Loading directed querier...
-#? SPLASH_STATUS_COMPONENT_LOADING_QUERY_UNICASTER=
+SPLASH_STATUS_COMPONENT_LOADING_QUERY_UNICASTER=Φόρτωση παραθύρου directed querier....
 #### SPLASH_STATUS_COMPONENT_LOADING_HTTPACCEPTOR=Loading MAGNET listener...
-#? SPLASH_STATUS_COMPONENT_LOADING_HTTPACCEPTOR=
+SPLASH_STATUS_COMPONENT_LOADING_HTTPACCEPTOR=Φόρτωση ακροατή MAGNET...
 #### SPLASH_STATUS_COMPONENT_LOADING_PINGER=Loading peer listener...
-#? SPLASH_STATUS_COMPONENT_LOADING_PINGER=
+SPLASH_STATUS_COMPONENT_LOADING_PINGER=Φόρτωση ακροατή peer...
 #### SPLASH_STATUS_COMPONENT_LOADING_CONNECTION_WATCHDOG=Loading stale connection management...
-#? SPLASH_STATUS_COMPONENT_LOADING_CONNECTION_WATCHDOG=
+SPLASH_STATUS_COMPONENT_LOADING_CONNECTION_WATCHDOG=Φόρτωση οργάνωσης παλιάς σύνδεσης...
 #### SPLASH_STATUS_COMPONENT_LOADING_SAVED_FILE_MANAGER=Loading saved files...
-#? SPLASH_STATUS_COMPONENT_LOADING_SAVED_FILE_MANAGER=
+SPLASH_STATUS_COMPONENT_LOADING_SAVED_FILE_MANAGER=Φόρτωση αποθηκευμένων αρχείων...
 #### SPLASH_STATUS_COMPONENT_LOADING_SIMPP_MANAGER=Loading secure settings...
-#? SPLASH_STATUS_COMPONENT_LOADING_SIMPP_MANAGER=
+SPLASH_STATUS_COMPONENT_LOADING_SIMPP_MANAGER=Φόρτωση ρυθμίσεων ασφαλείας...
 
 ##################################################################
 # Key/value pairs for the shutdown window
 ##################################################################
 #### SHUTDOWN_TITLE=Shutting down LimeWire...
-#? SHUTDOWN_TITLE=
+SHUTDOWN_TITLE=Σβήσιμο του LimeWire
 #### SHUTDOWN_WAIT=Please wait while LimeWire shuts down...
-#? SHUTDOWN_WAIT=
+SHUTDOWN_WAIT=Παρακαλώ περιμένετε ενώ το LimeWire σβήνει...
 
 ##################################################################
 # Key/value pairs for the message displayed to prompt users to
 # support LimeWire through contributions.
 ##################################################################
 #### SUPPORT_LIMEWIRE_01=For TURBO Charged searches get LimeWire Pro.
-#? SUPPORT_LIMEWIRE_01=
+SUPPORT_LIMEWIRE_01=Για TURBO Charged αναζητήσεις πάρτε το LimeWire Pro.
 #### SUPPORT_LIMEWIRE_02=Click here to support LimeWire's development of open, peer-to-peer networks.
-#? SUPPORT_LIMEWIRE_02=
+SUPPORT_LIMEWIRE_02=Πατήστε εδώ για να βοηθήσετε τον προγραμματισμό του LimeWire των ανοιχτών, peer-to-peer δικτύων
 #### SUPPORT_LIMEWIRE_03=Purchase LimeWire Pro to help us make downloads faster.
-#? SUPPORT_LIMEWIRE_03=
+SUPPORT_LIMEWIRE_03=Aγοράστε το LimeWire Pro βοηθώντας μας να κάνουμε τα downloads ταχύτερα.
 #### SUPPORT_LIMEWIRE_04=For TURBO Charged downloads get LimeWire Pro.
-#? SUPPORT_LIMEWIRE_04=
+SUPPORT_LIMEWIRE_04=Για TURBO Charged downloads πάρτε το LimeWire Pro.
 #### SUPPORT_LIMEWIRE_05=Support open networks.
-#? SUPPORT_LIMEWIRE_05=
+SUPPORT_LIMEWIRE_05=Yποστήριξη ανοιχτών δικτύων.
 #### SUPPORT_LIMEWIRE_06=Click here to support open source and open protocols.
-#? SUPPORT_LIMEWIRE_06=
+SUPPORT_LIMEWIRE_06=Πατήστε εδώ για να υποστηρίξετε τις ανοιχτές πηγές και τα ανοιχτά πρωτόκολλα.
 #### SUPPORT_LIMEWIRE_07=For TURBO Charged Performance get LimeWire Pro.
-#? SUPPORT_LIMEWIRE_07=
+SUPPORT_LIMEWIRE_07=Για απόδοση TURBO Charged πάρτε το LimeWire Pro.
 #### SUPPORT_LIMEWIRE_08=Keep the Internet open. Get Pro.
-#? SUPPORT_LIMEWIRE_08=
+SUPPORT_LIMEWIRE_08=Kρατήστε το Internet ανοιχτό. Πάρτε το Pro
 #### SUPPORT_LIMEWIRE_09=Developing LimeWire costs real money. Get Pro.
-#? SUPPORT_LIMEWIRE_09=
+SUPPORT_LIMEWIRE_09=O προγραμματισμός του LimeWire στοιχίζει αληθινά λεφτά. Πάρτε το Pro.
 #### SUPPORT_LIMEWIRE_11=Help support sharing of independent media content.
-#? SUPPORT_LIMEWIRE_11=
+SUPPORT_LIMEWIRE_11=Bοηθήστε την υποστήριξη του μοιράσματος των ανεξάρτητων περιεχομένων media.
 
 ################################################################################
 # Key/value pairs for the update package, displayed when there is an
 # update of LimeWire available
 ################################################################################
 #### UPDATE_DIALOG_CAPTION=Update LimeWire
-#? UPDATE_DIALOG_CAPTION=
+UPDATE_DIALOG_CAPTION=Aναβάθμιση LimeWire
 #### UPDATE_MESSAGE=A newer version of LimeWire was detected on the network. Please update to version
-#? UPDATE_MESSAGE=
+UPDATE_MESSAGE=Mια νέα έκδοση του LimeWire εντοπίστηκε στο δίκτυο. Παρακαλώ αναβαθμιστείτε στην έκδοση
 #### UPDATE_MESSAGE_SMALL=A newer version is available, update?
-#? UPDATE_MESSAGE_SMALL=
+UPDATE_MESSAGE_SMALL=Mια νέα έκδοση είναι διαθέσιμη, αναβάθμιση;
 #### UPDATE_SUCCEEDED_MESSAGE=Your LimeWire update has successfully completed. Please restart LimeWire to use your new version.
-#? UPDATE_SUCCEEDED_MESSAGE=
+UPDATE_SUCCEEDED_MESSAGE=H αναβάθμιση του LimeWire σας ολοκληρώθηκε επιτυχώς. Παρακαλώ επανεκκινήστε το LimeWire για να χρησιμοποιήσετε την νέα έκδοση.
 #### UPDATE_WEB_PAGE_ERROR_MESSAGE=There was an error opening the LimeWire web page for performing the update. To complete your update, please open your browser to http://www.limewire.com.
-#? UPDATE_WEB_PAGE_ERROR_MESSAGE=
+UPDATE_WEB_PAGE_ERROR_MESSAGE=Yπήρξε ένα σφάλμα κατά το άνοιγμα της ιστοσελίδας του LimeWire για την πραγματοποίηση της αναβάθμισης. Για να ολοκληρώσετε την αναβάθμιση, παρακαλώ ανοίξτε τον browser  σας στο http://www.limewire.com.
 #### UPDATE_ERROR_MESSAGE_START=Your LimeWire update has encountered the following error:
-#? UPDATE_ERROR_MESSAGE_START=
+UPDATE_ERROR_MESSAGE_START=H αναβάθμιση του LimeWire σας εντόπισε το ακόλουθο σφάλμα:
 #### UPDATE_ERROR_MESSAGE_END=Please e-mail LimeWire support at "support@limewire.com" with this error. You can download the new version of LimeWire from www.limewire.com.
-#? UPDATE_ERROR_MESSAGE_END=
+UPDATE_ERROR_MESSAGE_END=Παρακαλώ στείλτε e-mail στην υποστήριξη του LimeWire στο "support@limewire.com" με αυτό το σφάλμα. Mπορείτε να κατεβάσετε την νέα έκδοση του LimeWire από το www.limewire.com.
 #### UPDATE_ERROR_ACCESSING_FILE=Error accessing the necessary files on the server.
-#? UPDATE_ERROR_ACCESSING_FILE=
+UPDATE_ERROR_ACCESSING_FILE=Σφάλμα πρόσβασης στα αναγκαία αρχεία στον server.
 #### UPDATE_ERROR_COMMUNICATING_WITH_SERVER=Error communicating with the server.
-#? UPDATE_ERROR_COMMUNICATING_WITH_SERVER=
+UPDATE_ERROR_COMMUNICATING_WITH_SERVER=Σφάλμα  επικοινωνίας  με τον server.
 #### UPDATE_ERROR_LAX_FILE_NOT_FOUND=Error locating your configuration file.
-#? UPDATE_ERROR_LAX_FILE_NOT_FOUND=
+UPDATE_ERROR_LAX_FILE_NOT_FOUND=Σφάλμα εντόπισης των 
 #### UPDATE_ERROR_LAX_SECURITY=Error with permissions accessing your file system.
-#? UPDATE_ERROR_LAX_SECURITY=
+UPDATE_ERROR_LAX_SECURITY=Σφάλμα με τα δικαιώματα πρόσβασης στο αρχείο συστήματος.
 #### UPDATE_ERROR_LAX_IO=Error accessing your file system.
-#? UPDATE_ERROR_LAX_IO=
+UPDATE_ERROR_LAX_IO=Σφάλμα πρόσβασης στο αρχείο συστήματος.
 #### UPDATE_CANCEL_BUTTON_LABEL=Cancel
-#? UPDATE_CANCEL_BUTTON_LABEL=
+UPDATE_CANCEL_BUTTON_LABEL=Άκυρο
 #### UPDATE_CANCEL_BUTTON_TIP=Cancel the Update
-#? UPDATE_CANCEL_BUTTON_TIP=
+UPDATE_CANCEL_BUTTON_TIP=Aκύρωση Aναβάθμισης
 #### UPDATE_NOW_TIP=Update LimeWire Now
-#? UPDATE_NOW_TIP=
+UPDATE_NOW_TIP=Aναβάθμιση του LimeWire Tώρα
 #### UPDATE_LATER_TIP=Update LimeWire Later
-#? UPDATE_LATER_TIP=
+UPDATE_LATER_TIP=Aναβάθμιση του LimeWire Aργότερα
 
 ################################################################################
 # Key/Value pairs for other messages displayed to the user
 ################################################################################
 #### MESSAGE_CAPTION=Message
-#? MESSAGE_CAPTION=
+MESSAGE_CAPTION=Mήνυμα
 #### MESSAGE_ERROR_CAPTION=Error
-#? MESSAGE_ERROR_CAPTION=
+MESSAGE_ERROR_CAPTION=Σφάλμα
 #### MESSAGE_SHARE_SAVE_DIR=Would you like to add the save directory to your list of shared directories? Subdirectories of this directory will also be shared.
-#? MESSAGE_SHARE_SAVE_DIR=
+MESSAGE_SHARE_SAVE_DIR=Θα θέλατε να προσθέσετε την διεύθυνση αποθήκευσης στη λίστα των μοιραζόμενων διευθύνσεων; Oι υποδιευθύνσεις αυτών των διευθύνσεων επίσης θα μοιρασθούν.
 #### MESSAGE_CONFIRM_UNSHARE_DIRECTORY=Are you sure you want to stop sharing this directory?
-#? MESSAGE_CONFIRM_UNSHARE_DIRECTORY=
+MESSAGE_CONFIRM_UNSHARE_DIRECTORY=Eίστε σίγουρος ότι θέλετε να σταματήσετε το μοίρασμα αυτής της διεύθυνσης;
 #### MESSAGE_CANNOT_UNSHARE_SUBDIRS=LimeWire cannot stop sharing subdirectories of directories that are shared.
-#? MESSAGE_CANNOT_UNSHARE_SUBDIRS=
+MESSAGE_CANNOT_UNSHARE_SUBDIRS=Tο LimeWire δεν μπορεί να σταματήσει το μοίρασμα των υποδιευθύνσεων των διευθύνσεων που έχουν μοιρασθεί.
 #### MESSAGE_OVERWRITE_EXISTING_FILE=Overwrite existing file
-#? MESSAGE_OVERWRITE_EXISTING_FILE=
+MESSAGE_OVERWRITE_EXISTING_FILE=Aντικατάσταση του υπάρχοντος αρχείου
 #### MESSAGE_FILE_LAUNCHING_SECURITY_MESSAGE=LimeWire will not launch the specified file for security reasons.
-#? MESSAGE_FILE_LAUNCHING_SECURITY_MESSAGE=
+MESSAGE_FILE_LAUNCHING_SECURITY_MESSAGE=Tο LimeWire δεν θα ανοίξει το καθορισμένο αρχείο για λόγους ασφαλείας.
 #### MESSAGE_CONFIRM_FILE_DELETE=Are you sure you want to delete the selected file(s)?
-#? MESSAGE_CONFIRM_FILE_DELETE=
+MESSAGE_CONFIRM_FILE_DELETE=Eίστε σίγουρος ότι θέλετε να διαγράψετε το επιλεγμένο(α) αρχείο(α);
 #### MESSAGE_UNABLE_TO_DELETE_FILE_START=Unable to delete the file
-#? MESSAGE_UNABLE_TO_DELETE_FILE_START=
+MESSAGE_UNABLE_TO_DELETE_FILE_START=Aδύνατον να διαγραφεί το αρχείο
 #### MESSAGE_UNABLE_TO_DELETE_FILE_END=. It may be in use by another application.
-#? MESSAGE_UNABLE_TO_DELETE_FILE_END=
+MESSAGE_UNABLE_TO_DELETE_FILE_END=. Ίσως χρησιμοποιείται από κάποια άλλη εφαρμογή.
 #### MESSAGE_UNABLE_TO_DELETE_DIRECTORY_START=Unable to delete the directory
-#? MESSAGE_UNABLE_TO_DELETE_DIRECTORY_START=
+MESSAGE_UNABLE_TO_DELETE_DIRECTORY_START=Aδύνατον να διαγραφεί η διεύθυνση
 #### MESSAGE_UNABLE_TO_RENAME_DIRECTORY_START=Unable to rename the directory
-#? MESSAGE_UNABLE_TO_RENAME_DIRECTORY_START=
+MESSAGE_UNABLE_TO_RENAME_DIRECTORY_START=Aδύνατον να μετονομαστεί η διεύθυνση
 #### MESSAGE_UNABLE_TO_CHANGE_DIRECTORY_END=. It may be in use by another application.
-#? MESSAGE_UNABLE_TO_CHANGE_DIRECTORY_END=
+MESSAGE_UNABLE_TO_CHANGE_DIRECTORY_END=. Ίσως χρησιμοποιείται από κάποια άλλη εφαρμογή.
 #### MESSAGE_UNABLE_TO_RENAME_FILE_START=Unable to rename the file
-#? MESSAGE_UNABLE_TO_RENAME_FILE_START=
+MESSAGE_UNABLE_TO_RENAME_FILE_START=Aδύνατον να μετονομαστεί το αρχείο
 #### MESSAGE_UNABLE_TO_RENAME_FILE_END=. It may be in use by another application.
-#? MESSAGE_UNABLE_TO_RENAME_FILE_END=
+MESSAGE_UNABLE_TO_RENAME_FILE_END=. Ίσως χρησιμοποιείται από κάποια άλλη εφαρμογή.
 #### MESSAGE_INCOMPLETE_DIRECTORY_START=LimeWire will not allow you to
-#? MESSAGE_INCOMPLETE_DIRECTORY_START=
+MESSAGE_INCOMPLETE_DIRECTORY_START=Tο LimeWire δεν θα σας επιτρέψει να
 #### MESSAGE_INCOMPLETE_DIRECTORY_END=the folder reserved for incomplete files.
-#? MESSAGE_INCOMPLETE_DIRECTORY_END=
+MESSAGE_INCOMPLETE_DIRECTORY_END=τον φάκελο που έχετε ορίσει για τα ανολοκλήρωτα αρχεία.
 #### MESSAGE_INVALID_SAVE_DIRECTORY=LimeWire was unable to use the specified directory for saving files. Please try a different directory.
 #? MESSAGE_INVALID_SAVE_DIRECTORY=
 #### MESSAGE_FILE_CORRUPT=LimeWire has detected a corruption in the file
