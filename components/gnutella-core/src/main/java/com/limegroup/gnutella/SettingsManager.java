@@ -63,6 +63,8 @@ public class SettingsManager implements SettingsInterface {
     private volatile int      _searchAnimationTime;
     private volatile int      _uploadsPerPerson;
 
+	private volatile boolean  _chatEnabled;          
+
     /** connectString_ is something like "GNUTELLA CONNECT..."
      *  connectStringOk_ is something like "GNUTELLA OK..."
      *  INVARIANT: connectString_=connectStringFirstWord_+" "+connectStringRemainder_
@@ -248,7 +250,16 @@ public class SettingsManager implements SettingsInterface {
                 else if(key.equals(SEARCH_LIMIT)) {
                     setSearchLimit(Byte.parseByte(p));
                 }
-
+				else if(key.equals(CHAT_ENABLED)) {
+					boolean bs;
+                    if (p.equals("true"))
+                        bs=true;
+                    else if (p.equals("false"))
+                        bs=false;
+                    else
+                        break;
+                    setChatEnabled(bs);
+				}
                 else if(key.equals(CLIENT_ID)) {
                     setClientID(p);
                 }
@@ -552,6 +563,8 @@ public class SettingsManager implements SettingsInterface {
 
 		setAppWidth(DEFAULT_APP_WIDTH);
 		setAppHeight(DEFAULT_APP_HEIGHT);
+
+		setChatEnabled(DEFAULT_CHAT_ENABLED);
     }
 
 
@@ -622,7 +635,10 @@ public class SettingsManager implements SettingsInterface {
     public File getSaveDirectory() throws FileNotFoundException {
 		if(_saveDirectory == null) throw new FileNotFoundException();
 		return _saveDirectory;
-    }
+	}
+
+	/** returns true if the chat is enabled */
+	public boolean getChatEnabled() {return _chatEnabled;}
 
     /** 
 	 * Returns a new <code>File</code> instance that denotes the abstract
@@ -1428,6 +1444,12 @@ public class SettingsManager implements SettingsInterface {
         String s = String.valueOf(prompt);
         _props.put(PROMPT_EXE_DOWNLOAD, s);
     }
+
+	public void setChatEnabled(boolean chatEnabled) {
+		_chatEnabled = chatEnabled;
+		String s = String.valueOf(chatEnabled);
+		_props.put(CHAT_ENABLED, s);
+	}
 
 
     public void setMaxUploads(int max) {

@@ -360,6 +360,21 @@ public class UploadManager {
 	}
 
 
+	/**
+	 * returns in string format the ip address of the machine
+	 * that this limewire is running on.
+	 */
+	public String getThisHost() {
+		byte[] address = _acceptor.getAddress() ;
+		String host = Message.ip2string(address);
+		return host;
+	}
+	/**
+	 * returns the port of the machine that this limewire is
+	 * running on
+	 */
+	public int getThisPort() {return _acceptor.getPort(); }
+
     /** Returns the estimated upload speed in <b>KILOBITS/s</b> [sic] of the
      *  next transfer, assuming the client (i.e., downloader) has infinite
      *  bandwidth.  Returns -1 if not enough data is available for an 

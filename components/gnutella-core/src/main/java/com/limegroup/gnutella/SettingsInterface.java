@@ -136,6 +136,7 @@ public interface SettingsInterface {
 	public static final String  DEFAULT_MAIN_CLASS           
 		= "a.a.a.b.Main";
 
+	public static final boolean DEFAULT_CHAT_ENABLED        = true;
 
     // The property key name constants
 	public static final String ALLOW_BROWSER         = "ALLOW_BROWSER";
@@ -204,6 +205,8 @@ public interface SettingsInterface {
 	public static final String SHOW_CLOSE_DIALOG     = "SHOW_CLOSE_DIALOG";
 	public static final String CLASSPATH             = "CLASSPATH";
 	public static final String MAIN_CLASS            = "MAIN_CLASS";
+
+	public static final String CHAT_ENABLED          = "CHAT_ENABLED";
 }
 
 

@@ -75,5 +75,20 @@ public interface Uploader {
 	public void setState(int state);
 	public void setAmountUploaded(int amount);
 
+	/**
+	 * returns true if chat for the host is on, false if it is not.
+	 */
+	public boolean chatEnabled();
+	
+	/**
+	 * return the host address of the host to chat with
+	 */
+	public String getChatHost();
+	
+	/**
+	 * return the port of the host to chat with
+	 */
+	public int getChatPort();
+	
 }
 

@@ -32,6 +32,11 @@ public class HTTPDownloader {
 	private Socket _socket;
     private File _incompleteFile;
 
+	private int _port;
+	private String _host;
+	
+	private boolean _chatEnabled = false; // for now
+
 	/**
      * Creates a server-side push download.
      * 
@@ -73,6 +78,7 @@ public class HTTPDownloader {
 		    throws IOException {
         initializeFile(rfd, incompleteFile);
         try {
+
             _socket = (new SocketOpener(rfd.getHost(), rfd.getPort())).
                                                          connect(timeout);
         } catch (IOException e) {
@@ -90,6 +96,9 @@ public class HTTPDownloader {
 		_index = rfd.getIndex();
 		_guid = rfd.getClientGUID();
 		_fileSize = rfd.getSize();
+		_port = rfd.getPort();
+		_host = rfd.getHost();
+		_chatEnabled = rfd.chatEnabled();
 
         //If the incomplete file exists, set up a resume just past the end.
         //Otherwise, begin from the start.
@@ -120,6 +129,8 @@ public class HTTPDownloader {
         out.write("GET /get/"+_index+"/"+_filename+" HTTP/1.0\r\n");
         out.write("User-Agent: "+CommonUtils.getVendor()+"\r\n");
         out.write("Range: bytes=" + startRange + "-\r\n");
+		if (SettingsManager.instance().getChatEnabled() )
+			out.write("Chat: " + _host + ":" + _port + "\r\n");;
         out.write("\r\n");
         out.flush();
 	}
@@ -163,11 +174,17 @@ public class HTTPDownloader {
 	public int getInitialRead() {return _initialReadingPoint;}
     public InetAddress getInetAddress() {return _socket.getInetAddress();}
 
+	public boolean chatEnabled() {
+		return _chatEnabled;
+	}
+
 	/* Construction time variables */
 	public int getIndex() {return _index;}
   	public String getFileName() {return _filename;}
   	public byte[] getGUID() {return _guid;}
+	public int getPort() {return _port;}
 
+	
 
 	/*************************************************************/
 
@@ -194,11 +211,10 @@ public class HTTPDownloader {
 			throw new com.limegroup.gnutella.downloader.FileNotFoundException();
         else if ( str.indexOf("410") > 0 )
             throw new com.limegroup.gnutella.downloader.NotSharingException();
-		else if ( (str.indexOf("HTTP") < 0 ) && (str.indexOf("OK") < 0 ) )
+		else if ( (str.indexOf("HTTP") < 0 ) || (str.indexOf("OK") < 0 ) )
 			throw new NoHTTPOKException();
-
+	
 		while (true) {
-				
 			if (str.toUpperCase().indexOf("CONTENT-LENGTH:") != -1)  {
 
                 String sub;

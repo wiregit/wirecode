@@ -5,6 +5,7 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import com.sun.java.util.collections.*;
 import com.limegroup.gnutella.downloader.*;
+import com.limegroup.gnutella.chat.*;
 
 /**
  * The External interface into the router world.
@@ -700,6 +701,15 @@ public class RouterService
     public void refreshBannedIPs() {
         acceptor.refreshBannedIPs();
     }
+
+
+	/**
+	 * create a new chat
+	 */
+	public Chatter createChat(String host, int port) {
+		Chatter chatter = ChatManager.instance().request(host, port);
+		return chatter;
+	}
 
 
 }
