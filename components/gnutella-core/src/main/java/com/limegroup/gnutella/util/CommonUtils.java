@@ -79,7 +79,7 @@ public class CommonUtils {
      * Same as '"LimeWire "+getLimeWireVersion'.
 	 */
 	public static String getVendor() {
-		return "LimeWire "+LIMEWIRE_VERSION;
+		return "LimeWire " + LIMEWIRE_VERSION;
 	}    
 
 	/**
