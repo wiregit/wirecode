@@ -194,6 +194,24 @@ public class RouterService
      *  pong server as needed.
      */
     public void connect() {
+        //HACK. People used to complain to that the connect button wasn't
+        //working when the host catcher was empty and USE_QUICK_CONNECT=false.
+        //This is not a bug; LimeWire isn't supposed to connect to the pong
+        //server in this case.  But this IS admittedly confusing.  So we force a
+        //connection to the pong server in this case by disconnecting and
+        //temporarily setting USE_QUICK_CONNECT to true.  But we have to
+        //sleep(..) a little bit before setting USE_QUICK_CONNECT back to false
+        //to give the connection fetchers time to do their thing.  Ugh.  A
+        //Thread.yield() may work here too, but that's less dependable.  And I
+        //do not want to bother with wait/notify's just for this obscure case.
+        boolean useHack=
+            (! SettingsManager.instance().getUseQuickConnect())
+                && catcher.getNumHosts()==0;
+        if (useHack) {
+            SettingsManager.instance().setUseQuickConnect(true);
+            disconnect();
+        }
+
         //Force reconnect to pong server.
         catcher.expire();
 
@@ -208,10 +226,17 @@ public class RouterService
         if (incoming<1 && outgoing!=0) {
             incoming = outgoing/2;
             settings.setMaxIncomingConnections(incoming);
-        }
-        
+        }        
         //Special action needed if KEEP_ALIVE changed.
-        setKeepAlive(outgoing);
+        setKeepAlive(outgoing);    
+
+        //See note above.
+        if (useHack) {
+            try {
+                Thread.sleep(100);
+            } catch (InterruptedException e) { }
+            SettingsManager.instance().setUseQuickConnect(false);
+        }
     }
 
     /**
