@@ -185,6 +185,10 @@ public final class HandshakeResponse {
      }
    
 
+    public static HandshakeResponse createEmptyResponse() {
+        return new HandshakeResponse(new Properties());
+    }
+
     /**
      * Utility method to extract the connection code from the connect string,
      * such as "200" in a "200 OK" message.
