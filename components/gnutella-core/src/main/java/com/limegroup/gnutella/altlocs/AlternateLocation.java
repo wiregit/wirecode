@@ -1,12 +1,14 @@
 package com.limegroup.gnutella.altlocs;
 
+import com.limegroup.gnutella.*;
 import com.limegroup.gnutella.http.*;
 import com.limegroup.gnutella.util.*;
-import com.sun.java.util.collections.*;
 import java.net.*;
 import java.util.StringTokenizer;
 import java.io.*;
-import com.limegroup.gnutella.*;
+import com.sun.java.util.collections.Set;
+import com.sun.java.util.collections.HashSet;
+import com.sun.java.util.collections.Comparable;
 
 /**
  * This class encapsulates the data for an alternate resource location, as 
@@ -14,8 +16,7 @@ import com.limegroup.gnutella.*;
  * operations as comparing alternate locations based on the date they were 
  * stored.
  */
-public final class AlternateLocation implements 
-                    HTTPHeaderValue, com.sun.java.util.collections.Comparable {
+public final class AlternateLocation implements HTTPHeaderValue, Comparable {
 
 	/**
 	 * A <tt>URL</tt> instance for the URL specified in the header.
@@ -125,7 +126,7 @@ public final class AlternateLocation implements
 		if(!NetworkUtils.isValidPort(url.getPort()))
 			throw new IOException("invalid port");
         if(NetworkUtils.isPrivateAddress(url.getHost()))
-            throw new IOException("invalid address");			
+            throw new IOException("invalid address: " + url.getHost());
 
 		// create a new URL instance from the data for the given url
 		// and the urn
@@ -185,9 +186,13 @@ public final class AlternateLocation implements
 		if(urn == null) throw new NullPointerException("null sha1");
 		URL url = null;
         try {
-			url = new URL("http", 
-                          NetworkUtils.ip2string(RouterService.getAddress()), 
-                          RouterService.getPort(), 
+            int port = RouterService.getPort();
+            String addr = NetworkUtils.ip2string(RouterService.getAddress());
+            if(!NetworkUtils.isValidPort(port))
+                throw new IllegalArgumentException("invalid port: " + port);
+            if(NetworkUtils.isPrivateAddress(addr))
+                throw new IllegalArgumentException("invalid address: " + addr);
+			url = new URL("http", addr, port,
                           HTTPConstants.URI_RES_N2R + urn.httpStringValue());
         } catch(MalformedURLException e) {
             ErrorService.error(e);
@@ -227,6 +232,13 @@ public final class AlternateLocation implements
 			// this should never happen in practice, but retun null nevertheless
 			return null;
 		}
+	}
+	
+	/**
+	 * Returns the host/port of this alternate location as an endpoint.
+	 */
+	public Endpoint getHost() {
+	    return new Endpoint(this.URL.getHost(), this.URL.getPort());
 	}
 
 	/**
