@@ -293,6 +293,21 @@ public class PingReply extends Message implements Serializable {
                       newGGEP(dailyUptime, isUltrapeer, isGUESSCapable));
     }
 
+    /**
+     * Returns a new <tt>PingReply</tt> instance with all the same data
+     * as <tt>this</tt>, but with the specified GUID.
+     *
+     * @param guid the guid to use for the new <tt>PingReply</tt>
+     * @return a new <tt>PingReply</tt> instance with the specified GUID
+     *  and all of the data from this <tt>PingReply</tt>
+     */
+    public PingReply mutateGUID(byte[] guid) {
+        return PingReply.create(guid, 
+                                getTTL(), getPort(),
+                                getIPBytes(), getFiles(), getKbytes(),
+                                isUltrapeer(), getDailyUptime(),
+                                supportsUnicast());        
+    }
 
     /**
      * Creates a new <tt>PingReply</tt> instance with the specified
