@@ -380,15 +380,6 @@ public abstract class FileManager {
     }
     
     /**
-     * Returns a list of all shared files.
-     */
-    public File[] getAllSharedFiles() {
-        File[] files = new File[_fileToFileDesc.size()];
-        files = (File[])_fileToFileDesc.keySet().toArray(files);
-        return files;
-    }
-    
-    /**
      * Returns a list of all shared file descriptors.
      */
     public synchronized FileDesc[] getAllSharedFileDescriptors() {
@@ -399,39 +390,6 @@ public abstract class FileManager {
         FileDesc[] fds = new FileDesc[_fileToFileDesc.size()];        
         fds = (FileDesc[])_fileToFileDesc.values().toArray(fds);
         return fds;
-    }
-
-    /**
-     * Returns a list of all shared files in the given directory, in any order.
-     * Returns null if directory is not shared, or a zero-length array if it is
-     * shared but contains no files.  This method is not recursive; files in 
-     * any of the directory's children are not returned.
-     */
-    public File[] getSharedFiles(File directory) {
-        if( directory == null )
-            throw new NullPointerException("null directory");
-        
-        // a. Remove case, trailing separators, etc.
-        try {
-            directory = getCanonicalFile(directory);
-        } catch (IOException e) { // invalid directory ?
-            return null;
-        }
-        
-        //Lookup indices of files in the given directory...
-        IntSet indices=(IntSet)_sharedDirectories.get(directory);
-        if (indices==null) // directory not shared.
-            return null;
-
-        File[] files = new File[indices.size()];
-        IntSet.IntSetIterator iter=indices.iterator();
-        for (int i=0; iter.hasNext(); i++) {
-            FileDesc fd=(FileDesc)_files.get(iter.next());
-            Assert.that(fd!=null, "Directory has null entry");
-            files[i] = fd.getFile();
-        }
-        
-        return files;
     }
 
     /**
@@ -807,7 +765,7 @@ public abstract class FileManager {
         } catch (IOException e) {
             return -1;
 		}
-        File dir = getParentFile(file);
+        File dir = FileUtils.getParentFile(file);
         if (dir==null) 
             return -1;
 
@@ -886,7 +844,7 @@ public abstract class FileManager {
             _numFiles++;
 		
             //Register this file with its parent directory.
-            File parent=getParentFile(file);
+            File parent=FileUtils.getParentFile(file);
             Assert.that(parent!=null, "Null parent to \""+file+"\"");
             IntSet siblings=(IntSet)_sharedDirectories.get(parent);
             Assert.that(siblings!=null,
@@ -980,7 +938,7 @@ public abstract class FileManager {
         this.updateUrnIndex(ifd);
         _numIncompleteFiles++;
         if (_callback != null) {
-            File parent = getParentFile(incompleteFile);
+            File parent = FileUtils.getParentFile(incompleteFile);
             _callback.addSharedFile(ifd, parent);
         }
     }
@@ -1073,7 +1031,7 @@ public abstract class FileManager {
         _size-=fd.getSize();
 
         //Remove references to this from directory listing
-        File parent=getParentFile(f);
+        File parent=FileUtils.getParentFile(f);
         IntSet siblings=(IntSet)_sharedDirectories.get(parent);
         Assert.that(siblings!=null,
             "Rem directory \""+parent+"\" not in "+_sharedDirectories);
@@ -1188,33 +1146,16 @@ public abstract class FileManager {
         return true;
     }
 
-    /** 
-	 * Same as f.getParentFile() in JDK1.3. 
-	 * @requires the File parameter must be a File object constructed
-	 *  with the canonical path.
-	 */
-    public static File getParentFile(File f) {
-		// slight changes to get around getParent bug on Mac
-		String name=f.getParent();
-		if(name == null) return null;
-		try {
-			return getCanonicalFile(new File(name));
-		} catch(IOException ioe) {
-  			//if the exception occurs, simply return null
-  			return null;
-  		}
-    }
-    
     /**
      * called when a query route table has to be made. The current 
      * implementaion just takes all the file names and they are split
      * internally when added the QRT
      */
     public List getKeyWords(){
-        File[] files = getAllSharedFiles();
+        FileDesc[] fds = getAllSharedFileDescriptors();
         ArrayList retList = new ArrayList();
-        for(int i=0;i<files.length;i++)
-            retList.add(files[i].getAbsolutePath());
+        for(int i=0;i<fds.length;i++)
+            retList.add(fds[i].getFile().getAbsolutePath());
         return retList;
     }
     
@@ -1544,7 +1485,7 @@ public abstract class FileManager {
             //c) Ensure properly listed in directory
             try {
                 IntSet siblings=(IntSet)_sharedDirectories.get(
-                    getCanonicalFile(getParentFile(desc.getFile())));
+                    getCanonicalFile(FileUtils.getParentFile(desc.getFile())));
                 Assert.that(siblings!=null, 
                     "Directory for "+desc.getPath()+" isn't shared");
                 Assert.that(siblings.contains(i),
