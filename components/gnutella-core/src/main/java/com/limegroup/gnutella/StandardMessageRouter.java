@@ -80,10 +80,6 @@ public class StandardMessageRouter extends MessageRouter {
         InetAddress pingerIP = handler.getInetAddress();
         while(iter.hasNext()) {
             PingReply pr = (PingReply)iter.next();
-            if(pr.getClientLocale().equals("ja"))
-               System.out.println("Ping being sent : "
-                                  + pr.getAddress() + " : "
-                                  + pr.getClientLocale());
             if(pr.getInetAddress().equals(pingerIP)) {
                 continue;
             }
@@ -156,10 +152,6 @@ public class StandardMessageRouter extends MessageRouter {
 			mc.updateHorizonStats(pingReply);
 		}
         super.handlePingReply(pingReply, receivingConnection);
-        if(pingReply.getClientLocale().equals("ja"))
-            System.out.println("StandardMessageRouter : PipngReply : "
-                               + pingReply.getAddress() + " port: "
-                               + pingReply.getPort());
     }
 
 
