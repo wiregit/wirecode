@@ -2,6 +2,7 @@ package com.limegroup.gnutella;
 
 import com.limegroup.gnutella.downloader.AlreadyDownloadingException;
 import java.net.InetAddress;
+import com.sun.java.util.collections.Iterator;
 import com.limegroup.gnutella.xml.LimeXMLDocument;
 import java.io.File;
 
@@ -11,7 +12,6 @@ import java.io.File;
  * it is assumed that the downloader will start as soon as it is instantiated.
  */
 public interface Downloader extends BandwidthTracker {
-
     public static final int QUEUED            = 0;
     public static final int CONNECTING        = 1;
     public static final int DOWNLOADING       = 2;
@@ -38,9 +38,12 @@ public interface Downloader extends BandwidthTracker {
     public boolean resume() throws AlreadyDownloadingException;
 
     /**
-     * Retuns the downloaded file.  If the
-     * download isn't complete, returns whatever has been downloaded, taking
-     * extra work (e.g., copying) if necessary to avoid file locking problems.  
+     * If this download is not yet complete, returns a copy of the first
+     * contiguous fragment of the incomplete file.  (The copying helps prevent
+     * file locking problems.)  Returns null if the download hasn't started or
+     * the copy failed.  If the download is complete, returns the saved file.
+     *
+     * @return the copied file fragment, saved file, or null 
      */
     public File getDownloadFragment();
 
@@ -73,54 +76,40 @@ public interface Downloader extends BandwidthTracker {
      * Returns the amount read by this so far, in bytes.
      */
     public int getAmountRead();
-
-    /**
-     * Returns the address of the downloader, or null if this is not currently
-     * connected. 
-     */
-    public String getHost();
-	/**
-     * Returns the port of the downloader, or null if this is not currently
-     * connected. 
-     */
-    public int getPort();
-
-	/**
-	 * returns true if that chat is enambled
-	 */
-	public boolean chatEnabled();
-
-    /**
-     * Returns the number of pushes results this is waiting for. 
-     *     @requires this in the WAITING_FOR_RETRY state
-     */
-    public int getPushesWaiting();
-
+  
     /**
      * Returns the number of retries this is waiting for. 
-     *     @requires this in the WAITING_FOR_RETRY state
+     * Result meaningful on in WAIT_FOR_RETRY state.
      */
-    public int getRetriesWaiting();
-
-    /** 
-     * Returns an LimeXMLDocument array describing the downloaded
-     * file.
-     */
-    public LimeXMLDocument[] getXMLDocs();
-
-	/**
-	 * Inherited from the <tt>BandwidthTracker</tt> interface.
-	 * Returns the number of bytes transferred by this <tt>UpdateTracker</tt>
-	 * component since the last time this method was called.
-	 *
-	 * @return the number of bytes transferred by this <tt>UpdateTracker</tt>
-	 *         component since the last time this method was called
-	 */
-	public int getNewBytesTransferred();
-
-    /** call this method if you need to add a newly downloaded file to the
-        FileManager repository.
-    */
-    public void addFileToFM(File f, String hash);
+     public int getRetriesWaiting();
     
+    /**
+     * Returns the last address that this tried to connect to, or null if it
+     * hasn't tried any.  Useful primarily for CONNECTING.  
+     */
+    public String getAddress();
+    
+    /**
+     * Returns the locations from which this is currently downloading, as an
+     * iterator of Endpoint.  If this is swarming, may return multiple
+     * addresses.  Result meaningful only in the DOWNLOADING state.
+     */
+    public Iterator /* of Endpoint */ getHosts();
+
+    /**
+     * Returns the subset of getHosts that supports chat, if any. 
+     * Result meaningful only in the DOWNLOADING state.
+     */
+    public Iterator /* of Endpoint */ getChattableHosts();
+
+    /**
+     * Inherited from the <tt>BandwidthTracker</tt> interface.
+     * Returns the number of bytes transferred by this <tt>UpdateTracker</tt>
+     * component since the last time this method was called.
+     *
+     * @return the number of bytes transferred by this <tt>UpdateTracker</tt>
+     *
+     *         component since the last time this method was called
+     */
+    public int getNewBytesTransferred();
 }

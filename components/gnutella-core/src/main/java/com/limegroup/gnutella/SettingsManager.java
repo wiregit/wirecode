@@ -151,6 +151,8 @@ public final class SettingsManager {
     private final int     DEFAULT_MAX_INCOMING_CONNECTION=4;
     /** Default directories for file searching */
     private final String  DEFAULT_SAVE_DIRECTORY = "";
+    /** Default time to expire incomplete files, in days. */
+    private final int     DEFAULT_INCOMPLETE_PURGE_TIME = 7;
     /** Default directories for file searching */
     private final String  DEFAULT_DIRECTORIES    = "";
     /** Default file extensions */
@@ -331,6 +333,7 @@ public final class SettingsManager {
 		= "MAX_INCOMING_CONNECTIONS";
     private final String SAVE_DIRECTORY 
 		= "DIRECTORY_FOR_SAVING_FILES";
+    private final String INCOMPLETE_PURGE_TIME = "INCOMPLETE_PURGE_TIME";
     private final String DIRECTORIES
 		= "DIRECTORIES_TO_SEARCH_FOR_FILES";
     private final String EXTENSIONS            
@@ -481,6 +484,7 @@ public final class SettingsManager {
     private volatile File     _saveDirectory;
     private volatile File     _incompleteDirectory;
     private volatile File[]   _directories;
+    private volatile int      _incompletePurgeTime;
     private volatile String   _extensions;
     private volatile String[] _bannedIps;
     private volatile String[] _bannedWords;
@@ -761,6 +765,10 @@ public final class SettingsManager {
 					}
                 }
 
+                else if(key.equals(INCOMPLETE_PURGE_TIME)) {
+                    setIncompletePurgeTime(Integer.parseInt(p));
+                }
+                
                 else if(key.equals(DIRECTORIES)) {
                     setDirectories(p);
                 }
@@ -1096,6 +1104,7 @@ public final class SettingsManager {
 		setAverageUptime(DEFAULT_AVERAGE_UPTIME);
 		setTotalUptime(DEFAULT_TOTAL_UPTIME);		
 		setConnectOnStartup(DEFAULT_CONNECT_ON_STARTUP);
+        setIncompletePurgeTime(DEFAULT_INCOMPLETE_PURGE_TIME);
         setLastExpireTime(DEFAULT_LAST_EXPIRE_TIME);
     }
 
@@ -1192,6 +1201,12 @@ public final class SettingsManager {
     public File getIncompleteDirectory() throws FileNotFoundException {
 		if(_incompleteDirectory == null) throw new FileNotFoundException();
 		return _incompleteDirectory;
+    }
+
+    /** Returns the minimum age of incomplete files, in days, before they
+     *  are deleted from disk. */
+    public int getIncompletePurgeTime() {
+        return _incompletePurgeTime;
     }
 
     /** 
@@ -2118,6 +2133,14 @@ public final class SettingsManager {
 		}
 		setDirectories(files);
 	}
+
+    /** Sets the minimum age in days for which incomplete files will be deleted.
+     *  This values may be zero or negative; doing so will cause LimeWire to
+     *  delete ALL incomplete files on startup. */
+    public void setIncompletePurgeTime(int days) {
+        _incompletePurgeTime=days;
+        PROPS.put(INCOMPLETE_PURGE_TIME, Integer.toString(days));
+    }
 
     /** 
 	 * Sets the shared directories.  This method filters

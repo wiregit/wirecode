@@ -46,6 +46,56 @@ public class MetaFileManager extends FileManager {
         return result;
     }
 
+    /**
+     * @modifies this
+     * @effects calls addFileIfShared(file), then stores any metadata from the
+     *  given XML documents.  metadata may be null if there is no data.  Returns
+     *  the value from addFileIfShared.  Returns the value from addFileIfShared.
+     *  <b>WARNING: this is a potential security hazard.</b> 
+     */
+	public synchronized boolean addFileIfShared(File file,
+                                                LimeXMLDocument[] metadata) {
+        boolean added=super.addFileIfShared(file, metadata);
+        if (added && metadata!=null) {
+            SchemaReplyCollectionMapper mapper =
+                SchemaReplyCollectionMapper.instance();
+
+            // compute the hash of the file.  integral for proceeding.
+            String hash;
+            try {
+                hash = new String(LimeXMLUtils.hashFile(file));
+                if (hash == null)
+                    throw new Exception();
+                // add to the file manager
+                writeToMap(file, hash, LimeXMLUtils.isMP3File(file));
+            }
+            catch (Exception hashFailed) {
+                //TODO: get rid of blanket catch.  Problem is with hashFile.
+                return true;  //file added but not metadata!
+            }
+            
+            // add xml docs as appropriate
+            for (int i = 0;
+                 (metadata != null) && (i < metadata.length);
+                 i++) {
+                try {
+                    LimeXMLDocument currDoc = metadata[i];
+                    String uri = currDoc.getSchemaURI();
+                    LimeXMLReplyCollection collection =
+                    mapper.getReplyCollection(uri);
+                    
+                    if (collection != null)
+                        collection.addReplyWithCommit(file, hash, currDoc);
+                }
+                catch (Exception ignored) {
+                    //TODO: get rid of blanket catch.
+                }
+            }
+        }
+        return added;
+    }
+
+
     private void addAudioMetadata(Response[] responses){
         if (responses == null)//responses may be null
             return;
@@ -280,6 +330,7 @@ public class MetaFileManager extends FileManager {
             }
         }
     }
+
 
     /**
      * Returns a list of all the words in the annotations - leaves out

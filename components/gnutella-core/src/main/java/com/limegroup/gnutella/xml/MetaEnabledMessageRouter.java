@@ -29,7 +29,7 @@ public class MetaEnabledMessageRouter extends StandardMessageRouter {
         
         debug("MetaEnabledMessageRouter.sendResponses(): entered.");
         
-        boolean supportsChat = true;//From this version on we do.
+        boolean supportsChat = SettingsManager.instance().getChatEnabled();
         
         // if either there are no responses or, the
         // response array came back null for some reason,

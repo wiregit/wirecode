@@ -29,6 +29,10 @@ public class DownloadManager implements BandwidthTracker {
     private Acceptor acceptor;
     /** Used to check if the file exists. */
     private FileManager fileManager;
+    /** The repository of incomplete files 
+     *  INVARIANT: incompleteFileManager is same as those of all downloaders */
+    private IncompleteFileManager incompleteFileManager
+        =new IncompleteFileManager();
 
     /** The list of all ManagedDownloader's attempting to download.
      *  INVARIANT: active.size()<=slots() && active contains no duplicates */
@@ -71,6 +75,7 @@ public class DownloadManager implements BandwidthTracker {
                 new FileOutputStream(
                     SettingsManager.instance().getDownloadSnapshotFile()));
             out.writeObject(buf);
+            out.writeObject(incompleteFileManager);
             out.flush();
             out.close();
             return true;
@@ -82,7 +87,7 @@ public class DownloadManager implements BandwidthTracker {
     /** Reads the downloaders serialized in DOWNLOAD_SNAPSHOT_FILE and adds them
      *  to this, queued.  The queued downloads will restart immediately if slots
      *  are available.  Returns false iff the file could not be read for any
-     *  reason. */
+     *  reason.  THIS METHOD SHOULD BE CALLED BEFORE ANY GUI ACTION. */
     public synchronized boolean readSnapshot() {
         //Read downloaders from disk.
         List buf=null;
@@ -90,7 +95,14 @@ public class DownloadManager implements BandwidthTracker {
             ObjectInputStream in=new ObjectInputStream(
                 new FileInputStream(
                     SettingsManager.instance().getDownloadSnapshotFile()));
+            //This does not try to maintain backwards compatibility with older
+            //versions of LimeWire, which only wrote the list of downloaders.
+            //Note that there is a minor race condition here; if the user has
+            //started some downloads before this method is called, the new and
+            //old downloads will use different IncompleteFileManager instances.
+            //This doesn't really cause an errors, however.
             buf=(List)in.readObject();
+            incompleteFileManager=(IncompleteFileManager)in.readObject();
         } catch (IOException e) {
             return false;
         } catch (ClassCastException e) {
@@ -98,6 +110,13 @@ public class DownloadManager implements BandwidthTracker {
         } catch (ClassNotFoundException e) {
             return false;
         }
+        
+        //Remove entries that are too old or no longer existent.  This is done
+        //before starting downloads in the rare case that a downloader uses one
+        //of these incomplete files.  Then commit changes to disk.  (This last
+        //step isn't really needed.)
+        if (incompleteFileManager.purge())
+            writeSnapshot();
 
         //Initialize and start downloaders.  Must catch ClassCastException since
         //the data could be corrupt.  This code is a little tricky.  It is
@@ -165,10 +184,18 @@ public class DownloadManager implements BandwidthTracker {
             }
         }
 
+        //Purge entries from incompleteFileManager that have no corresponding
+        //file on disk.  This protects against stupid users who delete their
+        //temporary files while LimeWire is running, either through the command
+        //prompt or the library.  Note that you could optimize this by just
+        //purging files corresponding to the current download, but it's not
+        //worth it.
+        incompleteFileManager.purge();
+
         //Start download asynchronously.  This automatically moves downloader to
         //active if it can.
-        ManagedDownloader downloader=new ManagedDownloader
-                                     (this, files,fileManager);
+        ManagedDownloader downloader=new ManagedDownloader(
+            this, files, fileManager, incompleteFileManager);
         waiting.add(downloader);
         callback.addDownload(downloader);
         //Save this' state to disk for crash recovery.

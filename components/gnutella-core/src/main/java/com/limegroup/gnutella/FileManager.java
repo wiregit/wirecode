@@ -3,7 +3,7 @@ package com.limegroup.gnutella;
 import java.io.*;
 import com.sun.java.util.collections.*;
 import com.limegroup.gnutella.util.*;
-import com.limegroup.gnutella.xml.MetaFileManager;
+import com.limegroup.gnutella.xml.*;
 
 /**
  * The list of all shared files.  Provides operations to add and remove
@@ -514,6 +514,18 @@ public class FileManager {
             return false;
 	}
 
+    /**
+     * @modifies this
+     * @effects calls addFileIfShared(file), then optionally stores any metadata
+     *  in the given XML documents.  metadata may be null if there is no data.
+     *  Returns the value from addFileIfShared. <b>WARNING: this is a potential
+     *  security hazard.</b> 
+     */
+	public synchronized boolean addFileIfShared(File file,
+                                                LimeXMLDocument[] metadata) {
+        return addFileIfShared(file);
+        //This implementation does nothing with metadata.  See MetaFileManager.
+    }
 
     /**
      * @requires the given file exists and is in a shared directory
